@@ -373,7 +373,7 @@ void Operator::UpdateRates( const Chip* chip ) {
   UpdateRelease( chip );
 }
 
-inline Bit32s Operator::RateForward( Bit32u add ) {
+INLINE Bit32s Operator::RateForward( Bit32u add ) {
   rateIndex += add;
   Bit32s ret = rateIndex >> RATE_SH;
   rateIndex = rateIndex & RATE_MASK;
@@ -401,9 +401,9 @@ Bits Operator::TemplateVolume(  ) {
     break;
   case DECAY:
     vol += RateForward( decayAdd );
-    if ( vol >= sustainLevel ) {
+    if ( GCC_UNLIKELY(vol >= sustainLevel) ) {
       //Check if we didn't overshoot max attenuation, then just go off
-      if ( vol >= ENV_MAX ) {
+      if ( GCC_UNLIKELY(vol >= ENV_MAX) ) {
         volume = ENV_MAX;
         SetState( OFF );
         return ENV_MAX;
@@ -420,7 +420,7 @@ Bits Operator::TemplateVolume(  ) {
     //In sustain phase, but not sustaining, do regular release
   case RELEASE:
     vol += RateForward( releaseAdd );;
-    if ( vol >= ENV_MAX ) {
+    if ( GCC_UNLIKELY(vol >= ENV_MAX) ) {
       volume = ENV_MAX;
       SetState( OFF );
       return ENV_MAX;
@@ -439,12 +439,12 @@ static const VolumeHandler VolumeHandlerTable[5] = {
   &Operator::TemplateVolume< Operator::ATTACK >
 };
 
-inline Bitu Operator::ForwardVolume() {
+INLINE Bitu Operator::ForwardVolume() {
   return currentLevel + (this->*volHandler)();
 }
 
 
-inline Bitu Operator::ForwardWave() {
+INLINE Bitu Operator::ForwardWave() {
   waveIndex += waveCurrent;
   return waveIndex >> WAVE_SH;
 }
@@ -521,12 +521,12 @@ void Operator::WriteE0( const Chip* chip, Bit8u val ) {
 #endif
 }
 
-inline void Operator::SetState( Bit8u s ) {
+INLINE void Operator::SetState( Bit8u s ) {
   state = s;
   volHandler = VolumeHandlerTable[ s ];
 }
 
-inline bool Operator::Silent() const {
+INLINE bool Operator::Silent() const {
   if ( !ENV_SILENT( totalLevel + volume ) )
     return false;
   if ( !(rateZero & ( 1 << state ) ) )
@@ -534,7 +534,7 @@ inline bool Operator::Silent() const {
   return true;
 }
 
-inline void Operator::Prepare( const Chip* chip )  {
+INLINE void Operator::Prepare( const Chip* chip )  {
   currentLevel = totalLevel + (chip->tremoloValue & tremoloMask);
   waveCurrent = waveAdd;
   if ( vibStrength >> chip->vibratoShift ) {
@@ -570,7 +570,7 @@ void Operator::KeyOff( Bit8u mask ) {
   }
 }
 
-inline Bits Operator::GetWave( Bitu index, Bitu vol ) {
+INLINE Bits Operator::GetWave( Bitu index, Bitu vol ) {
 #if ( DBOPL_WAVE == WAVE_HANDLER )
   return waveHandler( index, vol << ( 3 - ENV_EXTRA ) );
 #elif ( DBOPL_WAVE == WAVE_TABLEMUL )
@@ -587,7 +587,7 @@ inline Bits Operator::GetWave( Bitu index, Bitu vol ) {
 #endif
 }
 
-Bits inline Operator::GetSample( Bits modulation ) {
+Bits INLINE Operator::GetSample( Bits modulation ) {
   Bitu vol = ForwardVolume();
   if ( ENV_SILENT( vol ) ) {
     //Simply forward the wave
@@ -790,7 +790,7 @@ void Channel::ResetC0( const Chip* chip ) {
 };
 
 template< bool opl3Mode>
-inline void Channel::GeneratePercussion( Chip* chip, Bit32s* output ) {
+INLINE void Channel::GeneratePercussion( Chip* chip, Bit32s* output ) {
   Channel* chan = this;
 
   //BassDrum
@@ -884,9 +884,6 @@ Channel* Channel::BlockTemplate( Chip* chip, Bit32u samples, Bit32s* output ) {
       return (this + 2);
     }
     break;
-
-  default:
-    break;
   }
   //Init the operators with the the current vibrato and tremolo values
   Op( 0 )->Prepare( chip );
@@ -952,8 +949,6 @@ Channel* Channel::BlockTemplate( Chip* chip, Bit32u samples, Bit32s* output ) {
       output[ i * 2 + 0 ] += sample & maskLeft;
       output[ i * 2 + 1 ] += sample & maskRight;
       break;
-    default:
-      break;
     }
   }
   switch( mode ) {
@@ -970,8 +965,6 @@ Channel* Channel::BlockTemplate( Chip* chip, Bit32u samples, Bit32s* output ) {
   case sm2Percussion:
   case sm3Percussion:
     return( this + 3 );
-  default:
-    break;
   }
   return 0;
 }
@@ -996,7 +989,7 @@ Chip::Chip( Bit32u sampleRate )
   Setup(sampleRate);
 }
 
-inline Bit32u Chip::ForwardNoise() {
+INLINE Bit32u Chip::ForwardNoise() {
   noiseCounter += noiseAdd;
   Bitu count = noiseCounter >> LFO_SH;
   noiseCounter &= WAVE_MASK;
@@ -1008,7 +1001,7 @@ inline Bit32u Chip::ForwardNoise() {
   return noiseValue;
 }
 
-inline Bit32u Chip::ForwardLFO( Bit32u samples ) {
+INLINE Bit32u Chip::ForwardLFO( Bit32u samples ) {
   //Current vibrato value, runs 4x slower than tremolo
   vibratoSign = ( VibratoTable[ vibratoIndex >> 2] ) >> 7;
   vibratoShift = ( VibratoTable[ vibratoIndex >> 2] & 7) + vibratoStrength;
@@ -1272,7 +1265,7 @@ void Chip::Setup( Bit32u rate ) {
         count += guessAdd;
         Bit32s change = count >> RATE_SH;
         count &= RATE_MASK;
-        if ( change ) { // less than 1 %
+        if ( GCC_UNLIKELY(change) ) { // less than 1 %
           volume += ( ~volume * change ) >> 3;
         }
         samples++;
@@ -1447,8 +1440,7 @@ static void InitTables( ) {
     //Add back the bits for highest ones
     if ( i >= 16 )
       index += 9;
-    Bitu blah = static_cast<Bitu>(
-      reinterpret_cast<std::uintptr_t>( &(chip->chan[ index ]) ));
+    Bitu blah = reinterpret_cast<Bitu>( &(chip->chan[ index ]) );
     ChanOffsetTable[i] = blah;
   }
   //Same for operators
@@ -1463,8 +1455,7 @@ static void InitTables( ) {
       chNum += 16 - 12;
     Bitu opNum = ( i % 8 ) / 3;
     DBOPL::Channel* chan = 0;
-    Bitu blah = static_cast<Bitu>(
-      reinterpret_cast<std::uintptr_t>(&(chan->op[opNum]) ));
+    Bitu blah = reinterpret_cast<Bitu>( &(chan->op[opNum]) );
     OpOffsetTable[i] = ChanOffsetTable[ chNum ] + blah;
   }
 #if 0

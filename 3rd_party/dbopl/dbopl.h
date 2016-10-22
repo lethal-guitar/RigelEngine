@@ -18,7 +18,33 @@
 
 #pragma once
 
+/* This is based on the dbopl.h/dbopl.cpp files from DosBox trunk, rev. 4000.
+ * For inclusion in Rigel Engine, the following changes were made:
+ *
+ *  - Remove the Adlib::Handler subclass, integrate the Generate()
+ *    functionality into DBOPL::Chip
+ *  - Call Chip::Setup() from Chip's ctor, add sampleRate argument to ctor
+ *  - Directly provide all the definitions/typedefs normally provided by
+ *    'dosbox.h', hardcoding the configure variants for gcc (or compatible)
+ *    and MSVC.
+ *  - Some minor internal changes (use initializer list in ctor, move the logic
+ *    for determining if InitTables() is necessary, use C++ versions of C
+ *    library headers)
+ */
+
 #include <cstdint>
+
+#if defined(__GNUC__)
+  #define GCC_UNLIKELY(x) __builtin_expect((x),0)
+  #define INLINE inline __attribute__((always_inline))
+  #define DB_FASTCALL __attribute__((fastcall))
+#elif defined(_MSC_VER)
+  #define GCC_UNLIKELY(x) (x)
+  #define INLINE __forceinline
+  #define DB_FASTCALL __fastcall
+#else
+  #error "Unrecognized compiler"
+#endif
 
 
 //Use 8 handlers based on a small logatirmic wavetabe and an exponential table for volume
@@ -29,7 +55,7 @@
 #define WAVE_TABLEMUL 12
 
 //Select the type of wave generator routine
-#define DBOPL_WAVE WAVE_HANDLER
+#define DBOPL_WAVE WAVE_TABLEMUL
 
 namespace DBOPL {
 
@@ -39,14 +65,12 @@ using Bit16u = std::uint16_t;
 using Bit16s = std::int16_t;
 using Bit32u = std::uint32_t;
 using Bit32s = std::int32_t;
-using Bitu = unsigned int;
-using Bits = signed int;
+using Bitu = std::uintptr_t;
+using Bits = std::intptr_t;
 
 struct Chip;
 struct Operator;
 struct Channel;
-
-#define DB_FASTCALL
 
 #if (DBOPL_WAVE == WAVE_HANDLER)
 typedef Bits ( DB_FASTCALL *WaveHandler) ( Bitu i, Bitu volume );
