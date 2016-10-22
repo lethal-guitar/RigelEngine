@@ -1,0 +1,9 @@
+Checks: >
+    ,-*,
+    ,google-explicit-constructor,
+    ,misc-move-const-arg,
+    ,misc-string-constructor,
+    ,modernize-*,
+    ,performance-*,
+
+HeaderFilterRegex: 'src/'
