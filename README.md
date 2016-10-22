@@ -29,7 +29,8 @@ enemies do anything, you cannot take any damage, rocket elevators don't work
 yet, you cannot shoot any weapon, and you can't finish levels.
 
 Many of the game's other systems, like most of the menus, intro movie and story
-sequences etc. are already implemented.
+sequences etc. are already implemented. Not all of them are currently
+integrated though, e.g. the bonus screen which is shown in-between levels.
 
 ## Building and running
 
@@ -53,6 +54,9 @@ cd build
 cmake ..
 make
 
+# NOTE:  Pass -j<NUM_PROCESSES> to 'make' in order to get multi-core
+# compilation, '8' is a good number for a 4-core machine with hyperthreading
+
 # Now run it!
 ./RigelEngine <PATH_TO_YOUR_GAME_FILES>
 ```
@@ -75,7 +79,7 @@ The project depends on the following libraries:
 The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):
 
-* [entityx](https://github.com/alecthomas/entityx) Entity-Component-System framework, v. 1.0.0
+* [entityx](https://github.com/alecthomas/entityx) Entity-Component-System framework, v. 1.2.0
 * Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * DBOPL AdLib emulator (taken from [DosBox](http://www.dosbox.com/))
 * [Catch](https://github.com/philsquared/Catch) testing framework
