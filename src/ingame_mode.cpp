@@ -101,44 +101,28 @@ IngameMode::IngameMode(
 
 
 void IngameMode::handleEvent(const SDL_Event& event) {
-  if (event.type == SDL_KEYDOWN) {
-    switch (event.key.keysym.sym) {
-      case SDLK_UP:
-        mPlayerInputs.mMovingUp = true;
-        break;
-      case SDLK_DOWN:
-        mPlayerInputs.mMovingDown = true;
-        break;
-      case SDLK_LEFT:
-        mPlayerInputs.mMovingLeft = true;
-        break;
-      case SDLK_RIGHT:
-        mPlayerInputs.mMovingRight = true;
-        break;
-      case SDLK_LCTRL:
-      case SDLK_RCTRL:
-        mPlayerInputs.mJumping = true;
-        break;
-    }
-  } else if (event.type == SDL_KEYUP) {
-    switch (event.key.keysym.sym) {
-      case SDLK_UP:
-        mPlayerInputs.mMovingUp = false;
-        break;
-      case SDLK_DOWN:
-        mPlayerInputs.mMovingDown = false;
-        break;
-      case SDLK_LEFT:
-        mPlayerInputs.mMovingLeft = false;
-        break;
-      case SDLK_RIGHT:
-        mPlayerInputs.mMovingRight = false;
-        break;
-      case SDLK_LCTRL:
-      case SDLK_RCTRL:
-        mPlayerInputs.mJumping = false;
-        break;
-    }
+  if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP) {
+    return;
+  }
+
+  const auto keyPressed = event.type == SDL_KEYDOWN;
+  switch (event.key.keysym.sym) {
+    case SDLK_UP:
+      mPlayerInputs.mMovingUp = keyPressed;
+      break;
+    case SDLK_DOWN:
+      mPlayerInputs.mMovingDown = keyPressed;
+      break;
+    case SDLK_LEFT:
+      mPlayerInputs.mMovingLeft = keyPressed;
+      break;
+    case SDLK_RIGHT:
+      mPlayerInputs.mMovingRight = keyPressed;
+      break;
+    case SDLK_LCTRL:
+    case SDLK_RCTRL:
+      mPlayerInputs.mJumping = keyPressed;
+      break;
   }
 }
 
