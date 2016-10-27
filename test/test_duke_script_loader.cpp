@@ -162,15 +162,16 @@ TEST_CASE("Draw big text is parsed correctly") {
 RIGEL_DISABLE_WARNINGS
   const auto testData =
     "//XYTEXT 2 4 \xF2""Colored text!\r\n"
-    "//XYTEXT 2 8   \xF7""Colored text with leading spaces\r\n"
+    "//XYTEXT 2 8 test\xF7""Colored text with leading regular text\r\n"
     "//END\r\n";
 RIGEL_RESTORE_WARNINGS
 
   const auto testScript = loadSingleScript(testData);
-  REQUIRE(testScript.size() == 2);
+  REQUIRE(testScript.size() == 3);
 
   REQUIRE(isType<DrawBigText>(testScript[0]));
-  REQUIRE(isType<DrawBigText>(testScript[1]));
+  REQUIRE(isType<DrawText>(testScript[1]));
+  REQUIRE(isType<DrawBigText>(testScript[2]));
 
   SECTION("BigText has correct data") {
     const auto bigText = asType<DrawBigText>(testScript[0]);
@@ -181,13 +182,17 @@ RIGEL_RESTORE_WARNINGS
     REQUIRE(bigText.text == "Colored text!");
   }
 
-  SECTION("Leading spaces are used to adjust the position") {
-    const auto bigText = asType<DrawBigText>(testScript[1]);
+  SECTION("Mixed regular and big text results in two text commands") {
+    const auto leadingRegularText = asType<DrawText>(testScript[1]);
+    REQUIRE(leadingRegularText.x == 2);
+    REQUIRE(leadingRegularText.y == 8);
+    REQUIRE(leadingRegularText.text == "test");
 
-    REQUIRE(bigText.x == 4); // two leading spaces
+    const auto bigText = asType<DrawBigText>(testScript[2]);
+    REQUIRE(bigText.x == 2 + 4); // four leading characters in 'test'
     REQUIRE(bigText.y == 8);
     REQUIRE(bigText.colorIndex == 7);
-    REQUIRE(bigText.text == "Colored text with leading spaces");
+    REQUIRE(bigText.text == "Colored text with leading regular text");
   }
 }
 

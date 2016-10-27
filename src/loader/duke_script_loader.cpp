@@ -138,7 +138,7 @@ vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
 }
 
 
-b::optional<data::script::Action> parseOneLineAction(
+b::optional<Action> parseSingleActionCommand(
   const string& command,
   istream& lineTextStream
 ) {
@@ -211,89 +211,6 @@ b::optional<data::script::Action> parseOneLineAction(
     lineTextStream >> yPos;
     return Action{ShowMenuSelectionIndicator{yPos}};
   }
-  else if (command == "XYTEXT")
-  {
-    // They decided to pack a lot of different functionality into this single
-    // command, which makes parsing it a bit more involved. There are three
-    // variants:
-    //
-    // 1. Draw normal text
-    // 2. Draw sprite
-    // 3. Draw big, colorized text
-    //
-    // Variant 1 is the default, where we just need to take the remainder of
-    // the line and draw it at the specified position.  The other two are
-    // indicated by special 'markup' bytes in the text. If the text starts with
-    // the byte 0xEF, the remaining text is actually interpreted as a sequence
-    // of 2 numbers. The first always has 3 digits and indicates the actor ID
-    // (index into ACTORINFO.MNI). The next 2 digits make up the second number,
-    // which indicates the animation frame to draw for the specified actor's
-    // sprite.
-    //
-    // If the text contains a byte >= 0xF0 at one point, the remaining text
-    // will instead be drawn using a bigger font, which is also colorized using
-    // the lower nibble of the markup byte as color index into the current
-    // palette. E.g. if we have the text \xF7Hello, this will draw 'Hello'
-    // using the big font colorized with palette index 7.
-    // If there is other text preceding the 'big font' marker, it will be
-    // drawn in the normal font. But the only occurence of that in the original
-    // game's files has preceding spaces only, no printable characters. Thus,
-    // we simplify our lives a little bit and say only preceding spaces are
-    // supported, which we will then convert to an offset to the X coordinate
-    // instead.
-    int x = 0;
-    int y = 0;
-    lineTextStream >> x;
-    lineTextStream >> y;
-
-    lineTextStream.get();
-
-    string parameters;
-    getline(lineTextStream, parameters, '\r');
-
-    if (parameters.empty()) {
-      throw invalid_argument("Corrupt Duke Script file");
-    }
-
-    const auto bigTextMarkerIter =
-      std::find_if(parameters.cbegin(), parameters.cend(), [](const auto ch) {
-        return static_cast<uint8_t>(ch) >= 0xF0;
-      });
-
-    if (bigTextMarkerIter != parameters.cend()) {
-      const auto numPrecedingCharacters = static_cast<int>(
-        distance(parameters.cbegin(), bigTextMarkerIter));
-      const auto colorIndex = static_cast<uint8_t>(*bigTextMarkerIter) - 0xF0;
-
-      parameters.erase(parameters.cbegin(), next(bigTextMarkerIter));
-
-      return Action{DrawBigText{
-        x + numPrecedingCharacters,
-        y,
-        colorIndex,
-        move(parameters)
-      }};
-    }
-
-    if (static_cast<uint8_t>(parameters[0]) == 0xEF) {
-      if (parameters.size() < 5) {
-        throw invalid_argument("Corrupt Duke Script file");
-      }
-
-      string actorNumberString(
-        parameters.cbegin() + 1, parameters.cbegin() + 4);
-      string frameNumberString(
-          parameters.cbegin() + 4, parameters.cbegin() + 6);
-
-      return Action{DrawSprite{
-        x + 2,
-        y + 1,
-        stoi(actorNumberString),
-        stoi(frameNumberString)}};
-    } else {
-      return Action{DrawText{x, y, parameters}};
-    }
-  }
   else if (command == "GETPAL")
   {
     string paletteFile;
@@ -357,32 +274,117 @@ b::optional<data::script::Action> parseOneLineAction(
 }
 
 
-PagesDefinition parsePagesDefinition(
-  istream& sourceTextStream
+vector<Action> parseTextCommandWithBigText(
+  const int x,
+  const int y,
+  const string& sourceText,
+  const string::const_iterator bigTextMarkerIter
 ) {
-  vector<data::script::Script> pages(1);
-  parseScriptLines(sourceTextStream, "PAGESEND",
-    [&pages](const auto& command, auto& lineTextStream) {
-      if (command == "APAGE") {
-        pages.emplace_back(Script{});
-      } else {
-        auto maybeAction = parseOneLineAction(command, lineTextStream);
-        if (maybeAction) {
-          auto& currentPage = pages.back();
-          currentPage.emplace_back(*maybeAction);
-        }
-      }
-    });
+  vector<Action> textActions;
 
-  return PagesDefinition{pages};
+  const auto numPrecedingCharacters = static_cast<int>(
+    distance(sourceText.cbegin(), bigTextMarkerIter));
+  if (numPrecedingCharacters > 0) {
+    string regularTextPart(sourceText.cbegin(), bigTextMarkerIter);
+    textActions.emplace_back(DrawText{x, y, regularTextPart});
+  }
+
+  const auto colorIndex = static_cast<uint8_t>(*bigTextMarkerIter) - 0xF0;
+  string bigTextPart(next(bigTextMarkerIter), sourceText.cend());
+  textActions.emplace_back(DrawBigText{
+    x + numPrecedingCharacters,
+    y,
+    colorIndex,
+    move(bigTextPart)
+  });
+
+  return textActions;
 }
 
 
-b::optional<Action> parseAction(
+Action parseDrawSpriteCommand(const int x, const int y, const string& source) {
+  if (source.size() < 5) {
+    throw invalid_argument("Corrupt Duke Script file");
+  }
+
+  string actorNumberString(source.cbegin() + 1, source.cbegin() + 4);
+  string frameNumberString(source.cbegin() + 4, source.cbegin() + 6);
+
+  return {DrawSprite{
+    x + 2,
+    y + 1,
+    stoi(actorNumberString),
+    stoi(frameNumberString)}};
+}
+
+
+vector<Action> parseTextCommand(istream& lineTextStream) {
+  // They decided to pack a lot of different functionality into the XYTEXT
+  // command, which makes parsing it a bit more involved. There are three
+  // variants:
+  //
+  // 1. Draw normal text
+  // 2. Draw sprite
+  // 3. Draw big, colorized text (potentially with preceding normal text)
+  //
+  // Variant 1 is the default, where we just need to take the remainder of
+  // the line and draw it at the specified position.  The other two are
+  // indicated by special 'markup' bytes in the text. If the text starts with
+  // the byte 0xEF, the remaining text is actually interpreted as a sequence
+  // of 2 numbers. The first always has 3 digits and indicates the actor ID
+  // (index into ACTORINFO.MNI). The next 2 digits make up the second number,
+  // which indicates the animation frame to draw for the specified actor's
+  // sprite.
+  //
+  // If the text contains a byte >= 0xF0 at one point, the remaining text
+  // will instead be drawn using a bigger font, which is also colorized using
+  // the lower nibble of the markup byte as color index into the current
+  // palette. E.g. if we have the text \xF7Hello, this will draw 'Hello'
+  // using the big font colorized with palette index 7.
+  // If there is other text preceding the 'big font' marker, it will be
+  // drawn in the normal font.
+
+  int x = 0;
+  int y = 0;
+  lineTextStream >> x;
+  lineTextStream >> y;
+
+  lineTextStream.get(); // skip one character of white-space
+
+  string sourceText;
+  getline(lineTextStream, sourceText, '\r');
+
+  if (sourceText.empty()) {
+    throw invalid_argument("Corrupt Duke Script file");
+  }
+
+  vector<Action> textActions;
+  if (static_cast<uint8_t>(sourceText[0]) == 0xEF) {
+    textActions.emplace_back(parseDrawSpriteCommand(x, y, sourceText));
+  } else {
+    const auto bigTextMarkerIter =
+      std::find_if(sourceText.cbegin(), sourceText.cend(), [](const auto ch) {
+        return static_cast<uint8_t>(ch) >= 0xF0;
+      });
+
+    if (bigTextMarkerIter != sourceText.cend()) {
+      return parseTextCommandWithBigText(x, y, sourceText, bigTextMarkerIter);
+    } else {
+      textActions.emplace_back(DrawText{x, y, sourceText});
+    }
+  }
+
+  return textActions;
+}
+
+
+vector<Action> parseCommand(
   const std::string& command,
   istream& sourceTextStream,
   istream& currentLineStream
 ) {
+  vector<Action> actions;
+
   if (command == "CENTERWINDOW") {
     int y = 0;
     int width = 0;
@@ -392,14 +394,50 @@ b::optional<Action> parseAction(
     currentLineStream >> width;
 
     skipWhiteSpace(sourceTextStream);
-    return Action{ShowMessageBox{
+    return {Action{ShowMessageBox{
       y,
       width,
       height,
-      parseMessageBoxTextDefinition(sourceTextStream)}};
+      parseMessageBoxTextDefinition(sourceTextStream)}}};
+  } else if (command == "MENU") {
+    int slot = 0;
+    currentLineStream >> slot;
+
+    return {
+      ConfigurePersistentMenuSelection{slot},
+      ScheduleFadeInBeforeNextWaitState{}
+    };
+  } else if (command == "XYTEXT") {
+    actions = parseTextCommand(currentLineStream);
   } else {
-    return parseOneLineAction(command, currentLineStream);
+    const auto maybeAction = parseSingleActionCommand(
+      command, currentLineStream);
+    if (maybeAction) {
+      actions.emplace_back(*maybeAction);
+    }
   }
+
+  return actions;
+}
+
+
+PagesDefinition parsePagesDefinition(
+  istream& sourceTextStream
+) {
+  vector<data::script::Script> pages(1);
+  parseScriptLines(sourceTextStream, "PAGESEND",
+    [&pages, &sourceTextStream](const auto& command, auto& lineTextStream) {
+      if (command == "APAGE") {
+        pages.emplace_back(Script{});
+      } else {
+        const auto actions = parseCommand(
+          command, sourceTextStream, lineTextStream);
+        auto& currentPage = pages.back();
+        currentPage.insert(currentPage.end(), actions.cbegin(), actions.cend());
+      }
+    });
+
+  return PagesDefinition{pages};
 }
 
 
@@ -408,24 +446,16 @@ data::script::Script parseScript(istream& sourceTextStream) {
 
   parseScriptLines(sourceTextStream, "END",
     [&script, &sourceTextStream](const auto& command, auto& lineTextStream) {
-      b::optional<Action> maybeAction;
+      vector<Action> actions;
 
       if (command == "PAGESSTART") {
         skipWhiteSpace(sourceTextStream);
-        maybeAction = parsePagesDefinition(sourceTextStream);
-      } else if (command == "MENU") {
-        int slot = 0;
-        lineTextStream >> slot;
-
-        script.emplace_back(ConfigurePersistentMenuSelection{slot});
-        script.emplace_back(ScheduleFadeInBeforeNextWaitState{});
+        actions.emplace_back(parsePagesDefinition(sourceTextStream));
       } else {
-        maybeAction = parseAction(command, sourceTextStream, lineTextStream);
+        actions = parseCommand(command, sourceTextStream, lineTextStream);
       }
 
-      if (maybeAction) {
-        script.emplace_back(*maybeAction);
-      }
+      script.insert(script.end(), actions.cbegin(), actions.cend());
     });
 
   return script;
