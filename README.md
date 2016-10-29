@@ -36,8 +36,9 @@ integrated though, e.g. the bonus screen which is shown in-between levels.
 
 ### Linux build quick start guide
 
-If you're on Linux and running a recent enough Ubuntu/Debian-like distro, here's
-how to quickly get the project up and running:
+If you're on Linux and running a recent enough Ubuntu/Debian-like distro (I'm
+using Linux Mint based on Ubuntu 16.04 Xenial Xerus), here's how to quickly get
+the project up and running. Windows build instructions can be found further down.
 
 ```bash
 # Install all external dependencies, as well as the CMake build system:
@@ -66,20 +67,22 @@ make
 To build from source, a C++ 14 compatible compiler is required. The project has been
 built successfully on the following compilers:
 
-* Microsoft Visual Studio 2015 (Update 2 or newer) - see notes below
+* Microsoft Visual Studio 2015 (Update 2 or newer)
 * gcc 5.4.0
 * clang 3.9
 
+Slightly older versions of gcc/clang might also work, but I haven't tried that.
+
 The project depends on the following libraries:
 
-* SDL >= 2.0
-* SDL\_mixer >= 2.0
+* SDL >= 2.0.4
+* SDL\_mixer >= 2.0.1
 * Boost >= 1.58 (older versions might work, but I didn't try)
 
 The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):
 
-* [entityx](https://github.com/alecthomas/entityx) Entity-Component-System framework, v. 1.2.0
+* [entityx](https://github.com/alecthomas/entityx) Entity-Component-System framework, v. 1.1.2
 * Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * DBOPL AdLib emulator (taken from [DosBox](http://www.dosbox.com/))
 * [Catch](https://github.com/philsquared/Catch) testing framework
@@ -87,6 +90,27 @@ code (in the `3rd_party` directory):
 
 ### Windows builds
 
-Although the project can be built successfully on Windows, this is not yet fully
-supported. In particular, there is no CMake find script for SDL 2 yet.
-Full Windows support is planned for the future.
+To build on Windows, you'll need to install CMake and provide binaries for the
+external dependencies listed above. You can get them using the following links:
+
+* [CMake 3.6.2](https://cmake.org/files/v3.6/cmake-3.6.2-win64-x64.zip)
+* [SDL2 2.0.4](https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip)
+* [SDL2 mixer 2.0.1](https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip)
+* [Boost 1.61](https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-64.exe/download)
+
+In order for CMake (or cmake-gui) to automatically find all dependencies, you
+can set the following environment variables prior to running CMake:
+
+```bash
+# Assuming you've used the Boost installer linked above, and installed to BOOST_LOCATION
+BOOST_ROOT=<BOOST_LOCATION>
+BOOST_LIBRARYDIR=<BOOST_LOCATION>/lib64-msvc-14.0
+
+# These should point to the respective root directory of the unzipped packages linked above
+SDL2DIR=<SDL2_LOCATION>
+SDL2MIXERDIR=<SDL2_MIXER_LOCATION>
+```
+
+All of the above would need slight adjustments in order to create a 32-bit
+build. Also note that I haven't tried building 32-bit so far, so it might still
+not work without some minor changes.
