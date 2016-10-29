@@ -1,4 +1,4 @@
-# Rigel Engine
+# Rigel Engine [![Build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master)
 
 ## What is Rigel Engine?
 
