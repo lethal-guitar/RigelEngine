@@ -19,6 +19,7 @@
 #include <data/game_traits.hpp>
 #include <loader/resource_bundle.hpp>
 
+#include <cmath>
 #include <string>
 
 

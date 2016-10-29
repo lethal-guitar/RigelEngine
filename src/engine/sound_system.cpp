@@ -23,6 +23,7 @@
 
 #include <speex/speex_resampler.h>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <memory>
 #include <string>
