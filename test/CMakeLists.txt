@@ -10,3 +10,5 @@ target_link_libraries(tests rigel_core)
 target_include_directories(tests PRIVATE
     ${CMAKE_SOURCE_DIR}/3rd_party/catch
 )
+
+add_test(all-tests tests)

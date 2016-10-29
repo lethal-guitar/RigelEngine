@@ -81,5 +81,7 @@ target_compile_options(entityx PRIVATE
 # RigelEngine build targets
 ###############################################################################
 
+enable_testing()
+
 add_subdirectory(src)
 add_subdirectory(test)
