@@ -58,7 +58,7 @@ make
 # compilation, '8' is a good number for a 4-core machine with hyperthreading
 
 # Now run it!
-./RigelEngine <PATH_TO_YOUR_GAME_FILES>
+./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
 ```
 
 ### Detailed build pre-requisites and dependencies

@@ -1,0 +1,150 @@
+set(core_sources
+    base/grid.hpp
+    base/spatial_types.hpp
+    base/warnings.hpp
+    data/audio_buffer.hpp
+    data/duke_script.hpp
+    data/game_session_data.hpp
+    data/game_traits.cpp
+    data/game_traits.hpp
+    data/image.cpp
+    data/image.hpp
+    data/map.cpp
+    data/map.hpp
+    data/player_data.hpp
+    data/sound_ids.hpp
+    data/tile_set.cpp
+    data/tile_set.hpp
+    data/unit_conversions.cpp
+    data/unit_conversions.hpp
+    engine/base_components.hpp
+    engine/map_renderer.cpp
+    engine/map_renderer.hpp
+    engine/physics_system.cpp
+    engine/physics_system.hpp
+    engine/rendering_system.cpp
+    engine/rendering_system.hpp
+    engine/sound_system.cpp
+    engine/sound_system.hpp
+    engine/tile_renderer.cpp
+    engine/tile_renderer.hpp
+    engine/timing.cpp
+    engine/timing.hpp
+    game_logic/collectable_components.hpp
+    game_logic/entity_factory.cpp
+    game_logic/entity_factory.hpp
+    game_logic/player_control_system.cpp
+    game_logic/player_control_system.hpp
+    game_logic/player_interaction_system.cpp
+    game_logic/player_interaction_system.hpp
+    loader/actor_image_package.cpp
+    loader/actor_image_package.hpp
+    loader/audio_package.cpp
+    loader/audio_package.hpp
+    loader/bitwise_iter.hpp
+    loader/byte_buffer.hpp
+    loader/cmp_file_package.cpp
+    loader/cmp_file_package.hpp
+    loader/duke_script_loader.cpp
+    loader/duke_script_loader.hpp
+    loader/ega_image_decoder.cpp
+    loader/ega_image_decoder.hpp
+    loader/file_utils.cpp
+    loader/file_utils.hpp
+    loader/level_loader.cpp
+    loader/level_loader.hpp
+    loader/movie_loader.cpp
+    loader/movie_loader.hpp
+    loader/music_loader.cpp
+    loader/music_loader.hpp
+    loader/palette.cpp
+    loader/palette.hpp
+    loader/resource_bundle.cpp
+    loader/resource_bundle.hpp
+    loader/rle_compression.hpp
+    loader/voc_decoder.cpp
+    loader/voc_decoder.hpp
+    sdl_utils/error.cpp
+    sdl_utils/error.hpp
+    sdl_utils/ptr.hpp
+    sdl_utils/texture.cpp
+    sdl_utils/texture.hpp
+    ui/apogee_logo.cpp
+    ui/apogee_logo.hpp
+    ui/bonus_screen.cpp
+    ui/bonus_screen.hpp
+    ui/duke_script_runner.cpp
+    ui/duke_script_runner.hpp
+    ui/hud_renderer.cpp
+    ui/hud_renderer.hpp
+    ui/intro_movie.cpp
+    ui/intro_movie.hpp
+    ui/menu_element_renderer.cpp
+    ui/menu_element_renderer.hpp
+    ui/movie_player.cpp
+    ui/movie_player.hpp
+    ui/utils.cpp
+    ui/utils.hpp
+    utils/container_tools.hpp
+    utils/enum_hash.hpp
+    utils/math_tools.hpp
+
+    game.cpp
+    game.hpp
+    game_mode.hpp
+    ingame_mode.cpp
+    ingame_mode.hpp
+    intro_demo_loop_mode.cpp
+    intro_demo_loop_mode.hpp
+    menu_mode.cpp
+    menu_mode.hpp
+    mode_stage.hpp
+)
+
+
+set(3rd_party_path ${CMAKE_SOURCE_DIR}/3rd_party)
+
+
+# Core library
+add_library(rigel_core STATIC ${core_sources})
+target_include_directories(rigel_core
+    PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${SDL2_INCLUDE_DIR}"
+    ${SDL2_MIXER_INCLUDE_DIRS}
+    ${3rd_party_path}/entityx
+
+    PRIVATE
+    ${3rd_party_path}/atria/src
+    ${3rd_party_path}/atria/compat
+    ${3rd_party_path}/dbopl
+    ${3rd_party_path}/speex_resampler
+)
+target_link_libraries(rigel_core
+    PUBLIC
+    Boost::boost
+    "${SDL2_LIBRARY}"
+    ${SDL2_MIXER_LIBRARIES}
+
+    PRIVATE
+    entityx
+    dbopl
+    speex_resampler
+)
+
+
+# Main executable
+set(main_exe_sources
+    main.cpp
+)
+
+
+add_executable(${main_exe_name} ${main_exe_sources})
+target_link_libraries(${main_exe_name} PRIVATE
+    ${SDLMAIN2_LIBRARY}
+    rigel_core
+    Boost::program_options
+    Boost::disable_autolinking
+    Boost::dynamic_linking
+)
+
