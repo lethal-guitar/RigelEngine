@@ -16,12 +16,15 @@
 
 #include <game.hpp>
 
+#include <base/warnings.hpp>
 #include <sdl_utils/error.hpp>
 #include <sdl_utils/ptr.hpp>
 
+RIGEL_DISABLE_WARNINGS
 #include <boost/program_options.hpp>
 #include <SDL.h>
 #include <SDL_mixer.h>
+RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
 #include <stdexcept>
