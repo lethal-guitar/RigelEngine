@@ -113,6 +113,7 @@ target_include_directories(rigel_core
     "${SDL2_INCLUDE_DIR}"
     ${SDL2_MIXER_INCLUDE_DIRS}
     ${3rd_party_path}/entityx
+    ${Boost_INCLUDE_DIRS}
 
     PRIVATE
     ${3rd_party_path}/atria/src
@@ -122,7 +123,6 @@ target_include_directories(rigel_core
 )
 target_link_libraries(rigel_core
     PUBLIC
-    Boost::boost
     "${SDL2_LIBRARY}"
     ${SDL2_MIXER_LIBRARIES}
 
@@ -143,8 +143,6 @@ add_executable(${main_exe_name} ${main_exe_sources})
 target_link_libraries(${main_exe_name} PRIVATE
     ${SDLMAIN2_LIBRARY}
     rigel_core
-    Boost::program_options
-    Boost::disable_autolinking
-    Boost::dynamic_linking
+    ${Boost_LIBRARIES}
 )
 
