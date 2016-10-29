@@ -3,4 +3,4 @@
 	url = https://github.com/alecthomas/entityx.git
 [submodule "3rd_party/atria"]
 	path = 3rd_party/atria
-	url = https://github.com/Ableton/atria.git
+	url = https://github.com/lethal-guitar/atria.git

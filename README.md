@@ -87,7 +87,6 @@ code (in the `3rd_party` directory):
 
 ### Windows builds
 
-While the project can be built successfully on Windows, this is not yet fully
-supported. In particular, some changes to the `atria` library are necessary
-in order to work on MSVC 2015, and there is no CMake find script for SDL 2 yet.
+Although the project can be built successfully on Windows, this is not yet fully
+supported. In particular, there is no CMake find script for SDL 2 yet.
 Full Windows support is planned for the future.
