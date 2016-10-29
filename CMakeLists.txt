@@ -11,27 +11,11 @@ set(main_exe_name RigelEngine)
 # Dependencies
 ###############################################################################
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 find_package(Boost 1.58 COMPONENTS program_options REQUIRED)
-
-
-include(FindPkgConfig)
-
-if (PKG_CONFIG_FOUND)
-    pkg_search_module(SDL2 REQUIRED sdl2)
-    pkg_search_module(SDL2_MIXER REQUIRED SDL2_mixer>=2.0.0)
-else()
-    # TODO: This is a HACK for Windows until we have a proper find script.
-    # It uses the SDL1 find script, so you can set the locations manually in
-    # cmake-gui
-    find_package(SDL QUIET)
-    find_package(SDL_mixer QUIET)
-
-    set(SDL2_INCLUDE_DIR ${SDL_INCLUDE_DIR})
-    set(SDL2_MIXER_INCLUDE_DIRS ${SDL_MIXER_INCLUDE_DIRS})
-    set(SDL2_LIBRARY ${SDL_LIBRARY})
-    set(SDL2_MIXER_LIBRARIES ${SDL_MIXER_LIBRARIES})
-    set(SDLMAIN2_LIBRARY ${SDLMAIN_LIBRARY})
-endif()
+find_package(SDL2 REQUIRED)
+find_package(SDL2_mixer REQUIRED)
 
 
 # Compiler settings
