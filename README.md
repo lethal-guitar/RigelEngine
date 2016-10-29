@@ -77,7 +77,7 @@ The project depends on the following libraries:
 
 * SDL >= 2.0.4
 * SDL\_mixer >= 2.0.1
-* Boost >= 1.58 (older versions might work, but I didn't try)
+* Boost >= 1.55
 
 The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):

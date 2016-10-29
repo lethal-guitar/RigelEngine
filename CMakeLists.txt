@@ -14,7 +14,7 @@ set(main_exe_name RigelEngine)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK)
-find_package(Boost 1.58 COMPONENTS program_options REQUIRED)
+find_package(Boost 1.55 COMPONENTS program_options REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
