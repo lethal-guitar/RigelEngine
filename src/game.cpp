@@ -38,7 +38,26 @@ using RenderTargetBinder = sdl_utils::RenderTargetTexture::Binder;
 
 namespace {
 
+// The game's original 320x200 resolution would give us a 16:10 aspect ratio
+// when using square pixels, but monitors of the time had a 4:3 aspect ratio,
+// and that's what the game's graphics were designed for (very noticeable e.g.
+// with the earth in the Apogee logo). It worked out fine back then because
+// CRTs can show non-square pixels, but that's not possible with today's
+// screens anymore. Therefore, we need to stretch the image slightly before
+// actually rendering it. We do that by rendering the game into a 320x200
+// render target, and then stretching that onto our logical display which has a
+// slightly bigger vertical resolution in order to get a 4:3 aspect ratio.
 const auto ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT = 240;
+
+// By making the logical display bigger than the aspect-ratio corrected
+// original resolution, we can show text with debug info (e.g. FPS) without it
+// taking up too much space or being hard to read.
+const auto SCALE_FACTOR = 2;
+
+const auto LOGICAL_DISPLAY_WIDTH =
+  data::GameTraits::viewPortWidthPx * SCALE_FACTOR;
+const auto LOGICAL_DISPLAY_HEIGHT =
+  ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT * SCALE_FACTOR;
 
 }
 
@@ -53,12 +72,13 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
       data::GameTraits::viewPortHeightPx)
   , mIsRunning(true)
   , mIsMinimized(false)
+  , mFpsDisplay(pRenderer, mResources)
 {
   throwIfFailed([this]() {
     return SDL_RenderSetLogicalSize(
       mpRenderer,
-      data::GameTraits::viewPortWidthPx,
-      ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT);
+      LOGICAL_DISPLAY_WIDTH,
+      LOGICAL_DISPLAY_HEIGHT);
   });
 }
 
@@ -131,6 +151,11 @@ void Game::mainLoop() {
   mLastTime = high_resolution_clock::now();
 
   for (;;) {
+    const auto startOfFrame = high_resolution_clock::now();
+    const auto elapsed =
+      duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
+    mLastTime = startOfFrame;
+
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
 
@@ -144,10 +169,6 @@ void Game::mainLoop() {
         break;
       }
 
-      const auto now = high_resolution_clock::now();
-      const auto elapsed = duration<entityx::TimeDelta>(now - mLastTime).count();
-      mLastTime = now;
-
       if (mpNextGameMode) {
         fadeOutScreen();
         mpCurrentGameMode = std::move(mpNextGameMode);
@@ -159,6 +180,12 @@ void Game::mainLoop() {
     }
 
     mRenderTarget.renderScaledToScreen(mpRenderer);
+
+    const auto afterRender = high_resolution_clock::now();
+    const auto innerRenderTime =
+      duration<engine::TimeDelta>(afterRender - startOfFrame).count();
+    mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+
     SDL_RenderPresent(mpRenderer);
   }
 }

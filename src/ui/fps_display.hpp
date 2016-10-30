@@ -14,27 +14,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game_traits.hpp"
+#pragma once
 
-#include <base/warnings.hpp>
+#include "menu_element_renderer.hpp"
+
+#include <engine/timing.hpp>
 
 
-namespace rigel { namespace data {
+namespace rigel { namespace loader {
+  class ResourceLoader;
+}}
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
 
-const base::Vector GameTraits::inGameViewPortOffset(8, 8);
+namespace rigel { namespace ui {
 
-const base::Extents GameTraits::inGameViewPortSize(
-  GameTraits::viewPortWidthPx - 16,
-  GameTraits::viewPortHeightPx - 8);
+class FpsDisplay {
+public:
+  FpsDisplay(SDL_Renderer* pRenderer, const loader::ResourceLoader& resources);
 
-const base::Extents GameTraits::mapViewPortSize(
-  GameTraits::mapViewPortWidthTiles,
-  GameTraits::mapViewPortHeightTiles);
+  void updateAndRender(
+    engine::TimeDelta totalElapsed,
+    engine::TimeDelta renderingElapsed);
 
-const base::Extents GameTraits::menuFontCharacterBitmapSizeTiles(1, 2);
+private:
+  MenuElementRenderer mTextRenderer;
 
-RIGEL_RESTORE_WARNINGS
+  float mSmoothedFrameTime = 0.0f;
+  float mWeightedFrameTime = 0.0f;
+};
 
 }}

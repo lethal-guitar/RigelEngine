@@ -24,7 +24,7 @@
 #include <data/unit_conversions.hpp>
 #include <loader/bitwise_iter.hpp>
 #include <loader/file_utils.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 #include <loader/rle_compression.hpp>
 #include <utils/container_tools.hpp>
 #include <utils/math_tools.hpp>
@@ -137,7 +137,7 @@ string backdropNameFromNumber(const uint8_t backdropNumber) {
 
 LevelData loadLevel(
   const string& mapName,
-  const ResourceBundle& resources
+  const ResourceLoader& resources
 ) {
   const auto levelData = resources.mFilePackage.file(mapName);
   LeStreamReader levelReader(levelData);

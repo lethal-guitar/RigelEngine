@@ -34,9 +34,6 @@ public:
    * for all subsequent frames.
    */
   using FrameCallbackFunc = std::function<boost::optional<int>(int)>;
-  //static const auto DEFAULT_FRAME_CALLBACK = []() -> boost::optional<int> {
-  //  return boost::none;
-  //};
 
   explicit MoviePlayer(SDL_Renderer* pRenderer);
 

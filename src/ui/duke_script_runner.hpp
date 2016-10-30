@@ -137,7 +137,7 @@ private:
   void stopNewsReporterAnimation();
 
 private:
-  const loader::ResourceBundle* mpResourceBundle;
+  const loader::ResourceLoader* mpResourceBundle;
   loader::Palette16 mCurrentPalette;
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServices;

@@ -59,8 +59,8 @@ set(core_sources
     loader/music_loader.hpp
     loader/palette.cpp
     loader/palette.hpp
-    loader/resource_bundle.cpp
-    loader/resource_bundle.hpp
+    loader/resource_loader.cpp
+    loader/resource_loader.hpp
     loader/rle_compression.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
@@ -75,6 +75,8 @@ set(core_sources
     ui/bonus_screen.hpp
     ui/duke_script_runner.cpp
     ui/duke_script_runner.hpp
+    ui/fps_display.cpp
+    ui/fps_display.hpp
     ui/hud_renderer.cpp
     ui/hud_renderer.hpp
     ui/intro_movie.cpp

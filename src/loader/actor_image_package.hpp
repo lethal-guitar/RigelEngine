@@ -42,11 +42,7 @@ struct ActorData {
 };
 
 
-struct FontData {
-  base::Extents mSingleCharacterBitmapSize;
-  int mCharacterCount;
-  data::Image mCharacterBitmaps;
-};
+using FontData = std::vector<data::Image>;
 
 
 class ActorImagePackage {

@@ -45,9 +45,13 @@ private:
     const std::uint32_t fileSize = 0;
   };
 
+  using FileDict = std::unordered_map<std::string, DictEntry>;
+
+  FileDict::const_iterator findFileEntry(const std::string& name) const;
+
 private:
   std::vector<std::uint8_t> mFileData;
-  std::unordered_map<std::string, DictEntry> mFileDict;
+  FileDict mFileDict;
 };
 
 

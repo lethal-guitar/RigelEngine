@@ -16,7 +16,7 @@
 
 #include "intro_movie.hpp"
 
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 
 // Repetition counts and delays from original exe, determined from disassembly:
 //
@@ -60,7 +60,7 @@ using data::SoundId;
 
 
 IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
-  const loader::ResourceBundle& resources
+  const loader::ResourceLoader& resources
 ){
   return {
     // Neo LA - the future

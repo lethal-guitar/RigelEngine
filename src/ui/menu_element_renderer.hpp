@@ -27,7 +27,7 @@
 
 
 namespace rigel { namespace loader {
-  class ResourceBundle;
+  class ResourceLoader;
 }}
 
 
@@ -37,7 +37,7 @@ class MenuElementRenderer {
 public:
   MenuElementRenderer(
     SDL_Renderer* pRenderer,
-    const loader::ResourceBundle& resources,
+    const loader::ResourceLoader& resources,
     const loader::Palette16& palette = loader::INGAME_PALETTE);
 
   // Stateless API
@@ -70,11 +70,8 @@ private:
     int rightIndex) const;
 
 private:
-  SDL_Renderer* mpRenderer;
   engine::TileRenderer mSpriteSheetRenderer;
-
-  base::Extents mFontBitmapSize;
-  mutable sdl_utils::OwningTexture mFontTexture;
+  mutable engine::TileRenderer mBigTextRenderer;
 
   loader::Palette16 mPalette;
 

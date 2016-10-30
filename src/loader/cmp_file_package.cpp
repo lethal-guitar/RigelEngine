@@ -71,10 +71,11 @@ CMPFilePackage::CMPFilePackage(const string& filePath)
 
 
 ByteBuffer CMPFilePackage::file(const std::string& name) const {
-  const auto normalizedName = normalizedFileName(name);
-  const auto it = mFileDict.find(normalizedName);
-  if (it == mFileDict.end())
-    throw invalid_argument(string("No such file in CMP: ") + normalizedName);
+  const auto it = findFileEntry(name);
+  if (it == mFileDict.end()) {
+    throw invalid_argument(
+      string("No such file in CMP: ") + normalizedFileName(name));
+  }
 
   const auto& fileHeader = it->second;
   const auto fileStart = mFileData.begin() + fileHeader.fileOffset;
@@ -83,10 +84,14 @@ ByteBuffer CMPFilePackage::file(const std::string& name) const {
 
 
 bool CMPFilePackage::hasFile(const std::string& name) const {
-  const auto normalizedName = normalizedFileName(name);
-  const auto it = mFileDict.find(normalizedName);
+  return findFileEntry(name) != mFileDict.end();
+}
 
-  return it != mFileDict.end();
+
+CMPFilePackage::FileDict::const_iterator CMPFilePackage::findFileEntry(
+  const std::string& name
+) const {
+  return mFileDict.find(normalizedFileName(name));
 }
 
 

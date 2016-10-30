@@ -16,6 +16,8 @@
 
 #include "duke_script_loader.hpp"
 
+#include <data/game_traits.hpp>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -46,6 +48,7 @@ namespace rigel { namespace loader {
 namespace b = boost;
 using namespace std;
 using namespace data::script;
+using data::GameTraits;
 
 
 namespace {
@@ -289,10 +292,13 @@ vector<Action> parseTextCommandWithBigText(
     textActions.emplace_back(DrawText{x, y, regularTextPart});
   }
 
+  const auto positionOffset =
+    numPrecedingCharacters * GameTraits::menuFontCharacterBitmapSizeTiles.width;
+
   const auto colorIndex = static_cast<uint8_t>(*bigTextMarkerIter) - 0xF0;
   string bigTextPart(next(bigTextMarkerIter), sourceText.cend());
   textActions.emplace_back(DrawBigText{
-    x + numPrecedingCharacters,
+    x + positionOffset,
     y,
     colorIndex,
     move(bigTextPart)

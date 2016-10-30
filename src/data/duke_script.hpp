@@ -191,7 +191,7 @@ struct SetupCheckBoxes {
 
 
 struct ShowSaveSlots {
-  ShowSaveSlots(const int selectedSlot)
+  explicit ShowSaveSlots(const int selectedSlot)
     : mSelectedSlot(selectedSlot)
   {
   }

@@ -18,8 +18,9 @@
 
 #include <engine/sound_system.hpp>
 #include <game_mode.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 #include <sdl_utils/texture.hpp>
+#include <ui/fps_display.hpp>
 
 #include <boost/optional.hpp>
 #include <chrono>
@@ -74,7 +75,7 @@ private:
 private:
   SDL_Renderer* mpRenderer;
   engine::SoundSystem mSoundSystem;
-  loader::ResourceBundle mResources;
+  loader::ResourceLoader mResources;
   bool mIsShareWareVersion;
 
   sdl_utils::RenderTargetTexture mRenderTarget;
@@ -90,6 +91,8 @@ private:
   bool mIsRunning;
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
+
+  ui::FpsDisplay mFpsDisplay;
 };
 
 }

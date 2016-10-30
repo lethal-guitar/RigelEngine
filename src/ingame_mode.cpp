@@ -22,7 +22,7 @@
 #include <engine/physics_system.hpp>
 #include <engine/rendering_system.hpp>
 #include <game_logic/player_interaction_system.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 #include <ui/utils.hpp>
 
 #include <cassert>
@@ -162,7 +162,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
 void IngameMode::showLoadingScreen(
   const int episode,
-  const loader::ResourceBundle& resources
+  const loader::ResourceLoader& resources
 ) {
   mpServiceProvider->fadeOutScreen();
   mpServiceProvider->playMusic("MENUSNG2.IMF");
@@ -181,7 +181,7 @@ void IngameMode::loadLevel(
   const int episode,
   const int levelNumber,
   const data::Difficulty difficulty,
-  const loader::ResourceBundle& resources
+  const loader::ResourceLoader& resources
 ) {
   auto level = loader::loadLevel(
     levelFileName(episode, levelNumber), resources);
