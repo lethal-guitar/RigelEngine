@@ -38,6 +38,15 @@ using RenderTargetBinder = sdl_utils::RenderTargetTexture::Binder;
 
 namespace {
 
+// The game's original 320x200 resolution would give us a 16:10 aspect ratio
+// when using square pixels, but monitors of the time had a 4:3 aspect ratio,
+// and that's what the game's graphics were designed for (very noticeable e.g.
+// with the earth in the Apogee logo). It worked out fine back then because
+// CRTs can show non-square pixels, but that's not possible with today's
+// screens anymore. Therefore, we need to stretch the image slightly before
+// actually rendering it. We do that by rendering the game into a 320x200
+// render target, and then stretching that onto our logical display which has a
+// slightly bigger vertical resolution in order to get a 4:3 aspect ratio.
 const auto ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT = 240;
 
 }
