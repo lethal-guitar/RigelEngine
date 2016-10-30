@@ -28,17 +28,6 @@
 
 /* FONT FINDINGS
  *
- * XYTEXT special chars:
- *    0xEF: Draw sprite instead. Followed by 3 numbers for ActorID, and 2 for
- *          frame number in actor (zero-based)
- *
- *    0xF3: Big bold, highlighted text (menu)
- *    0xF2: Big bold, gray text (menu)
- *    0xF8: Big bold, yellow text (menu, for "Ordering information")
- *    0xF0: ??
- *
- *  For all the menu text, the low byte is the palette index to use
- *
  * Font actor: 29 (2-planar, 1st mask, 2nd grayscale)
  *
  * |   0 | A |
