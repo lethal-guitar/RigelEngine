@@ -143,12 +143,8 @@ FontData ActorImagePackage::loadFont() const {
 
   const auto& header = it->second;
   const auto sizeInTiles = header.mFrames.front().mSizeInTiles;
-  const auto bitmapSize = data::tileExtentsToPixelExtents(sizeInTiles);
-  data::Image allBitmaps(
-    bitmapSize.width * header.mFrames.size(),
-    bitmapSize.height);
 
-  int insertPosX = 0;
+  FontData fontBitmaps;
   for (const auto& frameHeader : header.mFrames) {
     if (frameHeader.mSizeInTiles != sizeInTiles) {
       throw runtime_error("Font bitmaps must all be equally sized");
@@ -161,20 +157,14 @@ FontData ActorImagePackage::loadFont() const {
     }
 
     const auto dataStart = mImageData.cbegin() + frameHeader.mFileOffset;
-    const auto characterBitmap = loadTiledFontBitmap(
+    auto characterBitmap = loadTiledFontBitmap(
       dataStart,
       dataStart + dataSize,
       sizeInTiles.width);
-    allBitmaps.insertImage(insertPosX, 0, characterBitmap);
-
-    insertPosX += bitmapSize.width;
+    fontBitmaps.emplace_back(std::move(characterBitmap));
   }
 
-  return {
-    bitmapSize,
-    static_cast<int>(header.mFrames.size()),
-    allBitmaps
-  };
+  return fontBitmaps;
 }
 
 }}

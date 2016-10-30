@@ -70,11 +70,8 @@ private:
     int rightIndex) const;
 
 private:
-  SDL_Renderer* mpRenderer;
   engine::TileRenderer mSpriteSheetRenderer;
-
-  base::Extents mFontBitmapSize;
-  mutable sdl_utils::OwningTexture mFontTexture;
+  mutable engine::TileRenderer mBigTextRenderer;
 
   loader::Palette16 mPalette;
 

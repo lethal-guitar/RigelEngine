@@ -136,6 +136,29 @@ namespace {
 const auto NUM_MENU_INDICATOR_STATES = 8;
 const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
+
+sdl_utils::OwningTexture createFontTexture(
+  const loader::FontData& font,
+  SDL_Renderer* pRenderer
+) {
+  if (font.size() != 67u) {
+    throw std::runtime_error("Wrong number of bitmaps in menu font");
+  }
+
+  const auto characterWidth = int(font.front().width());
+  data::Image combinedBitmaps(
+    characterWidth * font.size(),
+    font.front().height());
+
+  int insertPosX = 0;
+  for (const auto& characterBitmap : font) {
+    combinedBitmaps.insertImage(insertPosX, 0, characterBitmap);
+    insertPosX += characterWidth;
+  }
+
+  return sdl_utils::OwningTexture{pRenderer, combinedBitmaps};
+}
+
 }
 
 
@@ -144,21 +167,16 @@ MenuElementRenderer::MenuElementRenderer(
   const loader::ResourceLoader& resources,
   const loader::Palette16& palette
 )
-  : mpRenderer(pRenderer)
-  , mSpriteSheetRenderer(
-    sdl_utils::OwningTexture(
-      pRenderer,
-      resources.loadTiledFullscreenImage("STATUS.MNI", palette)),
-    pRenderer)
+  : mSpriteSheetRenderer(
+      sdl_utils::OwningTexture(
+        pRenderer,
+        resources.loadTiledFullscreenImage("STATUS.MNI", palette)),
+      pRenderer)
+  , mBigTextRenderer(
+      createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
+      pRenderer)
   , mPalette(palette)
 {
-  const auto font = resources.mActorImagePackage.loadFont();
-  if (font.mCharacterCount != 67) {
-    throw std::runtime_error("Font data incomplete");
-  }
-
-  mFontBitmapSize = font.mSingleCharacterBitmapSize;
-  mFontTexture = sdl_utils::OwningTexture(pRenderer, font.mCharacterBitmaps);
 }
 
 
@@ -196,7 +214,7 @@ void MenuElementRenderer::drawBigText(
   const std::string& text
 ) const {
   const auto& color = mPalette.at(colorIndex);
-  mFontTexture.setColorMod(color.r, color.g, color.b);
+  mBigTextRenderer.setColorMod(color.r, color.g, color.b);
 
   for (auto i=0u; i<text.size(); ++i) {
     const auto ch = static_cast<uint8_t>(text[i]);
@@ -220,18 +238,8 @@ void MenuElementRenderer::drawBigText(
       index = 40;
     }
 
-    const auto characterPosition = static_cast<int>(i);
-    const auto pixelPosX = data::tilesToPixels(x) +
-      characterPosition * mFontBitmapSize.width;
-    const auto pixelPosY = data::tilesToPixels(y) -
-      (mFontBitmapSize.height - data::GameTraits::tileSize);
-    mFontTexture.render(
-      mpRenderer,
-      {pixelPosX, pixelPosY},
-      {
-        {index * mFontBitmapSize.width, 0},
-        mFontBitmapSize
-      });
+    const auto position = static_cast<int>(i);
+    mBigTextRenderer.renderTileSlice(index, {x + position, y-1});
   }
 }
 
