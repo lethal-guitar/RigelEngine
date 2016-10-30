@@ -22,6 +22,7 @@
 #include <loader/resource_bundle.hpp>
 
 #include <cassert>
+#include <cmath>
 #include <stdexcept>
 
 

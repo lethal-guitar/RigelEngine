@@ -1,4 +1,4 @@
-# Rigel Engine [![Build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master)
+# Rigel Engine [![Build Status](https://travis-ci.org/lethal-guitar/RigelEngine.svg?branch=master)](https://travis-ci.org/lethal-guitar/RigelEngine) [![Windows build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master)
 
 ## What is Rigel Engine?
 
@@ -77,7 +77,7 @@ The project depends on the following libraries:
 
 * SDL >= 2.0.4
 * SDL\_mixer >= 2.0.1
-* Boost >= 1.58 (older versions might work, but I didn't try)
+* Boost >= 1.55
 
 The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):
