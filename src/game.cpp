@@ -140,6 +140,10 @@ void Game::mainLoop() {
   mLastTime = high_resolution_clock::now();
 
   for (;;) {
+    const auto now = high_resolution_clock::now();
+    const auto elapsed = duration<entityx::TimeDelta>(now - mLastTime).count();
+    mLastTime = now;
+
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
 
@@ -152,10 +156,6 @@ void Game::mainLoop() {
       if (!mIsRunning) {
         break;
       }
-
-      const auto now = high_resolution_clock::now();
-      const auto elapsed = duration<entityx::TimeDelta>(now - mLastTime).count();
-      mLastTime = now;
 
       if (mpNextGameMode) {
         fadeOutScreen();
