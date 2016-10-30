@@ -36,9 +36,9 @@ integrated though, e.g. the bonus screen which is shown in-between levels.
 
 ### Linux build quick start guide
 
-If you're on Linux and running a recent enough Ubuntu/Debian-like distro (I'm
-using Linux Mint based on Ubuntu 16.04 Xenial Xerus), here's how to quickly get
-the project up and running. Windows build instructions can be found further down.
+If you're on Linux and running a recent enough Ubuntu/Debian-like distro<sup>[1](#foot-note-linux)</sup>,
+here's how to quickly get the project up and running. Windows build
+instructions can be found [further down](#windows-build-instructions).
 
 ```bash
 # Install all external dependencies, as well as the CMake build system:
@@ -88,7 +88,7 @@ code (in the `3rd_party` directory):
 * [Catch](https://github.com/philsquared/Catch) testing framework
 * [atria](https://github.com/Ableton/atria) C++ utilities
 
-### Windows builds
+### <a name="windows-build-instructions">Windows builds</a>
 
 To build on Windows, you'll need to install CMake and provide binaries for the
 external dependencies listed above. You can get them using the following links:
@@ -111,6 +111,13 @@ SDL2DIR=<SDL2_LOCATION>
 SDL2MIXERDIR=<SDL2_MIXER_LOCATION>
 ```
 
-All of the above would need slight adjustments in order to create a 32-bit
-build. Also note that I haven't tried building 32-bit so far, so it might still
-not work without some minor changes.
+If you're using git-bash on Windows, an easy way to do so is by adding the
+corresponding `export` commands in your`.bashrc`.
+
+_Note_: All of the above would need slight adjustments in order to create a
+32-bit build. Also I haven't tried building 32-bit so far, so it's possible
+that some additional changes would be necessary.
+
+***
+
+<a name="foot-note-linux">[1]</a>: I'm using Linux Mint 18, based on Ubuntu 16.04 Xenial Xerus
