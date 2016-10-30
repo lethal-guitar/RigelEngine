@@ -31,17 +31,7 @@ namespace rigel { namespace sdl_utils {
 namespace detail {
 
 template<typename SDLType>
-class PtrBase : public std::unique_ptr<SDLType, void(*)(SDLType*)> {
-private:
-  using BasePtrT = std::unique_ptr<SDLType, void(*)(SDLType*)>;
-
-protected:
-  template<typename P, typename D>
-  PtrBase(P&& p, D&& d)
-    : BasePtrT(std::forward<P>(p), std::forward<D>(d))
-  {
-  }
-};
+using PtrBase = std::unique_ptr<SDLType, void(*)(SDLType*)>;
 
 }
 
