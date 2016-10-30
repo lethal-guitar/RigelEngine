@@ -51,7 +51,7 @@ private:
   using PlaybackConfigList = std::vector<PlaybackConfig>;
 
   PlaybackConfigList createConfigurations(
-    const loader::ResourceBundle& resources);
+    const loader::ResourceLoader& resources);
 
 private:
   IGameServiceProvider* mpServiceProvider;

@@ -17,7 +17,7 @@
 #include "hud_renderer.hpp"
 
 #include <data/game_traits.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 
 #include <cmath>
 #include <string>
@@ -189,7 +189,7 @@ HudRenderer::HudRenderer(
   data::PlayerModel* pPlayerModel,
   const int levelNumber,
   SDL_Renderer* pRenderer,
-  const loader::ResourceBundle& bundle
+  const loader::ResourceLoader& bundle
 )
   : HudRenderer(
       pPlayerModel,

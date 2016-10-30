@@ -21,7 +21,7 @@
 #include <data/unit_conversions.hpp>
 #include <engine/tile_renderer.hpp>
 #include <engine/timing.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 #include <utils/container_tools.hpp>
 #include <utils/math_tools.hpp>
 #include <ui/utils.hpp>

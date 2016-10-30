@@ -19,7 +19,7 @@
 #include <data/game_traits.hpp>
 #include <data/unit_conversions.hpp>
 #include <engine/timing.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -152,7 +152,7 @@ const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
 MenuElementRenderer::MenuElementRenderer(
   SDL_Renderer* pRenderer,
-  const loader::ResourceBundle& resources,
+  const loader::ResourceLoader& resources,
   const loader::Palette16& palette
 )
   : mpRenderer(pRenderer)

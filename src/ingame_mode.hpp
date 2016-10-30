@@ -49,13 +49,13 @@ public:
   void updateAndRender(engine::TimeDelta dt) override;
 
 private:
-  void showLoadingScreen(int episode, const loader::ResourceBundle& resources);
+  void showLoadingScreen(int episode, const loader::ResourceLoader& resources);
 
   void loadLevel(
     int episode,
     int levelNumber,
     data::Difficulty difficulty,
-    const loader::ResourceBundle& resources
+    const loader::ResourceLoader& resources
   );
 
 private:

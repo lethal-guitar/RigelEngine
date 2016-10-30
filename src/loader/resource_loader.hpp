@@ -32,9 +32,9 @@
 
 namespace rigel { namespace loader {
 
-class ResourceBundle {
+class ResourceLoader {
 public:
-  explicit ResourceBundle(const std::string& gamePath);
+  explicit ResourceLoader(const std::string& gamePath);
 
   data::Image loadTiledFullscreenImage(const std::string& name) const;
   data::Image loadTiledFullscreenImage(

@@ -17,7 +17,7 @@
 #include "menu_mode.hpp"
 
 #include <data/game_session_data.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 
 
 namespace rigel {

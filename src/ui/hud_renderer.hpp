@@ -34,7 +34,7 @@ namespace data {
 namespace loader {
   struct ActorData;
   class ActorImagePackage;
-  class ResourceBundle;
+  class ResourceLoader;
 }
 
 
@@ -46,7 +46,7 @@ public:
     data::PlayerModel* pPlayerModel,
     int levelNumber,
     SDL_Renderer* pRenderer,
-    const loader::ResourceBundle& bundle);
+    const loader::ResourceLoader& bundle);
 
   void render();
   void update(engine::TimeDelta dt);

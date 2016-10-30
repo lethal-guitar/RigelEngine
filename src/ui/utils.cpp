@@ -1,13 +1,13 @@
 #include "utils.hpp"
 
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 
 
 namespace rigel { namespace ui {
 
 sdl_utils::OwningTexture fullScreenImageAsTexture(
   SDL_Renderer* pRenderer,
-  const loader::ResourceBundle& resources,
+  const loader::ResourceLoader& resources,
   const std::string& imageName
 ) {
   return sdl_utils::OwningTexture(

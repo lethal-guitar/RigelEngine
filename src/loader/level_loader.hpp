@@ -26,11 +26,11 @@
 
 namespace rigel { namespace loader {
 
-class ResourceBundle;
+class ResourceLoader;
 
 
 data::map::LevelData loadLevel(
   const std::string& mapName,
-  const ResourceBundle& resources);
+  const ResourceLoader& resources);
 
 }}

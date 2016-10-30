@@ -18,7 +18,7 @@
 
 #include <base/warnings.hpp>
 #include <loader/duke_script_loader.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 
 #include <typeinfo>
 

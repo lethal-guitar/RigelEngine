@@ -59,8 +59,8 @@ set(core_sources
     loader/music_loader.hpp
     loader/palette.cpp
     loader/palette.hpp
-    loader/resource_bundle.cpp
-    loader/resource_bundle.hpp
+    loader/resource_loader.cpp
+    loader/resource_loader.hpp
     loader/rle_compression.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp

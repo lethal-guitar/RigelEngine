@@ -18,7 +18,7 @@
 
 #include <engine/sound_system.hpp>
 #include <game_mode.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 #include <sdl_utils/texture.hpp>
 
 #include <boost/optional.hpp>
@@ -74,7 +74,7 @@ private:
 private:
   SDL_Renderer* mpRenderer;
   engine::SoundSystem mSoundSystem;
-  loader::ResourceBundle mResources;
+  loader::ResourceLoader mResources;
   bool mIsShareWareVersion;
 
   sdl_utils::RenderTargetTexture mRenderTarget;

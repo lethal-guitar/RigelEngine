@@ -32,7 +32,7 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
 
 namespace loader {
-  class ResourceBundle;
+  class ResourceLoader;
 }
 
 
@@ -65,7 +65,7 @@ struct IGameServiceProvider {
 struct GameMode {
   /** Contains everything a mode needs */
   struct Context {
-    const loader::ResourceBundle* mpResources;
+    const loader::ResourceLoader* mpResources;
     SDL_Renderer* mpRenderer;
     engine::SoundSystem* mpSoundSystem;
     IGameServiceProvider* mpServiceProvider;

@@ -27,7 +27,7 @@
 
 
 namespace rigel { namespace loader {
-  class ResourceBundle;
+  class ResourceLoader;
 }}
 
 
@@ -37,7 +37,7 @@ class MenuElementRenderer {
 public:
   MenuElementRenderer(
     SDL_Renderer* pRenderer,
-    const loader::ResourceBundle& resources,
+    const loader::ResourceLoader& resources,
     const loader::Palette16& palette = loader::INGAME_PALETTE);
 
   // Stateless API

@@ -17,7 +17,7 @@
 #include "bonus_screen.hpp"
 
 #include <engine/timing.hpp>
-#include <loader/resource_bundle.hpp>
+#include <loader/resource_loader.hpp>
 #include <ui/utils.hpp>
 
 

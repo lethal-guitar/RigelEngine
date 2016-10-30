@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "resource_bundle.hpp"
+#include "resource_loader.hpp"
 
 #include <data/game_traits.hpp>
 #include <data/unit_conversions.hpp>
@@ -46,7 +46,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 }
 
 
-ResourceBundle::ResourceBundle(const std::string& gamePath)
+ResourceLoader::ResourceLoader(const std::string& gamePath)
   : mFilePackage(gamePath + "/NUKEM2.CMP")
   , mActorImagePackage(mFilePackage)
   , mGamePath(gamePath)
@@ -55,14 +55,14 @@ ResourceBundle::ResourceBundle(const std::string& gamePath)
 }
 
 
-data::Image ResourceBundle::loadTiledFullscreenImage(
+data::Image ResourceLoader::loadTiledFullscreenImage(
   const std::string& name
 ) const {
   return loadTiledFullscreenImage(name, INGAME_PALETTE);
 }
 
 
-data::Image ResourceBundle::loadTiledFullscreenImage(
+data::Image ResourceLoader::loadTiledFullscreenImage(
   const std::string& name,
   const Palette16& overridePalette
 ) const {
@@ -74,7 +74,7 @@ data::Image ResourceBundle::loadTiledFullscreenImage(
 }
 
 
-data::Image ResourceBundle::loadStandaloneFullscreenImage(
+data::Image ResourceLoader::loadStandaloneFullscreenImage(
   const std::string& name
 ) const {
   const auto& data = mFilePackage.file(name);
@@ -94,7 +94,7 @@ data::Image ResourceBundle::loadStandaloneFullscreenImage(
 }
 
 
-loader::Palette16 ResourceBundle::loadPaletteFromFullScreenImage(
+loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
   const std::string& imageName
 ) const {
   const auto& data = mFilePackage.file(imageName);
@@ -103,7 +103,7 @@ loader::Palette16 ResourceBundle::loadPaletteFromFullScreenImage(
 }
 
 
-data::map::TileSet ResourceBundle::loadCZone(const std::string& name) const {
+data::map::TileSet ResourceLoader::loadCZone(const std::string& name) const {
   using namespace data;
   using namespace map;
 
@@ -152,12 +152,12 @@ data::map::TileSet ResourceBundle::loadCZone(const std::string& name) const {
 }
 
 
-data::Movie ResourceBundle::loadMovie(const std::string& name) const {
+data::Movie ResourceLoader::loadMovie(const std::string& name) const {
   return loader::loadMovie(loadFile(mGamePath + '/' + name));
 }
 
 
-data::AudioBuffer ResourceBundle::loadMusic(const std::string& name) const {
+data::AudioBuffer ResourceLoader::loadMusic(const std::string& name) const {
   using namespace chrono;
 
   const auto before = high_resolution_clock::now();
@@ -172,7 +172,7 @@ data::AudioBuffer ResourceBundle::loadMusic(const std::string& name) const {
 }
 
 
-data::AudioBuffer ResourceBundle::loadSound(const data::SoundId id) const {
+data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const {
   static const std::map<data::SoundId, const char*> INTRO_SOUND_MAP{
     {data::SoundId::IntroGunShot, "INTRO3.MNI"},
     {data::SoundId::IntroGunShotLow, "INTRO4.MNI"},
@@ -199,12 +199,12 @@ data::AudioBuffer ResourceBundle::loadSound(const data::SoundId id) const {
 }
 
 
-data::AudioBuffer ResourceBundle::loadSound(const std::string& name) const {
+data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const {
   return loader::decodeVoc(mFilePackage.file(name));
 }
 
 
-ScriptBundle ResourceBundle::loadScriptBundle(
+ScriptBundle ResourceLoader::loadScriptBundle(
   const std::string& fileName
 ) const {
   const auto data = mFilePackage.file(fileName);
