@@ -65,6 +65,8 @@ struct GameTraits {
     return (tileSizeSquared / pixelsPerEgaByte) * fontEgaPlanes;
   }
 
+  static const base::Extents menuFontCharacterBitmapSizeTiles;
+
   static const std::size_t mapDataWords = 32750u;
 
   static constexpr std::size_t mapHeightForWidth(const std::size_t width) {

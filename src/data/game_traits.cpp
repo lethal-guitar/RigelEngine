@@ -33,6 +33,8 @@ const base::Extents GameTraits::mapViewPortSize(
   GameTraits::mapViewPortWidthTiles,
   GameTraits::mapViewPortHeightTiles);
 
+const base::Extents GameTraits::menuFontCharacterBitmapSizeTiles(1, 2);
+
 RIGEL_RESTORE_WARNINGS
 
 }}
