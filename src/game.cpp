@@ -62,6 +62,7 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
       data::GameTraits::viewPortHeightPx)
   , mIsRunning(true)
   , mIsMinimized(false)
+  , mFpsDisplay(pRenderer, mResources)
 {
   throwIfFailed([this]() {
     return SDL_RenderSetLogicalSize(
@@ -168,6 +169,8 @@ void Game::mainLoop() {
     }
 
     mRenderTarget.renderScaledToScreen(mpRenderer);
+    mFpsDisplay.updateAndRender(elapsed);
+
     SDL_RenderPresent(mpRenderer);
   }
 }

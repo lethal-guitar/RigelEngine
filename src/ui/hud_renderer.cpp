@@ -275,24 +275,11 @@ void HudRenderer::render() {
   drawHealthBar();
   drawLevelNumber(mLevelNumber, mStatusSpriteSheetRenderer);
   drawCollectedLetters();
-
-  // FPS counter
-  drawNumbersBig(
-    static_cast<int>(std::round(1.0f / mFpsMeasurement)),
-    4,
-    {0, 0}, mStatusSpriteSheetRenderer);
 }
 
 
 void HudRenderer::update(engine::TimeDelta dt) {
   mTimeStepper.update(dt);
-
-  // FPS counter
-  float smoothing = 0.7f;
-  mFrameTime = (mFrameTime * smoothing) +
-    (static_cast<float>(dt) * (1.0f-smoothing));
-  float weightRatio = 0.1f;
-  mFpsMeasurement = mFpsMeasurement*(1.0f - weightRatio) + mFrameTime*weightRatio;
 }
 
 

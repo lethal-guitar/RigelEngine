@@ -93,10 +93,6 @@ private:
   InventoryItemTextureMap mInventoryTexturesByType;
   CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
   engine::TileRenderer mStatusSpriteSheetRenderer;
-
-  // FPS counter
-  float mFrameTime = 0.0f;
-  float mFpsMeasurement = 0.0f;
 };
 
 }}

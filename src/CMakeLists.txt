@@ -75,6 +75,8 @@ set(core_sources
     ui/bonus_screen.hpp
     ui/duke_script_runner.cpp
     ui/duke_script_runner.hpp
+    ui/fps_display.cpp
+    ui/fps_display.hpp
     ui/hud_renderer.cpp
     ui/hud_renderer.hpp
     ui/intro_movie.cpp

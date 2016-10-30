@@ -20,6 +20,7 @@
 #include <game_mode.hpp>
 #include <loader/resource_loader.hpp>
 #include <sdl_utils/texture.hpp>
+#include <ui/fps_display.hpp>
 
 #include <boost/optional.hpp>
 #include <chrono>
@@ -90,6 +91,8 @@ private:
   bool mIsRunning;
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
+
+  ui::FpsDisplay mFpsDisplay;
 };
 
 }
