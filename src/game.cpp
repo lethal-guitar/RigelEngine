@@ -151,9 +151,10 @@ void Game::mainLoop() {
   mLastTime = high_resolution_clock::now();
 
   for (;;) {
-    const auto now = high_resolution_clock::now();
-    const auto elapsed = duration<entityx::TimeDelta>(now - mLastTime).count();
-    mLastTime = now;
+    const auto startOfFrame = high_resolution_clock::now();
+    const auto elapsed =
+      duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
+    mLastTime = startOfFrame;
 
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
@@ -179,7 +180,11 @@ void Game::mainLoop() {
     }
 
     mRenderTarget.renderScaledToScreen(mpRenderer);
-    mFpsDisplay.updateAndRender(elapsed);
+
+    const auto afterRender = high_resolution_clock::now();
+    const auto innerRenderTime =
+      duration<engine::TimeDelta>(afterRender - startOfFrame).count();
+    mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
 
     SDL_RenderPresent(mpRenderer);
   }

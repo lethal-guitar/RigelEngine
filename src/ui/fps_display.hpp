@@ -32,7 +32,9 @@ class FpsDisplay {
 public:
   FpsDisplay(SDL_Renderer* pRenderer, const loader::ResourceLoader& resources);
 
-  void updateAndRender(engine::TimeDelta elapsed);
+  void updateAndRender(
+    engine::TimeDelta totalElapsed,
+    engine::TimeDelta renderingElapsed);
 
 private:
   MenuElementRenderer mTextRenderer;

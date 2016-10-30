@@ -19,7 +19,9 @@
 #include <loader/resource_loader.hpp>
 
 #include <cmath>
+#include <iomanip>
 #include <string>
+#include <sstream>
 
 
 namespace rigel { namespace ui {
@@ -41,9 +43,12 @@ FpsDisplay::FpsDisplay(
 }
 
 
-void FpsDisplay::updateAndRender(const engine::TimeDelta elapsed) {
+void FpsDisplay::updateAndRender(
+  const engine::TimeDelta totalElapsed,
+  const engine::TimeDelta renderingElapsed
+) {
   mSmoothedFrameTime = (mSmoothedFrameTime * SMOOTHING) +
-    (static_cast<float>(elapsed) * (1.0f-SMOOTHING));
+    (static_cast<float>(totalElapsed) * (1.0f-SMOOTHING));
 
   mWeightedFrameTime =
     mWeightedFrameTime * (1.0f - NEW_FRAME_TIME_WEIGHT)
@@ -53,11 +58,14 @@ void FpsDisplay::updateAndRender(const engine::TimeDelta elapsed) {
   const auto smoothedFps =
     static_cast<int>(std::round(1.0f / mWeightedFrameTime));
 
-  std::string statsReport;
-  statsReport += std::to_string(smoothedFps);
-  statsReport += " FPS";
+  std::stringstream statsReport;
+  statsReport
+    << smoothedFps << " FPS, "
+    << std::setw(4) << std::fixed << std::setprecision(2)
+    << totalElapsed * 1000.0 << " ms, "
+    << renderingElapsed * 1000.0 << " ms (inner)";
 
-  mTextRenderer.drawText(0, 0, statsReport);
+  mTextRenderer.drawText(0, 0, statsReport.str());
 }
 
 }}
