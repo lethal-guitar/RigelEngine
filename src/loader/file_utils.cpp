@@ -103,7 +103,7 @@ int16_t LeStreamReader::readS16() {
 
 
 int32_t LeStreamReader::readS24() {
-  static_assert(static_cast<int8_t>(0xFFU) == -1, "Need twos complement");
+  static_assert(static_cast<int8_t>(0xFFU) == -1, "Need two's complement");
   const auto rawValue = readU24();
   const auto extension = (rawValue & 0x800000) ? 0xFF : 0x00;
   return static_cast<int32_t>((extension << 24) | (rawValue & 0xFFFFFF));
