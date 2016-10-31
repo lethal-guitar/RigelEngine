@@ -37,12 +37,6 @@ namespace {
 
 const auto FONT_ACTOR_ID = 29;
 
-
-size_t determineNumActorInfoEntries(const ByteBuffer& actorInfoData) {
-  LeStreamReader reader(actorInfoData);
-  return reader.readU16();
-}
-
 }
 
 
@@ -50,9 +44,10 @@ ActorImagePackage::ActorImagePackage(const CMPFilePackage& filePackage)
   : mImageData(filePackage.file("ACTORS.MNI"))
 {
   const auto actorInfoData = filePackage.file("ACTRINFO.MNI");
-  const auto numEntries = determineNumActorInfoEntries(actorInfoData);
 
   LeStreamReader actorInfoReader(actorInfoData);
+  const auto numEntries = actorInfoReader.peekU16();
+
   for (uint16_t index=0; index<numEntries; ++index) {
     const auto offset = actorInfoReader.readU16();
 
