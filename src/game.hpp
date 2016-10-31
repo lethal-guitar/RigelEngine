@@ -36,6 +36,7 @@ public:
   struct Options {
     boost::optional<std::pair<int, int>> mLevelToJumpTo;
     bool mSkipIntro = false;
+    bool mEnableMusic = true;
   };
 
   Game(const std::string& gamePath, SDL_Renderer* pRenderer);
@@ -87,6 +88,8 @@ private:
 
   std::unordered_map<std::string, engine::SoundSystem::SoundHandle>
     mLoadedSongs;
+
+  bool mMusicEnabled = true;
 
   bool mIsRunning;
   bool mIsMinimized;

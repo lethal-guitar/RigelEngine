@@ -170,6 +170,7 @@ int main(int argc, char** argv) {
 
   string gamePath;
   Game::Options gameOptions;
+  bool disableMusic = false;
 
   po::options_description optionsDescription("Options");
   optionsDescription.add_options()
@@ -180,6 +181,9 @@ int main(int argc, char** argv) {
     ("play-level,l",
      po::value<string>(),
      "Directly jump to given map, skipping intro/menu etc.")
+    ("no-music",
+     po::bool_switch(&disableMusic),
+     "Disable music playback")
     ("game-path",
      po::value<string>(&gamePath),
      "Path to original game's installation. Can also be given as positional "
@@ -202,6 +206,10 @@ int main(int argc, char** argv) {
     if (options.count("help")) {
       cout << optionsDescription << '\n';
       return 0;
+    }
+
+    if (disableMusic) {
+      gameOptions.mEnableMusic = false;
     }
 
     if (options.count("play-level")) {
