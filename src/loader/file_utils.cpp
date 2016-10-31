@@ -115,6 +115,55 @@ int32_t LeStreamReader::readS32() {
 }
 
 
+template<typename Callable>
+auto LeStreamReader::withPreservingCurrentIter(Callable func) {
+  const auto currentIter = mCurrentByteIter;
+  const auto result = func();
+  mCurrentByteIter = currentIter;
+  return result;
+}
+
+
+uint8_t LeStreamReader::peekU8() {
+  return withPreservingCurrentIter([this]() { return readU8(); });
+}
+
+
+uint16_t LeStreamReader::peekU16() {
+  return withPreservingCurrentIter([this]() { return readU16(); });
+}
+
+
+uint32_t LeStreamReader::peekU24() {
+  return withPreservingCurrentIter([this]() { return readU24(); });
+}
+
+
+uint32_t LeStreamReader::peekU32() {
+  return withPreservingCurrentIter([this]() { return readU32(); });
+}
+
+
+int8_t LeStreamReader::peekS8() {
+  return withPreservingCurrentIter([this]() { return readS8(); });
+}
+
+
+int16_t LeStreamReader::peekS16() {
+  return withPreservingCurrentIter([this]() { return readS16(); });
+}
+
+
+int32_t LeStreamReader::peekS24() {
+  return withPreservingCurrentIter([this]() { return readS24(); });
+}
+
+
+int32_t LeStreamReader::peekS32() {
+  return withPreservingCurrentIter([this]() { return readS32(); });
+}
+
+
 void LeStreamReader::skipBytes(const size_t count) {
   assert(distance(mCurrentByteIter, mDataEnd) >= 0);
   const auto availableBytes = static_cast<size_t>(
