@@ -49,8 +49,7 @@ ByteBuffer loadFile(const string& fileName) {
 
 
 LeStreamReader::LeStreamReader(const ByteBuffer& data)
-  : mCurrentByteIter(data.cbegin())
-  , mDataEnd(data.cend())
+  : LeStreamReader(data.cbegin(), data.cend())
 {
 }
 
