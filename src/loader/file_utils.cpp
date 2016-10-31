@@ -16,6 +16,7 @@
 
 #include "file_utils.hpp"
 
+#include <cassert>
 #include <fstream>
 #include <stdexcept>
 
@@ -116,6 +117,7 @@ int32_t LeStreamReader::readS32() {
 
 
 void LeStreamReader::skipBytes(const size_t count) {
+  assert(distance(mCurrentByteIter, mDataEnd) >= 0);
   const auto availableBytes = static_cast<size_t>(
     distance(mCurrentByteIter, mDataEnd));
   if (availableBytes < count) {
