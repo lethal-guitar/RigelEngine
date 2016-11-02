@@ -17,9 +17,13 @@
 #pragma once
 
 #include <base/spatial_types.hpp>
+#include <base/warnings.hpp>
 #include <data/tile_set.hpp>
 
+RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
+
 #include <array>
 #include <cstddef>
 #include <string>
