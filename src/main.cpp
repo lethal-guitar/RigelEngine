@@ -146,6 +146,22 @@ void showBanner() {
     "\n";
 }
 
+
+void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
+  SdlInitializer initializeSDL;
+  Ptr<SDL_Window> pWindow(createWindow());
+  Ptr<SDL_Renderer> pRenderer(createRenderer(pWindow.get()));
+
+  verifyRequiredRendererCapabilities(pRenderer.get());
+
+  // We don't care if screen saver disabling failed, it's not that important.
+  // So no return value checking.
+  SDL_DisableScreenSaver();
+
+  Game game(gamePath, pRenderer.get());
+  game.run(gameOptions);
+}
+
 }
 
 
@@ -154,6 +170,7 @@ int main(int argc, char** argv) {
 
   string gamePath;
   Game::Options gameOptions;
+  bool disableMusic = false;
 
   po::options_description optionsDescription("Options");
   optionsDescription.add_options()
@@ -164,6 +181,9 @@ int main(int argc, char** argv) {
     ("play-level,l",
      po::value<string>(),
      "Directly jump to given map, skipping intro/menu etc.")
+    ("no-music",
+     po::bool_switch(&disableMusic),
+     "Disable music playback")
     ("game-path",
      po::value<string>(&gamePath),
      "Path to original game's installation. Can also be given as positional "
@@ -188,6 +208,10 @@ int main(int argc, char** argv) {
       return 0;
     }
 
+    if (disableMusic) {
+      gameOptions.mEnableMusic = false;
+    }
+
     if (options.count("play-level")) {
       const auto levelToPlay = options["play-level"].as<string>();
       if (levelToPlay.size() != 2) {
@@ -204,18 +228,7 @@ int main(int argc, char** argv) {
       gameOptions.mLevelToJumpTo = std::make_pair(episode, level);
     }
 
-    SdlInitializer initializeSDL;
-    Ptr<SDL_Window> pWindow(createWindow());
-    Ptr<SDL_Renderer> pRenderer(createRenderer(pWindow.get()));
-
-    verifyRequiredRendererCapabilities(pRenderer.get());
-
-    // We don't care if screen saver disabling failed, it's not that important.
-    // So no return value checking.
-    SDL_DisableScreenSaver();
-
-    Game game(gamePath, pRenderer.get());
-    game.run(gameOptions);
+    initAndRunGame(gamePath, gameOptions);
   }
   catch (const po::error& err)
   {

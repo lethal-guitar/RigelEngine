@@ -106,8 +106,10 @@ void Game::run(const Options& options) {
   preLoadSong("OPNGATEA.IMF");
   preLoadSong("RANGEA.IMF");
 
-
   mSoundSystem.reportMemoryUsage();
+
+
+  mMusicEnabled = options.mEnableMusic;
 
   // Check if running registered version
   if (
@@ -286,6 +288,10 @@ void Game::playSound(const data::SoundId id) {
 
 
 void Game::playMusic(const std::string& name) {
+  if (!mMusicEnabled) {
+    return;
+  }
+
   auto loadedSongIter = mLoadedSongs.find(name);
   if (loadedSongIter == mLoadedSongs.end()) {
     const auto handle = mSoundSystem.addSong(mResources.loadMusic(name));

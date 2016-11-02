@@ -16,6 +16,7 @@
 
 #include "file_utils.hpp"
 
+#include <cassert>
 #include <fstream>
 #include <stdexcept>
 
@@ -48,8 +49,7 @@ ByteBuffer loadFile(const string& fileName) {
 
 
 LeStreamReader::LeStreamReader(const ByteBuffer& data)
-  : mCurrentByteIter(data.cbegin())
-  , mDataEnd(data.cend())
+  : LeStreamReader(data.cbegin(), data.cend())
 {
 }
 
@@ -103,7 +103,7 @@ int16_t LeStreamReader::readS16() {
 
 
 int32_t LeStreamReader::readS24() {
-  static_assert(static_cast<int8_t>(0xFFU) == -1, "Need twos complement");
+  static_assert(static_cast<int8_t>(0xFFU) == -1, "Need two's complement");
   const auto rawValue = readU24();
   const auto extension = (rawValue & 0x800000) ? 0xFF : 0x00;
   return static_cast<int32_t>((extension << 24) | (rawValue & 0xFFFFFF));
@@ -115,7 +115,57 @@ int32_t LeStreamReader::readS32() {
 }
 
 
+template<typename Callable>
+auto LeStreamReader::withPreservingCurrentIter(Callable func) {
+  const auto currentIter = mCurrentByteIter;
+  const auto result = func();
+  mCurrentByteIter = currentIter;
+  return result;
+}
+
+
+uint8_t LeStreamReader::peekU8() {
+  return withPreservingCurrentIter([this]() { return readU8(); });
+}
+
+
+uint16_t LeStreamReader::peekU16() {
+  return withPreservingCurrentIter([this]() { return readU16(); });
+}
+
+
+uint32_t LeStreamReader::peekU24() {
+  return withPreservingCurrentIter([this]() { return readU24(); });
+}
+
+
+uint32_t LeStreamReader::peekU32() {
+  return withPreservingCurrentIter([this]() { return readU32(); });
+}
+
+
+int8_t LeStreamReader::peekS8() {
+  return withPreservingCurrentIter([this]() { return readS8(); });
+}
+
+
+int16_t LeStreamReader::peekS16() {
+  return withPreservingCurrentIter([this]() { return readS16(); });
+}
+
+
+int32_t LeStreamReader::peekS24() {
+  return withPreservingCurrentIter([this]() { return readS24(); });
+}
+
+
+int32_t LeStreamReader::peekS32() {
+  return withPreservingCurrentIter([this]() { return readS32(); });
+}
+
+
 void LeStreamReader::skipBytes(const size_t count) {
+  assert(distance(mCurrentByteIter, mDataEnd) >= 0);
   const auto availableBytes = static_cast<size_t>(
     distance(mCurrentByteIter, mDataEnd));
   if (availableBytes < count) {

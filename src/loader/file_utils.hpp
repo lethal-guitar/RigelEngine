@@ -52,11 +52,24 @@ public:
   std::int32_t readS24();
   std::int32_t readS32();
 
+  std::uint8_t peekU8();
+  std::uint16_t peekU16();
+  std::uint32_t peekU24();
+  std::uint32_t peekU32();
+
+  std::int8_t peekS8();
+  std::int16_t peekS16();
+  std::int32_t peekS24();
+  std::int32_t peekS32();
+
   void skipBytes(std::size_t count);
   bool hasData() const;
   ByteBufferCIter currentIter() const;
 
 private:
+  template<typename Callable>
+  auto withPreservingCurrentIter(Callable func);
+
   ByteBufferCIter mCurrentByteIter;
   const ByteBufferCIter mDataEnd;
 };
