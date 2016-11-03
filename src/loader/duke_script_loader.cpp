@@ -16,17 +16,20 @@
 
 #include "duke_script_loader.hpp"
 
+#include <base/warnings.hpp>
 #include <data/game_traits.hpp>
 
+RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <cctype>
-#include <unordered_set>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_set>
 
 
 // TODO:

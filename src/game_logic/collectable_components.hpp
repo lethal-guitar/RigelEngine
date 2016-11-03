@@ -16,9 +16,12 @@
 
 #pragma once
 
+#include <base/warnings.hpp>
 #include <data/player_data.hpp>
 
+RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic {
