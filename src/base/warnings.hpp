@@ -37,7 +37,14 @@
 
   #define RIGEL_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push") \
-    _Pragma("clang diagnostic ignored \"-Weverything\"") \
+    _Pragma("clang diagnostic ignored \"-Wreserved-id-macro\"") \
+    _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"") \
+    _Pragma("clang diagnostic ignored \"-Wdocumentation-unknown-command\"") \
+    _Pragma("clang diagnostic ignored \"-Wdocumentation\"") \
+    _Pragma("clang diagnostic ignored \"-Wshadow\"") \
+    _Pragma("clang diagnostic ignored \"-Wmissing-noreturn\"") \
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"") \
+    _Pragma("clang diagnostic ignored \"-Wundef\"") \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")

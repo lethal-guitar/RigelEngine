@@ -9,22 +9,36 @@ branches:
 # 'language: c++' doesn't help us, since it won't use the custom gcc we install
 language: generic
 
-addons:
-  apt:
-    packages:
-      - libsdl2-dev
-      - libsdl2-mixer-dev
-      - g++-5
-      - libboost1.55-dev
-      - libboost-program-options1.55-dev
-    sources: &sources
-      - ubuntu-toolchain-r-test
-      - boost-latest
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - libsdl2-dev
+            - libsdl2-mixer-dev
+            - g++-5
+            - libboost1.55-dev
+            - libboost-program-options1.55-dev
+          sources: &sources
+            - ubuntu-toolchain-r-test
+            - boost-latest
+
+    - os: osx
+
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      brew update && brew install sdl2 && brew install sdl2_mixer;
+    fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      export CC=gcc-5;
+      export CXX=g++-5;
+    fi
 
 before_script:
-  - export CC=gcc-5
-  - export CXX=g++-5
-  - (mkdir build && cd build && cmake ..)
+  - (mkdir build_dbg && cd build_dbg && cmake .. -DCMAKE_BUILD_TYPE=Debug)
+  - (mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release)
 
 script:
+  - (cd build_dbg && make -j2 && ctest)
   - (cd build && make -j2 && ctest)
