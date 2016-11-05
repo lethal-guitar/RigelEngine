@@ -929,22 +929,6 @@ std::vector<ActorDescription> collectActorDescriptions(
 
       const auto& actor = helper.actorAt(col, row);
       switch (actor.mID) {
-        case 103: // stray tile section marker, ignore
-        case 104: // stray tile section marker, ignore
-        case 137:
-        case 138:
-        case 139: // level exit
-        case 142:
-        case 143:
-        case 221: // water
-        case 233: // water surface
-        case 234: // water surface
-        case 241: // windblown-spider generator
-        case 250:
-        case 251:
-        case 254:
-          continue;
-
         case 102:
         case 106:
         //case 116:
@@ -976,6 +960,24 @@ EntityBundle createEntitiesForLevel(
 
   SpriteEntityCreator creator(pRenderer, spritePackage);
   for (const auto& actor : actors) {
+    switch (actor.mID) {
+      case 103: // stray tile section marker, ignore
+      case 104: // stray tile section marker, ignore
+      case 137:
+      case 138:
+      case 139: // level exit
+      case 142:
+      case 143:
+      case 221: // water
+      case 233: // water surface
+      case 234: // water surface
+      case 241: // windblown-spider generator
+      case 250:
+      case 251:
+      case 254:
+        continue;
+    }
+
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
     creator.configureEntity(entity, actor.mID);
