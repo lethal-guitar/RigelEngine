@@ -199,73 +199,14 @@ auto makeActorGrid(const LevelData& level) {
 }
 
 
-class ActorParsingHelper {
+class SpriteEntityCreator {
 public:
-  ActorParsingHelper(
-    LevelData& level,
+  SpriteEntityCreator(
     SDL_Renderer* pRenderer,
     const ActorImagePackage& spritePackage)
-    : mActorGrid(makeActorGrid(level))
-    , mMap(level.mMap)
-    , mpRenderer(pRenderer)
+    : mpRenderer(pRenderer)
     , mpSpritePackage(&spritePackage)
   {
-  }
-
-  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
-    return *mActorGrid.valueAt(col, row);
-  }
-
-  bool hasActorAt(const size_t col, const size_t row) const {
-    return mActorGrid.valueAt(col, row) != nullptr;
-  }
-
-  void removeActorAt(const size_t col, const size_t row) {
-    mActorGrid.setValueAt(col, row, nullptr);
-  }
-
-  bool handleMetaActor(
-    const int col,
-    const int row,
-    const Difficulty chosenDifficulty
-  ) {
-    const auto ID = actorAt(col, row).mID;
-    switch (ID) {
-      case 82:
-        applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
-        return true;
-
-      case 83:
-        applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
-        return true;
-
-      case 103: // stray tile section marker, ignore
-      case 104: // stray tile section marker, ignore
-      case 137:
-      case 138:
-      case 139: // level exit
-      case 142:
-      case 143:
-      case 221: // water
-      case 233: // water surface
-      case 234: // water surface
-      case 241: // windblown-spider generator
-      case 250:
-      case 251:
-      case 254:
-        return true;
-
-      case 102:
-      case 106:
-      //case 116:
-        applyInteractiveTileSection(col, row, ID);
-        return true;
-
-      default:
-        break;
-    }
-
-    return false;
   }
 
   void configureEntity(ex::Entity entity, const ActorID actorID) {
@@ -823,7 +764,79 @@ private:
     return sprite;
   }
 
+  SDL_Renderer* mpRenderer;
+  const ActorImagePackage* mpSpritePackage;
 
+  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
+};
+
+
+class ActorParsingHelper {
+public:
+  ActorParsingHelper(LevelData& level)
+    : mActorGrid(makeActorGrid(level))
+    , mMap(level.mMap)
+  {
+  }
+
+  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
+    return *mActorGrid.valueAt(col, row);
+  }
+
+  bool hasActorAt(const size_t col, const size_t row) const {
+    return mActorGrid.valueAt(col, row) != nullptr;
+  }
+
+  void removeActorAt(const size_t col, const size_t row) {
+    mActorGrid.setValueAt(col, row, nullptr);
+  }
+
+  bool handleMetaActor(
+    const int col,
+    const int row,
+    const Difficulty chosenDifficulty
+  ) {
+    const auto ID = actorAt(col, row).mID;
+    switch (ID) {
+      case 82:
+        applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
+        return true;
+
+      case 83:
+        applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
+        return true;
+
+      case 103: // stray tile section marker, ignore
+      case 104: // stray tile section marker, ignore
+      case 137:
+      case 138:
+      case 139: // level exit
+      case 142:
+      case 143:
+      case 221: // water
+      case 233: // water surface
+      case 234: // water surface
+      case 241: // windblown-spider generator
+      case 250:
+      case 251:
+      case 254:
+        return true;
+
+      case 102:
+      case 106:
+      //case 116:
+        applyInteractiveTileSection(col, row, ID);
+        return true;
+
+      default:
+        break;
+    }
+
+    return false;
+  }
+
+
+private:
   void applyDifficulty(
     const size_t sourceCol,
     const size_t row,
@@ -906,10 +919,6 @@ private:
 private:
   base::Grid<const LevelData::Actor*> mActorGrid;
   map::Map& mMap;
-  SDL_Renderer* mpRenderer;
-  const ActorImagePackage* mpSpritePackage;
-
-  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
 };
 
 }
@@ -923,10 +932,9 @@ EntityBundle createEntitiesForLevel(
 ) {
   EntityBundle bundle;
 
-  ActorParsingHelper helper(
-    level,
-    pRenderer,
-    spritePackage);
+  ActorParsingHelper helper(level);
+  SpriteEntityCreator creator(pRenderer, spritePackage);
+
   for (int row=0; row<level.mMap.height(); ++row) {
     for (int col=0; col<level.mMap.width(); ++col) {
       if (!helper.hasActorAt(col, row)) continue;
@@ -937,7 +945,7 @@ EntityBundle createEntitiesForLevel(
       const auto& actor = helper.actorAt(col, row);
       auto entity = entityManager.create();
       entity.assign<WorldPosition>(actor.mPosition);
-      helper.configureEntity(entity, actor.mID);
+      creator.configureEntity(entity, actor.mID);
 
       const auto isPlayer = actor.mID == 5 || actor.mID == 6;
       if (isPlayer) {
@@ -948,8 +956,7 @@ EntityBundle createEntitiesForLevel(
     }
   }
 
-  bundle.mSpriteTextures = helper.releaseCollectedTextures();
-
+  bundle.mSpriteTextures = creator.releaseCollectedTextures();
   return bundle;
 }
 
