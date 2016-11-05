@@ -914,7 +914,7 @@ private:
 
 }
 
-EntityBundle createEntities(
+EntityBundle createEntitiesForLevel(
   LevelData& level,
   Difficulty chosenDifficulty,
   SDL_Renderer* pRenderer,

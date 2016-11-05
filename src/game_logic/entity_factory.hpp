@@ -38,7 +38,7 @@ struct EntityBundle {
 };
 
 
-EntityBundle createEntities(
+EntityBundle createEntitiesForLevel(
   data::map::LevelData& level,
   data::Difficulty difficulty,
   SDL_Renderer* pRenderer,
