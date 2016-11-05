@@ -781,7 +781,6 @@ class ActorParsingHelper {
 public:
   ActorParsingHelper(LevelData& level)
     : mActorGrid(makeActorGrid(level))
-    , mMap(level.mMap)
   {
   }
 
@@ -823,13 +822,13 @@ public:
     const int startCol,
     const int startRow
   ) {
-    for (auto x=startCol; x<mMap.width(); ++x) {
+    for (auto x=startCol; x<int(mActorGrid.width()); ++x) {
       auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
 
       if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == 103) {
         const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
 
-        for (auto y=startRow+1; y<mMap.height(); ++y) {
+        for (auto y=startRow+1; y<int(mActorGrid.height()); ++y) {
           auto pBottomRightMarkerCandidate = mActorGrid.valueAt(rightCol, y);
 
           if (
@@ -871,7 +870,6 @@ private:
 
 private:
   base::Grid<const LevelData::Actor*> mActorGrid;
-  map::Map& mMap;
 };
 
 
