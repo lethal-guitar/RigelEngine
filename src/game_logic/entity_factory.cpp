@@ -899,7 +899,11 @@ std::vector<ActorDescription> collectActorDescriptions(
       switch (actor.mID) {
         case 102:
         case 106:
-        //case 116:
+        case 116:
+        case 137:
+        case 138:
+        case 142:
+        case 143:
           try {
             actorArea = helper.findTileSectionRect(col, row);
           } catch (const runtime_error&) {
@@ -956,6 +960,7 @@ EntityBundle createEntitiesForLevel(
     switch (actor.mID) {
       case 103: // stray tile section marker, ignore
       case 104: // stray tile section marker, ignore
+      case 116:
       case 137:
       case 138:
       case 139: // level exit
