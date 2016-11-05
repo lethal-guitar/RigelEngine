@@ -205,21 +205,6 @@ public:
     throw runtime_error("Could not find all tile section markers");
   }
 
-  void applyDifficulty(
-    const size_t sourceCol,
-    const size_t row,
-    const Difficulty requiredDifficulty,
-    const Difficulty chosenDifficulty
-  ) {
-    if (
-      chosenDifficulty < requiredDifficulty &&
-      hasActorAt(sourceCol+1, row)
-    ) {
-      removeActorAt(sourceCol+1, row);
-    }
-    removeActorAt(sourceCol, row);
-  }
-
 private:
   base::Grid<const LevelData::Actor*> mActorGrid;
 };
@@ -239,15 +224,27 @@ ActorList preProcessActorDescriptions(
         continue;
       }
 
+      auto applyDifficulty = [&helper, sourceCol=col, row, chosenDifficulty](
+        const Difficulty requiredDifficulty
+      ) {
+        if (
+          chosenDifficulty < requiredDifficulty &&
+          helper.hasActorAt(sourceCol + 1, row)
+        ) {
+          helper.removeActorAt(sourceCol + 1, row);
+        }
+        helper.removeActorAt(col, row);
+      };
+
       boost::optional<base::Rect<int>> actorArea;
       const auto& actor = helper.actorAt(col, row);
       switch (actor.mID) {
         case 82:
-          helper.applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
+          applyDifficulty(Difficulty::Medium);
           continue;
 
         case 83:
-          helper.applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
+          applyDifficulty(Difficulty::Hard);
           continue;
 
         case 102:
