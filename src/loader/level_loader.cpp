@@ -172,28 +172,6 @@ public:
     mActorGrid.setValueAt(col, row, nullptr);
   }
 
-  bool handleDifficultyMarker(
-    const int col,
-    const int row,
-    const Difficulty chosenDifficulty
-  ) {
-    const auto ID = actorAt(col, row).mID;
-    switch (ID) {
-      case 82:
-        applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
-        return true;
-
-      case 83:
-        applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
-        return true;
-
-      default:
-        break;
-    }
-
-    return false;
-  }
-
   base::Rect<int> findTileSectionRect(
     const int startCol,
     const int startRow
@@ -227,8 +205,6 @@ public:
     throw runtime_error("Could not find all tile section markers");
   }
 
-
-private:
   void applyDifficulty(
     const size_t sourceCol,
     const size_t row,
@@ -259,14 +235,21 @@ ActorList preProcessActorDescriptions(
   ActorParsingHelper helper(map, originalActors);
   for (int row=0; row<map.height(); ++row) {
     for (int col=0; col<map.width(); ++col) {
-      if (!helper.hasActorAt(col, row)) continue;
-      if (helper.handleDifficultyMarker(col, row, chosenDifficulty)) {
+      if (!helper.hasActorAt(col, row)) {
         continue;
       }
 
       boost::optional<base::Rect<int>> actorArea;
       const auto& actor = helper.actorAt(col, row);
       switch (actor.mID) {
+        case 82:
+          helper.applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
+          continue;
+
+        case 83:
+          helper.applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
+          continue;
+
         case 102:
         case 106:
         case 116:
