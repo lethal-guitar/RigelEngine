@@ -224,14 +224,12 @@ ActorList preProcessActorDescriptions(
         continue;
       }
 
-      auto applyDifficulty = [&helper, sourceCol=col, row, chosenDifficulty](
+      auto applyDifficultyMarker = [&helper, col, row, chosenDifficulty](
         const Difficulty requiredDifficulty
       ) {
-        if (
-          chosenDifficulty < requiredDifficulty &&
-          helper.hasActorAt(sourceCol + 1, row)
-        ) {
-          helper.removeActorAt(sourceCol + 1, row);
+        const auto targetCol = col + 1;
+        if (chosenDifficulty < requiredDifficulty) {
+          helper.removeActorAt(targetCol, row);
         }
         helper.removeActorAt(col, row);
       };
@@ -240,11 +238,11 @@ ActorList preProcessActorDescriptions(
       const auto& actor = helper.actorAt(col, row);
       switch (actor.mID) {
         case 82:
-          applyDifficulty(Difficulty::Medium);
+          applyDifficultyMarker(Difficulty::Medium);
           continue;
 
         case 83:
-          applyDifficulty(Difficulty::Hard);
+          applyDifficultyMarker(Difficulty::Hard);
           continue;
 
         case 102:
