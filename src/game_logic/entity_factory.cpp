@@ -16,6 +16,7 @@
 
 #include "entity_factory.hpp"
 
+#include <base/warnings.hpp>
 #include <data/unit_conversions.hpp>
 #include <engine/base_components.hpp>
 #include <engine/physics_system.hpp>
@@ -24,6 +25,11 @@
 #include <game_logic/player_control_system.hpp>
 #include <map>
 #include <utility>
+
+
+RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 
 /* NOTE-WORTHY ACTOR IDs
@@ -921,11 +927,19 @@ private:
   map::Map& mMap;
 };
 
-std::vector<LevelData::Actor> collectActorDescriptions(
+
+struct ActorDescription {
+  base::Vector mPosition;
+  ActorID mID;
+  boost::optional<base::Rect<int>> mAssignedArea;
+};
+
+
+std::vector<ActorDescription> collectActorDescriptions(
   LevelData& level,
   const Difficulty chosenDifficulty
 ) {
-  std::vector<LevelData::Actor> actors;
+  std::vector<ActorDescription> actors;
 
   ActorParsingHelper helper(level);
   for (int row=0; row<level.mMap.height(); ++row) {
@@ -935,7 +949,9 @@ std::vector<LevelData::Actor> collectActorDescriptions(
         continue;
       }
 
-      actors.emplace_back(helper.actorAt(col, row));
+      const auto& actor = helper.actorAt(col, row);
+      actors.emplace_back(
+        ActorDescription{actor.mPosition, actor.mID, boost::none});
       helper.removeActorAt(col, row);
     }
   }
