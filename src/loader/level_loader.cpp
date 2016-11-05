@@ -55,6 +55,9 @@ using data::GameTraits;
 
 namespace {
 
+using ActorList = std::vector<LevelData::Actor>;
+
+
 string stripSpaces(string str) {
   const auto it = str.find(' ');
   if (it != str.npos) {
@@ -140,7 +143,7 @@ string backdropNameFromNumber(const uint8_t backdropNumber) {
  * Takes a linear list of actor descriptions, and puts them into a 2d grid.
  * This is useful since some meta actors have spatial relations to others.
  */
-auto makeActorGrid(const data::map::Map& map, const vector<LevelData::Actor>& actors) {
+auto makeActorGrid(const data::map::Map& map, const ActorList& actors) {
   base::Grid<const LevelData::Actor*> actorGrid(map.width(), map.height());
 
   for (const auto& actor : actors) {
@@ -152,7 +155,7 @@ auto makeActorGrid(const data::map::Map& map, const vector<LevelData::Actor>& ac
 
 class ActorParsingHelper {
 public:
-  ActorParsingHelper(const data::map::Map& map, const vector<LevelData::Actor>& actors)
+  ActorParsingHelper(const data::map::Map& map, const ActorList& actors)
     : mActorGrid(makeActorGrid(map, actors))
   {
   }
@@ -246,12 +249,12 @@ private:
 };
 
 
-std::vector<LevelData::Actor> collectActorDescriptions(
+ActorList collectActorDescriptions(
   const data::map::Map& map,
-  const vector<LevelData::Actor>& originalActors,
+  const ActorList& originalActors,
   const Difficulty chosenDifficulty
 ) {
-  std::vector<LevelData::Actor> actors;
+  ActorList actors;
 
   ActorParsingHelper helper(map, originalActors);
   for (int row=0; row<map.height(); ++row) {
@@ -300,7 +303,7 @@ LevelData loadLevel(
   LeStreamReader levelReader(levelData);
 
   LevelHeader header(levelReader);
-  vector<LevelData::Actor> actors;
+  ActorList actors;
   for (size_t i=0; i<header.numActorWords/3; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
