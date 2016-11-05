@@ -249,7 +249,7 @@ private:
 };
 
 
-ActorList collectActorDescriptions(
+ActorList preProcessActorDescriptions(
   const data::map::Map& map,
   const ActorList& originalActors,
   const Difficulty chosenDifficulty
@@ -396,7 +396,7 @@ LevelData loadLevel(
 
   return LevelData{
     move(map),
-    collectActorDescriptions(map, actors, chosenDifficulty),
+    preProcessActorDescriptions(map, actors, chosenDifficulty),
     scrollMode,
     backdropSwitchCondition,
     header.flagBitSet(0x20),
