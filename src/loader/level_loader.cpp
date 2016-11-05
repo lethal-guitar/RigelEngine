@@ -153,9 +153,9 @@ auto makeActorGrid(const data::map::Map& map, const ActorList& actors) {
 }
 
 
-class ActorParsingHelper {
+class ActorGrid {
 public:
-  ActorParsingHelper(const data::map::Map& map, const ActorList& actors)
+  ActorGrid(const data::map::Map& map, const ActorList& actors)
     : mActorGrid(makeActorGrid(map, actors))
   {
   }
@@ -217,23 +217,23 @@ ActorList preProcessActorDescriptions(
 ) {
   ActorList actors;
 
-  ActorParsingHelper helper(map, originalActors);
+  ActorGrid grid(map, originalActors);
   for (int row=0; row<map.height(); ++row) {
     for (int col=0; col<map.width(); ++col) {
-      if (!helper.hasActorAt(col, row)) {
+      if (!grid.hasActorAt(col, row)) {
         continue;
       }
 
-      auto applyDifficultyMarker = [&helper, col, row, chosenDifficulty](
+      auto applyDifficultyMarker = [&grid, col, row, chosenDifficulty](
         const Difficulty requiredDifficulty
       ) {
         const auto targetCol = col + 1;
         if (chosenDifficulty < requiredDifficulty) {
-          helper.removeActorAt(targetCol, row);
+          grid.removeActorAt(targetCol, row);
         }
       };
 
-      const auto& actor = helper.actorAt(col, row);
+      const auto& actor = grid.actorAt(col, row);
       switch (actor.mID) {
         case 82:
           applyDifficultyMarker(Difficulty::Medium);
@@ -253,7 +253,7 @@ ActorList preProcessActorDescriptions(
           {
             boost::optional<base::Rect<int>> actorArea;
             try {
-              actorArea = helper.findTileSectionRect(col, row);
+              actorArea = grid.findTileSectionRect(col, row);
             } catch (const runtime_error&) {
               // In case there are markers missing, we will go out-of bounds,
               // which we just ignore for the moment.
@@ -269,7 +269,7 @@ ActorList preProcessActorDescriptions(
           break;
       }
 
-      helper.removeActorAt(col, row);
+      grid.removeActorAt(col, row);
     }
   }
 
