@@ -188,23 +188,6 @@ auto actorIDListForActor(const ActorID ID) {
 }
 
 
-/** Creates 2d grid of actor descriptions in a level
- *
- * Takes a linear list of actor descriptions from level, and puts them into
- * a 2d grid. This is useful since some meta actors have spatial relations
- * to others.
- */
-auto makeActorGrid(const LevelData& level) {
-  base::Grid<const LevelData::Actor*> actorGrid(
-    level.mMap.width(), level.mMap.height());
-
-  for (const auto& actor : level.mActors) {
-    actorGrid.setValueAt(actor.mPosition.x, actor.mPosition.y, &actor);
-  }
-  return actorGrid;
-}
-
-
 class SpriteEntityCreator {
 public:
   SpriteEntityCreator(
@@ -776,151 +759,6 @@ private:
   std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
 };
 
-
-class ActorParsingHelper {
-public:
-  ActorParsingHelper(LevelData& level)
-    : mActorGrid(makeActorGrid(level))
-  {
-  }
-
-  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
-    return *mActorGrid.valueAt(col, row);
-  }
-
-  bool hasActorAt(const size_t col, const size_t row) const {
-    return mActorGrid.valueAt(col, row) != nullptr;
-  }
-
-  void removeActorAt(const size_t col, const size_t row) {
-    mActorGrid.setValueAt(col, row, nullptr);
-  }
-
-  bool handleDifficultyMarker(
-    const int col,
-    const int row,
-    const Difficulty chosenDifficulty
-  ) {
-    const auto ID = actorAt(col, row).mID;
-    switch (ID) {
-      case 82:
-        applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
-        return true;
-
-      case 83:
-        applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
-        return true;
-
-      default:
-        break;
-    }
-
-    return false;
-  }
-
-  base::Rect<int> findTileSectionRect(
-    const int startCol,
-    const int startRow
-  ) {
-    for (auto x=startCol; x<int(mActorGrid.width()); ++x) {
-      auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
-
-      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == 103) {
-        const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
-
-        for (auto y=startRow+1; y<int(mActorGrid.height()); ++y) {
-          auto pBottomRightMarkerCandidate = mActorGrid.valueAt(rightCol, y);
-
-          if (
-            pBottomRightMarkerCandidate &&
-            pBottomRightMarkerCandidate->mID == 104
-          ) {
-            const auto bottomRow = y;
-            removeActorAt(rightCol, startRow);
-            removeActorAt(rightCol, bottomRow);
-
-            return base::Rect<int>{
-              {startCol, startRow},
-              {rightCol - startCol + 1, bottomRow - startRow + 1}
-            };
-          }
-        }
-      }
-    }
-
-    throw runtime_error("Could not find all tile section markers");
-  }
-
-
-private:
-  void applyDifficulty(
-    const size_t sourceCol,
-    const size_t row,
-    const Difficulty requiredDifficulty,
-    const Difficulty chosenDifficulty
-  ) {
-    if (
-      chosenDifficulty < requiredDifficulty &&
-      hasActorAt(sourceCol+1, row)
-    ) {
-      removeActorAt(sourceCol+1, row);
-    }
-    removeActorAt(sourceCol, row);
-  }
-
-private:
-  base::Grid<const LevelData::Actor*> mActorGrid;
-};
-
-
-struct ActorDescription {
-  base::Vector mPosition;
-  ActorID mID;
-  boost::optional<base::Rect<int>> mAssignedArea;
-};
-
-
-std::vector<ActorDescription> collectActorDescriptions(
-  LevelData& level,
-  const Difficulty chosenDifficulty
-) {
-  std::vector<ActorDescription> actors;
-
-  ActorParsingHelper helper(level);
-  for (int row=0; row<level.mMap.height(); ++row) {
-    for (int col=0; col<level.mMap.width(); ++col) {
-      if (!helper.hasActorAt(col, row)) continue;
-      if (helper.handleDifficultyMarker(col, row, chosenDifficulty)) {
-        continue;
-      }
-
-      boost::optional<base::Rect<int>> actorArea;
-      const auto& actor = helper.actorAt(col, row);
-      switch (actor.mID) {
-        case 102:
-        case 106:
-        case 116:
-        case 137:
-        case 138:
-        case 142:
-        case 143:
-          try {
-            actorArea = helper.findTileSectionRect(col, row);
-          } catch (const runtime_error&) {
-            // In case there are markers missing, we will go out-of bounds, which
-            // we just ignore for the moment.
-          }
-      }
-
-      actors.emplace_back(
-        ActorDescription{actor.mPosition, actor.mID, actorArea});
-      helper.removeActorAt(col, row);
-    }
-  }
-
-  return actors;
-}
-
 }
 
 EntityBundle createEntitiesForLevel(
@@ -930,12 +768,10 @@ EntityBundle createEntitiesForLevel(
   const loader::ActorImagePackage& spritePackage,
   entityx::EntityManager& entityManager
 ) {
-  const auto actors = collectActorDescriptions(level, chosenDifficulty);
-
   entityx::Entity playerEntity;
 
   SpriteEntityCreator creator(pRenderer, spritePackage);
-  for (const auto& actor : actors) {
+  for (const auto& actor : level.mActors) {
     if (actor.mAssignedArea) {
       const auto sectionRect = *actor.mAssignedArea;
       // TODO: Create correct entity

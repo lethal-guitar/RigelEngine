@@ -116,6 +116,7 @@ struct LevelData {
   struct Actor {
     base::Vector mPosition;
     ActorID mID;
+    boost::optional<base::Rect<int>> mAssignedArea;
   };
 
   data::map::Map mMap;

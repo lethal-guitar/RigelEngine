@@ -20,6 +20,7 @@
 #include <string>
 #include <type_traits>
 
+#include <base/grid.hpp>
 #include <data/game_traits.hpp>
 #include <data/unit_conversions.hpp>
 #include <loader/bitwise_iter.hpp>
@@ -45,6 +46,7 @@ namespace rigel { namespace loader {
 
 using namespace std;
 using data::ActorID;
+using data::Difficulty;
 using data::map::BackdropScrollMode;
 using data::map::BackdropSwitchCondition;
 using data::map::LevelData;
@@ -132,12 +134,167 @@ string backdropNameFromNumber(const uint8_t backdropNumber) {
   return name;
 }
 
+
+/** Creates 2d grid of actor descriptions in a level
+ *
+ * Takes a linear list of actor descriptions, and puts them into a 2d grid.
+ * This is useful since some meta actors have spatial relations to others.
+ */
+auto makeActorGrid(const data::map::Map& map, const vector<LevelData::Actor>& actors) {
+  base::Grid<const LevelData::Actor*> actorGrid(map.width(), map.height());
+
+  for (const auto& actor : actors) {
+    actorGrid.setValueAt(actor.mPosition.x, actor.mPosition.y, &actor);
+  }
+  return actorGrid;
+}
+
+
+class ActorParsingHelper {
+public:
+  ActorParsingHelper(const data::map::Map& map, const vector<LevelData::Actor>& actors)
+    : mActorGrid(makeActorGrid(map, actors))
+  {
+  }
+
+  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
+    return *mActorGrid.valueAt(col, row);
+  }
+
+  bool hasActorAt(const size_t col, const size_t row) const {
+    return mActorGrid.valueAt(col, row) != nullptr;
+  }
+
+  void removeActorAt(const size_t col, const size_t row) {
+    mActorGrid.setValueAt(col, row, nullptr);
+  }
+
+  bool handleDifficultyMarker(
+    const int col,
+    const int row,
+    const Difficulty chosenDifficulty
+  ) {
+    const auto ID = actorAt(col, row).mID;
+    switch (ID) {
+      case 82:
+        applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
+        return true;
+
+      case 83:
+        applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
+        return true;
+
+      default:
+        break;
+    }
+
+    return false;
+  }
+
+  base::Rect<int> findTileSectionRect(
+    const int startCol,
+    const int startRow
+  ) {
+    for (auto x=startCol; x<int(mActorGrid.width()); ++x) {
+      auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
+
+      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == 103) {
+        const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
+
+        for (auto y=startRow+1; y<int(mActorGrid.height()); ++y) {
+          auto pBottomRightMarkerCandidate = mActorGrid.valueAt(rightCol, y);
+
+          if (
+            pBottomRightMarkerCandidate &&
+            pBottomRightMarkerCandidate->mID == 104
+          ) {
+            const auto bottomRow = y;
+            removeActorAt(rightCol, startRow);
+            removeActorAt(rightCol, bottomRow);
+
+            return base::Rect<int>{
+              {startCol, startRow},
+              {rightCol - startCol + 1, bottomRow - startRow + 1}
+            };
+          }
+        }
+      }
+    }
+
+    throw runtime_error("Could not find all tile section markers");
+  }
+
+
+private:
+  void applyDifficulty(
+    const size_t sourceCol,
+    const size_t row,
+    const Difficulty requiredDifficulty,
+    const Difficulty chosenDifficulty
+  ) {
+    if (
+      chosenDifficulty < requiredDifficulty &&
+      hasActorAt(sourceCol+1, row)
+    ) {
+      removeActorAt(sourceCol+1, row);
+    }
+    removeActorAt(sourceCol, row);
+  }
+
+private:
+  base::Grid<const LevelData::Actor*> mActorGrid;
+};
+
+
+std::vector<LevelData::Actor> collectActorDescriptions(
+  const data::map::Map& map,
+  const vector<LevelData::Actor>& originalActors,
+  const Difficulty chosenDifficulty
+) {
+  std::vector<LevelData::Actor> actors;
+
+  ActorParsingHelper helper(map, originalActors);
+  for (int row=0; row<map.height(); ++row) {
+    for (int col=0; col<map.width(); ++col) {
+      if (!helper.hasActorAt(col, row)) continue;
+      if (helper.handleDifficultyMarker(col, row, chosenDifficulty)) {
+        continue;
+      }
+
+      boost::optional<base::Rect<int>> actorArea;
+      const auto& actor = helper.actorAt(col, row);
+      switch (actor.mID) {
+        case 102:
+        case 106:
+        case 116:
+        case 137:
+        case 138:
+        case 142:
+        case 143:
+          try {
+            actorArea = helper.findTileSectionRect(col, row);
+          } catch (const runtime_error&) {
+            // In case there are markers missing, we will go out-of bounds, which
+            // we just ignore for the moment.
+          }
+      }
+
+      actors.emplace_back(
+        LevelData::Actor{actor.mPosition, actor.mID, actorArea});
+      helper.removeActorAt(col, row);
+    }
+  }
+
+  return actors;
+}
+
 }
 
 
 LevelData loadLevel(
   const string& mapName,
-  const ResourceLoader& resources
+  const ResourceLoader& resources,
+  const Difficulty chosenDifficulty
 ) {
   const auto levelData = resources.mFilePackage.file(mapName);
   LeStreamReader levelReader(levelData);
@@ -147,7 +304,7 @@ LevelData loadLevel(
   for (size_t i=0; i<header.numActorWords/3; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
-    actors.emplace_back(LevelData::Actor{position, type});
+    actors.emplace_back(LevelData::Actor{position, type, boost::none});
   }
 
   const auto backdropImage = resources.loadTiledFullscreenImage(
@@ -236,7 +393,7 @@ LevelData loadLevel(
 
   return LevelData{
     move(map),
-    move(actors),
+    collectActorDescriptions(map, actors, chosenDifficulty),
     scrollMode,
     backdropSwitchCondition,
     header.flagBitSet(0x20),

@@ -184,7 +184,7 @@ void IngameMode::loadLevel(
   const loader::ResourceLoader& resources
 ) {
   auto level = loader::loadLevel(
-    levelFileName(episode, levelNumber), resources);
+    levelFileName(episode, levelNumber), resources, difficulty);
   auto entityBundle = game_logic::createEntitiesForLevel(
     level,
     difficulty,
