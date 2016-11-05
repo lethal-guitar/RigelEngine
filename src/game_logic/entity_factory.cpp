@@ -954,7 +954,8 @@ EntityBundle createEntitiesForLevel(
 ) {
   const auto actors = collectActorDescriptions(level, chosenDifficulty);
 
-  EntityBundle bundle;
+  entityx::Entity playerEntity;
+
   SpriteEntityCreator creator(pRenderer, spritePackage);
   for (const auto& actor : actors) {
     auto entity = entityManager.create();
@@ -963,12 +964,14 @@ EntityBundle createEntitiesForLevel(
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {
-      bundle.mPlayerEntity = entity;
+      playerEntity = entity;
     }
   }
 
-  bundle.mSpriteTextures = creator.releaseCollectedTextures();
-  return bundle;
+  return {
+    playerEntity,
+    creator.releaseCollectedTextures()
+  };
 }
 
 }}
