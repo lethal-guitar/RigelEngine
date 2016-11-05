@@ -36,7 +36,9 @@ before_install:
     fi
 
 before_script:
-  - (mkdir build && cd build && cmake ..)
+  - (mkdir build_dbg && cd build_dbg && cmake .. -DCMAKE_BUILD_TYPE=Debug)
+  - (mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release)
 
 script:
+  - (cd build_dbg && make -j2 && ctest)
   - (cd build && make -j2 && ctest)
