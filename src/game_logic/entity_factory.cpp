@@ -819,53 +819,6 @@ public:
     return false;
   }
 
-  void applyInteractiveTileSection(
-    const int col,
-    const int row,
-    const ActorID sectionTypeID
-  ) {
-    try {
-      removeActorAt(col, row);
-      const auto sectionRect = findTileSectionRect(col, row);
-
-      // TODO: Create correct entity
-      for (
-        auto mapRow=sectionRect.topLeft.y;
-        mapRow<=sectionRect.bottomRight().y;
-        ++mapRow
-      ) {
-        for (
-          auto mapCol=sectionRect.topLeft.x;
-          mapCol<=sectionRect.bottomRight().x;
-          ++mapCol
-        ) {
-          mMap.setTileAt(0, mapCol, mapRow, 0);
-          mMap.setTileAt(1, mapCol, mapRow, 0);
-        }
-      }
-    } catch (const runtime_error&) {
-      // In case there are markers missing, we will go out-of bounds, which
-      // we just ignore for the moment.
-    }
-  }
-
-
-private:
-  void applyDifficulty(
-    const size_t sourceCol,
-    const size_t row,
-    const Difficulty requiredDifficulty,
-    const Difficulty chosenDifficulty
-  ) {
-    if (
-      chosenDifficulty < requiredDifficulty &&
-      hasActorAt(sourceCol+1, row)
-    ) {
-      removeActorAt(sourceCol+1, row);
-    }
-    removeActorAt(sourceCol, row);
-  }
-
   base::Rect<int> findTileSectionRect(
     const int startCol,
     const int startRow
@@ -884,7 +837,6 @@ private:
             pBottomRightMarkerCandidate->mID == 104
           ) {
             const auto bottomRow = y;
-            removeActorAt(startCol, startRow);
             removeActorAt(rightCol, startRow);
             removeActorAt(rightCol, bottomRow);
 
@@ -898,6 +850,23 @@ private:
     }
 
     throw runtime_error("Could not find all tile section markers");
+  }
+
+
+private:
+  void applyDifficulty(
+    const size_t sourceCol,
+    const size_t row,
+    const Difficulty requiredDifficulty,
+    const Difficulty chosenDifficulty
+  ) {
+    if (
+      chosenDifficulty < requiredDifficulty &&
+      hasActorAt(sourceCol+1, row)
+    ) {
+      removeActorAt(sourceCol+1, row);
+    }
+    removeActorAt(sourceCol, row);
   }
 
 private:
@@ -927,17 +896,22 @@ std::vector<ActorDescription> collectActorDescriptions(
         continue;
       }
 
+      boost::optional<base::Rect<int>> actorArea;
       const auto& actor = helper.actorAt(col, row);
       switch (actor.mID) {
         case 102:
         case 106:
         //case 116:
-          helper.applyInteractiveTileSection(col, row, actor.mID);
-          continue;
+          try {
+            actorArea = helper.findTileSectionRect(col, row);
+          } catch (const runtime_error&) {
+            // In case there are markers missing, we will go out-of bounds, which
+            // we just ignore for the moment.
+          }
       }
 
       actors.emplace_back(
-        ActorDescription{actor.mPosition, actor.mID, boost::none});
+        ActorDescription{actor.mPosition, actor.mID, actorArea});
       helper.removeActorAt(col, row);
     }
   }
@@ -960,6 +934,27 @@ EntityBundle createEntitiesForLevel(
 
   SpriteEntityCreator creator(pRenderer, spritePackage);
   for (const auto& actor : actors) {
+    if (actor.mAssignedArea) {
+      const auto sectionRect = *actor.mAssignedArea;
+      // TODO: Create correct entity
+      for (
+        auto mapRow=sectionRect.topLeft.y;
+        mapRow<=sectionRect.bottomRight().y;
+        ++mapRow
+      ) {
+        for (
+          auto mapCol=sectionRect.topLeft.x;
+          mapCol<=sectionRect.bottomRight().x;
+          ++mapCol
+        ) {
+          level.mMap.setTileAt(0, mapCol, mapRow, 0);
+          level.mMap.setTileAt(1, mapCol, mapRow, 0);
+        }
+      }
+
+      continue;
+    }
+
     switch (actor.mID) {
       case 103: // stray tile section marker, ignore
       case 104: // stray tile section marker, ignore
