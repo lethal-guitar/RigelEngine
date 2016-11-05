@@ -921,22 +921,13 @@ private:
   map::Map& mMap;
 };
 
-}
-
-EntityBundle createEntitiesForLevel(
+std::vector<LevelData::Actor> collectActorDescriptions(
   LevelData& level,
-  Difficulty chosenDifficulty,
-  SDL_Renderer* pRenderer,
-  const loader::ActorImagePackage& spritePackage,
-  entityx::EntityManager& entityManager
+  const Difficulty chosenDifficulty
 ) {
-  EntityBundle bundle;
-
-  ActorParsingHelper helper(level);
-  SpriteEntityCreator creator(pRenderer, spritePackage);
-
   std::vector<LevelData::Actor> actors;
 
+  ActorParsingHelper helper(level);
   for (int row=0; row<level.mMap.height(); ++row) {
     for (int col=0; col<level.mMap.width(); ++col) {
       if (!helper.hasActorAt(col, row)) continue;
@@ -949,6 +940,22 @@ EntityBundle createEntitiesForLevel(
     }
   }
 
+  return actors;
+}
+
+}
+
+EntityBundle createEntitiesForLevel(
+  LevelData& level,
+  Difficulty chosenDifficulty,
+  SDL_Renderer* pRenderer,
+  const loader::ActorImagePackage& spritePackage,
+  entityx::EntityManager& entityManager
+) {
+  const auto actors = collectActorDescriptions(level, chosenDifficulty);
+
+  EntityBundle bundle;
+  SpriteEntityCreator creator(pRenderer, spritePackage);
   for (const auto& actor : actors) {
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
