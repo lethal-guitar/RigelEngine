@@ -231,19 +231,17 @@ ActorList preProcessActorDescriptions(
         if (chosenDifficulty < requiredDifficulty) {
           helper.removeActorAt(targetCol, row);
         }
-        helper.removeActorAt(col, row);
       };
 
-      boost::optional<base::Rect<int>> actorArea;
       const auto& actor = helper.actorAt(col, row);
       switch (actor.mID) {
         case 82:
           applyDifficultyMarker(Difficulty::Medium);
-          continue;
+          break;
 
         case 83:
           applyDifficultyMarker(Difficulty::Hard);
-          continue;
+          break;
 
         case 102:
         case 106:
@@ -252,16 +250,25 @@ ActorList preProcessActorDescriptions(
         case 138:
         case 142:
         case 143:
-          try {
-            actorArea = helper.findTileSectionRect(col, row);
-          } catch (const runtime_error&) {
-            // In case there are markers missing, we will go out-of bounds, which
-            // we just ignore for the moment.
+          {
+            boost::optional<base::Rect<int>> actorArea;
+            try {
+              actorArea = helper.findTileSectionRect(col, row);
+            } catch (const runtime_error&) {
+              // In case there are markers missing, we will go out-of bounds,
+              // which we just ignore for the moment.
+            }
+            actors.emplace_back(
+              LevelData::Actor{actor.mPosition, actor.mID, actorArea});
           }
+          break;
+
+        default:
+          actors.emplace_back(
+            LevelData::Actor{actor.mPosition, actor.mID, boost::none});
+          break;
       }
 
-      actors.emplace_back(
-        LevelData::Actor{actor.mPosition, actor.mID, actorArea});
       helper.removeActorAt(col, row);
     }
   }
