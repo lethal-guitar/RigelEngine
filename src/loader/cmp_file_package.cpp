@@ -96,11 +96,11 @@ CMPFilePackage::FileDict::const_iterator CMPFilePackage::findFileEntry(
 
 
 CMPFilePackage::DictEntry::DictEntry(
-  const uint32_t fileOffset,
-  const uint32_t fileSize
+  const uint32_t fileOffset_,
+  const uint32_t fileSize_
 )
-  : fileOffset(fileOffset)
-  , fileSize(fileSize)
+  : fileOffset(fileOffset_)
+  , fileSize(fileSize_)
 {
 }
 

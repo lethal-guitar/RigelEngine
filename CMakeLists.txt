@@ -40,7 +40,6 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wno-exit-time-destructors
         -Wno-missing-braces
         -Wno-padded
-        -Wno-shadow-field-in-constructor
         -Wno-sign-conversion
         -Wno-switch-enum
         -Wno-unused-parameter

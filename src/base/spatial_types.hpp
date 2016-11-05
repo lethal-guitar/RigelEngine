@@ -27,9 +27,9 @@ struct Point {
   Point() = default;
   Point(const Point&) = default;
   Point(Point&&) = default;
-  Point(const ValueT x, const ValueT y)
-    : x(x)
-    , y(y)
+  Point(const ValueT x_, const ValueT y_)
+    : x(x_)
+    , y(y_)
   {
   }
   Point& operator=(const Point&) = default;
@@ -51,9 +51,9 @@ struct Point {
 template<typename ValueT>
 struct Size {
   Size() = default;
-  Size(const ValueT width, const ValueT height)
-    : width(width)
-    , height(height)
+  Size(const ValueT width_, const ValueT height_)
+    : width(width_)
+    , height(height_)
   {
   }
 

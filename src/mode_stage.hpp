@@ -37,8 +37,8 @@ void forwardEventToStage(const T&, const SDL_Event&) {
 class ModeStage {
 public:
   template<typename T>
-  explicit ModeStage(T&& item)
-    : mpSelf(std::make_unique<Model<T>>(std::forward<T>(item)))
+  explicit ModeStage(T&& item_)
+    : mpSelf(std::make_unique<Model<T>>(std::forward<T>(item_)))
   {
   }
 
@@ -77,8 +77,8 @@ private:
 
   template<typename T>
   struct Model : public Concept {
-    explicit Model(T&& data)
-      : data(std::forward<T>(data))
+    explicit Model(T&& data_)
+      : data(std::forward<T>(data_))
     {
     }
 

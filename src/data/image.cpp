@@ -24,11 +24,11 @@ namespace rigel { namespace data {
 using namespace std;
 
 
-Pixel::Pixel(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a)
-  : r(r)
-  , g(g)
-  , b(b)
-  , a(a)
+Pixel::Pixel(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
+  : r(r_)
+  , g(g_)
+  , b(b_)
+  , a(a_)
 {
 }
 
