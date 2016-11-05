@@ -797,7 +797,7 @@ public:
     mActorGrid.setValueAt(col, row, nullptr);
   }
 
-  bool handleMetaActor(
+  bool handleDifficultyMarker(
     const int col,
     const int row,
     const Difficulty chosenDifficulty
@@ -812,50 +812,11 @@ public:
         applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
         return true;
 
-      case 103: // stray tile section marker, ignore
-      case 104: // stray tile section marker, ignore
-      case 137:
-      case 138:
-      case 139: // level exit
-      case 142:
-      case 143:
-      case 221: // water
-      case 233: // water surface
-      case 234: // water surface
-      case 241: // windblown-spider generator
-      case 250:
-      case 251:
-      case 254:
-        return true;
-
-      case 102:
-      case 106:
-      //case 116:
-        applyInteractiveTileSection(col, row, ID);
-        return true;
-
       default:
         break;
     }
 
     return false;
-  }
-
-
-private:
-  void applyDifficulty(
-    const size_t sourceCol,
-    const size_t row,
-    const Difficulty requiredDifficulty,
-    const Difficulty chosenDifficulty
-  ) {
-    if (
-      chosenDifficulty < requiredDifficulty &&
-      hasActorAt(sourceCol+1, row)
-    ) {
-      removeActorAt(sourceCol+1, row);
-    }
-    removeActorAt(sourceCol, row);
   }
 
   void applyInteractiveTileSection(
@@ -886,6 +847,23 @@ private:
       // In case there are markers missing, we will go out-of bounds, which
       // we just ignore for the moment.
     }
+  }
+
+
+private:
+  void applyDifficulty(
+    const size_t sourceCol,
+    const size_t row,
+    const Difficulty requiredDifficulty,
+    const Difficulty chosenDifficulty
+  ) {
+    if (
+      chosenDifficulty < requiredDifficulty &&
+      hasActorAt(sourceCol+1, row)
+    ) {
+      removeActorAt(sourceCol+1, row);
+    }
+    removeActorAt(sourceCol, row);
   }
 
   base::Rect<int> findTileSectionRect(
@@ -945,11 +923,35 @@ std::vector<ActorDescription> collectActorDescriptions(
   for (int row=0; row<level.mMap.height(); ++row) {
     for (int col=0; col<level.mMap.width(); ++col) {
       if (!helper.hasActorAt(col, row)) continue;
-      if (helper.handleMetaActor(col, row, chosenDifficulty)) {
+      if (helper.handleDifficultyMarker(col, row, chosenDifficulty)) {
         continue;
       }
 
       const auto& actor = helper.actorAt(col, row);
+      switch (actor.mID) {
+        case 103: // stray tile section marker, ignore
+        case 104: // stray tile section marker, ignore
+        case 137:
+        case 138:
+        case 139: // level exit
+        case 142:
+        case 143:
+        case 221: // water
+        case 233: // water surface
+        case 234: // water surface
+        case 241: // windblown-spider generator
+        case 250:
+        case 251:
+        case 254:
+          continue;
+
+        case 102:
+        case 106:
+        //case 116:
+          helper.applyInteractiveTileSection(col, row, actor.mID);
+          continue;
+      }
+
       actors.emplace_back(
         ActorDescription{actor.mPosition, actor.mID, boost::none});
       helper.removeActorAt(col, row);
