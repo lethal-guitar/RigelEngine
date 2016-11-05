@@ -935,6 +935,8 @@ EntityBundle createEntitiesForLevel(
   ActorParsingHelper helper(level);
   SpriteEntityCreator creator(pRenderer, spritePackage);
 
+  std::vector<LevelData::Actor> actors;
+
   for (int row=0; row<level.mMap.height(); ++row) {
     for (int col=0; col<level.mMap.width(); ++col) {
       if (!helper.hasActorAt(col, row)) continue;
@@ -942,17 +944,19 @@ EntityBundle createEntitiesForLevel(
         continue;
       }
 
-      const auto& actor = helper.actorAt(col, row);
-      auto entity = entityManager.create();
-      entity.assign<WorldPosition>(actor.mPosition);
-      creator.configureEntity(entity, actor.mID);
-
-      const auto isPlayer = actor.mID == 5 || actor.mID == 6;
-      if (isPlayer) {
-        bundle.mPlayerEntity = entity;
-      }
-
+      actors.emplace_back(helper.actorAt(col, row));
       helper.removeActorAt(col, row);
+    }
+  }
+
+  for (const auto& actor : actors) {
+    auto entity = entityManager.create();
+    entity.assign<WorldPosition>(actor.mPosition);
+    creator.configureEntity(entity, actor.mID);
+
+    const auto isPlayer = actor.mID == 5 || actor.mID == 6;
+    if (isPlayer) {
+      bundle.mPlayerEntity = entity;
     }
   }
 
