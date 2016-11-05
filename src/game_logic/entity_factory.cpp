@@ -922,7 +922,6 @@ EntityBundle createEntitiesForLevel(
   entityx::EntityManager& entityManager
 ) {
   EntityBundle bundle;
-  int numEntities = 0;
 
   ActorParsingHelper helper(
     level,
@@ -946,13 +945,11 @@ EntityBundle createEntitiesForLevel(
       }
 
       helper.removeActorAt(col, row);
-      ++numEntities;
     }
   }
 
   bundle.mSpriteTextures = helper.releaseCollectedTextures();
 
-  std::cout << "Entities: " << numEntities << std::endl;
   return bundle;
 }
 
