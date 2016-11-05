@@ -379,7 +379,7 @@ LevelData loadLevel(
   if (
     scrollMode != BackdropScrollMode::AutoHorizontal &&
     scrollMode != BackdropScrollMode::AutoVertical
-    ) {
+  ) {
     if (header.flagBitSet(0x40)) {
       backdropSwitchCondition = BackdropSwitchCondition::OnReactorDestruction;
     }
