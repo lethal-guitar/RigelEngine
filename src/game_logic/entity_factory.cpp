@@ -16,6 +16,7 @@
 
 #include "entity_factory.hpp"
 
+#include <base/warnings.hpp>
 #include <data/unit_conversions.hpp>
 #include <engine/base_components.hpp>
 #include <engine/physics_system.hpp>
@@ -24,6 +25,11 @@
 #include <game_logic/player_control_system.hpp>
 #include <map>
 #include <utility>
+
+
+RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 
 /* NOTE-WORTHY ACTOR IDs
@@ -182,90 +188,14 @@ auto actorIDListForActor(const ActorID ID) {
 }
 
 
-/** Creates 2d grid of actor descriptions in a level
- *
- * Takes a linear list of actor descriptions from level, and puts them into
- * a 2d grid. This is useful since some meta actors have spatial relations
- * to others.
- */
-auto makeActorGrid(const LevelData& level) {
-  base::Grid<const LevelData::Actor*> actorGrid(
-    level.mMap.width(), level.mMap.height());
-
-  for (const auto& actor : level.mActors) {
-    actorGrid.setValueAt(actor.mPosition.x, actor.mPosition.y, &actor);
-  }
-  return actorGrid;
-}
-
-
-class ActorParsingHelper {
+class SpriteEntityCreator {
 public:
-  ActorParsingHelper(
-    LevelData& level,
+  SpriteEntityCreator(
     SDL_Renderer* pRenderer,
     const ActorImagePackage& spritePackage)
-    : mActorGrid(makeActorGrid(level))
-    , mMap(level.mMap)
-    , mpRenderer(pRenderer)
+    : mpRenderer(pRenderer)
     , mpSpritePackage(&spritePackage)
   {
-  }
-
-  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
-    return *mActorGrid.valueAt(col, row);
-  }
-
-  bool hasActorAt(const size_t col, const size_t row) const {
-    return mActorGrid.valueAt(col, row) != nullptr;
-  }
-
-  void removeActorAt(const size_t col, const size_t row) {
-    mActorGrid.setValueAt(col, row, nullptr);
-  }
-
-  bool handleMetaActor(
-    const int col,
-    const int row,
-    const Difficulty chosenDifficulty
-  ) {
-    const auto ID = actorAt(col, row).mID;
-    switch (ID) {
-      case 82:
-        applyDifficulty(col, row, Difficulty::Medium, chosenDifficulty);
-        return true;
-
-      case 83:
-        applyDifficulty(col, row, Difficulty::Hard, chosenDifficulty);
-        return true;
-
-      case 103: // stray tile section marker, ignore
-      case 104: // stray tile section marker, ignore
-      case 137:
-      case 138:
-      case 139: // level exit
-      case 142:
-      case 143:
-      case 221: // water
-      case 233: // water surface
-      case 234: // water surface
-      case 241: // windblown-spider generator
-      case 250:
-      case 251:
-      case 254:
-        return true;
-
-      case 102:
-      case 106:
-      //case 116:
-        applyInteractiveTileSection(col, row, ID);
-        return true;
-
-      default:
-        break;
-    }
-
-    return false;
   }
 
   void configureEntity(ex::Entity entity, const ActorID actorID) {
@@ -823,31 +753,33 @@ private:
     return sprite;
   }
 
+  SDL_Renderer* mpRenderer;
+  const ActorImagePackage* mpSpritePackage;
 
-  void applyDifficulty(
-    const size_t sourceCol,
-    const size_t row,
-    const Difficulty requiredDifficulty,
-    const Difficulty chosenDifficulty
-  ) {
-    if (
-      chosenDifficulty < requiredDifficulty &&
-      hasActorAt(sourceCol+1, row)
-    ) {
-      removeActorAt(sourceCol+1, row);
-    }
-    removeActorAt(sourceCol, row);
-  }
+  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
+};
 
-  void applyInteractiveTileSection(
-    const int col,
-    const int row,
-    const ActorID sectionTypeID
-  ) {
-    try {
-      removeActorAt(col, row);
-      const auto sectionRect = findTileSectionRect(col, row);
+}
 
+EntityBundle createEntitiesForLevel(
+  LevelData& level,
+  Difficulty chosenDifficulty,
+  SDL_Renderer* pRenderer,
+  const loader::ActorImagePackage& spritePackage,
+  entityx::EntityManager& entityManager
+) {
+  entityx::Entity playerEntity;
+
+  SpriteEntityCreator creator(pRenderer, spritePackage);
+  for (const auto& actor : level.mActors) {
+    // Difficulty/section markers should never appear in the actor descriptions
+    // coming from the loader, as they are handled during pre-processing.
+    assert(
+      actor.mID != 82 && actor.mID != 83 &&
+      actor.mID != 103 && actor.mID != 104);
+
+    if (actor.mAssignedArea) {
+      const auto sectionRect = *actor.mAssignedArea;
       // TODO: Create correct entity
       for (
         auto mapRow=sectionRect.topLeft.y;
@@ -859,101 +791,45 @@ private:
           mapCol<=sectionRect.bottomRight().x;
           ++mapCol
         ) {
-          mMap.setTileAt(0, mapCol, mapRow, 0);
-          mMap.setTileAt(1, mapCol, mapRow, 0);
+          level.mMap.setTileAt(0, mapCol, mapRow, 0);
+          level.mMap.setTileAt(1, mapCol, mapRow, 0);
         }
       }
-    } catch (const runtime_error&) {
-      // In case there are markers missing, we will go out-of bounds, which
-      // we just ignore for the moment.
-    }
-  }
 
-  base::Rect<int> findTileSectionRect(
-    const int startCol,
-    const int startRow
-  ) {
-    for (auto x=startCol; x<mMap.width(); ++x) {
-      auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
-
-      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == 103) {
-        const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
-
-        for (auto y=startRow+1; y<mMap.height(); ++y) {
-          auto pBottomRightMarkerCandidate = mActorGrid.valueAt(rightCol, y);
-
-          if (
-            pBottomRightMarkerCandidate &&
-            pBottomRightMarkerCandidate->mID == 104
-          ) {
-            const auto bottomRow = y;
-            removeActorAt(startCol, startRow);
-            removeActorAt(rightCol, startRow);
-            removeActorAt(rightCol, bottomRow);
-
-            return base::Rect<int>{
-              {startCol, startRow},
-              {rightCol - startCol + 1, bottomRow - startRow + 1}
-            };
-          }
-        }
-      }
+      continue;
     }
 
-    throw runtime_error("Could not find all tile section markers");
-  }
-
-private:
-  base::Grid<const LevelData::Actor*> mActorGrid;
-  map::Map& mMap;
-  SDL_Renderer* mpRenderer;
-  const ActorImagePackage* mpSpritePackage;
-
-  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
-};
-
-}
-
-EntityBundle createEntities(
-  LevelData& level,
-  Difficulty chosenDifficulty,
-  SDL_Renderer* pRenderer,
-  const loader::ActorImagePackage& spritePackage,
-  entityx::EntityManager& entityManager
-) {
-  EntityBundle bundle;
-  int numEntities = 0;
-
-  ActorParsingHelper helper(
-    level,
-    pRenderer,
-    spritePackage);
-  for (int row=0; row<level.mMap.height(); ++row) {
-    for (int col=0; col<level.mMap.width(); ++col) {
-      if (!helper.hasActorAt(col, row)) continue;
-      if (helper.handleMetaActor(col, row, chosenDifficulty)) {
+    switch (actor.mID) {
+      case 116:
+      case 137:
+      case 138:
+      case 139: // level exit
+      case 142:
+      case 143:
+      case 221: // water
+      case 233: // water surface
+      case 234: // water surface
+      case 241: // windblown-spider generator
+      case 250:
+      case 251:
+      case 254:
         continue;
-      }
+    }
 
-      const auto& actor = helper.actorAt(col, row);
-      auto entity = entityManager.create();
-      entity.assign<WorldPosition>(actor.mPosition);
-      helper.configureEntity(entity, actor.mID);
+    auto entity = entityManager.create();
+    entity.assign<WorldPosition>(actor.mPosition);
+    creator.configureEntity(entity, actor.mID);
 
-      const auto isPlayer = actor.mID == 5 || actor.mID == 6;
-      if (isPlayer) {
-        bundle.mPlayerEntity = entity;
-      }
-
-      helper.removeActorAt(col, row);
-      ++numEntities;
+    const auto isPlayer = actor.mID == 5 || actor.mID == 6;
+    if (isPlayer) {
+      playerEntity = entity;
     }
   }
 
-  bundle.mSpriteTextures = helper.releaseCollectedTextures();
-
-  std::cout << "Entities: " << numEntities << std::endl;
-  return bundle;
+  return {
+    playerEntity,
+    creator.releaseCollectedTextures()
+  };
 }
 
 }}

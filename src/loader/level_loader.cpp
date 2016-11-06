@@ -20,6 +20,7 @@
 #include <string>
 #include <type_traits>
 
+#include <base/grid.hpp>
 #include <data/game_traits.hpp>
 #include <data/unit_conversions.hpp>
 #include <loader/bitwise_iter.hpp>
@@ -45,6 +46,7 @@ namespace rigel { namespace loader {
 
 using namespace std;
 using data::ActorID;
+using data::Difficulty;
 using data::map::BackdropScrollMode;
 using data::map::BackdropSwitchCondition;
 using data::map::LevelData;
@@ -52,6 +54,9 @@ using data::GameTraits;
 
 
 namespace {
+
+using ActorList = std::vector<LevelData::Actor>;
+
 
 string stripSpaces(string str) {
   const auto it = str.find(' ');
@@ -132,22 +137,171 @@ string backdropNameFromNumber(const uint8_t backdropNumber) {
   return name;
 }
 
+
+/** Creates 2d grid of actor descriptions in a level
+ *
+ * Takes a linear list of actor descriptions, and puts them into a 2d grid.
+ * This is useful since some meta actors have spatial relations to others.
+ */
+auto makeActorGrid(const data::map::Map& map, const ActorList& actors) {
+  base::Grid<const LevelData::Actor*> actorGrid(map.width(), map.height());
+
+  for (const auto& actor : actors) {
+    actorGrid.setValueAt(actor.mPosition.x, actor.mPosition.y, &actor);
+  }
+  return actorGrid;
+}
+
+
+class ActorGrid {
+public:
+  ActorGrid(const data::map::Map& map, const ActorList& actors)
+    : mActorGrid(makeActorGrid(map, actors))
+  {
+  }
+
+  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
+    return *mActorGrid.valueAt(col, row);
+  }
+
+  bool hasActorAt(const size_t col, const size_t row) const {
+    return mActorGrid.valueAt(col, row) != nullptr;
+  }
+
+  void removeActorAt(const size_t col, const size_t row) {
+    mActorGrid.setValueAt(col, row, nullptr);
+  }
+
+  boost::optional<base::Rect<int>> findTileSectionRect(
+    const int startCol,
+    const int startRow
+  ) {
+    for (auto x=startCol; x<int(mActorGrid.width()); ++x) {
+      auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
+
+      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == 103) {
+        const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
+
+        for (auto y=startRow+1; y<int(mActorGrid.height()); ++y) {
+          auto pBottomRightMarkerCandidate = mActorGrid.valueAt(rightCol, y);
+
+          if (
+            pBottomRightMarkerCandidate &&
+            pBottomRightMarkerCandidate->mID == 104
+          ) {
+            const auto bottomRow = y;
+            removeActorAt(rightCol, startRow);
+            removeActorAt(rightCol, bottomRow);
+
+            return base::Rect<int>{
+              {startCol, startRow},
+              {rightCol - startCol + 1, bottomRow - startRow + 1}
+            };
+          }
+        }
+      }
+    }
+
+    return boost::none;
+  }
+
+private:
+  base::Grid<const LevelData::Actor*> mActorGrid;
+};
+
+
+/** Transforms actor list to be more useful in subsequent stages
+ *
+ * This does two things:
+ *  - Applies the selected difficulty, i.e. removes actors that only appear
+ *    in higher difficulties than the selected one
+ *  - Assigns an area/bounding box to actors that require it, e.g. shootable
+ *    walls
+ *
+ * Actors which are only relevant for these two purposes will be removed from
+ * the list (difficulty markers and section markers).
+ */
+ActorList preProcessActorDescriptions(
+  const data::map::Map& map,
+  const ActorList& originalActors,
+  const Difficulty chosenDifficulty
+) {
+  ActorList actors;
+
+  ActorGrid grid(map, originalActors);
+  for (int row=0; row<map.height(); ++row) {
+    for (int col=0; col<map.width(); ++col) {
+      if (!grid.hasActorAt(col, row)) {
+        continue;
+      }
+
+      auto applyDifficultyMarker = [&grid, col, row, chosenDifficulty](
+        const Difficulty requiredDifficulty
+      ) {
+        const auto targetCol = col + 1;
+        if (chosenDifficulty < requiredDifficulty) {
+          grid.removeActorAt(targetCol, row);
+        }
+      };
+
+      const auto& actor = grid.actorAt(col, row);
+      switch (actor.mID) {
+        case 82:
+          applyDifficultyMarker(Difficulty::Medium);
+          break;
+
+        case 83:
+          applyDifficultyMarker(Difficulty::Hard);
+          break;
+
+        case 103: // stray tile section marker, ignore
+        case 104: // stray tile section marker, ignore
+          break;
+
+        case 102:
+        case 106:
+        case 116:
+        case 137:
+        case 138:
+        case 142:
+        case 143:
+          actors.emplace_back(LevelData::Actor{
+            actor.mPosition,
+            actor.mID,
+            grid.findTileSectionRect(col, row)
+          });
+          break;
+
+        default:
+          actors.emplace_back(
+            LevelData::Actor{actor.mPosition, actor.mID, boost::none});
+          break;
+      }
+
+      grid.removeActorAt(col, row);
+    }
+  }
+
+  return actors;
+}
+
 }
 
 
 LevelData loadLevel(
   const string& mapName,
-  const ResourceLoader& resources
+  const ResourceLoader& resources,
+  const Difficulty chosenDifficulty
 ) {
   const auto levelData = resources.mFilePackage.file(mapName);
   LeStreamReader levelReader(levelData);
 
   LevelHeader header(levelReader);
-  vector<LevelData::Actor> actors;
+  ActorList actors;
   for (size_t i=0; i<header.numActorWords/3; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
-    actors.emplace_back(LevelData::Actor{position, type});
+    actors.emplace_back(LevelData::Actor{position, type, boost::none});
   }
 
   const auto backdropImage = resources.loadTiledFullscreenImage(
@@ -236,7 +390,7 @@ LevelData loadLevel(
 
   return LevelData{
     move(map),
-    move(actors),
+    preProcessActorDescriptions(map, actors, chosenDifficulty),
     scrollMode,
     backdropSwitchCondition,
     header.flagBitSet(0x20),
