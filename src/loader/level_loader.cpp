@@ -265,11 +265,16 @@ ActorList preProcessActorDescriptions(
         case 138:
         case 142:
         case 143:
-          actors.emplace_back(LevelData::Actor{
-            actor.mPosition,
-            actor.mID,
-            grid.findTileSectionRect(col, row)
-          });
+          {
+            auto tileSection = grid.findTileSectionRect(col, row);
+            if (tileSection) {
+            actors.emplace_back(LevelData::Actor{
+              actor.mPosition,
+              actor.mID,
+              tileSection
+            });
+            }
+          }
           break;
 
         default:
