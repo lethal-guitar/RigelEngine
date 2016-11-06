@@ -198,6 +198,15 @@ public:
   {
   }
 
+  using VisualsAndBounds =
+    std::tuple<boost::optional<Sprite>, engine::BoundingBox>;
+
+  VisualsAndBounds createVisualsAndBoundingBox(const LevelData::Actor& actor) {
+    auto sprite = createSpriteForId(actor.mID);
+    auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
+    return std::make_tuple(std::move(sprite), boundingBox);
+  }
+
   Sprite createSpriteForId(const ActorID actorID) {
     const auto actorParts = actorIDListForActor(actorID);
     auto sprite = makeSpriteFromActorIDs(actorParts);
@@ -822,9 +831,16 @@ EntityBundle createEntitiesForLevel(
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
 
-    auto sprite = spriteFactory.createSpriteForId(actor.mID);
-    configureEntity(entity, actor.mID, inferBoundingBox(sprite.mFrames[0]));
-    entity.assign<Sprite>(std::move(sprite));
+    boost::optional<Sprite> maybeSprite;
+    engine::BoundingBox boundingBox;
+    std::tie(maybeSprite, boundingBox) =
+      spriteFactory.createVisualsAndBoundingBox(actor);
+
+    configureEntity(entity, actor.mID, boundingBox);
+
+    if (maybeSprite) {
+      entity.assign<Sprite>(std::move(*maybeSprite));
+    }
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {
