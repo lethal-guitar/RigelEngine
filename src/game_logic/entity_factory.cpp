@@ -188,9 +188,9 @@ auto actorIDListForActor(const ActorID ID) {
 }
 
 
-class SpriteEntityCreator {
+class SpriteTextureFactory {
 public:
-  SpriteEntityCreator(
+  SpriteTextureFactory(
     SDL_Renderer* pRenderer,
     const ActorImagePackage& spritePackage)
     : mpRenderer(pRenderer)
@@ -773,7 +773,7 @@ EntityBundle createEntitiesForLevel(
 ) {
   entityx::Entity playerEntity;
 
-  SpriteEntityCreator creator(pRenderer, spritePackage);
+  SpriteTextureFactory spriteFactory(pRenderer, spritePackage);
   for (const auto& actor : level.mActors) {
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
@@ -822,7 +822,7 @@ EntityBundle createEntitiesForLevel(
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
 
-    auto sprite = creator.createSpriteForId(actor.mID);
+    auto sprite = spriteFactory.createSpriteForId(actor.mID);
     configureEntity(entity, actor.mID, inferBoundingBox(sprite.mFrames[0]));
     entity.assign<Sprite>(std::move(sprite));
 
