@@ -200,6 +200,80 @@ auto actorIDListForActor(const ActorID ID) {
   return actorParts;
 }
 
+void configureSprite(Sprite& sprite, const ActorID actorID) {
+  if (actorID == 5 || actorID == 6) {
+    for (int i=0; i<39; ++i) {
+      sprite.mFrames[i].mDrawOffset.x -= 1;
+    }
+  }
+
+  switch (actorID) {
+    case 0:
+      sprite.mFramesToRender = {0, 6};
+      break;
+
+    case 62:
+      sprite.mFramesToRender = {1, 0};
+      break;
+
+    case 68:
+      sprite.mFramesToRender = {0, 2, 8};
+      break;
+
+    case 93:
+      sprite.mFramesToRender = {1, 3};
+      break;
+
+    case 115:
+      sprite.mFramesToRender = {0, 4};
+      break;
+
+    case 128:
+      sprite.mFramesToRender = {0, 5, 6, 7, 8};
+      break;
+
+    case 150:
+      sprite.mFramesToRender = {1};
+      break;
+
+    case 154:
+      sprite.mFramesToRender = {6};
+      break;
+
+    case 171:
+      sprite.mFramesToRender = {6};
+      break;
+
+    case 119:
+      sprite.mFramesToRender = {0, 1, 2};
+      break;
+
+    case 200:
+      sprite.mFramesToRender = {0, 2};
+      break;
+
+    case 209:
+      sprite.mFramesToRender = {5, 0};
+      break;
+
+    case 217:
+      sprite.mFramesToRender = {12};
+      break;
+
+    case 231:
+      sprite.mFramesToRender = {3};
+      break;
+
+    case 237:
+      sprite.mFramesToRender = {0, 1, 2, 3};
+      break;
+
+    case 279:
+      sprite.mFramesToRender = {0, 2};
+      break;
+  }
+}
+
 
 class SpriteTextureFactory {
 public:
@@ -250,79 +324,7 @@ public:
   Sprite createSpriteForId(const ActorID actorID) {
     const auto actorParts = actorIDListForActor(actorID);
     auto sprite = makeSpriteFromActorIDs(actorParts);
-
-    if (actorID == 5 || actorID == 6) {
-      for (int i=0; i<39; ++i) {
-        sprite.mFrames[i].mDrawOffset.x -= 1;
-      }
-    }
-
-    switch (actorID) {
-      case 0:
-        sprite.mFramesToRender = {0, 6};
-        break;
-
-      case 62:
-        sprite.mFramesToRender = {1, 0};
-        break;
-
-      case 68:
-        sprite.mFramesToRender = {0, 2, 8};
-        break;
-
-      case 93:
-        sprite.mFramesToRender = {1, 3};
-        break;
-
-      case 115:
-        sprite.mFramesToRender = {0, 4};
-        break;
-
-      case 128:
-        sprite.mFramesToRender = {0, 5, 6, 7, 8};
-        break;
-
-      case 150:
-        sprite.mFramesToRender = {1};
-        break;
-
-      case 154:
-        sprite.mFramesToRender = {6};
-        break;
-
-      case 171:
-        sprite.mFramesToRender = {6};
-        break;
-
-      case 119:
-        sprite.mFramesToRender = {0, 1, 2};
-        break;
-
-      case 200:
-        sprite.mFramesToRender = {0, 2};
-        break;
-
-      case 209:
-        sprite.mFramesToRender = {5, 0};
-        break;
-
-      case 217:
-        sprite.mFramesToRender = {12};
-        break;
-
-      case 231:
-        sprite.mFramesToRender = {3};
-        break;
-
-      case 237:
-        sprite.mFramesToRender = {0, 1, 2, 3};
-        break;
-
-      case 279:
-        sprite.mFramesToRender = {0, 2};
-        break;
-    }
-
+    configureSprite(sprite, actorID);
     return sprite;
   }
 
