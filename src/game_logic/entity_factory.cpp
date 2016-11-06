@@ -113,12 +113,12 @@ engine::BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
 }
 
 
-// Assign gravity affected physical component, using sprite size to determine
-// bounding box
-void addDefaultPhysical(ex::Entity entity, const SpriteFrame& spriteFrame) {
-  entity.assign<Physical>(
-      Physical{inferBoundingBox(spriteFrame), {0.0f, 0.0f}, true});
-
+// Assign gravity affected physical component
+void addDefaultPhysical(
+  ex::Entity entity,
+  const engine::BoundingBox& boundingBox
+) {
+  entity.assign<Physical>(Physical{boundingBox, {0.0f, 0.0f}, true});
 }
 
 
@@ -334,13 +334,13 @@ private:
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  const Sprite& sprite
+  const engine::BoundingBox& boundingBox
 ) {
   switch (actorID) {
     // Bonus globes
     case 45:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -350,7 +350,7 @@ void configureEntity(
 
     case 46:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -360,7 +360,7 @@ void configureEntity(
 
     case 47:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 5000;
@@ -370,7 +370,7 @@ void configureEntity(
 
     case 48:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -395,14 +395,14 @@ void configureEntity(
     case 163: // Empty red box
     case 164: // Empty blue box
     case 161: // Empty white box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
     // White boxes
     // ----------------------------------------------------------------------
     case 37: // Circuit board
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -412,7 +412,7 @@ void configureEntity(
       break;
 
     case 121: // Blue key
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -430,7 +430,7 @@ void configureEntity(
         entity.assign<CollectableItem>(item);
       }
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       break;
 
     case 114: // Cloaking device
@@ -442,7 +442,7 @@ void configureEntity(
         item.mGivenPlayerBuff = PlayerBuff::Cloak;
         entity.assign<CollectableItem>(item);
       }
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
@@ -450,7 +450,7 @@ void configureEntity(
     // ----------------------------------------------------------------------
     case 168: // Soda can
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 5)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100; // 2000 if shot and grabbed while flying
@@ -460,7 +460,7 @@ void configureEntity(
       break;
 
     case 174: // 6-pack soda
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100; // 10000 when shot
@@ -470,7 +470,7 @@ void configureEntity(
       break;
 
     case 201: // Turkey
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100;
@@ -483,7 +483,7 @@ void configureEntity(
     // Green boxes
     // ----------------------------------------------------------------------
     case 19: // Rocket launcher
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -493,7 +493,7 @@ void configureEntity(
       break;
 
     case 20: // Flame thrower
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -503,7 +503,7 @@ void configureEntity(
       break;
 
     case 22: // Default weapon
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenWeapon = WeaponType::Normal;
@@ -512,7 +512,7 @@ void configureEntity(
       break;
 
     case 23: // Laser
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -526,7 +526,7 @@ void configureEntity(
     // ----------------------------------------------------------------------
     case 28: // Health molecule
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500; // 10000 when at full health
@@ -536,7 +536,7 @@ void configureEntity(
       break;
 
     case 155: // Collectable letter N in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
@@ -546,7 +546,7 @@ void configureEntity(
       break;
 
     case 156: // Collectable letter U in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
@@ -556,7 +556,7 @@ void configureEntity(
       break;
 
     case 157: // Collectable letter K in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
@@ -566,7 +566,7 @@ void configureEntity(
       break;
 
     case 158: // Collectable letter E in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
@@ -576,7 +576,7 @@ void configureEntity(
       break;
 
     case 187: // Collectable letter M in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
@@ -586,7 +586,7 @@ void configureEntity(
       break;
 
     case 160: // Video game cartridge in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -595,7 +595,7 @@ void configureEntity(
       break;
 
     case 172: // Sunglasses in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100;
@@ -604,7 +604,7 @@ void configureEntity(
       break;
 
     case 173: // Phone in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -613,7 +613,7 @@ void configureEntity(
       break;
 
     case 181: // Boom box in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -622,7 +622,7 @@ void configureEntity(
       break;
 
     case 182: // Game disk in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -631,7 +631,7 @@ void configureEntity(
       break;
 
     case 183: // TV in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1500;
@@ -640,7 +640,7 @@ void configureEntity(
       break;
 
     case 184: // Camera in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2500;
@@ -649,7 +649,7 @@ void configureEntity(
       break;
 
     case 185: // Computer in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 3000;
@@ -658,7 +658,7 @@ void configureEntity(
       break;
 
     case 186: // CD in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -667,7 +667,7 @@ void configureEntity(
       break;
 
     case 274: // T-Shirt in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 5000;
@@ -676,7 +676,7 @@ void configureEntity(
       break;
 
     case 275: // Video tape in blue box
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -688,12 +688,12 @@ void configureEntity(
     case 51: // teleporter
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       entity.assign<Interactable>(Interactable{InteractableType::Teleporter});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       break;
 
     case 239: // Special hint globe
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-      addDefaultPhysical(entity, sprite.mFrames[0]);
+      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 10000;
@@ -823,7 +823,7 @@ EntityBundle createEntitiesForLevel(
     entity.assign<WorldPosition>(actor.mPosition);
 
     auto sprite = creator.createSpriteForId(actor.mID);
-    configureEntity(entity, actor.mID, sprite);
+    configureEntity(entity, actor.mID, inferBoundingBox(sprite.mFrames[0]));
     entity.assign<Sprite>(std::move(sprite));
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
