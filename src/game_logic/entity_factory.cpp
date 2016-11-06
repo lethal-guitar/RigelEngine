@@ -122,6 +122,19 @@ void addDefaultPhysical(
 }
 
 
+bool hasAssociatedSprite(const ActorID actorID) {
+  switch (actorID) {
+    case 102: case 106: case 116: case 137: case 138: case 142: case 143:
+    case 139: case 221: case 233: case 234: case 241: case 250: case 251:
+    case 254:
+      return false;
+
+    default:
+      return true;
+  }
+}
+
+
 /** Returns list of actor IDs making up a compound actor
  */
 auto actorIDListForActor(const ActorID ID) {
@@ -201,10 +214,37 @@ public:
   using VisualsAndBounds =
     std::tuple<boost::optional<Sprite>, engine::BoundingBox>;
 
-  VisualsAndBounds createVisualsAndBoundingBox(const LevelData::Actor& actor) {
-    auto sprite = createSpriteForId(actor.mID);
-    auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
-    return std::make_tuple(std::move(sprite), boundingBox);
+  VisualsAndBounds createVisualsAndBoundingBox(
+    const LevelData::Actor& actor,
+    data::map::Map& map
+  ) {
+    VisualsAndBounds result;
+
+    if (actor.mAssignedArea) {
+      const auto sectionRect = *actor.mAssignedArea;
+      for (
+        auto mapRow=sectionRect.topLeft.y;
+        mapRow<=sectionRect.bottomRight().y;
+        ++mapRow
+      ) {
+        for (
+          auto mapCol=sectionRect.topLeft.x;
+          mapCol<=sectionRect.bottomRight().x;
+          ++mapCol
+        ) {
+          map.setTileAt(0, mapCol, mapRow, 0);
+          map.setTileAt(1, mapCol, mapRow, 0);
+        }
+      }
+    } else if (hasAssociatedSprite(actor.mID)) {
+      auto sprite = createSpriteForId(actor.mID);
+      std::get<1>(result) = inferBoundingBox(sprite.mFrames[0]);
+      std::get<0>(result) = std::move(sprite);
+    } else {
+      // TODO: Assign bounding box for non-visual entities that have one
+    }
+
+    return result;
   }
 
   Sprite createSpriteForId(const ActorID actorID) {
@@ -790,27 +830,6 @@ EntityBundle createEntitiesForLevel(
       actor.mID != 82 && actor.mID != 83 &&
       actor.mID != 103 && actor.mID != 104);
 
-    if (actor.mAssignedArea) {
-      const auto sectionRect = *actor.mAssignedArea;
-      // TODO: Create correct entity
-      for (
-        auto mapRow=sectionRect.topLeft.y;
-        mapRow<=sectionRect.bottomRight().y;
-        ++mapRow
-      ) {
-        for (
-          auto mapCol=sectionRect.topLeft.x;
-          mapCol<=sectionRect.bottomRight().x;
-          ++mapCol
-        ) {
-          level.mMap.setTileAt(0, mapCol, mapRow, 0);
-          level.mMap.setTileAt(1, mapCol, mapRow, 0);
-        }
-      }
-
-      continue;
-    }
-
     switch (actor.mID) {
       case 116:
       case 137:
@@ -834,7 +853,7 @@ EntityBundle createEntitiesForLevel(
     boost::optional<Sprite> maybeSprite;
     engine::BoundingBox boundingBox;
     std::tie(maybeSprite, boundingBox) =
-      spriteFactory.createVisualsAndBoundingBox(actor);
+      spriteFactory.createVisualsAndBoundingBox(actor, level.mMap);
 
     configureEntity(entity, actor.mID, boundingBox);
 
