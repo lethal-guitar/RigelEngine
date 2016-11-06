@@ -172,7 +172,7 @@ public:
     mActorGrid.setValueAt(col, row, nullptr);
   }
 
-  base::Rect<int> findTileSectionRect(
+  boost::optional<base::Rect<int>> findTileSectionRect(
     const int startCol,
     const int startRow
   ) {
@@ -202,7 +202,7 @@ public:
       }
     }
 
-    throw runtime_error("Could not find all tile section markers");
+    return boost::none;
   }
 
 private:
@@ -254,17 +254,11 @@ ActorList preProcessActorDescriptions(
         case 138:
         case 142:
         case 143:
-          {
-            boost::optional<base::Rect<int>> actorArea;
-            try {
-              actorArea = grid.findTileSectionRect(col, row);
-            } catch (const runtime_error&) {
-              // In case there are markers missing, we will go out-of bounds,
-              // which we just ignore for the moment.
-            }
-            actors.emplace_back(
-              LevelData::Actor{actor.mPosition, actor.mID, actorArea});
-          }
+          actors.emplace_back(LevelData::Actor{
+            actor.mPosition,
+            actor.mID,
+            grid.findTileSectionRect(col, row)
+          });
           break;
 
         default:
