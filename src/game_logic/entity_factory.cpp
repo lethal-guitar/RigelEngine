@@ -277,7 +277,7 @@ public:
     return sprite;
   }
 
-  auto releaseCollectedTextures() {
+  auto releaseTextures() {
     std::vector<sdl_utils::OwningTexture> allTextures;
     for (auto& mapping : mTextureCache) {
       allTextures.emplace_back(std::move(mapping.second));
@@ -835,7 +835,7 @@ EntityBundle createEntitiesForLevel(
 
   return {
     playerEntity,
-    creator.releaseCollectedTextures()
+    spriteFactory.releaseTextures()
   };
 }
 
