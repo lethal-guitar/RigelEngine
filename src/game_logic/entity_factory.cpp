@@ -334,7 +334,7 @@ private:
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  Sprite&& sprite
+  const Sprite& sprite
 ) {
   switch (actorID) {
     // Bonus globes
@@ -760,12 +760,6 @@ void configureEntity(
     default:
       break;
   }
-
-  entity.assign<Sprite>(std::move(sprite));
-
-  if (actorID == 5 || actorID == 6) {
-    game_logic::initializePlayerEntity(entity, actorID == 6);
-  }
 }
 
 }
@@ -827,10 +821,14 @@ EntityBundle createEntitiesForLevel(
 
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
-    configureEntity(entity, actor.mID, creator.createSpriteForId(actor.mID));
+
+    auto sprite = creator.createSpriteForId(actor.mID);
+    configureEntity(entity, actor.mID, sprite);
+    entity.assign<Sprite>(std::move(sprite));
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {
+      game_logic::initializePlayerEntity(entity, actor.mID == 6);
       playerEntity = entity;
     }
   }
