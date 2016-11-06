@@ -210,6 +210,17 @@ private:
 };
 
 
+/** Transforms actor list to be more useful in subsequent stages
+ *
+ * This does two things:
+ *  - Applies the selected difficulty, i.e. removes actors that only appear
+ *    in higher difficulties than the selected one
+ *  - Assigns an area/bounding box to actors that require it, e.g. shootable
+ *    walls
+ *
+ * Actors which are only relevant for these two purposes will be removed from
+ * the list (difficulty markers and section markers).
+ */
 ActorList preProcessActorDescriptions(
   const data::map::Map& map,
   const ActorList& originalActors,
