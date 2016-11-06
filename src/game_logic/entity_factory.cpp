@@ -198,7 +198,7 @@ public:
   {
   }
 
-  void configureEntity(ex::Entity entity, const ActorID actorID) {
+  Sprite createSpriteForId(const ActorID actorID) {
     const auto actorParts = actorIDListForActor(actorID);
     auto sprite = makeSpriteFromActorIDs(actorParts);
 
@@ -274,436 +274,7 @@ public:
         break;
     }
 
-    switch (actorID) {
-      // Bonus globes
-      case 45:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 46:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 1000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 47:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 5000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 48:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 1000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      // Circuit card force field
-      case 119:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 2, 4, 2)}});
-        break;
-
-      // Keyhole (blue key)
-      case 122:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 4)}});
-        break;
-
-      // ----------------------------------------------------------------------
-      // Empty boxes
-      // ----------------------------------------------------------------------
-      case 162: // Empty green box
-      case 163: // Empty red box
-      case 164: // Empty blue box
-      case 161: // Empty white box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        break;
-
-      // ----------------------------------------------------------------------
-      // White boxes
-      // ----------------------------------------------------------------------
-      case 37: // Circuit board
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          item.mGivenItem = InventoryItemType::CircuitBoard;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 121: // Blue key
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          item.mGivenItem = InventoryItemType::BlueKey;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 53: // Rapid fire item
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          item.mGivenItem = InventoryItemType::RapidFire;
-          item.mGivenPlayerBuff = PlayerBuff::RapidFire;
-          entity.assign<CollectableItem>(item);
-        }
-        entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        break;
-
-      case 114: // Cloaking device
-        entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          item.mGivenItem = InventoryItemType::CloakingDevice;
-          item.mGivenPlayerBuff = PlayerBuff::Cloak;
-          entity.assign<CollectableItem>(item);
-        }
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        break;
-
-      // ----------------------------------------------------------------------
-      // Red boxes
-      // ----------------------------------------------------------------------
-      case 168: // Soda can
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 5)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 100; // 2000 if shot and grabbed while flying
-          item.mGivenHealth = 1;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 174: // 6-pack soda
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 100; // 10000 when shot
-          item.mGivenHealth = 6;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 201: // Turkey
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 100;
-          item.mGivenHealth = 1; // 2 if cooked
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      // ----------------------------------------------------------------------
-      // Green boxes
-      // ----------------------------------------------------------------------
-      case 19: // Rocket launcher
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 2000;
-          item.mGivenWeapon = WeaponType::Rocket;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 20: // Flame thrower
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 2000;
-          item.mGivenWeapon = WeaponType::FlameThrower;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 22: // Default weapon
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenWeapon = WeaponType::Normal;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 23: // Laser
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 2000;
-          item.mGivenWeapon = WeaponType::Laser;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      // ----------------------------------------------------------------------
-      // Blue boxes
-      // ----------------------------------------------------------------------
-      case 28: // Health molecule
-        entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500; // 10000 when at full health
-          item.mGivenHealth = 1;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 155: // Collectable letter N in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 101000;
-          item.mGivenCollectableLetter = CollectableLetterType::N;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 156: // Collectable letter U in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 101000;
-          item.mGivenCollectableLetter = CollectableLetterType::U;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 157: // Collectable letter K in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 101000;
-          item.mGivenCollectableLetter = CollectableLetterType::K;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 158: // Collectable letter E in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 101000;
-          item.mGivenCollectableLetter = CollectableLetterType::E;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 187: // Collectable letter M in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 101000;
-          item.mGivenCollectableLetter = CollectableLetterType::M;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 160: // Video game cartridge in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 172: // Sunglasses in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 100;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 173: // Phone in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 2000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 181: // Boom box in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 1000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 182: // Game disk in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 183: // TV in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 1500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 184: // Camera in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 2500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 185: // Computer in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 3000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 186: // CD in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 274: // T-Shirt in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 5000;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 275: // Video tape in blue box
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 500;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 50: // teleporter
-      case 51: // teleporter
-        entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-        entity.assign<Interactable>(Interactable{InteractableType::Teleporter});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        break;
-
-      case 239: // Special hint globe
-        entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-        addDefaultPhysical(entity, sprite.mFrames[0]);
-        {
-          CollectableItem item;
-          item.mGivenScore = 10000;
-          item.mGivenItem = InventoryItemType::SpecialHintGlobe;
-          entity.assign<CollectableItem>(item);
-        }
-        break;
-
-      case 66: // Destroyable reactor
-      case 117:
-      case 120: // Keyhole (circuit board)
-      case 188: // rotating floor spikes
-      case 208: // floating exit sign to right
-      case 252: // floating exit sign to left
-      case 296: // floating arrow
-      case 210:
-      case 212:
-      case 222:
-      case 223:
-      case 224:
-      case 225:
-      case 228:
-      case 229:
-      case 230:
-      case 235:
-      case 236:
-      case 257:
-      case 258:
-      case 262:
-      case 263:
-        entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-        break;
-
-      // Flying message ships
-      case 213:
-      case 214:
-      case 215:
-      case 216:
-      case 220:
-        //slot  0   1   2   3   4       5      6
-        //frame 0   1   2   3   4   5   6   7  8   9
-        //actor 107 108 109 110 111     112    113
-        entity.assign<Animated>(Animated{{
-          AnimationSequence(2, 4, 5, 4),
-          AnimationSequence(2, 6, 7, 5),
-          AnimationSequence(2, 8, 9, 6)}});
-        break;
-
-      case 231: // Lava riser
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 3, 5)}});
-        break;
-
-      case 62:
-        entity.assign<Animated>(Animated{{AnimationSequence(2, 1, 2)}});
-        break;
-
-      case 246:
-      case 247:
-      case 248:
-      case 249:
-        entity.assign<Animated>(Animated{{AnimationSequence(4)}});
-        break;
-
-      default:
-        break;
-    }
-
-    entity.assign<Sprite>(std::move(sprite));
-
-    if (actorID == 5 || actorID == 6) {
-      game_logic::initializePlayerEntity(entity, actorID == 6);
-    }
+    return sprite;
   }
 
   auto releaseCollectedTextures() {
@@ -758,6 +329,444 @@ private:
 
   std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
 };
+
+
+void configureEntity(
+  ex::Entity entity,
+  const ActorID actorID,
+  Sprite&& sprite
+) {
+  switch (actorID) {
+    // Bonus globes
+    case 45:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 46:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 1000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 47:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 5000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 48:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 1000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    // Circuit card force field
+    case 119:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 2, 4, 2)}});
+      break;
+
+    // Keyhole (blue key)
+    case 122:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 4)}});
+      break;
+
+    // ----------------------------------------------------------------------
+    // Empty boxes
+    // ----------------------------------------------------------------------
+    case 162: // Empty green box
+    case 163: // Empty red box
+    case 164: // Empty blue box
+    case 161: // Empty white box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      break;
+
+    // ----------------------------------------------------------------------
+    // White boxes
+    // ----------------------------------------------------------------------
+    case 37: // Circuit board
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        item.mGivenItem = InventoryItemType::CircuitBoard;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 121: // Blue key
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        item.mGivenItem = InventoryItemType::BlueKey;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 53: // Rapid fire item
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        item.mGivenItem = InventoryItemType::RapidFire;
+        item.mGivenPlayerBuff = PlayerBuff::RapidFire;
+        entity.assign<CollectableItem>(item);
+      }
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      break;
+
+    case 114: // Cloaking device
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        item.mGivenItem = InventoryItemType::CloakingDevice;
+        item.mGivenPlayerBuff = PlayerBuff::Cloak;
+        entity.assign<CollectableItem>(item);
+      }
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      break;
+
+    // ----------------------------------------------------------------------
+    // Red boxes
+    // ----------------------------------------------------------------------
+    case 168: // Soda can
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 5)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 100; // 2000 if shot and grabbed while flying
+        item.mGivenHealth = 1;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 174: // 6-pack soda
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 100; // 10000 when shot
+        item.mGivenHealth = 6;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 201: // Turkey
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 100;
+        item.mGivenHealth = 1; // 2 if cooked
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    // ----------------------------------------------------------------------
+    // Green boxes
+    // ----------------------------------------------------------------------
+    case 19: // Rocket launcher
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 2000;
+        item.mGivenWeapon = WeaponType::Rocket;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 20: // Flame thrower
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 2000;
+        item.mGivenWeapon = WeaponType::FlameThrower;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 22: // Default weapon
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenWeapon = WeaponType::Normal;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 23: // Laser
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 2000;
+        item.mGivenWeapon = WeaponType::Laser;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    // ----------------------------------------------------------------------
+    // Blue boxes
+    // ----------------------------------------------------------------------
+    case 28: // Health molecule
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500; // 10000 when at full health
+        item.mGivenHealth = 1;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 155: // Collectable letter N in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 101000;
+        item.mGivenCollectableLetter = CollectableLetterType::N;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 156: // Collectable letter U in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 101000;
+        item.mGivenCollectableLetter = CollectableLetterType::U;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 157: // Collectable letter K in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 101000;
+        item.mGivenCollectableLetter = CollectableLetterType::K;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 158: // Collectable letter E in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 101000;
+        item.mGivenCollectableLetter = CollectableLetterType::E;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 187: // Collectable letter M in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 101000;
+        item.mGivenCollectableLetter = CollectableLetterType::M;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 160: // Video game cartridge in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 172: // Sunglasses in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 100;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 173: // Phone in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 2000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 181: // Boom box in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 1000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 182: // Game disk in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 183: // TV in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 1500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 184: // Camera in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 2500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 185: // Computer in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 3000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 186: // CD in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 274: // T-Shirt in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 5000;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 275: // Video tape in blue box
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 500;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 50: // teleporter
+    case 51: // teleporter
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Interactable>(Interactable{InteractableType::Teleporter});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      break;
+
+    case 239: // Special hint globe
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      addDefaultPhysical(entity, sprite.mFrames[0]);
+      {
+        CollectableItem item;
+        item.mGivenScore = 10000;
+        item.mGivenItem = InventoryItemType::SpecialHintGlobe;
+        entity.assign<CollectableItem>(item);
+      }
+      break;
+
+    case 66: // Destroyable reactor
+    case 117:
+    case 120: // Keyhole (circuit board)
+    case 188: // rotating floor spikes
+    case 208: // floating exit sign to right
+    case 252: // floating exit sign to left
+    case 296: // floating arrow
+    case 210:
+    case 212:
+    case 222:
+    case 223:
+    case 224:
+    case 225:
+    case 228:
+    case 229:
+    case 230:
+    case 235:
+    case 236:
+    case 257:
+    case 258:
+    case 262:
+    case 263:
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      break;
+
+    // Flying message ships
+    case 213:
+    case 214:
+    case 215:
+    case 216:
+    case 220:
+      //slot  0   1   2   3   4       5      6
+      //frame 0   1   2   3   4   5   6   7  8   9
+      //actor 107 108 109 110 111     112    113
+      entity.assign<Animated>(Animated{{
+        AnimationSequence(2, 4, 5, 4),
+        AnimationSequence(2, 6, 7, 5),
+        AnimationSequence(2, 8, 9, 6)}});
+      break;
+
+    case 231: // Lava riser
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 3, 5)}});
+      break;
+
+    case 62:
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 1, 2)}});
+      break;
+
+    case 246:
+    case 247:
+    case 248:
+    case 249:
+      entity.assign<Animated>(Animated{{AnimationSequence(4)}});
+      break;
+
+    default:
+      break;
+  }
+
+  entity.assign<Sprite>(std::move(sprite));
+
+  if (actorID == 5 || actorID == 6) {
+    game_logic::initializePlayerEntity(entity, actorID == 6);
+  }
+}
 
 }
 
@@ -818,7 +827,7 @@ EntityBundle createEntitiesForLevel(
 
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
-    creator.configureEntity(entity, actor.mID);
+    configureEntity(entity, actor.mID, creator.createSpriteForId(actor.mID));
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {
