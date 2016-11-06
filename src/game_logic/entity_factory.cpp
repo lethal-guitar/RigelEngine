@@ -806,6 +806,26 @@ void configureEntity(
       entity.assign<Animated>(Animated{{AnimationSequence(4)}});
       break;
 
+    case 102: // dynamic wall: falls down, sinks into ground (when seen)
+    case 106: // shootable wall, explodes into small pieces
+    case 116: // door, opened by blue key (slides into ground)
+    case 137: // unknown dynamic geometry
+    case 138: // dynamic wall: falls down, stays intact
+    case 142: // unknown dynamic geometry
+    case 143: // shootable wall, burns away
+
+    case 139: // level exit
+
+    case 221: // water
+    case 233: // water surface A
+    case 234: // water surface B
+
+    case 241: // windblown-spider generator
+    case 250: // airlock effect, left
+    case 251: // airlock effect, right
+    case 254: // explosion effect trigger
+      break;
+
     default:
       break;
   }
@@ -829,23 +849,6 @@ EntityBundle createEntitiesForLevel(
     assert(
       actor.mID != 82 && actor.mID != 83 &&
       actor.mID != 103 && actor.mID != 104);
-
-    switch (actor.mID) {
-      case 116:
-      case 137:
-      case 138:
-      case 139: // level exit
-      case 142:
-      case 143:
-      case 221: // water
-      case 233: // water surface
-      case 234: // water surface
-      case 241: // windblown-spider generator
-      case 250:
-      case 251:
-      case 254:
-        continue;
-    }
 
     auto entity = entityManager.create();
     entity.assign<WorldPosition>(actor.mPosition);
