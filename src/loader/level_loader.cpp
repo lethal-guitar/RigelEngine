@@ -243,6 +243,10 @@ ActorList preProcessActorDescriptions(
           applyDifficultyMarker(Difficulty::Hard);
           break;
 
+        case 103: // stray tile section marker, ignore
+        case 104: // stray tile section marker, ignore
+          break;
+
         case 102:
         case 106:
         case 116:

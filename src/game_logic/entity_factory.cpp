@@ -772,6 +772,12 @@ EntityBundle createEntitiesForLevel(
 
   SpriteEntityCreator creator(pRenderer, spritePackage);
   for (const auto& actor : level.mActors) {
+    // Difficulty/section markers should never appear in the actor descriptions
+    // coming from the loader, as they are handled during pre-processing.
+    assert(
+      actor.mID != 82 && actor.mID != 83 &&
+      actor.mID != 103 && actor.mID != 104);
+
     if (actor.mAssignedArea) {
       const auto sectionRect = *actor.mAssignedArea;
       // TODO: Create correct entity
@@ -794,8 +800,6 @@ EntityBundle createEntitiesForLevel(
     }
 
     switch (actor.mID) {
-      case 103: // stray tile section marker, ignore
-      case 104: // stray tile section marker, ignore
       case 116:
       case 137:
       case 138:
