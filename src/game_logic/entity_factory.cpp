@@ -112,8 +112,8 @@ public:
       }
     } else if (hasAssociatedSprite(actor.mID)) {
       auto sprite = createSpriteForId(actor.mID);
+      std::get<0>(result) = sprite;
       std::get<1>(result) = inferBoundingBox(sprite.mFrames[0]);
-      std::get<0>(result) = std::move(sprite);
     } else {
       // TODO: Assign bounding box for non-visual entities that have one
     }
@@ -163,10 +163,8 @@ private:
       for (auto i=0u; i<actorData.mFrames.size(); ++i) {
         const auto& frameData = actorData.mFrames[i];
         const auto& texture = getOrCreateTexture(make_pair(ID, i));
-        auto textureRef = sdl_utils::NonOwningTexture(texture);
-        sprite.mFrames.emplace_back(
-          std::move(textureRef),
-          frameData.mDrawOffset);
+        const auto textureRef = sdl_utils::NonOwningTexture(texture);
+        sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
       }
       sprite.mDrawOrder = actorData.mDrawIndex;
       sprite.mFramesToRender.push_back(lastFrameCount);
@@ -212,7 +210,7 @@ EntityBundle createEntitiesForLevel(
     configureEntity(entity, actor.mID, boundingBox);
 
     if (maybeSprite) {
-      entity.assign<Sprite>(std::move(*maybeSprite));
+      entity.assign<Sprite>(*maybeSprite);
     }
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
