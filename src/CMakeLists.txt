@@ -31,6 +31,7 @@ set(core_sources
     engine/timing.cpp
     engine/timing.hpp
     game_logic/collectable_components.hpp
+    game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
     game_logic/player_control_system.cpp
