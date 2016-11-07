@@ -43,9 +43,6 @@ template<typename PtrT>
 class TextureBase {
 public:
   TextureBase();
-  TextureBase(TextureBase&&) = default;
-
-  TextureBase& operator=(TextureBase&& other) = default;
 
   /** Render entire texture at given position */
   void render(SDL_Renderer* renderer, const base::Vector& position) const;
@@ -161,15 +158,11 @@ protected:
 class NonOwningTexture : public detail::TextureBase<SDL_Texture*> {
 public:
   NonOwningTexture() = default;
-  NonOwningTexture(const NonOwningTexture&) = default;
-  NonOwningTexture(NonOwningTexture&&) = default;
 
   explicit NonOwningTexture(const OwningTexture& texture) :
     TextureBase(texture.texturePtr(), texture.width(), texture.height())
   {
   }
-
-  NonOwningTexture& operator=(const NonOwningTexture&) = default;
 };
 
 
