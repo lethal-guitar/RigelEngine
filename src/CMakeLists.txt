@@ -38,6 +38,7 @@ set(core_sources
     game_logic/player_control_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
+    game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
     loader/audio_package.cpp
