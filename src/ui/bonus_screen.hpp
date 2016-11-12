@@ -37,6 +37,10 @@ public:
 
   void updateAndRender(engine::TimeDelta dt);
 
+  bool finished() const {
+    return mState.mIsDone;
+  }
+
 private:
   struct State {
     explicit State(const int score)
