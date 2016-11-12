@@ -22,6 +22,7 @@
 #include <loader/duke_script_loader.hpp>
 #include <sdl_utils/error.hpp>
 
+#include <game_session_mode.hpp>
 #include <ingame_mode.hpp>
 #include <intro_demo_loop_mode.hpp>
 #include <menu_mode.hpp>
@@ -124,7 +125,7 @@ void Game::run(const Options& options) {
     int episode, level;
     std::tie(episode, level) = *options.mLevelToJumpTo;
 
-    mpCurrentGameMode = std::make_unique<IngameMode>(
+    mpCurrentGameMode = std::make_unique<GameSessionMode>(
       episode,
       level,
       data::Difficulty::Medium,
@@ -311,7 +312,7 @@ void Game::scheduleNewGameStart(
   const int episode,
   const data::Difficulty difficulty
 ) {
-  mpNextGameMode = std::make_unique<IngameMode>(
+  mpNextGameMode = std::make_unique<GameSessionMode>(
     episode,
     0,
     difficulty,
