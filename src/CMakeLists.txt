@@ -1,4 +1,5 @@
 set(core_sources
+    base/boost_variant.hpp
     base/grid.hpp
     base/spatial_types.hpp
     base/warnings.hpp
