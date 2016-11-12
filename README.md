@@ -26,11 +26,12 @@ You can already load levels and walk/jump around in them, as well as collect
 items.  Climbing ladders also works, but hanging onto climbing poles isn't
 implemented yet.  There is not much interactivity otherwise, none of the
 enemies do anything, you cannot take any damage, rocket elevators don't work
-yet, you cannot shoot any weapon, and you can't finish levels.
+yet, and you cannot shoot any weapon. Due to those missing features, it is
+currently not possible to complete most of the levels. The exit can already
+be reached in some levels though, e.g. L3 and L6.
 
 Many of the game's other systems, like most of the menus, intro movie and story
-sequences etc. are already implemented. Not all of them are currently
-integrated though, e.g. the bonus screen which is shown in-between levels.
+sequences etc. are already implemented.
 
 ## Building and running
 
