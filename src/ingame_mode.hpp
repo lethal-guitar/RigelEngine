@@ -35,11 +35,6 @@ namespace rigel {
 class IngameMode : public GameMode {
 public:
   IngameMode(
-    const std::string& levelName,
-    data::Difficulty difficulty,
-    Context context);
-
-  IngameMode(
     int episode,
     int level,
     data::Difficulty difficulty,
