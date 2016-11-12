@@ -95,6 +95,7 @@ public:
     VisualsAndBounds result;
 
     if (actor.mAssignedArea) {
+      // TODO: Implement dynamic geometry
       const auto sectionRect = *actor.mAssignedArea;
       for (
         auto mapRow=sectionRect.topLeft.y;
