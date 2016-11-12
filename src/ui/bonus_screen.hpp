@@ -38,9 +38,20 @@ public:
   void updateAndRender(engine::TimeDelta dt);
 
 private:
+  struct State {
+    explicit State(const int score)
+      : mScore(score)
+    {
+    }
+
+    int mScore;
+    std::string mRunningText;
+    bool mIsDone = false;
+  };
+
   struct Event {
     engine::TimeDelta mTime;
-    std::function<void()> mAction;
+    std::function<void(State&)> mAction;
   };
 
   engine::TimeDelta setupBonusSummationSequence(
@@ -49,13 +60,11 @@ private:
   void updateSequence(engine::TimeDelta timeDelta);
 
 private:
-  int mScore;
-  std::string mRunningText;
+  State mState;
 
   engine::TimeDelta mElapsedTime = 0.0;
   std::vector<Event> mEvents;
   std::size_t mNextEvent = 0;
-  bool mIsDone = false;
 
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;

@@ -78,7 +78,7 @@ BonusScreen::BonusScreen(
   const std::set<BonusNumber>& achievedBonuses,
   int scoreBeforeAddingBonuses
 )
-  : mScore(scoreBeforeAddingBonuses)
+  : mState(scoreBeforeAddingBonuses)
   , mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
   , mBackgroundTexture(ui::fullScreenImageAsTexture(
@@ -99,8 +99,8 @@ BonusScreen::BonusScreen(
   time += slowTicksToTime(FINAL_DELAY_TICKS);
   mEvents.emplace_back(Event{
     time,
-    [this]() {
-      mIsDone = true;
+    [](State& state) {
+      state.mIsDone = true;
     }
   });
 }
@@ -111,23 +111,23 @@ void BonusScreen::updateAndRender(engine::TimeDelta dt) {
 
   mBackgroundTexture.render(mpRenderer, 0, 0);
   mTextRenderer.drawBonusScreenText(6, 8, "SCORE");
-  mTextRenderer.drawBonusScreenText(6, 17, mRunningText);
+  mTextRenderer.drawBonusScreenText(6, 17, mState.mRunningText);
 
-  const auto scoreAsText = to_string(mScore);
+  const auto scoreAsText = to_string(mState.mScore);
   const auto scorePosX = static_cast<int>(34 - scoreAsText.size() * 2);
   mTextRenderer.drawBonusScreenText(scorePosX, 8, scoreAsText);
 }
 
 
 void BonusScreen::updateSequence(const engine::TimeDelta timeDelta) {
-  if (mIsDone) {
+  if (mState.mIsDone) {
     return;
   }
 
   mElapsedTime += timeDelta;
 
   if (mElapsedTime >= mEvents[mNextEvent].mTime) {
-    mEvents[mNextEvent].mAction();
+    mEvents[mNextEvent].mAction(mState);
     ++mNextEvent;
   }
 }
@@ -144,8 +144,8 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
     for (const auto& text : BONUS_SLIDE_IN) {
       mEvents.emplace_back(Event{
         time,
-        [this, text]() {
-          mRunningText = text;
+        [text](State& state) {
+          state.mRunningText = text;
         }
       });
 
@@ -154,17 +154,17 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
 
     mEvents.emplace_back(Event{
       time,
-      [this, bonus]() {
-        mRunningText = mRunningText + " " + to_string(bonus);
-        mpServiceProvider->playSound(data::SoundId::BigExplosion);
+      [pServiceProvider = mpServiceProvider, bonus](State& state) {
+        state.mRunningText += " " + to_string(bonus);
+        pServiceProvider->playSound(data::SoundId::BigExplosion);
       }
     });
 
     time += slowTicksToTime(190);
     mEvents.emplace_back(Event{
       time,
-      [this]() {
-        mRunningText = "  100000 PTS";
+      [](State& state) {
+        state.mRunningText = "  100000 PTS";
       }
     });
     time += slowTicksToTime(100);
@@ -172,9 +172,9 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
     for (int iteration = 0; iteration < 100; ++iteration) {
       mEvents.emplace_back(Event{
         time,
-        [this, iteration]() {
-          mScore += 1000;
-          mpServiceProvider->playSound(data::SoundId::DukeJumping);
+        [pServiceProvider = mpServiceProvider, iteration](State& state) {
+          state.mScore += 1000;
+          pServiceProvider->playSound(data::SoundId::DukeJumping);
 
           const auto newNumberAsText = to_string(99000 - iteration*1000);
 
@@ -185,7 +185,7 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
           }
           newText += newNumberAsText;
           newText += " PTS";
-          mRunningText = newText;
+          state.mRunningText = newText;
         }
       });
 
@@ -194,9 +194,9 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
 
     mEvents.emplace_back(Event{
       time,
-      [this]() {
-        mRunningText = "       0 PTS";
-        mpServiceProvider->playSound(data::SoundId::BigExplosion);
+      [pServiceProvider = mpServiceProvider](State& state) {
+        state.mRunningText = "       0 PTS";
+        pServiceProvider->playSound(data::SoundId::BigExplosion);
       }
     });
 
@@ -212,8 +212,8 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence() {
   for (int i = 0; i < 14; ++i) {
     mEvents.emplace_back(Event{
       time,
-      [this, i]() {
-        mRunningText = NO_BONUS_SLIDE_IN[i];
+      [i](State& state) {
+        state.mRunningText = NO_BONUS_SLIDE_IN[i];
       }
     });
     time += slowTicksToTime(5);
@@ -221,8 +221,8 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence() {
 
   mEvents.emplace_back(Event{
     time,
-    [this]() {
-      mpServiceProvider->playSound(data::SoundId::BigExplosion);
+    [pServiceProvider = mpServiceProvider](State&) {
+      pServiceProvider->playSound(data::SoundId::BigExplosion);
     }
   });
   time += slowTicksToTime(130);
@@ -230,8 +230,8 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence() {
   for (int i = 14; i < 20; ++i) {
     mEvents.emplace_back(Event{
       time,
-      [this, i]() {
-        mRunningText = NO_BONUS_SLIDE_IN[i];
+      [i](State& state) {
+        state.mRunningText = NO_BONUS_SLIDE_IN[i];
       }
     });
     time += slowTicksToTime(10);
@@ -239,8 +239,8 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence() {
 
   mEvents.emplace_back(Event{
     time,
-    [this]() {
-      mpServiceProvider->playSound(data::SoundId::BigExplosion);
+    [pServiceProvider = mpServiceProvider](State&) {
+      pServiceProvider->playSound(data::SoundId::BigExplosion);
     }
   });
   time += slowTicksToTime(130);
@@ -248,8 +248,8 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence() {
   for (int i = 20; i < 27; ++i) {
     mEvents.emplace_back(Event{
       time,
-      [this, i]() {
-        mRunningText = NO_BONUS_SLIDE_IN[i];
+      [i](State& state) {
+        state.mRunningText = NO_BONUS_SLIDE_IN[i];
       }
     });
     time += slowTicksToTime(10);
@@ -258,8 +258,8 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence() {
   time += slowTicksToTime(15);
   mEvents.emplace_back(Event{
     time,
-    [this]() {
-      mpServiceProvider->playSound(data::SoundId::BigExplosion);
+    [pServiceProvider = mpServiceProvider](State&) {
+      pServiceProvider->playSound(data::SoundId::BigExplosion);
     }
   });
 
