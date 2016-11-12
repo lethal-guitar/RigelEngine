@@ -97,6 +97,8 @@ set(core_sources
     game.cpp
     game.hpp
     game_mode.hpp
+    game_session_mode.cpp
+    game_session_mode.hpp
     ingame_mode.cpp
     ingame_mode.hpp
     intro_demo_loop_mode.cpp
