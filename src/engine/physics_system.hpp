@@ -48,6 +48,10 @@ struct Physical {
 }
 
 
+BoundingBox toWorldSpace(
+  const BoundingBox& bbox, const base::Vector& entityPosition);
+
+
 /** Implements game physics/world interaction
  *
  * Operates on all entities with Physical and WorldPosition components.
@@ -66,9 +70,6 @@ public:
 
 private:
   const data::map::CollisionData& worldAt(int x, int y) const;
-
-  BoundingBox toWorldSpace(
-    const BoundingBox& bbox, const base::Vector& entityPosition) const;
 
   base::Vector applyHorizontalMovement(
     const BoundingBox& bbox,
