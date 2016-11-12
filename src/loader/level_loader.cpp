@@ -268,11 +268,11 @@ ActorList preProcessActorDescriptions(
           {
             auto tileSection = grid.findTileSectionRect(col, row);
             if (tileSection) {
-            actors.emplace_back(LevelData::Actor{
-              actor.mPosition,
-              actor.mID,
-              tileSection
-            });
+              actors.emplace_back(LevelData::Actor{
+                actor.mPosition,
+                actor.mID,
+                tileSection
+              });
             }
           }
           break;
