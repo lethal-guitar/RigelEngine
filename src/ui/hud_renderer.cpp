@@ -300,8 +300,7 @@ void HudRenderer::drawHealthBar() const {
     }
   } else {
     // TODO: Determine actual animation timing
-    const auto animationOffset =
-      static_cast<int>(std::round(mTimeStepper.elapsedTicks() / 1.5f));
+    const auto animationOffset = mTimeStepper.elapsedTicks() / 2;
 
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = (i + animationOffset) % 9;
