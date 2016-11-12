@@ -59,8 +59,10 @@ private:
   };
 
   engine::TimeDelta setupBonusSummationSequence(
-    const std::set<BonusNumber>& achievedBonuses);
-  engine::TimeDelta setupNoBonusSequence();
+    const std::set<BonusNumber>& achievedBonuses,
+    IGameServiceProvider* pServiceProvider);
+  engine::TimeDelta setupNoBonusSequence(
+    IGameServiceProvider* pServiceProvider);
   void updateSequence(engine::TimeDelta timeDelta);
 
 private:
@@ -71,7 +73,6 @@ private:
   std::size_t mNextEvent = 0;
 
   SDL_Renderer* mpRenderer;
-  IGameServiceProvider* mpServiceProvider;
   sdl_utils::OwningTexture mBackgroundTexture;
   ui::MenuElementRenderer mTextRenderer;
 };
