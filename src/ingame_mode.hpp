@@ -35,11 +35,6 @@ namespace rigel {
 class IngameMode : public GameMode {
 public:
   IngameMode(
-    const std::string& levelName,
-    data::Difficulty difficulty,
-    Context context);
-
-  IngameMode(
     int episode,
     int level,
     data::Difficulty difficulty,
@@ -47,6 +42,8 @@ public:
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;
+
+  bool levelFinished() const;
 
 private:
   void showLoadingScreen(int episode, const loader::ResourceLoader& resources);
@@ -58,12 +55,15 @@ private:
     const loader::ResourceLoader& resources
   );
 
+  void checkForLevelExitReached();
+
 private:
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   data::PlayerModel mPlayerModel;
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
+  bool mLevelFinished;
 
   entityx::EntityX mEntities;
   entityx::Entity mPlayerEntity;

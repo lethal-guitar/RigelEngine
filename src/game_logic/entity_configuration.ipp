@@ -493,6 +493,10 @@ void configureEntity(
       entity.assign<Animated>(Animated{{AnimationSequence(4)}});
       break;
 
+    case 139: // level exit
+      entity.assign<Trigger>(TriggerType::LevelExit);
+      break;
+
     case 102: // dynamic wall: falls down, sinks into ground (when seen)
     case 106: // shootable wall, explodes into small pieces
     case 116: // door, opened by blue key (slides into ground)
@@ -500,8 +504,6 @@ void configureEntity(
     case 138: // dynamic wall: falls down, stays intact
     case 142: // unknown dynamic geometry
     case 143: // shootable wall, burns away
-
-    case 139: // level exit
 
     case 221: // water
     case 233: // water surface A

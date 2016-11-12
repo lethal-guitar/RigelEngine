@@ -32,6 +32,16 @@ using components::WorldPosition;
 using data::map::CollisionData;
 
 
+BoundingBox toWorldSpace(
+  const BoundingBox& bbox,
+  const base::Vector& entityPosition
+) {
+  return bbox + base::Vector(
+    entityPosition.x,
+    entityPosition.y - (bbox.size.height - 1));
+}
+
+
 PhysicsSystem::PhysicsSystem(const data::map::Map& map)
   : mCollisionData(map.width(), map.height())
 {
@@ -102,15 +112,6 @@ const data::map::CollisionData& PhysicsSystem::worldAt(
 ) const {
   static const auto emptyCollisionData = CollisionData{};
   return mCollisionData.valueAtWithDefault(x, y, emptyCollisionData);
-}
-
-BoundingBox PhysicsSystem::toWorldSpace(
-  const BoundingBox& bbox,
-  const base::Vector& entityPosition
-) const {
-  return bbox + base::Vector(
-    entityPosition.x,
-    entityPosition.y - (bbox.size.height - 1));
 }
 
 

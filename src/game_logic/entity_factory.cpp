@@ -23,6 +23,7 @@
 #include <engine/rendering_system.hpp>
 #include <game_logic/collectable_components.hpp>
 #include <game_logic/player_control_system.hpp>
+#include <game_logic/trigger_components.hpp>
 #include <map>
 #include <utility>
 
@@ -95,6 +96,7 @@ public:
     VisualsAndBounds result;
 
     if (actor.mAssignedArea) {
+      // TODO: Implement dynamic geometry
       const auto sectionRect = *actor.mAssignedArea;
       for (
         auto mapRow=sectionRect.topLeft.y;

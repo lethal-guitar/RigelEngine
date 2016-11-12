@@ -37,28 +37,42 @@ public:
 
   void updateAndRender(engine::TimeDelta dt);
 
+  bool finished() const {
+    return mState.mIsDone;
+  }
+
 private:
+  struct State {
+    explicit State(const int score)
+      : mScore(score)
+    {
+    }
+
+    int mScore;
+    std::string mRunningText;
+    bool mIsDone = false;
+  };
+
   struct Event {
     engine::TimeDelta mTime;
-    std::function<void()> mAction;
+    std::function<void(State&)> mAction;
   };
 
   engine::TimeDelta setupBonusSummationSequence(
-    const std::set<BonusNumber>& achievedBonuses);
-  engine::TimeDelta setupNoBonusSequence();
+    const std::set<BonusNumber>& achievedBonuses,
+    IGameServiceProvider* pServiceProvider);
+  engine::TimeDelta setupNoBonusSequence(
+    IGameServiceProvider* pServiceProvider);
   void updateSequence(engine::TimeDelta timeDelta);
 
 private:
-  int mScore;
-  std::string mRunningText;
+  State mState;
 
   engine::TimeDelta mElapsedTime = 0.0;
   std::vector<Event> mEvents;
   std::size_t mNextEvent = 0;
-  bool mIsDone = false;
 
   SDL_Renderer* mpRenderer;
-  IGameServiceProvider* mpServiceProvider;
   sdl_utils::OwningTexture mBackgroundTexture;
   ui::MenuElementRenderer mTextRenderer;
 };

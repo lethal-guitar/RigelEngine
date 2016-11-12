@@ -16,15 +16,7 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
-
-#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_LIST_SIZE 30
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
-
-RIGEL_DISABLE_WARNINGS
-#include <boost/variant.hpp>
-RIGEL_RESTORE_WARNINGS
+#include <base/boost_variant.hpp>
 
 #include <string>
 #include <vector>

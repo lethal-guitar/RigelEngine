@@ -22,6 +22,7 @@
 #include <engine/physics_system.hpp>
 #include <engine/rendering_system.hpp>
 #include <game_logic/player_interaction_system.hpp>
+#include <game_logic/trigger_components.hpp>
 #include <loader/resource_loader.hpp>
 #include <ui/utils.hpp>
 
@@ -77,6 +78,7 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mLevelFinished(false)
   , mHudRenderer(
       &mPlayerModel,
       levelNumber + 1,
@@ -105,13 +107,6 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  // This is temporary - remove when in-game menu implemented
-  if (event.key.keysym.sym == SDLK_ESCAPE) {
-    mpServiceProvider->fadeOutScreen();
-    mpServiceProvider->scheduleEnterMainMenu();
-    return;
-  }
-
   const auto keyPressed = event.type == SDL_KEYDOWN;
   switch (event.key.keysym.sym) {
     case SDLK_UP:
@@ -137,14 +132,22 @@ void IngameMode::handleEvent(const SDL_Event& event) {
 void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // ----------
   // updating
-  mEntities.systems.update<PlayerControlSystem>(dt);
-  mEntities.systems.update<PlayerInteractionSystem>(dt);
-  mEntities.systems.update<PhysicsSystem>(dt);
-  mEntities.systems.update<MapScrollSystem>(dt);
-  mHudRenderer.update(dt);
+  if (!mLevelFinished) {
+    mEntities.systems.update<PlayerControlSystem>(dt);
+    mEntities.systems.update<PlayerInteractionSystem>(dt);
+    mEntities.systems.update<PhysicsSystem>(dt);
+    mEntities.systems.update<MapScrollSystem>(dt);
+    mHudRenderer.update(dt);
+
+    checkForLevelExitReached();
+  }
 
   // ----------
   // rendering
+  if (mLevelFinished) {
+    dt = 0;
+  }
+
   {
     sdl_utils::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
@@ -157,6 +160,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x,
     data::GameTraits::inGameViewPortOffset.y);
+}
+
+
+bool IngameMode::levelFinished() const {
+  return mLevelFinished;
 }
 
 
@@ -215,6 +223,42 @@ void IngameMode::loadLevel(
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(level.mMusicFile);
+}
+
+
+void IngameMode::checkForLevelExitReached() {
+  using engine::components::WorldPosition;
+  using engine::components::Physical;
+  using game_logic::components::Trigger;
+  using game_logic::components::TriggerType;
+
+  mEntities.entities.each<Trigger, WorldPosition>(
+    [this](
+      entityx::Entity,
+      const Trigger& trigger,
+      const WorldPosition& triggerPosition
+    ) {
+      if (trigger.mType != TriggerType::LevelExit || mLevelFinished) {
+        return;
+      }
+
+      const auto& playerPosition =
+        *mPlayerEntity.component<WorldPosition>().get();
+      const auto playerBBox = toWorldSpace(
+        mPlayerEntity.component<Physical>().get()->mCollisionRect,
+        playerPosition);
+
+      const auto playerAboveOrAtTriggerHeight =
+        playerBBox.bottom() <= triggerPosition.y;
+      const auto touchingTriggerOnXAxis =
+        triggerPosition.x >= playerBBox.left() &&
+        triggerPosition.x <= (playerBBox.right() + 1);
+
+      // TODO: Add check for trigger being visible on-screen to properly
+      // replicate the original game's behavior
+
+      mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
+    });
 }
 
 }

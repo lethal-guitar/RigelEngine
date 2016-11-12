@@ -96,6 +96,14 @@ struct Rect {
   ValueT bottom() const {
     return bottomLeft().y;
   }
+
+  ValueT left() const {
+    return topLeft.x;
+  }
+
+  ValueT right() const {
+    return bottomRight().x;
+  }
 };
 
 

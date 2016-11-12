@@ -1,4 +1,5 @@
 set(core_sources
+    base/boost_variant.hpp
     base/grid.hpp
     base/spatial_types.hpp
     base/warnings.hpp
@@ -38,6 +39,7 @@ set(core_sources
     game_logic/player_control_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
+    game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
     loader/audio_package.cpp
@@ -95,6 +97,8 @@ set(core_sources
     game.cpp
     game.hpp
     game_mode.hpp
+    game_session_mode.cpp
+    game_session_mode.hpp
     ingame_mode.cpp
     ingame_mode.hpp
     intro_demo_loop_mode.cpp
