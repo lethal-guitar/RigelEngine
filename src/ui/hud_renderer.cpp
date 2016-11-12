@@ -33,6 +33,7 @@ using sdl_utils::OwningTexture;
 namespace {
 
 const auto HUD_BACKGROUND_ACTOR_ID = 77;
+const auto NUM_HEALTH_SLICES = 8;
 
 
 void drawNumbersBig(
@@ -287,10 +288,12 @@ void HudRenderer::drawHealthBar() const {
   // Health slices start at col 20, row 4. The first 9 are for the "0 health"
   // animation
 
-  const auto health = mpPlayerModel->mHealth;
-  if (health > 0) {
-    for (int i=0; i<MAX_HEALTH; ++i) {
-      const auto sliceIndex = i < health ? 9 : 10;
+  // The model has a range of 1-9 for health, but the HUD shows only 8
+  // slices, with a special animation for having 1 point of health.
+  const auto numFullSlices = mpPlayerModel->mHealth - 1;
+  if (numFullSlices > 0) {
+    for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
+      const auto sliceIndex = i < numFullSlices ? 9 : 10;
       mStatusSpriteSheetRenderer.renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
@@ -300,7 +303,7 @@ void HudRenderer::drawHealthBar() const {
     const auto animationOffset =
       static_cast<int>(std::round(mTimeStepper.elapsedTicks() / 1.5f));
 
-    for (int i=0; i<MAX_HEALTH; ++i) {
+    for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = (i + animationOffset) % 9;
       mStatusSpriteSheetRenderer.renderTileSlice(
         sliceIndex + 20 + 4*40,
