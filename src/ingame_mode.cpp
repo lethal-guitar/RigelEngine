@@ -107,13 +107,6 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  // This is temporary - remove when in-game menu implemented
-  if (event.key.keysym.sym == SDLK_ESCAPE) {
-    mpServiceProvider->fadeOutScreen();
-    mpServiceProvider->scheduleEnterMainMenu();
-    return;
-  }
-
   const auto keyPressed = event.type == SDL_KEYDOWN;
   switch (event.key.keysym.sym) {
     case SDLK_UP:

@@ -42,6 +42,13 @@ GameSessionMode::GameSessionMode(
 
 
 void GameSessionMode::handleEvent(const SDL_Event& event) {
+  // This is temporary - remove when in-game menu implemented
+  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+    mContext.mpServiceProvider->fadeOutScreen();
+    mContext.mpServiceProvider->scheduleEnterMainMenu();
+    return;
+  }
+
   atria::variant::match(mCurrentStage,
     [&event](std::unique_ptr<IngameMode>& pIngameMode) {
       pIngameMode->handleEvent(event);
