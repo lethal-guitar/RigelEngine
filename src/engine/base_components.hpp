@@ -31,5 +31,9 @@ struct WorldPosition : public base::Vector {
   }
 };
 
+}
 
-}}}
+using BoundingBox = base::Rect<int>;
+
+
+}}
