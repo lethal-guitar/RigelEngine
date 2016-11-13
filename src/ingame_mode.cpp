@@ -195,7 +195,8 @@ void IngameMode::loadLevel(
   auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
-    loadedLevel,
+    loadedLevel.mActors,
+    loadedLevel.mMap,
     mEntities.entities);
 
   mLevelData = LevelData{

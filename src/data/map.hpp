@@ -104,4 +104,7 @@ struct LevelData {
   std::string mMusicFile;
 };
 
+
+using ActorDescriptionList = std::vector<LevelData::Actor>;
+
 }}}

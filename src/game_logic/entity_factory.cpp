@@ -35,7 +35,6 @@ using namespace data;
 using namespace loader;
 using namespace std;
 
-using data::map::LevelData;
 using data::ActorID;
 
 using engine::components::Animated;
@@ -80,7 +79,7 @@ EntityFactory::EntityFactory(
 
 
 auto EntityFactory::createVisualsAndBoundingBox(
-  const LevelData::Actor& actor,
+  const data::map::LevelData::Actor& actor,
   data::map::Map& map
 ) -> VisualsAndBounds {
   VisualsAndBounds result;
@@ -157,12 +156,13 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 
 
 entityx::Entity EntityFactory::createEntitiesForLevel(
-  LevelData& level,
+  const data::map::ActorDescriptionList& actors,
+  data::map::Map& map,
   entityx::EntityManager& entityManager
 ) {
   entityx::Entity playerEntity;
 
-  for (const auto& actor : level.mActors) {
+  for (const auto& actor : actors) {
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
     assert(
@@ -175,7 +175,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     boost::optional<Sprite> maybeSprite;
     engine::BoundingBox boundingBox;
     std::tie(maybeSprite, boundingBox) =
-      createVisualsAndBoundingBox(actor, level.mMap);
+      createVisualsAndBoundingBox(actor, map);
 
     configureEntity(entity, actor.mID, boundingBox);
 

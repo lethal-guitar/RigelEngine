@@ -44,7 +44,8 @@ public:
     const loader::ActorImagePackage* pSpritePackage);
 
   entityx::Entity createEntitiesForLevel(
-    data::map::LevelData& level,
+    const data::map::ActorDescriptionList& actors,
+    data::map::Map& map,
     entityx::EntityManager& entityManager);
 
 private:
