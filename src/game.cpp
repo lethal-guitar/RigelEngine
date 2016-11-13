@@ -84,9 +84,6 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
 }
 
 
-Game::~Game() = default;
-
-
 void Game::run(const Options& options) {
   clearScreen();
   SDL_RenderPresent(mpRenderer);

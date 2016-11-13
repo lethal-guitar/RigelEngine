@@ -40,7 +40,6 @@ public:
   };
 
   Game(const std::string& gamePath, SDL_Renderer* pRenderer);
-  ~Game();
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 

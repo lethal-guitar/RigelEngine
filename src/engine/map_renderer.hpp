@@ -31,9 +31,9 @@ public:
     SDL_Renderer* renderer,
     const data::map::Map* pMap,
     const data::map::TileAttributes* pTileAtttributes,
-    data::Image tileSetImage,
-    data::Image backdropImage,
-    boost::optional<data::Image> secondaryBackdropImage,
+    const data::Image& tileSetImage,
+    const data::Image& backdropImage,
+    const boost::optional<data::Image>& secondaryBackdropImage,
     data::map::BackdropScrollMode backdropScrollMode);
 
   void switchBackdrops();

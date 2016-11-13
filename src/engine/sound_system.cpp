@@ -201,7 +201,7 @@ struct SoundSystem::SoundSystemImpl
   SoundHandle addSong(
     data::AudioBuffer buffer
   ) {
-    mAudioBuffers.emplace_back(buffer);
+    mAudioBuffers.emplace_back(std::move(buffer));
     const auto assignedHandle = mNextHandle++;
     mLoadedChunks.emplace(
       assignedHandle,
@@ -252,8 +252,8 @@ SoundHandle SoundSystem::addSong(data::AudioBuffer buffer) {
   return mpImpl->addSong(std::move(buffer));
 }
 
-SoundHandle SoundSystem::addSound(data::AudioBuffer buffer) {
- return  mpImpl->addSound(std::move(buffer));
+SoundHandle SoundSystem::addSound(const data::AudioBuffer& buffer) {
+ return mpImpl->addSound(buffer);
 }
 
 void SoundSystem::playSong(SoundHandle handle) const {
