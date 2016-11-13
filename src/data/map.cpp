@@ -29,35 +29,15 @@ namespace rigel { namespace data { namespace map {
 using namespace std;
 
 
-Map::Map(
-  TileSet tileSet,
-  Image backdrop,
-  boost::optional<Image>&& secondaryBackdrop,
-  const int widthInTiles,
-  const int heightInTiles
-)
-  : mTileSet(std::move(tileSet))
-  , mLayers({
+Map::Map(const int widthInTiles, const int heightInTiles)
+  : mLayers({
       TileArray(widthInTiles*heightInTiles, 0),
       TileArray(widthInTiles*heightInTiles, 0)})
-  , mBackdropImage(std::move(backdrop))
-  , mSecondaryBackdropImage(std::move(secondaryBackdrop))
   , mWidthInTiles(static_cast<size_t>(widthInTiles))
   , mHeightInTiles(static_cast<size_t>(heightInTiles))
 {
   assert(widthInTiles >= 0);
   assert(heightInTiles >= 0);
-}
-
-
-Map::Map(
-  TileSet tileSet,
-  Image backdrop,
-  const int widthInTiles,
-  const int heightInTiles
-)
-  : Map(move(tileSet), move(backdrop), boost::none, widthInTiles, heightInTiles)
-{
 }
 
 

@@ -78,6 +78,7 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mEntityFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
   , mLevelFinished(false)
   , mHudRenderer(
       &mPlayerModel,
@@ -191,38 +192,47 @@ void IngameMode::loadLevel(
   const data::Difficulty difficulty,
   const loader::ResourceLoader& resources
 ) {
-  auto level = loader::loadLevel(
+  auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
-  auto entityBundle = game_logic::createEntitiesForLevel(
-    level,
-    difficulty,
-    mpRenderer,
-    resources.mActorImagePackage,
+  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
+    loadedLevel.mActors,
+    loadedLevel.mMap,
     mEntities.entities);
-  mPlayerEntity = entityBundle.mPlayerEntity;
 
-  mSpriteTextures = std::move(entityBundle.mSpriteTextures);
+  mLevelData = LevelData{
+    std::move(loadedLevel.mMap),
+    std::move(loadedLevel.mTileSet.mAttributes),
+    std::move(loadedLevel.mActors)
+  };
 
-  mEntities.systems.add<PhysicsSystem>(level.mMap);
+  mEntities.systems.add<PhysicsSystem>(
+    mLevelData.mMap,
+    mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::PlayerControlSystem>(
     mPlayerEntity,
     &mPlayerInputs,
-    level.mMap);
+    mLevelData.mMap,
+    mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
-    level.mMap);
+    mLevelData.mMap);
   mEntities.systems.add<RenderingSystem>(
-    std::move(level),
     &mScrollOffset,
-    mpRenderer);
+    mpRenderer,
+    &mLevelData.mMap,
+    &mLevelData.mTileAttributes,
+    std::move(loadedLevel.mTileSet.mImage),
+    std::move(loadedLevel.mBackdropImage),
+    std::move(loadedLevel.mSecondaryBackdropImage),
+    loadedLevel.mBackdropScrollMode);
   mEntities.systems.add<PlayerInteractionSystem>(
     mPlayerEntity,
     &mPlayerModel,
     mpServiceProvider);
   mEntities.systems.configure();
 
-  mpServiceProvider->playMusic(level.mMusicFile);
+  mpServiceProvider->playMusic(loadedLevel.mMusicFile);
 }
 
 

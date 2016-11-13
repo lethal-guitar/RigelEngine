@@ -31,6 +31,7 @@ set(core_sources
     engine/tile_renderer.hpp
     engine/timing.cpp
     engine/timing.hpp
+    engine/visual_components.hpp
     game_logic/collectable_components.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp

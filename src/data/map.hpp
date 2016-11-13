@@ -55,28 +55,12 @@ enum class BackdropSwitchCondition {
 
 class Map {
 public:
-  Map(
-    TileSet tileSet,
-    Image backdrop,
-    int widthInTiles,
-    int heightInTiles
-  );
-
-  Map(
-    TileSet tileSet,
-    Image backdrop,
-    boost::optional<Image>&& secondaryBackdrop,
-    int widthInTiles,
-    int heightInTiles
-  );
+  Map() = default;
+  Map(int widthInTiles, int heightInTiles);
 
   TileIndex tileAt(int layer, int x, int y) const;
 
   void setTileAt(int layer, int x, int y, TileIndex index);
-
-  const TileSet& tileSet() const {
-    return mTileSet;
-  }
 
   int width() const {
     return static_cast<int>(mWidthInTiles);
@@ -86,26 +70,14 @@ public:
     return static_cast<int>(mHeightInTiles);
   }
 
-  const Image& backdropImage() const {
-    return mBackdropImage;
-  }
-
-  const boost::optional<Image>& secondaryBackdropImage() const {
-    return mSecondaryBackdropImage;
-  }
 
 private:
   const TileIndex& tileRefAt(int layer, int x, int y) const;
   TileIndex& tileRefAt(int layer, int x, int y);
 
 private:
-  TileSet mTileSet;
-
   using TileArray = std::vector<TileIndex>;
   std::array<TileArray, 2> mLayers;
-
-  Image mBackdropImage;
-  boost::optional<Image> mSecondaryBackdropImage;
 
   std::size_t mWidthInTiles;
   std::size_t mHeightInTiles;
@@ -119,6 +91,10 @@ struct LevelData {
     boost::optional<base::Rect<int>> mAssignedArea;
   };
 
+  TileSet mTileSet;
+  Image mBackdropImage;
+  boost::optional<Image> mSecondaryBackdropImage;
+
   data::map::Map mMap;
   std::vector<Actor> mActors;
 
@@ -127,5 +103,8 @@ struct LevelData {
   bool mEarthquake;
   std::string mMusicFile;
 };
+
+
+using ActorDescriptionList = std::vector<LevelData::Actor>;
 
 }}}

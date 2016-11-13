@@ -42,15 +42,20 @@ BoundingBox toWorldSpace(
 }
 
 
-PhysicsSystem::PhysicsSystem(const data::map::Map& map)
+PhysicsSystem::PhysicsSystem(
+  const data::map::Map& map,
+  const data::map::TileAttributes& tileAttributes
+)
   : mCollisionData(map.width(), map.height())
 {
   for (int row=0; row<map.height(); ++row) {
     for (int col=0; col<map.width(); ++col) {
       auto collisionData1 =
-        map.tileSet().mAttributes.collisionData(map.tileAt(0, col, row));
+        tileAttributes.collisionData(
+          map.tileAt(0, col, row));
       auto collisionData2 =
-        map.tileSet().mAttributes.collisionData(map.tileAt(1, col, row));
+        tileAttributes.collisionData(
+          map.tileAt(1, col, row));
       mCollisionData.setValueAt(
         col, row, CollisionData{collisionData1, collisionData2});
     }

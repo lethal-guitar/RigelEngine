@@ -60,16 +60,24 @@ private:
 private:
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
+  game_logic::EntityFactory mEntityFactory;
+
   data::PlayerModel mPlayerModel;
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
   bool mLevelFinished;
 
+  struct LevelData {
+    data::map::Map mMap;
+    data::map::TileAttributes mTileAttributes;
+    std::vector<data::map::LevelData::Actor> mInitialActors;
+  };
+
+  LevelData mLevelData;
   entityx::EntityX mEntities;
   entityx::Entity mPlayerEntity;
 
   ui::HudRenderer mHudRenderer;
-  std::vector<sdl_utils::OwningTexture> mSpriteTextures;
   sdl_utils::RenderTargetTexture mIngameViewPortRenderTarget;
 };
 

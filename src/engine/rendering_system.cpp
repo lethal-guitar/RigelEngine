@@ -36,17 +36,6 @@ using components::Animated;
 using components::Sprite;
 using components::WorldPosition;
 
-RenderingSystem::RenderingSystem(
-  data::map::LevelData&& level,
-  const base::Vector* pScrollOffset,
-  SDL_Renderer* pRenderer
-)
-  : mpRenderer(pRenderer)
-  , mMapRenderer(pRenderer, std::move(level))
-  , mpScrollOffset(pScrollOffset)
-{
-}
-
 
 void RenderingSystem::update(
   ex::EntityManager& es,

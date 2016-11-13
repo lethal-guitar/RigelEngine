@@ -19,6 +19,7 @@
 #include <base/grid.hpp>
 #include <base/spatial_types.hpp>
 #include <data/tile_set.hpp>
+#include <engine/base_components.hpp>
 #include <engine/timing.hpp>
 
 #include <entityx/entityx.h>
@@ -31,8 +32,6 @@ namespace rigel { namespace data { namespace map { class Map; }}}
 
 
 namespace rigel { namespace engine {
-
-using BoundingBox = base::Rect<int>;
 
 
 namespace components {
@@ -61,7 +60,9 @@ BoundingBox toWorldSpace(
  */
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
-  explicit PhysicsSystem(const data::map::Map& map);
+  explicit PhysicsSystem(
+    const data::map::Map& map,
+    const data::map::TileAttributes& tileAttributes);
 
   void update(
     entityx::EntityManager& es,

@@ -16,21 +16,14 @@
 
 #include "entity_factory.hpp"
 
-#include <base/warnings.hpp>
 #include <data/unit_conversions.hpp>
 #include <engine/base_components.hpp>
 #include <engine/physics_system.hpp>
-#include <engine/rendering_system.hpp>
 #include <game_logic/collectable_components.hpp>
 #include <game_logic/player_control_system.hpp>
 #include <game_logic/trigger_components.hpp>
-#include <map>
+
 #include <utility>
-
-
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace ex = entityx;
@@ -42,7 +35,6 @@ using namespace data;
 using namespace loader;
 using namespace std;
 
-using data::map::LevelData;
 using data::ActorID;
 
 using engine::components::Animated;
@@ -75,126 +67,102 @@ void addDefaultPhysical(
 
 #include "entity_configuration.ipp"
 
+}
 
-class SpriteTextureFactory {
-public:
-  SpriteTextureFactory(
-    SDL_Renderer* pRenderer,
-    const ActorImagePackage& spritePackage)
-    : mpRenderer(pRenderer)
-    , mpSpritePackage(&spritePackage)
-  {
-  }
-
-  using VisualsAndBounds =
-    std::tuple<boost::optional<Sprite>, engine::BoundingBox>;
-
-  VisualsAndBounds createVisualsAndBoundingBox(
-    const LevelData::Actor& actor,
-    data::map::Map& map
-  ) {
-    VisualsAndBounds result;
-
-    if (actor.mAssignedArea) {
-      // TODO: Implement dynamic geometry
-      const auto sectionRect = *actor.mAssignedArea;
-      for (
-        auto mapRow=sectionRect.topLeft.y;
-        mapRow<=sectionRect.bottomRight().y;
-        ++mapRow
-      ) {
-        for (
-          auto mapCol=sectionRect.topLeft.x;
-          mapCol<=sectionRect.bottomRight().x;
-          ++mapCol
-        ) {
-          map.setTileAt(0, mapCol, mapRow, 0);
-          map.setTileAt(1, mapCol, mapRow, 0);
-        }
-      }
-    } else if (hasAssociatedSprite(actor.mID)) {
-      auto sprite = createSpriteForId(actor.mID);
-      std::get<0>(result) = sprite;
-      std::get<1>(result) = inferBoundingBox(sprite.mFrames[0]);
-    } else {
-      // TODO: Assign bounding box for non-visual entities that have one
-    }
-
-    return result;
-  }
-
-  Sprite createSpriteForId(const ActorID actorID) {
-    const auto actorParts = actorIDListForActor(actorID);
-    auto sprite = makeSpriteFromActorIDs(actorParts);
-    configureSprite(sprite, actorID);
-    return sprite;
-  }
-
-  auto releaseTextures() {
-    std::vector<sdl_utils::OwningTexture> allTextures;
-    for (auto& mapping : mTextureCache) {
-      allTextures.emplace_back(std::move(mapping.second));
-    }
-    mTextureCache.clear();
-    return allTextures;
-  }
-
-private:
-  using IdAndFrameNr = std::pair<ActorID, std::size_t>;
-
-  const sdl_utils::OwningTexture& getOrCreateTexture(
-    const IdAndFrameNr& textureId
-  ) {
-    auto it = mTextureCache.find(textureId);
-    if (it == mTextureCache.end()) {
-      const auto& actorData = mpSpritePackage->loadActor(textureId.first);
-      const auto& frameData = actorData.mFrames[textureId.second];
-      auto texture = sdl_utils::OwningTexture(
-        mpRenderer, frameData.mFrameImage);
-      it = mTextureCache.emplace(textureId, std::move(texture)).first;
-    }
-    return it->second;
-  }
-
-  Sprite makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
-    Sprite sprite;
-    int lastFrameCount = 0;
-
-    for (const auto ID : actorIDs) {
-      const auto& actorData = mpSpritePackage->loadActor(ID);
-      for (auto i=0u; i<actorData.mFrames.size(); ++i) {
-        const auto& frameData = actorData.mFrames[i];
-        const auto& texture = getOrCreateTexture(make_pair(ID, i));
-        const auto textureRef = sdl_utils::NonOwningTexture(texture);
-        sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
-      }
-      sprite.mDrawOrder = actorData.mDrawIndex;
-      sprite.mFramesToRender.push_back(lastFrameCount);
-      lastFrameCount += static_cast<int>(actorData.mFrames.size());
-    }
-    return sprite;
-  }
-
-  SDL_Renderer* mpRenderer;
-  const ActorImagePackage* mpSpritePackage;
-
-  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
-};
-
+EntityFactory::EntityFactory(
+  SDL_Renderer* pRenderer,
+  const ActorImagePackage* pSpritePackage)
+  : mpRenderer(pRenderer)
+  , mpSpritePackage(pSpritePackage)
+{
 }
 
 
-EntityBundle createEntitiesForLevel(
-  LevelData& level,
-  Difficulty chosenDifficulty,
-  SDL_Renderer* pRenderer,
-  const loader::ActorImagePackage& spritePackage,
+auto EntityFactory::createVisualsAndBoundingBox(
+  const data::map::LevelData::Actor& actor,
+  data::map::Map& map
+) -> VisualsAndBounds {
+  VisualsAndBounds result;
+
+  if (actor.mAssignedArea) {
+    // TODO: Implement dynamic geometry
+    const auto sectionRect = *actor.mAssignedArea;
+    for (
+      auto mapRow=sectionRect.topLeft.y;
+      mapRow<=sectionRect.bottomRight().y;
+      ++mapRow
+    ) {
+      for (
+        auto mapCol=sectionRect.topLeft.x;
+        mapCol<=sectionRect.bottomRight().x;
+        ++mapCol
+      ) {
+        map.setTileAt(0, mapCol, mapRow, 0);
+        map.setTileAt(1, mapCol, mapRow, 0);
+      }
+    }
+  } else if (hasAssociatedSprite(actor.mID)) {
+    auto sprite = createSpriteForId(actor.mID);
+    std::get<0>(result) = sprite;
+    std::get<1>(result) = inferBoundingBox(sprite.mFrames[0]);
+  } else {
+    // TODO: Assign bounding box for non-visual entities that have one
+  }
+
+  return result;
+}
+
+
+Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
+  const auto actorParts = actorIDListForActor(actorID);
+  auto sprite = makeSpriteFromActorIDs(actorParts);
+  configureSprite(sprite, actorID);
+  return sprite;
+}
+
+
+const sdl_utils::OwningTexture& EntityFactory::getOrCreateTexture(
+  const IdAndFrameNr& textureId
+) {
+  auto it = mTextureCache.find(textureId);
+  if (it == mTextureCache.end()) {
+    const auto& actorData = mpSpritePackage->loadActor(textureId.first);
+    const auto& frameData = actorData.mFrames[textureId.second];
+    auto texture = sdl_utils::OwningTexture(
+      mpRenderer, frameData.mFrameImage);
+    it = mTextureCache.emplace(textureId, std::move(texture)).first;
+  }
+  return it->second;
+}
+
+Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
+  Sprite sprite;
+  int lastFrameCount = 0;
+
+  for (const auto ID : actorIDs) {
+    const auto& actorData = mpSpritePackage->loadActor(ID);
+    for (auto i=0u; i<actorData.mFrames.size(); ++i) {
+      const auto& frameData = actorData.mFrames[i];
+      const auto& texture = getOrCreateTexture(make_pair(ID, i));
+      const auto textureRef = sdl_utils::NonOwningTexture(texture);
+      sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
+    }
+    sprite.mDrawOrder = actorData.mDrawIndex;
+    sprite.mFramesToRender.push_back(lastFrameCount);
+    lastFrameCount += static_cast<int>(actorData.mFrames.size());
+  }
+  return sprite;
+}
+
+
+entityx::Entity EntityFactory::createEntitiesForLevel(
+  const data::map::ActorDescriptionList& actors,
+  data::map::Map& map,
   entityx::EntityManager& entityManager
 ) {
   entityx::Entity playerEntity;
 
-  SpriteTextureFactory spriteFactory(pRenderer, spritePackage);
-  for (const auto& actor : level.mActors) {
+  for (const auto& actor : actors) {
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
     assert(
@@ -207,7 +175,7 @@ EntityBundle createEntitiesForLevel(
     boost::optional<Sprite> maybeSprite;
     engine::BoundingBox boundingBox;
     std::tie(maybeSprite, boundingBox) =
-      spriteFactory.createVisualsAndBoundingBox(actor, level.mMap);
+      createVisualsAndBoundingBox(actor, map);
 
     configureEntity(entity, actor.mID, boundingBox);
 
@@ -222,10 +190,7 @@ EntityBundle createEntitiesForLevel(
     }
   }
 
-  return {
-    playerEntity,
-    spriteFactory.releaseTextures()
-  };
+  return playerEntity;
 }
 
 }}

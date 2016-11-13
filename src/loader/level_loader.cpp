@@ -309,25 +309,11 @@ LevelData loadLevel(
     actors.emplace_back(LevelData::Actor{position, type, boost::none});
   }
 
-  const auto backdropImage = resources.loadTiledFullscreenImage(
-    header.backdrop);
-  boost::optional<data::Image> alternativeBackdropImage;
-  if (header.flagBitSet(0x40) || header.flagBitSet(0x80)) {
-    alternativeBackdropImage = resources.loadTiledFullscreenImage(
-      backdropNameFromNumber(header.alternativeBackdropNumber));
-  }
-
   const auto width = static_cast<int>(levelReader.readU16());
   const auto height = static_cast<int>(GameTraits::mapHeightForWidth(width));
-  data::map::Map map(
-    resources.loadCZone(header.CZone),
-    std::move(backdropImage),
-    std::move(alternativeBackdropImage),
-    width,
-    height);
+  data::map::Map map(width, height);
 
   const auto maskedTileOffsets = readExtraMaskedTileBits(levelReader);
-
   auto lookupExtraMaskedTileBits = [&maskedTileOffsets, width, height](
     const int x,
     const int y
@@ -393,9 +379,21 @@ LevelData loadLevel(
     }
   }
 
+  const auto backdropImage = resources.loadTiledFullscreenImage(
+    header.backdrop);
+  boost::optional<data::Image> alternativeBackdropImage;
+  if (header.flagBitSet(0x40) || header.flagBitSet(0x80)) {
+    alternativeBackdropImage = resources.loadTiledFullscreenImage(
+      backdropNameFromNumber(header.alternativeBackdropNumber));
+  }
+  auto actorDescriptions =
+      preProcessActorDescriptions(map, actors, chosenDifficulty);
   return LevelData{
-    move(map),
-    preProcessActorDescriptions(map, actors, chosenDifficulty),
+    resources.loadCZone(header.CZone),
+    std::move(backdropImage),
+    std::move(alternativeBackdropImage),
+    std::move(map),
+    std::move(actorDescriptions),
     scrollMode,
     backdropSwitchCondition,
     header.flagBitSet(0x20),

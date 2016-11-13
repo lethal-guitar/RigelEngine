@@ -155,7 +155,7 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
 
     mEvents.emplace_back(Event{
       time,
-      [pServiceProvider = pServiceProvider, bonus](State& state) {
+      [pServiceProvider, bonus](State& state) {
         state.mRunningText += " " + to_string(bonus);
         pServiceProvider->playSound(data::SoundId::BigExplosion);
       }
@@ -173,7 +173,7 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
     for (int iteration = 0; iteration < 100; ++iteration) {
       mEvents.emplace_back(Event{
         time,
-        [pServiceProvider = pServiceProvider, iteration](State& state) {
+        [pServiceProvider, iteration](State& state) {
           state.mScore += 1000;
           pServiceProvider->playSound(data::SoundId::DukeJumping);
 
@@ -195,7 +195,7 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
 
     mEvents.emplace_back(Event{
       time,
-      [pServiceProvider = pServiceProvider](State& state) {
+      [pServiceProvider](State& state) {
         state.mRunningText = "       0 PTS";
         pServiceProvider->playSound(data::SoundId::BigExplosion);
       }
@@ -224,7 +224,7 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence(
 
   mEvents.emplace_back(Event{
     time,
-    [pServiceProvider = pServiceProvider](State&) {
+    [pServiceProvider](State&) {
       pServiceProvider->playSound(data::SoundId::BigExplosion);
     }
   });
@@ -242,7 +242,7 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence(
 
   mEvents.emplace_back(Event{
     time,
-    [pServiceProvider = pServiceProvider](State&) {
+    [pServiceProvider](State&) {
       pServiceProvider->playSound(data::SoundId::BigExplosion);
     }
   });
@@ -261,7 +261,7 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence(
   time += slowTicksToTime(15);
   mEvents.emplace_back(Event{
     time,
-    [pServiceProvider = pServiceProvider](State&) {
+    [pServiceProvider](State&) {
       pServiceProvider->playSound(data::SoundId::BigExplosion);
     }
   });
