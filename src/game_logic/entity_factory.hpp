@@ -17,7 +17,6 @@
 #pragma once
 
 #include <base/warnings.hpp>
-#include <data/game_session_data.hpp>
 #include <loader/level_loader.hpp>
 #include <sdl_utils/texture.hpp>
 
@@ -40,7 +39,6 @@ struct EntityBundle {
 
 EntityBundle createEntitiesForLevel(
   data::map::LevelData& level,
-  data::Difficulty difficulty,
   SDL_Renderer* pRenderer,
   const loader::ActorImagePackage& spritePackage,
   entityx::EntityManager& entityManager);

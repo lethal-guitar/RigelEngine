@@ -195,7 +195,6 @@ void IngameMode::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
   auto entityBundle = game_logic::createEntitiesForLevel(
     loadedLevel,
-    difficulty,
     mpRenderer,
     resources.mActorImagePackage,
     mEntities.entities);

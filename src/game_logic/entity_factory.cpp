@@ -186,7 +186,6 @@ private:
 
 EntityBundle createEntitiesForLevel(
   LevelData& level,
-  Difficulty chosenDifficulty,
   SDL_Renderer* pRenderer,
   const loader::ActorImagePackage& spritePackage,
   entityx::EntityManager& entityManager
