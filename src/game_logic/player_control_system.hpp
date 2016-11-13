@@ -29,7 +29,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace data { namespace map { class Map; }}}
+namespace rigel { namespace data { namespace map {
+  struct LevelData;
+  class Map;
+}}}
+
 namespace rigel { namespace engine { namespace components {
   struct Physical;
   struct Sprite;
@@ -122,7 +126,7 @@ public:
   PlayerControlSystem(
     entityx::Entity player,
     const PlayerInputState* pInputs,
-    const data::map::Map& map);
+    const data::map::LevelData& level);
 
   void update(
     entityx::EntityManager& es,

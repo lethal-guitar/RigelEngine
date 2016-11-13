@@ -203,11 +203,13 @@ void IngameMode::loadLevel(
 
   mSpriteTextures = std::move(entityBundle.mSpriteTextures);
 
-  mEntities.systems.add<PhysicsSystem>(level.mMap);
+  const auto musicFile = level.mMusicFile;
+
+  mEntities.systems.add<PhysicsSystem>(level);
   mEntities.systems.add<game_logic::PlayerControlSystem>(
     mPlayerEntity,
     &mPlayerInputs,
-    level.mMap);
+    level);
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
@@ -222,7 +224,7 @@ void IngameMode::loadLevel(
     mpServiceProvider);
   mEntities.systems.configure();
 
-  mpServiceProvider->playMusic(level.mMusicFile);
+  mpServiceProvider->playMusic(musicFile);
 }
 
 

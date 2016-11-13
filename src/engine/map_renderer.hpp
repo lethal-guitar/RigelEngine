@@ -29,7 +29,7 @@ namespace rigel { namespace engine {
 
 class MapRenderer {
 public:
-  MapRenderer(SDL_Renderer* renderer, data::map::LevelData&& level);
+  MapRenderer(SDL_Renderer* renderer, data::map::LevelData level);
 
   void switchBackdrops();
 
@@ -47,7 +47,7 @@ private:
 
 private:
   SDL_Renderer* mpRenderer;
-  data::map::Map mLevel;
+  data::map::Map mMap;
 
   TileRenderer mTileRenderer;
   sdl_utils::OwningTexture mBackdropTexture;

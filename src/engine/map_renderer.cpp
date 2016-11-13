@@ -47,19 +47,19 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 
 }
 
-MapRenderer::MapRenderer(SDL_Renderer* pRenderer, data::map::LevelData&& level)
+MapRenderer::MapRenderer(SDL_Renderer* pRenderer, data::map::LevelData level)
   : mpRenderer(pRenderer)
-  , mLevel(std::move(level.mMap))
+  , mMap(std::move(level.mMap))
   , mTileRenderer(
-      sdl_utils::OwningTexture(pRenderer, mLevel.tileSet().mImage),
+      sdl_utils::OwningTexture(pRenderer, level.mTileSet.mImage),
       pRenderer)
-  , mBackdropTexture(mpRenderer, mLevel.backdropImage(), false)
+  , mBackdropTexture(mpRenderer, level.mBackdropImage, false)
   , mScrollMode(level.mBackdropScrollMode)
-  , mTileAttributes(mLevel.tileSet().mAttributes)
+  , mTileAttributes(std::move(level.mTileSet.mAttributes))
 {
-  if (mLevel.secondaryBackdropImage()) {
+  if (level.mSecondaryBackdropImage) {
     mAlternativeBackdropTexture = OwningTexture(
-      mpRenderer, *mLevel.secondaryBackdropImage(), false);
+      mpRenderer, *level.mSecondaryBackdropImage, false);
   }
 }
 
@@ -148,11 +148,11 @@ void MapRenderer::renderMapTiles(
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
         const auto col = x + scrollOffset.x;
         const auto row = y + scrollOffset.y;
-        if (col >= mLevel.width() || row >= mLevel.height()) {
+        if (col >= mMap.width() || row >= mMap.height()) {
           continue;
         }
 
-        const auto tileIndex = mLevel.tileAt(layer, col, row);
+        const auto tileIndex = mMap.tileAt(layer, col, row);
 
         // Skip drawing for tile index 0, or for tiles which are not on the
         // meta-layer (foreground/background) we're currently drawing
