@@ -17,30 +17,58 @@
 #pragma once
 
 #include <base/warnings.hpp>
+#include <engine/visual_components.hpp>
 #include <loader/level_loader.hpp>
 #include <sdl_utils/texture.hpp>
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <map>
+#include <tuple>
 #include <vector>
+
 
 namespace rigel { namespace loader { class ActorImagePackage; }}
 
 namespace rigel { namespace game_logic {
 
-struct EntityBundle {
-  entityx::Entity mPlayerEntity;
-  std::vector<sdl_utils::OwningTexture> mSpriteTextures;
+
+class EntityFactory {
+public:
+  EntityFactory(
+    SDL_Renderer* pRenderer,
+    const loader::ActorImagePackage* pSpritePackage);
+
+  entityx::Entity createEntitiesForLevel(
+    data::map::LevelData& level,
+    entityx::EntityManager& entityManager);
+
+private:
+  using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
+  using VisualsAndBounds = std::tuple<
+    boost::optional<engine::components::Sprite>,
+    engine::BoundingBox>;
+
+  VisualsAndBounds createVisualsAndBoundingBox(
+    const data::map::LevelData::Actor& actor,
+    data::map::Map& map
+  );
+
+  engine::components::Sprite createSpriteForId(const data::ActorID actorID);
+
+  const sdl_utils::OwningTexture& getOrCreateTexture(
+    const IdAndFrameNr& textureId);
+  engine::components::Sprite makeSpriteFromActorIDs(
+    const std::vector<data::ActorID>& actorIDs);
+
+  SDL_Renderer* mpRenderer;
+  const loader::ActorImagePackage* mpSpritePackage;
+
+  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
 };
-
-
-EntityBundle createEntitiesForLevel(
-  data::map::LevelData& level,
-  SDL_Renderer* pRenderer,
-  const loader::ActorImagePackage& spritePackage,
-  entityx::EntityManager& entityManager);
 
 }}

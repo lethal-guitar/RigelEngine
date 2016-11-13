@@ -78,6 +78,7 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mEntityFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
   , mLevelFinished(false)
   , mHudRenderer(
       &mPlayerModel,
@@ -193,14 +194,9 @@ void IngameMode::loadLevel(
 ) {
   auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
-  auto entityBundle = game_logic::createEntitiesForLevel(
+  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     loadedLevel,
-    mpRenderer,
-    resources.mActorImagePackage,
     mEntities.entities);
-  mPlayerEntity = entityBundle.mPlayerEntity;
-
-  mSpriteTextures = std::move(entityBundle.mSpriteTextures);
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),

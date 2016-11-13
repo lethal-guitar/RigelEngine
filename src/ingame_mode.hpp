@@ -60,6 +60,8 @@ private:
 private:
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
+  game_logic::EntityFactory mEntityFactory;
+
   data::PlayerModel mPlayerModel;
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
@@ -76,7 +78,6 @@ private:
   entityx::Entity mPlayerEntity;
 
   ui::HudRenderer mHudRenderer;
-  std::vector<sdl_utils::OwningTexture> mSpriteTextures;
   sdl_utils::RenderTargetTexture mIngameViewPortRenderTarget;
 };
 
