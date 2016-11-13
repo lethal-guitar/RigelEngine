@@ -22,8 +22,6 @@
 #include <loader/level_loader.hpp>
 #include <sdl_utils/texture.hpp>
 
-#include <memory>
-
 
 namespace rigel { namespace engine {
 
