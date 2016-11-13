@@ -27,10 +27,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data { namespace map {
-  struct LevelData;
-  class Map;
-}}}
+namespace rigel { namespace data { namespace map { class Map; }}}
 
 
 namespace rigel { namespace engine {
@@ -64,7 +61,9 @@ BoundingBox toWorldSpace(
  */
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
-  explicit PhysicsSystem(const data::map::LevelData& level);
+  explicit PhysicsSystem(
+    const data::map::Map& map,
+    const data::map::TileAttributes& tileAttributes);
 
   void update(
     entityx::EntityManager& es,

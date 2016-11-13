@@ -99,18 +99,18 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 PlayerControlSystem::PlayerControlSystem(
   entityx::Entity player,
   const PlayerInputState* pInputs,
-  const data::map::LevelData& level
+  const data::map::Map& map,
+  const data::map::TileAttributes& tileAttributes
 )
   : mpPlayerControlInput(pInputs)
   , mPlayer(player)
-  , mLadderFlags(level.mMap.width(), level.mMap.height())
+  , mLadderFlags(map.width(), map.height())
 {
-  const auto& attributes = level.mTileSet.mAttributes;
-  for (int row=0; row<level.mMap.height(); ++row) {
-    for (int col=0; col<level.mMap.width(); ++col) {
+  for (int row=0; row<map.height(); ++row) {
+    for (int col=0; col<map.width(); ++col) {
       const auto isLadder =
-        attributes.isLadder(level.mMap.tileAt(0, col, row)) ||
-        attributes.isLadder(level.mMap.tileAt(1, col, row));
+        tileAttributes.isLadder(map.tileAt(0, col, row)) ||
+        tileAttributes.isLadder(map.tileAt(1, col, row));
       mLadderFlags.setValueAt(col, row, isLadder);
     }
   }

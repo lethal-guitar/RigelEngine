@@ -65,6 +65,13 @@ private:
   game_logic::PlayerInputState mPlayerInputs;
   bool mLevelFinished;
 
+  struct LevelData {
+    data::map::Map mMap;
+    data::map::TileAttributes mTileAttributes;
+    std::vector<data::map::LevelData::Actor> mInitialActors;
+  };
+
+  LevelData mLevelData;
   entityx::EntityX mEntities;
   entityx::Entity mPlayerEntity;
 

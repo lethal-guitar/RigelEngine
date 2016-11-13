@@ -55,6 +55,7 @@ enum class BackdropSwitchCondition {
 
 class Map {
 public:
+  Map() = default;
   Map(int widthInTiles, int heightInTiles);
 
   TileIndex tileAt(int layer, int x, int y) const;

@@ -109,10 +109,19 @@ struct Animated {
  */
 class RenderingSystem : public entityx::System<RenderingSystem> {
 public:
+  template<typename... MapRendererArgTs>
   RenderingSystem(
-    data::map::LevelData&& level,
     const base::Vector* pScrollOffset,
-    SDL_Renderer* pRenderer);
+    SDL_Renderer* pRenderer,
+    MapRendererArgTs&&... mapRendererArgs
+  )
+    : mpRenderer(pRenderer)
+    , mMapRenderer(
+        pRenderer,
+        std::forward<MapRendererArgTs>(mapRendererArgs)...)
+    , mpScrollOffset(pScrollOffset)
+  {
+  }
 
   void update(
     entityx::EntityManager& es,

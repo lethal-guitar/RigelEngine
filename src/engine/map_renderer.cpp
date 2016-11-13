@@ -17,9 +17,11 @@
 #include "map_renderer.hpp"
 
 #include <data/game_traits.hpp>
+
 #include <cfenv>
 #include <cmath>
 #include <iostream>
+
 
 namespace rigel { namespace engine {
 
@@ -47,19 +49,27 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 
 }
 
-MapRenderer::MapRenderer(SDL_Renderer* pRenderer, data::map::LevelData level)
+MapRenderer::MapRenderer(
+  SDL_Renderer* pRenderer,
+  const data::map::Map* pMap,
+  const data::map::TileAttributes* pTileAtttributes,
+  data::Image tileSetImage,
+  data::Image backdropImage,
+  boost::optional<data::Image> secondaryBackdropImage,
+  const data::map::BackdropScrollMode backdropScrollMode
+)
   : mpRenderer(pRenderer)
-  , mMap(std::move(level.mMap))
+  , mpMap(pMap)
   , mTileRenderer(
-      sdl_utils::OwningTexture(pRenderer, level.mTileSet.mImage),
+      sdl_utils::OwningTexture(pRenderer, std::move(tileSetImage)),
       pRenderer)
-  , mBackdropTexture(mpRenderer, level.mBackdropImage, false)
-  , mScrollMode(level.mBackdropScrollMode)
-  , mTileAttributes(std::move(level.mTileSet.mAttributes))
+  , mBackdropTexture(mpRenderer, std::move(backdropImage), false)
+  , mScrollMode(backdropScrollMode)
+  , mpTileAttributes(pTileAtttributes)
 {
-  if (level.mSecondaryBackdropImage) {
+  if (secondaryBackdropImage) {
     mAlternativeBackdropTexture = OwningTexture(
-      mpRenderer, *level.mSecondaryBackdropImage, false);
+      mpRenderer, *secondaryBackdropImage, false);
   }
 }
 
@@ -148,17 +158,17 @@ void MapRenderer::renderMapTiles(
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
         const auto col = x + scrollOffset.x;
         const auto row = y + scrollOffset.y;
-        if (col >= mMap.width() || row >= mMap.height()) {
+        if (col >= mpMap->width() || row >= mpMap->height()) {
           continue;
         }
 
-        const auto tileIndex = mMap.tileAt(layer, col, row);
+        const auto tileIndex = mpMap->tileAt(layer, col, row);
 
         // Skip drawing for tile index 0, or for tiles which are not on the
         // meta-layer (foreground/background) we're currently drawing
         if (
             tileIndex == 0 ||
-            mTileAttributes.isForeGround(tileIndex) != renderForeground
+            mpTileAttributes->isForeGround(tileIndex) != renderForeground
         ) {
           continue;
         }
@@ -189,14 +199,14 @@ void MapRenderer::update(const engine::TimeDelta dt) {
 map::TileIndex MapRenderer::animatedTileIndex(
   const map::TileIndex tileIndex
 ) const {
-  if (mTileAttributes.isAnimated(tileIndex)) {
+  if (mpTileAttributes->isAnimated(tileIndex)) {
     const auto elapsedTicks = mTimeStepper.elapsedTicks();
     const auto fastAnimState =
       (elapsedTicks / FAST_ANIM_TICKS) % ANIM_STATES;
     const auto slowAnimState =
       (elapsedTicks / SLOW_ANIM_TICKS) % ANIM_STATES;
 
-    if (mTileAttributes.isFastAnimation(tileIndex)) {
+    if (mpTileAttributes->isFastAnimation(tileIndex)) {
       return tileIndex + fastAnimState;
     } else {
       return tileIndex + slowAnimState;

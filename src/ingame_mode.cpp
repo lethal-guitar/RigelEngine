@@ -191,10 +191,10 @@ void IngameMode::loadLevel(
   const data::Difficulty difficulty,
   const loader::ResourceLoader& resources
 ) {
-  auto level = loader::loadLevel(
+  auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
   auto entityBundle = game_logic::createEntitiesForLevel(
-    level,
+    loadedLevel,
     difficulty,
     mpRenderer,
     resources.mActorImagePackage,
@@ -203,28 +203,40 @@ void IngameMode::loadLevel(
 
   mSpriteTextures = std::move(entityBundle.mSpriteTextures);
 
-  const auto musicFile = level.mMusicFile;
+  mLevelData = LevelData{
+    std::move(loadedLevel.mMap),
+    std::move(loadedLevel.mTileSet.mAttributes),
+    std::move(loadedLevel.mActors)
+  };
 
-  mEntities.systems.add<PhysicsSystem>(level);
+  mEntities.systems.add<PhysicsSystem>(
+    mLevelData.mMap,
+    mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::PlayerControlSystem>(
     mPlayerEntity,
     &mPlayerInputs,
-    level);
+    mLevelData.mMap,
+    mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
-    level.mMap);
+    mLevelData.mMap);
   mEntities.systems.add<RenderingSystem>(
-    std::move(level),
     &mScrollOffset,
-    mpRenderer);
+    mpRenderer,
+    &mLevelData.mMap,
+    &mLevelData.mTileAttributes,
+    std::move(loadedLevel.mTileSet.mImage),
+    std::move(loadedLevel.mBackdropImage),
+    std::move(loadedLevel.mSecondaryBackdropImage),
+    loadedLevel.mBackdropScrollMode);
   mEntities.systems.add<PlayerInteractionSystem>(
     mPlayerEntity,
     &mPlayerModel,
     mpServiceProvider);
   mEntities.systems.configure();
 
-  mpServiceProvider->playMusic(musicFile);
+  mpServiceProvider->playMusic(loadedLevel.mMusicFile);
 }
 
 

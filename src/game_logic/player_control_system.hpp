@@ -30,8 +30,8 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace data { namespace map {
-  struct LevelData;
   class Map;
+  class TileAttributes;
 }}}
 
 namespace rigel { namespace engine { namespace components {
@@ -126,7 +126,8 @@ public:
   PlayerControlSystem(
     entityx::Entity player,
     const PlayerInputState* pInputs,
-    const data::map::LevelData& level);
+    const data::map::Map& map,
+    const data::map::TileAttributes& tileAttributes);
 
   void update(
     entityx::EntityManager& es,

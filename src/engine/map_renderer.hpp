@@ -29,7 +29,14 @@ namespace rigel { namespace engine {
 
 class MapRenderer {
 public:
-  MapRenderer(SDL_Renderer* renderer, data::map::LevelData level);
+  MapRenderer(
+    SDL_Renderer* renderer,
+    const data::map::Map* pMap,
+    const data::map::TileAttributes* pTileAtttributes,
+    data::Image tileSetImage,
+    data::Image backdropImage,
+    boost::optional<data::Image> secondaryBackdropImage,
+    data::map::BackdropScrollMode backdropScrollMode);
 
   void switchBackdrops();
 
@@ -47,7 +54,7 @@ private:
 
 private:
   SDL_Renderer* mpRenderer;
-  data::map::Map mMap;
+  const data::map::Map* mpMap;
 
   TileRenderer mTileRenderer;
   sdl_utils::OwningTexture mBackdropTexture;
@@ -58,7 +65,7 @@ private:
   TimeStepper mTimeStepper;
   std::uint32_t mElapsedFrames = 0;
 
-  data::map::TileAttributes mTileAttributes;
+  const data::map::TileAttributes* mpTileAttributes;
 };
 
 }}
