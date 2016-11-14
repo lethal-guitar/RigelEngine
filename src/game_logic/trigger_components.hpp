@@ -35,6 +35,21 @@ struct Trigger {
   TriggerType mType;
 };
 
+
+struct PlayerDamaging {
+  explicit PlayerDamaging(
+    const int amount,
+    const bool ignoreMercyFrames = false
+  )
+    : mAmount(amount)
+    , mIgnoreMercyFrames(ignoreMercyFrames)
+  {
+  }
+
+  int mAmount;
+  bool mIgnoreMercyFrames;
+};
+
 }
 
 }}
