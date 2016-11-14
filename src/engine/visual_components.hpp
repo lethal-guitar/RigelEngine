@@ -52,6 +52,7 @@ struct Sprite {
   int mDrawOrder;
 
   std::vector<int> mFramesToRender;
+  bool mShow = true;
 };
 
 

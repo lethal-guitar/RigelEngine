@@ -111,6 +111,10 @@ void RenderingSystem::renderSprite(
   const Sprite& sprite,
   const WorldPosition& pos
 ) const {
+  if (!sprite.mShow) {
+    return;
+  }
+
   for (const auto frameIndex : sprite.mFramesToRender) {
     assert(frameIndex < int(sprite.mFrames.size()));
     auto& frame = sprite.mFrames[frameIndex];
