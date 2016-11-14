@@ -31,7 +31,7 @@ public:
   ~SoundSystem();
 
   SoundHandle addSong(data::AudioBuffer buffer);
-  SoundHandle addSound(data::AudioBuffer buffer);
+  SoundHandle addSound(const data::AudioBuffer& buffer);
 
   void reportMemoryUsage() const;
 

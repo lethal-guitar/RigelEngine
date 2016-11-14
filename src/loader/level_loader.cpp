@@ -379,8 +379,7 @@ LevelData loadLevel(
     }
   }
 
-  const auto backdropImage = resources.loadTiledFullscreenImage(
-    header.backdrop);
+  auto backdropImage = resources.loadTiledFullscreenImage(header.backdrop);
   boost::optional<data::Image> alternativeBackdropImage;
   if (header.flagBitSet(0x40) || header.flagBitSet(0x80)) {
     alternativeBackdropImage = resources.loadTiledFullscreenImage(

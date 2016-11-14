@@ -53,17 +53,17 @@ MapRenderer::MapRenderer(
   SDL_Renderer* pRenderer,
   const data::map::Map* pMap,
   const data::map::TileAttributes* pTileAtttributes,
-  data::Image tileSetImage,
-  data::Image backdropImage,
-  boost::optional<data::Image> secondaryBackdropImage,
+  const data::Image& tileSetImage,
+  const data::Image& backdropImage,
+  const boost::optional<data::Image>& secondaryBackdropImage,
   const data::map::BackdropScrollMode backdropScrollMode
 )
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileRenderer(
-      sdl_utils::OwningTexture(pRenderer, std::move(tileSetImage)),
+      sdl_utils::OwningTexture(pRenderer, tileSetImage),
       pRenderer)
-  , mBackdropTexture(mpRenderer, std::move(backdropImage), false)
+  , mBackdropTexture(mpRenderer, backdropImage, false)
   , mScrollMode(backdropScrollMode)
   , mpTileAttributes(pTileAtttributes)
 {

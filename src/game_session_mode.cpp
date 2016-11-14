@@ -36,7 +36,7 @@ GameSessionMode::GameSessionMode(
   , mEpisode(episode)
   , mCurrentLevelNr(level)
   , mDifficulty(difficulty)
-  , mContext(std::move(context))
+  , mContext(context)
 {
 }
 

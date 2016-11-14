@@ -1,3 +1,5 @@
+# To run: for f in  $(git ls-files src/); do clang-tidy-3.9 $f -fix -p build; done
+
 Checks: >
     ,-*,
     ,google-explicit-constructor,
