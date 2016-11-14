@@ -60,6 +60,7 @@ private:
   );
 
   void checkForLevelExitReached();
+  void restartLevel();
 
 private:
   SDL_Renderer* mpRenderer;
@@ -67,6 +68,7 @@ private:
   game_logic::EntityFactory mEntityFactory;
 
   data::PlayerModel mPlayerModel;
+  data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
   bool mLevelFinished;

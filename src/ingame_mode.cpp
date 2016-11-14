@@ -81,6 +81,7 @@ IngameMode::IngameMode(
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
   , mEntityFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
+  , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
   , mHudRenderer(
       &mPlayerModel,
@@ -271,6 +272,24 @@ void IngameMode::checkForLevelExitReached() {
 
       mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
     });
+}
+
+
+void IngameMode::restartLevel() {
+  mpServiceProvider->fadeOutScreen();
+
+  mEntities.entities.reset();
+
+  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
+    mLevelData.mInitialActors,
+    mLevelData.mMap,
+    mEntities.entities);
+
+  mPlayerModel = mPlayerModelAtLevelStart;
+
+  updateAndRender(0);
+
+  mpServiceProvider->fadeInScreen();
 }
 
 }
