@@ -37,6 +37,11 @@
 
   #define RIGEL_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push") \
+    _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"") \
+    _Pragma("clang diagnostic ignored \"-Wold-style-cast\"") \
+    _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"") \
+    _Pragma("clang diagnostic ignored \"-Wextra-semi\"") \
+    _Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
     _Pragma("clang diagnostic ignored \"-Wreserved-id-macro\"") \
     _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"") \
     _Pragma("clang diagnostic ignored \"-Wdocumentation-unknown-command\"") \
