@@ -21,7 +21,7 @@
 // Repetition counts and delays from original exe, determined from disassembly:
 //
 // | M  | Rep | Delay |
-// | F5 | 255 |    35 |
+// | F5 | N/A |    35 | // Repeats forever, length controlled by music playback
 // |    |     |    60 | // Additional delay between Logo and intro movies
 // | F2 |   6 |    70 |
 // | F1 |  10 |    14 |

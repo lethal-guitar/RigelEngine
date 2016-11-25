@@ -38,8 +38,9 @@ sequences etc. are already implemented.
 ### Linux build quick start guide
 
 If you're on Linux and running a recent enough Ubuntu/Debian-like distro<sup>[1](#foot-note-linux)</sup>,
-here's how to quickly get the project up and running. Windows build
-instructions can be found [further down](#windows-build-instructions).
+here's how to quickly get the project up and running. Instructions for
+[OS X](#mac-build-instructions) and [Windows](#windows-build-instructions) can
+be found further down.
 
 ```bash
 # Install all external dependencies, as well as the CMake build system:
@@ -88,6 +89,15 @@ code (in the `3rd_party` directory):
 * DBOPL AdLib emulator (taken from [DosBox](http://www.dosbox.com/))
 * [Catch](https://github.com/philsquared/Catch) testing framework
 * [atria](https://github.com/Ableton/atria) C++ utilities
+
+### <a name="mac-build-instructions">OS X builds</a>
+
+Building on OS X works almost exactly like the Linux build, except for getting
+the dependencies. If you have homebrew, you can get them using the following:
+
+```bash
+brew install cmake sdl2 sdl2_mixer boost
+```
 
 ### <a name="windows-build-instructions">Windows builds</a>
 

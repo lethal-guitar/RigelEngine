@@ -75,6 +75,9 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
   , mIsMinimized(false)
   , mFpsDisplay(pRenderer, mResources)
 {
+  clearScreen();
+  SDL_RenderPresent(mpRenderer);
+
   throwIfFailed([this]() {
     return SDL_RenderSetLogicalSize(
       mpRenderer,
@@ -85,9 +88,6 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
 
 
 void Game::run(const Options& options) {
-  clearScreen();
-  SDL_RenderPresent(mpRenderer);
-
   data::forEachSoundId([this](const auto id) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
