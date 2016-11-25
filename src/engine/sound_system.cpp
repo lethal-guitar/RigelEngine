@@ -87,7 +87,7 @@ void appendRampToZero(data::AudioBuffer& buffer) {
   const auto rampLength = (SAMPLE_RATE / 100);
 
   buffer.mSamples.reserve(buffer.mSamples.size() + rampLength - 1);
-  auto lastSample = buffer.mSamples.back();
+  const auto lastSample = buffer.mSamples.back();
 
   for (int i=1; i<rampLength; ++i) {
     const auto interpolation = i / static_cast<double>(rampLength);
