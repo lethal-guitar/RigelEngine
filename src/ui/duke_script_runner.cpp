@@ -281,7 +281,8 @@ void DukeScriptRunner::animateNewsReporter(
   const auto numFramesAlreadyTalked = static_cast<int>(elapsedFrames);
 
   if (numFramesAlreadyTalked < state.mTalkDuration) {
-    const auto randomNumber = RANDOM_NUMBER_TABLE[numFramesAlreadyTalked];
+    const auto randomNumber =
+      RANDOM_NUMBER_TABLE[numFramesAlreadyTalked % RANDOM_NUMBER_TABLE.size()];
     drawSprite(
       NEWS_REPORTER_ACTOR_ID,
       randomNumber % NUM_NEWS_REPORTER_STATES,
