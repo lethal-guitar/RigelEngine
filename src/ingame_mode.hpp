@@ -16,17 +16,21 @@
 
 #pragma once
 
-#include <base/spatial_types.hpp>
-#include <data/player_data.hpp>
-#include <game_logic/entity_factory.hpp>
-#include <game_logic/player_control_system.hpp>
-#include <sdl_utils/texture.hpp>
-#include <ui/hud_renderer.hpp>
+#include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
+#include "data/player_data.hpp"
+#include "game_logic/entity_factory.hpp"
+#include "game_logic/player_control_system.hpp"
+#include "sdl_utils/texture.hpp"
+#include "ui/hud_renderer.hpp"
 
-#include <game_mode.hpp>
+#include "game_mode.hpp"
 
+RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 #include <SDL.h>
+RIGEL_RESTORE_WARNINGS
+
 #include <vector>
 
 

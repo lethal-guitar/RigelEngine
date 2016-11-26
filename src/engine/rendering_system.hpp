@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <base/spatial_types.hpp>
-#include <engine/base_components.hpp>
-#include <engine/map_renderer.hpp>
-#include <engine/timing.hpp>
-#include <engine/visual_components.hpp>
-#include <sdl_utils/texture.hpp>
+#include "base/spatial_types.hpp"
+#include "engine/base_components.hpp"
+#include "engine/map_renderer.hpp"
+#include "engine/timing.hpp"
+#include "engine/visual_components.hpp"
+#include "sdl_utils/texture.hpp"
 
 #include <entityx/entityx.h>
 #include <cstdint>

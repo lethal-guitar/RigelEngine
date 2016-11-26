@@ -16,7 +16,7 @@
 
 #include "game_session_mode.hpp"
 
-#include <base/warnings.hpp>
+#include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <atria/variant/match_boost.hpp>

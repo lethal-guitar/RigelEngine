@@ -16,15 +16,15 @@
 
 #include "ingame_mode.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/map.hpp>
-#include <data/sound_ids.hpp>
-#include <engine/physics_system.hpp>
-#include <engine/rendering_system.hpp>
-#include <game_logic/player_interaction_system.hpp>
-#include <game_logic/trigger_components.hpp>
-#include <loader/resource_loader.hpp>
-#include <ui/utils.hpp>
+#include "data/game_traits.hpp"
+#include "data/map.hpp"
+#include "data/sound_ids.hpp"
+#include "engine/physics_system.hpp"
+#include "engine/rendering_system.hpp"
+#include "game_logic/player_interaction_system.hpp"
+#include "game_logic/trigger_components.hpp"
+#include "loader/resource_loader.hpp"
+#include "ui/utils.hpp"
 
 #include <cassert>
 #include <chrono>

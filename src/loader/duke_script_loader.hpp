@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <data/duke_script.hpp>
+#include "data/duke_script.hpp"
 
 #include <string>
 #include <unordered_map>

@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <data/audio_buffer.hpp>
-#include <data/sound_ids.hpp>
-#include <loader/byte_buffer.hpp>
-#include <loader/cmp_file_package.hpp>
+#include "data/audio_buffer.hpp"
+#include "data/sound_ids.hpp"
+#include "loader/byte_buffer.hpp"
+#include "loader/cmp_file_package.hpp"
 
 #include <array>
 #include <cstdint>

@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
-#include <data/movie.hpp>
-#include <engine/timing.hpp>
-#include <sdl_utils/texture.hpp>
+#include "base/warnings.hpp"
+#include "data/movie.hpp"
+#include "engine/timing.hpp"
+#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>

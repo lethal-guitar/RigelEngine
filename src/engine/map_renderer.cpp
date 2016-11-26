@@ -16,7 +16,7 @@
 
 #include "map_renderer.hpp"
 
-#include <data/game_traits.hpp>
+#include "data/game_traits.hpp"
 
 #include <cfenv>
 #include <cmath>

@@ -16,12 +16,12 @@
 
 #include "ega_image_decoder.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
-#include <loader/bitwise_iter.hpp>
-#include <loader/file_utils.hpp>
-#include <utils/container_tools.hpp>
-#include <utils/math_tools.hpp>
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "loader/bitwise_iter.hpp"
+#include "loader/file_utils.hpp"
+#include "utils/container_tools.hpp"
+#include "utils/math_tools.hpp"
 
 #include <array>
 #include <stdexcept>

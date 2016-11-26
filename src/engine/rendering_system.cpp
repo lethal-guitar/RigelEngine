@@ -16,10 +16,10 @@
 
 #include "rendering_system.hpp"
 
-#include <base/warnings.hpp>
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
-#include <engine/physics_system.hpp>
+#include "base/warnings.hpp"
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "engine/physics_system.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/range/algorithm/find_if.hpp>

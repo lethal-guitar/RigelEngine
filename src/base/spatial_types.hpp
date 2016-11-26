@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
+#include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_rect.h>

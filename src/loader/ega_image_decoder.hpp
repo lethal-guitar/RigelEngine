@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <loader/byte_buffer.hpp>
-#include <loader/palette.hpp>
-#include <data/image.hpp>
+#include "loader/byte_buffer.hpp"
+#include "loader/palette.hpp"
+#include "data/image.hpp"
 
 
 namespace rigel { namespace loader {

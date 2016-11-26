@@ -18,7 +18,7 @@
 
 #include "menu_element_renderer.hpp"
 
-#include <engine/timing.hpp>
+#include "engine/timing.hpp"
 
 
 namespace rigel { namespace loader {

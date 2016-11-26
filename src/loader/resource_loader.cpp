@@ -16,14 +16,14 @@
 
 #include "resource_loader.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
-#include <loader/file_utils.hpp>
-#include <loader/ega_image_decoder.hpp>
-#include <loader/movie_loader.hpp>
-#include <loader/music_loader.hpp>
-#include <loader/voc_decoder.hpp>
-#include <utils/container_tools.hpp>
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "loader/file_utils.hpp"
+#include "loader/ega_image_decoder.hpp"
+#include "loader/movie_loader.hpp"
+#include "loader/music_loader.hpp"
+#include "loader/voc_decoder.hpp"
+#include "utils/container_tools.hpp"
 
 #include <chrono>
 #include <cstdint>

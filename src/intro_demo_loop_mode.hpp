@@ -1,11 +1,11 @@
 #pragma once
 
-#include <loader/duke_script_loader.hpp>
-#include <ui/apogee_logo.hpp>
-#include <ui/intro_movie.hpp>
-#include <ui/duke_script_runner.hpp>
-#include <game_mode.hpp>
-#include <mode_stage.hpp>
+#include "loader/duke_script_loader.hpp"
+#include "ui/apogee_logo.hpp"
+#include "ui/intro_movie.hpp"
+#include "ui/duke_script_runner.hpp"
+#include "game_mode.hpp"
+#include "mode_stage.hpp"
 
 #include <memory>
 

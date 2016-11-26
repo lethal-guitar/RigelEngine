@@ -16,9 +16,9 @@
 
 #include "voc_decoder.hpp"
 
-#include <base/warnings.hpp>
-#include <loader/file_utils.hpp>
-#include <utils/math_tools.hpp>
+#include "base/warnings.hpp"
+#include "loader/file_utils.hpp"
+#include "utils/math_tools.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>

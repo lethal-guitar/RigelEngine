@@ -16,14 +16,14 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
+#include "data/image.hpp"
+#include "data/map.hpp"
+#include "loader/byte_buffer.hpp"
+#include "loader/palette.hpp"
+
 #include <map>
 #include <vector>
-
-#include <base/spatial_types.hpp>
-#include <data/image.hpp>
-#include <data/map.hpp>
-#include <loader/byte_buffer.hpp>
-#include <loader/palette.hpp>
 
 
 namespace rigel { namespace loader {

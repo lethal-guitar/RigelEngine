@@ -19,10 +19,10 @@
 #include <string>
 #include <vector>
 
-#include <base/spatial_types.hpp>
-#include <data/game_session_data.hpp>
-#include <data/map.hpp>
-#include <loader/actor_image_package.hpp>
+#include "base/spatial_types.hpp"
+#include "data/game_session_data.hpp"
+#include "data/map.hpp"
+#include "loader/actor_image_package.hpp"
 
 
 namespace rigel { namespace loader {

@@ -16,12 +16,12 @@
 
 #include "player_control_system.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/map.hpp>
-#include <engine/base_components.hpp>
-#include <engine/physical_components.hpp>
-#include <engine/rendering_system.hpp>
-#include <utils/math_tools.hpp>
+#include "data/game_traits.hpp"
+#include "data/map.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physical_components.hpp"
+#include "engine/rendering_system.hpp"
+#include "utils/math_tools.hpp"
 
 #include <boost/algorithm/cxx11/any_of.hpp>
 

@@ -16,7 +16,8 @@
 
 #include "intro_movie.hpp"
 
-#include <loader/resource_loader.hpp>
+#include "loader/resource_loader.hpp"
+
 
 // Repetition counts and delays from original exe, determined from disassembly:
 //

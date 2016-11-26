@@ -16,13 +16,17 @@
 
 #pragma once
 
-#include <engine/sound_system.hpp>
-#include <game_mode.hpp>
-#include <loader/resource_loader.hpp>
-#include <sdl_utils/texture.hpp>
-#include <ui/fps_display.hpp>
+#include "base/warnings.hpp"
+#include "engine/sound_system.hpp"
+#include "game_mode.hpp"
+#include "loader/resource_loader.hpp"
+#include "sdl_utils/texture.hpp"
+#include "ui/fps_display.hpp"
 
+RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
+
 #include <chrono>
 #include <memory>
 #include <string>

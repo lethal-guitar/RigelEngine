@@ -16,16 +16,16 @@
 
 #pragma once
 
-#include <data/audio_buffer.hpp>
-#include <data/image.hpp>
-#include <data/movie.hpp>
-#include <data/sound_ids.hpp>
-#include <data/tile_set.hpp>
-#include <loader/actor_image_package.hpp>
-#include <loader/audio_package.hpp>
-#include <loader/duke_script_loader.hpp>
-#include <loader/cmp_file_package.hpp>
-#include <loader/palette.hpp>
+#include "data/audio_buffer.hpp"
+#include "data/image.hpp"
+#include "data/movie.hpp"
+#include "data/sound_ids.hpp"
+#include "data/tile_set.hpp"
+#include "loader/actor_image_package.hpp"
+#include "loader/audio_package.hpp"
+#include "loader/duke_script_loader.hpp"
+#include "loader/cmp_file_package.hpp"
+#include "loader/palette.hpp"
 
 #include <string>
 

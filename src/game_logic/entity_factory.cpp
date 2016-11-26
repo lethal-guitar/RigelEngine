@@ -16,12 +16,12 @@
 
 #include "entity_factory.hpp"
 
-#include <data/unit_conversions.hpp>
-#include <engine/base_components.hpp>
-#include <engine/physics_system.hpp>
-#include <game_logic/collectable_components.hpp>
-#include <game_logic/player_control_system.hpp>
-#include <game_logic/trigger_components.hpp>
+#include "data/unit_conversions.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physics_system.hpp"
+#include "game_logic/collectable_components.hpp"
+#include "game_logic/player_control_system.hpp"
+#include "game_logic/trigger_components.hpp"
 
 #include <utility>
 

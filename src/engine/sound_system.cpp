@@ -16,18 +16,19 @@
 
 #include "sound_system.hpp"
 
-#include <sdl_utils/error.hpp>
-#include <sdl_utils/ptr.hpp>
-#include <utility>
-#include <utils/math_tools.hpp>
+#include "sdl_utils/error.hpp"
+#include "sdl_utils/ptr.hpp"
+#include "utils/math_tools.hpp"
 
 #include <speex/speex_resampler.h>
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace rigel { namespace engine {

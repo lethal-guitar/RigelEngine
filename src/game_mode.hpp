@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
-#include <data/sound_ids.hpp>
-#include <data/game_session_data.hpp>
-#include <engine/timing.hpp>
+#include "base/warnings.hpp"
+#include "data/sound_ids.hpp"
+#include "data/game_session_data.hpp"
+#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>

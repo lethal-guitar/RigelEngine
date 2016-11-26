@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <base/grid.hpp>
-#include <base/spatial_types.hpp>
-#include <base/warnings.hpp>
-#include <data/tile_set.hpp>
-#include <engine/base_components.hpp>
-#include <engine/physical_components.hpp>
-#include <engine/timing.hpp>
+#include "base/grid.hpp"
+#include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
+#include "data/tile_set.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physical_components.hpp"
+#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

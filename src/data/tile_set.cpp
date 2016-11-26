@@ -16,8 +16,8 @@
 
 #include "tile_set.hpp"
 
-#include <data/game_traits.hpp>
-#include <utils/container_tools.hpp>
+#include "data/game_traits.hpp"
+#include "utils/container_tools.hpp"
 
 #include <cassert>
 #include <stdexcept>

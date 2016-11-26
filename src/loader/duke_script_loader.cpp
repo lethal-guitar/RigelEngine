@@ -16,8 +16,8 @@
 
 #include "duke_script_loader.hpp"
 
-#include <base/warnings.hpp>
-#include <data/game_traits.hpp>
+#include "base/warnings.hpp"
+#include "data/game_traits.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/split.hpp>
