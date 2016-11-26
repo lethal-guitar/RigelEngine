@@ -21,6 +21,7 @@ set(core_sources
     engine/base_components.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/physical_components.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp
     engine/rendering_system.cpp

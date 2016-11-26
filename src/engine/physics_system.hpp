@@ -18,11 +18,16 @@
 
 #include <base/grid.hpp>
 #include <base/spatial_types.hpp>
+#include <base/warnings.hpp>
 #include <data/tile_set.hpp>
 #include <engine/base_components.hpp>
+#include <engine/physical_components.hpp>
 #include <engine/timing.hpp>
 
+RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
+
 #include <cstdint>
 #include <tuple>
 #include <vector>
@@ -30,23 +35,7 @@
 
 namespace rigel { namespace data { namespace map { class Map; }}}
 
-
 namespace rigel { namespace engine {
-
-
-namespace components {
-
-struct Physical {
-  base::Point<float> mVelocity;
-  bool mGravityAffected;
-};
-
-}
-
-
-BoundingBox toWorldSpace(
-  const BoundingBox& bbox, const base::Vector& entityPosition);
-
 
 /** Implements game physics/world interaction
  *
