@@ -117,6 +117,8 @@ void configureEntity(
     // Circuit card force field
     case 119:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 2, 4, 2)}});
+      entity.assign<PlayerDamaging>(9, true);
+      entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
       break;
 
     // Keyhole (blue key)
@@ -438,7 +440,66 @@ void configureEntity(
       }
       break;
 
+
+    // ----------------------------------------------------------------------
+    // Enemies
+    // ----------------------------------------------------------------------
+
+    case 0: // Robot drone
+    case 49: // Bouncing robot
+    case 64: // Bouncing spike ball
+    case 67: // Green slime blob
+    case 98: // Eye-ball throwing monster
+    case 134: // Walking skeleton
+    case 154: // Spider
+    case 203: // Red bird
+    case 271: // Small flying ship 1
+    case 272: // Small flying ship 2
+    case 273: // Small flying ship 3
+    case 299: // Rigelatin soldier
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    // Guard wearing blue suit
+    case 159: // ->
+    case 171: // <-
+    case 217: // using terminal
+      entity.assign<PlayerDamaging>(1);
+      addDefaultPhysical(entity, boundingBox);
+      break;
+
+
+    // Laser turret
+    case 131:
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    // ----------------------------------------------------------------------
+    // Various
+    // ----------------------------------------------------------------------
+
     case 66: // Destroyable reactor
+      entity.assign<PlayerDamaging>(9, true);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      break;
+
+    case 93: // Blue force field (disabled by cloak)
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 212: // Lava pool
+    case 235: // Slime pool
+    case 262: // Fire (variant 1)
+    case 263: // Fire (variant 2)
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      break;
+
     case 117:
     case 120: // Keyhole (circuit board)
     case 188: // rotating floor spikes
@@ -446,7 +507,6 @@ void configureEntity(
     case 252: // floating exit sign to left
     case 296: // floating arrow
     case 210:
-    case 212:
     case 222:
     case 223:
     case 224:
@@ -454,12 +514,9 @@ void configureEntity(
     case 228:
     case 229:
     case 230:
-    case 235:
     case 236:
     case 257:
     case 258:
-    case 262:
-    case 263:
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       break;
 
