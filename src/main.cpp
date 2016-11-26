@@ -234,6 +234,10 @@ int main(int argc, char** argv) {
       gameOptions.mLevelToJumpTo = std::make_pair(episode, level);
     }
 
+    if (!gamePath.empty() && gamePath.back() != '/') {
+      gamePath += "/";
+    }
+
     initAndRunGame(gamePath, gameOptions);
   }
   catch (const po::error& err)

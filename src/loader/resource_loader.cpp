@@ -47,7 +47,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
-  : mFilePackage(gamePath + "/NUKEM2.CMP")
+  : mFilePackage(gamePath + "NUKEM2.CMP")
   , mActorImagePackage(mFilePackage)
   , mGamePath(gamePath)
   , mAdlibSoundsPackage(mFilePackage)
@@ -153,7 +153,7 @@ data::map::TileSet ResourceLoader::loadCZone(const std::string& name) const {
 
 
 data::Movie ResourceLoader::loadMovie(const std::string& name) const {
-  return loader::loadMovie(loadFile(mGamePath + '/' + name));
+  return loader::loadMovie(loadFile(mGamePath + name));
 }
 
 
