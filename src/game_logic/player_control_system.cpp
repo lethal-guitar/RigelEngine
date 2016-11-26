@@ -251,18 +251,13 @@ void PlayerControlSystem::update(
             const WorldPosition& pos,
             const Physical&
           ) {
-            SDL_Rect sdlObjectBounds{
-              pos.x,
-              pos.y - (physical.mCollisionRect.size.height - 1),
-              physical.mCollisionRect.size.width,
-              physical.mCollisionRect.size.height
+            const auto objectBounds = engine::BoundingBox{
+              {
+                pos.x,
+                pos.y - (physical.mCollisionRect.size.height - 1)},
+              physical.mCollisionRect.size
             };
-            SDL_Rect sdlPlayerBounds{
-              worldSpacePlayerBounds.topLeft.x,
-              worldSpacePlayerBounds.topLeft.y,
-              worldSpacePlayerBounds.size.width,
-              worldSpacePlayerBounds.size.height};
-            if (SDL_HasIntersection(&sdlObjectBounds, &sdlPlayerBounds)) {
+            if (worldSpacePlayerBounds.intersects(objectBounds)) {
               events.emit<events::PlayerInteraction>(entity, interactable.mType);
               state.mPerformedInteraction = true;
             }

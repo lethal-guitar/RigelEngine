@@ -94,20 +94,7 @@ void PlayerInteractionSystem::update(
       playerBBox.topLeft +=
         base::Vector{playerPos.x, playerPos.y - (playerBBox.size.height - 1)};
 
-      SDL_Rect itemRect{
-        worldSpaceBbox.topLeft.x,
-        worldSpaceBbox.topLeft.y,
-        worldSpaceBbox.size.width,
-        worldSpaceBbox.size.height
-      };
-      SDL_Rect playerRect{
-        playerBBox.topLeft.x,
-        playerBBox.topLeft.y,
-        playerBBox.size.width,
-        playerBBox.size.height
-      };
-
-      if (SDL_HasIntersection(&itemRect, &playerRect)) {
+      if (worldSpaceBbox.intersects(playerBBox)) {
         boost::optional<data::SoundId> soundToPlay;
 
         if (collectable.mGivenScore) {
