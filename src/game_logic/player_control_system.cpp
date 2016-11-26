@@ -37,7 +37,6 @@ using namespace rigel::engine::components;
 using namespace detail;
 using namespace std;
 
-using engine::BoundingBox;
 using engine::TimeStepper;
 using engine::updateAndCheckIfDesiredTicksElapsed;
 

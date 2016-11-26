@@ -36,6 +36,7 @@ namespace rigel {
 using namespace engine;
 using namespace std;
 
+using components::BoundingBox;
 using game_logic::PlayerControlSystem;
 using game_logic::PlayerInteractionSystem;
 using game_logic::MapScrollSystem;

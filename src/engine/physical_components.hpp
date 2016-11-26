@@ -32,7 +32,7 @@ struct Physical {
 }
 
 
-BoundingBox toWorldSpace(
-  const BoundingBox& bbox, const base::Vector& entityPosition);
+components::BoundingBox toWorldSpace(
+  const components::BoundingBox& bbox, const base::Vector& entityPosition);
 
 }}

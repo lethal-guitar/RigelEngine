@@ -37,9 +37,9 @@ using namespace std;
 
 using data::ActorID;
 
-using engine::BoundingBox;
 using engine::components::Animated;
 using engine::components::AnimationSequence;
+using engine::components::BoundingBox;
 using engine::components::Physical;
 using engine::components::Sprite;
 using engine::components::SpriteFrame;
@@ -49,7 +49,7 @@ using namespace game_logic::components;
 
 namespace {
 
-engine::BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
+BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
   const auto dimensionsInTiles = pixelExtentsToTileExtents(
     sprite.mImage.extents());
 
@@ -60,7 +60,7 @@ engine::BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
 // Assign gravity affected physical component
 void addDefaultPhysical(
   ex::Entity entity,
-  const engine::BoundingBox& boundingBox
+  const BoundingBox& boundingBox
 ) {
   entity.assign<Physical>(Physical{{0.0f, 0.0f}, true});
   entity.assign<BoundingBox>(boundingBox);
@@ -175,7 +175,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     entity.assign<WorldPosition>(actor.mPosition);
 
     boost::optional<Sprite> maybeSprite;
-    engine::BoundingBox boundingBox;
+    BoundingBox boundingBox;
     std::tie(maybeSprite, boundingBox) =
       createVisualsAndBoundingBox(actor, map);
 

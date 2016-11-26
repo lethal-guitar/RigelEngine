@@ -11,7 +11,7 @@
 namespace rigel { namespace game_logic {
 
 using data::PlayerModel;
-using engine::BoundingBox;
+using engine::components::BoundingBox;
 using engine::components::WorldPosition;
 
 namespace ex = entityx;

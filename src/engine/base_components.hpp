@@ -18,8 +18,6 @@
 
 #include <base/spatial_types.hpp>
 
-#include <utility>
-
 
 namespace rigel { namespace engine { namespace components {
 
@@ -31,9 +29,10 @@ struct WorldPosition : public base::Vector {
   }
 };
 
-}
 
 using BoundingBox = base::Rect<int>;
+
+}
 
 
 }}

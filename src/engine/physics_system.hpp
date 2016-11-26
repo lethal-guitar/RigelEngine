@@ -59,20 +59,20 @@ private:
   const data::map::CollisionData& worldAt(int x, int y) const;
 
   base::Vector applyHorizontalMovement(
-    const BoundingBox& bbox,
+    const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     const std::int16_t movementX
   ) const;
 
   std::tuple<base::Vector, float> applyVerticalMovement(
-    const BoundingBox& bbox,
+    const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
     const std::int16_t movementY
   ) const;
 
   float applyGravity(
-    const BoundingBox& bbox,
+    const components::BoundingBox& bbox,
     float currentVelocity);
 
 private:

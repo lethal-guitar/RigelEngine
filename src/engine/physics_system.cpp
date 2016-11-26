@@ -27,6 +27,7 @@ namespace rigel { namespace engine {
 
 using namespace std;
 
+using components::BoundingBox;
 using components::Physical;
 using components::WorldPosition;
 using data::map::CollisionData;

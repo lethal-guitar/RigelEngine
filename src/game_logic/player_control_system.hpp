@@ -141,14 +141,14 @@ private:
   void updateAnimationStateAndBoundingBox(
     const components::PlayerControlled& state,
     engine::components::Sprite& sprite,
-    engine::BoundingBox& bbox);
+    engine::components::BoundingBox& bbox);
 
   boost::optional<base::Vector> findLadderTouchPoint(
-    const engine::BoundingBox& worldSpacePlayerBounds
+    const engine::components::BoundingBox& worldSpacePlayerBounds
   ) const;
 
-  bool canClimbUp(const engine::BoundingBox& worldSpacePlayerBounds) const;
-  bool canClimbDown(const engine::BoundingBox& worldSpacePlayerBounds) const;
+  bool canClimbUp(const engine::components::BoundingBox& worldSpacePlayerBounds) const;
+  bool canClimbDown(const engine::components::BoundingBox& worldSpacePlayerBounds) const;
 
 private:
   engine::TimeStepper mTimeStepper;
@@ -176,7 +176,7 @@ private:
   void updateScrollOffset(
     const components::PlayerControlled& state,
     const engine::components::WorldPosition& position,
-    const engine::BoundingBox& playerBounds,
+    const engine::components::BoundingBox& playerBounds,
     entityx::TimeDelta dt);
 
 private:
