@@ -141,7 +141,7 @@ private:
   void updateAnimationStateAndBoundingBox(
     const components::PlayerControlled& state,
     engine::components::Sprite& sprite,
-    engine::components::Physical& physical);
+    engine::BoundingBox& bbox);
 
   boost::optional<base::Vector> findLadderTouchPoint(
     const engine::BoundingBox& worldSpacePlayerBounds
@@ -176,7 +176,7 @@ private:
   void updateScrollOffset(
     const components::PlayerControlled& state,
     const engine::components::WorldPosition& position,
-    const engine::components::Physical& physical,
+    const engine::BoundingBox& playerBounds,
     entityx::TimeDelta dt);
 
 private:

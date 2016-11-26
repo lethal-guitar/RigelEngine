@@ -11,7 +11,7 @@
 namespace rigel { namespace game_logic {
 
 using data::PlayerModel;
-using engine::components::Physical;
+using engine::BoundingBox;
 using engine::components::WorldPosition;
 
 namespace ex = entityx;
@@ -76,21 +76,21 @@ void PlayerInteractionSystem::update(
 
 
   // ----------------------------------------------------------------------
-  es.each<CollectableItem, WorldPosition, Physical>(
+  es.each<CollectableItem, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity entity,
       const CollectableItem& collectable,
       const WorldPosition& pos,
-      const Physical& physical
+      const BoundingBox& collisionRect
     ) {
       using namespace data;
 
-      auto worldSpaceBbox = physical.mCollisionRect;
+      auto worldSpaceBbox = collisionRect;
       worldSpaceBbox.topLeft +=
         base::Vector{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
 
       const auto playerPos = *mPlayer.component<WorldPosition>().get();
-      auto playerBBox = mPlayer.component<Physical>()->mCollisionRect;
+      auto playerBBox = *mPlayer.component<BoundingBox>().get();
       playerBBox.topLeft +=
         base::Vector{playerPos.x, playerPos.y - (playerBBox.size.height - 1)};
 

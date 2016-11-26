@@ -255,8 +255,7 @@ void IngameMode::checkForLevelExitReached() {
       const auto& playerPosition =
         *mPlayerEntity.component<WorldPosition>().get();
       const auto playerBBox = toWorldSpace(
-        mPlayerEntity.component<Physical>().get()->mCollisionRect,
-        playerPosition);
+        *mPlayerEntity.component<BoundingBox>().get(), playerPosition);
 
       const auto playerAboveOrAtTriggerHeight =
         playerBBox.bottom() <= triggerPosition.y;

@@ -37,6 +37,7 @@ using namespace std;
 
 using data::ActorID;
 
+using engine::BoundingBox;
 using engine::components::Animated;
 using engine::components::AnimationSequence;
 using engine::components::Physical;
@@ -61,7 +62,8 @@ void addDefaultPhysical(
   ex::Entity entity,
   const engine::BoundingBox& boundingBox
 ) {
-  entity.assign<Physical>(Physical{boundingBox, {0.0f, 0.0f}, true});
+  entity.assign<Physical>(Physical{{0.0f, 0.0f}, true});
+  entity.assign<BoundingBox>(boundingBox);
 }
 
 

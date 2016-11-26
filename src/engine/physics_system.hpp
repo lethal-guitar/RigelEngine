@@ -37,9 +37,6 @@ namespace rigel { namespace engine {
 namespace components {
 
 struct Physical {
-  // Bounding box for world collision. Relative to entity's world position
-  BoundingBox mCollisionRect;
-
   base::Point<float> mVelocity;
   bool mGravityAffected;
 };
