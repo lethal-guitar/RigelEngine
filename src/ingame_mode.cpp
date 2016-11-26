@@ -132,24 +132,21 @@ void IngameMode::handleEvent(const SDL_Event& event) {
 
 
 void IngameMode::updateAndRender(engine::TimeDelta dt) {
+  if (mLevelFinished) {
+    return;
+  }
+
   // ----------
   // updating
-  if (!mLevelFinished) {
-    mEntities.systems.update<PlayerControlSystem>(dt);
-    mEntities.systems.update<PlayerInteractionSystem>(dt);
-    mEntities.systems.update<PhysicsSystem>(dt);
-    mEntities.systems.update<MapScrollSystem>(dt);
-    mHudRenderer.update(dt);
+  mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<PlayerInteractionSystem>(dt);
+  mEntities.systems.update<PhysicsSystem>(dt);
+  mEntities.systems.update<MapScrollSystem>(dt);
+  mHudRenderer.update(dt);
 
-    checkForLevelExitReached();
-  }
 
   // ----------
   // rendering
-  if (mLevelFinished) {
-    dt = 0;
-  }
-
   {
     sdl_utils::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
@@ -162,6 +159,8 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x,
     data::GameTraits::inGameViewPortOffset.y);
+
+  checkForLevelExitReached();
 }
 
 
