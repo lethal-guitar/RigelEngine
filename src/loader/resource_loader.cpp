@@ -161,7 +161,7 @@ data::AudioBuffer ResourceLoader::loadMusic(const std::string& name) const {
   using namespace chrono;
 
   const auto before = high_resolution_clock::now();
-  auto buffer = loader::renderImf(mFilePackage.file(name), 44100);
+  const auto buffer = loader::renderImf(mFilePackage.file(name), 44100);
   const auto after = high_resolution_clock::now();
 
   std::cout
