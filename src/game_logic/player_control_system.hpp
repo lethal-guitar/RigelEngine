@@ -135,8 +135,6 @@ public:
     entityx::TimeDelta dt
   ) override;
 
-  void updateScrollOffset();
-
 private:
   void updateAnimationStateAndBoundingBox(
     const components::PlayerControlled& state,
