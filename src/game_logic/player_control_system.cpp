@@ -19,7 +19,7 @@
 #include <data/game_traits.hpp>
 #include <data/map.hpp>
 #include <engine/base_components.hpp>
-#include <engine/physics_system.hpp>
+#include <engine/physical_components.hpp>
 #include <engine/rendering_system.hpp>
 #include <utils/math_tools.hpp>
 
@@ -248,10 +248,7 @@ void PlayerControlSystem::update(
             const WorldPosition& pos,
             const BoundingBox& bbox
           ) {
-            const auto objectBounds = BoundingBox{
-              {pos.x, pos.y - (bbox.size.height - 1)},
-              bbox.size
-            };
+            const auto objectBounds = engine::toWorldSpace(bbox, pos);
             if (worldSpacePlayerBounds.intersects(objectBounds)) {
               events.emit<events::PlayerInteraction>(entity, interactable.mType);
               state.mPerformedInteraction = true;
