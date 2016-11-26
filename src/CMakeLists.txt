@@ -74,6 +74,7 @@ set(core_sources
     sdl_utils/ptr.hpp
     sdl_utils/texture.cpp
     sdl_utils/texture.hpp
+    sdl_utils/texture.ipp
     ui/apogee_logo.cpp
     ui/apogee_logo.hpp
     ui/bonus_screen.cpp
