@@ -16,11 +16,34 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <SDL_rect.h>
+RIGEL_RESTORE_WARNINGS
+
+
 #include <cstdint>
 #include <tuple>
 
 
 namespace rigel { namespace base {
+
+template<typename ValueT>
+struct Rect;
+
+namespace detail {
+
+template<typename ValueT>
+SDL_Rect toSdlRect(const Rect<ValueT>& rect)
+{
+  return {
+    int(rect.topLeft.x), int(rect.topLeft.y),
+    int(rect.size.width), int(rect.size.height)
+  };
+}
+
+}
 
 template<typename ValueT>
 struct Point {
@@ -103,6 +126,12 @@ struct Rect {
 
   ValueT right() const {
     return bottomRight().x;
+  }
+
+  bool intersects(const Rect& other) const {
+    const auto r1 = detail::toSdlRect(*this);
+    const auto r2 = detail::toSdlRect(other);
+    return SDL_HasIntersection(&r1, &r2);
   }
 };
 

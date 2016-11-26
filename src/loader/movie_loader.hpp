@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <data/movie.hpp>
-#include <loader/byte_buffer.hpp>
+#include "data/movie.hpp"
+#include "loader/byte_buffer.hpp"
 
 
 namespace rigel { namespace loader {

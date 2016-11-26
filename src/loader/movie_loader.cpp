@@ -16,10 +16,12 @@
 
 #include "movie_loader.hpp"
 
-#include <loader/file_utils.hpp>
-#include <loader/palette.hpp>
-#include <loader/rle_compression.hpp>
+#include "loader/file_utils.hpp"
+#include "loader/palette.hpp"
+#include "loader/rle_compression.hpp"
+
 #include <stdexcept>
+
 
 /* Duke Nukem II Movie/Animation loader
  *

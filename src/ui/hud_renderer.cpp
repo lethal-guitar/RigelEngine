@@ -16,8 +16,8 @@
 
 #include "hud_renderer.hpp"
 
-#include <data/game_traits.hpp>
-#include <loader/resource_loader.hpp>
+#include "data/game_traits.hpp"
+#include "loader/resource_loader.hpp"
 
 #include <cmath>
 #include <string>

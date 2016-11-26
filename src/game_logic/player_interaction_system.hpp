@@ -1,6 +1,6 @@
 #pragma once
 
-#include <base/warnings.hpp>
+#include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

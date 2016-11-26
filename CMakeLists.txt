@@ -30,6 +30,7 @@ if(MSVC)
         /WX
         /wd4100 # Unused parameter
         /wd4503 # Decorated name length exceeded
+        /wd4800 # Forcing value to bool
     )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(

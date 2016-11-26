@@ -16,17 +16,17 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
-#include <engine/tile_renderer.hpp>
-#include <engine/timing.hpp>
-#include <loader/palette.hpp>
-#include <sdl_utils/texture.hpp>
+#include "base/warnings.hpp"
+#include "engine/tile_renderer.hpp"
+#include "engine/timing.hpp"
+#include "loader/palette.hpp"
+#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+#include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <SDL.h>
 #include <string>
 
 

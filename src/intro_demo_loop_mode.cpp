@@ -1,6 +1,6 @@
 #include "intro_demo_loop_mode.hpp"
 
-#include <loader/resource_loader.hpp>
+#include "loader/resource_loader.hpp"
 
 
 namespace rigel {

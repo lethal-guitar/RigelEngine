@@ -16,16 +16,20 @@
 
 #pragma once
 
-#include <data/duke_script.hpp>
-#include <data/map.hpp>
-#include <engine/timing.hpp>
-#include <loader/palette.hpp>
-#include <sdl_utils/texture.hpp>
-#include <ui/menu_element_renderer.hpp>
+#include "base/warnings.hpp"
+#include "data/duke_script.hpp"
+#include "data/map.hpp"
+#include "engine/timing.hpp"
+#include "loader/palette.hpp"
+#include "sdl_utils/texture.hpp"
+#include "ui/menu_element_renderer.hpp"
 
-#include <game_mode.hpp>
+#include "game_mode.hpp"
 
+RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
+
 #include <cstddef>
 
 

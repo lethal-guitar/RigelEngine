@@ -16,13 +16,18 @@
 
 #pragma once
 
-#include <base/grid.hpp>
-#include <base/spatial_types.hpp>
-#include <data/tile_set.hpp>
-#include <engine/base_components.hpp>
-#include <engine/timing.hpp>
+#include "base/grid.hpp"
+#include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
+#include "data/tile_set.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physical_components.hpp"
+#include "engine/timing.hpp"
 
+RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
+
 #include <cstdint>
 #include <tuple>
 #include <vector>
@@ -30,26 +35,7 @@
 
 namespace rigel { namespace data { namespace map { class Map; }}}
 
-
 namespace rigel { namespace engine {
-
-
-namespace components {
-
-struct Physical {
-  // Bounding box for world collision. Relative to entity's world position
-  BoundingBox mCollisionRect;
-
-  base::Point<float> mVelocity;
-  bool mGravityAffected;
-};
-
-}
-
-
-BoundingBox toWorldSpace(
-  const BoundingBox& bbox, const base::Vector& entityPosition);
-
 
 /** Implements game physics/world interaction
  *
@@ -73,20 +59,20 @@ private:
   const data::map::CollisionData& worldAt(int x, int y) const;
 
   base::Vector applyHorizontalMovement(
-    const BoundingBox& bbox,
+    const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     const std::int16_t movementX
   ) const;
 
   std::tuple<base::Vector, float> applyVerticalMovement(
-    const BoundingBox& bbox,
+    const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
     const std::int16_t movementY
   ) const;
 
   float applyGravity(
-    const BoundingBox& bbox,
+    const components::BoundingBox& bbox,
     float currentVelocity);
 
 private:

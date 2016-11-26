@@ -16,8 +16,8 @@
 
 #include "tile_renderer.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
 
 #include <cassert>
 

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <sdl_utils/texture.hpp>
+#include "sdl_utils/texture.hpp"
 
 
 namespace rigel { namespace engine {

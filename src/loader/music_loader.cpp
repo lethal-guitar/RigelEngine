@@ -16,8 +16,8 @@
 
 #include "music_loader.hpp"
 
-#include <loader/file_utils.hpp>
-#include <utils/math_tools.hpp>
+#include "loader/file_utils.hpp"
+#include "utils/math_tools.hpp"
 
 #include <dbopl.h>
 

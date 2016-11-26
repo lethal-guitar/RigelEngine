@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <base/boost_variant.hpp>
-#include <ui/bonus_screen.hpp>
+#include "base/boost_variant.hpp"
+#include "ui/bonus_screen.hpp"
 
-#include <game_mode.hpp>
-#include <ingame_mode.hpp>
+#include "game_mode.hpp"
+#include "ingame_mode.hpp"
 
 
 namespace rigel {

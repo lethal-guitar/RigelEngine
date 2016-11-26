@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <data/player_data.hpp>
-#include <engine/tile_renderer.hpp>
-#include <engine/timing.hpp>
-#include <sdl_utils/texture.hpp>
-#include <utils/enum_hash.hpp>
+#include "data/player_data.hpp"
+#include "engine/tile_renderer.hpp"
+#include "engine/timing.hpp"
+#include "sdl_utils/texture.hpp"
+#include "utils/enum_hash.hpp"
 
 #include <unordered_map>
 

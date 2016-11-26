@@ -16,12 +16,12 @@
 
 #include "actor_image_package.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
-#include <utils/container_tools.hpp>
-#include <loader/cmp_file_package.hpp>
-#include <loader/ega_image_decoder.hpp>
-#include <loader/file_utils.hpp>
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "utils/container_tools.hpp"
+#include "loader/cmp_file_package.hpp"
+#include "loader/ega_image_decoder.hpp"
+#include "loader/file_utils.hpp"
 
 #include <cassert>
 

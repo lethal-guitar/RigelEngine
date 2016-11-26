@@ -18,8 +18,8 @@
 
 #include "ptr.hpp"
 
-#include <base/spatial_types.hpp>
-#include <data/image.hpp>
+#include "base/spatial_types.hpp"
+#include "data/image.hpp"
 
 #include <cstddef>
 #include <SDL.h>

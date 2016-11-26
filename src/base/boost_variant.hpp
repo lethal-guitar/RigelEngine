@@ -20,7 +20,7 @@
 #define BOOST_MPL_LIMIT_LIST_SIZE 30
 #define BOOST_MPL_LIMIT_VECTOR_SIZE 30
 
-#include <base/warnings.hpp>
+#include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/variant.hpp>

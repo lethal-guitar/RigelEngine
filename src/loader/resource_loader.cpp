@@ -16,14 +16,14 @@
 
 #include "resource_loader.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
-#include <loader/file_utils.hpp>
-#include <loader/ega_image_decoder.hpp>
-#include <loader/movie_loader.hpp>
-#include <loader/music_loader.hpp>
-#include <loader/voc_decoder.hpp>
-#include <utils/container_tools.hpp>
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "loader/file_utils.hpp"
+#include "loader/ega_image_decoder.hpp"
+#include "loader/movie_loader.hpp"
+#include "loader/music_loader.hpp"
+#include "loader/voc_decoder.hpp"
+#include "utils/container_tools.hpp"
 
 #include <chrono>
 #include <cstdint>
@@ -47,7 +47,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
-  : mFilePackage(gamePath + "/NUKEM2.CMP")
+  : mFilePackage(gamePath + "NUKEM2.CMP")
   , mActorImagePackage(mFilePackage)
   , mGamePath(gamePath)
   , mAdlibSoundsPackage(mFilePackage)
@@ -153,7 +153,7 @@ data::map::TileSet ResourceLoader::loadCZone(const std::string& name) const {
 
 
 data::Movie ResourceLoader::loadMovie(const std::string& name) const {
-  return loader::loadMovie(loadFile(mGamePath + '/' + name));
+  return loader::loadMovie(loadFile(mGamePath + name));
 }
 
 
@@ -161,7 +161,7 @@ data::AudioBuffer ResourceLoader::loadMusic(const std::string& name) const {
   using namespace chrono;
 
   const auto before = high_resolution_clock::now();
-  auto buffer = loader::renderImf(mFilePackage.file(name), 44100);
+  const auto buffer = loader::renderImf(mFilePackage.file(name), 44100);
   const auto after = high_resolution_clock::now();
 
   std::cout

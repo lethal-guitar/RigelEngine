@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
-#include <engine/visual_components.hpp>
-#include <loader/level_loader.hpp>
-#include <sdl_utils/texture.hpp>
+#include "base/warnings.hpp"
+#include "engine/visual_components.hpp"
+#include "loader/level_loader.hpp"
+#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -52,7 +52,7 @@ private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
   using VisualsAndBounds = std::tuple<
     boost::optional<engine::components::Sprite>,
-    engine::BoundingBox>;
+    engine::components::BoundingBox>;
 
   VisualsAndBounds createVisualsAndBoundingBox(
     const data::map::LevelData::Actor& actor,

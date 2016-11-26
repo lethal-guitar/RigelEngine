@@ -70,7 +70,7 @@
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  const engine::BoundingBox& boundingBox
+  const BoundingBox& boundingBox
 ) {
   switch (actorID) {
     // Bonus globes

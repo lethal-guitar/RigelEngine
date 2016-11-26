@@ -16,7 +16,8 @@
 
 #include "apogee_logo.hpp"
 
-#include <loader/resource_loader.hpp>
+#include "loader/resource_loader.hpp"
+
 
 namespace rigel { namespace ui {
 

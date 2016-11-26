@@ -21,6 +21,7 @@ set(core_sources
     engine/base_components.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/physical_components.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp
     engine/rendering_system.cpp
@@ -73,6 +74,7 @@ set(core_sources
     sdl_utils/ptr.hpp
     sdl_utils/texture.cpp
     sdl_utils/texture.hpp
+    sdl_utils/texture.ipp
     ui/apogee_logo.cpp
     ui/apogee_logo.hpp
     ui/bonus_screen.cpp

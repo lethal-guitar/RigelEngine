@@ -16,12 +16,12 @@
 
 #include "entity_factory.hpp"
 
-#include <data/unit_conversions.hpp>
-#include <engine/base_components.hpp>
-#include <engine/physics_system.hpp>
-#include <game_logic/collectable_components.hpp>
-#include <game_logic/player_control_system.hpp>
-#include <game_logic/trigger_components.hpp>
+#include "data/unit_conversions.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physics_system.hpp"
+#include "game_logic/collectable_components.hpp"
+#include "game_logic/player_control_system.hpp"
+#include "game_logic/trigger_components.hpp"
 
 #include <utility>
 
@@ -39,6 +39,7 @@ using data::ActorID;
 
 using engine::components::Animated;
 using engine::components::AnimationSequence;
+using engine::components::BoundingBox;
 using engine::components::Physical;
 using engine::components::Sprite;
 using engine::components::SpriteFrame;
@@ -48,7 +49,7 @@ using namespace game_logic::components;
 
 namespace {
 
-engine::BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
+BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
   const auto dimensionsInTiles = pixelExtentsToTileExtents(
     sprite.mImage.extents());
 
@@ -59,9 +60,10 @@ engine::BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
 // Assign gravity affected physical component
 void addDefaultPhysical(
   ex::Entity entity,
-  const engine::BoundingBox& boundingBox
+  const BoundingBox& boundingBox
 ) {
-  entity.assign<Physical>(Physical{boundingBox, {0.0f, 0.0f}, true});
+  entity.assign<Physical>(Physical{{0.0f, 0.0f}, true});
+  entity.assign<BoundingBox>(boundingBox);
 }
 
 
@@ -173,7 +175,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     entity.assign<WorldPosition>(actor.mPosition);
 
     boost::optional<Sprite> maybeSprite;
-    engine::BoundingBox boundingBox;
+    BoundingBox boundingBox;
     std::tie(maybeSprite, boundingBox) =
       createVisualsAndBoundingBox(actor, map);
 

@@ -16,24 +16,15 @@
 
 #pragma once
 
-#include <base/spatial_types.hpp>
-
-#include <utility>
+#include "base/spatial_types.hpp"
 
 
 namespace rigel { namespace engine { namespace components {
 
-struct WorldPosition : public base::Vector {
-  // We want to allow implicit conversions from base::Vector here
-  WorldPosition(base::Vector pos) // NOLINT
-    : base::Vector(pos)
-  {
-  }
-};
+using WorldPosition = base::Vector;
+using BoundingBox = base::Rect<int>;
 
 }
-
-using BoundingBox = base::Rect<int>;
 
 
 }}

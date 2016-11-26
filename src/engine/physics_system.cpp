@@ -16,8 +16,8 @@
 
 #include "physics_system.hpp"
 
-#include <data/map.hpp>
-#include <engine/base_components.hpp>
+#include "data/map.hpp"
+#include "engine/base_components.hpp"
 
 
 namespace ex = entityx;
@@ -27,6 +27,7 @@ namespace rigel { namespace engine {
 
 using namespace std;
 
+using components::BoundingBox;
 using components::Physical;
 using components::WorldPosition;
 using data::map::CollisionData;
@@ -72,23 +73,24 @@ void PhysicsSystem::update(
     return;
   }
 
-  es.each<Physical, WorldPosition>(
+  es.each<Physical, WorldPosition, BoundingBox>(
     [this](
       ex::Entity,
       Physical& physical,
-      WorldPosition& position
+      WorldPosition& position,
+      const BoundingBox& collisionRect
     ) {
       const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
       if (movementX != 0) {
         position = applyHorizontalMovement(
-          toWorldSpace(physical.mCollisionRect, position),
+          toWorldSpace(collisionRect, position),
           position,
           movementX);
       }
 
       // Cache new world space BBox after applying horizontal movement
       // for the next steps
-      const auto bbox = toWorldSpace(physical.mCollisionRect, position);
+      const auto bbox = toWorldSpace(collisionRect, position);
 
       // Apply Gravity after horizontal movement, but before vertical
       // movement. This is so that if the horizontal movement results in the

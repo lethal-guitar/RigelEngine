@@ -16,7 +16,7 @@
 
 #include "game_traits.hpp"
 
-#include <base/warnings.hpp>
+#include "base/warnings.hpp"
 
 
 namespace rigel { namespace data {

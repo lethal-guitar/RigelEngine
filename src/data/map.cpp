@@ -16,7 +16,7 @@
 
 #include "map.hpp"
 
-#include <data/game_traits.hpp>
+#include "data/game_traits.hpp"
 
 #include <algorithm>
 #include <cassert>

@@ -16,10 +16,11 @@
 
 #pragma once
 
-#include <data/duke_script.hpp>
-#include <loader/duke_script_loader.hpp>
-#include <ui/duke_script_runner.hpp>
-#include <game_mode.hpp>
+#include "data/duke_script.hpp"
+#include "loader/duke_script_loader.hpp"
+#include "ui/duke_script_runner.hpp"
+
+#include "game_mode.hpp"
 
 
 namespace rigel {

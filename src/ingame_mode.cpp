@@ -16,15 +16,15 @@
 
 #include "ingame_mode.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/map.hpp>
-#include <data/sound_ids.hpp>
-#include <engine/physics_system.hpp>
-#include <engine/rendering_system.hpp>
-#include <game_logic/player_interaction_system.hpp>
-#include <game_logic/trigger_components.hpp>
-#include <loader/resource_loader.hpp>
-#include <ui/utils.hpp>
+#include "data/game_traits.hpp"
+#include "data/map.hpp"
+#include "data/sound_ids.hpp"
+#include "engine/physics_system.hpp"
+#include "engine/rendering_system.hpp"
+#include "game_logic/player_interaction_system.hpp"
+#include "game_logic/trigger_components.hpp"
+#include "loader/resource_loader.hpp"
+#include "ui/utils.hpp"
 
 #include <cassert>
 #include <chrono>
@@ -36,6 +36,7 @@ namespace rigel {
 using namespace engine;
 using namespace std;
 
+using components::BoundingBox;
 using game_logic::PlayerControlSystem;
 using game_logic::PlayerInteractionSystem;
 using game_logic::MapScrollSystem;
@@ -255,8 +256,7 @@ void IngameMode::checkForLevelExitReached() {
       const auto& playerPosition =
         *mPlayerEntity.component<WorldPosition>().get();
       const auto playerBBox = toWorldSpace(
-        mPlayerEntity.component<Physical>().get()->mCollisionRect,
-        playerPosition);
+        *mPlayerEntity.component<BoundingBox>().get(), playerPosition);
 
       const auto playerAboveOrAtTriggerHeight =
         playerBBox.bottom() <= triggerPosition.y;

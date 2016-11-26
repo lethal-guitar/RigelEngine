@@ -16,12 +16,12 @@
 
 #include "player_control_system.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/map.hpp>
-#include <engine/base_components.hpp>
-#include <engine/physics_system.hpp>
-#include <engine/rendering_system.hpp>
-#include <utils/math_tools.hpp>
+#include "data/game_traits.hpp"
+#include "data/map.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physical_components.hpp"
+#include "engine/rendering_system.hpp"
+#include "utils/math_tools.hpp"
 
 #include <boost/algorithm/cxx11/any_of.hpp>
 
@@ -86,13 +86,8 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
   sprite->mFramesToRender = {isFacingRight ? 39 : 0};
   player.assign<PlayerControlled>(controls);
 
-  player.assign<Physical>(Physical{
-    engine::BoundingBox{
-      {0, 0},
-      {3, 5}},
-    {0.0f, 0.0f},
-    true
-  });
+  player.assign<Physical>(Physical{{0.0f, 0.0f}, true});
+  player.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 5}});
 }
 
 
@@ -133,6 +128,7 @@ void PlayerControlSystem::update(
   auto& state = *mPlayer.component<PlayerControlled>().get();
   auto& physical = *mPlayer.component<Physical>().get();
   auto& sprite = *mPlayer.component<Sprite>().get();
+  auto& boundingBox = *mPlayer.component<BoundingBox>().get();
   auto& worldPosition = *mPlayer.component<WorldPosition>().get();
 
   auto movingLeft = mpPlayerControlInput->mMovingLeft;
@@ -157,7 +153,7 @@ void PlayerControlSystem::update(
   auto horizontalMovementWanted = movingLeft || movingRight;
   auto verticalMovementWanted = movingUp || movingDown;
 
-  auto worldSpacePlayerBounds = physical.mCollisionRect;
+  auto worldSpacePlayerBounds = boundingBox;
   worldSpacePlayerBounds.topLeft += worldPosition;
   worldSpacePlayerBounds.topLeft.y -= worldSpacePlayerBounds.size.height-1;
 
@@ -244,25 +240,15 @@ void PlayerControlSystem::update(
       state.mIsLookingUp = true;
 
       if (!state.mPerformedInteraction) {
-        es.each<Interactable, WorldPosition, Physical>(
-          [&state, &worldSpacePlayerBounds, &events, &physical](
+        es.each<Interactable, WorldPosition, BoundingBox>(
+          [&state, &worldSpacePlayerBounds, &events](
             ex::Entity entity,
             const Interactable& interactable,
             const WorldPosition& pos,
-            const Physical&
+            const BoundingBox& bbox
           ) {
-            SDL_Rect sdlObjectBounds{
-              pos.x,
-              pos.y - (physical.mCollisionRect.size.height - 1),
-              physical.mCollisionRect.size.width,
-              physical.mCollisionRect.size.height
-            };
-            SDL_Rect sdlPlayerBounds{
-              worldSpacePlayerBounds.topLeft.x,
-              worldSpacePlayerBounds.topLeft.y,
-              worldSpacePlayerBounds.size.width,
-              worldSpacePlayerBounds.size.height};
-            if (SDL_HasIntersection(&sdlObjectBounds, &sdlPlayerBounds)) {
+            const auto objectBounds = engine::toWorldSpace(bbox, pos);
+            if (worldSpacePlayerBounds.intersects(objectBounds)) {
               events.emit<events::PlayerInteraction>(entity, interactable.mType);
               state.mPerformedInteraction = true;
             }
@@ -328,20 +314,20 @@ void PlayerControlSystem::update(
     state.mState != oldState ||
     state.mOrientation != oldOrientation
   ) {
-    updateAnimationStateAndBoundingBox(state, sprite, physical);
+    updateAnimationStateAndBoundingBox(state, sprite, boundingBox);
   }
 }
 
 void PlayerControlSystem::updateAnimationStateAndBoundingBox(
   const PlayerControlled& state,
   Sprite& sprite,
-  Physical& physical
+  BoundingBox& bbox
 ) {
   // All the magic numbers in this function are matched to the frame indices in
   // the game's sprite sheet for Duke.
 
   boost::optional<int> endFrameOffset;
-  engine::BoundingBox newBoundingRect{
+  BoundingBox newBoundingRect{
     {0, 0},
     {3, 5}
   };
@@ -395,11 +381,11 @@ void PlayerControlSystem::updateAnimationStateAndBoundingBox(
       orientedAnimationFrame + *endFrameOffset}}});
   }
 
-  physical.mCollisionRect = newBoundingRect;
+  bbox = newBoundingRect;
 }
 
 bool PlayerControlSystem::canClimbUp(
-  const engine::BoundingBox& worldSpacePlayerBounds
+  const BoundingBox& worldSpacePlayerBounds
 ) const {
   // Is there still ladder above the player's current position?
   const auto row = worldSpacePlayerBounds.topLeft.y - 1;
@@ -413,7 +399,7 @@ bool PlayerControlSystem::canClimbUp(
 }
 
 bool PlayerControlSystem::canClimbDown(
-  const engine::BoundingBox& worldSpacePlayerBounds
+  const BoundingBox& worldSpacePlayerBounds
 ) const {
   // Is there still ladder below the player's current position?
   const auto row = worldSpacePlayerBounds.bottomLeft().y + 1;
@@ -427,7 +413,7 @@ bool PlayerControlSystem::canClimbDown(
 }
 
 boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
-  const engine::BoundingBox& worldSpacePlayerBounds
+  const BoundingBox& worldSpacePlayerBounds
 ) const {
   const auto position = worldSpacePlayerBounds.topLeft;
   const auto size = worldSpacePlayerBounds.size;
@@ -463,17 +449,17 @@ void MapScrollSystem::update(
   entityx::TimeDelta dt
 ) {
   const auto& state = *mPlayer.component<PlayerControlled>().get();
-  const auto& physical = *mPlayer.component<Physical>().get();
+  const auto& bbox = *mPlayer.component<BoundingBox>().get();
   const auto& worldPosition = *mPlayer.component<WorldPosition>().get();
 
-  updateScrollOffset(state, worldPosition, physical, dt);
+  updateScrollOffset(state, worldPosition, bbox, dt);
 }
 
 
 void MapScrollSystem::updateScrollOffset(
   const PlayerControlled& state,
   const WorldPosition& playerPosition,
-  const Physical& physical,
+  const BoundingBox& originalPlayerBounds,
   const ex::TimeDelta dt
 ) {
   if (updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
@@ -487,7 +473,7 @@ void MapScrollSystem::updateScrollOffset(
     }
   }
 
-  auto playerBounds = physical.mCollisionRect;
+  auto playerBounds = originalPlayerBounds;
   playerBounds.topLeft =
     (playerPosition - base::Vector{0, playerBounds.size.height - 1});
 

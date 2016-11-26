@@ -14,27 +14,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "error.hpp"
+#pragma once
 
-#include "base/warnings.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <SDL.h>
-RIGEL_RESTORE_WARNINGS
+#include "base/spatial_types.hpp"
 
 
-namespace rigel { namespace sdl_utils {
+namespace rigel { namespace engine {
 
-Error::Error()
-  : Error(SDL_GetError())
-{
+
+namespace components {
+
+struct Physical {
+  base::Point<float> mVelocity;
+  bool mGravityAffected;
+};
+
 }
 
 
-Error::Error(const std::string& message)
-  : std::runtime_error(std::string("SDL error: ") + message)
-{
-}
-
+components::BoundingBox toWorldSpace(
+  const components::BoundingBox& bbox, const base::Vector& entityPosition);
 
 }}

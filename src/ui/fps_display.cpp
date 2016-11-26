@@ -16,7 +16,7 @@
 
 #include "fps_display.hpp"
 
-#include <loader/resource_loader.hpp>
+#include "loader/resource_loader.hpp"
 
 #include <cmath>
 #include <iomanip>

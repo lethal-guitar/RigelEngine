@@ -16,10 +16,10 @@
 
 #include "menu_element_renderer.hpp"
 
-#include <data/game_traits.hpp>
-#include <data/unit_conversions.hpp>
-#include <engine/timing.hpp>
-#include <loader/resource_loader.hpp>
+#include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "engine/timing.hpp"
+#include "loader/resource_loader.hpp"
 
 #include <cassert>
 #include <cmath>

@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <base/spatial_types.hpp>
-#include <data/game_traits.hpp>
+#include "base/spatial_types.hpp"
+#include "data/game_traits.hpp"
 
 
 namespace rigel { namespace data {

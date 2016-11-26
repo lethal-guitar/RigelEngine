@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <base/spatial_types.hpp>
-#include <base/grid.hpp>
-#include <base/warnings.hpp>
-#include <engine/base_components.hpp>
-#include <engine/physics_system.hpp>
-#include <engine/timing.hpp>
+#include "base/spatial_types.hpp"
+#include "base/grid.hpp"
+#include "base/warnings.hpp"
+#include "engine/base_components.hpp"
+#include "engine/physics_system.hpp"
+#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -141,14 +141,14 @@ private:
   void updateAnimationStateAndBoundingBox(
     const components::PlayerControlled& state,
     engine::components::Sprite& sprite,
-    engine::components::Physical& physical);
+    engine::components::BoundingBox& bbox);
 
   boost::optional<base::Vector> findLadderTouchPoint(
-    const engine::BoundingBox& worldSpacePlayerBounds
+    const engine::components::BoundingBox& worldSpacePlayerBounds
   ) const;
 
-  bool canClimbUp(const engine::BoundingBox& worldSpacePlayerBounds) const;
-  bool canClimbDown(const engine::BoundingBox& worldSpacePlayerBounds) const;
+  bool canClimbUp(const engine::components::BoundingBox& worldSpacePlayerBounds) const;
+  bool canClimbDown(const engine::components::BoundingBox& worldSpacePlayerBounds) const;
 
 private:
   engine::TimeStepper mTimeStepper;
@@ -176,7 +176,7 @@ private:
   void updateScrollOffset(
     const components::PlayerControlled& state,
     const engine::components::WorldPosition& position,
-    const engine::components::Physical& physical,
+    const engine::components::BoundingBox& playerBounds,
     entityx::TimeDelta dt);
 
 private:

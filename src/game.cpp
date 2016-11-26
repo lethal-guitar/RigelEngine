@@ -16,16 +16,16 @@
 
 #include "game.hpp"
 
-#include <data/duke_script.hpp>
-#include <data/game_traits.hpp>
-#include <engine/timing.hpp>
-#include <loader/duke_script_loader.hpp>
-#include <sdl_utils/error.hpp>
+#include "data/duke_script.hpp"
+#include "data/game_traits.hpp"
+#include "engine/timing.hpp"
+#include "loader/duke_script_loader.hpp"
+#include "sdl_utils/error.hpp"
 
-#include <game_session_mode.hpp>
-#include <ingame_mode.hpp>
-#include <intro_demo_loop_mode.hpp>
-#include <menu_mode.hpp>
+#include "game_session_mode.hpp"
+#include "ingame_mode.hpp"
+#include "intro_demo_loop_mode.hpp"
+#include "menu_mode.hpp"
 
 #include <cassert>
 #include <cmath>

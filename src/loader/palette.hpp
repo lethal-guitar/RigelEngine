@@ -16,11 +16,12 @@
 
 #pragma once
 
-#include <data/image.hpp>
-#include <loader/byte_buffer.hpp>
+#include "data/image.hpp"
+#include "loader/byte_buffer.hpp"
 
 #include <array>
 #include <cstdint>
+
 
 namespace rigel { namespace loader {
 

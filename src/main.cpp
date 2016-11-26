@@ -14,11 +14,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <game.hpp>
+#include "base/warnings.hpp"
+#include "sdl_utils/error.hpp"
+#include "sdl_utils/ptr.hpp"
 
-#include <base/warnings.hpp>
-#include <sdl_utils/error.hpp>
-#include <sdl_utils/ptr.hpp>
+#include "game.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/program_options.hpp>
@@ -232,6 +232,10 @@ int main(int argc, char** argv) {
       }
 
       gameOptions.mLevelToJumpTo = std::make_pair(episode, level);
+    }
+
+    if (!gamePath.empty() && gamePath.back() != '/') {
+      gamePath += "/";
     }
 
     initAndRunGame(gamePath, gameOptions);

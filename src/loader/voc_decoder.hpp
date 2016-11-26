@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <data/audio_buffer.hpp>
-#include <loader/byte_buffer.hpp>
+#include "data/audio_buffer.hpp"
+#include "loader/byte_buffer.hpp"
 
 
 namespace rigel { namespace loader {
