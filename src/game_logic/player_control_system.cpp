@@ -119,7 +119,6 @@ void PlayerControlSystem::update(
 ) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Physical>());
-  assert(mPlayer.has_component<Sprite>());
   assert(mPlayer.has_component<WorldPosition>());
 
   const auto hasTicks =
@@ -127,7 +126,6 @@ void PlayerControlSystem::update(
 
   auto& state = *mPlayer.component<PlayerControlled>().get();
   auto& physical = *mPlayer.component<Physical>().get();
-  auto& sprite = *mPlayer.component<Sprite>().get();
   auto& boundingBox = *mPlayer.component<BoundingBox>().get();
   auto& worldPosition = *mPlayer.component<WorldPosition>().get();
 
@@ -314,8 +312,6 @@ void PlayerControlSystem::update(
     state.mState != oldState ||
     state.mOrientation != oldOrientation
   ) {
-    updateAnimationState(state, sprite);
-
     const auto boundingBoxHeight =
       state.mState == PlayerState::Crouching ? 4 : 5;
     boundingBox = BoundingBox{
@@ -325,7 +321,85 @@ void PlayerControlSystem::update(
   }
 }
 
-void PlayerControlSystem::updateAnimationState(
+bool PlayerControlSystem::canClimbUp(
+  const BoundingBox& worldSpacePlayerBounds
+) const {
+  // Is there still ladder above the player's current position?
+  const auto row = worldSpacePlayerBounds.topLeft.y - 1;
+  for (int x=0; x<worldSpacePlayerBounds.size.width; ++x) {
+    const auto col = x + worldSpacePlayerBounds.topLeft.x;
+    if (mLadderFlags.valueAtWithDefault(col, row, 0) == 1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool PlayerControlSystem::canClimbDown(
+  const BoundingBox& worldSpacePlayerBounds
+) const {
+  // Is there still ladder below the player's current position?
+  const auto row = worldSpacePlayerBounds.bottomLeft().y + 1;
+  for (int x=0; x<worldSpacePlayerBounds.size.width; ++x) {
+    const auto col = x + worldSpacePlayerBounds.topLeft.x;
+    if (mLadderFlags.valueAtWithDefault(col, row, 0) == 1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
+  const BoundingBox& worldSpacePlayerBounds
+) const {
+  const auto position = worldSpacePlayerBounds.topLeft;
+  const auto size = worldSpacePlayerBounds.size;
+  for (auto row=position.y; row<position.y+size.height; ++row) {
+    for (auto col=position.x; col<position.x+size.width; ++col) {
+      if (mLadderFlags.valueAtWithDefault(col, row, 0)) {
+        return base::Vector{col, row};
+      }
+    }
+  }
+
+  return boost::none;
+}
+
+
+PlayerAnimationSystem::PlayerAnimationSystem(ex::Entity player)
+  : mPlayer(player)
+{
+  assert(mPlayer.has_component<PlayerControlled>());
+  auto& state = *mPlayer.component<PlayerControlled>().get();
+  mPreviousOrientation = state.mOrientation;
+  mPreviousState = state.mState;
+}
+
+
+void PlayerAnimationSystem::update(
+  entityx::EntityManager& es,
+  entityx::EventManager& events,
+  entityx::TimeDelta dt
+) {
+  assert(mPlayer.has_component<PlayerControlled>());
+  assert(mPlayer.has_component<Sprite>());
+
+  auto& state = *mPlayer.component<PlayerControlled>().get();
+  auto& sprite = *mPlayer.component<Sprite>().get();
+
+  if (
+    state.mState != mPreviousState ||
+    state.mOrientation != mPreviousOrientation
+  ) {
+    updateAnimation(state, sprite);
+
+    mPreviousState = state.mState;
+    mPreviousOrientation = state.mOrientation;
+  }
+}
+
+
+void PlayerAnimationSystem::updateAnimation(
   const PlayerControlled& state,
   Sprite& sprite
 ) {
@@ -383,49 +457,6 @@ void PlayerControlSystem::updateAnimationState(
   }
 }
 
-bool PlayerControlSystem::canClimbUp(
-  const BoundingBox& worldSpacePlayerBounds
-) const {
-  // Is there still ladder above the player's current position?
-  const auto row = worldSpacePlayerBounds.topLeft.y - 1;
-  for (int x=0; x<worldSpacePlayerBounds.size.width; ++x) {
-    const auto col = x + worldSpacePlayerBounds.topLeft.x;
-    if (mLadderFlags.valueAtWithDefault(col, row, 0) == 1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool PlayerControlSystem::canClimbDown(
-  const BoundingBox& worldSpacePlayerBounds
-) const {
-  // Is there still ladder below the player's current position?
-  const auto row = worldSpacePlayerBounds.bottomLeft().y + 1;
-  for (int x=0; x<worldSpacePlayerBounds.size.width; ++x) {
-    const auto col = x + worldSpacePlayerBounds.topLeft.x;
-    if (mLadderFlags.valueAtWithDefault(col, row, 0) == 1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
-  const BoundingBox& worldSpacePlayerBounds
-) const {
-  const auto position = worldSpacePlayerBounds.topLeft;
-  const auto size = worldSpacePlayerBounds.size;
-  for (auto row=position.y; row<position.y+size.height; ++row) {
-    for (auto col=position.x; col<position.x+size.width; ++col) {
-      if (mLadderFlags.valueAtWithDefault(col, row, 0)) {
-        return base::Vector{col, row};
-      }
-    }
-  }
-
-  return boost::none;
-}
 
 
 MapScrollSystem::MapScrollSystem(

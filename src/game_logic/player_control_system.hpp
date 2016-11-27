@@ -136,10 +136,6 @@ public:
   ) override;
 
 private:
-  void updateAnimationState(
-    const components::PlayerControlled& state,
-    engine::components::Sprite& sprite);
-
   boost::optional<base::Vector> findLadderTouchPoint(
     const engine::components::BoundingBox& worldSpacePlayerBounds
   ) const;
@@ -153,6 +149,28 @@ private:
   entityx::Entity mPlayer;
 
   base::Grid<std::uint8_t> mLadderFlags;
+};
+
+
+class PlayerAnimationSystem : public entityx::System<PlayerAnimationSystem> {
+public:
+  explicit PlayerAnimationSystem(entityx::Entity player);
+
+  void update(
+    entityx::EntityManager& es,
+    entityx::EventManager& events,
+    entityx::TimeDelta dt
+  ) override;
+
+private:
+  void updateAnimation(
+    const components::PlayerControlled& state,
+    engine::components::Sprite& sprite);
+
+private:
+  entityx::Entity mPlayer;
+  detail::Orientation mPreviousOrientation;
+  detail::PlayerState mPreviousState;
 };
 
 

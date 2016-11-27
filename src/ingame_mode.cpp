@@ -37,6 +37,7 @@ using namespace engine;
 using namespace std;
 
 using components::BoundingBox;
+using game_logic::PlayerAnimationSystem;
 using game_logic::PlayerControlSystem;
 using game_logic::PlayerInteractionSystem;
 using game_logic::MapScrollSystem;
@@ -139,6 +140,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // ----------
   // updating
   mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<PlayerAnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
   mEntities.systems.update<PhysicsSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
@@ -213,6 +215,7 @@ void IngameMode::loadLevel(
     &mPlayerInputs,
     mLevelData.mMap,
     mLevelData.mTileAttributes);
+  mEntities.systems.add<game_logic::PlayerAnimationSystem>(mPlayerEntity);
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
