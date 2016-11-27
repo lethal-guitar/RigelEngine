@@ -136,10 +136,9 @@ public:
   ) override;
 
 private:
-  void updateAnimationStateAndBoundingBox(
+  void updateAnimationState(
     const components::PlayerControlled& state,
-    engine::components::Sprite& sprite,
-    engine::components::BoundingBox& bbox);
+    engine::components::Sprite& sprite);
 
   boost::optional<base::Vector> findLadderTouchPoint(
     const engine::components::BoundingBox& worldSpacePlayerBounds

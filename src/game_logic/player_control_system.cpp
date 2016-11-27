@@ -314,23 +314,25 @@ void PlayerControlSystem::update(
     state.mState != oldState ||
     state.mOrientation != oldOrientation
   ) {
-    updateAnimationStateAndBoundingBox(state, sprite, boundingBox);
+    updateAnimationState(state, sprite);
+
+    const auto boundingBoxHeight =
+      state.mState == PlayerState::Crouching ? 4 : 5;
+    boundingBox = BoundingBox{
+      {0, 0},
+      {3, boundingBoxHeight}
+    };
   }
 }
 
-void PlayerControlSystem::updateAnimationStateAndBoundingBox(
+void PlayerControlSystem::updateAnimationState(
   const PlayerControlled& state,
-  Sprite& sprite,
-  BoundingBox& bbox
+  Sprite& sprite
 ) {
   // All the magic numbers in this function are matched to the frame indices in
   // the game's sprite sheet for Duke.
 
   boost::optional<int> endFrameOffset;
-  BoundingBox newBoundingRect{
-    {0, 0},
-    {3, 5}
-  };
   int newAnimationFrame = 0;
 
   switch (state.mState) {
@@ -349,7 +351,6 @@ void PlayerControlSystem::updateAnimationStateAndBoundingBox(
 
     case PlayerState::Crouching:
       newAnimationFrame = 17;
-      newBoundingRect.size.height = 4;
       break;
 
     case PlayerState::Airborne:
@@ -380,8 +381,6 @@ void PlayerControlSystem::updateAnimationStateAndBoundingBox(
       orientedAnimationFrame,
       orientedAnimationFrame + *endFrameOffset}}});
   }
-
-  bbox = newBoundingRect;
 }
 
 bool PlayerControlSystem::canClimbUp(
