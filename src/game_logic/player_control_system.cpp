@@ -91,6 +91,17 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 }
 
 
+/* WARNING: PROTOTYPE CODE
+ *
+ * The current PlayerControlSystem is a quick & dirty first prototype of the
+ * player movement. It's not very easy to folow or maintainable. It will be
+ * replaced by a new implementation as soon as more player movement features
+ * will be implemented.
+ *
+ * TODO: Rewrite PlayerControlSystem
+ */
+
+
 PlayerControlSystem::PlayerControlSystem(
   entityx::Entity player,
   const PlayerInputState* pInputs,
