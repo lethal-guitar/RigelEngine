@@ -27,6 +27,7 @@ namespace rigel { namespace engine {
 
 using TimeDelta = double;
 
+
 constexpr TimeDelta slowTicksToTime(const int ticks) {
   return ticks * (1.0 / 140.0);
 }
@@ -44,6 +45,11 @@ constexpr TimeDelta fastTicksToTime(const int ticks) {
 
 constexpr double timeToFastTicks(const TimeDelta time) {
   return time / (1.0 / 280.0);
+}
+
+
+constexpr double timeToGameFrames(const TimeDelta time) {
+  return time / (fastTicksToTime(1) * 16.0);
 }
 
 
