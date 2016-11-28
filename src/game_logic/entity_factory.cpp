@@ -53,7 +53,7 @@ BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
   const auto dimensionsInTiles = pixelExtentsToTileExtents(
     sprite.mImage.extents());
 
-  return {{0, 0}, dimensionsInTiles};
+  return {sprite.mDrawOffset, dimensionsInTiles};
 }
 
 

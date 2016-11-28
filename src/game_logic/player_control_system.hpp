@@ -29,6 +29,10 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
+namespace rigel {
+  struct IGameServiceProvider;
+}
+
 namespace rigel { namespace data { namespace map {
   class Map;
   class TileAttributes;
@@ -42,7 +46,7 @@ namespace rigel { namespace engine { namespace components {
 
 namespace rigel { namespace game_logic {
 
-namespace detail {
+namespace player {
 
 enum class Orientation {
   None,
@@ -57,10 +61,24 @@ enum class PlayerState {
   Crouching,
   LookingUp,
   ClimbingLadder,
-  Airborne
+  Airborne,
+  Dieing,
+  Dead
+};
+
+
+}
+
+
+namespace detail {
+
+struct DeathAnimationState {
+  engine::TimeStepper mStepper;
+  int mElapsedFrames = 0;
 };
 
 }
+
 
 struct PlayerInputState {
   bool mMovingLeft = false;
@@ -75,8 +93,11 @@ struct PlayerInputState {
 namespace components {
 
 struct PlayerControlled {
-  detail::Orientation mOrientation = detail::Orientation::Left;
-  detail::PlayerState mState = detail::PlayerState::Standing;
+  player::Orientation mOrientation = player::Orientation::Left;
+  player::PlayerState mState = player::PlayerState::Standing;
+
+  boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
+  boost::optional<detail::DeathAnimationState> mDeathAnimationState;
 
   bool mIsLookingUp = false;
   bool mIsLookingDown = false;
@@ -84,6 +105,13 @@ struct PlayerControlled {
   bool mPerformedInteraction = false;
   bool mPerformedJump = false;
   bool mPerformedShot = false;
+
+
+  bool isPlayerDead() const {
+    return
+      mState == player::PlayerState::Dieing ||
+      mState == player::PlayerState::Dead;
+  }
 };
 
 
@@ -135,14 +163,7 @@ public:
     entityx::TimeDelta dt
   ) override;
 
-  void updateScrollOffset();
-
 private:
-  void updateAnimationStateAndBoundingBox(
-    const components::PlayerControlled& state,
-    engine::components::Sprite& sprite,
-    engine::components::BoundingBox& bbox);
-
   boost::optional<base::Vector> findLadderTouchPoint(
     const engine::components::BoundingBox& worldSpacePlayerBounds
   ) const;
@@ -156,6 +177,41 @@ private:
   entityx::Entity mPlayer;
 
   base::Grid<std::uint8_t> mLadderFlags;
+};
+
+
+class PlayerAnimationSystem : public entityx::System<PlayerAnimationSystem> {
+public:
+  explicit PlayerAnimationSystem(
+    entityx::Entity player,
+    IGameServiceProvider* pServiceProvider);
+
+  void update(
+    entityx::EntityManager& es,
+    entityx::EventManager& events,
+    entityx::TimeDelta dt
+  ) override;
+
+private:
+  void updateAnimation(
+    const components::PlayerControlled& state,
+    engine::components::Sprite& sprite);
+
+  void updateMercyFramesAnimation(
+    engine::TimeDelta mercyTimeElapsed,
+    engine::components::Sprite& sprite);
+
+  void updateDeathAnimation(
+    components::PlayerControlled& state,
+    engine::components::Sprite& sprite,
+    engine::TimeDelta dt);
+
+private:
+  entityx::Entity mPlayer;
+  IGameServiceProvider* mpServiceProvider;
+
+  player::Orientation mPreviousOrientation;
+  player::PlayerState mPreviousState;
 };
 
 

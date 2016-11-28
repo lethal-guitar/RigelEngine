@@ -18,10 +18,13 @@
 
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
+#include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/rendering_system.hpp"
 #include "utils/math_tools.hpp"
+
+#include "game_mode.hpp"
 
 #include <boost/algorithm/cxx11/any_of.hpp>
 
@@ -34,7 +37,7 @@ namespace rigel { namespace game_logic {
 
 using namespace components;
 using namespace rigel::engine::components;
-using namespace detail;
+using namespace player;
 using namespace std;
 
 using engine::TimeStepper;
@@ -91,6 +94,17 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 }
 
 
+/* WARNING: PROTOTYPE CODE
+ *
+ * The current PlayerControlSystem is a quick & dirty first prototype of the
+ * player movement. It's not very easy to folow or maintainable. It will be
+ * replaced by a new implementation as soon as more player movement features
+ * will be implemented.
+ *
+ * TODO: Rewrite PlayerControlSystem
+ */
+
+
 PlayerControlSystem::PlayerControlSystem(
   entityx::Entity player,
   const PlayerInputState* pInputs,
@@ -119,7 +133,6 @@ void PlayerControlSystem::update(
 ) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Physical>());
-  assert(mPlayer.has_component<Sprite>());
   assert(mPlayer.has_component<WorldPosition>());
 
   const auto hasTicks =
@@ -127,9 +140,12 @@ void PlayerControlSystem::update(
 
   auto& state = *mPlayer.component<PlayerControlled>().get();
   auto& physical = *mPlayer.component<Physical>().get();
-  auto& sprite = *mPlayer.component<Sprite>().get();
   auto& boundingBox = *mPlayer.component<BoundingBox>().get();
   auto& worldPosition = *mPlayer.component<WorldPosition>().get();
+
+  if (state.isPlayerDead()) {
+    return;
+  }
 
   auto movingLeft = mpPlayerControlInput->mMovingLeft;
   auto movingRight = mpPlayerControlInput->mMovingRight;
@@ -314,74 +330,13 @@ void PlayerControlSystem::update(
     state.mState != oldState ||
     state.mOrientation != oldOrientation
   ) {
-    updateAnimationStateAndBoundingBox(state, sprite, boundingBox);
+    const auto boundingBoxHeight =
+      state.mState == PlayerState::Crouching ? 4 : 5;
+    boundingBox = BoundingBox{
+      {0, 0},
+      {3, boundingBoxHeight}
+    };
   }
-}
-
-void PlayerControlSystem::updateAnimationStateAndBoundingBox(
-  const PlayerControlled& state,
-  Sprite& sprite,
-  BoundingBox& bbox
-) {
-  // All the magic numbers in this function are matched to the frame indices in
-  // the game's sprite sheet for Duke.
-
-  boost::optional<int> endFrameOffset;
-  BoundingBox newBoundingRect{
-    {0, 0},
-    {3, 5}
-  };
-  int newAnimationFrame = 0;
-
-  switch (state.mState) {
-    case PlayerState::Standing:
-      newAnimationFrame = 0;
-      break;
-
-    case PlayerState::Walking:
-      newAnimationFrame = 1;
-      endFrameOffset = 3;
-      break;
-
-    case PlayerState::LookingUp:
-      newAnimationFrame = 16;
-      break;
-
-    case PlayerState::Crouching:
-      newAnimationFrame = 17;
-      newBoundingRect.size.height = 4;
-      break;
-
-    case PlayerState::Airborne:
-      newAnimationFrame = 8;
-      break;
-
-    case PlayerState::ClimbingLadder:
-      newAnimationFrame = 36;
-      break;
-
-    default:
-      break;
-  }
-
-  const auto orientationOffset =
-    state.mOrientation == Orientation::Right ? 39 : 0;
-
-  const auto orientedAnimationFrame =
-    newAnimationFrame + orientationOffset;
-  sprite.mFramesToRender[0] = orientedAnimationFrame;
-
-  if (mPlayer.has_component<Animated>()) {
-    mPlayer.remove<Animated>();
-  }
-  if (endFrameOffset) {
-    mPlayer.assign<Animated>(Animated{{AnimationSequence{
-      4,
-      orientedAnimationFrame,
-      orientedAnimationFrame + *endFrameOffset}}});
-  }
-
-  bbox = newBoundingRect;
 }
 
 bool PlayerControlSystem::canClimbUp(
@@ -426,6 +381,177 @@ boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
   }
 
   return boost::none;
+}
+
+
+PlayerAnimationSystem::PlayerAnimationSystem(
+  ex::Entity player,
+  IGameServiceProvider* pServiceProvider
+)
+  : mPlayer(player)
+  , mpServiceProvider(pServiceProvider)
+{
+  assert(mPlayer.has_component<PlayerControlled>());
+  auto& state = *mPlayer.component<PlayerControlled>().get();
+  mPreviousOrientation = state.mOrientation;
+  mPreviousState = state.mState;
+}
+
+
+void PlayerAnimationSystem::update(
+  entityx::EntityManager& es,
+  entityx::EventManager& events,
+  entityx::TimeDelta dt
+) {
+  assert(mPlayer.has_component<PlayerControlled>());
+  assert(mPlayer.has_component<Sprite>());
+
+  auto& state = *mPlayer.component<PlayerControlled>().get();
+  auto& sprite = *mPlayer.component<Sprite>().get();
+
+  if (state.mState == player::PlayerState::Dead) {
+    return;
+  }
+
+  if (state.mState == player::PlayerState::Dieing) {
+    // Initialize animation on first frame
+    if (!state.mDeathAnimationState) {
+      state.mDeathAnimationState = detail::DeathAnimationState{};
+
+      if (mPlayer.has_component<Animated>()) {
+        mPlayer.remove<Animated>();
+      }
+    }
+
+    updateDeathAnimation(state, sprite, dt);
+  } else {
+    sprite.mShow = true;
+    if (state.mMercyFramesTimeElapsed) {
+      updateMercyFramesAnimation(*state.mMercyFramesTimeElapsed, sprite);
+    }
+
+    if (
+      state.mState != mPreviousState ||
+      state.mOrientation != mPreviousOrientation
+    ) {
+      updateAnimation(state, sprite);
+
+      mPreviousState = state.mState;
+      mPreviousOrientation = state.mOrientation;
+    }
+  }
+}
+
+
+void PlayerAnimationSystem::updateMercyFramesAnimation(
+  const engine::TimeDelta mercyTimeElapsed,
+  Sprite& sprite
+) {
+  // TODO: Flash white at end of mercy frames instead of blinking to
+  // invisible.
+  const auto mercyFramesElapsed =
+    static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
+  const auto blinkSprite = mercyFramesElapsed % 2 != 0;
+  sprite.mShow = !blinkSprite;
+}
+
+
+void PlayerAnimationSystem::updateDeathAnimation(
+  PlayerControlled& playerState,
+  Sprite& sprite,
+  engine::TimeDelta dt
+) {
+  assert(playerState.mState == PlayerState::Dieing);
+  assert(playerState.mDeathAnimationState);
+
+  auto& animationState = *playerState.mDeathAnimationState;
+  if (!updateAndCheckIfDesiredTicksElapsed(animationState.mStepper, 2, dt)) {
+    return;
+  }
+
+  const auto elapsedFrames = ++animationState.mElapsedFrames;
+
+  boost::optional<int> newFrameToShow;
+  if (elapsedFrames == 1) {
+    newFrameToShow = 29;
+  } else if (elapsedFrames == 5) {
+    newFrameToShow = 30;
+  } else if (elapsedFrames == 6) {
+    newFrameToShow = 31;
+  } else if (elapsedFrames == 7) {
+    newFrameToShow = 32;
+  } else if (elapsedFrames == 17) {
+    // TODO: Trigger particles
+    sprite.mShow = false;
+    mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
+  } else if (elapsedFrames >= 42) {
+    playerState.mState = PlayerState::Dead;
+  }
+
+  if (newFrameToShow) {
+    const auto orientationOffset =
+      playerState.mOrientation == Orientation::Right ? 39 : 0;
+    sprite.mFramesToRender[0] = *newFrameToShow + orientationOffset;
+  }
+}
+
+
+void PlayerAnimationSystem::updateAnimation(
+  const PlayerControlled& state,
+  Sprite& sprite
+) {
+  // All the magic numbers in this function are matched to the frame indices in
+  // the game's sprite sheet for Duke.
+
+  boost::optional<int> endFrameOffset;
+  int newAnimationFrame = 0;
+
+  switch (state.mState) {
+    case PlayerState::Standing:
+      newAnimationFrame = 0;
+      break;
+
+    case PlayerState::Walking:
+      newAnimationFrame = 1;
+      endFrameOffset = 3;
+      break;
+
+    case PlayerState::LookingUp:
+      newAnimationFrame = 16;
+      break;
+
+    case PlayerState::Crouching:
+      newAnimationFrame = 17;
+      break;
+
+    case PlayerState::Airborne:
+      newAnimationFrame = 8;
+      break;
+
+    case PlayerState::ClimbingLadder:
+      newAnimationFrame = 36;
+      break;
+
+    default:
+      break;
+  }
+
+  const auto orientationOffset =
+    state.mOrientation == Orientation::Right ? 39 : 0;
+
+  const auto orientedAnimationFrame =
+    newAnimationFrame + orientationOffset;
+  sprite.mFramesToRender[0] = orientedAnimationFrame;
+
+  if (mPlayer.has_component<Animated>()) {
+    mPlayer.remove<Animated>();
+  }
+  if (endFrameOffset) {
+    mPlayer.assign<Animated>(Animated{{AnimationSequence{
+      4,
+      orientedAnimationFrame,
+      orientedAnimationFrame + *endFrameOffset}}});
+  }
 }
 
 

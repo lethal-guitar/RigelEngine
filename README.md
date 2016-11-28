@@ -18,17 +18,17 @@ running in DosBox.
 
 ## Current state
 
-The project is still in an extremely early state. There are many areas of the
+The project is still in an extremely early state. There are a few areas of the
 code which are rather hacky, early protoypes, and will be replaced in the future.
 There is also not much functionality yet.
 
 You can already load levels and walk/jump around in them, as well as collect
-items.  Climbing ladders also works, but hanging onto climbing poles isn't
-implemented yet.  There is not much interactivity otherwise, none of the
-enemies do anything, you cannot take any damage, rocket elevators don't work
-yet, and you cannot shoot any weapon. Due to those missing features, it is
-currently not possible to complete most of the levels. The exit can already
-be reached in some levels though, e.g. L3 and L6.
+items. The player can take damage and die.  Climbing ladders also works, but
+hanging onto climbing poles isn't implemented yet.  There is not much
+interactivity otherwise, none of the enemies do anything, rocket elevators
+don't work yet, and you cannot shoot any weapon. Due to the missing features,
+it is currently not possible to complete most of the levels. The exit can
+already be reached in some levels though, e.g. L3 and M2.
 
 Many of the game's other systems, like most of the menus, intro movie and story
 sequences etc. are already implemented.

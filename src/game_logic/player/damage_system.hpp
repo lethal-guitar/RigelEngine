@@ -17,57 +17,37 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/player_data.hpp"
+#include "engine/timing.hpp"
+
+#include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace game_logic { namespace player {
 
-using TimeDelta = double;
-
-
-constexpr TimeDelta slowTicksToTime(const int ticks) {
-  return ticks * (1.0 / 140.0);
-}
-
-
-constexpr double timeToSlowTicks(const TimeDelta time) {
-  return time / (1.0 / 140.0);
-}
-
-
-constexpr TimeDelta fastTicksToTime(const int ticks) {
-  return ticks * (1.0 / 280.0);
-}
-
-
-constexpr double timeToFastTicks(const TimeDelta time) {
-  return time / (1.0 / 280.0);
-}
-
-
-constexpr double timeToGameFrames(const TimeDelta time) {
-  return time / (fastTicksToTime(1) * 16.0);
-}
-
-
-class TimeStepper {
+class DamageSystem : public entityx::System<DamageSystem> {
 public:
-  void update(engine::TimeDelta dt);
+  DamageSystem(
+    entityx::Entity player,
+    data::PlayerModel* pPlayerModel,
+    IGameServiceProvider* pServiceProvider,
+    int numMercyFrames);
 
-  int elapsedTicks() const;
-  void resetToRemainder();
+  void update(
+    entityx::EntityManager& es,
+    entityx::EventManager& events,
+    entityx::TimeDelta dt) override;
 
 private:
-  engine::TimeDelta mElapsedTime = 0;
+  entityx::Entity mPlayer;
+  data::PlayerModel* mpPlayerModel;
+  IGameServiceProvider* mpServiceProvider;
+  int mNumMercyFrames;
 };
 
 
-bool updateAndCheckIfDesiredTicksElapsed(
-  TimeStepper& stepper,
-  const int desiredTicks,
-  engine::TimeDelta dt);
-
-}}
+}}}

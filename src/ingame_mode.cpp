@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
@@ -34,13 +35,11 @@
 namespace rigel {
 
 using namespace engine;
+using namespace game_logic;
 using namespace std;
 
-using components::BoundingBox;
-using game_logic::PlayerControlSystem;
-using game_logic::PlayerInteractionSystem;
-using game_logic::MapScrollSystem;
 using data::PlayerModel;
+using engine::components::BoundingBox;
 
 
 namespace {
@@ -68,6 +67,25 @@ std::string loadingScreenFileName(const int episode) {
   return fileName;
 }
 
+
+int mercyFramesForDifficulty(const data::Difficulty difficulty) {
+  using data::Difficulty;
+
+  switch (difficulty) {
+    case Difficulty::Easy:
+      return 40;
+
+    case Difficulty::Medium:
+      return 30;
+
+    case Difficulty::Hard:
+      return 20;
+  }
+
+  assert(false);
+  return 40;
+}
+
 }
 
 
@@ -80,6 +98,7 @@ IngameMode::IngameMode(
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
   , mEntityFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
+  , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
   , mHudRenderer(
       &mPlayerModel,
@@ -132,24 +151,24 @@ void IngameMode::handleEvent(const SDL_Event& event) {
 
 
 void IngameMode::updateAndRender(engine::TimeDelta dt) {
+  if (mLevelFinished) {
+    return;
+  }
+
   // ----------
   // updating
-  if (!mLevelFinished) {
-    mEntities.systems.update<PlayerControlSystem>(dt);
-    mEntities.systems.update<PlayerInteractionSystem>(dt);
-    mEntities.systems.update<PhysicsSystem>(dt);
-    mEntities.systems.update<MapScrollSystem>(dt);
-    mHudRenderer.update(dt);
+  // TODO: Move all player related systems into the player namespace
+  mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<PlayerAnimationSystem>(dt);
+  mEntities.systems.update<PlayerInteractionSystem>(dt);
+  mEntities.systems.update<PhysicsSystem>(dt);
+  mEntities.systems.update<player::DamageSystem>(dt);
+  mEntities.systems.update<MapScrollSystem>(dt);
+  mHudRenderer.update(dt);
 
-    checkForLevelExitReached();
-  }
 
   // ----------
   // rendering
-  if (mLevelFinished) {
-    dt = 0;
-  }
-
   {
     sdl_utils::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
@@ -162,6 +181,9 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x,
     data::GameTraits::inGameViewPortOffset.y);
+
+  checkForPlayerDeath();
+  checkForLevelExitReached();
 }
 
 
@@ -214,6 +236,14 @@ void IngameMode::loadLevel(
     &mPlayerInputs,
     mLevelData.mMap,
     mLevelData.mTileAttributes);
+  mEntities.systems.add<game_logic::PlayerAnimationSystem>(
+    mPlayerEntity,
+    mpServiceProvider);
+  mEntities.systems.add<game_logic::player::DamageSystem>(
+    mPlayerEntity,
+    &mPlayerModel,
+    mpServiceProvider,
+    mercyFramesForDifficulty(difficulty));
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
@@ -269,6 +299,37 @@ void IngameMode::checkForLevelExitReached() {
 
       mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
     });
+}
+
+
+void IngameMode::checkForPlayerDeath() {
+  const auto& playerState =
+    *mPlayerEntity.component<game_logic::components::PlayerControlled>().get();
+
+  const auto playerDead =
+    playerState.mState == player::PlayerState::Dead &&
+    mPlayerModel.mHealth <= 0;
+  if (playerDead) {
+    restartLevel();
+  }
+}
+
+
+void IngameMode::restartLevel() {
+  mpServiceProvider->fadeOutScreen();
+
+  mEntities.entities.reset();
+
+  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
+    mLevelData.mInitialActors,
+    mLevelData.mMap,
+    mEntities.entities);
+
+  mPlayerModel = mPlayerModelAtLevelStart;
+
+  updateAndRender(0);
+
+  mpServiceProvider->fadeInScreen();
 }
 
 }
