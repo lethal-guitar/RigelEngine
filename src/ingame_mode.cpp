@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
@@ -34,14 +35,11 @@
 namespace rigel {
 
 using namespace engine;
+using namespace game_logic;
 using namespace std;
 
-using components::BoundingBox;
-using game_logic::PlayerAnimationSystem;
-using game_logic::PlayerControlSystem;
-using game_logic::PlayerInteractionSystem;
-using game_logic::MapScrollSystem;
 using data::PlayerModel;
+using engine::components::BoundingBox;
 
 
 namespace {
@@ -67,6 +65,25 @@ std::string loadingScreenFileName(const int episode) {
   fileName += std::to_string(episode + 1);
   fileName += ".MNI";
   return fileName;
+}
+
+
+int mercyFramesForDifficulty(const data::Difficulty difficulty) {
+  using data::Difficulty;
+
+  switch (difficulty) {
+    case Difficulty::Easy:
+      return 40;
+
+    case Difficulty::Medium:
+      return 30;
+
+    case Difficulty::Hard:
+      return 20;
+  }
+
+  assert(false);
+  return 40;
 }
 
 }
@@ -140,10 +157,12 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
   // ----------
   // updating
+  // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerControlSystem>(dt);
   mEntities.systems.update<PlayerAnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
   mEntities.systems.update<PhysicsSystem>(dt);
+  mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
   mHudRenderer.update(dt);
 
@@ -163,6 +182,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     data::GameTraits::inGameViewPortOffset.x,
     data::GameTraits::inGameViewPortOffset.y);
 
+  checkForPlayerDeath();
   checkForLevelExitReached();
 }
 
@@ -217,6 +237,11 @@ void IngameMode::loadLevel(
     mLevelData.mMap,
     mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::PlayerAnimationSystem>(mPlayerEntity);
+  mEntities.systems.add<game_logic::player::DamageSystem>(
+    mPlayerEntity,
+    &mPlayerModel,
+    mpServiceProvider,
+    mercyFramesForDifficulty(difficulty));
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
@@ -272,6 +297,13 @@ void IngameMode::checkForLevelExitReached() {
 
       mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
     });
+}
+
+
+void IngameMode::checkForPlayerDeath() {
+  if (mPlayerModel.mHealth <= 0) {
+    restartLevel();
+  }
 }
 
 

@@ -398,6 +398,11 @@ void PlayerAnimationSystem::update(
   auto& state = *mPlayer.component<PlayerControlled>().get();
   auto& sprite = *mPlayer.component<Sprite>().get();
 
+  sprite.mShow = true;
+  if (state.mMercyFramesTimeElapsed) {
+    updateMercyFramesAnimation(*state.mMercyFramesTimeElapsed, sprite);
+  }
+
   if (
     state.mState != mPreviousState ||
     state.mOrientation != mPreviousOrientation
@@ -407,6 +412,19 @@ void PlayerAnimationSystem::update(
     mPreviousState = state.mState;
     mPreviousOrientation = state.mOrientation;
   }
+}
+
+
+void PlayerAnimationSystem::updateMercyFramesAnimation(
+  const engine::TimeDelta mercyTimeElapsed,
+  Sprite& sprite
+) {
+  // TODO: Flash white at end of mercy frames instead of blinking to
+  // invisible.
+  const auto mercyFramesElapsed =
+    static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
+  const auto blinkSprite = mercyFramesElapsed % 2 != 0;
+  sprite.mShow = !blinkSprite;
 }
 
 

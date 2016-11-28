@@ -37,6 +37,8 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/player/damage_system.cpp
+    game_logic/player/damage_system.hpp
     game_logic/player_control_system.cpp
     game_logic/player_control_system.hpp
     game_logic/player_interaction_system.cpp

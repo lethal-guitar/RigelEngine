@@ -60,6 +60,7 @@ private:
   );
 
   void checkForLevelExitReached();
+  void checkForPlayerDeath();
   void restartLevel();
 
 private:

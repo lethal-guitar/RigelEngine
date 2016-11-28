@@ -78,6 +78,8 @@ struct PlayerControlled {
   detail::Orientation mOrientation = detail::Orientation::Left;
   detail::PlayerState mState = detail::PlayerState::Standing;
 
+  boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
+
   bool mIsLookingUp = false;
   bool mIsLookingDown = false;
 
@@ -165,6 +167,10 @@ public:
 private:
   void updateAnimation(
     const components::PlayerControlled& state,
+    engine::components::Sprite& sprite);
+
+  void updateMercyFramesAnimation(
+    engine::TimeDelta mercyTimeElapsed,
     engine::components::Sprite& sprite);
 
 private:
