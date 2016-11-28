@@ -42,7 +42,7 @@ namespace rigel { namespace engine { namespace components {
 
 namespace rigel { namespace game_logic {
 
-namespace detail {
+namespace player {
 
 enum class Orientation {
   None,
@@ -75,8 +75,8 @@ struct PlayerInputState {
 namespace components {
 
 struct PlayerControlled {
-  detail::Orientation mOrientation = detail::Orientation::Left;
-  detail::PlayerState mState = detail::PlayerState::Standing;
+  player::Orientation mOrientation = player::Orientation::Left;
+  player::PlayerState mState = player::PlayerState::Standing;
 
   boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
 
@@ -175,8 +175,8 @@ private:
 
 private:
   entityx::Entity mPlayer;
-  detail::Orientation mPreviousOrientation;
-  detail::PlayerState mPreviousState;
+  player::Orientation mPreviousOrientation;
+  player::PlayerState mPreviousState;
 };
 
 

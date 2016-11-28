@@ -34,7 +34,7 @@ namespace rigel { namespace game_logic {
 
 using namespace components;
 using namespace rigel::engine::components;
-using namespace detail;
+using namespace player;
 using namespace std;
 
 using engine::TimeStepper;
