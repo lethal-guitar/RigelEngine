@@ -18,10 +18,13 @@
 
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
+#include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/rendering_system.hpp"
 #include "utils/math_tools.hpp"
+
+#include "game_mode.hpp"
 
 #include <boost/algorithm/cxx11/any_of.hpp>
 
@@ -139,6 +142,10 @@ void PlayerControlSystem::update(
   auto& physical = *mPlayer.component<Physical>().get();
   auto& boundingBox = *mPlayer.component<BoundingBox>().get();
   auto& worldPosition = *mPlayer.component<WorldPosition>().get();
+
+  if (state.isPlayerDead()) {
+    return;
+  }
 
   auto movingLeft = mpPlayerControlInput->mMovingLeft;
   auto movingRight = mpPlayerControlInput->mMovingRight;
@@ -377,8 +384,12 @@ boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
 }
 
 
-PlayerAnimationSystem::PlayerAnimationSystem(ex::Entity player)
+PlayerAnimationSystem::PlayerAnimationSystem(
+  ex::Entity player,
+  IGameServiceProvider* pServiceProvider
+)
   : mPlayer(player)
+  , mpServiceProvider(pServiceProvider)
 {
   assert(mPlayer.has_component<PlayerControlled>());
   auto& state = *mPlayer.component<PlayerControlled>().get();
@@ -398,19 +409,36 @@ void PlayerAnimationSystem::update(
   auto& state = *mPlayer.component<PlayerControlled>().get();
   auto& sprite = *mPlayer.component<Sprite>().get();
 
-  sprite.mShow = true;
-  if (state.mMercyFramesTimeElapsed) {
-    updateMercyFramesAnimation(*state.mMercyFramesTimeElapsed, sprite);
+  if (state.mState == player::PlayerState::Dead) {
+    return;
   }
 
-  if (
-    state.mState != mPreviousState ||
-    state.mOrientation != mPreviousOrientation
-  ) {
-    updateAnimation(state, sprite);
+  if (state.mState == player::PlayerState::Dieing) {
+    // Initialize animation on first frame
+    if (!state.mDeathAnimationState) {
+      state.mDeathAnimationState = detail::DeathAnimationState{};
 
-    mPreviousState = state.mState;
-    mPreviousOrientation = state.mOrientation;
+      if (mPlayer.has_component<Animated>()) {
+        mPlayer.remove<Animated>();
+      }
+    }
+
+    updateDeathAnimation(state, sprite, dt);
+  } else {
+    sprite.mShow = true;
+    if (state.mMercyFramesTimeElapsed) {
+      updateMercyFramesAnimation(*state.mMercyFramesTimeElapsed, sprite);
+    }
+
+    if (
+      state.mState != mPreviousState ||
+      state.mOrientation != mPreviousOrientation
+    ) {
+      updateAnimation(state, sprite);
+
+      mPreviousState = state.mState;
+      mPreviousOrientation = state.mOrientation;
+    }
   }
 }
 
@@ -425,6 +453,46 @@ void PlayerAnimationSystem::updateMercyFramesAnimation(
     static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
   const auto blinkSprite = mercyFramesElapsed % 2 != 0;
   sprite.mShow = !blinkSprite;
+}
+
+
+void PlayerAnimationSystem::updateDeathAnimation(
+  PlayerControlled& playerState,
+  Sprite& sprite,
+  engine::TimeDelta dt
+) {
+  assert(playerState.mState == PlayerState::Dieing);
+  assert(playerState.mDeathAnimationState);
+
+  auto& animationState = *playerState.mDeathAnimationState;
+  if (!updateAndCheckIfDesiredTicksElapsed(animationState.mStepper, 2, dt)) {
+    return;
+  }
+
+  const auto elapsedFrames = ++animationState.mElapsedFrames;
+
+  boost::optional<int> newFrameToShow;
+  if (elapsedFrames == 1) {
+    newFrameToShow = 29;
+  } else if (elapsedFrames == 5) {
+    newFrameToShow = 30;
+  } else if (elapsedFrames == 6) {
+    newFrameToShow = 31;
+  } else if (elapsedFrames == 7) {
+    newFrameToShow = 32;
+  } else if (elapsedFrames == 17) {
+    // TODO: Trigger particles
+    sprite.mShow = false;
+    mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
+  } else if (elapsedFrames >= 42) {
+    playerState.mState = PlayerState::Dead;
+  }
+
+  if (newFrameToShow) {
+    const auto orientationOffset =
+      playerState.mOrientation == Orientation::Right ? 39 : 0;
+    sprite.mFramesToRender[0] = *newFrameToShow + orientationOffset;
+  }
 }
 
 
@@ -485,7 +553,6 @@ void PlayerAnimationSystem::updateAnimation(
       orientedAnimationFrame + *endFrameOffset}}});
   }
 }
-
 
 
 MapScrollSystem::MapScrollSystem(

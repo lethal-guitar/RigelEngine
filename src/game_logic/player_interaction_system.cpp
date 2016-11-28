@@ -44,6 +44,12 @@ void PlayerInteractionSystem::update(
 ) {
   using namespace game_logic::components;
 
+  assert(mPlayer.has_component<PlayerControlled>());
+  const auto& state = *mPlayer.component<PlayerControlled>().get();
+  if (state.isPlayerDead()) {
+    return;
+  }
+
   if (mNeedFadeIn) {
     mNeedFadeIn = false;
     mpServiceProvider->fadeInScreen();

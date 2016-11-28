@@ -236,7 +236,9 @@ void IngameMode::loadLevel(
     &mPlayerInputs,
     mLevelData.mMap,
     mLevelData.mTileAttributes);
-  mEntities.systems.add<game_logic::PlayerAnimationSystem>(mPlayerEntity);
+  mEntities.systems.add<game_logic::PlayerAnimationSystem>(
+    mPlayerEntity,
+    mpServiceProvider);
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,
     &mPlayerModel,
@@ -301,7 +303,13 @@ void IngameMode::checkForLevelExitReached() {
 
 
 void IngameMode::checkForPlayerDeath() {
-  if (mPlayerModel.mHealth <= 0) {
+  const auto& playerState =
+    *mPlayerEntity.component<game_logic::components::PlayerControlled>().get();
+
+  const auto playerDead =
+    playerState.mState == player::PlayerState::Dead &&
+    mPlayerModel.mHealth <= 0;
+  if (playerDead) {
     restartLevel();
   }
 }

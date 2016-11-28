@@ -29,6 +29,10 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
+namespace rigel {
+  struct IGameServiceProvider;
+}
+
 namespace rigel { namespace data { namespace map {
   class Map;
   class TileAttributes;
@@ -57,10 +61,24 @@ enum class PlayerState {
   Crouching,
   LookingUp,
   ClimbingLadder,
-  Airborne
+  Airborne,
+  Dieing,
+  Dead
+};
+
+
+}
+
+
+namespace detail {
+
+struct DeathAnimationState {
+  engine::TimeStepper mStepper;
+  int mElapsedFrames = 0;
 };
 
 }
+
 
 struct PlayerInputState {
   bool mMovingLeft = false;
@@ -79,6 +97,7 @@ struct PlayerControlled {
   player::PlayerState mState = player::PlayerState::Standing;
 
   boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
+  boost::optional<detail::DeathAnimationState> mDeathAnimationState;
 
   bool mIsLookingUp = false;
   bool mIsLookingDown = false;
@@ -86,6 +105,13 @@ struct PlayerControlled {
   bool mPerformedInteraction = false;
   bool mPerformedJump = false;
   bool mPerformedShot = false;
+
+
+  bool isPlayerDead() const {
+    return
+      mState == player::PlayerState::Dieing ||
+      mState == player::PlayerState::Dead;
+  }
 };
 
 
@@ -156,7 +182,9 @@ private:
 
 class PlayerAnimationSystem : public entityx::System<PlayerAnimationSystem> {
 public:
-  explicit PlayerAnimationSystem(entityx::Entity player);
+  explicit PlayerAnimationSystem(
+    entityx::Entity player,
+    IGameServiceProvider* pServiceProvider);
 
   void update(
     entityx::EntityManager& es,
@@ -173,8 +201,15 @@ private:
     engine::TimeDelta mercyTimeElapsed,
     engine::components::Sprite& sprite);
 
+  void updateDeathAnimation(
+    components::PlayerControlled& state,
+    engine::components::Sprite& sprite,
+    engine::TimeDelta dt);
+
 private:
   entityx::Entity mPlayer;
+  IGameServiceProvider* mpServiceProvider;
+
   player::Orientation mPreviousOrientation;
   player::PlayerState mPreviousState;
 };

@@ -42,6 +42,14 @@
 
 namespace rigel { namespace game_logic { namespace player {
 
+namespace {
+
+// TODO: Possibly tweak this value
+const auto DEATH_JUMP_IMPULSE = -2.6f;
+
+}
+
+
 using engine::components::BoundingBox;
 using engine::components::Physical;
 using engine::components::WorldPosition;
@@ -74,6 +82,7 @@ void DamageSystem::update(
   }
 
   assert(mPlayer.has_component<BoundingBox>());
+  assert(mPlayer.has_component<Physical>());
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<WorldPosition>());
 
@@ -114,6 +123,10 @@ void DamageSystem::update(
           playerState.mMercyFramesTimeElapsed = 0.0;
           mpServiceProvider->playSound(data::SoundId::DukePain);
         } else {
+          auto& physical = *mPlayer.component<Physical>().get();
+          physical.mVelocity = {0.0f, DEATH_JUMP_IMPULSE};
+
+          playerState.mState = PlayerState::Dieing;
           mpServiceProvider->playSound(data::SoundId::DukeDeath);
         }
       }
