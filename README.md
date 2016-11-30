@@ -64,6 +64,24 @@ make
 ./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
 ```
 
+### Jumping to specific levels, command line options
+
+Since most levels cannot be completed at the moment, only the first level of each episode is accessible
+from the main menu. In order to try different levels, you can use the `-l` command line option:
+
+```bash
+# Jump to 6th level of first episode
+./src/RigelEngine <PATH_TO_YOUR_GAME_FILES> -l L6
+```
+
+This will skip the intro movies and main menu, and jump straight to the specified level at Medium difficulty.
+
+Other command line options are:
+
+* `-s`: skip intro movies, go straight to main menu
+* `--no-music`: don't play music
+* `-h`/`--help`: show all command line options
+
 ### Detailed build pre-requisites and dependencies
 
 To build from source, a C++ 14 compatible compiler is required. The project has been
