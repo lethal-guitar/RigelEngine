@@ -501,6 +501,10 @@ void configureEntity(
       break;
 
     case 117: // Pipe dripping green stuff
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<DrawTopMost>();
+      break;
+
     case 120: // Keyhole (circuit board)
     case 188: // rotating floor spikes
     case 208: // floating exit sign to right

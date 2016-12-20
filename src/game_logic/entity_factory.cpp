@@ -40,6 +40,7 @@ using data::ActorID;
 using engine::components::Animated;
 using engine::components::AnimationSequence;
 using engine::components::BoundingBox;
+using engine::components::DrawTopMost;
 using engine::components::Physical;
 using engine::components::Sprite;
 using engine::components::SpriteFrame;
