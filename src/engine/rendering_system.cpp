@@ -33,6 +33,7 @@ namespace ex = entityx;
 namespace rigel { namespace engine {
 
 using components::Animated;
+using components::DrawTopMost;
 using components::Sprite;
 using components::WorldPosition;
 
@@ -50,13 +51,18 @@ void RenderingSystem::update(
 
   // Collect sprites, then order by draw index
   std::vector<std::pair<const Sprite*, WorldPosition>> spritesByDrawOrder;
+  std::vector<std::pair<const Sprite*, WorldPosition>> topMostSprites;
   es.each<Sprite, WorldPosition>(
-    [this, &spritesByDrawOrder](
+    [this, &spritesByDrawOrder, &topMostSprites](
       ex::Entity entity,
       Sprite& sprite,
       const WorldPosition& pos
     ) {
+      if (!entity.has_component<DrawTopMost>()) {
         spritesByDrawOrder.emplace_back(&sprite, pos);
+      } else {
+        topMostSprites.emplace_back(&sprite, pos);
+      }
     });
   sort(spritesByDrawOrder, [](const auto& lhs, const auto& rhs) {
     return lhs.first->mDrawOrder < rhs.first->mDrawOrder;
@@ -68,6 +74,10 @@ void RenderingSystem::update(
     renderSprite(*spriteAndPos.first, spriteAndPos.second);
   }
   mMapRenderer.renderForeground(*mpScrollOffset);
+
+  for (const auto& spriteAndPos : topMostSprites) {
+    renderSprite(*spriteAndPos.first, spriteAndPos.second);
+  }
 }
 
 

@@ -500,32 +500,36 @@ void configureEntity(
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       break;
 
-    case 117:
+    case 117: // Pipe dripping green stuff
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<DrawTopMost>();
+      break;
+
     case 120: // Keyhole (circuit board)
     case 188: // rotating floor spikes
     case 208: // floating exit sign to right
     case 252: // floating exit sign to left
     case 296: // floating arrow
-    case 210:
-    case 222:
-    case 223:
-    case 224:
-    case 225:
-    case 228:
-    case 229:
-    case 230:
-    case 236:
-    case 257:
-    case 258:
+    case 210: // Computer showing "Duke escaped"
+    case 222: // Lava fall left
+    case 223: // Lava fall right
+    case 224: // Water fall left
+    case 225: // Water fall right
+    case 228: // Water surface splash left
+    case 229: // Water surface splash center
+    case 230: // Water surface splash right
+    case 236: // Radar dish
+    case 257: // Shallow water (variant 1)
+    case 258: // Shallow water (variant 2)
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       break;
 
     // Flying message ships
-    case 213:
-    case 214:
-    case 215:
-    case 216:
-    case 220:
+    case 213: // "Your brain is ours!"
+    case 214: // "Bring back the brain! ... Please stand by"
+    case 215: // "Live from Rigel it's Saturday night!"
+    case 216: // "Die!"
+    case 220: // "You cannot escape us! You will get your brain sucked!"
       //slot  0   1   2   3   4       5      6
       //frame 0   1   2   3   4   5   6   7  8   9
       //actor 107 108 109 110 111     112    113
@@ -539,14 +543,14 @@ void configureEntity(
       entity.assign<Animated>(Animated{{AnimationSequence(2, 3, 5)}});
       break;
 
-    case 62:
+    case 62: // Bomb dropping space ship
       entity.assign<Animated>(Animated{{AnimationSequence(2, 1, 2)}});
       break;
 
-    case 246:
-    case 247:
-    case 248:
-    case 249:
+    case 246: // Rocket exhaust flame left
+    case 247: // Rocket exhaust flame right
+    case 248: // Small rocket exhaust flame left
+    case 249: // Small rocket exhaust flame right
       entity.assign<Animated>(Animated{{AnimationSequence(4)}});
       break;
 

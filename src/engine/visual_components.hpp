@@ -56,6 +56,14 @@ struct Sprite {
 };
 
 
+/** Indicates that an entity should always be drawn last
+ *
+ * An entity marked with this component will alwyas have its Sprite drawn after
+ * drawing the world, even if it is placed on top of foreground tiles.
+ */
+struct DrawTopMost {};
+
+
 struct AnimationSequence {
   AnimationSequence() = default;
   explicit AnimationSequence(
