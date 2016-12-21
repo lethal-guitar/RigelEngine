@@ -164,6 +164,9 @@ void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
   // So no return value checking.
   SDL_DisableScreenSaver();
 
+  // Same for the cursor disabling.
+  SDL_ShowCursor(SDL_DISABLE);
+
   Game game(gamePath, pRenderer.get());
   game.run(gameOptions);
 }
