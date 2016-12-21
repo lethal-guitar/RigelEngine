@@ -20,10 +20,15 @@
 #include <base/warnings.hpp>
 #include <game_logic/player/attack_system.hpp>
 #include <game_logic/player_control_system.hpp>
+#include <game_mode.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <atria/testing/spies.hpp>
+#include <boost/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 RIGEL_RESTORE_WARNINGS
+
+#include <iostream>
 
 
 using namespace std;
@@ -44,6 +49,35 @@ struct FireShotParameters {
 };
 
 
+struct MockServiceProvider : public rigel::IGameServiceProvider {
+  void fadeOutScreen() override {}
+  void fadeInScreen() override {}
+
+  void playSound(data::SoundId id) override {
+    mLastTriggeredSoundId = id;
+  }
+
+  void playMusic(const std::string&) override {}
+  void stopMusic() override {}
+  void scheduleNewGameStart(int, data::Difficulty) override {}
+  void scheduleEnterMainMenu() override {}
+  void scheduleGameQuit() override {}
+  bool isShareWareVersion() const override { return false; }
+
+  boost::optional<data::SoundId> mLastTriggeredSoundId;
+};
+
+
+namespace rigel { namespace data {
+
+static std::ostream& operator<<(std::ostream& os, const SoundId id) {
+  os << static_cast<int>(id);
+  return os;
+}
+
+}}
+
+
 TEST_CASE("Player attack system works as expected") {
   ex::EntityX entityx;
   auto player = entityx.entities.create();
@@ -59,7 +93,9 @@ TEST_CASE("Player attack system works as expected") {
     fireShotParameters.velocity = velocity;
   });
 
-  entityx.systems.add<player::AttackSystem>(player, fireShotSpy);
+  MockServiceProvider mockServiceProvicer;
+  entityx.systems.add<player::AttackSystem>(
+    player, &mockServiceProvicer, fireShotSpy);
   entityx.systems.configure();
   auto& attackSystem = *entityx.systems.system<player::AttackSystem>();
 
@@ -207,5 +243,17 @@ TEST_CASE("Player attack system works as expected") {
       updateWithInput(shootingInputState);
       REQUIRE(fireShotSpy.count() == 0);
     }
+  }
+
+
+  SECTION("Shooting triggers appropriate sound") {
+    REQUIRE(mockServiceProvicer.mLastTriggeredSoundId == boost::none);
+
+    updateWithInput(shootingInputState);
+
+    REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+    REQUIRE(
+      *mockServiceProvicer.mLastTriggeredSoundId ==
+      data::SoundId::DukeNormalShot);
   }
 }

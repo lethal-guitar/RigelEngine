@@ -16,6 +16,8 @@
 
 #include "attack_system.hpp"
 
+#include "game_mode.hpp"
+
 
 namespace rigel { namespace game_logic { namespace player {
 
@@ -32,9 +34,11 @@ const auto DUKE_SHOT_VELOCITY = 2.0f;
 
 AttackSystem::AttackSystem(
   entityx::Entity playerEntity,
+  IGameServiceProvider* pServiceProvider,
   FireShotFunc fireShotFunc
 )
   : mPlayerEntity(playerEntity)
+  , mpServiceProvider(pServiceProvider)
   , mFireShotFunc(fireShotFunc)
 {
 }
@@ -107,6 +111,7 @@ void AttackSystem::fireShot(
     : base::Point<float>{velocity, 0.0f};
 
   mFireShotFunc(shotOffset + playerPosition, velocityVector);
+  mpServiceProvider->playSound(data::SoundId::DukeNormalShot);
 }
 
 }}}

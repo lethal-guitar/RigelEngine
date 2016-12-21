@@ -25,6 +25,10 @@ RIGEL_RESTORE_WARNINGS
 
 #include <functional>
 
+namespace rigel {
+  struct IGameServiceProvider;
+}
+
 namespace rigel { namespace game_logic { namespace components {
   struct PlayerControlled;
 }}}
@@ -39,7 +43,10 @@ public:
     const base::Point<float>&
   )>;
 
-  AttackSystem(entityx::Entity playerEntity, FireShotFunc fireShotFunc);
+  AttackSystem(
+    entityx::Entity playerEntity,
+    IGameServiceProvider* pServiceProvider,
+    FireShotFunc fireShotFunc);
 
   // TODO: Consider having a special 'updateWithInput' method instead.
   void setInputState(PlayerInputState inputState);
@@ -57,6 +64,7 @@ private:
 
 private:
   entityx::Entity mPlayerEntity;
+  IGameServiceProvider* mpServiceProvider;
   FireShotFunc mFireShotFunc;
   PlayerInputState mInputState;
 };
