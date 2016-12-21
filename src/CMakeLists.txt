@@ -34,6 +34,8 @@ set(core_sources
     engine/timing.hpp
     engine/visual_components.hpp
     game_logic/collectable_components.hpp
+    game_logic/damage_infliction_system.cpp
+    game_logic/damage_infliction_system.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp

@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 #include "game_logic/trigger_components.hpp"
@@ -167,6 +168,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<PlayerInteractionSystem>(dt);
   mEntities.systems.update<PhysicsSystem>(dt);
   mEntities.systems.update<player::DamageSystem>(dt);
+  mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
   mHudRenderer.update(dt);
 
@@ -262,6 +264,9 @@ void IngameMode::loadLevel(
     loadedLevel.mBackdropScrollMode);
   mEntities.systems.add<PlayerInteractionSystem>(
     mPlayerEntity,
+    &mPlayerModel,
+    mpServiceProvider);
+  mEntities.systems.add<DamageInflictionSystem>(
     &mPlayerModel,
     mpServiceProvider);
   mEntities.systems.configure();
