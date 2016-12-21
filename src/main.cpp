@@ -41,7 +41,7 @@ namespace po = boost::program_options;
 namespace {
 
 #ifdef __APPLE__
-  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN_DESKTOP;
+  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
 #else
   const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
 #endif
