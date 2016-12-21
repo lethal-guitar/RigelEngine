@@ -41,6 +41,12 @@ struct Physical {
   bool mCanStepUpStairs;
 };
 
+
+/** Marker component which is added to all entities that had a collision with
+ * the level geometry on the last physics update.
+ */
+struct CollidedWithWorld {};
+
 }
 
 
