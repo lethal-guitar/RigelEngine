@@ -33,4 +33,26 @@ struct PlayerDamaging {
   bool mIgnoreMercyFrames;
 };
 
+
+struct Shootable {
+  explicit Shootable(const int health, const int givenScore = 0)
+    : mHealth(health)
+    , mGivenScore(givenScore)
+  {
+  }
+
+  int mHealth;
+  int mGivenScore;
+};
+
+
+struct DamageInflicting {
+  explicit DamageInflicting(const int amount)
+    : mAmount(amount)
+  {
+  }
+
+  int mAmount;
+};
+
 }}}
