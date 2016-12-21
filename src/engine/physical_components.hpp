@@ -25,9 +25,27 @@ namespace rigel { namespace engine {
 namespace components {
 
 struct Physical {
+  Physical(
+    const base::Point<float> velocity,
+    const bool gravityAffected,
+    const bool canStepUpStairs = false
+  )
+    : mVelocity(velocity)
+    , mGravityAffected(gravityAffected)
+    , mCanStepUpStairs(canStepUpStairs)
+  {
+  }
+
   base::Point<float> mVelocity;
   bool mGravityAffected;
+  bool mCanStepUpStairs;
 };
+
+
+/** Marker component which is added to all entities that had a collision with
+ * the level geometry on the last physics update.
+ */
+struct CollidedWithWorld {};
 
 }
 

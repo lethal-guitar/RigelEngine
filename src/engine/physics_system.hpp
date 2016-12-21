@@ -39,10 +39,13 @@ namespace rigel { namespace engine {
 
 /** Implements game physics/world interaction
  *
- * Operates on all entities with Physical and WorldPosition components.
- * The Physical component's velocity is used to change the world position,
- * respecting world collision data. If gravityAffected is true, entities will
- * also fall down until they hit solid ground.
+ * Operates on all entities with Physical, BoundingBox and WorldPosition
+ * components. The Physical component's velocity is used to change the world
+ * position, respecting world collision data. If gravityAffected is true,
+ * entities will also fall down until they hit solid ground.
+ *
+ * Entities that collided with the world on the last update() will be tagged
+ * with the CollidedWithWorld component.
  */
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
@@ -58,17 +61,19 @@ public:
 private:
   const data::map::CollisionData& worldAt(int x, int y) const;
 
-  base::Vector applyHorizontalMovement(
+  std::tuple<base::Vector, bool> applyHorizontalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
-    const std::int16_t movementX
+    std::int16_t movementX,
+    bool allowStairStepping
   ) const;
 
-  std::tuple<base::Vector, float> applyVerticalMovement(
+  std::tuple<base::Vector, float, bool> applyVerticalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
-    const std::int16_t movementY
+    std::int16_t movementY,
+    bool beginFallingOnHittingCeiling
   ) const;
 
   float applyGravity(

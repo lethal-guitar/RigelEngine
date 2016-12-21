@@ -19,18 +19,18 @@
 
 namespace rigel { namespace game_logic { namespace components {
 
-enum class TriggerType {
-  LevelExit
-};
-
-
-struct Trigger {
-  explicit Trigger(const TriggerType type)
-    : mType(type)
+struct PlayerDamaging {
+  explicit PlayerDamaging(
+    const int amount,
+    const bool ignoreMercyFrames = false
+  )
+    : mAmount(amount)
+    , mIgnoreMercyFrames(ignoreMercyFrames)
   {
   }
 
-  TriggerType mType;
+  int mAmount;
+  bool mIgnoreMercyFrames;
 };
 
 }}}

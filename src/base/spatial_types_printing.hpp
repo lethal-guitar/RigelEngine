@@ -16,21 +16,17 @@
 
 #pragma once
 
+#include "spatial_types.hpp"
 
-namespace rigel { namespace game_logic { namespace components {
-
-enum class TriggerType {
-  LevelExit
-};
+#include <iostream>
 
 
-struct Trigger {
-  explicit Trigger(const TriggerType type)
-    : mType(type)
-  {
-  }
+namespace rigel { namespace base {
 
-  TriggerType mType;
-};
+template<typename ValueT>
+std::ostream& operator<<(std::ostream& stream, const Point<ValueT>& point) {
+  stream << "Point{" << point.x << ", " << point.y << '}';
+  return stream;
+}
 
-}}}
+}}

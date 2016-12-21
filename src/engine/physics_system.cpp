@@ -69,23 +69,28 @@ void PhysicsSystem::update(
   ex::EventManager& events,
   ex::TimeDelta dt
 ) {
+  using components::CollidedWithWorld;
+
   if (!updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
     return;
   }
 
   es.each<Physical, WorldPosition, BoundingBox>(
     [this](
-      ex::Entity,
+      ex::Entity entity,
       Physical& physical,
       WorldPosition& position,
       const BoundingBox& collisionRect
     ) {
+      bool collisionOccured = false;
+
       const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
       if (movementX != 0) {
-        position = applyHorizontalMovement(
+        std::tie(position, collisionOccured) = applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
-          movementX);
+          movementX,
+          physical.mCanStepUpStairs);
       }
 
       // Cache new world space BBox after applying horizontal movement
@@ -104,11 +109,23 @@ void PhysicsSystem::update(
 
       const auto movementY = static_cast<std::int16_t>(physical.mVelocity.y);
       if (movementY != 0) {
-        std::tie(position, physical.mVelocity.y) = applyVerticalMovement(
-          bbox,
-          position,
-          physical.mVelocity.y,
-          movementY);
+        bool verticalCollisionOccured = false;
+        std::tie(position, physical.mVelocity.y, verticalCollisionOccured) =
+          applyVerticalMovement(
+            bbox,
+            position,
+            physical.mVelocity.y,
+            movementY,
+            physical.mGravityAffected);
+        collisionOccured = collisionOccured || verticalCollisionOccured;
+      }
+
+      if (entity.has_component<CollidedWithWorld>()) {
+        entity.remove<CollidedWithWorld>();
+      }
+
+      if (collisionOccured) {
+        entity.assign<CollidedWithWorld>();
       }
     });
 }
@@ -122,10 +139,11 @@ const data::map::CollisionData& PhysicsSystem::worldAt(
 }
 
 
-base::Vector PhysicsSystem::applyHorizontalMovement(
+std::tuple<base::Vector, bool> PhysicsSystem::applyHorizontalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
-  const int16_t movementX
+  const int16_t movementX,
+  const bool allowStairStepping
 ) const {
   base::Vector newPosition = currentPosition;
   newPosition.x += movementX;
@@ -155,7 +173,7 @@ base::Vector PhysicsSystem::applyHorizontalMovement(
         bool mustResolveCollision = true;
 
         const auto atBottomRow = row == bbox.bottomLeft().y;
-        if (atBottomRow) {
+        if (atBottomRow && allowStairStepping) {
           // Collision happened at bottom row, check if we can step up
           // a stair
           const auto& stairStepUp = worldAt(x, row-1);
@@ -167,15 +185,17 @@ base::Vector PhysicsSystem::applyHorizontalMovement(
         }
 
         if (mustResolveCollision) {
-          return {
-            static_cast<uint16_t>(col - movementDirection),
-            newPosition.y};
+          return std::make_tuple(
+            base::Vector{
+              static_cast<uint16_t>(col - movementDirection),
+              newPosition.y},
+            true);
         }
       }
     }
   }
 
-  return newPosition;
+  return std::make_tuple(newPosition, false);
 }
 
 
@@ -206,11 +226,12 @@ float PhysicsSystem::applyGravity(
 }
 
 
-std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
+std::tuple<base::Vector, float, bool> PhysicsSystem::applyVerticalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const float currentVelocity,
-  const int16_t movementY
+  const int16_t movementY,
+  const bool beginFallingOnHittingCeiling
 ) const {
   base::Vector newPosition = currentPosition;
   newPosition.y += movementY;
@@ -235,22 +256,18 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
       const auto& enteredCell = worldAt(col, y);
       if (hasCollision(enteredCell)) {
         newPosition.y = row - movementDirection;
-        if (movingDown) {
+        if (movingDown || !beginFallingOnHittingCeiling) {
           // For falling, we reset the Y velocity as soon as we hit the ground
-          return make_tuple(
-            newPosition,
-            0.0f);
+          return make_tuple(newPosition, 0.0f, true);
         } else {
           // For jumping, we begin falling early when we hit the ceiling
-          return make_tuple(
-            newPosition,
-            1.0f);
+          return make_tuple(newPosition, 1.0f, true);
         }
       }
     }
   }
 
-  return make_tuple(newPosition, currentVelocity);
+  return make_tuple(newPosition, currentVelocity, false);
 }
 
 }}
