@@ -97,7 +97,10 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
-  , mEntityFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
+  , mEntityFactory(
+      context.mpRenderer,
+      &mEntities.entities,
+      &context.mpResources->mActorImagePackage)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
   , mHudRenderer(
@@ -219,8 +222,7 @@ void IngameMode::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     loadedLevel.mActors,
-    loadedLevel.mMap,
-    mEntities.entities);
+    loadedLevel.mMap);
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
@@ -322,8 +324,7 @@ void IngameMode::restartLevel() {
 
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors,
-    mLevelData.mMap,
-    mEntities.entities);
+    mLevelData.mMap);
 
   mPlayerModel = mPlayerModelAtLevelStart;
 
