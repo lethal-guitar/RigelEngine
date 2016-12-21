@@ -76,10 +76,12 @@ void addDefaultPhysical(
 EntityFactory::EntityFactory(
   SDL_Renderer* pRenderer,
   ex::EntityManager* pEntityManager,
-  const ActorImagePackage* pSpritePackage)
+  const ActorImagePackage* pSpritePackage,
+  const data::Difficulty difficulty)
   : mpRenderer(pRenderer)
   , mpEntityManager(pEntityManager)
   , mpSpritePackage(pSpritePackage)
+  , mDifficulty(difficulty)
 {
 }
 
@@ -176,6 +178,7 @@ entityx::Entity EntityFactory::createProjectile(
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(inferBoundingBox(sprite.mFrames[0]));
   entity.assign<Physical>(Physical{velocity, false});
+  entity.assign<DamageInflicting>(1);
 
   return entity;
 }
@@ -202,7 +205,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     std::tie(maybeSprite, boundingBox) =
       createVisualsAndBoundingBox(actor, map);
 
-    configureEntity(entity, actor.mID, boundingBox);
+    configureEntity(entity, actor.mID, boundingBox, mDifficulty);
 
     if (maybeSprite) {
       entity.assign<Sprite>(*maybeSprite);

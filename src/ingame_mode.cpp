@@ -100,7 +100,8 @@ IngameMode::IngameMode(
   , mEntityFactory(
       context.mpRenderer,
       &mEntities.entities,
-      &context.mpResources->mActorImagePackage)
+      &context.mpResources->mActorImagePackage,
+      difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
   , mHudRenderer(

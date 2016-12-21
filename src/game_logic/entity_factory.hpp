@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/game_session_data.hpp"
 #include "engine/visual_components.hpp"
 #include "loader/level_loader.hpp"
 #include "sdl_utils/texture.hpp"
@@ -42,7 +43,8 @@ public:
   EntityFactory(
     SDL_Renderer* pRenderer,
     entityx::EntityManager* pEntityManager,
-    const loader::ActorImagePackage* pSpritePackage);
+    const loader::ActorImagePackage* pSpritePackage,
+    data::Difficulty difficulty);
 
   entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors,
@@ -73,6 +75,7 @@ private:
   SDL_Renderer* mpRenderer;
   entityx::EntityManager* mpEntityManager;
   const loader::ActorImagePackage* mpSpritePackage;
+  data::Difficulty mDifficulty;
 
   std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
 };

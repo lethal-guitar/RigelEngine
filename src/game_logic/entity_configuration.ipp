@@ -70,12 +70,18 @@
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  const BoundingBox& boundingBox
+  const BoundingBox& boundingBox,
+  const Difficulty difficulty
 ) {
+  const auto difficultyOffset = difficulty != Difficulty::Easy
+    ? (difficulty == Difficulty::Hard ? 2 : 1)
+    : 0;
+
   switch (actorID) {
     // Bonus globes
     case 45:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -86,6 +92,7 @@ void configureEntity(
 
     case 46:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -96,6 +103,7 @@ void configureEntity(
 
     case 47:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -106,6 +114,7 @@ void configureEntity(
 
     case 48:
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -133,6 +142,7 @@ void configureEntity(
     case 163: // Empty red box
     case 164: // Empty blue box
     case 161: // Empty white box
+      entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       break;
 
@@ -140,6 +150,7 @@ void configureEntity(
     // White boxes
     // ----------------------------------------------------------------------
     case 37: // Circuit board
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -150,6 +161,7 @@ void configureEntity(
       break;
 
     case 121: // Blue key
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -160,6 +172,7 @@ void configureEntity(
       break;
 
     case 53: // Rapid fire item
+      // 100 pts when box is shot
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -172,6 +185,7 @@ void configureEntity(
       break;
 
     case 114: // Cloaking device
+      // 100 pts when box is shot
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       {
         CollectableItem item;
@@ -187,6 +201,7 @@ void configureEntity(
     // Red boxes
     // ----------------------------------------------------------------------
     case 168: // Soda can
+      // 100 pts when box is shot
       entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 5)}});
       addDefaultPhysical(entity, boundingBox);
       {
@@ -198,20 +213,25 @@ void configureEntity(
       break;
 
     case 174: // 6-pack soda
+      // 100 pts when box is shot
+      entity.assign<Shootable>(1, 10000);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
-        item.mGivenScore = 100; // 10000 when shot
+        item.mGivenScore = 100;
         item.mGivenHealth = 6;
         entity.assign<CollectableItem>(item);
       }
       break;
 
     case 201: // Turkey
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
-        item.mGivenScore = 100;
+        // BUG in the original game: The turkey triggers a floating '100', but
+        // doesn't actually give the player any score.
+        //item.mGivenScore = 100;
         item.mGivenHealth = 1; // 2 if cooked
         entity.assign<CollectableItem>(item);
       }
@@ -221,6 +241,7 @@ void configureEntity(
     // Green boxes
     // ----------------------------------------------------------------------
     case 19: // Rocket launcher
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -231,6 +252,7 @@ void configureEntity(
       break;
 
     case 20: // Flame thrower
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -241,6 +263,7 @@ void configureEntity(
       break;
 
     case 22: // Default weapon
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -250,6 +273,7 @@ void configureEntity(
       break;
 
     case 23: // Laser
+      // 100 pts when box is shot
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -430,6 +454,7 @@ void configureEntity(
       break;
 
     case 239: // Special hint globe
+      entity.assign<Shootable>(3, 100);
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       addDefaultPhysical(entity, boundingBox);
       {
@@ -445,18 +470,93 @@ void configureEntity(
     // Enemies
     // ----------------------------------------------------------------------
 
-    case 0: // Robot drone
-    case 49: // Bouncing robot
+    case 0: // Cylindrical robot with blinking 'head'
+      entity.assign<Shootable>(1 + difficultyOffset, 150);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 49: // Bouncing robot with big eye
+      entity.assign<Shootable>(6 + difficultyOffset, 1000);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<PlayerDamaging>(1);
+      break;
+
+    case 54: // Rocket launcher turret
+      // Shooting the rockets: 10 pts
+      entity.assign<Shootable>(3, 500);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<PlayerDamaging>(1);
+      break;
+
+    case 62: // Bomb dropping space ship
+      // Not player damaging, only the bombs are
+      entity.assign<Shootable>(6 + difficultyOffset, 5000);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Animated>(Animated{{AnimationSequence(2, 1, 2)}});
+      break;
+
     case 64: // Bouncing spike ball
+      entity.assign<Shootable>(6 + difficultyOffset, 1000);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 67: // Green slime blob
+      entity.assign<Shootable>(6 + difficultyOffset, 500);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 68: // Green slime container
+      // 100 pts when shot, 1 health
+      break;
+
+    case 78: // Snake
+      // Not player damaging, but can eat duke
+      // Only 1 health when Duke has been eaten
+      entity.assign<Shootable>(8 + difficultyOffset, 5000);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 79: // Security camera, ceiling-mounted
+    case 80: // Security camera, floor-mounted
+      entity.assign<Shootable>(1, 100);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 81:
+      entity.assign<Shootable>(15 + 3 * difficultyOffset, 300);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 98: // Eye-ball throwing monster
+      entity.assign<Shootable>(8, 2000);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 134: // Walking skeleton
+      entity.assign<Shootable>(2 + difficultyOffset, 100);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 151: // Floating ball, opens up and shoots lasers
+      entity.assign<Shootable>(3 + difficultyOffset, 1000);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 154: // Spider
-    case 203: // Red bird
+      entity.assign<Shootable>(1 + difficultyOffset, 101);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 271: // Small flying ship 1
     case 272: // Small flying ship 2
     case 273: // Small flying ship 3
-    case 299: // Rigelatin soldier
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       break;
@@ -466,12 +566,31 @@ void configureEntity(
     case 171: // <-
     case 217: // using terminal
       entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(2 + difficultyOffset, 3000);
       addDefaultPhysical(entity, boundingBox);
       break;
 
 
     // Laser turret
     case 131:
+      // gives one point when shot with normal shot
+      // gives 500 pts when destroyed
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 203: // Red bird
+      entity.assign<Shootable>(1 + difficultyOffset, 100);
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 253: // Monster in prison cell, aggressive
+      // 500 pts when killed
+      break;
+
+    case 299: // Rigelatin soldier
+      entity.assign<Shootable>(27 + 2 * difficultyOffset, 2100);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       break;
@@ -480,7 +599,18 @@ void configureEntity(
     // Various
     // ----------------------------------------------------------------------
 
+    case 14: // Nuclear waste can, empty
+      entity.assign<Shootable>(1, 100);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 75: // Nuclear waste can, slime inside
+      entity.assign<Shootable>(1, 200);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 66: // Destroyable reactor
+      entity.assign<Shootable>(10, 20000);
       entity.assign<PlayerDamaging>(9, true);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
@@ -505,11 +635,27 @@ void configureEntity(
       entity.assign<DrawTopMost>();
       break;
 
-    case 120: // Keyhole (circuit board)
-    case 188: // rotating floor spikes
     case 208: // floating exit sign to right
     case 252: // floating exit sign to left
+      entity.assign<Shootable>(5, 10000);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      break;
+
     case 296: // floating arrow
+      entity.assign<Shootable>(5, 500);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      break;
+
+    case 236: // Radar dish
+      entity.assign<Shootable>(4, 2000);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      break;
+
+    case 120: // Keyhole (circuit board)
+    case 188: // rotating floor spikes
     case 210: // Computer showing "Duke escaped"
     case 222: // Lava fall left
     case 223: // Lava fall right
@@ -518,7 +664,6 @@ void configureEntity(
     case 228: // Water surface splash left
     case 229: // Water surface splash center
     case 230: // Water surface splash right
-    case 236: // Radar dish
     case 257: // Shallow water (variant 1)
     case 258: // Shallow water (variant 2)
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
@@ -541,10 +686,6 @@ void configureEntity(
 
     case 231: // Lava riser
       entity.assign<Animated>(Animated{{AnimationSequence(2, 3, 5)}});
-      break;
-
-    case 62: // Bomb dropping space ship
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 1, 2)}});
       break;
 
     case 246: // Rocket exhaust flame left
