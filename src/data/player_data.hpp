@@ -84,6 +84,10 @@ struct PlayerModel {
     mAmmo = currentMaxAmmo();
   }
 
+  bool currentWeaponConsumesAmmo() const {
+    return mWeapon != WeaponType::Normal;
+  }
+
   std::unordered_set<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
 };

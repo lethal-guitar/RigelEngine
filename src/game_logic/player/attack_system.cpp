@@ -16,11 +16,15 @@
 
 #include "attack_system.hpp"
 
+#include "data/player_data.hpp"
 #include "game_mode.hpp"
+
+#include <cassert>
 
 
 namespace rigel { namespace game_logic { namespace player {
 
+using data::WeaponType;
 using engine::components::WorldPosition;
 
 namespace ex = entityx;
@@ -29,15 +33,53 @@ namespace {
 
 const auto DUKE_SHOT_VELOCITY = 2.0f;
 
+
+ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
+  switch (weaponType) {
+    case WeaponType::Normal:
+      return ProjectileType::PlayerRegularShot;
+
+    case WeaponType::Laser:
+      return ProjectileType::PlayerLaserShot;
+
+    case WeaponType::Rocket:
+      return ProjectileType::PlayerRocketShot;
+
+    case WeaponType::FlameThrower:
+      return ProjectileType::PlayerFlameShot;
+  }
+
+  assert(false);
+  return ProjectileType::PlayerRegularShot;
+}
+
+
+data::SoundId soundIdForWeapon(const WeaponType weaponType) {
+  using data::SoundId;
+
+  switch (weaponType) {
+    case WeaponType::Laser:
+      return SoundId::DukeLaserShot;
+
+    case WeaponType::FlameThrower:
+      return SoundId::FlameThrowerShot;
+
+    default:
+      return SoundId::DukeNormalShot;
+  };
+}
+
 }
 
 
 AttackSystem::AttackSystem(
   entityx::Entity playerEntity,
+  data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
   FireShotFunc fireShotFunc
 )
   : mPlayerEntity(playerEntity)
+  , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
   , mFireShotFunc(fireShotFunc)
 {
@@ -110,8 +152,19 @@ void AttackSystem::fireShot(
     ? base::Point<float>{0.0f, velocity}
     : base::Point<float>{velocity, 0.0f};
 
-  mFireShotFunc(shotOffset + playerPosition, velocityVector);
-  mpServiceProvider->playSound(data::SoundId::DukeNormalShot);
+  mFireShotFunc(
+    projectileTypeForWeapon(mpPlayerModel->mWeapon),
+    shotOffset + playerPosition,
+    velocityVector);
+  mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
+
+  if (mpPlayerModel->currentWeaponConsumesAmmo()) {
+    --mpPlayerModel->mAmmo;
+
+    if (mpPlayerModel->mAmmo <= 0) {
+      mpPlayerModel->switchToWeapon(WeaponType::Normal);
+    }
+  }
 }
 
 }}}

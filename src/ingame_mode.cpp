@@ -255,12 +255,14 @@ void IngameMode::loadLevel(
     mpServiceProvider);
   mEntities.systems.add<game_logic::player::AttackSystem>(
     mPlayerEntity,
+    &mPlayerModel,
     mpServiceProvider,
     [this](
+      const game_logic::ProjectileType type,
       const engine::components::WorldPosition& pos,
       const base::Point<float>& velocity
     ) {
-      mEntityFactory.createProjectile(pos, velocity);
+      mEntityFactory.createProjectile(type, pos, velocity);
     });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,

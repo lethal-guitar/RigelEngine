@@ -164,6 +164,7 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 
 
 entityx::Entity EntityFactory::createProjectile(
+  const ProjectileType,
   const WorldPosition& pos,
   const base::Point<float>& velocity
 ) {

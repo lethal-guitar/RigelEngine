@@ -37,6 +37,13 @@ namespace rigel { namespace loader { class ActorImagePackage; }}
 
 namespace rigel { namespace game_logic {
 
+enum class ProjectileType {
+  PlayerRegularShot,
+  PlayerLaserShot,
+  PlayerRocketShot,
+  PlayerFlameShot
+};
+
 
 class EntityFactory {
 public:
@@ -51,6 +58,7 @@ public:
     data::map::Map& map);
 
   entityx::Entity createProjectile(
+    ProjectileType type,
     const engine::components::WorldPosition& pos,
     const base::Point<float>& velocity);
 

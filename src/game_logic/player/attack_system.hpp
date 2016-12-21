@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "game_logic/entity_factory.hpp"
 #include "game_logic/player_control_system.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -29,6 +30,8 @@ namespace rigel {
   struct IGameServiceProvider;
 }
 
+namespace rigel { namespace data { struct PlayerModel; }}
+
 namespace rigel { namespace game_logic { namespace components {
   struct PlayerControlled;
 }}}
@@ -39,12 +42,14 @@ namespace rigel { namespace game_logic { namespace player {
 class AttackSystem : public entityx::System<AttackSystem> {
 public:
   using FireShotFunc = std::function<void(
+    ProjectileType type,
     const engine::components::WorldPosition&,
     const base::Point<float>&
   )>;
 
   AttackSystem(
     entityx::Entity playerEntity,
+    data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServiceProvider,
     FireShotFunc fireShotFunc);
 
@@ -64,6 +69,7 @@ private:
 
 private:
   entityx::Entity mPlayerEntity;
+  data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
   FireShotFunc mFireShotFunc;
   PlayerInputState mInputState;
