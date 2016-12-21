@@ -41,12 +41,12 @@ class EntityFactory {
 public:
   EntityFactory(
     SDL_Renderer* pRenderer,
+    entityx::EntityManager* pEntityManager,
     const loader::ActorImagePackage* pSpritePackage);
 
   entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors,
-    data::map::Map& map,
-    entityx::EntityManager& entityManager);
+    data::map::Map& map);
 
 private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
@@ -67,6 +67,7 @@ private:
     const std::vector<data::ActorID>& actorIDs);
 
   SDL_Renderer* mpRenderer;
+  entityx::EntityManager* mpEntityManager;
   const loader::ActorImagePackage* mpSpritePackage;
 
   std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;

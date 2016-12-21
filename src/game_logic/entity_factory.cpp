@@ -74,8 +74,10 @@ void addDefaultPhysical(
 
 EntityFactory::EntityFactory(
   SDL_Renderer* pRenderer,
+  ex::EntityManager* pEntityManager,
   const ActorImagePackage* pSpritePackage)
   : mpRenderer(pRenderer)
+  , mpEntityManager(pEntityManager)
   , mpSpritePackage(pSpritePackage)
 {
 }
@@ -160,8 +162,7 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 
 entityx::Entity EntityFactory::createEntitiesForLevel(
   const data::map::ActorDescriptionList& actors,
-  data::map::Map& map,
-  entityx::EntityManager& entityManager
+  data::map::Map& map
 ) {
   entityx::Entity playerEntity;
 
@@ -172,7 +173,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       actor.mID != 82 && actor.mID != 83 &&
       actor.mID != 103 && actor.mID != 104);
 
-    auto entity = entityManager.create();
+    auto entity = mpEntityManager->create();
     entity.assign<WorldPosition>(actor.mPosition);
 
     boost::optional<Sprite> maybeSprite;
