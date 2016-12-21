@@ -89,7 +89,7 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
   sprite->mFramesToRender = {isFacingRight ? 39 : 0};
   player.assign<PlayerControlled>(controls);
 
-  player.assign<Physical>(Physical{{0.0f, 0.0f}, true});
+  player.assign<Physical>(Physical{{0.0f, 0.0f}, true, true});
   player.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 5}});
 }
 

@@ -85,7 +85,8 @@ void PhysicsSystem::update(
         position = applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
-          movementX);
+          movementX,
+          physical.mCanStepUpStairs);
       }
 
       // Cache new world space BBox after applying horizontal movement
@@ -126,7 +127,8 @@ const data::map::CollisionData& PhysicsSystem::worldAt(
 base::Vector PhysicsSystem::applyHorizontalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
-  const int16_t movementX
+  const int16_t movementX,
+  const bool allowStairStepping
 ) const {
   base::Vector newPosition = currentPosition;
   newPosition.x += movementX;
@@ -156,7 +158,7 @@ base::Vector PhysicsSystem::applyHorizontalMovement(
         bool mustResolveCollision = true;
 
         const auto atBottomRow = row == bbox.bottomLeft().y;
-        if (atBottomRow) {
+        if (atBottomRow && allowStairStepping) {
           // Collision happened at bottom row, check if we can step up
           // a stair
           const auto& stairStepUp = worldAt(x, row-1);
