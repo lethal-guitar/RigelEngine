@@ -67,6 +67,74 @@
  * 300: Green slime ball, thrown by Rigelatin enemies
  */
 
+ActorID actorIdForProjectile(
+  const ProjectileType type,
+  const base::Point<float>& velocity
+) {
+  const auto isHorizontal = velocity.x != 0.0f;
+  const auto isGoingRight = velocity.x > 0.0f;
+  const auto isGoingUp = velocity.y < 0.0f;
+
+  switch (type) {
+    case ProjectileType::PlayerRegularShot:
+      return isHorizontal ? 26 : 27;
+
+    case ProjectileType::PlayerLaserShot:
+      return isHorizontal ? 24 : 25;
+
+    case ProjectileType::PlayerRocketShot:
+      return isHorizontal
+        ? (isGoingRight ? 10 : 9)
+        : (isGoingUp ? 7 : 8);
+
+    case ProjectileType::PlayerFlameShot:
+      return isHorizontal
+        ? (isGoingRight ? 206 : 205)
+        : (isGoingUp ? 21 : 204);
+  }
+
+  assert(false);
+  return 0;
+}
+
+
+void configureProjectile(
+  entityx::Entity entity,
+  const ProjectileType type,
+  WorldPosition position,
+  const base::Point<float>& velocity,
+  const BoundingBox& boundingBox
+) {
+  const auto isHorizontal = velocity.x != 0.0f;
+  const auto isGoingLeft = velocity.x < 0.0f;
+
+  // Position adjustment for the flame thrower shot
+  if (type == ProjectileType::PlayerFlameShot) {
+    if (isHorizontal) {
+      position.y += 1;
+    } else {
+      position.x -= 1;
+    }
+  }
+
+  // Position adjustment for left-facing projectiles. We want the incoming
+  // position to always represent the projectile's origin, which means we need
+  // to adjust the position by the projectile's length to match the left-bottom
+  // corner positioning system.
+  if (isHorizontal && isGoingLeft) {
+    position.x -= boundingBox.size.width - 1;
+
+    if (type == ProjectileType::PlayerFlameShot) {
+      position.x += 3;
+    }
+  }
+
+  entity.assign<WorldPosition>(position);
+  entity.assign<Physical>(Physical{velocity, false});
+  entity.assign<DamageInflicting>(1);
+}
+
+
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
