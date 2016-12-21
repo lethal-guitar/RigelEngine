@@ -68,7 +68,8 @@ private:
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
-    const std::int16_t movementY
+    std::int16_t movementY,
+    bool beginFallingOnHittingCeiling
   ) const;
 
   float applyGravity(
