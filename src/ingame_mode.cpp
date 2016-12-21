@@ -22,6 +22,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 #include "game_logic/trigger_components.hpp"
@@ -151,6 +152,10 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_RCTRL:
       mPlayerInputs.mJumping = keyPressed;
       break;
+    case SDLK_LALT:
+    case SDLK_RALT:
+      mPlayerInputs.mShooting = keyPressed;
+      break;
   }
 }
 
@@ -162,8 +167,12 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
   // ----------
   // updating
+  mEntities.systems.system<player::AttackSystem>()->setInputState(
+    mPlayerInputs);
+
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<PlayerAnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
   mEntities.systems.update<PhysicsSystem>(dt);
@@ -244,6 +253,15 @@ void IngameMode::loadLevel(
   mEntities.systems.add<game_logic::PlayerAnimationSystem>(
     mPlayerEntity,
     mpServiceProvider);
+  mEntities.systems.add<game_logic::player::AttackSystem>(
+    mPlayerEntity,
+    mpServiceProvider,
+    [this](
+      const engine::components::WorldPosition& pos,
+      const base::Point<float>& velocity
+    ) {
+      mEntityFactory.createProjectile(pos, velocity);
+    });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,
     &mPlayerModel,
