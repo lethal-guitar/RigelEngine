@@ -79,6 +79,11 @@ struct PlayerModel {
       mWeapon == WeaponType::FlameThrower ? MAX_AMMO_FLAME_THROWER : MAX_AMMO;
   }
 
+  void switchToWeapon(const WeaponType type) {
+    mWeapon = type;
+    mAmmo = currentMaxAmmo();
+  }
+
   std::unordered_set<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
 };

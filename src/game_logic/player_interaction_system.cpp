@@ -120,9 +120,7 @@ void PlayerInteractionSystem::update(
         }
 
         if (collectable.mGivenWeapon) {
-          mpPlayerModel->mWeapon = *collectable.mGivenWeapon;
-          mpPlayerModel->mAmmo = mpPlayerModel->currentMaxAmmo();
-
+          mpPlayerModel->switchToWeapon(*collectable.mGivenWeapon);
           soundToPlay = SoundId::WeaponPickup;
         }
 
