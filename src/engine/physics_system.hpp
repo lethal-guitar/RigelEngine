@@ -61,7 +61,8 @@ private:
   base::Vector applyHorizontalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
-    const std::int16_t movementX
+    std::int16_t movementX,
+    bool allowStairStepping
   ) const;
 
   std::tuple<base::Vector, float> applyVerticalMovement(

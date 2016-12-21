@@ -25,8 +25,20 @@ namespace rigel { namespace engine {
 namespace components {
 
 struct Physical {
+  Physical(
+    const base::Point<float> velocity,
+    const bool gravityAffected,
+    const bool canStepUpStairs = false
+  )
+    : mVelocity(velocity)
+    , mGravityAffected(gravityAffected)
+    , mCanStepUpStairs(canStepUpStairs)
+  {
+  }
+
   base::Point<float> mVelocity;
   bool mGravityAffected;
+  bool mCanStepUpStairs;
 };
 
 }
