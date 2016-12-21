@@ -108,7 +108,8 @@ void PhysicsSystem::update(
           bbox,
           position,
           physical.mVelocity.y,
-          movementY);
+          movementY,
+          physical.mGravityAffected);
       }
     });
 }
@@ -210,7 +211,8 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const float currentVelocity,
-  const int16_t movementY
+  const int16_t movementY,
+  const bool beginFallingOnHittingCeiling
 ) const {
   base::Vector newPosition = currentPosition;
   newPosition.y += movementY;
@@ -235,7 +237,7 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
       const auto& enteredCell = worldAt(col, y);
       if (hasCollision(enteredCell)) {
         newPosition.y = row - movementDirection;
-        if (movingDown) {
+        if (movingDown || !beginFallingOnHittingCeiling) {
           // For falling, we reset the Y velocity as soon as we hit the ground
           return make_tuple(
             newPosition,
