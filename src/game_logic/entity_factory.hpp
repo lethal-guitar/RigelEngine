@@ -48,6 +48,10 @@ public:
     const data::map::ActorDescriptionList& actors,
     data::map::Map& map);
 
+  entityx::Entity createProjectile(
+    const engine::components::WorldPosition& pos,
+    const base::Point<float>& velocity);
+
 private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
   using VisualsAndBounds = std::tuple<
