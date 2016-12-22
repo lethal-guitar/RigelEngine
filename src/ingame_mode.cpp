@@ -260,9 +260,9 @@ void IngameMode::loadLevel(
     [this](
       const game_logic::ProjectileType type,
       const engine::components::WorldPosition& pos,
-      const base::Point<float>& velocity
+      const base::Point<float>& directionVector
     ) {
-      mEntityFactory.createProjectile(type, pos, velocity);
+      mEntityFactory.createProjectile(type, pos, directionVector);
     });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,

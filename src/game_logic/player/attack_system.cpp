@@ -31,9 +31,6 @@ namespace ex = entityx;
 
 namespace {
 
-const auto DUKE_SHOT_VELOCITY = 2.0f;
-
-
 ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
   switch (weaponType) {
     case WeaponType::Normal:
@@ -143,19 +140,18 @@ void AttackSystem::fireShot(
   const auto shotOffset =
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
-  const auto directionAdjustment = state != PlayerState::LookingUp
+  const auto direction = state != PlayerState::LookingUp
     ? (facingRight ? 1.0f : -1.0f)
     : -1.0f;
-  const auto velocity = DUKE_SHOT_VELOCITY * directionAdjustment;
 
-  const auto velocityVector = state == PlayerState::LookingUp
-    ? base::Point<float>{0.0f, velocity}
-    : base::Point<float>{velocity, 0.0f};
+  const auto directionVector = state == PlayerState::LookingUp
+    ? base::Point<float>{0.0f, direction}
+    : base::Point<float>{direction, 0.0f};
 
   mFireShotFunc(
     projectileTypeForWeapon(mpPlayerModel->mWeapon),
     shotOffset + playerPosition,
-    velocityVector);
+    directionVector);
   mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
 
   if (mpPlayerModel->currentWeaponConsumesAmmo()) {

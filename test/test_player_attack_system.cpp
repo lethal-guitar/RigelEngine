@@ -47,7 +47,7 @@ namespace ex = entityx;
 struct FireShotParameters {
   ProjectileType type;
   WorldPosition position;
-  base::Point<float> velocity;
+  base::Point<float> directionVector;
 };
 
 
@@ -92,11 +92,11 @@ TEST_CASE("Player attack system works as expected") {
   auto fireShotSpy = atria::testing::spy([&fireShotParameters](
     const ProjectileType type,
     const WorldPosition& position,
-    const base::Point<float>& velocity
+    const base::Point<float>& directionVector
   ) {
     fireShotParameters.type = type;
     fireShotParameters.position = position;
-    fireShotParameters.velocity = velocity;
+    fireShotParameters.directionVector = directionVector;
   });
 
   MockServiceProvider mockServiceProvicer;
@@ -151,9 +151,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -2};
-        const auto expectedVelocity = base::Point<float>{2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Facing left") {
@@ -162,9 +162,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -2};
-        const auto expectedVelocity = base::Point<float>{-2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{-1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Player position offset") {
@@ -191,9 +191,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -1};
-        const auto expectedVelocity = base::Point<float>{2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Facing left") {
@@ -202,9 +202,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -1};
-        const auto expectedVelocity = base::Point<float>{-2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{-1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
     }
 
@@ -215,9 +215,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{2, -5};
-        const auto expectedVelocity = base::Point<float>{0.0f, -2.0f};
+        const auto expectedVector = base::Point<float>{0.0f, -1.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Facing left") {
@@ -226,9 +226,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{0, -5};
-        const auto expectedVelocity = base::Point<float>{0.0f, -2.0f};
+        const auto expectedVector = base::Point<float>{0.0f, -1.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
     }
   }

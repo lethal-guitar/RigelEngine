@@ -166,15 +166,15 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 entityx::Entity EntityFactory::createProjectile(
   const ProjectileType type,
   const WorldPosition& pos,
-  const base::Point<float>& velocity
+  const base::Point<float>& directionVector
 ) {
   auto entity = mpEntityManager->create();
-  auto sprite = createSpriteForId(actorIdForProjectile(type, velocity));
+  auto sprite = createSpriteForId(actorIdForProjectile(type, directionVector));
   const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);
 
-  configureProjectile(entity, type, pos, velocity, boundingBox);
+  configureProjectile(entity, type, pos, directionVector, boundingBox);
 
   return entity;
 }

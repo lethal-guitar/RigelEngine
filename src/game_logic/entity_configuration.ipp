@@ -69,11 +69,11 @@
 
 ActorID actorIdForProjectile(
   const ProjectileType type,
-  const base::Point<float>& velocity
+  const base::Point<float>& directionVector
 ) {
-  const auto isHorizontal = velocity.x != 0.0f;
-  const auto isGoingRight = velocity.x > 0.0f;
-  const auto isGoingUp = velocity.y < 0.0f;
+  const auto isHorizontal = directionVector.x != 0.0f;
+  const auto isGoingRight = directionVector.x > 0.0f;
+  const auto isGoingUp = directionVector.y < 0.0f;
 
   switch (type) {
     case ProjectileType::PlayerRegularShot:
@@ -98,6 +98,18 @@ ActorID actorIdForProjectile(
 }
 
 
+float speedForProjectileType(const ProjectileType type) {
+  switch (type) {
+    case ProjectileType::PlayerLaserShot:
+    case ProjectileType::PlayerFlameShot:
+      return 5.0f;
+
+    default:
+      return 2.0f;
+  }
+}
+
+
 int damageForProjectileType(const ProjectileType type) {
   switch (type) {
     case ProjectileType::PlayerFlameShot:
@@ -119,11 +131,11 @@ void configureProjectile(
   entityx::Entity entity,
   const ProjectileType type,
   WorldPosition position,
-  const base::Point<float>& velocity,
+  const base::Point<float>& directionVector,
   const BoundingBox& boundingBox
 ) {
-  const auto isHorizontal = velocity.x != 0.0f;
-  const auto isGoingLeft = velocity.x < 0.0f;
+  const auto isHorizontal = directionVector.x != 0.0f;
+  const auto isGoingLeft = directionVector.x < 0.0f;
 
   // Position adjustment for the flame thrower shot
   if (type == ProjectileType::PlayerFlameShot) {
@@ -146,9 +158,10 @@ void configureProjectile(
     }
   }
 
+  const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
   entity.assign<WorldPosition>(position);
-  entity.assign<Physical>(Physical{velocity, false});
+  entity.assign<Physical>(Physical{directionVector * speed, false});
   entity.assign<DamageInflicting>(damageAmount);
 }
 
