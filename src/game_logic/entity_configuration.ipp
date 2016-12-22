@@ -98,6 +98,23 @@ ActorID actorIdForProjectile(
 }
 
 
+int damageForProjectileType(const ProjectileType type) {
+  switch (type) {
+    case ProjectileType::PlayerFlameShot:
+      return 2;
+
+    case ProjectileType::PlayerLaserShot:
+      return 4;
+
+    case ProjectileType::PlayerRocketShot:
+      return 8;
+
+    default:
+      return 1;
+  }
+}
+
+
 void configureProjectile(
   entityx::Entity entity,
   const ProjectileType type,
@@ -129,9 +146,10 @@ void configureProjectile(
     }
   }
 
+  const auto damageAmount = damageForProjectileType(type);
   entity.assign<WorldPosition>(position);
   entity.assign<Physical>(Physical{velocity, false});
-  entity.assign<DamageInflicting>(1);
+  entity.assign<DamageInflicting>(damageAmount);
 }
 
 
