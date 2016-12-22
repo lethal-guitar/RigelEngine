@@ -64,14 +64,6 @@ public:
 
 private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
-  using VisualsAndBounds = std::tuple<
-    boost::optional<engine::components::Sprite>,
-    engine::components::BoundingBox>;
-
-  VisualsAndBounds createVisualsAndBoundingBox(
-    const data::map::LevelData::Actor& actor,
-    data::map::Map& map
-  );
 
   engine::components::Sprite createSpriteForId(const data::ActorID actorID);
 

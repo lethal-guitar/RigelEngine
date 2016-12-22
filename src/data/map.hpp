@@ -70,6 +70,11 @@ public:
     return static_cast<int>(mHeightInTiles);
   }
 
+  void clearSection(int x, int y, int width, int height);
+
+  /** Returns true if the given coordinates are valid/inside the map. */
+  bool coordinatesValid(int x, int y) const;
+
 
 private:
   const TileIndex& tileRefAt(int layer, int x, int y) const;

@@ -243,8 +243,8 @@ void IngameMode::loadLevel(
   };
 
   mEntities.systems.add<PhysicsSystem>(
-    mLevelData.mMap,
-    mLevelData.mTileAttributes);
+    &mLevelData.mMap,
+    &mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::PlayerControlSystem>(
     mPlayerEntity,
     &mPlayerInputs,
@@ -288,6 +288,7 @@ void IngameMode::loadLevel(
     mpServiceProvider);
   mEntities.systems.add<DamageInflictionSystem>(
     &mPlayerModel,
+    &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.configure();
 

@@ -21,6 +21,7 @@
 #include "engine/physics_system.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/player_control_system.hpp"
 #include "game_logic/trigger_components.hpp"
 
@@ -83,41 +84,6 @@ EntityFactory::EntityFactory(
   , mpSpritePackage(pSpritePackage)
   , mDifficulty(difficulty)
 {
-}
-
-
-auto EntityFactory::createVisualsAndBoundingBox(
-  const data::map::LevelData::Actor& actor,
-  data::map::Map& map
-) -> VisualsAndBounds {
-  VisualsAndBounds result;
-
-  if (actor.mAssignedArea) {
-    // TODO: Implement dynamic geometry
-    const auto sectionRect = *actor.mAssignedArea;
-    for (
-      auto mapRow=sectionRect.topLeft.y;
-      mapRow<=sectionRect.bottomRight().y;
-      ++mapRow
-    ) {
-      for (
-        auto mapCol=sectionRect.topLeft.x;
-        mapCol<=sectionRect.bottomRight().x;
-        ++mapCol
-      ) {
-        map.setTileAt(0, mapCol, mapRow, 0);
-        map.setTileAt(1, mapCol, mapRow, 0);
-      }
-    }
-  } else if (hasAssociatedSprite(actor.mID)) {
-    auto sprite = createSpriteForId(actor.mID);
-    std::get<0>(result) = sprite;
-    std::get<1>(result) = inferBoundingBox(sprite.mFrames[0]);
-  } else {
-    // TODO: Assign bounding box for non-visual entities that have one
-  }
-
-  return result;
 }
 
 
@@ -194,18 +160,31 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       actor.mID != 103 && actor.mID != 104);
 
     auto entity = mpEntityManager->create();
-    entity.assign<WorldPosition>(actor.mPosition);
 
-    boost::optional<Sprite> maybeSprite;
+    auto position = actor.mPosition;
+    if (actor.mAssignedArea) {
+      // For dynamic geometry, the original position refers to the top-left
+      // corner of the assigned area, but it refers to the bottom-left corner
+      // for all other entities. Adjust the position here so that it's also
+      // bottom-left.
+      position.y += actor.mAssignedArea->size.height - 1;
+    }
+    entity.assign<WorldPosition>(position);
+
     BoundingBox boundingBox;
-    std::tie(maybeSprite, boundingBox) =
-      createVisualsAndBoundingBox(actor, map);
+    if (actor.mAssignedArea) {
+      const auto mapSectionRect = *actor.mAssignedArea;
+      entity.assign<MapGeometryLink>(mapSectionRect);
+
+      boundingBox = mapSectionRect;
+      boundingBox.topLeft = {0, 0};
+    } else if (hasAssociatedSprite(actor.mID)) {
+      const auto sprite = createSpriteForId(actor.mID);
+      boundingBox = inferBoundingBox(sprite.mFrames[0]);
+      entity.assign<Sprite>(sprite);
+    }
 
     configureEntity(entity, actor.mID, boundingBox, mDifficulty);
-
-    if (maybeSprite) {
-      entity.assign<Sprite>(*maybeSprite);
-    }
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {

@@ -16,37 +16,19 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-#include "data/map.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
-RIGEL_RESTORE_WARNINGS
-
-namespace rigel { struct IGameServiceProvider; }
-
-namespace rigel { namespace data { struct PlayerModel; }}
+#include "engine/base_components.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel { namespace game_logic { namespace components {
 
-class DamageInflictionSystem : public entityx::System<DamageInflictionSystem> {
-public:
-  DamageInflictionSystem(
-    data::PlayerModel* pPlayerModel,
-    data::map::Map* pMap,
-    IGameServiceProvider* pServiceProvider);
+struct MapGeometryLink {
+  explicit MapGeometryLink(engine::components::BoundingBox geometrySection)
+    : mLinkedGeometrySection(geometrySection)
+  {
+  }
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
-
-private:
-  data::PlayerModel* mpPlayerModel;
-  data::map::Map* mpMap;
-  IGameServiceProvider* mpServiceProvider;
+  engine::components::BoundingBox mLinkedGeometrySection;
 };
 
-}}
+
+}}}

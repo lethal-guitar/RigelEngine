@@ -50,8 +50,8 @@ namespace rigel { namespace engine {
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
   explicit PhysicsSystem(
-    const data::map::Map& map,
-    const data::map::TileAttributes& tileAttributes);
+    const data::map::Map* pMap,
+    const data::map::TileAttributes* pTileAttributes);
 
   void update(
     entityx::EntityManager& es,
@@ -59,7 +59,7 @@ public:
     entityx::TimeDelta dt) override;
 
 private:
-  const data::map::CollisionData& worldAt(int x, int y) const;
+  data::map::CollisionData worldAt(int x, int y) const;
 
   std::tuple<base::Vector, bool> applyHorizontalMovement(
     const components::BoundingBox& bbox,
@@ -81,7 +81,8 @@ private:
     float currentVelocity);
 
 private:
-  base::Grid<data::map::CollisionData> mCollisionData;
+  const data::map::Map* mpMap;
+  const data::map::TileAttributes* mpTileAttributes;
   TimeStepper mTimeStepper;
 };
 

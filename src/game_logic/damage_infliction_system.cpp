@@ -20,6 +20,7 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
 #include "game_mode.hpp"
 
 
@@ -31,14 +32,17 @@ using engine::components::BoundingBox;
 using engine::components::CollidedWithWorld;
 using engine::components::WorldPosition;
 using game_logic::components::DamageInflicting;
+using game_logic::components::MapGeometryLink;
 using game_logic::components::Shootable;
 
 
 DamageInflictionSystem::DamageInflictionSystem(
   data::PlayerModel* pPlayerModel,
+  data::map::Map* pMap,
   IGameServiceProvider* pServiceProvider
 )
   : mpPlayerModel(pPlayerModel)
+  , mpMap(pMap)
   , mpServiceProvider(pServiceProvider)
 {
 }
@@ -73,8 +77,20 @@ void DamageInflictionSystem::update(
           if (shootable->mHealth <= 0) {
             mpPlayerModel->mScore += shootable->mGivenScore;
 
+            // Take care of shootable walls
+            // NOTE: This might move someplace else later - maybe.
+            if (shootableEntity.has_component<MapGeometryLink>()) {
+              const auto mapSection =
+                shootableEntity.component<MapGeometryLink>()
+                  ->mLinkedGeometrySection;
+              mpMap->clearSection(
+                mapSection.topLeft.x, mapSection.topLeft.y,
+                mapSection.size.width, mapSection.size.height);
+            }
+
+            // Generate sound and destroy entity
             // NOTE: This is only temporary, it will change once we implement
-            // different sounds and particle effects per enemy.
+            // different sounds and particle effects per enemy/object.
             mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
             shootableEntity.destroy();
           } else {
