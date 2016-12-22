@@ -63,6 +63,21 @@ void Map::setTileAt(
 }
 
 
+void Map::clearSection(
+  const int x,
+  const int y,
+  const int width,
+  const int height
+) {
+  for (auto row = y; row < y+height; ++row) {
+    for (auto col = x; col < x + width; ++col) {
+      setTileAt(0, col, row, 0);
+      setTileAt(1, col, row, 0);
+    }
+  }
+}
+
+
 const map::TileIndex& Map::tileRefAt(
   const int layerS,
   const int xS,

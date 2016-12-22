@@ -70,6 +70,8 @@ public:
     return static_cast<int>(mHeightInTiles);
   }
 
+  void clearSection(int x, int y, int width, int height);
+
 
 private:
   const TileIndex& tileRefAt(int layer, int x, int y) const;
