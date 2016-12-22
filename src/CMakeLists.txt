@@ -37,6 +37,7 @@ set(core_sources
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp
     game_logic/damage_infliction_system.hpp
+    game_logic/dynamic_geometry_components.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
