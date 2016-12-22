@@ -44,23 +44,12 @@ BoundingBox toWorldSpace(
 
 
 PhysicsSystem::PhysicsSystem(
-  const data::map::Map& map,
-  const data::map::TileAttributes& tileAttributes
+  const data::map::Map* pMap,
+  const data::map::TileAttributes* pTileAttributes
 )
-  : mCollisionData(map.width(), map.height())
+  : mpMap(pMap)
+  , mpTileAttributes(pTileAttributes)
 {
-  for (int row=0; row<map.height(); ++row) {
-    for (int col=0; col<map.width(); ++col) {
-      auto collisionData1 =
-        tileAttributes.collisionData(
-          map.tileAt(0, col, row));
-      auto collisionData2 =
-        tileAttributes.collisionData(
-          map.tileAt(1, col, row));
-      mCollisionData.setValueAt(
-        col, row, CollisionData{collisionData1, collisionData2});
-    }
-  }
 }
 
 
@@ -131,11 +120,19 @@ void PhysicsSystem::update(
 }
 
 
-const data::map::CollisionData& PhysicsSystem::worldAt(
+data::map::CollisionData PhysicsSystem::worldAt(
   const int x, const int y
 ) const {
-  static const auto emptyCollisionData = CollisionData{};
-  return mCollisionData.valueAtWithDefault(x, y, emptyCollisionData);
+  if (!mpMap->coordinatesValid(x, y)) {
+    return CollisionData{};
+  }
+
+  const auto collisionData1 =
+    mpTileAttributes->collisionData(mpMap->tileAt(0, x, y));
+  const auto collisionData2 =
+    mpTileAttributes->collisionData(mpMap->tileAt(1, x, y));
+
+  return CollisionData{collisionData1, collisionData2};
 }
 
 
