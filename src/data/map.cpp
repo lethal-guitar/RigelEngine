@@ -78,6 +78,13 @@ void Map::clearSection(
 }
 
 
+bool Map::coordinatesValid(const int xS, const int yS) const {
+  const auto x = static_cast<size_t>(xS);
+  const auto y = static_cast<size_t>(yS);
+  return x < mWidthInTiles && y < mHeightInTiles;
+}
+
+
 const map::TileIndex& Map::tileRefAt(
   const int layerS,
   const int xS,
