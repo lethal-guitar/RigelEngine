@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/map.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -33,6 +34,7 @@ class DamageInflictionSystem : public entityx::System<DamageInflictionSystem> {
 public:
   DamageInflictionSystem(
     data::PlayerModel* pPlayerModel,
+    data::map::Map* pMap,
     IGameServiceProvider* pServiceProvider);
 
   void update(
@@ -43,6 +45,7 @@ public:
 
 private:
   data::PlayerModel* mpPlayerModel;
+  data::map::Map* mpMap;
   IGameServiceProvider* mpServiceProvider;
 };
 

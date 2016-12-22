@@ -288,6 +288,7 @@ void IngameMode::loadLevel(
     mpServiceProvider);
   mEntities.systems.add<DamageInflictionSystem>(
     &mPlayerModel,
+    &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.configure();
 

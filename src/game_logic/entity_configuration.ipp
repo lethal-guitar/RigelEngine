@@ -798,8 +798,24 @@ void configureEntity(
       entity.assign<Trigger>(TriggerType::LevelExit);
       break;
 
-    case 102: // dynamic wall: falls down, sinks into ground (when seen)
     case 106: // shootable wall, explodes into small pieces
+      entity.assign<Shootable>(1);
+      {
+        // If we keep the bounding box unchanged, the collision from the
+        // underlying map geometry will prevent projectiles from ever reaching
+        // the bounding box, thus preventing the wall's destruction.
+        // Making the bounding box slightly wider solves this problem in a
+        // simple way, without making the world collision detection more
+        // complicated. It seems that the original game is actually doing
+        // something similar, too.
+        auto adjustedBbox = boundingBox;
+        adjustedBbox.size.width += 2;
+        adjustedBbox.topLeft.x -= 1;
+        entity.assign<BoundingBox>(adjustedBbox);
+      }
+      break;
+
+    case 102: // dynamic wall: falls down, sinks into ground (when seen)
     case 116: // door, opened by blue key (slides into ground)
     case 137: // unknown dynamic geometry
     case 138: // dynamic wall: falls down, stays intact
