@@ -47,6 +47,25 @@ namespace {
 // TODO: Possibly tweak this value
 const auto DEATH_JUMP_IMPULSE = -2.6f;
 
+
+int mercyFramesForDifficulty(const data::Difficulty difficulty) {
+  using data::Difficulty;
+
+  switch (difficulty) {
+    case Difficulty::Easy:
+      return 40;
+
+    case Difficulty::Medium:
+      return 30;
+
+    case Difficulty::Hard:
+      return 20;
+  }
+
+  assert(false);
+  return 40;
+}
+
 }
 
 
@@ -62,12 +81,12 @@ DamageSystem::DamageSystem(
   entityx::Entity player,
   data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
-  const int numMercyFrames
+  const data::Difficulty difficulty
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
-  , mNumMercyFrames(numMercyFrames)
+  , mNumMercyFrames(mercyFramesForDifficulty(difficulty))
 {
 }
 

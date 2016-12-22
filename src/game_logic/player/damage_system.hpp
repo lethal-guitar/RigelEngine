@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/game_session_data.hpp"
 #include "data/player_data.hpp"
 #include "engine/timing.hpp"
 
@@ -35,7 +36,7 @@ public:
     entityx::Entity player,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServiceProvider,
-    int numMercyFrames);
+    data::Difficulty difficulty);
 
   void update(
     entityx::EntityManager& es,

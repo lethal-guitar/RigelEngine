@@ -69,25 +69,6 @@ std::string loadingScreenFileName(const int episode) {
   return fileName;
 }
 
-
-int mercyFramesForDifficulty(const data::Difficulty difficulty) {
-  using data::Difficulty;
-
-  switch (difficulty) {
-    case Difficulty::Easy:
-      return 40;
-
-    case Difficulty::Medium:
-      return 30;
-
-    case Difficulty::Hard:
-      return 20;
-  }
-
-  assert(false);
-  return 40;
-}
-
 }
 
 
@@ -269,7 +250,7 @@ void IngameMode::loadLevel(
     mPlayerEntity,
     &mPlayerModel,
     mpServiceProvider,
-    mercyFramesForDifficulty(difficulty));
+    difficulty);
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
