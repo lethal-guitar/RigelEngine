@@ -67,6 +67,105 @@
  * 300: Green slime ball, thrown by Rigelatin enemies
  */
 
+ActorID actorIdForProjectile(
+  const ProjectileType type,
+  const base::Point<float>& directionVector
+) {
+  const auto isHorizontal = directionVector.x != 0.0f;
+  const auto isGoingRight = directionVector.x > 0.0f;
+  const auto isGoingUp = directionVector.y < 0.0f;
+
+  switch (type) {
+    case ProjectileType::PlayerRegularShot:
+      return isHorizontal ? 26 : 27;
+
+    case ProjectileType::PlayerLaserShot:
+      return isHorizontal ? 24 : 25;
+
+    case ProjectileType::PlayerRocketShot:
+      return isHorizontal
+        ? (isGoingRight ? 10 : 9)
+        : (isGoingUp ? 7 : 8);
+
+    case ProjectileType::PlayerFlameShot:
+      return isHorizontal
+        ? (isGoingRight ? 206 : 205)
+        : (isGoingUp ? 21 : 204);
+  }
+
+  assert(false);
+  return 0;
+}
+
+
+float speedForProjectileType(const ProjectileType type) {
+  switch (type) {
+    case ProjectileType::PlayerLaserShot:
+    case ProjectileType::PlayerFlameShot:
+      return 5.0f;
+
+    default:
+      return 2.0f;
+  }
+}
+
+
+int damageForProjectileType(const ProjectileType type) {
+  switch (type) {
+    case ProjectileType::PlayerFlameShot:
+      return 2;
+
+    case ProjectileType::PlayerLaserShot:
+      return 4;
+
+    case ProjectileType::PlayerRocketShot:
+      return 8;
+
+    default:
+      return 1;
+  }
+}
+
+
+void configureProjectile(
+  entityx::Entity entity,
+  const ProjectileType type,
+  WorldPosition position,
+  const base::Point<float>& directionVector,
+  const BoundingBox& boundingBox
+) {
+  const auto isHorizontal = directionVector.x != 0.0f;
+  const auto isGoingLeft = directionVector.x < 0.0f;
+
+  // Position adjustment for the flame thrower shot
+  if (type == ProjectileType::PlayerFlameShot) {
+    if (isHorizontal) {
+      position.y += 1;
+    } else {
+      position.x -= 1;
+    }
+  }
+
+  // Position adjustment for left-facing projectiles. We want the incoming
+  // position to always represent the projectile's origin, which means we need
+  // to adjust the position by the projectile's length to match the left-bottom
+  // corner positioning system.
+  if (isHorizontal && isGoingLeft) {
+    position.x -= boundingBox.size.width - 1;
+
+    if (type == ProjectileType::PlayerFlameShot) {
+      position.x += 3;
+    }
+  }
+
+  const auto speed = speedForProjectileType(type);
+  const auto damageAmount = damageForProjectileType(type);
+  entity.assign<WorldPosition>(position);
+  entity.assign<Physical>(Physical{directionVector * speed, false});
+  entity.assign<DamageInflicting>(damageAmount);
+}
+
+
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,

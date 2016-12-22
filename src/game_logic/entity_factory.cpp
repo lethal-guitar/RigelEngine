@@ -164,21 +164,17 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 
 
 entityx::Entity EntityFactory::createProjectile(
+  const ProjectileType type,
   const WorldPosition& pos,
-  const base::Point<float>& velocity
+  const base::Point<float>& directionVector
 ) {
   auto entity = mpEntityManager->create();
-  entity.assign<WorldPosition>(pos);
-
-  // TODO: This is only temporary, it always creates a "player regular shot"
-  // projectile. We need to add a type parameter, and parameterize the sprite
-  // ID on that type in addition to the direction vector.
-  auto sprite = createSpriteForId(
-    velocity.x != 0.0f ? 26 : 27);
+  auto sprite = createSpriteForId(actorIdForProjectile(type, directionVector));
+  const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
   entity.assign<Sprite>(sprite);
-  entity.assign<BoundingBox>(inferBoundingBox(sprite.mFrames[0]));
-  entity.assign<Physical>(Physical{velocity, false});
-  entity.assign<DamageInflicting>(1);
+  entity.assign<BoundingBox>(boundingBox);
+
+  configureProjectile(entity, type, pos, directionVector, boundingBox);
 
   return entity;
 }

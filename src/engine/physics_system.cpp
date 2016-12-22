@@ -152,7 +152,10 @@ std::tuple<base::Vector, bool> PhysicsSystem::applyHorizontalMovement(
   const auto movementDirection = movingRight ? 1 : -1;
   const auto startX = currentPosition.x + movementDirection;
   const auto endX = newPosition.x + movementDirection;
-  const auto xOffset = movingRight ? bbox.size.width-1u : 0u;
+  const auto boundingBoxOffsetX = bbox.left() - currentPosition.x;
+  const auto xOffset =
+    (movingRight ? bbox.size.width-1u : 0u) +
+    boundingBoxOffsetX;
   auto hasCollision = [movingRight](const auto& cellData) {
     if (movingRight) {
       return cellData.isSolidLeft();
@@ -240,7 +243,10 @@ std::tuple<base::Vector, float, bool> PhysicsSystem::applyVerticalMovement(
   const auto movementDirection = movingDown ? 1 : -1;
   const auto startY = currentPosition.y + movementDirection;
   const auto endY = newPosition.y + movementDirection;
-  const auto yOffset = movingDown ? 0 : -(bbox.size.height - 1);
+  const auto boundingBoxOffsetY = bbox.bottom() - currentPosition.y;
+  const auto yOffset =
+    (movingDown ? 0 : -(bbox.size.height - 1)) +
+    boundingBoxOffsetY;
   auto hasCollision = [movingDown](const auto& cellData) {
     if (movingDown) {
       return cellData.isSolidTop();

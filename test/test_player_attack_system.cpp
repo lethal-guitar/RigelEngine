@@ -18,6 +18,7 @@
 
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
+#include <data/player_data.hpp>
 #include <game_logic/player/attack_system.hpp>
 #include <game_logic/player_control_system.hpp>
 #include <game_mode.hpp>
@@ -44,8 +45,9 @@ namespace ex = entityx;
 
 
 struct FireShotParameters {
+  ProjectileType type;
   WorldPosition position;
-  base::Point<float> velocity;
+  base::Point<float> directionVector;
 };
 
 
@@ -84,18 +86,25 @@ TEST_CASE("Player attack system works as expected") {
   player.assign<WorldPosition>(0, 0);
   initializePlayerEntity(player, true);
 
+  data::PlayerModel playerModel;
+
   FireShotParameters fireShotParameters;
   auto fireShotSpy = atria::testing::spy([&fireShotParameters](
+    const ProjectileType type,
     const WorldPosition& position,
-    const base::Point<float>& velocity
+    const base::Point<float>& directionVector
   ) {
+    fireShotParameters.type = type;
     fireShotParameters.position = position;
-    fireShotParameters.velocity = velocity;
+    fireShotParameters.directionVector = directionVector;
   });
 
   MockServiceProvider mockServiceProvicer;
   entityx.systems.add<player::AttackSystem>(
-    player, &mockServiceProvicer, fireShotSpy);
+    player,
+    &playerModel,
+    &mockServiceProvicer,
+    fireShotSpy);
   entityx.systems.configure();
   auto& attackSystem = *entityx.systems.system<player::AttackSystem>();
 
@@ -142,9 +151,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -2};
-        const auto expectedVelocity = base::Point<float>{2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Facing left") {
@@ -153,9 +162,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -2};
-        const auto expectedVelocity = base::Point<float>{-2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{-1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Player position offset") {
@@ -182,9 +191,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -1};
-        const auto expectedVelocity = base::Point<float>{2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Facing left") {
@@ -193,9 +202,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -1};
-        const auto expectedVelocity = base::Point<float>{-2.0f, 0.0f};
+        const auto expectedVector = base::Point<float>{-1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
     }
 
@@ -206,9 +215,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{2, -5};
-        const auto expectedVelocity = base::Point<float>{0.0f, -2.0f};
+        const auto expectedVector = base::Point<float>{0.0f, -1.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
 
       SECTION("Facing left") {
@@ -217,9 +226,9 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{0, -5};
-        const auto expectedVelocity = base::Point<float>{0.0f, -2.0f};
+        const auto expectedVector = base::Point<float>{0.0f, -1.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.velocity == expectedVelocity);
+        REQUIRE(fireShotParameters.directionVector == expectedVector);
       }
     }
   }
@@ -246,14 +255,148 @@ TEST_CASE("Player attack system works as expected") {
   }
 
 
+  SECTION("Shot type depends on player's current weapon") {
+    SECTION("Regular shot") {
+      updateWithInput(shootingInputState);
+      REQUIRE(fireShotParameters.type == ProjectileType::PlayerRegularShot);
+    }
+
+    SECTION("Laser shot") {
+      playerModel.mWeapon = data::WeaponType::Laser;
+
+      updateWithInput(shootingInputState);
+      REQUIRE(fireShotParameters.type == ProjectileType::PlayerLaserShot);
+    }
+
+    SECTION("Rocket shot") {
+      playerModel.mWeapon = data::WeaponType::Rocket;
+
+      updateWithInput(shootingInputState);
+      REQUIRE(fireShotParameters.type == ProjectileType::PlayerRocketShot);
+    }
+
+    SECTION("Flame shot") {
+      playerModel.mWeapon = data::WeaponType::FlameThrower;
+
+      updateWithInput(shootingInputState);
+      REQUIRE(fireShotParameters.type == ProjectileType::PlayerFlameShot);
+    }
+  }
+
+
   SECTION("Shooting triggers appropriate sound") {
     REQUIRE(mockServiceProvicer.mLastTriggeredSoundId == boost::none);
 
-    updateWithInput(shootingInputState);
+    SECTION("Normal shot") {
+      updateWithInput(shootingInputState);
+      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      REQUIRE(
+          *mockServiceProvicer.mLastTriggeredSoundId ==
+          data::SoundId::DukeNormalShot);
+    }
 
-    REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
-    REQUIRE(
-      *mockServiceProvicer.mLastTriggeredSoundId ==
-      data::SoundId::DukeNormalShot);
+    SECTION("Laser") {
+      playerModel.mWeapon = data::WeaponType::Laser;
+
+      updateWithInput(shootingInputState);
+      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      REQUIRE(
+          *mockServiceProvicer.mLastTriggeredSoundId ==
+          data::SoundId::DukeLaserShot);
+    }
+
+    SECTION("Rocket launcher") {
+      playerModel.mWeapon = data::WeaponType::Rocket;
+
+      // The rocket launcher also uses the normal shot sound
+      updateWithInput(shootingInputState);
+      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      REQUIRE(
+          *mockServiceProvicer.mLastTriggeredSoundId ==
+          data::SoundId::DukeNormalShot);
+    }
+
+    SECTION("Flame thrower") {
+      playerModel.mWeapon = data::WeaponType::FlameThrower;
+
+      updateWithInput(shootingInputState);
+      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      REQUIRE(
+          *mockServiceProvicer.mLastTriggeredSoundId ==
+          data::SoundId::FlameThrowerShot);
+    }
+
+    SECTION("Last shot before ammo depletion still uses appropriate sound") {
+      playerModel.mWeapon = data::WeaponType::Laser;
+      playerModel.mAmmo = 1;
+
+      updateWithInput(shootingInputState);
+
+      REQUIRE(
+          *mockServiceProvicer.mLastTriggeredSoundId ==
+          data::SoundId::DukeLaserShot);
+    }
+  }
+
+
+  const auto fireOneShot = [
+    &updateWithInput, &shootingInputState, &defaultInputState
+  ]() {
+    updateWithInput(shootingInputState);
+    updateWithInput(defaultInputState);
+  };
+
+  SECTION("Ammo consumption for non-regular weapons works") {
+    SECTION("Normal shot doesn't consume ammo") {
+      playerModel.mAmmo = 42;
+      fireOneShot();
+      REQUIRE(playerModel.mAmmo == 42);
+    }
+
+    SECTION("Laser consumes 1 unit of ammo per shot") {
+      playerModel.mWeapon = data::WeaponType::Laser;
+      playerModel.mAmmo = 10;
+
+      fireOneShot();
+      REQUIRE(playerModel.mAmmo == 9);
+    }
+
+    SECTION("Rocket launcher consumes 1 unit of ammo per shot") {
+      playerModel.mWeapon = data::WeaponType::Rocket;
+      playerModel.mAmmo = 10;
+
+      fireOneShot();
+      REQUIRE(playerModel.mAmmo == 9);
+    }
+
+    SECTION("Flame thrower consumes 1 unit of ammo per shot") {
+      playerModel.mWeapon = data::WeaponType::FlameThrower;
+      playerModel.mAmmo = 10;
+
+      fireOneShot();
+      REQUIRE(playerModel.mAmmo == 9);
+    }
+
+    SECTION("Multiple shots consume several units of ammo") {
+      playerModel.mWeapon = data::WeaponType::Laser;
+      playerModel.mAmmo = 20;
+
+      const auto shotsToFire = 15;
+      for (int i = 0; i < shotsToFire; ++i) {
+        fireOneShot();
+      }
+
+      REQUIRE(playerModel.mAmmo == 20 - shotsToFire);
+    }
+
+    SECTION("Depleting ammo switches back to normal weapon") {
+      playerModel.mWeapon = data::WeaponType::Rocket;
+      playerModel.mAmmo = 1;
+
+      fireOneShot();
+
+      REQUIRE(playerModel.mWeapon == data::WeaponType::Normal);
+      REQUIRE(playerModel.mAmmo == playerModel.currentMaxAmmo());
+    }
   }
 }
