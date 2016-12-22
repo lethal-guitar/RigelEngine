@@ -20,6 +20,7 @@
 #include "engine/base_components.hpp"
 #include "engine/physics_system.hpp"
 #include "game_logic/collectable_components.hpp"
+#include "game_logic/damage_components.hpp"
 #include "game_logic/player_control_system.hpp"
 #include "game_logic/trigger_components.hpp"
 
@@ -74,9 +75,13 @@ void addDefaultPhysical(
 
 EntityFactory::EntityFactory(
   SDL_Renderer* pRenderer,
-  const ActorImagePackage* pSpritePackage)
+  ex::EntityManager* pEntityManager,
+  const ActorImagePackage* pSpritePackage,
+  const data::Difficulty difficulty)
   : mpRenderer(pRenderer)
+  , mpEntityManager(pEntityManager)
   , mpSpritePackage(pSpritePackage)
+  , mDifficulty(difficulty)
 {
 }
 
@@ -158,10 +163,30 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 }
 
 
+entityx::Entity EntityFactory::createProjectile(
+  const WorldPosition& pos,
+  const base::Point<float>& velocity
+) {
+  auto entity = mpEntityManager->create();
+  entity.assign<WorldPosition>(pos);
+
+  // TODO: This is only temporary, it always creates a "player regular shot"
+  // projectile. We need to add a type parameter, and parameterize the sprite
+  // ID on that type in addition to the direction vector.
+  auto sprite = createSpriteForId(
+    velocity.x != 0.0f ? 26 : 27);
+  entity.assign<Sprite>(sprite);
+  entity.assign<BoundingBox>(inferBoundingBox(sprite.mFrames[0]));
+  entity.assign<Physical>(Physical{velocity, false});
+  entity.assign<DamageInflicting>(1);
+
+  return entity;
+}
+
+
 entityx::Entity EntityFactory::createEntitiesForLevel(
   const data::map::ActorDescriptionList& actors,
-  data::map::Map& map,
-  entityx::EntityManager& entityManager
+  data::map::Map& map
 ) {
   entityx::Entity playerEntity;
 
@@ -172,7 +197,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       actor.mID != 82 && actor.mID != 83 &&
       actor.mID != 103 && actor.mID != 104);
 
-    auto entity = entityManager.create();
+    auto entity = mpEntityManager->create();
     entity.assign<WorldPosition>(actor.mPosition);
 
     boost::optional<Sprite> maybeSprite;
@@ -180,7 +205,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     std::tie(maybeSprite, boundingBox) =
       createVisualsAndBoundingBox(actor, map);
 
-    configureEntity(entity, actor.mID, boundingBox);
+    configureEntity(entity, actor.mID, boundingBox, mDifficulty);
 
     if (maybeSprite) {
       entity.assign<Sprite>(*maybeSprite);

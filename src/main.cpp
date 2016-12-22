@@ -41,7 +41,7 @@ namespace po = boost::program_options;
 namespace {
 
 #ifdef __APPLE__
-  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN_DESKTOP;
+  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
 #else
   const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
 #endif
@@ -163,6 +163,9 @@ void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
   // We don't care if screen saver disabling failed, it's not that important.
   // So no return value checking.
   SDL_DisableScreenSaver();
+
+  // Same for the cursor disabling.
+  SDL_ShowCursor(SDL_DISABLE);
 
   Game game(gamePath, pRenderer.get());
   game.run(gameOptions);

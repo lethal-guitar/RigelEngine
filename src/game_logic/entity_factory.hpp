@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/game_session_data.hpp"
 #include "engine/visual_components.hpp"
 #include "loader/level_loader.hpp"
 #include "sdl_utils/texture.hpp"
@@ -41,12 +42,17 @@ class EntityFactory {
 public:
   EntityFactory(
     SDL_Renderer* pRenderer,
-    const loader::ActorImagePackage* pSpritePackage);
+    entityx::EntityManager* pEntityManager,
+    const loader::ActorImagePackage* pSpritePackage,
+    data::Difficulty difficulty);
 
   entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors,
-    data::map::Map& map,
-    entityx::EntityManager& entityManager);
+    data::map::Map& map);
+
+  entityx::Entity createProjectile(
+    const engine::components::WorldPosition& pos,
+    const base::Point<float>& velocity);
 
 private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
@@ -67,7 +73,9 @@ private:
     const std::vector<data::ActorID>& actorIDs);
 
   SDL_Renderer* mpRenderer;
+  entityx::EntityManager* mpEntityManager;
   const loader::ActorImagePackage* mpSpritePackage;
+  data::Difficulty mDifficulty;
 
   std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
 };

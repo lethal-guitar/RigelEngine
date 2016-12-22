@@ -40,6 +40,9 @@ build:
     project: build/RigelEngine.sln
     verbosity: minimal
 
+before_test:
+    - set PATH=%PATH%;%SDL2DIR%\lib\x64;%SDL2MIXERDIR%\lib\x64
+
 test_script:
     - cd build
     - ctest

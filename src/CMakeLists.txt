@@ -34,9 +34,13 @@ set(core_sources
     engine/timing.hpp
     engine/visual_components.hpp
     game_logic/collectable_components.hpp
+    game_logic/damage_infliction_system.cpp
+    game_logic/damage_infliction_system.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/player/attack_system.cpp
+    game_logic/player/attack_system.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
     game_logic/player_control_system.cpp
@@ -127,9 +131,10 @@ target_include_directories(rigel_core
     ${3rd_party_path}/entityx
     ${Boost_INCLUDE_DIRS}
 
-    PRIVATE
     ${3rd_party_path}/atria/src
     ${3rd_party_path}/atria/compat
+
+    PRIVATE
     ${3rd_party_path}/dbopl
     ${3rd_party_path}/speex_resampler
 )
@@ -137,9 +142,9 @@ target_link_libraries(rigel_core
     PUBLIC
     "${SDL2_LIBRARY}"
     ${SDL2_MIXER_LIBRARIES}
+    entityx
 
     PRIVATE
-    entityx
     dbopl
     speex_resampler
 )

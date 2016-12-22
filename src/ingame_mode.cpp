@@ -21,6 +21,8 @@
 #include "data/sound_ids.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 #include "game_logic/trigger_components.hpp"
@@ -97,7 +99,11 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
-  , mEntityFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
+  , mEntityFactory(
+      context.mpRenderer,
+      &mEntities.entities,
+      &context.mpResources->mActorImagePackage,
+      difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
   , mHudRenderer(
@@ -146,6 +152,10 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_RCTRL:
       mPlayerInputs.mJumping = keyPressed;
       break;
+    case SDLK_LALT:
+    case SDLK_RALT:
+      mPlayerInputs.mShooting = keyPressed;
+      break;
   }
 }
 
@@ -157,12 +167,17 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
   // ----------
   // updating
+  mEntities.systems.system<player::AttackSystem>()->setInputState(
+    mPlayerInputs);
+
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<PlayerAnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
   mEntities.systems.update<PhysicsSystem>(dt);
   mEntities.systems.update<player::DamageSystem>(dt);
+  mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
   mHudRenderer.update(dt);
 
@@ -219,8 +234,7 @@ void IngameMode::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     loadedLevel.mActors,
-    loadedLevel.mMap,
-    mEntities.entities);
+    loadedLevel.mMap);
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
@@ -239,6 +253,15 @@ void IngameMode::loadLevel(
   mEntities.systems.add<game_logic::PlayerAnimationSystem>(
     mPlayerEntity,
     mpServiceProvider);
+  mEntities.systems.add<game_logic::player::AttackSystem>(
+    mPlayerEntity,
+    mpServiceProvider,
+    [this](
+      const engine::components::WorldPosition& pos,
+      const base::Point<float>& velocity
+    ) {
+      mEntityFactory.createProjectile(pos, velocity);
+    });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,
     &mPlayerModel,
@@ -259,6 +282,9 @@ void IngameMode::loadLevel(
     loadedLevel.mBackdropScrollMode);
   mEntities.systems.add<PlayerInteractionSystem>(
     mPlayerEntity,
+    &mPlayerModel,
+    mpServiceProvider);
+  mEntities.systems.add<DamageInflictionSystem>(
     &mPlayerModel,
     mpServiceProvider);
   mEntities.systems.configure();
@@ -322,8 +348,7 @@ void IngameMode::restartLevel() {
 
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors,
-    mLevelData.mMap,
-    mEntities.entities);
+    mLevelData.mMap);
 
   mPlayerModel = mPlayerModelAtLevelStart;
 

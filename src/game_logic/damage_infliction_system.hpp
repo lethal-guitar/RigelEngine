@@ -16,21 +16,34 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
 
-namespace rigel { namespace game_logic { namespace components {
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
 
-enum class TriggerType {
-  LevelExit
+namespace rigel { struct IGameServiceProvider; }
+
+namespace rigel { namespace data { struct PlayerModel; }}
+
+
+namespace rigel { namespace game_logic {
+
+class DamageInflictionSystem : public entityx::System<DamageInflictionSystem> {
+public:
+  DamageInflictionSystem(
+    data::PlayerModel* pPlayerModel,
+    IGameServiceProvider* pServiceProvider);
+
+  void update(
+    entityx::EntityManager& es,
+    entityx::EventManager& events,
+    entityx::TimeDelta dt
+  ) override;
+
+private:
+  data::PlayerModel* mpPlayerModel;
+  IGameServiceProvider* mpServiceProvider;
 };
 
-
-struct Trigger {
-  explicit Trigger(const TriggerType type)
-    : mType(type)
-  {
-  }
-
-  TriggerType mType;
-};
-
-}}}
+}}

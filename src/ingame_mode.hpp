@@ -66,6 +66,7 @@ private:
 private:
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
+  entityx::EntityX mEntities;
   game_logic::EntityFactory mEntityFactory;
 
   data::PlayerModel mPlayerModel;
@@ -81,7 +82,6 @@ private:
   };
 
   LevelData mLevelData;
-  entityx::EntityX mEntities;
   entityx::Entity mPlayerEntity;
 
   ui::HudRenderer mHudRenderer;

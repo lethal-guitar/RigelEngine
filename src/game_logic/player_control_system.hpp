@@ -104,7 +104,7 @@ struct PlayerControlled {
 
   bool mPerformedInteraction = false;
   bool mPerformedJump = false;
-  bool mPerformedShot = false;
+  bool mShotFired = false;
 
 
   bool isPlayerDead() const {
