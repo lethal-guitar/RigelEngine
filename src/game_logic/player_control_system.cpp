@@ -21,7 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
-#include "engine/rendering_system.hpp"
+#include "engine/visual_components.hpp"
 #include "utils/math_tools.hpp"
 
 #include "game_mode.hpp"
