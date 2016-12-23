@@ -48,8 +48,7 @@ public:
     SDL_Renderer* pRenderer,
     const loader::ResourceLoader& bundle);
 
-  void render();
-  void update(engine::TimeDelta dt);
+  void updateAndRender(engine::TimeDelta dt);
 
 private:
   struct CollectedLetterIndicator {

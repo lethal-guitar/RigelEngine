@@ -168,8 +168,6 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
-  mHudRenderer.update(dt);
-
 
   // **********************************************************************
   // Rendering
@@ -179,7 +177,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
 
     mEntities.systems.update<RenderingSystem>(dt);
-    mHudRenderer.render();
+    mHudRenderer.updateAndRender(dt);
   }
 
   mIngameViewPortRenderTarget.render(
