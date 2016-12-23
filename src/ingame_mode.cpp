@@ -22,6 +22,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player/animation_system.hpp"
 #include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"

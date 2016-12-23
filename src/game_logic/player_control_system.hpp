@@ -178,32 +178,4 @@ private:
   base::Grid<std::uint8_t> mLadderFlags;
 };
 
-
-class MapScrollSystem : public entityx::System<MapScrollSystem> {
-public:
-  MapScrollSystem(
-    base::Vector* pScrollOffset,
-    entityx::Entity player,
-    const data::map::Map& map);
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
-
-private:
-  void updateScrollOffset(
-    const components::PlayerControlled& state,
-    const engine::components::WorldPosition& position,
-    const engine::components::BoundingBox& playerBounds,
-    entityx::TimeDelta dt);
-
-private:
-  engine::TimeStepper mTimeStepper;
-  entityx::Entity mPlayer;
-  base::Vector* mpScrollOffset;
-  base::Extents mMaxScrollOffset;
-};
-
 }}
