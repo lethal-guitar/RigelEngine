@@ -146,16 +146,24 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
-  // ----------
-  // updating
+  // **********************************************************************
+  // Updating
+  // **********************************************************************
   mEntities.systems.system<player::AttackSystem>()->setInputState(
     mPlayerInputs);
 
+  // ----------------------------------------------------------------------
+  // Player update
+  // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerControlSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<PlayerAnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
+
+  // ----------------------------------------------------------------------
+  // Other updates
+  // ----------------------------------------------------------------------
   mEntities.systems.update<PhysicsSystem>(dt);
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
@@ -163,8 +171,9 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mHudRenderer.update(dt);
 
 
-  // ----------
-  // rendering
+  // **********************************************************************
+  // Rendering
+  // **********************************************************************
   {
     sdl_utils::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
