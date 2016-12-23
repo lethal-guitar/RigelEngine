@@ -220,9 +220,7 @@ void IngameMode::loadLevel(
 ) {
   auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
-  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
-    loadedLevel.mActors,
-    loadedLevel.mMap);
+  mPlayerEntity = mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
@@ -340,8 +338,7 @@ void IngameMode::restartLevel() {
 
   mEntities.entities.reset();
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
-    mLevelData.mInitialActors,
-    mLevelData.mMap);
+    mLevelData.mInitialActors);
 
   mPlayerModel = mPlayerModelAtLevelStart;
 

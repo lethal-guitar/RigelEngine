@@ -54,8 +54,7 @@ public:
     data::Difficulty difficulty);
 
   entityx::Entity createEntitiesForLevel(
-    const data::map::ActorDescriptionList& actors,
-    data::map::Map& map);
+    const data::map::ActorDescriptionList& actors);
 
   entityx::Entity createProjectile(
     ProjectileType type,

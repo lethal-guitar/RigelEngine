@@ -147,8 +147,7 @@ entityx::Entity EntityFactory::createProjectile(
 
 
 entityx::Entity EntityFactory::createEntitiesForLevel(
-  const data::map::ActorDescriptionList& actors,
-  data::map::Map& map
+  const data::map::ActorDescriptionList& actors
 ) {
   entityx::Entity playerEntity;
 
