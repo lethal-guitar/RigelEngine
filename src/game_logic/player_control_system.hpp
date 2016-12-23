@@ -179,41 +179,6 @@ private:
 };
 
 
-class PlayerAnimationSystem : public entityx::System<PlayerAnimationSystem> {
-public:
-  explicit PlayerAnimationSystem(
-    entityx::Entity player,
-    IGameServiceProvider* pServiceProvider);
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
-
-private:
-  void updateAnimation(
-    const components::PlayerControlled& state,
-    engine::components::Sprite& sprite);
-
-  void updateMercyFramesAnimation(
-    engine::TimeDelta mercyTimeElapsed,
-    engine::components::Sprite& sprite);
-
-  void updateDeathAnimation(
-    components::PlayerControlled& state,
-    engine::components::Sprite& sprite,
-    engine::TimeDelta dt);
-
-private:
-  entityx::Entity mPlayer;
-  IGameServiceProvider* mpServiceProvider;
-
-  player::Orientation mPreviousOrientation;
-  player::PlayerState mPreviousState;
-};
-
-
 class MapScrollSystem : public entityx::System<MapScrollSystem> {
 public:
   MapScrollSystem(

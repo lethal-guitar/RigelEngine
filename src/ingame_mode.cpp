@@ -22,6 +22,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/player/animation_system.hpp"
 #include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
@@ -158,7 +159,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerControlSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
-  mEntities.systems.update<PlayerAnimationSystem>(dt);
+  mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   // ----------------------------------------------------------------------
@@ -237,7 +238,7 @@ void IngameMode::loadLevel(
     &mPlayerInputs,
     mLevelData.mMap,
     mLevelData.mTileAttributes);
-  mEntities.systems.add<game_logic::PlayerAnimationSystem>(
+  mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider);
   mEntities.systems.add<game_logic::player::AttackSystem>(
