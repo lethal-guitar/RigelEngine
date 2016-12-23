@@ -18,7 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "game_logic/entity_factory.hpp"
-#include "game_logic/player_control_system.hpp"
+#include "game_logic/player_movement_system.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

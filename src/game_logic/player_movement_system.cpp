@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "player_control_system.hpp"
+#include "player_movement_system.hpp"
 
 #include "data/map.hpp"
 #include "engine/base_components.hpp"
@@ -54,16 +54,16 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 
 /* WARNING: PROTOTYPE CODE
  *
- * The current PlayerControlSystem is a quick & dirty first prototype of the
+ * The current PlayerMovementSystem is a quick & dirty first prototype of the
  * player movement. It's not very easy to folow or maintainable. It will be
  * replaced by a new implementation as soon as more player movement features
  * will be implemented.
  *
- * TODO: Rewrite PlayerControlSystem
+ * TODO: Rewrite PlayerMovementSystem
  */
 
 
-PlayerControlSystem::PlayerControlSystem(
+PlayerMovementSystem::PlayerMovementSystem(
   entityx::Entity player,
   const PlayerInputState* pInputs,
   const data::map::Map& map,
@@ -84,7 +84,7 @@ PlayerControlSystem::PlayerControlSystem(
 }
 
 
-void PlayerControlSystem::update(
+void PlayerMovementSystem::update(
   entityx::EntityManager& es,
   entityx::EventManager& events,
   entityx::TimeDelta dt
@@ -297,7 +297,7 @@ void PlayerControlSystem::update(
   }
 }
 
-bool PlayerControlSystem::canClimbUp(
+bool PlayerMovementSystem::canClimbUp(
   const BoundingBox& worldSpacePlayerBounds
 ) const {
   // Is there still ladder above the player's current position?
@@ -311,7 +311,7 @@ bool PlayerControlSystem::canClimbUp(
   return false;
 }
 
-bool PlayerControlSystem::canClimbDown(
+bool PlayerMovementSystem::canClimbDown(
   const BoundingBox& worldSpacePlayerBounds
 ) const {
   // Is there still ladder below the player's current position?
@@ -325,7 +325,7 @@ bool PlayerControlSystem::canClimbDown(
   return false;
 }
 
-boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
+boost::optional<base::Vector> PlayerMovementSystem::findLadderTouchPoint(
   const BoundingBox& worldSpacePlayerBounds
 ) const {
   const auto position = worldSpacePlayerBounds.topLeft;

@@ -158,7 +158,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // Player update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
-  mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<PlayerMovementSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
@@ -234,7 +234,7 @@ void IngameMode::loadLevel(
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap,
     &mLevelData.mTileAttributes);
-  mEntities.systems.add<game_logic::PlayerControlSystem>(
+  mEntities.systems.add<game_logic::PlayerMovementSystem>(
     mPlayerEntity,
     &mPlayerInputs,
     mLevelData.mMap,

@@ -20,7 +20,7 @@
 #include <base/warnings.hpp>
 #include <data/player_data.hpp>
 #include <game_logic/player/attack_system.hpp>
-#include <game_logic/player_control_system.hpp>
+#include <game_logic/player_movement_system.hpp>
 #include <game_mode.hpp>
 
 RIGEL_DISABLE_WARNINGS

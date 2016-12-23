@@ -148,9 +148,9 @@ void initializePlayerEntity(entityx::Entity player, bool isFacingRight);
  * avatar (Duke) accordingly.
  *
  */
-class PlayerControlSystem : public entityx::System<PlayerControlSystem> {
+class PlayerMovementSystem : public entityx::System<PlayerMovementSystem> {
 public:
-  PlayerControlSystem(
+  PlayerMovementSystem(
     entityx::Entity player,
     const PlayerInputState* pInputs,
     const data::map::Map& map,
