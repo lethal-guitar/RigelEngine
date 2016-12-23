@@ -17,38 +17,51 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "data/game_session_data.hpp"
-#include "data/player_data.hpp"
+#include "game_logic/player/components.hpp"
+#include "engine/visual_components.hpp"
 #include "engine/timing.hpp"
-
-#include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel { struct IGameServiceProvider; }
+
 
 namespace rigel { namespace game_logic { namespace player {
 
-class DamageSystem : public entityx::System<DamageSystem> {
+class AnimationSystem : public entityx::System<AnimationSystem> {
 public:
-  DamageSystem(
+  explicit AnimationSystem(
     entityx::Entity player,
-    data::PlayerModel* pPlayerModel,
-    IGameServiceProvider* pServiceProvider,
-    data::Difficulty difficulty);
+    IGameServiceProvider* pServiceProvider);
 
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+    entityx::TimeDelta dt
+  ) override;
+
+private:
+  void updateAnimation(
+    const components::PlayerControlled& state,
+    engine::components::Sprite& sprite);
+
+  void updateMercyFramesAnimation(
+    engine::TimeDelta mercyTimeElapsed,
+    engine::components::Sprite& sprite);
+
+  void updateDeathAnimation(
+    components::PlayerControlled& state,
+    engine::components::Sprite& sprite,
+    engine::TimeDelta dt);
 
 private:
   entityx::Entity mPlayer;
-  data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
-  int mNumMercyFrames;
-};
 
+  Orientation mPreviousOrientation;
+  PlayerState mPreviousState;
+};
 
 }}}

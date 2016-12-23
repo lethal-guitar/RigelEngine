@@ -4,7 +4,6 @@
 #include "engine/base_components.hpp"
 #include "engine/physics_system.hpp"
 #include "game_logic/collectable_components.hpp"
-#include "game_logic/player_control_system.hpp"
 #include "game_mode.hpp"
 
 
@@ -13,6 +12,9 @@ namespace rigel { namespace game_logic {
 using data::PlayerModel;
 using engine::components::BoundingBox;
 using engine::components::WorldPosition;
+using player::PlayerState;
+
+using namespace game_logic::components;
 
 namespace ex = entityx;
 
@@ -29,57 +31,48 @@ PlayerInteractionSystem::PlayerInteractionSystem(
 }
 
 
-void PlayerInteractionSystem::configure(
-  ex::EntityManager&,
-  ex::EventManager& events
-) {
-  events.subscribe<game_logic::events::PlayerInteraction>(*this);
-}
-
-
 void PlayerInteractionSystem::update(
   entityx::EntityManager& es,
   entityx::EventManager& events,
   entityx::TimeDelta
 ) {
-  using namespace game_logic::components;
-
   assert(mPlayer.has_component<PlayerControlled>());
-  const auto& state = *mPlayer.component<PlayerControlled>().get();
+  auto& state = *mPlayer.component<PlayerControlled>().get();
   if (state.isPlayerDead()) {
     return;
+  }
+
+  if (state.mState != PlayerState::LookingUp) {
+    state.mPerformedInteraction = false;
+  }
+
+  if (!state.mPerformedInteraction && state.mState == PlayerState::LookingUp) {
+    const auto& playerBox = *mPlayer.component<BoundingBox>().get();
+    const auto& playerPos = *mPlayer.component<WorldPosition>().get();
+    const auto worldSpacePlayerBounds =
+      engine::toWorldSpace(playerBox, playerPos);
+    es.each<Interactable, WorldPosition, BoundingBox>(
+      [this, &es, &state, &worldSpacePlayerBounds](
+        ex::Entity entity,
+        const Interactable& interactable,
+        const WorldPosition& pos,
+        const BoundingBox& bbox
+      ) {
+        if (state.mPerformedInteraction) {
+          return;
+        }
+        const auto objectBounds = engine::toWorldSpace(bbox, pos);
+        if (worldSpacePlayerBounds.intersects(objectBounds)) {
+          performInteraction(es, entity, interactable.mType);
+          state.mPerformedInteraction = true;
+        }
+      });
   }
 
   if (mNeedFadeIn) {
     mNeedFadeIn = false;
     mpServiceProvider->fadeInScreen();
   }
-
-  // ----------------------------------------------------------------------
-  if (mTeleportRequested) {
-    mTeleportRequested = false;
-
-    const auto sourceTeleporterPosition =
-      *mSourceTeleporter.component<WorldPosition>().get();
-
-    es.each<Interactable, WorldPosition>(
-      [this, sourceTeleporterPosition](
-        ex::Entity,
-        const Interactable& i,
-        const WorldPosition& pos
-      ) {
-        if (
-          i.mType == InteractableType::Teleporter &&
-          pos != sourceTeleporterPosition
-        ) {
-          mpServiceProvider->fadeOutScreen();
-          auto playerPosition = mPlayer.component<WorldPosition>();
-          *playerPosition.get() = pos + base::Vector{2, 0};
-          mNeedFadeIn = true;
-        }
-      });
-  }
-
 
   // ----------------------------------------------------------------------
   es.each<CollectableItem, WorldPosition, BoundingBox>(
@@ -147,14 +140,39 @@ void PlayerInteractionSystem::update(
         es.destroy(entity.id());
       }
     });
-
 }
 
-void PlayerInteractionSystem::receive(
-  const game_logic::events::PlayerInteraction& interaction
+
+void PlayerInteractionSystem::performInteraction(
+  entityx::EntityManager& es,
+  entityx::Entity interactable,
+  const components::InteractableType type
 ) {
-  mTeleportRequested = true;
-  mSourceTeleporter = interaction.mInteractedEntity;
+  switch (type) {
+    case InteractableType::Teleporter:
+      {
+        const auto sourceTeleporterPosition =
+          *interactable.component<WorldPosition>().get();
+
+        es.each<Interactable, WorldPosition>(
+          [this, sourceTeleporterPosition](
+            ex::Entity,
+            const Interactable& i,
+            const WorldPosition& pos
+          ) {
+            if (
+              i.mType == InteractableType::Teleporter &&
+              pos != sourceTeleporterPosition
+            ) {
+              mpServiceProvider->fadeOutScreen();
+              auto playerPosition = mPlayer.component<WorldPosition>();
+              *playerPosition.get() = pos + base::Vector{2, 0};
+              mNeedFadeIn = true;
+            }
+          });
+      }
+      break;
+  }
 }
 
 }}

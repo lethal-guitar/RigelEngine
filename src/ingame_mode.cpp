@@ -22,9 +22,12 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/map_scroll_system.hpp"
+#include "game_logic/player/animation_system.hpp"
 #include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
+#include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
@@ -67,25 +70,6 @@ std::string loadingScreenFileName(const int episode) {
   fileName += std::to_string(episode + 1);
   fileName += ".MNI";
   return fileName;
-}
-
-
-int mercyFramesForDifficulty(const data::Difficulty difficulty) {
-  using data::Difficulty;
-
-  switch (difficulty) {
-    case Difficulty::Easy:
-      return 40;
-
-    case Difficulty::Medium:
-      return 30;
-
-    case Difficulty::Hard:
-      return 20;
-  }
-
-  assert(false);
-  return 40;
 }
 
 }
@@ -165,31 +149,38 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
-  // ----------
-  // updating
+  // **********************************************************************
+  // Updating
+  // **********************************************************************
   mEntities.systems.system<player::AttackSystem>()->setInputState(
     mPlayerInputs);
 
+  // ----------------------------------------------------------------------
+  // Player update
+  // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
-  mEntities.systems.update<PlayerControlSystem>(dt);
+  mEntities.systems.update<PlayerMovementSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
-  mEntities.systems.update<PlayerAnimationSystem>(dt);
+  mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
+
+  // ----------------------------------------------------------------------
+  // Other updates
+  // ----------------------------------------------------------------------
   mEntities.systems.update<PhysicsSystem>(dt);
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
-  mHudRenderer.update(dt);
 
-
-  // ----------
-  // rendering
+  // **********************************************************************
+  // Rendering
+  // **********************************************************************
   {
     sdl_utils::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
 
     mEntities.systems.update<RenderingSystem>(dt);
-    mHudRenderer.render();
+    mHudRenderer.updateAndRender(dt);
   }
 
   mIngameViewPortRenderTarget.render(
@@ -232,25 +223,24 @@ void IngameMode::loadLevel(
 ) {
   auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
-  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
-    loadedLevel.mActors,
-    loadedLevel.mMap);
+  mPlayerEntity = mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
     std::move(loadedLevel.mTileSet.mAttributes),
     std::move(loadedLevel.mActors)
   };
+  mMapAtLevelStart = mLevelData.mMap;
 
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap,
     &mLevelData.mTileAttributes);
-  mEntities.systems.add<game_logic::PlayerControlSystem>(
+  mEntities.systems.add<game_logic::PlayerMovementSystem>(
     mPlayerEntity,
     &mPlayerInputs,
     mLevelData.mMap,
     mLevelData.mTileAttributes);
-  mEntities.systems.add<game_logic::PlayerAnimationSystem>(
+  mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider);
   mEntities.systems.add<game_logic::player::AttackSystem>(
@@ -268,7 +258,7 @@ void IngameMode::loadLevel(
     mPlayerEntity,
     &mPlayerModel,
     mpServiceProvider,
-    mercyFramesForDifficulty(difficulty));
+    difficulty);
   mEntities.systems.add<game_logic::MapScrollSystem>(
     &mScrollOffset,
     mPlayerEntity,
@@ -347,11 +337,11 @@ void IngameMode::checkForPlayerDeath() {
 void IngameMode::restartLevel() {
   mpServiceProvider->fadeOutScreen();
 
-  mEntities.entities.reset();
+  mLevelData.mMap = mMapAtLevelStart;
 
+  mEntities.entities.reset();
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
-    mLevelData.mInitialActors,
-    mLevelData.mMap);
+    mLevelData.mInitialActors);
 
   mPlayerModel = mPlayerModelAtLevelStart;
 

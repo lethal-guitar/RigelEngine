@@ -228,7 +228,9 @@ HudRenderer::HudRenderer(
 }
 
 
-void HudRenderer::render() {
+void HudRenderer::updateAndRender(const engine::TimeDelta dt) {
+  mTimeStepper.update(dt);
+
   // Hud background
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
@@ -279,11 +281,6 @@ void HudRenderer::render() {
 }
 
 
-void HudRenderer::update(engine::TimeDelta dt) {
-  mTimeStepper.update(dt);
-}
-
-
 void HudRenderer::drawHealthBar() const {
   // Health slices start at col 20, row 4. The first 9 are for the "0 health"
   // animation
@@ -316,10 +313,7 @@ void HudRenderer::drawCollectedLetters() const {
   for (const auto letter : mpPlayerModel->mCollectedLetters) {
     const auto it = mCollectedLetterIndicatorsByType.find(letter);
     assert(it != mCollectedLetterIndicatorsByType.end());
-
-    it->second.mTexture.render(
-      mpRenderer,
-      it->second.mPxPosition);
+    it->second.mTexture.render(mpRenderer, it->second.mPxPosition);
   }
 }
 

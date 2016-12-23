@@ -17,38 +17,48 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "data/game_session_data.hpp"
-#include "data/player_data.hpp"
+#include "base/spatial_types.hpp"
+#include "engine/base_components.hpp"
 #include "engine/timing.hpp"
-
-#include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel { namespace data { namespace map { class Map; }}}
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel { namespace game_logic { namespace components {
+  struct PlayerControlled;
+}}}
 
-class DamageSystem : public entityx::System<DamageSystem> {
+
+namespace rigel { namespace game_logic {
+
+class MapScrollSystem : public entityx::System<MapScrollSystem> {
 public:
-  DamageSystem(
+  MapScrollSystem(
+    base::Vector* pScrollOffset,
     entityx::Entity player,
-    data::PlayerModel* pPlayerModel,
-    IGameServiceProvider* pServiceProvider,
-    data::Difficulty difficulty);
+    const data::map::Map& map);
 
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+    entityx::TimeDelta dt
+  ) override;
 
 private:
+  void updateScrollOffset(
+    const components::PlayerControlled& state,
+    const engine::components::WorldPosition& position,
+    const engine::components::BoundingBox& playerBounds,
+    entityx::TimeDelta dt);
+
+private:
+  engine::TimeStepper mTimeStepper;
   entityx::Entity mPlayer;
-  data::PlayerModel* mpPlayerModel;
-  IGameServiceProvider* mpServiceProvider;
-  int mNumMercyFrames;
+  base::Vector* mpScrollOffset;
+  base::Extents mMaxScrollOffset;
 };
 
-
-}}}
+}}

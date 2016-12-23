@@ -781,6 +781,9 @@ void configureEntity(
         AnimationSequence(2, 4, 5, 4),
         AnimationSequence(2, 6, 7, 5),
         AnimationSequence(2, 8, 9, 6)}});
+
+      entity.assign<Shootable>(1);
+      entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 231: // Lava riser

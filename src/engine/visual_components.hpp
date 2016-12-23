@@ -78,14 +78,12 @@ struct AnimationSequence {
     const int delayInTicks,
     const int startFrame,
     boost::optional<int> endFrame,
-    const int renderSlot = 0,
-    const bool pingPong = false
+    const int renderSlot = 0
   )
     : mDelayInTicks(delayInTicks)
     , mStartFrame(startFrame)
     , mEndFrame(std::move(endFrame))
     , mRenderSlot(renderSlot)
-    , mPingPong(pingPong)
   {
   }
 
@@ -93,10 +91,8 @@ struct AnimationSequence {
   int mStartFrame = 0;
   boost::optional<int> mEndFrame;
   int mRenderSlot = 0;
-  bool mPingPong = false;
 
   TimeStepper mTimeStepper;
-  bool mIsInPingPongLoopBackPhase = false;
 };
 
 

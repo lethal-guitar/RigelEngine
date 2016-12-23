@@ -14,22 +14,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "player_control_system.hpp"
+#include "player_movement_system.hpp"
 
-#include "data/game_traits.hpp"
 #include "data/map.hpp"
-#include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
-#include "engine/rendering_system.hpp"
-#include "utils/math_tools.hpp"
-
-#include "game_mode.hpp"
-
-#include <boost/algorithm/cxx11/any_of.hpp>
+#include "engine/visual_components.hpp"
 
 
-namespace ba = boost::algorithm;
 namespace ex = entityx;
 
 
@@ -42,43 +34,6 @@ using namespace std;
 
 using engine::TimeStepper;
 using engine::updateAndCheckIfDesiredTicksElapsed;
-
-
-namespace {
-
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
-const base::Rect<int> DefaultDeadZone{
-  {11, 2},
-  {
-    data::GameTraits::mapViewPortWidthTiles - 23,
-    data::GameTraits::mapViewPortHeightTiles - 3,
-  }
-};
-
-
-const base::Rect<int> ClimbingDeadZone{
-  {11, 7},
-  {
-    data::GameTraits::mapViewPortWidthTiles - 23,
-    data::GameTraits::mapViewPortHeightTiles - 14,
-  }
-};
-
-RIGEL_RESTORE_WARNINGS
-
-
-base::Rect<int> scrollDeadZoneForState(const PlayerState state) {
-  switch (state) {
-    case PlayerState::ClimbingLadder:
-      return ClimbingDeadZone;
-
-    default:
-      return DefaultDeadZone;
-  }
-}
-
-}
 
 
 void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
@@ -99,16 +54,16 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 
 /* WARNING: PROTOTYPE CODE
  *
- * The current PlayerControlSystem is a quick & dirty first prototype of the
+ * The current PlayerMovementSystem is a quick & dirty first prototype of the
  * player movement. It's not very easy to folow or maintainable. It will be
  * replaced by a new implementation as soon as more player movement features
  * will be implemented.
  *
- * TODO: Rewrite PlayerControlSystem
+ * TODO: Rewrite PlayerMovementSystem
  */
 
 
-PlayerControlSystem::PlayerControlSystem(
+PlayerMovementSystem::PlayerMovementSystem(
   entityx::Entity player,
   const PlayerInputState* pInputs,
   const data::map::Map& map,
@@ -129,7 +84,7 @@ PlayerControlSystem::PlayerControlSystem(
 }
 
 
-void PlayerControlSystem::update(
+void PlayerMovementSystem::update(
   entityx::EntityManager& es,
   entityx::EventManager& events,
   entityx::TimeDelta dt
@@ -155,10 +110,6 @@ void PlayerControlSystem::update(
   auto movingUp = mpPlayerControlInput->mMovingUp;
   auto movingDown = mpPlayerControlInput->mMovingDown;
   auto jumping = mpPlayerControlInput->mJumping;
-
-  if (state.mPerformedInteraction && !movingUp) {
-    state.mPerformedInteraction = false;
-  }
 
   // Filter out conflicting directional inputs
   if (movingLeft && movingRight) {
@@ -257,22 +208,6 @@ void PlayerControlSystem::update(
     if (movingUp) {
       state.mState = PlayerState::LookingUp;
       state.mIsLookingUp = true;
-
-      if (!state.mPerformedInteraction) {
-        es.each<Interactable, WorldPosition, BoundingBox>(
-          [&state, &worldSpacePlayerBounds, &events](
-            ex::Entity entity,
-            const Interactable& interactable,
-            const WorldPosition& pos,
-            const BoundingBox& bbox
-          ) {
-            const auto objectBounds = engine::toWorldSpace(bbox, pos);
-            if (worldSpacePlayerBounds.intersects(objectBounds)) {
-              events.emit<events::PlayerInteraction>(entity, interactable.mType);
-              state.mPerformedInteraction = true;
-            }
-          });
-      }
     } else {
       state.mState = PlayerState::Crouching;
       state.mIsLookingDown = true;
@@ -342,7 +277,7 @@ void PlayerControlSystem::update(
   }
 }
 
-bool PlayerControlSystem::canClimbUp(
+bool PlayerMovementSystem::canClimbUp(
   const BoundingBox& worldSpacePlayerBounds
 ) const {
   // Is there still ladder above the player's current position?
@@ -356,7 +291,7 @@ bool PlayerControlSystem::canClimbUp(
   return false;
 }
 
-bool PlayerControlSystem::canClimbDown(
+bool PlayerMovementSystem::canClimbDown(
   const BoundingBox& worldSpacePlayerBounds
 ) const {
   // Is there still ladder below the player's current position?
@@ -370,7 +305,7 @@ bool PlayerControlSystem::canClimbDown(
   return false;
 }
 
-boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
+boost::optional<base::Vector> PlayerMovementSystem::findLadderTouchPoint(
   const BoundingBox& worldSpacePlayerBounds
 ) const {
   const auto position = worldSpacePlayerBounds.topLeft;
@@ -386,251 +321,4 @@ boost::optional<base::Vector> PlayerControlSystem::findLadderTouchPoint(
   return boost::none;
 }
 
-
-PlayerAnimationSystem::PlayerAnimationSystem(
-  ex::Entity player,
-  IGameServiceProvider* pServiceProvider
-)
-  : mPlayer(player)
-  , mpServiceProvider(pServiceProvider)
-{
-  assert(mPlayer.has_component<PlayerControlled>());
-  auto& state = *mPlayer.component<PlayerControlled>().get();
-  mPreviousOrientation = state.mOrientation;
-  mPreviousState = state.mState;
-}
-
-
-void PlayerAnimationSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
-  assert(mPlayer.has_component<PlayerControlled>());
-  assert(mPlayer.has_component<Sprite>());
-
-  auto& state = *mPlayer.component<PlayerControlled>().get();
-  auto& sprite = *mPlayer.component<Sprite>().get();
-
-  if (state.mState == player::PlayerState::Dead) {
-    return;
-  }
-
-  if (state.mState == player::PlayerState::Dieing) {
-    // Initialize animation on first frame
-    if (!state.mDeathAnimationState) {
-      state.mDeathAnimationState = detail::DeathAnimationState{};
-
-      if (mPlayer.has_component<Animated>()) {
-        mPlayer.remove<Animated>();
-      }
-    }
-
-    updateDeathAnimation(state, sprite, dt);
-  } else {
-    sprite.mShow = true;
-    if (state.mMercyFramesTimeElapsed) {
-      updateMercyFramesAnimation(*state.mMercyFramesTimeElapsed, sprite);
-    }
-
-    if (
-      state.mState != mPreviousState ||
-      state.mOrientation != mPreviousOrientation
-    ) {
-      updateAnimation(state, sprite);
-
-      mPreviousState = state.mState;
-      mPreviousOrientation = state.mOrientation;
-    }
-  }
-}
-
-
-void PlayerAnimationSystem::updateMercyFramesAnimation(
-  const engine::TimeDelta mercyTimeElapsed,
-  Sprite& sprite
-) {
-  // TODO: Flash white at end of mercy frames instead of blinking to
-  // invisible.
-  const auto mercyFramesElapsed =
-    static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
-  const auto blinkSprite = mercyFramesElapsed % 2 != 0;
-  sprite.mShow = !blinkSprite;
-}
-
-
-void PlayerAnimationSystem::updateDeathAnimation(
-  PlayerControlled& playerState,
-  Sprite& sprite,
-  engine::TimeDelta dt
-) {
-  assert(playerState.mState == PlayerState::Dieing);
-  assert(playerState.mDeathAnimationState);
-
-  auto& animationState = *playerState.mDeathAnimationState;
-  if (!updateAndCheckIfDesiredTicksElapsed(animationState.mStepper, 2, dt)) {
-    return;
-  }
-
-  const auto elapsedFrames = ++animationState.mElapsedFrames;
-
-  boost::optional<int> newFrameToShow;
-  if (elapsedFrames == 1) {
-    newFrameToShow = 29;
-  } else if (elapsedFrames == 5) {
-    newFrameToShow = 30;
-  } else if (elapsedFrames == 6) {
-    newFrameToShow = 31;
-  } else if (elapsedFrames == 7) {
-    newFrameToShow = 32;
-  } else if (elapsedFrames == 17) {
-    // TODO: Trigger particles
-    sprite.mShow = false;
-    mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
-  } else if (elapsedFrames >= 42) {
-    playerState.mState = PlayerState::Dead;
-  }
-
-  if (newFrameToShow) {
-    const auto orientationOffset =
-      playerState.mOrientation == Orientation::Right ? 39 : 0;
-    sprite.mFramesToRender[0] = *newFrameToShow + orientationOffset;
-  }
-}
-
-
-void PlayerAnimationSystem::updateAnimation(
-  const PlayerControlled& state,
-  Sprite& sprite
-) {
-  // All the magic numbers in this function are matched to the frame indices in
-  // the game's sprite sheet for Duke.
-
-  boost::optional<int> endFrameOffset;
-  int newAnimationFrame = 0;
-
-  switch (state.mState) {
-    case PlayerState::Standing:
-      newAnimationFrame = 0;
-      break;
-
-    case PlayerState::Walking:
-      newAnimationFrame = 1;
-      endFrameOffset = 3;
-      break;
-
-    case PlayerState::LookingUp:
-      newAnimationFrame = 16;
-      break;
-
-    case PlayerState::Crouching:
-      newAnimationFrame = 17;
-      break;
-
-    case PlayerState::Airborne:
-      newAnimationFrame = 8;
-      break;
-
-    case PlayerState::ClimbingLadder:
-      newAnimationFrame = 36;
-      break;
-
-    default:
-      break;
-  }
-
-  const auto orientationOffset =
-    state.mOrientation == Orientation::Right ? 39 : 0;
-
-  const auto orientedAnimationFrame =
-    newAnimationFrame + orientationOffset;
-  sprite.mFramesToRender[0] = orientedAnimationFrame;
-
-  if (mPlayer.has_component<Animated>()) {
-    mPlayer.remove<Animated>();
-  }
-  if (endFrameOffset) {
-    mPlayer.assign<Animated>(Animated{{AnimationSequence{
-      4,
-      orientedAnimationFrame,
-      orientedAnimationFrame + *endFrameOffset}}});
-  }
-}
-
-
-MapScrollSystem::MapScrollSystem(
-  base::Vector* pScrollOffset,
-  entityx::Entity player,
-  const data::map::Map& map
-)
-  : mPlayer(player)
-  , mpScrollOffset(pScrollOffset)
-  , mMaxScrollOffset(base::Extents{
-    static_cast<int>(map.width() - data::GameTraits::mapViewPortWidthTiles),
-    static_cast<int>(map.height() - data::GameTraits::mapViewPortHeightTiles)})
-{
-}
-
-
-void MapScrollSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
-  const auto& state = *mPlayer.component<PlayerControlled>().get();
-  const auto& bbox = *mPlayer.component<BoundingBox>().get();
-  const auto& worldPosition = *mPlayer.component<WorldPosition>().get();
-
-  updateScrollOffset(state, worldPosition, bbox, dt);
-}
-
-
-void MapScrollSystem::updateScrollOffset(
-  const PlayerControlled& state,
-  const WorldPosition& playerPosition,
-  const BoundingBox& originalPlayerBounds,
-  const ex::TimeDelta dt
-) {
-  if (updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    // We can just always update here, since the code below will clamp the
-    // scroll offset properly
-    if (state.mIsLookingDown) {
-      mpScrollOffset->y += 2;
-    }
-    if (state.mIsLookingUp) {
-      mpScrollOffset->y -= 2;
-    }
-  }
-
-  auto playerBounds = originalPlayerBounds;
-  playerBounds.topLeft =
-    (playerPosition - base::Vector{0, playerBounds.size.height - 1});
-
-  auto worldSpaceDeadZone = scrollDeadZoneForState(state.mState);
-  worldSpaceDeadZone.topLeft += *mpScrollOffset;
-
-  // horizontal
-  const auto offsetLeft =
-    std::max(0, worldSpaceDeadZone.topLeft.x -  playerPosition.x);
-  const auto offsetRight =
-    std::min(0,
-      worldSpaceDeadZone.bottomRight().x - playerBounds.bottomRight().x);
-  const auto offsetX = -offsetLeft - offsetRight;
-
-  // vertical
-  const auto offsetTop =
-    std::max(0, worldSpaceDeadZone.top() - playerBounds.top());
-  const auto offsetBottom =
-    std::min(0,
-      worldSpaceDeadZone.bottom() - playerBounds.bottom());
-  const auto offsetY = -offsetTop - offsetBottom;
-
-  // Update and clamp
-  *mpScrollOffset += base::Vector(offsetX, offsetY);
-
-  mpScrollOffset->x =
-    utils::clamp(mpScrollOffset->x, 0, mMaxScrollOffset.width);
-  mpScrollOffset->y =
-    utils::clamp(mpScrollOffset->y, 0, mMaxScrollOffset.height);
-}
 }}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -32,23 +33,20 @@ public:
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServices);
 
-  void configure(
-    entityx::EntityManager&,
-    entityx::EventManager& events) override;
-
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,
     entityx::TimeDelta) override;
 
-  void receive(
-    const game_logic::events::PlayerInteraction& interaction
+private:
+  void performInteraction(
+    entityx::EntityManager& es,
+    entityx::Entity interactable,
+    components::InteractableType type
   );
 
 private:
   entityx::Entity mPlayer;
-  bool mTeleportRequested = false;
-  entityx::Entity mSourceTeleporter;
   bool mNeedFadeIn = false;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;

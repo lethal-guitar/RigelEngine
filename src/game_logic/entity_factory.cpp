@@ -22,7 +22,7 @@
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
-#include "game_logic/player_control_system.hpp"
+#include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 
 #include <utility>
@@ -147,8 +147,7 @@ entityx::Entity EntityFactory::createProjectile(
 
 
 entityx::Entity EntityFactory::createEntitiesForLevel(
-  const data::map::ActorDescriptionList& actors,
-  data::map::Map& map
+  const data::map::ActorDescriptionList& actors
 ) {
   entityx::Entity playerEntity;
 

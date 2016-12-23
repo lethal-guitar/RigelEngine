@@ -41,12 +41,17 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/map_scroll_system.cpp
+    game_logic/map_scroll_system.hpp
+    game_logic/player/animation_system.cpp
+    game_logic/player/animation_system.hpp
     game_logic/player/attack_system.cpp
     game_logic/player/attack_system.hpp
+    game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
-    game_logic/player_control_system.cpp
-    game_logic/player_control_system.hpp
+    game_logic/player_movement_system.cpp
+    game_logic/player_movement_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
     game_logic/trigger_components.hpp
