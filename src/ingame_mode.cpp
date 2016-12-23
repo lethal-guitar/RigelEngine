@@ -241,6 +241,7 @@ void IngameMode::loadLevel(
     std::move(loadedLevel.mTileSet.mAttributes),
     std::move(loadedLevel.mActors)
   };
+  mMapAtLevelStart = mLevelData.mMap;
 
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap,
@@ -347,8 +348,9 @@ void IngameMode::checkForPlayerDeath() {
 void IngameMode::restartLevel() {
   mpServiceProvider->fadeOutScreen();
 
-  mEntities.entities.reset();
+  mLevelData.mMap = mMapAtLevelStart;
 
+  mEntities.entities.reset();
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors,
     mLevelData.mMap);

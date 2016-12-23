@@ -82,6 +82,7 @@ private:
   };
 
   LevelData mLevelData;
+  data::map::Map mMapAtLevelStart;
   entityx::Entity mPlayerEntity;
 
   ui::HudRenderer mHudRenderer;
