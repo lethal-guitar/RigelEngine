@@ -96,7 +96,8 @@ struct PlayerControlled {
 
 
 enum class InteractableType {
-  Teleporter
+  Teleporter,
+  ForceFieldCardReader
 };
 
 
@@ -108,6 +109,9 @@ struct Interactable {
 
   InteractableType mType;
 };
+
+
+struct CircuitCardForceField {};
 
 }
 

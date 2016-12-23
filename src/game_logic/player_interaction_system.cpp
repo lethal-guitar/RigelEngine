@@ -3,14 +3,19 @@
 #include "data/player_data.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physics_system.hpp"
+#include "engine/visual_components.hpp"
 #include "game_logic/collectable_components.hpp"
+#include "game_logic/damage_components.hpp"
+#include "game_logic/interaction/force_field.hpp"
 #include "game_mode.hpp"
 
 
 namespace rigel { namespace game_logic {
 
 using data::PlayerModel;
+using engine::components::Animated;
 using engine::components::BoundingBox;
+using engine::components::Sprite;
 using engine::components::WorldPosition;
 using player::PlayerState;
 
@@ -171,6 +176,10 @@ void PlayerInteractionSystem::performInteraction(
             }
           });
       }
+      break;
+
+    case InteractableType::ForceFieldCardReader:
+      interaction::disableForceField(es, interactable, mpPlayerModel);
       break;
   }
 }

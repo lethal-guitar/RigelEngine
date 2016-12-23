@@ -224,9 +224,11 @@ void configureEntity(
 
     // Circuit card force field
     case 119:
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 2, 4, 2)}});
-      entity.assign<PlayerDamaging>(9, true);
-      entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
+      interaction::configureForceField(entity);
+      break;
+
+    case 120: // Keyhole (circuit board)
+      interaction::configureKeyCardSlot(entity, boundingBox);
       break;
 
     // Keyhole (blue key)
@@ -754,7 +756,6 @@ void configureEntity(
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       break;
 
-    case 120: // Keyhole (circuit board)
     case 188: // rotating floor spikes
     case 210: // Computer showing "Duke escaped"
     case 222: // Lava fall left
@@ -948,10 +949,6 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 171:
       sprite.mFramesToRender = {6};
-      break;
-
-    case 119:
-      sprite.mFramesToRender = {0, 1, 2};
       break;
 
     case 200:
