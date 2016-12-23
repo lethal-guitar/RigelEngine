@@ -548,7 +548,7 @@ void configureEntity(
     case 50: // teleporter
     case 51: // teleporter
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
-      entity.assign<Interactable>(Interactable{InteractableType::Teleporter});
+      entity.assign<Interactable>(InteractableType::Teleporter);
       addDefaultPhysical(entity, boundingBox);
       break;
 

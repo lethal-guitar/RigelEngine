@@ -99,7 +99,13 @@ enum class InteractableType {
   Teleporter
 };
 
+
 struct Interactable {
+  explicit Interactable(const InteractableType type)
+    : mType(type)
+  {
+  }
+
   InteractableType mType;
 };
 
