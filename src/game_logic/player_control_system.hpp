@@ -20,7 +20,6 @@
 #include "base/grid.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/physics_system.hpp"
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS

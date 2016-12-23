@@ -26,10 +26,7 @@
 
 #include "game_mode.hpp"
 
-#include <boost/algorithm/cxx11/any_of.hpp>
 
-
-namespace ba = boost::algorithm;
 namespace ex = entityx;
 
 
