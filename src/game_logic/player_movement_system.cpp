@@ -111,10 +111,6 @@ void PlayerMovementSystem::update(
   auto movingDown = mpPlayerControlInput->mMovingDown;
   auto jumping = mpPlayerControlInput->mJumping;
 
-  if (state.mPerformedInteraction && !movingUp) {
-    state.mPerformedInteraction = false;
-  }
-
   // Filter out conflicting directional inputs
   if (movingLeft && movingRight) {
     movingLeft = movingRight = false;
@@ -212,22 +208,6 @@ void PlayerMovementSystem::update(
     if (movingUp) {
       state.mState = PlayerState::LookingUp;
       state.mIsLookingUp = true;
-
-      if (!state.mPerformedInteraction) {
-        es.each<Interactable, WorldPosition, BoundingBox>(
-          [&state, &worldSpacePlayerBounds, &events](
-            ex::Entity entity,
-            const Interactable& interactable,
-            const WorldPosition& pos,
-            const BoundingBox& bbox
-          ) {
-            const auto objectBounds = engine::toWorldSpace(bbox, pos);
-            if (worldSpacePlayerBounds.intersects(objectBounds)) {
-              events.emit<events::PlayerInteraction>(entity, interactable.mType);
-              state.mPerformedInteraction = true;
-            }
-          });
-      }
     } else {
       state.mState = PlayerState::Crouching;
       state.mIsLookingDown = true;

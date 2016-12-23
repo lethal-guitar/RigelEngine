@@ -44,23 +44,6 @@ namespace rigel { namespace engine { namespace components {
 
 namespace rigel { namespace game_logic {
 
-namespace events {
-
-struct PlayerInteraction {
-  PlayerInteraction(entityx::Entity e, const components::InteractableType t)
-    : mInteractedEntity(e)
-    , mType(t)
-  {
-  }
-
-  entityx::Entity mInteractedEntity;
-  const components::InteractableType mType;
-};
-
-
-}
-
-
 void initializePlayerEntity(entityx::Entity player, bool isFacingRight);
 
 
