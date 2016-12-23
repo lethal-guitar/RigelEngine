@@ -20,7 +20,7 @@
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/player_movement_system.hpp"
+#include "game_logic/player/components.hpp"
 
 
 // Duke damage mercy frames:

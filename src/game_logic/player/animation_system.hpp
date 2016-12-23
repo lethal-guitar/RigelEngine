@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "game_logic/player_movement_system.hpp"
+#include "game_logic/player/components.hpp"
 #include "engine/visual_components.hpp"
 #include "engine/timing.hpp"
 

@@ -27,6 +27,7 @@
 #include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
+#include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"

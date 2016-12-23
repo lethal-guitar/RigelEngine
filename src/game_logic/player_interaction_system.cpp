@@ -5,6 +5,7 @@
 #include "engine/physics_system.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/player_movement_system.hpp"
+#include "game_logic/player/components.hpp"
 #include "game_mode.hpp"
 
 

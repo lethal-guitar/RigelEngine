@@ -47,6 +47,7 @@ set(core_sources
     game_logic/player/animation_system.hpp
     game_logic/player/attack_system.cpp
     game_logic/player/attack_system.hpp
+    game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
     game_logic/player_movement_system.cpp

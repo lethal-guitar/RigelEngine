@@ -18,7 +18,7 @@
 
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
-#include "game_logic/player_movement_system.hpp"
+#include "game_logic/player/components.hpp"
 #include "utils/math_tools.hpp"
 
 namespace ex = entityx;
