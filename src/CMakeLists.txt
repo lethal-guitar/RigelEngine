@@ -33,6 +33,8 @@ set(core_sources
     engine/timing.cpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/security_camera.cpp
+    game_logic/ai/security_camera.hpp
     game_logic/collectable_components.hpp
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp

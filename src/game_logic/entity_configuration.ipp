@@ -622,6 +622,7 @@ void configureEntity(
     case 80: // Security camera, floor-mounted
       entity.assign<Shootable>(1, 100);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ai::components::SecurityCamera>();
       break;
 
     case 81:

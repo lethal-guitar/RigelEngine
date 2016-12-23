@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/ai/security_camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player/animation_system.hpp"
@@ -165,6 +166,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   // ----------------------------------------------------------------------
+  // A.I. update
+  // ----------------------------------------------------------------------
+  mEntities.systems.update<ai::SecurityCameraSystem>(dt);
+
+  // ----------------------------------------------------------------------
   // Other updates
   // ----------------------------------------------------------------------
   mEntities.systems.update<PhysicsSystem>(dt);
@@ -280,6 +286,7 @@ void IngameMode::loadLevel(
     &mPlayerModel,
     &mLevelData.mMap,
     mpServiceProvider);
+  mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
