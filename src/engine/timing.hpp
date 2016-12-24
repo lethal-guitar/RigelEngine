@@ -53,6 +53,11 @@ constexpr double timeToGameFrames(const TimeDelta time) {
 }
 
 
+constexpr TimeDelta gameFramesToTime(const int frames) {
+  return frames * (fastTicksToTime(1) * 16.0);
+}
+
+
 class TimeStepper {
 public:
   void update(engine::TimeDelta dt);
