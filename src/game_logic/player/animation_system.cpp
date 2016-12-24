@@ -16,6 +16,7 @@
 
 #include "animation_system.hpp"
 
+#include "base/warnings.hpp"
 #include "data/sound_ids.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/attack_traits.hpp"
@@ -24,6 +25,8 @@
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
 RIGEL_RESTORE_WARNINGS
+
+#include <unordered_map>
 
 
 namespace ex = entityx;
@@ -37,6 +40,24 @@ namespace {
 
 const auto FRAMES_PER_ORIENTATION = 39;
 
+RIGEL_DISABLE_GLOBAL_CTORS_WARNING
+
+const std::unordered_map<int, int> ATTACK_FRAME_MAP = {
+  {0, 18},
+  {17, 34},
+  {16, 19},
+  {20, 27},
+  {25, 26},
+
+  {18, 0},
+  {34, 17},
+  {19, 16},
+  {27, 20},
+  {26, 25}
+};
+
+RIGEL_RESTORE_WARNINGS
+
 
 int orientedAnimationFrame(
   const int frame,
@@ -45,6 +66,30 @@ int orientedAnimationFrame(
   const auto orientationOffset =
     orientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
   return frame + orientationOffset;
+}
+
+
+int baseAnimationFrame(
+  const int frame,
+  const player::Orientation orientation
+) {
+  const auto orientationOffset =
+    orientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
+  return frame - orientationOffset;
+}
+
+
+void toggleAttackAnimationFrame(
+  engine::components::Sprite& sprite,
+  const player::Orientation orientation
+) {
+  const auto currentFrame =
+    baseAnimationFrame(sprite.mFramesToRender[0], orientation);
+  const auto iter = ATTACK_FRAME_MAP.find(currentFrame);
+  if (iter != ATTACK_FRAME_MAP.end()) {
+    sprite.mFramesToRender[0] =
+      orientedAnimationFrame(iter->second, orientation);
+  }
 }
 
 
@@ -256,6 +301,8 @@ void AnimationSystem::updateAttackAnimation(
     mMuzzleFlashEntity = mpEntityFactory->createSprite(spriteId);
     mMuzzleFlashEntity.component<Sprite>()->mDrawOrder = playerDrawIndex + 1;
     mMuzzleFlashEntity.assign<WorldPosition>();
+
+    toggleAttackAnimationFrame(sprite, state.mOrientation);
   }
 
   if (mMuzzleFlashEntity.valid()) {
@@ -267,6 +314,7 @@ void AnimationSystem::updateAttackAnimation(
     if (*mElapsedForShotAnimation >= engine::gameFramesToTime(1)) {
       mMuzzleFlashEntity.destroy();
       mElapsedForShotAnimation = boost::none;
+      toggleAttackAnimationFrame(sprite, state.mOrientation);
     }
   }
 }
