@@ -79,6 +79,8 @@ struct PlayerControlled {
   boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
   boost::optional<detail::DeathAnimationState> mDeathAnimationState;
 
+  boost::optional<int> mPositionAtAnimatedMoveStart;
+
   bool mIsLookingUp = false;
   bool mIsLookingDown = false;
 

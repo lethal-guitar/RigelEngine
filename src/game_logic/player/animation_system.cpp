@@ -26,6 +26,7 @@ RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
 RIGEL_RESTORE_WARNINGS
 
+#include <cmath>
 #include <unordered_map>
 
 
@@ -38,6 +39,7 @@ using namespace game_logic::components;
 
 namespace {
 
+const auto NUM_WALK_ANIM_STATES = 4;
 const auto FRAMES_PER_ORIENTATION = 39;
 
 RIGEL_DISABLE_GLOBAL_CTORS_WARNING
@@ -139,9 +141,11 @@ void AnimationSystem::update(
 ) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Sprite>());
+  assert(mPlayer.has_component<WorldPosition>());
 
   auto& state = *mPlayer.component<PlayerControlled>().get();
   auto& sprite = *mPlayer.component<Sprite>().get();
+  const auto& position = *mPlayer.component<WorldPosition>().get();
 
   if (state.mState == player::PlayerState::Dead) {
     return;
@@ -151,10 +155,6 @@ void AnimationSystem::update(
     // Initialize animation on first frame
     if (!state.mDeathAnimationState) {
       state.mDeathAnimationState = detail::DeathAnimationState{};
-
-      if (mPlayer.has_component<Animated>()) {
-        mPlayer.remove<Animated>();
-      }
     }
 
     updateDeathAnimation(state, sprite, dt);
@@ -170,8 +170,22 @@ void AnimationSystem::update(
     ) {
       updateAnimation(state, sprite);
 
+      if (state.mState == PlayerState::Walking) {
+        state.mPositionAtAnimatedMoveStart = position.x;
+      } else {
+        state.mPositionAtAnimatedMoveStart = boost::none;
+      }
+
       mPreviousState = state.mState;
       mPreviousOrientation = state.mOrientation;
+    }
+
+    if (state.mState == PlayerState::Walking) {
+      const auto walkStartPosition = *state.mPositionAtAnimatedMoveStart;
+      const auto distance = std::abs(walkStartPosition - position.x);
+      const auto frame = 1 + (distance / 2) % NUM_WALK_ANIM_STATES;
+      sprite.mFramesToRender[0] =
+        orientedAnimationFrame(frame, state.mOrientation);
     }
 
     updateAttackAnimation(state, sprite, dt);
@@ -238,18 +252,14 @@ void AnimationSystem::updateAnimation(
   // All the magic numbers in this function are matched to the frame indices in
   // the game's sprite sheet for Duke.
 
-  boost::optional<int> endFrameOffset;
   int newAnimationFrame = 0;
 
   switch (state.mState) {
     case PlayerState::Standing:
+    case PlayerState::Walking:
       newAnimationFrame = 0;
       break;
 
-    case PlayerState::Walking:
-      newAnimationFrame = 1;
-      endFrameOffset = 3;
-      break;
 
     case PlayerState::LookingUp:
       newAnimationFrame = 16;
@@ -274,14 +284,6 @@ void AnimationSystem::updateAnimation(
   const auto frameToShow =
     orientedAnimationFrame(newAnimationFrame, state.mOrientation);
   sprite.mFramesToRender[0] = frameToShow;
-
-  if (mPlayer.has_component<Animated>()) {
-    mPlayer.remove<Animated>();
-  }
-  if (endFrameOffset) {
-    mPlayer.assign<Animated>(Animated{{AnimationSequence{
-      4, frameToShow, frameToShow + *endFrameOffset}}});
-  }
 }
 
 
