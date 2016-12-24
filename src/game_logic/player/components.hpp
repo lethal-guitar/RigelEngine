@@ -96,12 +96,22 @@ struct PlayerControlled {
 
 
 enum class InteractableType {
-  Teleporter
+  Teleporter,
+  ForceFieldCardReader
 };
 
+
 struct Interactable {
+  explicit Interactable(const InteractableType type)
+    : mType(type)
+  {
+  }
+
   InteractableType mType;
 };
+
+
+struct CircuitCardForceField {};
 
 }
 

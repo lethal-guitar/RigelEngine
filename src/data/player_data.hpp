@@ -88,6 +88,14 @@ struct PlayerModel {
     return mWeapon != WeaponType::Normal;
   }
 
+  bool hasItem(const InventoryItemType type) const {
+    return mInventory.count(type) != 0;
+  }
+
+  void removeItem(const InventoryItemType type) {
+    mInventory.erase(type);
+  }
+
   std::unordered_set<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
 };
