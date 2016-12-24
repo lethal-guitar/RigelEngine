@@ -25,8 +25,10 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
+#include <array>
 
+namespace rigel { struct IGameServiceProvider; }
+namespace rigel { namespace game_logic { class EntityFactory; }}
 
 namespace rigel { namespace game_logic { namespace player {
 
@@ -34,7 +36,8 @@ class AnimationSystem : public entityx::System<AnimationSystem> {
 public:
   explicit AnimationSystem(
     entityx::Entity player,
-    IGameServiceProvider* pServiceProvider);
+    IGameServiceProvider* pServiceProvider,
+    EntityFactory* pFactory);
 
   void update(
     entityx::EntityManager& es,
@@ -56,12 +59,22 @@ private:
     engine::components::Sprite& sprite,
     engine::TimeDelta dt);
 
+  void updateAttackAnimation(
+    components::PlayerControlled& state,
+    engine::components::Sprite&,
+    engine::TimeDelta dt);
+
 private:
   entityx::Entity mPlayer;
   IGameServiceProvider* mpServiceProvider;
+  EntityFactory* mpEntityFactory;
+
+  boost::optional<engine::TimeDelta> mElapsedForShotAnimation;
+  entityx::Entity mMuzzleFlashEntity;
 
   Orientation mPreviousOrientation;
   PlayerState mPreviousState;
+
 };
 
 }}}

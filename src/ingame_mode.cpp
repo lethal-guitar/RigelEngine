@@ -249,7 +249,8 @@ void IngameMode::loadLevel(
     mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
-    mpServiceProvider);
+    mpServiceProvider,
+    &mEntityFactory);
   mEntities.systems.add<game_logic::player::AttackSystem>(
     mPlayerEntity,
     &mPlayerModel,

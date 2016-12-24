@@ -17,6 +17,8 @@
 #include "animation_system.hpp"
 
 #include "data/sound_ids.hpp"
+#include "game_logic/entity_factory.hpp"
+#include "game_logic/player/attack_traits.hpp"
 #include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -36,7 +38,6 @@ namespace {
 const auto FRAMES_PER_ORIENTATION = 39;
 
 
-
 int orientedAnimationFrame(
   const int frame,
   const player::Orientation orientation
@@ -46,15 +47,38 @@ int orientedAnimationFrame(
   return frame + orientationOffset;
 }
 
+
+data::ActorID muzzleFlashActorId(const ProjectileDirection direction) {
+  static const data::ActorID DIRECTION_MAP[] = { 35, 36, 33, 34 };
+  return DIRECTION_MAP[static_cast<std::size_t>(direction)];
+}
+
+
+base::Vector muzzleFlashOffset(
+  const player::PlayerState state,
+  const player::Orientation orientation
+) {
+  const auto horizontalOffset = state == player::PlayerState::LookingUp
+    ? (orientation == player::Orientation::Left ? 0 : 2)
+    : (orientation == player::Orientation::Left ? -3 : 3);
+  const auto verticalOffset = state == player::PlayerState::LookingUp
+    ? -5
+    : (state == player::PlayerState::Crouching ? -1 : -2);
+
+  return {horizontalOffset, verticalOffset};
+}
+
 }
 
 
 AnimationSystem::AnimationSystem(
   ex::Entity player,
-  IGameServiceProvider* pServiceProvider
+  IGameServiceProvider* pServiceProvider,
+  EntityFactory* pFactory
 )
   : mPlayer(player)
   , mpServiceProvider(pServiceProvider)
+  , mpEntityFactory(pFactory)
 {
   assert(mPlayer.has_component<PlayerControlled>());
   auto& state = *mPlayer.component<PlayerControlled>().get();
@@ -104,6 +128,8 @@ void AnimationSystem::update(
       mPreviousState = state.mState;
       mPreviousOrientation = state.mOrientation;
     }
+
+    updateAttackAnimation(state, sprite, dt);
   }
 }
 
@@ -210,6 +236,38 @@ void AnimationSystem::updateAnimation(
   if (endFrameOffset) {
     mPlayer.assign<Animated>(Animated{{AnimationSequence{
       4, frameToShow, frameToShow + *endFrameOffset}}});
+  }
+}
+
+
+void AnimationSystem::updateAttackAnimation(
+  components::PlayerControlled& state,
+  engine::components::Sprite& sprite,
+  engine::TimeDelta dt
+) {
+  if (state.mShotFired && mElapsedForShotAnimation == boost::none) {
+    mElapsedForShotAnimation = 0.0;
+
+    const auto shotDirection =
+      player::shotDirection(state.mState, state.mOrientation);
+    const auto spriteId = muzzleFlashActorId(shotDirection);
+    const auto playerDrawIndex = sprite.mDrawOrder;
+
+    mMuzzleFlashEntity = mpEntityFactory->createSprite(spriteId);
+    mMuzzleFlashEntity.component<Sprite>()->mDrawOrder = playerDrawIndex + 1;
+    mMuzzleFlashEntity.assign<WorldPosition>();
+  }
+
+  if (mMuzzleFlashEntity.valid()) {
+    *mMuzzleFlashEntity.component<WorldPosition>().get() =
+      *mPlayer.component<WorldPosition>().get() +
+        muzzleFlashOffset(state.mState, state.mOrientation);
+
+    *mElapsedForShotAnimation += dt;
+    if (*mElapsedForShotAnimation >= engine::gameFramesToTime(1)) {
+      mMuzzleFlashEntity.destroy();
+      mElapsedForShotAnimation = boost::none;
+    }
   }
 }
 
