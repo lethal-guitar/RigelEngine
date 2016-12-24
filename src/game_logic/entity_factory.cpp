@@ -111,6 +111,7 @@ const sdl_utils::OwningTexture& EntityFactory::getOrCreateTexture(
   return it->second;
 }
 
+
 Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
   Sprite sprite;
   int lastFrameCount = 0;
