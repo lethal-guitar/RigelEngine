@@ -17,6 +17,7 @@
 #include "attack_system.hpp"
 
 #include "data/player_data.hpp"
+#include "game_logic/player/attack_traits.hpp"
 #include "game_mode.hpp"
 
 #include <cassert>
@@ -140,16 +141,10 @@ void AttackSystem::fireShot(
   const auto shotOffset =
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
-  const auto direction = state == PlayerState::LookingUp
-    ? ProjectileDirection::Up
-    : (playerState.mOrientation == Orientation::Right)
-      ? ProjectileDirection::Right
-      : ProjectileDirection::Left;
-
   mFireShotFunc(
     projectileTypeForWeapon(mpPlayerModel->mWeapon),
     shotOffset + playerPosition,
-    direction);
+    shotDirection(playerState.mState, playerState.mOrientation));
   mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
 
   if (mpPlayerModel->currentWeaponConsumesAmmo()) {
