@@ -31,6 +31,13 @@ namespace rigel { namespace game_logic { namespace player {
 using namespace engine::components;
 using namespace game_logic::components;
 
+namespace {
+
+const auto FRAMES_PER_ORIENTATION = 39;
+
+
+}
+
 
 AnimationSystem::AnimationSystem(
   ex::Entity player,
@@ -138,7 +145,8 @@ void AnimationSystem::updateDeathAnimation(
 
   if (newFrameToShow) {
     const auto orientationOffset =
-      playerState.mOrientation == Orientation::Right ? 39 : 0;
+      playerState.mOrientation == Orientation::Right
+        ? FRAMES_PER_ORIENTATION : 0;
     sprite.mFramesToRender[0] = *newFrameToShow + orientationOffset;
   }
 }
@@ -185,7 +193,7 @@ void AnimationSystem::updateAnimation(
   }
 
   const auto orientationOffset =
-    state.mOrientation == Orientation::Right ? 39 : 0;
+    state.mOrientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
 
   const auto orientedAnimationFrame =
     newAnimationFrame + orientationOffset;
