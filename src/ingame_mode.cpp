@@ -157,25 +157,26 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mPlayerInputs);
 
   // ----------------------------------------------------------------------
-  // Player update
+  // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerMovementSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
-  mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   // ----------------------------------------------------------------------
-  // A.I. update
+  // A.I. logic update
   // ----------------------------------------------------------------------
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
 
   // ----------------------------------------------------------------------
-  // Other updates
+  // Physics and other updates
   // ----------------------------------------------------------------------
   mEntities.systems.update<PhysicsSystem>(dt);
+
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
+  mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
 
   // **********************************************************************
