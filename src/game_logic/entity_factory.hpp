@@ -56,6 +56,8 @@ public:
   entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors);
 
+  entityx::Entity createSprite(data::ActorID actorID);
+
   entityx::Entity createProjectile(
     ProjectileType type,
     const engine::components::WorldPosition& pos,

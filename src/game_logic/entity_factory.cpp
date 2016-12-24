@@ -132,6 +132,13 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 }
 
 
+entityx::Entity EntityFactory::createSprite(const data::ActorID actorID) {
+  auto entity = mpEntityManager->create();
+  entity.assign<Sprite>(createSpriteForId(actorID));
+  return entity;
+}
+
+
 entityx::Entity EntityFactory::createProjectile(
   const ProjectileType type,
   const WorldPosition& pos,
