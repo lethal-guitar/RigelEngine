@@ -54,6 +54,12 @@ using namespace game_logic::components;
 
 namespace {
 
+// Scale factor for sprite draw order. This allows for more fine-grained
+// draw-order configurations, like specifying an order for sprites that would
+// fall into the same bucket given the original draw-order values.
+const auto DRAW_ORDER_SCALE_FACTOR = 10;
+
+
 BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
   const auto dimensionsInTiles = pixelExtentsToTileExtents(
     sprite.mImage.extents());
@@ -124,7 +130,7 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
       const auto textureRef = sdl_utils::NonOwningTexture(texture);
       sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
     }
-    sprite.mDrawOrder = actorData.mDrawIndex;
+    sprite.mDrawOrder = actorData.mDrawIndex * DRAW_ORDER_SCALE_FACTOR;
     sprite.mFramesToRender.push_back(lastFrameCount);
     lastFrameCount += static_cast<int>(actorData.mFrames.size());
   }
