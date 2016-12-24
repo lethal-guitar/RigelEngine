@@ -36,6 +36,16 @@ namespace {
 const auto FRAMES_PER_ORIENTATION = 39;
 
 
+
+int orientedAnimationFrame(
+  const int frame,
+  const player::Orientation orientation
+) {
+  const auto orientationOffset =
+    orientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
+  return frame + orientationOffset;
+}
+
 }
 
 
@@ -144,10 +154,8 @@ void AnimationSystem::updateDeathAnimation(
   }
 
   if (newFrameToShow) {
-    const auto orientationOffset =
-      playerState.mOrientation == Orientation::Right
-        ? FRAMES_PER_ORIENTATION : 0;
-    sprite.mFramesToRender[0] = *newFrameToShow + orientationOffset;
+    sprite.mFramesToRender[0] =
+      orientedAnimationFrame(*newFrameToShow, playerState.mOrientation);
   }
 }
 
@@ -192,21 +200,16 @@ void AnimationSystem::updateAnimation(
       break;
   }
 
-  const auto orientationOffset =
-    state.mOrientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
-
-  const auto orientedAnimationFrame =
-    newAnimationFrame + orientationOffset;
-  sprite.mFramesToRender[0] = orientedAnimationFrame;
+  const auto frameToShow =
+    orientedAnimationFrame(newAnimationFrame, state.mOrientation);
+  sprite.mFramesToRender[0] = frameToShow;
 
   if (mPlayer.has_component<Animated>()) {
     mPlayer.remove<Animated>();
   }
   if (endFrameOffset) {
     mPlayer.assign<Animated>(Animated{{AnimationSequence{
-      4,
-      orientedAnimationFrame,
-      orientedAnimationFrame + *endFrameOffset}}});
+      4, frameToShow, frameToShow + *endFrameOffset}}});
   }
 }
 
