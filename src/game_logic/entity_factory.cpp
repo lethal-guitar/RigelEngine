@@ -60,6 +60,12 @@ namespace {
 const auto DRAW_ORDER_SCALE_FACTOR = 10;
 
 
+// The game seems to draw projectiles in a separate pass, so the ordering
+// is achieved that way. But in our case, they are rendered using the same
+// mechanism as the other sprites, so we have to explicitly assign an order.
+const auto PROJECTILE_DRAW_ORDER_ADJUSTMENT = 10;
+
+
 BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
   const auto dimensionsInTiles = pixelExtentsToTileExtents(
     sprite.mImage.extents());
@@ -152,6 +158,8 @@ entityx::Entity EntityFactory::createProjectile(
 ) {
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorIdForProjectile(type, directionVector));
+  sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
+
   const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);
