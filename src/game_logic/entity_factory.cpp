@@ -154,17 +154,17 @@ entityx::Entity EntityFactory::createSprite(const data::ActorID actorID) {
 entityx::Entity EntityFactory::createProjectile(
   const ProjectileType type,
   const WorldPosition& pos,
-  const base::Point<float>& directionVector
+  const ProjectileDirection direction
 ) {
   auto entity = mpEntityManager->create();
-  auto sprite = createSpriteForId(actorIdForProjectile(type, directionVector));
+  auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
   sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
 
   const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);
 
-  configureProjectile(entity, type, pos, directionVector, boundingBox);
+  configureProjectile(entity, type, pos, direction, boundingBox);
 
   return entity;
 }

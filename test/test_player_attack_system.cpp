@@ -47,7 +47,7 @@ namespace ex = entityx;
 struct FireShotParameters {
   ProjectileType type;
   WorldPosition position;
-  base::Point<float> directionVector;
+  ProjectileDirection direction;
 };
 
 
@@ -92,11 +92,11 @@ TEST_CASE("Player attack system works as expected") {
   auto fireShotSpy = atria::testing::spy([&fireShotParameters](
     const ProjectileType type,
     const WorldPosition& position,
-    const base::Point<float>& directionVector
+    const ProjectileDirection direction
   ) {
     fireShotParameters.type = type;
     fireShotParameters.position = position;
-    fireShotParameters.directionVector = directionVector;
+    fireShotParameters.direction = direction;
   });
 
   MockServiceProvider mockServiceProvicer;
@@ -151,9 +151,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -2};
-        const auto expectedVector = base::Point<float>{1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.directionVector == expectedVector);
+        REQUIRE(fireShotParameters.direction == ProjectileDirection::Right);
       }
 
       SECTION("Facing left") {
@@ -162,9 +161,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -2};
-        const auto expectedVector = base::Point<float>{-1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.directionVector == expectedVector);
+        REQUIRE(fireShotParameters.direction == ProjectileDirection::Left);
       }
 
       SECTION("Player position offset") {
@@ -191,9 +189,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -1};
-        const auto expectedVector = base::Point<float>{1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.directionVector == expectedVector);
+        REQUIRE(fireShotParameters.direction == ProjectileDirection::Right);
       }
 
       SECTION("Facing left") {
@@ -202,9 +199,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -1};
-        const auto expectedVector = base::Point<float>{-1.0f, 0.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.directionVector == expectedVector);
+        REQUIRE(fireShotParameters.direction == ProjectileDirection::Left);
       }
     }
 
@@ -215,9 +211,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{2, -5};
-        const auto expectedVector = base::Point<float>{0.0f, -1.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.directionVector == expectedVector);
+        REQUIRE(fireShotParameters.direction == ProjectileDirection::Up);
       }
 
       SECTION("Facing left") {
@@ -226,9 +221,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{0, -5};
-        const auto expectedVector = base::Point<float>{0.0f, -1.0f};
         REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.directionVector == expectedVector);
+        REQUIRE(fireShotParameters.direction == ProjectileDirection::Up);
       }
     }
   }

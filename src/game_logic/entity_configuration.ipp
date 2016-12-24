@@ -67,28 +67,38 @@
  * 300: Green slime ball, thrown by Rigelatin enemies
  */
 
+base::Point<float> directionToVector(const ProjectileDirection direction) {
+  const auto isNegative =
+    direction == ProjectileDirection::Left ||
+    direction == ProjectileDirection::Up;
+  const auto value = isNegative ? -1.0f : 1.0f;
+
+  using Vec = base::Point<float>;
+  return isHorizontal(direction) ? Vec{value, 0.0f} : Vec{0.0f, value};
+}
+
+
 ActorID actorIdForProjectile(
   const ProjectileType type,
-  const base::Point<float>& directionVector
+  const ProjectileDirection direction
 ) {
-  const auto isHorizontal = directionVector.x != 0.0f;
-  const auto isGoingRight = directionVector.x > 0.0f;
-  const auto isGoingUp = directionVector.y < 0.0f;
+  const auto isGoingRight = direction == ProjectileDirection::Right;
+  const auto isGoingUp = direction == ProjectileDirection::Up;
 
   switch (type) {
     case ProjectileType::PlayerRegularShot:
-      return isHorizontal ? 26 : 27;
+      return isHorizontal(direction) ? 26 : 27;
 
     case ProjectileType::PlayerLaserShot:
-      return isHorizontal ? 24 : 25;
+      return isHorizontal(direction) ? 24 : 25;
 
     case ProjectileType::PlayerRocketShot:
-      return isHorizontal
+      return isHorizontal(direction)
         ? (isGoingRight ? 10 : 9)
         : (isGoingUp ? 7 : 8);
 
     case ProjectileType::PlayerFlameShot:
-      return isHorizontal
+      return isHorizontal(direction)
         ? (isGoingRight ? 206 : 205)
         : (isGoingUp ? 21 : 204);
   }
@@ -131,15 +141,14 @@ void configureProjectile(
   entityx::Entity entity,
   const ProjectileType type,
   WorldPosition position,
-  const base::Point<float>& directionVector,
+  const ProjectileDirection direction,
   const BoundingBox& boundingBox
 ) {
-  const auto isHorizontal = directionVector.x != 0.0f;
-  const auto isGoingLeft = directionVector.x < 0.0f;
+  const auto isGoingLeft = direction == ProjectileDirection::Left;
 
   // Position adjustment for the flame thrower shot
   if (type == ProjectileType::PlayerFlameShot) {
-    if (isHorizontal) {
+    if (isHorizontal(direction)) {
       position.y += 1;
     } else {
       position.x -= 1;
@@ -150,7 +159,7 @@ void configureProjectile(
   // position to always represent the projectile's origin, which means we need
   // to adjust the position by the projectile's length to match the left-bottom
   // corner positioning system.
-  if (isHorizontal && isGoingLeft) {
+  if (isHorizontal(direction) && isGoingLeft) {
     position.x -= boundingBox.size.width - 1;
 
     if (type == ProjectileType::PlayerFlameShot) {
@@ -161,7 +170,8 @@ void configureProjectile(
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
   entity.assign<WorldPosition>(position);
-  entity.assign<Physical>(Physical{directionVector * speed, false});
+  entity.assign<Physical>(
+    Physical{directionToVector(direction) * speed, false});
   entity.assign<DamageInflicting>(damageAmount);
 }
 

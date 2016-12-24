@@ -44,7 +44,7 @@ public:
   using FireShotFunc = std::function<void(
     ProjectileType type,
     const engine::components::WorldPosition&,
-    const base::Point<float>&
+    ProjectileDirection
   )>;
 
   AttackSystem(

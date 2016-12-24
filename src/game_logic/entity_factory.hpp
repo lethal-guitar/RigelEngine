@@ -45,6 +45,21 @@ enum class ProjectileType {
 };
 
 
+enum class ProjectileDirection {
+  Left,
+  Right,
+  Up,
+  Down
+};
+
+
+inline bool isHorizontal(const ProjectileDirection direction) {
+  return
+    direction == ProjectileDirection::Left ||
+    direction == ProjectileDirection::Right;
+}
+
+
 class EntityFactory {
 public:
   EntityFactory(
@@ -61,7 +76,7 @@ public:
   entityx::Entity createProjectile(
     ProjectileType type,
     const engine::components::WorldPosition& pos,
-    const base::Point<float>& velocity);
+    ProjectileDirection direction);
 
 private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;

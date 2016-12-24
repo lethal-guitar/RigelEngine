@@ -140,18 +140,16 @@ void AttackSystem::fireShot(
   const auto shotOffset =
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
-  const auto direction = state != PlayerState::LookingUp
-    ? (facingRight ? 1.0f : -1.0f)
-    : -1.0f;
-
-  const auto directionVector = state == PlayerState::LookingUp
-    ? base::Point<float>{0.0f, direction}
-    : base::Point<float>{direction, 0.0f};
+  const auto direction = state == PlayerState::LookingUp
+    ? ProjectileDirection::Up
+    : (playerState.mOrientation == Orientation::Right)
+      ? ProjectileDirection::Right
+      : ProjectileDirection::Left;
 
   mFireShotFunc(
     projectileTypeForWeapon(mpPlayerModel->mWeapon),
     shotOffset + playerPosition,
-    directionVector);
+    direction);
   mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
 
   if (mpPlayerModel->currentWeaponConsumesAmmo()) {
