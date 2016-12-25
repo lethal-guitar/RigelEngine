@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "engine/timing.hpp"
+#include "utils/enum_hash.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -120,3 +121,6 @@ struct CircuitCardForceField {};
 }
 
 }}
+
+
+RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::game_logic::player::PlayerState)
