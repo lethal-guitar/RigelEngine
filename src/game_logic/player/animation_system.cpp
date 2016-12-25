@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/attack_traits.hpp"
@@ -70,8 +71,7 @@ const std::unordered_map<player::PlayerState, int> STATE_FRAME_MAP = {
   {PlayerState::Standing, 0},
   {PlayerState::Walking, 0},
   {PlayerState::LookingUp, 16},
-  {PlayerState::Crouching, 17},
-  {PlayerState::Airborne, 8}
+  {PlayerState::Crouching, 17}
 };
 
 
@@ -252,6 +252,17 @@ int AnimationSystem::movementAnimationFrame(
   } else if (state.mState == PlayerState::ClimbingLadder) {
     newAnimationFrame = 35 + calcMovementBasedFrame(
       state, playerPosition.y, NUM_LADDER_ANIM_STATES);
+  } else if (state.mState == PlayerState::Airborne) {
+    const auto verticalVelocity =
+      mPlayer.component<engine::components::Physical>()->mVelocity.y;
+
+    if (verticalVelocity <= 0.0f) {
+      newAnimationFrame = 6;
+    } else {
+      newAnimationFrame = 7;
+    }
+
+    // TODO: Switch to frame 8 when 2 units away from ground
   }
 
   return newAnimationFrame;
