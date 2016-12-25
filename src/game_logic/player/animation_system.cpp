@@ -172,6 +172,8 @@ void AnimationSystem::update(
 
       if (state.mState == PlayerState::Walking) {
         state.mPositionAtAnimatedMoveStart = position.x;
+      } else if (state.mState == PlayerState::ClimbingLadder) {
+        state.mPositionAtAnimatedMoveStart = position.y;
       } else {
         state.mPositionAtAnimatedMoveStart = boost::none;
       }
@@ -184,6 +186,14 @@ void AnimationSystem::update(
       const auto walkStartPosition = *state.mPositionAtAnimatedMoveStart;
       const auto distance = std::abs(walkStartPosition - position.x);
       const auto frame = 1 + (distance / 2) % NUM_WALK_ANIM_STATES;
+      sprite.mFramesToRender[0] =
+        orientedAnimationFrame(frame, state.mOrientation);
+    }
+
+    if (state.mState == PlayerState::ClimbingLadder) {
+      const auto climbStartPosition = *state.mPositionAtAnimatedMoveStart;
+      const auto distance = std::abs(climbStartPosition - position.y);
+      const auto frame = 35 + (distance / 2) % 2;
       sprite.mFramesToRender[0] =
         orientedAnimationFrame(frame, state.mOrientation);
     }
@@ -260,7 +270,6 @@ void AnimationSystem::updateAnimation(
       newAnimationFrame = 0;
       break;
 
-
     case PlayerState::LookingUp:
       newAnimationFrame = 16;
       break;
@@ -271,10 +280,6 @@ void AnimationSystem::updateAnimation(
 
     case PlayerState::Airborne:
       newAnimationFrame = 8;
-      break;
-
-    case PlayerState::ClimbingLadder:
-      newAnimationFrame = 36;
       break;
 
     default:
