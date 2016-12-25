@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "engine/timing.hpp"
+#include "utils/enum_hash.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -79,11 +80,15 @@ struct PlayerControlled {
   boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
   boost::optional<detail::DeathAnimationState> mDeathAnimationState;
 
+  boost::optional<int> mPositionAtAnimatedMoveStart;
+
   bool mIsLookingUp = false;
   bool mIsLookingDown = false;
 
   bool mPerformedInteraction = false;
   bool mPerformedJump = false;
+
+  /** Indicates whether a shot was (is supposed to be) fired this frame */
   bool mShotFired = false;
 
 
@@ -116,3 +121,6 @@ struct CircuitCardForceField {};
 }
 
 }}
+
+
+RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::game_logic::player::PlayerState)

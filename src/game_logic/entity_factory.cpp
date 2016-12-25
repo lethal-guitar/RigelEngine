@@ -54,6 +54,18 @@ using namespace game_logic::components;
 
 namespace {
 
+// Scale factor for sprite draw order. This allows for more fine-grained
+// draw-order configurations, like specifying an order for sprites that would
+// fall into the same bucket given the original draw-order values.
+const auto DRAW_ORDER_SCALE_FACTOR = 10;
+
+
+// The game seems to draw projectiles in a separate pass, so the ordering
+// is achieved that way. But in our case, they are rendered using the same
+// mechanism as the other sprites, so we have to explicitly assign an order.
+const auto PROJECTILE_DRAW_ORDER_ADJUSTMENT = 10;
+
+
 BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
   const auto dimensionsInTiles = pixelExtentsToTileExtents(
     sprite.mImage.extents());
@@ -111,6 +123,7 @@ const sdl_utils::OwningTexture& EntityFactory::getOrCreateTexture(
   return it->second;
 }
 
+
 Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
   Sprite sprite;
   int lastFrameCount = 0;
@@ -123,7 +136,7 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
       const auto textureRef = sdl_utils::NonOwningTexture(texture);
       sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
     }
-    sprite.mDrawOrder = actorData.mDrawIndex;
+    sprite.mDrawOrder = actorData.mDrawIndex * DRAW_ORDER_SCALE_FACTOR;
     sprite.mFramesToRender.push_back(lastFrameCount);
     lastFrameCount += static_cast<int>(actorData.mFrames.size());
   }
@@ -131,18 +144,27 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 }
 
 
+entityx::Entity EntityFactory::createSprite(const data::ActorID actorID) {
+  auto entity = mpEntityManager->create();
+  entity.assign<Sprite>(createSpriteForId(actorID));
+  return entity;
+}
+
+
 entityx::Entity EntityFactory::createProjectile(
   const ProjectileType type,
   const WorldPosition& pos,
-  const base::Point<float>& directionVector
+  const ProjectileDirection direction
 ) {
   auto entity = mpEntityManager->create();
-  auto sprite = createSpriteForId(actorIdForProjectile(type, directionVector));
+  auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
+  sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
+
   const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);
 
-  configureProjectile(entity, type, pos, directionVector, boundingBox);
+  configureProjectile(entity, type, pos, direction, boundingBox);
 
   return entity;
 }

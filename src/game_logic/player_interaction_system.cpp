@@ -169,6 +169,7 @@ void PlayerInteractionSystem::performInteraction(
               i.mType == InteractableType::Teleporter &&
               pos != sourceTeleporterPosition
             ) {
+              mpServiceProvider->playSound(data::SoundId::Teleport);
               mpServiceProvider->fadeOutScreen();
               auto playerPosition = mPlayer.component<WorldPosition>();
               *playerPosition.get() = pos + base::Vector{2, 0};

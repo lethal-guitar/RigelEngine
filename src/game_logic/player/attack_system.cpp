@@ -17,6 +17,7 @@
 #include "attack_system.hpp"
 
 #include "data/player_data.hpp"
+#include "game_logic/player/attack_traits.hpp"
 #include "game_mode.hpp"
 
 #include <cassert>
@@ -79,6 +80,7 @@ AttackSystem::AttackSystem(
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
   , mFireShotFunc(fireShotFunc)
+  , mPreviousFireButtonState(false)
 {
 }
 
@@ -109,16 +111,15 @@ void AttackSystem::update(
     return;
   }
 
-  if (!mInputState.mShooting) {
-    playerState.mShotFired = false;
-    return;
-  }
-
-  const auto canShoot = !playerState.mShotFired;
-  if (canShoot) {
+  const auto canShoot = !mPreviousFireButtonState;
+  if (mInputState.mShooting && canShoot) {
     fireShot(playerPosition, playerState);
     playerState.mShotFired = true;
+  } else {
+    playerState.mShotFired = false;
   }
+
+  mPreviousFireButtonState = mInputState.mShooting;
 }
 
 
@@ -140,18 +141,10 @@ void AttackSystem::fireShot(
   const auto shotOffset =
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
-  const auto direction = state != PlayerState::LookingUp
-    ? (facingRight ? 1.0f : -1.0f)
-    : -1.0f;
-
-  const auto directionVector = state == PlayerState::LookingUp
-    ? base::Point<float>{0.0f, direction}
-    : base::Point<float>{direction, 0.0f};
-
   mFireShotFunc(
     projectileTypeForWeapon(mpPlayerModel->mWeapon),
     shotOffset + playerPosition,
-    directionVector);
+    shotDirection(playerState.mState, playerState.mOrientation));
   mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
 
   if (mpPlayerModel->currentWeaponConsumesAmmo()) {

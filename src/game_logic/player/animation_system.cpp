@@ -16,12 +16,20 @@
 
 #include "animation_system.hpp"
 
+#include "base/warnings.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/physical_components.hpp"
+#include "engine/visual_components.hpp"
+#include "game_logic/entity_factory.hpp"
+#include "game_logic/player/attack_traits.hpp"
 #include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
 RIGEL_RESTORE_WARNINGS
+
+#include <cmath>
+#include <unordered_map>
 
 
 namespace ex = entityx;
@@ -31,18 +39,89 @@ namespace rigel { namespace game_logic { namespace player {
 using namespace engine::components;
 using namespace game_logic::components;
 
+namespace {
+
+const auto DEATH_ANIM_BASE_FRAME = 29;
+const auto FRAMES_PER_ORIENTATION = 39;
+const auto MOVEMENT_BASED_ANIM_SPEED_SCALE = 2;
+const auto MUZZLE_FLASH_DRAW_ORDER = 12;
+const auto NUM_LADDER_ANIM_STATES = 2;
+const auto NUM_WALK_ANIM_STATES = 4;
+
+
+RIGEL_DISABLE_GLOBAL_CTORS_WARNING
+
+const std::unordered_map<int, int> ATTACK_FRAME_MAP = {
+  {0, 18},
+  {17, 34},
+  {16, 19},
+  {20, 27},
+  {25, 26},
+
+  // TODO generate the reverse mappings programmatically
+  {18, 0},
+  {34, 17},
+  {19, 16},
+  {27, 20},
+  {26, 25}
+};
+
+
+const std::unordered_map<player::PlayerState, int> STATE_FRAME_MAP = {
+  {PlayerState::Standing, 0},
+  {PlayerState::Walking, 0},
+  {PlayerState::LookingUp, 16},
+  {PlayerState::Crouching, 17}
+};
+
+
+RIGEL_RESTORE_WARNINGS
+
+
+int deathAnimationFrame(const int elapsedTicks, const int currentFrame) {
+  if (elapsedTicks == 0) {
+    // Keep showing the player's previous animation frame for one tick
+    return currentFrame;
+  }
+
+  const auto stage = std::min(3, elapsedTicks >= 5 ? elapsedTicks - 4 : 0);
+  return DEATH_ANIM_BASE_FRAME + stage;
+}
+
+
+data::ActorID muzzleFlashActorId(const ProjectileDirection direction) {
+  static const data::ActorID DIRECTION_MAP[] = { 35, 36, 33, 34 };
+  return DIRECTION_MAP[static_cast<std::size_t>(direction)];
+}
+
+
+base::Vector muzzleFlashOffset(
+  const player::PlayerState state,
+  const player::Orientation orientation
+) {
+  const auto horizontalOffset = state == player::PlayerState::LookingUp
+    ? (orientation == player::Orientation::Left ? 0 : 2)
+    : (orientation == player::Orientation::Left ? -3 : 3);
+  const auto verticalOffset = state == player::PlayerState::LookingUp
+    ? -5
+    : (state == player::PlayerState::Crouching ? -1 : -2);
+
+  return {horizontalOffset, verticalOffset};
+}
+
+}
+
 
 AnimationSystem::AnimationSystem(
   ex::Entity player,
-  IGameServiceProvider* pServiceProvider
+  IGameServiceProvider* pServiceProvider,
+  EntityFactory* pFactory
 )
   : mPlayer(player)
   , mpServiceProvider(pServiceProvider)
+  , mpEntityFactory(pFactory)
+  , mPreviousState(mPlayer.component<PlayerControlled>()->mState)
 {
-  assert(mPlayer.has_component<PlayerControlled>());
-  auto& state = *mPlayer.component<PlayerControlled>().get();
-  mPreviousOrientation = state.mOrientation;
-  mPreviousState = state.mState;
 }
 
 
@@ -53,153 +132,186 @@ void AnimationSystem::update(
 ) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Sprite>());
+  assert(mPlayer.has_component<WorldPosition>());
 
   auto& state = *mPlayer.component<PlayerControlled>().get();
-  auto& sprite = *mPlayer.component<Sprite>().get();
-
   if (state.mState == player::PlayerState::Dead) {
     return;
   }
 
-  if (state.mState == player::PlayerState::Dieing) {
+  auto& sprite = *mPlayer.component<Sprite>().get();
+  // Update mercy frame blink effect
+  // ----------------------------------
+  if (!state.isPlayerDead()) {
+    sprite.mShow = true;
+
+    if (state.mMercyFramesTimeElapsed) {
+      const auto mercyTimeElapsed = *state.mMercyFramesTimeElapsed;
+      // TODO: Flash white at end of mercy frames instead of blinking to
+      // invisible.
+      const auto mercyFramesElapsed =
+        static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
+      const auto blinkSprite = mercyFramesElapsed % 2 != 0;
+      sprite.mShow = !blinkSprite;
+    }
+  }
+
+  // Death sequence
+  // ----------------------------------
+  if (state.mState == PlayerState::Dieing) {
     // Initialize animation on first frame
     if (!state.mDeathAnimationState) {
       state.mDeathAnimationState = detail::DeathAnimationState{};
-
-      if (mPlayer.has_component<Animated>()) {
-        mPlayer.remove<Animated>();
-      }
     }
 
-    updateDeathAnimation(state, sprite, dt);
-  } else {
-    sprite.mShow = true;
-    if (state.mMercyFramesTimeElapsed) {
-      updateMercyFramesAnimation(*state.mMercyFramesTimeElapsed, sprite);
+    auto& animationState = *state.mDeathAnimationState;
+    if (updateAndCheckIfDesiredTicksElapsed(animationState.mStepper, 2, dt)) {
+      ++animationState.mElapsedFrames;
     }
 
-    if (
-      state.mState != mPreviousState ||
-      state.mOrientation != mPreviousOrientation
-    ) {
-      updateAnimation(state, sprite);
-
-      mPreviousState = state.mState;
-      mPreviousOrientation = state.mOrientation;
+    const auto elapsedFrames = animationState.mElapsedFrames;
+    if (elapsedFrames == 17) {
+      // TODO: Trigger particles
+      sprite.mShow = false;
+      mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
+    } else if (elapsedFrames >= 42) {
+      state.mState = PlayerState::Dead;
     }
   }
-}
 
+  // Update sprite's animation frame
+  // ----------------------------------
 
-void AnimationSystem::updateMercyFramesAnimation(
-  const engine::TimeDelta mercyTimeElapsed,
-  Sprite& sprite
-) {
-  // TODO: Flash white at end of mercy frames instead of blinking to
-  // invisible.
-  const auto mercyFramesElapsed =
-    static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
-  const auto blinkSprite = mercyFramesElapsed % 2 != 0;
-  sprite.mShow = !blinkSprite;
-}
+  // 'normalize' the frame index by removing the orientation offset, if any.
+  const auto currentAnimationFrame =
+    sprite.mFramesToRender[0] % FRAMES_PER_ORIENTATION;
 
-
-void AnimationSystem::updateDeathAnimation(
-  PlayerControlled& playerState,
-  Sprite& sprite,
-  engine::TimeDelta dt
-) {
-  assert(playerState.mState == PlayerState::Dieing);
-  assert(playerState.mDeathAnimationState);
-
-  auto& animationState = *playerState.mDeathAnimationState;
-  if (!updateAndCheckIfDesiredTicksElapsed(animationState.mStepper, 2, dt)) {
-    return;
-  }
-
-  const auto elapsedFrames = ++animationState.mElapsedFrames;
-
-  boost::optional<int> newFrameToShow;
-  if (elapsedFrames == 1) {
-    newFrameToShow = 29;
-  } else if (elapsedFrames == 5) {
-    newFrameToShow = 30;
-  } else if (elapsedFrames == 6) {
-    newFrameToShow = 31;
-  } else if (elapsedFrames == 7) {
-    newFrameToShow = 32;
-  } else if (elapsedFrames == 17) {
-    // TODO: Trigger particles
-    sprite.mShow = false;
-    mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
-  } else if (elapsedFrames >= 42) {
-    playerState.mState = PlayerState::Dead;
-  }
-
-  if (newFrameToShow) {
-    const auto orientationOffset =
-      playerState.mOrientation == Orientation::Right ? 39 : 0;
-    sprite.mFramesToRender[0] = *newFrameToShow + orientationOffset;
-  }
-}
-
-
-void AnimationSystem::updateAnimation(
-  const PlayerControlled& state,
-  Sprite& sprite
-) {
-  // All the magic numbers in this function are matched to the frame indices in
-  // the game's sprite sheet for Duke.
-
-  boost::optional<int> endFrameOffset;
-  int newAnimationFrame = 0;
-
-  switch (state.mState) {
-    case PlayerState::Standing:
-      newAnimationFrame = 0;
-      break;
-
-    case PlayerState::Walking:
-      newAnimationFrame = 1;
-      endFrameOffset = 3;
-      break;
-
-    case PlayerState::LookingUp:
-      newAnimationFrame = 16;
-      break;
-
-    case PlayerState::Crouching:
-      newAnimationFrame = 17;
-      break;
-
-    case PlayerState::Airborne:
-      newAnimationFrame = 8;
-      break;
-
-    case PlayerState::ClimbingLadder:
-      newAnimationFrame = 36;
-      break;
-
-    default:
-      break;
-  }
+  const auto newAnimationFrame = determineAnimationFrame(
+    state, dt, currentAnimationFrame);
 
   const auto orientationOffset =
-    state.mOrientation == Orientation::Right ? 39 : 0;
+    state.mOrientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
+  sprite.mFramesToRender[0] = newAnimationFrame + orientationOffset;
+}
 
-  const auto orientedAnimationFrame =
-    newAnimationFrame + orientationOffset;
-  sprite.mFramesToRender[0] = orientedAnimationFrame;
 
-  if (mPlayer.has_component<Animated>()) {
-    mPlayer.remove<Animated>();
+int AnimationSystem::determineAnimationFrame(
+  PlayerControlled& state,
+  const engine::TimeDelta dt,
+  const int currentAnimationFrame
+) {
+  if (state.mState != player::PlayerState::Dieing) {
+    auto newAnimationFrame =
+      movementAnimationFrame(state, currentAnimationFrame);
+    return attackAnimationFrame(state, dt, newAnimationFrame);
+  } else {
+    return deathAnimationFrame(
+      state.mDeathAnimationState->mElapsedFrames,
+      currentAnimationFrame);
   }
-  if (endFrameOffset) {
-    mPlayer.assign<Animated>(Animated{{AnimationSequence{
-      4,
-      orientedAnimationFrame,
-      orientedAnimationFrame + *endFrameOffset}}});
+}
+
+
+int AnimationSystem::movementAnimationFrame(
+  PlayerControlled& state,
+  const int currentAnimationFrame
+) {
+  int newAnimationFrame = currentAnimationFrame;
+
+  const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
+  if (state.mState != mPreviousState) {
+    const auto it = STATE_FRAME_MAP.find(state.mState);
+    if (it != STATE_FRAME_MAP.end()) {
+      newAnimationFrame = it->second;
+    }
+
+    if (state.mState == PlayerState::Walking) {
+      state.mPositionAtAnimatedMoveStart = playerPosition.x;
+    } else if (state.mState == PlayerState::ClimbingLadder) {
+      state.mPositionAtAnimatedMoveStart = playerPosition.y;
+    } else {
+      state.mPositionAtAnimatedMoveStart = boost::none;
+    }
+
+    mPreviousState = state.mState;
   }
+
+  const auto calcMovementBasedFrame = [](
+    PlayerControlled& playerState,
+    const int currentPosition,
+    const int numAnimStates
+  ) {
+    const auto startPosition = *playerState.mPositionAtAnimatedMoveStart;
+    const auto distance = std::abs(startPosition - currentPosition);
+    return (distance / MOVEMENT_BASED_ANIM_SPEED_SCALE) % numAnimStates;
+  };
+
+  if (state.mState == PlayerState::Walking) {
+    newAnimationFrame = 1 + calcMovementBasedFrame(
+      state, playerPosition.x, NUM_WALK_ANIM_STATES);
+  } else if (state.mState == PlayerState::ClimbingLadder) {
+    newAnimationFrame = 35 + calcMovementBasedFrame(
+      state, playerPosition.y, NUM_LADDER_ANIM_STATES);
+  } else if (state.mState == PlayerState::Airborne) {
+    const auto verticalVelocity =
+      mPlayer.component<engine::components::Physical>()->mVelocity.y;
+
+    if (verticalVelocity <= 0.0f) {
+      newAnimationFrame = 6;
+    } else {
+      newAnimationFrame = 7;
+    }
+
+    // TODO: Switch to frame 8 when 2 units away from ground
+  }
+
+  return newAnimationFrame;
+}
+
+
+int AnimationSystem::attackAnimationFrame(
+  PlayerControlled& state,
+  engine::TimeDelta dt,
+  const int currentAnimationFrame
+) {
+  auto newAnimationFrame = currentAnimationFrame;
+
+  const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
+  if (state.mShotFired && mElapsedForShotAnimation == boost::none) {
+    mElapsedForShotAnimation = 0.0;
+
+    const auto shotDirection =
+      player::shotDirection(state.mState, state.mOrientation);
+    const auto spriteId = muzzleFlashActorId(shotDirection);
+
+    mMuzzleFlashEntity = mpEntityFactory->createSprite(spriteId);
+    mMuzzleFlashEntity.component<Sprite>()->mDrawOrder =
+      MUZZLE_FLASH_DRAW_ORDER;
+    mMuzzleFlashEntity.assign<WorldPosition>(playerPosition);
+
+    const auto iter = ATTACK_FRAME_MAP.find(currentAnimationFrame);
+    if (iter != ATTACK_FRAME_MAP.end()) {
+      newAnimationFrame = iter->second;
+    }
+  }
+
+  if (mMuzzleFlashEntity.valid()) {
+    *mMuzzleFlashEntity.component<WorldPosition>().get() =
+      playerPosition + muzzleFlashOffset(state.mState, state.mOrientation);
+
+    *mElapsedForShotAnimation += dt;
+    if (*mElapsedForShotAnimation >= engine::gameFramesToTime(1)) {
+      mMuzzleFlashEntity.destroy();
+      mElapsedForShotAnimation = boost::none;
+
+      const auto iter = ATTACK_FRAME_MAP.find(currentAnimationFrame);
+      if (iter != ATTACK_FRAME_MAP.end()) {
+        newAnimationFrame = iter->second;
+      }
+    }
+  }
+
+  return newAnimationFrame;
 }
 
 }}}

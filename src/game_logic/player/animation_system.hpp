@@ -18,14 +18,16 @@
 
 #include "base/warnings.hpp"
 #include "game_logic/player/components.hpp"
-#include "engine/visual_components.hpp"
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <array>
+
 namespace rigel { struct IGameServiceProvider; }
+namespace rigel { namespace game_logic { class EntityFactory; }}
 
 
 namespace rigel { namespace game_logic { namespace player {
@@ -34,7 +36,8 @@ class AnimationSystem : public entityx::System<AnimationSystem> {
 public:
   explicit AnimationSystem(
     entityx::Entity player,
-    IGameServiceProvider* pServiceProvider);
+    IGameServiceProvider* pServiceProvider,
+    EntityFactory* pFactory);
 
   void update(
     entityx::EntityManager& es,
@@ -43,24 +46,28 @@ public:
   ) override;
 
 private:
-  void updateAnimation(
-    const components::PlayerControlled& state,
-    engine::components::Sprite& sprite);
-
-  void updateMercyFramesAnimation(
-    engine::TimeDelta mercyTimeElapsed,
-    engine::components::Sprite& sprite);
-
-  void updateDeathAnimation(
+  int determineAnimationFrame(
     components::PlayerControlled& state,
-    engine::components::Sprite& sprite,
-    engine::TimeDelta dt);
+    engine::TimeDelta dt,
+    int currentAnimationFrame);
+
+  int movementAnimationFrame(
+    components::PlayerControlled& state,
+    int currentAnimationFrame);
+
+  int attackAnimationFrame(
+    components::PlayerControlled& state,
+    engine::TimeDelta dt,
+    int currentAnimationFrame);
 
 private:
   entityx::Entity mPlayer;
   IGameServiceProvider* mpServiceProvider;
+  EntityFactory* mpEntityFactory;
 
-  Orientation mPreviousOrientation;
+  boost::optional<engine::TimeDelta> mElapsedForShotAnimation;
+  entityx::Entity mMuzzleFlashEntity;
+
   PlayerState mPreviousState;
 };
 

@@ -157,25 +157,26 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mPlayerInputs);
 
   // ----------------------------------------------------------------------
-  // Player update
+  // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<PlayerMovementSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
-  mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   // ----------------------------------------------------------------------
-  // A.I. update
+  // A.I. logic update
   // ----------------------------------------------------------------------
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
 
   // ----------------------------------------------------------------------
-  // Other updates
+  // Physics and other updates
   // ----------------------------------------------------------------------
   mEntities.systems.update<PhysicsSystem>(dt);
+
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
+  mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
 
   // **********************************************************************
@@ -248,7 +249,8 @@ void IngameMode::loadLevel(
     mLevelData.mTileAttributes);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
-    mpServiceProvider);
+    mpServiceProvider,
+    &mEntityFactory);
   mEntities.systems.add<game_logic::player::AttackSystem>(
     mPlayerEntity,
     &mPlayerModel,
@@ -256,9 +258,9 @@ void IngameMode::loadLevel(
     [this](
       const game_logic::ProjectileType type,
       const engine::components::WorldPosition& pos,
-      const base::Point<float>& directionVector
+      const game_logic::ProjectileDirection direction
     ) {
-      mEntityFactory.createProjectile(type, pos, directionVector);
+      mEntityFactory.createProjectile(type, pos, direction);
     });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,

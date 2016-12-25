@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "engine/base_components.hpp"
 
 
 namespace rigel { namespace engine {
