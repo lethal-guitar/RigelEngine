@@ -18,7 +18,6 @@
 
 #include "base/warnings.hpp"
 #include "game_logic/player/components.hpp"
-#include "engine/visual_components.hpp"
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -29,6 +28,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace game_logic { class EntityFactory; }}
+
 
 namespace rigel { namespace game_logic { namespace player {
 
@@ -46,23 +46,19 @@ public:
   ) override;
 
 private:
-  void updateAnimation(
-    const components::PlayerControlled& state,
-    engine::components::Sprite& sprite);
-
-  void updateMercyFramesAnimation(
-    engine::TimeDelta mercyTimeElapsed,
-    engine::components::Sprite& sprite);
-
-  void updateDeathAnimation(
+  int determineAnimationFrame(
     components::PlayerControlled& state,
-    engine::components::Sprite& sprite,
-    engine::TimeDelta dt);
+    engine::TimeDelta dt,
+    int currentAnimationFrame);
 
-  void updateAttackAnimation(
+  int movementAnimationFrame(
     components::PlayerControlled& state,
-    engine::components::Sprite&,
-    engine::TimeDelta dt);
+    int currentAnimationFrame);
+
+  int attackAnimationFrame(
+    components::PlayerControlled& state,
+    engine::TimeDelta dt,
+    int currentAnimationFrame);
 
 private:
   entityx::Entity mPlayer;
@@ -72,9 +68,7 @@ private:
   boost::optional<engine::TimeDelta> mElapsedForShotAnimation;
   entityx::Entity mMuzzleFlashEntity;
 
-  Orientation mPreviousOrientation;
   PlayerState mPreviousState;
-
 };
 
 }}}
