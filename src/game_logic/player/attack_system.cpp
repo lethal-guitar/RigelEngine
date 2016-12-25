@@ -80,6 +80,7 @@ AttackSystem::AttackSystem(
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
   , mFireShotFunc(fireShotFunc)
+  , mPreviousFireButtonState(false)
 {
 }
 
@@ -110,16 +111,15 @@ void AttackSystem::update(
     return;
   }
 
-  if (!mInputState.mShooting) {
-    playerState.mShotFired = false;
-    return;
-  }
-
-  const auto canShoot = !playerState.mShotFired;
-  if (canShoot) {
+  const auto canShoot = !mPreviousFireButtonState;
+  if (mInputState.mShooting && canShoot) {
     fireShot(playerPosition, playerState);
     playerState.mShotFired = true;
+  } else {
+    playerState.mShotFired = false;
   }
+
+  mPreviousFireButtonState = mInputState.mShooting;
 }
 
 

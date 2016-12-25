@@ -84,6 +84,8 @@ struct PlayerControlled {
 
   bool mPerformedInteraction = false;
   bool mPerformedJump = false;
+
+  /** Indicates whether a shot was (is supposed to be) fired this frame */
   bool mShotFired = false;
 
 

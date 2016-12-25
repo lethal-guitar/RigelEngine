@@ -73,6 +73,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   FireShotFunc mFireShotFunc;
   PlayerInputState mInputState;
+  bool mPreviousFireButtonState;
 };
 
 
