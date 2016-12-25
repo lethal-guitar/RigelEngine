@@ -18,18 +18,11 @@
 
 #include "utils.hpp"
 
-#include <base/warnings.hpp>
 #include <data/player_data.hpp>
 #include <engine/visual_components.hpp>
 #include <game_logic/player/animation_system.hpp>
 #include <game_logic/player_movement_system.hpp>
 #include <game_mode.hpp>
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/testing/spies.hpp>
-#include <boost/optional.hpp>
-#include <boost/optional/optional_io.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 using namespace std;
