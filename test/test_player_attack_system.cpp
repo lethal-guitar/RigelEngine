@@ -16,6 +16,8 @@
 
 #include <catch.hpp>
 
+#include "utils.hpp"
+
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 #include <data/player_data.hpp>
@@ -25,8 +27,6 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <atria/testing/spies.hpp>
-#include <boost/optional.hpp>
-#include <boost/optional/optional_io.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
@@ -48,25 +48,6 @@ struct FireShotParameters {
   ProjectileType type;
   WorldPosition position;
   ProjectileDirection direction;
-};
-
-
-struct MockServiceProvider : public rigel::IGameServiceProvider {
-  void fadeOutScreen() override {}
-  void fadeInScreen() override {}
-
-  void playSound(data::SoundId id) override {
-    mLastTriggeredSoundId = id;
-  }
-
-  void playMusic(const std::string&) override {}
-  void stopMusic() override {}
-  void scheduleNewGameStart(int, data::Difficulty) override {}
-  void scheduleEnterMainMenu() override {}
-  void scheduleGameQuit() override {}
-  bool isShareWareVersion() const override { return false; }
-
-  boost::optional<data::SoundId> mLastTriggeredSoundId;
 };
 
 
