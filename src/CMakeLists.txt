@@ -19,6 +19,8 @@ set(core_sources
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
+    engine/debugging_system.cpp
+    engine/debugging_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
     engine/physical_components.hpp

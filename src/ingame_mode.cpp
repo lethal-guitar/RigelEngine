@@ -19,6 +19,7 @@
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/debugging_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -142,6 +143,19 @@ void IngameMode::handleEvent(const SDL_Event& event) {
       mPlayerInputs.mShooting = keyPressed;
       break;
   }
+
+  // Debug keys
+  // ----------------------------------------------------------------------
+  if (keyPressed) {
+    return;
+  }
+
+  auto& debuggingSystem = *mEntities.systems.system<DebuggingSystem>();
+  switch (event.key.keysym.sym) {
+    case SDLK_b:
+      debuggingSystem.toggleBoundingBoxDisplay();
+      break;
+  }
 }
 
 
@@ -187,6 +201,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
 
     mEntities.systems.update<RenderingSystem>(dt);
+    mEntities.systems.update<DebuggingSystem>(dt);
     mHudRenderer.updateAndRender(dt);
   }
 
@@ -289,6 +304,7 @@ void IngameMode::loadLevel(
     &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
+  mEntities.systems.add<DebuggingSystem>(mpRenderer, &mScrollOffset);
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
