@@ -59,6 +59,8 @@ struct IGameServiceProvider {
   virtual void scheduleEnterMainMenu() = 0;
   virtual void scheduleGameQuit() = 0;
   virtual bool isShareWareVersion() const = 0;
+
+  virtual void showDebugText(const std::string& text) = 0;
 };
 
 

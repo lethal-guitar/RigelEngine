@@ -157,6 +157,8 @@ void Game::mainLoop() {
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
     mLastTime = startOfFrame;
 
+    mDebugText.clear();
+
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
 
@@ -181,6 +183,10 @@ void Game::mainLoop() {
     }
 
     mRenderTarget.renderScaledToScreen(mpRenderer);
+
+    if (!mDebugText.empty()) {
+      mTextRenderer.drawMultiLineText(0, 2, mDebugText);
+    }
 
     const auto afterRender = high_resolution_clock::now();
     const auto innerRenderTime =
@@ -325,6 +331,11 @@ void Game::scheduleEnterMainMenu() {
 
 void Game::scheduleGameQuit() {
   mIsRunning = false;
+}
+
+
+void Game::showDebugText(const std::string& text) {
+  mDebugText = text;
 }
 
 
