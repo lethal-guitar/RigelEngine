@@ -73,7 +73,8 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
       data::GameTraits::viewPortHeightPx)
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mFpsDisplay(pRenderer, mResources)
+  , mTextRenderer(pRenderer, mResources)
+  , mFpsDisplay(&mTextRenderer)
 {
   clearScreen();
   SDL_RenderPresent(mpRenderer);

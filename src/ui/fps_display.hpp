@@ -16,28 +16,24 @@
 
 #pragma once
 
-#include "menu_element_renderer.hpp"
-
 #include "engine/timing.hpp"
 
 
-namespace rigel { namespace loader {
-  class ResourceLoader;
-}}
+namespace rigel { namespace ui { class MenuElementRenderer; }}
 
 
 namespace rigel { namespace ui {
 
 class FpsDisplay {
 public:
-  FpsDisplay(SDL_Renderer* pRenderer, const loader::ResourceLoader& resources);
+  explicit FpsDisplay(MenuElementRenderer* pTextRenderer);
 
   void updateAndRender(
     engine::TimeDelta totalElapsed,
     engine::TimeDelta renderingElapsed);
 
 private:
-  MenuElementRenderer mTextRenderer;
+  MenuElementRenderer* mpTextRenderer;
 
   float mSmoothedFrameTime = 0.0f;
   float mWeightedFrameTime = 0.0f;

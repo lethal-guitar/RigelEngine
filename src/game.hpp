@@ -22,6 +22,7 @@
 #include "loader/resource_loader.hpp"
 #include "sdl_utils/texture.hpp"
 #include "ui/fps_display.hpp"
+#include "ui/menu_element_renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -98,6 +99,7 @@ private:
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
 
+  ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
 };
 

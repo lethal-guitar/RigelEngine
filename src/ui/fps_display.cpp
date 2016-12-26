@@ -16,7 +16,7 @@
 
 #include "fps_display.hpp"
 
-#include "loader/resource_loader.hpp"
+#include "menu_element_renderer.hpp"
 
 #include <cmath>
 #include <iomanip>
@@ -34,11 +34,8 @@ const auto NEW_FRAME_TIME_WEIGHT = 0.1f;
 }
 
 
-FpsDisplay::FpsDisplay(
-  SDL_Renderer* pRenderer,
-  const loader::ResourceLoader& resources
-)
-  : mTextRenderer(pRenderer, resources)
+FpsDisplay::FpsDisplay(MenuElementRenderer* pTextRenderer)
+  : mpTextRenderer(pTextRenderer)
 {
 }
 
@@ -65,7 +62,7 @@ void FpsDisplay::updateAndRender(
     << totalElapsed * 1000.0 << " ms, "
     << renderingElapsed * 1000.0 << " ms (inner)";
 
-  mTextRenderer.drawText(0, 0, statsReport.str());
+  mpTextRenderer->drawText(0, 0, statsReport.str());
 }
 
 }}
