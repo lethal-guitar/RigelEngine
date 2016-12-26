@@ -63,6 +63,8 @@ private:
   void checkForPlayerDeath();
   void restartLevel();
 
+  void showDebugText();
+
 private:
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
@@ -74,6 +76,8 @@ private:
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
   bool mLevelFinished;
+
+  bool mShowDebugText;
 
   struct LevelData {
     data::map::Map mMap;

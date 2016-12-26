@@ -36,7 +36,9 @@
 
 #include <cassert>
 #include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 
 namespace rigel {
@@ -47,6 +49,8 @@ using namespace std;
 
 using data::PlayerModel;
 using engine::components::BoundingBox;
+using engine::components::Physical;
+using engine::components::WorldPosition;
 
 
 namespace {
@@ -74,6 +78,16 @@ std::string loadingScreenFileName(const int episode) {
   return fileName;
 }
 
+
+template<typename ValueT>
+std::string vec2String(const base::Point<ValueT>& vec, const int width) {
+  std::stringstream stream;
+  stream
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
+  return stream.str();
+}
+
 }
 
 
@@ -92,6 +106,7 @@ IngameMode::IngameMode(
       difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
+  , mShowDebugText(false)
   , mHudRenderer(
       &mPlayerModel,
       levelNumber + 1,
@@ -159,6 +174,10 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_c:
       debuggingSystem.toggleWorldCollisionDataDisplay();
       break;
+
+    case SDLK_d:
+      mShowDebugText = !mShowDebugText;
+      break;
   }
 }
 
@@ -213,6 +232,10 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x,
     data::GameTraits::inGameViewPortOffset.y);
+
+  if (mShowDebugText) {
+    showDebugText();
+  }
 
   checkForPlayerDeath();
   checkForLevelExitReached();
@@ -276,7 +299,7 @@ void IngameMode::loadLevel(
     mpServiceProvider,
     [this](
       const game_logic::ProjectileType type,
-      const engine::components::WorldPosition& pos,
+      const WorldPosition& pos,
       const game_logic::ProjectileDirection direction
     ) {
       mEntityFactory.createProjectile(type, pos, direction);
@@ -320,8 +343,6 @@ void IngameMode::loadLevel(
 
 
 void IngameMode::checkForLevelExitReached() {
-  using engine::components::WorldPosition;
-  using engine::components::Physical;
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
@@ -381,6 +402,19 @@ void IngameMode::restartLevel() {
   updateAndRender(0);
 
   mpServiceProvider->fadeInScreen();
+}
+
+
+void IngameMode::showDebugText() {
+  const auto& playerPos = *mPlayerEntity.component<WorldPosition>().get();
+  const auto& playerVel = mPlayerEntity.component<Physical>()->mVelocity;
+  std::stringstream infoText;
+  infoText
+    << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
+    << "Player: " << vec2String(playerPos, 4)
+    << ", Vel.: " << vec2String(playerVel, 5);
+
+  mpServiceProvider->showDebugText(infoText.str());
 }
 
 }
