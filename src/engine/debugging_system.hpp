@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "data/map.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -29,9 +30,14 @@ namespace rigel { namespace engine {
 
 class DebuggingSystem : public entityx::System<DebuggingSystem> {
 public:
-  DebuggingSystem(SDL_Renderer* pRenderer, base::Vector* pScrollOffset);
+  DebuggingSystem(
+    SDL_Renderer* pRenderer,
+    base::Vector* pScrollOffset,
+    data::map::Map* pMap,
+    data::map::TileAttributes* pTileAttributes);
 
   void toggleBoundingBoxDisplay();
+  void toggleWorldCollisionDataDisplay();
 
   void update(
     entityx::EntityManager& es,
@@ -41,7 +47,11 @@ public:
 private:
   SDL_Renderer* mpRenderer;
   base::Vector* mpScrollOffset;
+  data::map::Map* mpMap;
+  data::map::TileAttributes* mpTileAttributes;
+
   bool mShowBoundingBoxes = false;
+  bool mShowWorldCollisionData = false;
 };
 
 }}

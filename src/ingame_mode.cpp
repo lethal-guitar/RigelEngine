@@ -155,6 +155,10 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();
       break;
+
+    case SDLK_c:
+      debuggingSystem.toggleWorldCollisionDataDisplay();
+      break;
   }
 }
 
@@ -304,7 +308,11 @@ void IngameMode::loadLevel(
     &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
-  mEntities.systems.add<DebuggingSystem>(mpRenderer, &mScrollOffset);
+  mEntities.systems.add<DebuggingSystem>(
+    mpRenderer,
+    &mScrollOffset,
+    &mLevelData.mMap,
+    &mLevelData.mTileAttributes);
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
