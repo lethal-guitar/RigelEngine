@@ -47,6 +47,7 @@ public:
   // Stateless API
   // --------------------------------------------------------------------------
   void drawText(int x, int y, const std::string& text) const;
+  void drawMultiLineText(int x, int y, const std::string& text) const;
   void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
   void drawMessageBox(int x, int y, int width, int height) const;
 

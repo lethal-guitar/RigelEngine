@@ -16,10 +16,16 @@
 
 #include "menu_element_renderer.hpp"
 
+#include "base/warnings.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/timing.hpp"
 #include "loader/resource_loader.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <cassert>
 #include <cmath>
@@ -203,6 +209,21 @@ void MenuElementRenderer::drawText(
     }
 
     mSpriteSheetRenderer.renderTile(spriteSheetIndex, x + i, y);
+  }
+}
+
+
+void MenuElementRenderer::drawMultiLineText(
+  const int x,
+  const int y,
+  const std::string& text
+) const {
+  namespace ba = boost::algorithm;
+
+  std::vector<std::string> lines;
+  ba::split(lines, text, ba::is_any_of("\n"));
+  for (int i = 0; i < int(lines.size()); ++i) {
+    drawText(x, y + i, lines[i]);
   }
 }
 
