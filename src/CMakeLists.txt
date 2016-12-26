@@ -91,6 +91,7 @@ set(core_sources
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
+    sdl_utils/rect_tools.hpp
     sdl_utils/texture.cpp
     sdl_utils/texture.hpp
     sdl_utils/texture.ipp
