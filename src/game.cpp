@@ -127,7 +127,8 @@ void Game::run(const Options& options) {
       episode,
       level,
       data::Difficulty::Medium,
-      makeModeContext());
+      makeModeContext(),
+      options.mPlayerPosition);
   }
   else if (options.mSkipIntro)
   {

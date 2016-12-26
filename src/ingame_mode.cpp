@@ -95,7 +95,8 @@ IngameMode::IngameMode(
   const int episode,
   const int levelNumber,
   const data::Difficulty difficulty,
-  Context context
+  Context context,
+  boost::optional<base::Vector> playerPositionOverride
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
@@ -123,6 +124,10 @@ IngameMode::IngameMode(
   auto before = high_resolution_clock::now();
 
   loadLevel(episode, levelNumber, difficulty, *context.mpResources);
+
+  if (playerPositionOverride) {
+    *mPlayerEntity.component<WorldPosition>().get() = *playerPositionOverride;
+  }
 
   auto after = high_resolution_clock::now();
   std::cout << "Level load time: " <<

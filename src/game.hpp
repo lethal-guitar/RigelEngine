@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "base/spatial_types.hpp"
 #include "engine/sound_system.hpp"
 #include "game_mode.hpp"
 #include "loader/resource_loader.hpp"
@@ -42,6 +43,7 @@ public:
     boost::optional<std::pair<int, int>> mLevelToJumpTo;
     bool mSkipIntro = false;
     bool mEnableMusic = true;
+    boost::optional<base::Vector> mPlayerPosition;
   };
 
   Game(const std::string& gamePath, SDL_Renderer* pRenderer);

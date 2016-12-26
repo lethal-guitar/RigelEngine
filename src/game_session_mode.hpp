@@ -31,7 +31,8 @@ public:
     int episode,
     int level,
     data::Difficulty difficulty,
-    Context context);
+    Context context,
+    boost::optional<base::Vector> playerPositionOverride = boost::none);
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;

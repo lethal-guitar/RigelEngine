@@ -29,10 +29,11 @@ GameSessionMode::GameSessionMode(
   const int episode,
   const int level,
   const data::Difficulty difficulty,
-  Context context
+  Context context,
+  boost::optional<base::Vector> playerPositionOverride
 )
   : mCurrentStage(std::make_unique<IngameMode>(
-      episode, level, difficulty, context))
+      episode, level, difficulty, context, playerPositionOverride))
   , mEpisode(episode)
   , mCurrentLevelNr(level)
   , mDifficulty(difficulty)

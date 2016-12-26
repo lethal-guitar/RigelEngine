@@ -21,6 +21,8 @@
 #include "game.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/program_options.hpp>
 #include <SDL.h>
 #include <SDL_mixer.h>
@@ -35,6 +37,7 @@ using namespace rigel;
 using namespace rigel::sdl_utils;
 using namespace std;
 
+namespace ba = boost::algorithm;
 namespace po = boost::program_options;
 
 
@@ -193,6 +196,10 @@ int main(int argc, char** argv) {
     ("no-music",
      po::bool_switch(&disableMusic),
      "Disable music playback")
+    ("player-pos",
+     po::value<string>(),
+     "Specify position to place the player at (to be used in conjunction with\n"
+     "'play-level')")
     ("game-path",
      po::value<string>(&gamePath),
      "Path to original game's installation. Can also be given as positional "
@@ -235,6 +242,32 @@ int main(int argc, char** argv) {
       }
 
       gameOptions.mLevelToJumpTo = std::make_pair(episode, level);
+    }
+
+    if (options.count("player-pos")) {
+      if (!options.count("play-level")) {
+        throw invalid_argument(
+          "This option requires also using the play-level option");
+      }
+
+      const auto playerPosString = options["player-pos"].as<string>();
+      std::vector<std::string> positionParts;
+      ba::split(positionParts, playerPosString, ba::is_any_of(","));
+
+      if (
+        positionParts.size() != 2 ||
+        positionParts[0].empty() ||
+        positionParts[1].empty()
+      ) {
+        throw invalid_argument(
+          "Invalid x/y-position (specify using '<X>,<Y>')");
+      }
+
+      const auto position = base::Vector{
+        std::stoi(positionParts[0]),
+        std::stoi(positionParts[1])
+      };
+      gameOptions.mPlayerPosition = position;
     }
 
     if (!gamePath.empty() && gamePath.back() != '/') {
