@@ -18,6 +18,7 @@
 
 #include "data/map.hpp"
 #include "engine/base_components.hpp"
+#include "engine/entity_tools.hpp"
 
 
 namespace ex = entityx;
@@ -106,14 +107,9 @@ void PhysicsSystem::update(
           physical.mGravityAffected);
       }
 
-      if (entity.has_component<CollidedWithWorld>()) {
-        entity.remove<CollidedWithWorld>();
-      }
       const auto collisionOccured =
         position != originalPosition + WorldPosition{movementX, movementY};
-      if (collisionOccured) {
-        entity.assign<CollidedWithWorld>();
-      }
+      setTag<CollidedWithWorld>(entity, collisionOccured);
     });
 }
 

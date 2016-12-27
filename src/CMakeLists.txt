@@ -19,6 +19,7 @@ set(core_sources
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
+    engine/entity_tools.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
     engine/map_renderer.cpp
