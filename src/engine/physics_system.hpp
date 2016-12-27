@@ -46,6 +46,13 @@ namespace rigel { namespace engine {
  *
  * Entities that collided with the world on the last update() will be tagged
  * with the CollidedWithWorld component.
+ *
+ * The collision detection is very simple and relies on knowing each entity's
+ * previous position. Therefore, entities which are to collide against the
+ * world mustn't be moved directly (i.e. by modifying their position), but via
+ * setting a velocity and then letting the PhysicsSystem take care of doing the
+ * movement. The system can't perform any corrections to entities which are
+ * already positioned so that they collide with the world.
  */
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
