@@ -346,7 +346,9 @@ void IngameMode::loadLevel(
     &mScrollOffset,
     &mLevelData.mMap,
     &mLevelData.mTileAttributes);
-  mEntities.systems.add<interaction::ElevatorSystem>(mPlayerEntity);
+  mEntities.systems.add<interaction::ElevatorSystem>(
+    mPlayerEntity,
+    mpServiceProvider);
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);

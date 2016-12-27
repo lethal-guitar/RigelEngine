@@ -19,6 +19,7 @@
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/player/components.hpp"
+#include "game_mode.hpp"
 
 namespace ex = entityx;
 
@@ -57,8 +58,12 @@ void configureElevator(entityx::Entity entity) {
 }
 
 
-ElevatorSystem::ElevatorSystem(entityx::Entity player)
+ElevatorSystem::ElevatorSystem(
+  entityx::Entity player,
+  IGameServiceProvider* pServiceProvider
+)
   : mPlayer(player)
+  , mpServiceProvider(pServiceProvider)
   , mPreviousMovement(0)
 {
 }
@@ -87,6 +92,13 @@ void ElevatorSystem::update(
     movement = determineMovementDirection(mPlayerInputs);
     playerState.mIsInteracting = movement != 0;
     updateElevatorMovement(movement, playerPhysical);
+  }
+
+  if (
+    movement < 0 &&
+    updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 4, dt)
+  ) {
+    mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
   }
 }
 

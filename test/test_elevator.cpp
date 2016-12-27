@@ -15,6 +15,7 @@
  */
 
 #include <catch.hpp>
+#include "utils.hpp"
 
 #include <base/spatial_types_printing.hpp>
 #include <data/map.hpp>
@@ -77,7 +78,8 @@ TEST_CASE("Rocket elevator") {
 
   auto& elevatorPosition = *elevator.component<WorldPosition>().get();
 
-  interaction::ElevatorSystem elevatorSystem(player);
+  MockServiceProvider mockServiceProvicer;
+  interaction::ElevatorSystem elevatorSystem(player, &mockServiceProvicer);
   const auto update = [&elevatorSystem, &physicsSystem, &entityx, &player](
     const ex::TimeDelta dt
   ) {

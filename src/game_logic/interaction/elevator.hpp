@@ -17,12 +17,14 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/timing.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine { namespace components { struct Physical; }}}
 namespace rigel { namespace game_logic { namespace components {
   struct PlayerControlled;
@@ -43,7 +45,9 @@ void configureElevator(entityx::Entity entity);
 
 class ElevatorSystem : public entityx::System<ElevatorSystem> {
 public:
-  explicit ElevatorSystem(entityx::Entity player);
+  ElevatorSystem(
+    entityx::Entity player,
+    IGameServiceProvider* pServiceProvider);
 
   void update(
     entityx::EntityManager& es,
@@ -68,11 +72,13 @@ private:
 
 private:
   entityx::Entity mPlayer;
+  IGameServiceProvider* mpServiceProvider;
   entityx::Entity mAttachedElevator;
 
   PlayerInputState mPlayerInputs;
 
   int mPreviousMovement;
+  engine::TimeStepper mTimeStepper;
 };
 
 }}}
