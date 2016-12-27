@@ -121,6 +121,7 @@ AnimationSystem::AnimationSystem(
   , mpServiceProvider(pServiceProvider)
   , mpEntityFactory(pFactory)
   , mPreviousState(mPlayer.component<PlayerControlled>()->mState)
+  , mWasInteracting(false)
 {
 }
 
@@ -219,7 +220,10 @@ int AnimationSystem::movementAnimationFrame(
   int newAnimationFrame = currentAnimationFrame;
 
   const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
-  if (state.mState != mPreviousState) {
+  if (
+    state.mState != mPreviousState ||
+    (mWasInteracting && !state.mIsInteracting)
+  ) {
     const auto it = STATE_FRAME_MAP.find(state.mState);
     if (it != STATE_FRAME_MAP.end()) {
       newAnimationFrame = it->second;
@@ -265,6 +269,11 @@ int AnimationSystem::movementAnimationFrame(
       }
     }
   }
+
+  if (state.mIsInteracting) {
+    newAnimationFrame = 33;
+  }
+  mWasInteracting = state.mIsInteracting;
 
   return newAnimationFrame;
 }

@@ -69,6 +69,7 @@ private:
   entityx::Entity mMuzzleFlashEntity;
 
   PlayerState mPreviousState;
+  bool mWasInteracting;
 };
 
 }}}

@@ -116,4 +116,15 @@ TEST_CASE("Player animation system works as expected") {
     updateFrames(1);
     CHECK(playerSprite.mFramesToRender[0] == 16 + 39);
   }
+
+
+  SECTION("'is interacting' state is applied correctly") {
+    playerState.mIsInteracting = true;
+    updateFrames(1);
+    CHECK(playerSprite.mFramesToRender[0] == 33);
+
+    playerState.mIsInteracting = false;
+    updateFrames(1);
+    CHECK(playerSprite.mFramesToRender[0] == 0);
+  }
 }

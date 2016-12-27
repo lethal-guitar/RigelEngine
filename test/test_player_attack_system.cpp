@@ -374,4 +374,11 @@ TEST_CASE("Player attack system works as expected") {
       CHECK(playerModel.mAmmo == playerModel.currentMaxAmmo());
     }
   }
+
+
+  SECTION("Player cannot fire while in 'interacting' state") {
+    playerState.mIsInteracting = true;
+    updateWithInput(shootingInputState);
+    CHECK(fireShotSpy.count() == 0);
+  }
 }

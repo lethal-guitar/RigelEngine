@@ -91,6 +91,7 @@ struct PlayerControlled {
   /** Indicates whether a shot was (is supposed to be) fired this frame */
   bool mShotFired = false;
 
+  bool mIsInteracting = false;
 
   bool isPlayerDead() const {
     return

@@ -101,7 +101,7 @@ void PlayerMovementSystem::update(
   auto& boundingBox = *mPlayer.component<BoundingBox>().get();
   auto& worldPosition = *mPlayer.component<WorldPosition>().get();
 
-  if (state.isPlayerDead()) {
+  if (state.isPlayerDead() || state.mIsInteracting) {
     return;
   }
 
