@@ -32,6 +32,7 @@ if(MSVC)
         /wd4503 # Decorated name length exceeded
         /wd4800 # Forcing value to bool
     )
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(
         -Werror
