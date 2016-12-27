@@ -24,6 +24,7 @@
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/interaction/elevator.hpp"
 #include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player/animation_system.hpp"
 #include "game_logic/player/attack_system.hpp"
@@ -197,11 +198,15 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   mEntities.systems.system<player::AttackSystem>()->setInputState(
     mPlayerInputs);
+  mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
+    mPlayerInputs);
 
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
+  mEntities.systems.update<interaction::ElevatorSystem>(dt);
+
   mEntities.systems.update<PlayerMovementSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
@@ -341,6 +346,7 @@ void IngameMode::loadLevel(
     &mScrollOffset,
     &mLevelData.mMap,
     &mLevelData.mTileAttributes);
+  mEntities.systems.add<interaction::ElevatorSystem>(mPlayerEntity);
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
