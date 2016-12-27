@@ -61,14 +61,14 @@ public:
 private:
   data::map::CollisionData worldAt(int x, int y) const;
 
-  std::tuple<base::Vector, bool> applyHorizontalMovement(
+  base::Vector applyHorizontalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     std::int16_t movementX,
     bool allowStairStepping
   ) const;
 
-  std::tuple<base::Vector, float, bool> applyVerticalMovement(
+  std::tuple<base::Vector, float> applyVerticalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,

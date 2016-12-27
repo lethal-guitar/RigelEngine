@@ -71,11 +71,11 @@ void PhysicsSystem::update(
       WorldPosition& position,
       const BoundingBox& collisionRect
     ) {
-      bool collisionOccured = false;
+      const auto originalPosition = position;
 
       const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
       if (movementX != 0) {
-        std::tie(position, collisionOccured) = applyHorizontalMovement(
+        position= applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
           movementX,
@@ -98,21 +98,19 @@ void PhysicsSystem::update(
 
       const auto movementY = static_cast<std::int16_t>(physical.mVelocity.y);
       if (movementY != 0) {
-        bool verticalCollisionOccured = false;
-        std::tie(position, physical.mVelocity.y, verticalCollisionOccured) =
-          applyVerticalMovement(
-            bbox,
-            position,
-            physical.mVelocity.y,
-            movementY,
-            physical.mGravityAffected);
-        collisionOccured = collisionOccured || verticalCollisionOccured;
+        std::tie(position, physical.mVelocity.y) = applyVerticalMovement(
+          bbox,
+          position,
+          physical.mVelocity.y,
+          movementY,
+          physical.mGravityAffected);
       }
 
       if (entity.has_component<CollidedWithWorld>()) {
         entity.remove<CollidedWithWorld>();
       }
-
+      const auto collisionOccured =
+        position != originalPosition + WorldPosition{movementX, movementY};
       if (collisionOccured) {
         entity.assign<CollidedWithWorld>();
       }
@@ -136,7 +134,7 @@ data::map::CollisionData PhysicsSystem::worldAt(
 }
 
 
-std::tuple<base::Vector, bool> PhysicsSystem::applyHorizontalMovement(
+base::Vector PhysicsSystem::applyHorizontalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const int16_t movementX,
@@ -185,17 +183,16 @@ std::tuple<base::Vector, bool> PhysicsSystem::applyHorizontalMovement(
         }
 
         if (mustResolveCollision) {
-          return std::make_tuple(
-            base::Vector{
-              static_cast<uint16_t>(col - movementDirection),
-              newPosition.y},
-            true);
+          return {
+            static_cast<uint16_t>(col - movementDirection),
+            newPosition.y
+          };
         }
       }
     }
   }
 
-  return std::make_tuple(newPosition, false);
+  return newPosition;
 }
 
 
@@ -226,7 +223,7 @@ float PhysicsSystem::applyGravity(
 }
 
 
-std::tuple<base::Vector, float, bool> PhysicsSystem::applyVerticalMovement(
+std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const float currentVelocity,
@@ -261,16 +258,16 @@ std::tuple<base::Vector, float, bool> PhysicsSystem::applyVerticalMovement(
         newPosition.y = row - movementDirection;
         if (movingDown || !beginFallingOnHittingCeiling) {
           // For falling, we reset the Y velocity as soon as we hit the ground
-          return make_tuple(newPosition, 0.0f, true);
+          return make_tuple(newPosition, 0.0f);
         } else {
           // For jumping, we begin falling early when we hit the ceiling
-          return make_tuple(newPosition, 1.0f, true);
+          return make_tuple(newPosition, 1.0f);
         }
       }
     }
   }
 
-  return make_tuple(newPosition, currentVelocity, false);
+  return make_tuple(newPosition, currentVelocity);
 }
 
 }}
