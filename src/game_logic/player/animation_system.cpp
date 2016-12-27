@@ -255,14 +255,15 @@ int AnimationSystem::movementAnimationFrame(
   } else if (state.mState == PlayerState::Airborne) {
     const auto verticalVelocity =
       mPlayer.component<engine::components::Physical>()->mVelocity.y;
-
-    if (verticalVelocity <= 0.0f) {
-      newAnimationFrame = 6;
-    } else {
-      newAnimationFrame = 7;
+    if (verticalVelocity != 0.0f) {
+      if (verticalVelocity <= 0.0f) {
+        newAnimationFrame = 6;
+      } else if (verticalVelocity < 2.0f) {
+        newAnimationFrame = 7;
+      } else {
+        newAnimationFrame = 8;
+      }
     }
-
-    // TODO: Switch to frame 8 when 2 units away from ground
   }
 
   return newAnimationFrame;

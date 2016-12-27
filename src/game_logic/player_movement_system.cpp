@@ -258,6 +258,14 @@ void PlayerMovementSystem::update(
     state.mState = PlayerState::Standing;
   }
 
+  if (
+    physical.mVelocity.y != 0.0f &&
+    state.mState != PlayerState::Airborne &&
+    state.mState != PlayerState::ClimbingLadder
+  ) {
+    state.mState = PlayerState::Airborne;
+  }
+
   if (jumping && state.mState != PlayerState::Airborne) {
     physical.mVelocity.y = -3.6f;
     physical.mGravityAffected = true;
