@@ -16,11 +16,16 @@
 
 #include "physics_system.hpp"
 
+#include "base/warnings.hpp"
 #include "data/map.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 
+RIGEL_DISABLE_WARNINGS
+#include <boost/algorithm/cxx11/any_of.hpp>
+RIGEL_RESTORE_WARNINGS
 
+namespace ba = boost::algorithm;
 namespace ex = entityx;
 
 
@@ -30,6 +35,7 @@ using namespace std;
 
 using components::BoundingBox;
 using components::Physical;
+using components::SolidBody;
 using components::WorldPosition;
 using data::map::CollisionData;
 
@@ -64,6 +70,18 @@ void PhysicsSystem::update(
   if (!updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
     return;
   }
+
+  mSolidBodies.clear();
+  es.each<SolidBody, WorldPosition, BoundingBox>(
+    [this](
+      ex::Entity entity,
+      const SolidBody&,
+      const WorldPosition& pos,
+      const BoundingBox& bbox
+    ) {
+      mSolidBodies.emplace_back(
+        std::make_tuple(entity, toWorldSpace(bbox, pos)));
+    });
 
   es.each<Physical, WorldPosition, BoundingBox>(
     [this](
@@ -100,6 +118,7 @@ void PhysicsSystem::update(
       const auto movementY = static_cast<std::int16_t>(physical.mVelocity.y);
       if (movementY != 0) {
         std::tie(position, physical.mVelocity.y) = applyVerticalMovement(
+          entity,
           bbox,
           position,
           physical.mVelocity.y,
@@ -220,6 +239,7 @@ float PhysicsSystem::applyGravity(
 
 
 std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
+  entityx::Entity entity,
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const float currentVelocity,
@@ -245,12 +265,22 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
     }
   };
 
+  auto transformedBbox = bbox;
   for (auto row=startY; row != endY; row += movementDirection) {
+    transformedBbox.topLeft.y += movementDirection;
+
     for (auto col=bbox.topLeft.x; col<=bbox.bottomRight().x; ++col) {
       const auto y = row + yOffset;
 
+      const auto collidesWithSolidBody = ba::any_of(mSolidBodies,
+        [&transformedBbox, &entity](const auto& solidBodyInfo) {
+          return
+            entity != std::get<0>(solidBodyInfo) &&
+            transformedBbox.intersects(std::get<1>(solidBodyInfo));
+        });
+
       const auto& enteredCell = worldAt(col, y);
-      if (hasCollision(enteredCell)) {
+      if (collidesWithSolidBody || hasCollision(enteredCell)) {
         newPosition.y = row - movementDirection;
         if (movingDown || !beginFallingOnHittingCeiling) {
           // For falling, we reset the Y velocity as soon as we hit the ground

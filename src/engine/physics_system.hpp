@@ -76,6 +76,7 @@ private:
   ) const;
 
   std::tuple<base::Vector, float> applyVerticalMovement(
+    entityx::Entity entity,
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
@@ -91,6 +92,9 @@ private:
   const data::map::Map* mpMap;
   const data::map::TileAttributes* mpTileAttributes;
   TimeStepper mTimeStepper;
+
+  using SolidBodyInfo = std::tuple<entityx::Entity, components::BoundingBox>;
+  std::vector<SolidBodyInfo> mSolidBodies;
 };
 
 }}
