@@ -73,7 +73,8 @@ Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
       data::GameTraits::viewPortHeightPx)
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mFpsDisplay(pRenderer, mResources)
+  , mTextRenderer(pRenderer, mResources)
+  , mFpsDisplay(&mTextRenderer)
 {
   clearScreen();
   SDL_RenderPresent(mpRenderer);
@@ -126,7 +127,8 @@ void Game::run(const Options& options) {
       episode,
       level,
       data::Difficulty::Medium,
-      makeModeContext());
+      makeModeContext(),
+      options.mPlayerPosition);
   }
   else if (options.mSkipIntro)
   {
@@ -156,6 +158,8 @@ void Game::mainLoop() {
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
     mLastTime = startOfFrame;
 
+    mDebugText.clear();
+
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
 
@@ -180,6 +184,10 @@ void Game::mainLoop() {
     }
 
     mRenderTarget.renderScaledToScreen(mpRenderer);
+
+    if (!mDebugText.empty()) {
+      mTextRenderer.drawMultiLineText(0, 2, mDebugText);
+    }
 
     const auto afterRender = high_resolution_clock::now();
     const auto innerRenderTime =
@@ -324,6 +332,11 @@ void Game::scheduleEnterMainMenu() {
 
 void Game::scheduleGameQuit() {
   mIsRunning = false;
+}
+
+
+void Game::showDebugText(const std::string& text) {
+  mDebugText = text;
 }
 
 

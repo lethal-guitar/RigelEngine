@@ -17,11 +17,13 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "base/spatial_types.hpp"
 #include "engine/sound_system.hpp"
 #include "game_mode.hpp"
 #include "loader/resource_loader.hpp"
 #include "sdl_utils/texture.hpp"
 #include "ui/fps_display.hpp"
+#include "ui/menu_element_renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -41,6 +43,7 @@ public:
     boost::optional<std::pair<int, int>> mLevelToJumpTo;
     bool mSkipIntro = false;
     bool mEnableMusic = true;
+    boost::optional<base::Vector> mPlayerPosition;
   };
 
   Game(const std::string& gamePath, SDL_Renderer* pRenderer);
@@ -76,6 +79,8 @@ private:
     return mIsShareWareVersion;
   }
 
+  void showDebugText(const std::string& text) override;
+
 private:
   SDL_Renderer* mpRenderer;
   engine::SoundSystem mSoundSystem;
@@ -98,7 +103,9 @@ private:
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
 
+  ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
+  std::string mDebugText;
 };
 
 }

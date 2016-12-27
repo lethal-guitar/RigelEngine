@@ -19,6 +19,7 @@
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/debugging_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -35,7 +36,9 @@
 
 #include <cassert>
 #include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 
 namespace rigel {
@@ -46,6 +49,8 @@ using namespace std;
 
 using data::PlayerModel;
 using engine::components::BoundingBox;
+using engine::components::Physical;
+using engine::components::WorldPosition;
 
 
 namespace {
@@ -73,6 +78,16 @@ std::string loadingScreenFileName(const int episode) {
   return fileName;
 }
 
+
+template<typename ValueT>
+std::string vec2String(const base::Point<ValueT>& vec, const int width) {
+  std::stringstream stream;
+  stream
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
+  return stream.str();
+}
+
 }
 
 
@@ -80,7 +95,8 @@ IngameMode::IngameMode(
   const int episode,
   const int levelNumber,
   const data::Difficulty difficulty,
-  Context context
+  Context context,
+  boost::optional<base::Vector> playerPositionOverride
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
@@ -91,6 +107,7 @@ IngameMode::IngameMode(
       difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
+  , mShowDebugText(false)
   , mHudRenderer(
       &mPlayerModel,
       levelNumber + 1,
@@ -107,6 +124,10 @@ IngameMode::IngameMode(
   auto before = high_resolution_clock::now();
 
   loadLevel(episode, levelNumber, difficulty, *context.mpResources);
+
+  if (playerPositionOverride) {
+    *mPlayerEntity.component<WorldPosition>().get() = *playerPositionOverride;
+  }
 
   auto after = high_resolution_clock::now();
   std::cout << "Level load time: " <<
@@ -140,6 +161,27 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_LALT:
     case SDLK_RALT:
       mPlayerInputs.mShooting = keyPressed;
+      break;
+  }
+
+  // Debug keys
+  // ----------------------------------------------------------------------
+  if (keyPressed) {
+    return;
+  }
+
+  auto& debuggingSystem = *mEntities.systems.system<DebuggingSystem>();
+  switch (event.key.keysym.sym) {
+    case SDLK_b:
+      debuggingSystem.toggleBoundingBoxDisplay();
+      break;
+
+    case SDLK_c:
+      debuggingSystem.toggleWorldCollisionDataDisplay();
+      break;
+
+    case SDLK_d:
+      mShowDebugText = !mShowDebugText;
       break;
   }
 }
@@ -187,6 +229,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
 
     mEntities.systems.update<RenderingSystem>(dt);
+    mEntities.systems.update<DebuggingSystem>(dt);
     mHudRenderer.updateAndRender(dt);
   }
 
@@ -194,6 +237,10 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x,
     data::GameTraits::inGameViewPortOffset.y);
+
+  if (mShowDebugText) {
+    showDebugText();
+  }
 
   checkForPlayerDeath();
   checkForLevelExitReached();
@@ -257,7 +304,7 @@ void IngameMode::loadLevel(
     mpServiceProvider,
     [this](
       const game_logic::ProjectileType type,
-      const engine::components::WorldPosition& pos,
+      const WorldPosition& pos,
       const game_logic::ProjectileDirection direction
     ) {
       mEntityFactory.createProjectile(type, pos, direction);
@@ -289,6 +336,11 @@ void IngameMode::loadLevel(
     &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
+  mEntities.systems.add<DebuggingSystem>(
+    mpRenderer,
+    &mScrollOffset,
+    &mLevelData.mMap,
+    &mLevelData.mTileAttributes);
   mEntities.systems.configure();
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
@@ -296,8 +348,6 @@ void IngameMode::loadLevel(
 
 
 void IngameMode::checkForLevelExitReached() {
-  using engine::components::WorldPosition;
-  using engine::components::Physical;
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
@@ -357,6 +407,19 @@ void IngameMode::restartLevel() {
   updateAndRender(0);
 
   mpServiceProvider->fadeInScreen();
+}
+
+
+void IngameMode::showDebugText() {
+  const auto& playerPos = *mPlayerEntity.component<WorldPosition>().get();
+  const auto& playerVel = mPlayerEntity.component<Physical>()->mVelocity;
+  std::stringstream infoText;
+  infoText
+    << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
+    << "Player: " << vec2String(playerPos, 4)
+    << ", Vel.: " << vec2String(playerVel, 5);
+
+  mpServiceProvider->showDebugText(infoText.str());
 }
 
 }

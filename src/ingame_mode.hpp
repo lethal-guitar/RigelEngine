@@ -27,6 +27,7 @@
 #include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
@@ -42,7 +43,8 @@ public:
     int episode,
     int level,
     data::Difficulty difficulty,
-    Context context);
+    Context context,
+    boost::optional<base::Vector> playerPositionOverride = boost::none);
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;
@@ -63,6 +65,8 @@ private:
   void checkForPlayerDeath();
   void restartLevel();
 
+  void showDebugText();
+
 private:
   SDL_Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
@@ -74,6 +78,8 @@ private:
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
   bool mLevelFinished;
+
+  bool mShowDebugText;
 
   struct LevelData {
     data::map::Map mMap;

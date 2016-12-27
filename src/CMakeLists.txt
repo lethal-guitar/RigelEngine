@@ -19,6 +19,8 @@ set(core_sources
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
+    engine/debugging_system.cpp
+    engine/debugging_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
     engine/physical_components.hpp
@@ -91,6 +93,7 @@ set(core_sources
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
+    sdl_utils/rect_tools.hpp
     sdl_utils/texture.cpp
     sdl_utils/texture.hpp
     sdl_utils/texture.ipp

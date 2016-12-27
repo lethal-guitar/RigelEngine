@@ -143,20 +143,4 @@ void RenderingSystem::renderSprite(
   }
 }
 
-// DEBUGGING collision boxes
-/*
-auto physical = entity.component<components::Physical>();
-if (physical) {
-  const auto tileSize = data::GameTraits::tileSize;
-  SDL_SetRenderDrawColor(mpRenderer, 255, 0, 0, 200);
-  SDL_Rect bboxRect{
-    pos.x*tileSize + tileSize*physical->mCollisionRect.topLeft.x - worldToScreenPx.x,
-    pos.y*tileSize + (tileSize*physical->mCollisionRect.topLeft.y - tileSize*(physical->mCollisionRect.size.height-1)) - worldToScreenPx.y,
-    physical->mCollisionRect.size.width*tileSize,
-    physical->mCollisionRect.size.height*tileSize
-  };
-  SDL_RenderDrawRect(mpRenderer, &bboxRect);
-}
-*/
-
 }}
