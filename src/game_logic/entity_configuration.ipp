@@ -561,7 +561,7 @@ void configureEntity(
     case 51: // teleporter
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       entity.assign<Interactable>(InteractableType::Teleporter);
-      addDefaultPhysical(entity, boundingBox);
+      entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
     case 239: // Special hint globe

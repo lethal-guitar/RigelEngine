@@ -1,3 +1,19 @@
+/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "player_interaction_system.hpp"
 
 #include "data/player_data.hpp"
@@ -7,6 +23,7 @@
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/interaction/force_field.hpp"
+#include "game_logic/interaction/teleporter.hpp"
 #include "game_mode.hpp"
 
 
@@ -27,11 +44,13 @@ namespace ex = entityx;
 PlayerInteractionSystem::PlayerInteractionSystem(
   ex::Entity player,
   PlayerModel* pPlayerModel,
-  IGameServiceProvider* pServices
+  IGameServiceProvider* pServices,
+  TeleportCallback teleportCallback
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
+  , mTeleportCallback(teleportCallback)
 {
 }
 
@@ -72,11 +91,6 @@ void PlayerInteractionSystem::update(
           state.mPerformedInteraction = true;
         }
       });
-  }
-
-  if (mNeedFadeIn) {
-    mNeedFadeIn = false;
-    mpServiceProvider->fadeInScreen();
   }
 
   // ----------------------------------------------------------------------
@@ -155,28 +169,7 @@ void PlayerInteractionSystem::performInteraction(
 ) {
   switch (type) {
     case InteractableType::Teleporter:
-      {
-        const auto sourceTeleporterPosition =
-          *interactable.component<WorldPosition>().get();
-
-        es.each<Interactable, WorldPosition>(
-          [this, sourceTeleporterPosition](
-            ex::Entity,
-            const Interactable& i,
-            const WorldPosition& pos
-          ) {
-            if (
-              i.mType == InteractableType::Teleporter &&
-              pos != sourceTeleporterPosition
-            ) {
-              mpServiceProvider->playSound(data::SoundId::Teleport);
-              mpServiceProvider->fadeOutScreen();
-              auto playerPosition = mPlayer.component<WorldPosition>();
-              *playerPosition.get() = pos + base::Vector{2, 0};
-              mNeedFadeIn = true;
-            }
-          });
-      }
+      mTeleportCallback(interactable);
       break;
 
     case InteractableType::ForceFieldCardReader:

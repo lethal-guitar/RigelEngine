@@ -64,6 +64,7 @@ private:
   void checkForLevelExitReached();
   void checkForPlayerDeath();
   void restartLevel();
+  void handleTeleporter();
 
   void showDebugText();
 
@@ -85,6 +86,7 @@ private:
     data::map::Map mMap;
     data::map::TileAttributes mTileAttributes;
     std::vector<data::map::LevelData::Actor> mInitialActors;
+    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
   };
 
   LevelData mLevelData;
@@ -93,6 +95,8 @@ private:
 
   ui::HudRenderer mHudRenderer;
   sdl_utils::RenderTargetTexture mIngameViewPortRenderTarget;
+
+  boost::optional<entityx::Entity> mActiveTeleporter;
 };
 
 }
