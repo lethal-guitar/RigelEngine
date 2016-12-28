@@ -62,19 +62,26 @@ IntroDemoLoopMode::IntroDemoLoopMode(
   }
 
   auto creditsScript = mScripts["&Credits"];
-  creditsScript.emplace_back(data::script::Delay{300});
+  creditsScript.emplace_back(data::script::Delay{700});
   mStages.emplace_back(ScriptExecutionStage{
     &mScriptRunner,
     std::move(creditsScript)});
 
+  // The credits screen is shown twice as long in the registered version. This
+  // makes the timing equivalent between the versions, only that the shareware
+  // version will switch to the order info screen after half the time has
+  // elapsed.
+  //
+  // Consequently, we always insert two 700 tick delays, but only insert the
+  // order info script commands if we're running the shareware version.
+  auto orderInfoScript = data::script::Script{};
   if (context.mpServiceProvider->isShareWareVersion()) {
-    auto orderInfoScript = mScripts["Q_ORDER"];
-    orderInfoScript.emplace_back(data::script::Delay{300});
-    mStages.emplace_back(ScriptExecutionStage{
-      &mScriptRunner,
-      std::move(orderInfoScript)});
+    orderInfoScript = mScripts["Q_ORDER"];
   }
-
+  orderInfoScript.emplace_back(data::script::Delay{700});
+  mStages.emplace_back(ScriptExecutionStage{
+    &mScriptRunner,
+    std::move(orderInfoScript)});
 
   startStage(mStages[mCurrentStage]);
 }
