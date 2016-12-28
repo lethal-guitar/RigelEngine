@@ -289,7 +289,8 @@ void IngameMode::loadLevel(
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
     std::move(loadedLevel.mTileSet.mAttributes),
-    std::move(loadedLevel.mActors)
+    std::move(loadedLevel.mActors),
+    loadedLevel.mBackdropSwitchCondition
   };
   mMapAtLevelStart = mLevelData.mMap;
 
@@ -438,6 +439,13 @@ void IngameMode::handleTeleporter() {
   // It's important to reset mActiveTeleporter before calling updateAndRender,
   // as there would be an infinite recursion otherwise.
   mActiveTeleporter = boost::none;
+
+  const auto switchBackdrop =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnTeleportation;
+  if (switchBackdrop) {
+    mEntities.systems.system<RenderingSystem>()->switchBackdrops();
+  }
 
   mScrollOffset = {0, 0};
   updateAndRender(0.0);
