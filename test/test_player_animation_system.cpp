@@ -71,38 +71,38 @@ TEST_CASE("Player animation system works as expected") {
     playerState.mState = PlayerState::Dieing;
 
     update(0.0);
-    REQUIRE(playerSprite.mFramesToRender[0] == 0);
+    CHECK(playerSprite.mFramesToRender[0] == 0);
 
     updateFrames(1); // 1
-    REQUIRE(playerSprite.mFramesToRender[0] == 29);
+    CHECK(playerSprite.mFramesToRender[0] == 29);
 
     updateFrames(1); // 2
-    REQUIRE(playerSprite.mFramesToRender[0] == 29);
+    CHECK(playerSprite.mFramesToRender[0] == 29);
 
     updateFrames(3); // 5
-    REQUIRE(playerSprite.mFramesToRender[0] == 30);
+    CHECK(playerSprite.mFramesToRender[0] == 30);
 
     updateFrames(1); // 6
-    REQUIRE(playerSprite.mFramesToRender[0] == 31);
+    CHECK(playerSprite.mFramesToRender[0] == 31);
 
     updateFrames(1); // 7
-    REQUIRE(playerSprite.mFramesToRender[0] == 32);
+    CHECK(playerSprite.mFramesToRender[0] == 32);
 
     updateFrames(1); // 8
-    REQUIRE(playerSprite.mFramesToRender[0] == 32);
+    CHECK(playerSprite.mFramesToRender[0] == 32);
 
     updateFrames(8); // 16
-    REQUIRE(playerSprite.mShow == true);
+    CHECK(playerSprite.mShow == true);
 
     updateFrames(1); // 17
-    REQUIRE(playerSprite.mShow == false);
-    REQUIRE(playerState.mState == PlayerState::Dieing);
+    CHECK(playerSprite.mShow == false);
+    CHECK(playerState.mState == PlayerState::Dieing);
 
     updateFrames(24); // 41
-    REQUIRE(playerState.mState == PlayerState::Dieing);
+    CHECK(playerState.mState == PlayerState::Dieing);
 
     updateFrames(1); // 42
-    REQUIRE(playerState.mState == PlayerState::Dead);
+    CHECK(playerState.mState == PlayerState::Dead);
   }
 
 
@@ -110,10 +110,21 @@ TEST_CASE("Player animation system works as expected") {
     playerState.mOrientation = Orientation::Left;
     playerState.mState = PlayerState::LookingUp;
     updateFrames(1);
-    REQUIRE(playerSprite.mFramesToRender[0] == 16);
+    CHECK(playerSprite.mFramesToRender[0] == 16);
 
     playerState.mOrientation = Orientation::Right;
     updateFrames(1);
-    REQUIRE(playerSprite.mFramesToRender[0] == 16 + 39);
+    CHECK(playerSprite.mFramesToRender[0] == 16 + 39);
+  }
+
+
+  SECTION("'is interacting' state is applied correctly") {
+    playerState.mIsInteracting = true;
+    updateFrames(1);
+    CHECK(playerSprite.mFramesToRender[0] == 33);
+
+    playerState.mIsInteracting = false;
+    updateFrames(1);
+    CHECK(playerSprite.mFramesToRender[0] == 0);
   }
 }

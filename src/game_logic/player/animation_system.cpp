@@ -121,6 +121,7 @@ AnimationSystem::AnimationSystem(
   , mpServiceProvider(pServiceProvider)
   , mpEntityFactory(pFactory)
   , mPreviousState(mPlayer.component<PlayerControlled>()->mState)
+  , mWasInteracting(false)
 {
 }
 
@@ -219,7 +220,10 @@ int AnimationSystem::movementAnimationFrame(
   int newAnimationFrame = currentAnimationFrame;
 
   const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
-  if (state.mState != mPreviousState) {
+  if (
+    state.mState != mPreviousState ||
+    (mWasInteracting && !state.mIsInteracting)
+  ) {
     const auto it = STATE_FRAME_MAP.find(state.mState);
     if (it != STATE_FRAME_MAP.end()) {
       newAnimationFrame = it->second;
@@ -255,15 +259,21 @@ int AnimationSystem::movementAnimationFrame(
   } else if (state.mState == PlayerState::Airborne) {
     const auto verticalVelocity =
       mPlayer.component<engine::components::Physical>()->mVelocity.y;
-
-    if (verticalVelocity <= 0.0f) {
-      newAnimationFrame = 6;
-    } else {
-      newAnimationFrame = 7;
+    if (verticalVelocity != 0.0f) {
+      if (verticalVelocity <= 0.0f) {
+        newAnimationFrame = 6;
+      } else if (verticalVelocity < 2.0f) {
+        newAnimationFrame = 7;
+      } else {
+        newAnimationFrame = 8;
+      }
     }
-
-    // TODO: Switch to frame 8 when 2 units away from ground
   }
+
+  if (state.mIsInteracting) {
+    newAnimationFrame = 33;
+  }
+  mWasInteracting = state.mIsInteracting;
 
   return newAnimationFrame;
 }

@@ -106,7 +106,8 @@ void AttackSystem::update(
   if (
     playerState.mState == PlayerState::ClimbingLadder ||
     playerState.mState == PlayerState::Dieing ||
-    playerState.mState == PlayerState::Dead
+    playerState.mState == PlayerState::Dead ||
+    playerState.mIsInteracting
   ) {
     return;
   }

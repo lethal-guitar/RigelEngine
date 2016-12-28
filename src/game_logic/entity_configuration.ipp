@@ -733,6 +733,10 @@ void configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
+    case 209: // Rocket elevator
+      interaction::configureElevator(entity);
+      break;
+
     case 212: // Lava pool
     case 235: // Slime pool
     case 262: // Fire (variant 1)

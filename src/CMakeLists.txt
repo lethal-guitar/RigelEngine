@@ -19,6 +19,7 @@ set(core_sources
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
+    engine/entity_tools.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
     engine/map_renderer.cpp
@@ -45,6 +46,8 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/interaction/elevator.cpp
+    game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
     game_logic/map_scroll_system.cpp

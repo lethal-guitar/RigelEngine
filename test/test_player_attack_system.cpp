@@ -108,20 +108,20 @@ TEST_CASE("Player attack system works as expected") {
 
   SECTION("Pressing fire button triggers only one shot") {
     updateWithInput(defaultInputState);
-    REQUIRE(fireShotSpy.count() == 0);
+    CHECK(fireShotSpy.count() == 0);
 
     updateWithInput(shootingInputState);
-    REQUIRE(fireShotSpy.count() == 1);
+    CHECK(fireShotSpy.count() == 1);
 
     // holding the fire button doesn't trigger another shot
     updateWithInput(shootingInputState);
-    REQUIRE(fireShotSpy.count() == 1);
+    CHECK(fireShotSpy.count() == 1);
 
     SECTION("Releasing fire button allows shooting again on next press") {
       updateWithInput(defaultInputState);
 
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotSpy.count() == 2);
+      CHECK(fireShotSpy.count() == 2);
     }
   }
 
@@ -132,8 +132,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -2};
-        REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.direction == ProjectileDirection::Right);
+        CHECK(fireShotParameters.position == expectedPosition);
+        CHECK(fireShotParameters.direction == ProjectileDirection::Right);
       }
 
       SECTION("Facing left") {
@@ -142,8 +142,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -2};
-        REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.direction == ProjectileDirection::Left);
+        CHECK(fireShotParameters.position == expectedPosition);
+        CHECK(fireShotParameters.direction == ProjectileDirection::Left);
       }
 
       SECTION("Player position offset") {
@@ -151,14 +151,14 @@ TEST_CASE("Player attack system works as expected") {
 
         SECTION("Facing right") {
           updateWithInput(shootingInputState);
-          REQUIRE(fireShotParameters.position.x == 3 + 4);
+          CHECK(fireShotParameters.position.x == 3 + 4);
         }
 
         SECTION("Facing left") {
           playerState.mOrientation = player::Orientation::Left;
 
           updateWithInput(shootingInputState);
-          REQUIRE(fireShotParameters.position.x == -1 + 4);
+          CHECK(fireShotParameters.position.x == -1 + 4);
         }
       }
     }
@@ -170,8 +170,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -1};
-        REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.direction == ProjectileDirection::Right);
+        CHECK(fireShotParameters.position == expectedPosition);
+        CHECK(fireShotParameters.direction == ProjectileDirection::Right);
       }
 
       SECTION("Facing left") {
@@ -180,8 +180,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -1};
-        REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.direction == ProjectileDirection::Left);
+        CHECK(fireShotParameters.position == expectedPosition);
+        CHECK(fireShotParameters.direction == ProjectileDirection::Left);
       }
     }
 
@@ -192,8 +192,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{2, -5};
-        REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.direction == ProjectileDirection::Up);
+        CHECK(fireShotParameters.position == expectedPosition);
+        CHECK(fireShotParameters.direction == ProjectileDirection::Up);
       }
 
       SECTION("Facing left") {
@@ -202,8 +202,8 @@ TEST_CASE("Player attack system works as expected") {
         updateWithInput(shootingInputState);
 
         const auto expectedPosition = WorldPosition{0, -5};
-        REQUIRE(fireShotParameters.position == expectedPosition);
-        REQUIRE(fireShotParameters.direction == ProjectileDirection::Up);
+        CHECK(fireShotParameters.position == expectedPosition);
+        CHECK(fireShotParameters.direction == ProjectileDirection::Up);
       }
     }
   }
@@ -213,19 +213,19 @@ TEST_CASE("Player attack system works as expected") {
     SECTION("Cannot shoot while climbing a ladder") {
       playerState.mState = PlayerState::ClimbingLadder;
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotSpy.count() == 0);
+      CHECK(fireShotSpy.count() == 0);
     }
 
     SECTION("Cannot shoot while dieing") {
       playerState.mState = PlayerState::Dieing;
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotSpy.count() == 0);
+      CHECK(fireShotSpy.count() == 0);
     }
 
     SECTION("Cannot shoot when dead") {
       playerState.mState = PlayerState::Dead;
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotSpy.count() == 0);
+      CHECK(fireShotSpy.count() == 0);
     }
   }
 
@@ -233,39 +233,39 @@ TEST_CASE("Player attack system works as expected") {
   SECTION("Shot type depends on player's current weapon") {
     SECTION("Regular shot") {
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotParameters.type == ProjectileType::PlayerRegularShot);
+      CHECK(fireShotParameters.type == ProjectileType::PlayerRegularShot);
     }
 
     SECTION("Laser shot") {
       playerModel.mWeapon = data::WeaponType::Laser;
 
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotParameters.type == ProjectileType::PlayerLaserShot);
+      CHECK(fireShotParameters.type == ProjectileType::PlayerLaserShot);
     }
 
     SECTION("Rocket shot") {
       playerModel.mWeapon = data::WeaponType::Rocket;
 
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotParameters.type == ProjectileType::PlayerRocketShot);
+      CHECK(fireShotParameters.type == ProjectileType::PlayerRocketShot);
     }
 
     SECTION("Flame shot") {
       playerModel.mWeapon = data::WeaponType::FlameThrower;
 
       updateWithInput(shootingInputState);
-      REQUIRE(fireShotParameters.type == ProjectileType::PlayerFlameShot);
+      CHECK(fireShotParameters.type == ProjectileType::PlayerFlameShot);
     }
   }
 
 
   SECTION("Shooting triggers appropriate sound") {
-    REQUIRE(mockServiceProvicer.mLastTriggeredSoundId == boost::none);
+    CHECK(mockServiceProvicer.mLastTriggeredSoundId == boost::none);
 
     SECTION("Normal shot") {
       updateWithInput(shootingInputState);
-      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
-      REQUIRE(
+      CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
           data::SoundId::DukeNormalShot);
     }
@@ -274,8 +274,8 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mWeapon = data::WeaponType::Laser;
 
       updateWithInput(shootingInputState);
-      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
-      REQUIRE(
+      CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
           data::SoundId::DukeLaserShot);
     }
@@ -285,8 +285,8 @@ TEST_CASE("Player attack system works as expected") {
 
       // The rocket launcher also uses the normal shot sound
       updateWithInput(shootingInputState);
-      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
-      REQUIRE(
+      CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
           data::SoundId::DukeNormalShot);
     }
@@ -295,8 +295,8 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mWeapon = data::WeaponType::FlameThrower;
 
       updateWithInput(shootingInputState);
-      REQUIRE(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
-      REQUIRE(
+      CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
+      CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
           data::SoundId::FlameThrowerShot);
     }
@@ -307,7 +307,7 @@ TEST_CASE("Player attack system works as expected") {
 
       updateWithInput(shootingInputState);
 
-      REQUIRE(
+      CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
           data::SoundId::DukeLaserShot);
     }
@@ -325,7 +325,7 @@ TEST_CASE("Player attack system works as expected") {
     SECTION("Normal shot doesn't consume ammo") {
       playerModel.mAmmo = 42;
       fireOneShot();
-      REQUIRE(playerModel.mAmmo == 42);
+      CHECK(playerModel.mAmmo == 42);
     }
 
     SECTION("Laser consumes 1 unit of ammo per shot") {
@@ -333,7 +333,7 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mAmmo = 10;
 
       fireOneShot();
-      REQUIRE(playerModel.mAmmo == 9);
+      CHECK(playerModel.mAmmo == 9);
     }
 
     SECTION("Rocket launcher consumes 1 unit of ammo per shot") {
@@ -341,7 +341,7 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mAmmo = 10;
 
       fireOneShot();
-      REQUIRE(playerModel.mAmmo == 9);
+      CHECK(playerModel.mAmmo == 9);
     }
 
     SECTION("Flame thrower consumes 1 unit of ammo per shot") {
@@ -349,7 +349,7 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mAmmo = 10;
 
       fireOneShot();
-      REQUIRE(playerModel.mAmmo == 9);
+      CHECK(playerModel.mAmmo == 9);
     }
 
     SECTION("Multiple shots consume several units of ammo") {
@@ -361,7 +361,7 @@ TEST_CASE("Player attack system works as expected") {
         fireOneShot();
       }
 
-      REQUIRE(playerModel.mAmmo == 20 - shotsToFire);
+      CHECK(playerModel.mAmmo == 20 - shotsToFire);
     }
 
     SECTION("Depleting ammo switches back to normal weapon") {
@@ -370,8 +370,15 @@ TEST_CASE("Player attack system works as expected") {
 
       fireOneShot();
 
-      REQUIRE(playerModel.mWeapon == data::WeaponType::Normal);
-      REQUIRE(playerModel.mAmmo == playerModel.currentMaxAmmo());
+      CHECK(playerModel.mWeapon == data::WeaponType::Normal);
+      CHECK(playerModel.mAmmo == playerModel.currentMaxAmmo());
     }
+  }
+
+
+  SECTION("Player cannot fire while in 'interacting' state") {
+    playerState.mIsInteracting = true;
+    updateWithInput(shootingInputState);
+    CHECK(fireShotSpy.count() == 0);
   }
 }

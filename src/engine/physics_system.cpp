@@ -16,10 +16,16 @@
 
 #include "physics_system.hpp"
 
+#include "base/warnings.hpp"
 #include "data/map.hpp"
 #include "engine/base_components.hpp"
+#include "engine/entity_tools.hpp"
 
+RIGEL_DISABLE_WARNINGS
+#include <boost/algorithm/cxx11/any_of.hpp>
+RIGEL_RESTORE_WARNINGS
 
+namespace ba = boost::algorithm;
 namespace ex = entityx;
 
 
@@ -29,6 +35,7 @@ using namespace std;
 
 using components::BoundingBox;
 using components::Physical;
+using components::SolidBody;
 using components::WorldPosition;
 using data::map::CollisionData;
 
@@ -64,6 +71,18 @@ void PhysicsSystem::update(
     return;
   }
 
+  mSolidBodies.clear();
+  es.each<SolidBody, WorldPosition, BoundingBox>(
+    [this](
+      ex::Entity entity,
+      const SolidBody&,
+      const WorldPosition& pos,
+      const BoundingBox& bbox
+    ) {
+      mSolidBodies.emplace_back(
+        std::make_tuple(entity, toWorldSpace(bbox, pos)));
+    });
+
   es.each<Physical, WorldPosition, BoundingBox>(
     [this](
       ex::Entity entity,
@@ -71,11 +90,11 @@ void PhysicsSystem::update(
       WorldPosition& position,
       const BoundingBox& collisionRect
     ) {
-      bool collisionOccured = false;
+      const auto originalPosition = position;
 
       const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
       if (movementX != 0) {
-        std::tie(position, collisionOccured) = applyHorizontalMovement(
+        position= applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
           movementX,
@@ -98,24 +117,18 @@ void PhysicsSystem::update(
 
       const auto movementY = static_cast<std::int16_t>(physical.mVelocity.y);
       if (movementY != 0) {
-        bool verticalCollisionOccured = false;
-        std::tie(position, physical.mVelocity.y, verticalCollisionOccured) =
-          applyVerticalMovement(
-            bbox,
-            position,
-            physical.mVelocity.y,
-            movementY,
-            physical.mGravityAffected);
-        collisionOccured = collisionOccured || verticalCollisionOccured;
+        std::tie(position, physical.mVelocity.y) = applyVerticalMovement(
+          entity,
+          bbox,
+          position,
+          physical.mVelocity.y,
+          movementY,
+          physical.mGravityAffected);
       }
 
-      if (entity.has_component<CollidedWithWorld>()) {
-        entity.remove<CollidedWithWorld>();
-      }
-
-      if (collisionOccured) {
-        entity.assign<CollidedWithWorld>();
-      }
+      const auto collisionOccured =
+        position != originalPosition + WorldPosition{movementX, movementY};
+      setTag<CollidedWithWorld>(entity, collisionOccured);
     });
 }
 
@@ -136,7 +149,7 @@ data::map::CollisionData PhysicsSystem::worldAt(
 }
 
 
-std::tuple<base::Vector, bool> PhysicsSystem::applyHorizontalMovement(
+base::Vector PhysicsSystem::applyHorizontalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const int16_t movementX,
@@ -185,17 +198,16 @@ std::tuple<base::Vector, bool> PhysicsSystem::applyHorizontalMovement(
         }
 
         if (mustResolveCollision) {
-          return std::make_tuple(
-            base::Vector{
-              static_cast<uint16_t>(col - movementDirection),
-              newPosition.y},
-            true);
+          return {
+            static_cast<uint16_t>(col - movementDirection),
+            newPosition.y
+          };
         }
       }
     }
   }
 
-  return std::make_tuple(newPosition, false);
+  return newPosition;
 }
 
 
@@ -226,7 +238,8 @@ float PhysicsSystem::applyGravity(
 }
 
 
-std::tuple<base::Vector, float, bool> PhysicsSystem::applyVerticalMovement(
+std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
+  entityx::Entity entity,
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const float currentVelocity,
@@ -252,25 +265,35 @@ std::tuple<base::Vector, float, bool> PhysicsSystem::applyVerticalMovement(
     }
   };
 
+  auto transformedBbox = bbox;
   for (auto row=startY; row != endY; row += movementDirection) {
+    transformedBbox.topLeft.y += movementDirection;
+
     for (auto col=bbox.topLeft.x; col<=bbox.bottomRight().x; ++col) {
       const auto y = row + yOffset;
 
+      const auto collidesWithSolidBody = ba::any_of(mSolidBodies,
+        [&transformedBbox, &entity](const auto& solidBodyInfo) {
+          return
+            entity != std::get<0>(solidBodyInfo) &&
+            transformedBbox.intersects(std::get<1>(solidBodyInfo));
+        });
+
       const auto& enteredCell = worldAt(col, y);
-      if (hasCollision(enteredCell)) {
+      if (collidesWithSolidBody || hasCollision(enteredCell)) {
         newPosition.y = row - movementDirection;
         if (movingDown || !beginFallingOnHittingCeiling) {
           // For falling, we reset the Y velocity as soon as we hit the ground
-          return make_tuple(newPosition, 0.0f, true);
+          return make_tuple(newPosition, 0.0f);
         } else {
           // For jumping, we begin falling early when we hit the ceiling
-          return make_tuple(newPosition, 1.0f, true);
+          return make_tuple(newPosition, 1.0f);
         }
       }
     }
   }
 
-  return make_tuple(newPosition, currentVelocity, false);
+  return make_tuple(newPosition, currentVelocity);
 }
 
 }}

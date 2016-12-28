@@ -46,6 +46,13 @@ namespace rigel { namespace engine {
  *
  * Entities that collided with the world on the last update() will be tagged
  * with the CollidedWithWorld component.
+ *
+ * The collision detection is very simple and relies on knowing each entity's
+ * previous position. Therefore, entities which are to collide against the
+ * world mustn't be moved directly (i.e. by modifying their position), but via
+ * setting a velocity and then letting the PhysicsSystem take care of doing the
+ * movement. The system can't perform any corrections to entities which are
+ * already positioned so that they collide with the world.
  */
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
@@ -61,14 +68,15 @@ public:
 private:
   data::map::CollisionData worldAt(int x, int y) const;
 
-  std::tuple<base::Vector, bool> applyHorizontalMovement(
+  base::Vector applyHorizontalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     std::int16_t movementX,
     bool allowStairStepping
   ) const;
 
-  std::tuple<base::Vector, float, bool> applyVerticalMovement(
+  std::tuple<base::Vector, float> applyVerticalMovement(
+    entityx::Entity entity,
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
@@ -84,6 +92,9 @@ private:
   const data::map::Map* mpMap;
   const data::map::TileAttributes* mpTileAttributes;
   TimeStepper mTimeStepper;
+
+  using SolidBodyInfo = std::tuple<entityx::Entity, components::BoundingBox>;
+  std::vector<SolidBodyInfo> mSolidBodies;
 };
 
 }}

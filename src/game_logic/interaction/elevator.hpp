@@ -17,59 +17,68 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "game_logic/player/components.hpp"
 #include "engine/timing.hpp"
+#include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <array>
-
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace game_logic { class EntityFactory; }}
+namespace rigel { namespace engine { namespace components { struct Physical; }}}
+namespace rigel { namespace game_logic { namespace components {
+  struct PlayerControlled;
+}}}
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel { namespace game_logic { namespace interaction {
 
-class AnimationSystem : public entityx::System<AnimationSystem> {
+namespace components {
+
+struct Elevator {};
+
+}
+
+
+void configureElevator(entityx::Entity entity);
+
+
+class ElevatorSystem : public entityx::System<ElevatorSystem> {
 public:
-  explicit AnimationSystem(
+  ElevatorSystem(
     entityx::Entity player,
-    IGameServiceProvider* pServiceProvider,
-    EntityFactory* pFactory);
+    IGameServiceProvider* pServiceProvider);
 
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+    entityx::TimeDelta dt) override;
+
+  bool isPlayerAttached() const;
+
+  // TODO: Consider having a special 'updateWithInput' method instead.
+  void setInputState(PlayerInputState inputState);
 
 private:
-  int determineAnimationFrame(
-    components::PlayerControlled& state,
-    engine::TimeDelta dt,
-    int currentAnimationFrame);
+  entityx::Entity findAttachableElevator(entityx::EntityManager& es);
 
-  int movementAnimationFrame(
-    components::PlayerControlled& state,
-    int currentAnimationFrame);
+  void updateElevatorAttachment(
+    entityx::EntityManager& es,
+    const game_logic::components::PlayerControlled& playerState);
 
-  int attackAnimationFrame(
-    components::PlayerControlled& state,
-    engine::TimeDelta dt,
-    int currentAnimationFrame);
+  void updateElevatorMovement(
+    int movement,
+   engine::components::Physical& playerPhysical);
 
 private:
   entityx::Entity mPlayer;
   IGameServiceProvider* mpServiceProvider;
-  EntityFactory* mpEntityFactory;
+  entityx::Entity mAttachedElevator;
 
-  boost::optional<engine::TimeDelta> mElapsedForShotAnimation;
-  entityx::Entity mMuzzleFlashEntity;
+  PlayerInputState mPlayerInputs;
 
-  PlayerState mPreviousState;
-  bool mWasInteracting;
+  int mPreviousMovement;
+  engine::TimeStepper mTimeStepper;
 };
 
 }}}

@@ -48,6 +48,14 @@ struct Physical {
  */
 struct CollidedWithWorld {};
 
+
+/** Marks an entity to participate in world collision
+ *
+ * Other Physical entities will collide against the bounding box of any
+ * SolidBody entity as if it were part of the world.
+ * */
+struct SolidBody {};
+
 }
 
 
