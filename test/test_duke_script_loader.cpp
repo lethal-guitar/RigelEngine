@@ -73,8 +73,8 @@ TEST_CASE("Duke Script files are parsed correctly for base cases") {
 
   SECTION("Script names are parsed correctly") {
     REQUIRE(scriptBundle.size() == 2);
-    REQUIRE(scriptBundle.count("Test_Script") == 1);
-    REQUIRE(scriptBundle.count("Another_Test_Script") == 1);
+    CHECK(scriptBundle.count("Test_Script") == 1);
+    CHECK(scriptBundle.count("Another_Test_Script") == 1);
 
     const auto& firstScript = scriptBundle.find("Test_Script")->second;
     const auto& secondScript = scriptBundle.find("Another_Test_Script")->second;
@@ -84,9 +84,9 @@ TEST_CASE("Duke Script files are parsed correctly for base cases") {
       REQUIRE(secondScript.size() == 3);
 
       SECTION("Correct action types are created") {
-        REQUIRE(isType<FadeIn>(firstScript[0]));
+        CHECK(isType<FadeIn>(firstScript[0]));
 
-        REQUIRE(isType<FadeOut>(secondScript[0]));
+        CHECK(isType<FadeOut>(secondScript[0]));
         REQUIRE(isType<Delay>(secondScript[1]));
         REQUIRE(isType<ShowFullScreenImage>(secondScript[2]));
 
@@ -94,8 +94,8 @@ TEST_CASE("Duke Script files are parsed correctly for base cases") {
           const auto delay = asType<Delay>(secondScript[1]);
           const auto showImage = asType<ShowFullScreenImage>(secondScript[2]);
 
-          REQUIRE(delay.amount == 600);
-          REQUIRE(showImage.image == "MESSAGE.MNI");
+          CHECK(delay.amount == 600);
+          CHECK(showImage.image == "MESSAGE.MNI");
         }
       }
     }
@@ -119,8 +119,8 @@ TEST_CASE("White space between commands is ignored") {
   const auto scriptBundle = loadScripts(testData);
   const auto& testScript = scriptBundle.find("WhiteSpaceTest")->second;
 
-  REQUIRE(scriptBundle.size() == 1);
-  REQUIRE(testScript.size() == 2);
+  CHECK(scriptBundle.size() == 1);
+  CHECK(testScript.size() == 2);
 }
 
 TEST_CASE("Draw Text and Draw Sprite commands are parsed correctly") {
@@ -142,16 +142,16 @@ RIGEL_RESTORE_WARNINGS
     const auto drawSprite = asType<DrawSprite>(testScript[1]);
 
     SECTION("Draw Text is parsed correctly") {
-      REQUIRE(drawText.x == 2);
-      REQUIRE(drawText.y == 4);
-      REQUIRE(drawText.text == "Hello World what's up!");
+      CHECK(drawText.x == 2);
+      CHECK(drawText.y == 4);
+      CHECK(drawText.text == "Hello World what's up!");
     }
 
     SECTION("Draw Sprite is parsed correctly, x/y are adjusted") {
-      REQUIRE(drawSprite.x == 24);
-      REQUIRE(drawSprite.y == 11);
-      REQUIRE(drawSprite.spriteId == 145);
-      REQUIRE(drawSprite.frameNumber == 4);
+      CHECK(drawSprite.x == 24);
+      CHECK(drawSprite.y == 11);
+      CHECK(drawSprite.spriteId == 145);
+      CHECK(drawSprite.frameNumber == 4);
     }
   }
 }
@@ -176,23 +176,23 @@ RIGEL_RESTORE_WARNINGS
   SECTION("BigText has correct data") {
     const auto bigText = asType<DrawBigText>(testScript[0]);
 
-    REQUIRE(bigText.x == 2);
-    REQUIRE(bigText.y == 4);
-    REQUIRE(bigText.colorIndex == 2);
-    REQUIRE(bigText.text == "Colored text!");
+    CHECK(bigText.x == 2);
+    CHECK(bigText.y == 4);
+    CHECK(bigText.colorIndex == 2);
+    CHECK(bigText.text == "Colored text!");
   }
 
   SECTION("Mixed regular and big text results in two text commands") {
     const auto leadingRegularText = asType<DrawText>(testScript[1]);
-    REQUIRE(leadingRegularText.x == 2);
-    REQUIRE(leadingRegularText.y == 8);
-    REQUIRE(leadingRegularText.text == "test");
+    CHECK(leadingRegularText.x == 2);
+    CHECK(leadingRegularText.y == 8);
+    CHECK(leadingRegularText.text == "test");
 
     const auto bigText = asType<DrawBigText>(testScript[2]);
-    REQUIRE(bigText.x == 2 + 4); // four leading characters in 'test'
-    REQUIRE(bigText.y == 8);
-    REQUIRE(bigText.colorIndex == 7);
-    REQUIRE(bigText.text == "Colored text with leading regular text");
+    CHECK(bigText.x == 2 + 4); // four leading characters in 'test'
+    CHECK(bigText.y == 8);
+    CHECK(bigText.colorIndex == 7);
+    CHECK(bigText.text == "Colored text with leading regular text");
   }
 }
 
@@ -210,7 +210,7 @@ TEST_CASE("Get palette command is parsed correctly") {
   REQUIRE(testScript.size() == 1);
 
   const auto palette = asType<SetPalette>(testScript[0]);
-  REQUIRE(palette.paletteFile == "Test.pal");
+  CHECK(palette.paletteFile == "Test.pal");
 }
 
 TEST_CASE("Message box definition is parsed correctly") {
@@ -227,9 +227,9 @@ TEST_CASE("Message box definition is parsed correctly") {
   REQUIRE(testScript.size() == 1);
   const auto msgBox = asType<ShowMessageBox>(testScript[0]);
 
-  REQUIRE(msgBox.y == 5);
-  REQUIRE(msgBox.height == 6);
-  REQUIRE(msgBox.width == 24);
+  CHECK(msgBox.y == 5);
+  CHECK(msgBox.height == 6);
+  CHECK(msgBox.width == 24);
 
   vector<string> expectedMessageLines{
     "",
@@ -238,7 +238,7 @@ TEST_CASE("Message box definition is parsed correctly") {
     "",
     "  Hello Leading Space"
   };
-  REQUIRE(msgBox.messageLines == expectedMessageLines);
+  CHECK(msgBox.messageLines == expectedMessageLines);
 }
 
 TEST_CASE("News reporter animation commands are parsed correctly") {
@@ -250,10 +250,10 @@ TEST_CASE("News reporter animation commands are parsed correctly") {
 
   REQUIRE(script.size() == 2);
 
-  REQUIRE(isType<StopNewsReporterAnimation>(script[1]));
+  CHECK(isType<StopNewsReporterAnimation>(script[1]));
 
   const auto startTalking = asType<AnimateNewsReporter>(script[0]);
-  REQUIRE(startTalking.talkDuration == 50);
+  CHECK(startTalking.talkDuration == 50);
 }
 
 TEST_CASE("Simple commands are parsed correctly") {
@@ -268,11 +268,11 @@ TEST_CASE("Simple commands are parsed correctly") {
 
   REQUIRE(script.size() == 5);
 
-  REQUIRE(isType<WaitForUserInput>(script[0]));
-  REQUIRE(isType<EnableTextOffset>(script[1]));
-  REQUIRE(isType<EnableTimeOutToDemo>(script[2]));
-  REQUIRE(isType<EnableTextOffset>(script[3]));
-  REQUIRE(isType<ShowKeyBindings>(script[4]));
+  CHECK(isType<WaitForUserInput>(script[0]));
+  CHECK(isType<EnableTextOffset>(script[1]));
+  CHECK(isType<EnableTimeOutToDemo>(script[2]));
+  CHECK(isType<EnableTextOffset>(script[3]));
+  CHECK(isType<ShowKeyBindings>(script[4]));
 }
 
 TEST_CASE("ShowSaveSlots is parsed correctly") {
@@ -284,8 +284,8 @@ TEST_CASE("ShowSaveSlots is parsed correctly") {
 
   REQUIRE(script.size() == 2);
 
-  REQUIRE(asType<ShowSaveSlots>(script[0]).mSelectedSlot == 0);
-  REQUIRE(asType<ShowSaveSlots>(script[1]).mSelectedSlot == 5);
+  CHECK(asType<ShowSaveSlots>(script[0]).mSelectedSlot == 0);
+  CHECK(asType<ShowSaveSlots>(script[1]).mSelectedSlot == 5);
 }
 
 TEST_CASE("Page definitions are parsed correctly") {
@@ -332,14 +332,14 @@ TEST_CASE("Page definitions are parsed correctly") {
 
       SECTION("Parameters are correct for commands on pages") {
         auto xyText = asType<DrawText>(secondPage[0]);
-        REQUIRE(xyText.x == 2);
-        REQUIRE(xyText.y == 4);
-        REQUIRE(xyText.text == "Test ABC");
+        CHECK(xyText.x == 2);
+        CHECK(xyText.y == 4);
+        CHECK(xyText.text == "Test ABC");
 
         auto delay = asType<Delay>(thirdPage[0]);
         auto babble = asType<AnimateNewsReporter>(thirdPage[1]);
-        REQUIRE(delay.amount == 500);
-        REQUIRE(babble.talkDuration == 30);
+        CHECK(delay.amount == 500);
+        CHECK(babble.talkDuration == 30);
       }
     }
   }
