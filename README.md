@@ -18,20 +18,28 @@ running in DosBox.
 
 ## Current state
 
-The project is still in an extremely early state. There are a few areas of the
-code which are rather hacky, early protoypes, and will be replaced in the future.
-There is also not much functionality yet.
+The project is in a fairly early state. Some areas of the
+code are still rather hacky, early protoypes, and will be replaced in the future.
+Regarding functionality, basic gameplay is already possible, but most of the levels
+cannot be completed at the moment due to missing features, and most of the enemies
+aren't active yet.
 
-You can already load levels and walk/jump around in them, as well as collect
-items. The player can take damage and die.  Climbing ladders also works, but
-hanging onto climbing poles isn't implemented yet.  There is not much
-interactivity otherwise, none of the enemies do anything, rocket elevators
-don't work yet, and you cannot shoot any weapon. Due to the missing features,
-it is currently not possible to complete most of the levels. The exit can
-already be reached in some levels though, e.g. L3 and M2.
+Here's a quick list of already working gameplay features:
 
-Many of the game's other systems, like most of the menus, intro movie and story
-sequences etc. are already implemented.
+* Basic player movement (walking, jumping, looking up/crouching, climbing ladders)
+* Player score
+* Item pickup + inventory
+* Level progression (go to next level when reaching exit)
+* Shooting (some fetures missing, like flame thrower jetpack)
+* Shootable walls
+* Teleporters
+* Player taking damage, player death
+* Unlocking force-fields (access card)
+
+Many of the game's non-gameplay systems, like most of the menus, intro movie and story
+sequences etc. are also already implemented.
+
+The [issue list]() should give a comprehensive overview of what's still missing.
 
 ## Building and running
 
