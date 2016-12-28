@@ -25,6 +25,7 @@
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/interaction/elevator.hpp"
+#include "game_logic/interaction/teleporter.hpp"
 #include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player/animation_system.hpp"
 #include "game_logic/player/attack_system.hpp"
@@ -249,6 +250,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
   checkForPlayerDeath();
   checkForLevelExitReached();
+  handleTeleporter();
 }
 
 
@@ -335,7 +337,10 @@ void IngameMode::loadLevel(
   mEntities.systems.add<PlayerInteractionSystem>(
     mPlayerEntity,
     &mPlayerModel,
-    mpServiceProvider);
+    mpServiceProvider,
+    [this](const entityx::Entity& teleporter) {
+      mActiveTeleporter = teleporter;
+    });
   mEntities.systems.add<DamageInflictionSystem>(
     &mPlayerModel,
     &mLevelData.mMap,
@@ -414,6 +419,28 @@ void IngameMode::restartLevel() {
 
   updateAndRender(0);
 
+  mpServiceProvider->fadeInScreen();
+}
+
+
+void IngameMode::handleTeleporter() {
+  if (!mActiveTeleporter) {
+    return;
+  }
+
+  mpServiceProvider->playSound(data::SoundId::Teleport);
+  mpServiceProvider->fadeOutScreen();
+
+  game_logic::interaction::teleportPlayer(
+    mEntities.entities,
+    mPlayerEntity,
+    *mActiveTeleporter);
+  // It's important to reset mActiveTeleporter before calling updateAndRender,
+  // as there would be an infinite recursion otherwise.
+  mActiveTeleporter = boost::none;
+
+  mScrollOffset = {0, 0};
+  updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
 }
 

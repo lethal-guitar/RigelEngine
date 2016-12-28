@@ -64,6 +64,7 @@ private:
   void checkForLevelExitReached();
   void checkForPlayerDeath();
   void restartLevel();
+  void handleTeleporter();
 
   void showDebugText();
 
@@ -93,6 +94,8 @@ private:
 
   ui::HudRenderer mHudRenderer;
   sdl_utils::RenderTargetTexture mIngameViewPortRenderTarget;
+
+  boost::optional<entityx::Entity> mActiveTeleporter;
 };
 
 }

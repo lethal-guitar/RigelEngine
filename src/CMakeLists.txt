@@ -50,6 +50,8 @@ set(core_sources
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
+    game_logic/interaction/teleporter.cpp
+    game_logic/interaction/teleporter.hpp
     game_logic/map_scroll_system.cpp
     game_logic/map_scroll_system.hpp
     game_logic/player/animation_system.cpp

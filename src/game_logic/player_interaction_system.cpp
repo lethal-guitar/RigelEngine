@@ -23,6 +23,7 @@
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/interaction/force_field.hpp"
+#include "game_logic/interaction/teleporter.hpp"
 #include "game_mode.hpp"
 
 
@@ -43,11 +44,13 @@ namespace ex = entityx;
 PlayerInteractionSystem::PlayerInteractionSystem(
   ex::Entity player,
   PlayerModel* pPlayerModel,
-  IGameServiceProvider* pServices
+  IGameServiceProvider* pServices,
+  TeleportCallback teleportCallback
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
+  , mTeleportCallback(teleportCallback)
 {
 }
 
@@ -88,11 +91,6 @@ void PlayerInteractionSystem::update(
           state.mPerformedInteraction = true;
         }
       });
-  }
-
-  if (mNeedFadeIn) {
-    mNeedFadeIn = false;
-    mpServiceProvider->fadeInScreen();
   }
 
   // ----------------------------------------------------------------------
@@ -171,28 +169,7 @@ void PlayerInteractionSystem::performInteraction(
 ) {
   switch (type) {
     case InteractableType::Teleporter:
-      {
-        const auto sourceTeleporterPosition =
-          *interactable.component<WorldPosition>().get();
-
-        es.each<Interactable, WorldPosition>(
-          [this, sourceTeleporterPosition](
-            ex::Entity,
-            const Interactable& i,
-            const WorldPosition& pos
-          ) {
-            if (
-              i.mType == InteractableType::Teleporter &&
-              pos != sourceTeleporterPosition
-            ) {
-              mpServiceProvider->playSound(data::SoundId::Teleport);
-              mpServiceProvider->fadeOutScreen();
-              auto playerPosition = mPlayer.component<WorldPosition>();
-              *playerPosition.get() = pos + base::Vector{2, 0};
-              mNeedFadeIn = true;
-            }
-          });
-      }
+      mTeleportCallback(interactable);
       break;
 
     case InteractableType::ForceFieldCardReader:

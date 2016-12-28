@@ -17,12 +17,14 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <functional>
 
 namespace rigel {
   struct IGameServiceProvider;
@@ -40,10 +42,13 @@ class PlayerInteractionSystem :
   public entityx::Receiver<PlayerInteractionSystem>
 {
 public:
+  using TeleportCallback = std::function<void(const entityx::Entity&)>;
+
   PlayerInteractionSystem(
     entityx::Entity player,
     data::PlayerModel* pPlayerModel,
-    IGameServiceProvider* pServices);
+    IGameServiceProvider* pServices,
+    TeleportCallback teleportCallback);
 
   void update(
     entityx::EntityManager& es,
@@ -59,9 +64,9 @@ private:
 
 private:
   entityx::Entity mPlayer;
-  bool mNeedFadeIn = false;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
+  TeleportCallback mTeleportCallback;
 };
 
 }}
