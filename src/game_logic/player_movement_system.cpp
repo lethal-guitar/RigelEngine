@@ -137,7 +137,7 @@ void PlayerMovementSystem::update(
         worldSpacePlayerBounds);
 
       // If a ladder is in reach, start climbing
-      if (ladderTouchPoint) {
+      if (ladderTouchPoint && canClimbUp(worldSpacePlayerBounds)) {
         state.mState = PlayerState::ClimbingLadder;
 
         // Snap player position to ladder
