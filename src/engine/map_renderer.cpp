@@ -52,7 +52,6 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 MapRenderer::MapRenderer(
   SDL_Renderer* pRenderer,
   const data::map::Map* pMap,
-  const data::map::TileAttributes* pTileAtttributes,
   const data::Image& tileSetImage,
   const data::Image& backdropImage,
   const boost::optional<data::Image>& secondaryBackdropImage,
@@ -65,7 +64,6 @@ MapRenderer::MapRenderer(
       pRenderer)
   , mBackdropTexture(mpRenderer, backdropImage, false)
   , mScrollMode(backdropScrollMode)
-  , mpTileAttributes(pTileAtttributes)
 {
   if (secondaryBackdropImage) {
     mAlternativeBackdropTexture = OwningTexture(
@@ -168,7 +166,7 @@ void MapRenderer::renderMapTiles(
         // meta-layer (foreground/background) we're currently drawing
         if (
             tileIndex == 0 ||
-            mpTileAttributes->isForeGround(tileIndex) != renderForeground
+            mpMap->attributes().isForeGround(tileIndex) != renderForeground
         ) {
           continue;
         }
@@ -199,14 +197,14 @@ void MapRenderer::update(const engine::TimeDelta dt) {
 map::TileIndex MapRenderer::animatedTileIndex(
   const map::TileIndex tileIndex
 ) const {
-  if (mpTileAttributes->isAnimated(tileIndex)) {
+  if (mpMap->attributes().isAnimated(tileIndex)) {
     const auto elapsedTicks = mTimeStepper.elapsedTicks();
     const auto fastAnimState =
       (elapsedTicks / FAST_ANIM_TICKS) % ANIM_STATES;
     const auto slowAnimState =
       (elapsedTicks / SLOW_ANIM_TICKS) % ANIM_STATES;
 
-    if (mpTileAttributes->isFastAnimation(tileIndex)) {
+    if (mpMap->attributes().isFastAnimation(tileIndex)) {
       return tileIndex + fastAnimState;
     } else {
       return tileIndex + slowAnimState;

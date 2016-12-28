@@ -84,7 +84,6 @@ private:
 
   struct LevelData {
     data::map::Map mMap;
-    data::map::TileAttributes mTileAttributes;
     std::vector<data::map::LevelData::Actor> mInitialActors;
     data::map::BackdropSwitchCondition mBackdropSwitchCondition;
   };

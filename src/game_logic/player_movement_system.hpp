@@ -31,10 +31,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 
-namespace rigel { namespace data { namespace map {
-  class Map;
-  class TileAttributes;
-}}}
+namespace rigel { namespace data { namespace map { class Map; }}}
 
 namespace rigel { namespace engine { namespace components {
   struct Physical;
@@ -56,8 +53,7 @@ public:
   PlayerMovementSystem(
     entityx::Entity player,
     const PlayerInputState* pInputs,
-    const data::map::Map& map,
-    const data::map::TileAttributes& tileAttributes);
+    const data::map::Map& map);
 
   void update(
     entityx::EntityManager& es,

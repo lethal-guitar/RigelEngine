@@ -56,9 +56,7 @@ namespace rigel { namespace engine {
  */
 class PhysicsSystem : public entityx::System<PhysicsSystem> {
 public:
-  explicit PhysicsSystem(
-    const data::map::Map* pMap,
-    const data::map::TileAttributes* pTileAttributes);
+  explicit PhysicsSystem(const data::map::Map* pMap);
 
   void update(
     entityx::EntityManager& es,
@@ -90,7 +88,6 @@ private:
 
 private:
   const data::map::Map* mpMap;
-  const data::map::TileAttributes* mpTileAttributes;
   TimeStepper mTimeStepper;
 
   using SolidBodyInfo = std::tuple<entityx::Entity, components::BoundingBox>;

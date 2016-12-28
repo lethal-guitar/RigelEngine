@@ -66,8 +66,7 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 PlayerMovementSystem::PlayerMovementSystem(
   entityx::Entity player,
   const PlayerInputState* pInputs,
-  const data::map::Map& map,
-  const data::map::TileAttributes& tileAttributes
+  const data::map::Map& map
 )
   : mpPlayerControlInput(pInputs)
   , mPlayer(player)
@@ -76,8 +75,8 @@ PlayerMovementSystem::PlayerMovementSystem(
   for (int row=0; row<map.height(); ++row) {
     for (int col=0; col<map.width(); ++col) {
       const auto isLadder =
-        tileAttributes.isLadder(map.tileAt(0, col, row)) ||
-        tileAttributes.isLadder(map.tileAt(1, col, row));
+        map.attributes().isLadder(map.tileAt(0, col, row)) ||
+        map.attributes().isLadder(map.tileAt(1, col, row));
       mLadderFlags.setValueAt(col, row, isLadder);
     }
   }

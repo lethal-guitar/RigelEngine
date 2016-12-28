@@ -32,6 +32,12 @@
 
 namespace rigel { namespace loader {
 
+struct TileSet {
+  data::Image mTiles;
+  data::map::TileAttributes mAttributes;
+};
+
+
 class ResourceLoader {
 public:
   explicit ResourceLoader(const std::string& gamePath);
@@ -45,7 +51,7 @@ public:
   loader::Palette16 loadPaletteFromFullScreenImage(
     const std::string& imageName) const;
 
-  data::map::TileSet loadCZone(const std::string& name) const;
+  TileSet loadCZone(const std::string& name) const;
   data::Movie loadMovie(const std::string& name) const;
   data::AudioBuffer loadMusic(const std::string& name) const;
 

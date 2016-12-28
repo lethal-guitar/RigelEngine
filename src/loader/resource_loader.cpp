@@ -103,7 +103,7 @@ loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
 }
 
 
-data::map::TileSet ResourceLoader::loadCZone(const std::string& name) const {
+TileSet ResourceLoader::loadCZone(const std::string& name) const {
   using namespace data;
   using namespace map;
 

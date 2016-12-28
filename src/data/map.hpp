@@ -56,7 +56,7 @@ enum class BackdropSwitchCondition {
 class Map {
 public:
   Map() = default;
-  Map(int widthInTiles, int heightInTiles);
+  Map(int widthInTiles, int heightInTiles, TileAttributes attributes);
 
   TileIndex tileAt(int layer, int x, int y) const;
 
@@ -75,6 +75,15 @@ public:
   /** Returns true if the given coordinates are valid/inside the map. */
   bool coordinatesValid(int x, int y) const;
 
+  TileAttributes& attributes() {
+    return mAttributes;
+  }
+
+  const TileAttributes& attributes() const {
+    return mAttributes;
+  }
+
+  CollisionData collisionData(int x, int y) const;
 
 private:
   const TileIndex& tileRefAt(int layer, int x, int y) const;
@@ -86,6 +95,8 @@ private:
 
   std::size_t mWidthInTiles;
   std::size_t mHeightInTiles;
+
+  TileAttributes mAttributes;
 };
 
 
@@ -96,7 +107,7 @@ struct LevelData {
     boost::optional<base::Rect<int>> mAssignedArea;
   };
 
-  TileSet mTileSet;
+  Image mTileSetImage;
   Image mBackdropImage;
   boost::optional<Image> mSecondaryBackdropImage;
 

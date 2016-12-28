@@ -66,11 +66,4 @@ private:
   AttributeArray mAttributeBitPacks;
 };
 
-
-struct TileSet {
-  Image mImage;
-  TileAttributes mAttributes;
-};
-
-
 }}}

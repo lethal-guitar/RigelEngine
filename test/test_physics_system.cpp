@@ -36,10 +36,9 @@ TEST_CASE("Physics system works as expected") {
   ex::EntityX entityx;
   auto& entities = entityx.entities;
 
-  data::map::TileAttributes tileAttributes{{0x0, 0xF}};
-  data::map::Map map{100, 100};
+  data::map::Map map{100, 100, data::map::TileAttributes{{0x0, 0xF}}};
 
-  PhysicsSystem physicsSystem{&map, &tileAttributes};
+  PhysicsSystem physicsSystem{&map};
 
   auto physicalObject = entities.create();
   physicalObject.assign<BoundingBox>(BoundingBox{{0, 0}, {2, 2}});
