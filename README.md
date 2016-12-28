@@ -39,7 +39,7 @@ Here's a quick list of already working gameplay features:
 Many of the game's non-gameplay systems, like most of the menus, intro movie and story
 sequences etc. are also already implemented.
 
-The [issue list]() should give a comprehensive overview of what's still missing.
+The [issue list](https://github.com/lethal-guitar/RigelEngine/issues) should give a comprehensive overview of what's still missing.
 
 ## Building and running
 
