@@ -30,10 +30,6 @@ namespace rigel {
   namespace data {
     struct PlayerModel;
   }
-
-  namespace game_logic { namespace events {
-    struct PlayerInteraction;
-  }}
 }
 
 
