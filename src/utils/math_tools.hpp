@@ -32,4 +32,10 @@ T integerDivCeil(const T value, const T divisor) {
   return (value + divisor - 1) / divisor;
 }
 
+
+template<typename T>
+bool inRange(const T value, const T min, const T max) {
+  return value >= min && value <= max;
+}
+
 }}
