@@ -51,8 +51,8 @@ TEST_CASE("Player animation system works as expected") {
   player::AnimationSystem animationSystem{
     player, &mockServiceProvicer, nullptr};
 
-  auto& playerState = *player.component<PlayerControlled>().get();
-  auto& playerSprite = *player.component<Sprite>().get();
+  auto& playerState = *player.component<PlayerControlled>();
+  auto& playerSprite = *player.component<Sprite>();
   playerSprite.mFramesToRender.push_back(0);
 
   const auto updateFrames = [&animationSystem, &entityx](const int frames) {

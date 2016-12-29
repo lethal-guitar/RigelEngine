@@ -94,8 +94,8 @@ TEST_CASE("Player attack system works as expected") {
   shootingInputState.mShooting = true;
 
   REQUIRE(player.has_component<PlayerControlled>());
-  auto& playerState = *player.component<PlayerControlled>().get();
-  auto& playerPosition = *player.component<WorldPosition>().get();
+  auto& playerState = *player.component<PlayerControlled>();
+  auto& playerPosition = *player.component<WorldPosition>();
 
   const auto updateWithInput = [&attackSystem, &entityx](
     const PlayerInputState& inputState,

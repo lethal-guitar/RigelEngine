@@ -135,12 +135,12 @@ void AnimationSystem::update(
   assert(mPlayer.has_component<Sprite>());
   assert(mPlayer.has_component<WorldPosition>());
 
-  auto& state = *mPlayer.component<PlayerControlled>().get();
+  auto& state = *mPlayer.component<PlayerControlled>();
   if (state.mState == player::PlayerState::Dead) {
     return;
   }
 
-  auto& sprite = *mPlayer.component<Sprite>().get();
+  auto& sprite = *mPlayer.component<Sprite>();
   // Update mercy frame blink effect
   // ----------------------------------
   if (!state.isPlayerDead()) {
@@ -219,7 +219,7 @@ int AnimationSystem::movementAnimationFrame(
 ) {
   int newAnimationFrame = currentAnimationFrame;
 
-  const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
+  const auto& playerPosition = *mPlayer.component<WorldPosition>();
   if (
     state.mState != mPreviousState ||
     (mWasInteracting && !state.mIsInteracting)
@@ -286,7 +286,7 @@ int AnimationSystem::attackAnimationFrame(
 ) {
   auto newAnimationFrame = currentAnimationFrame;
 
-  const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
+  const auto& playerPosition = *mPlayer.component<WorldPosition>();
   if (state.mShotFired && mElapsedForShotAnimation == boost::none) {
     mElapsedForShotAnimation = 0.0;
 
@@ -306,7 +306,7 @@ int AnimationSystem::attackAnimationFrame(
   }
 
   if (mMuzzleFlashEntity.valid()) {
-    *mMuzzleFlashEntity.component<WorldPosition>().get() =
+    *mMuzzleFlashEntity.component<WorldPosition>() =
       playerPosition + muzzleFlashOffset(state.mState, state.mOrientation);
 
     *mElapsedForShotAnimation += dt;

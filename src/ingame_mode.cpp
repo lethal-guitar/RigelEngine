@@ -128,7 +128,7 @@ IngameMode::IngameMode(
   loadLevel(episode, levelNumber, difficulty, *context.mpResources);
 
   if (playerPositionOverride) {
-    *mPlayerEntity.component<WorldPosition>().get() = *playerPositionOverride;
+    *mPlayerEntity.component<WorldPosition>() = *playerPositionOverride;
   }
 
   auto after = high_resolution_clock::now();
@@ -375,10 +375,9 @@ void IngameMode::checkForLevelExitReached() {
         return;
       }
 
-      const auto& playerPosition =
-        *mPlayerEntity.component<WorldPosition>().get();
+      const auto& playerPosition = *mPlayerEntity.component<WorldPosition>();
       const auto playerBBox = toWorldSpace(
-        *mPlayerEntity.component<BoundingBox>().get(), playerPosition);
+        *mPlayerEntity.component<BoundingBox>(), playerPosition);
 
       const auto playerAboveOrAtTriggerHeight =
         playerBBox.bottom() <= triggerPosition.y;
@@ -396,7 +395,7 @@ void IngameMode::checkForLevelExitReached() {
 
 void IngameMode::checkForPlayerDeath() {
   const auto& playerState =
-    *mPlayerEntity.component<game_logic::components::PlayerControlled>().get();
+    *mPlayerEntity.component<game_logic::components::PlayerControlled>();
 
   const auto playerDead =
     playerState.mState == player::PlayerState::Dead &&
@@ -454,7 +453,7 @@ void IngameMode::handleTeleporter() {
 
 
 void IngameMode::showDebugText() {
-  const auto& playerPos = *mPlayerEntity.component<WorldPosition>().get();
+  const auto& playerPos = *mPlayerEntity.component<WorldPosition>();
   const auto& playerVel = mPlayerEntity.component<Physical>()->mVelocity;
   std::stringstream infoText;
   infoText

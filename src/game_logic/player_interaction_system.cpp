@@ -61,7 +61,7 @@ void PlayerInteractionSystem::update(
   entityx::TimeDelta
 ) {
   assert(mPlayer.has_component<PlayerControlled>());
-  auto& state = *mPlayer.component<PlayerControlled>().get();
+  auto& state = *mPlayer.component<PlayerControlled>();
   if (state.isPlayerDead()) {
     return;
   }
@@ -71,8 +71,8 @@ void PlayerInteractionSystem::update(
   }
 
   if (!state.mPerformedInteraction && state.mState == PlayerState::LookingUp) {
-    const auto& playerBox = *mPlayer.component<BoundingBox>().get();
-    const auto& playerPos = *mPlayer.component<WorldPosition>().get();
+    const auto& playerBox = *mPlayer.component<BoundingBox>();
+    const auto& playerPos = *mPlayer.component<WorldPosition>();
     const auto worldSpacePlayerBounds =
       engine::toWorldSpace(playerBox, playerPos);
     es.each<Interactable, WorldPosition, BoundingBox>(
@@ -107,8 +107,8 @@ void PlayerInteractionSystem::update(
       worldSpaceBbox.topLeft +=
         base::Vector{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
 
-      const auto playerPos = *mPlayer.component<WorldPosition>().get();
-      auto playerBBox = *mPlayer.component<BoundingBox>().get();
+      const auto playerPos = *mPlayer.component<WorldPosition>();
+      auto playerBBox = *mPlayer.component<BoundingBox>();
       playerBBox.topLeft +=
         base::Vector{playerPos.x, playerPos.y - (playerBBox.size.height - 1)};
 

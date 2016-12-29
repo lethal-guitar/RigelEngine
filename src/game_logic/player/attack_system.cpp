@@ -99,9 +99,9 @@ void AttackSystem::update(
   assert(mPlayerEntity.has_component<WorldPosition>());
 
   auto& playerState =
-    *mPlayerEntity.component<components::PlayerControlled>().get();
+    *mPlayerEntity.component<components::PlayerControlled>();
   const auto& playerPosition =
-    *mPlayerEntity.component<WorldPosition>().get();
+    *mPlayerEntity.component<WorldPosition>();
 
   if (
     playerState.mState == PlayerState::ClimbingLadder ||

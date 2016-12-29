@@ -74,8 +74,8 @@ void ElevatorSystem::update(
   ex::EventManager& events,
   ex::TimeDelta dt
 ) {
-  auto& playerState = *mPlayer.component<PlayerControlled>().get();
-  auto& playerPhysical = *mPlayer.component<Physical>().get();
+  auto& playerState = *mPlayer.component<PlayerControlled>();
+  auto& playerPhysical = *mPlayer.component<Physical>();
 
   // Reset player state back to default if currently attached. This makes sure
   // the player is in the right state if the following updateElevatorAttachment
@@ -118,8 +118,8 @@ void ElevatorSystem::setInputState(PlayerInputState inputState) {
 ex::Entity ElevatorSystem::findAttachableElevator(ex::EntityManager& es) {
   ex::Entity attachableElevator;
 
-  const auto& playerPos = *mPlayer.component<WorldPosition>().get();
-  const auto& playerBox = *mPlayer.component<BoundingBox>().get();
+  const auto& playerPos = *mPlayer.component<WorldPosition>();
+  const auto& playerBox = *mPlayer.component<BoundingBox>();
   const auto leftAttachPoint = playerPos.x;
   const auto rightAttachPoint = playerPos.x + playerBox.size.width - 1;
 
@@ -179,7 +179,7 @@ void ElevatorSystem::updateElevatorMovement(
   const int movement,
   Physical& playerPhysical
 ) {
-  auto& elevatorPhysical = *mAttachedElevator.component<Physical>().get();
+  auto& elevatorPhysical = *mAttachedElevator.component<Physical>();
 
   mAttachedElevator.component<BoundingBox>()->size.height = 3;
   engine::setTag<SolidBody>(mAttachedElevator, true);
@@ -208,7 +208,7 @@ void ElevatorSystem::updateElevatorMovement(
     mAttachedElevator.component<BoundingBox>()->size.height =
       elevatorBboxHeight;
 
-    auto& playerBounds = *mPlayer.component<BoundingBox>().get();
+    auto& playerBounds = *mPlayer.component<BoundingBox>();
     if (movement > 0) {
       playerBounds.size.height = 8;
       playerBounds.topLeft.y = 3;

@@ -69,7 +69,7 @@ void DamageInflictionSystem::update(
         shootable, shootablePos, shootableBboxLocal)
       ) {
         const auto shootableBbox =
-          engine::toWorldSpace(*shootableBboxLocal.get(), *shootablePos.get());
+          engine::toWorldSpace(*shootableBboxLocal, *shootablePos);
         if (shootableBbox.intersects(inflictorBbox)) {
           inflictorEntity.destroy();
 

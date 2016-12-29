@@ -43,8 +43,8 @@ TEST_CASE("Rocket elevator") {
   player.assign<WorldPosition>(6, 100);
   initializePlayerEntity(player, true);
 
-  auto& playerPosition = *player.component<WorldPosition>().get();
-  auto& playerState = *player.component<PlayerControlled>().get();
+  auto& playerPosition = *player.component<WorldPosition>();
+  auto& playerState = *player.component<PlayerControlled>();
 
   auto elevator = entityx.entities.create();
   elevator.assign<WorldPosition>(2, 103);
@@ -76,7 +76,7 @@ TEST_CASE("Rocket elevator") {
     CHECK(elevator.component<Physical>()->mGravityAffected == true);
   }
 
-  auto& elevatorPosition = *elevator.component<WorldPosition>().get();
+  auto& elevatorPosition = *elevator.component<WorldPosition>();
 
   MockServiceProvider mockServiceProvicer;
   interaction::ElevatorSystem elevatorSystem(player, &mockServiceProvicer);
