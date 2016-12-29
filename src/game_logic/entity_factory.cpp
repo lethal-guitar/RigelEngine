@@ -21,6 +21,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
+#include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
