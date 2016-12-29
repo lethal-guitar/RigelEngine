@@ -42,7 +42,7 @@ struct GameTraits {
   static const base::Extents inGameViewPortSize;
 
   static const int mapViewPortWidthTiles =
-    viewPortWidthTiles - 7;
+    viewPortWidthTiles - 8;
   static const int mapViewPortHeightTiles =
     viewPortHeightTiles - 5;
 
