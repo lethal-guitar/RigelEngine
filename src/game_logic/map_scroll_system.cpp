@@ -87,9 +87,9 @@ void MapScrollSystem::update(
   entityx::EventManager& events,
   entityx::TimeDelta dt
 ) {
-  const auto& state = *mPlayer.component<PlayerControlled>().get();
-  const auto& bbox = *mPlayer.component<BoundingBox>().get();
-  const auto& worldPosition = *mPlayer.component<WorldPosition>().get();
+  const auto& state = *mPlayer.component<PlayerControlled>();
+  const auto& bbox = *mPlayer.component<BoundingBox>();
+  const auto& worldPosition = *mPlayer.component<WorldPosition>();
 
   updateScrollOffset(state, worldPosition, bbox, dt);
 }

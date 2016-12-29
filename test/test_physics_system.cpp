@@ -46,8 +46,8 @@ TEST_CASE("Physics system works as expected") {
   physicalObject.assign<Physical>(Physical{{0.0f, 0.0f}, true});
   physicalObject.assign<WorldPosition>(WorldPosition{0, 4});
 
-  auto& physical = *physicalObject.component<Physical>().get();
-  auto& position = *physicalObject.component<WorldPosition>().get();
+  auto& physical = *physicalObject.component<Physical>();
+  auto& position = *physicalObject.component<WorldPosition>();
 
   const auto runOneFrame = [&physicsSystem, &entityx]() {
     physicsSystem.update(entityx.entities, entityx.events, gameFramesToTime(1));
@@ -80,7 +80,7 @@ TEST_CASE("Physics system works as expected") {
 
       solidBody.component<BoundingBox>()->topLeft.y = 3;
       solidBody.component<BoundingBox>()->size.height = 6;
-      *solidBody.component<WorldPosition>().get() = {7,96};
+      *solidBody.component<WorldPosition>() = {7,96};
 
       runOneFrame();
       CHECK(position.y == 90);

@@ -105,10 +105,10 @@ void DamageSystem::update(
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<WorldPosition>());
 
-  const auto& playerPosition = *mPlayer.component<WorldPosition>().get();
+  const auto& playerPosition = *mPlayer.component<WorldPosition>();
   const auto playerBBox = toWorldSpace(
-    *mPlayer.component<BoundingBox>().get(), playerPosition);
-  auto& playerState = *mPlayer.component<PlayerControlled>().get();
+    *mPlayer.component<BoundingBox>(), playerPosition);
+  auto& playerState = *mPlayer.component<PlayerControlled>();
 
   const auto inMercyFrames =
     playerState.mMercyFramesTimeElapsed != boost::none;
@@ -142,7 +142,7 @@ void DamageSystem::update(
           playerState.mMercyFramesTimeElapsed = 0.0;
           mpServiceProvider->playSound(data::SoundId::DukePain);
         } else {
-          auto& physical = *mPlayer.component<Physical>().get();
+          auto& physical = *mPlayer.component<Physical>();
           physical.mVelocity = {0.0f, DEATH_JUMP_IMPULSE};
 
           playerState.mState = PlayerState::Dieing;

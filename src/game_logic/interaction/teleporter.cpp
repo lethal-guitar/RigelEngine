@@ -37,7 +37,7 @@ base::Vector findTeleporterTargetPosition(
   ex::Entity teleporter
 ) {
   const auto sourceTeleporterPosition =
-    *teleporter.component<WorldPosition>().get();
+    *teleporter.component<WorldPosition>();
 
   base::Vector targetPosition;
 
@@ -48,13 +48,13 @@ base::Vector findTeleporterTargetPosition(
   for (auto entity : es.entities_with_components(interactable, position)) {
     if (
       interactable->mType == components::InteractableType::Teleporter &&
-      *position.get() != sourceTeleporterPosition
+      *position != sourceTeleporterPosition
     ) {
       targetTeleporter = entity;
     }
   }
 
-  return *targetTeleporter.component<WorldPosition>().get();
+  return *targetTeleporter.component<WorldPosition>();
 }
 
 }
@@ -67,7 +67,7 @@ void teleportPlayer(
 ) {
   const auto targetPosition = findTeleporterTargetPosition(es, teleporter);
 
-  *player.component<WorldPosition>().get() =
+  *player.component<WorldPosition>() =
     targetPosition + base::Vector{PLAYER_OFFSET, 0};
 }
 

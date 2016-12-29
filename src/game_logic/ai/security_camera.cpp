@@ -65,7 +65,7 @@ void SecurityCameraSystem::update(
     return;
   }
 
-  const auto& playerPosition = *mPlayerEntity.component<WorldPosition>().get();
+  const auto& playerPosition = *mPlayerEntity.component<WorldPosition>();
 
   es.each<WorldPosition, Sprite, components::SecurityCamera>(
     [&playerPosition](

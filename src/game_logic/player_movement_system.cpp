@@ -96,10 +96,10 @@ void PlayerMovementSystem::update(
   const auto hasTicks =
     updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt);
 
-  auto& state = *mPlayer.component<PlayerControlled>().get();
-  auto& physical = *mPlayer.component<Physical>().get();
-  auto& boundingBox = *mPlayer.component<BoundingBox>().get();
-  auto& worldPosition = *mPlayer.component<WorldPosition>().get();
+  auto& state = *mPlayer.component<PlayerControlled>();
+  auto& physical = *mPlayer.component<Physical>();
+  auto& boundingBox = *mPlayer.component<BoundingBox>();
+  auto& worldPosition = *mPlayer.component<WorldPosition>();
 
   if (state.isPlayerDead() || state.mIsInteracting) {
     return;
