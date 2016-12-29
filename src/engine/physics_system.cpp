@@ -92,6 +92,7 @@ void PhysicsSystem::update(
       const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
       if (movementX != 0) {
         position= applyHorizontalMovement(
+          entity,
           toWorldSpace(collisionRect, position),
           position,
           movementX,
@@ -142,6 +143,7 @@ data::map::CollisionData PhysicsSystem::worldAt(
 
 
 base::Vector PhysicsSystem::applyHorizontalMovement(
+  entityx::Entity entity,
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const int16_t movementX,
@@ -173,8 +175,13 @@ base::Vector PhysicsSystem::applyHorizontalMovement(
     for (auto col=startX; col != endX; col += movementDirection) {
       const auto x = col + xOffset;
 
+      auto transformedBbox = bbox;
+      transformedBbox.topLeft.x = col;
+      const auto collidesWithSolidBody = hasSolidBodyCollision(
+        entity, transformedBbox);
+
       const auto& enteredCell = worldAt(x, row);
-      if (hasCollision(enteredCell)) {
+      if (collidesWithSolidBody || hasCollision(enteredCell)) {
         bool mustResolveCollision = true;
 
         const auto atBottomRow = row == bbox.bottomLeft().y;
@@ -263,16 +270,11 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
 
     for (auto col=bbox.topLeft.x; col<=bbox.bottomRight().x; ++col) {
       const auto y = row + yOffset;
-
-      const auto collidesWithSolidBody = ba::any_of(mSolidBodies,
-        [&transformedBbox, &entity](const auto& solidBodyInfo) {
-          return
-            entity != std::get<0>(solidBodyInfo) &&
-            transformedBbox.intersects(std::get<1>(solidBodyInfo));
-        });
-
       const auto& enteredCell = worldAt(col, y);
-      if (collidesWithSolidBody || hasCollision(enteredCell)) {
+      if (
+        hasSolidBodyCollision(entity, transformedBbox) ||
+        hasCollision(enteredCell)
+      ) {
         newPosition.y = row - movementDirection;
         if (movingDown || !beginFallingOnHittingCeiling) {
           // For falling, we reset the Y velocity as soon as we hit the ground
@@ -286,6 +288,18 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
   }
 
   return make_tuple(newPosition, currentVelocity);
+}
+
+
+bool PhysicsSystem::hasSolidBodyCollision(
+  entityx::Entity entity,
+  const BoundingBox& bbox
+) const {
+  return ba::any_of(mSolidBodies, [&bbox, &entity](const auto& solidBodyInfo) {
+    return
+      entity != std::get<0>(solidBodyInfo) &&
+      bbox.intersects(std::get<1>(solidBodyInfo));
+  });
 }
 
 }}

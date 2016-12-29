@@ -210,6 +210,17 @@ TEST_CASE("Physics system works as expected") {
       CHECK(physicalObject.has_component<CollidedWithWorld>());
     }
 
+    SECTION("Object continues falling after solidbody removed") {
+      physical.mVelocity.y = 2.0f;
+      runOneFrame();
+      CHECK(position.y == 5);
+
+      solidBody.destroy();
+      physical.mVelocity.y = 2.0f;
+      runOneFrame();
+      CHECK(position.y == 7);
+    }
+
     SECTION("Upward") {
       position.y = 11;
       physical.mVelocity.y = -2.0f;
@@ -224,16 +235,36 @@ TEST_CASE("Physics system works as expected") {
       CHECK(position.y == 10);
     }
 
-    SECTION("Object continues falling after solidbody removed") {
-      physical.mVelocity.y = 2.0f;
-      runOneFrame();
-      CHECK(position.y == 5);
+    SECTION("Left") {
+      position.x = 5;
+      position.y = 8;
+      physical.mVelocity.x = -2.0f;
+      physical.mGravityAffected = false;
 
-      solidBody.destroy();
-      physical.mVelocity.y = 2.0f;
       runOneFrame();
-      CHECK(position.y == 7);
+      CHECK(position.x == 4);
+      CHECK(physicalObject.has_component<CollidedWithWorld>());
+
+      runOneFrame();
+      CHECK(position.x == 4);
     }
+
+    SECTION("Right") {
+      solidBody.component<WorldPosition>()->x = 3;
+      position.x = 0;
+      position.y = 8;
+      physical.mVelocity.x = 2.0f;
+      physical.mGravityAffected = false;
+
+      runOneFrame();
+      CHECK(position.x == 1);
+      CHECK(physicalObject.has_component<CollidedWithWorld>());
+
+      runOneFrame();
+      CHECK(position.x == 1);
+    }
+
+    // TODO: Make stair-stepping work with solid bodies
 
     SECTION("SolidBody doesn't collide with itself") {
       solidBody.assign<Physical>(base::Point<float>{0, 2.0f}, false);

@@ -67,6 +67,7 @@ private:
   data::map::CollisionData worldAt(int x, int y) const;
 
   base::Vector applyHorizontalMovement(
+    entityx::Entity entity,
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     std::int16_t movementX,
@@ -85,6 +86,10 @@ private:
   float applyGravity(
     const components::BoundingBox& bbox,
     float currentVelocity);
+
+  bool hasSolidBodyCollision(
+    entityx::Entity,
+    const components::BoundingBox& bbox) const;
 
 private:
   const data::map::Map* mpMap;
