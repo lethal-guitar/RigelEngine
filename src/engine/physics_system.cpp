@@ -79,12 +79,13 @@ void PhysicsSystem::update(
         std::make_tuple(entity, toWorldSpace(bbox, pos)));
     });
 
-  es.each<Physical, WorldPosition, BoundingBox>(
+  es.each<Physical, WorldPosition, BoundingBox, components::Active>(
     [this](
       ex::Entity entity,
       Physical& physical,
       WorldPosition& position,
-      const BoundingBox& collisionRect
+      const BoundingBox& collisionRect,
+      const components::Active&
     ) {
       const auto originalPosition = position;
 

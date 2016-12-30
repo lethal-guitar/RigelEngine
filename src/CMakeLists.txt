@@ -19,9 +19,14 @@ set(core_sources
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
-    engine/entity_tools.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
+    engine/entity_activation_system.cpp
+    engine/entity_activation_system.hpp
+    engine/entity_tools.hpp
+    engine/life_time_components.hpp
+    engine/life_time_system.cpp
+    engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
     engine/physical_components.hpp
@@ -63,10 +68,10 @@ set(core_sources
     game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
-    game_logic/player_movement_system.cpp
-    game_logic/player_movement_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
+    game_logic/player_movement_system.cpp
+    game_logic/player_movement_system.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
