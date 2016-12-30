@@ -44,6 +44,7 @@ TEST_CASE("Physics system works as expected") {
   physicalObject.assign<BoundingBox>(BoundingBox{{0, 0}, {2, 2}});
   physicalObject.assign<Physical>(Physical{{0.0f, 0.0f}, true});
   physicalObject.assign<WorldPosition>(WorldPosition{0, 4});
+  physicalObject.assign<Active>();
 
   auto& physical = *physicalObject.component<Physical>();
   auto& position = *physicalObject.component<WorldPosition>();
@@ -68,6 +69,12 @@ TEST_CASE("Physics system works as expected") {
     }
 
     physical.mVelocity.x = 4.0f;
+
+    SECTION("Inactive objects's don't move") {
+      physicalObject.remove<Active>();
+      runOneFrame();
+      CHECK(position.x == 0);
+    }
 
     SECTION("Object's position changes") {
       SECTION("To the right") {
@@ -230,6 +237,7 @@ TEST_CASE("Physics system works as expected") {
 
     SECTION("SolidBody doesn't collide with itself") {
       solidBody.assign<Physical>(base::Point<float>{0, 2.0f}, false);
+      solidBody.assign<Active>();
       runOneFrame();
       CHECK(solidBody.component<WorldPosition>()->y == 10);
     }

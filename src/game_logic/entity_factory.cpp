@@ -42,14 +42,7 @@ using namespace std;
 
 using data::ActorID;
 
-using engine::components::Animated;
-using engine::components::AnimationSequence;
-using engine::components::BoundingBox;
-using engine::components::DrawTopMost;
-using engine::components::Physical;
-using engine::components::Sprite;
-using engine::components::SpriteFrame;
-using engine::components::WorldPosition;
+using namespace engine::components;
 using namespace game_logic::components;
 
 
@@ -82,6 +75,8 @@ void addDefaultPhysical(
 ) {
   entity.assign<Physical>(Physical{{0.0f, 0.0f}, true});
   entity.assign<BoundingBox>(boundingBox);
+  entity.assign<ActivationSettings>(
+    ActivationSettings::Policy::AlwaysAfterFirstActivation);
 }
 
 
@@ -162,6 +157,8 @@ entityx::Entity EntityFactory::createProjectile(
   sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
 
   const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
+
+  entity.assign<Active>();
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);
 

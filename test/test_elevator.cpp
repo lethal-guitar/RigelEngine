@@ -41,6 +41,7 @@ TEST_CASE("Rocket elevator") {
   ex::EntityX entityx;
   auto player = entityx.entities.create();
   player.assign<WorldPosition>(6, 100);
+  player.assign<Active>();
   initializePlayerEntity(player, true);
 
   auto& playerPosition = *player.component<WorldPosition>();
@@ -48,6 +49,7 @@ TEST_CASE("Rocket elevator") {
 
   auto elevator = entityx.entities.create();
   elevator.assign<WorldPosition>(2, 103);
+  elevator.assign<Active>();
   interaction::configureElevator(elevator);
 
   data::map::Map map{300, 300, data::map::TileAttributes{{0x0, 0xF}}};

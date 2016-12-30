@@ -51,9 +51,12 @@ int determineMovementDirection(const PlayerInputState& inputState) {
 
 
 void configureElevator(entityx::Entity entity) {
+  using engine::components::ActivationSettings;
+
   entity.assign<components::Elevator>();
   entity.assign<BoundingBox>(BoundingBox{{0, 0}, {4, 3}});
   entity.assign<Physical>(base::Point<float>{0.0f, 0.0f}, true);
+  entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
   entity.assign<SolidBody>();
 }
 
