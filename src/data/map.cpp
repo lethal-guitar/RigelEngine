@@ -29,12 +29,17 @@ namespace rigel { namespace data { namespace map {
 using namespace std;
 
 
-Map::Map(const int widthInTiles, const int heightInTiles)
+Map::Map(
+  const int widthInTiles,
+  const int heightInTiles,
+  TileAttributes attributes
+)
   : mLayers({
       TileArray(widthInTiles*heightInTiles, 0),
       TileArray(widthInTiles*heightInTiles, 0)})
   , mWidthInTiles(static_cast<size_t>(widthInTiles))
   , mHeightInTiles(static_cast<size_t>(heightInTiles))
+  , mAttributes(std::move(attributes))
 {
   assert(widthInTiles >= 0);
   assert(heightInTiles >= 0);
@@ -82,6 +87,13 @@ bool Map::coordinatesValid(const int xS, const int yS) const {
   const auto x = static_cast<size_t>(xS);
   const auto y = static_cast<size_t>(yS);
   return x < mWidthInTiles && y < mHeightInTiles;
+}
+
+
+CollisionData Map::collisionData(int x, int y) const {
+  const auto data1 = mAttributes.collisionData(tileAt(0, x, y));
+  const auto data2 = mAttributes.collisionData(tileAt(1, x, y));
+  return CollisionData{data1, data2};
 }
 
 

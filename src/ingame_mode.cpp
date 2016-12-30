@@ -288,20 +288,17 @@ void IngameMode::loadLevel(
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
-    std::move(loadedLevel.mTileSet.mAttributes),
     std::move(loadedLevel.mActors),
     loadedLevel.mBackdropSwitchCondition
   };
   mMapAtLevelStart = mLevelData.mMap;
 
   mEntities.systems.add<PhysicsSystem>(
-    &mLevelData.mMap,
-    &mLevelData.mTileAttributes);
+    &mLevelData.mMap);
   mEntities.systems.add<game_logic::PlayerMovementSystem>(
     mPlayerEntity,
     &mPlayerInputs,
-    mLevelData.mMap,
-    mLevelData.mTileAttributes);
+    mLevelData.mMap);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider,
@@ -330,8 +327,7 @@ void IngameMode::loadLevel(
     &mScrollOffset,
     mpRenderer,
     &mLevelData.mMap,
-    &mLevelData.mTileAttributes,
-    std::move(loadedLevel.mTileSet.mImage),
+    std::move(loadedLevel.mTileSetImage),
     std::move(loadedLevel.mBackdropImage),
     std::move(loadedLevel.mSecondaryBackdropImage),
     loadedLevel.mBackdropScrollMode);
@@ -350,8 +346,7 @@ void IngameMode::loadLevel(
   mEntities.systems.add<DebuggingSystem>(
     mpRenderer,
     &mScrollOffset,
-    &mLevelData.mMap,
-    &mLevelData.mTileAttributes);
+    &mLevelData.mMap);
   mEntities.systems.add<interaction::ElevatorSystem>(
     mPlayerEntity,
     mpServiceProvider);

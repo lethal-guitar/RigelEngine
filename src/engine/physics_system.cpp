@@ -50,12 +50,8 @@ BoundingBox toWorldSpace(
 }
 
 
-PhysicsSystem::PhysicsSystem(
-  const data::map::Map* pMap,
-  const data::map::TileAttributes* pTileAttributes
-)
+PhysicsSystem::PhysicsSystem(const data::map::Map* pMap)
   : mpMap(pMap)
-  , mpTileAttributes(pTileAttributes)
 {
 }
 
@@ -137,15 +133,10 @@ data::map::CollisionData PhysicsSystem::worldAt(
   const int x, const int y
 ) const {
   if (!mpMap->coordinatesValid(x, y)) {
-    return CollisionData{};
+    return CollisionData::fullySolid();
   }
 
-  const auto collisionData1 =
-    mpTileAttributes->collisionData(mpMap->tileAt(0, x, y));
-  const auto collisionData2 =
-    mpTileAttributes->collisionData(mpMap->tileAt(1, x, y));
-
-  return CollisionData{collisionData1, collisionData2};
+  return mpMap->collisionData(x, y);
 }
 
 

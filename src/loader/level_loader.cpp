@@ -309,9 +309,11 @@ LevelData loadLevel(
     actors.emplace_back(LevelData::Actor{position, type, boost::none});
   }
 
+  auto tileSet = resources.loadCZone(header.CZone);
+
   const auto width = static_cast<int>(levelReader.readU16());
   const auto height = static_cast<int>(GameTraits::mapHeightForWidth(width));
-  data::map::Map map(width, height);
+  data::map::Map map(width, height, std::move(tileSet.mAttributes));
 
   const auto maskedTileOffsets = readExtraMaskedTileBits(levelReader);
   auto lookupExtraMaskedTileBits = [&maskedTileOffsets, width, height](
@@ -388,7 +390,7 @@ LevelData loadLevel(
   auto actorDescriptions =
       preProcessActorDescriptions(map, actors, chosenDifficulty);
   return LevelData{
-    resources.loadCZone(header.CZone),
+    std::move(tileSet.mTiles),
     std::move(backdropImage),
     std::move(alternativeBackdropImage),
     std::move(map),

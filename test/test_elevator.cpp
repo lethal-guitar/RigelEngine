@@ -50,8 +50,7 @@ TEST_CASE("Rocket elevator") {
   elevator.assign<WorldPosition>(2, 103);
   interaction::configureElevator(elevator);
 
-  data::map::TileAttributes tileAttributes{{0x0, 0xF}};
-  data::map::Map map{300, 300};
+  data::map::Map map{300, 300, data::map::TileAttributes{{0x0, 0xF}}};
 
   // Floor
   for (int i = 0; i < 8; ++i) {
@@ -64,7 +63,7 @@ TEST_CASE("Rocket elevator") {
     map.setTileAt(0, i, 90, 1);
   }
 
-  PhysicsSystem physicsSystem{&map, &tileAttributes};
+  PhysicsSystem physicsSystem{&map};
 
 
   SECTION("Elevator is setup correctly") {

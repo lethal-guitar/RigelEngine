@@ -33,8 +33,7 @@ public:
   DebuggingSystem(
     SDL_Renderer* pRenderer,
     base::Vector* pScrollOffset,
-    data::map::Map* pMap,
-    data::map::TileAttributes* pTileAttributes);
+    data::map::Map* pMap);
 
   void toggleBoundingBoxDisplay();
   void toggleWorldCollisionDataDisplay();
@@ -48,7 +47,6 @@ private:
   SDL_Renderer* mpRenderer;
   base::Vector* mpScrollOffset;
   data::map::Map* mpMap;
-  data::map::TileAttributes* mpTileAttributes;
 
   bool mShowBoundingBoxes = false;
   bool mShowWorldCollisionData = false;

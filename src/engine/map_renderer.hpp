@@ -30,7 +30,6 @@ public:
   MapRenderer(
     SDL_Renderer* renderer,
     const data::map::Map* pMap,
-    const data::map::TileAttributes* pTileAtttributes,
     const data::Image& tileSetImage,
     const data::Image& backdropImage,
     const boost::optional<data::Image>& secondaryBackdropImage,
@@ -62,8 +61,6 @@ private:
 
   TimeStepper mTimeStepper;
   std::uint32_t mElapsedFrames = 0;
-
-  const data::map::TileAttributes* mpTileAttributes;
 };
 
 }}

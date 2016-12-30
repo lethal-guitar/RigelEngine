@@ -20,7 +20,7 @@
 #include "data/image.hpp"
 #include "data/movie.hpp"
 #include "data/sound_ids.hpp"
-#include "data/tile_set.hpp"
+#include "data/tile_attributes.hpp"
 #include "loader/actor_image_package.hpp"
 #include "loader/audio_package.hpp"
 #include "loader/duke_script_loader.hpp"
@@ -31,6 +31,12 @@
 
 
 namespace rigel { namespace loader {
+
+struct TileSet {
+  data::Image mTiles;
+  data::map::TileAttributes mAttributes;
+};
+
 
 class ResourceLoader {
 public:
@@ -45,7 +51,7 @@ public:
   loader::Palette16 loadPaletteFromFullScreenImage(
     const std::string& imageName) const;
 
-  data::map::TileSet loadCZone(const std::string& name) const;
+  TileSet loadCZone(const std::string& name) const;
   data::Movie loadMovie(const std::string& name) const;
   data::AudioBuffer loadMusic(const std::string& name) const;
 
