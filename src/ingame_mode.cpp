@@ -205,7 +205,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
     mPlayerInputs);
 
-  mEntities.systems.update<engine::EntityActivationSystem>(dt);
+  engine::markActiveEntities(mEntities.entities, mScrollOffset);
 
   // ----------------------------------------------------------------------
   // Player logic update
@@ -303,7 +303,6 @@ void IngameMode::loadLevel(
 
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap);
-  mEntities.systems.add<engine::EntityActivationSystem>(&mScrollOffset);
   mEntities.systems.add<game_logic::PlayerMovementSystem>(
     mPlayerEntity,
     &mPlayerInputs,

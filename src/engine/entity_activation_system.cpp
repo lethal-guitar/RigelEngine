@@ -55,8 +55,10 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion) {
   return inActiveRegion;
 }
 
+}
 
-void markActiveEntites(
+
+void markActiveEntities(
   entityx::EntityManager& es,
   const base::Vector& scrollOffset
 ) {
@@ -74,29 +76,6 @@ void markActiveEntites(
     const auto active = determineActiveState(entity, inActiveRegion);
     setTag<Active>(entity, active);
   });
-}
-
-}
-
-
-EntityActivationSystem::EntityActivationSystem(
-  const base::Vector* pScrollOffset
-)
-  : mpScrollOffset(pScrollOffset)
-  , mPreviousScrollOffset(*pScrollOffset)
-{
-}
-
-
-void EntityActivationSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager&,
-  entityx::TimeDelta
-) {
-  if (*mpScrollOffset != mPreviousScrollOffset) {
-    markActiveEntites(es, *mpScrollOffset);
-    mPreviousScrollOffset = *mpScrollOffset;
-  }
 }
 
 }}
