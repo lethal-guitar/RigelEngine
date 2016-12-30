@@ -174,8 +174,9 @@ void configureProjectile(
     Physical{directionToVector(direction) * speed, false});
   entity.assign<DamageInflicting>(damageAmount);
 
-  entity.assign<engine::components::AutoDestroy>(
-    engine::components::AutoDestroy::Condition::OnWorldCollision);
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnWorldCollision,
+    AutoDestroy::Condition::OnLeavingActiveRegion});
 }
 
 
