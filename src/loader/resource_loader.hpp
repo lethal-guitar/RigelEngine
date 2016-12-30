@@ -20,7 +20,7 @@
 #include "data/image.hpp"
 #include "data/movie.hpp"
 #include "data/sound_ids.hpp"
-#include "data/tile_set.hpp"
+#include "data/tile_attributes.hpp"
 #include "loader/actor_image_package.hpp"
 #include "loader/audio_package.hpp"
 #include "loader/duke_script_loader.hpp"

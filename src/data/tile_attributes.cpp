@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tile_set.hpp"
+#include "tile_attributes.hpp"
 
 #include "data/game_traits.hpp"
 #include "utils/container_tools.hpp"

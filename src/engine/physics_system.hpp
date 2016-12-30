@@ -19,7 +19,7 @@
 #include "base/grid.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/tile_set.hpp"
+#include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/timing.hpp"
