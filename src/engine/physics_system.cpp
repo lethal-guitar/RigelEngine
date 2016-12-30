@@ -133,7 +133,7 @@ data::map::CollisionData PhysicsSystem::worldAt(
   const int x, const int y
 ) const {
   if (!mpMap->coordinatesValid(x, y)) {
-    return CollisionData{};
+    return CollisionData::fullySolid();
   }
 
   return mpMap->collisionData(x, y);

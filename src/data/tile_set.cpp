@@ -37,6 +37,11 @@ bool isBitSet(uint16_t bitPack, uint16_t bitMask) {
 }
 
 
+CollisionData CollisionData::fullySolid() {
+  return CollisionData{0xFF};
+}
+
+
 CollisionData::CollisionData(const std::initializer_list<CollisionData>& items)
   : mCollisionFlagsBitPack(0)
 {

@@ -29,6 +29,8 @@ using TileIndex = std::uint32_t;
 
 class CollisionData {
 public:
+  static CollisionData fullySolid();
+
   CollisionData() = default;
   CollisionData(const std::initializer_list<CollisionData>& items);
   explicit CollisionData(std::uint8_t flagsBitPack);
@@ -40,7 +42,7 @@ public:
   bool isClear() const;
 
 private:
-  std::uint8_t mCollisionFlagsBitPack = 0xFF;
+  std::uint8_t mCollisionFlagsBitPack = 0;
 };
 
 
