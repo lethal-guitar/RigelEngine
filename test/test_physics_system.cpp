@@ -48,9 +48,117 @@ TEST_CASE("Physics system works as expected") {
   auto& physical = *physicalObject.component<Physical>();
   auto& position = *physicalObject.component<WorldPosition>();
 
-  const auto runOneFrame = [&physicsSystem, &entityx]() {
-    physicsSystem.update(entityx.entities, entityx.events, gameFramesToTime(1));
+  const auto update = [&physicsSystem, &entityx](const TimeDelta dt) {
+    physicsSystem.update(entityx.entities, entityx.events, dt);
   };
+  const auto runOneFrame = [&update]() {
+    update(gameFramesToTime(1));
+  };
+
+
+  SECTION("Objects move according to their velocity") {
+    physical.mGravityAffected = false;
+
+    SECTION("No movement when velocity is 0") {
+      const auto previousPosition = position;
+
+      physical.mVelocity.x = 0.0f;
+      runOneFrame();
+      CHECK(position == previousPosition);
+    }
+
+    physical.mVelocity.x = 4.0f;
+
+    SECTION("Object's position changes") {
+      SECTION("To the right") {
+        runOneFrame();
+        CHECK(position.x == 4);
+      }
+
+      position.x = 4;
+
+      SECTION("To the left") {
+        physical.mVelocity.x = -1.0f;
+        runOneFrame();
+        CHECK(position.x == 3);
+      }
+
+      physical.mVelocity.x = 0.0f;
+
+      SECTION("Movement stops when setting velocity to 0") {
+        runOneFrame();
+        CHECK(position.x == 4);
+      }
+
+      SECTION("Upwards") {
+        position.y = 10;
+        physical.mVelocity.y = -2.0f;
+        runOneFrame();
+        CHECK(position.x == 4);
+        CHECK(position.y == 8);
+      }
+
+      SECTION("Downwards") {
+        position.y = 5;
+        physical.mVelocity.y = 1.0f;
+        runOneFrame();
+        CHECK(position.x == 4);
+        CHECK(position.y == 6);
+      }
+    }
+
+    SECTION("Movement happens only if enough time has elapsed") {
+      const auto timeForOneFrame = gameFramesToTime(1);
+
+      update(0.0);
+      CHECK(position.x == 0);
+
+      update(timeForOneFrame / 2.0);
+      CHECK(position.x == 0);
+
+      update(timeForOneFrame / 2.0 + 0.0001);
+      CHECK(position.x == 4);
+    }
+  }
+
+
+  SECTION("Object's are pulled down by gravity") {
+    position.x = 10;
+    position.y = 5;
+
+    SECTION("Non-moving object") {
+      physical.mVelocity = base::Point<float>{0.0f, 0.0f};
+      runOneFrame();
+      CHECK(position.y > 5);
+      CHECK(physical.mVelocity.y > 0.0f);
+
+      SECTION("Falling speed increases until terminal velocity reached") {
+        const auto lastPosition = position.y;
+        const auto lastVelocity = physical.mVelocity.y;
+
+        runOneFrame();
+        CHECK(position.y > lastPosition);
+        CHECK(physical.mVelocity.y > lastVelocity);
+
+        for (int i = 0; i < 10; ++i) {
+          runOneFrame();
+        }
+
+        // Yes, in the world of Duke Nukem II, 'terminal velocity' has a
+        // value of 2...
+        CHECK(physical.mVelocity.y <= 2.0f);
+      }
+    }
+
+    SECTION("Moving object") {
+      physical.mVelocity.x = 2;
+      runOneFrame();
+      CHECK(position.x == 12);
+
+      CHECK(position.y > 5);
+      CHECK(physical.mVelocity.y > 0.0f);
+    }
+  }
 
 
   SECTION("Physical objects collide with solid bodies") {
