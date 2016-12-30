@@ -26,18 +26,8 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine {
 
-class EntityActivationSystem : public entityx::System<EntityActivationSystem> {
-public:
-  explicit EntityActivationSystem(const base::Vector* pScrollOffset);
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
-
-private:
-  const base::Vector* mpScrollOffset;
-  base::Vector mPreviousScrollOffset;
-};
+void markActiveEntities(
+  entityx::EntityManager& es,
+  const base::Vector& scrollOffset);
 
 }}
