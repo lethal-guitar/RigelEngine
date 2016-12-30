@@ -71,7 +71,18 @@ public:
   entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors);
 
-  entityx::Entity createSprite(data::ActorID actorID);
+  /** Create a sprite entity using the given actor ID. If assignBoundingBox is
+   * true, the dimensions of the sprite's first frame are used to assign a
+   * bounding box.
+   */
+  entityx::Entity createSprite(
+    data::ActorID actorID,
+    bool assignBoundingBox = false);
+
+  entityx::Entity createSprite(
+    data::ActorID actorID,
+    const base::Vector& position,
+    bool assignBoundingBox = false);
 
   entityx::Entity createProjectile(
     ProjectileType type,

@@ -753,6 +753,8 @@ void configureEntity(
     case 117: // Pipe dripping green stuff
       entity.assign<Animated>(Animated{{AnimationSequence(2)}});
       entity.assign<DrawTopMost>();
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ai::components::SlimePipe>();
       break;
 
     case 208: // floating exit sign to right

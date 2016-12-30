@@ -21,6 +21,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
+#include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
@@ -141,9 +142,27 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
 }
 
 
-entityx::Entity EntityFactory::createSprite(const data::ActorID actorID) {
+entityx::Entity EntityFactory::createSprite(
+  const data::ActorID actorID,
+  const bool assignBoundingBox
+) {
   auto entity = mpEntityManager->create();
-  entity.assign<Sprite>(createSpriteForId(actorID));
+  auto sprite = createSpriteForId(actorID);
+  entity.assign<Sprite>(sprite);
+
+  if (assignBoundingBox) {
+    entity.assign<BoundingBox>(inferBoundingBox(sprite.mFrames[0]));
+  }
+  return entity;
+}
+
+entityx::Entity EntityFactory::createSprite(
+  const data::ActorID actorID,
+  const base::Vector& position,
+  const bool assignBoundingBox
+) {
+  auto entity = createSprite(actorID, assignBoundingBox);
+  entity.assign<WorldPosition>(position);
   return entity;
 }
 
