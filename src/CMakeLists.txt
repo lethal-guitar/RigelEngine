@@ -21,6 +21,8 @@ set(core_sources
     engine/base_components.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
+    engine/entity_activation_system.cpp
+    engine/entity_activation_system.hpp
     engine/entity_tools.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp

@@ -20,6 +20,7 @@
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/debugging_system.hpp"
+#include "engine/entity_activation_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -202,6 +203,8 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
     mPlayerInputs);
 
+  mEntities.systems.update<engine::EntityActivationSystem>(dt);
+
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
@@ -295,6 +298,7 @@ void IngameMode::loadLevel(
 
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap);
+  mEntities.systems.add<engine::EntityActivationSystem>(&mScrollOffset);
   mEntities.systems.add<game_logic::PlayerMovementSystem>(
     mPlayerEntity,
     &mPlayerInputs,
