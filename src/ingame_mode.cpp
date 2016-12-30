@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/debugging_system.hpp"
 #include "engine/entity_activation_system.hpp"
+#include "engine/life_time_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -230,6 +231,8 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
 
+  mEntities.systems.update<engine::LifeTimeSystem>(dt);
+
   // **********************************************************************
   // Rendering
   // **********************************************************************
@@ -347,6 +350,7 @@ void IngameMode::loadLevel(
     &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
+  mEntities.systems.add<engine::LifeTimeSystem>();
   mEntities.systems.add<DebuggingSystem>(
     mpRenderer,
     &mScrollOffset,

@@ -100,18 +100,6 @@ void DamageInflictionSystem::update(
         }
       }
     });
-
-  // TODO: Move this into a separate system once enemy projectiles are
-  // implemented. E.g., add a component to tag entities to be destroyed on
-  // collision, and a corresponding system
-  es.each<DamageInflicting, CollidedWithWorld>(
-    [](
-      ex::Entity inflictor,
-      const DamageInflicting&,
-      const CollidedWithWorld&
-    ) {
-      inflictor.destroy();
-    });
 }
 
 }}
