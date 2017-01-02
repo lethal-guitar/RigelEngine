@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/math_tools.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -136,6 +137,11 @@ struct Rect {
     const auto r1 = detail::toSdlRect(*this);
     const auto r2 = detail::toSdlRect(other);
     return SDL_HasIntersection(&r1, &r2);
+  }
+
+  bool containsPoint(const Point<ValueT>& point) const {
+    return
+      inRange(point.x, left(), right()) && inRange(point.y, top(), bottom());
   }
 };
 
