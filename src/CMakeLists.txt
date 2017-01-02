@@ -1,6 +1,7 @@
 set(core_sources
     base/boost_variant.hpp
     base/grid.hpp
+    base/math_tools.hpp
     base/spatial_types.hpp
     base/warnings.hpp
     data/audio_buffer.hpp
@@ -43,6 +44,8 @@ set(core_sources
     engine/visual_components.hpp
     game_logic/ai/security_camera.cpp
     game_logic/ai/security_camera.hpp
+    game_logic/ai/sliding_door.cpp
+    game_logic/ai/sliding_door.hpp
     game_logic/ai/slime_pipe.cpp
     game_logic/ai/slime_pipe.hpp
     game_logic/collectable_components.hpp
@@ -129,7 +132,6 @@ set(core_sources
     ui/utils.hpp
     utils/container_tools.hpp
     utils/enum_hash.hpp
-    utils/math_tools.hpp
 
     game.cpp
     game.hpp

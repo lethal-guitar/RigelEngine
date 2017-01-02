@@ -16,8 +16,8 @@
 
 #include "music_loader.hpp"
 
+#include "base/math_tools.hpp"
 #include "loader/file_utils.hpp"
-#include "utils/math_tools.hpp"
 
 #include <dbopl.h>
 
@@ -97,7 +97,7 @@ data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
         std::back_inserter(renderedAudio.mSamples),
         [](const auto sample32Bit) {
           return static_cast<std::int16_t>(
-            utils::clamp(sample32Bit * VOLUME_SCALE, -16384, 16384));
+            base::clamp(sample32Bit * VOLUME_SCALE, -16384, 16384));
         });
     }
   }

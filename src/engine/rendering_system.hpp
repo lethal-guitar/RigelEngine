@@ -65,21 +65,24 @@ public:
     mMapRenderer.switchBackdrops();
   }
 
+  std::size_t spritesRendered() const {
+    return mSpritesRendered;
+  }
+
 private:
   void animateSprites(
     entityx::EntityManager& es,
     entityx::EventManager& events,
     entityx::TimeDelta dt);
 
-  void renderSprite(
-    const components::Sprite& sprite,
-    const components::WorldPosition& pos
-  ) const;
+  struct SpriteData;
+  void renderSprite(const SpriteData& data) const;
 
 private:
   SDL_Renderer* mpRenderer;
   MapRenderer mMapRenderer;
   const base::Vector* mpScrollOffset;
+  std::size_t mSpritesRendered = 0;
 };
 
 }}

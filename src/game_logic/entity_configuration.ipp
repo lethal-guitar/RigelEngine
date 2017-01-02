@@ -737,6 +737,19 @@ void configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
+    case 128: // Sliding door, vertical
+      entity.assign<ai::components::VerticalSlidingDoor>();
+      entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
+      entity.assign<engine::components::SolidBody>();
+      entity.assign<CustomRenderFunc>(&renderVerticalSlidingDoor);
+      break;
+
+    case 132: // Sliding door, horizontal
+      entity.assign<ai::components::HorizontalSlidingDoor>();
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<engine::components::SolidBody>();
+      break;
+
     case 209: // Rocket elevator
       interaction::configureElevator(entity);
       break;
@@ -953,10 +966,6 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 115:
       sprite.mFramesToRender = {0, 4};
-      break;
-
-    case 128:
-      sprite.mFramesToRender = {0, 5, 6, 7, 8};
       break;
 
     case 150:
