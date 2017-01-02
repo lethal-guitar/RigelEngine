@@ -33,6 +33,7 @@ namespace ex = entityx;
 namespace rigel { namespace engine {
 
 using components::Animated;
+using components::CustomRenderFunc;
 using components::DrawTopMost;
 using components::Sprite;
 using components::WorldPosition;
@@ -40,11 +41,13 @@ using components::WorldPosition;
 
 struct RenderingSystem::SpriteData {
   SpriteData(
+    const ex::Entity entity,
     const Sprite* pSprite,
     const bool drawTopMost,
     const WorldPosition& position
   )
-    : mpSprite(pSprite)
+    : mEntity(entity)
+    , mpSprite(pSprite)
     , mDrawTopMost(drawTopMost)
     , mPosition(position)
   {
@@ -56,6 +59,7 @@ struct RenderingSystem::SpriteData {
       std::tie(rhs.mDrawTopMost, rhs.mpSprite->mDrawOrder);
   }
 
+  entityx::Entity mEntity;
   const Sprite* mpSprite;
   bool mDrawTopMost;
   WorldPosition mPosition;
@@ -81,7 +85,7 @@ void RenderingSystem::update(
     const WorldPosition& pos
   ) {
     const auto drawTopMost = entity.has_component<DrawTopMost>();
-    spritesByDrawOrder.emplace_back(&sprite, drawTopMost, pos);
+    spritesByDrawOrder.emplace_back(entity, &sprite, drawTopMost, pos);
   });
   sort(spritesByDrawOrder);
 
@@ -151,21 +155,29 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     return;
   }
 
-  for (const auto frameIndex : sprite.mFramesToRender) {
-    assert(frameIndex < int(sprite.mFrames.size()));
-    auto& frame = sprite.mFrames[frameIndex];
+  const auto worldToScreenPx = data::tileVectorToPixelVector(*mpScrollOffset);
 
-    // World-space tile positions refer to a sprite's bottom left tile,
-    // but we need its top left corner for drawing.
-    const auto spriteHeightTiles = data::pixelsToTiles(frame.mImage.height());
-    const auto topLeft = pos - base::Vector(0, spriteHeightTiles - 1);
-    const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
-    const auto drawOffsetPx = data::tileVectorToPixelVector(
-      frame.mDrawOffset);
+  if (data.mEntity.has_component<CustomRenderFunc>()) {
+    const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
+    const auto screenPos =
+      data::tileVectorToPixelVector(pos) - worldToScreenPx;
+    renderFunc(mpRenderer, data.mEntity, sprite, screenPos);
+  } else {
+    for (const auto frameIndex : sprite.mFramesToRender) {
+      assert(frameIndex < int(sprite.mFrames.size()));
+      auto& frame = sprite.mFrames[frameIndex];
 
-    const auto worldToScreenPx = data::tileVectorToPixelVector(*mpScrollOffset);
-    const auto screenPositionPx = topLeftPx + drawOffsetPx - worldToScreenPx;
-    frame.mImage.render(mpRenderer, screenPositionPx);
+      // World-space tile positions refer to a sprite's bottom left tile,
+      // but we need its top left corner for drawing.
+      const auto heightTiles = data::pixelsToTiles(frame.mImage.height());
+      const auto topLeft = pos - base::Vector(0, heightTiles - 1);
+      const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
+      const auto drawOffsetPx = data::tileVectorToPixelVector(
+        frame.mDrawOffset);
+
+      const auto screenPositionPx = topLeftPx + drawOffsetPx - worldToScreenPx;
+      frame.mImage.render(mpRenderer, screenPositionPx);
+    }
   }
 }
 

@@ -24,6 +24,8 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+#include <entityx/entityx.h>
+#include <SDL_render.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <vector>
@@ -54,6 +56,21 @@ struct Sprite {
   std::vector<int> mFramesToRender;
   bool mShow = true;
 };
+
+
+/** Specify a custom rendering function for a sprite
+ *
+ * When a sprite entity also has this component, the provided function
+ * pointer will be invoked instead of rendering the sprite directly.
+ *
+ * The last argument is the sprite's world position converted to a screen-space
+ * pixel position.
+ */
+using CustomRenderFunc = void(*)(
+  SDL_Renderer*,
+  entityx::Entity,
+  const engine::components::Sprite&,
+  const base::Vector&);
 
 
 /** Indicates that an entity should always be drawn last
