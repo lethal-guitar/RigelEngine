@@ -834,6 +834,7 @@ void configureEntity(
 
     case 139: // level exit
       entity.assign<Trigger>(TriggerType::LevelExit);
+      entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 1}});
       break;
 
     case 106: // shootable wall, explodes into small pieces

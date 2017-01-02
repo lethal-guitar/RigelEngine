@@ -373,14 +373,16 @@ void IngameMode::loadLevel(
 
 
 void IngameMode::handleLevelExit() {
+  using engine::components::Active;
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
-  mEntities.entities.each<Trigger, WorldPosition>(
+  mEntities.entities.each<Trigger, WorldPosition, Active>(
     [this](
       entityx::Entity,
       const Trigger& trigger,
-      const WorldPosition& triggerPosition
+      const WorldPosition& triggerPosition,
+      const Active&
     ) {
       if (trigger.mType != TriggerType::LevelExit || mLevelFinished) {
         return;
@@ -395,9 +397,6 @@ void IngameMode::handleLevelExit() {
       const auto touchingTriggerOnXAxis =
         triggerPosition.x >= playerBBox.left() &&
         triggerPosition.x <= (playerBBox.right() + 1);
-
-      // TODO: Add check for trigger being visible on-screen to properly
-      // replicate the original game's behavior
 
       mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
     });
