@@ -61,8 +61,8 @@ private:
     const loader::ResourceLoader& resources
   );
 
-  void checkForLevelExitReached();
-  void checkForPlayerDeath();
+  void handleLevelExit();
+  void handlePlayerDeath();
   void restartLevel();
   void handleTeleporter();
 

@@ -257,8 +257,8 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     showDebugText();
   }
 
-  checkForPlayerDeath();
-  checkForLevelExitReached();
+  handlePlayerDeath();
+  handleLevelExit();
   handleTeleporter();
 }
 
@@ -372,15 +372,17 @@ void IngameMode::loadLevel(
 }
 
 
-void IngameMode::checkForLevelExitReached() {
+void IngameMode::handleLevelExit() {
+  using engine::components::Active;
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
-  mEntities.entities.each<Trigger, WorldPosition>(
+  mEntities.entities.each<Trigger, WorldPosition, Active>(
     [this](
       entityx::Entity,
       const Trigger& trigger,
-      const WorldPosition& triggerPosition
+      const WorldPosition& triggerPosition,
+      const Active&
     ) {
       if (trigger.mType != TriggerType::LevelExit || mLevelFinished) {
         return;
@@ -396,15 +398,12 @@ void IngameMode::checkForLevelExitReached() {
         triggerPosition.x >= playerBBox.left() &&
         triggerPosition.x <= (playerBBox.right() + 1);
 
-      // TODO: Add check for trigger being visible on-screen to properly
-      // replicate the original game's behavior
-
       mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
     });
 }
 
 
-void IngameMode::checkForPlayerDeath() {
+void IngameMode::handlePlayerDeath() {
   const auto& playerState =
     *mPlayerEntity.component<game_logic::components::PlayerControlled>();
 
