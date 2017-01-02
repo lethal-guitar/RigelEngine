@@ -466,7 +466,10 @@ void IngameMode::showDebugText() {
   infoText
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
     << "Player: " << vec2String(playerPos, 4)
-    << ", Vel.: " << vec2String(playerVel, 5);
+    << ", Vel.: " << vec2String(playerVel, 5) << '\n'
+    << "Entities: " << mEntities.entities.size() << '\n'
+    << "Sprites rendered: " <<
+      mEntities.systems.system<RenderingSystem>()->spritesRendered();
 
   mpServiceProvider->showDebugText(infoText.str());
 }

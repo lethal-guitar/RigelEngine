@@ -102,6 +102,8 @@ void RenderingSystem::update(
   for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {
     renderSprite(*it);
   }
+
+  mSpritesRendered = spritesByDrawOrder.size();
 }
 
 
