@@ -16,10 +16,10 @@
 
 #include "map_scroll_system.hpp"
 
+#include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "game_logic/player/components.hpp"
-#include "utils/math_tools.hpp"
 
 namespace ex = entityx;
 
@@ -139,9 +139,9 @@ void MapScrollSystem::updateScrollOffset(
   *mpScrollOffset += base::Vector(offsetX, offsetY);
 
   mpScrollOffset->x =
-    utils::clamp(mpScrollOffset->x, 0, mMaxScrollOffset.width);
+    base::clamp(mpScrollOffset->x, 0, mMaxScrollOffset.width);
   mpScrollOffset->y =
-    utils::clamp(mpScrollOffset->y, 0, mMaxScrollOffset.height);
+    base::clamp(mpScrollOffset->y, 0, mMaxScrollOffset.height);
 }
 
 }}

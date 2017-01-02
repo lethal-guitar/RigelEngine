@@ -19,7 +19,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace utils {
+namespace rigel { namespace base {
 
 template<typename T>
 T clamp(const T value, const T minValue, const T maxValue) {

@@ -16,9 +16,9 @@
 
 #include "voc_decoder.hpp"
 
+#include "base/math_tools.hpp"
 #include "base/warnings.hpp"
 #include "loader/file_utils.hpp"
-#include "utils/math_tools.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -190,7 +190,7 @@ public:
       difference = -difference;
     }
 
-    const auto newSample = utils::clamp(
+    const auto newSample = base::clamp(
       mPrediction + difference, -16384, 16384);
     mPrediction = newSample;
 

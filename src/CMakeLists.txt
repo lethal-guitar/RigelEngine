@@ -1,6 +1,7 @@
 set(core_sources
     base/boost_variant.hpp
     base/grid.hpp
+    base/math_tools.hpp
     base/spatial_types.hpp
     base/warnings.hpp
     data/audio_buffer.hpp
@@ -129,7 +130,6 @@ set(core_sources
     ui/utils.hpp
     utils/container_tools.hpp
     utils/enum_hash.hpp
-    utils/math_tools.hpp
 
     game.cpp
     game.hpp

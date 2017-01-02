@@ -17,6 +17,7 @@
 #include "level_loader.hpp"
 
 #include "base/grid.hpp"
+#include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "loader/bitwise_iter.hpp"
@@ -24,7 +25,6 @@
 #include "loader/resource_loader.hpp"
 #include "loader/rle_compression.hpp"
 #include "utils/container_tools.hpp"
-#include "utils/math_tools.hpp"
 
 #include <fstream>
 #include <string>
@@ -120,7 +120,7 @@ ByteBuffer readExtraMaskedTileBits(const LeStreamReader& levelReader) {
   // The uncompressed masked tile extra bits contain 2 bits for each tile, so
   // we need one byte to represent 4 tiles.
   maskedTileOffsets.reserve(
-    utils::integerDivCeil<size_t>(GameTraits::mapDataWords, 4u));
+    base::integerDivCeil<size_t>(GameTraits::mapDataWords, 4u));
 
   decompressRle(rleReader, [&maskedTileOffsets](const auto decoded) {
     maskedTileOffsets.push_back(decoded);

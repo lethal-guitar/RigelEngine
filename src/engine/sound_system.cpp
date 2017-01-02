@@ -16,9 +16,9 @@
 
 #include "sound_system.hpp"
 
+#include "base/math_tools.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
-#include "utils/math_tools.hpp"
 
 #include <speex/speex_resampler.h>
 
@@ -67,7 +67,7 @@ data::AudioBuffer resampleAudio(
 
   auto inputLength = static_cast<spx_uint32_t>(buffer.mSamples.size());
   auto outputLength = static_cast<spx_uint32_t>(
-    utils::integerDivCeil<spx_uint32_t>(
+    base::integerDivCeil<spx_uint32_t>(
       inputLength, buffer.mSampleRate) * newSampleRate);
 
   std::vector<data::Sample> resampled(outputLength);
