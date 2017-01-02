@@ -41,18 +41,23 @@ using components::WorldPosition;
 struct RenderingSystem::SpriteData {
   SpriteData(
     const Sprite* pSprite,
+    const bool drawTopMost,
     const WorldPosition& position
   )
     : mpSprite(pSprite)
+    , mDrawTopMost(drawTopMost)
     , mPosition(position)
   {
   }
 
   bool operator<(const SpriteData& rhs) const {
-    return mpSprite->mDrawOrder < rhs.mpSprite->mDrawOrder;
+    return
+      std::tie(mDrawTopMost, mpSprite->mDrawOrder) <
+      std::tie(rhs.mDrawTopMost, rhs.mpSprite->mDrawOrder);
   }
 
   const Sprite* mpSprite;
+  bool mDrawTopMost;
   WorldPosition mPosition;
 };
 
@@ -70,30 +75,32 @@ void RenderingSystem::update(
 
   // Collect sprites, then order by draw index
   std::vector<SpriteData> spritesByDrawOrder;
-  std::vector<SpriteData> topMostSprites;
-  es.each<Sprite, WorldPosition>(
-    [this, &spritesByDrawOrder, &topMostSprites](
-      ex::Entity entity,
-      Sprite& sprite,
-      const WorldPosition& pos
-    ) {
-      if (!entity.has_component<DrawTopMost>()) {
-        spritesByDrawOrder.emplace_back(&sprite, pos);
-      } else {
-        topMostSprites.emplace_back(&sprite, pos);
-      }
-    });
+  es.each<Sprite, WorldPosition>([this, &spritesByDrawOrder](
+    ex::Entity entity,
+    Sprite& sprite,
+    const WorldPosition& pos
+  ) {
+    const auto drawTopMost = entity.has_component<DrawTopMost>();
+    spritesByDrawOrder.emplace_back(&sprite, drawTopMost, pos);
+  });
   sort(spritesByDrawOrder);
 
   // Render
   mMapRenderer.renderBackground(*mpScrollOffset);
-  for (const auto& data : spritesByDrawOrder) {
-    renderSprite(data);
+
+  const auto firstTopMostIt = find_if(spritesByDrawOrder,
+    [](const auto& data) { return data.mDrawTopMost; });
+
+  // behind foreground
+  for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
+    renderSprite(*it);
   }
+
   mMapRenderer.renderForeground(*mpScrollOffset);
 
-  for (const auto& data : topMostSprites) {
-    renderSprite(data);
+  // top most
+  for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {
+    renderSprite(*it);
   }
 }
 
