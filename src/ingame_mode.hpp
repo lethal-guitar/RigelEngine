@@ -62,7 +62,7 @@ private:
   );
 
   void checkForLevelExitReached();
-  void checkForPlayerDeath();
+  void handlePlayerDeath();
   void restartLevel();
   void handleTeleporter();
 

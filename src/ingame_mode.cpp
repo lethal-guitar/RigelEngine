@@ -257,7 +257,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     showDebugText();
   }
 
-  checkForPlayerDeath();
+  handlePlayerDeath();
   checkForLevelExitReached();
   handleTeleporter();
 }
@@ -404,7 +404,7 @@ void IngameMode::checkForLevelExitReached() {
 }
 
 
-void IngameMode::checkForPlayerDeath() {
+void IngameMode::handlePlayerDeath() {
   const auto& playerState =
     *mPlayerEntity.component<game_logic::components::PlayerControlled>();
 
