@@ -25,6 +25,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/security_camera.hpp"
+#include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/interaction/elevator.hpp"
@@ -221,6 +222,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // A.I. logic update
   // ----------------------------------------------------------------------
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
+  mEntities.systems.update<ai::SlidingDoorSystem>(dt);
   mEntities.systems.update<ai::SlimePipeSystem>(dt);
 
   // ----------------------------------------------------------------------
@@ -241,7 +243,6 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   {
     sdl_utils::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
-
     mEntities.systems.update<RenderingSystem>(dt);
     mEntities.systems.update<DebuggingSystem>(dt);
     mHudRenderer.updateAndRender(dt);
@@ -351,6 +352,9 @@ void IngameMode::loadLevel(
     &mLevelData.mMap,
     mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
+  mEntities.systems.add<ai::SlidingDoorSystem>(
+    mPlayerEntity,
+    mpServiceProvider);
   mEntities.systems.add<ai::SlimePipeSystem>(
     &mEntityFactory,
     mpServiceProvider);
