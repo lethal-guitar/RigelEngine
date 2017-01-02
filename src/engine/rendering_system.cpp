@@ -38,6 +38,25 @@ using components::Sprite;
 using components::WorldPosition;
 
 
+struct RenderingSystem::SpriteData {
+  SpriteData(
+    const Sprite* pSprite,
+    const WorldPosition& position
+  )
+    : mpSprite(pSprite)
+    , mPosition(position)
+  {
+  }
+
+  bool operator<(const SpriteData& rhs) const {
+    return mpSprite->mDrawOrder < rhs.mpSprite->mDrawOrder;
+  }
+
+  const Sprite* mpSprite;
+  WorldPosition mPosition;
+};
+
+
 void RenderingSystem::update(
   ex::EntityManager& es,
   ex::EventManager& events,
@@ -50,8 +69,8 @@ void RenderingSystem::update(
   animateSprites(es, events, dt);
 
   // Collect sprites, then order by draw index
-  std::vector<std::pair<const Sprite*, WorldPosition>> spritesByDrawOrder;
-  std::vector<std::pair<const Sprite*, WorldPosition>> topMostSprites;
+  std::vector<SpriteData> spritesByDrawOrder;
+  std::vector<SpriteData> topMostSprites;
   es.each<Sprite, WorldPosition>(
     [this, &spritesByDrawOrder, &topMostSprites](
       ex::Entity entity,
@@ -64,19 +83,17 @@ void RenderingSystem::update(
         topMostSprites.emplace_back(&sprite, pos);
       }
     });
-  sort(spritesByDrawOrder, [](const auto& lhs, const auto& rhs) {
-    return lhs.first->mDrawOrder < rhs.first->mDrawOrder;
-  });
+  sort(spritesByDrawOrder);
 
   // Render
   mMapRenderer.renderBackground(*mpScrollOffset);
-  for (const auto& spriteAndPos : spritesByDrawOrder) {
-    renderSprite(*spriteAndPos.first, spriteAndPos.second);
+  for (const auto& data : spritesByDrawOrder) {
+    renderSprite(data);
   }
   mMapRenderer.renderForeground(*mpScrollOffset);
 
-  for (const auto& spriteAndPos : topMostSprites) {
-    renderSprite(*spriteAndPos.first, spriteAndPos.second);
+  for (const auto& data : topMostSprites) {
+    renderSprite(data);
   }
 }
 
@@ -117,10 +134,10 @@ void RenderingSystem::animateSprites(
 }
 
 
-void RenderingSystem::renderSprite(
-  const Sprite& sprite,
-  const WorldPosition& pos
-) const {
+void RenderingSystem::renderSprite(const SpriteData& data) const {
+  const auto& pos = data.mPosition;
+  const auto& sprite = *data.mpSprite;
+
   if (!sprite.mShow) {
     return;
   }

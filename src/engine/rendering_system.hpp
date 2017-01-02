@@ -71,10 +71,8 @@ private:
     entityx::EventManager& events,
     entityx::TimeDelta dt);
 
-  void renderSprite(
-    const components::Sprite& sprite,
-    const components::WorldPosition& pos
-  ) const;
+  struct SpriteData;
+  void renderSprite(const SpriteData& data) const;
 
 private:
   SDL_Renderer* mpRenderer;
