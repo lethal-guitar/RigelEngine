@@ -258,7 +258,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   }
 
   handlePlayerDeath();
-  checkForLevelExitReached();
+  handleLevelExit();
   handleTeleporter();
 }
 
@@ -372,7 +372,7 @@ void IngameMode::loadLevel(
 }
 
 
-void IngameMode::checkForLevelExitReached() {
+void IngameMode::handleLevelExit() {
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
