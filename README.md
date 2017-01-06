@@ -30,7 +30,7 @@ Here's a quick list of already working gameplay features:
 * Player score
 * Item pickup + inventory
 * Level progression (go to next level when reaching exit)
-* Shooting (some fetures missing, like flame thrower jetpack)
+* Shooting (some features missing, like flame thrower jetpack)
 * Shootable walls
 * Teleporters
 * Player taking damage, player death
