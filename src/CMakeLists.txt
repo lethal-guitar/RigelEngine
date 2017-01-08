@@ -33,6 +33,8 @@ set(core_sources
     engine/physical_components.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp
+    engine/random_number_generator.cpp
+    engine/random_number_generator.hpp
     engine/rendering_system.cpp
     engine/rendering_system.hpp
     engine/sound_system.cpp
