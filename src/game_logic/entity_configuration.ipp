@@ -702,7 +702,15 @@ void configureEntity(
       break;
 
     case 253: // Monster in prison cell, aggressive
-      // 500 pts when killed
+      entity.assign<ai::components::Prisoner>(true);
+      entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
+      entity.assign<Shootable>(1, 500);
+      entity.component<Shootable>()->mInvincible = true;
+      break;
+
+    case 261: // Monster in prison cell, passive
+      entity.assign<ai::components::Prisoner>(false);
+      entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 299: // Rigelatin soldier

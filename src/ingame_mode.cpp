@@ -24,6 +24,7 @@
 #include "engine/life_time_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
@@ -221,6 +222,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
+  mEntities.systems.update<ai::PrisonerSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
   mEntities.systems.update<ai::SlidingDoorSystem>(dt);
   mEntities.systems.update<ai::SlimePipeSystem>(dt);
@@ -351,6 +353,7 @@ void IngameMode::loadLevel(
     &mPlayerModel,
     &mLevelData.mMap,
     mpServiceProvider);
+  mEntities.systems.add<ai::PrisonerSystem>(mPlayerEntity, &mRandomGenerator);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,

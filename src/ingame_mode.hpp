@@ -19,6 +19,7 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/player_data.hpp"
+#include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
 #include "sdl_utils/texture.hpp"
@@ -92,6 +93,7 @@ private:
   data::map::Map mMapAtLevelStart;
   entityx::Entity mPlayerEntity;
 
+  engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   sdl_utils::RenderTargetTexture mIngameViewPortRenderTarget;
 
