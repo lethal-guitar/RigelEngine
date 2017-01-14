@@ -58,7 +58,7 @@ void PrisonerSystem::update(
       Sprite& sprite,
       const WorldPosition& position,
       components::Prisoner& state,
-      const engine::components::Active
+      const engine::components::Active&
     ) {
       if (state.mIsAggressive) {
         if (!mIsEvenFrame) {
