@@ -33,6 +33,8 @@ set(core_sources
     engine/physical_components.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp
+    engine/random_number_generator.cpp
+    engine/random_number_generator.hpp
     engine/rendering_system.cpp
     engine/rendering_system.hpp
     engine/sound_system.cpp
@@ -42,6 +44,8 @@ set(core_sources
     engine/timing.cpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/prisoner.cpp
+    game_logic/ai/prisoner.hpp
     game_logic/ai/security_camera.cpp
     game_logic/ai/security_camera.hpp
     game_logic/ai/sliding_door.cpp

@@ -70,7 +70,10 @@ void DamageInflictionSystem::update(
       ) {
         const auto shootableBbox =
           engine::toWorldSpace(*shootableBboxLocal, *shootablePos);
-        if (shootableBbox.intersects(inflictorBbox)) {
+        if (
+          shootableBbox.intersects(inflictorBbox) &&
+          !shootable->mInvincible
+        ) {
           inflictorEntity.destroy();
 
           shootable->mHealth -= damage.mAmount;

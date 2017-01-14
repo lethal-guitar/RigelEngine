@@ -16,44 +16,21 @@
 
 #pragma once
 
+#include <array>
+#include <cstdint>
 
-namespace rigel { namespace game_logic { namespace components {
 
-struct PlayerDamaging {
-  explicit PlayerDamaging(
-    const int amount,
-    const bool ignoreMercyFrames = false
-  )
-    : mAmount(amount)
-    , mIgnoreMercyFrames(ignoreMercyFrames)
-  {
-  }
+namespace rigel { namespace engine {
 
-  int mAmount;
-  bool mIgnoreMercyFrames;
+extern const std::array<int, 256> RANDOM_NUMBER_TABLE;
+
+
+class RandomNumberGenerator {
+public:
+  int gen();
+
+private:
+  std::size_t mNextNumberIndex = 0;
 };
 
-
-struct Shootable {
-  explicit Shootable(const int health, const int givenScore = 0)
-    : mHealth(health)
-    , mGivenScore(givenScore)
-  {
-  }
-
-  int mHealth;
-  int mGivenScore;
-  bool mInvincible = false;
-};
-
-
-struct DamageInflicting {
-  explicit DamageInflicting(const int amount)
-    : mAmount(amount)
-  {
-  }
-
-  int mAmount;
-};
-
-}}}
+}}
