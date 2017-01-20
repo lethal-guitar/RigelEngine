@@ -20,6 +20,7 @@
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
+#include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"

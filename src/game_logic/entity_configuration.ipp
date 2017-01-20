@@ -180,6 +180,32 @@ void configureProjectile(
 }
 
 
+using Message = ai::components::MessengerDrone::Message;
+
+Message messengerDroneMessage(const ActorID id) {
+  switch (id) {
+    case 213:
+      return Message::YourBrainIsOurs;
+
+    case 214:
+      return Message::BringBackTheBrain;
+
+    case 215:
+      return Message::LiveFromRigel;
+
+    case 216:
+      return Message::Die;
+
+    case 220:
+      return Message::CantEscape;
+
+    default:
+      assert(false);
+      return Message::YourBrainIsOurs;
+  }
+}
+
+
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
@@ -817,16 +843,12 @@ void configureEntity(
     case 215: // "Live from Rigel it's Saturday night!"
     case 216: // "Die!"
     case 220: // "You cannot escape us! You will get your brain sucked!"
-      //slot  0   1   2   3   4       5      6
-      //frame 0   1   2   3   4   5   6   7  8   9
-      //actor 107 108 109 110 111     112    113
-      entity.assign<Animated>(Animated{{
-        AnimationSequence(2, 4, 5, 4),
-        AnimationSequence(2, 6, 7, 5),
-        AnimationSequence(2, 8, 9, 6)}});
-
       entity.assign<Shootable>(1);
       entity.assign<BoundingBox>(boundingBox);
+      entity.component<Sprite>()->mFramesToRender.clear();
+
+      entity.assign<ai::components::MessengerDrone>(
+        messengerDroneMessage(actorID));
       break;
 
     case 231: // Lava riser
@@ -926,6 +948,7 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(202);
       break;
 
+    // Flying message ships
     case 213:
     case 214:
     case 215:
