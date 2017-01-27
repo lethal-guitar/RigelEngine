@@ -106,7 +106,7 @@ void drawLevelNumber(const int number, const TileRenderer& spriteSheet) {
 
 
 OwningTexture actorToTexture(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorData& data
 ) {
   return OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
@@ -117,7 +117,7 @@ OwningTexture actorToTexture(
 
 
 HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorImagePackage& imagePack
 ) {
   InventoryItemTextureMap map;
@@ -143,7 +143,7 @@ HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
 
 HudRenderer::CollectedLetterIndicatorMap
 HudRenderer::makeCollectedLetterTextureMap(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorImagePackage& imagePack
 ) {
   CollectedLetterIndicatorMap map;
@@ -188,7 +188,7 @@ HudRenderer::makeCollectedLetterTextureMap(
 HudRenderer::HudRenderer(
   data::PlayerModel* pPlayerModel,
   const int levelNumber,
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ResourceLoader& bundle
 )
   : HudRenderer(
@@ -206,7 +206,7 @@ HudRenderer::HudRenderer(
 HudRenderer::HudRenderer(
   data::PlayerModel* pPlayerModel,
   const int levelNumber,
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorData& actorData,
   InventoryItemTextureMap&& inventoryItemTextures,
   CollectedLetterIndicatorMap&& collectedLetterTextures,

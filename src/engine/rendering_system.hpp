@@ -19,6 +19,7 @@
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
 #include "engine/map_renderer.hpp"
+#include "engine/renderer.hpp"
 #include "engine/texture.hpp"
 #include "engine/timing.hpp"
 #include "engine/visual_components.hpp"
@@ -44,7 +45,7 @@ public:
   template<typename... MapRendererArgTs>
   RenderingSystem(
     const base::Vector* pScrollOffset,
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     MapRendererArgTs&&... mapRendererArgs
   )
     : mpRenderer(pRenderer)
@@ -79,7 +80,7 @@ private:
   void renderSprite(const SpriteData& data) const;
 
 private:
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   MapRenderer mMapRenderer;
   const base::Vector* mpScrollOffset;
   std::size_t mSpritesRendered = 0;

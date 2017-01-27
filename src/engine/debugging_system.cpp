@@ -20,7 +20,6 @@
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
-#include "sdl_utils/rect_tools.hpp"
 
 namespace ex = entityx;
 
@@ -32,7 +31,7 @@ using namespace engine::components;
 
 
 DebuggingSystem::DebuggingSystem(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   base::Vector* pScrollOffset,
   data::map::Map* pMap
 )
@@ -59,6 +58,8 @@ void DebuggingSystem::update(
   ex::TimeDelta dt
 ) {
   if (mShowWorldCollisionData) {
+    const auto drawColor = base::Color{255, 255, 0, 255};
+
     for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
         const auto col = x + mpScrollOffset->x;
@@ -75,18 +76,17 @@ void DebuggingSystem::update(
         const auto right = bottomRight.x;
         const auto bottom = bottomRight.y;
 
-        SDL_SetRenderDrawColor(mpRenderer, 255, 255, 0, 255);
         if (collisionData.isSolidTop()) {
-          SDL_RenderDrawLine(mpRenderer, left, top, right, top);
+          mpRenderer->drawLine(left, top, right, top, drawColor);
         }
         if (collisionData.isSolidRight()) {
-          SDL_RenderDrawLine(mpRenderer, right, top, right, bottom);
+          mpRenderer->drawLine(right, top, right, bottom, drawColor);
         }
         if (collisionData.isSolidBottom()) {
-          SDL_RenderDrawLine(mpRenderer, left, bottom, right, bottom);
+          mpRenderer->drawLine(left, bottom, right, bottom, drawColor);
         }
         if (collisionData.isSolidLeft()) {
-          SDL_RenderDrawLine(mpRenderer, left, top, left, bottom);
+          mpRenderer->drawLine(left, top, left, bottom, drawColor);
         }
       }
     }
@@ -104,7 +104,7 @@ void DebuggingSystem::update(
           tileExtentsToPixelExtents(worldSpaceBox.size)
         };
 
-        sdl_utils::drawRectangle(mpRenderer, boxInPixels, 255, 0, 0);
+        mpRenderer->drawRectangle(boxInPixels, {255, 0, 0, 255});
       });
   }
 }

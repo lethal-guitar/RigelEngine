@@ -89,7 +89,7 @@ void addDefaultPhysical(
 }
 
 EntityFactory::EntityFactory(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   ex::EntityManager* pEntityManager,
   const ActorImagePackage* pSpritePackage,
   const data::Difficulty difficulty)

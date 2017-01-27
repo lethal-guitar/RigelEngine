@@ -19,11 +19,11 @@
 #include "base/warnings.hpp"
 #include "data/sound_ids.hpp"
 #include "data/game_session_data.hpp"
+#include "engine/renderer.hpp"
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>
-#include <SDL_render.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <string>
@@ -68,7 +68,7 @@ struct GameMode {
   /** Contains everything a mode needs */
   struct Context {
     const loader::ResourceLoader* mpResources;
-    SDL_Renderer* mpRenderer;
+    engine::Renderer* mpRenderer;
     engine::SoundSystem* mpSoundSystem;
     IGameServiceProvider* mpServiceProvider;
   };

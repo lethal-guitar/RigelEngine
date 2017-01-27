@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
+#include "engine/renderer.hpp"
 #include "engine/sound_system.hpp"
 #include "engine/texture.hpp"
 #include "game_mode.hpp"
@@ -46,7 +47,7 @@ public:
     boost::optional<base::Vector> mPlayerPosition;
   };
 
-  Game(const std::string& gamePath, SDL_Renderer* pRenderer);
+  Game(const std::string& gamePath, SDL_Window* pWindow);
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
@@ -60,7 +61,6 @@ private:
   void handleEvent(const SDL_Event& event);
 
   void performScreenFadeBlocking(bool doFadeIn);
-  void clearScreen();
 
   // IGameServiceProvider implementation
   void fadeOutScreen() override;
@@ -82,7 +82,7 @@ private:
   void showDebugText(const std::string& text) override;
 
 private:
-  SDL_Renderer* mpRenderer;
+  engine::Renderer mRenderer;
   engine::SoundSystem mSoundSystem;
   loader::ResourceLoader mResources;
   bool mIsShareWareVersion;

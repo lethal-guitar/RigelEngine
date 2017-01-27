@@ -282,6 +282,7 @@ void IngameMode::showLoadingScreen(
       resources,
       loadingScreenFileName(episode));
     loadingScreenTexture.render(mpRenderer, 0, 0);
+    mpRenderer->submitBatch();
   }
   mpServiceProvider->fadeInScreen();
 }

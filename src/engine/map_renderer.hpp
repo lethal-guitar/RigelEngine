@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "engine/renderer.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
@@ -28,7 +29,7 @@ namespace rigel { namespace engine {
 class MapRenderer {
 public:
   MapRenderer(
-    SDL_Renderer* renderer,
+    engine::Renderer* renderer,
     const data::map::Map* pMap,
     const data::Image& tileSetImage,
     const data::Image& backdropImage,
@@ -50,7 +51,7 @@ private:
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 
 private:
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   const data::map::Map* mpMap;
 
   TileRenderer mTileRenderer;

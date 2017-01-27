@@ -75,6 +75,7 @@ set(ENTITYX_MAX_COMPONENTS 64 CACHE INTERNAL "")
 
 add_subdirectory(3rd_party/entityx)
 add_subdirectory(3rd_party/dbopl)
+add_subdirectory(3rd_party/glad)
 add_subdirectory(3rd_party/speex_resampler)
 
 target_compile_options(entityx PRIVATE

@@ -40,7 +40,7 @@ namespace rigel { namespace ui {
 class MenuElementRenderer {
 public:
   MenuElementRenderer(
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     const loader::ResourceLoader& resources,
     const loader::Palette16& palette = loader::INGAME_PALETTE);
 

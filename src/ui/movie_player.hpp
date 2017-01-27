@@ -39,7 +39,7 @@ public:
    */
   using FrameCallbackFunc = std::function<boost::optional<int>(int)>;
 
-  explicit MoviePlayer(SDL_Renderer* pRenderer);
+  explicit MoviePlayer(engine::Renderer* pRenderer);
 
   void playMovie(
     const data::Movie& movie,
@@ -61,7 +61,7 @@ private:
   void invokeFrameCallbackIfPresent(int whichFrame);
 
 private:
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   engine::OwningTexture mBaseImage;
   std::vector<FrameData> mAnimationFrames;
   FrameCallbackFunc mFrameCallback = nullptr;

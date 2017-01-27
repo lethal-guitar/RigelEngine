@@ -320,6 +320,7 @@ void DukeScriptRunner::interpretNextAction() {
         *mpResourceBundle,
         showImage.image);
       imageTexture.render(mpRenderer, 0, 0);
+      mpRenderer->submitBatch();
     },
 
     [this](const Delay& delay) {
@@ -477,6 +478,7 @@ void DukeScriptRunner::drawSprite(
 
   engine::OwningTexture spriteTexture(mpRenderer, image);
   spriteTexture.render(mpRenderer, topLeftPx + drawOffsetPx);
+  mpRenderer->submitBatch();
 }
 
 

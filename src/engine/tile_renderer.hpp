@@ -23,7 +23,7 @@ namespace rigel { namespace engine {
 
 class TileRenderer {
 public:
-  TileRenderer(engine::OwningTexture&& tileSet, SDL_Renderer* pRenderer);
+  TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer);
 
   void renderTile(int index, int posX, int posY) const;
   void renderTile(const int index, const base::Vector& tlPosition) const {
@@ -56,8 +56,8 @@ private:
   ) const;
 
 private:
-  engine::OwningTexture mTileSetTexture;
-  SDL_Renderer* mpRenderer;
+  OwningTexture mTileSetTexture;
+  Renderer* mpRenderer;
 };
 
 }}

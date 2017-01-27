@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
+#include "engine/renderer.hpp"
 #include "engine/visual_components.hpp"
 #include "loader/level_loader.hpp"
 
@@ -62,7 +63,7 @@ inline bool isHorizontal(const ProjectileDirection direction) {
 class EntityFactory {
 public:
   EntityFactory(
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     entityx::EntityManager* pEntityManager,
     const loader::ActorImagePackage* pSpritePackage,
     data::Difficulty difficulty);
@@ -98,7 +99,7 @@ private:
   engine::components::Sprite makeSpriteFromActorIDs(
     const std::vector<data::ActorID>& actorIDs);
 
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   entityx::EntityManager* mpEntityManager;
   const loader::ActorImagePackage* mpSpritePackage;
   data::Difficulty mDifficulty;

@@ -236,7 +236,7 @@ void SlidingDoorSystem::updateSoundGeneration(
 
 
 void renderVerticalSlidingDoor(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& screenPosition

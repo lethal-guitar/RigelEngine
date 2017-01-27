@@ -16,38 +16,34 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <SDL_render.h>
-RIGEL_RESTORE_WARNINGS
-
 #include <cstdint>
+#include <tuple>
 
 
-namespace rigel { namespace sdl_utils {
+namespace rigel { namespace base {
 
-template<typename ValueT>
-SDL_Rect toSdlRect(const base::Rect<ValueT>& rect) {
-  return {
-    int(rect.topLeft.x), int(rect.topLeft.y),
-    int(rect.size.width), int(rect.size.height)};
-}
+struct Color {
+  Color() = default;
+  Color(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
+    : r(r_)
+    , g(g_)
+    , b(b_)
+    , a(a_)
+  {
+  }
 
+  bool operator==(const Color& other) const {
+    return std::tie(r, g, b, a) == std::tie(other.r, other.g, other.b, other.a);
+  }
 
-template<typename ValueT>
-void drawRectangle(
-  SDL_Renderer* pRenderer,
-  const base::Rect<ValueT>& rect,
-  const std::uint8_t red,
-  const std::uint8_t green,
-  const std::uint8_t blue,
-  const std::uint8_t alpha = 255
-) {
-  const auto sdlRect = toSdlRect(rect);
-  SDL_SetRenderDrawColor(pRenderer, red, green, blue, alpha);
-  SDL_RenderDrawRect(pRenderer, &sdlRect);
-}
+  bool operator!=(const Color& other) const {
+    return !(*this == other);
+  }
+
+  std::uint8_t r = 0;
+  std::uint8_t g = 0;
+  std::uint8_t b = 0;
+  std::uint8_t a = 0;
+};
 
 }}

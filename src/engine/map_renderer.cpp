@@ -49,7 +49,7 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 }
 
 MapRenderer::MapRenderer(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const data::map::Map* pMap,
   const data::Image& tileSetImage,
   const data::Image& backdropImage,

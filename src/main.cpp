@@ -25,7 +25,6 @@ RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/split.hpp>
 #include <boost/program_options.hpp>
 #include <SDL.h>
-#include <SDL_mixer.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
@@ -49,14 +48,10 @@ namespace {
   const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
 #endif
 
-const auto SOME_DUMMY_SIZE = 32;
-
 
 struct SdlInitializer {
   SdlInitializer() {
-    throwIfFailed([]() {
-      return SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    });
+    throwIfFailed([]() { return SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO); });
   }
   ~SdlInitializer() {
     SDL_Quit();
@@ -64,6 +59,23 @@ struct SdlInitializer {
 
   SdlInitializer(const SdlInitializer&) = delete;
   SdlInitializer& operator=(const SdlInitializer&) = delete;
+};
+
+
+class OpenGlContext {
+public:
+  explicit OpenGlContext(SDL_Window* pWindow)
+    : mpOpenGLContext(SDL_GL_CreateContext(pWindow))
+  {
+  }
+  ~OpenGlContext() {
+    SDL_GL_DeleteContext(mpOpenGLContext);
+  }
+
+  OpenGlContext(const OpenGlContext&) = delete;
+  OpenGlContext& operator=(const OpenGlContext&) = delete;
+private:
+  SDL_GLContext mpOpenGLContext;
 };
 
 
@@ -80,58 +92,7 @@ SDL_Window* createWindow() {
       SDL_WINDOWPOS_UNDEFINED,
       displayMode.w,
       displayMode.h,
-      WINDOW_FLAGS);
-  });
-}
-
-
-SDL_Renderer* createRenderer(SDL_Window* pWindow) {
-  return throwIfCreationFailed([pWindow]() {
-    return SDL_CreateRenderer(
-      pWindow,
-      -1,
-      SDL_RENDERER_ACCELERATED
-      | SDL_RENDERER_PRESENTVSYNC
-      | SDL_RENDERER_TARGETTEXTURE
-    );
-  });
-}
-
-
-void verifyRequiredRendererCapabilities(SDL_Renderer* pRenderer) {
-  SDL_RendererInfo rendererInfo;
-  throwIfFailed([&rendererInfo, pRenderer]() {
-    return SDL_GetRendererInfo(pRenderer, &rendererInfo);
-  });
-
-  // Verify that render targets are supported
-  if ((rendererInfo.flags & SDL_RENDERER_TARGETTEXTURE) == 0) {
-    throw runtime_error("Renderer doesn't support render targets");
-  }
-
-  // Verify that textures can be created with the desired pixel format
-  Ptr<SDL_Texture> pTestTexture(throwIfCreationFailed([pRenderer]() {
-    return SDL_CreateTexture(
-      pRenderer,
-      SDL_PIXELFORMAT_ABGR8888,
-      SDL_TEXTUREACCESS_STATIC,
-      SOME_DUMMY_SIZE,
-      SOME_DUMMY_SIZE);
-  }));
-
-  // Verify that textures support alpha blending
-  throwIfFailed([&pTestTexture, pRenderer]() {
-    return SDL_SetTextureBlendMode(pTestTexture.get(), SDL_BLENDMODE_BLEND);
-  });
-
-  // Verify that textures support alpha modulation
-  throwIfFailed([&pTestTexture, pRenderer]() {
-    return SDL_SetTextureAlphaMod(pTestTexture.get(), 125);
-  });
-
-  // Verify that textures support color modulation
-  throwIfFailed([&pTestTexture, pRenderer]() {
-    return SDL_SetTextureColorMod(pTestTexture.get(), 0, 255, 0);
+      WINDOW_FLAGS | SDL_WINDOW_OPENGL);
   });
 }
 
@@ -158,10 +119,17 @@ void showBanner() {
 
 void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
   SdlInitializer initializeSDL;
-  Ptr<SDL_Window> pWindow(createWindow());
-  Ptr<SDL_Renderer> pRenderer(createRenderer(pWindow.get()));
 
-  verifyRequiredRendererCapabilities(pRenderer.get());
+  throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
+
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+  Ptr<SDL_Window> pWindow(createWindow());
+  OpenGlContext glContext(pWindow.get());
+  engine::loadGlFunctions();
 
   // We don't care if screen saver disabling failed, it's not that important.
   // So no return value checking.
@@ -170,7 +138,7 @@ void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
   // Same for the cursor disabling.
   SDL_ShowCursor(SDL_DISABLE);
 
-  Game game(gamePath, pRenderer.get());
+  Game game(gamePath, pWindow.get());
   game.run(gameOptions);
 }
 

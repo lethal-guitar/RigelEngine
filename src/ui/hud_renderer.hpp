@@ -45,7 +45,7 @@ public:
   HudRenderer(
     data::PlayerModel* pPlayerModel,
     int levelNumber,
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     const loader::ResourceLoader& bundle);
 
   void updateAndRender(engine::TimeDelta dt);
@@ -64,18 +64,18 @@ private:
   HudRenderer(
     data::PlayerModel* pPlayerModel,
     int levelNumber,
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     const loader::ActorData& actorData,
     InventoryItemTextureMap&& inventoryItemTextures,
     CollectedLetterIndicatorMap&& collectedLetterTextures,
     const data::Image& statusSpriteSheetImage);
 
   static InventoryItemTextureMap makeInventoryItemTextureMap(
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     const loader::ActorImagePackage& imagePack);
 
   static CollectedLetterIndicatorMap makeCollectedLetterTextureMap(
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     const loader::ActorImagePackage& imagePack);
 
   void drawHealthBar() const;
@@ -83,7 +83,7 @@ private:
 
   data::PlayerModel* mpPlayerModel;
   const int mLevelNumber;
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   engine::TimeStepper mTimeStepper;
 
   engine::OwningTexture mTopRightTexture;

@@ -16,40 +16,20 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/map.hpp"
-#include "engine/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
+#include <glad/glad.h>
 RIGEL_RESTORE_WARNINGS
+
+// Undefine stupid macros from Windows.h which lead to name clashes otherwise
+#ifdef DrawText
+#undef DrawText
+#endif
 
 
 namespace rigel { namespace engine {
 
-class DebuggingSystem : public entityx::System<DebuggingSystem> {
-public:
-  DebuggingSystem(
-    engine::Renderer* pRenderer,
-    base::Vector* pScrollOffset,
-    data::map::Map* pMap);
-
-  void toggleBoundingBoxDisplay();
-  void toggleWorldCollisionDataDisplay();
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
-
-private:
-  engine::Renderer* mpRenderer;
-  base::Vector* mpScrollOffset;
-  data::map::Map* mpMap;
-
-  bool mShowBoundingBoxes = false;
-  bool mShowWorldCollisionData = false;
-};
+void loadGlFunctions();
 
 }}

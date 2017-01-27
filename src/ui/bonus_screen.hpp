@@ -72,7 +72,7 @@ private:
   std::vector<Event> mEvents;
   std::size_t mNextEvent = 0;
 
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   engine::OwningTexture mBackgroundTexture;
   ui::MenuElementRenderer mTextRenderer;
 };

@@ -28,7 +28,7 @@ namespace rigel { namespace ui {
 using engine::fastTicksToTime;
 
 
-MoviePlayer::MoviePlayer(SDL_Renderer* pRenderer)
+MoviePlayer::MoviePlayer(engine::Renderer* pRenderer)
   : mpRenderer(pRenderer)
 {
 }

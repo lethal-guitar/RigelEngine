@@ -145,7 +145,7 @@ const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
 engine::OwningTexture createFontTexture(
   const loader::FontData& font,
-  SDL_Renderer* pRenderer
+  engine::Renderer* pRenderer
 ) {
   if (font.size() != 67u) {
     throw std::runtime_error("Wrong number of bitmaps in menu font");
@@ -169,7 +169,7 @@ engine::OwningTexture createFontTexture(
 
 
 MenuElementRenderer::MenuElementRenderer(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const loader::Palette16& palette
 )

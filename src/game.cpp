@@ -38,54 +38,22 @@ using namespace sdl_utils;
 
 using RenderTargetBinder = engine::RenderTargetTexture::Binder;
 
-namespace {
 
-// The game's original 320x200 resolution would give us a 16:10 aspect ratio
-// when using square pixels, but monitors of the time had a 4:3 aspect ratio,
-// and that's what the game's graphics were designed for (very noticeable e.g.
-// with the earth in the Apogee logo). It worked out fine back then because
-// CRTs can show non-square pixels, but that's not possible with today's
-// screens anymore. Therefore, we need to stretch the image slightly before
-// actually rendering it. We do that by rendering the game into a 320x200
-// render target, and then stretching that onto our logical display which has a
-// slightly bigger vertical resolution in order to get a 4:3 aspect ratio.
-const auto ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT = 240;
-
-// By making the logical display bigger than the aspect-ratio corrected
-// original resolution, we can show text with debug info (e.g. FPS) without it
-// taking up too much space or being hard to read.
-const auto SCALE_FACTOR = 2;
-
-const auto LOGICAL_DISPLAY_WIDTH =
-  data::GameTraits::viewPortWidthPx * SCALE_FACTOR;
-const auto LOGICAL_DISPLAY_HEIGHT =
-  ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT * SCALE_FACTOR;
-
-}
-
-
-Game::Game(const std::string& gamePath, SDL_Renderer* pRenderer)
-  : mpRenderer(pRenderer)
+Game::Game(const std::string& gamePath, SDL_Window* pWindow)
+  : mRenderer(pWindow)
   , mResources(gamePath)
   , mIsShareWareVersion(true)
   , mRenderTarget(
-      mpRenderer,
+      &mRenderer,
       data::GameTraits::viewPortWidthPx,
       data::GameTraits::viewPortHeightPx)
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mTextRenderer(pRenderer, mResources)
+  , mTextRenderer(&mRenderer, mResources)
   , mFpsDisplay(&mTextRenderer)
 {
-  clearScreen();
-  SDL_RenderPresent(mpRenderer);
-
-  throwIfFailed([this]() {
-    return SDL_RenderSetLogicalSize(
-      mpRenderer,
-      LOGICAL_DISPLAY_WIDTH,
-      LOGICAL_DISPLAY_HEIGHT);
-  });
+  mRenderer.clear();
+  mRenderer.swapBuffers();
 }
 
 
@@ -161,8 +129,10 @@ void Game::mainLoop() {
 
     mDebugText.clear();
 
+    mRenderer.clear();
+
     {
-      RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
+      RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
 
       while (mIsMinimized && SDL_WaitEvent(&event)) {
         handleEvent(event);
@@ -184,7 +154,7 @@ void Game::mainLoop() {
       mpCurrentGameMode->updateAndRender(elapsed);
     }
 
-    mRenderTarget.renderScaledToScreen(mpRenderer);
+    mRenderTarget.renderScaledToScreen(&mRenderer);
 
     if (!mDebugText.empty()) {
       mTextRenderer.drawMultiLineText(0, 2, mDebugText);
@@ -195,13 +165,13 @@ void Game::mainLoop() {
       duration<engine::TimeDelta>(afterRender - startOfFrame).count();
     mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
 
-    SDL_RenderPresent(mpRenderer);
+    mRenderer.swapBuffers();
   }
 }
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, mpRenderer, &mSoundSystem, this};
+  return {&mResources, &mRenderer, &mSoundSystem, this};
 }
 
 
@@ -237,7 +207,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
     return;
   }
 
-  engine::DefaultRenderTargetBinder bindDefaultRenderTarget(mpRenderer);
+  engine::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
 
   // We use the previous frame's mLastTime here as initial value
   engine::TimeDelta elapsedTime = 0.0;
@@ -259,10 +229,10 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
       mRenderTarget.setAlphaMod(doFadeIn ? 255 : 0);
     }
 
-    clearScreen();
+    mRenderer.clear();
 
-    mRenderTarget.renderScaledToScreen(mpRenderer);
-    SDL_RenderPresent(mpRenderer);
+    mRenderTarget.renderScaledToScreen(&mRenderer);
+    mRenderer.swapBuffers();
 
     if (fadeFactor >= 1.0) {
       break;
@@ -275,8 +245,8 @@ void Game::fadeOutScreen() {
   performScreenFadeBlocking(false);
 
   // Clear render canvas after a fade-out
-  RenderTargetBinder bindRenderTarget(mRenderTarget, mpRenderer);
-  clearScreen();
+  RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+  mRenderer.clear();
 }
 
 
@@ -338,12 +308,6 @@ void Game::scheduleGameQuit() {
 
 void Game::showDebugText(const std::string& text) {
   mDebugText = text;
-}
-
-
-void Game::clearScreen() {
-  SDL_SetRenderDrawColor(mpRenderer, 0, 0, 0, 255);
-  SDL_RenderClear(mpRenderer);
 }
 
 }

@@ -70,7 +70,7 @@ private:
   void showDebugText();
 
 private:
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   entityx::EntityX mEntities;
   game_logic::EntityFactory mEntityFactory;

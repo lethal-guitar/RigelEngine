@@ -35,13 +35,18 @@ set(core_sources
     engine/physics_system.hpp
     engine/random_number_generator.cpp
     engine/random_number_generator.hpp
+    engine/renderer.cpp
+    engine/renderer.hpp
     engine/rendering_system.cpp
     engine/rendering_system.hpp
+    engine/shader.cpp
+    engine/shader.hpp
+    engine/opengl.cpp
+    engine/opengl.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/texture.cpp
     engine/texture.hpp
-    engine/texture.ipp
     engine/tile_renderer.cpp
     engine/tile_renderer.hpp
     engine/timing.cpp
@@ -115,7 +120,6 @@ set(core_sources
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
-    sdl_utils/rect_tools.hpp
     ui/apogee_logo.cpp
     ui/apogee_logo.hpp
     ui/bonus_screen.cpp
@@ -168,6 +172,9 @@ target_include_directories(rigel_core
     ${3rd_party_path}/atria/src
     ${3rd_party_path}/atria/compat
 
+    ${3rd_party_path}/glad/include
+    ${3rd_party_path}/glm
+
     PRIVATE
     ${3rd_party_path}/dbopl
     ${3rd_party_path}/speex_resampler
@@ -181,6 +188,7 @@ target_link_libraries(rigel_core
     PRIVATE
     dbopl
     speex_resampler
+    glad
 )
 
 

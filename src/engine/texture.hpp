@@ -17,37 +17,27 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "data/image.hpp"
-#include "sdl_utils/ptr.hpp"
+#include "engine/renderer.hpp"
+#include "engine/opengl.hpp"
 
 #include <cstddef>
-#include <SDL.h>
 
 
 namespace rigel { namespace engine {
 
 namespace detail {
 
-template<typename PtrT>
-inline SDL_Texture* getTexturePtr(const PtrT& ptr) {
-  return ptr;
-}
-
-template<>
-inline SDL_Texture* getTexturePtr(const sdl_utils::Ptr<SDL_Texture>& ptr) {
-  return ptr.get();
-}
-
-template<typename PtrT>
 class TextureBase {
 public:
-  TextureBase();
+  TextureBase() = default;
 
   /** Render entire texture at given position */
-  void render(SDL_Renderer* renderer, const base::Vector& position) const;
+  void render(engine::Renderer* renderer, const base::Vector& position) const;
 
   /** Render entire texture at given position */
-  void render(SDL_Renderer* renderer, int x, int y) const;
+  void render(engine::Renderer* renderer, int x, int y) const;
 
   /** Render a part of the texture at given position
    *
@@ -56,19 +46,19 @@ public:
    * texture.
    */
   void render(
-    SDL_Renderer* renderer,
+    engine::Renderer* renderer,
     const base::Vector& position,
     const base::Rect<int>& sourceRect
   ) const;
 
   /** Render entire texture scaled to fill the given rectangle */
   void renderScaled(
-    SDL_Renderer* renderer,
+    engine::Renderer* renderer,
     const base::Rect<int>& destRect
   ) const;
 
   /** Render entire texture scaled to fill the entire screen */
-  void renderScaledToScreen(SDL_Renderer* pRenderer) const;
+  void renderScaledToScreen(engine::Renderer* pRenderer) const;
 
   /** Sets the blendmode to BLEND or NONE */
   void enableBlending(bool enable);
@@ -79,87 +69,96 @@ public:
   void setColorMod(int r, int g, int b);
 
   int width() const {
-    return mWidth;
+    return mData.mWidth;
   }
 
   int height() const {
-    return mHeight;
+    return mData.mHeight;
   }
 
   base::Extents extents() const {
-    return {mWidth, mHeight};
+    return {mData.mWidth, mData.mHeight};
   }
 
 protected:
+  base::Rect<int> completeSourceRect() const {
+    return {{0, 0}, extents()};
+  }
+
   void render(
-    SDL_Renderer* renderer,
+    engine::Renderer* renderer,
     int x,
     int y,
-    const SDL_Rect& sourceRect) const;
+    const base::Rect<int>& sourceRect) const;
 
-  template<typename PtrInitT>
-  TextureBase(PtrInitT&& ptr, const int width, const int height)
-    : mpTexture(std::forward<PtrInitT>(ptr))
-    , mWidth(width)
-    , mHeight(height)
+  TextureBase(Renderer::TextureData data)
+    : mData(data)
+    , mModulation({255, 255, 255, 255})
   {
   }
 
-  SDL_Texture* texturePtr() const {
-    return getTexturePtr(mpTexture);
-  }
-
-  PtrT mpTexture;
-
-private:
-  int mWidth;
-  int mHeight;
+  Renderer::TextureData mData;
+  base::Color mModulation;
 };
 
 }
 
-/** Wrapper class for SDL_Texture
+/** Wrapper class for renderable texture
  *
- * This wrapper class manages the life-time of an SDL_Texture, and offers
+ * This wrapper class manages the life-time of a texture, and offers
  * a more object-oriented interface.
  *
  * The ownership semantics are the same as for a std::unique_ptr.
  */
-class OwningTexture : public detail::TextureBase<sdl_utils::Ptr<SDL_Texture>> {
+class OwningTexture : public detail::TextureBase {
 public:
   OwningTexture() = default;
   OwningTexture(
-    SDL_Renderer* renderer,
+    engine::Renderer* renderer,
     const data::Image& image,
     bool enableBlending = true);
+  ~OwningTexture();
+
+  OwningTexture(OwningTexture&& other)
+    : TextureBase(other.mData)
+  {
+    other.mData.mHandle = 0;
+  }
+
+  OwningTexture(const OwningTexture&) = delete;
+  OwningTexture& operator=(const OwningTexture&) = delete;
+
+  OwningTexture& operator=(OwningTexture&& other) {
+    mData = other.mData;
+    other.mData.mHandle = 0;
+    return *this;
+  }
 
   friend class NonOwningTexture;
 
 protected:
-  OwningTexture(
-    SDL_Renderer* renderer,
-    std::size_t width,
-    std::size_t height,
-    bool createRenderTarget,
-    bool enableBlending);
+  OwningTexture(Renderer::TextureData data)
+    : TextureBase(data)
+  {
+  }
 };
 
 
 /** Non-owning version of OwningTexture
  *
  * This has exactly the same interface as OwningTexture, but it doesn't
- * manage the underlying SDL_Texture's life-time.
+ * manage the underlying texture's life-time.
  *
  * It behaves like a raw pointer, and clients are responsible for ensuring
  * that the corresponding OwningTexture outlives any NonOwningTexture
  * instances.
  */
-class NonOwningTexture : public detail::TextureBase<SDL_Texture*> {
+class NonOwningTexture : public detail::TextureBase {
 public:
   NonOwningTexture() = default;
 
   explicit NonOwningTexture(const OwningTexture& texture) :
-    TextureBase(texture.texturePtr(), texture.width(), texture.height())
+    TextureBase(texture.mData)
   {
   }
 };
@@ -212,33 +211,41 @@ public:
 
   class Binder {
   public:
-    Binder(RenderTargetTexture& renderTarget, SDL_Renderer* pRenderer);
+    Binder(RenderTargetTexture& renderTarget, engine::Renderer* pRenderer);
     ~Binder();
 
     Binder(const Binder&) = delete;
     Binder& operator=(const Binder&) = delete;
 
   protected:
-    Binder(SDL_Texture* pRenderTarget, SDL_Renderer* pRenderer);
+    Binder(const engine::Renderer::RenderTarget&, engine::Renderer* pRenderer);
 
   private:
-    SDL_Texture* mpRenderTarget;
-    SDL_Texture* mpPreviousRenderTarget;
-    SDL_Renderer* mpRenderer;
+    engine::Renderer::RenderTarget mRenderTarget;
+    engine::Renderer::RenderTarget mPreviousRenderTarget;
+    engine::Renderer* mpRenderer;
   };
 
   RenderTargetTexture(
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     std::size_t width,
     std::size_t height);
+  ~RenderTargetTexture();
+
+private:
+  RenderTargetTexture(
+    const Renderer::RenderTargetHandles& handles,
+    int width,
+    int height);
+
+private:
+  GLuint mFboHandle;
 };
 
 
 class DefaultRenderTargetBinder : public RenderTargetTexture::Binder {
 public:
-  explicit DefaultRenderTargetBinder(SDL_Renderer* pRenderer);
+  explicit DefaultRenderTargetBinder(engine::Renderer* pRenderer);
 };
 
 }}
-
-#include "texture.ipp"

@@ -18,12 +18,12 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
+#include "engine/renderer.hpp"
 #include "engine/timing.hpp"
 #include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
-#include <SDL_render.h>
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
@@ -86,7 +86,7 @@ private:
 
 
 void renderVerticalSlidingDoor(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   entityx::Entity,
   const engine::components::Sprite& sprite,
   const base::Vector& screenPosition);

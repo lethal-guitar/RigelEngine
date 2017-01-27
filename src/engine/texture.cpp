@@ -22,83 +22,175 @@
 namespace rigel { namespace engine {
 
 using data::Image;
+using detail::TextureBase;
 
 
-OwningTexture::OwningTexture(
-  SDL_Renderer* renderer,
-  const Image& image,
-  const bool enableBlending)
-  : OwningTexture(
-      renderer,
-      image.width(),
-      image.height(),
-      false,
-      enableBlending)
-{
-  const void* pixelData = image.pixelData().data();
-  SDL_UpdateTexture(texturePtr(), nullptr, pixelData, width()*4);
+void TextureBase::enableBlending(const bool enable) {
+}
+
+
+void TextureBase::setAlphaMod(const int alpha) {
+  mModulation.a = std::uint8_t(alpha);
+}
+
+
+int TextureBase::alphaMod() const {
+  return mModulation.a;
+}
+
+
+void TextureBase::setColorMod(
+  const int red,
+  const int green,
+  const int blue
+) {
+  mModulation.r = std::uint8_t(red);
+  mModulation.g = std::uint8_t(green);
+  mModulation.b = std::uint8_t(blue);
+}
+
+
+void TextureBase::render(
+  engine::Renderer* renderer,
+  const int x,
+  const int y
+) const {
+  base::Rect<int> fullImageRect{{0, 0}, {width(), height()}};
+  render(renderer, x, y, fullImageRect);
+}
+
+
+void TextureBase::render(
+  engine::Renderer* renderer,
+  const base::Vector& position
+) const {
+  render(renderer, position.x, position.y);
+}
+
+
+void TextureBase::render(
+  engine::Renderer* renderer,
+  const base::Vector& position,
+  const base::Rect<int>& sourceRect
+) const {
+  render(
+    renderer,
+    position.x,
+    position.y,
+    sourceRect);
+}
+
+
+void TextureBase::renderScaled(
+  engine::Renderer* pRenderer,
+  const base::Rect<int>& destRect
+) const {
+  pRenderer->drawTexture(mData, completeSourceRect(), destRect, mModulation);
+}
+
+
+void TextureBase::renderScaledToScreen(engine::Renderer* pRenderer) const {
+  renderScaled(pRenderer, pRenderer->fullScreenRect());
+}
+
+
+void TextureBase::render(
+  engine::Renderer* pRenderer,
+  const int x,
+  const int y,
+  const base::Rect<int>& sourceRect
+) const {
+  base::Rect<int> destRect{
+    {x, y},
+    {sourceRect.size.width, sourceRect.size.height}
+  };
+  pRenderer->drawTexture(
+    mData,
+    sourceRect,
+    destRect,
+    mModulation);
 }
 
 
 OwningTexture::OwningTexture(
-  SDL_Renderer* renderer,
-  const std::size_t width,
-  const std::size_t height,
-  const bool createRenderTarget,
-  const bool blendingDesired
-)
-  : TextureBase(
-    SDL_CreateTexture(
-      renderer,
-      SDL_PIXELFORMAT_ABGR8888,
-      createRenderTarget ? SDL_TEXTUREACCESS_TARGET : SDL_TEXTUREACCESS_STATIC,
-      static_cast<int>(width),
-      static_cast<int>(height)),
-      static_cast<int>(width),
-      static_cast<int>(height))
+  engine::Renderer* pRenderer,
+  const Image& image,
+  const bool enableBlending)
+  : TextureBase(pRenderer->createTexture(image))
 {
-  enableBlending(blendingDesired);
+}
+
+
+OwningTexture::~OwningTexture() {
+  glDeleteTextures(1, &mData.mHandle);
 }
 
 
 RenderTargetTexture::RenderTargetTexture(
-  SDL_Renderer* pRenderer,
-  std::size_t width,
-  std::size_t height
+  engine::Renderer* pRenderer,
+  const std::size_t width,
+  const std::size_t height
 )
-  : OwningTexture(pRenderer, width, height, true, true)
+  : RenderTargetTexture(
+      pRenderer->createRenderTargetTexture(int(width), int(height)),
+      static_cast<int>(width),
+      static_cast<int>(height))
 {
+}
+
+
+RenderTargetTexture::RenderTargetTexture(
+  const Renderer::RenderTargetHandles& handles,
+  const int width,
+  const int height
+)
+  : OwningTexture({width, height, handles.texture})
+  , mFboHandle(handles.fbo)
+{
+}
+
+
+RenderTargetTexture::~RenderTargetTexture() {
+  glDeleteFramebuffers(1, &mFboHandle);
 }
 
 
 RenderTargetTexture::Binder::Binder(
   RenderTargetTexture& renderTarget,
-  SDL_Renderer* pRenderer
+  engine::Renderer* pRenderer
 )
-  : Binder(renderTarget.texturePtr(), pRenderer)
+  : Binder(
+      {
+        renderTarget.mData.mWidth,
+        renderTarget.mData.mHeight,
+        renderTarget.mFboHandle
+      },
+      pRenderer)
 {
 }
 
 
 RenderTargetTexture::Binder::Binder(
-  SDL_Texture* pRenderTarget,
-  SDL_Renderer* pRenderer
+  const engine::Renderer::RenderTarget& target,
+  engine::Renderer* pRenderer
 )
-  : mpRenderTarget(pRenderTarget)
-  , mpPreviousRenderTarget(SDL_GetRenderTarget(pRenderer))
+  : mRenderTarget(target)
+  , mPreviousRenderTarget(pRenderer->currentRenderTarget())
   , mpRenderer(pRenderer)
 {
-  SDL_SetRenderTarget(mpRenderer, mpRenderTarget);
+  mpRenderer->setRenderTarget(mRenderTarget);
 }
 
 
 RenderTargetTexture::Binder::~Binder() {
-  SDL_SetRenderTarget(mpRenderer, mpPreviousRenderTarget);
+  mpRenderer->setRenderTarget(mPreviousRenderTarget);
 }
 
 
-DefaultRenderTargetBinder::DefaultRenderTargetBinder(SDL_Renderer* pRenderer)
-  : Binder(nullptr, pRenderer)
+DefaultRenderTargetBinder::DefaultRenderTargetBinder(
+  engine::Renderer* pRenderer
+)
+  : Binder({0, 0, 0}, pRenderer)
 {
 }
 

@@ -6,7 +6,7 @@
 namespace rigel { namespace ui {
 
 engine::OwningTexture fullScreenImageAsTexture(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName
 ) {

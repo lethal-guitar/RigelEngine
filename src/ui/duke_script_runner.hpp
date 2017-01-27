@@ -144,7 +144,7 @@ private:
 private:
   const loader::ResourceLoader* mpResourceBundle;
   loader::Palette16 mCurrentPalette;
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServices;
   MenuElementRenderer mMenuElementRenderer;
 
