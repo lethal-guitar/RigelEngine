@@ -16,16 +16,15 @@
 
 #pragma once
 
-#include "ptr.hpp"
-
 #include "base/spatial_types.hpp"
 #include "data/image.hpp"
+#include "sdl_utils/ptr.hpp"
 
 #include <cstddef>
 #include <SDL.h>
 
 
-namespace rigel { namespace sdl_utils {
+namespace rigel { namespace engine {
 
 namespace detail {
 
@@ -35,7 +34,7 @@ inline SDL_Texture* getTexturePtr(const PtrT& ptr) {
 }
 
 template<>
-inline SDL_Texture* getTexturePtr(const Ptr<SDL_Texture>& ptr) {
+inline SDL_Texture* getTexturePtr(const sdl_utils::Ptr<SDL_Texture>& ptr) {
   return ptr.get();
 }
 
@@ -126,7 +125,7 @@ private:
  *
  * The ownership semantics are the same as for a std::unique_ptr.
  */
-class OwningTexture : public detail::TextureBase<Ptr<SDL_Texture>> {
+class OwningTexture : public detail::TextureBase<sdl_utils::Ptr<SDL_Texture>> {
 public:
   OwningTexture() = default;
   OwningTexture(

@@ -475,7 +475,7 @@ void DukeScriptRunner::drawSprite(
   const auto drawOffsetPx =
     data::tileVectorToPixelVector(frameData.mDrawOffset);
 
-  sdl_utils::OwningTexture spriteTexture(mpRenderer, image);
+  engine::OwningTexture spriteTexture(mpRenderer, image);
   spriteTexture.render(mpRenderer, topLeftPx + drawOffsetPx);
 }
 

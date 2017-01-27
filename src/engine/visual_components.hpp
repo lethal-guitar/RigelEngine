@@ -19,8 +19,8 @@
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
+#include "engine/texture.hpp"
 #include "engine/timing.hpp"
-#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -36,7 +36,7 @@ namespace rigel { namespace engine { namespace components {
 struct SpriteFrame {
   SpriteFrame() = default;
   SpriteFrame(
-    sdl_utils::NonOwningTexture image,
+    engine::NonOwningTexture image,
     base::Vector drawOffset
   )
     : mImage(std::move(image))
@@ -44,7 +44,7 @@ struct SpriteFrame {
   {
   }
 
-  sdl_utils::NonOwningTexture mImage;
+  engine::NonOwningTexture mImage;
   base::Vector mDrawOffset;
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sdl_utils/texture.hpp"
+#include "engine/texture.hpp"
 
 
 namespace rigel { namespace loader {
@@ -9,7 +9,7 @@ namespace rigel { namespace loader {
 
 namespace rigel { namespace ui {
 
-sdl_utils::OwningTexture fullScreenImageAsTexture(
+engine::OwningTexture fullScreenImageAsTexture(
   SDL_Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName);

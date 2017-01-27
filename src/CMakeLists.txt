@@ -39,6 +39,9 @@ set(core_sources
     engine/rendering_system.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
+    engine/texture.cpp
+    engine/texture.hpp
+    engine/texture.ipp
     engine/tile_renderer.cpp
     engine/tile_renderer.hpp
     engine/timing.cpp
@@ -113,9 +116,6 @@ set(core_sources
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
     sdl_utils/rect_tools.hpp
-    sdl_utils/texture.cpp
-    sdl_utils/texture.hpp
-    sdl_utils/texture.ipp
     ui/apogee_logo.cpp
     ui/apogee_logo.hpp
     ui/bonus_screen.cpp

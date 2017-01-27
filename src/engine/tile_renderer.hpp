@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include "sdl_utils/texture.hpp"
+#include "engine/texture.hpp"
 
 
 namespace rigel { namespace engine {
 
 class TileRenderer {
 public:
-  TileRenderer(sdl_utils::OwningTexture&& tileSet, SDL_Renderer* pRenderer);
+  TileRenderer(engine::OwningTexture&& tileSet, SDL_Renderer* pRenderer);
 
   void renderTile(int index, int posX, int posY) const;
   void renderTile(const int index, const base::Vector& tlPosition) const {
@@ -56,7 +56,7 @@ private:
   ) const;
 
 private:
-  sdl_utils::OwningTexture mTileSetTexture;
+  engine::OwningTexture mTileSetTexture;
   SDL_Renderer* mpRenderer;
 };
 

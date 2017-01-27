@@ -143,7 +143,7 @@ const auto NUM_MENU_INDICATOR_STATES = 8;
 const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
 
-sdl_utils::OwningTexture createFontTexture(
+engine::OwningTexture createFontTexture(
   const loader::FontData& font,
   SDL_Renderer* pRenderer
 ) {
@@ -162,7 +162,7 @@ sdl_utils::OwningTexture createFontTexture(
     insertPosX += characterWidth;
   }
 
-  return sdl_utils::OwningTexture{pRenderer, combinedBitmaps};
+  return engine::OwningTexture{pRenderer, combinedBitmaps};
 }
 
 }
@@ -174,7 +174,7 @@ MenuElementRenderer::MenuElementRenderer(
   const loader::Palette16& palette
 )
   : mSpriteSheetRenderer(
-      sdl_utils::OwningTexture(
+      engine::OwningTexture(
         pRenderer,
         resources.loadTiledFullscreenImage("STATUS.MNI", palette)),
       pRenderer)

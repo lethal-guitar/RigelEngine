@@ -27,7 +27,6 @@ namespace rigel { namespace ui {
 
 using namespace rigel::data;
 using namespace rigel::engine;
-using sdl_utils::OwningTexture;
 
 
 namespace {
@@ -106,11 +105,11 @@ void drawLevelNumber(const int number, const TileRenderer& spriteSheet) {
 }
 
 
-sdl_utils::OwningTexture actorToTexture(
+OwningTexture actorToTexture(
   SDL_Renderer* pRenderer,
   const loader::ActorData& data
 ) {
-  return sdl_utils::OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
+  return OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
 }
 
 
@@ -222,7 +221,7 @@ HudRenderer::HudRenderer(
   , mInventoryTexturesByType(std::move(inventoryItemTextures))
   , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
   , mStatusSpriteSheetRenderer(
-      sdl_utils::OwningTexture(pRenderer, statusSpriteSheetImage),
+      OwningTexture(pRenderer, statusSpriteSheetImage),
       pRenderer)
 {
 }

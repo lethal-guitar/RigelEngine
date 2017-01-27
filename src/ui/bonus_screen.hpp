@@ -73,7 +73,7 @@ private:
   std::size_t mNextEvent = 0;
 
   SDL_Renderer* mpRenderer;
-  sdl_utils::OwningTexture mBackgroundTexture;
+  engine::OwningTexture mBackgroundTexture;
   ui::MenuElementRenderer mTextRenderer;
 };
 

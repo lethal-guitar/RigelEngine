@@ -19,9 +19,9 @@
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/sound_system.hpp"
+#include "engine/texture.hpp"
 #include "game_mode.hpp"
 #include "loader/resource_loader.hpp"
-#include "sdl_utils/texture.hpp"
 #include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
 
@@ -87,7 +87,7 @@ private:
   loader::ResourceLoader mResources;
   bool mIsShareWareVersion;
 
-  sdl_utils::RenderTargetTexture mRenderTarget;
+  engine::RenderTargetTexture mRenderTarget;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;
   std::unique_ptr<GameMode> mpNextGameMode;

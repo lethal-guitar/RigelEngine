@@ -5,12 +5,12 @@
 
 namespace rigel { namespace ui {
 
-sdl_utils::OwningTexture fullScreenImageAsTexture(
+engine::OwningTexture fullScreenImageAsTexture(
   SDL_Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName
 ) {
-  return sdl_utils::OwningTexture(
+  return engine::OwningTexture(
     pRenderer,
     resources.loadStandaloneFullscreenImage(imageName),
     false);

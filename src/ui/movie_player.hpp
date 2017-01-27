@@ -18,8 +18,8 @@
 
 #include "base/warnings.hpp"
 #include "data/movie.hpp"
+#include "engine/texture.hpp"
 #include "engine/timing.hpp"
-#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -54,7 +54,7 @@ public:
 
 private:
   struct FrameData {
-    sdl_utils::OwningTexture mImage;
+    engine::OwningTexture mImage;
     int mStartRow;
   };
 
@@ -62,7 +62,7 @@ private:
 
 private:
   SDL_Renderer* mpRenderer;
-  sdl_utils::OwningTexture mBaseImage;
+  engine::OwningTexture mBaseImage;
   std::vector<FrameData> mAnimationFrames;
   FrameCallbackFunc mFrameCallback = nullptr;
 

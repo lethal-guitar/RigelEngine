@@ -27,7 +27,7 @@ namespace rigel { namespace engine {
 using namespace data;
 
 TileRenderer::TileRenderer(
-  sdl_utils::OwningTexture&& tileSet,
+  engine::OwningTexture&& tileSet,
   SDL_Renderer* pRenderer
 )
   : mTileSetTexture(std::move(tileSet))

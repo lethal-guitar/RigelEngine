@@ -20,9 +20,9 @@
 #include "base/warnings.hpp"
 #include "data/player_data.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/texture.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
-#include "sdl_utils/texture.hpp"
 #include "ui/hud_renderer.hpp"
 
 #include "game_mode.hpp"
@@ -95,7 +95,7 @@ private:
 
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
-  sdl_utils::RenderTargetTexture mIngameViewPortRenderTarget;
+  engine::RenderTargetTexture mIngameViewPortRenderTarget;
 
   boost::optional<entityx::Entity> mActiveTeleporter;
 };

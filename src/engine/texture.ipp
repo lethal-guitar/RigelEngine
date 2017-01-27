@@ -17,7 +17,7 @@
 #include "texture.hpp"
 
 
-namespace rigel { namespace sdl_utils {
+namespace rigel { namespace engine {
 
 using data::Image;
 

@@ -17,10 +17,10 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
 #include "loader/palette.hpp"
-#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>

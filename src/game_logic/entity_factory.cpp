@@ -109,14 +109,14 @@ Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
 }
 
 
-const sdl_utils::OwningTexture& EntityFactory::getOrCreateTexture(
+const engine::OwningTexture& EntityFactory::getOrCreateTexture(
   const IdAndFrameNr& textureId
 ) {
   auto it = mTextureCache.find(textureId);
   if (it == mTextureCache.end()) {
     const auto& actorData = mpSpritePackage->loadActor(textureId.first);
     const auto& frameData = actorData.mFrames[textureId.second];
-    auto texture = sdl_utils::OwningTexture(
+    auto texture = engine::OwningTexture(
       mpRenderer, frameData.mFrameImage);
     it = mTextureCache.emplace(textureId, std::move(texture)).first;
   }
@@ -133,7 +133,7 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
     for (auto i=0u; i<actorData.mFrames.size(); ++i) {
       const auto& frameData = actorData.mFrames[i];
       const auto& texture = getOrCreateTexture(make_pair(ID, i));
-      const auto textureRef = sdl_utils::NonOwningTexture(texture);
+      const auto textureRef = engine::NonOwningTexture(texture);
       sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
     }
     sprite.mDrawOrder = actorData.mDrawIndex * DRAW_ORDER_SCALE_FACTOR;

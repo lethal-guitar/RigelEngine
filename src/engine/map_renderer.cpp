@@ -26,7 +26,6 @@
 namespace rigel { namespace engine {
 
 using namespace std;
-using sdl_utils::OwningTexture;
 using namespace data;
 
 using data::map::BackdropScrollMode;
@@ -60,13 +59,13 @@ MapRenderer::MapRenderer(
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileRenderer(
-      sdl_utils::OwningTexture(pRenderer, tileSetImage),
+      engine::OwningTexture(pRenderer, tileSetImage),
       pRenderer)
   , mBackdropTexture(mpRenderer, backdropImage, false)
   , mScrollMode(backdropScrollMode)
 {
   if (secondaryBackdropImage) {
-    mAlternativeBackdropTexture = OwningTexture(
+    mAlternativeBackdropTexture = engine::OwningTexture(
       mpRenderer, *secondaryBackdropImage, false);
   }
 }

@@ -19,9 +19,9 @@
 #include "base/warnings.hpp"
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
+#include "engine/texture.hpp"
 #include "engine/timing.hpp"
 #include "loader/palette.hpp"
-#include "sdl_utils/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
 
 #include "game_mode.hpp"

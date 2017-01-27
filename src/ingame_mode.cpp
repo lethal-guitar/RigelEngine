@@ -243,7 +243,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // Rendering
   // **********************************************************************
   {
-    sdl_utils::RenderTargetTexture::Binder
+    engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
     mEntities.systems.update<RenderingSystem>(dt);
     mEntities.systems.update<DebuggingSystem>(dt);

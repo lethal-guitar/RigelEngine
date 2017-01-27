@@ -17,10 +17,10 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
 #include "loader/level_loader.hpp"
-#include "sdl_utils/texture.hpp"
 
 
 namespace rigel { namespace engine {
@@ -54,8 +54,8 @@ private:
   const data::map::Map* mpMap;
 
   TileRenderer mTileRenderer;
-  sdl_utils::OwningTexture mBackdropTexture;
-  sdl_utils::OwningTexture mAlternativeBackdropTexture;
+  engine::OwningTexture mBackdropTexture;
+  engine::OwningTexture mAlternativeBackdropTexture;
 
   data::map::BackdropScrollMode mScrollMode;
 

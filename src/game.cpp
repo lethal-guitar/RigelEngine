@@ -33,9 +33,10 @@
 
 namespace rigel {
 
+using namespace engine;
 using namespace sdl_utils;
 
-using RenderTargetBinder = sdl_utils::RenderTargetTexture::Binder;
+using RenderTargetBinder = engine::RenderTargetTexture::Binder;
 
 namespace {
 
@@ -236,7 +237,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
     return;
   }
 
-  sdl_utils::DefaultRenderTargetBinder bindDefaultRenderTarget(mpRenderer);
+  engine::DefaultRenderTargetBinder bindDefaultRenderTarget(mpRenderer);
 
   // We use the previous frame's mLastTime here as initial value
   engine::TimeDelta elapsedTime = 0.0;
