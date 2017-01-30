@@ -84,6 +84,7 @@ private:
     }
 
     int mTalkDuration;
+    int mLastTalkFrame = -1;
     engine::TimeDelta mElapsedTime = 0;
   };
 
