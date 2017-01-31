@@ -148,9 +148,6 @@ void MapRenderer::renderMapTiles(
   const bool renderForeground
 ) {
   for (int layer=0; layer<2; ++layer) {
-    // We don't need alpha blending for the background layer
-    mTileRenderer.enableBlending(layer % 2 != 0);
-
     for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
         const auto col = x + scrollOffset.x;

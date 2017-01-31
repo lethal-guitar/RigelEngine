@@ -66,10 +66,6 @@ void TileRenderer::renderTileDoubleQuad(
 }
 
 
-void TileRenderer::enableBlending(const bool enabled) {
-}
-
-
 void TileRenderer::setColorMod(const int r, const int g, const int b) {
   mTileSetTexture.setColorMod(r, g, b);
 }

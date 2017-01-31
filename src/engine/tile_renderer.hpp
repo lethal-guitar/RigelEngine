@@ -41,7 +41,6 @@ public:
     int baseIndex,
     const base::Vector& tlPosition) const;
 
-  void enableBlending(bool enabled);
   void setColorMod(int r, int g, int b);
 
   int tilesPerRow() const;
