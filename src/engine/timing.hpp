@@ -27,6 +27,8 @@ namespace rigel { namespace engine {
 
 using TimeDelta = double;
 
+using TimePoint = double;
+
 
 constexpr TimeDelta slowTicksToTime(const int ticks) {
   return ticks * (1.0 / 140.0);
@@ -56,6 +58,12 @@ constexpr double timeToGameFrames(const TimeDelta time) {
 constexpr TimeDelta gameFramesToTime(const int frames) {
   return frames * (fastTicksToTime(1) * 16.0);
 }
+
+
+void initGlobalTimer();
+
+
+TimePoint currentGlobalTime();
 
 
 class TimeStepper {

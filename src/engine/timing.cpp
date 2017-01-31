@@ -16,6 +16,8 @@
 
 #include "timing.hpp"
 
+#include <chrono>
+
 
 namespace rigel { namespace engine {
 
@@ -34,6 +36,19 @@ namespace {
 const auto TIME_PER_FRAME = fastTicksToTime(1) * 8.0;
 
 
+std::chrono::high_resolution_clock::time_point globalTimeStart;
+
+}
+
+
+void initGlobalTimer() {
+  globalTimeStart = std::chrono::high_resolution_clock::now();
+}
+
+
+TimePoint currentGlobalTime() {
+  const auto now = std::chrono::high_resolution_clock::now();
+  return std::chrono::duration<double>(now - globalTimeStart).count();
 }
 
 
