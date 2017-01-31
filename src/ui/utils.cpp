@@ -12,8 +12,7 @@ engine::OwningTexture fullScreenImageAsTexture(
 ) {
   return engine::OwningTexture(
     pRenderer,
-    resources.loadStandaloneFullscreenImage(imageName),
-    false);
+    resources.loadStandaloneFullscreenImage(imageName));
 }
 
 }}

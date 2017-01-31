@@ -25,10 +25,6 @@ using data::Image;
 using detail::TextureBase;
 
 
-void TextureBase::enableBlending(const bool enable) {
-}
-
-
 void TextureBase::setAlphaMod(const int alpha) {
   mModulation.a = std::uint8_t(alpha);
 }
@@ -112,10 +108,7 @@ void TextureBase::render(
 }
 
 
-OwningTexture::OwningTexture(
-  engine::Renderer* pRenderer,
-  const Image& image,
-  const bool enableBlending)
+OwningTexture::OwningTexture(engine::Renderer* pRenderer, const Image& image)
   : TextureBase(pRenderer->createTexture(image))
 {
 }

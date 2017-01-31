@@ -61,12 +61,12 @@ MapRenderer::MapRenderer(
   , mTileRenderer(
       engine::OwningTexture(pRenderer, tileSetImage),
       pRenderer)
-  , mBackdropTexture(mpRenderer, backdropImage, false)
+  , mBackdropTexture(mpRenderer, backdropImage)
   , mScrollMode(backdropScrollMode)
 {
   if (secondaryBackdropImage) {
     mAlternativeBackdropTexture = engine::OwningTexture(
-      mpRenderer, *secondaryBackdropImage, false);
+      mpRenderer, *secondaryBackdropImage);
   }
 }
 

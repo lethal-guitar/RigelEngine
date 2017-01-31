@@ -60,9 +60,6 @@ public:
   /** Render entire texture scaled to fill the entire screen */
   void renderScaledToScreen(engine::Renderer* pRenderer) const;
 
-  /** Sets the blendmode to BLEND or NONE */
-  void enableBlending(bool enable);
-
   void setAlphaMod(int alpha);
   int alphaMod() const;
 
@@ -113,10 +110,7 @@ protected:
 class OwningTexture : public detail::TextureBase {
 public:
   OwningTexture() = default;
-  OwningTexture(
-    engine::Renderer* renderer,
-    const data::Image& image,
-    bool enableBlending = true);
+  OwningTexture(engine::Renderer* renderer, const data::Image& image);
   ~OwningTexture();
 
   OwningTexture(OwningTexture&& other)

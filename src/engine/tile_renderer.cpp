@@ -67,7 +67,6 @@ void TileRenderer::renderTileDoubleQuad(
 
 
 void TileRenderer::enableBlending(const bool enabled) {
-  mTileSetTexture.enableBlending(enabled);
 }
 
 
