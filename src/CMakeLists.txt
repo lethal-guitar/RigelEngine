@@ -141,8 +141,9 @@ set(core_sources
     utils/container_tools.hpp
     utils/enum_hash.hpp
 
-    game.cpp
-    game.hpp
+    game_main.cpp
+    game_main.hpp
+    game_main.ipp
     game_mode.hpp
     game_session_mode.cpp
     game_session_mode.hpp

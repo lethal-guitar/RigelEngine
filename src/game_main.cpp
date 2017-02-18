@@ -14,7 +14,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game.hpp"
+#include "game_main.hpp"
+#include "game_main.ipp"
 
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
@@ -39,6 +40,16 @@ using namespace sdl_utils;
 using RenderTargetBinder = engine::RenderTargetTexture::Binder;
 
 
+void gameMain(
+  const std::string& gamePath,
+  const GameOptions& options,
+  SDL_Window* pWindow
+) {
+  Game game(gamePath, pWindow);
+  game.run(options);
+}
+
+
 Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   : mRenderer(pWindow)
   , mResources(gamePath)
@@ -52,12 +63,13 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mTextRenderer(&mRenderer, mResources)
   , mFpsDisplay(&mTextRenderer)
 {
-  mRenderer.clear();
-  mRenderer.swapBuffers();
 }
 
 
-void Game::run(const Options& options) {
+void Game::run(const GameOptions& options) {
+  mRenderer.clear();
+  mRenderer.swapBuffers();
+
   data::forEachSoundId([this](const auto id) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });

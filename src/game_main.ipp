@@ -26,10 +26,6 @@
 #include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
 #include <chrono>
 #include <memory>
 #include <string>
@@ -40,18 +36,11 @@ namespace rigel {
 
 class Game : public IGameServiceProvider {
 public:
-  struct Options {
-    boost::optional<std::pair<int, int>> mLevelToJumpTo;
-    bool mSkipIntro = false;
-    bool mEnableMusic = true;
-    boost::optional<base::Vector> mPlayerPosition;
-  };
-
   Game(const std::string& gamePath, SDL_Window* pWindow);
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  void run(const Options& options);
+  void run(const GameOptions& options);
 
 private:
   void mainLoop();

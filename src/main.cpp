@@ -15,10 +15,11 @@
  */
 
 #include "base/warnings.hpp"
+#include "engine/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
 
-#include "game.hpp"
+#include "game_main.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/classification.hpp>
@@ -117,7 +118,7 @@ void showBanner() {
 }
 
 
-void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
+void initAndRunGame(const string& gamePath, const GameOptions& gameOptions) {
   SdlInitializer initializeSDL;
 
   throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
@@ -138,8 +139,7 @@ void initAndRunGame(const string& gamePath, const Game::Options& gameOptions) {
   // Same for the cursor disabling.
   SDL_ShowCursor(SDL_DISABLE);
 
-  Game game(gamePath, pWindow.get());
-  game.run(gameOptions);
+  gameMain(gamePath, gameOptions, pWindow.get());
 }
 
 }
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
   showBanner();
 
   string gamePath;
-  Game::Options gameOptions;
+  GameOptions gameOptions;
   bool disableMusic = false;
 
   po::options_description optionsDescription("Options");
