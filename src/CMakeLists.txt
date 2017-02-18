@@ -140,20 +140,6 @@ set(core_sources
     ui/utils.hpp
     utils/container_tools.hpp
     utils/enum_hash.hpp
-
-    game_main.cpp
-    game_main.hpp
-    game_main.ipp
-    game_mode.hpp
-    game_session_mode.cpp
-    game_session_mode.hpp
-    ingame_mode.cpp
-    ingame_mode.hpp
-    intro_demo_loop_mode.cpp
-    intro_demo_loop_mode.hpp
-    menu_mode.cpp
-    menu_mode.hpp
-    mode_stage.hpp
 )
 
 
@@ -195,7 +181,20 @@ target_link_libraries(rigel_core
 
 # Main executable
 set(main_exe_sources
+    game_main.cpp
+    game_main.hpp
+    game_main.ipp
+    game_mode.hpp
+    game_session_mode.cpp
+    game_session_mode.hpp
+    ingame_mode.cpp
+    ingame_mode.hpp
+    intro_demo_loop_mode.cpp
+    intro_demo_loop_mode.hpp
     main.cpp
+    menu_mode.cpp
+    menu_mode.hpp
+    mode_stage.hpp
 )
 
 
