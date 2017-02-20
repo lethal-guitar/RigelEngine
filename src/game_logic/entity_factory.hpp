@@ -18,9 +18,9 @@
 
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
+#include "engine/renderer.hpp"
 #include "engine/visual_components.hpp"
 #include "loader/level_loader.hpp"
-#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -63,7 +63,7 @@ inline bool isHorizontal(const ProjectileDirection direction) {
 class EntityFactory {
 public:
   EntityFactory(
-    SDL_Renderer* pRenderer,
+    engine::Renderer* pRenderer,
     entityx::EntityManager* pEntityManager,
     const loader::ActorImagePackage* pSpritePackage,
     data::Difficulty difficulty);
@@ -94,17 +94,17 @@ private:
 
   engine::components::Sprite createSpriteForId(const data::ActorID actorID);
 
-  const sdl_utils::OwningTexture& getOrCreateTexture(
+  const engine::OwningTexture& getOrCreateTexture(
     const IdAndFrameNr& textureId);
   engine::components::Sprite makeSpriteFromActorIDs(
     const std::vector<data::ActorID>& actorIDs);
 
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   entityx::EntityManager* mpEntityManager;
   const loader::ActorImagePackage* mpSpritePackage;
   data::Difficulty mDifficulty;
 
-  std::map<IdAndFrameNr, sdl_utils::OwningTexture> mTextureCache;
+  std::map<IdAndFrameNr, engine::OwningTexture> mTextureCache;
 };
 
 }}

@@ -26,10 +26,7 @@ namespace rigel { namespace engine {
 
 using namespace data;
 
-TileRenderer::TileRenderer(
-  sdl_utils::OwningTexture&& tileSet,
-  SDL_Renderer* pRenderer
-)
+TileRenderer::TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer)
   : mTileSetTexture(std::move(tileSet))
   , mpRenderer(pRenderer)
 {
@@ -66,11 +63,6 @@ void TileRenderer::renderTileDoubleQuad(
   const base::Vector& tlPosition
 ) const {
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 4, 2);
-}
-
-
-void TileRenderer::enableBlending(const bool enabled) {
-  mTileSetTexture.enableBlending(enabled);
 }
 
 

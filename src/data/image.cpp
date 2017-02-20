@@ -24,15 +24,6 @@ namespace rigel { namespace data {
 using namespace std;
 
 
-Pixel::Pixel(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
-  : r(r_)
-  , g(g_)
-  , b(b_)
-  , a(a_)
-{
-}
-
-
 Image::Image(
   const PixelBuffer& pixels,
   const std::size_t width,

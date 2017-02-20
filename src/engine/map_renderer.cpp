@@ -26,7 +26,6 @@
 namespace rigel { namespace engine {
 
 using namespace std;
-using sdl_utils::OwningTexture;
 using namespace data;
 
 using data::map::BackdropScrollMode;
@@ -50,7 +49,7 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 }
 
 MapRenderer::MapRenderer(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const data::map::Map* pMap,
   const data::Image& tileSetImage,
   const data::Image& backdropImage,
@@ -60,14 +59,14 @@ MapRenderer::MapRenderer(
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileRenderer(
-      sdl_utils::OwningTexture(pRenderer, tileSetImage),
+      engine::OwningTexture(pRenderer, tileSetImage),
       pRenderer)
-  , mBackdropTexture(mpRenderer, backdropImage, false)
+  , mBackdropTexture(mpRenderer, backdropImage)
   , mScrollMode(backdropScrollMode)
 {
   if (secondaryBackdropImage) {
-    mAlternativeBackdropTexture = OwningTexture(
-      mpRenderer, *secondaryBackdropImage, false);
+    mAlternativeBackdropTexture = engine::OwningTexture(
+      mpRenderer, *secondaryBackdropImage);
   }
 }
 
@@ -149,9 +148,6 @@ void MapRenderer::renderMapTiles(
   const bool renderForeground
 ) {
   for (int layer=0; layer<2; ++layer) {
-    // We don't need alpha blending for the background layer
-    mTileRenderer.enableBlending(layer % 2 != 0);
-
     for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
         const auto col = x + scrollOffset.x;

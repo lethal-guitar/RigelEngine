@@ -16,23 +16,15 @@
 
 #pragma once
 
+#include "base/color.hpp"
+
 #include <cstdint>
 #include <vector>
 
 
 namespace rigel { namespace data {
 
-struct Pixel {
-  Pixel() = default;
-  Pixel(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
-
-  std::uint8_t r = 0;
-  std::uint8_t g = 0;
-  std::uint8_t b = 0;
-  std::uint8_t a = 0;
-};
-
-
+using Pixel = rigel::base::Color;
 using PixelBuffer = std::vector<Pixel>;
 
 

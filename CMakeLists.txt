@@ -4,6 +4,7 @@ project(RigelEngine)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(main_exe_name RigelEngine)
@@ -75,6 +76,7 @@ set(ENTITYX_MAX_COMPONENTS 64 CACHE INTERNAL "")
 
 add_subdirectory(3rd_party/entityx)
 add_subdirectory(3rd_party/dbopl)
+add_subdirectory(3rd_party/glad)
 add_subdirectory(3rd_party/speex_resampler)
 
 target_compile_options(entityx PRIVATE

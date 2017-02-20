@@ -28,7 +28,7 @@ namespace rigel { namespace ui {
 using engine::fastTicksToTime;
 
 
-MoviePlayer::MoviePlayer(SDL_Renderer* pRenderer)
+MoviePlayer::MoviePlayer(engine::Renderer* pRenderer)
   : mpRenderer(pRenderer)
 {
 }
@@ -42,11 +42,11 @@ void MoviePlayer::playMovie(
 ) {
   assert(frameDelayInFastTicks >= 1);
 
-  mBaseImage = sdl_utils::OwningTexture(mpRenderer, movie.mBaseImage);
+  mBaseImage = engine::OwningTexture(mpRenderer, movie.mBaseImage);
   mAnimationFrames = utils::transformed(movie.mFrames,
     [this](const auto& frame) {
       auto texture =
-        sdl_utils::OwningTexture(mpRenderer, frame.mReplacementImage);
+        engine::OwningTexture(mpRenderer, frame.mReplacementImage);
       return FrameData{
       std::move(texture),
         frame.mStartRow

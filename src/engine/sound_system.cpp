@@ -103,8 +103,8 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 
 struct SoundSystem::SoundSystemImpl
 {
-  std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
   std::vector<data::AudioBuffer> mAudioBuffers;
+  std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
   SoundHandle mNextHandle = 0;
   mutable int mCurrentSongChannel = -1;
   mutable int mCurrentSoundChannel = -1;
@@ -122,6 +122,7 @@ struct SoundSystem::SoundSystemImpl
 
 
   ~SoundSystemImpl() {
+    mLoadedChunks.clear();
     Mix_Quit();
   }
 

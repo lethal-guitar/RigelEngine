@@ -14,42 +14,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
-#include "data/map.hpp"
-#include "engine/renderer.hpp"
+#include "opengl.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
+#include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
-
-class DebuggingSystem : public entityx::System<DebuggingSystem> {
-public:
-  DebuggingSystem(
-    engine::Renderer* pRenderer,
-    base::Vector* pScrollOffset,
-    data::map::Map* pMap);
-
-  void toggleBoundingBoxDisplay();
-  void toggleWorldCollisionDataDisplay();
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
-
-private:
-  engine::Renderer* mpRenderer;
-  base::Vector* mpScrollOffset;
-  data::map::Map* mpMap;
-
-  bool mShowBoundingBoxes = false;
-  bool mShowWorldCollisionData = false;
-};
-
-}}
+void rigel::engine::loadGlFunctions() {
+  gladLoadGLLoader(SDL_GL_GetProcAddress);
+}

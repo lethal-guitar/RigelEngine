@@ -27,7 +27,6 @@ namespace rigel { namespace ui {
 
 using namespace rigel::data;
 using namespace rigel::engine;
-using sdl_utils::OwningTexture;
 
 
 namespace {
@@ -106,11 +105,11 @@ void drawLevelNumber(const int number, const TileRenderer& spriteSheet) {
 }
 
 
-sdl_utils::OwningTexture actorToTexture(
-  SDL_Renderer* pRenderer,
+OwningTexture actorToTexture(
+  engine::Renderer* pRenderer,
   const loader::ActorData& data
 ) {
-  return sdl_utils::OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
+  return OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
 }
 
 
@@ -118,7 +117,7 @@ sdl_utils::OwningTexture actorToTexture(
 
 
 HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorImagePackage& imagePack
 ) {
   InventoryItemTextureMap map;
@@ -144,7 +143,7 @@ HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
 
 HudRenderer::CollectedLetterIndicatorMap
 HudRenderer::makeCollectedLetterTextureMap(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorImagePackage& imagePack
 ) {
   CollectedLetterIndicatorMap map;
@@ -189,7 +188,7 @@ HudRenderer::makeCollectedLetterTextureMap(
 HudRenderer::HudRenderer(
   data::PlayerModel* pPlayerModel,
   const int levelNumber,
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ResourceLoader& bundle
 )
   : HudRenderer(
@@ -207,7 +206,7 @@ HudRenderer::HudRenderer(
 HudRenderer::HudRenderer(
   data::PlayerModel* pPlayerModel,
   const int levelNumber,
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ActorData& actorData,
   InventoryItemTextureMap&& inventoryItemTextures,
   CollectedLetterIndicatorMap&& collectedLetterTextures,
@@ -222,7 +221,7 @@ HudRenderer::HudRenderer(
   , mInventoryTexturesByType(std::move(inventoryItemTextures))
   , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
   , mStatusSpriteSheetRenderer(
-      sdl_utils::OwningTexture(pRenderer, statusSpriteSheetImage),
+      OwningTexture(pRenderer, statusSpriteSheetImage),
       pRenderer)
 {
 }

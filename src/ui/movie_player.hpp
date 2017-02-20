@@ -18,8 +18,8 @@
 
 #include "base/warnings.hpp"
 #include "data/movie.hpp"
+#include "engine/texture.hpp"
 #include "engine/timing.hpp"
-#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -39,7 +39,7 @@ public:
    */
   using FrameCallbackFunc = std::function<boost::optional<int>(int)>;
 
-  explicit MoviePlayer(SDL_Renderer* pRenderer);
+  explicit MoviePlayer(engine::Renderer* pRenderer);
 
   void playMovie(
     const data::Movie& movie,
@@ -54,15 +54,15 @@ public:
 
 private:
   struct FrameData {
-    sdl_utils::OwningTexture mImage;
+    engine::OwningTexture mImage;
     int mStartRow;
   };
 
   void invokeFrameCallbackIfPresent(int whichFrame);
 
 private:
-  SDL_Renderer* mpRenderer;
-  sdl_utils::OwningTexture mBaseImage;
+  engine::Renderer* mpRenderer;
+  engine::OwningTexture mBaseImage;
   std::vector<FrameData> mAnimationFrames;
   FrameCallbackFunc mFrameCallback = nullptr;
 

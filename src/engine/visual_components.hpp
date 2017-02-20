@@ -19,13 +19,13 @@
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
+#include "engine/renderer.hpp"
+#include "engine/texture.hpp"
 #include "engine/timing.hpp"
-#include "sdl_utils/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
 #include <entityx/entityx.h>
-#include <SDL_render.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <vector>
@@ -36,7 +36,7 @@ namespace rigel { namespace engine { namespace components {
 struct SpriteFrame {
   SpriteFrame() = default;
   SpriteFrame(
-    sdl_utils::NonOwningTexture image,
+    engine::NonOwningTexture image,
     base::Vector drawOffset
   )
     : mImage(std::move(image))
@@ -44,7 +44,7 @@ struct SpriteFrame {
   {
   }
 
-  sdl_utils::NonOwningTexture mImage;
+  engine::NonOwningTexture mImage;
   base::Vector mDrawOffset;
 };
 
@@ -67,7 +67,7 @@ struct Sprite {
  * pixel position.
  */
 using CustomRenderFunc = void(*)(
-  SDL_Renderer*,
+  engine::Renderer*,
   entityx::Entity,
   const engine::components::Sprite&,
   const base::Vector&);

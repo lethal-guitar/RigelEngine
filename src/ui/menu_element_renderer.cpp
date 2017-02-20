@@ -143,9 +143,9 @@ const auto NUM_MENU_INDICATOR_STATES = 8;
 const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
 
-sdl_utils::OwningTexture createFontTexture(
+engine::OwningTexture createFontTexture(
   const loader::FontData& font,
-  SDL_Renderer* pRenderer
+  engine::Renderer* pRenderer
 ) {
   if (font.size() != 67u) {
     throw std::runtime_error("Wrong number of bitmaps in menu font");
@@ -162,19 +162,19 @@ sdl_utils::OwningTexture createFontTexture(
     insertPosX += characterWidth;
   }
 
-  return sdl_utils::OwningTexture{pRenderer, combinedBitmaps};
+  return engine::OwningTexture{pRenderer, combinedBitmaps};
 }
 
 }
 
 
 MenuElementRenderer::MenuElementRenderer(
-  SDL_Renderer* pRenderer,
+  engine::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const loader::Palette16& palette
 )
   : mSpriteSheetRenderer(
-      sdl_utils::OwningTexture(
+      engine::OwningTexture(
         pRenderer,
         resources.loadTiledFullscreenImage("STATUS.MNI", palette)),
       pRenderer)

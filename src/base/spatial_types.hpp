@@ -38,10 +38,6 @@ namespace detail {
 template<typename ValueT>
 SDL_Rect toSdlRect(const Rect<ValueT>& rect)
 {
-  // This code is duplicated with the one in sdl_utils/rect_tools.hpp *on
-  // purpose*. It's an implementation detail that the Rect class uses SDL to
-  // implement the intersects() method, and the public API of the 'base' module
-  // should not depend on SDL.
   return {
     int(rect.topLeft.x), int(rect.topLeft.y),
     int(rect.size.width), int(rect.size.height)

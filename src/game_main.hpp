@@ -16,40 +16,31 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/map.hpp"
-#include "engine/renderer.hpp"
+#include "base/spatial_types.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
+#include <boost/optional.hpp>
+#include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <string>
+#include <utility>
 
-namespace rigel { namespace engine {
 
-class DebuggingSystem : public entityx::System<DebuggingSystem> {
-public:
-  DebuggingSystem(
-    engine::Renderer* pRenderer,
-    base::Vector* pScrollOffset,
-    data::map::Map* pMap);
+namespace rigel {
 
-  void toggleBoundingBoxDisplay();
-  void toggleWorldCollisionDataDisplay();
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
-
-private:
-  engine::Renderer* mpRenderer;
-  base::Vector* mpScrollOffset;
-  data::map::Map* mpMap;
-
-  bool mShowBoundingBoxes = false;
-  bool mShowWorldCollisionData = false;
+struct GameOptions {
+  boost::optional<std::pair<int, int>> mLevelToJumpTo;
+  bool mSkipIntro = false;
+  bool mEnableMusic = true;
+  boost::optional<base::Vector> mPlayerPosition;
 };
 
-}}
+
+void gameMain(
+  const std::string& gamePath,
+  const GameOptions& options,
+  SDL_Window* pWindow);
+
+}

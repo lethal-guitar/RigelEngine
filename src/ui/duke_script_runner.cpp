@@ -253,11 +253,16 @@ void DukeScriptRunner::animateNewsReporter(
     const auto randomNumber =
       engine::RANDOM_NUMBER_TABLE[
         numFramesAlreadyTalked % engine::RANDOM_NUMBER_TABLE.size()];
-    drawSprite(
-      NEWS_REPORTER_ACTOR_ID,
-      randomNumber % NUM_NEWS_REPORTER_STATES,
-      0,
-      0);
+    const auto newTalkFrame = randomNumber % NUM_NEWS_REPORTER_STATES;
+
+    if (newTalkFrame != state.mLastTalkFrame) {
+      drawSprite(
+        NEWS_REPORTER_ACTOR_ID,
+        newTalkFrame,
+        0,
+        0);
+      state.mLastTalkFrame = newTalkFrame;
+    }
   } else {
     stopNewsReporterAnimation();
   }
@@ -315,6 +320,7 @@ void DukeScriptRunner::interpretNextAction() {
         *mpResourceBundle,
         showImage.image);
       imageTexture.render(mpRenderer, 0, 0);
+      mpRenderer->submitBatch();
     },
 
     [this](const Delay& delay) {
@@ -470,8 +476,9 @@ void DukeScriptRunner::drawSprite(
   const auto drawOffsetPx =
     data::tileVectorToPixelVector(frameData.mDrawOffset);
 
-  sdl_utils::OwningTexture spriteTexture(mpRenderer, image);
+  engine::OwningTexture spriteTexture(mpRenderer, image);
   spriteTexture.render(mpRenderer, topLeftPx + drawOffsetPx);
+  mpRenderer->submitBatch();
 }
 
 

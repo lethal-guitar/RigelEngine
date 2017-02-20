@@ -50,6 +50,7 @@
     _Pragma("clang diagnostic ignored \"-Wmissing-noreturn\"") \
     _Pragma("clang diagnostic ignored \"-Wdeprecated\"") \
     _Pragma("clang diagnostic ignored \"-Wundef\"") \
+    _Pragma("clang diagnostic ignored \"-Wundefined-reinterpret-cast\"") \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")

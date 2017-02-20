@@ -19,9 +19,9 @@
 #include "base/warnings.hpp"
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
+#include "engine/texture.hpp"
 #include "engine/timing.hpp"
 #include "loader/palette.hpp"
-#include "sdl_utils/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
 
 #include "game_mode.hpp"
@@ -84,6 +84,7 @@ private:
     }
 
     int mTalkDuration;
+    int mLastTalkFrame = -1;
     engine::TimeDelta mElapsedTime = 0;
   };
 
@@ -143,7 +144,7 @@ private:
 private:
   const loader::ResourceLoader* mpResourceBundle;
   loader::Palette16 mCurrentPalette;
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServices;
   MenuElementRenderer mMenuElementRenderer;
 

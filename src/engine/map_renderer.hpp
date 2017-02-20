@@ -17,10 +17,11 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "engine/renderer.hpp"
+#include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
 #include "loader/level_loader.hpp"
-#include "sdl_utils/texture.hpp"
 
 
 namespace rigel { namespace engine {
@@ -28,7 +29,7 @@ namespace rigel { namespace engine {
 class MapRenderer {
 public:
   MapRenderer(
-    SDL_Renderer* renderer,
+    engine::Renderer* renderer,
     const data::map::Map* pMap,
     const data::Image& tileSetImage,
     const data::Image& backdropImage,
@@ -50,12 +51,12 @@ private:
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 
 private:
-  SDL_Renderer* mpRenderer;
+  engine::Renderer* mpRenderer;
   const data::map::Map* mpMap;
 
   TileRenderer mTileRenderer;
-  sdl_utils::OwningTexture mBackdropTexture;
-  sdl_utils::OwningTexture mAlternativeBackdropTexture;
+  engine::OwningTexture mBackdropTexture;
+  engine::OwningTexture mAlternativeBackdropTexture;
 
   data::map::BackdropScrollMode mScrollMode;
 
