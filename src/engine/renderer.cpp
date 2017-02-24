@@ -146,6 +146,11 @@ void* toAttribOffset(std::uintptr_t offset) {
   return reinterpret_cast<void*>(offset);
 }
 
+
+glm::vec4 toGlColor(const base::Color& color) {
+  return glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
+}
+
 }
 
 
@@ -221,12 +226,8 @@ void Renderer::drawTexture(
   }
 
   if (colorModulationChanged) {
-    const auto colorModulationVec = glm::vec4{
-      colorModulation.r,
-      colorModulation.g,
-      colorModulation.b,
-      colorModulation.a} / 255.0f;
-    mTexturedQuadShader.setUniform("colorModulation", colorModulationVec);
+    mTexturedQuadShader.setUniform(
+      "colorModulation", toGlColor(colorModulation));
     mLastColorModulation = colorModulation;
   }
 
