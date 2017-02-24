@@ -76,15 +76,17 @@ out vec4 outputColor;
 in vec2 texCoordFrag;
 
 uniform sampler2D textureData;
-uniform vec3 overlayColor;
-uniform float overlayAmount;
+uniform vec4 overlayColor;
 
 uniform vec4 colorModulation;
 
 void main() {
   vec4 baseColor = texture(textureData, texCoordFrag);
-  vec3 overlay = overlayColor * overlayAmount;
-  outputColor = baseColor * colorModulation + vec4(overlay, 0.0);
+  vec4 modulated = baseColor * colorModulation;
+  float targetAlpha = modulated.a;
+
+  outputColor =
+    vec4(mix(modulated.rgb, overlayColor.rgb, overlayColor.a), targetAlpha);
 }
 )shd";
 
@@ -203,6 +205,17 @@ base::Rect<int> Renderer::fullScreenRect() const {
     {0, 0},
     {mCurrentFramebufferWidth, mCurrentFramebufferHeight}
   };
+}
+
+
+void Renderer::setOverlayColor(const base::Color& color) {
+  if (color != mLastOverlayColor) {
+    submitBatch();
+
+    setRenderModeIfChanged(RenderMode::SpriteBatch);
+    mTexturedQuadShader.setUniform("overlayColor", toGlColor(color));
+    mLastOverlayColor = color;
+  }
 }
 
 

@@ -90,6 +90,8 @@ public:
 
   base::Rect<int> fullScreenRect() const;
 
+  void setOverlayColor(const base::Color& color);
+
   void drawTexture(
     const TextureData& textureData,
     const base::Rect<int>& pSourceRect,
@@ -162,6 +164,7 @@ private:
   GLuint mLastUsedShader;
   GLuint mLastUsedTexture;
   base::Color mLastColorModulation;
+  base::Color mLastOverlayColor;
 
   RenderMode mRenderMode;
 
