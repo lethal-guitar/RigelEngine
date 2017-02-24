@@ -19,6 +19,7 @@
 #include "data/player_data.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
+#include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_mode.hpp"
@@ -30,6 +31,7 @@ namespace ex = entityx;
 
 using engine::components::BoundingBox;
 using engine::components::CollidedWithWorld;
+using engine::components::Sprite;
 using engine::components::WorldPosition;
 using game_logic::components::DamageInflicting;
 using game_logic::components::MapGeometryLink;
@@ -98,6 +100,10 @@ void DamageInflictionSystem::update(
             shootableEntity.destroy();
           } else {
             mpServiceProvider->playSound(data::SoundId::EnemyHit);
+
+            if (shootableEntity.has_component<Sprite>()) {
+              shootableEntity.component<Sprite>()->flashWhite();
+            }
           }
           break;
         }
