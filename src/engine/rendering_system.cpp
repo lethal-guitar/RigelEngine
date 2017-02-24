@@ -165,6 +165,19 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
   } else {
     for (const auto frameIndex : sprite.mFramesToRender) {
       assert(frameIndex < int(sprite.mFrames.size()));
+
+      // White flash effect
+      const auto maxFlashWhiteTime = engine::gameFramesToTime(1);
+      const auto elapsedFlashWhiteTime =
+        engine::currentGlobalTime() - sprite.mFlashWhiteTime;
+      const auto flashWhite =
+        sprite.mFlashWhiteTime != 0.0 &&
+        elapsedFlashWhiteTime <= maxFlashWhiteTime;
+
+      if (flashWhite) {
+        mpRenderer->setOverlayColor(base::Color(255, 255, 255, 255));
+      }
+
       auto& frame = sprite.mFrames[frameIndex];
 
       // World-space tile positions refer to a sprite's bottom left tile,
@@ -177,6 +190,8 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       const auto screenPositionPx = topLeftPx + drawOffsetPx - worldToScreenPx;
       frame.mImage.render(mpRenderer, screenPositionPx);
+
+      mpRenderer->setOverlayColor(base::Color{});
     }
   }
 }

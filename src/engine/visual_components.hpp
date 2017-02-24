@@ -53,8 +53,13 @@ struct Sprite {
   std::vector<SpriteFrame> mFrames;
   int mDrawOrder;
 
+  void flashWhite() {
+    mFlashWhiteTime = currentGlobalTime();
+  }
+
   std::vector<int> mFramesToRender;
   bool mShow = true;
+  engine::TimePoint mFlashWhiteTime = 0.0;
 };
 
 
