@@ -49,8 +49,6 @@ const auto NUM_LADDER_ANIM_STATES = 2;
 const auto NUM_WALK_ANIM_STATES = 4;
 
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
 const std::unordered_map<int, int> ATTACK_FRAME_MAP = {
   {0, 18},
   {17, 34},
@@ -73,9 +71,6 @@ const std::unordered_map<player::PlayerState, int> STATE_FRAME_MAP = {
   {PlayerState::LookingUp, 16},
   {PlayerState::Crouching, 17}
 };
-
-
-RIGEL_RESTORE_WARNINGS
 
 
 int deathAnimationFrame(const int elapsedTicks, const int currentFrame) {

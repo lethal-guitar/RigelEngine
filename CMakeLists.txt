@@ -48,6 +48,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wno-switch-enum
         -Wno-unused-parameter
         -Wno-weak-vtables
+        -Wno-global-constructors
 
         -fcolor-diagnostics
     )

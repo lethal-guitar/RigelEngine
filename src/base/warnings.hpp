@@ -22,18 +22,11 @@
 
 #if defined(_MSC_VER)
 
-  #define RIGEL_DISABLE_GLOBAL_CTORS_WARNING __pragma(warning(push))
-
   #define RIGEL_DISABLE_WARNINGS __pragma(warning(push, 0))
 
   #define RIGEL_RESTORE_WARNINGS __pragma(warning(pop))
 
 #elif defined(__clang__)
-
-  #define RIGEL_DISABLE_GLOBAL_CTORS_WARNING \
-    _Pragma("clang diagnostic push") \
-    _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"") \
-    /**/
 
   #define RIGEL_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push") \
@@ -56,8 +49,6 @@
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")
 
 #elif defined(__GNUC__)
-
-  #define RIGEL_DISABLE_GLOBAL_CTORS_WARNING _Pragma("GCC diagnostic push")
 
   #define RIGEL_DISABLE_WARNINGS \
     _Pragma("GCC diagnostic push") \

@@ -32,13 +32,9 @@ using engine::components::WorldPosition;
 
 namespace {
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
 const data::ActorID DROP_ACTOR_ID = 118;
 const auto DROP_FREQUENCY = 25;
 const auto DROP_OFFSET = WorldPosition{1, 0};
-
-RIGEL_RESTORE_WARNINGS
 
 }
 
