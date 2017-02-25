@@ -53,8 +53,6 @@ PaletteType load6bitPalette(
 
 }
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
 // This palette is derived from the hardcoded EGA palette in the uncompressed
 // EXE (using unlzexe) at offset 0x1b038 (registered version, might be
 // different in the shareware version). It's very similar to GAMEPAL.PAL, but
@@ -83,8 +81,6 @@ const Palette16 INGAME_PALETTE{
   data::Pixel{121,  60,   0, 255},
   data::Pixel{242, 242, 242, 255}
 };
-
-RIGEL_RESTORE_WARNINGS
 
 
 Palette16 load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end) {

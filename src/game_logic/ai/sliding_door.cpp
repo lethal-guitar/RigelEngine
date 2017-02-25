@@ -33,12 +33,8 @@ using engine::components::WorldPosition;
 
 namespace {
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
 const auto HORIZONTAL_DOOR_RANGE = base::Rect<int>{{-2, -2}, {8, 9}};
 const auto VERTICAL_DOOR_RANGE = base::Rect<int>{{-8, -6}, {15, 7}};
-
-RIGEL_RESTORE_WARNINGS
 
 
 bool playerInRange(

@@ -52,6 +52,8 @@ set(core_sources
     engine/timing.cpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/messenger_drone.cpp
+    game_logic/ai/messenger_drone.hpp
     game_logic/ai/prisoner.cpp
     game_logic/ai/prisoner.hpp
     game_logic/ai/security_camera.cpp

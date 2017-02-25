@@ -21,8 +21,6 @@
 
 namespace rigel { namespace data {
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
 const base::Vector GameTraits::inGameViewPortOffset(8, 8);
 
 const base::Extents GameTraits::inGameViewPortSize(
@@ -34,7 +32,5 @@ const base::Extents GameTraits::mapViewPortSize(
   GameTraits::mapViewPortHeightTiles);
 
 const base::Extents GameTraits::menuFontCharacterBitmapSizeTiles(1, 2);
-
-RIGEL_RESTORE_WARNINGS
 
 }}

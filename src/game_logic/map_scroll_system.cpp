@@ -33,8 +33,6 @@ using namespace engine::components;
 using namespace game_logic::components;
 
 
-RIGEL_DISABLE_GLOBAL_CTORS_WARNING
-
 const base::Rect<int> DefaultDeadZone{
   {11, 2},
   {
@@ -51,8 +49,6 @@ const base::Rect<int> ClimbingDeadZone{
     data::GameTraits::mapViewPortHeightTiles - 14,
   }
 };
-
-RIGEL_RESTORE_WARNINGS
 
 
 base::Rect<int> scrollDeadZoneForState(const PlayerState state) {
