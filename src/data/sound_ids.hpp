@@ -31,7 +31,7 @@ enum class SoundId {
   ItemPickup = 8,
   WeaponPickup = 9,
   EnemyHit = 10,
-  SwivelGunTurning = 11,
+  Swoosh = 11,
   FlameThrowerShot = 12,
   DukeJumping = 13,
   LavaRiser = 14,
