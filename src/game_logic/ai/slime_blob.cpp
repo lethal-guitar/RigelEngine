@@ -105,17 +105,27 @@ void SlimeBlobSystem::update(
           sprite.mFramesToRender[0] = state.mBreakAnimationStep + 2;
         }
       }
-
-      if (stillIntact && entity.component<Shootable>()->mHasBeenHit) {
-        entity.remove<Shootable>();
-        sprite.mFramesToRender.pop_back();
-        sprite.mFramesToRender[0] = 2;
-
-        sprite.flashWhite();
-      }
     });
 
   // TODO: Slime blob enemy logic
+}
+
+
+void SlimeBlobSystem::onEntityHit(entityx::Entity entity) {
+  if (
+    !entity.has_component<components::SlimeContainer>() ||
+    !entity.has_component<Shootable>()
+  ) {
+    return;
+  }
+
+  entity.remove<Shootable>();
+
+  auto& sprite = *entity.component<Sprite>();
+  sprite.mFramesToRender.pop_back();
+  sprite.mFramesToRender[0] = 2;
+
+  sprite.flashWhite();
 }
 
 }}}

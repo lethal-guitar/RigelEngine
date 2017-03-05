@@ -55,16 +55,6 @@ void DamageInflictionSystem::update(
   ex::EventManager& events,
   ex::TimeDelta dt
 ) {
-  // TODO: Do this one layer higher up instead of in each system
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
-  // Reset 'has been hit' flag
-  es.each<Shootable>([](ex::Entity, Shootable& shootable) {
-    shootable.mHasBeenHit = false;
-  });
-
   es.each<DamageInflicting, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity inflictorEntity,
@@ -88,7 +78,7 @@ void DamageInflictionSystem::update(
         ) {
           inflictorEntity.destroy();
 
-          shootable->mHasBeenHit = true;
+          mEntityHitSignal(shootableEntity);
           shootable->mHealth -= damage.mAmount;
           if (shootable->mHealth <= 0) {
             mpPlayerModel->mScore += shootable->mGivenScore;

@@ -27,6 +27,9 @@
 
 namespace rigel { namespace game_logic { namespace ai {
 
+using game_logic::components::Shootable;
+
+
 namespace {
 
 int angleAdjustment(const int currentAngle, const bool playerIsRight) {
@@ -78,7 +81,6 @@ void LaserTurretSystem::update(
 ) {
   using namespace engine::components;
   using game_logic::components::PlayerDamaging;
-  using game_logic::components::Shootable;
 
   // TODO: Do this one layer higher up instead of in each system
   if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
@@ -96,16 +98,6 @@ void LaserTurretSystem::update(
       Shootable& shootable,
       const Active&
     ) {
-      if (shootable.mHasBeenHit) {
-        // When hit, go into spinning mode
-        state.mSpinningTurnsLeft = 40;
-        shootable.mHealth = 2;
-        shootable.mInvincible = true;
-        entity.remove<PlayerDamaging>();
-
-        mpPlayerModel->mScore += 1;
-      }
-
       const auto isSpinning = state.mSpinningTurnsLeft > 0;
       if (!isSpinning) {
         // Flash the sprite before checking orientation and potentially firing.
@@ -171,6 +163,23 @@ void LaserTurretSystem::update(
       sprite.mFramesToRender[0] = state.mAngle;
       engine::synchronizeBoundingBoxToSprite(entity);
     });
+}
+
+
+void LaserTurretSystem::onEntityHit(entityx::Entity entity) {
+  if (!entity.has_component<components::LaserTurret>()) {
+    return;
+  }
+
+  // When hit, go into spinning mode
+  entity.component<components::LaserTurret>()->mSpinningTurnsLeft = 40;
+
+  auto& shootable = *entity.component<Shootable>();
+  shootable.mHealth = 2;
+  shootable.mInvincible = true;
+  entity.remove<game_logic::components::PlayerDamaging>();
+
+  mpPlayerModel->mScore += 1;
 }
 
 }}}
