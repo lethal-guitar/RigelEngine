@@ -77,7 +77,7 @@ private:
   entityx::Entity mPlayer;
   engine::RandomNumberGenerator* mpRandomGenerator;
   engine::TimeStepper mTimeStepper;
-  bool mIsEvenFrame = true;
+  bool mIsOddFrame = false;
 };
 
 }}}
