@@ -25,6 +25,7 @@ namespace rigel { namespace game_logic { namespace ai {
 
 using engine::components::Sprite;
 using engine::components::WorldPosition;
+using game_logic::components::Shootable;
 
 
 PrisonerSystem::PrisonerSystem(
@@ -76,7 +77,6 @@ void PrisonerSystem::updateAggressivePrisoner(
   Sprite& sprite
 ) {
   using game_logic::components::PlayerDamaging;
-  using game_logic::components::Shootable;
   using State = components::Prisoner::State;
 
   if (state.mState == State::Dieing) {
@@ -137,17 +137,25 @@ void PrisonerSystem::updateAggressivePrisoner(
       ++state.mGrabStep;
     }
   }
+}
 
-  // Trigger death sequence if hit
-  if (shootable.mHasBeenHit) {
-    if (state.mState == State::Grabbing) {
-      sprite.mFramesToRender.pop_back();
-    }
 
-    state.mState = State::Dieing;
-    sprite.mFramesToRender[0] = 5;
-    entity.remove<Shootable>();
+void PrisonerSystem::onEntityHit(entityx::Entity entity) {
+  if (!entity.has_component<components::Prisoner>()) {
+    return;
   }
+
+  auto& sprite = *entity.component<Sprite>();
+  auto& state = *entity.component<components::Prisoner>();
+
+  if (state.mState == components::Prisoner::State::Grabbing) {
+    sprite.mFramesToRender.pop_back();
+  }
+
+  state.mState = components::Prisoner::State::Dieing;
+  sprite.mFramesToRender[0] = 5;
+
+  entity.remove<Shootable>();
 }
 
 }}}

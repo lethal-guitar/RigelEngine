@@ -67,6 +67,8 @@ public:
     entityx::EventManager& events,
     entityx::TimeDelta dt) override;
 
+  void onEntityHit(entityx::Entity entity);
+
 private:
   void updateAggressivePrisoner(
     entityx::Entity entity,

@@ -16,11 +16,12 @@
 
 #pragma once
 
+#include "base/boost_variant.hpp" // Required because signals2 includes variant
 #include "base/warnings.hpp"
 #include "data/map.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/signals2/signal.hpp>
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
@@ -44,11 +45,16 @@ public:
     entityx::TimeDelta dt
   ) override;
 
+  boost::signals2::signal<void(entityx::Entity)>& entityHitSignal() {
+    return mEntityHitSignal;
+  }
+
 private:
   data::PlayerModel* mpPlayerModel;
   data::map::Map* mpMap;
   IGameServiceProvider* mpServiceProvider;
-  engine::TimeStepper mTimeStepper;
+
+  boost::signals2::signal<void(entityx::Entity)> mEntityHitSignal;
 };
 
 }}

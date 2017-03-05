@@ -57,6 +57,8 @@ public:
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider);
 
+  void onEntityHit(entityx::Entity entity);
+
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,

@@ -223,14 +223,6 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   // ----------------------------------------------------------------------
-
-  // TODO: FIXME: We need to run physics before we can run damage infliction.
-  // Otherwise, enemy hits will be one frame to late.
-
-  // Inflict damage before A.I. update, so that AIs can react to being hit
-  mEntities.systems.update<DamageInflictionSystem>(dt);
-
-  // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
   mEntities.systems.update<ai::LaserTurretSystem>(dt);
@@ -247,6 +239,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<PhysicsSystem>(dt);
 
   mEntities.systems.update<player::DamageSystem>(dt);
+  mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
 
@@ -394,6 +387,13 @@ void IngameMode::loadLevel(
     mPlayerEntity,
     mpServiceProvider);
   mEntities.systems.configure();
+
+  mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
+    [this](entityx::Entity entity) {
+      mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
+      mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);
+      mEntities.systems.system<ai::SlimeBlobSystem>()->onEntityHit(entity);
+    });
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
 }

@@ -54,6 +54,8 @@ public:
     entityx::EventManager& events,
     entityx::TimeDelta dt) override;
 
+  void onEntityHit(entityx::Entity entity);
+
 private:
   entityx::Entity mPlayer;
   EntityFactory* mpEntityFactory;
