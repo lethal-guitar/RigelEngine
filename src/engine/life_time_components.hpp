@@ -27,7 +27,8 @@ namespace rigel { namespace engine { namespace components {
 struct AutoDestroy {
   enum class Condition {
     OnWorldCollision = 1,
-    OnLeavingActiveRegion = 2
+    OnLeavingActiveRegion = 2,
+    OnTimeoutElapsed = 4
   };
 
   explicit AutoDestroy(const Condition condition)
@@ -43,7 +44,14 @@ struct AutoDestroy {
     }
   }
 
+  static AutoDestroy afterTimeout(const int framesToLive) {
+    auto instance = AutoDestroy{Condition::OnTimeoutElapsed};
+    instance.mFramesToLive = framesToLive;
+    return instance;
+  }
+
   int mConditionFlags;
+  int mFramesToLive = 0;
 };
 
 }}}

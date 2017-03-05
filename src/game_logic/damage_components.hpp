@@ -22,15 +22,18 @@ namespace rigel { namespace game_logic { namespace components {
 struct PlayerDamaging {
   explicit PlayerDamaging(
     const int amount,
-    const bool ignoreMercyFrames = false
+    const bool ignoreMercyFrames = false,
+    const bool destroyOnContact = false
   )
     : mAmount(amount)
     , mIgnoreMercyFrames(ignoreMercyFrames)
+    , mDestroyOnContact(destroyOnContact)
   {
   }
 
   int mAmount;
   bool mIgnoreMercyFrames;
+  bool mDestroyOnContact;
 };
 
 
@@ -44,6 +47,10 @@ struct Shootable {
   int mHealth;
   int mGivenScore;
   bool mInvincible = false;
+  bool mEnableHitFeedback = true;
+
+  // Will be set each frame
+  bool mHasBeenHit = false;
 };
 
 

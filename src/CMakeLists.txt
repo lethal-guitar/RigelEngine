@@ -43,6 +43,7 @@ set(core_sources
     engine/shader.hpp
     engine/opengl.cpp
     engine/opengl.hpp
+    engine/sprite_tools.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/texture.cpp
@@ -52,6 +53,8 @@ set(core_sources
     engine/timing.cpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/laser_turret.cpp
+    game_logic/ai/laser_turret.hpp
     game_logic/ai/messenger_drone.cpp
     game_logic/ai/messenger_drone.hpp
     game_logic/ai/prisoner.cpp

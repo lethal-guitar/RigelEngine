@@ -55,6 +55,16 @@ void DamageInflictionSystem::update(
   ex::EventManager& events,
   ex::TimeDelta dt
 ) {
+  // TODO: Do this one layer higher up instead of in each system
+  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
+    return;
+  }
+
+  // Reset 'has been hit' flag
+  es.each<Shootable>([](ex::Entity, Shootable& shootable) {
+    shootable.mHasBeenHit = false;
+  });
+
   es.each<DamageInflicting, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity inflictorEntity,
@@ -99,11 +109,15 @@ void DamageInflictionSystem::update(
             mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
             shootableEntity.destroy();
           } else {
-            mpServiceProvider->playSound(data::SoundId::EnemyHit);
+            if (shootable->mEnableHitFeedback) {
+              mpServiceProvider->playSound(data::SoundId::EnemyHit);
 
-            if (shootableEntity.has_component<Sprite>()) {
-              shootableEntity.component<Sprite>()->flashWhite();
+              if (shootableEntity.has_component<Sprite>()) {
+                shootableEntity.component<Sprite>()->flashWhite();
+              }
             }
+
+            shootable->mHasBeenHit = true;
           }
           break;
         }

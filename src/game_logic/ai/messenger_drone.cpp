@@ -157,6 +157,15 @@ void MessengerDroneSystem::update(
       components::MessengerDrone& state,
       const engine::components::Active&
     ) {
+      const auto flyForward = [&state, &position]() {
+        const auto movementDirection =
+          state.mOrientation == Orientation::Left ? -1 : 1;
+
+        // The messenger drone has no collision detection, so we can move
+        // directly without using physics/velocity.
+        position.x += movementDirection * 2;
+      };
+
       if (state.mState == State::AwaitActivation) {
         // Initialize on first activation to face player
 
@@ -181,12 +190,7 @@ void MessengerDroneSystem::update(
       }
 
       if (state.mState == State::FlyIn) {
-        const auto movementDirection =
-          state.mOrientation == Orientation::Left ? -1 : 1;
-
-        // The messenger drone has no collision detection, so we can move
-        // directly without using physics/velocity.
-        position.x += movementDirection * 2;
+        flyForward();
 
         const auto playerCenterX = playerPos.x + 1;
         const auto droneCenterX = position.x + 3;
@@ -244,12 +248,7 @@ void MessengerDroneSystem::update(
       }
 
       if (state.mState == State::FlyOut) {
-        const auto movementDirection =
-          state.mOrientation == Orientation::Left ? -1 : 1;
-
-        // The messenger drone has no collision detection, so we can move
-        // directly without using physics/velocity.
-        position.x += movementDirection * 2;
+        flyForward();
       }
     });
 }

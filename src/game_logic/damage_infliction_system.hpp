@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/map.hpp"
+#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -47,6 +48,7 @@ private:
   data::PlayerModel* mpPlayerModel;
   data::map::Map* mpMap;
   IGameServiceProvider* mpServiceProvider;
+  engine::TimeStepper mTimeStepper;
 };
 
 }}

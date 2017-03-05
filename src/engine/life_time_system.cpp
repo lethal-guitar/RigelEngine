@@ -26,10 +26,15 @@ void LifeTimeSystem::update(
   entityx::EventManager& events,
   entityx::TimeDelta dt
 ) {
+  // TODO: ...
+  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
+    return;
+  }
+
   using Condition = components::AutoDestroy::Condition;
   es.each<components::AutoDestroy>([](
     entityx::Entity entity,
-    const components::AutoDestroy& autoDestroyProperties
+    components::AutoDestroy& autoDestroyProperties
   ) {
     const auto flags = autoDestroyProperties.mConditionFlags;
 
@@ -38,11 +43,17 @@ void LifeTimeSystem::update(
       return (flags & conditionValue) != 0;
     };
 
+    const auto hasTimeout = conditionIsSet(Condition::OnTimeoutElapsed);
+    if (hasTimeout) {
+      --autoDestroyProperties.mFramesToLive;
+    }
+
     const auto mustDestroy =
       (conditionIsSet(Condition::OnWorldCollision) &&
         entity.has_component<components::CollidedWithWorld>()) ||
       (conditionIsSet(Condition::OnLeavingActiveRegion) &&
-        !entity.has_component<components::Active>());
+        !entity.has_component<components::Active>()) ||
+      (hasTimeout && autoDestroyProperties.mFramesToLive < 0);
 
     if (mustDestroy) {
       entity.destroy();

@@ -17,9 +17,10 @@
 #include "entity_factory.hpp"
 
 #include "data/unit_conversions.hpp"
-#include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
+#include "engine/sprite_tools.hpp"
+#include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -63,14 +64,6 @@ const auto DRAW_ORDER_SCALE_FACTOR = 10;
 // is achieved that way. But in our case, they are rendered using the same
 // mechanism as the other sprites, so we have to explicitly assign an order.
 const auto PROJECTILE_DRAW_ORDER_ADJUSTMENT = 10;
-
-
-BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
-  const auto dimensionsInTiles = pixelExtentsToTileExtents(
-    sprite.mImage.extents());
-
-  return {sprite.mDrawOffset, dimensionsInTiles};
-}
 
 
 // Assign gravity affected physical component
@@ -154,7 +147,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(inferBoundingBox(sprite.mFrames[0]));
+    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite.mFrames[0]));
   }
   return entity;
 }
@@ -179,7 +172,7 @@ entityx::Entity EntityFactory::createProjectile(
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
   sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
 
-  const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
+  const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 
   entity.assign<Active>();
   entity.assign<Sprite>(sprite);
@@ -188,6 +181,63 @@ entityx::Entity EntityFactory::createProjectile(
   configureProjectile(entity, type, pos, direction, boundingBox);
 
   return entity;
+}
+
+
+void EntityFactory::configureProjectile(
+  entityx::Entity entity,
+  const ProjectileType type,
+  WorldPosition position,
+  const ProjectileDirection direction,
+  const BoundingBox& boundingBox
+) {
+  const auto isGoingLeft = direction == ProjectileDirection::Left;
+
+  // Position adjustment for the flame thrower shot
+  if (type == ProjectileType::PlayerFlameShot) {
+    if (isHorizontal(direction)) {
+      position.y += 1;
+    } else {
+      position.x -= 1;
+    }
+  }
+
+  // Position adjustment for left-facing projectiles. We want the incoming
+  // position to always represent the projectile's origin, which means we need
+  // to adjust the position by the projectile's length to match the left-bottom
+  // corner positioning system.
+  if (isHorizontal(direction) && isGoingLeft) {
+    position.x -= boundingBox.size.width - 1;
+
+    if (type == ProjectileType::PlayerFlameShot) {
+      position.x += 3;
+    }
+  }
+
+  const auto speed = speedForProjectileType(type);
+  const auto damageAmount = damageForProjectileType(type);
+  entity.assign<WorldPosition>(position);
+  entity.assign<Physical>(
+    Physical{directionToVector(direction) * speed, false});
+  if (isPlayerProjectile(type)) {
+    entity.assign<DamageInflicting>(damageAmount);
+  } else {
+    entity.assign<PlayerDamaging>(damageAmount, false, true);
+  }
+
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnWorldCollision,
+    AutoDestroy::Condition::OnLeavingActiveRegion});
+
+  // For convenience, the enemy laser shot muzzle flash is created along with
+  // the projectile.
+  if (type == ProjectileType::EnemyLaserShot) {
+    const auto muzzleFlashSpriteId = static_cast<data::ActorID>(
+      direction == ProjectileDirection::Left ? 147 : 148);
+    auto muzzleFlash = createSprite(muzzleFlashSpriteId);
+    muzzleFlash.assign<WorldPosition>(position);
+    muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
+  }
 }
 
 
@@ -224,7 +274,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = inferBoundingBox(sprite.mFrames[0]);
+      boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
       entity.assign<Sprite>(sprite);
     }
 

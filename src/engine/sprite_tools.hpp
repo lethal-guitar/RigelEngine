@@ -16,8 +16,10 @@
 
 #pragma once
 
-#include "engine/life_time_components.hpp"
-#include "engine/timing.hpp"
+#include "base/warnings.hpp"
+#include "data/unit_conversions.hpp"
+#include "engine/base_components.hpp"
+#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -26,15 +28,21 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine {
 
-class LifeTimeSystem : public entityx::System<LifeTimeSystem> {
-public:
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+inline components::BoundingBox inferBoundingBox(
+  const components::SpriteFrame& sprite
+) {
+  const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
+    sprite.mImage.extents());
 
-private:
-  TimeStepper mTimeStepper;
-};
+  return {sprite.mDrawOffset, dimensionsInTiles};
+}
+
+
+inline void synchronizeBoundingBoxToSprite(entityx::Entity& entity) {
+  auto& sprite = *entity.component<components::Sprite>();
+  auto& bbox = *entity.component<components::BoundingBox>();
+
+  bbox = inferBoundingBox(sprite.mFrames[sprite.mFramesToRender[0]]);
+}
 
 }}
