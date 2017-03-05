@@ -29,6 +29,7 @@
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"
+#include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/interaction/elevator.hpp"
@@ -223,6 +224,9 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
   // ----------------------------------------------------------------------
 
+  // TODO: FIXME: We need to run physics before we can run damage infliction.
+  // Otherwise, enemy hits will be one frame to late.
+
   // Inflict damage before A.I. update, so that AIs can react to being hit
   mEntities.systems.update<DamageInflictionSystem>(dt);
 
@@ -234,6 +238,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<ai::PrisonerSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
   mEntities.systems.update<ai::SlidingDoorSystem>(dt);
+  mEntities.systems.update<ai::SlimeBlobSystem>(dt);
   mEntities.systems.update<ai::SlimePipeSystem>(dt);
 
   // ----------------------------------------------------------------------
@@ -373,6 +378,10 @@ void IngameMode::loadLevel(
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,
     mpServiceProvider);
+  mEntities.systems.add<ai::SlimeBlobSystem>(
+    mPlayerEntity,
+    &mEntityFactory,
+    &mRandomGenerator);
   mEntities.systems.add<ai::SlimePipeSystem>(
     &mEntityFactory,
     mpServiceProvider);

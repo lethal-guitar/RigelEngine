@@ -88,6 +88,7 @@ void DamageInflictionSystem::update(
         ) {
           inflictorEntity.destroy();
 
+          shootable->mHasBeenHit = true;
           shootable->mHealth -= damage.mAmount;
           if (shootable->mHealth <= 0) {
             mpPlayerModel->mScore += shootable->mGivenScore;
@@ -107,7 +108,10 @@ void DamageInflictionSystem::update(
             // NOTE: This is only temporary, it will change once we implement
             // different sounds and particle effects per enemy/object.
             mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
-            shootableEntity.destroy();
+
+            if (shootable->mDestroyWhenKilled) {
+              shootableEntity.destroy();
+            }
           } else {
             if (shootable->mEnableHitFeedback) {
               mpServiceProvider->playSound(data::SoundId::EnemyHit);
@@ -116,8 +120,6 @@ void DamageInflictionSystem::update(
                 shootableEntity.component<Sprite>()->flashWhite();
               }
             }
-
-            shootable->mHasBeenHit = true;
           }
           break;
         }

@@ -620,7 +620,8 @@ void configureEntity(
       break;
 
     case 68: // Green slime container
-      // 100 pts when shot, 1 health
+      entity.assign<Shootable>(1, 100);
+      ai::configureSlimeContainer(entity);
       break;
 
     case 78: // Snake
@@ -955,10 +956,6 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 62:
       sprite.mFramesToRender = {1, 0};
-      break;
-
-    case 68:
-      sprite.mFramesToRender = {0, 2, 8};
       break;
 
     case 93:

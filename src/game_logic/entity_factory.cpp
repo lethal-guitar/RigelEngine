@@ -25,6 +25,7 @@
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"
+#include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
@@ -179,6 +180,20 @@ entityx::Entity EntityFactory::createProjectile(
   entity.assign<BoundingBox>(boundingBox);
 
   configureProjectile(entity, type, pos, direction, boundingBox);
+
+  return entity;
+}
+
+
+entityx::Entity EntityFactory::createActor(
+  const data::ActorID id,
+  const base::Vector& position
+) {
+  auto entity = createSprite(id, position);
+  auto& sprite = *entity.component<Sprite>();
+  const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
+
+  configureEntity(entity, id, boundingBox, mDifficulty);
 
   return entity;
 }
