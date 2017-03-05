@@ -37,4 +37,12 @@ inline components::BoundingBox inferBoundingBox(
   return {sprite.mDrawOffset, dimensionsInTiles};
 }
 
+
+inline void synchronizeBoundingBoxToSprite(entityx::Entity& entity) {
+  auto& sprite = *entity.component<components::Sprite>();
+  auto& bbox = *entity.component<components::BoundingBox>();
+
+  bbox = inferBoundingBox(sprite.mFrames[sprite.mFramesToRender[0]]);
+}
+
 }}
