@@ -77,6 +77,10 @@ void ElevatorSystem::update(
   ex::EventManager& events,
   ex::TimeDelta dt
 ) {
+  if (!updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
+    return;
+  }
+
   auto& playerState = *mPlayer.component<PlayerControlled>();
   auto& playerPhysical = *mPlayer.component<Physical>();
 
@@ -97,10 +101,9 @@ void ElevatorSystem::update(
     updateElevatorMovement(movement, playerPhysical);
   }
 
-  if (
-    movement < 0 &&
-    updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 4, dt)
-  ) {
+  mIsOddFrame = !mIsOddFrame;
+
+  if (movement < 0 && mIsOddFrame) {
     mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
   }
 }

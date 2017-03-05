@@ -79,6 +79,7 @@ private:
 
   int mPreviousMovement;
   engine::TimeStepper mTimeStepper;
+  bool mIsOddFrame = false;
 };
 
 }}}
