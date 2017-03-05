@@ -158,10 +158,6 @@ void SlidingDoorSystem::update(
   entityx::EventManager& events,
   entityx::TimeDelta dt
 ) {
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   const auto& playerPosition = *mPlayerEntity.component<WorldPosition>().get();
 
   using engine::components::BoundingBox;

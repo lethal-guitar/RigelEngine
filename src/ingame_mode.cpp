@@ -131,6 +131,7 @@ IngameMode::IngameMode(
       difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
+  , mAccumulatedTime(0.0)
   , mShowDebugText(false)
   , mHudRenderer(
       &mPlayerModel,
@@ -167,27 +168,34 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  const auto keyPressed = event.type == SDL_KEYDOWN;
+  const auto keyPressed = std::uint8_t{event.type == SDL_KEYDOWN};
   switch (event.key.keysym.sym) {
+    // TODO: Refactor: This can be clearer and less repetitive.
     case SDLK_UP:
-      mPlayerInputs.mMovingUp = keyPressed;
+      mPlayerInputs.mMovingUp = mPlayerInputs.mMovingUp || keyPressed;
+      mPlayerInputsFrequent.mMovingUp = keyPressed;
       break;
     case SDLK_DOWN:
-      mPlayerInputs.mMovingDown = keyPressed;
+      mPlayerInputs.mMovingDown = mPlayerInputs.mMovingDown || keyPressed;
+      mPlayerInputsFrequent.mMovingDown = keyPressed;
       break;
     case SDLK_LEFT:
-      mPlayerInputs.mMovingLeft = keyPressed;
+      mPlayerInputs.mMovingLeft = mPlayerInputs.mMovingLeft || keyPressed;
+      mPlayerInputsFrequent.mMovingLeft = keyPressed;
       break;
     case SDLK_RIGHT:
-      mPlayerInputs.mMovingRight = keyPressed;
+      mPlayerInputs.mMovingRight = mPlayerInputs.mMovingRight || keyPressed;
+      mPlayerInputsFrequent.mMovingRight = keyPressed;
       break;
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-      mPlayerInputs.mJumping = keyPressed;
+      mPlayerInputs.mJumping = mPlayerInputs.mJumping || keyPressed;
+      mPlayerInputsFrequent.mJumping = keyPressed;
       break;
     case SDLK_LALT:
     case SDLK_RALT:
-      mPlayerInputs.mShooting = keyPressed;
+      mPlayerInputs.mShooting = mPlayerInputs.mShooting || keyPressed;
+      mPlayerInputsFrequent.mShooting = keyPressed;
       break;
   }
 
@@ -222,22 +230,63 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   // Updating
   // **********************************************************************
-  mEntities.systems.system<player::AttackSystem>()->setInputState(
-    mPlayerInputs);
-  mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
-    mPlayerInputs);
 
+  constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
+  mAccumulatedTime += dt;
+  for (;
+    mAccumulatedTime >= timeForOneFrame;
+    mAccumulatedTime -= timeForOneFrame
+  ) {
+    updateGameLogic(timeForOneFrame);
+  }
+
+
+  // **********************************************************************
+  // Rendering
+  // **********************************************************************
+  mpSystems->mMapScrollSystem.updateScrollOffset();
+
+  {
+    engine::RenderTargetTexture::Binder
+      bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
+    mEntities.systems.update<RenderingSystem>(dt);
+    mEntities.systems.update<DebuggingSystem>(dt);
+    mHudRenderer.updateAndRender(dt);
+  }
+
+  mIngameViewPortRenderTarget.render(
+    mpRenderer,
+    data::GameTraits::inGameViewPortOffset.x,
+    data::GameTraits::inGameViewPortOffset.y);
+
+  if (mShowDebugText) {
+    showDebugText();
+  }
+
+  handlePlayerDeath();
+  handleLevelExit();
+  handleTeleporter();
+}
+
+
+void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   engine::markActiveEntities(mEntities.entities, mScrollOffset);
 
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
+  mEntities.systems.system<player::AttackSystem>()->setInputState(
+    mPlayerInputs);
+  mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
+    mPlayerInputs);
+
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<interaction::ElevatorSystem>(dt);
-
   mEntities.systems.update<PlayerMovementSystem>(dt);
   mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
+
+  mPlayerInputs = mPlayerInputsFrequent;
 
   // ----------------------------------------------------------------------
   // A.I. logic update
@@ -260,33 +309,8 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<player::AnimationSystem>(dt);
 
   mpSystems->mMapScrollSystem.updateManualScrolling(dt);
-  mpSystems->mMapScrollSystem.updateScrollOffset();
 
   mEntities.systems.update<engine::LifeTimeSystem>(dt);
-
-  // **********************************************************************
-  // Rendering
-  // **********************************************************************
-  {
-    engine::RenderTargetTexture::Binder
-      bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
-    mEntities.systems.update<RenderingSystem>(dt);
-    mEntities.systems.update<DebuggingSystem>(dt);
-    mHudRenderer.updateAndRender(dt);
-  }
-
-  mIngameViewPortRenderTarget.render(
-    mpRenderer,
-    data::GameTraits::inGameViewPortOffset.x,
-    data::GameTraits::inGameViewPortOffset.y);
-
-  if (mShowDebugText) {
-    showDebugText();
-  }
-
-  handlePlayerDeath();
-  handleLevelExit();
-  handleTeleporter();
 }
 
 

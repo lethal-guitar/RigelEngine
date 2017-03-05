@@ -81,13 +81,11 @@ MapScrollSystem::MapScrollSystem(
 void MapScrollSystem::updateManualScrolling(const entityx::TimeDelta dt) {
   const auto& state = *mPlayer.component<PlayerControlled>();
 
-  if (updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    if (state.mIsLookingDown) {
-      mpScrollOffset->y += 2;
-    }
-    if (state.mIsLookingUp) {
-      mpScrollOffset->y -= 2;
-    }
+  if (state.mIsLookingDown) {
+    mpScrollOffset->y += 2;
+  }
+  if (state.mIsLookingUp) {
+    mpScrollOffset->y -= 2;
   }
 }
 
