@@ -79,6 +79,21 @@ void PrisonerSystem::updateAggressivePrisoner(
   using game_logic::components::Shootable;
   using State = components::Prisoner::State;
 
+  if (state.mState == State::Dieing) {
+    ++state.mDeathAnimationStep;
+    if (state.mDeathAnimationStep >= 6) {
+      entity.destroy();
+    }
+
+    const auto canAdvance =
+      state.mDeathAnimationStep == 2 ||
+      state.mDeathAnimationStep == 3;
+    if (canAdvance) {
+      ++sprite.mFramesToRender[0];
+    }
+    return;
+  }
+
   auto& shootable = *entity.component<Shootable>();
 
   // See if we want to grab
@@ -121,6 +136,17 @@ void PrisonerSystem::updateAggressivePrisoner(
     if (mIsOddFrame) {
       ++state.mGrabStep;
     }
+  }
+
+  // Trigger death sequence if hit
+  if (shootable.mHasBeenHit) {
+    if (state.mState == State::Grabbing) {
+      sprite.mFramesToRender.pop_back();
+    }
+
+    state.mState = State::Dieing;
+    sprite.mFramesToRender[0] = 5;
+    entity.remove<Shootable>();
   }
 }
 
