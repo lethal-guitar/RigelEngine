@@ -101,6 +101,10 @@ ActorID actorIdForProjectile(
       return isHorizontal(direction)
         ? (isGoingRight ? 206 : 205)
         : (isGoingUp ? 21 : 204);
+
+    case ProjectileType::EnemyLaserShot:
+      assert(isHorizontal(direction));
+      return 136;
   }
 
   assert(false);
@@ -137,46 +141,12 @@ int damageForProjectileType(const ProjectileType type) {
 }
 
 
-void configureProjectile(
-  entityx::Entity entity,
-  const ProjectileType type,
-  WorldPosition position,
-  const ProjectileDirection direction,
-  const BoundingBox& boundingBox
-) {
-  const auto isGoingLeft = direction == ProjectileDirection::Left;
-
-  // Position adjustment for the flame thrower shot
-  if (type == ProjectileType::PlayerFlameShot) {
-    if (isHorizontal(direction)) {
-      position.y += 1;
-    } else {
-      position.x -= 1;
-    }
-  }
-
-  // Position adjustment for left-facing projectiles. We want the incoming
-  // position to always represent the projectile's origin, which means we need
-  // to adjust the position by the projectile's length to match the left-bottom
-  // corner positioning system.
-  if (isHorizontal(direction) && isGoingLeft) {
-    position.x -= boundingBox.size.width - 1;
-
-    if (type == ProjectileType::PlayerFlameShot) {
-      position.x += 3;
-    }
-  }
-
-  const auto speed = speedForProjectileType(type);
-  const auto damageAmount = damageForProjectileType(type);
-  entity.assign<WorldPosition>(position);
-  entity.assign<Physical>(
-    Physical{directionToVector(direction) * speed, false});
-  entity.assign<DamageInflicting>(damageAmount);
-
-  entity.assign<AutoDestroy>(AutoDestroy{
-    AutoDestroy::Condition::OnWorldCollision,
-    AutoDestroy::Condition::OnLeavingActiveRegion});
+constexpr bool isPlayerProjectile(const ProjectileType type) {
+  return
+    type == ProjectileType::PlayerRegularShot ||
+    type == ProjectileType::PlayerLaserShot ||
+    type == ProjectileType::PlayerFlameShot ||
+    type == ProjectileType::PlayerRocketShot;
 }
 
 

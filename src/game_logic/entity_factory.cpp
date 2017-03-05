@@ -17,7 +17,6 @@
 #include "entity_factory.hpp"
 
 #include "data/unit_conversions.hpp"
-#include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
@@ -188,6 +187,63 @@ entityx::Entity EntityFactory::createProjectile(
   configureProjectile(entity, type, pos, direction, boundingBox);
 
   return entity;
+}
+
+
+void EntityFactory::configureProjectile(
+  entityx::Entity entity,
+  const ProjectileType type,
+  WorldPosition position,
+  const ProjectileDirection direction,
+  const BoundingBox& boundingBox
+) {
+  const auto isGoingLeft = direction == ProjectileDirection::Left;
+
+  // Position adjustment for the flame thrower shot
+  if (type == ProjectileType::PlayerFlameShot) {
+    if (isHorizontal(direction)) {
+      position.y += 1;
+    } else {
+      position.x -= 1;
+    }
+  }
+
+  // Position adjustment for left-facing projectiles. We want the incoming
+  // position to always represent the projectile's origin, which means we need
+  // to adjust the position by the projectile's length to match the left-bottom
+  // corner positioning system.
+  if (isHorizontal(direction) && isGoingLeft) {
+    position.x -= boundingBox.size.width - 1;
+
+    if (type == ProjectileType::PlayerFlameShot) {
+      position.x += 3;
+    }
+  }
+
+  const auto speed = speedForProjectileType(type);
+  const auto damageAmount = damageForProjectileType(type);
+  entity.assign<WorldPosition>(position);
+  entity.assign<Physical>(
+    Physical{directionToVector(direction) * speed, false});
+  if (isPlayerProjectile(type)) {
+    entity.assign<DamageInflicting>(damageAmount);
+  } else {
+    entity.assign<PlayerDamaging>(damageAmount, false, true);
+  }
+
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnWorldCollision,
+    AutoDestroy::Condition::OnLeavingActiveRegion});
+
+  // For convenience, the enemy laser shot muzzle flash is created along with
+  // the projectile.
+  if (type == ProjectileType::EnemyLaserShot) {
+    const auto muzzleFlashSpriteId = static_cast<data::ActorID>(
+      direction == ProjectileDirection::Left ? 147 : 148);
+    auto muzzleFlash = createSprite(muzzleFlashSpriteId);
+    muzzleFlash.assign<WorldPosition>(position);
+    muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
+  }
 }
 
 

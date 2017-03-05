@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
+#include "engine/base_components.hpp"
 #include "engine/renderer.hpp"
 #include "engine/visual_components.hpp"
 #include "loader/level_loader.hpp"
@@ -41,7 +42,8 @@ enum class ProjectileType {
   PlayerRegularShot,
   PlayerLaserShot,
   PlayerRocketShot,
-  PlayerFlameShot
+  PlayerFlameShot,
+  EnemyLaserShot
 };
 
 
@@ -98,6 +100,14 @@ private:
     const IdAndFrameNr& textureId);
   engine::components::Sprite makeSpriteFromActorIDs(
     const std::vector<data::ActorID>& actorIDs);
+
+  void configureProjectile(
+    entityx::Entity entity,
+    const ProjectileType type,
+    engine::components::WorldPosition position,
+    const ProjectileDirection direction,
+    const engine::components::BoundingBox& boundingBox
+  );
 
   engine::Renderer* mpRenderer;
   entityx::EntityManager* mpEntityManager;
