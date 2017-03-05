@@ -65,8 +65,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   EntityFactory* mpEntityFactory;
 
-  boost::optional<engine::TimeDelta> mElapsedForShotAnimation;
-  entityx::Entity mMuzzleFlashEntity;
+  bool mShotAnimationActive;
 
   PlayerState mPreviousState;
   bool mWasInteracting;

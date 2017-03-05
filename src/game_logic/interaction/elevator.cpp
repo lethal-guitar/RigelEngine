@@ -77,10 +77,6 @@ void ElevatorSystem::update(
   ex::EventManager& events,
   ex::TimeDelta dt
 ) {
-  if (!updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   auto& playerState = *mPlayer.component<PlayerControlled>();
   auto& playerPhysical = *mPlayer.component<Physical>();
 

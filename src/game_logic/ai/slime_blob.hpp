@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -60,7 +59,6 @@ private:
   entityx::Entity mPlayer;
   EntityFactory* mpEntityFactory;
   engine::RandomNumberGenerator* mpRandomGenerator;
-  engine::TimeStepper mTimeStepper;
 };
 
 }}}

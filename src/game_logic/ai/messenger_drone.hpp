@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -80,7 +79,6 @@ public:
 
 private:
   entityx::Entity mPlayer;
-  engine::TimeStepper mTimeStepper;
 };
 
 }}}

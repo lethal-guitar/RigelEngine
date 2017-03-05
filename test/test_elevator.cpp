@@ -81,16 +81,11 @@ TEST_CASE("Rocket elevator") {
 
   MockServiceProvider mockServiceProvicer;
   interaction::ElevatorSystem elevatorSystem(player, &mockServiceProvicer);
-  const auto update = [&elevatorSystem, &physicsSystem, &entityx, &player](
-    const ex::TimeDelta dt
-  ) {
-    elevatorSystem.update(entityx.entities, entityx.events, dt);
-    physicsSystem.update(entityx.entities, entityx.events, dt);
-  };
-
-  const auto runOneFrame = [&update]() {
-    update(gameFramesToTime(1));
-  };
+  const auto runOneFrame =
+    [&elevatorSystem, &physicsSystem, &entityx, &player]() {
+      elevatorSystem.update(entityx.entities, entityx.events, 0);
+      physicsSystem.update(entityx.entities, entityx.events, 0);
+    };
 
   const auto verifyPositions = [&playerPosition, &elevatorPosition](
     const WorldPosition& expectedPlayerPosition,
@@ -183,15 +178,6 @@ TEST_CASE("Rocket elevator") {
       runOneFrame();
 
       expectedPos.y += 2;
-      verifyPositions(expectedPos);
-    }
-
-    SECTION("Movement happens only once every game frame") {
-      const auto expectedPos = playerPosition;
-
-      elevatorSystem.setInputState(movingUpState);
-      update(gameFramesToTime(1) / 2.0);
-
       verifyPositions(expectedPos);
     }
 

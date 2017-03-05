@@ -19,7 +19,6 @@
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -55,7 +54,6 @@ private:
     entityx::TimeDelta dt);
 
 private:
-  engine::TimeStepper mTimeStepper;
   entityx::Entity mPlayer;
   base::Vector* mpScrollOffset;
   base::Extents mMaxScrollOffset;

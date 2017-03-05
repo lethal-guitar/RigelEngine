@@ -97,15 +97,13 @@ void MapScrollSystem::updateScrollOffset(
   const BoundingBox& originalPlayerBounds,
   const ex::TimeDelta dt
 ) {
-  if (updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    // We can just always update here, since the code below will clamp the
-    // scroll offset properly
-    if (state.mIsLookingDown) {
-      mpScrollOffset->y += 2;
-    }
-    if (state.mIsLookingUp) {
-      mpScrollOffset->y -= 2;
-    }
+  // We can just always update here, since the code below will clamp the
+  // scroll offset properly
+  if (state.mIsLookingDown) {
+    mpScrollOffset->y += 2;
+  }
+  if (state.mIsLookingUp) {
+    mpScrollOffset->y -= 2;
   }
 
   auto playerBounds = originalPlayerBounds;

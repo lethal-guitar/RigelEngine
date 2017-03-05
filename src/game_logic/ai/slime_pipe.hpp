@@ -18,7 +18,6 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -56,7 +55,6 @@ private:
 private:
   EntityFactory* mpEntityFactory;
   IGameServiceProvider* mpServiceProvider;
-  engine::TimeStepper mTimeStepper;
 };
 
 }}}

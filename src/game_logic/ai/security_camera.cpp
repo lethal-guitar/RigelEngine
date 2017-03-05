@@ -59,12 +59,6 @@ void SecurityCameraSystem::update(
   entityx::EventManager& events,
   entityx::TimeDelta dt
 ) {
-  // Updating the cameras at a full 60 FPS feels a bit too twitchy, so we
-  // limit the update rate to the original game's frame rate.
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   const auto& playerPosition = *mPlayerEntity.component<WorldPosition>();
 
   es.each<WorldPosition, Sprite, components::SecurityCamera>(
