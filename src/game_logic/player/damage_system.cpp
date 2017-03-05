@@ -125,7 +125,7 @@ void DamageSystem::update(
 
   es.each<PlayerDamaging, BoundingBox, WorldPosition>(
     [this, &playerBBox, &playerState, inMercyFrames](
-      entityx::Entity,
+      entityx::Entity entity,
       const PlayerDamaging& damage,
       const BoundingBox& boundingBox,
       const WorldPosition& position
@@ -147,6 +147,10 @@ void DamageSystem::update(
 
           playerState.mState = PlayerState::Dieing;
           mpServiceProvider->playSound(data::SoundId::DukeDeath);
+        }
+
+        if (damage.mDestroyOnContact) {
+          entity.destroy();
         }
       }
     });
