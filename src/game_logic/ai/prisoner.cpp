@@ -48,9 +48,7 @@ void PrisonerSystem::update(
     return;
   }
 
-  // TODO: Adjust player position according to orientation to replicate
-  // original positioning?
-  mIsEvenFrame = !mIsEvenFrame;
+  mIsOddFrame = !mIsOddFrame;
 
   es.each<Sprite, WorldPosition, components::Prisoner, Active>(
     [this](
@@ -61,9 +59,7 @@ void PrisonerSystem::update(
       const engine::components::Active&
     ) {
       if (state.mIsAggressive) {
-        if (!mIsEvenFrame) {
-          updateAggressivePrisoner(entity, position, state, sprite);
-        }
+        updateAggressivePrisoner(entity, position, state, sprite);
       } else {
         const auto shakeIronBars = (mpRandomGenerator->gen() & 4) != 0;
         // The animation has two frames, 0 is "idle" and 1 is "shaking".
@@ -83,21 +79,40 @@ void PrisonerSystem::updateAggressivePrisoner(
   using game_logic::components::Shootable;
   using State = components::Prisoner::State;
 
-  const auto& playerPos = *mPlayer.component<WorldPosition>();
+  if (state.mState == State::Dieing) {
+    ++state.mDeathAnimationStep;
+    if (state.mDeathAnimationStep >= 6) {
+      entity.destroy();
+    }
+
+    const auto canAdvance =
+      state.mDeathAnimationStep == 2 ||
+      state.mDeathAnimationStep == 3;
+    if (canAdvance) {
+      ++sprite.mFramesToRender[0];
+    }
+    return;
+  }
+
+  auto& shootable = *entity.component<Shootable>();
 
   // See if we want to grab
   if (state.mState == State::Idle) {
+    // TODO: Adjust player position according to orientation to replicate
+    // original positioning?
+    const auto& playerPos = *mPlayer.component<WorldPosition>();
     const auto playerInRange =
       position.x - 4 < playerPos.x &&
       position.x + 7 > playerPos.x;
 
     if (playerInRange) {
-      const auto wantsToGrab = (mpRandomGenerator->gen() & 0x10) != 0;
+      const auto wantsToGrab =
+        (mpRandomGenerator->gen() & 0x10) != 0 && mIsOddFrame;
       if (wantsToGrab) {
         state.mState = State::Grabbing;
         state.mGrabStep = 0;
         sprite.mFramesToRender.push_back(1);
-        entity.component<Shootable>()->mInvincible = false;
+        shootable.mInvincible = false;
         entity.assign<PlayerDamaging>(1);
       }
     }
@@ -108,13 +123,30 @@ void PrisonerSystem::updateAggressivePrisoner(
   if (state.mState == State::Grabbing) {
     sprite.mFramesToRender[1] = (state.mGrabStep + 1) % 5;
 
-    ++state.mGrabStep;
     if (state.mGrabStep >= 4) {
       state.mState = State::Idle;
       sprite.mFramesToRender.pop_back();
-      entity.component<Shootable>()->mInvincible = true;
+      shootable.mInvincible = true;
       entity.remove<PlayerDamaging>();
     }
+
+    // Do this *after* checking whether the grab sequence is finished.
+    // This is required in order to get exactly the same sequence as in the
+    // original game.
+    if (mIsOddFrame) {
+      ++state.mGrabStep;
+    }
+  }
+
+  // Trigger death sequence if hit
+  if (shootable.mHasBeenHit) {
+    if (state.mState == State::Grabbing) {
+      sprite.mFramesToRender.pop_back();
+    }
+
+    state.mState = State::Dieing;
+    sprite.mFramesToRender[0] = 5;
+    entity.remove<Shootable>();
   }
 }
 

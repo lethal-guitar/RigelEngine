@@ -38,7 +38,8 @@ namespace components {
 struct Prisoner {
   enum class State {
     Idle,
-    Grabbing
+    Grabbing,
+    Dieing
   };
 
   explicit Prisoner(const bool isAggressive)
@@ -49,6 +50,7 @@ struct Prisoner {
   bool mIsAggressive;
   State mState = State::Idle;
   int mGrabStep = 0;
+  int mDeathAnimationStep = 0;
 };
 
 }
@@ -77,7 +79,7 @@ private:
   entityx::Entity mPlayer;
   engine::RandomNumberGenerator* mpRandomGenerator;
   engine::TimeStepper mTimeStepper;
-  bool mIsEvenFrame = true;
+  bool mIsOddFrame = false;
 };
 
 }}}
