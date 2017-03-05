@@ -221,6 +221,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   // ----------------------------------------------------------------------
+
+  // Inflict damage before A.I. update, so that AIs can react to being hit
+  mEntities.systems.update<DamageInflictionSystem>(dt);
+
+  // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
@@ -235,7 +240,6 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<PhysicsSystem>(dt);
 
   mEntities.systems.update<player::DamageSystem>(dt);
-  mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<player::AnimationSystem>(dt);
   mEntities.systems.update<MapScrollSystem>(dt);
 

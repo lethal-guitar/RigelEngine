@@ -48,6 +48,9 @@ struct Shootable {
   int mGivenScore;
   bool mInvincible = false;
   bool mEnableHitFeedback = true;
+
+  // Will be set each frame
+  bool mHasBeenHit = false;
 };
 
 
