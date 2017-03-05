@@ -53,6 +53,8 @@ set(core_sources
     engine/timing.cpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/laser_turret.cpp
+    game_logic/ai/laser_turret.hpp
     game_logic/ai/messenger_drone.cpp
     game_logic/ai/messenger_drone.hpp
     game_logic/ai/prisoner.cpp

@@ -24,6 +24,7 @@
 #include "engine/life_time_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -228,6 +229,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
+  mEntities.systems.update<ai::LaserTurretSystem>(dt);
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
   mEntities.systems.update<ai::PrisonerSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
@@ -362,6 +364,11 @@ void IngameMode::loadLevel(
     mpServiceProvider);
   mEntities.systems.add<ai::MessengerDroneSystem>(mPlayerEntity);
   mEntities.systems.add<ai::PrisonerSystem>(mPlayerEntity, &mRandomGenerator);
+  mEntities.systems.add<ai::LaserTurretSystem>(
+    mPlayerEntity,
+    &mPlayerModel,
+    &mEntityFactory,
+    mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,

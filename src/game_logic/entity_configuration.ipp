@@ -685,10 +685,9 @@ void configureEntity(
 
     // Laser turret
     case 131:
-      // gives one point when shot with normal shot
-      // gives 500 pts when destroyed
-      entity.assign<PlayerDamaging>(1);
+      // gives one point when shot with normal shot, 500 when destroyed.
       entity.assign<BoundingBox>(boundingBox);
+      ai::configureLaserTurret(entity, 500);
       break;
 
     case 203: // Red bird
