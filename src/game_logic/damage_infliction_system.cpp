@@ -99,10 +99,12 @@ void DamageInflictionSystem::update(
             mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
             shootableEntity.destroy();
           } else {
-            mpServiceProvider->playSound(data::SoundId::EnemyHit);
+            if (shootable->mEnableHitFeedback) {
+              mpServiceProvider->playSound(data::SoundId::EnemyHit);
 
-            if (shootableEntity.has_component<Sprite>()) {
-              shootableEntity.component<Sprite>()->flashWhite();
+              if (shootableEntity.has_component<Sprite>()) {
+                shootableEntity.component<Sprite>()->flashWhite();
+              }
             }
           }
           break;

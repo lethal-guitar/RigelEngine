@@ -47,6 +47,7 @@ struct Shootable {
   int mHealth;
   int mGivenScore;
   bool mInvincible = false;
+  bool mEnableHitFeedback = true;
 };
 
 
