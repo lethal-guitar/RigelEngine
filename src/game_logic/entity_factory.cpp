@@ -19,6 +19,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
+#include "engine/sprite_tools.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
@@ -62,14 +63,6 @@ const auto DRAW_ORDER_SCALE_FACTOR = 10;
 // is achieved that way. But in our case, they are rendered using the same
 // mechanism as the other sprites, so we have to explicitly assign an order.
 const auto PROJECTILE_DRAW_ORDER_ADJUSTMENT = 10;
-
-
-BoundingBox inferBoundingBox(const SpriteFrame& sprite) {
-  const auto dimensionsInTiles = pixelExtentsToTileExtents(
-    sprite.mImage.extents());
-
-  return {sprite.mDrawOffset, dimensionsInTiles};
-}
 
 
 // Assign gravity affected physical component
@@ -153,7 +146,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(inferBoundingBox(sprite.mFrames[0]));
+    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite.mFrames[0]));
   }
   return entity;
 }
@@ -178,7 +171,7 @@ entityx::Entity EntityFactory::createProjectile(
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
   sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
 
-  const auto boundingBox = inferBoundingBox(sprite.mFrames[0]);
+  const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 
   entity.assign<Active>();
   entity.assign<Sprite>(sprite);
@@ -280,7 +273,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = inferBoundingBox(sprite.mFrames[0]);
+      boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
       entity.assign<Sprite>(sprite);
     }
 

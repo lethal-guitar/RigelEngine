@@ -43,6 +43,7 @@ set(core_sources
     engine/shader.hpp
     engine/opengl.cpp
     engine/opengl.hpp
+    engine/sprite_tools.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/texture.cpp
