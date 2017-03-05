@@ -184,6 +184,20 @@ entityx::Entity EntityFactory::createProjectile(
 }
 
 
+entityx::Entity EntityFactory::createActor(
+  const data::ActorID id,
+  const base::Vector& position
+) {
+  auto entity = createSprite(id, position);
+  auto& sprite = *entity.component<Sprite>();
+  const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
+
+  configureEntity(entity, id, boundingBox, mDifficulty);
+
+  return entity;
+}
+
+
 void EntityFactory::configureProjectile(
   entityx::Entity entity,
   const ProjectileType type,

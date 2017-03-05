@@ -91,6 +91,10 @@ public:
     const engine::components::WorldPosition& pos,
     ProjectileDirection direction);
 
+  entityx::Entity createActor(
+    data::ActorID actorID,
+    const base::Vector& position);
+
 private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
 
