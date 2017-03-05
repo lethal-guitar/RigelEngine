@@ -63,6 +63,8 @@ set(core_sources
     game_logic/ai/security_camera.hpp
     game_logic/ai/sliding_door.cpp
     game_logic/ai/sliding_door.hpp
+    game_logic/ai/slime_blob.cpp
+    game_logic/ai/slime_blob.hpp
     game_logic/ai/slime_pipe.cpp
     game_logic/ai/slime_pipe.hpp
     game_logic/collectable_components.hpp

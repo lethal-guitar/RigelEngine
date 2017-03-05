@@ -25,6 +25,7 @@
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"
+#include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
