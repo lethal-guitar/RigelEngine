@@ -16,6 +16,7 @@
 
 #include "entity_factory.hpp"
 
+#include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
@@ -55,16 +56,11 @@ using namespace game_logic::components;
 
 namespace {
 
-// Scale factor for sprite draw order. This allows for more fine-grained
-// draw-order configurations, like specifying an order for sprites that would
-// fall into the same bucket given the original draw-order values.
-const auto DRAW_ORDER_SCALE_FACTOR = 10;
-
-
-// The game seems to draw projectiles in a separate pass, so the ordering
-// is achieved that way. But in our case, they are rendered using the same
-// mechanism as the other sprites, so we have to explicitly assign an order.
-const auto PROJECTILE_DRAW_ORDER_ADJUSTMENT = 10;
+// The game draws player projectiles after drawing all regular actors, which
+// makes them appear on top of everything. But in our case, they are rendered
+// using the same mechanism as the other sprites, so we have to explicitly
+// assign an order (which is higher than all regular actors' draw order).
+const auto PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
 
 
 // Assign gravity affected physical component
@@ -131,7 +127,7 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
       const auto textureRef = engine::NonOwningTexture(texture);
       sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
     }
-    sprite.mDrawOrder = actorData.mDrawIndex * DRAW_ORDER_SCALE_FACTOR;
+    sprite.mDrawOrder = actorData.mDrawIndex;
     sprite.mFramesToRender.push_back(lastFrameCount);
     lastFrameCount += static_cast<int>(actorData.mFrames.size());
   }
@@ -171,10 +167,11 @@ entityx::Entity EntityFactory::createProjectile(
 ) {
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
-  sprite.mDrawOrder += PROJECTILE_DRAW_ORDER_ADJUSTMENT;
+  sprite.mDrawOrder = PROJECTILE_DRAW_ORDER;
 
   const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 
+  // TODO: Player projectiles shouldn't move on the frame they were created
   entity.assign<Active>();
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);

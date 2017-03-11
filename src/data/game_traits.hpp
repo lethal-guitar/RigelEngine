@@ -73,6 +73,9 @@ struct GameTraits {
     return mapDataWords / width;
   }
 
+  static const int minDrawOrder = -1;
+  static const int maxDrawOrder = 4;
+
   struct CZone {
     static const std::size_t numSolidTiles = 1000u;
     static const std::size_t numMaskedTiles = 160u;
