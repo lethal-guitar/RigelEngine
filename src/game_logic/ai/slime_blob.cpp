@@ -32,8 +32,8 @@ using game_logic::components::Shootable;
 
 namespace {
 
-const auto NUM_BREAK_ANIMATION_STEPS = 6;
-const auto BREAK_ANIM_SPEED = 3; // frames between animation steps
+const auto NUM_BREAK_ANIMATION_STEPS = 15;
+const auto BREAK_ANIM_SPEED = 3; // frames between visible animation steps
 
 const auto SLIME_BLOB_SPAWN_OFFSET = base::Vector{2, 0};
 
@@ -83,12 +83,7 @@ void SlimeBlobSystem::update(
         // Animate slime blob inside
         sprite.mFramesToRender[2] = mpRandomGenerator->gen() % 2;
       } else {
-        ++state.mAnimationStepCounter;
-        if (state.mAnimationStepCounter >= BREAK_ANIM_SPEED) {
-          state.mAnimationStepCounter = 0;
-          ++state.mBreakAnimationStep;
-        }
-
+        ++state.mBreakAnimationStep;
         if (state.mBreakAnimationStep >= NUM_BREAK_ANIMATION_STEPS) {
           entity.remove<components::SlimeContainer>();
           entity.remove<BoundingBox>();
@@ -97,9 +92,9 @@ void SlimeBlobSystem::update(
           mpEntityFactory->createActor(67, position + SLIME_BLOB_SPAWN_OFFSET);
         }
 
-        if (state.mBreakAnimationStep < NUM_BREAK_ANIMATION_STEPS) {
-          sprite.mFramesToRender[0] = state.mBreakAnimationStep + 2;
-        }
+        const auto visibleFrame =
+          state.mBreakAnimationStep / BREAK_ANIM_SPEED;
+        sprite.mFramesToRender[0] = 2 + visibleFrame;
       }
     });
 

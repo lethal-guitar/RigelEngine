@@ -32,7 +32,6 @@ namespace components {
 
 struct SlimeContainer {
   int mBreakAnimationStep = 0;
-  int mAnimationStepCounter = 0;
 };
 
 }
