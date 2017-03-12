@@ -24,6 +24,7 @@
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
+#include "game_logic/ai/rocket_turret.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"

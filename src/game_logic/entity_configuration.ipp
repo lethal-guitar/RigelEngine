@@ -557,6 +557,7 @@ void configureEntity(
       entity.assign<Shootable>(3, 500);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(1);
+      entity.assign<ai::components::RocketTurret>();
       break;
 
     case 62: // Bomb dropping space ship
