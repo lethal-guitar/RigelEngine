@@ -167,7 +167,9 @@ entityx::Entity EntityFactory::createProjectile(
 ) {
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
-  sprite.mDrawOrder = PROJECTILE_DRAW_ORDER;
+  if (isPlayerProjectile(type)) {
+    sprite.mDrawOrder = PROJECTILE_DRAW_ORDER;
+  }
 
   const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 
