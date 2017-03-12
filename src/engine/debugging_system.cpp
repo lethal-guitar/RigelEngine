@@ -20,6 +20,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/damage_components.hpp"
 
 namespace ex = entityx;
 
@@ -94,17 +95,24 @@ void DebuggingSystem::update(
 
   if (mShowBoundingBoxes) {
     es.each<WorldPosition, BoundingBox>(
-      [this](ex::Entity, const WorldPosition& pos, const BoundingBox& bbox) {
-        const auto worldToScreenPx =
-          tileVectorToPixelVector(*mpScrollOffset);
-
+      [this](
+        ex::Entity entity,
+        const WorldPosition& pos,
+        const BoundingBox& bbox
+      ) {
+        const auto worldToScreenPx = tileVectorToPixelVector(*mpScrollOffset);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
           tileExtentsToPixelExtents(worldSpaceBox.size)
         };
 
-        mpRenderer->drawRectangle(boxInPixels, {255, 0, 0, 255});
+        const auto isPlayerDamaging =
+          entity.has_component<game_logic::components::PlayerDamaging>();
+        const auto color = isPlayerDamaging
+          ? base::Color{255, 0, 0, 255}
+          : base::Color{0, 255, 0, 255};
+        mpRenderer->drawRectangle(boxInPixels, color);
       });
   }
 }
