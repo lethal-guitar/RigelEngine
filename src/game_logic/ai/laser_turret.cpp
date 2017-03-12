@@ -82,11 +82,6 @@ void LaserTurretSystem::update(
   using namespace engine::components;
   using game_logic::components::PlayerDamaging;
 
-  // TODO: Do this one layer higher up instead of in each system
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
   es.each<components::LaserTurret, WorldPosition, Sprite, Shootable, Active>(

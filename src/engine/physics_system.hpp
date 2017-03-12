@@ -22,7 +22,6 @@
 #include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -93,7 +92,6 @@ private:
 
 private:
   const data::map::Map* mpMap;
-  TimeStepper mTimeStepper;
 
   using SolidBodyInfo = std::tuple<entityx::Entity, components::BoundingBox>;
   std::vector<SolidBodyInfo> mSolidBodies;

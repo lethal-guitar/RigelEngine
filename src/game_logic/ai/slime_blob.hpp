@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -33,7 +32,6 @@ namespace components {
 
 struct SlimeContainer {
   int mBreakAnimationStep = 0;
-  int mAnimationStepCounter = 0;
 };
 
 }
@@ -60,7 +58,6 @@ private:
   entityx::Entity mPlayer;
   EntityFactory* mpEntityFactory;
   engine::RandomNumberGenerator* mpRandomGenerator;
-  engine::TimeStepper mTimeStepper;
 };
 
 }}}

@@ -63,10 +63,6 @@ void PhysicsSystem::update(
 ) {
   using components::CollidedWithWorld;
 
-  if (!updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   mSolidBodies.clear();
   es.each<SolidBody, WorldPosition, BoundingBox>(
     [this](

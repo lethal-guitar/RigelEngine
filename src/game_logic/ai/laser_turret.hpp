@@ -18,7 +18,6 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 #include "game_logic/damage_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -69,7 +68,6 @@ private:
   data::PlayerModel* mpPlayerModel;
   EntityFactory* mpEntityFactory;
   IGameServiceProvider* mpServiceProvider;
-  engine::TimeStepper mTimeStepper;
 };
 
 }}}

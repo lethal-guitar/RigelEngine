@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -78,7 +77,7 @@ private:
   PlayerInputState mPlayerInputs;
 
   int mPreviousMovement;
-  engine::TimeStepper mTimeStepper;
+  bool mIsOddFrame = false;
 };
 
 }}}

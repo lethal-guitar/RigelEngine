@@ -62,10 +62,14 @@ private:
     const loader::ResourceLoader& resources
   );
 
+  void updateGameLogic(engine::TimeDelta dt);
+
   void handleLevelExit();
   void handlePlayerDeath();
   void restartLevel();
   void handleTeleporter();
+
+  void updateScrollOffset();
 
   void showDebugText();
 
@@ -79,7 +83,10 @@ private:
   data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mPlayerInputs;
+  game_logic::PlayerInputState mPlayerInputsFrequent;
   bool mLevelFinished;
+
+  engine::TimeDelta mAccumulatedTime;
 
   bool mShowDebugText;
 

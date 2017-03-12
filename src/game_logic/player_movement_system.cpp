@@ -33,7 +33,6 @@ using namespace player;
 using namespace std;
 
 using engine::TimeStepper;
-using engine::updateAndCheckIfDesiredTicksElapsed;
 
 
 void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
@@ -70,6 +69,7 @@ PlayerMovementSystem::PlayerMovementSystem(
 )
   : mpPlayerControlInput(pInputs)
   , mPlayer(player)
+  , mWalkRequestedLastFrame(false)
   , mLadderFlags(map.width(), map.height())
 {
   for (int row=0; row<map.height(); ++row) {
@@ -91,9 +91,6 @@ void PlayerMovementSystem::update(
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Physical>());
   assert(mPlayer.has_component<WorldPosition>());
-
-  const auto hasTicks =
-    updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt);
 
   auto& state = *mPlayer.component<PlayerControlled>();
   auto& physical = *mPlayer.component<Physical>();
@@ -224,8 +221,8 @@ void PlayerMovementSystem::update(
   }
 
   // Update velocity for walking.
-  // There's no delay for stopping, but starting to actually walk has 2 ticks
-  // of delay.
+  // There's no delay for stopping, but starting to actually walk has 1 frame
+  // of delay to allow for turning without moving.
   if (!horizontalMovementWanted) {
     if (
       state.mState == PlayerState::Walking
@@ -234,6 +231,7 @@ void PlayerMovementSystem::update(
     }
     physical.mVelocity.x = 0.0f;
   } else {
+
     if (state.mState == PlayerState::Standing) {
       state.mState = PlayerState::Walking;
     }
@@ -242,13 +240,13 @@ void PlayerMovementSystem::update(
       state.mState == PlayerState::Walking ||
       state.mState == PlayerState::Airborne
     ) {
-      if (hasTicks) { // Delay for acceleration
-        if (horizontalMovementWanted) {
-          physical.mVelocity.x = movingLeft ? -1.0f : 1.0f;
-        }
+      if (horizontalMovementWanted && mWalkRequestedLastFrame) {
+        physical.mVelocity.x = movingLeft ? -1.0f : 1.0f;
       }
     }
   }
+
+  mWalkRequestedLastFrame = horizontalMovementWanted;
 
   if (
     physical.mVelocity.y == 0.0f &&

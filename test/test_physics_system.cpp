@@ -49,11 +49,8 @@ TEST_CASE("Physics system works as expected") {
   auto& physical = *physicalObject.component<Physical>();
   auto& position = *physicalObject.component<WorldPosition>();
 
-  const auto update = [&physicsSystem, &entityx](const TimeDelta dt) {
-    physicsSystem.update(entityx.entities, entityx.events, dt);
-  };
-  const auto runOneFrame = [&update]() {
-    update(gameFramesToTime(1));
+  const auto runOneFrame = [&physicsSystem, &entityx]() {
+    physicsSystem.update(entityx.entities, entityx.events, 0);
   };
 
 
@@ -112,19 +109,6 @@ TEST_CASE("Physics system works as expected") {
         CHECK(position.x == 4);
         CHECK(position.y == 6);
       }
-    }
-
-    SECTION("Movement happens only if enough time has elapsed") {
-      const auto timeForOneFrame = gameFramesToTime(1);
-
-      update(0.0);
-      CHECK(position.x == 0);
-
-      update(timeForOneFrame / 2.0);
-      CHECK(position.x == 0);
-
-      update(timeForOneFrame / 2.0 + 0.0001);
-      CHECK(position.x == 4);
     }
   }
 

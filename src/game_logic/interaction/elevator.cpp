@@ -97,10 +97,9 @@ void ElevatorSystem::update(
     updateElevatorMovement(movement, playerPhysical);
   }
 
-  if (
-    movement < 0 &&
-    updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 4, dt)
-  ) {
+  mIsOddFrame = !mIsOddFrame;
+
+  if (movement < 0 && mIsOddFrame) {
     mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
   }
 }

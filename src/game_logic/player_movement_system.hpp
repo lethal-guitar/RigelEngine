@@ -20,7 +20,6 @@
 #include "base/grid.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/timing.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -70,9 +69,9 @@ private:
   bool canClimbDown(const engine::components::BoundingBox& worldSpacePlayerBounds) const;
 
 private:
-  engine::TimeStepper mTimeStepper;
   const PlayerInputState* mpPlayerControlInput;
   entityx::Entity mPlayer;
+  bool mWalkRequestedLastFrame;
 
   base::Grid<std::uint8_t> mLadderFlags;
 };

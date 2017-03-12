@@ -55,53 +55,44 @@ TEST_CASE("Player animation system works as expected") {
   auto& playerSprite = *player.component<Sprite>();
   playerSprite.mFramesToRender.push_back(0);
 
-  const auto updateFrames = [&animationSystem, &entityx](const int frames) {
+  const auto runFrames = [&animationSystem, &entityx](const int frames) {
     for (int i = 0; i < frames; ++i) {
-      const auto dt = engine::gameFramesToTime(1);
-      animationSystem.update(entityx.entities, entityx.events, dt);
+      animationSystem.update(entityx.entities, entityx.events, 0);
     }
   };
-
-  const auto update = [&animationSystem, &entityx](const ex::TimeDelta dt) {
-    animationSystem.update(entityx.entities, entityx.events, dt);
-  };
-
 
   SECTION("Death animation") {
     playerState.mState = PlayerState::Dieing;
 
-    update(0.0);
-    CHECK(playerSprite.mFramesToRender[0] == 0);
-
-    updateFrames(1); // 1
+    runFrames(1); // 1
     CHECK(playerSprite.mFramesToRender[0] == 29);
 
-    updateFrames(1); // 2
+    runFrames(1); // 2
     CHECK(playerSprite.mFramesToRender[0] == 29);
 
-    updateFrames(3); // 5
+    runFrames(3); // 5
     CHECK(playerSprite.mFramesToRender[0] == 30);
 
-    updateFrames(1); // 6
+    runFrames(1); // 6
     CHECK(playerSprite.mFramesToRender[0] == 31);
 
-    updateFrames(1); // 7
+    runFrames(1); // 7
     CHECK(playerSprite.mFramesToRender[0] == 32);
 
-    updateFrames(1); // 8
+    runFrames(1); // 8
     CHECK(playerSprite.mFramesToRender[0] == 32);
 
-    updateFrames(8); // 16
+    runFrames(8); // 16
     CHECK(playerSprite.mShow == true);
 
-    updateFrames(1); // 17
+    runFrames(1); // 17
     CHECK(playerSprite.mShow == false);
     CHECK(playerState.mState == PlayerState::Dieing);
 
-    updateFrames(24); // 41
+    runFrames(24); // 41
     CHECK(playerState.mState == PlayerState::Dieing);
 
-    updateFrames(1); // 42
+    runFrames(1); // 42
     CHECK(playerState.mState == PlayerState::Dead);
   }
 
@@ -109,22 +100,22 @@ TEST_CASE("Player animation system works as expected") {
   SECTION("Orientation change updates animation frame") {
     playerState.mOrientation = Orientation::Left;
     playerState.mState = PlayerState::LookingUp;
-    updateFrames(1);
+    runFrames(1);
     CHECK(playerSprite.mFramesToRender[0] == 16);
 
     playerState.mOrientation = Orientation::Right;
-    updateFrames(1);
+    runFrames(1);
     CHECK(playerSprite.mFramesToRender[0] == 16 + 39);
   }
 
 
   SECTION("'is interacting' state is applied correctly") {
     playerState.mIsInteracting = true;
-    updateFrames(1);
+    runFrames(1);
     CHECK(playerSprite.mFramesToRender[0] == 33);
 
     playerState.mIsInteracting = false;
-    updateFrames(1);
+    runFrames(1);
     CHECK(playerSprite.mFramesToRender[0] == 0);
   }
 }

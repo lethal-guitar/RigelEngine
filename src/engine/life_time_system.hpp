@@ -17,7 +17,6 @@
 #pragma once
 
 #include "engine/life_time_components.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -32,9 +31,6 @@ public:
     entityx::EntityManager& es,
     entityx::EventManager& events,
     entityx::TimeDelta dt) override;
-
-private:
-  TimeStepper mTimeStepper;
 };
 
 }}
