@@ -20,6 +20,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/damage_components.hpp"
 
 namespace ex = entityx;
 
@@ -28,6 +29,26 @@ namespace rigel { namespace engine {
 
 using namespace data;
 using namespace engine::components;
+
+
+namespace {
+
+base::Color colorForEntity(entityx::Entity entity) {
+  const auto isPlayerDamaging =
+    entity.has_component<game_logic::components::PlayerDamaging>();
+  const auto isSolidBody =
+    entity.has_component<engine::components::SolidBody>();
+
+  if (isPlayerDamaging) {
+    return {255, 0, 0, 255};
+  } else if (isSolidBody) {
+    return {255, 255, 0, 255};
+  } else {
+    return {0, 255, 0, 255};
+  }
+}
+
+}
 
 
 DebuggingSystem::DebuggingSystem(
@@ -94,17 +115,19 @@ void DebuggingSystem::update(
 
   if (mShowBoundingBoxes) {
     es.each<WorldPosition, BoundingBox>(
-      [this](ex::Entity, const WorldPosition& pos, const BoundingBox& bbox) {
-        const auto worldToScreenPx =
-          tileVectorToPixelVector(*mpScrollOffset);
-
+      [this](
+        ex::Entity entity,
+        const WorldPosition& pos,
+        const BoundingBox& bbox
+      ) {
+        const auto worldToScreenPx = tileVectorToPixelVector(*mpScrollOffset);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
           tileExtentsToPixelExtents(worldSpaceBox.size)
         };
 
-        mpRenderer->drawRectangle(boxInPixels, {255, 0, 0, 255});
+        mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
   }
 }
