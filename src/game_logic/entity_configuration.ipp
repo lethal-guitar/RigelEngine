@@ -55,6 +55,12 @@ ActorID actorIdForProjectile(
     case ProjectileType::EnemyLaserShot:
       assert(isHorizontal(direction));
       return 136;
+
+    case ProjectileType::EnemyRocket:
+      return isHorizontal(direction)
+        ? (isGoingRight ? 57 : 55)
+        : 56;
+
   }
 
   assert(false);
@@ -67,6 +73,9 @@ float speedForProjectileType(const ProjectileType type) {
     case ProjectileType::PlayerLaserShot:
     case ProjectileType::PlayerFlameShot:
       return 5.0f;
+
+    case ProjectileType::EnemyRocket:
+      return 1.0f;
 
     default:
       return 2.0f;
