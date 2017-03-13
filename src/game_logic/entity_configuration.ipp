@@ -848,8 +848,9 @@ void configureEntity(
         // the bounding box, thus preventing the wall's destruction.
         // Making the bounding box slightly wider solves this problem in a
         // simple way, without making the world collision detection more
-        // complicated. It seems that the original game is actually doing
-        // something similar, too.
+        // complicated.
+        // TODO: Implementing projectile wall penetration would solve this as
+        // well.
         auto adjustedBbox = boundingBox;
         adjustedBbox.size.width += 2;
         adjustedBbox.topLeft.x -= 1;
@@ -861,6 +862,7 @@ void configureEntity(
     case 116: // door, opened by blue key (slides into ground)
     case 137: // unknown dynamic geometry
     case 138: // dynamic wall: falls down, stays intact
+    case 141: // unknown dynamic geometry
     case 142: // unknown dynamic geometry
     case 143: // shootable wall, burns away
 
@@ -1010,12 +1012,25 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
 bool hasAssociatedSprite(const ActorID actorID) {
   switch (actorID) {
-    case 102: case 106: case 116: case 137: case 138: case 142: case 143:
-    case 139: case 221: case 233: case 234: case 241: case 250: case 251:
-    case 254:
-      return false;
-
     default:
       return true;
+
+    case 102:
+    case 106:
+    case 116:
+    case 137:
+    case 138:
+    case 141:
+    case 142:
+    case 143:
+    case 139:
+    case 221:
+    case 233:
+    case 234:
+    case 241:
+    case 250:
+    case 251:
+    case 254:
+      return false;
   }
 }
