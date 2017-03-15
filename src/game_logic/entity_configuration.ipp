@@ -820,6 +820,8 @@ void configureEntity(
 
       entity.assign<ai::components::MessengerDrone>(
         messengerDroneMessage(actorID));
+      entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
       break;
 
     case 231: // Lava riser
