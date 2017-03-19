@@ -525,6 +525,9 @@ void IngameMode::handleTeleporter() {
     mEntities.systems.system<RenderingSystem>()->switchBackdrops();
   }
 
+  // Resetting the scroll offset to 0 will cause the scroll position update
+  // to set the position as if the player started the level at the teleport
+  // destination - which is exactly what we want.
   mScrollOffset = {0, 0};
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
