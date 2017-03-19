@@ -64,11 +64,9 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 
 PlayerMovementSystem::PlayerMovementSystem(
   entityx::Entity player,
-  const PlayerInputState* pInputs,
   const data::map::Map& map
 )
-  : mpPlayerControlInput(pInputs)
-  , mPlayer(player)
+  : mPlayer(player)
   , mWalkRequestedLastFrame(false)
   , mLadderFlags(map.width(), map.height())
 {
@@ -83,11 +81,7 @@ PlayerMovementSystem::PlayerMovementSystem(
 }
 
 
-void PlayerMovementSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void PlayerMovementSystem::update(const PlayerInputState& inputState) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Physical>());
   assert(mPlayer.has_component<WorldPosition>());
@@ -101,11 +95,11 @@ void PlayerMovementSystem::update(
     return;
   }
 
-  auto movingLeft = mpPlayerControlInput->mMovingLeft;
-  auto movingRight = mpPlayerControlInput->mMovingRight;
-  auto movingUp = mpPlayerControlInput->mMovingUp;
-  auto movingDown = mpPlayerControlInput->mMovingDown;
-  auto jumping = mpPlayerControlInput->mJumping;
+  auto movingLeft = inputState.mMovingLeft;
+  auto movingRight = inputState.mMovingRight;
+  auto movingUp = inputState.mMovingUp;
+  auto movingDown = inputState.mMovingDown;
+  auto jumping = inputState.mJumping;
 
   // Filter out conflicting directional inputs
   if (movingLeft && movingRight) {

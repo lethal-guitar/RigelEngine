@@ -108,10 +108,12 @@ struct IngameMode::Systems {
     const data::map::Map& map
   )
     : mMapScrollSystem(pScrollOffset, playerEntity, map)
+    , mPlayerMovementSystem(playerEntity, map)
   {
   }
 
   game_logic::MapScrollSystem mMapScrollSystem;
+  game_logic::PlayerMovementSystem mPlayerMovementSystem;
 };
 
 
@@ -282,7 +284,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
 
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<interaction::ElevatorSystem>(dt);
-  mEntities.systems.update<PlayerMovementSystem>(dt);
+  mpSystems->mPlayerMovementSystem.update(mPlayerInputs);
   mEntities.systems.update<player::AttackSystem>(dt);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
@@ -356,10 +358,6 @@ void IngameMode::loadLevel(
 
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap);
-  mEntities.systems.add<game_logic::PlayerMovementSystem>(
-    mPlayerEntity,
-    &mPlayerInputs,
-    mLevelData.mMap);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider,

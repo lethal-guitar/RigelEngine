@@ -47,18 +47,11 @@ void initializePlayerEntity(entityx::Entity player, bool isFacingRight);
  * avatar (Duke) accordingly.
  *
  */
-class PlayerMovementSystem : public entityx::System<PlayerMovementSystem> {
+class PlayerMovementSystem {
 public:
-  PlayerMovementSystem(
-    entityx::Entity player,
-    const PlayerInputState* pInputs,
-    const data::map::Map& map);
+  PlayerMovementSystem(entityx::Entity player, const data::map::Map& map);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+  void update(const PlayerInputState& inputState);
 
 private:
   boost::optional<base::Vector> findLadderTouchPoint(
@@ -69,7 +62,6 @@ private:
   bool canClimbDown(const engine::components::BoundingBox& worldSpacePlayerBounds) const;
 
 private:
-  const PlayerInputState* mpPlayerControlInput;
   entityx::Entity mPlayer;
   bool mWalkRequestedLastFrame;
 
