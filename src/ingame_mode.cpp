@@ -258,7 +258,9 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<player::AnimationSystem>(dt);
-  mpSystems->mMapScrollSystem.update(dt);
+
+  mpSystems->mMapScrollSystem.updateManualScrolling(dt);
+  mpSystems->mMapScrollSystem.updateScrollOffset();
 
   mEntities.systems.update<engine::LifeTimeSystem>(dt);
 

@@ -41,14 +41,9 @@ public:
     entityx::Entity player,
     const data::map::Map& map);
 
-  void update(entityx::TimeDelta dt);
+  void updateManualScrolling(entityx::TimeDelta dt);
 
-private:
-  void updateScrollOffset(
-    const components::PlayerControlled& state,
-    const engine::components::WorldPosition& position,
-    const engine::components::BoundingBox& playerBounds,
-    entityx::TimeDelta dt);
+  void updateScrollOffset();
 
 private:
   engine::TimeStepper mTimeStepper;
