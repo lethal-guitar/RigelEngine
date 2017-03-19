@@ -16,48 +16,58 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { namespace engine { class RandomNumberGenerator; }}
-namespace rigel { namespace game_logic { class EntityFactory; }}
+
+namespace rigel { namespace game_logic { class EntityFactory; } }
 
 
 namespace rigel { namespace game_logic { namespace ai {
 
 namespace components {
 
-struct SlimeContainer {
-  int mBreakAnimationStep = 0;
+struct RocketTurret {
+  enum class Orientation {
+    Left = 0,
+    Top = 1,
+    Right = 2
+  };
+
+  Orientation mOrientation = Orientation::Left;
+  bool mNeedsReorientation = true;
+  int mNextShotCountdown = 0;
 };
 
 }
 
 
-void configureSlimeContainer(entityx::Entity entity);
+void configureRocketTurret(entityx::Entity& entity, int givenScore);
 
 
-class SlimeBlobSystem : public entityx::System<SlimeBlobSystem> {
+class RocketTurretSystem : public entityx::System<RocketTurretSystem> {
 public:
-  SlimeBlobSystem(
+  RocketTurretSystem(
     entityx::Entity player,
-    EntityFactory* pEntityFactory,
-    engine::RandomNumberGenerator* pRandomGenerator);
+    EntityFactory* pEntityFactory);
 
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,
     entityx::TimeDelta dt) override;
 
-  void onEntityHit(entityx::Entity entity);
+private:
+  void fireRocket(
+    const base::Vector& myPosition,
+    components::RocketTurret::Orientation myOrientation);
 
 private:
   entityx::Entity mPlayer;
   EntityFactory* mpEntityFactory;
-  engine::RandomNumberGenerator* mpRandomGenerator;
 };
 
 }}}

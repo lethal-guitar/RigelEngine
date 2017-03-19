@@ -27,6 +27,7 @@
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
+#include "game_logic/ai/rocket_turret.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
@@ -317,6 +318,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   mEntities.systems.update<ai::LaserTurretSystem>(dt);
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
   mEntities.systems.update<ai::PrisonerSystem>(dt);
+  mEntities.systems.update<ai::RocketTurretSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
   mEntities.systems.update<ai::SlidingDoorSystem>(dt);
   mEntities.systems.update<ai::SlimeBlobSystem>(dt);
@@ -414,6 +416,7 @@ void IngameMode::loadLevel(
     &mPlayerModel,
     &mEntityFactory,
     mpServiceProvider);
+  mEntities.systems.add<ai::RocketTurretSystem>(mPlayerEntity, &mEntityFactory);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,

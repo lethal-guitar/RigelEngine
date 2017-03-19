@@ -43,7 +43,8 @@ enum class ProjectileType {
   PlayerLaserShot,
   PlayerRocketShot,
   PlayerFlameShot,
-  EnemyLaserShot
+  EnemyLaserShot,
+  EnemyRocket
 };
 
 

@@ -17,56 +17,6 @@
 // This file is meant to be included into entity_factory.cpp. It's only
 // a separate file to make the amount of code in one file more manageable.
 
-/* NOTE-WORTHY ACTOR IDs
- *
- * 1-2: Explosions
- * 3: Explosion when Duke's normal shot hits wall
- * 4: Technical blinking thing, maybe UI-element or part of some enemy???
- * 7-10: Duke's rocket shot
- * 11: Debris/puff of smoke
- * 12-13: Sentry robot drone debris
- * 15-18: Barrel debris
- * 21: Duke's flame thrower shot (upwards)
- * 24-25: Duke's laser shot
- * 26-27: Duke's default shot
- * 71: Debris flying upwards from dying Duke
- * 72/73: Halves of a broken bonus globe
- * 74: White circle ???
- * 75: Collapsing slime bundle, after shooting nuclear waste barrel
- * 76: Small red bomb being dropped
- * 84: Smoke cloud, dissolving (maybe for turkey?)
- * 85/86: debris/particles from destroying shootable reactor
- * 91: Player ship shots?
- * 92: exhaust flames (for player ship maybe?)
- * 94: flying slime parts (after shooting moving green slime enemy, or suction plant)
- * 95: Rocket toppling over
- * 96: debris/parts of above rocket
- * 100: eye-ball (thrown by enemy)
- * 118: Green slime drop (for pipe dripping slime)
- * 123-127: Floating score numbers
- * 136: Green laser shot
- * 137-143: ??? maybe UI elements?
- * 144: Standing rocket, flies up if shot
- * 147/148: Green laser shot muzzle flash
- * 149: Rocket exhaust flame
- * 152/153: Debris/parts of destroyed ceiling grabber claw
- * 165-167: Explosion/particle effect animations
- * 169/170: Coke can debris/parts
- * 175: The end - until duke 3d
- * 191: Technical blinking thing, maybe UI-element or part of some enemy???
- * 192-199: Stone cat debris pieces
- * 204-206: Flame thrower shots
- * 232: Single frame of spider enemy.. huh?
- * 241-242: small puff of smoke, or debris parts
- * 243: More spider
- * 255: Hand of caged monster, flying after shooting it off
- * 256: Small rocket flying upwards
- * 259: Small rocket flying downwards
- * 280: WTF ???
- * 290-294: HUD elements for collected letters
- * 300: Green slime ball, thrown by Rigelatin enemies
- */
-
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -105,6 +55,12 @@ ActorID actorIdForProjectile(
     case ProjectileType::EnemyLaserShot:
       assert(isHorizontal(direction));
       return 136;
+
+    case ProjectileType::EnemyRocket:
+      return isHorizontal(direction)
+        ? (isGoingRight ? 57 : 55)
+        : 56;
+
   }
 
   assert(false);
@@ -117,6 +73,9 @@ float speedForProjectileType(const ProjectileType type) {
     case ProjectileType::PlayerLaserShot:
     case ProjectileType::PlayerFlameShot:
       return 5.0f;
+
+    case ProjectileType::EnemyRocket:
+      return 1.0f;
 
     default:
       return 2.0f;
@@ -598,6 +557,7 @@ void configureEntity(
       entity.assign<Shootable>(3, 500);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(1);
+      entity.assign<ai::components::RocketTurret>();
       break;
 
     case 62: // Bomb dropping space ship
@@ -820,6 +780,8 @@ void configureEntity(
 
       entity.assign<ai::components::MessengerDrone>(
         messengerDroneMessage(actorID));
+      entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
       break;
 
     case 231: // Lava riser
@@ -846,8 +808,9 @@ void configureEntity(
         // the bounding box, thus preventing the wall's destruction.
         // Making the bounding box slightly wider solves this problem in a
         // simple way, without making the world collision detection more
-        // complicated. It seems that the original game is actually doing
-        // something similar, too.
+        // complicated.
+        // TODO: Implementing projectile wall penetration would solve this as
+        // well.
         auto adjustedBbox = boundingBox;
         adjustedBbox.size.width += 2;
         adjustedBbox.topLeft.x -= 1;
@@ -859,6 +822,7 @@ void configureEntity(
     case 116: // door, opened by blue key (slides into ground)
     case 137: // unknown dynamic geometry
     case 138: // dynamic wall: falls down, stays intact
+    case 141: // unknown dynamic geometry
     case 142: // unknown dynamic geometry
     case 143: // shootable wall, burns away
 
@@ -1008,12 +972,25 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
 bool hasAssociatedSprite(const ActorID actorID) {
   switch (actorID) {
-    case 102: case 106: case 116: case 137: case 138: case 142: case 143:
-    case 139: case 221: case 233: case 234: case 241: case 250: case 251:
-    case 254:
-      return false;
-
     default:
       return true;
+
+    case 102:
+    case 106:
+    case 116:
+    case 137:
+    case 138:
+    case 141:
+    case 142:
+    case 143:
+    case 139:
+    case 221:
+    case 233:
+    case 234:
+    case 241:
+    case 250:
+    case 251:
+    case 254:
+      return false;
   }
 }

@@ -59,6 +59,8 @@ set(core_sources
     game_logic/ai/messenger_drone.hpp
     game_logic/ai/prisoner.cpp
     game_logic/ai/prisoner.hpp
+    game_logic/ai/rocket_turret.cpp
+    game_logic/ai/rocket_turret.hpp
     game_logic/ai/security_camera.cpp
     game_logic/ai/security_camera.hpp
     game_logic/ai/sliding_door.cpp
