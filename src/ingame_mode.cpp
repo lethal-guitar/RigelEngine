@@ -118,12 +118,14 @@ struct IngameMode::Systems {
         pPlayerModel,
         pServiceProvider,
         fireShotFunc)
+    , mElevatorSystem(playerEntity, pServiceProvider)
   {
   }
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
   game_logic::player::AttackSystem mPlayerAttackSystem;
+  game_logic::interaction::ElevatorSystem mElevatorSystem;
 };
 
 
@@ -287,11 +289,8 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
-  mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
-    mPlayerInputs);
-
   // TODO: Move all player related systems into the player namespace
-  mEntities.systems.update<interaction::ElevatorSystem>(dt);
+  mpSystems->mElevatorSystem.update(mEntities.entities, mPlayerInputs);
   mpSystems->mPlayerMovementSystem.update(mPlayerInputs);
   mpSystems->mPlayerAttackSystem.update(mPlayerInputs);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
@@ -417,9 +416,6 @@ void IngameMode::loadLevel(
     mpRenderer,
     &mScrollOffset,
     &mLevelData.mMap);
-  mEntities.systems.add<interaction::ElevatorSystem>(
-    mPlayerEntity,
-    mpServiceProvider);
   mEntities.systems.configure();
 
   mpSystems = std::make_unique<Systems>(

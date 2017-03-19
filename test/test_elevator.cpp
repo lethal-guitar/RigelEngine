@@ -82,8 +82,10 @@ TEST_CASE("Rocket elevator") {
   MockServiceProvider mockServiceProvicer;
   interaction::ElevatorSystem elevatorSystem(player, &mockServiceProvicer);
   const auto runOneFrame =
-    [&elevatorSystem, &physicsSystem, &entityx, &player]() {
-      elevatorSystem.update(entityx.entities, entityx.events, 0);
+    [&elevatorSystem, &physicsSystem, &entityx, &player](
+      const PlayerInputState& inputState
+    ) {
+      elevatorSystem.update(entityx.entities, inputState);
       physicsSystem.update(entityx.entities, entityx.events, 0);
     };
 
@@ -98,38 +100,6 @@ TEST_CASE("Rocket elevator") {
   };
 
 
-  SECTION("Player attachment") {
-    SECTION("Player is not attached when not completely standing on elevator") {
-      runOneFrame();
-      CHECK(!elevatorSystem.isPlayerAttached());
-
-      playerPosition.x = 5;
-      runOneFrame();
-      CHECK(!elevatorSystem.isPlayerAttached());
-
-      playerPosition.x = 4;
-      runOneFrame();
-      CHECK(!elevatorSystem.isPlayerAttached());
-
-      playerPosition.x = 1;
-      runOneFrame();
-      CHECK(!elevatorSystem.isPlayerAttached());
-    }
-
-    SECTION("Player is attached when completely on top of elevator") {
-      playerPosition.x = 3;
-      runOneFrame();
-      CHECK(elevatorSystem.isPlayerAttached());
-
-      playerPosition.x = 2;
-      runOneFrame();
-      CHECK(elevatorSystem.isPlayerAttached());
-    }
-  }
-
-  playerPosition.x = 3;
-  runOneFrame();
-
   const auto idleState = PlayerInputState{};
   PlayerInputState movingUpState;
   movingUpState.mMovingUp = true;
@@ -137,13 +107,44 @@ TEST_CASE("Rocket elevator") {
   movingDownState.mMovingDown = true;
 
 
+  SECTION("Player attachment") {
+    SECTION("Player is not attached when not completely standing on elevator") {
+      runOneFrame(idleState);
+      CHECK(!elevatorSystem.isPlayerAttached());
+
+      playerPosition.x = 5;
+      runOneFrame(idleState);
+      CHECK(!elevatorSystem.isPlayerAttached());
+
+      playerPosition.x = 4;
+      runOneFrame(idleState);
+      CHECK(!elevatorSystem.isPlayerAttached());
+
+      playerPosition.x = 1;
+      runOneFrame(idleState);
+      CHECK(!elevatorSystem.isPlayerAttached());
+    }
+
+    SECTION("Player is attached when completely on top of elevator") {
+      playerPosition.x = 3;
+      runOneFrame(idleState);
+      CHECK(elevatorSystem.isPlayerAttached());
+
+      playerPosition.x = 2;
+      runOneFrame(idleState);
+      CHECK(elevatorSystem.isPlayerAttached());
+    }
+  }
+
+  playerPosition.x = 3;
+  runOneFrame(idleState);
+
+
   SECTION("Movement on elevator") {
     SECTION("No movement while player idle") {
       const auto expectedPos = playerPosition;
 
-      elevatorSystem.setInputState(idleState);
-
-      runOneFrame();
+      runOneFrame(idleState);
 
       verifyPositions(expectedPos);
     }
@@ -151,13 +152,12 @@ TEST_CASE("Rocket elevator") {
     SECTION("Moving up") {
       auto expectedPos = playerPosition;
 
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
+      runOneFrame(movingUpState);
 
       expectedPos.y -= 2;
       verifyPositions(expectedPos);
 
-      runOneFrame();
+      runOneFrame(movingUpState);
 
       expectedPos.y -= 2;
       verifyPositions(expectedPos);
@@ -169,13 +169,12 @@ TEST_CASE("Rocket elevator") {
 
       auto expectedPos = playerPosition;
 
-      elevatorSystem.setInputState(movingDownState);
-      runOneFrame();
+      runOneFrame(movingDownState);
 
       expectedPos.y += 2;
       verifyPositions(expectedPos);
 
-      runOneFrame();
+      runOneFrame(movingDownState);
 
       expectedPos.y += 2;
       verifyPositions(expectedPos);
@@ -184,20 +183,16 @@ TEST_CASE("Rocket elevator") {
     SECTION("Elevator stays in air when player stops moving") {
       auto expectedPos = playerPosition;
 
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
+      runOneFrame(movingUpState);
 
-      elevatorSystem.setInputState(idleState);
-      runOneFrame();
+      runOneFrame(idleState);
 
       expectedPos.y -= 2;
       verifyPositions(expectedPos);
     }
 
     SECTION("Elevator is detached when player jumps") {
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
-      elevatorSystem.setInputState(idleState);
+      runOneFrame(movingUpState);
 
       const auto originalPos = playerPosition;
       const auto originalElevatorPos = elevatorPosition;
@@ -205,7 +200,7 @@ TEST_CASE("Rocket elevator") {
       player.component<Physical>()->mVelocity.y = -3.6f;
       player.component<Physical>()->mGravityAffected = true;
       player.component<PlayerControlled>()->mPerformedJump = true;
-      runOneFrame();
+      runOneFrame(idleState);
 
       CHECK(!elevatorSystem.isPlayerAttached());
       CHECK(playerPosition.y < originalPos.y);
@@ -216,18 +211,16 @@ TEST_CASE("Rocket elevator") {
 
     SECTION("Elevator is detached when player walks off") {
       // Setup: Get player+elevator in the air
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
-      runOneFrame();
+      runOneFrame(movingUpState);
+      runOneFrame(movingUpState);
 
       const auto originalPlayerY = playerPosition.y;
       const auto originalElevatorY = elevatorPosition.y;
 
-      elevatorSystem.setInputState(idleState);
-      runOneFrame();
+      runOneFrame(idleState);
 
       playerPosition.x -= 2;
-      runOneFrame();
+      runOneFrame(idleState);
 
       CHECK(!elevatorSystem.isPlayerAttached());
       CHECK(player.component<Physical>()->mGravityAffected);
@@ -240,15 +233,13 @@ TEST_CASE("Rocket elevator") {
       const auto expectedPos = playerPosition;
 
       // Setup: Get player+elevator in the air
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
+      runOneFrame(movingUpState);
 
       CHECK(playerPosition.y == 98);
       CHECK(elevatorPosition.y == 101);
 
-      elevatorSystem.setInputState(movingDownState);
-      runOneFrame();
-      runOneFrame();
+      runOneFrame(movingDownState);
+      runOneFrame(movingDownState);
 
       verifyPositions(expectedPos);
     }
@@ -258,15 +249,13 @@ TEST_CASE("Rocket elevator") {
       elevatorPosition.y = 99;
       const auto initialPos = playerPosition;
 
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
+      runOneFrame(movingUpState);
 
       const auto expectedPos = initialPos - WorldPosition{0, 1};
       verifyPositions(expectedPos);
 
-      elevatorSystem.setInputState(idleState);
-      runOneFrame();
-      runOneFrame();
+      runOneFrame(idleState);
+      runOneFrame(idleState);
 
       verifyPositions(expectedPos);
     }
@@ -275,43 +264,39 @@ TEST_CASE("Rocket elevator") {
 
   SECTION("Player state is updated correctly") {
     SECTION("State initially marked as not interacting") {
-      runOneFrame();
+      runOneFrame(idleState);
       CHECK(!playerState.mIsInteracting);
     }
 
     SECTION("State set to interacting when moving up") {
-      elevatorSystem.setInputState(movingUpState);
-      runOneFrame();
+      runOneFrame(movingUpState);
       CHECK(playerState.mIsInteracting);
     }
 
     SECTION("State set to interacting when moving down") {
-      elevatorSystem.setInputState(movingDownState);
-      runOneFrame();
+      runOneFrame(movingDownState);
       CHECK(playerState.mIsInteracting);
     }
 
-    elevatorSystem.setInputState(movingUpState);
-    runOneFrame();
+    runOneFrame(movingUpState);
 
     SECTION("State reset to normal after movement stops") {
-      elevatorSystem.setInputState(idleState);
-      runOneFrame();
+      runOneFrame(idleState);
       CHECK(!playerState.mIsInteracting);
     }
 
     SECTION("State reset to normal after detaching") {
       playerPosition.x = 0;
-      runOneFrame();
+      runOneFrame(idleState);
       CHECK(!playerState.mIsInteracting);
     }
 
     SECTION("Interacting state is not changed when not attached to elevator") {
       playerPosition.x = 6;
-      runOneFrame();
+      runOneFrame(idleState);
 
       playerState.mIsInteracting = true;
-      runOneFrame();
+      runOneFrame(idleState);
       CHECK(playerState.mIsInteracting);
     }
   }
