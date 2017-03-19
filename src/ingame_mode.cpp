@@ -24,6 +24,7 @@
 #include "engine/life_time_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
+#include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
@@ -108,7 +109,10 @@ struct IngameMode::Systems {
     base::Vector* pScrollOffset,
     entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
+    data::map::Map* pMap,
     IGameServiceProvider* pServiceProvider,
+    EntityFactory* pEntityFactory,
+    RandomNumberGenerator* pRandomGenerator,
     const data::map::Map& map,
     FireShotFuncT fireShotFunc
   )
@@ -120,6 +124,12 @@ struct IngameMode::Systems {
         pServiceProvider,
         fireShotFunc)
     , mElevatorSystem(playerEntity, pServiceProvider)
+    , mBlueGuardSystem(
+        playerEntity,
+        pMap,
+        pEntityFactory,
+        pServiceProvider,
+        pRandomGenerator)
   {
   }
 
@@ -127,6 +137,8 @@ struct IngameMode::Systems {
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
   game_logic::player::AttackSystem mPlayerAttackSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
+
+  game_logic::ai::BlueGuardSystem mBlueGuardSystem;
 };
 
 
@@ -315,6 +327,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
+  mpSystems->mBlueGuardSystem.update(mEntities.entities);
   mEntities.systems.update<ai::LaserTurretSystem>(dt);
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
   mEntities.systems.update<ai::PrisonerSystem>(dt);
@@ -439,7 +452,10 @@ void IngameMode::loadLevel(
     &mScrollOffset,
     mPlayerEntity,
     &mPlayerModel,
+    &mLevelData.mMap,
     mpServiceProvider,
+    &mEntityFactory,
+    &mRandomGenerator,
     mLevelData.mMap,
     [this](
       const game_logic::ProjectileType type,
@@ -451,6 +467,7 @@ void IngameMode::loadLevel(
 
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {
+      mpSystems->mBlueGuardSystem.onEntityHit(entity);
       mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::SlimeBlobSystem>()->onEntityHit(entity);

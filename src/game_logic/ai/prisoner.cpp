@@ -146,6 +146,7 @@ void PrisonerSystem::onEntityHit(entityx::Entity entity) {
 
   if (state.mState == components::Prisoner::State::Grabbing) {
     sprite.mFramesToRender.pop_back();
+    entity.remove<game_logic::components::PlayerDamaging>();
   }
 
   state.mState = components::Prisoner::State::Dieing;

@@ -90,7 +90,11 @@ bool Map::coordinatesValid(const int xS, const int yS) const {
 }
 
 
-CollisionData Map::collisionData(int x, int y) const {
+CollisionData Map::collisionData(const int x, const int y) const {
+  if (!coordinatesValid(x, y)) {
+    return CollisionData::fullySolid();
+  }
+
   const auto data1 = mAttributes.collisionData(tileAt(0, x, y));
   const auto data2 = mAttributes.collisionData(tileAt(1, x, y));
   return CollisionData{data1, data2};

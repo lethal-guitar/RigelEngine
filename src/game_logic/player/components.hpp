@@ -97,6 +97,13 @@ struct PlayerControlled {
       mState == player::PlayerState::Dieing ||
       mState == player::PlayerState::Dead;
   }
+
+  bool isPlayerOnGround() const {
+    return
+      !isPlayerDead() &&
+      mState != player::PlayerState::ClimbingLadder &&
+      mState != player::PlayerState::Airborne;
+  }
 };
 
 

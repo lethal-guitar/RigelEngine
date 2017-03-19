@@ -135,6 +135,18 @@ Message messengerDroneMessage(const ActorID id) {
 }
 
 
+auto createBlueGuardAiComponent(const ActorID id) {
+  using Orientation = ai::components::BlueGuard::Orientation;
+
+  const auto typingOnTerminal = id == 217;
+  // Orientation doesn't matter when the guard is in terminal typing mode,
+  // so we arbitrarily assign Left in that case.
+  const auto orientation = id == 159 ? Orientation::Right : Orientation::Left;
+
+  return ai::components::BlueGuard{typingOnTerminal, orientation};
+}
+
+
 void configureEntity(
   ex::Entity entity,
   const ActorID actorID,
@@ -634,13 +646,18 @@ void configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    // Guard wearing blue suit
+    // Guard wearing blue space suit
     case 159: // ->
     case 171: // <-
     case 217: // using terminal
       entity.assign<PlayerDamaging>(1);
       entity.assign<Shootable>(2 + difficultyOffset, 3000);
-      addDefaultPhysical(entity, boundingBox);
+      entity.assign<Physical>(Physical{{0.0f, 0.0f}, false});
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<ai::components::BlueGuard>(
+        createBlueGuardAiComponent(actorID));
       break;
 
 

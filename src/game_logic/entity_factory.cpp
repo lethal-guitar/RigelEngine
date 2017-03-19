@@ -21,6 +21,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
+#include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
