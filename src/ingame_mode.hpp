@@ -46,6 +46,7 @@ public:
     data::Difficulty difficulty,
     Context context,
     boost::optional<base::Vector> playerPositionOverride = boost::none);
+  ~IngameMode();
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;
@@ -89,9 +90,13 @@ private:
     data::map::BackdropSwitchCondition mBackdropSwitchCondition;
   };
 
+  struct Systems;
+
   LevelData mLevelData;
   data::map::Map mMapAtLevelStart;
   entityx::Entity mPlayerEntity;
+
+  std::unique_ptr<Systems> mpSystems;
 
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;

@@ -101,6 +101,20 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 }
 
 
+struct IngameMode::Systems {
+  Systems(
+    base::Vector* pScrollOffset,
+    entityx::Entity playerEntity,
+    const data::map::Map& map
+  )
+    : mMapScrollSystem(pScrollOffset, playerEntity, map)
+  {
+  }
+
+  game_logic::MapScrollSystem mMapScrollSystem;
+};
+
+
 IngameMode::IngameMode(
   const int episode,
   const int levelNumber,
@@ -142,6 +156,9 @@ IngameMode::IngameMode(
   auto after = high_resolution_clock::now();
   std::cout << "Level load time: " <<
     duration<double>(after - before).count() * 1000.0 << " ms\n";
+}
+
+IngameMode::~IngameMode() {
 }
 
 
@@ -241,7 +258,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
   mEntities.systems.update<player::AnimationSystem>(dt);
-  mEntities.systems.update<MapScrollSystem>(dt);
+  mpSystems->mMapScrollSystem.update(dt);
 
   mEntities.systems.update<engine::LifeTimeSystem>(dt);
 
@@ -337,10 +354,6 @@ void IngameMode::loadLevel(
     &mPlayerModel,
     mpServiceProvider,
     difficulty);
-  mEntities.systems.add<game_logic::MapScrollSystem>(
-    &mScrollOffset,
-    mPlayerEntity,
-    mLevelData.mMap);
   mEntities.systems.add<RenderingSystem>(
     &mScrollOffset,
     mpRenderer,
@@ -387,6 +400,9 @@ void IngameMode::loadLevel(
     mPlayerEntity,
     mpServiceProvider);
   mEntities.systems.configure();
+
+  mpSystems =
+    std::make_unique<Systems>(&mScrollOffset, mPlayerEntity, mLevelData.mMap);
 
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {

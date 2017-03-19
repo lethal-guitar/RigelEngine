@@ -78,11 +78,7 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
-void MapScrollSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void MapScrollSystem::update(const entityx::TimeDelta dt) {
   const auto& state = *mPlayer.component<PlayerControlled>();
   const auto& bbox = *mPlayer.component<BoundingBox>();
   const auto& worldPosition = *mPlayer.component<WorldPosition>();

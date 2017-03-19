@@ -34,18 +34,14 @@ namespace rigel { namespace game_logic { namespace components {
 
 namespace rigel { namespace game_logic {
 
-class MapScrollSystem : public entityx::System<MapScrollSystem> {
+class MapScrollSystem {
 public:
   MapScrollSystem(
     base::Vector* pScrollOffset,
     entityx::Entity player,
     const data::map::Map& map);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+  void update(entityx::TimeDelta dt);
 
 private:
   void updateScrollOffset(
