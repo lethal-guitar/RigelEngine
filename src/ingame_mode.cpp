@@ -186,30 +186,41 @@ void IngameMode::handleEvent(const SDL_Event& event) {
   switch (event.key.keysym.sym) {
     // TODO: Refactor: This can be clearer and less repetitive.
     case SDLK_UP:
-      mPlayerInputs.mMovingUp = mPlayerInputs.mMovingUp || keyPressed;
-      mPlayerInputsFrequent.mMovingUp = keyPressed;
+      mCombinedInputState.mMovingUp = mCombinedInputState.mMovingUp || keyPressed;
+      mInputState.mMovingUp = keyPressed;
       break;
     case SDLK_DOWN:
-      mPlayerInputs.mMovingDown = mPlayerInputs.mMovingDown || keyPressed;
-      mPlayerInputsFrequent.mMovingDown = keyPressed;
+      mCombinedInputState.mMovingDown = mCombinedInputState.mMovingDown || keyPressed;
+      mInputState.mMovingDown = keyPressed;
       break;
     case SDLK_LEFT:
-      mPlayerInputs.mMovingLeft = mPlayerInputs.mMovingLeft || keyPressed;
-      mPlayerInputsFrequent.mMovingLeft = keyPressed;
+      mCombinedInputState.mMovingLeft = mCombinedInputState.mMovingLeft || keyPressed;
+      mInputState.mMovingLeft = keyPressed;
       break;
     case SDLK_RIGHT:
-      mPlayerInputs.mMovingRight = mPlayerInputs.mMovingRight || keyPressed;
-      mPlayerInputsFrequent.mMovingRight = keyPressed;
+      mCombinedInputState.mMovingRight = mCombinedInputState.mMovingRight || keyPressed;
+      mInputState.mMovingRight = keyPressed;
       break;
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-      mPlayerInputs.mJumping = mPlayerInputs.mJumping || keyPressed;
-      mPlayerInputsFrequent.mJumping = keyPressed;
+      mCombinedInputState.mJumping = mCombinedInputState.mJumping || keyPressed;
+      mInputState.mJumping = keyPressed;
       break;
     case SDLK_LALT:
     case SDLK_RALT:
-      mPlayerInputs.mShooting = mPlayerInputs.mShooting || keyPressed;
-      mPlayerInputsFrequent.mShooting = keyPressed;
+      mCombinedInputState.mShooting = mCombinedInputState.mShooting || keyPressed;
+      mInputState.mShooting = keyPressed;
+
+      // To make shooting feel responsive even when updating the attack system
+      // only at game-logic rate, we notify the system about button presses
+      // immediately. The system will queue up one requested shot for the
+      // next logic update.
+      //
+      // Without this, fire button presses can get lost since firing is
+      // only allowed if the button is released between two shots. If the
+      // release happens between two logic updates, the system wouldn't see it,
+      // therefore thinking you're still holding the button.
+      mpSystems->mPlayerAttackSystem.buttonStateChanged(mInputState);
       break;
   }
 
@@ -293,12 +304,12 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
-  mpSystems->mElevatorSystem.update(mEntities.entities, mPlayerInputs);
-  mpSystems->mPlayerMovementSystem.update(mPlayerInputs);
-  mpSystems->mPlayerAttackSystem.update(mPlayerInputs);
+  mpSystems->mElevatorSystem.update(mEntities.entities, mCombinedInputState);
+  mpSystems->mPlayerMovementSystem.update(mCombinedInputState);
+  mpSystems->mPlayerAttackSystem.update();
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
-  mPlayerInputs = mPlayerInputsFrequent;
+  mCombinedInputState = mInputState;
 
   // ----------------------------------------------------------------------
   // A.I. logic update

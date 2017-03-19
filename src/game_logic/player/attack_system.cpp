@@ -81,11 +81,12 @@ AttackSystem::AttackSystem(
   , mpServiceProvider(pServiceProvider)
   , mFireShotFunc(fireShotFunc)
   , mPreviousFireButtonState(false)
+  , mShotRequested(false)
 {
 }
 
 
-void AttackSystem::update(const PlayerInputState& inputState) {
+void AttackSystem::update() {
   assert(mPlayerEntity.has_component<components::PlayerControlled>());
   assert(mPlayerEntity.has_component<WorldPosition>());
 
@@ -103,12 +104,19 @@ void AttackSystem::update(const PlayerInputState& inputState) {
     return;
   }
 
-  const auto canShoot = !mPreviousFireButtonState;
-  if (inputState.mShooting && canShoot) {
+  if (mShotRequested) {
     fireShot(playerPosition, playerState);
+    mShotRequested = false;
     playerState.mShotFired = true;
   } else {
     playerState.mShotFired = false;
+  }
+}
+
+
+void AttackSystem::buttonStateChanged(const PlayerInputState& inputState) {
+  if (inputState.mShooting && !mPreviousFireButtonState && !mShotRequested) {
+    mShotRequested = true;
   }
 
   mPreviousFireButtonState = inputState.mShooting;

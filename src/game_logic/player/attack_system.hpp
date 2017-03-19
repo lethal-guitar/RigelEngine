@@ -53,7 +53,8 @@ public:
     IGameServiceProvider* pServiceProvider,
     FireShotFunc fireShotFunc);
 
-  void update(const PlayerInputState& inputState);
+  void update();
+  void buttonStateChanged(const PlayerInputState& inputState);
 
 private:
   void fireShot(
@@ -67,6 +68,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   FireShotFunc mFireShotFunc;
   bool mPreviousFireButtonState;
+  bool mShotRequested;
 };
 
 

@@ -234,7 +234,9 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
       state.mState == PlayerState::Walking ||
       state.mState == PlayerState::Airborne
     ) {
-      if (horizontalMovementWanted && mWalkRequestedLastFrame) {
+      const auto canStartMoving = mWalkRequestedLastFrame ||
+        state.mOrientation == oldOrientation;
+      if (horizontalMovementWanted && canStartMoving) {
         physical.mVelocity.x = movingLeft ? -1.0f : 1.0f;
       }
     }

@@ -81,8 +81,8 @@ private:
   data::PlayerModel mPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
-  game_logic::PlayerInputState mPlayerInputs;
-  game_logic::PlayerInputState mPlayerInputsFrequent;
+  game_logic::PlayerInputState mInputState;
+  game_logic::PlayerInputState mCombinedInputState;
   bool mLevelFinished;
 
   engine::TimeDelta mAccumulatedTime;
