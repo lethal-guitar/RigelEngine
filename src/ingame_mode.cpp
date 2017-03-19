@@ -286,6 +286,9 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   engine::markActiveEntities(mEntities.entities, mScrollOffset);
 
+  // TODO: Use Systems struct for everything, stop using entityx::SystemManager
+  // entirely
+
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
