@@ -102,18 +102,28 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 
 
 struct IngameMode::Systems {
+  template<typename FireShotFuncT>
   Systems(
     base::Vector* pScrollOffset,
     entityx::Entity playerEntity,
-    const data::map::Map& map
+    data::PlayerModel* pPlayerModel,
+    IGameServiceProvider* pServiceProvider,
+    const data::map::Map& map,
+    FireShotFuncT fireShotFunc
   )
     : mMapScrollSystem(pScrollOffset, playerEntity, map)
     , mPlayerMovementSystem(playerEntity, map)
+    , mPlayerAttackSystem(
+        playerEntity,
+        pPlayerModel,
+        pServiceProvider,
+        fireShotFunc)
   {
   }
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
+  game_logic::player::AttackSystem mPlayerAttackSystem;
 };
 
 
@@ -277,15 +287,13 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
-  mEntities.systems.system<player::AttackSystem>()->setInputState(
-    mPlayerInputs);
   mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
     mPlayerInputs);
 
   // TODO: Move all player related systems into the player namespace
   mEntities.systems.update<interaction::ElevatorSystem>(dt);
   mpSystems->mPlayerMovementSystem.update(mPlayerInputs);
-  mEntities.systems.update<player::AttackSystem>(dt);
+  mpSystems->mPlayerAttackSystem.update(mPlayerInputs);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   mPlayerInputs = mPlayerInputsFrequent;
@@ -362,17 +370,6 @@ void IngameMode::loadLevel(
     mPlayerEntity,
     mpServiceProvider,
     &mEntityFactory);
-  mEntities.systems.add<game_logic::player::AttackSystem>(
-    mPlayerEntity,
-    &mPlayerModel,
-    mpServiceProvider,
-    [this](
-      const game_logic::ProjectileType type,
-      const WorldPosition& pos,
-      const game_logic::ProjectileDirection direction
-    ) {
-      mEntityFactory.createProjectile(type, pos, direction);
-    });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,
     &mPlayerModel,
@@ -425,8 +422,19 @@ void IngameMode::loadLevel(
     mpServiceProvider);
   mEntities.systems.configure();
 
-  mpSystems =
-    std::make_unique<Systems>(&mScrollOffset, mPlayerEntity, mLevelData.mMap);
+  mpSystems = std::make_unique<Systems>(
+    &mScrollOffset,
+    mPlayerEntity,
+    &mPlayerModel,
+    mpServiceProvider,
+    mLevelData.mMap,
+    [this](
+      const game_logic::ProjectileType type,
+      const WorldPosition& pos,
+      const game_logic::ProjectileDirection direction
+    ) {
+      mEntityFactory.createProjectile(type, pos, direction);
+    });
 
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {

@@ -39,7 +39,7 @@ namespace rigel { namespace game_logic { namespace components {
 
 namespace rigel { namespace game_logic { namespace player {
 
-class AttackSystem : public entityx::System<AttackSystem> {
+class AttackSystem {
 public:
   using FireShotFunc = std::function<void(
     ProjectileType type,
@@ -53,13 +53,7 @@ public:
     IGameServiceProvider* pServiceProvider,
     FireShotFunc fireShotFunc);
 
-  // TODO: Consider having a special 'updateWithInput' method instead.
-  void setInputState(PlayerInputState inputState);
-
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(const PlayerInputState& inputState);
 
 private:
   void fireShot(
@@ -72,7 +66,6 @@ private:
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
   FireShotFunc mFireShotFunc;
-  PlayerInputState mInputState;
   bool mPreviousFireButtonState;
 };
 

@@ -85,16 +85,7 @@ AttackSystem::AttackSystem(
 }
 
 
-void AttackSystem::setInputState(PlayerInputState inputState) {
-  mInputState = inputState;
-}
-
-
-void AttackSystem::update(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  ex::TimeDelta dt
-) {
+void AttackSystem::update(const PlayerInputState& inputState) {
   assert(mPlayerEntity.has_component<components::PlayerControlled>());
   assert(mPlayerEntity.has_component<WorldPosition>());
 
@@ -113,14 +104,14 @@ void AttackSystem::update(
   }
 
   const auto canShoot = !mPreviousFireButtonState;
-  if (mInputState.mShooting && canShoot) {
+  if (inputState.mShooting && canShoot) {
     fireShot(playerPosition, playerState);
     playerState.mShotFired = true;
   } else {
     playerState.mShotFired = false;
   }
 
-  mPreviousFireButtonState = mInputState.mShooting;
+  mPreviousFireButtonState = inputState.mShooting;
 }
 
 
