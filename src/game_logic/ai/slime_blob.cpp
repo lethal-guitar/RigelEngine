@@ -70,10 +70,6 @@ void SlimeBlobSystem::update(
   using engine::components::Active;
   using engine::components::WorldPosition;
 
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   es.each<Sprite, WorldPosition, components::SlimeContainer, Active>(
     [this](
       entityx::Entity entity,

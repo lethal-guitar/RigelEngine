@@ -18,7 +18,6 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -80,7 +79,6 @@ private:
 private:
   entityx::Entity mPlayer;
   engine::RandomNumberGenerator* mpRandomGenerator;
-  engine::TimeStepper mTimeStepper;
   bool mIsOddFrame = false;
 };
 

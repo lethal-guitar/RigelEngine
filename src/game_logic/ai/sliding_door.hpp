@@ -19,7 +19,6 @@
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/renderer.hpp"
-#include "engine/timing.hpp"
 #include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -79,7 +78,6 @@ private:
 private:
   entityx::Entity mPlayerEntity;
   IGameServiceProvider* mpServiceProvider;
-  engine::TimeStepper mTimeStepper;
 };
 
 }

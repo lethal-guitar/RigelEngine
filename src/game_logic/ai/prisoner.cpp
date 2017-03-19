@@ -45,10 +45,6 @@ void PrisonerSystem::update(
 ) {
   using engine::components::Active;
 
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   mIsOddFrame = !mIsOddFrame;
 
   es.each<Sprite, WorldPosition, components::Prisoner, Active>(

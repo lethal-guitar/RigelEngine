@@ -78,35 +78,22 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
-void MapScrollSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void MapScrollSystem::updateManualScrolling(const entityx::TimeDelta dt) {
   const auto& state = *mPlayer.component<PlayerControlled>();
-  const auto& bbox = *mPlayer.component<BoundingBox>();
-  const auto& worldPosition = *mPlayer.component<WorldPosition>();
 
-  updateScrollOffset(state, worldPosition, bbox, dt);
+  if (state.mIsLookingDown) {
+    mpScrollOffset->y += 2;
+  }
+  if (state.mIsLookingUp) {
+    mpScrollOffset->y -= 2;
+  }
 }
 
 
-void MapScrollSystem::updateScrollOffset(
-  const PlayerControlled& state,
-  const WorldPosition& playerPosition,
-  const BoundingBox& originalPlayerBounds,
-  const ex::TimeDelta dt
-) {
-  if (updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    // We can just always update here, since the code below will clamp the
-    // scroll offset properly
-    if (state.mIsLookingDown) {
-      mpScrollOffset->y += 2;
-    }
-    if (state.mIsLookingUp) {
-      mpScrollOffset->y -= 2;
-    }
-  }
+void MapScrollSystem::updateScrollOffset() {
+  const auto& state = *mPlayer.component<PlayerControlled>();
+  const auto& originalPlayerBounds = *mPlayer.component<BoundingBox>();
+  const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
   auto playerBounds = originalPlayerBounds;
   playerBounds.topLeft =

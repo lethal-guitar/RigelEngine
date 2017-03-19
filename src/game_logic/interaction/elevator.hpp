@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -43,21 +42,15 @@ struct Elevator {};
 void configureElevator(entityx::Entity entity);
 
 
-class ElevatorSystem : public entityx::System<ElevatorSystem> {
+class ElevatorSystem {
 public:
   ElevatorSystem(
     entityx::Entity player,
     IGameServiceProvider* pServiceProvider);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es, const PlayerInputState& inputState);
 
   bool isPlayerAttached() const;
-
-  // TODO: Consider having a special 'updateWithInput' method instead.
-  void setInputState(PlayerInputState inputState);
 
 private:
   entityx::Entity findAttachableElevator(entityx::EntityManager& es);
@@ -75,10 +68,8 @@ private:
   IGameServiceProvider* mpServiceProvider;
   entityx::Entity mAttachedElevator;
 
-  PlayerInputState mPlayerInputs;
-
   int mPreviousMovement;
-  engine::TimeStepper mTimeStepper;
+  bool mIsOddFrame = false;
 };
 
 }}}

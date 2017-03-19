@@ -54,10 +54,6 @@ void SlimePipeSystem::update(
   entityx::EventManager& events,
   entityx::TimeDelta dt
 ) {
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   es.each<components::SlimePipe, WorldPosition, Active>(
     [this](
       entityx::Entity,

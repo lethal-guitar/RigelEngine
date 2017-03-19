@@ -46,6 +46,7 @@ public:
     data::Difficulty difficulty,
     Context context,
     boost::optional<base::Vector> playerPositionOverride = boost::none);
+  ~IngameMode();
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;
@@ -61,6 +62,8 @@ private:
     data::Difficulty difficulty,
     const loader::ResourceLoader& resources
   );
+
+  void updateGameLogic(engine::TimeDelta dt);
 
   void handleLevelExit();
   void handlePlayerDeath();
@@ -78,8 +81,11 @@ private:
   data::PlayerModel mPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
-  game_logic::PlayerInputState mPlayerInputs;
+  game_logic::PlayerInputState mInputState;
+  game_logic::PlayerInputState mCombinedInputState;
   bool mLevelFinished;
+
+  engine::TimeDelta mAccumulatedTime;
 
   bool mShowDebugText;
 
@@ -89,9 +95,13 @@ private:
     data::map::BackdropSwitchCondition mBackdropSwitchCondition;
   };
 
+  struct Systems;
+
   LevelData mLevelData;
   data::map::Map mMapAtLevelStart;
   entityx::Entity mPlayerEntity;
+
+  std::unique_ptr<Systems> mpSystems;
 
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;

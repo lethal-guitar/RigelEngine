@@ -73,9 +73,8 @@ ElevatorSystem::ElevatorSystem(
 
 
 void ElevatorSystem::update(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  ex::TimeDelta dt
+  entityx::EntityManager& es,
+  const PlayerInputState& inputState
 ) {
   auto& playerState = *mPlayer.component<PlayerControlled>();
   auto& playerPhysical = *mPlayer.component<Physical>();
@@ -92,15 +91,14 @@ void ElevatorSystem::update(
 
   int movement = 0;
   if (mAttachedElevator) {
-    movement = determineMovementDirection(mPlayerInputs);
+    movement = determineMovementDirection(inputState);
     playerState.mIsInteracting = movement != 0;
     updateElevatorMovement(movement, playerPhysical);
   }
 
-  if (
-    movement < 0 &&
-    updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 4, dt)
-  ) {
+  mIsOddFrame = !mIsOddFrame;
+
+  if (movement < 0 && mIsOddFrame) {
     mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
   }
 }
@@ -108,11 +106,6 @@ void ElevatorSystem::update(
 
 bool ElevatorSystem::isPlayerAttached() const {
   return mAttachedElevator.valid();
-}
-
-
-void ElevatorSystem::setInputState(PlayerInputState inputState) {
-  mPlayerInputs = inputState;
 }
 
 

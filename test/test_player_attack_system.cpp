@@ -81,46 +81,40 @@ TEST_CASE("Player attack system works as expected") {
   });
 
   MockServiceProvider mockServiceProvicer;
-  entityx.systems.add<player::AttackSystem>(
+  player::AttackSystem attackSystem{
     player,
     &playerModel,
     &mockServiceProvicer,
-    fireShotSpy);
-  entityx.systems.configure();
-  auto& attackSystem = *entityx.systems.system<player::AttackSystem>();
+    fireShotSpy};
 
   const auto defaultInputState = PlayerInputState{};
   auto shootingInputState = PlayerInputState{};
   shootingInputState.mShooting = true;
 
+  const auto update = [&attackSystem](const auto& inputState) {
+    attackSystem.buttonStateChanged(inputState);
+    attackSystem.update();
+  };
+
   REQUIRE(player.has_component<PlayerControlled>());
   auto& playerState = *player.component<PlayerControlled>();
   auto& playerPosition = *player.component<WorldPosition>();
 
-  const auto updateWithInput = [&attackSystem, &entityx](
-    const PlayerInputState& inputState,
-    const ex::TimeDelta timeDelta = 10.0
-  ) {
-    attackSystem.setInputState(inputState);
-    entityx.systems.update<player::AttackSystem>(timeDelta);
-  };
-
-
   SECTION("Pressing fire button triggers only one shot") {
-    updateWithInput(defaultInputState);
+    update(defaultInputState);
     CHECK(fireShotSpy.count() == 0);
 
-    updateWithInput(shootingInputState);
+    update(shootingInputState);
     CHECK(fireShotSpy.count() == 1);
 
     // holding the fire button doesn't trigger another shot
-    updateWithInput(shootingInputState);
+    update(shootingInputState);
     CHECK(fireShotSpy.count() == 1);
 
     SECTION("Releasing fire button allows shooting again on next press") {
-      updateWithInput(defaultInputState);
+      update(defaultInputState);
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotSpy.count() == 2);
     }
   }
@@ -129,7 +123,7 @@ TEST_CASE("Player attack system works as expected") {
   SECTION("Shot position and direction depend on player orientation and state") {
     SECTION("Standing") {
       SECTION("Facing right") {
-        updateWithInput(shootingInputState);
+        update(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -2};
         CHECK(fireShotParameters.position == expectedPosition);
@@ -139,7 +133,7 @@ TEST_CASE("Player attack system works as expected") {
       SECTION("Facing left") {
         playerState.mOrientation = player::Orientation::Left;
 
-        updateWithInput(shootingInputState);
+        update(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -2};
         CHECK(fireShotParameters.position == expectedPosition);
@@ -150,14 +144,14 @@ TEST_CASE("Player attack system works as expected") {
         playerPosition.x += 4;
 
         SECTION("Facing right") {
-          updateWithInput(shootingInputState);
+          update(shootingInputState);
           CHECK(fireShotParameters.position.x == 3 + 4);
         }
 
         SECTION("Facing left") {
           playerState.mOrientation = player::Orientation::Left;
 
-          updateWithInput(shootingInputState);
+          update(shootingInputState);
           CHECK(fireShotParameters.position.x == -1 + 4);
         }
       }
@@ -167,7 +161,7 @@ TEST_CASE("Player attack system works as expected") {
       playerState.mState = PlayerState::Crouching;
 
       SECTION("Facing right") {
-        updateWithInput(shootingInputState);
+        update(shootingInputState);
 
         const auto expectedPosition = WorldPosition{3, -1};
         CHECK(fireShotParameters.position == expectedPosition);
@@ -177,7 +171,7 @@ TEST_CASE("Player attack system works as expected") {
       SECTION("Facing left") {
         playerState.mOrientation = player::Orientation::Left;
 
-        updateWithInput(shootingInputState);
+        update(shootingInputState);
 
         const auto expectedPosition = WorldPosition{-1, -1};
         CHECK(fireShotParameters.position == expectedPosition);
@@ -189,7 +183,7 @@ TEST_CASE("Player attack system works as expected") {
       playerState.mState = PlayerState::LookingUp;
 
       SECTION("Facing right") {
-        updateWithInput(shootingInputState);
+        update(shootingInputState);
 
         const auto expectedPosition = WorldPosition{2, -5};
         CHECK(fireShotParameters.position == expectedPosition);
@@ -199,7 +193,7 @@ TEST_CASE("Player attack system works as expected") {
       SECTION("Facing left") {
         playerState.mOrientation = player::Orientation::Left;
 
-        updateWithInput(shootingInputState);
+        update(shootingInputState);
 
         const auto expectedPosition = WorldPosition{0, -5};
         CHECK(fireShotParameters.position == expectedPosition);
@@ -212,19 +206,19 @@ TEST_CASE("Player attack system works as expected") {
   SECTION("Player cannot shoot in certain states") {
     SECTION("Cannot shoot while climbing a ladder") {
       playerState.mState = PlayerState::ClimbingLadder;
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotSpy.count() == 0);
     }
 
     SECTION("Cannot shoot while dieing") {
       playerState.mState = PlayerState::Dieing;
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotSpy.count() == 0);
     }
 
     SECTION("Cannot shoot when dead") {
       playerState.mState = PlayerState::Dead;
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotSpy.count() == 0);
     }
   }
@@ -232,28 +226,28 @@ TEST_CASE("Player attack system works as expected") {
 
   SECTION("Shot type depends on player's current weapon") {
     SECTION("Regular shot") {
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerRegularShot);
     }
 
     SECTION("Laser shot") {
       playerModel.mWeapon = data::WeaponType::Laser;
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerLaserShot);
     }
 
     SECTION("Rocket shot") {
       playerModel.mWeapon = data::WeaponType::Rocket;
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerRocketShot);
     }
 
     SECTION("Flame shot") {
       playerModel.mWeapon = data::WeaponType::FlameThrower;
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerFlameShot);
     }
   }
@@ -263,7 +257,7 @@ TEST_CASE("Player attack system works as expected") {
     CHECK(mockServiceProvicer.mLastTriggeredSoundId == boost::none);
 
     SECTION("Normal shot") {
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
       CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
@@ -273,7 +267,7 @@ TEST_CASE("Player attack system works as expected") {
     SECTION("Laser") {
       playerModel.mWeapon = data::WeaponType::Laser;
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
       CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
@@ -284,7 +278,7 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mWeapon = data::WeaponType::Rocket;
 
       // The rocket launcher also uses the normal shot sound
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
       CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
@@ -294,7 +288,7 @@ TEST_CASE("Player attack system works as expected") {
     SECTION("Flame thrower") {
       playerModel.mWeapon = data::WeaponType::FlameThrower;
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
       CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
       CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
@@ -305,7 +299,7 @@ TEST_CASE("Player attack system works as expected") {
       playerModel.mWeapon = data::WeaponType::Laser;
       playerModel.mAmmo = 1;
 
-      updateWithInput(shootingInputState);
+      update(shootingInputState);
 
       CHECK(
           *mockServiceProvicer.mLastTriggeredSoundId ==
@@ -315,10 +309,10 @@ TEST_CASE("Player attack system works as expected") {
 
 
   const auto fireOneShot = [
-    &updateWithInput, &shootingInputState, &defaultInputState
+    &attackSystem, &shootingInputState, &defaultInputState, &update
   ]() {
-    updateWithInput(shootingInputState);
-    updateWithInput(defaultInputState);
+    update(shootingInputState);
+    update(defaultInputState);
   };
 
   SECTION("Ammo consumption for non-regular weapons works") {
@@ -378,7 +372,7 @@ TEST_CASE("Player attack system works as expected") {
 
   SECTION("Player cannot fire while in 'interacting' state") {
     playerState.mIsInteracting = true;
-    updateWithInput(shootingInputState);
+    update(shootingInputState);
     CHECK(fireShotSpy.count() == 0);
   }
 }

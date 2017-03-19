@@ -33,7 +33,6 @@ using namespace player;
 using namespace std;
 
 using engine::TimeStepper;
-using engine::updateAndCheckIfDesiredTicksElapsed;
 
 
 void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
@@ -65,11 +64,10 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
 
 PlayerMovementSystem::PlayerMovementSystem(
   entityx::Entity player,
-  const PlayerInputState* pInputs,
   const data::map::Map& map
 )
-  : mpPlayerControlInput(pInputs)
-  , mPlayer(player)
+  : mPlayer(player)
+  , mWalkRequestedLastFrame(false)
   , mLadderFlags(map.width(), map.height())
 {
   for (int row=0; row<map.height(); ++row) {
@@ -83,17 +81,10 @@ PlayerMovementSystem::PlayerMovementSystem(
 }
 
 
-void PlayerMovementSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void PlayerMovementSystem::update(const PlayerInputState& inputState) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Physical>());
   assert(mPlayer.has_component<WorldPosition>());
-
-  const auto hasTicks =
-    updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt);
 
   auto& state = *mPlayer.component<PlayerControlled>();
   auto& physical = *mPlayer.component<Physical>();
@@ -104,11 +95,11 @@ void PlayerMovementSystem::update(
     return;
   }
 
-  auto movingLeft = mpPlayerControlInput->mMovingLeft;
-  auto movingRight = mpPlayerControlInput->mMovingRight;
-  auto movingUp = mpPlayerControlInput->mMovingUp;
-  auto movingDown = mpPlayerControlInput->mMovingDown;
-  auto jumping = mpPlayerControlInput->mJumping;
+  auto movingLeft = inputState.mMovingLeft;
+  auto movingRight = inputState.mMovingRight;
+  auto movingUp = inputState.mMovingUp;
+  auto movingDown = inputState.mMovingDown;
+  auto jumping = inputState.mJumping;
 
   // Filter out conflicting directional inputs
   if (movingLeft && movingRight) {
@@ -224,8 +215,8 @@ void PlayerMovementSystem::update(
   }
 
   // Update velocity for walking.
-  // There's no delay for stopping, but starting to actually walk has 2 ticks
-  // of delay.
+  // There's no delay for stopping, but starting to actually walk has 1 frame
+  // of delay to allow for turning without moving.
   if (!horizontalMovementWanted) {
     if (
       state.mState == PlayerState::Walking
@@ -234,6 +225,7 @@ void PlayerMovementSystem::update(
     }
     physical.mVelocity.x = 0.0f;
   } else {
+
     if (state.mState == PlayerState::Standing) {
       state.mState = PlayerState::Walking;
     }
@@ -242,13 +234,15 @@ void PlayerMovementSystem::update(
       state.mState == PlayerState::Walking ||
       state.mState == PlayerState::Airborne
     ) {
-      if (hasTicks) { // Delay for acceleration
-        if (horizontalMovementWanted) {
-          physical.mVelocity.x = movingLeft ? -1.0f : 1.0f;
-        }
+      const auto canStartMoving = mWalkRequestedLastFrame ||
+        state.mOrientation == oldOrientation;
+      if (horizontalMovementWanted && canStartMoving) {
+        physical.mVelocity.x = movingLeft ? -1.0f : 1.0f;
       }
     }
   }
+
+  mWalkRequestedLastFrame = horizontalMovementWanted;
 
   if (
     physical.mVelocity.y == 0.0f &&

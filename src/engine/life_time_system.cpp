@@ -26,11 +26,6 @@ void LifeTimeSystem::update(
   entityx::EventManager& events,
   entityx::TimeDelta dt
 ) {
-  // TODO: ...
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   using Condition = components::AutoDestroy::Condition;
   es.each<components::AutoDestroy>([](
     entityx::Entity entity,

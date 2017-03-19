@@ -19,7 +19,6 @@
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
-#include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -34,28 +33,18 @@ namespace rigel { namespace game_logic { namespace components {
 
 namespace rigel { namespace game_logic {
 
-class MapScrollSystem : public entityx::System<MapScrollSystem> {
+class MapScrollSystem {
 public:
   MapScrollSystem(
     base::Vector* pScrollOffset,
     entityx::Entity player,
     const data::map::Map& map);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+  void updateManualScrolling(entityx::TimeDelta dt);
+
+  void updateScrollOffset();
 
 private:
-  void updateScrollOffset(
-    const components::PlayerControlled& state,
-    const engine::components::WorldPosition& position,
-    const engine::components::BoundingBox& playerBounds,
-    entityx::TimeDelta dt);
-
-private:
-  engine::TimeStepper mTimeStepper;
   entityx::Entity mPlayer;
   base::Vector* mpScrollOffset;
   base::Extents mMaxScrollOffset;

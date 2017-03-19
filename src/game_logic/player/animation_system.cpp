@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -115,6 +116,7 @@ AnimationSystem::AnimationSystem(
   : mPlayer(player)
   , mpServiceProvider(pServiceProvider)
   , mpEntityFactory(pFactory)
+  , mShotAnimationActive(false)
   , mPreviousState(mPlayer.component<PlayerControlled>()->mState)
   , mWasInteracting(false)
 {
@@ -161,10 +163,8 @@ void AnimationSystem::update(
     }
 
     auto& animationState = *state.mDeathAnimationState;
-    if (updateAndCheckIfDesiredTicksElapsed(animationState.mStepper, 2, dt)) {
-      ++animationState.mElapsedFrames;
-    }
 
+    ++animationState.mElapsedFrames;
     const auto elapsedFrames = animationState.mElapsedFrames;
     if (elapsedFrames == 17) {
       // TODO: Trigger particles
@@ -281,18 +281,8 @@ int AnimationSystem::attackAnimationFrame(
 ) {
   auto newAnimationFrame = currentAnimationFrame;
 
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
-  if (state.mShotFired && mElapsedForShotAnimation == boost::none) {
-    mElapsedForShotAnimation = 0.0;
-
-    const auto shotDirection =
-      player::shotDirection(state.mState, state.mOrientation);
-    const auto spriteId = muzzleFlashActorId(shotDirection);
-
-    mMuzzleFlashEntity = mpEntityFactory->createSprite(spriteId);
-    mMuzzleFlashEntity.component<Sprite>()->mDrawOrder =
-      MUZZLE_FLASH_DRAW_ORDER;
-    mMuzzleFlashEntity.assign<WorldPosition>(playerPosition);
+  if (mShotAnimationActive) {
+    mShotAnimationActive = false;
 
     const auto iter = ATTACK_FRAME_MAP.find(currentAnimationFrame);
     if (iter != ATTACK_FRAME_MAP.end()) {
@@ -300,19 +290,24 @@ int AnimationSystem::attackAnimationFrame(
     }
   }
 
-  if (mMuzzleFlashEntity.valid()) {
-    *mMuzzleFlashEntity.component<WorldPosition>() =
-      playerPosition + muzzleFlashOffset(state.mState, state.mOrientation);
+  const auto& playerPosition = *mPlayer.component<WorldPosition>();
+  if (state.mShotFired && !mShotAnimationActive) {
+    mShotAnimationActive = true;
 
-    *mElapsedForShotAnimation += dt;
-    if (*mElapsedForShotAnimation >= engine::gameFramesToTime(1)) {
-      mMuzzleFlashEntity.destroy();
-      mElapsedForShotAnimation = boost::none;
+    const auto shotDirection =
+      player::shotDirection(state.mState, state.mOrientation);
+    const auto spriteId = muzzleFlashActorId(shotDirection);
 
-      const auto iter = ATTACK_FRAME_MAP.find(currentAnimationFrame);
-      if (iter != ATTACK_FRAME_MAP.end()) {
-        newAnimationFrame = iter->second;
-      }
+    auto muzzleFlashEntity = mpEntityFactory->createSprite(spriteId);
+    muzzleFlashEntity.component<Sprite>()->mDrawOrder =
+      MUZZLE_FLASH_DRAW_ORDER;
+    muzzleFlashEntity.assign<WorldPosition>(
+       playerPosition + muzzleFlashOffset(state.mState, state.mOrientation));
+    muzzleFlashEntity.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
+
+    const auto iter = ATTACK_FRAME_MAP.find(currentAnimationFrame);
+    if (iter != ATTACK_FRAME_MAP.end()) {
+      newAnimationFrame = iter->second;
     }
   }
 

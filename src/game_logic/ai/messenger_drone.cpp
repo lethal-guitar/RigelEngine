@@ -143,10 +143,6 @@ void MessengerDroneSystem::update(
   using State = components::MessengerDrone::State;
   using Orientation = components::MessengerDrone::Orientation;
 
-  if (!engine::updateAndCheckIfDesiredTicksElapsed(mTimeStepper, 2, dt)) {
-    return;
-  }
-
   const auto& playerPos = *mPlayer.component<WorldPosition>();
 
   es.each<Sprite, WorldPosition, components::MessengerDrone, Active>(

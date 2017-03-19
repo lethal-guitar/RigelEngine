@@ -101,6 +101,34 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 }
 
 
+struct IngameMode::Systems {
+  template<typename FireShotFuncT>
+  Systems(
+    base::Vector* pScrollOffset,
+    entityx::Entity playerEntity,
+    data::PlayerModel* pPlayerModel,
+    IGameServiceProvider* pServiceProvider,
+    const data::map::Map& map,
+    FireShotFuncT fireShotFunc
+  )
+    : mMapScrollSystem(pScrollOffset, playerEntity, map)
+    , mPlayerMovementSystem(playerEntity, map)
+    , mPlayerAttackSystem(
+        playerEntity,
+        pPlayerModel,
+        pServiceProvider,
+        fireShotFunc)
+    , mElevatorSystem(playerEntity, pServiceProvider)
+  {
+  }
+
+  game_logic::MapScrollSystem mMapScrollSystem;
+  game_logic::PlayerMovementSystem mPlayerMovementSystem;
+  game_logic::player::AttackSystem mPlayerAttackSystem;
+  game_logic::interaction::ElevatorSystem mElevatorSystem;
+};
+
+
 IngameMode::IngameMode(
   const int episode,
   const int levelNumber,
@@ -117,6 +145,7 @@ IngameMode::IngameMode(
       difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
   , mLevelFinished(false)
+  , mAccumulatedTime(0.0)
   , mShowDebugText(false)
   , mHudRenderer(
       &mPlayerModel,
@@ -144,33 +173,54 @@ IngameMode::IngameMode(
     duration<double>(after - before).count() * 1000.0 << " ms\n";
 }
 
+IngameMode::~IngameMode() {
+}
+
 
 void IngameMode::handleEvent(const SDL_Event& event) {
   if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP) {
     return;
   }
 
-  const auto keyPressed = event.type == SDL_KEYDOWN;
+  const auto keyPressed = std::uint8_t{event.type == SDL_KEYDOWN};
   switch (event.key.keysym.sym) {
+    // TODO: Refactor: This can be clearer and less repetitive.
     case SDLK_UP:
-      mPlayerInputs.mMovingUp = keyPressed;
+      mCombinedInputState.mMovingUp = mCombinedInputState.mMovingUp || keyPressed;
+      mInputState.mMovingUp = keyPressed;
       break;
     case SDLK_DOWN:
-      mPlayerInputs.mMovingDown = keyPressed;
+      mCombinedInputState.mMovingDown = mCombinedInputState.mMovingDown || keyPressed;
+      mInputState.mMovingDown = keyPressed;
       break;
     case SDLK_LEFT:
-      mPlayerInputs.mMovingLeft = keyPressed;
+      mCombinedInputState.mMovingLeft = mCombinedInputState.mMovingLeft || keyPressed;
+      mInputState.mMovingLeft = keyPressed;
       break;
     case SDLK_RIGHT:
-      mPlayerInputs.mMovingRight = keyPressed;
+      mCombinedInputState.mMovingRight = mCombinedInputState.mMovingRight || keyPressed;
+      mInputState.mMovingRight = keyPressed;
       break;
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-      mPlayerInputs.mJumping = keyPressed;
+      mCombinedInputState.mJumping = mCombinedInputState.mJumping || keyPressed;
+      mInputState.mJumping = keyPressed;
       break;
     case SDLK_LALT:
     case SDLK_RALT:
-      mPlayerInputs.mShooting = keyPressed;
+      mCombinedInputState.mShooting = mCombinedInputState.mShooting || keyPressed;
+      mInputState.mShooting = keyPressed;
+
+      // To make shooting feel responsive even when updating the attack system
+      // only at game-logic rate, we notify the system about button presses
+      // immediately. The system will queue up one requested shot for the
+      // next logic update.
+      //
+      // Without this, fire button presses can get lost since firing is
+      // only allowed if the button is released between two shots. If the
+      // release happens between two logic updates, the system wouldn't see it,
+      // therefore thinking you're still holding the button.
+      mpSystems->mPlayerAttackSystem.buttonStateChanged(mInputState);
       break;
   }
 
@@ -205,49 +255,22 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   // Updating
   // **********************************************************************
-  mEntities.systems.system<player::AttackSystem>()->setInputState(
-    mPlayerInputs);
-  mEntities.systems.system<interaction::ElevatorSystem>()->setInputState(
-    mPlayerInputs);
 
-  engine::markActiveEntities(mEntities.entities, mScrollOffset);
+  constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
+  mAccumulatedTime += dt;
+  for (;
+    mAccumulatedTime >= timeForOneFrame;
+    mAccumulatedTime -= timeForOneFrame
+  ) {
+    updateGameLogic(timeForOneFrame);
+  }
 
-  // ----------------------------------------------------------------------
-  // Player logic update
-  // ----------------------------------------------------------------------
-  // TODO: Move all player related systems into the player namespace
-  mEntities.systems.update<interaction::ElevatorSystem>(dt);
-
-  mEntities.systems.update<PlayerMovementSystem>(dt);
-  mEntities.systems.update<player::AttackSystem>(dt);
-  mEntities.systems.update<PlayerInteractionSystem>(dt);
-
-  // ----------------------------------------------------------------------
-  // A.I. logic update
-  // ----------------------------------------------------------------------
-  mEntities.systems.update<ai::LaserTurretSystem>(dt);
-  mEntities.systems.update<ai::MessengerDroneSystem>(dt);
-  mEntities.systems.update<ai::PrisonerSystem>(dt);
-  mEntities.systems.update<ai::SecurityCameraSystem>(dt);
-  mEntities.systems.update<ai::SlidingDoorSystem>(dt);
-  mEntities.systems.update<ai::SlimeBlobSystem>(dt);
-  mEntities.systems.update<ai::SlimePipeSystem>(dt);
-
-  // ----------------------------------------------------------------------
-  // Physics and other updates
-  // ----------------------------------------------------------------------
-  mEntities.systems.update<PhysicsSystem>(dt);
-
-  mEntities.systems.update<player::DamageSystem>(dt);
-  mEntities.systems.update<DamageInflictionSystem>(dt);
-  mEntities.systems.update<player::AnimationSystem>(dt);
-  mEntities.systems.update<MapScrollSystem>(dt);
-
-  mEntities.systems.update<engine::LifeTimeSystem>(dt);
 
   // **********************************************************************
   // Rendering
   // **********************************************************************
+  mpSystems->mMapScrollSystem.updateScrollOffset();
+
   {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
@@ -268,6 +291,49 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   handlePlayerDeath();
   handleLevelExit();
   handleTeleporter();
+}
+
+
+void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
+  engine::markActiveEntities(mEntities.entities, mScrollOffset);
+
+  // TODO: Use Systems struct for everything, stop using entityx::SystemManager
+  // entirely
+
+  // ----------------------------------------------------------------------
+  // Player logic update
+  // ----------------------------------------------------------------------
+  // TODO: Move all player related systems into the player namespace
+  mpSystems->mElevatorSystem.update(mEntities.entities, mCombinedInputState);
+  mpSystems->mPlayerMovementSystem.update(mCombinedInputState);
+  mpSystems->mPlayerAttackSystem.update();
+  mEntities.systems.update<PlayerInteractionSystem>(dt);
+
+  mCombinedInputState = mInputState;
+
+  // ----------------------------------------------------------------------
+  // A.I. logic update
+  // ----------------------------------------------------------------------
+  mEntities.systems.update<ai::LaserTurretSystem>(dt);
+  mEntities.systems.update<ai::MessengerDroneSystem>(dt);
+  mEntities.systems.update<ai::PrisonerSystem>(dt);
+  mEntities.systems.update<ai::SecurityCameraSystem>(dt);
+  mEntities.systems.update<ai::SlidingDoorSystem>(dt);
+  mEntities.systems.update<ai::SlimeBlobSystem>(dt);
+  mEntities.systems.update<ai::SlimePipeSystem>(dt);
+
+  // ----------------------------------------------------------------------
+  // Physics and other updates
+  // ----------------------------------------------------------------------
+  mEntities.systems.update<PhysicsSystem>(dt);
+
+  mEntities.systems.update<player::DamageSystem>(dt);
+  mEntities.systems.update<DamageInflictionSystem>(dt);
+  mEntities.systems.update<player::AnimationSystem>(dt);
+
+  mpSystems->mMapScrollSystem.updateManualScrolling(dt);
+
+  mEntities.systems.update<engine::LifeTimeSystem>(dt);
 }
 
 
@@ -313,34 +379,15 @@ void IngameMode::loadLevel(
 
   mEntities.systems.add<PhysicsSystem>(
     &mLevelData.mMap);
-  mEntities.systems.add<game_logic::PlayerMovementSystem>(
-    mPlayerEntity,
-    &mPlayerInputs,
-    mLevelData.mMap);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider,
     &mEntityFactory);
-  mEntities.systems.add<game_logic::player::AttackSystem>(
-    mPlayerEntity,
-    &mPlayerModel,
-    mpServiceProvider,
-    [this](
-      const game_logic::ProjectileType type,
-      const WorldPosition& pos,
-      const game_logic::ProjectileDirection direction
-    ) {
-      mEntityFactory.createProjectile(type, pos, direction);
-    });
   mEntities.systems.add<game_logic::player::DamageSystem>(
     mPlayerEntity,
     &mPlayerModel,
     mpServiceProvider,
     difficulty);
-  mEntities.systems.add<game_logic::MapScrollSystem>(
-    &mScrollOffset,
-    mPlayerEntity,
-    mLevelData.mMap);
   mEntities.systems.add<RenderingSystem>(
     &mScrollOffset,
     mpRenderer,
@@ -383,10 +430,21 @@ void IngameMode::loadLevel(
     mpRenderer,
     &mScrollOffset,
     &mLevelData.mMap);
-  mEntities.systems.add<interaction::ElevatorSystem>(
-    mPlayerEntity,
-    mpServiceProvider);
   mEntities.systems.configure();
+
+  mpSystems = std::make_unique<Systems>(
+    &mScrollOffset,
+    mPlayerEntity,
+    &mPlayerModel,
+    mpServiceProvider,
+    mLevelData.mMap,
+    [this](
+      const game_logic::ProjectileType type,
+      const WorldPosition& pos,
+      const game_logic::ProjectileDirection direction
+    ) {
+      mEntityFactory.createProjectile(type, pos, direction);
+    });
 
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {
@@ -483,6 +541,9 @@ void IngameMode::handleTeleporter() {
     mEntities.systems.system<RenderingSystem>()->switchBackdrops();
   }
 
+  // Resetting the scroll offset to 0 will cause the scroll position update
+  // to set the position as if the player started the level at the teleport
+  // destination - which is exactly what we want.
   mScrollOffset = {0, 0};
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();

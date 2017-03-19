@@ -54,7 +54,6 @@ enum class PlayerState {
 namespace detail {
 
 struct DeathAnimationState {
-  engine::TimeStepper mStepper;
   int mElapsedFrames = 0;
 };
 
