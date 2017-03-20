@@ -28,6 +28,9 @@ namespace rigel { namespace game_logic {
 
 namespace player {
 
+constexpr auto INITIAL_MERCY_FRAMES = 20;
+
+
 enum class Orientation {
   None,
   Left,
@@ -65,7 +68,7 @@ struct PlayerControlled {
   player::Orientation mOrientation = player::Orientation::Left;
   player::PlayerState mState = player::PlayerState::Standing;
 
-  int mMercyFramesRemaining = 0;
+  int mMercyFramesRemaining = player::INITIAL_MERCY_FRAMES;
   boost::optional<int> mDeathAnimationFramesElapsed;
 
   boost::optional<int> mPositionAtAnimatedMoveStart;
