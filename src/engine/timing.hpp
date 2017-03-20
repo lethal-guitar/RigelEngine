@@ -25,62 +25,59 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine {
 
-using TimeDelta = double;
+namespace detail {
 
+// The original game re-programs the PIT (programmable interrupt timer)
+// using 0x10A1 as counter. This gives a tick rate of roughly 280 Hz
+// (1193180 / 4257 ~= 280.29).
+//
+// The game's actual frame rate is derived from that by dividing by 16, which
+// gives 17.5 FPS. Note that this is exactly 1/4th of 70 Hz, which was actually
+// the usual monitor refresh rate at the time.
+
+constexpr auto FAST_TICK_RATE = 280.0;
+constexpr auto SLOW_TICK_RATE = FAST_TICK_RATE / 2.0;
+constexpr auto GAME_FRAME_RATE = FAST_TICK_RATE / 16.0;
+
+}
+
+
+using TimeDelta = double;
 using TimePoint = double;
 
 
 constexpr TimeDelta slowTicksToTime(const int ticks) {
-  return ticks * (1.0 / 140.0);
+  return ticks / detail::SLOW_TICK_RATE;
 }
 
 
 constexpr double timeToSlowTicks(const TimeDelta time) {
-  return time / (1.0 / 140.0);
+  return time * detail::SLOW_TICK_RATE;
 }
 
 
 constexpr TimeDelta fastTicksToTime(const int ticks) {
-  return ticks * (1.0 / 280.0);
+  return ticks / detail::FAST_TICK_RATE;
 }
 
 
 constexpr double timeToFastTicks(const TimeDelta time) {
-  return time / (1.0 / 280.0);
-}
-
-
-constexpr double timeToGameFrames(const TimeDelta time) {
-  return time / (fastTicksToTime(1) * 16.0);
+  return time * detail::FAST_TICK_RATE;
 }
 
 
 constexpr TimeDelta gameFramesToTime(const int frames) {
-  return frames * (fastTicksToTime(1) * 16.0);
+  return frames / detail::GAME_FRAME_RATE;
+}
+
+
+constexpr double timeToGameFrames(const TimeDelta time) {
+  return time * detail::GAME_FRAME_RATE;
 }
 
 
 void initGlobalTimer();
 
-
 TimePoint currentGlobalTime();
-
-
-class TimeStepper {
-public:
-  void update(engine::TimeDelta dt);
-
-  int elapsedTicks() const;
-  void resetToRemainder();
-
-private:
-  engine::TimeDelta mElapsedTime = 0;
-};
-
-
-bool updateAndCheckIfDesiredTicksElapsed(
-  TimeStepper& stepper,
-  const int desiredTicks,
-  engine::TimeDelta dt);
 
 }}

@@ -86,40 +86,34 @@ using CustomRenderFunc = void(*)(
 struct DrawTopMost {};
 
 
-struct AnimationSequence {
-  AnimationSequence() = default;
-  explicit AnimationSequence(
-    const int delayInTicks,
+struct Animated {
+  Animated() = default;
+  explicit Animated(
+    const int delayInFrames,
     boost::optional<int> endFrame = boost::none
   )
-    : AnimationSequence(delayInTicks, 0, endFrame)
+    : Animated(delayInFrames, 0, endFrame)
   {
   }
 
-  AnimationSequence(
-    const int delayInTicks,
+  Animated(
+    const int delayInFrames,
     const int startFrame,
     boost::optional<int> endFrame,
     const int renderSlot = 0
   )
-    : mDelayInTicks(delayInTicks)
+    : mDelayInFrames(delayInFrames)
     , mStartFrame(startFrame)
     , mEndFrame(std::move(endFrame))
     , mRenderSlot(renderSlot)
   {
   }
 
-  int mDelayInTicks = 0;
+  int mDelayInFrames = 0;
+  int mFramesElapsed = 0;
   int mStartFrame = 0;
   boost::optional<int> mEndFrame;
   int mRenderSlot = 0;
-
-  TimeStepper mTimeStepper;
-};
-
-
-struct Animated {
-  std::vector<AnimationSequence> mSequences;
 };
 
 }}}

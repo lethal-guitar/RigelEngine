@@ -138,34 +138,34 @@ void AnimationSystem::update(
   }
 
   auto& sprite = *mPlayer.component<Sprite>();
-  // Update mercy frame blink effect
+  // Update mercy frame effect
   // ----------------------------------
-  if (!state.isPlayerDead()) {
+  if (!state.isPlayerDead() && state.isInMercyFrames()) {
     sprite.mShow = true;
 
-    if (state.mMercyFramesTimeElapsed) {
-      const auto mercyTimeElapsed = *state.mMercyFramesTimeElapsed;
-      // TODO: Flash white at end of mercy frames instead of blinking to
-      // invisible.
-      const auto mercyFramesElapsed =
-        static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
-      const auto blinkSprite = mercyFramesElapsed % 2 != 0;
-      sprite.mShow = !blinkSprite;
+    const auto effectActive = state.mMercyFramesRemaining % 2 != 0;
+    if (effectActive) {
+      if (state.mMercyFramesRemaining > 10) {
+        sprite.mShow = false;
+      } else {
+        sprite.flashWhite();
+      }
     }
+
+    --state.mMercyFramesRemaining;
   }
 
   // Death sequence
   // ----------------------------------
   if (state.mState == PlayerState::Dieing) {
     // Initialize animation on first frame
-    if (!state.mDeathAnimationState) {
-      state.mDeathAnimationState = detail::DeathAnimationState{};
+    if (!state.mDeathAnimationFramesElapsed) {
+      state.mDeathAnimationFramesElapsed = 0;
     }
 
-    auto& animationState = *state.mDeathAnimationState;
+    auto& elapsedFrames = *state.mDeathAnimationFramesElapsed;
 
-    ++animationState.mElapsedFrames;
-    const auto elapsedFrames = animationState.mElapsedFrames;
+    ++elapsedFrames;
     if (elapsedFrames == 17) {
       // TODO: Trigger particles
       sprite.mShow = false;
@@ -202,7 +202,7 @@ int AnimationSystem::determineAnimationFrame(
     return attackAnimationFrame(state, dt, newAnimationFrame);
   } else {
     return deathAnimationFrame(
-      state.mDeathAnimationState->mElapsedFrames,
+      *state.mDeathAnimationFramesElapsed,
       currentAnimationFrame);
   }
 }

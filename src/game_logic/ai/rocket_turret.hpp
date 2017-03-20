@@ -24,7 +24,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace game_logic { class EntityFactory; } }
+namespace rigel { struct IGameServiceProvider; }
+namespace rigel { namespace game_logic { class EntityFactory; }}
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -53,7 +54,8 @@ class RocketTurretSystem : public entityx::System<RocketTurretSystem> {
 public:
   RocketTurretSystem(
     entityx::Entity player,
-    EntityFactory* pEntityFactory);
+    EntityFactory* pEntityFactory,
+    IGameServiceProvider* pServiceProvider);
 
   void update(
     entityx::EntityManager& es,
@@ -68,6 +70,7 @@ private:
 private:
   entityx::Entity mPlayer;
   EntityFactory* mpEntityFactory;
+  IGameServiceProvider* mpServiceProvider;
 };
 
 }}}

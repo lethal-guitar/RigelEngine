@@ -23,19 +23,6 @@ namespace rigel { namespace engine {
 
 namespace {
 
-// The original game re-programs the PIT (programmable interrupt timer)
-// using 0x10A1 as counter. This gives a tick rate of roughly 280 Hz
-// (1193180 / 4257 ~= 280.29).
-//
-// The game's actual frame rate is derived from that by dividing by 16, which
-// gives 17.5 FPS. Note that this is exactly 1/4th of 70 Hz, which was actually
-// the usual monitor refresh rate at the time.
-
-// TODO: Change this to times 16, and update all the places that currently wait
-// for 2 or 4 ticks to use 1/2 instead.
-const auto TIME_PER_FRAME = fastTicksToTime(1) * 8.0;
-
-
 std::chrono::high_resolution_clock::time_point globalTimeStart;
 
 }
@@ -52,33 +39,19 @@ TimePoint currentGlobalTime() {
 }
 
 
-void TimeStepper::update(engine::TimeDelta dt) {
-  mElapsedTime += dt;
-}
+static_assert(fastTicksToTime(280) == 1.0, "");
+static_assert(fastTicksToTime(280 * 2) == 2.0, "");
+static_assert(slowTicksToTime(140) == 1.0, "");
+static_assert(slowTicksToTime(70) == 0.5, "");
+static_assert(gameFramesToTime(70) == 4.0, "");
+static_assert(gameFramesToTime(35) == 2.0, "");
 
-
-int TimeStepper::elapsedTicks() const {
-  return static_cast<int>(mElapsedTime / TIME_PER_FRAME);
-}
-
-
-void TimeStepper::resetToRemainder() {
-  mElapsedTime -= elapsedTicks() * TIME_PER_FRAME;
-}
-
-
-bool updateAndCheckIfDesiredTicksElapsed(
-  TimeStepper& stepper,
-  const int desiredTicks,
-  engine::TimeDelta dt
-) {
-  stepper.update(dt);
-  if (stepper.elapsedTicks() >= desiredTicks) {
-    stepper.resetToRemainder();
-    return true;
-  }
-
-  return false;
-}
+constexpr auto EPSILON = 0.0000001;
+static_assert(timeToFastTicks(4.0) - 280.0*4 < EPSILON, "");
+static_assert(timeToFastTicks(1.0) - 280.0 < EPSILON, "");
+static_assert(timeToSlowTicks(2.0) - 140.0*2 < EPSILON, "");
+static_assert(timeToSlowTicks(1.0) - 140.0 < EPSILON, "");
+static_assert(timeToGameFrames(4.0) - 70.0 < EPSILON, "");
+static_assert(timeToGameFrames(1.0) - 17.5 < EPSILON, "");
 
 }}

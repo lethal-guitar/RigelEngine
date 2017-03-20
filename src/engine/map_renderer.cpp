@@ -34,8 +34,8 @@ using data::map::BackdropScrollMode;
 namespace {
 
 const auto ANIM_STATES = 4;
-const auto SLOW_ANIM_TICKS = 4;
-const auto FAST_ANIM_TICKS = SLOW_ANIM_TICKS / 2;
+const auto FAST_ANIM_FRAME_DELAY = 1;
+const auto SLOW_ANIM_FRAME_DELAY = 2;
 const auto PARALLAX_FACTOR = 4;
 
 
@@ -109,7 +109,8 @@ void MapRenderer::renderBackdrop(const base::Vector& scrollOffset) {
     const double speedFactor = autoScrollX ? 2.0 : 1.0;
     std::fesetround(FE_TONEAREST);
     const auto offsetPixels = static_cast<int>(
-      std::round(mElapsedFrames / speedFactor));
+      std::round(mElapsedFrames60Fps / speedFactor));
+    ++mElapsedFrames60Fps;
 
     if (autoScrollX) {
       offset.x = offsetPixels % GameTraits::viewPortWidthPx;
@@ -124,6 +125,7 @@ void MapRenderer::renderBackdrop(const base::Vector& scrollOffset) {
     GameTraits::viewPortWidthPx - offset.x,
     GameTraits::viewPortHeightPx - offset.y};
 
+  // TODO: This can be simplified by using texture wrap mode (GL_REPEAT)
   mBackdropTexture.render(mpRenderer, offsetForDrawing);
   if (!autoScrollY) {
     mBackdropTexture.render(
@@ -175,18 +177,8 @@ void MapRenderer::renderMapTiles(
 }
 
 
-void MapRenderer::update(const engine::TimeDelta dt) {
-  mTimeStepper.update(dt);
-  if (mTimeStepper.elapsedTicks() >= SLOW_ANIM_TICKS*ANIM_STATES) {
-    mTimeStepper.resetToRemainder();
-  }
-
-  if (
-    mScrollMode == BackdropScrollMode::AutoHorizontal ||
-    mScrollMode == BackdropScrollMode::AutoVertical
-  ) {
-    ++mElapsedFrames;
-  }
+void MapRenderer::updateAnimatedMapTiles() {
+  ++mElapsedFrames;
 }
 
 
@@ -194,17 +186,13 @@ map::TileIndex MapRenderer::animatedTileIndex(
   const map::TileIndex tileIndex
 ) const {
   if (mpMap->attributes().isAnimated(tileIndex)) {
-    const auto elapsedTicks = mTimeStepper.elapsedTicks();
-    const auto fastAnimState =
-      (elapsedTicks / FAST_ANIM_TICKS) % ANIM_STATES;
-    const auto slowAnimState =
-      (elapsedTicks / SLOW_ANIM_TICKS) % ANIM_STATES;
+    const auto fastAnimOffset =
+      (mElapsedFrames / FAST_ANIM_FRAME_DELAY) % ANIM_STATES;
+    const auto slowAnimOffset =
+      (mElapsedFrames / SLOW_ANIM_FRAME_DELAY) % ANIM_STATES;
 
-    if (mpMap->attributes().isFastAnimation(tileIndex)) {
-      return tileIndex + fastAnimState;
-    } else {
-      return tileIndex + slowAnimState;
-    }
+    const auto isFastAnim = mpMap->attributes().isFastAnimation(tileIndex);
+    return tileIndex + (isFastAnim ? fastAnimOffset : slowAnimOffset);
   } else {
     return tileIndex;
   }

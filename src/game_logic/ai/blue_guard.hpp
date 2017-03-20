@@ -46,18 +46,20 @@ struct BlueGuard {
     Right
   };
 
-  BlueGuard(
-    const bool typingOnTerminal,
-    const Orientation orientation = Orientation::Left
-  )
-    : mTypingOnTerminal(typingOnTerminal)
-    , mOrientation(orientation)
-  {
+  static BlueGuard typingOnTerminal() {
+    BlueGuard instance;
+    instance.mTypingOnTerminal = true;
+    return instance;
   }
 
-  bool mTypingOnTerminal;
-  Orientation mOrientation;
+  static BlueGuard patrolling(const Orientation orientation) {
+    BlueGuard instance;
+    instance.mOrientation = orientation;
+    return instance;
+  }
 
+  bool mTypingOnTerminal = false;
+  Orientation mOrientation = Orientation::Left;
   int mStanceChangeCountdown = 0;
   int mStepsWalked = 0;
   bool mIsCrouched = false;

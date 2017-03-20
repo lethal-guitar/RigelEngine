@@ -136,14 +136,15 @@ Message messengerDroneMessage(const ActorID id) {
 
 
 auto createBlueGuardAiComponent(const ActorID id) {
-  using Orientation = ai::components::BlueGuard::Orientation;
+  using ai::components::BlueGuard;
+  using Orientation = BlueGuard::Orientation;
 
-  const auto typingOnTerminal = id == 217;
-  // Orientation doesn't matter when the guard is in terminal typing mode,
-  // so we arbitrarily assign Left in that case.
-  const auto orientation = id == 159 ? Orientation::Right : Orientation::Left;
-
-  return ai::components::BlueGuard{typingOnTerminal, orientation};
+  if (id == 217) {
+    return BlueGuard::typingOnTerminal();
+  } else {
+    const auto orientation = id == 159 ? Orientation::Right : Orientation::Left;
+    return BlueGuard::patrolling(orientation);
+  }
 }
 
 
@@ -160,7 +161,7 @@ void configureEntity(
   switch (actorID) {
     // Bonus globes
     case 45:
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Animated>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
@@ -171,7 +172,7 @@ void configureEntity(
       break;
 
     case 46:
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Animated>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
@@ -182,7 +183,7 @@ void configureEntity(
       break;
 
     case 47:
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Animated>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
@@ -193,7 +194,7 @@ void configureEntity(
       break;
 
     case 48:
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 3, 0)}});
+      entity.assign<Animated>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
       addDefaultPhysical(entity, boundingBox);
       {
@@ -214,7 +215,7 @@ void configureEntity(
 
     // Keyhole (blue key)
     case 122:
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 4)}});
+      entity.assign<Animated>(1, 4);
       break;
 
     // ----------------------------------------------------------------------
@@ -262,13 +263,13 @@ void configureEntity(
         item.mGivenPlayerBuff = PlayerBuff::RapidFire;
         entity.assign<CollectableItem>(item);
       }
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       addDefaultPhysical(entity, boundingBox);
       break;
 
     case 114: // Cloaking device
       // 100 pts when box is shot
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -284,7 +285,7 @@ void configureEntity(
     // ----------------------------------------------------------------------
     case 168: // Soda can
       // 100 pts when box is shot
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 0, 5)}});
+      entity.assign<Animated>(1, 0, 5);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -369,7 +370,7 @@ void configureEntity(
     // Blue boxes
     // ----------------------------------------------------------------------
     case 28: // Health molecule
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -530,14 +531,14 @@ void configureEntity(
 
     case 50: // teleporter
     case 51: // teleporter
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       entity.assign<Interactable>(InteractableType::Teleporter);
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
     case 239: // Special hint globe
       entity.assign<Shootable>(3, 100);
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
@@ -576,7 +577,7 @@ void configureEntity(
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(6 + difficultyOffset, 5000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 1, 2)}});
+      entity.assign<Animated>(1, 1, 2);
       break;
 
     case 64: // Bouncing spike ball
@@ -652,7 +653,6 @@ void configureEntity(
     case 217: // using terminal
       entity.assign<PlayerDamaging>(1);
       entity.assign<Shootable>(2 + difficultyOffset, 3000);
-      entity.assign<Physical>(Physical{{0.0f, 0.0f}, false});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -711,7 +711,7 @@ void configureEntity(
       entity.assign<Shootable>(10, 20000);
       entity.assign<PlayerDamaging>(9, true);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       break;
 
     case 93: // Blue force field (disabled by cloak)
@@ -742,11 +742,11 @@ void configureEntity(
     case 263: // Fire (variant 2)
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       break;
 
     case 117: // Pipe dripping green stuff
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       entity.assign<DrawTopMost>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::SlimePipe>();
@@ -756,19 +756,19 @@ void configureEntity(
     case 252: // floating exit sign to left
       entity.assign<Shootable>(5, 10000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       break;
 
     case 296: // floating arrow
       entity.assign<Shootable>(5, 500);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       break;
 
     case 236: // Radar dish
       entity.assign<Shootable>(4, 2000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       break;
 
     case 188: // rotating floor spikes
@@ -782,7 +782,7 @@ void configureEntity(
     case 230: // Water surface splash right
     case 257: // Shallow water (variant 1)
     case 258: // Shallow water (variant 2)
-      entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+      entity.assign<Animated>(1);
       break;
 
     // Flying message ships
@@ -802,14 +802,14 @@ void configureEntity(
       break;
 
     case 231: // Lava riser
-      entity.assign<Animated>(Animated{{AnimationSequence(2, 3, 5)}});
+      entity.assign<Animated>(1, 3, 5);
       break;
 
     case 246: // Rocket exhaust flame left
     case 247: // Rocket exhaust flame right
     case 248: // Small rocket exhaust flame left
     case 249: // Small rocket exhaust flame right
-      entity.assign<Animated>(Animated{{AnimationSequence(4)}});
+      entity.assign<Animated>(2);
       break;
 
     case 139: // level exit

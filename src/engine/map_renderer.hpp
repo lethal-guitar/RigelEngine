@@ -20,7 +20,6 @@
 #include "engine/renderer.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
-#include "engine/timing.hpp"
 #include "loader/level_loader.hpp"
 
 
@@ -41,7 +40,7 @@ public:
   void renderBackground(const base::Vector& scrollPosition);
   void renderForeground(const base::Vector& scrollPosition);
 
-  void update(engine::TimeDelta dt);
+  void updateAnimatedMapTiles();
 
 private:
   void renderBackdrop(const base::Vector& scrollPosition);
@@ -60,8 +59,8 @@ private:
 
   data::map::BackdropScrollMode mScrollMode;
 
-  TimeStepper mTimeStepper;
   std::uint32_t mElapsedFrames = 0;
+  std::uint32_t mElapsedFrames60Fps = 0;
 };
 
 }}

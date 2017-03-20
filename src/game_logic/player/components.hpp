@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 #include "utils/enum_hash.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -28,6 +27,9 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel { namespace game_logic {
 
 namespace player {
+
+constexpr auto INITIAL_MERCY_FRAMES = 20;
+
 
 enum class Orientation {
   None,
@@ -45,16 +47,6 @@ enum class PlayerState {
   Airborne,
   Dieing,
   Dead
-};
-
-
-}
-
-
-namespace detail {
-
-struct DeathAnimationState {
-  int mElapsedFrames = 0;
 };
 
 }
@@ -76,8 +68,8 @@ struct PlayerControlled {
   player::Orientation mOrientation = player::Orientation::Left;
   player::PlayerState mState = player::PlayerState::Standing;
 
-  boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
-  boost::optional<detail::DeathAnimationState> mDeathAnimationState;
+  int mMercyFramesRemaining = player::INITIAL_MERCY_FRAMES;
+  boost::optional<int> mDeathAnimationFramesElapsed;
 
   boost::optional<int> mPositionAtAnimatedMoveStart;
 
@@ -91,6 +83,10 @@ struct PlayerControlled {
   bool mShotFired = false;
 
   bool mIsInteracting = false;
+
+  bool isInMercyFrames() const {
+    return mMercyFramesRemaining > 0;
+  }
 
   bool isPlayerDead() const {
     return

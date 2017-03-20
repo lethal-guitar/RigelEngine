@@ -227,9 +227,12 @@ HudRenderer::HudRenderer(
 }
 
 
-void HudRenderer::updateAndRender(const engine::TimeDelta dt) {
-  mTimeStepper.update(dt);
+void HudRenderer::updateAnimation() {
+  ++mElapsedFrames;
+}
 
+
+void HudRenderer::render() {
   // Hud background
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
@@ -295,8 +298,7 @@ void HudRenderer::drawHealthBar() const {
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
     }
   } else {
-    // TODO: Determine actual animation timing
-    const auto animationOffset = mTimeStepper.elapsedTicks() / 2;
+    const auto animationOffset = mElapsedFrames;
 
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = (i + animationOffset) % 9;

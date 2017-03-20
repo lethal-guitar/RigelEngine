@@ -276,6 +276,9 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mAccumulatedTime -= timeForOneFrame
   ) {
     updateGameLogic(timeForOneFrame);
+    engine::updateAnimatedSprites(mEntities.entities);
+    mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
+    mHudRenderer.updateAnimation();
   }
 
 
@@ -289,7 +292,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
     mEntities.systems.update<RenderingSystem>(dt);
     mEntities.systems.update<DebuggingSystem>(dt);
-    mHudRenderer.updateAndRender(dt);
+    mHudRenderer.render();
   }
 
   mIngameViewPortRenderTarget.render(
@@ -429,7 +432,10 @@ void IngameMode::loadLevel(
     &mPlayerModel,
     &mEntityFactory,
     mpServiceProvider);
-  mEntities.systems.add<ai::RocketTurretSystem>(mPlayerEntity, &mEntityFactory);
+  mEntities.systems.add<ai::RocketTurretSystem>(
+    mPlayerEntity,
+    &mEntityFactory,
+    mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,
