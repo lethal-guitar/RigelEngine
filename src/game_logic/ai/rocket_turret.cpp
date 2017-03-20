@@ -22,6 +22,8 @@
 #include "game_logic/entity_factory.hpp"
 #include "base/math_tools.hpp"
 
+#include "game_mode.hpp"
+
 
 namespace rigel { namespace game_logic { namespace ai {
 
@@ -66,10 +68,12 @@ auto determineOrientation(
 
 RocketTurretSystem::RocketTurretSystem(
   entityx::Entity player,
-  EntityFactory* pEntityFactory
+  EntityFactory* pEntityFactory,
+  IGameServiceProvider* pServiceProvider
 )
   : mPlayer(player)
   , mpEntityFactory(pEntityFactory)
+  , mpServiceProvider(pServiceProvider)
 {
 }
 
@@ -121,6 +125,8 @@ void RocketTurretSystem::fireRocket(
   projectile.assign<game_logic::components::Shootable>(1, 10);
   projectile.component<Sprite>()->mFramesToRender.push_back(0);
   projectile.assign<Animated>(1, 1, 2, 0);
+
+  mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
 }
 
 }}}

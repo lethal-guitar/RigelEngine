@@ -432,7 +432,10 @@ void IngameMode::loadLevel(
     &mPlayerModel,
     &mEntityFactory,
     mpServiceProvider);
-  mEntities.systems.add<ai::RocketTurretSystem>(mPlayerEntity, &mEntityFactory);
+  mEntities.systems.add<ai::RocketTurretSystem>(
+    mPlayerEntity,
+    &mEntityFactory,
+    mpServiceProvider);
   mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,
