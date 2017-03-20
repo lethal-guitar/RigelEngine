@@ -118,31 +118,29 @@ void RenderingSystem::animateSprites(
 ) {
   es.each<Sprite, Animated>(
     [this, dt](ex::Entity entity, Sprite& sprite, Animated& animated) {
-      for (auto& sequence : animated.mSequences) {
-        if (!updateAndCheckIfDesiredTicksElapsed(
-          sequence.mTimeStepper, sequence.mDelayInTicks, dt)
-        ) {
-          continue;
-        }
-
-        const auto endFrame = sequence.mEndFrame ?
-          *sequence.mEndFrame :
-          static_cast<int>(sprite.mFrames.size()) - 1;
-        assert(endFrame >= 0 && endFrame < int(sprite.mFrames.size()));
-        assert(endFrame > sequence.mStartFrame);
-          //Animations must have at least two frames
-        assert(
-          sequence.mRenderSlot >= 0 &&
-          sequence.mRenderSlot < int(sprite.mFramesToRender.size()));
-
-        auto newFrameNr = sprite.mFramesToRender[sequence.mRenderSlot] + 1;
-        if (newFrameNr > endFrame) {
-          newFrameNr = sequence.mStartFrame;
-        }
-
-        assert(newFrameNr >= 0 && newFrameNr < int(sprite.mFrames.size()));
-        sprite.mFramesToRender[sequence.mRenderSlot] = newFrameNr;
+      if (!updateAndCheckIfDesiredTicksElapsed(
+        animated.mTimeStepper, animated.mDelayInTicks, dt)
+      ) {
+        return;
       }
+
+      const auto endFrame = animated.mEndFrame ?
+      *animated.mEndFrame :
+      static_cast<int>(sprite.mFrames.size()) - 1;
+      assert(endFrame >= 0 && endFrame < int(sprite.mFrames.size()));
+      assert(endFrame > animated.mStartFrame);
+      //Animations must have at least two frames
+      assert(
+        animated.mRenderSlot >= 0 &&
+        animated.mRenderSlot < int(sprite.mFramesToRender.size()));
+
+      auto newFrameNr = sprite.mFramesToRender[animated.mRenderSlot] + 1;
+      if (newFrameNr > endFrame) {
+        newFrameNr = animated.mStartFrame;
+      }
+
+      assert(newFrameNr >= 0 && newFrameNr < int(sprite.mFrames.size()));
+      sprite.mFramesToRender[animated.mRenderSlot] = newFrameNr;
     });
 }
 

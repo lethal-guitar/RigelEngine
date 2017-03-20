@@ -31,7 +31,7 @@ using namespace engine::components;
 using namespace game_logic::components;
 
 void configureForceField(entityx::Entity entity) {
-  entity.assign<Animated>(Animated{{AnimationSequence(2, 2, 4, 2)}});
+  entity.assign<Animated>(2, 2, 4, 2);
   entity.assign<PlayerDamaging>(9, true);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
   entity.assign<CircuitCardForceField>();
@@ -48,7 +48,7 @@ void configureKeyCardSlot(
   const BoundingBox& boundingBox
 ) {
   entity.assign<Interactable>(InteractableType::ForceFieldCardReader);
-  entity.assign<Animated>(Animated{{AnimationSequence(2)}});
+  entity.assign<Animated>(2);
   entity.assign<BoundingBox>(boundingBox);
 }
 
