@@ -110,8 +110,6 @@ void SlimeBlobSystem::onEntityHit(entityx::Entity entity) {
     return;
   }
 
-  entity.remove<Shootable>();
-
   auto& sprite = *entity.component<Sprite>();
   sprite.mFramesToRender.pop_back();
   sprite.mFramesToRender[0] = 2;

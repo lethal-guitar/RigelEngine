@@ -151,8 +151,6 @@ void PrisonerSystem::onEntityHit(entityx::Entity entity) {
 
   state.mState = components::Prisoner::State::Dieing;
   sprite.mFramesToRender[0] = 5;
-
-  entity.remove<Shootable>();
 }
 
 }}}
