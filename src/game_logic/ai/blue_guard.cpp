@@ -210,6 +210,7 @@ void BlueGuardSystem::stopTyping(
   WorldPosition& position
 ) {
   state.mTypingOnTerminal = false;
+  state.mOneStepWalkedSinceTypingStop = false;
 
   // TODO: Use orientation-dependent position here
   const auto playerX = mPlayer.component<WorldPosition>()->x;
@@ -245,7 +246,14 @@ void BlueGuardSystem::updateGuard(
     return newPosition != boost::none;
   };
 
-  if (playerVisible(state, position, playerPosition, playerState)) {
+  // If a guard was previously typing on a terminal, it will not attack the
+  // player until after the next walked step, even if all other conditions are
+  // fulfilled.
+  const auto canAttack =
+    state.mOneStepWalkedSinceTypingStop &&
+    playerVisible(state, position, playerPosition, playerState);
+
+  if (canAttack) {
     // Change stance if necessary
     if (state.mStanceChangeCountdown <= 0) {
       const auto playerCrouched =
@@ -299,6 +307,8 @@ void BlueGuardSystem::updateGuard(
         walkOneStep();
         state.mStepsWalked = 1;
       }
+
+      state.mOneStepWalkedSinceTypingStop = true;
     }
 
     // Update sprite
