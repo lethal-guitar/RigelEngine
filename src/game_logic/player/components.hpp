@@ -47,16 +47,6 @@ enum class PlayerState {
   Dead
 };
 
-
-}
-
-
-namespace detail {
-
-struct DeathAnimationState {
-  int mElapsedFrames = 0;
-};
-
 }
 
 
@@ -77,7 +67,7 @@ struct PlayerControlled {
   player::PlayerState mState = player::PlayerState::Standing;
 
   boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
-  boost::optional<detail::DeathAnimationState> mDeathAnimationState;
+  boost::optional<int> mDeathAnimationFramesElapsed;
 
   boost::optional<int> mPositionAtAnimatedMoveStart;
 

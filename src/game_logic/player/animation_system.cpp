@@ -158,14 +158,13 @@ void AnimationSystem::update(
   // ----------------------------------
   if (state.mState == PlayerState::Dieing) {
     // Initialize animation on first frame
-    if (!state.mDeathAnimationState) {
-      state.mDeathAnimationState = detail::DeathAnimationState{};
+    if (!state.mDeathAnimationFramesElapsed) {
+      state.mDeathAnimationFramesElapsed = 0;
     }
 
-    auto& animationState = *state.mDeathAnimationState;
+    auto& elapsedFrames = *state.mDeathAnimationFramesElapsed;
 
-    ++animationState.mElapsedFrames;
-    const auto elapsedFrames = animationState.mElapsedFrames;
+    ++elapsedFrames;
     if (elapsedFrames == 17) {
       // TODO: Trigger particles
       sprite.mShow = false;
@@ -202,7 +201,7 @@ int AnimationSystem::determineAnimationFrame(
     return attackAnimationFrame(state, dt, newAnimationFrame);
   } else {
     return deathAnimationFrame(
-      state.mDeathAnimationState->mElapsedFrames,
+      *state.mDeathAnimationFramesElapsed,
       currentAnimationFrame);
   }
 }
