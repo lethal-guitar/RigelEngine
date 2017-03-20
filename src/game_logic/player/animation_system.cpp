@@ -138,19 +138,21 @@ void AnimationSystem::update(
   }
 
   auto& sprite = *mPlayer.component<Sprite>();
-  // Update mercy frame blink effect
+  // Update mercy frame effect
   // ----------------------------------
-  if (!state.isPlayerDead()) {
+  if (!state.isPlayerDead() && state.isInMercyFrames()) {
     sprite.mShow = true;
 
-    if (state.isInMercyFrames()) {
-      // TODO: Flash white at end of mercy frames instead of blinking to
-      // invisible.
-      const auto blinkSprite = state.mMercyFramesRemaining % 2 != 0;
-      sprite.mShow = !blinkSprite;
-
-      --state.mMercyFramesRemaining;
+    const auto effectActive = state.mMercyFramesRemaining % 2 != 0;
+    if (effectActive) {
+      if (state.mMercyFramesRemaining > 10) {
+        sprite.mShow = false;
+      } else {
+        sprite.flashWhite();
+      }
     }
+
+    --state.mMercyFramesRemaining;
   }
 
   // Death sequence
@@ -159,7 +161,6 @@ void AnimationSystem::update(
     // Initialize animation on first frame
     if (!state.mDeathAnimationFramesElapsed) {
       state.mDeathAnimationFramesElapsed = 0;
-      sprite.mShow = true;
     }
 
     auto& elapsedFrames = *state.mDeathAnimationFramesElapsed;
