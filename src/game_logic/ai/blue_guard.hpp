@@ -58,10 +58,11 @@ struct BlueGuard {
     return instance;
   }
 
-  bool mTypingOnTerminal = false;
   Orientation mOrientation = Orientation::Left;
   int mStanceChangeCountdown = 0;
   int mStepsWalked = 0;
+  bool mTypingOnTerminal = false;
+  bool mOneStepWalkedSinceTypingStop = true;
   bool mIsCrouched = false;
 };
 
