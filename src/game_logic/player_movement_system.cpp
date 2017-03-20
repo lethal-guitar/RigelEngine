@@ -32,8 +32,6 @@ using namespace rigel::engine::components;
 using namespace player;
 using namespace std;
 
-using engine::TimeStepper;
-
 
 void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
   PlayerControlled controls;
