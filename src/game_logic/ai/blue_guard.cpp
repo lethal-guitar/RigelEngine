@@ -74,8 +74,8 @@ bool playerVisible(
     (facingLeft && myPosition.x >= playerX) ||
     (!facingLeft && myPosition.x <= playerX);
   const auto hasLineOfSightVertical =
-    playerY - 3 <= myPosition.y &&
-    playerY + 3 >= myPosition.y;
+    playerY - 3 < myPosition.y &&
+    playerY + 3 > myPosition.y;
 
   // TODO: Check player not cloaked
   return
