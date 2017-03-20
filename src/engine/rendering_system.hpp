@@ -32,10 +32,18 @@
 
 namespace rigel { namespace engine {
 
-/** Renders the map and in-game sprites, optionally animating them
+/** Animates sprites with an Animated component
  *
- * Works on all entities that have a SpriteBundle and WorldPosition component.
- * Performs animation if an Animated component is also present.
+ * Should be called at game-logic rate. Works on all entities that have a
+ * Sprite and an Animated component. Adjusts the sprite's animation frame
+ * based on the animation.
+ */
+void updateAnimatedSprites(entityx::EntityManager& es);
+
+
+/** Renders the map and in-game sprites
+ *
+ * Works on all entities that have a Sprite and WorldPosition component.
  * Also renders the map using a engine::MapRenderer. Map and sprite rendering
  * are handled by the same system so that draw-order can be done properly
  * (e.g. some sprites are rendered behind certain tiles, others before etc.)
@@ -71,11 +79,6 @@ public:
   }
 
 private:
-  void animateSprites(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt);
-
   struct SpriteData;
   void renderSprite(const SpriteData& data) const;
 

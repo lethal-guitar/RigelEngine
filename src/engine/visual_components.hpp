@@ -89,32 +89,31 @@ struct DrawTopMost {};
 struct Animated {
   Animated() = default;
   explicit Animated(
-    const int delayInTicks,
+    const int delayInFrames,
     boost::optional<int> endFrame = boost::none
   )
-    : Animated(delayInTicks, 0, endFrame)
+    : Animated(delayInFrames, 0, endFrame)
   {
   }
 
   Animated(
-    const int delayInTicks,
+    const int delayInFrames,
     const int startFrame,
     boost::optional<int> endFrame,
     const int renderSlot = 0
   )
-    : mDelayInTicks(delayInTicks)
+    : mDelayInFrames(delayInFrames)
     , mStartFrame(startFrame)
     , mEndFrame(std::move(endFrame))
     , mRenderSlot(renderSlot)
   {
   }
 
-  int mDelayInTicks = 0;
+  int mDelayInFrames = 0;
+  int mFramesElapsed = 0;
   int mStartFrame = 0;
   boost::optional<int> mEndFrame;
   int mRenderSlot = 0;
-
-  TimeStepper mTimeStepper;
 };
 
 }}}

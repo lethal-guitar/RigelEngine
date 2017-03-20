@@ -178,7 +178,7 @@ void MessengerDroneSystem::update(
         };
 
         entity.assign<Animated>(
-          2, exhaustStartFrame, exhaustStartFrame + 1, 3);
+          1, exhaustStartFrame, exhaustStartFrame + 1, 3);
 
         state.mState = State::FlyIn;
       }
@@ -194,7 +194,7 @@ void MessengerDroneSystem::update(
           // mid-air instead of propulsion)
           sprite.mFramesToRender[3] = 4;
           entity.remove<Animated>();
-          entity.assign<Animated>(2, 4, 5, 3);
+          entity.assign<Animated>(1, 4, 5, 3);
 
           // Start showing message on screen, use 5th render slot (index 4)
           sprite.mFramesToRender.push_back(10);
@@ -227,7 +227,7 @@ void MessengerDroneSystem::update(
             sprite.mFramesToRender[3] = exhaustStartFrame;
             entity.remove<Animated>();
             entity.assign<Animated>(
-              2, exhaustStartFrame, exhaustStartFrame + 1, 3);
+              1, exhaustStartFrame, exhaustStartFrame + 1, 3);
 
             entity.assign<AutoDestroy>(
               AutoDestroy::Condition::OnLeavingActiveRegion);

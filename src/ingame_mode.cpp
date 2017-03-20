@@ -276,6 +276,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mAccumulatedTime -= timeForOneFrame
   ) {
     updateGameLogic(timeForOneFrame);
+    engine::updateAnimatedSprites(mEntities.entities);
   }
 
 

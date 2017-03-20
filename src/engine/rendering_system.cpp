@@ -39,6 +39,47 @@ using components::Sprite;
 using components::WorldPosition;
 
 
+namespace {
+
+
+void advanceAnimation(Sprite& sprite, Animated& animated) {
+  const auto endFrame = animated.mEndFrame
+    ? *animated.mEndFrame
+    : static_cast<int>(sprite.mFrames.size()) - 1;
+  assert(endFrame >= 0 && endFrame < int(sprite.mFrames.size()));
+  assert(endFrame > animated.mStartFrame);
+  //Animations must have at least two frames
+  assert(
+    animated.mRenderSlot >= 0 &&
+    animated.mRenderSlot < int(sprite.mFramesToRender.size()));
+
+  auto newFrameNr = sprite.mFramesToRender[animated.mRenderSlot] + 1;
+  if (newFrameNr > endFrame) {
+    newFrameNr = animated.mStartFrame;
+  }
+
+  assert(newFrameNr >= 0 && newFrameNr < int(sprite.mFrames.size()));
+  sprite.mFramesToRender[animated.mRenderSlot] = newFrameNr;
+}
+
+}
+
+
+void updateAnimatedSprites(ex::EntityManager& es) {
+  es.each<Sprite, Animated>([](
+    ex::Entity entity,
+    Sprite& sprite,
+    Animated& animated
+  ) {
+    ++animated.mFramesElapsed;
+    if (animated.mFramesElapsed >= animated.mDelayInFrames) {
+      animated.mFramesElapsed = 0;
+      advanceAnimation(sprite, animated);
+    }
+  });
+}
+
+
 struct RenderingSystem::SpriteData {
   SpriteData(
     const ex::Entity entity,
@@ -73,9 +114,8 @@ void RenderingSystem::update(
 ) {
   using namespace boost::range;
 
-  // Animate sprites and map
+  // Animate map
   mMapRenderer.update(dt);
-  animateSprites(es, events, dt);
 
   // Collect sprites, then order by draw index
   std::vector<SpriteData> spritesByDrawOrder;
@@ -108,40 +148,6 @@ void RenderingSystem::update(
   }
 
   mSpritesRendered = spritesByDrawOrder.size();
-}
-
-
-void RenderingSystem::animateSprites(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  const ex::TimeDelta dt
-) {
-  es.each<Sprite, Animated>(
-    [this, dt](ex::Entity entity, Sprite& sprite, Animated& animated) {
-      if (!updateAndCheckIfDesiredTicksElapsed(
-        animated.mTimeStepper, animated.mDelayInTicks, dt)
-      ) {
-        return;
-      }
-
-      const auto endFrame = animated.mEndFrame ?
-      *animated.mEndFrame :
-      static_cast<int>(sprite.mFrames.size()) - 1;
-      assert(endFrame >= 0 && endFrame < int(sprite.mFrames.size()));
-      assert(endFrame > animated.mStartFrame);
-      //Animations must have at least two frames
-      assert(
-        animated.mRenderSlot >= 0 &&
-        animated.mRenderSlot < int(sprite.mFramesToRender.size()));
-
-      auto newFrameNr = sprite.mFramesToRender[animated.mRenderSlot] + 1;
-      if (newFrameNr > endFrame) {
-        newFrameNr = animated.mStartFrame;
-      }
-
-      assert(newFrameNr >= 0 && newFrameNr < int(sprite.mFrames.size()));
-      sprite.mFramesToRender[animated.mRenderSlot] = newFrameNr;
-    });
 }
 
 
