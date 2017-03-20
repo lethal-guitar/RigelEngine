@@ -33,7 +33,6 @@ namespace {
 
 // TODO: Change this to times 16, and update all the places that currently wait
 // for 2 or 4 ticks to use 1/2 instead.
-const auto TIME_PER_FRAME = fastTicksToTime(1) * 8.0;
 
 
 std::chrono::high_resolution_clock::time_point globalTimeStart;
@@ -49,36 +48,6 @@ void initGlobalTimer() {
 TimePoint currentGlobalTime() {
   const auto now = std::chrono::high_resolution_clock::now();
   return std::chrono::duration<double>(now - globalTimeStart).count();
-}
-
-
-void TimeStepper::update(engine::TimeDelta dt) {
-  mElapsedTime += dt;
-}
-
-
-int TimeStepper::elapsedTicks() const {
-  return static_cast<int>(mElapsedTime / TIME_PER_FRAME);
-}
-
-
-void TimeStepper::resetToRemainder() {
-  mElapsedTime -= elapsedTicks() * TIME_PER_FRAME;
-}
-
-
-bool updateAndCheckIfDesiredTicksElapsed(
-  TimeStepper& stepper,
-  const int desiredTicks,
-  engine::TimeDelta dt
-) {
-  stepper.update(dt);
-  if (stepper.elapsedTicks() >= desiredTicks) {
-    stepper.resetToRemainder();
-    return true;
-  }
-
-  return false;
 }
 
 }}

@@ -65,22 +65,4 @@ void initGlobalTimer();
 
 TimePoint currentGlobalTime();
 
-
-class TimeStepper {
-public:
-  void update(engine::TimeDelta dt);
-
-  int elapsedTicks() const;
-  void resetToRemainder();
-
-private:
-  engine::TimeDelta mElapsedTime = 0;
-};
-
-
-bool updateAndCheckIfDesiredTicksElapsed(
-  TimeStepper& stepper,
-  const int desiredTicks,
-  engine::TimeDelta dt);
-
 }}
