@@ -125,6 +125,7 @@ void MapRenderer::renderBackdrop(const base::Vector& scrollOffset) {
     GameTraits::viewPortWidthPx - offset.x,
     GameTraits::viewPortHeightPx - offset.y};
 
+  // TODO: This can be simplified by using texture wrap mode (GL_REPEAT)
   mBackdropTexture.render(mpRenderer, offsetForDrawing);
   if (!autoScrollY) {
     mBackdropTexture.render(
