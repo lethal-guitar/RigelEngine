@@ -136,14 +136,15 @@ Message messengerDroneMessage(const ActorID id) {
 
 
 auto createBlueGuardAiComponent(const ActorID id) {
-  using Orientation = ai::components::BlueGuard::Orientation;
+  using ai::components::BlueGuard;
+  using Orientation = BlueGuard::Orientation;
 
-  const auto typingOnTerminal = id == 217;
-  // Orientation doesn't matter when the guard is in terminal typing mode,
-  // so we arbitrarily assign Left in that case.
-  const auto orientation = id == 159 ? Orientation::Right : Orientation::Left;
-
-  return ai::components::BlueGuard{typingOnTerminal, orientation};
+  if (id == 217) {
+    return BlueGuard::typingOnTerminal();
+  } else {
+    const auto orientation = id == 159 ? Orientation::Right : Orientation::Left;
+    return BlueGuard::patrolling(orientation);
+  }
 }
 
 
@@ -652,7 +653,6 @@ void configureEntity(
     case 217: // using terminal
       entity.assign<PlayerDamaging>(1);
       entity.assign<Shootable>(2 + difficultyOffset, 3000);
-      entity.assign<Physical>(Physical{{0.0f, 0.0f}, false});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
