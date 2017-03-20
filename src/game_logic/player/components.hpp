@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/timing.hpp"
 #include "utils/enum_hash.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -66,7 +65,7 @@ struct PlayerControlled {
   player::Orientation mOrientation = player::Orientation::Left;
   player::PlayerState mState = player::PlayerState::Standing;
 
-  boost::optional<engine::TimeDelta> mMercyFramesTimeElapsed;
+  int mMercyFramesRemaining = 0;
   boost::optional<int> mDeathAnimationFramesElapsed;
 
   boost::optional<int> mPositionAtAnimatedMoveStart;
@@ -81,6 +80,10 @@ struct PlayerControlled {
   bool mShotFired = false;
 
   bool mIsInteracting = false;
+
+  bool isInMercyFrames() const {
+    return mMercyFramesRemaining > 0;
+  }
 
   bool isPlayerDead() const {
     return

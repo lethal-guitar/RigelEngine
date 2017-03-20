@@ -93,21 +93,8 @@ void DamageSystem::update(
     *mPlayer.component<BoundingBox>(), playerPosition);
   auto& playerState = *mPlayer.component<PlayerControlled>();
 
-  const auto inMercyFrames =
-    playerState.mMercyFramesTimeElapsed != boost::none;
-  if (inMercyFrames) {
-    auto& mercyTimeElapsed = *playerState.mMercyFramesTimeElapsed;
-    mercyTimeElapsed += dt;
-
-    const auto mercyFramesElapsed = static_cast<int>(
-      engine::timeToGameFrames(mercyTimeElapsed));
-    if (mercyFramesElapsed >= mNumMercyFrames) {
-      playerState.mMercyFramesTimeElapsed = boost::none;
-    }
-  }
-
   es.each<PlayerDamaging, BoundingBox, WorldPosition>(
-    [this, &playerBBox, &playerState, inMercyFrames](
+    [this, &playerBBox, &playerState](
       entityx::Entity entity,
       const PlayerDamaging& damage,
       const BoundingBox& boundingBox,
@@ -115,14 +102,15 @@ void DamageSystem::update(
     ) {
       const auto bbox = toWorldSpace(boundingBox, position);
       const auto hasCollision = bbox.intersects(playerBBox);
-      const auto canTakeDamage = !inMercyFrames || damage.mIgnoreMercyFrames;
+      const auto canTakeDamage =
+        !playerState.isInMercyFrames() || damage.mIgnoreMercyFrames;
 
       if (hasCollision && canTakeDamage) {
         mpPlayerModel->mHealth =
           std::max(0, mpPlayerModel->mHealth - damage.mAmount);
 
         if (mpPlayerModel->mHealth > 0) {
-          playerState.mMercyFramesTimeElapsed = 0.0;
+          playerState.mMercyFramesRemaining = mNumMercyFrames;
           mpServiceProvider->playSound(data::SoundId::DukePain);
         } else {
           auto& physical = *mPlayer.component<Physical>();

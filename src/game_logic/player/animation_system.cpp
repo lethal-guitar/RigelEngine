@@ -143,14 +143,13 @@ void AnimationSystem::update(
   if (!state.isPlayerDead()) {
     sprite.mShow = true;
 
-    if (state.mMercyFramesTimeElapsed) {
-      const auto mercyTimeElapsed = *state.mMercyFramesTimeElapsed;
+    if (state.isInMercyFrames()) {
       // TODO: Flash white at end of mercy frames instead of blinking to
       // invisible.
-      const auto mercyFramesElapsed =
-        static_cast<int>(engine::timeToGameFrames(mercyTimeElapsed));
-      const auto blinkSprite = mercyFramesElapsed % 2 != 0;
+      const auto blinkSprite = state.mMercyFramesRemaining % 2 != 0;
       sprite.mShow = !blinkSprite;
+
+      --state.mMercyFramesRemaining;
     }
   }
 
@@ -160,6 +159,7 @@ void AnimationSystem::update(
     // Initialize animation on first frame
     if (!state.mDeathAnimationFramesElapsed) {
       state.mDeathAnimationFramesElapsed = 0;
+      sprite.mShow = true;
     }
 
     auto& elapsedFrames = *state.mDeathAnimationFramesElapsed;
