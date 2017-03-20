@@ -23,23 +23,6 @@
 #include "game_logic/player/components.hpp"
 
 
-// Duke damage mercy frames:
-//   Easy mode:
-//     40 in total. First 30 are blinking (one frame show, one frame hide),
-//     rest is flashing white at same frequency.
-//
-//   Medium mode:
-//     30 in total. First 23/24 blinking?? (needs more capture analysis)
-//
-//   Hard mode:
-//     20 in total. First 12 blinking?? (needs more analysis)
-//
-// Death animation: 42 frames total till fade-out.
-//   17 frames for animation
-//   22 explosion/particles
-//   rest is waiting for fade-out
-
-
 namespace rigel { namespace game_logic { namespace player {
 
 namespace {
