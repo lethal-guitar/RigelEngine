@@ -64,6 +64,12 @@ public:
   {
   }
 
+  /** Update map tile animation state. Should be called at game-logic rate. */
+  void updateAnimatedMapTiles() {
+    mMapRenderer.updateAnimatedMapTiles();
+  }
+
+  /** Render everything. Can be called at full frame rate. */
   void update(
     entityx::EntityManager& es,
     entityx::EventManager& events,

@@ -114,9 +114,6 @@ void RenderingSystem::update(
 ) {
   using namespace boost::range;
 
-  // Animate map
-  mMapRenderer.update(dt);
-
   // Collect sprites, then order by draw index
   std::vector<SpriteData> spritesByDrawOrder;
   es.each<Sprite, WorldPosition>([this, &spritesByDrawOrder](

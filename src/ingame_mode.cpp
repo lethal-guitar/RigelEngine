@@ -277,6 +277,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   ) {
     updateGameLogic(timeForOneFrame);
     engine::updateAnimatedSprites(mEntities.entities);
+    mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
   }
 
 
