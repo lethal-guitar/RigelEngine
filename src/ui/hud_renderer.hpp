@@ -19,9 +19,9 @@
 #include "data/player_data.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
-#include "engine/timing.hpp"
 #include "utils/enum_hash.hpp"
 
+#include <cstdint>
 #include <unordered_map>
 
 
@@ -48,7 +48,8 @@ public:
     engine::Renderer* pRenderer,
     const loader::ResourceLoader& bundle);
 
-  void updateAndRender(engine::TimeDelta dt);
+  void updateAnimation();
+  void render();
 
 private:
   struct CollectedLetterIndicator {
@@ -84,7 +85,8 @@ private:
   data::PlayerModel* mpPlayerModel;
   const int mLevelNumber;
   engine::Renderer* mpRenderer;
-  engine::TimeStepper mTimeStepper;
+
+  std::uint32_t mElapsedFrames = 0;
 
   engine::OwningTexture mTopRightTexture;
   engine::OwningTexture mBottomLeftTexture;

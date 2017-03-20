@@ -278,6 +278,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     updateGameLogic(timeForOneFrame);
     engine::updateAnimatedSprites(mEntities.entities);
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
+    mHudRenderer.updateAnimation();
   }
 
 
@@ -291,7 +292,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
     mEntities.systems.update<RenderingSystem>(dt);
     mEntities.systems.update<DebuggingSystem>(dt);
-    mHudRenderer.updateAndRender(dt);
+    mHudRenderer.render();
   }
 
   mIngameViewPortRenderTarget.render(
