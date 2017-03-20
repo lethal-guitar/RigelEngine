@@ -23,18 +23,6 @@ namespace rigel { namespace engine {
 
 namespace {
 
-// The original game re-programs the PIT (programmable interrupt timer)
-// using 0x10A1 as counter. This gives a tick rate of roughly 280 Hz
-// (1193180 / 4257 ~= 280.29).
-//
-// The game's actual frame rate is derived from that by dividing by 16, which
-// gives 17.5 FPS. Note that this is exactly 1/4th of 70 Hz, which was actually
-// the usual monitor refresh rate at the time.
-
-// TODO: Change this to times 16, and update all the places that currently wait
-// for 2 or 4 ticks to use 1/2 instead.
-
-
 std::chrono::high_resolution_clock::time_point globalTimeStart;
 
 }
