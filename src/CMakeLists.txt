@@ -20,6 +20,8 @@ set(core_sources
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
+    engine/collision_checker.cpp
+    engine/collision_checker.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
     engine/earth_quake_effect.cpp

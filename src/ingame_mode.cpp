@@ -19,6 +19,7 @@
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/debugging_system.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
@@ -116,7 +117,8 @@ struct IngameMode::Systems {
     const data::map::Map& map,
     FireShotFuncT fireShotFunc
   )
-    : mMapScrollSystem(pScrollOffset, playerEntity, map)
+    : mCollisionChecker(pMap)
+    , mMapScrollSystem(pScrollOffset, playerEntity, map)
     , mPlayerMovementSystem(playerEntity, map)
     , mPlayerAttackSystem(
         playerEntity,
@@ -126,12 +128,14 @@ struct IngameMode::Systems {
     , mElevatorSystem(playerEntity, pServiceProvider)
     , mBlueGuardSystem(
         playerEntity,
-        pMap,
+        &mCollisionChecker,
         pEntityFactory,
         pServiceProvider,
         pRandomGenerator)
   {
   }
+
+  engine::CollisionChecker mCollisionChecker;
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
