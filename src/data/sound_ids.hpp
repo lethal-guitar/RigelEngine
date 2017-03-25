@@ -48,7 +48,7 @@ enum class SoundId {
   MenuToggle = 25,
   FallingRock = 26,
   EnemyLaserShot = 27,
-  Unknown2 = 28,
+  EarthQuake = 28,
   BiologicalEnemyDestroyed = 29,
   Teleport = 30,
   Unknown3 = 31,

@@ -265,6 +265,8 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
+  int screenShakeOffsetX = 0;
+
   // **********************************************************************
   // Updating
   // **********************************************************************
@@ -279,6 +281,10 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     engine::updateAnimatedSprites(mEntities.entities);
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
     mHudRenderer.updateAnimation();
+
+    if (mEarthQuakeEffect) {
+      screenShakeOffsetX = mEarthQuakeEffect->update();
+    }
   }
 
 
@@ -295,9 +301,10 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mHudRenderer.render();
   }
 
+  mpRenderer->clear();
   mIngameViewPortRenderTarget.render(
     mpRenderer,
-    data::GameTraits::inGameViewPortOffset.x,
+    data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,
     data::GameTraits::inGameViewPortOffset.y);
 
   if (mShowDebugText) {
@@ -478,6 +485,12 @@ void IngameMode::loadLevel(
       mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::SlimeBlobSystem>()->onEntityHit(entity);
     });
+
+
+  if (loadedLevel.mEarthquake) {
+    mEarthQuakeEffect =
+      engine::EarthQuakeEffect{mpServiceProvider, &mRandomGenerator};
+  }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
 }

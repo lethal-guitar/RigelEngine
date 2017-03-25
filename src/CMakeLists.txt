@@ -22,6 +22,8 @@ set(core_sources
     engine/base_components.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
+    engine/earth_quake_effect.cpp
+    engine/earth_quake_effect.hpp
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
