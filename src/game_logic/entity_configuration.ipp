@@ -111,26 +111,29 @@ constexpr bool isPlayerProjectile(const ProjectileType type) {
 
 using Message = ai::components::MessengerDrone::Message;
 
-Message messengerDroneMessage(const ActorID id) {
+Message MESSAGE_TYPE_BY_INDEX[] = {
+  Message::YourBrainIsOurs,
+  Message::BringBackTheBrain,
+  Message::LiveFromRigel,
+  Message::Die,
+  Message::CantEscape
+};
+
+
+int messengerDroneTypeIndex(const ActorID id) {
   switch (id) {
     case 213:
-      return Message::YourBrainIsOurs;
-
     case 214:
-      return Message::BringBackTheBrain;
-
     case 215:
-      return Message::LiveFromRigel;
-
     case 216:
-      return Message::Die;
+      return id - 213; // 0 to 3
 
     case 220:
-      return Message::CantEscape;
+      return 4;
 
     default:
       assert(false);
-      return Message::YourBrainIsOurs;
+      return 0;
   }
 }
 
@@ -791,14 +794,24 @@ void configureEntity(
     case 215: // "Live from Rigel it's Saturday night!"
     case 216: // "Die!"
     case 220: // "You cannot escape us! You will get your brain sucked!"
-      entity.assign<Shootable>(1);
-      entity.assign<BoundingBox>(boundingBox);
-      entity.component<Sprite>()->mFramesToRender.clear();
+      {
+        const auto typeIndex = messengerDroneTypeIndex(actorID);
 
-      entity.assign<ai::components::MessengerDrone>(
-        messengerDroneMessage(actorID));
-      entity.assign<ActivationSettings>(
+        // The original game uses the actor's "score" field to store which
+        // type of message is shown. The result is that the message ships will
+        // give between 0 and 4 points of score, depending on their type.
+        // It's unclear whether this is intentional, it seems like it might not
+        // be because this score value is assigned in the update() function,
+        // not when constructing the actor.
+        entity.assign<Shootable>(1, typeIndex);
+        entity.assign<BoundingBox>(boundingBox);
+        entity.component<Sprite>()->mFramesToRender.clear();
+
+        entity.assign<ai::components::MessengerDrone>(
+          MESSAGE_TYPE_BY_INDEX[typeIndex]);
+        entity.assign<ActivationSettings>(
           ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      }
       break;
 
     case 231: // Lava riser
