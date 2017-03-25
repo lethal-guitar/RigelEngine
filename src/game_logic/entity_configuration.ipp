@@ -833,17 +833,13 @@ void configureEntity(
     case 106: // shootable wall, explodes into small pieces
       entity.assign<Shootable>(1);
       {
-        // If we keep the bounding box unchanged, the collision from the
-        // underlying map geometry will prevent projectiles from ever reaching
-        // the bounding box, thus preventing the wall's destruction.
-        // Making the bounding box slightly wider solves this problem in a
-        // simple way, without making the world collision detection more
-        // complicated.
-        // TODO: Implementing projectile wall penetration would solve this as
-        // well.
+        // Shootable walls have a bounding box that's one unit wider than the
+        // actual area.
         auto adjustedBbox = boundingBox;
         adjustedBbox.size.width += 2;
+        adjustedBbox.size.height += 2;
         adjustedBbox.topLeft.x -= 1;
+        adjustedBbox.topLeft.y += 1;
         entity.assign<BoundingBox>(adjustedBbox);
       }
       break;
