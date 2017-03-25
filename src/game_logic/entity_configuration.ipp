@@ -592,7 +592,11 @@ void configureEntity(
     case 67: // Green slime blob
       entity.assign<Shootable>(6 + difficultyOffset, 1500);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ai::components::SlimeBlob>();
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      addDefaultPhysical(entity, boundingBox);
+      entity.component<Physical>()->mGravityAffected = false;
       break;
 
     case 68: // Green slime container
@@ -895,6 +899,12 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(59);
       break;
 
+
+    case 67:
+      actorParts.push_back(67);
+      actorParts.push_back(70);
+      break;
+
     case 130:
       actorParts.push_back(260);
       actorParts.push_back(130);
@@ -947,6 +957,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 62:
       sprite.mFramesToRender = {1, 0};
+      break;
+
+    case 67:
+      sprite.mFramesToRender = {0};
       break;
 
     case 93:

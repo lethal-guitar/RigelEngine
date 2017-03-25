@@ -132,6 +132,11 @@ struct IngameMode::Systems {
         pEntityFactory,
         pServiceProvider,
         pRandomGenerator)
+    , mSlimeBlobSystem(
+        playerEntity,
+        &mCollisionChecker,
+        pEntityFactory,
+        pRandomGenerator)
   {
   }
 
@@ -143,6 +148,7 @@ struct IngameMode::Systems {
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
+  game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
 };
 
 
@@ -348,7 +354,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   mEntities.systems.update<ai::RocketTurretSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
   mEntities.systems.update<ai::SlidingDoorSystem>(dt);
-  mEntities.systems.update<ai::SlimeBlobSystem>(dt);
+  mpSystems->mSlimeBlobSystem.update(mEntities.entities);
   mEntities.systems.update<ai::SlimePipeSystem>(dt);
 
   // ----------------------------------------------------------------------
@@ -451,10 +457,6 @@ void IngameMode::loadLevel(
   mEntities.systems.add<ai::SlidingDoorSystem>(
     mPlayerEntity,
     mpServiceProvider);
-  mEntities.systems.add<ai::SlimeBlobSystem>(
-    mPlayerEntity,
-    &mEntityFactory,
-    &mRandomGenerator);
   mEntities.systems.add<ai::SlimePipeSystem>(
     &mEntityFactory,
     mpServiceProvider);
@@ -485,9 +487,9 @@ void IngameMode::loadLevel(
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {
       mpSystems->mBlueGuardSystem.onEntityHit(entity);
+      mpSystems->mSlimeBlobSystem.onEntityHit(entity);
       mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);
-      mEntities.systems.system<ai::SlimeBlobSystem>()->onEntityHit(entity);
     });
 
 
