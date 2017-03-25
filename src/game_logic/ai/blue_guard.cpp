@@ -16,6 +16,7 @@
 
 #include "blue_guard.hpp"
 
+#include "engine/collision_checker.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
@@ -30,6 +31,7 @@
 
 namespace rigel { namespace game_logic { namespace ai {
 
+using engine::CollisionChecker;
 using engine::components::Active;
 using engine::components::BoundingBox;
 using engine::components::Sprite;
@@ -102,49 +104,18 @@ auto oppositeOrientation(const Orientation orientation) {
   return Orientation::Left;
 }
 
-
-boost::optional<WorldPosition> walk(
-  const WorldPosition& currentPosition,
-  const base::Vector& walkVector,
-  const BoundingBox& bbox,
-  const data::map::Map& map
-) {
-  const auto newPosition = currentPosition + walkVector;
-
-  const auto movingLeft = walkVector.x < 0;
-  const auto xToTest = newPosition.x + (movingLeft ? 0 : bbox.size.width - 1);
-
-  const auto stillOnSolidGround =
-    map.collisionData(xToTest, newPosition.y + 1).isSolidTop();
-
-  // TODO: Unify this with the code in the physics system
-  bool collidingWithWorld = false;
-  for (int i = 0; i < bbox.size.height; ++i) {
-    if (!map.collisionData(xToTest, newPosition.y - i).isClear()) {
-      collidingWithWorld = true;
-      break;
-    }
-  }
-
-  if (stillOnSolidGround && !collidingWithWorld) {
-    return newPosition;
-  }
-
-  return boost::none;
-}
-
 }
 
 
 BlueGuardSystem::BlueGuardSystem(
   entityx::Entity player,
-  const data::map::Map* pMap,
+  CollisionChecker* pCollisionChecker,
   EntityFactory* pEntityFactory,
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator
 )
   : mPlayer(player)
-  , mpMap(pMap)
+  , mpCollisionChecker(pCollisionChecker)
   , mpEntityFactory(pEntityFactory)
   , mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
@@ -155,13 +126,12 @@ BlueGuardSystem::BlueGuardSystem(
 void BlueGuardSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
-  es.each<components::BlueGuard, Sprite, WorldPosition, BoundingBox, Active>(
+  es.each<components::BlueGuard, Sprite, WorldPosition, Active>(
     [this, &playerPosition](
       entityx::Entity entity,
       components::BlueGuard& state,
       Sprite& sprite,
       WorldPosition& position,
-      BoundingBox& bbox,
       const Active&
     ) {
       if (state.mTypingOnTerminal) {
@@ -170,7 +140,7 @@ void BlueGuardSystem::update(entityx::EntityManager& es) {
 
         if (noticesPlayer) {
           stopTyping(state, sprite, position);
-          updateGuard(state, sprite, position, bbox);
+          updateGuard(entity, state, sprite, position);
         } else {
           // Animate typing on terminal
           const auto skipOneMove = (mpRandomGenerator->gen() & 4) != 0;
@@ -180,7 +150,7 @@ void BlueGuardSystem::update(entityx::EntityManager& es) {
           sprite.mFramesToRender[0] = TYPING_BASE_FRAME + typingFrameOffset;
         }
       } else {
-        updateGuard(state, sprite, position, bbox);
+        updateGuard(entity, state, sprite, position);
       }
 
       engine::synchronizeBoundingBoxToSprite(entity);
@@ -225,25 +195,19 @@ void BlueGuardSystem::stopTyping(
 
 
 void BlueGuardSystem::updateGuard(
+  entityx::Entity guardEntity,
   components::BlueGuard& state,
   engine::components::Sprite& sprite,
-  WorldPosition& position,
-  const BoundingBox& bbox
+  WorldPosition& position
 ) {
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
   const auto& playerState =
     *mPlayer.component<game_logic::components::PlayerControlled>();
 
-  const auto walkOneStep = [this, &state, &position, &bbox]() {
+  const auto walkOneStep = [this, &state, &guardEntity]() {
     const auto facingLeft = state.mOrientation == Orientation::Left;
-    const auto walkVector = base::Vector{1, 0} * (facingLeft ? -1 : 1);
-
-    const auto newPosition = walk(position, walkVector, bbox, *mpMap);
-    if (newPosition) {
-      position = *newPosition;
-    }
-
-    return newPosition != boost::none;
+    const auto walkAmount = facingLeft ? -1 : 1;
+    return mpCollisionChecker->walkEntity(guardEntity, walkAmount);
   };
 
   // If a guard was previously typing on a terminal, it will not attack the

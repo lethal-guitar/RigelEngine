@@ -27,6 +27,7 @@ namespace rigel {
 
 struct IGameServiceProvider;
 namespace data { namespace map { class Map; }}
+namespace engine { class CollisionChecker; }
 namespace engine { class RandomNumberGenerator; }
 namespace engine { namespace components { struct Sprite; }}
 namespace game_logic { class EntityFactory; }
@@ -68,12 +69,11 @@ struct BlueGuard {
 
 }
 
-
 class BlueGuardSystem {
 public:
   BlueGuardSystem(
     entityx::Entity player,
-    const data::map::Map* pMap,
+    engine::CollisionChecker* pCollisionChecker,
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator);
@@ -88,14 +88,14 @@ private:
     engine::components::WorldPosition& position);
 
   void updateGuard(
+    entityx::Entity guardEntity,
     components::BlueGuard& state,
     engine::components::Sprite& sprite,
-    engine::components::WorldPosition& position,
-    const engine::components::BoundingBox& bbox);
+    engine::components::WorldPosition& position);
 
 private:
   entityx::Entity mPlayer;
-  const data::map::Map* mpMap;
+  engine::CollisionChecker* mpCollisionChecker;
   EntityFactory* mpEntityFactory;
   IGameServiceProvider* mpServiceProvider;
   engine::RandomNumberGenerator* mpRandomGenerator;

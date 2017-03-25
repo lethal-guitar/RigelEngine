@@ -17,16 +17,24 @@
 #include "slime_blob.hpp"
 
 #include "engine/base_components.hpp"
+#include "engine/collision_checker.hpp"
+#include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/player/components.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <atria/variant/match_boost.hpp>
+RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace ai {
 
-using engine::components::BoundingBox;
-using engine::components::Sprite;
+using namespace engine::components;
+using engine::CollisionChecker;
 using game_logic::components::Shootable;
 
 
@@ -36,6 +44,24 @@ const auto NUM_BREAK_ANIMATION_STEPS = 15;
 const auto BREAK_ANIM_SPEED = 3; // frames between visible animation steps
 
 const auto SLIME_BLOB_SPAWN_OFFSET = base::Vector{2, 0};
+
+const auto SPRITE_ORIENTATION_OFFSET = 5;
+const auto WALKING_ON_GROUND_BASE_FRAME = 3;
+
+const auto STRETCH_UP_ANIM_START = 10;
+const auto CONTRACT_DOWN_ANIM_START = 12;
+const auto CONTRACT_DOWN_ANIM_END = 10;
+const auto IN_FLIGHT_ANIM_FRAME = 13;
+const auto CONTRACT_UP_ANIM_START = 14;
+const auto CONTRACT_UP_ANIM_END = 16;
+const auto STRETCH_DOWN_ANIM_END = 14;
+
+
+int toOffset(const components::SlimeBlob::Orientation orientation) {
+  return orientation == components::SlimeBlob::Orientation::Right
+    ? SPRITE_ORIENTATION_OFFSET
+    : 0;
+}
 
 }
 
@@ -52,24 +78,23 @@ void configureSlimeContainer(entityx::Entity entity) {
 
 SlimeBlobSystem::SlimeBlobSystem(
   entityx::Entity player,
+  CollisionChecker* pCollisionChecker,
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator
 )
   : mPlayer(player)
+  , mpCollisionChecker(pCollisionChecker)
   , mpEntityFactory(pEntityFactory)
   , mpRandomGenerator(pRandomGenerator)
 {
 }
 
 
-void SlimeBlobSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void SlimeBlobSystem::update(entityx::EntityManager& es) {
   using engine::components::Active;
   using engine::components::WorldPosition;
 
+  // Slime containers
   es.each<Sprite, WorldPosition, components::SlimeContainer, Active>(
     [this](
       entityx::Entity entity,
@@ -98,7 +123,181 @@ void SlimeBlobSystem::update(
       }
     });
 
-  // TODO: Slime blob enemy logic
+
+  // Slime blobs
+  es.each<Sprite, WorldPosition, components::SlimeBlob, Active>(
+    [this](
+      entityx::Entity entity,
+      Sprite& sprite,
+      WorldPosition& position,
+      components::SlimeBlob& blobState,
+      const engine::components::Active&
+    ) {
+      using namespace components::detail;
+      using Orientation = components::SlimeBlob::Orientation;
+
+      const auto playerPosition = adjustedPlayerPosition();
+      const auto& bbox = *entity.component<BoundingBox>();
+
+      atria::variant::match(blobState.mState,
+        [&](OnGround& state) {
+          // Animate walking
+          state.mIsOddUpdate = !state.mIsOddUpdate;
+
+          const auto newAnimFrame =
+            WALKING_ON_GROUND_BASE_FRAME +
+            (state.mIsOddUpdate ? 1 : 0) +
+            toOffset(blobState.mOrientation);
+          sprite.mFramesToRender[0] = newAnimFrame;
+
+          // Decide if we should continue walking or change state
+          const auto isFacingLeft =
+            blobState.mOrientation == Orientation::Left;
+          const auto movingTowardsPlayer =
+            (isFacingLeft && position.x >= playerPosition.x) ||
+            (!isFacingLeft && position.x <= playerPosition.x);
+
+          if (movingTowardsPlayer) {
+            if (newAnimFrame % 2 == 1) {
+              const auto walkedSuccessfully =
+                mpCollisionChecker->walkEntity(entity, isFacingLeft ? -1 : 1);
+
+              if (!walkedSuccessfully) {
+                blobState.mState = Idle{};
+              }
+            }
+          } else {
+            blobState.mState = Idle{};
+          }
+        },
+
+
+        [&](OnCeiling& state) {
+          // Check if we are above the player, and fall back down if so
+          if (position.x == playerPosition.x) {
+            blobState.mState = Descending{};
+            return;
+          }
+
+          // Animate
+          state.mIsOddUpdate = !state.mIsOddUpdate;
+          const auto playerIsRight = position.x <= playerPosition.x;
+          const auto baseFrame = playerIsRight ? 19 : 17;
+          sprite.mFramesToRender[0] = baseFrame + (state.mIsOddUpdate ? 1 : 0);
+
+          // Move
+          if (state.mIsOddUpdate) {
+            const auto movement = playerIsRight ? 1 : -1;
+            const auto walkedSuccessfully =
+              mpCollisionChecker->walkEntityOnCeiling(entity, movement);
+
+            if (!walkedSuccessfully) {
+              sprite.mFramesToRender[0] -= 2;
+              blobState.mState = Descending{};
+            }
+          }
+        },
+
+
+        [&](Idle& state) {
+          // Randomly decide to fly up
+          if ((mpRandomGenerator->gen() & 0x1F) == 0) {
+            blobState.mState = Ascending{};
+            sprite.mFramesToRender[0] = STRETCH_UP_ANIM_START;
+            return;
+          }
+
+          // Animate
+          const auto newAnimFrame =
+            (mpRandomGenerator->gen() & 3) + toOffset(blobState.mOrientation);
+          sprite.mFramesToRender[0] = newAnimFrame;
+
+          // Wait until time-out elapsed
+          ++state.mFramesElapsed;
+          if (state.mFramesElapsed >= 10) {
+            // Orient towards player and back to movement
+            const auto newOrientation = position.x <= playerPosition.x
+              ? Orientation::Right
+              : Orientation::Left;
+            blobState.mOrientation = newOrientation;
+
+            blobState.mState = OnGround{};
+          }
+        },
+
+
+        [&](Ascending& state) {
+          auto& animationFrame = sprite.mFramesToRender[0];
+
+          if (animationFrame < IN_FLIGHT_ANIM_FRAME) {
+            // Animate getting ready to fly up (stretch upwards). Assumes we
+            // previously set the animation frame to STRETCH_UP_ANIM_START
+            ++animationFrame;
+          } else if (animationFrame == IN_FLIGHT_ANIM_FRAME) {
+            // Fly upwards
+            const auto willCollide =
+              mpCollisionChecker->isTouchingCeiling(position, bbox);
+            if (willCollide) {
+              animationFrame = CONTRACT_UP_ANIM_START;
+            }
+
+            // always move, even when colliding. This is ok because the next
+            // anim frame has an offset which makes us not collide anymore.
+            position.y -= 1;
+          } else {
+            // Animate arrival on ceiling (contract)
+            ++animationFrame;
+            if (animationFrame >= CONTRACT_UP_ANIM_END) {
+              blobState.mState = OnCeiling{};
+            }
+          }
+        },
+
+
+        [&](Descending& state) {
+          auto& animationFrame = sprite.mFramesToRender[0];
+
+          if (animationFrame == IN_FLIGHT_ANIM_FRAME) {
+            const auto offset = base::Vector{0, 3};
+
+            const auto willCollide =
+              mpCollisionChecker->isOnSolidGround(position + offset, bbox);
+            if (willCollide) {
+              animationFrame = CONTRACT_DOWN_ANIM_START;
+            }
+
+            // always move, even when colliding. This is ok because the next
+            // anim frame has an offset which makes us not collide anymore.
+            position.y += 1;
+          } else {
+            if (animationFrame == STRETCH_DOWN_ANIM_END) {
+              position.y += 1;
+            }
+
+            --animationFrame;
+            if (animationFrame <= CONTRACT_DOWN_ANIM_END) {
+              animationFrame = 0;
+              blobState.mState = Idle{};
+              blobState.mOrientation = Orientation::Left;
+            }
+          }
+        });
+
+      engine::synchronizeBoundingBoxToSprite(entity);
+    });
+}
+
+
+base::Vector SlimeBlobSystem::adjustedPlayerPosition() const {
+  using engine::components::WorldPosition;
+  using game_logic::components::PlayerControlled;
+
+  const auto& playerPosition = *mPlayer.component<const WorldPosition>();
+  const auto& playerState = *mPlayer.component<const PlayerControlled>();
+  const auto adjustment =
+    (playerState.mOrientation == player::Orientation::Left ? 1 : 0);
+
+  return playerPosition - base::Vector{adjustment, 0};
 }
 
 
