@@ -587,7 +587,7 @@ void configureEntity(
       break;
 
     case 67: // Green slime blob
-      entity.assign<Shootable>(6 + difficultyOffset, 500);
+      entity.assign<Shootable>(6 + difficultyOffset, 1500);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       break;
