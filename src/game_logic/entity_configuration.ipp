@@ -111,26 +111,29 @@ constexpr bool isPlayerProjectile(const ProjectileType type) {
 
 using Message = ai::components::MessengerDrone::Message;
 
-Message messengerDroneMessage(const ActorID id) {
+Message MESSAGE_TYPE_BY_INDEX[] = {
+  Message::YourBrainIsOurs,
+  Message::BringBackTheBrain,
+  Message::LiveFromRigel,
+  Message::Die,
+  Message::CantEscape
+};
+
+
+int messengerDroneTypeIndex(const ActorID id) {
   switch (id) {
     case 213:
-      return Message::YourBrainIsOurs;
-
     case 214:
-      return Message::BringBackTheBrain;
-
     case 215:
-      return Message::LiveFromRigel;
-
     case 216:
-      return Message::Die;
+      return id - 213; // 0 to 3
 
     case 220:
-      return Message::CantEscape;
+      return 4;
 
     default:
       assert(false);
-      return Message::YourBrainIsOurs;
+      return 0;
   }
 }
 
@@ -587,7 +590,7 @@ void configureEntity(
       break;
 
     case 67: // Green slime blob
-      entity.assign<Shootable>(6 + difficultyOffset, 500);
+      entity.assign<Shootable>(6 + difficultyOffset, 1500);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       break;
@@ -791,14 +794,24 @@ void configureEntity(
     case 215: // "Live from Rigel it's Saturday night!"
     case 216: // "Die!"
     case 220: // "You cannot escape us! You will get your brain sucked!"
-      entity.assign<Shootable>(1);
-      entity.assign<BoundingBox>(boundingBox);
-      entity.component<Sprite>()->mFramesToRender.clear();
+      {
+        const auto typeIndex = messengerDroneTypeIndex(actorID);
 
-      entity.assign<ai::components::MessengerDrone>(
-        messengerDroneMessage(actorID));
-      entity.assign<ActivationSettings>(
+        // The original game uses the actor's "score" field to store which
+        // type of message is shown. The result is that the message ships will
+        // give between 0 and 4 points of score, depending on their type.
+        // It's unclear whether this is intentional, it seems like it might not
+        // be because this score value is assigned in the update() function,
+        // not when constructing the actor.
+        entity.assign<Shootable>(1, typeIndex);
+        entity.assign<BoundingBox>(boundingBox);
+        entity.component<Sprite>()->mFramesToRender.clear();
+
+        entity.assign<ai::components::MessengerDrone>(
+          MESSAGE_TYPE_BY_INDEX[typeIndex]);
+        entity.assign<ActivationSettings>(
           ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      }
       break;
 
     case 231: // Lava riser
@@ -820,17 +833,13 @@ void configureEntity(
     case 106: // shootable wall, explodes into small pieces
       entity.assign<Shootable>(1);
       {
-        // If we keep the bounding box unchanged, the collision from the
-        // underlying map geometry will prevent projectiles from ever reaching
-        // the bounding box, thus preventing the wall's destruction.
-        // Making the bounding box slightly wider solves this problem in a
-        // simple way, without making the world collision detection more
-        // complicated.
-        // TODO: Implementing projectile wall penetration would solve this as
-        // well.
+        // Shootable walls have a bounding box that's one unit wider than the
+        // actual area.
         auto adjustedBbox = boundingBox;
         adjustedBbox.size.width += 2;
+        adjustedBbox.size.height += 2;
         adjustedBbox.topLeft.x -= 1;
+        adjustedBbox.topLeft.y += 1;
         entity.assign<BoundingBox>(adjustedBbox);
       }
       break;

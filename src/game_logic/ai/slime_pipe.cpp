@@ -82,7 +82,9 @@ void SlimePipeSystem::createSlimeDrop(const base::Vector& position) {
   entity.assign<Physical>(base::Point<float>{0.0f, 0.0f}, true);
 
   entity.assign<game_logic::components::PlayerDamaging>(1);
-  entity.assign<AutoDestroy>(AutoDestroy::Condition::OnWorldCollision);
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnWorldCollision,
+    AutoDestroy::Condition::OnLeavingActiveRegion});
   entity.assign<Active>();
 }
 

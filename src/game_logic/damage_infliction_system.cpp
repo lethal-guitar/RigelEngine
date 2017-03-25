@@ -79,6 +79,9 @@ void DamageInflictionSystem::update(
           inflictorEntity.destroy();
 
           mEntityHitSignal(shootableEntity);
+          // The onHit() callback mustn't remove the shootable component
+          assert(shootableEntity.has_component<Shootable>());
+
           shootable->mHealth -= damage.mAmount;
           if (shootable->mHealth <= 0) {
             mpPlayerModel->mScore += shootable->mGivenScore;
@@ -101,6 +104,8 @@ void DamageInflictionSystem::update(
 
             if (shootable->mDestroyWhenKilled) {
               shootableEntity.destroy();
+            } else {
+              shootableEntity.remove<Shootable>();
             }
           } else {
             if (shootable->mEnableHitFeedback) {

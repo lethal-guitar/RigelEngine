@@ -19,6 +19,7 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/player_data.hpp"
+#include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/texture.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -108,6 +109,8 @@ private:
   engine::RenderTargetTexture mIngameViewPortRenderTarget;
 
   boost::optional<entityx::Entity> mActiveTeleporter;
+
+  boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
 };
 
 }
