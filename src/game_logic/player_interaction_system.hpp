@@ -62,6 +62,8 @@ private:
     components::InteractableType type
   );
 
+  void triggerPlayerInteractionAnimation();
+
 private:
   entityx::Entity mPlayer;
   data::PlayerModel* mpPlayerModel;
