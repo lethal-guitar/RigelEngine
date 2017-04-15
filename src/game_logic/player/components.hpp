@@ -29,6 +29,7 @@ namespace rigel { namespace game_logic {
 namespace player {
 
 constexpr auto INITIAL_MERCY_FRAMES = 20;
+constexpr auto INTERACTION_LOCK_DURATION = 8;
 
 
 enum class Orientation {
@@ -83,6 +84,13 @@ struct PlayerControlled {
   bool mShotFired = false;
 
   bool mIsInteracting = false;
+  int mInteractionLockFramesLeft = 0;
+
+  void enterTimedInteractionLock() {
+    mInteractionLockFramesLeft = player::INTERACTION_LOCK_DURATION;
+    mIsInteracting = true;
+    mState = player::PlayerState::Standing;
+  }
 
   bool isInMercyFrames() const {
     return mMercyFramesRemaining > 0;
