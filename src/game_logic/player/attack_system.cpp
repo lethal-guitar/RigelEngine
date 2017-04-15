@@ -86,7 +86,23 @@ AttackSystem::AttackSystem(
 }
 
 
+bool AttackSystem::attackPossible() const {
+  auto& playerState =
+    *mPlayerEntity.component<const components::PlayerControlled>();
+
+  return
+    playerState.mState != PlayerState::ClimbingLadder &&
+    playerState.mState != PlayerState::Dieing &&
+    playerState.mState != PlayerState::Dead &&
+    !playerState.mIsInteracting;
+}
+
+
 void AttackSystem::update() {
+  if (!attackPossible()) {
+    return;
+  }
+
   assert(mPlayerEntity.has_component<components::PlayerControlled>());
   assert(mPlayerEntity.has_component<WorldPosition>());
 
@@ -94,15 +110,6 @@ void AttackSystem::update() {
     *mPlayerEntity.component<components::PlayerControlled>();
   const auto& playerPosition =
     *mPlayerEntity.component<WorldPosition>();
-
-  if (
-    playerState.mState == PlayerState::ClimbingLadder ||
-    playerState.mState == PlayerState::Dieing ||
-    playerState.mState == PlayerState::Dead ||
-    playerState.mIsInteracting
-  ) {
-    return;
-  }
 
   if (mShotRequested) {
     fireShot(playerPosition, playerState);
@@ -115,7 +122,12 @@ void AttackSystem::update() {
 
 
 void AttackSystem::buttonStateChanged(const PlayerInputState& inputState) {
-  if (inputState.mShooting && !mPreviousFireButtonState && !mShotRequested) {
+  if (
+    attackPossible() &&
+    inputState.mShooting &&
+    !mPreviousFireButtonState &&
+    !mShotRequested
+  ) {
     mShotRequested = true;
   }
 

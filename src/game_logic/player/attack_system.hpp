@@ -62,6 +62,8 @@ private:
     const components::PlayerControlled& playerState
   );
 
+  bool attackPossible() const;
+
 private:
   entityx::Entity mPlayerEntity;
   data::PlayerModel* mpPlayerModel;
