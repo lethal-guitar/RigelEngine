@@ -45,4 +45,22 @@ inline void synchronizeBoundingBoxToSprite(entityx::Entity& entity) {
   bbox = inferBoundingBox(sprite.mFrames[sprite.mFramesToRender[0]]);
 }
 
+
+inline void startAnimation(
+  entityx::Entity& entity,
+  const int delayInFrames,
+  const int startFrame,
+  boost::optional<int> endFrame,
+  const int renderSlot = 0
+) {
+  if (entity.has_component<components::Animated>()) {
+    entity.remove<components::Animated>();
+  }
+
+  auto& sprite = *entity.component<components::Sprite>();
+  sprite.mFramesToRender[renderSlot] = startFrame;
+  entity.assign<components::Animated>(
+    delayInFrames, startFrame, endFrame, renderSlot);
+}
+
 }}
