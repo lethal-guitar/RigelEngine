@@ -249,7 +249,6 @@ void IngameMode::handleEvent(const SDL_Event& event) {
       // only allowed if the button is released between two shots. If the
       // release happens between two logic updates, the system wouldn't see it,
       // therefore thinking you're still holding the button.
-      mpSystems->mPlayerAttackSystem.buttonStateChanged(mInputState);
       break;
   }
 
@@ -286,6 +285,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   // Updating
   // **********************************************************************
+  mpSystems->mPlayerAttackSystem.buttonStateChanged(mInputState);
 
   constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
   mAccumulatedTime += dt;
@@ -293,10 +293,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mAccumulatedTime >= timeForOneFrame;
     mAccumulatedTime -= timeForOneFrame
   ) {
-    updateGameLogic(timeForOneFrame);
-    engine::updateAnimatedSprites(mEntities.entities);
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
+    engine::updateAnimatedSprites(mEntities.entities);
     mHudRenderer.updateAnimation();
+
+    updateGameLogic(timeForOneFrame);
 
     if (mEarthQuakeEffect) {
       screenShakeOffsetX = mEarthQuakeEffect->update();

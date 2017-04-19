@@ -44,6 +44,8 @@ bool CollisionChecker::walkEntity(entityx::Entity entity, const int amount) cons
     mpMap->collisionData(xToTest, newPosition.y + 1).isSolidTop();
 
   // TODO: Unify this with the code in the physics system
+  // FIXME: this is not correct - we need to check for collision against the
+  // left or right wall instead of just checking for a clear cell
   bool collidingWithWorld = false;
   for (int i = 0; i < bbox.size.height; ++i) {
     if (!mpMap->collisionData(xToTest, newPosition.y - i).isClear()) {
