@@ -26,6 +26,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/blue_guard.hpp"
+#include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
@@ -132,6 +133,10 @@ struct IngameMode::Systems {
         pEntityFactory,
         pServiceProvider,
         pRandomGenerator)
+    , mHoverBotSystem(
+        playerEntity,
+        &mCollisionChecker,
+        pEntityFactory)
     , mSlimeBlobSystem(
         playerEntity,
         &mCollisionChecker,
@@ -148,6 +153,7 @@ struct IngameMode::Systems {
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
+  game_logic::ai::HoverBotSystem mHoverBotSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
 };
 
@@ -348,6 +354,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // A.I. logic update
   // ----------------------------------------------------------------------
   mpSystems->mBlueGuardSystem.update(mEntities.entities);
+  mpSystems->mHoverBotSystem.update(mEntities.entities);
   mEntities.systems.update<ai::LaserTurretSystem>(dt);
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
   mEntities.systems.update<ai::PrisonerSystem>(dt);
