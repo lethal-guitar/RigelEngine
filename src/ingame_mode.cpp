@@ -36,6 +36,7 @@
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/teleporter.hpp"
 #include "game_logic/map_scroll_system.hpp"
@@ -495,6 +496,7 @@ void IngameMode::loadLevel(
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {
       mpSystems->mBlueGuardSystem.onEntityHit(entity);
+      item_containers::onEntityHit(entity, mEntities.entities);
       mpSystems->mSlimeBlobSystem.onEntityHit(entity);
       mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);

@@ -17,6 +17,8 @@
 // This file is meant to be included into entity_factory.cpp. It's only
 // a separate file to make the amount of code in one file more manageable.
 
+namespace {
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -151,7 +153,227 @@ auto createBlueGuardAiComponent(const ActorID id) {
 }
 
 
-void configureEntity(
+auto actorIDListForActor(const ActorID ID) {
+  std::vector<ActorID> actorParts;
+
+  switch (ID) {
+    case 0:
+      actorParts.push_back(0);
+      actorParts.push_back(69);
+      break;
+
+    case 5: // player facing left
+    case 6: // player facing right
+      actorParts.push_back(5);
+      actorParts.push_back(6);
+      break;
+
+    case 45:
+    case 46:
+    case 47:
+    case 48:
+      actorParts.push_back(ID);
+      actorParts.push_back(44);
+      break;
+
+    case 50:
+      actorParts.push_back(51);
+      break;
+
+    case 58:
+      actorParts.push_back(58);
+      actorParts.push_back(59);
+      break;
+
+
+    case 67:
+      actorParts.push_back(67);
+      actorParts.push_back(70);
+      break;
+
+    case 130:
+      actorParts.push_back(260);
+      actorParts.push_back(130);
+      break;
+
+    case 171:
+    case 217:
+      actorParts.push_back(159);
+      break;
+
+    case 201:
+      actorParts.push_back(202);
+      break;
+
+    // Flying message ships
+    case 213:
+    case 214:
+    case 215:
+    case 216:
+    case 220:
+      actorParts.push_back(107);
+      actorParts.push_back(108);
+      actorParts.push_back(109);
+      actorParts.push_back(110);
+      actorParts.push_back(111);
+      actorParts.push_back(112);
+      actorParts.push_back(113);
+      actorParts.push_back(ID);
+      break;
+
+    default:
+      actorParts.push_back(ID);
+      break;
+  }
+  return actorParts;
+}
+
+
+void configureSprite(Sprite& sprite, const ActorID actorID) {
+  if (actorID == 5 || actorID == 6) {
+    for (int i=0; i<39; ++i) {
+      sprite.mFrames[i].mDrawOffset.x -= 1;
+    }
+  }
+
+  switch (actorID) {
+    case 0:
+      sprite.mFramesToRender = {0};
+      break;
+
+    case 62:
+      sprite.mFramesToRender = {1, 0};
+      break;
+
+    case 67:
+      sprite.mFramesToRender = {0};
+      break;
+
+    case 93:
+      sprite.mFramesToRender = {1, 3};
+      break;
+
+    case 115:
+      sprite.mFramesToRender = {0, 4};
+      break;
+
+    case 150:
+      sprite.mFramesToRender = {1};
+      break;
+
+    case 154:
+      sprite.mFramesToRender = {6};
+      break;
+
+    case 171:
+      sprite.mFramesToRender = {6};
+      break;
+
+    case 200:
+      sprite.mFramesToRender = {0, 2};
+      break;
+
+    case 209:
+      sprite.mFramesToRender = {5, 0};
+      break;
+
+    case 217:
+      sprite.mFramesToRender = {12};
+      break;
+
+    case 231:
+      sprite.mFramesToRender = {3};
+      break;
+
+    case 237:
+      sprite.mFramesToRender = {0, 1, 2, 3};
+      break;
+
+    case 279:
+      sprite.mFramesToRender = {0, 2};
+      break;
+  }
+}
+
+
+bool hasAssociatedSprite(const ActorID actorID) {
+  switch (actorID) {
+    default:
+      return true;
+
+    case 102:
+    case 106:
+    case 116:
+    case 137:
+    case 138:
+    case 141:
+    case 142:
+    case 143:
+    case 139:
+    case 221:
+    case 233:
+    case 234:
+    case 241:
+    case 250:
+    case 251:
+    case 254:
+      return false;
+  }
+}
+
+
+ActorID actorIdForBoxColor(const ContainerColor color) {
+  switch (color) {
+    case ContainerColor::White: return 161;
+    case ContainerColor::Green: return 162;
+    case ContainerColor::Red: return 163;
+    case ContainerColor::Blue: return 164;
+  }
+
+  assert(false);
+  return 161;
+}
+
+} // namespace
+
+
+template<typename... Args>
+void EntityFactory::configureItemContainer(
+  ex::Entity entity,
+  const ContainerColor color,
+  const int givenScore,
+  Args&&... components
+) {
+  auto physicalProperties = Physical{{0.0f, 0.0f}, true};
+  auto activation = ActivationSettings{
+    ActivationSettings::Policy::AlwaysAfterFirstActivation};
+
+  // We don't assign a position here, as the box might move before being opened.
+  // The item container's onHit callback will set the spawned entity's position
+  // when the container is opened.
+  components::ItemContainer container;
+  container.mContainedComponents = {
+    ComponentHolder{physicalProperties},
+    ComponentHolder{activation},
+    ComponentHolder{*entity.component<Sprite>()}
+  };
+  boost::fusion::for_each(
+    std::make_tuple(components...),
+    [&container](auto component) {
+      container.mContainedComponents.emplace_back(std::move(component));
+    });
+
+  entity.remove<Sprite>();
+
+  auto boxSprite = createSpriteForId(actorIdForBoxColor(color));
+  entity.assign<Sprite>(boxSprite);
+  entity.assign<components::ItemContainer>(container);
+  entity.assign<Shootable>(1, givenScore);
+  addDefaultPhysical(entity, engine::inferBoundingBox(boxSprite.mFrames[0]));
+}
+
+
+void EntityFactory::configureEntity(
   ex::Entity entity,
   const ActorID actorID,
   const BoundingBox& boundingBox,
@@ -236,90 +458,134 @@ void configureEntity(
     // White boxes
     // ----------------------------------------------------------------------
     case 37: // Circuit board
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CircuitBoard;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::White,
+          100,
+          item,
+          boundingBox);
       }
       break;
 
     case 121: // Blue key
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::BlueKey;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::White,
+          100,
+          item,
+          boundingBox);
+
+        //auto boxSprite = createSpriteForId(data::ActorID{161});
+        //makeItemContainer(entity, {ComponentHolder{item}}, boxSprite, boundingBox);
+        //entity.assign<Shootable>(1, 100);
       }
       break;
 
     case 53: // Rapid fire item
-      // 100 pts when box is shot
       {
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::RapidFire;
         item.mGivenPlayerBuff = PlayerBuff::RapidFire;
-        entity.assign<CollectableItem>(item);
+        auto animation = Animated{1};
+        configureItemContainer(
+          entity,
+          ContainerColor::White,
+          100,
+          item,
+          animation,
+          boundingBox);
       }
-      entity.assign<Animated>(1);
-      addDefaultPhysical(entity, boundingBox);
       break;
 
     case 114: // Cloaking device
-      // 100 pts when box is shot
-      entity.assign<Animated>(1);
       {
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CloakingDevice;
         item.mGivenPlayerBuff = PlayerBuff::Cloak;
-        entity.assign<CollectableItem>(item);
+        auto animation = Animated{1};
+        configureItemContainer(
+          entity,
+          ContainerColor::White,
+          100,
+          item,
+          animation,
+          boundingBox);
+
+        //auto boxSprite = createSpriteForId(data::ActorID{161});
+        //makeItemContainer(entity, {ComponentHolder{item}, ComponentHolder{animation}}, boxSprite, boundingBox);
+        //entity.assign<Shootable>(1, 100);
       }
-      addDefaultPhysical(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
     // Red boxes
     // ----------------------------------------------------------------------
+    case 42: // Napalm Bomb
+      {
+        const auto originalDrawOrder = entity.component<Sprite>()->mDrawOrder;
+        configureItemContainer(
+          entity,
+          ContainerColor::Red,
+          0,
+          Animated{1},
+          boundingBox);
+        entity.component<Sprite>()->mDrawOrder = originalDrawOrder;
+      }
+      break;
+
     case 168: // Soda can
-      // 100 pts when box is shot
-      entity.assign<Animated>(1, 0, 5);
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100; // 2000 if shot and grabbed while flying
         item.mGivenHealth = 1;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Red,
+          100,
+          item,
+          Animated{1, 0, 5},
+          boundingBox);
       }
       break;
 
     case 174: // 6-pack soda
-      // 100 pts when box is shot
-      entity.assign<Shootable>(1, 10000);
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100;
         item.mGivenHealth = 6;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Red,
+          100,
+          item,
+          Shootable{1, 10000},
+          boundingBox);
       }
       break;
 
     case 201: // Turkey
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         // BUG in the original game: The turkey triggers a floating '100', but
         // doesn't actually give the player any score.
         //item.mGivenScore = 100;
         item.mGivenHealth = 1; // 2 if cooked
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Red,
+          100,
+          item,
+          boundingBox);
       }
       break;
 
@@ -327,45 +593,57 @@ void configureEntity(
     // Green boxes
     // ----------------------------------------------------------------------
     case 19: // Rocket launcher
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Rocket;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Green,
+          100,
+          item,
+          boundingBox);
       }
       break;
 
     case 20: // Flame thrower
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::FlameThrower;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Green,
+          100,
+          item,
+          boundingBox);
       }
       break;
 
     case 22: // Default weapon
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenWeapon = WeaponType::Normal;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Green,
+          100,
+          item,
+          boundingBox);
       }
       break;
 
     case 23: // Laser
-      // 100 pts when box is shot
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Laser;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Green,
+          100,
+          item,
+          boundingBox);
       }
       break;
 
@@ -373,162 +651,230 @@ void configureEntity(
     // Blue boxes
     // ----------------------------------------------------------------------
     case 28: // Health molecule
-      entity.assign<Animated>(1);
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500; // 10000 when at full health
         item.mGivenHealth = 1;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          Animated{1},
+          boundingBox);
       }
       break;
 
     case 155: // Collectable letter N in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::N;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 156: // Collectable letter U in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::U;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 157: // Collectable letter K in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::K;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 158: // Collectable letter E in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::E;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 187: // Collectable letter M in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::M;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 160: // Video game cartridge in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 172: // Sunglasses in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 100;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 173: // Phone in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2000;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 181: // Boom box in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 182: // Game disk in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 183: // TV in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1500;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 184: // Camera in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 2500;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 185: // Computer in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 3000;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 186: // CD in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 274: // T-Shirt in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 5000;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
     case 275: // Video tape in blue box
-      addDefaultPhysical(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        entity.assign<CollectableItem>(item);
+        configureItemContainer(
+          entity,
+          ContainerColor::Blue,
+          0,
+          item,
+          boundingBox);
       }
       break;
 
@@ -874,174 +1220,5 @@ void configureEntity(
 
     default:
       break;
-  }
-}
-
-
-auto actorIDListForActor(const ActorID ID) {
-  std::vector<ActorID> actorParts;
-
-  switch (ID) {
-    case 0:
-      actorParts.push_back(0);
-      actorParts.push_back(69);
-      break;
-
-    case 5: // player facing left
-    case 6: // player facing right
-      actorParts.push_back(5);
-      actorParts.push_back(6);
-      break;
-
-    case 45:
-    case 46:
-    case 47:
-    case 48:
-      actorParts.push_back(ID);
-      actorParts.push_back(44);
-      break;
-
-    case 50:
-      actorParts.push_back(51);
-      break;
-
-    case 58:
-      actorParts.push_back(58);
-      actorParts.push_back(59);
-      break;
-
-
-    case 67:
-      actorParts.push_back(67);
-      actorParts.push_back(70);
-      break;
-
-    case 130:
-      actorParts.push_back(260);
-      actorParts.push_back(130);
-      break;
-
-    case 171:
-    case 217:
-      actorParts.push_back(159);
-      break;
-
-    case 201:
-      actorParts.push_back(202);
-      break;
-
-    // Flying message ships
-    case 213:
-    case 214:
-    case 215:
-    case 216:
-    case 220:
-      actorParts.push_back(107);
-      actorParts.push_back(108);
-      actorParts.push_back(109);
-      actorParts.push_back(110);
-      actorParts.push_back(111);
-      actorParts.push_back(112);
-      actorParts.push_back(113);
-      actorParts.push_back(ID);
-      break;
-
-    default:
-      actorParts.push_back(ID);
-      break;
-  }
-  return actorParts;
-}
-
-
-void configureSprite(Sprite& sprite, const ActorID actorID) {
-  if (actorID == 5 || actorID == 6) {
-    for (int i=0; i<39; ++i) {
-      sprite.mFrames[i].mDrawOffset.x -= 1;
-    }
-  }
-
-  switch (actorID) {
-    case 0:
-      sprite.mFramesToRender = {0};
-      break;
-
-    case 62:
-      sprite.mFramesToRender = {1, 0};
-      break;
-
-    case 67:
-      sprite.mFramesToRender = {0};
-      break;
-
-    case 93:
-      sprite.mFramesToRender = {1, 3};
-      break;
-
-    case 115:
-      sprite.mFramesToRender = {0, 4};
-      break;
-
-    case 150:
-      sprite.mFramesToRender = {1};
-      break;
-
-    case 154:
-      sprite.mFramesToRender = {6};
-      break;
-
-    case 171:
-      sprite.mFramesToRender = {6};
-      break;
-
-    case 200:
-      sprite.mFramesToRender = {0, 2};
-      break;
-
-    case 209:
-      sprite.mFramesToRender = {5, 0};
-      break;
-
-    case 217:
-      sprite.mFramesToRender = {12};
-      break;
-
-    case 231:
-      sprite.mFramesToRender = {3};
-      break;
-
-    case 237:
-      sprite.mFramesToRender = {0, 1, 2, 3};
-      break;
-
-    case 279:
-      sprite.mFramesToRender = {0, 2};
-      break;
-  }
-}
-
-
-bool hasAssociatedSprite(const ActorID actorID) {
-  switch (actorID) {
-    default:
-      return true;
-
-    case 102:
-    case 106:
-    case 116:
-    case 137:
-    case 138:
-    case 141:
-    case 142:
-    case 143:
-    case 139:
-    case 221:
-    case 233:
-    case 234:
-    case 241:
-    case 250:
-    case 251:
-    case 254:
-      return false;
   }
 }

@@ -85,6 +85,8 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/item_container.cpp
+    game_logic/item_container.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
