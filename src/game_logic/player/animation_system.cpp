@@ -175,6 +175,15 @@ void AnimationSystem::update(
     }
   }
 
+  // Handle interacting state
+  // ----------------------------------
+  if (state.mInteractionLockFramesLeft) {
+    --state.mInteractionLockFramesLeft;
+    if (state.mInteractionLockFramesLeft <= 0) {
+      state.mIsInteracting = false;
+    }
+  }
+
   // Update sprite's animation frame
   // ----------------------------------
 

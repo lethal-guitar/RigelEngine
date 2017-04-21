@@ -173,7 +173,11 @@ void PlayerInteractionSystem::performInteraction(
       break;
 
     case InteractableType::ForceFieldCardReader:
-      interaction::disableForceField(es, interactable, mpPlayerModel);
+      {
+        interaction::disableForceField(es, interactable, mpPlayerModel);
+        auto& state = *mPlayer.component<PlayerControlled>();
+        state.enterTimedInteractionLock();
+      }
       break;
   }
 }

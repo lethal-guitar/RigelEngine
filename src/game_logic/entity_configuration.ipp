@@ -556,10 +556,11 @@ void configureEntity(
     // Enemies
     // ----------------------------------------------------------------------
 
-    case 0: // Cylindrical robot with blinking 'head'
+    case 0: // Cylindrical robot with blinking 'head', aka hover-bot
       entity.assign<Shootable>(1 + difficultyOffset, 150);
-      entity.assign<PlayerDamaging>(1);
-      entity.assign<BoundingBox>(boundingBox);
+      addDefaultPhysical(entity, boundingBox);
+      entity.component<Sprite>()->mShow = false;
+      entity.assign<ai::components::HoverBot>();
       break;
 
     case 49: // Bouncing robot with big eye
@@ -593,8 +594,6 @@ void configureEntity(
       entity.assign<Shootable>(6 + difficultyOffset, 1500);
       entity.assign<PlayerDamaging>(1);
       entity.assign<ai::components::SlimeBlob>();
-      entity.assign<ActivationSettings>(
-        ActivationSettings::Policy::AlwaysAfterFirstActivation);
       addDefaultPhysical(entity, boundingBox);
       entity.component<Physical>()->mGravityAffected = false;
       break;
@@ -627,6 +626,13 @@ void configureEntity(
       entity.assign<Shootable>(8, 2000);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 115: // hover bot generator
+      entity.assign<Animated>(1, 0, 3);
+      entity.assign<Shootable>(20, 2500);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ai::components::HoverBotSpawnMachine>();
       break;
 
     case 134: // Walking skeleton
@@ -876,6 +882,11 @@ auto actorIDListForActor(const ActorID ID) {
   std::vector<ActorID> actorParts;
 
   switch (ID) {
+    case 0:
+      actorParts.push_back(0);
+      actorParts.push_back(69);
+      break;
+
     case 5: // player facing left
     case 6: // player facing right
       actorParts.push_back(5);
@@ -952,7 +963,7 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
   switch (actorID) {
     case 0:
-      sprite.mFramesToRender = {0, 6};
+      sprite.mFramesToRender = {0};
       break;
 
     case 62:
