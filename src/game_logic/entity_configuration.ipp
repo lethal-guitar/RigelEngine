@@ -974,7 +974,8 @@ void EntityFactory::configureEntity(
     case 134: // Walking skeleton
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ai::components::Skeleton>();
+      addDefaultPhysical(entity, boundingBox);
       break;
 
     case 151: // Floating ball, opens up and shoots lasers
