@@ -142,7 +142,6 @@ int messengerDroneTypeIndex(const ActorID id) {
 
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
-  using Orientation = BlueGuard::Orientation;
 
   if (id == 217) {
     return BlueGuard::typingOnTerminal();

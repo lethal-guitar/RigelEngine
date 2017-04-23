@@ -34,6 +34,7 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel { namespace game_logic { namespace ai {
 
 using namespace engine::components;
+using namespace engine::orientation;
 using engine::CollisionChecker;
 using game_logic::components::Shootable;
 
@@ -57,10 +58,8 @@ const auto CONTRACT_UP_ANIM_END = 16;
 const auto STRETCH_DOWN_ANIM_END = 14;
 
 
-int toOffset(const components::SlimeBlob::Orientation orientation) {
-  return orientation == components::SlimeBlob::Orientation::Right
-    ? SPRITE_ORIENTATION_OFFSET
-    : 0;
+int toOffset(const Orientation orientation) {
+  return orientation == Orientation::Right ? SPRITE_ORIENTATION_OFFSET : 0;
 }
 
 }
@@ -134,7 +133,6 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
       const engine::components::Active&
     ) {
       using namespace components::detail;
-      using Orientation = components::SlimeBlob::Orientation;
 
       const auto playerPosition = adjustedPlayerPosition();
       const auto& bbox = *entity.component<BoundingBox>();
@@ -160,7 +158,8 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
           if (movingTowardsPlayer) {
             if (newAnimFrame % 2 == 1) {
               const auto walkedSuccessfully =
-                mpCollisionChecker->walkEntity(entity, isFacingLeft ? -1 : 1);
+                mpCollisionChecker->walkEntity(
+                  entity, toMovement(blobState.mOrientation));
 
               if (!walkedSuccessfully) {
                 blobState.mState = Idle{};

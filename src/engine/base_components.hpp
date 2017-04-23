@@ -58,7 +58,30 @@ struct ActivationSettings {
   bool mHasBeenActivated = false;
 };
 
+
+enum class Orientation {
+  Left,
+  Right
+};
+
 }
 
+
+namespace orientation {
+
+inline components::Orientation opposite(
+  const components::Orientation orientation
+) {
+  return orientation == components::Orientation::Left
+    ? components::Orientation::Right
+    : components::Orientation::Left;
+}
+
+
+inline int toMovement(const components::Orientation orientation) {
+  return orientation == components::Orientation::Left ? -1 : 1;
+}
+
+}
 
 }}

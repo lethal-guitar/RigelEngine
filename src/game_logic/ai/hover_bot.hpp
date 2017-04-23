@@ -18,6 +18,7 @@
 
 #include "base/boost_variant.hpp"
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -40,34 +41,28 @@ struct HoverBotSpawnMachine {
 
 namespace detail {
 
-enum class Orientation {
-  Left,
-  Right
-};
-
-
 struct TeleportingIn {
   int mFramesElapsed = 0;
 };
 
 
 struct Moving {
-  Moving(const Orientation orientation)
+  Moving(const engine::components::Orientation orientation)
     : mOrientation(orientation)
   {
   }
 
-  Orientation mOrientation;
+  engine::components::Orientation mOrientation;
 };
 
 
 struct Reorientation {
-  Reorientation(const Orientation targetOrientation)
+  Reorientation(const engine::components::Orientation targetOrientation)
     : mTargetOrientation(targetOrientation)
   {
   }
 
-  Orientation mTargetOrientation;
+  engine::components::Orientation mTargetOrientation;
   int mStep = 0;
 };
 

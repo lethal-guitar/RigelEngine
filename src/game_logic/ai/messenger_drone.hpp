@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -46,19 +47,14 @@ struct MessengerDrone {
     FlyOut
   };
 
-  enum class Orientation {
-    Left,
-    Right
-  };
-
-
   explicit MessengerDrone(const Message message)
     : mMessage(message)
   {
   }
 
   State mState = State::AwaitActivation;
-  Orientation mOrientation = Orientation::Left;
+  engine::components::Orientation mOrientation =
+    engine::components::Orientation::Left;
   Message mMessage;
 
   std::size_t mMessageStep = 0;

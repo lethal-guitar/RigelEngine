@@ -133,14 +133,10 @@ void MessengerDroneSystem::update(
   entityx::EventManager& events,
   const entityx::TimeDelta dt
 ) {
-  using engine::components::Active;
-  using engine::components::Animated;
-  using engine::components::AutoDestroy;
-  using engine::components::Sprite;
-  using engine::components::WorldPosition;
+  using namespace engine::components;
+  using namespace engine::orientation;
 
   using State = components::MessengerDrone::State;
-  using Orientation = components::MessengerDrone::Orientation;
 
   const auto& playerPos = *mPlayer.component<WorldPosition>();
 
@@ -153,12 +149,9 @@ void MessengerDroneSystem::update(
       const engine::components::Active&
     ) {
       const auto flyForward = [&state, &position]() {
-        const auto movementDirection =
-          state.mOrientation == Orientation::Left ? -1 : 1;
-
         // The messenger drone has no collision detection, so we can move
         // directly without using physics/velocity.
-        position.x += movementDirection * 2;
+        position.x += toMovement(state.mOrientation) * 2;
       };
 
       if (state.mState == State::AwaitActivation) {
