@@ -203,7 +203,7 @@ entityx::Entity EntityFactory::createActor(
   auto& sprite = *entity.component<Sprite>();
   const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 
-  configureEntity(entity, id, boundingBox, mDifficulty);
+  configureEntity(entity, id, boundingBox);
 
   return entity;
 }
@@ -303,7 +303,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       entity.assign<Sprite>(sprite);
     }
 
-    configureEntity(entity, actor.mID, boundingBox, mDifficulty);
+    configureEntity(entity, actor.mID, boundingBox);
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {

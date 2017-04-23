@@ -112,8 +112,7 @@ private:
   void configureEntity(
     entityx::Entity entity,
     const data::ActorID actorID,
-    const engine::components::BoundingBox& boundingBox,
-    const data::Difficulty difficulty);
+    const engine::components::BoundingBox& boundingBox);
 
   template<typename... Args>
   void configureItemContainer(

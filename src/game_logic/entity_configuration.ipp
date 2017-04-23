@@ -376,11 +376,10 @@ void EntityFactory::configureItemContainer(
 void EntityFactory::configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  const BoundingBox& boundingBox,
-  const Difficulty difficulty
+  const BoundingBox& boundingBox
 ) {
-  const auto difficultyOffset = difficulty != Difficulty::Easy
-    ? (difficulty == Difficulty::Hard ? 2 : 1)
+  const auto difficultyOffset = mDifficulty != Difficulty::Easy
+    ? (mDifficulty == Difficulty::Hard ? 2 : 1)
     : 0;
 
   switch (actorID) {
