@@ -26,6 +26,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "game_logic/ai/blue_guard.hpp"
+#include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
@@ -35,6 +36,7 @@
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/teleporter.hpp"
 #include "game_logic/map_scroll_system.hpp"
@@ -132,6 +134,10 @@ struct IngameMode::Systems {
         pEntityFactory,
         pServiceProvider,
         pRandomGenerator)
+    , mHoverBotSystem(
+        playerEntity,
+        &mCollisionChecker,
+        pEntityFactory)
     , mSlimeBlobSystem(
         playerEntity,
         &mCollisionChecker,
@@ -148,6 +154,7 @@ struct IngameMode::Systems {
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
+  game_logic::ai::HoverBotSystem mHoverBotSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
 };
 
@@ -287,10 +294,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mAccumulatedTime >= timeForOneFrame;
     mAccumulatedTime -= timeForOneFrame
   ) {
-    updateGameLogic(timeForOneFrame);
-    engine::updateAnimatedSprites(mEntities.entities);
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
+    engine::updateAnimatedSprites(mEntities.entities);
     mHudRenderer.updateAnimation();
+
+    updateGameLogic(timeForOneFrame);
 
     if (mEarthQuakeEffect) {
       screenShakeOffsetX = mEarthQuakeEffect->update();
@@ -348,6 +356,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // A.I. logic update
   // ----------------------------------------------------------------------
   mpSystems->mBlueGuardSystem.update(mEntities.entities);
+  mpSystems->mHoverBotSystem.update(mEntities.entities);
   mEntities.systems.update<ai::LaserTurretSystem>(dt);
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
   mEntities.systems.update<ai::PrisonerSystem>(dt);
@@ -487,6 +496,7 @@ void IngameMode::loadLevel(
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {
       mpSystems->mBlueGuardSystem.onEntityHit(entity);
+      item_containers::onEntityHit(entity, mEntities.entities);
       mpSystems->mSlimeBlobSystem.onEntityHit(entity);
       mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);

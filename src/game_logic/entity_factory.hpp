@@ -38,6 +38,14 @@ namespace rigel { namespace loader { class ActorImagePackage; }}
 
 namespace rigel { namespace game_logic {
 
+enum class ContainerColor {
+  Red,
+  Green,
+  White,
+  Blue
+};
+
+
 enum class ProjectileType {
   PlayerRegularShot,
   PlayerLaserShot,
@@ -100,6 +108,19 @@ private:
   using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
 
   engine::components::Sprite createSpriteForId(const data::ActorID actorID);
+
+  void configureEntity(
+    entityx::Entity entity,
+    const data::ActorID actorID,
+    const engine::components::BoundingBox& boundingBox,
+    const data::Difficulty difficulty);
+
+  template<typename... Args>
+  void configureItemContainer(
+    entityx::Entity entity,
+    ContainerColor color,
+    int givenScore,
+    Args&&... components);
 
   const engine::OwningTexture& getOrCreateTexture(
     const IdAndFrameNr& textureId);

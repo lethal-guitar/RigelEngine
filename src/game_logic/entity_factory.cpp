@@ -22,6 +22,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/ai/blue_guard.hpp"
+#include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
@@ -33,11 +34,18 @@
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
+#include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 
+RIGEL_DISABLE_WARNINGS
+#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/fusion/include/for_each.hpp>
+RIGEL_RESTORE_WARNINGS
+
+#include <tuple>
 #include <utility>
 
 
@@ -76,10 +84,11 @@ void addDefaultPhysical(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
 }
 
+}
+
 
 #include "entity_configuration.ipp"
 
-}
 
 EntityFactory::EntityFactory(
   engine::Renderer* pRenderer,

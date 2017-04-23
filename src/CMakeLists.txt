@@ -59,6 +59,8 @@ set(core_sources
     engine/visual_components.hpp
     game_logic/ai/blue_guard.cpp
     game_logic/ai/blue_guard.hpp
+    game_logic/ai/hover_bot.cpp
+    game_logic/ai/hover_bot.hpp
     game_logic/ai/laser_turret.cpp
     game_logic/ai/laser_turret.hpp
     game_logic/ai/messenger_drone.cpp
@@ -83,6 +85,8 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/item_container.cpp
+    game_logic/item_container.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
