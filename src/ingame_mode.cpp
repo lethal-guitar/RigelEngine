@@ -287,10 +287,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mAccumulatedTime >= timeForOneFrame;
     mAccumulatedTime -= timeForOneFrame
   ) {
-    updateGameLogic(timeForOneFrame);
-    engine::updateAnimatedSprites(mEntities.entities);
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
+    engine::updateAnimatedSprites(mEntities.entities);
     mHudRenderer.updateAnimation();
+
+    updateGameLogic(timeForOneFrame);
 
     if (mEarthQuakeEffect) {
       screenShakeOffsetX = mEarthQuakeEffect->update();
