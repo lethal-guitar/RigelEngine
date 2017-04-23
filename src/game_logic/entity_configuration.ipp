@@ -482,10 +482,6 @@ void EntityFactory::configureEntity(
           100,
           item,
           boundingBox);
-
-        //auto boxSprite = createSpriteForId(data::ActorID{161});
-        //makeItemContainer(entity, {ComponentHolder{item}}, boxSprite, boundingBox);
-        //entity.assign<Shootable>(1, 100);
       }
       break;
 
@@ -520,10 +516,6 @@ void EntityFactory::configureEntity(
           item,
           animation,
           boundingBox);
-
-        //auto boxSprite = createSpriteForId(data::ActorID{161});
-        //makeItemContainer(entity, {ComponentHolder{item}, ComponentHolder{animation}}, boxSprite, boundingBox);
-        //entity.assign<Shootable>(1, 100);
       }
       break;
 
