@@ -28,6 +28,7 @@
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/rocket_turret.hpp"
 #include "game_logic/ai/security_camera.hpp"
+#include "game_logic/ai/skeleton.hpp"
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
@@ -203,7 +204,7 @@ entityx::Entity EntityFactory::createActor(
   auto& sprite = *entity.component<Sprite>();
   const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 
-  configureEntity(entity, id, boundingBox, mDifficulty);
+  configureEntity(entity, id, boundingBox);
 
   return entity;
 }
@@ -303,7 +304,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       entity.assign<Sprite>(sprite);
     }
 
-    configureEntity(entity, actor.mID, boundingBox, mDifficulty);
+    configureEntity(entity, actor.mID, boundingBox);
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {

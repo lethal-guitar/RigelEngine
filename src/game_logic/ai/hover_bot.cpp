@@ -32,6 +32,7 @@ namespace rigel { namespace game_logic { namespace ai {
 
 using namespace components::detail;
 using namespace engine::components;
+using namespace engine::orientation;
 
 
 namespace {
@@ -42,17 +43,6 @@ const auto BOT_SPAWN_OFFSET = base::Vector{1, 0};
 constexpr auto TELEPORT_ANIMATION_START_FRAME = 12;
 constexpr auto TELEPORT_ANIMATION_END_FRAME =
   TELEPORT_ANIMATION_START_FRAME + 6;
-
-Orientation opposite(const Orientation orientation) {
-  return orientation == Orientation::Left
-    ? Orientation::Right
-    : Orientation::Left;
-}
-
-
-int toMovement(const Orientation orientation) {
-  return orientation == Orientation::Left ? -1 : 1;
-}
 
 } // namespace
 

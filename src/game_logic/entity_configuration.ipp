@@ -142,7 +142,6 @@ int messengerDroneTypeIndex(const ActorID id) {
 
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
-  using Orientation = BlueGuard::Orientation;
 
   if (id == 217) {
     return BlueGuard::typingOnTerminal();
@@ -376,11 +375,10 @@ void EntityFactory::configureItemContainer(
 void EntityFactory::configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  const BoundingBox& boundingBox,
-  const Difficulty difficulty
+  const BoundingBox& boundingBox
 ) {
-  const auto difficultyOffset = difficulty != Difficulty::Easy
-    ? (difficulty == Difficulty::Hard ? 2 : 1)
+  const auto difficultyOffset = mDifficulty != Difficulty::Easy
+    ? (mDifficulty == Difficulty::Hard ? 2 : 1)
     : 0;
 
   switch (actorID) {
@@ -976,7 +974,8 @@ void EntityFactory::configureEntity(
     case 134: // Walking skeleton
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ai::components::Skeleton>();
+      addDefaultPhysical(entity, boundingBox);
       break;
 
     case 151: // Floating ball, opens up and shoots lasers

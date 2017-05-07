@@ -31,17 +31,13 @@
 
 namespace rigel { namespace game_logic { namespace ai {
 
+using namespace engine::components;
+using namespace engine::orientation;
 using engine::CollisionChecker;
-using engine::components::Active;
-using engine::components::BoundingBox;
-using engine::components::Sprite;
-using engine::components::WorldPosition;
 using game_logic::components::PlayerControlled;
 
 
 namespace {
-
-using Orientation = components::BlueGuard::Orientation;
 
 const auto SPRITE_ORIENTATION_OFFSET = 6;
 const auto TYPING_BASE_FRAME = 12;
@@ -93,15 +89,6 @@ base::Vector offsetForShot(const components::BlueGuard& state) {
   const auto offsetX = facingLeft ? -1 : 3;
 
   return {offsetX, offsetY};
-}
-
-
-auto oppositeOrientation(const Orientation orientation) {
-  if (orientation == Orientation::Left) {
-    return Orientation::Right;
-  }
-
-  return Orientation::Left;
 }
 
 }
@@ -205,8 +192,7 @@ void BlueGuardSystem::updateGuard(
     *mPlayer.component<game_logic::components::PlayerControlled>();
 
   const auto walkOneStep = [this, &state, &guardEntity]() {
-    const auto facingLeft = state.mOrientation == Orientation::Left;
-    const auto walkAmount = facingLeft ? -1 : 1;
+    const auto walkAmount = toMovement(state.mOrientation);
     return mpCollisionChecker->walkEntity(guardEntity, walkAmount);
   };
 
@@ -262,7 +248,7 @@ void BlueGuardSystem::updateGuard(
 
       ++state.mStepsWalked;
       if (state.mStepsWalked >= 20 || !walkedSuccessfully) {
-        state.mOrientation = oppositeOrientation(state.mOrientation);
+        state.mOrientation = opposite(state.mOrientation);
 
         // After changing orientation, walk one step in the new direction on
         // the same frame. The original code used a jump to accomplish this,

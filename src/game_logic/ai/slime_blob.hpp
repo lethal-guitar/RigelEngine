@@ -19,6 +19,7 @@
 #include "base/boost_variant.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -68,13 +69,9 @@ struct SlimeContainer {
 
 
 struct SlimeBlob {
-  enum class Orientation {
-    Left,
-    Right
-  };
-
   detail::StateT mState = detail::Idle{};
-  Orientation mOrientation = Orientation::Left;
+  engine::components::Orientation mOrientation =
+    engine::components::Orientation::Left;
 };
 
 } // namespace components

@@ -16,84 +16,39 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine { class CollisionChecker; }}
-namespace rigel { namespace engine { namespace components { struct Sprite; }}}
-namespace rigel { namespace game_logic { class EntityFactory; }}
 
 
 namespace rigel { namespace game_logic { namespace ai {
 
 namespace components {
 
-struct HoverBotSpawnMachine {
-  int mSpawnsRemaining = 30;
-  int mNextSpawnCountdown = 0;
+struct Skeleton {
+  boost::optional<engine::components::Orientation> mOrientation;
 };
-
-
-namespace detail {
-
-struct TeleportingIn {
-  int mFramesElapsed = 0;
-};
-
-
-struct Moving {
-  Moving(const engine::components::Orientation orientation)
-    : mOrientation(orientation)
-  {
-  }
-
-  engine::components::Orientation mOrientation;
-};
-
-
-struct Reorientation {
-  Reorientation(const engine::components::Orientation targetOrientation)
-    : mTargetOrientation(targetOrientation)
-  {
-  }
-
-  engine::components::Orientation mTargetOrientation;
-  int mStep = 0;
-};
-
-} // namespace detail
-
-
-using HoverBot =
-  boost::variant<detail::TeleportingIn, detail::Moving, detail::Reorientation>;
 
 }
 
 
-class HoverBotSystem {
+class SkeletonSystem {
 public:
-  HoverBotSystem(
+  SkeletonSystem(
     entityx::Entity player,
-    engine::CollisionChecker* pCollisionChecker,
-    EntityFactory* pEntityFactory);
+    engine::CollisionChecker* pCollisionChecker);
 
   void update(entityx::EntityManager& es);
 
 private:
-  void updateReorientation(
-    components::detail::Reorientation& state,
-    components::HoverBot& robotState,
-    engine::components::Sprite& sprite);
-
-private:
   entityx::Entity mPlayer;
   engine::CollisionChecker* mpCollisionChecker;
-  EntityFactory* mpEntityFactory;
   bool mIsOddFrame = false;
 };
 

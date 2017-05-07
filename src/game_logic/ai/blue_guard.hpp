@@ -40,26 +40,20 @@ namespace rigel { namespace game_logic { namespace ai {
 namespace components {
 
 struct BlueGuard {
-  // TODO: Create unified orientation component, and components to handle
-  // animation frame offset automatically
-  enum class Orientation {
-    Left,
-    Right
-  };
-
   static BlueGuard typingOnTerminal() {
     BlueGuard instance;
     instance.mTypingOnTerminal = true;
     return instance;
   }
 
-  static BlueGuard patrolling(const Orientation orientation) {
+  static BlueGuard patrolling(const engine::components::Orientation orientation) {
     BlueGuard instance;
     instance.mOrientation = orientation;
     return instance;
   }
 
-  Orientation mOrientation = Orientation::Left;
+  engine::components::Orientation mOrientation =
+    engine::components::Orientation::Left;
   int mStanceChangeCountdown = 0;
   int mStepsWalked = 0;
   bool mTypingOnTerminal = false;
