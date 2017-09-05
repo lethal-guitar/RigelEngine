@@ -352,7 +352,6 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // TODO: Move all player related systems into the player namespace
   mpSystems->mElevatorSystem.update(mEntities.entities, mCombinedInputState);
   mpSystems->mPlayerMovementSystem.update(mCombinedInputState);
-  mpSystems->mPlayerAttackSystem.update();
   mEntities.systems.update<PlayerInteractionSystem>(dt);
 
   mCombinedInputState = mInputState;
@@ -376,6 +375,11 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // Physics and other updates
   // ----------------------------------------------------------------------
   mEntities.systems.update<PhysicsSystem>(dt);
+
+  // Player attacks have to be processed after physics, because:
+  //  1. Player projectiles should spawn at the player's location
+  //  2. Player projectiles mustn't move on the frame they were spawned on
+  mpSystems->mPlayerAttackSystem.update();
 
   mEntities.systems.update<player::DamageSystem>(dt);
   mEntities.systems.update<DamageInflictionSystem>(dt);
