@@ -17,7 +17,6 @@
 #include "music_loader.hpp"
 
 #include "data/game_traits.hpp"
-#include "data/song.hpp"
 #include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
 
@@ -45,6 +44,17 @@ data::ImfCommand readCommand(LeStreamReader& reader) {
 
 }
 
+data::Song loadSong(const ByteBuffer& imfData) {
+  data::Song song;
+
+  LeStreamReader reader(imfData);
+  while (reader.hasData()) {
+    song.push_back(readCommand(reader));
+  }
+
+  return song;
+}
+
 
 data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
   assert(sampleRate > 0);
@@ -59,9 +69,8 @@ data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
   const auto outputSamplesPerImfTick =
     static_cast<double>(sampleRate) / data::GameTraits::musicPlaybackRate;
 
-  LeStreamReader reader(imfData);
-  while (reader.hasData()) {
-    const auto entry = readCommand(reader);
+  const auto song = loadSong(imfData);
+  for (const auto& entry : song) {
     emulator.writeRegister(entry.reg, entry.value);
 
     if (entry.delay > 0) {
