@@ -103,7 +103,7 @@ SoundSystem::SoundSystem() {
     return Mix_OpenAudio(
       SAMPLE_RATE,
       MIX_DEFAULT_FORMAT,
-      1, // stereo
+      1, // mono
       BUFFER_SIZE);
   });
 }
