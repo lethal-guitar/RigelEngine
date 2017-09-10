@@ -17,11 +17,38 @@
 #pragma once
 
 #include "data/song.hpp"
-#include "loader/byte_buffer.hpp"
+#include "loader/adlib_emulator.hpp"
+
+#include <atomic>
+#include <mutex>
 
 
-namespace rigel { namespace loader {
+namespace rigel { namespace engine {
 
-data::Song loadSong(const ByteBuffer& imfData);
+class ImfPlayer {
+public:
+  explicit ImfPlayer(int sampleRate);
+  ImfPlayer(const ImfPlayer&) = delete;
+  ImfPlayer(ImfPlayer&&) = delete;
+
+  ImfPlayer& operator=(const ImfPlayer&) = delete;
+  ImfPlayer& operator=(ImfPlayer&&) = delete;
+
+  void playSong(data::Song&& song);
+
+  void render(std::int16_t* pBuffer, std::size_t samplesRequired);
+
+private:
+  loader::AdlibEmulator mEmulator;
+  std::mutex mAudioLock;
+  data::Song mNextSongData;
+
+  data::Song mSongData;
+  data::Song::const_iterator miNextCommand;
+  std::size_t mSamplesAvailable = 0;
+  int mSampleRate;
+
+  std::atomic<bool> mSongSwitchPending;
+};
 
 }}

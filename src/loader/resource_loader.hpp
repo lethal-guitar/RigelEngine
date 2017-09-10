@@ -19,6 +19,7 @@
 #include "data/audio_buffer.hpp"
 #include "data/image.hpp"
 #include "data/movie.hpp"
+#include "data/song.hpp"
 #include "data/sound_ids.hpp"
 #include "data/tile_attributes.hpp"
 #include "loader/actor_image_package.hpp"
@@ -53,7 +54,7 @@ public:
 
   TileSet loadCZone(const std::string& name) const;
   data::Movie loadMovie(const std::string& name) const;
-  data::AudioBuffer loadMusic(const std::string& name) const;
+  data::Song loadMusic(const std::string& name) const;
 
   data::AudioBuffer loadSound(const std::string& name) const;
 

@@ -76,18 +76,6 @@ void Game::run(const GameOptions& options) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
 
-  const auto preLoadSong = [this](const auto songFile) {
-    mLoadedSongs.emplace(
-      songFile,
-      mSoundSystem.addSong(mResources.loadMusic(songFile)));
-  };
-
-  preLoadSong("DUKEIIA.IMF");
-  preLoadSong("FANFAREA.IMF");
-  preLoadSong("MENUSNG2.IMF");
-  preLoadSong("OPNGATEA.IMF");
-  preLoadSong("RANGEA.IMF");
-
   mSoundSystem.reportMemoryUsage();
 
 
@@ -283,13 +271,7 @@ void Game::playMusic(const std::string& name) {
     return;
   }
 
-  auto loadedSongIter = mLoadedSongs.find(name);
-  if (loadedSongIter == mLoadedSongs.end()) {
-    const auto handle = mSoundSystem.addSong(mResources.loadMusic(name));
-    loadedSongIter = mLoadedSongs.emplace(name, handle).first;
-  }
-
-  mSoundSystem.playSong(loadedSongIter->second);
+  mSoundSystem.playSong(mResources.loadMusic(name));
 }
 
 

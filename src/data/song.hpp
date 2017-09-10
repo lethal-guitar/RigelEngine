@@ -14,33 +14,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "music_loader.hpp"
+#pragma once
 
-#include "loader/file_utils.hpp"
+#include <cstdint>
+#include <vector>
+
+namespace rigel { namespace data {
+
+struct ImfCommand {
+  std::uint8_t reg;
+  std::uint8_t value;
+  std::uint16_t delay;
+};
 
 
-namespace rigel { namespace loader {
-
-namespace {
-
-data::ImfCommand readCommand(LeStreamReader& reader) {
-  return {
-    reader.readU8(),
-    reader.readU8(),
-    reader.readU16()};
-}
-
-}
-
-data::Song loadSong(const ByteBuffer& imfData) {
-  data::Song song;
-
-  LeStreamReader reader(imfData);
-  while (reader.hasData()) {
-    song.push_back(readCommand(reader));
-  }
-
-  return song;
-}
+using Song = std::vector<ImfCommand>;
 
 }}

@@ -14,6 +14,7 @@ set(core_sources
     data/map.cpp
     data/map.hpp
     data/player_data.hpp
+    data/song.hpp
     data/sound_ids.hpp
     data/tile_attributes.cpp
     data/tile_attributes.hpp
@@ -29,6 +30,8 @@ set(core_sources
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
+    engine/imf_player.cpp
+    engine/imf_player.hpp
     engine/life_time_components.hpp
     engine/life_time_system.cpp
     engine/life_time_system.hpp
@@ -113,6 +116,7 @@ set(core_sources
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
+    loader/adlib_emulator.hpp
     loader/audio_package.cpp
     loader/audio_package.hpp
     loader/bitwise_iter.hpp

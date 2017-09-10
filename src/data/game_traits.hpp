@@ -96,6 +96,8 @@ struct GameTraits {
     static const std::size_t attributeBytesTotal =
       attributeBytes*numSolidTiles + attributeBytes*5*numMaskedTiles;
   };
+
+  static const auto musicPlaybackRate = 280;
 };
 
 

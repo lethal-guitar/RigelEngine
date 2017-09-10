@@ -83,9 +83,6 @@ private:
 
   std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 
-  std::unordered_map<std::string, engine::SoundSystem::SoundHandle>
-    mLoadedSongs;
-
   bool mMusicEnabled = true;
 
   bool mIsRunning;
