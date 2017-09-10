@@ -16,6 +16,7 @@
 
 #include "music_loader.hpp"
 
+#include "data/game_traits.hpp"
 #include "data/song.hpp"
 #include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
@@ -34,9 +35,6 @@ using namespace std;
 
 
 namespace {
-
-const auto DUKE2_IMF_RATE = 280;
-
 
 data::ImfCommand readCommand(LeStreamReader& reader) {
   return {
@@ -59,7 +57,7 @@ data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
   AdlibEmulator emulator{sampleRate};
 
   const auto outputSamplesPerImfTick =
-    static_cast<double>(sampleRate) / DUKE2_IMF_RATE;
+    static_cast<double>(sampleRate) / data::GameTraits::musicPlaybackRate;
 
   LeStreamReader reader(imfData);
   while (reader.hasData()) {
