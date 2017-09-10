@@ -18,15 +18,17 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 
 namespace rigel { namespace engine {
 
 namespace {
 
-GlHandleWrapper compileShader(const char* source, GLenum type) {
+GlHandleWrapper compileShader(const std::string& source, GLenum type) {
   auto shader = GlHandleWrapper{glCreateShader(type), glDeleteShader};
-  glShaderSource(shader.mHandle, 1, &source, nullptr);
+  const auto sourcePtr = source.c_str();
+  glShaderSource(shader.mHandle, 1, &sourcePtr, nullptr);
   glCompileShader(shader.mHandle);
 
   GLint compileStatus = 0;
@@ -56,13 +58,16 @@ GlHandleWrapper compileShader(const char* source, GLenum type) {
 
 
 Shader::Shader(
+  const char* preamble,
   const char* vertexSource,
   const char* fragmentSource,
   std::initializer_list<std::string> attributesToBind)
   : mProgram(glCreateProgram(), glDeleteProgram)
 {
-  auto vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
-  auto fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
+  auto vertexShader = compileShader(
+    std::string{preamble} + vertexSource, GL_VERTEX_SHADER);
+  auto fragmentShader = compileShader(
+    std::string{preamble} + fragmentSource, GL_FRAGMENT_SHADER);
 
   glAttachShader(mProgram.mHandle, vertexShader.mHandle);
   glAttachShader(mProgram.mHandle, fragmentShader.mHandle);

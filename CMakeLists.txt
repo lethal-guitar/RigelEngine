@@ -10,6 +10,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(main_exe_name RigelEngine)
 
 
+# Project settings
+###############################################################################
+
+option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
+
+
 # Dependencies
 ###############################################################################
 

@@ -20,7 +20,18 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <stdexcept>
+
 
 void rigel::engine::loadGlFunctions() {
-  gladLoadGLLoader(SDL_GL_GetProcAddress);
+  int result = 0;
+#ifdef RIGEL_USE_GL_ES
+  result = gladLoadGLES2Loader(SDL_GL_GetProcAddress);
+#else
+  result = gladLoadGLLoader(SDL_GL_GetProcAddress);
+#endif
+
+  if (!result) {
+    throw std::runtime_error("Failed to load OpenGL function pointers");
+  }
 }

@@ -43,11 +43,17 @@ namespace po = boost::program_options;
 
 namespace {
 
-#ifdef __APPLE__
+#if defined( __APPLE__) || defined(RIGEL_USE_GL_ES)
   const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
 #else
   const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
 #endif
+
+
+// Default values for screen resolution in case we can't figure out the
+// current Desktop size
+const auto DEFAULT_RESOLUTION_X = 1920;
+const auto DEFAULT_RESOLUTION_Y = 1080;
 
 
 struct SdlInitializer {
@@ -82,9 +88,10 @@ private:
 
 SDL_Window* createWindow() {
   SDL_DisplayMode displayMode;
-  throwIfFailed([&displayMode]() {
-    return SDL_GetDesktopDisplayMode(0, &displayMode);
-  });
+  if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
+    displayMode.w = DEFAULT_RESOLUTION_X;
+    displayMode.h = DEFAULT_RESOLUTION_Y;
+  }
 
   return throwIfCreationFailed([&displayMode]() {
     return SDL_CreateWindow(
@@ -123,9 +130,15 @@ void initAndRunGame(const string& gamePath, const GameOptions& gameOptions) {
 
   throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
 
+#ifdef RIGEL_USE_GL_ES
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#endif
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   Ptr<SDL_Window> pWindow(createWindow());
