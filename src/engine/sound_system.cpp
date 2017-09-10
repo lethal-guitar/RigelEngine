@@ -17,6 +17,7 @@
 #include "sound_system.hpp"
 
 #include "base/math_tools.hpp"
+#include "engine/imf_player.hpp"
 #include "sdl_utils/error.hpp"
 
 #include <speex/speex_resampler.h>
@@ -24,7 +25,6 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -98,7 +98,9 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
-SoundSystem::SoundSystem() {
+SoundSystem::SoundSystem()
+  : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
+{
   sdl_utils::throwIfFailed([]() {
     return Mix_OpenAudio(
       SAMPLE_RATE,
@@ -106,10 +108,20 @@ SoundSystem::SoundSystem() {
       1, // mono
       BUFFER_SIZE);
   });
+  Mix_HookMusic(
+    [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
+      auto pPlayer = static_cast<ImfPlayer*>(pUserData);
+      auto pDestination = reinterpret_cast<std::int16_t*>(pOutBuffer);
+      const auto samplesRequired = bytesRequired / sizeof(std::int16_t);
+
+      pPlayer->render(pDestination, samplesRequired);
+    },
+    mpMusicPlayer.get());
 }
 
 
 SoundSystem::~SoundSystem() {
+  Mix_HookMusic(nullptr, nullptr);
   mLoadedChunks.clear();
   Mix_Quit();
 }
@@ -118,7 +130,7 @@ SoundSystem::~SoundSystem() {
 void SoundSystem::reportMemoryUsage() const {
   using namespace std;
 
-  size_t totalUsedMemory = sizeof(SoundSystem);
+  size_t totalUsedMemory = sizeof(SoundSystem) + sizeof(ImfPlayer);
 
   for (const auto& buffer : mAudioBuffers) {
     totalUsedMemory += sizeof(data::AudioBuffer);
@@ -178,14 +190,14 @@ SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
     convertedBuffer.mSamples.end(),
     tempBuffer.cbegin(),
     tempBuffer.cbegin() + conversionSpecs.len_cvt);
-  return addSong(convertedBuffer);
+  return addConvertedSound(convertedBuffer);
 #else
-  return addSong(buffer);
+  return addConvertedSound(buffer);
 #endif
 }
 
 
-SoundHandle SoundSystem::addSong(data::AudioBuffer buffer) {
+SoundHandle SoundSystem::addConvertedSound(data::AudioBuffer buffer) {
   mAudioBuffers.emplace_back(std::move(buffer));
   const auto assignedHandle = mNextHandle++;
   mLoadedChunks.emplace(
@@ -195,19 +207,13 @@ SoundHandle SoundSystem::addSong(data::AudioBuffer buffer) {
 }
 
 
-void SoundSystem::playSong(const SoundHandle handle) const {
-  const auto it = mLoadedChunks.find(handle);
-  assert(it != mLoadedChunks.end());
-
-  stopMusic();
-  mCurrentSongChannel = Mix_PlayChannel(0, it->second.get(), -1);
+void SoundSystem::playSong(data::Song&& song) {
+  mpMusicPlayer->playSong(std::move(song));
 }
 
 
 void SoundSystem::stopMusic() const {
-  if (mCurrentSongChannel != -1) {
-    Mix_HaltChannel(mCurrentSongChannel);
-  }
+  mpMusicPlayer->playSong({});
 }
 
 

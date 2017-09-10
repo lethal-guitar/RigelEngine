@@ -17,13 +17,18 @@
 #pragma once
 
 #include "data/audio_buffer.hpp"
+#include "data/song.hpp"
 #include "sdl_utils/ptr.hpp"
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 
 namespace rigel { namespace engine {
+
+class ImfPlayer;
+
 
 class SoundSystem {
 public:
@@ -32,12 +37,11 @@ public:
   SoundSystem();
   ~SoundSystem();
 
-  SoundHandle addSong(data::AudioBuffer buffer);
   SoundHandle addSound(const data::AudioBuffer& buffer);
 
   void reportMemoryUsage() const;
 
-  void playSong(SoundHandle handle) const;
+  void playSong(data::Song&& song);
   void stopMusic() const;
 
   void playSound(SoundHandle handle) const;
@@ -45,10 +49,12 @@ public:
   void clearAll();
 
 private:
+  SoundHandle addConvertedSound(data::AudioBuffer buffer);
+
+  std::unique_ptr<ImfPlayer> mpMusicPlayer;
   std::vector<data::AudioBuffer> mAudioBuffers;
   std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
   SoundHandle mNextHandle = 0;
-  mutable int mCurrentSongChannel = -1;
   mutable int mCurrentSoundChannel = -1;
 };
 

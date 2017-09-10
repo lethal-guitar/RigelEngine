@@ -157,18 +157,8 @@ data::Movie ResourceLoader::loadMovie(const std::string& name) const {
 }
 
 
-data::AudioBuffer ResourceLoader::loadMusic(const std::string& name) const {
-  using namespace chrono;
-
-  const auto before = high_resolution_clock::now();
-  const auto buffer = loader::renderImf(mFilePackage.file(name), 44100);
-  const auto after = high_resolution_clock::now();
-
-  std::cout
-    << "Song rendering time for '" << name << "': "
-    << duration_cast<milliseconds>(after - before).count() << " ms\n";
-
-  return buffer;
+data::Song ResourceLoader::loadMusic(const std::string& name) const {
+  return loader::loadSong(mFilePackage.file(name));
 }
 
 
