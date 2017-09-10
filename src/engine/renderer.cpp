@@ -52,13 +52,40 @@ const auto LOGICAL_DISPLAY_HEIGHT =
 const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
 
 
-const auto VERTEX_SOURCE = R"shd(
+#ifdef RIGEL_USE_GL_ES
+
+const auto SHADER_PREAMBLE = R"shd(
+#version 100
+
+#define ATTRIBUTE attribute
+#define OUT varying
+#define IN varying
+#define TEXTURE_LOOKUP texture2D
+#define OUTPUT_COLOR gl_FragColor
+#define OUTPUT_COLOR_DECLARATION
+)shd";
+
+#else
+
+const auto SHADER_PREAMBLE = R"shd(
 #version 150
 
-in vec2 position;
-in vec2 texCoord;
+#define ATTRIBUTE in
+#define OUT out
+#define IN in
+#define TEXTURE_LOOKUP texture
+#define OUTPUT_COLOR outputColor
+#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
+)shd";
 
-out vec2 texCoordFrag;
+#endif
+
+
+const auto VERTEX_SOURCE = R"shd(
+ATTRIBUTE vec2 position;
+ATTRIBUTE vec2 texCoord;
+
+OUT vec2 texCoordFrag;
 
 uniform mat4 transform;
 
@@ -69,11 +96,9 @@ void main() {
 )shd";
 
 const auto FRAGMENT_SOURCE = R"shd(
-#version 150
+OUTPUT_COLOR_DECLARATION
 
-out vec4 outputColor;
-
-in vec2 texCoordFrag;
+IN vec2 texCoordFrag;
 
 uniform sampler2D textureData;
 uniform vec4 overlayColor;
@@ -81,19 +106,17 @@ uniform vec4 overlayColor;
 uniform vec4 colorModulation;
 
 void main() {
-  vec4 baseColor = texture(textureData, texCoordFrag);
+  vec4 baseColor = TEXTURE_LOOKUP(textureData, texCoordFrag);
   vec4 modulated = baseColor * colorModulation;
   float targetAlpha = modulated.a;
 
-  outputColor =
+  OUTPUT_COLOR =
     vec4(mix(modulated.rgb, overlayColor.rgb, overlayColor.a), targetAlpha);
 }
 )shd";
 
 const auto VERTEX_SOURCE_SOLID = R"shd(
-#version 150
-
-in vec2 position;
+ATTRIBUTE vec2 position;
 
 uniform mat4 transform;
 
@@ -103,14 +126,12 @@ void main() {
 )shd";
 
 const auto FRAGMENT_SOURCE_SOLID = R"shd(
-#version 150
-
-out vec4 outputColor;
+OUTPUT_COLOR_DECLARATION
 
 uniform vec4 color;
 
 void main() {
-  outputColor = color;
+  OUTPUT_COLOR = color;
 }
 )shd";
 
@@ -159,9 +180,15 @@ glm::vec4 toGlColor(const base::Color& color) {
 Renderer::Renderer(SDL_Window* pWindow)
   : mpWindow(pWindow)
   , mTexturedQuadShader(
-      VERTEX_SOURCE, FRAGMENT_SOURCE, {"position", "texCoord"})
+      SHADER_PREAMBLE,
+      VERTEX_SOURCE,
+      FRAGMENT_SOURCE,
+      {"position", "texCoord"})
   , mSolidColorShader(
-      VERTEX_SOURCE_SOLID, FRAGMENT_SOURCE_SOLID, {"position"})
+      SHADER_PREAMBLE,
+      VERTEX_SOURCE_SOLID,
+      FRAGMENT_SOURCE_SOLID,
+      {"position"})
   , mLastUsedShader(0)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)

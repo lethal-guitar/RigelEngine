@@ -203,6 +203,13 @@ target_link_libraries(rigel_core
     glad
 )
 
+if(USE_GL_ES)
+    target_compile_definitions(rigel_core PUBLIC
+        RIGEL_USE_GL_ES=1
+    )
+endif()
+
+
 
 # Main executable
 set(main_exe_sources

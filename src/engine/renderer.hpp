@@ -135,6 +135,7 @@ public:
 
 private:
   class DummyVao {
+#ifndef RIGEL_USE_GL_ES
   public:
     DummyVao() {
       glGenVertexArrays(1, &mVao);
@@ -150,6 +151,7 @@ private:
 
   private:
     GLuint mVao;
+#endif
   };
 
   enum class RenderMode {
