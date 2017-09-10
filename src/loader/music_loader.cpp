@@ -65,10 +65,10 @@ data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
     emulator.writeRegister(entry.reg, entry.value);
 
     if (entry.delay > 0) {
-      const auto numSamplesToCompute = static_cast<size_t>(std::round(
+      const auto numSamplesToCompute = static_cast<size_t>(round(
         entry.delay * outputSamplesPerImfTick));
       emulator.render(
-        numSamplesToCompute, std::back_inserter(renderedAudio.mSamples));
+        numSamplesToCompute, back_inserter(renderedAudio.mSamples));
     }
   }
 
