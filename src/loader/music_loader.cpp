@@ -16,6 +16,7 @@
 
 #include "music_loader.hpp"
 
+#include "data/song.hpp"
 #include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
 
@@ -37,20 +38,15 @@ namespace {
 const auto DUKE2_IMF_RATE = 280;
 
 
-struct ImfEntry {
-  explicit ImfEntry(LeStreamReader& reader)
-    : reg(reader.readU8())
-    , value(reader.readU8())
-    , delay(reader.readU16())
-  {
-  }
-
-  const std::uint8_t reg;
-  const std::uint8_t value;
-  const std::uint16_t delay;
-};
+data::ImfCommand readCommand(LeStreamReader& reader) {
+  return {
+    reader.readU8(),
+    reader.readU8(),
+    reader.readU16()};
+}
 
 }
+
 
 data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
   assert(sampleRate > 0);
@@ -67,7 +63,7 @@ data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
 
   LeStreamReader reader(imfData);
   while (reader.hasData()) {
-    ImfEntry entry(reader);
+    const auto entry = readCommand(reader);
     emulator.writeRegister(entry.reg, entry.value);
 
     if (entry.delay > 0) {
