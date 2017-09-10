@@ -177,8 +177,6 @@ Renderer::Renderer(SDL_Window* pWindow)
   SDL_GL_SetSwapInterval(1);
 
   // Setup a VBO for streaming data to the GPU, stays bound all the time
-  glGenVertexArrays(1, &mStreamVao);
-  glBindVertexArray(mStreamVao);
   glGenBuffers(1, &mStreamVbo);
   glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
   glGenBuffers(1, &mStreamEbo);
@@ -196,7 +194,6 @@ Renderer::Renderer(SDL_Window* pWindow)
 
 Renderer::~Renderer() {
   glDeleteBuffers(1, &mStreamVbo);
-  glDeleteVertexArrays(1, &mStreamVao);
 }
 
 

@@ -134,6 +134,24 @@ public:
     int height);
 
 private:
+  class DummyVao {
+  public:
+    DummyVao() {
+      glGenVertexArrays(1, &mVao);
+      glBindVertexArray(mVao);
+    }
+
+    ~DummyVao() {
+      glDeleteVertexArrays(1, &mVao);
+    }
+
+    DummyVao(const DummyVao&) = delete;
+    DummyVao& operator=(const DummyVao&) = delete;
+
+  private:
+    GLuint mVao;
+  };
+
   enum class RenderMode {
     SpriteBatch,
     NonTexturedRender
@@ -154,7 +172,7 @@ private:
 private:
   SDL_Window* mpWindow;
 
-  GLuint mStreamVao;
+  DummyVao mDummyVao;
   GLuint mStreamVbo;
   GLuint mStreamEbo;
 
