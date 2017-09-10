@@ -40,15 +40,7 @@ public:
   void playSong(SoundHandle handle) const;
   void stopMusic() const;
 
-  /** Play sound with specified volume and panning
-   *
-   * volume range is 0.0 (silent) to 1.0 (max volume)
-   * pan range is -1.0 (left) to (1.0) right, 0.0 is center
-   */
-  void playSound(
-    SoundHandle handle,
-    float volume = 1.0f,
-    float pan = 0.0f) const;
+  void playSound(SoundHandle handle) const;
 
   void clearAll();
 

@@ -211,11 +211,7 @@ void SoundSystem::stopMusic() const {
 }
 
 
-void SoundSystem::playSound(
-  const SoundHandle handle,
-  float volume,
-  float pan
-) const {
+void SoundSystem::playSound(const SoundHandle handle) const {
   const auto it = mLoadedChunks.find(handle);
   assert(it != mLoadedChunks.end());
   Mix_PlayChannel(1, it->second.get(), 0);
