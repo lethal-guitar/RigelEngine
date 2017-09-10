@@ -113,6 +113,7 @@ set(core_sources
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
+    loader/adlib_emulator.hpp
     loader/audio_package.cpp
     loader/audio_package.hpp
     loader/bitwise_iter.hpp

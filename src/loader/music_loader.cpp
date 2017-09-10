@@ -16,10 +16,8 @@
 
 #include "music_loader.hpp"
 
-#include "base/math_tools.hpp"
+#include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
-
-#include <dbopl.h>
 
 #include <algorithm>
 #include <cassert>
@@ -37,7 +35,6 @@ using namespace std;
 namespace {
 
 const auto DUKE2_IMF_RATE = 280;
-const auto VOLUME_SCALE = 1;
 
 
 struct ImfEntry {
@@ -63,42 +60,21 @@ data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
   // reallocations during rendering
   renderedAudio.mSamples.reserve(30 * sampleRate);
 
-  DBOPL::Chip emulator(sampleRate);
-  // This is normally done by the game to select the right type of wave forms.
-  // It's not part of the IMF files.
-  emulator.WriteReg(1, 32);
+  AdlibEmulator emulator{sampleRate};
 
   const auto outputSamplesPerImfTick =
     static_cast<double>(sampleRate) / DUKE2_IMF_RATE;
 
-  // DBOPL outputs 32 bit samples, but they never exceed the 16 bit range
-  // (compare source code comment in MixerChannel::AddSamples() in mixer.cpp
-  // in the DosBox source). Still, this means we cannot render directly into
-  // the output buffer.
-  vector<std::int32_t> tempBuffer;
-
   LeStreamReader reader(imfData);
   while (reader.hasData()) {
     ImfEntry entry(reader);
-    emulator.WriteReg(entry.reg, entry.value);
+    emulator.writeRegister(entry.reg, entry.value);
 
     if (entry.delay > 0) {
       const auto numSamplesToCompute = static_cast<size_t>(std::round(
         entry.delay * outputSamplesPerImfTick));
-      if (tempBuffer.size() < numSamplesToCompute) {
-        tempBuffer.resize(numSamplesToCompute * 2);
-      }
-
-      emulator.GenerateBlock2(
-        static_cast<DBOPL::Bitu>(numSamplesToCompute), tempBuffer.data());
-      std::transform(
-        tempBuffer.cbegin(),
-        tempBuffer.cbegin() + numSamplesToCompute,
-        std::back_inserter(renderedAudio.mSamples),
-        [](const auto sample32Bit) {
-          return static_cast<std::int16_t>(
-            base::clamp(sample32Bit * VOLUME_SCALE, -16384, 16384));
-        });
+      emulator.render(
+        numSamplesToCompute, std::back_inserter(renderedAudio.mSamples));
     }
   }
 

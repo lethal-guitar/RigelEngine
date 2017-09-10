@@ -16,12 +16,8 @@
 
 #include "audio_package.hpp"
 
+#include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
-
-#include <dbopl.h>
-
-#include <algorithm>
-#include <iostream>
 
 
 namespace rigel { namespace loader {
@@ -124,48 +120,39 @@ data::AudioBuffer AudioPackage::renderAdlibSound(
   const AdlibSound& sound
 ) const {
   const auto sampleRate = 44100;
-  const auto samplesPerTick = sampleRate / ADLIB_SOUND_RATE;
 
-  DBOPL::Chip emulator(sampleRate);
-  emulator.WriteReg(0x01, 0x20);
+  AdlibEmulator emulator{sampleRate};
 
-  emulator.WriteReg(0x20, sound.mInstrumentSettings[0]);
-  emulator.WriteReg(0x40, sound.mInstrumentSettings[2]);
-  emulator.WriteReg(0x60, sound.mInstrumentSettings[4]);
-  emulator.WriteReg(0x80, sound.mInstrumentSettings[6]);
-  emulator.WriteReg(0xE0, sound.mInstrumentSettings[8]);
+  emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
+  emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
+  emulator.writeRegister(0x60, sound.mInstrumentSettings[4]);
+  emulator.writeRegister(0x80, sound.mInstrumentSettings[6]);
+  emulator.writeRegister(0xE0, sound.mInstrumentSettings[8]);
 
-  emulator.WriteReg(0x23, sound.mInstrumentSettings[1]);
-  emulator.WriteReg(0x43, sound.mInstrumentSettings[3]);
-  emulator.WriteReg(0x63, sound.mInstrumentSettings[5]);
-  emulator.WriteReg(0x83, sound.mInstrumentSettings[7]);
-  emulator.WriteReg(0xE3, sound.mInstrumentSettings[9]);
+  emulator.writeRegister(0x23, sound.mInstrumentSettings[1]);
+  emulator.writeRegister(0x43, sound.mInstrumentSettings[3]);
+  emulator.writeRegister(0x63, sound.mInstrumentSettings[5]);
+  emulator.writeRegister(0x83, sound.mInstrumentSettings[7]);
+  emulator.writeRegister(0xE3, sound.mInstrumentSettings[9]);
 
-  emulator.WriteReg(0xC0, 0);
-  emulator.WriteReg(0xB0, 0);
+  emulator.writeRegister(0xC0, 0);
+  emulator.writeRegister(0xB0, 0);
 
   const auto octaveBits = static_cast<uint8_t>((sound.mOctave & 7) << 2);
 
+  const auto samplesPerTick = sampleRate / ADLIB_SOUND_RATE;
   vector<data::Sample> renderedSamples;
   renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
-  vector<int32_t> tempBuffer(samplesPerTick);
 
   for (const auto byte : sound.mSoundData) {
     if (byte == 0) {
-      emulator.WriteReg(0xB0, 0);
+      emulator.writeRegister(0xB0, 0);
     } else {
-      emulator.WriteReg(0xA0, byte);
-      emulator.WriteReg(0xB0, 0x20 | octaveBits);
+      emulator.writeRegister(0xA0, byte);
+      emulator.writeRegister(0xB0, 0x20 | octaveBits);
     }
 
-    emulator.GenerateBlock2(samplesPerTick, tempBuffer.data());
-    std::transform(
-      tempBuffer.cbegin(),
-      tempBuffer.cend(),
-      back_inserter(renderedSamples),
-      [](const auto sample) {
-        return static_cast<data::Sample>(sample * 2);
-      });
+    emulator.render(samplesPerTick, back_inserter(renderedSamples), 2);
   }
 
   return {sampleRate, renderedSamples};
