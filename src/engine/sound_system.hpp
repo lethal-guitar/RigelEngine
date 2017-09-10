@@ -17,8 +17,10 @@
 #pragma once
 
 #include "data/audio_buffer.hpp"
+#include "sdl_utils/ptr.hpp"
 
-#include <memory>
+#include <unordered_map>
+#include <vector>
 
 
 namespace rigel { namespace engine {
@@ -51,8 +53,11 @@ public:
   void clearAll();
 
 private:
-  struct SoundSystemImpl;
-  std::unique_ptr<SoundSystemImpl> mpImpl;
+  std::vector<data::AudioBuffer> mAudioBuffers;
+  std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
+  SoundHandle mNextHandle = 0;
+  mutable int mCurrentSongChannel = -1;
+  mutable int mCurrentSoundChannel = -1;
 };
 
 }}

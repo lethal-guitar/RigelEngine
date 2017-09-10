@@ -18,7 +18,6 @@
 
 #include "base/math_tools.hpp"
 #include "sdl_utils/error.hpp"
-#include "sdl_utils/ptr.hpp"
 
 #include <speex/speex_resampler.h>
 
@@ -27,9 +26,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace rigel { namespace engine {
 
@@ -101,177 +98,127 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
-struct SoundSystem::SoundSystemImpl
-{
-  std::vector<data::AudioBuffer> mAudioBuffers;
-  std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
-  SoundHandle mNextHandle = 0;
-  mutable int mCurrentSongChannel = -1;
-  mutable int mCurrentSoundChannel = -1;
-
-
-  SoundSystemImpl() {
-    sdl_utils::throwIfFailed([]() {
-      return Mix_OpenAudio(
-        SAMPLE_RATE,
-        MIX_DEFAULT_FORMAT,
-        1, // stereo
-        BUFFER_SIZE);
-    });
-  }
-
-
-  ~SoundSystemImpl() {
-    mLoadedChunks.clear();
-    Mix_Quit();
-  }
-
-
-  void reportMemoryUsage() const {
-    using namespace std;
-
-    size_t totalUsedMemory =
-      sizeof(SoundSystemImpl);
-
-    for (const auto& buffer : mAudioBuffers) {
-      totalUsedMemory += sizeof(data::AudioBuffer);
-      totalUsedMemory += sizeof(data::Sample) * buffer.mSamples.size();
-    }
-
-    totalUsedMemory +=
-      (sizeof(Mix_Chunk) + sizeof(SoundHandle)) * mLoadedChunks.size();
-
-    string suffix("B");
-    if (totalUsedMemory >= 1024) {
-      suffix = "KB";
-      totalUsedMemory /= 1024;
-    }
-
-    if (totalUsedMemory >= 1024) {
-      suffix = "MB";
-      totalUsedMemory /= 1024;
-    }
-
-    cout << "SoundSystem memory usage: " << totalUsedMemory << suffix << '\n';
-  }
-
-
-  SoundHandle addSound(
-    const data::AudioBuffer& original
-  ) {
-    auto buffer = resampleAudio(original, SAMPLE_RATE);
-    if (buffer.mSamples.back() != 0) {
-      // Prevent clicks/pops with samples that don't return to 0 at the end
-      // by adding a small linear ramp leading back to zero.
-      appendRampToZero(buffer);
-    }
-
-#if MIX_DEFAULT_FORMAT != AUDIO_S16LSB
-    SDL_AudioSpec originalSoundSpec{
-      buffer.mSampleRate,
-      AUDIO_S16LSB,
-      1,
-      0, 0, 0, 0, nullptr};
-    SDL_AudioCVT conversionSpecs;
-    SDL_BuildAudioCVT(
-      &conversionSpecs,
-      AUDIO_S16LSB, 1, buffer.mSampleRate,
-      MIX_DEFAULT_FORMAT, 1, SAMPLE_RATE);
-
-    conversionSpecs.len = static_cast<int>(
-      buffer.mSamples.size() * 2);
-    std::vector<data::Sample> tempBuffer(
-      conversionSpecs.len * conversionSpecs.len_mult);
-    conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
-    std::copy(
-      buffer.mSamples.cbegin(), buffer.mSamples.cend(), tempBuffer.begin());
-
-    SDL_ConvertAudio(&conversionSpecs);
-
-    data::AudioBuffer convertedBuffer{SAMPLE_RATE};
-    convertedBuffer.mSamples.insert(
-      convertedBuffer.mSamples.end(),
-      tempBuffer.cbegin(),
-      tempBuffer.cbegin() + conversionSpecs.len_cvt);
-    return addSong(convertedBuffer);
-#else
-    return addSong(buffer);
-#endif
-  }
-
-
-  SoundHandle addSong(
-    data::AudioBuffer buffer
-  ) {
-    mAudioBuffers.emplace_back(std::move(buffer));
-    const auto assignedHandle = mNextHandle++;
-    mLoadedChunks.emplace(
-      assignedHandle,
-      createMixChunk(mAudioBuffers.back()));
-    return assignedHandle;
-  }
-
-
-  void playSong(const SoundHandle handle) const {
-    const auto it = mLoadedChunks.find(handle);
-    assert(it != mLoadedChunks.end());
-
-    stopMusic();
-    mCurrentSongChannel = Mix_PlayChannel(0, it->second.get(), -1);
-  }
-
-
-  void stopMusic() const {
-    if (mCurrentSongChannel != -1) {
-      Mix_HaltChannel(mCurrentSongChannel);
-    }
-  }
-
-  void playSound(
-    const SoundHandle handle,
-    float volume,
-    float pan
-  ) {
-    const auto it = mLoadedChunks.find(handle);
-    assert(it != mLoadedChunks.end());
-    Mix_PlayChannel(1, it->second.get(), 0);
-  }
-};
-
-
-SoundSystem::SoundSystem()
-  : mpImpl(std::make_unique<SoundSystemImpl>())
-{
+SoundSystem::SoundSystem() {
+  sdl_utils::throwIfFailed([]() {
+    return Mix_OpenAudio(
+      SAMPLE_RATE,
+      MIX_DEFAULT_FORMAT,
+      1, // stereo
+      BUFFER_SIZE);
+  });
 }
 
-SoundSystem::~SoundSystem() = default;
+
+SoundSystem::~SoundSystem() {
+  mLoadedChunks.clear();
+  Mix_Quit();
+}
+
 
 void SoundSystem::reportMemoryUsage() const {
-  mpImpl->reportMemoryUsage();
+  using namespace std;
+
+  size_t totalUsedMemory = sizeof(SoundSystem);
+
+  for (const auto& buffer : mAudioBuffers) {
+    totalUsedMemory += sizeof(data::AudioBuffer);
+    totalUsedMemory += sizeof(data::Sample) * buffer.mSamples.size();
+  }
+
+  totalUsedMemory +=
+    (sizeof(Mix_Chunk) + sizeof(SoundHandle)) * mLoadedChunks.size();
+
+  string suffix("B");
+  if (totalUsedMemory >= 1024) {
+    suffix = "KB";
+    totalUsedMemory /= 1024;
+  }
+
+  if (totalUsedMemory >= 1024) {
+    suffix = "MB";
+    totalUsedMemory /= 1024;
+  }
+
+  cout << "SoundSystem memory usage: " << totalUsedMemory << suffix << '\n';
 }
+
+
+SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
+  auto buffer = resampleAudio(original, SAMPLE_RATE);
+  if (buffer.mSamples.back() != 0) {
+    // Prevent clicks/pops with samples that don't return to 0 at the end
+    // by adding a small linear ramp leading back to zero.
+    appendRampToZero(buffer);
+  }
+
+#if MIX_DEFAULT_FORMAT != AUDIO_S16LSB
+  SDL_AudioSpec originalSoundSpec{
+    buffer.mSampleRate,
+    AUDIO_S16LSB,
+    1,
+    0, 0, 0, 0, nullptr};
+  SDL_AudioCVT conversionSpecs;
+  SDL_BuildAudioCVT(
+    &conversionSpecs,
+    AUDIO_S16LSB, 1, buffer.mSampleRate,
+    MIX_DEFAULT_FORMAT, 1, SAMPLE_RATE);
+
+  conversionSpecs.len = static_cast<int>(
+    buffer.mSamples.size() * 2);
+  std::vector<data::Sample> tempBuffer(
+    conversionSpecs.len * conversionSpecs.len_mult);
+  conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
+  std::copy(
+    buffer.mSamples.cbegin(), buffer.mSamples.cend(), tempBuffer.begin());
+
+  SDL_ConvertAudio(&conversionSpecs);
+
+  data::AudioBuffer convertedBuffer{SAMPLE_RATE};
+  convertedBuffer.mSamples.insert(
+    convertedBuffer.mSamples.end(),
+    tempBuffer.cbegin(),
+    tempBuffer.cbegin() + conversionSpecs.len_cvt);
+  return addSong(convertedBuffer);
+#else
+  return addSong(buffer);
+#endif
+}
+
 
 SoundHandle SoundSystem::addSong(data::AudioBuffer buffer) {
-  return mpImpl->addSong(std::move(buffer));
+  mAudioBuffers.emplace_back(std::move(buffer));
+  const auto assignedHandle = mNextHandle++;
+  mLoadedChunks.emplace(
+    assignedHandle,
+    createMixChunk(mAudioBuffers.back()));
+  return assignedHandle;
 }
 
-SoundHandle SoundSystem::addSound(const data::AudioBuffer& buffer) {
- return mpImpl->addSound(buffer);
+
+void SoundSystem::playSong(const SoundHandle handle) const {
+  const auto it = mLoadedChunks.find(handle);
+  assert(it != mLoadedChunks.end());
+
+  stopMusic();
+  mCurrentSongChannel = Mix_PlayChannel(0, it->second.get(), -1);
 }
 
-void SoundSystem::playSong(SoundHandle handle) const {
-  mpImpl->playSong(handle);
-}
 
 void SoundSystem::stopMusic() const {
-  mpImpl->stopMusic();
+  if (mCurrentSongChannel != -1) {
+    Mix_HaltChannel(mCurrentSongChannel);
+  }
 }
 
+
 void SoundSystem::playSound(
-  SoundHandle handle,
+  const SoundHandle handle,
   float volume,
   float pan
 ) const {
-  mpImpl->playSound(handle, volume, pan);
+  const auto it = mLoadedChunks.find(handle);
+  assert(it != mLoadedChunks.end());
+  Mix_PlayChannel(1, it->second.get(), 0);
 }
 
 }}
