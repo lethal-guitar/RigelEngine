@@ -50,6 +50,12 @@ namespace {
 #endif
 
 
+// Default values for screen resolution in case we can't figure out the
+// current Desktop size
+const auto DEFAULT_RESOLUTION_X = 1920;
+const auto DEFAULT_RESOLUTION_Y = 1080;
+
+
 struct SdlInitializer {
   SdlInitializer() {
     throwIfFailed([]() { return SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO); });
@@ -82,9 +88,10 @@ private:
 
 SDL_Window* createWindow() {
   SDL_DisplayMode displayMode;
-  throwIfFailed([&displayMode]() {
-    return SDL_GetDesktopDisplayMode(0, &displayMode);
-  });
+  if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
+    displayMode.w = DEFAULT_RESOLUTION_X;
+    displayMode.h = DEFAULT_RESOLUTION_Y;
+  }
 
   return throwIfCreationFailed([&displayMode]() {
     return SDL_CreateWindow(
