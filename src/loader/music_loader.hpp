@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "data/audio_buffer.hpp"
 #include "data/song.hpp"
 #include "loader/byte_buffer.hpp"
 
@@ -24,8 +23,5 @@
 namespace rigel { namespace loader {
 
 data::Song loadSong(const ByteBuffer& imfData);
-
-data::AudioBuffer renderImf(const ByteBuffer& imfData, int sampleRate);
-
 
 }}

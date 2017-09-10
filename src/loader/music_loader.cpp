@@ -16,22 +16,10 @@
 
 #include "music_loader.hpp"
 
-#include "data/game_traits.hpp"
-#include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
-
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstdint>
-#include <iterator>
-#include <vector>
 
 
 namespace rigel { namespace loader {
-
-using namespace std;
-
 
 namespace {
 
@@ -54,35 +42,5 @@ data::Song loadSong(const ByteBuffer& imfData) {
 
   return song;
 }
-
-
-data::AudioBuffer renderImf(const ByteBuffer& imfData, const int sampleRate) {
-  assert(sampleRate > 0);
-
-  data::AudioBuffer renderedAudio{sampleRate, {}};
-  // Allocate enough for 30 seconds of audio, to reduce the number of
-  // reallocations during rendering
-  renderedAudio.mSamples.reserve(30 * sampleRate);
-
-  AdlibEmulator emulator{sampleRate};
-
-  const auto outputSamplesPerImfTick =
-    static_cast<double>(sampleRate) / data::GameTraits::musicPlaybackRate;
-
-  const auto song = loadSong(imfData);
-  for (const auto& entry : song) {
-    emulator.writeRegister(entry.reg, entry.value);
-
-    if (entry.delay > 0) {
-      const auto numSamplesToCompute = static_cast<size_t>(round(
-        entry.delay * outputSamplesPerImfTick));
-      emulator.render(
-        numSamplesToCompute, back_inserter(renderedAudio.mSamples));
-    }
-  }
-
-  return renderedAudio;
-}
-
 
 }}
