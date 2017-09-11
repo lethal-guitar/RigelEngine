@@ -88,13 +88,13 @@ struct RenderingSystem::SpriteData {
     const WorldPosition& position
   )
     : mEntity(entity)
+    , mPosition(position)
     , mpSprite(pSprite)
     , mDrawOrder(
         entity.has_component<components::OverrideDrawOrder>()
         ? entity.component<const components::OverrideDrawOrder>()->mDrawOrder
         : pSprite->mDrawOrder)
     , mDrawTopMost(drawTopMost)
-    , mPosition(position)
   {
   }
 
@@ -105,10 +105,10 @@ struct RenderingSystem::SpriteData {
   }
 
   entityx::Entity mEntity;
+  WorldPosition mPosition;
   const Sprite* mpSprite;
   int mDrawOrder;
   bool mDrawTopMost;
-  WorldPosition mPosition;
 };
 
 
