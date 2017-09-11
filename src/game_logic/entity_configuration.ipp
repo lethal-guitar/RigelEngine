@@ -239,12 +239,6 @@ auto actorIDListForActor(const ActorID ID) {
 
 
 void configureSprite(Sprite& sprite, const ActorID actorID) {
-  if (actorID == 5 || actorID == 6) {
-    for (int i=0; i<39; ++i) {
-      sprite.mFrames[i].mDrawOffset.x -= 1;
-    }
-  }
-
   switch (actorID) {
     case 0:
       sprite.mFramesToRender = {0};
@@ -394,7 +388,8 @@ void EntityFactory::configureItemContainer(
   entity.assign<Sprite>(boxSprite);
   entity.assign<components::ItemContainer>(container);
   entity.assign<Shootable>(1, givenScore);
-  addDefaultPhysical(entity, engine::inferBoundingBox(boxSprite.mFrames[0]));
+  addDefaultPhysical(entity, engine::inferBoundingBox(
+    boxSprite.mpDrawData->mFrames[0]));
 }
 
 
@@ -548,7 +543,8 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
     case 42: // Napalm Bomb
       {
-        const auto originalDrawOrder = entity.component<Sprite>()->mDrawOrder;
+        const auto originalDrawOrder =
+          entity.component<Sprite>()->mpDrawData->mDrawOrder;
         configureItemContainer(
           entity,
           ContainerColor::Red,

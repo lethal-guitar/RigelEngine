@@ -31,12 +31,12 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel { namespace engine { namespace components {
+namespace rigel { namespace engine {
 
 struct SpriteFrame {
   SpriteFrame() = default;
   SpriteFrame(
-    engine::NonOwningTexture image,
+    engine::OwningTexture image,
     base::Vector drawOffset
   )
     : mImage(std::move(image))
@@ -44,22 +44,35 @@ struct SpriteFrame {
   {
   }
 
-  engine::NonOwningTexture mImage;
+  engine::OwningTexture mImage;
   base::Vector mDrawOffset;
 };
 
 
-struct Sprite {
+struct SpriteDrawData {
   std::vector<SpriteFrame> mFrames;
   int mDrawOrder;
+};
+
+
+namespace components {
+
+struct Sprite {
+  Sprite() = default;
+  Sprite(const SpriteDrawData* pDrawData, std::vector<int> framesToRender)
+    : mFramesToRender(std::move(framesToRender))
+    , mpDrawData(pDrawData)
+  {
+  }
 
   void flashWhite() {
     mFlashWhiteTime = currentGlobalTime();
   }
 
   std::vector<int> mFramesToRender;
-  bool mShow = true;
   engine::TimePoint mFlashWhiteTime = 0.0;
+  const SpriteDrawData* mpDrawData = nullptr;
+  bool mShow = true;
 };
 
 
