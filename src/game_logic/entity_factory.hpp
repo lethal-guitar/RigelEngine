@@ -124,6 +124,7 @@ private:
   const engine::OwningTexture& getOrCreateTexture(
     const IdAndFrameNr& textureId);
   engine::components::Sprite makeSpriteFromActorIDs(
+    data::ActorID mainId,
     const std::vector<data::ActorID>& actorIDs);
 
   void configureProjectile(

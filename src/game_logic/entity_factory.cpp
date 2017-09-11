@@ -67,13 +67,6 @@ using namespace game_logic::components;
 
 namespace {
 
-// The game draws player projectiles after drawing all regular actors, which
-// makes them appear on top of everything. But in our case, they are rendered
-// using the same mechanism as the other sprites, so we have to explicitly
-// assign an order (which is higher than all regular actors' draw order).
-const auto PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
-
-
 // Assign gravity affected physical component
 void addDefaultPhysical(
   ex::Entity entity,
@@ -106,7 +99,7 @@ EntityFactory::EntityFactory(
 
 Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
   const auto actorParts = actorIDListForActor(actorID);
-  auto sprite = makeSpriteFromActorIDs(actorParts);
+  auto sprite = makeSpriteFromActorIDs(actorID, actorParts);
   configureSprite(sprite, actorID);
   return sprite;
 }
@@ -127,9 +120,13 @@ const engine::OwningTexture& EntityFactory::getOrCreateTexture(
 }
 
 
-Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
+Sprite EntityFactory::makeSpriteFromActorIDs(
+  data::ActorID mainId,
+  const vector<ActorID>& actorIDs
+) {
   Sprite sprite;
   int lastFrameCount = 0;
+  int lastDrawOrder = 0;
 
   for (const auto ID : actorIDs) {
     const auto& actorData = mpSpritePackage->loadActor(ID);
@@ -139,10 +136,12 @@ Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
       const auto textureRef = engine::NonOwningTexture(texture);
       sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
     }
-    sprite.mDrawOrder = actorData.mDrawIndex;
+    lastDrawOrder = actorData.mDrawIndex;
     sprite.mFramesToRender.push_back(lastFrameCount);
     lastFrameCount += static_cast<int>(actorData.mFrames.size());
   }
+
+  sprite.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
   return sprite;
 }
 
@@ -179,9 +178,6 @@ entityx::Entity EntityFactory::createProjectile(
 ) {
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
-  if (isPlayerProjectile(type)) {
-    sprite.mDrawOrder = PROJECTILE_DRAW_ORDER;
-  }
 
   const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
 

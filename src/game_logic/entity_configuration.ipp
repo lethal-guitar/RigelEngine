@@ -19,6 +19,16 @@
 
 namespace {
 
+// The game draws player projectiles after drawing all regular actors, which
+// makes them appear on top of everything. But in our case, they are rendered
+// using the same mechanism as the other sprites, so we have to explicitly
+// assign an order (which is higher than all regular actors' draw order).
+const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
+
+// Same thing as for player projectiles
+const auto MUZZLE_FLASH_DRAW_ORDER = 12;
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -331,6 +341,22 @@ ActorID actorIdForBoxColor(const ContainerColor color) {
 
   assert(false);
   return 161;
+}
+
+
+int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
+  switch (id) {
+    case 7: case 8: case 9: case 10:
+    case 24: case 25: case 26: case 27:
+    case 21: case 204: case 205: case 206:
+      return PLAYER_PROJECTILE_DRAW_ORDER;
+
+    case 33: case 34: case 35: case 36:
+      return MUZZLE_FLASH_DRAW_ORDER;
+
+    default:
+      return baseDrawOrder;
+  }
 }
 
 } // namespace
