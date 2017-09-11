@@ -555,7 +555,7 @@ void EntityFactory::configureEntity(
           0,
           Animated{1},
           boundingBox);
-        entity.component<Sprite>()->mDrawOrder = originalDrawOrder;
+        entity.assign<OverrideDrawOrder>(originalDrawOrder);
       }
       break;
 

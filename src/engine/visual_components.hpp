@@ -86,6 +86,16 @@ using CustomRenderFunc = void(*)(
 struct DrawTopMost {};
 
 
+struct OverrideDrawOrder {
+  explicit OverrideDrawOrder(const int drawOrder)
+    : mDrawOrder(drawOrder)
+  {
+  }
+
+  int mDrawOrder;
+};
+
+
 struct Animated {
   Animated() = default;
   explicit Animated(

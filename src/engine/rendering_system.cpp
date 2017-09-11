@@ -89,6 +89,10 @@ struct RenderingSystem::SpriteData {
   )
     : mEntity(entity)
     , mpSprite(pSprite)
+    , mDrawOrder(
+        entity.has_component<components::OverrideDrawOrder>()
+        ? entity.component<const components::OverrideDrawOrder>()->mDrawOrder
+        : pSprite->mDrawOrder)
     , mDrawTopMost(drawTopMost)
     , mPosition(position)
   {
@@ -96,12 +100,13 @@ struct RenderingSystem::SpriteData {
 
   bool operator<(const SpriteData& rhs) const {
     return
-      std::tie(mDrawTopMost, mpSprite->mDrawOrder) <
-      std::tie(rhs.mDrawTopMost, rhs.mpSprite->mDrawOrder);
+      std::tie(mDrawTopMost, mDrawOrder) <
+      std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
   }
 
   entityx::Entity mEntity;
   const Sprite* mpSprite;
+  int mDrawOrder;
   bool mDrawTopMost;
   WorldPosition mPosition;
 };
