@@ -113,7 +113,7 @@ public:
   OwningTexture(engine::Renderer* renderer, const data::Image& image);
   ~OwningTexture();
 
-  OwningTexture(OwningTexture&& other)
+  OwningTexture(OwningTexture&& other) noexcept
     : TextureBase(other.mData)
   {
     other.mData.mHandle = 0;
@@ -122,7 +122,7 @@ public:
   OwningTexture(const OwningTexture&) = delete;
   OwningTexture& operator=(const OwningTexture&) = delete;
 
-  OwningTexture& operator=(OwningTexture&& other) {
+  OwningTexture& operator=(OwningTexture&& other) noexcept {
     mData = other.mData;
     other.mData.mHandle = 0;
     return *this;
