@@ -55,8 +55,6 @@ public:
   bool levelFinished() const;
 
 private:
-  void showLoadingScreen(int episode, const loader::ResourceLoader& resources);
-
   void loadLevel(
     int episode,
     int levelNumber,
