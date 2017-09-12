@@ -72,7 +72,8 @@ struct SdlInitializer {
 class OpenGlContext {
 public:
   explicit OpenGlContext(SDL_Window* pWindow)
-    : mpOpenGLContext(SDL_GL_CreateContext(pWindow))
+    : mpOpenGLContext(
+        throwIfCreationFailed([=]() { return SDL_GL_CreateContext(pWindow); }))
   {
   }
   ~OpenGlContext() {
@@ -81,6 +82,7 @@ public:
 
   OpenGlContext(const OpenGlContext&) = delete;
   OpenGlContext& operator=(const OpenGlContext&) = delete;
+
 private:
   SDL_GLContext mpOpenGLContext;
 };
