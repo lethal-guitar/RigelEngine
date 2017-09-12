@@ -43,11 +43,9 @@ namespace {
 
 
 void advanceAnimation(Sprite& sprite, Animated& animated) {
-  const auto& spriteFrames = sprite.mpDrawData->mFrames;
-  const auto endFrame = animated.mEndFrame
-    ? *animated.mEndFrame
-    : static_cast<int>(spriteFrames.size()) - 1;
-  assert(endFrame >= 0 && endFrame < int(spriteFrames.size()));
+  const auto numFrames = static_cast<int>(sprite.mpDrawData->mFrames.size());
+  const auto endFrame = animated.mEndFrame ? *animated.mEndFrame : numFrames-1;
+  assert(endFrame >= 0 && endFrame < numFrames);
   assert(endFrame > animated.mStartFrame);
   //Animations must have at least two frames
   assert(
@@ -59,7 +57,7 @@ void advanceAnimation(Sprite& sprite, Animated& animated) {
     newFrameNr = animated.mStartFrame;
   }
 
-  assert(newFrameNr >= 0 && newFrameNr < int(spriteFrames.size()));
+  assert(newFrameNr >= 0 && newFrameNr < numFrames);
   sprite.mFramesToRender[animated.mRenderSlot] = newFrameNr;
 }
 

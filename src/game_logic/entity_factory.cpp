@@ -157,7 +157,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]));
+    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite));
   }
   return entity;
 }
@@ -181,7 +181,7 @@ entityx::Entity EntityFactory::createProjectile(
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
 
-  const auto boundingBox = engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]);
+  const auto boundingBox = engine::inferBoundingBox(sprite);
 
   // TODO: Player projectiles shouldn't move on the frame they were created
   entity.assign<Active>();
@@ -200,7 +200,7 @@ entityx::Entity EntityFactory::createActor(
 ) {
   auto entity = createSprite(id, position);
   auto& sprite = *entity.component<Sprite>();
-  const auto boundingBox = engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]);
+  const auto boundingBox = engine::inferBoundingBox(sprite);
 
   configureEntity(entity, id, boundingBox);
 
@@ -298,7 +298,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]);
+      boundingBox = engine::inferBoundingBox(sprite);
       entity.assign<Sprite>(sprite);
     }
 

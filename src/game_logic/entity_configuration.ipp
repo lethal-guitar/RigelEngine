@@ -388,8 +388,7 @@ void EntityFactory::configureItemContainer(
   entity.assign<Sprite>(boxSprite);
   entity.assign<components::ItemContainer>(container);
   entity.assign<Shootable>(1, givenScore);
-  addDefaultPhysical(entity, engine::inferBoundingBox(
-    boxSprite.mpDrawData->mFrames[0]));
+  addDefaultPhysical(entity, engine::inferBoundingBox(boxSprite));
 }
 
 

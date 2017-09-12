@@ -85,16 +85,6 @@ std::string levelFileName(const int episode, const int level) {
 }
 
 
-std::string loadingScreenFileName(const int episode) {
-  assert(episode >=0 && episode < 4);
-
-  std::string fileName("LOAD");
-  fileName += std::to_string(episode + 1);
-  fileName += ".MNI";
-  return fileName;
-}
-
-
 template<typename ValueT>
 std::string vec2String(const base::Point<ValueT>& vec, const int width) {
   std::stringstream stream;
@@ -192,8 +182,6 @@ IngameMode::IngameMode(
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
 {
-  showLoadingScreen(episode, *context.mpResources);
-
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
 
@@ -393,24 +381,6 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
 
 bool IngameMode::levelFinished() const {
   return mLevelFinished;
-}
-
-
-void IngameMode::showLoadingScreen(
-  const int episode,
-  const loader::ResourceLoader& resources
-) {
-  mpServiceProvider->fadeOutScreen();
-  mpServiceProvider->playMusic("MENUSNG2.IMF");
-  {
-    const auto loadingScreenTexture = ui::fullScreenImageAsTexture(
-      mpRenderer,
-      resources,
-      loadingScreenFileName(episode));
-    loadingScreenTexture.render(mpRenderer, 0, 0);
-    mpRenderer->submitBatch();
-  }
-  mpServiceProvider->fadeInScreen();
 }
 
 
