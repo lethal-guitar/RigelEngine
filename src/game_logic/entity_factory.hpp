@@ -29,8 +29,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <map>
-#include <tuple>
+#include <unordered_map>
 #include <vector>
 
 
@@ -105,8 +104,6 @@ public:
     const base::Vector& position);
 
 private:
-  using IdAndFrameNr = std::pair<data::ActorID, std::size_t>;
-
   engine::components::Sprite createSpriteForId(const data::ActorID actorID);
 
   void configureEntity(
@@ -121,10 +118,7 @@ private:
     int givenScore,
     Args&&... components);
 
-  const engine::OwningTexture& getOrCreateTexture(
-    const IdAndFrameNr& textureId);
-  engine::components::Sprite makeSpriteFromActorIDs(
-    const std::vector<data::ActorID>& actorIDs);
+  engine::components::Sprite createSpriteComponent(data::ActorID mainId);
 
   void configureProjectile(
     entityx::Entity entity,
@@ -139,7 +133,12 @@ private:
   const loader::ActorImagePackage* mpSpritePackage;
   data::Difficulty mDifficulty;
 
-  std::map<IdAndFrameNr, engine::OwningTexture> mTextureCache;
+  struct SpriteData {
+    engine::SpriteDrawData mDrawData;
+    std::vector<int> mInitialFramesToRender;
+  };
+
+  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
 };
 
 }}

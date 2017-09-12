@@ -43,10 +43,11 @@ namespace {
 
 
 void advanceAnimation(Sprite& sprite, Animated& animated) {
+  const auto& spriteFrames = sprite.mpDrawData->mFrames;
   const auto endFrame = animated.mEndFrame
     ? *animated.mEndFrame
-    : static_cast<int>(sprite.mFrames.size()) - 1;
-  assert(endFrame >= 0 && endFrame < int(sprite.mFrames.size()));
+    : static_cast<int>(spriteFrames.size()) - 1;
+  assert(endFrame >= 0 && endFrame < int(spriteFrames.size()));
   assert(endFrame > animated.mStartFrame);
   //Animations must have at least two frames
   assert(
@@ -58,7 +59,7 @@ void advanceAnimation(Sprite& sprite, Animated& animated) {
     newFrameNr = animated.mStartFrame;
   }
 
-  assert(newFrameNr >= 0 && newFrameNr < int(sprite.mFrames.size()));
+  assert(newFrameNr >= 0 && newFrameNr < int(spriteFrames.size()));
   sprite.mFramesToRender[animated.mRenderSlot] = newFrameNr;
 }
 
@@ -88,22 +89,27 @@ struct RenderingSystem::SpriteData {
     const WorldPosition& position
   )
     : mEntity(entity)
-    , mpSprite(pSprite)
-    , mDrawTopMost(drawTopMost)
     , mPosition(position)
+    , mpSprite(pSprite)
+    , mDrawOrder(
+        entity.has_component<components::OverrideDrawOrder>()
+        ? entity.component<const components::OverrideDrawOrder>()->mDrawOrder
+        : pSprite->mpDrawData->mDrawOrder)
+    , mDrawTopMost(drawTopMost)
   {
   }
 
   bool operator<(const SpriteData& rhs) const {
     return
-      std::tie(mDrawTopMost, mpSprite->mDrawOrder) <
-      std::tie(rhs.mDrawTopMost, rhs.mpSprite->mDrawOrder);
+      std::tie(mDrawTopMost, mDrawOrder) <
+      std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
   }
 
   entityx::Entity mEntity;
-  const Sprite* mpSprite;
-  bool mDrawTopMost;
   WorldPosition mPosition;
+  const Sprite* mpSprite;
+  int mDrawOrder;
+  bool mDrawTopMost;
 };
 
 
@@ -165,7 +171,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     renderFunc(mpRenderer, data.mEntity, sprite, screenPos);
   } else {
     for (const auto frameIndex : sprite.mFramesToRender) {
-      assert(frameIndex < int(sprite.mFrames.size()));
+      assert(frameIndex < int(sprite.mpDrawData->mFrames.size()));
 
       // White flash effect
       const auto maxFlashWhiteTime = engine::gameFramesToTime(1);
@@ -179,7 +185,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
         mpRenderer->setOverlayColor(base::Color(255, 255, 255, 255));
       }
 
-      auto& frame = sprite.mFrames[frameIndex];
+      auto& frame = sprite.mpDrawData->mFrames[frameIndex];
 
       // World-space tile positions refer to a sprite's bottom left tile,
       // but we need its top left corner for drawing.

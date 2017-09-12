@@ -19,6 +19,16 @@
 
 namespace {
 
+// The game draws player projectiles after drawing all regular actors, which
+// makes them appear on top of everything. But in our case, they are rendered
+// using the same mechanism as the other sprites, so we have to explicitly
+// assign an order (which is higher than all regular actors' draw order).
+const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
+
+// Same thing as for player projectiles
+const auto MUZZLE_FLASH_DRAW_ORDER = 12;
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -229,12 +239,6 @@ auto actorIDListForActor(const ActorID ID) {
 
 
 void configureSprite(Sprite& sprite, const ActorID actorID) {
-  if (actorID == 5 || actorID == 6) {
-    for (int i=0; i<39; ++i) {
-      sprite.mFrames[i].mDrawOffset.x -= 1;
-    }
-  }
-
   switch (actorID) {
     case 0:
       sprite.mFramesToRender = {0};
@@ -333,6 +337,22 @@ ActorID actorIdForBoxColor(const ContainerColor color) {
   return 161;
 }
 
+
+int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
+  switch (id) {
+    case 7: case 8: case 9: case 10:
+    case 24: case 25: case 26: case 27:
+    case 21: case 204: case 205: case 206:
+      return PLAYER_PROJECTILE_DRAW_ORDER;
+
+    case 33: case 34: case 35: case 36:
+      return MUZZLE_FLASH_DRAW_ORDER;
+
+    default:
+      return baseDrawOrder;
+  }
+}
+
 } // namespace
 
 
@@ -368,7 +388,8 @@ void EntityFactory::configureItemContainer(
   entity.assign<Sprite>(boxSprite);
   entity.assign<components::ItemContainer>(container);
   entity.assign<Shootable>(1, givenScore);
-  addDefaultPhysical(entity, engine::inferBoundingBox(boxSprite.mFrames[0]));
+  addDefaultPhysical(entity, engine::inferBoundingBox(
+    boxSprite.mpDrawData->mFrames[0]));
 }
 
 
@@ -522,14 +543,15 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
     case 42: // Napalm Bomb
       {
-        const auto originalDrawOrder = entity.component<Sprite>()->mDrawOrder;
+        const auto originalDrawOrder =
+          entity.component<Sprite>()->mpDrawData->mDrawOrder;
         configureItemContainer(
           entity,
           ContainerColor::Red,
           0,
           Animated{1},
           boundingBox);
-        entity.component<Sprite>()->mDrawOrder = originalDrawOrder;
+        entity.assign<OverrideDrawOrder>(originalDrawOrder);
       }
       break;
 

@@ -243,7 +243,7 @@ void renderVerticalSlidingDoor(
     const auto segmentIndex = 8 - i - state.mSlideStep;
     const auto x = topLeftScreenPos.x;
     const auto y = topLeftScreenPos.y + yStep * i;
-    sprite.mFrames[segmentIndex].mImage.render(pRenderer, x, y);
+    sprite.mpDrawData->mFrames[segmentIndex].mImage.render(pRenderer, x, y);
   }
 }
 

@@ -67,13 +67,6 @@ using namespace game_logic::components;
 
 namespace {
 
-// The game draws player projectiles after drawing all regular actors, which
-// makes them appear on top of everything. But in our case, they are rendered
-// using the same mechanism as the other sprites, so we have to explicitly
-// assign an order (which is higher than all regular actors' draw order).
-const auto PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
-
-
 // Assign gravity affected physical component
 void addDefaultPhysical(
   ex::Entity entity,
@@ -105,45 +98,53 @@ EntityFactory::EntityFactory(
 
 
 Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
-  const auto actorParts = actorIDListForActor(actorID);
-  auto sprite = makeSpriteFromActorIDs(actorParts);
+  auto sprite = createSpriteComponent(actorID);
   configureSprite(sprite, actorID);
   return sprite;
 }
 
 
-const engine::OwningTexture& EntityFactory::getOrCreateTexture(
-  const IdAndFrameNr& textureId
-) {
-  auto it = mTextureCache.find(textureId);
-  if (it == mTextureCache.end()) {
-    const auto& actorData = mpSpritePackage->loadActor(textureId.first);
-    const auto& frameData = actorData.mFrames[textureId.second];
-    auto texture = engine::OwningTexture(
-      mpRenderer, frameData.mFrameImage);
-    it = mTextureCache.emplace(textureId, std::move(texture)).first;
-  }
-  return it->second;
-}
+Sprite EntityFactory::createSpriteComponent(const ActorID mainId) {
+  auto iData = mSpriteDataCache.find(mainId);
+  if (iData == mSpriteDataCache.end()) {
+    engine::SpriteDrawData drawData;
 
+    int lastDrawOrder = 0;
+    int lastFrameCount = 0;
+    std::vector<int> framesToRender;
 
-Sprite EntityFactory::makeSpriteFromActorIDs(const vector<ActorID>& actorIDs) {
-  Sprite sprite;
-  int lastFrameCount = 0;
+    const auto actorParts = actorIDListForActor(mainId);
+    for (const auto part : actorParts) {
+        const auto& actorData = mpSpritePackage->loadActor(part);
+        lastDrawOrder = actorData.mDrawIndex;
 
-  for (const auto ID : actorIDs) {
-    const auto& actorData = mpSpritePackage->loadActor(ID);
-    for (auto i=0u; i<actorData.mFrames.size(); ++i) {
-      const auto& frameData = actorData.mFrames[i];
-      const auto& texture = getOrCreateTexture(make_pair(ID, i));
-      const auto textureRef = engine::NonOwningTexture(texture);
-      sprite.mFrames.emplace_back(textureRef, frameData.mDrawOffset);
+        for (const auto& frameData : actorData.mFrames) {
+          auto texture = engine::OwningTexture{
+            mpRenderer, frameData.mFrameImage};
+          drawData.mFrames.emplace_back(
+            std::move(texture), frameData.mDrawOffset);
+        }
+
+        framesToRender.push_back(lastFrameCount);
+        lastFrameCount = int(actorData.mFrames.size());
     }
-    sprite.mDrawOrder = actorData.mDrawIndex;
-    sprite.mFramesToRender.push_back(lastFrameCount);
-    lastFrameCount += static_cast<int>(actorData.mFrames.size());
+
+    drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
+
+    if (mainId == 5 || mainId == 6) {
+      for (int i=0; i<39; ++i) {
+        drawData.mFrames[i].mDrawOffset.x -= 1;
+      }
+    }
+
+    iData = mSpriteDataCache.emplace(
+      mainId,
+      SpriteData{std::move(drawData), std::move(framesToRender)}
+    ).first;
   }
-  return sprite;
+
+  const auto& data = iData->second;
+  return {&data.mDrawData, data.mInitialFramesToRender};
 }
 
 
@@ -156,7 +157,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite.mFrames[0]));
+    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]));
   }
   return entity;
 }
@@ -179,11 +180,8 @@ entityx::Entity EntityFactory::createProjectile(
 ) {
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
-  if (isPlayerProjectile(type)) {
-    sprite.mDrawOrder = PROJECTILE_DRAW_ORDER;
-  }
 
-  const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
+  const auto boundingBox = engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]);
 
   // TODO: Player projectiles shouldn't move on the frame they were created
   entity.assign<Active>();
@@ -202,7 +200,7 @@ entityx::Entity EntityFactory::createActor(
 ) {
   auto entity = createSprite(id, position);
   auto& sprite = *entity.component<Sprite>();
-  const auto boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
+  const auto boundingBox = engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]);
 
   configureEntity(entity, id, boundingBox);
 
@@ -300,7 +298,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = engine::inferBoundingBox(sprite.mFrames[0]);
+      boundingBox = engine::inferBoundingBox(sprite.mpDrawData->mFrames[0]);
       entity.assign<Sprite>(sprite);
     }
 

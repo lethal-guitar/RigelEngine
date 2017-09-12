@@ -45,7 +45,6 @@ namespace {
 const auto DEATH_ANIM_BASE_FRAME = 29;
 const auto FRAMES_PER_ORIENTATION = 39;
 const auto MOVEMENT_BASED_ANIM_SPEED_SCALE = 2;
-const auto MUZZLE_FLASH_DRAW_ORDER = 12;
 const auto NUM_LADDER_ANIM_STATES = 2;
 const auto NUM_WALK_ANIM_STATES = 4;
 
@@ -308,8 +307,6 @@ int AnimationSystem::attackAnimationFrame(
     const auto spriteId = muzzleFlashActorId(shotDirection);
 
     auto muzzleFlashEntity = mpEntityFactory->createSprite(spriteId);
-    muzzleFlashEntity.component<Sprite>()->mDrawOrder =
-      MUZZLE_FLASH_DRAW_ORDER;
     muzzleFlashEntity.assign<WorldPosition>(
        playerPosition + muzzleFlashOffset(state.mState, state.mOrientation));
     muzzleFlashEntity.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
