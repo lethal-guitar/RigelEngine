@@ -72,6 +72,23 @@ make
 ./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
 ```
 
+### Acquiring the game data
+
+In order to run RigelEngine, the game data from the original game is required. Both the shareware version and the registered version work.
+The game is currently not being sold anymore after the rights to the whole Duke Nukem franchise went to Gearbox, but you can still download the freely available shareware version from [the old 3D Realms site](http://legacy.3drealms.com/duke2/) - look for a download link for the file `4duke.zip`. You can also find the same file on various websites if you Google for "Duke Nukem 2 shareware".
+
+The download contains an installer which only runs on MS-DOS, but you don't need that - you can simply rename the file `DN2SW10.SHR` (also part of the download) to `.zip` and open it using your favorite archive manager. After that, you can point RigelEngine to the directory where you extracted the files, and it should work.
+
+If you already have a copy of the game, you can also point RigelEngine to that existing installation.
+
+The only files actually required for RigelEngine are:
+
+* `NUKEM2.CMP` (the main data file)
+* `NUKEM2.F1`, `.F2`, `.F3` etc. up to `.F5` (intro movie files)
+
+Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
+
+
 ### Jumping to specific levels, command line options
 
 Since most levels cannot be completed at the moment, only the first level of each episode is accessible
