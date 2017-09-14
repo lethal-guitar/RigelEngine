@@ -29,9 +29,8 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel { namespace engine {
 
 inline components::BoundingBox inferBoundingBox(
-  const components::Sprite& sprite
+  const SpriteFrame& frame
 ) {
-  const auto& frame = sprite.mpDrawData->mFrames[0];
   const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
     frame.mImage.extents());
 
@@ -39,11 +38,19 @@ inline components::BoundingBox inferBoundingBox(
 }
 
 
+inline components::BoundingBox inferBoundingBox(
+  const components::Sprite& sprite
+) {
+  return inferBoundingBox(sprite.mpDrawData->mFrames[0]);
+}
+
+
 inline void synchronizeBoundingBoxToSprite(entityx::Entity& entity) {
   auto& sprite = *entity.component<components::Sprite>();
   auto& bbox = *entity.component<components::BoundingBox>();
 
-  bbox = inferBoundingBox(sprite);
+  bbox = inferBoundingBox(
+    sprite.mpDrawData->mFrames[sprite.mFramesToRender[0]]);
 }
 
 
