@@ -22,6 +22,8 @@
 
 namespace rigel { namespace engine {
 
+namespace ex = entityx;
+
 using namespace engine::components;
 
 
@@ -31,7 +33,7 @@ CollisionChecker::CollisionChecker(const data::map::Map* pMap)
 }
 
 
-bool CollisionChecker::walkEntity(entityx::Entity entity, const int amount) const {
+bool CollisionChecker::walkEntity(ex::Entity entity, const int amount) const {
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
 
@@ -62,7 +64,7 @@ bool CollisionChecker::walkEntity(entityx::Entity entity, const int amount) cons
 
 
 bool CollisionChecker::walkEntityOnCeiling(
-  entityx::Entity entity,
+  ex::Entity entity,
   const int amount
 ) const {
   // TODO: Eliminate duplication with the regular walkEntity()
