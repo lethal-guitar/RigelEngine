@@ -113,6 +113,7 @@ struct IngameMode::Systems {
     entityx::EventManager& eventManager
   )
     : mCollisionChecker(pMap, entities, eventManager)
+    , mPhysicsSystem(&mCollisionChecker)
     , mMapScrollSystem(pScrollOffset, playerEntity, map)
     , mPlayerMovementSystem(playerEntity, map)
     , mPlayerAttackSystem(
@@ -143,6 +144,7 @@ struct IngameMode::Systems {
   }
 
   engine::CollisionChecker mCollisionChecker;
+  engine::PhysicsSystem mPhysicsSystem;
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
@@ -364,7 +366,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // Physics and other updates
   // ----------------------------------------------------------------------
-  mEntities.systems.update<PhysicsSystem>(dt);
+  mpSystems->mPhysicsSystem.update(mEntities.entities);
 
   // Player attacks have to be processed after physics, because:
   //  1. Player projectiles should spawn at the player's location
@@ -403,8 +405,6 @@ void IngameMode::loadLevel(
   };
   mMapAtLevelStart = mLevelData.mMap;
 
-  mEntities.systems.add<PhysicsSystem>(
-    &mLevelData.mMap);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider,

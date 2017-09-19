@@ -16,10 +16,8 @@
 
 #pragma once
 
-#include "base/grid.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 
@@ -29,12 +27,12 @@ RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
 #include <tuple>
-#include <vector>
 
-
-namespace rigel { namespace data { namespace map { class Map; }}}
 
 namespace rigel { namespace engine {
+
+class CollisionChecker;
+
 
 /** Implements game physics/world interaction
  *
@@ -53,20 +51,14 @@ namespace rigel { namespace engine {
  * movement. The system can't perform any corrections to entities which are
  * already positioned so that they collide with the world.
  */
-class PhysicsSystem : public entityx::System<PhysicsSystem> {
+class PhysicsSystem {
 public:
-  explicit PhysicsSystem(const data::map::Map* pMap);
+  explicit PhysicsSystem(const engine::CollisionChecker* pCollisionChecker);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
-  data::map::CollisionData worldAt(int x, int y) const;
-
   base::Vector applyHorizontalMovement(
-    entityx::Entity entity,
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     std::int16_t movementX,
@@ -74,7 +66,6 @@ private:
   ) const;
 
   std::tuple<base::Vector, float> applyVerticalMovement(
-    entityx::Entity entity,
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
@@ -86,15 +77,8 @@ private:
     const components::BoundingBox& bbox,
     float currentVelocity);
 
-  bool hasSolidBodyCollision(
-    entityx::Entity,
-    const components::BoundingBox& bbox) const;
-
 private:
-  const data::map::Map* mpMap;
-
-  using SolidBodyInfo = std::tuple<entityx::Entity, components::BoundingBox>;
-  std::vector<SolidBodyInfo> mSolidBodies;
+  const CollisionChecker* mpCollisionChecker;
 };
 
 }}

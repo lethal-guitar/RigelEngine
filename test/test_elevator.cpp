@@ -19,6 +19,7 @@
 
 #include <base/spatial_types_printing.hpp>
 #include <data/map.hpp>
+#include <engine/collision_checker.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
 #include <engine/timing.hpp>
@@ -65,7 +66,8 @@ TEST_CASE("Rocket elevator") {
     map.setTileAt(0, i, 90, 1);
   }
 
-  PhysicsSystem physicsSystem{&map};
+  CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
+  PhysicsSystem physicsSystem{&collisionChecker};
 
 
   SECTION("Elevator is setup correctly") {
@@ -86,7 +88,7 @@ TEST_CASE("Rocket elevator") {
       const PlayerInputState& inputState
     ) {
       elevatorSystem.update(entityx.entities, inputState);
-      physicsSystem.update(entityx.entities, entityx.events, 0);
+      physicsSystem.update(entityx.entities);
     };
 
   const auto verifyPositions = [&playerPosition, &elevatorPosition](

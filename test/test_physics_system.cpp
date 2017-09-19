@@ -19,6 +19,7 @@
 #include <base/warnings.hpp>
 
 #include <data/map.hpp>
+#include <engine/collision_checker.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
 #include <engine/timing.hpp>
@@ -38,7 +39,8 @@ TEST_CASE("Physics system works as expected") {
 
   data::map::Map map{100, 100, data::map::TileAttributes{{0x0, 0xF}}};
 
-  PhysicsSystem physicsSystem{&map};
+  CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
+  PhysicsSystem physicsSystem{&collisionChecker};
 
   auto physicalObject = entities.create();
   physicalObject.assign<BoundingBox>(BoundingBox{{0, 0}, {2, 2}});
@@ -50,7 +52,7 @@ TEST_CASE("Physics system works as expected") {
   auto& position = *physicalObject.component<WorldPosition>();
 
   const auto runOneFrame = [&physicsSystem, &entityx]() {
-    physicsSystem.update(entityx.entities, entityx.events, 0);
+    physicsSystem.update(entityx.entities);
   };
 
 
