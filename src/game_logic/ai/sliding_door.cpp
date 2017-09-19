@@ -161,18 +161,29 @@ void SlidingDoorSystem::update(
   const auto& playerPosition = *mPlayerEntity.component<WorldPosition>().get();
 
   using engine::components::BoundingBox;
+  using engine::components::SolidBody;
   using components::HorizontalSlidingDoor;
   es.each<WorldPosition, BoundingBox, Sprite, HorizontalSlidingDoor>(
-    [this, &playerPosition](
+    [this, &playerPosition, &es](
       entityx::Entity entity,
       const WorldPosition& position,
       BoundingBox& boundingBox,
       Sprite& sprite,
       HorizontalSlidingDoor& state
     ) {
+      if (!state.mCollisionHelper) {
+        auto collisionHelper = es.create();
+        collisionHelper.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
+        collisionHelper.assign<WorldPosition>(position);
+        collisionHelper.assign<engine::components::Active>();
+        collisionHelper.assign<SolidBody>();
+        state.mCollisionHelper = collisionHelper;
+      }
+
       const auto inRange =
         playerInRange(playerPosition, position, HORIZONTAL_DOOR_RANGE);
-      state.mState = horizontal::nextState(state.mState, inRange);
+      const auto previousState = state.mState;
+      state.mState = horizontal::nextState(previousState, inRange);
 
       if (state.mState == horizontal::State::Closed) {
         boundingBox.topLeft.x = 0;
@@ -181,6 +192,12 @@ void SlidingDoorSystem::update(
         boundingBox.topLeft.x = 5;
         boundingBox.size.width = 1;
       }
+
+      const auto missingLeftEdgeCollision =
+        previousState == horizontal::State::Closed &&
+        state.mState == horizontal::State::HalfOpen;
+      engine::setTag<SolidBody>(
+        state.mCollisionHelper, !missingLeftEdgeCollision);
 
       sprite.mFramesToRender[0] = static_cast<int>(state.mState);
       updateSoundGeneration(inRange, state);

@@ -41,6 +41,7 @@ struct HorizontalSlidingDoor {
 
   State mState = State::Closed;
   bool mPlayerWasInRange = false;
+  entityx::Entity mCollisionHelper;
 };
 
 
