@@ -37,6 +37,26 @@ bool isBitSet(uint16_t bitPack, uint16_t bitMask) {
 }
 
 
+SolidEdge SolidEdge::top() {
+  return SolidEdge{0x01};
+}
+
+
+SolidEdge SolidEdge::bottom() {
+  return SolidEdge{0x02};
+}
+
+
+SolidEdge SolidEdge::left() {
+  return SolidEdge{0x08};
+}
+
+
+SolidEdge SolidEdge::right() {
+  return SolidEdge{0x04};
+}
+
+
 CollisionData CollisionData::fullySolid() {
   return CollisionData{0xFF};
 }
