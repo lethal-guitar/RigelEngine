@@ -17,14 +17,13 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/map.hpp"
 #include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-
-namespace rigel { namespace data { namespace map { class Map; }}}
 
 namespace rigel { namespace engine {
 
@@ -54,7 +53,29 @@ public:
     const engine::components::WorldPosition& position,
     const engine::components::BoundingBox& bbox) const;
 
+  bool isTouchingLeftWall(
+    const engine::components::WorldPosition& position,
+    const engine::components::BoundingBox& bbox) const;
+
+  bool isTouchingRightWall(
+    const engine::components::WorldPosition& position,
+    const engine::components::BoundingBox& bbox) const;
+
+  bool isOnSolidGround(const engine::components::BoundingBox& bbox) const;
+  bool isTouchingCeiling(const engine::components::BoundingBox& bbox) const;
+  bool isTouchingLeftWall(const engine::components::BoundingBox& bbox) const;
+  bool isTouchingRightWall(const engine::components::BoundingBox& bbox) const;
+
 private:
+  bool testHorizontalSpan(
+    const engine::components::BoundingBox& bbox,
+    int y,
+    data::map::SolidEdge edge) const;
+  bool testVerticalSpan(
+    const engine::components::BoundingBox& bbox,
+    int x,
+    data::map::SolidEdge edge) const;
+
   const data::map::Map* mpMap;
 };
 
