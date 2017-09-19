@@ -16,7 +16,7 @@
 
 #include "collision_checker.hpp"
 
-#include "engine/physical_components.hpp"
+#include <algorithm>
 
 
 namespace rigel { namespace engine {
@@ -28,9 +28,19 @@ using data::map::SolidEdge;
 using namespace engine::components;
 
 
-CollisionChecker::CollisionChecker(const data::map::Map* pMap)
+CollisionChecker::CollisionChecker(
+  const data::map::Map* pMap,
+  ex::EntityManager& entities,
+  ex::EventManager& eventManager
+)
   : mpMap(pMap)
 {
+  entities.each<SolidBody>([this](ex::Entity entity, const SolidBody&) {
+    mSolidBodies.push_back(entity);
+  });
+
+  eventManager.subscribe<ex::ComponentAddedEvent<SolidBody>>(*this);
+  eventManager.subscribe<ex::ComponentRemovedEvent<SolidBody>>(*this);
 }
 
 
@@ -127,6 +137,13 @@ bool CollisionChecker::testHorizontalSpan(
   const int y,
   const SolidEdge edge
 ) const {
+  auto bboxForSolidBodyTest = bbox;
+  bboxForSolidBodyTest.topLeft.y = y;
+  bboxForSolidBodyTest.size.height = 1;
+  if (testSolidBodyCollision(bboxForSolidBodyTest)) {
+    return true;
+  }
+
   const auto startX = bbox.left();
   const auto endX = bbox.right();
   for (int x = startX; x <= endX; ++x) {
@@ -144,6 +161,13 @@ bool CollisionChecker::testVerticalSpan(
   const int x,
   const SolidEdge edge
 ) const {
+  auto bboxForSolidBodyTest = bbox;
+  bboxForSolidBodyTest.topLeft.x = x;
+  bboxForSolidBodyTest.size.width = 1;
+  if (testSolidBodyCollision(bboxForSolidBodyTest)) {
+    return true;
+  }
+
   const auto startY = bbox.top();
   const auto endY = bbox.bottom();
   for (int y = startY; y <= endY; ++y) {
@@ -153,6 +177,26 @@ bool CollisionChecker::testVerticalSpan(
   }
 
   return false;
+}
+
+
+bool CollisionChecker::testSolidBodyCollision(
+  const BoundingBox& bboxToTest
+) const {
+  return any_of(cbegin(mSolidBodies), cend(mSolidBodies),
+    [&bboxToTest](const ex::Entity& entity) {
+      if (
+        entity.has_component<BoundingBox>() &&
+        entity.has_component<WorldPosition>()
+      ) {
+        const auto solidBodyBbox = engine::toWorldSpace(
+          *entity.component<const BoundingBox>(),
+          *entity.component<const WorldPosition>());
+        return solidBodyBbox.intersects(bboxToTest);
+      }
+
+      return false;
+    });
 }
 
 
@@ -185,6 +229,27 @@ bool CollisionChecker::isTouchingRightWall(
 ) const {
   const auto x = worldSpaceBbox.right() + 1;
   return testVerticalSpan(worldSpaceBbox, x, SolidEdge::left());
+}
+
+
+void CollisionChecker::receive(
+  const ex::ComponentAddedEvent<SolidBody>& event
+) {
+  mSolidBodies.push_back(event.entity);
+}
+
+
+void CollisionChecker::receive(
+  const ex::ComponentRemovedEvent<SolidBody>& event
+) {
+  const auto it = find_if(begin(mSolidBodies), end(mSolidBodies),
+    [&event](const auto& entity) {
+      return entity == event.entity;
+    });
+
+  if (it != end(mSolidBodies)) {
+    mSolidBodies.erase(it);
+  }
 }
 
 }}

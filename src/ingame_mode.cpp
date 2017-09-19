@@ -108,9 +108,11 @@ struct IngameMode::Systems {
     EntityFactory* pEntityFactory,
     RandomNumberGenerator* pRandomGenerator,
     const data::map::Map& map,
-    FireShotFuncT fireShotFunc
+    FireShotFuncT fireShotFunc,
+    entityx::EntityManager& entities,
+    entityx::EventManager& eventManager
   )
-    : mCollisionChecker(pMap)
+    : mCollisionChecker(pMap, entities, eventManager)
     , mMapScrollSystem(pScrollOffset, playerEntity, map)
     , mPlayerMovementSystem(playerEntity, map)
     , mPlayerAttackSystem(
@@ -471,7 +473,9 @@ void IngameMode::loadLevel(
       const game_logic::ProjectileDirection direction
     ) {
       mEntityFactory.createProjectile(type, pos, direction);
-    });
+    },
+    mEntities.entities,
+    mEntities.events);
 
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {

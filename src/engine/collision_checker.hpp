@@ -19,6 +19,9 @@
 #include "base/warnings.hpp"
 #include "data/map.hpp"
 #include "engine/base_components.hpp"
+#include "engine/physical_components.hpp"
+
+#include <vector>
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -27,9 +30,12 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine {
 
-class CollisionChecker {
+class CollisionChecker : public entityx::Receiver<CollisionChecker> {
 public:
-  CollisionChecker(const data::map::Map* pMap);
+  CollisionChecker(
+    const data::map::Map* pMap,
+    entityx::EntityManager& entities,
+    entityx::EventManager& eventManager);
 
   /** Walk entity by the given amount if possible.
    *
@@ -66,6 +72,11 @@ public:
   bool isTouchingLeftWall(const engine::components::BoundingBox& bbox) const;
   bool isTouchingRightWall(const engine::components::BoundingBox& bbox) const;
 
+  void receive(
+    const entityx::ComponentAddedEvent<components::SolidBody>& event);
+  void receive(
+    const entityx::ComponentRemovedEvent<components::SolidBody>& event);
+
 private:
   bool testHorizontalSpan(
     const engine::components::BoundingBox& bbox,
@@ -75,7 +86,10 @@ private:
     const engine::components::BoundingBox& bbox,
     int x,
     data::map::SolidEdge edge) const;
+  bool testSolidBodyCollision(
+    const engine::components::BoundingBox& bbox) const;
 
+  std::vector<entityx::Entity> mSolidBodies;
   const data::map::Map* mpMap;
 };
 
