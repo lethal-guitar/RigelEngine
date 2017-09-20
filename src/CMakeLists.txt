@@ -189,7 +189,6 @@ target_include_directories(rigel_core
 
     PRIVATE
     ${3rd_party_path}/dbopl
-    ${3rd_party_path}/speex_resampler
 )
 target_link_libraries(rigel_core
     PUBLIC
@@ -199,7 +198,6 @@ target_link_libraries(rigel_core
 
     PRIVATE
     dbopl
-    speex_resampler
     glad
 )
 
