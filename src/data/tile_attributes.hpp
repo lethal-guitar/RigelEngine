@@ -54,12 +54,6 @@ public:
   CollisionData(const std::initializer_list<CollisionData>& items);
   explicit CollisionData(std::uint8_t flagsBitPack);
 
-  bool isSolidTop() const;
-  bool isSolidBottom() const;
-  bool isSolidLeft() const;
-  bool isSolidRight() const;
-  bool isClear() const;
-
   bool isSolidOn(const SolidEdge& edge) const {
     return (mCollisionFlagsBitPack & edge.mFlagsBitPack) != 0;
   }

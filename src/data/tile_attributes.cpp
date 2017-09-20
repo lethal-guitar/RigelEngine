@@ -77,31 +77,6 @@ CollisionData::CollisionData(std::uint8_t flagsBitPack)
 }
 
 
-bool CollisionData::isSolidTop() const {
-  return isBitSet(mCollisionFlagsBitPack, 0x01);
-}
-
-
-bool CollisionData::isSolidBottom() const {
-  return isBitSet(mCollisionFlagsBitPack, 0x02);
-}
-
-
-bool CollisionData::isSolidLeft() const {
-  return isBitSet(mCollisionFlagsBitPack, 0x08);
-}
-
-
-bool CollisionData::isSolidRight() const {
-  return isBitSet(mCollisionFlagsBitPack, 0x04);
-}
-
-
-bool CollisionData::isClear() const {
-  return mCollisionFlagsBitPack == 0x00;
-}
-
-
 TileAttributes::TileAttributes(const AttributeArray& bitpacks)
   : mAttributeBitPacks(bitpacks)
 {
