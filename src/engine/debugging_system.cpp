@@ -29,9 +29,17 @@ namespace rigel { namespace engine {
 
 using namespace data;
 using namespace engine::components;
+using namespace std;
+using data::map::SolidEdge;
 
 
 namespace {
+
+struct SolidEdgeVisualizationInfo {
+  data::map::SolidEdge mEdge;
+  tuple<int, int, int, int> mCoordinates;
+};
+
 
 base::Color colorForEntity(entityx::Entity entity) {
   const auto isPlayerDamaging =
@@ -97,19 +105,19 @@ void DebuggingSystem::update(
         const auto right = bottomRight.x;
         const auto bottom = bottomRight.y;
 
-        // TODO: Implement this using SolidEdge matching,
-        // then remove these functions (isSolidXXX) from CollisionData
-        if (collisionData.isSolidTop()) {
-          mpRenderer->drawLine(left, top, right, top, drawColor);
-        }
-        if (collisionData.isSolidRight()) {
-          mpRenderer->drawLine(right, top, right, bottom, drawColor);
-        }
-        if (collisionData.isSolidBottom()) {
-          mpRenderer->drawLine(left, bottom, right, bottom, drawColor);
-        }
-        if (collisionData.isSolidLeft()) {
-          mpRenderer->drawLine(left, top, left, bottom, drawColor);
+        const SolidEdgeVisualizationInfo visualizationInfos[] = {
+          {SolidEdge::top(),    make_tuple(left, top, right, top)},
+          {SolidEdge::right(),  make_tuple(right, top, right, bottom)},
+          {SolidEdge::bottom(), make_tuple(left, bottom, right, bottom)},
+          {SolidEdge::left(),   make_tuple(left, top, left, bottom)}
+        };
+
+        for (const auto& info : visualizationInfos) {
+          if (collisionData.isSolidOn(info.mEdge)) {
+            int x1, y1, x2, y2;
+            tie(x1, y1, x2, y2) = info.mCoordinates;
+            mpRenderer->drawLine(x1, y1, x2, y2, drawColor);
+          }
         }
       }
     }
