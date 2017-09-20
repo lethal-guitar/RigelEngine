@@ -16,16 +16,9 @@
 
 #include "physics_system.hpp"
 
-#include "base/warnings.hpp"
-#include "data/map.hpp"
-#include "engine/base_components.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/algorithm/cxx11/any_of.hpp>
-RIGEL_RESTORE_WARNINGS
-
-namespace ba = boost::algorithm;
 namespace ex = entityx;
 
 
@@ -37,9 +30,10 @@ using components::BoundingBox;
 using components::Physical;
 using components::SolidBody;
 using components::WorldPosition;
-using data::map::CollisionData;
 
 
+// TODO: This is implemented here, but declared in physical_components.hpp.
+// It would be cleaner to have a matching .cpp file for that file.
 BoundingBox toWorldSpace(
   const BoundingBox& bbox,
   const base::Vector& entityPosition
@@ -50,30 +44,14 @@ BoundingBox toWorldSpace(
 }
 
 
-PhysicsSystem::PhysicsSystem(const data::map::Map* pMap)
-  : mpMap(pMap)
+PhysicsSystem::PhysicsSystem(const engine::CollisionChecker* pCollisionChecker)
+  : mpCollisionChecker(pCollisionChecker)
 {
 }
 
 
-void PhysicsSystem::update(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  ex::TimeDelta dt
-) {
+void PhysicsSystem::update(ex::EntityManager& es) {
   using components::CollidedWithWorld;
-
-  mSolidBodies.clear();
-  es.each<SolidBody, WorldPosition, BoundingBox>(
-    [this](
-      ex::Entity entity,
-      const SolidBody&,
-      const WorldPosition& pos,
-      const BoundingBox& bbox
-    ) {
-      mSolidBodies.emplace_back(
-        std::make_tuple(entity, toWorldSpace(bbox, pos)));
-    });
 
   es.each<Physical, WorldPosition, BoundingBox, components::Active>(
     [this](
@@ -88,7 +66,6 @@ void PhysicsSystem::update(
       const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
       if (movementX != 0) {
         position= applyHorizontalMovement(
-          entity,
           toWorldSpace(collisionRect, position),
           position,
           movementX,
@@ -112,7 +89,6 @@ void PhysicsSystem::update(
       const auto movementY = static_cast<std::int16_t>(physical.mVelocity.y);
       if (movementY != 0) {
         std::tie(position, physical.mVelocity.y) = applyVerticalMovement(
-          entity,
           bbox,
           position,
           physical.mVelocity.y,
@@ -127,75 +103,50 @@ void PhysicsSystem::update(
 }
 
 
-data::map::CollisionData PhysicsSystem::worldAt(
-  const int x, const int y
-) const {
-  return mpMap->collisionData(x, y);
-}
-
-
 base::Vector PhysicsSystem::applyHorizontalMovement(
-  entityx::Entity entity,
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const int16_t movementX,
   const bool allowStairStepping
 ) const {
-  base::Vector newPosition = currentPosition;
-  newPosition.x += movementX;
-
   const auto movingRight = movementX > 0;
-  const auto movementDirection = movingRight ? 1 : -1;
-  const auto startX = currentPosition.x + movementDirection;
-  const auto endX = newPosition.x + movementDirection;
-  const auto boundingBoxOffsetX = bbox.left() - currentPosition.x;
-  const auto xOffset =
-    (movingRight ? bbox.size.width-1u : 0u) +
-    boundingBoxOffsetX;
-  auto hasCollision = [movingRight](const auto& cellData) {
-    if (movingRight) {
-      return cellData.isSolidLeft();
-    } else {
-      return cellData.isSolidRight();
-    }
-  };
+  base::Vector newPosition = currentPosition;
 
-  // Check each cell between old and new position along the movement
-  // direction for collisions. If one is found, stop and use the cell before
-  // that as new x value.
-  for (auto row=bbox.topLeft.y; row<=bbox.bottomLeft().y; ++row) {
-    for (auto col=startX; col != endX; col += movementDirection) {
-      const auto x = col + xOffset;
+  auto movingBbox = bbox;
+  for (auto step = 0; step < std::abs(movementX); ++step) {
+    const auto move = movingRight ? 1 : -1;
 
-      auto transformedBbox = bbox;
-      transformedBbox.topLeft.x = col;
-      const auto collidesWithSolidBody = hasSolidBodyCollision(
-        entity, transformedBbox);
+    const auto isTouching = movingRight
+      ? mpCollisionChecker->isTouchingRightWall(movingBbox)
+      : mpCollisionChecker->isTouchingLeftWall(movingBbox);
+    if (isTouching) {
+      if (allowStairStepping) {
+        // TODO: This stair-stepping logic is only needed for the player.
+        // It should be implemented as part of a dedicated player physics
+        // system/module which is separate from the generic physics system.
+        auto stepUpBbox = movingBbox;
+        stepUpBbox.topLeft.y -= 1;
+        const auto collisionAfterStairStep = movingRight
+          ? mpCollisionChecker->isTouchingRightWall(stepUpBbox)
+          : mpCollisionChecker->isTouchingLeftWall(stepUpBbox);
 
-      const auto& enteredCell = worldAt(x, row);
-      if (collidesWithSolidBody || hasCollision(enteredCell)) {
-        bool mustResolveCollision = true;
-
-        const auto atBottomRow = row == bbox.bottomLeft().y;
-        if (atBottomRow && allowStairStepping) {
-          // Collision happened at bottom row, check if we can step up
-          // a stair
-          const auto& stairStepUp = worldAt(x, row-1);
-          if (stairStepUp.isClear() && enteredCell.isSolidTop()) {
-            // Yes, step up
+        if (!collisionAfterStairStep) {
+          stepUpBbox.topLeft.x += move;
+          if (mpCollisionChecker->isOnSolidGround(stepUpBbox)) {
+            movingBbox.topLeft.x += move;
+            movingBbox.topLeft.y -= 1;
+            newPosition.x += move;
             newPosition.y -= 1;
-            mustResolveCollision = false;
+            continue;
           }
         }
-
-        if (mustResolveCollision) {
-          return {
-            static_cast<uint16_t>(col - movementDirection),
-            newPosition.y
-          };
-        }
       }
+
+      break;
     }
+
+    movingBbox.topLeft.x += move;
+    newPosition.x += move;
   }
 
   return newPosition;
@@ -207,13 +158,8 @@ float PhysicsSystem::applyGravity(
   const float currentVelocity
 ) {
   if (currentVelocity == 0.0f) {
-    // Check if we are still on solid ground
-
-    for (auto x=bbox.bottomLeft().x; x<bbox.bottomRight().x; ++x) {
-      if (worldAt(x, bbox.bottomLeft().y+1).isSolidTop()) {
-        // Standing on solid ground - all good
-        return currentVelocity;
-      }
+    if (mpCollisionChecker->isOnSolidGround(bbox)) {
+      return currentVelocity;
     }
 
     // We are floating - begin falling
@@ -230,7 +176,6 @@ float PhysicsSystem::applyGravity(
 
 
 std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
-  entityx::Entity entity,
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
   const float currentVelocity,
@@ -238,60 +183,29 @@ std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
   const bool beginFallingOnHittingCeiling
 ) const {
   base::Vector newPosition = currentPosition;
-  newPosition.y += movementY;
-
   const auto movingDown = movementY > 0;
-  const auto movementDirection = movingDown ? 1 : -1;
-  const auto startY = currentPosition.y + movementDirection;
-  const auto endY = newPosition.y + movementDirection;
-  const auto boundingBoxOffsetY = bbox.bottom() - currentPosition.y;
-  const auto yOffset =
-    (movingDown ? 0 : -(bbox.size.height - 1)) +
-    boundingBoxOffsetY;
-  auto hasCollision = [movingDown](const auto& cellData) {
-    if (movingDown) {
-      return cellData.isSolidTop();
-    } else {
-      return cellData.isSolidBottom();
-    }
-  };
 
-  auto transformedBbox = bbox;
-  for (auto row=startY; row != endY; row += movementDirection) {
-    transformedBbox.topLeft.y += movementDirection;
-
-    for (auto col=bbox.topLeft.x; col<=bbox.bottomRight().x; ++col) {
-      const auto y = row + yOffset;
-      const auto& enteredCell = worldAt(col, y);
-      if (
-        hasSolidBodyCollision(entity, transformedBbox) ||
-        hasCollision(enteredCell)
-      ) {
-        newPosition.y = row - movementDirection;
-        if (movingDown || !beginFallingOnHittingCeiling) {
-          // For falling, we reset the Y velocity as soon as we hit the ground
-          return make_tuple(newPosition, 0.0f);
-        } else {
-          // For jumping, we begin falling early when we hit the ceiling
-          return make_tuple(newPosition, 1.0f);
-        }
+  auto movingBbox = bbox;
+  for (auto step = 0; step < std::abs(movementY); ++step) {
+    const auto isTouching = movingDown
+      ? mpCollisionChecker->isOnSolidGround(movingBbox)
+      : mpCollisionChecker->isTouchingCeiling(movingBbox);
+    if (isTouching) {
+      if (movingDown || !beginFallingOnHittingCeiling) {
+        // For falling, we reset the Y velocity as soon as we hit the ground
+        return make_tuple(newPosition, 0.0f);
+      } else {
+        // For jumping, we begin falling early when we hit the ceiling
+        return make_tuple(newPosition, 1.0f);
       }
     }
+
+    const auto move = movingDown ? 1 : -1;
+    movingBbox.topLeft.y += move;
+    newPosition.y += move;
   }
 
   return make_tuple(newPosition, currentVelocity);
-}
-
-
-bool PhysicsSystem::hasSolidBodyCollision(
-  entityx::Entity entity,
-  const BoundingBox& bbox
-) const {
-  return ba::any_of(mSolidBodies, [&bbox, &entity](const auto& solidBodyInfo) {
-    return
-      entity != std::get<0>(solidBodyInfo) &&
-      bbox.intersects(std::get<1>(solidBodyInfo));
-  });
 }
 
 }}

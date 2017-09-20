@@ -27,6 +27,25 @@ namespace rigel { namespace data { namespace map {
 using TileIndex = std::uint32_t;
 
 
+class SolidEdge {
+public:
+  static SolidEdge top();
+  static SolidEdge bottom();
+  static SolidEdge left();
+  static SolidEdge right();
+
+  friend class CollisionData;
+
+private:
+  explicit SolidEdge(const std::uint8_t bitPack)
+    : mFlagsBitPack(bitPack)
+  {
+  }
+
+  std::uint8_t mFlagsBitPack;
+};
+
+
 class CollisionData {
 public:
   static CollisionData fullySolid();
@@ -40,6 +59,10 @@ public:
   bool isSolidLeft() const;
   bool isSolidRight() const;
   bool isClear() const;
+
+  bool isSolidOn(const SolidEdge& edge) const {
+    return (mCollisionFlagsBitPack & edge.mFlagsBitPack) != 0;
+  }
 
 private:
   std::uint8_t mCollisionFlagsBitPack = 0;

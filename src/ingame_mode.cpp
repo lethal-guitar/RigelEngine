@@ -108,9 +108,12 @@ struct IngameMode::Systems {
     EntityFactory* pEntityFactory,
     RandomNumberGenerator* pRandomGenerator,
     const data::map::Map& map,
-    FireShotFuncT fireShotFunc
+    FireShotFuncT fireShotFunc,
+    entityx::EntityManager& entities,
+    entityx::EventManager& eventManager
   )
-    : mCollisionChecker(pMap)
+    : mCollisionChecker(pMap, entities, eventManager)
+    , mPhysicsSystem(&mCollisionChecker)
     , mMapScrollSystem(pScrollOffset, playerEntity, map)
     , mPlayerMovementSystem(playerEntity, map)
     , mPlayerAttackSystem(
@@ -141,6 +144,7 @@ struct IngameMode::Systems {
   }
 
   engine::CollisionChecker mCollisionChecker;
+  engine::PhysicsSystem mPhysicsSystem;
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
@@ -362,7 +366,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // ----------------------------------------------------------------------
   // Physics and other updates
   // ----------------------------------------------------------------------
-  mEntities.systems.update<PhysicsSystem>(dt);
+  mpSystems->mPhysicsSystem.update(mEntities.entities);
 
   // Player attacks have to be processed after physics, because:
   //  1. Player projectiles should spawn at the player's location
@@ -401,8 +405,6 @@ void IngameMode::loadLevel(
   };
   mMapAtLevelStart = mLevelData.mMap;
 
-  mEntities.systems.add<PhysicsSystem>(
-    &mLevelData.mMap);
   mEntities.systems.add<game_logic::player::AnimationSystem>(
     mPlayerEntity,
     mpServiceProvider,
@@ -471,7 +473,9 @@ void IngameMode::loadLevel(
       const game_logic::ProjectileDirection direction
     ) {
       mEntityFactory.createProjectile(type, pos, direction);
-    });
+    },
+    mEntities.entities,
+    mEntities.events);
 
   mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
     [this](entityx::Entity entity) {

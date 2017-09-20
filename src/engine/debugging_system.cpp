@@ -97,6 +97,8 @@ void DebuggingSystem::update(
         const auto right = bottomRight.x;
         const auto bottom = bottomRight.y;
 
+        // TODO: Implement this using SolidEdge matching,
+        // then remove these functions (isSolidXXX) from CollisionData
         if (collisionData.isSolidTop()) {
           mpRenderer->drawLine(left, top, right, top, drawColor);
         }

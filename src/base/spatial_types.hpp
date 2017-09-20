@@ -194,6 +194,18 @@ Rect<ValueT> operator+(
 }
 
 
+template<typename ValueT>
+bool operator==(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs) {
+  return std::tie(lhs.topLeft, lhs.size) == std::tie(rhs.topLeft, rhs.size);
+}
+
+
+template<typename ValueT>
+bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs) {
+  return !(lhs == rhs);
+}
+
+
 using Vector = Point<int>;
 using Extents = Size<int>;
 
