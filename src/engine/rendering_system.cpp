@@ -20,6 +20,7 @@
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/physics_system.hpp"
+#include "engine/sprite_tools.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/range/algorithm/find_if.hpp>
@@ -74,6 +75,10 @@ void updateAnimatedSprites(ex::EntityManager& es) {
     if (animated.mFramesElapsed >= animated.mDelayInFrames) {
       animated.mFramesElapsed = 0;
       advanceAnimation(sprite, animated);
+
+      if (entity.has_component<components::BoundingBox>()) {
+        engine::synchronizeBoundingBoxToSprite(entity, animated.mRenderSlot);
+      }
     }
   });
 }

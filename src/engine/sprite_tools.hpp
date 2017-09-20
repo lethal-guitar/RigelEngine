@@ -45,12 +45,15 @@ inline components::BoundingBox inferBoundingBox(
 }
 
 
-inline void synchronizeBoundingBoxToSprite(entityx::Entity& entity) {
+inline void synchronizeBoundingBoxToSprite(
+  entityx::Entity& entity,
+  const int renderSlot = 0
+) {
   auto& sprite = *entity.component<components::Sprite>();
   auto& bbox = *entity.component<components::BoundingBox>();
 
   bbox = inferBoundingBox(
-    sprite.mpDrawData->mFrames[sprite.mFramesToRender[0]]);
+    sprite.mpDrawData->mFrames[sprite.mFramesToRender[renderSlot]]);
 }
 
 
