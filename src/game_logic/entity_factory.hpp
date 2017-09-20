@@ -114,6 +114,14 @@ private:
   template<typename... Args>
   void configureItemContainer(
     entityx::Entity entity,
+    const data::ActorID containerId,
+    const int givenScore,
+    Args&&... components
+  );
+
+  template<typename... Args>
+  void configureItemContainer(
+    entityx::Entity entity,
     ContainerColor color,
     int givenScore,
     Args&&... components);
