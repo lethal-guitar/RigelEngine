@@ -34,6 +34,12 @@ T integerDivCeil(const T value, const T divisor) {
 
 
 template<typename T>
+auto lerp(const T a, const T b, const float factor) {
+  return a * (1.0f - factor) + b * factor;
+}
+
+
+template<typename T>
 bool inRange(const T value, const T min, const T max) {
   return value >= min && value <= max;
 }
