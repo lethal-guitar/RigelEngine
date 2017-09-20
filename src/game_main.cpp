@@ -86,9 +86,6 @@ void Game::run(const GameOptions& options) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
 
-  mSoundSystem.reportMemoryUsage();
-
-
   mMusicEnabled = options.mEnableMusic;
 
   // Check if running registered version
