@@ -363,6 +363,18 @@ void EntityFactory::configureItemContainer(
   const int givenScore,
   Args&&... components
 ) {
+  configureItemContainer(
+    entity, actorIdForBoxColor(color), givenScore, components...);
+}
+
+
+template<typename... Args>
+void EntityFactory::configureItemContainer(
+  ex::Entity entity,
+  const ActorID containerId,
+  const int givenScore,
+  Args&&... components
+) {
   auto physicalProperties = Physical{{0.0f, 0.0f}, true};
   auto activation = ActivationSettings{
     ActivationSettings::Policy::AlwaysAfterFirstActivation};
@@ -384,11 +396,11 @@ void EntityFactory::configureItemContainer(
 
   entity.remove<Sprite>();
 
-  auto boxSprite = createSpriteForId(actorIdForBoxColor(color));
-  entity.assign<Sprite>(boxSprite);
+  auto containerSprite = createSpriteForId(containerId);
+  entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(container);
   entity.assign<Shootable>(1, givenScore);
-  addDefaultPhysical(entity, engine::inferBoundingBox(boxSprite));
+  addDefaultPhysical(entity, engine::inferBoundingBox(containerSprite));
 }
 
 
@@ -1068,14 +1080,24 @@ void EntityFactory::configureEntity(
     // Various
     // ----------------------------------------------------------------------
 
-    case 14: // Nuclear waste can, empty
+    case 14: // Nuclear waste barrel, empty
       entity.assign<Shootable>(1, 100);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    case 75: // Nuclear waste can, slime inside
-      entity.assign<Shootable>(1, 200);
-      entity.assign<BoundingBox>(boundingBox);
+    case 75: // Nuclear waste barrel, slime inside
+      {
+        const auto numAnimationFrames = static_cast<int>(
+          entity.component<Sprite>()->mpDrawData->mFrames.size());
+        configureItemContainer(
+          entity,
+          14,
+          200,
+          PlayerDamaging{1},
+          Animated{1},
+          AutoDestroy::afterTimeout(numAnimationFrames),
+          boundingBox);
+      }
       break;
 
     case 66: // Destroyable reactor
