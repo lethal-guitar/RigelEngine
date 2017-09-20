@@ -117,6 +117,9 @@ void Game::run(const GameOptions& options) {
   }
   else
   {
+    if (!mIsShareWareVersion) {
+      showAntiPiracyScreen();
+    }
     mpNextGameMode = std::make_unique<IntroDemoLoopMode>(
       makeModeContext(),
       true);
@@ -124,6 +127,19 @@ void Game::run(const GameOptions& options) {
 
   mainLoop();
 }
+
+
+void Game::showAntiPiracyScreen() {
+  auto antiPiracyImage = mResources.loadAntiPiracyImage();
+  engine::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
+  imageTexture.renderScaledToScreen(&mRenderer);
+  mRenderer.submitBatch();
+  mRenderer.swapBuffers();
+
+  SDL_Event event;
+  while (SDL_WaitEvent(&event) && event.type != SDL_KEYDOWN);
+}
+
 
 void Game::mainLoop() {
   using namespace std::chrono;

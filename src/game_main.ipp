@@ -43,6 +43,8 @@ public:
   void run(const GameOptions& options);
 
 private:
+  void showAntiPiracyScreen();
+
   void mainLoop();
 
   GameMode::Context makeModeContext();
