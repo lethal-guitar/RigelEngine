@@ -173,8 +173,9 @@ void PlayerInteractionSystem::performInteraction(
       break;
 
     case InteractableType::ForceFieldCardReader:
-      interaction::disableForceField(es, interactable, mpPlayerModel);
-      triggerPlayerInteractionAnimation();
+      if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
+        triggerPlayerInteractionAnimation();
+      }
       break;
   }
 }
