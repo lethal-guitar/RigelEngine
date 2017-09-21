@@ -52,6 +52,8 @@ public:
   loader::Palette16 loadPaletteFromFullScreenImage(
     const std::string& imageName) const;
 
+  data::Image loadAntiPiracyImage() const;
+
   TileSet loadCZone(const std::string& name) const;
   data::Movie loadMovie(const std::string& name) const;
   data::Song loadMusic(const std::string& name) const;

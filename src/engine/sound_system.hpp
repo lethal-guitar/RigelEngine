@@ -39,8 +39,6 @@ public:
 
   SoundHandle addSound(const data::AudioBuffer& buffer);
 
-  void reportMemoryUsage() const;
-
   void playSong(data::Song&& song);
   void stopMusic() const;
 

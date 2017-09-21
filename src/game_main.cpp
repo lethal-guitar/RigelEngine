@@ -39,6 +39,15 @@ using namespace sdl_utils;
 
 using RenderTargetBinder = engine::RenderTargetTexture::Binder;
 
+namespace {
+
+struct NullGameMode : public GameMode {
+  void handleEvent(const SDL_Event&) override {}
+  void updateAndRender(engine::TimeDelta) override {}
+};
+
+}
+
 
 void gameMain(
   const std::string& gamePath,
@@ -58,6 +67,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
       &mRenderer,
       data::GameTraits::viewPortWidthPx,
       data::GameTraits::viewPortHeightPx)
+  , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
   , mTextRenderer(&mRenderer, mResources)
@@ -76,9 +86,6 @@ void Game::run(const GameOptions& options) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
 
-  mSoundSystem.reportMemoryUsage();
-
-
   mMusicEnabled = options.mEnableMusic;
 
   // Check if running registered version
@@ -94,7 +101,7 @@ void Game::run(const GameOptions& options) {
     int episode, level;
     std::tie(episode, level) = *options.mLevelToJumpTo;
 
-    mpCurrentGameMode = std::make_unique<GameSessionMode>(
+    mpNextGameMode = std::make_unique<GameSessionMode>(
       episode,
       level,
       data::Difficulty::Medium,
@@ -103,11 +110,14 @@ void Game::run(const GameOptions& options) {
   }
   else if (options.mSkipIntro)
   {
-    mpCurrentGameMode = std::make_unique<MenuMode>(makeModeContext());
+    mpNextGameMode = std::make_unique<MenuMode>(makeModeContext());
   }
   else
   {
-    mpCurrentGameMode = std::make_unique<IntroDemoLoopMode>(
+    if (!mIsShareWareVersion) {
+      showAntiPiracyScreen();
+    }
+    mpNextGameMode = std::make_unique<IntroDemoLoopMode>(
       makeModeContext(),
       true);
   }
@@ -115,9 +125,20 @@ void Game::run(const GameOptions& options) {
   mainLoop();
 }
 
-void Game::mainLoop() {
-  assert(mpCurrentGameMode);
 
+void Game::showAntiPiracyScreen() {
+  auto antiPiracyImage = mResources.loadAntiPiracyImage();
+  engine::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
+  imageTexture.renderScaledToScreen(&mRenderer);
+  mRenderer.submitBatch();
+  mRenderer.swapBuffers();
+
+  SDL_Event event;
+  while (SDL_WaitEvent(&event) && event.type != SDL_KEYDOWN);
+}
+
+
+void Game::mainLoop() {
   using namespace std::chrono;
 
   SDL_Event event;

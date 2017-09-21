@@ -24,8 +24,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <iostream>
-#include <string>
 #include <utility>
 
 namespace rigel { namespace engine {
@@ -124,34 +122,6 @@ SoundSystem::~SoundSystem() {
   Mix_HookMusic(nullptr, nullptr);
   mLoadedChunks.clear();
   Mix_Quit();
-}
-
-
-void SoundSystem::reportMemoryUsage() const {
-  using namespace std;
-
-  size_t totalUsedMemory = sizeof(SoundSystem) + sizeof(ImfPlayer);
-
-  for (const auto& buffer : mAudioBuffers) {
-    totalUsedMemory += sizeof(data::AudioBuffer);
-    totalUsedMemory += sizeof(data::Sample) * buffer.mSamples.size();
-  }
-
-  totalUsedMemory +=
-    (sizeof(Mix_Chunk) + sizeof(SoundHandle)) * mLoadedChunks.size();
-
-  string suffix("B");
-  if (totalUsedMemory >= 1024) {
-    suffix = "KB";
-    totalUsedMemory /= 1024;
-  }
-
-  if (totalUsedMemory >= 1024) {
-    suffix = "MB";
-    totalUsedMemory /= 1024;
-  }
-
-  cout << "SoundSystem memory usage: " << totalUsedMemory << suffix << '\n';
 }
 
 

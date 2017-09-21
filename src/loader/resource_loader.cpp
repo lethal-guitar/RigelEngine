@@ -39,6 +39,8 @@ using namespace std;
 
 namespace {
 
+const auto ANTI_PIRACY_SCREEN_FILENAME = "LCR.MNI";
+
 const auto FULL_SCREEN_IMAGE_DATA_SIZE =
   (GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx) /
   (GameTraits::pixelsPerEgaByte / GameTraits::egaPlanes);
@@ -89,6 +91,29 @@ data::Image ResourceLoader::loadStandaloneFullscreenImage(
     palette);
   return data::Image(
     std::move(pixels),
+    GameTraits::viewPortWidthPx,
+    GameTraits::viewPortHeightPx);
+}
+
+
+data::Image ResourceLoader::loadAntiPiracyImage() const {
+  using namespace std;
+
+  // For some reason, the anti-piracy screen is in a different format than all
+  // the other full-screen images. It first defines a 256-color VGA palette,
+  // then defines the pixel data in linear format.
+  //
+  // See http://www.shikadi.net/moddingwiki/Duke_Nukem_II_Full-screen_Images
+  const auto& data = mFilePackage.file(ANTI_PIRACY_SCREEN_FILENAME);
+  const auto iImageStart = cbegin(data) + 256*3;
+  const auto palette = load6bitPalette256(cbegin(data), iImageStart);
+
+  data::PixelBuffer pixels;
+  pixels.reserve(GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx);
+  transform(iImageStart, cend(data), back_inserter(pixels),
+    [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
+  return data::Image(
+    move(pixels),
     GameTraits::viewPortWidthPx,
     GameTraits::viewPortHeightPx);
 }
