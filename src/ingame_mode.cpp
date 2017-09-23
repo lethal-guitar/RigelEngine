@@ -65,7 +65,7 @@ using namespace std;
 
 using data::PlayerModel;
 using engine::components::BoundingBox;
-using engine::components::Physical;
+using engine::components::MovingBody;
 using engine::components::WorldPosition;
 
 
@@ -591,7 +591,7 @@ void IngameMode::handleTeleporter() {
 
 void IngameMode::showDebugText() {
   const auto& playerPos = *mPlayerEntity.component<WorldPosition>();
-  const auto& playerVel = mPlayerEntity.component<Physical>()->mVelocity;
+  const auto& playerVel = mPlayerEntity.component<MovingBody>()->mVelocity;
   std::stringstream infoText;
   infoText
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'

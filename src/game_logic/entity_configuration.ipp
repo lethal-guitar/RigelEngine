@@ -375,7 +375,7 @@ void EntityFactory::configureItemContainer(
   const int givenScore,
   Args&&... components
 ) {
-  auto physicalProperties = Physical{{0.0f, 0.0f}, true};
+  auto physicalProperties = MovingBody{{0.0f, 0.0f}, true};
   auto activation = ActivationSettings{
     ActivationSettings::Policy::AlwaysAfterFirstActivation};
 
@@ -400,7 +400,7 @@ void EntityFactory::configureItemContainer(
   entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(container);
   entity.assign<Shootable>(1, givenScore);
-  addDefaultPhysical(entity, engine::inferBoundingBox(containerSprite));
+  addDefaultMovingBody(entity, engine::inferBoundingBox(containerSprite));
 }
 
 
@@ -418,7 +418,7 @@ void EntityFactory::configureEntity(
     case 45:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -429,7 +429,7 @@ void EntityFactory::configureEntity(
     case 46:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -440,7 +440,7 @@ void EntityFactory::configureEntity(
     case 47:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 5000;
@@ -451,7 +451,7 @@ void EntityFactory::configureEntity(
     case 48:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -481,7 +481,7 @@ void EntityFactory::configureEntity(
     case 164: // Empty blue box
     case 161: // Empty white box
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
@@ -911,7 +911,7 @@ void EntityFactory::configureEntity(
     case 239: // Special hint globe
       entity.assign<Shootable>(3, 100);
       entity.assign<AnimationLoop>(1);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 10000;
@@ -927,7 +927,7 @@ void EntityFactory::configureEntity(
 
     case 0: // Cylindrical robot with blinking 'head', aka hover-bot
       entity.assign<Shootable>(1 + difficultyOffset, 150);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
       entity.assign<ai::components::HoverBot>();
       break;
@@ -963,8 +963,8 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(6 + difficultyOffset, 1500);
       entity.assign<PlayerDamaging>(1);
       entity.assign<ai::components::SlimeBlob>();
-      addDefaultPhysical(entity, boundingBox);
-      entity.component<Physical>()->mGravityAffected = false;
+      addDefaultMovingBody(entity, boundingBox);
+      entity.component<MovingBody>()->mGravityAffected = false;
       break;
 
     case 68: // Green slime container
@@ -1008,7 +1008,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
       entity.assign<ai::components::Skeleton>();
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       break;
 
     case 151: // Floating ball, opens up and shoots lasers

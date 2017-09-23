@@ -24,7 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace engine { namespace components { struct Physical; }}}
+namespace rigel { namespace engine { namespace components { struct MovingBody; }}}
 namespace rigel { namespace game_logic { namespace components {
   struct PlayerControlled;
 }}}
@@ -61,7 +61,7 @@ private:
 
   void updateElevatorMovement(
     int movement,
-   engine::components::Physical& playerPhysical);
+    engine::components::MovingBody& playerMovingBody);
 
 private:
   entityx::Entity mPlayer;

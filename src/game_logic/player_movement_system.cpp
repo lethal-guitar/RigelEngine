@@ -44,7 +44,7 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
   }
   player.assign<PlayerControlled>(controls);
 
-  player.assign<Physical>(Physical{{0.0f, 0.0f}, true, true});
+  player.assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true, true});
   player.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 5}});
 }
 
@@ -81,11 +81,11 @@ PlayerMovementSystem::PlayerMovementSystem(
 
 void PlayerMovementSystem::update(const PlayerInputState& inputState) {
   assert(mPlayer.has_component<PlayerControlled>());
-  assert(mPlayer.has_component<Physical>());
+  assert(mPlayer.has_component<MovingBody>());
   assert(mPlayer.has_component<WorldPosition>());
 
   auto& state = *mPlayer.component<PlayerControlled>();
-  auto& physical = *mPlayer.component<Physical>();
+  auto& body = *mPlayer.component<MovingBody>();
   auto& boundingBox = *mPlayer.component<BoundingBox>();
   auto& worldPosition = *mPlayer.component<WorldPosition>();
 
@@ -135,7 +135,7 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
         const auto diff = relativeLadderTouchX - offsetForOrientation;
         worldPosition.x += diff;
 
-        physical.mGravityAffected = false;
+        body.mGravityAffected = false;
       }
     }
   }
@@ -170,21 +170,21 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
   if (state.mState == PlayerState::ClimbingLadder) {
     if (movingUp) {
       if (canClimbUp(worldSpacePlayerBounds)) {
-        physical.mVelocity.y = -1.0f;
+        body.mVelocity.y = -1.0f;
       } else {
-        physical.mVelocity.y = 0.0f;
+        body.mVelocity.y = 0.0f;
       }
     } else if (movingDown) {
       if (canClimbDown(worldSpacePlayerBounds)) {
-        physical.mVelocity.y = 1.0f;
+        body.mVelocity.y = 1.0f;
       } else {
         state.mState = PlayerState::Airborne;
-        physical.mGravityAffected = true;
-        physical.mVelocity.y = 1.0f;
+        body.mGravityAffected = true;
+        body.mVelocity.y = 1.0f;
         verticalMovementWanted = false;
       }
     } else {
-      physical.mVelocity.y = 0.0f;
+      body.mVelocity.y = 0.0f;
     }
   }
 
@@ -221,7 +221,7 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
     ) {
       state.mState = PlayerState::Standing;
     }
-    physical.mVelocity.x = 0.0f;
+    body.mVelocity.x = 0.0f;
   } else {
 
     if (state.mState == PlayerState::Standing) {
@@ -235,7 +235,7 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
       const auto canStartMoving = mWalkRequestedLastFrame ||
         state.mOrientation == oldOrientation;
       if (horizontalMovementWanted && canStartMoving) {
-        physical.mVelocity.x = movingLeft ? -1.0f : 1.0f;
+        body.mVelocity.x = movingLeft ? -1.0f : 1.0f;
       }
     }
   }
@@ -243,14 +243,14 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
   mWalkRequestedLastFrame = horizontalMovementWanted;
 
   if (
-    physical.mVelocity.y == 0.0f &&
+    body.mVelocity.y == 0.0f &&
     state.mState == PlayerState::Airborne
   ) {
     state.mState = PlayerState::Standing;
   }
 
   if (
-    physical.mVelocity.y != 0.0f &&
+    body.mVelocity.y != 0.0f &&
     state.mState != PlayerState::Airborne &&
     state.mState != PlayerState::ClimbingLadder
   ) {
@@ -266,8 +266,8 @@ void PlayerMovementSystem::update(const PlayerInputState& inputState) {
     state.mState != PlayerState::Airborne &&
     !state.mPerformedJump
   ) {
-    physical.mVelocity.y = -3.6f;
-    physical.mGravityAffected = true;
+    body.mVelocity.y = -3.6f;
+    body.mGravityAffected = true;
     state.mState = PlayerState::Airborne;
     state.mPerformedJump = true;
   }

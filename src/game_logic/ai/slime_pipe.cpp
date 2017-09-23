@@ -79,7 +79,7 @@ void SlimePipeSystem::createSlimeDrop(const base::Vector& position) {
     position + DROP_OFFSET,
     true);
   // Gravity handles the drop's movement, so velocity is initally 0.
-  entity.assign<Physical>(base::Point<float>{0.0f, 0.0f}, true);
+  entity.assign<MovingBody>(base::Point<float>{0.0f, 0.0f}, true);
 
   entity.assign<game_logic::components::PlayerDamaging>(1);
   entity.assign<AutoDestroy>(AutoDestroy{

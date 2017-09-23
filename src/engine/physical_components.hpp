@@ -25,8 +25,8 @@ namespace rigel { namespace engine {
 
 namespace components {
 
-struct Physical {
-  Physical(
+struct MovingBody {
+  MovingBody(
     const base::Point<float> velocity,
     const bool gravityAffected,
     const bool canStepUpStairs = false
@@ -51,7 +51,7 @@ struct CollidedWithWorld {};
 
 /** Marks an entity to participate in world collision
  *
- * Other Physical entities will collide against the bounding box of any
+ * Other MovingBody entities will collide against the bounding box of any
  * SolidBody entity as if it were part of the world.
  * */
 struct SolidBody {};

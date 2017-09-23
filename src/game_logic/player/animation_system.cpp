@@ -261,7 +261,7 @@ int AnimationSystem::movementAnimationFrame(
       state, playerPosition.y, NUM_LADDER_ANIM_STATES);
   } else if (state.mState == PlayerState::Airborne) {
     const auto verticalVelocity =
-      mPlayer.component<engine::components::Physical>()->mVelocity.y;
+      mPlayer.component<engine::components::MovingBody>()->mVelocity.y;
     if (verticalVelocity != 0.0f) {
       if (verticalVelocity <= 0.0f) {
         newAnimationFrame = 6;

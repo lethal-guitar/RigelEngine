@@ -68,11 +68,11 @@ using namespace game_logic::components;
 namespace {
 
 // Assign gravity affected physical component
-void addDefaultPhysical(
+void addDefaultMovingBody(
   ex::Entity entity,
   const BoundingBox& boundingBox
 ) {
-  entity.assign<Physical>(Physical{{0.0f, 0.0f}, true});
+  entity.assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true});
   entity.assign<BoundingBox>(boundingBox);
   entity.assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -241,8 +241,8 @@ void EntityFactory::configureProjectile(
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
   entity.assign<WorldPosition>(position);
-  entity.assign<Physical>(
-    Physical{directionToVector(direction) * speed, false});
+  entity.assign<MovingBody>(
+    MovingBody{directionToVector(direction) * speed, false});
   if (isPlayerProjectile(type)) {
     entity.assign<DamageInflicting>(damageAmount);
   } else {
