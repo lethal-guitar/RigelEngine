@@ -31,7 +31,7 @@ using namespace engine::orientation;
 void updateAnimation(entityx::Entity entity, const Orientation orientation) {
   const auto startFrame = orientation == Orientation::Left ? 0 : 4;
   const auto endFrame = startFrame + 3;
-  engine::startAnimation(entity, 2, startFrame, endFrame);
+  engine::startAnimationLoop(entity, 2, startFrame, endFrame);
 }
 
 } // namespace

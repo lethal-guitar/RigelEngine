@@ -57,7 +57,7 @@ inline void synchronizeBoundingBoxToSprite(
 }
 
 
-inline void startAnimation(
+inline void startAnimationLoop(
   entityx::Entity& entity,
   const int delayInFrames,
   const int startFrame,
