@@ -109,17 +109,17 @@ struct OverrideDrawOrder {
 };
 
 
-struct Animated {
-  Animated() = default;
-  explicit Animated(
+struct AnimationLoop {
+  AnimationLoop() = default;
+  explicit AnimationLoop(
     const int delayInFrames,
     boost::optional<int> endFrame = boost::none
   )
-    : Animated(delayInFrames, 0, endFrame)
+    : AnimationLoop(delayInFrames, 0, endFrame)
   {
   }
 
-  Animated(
+  AnimationLoop(
     const int delayInFrames,
     const int startFrame,
     boost::optional<int> endFrame,

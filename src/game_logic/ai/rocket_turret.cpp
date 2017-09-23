@@ -124,7 +124,7 @@ void RocketTurretSystem::fireRocket(
 
   projectile.assign<game_logic::components::Shootable>(1, 10);
   projectile.component<Sprite>()->mFramesToRender.push_back(0);
-  projectile.assign<Animated>(1, 1, 2, 0);
+  projectile.assign<AnimationLoop>(1, 1, 2, 0);
 
   mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
 }

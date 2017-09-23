@@ -64,13 +64,13 @@ inline void startAnimation(
   boost::optional<int> endFrame,
   const int renderSlot = 0
 ) {
-  if (entity.has_component<components::Animated>()) {
-    entity.remove<components::Animated>();
+  if (entity.has_component<components::AnimationLoop>()) {
+    entity.remove<components::AnimationLoop>();
   }
 
   auto& sprite = *entity.component<components::Sprite>();
   sprite.mFramesToRender[renderSlot] = startFrame;
-  entity.assign<components::Animated>(
+  entity.assign<components::AnimationLoop>(
     delayInFrames, startFrame, endFrame, renderSlot);
 }
 

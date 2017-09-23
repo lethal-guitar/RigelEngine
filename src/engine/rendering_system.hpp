@@ -32,10 +32,10 @@
 
 namespace rigel { namespace engine {
 
-/** Animates sprites with an Animated component
+/** Animates sprites with an AnimationLoop component
  *
  * Should be called at game-logic rate. Works on all entities that have a
- * Sprite and an Animated component. Adjusts the sprite's animation frame
+ * Sprite and an AnimationLoop component. Adjusts the sprite's animation frame
  * based on the animation.
  */
 void updateAnimatedSprites(entityx::EntityManager& es);

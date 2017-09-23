@@ -33,7 +33,7 @@ namespace ex = entityx;
 
 namespace rigel { namespace engine {
 
-using components::Animated;
+using components::AnimationLoop;
 using components::CustomRenderFunc;
 using components::DrawTopMost;
 using components::Sprite;
@@ -43,7 +43,7 @@ using components::WorldPosition;
 namespace {
 
 
-void advanceAnimation(Sprite& sprite, Animated& animated) {
+void advanceAnimation(Sprite& sprite, AnimationLoop& animated) {
   const auto numFrames = static_cast<int>(sprite.mpDrawData->mFrames.size());
   const auto endFrame = animated.mEndFrame ? *animated.mEndFrame : numFrames-1;
   assert(endFrame >= 0 && endFrame < numFrames);
@@ -66,10 +66,10 @@ void advanceAnimation(Sprite& sprite, Animated& animated) {
 
 
 void updateAnimatedSprites(ex::EntityManager& es) {
-  es.each<Sprite, Animated>([](
+  es.each<Sprite, AnimationLoop>([](
     ex::Entity entity,
     Sprite& sprite,
-    Animated& animated
+    AnimationLoop& animated
   ) {
     ++animated.mFramesElapsed;
     if (animated.mFramesElapsed >= animated.mDelayInFrames) {

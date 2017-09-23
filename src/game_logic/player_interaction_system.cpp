@@ -30,7 +30,7 @@
 namespace rigel { namespace game_logic {
 
 using data::PlayerModel;
-using engine::components::Animated;
+using engine::components::AnimationLoop;
 using engine::components::BoundingBox;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
