@@ -16,7 +16,9 @@
 
 #include "prisoner.hpp"
 
+#include "engine/life_time_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 
@@ -26,6 +28,14 @@ namespace rigel { namespace game_logic { namespace ai {
 using engine::components::Sprite;
 using engine::components::WorldPosition;
 using game_logic::components::Shootable;
+
+namespace {
+
+const int DEATH_SEQUENCE[] = {5, 5, 6, 7};
+
+const auto DEATH_FRAMES_TO_LIVE = 6;
+
+}
 
 
 PrisonerSystem::PrisonerSystem(
@@ -75,21 +85,6 @@ void PrisonerSystem::updateAggressivePrisoner(
   using game_logic::components::PlayerDamaging;
   using State = components::Prisoner::State;
 
-  if (state.mState == State::Dieing) {
-    ++state.mDeathAnimationStep;
-    if (state.mDeathAnimationStep >= 6) {
-      entity.destroy();
-    }
-
-    const auto canAdvance =
-      state.mDeathAnimationStep == 2 ||
-      state.mDeathAnimationStep == 3;
-    if (canAdvance) {
-      ++sprite.mFramesToRender[0];
-    }
-    return;
-  }
-
   auto& shootable = *entity.component<Shootable>();
 
   // See if we want to grab
@@ -137,6 +132,8 @@ void PrisonerSystem::updateAggressivePrisoner(
 
 
 void PrisonerSystem::onEntityHit(entityx::Entity entity) {
+  using engine::components::AutoDestroy;
+
   if (!entity.has_component<components::Prisoner>()) {
     return;
   }
@@ -149,8 +146,9 @@ void PrisonerSystem::onEntityHit(entityx::Entity entity) {
     entity.remove<game_logic::components::PlayerDamaging>();
   }
 
-  state.mState = components::Prisoner::State::Dieing;
-  sprite.mFramesToRender[0] = 5;
+  engine::startAnimationSequence(entity, DEATH_SEQUENCE);
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(DEATH_FRAMES_TO_LIVE));
+  entity.remove<components::Prisoner>();
 }
 
 }}}

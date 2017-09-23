@@ -49,7 +49,6 @@ struct Prisoner {
   bool mIsAggressive;
   State mState = State::Idle;
   int mGrabStep = 0;
-  int mDeathAnimationStep = 0;
 };
 
 }
