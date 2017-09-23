@@ -74,4 +74,20 @@ inline void startAnimationLoop(
     delayInFrames, startFrame, endFrame, renderSlot);
 }
 
+
+inline void startAnimationSequence(
+  entityx::Entity& entity,
+  const base::ArrayView<int>& frames,
+  const int renderSlot = 0
+) {
+  if (entity.has_component<components::AnimationSequence>()) {
+    entity.remove<components::AnimationSequence>();
+  }
+
+  auto& sprite = *entity.component<components::Sprite>();
+  sprite.mFramesToRender[renderSlot] = frames.front();
+  entity.assign<components::AnimationSequence>(frames, renderSlot);
+}
+
+
 }}

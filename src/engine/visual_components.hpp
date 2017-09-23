@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
@@ -137,6 +138,26 @@ struct AnimationLoop {
   int mStartFrame = 0;
   boost::optional<int> mEndFrame;
   int mRenderSlot = 0;
+};
+
+
+struct AnimationSequence {
+  AnimationSequence(
+    const base::ArrayView<int>& frames,
+    const int renderSlot = 0,
+    const bool repeat = false,
+    const int startFrame = 0)
+    : mFrames(frames)
+    , mCurrentFrame(startFrame)
+    , mRenderSlot(renderSlot)
+    , mRepeat(repeat)
+  {
+  }
+
+  base::ArrayView<int> mFrames;
+  decltype(mFrames)::size_type mCurrentFrame = 0;
+  int mRenderSlot = 0;
+  bool mRepeat = false;
 };
 
 }}}

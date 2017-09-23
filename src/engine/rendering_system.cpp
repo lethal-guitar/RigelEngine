@@ -34,6 +34,7 @@ namespace ex = entityx;
 namespace rigel { namespace engine {
 
 using components::AnimationLoop;
+using components::AnimationSequence;
 using components::CustomRenderFunc;
 using components::DrawTopMost;
 using components::Sprite;
@@ -79,6 +80,29 @@ void updateAnimatedSprites(ex::EntityManager& es) {
       if (entity.has_component<components::BoundingBox>()) {
         engine::synchronizeBoundingBoxToSprite(entity, animated.mRenderSlot);
       }
+    }
+  });
+
+  es.each<Sprite, AnimationSequence>([](
+    ex::Entity entity,
+    Sprite& sprite,
+    AnimationSequence& sequence
+  ) {
+    ++sequence.mCurrentFrame;
+    if (sequence.mCurrentFrame >= sequence.mFrames.size()) {
+      if (sequence.mRepeat) {
+        sequence.mCurrentFrame = 0;
+      } else {
+        entity.remove<AnimationSequence>();
+        return;
+      }
+    }
+
+    sprite.mFramesToRender[sequence.mRenderSlot] =
+      sequence.mFrames[sequence.mCurrentFrame];
+
+    if (entity.has_component<components::BoundingBox>()) {
+      engine::synchronizeBoundingBoxToSprite(entity, sequence.mRenderSlot);
     }
   });
 }
