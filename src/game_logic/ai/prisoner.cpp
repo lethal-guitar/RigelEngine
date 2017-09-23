@@ -83,12 +83,10 @@ void PrisonerSystem::updateAggressivePrisoner(
   Sprite& sprite
 ) {
   using game_logic::components::PlayerDamaging;
-  using State = components::Prisoner::State;
-
   auto& shootable = *entity.component<Shootable>();
 
   // See if we want to grab
-  if (state.mState == State::Idle) {
+  if (!state.mIsGrabbing) {
     // TODO: Adjust player position according to orientation to replicate
     // original positioning?
     const auto& playerPos = *mPlayer.component<WorldPosition>();
@@ -100,7 +98,7 @@ void PrisonerSystem::updateAggressivePrisoner(
       const auto wantsToGrab =
         (mpRandomGenerator->gen() & 0x10) != 0 && mIsOddFrame;
       if (wantsToGrab) {
-        state.mState = State::Grabbing;
+        state.mIsGrabbing = true;
         state.mGrabStep = 0;
         sprite.mFramesToRender.push_back(1);
         shootable.mInvincible = false;
@@ -111,11 +109,11 @@ void PrisonerSystem::updateAggressivePrisoner(
 
   // If we decided to grab, we immediately update accordingly on the
   // same frame (this is how it works in the original game)
-  if (state.mState == State::Grabbing) {
+  if (state.mIsGrabbing) {
     sprite.mFramesToRender[1] = (state.mGrabStep + 1) % 5;
 
     if (state.mGrabStep >= 4) {
-      state.mState = State::Idle;
+      state.mIsGrabbing = false;
       sprite.mFramesToRender.pop_back();
       shootable.mInvincible = true;
       entity.remove<PlayerDamaging>();
@@ -141,7 +139,7 @@ void PrisonerSystem::onEntityHit(entityx::Entity entity) {
   auto& sprite = *entity.component<Sprite>();
   auto& state = *entity.component<components::Prisoner>();
 
-  if (state.mState == components::Prisoner::State::Grabbing) {
+  if (state.mIsGrabbing) {
     sprite.mFramesToRender.pop_back();
     entity.remove<game_logic::components::PlayerDamaging>();
   }

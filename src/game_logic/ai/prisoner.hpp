@@ -35,20 +35,14 @@ namespace rigel { namespace game_logic { namespace ai {
 namespace components {
 
 struct Prisoner {
-  enum class State {
-    Idle,
-    Grabbing,
-    Dieing
-  };
-
   explicit Prisoner(const bool isAggressive)
     : mIsAggressive(isAggressive)
   {
   }
 
-  bool mIsAggressive;
-  State mState = State::Idle;
   int mGrabStep = 0;
+  bool mIsAggressive;
+  bool mIsGrabbing = false;
 };
 
 }
