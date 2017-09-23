@@ -112,15 +112,7 @@ private:
     const engine::components::BoundingBox& boundingBox);
 
   template<typename... Args>
-  void configureItemContainer(
-    entityx::Entity entity,
-    const data::ActorID containerId,
-    const int givenScore,
-    Args&&... components
-  );
-
-  template<typename... Args>
-  void configureItemContainer(
+  void configureItemBox(
     entityx::Entity entity,
     ContainerColor color,
     int givenScore,

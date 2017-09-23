@@ -353,54 +353,63 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
   }
 }
 
-} // namespace
-
 
 template<typename... Args>
-void EntityFactory::configureItemContainer(
-  ex::Entity entity,
-  const ContainerColor color,
-  const int givenScore,
-  Args&&... components
-) {
-  configureItemContainer(
-    entity, actorIdForBoxColor(color), givenScore, components...);
-}
-
-
-template<typename... Args>
-void EntityFactory::configureItemContainer(
-  ex::Entity entity,
-  const ActorID containerId,
-  const int givenScore,
-  Args&&... components
-) {
-  auto physicalProperties = MovingBody{{0.0f, 0.0f}, true};
-  auto activation = ActivationSettings{
-    ActivationSettings::Policy::AlwaysAfterFirstActivation};
-
-  // We don't assign a position here, as the box might move before being opened.
-  // The item container's onHit callback will set the spawned entity's position
-  // when the container is opened.
-  components::ItemContainer container;
-  container.mContainedComponents = {
-    ComponentHolder{physicalProperties},
-    ComponentHolder{activation},
-    ComponentHolder{*entity.component<Sprite>()}
-  };
+void addToContainer(components::ItemContainer& container, Args&&... components) {
   boost::fusion::for_each(
     std::make_tuple(components...),
     [&container](auto component) {
       container.mContainedComponents.emplace_back(std::move(component));
     });
+}
+
+
+template<typename... Args>
+components::ItemContainer makeContainer(Args&&... components) {
+  components::ItemContainer container;
+  addToContainer(container, components...);
+  return container;
+}
+
+
+void turnIntoContainer(
+  ex::Entity entity,
+  const Sprite containerSprite,
+  const int givenScore,
+  components::ItemContainer&& container
+) {
+  auto physicalProperties = MovingBody{{0.0f, 0.0f}, true};
+  auto originalSprite = *entity.component<Sprite>();
+
+  // We don't assign a position here, as the box might move before being opened.
+  // The item container's onHit callback will set the spawned entity's position
+  // when the container is opened.
+  addToContainer(container,
+    physicalProperties,
+    ActivationSettings{ActivationSettings::Policy::AlwaysAfterFirstActivation},
+    originalSprite);
 
   entity.remove<Sprite>();
-
-  auto containerSprite = createSpriteForId(containerId);
   entity.assign<Sprite>(containerSprite);
-  entity.assign<components::ItemContainer>(container);
+  entity.assign<components::ItemContainer>(std::move(container));
   entity.assign<Shootable>(1, givenScore);
   addDefaultMovingBody(entity, engine::inferBoundingBox(containerSprite));
+}
+
+
+} // namespace
+
+
+template<typename... Args>
+void EntityFactory::configureItemBox(
+  ex::Entity entity,
+  const ContainerColor color,
+  const int givenScore,
+  Args&&... components
+) {
+  auto container = makeContainer(components...);
+  auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
+  turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
 }
 
 
@@ -492,7 +501,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CircuitBoard;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::White,
           100,
@@ -506,7 +515,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::BlueKey;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::White,
           100,
@@ -522,7 +531,7 @@ void EntityFactory::configureEntity(
         item.mGivenItem = InventoryItemType::RapidFire;
         item.mGivenPlayerBuff = PlayerBuff::RapidFire;
         auto animation = AnimationLoop{1};
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::White,
           100,
@@ -539,7 +548,7 @@ void EntityFactory::configureEntity(
         item.mGivenItem = InventoryItemType::CloakingDevice;
         item.mGivenPlayerBuff = PlayerBuff::Cloak;
         auto animation = AnimationLoop{1};
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::White,
           100,
@@ -556,7 +565,7 @@ void EntityFactory::configureEntity(
       {
         const auto originalDrawOrder =
           entity.component<Sprite>()->mpDrawData->mDrawOrder;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Red,
           0,
@@ -571,7 +580,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 100; // 2000 if shot and grabbed while flying
         item.mGivenHealth = 1;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Red,
           100,
@@ -586,7 +595,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 100;
         item.mGivenHealth = 6;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Red,
           100,
@@ -603,7 +612,7 @@ void EntityFactory::configureEntity(
         // doesn't actually give the player any score.
         //item.mGivenScore = 100;
         item.mGivenHealth = 1; // 2 if cooked
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Red,
           100,
@@ -620,7 +629,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Rocket;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Green,
           100,
@@ -634,7 +643,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::FlameThrower;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Green,
           100,
@@ -647,7 +656,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenWeapon = WeaponType::Normal;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Green,
           100,
@@ -661,7 +670,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Laser;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Green,
           100,
@@ -678,7 +687,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500; // 10000 when at full health
         item.mGivenHealth = 1;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -693,7 +702,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::N;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -707,7 +716,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::U;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -721,7 +730,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::K;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -735,7 +744,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::E;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -749,7 +758,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 101000;
         item.mGivenCollectableLetter = CollectableLetterType::M;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -762,7 +771,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -775,7 +784,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 100;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -788,7 +797,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 2000;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -801,7 +810,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 1000;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -814,7 +823,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -827,7 +836,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 1500;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -840,7 +849,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 2500;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -853,7 +862,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 3000;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -866,7 +875,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -879,7 +888,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 5000;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -892,7 +901,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenScore = 500;
-        configureItemContainer(
+        configureItemBox(
           entity,
           ContainerColor::Blue,
           0,
@@ -1087,16 +1096,17 @@ void EntityFactory::configureEntity(
 
     case 75: // Nuclear waste barrel, slime inside
       {
+        const auto& sprite = *entity.component<Sprite>();
         const auto numAnimationFrames = static_cast<int>(
-          entity.component<Sprite>()->mpDrawData->mFrames.size());
-        configureItemContainer(
-          entity,
-          14,
-          200,
+          sprite.mpDrawData->mFrames.size());
+        auto container = makeContainer(
           PlayerDamaging{1},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
-          boundingBox);
+          boundingBox,
+          sprite);
+        auto barrelSprite = createSpriteForId(14);
+        turnIntoContainer(entity, barrelSprite, 200, std::move(container));
       }
       break;
 
