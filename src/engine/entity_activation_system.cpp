@@ -75,6 +75,9 @@ void markActiveEntities(
     const auto inActiveRegion = worldSpaceBbox.intersects(activeRegionBox);
     const auto active = determineActiveState(entity, inActiveRegion);
     setTag<Active>(entity, active);
+    if (active) {
+      entity.component<Active>()->mIsOnScreen = inActiveRegion;
+    }
   });
 }
 

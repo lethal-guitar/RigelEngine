@@ -31,7 +31,9 @@ using BoundingBox = base::Rect<int>;
  * active if their bounding box intersects the active region, i.e. they are
  * visible on screen.
  * */
-struct Active {};
+struct Active {
+  bool mIsOnScreen = true;
+};
 
 /** Specifies when to activate entity */
 struct ActivationSettings {
