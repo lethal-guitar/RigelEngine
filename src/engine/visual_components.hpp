@@ -145,10 +145,9 @@ struct AnimationSequence {
   AnimationSequence(
     const base::ArrayView<int>& frames,
     const int renderSlot = 0,
-    const bool repeat = false,
-    const int startFrame = 0)
+    const bool repeat = false)
     : mFrames(frames)
-    , mCurrentFrame(startFrame)
+    , mCurrentFrame(0)
     , mRenderSlot(renderSlot)
     , mRepeat(repeat)
   {
