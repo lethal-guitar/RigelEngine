@@ -245,7 +245,7 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       break;
 
     case 62:
-      sprite.mFramesToRender = {1, 0};
+      sprite.mFramesToRender = {0, 1};
       break;
 
     case 67:
@@ -950,7 +950,7 @@ void EntityFactory::configureEntity(
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(6 + difficultyOffset, 5000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<AnimationLoop>(1, 1, 2);
+      entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
     case 64: // Bouncing spike ball

@@ -77,8 +77,11 @@ void updateAnimatedSprites(ex::EntityManager& es) {
       animated.mFramesElapsed = 0;
       advanceAnimation(sprite, animated);
 
-      if (entity.has_component<components::BoundingBox>()) {
-        engine::synchronizeBoundingBoxToSprite(entity, animated.mRenderSlot);
+      if (
+        entity.has_component<components::BoundingBox>() &&
+        animated.mRenderSlot == 0
+      ) {
+        engine::synchronizeBoundingBoxToSprite(entity);
       }
     }
   });
@@ -101,8 +104,11 @@ void updateAnimatedSprites(ex::EntityManager& es) {
     sprite.mFramesToRender[sequence.mRenderSlot] =
       sequence.mFrames[sequence.mCurrentFrame];
 
-    if (entity.has_component<components::BoundingBox>()) {
-      engine::synchronizeBoundingBoxToSprite(entity, sequence.mRenderSlot);
+    if (
+      entity.has_component<components::BoundingBox>() &&
+      sequence.mRenderSlot == 0
+    ) {
+      engine::synchronizeBoundingBoxToSprite(entity);
     }
   });
 }
