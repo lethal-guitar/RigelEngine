@@ -270,6 +270,16 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_d:
       mShowDebugText = !mShowDebugText;
       break;
+
+    case SDLK_s:
+      mSingleStepping = !mSingleStepping;
+      break;
+
+    case SDLK_SPACE:
+      if (mSingleStepping) {
+        mCanAdvanceSingleStep = true;
+      }
+      break;
   }
 }
 
@@ -286,11 +296,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
 
   constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
-  mAccumulatedTime += dt;
-  for (;
-    mAccumulatedTime >= timeForOneFrame;
-    mAccumulatedTime -= timeForOneFrame
-  ) {
+  auto doTimeStep = [&, this]() {
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
     engine::updateAnimatedSprites(mEntities.entities);
     mHudRenderer.updateAnimation();
@@ -299,6 +305,21 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
     if (mEarthQuakeEffect) {
       screenShakeOffsetX = mEarthQuakeEffect->update();
+    }
+  };
+
+  if (mSingleStepping) {
+    if (mCanAdvanceSingleStep) {
+      doTimeStep();
+      mCanAdvanceSingleStep = false;
+    }
+  } else {
+    mAccumulatedTime += dt;
+    for (;
+      mAccumulatedTime >= timeForOneFrame;
+      mAccumulatedTime -= timeForOneFrame
+    ) {
+      doTimeStep();
     }
   }
 

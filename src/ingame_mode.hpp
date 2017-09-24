@@ -87,6 +87,8 @@ private:
   engine::TimeDelta mAccumulatedTime;
 
   bool mShowDebugText;
+  bool mSingleStepping = false;
+  bool mCanAdvanceSingleStep = false;
 
   struct LevelData {
     data::map::Map mMap;
