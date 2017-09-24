@@ -81,6 +81,11 @@ void DebuggingSystem::toggleWorldCollisionDataDisplay() {
 }
 
 
+void DebuggingSystem::toggleGridDisplay() {
+  mShowGrid = !mShowGrid;
+}
+
+
 void DebuggingSystem::update(
   ex::EntityManager& es,
   ex::EventManager& events,
@@ -139,6 +144,24 @@ void DebuggingSystem::update(
 
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
+  }
+
+  if (mShowGrid) {
+    const auto drawColor = base::Color{255, 255, 255, 190};
+    const auto maxX = tilesToPixels(GameTraits::mapViewPortWidthTiles);
+    const auto maxY = tilesToPixels(GameTraits::mapViewPortHeightTiles);
+
+    // Horizontal lines
+    for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
+      const auto pxY = tilesToPixels(y);
+      mpRenderer->drawLine(0, pxY, maxX, pxY, drawColor);
+    }
+
+    // Vertical lines
+    for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
+      const auto pxX = tilesToPixels(x);
+      mpRenderer->drawLine(pxX, 0, pxX, maxY, drawColor);
+    }
   }
 }
 

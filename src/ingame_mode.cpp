@@ -271,6 +271,10 @@ void IngameMode::handleEvent(const SDL_Event& event) {
       mShowDebugText = !mShowDebugText;
       break;
 
+    case SDLK_g:
+      debuggingSystem.toggleGridDisplay();
+      break;
+
     case SDLK_s:
       mSingleStepping = !mSingleStepping;
       break;
