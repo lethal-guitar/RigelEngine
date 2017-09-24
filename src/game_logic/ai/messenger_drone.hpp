@@ -57,7 +57,7 @@ struct MessengerDrone {
     engine::components::Orientation::Left;
   Message mMessage;
 
-  std::size_t mMessageStep = 0;
+  std::uint32_t mMessageStep = 0;
   int mElapsedFrames = 0;
 };
 

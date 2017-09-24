@@ -16,6 +16,7 @@
 
 #include "messenger_drone.hpp"
 
+#include "base/array_view.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/visual_components.hpp"
 
@@ -85,33 +86,7 @@ const MessageFrame CANT_ESCAPE[] = {
 };
 
 
-template <typename T>
-struct ArrayRef {
-  template <std::size_t N>
-  ArrayRef(const T (&array)[N]) // implicit on purpose
-    : mpItems(array)
-    , mSize(N)
-  {
-  }
-
-  std::size_t size() const {
-    return mSize;
-  }
-
-  const T& operator[](const std::size_t index) const {
-    return mpItems[index];
-  }
-
-  T& operator[](const std::size_t index) {
-    return mpItems[index];
-  }
-
-  const T* mpItems;
-  std::size_t mSize;
-};
-
-
-const ArrayRef<MessageFrame> MESSAGE_SEQUENCES[] = {
+const base::ArrayView<MessageFrame> MESSAGE_SEQUENCES[] = {
   YOUR_BRAIN_IS_OURS,
   BRING_BACK_THE_BRAIN,
   LIVE_FROM_RIGEL,
