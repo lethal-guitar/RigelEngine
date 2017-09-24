@@ -37,6 +37,7 @@ public:
 
   void toggleBoundingBoxDisplay();
   void toggleWorldCollisionDataDisplay();
+  void toggleGridDisplay();
 
   void update(
     entityx::EntityManager& es,
@@ -50,6 +51,7 @@ private:
 
   bool mShowBoundingBoxes = false;
   bool mShowWorldCollisionData = false;
+  bool mShowGrid = false;
 };
 
 }}

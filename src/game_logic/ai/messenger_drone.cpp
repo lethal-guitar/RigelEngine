@@ -16,6 +16,7 @@
 
 #include "messenger_drone.hpp"
 
+#include "base/array_view.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/visual_components.hpp"
 
@@ -85,33 +86,7 @@ const MessageFrame CANT_ESCAPE[] = {
 };
 
 
-template <typename T>
-struct ArrayRef {
-  template <std::size_t N>
-  ArrayRef(const T (&array)[N]) // implicit on purpose
-    : mpItems(array)
-    , mSize(N)
-  {
-  }
-
-  std::size_t size() const {
-    return mSize;
-  }
-
-  const T& operator[](const std::size_t index) const {
-    return mpItems[index];
-  }
-
-  T& operator[](const std::size_t index) {
-    return mpItems[index];
-  }
-
-  const T* mpItems;
-  std::size_t mSize;
-};
-
-
-const ArrayRef<MessageFrame> MESSAGE_SEQUENCES[] = {
+const base::ArrayView<MessageFrame> MESSAGE_SEQUENCES[] = {
   YOUR_BRAIN_IS_OURS,
   BRING_BACK_THE_BRAIN,
   LIVE_FROM_RIGEL,
@@ -170,7 +145,7 @@ void MessengerDroneSystem::update(
           exhaustStartFrame // horizontal engine exhaust/flame
         };
 
-        entity.assign<Animated>(
+        entity.assign<AnimationLoop>(
           1, exhaustStartFrame, exhaustStartFrame + 1, 3);
 
         state.mState = State::FlyIn;
@@ -186,8 +161,8 @@ void MessengerDroneSystem::update(
           // Switch from horizontal engine to vertical engine (suspension in
           // mid-air instead of propulsion)
           sprite.mFramesToRender[3] = 4;
-          entity.remove<Animated>();
-          entity.assign<Animated>(1, 4, 5, 3);
+          entity.remove<AnimationLoop>();
+          entity.assign<AnimationLoop>(1, 4, 5, 3);
 
           // Start showing message on screen, use 5th render slot (index 4)
           sprite.mFramesToRender.push_back(10);
@@ -218,8 +193,8 @@ void MessengerDroneSystem::update(
             const auto exhaustStartFrame =
               state.mOrientation == Orientation::Left ? 8 : 6;
             sprite.mFramesToRender[3] = exhaustStartFrame;
-            entity.remove<Animated>();
-            entity.assign<Animated>(
+            entity.remove<AnimationLoop>();
+            entity.assign<AnimationLoop>(
               1, exhaustStartFrame, exhaustStartFrame + 1, 3);
 
             entity.assign<AutoDestroy>(

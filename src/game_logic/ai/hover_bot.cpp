@@ -100,7 +100,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
           if (state.mFramesElapsed == 1) {
             // start teleport animation
             sprite.mShow = true;
-            engine::startAnimation(
+            engine::startAnimationLoop(
               entity,
               1,
               TELEPORT_ANIMATION_START_FRAME,
@@ -109,7 +109,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
           } else if (state.mFramesElapsed == 8) {
             // stop teleport animation, draw the robot's body with a looping
             // animation
-            engine::startAnimation(entity, 1, 0, 5);
+            engine::startAnimationLoop(entity, 1, 0, 5);
 
             // draw the robot's eye
             sprite.mFramesToRender.push_back(6);

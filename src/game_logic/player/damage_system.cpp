@@ -53,7 +53,7 @@ int mercyFramesForDifficulty(const data::Difficulty difficulty) {
 
 
 using engine::components::BoundingBox;
-using engine::components::Physical;
+using engine::components::MovingBody;
 using engine::components::WorldPosition;
 using engine::toWorldSpace;
 using game_logic::components::PlayerControlled;
@@ -84,7 +84,7 @@ void DamageSystem::update(
   }
 
   assert(mPlayer.has_component<BoundingBox>());
-  assert(mPlayer.has_component<Physical>());
+  assert(mPlayer.has_component<MovingBody>());
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<WorldPosition>());
 
@@ -113,8 +113,8 @@ void DamageSystem::update(
           playerState.mMercyFramesRemaining = mNumMercyFrames;
           mpServiceProvider->playSound(data::SoundId::DukePain);
         } else {
-          auto& physical = *mPlayer.component<Physical>();
-          physical.mVelocity = {0.0f, DEATH_JUMP_IMPULSE};
+          auto& body = *mPlayer.component<MovingBody>();
+          body.mVelocity = {0.0f, DEATH_JUMP_IMPULSE};
 
           playerState.mState = PlayerState::Dieing;
           mpServiceProvider->playSound(data::SoundId::DukeDeath);

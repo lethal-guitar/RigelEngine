@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
@@ -109,17 +110,17 @@ struct OverrideDrawOrder {
 };
 
 
-struct Animated {
-  Animated() = default;
-  explicit Animated(
+struct AnimationLoop {
+  AnimationLoop() = default;
+  explicit AnimationLoop(
     const int delayInFrames,
     boost::optional<int> endFrame = boost::none
   )
-    : Animated(delayInFrames, 0, endFrame)
+    : AnimationLoop(delayInFrames, 0, endFrame)
   {
   }
 
-  Animated(
+  AnimationLoop(
     const int delayInFrames,
     const int startFrame,
     boost::optional<int> endFrame,
@@ -137,6 +138,26 @@ struct Animated {
   int mStartFrame = 0;
   boost::optional<int> mEndFrame;
   int mRenderSlot = 0;
+};
+
+
+struct AnimationSequence {
+  AnimationSequence(
+    const base::ArrayView<int>& frames,
+    const int renderSlot = 0,
+    const bool repeat = false,
+    const int startFrame = 0)
+    : mFrames(frames)
+    , mCurrentFrame(startFrame)
+    , mRenderSlot(renderSlot)
+    , mRepeat(repeat)
+  {
+  }
+
+  base::ArrayView<int> mFrames;
+  decltype(mFrames)::size_type mCurrentFrame = 0;
+  int mRenderSlot = 0;
+  bool mRepeat = false;
 };
 
 }}}

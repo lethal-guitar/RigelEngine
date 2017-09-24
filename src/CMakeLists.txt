@@ -1,4 +1,5 @@
 set(core_sources
+    base/array_view.hpp
     base/boost_variant.hpp
     base/grid.hpp
     base/math_tools.hpp

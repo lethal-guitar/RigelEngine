@@ -245,7 +245,7 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       break;
 
     case 62:
-      sprite.mFramesToRender = {1, 0};
+      sprite.mFramesToRender = {0, 1};
       break;
 
     case 67:
@@ -375,7 +375,7 @@ void EntityFactory::configureItemContainer(
   const int givenScore,
   Args&&... components
 ) {
-  auto physicalProperties = Physical{{0.0f, 0.0f}, true};
+  auto physicalProperties = MovingBody{{0.0f, 0.0f}, true};
   auto activation = ActivationSettings{
     ActivationSettings::Policy::AlwaysAfterFirstActivation};
 
@@ -400,7 +400,7 @@ void EntityFactory::configureItemContainer(
   entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(container);
   entity.assign<Shootable>(1, givenScore);
-  addDefaultPhysical(entity, engine::inferBoundingBox(containerSprite));
+  addDefaultMovingBody(entity, engine::inferBoundingBox(containerSprite));
 }
 
 
@@ -416,9 +416,9 @@ void EntityFactory::configureEntity(
   switch (actorID) {
     // Bonus globes
     case 45:
-      entity.assign<Animated>(1, 0, 3, 0);
+      entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -427,9 +427,9 @@ void EntityFactory::configureEntity(
       break;
 
     case 46:
-      entity.assign<Animated>(1, 0, 3, 0);
+      entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -438,9 +438,9 @@ void EntityFactory::configureEntity(
       break;
 
     case 47:
-      entity.assign<Animated>(1, 0, 3, 0);
+      entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 5000;
@@ -449,9 +449,9 @@ void EntityFactory::configureEntity(
       break;
 
     case 48:
-      entity.assign<Animated>(1, 0, 3, 0);
+      entity.assign<AnimationLoop>(1, 0, 3, 0);
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -470,7 +470,7 @@ void EntityFactory::configureEntity(
 
     // Keyhole (blue key)
     case 122:
-      entity.assign<Animated>(1, 4);
+      entity.assign<AnimationLoop>(1, 4);
       break;
 
     // ----------------------------------------------------------------------
@@ -481,7 +481,7 @@ void EntityFactory::configureEntity(
     case 164: // Empty blue box
     case 161: // Empty white box
       entity.assign<Shootable>(1, 100);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
@@ -521,7 +521,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::RapidFire;
         item.mGivenPlayerBuff = PlayerBuff::RapidFire;
-        auto animation = Animated{1};
+        auto animation = AnimationLoop{1};
         configureItemContainer(
           entity,
           ContainerColor::White,
@@ -538,7 +538,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CloakingDevice;
         item.mGivenPlayerBuff = PlayerBuff::Cloak;
-        auto animation = Animated{1};
+        auto animation = AnimationLoop{1};
         configureItemContainer(
           entity,
           ContainerColor::White,
@@ -560,7 +560,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Red,
           0,
-          Animated{1},
+          AnimationLoop{1},
           boundingBox);
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
       }
@@ -576,7 +576,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Red,
           100,
           item,
-          Animated{1, 0, 5},
+          AnimationLoop{1, 0, 5},
           boundingBox);
       }
       break;
@@ -683,7 +683,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          Animated{1},
+          AnimationLoop{1},
           boundingBox);
       }
       break;
@@ -903,15 +903,15 @@ void EntityFactory::configureEntity(
 
     case 50: // teleporter
     case 51: // teleporter
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       entity.assign<Interactable>(InteractableType::Teleporter);
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
     case 239: // Special hint globe
       entity.assign<Shootable>(3, 100);
-      entity.assign<Animated>(1);
-      addDefaultPhysical(entity, boundingBox);
+      entity.assign<AnimationLoop>(1);
+      addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
         item.mGivenScore = 10000;
@@ -927,7 +927,7 @@ void EntityFactory::configureEntity(
 
     case 0: // Cylindrical robot with blinking 'head', aka hover-bot
       entity.assign<Shootable>(1 + difficultyOffset, 150);
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
       entity.assign<ai::components::HoverBot>();
       break;
@@ -950,7 +950,7 @@ void EntityFactory::configureEntity(
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(6 + difficultyOffset, 5000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(1, 1, 2);
+      entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
     case 64: // Bouncing spike ball
@@ -963,8 +963,8 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(6 + difficultyOffset, 1500);
       entity.assign<PlayerDamaging>(1);
       entity.assign<ai::components::SlimeBlob>();
-      addDefaultPhysical(entity, boundingBox);
-      entity.component<Physical>()->mGravityAffected = false;
+      addDefaultMovingBody(entity, boundingBox);
+      entity.component<MovingBody>()->mGravityAffected = false;
       break;
 
     case 68: // Green slime container
@@ -998,7 +998,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 115: // hover bot generator
-      entity.assign<Animated>(1, 0, 3);
+      entity.assign<AnimationLoop>(1, 0, 3);
       entity.assign<Shootable>(20, 2500);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::HoverBotSpawnMachine>();
@@ -1008,7 +1008,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
       entity.assign<ai::components::Skeleton>();
-      addDefaultPhysical(entity, boundingBox);
+      addDefaultMovingBody(entity, boundingBox);
       break;
 
     case 151: // Floating ball, opens up and shoots lasers
@@ -1094,7 +1094,7 @@ void EntityFactory::configureEntity(
           14,
           200,
           PlayerDamaging{1},
-          Animated{1},
+          AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
           boundingBox);
       }
@@ -1104,7 +1104,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(10, 20000);
       entity.assign<PlayerDamaging>(9, true);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       break;
 
     case 93: // Blue force field (disabled by cloak)
@@ -1135,11 +1135,11 @@ void EntityFactory::configureEntity(
     case 263: // Fire (variant 2)
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       break;
 
     case 117: // Pipe dripping green stuff
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       entity.assign<DrawTopMost>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::SlimePipe>();
@@ -1149,19 +1149,19 @@ void EntityFactory::configureEntity(
     case 252: // floating exit sign to left
       entity.assign<Shootable>(5, 10000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       break;
 
     case 296: // floating arrow
       entity.assign<Shootable>(5, 500);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       break;
 
     case 236: // Radar dish
       entity.assign<Shootable>(4, 2000);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       break;
 
     case 188: // rotating floor spikes
@@ -1175,7 +1175,7 @@ void EntityFactory::configureEntity(
     case 230: // Water surface splash right
     case 257: // Shallow water (variant 1)
     case 258: // Shallow water (variant 2)
-      entity.assign<Animated>(1);
+      entity.assign<AnimationLoop>(1);
       break;
 
     // Flying message ships
@@ -1205,14 +1205,14 @@ void EntityFactory::configureEntity(
       break;
 
     case 231: // Lava riser
-      entity.assign<Animated>(1, 3, 5);
+      entity.assign<AnimationLoop>(1, 3, 5);
       break;
 
     case 246: // Rocket exhaust flame left
     case 247: // Rocket exhaust flame right
     case 248: // Small rocket exhaust flame left
     case 249: // Small rocket exhaust flame right
-      entity.assign<Animated>(2);
+      entity.assign<AnimationLoop>(2);
       break;
 
     case 139: // level exit

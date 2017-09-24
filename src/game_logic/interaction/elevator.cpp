@@ -27,7 +27,7 @@ namespace ex = entityx;
 namespace rigel { namespace game_logic { namespace interaction {
 
 using engine::components::BoundingBox;
-using engine::components::Physical;
+using engine::components::MovingBody;
 using engine::components::SolidBody;
 using engine::components::WorldPosition;
 using rigel::game_logic::components::PlayerControlled;
@@ -55,7 +55,7 @@ void configureElevator(entityx::Entity entity) {
 
   entity.assign<components::Elevator>();
   entity.assign<BoundingBox>(BoundingBox{{0, 0}, {4, 3}});
-  entity.assign<Physical>(base::Point<float>{0.0f, 0.0f}, true);
+  entity.assign<MovingBody>(base::Point<float>{0.0f, 0.0f}, true);
   entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
   entity.assign<SolidBody>();
 }
@@ -77,14 +77,14 @@ void ElevatorSystem::update(
   const PlayerInputState& inputState
 ) {
   auto& playerState = *mPlayer.component<PlayerControlled>();
-  auto& playerPhysical = *mPlayer.component<Physical>();
+  auto& playerMovingBody = *mPlayer.component<MovingBody>();
 
   // Reset player state back to default if currently attached. This makes sure
   // the player is in the right state if the following updateElevatorAttachment
   // detaches the player.
   if (mAttachedElevator) {
     playerState.mIsInteracting = false;
-    playerPhysical.mGravityAffected = true;
+    playerMovingBody.mGravityAffected = true;
   }
 
   updateElevatorAttachment(es, playerState);
@@ -93,7 +93,7 @@ void ElevatorSystem::update(
   if (mAttachedElevator) {
     movement = determineMovementDirection(inputState);
     playerState.mIsInteracting = movement != 0;
-    updateElevatorMovement(movement, playerPhysical);
+    updateElevatorMovement(movement, playerMovingBody);
   }
 
   mIsOddFrame = !mIsOddFrame;
@@ -157,15 +157,15 @@ void ElevatorSystem::updateElevatorAttachment(
   // one
   if (mAttachedElevator && attachableElevator != mAttachedElevator) {
     mAttachedElevator.component<BoundingBox>()->size.height = 3;
-    mAttachedElevator.component<Physical>()->mVelocity.y = 2.0f;
-    mAttachedElevator.component<Physical>()->mGravityAffected = true;
+    mAttachedElevator.component<MovingBody>()->mVelocity.y = 2.0f;
+    mAttachedElevator.component<MovingBody>()->mGravityAffected = true;
     engine::setTag<SolidBody>(mAttachedElevator, true);
     mAttachedElevator.invalidate();
   }
 
   if (attachableElevator) {
     mAttachedElevator = attachableElevator;
-    mAttachedElevator.component<Physical>()->mGravityAffected = false;
+    mAttachedElevator.component<MovingBody>()->mGravityAffected = false;
     mPreviousMovement = 0;
   }
 }
@@ -173,21 +173,21 @@ void ElevatorSystem::updateElevatorAttachment(
 
 void ElevatorSystem::updateElevatorMovement(
   const int movement,
-  Physical& playerPhysical
+  MovingBody& playerMovingBody
 ) {
-  auto& elevatorPhysical = *mAttachedElevator.component<Physical>();
+  auto& elevatorMovingBody = *mAttachedElevator.component<MovingBody>();
 
   mAttachedElevator.component<BoundingBox>()->size.height = 3;
   engine::setTag<SolidBody>(mAttachedElevator, true);
 
-  playerPhysical.mVelocity.y = movement * ELEVATOR_SPEED;
-  elevatorPhysical.mVelocity.y = movement * ELEVATOR_SPEED;
+  playerMovingBody.mVelocity.y = movement * ELEVATOR_SPEED;
+  elevatorMovingBody.mVelocity.y = movement * ELEVATOR_SPEED;
 
   if (movement != mPreviousMovement) {
     mPreviousMovement = movement;
 
     engine::setTag<SolidBody>(mAttachedElevator, movement == 0);
-    playerPhysical.mGravityAffected = movement == 0;
+    playerMovingBody.mGravityAffected = movement == 0;
 
     // Bounding box adjustment: In order to get the expected behavior at the
     // edges of the available movement space for the elevator, we extend the

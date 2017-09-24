@@ -33,7 +33,8 @@ namespace ex = entityx;
 
 namespace rigel { namespace engine {
 
-using components::Animated;
+using components::AnimationLoop;
+using components::AnimationSequence;
 using components::CustomRenderFunc;
 using components::DrawTopMost;
 using components::Sprite;
@@ -43,7 +44,7 @@ using components::WorldPosition;
 namespace {
 
 
-void advanceAnimation(Sprite& sprite, Animated& animated) {
+void advanceAnimation(Sprite& sprite, AnimationLoop& animated) {
   const auto numFrames = static_cast<int>(sprite.mpDrawData->mFrames.size());
   const auto endFrame = animated.mEndFrame ? *animated.mEndFrame : numFrames-1;
   assert(endFrame >= 0 && endFrame < numFrames);
@@ -66,19 +67,48 @@ void advanceAnimation(Sprite& sprite, Animated& animated) {
 
 
 void updateAnimatedSprites(ex::EntityManager& es) {
-  es.each<Sprite, Animated>([](
+  es.each<Sprite, AnimationLoop>([](
     ex::Entity entity,
     Sprite& sprite,
-    Animated& animated
+    AnimationLoop& animated
   ) {
     ++animated.mFramesElapsed;
     if (animated.mFramesElapsed >= animated.mDelayInFrames) {
       animated.mFramesElapsed = 0;
       advanceAnimation(sprite, animated);
 
-      if (entity.has_component<components::BoundingBox>()) {
-        engine::synchronizeBoundingBoxToSprite(entity, animated.mRenderSlot);
+      if (
+        entity.has_component<components::BoundingBox>() &&
+        animated.mRenderSlot == 0
+      ) {
+        engine::synchronizeBoundingBoxToSprite(entity);
       }
+    }
+  });
+
+  es.each<Sprite, AnimationSequence>([](
+    ex::Entity entity,
+    Sprite& sprite,
+    AnimationSequence& sequence
+  ) {
+    ++sequence.mCurrentFrame;
+    if (sequence.mCurrentFrame >= sequence.mFrames.size()) {
+      if (sequence.mRepeat) {
+        sequence.mCurrentFrame = 0;
+      } else {
+        entity.remove<AnimationSequence>();
+        return;
+      }
+    }
+
+    sprite.mFramesToRender[sequence.mRenderSlot] =
+      sequence.mFrames[sequence.mCurrentFrame];
+
+    if (
+      entity.has_component<components::BoundingBox>() &&
+      sequence.mRenderSlot == 0
+    ) {
+      engine::synchronizeBoundingBoxToSprite(entity);
     }
   });
 }

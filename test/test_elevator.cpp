@@ -75,8 +75,8 @@ TEST_CASE("Rocket elevator") {
     CHECK(elevator.has_component<SolidBody>());
     CHECK(elevator.has_component<BoundingBox>());
 
-    REQUIRE(elevator.has_component<Physical>());
-    CHECK(elevator.component<Physical>()->mGravityAffected == true);
+    REQUIRE(elevator.has_component<MovingBody>());
+    CHECK(elevator.component<MovingBody>()->mGravityAffected == true);
   }
 
   auto& elevatorPosition = *elevator.component<WorldPosition>();
@@ -199,14 +199,14 @@ TEST_CASE("Rocket elevator") {
       const auto originalPos = playerPosition;
       const auto originalElevatorPos = elevatorPosition;
 
-      player.component<Physical>()->mVelocity.y = -3.6f;
-      player.component<Physical>()->mGravityAffected = true;
+      player.component<MovingBody>()->mVelocity.y = -3.6f;
+      player.component<MovingBody>()->mGravityAffected = true;
       player.component<PlayerControlled>()->mPerformedJump = true;
       runOneFrame(idleState);
 
       CHECK(!elevatorSystem.isPlayerAttached());
       CHECK(playerPosition.y < originalPos.y);
-      CHECK(elevator.component<Physical>()->mVelocity.y == 2.0f);
+      CHECK(elevator.component<MovingBody>()->mVelocity.y == 2.0f);
       CHECK(elevatorPosition.y > originalElevatorPos.y);
       CHECK(elevator.has_component<SolidBody>());
     }
@@ -225,7 +225,7 @@ TEST_CASE("Rocket elevator") {
       runOneFrame(idleState);
 
       CHECK(!elevatorSystem.isPlayerAttached());
-      CHECK(player.component<Physical>()->mGravityAffected);
+      CHECK(player.component<MovingBody>()->mGravityAffected);
       CHECK(playerPosition.y >= originalPlayerY);
       CHECK(elevatorPosition.y > originalElevatorY);
       CHECK(elevator.has_component<SolidBody>());

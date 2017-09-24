@@ -31,7 +31,7 @@ using namespace engine::components;
 using namespace game_logic::components;
 
 void configureForceField(entityx::Entity entity) {
-  entity.assign<Animated>(1, 2, 4, 2);
+  entity.assign<AnimationLoop>(1, 2, 4, 2);
   entity.assign<PlayerDamaging>(9, true);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
   entity.assign<CircuitCardForceField>();
@@ -48,7 +48,7 @@ void configureKeyCardSlot(
   const BoundingBox& boundingBox
 ) {
   entity.assign<Interactable>(InteractableType::ForceFieldCardReader);
-  entity.assign<Animated>(1);
+  entity.assign<AnimationLoop>(1);
   entity.assign<BoundingBox>(boundingBox);
 }
 
@@ -67,7 +67,7 @@ bool disableForceField(
     // TODO: Only turn off force fields that are visible on screen
     es.each<CircuitCardForceField>(
       [](ex::Entity entity, const CircuitCardForceField&) {
-        entity.remove<Animated>();
+        entity.remove<AnimationLoop>();
         entity.remove<BoundingBox>();
         entity.remove<CircuitCardForceField>();
         entity.remove<PlayerDamaging>();
@@ -78,7 +78,7 @@ bool disableForceField(
       });
 
     keyCardSlot.remove<Interactable>();
-    keyCardSlot.remove<Animated>();
+    keyCardSlot.remove<AnimationLoop>();
     keyCardSlot.remove<BoundingBox>();
   }
 

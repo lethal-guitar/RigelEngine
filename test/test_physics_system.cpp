@@ -44,11 +44,11 @@ TEST_CASE("Physics system works as expected") {
 
   auto physicalObject = entities.create();
   physicalObject.assign<BoundingBox>(BoundingBox{{0, 0}, {2, 2}});
-  physicalObject.assign<Physical>(Physical{{0.0f, 0.0f}, true});
+  physicalObject.assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true});
   physicalObject.assign<WorldPosition>(WorldPosition{0, 4});
   physicalObject.assign<Active>();
 
-  auto& physical = *physicalObject.component<Physical>();
+  auto& body = *physicalObject.component<MovingBody>();
   auto& position = *physicalObject.component<WorldPosition>();
 
   const auto runOneFrame = [&physicsSystem, &entityx]() {
@@ -57,17 +57,17 @@ TEST_CASE("Physics system works as expected") {
 
 
   SECTION("Objects move according to their velocity") {
-    physical.mGravityAffected = false;
+    body.mGravityAffected = false;
 
     SECTION("No movement when velocity is 0") {
       const auto previousPosition = position;
 
-      physical.mVelocity.x = 0.0f;
+      body.mVelocity.x = 0.0f;
       runOneFrame();
       CHECK(position == previousPosition);
     }
 
-    physical.mVelocity.x = 4.0f;
+    body.mVelocity.x = 4.0f;
 
     SECTION("Inactive objects's don't move") {
       physicalObject.remove<Active>();
@@ -84,12 +84,12 @@ TEST_CASE("Physics system works as expected") {
       position.x = 4;
 
       SECTION("To the left") {
-        physical.mVelocity.x = -1.0f;
+        body.mVelocity.x = -1.0f;
         runOneFrame();
         CHECK(position.x == 3);
       }
 
-      physical.mVelocity.x = 0.0f;
+      body.mVelocity.x = 0.0f;
 
       SECTION("Movement stops when setting velocity to 0") {
         runOneFrame();
@@ -98,7 +98,7 @@ TEST_CASE("Physics system works as expected") {
 
       SECTION("Upwards") {
         position.y = 10;
-        physical.mVelocity.y = -2.0f;
+        body.mVelocity.y = -2.0f;
         runOneFrame();
         CHECK(position.x == 4);
         CHECK(position.y == 8);
@@ -106,7 +106,7 @@ TEST_CASE("Physics system works as expected") {
 
       SECTION("Downwards") {
         position.y = 5;
-        physical.mVelocity.y = 1.0f;
+        body.mVelocity.y = 1.0f;
         runOneFrame();
         CHECK(position.x == 4);
         CHECK(position.y == 6);
@@ -120,18 +120,18 @@ TEST_CASE("Physics system works as expected") {
     position.y = 5;
 
     SECTION("Non-moving object") {
-      physical.mVelocity = base::Point<float>{0.0f, 0.0f};
+      body.mVelocity = base::Point<float>{0.0f, 0.0f};
       runOneFrame();
       CHECK(position.y > 5);
-      CHECK(physical.mVelocity.y > 0.0f);
+      CHECK(body.mVelocity.y > 0.0f);
 
       SECTION("Falling speed increases until terminal velocity reached") {
         const auto lastPosition = position.y;
-        const auto lastVelocity = physical.mVelocity.y;
+        const auto lastVelocity = body.mVelocity.y;
 
         runOneFrame();
         CHECK(position.y > lastPosition);
-        CHECK(physical.mVelocity.y > lastVelocity);
+        CHECK(body.mVelocity.y > lastVelocity);
 
         for (int i = 0; i < 10; ++i) {
           runOneFrame();
@@ -139,17 +139,17 @@ TEST_CASE("Physics system works as expected") {
 
         // Yes, in the world of Duke Nukem II, 'terminal velocity' has a
         // value of 2...
-        CHECK(physical.mVelocity.y <= 2.0f);
+        CHECK(body.mVelocity.y <= 2.0f);
       }
     }
 
     SECTION("Moving object") {
-      physical.mVelocity.x = 2;
+      body.mVelocity.x = 2;
       runOneFrame();
       CHECK(position.x == 12);
 
       CHECK(position.y > 5);
-      CHECK(physical.mVelocity.y > 0.0f);
+      CHECK(body.mVelocity.y > 0.0f);
     }
   }
 
@@ -161,10 +161,10 @@ TEST_CASE("Physics system works as expected") {
     solidBody.assign<SolidBody>();
 
     SECTION("Downard") {
-      physical.mVelocity.y = 2.0f;
+      body.mVelocity.y = 2.0f;
 
       runOneFrame();
-      CHECK(physical.mVelocity.y == 0.0f);
+      CHECK(body.mVelocity.y == 0.0f);
       CHECK(position.y == 5);
       CHECK(physicalObject.has_component<CollidedWithWorld>());
 
@@ -173,8 +173,8 @@ TEST_CASE("Physics system works as expected") {
     }
 
     SECTION("Downward with offset") {
-      physical.mVelocity.y = 2.0f;
-      physical.mGravityAffected = true;
+      body.mVelocity.y = 2.0f;
+      body.mGravityAffected = true;
       physicalObject.component<BoundingBox>()->size = {3,5};
       position = {7, 88};
 
@@ -192,28 +192,28 @@ TEST_CASE("Physics system works as expected") {
 
       runOneFrame();
       CHECK(position.y == 93);
-      CHECK(physical.mVelocity.y == 0.0f);
+      CHECK(body.mVelocity.y == 0.0f);
       CHECK(physicalObject.has_component<CollidedWithWorld>());
     }
 
     SECTION("Object continues falling after solidbody removed") {
-      physical.mVelocity.y = 2.0f;
+      body.mVelocity.y = 2.0f;
       runOneFrame();
       CHECK(position.y == 5);
 
       solidBody.destroy();
-      physical.mVelocity.y = 2.0f;
+      body.mVelocity.y = 2.0f;
       runOneFrame();
       CHECK(position.y == 7);
     }
 
     SECTION("Upward") {
       position.y = 11;
-      physical.mVelocity.y = -2.0f;
-      physical.mGravityAffected = false;
+      body.mVelocity.y = -2.0f;
+      body.mGravityAffected = false;
 
       runOneFrame();
-      CHECK(physical.mVelocity.y == 0.0f);
+      CHECK(body.mVelocity.y == 0.0f);
       CHECK(position.y == 10);
       CHECK(physicalObject.has_component<CollidedWithWorld>());
 
@@ -224,8 +224,8 @@ TEST_CASE("Physics system works as expected") {
     SECTION("Left") {
       position.x = 5;
       position.y = 8;
-      physical.mVelocity.x = -2.0f;
-      physical.mGravityAffected = false;
+      body.mVelocity.x = -2.0f;
+      body.mGravityAffected = false;
 
       runOneFrame();
       CHECK(position.x == 4);
@@ -239,8 +239,8 @@ TEST_CASE("Physics system works as expected") {
       solidBody.component<WorldPosition>()->x = 3;
       position.x = 0;
       position.y = 8;
-      physical.mVelocity.x = 2.0f;
-      physical.mGravityAffected = false;
+      body.mVelocity.x = 2.0f;
+      body.mGravityAffected = false;
 
       runOneFrame();
       CHECK(position.x == 1);
@@ -253,7 +253,7 @@ TEST_CASE("Physics system works as expected") {
     // TODO: Make stair-stepping work with solid bodies
 
     SECTION("SolidBody doesn't collide with itself") {
-      solidBody.assign<Physical>(base::Point<float>{0, 2.0f}, false);
+      solidBody.assign<MovingBody>(base::Point<float>{0, 2.0f}, false);
       solidBody.assign<Active>();
       runOneFrame();
       CHECK(solidBody.component<WorldPosition>()->y == 10);

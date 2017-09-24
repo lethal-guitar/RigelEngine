@@ -27,7 +27,7 @@ namespace rigel { namespace engine {
 using namespace std;
 
 using components::BoundingBox;
-using components::Physical;
+using components::MovingBody;
 using components::SolidBody;
 using components::WorldPosition;
 
@@ -53,23 +53,23 @@ PhysicsSystem::PhysicsSystem(const engine::CollisionChecker* pCollisionChecker)
 void PhysicsSystem::update(ex::EntityManager& es) {
   using components::CollidedWithWorld;
 
-  es.each<Physical, WorldPosition, BoundingBox, components::Active>(
+  es.each<MovingBody, WorldPosition, BoundingBox, components::Active>(
     [this](
       ex::Entity entity,
-      Physical& physical,
+      MovingBody& body,
       WorldPosition& position,
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
       const auto originalPosition = position;
 
-      const auto movementX = static_cast<int16_t>(physical.mVelocity.x);
+      const auto movementX = static_cast<int16_t>(body.mVelocity.x);
       if (movementX != 0) {
         position= applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
           movementX,
-          physical.mCanStepUpStairs);
+          body.mCanStepUpStairs);
       }
 
       // Cache new world space BBox after applying horizontal movement
@@ -82,18 +82,18 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       // frame where we applied the horizontal movement. Changing the velocity
       // here will automatically move the entity down when doing the vertical
       // movement.
-      if (physical.mGravityAffected) {
-        physical.mVelocity.y = applyGravity(bbox, physical.mVelocity.y);
+      if (body.mGravityAffected) {
+        body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
       }
 
-      const auto movementY = static_cast<std::int16_t>(physical.mVelocity.y);
+      const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
       if (movementY != 0) {
-        std::tie(position, physical.mVelocity.y) = applyVerticalMovement(
+        std::tie(position, body.mVelocity.y) = applyVerticalMovement(
           bbox,
           position,
-          physical.mVelocity.y,
+          body.mVelocity.y,
           movementY,
-          physical.mGravityAffected);
+          body.mGravityAffected);
       }
 
       const auto collisionOccured =

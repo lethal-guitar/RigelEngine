@@ -65,7 +65,7 @@ using namespace std;
 
 using data::PlayerModel;
 using engine::components::BoundingBox;
-using engine::components::Physical;
+using engine::components::MovingBody;
 using engine::components::WorldPosition;
 
 
@@ -270,6 +270,20 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     case SDLK_d:
       mShowDebugText = !mShowDebugText;
       break;
+
+    case SDLK_g:
+      debuggingSystem.toggleGridDisplay();
+      break;
+
+    case SDLK_s:
+      mSingleStepping = !mSingleStepping;
+      break;
+
+    case SDLK_SPACE:
+      if (mSingleStepping) {
+        mCanAdvanceSingleStep = true;
+      }
+      break;
   }
 }
 
@@ -286,11 +300,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
 
   constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
-  mAccumulatedTime += dt;
-  for (;
-    mAccumulatedTime >= timeForOneFrame;
-    mAccumulatedTime -= timeForOneFrame
-  ) {
+  auto doTimeStep = [&, this]() {
     mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
     engine::updateAnimatedSprites(mEntities.entities);
     mHudRenderer.updateAnimation();
@@ -299,6 +309,21 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
     if (mEarthQuakeEffect) {
       screenShakeOffsetX = mEarthQuakeEffect->update();
+    }
+  };
+
+  if (mSingleStepping) {
+    if (mCanAdvanceSingleStep) {
+      doTimeStep();
+      mCanAdvanceSingleStep = false;
+    }
+  } else {
+    mAccumulatedTime += dt;
+    for (;
+      mAccumulatedTime >= timeForOneFrame;
+      mAccumulatedTime -= timeForOneFrame
+    ) {
+      doTimeStep();
     }
   }
 
@@ -591,7 +616,7 @@ void IngameMode::handleTeleporter() {
 
 void IngameMode::showDebugText() {
   const auto& playerPos = *mPlayerEntity.component<WorldPosition>();
-  const auto& playerVel = mPlayerEntity.component<Physical>()->mVelocity;
+  const auto& playerVel = mPlayerEntity.component<MovingBody>()->mVelocity;
   std::stringstream infoText;
   infoText
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
