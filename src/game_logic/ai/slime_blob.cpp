@@ -124,19 +124,18 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
 
 
   // Slime blobs
-  es.each<Sprite, WorldPosition, components::SlimeBlob, Active>(
+  es.each<Sprite, WorldPosition, BoundingBox, components::SlimeBlob, Active>(
     [this](
       entityx::Entity entity,
       Sprite& sprite,
       WorldPosition& position,
+      const BoundingBox& bbox,
       components::SlimeBlob& blobState,
       const engine::components::Active&
     ) {
       using namespace components::detail;
 
       const auto playerPosition = adjustedPlayerPosition();
-      const auto& bbox = *entity.component<BoundingBox>();
-
       atria::variant::match(blobState.mState,
         [&](OnGround& state) {
           // Animate walking
