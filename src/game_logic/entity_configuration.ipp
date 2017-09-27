@@ -29,6 +29,12 @@ const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
 const auto MUZZLE_FLASH_DRAW_ORDER = 12;
 
 
+// NOTE: This is only an animation sequence (as opposed to a simple loop)
+// because we cannot have more than one instance of the same component type
+// per entity, i.e. we can't have two AnimationLoop components.
+const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -570,14 +576,53 @@ void EntityFactory::configureEntity(
 
     case 168: // Soda can
       {
-        CollectableItem item;
-        item.mGivenScore = 100; // 2000 if shot and grabbed while flying
-        item.mGivenHealth = 1;
+        CollectableItem intactSodaCanCollectable;
+        intactSodaCanCollectable.mGivenScore = 100;
+        intactSodaCanCollectable.mGivenHealth = 1;
+
+        CollectableItem flyingSodaCanCollectable;
+        flyingSodaCanCollectable.mGivenScore = 2000;
+
+        auto flyingSodaCanSprite = *entity.component<Sprite>();
+        // HACK: This is a little trick in order to get the soda can fly up
+        // animation to look (almost) exactly as in the original game. The
+        // problem is that (in the original) the rocket flame only appears once
+        // the can has started moving, which happens one frame after being hit.
+        // While our version also correctly starts movement on the frame after
+        // being hit, the animation would start one frame too early if we were
+        // to initialize the 2nd render slot correctly by pushing back the
+        // first element of SODA_CAN_ROCKET_FIRE_ANIMATION. This would be quite
+        // noticeable, since the flame can be visible through the floor tiles.
+        // So to avoid that, we instead initialize the 2nd render slot with
+        // frame 0, which is redundant, since the 1st render slot is already
+        // showing it, but that doesn't hurt, and it will be overriden by
+        // the animation sequence on the next frame.
+        //
+        // Note that there is still a small difference between the original and
+        // our version: The "shot" soda can will always restart the soda can
+        // "turn" animation from frame 0, whereas in the original game, it
+        // starts from the frame that was previously shown during the
+        // "intact/not shot" version. This is barely noticeable though, and
+        // would require a custom Component and System in order to fix -
+        // doesn't seem worth it for such a small detail.
+        flyingSodaCanSprite.mFramesToRender.push_back(0);
+
+        auto flyingSodaCanContainer = makeContainer(
+          flyingSodaCanCollectable,
+          flyingSodaCanSprite,
+          boundingBox,
+          AnimationLoop{1, 0, 5},
+          AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
+          MovingBody{{0.0f, -1.0f}, false},
+          AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
+
         configureItemBox(
           entity,
           ContainerColor::Red,
           100,
-          item,
+          intactSodaCanCollectable,
+          flyingSodaCanContainer,
+          Shootable{1, 0},
           AnimationLoop{1, 0, 5});
       }
       break;
