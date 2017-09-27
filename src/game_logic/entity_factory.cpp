@@ -115,18 +115,18 @@ Sprite EntityFactory::createSpriteComponent(const ActorID mainId) {
 
     const auto actorParts = actorIDListForActor(mainId);
     for (const auto part : actorParts) {
-        const auto& actorData = mpSpritePackage->loadActor(part);
-        lastDrawOrder = actorData.mDrawIndex;
+      const auto& actorData = mpSpritePackage->loadActor(part);
+      lastDrawOrder = actorData.mDrawIndex;
 
-        for (const auto& frameData : actorData.mFrames) {
-          auto texture = engine::OwningTexture{
-            mpRenderer, frameData.mFrameImage};
-          drawData.mFrames.emplace_back(
-            std::move(texture), frameData.mDrawOffset);
-        }
+      for (const auto& frameData : actorData.mFrames) {
+        auto texture = engine::OwningTexture{
+          mpRenderer, frameData.mFrameImage};
+        drawData.mFrames.emplace_back(
+          std::move(texture), frameData.mDrawOffset);
+      }
 
-        framesToRender.push_back(lastFrameCount);
-        lastFrameCount = int(actorData.mFrames.size());
+      framesToRender.push_back(lastFrameCount);
+      lastFrameCount = int(actorData.mFrames.size());
     }
 
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);

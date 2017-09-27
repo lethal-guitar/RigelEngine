@@ -78,7 +78,8 @@ inline void startAnimationLoop(
 inline void startAnimationSequence(
   entityx::Entity& entity,
   const base::ArrayView<int>& frames,
-  const int renderSlot = 0
+  const int renderSlot = 0,
+  const bool repeat = false
 ) {
   if (entity.has_component<components::AnimationSequence>()) {
     entity.remove<components::AnimationSequence>();
@@ -86,7 +87,7 @@ inline void startAnimationSequence(
 
   auto& sprite = *entity.component<components::Sprite>();
   sprite.mFramesToRender[renderSlot] = frames.front();
-  entity.assign<components::AnimationSequence>(frames, renderSlot);
+  entity.assign<components::AnimationSequence>(frames, renderSlot, repeat);
 }
 
 
