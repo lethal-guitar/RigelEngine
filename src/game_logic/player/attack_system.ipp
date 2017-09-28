@@ -79,7 +79,7 @@ AttackSystem<EntityFactoryT>::AttackSystem(
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
   , mpEntityFactory(pEntityFactory)
-  , mPreviousFireButtonState(false)
+  , mFireButtonPressed(false)
   , mShotRequested(false)
 {
 }
@@ -129,13 +129,13 @@ void AttackSystem<EntityFactoryT>::buttonStateChanged(
   if (
     attackPossible() &&
     inputState.mShooting &&
-    !mPreviousFireButtonState &&
+    !mFireButtonPressed &&
     !mShotRequested
   ) {
     mShotRequested = true;
   }
 
-  mPreviousFireButtonState = inputState.mShooting;
+  mFireButtonPressed = inputState.mShooting;
 }
 
 

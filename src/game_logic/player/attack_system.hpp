@@ -63,7 +63,7 @@ private:
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
   EntityFactoryT* mpEntityFactory;
-  bool mPreviousFireButtonState;
+  bool mFireButtonPressed;
   bool mShotRequested;
 };
 
