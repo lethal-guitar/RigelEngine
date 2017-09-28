@@ -314,4 +314,18 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
   return playerEntity;
 }
 
+
+entityx::Entity createOneShotSprite(
+  EntityFactory& factory,
+  const ActorID id,
+  const base::Vector& position
+) {
+  auto entity = factory.createSprite(id, position, true);
+  engine::startAnimationLoop(entity, 1, 0, boost::none);
+  const auto numAnimationFrames = static_cast<int>(
+    entity.component<Sprite>()->mpDrawData->mFrames.size());
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
+  return entity;
+}
+
 }}
