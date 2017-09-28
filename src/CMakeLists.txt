@@ -103,8 +103,8 @@ set(core_sources
     game_logic/map_scroll_system.hpp
     game_logic/player/animation_system.cpp
     game_logic/player/animation_system.hpp
-    game_logic/player/attack_system.cpp
     game_logic/player/attack_system.hpp
+    game_logic/player/attack_system.ipp
     game_logic/player/attack_traits.cpp
     game_logic/player/attack_traits.hpp
     game_logic/player/components.hpp

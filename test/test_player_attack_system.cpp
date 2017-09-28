@@ -80,12 +80,20 @@ TEST_CASE("Player attack system works as expected") {
     fireShotParameters.direction = direction;
   });
 
+  struct MockEntityFactory {
+    std::function<void(
+      const ProjectileType type,
+      const WorldPosition& position,
+      const ProjectileDirection direction)> createProjectile;
+  } mockEntityFactory{fireShotSpy};
+
+
   MockServiceProvider mockServiceProvicer;
-  player::AttackSystem attackSystem{
+  player::AttackSystem<MockEntityFactory> attackSystem{
     player,
     &playerModel,
     &mockServiceProvicer,
-    fireShotSpy};
+    &mockEntityFactory};
 
   const auto defaultInputState = PlayerInputState{};
   auto shootingInputState = PlayerInputState{};
