@@ -30,6 +30,7 @@ namespace ex = entityx;
 
 namespace {
 
+
 inline ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
   switch (weaponType) {
     case WeaponType::Normal:
@@ -112,7 +113,12 @@ void AttackSystem<EntityFactoryT>::update() {
   const auto& playerPosition =
     *mPlayerEntity.component<WorldPosition>();
 
-  if (mShotRequested) {
+  const auto shouldFireViaRapidFire =
+    mFireButtonPressed &&
+    !playerState.mShotFired &&
+    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire);
+
+  if (mShotRequested || shouldFireViaRapidFire) {
     fireShot(playerPosition, playerState);
     mShotRequested = false;
     playerState.mShotFired = true;

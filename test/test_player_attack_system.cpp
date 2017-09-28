@@ -383,4 +383,54 @@ TEST_CASE("Player attack system works as expected") {
     update(shootingInputState);
     CHECK(fireShotSpy.count() == 0);
   }
+
+
+  SECTION("Player fires only once when holding down fire button") {
+    attackSystem.buttonStateChanged(shootingInputState);
+    attackSystem.update();
+    CHECK(fireShotSpy.count() == 1);
+
+    for (int i = 0; i < 10; ++i) {
+      attackSystem.update();
+    }
+
+    CHECK(fireShotSpy.count() == 1);
+  }
+
+
+  SECTION("Player fires continuously every other frame when owning rapid fire buff") {
+    playerModel.mInventory.insert(data::InventoryItemType::RapidFire);
+
+    attackSystem.buttonStateChanged(shootingInputState);
+    attackSystem.update();
+    CHECK(fireShotSpy.count() == 1);
+
+    attackSystem.update();
+    attackSystem.update();
+    CHECK(fireShotSpy.count() == 2);
+
+    attackSystem.update();
+    CHECK(fireShotSpy.count() == 2);
+
+    attackSystem.update();
+    CHECK(fireShotSpy.count() == 3);
+  }
+
+  SECTION("Rapid fire expires after timeout") {
+    playerModel.mInventory.insert(data::InventoryItemType::RapidFire);
+
+    attackSystem.buttonStateChanged(shootingInputState);
+    for (int i = 0; i < 700; ++i) {
+      playerModel.updateTemporaryItemExpiry();
+      attackSystem.update();
+    }
+    CHECK(fireShotSpy.count() == 350);
+
+    // By this point, rapid fire should have expired, so if we keep updating,
+    // no more shots should be fired
+    for (int i = 0; i < 2; ++i) {
+      attackSystem.update();
+    }
+    CHECK(fireShotSpy.count() == 350);
+  }
 }

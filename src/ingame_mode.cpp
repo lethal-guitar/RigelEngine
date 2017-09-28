@@ -365,6 +365,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
+  mPlayerModel.updateTemporaryItemExpiry();
   mpSystems->mElevatorSystem.update(mEntities.entities, mCombinedInputState);
   mpSystems->mPlayerMovementSystem.update(mCombinedInputState);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
