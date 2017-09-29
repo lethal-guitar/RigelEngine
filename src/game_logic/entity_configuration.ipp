@@ -378,16 +378,11 @@ void turnIntoContainer(
   const int givenScore,
   components::ItemContainer&& container
 ) {
-  auto physicalProperties = MovingBody{{0.0f, 0.0f}, true};
+  // We don't assign a position here, as the container might move before being
+  // opened. The item container's onHit callback will set the spawned entity's
+  // position when the container is opened.
   auto originalSprite = *entity.component<Sprite>();
-
-  // We don't assign a position here, as the box might move before being opened.
-  // The item container's onHit callback will set the spawned entity's position
-  // when the container is opened.
-  addToContainer(container,
-    physicalProperties,
-    ActivationSettings{ActivationSettings::Policy::AlwaysAfterFirstActivation},
-    originalSprite);
+  addToContainer(container, originalSprite);
 
   entity.remove<Sprite>();
   entity.assign<Sprite>(containerSprite);
@@ -408,6 +403,8 @@ void EntityFactory::configureItemBox(
   Args&&... components
 ) {
   auto container = makeContainer(components...);
+  addDefaultMovingBody(
+    container, engine::inferBoundingBox(*entity.component<Sprite>()));
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
 }
@@ -505,8 +502,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::White,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -519,8 +515,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::White,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -536,8 +531,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item,
-          animation,
-          boundingBox);
+          animation);
       }
       break;
 
@@ -553,8 +547,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item,
-          animation,
-          boundingBox);
+          animation);
       }
       break;
 
@@ -585,8 +578,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Red,
           100,
           item,
-          AnimationLoop{1, 0, 5},
-          boundingBox);
+          AnimationLoop{1, 0, 5});
       }
       break;
 
@@ -600,8 +592,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Red,
           100,
           item,
-          Shootable{1, 10000},
-          boundingBox);
+          Shootable{1, 10000});
       }
       break;
 
@@ -616,8 +607,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Red,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -633,8 +623,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -647,8 +636,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -660,8 +648,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -674,8 +661,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -692,8 +678,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          AnimationLoop{1},
-          boundingBox);
+          AnimationLoop{1});
       }
       break;
 
@@ -706,8 +691,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -720,8 +704,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -734,8 +717,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -748,8 +730,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -762,8 +743,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -775,8 +755,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -788,8 +767,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -801,8 +779,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -814,8 +791,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -827,8 +803,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -840,8 +815,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -853,8 +827,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -866,8 +839,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -879,8 +851,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -892,8 +863,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -905,8 +875,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -1103,8 +1072,9 @@ void EntityFactory::configureEntity(
           PlayerDamaging{1},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
-          boundingBox,
           sprite);
+        addDefaultMovingBody(container, boundingBox);
+
         auto barrelSprite = createSpriteForId(14);
         turnIntoContainer(entity, barrelSprite, 200, std::move(container));
       }
