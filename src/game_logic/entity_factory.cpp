@@ -67,14 +67,15 @@ using namespace game_logic::components;
 
 namespace {
 
-// Assign gravity affected physical component
+// Assign gravity affected moving body component
+template<typename EntityLike>
 void addDefaultMovingBody(
-  ex::Entity entity,
+  EntityLike& entity,
   const BoundingBox& boundingBox
 ) {
-  entity.assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true});
-  entity.assign<BoundingBox>(boundingBox);
-  entity.assign<ActivationSettings>(
+  entity.template assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true});
+  entity.template assign<BoundingBox>(boundingBox);
+  entity.template assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
 }
 
@@ -312,6 +313,20 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
   }
 
   return playerEntity;
+}
+
+
+entityx::Entity createOneShotSprite(
+  EntityFactory& factory,
+  const ActorID id,
+  const base::Vector& position
+) {
+  auto entity = factory.createSprite(id, position, true);
+  engine::startAnimationLoop(entity, 1, 0, boost::none);
+  const auto numAnimationFrames = static_cast<int>(
+    entity.component<Sprite>()->mpDrawData->mFrames.size());
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
+  return entity;
 }
 
 }}

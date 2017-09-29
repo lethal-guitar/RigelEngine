@@ -29,6 +29,12 @@ const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
 const auto MUZZLE_FLASH_DRAW_ORDER = 12;
 
 
+// NOTE: This is only an animation sequence (as opposed to a simple loop)
+// because we cannot have more than one instance of the same component type
+// per entity, i.e. we can't have two AnimationLoop components.
+const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -378,16 +384,11 @@ void turnIntoContainer(
   const int givenScore,
   components::ItemContainer&& container
 ) {
-  auto physicalProperties = MovingBody{{0.0f, 0.0f}, true};
+  // We don't assign a position here, as the container might move before being
+  // opened. The item container's onHit callback will set the spawned entity's
+  // position when the container is opened.
   auto originalSprite = *entity.component<Sprite>();
-
-  // We don't assign a position here, as the box might move before being opened.
-  // The item container's onHit callback will set the spawned entity's position
-  // when the container is opened.
-  addToContainer(container,
-    physicalProperties,
-    ActivationSettings{ActivationSettings::Policy::AlwaysAfterFirstActivation},
-    originalSprite);
+  addToContainer(container, originalSprite);
 
   entity.remove<Sprite>();
   entity.assign<Sprite>(containerSprite);
@@ -408,6 +409,8 @@ void EntityFactory::configureItemBox(
   Args&&... components
 ) {
   auto container = makeContainer(components...);
+  addDefaultMovingBody(
+    container, engine::inferBoundingBox(*entity.component<Sprite>()));
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
 }
@@ -505,8 +508,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::White,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -519,8 +521,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::White,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -536,8 +537,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item,
-          animation,
-          boundingBox);
+          animation);
       }
       break;
 
@@ -553,8 +553,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item,
-          animation,
-          boundingBox);
+          animation);
       }
       break;
 
@@ -577,16 +576,54 @@ void EntityFactory::configureEntity(
 
     case 168: // Soda can
       {
-        CollectableItem item;
-        item.mGivenScore = 100; // 2000 if shot and grabbed while flying
-        item.mGivenHealth = 1;
+        CollectableItem intactSodaCanCollectable;
+        intactSodaCanCollectable.mGivenScore = 100;
+        intactSodaCanCollectable.mGivenHealth = 1;
+
+        CollectableItem flyingSodaCanCollectable;
+        flyingSodaCanCollectable.mGivenScore = 2000;
+
+        auto flyingSodaCanSprite = *entity.component<Sprite>();
+        // HACK: This is a little trick in order to get the soda can fly up
+        // animation to look (almost) exactly as in the original game. The
+        // problem is that (in the original) the rocket flame only appears once
+        // the can has started moving, which happens one frame after being hit.
+        // While our version also correctly starts movement on the frame after
+        // being hit, the animation would start one frame too early if we were
+        // to initialize the 2nd render slot correctly by pushing back the
+        // first element of SODA_CAN_ROCKET_FIRE_ANIMATION. This would be quite
+        // noticeable, since the flame can be visible through the floor tiles.
+        // So to avoid that, we instead initialize the 2nd render slot with
+        // frame 0, which is redundant, since the 1st render slot is already
+        // showing it, but that doesn't hurt, and it will be overriden by
+        // the animation sequence on the next frame.
+        //
+        // Note that there is still a small difference between the original and
+        // our version: The "shot" soda can will always restart the soda can
+        // "turn" animation from frame 0, whereas in the original game, it
+        // starts from the frame that was previously shown during the
+        // "intact/not shot" version. This is barely noticeable though, and
+        // would require a custom Component and System in order to fix -
+        // doesn't seem worth it for such a small detail.
+        flyingSodaCanSprite.mFramesToRender.push_back(0);
+
+        auto flyingSodaCanContainer = makeContainer(
+          flyingSodaCanCollectable,
+          flyingSodaCanSprite,
+          boundingBox,
+          AnimationLoop{1, 0, 5},
+          AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
+          MovingBody{{0.0f, -1.0f}, false},
+          AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
+
         configureItemBox(
           entity,
           ContainerColor::Red,
           100,
-          item,
-          AnimationLoop{1, 0, 5},
-          boundingBox);
+          intactSodaCanCollectable,
+          flyingSodaCanContainer,
+          Shootable{1, 0},
+          AnimationLoop{1, 0, 5});
       }
       break;
 
@@ -600,8 +637,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Red,
           100,
           item,
-          Shootable{1, 10000},
-          boundingBox);
+          Shootable{1, 10000});
       }
       break;
 
@@ -616,8 +652,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Red,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -633,8 +668,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -647,8 +681,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -660,8 +693,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -674,8 +706,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -692,8 +723,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          AnimationLoop{1},
-          boundingBox);
+          AnimationLoop{1});
       }
       break;
 
@@ -706,8 +736,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -720,8 +749,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -734,8 +762,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -748,8 +775,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -762,8 +788,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -775,8 +800,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -788,8 +812,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -801,8 +824,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -814,8 +836,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -827,8 +848,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -840,8 +860,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -853,8 +872,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -866,8 +884,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -879,8 +896,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -892,8 +908,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -905,8 +920,7 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item,
-          boundingBox);
+          item);
       }
       break;
 
@@ -1103,8 +1117,9 @@ void EntityFactory::configureEntity(
           PlayerDamaging{1},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
-          boundingBox,
           sprite);
+        addDefaultMovingBody(container, boundingBox);
+
         auto barrelSprite = createSpriteForId(14);
         turnIntoContainer(entity, barrelSprite, 200, std::move(container));
       }

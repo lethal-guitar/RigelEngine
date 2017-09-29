@@ -141,4 +141,16 @@ private:
   std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
 };
 
+
+/** Creates a temporary sprite (destroyed after showing last animation frame)
+ *
+ * This sets up a sprite entity using the sprite corresponding to the given
+ * actor ID, which is set up to play all animation frames in the sprite and
+ * then disappear.
+ */
+entityx::Entity createOneShotSprite(
+  EntityFactory& factory,
+  data::ActorID id,
+  const base::Vector& position);
+
 }}
