@@ -98,7 +98,6 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 
 
 struct IngameMode::Systems {
-  template<typename FireShotFuncT>
   Systems(
     base::Vector* pScrollOffset,
     entityx::Entity playerEntity,
@@ -108,7 +107,6 @@ struct IngameMode::Systems {
     EntityFactory* pEntityFactory,
     RandomNumberGenerator* pRandomGenerator,
     const data::map::Map& map,
-    FireShotFuncT fireShotFunc,
     entityx::EntityManager& entities,
     entityx::EventManager& eventManager
   )
@@ -120,7 +118,7 @@ struct IngameMode::Systems {
         playerEntity,
         pPlayerModel,
         pServiceProvider,
-        fireShotFunc)
+        pEntityFactory)
     , mElevatorSystem(playerEntity, pServiceProvider)
     , mBlueGuardSystem(
         playerEntity,
@@ -148,7 +146,7 @@ struct IngameMode::Systems {
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
-  game_logic::player::AttackSystem mPlayerAttackSystem;
+  game_logic::player::AttackSystem<EntityFactory> mPlayerAttackSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
@@ -367,6 +365,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
+  mPlayerModel.updateTemporaryItemExpiry();
   mpSystems->mElevatorSystem.update(mEntities.entities, mCombinedInputState);
   mpSystems->mPlayerMovementSystem.update(mCombinedInputState);
   mEntities.systems.update<PlayerInteractionSystem>(dt);
@@ -492,13 +491,6 @@ void IngameMode::loadLevel(
     &mEntityFactory,
     &mRandomGenerator,
     mLevelData.mMap,
-    [this](
-      const game_logic::ProjectileType type,
-      const WorldPosition& pos,
-      const game_logic::ProjectileDirection direction
-    ) {
-      mEntityFactory.createProjectile(type, pos, direction);
-    },
     mEntities.entities,
     mEntities.events);
 
