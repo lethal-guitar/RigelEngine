@@ -28,6 +28,8 @@ const auto MAX_AMMO = 32;
 const auto MAX_AMMO_FLAME_THROWER = 64;
 const auto MAX_HEALTH = 9;
 
+const auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
+
 
 enum class InventoryItemType {
   CircuitBoard,
@@ -69,11 +71,6 @@ RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::InventoryItemType)
 namespace rigel { namespace data {
 
 struct PlayerModel {
-  int mScore = 0;
-  int mAmmo = MAX_AMMO;
-  int mHealth = MAX_HEALTH;
-  WeaponType mWeapon = WeaponType::Normal;
-
   int currentMaxAmmo() const {
     return
       mWeapon == WeaponType::FlameThrower ? MAX_AMMO_FLAME_THROWER : MAX_AMMO;
@@ -96,8 +93,24 @@ struct PlayerModel {
     mInventory.erase(type);
   }
 
+  void updateTemporaryItemExpiry() {
+    if (hasItem(InventoryItemType::RapidFire)) {
+      ++mFramesElapsedHavingRapidFire;
+      if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+        removeItem(InventoryItemType::RapidFire);
+        mFramesElapsedHavingRapidFire = 0;
+      }
+    }
+  }
+
   std::unordered_set<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
+  WeaponType mWeapon = WeaponType::Normal;
+  int mScore = 0;
+  int mAmmo = MAX_AMMO;
+  int mHealth = MAX_HEALTH;
+  int mFramesElapsedHavingRapidFire = 0;
+  int mFramesElapsedHavingCloak = 0;
 };
 
 

@@ -24,7 +24,6 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <functional>
 
 namespace rigel {
   struct IGameServiceProvider;
@@ -39,19 +38,14 @@ namespace rigel { namespace game_logic { namespace components {
 
 namespace rigel { namespace game_logic { namespace player {
 
+template<typename EntityFactoryT>
 class AttackSystem {
 public:
-  using FireShotFunc = std::function<void(
-    ProjectileType type,
-    const engine::components::WorldPosition&,
-    ProjectileDirection
-  )>;
-
   AttackSystem(
     entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServiceProvider,
-    FireShotFunc fireShotFunc);
+    EntityFactoryT* pEntityFactory);
 
   void update();
   void buttonStateChanged(const PlayerInputState& inputState);
@@ -68,10 +62,12 @@ private:
   entityx::Entity mPlayerEntity;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
-  FireShotFunc mFireShotFunc;
-  bool mPreviousFireButtonState;
+  EntityFactoryT* mpEntityFactory;
+  bool mFireButtonPressed;
   bool mShotRequested;
 };
 
 
 }}}
+
+#include "attack_system.ipp"

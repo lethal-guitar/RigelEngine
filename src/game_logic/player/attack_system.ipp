@@ -14,8 +14,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "attack_system.hpp"
-
 #include "data/player_data.hpp"
 #include "game_logic/player/attack_traits.hpp"
 #include "game_mode.hpp"
@@ -32,7 +30,8 @@ namespace ex = entityx;
 
 namespace {
 
-ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
+
+inline ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
   switch (weaponType) {
     case WeaponType::Normal:
       return ProjectileType::PlayerRegularShot;
@@ -52,7 +51,7 @@ ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
 }
 
 
-data::SoundId soundIdForWeapon(const WeaponType weaponType) {
+inline data::SoundId soundIdForWeapon(const WeaponType weaponType) {
   using data::SoundId;
 
   switch (weaponType) {
@@ -70,23 +69,25 @@ data::SoundId soundIdForWeapon(const WeaponType weaponType) {
 }
 
 
-AttackSystem::AttackSystem(
+template<typename EntityFactoryT>
+AttackSystem<EntityFactoryT>::AttackSystem(
   entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
-  FireShotFunc fireShotFunc
+  EntityFactoryT* pEntityFactory
 )
   : mPlayerEntity(playerEntity)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
-  , mFireShotFunc(fireShotFunc)
-  , mPreviousFireButtonState(false)
+  , mpEntityFactory(pEntityFactory)
+  , mFireButtonPressed(false)
   , mShotRequested(false)
 {
 }
 
 
-bool AttackSystem::attackPossible() const {
+template<typename EntityFactoryT>
+bool AttackSystem<EntityFactoryT>::attackPossible() const {
   auto& playerState =
     *mPlayerEntity.component<const components::PlayerControlled>();
 
@@ -98,7 +99,8 @@ bool AttackSystem::attackPossible() const {
 }
 
 
-void AttackSystem::update() {
+template<typename EntityFactoryT>
+void AttackSystem<EntityFactoryT>::update() {
   if (!attackPossible()) {
     return;
   }
@@ -111,7 +113,12 @@ void AttackSystem::update() {
   const auto& playerPosition =
     *mPlayerEntity.component<WorldPosition>();
 
-  if (mShotRequested) {
+  const auto shouldFireViaRapidFire =
+    mFireButtonPressed &&
+    !playerState.mShotFired &&
+    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire);
+
+  if (mShotRequested || shouldFireViaRapidFire) {
     fireShot(playerPosition, playerState);
     mShotRequested = false;
     playerState.mShotFired = true;
@@ -121,21 +128,25 @@ void AttackSystem::update() {
 }
 
 
-void AttackSystem::buttonStateChanged(const PlayerInputState& inputState) {
+template<typename EntityFactoryT>
+void AttackSystem<EntityFactoryT>::buttonStateChanged(
+  const PlayerInputState& inputState
+) {
   if (
     attackPossible() &&
     inputState.mShooting &&
-    !mPreviousFireButtonState &&
+    !mFireButtonPressed &&
     !mShotRequested
   ) {
     mShotRequested = true;
   }
 
-  mPreviousFireButtonState = inputState.mShooting;
+  mFireButtonPressed = inputState.mShooting;
 }
 
 
-void AttackSystem::fireShot(
+template<typename EntityFactoryT>
+void AttackSystem<EntityFactoryT>::fireShot(
   const WorldPosition& playerPosition,
   const components::PlayerControlled& playerState
 ) {
@@ -153,7 +164,7 @@ void AttackSystem::fireShot(
   const auto shotOffset =
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
-  mFireShotFunc(
+  mpEntityFactory->createProjectile(
     projectileTypeForWeapon(mpPlayerModel->mWeapon),
     shotOffset + playerPosition,
     shotDirection(playerState.mState, playerState.mOrientation));
