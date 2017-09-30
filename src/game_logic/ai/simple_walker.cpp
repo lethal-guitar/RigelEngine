@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "skeleton.hpp"
+#include "simple_walker.hpp"
 
 #include "engine/collision_checker.hpp"
 #include "engine/sprite_tools.hpp"
@@ -29,15 +29,18 @@ using namespace engine::orientation;
 
 
 void updateAnimation(entityx::Entity entity, const Orientation orientation) {
-  const auto startFrame = orientation == Orientation::Left ? 0 : 4;
-  const auto endFrame = startFrame + 3;
-  engine::startAnimationLoop(entity, 2, startFrame, endFrame);
+  const auto& config = *entity.component<components::SimpleWalker>()->mpConfig;
+  const auto startFrame =
+    orientation == Orientation::Left ? 0 : config.mAnimationSteps;
+  const auto endFrame = startFrame + (config.mAnimationSteps - 1);
+  engine::startAnimationLoop(
+    entity, config.mAnimationDelay, startFrame, endFrame);
 }
 
 } // namespace
 
 
-SkeletonSystem::SkeletonSystem(
+SimpleWalkerSystem::SimpleWalkerSystem(
   entityx::Entity player,
   engine::CollisionChecker* pCollisionChecker
 )
@@ -47,13 +50,13 @@ SkeletonSystem::SkeletonSystem(
 }
 
 
-void SkeletonSystem::update(entityx::EntityManager& es) {
+void SimpleWalkerSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
-  es.each<components::Skeleton, WorldPosition, Active>(
+  es.each<components::SimpleWalker, WorldPosition, Active>(
     [this, &playerPosition](
       entityx::Entity entity,
-      components::Skeleton& state,
+      components::SimpleWalker& state,
       WorldPosition& position,
       const Active&
     ) {
@@ -64,7 +67,7 @@ void SkeletonSystem::update(entityx::EntityManager& es) {
         updateAnimation(entity, *state.mOrientation);
       }
 
-      if (mIsOddFrame) {
+      if (mIsOddFrame && !state.mpConfig->mWalkAtFullSpeed) {
         return;
       }
 

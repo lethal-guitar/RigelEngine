@@ -29,17 +29,17 @@ struct MovingBody {
   MovingBody(
     const base::Point<float> velocity,
     const bool gravityAffected,
-    const bool canStepUpStairs = false
+    const bool isPlayer = false
   )
     : mVelocity(velocity)
     , mGravityAffected(gravityAffected)
-    , mCanStepUpStairs(canStepUpStairs)
+    , mIsPlayer(isPlayer)
   {
   }
 
   base::Point<float> mVelocity;
   bool mGravityAffected;
-  bool mCanStepUpStairs;
+  bool mIsPlayer;
 };
 
 

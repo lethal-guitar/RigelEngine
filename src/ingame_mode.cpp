@@ -32,7 +32,7 @@
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/rocket_turret.hpp"
 #include "game_logic/ai/security_camera.hpp"
-#include "game_logic/ai/skeleton.hpp"
+#include "game_logic/ai/simple_walker.hpp"
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
@@ -130,7 +130,7 @@ struct IngameMode::Systems {
         playerEntity,
         &mCollisionChecker,
         pEntityFactory)
-    , mSkeletonSystem(
+    , mSimpleWalkerSystem(
         playerEntity,
         &mCollisionChecker)
     , mSlimeBlobSystem(
@@ -151,7 +151,7 @@ struct IngameMode::Systems {
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::HoverBotSystem mHoverBotSystem;
-  game_logic::ai::SkeletonSystem mSkeletonSystem;
+  game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
 };
 
@@ -382,7 +382,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   mEntities.systems.update<ai::PrisonerSystem>(dt);
   mEntities.systems.update<ai::RocketTurretSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
-  mpSystems->mSkeletonSystem.update(mEntities.entities);
+  mpSystems->mSimpleWalkerSystem.update(mEntities.entities);
   mEntities.systems.update<ai::SlidingDoorSystem>(dt);
   mpSystems->mSlimeBlobSystem.update(mEntities.entities);
   mEntities.systems.update<ai::SlimePipeSystem>(dt);

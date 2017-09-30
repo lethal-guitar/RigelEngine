@@ -168,6 +168,32 @@ auto createBlueGuardAiComponent(const ActorID id) {
 }
 
 
+auto skeletonAiConfig() {
+  static auto config = []() {
+    ai::components::SimpleWalker::Configuration c;
+    c.mAnimationSteps = 4;
+    c.mAnimationDelay = 2;
+    c.mWalkAtFullSpeed = false;
+    return c;
+  }();
+
+  return &config;
+}
+
+
+auto turkeyAiConfig() {
+  static auto config = []() {
+    ai::components::SimpleWalker::Configuration c;
+    c.mAnimationSteps = 2;
+    c.mAnimationDelay = 1;
+    c.mWalkAtFullSpeed = true;
+    return c;
+  }();
+
+  return &config;
+}
+
+
 auto actorIDListForActor(const ActorID ID) {
   std::vector<ActorID> actorParts;
 
@@ -643,16 +669,44 @@ void EntityFactory::configureEntity(
 
     case 201: // Turkey
       {
-        CollectableItem item;
         // BUG in the original game: The turkey triggers a floating '100', but
-        // doesn't actually give the player any score.
-        //item.mGivenScore = 100;
-        item.mGivenHealth = 1; // 2 if cooked
-        configureItemBox(
+        // doesn't actually give the player any score. Therefore, we don't
+        // assign givenScore here.
+        CollectableItem cookedTurkeyCollectable;
+        cookedTurkeyCollectable.mGivenHealth = 2;
+
+        CollectableItem walkingTurkeyCollectable;
+        walkingTurkeyCollectable.mGivenHealth = 1;
+
+        auto cookedTurkeySprite = *entity.component<Sprite>();
+        // TODO: It would be nice if we could apply startAnimationLoop() on
+        // containers. Since we can't, we currently have to manually setup
+        // the render slot with the right frame, in addition to adding a
+        // matching AnimationLoop component
+        cookedTurkeySprite.mFramesToRender[0] = 4;
+
+        // The turkey is implemented as a nested container: First, the box
+        // spawns the living turkey, which in turn is a container spawning
+        // the cooked turkey.
+        auto cookedTurkeyContainer = makeContainer(
+          cookedTurkeyCollectable,
+          cookedTurkeySprite,
+          AnimationLoop{1, 4, 7});
+        addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
+
+        auto livingTurkeyContainer = makeContainer(
+          walkingTurkeyCollectable,
+          Shootable{1, 0},
+          boundingBox,
+          cookedTurkeyContainer,
+          ai::components::SimpleWalker{turkeyAiConfig()});
+        addDefaultMovingBody(livingTurkeyContainer, boundingBox);
+
+        turnIntoContainer(
           entity,
-          ContainerColor::Red,
+          createSpriteForId(actorIdForBoxColor(ContainerColor::Red)),
           100,
-          item);
+          std::move(livingTurkeyContainer));
       }
       break;
 
@@ -1030,7 +1084,7 @@ void EntityFactory::configureEntity(
     case 134: // Walking skeleton
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<ai::components::Skeleton>();
+      entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
       addDefaultMovingBody(entity, boundingBox);
       break;
 
