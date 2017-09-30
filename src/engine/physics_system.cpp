@@ -65,7 +65,7 @@ void PhysicsSystem::update(ex::EntityManager& es) {
 
       const auto movementX = static_cast<int16_t>(body.mVelocity.x);
       if (movementX != 0) {
-        position= applyHorizontalMovement(
+        position = applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
           movementX,
