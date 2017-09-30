@@ -1030,7 +1030,7 @@ void EntityFactory::configureEntity(
     case 134: // Walking skeleton
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<ai::components::Skeleton>();
+      entity.assign<ai::components::SimpleWalker>();
       addDefaultMovingBody(entity, boundingBox);
       break;
 

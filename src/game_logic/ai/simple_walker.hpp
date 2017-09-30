@@ -31,16 +31,16 @@ namespace rigel { namespace game_logic { namespace ai {
 
 namespace components {
 
-struct Skeleton {
+struct SimpleWalker {
   boost::optional<engine::components::Orientation> mOrientation;
 };
 
 }
 
 
-class SkeletonSystem {
+class SimpleWalkerSystem {
 public:
-  SkeletonSystem(
+  SimpleWalkerSystem(
     entityx::Entity player,
     engine::CollisionChecker* pCollisionChecker);
 

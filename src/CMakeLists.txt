@@ -75,8 +75,8 @@ set(core_sources
     game_logic/ai/rocket_turret.hpp
     game_logic/ai/security_camera.cpp
     game_logic/ai/security_camera.hpp
-    game_logic/ai/skeleton.cpp
-    game_logic/ai/skeleton.hpp
+    game_logic/ai/simple_walker.cpp
+    game_logic/ai/simple_walker.hpp
     game_logic/ai/sliding_door.cpp
     game_logic/ai/sliding_door.hpp
     game_logic/ai/slime_blob.cpp

@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "skeleton.hpp"
+#include "simple_walker.hpp"
 
 #include "engine/collision_checker.hpp"
 #include "engine/sprite_tools.hpp"
@@ -37,7 +37,7 @@ void updateAnimation(entityx::Entity entity, const Orientation orientation) {
 } // namespace
 
 
-SkeletonSystem::SkeletonSystem(
+SimpleWalkerSystem::SimpleWalkerSystem(
   entityx::Entity player,
   engine::CollisionChecker* pCollisionChecker
 )
@@ -47,13 +47,13 @@ SkeletonSystem::SkeletonSystem(
 }
 
 
-void SkeletonSystem::update(entityx::EntityManager& es) {
+void SimpleWalkerSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
-  es.each<components::Skeleton, WorldPosition, Active>(
+  es.each<components::SimpleWalker, WorldPosition, Active>(
     [this, &playerPosition](
       entityx::Entity entity,
-      components::Skeleton& state,
+      components::SimpleWalker& state,
       WorldPosition& position,
       const Active&
     ) {
