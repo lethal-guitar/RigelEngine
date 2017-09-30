@@ -168,6 +168,19 @@ auto createBlueGuardAiComponent(const ActorID id) {
 }
 
 
+auto skeletonAiConfig() {
+  static auto config = []() {
+    ai::components::SimpleWalker::Configuration c;
+    c.mAnimationSteps = 4;
+    c.mAnimationDelay = 2;
+    c.mWalkAtFullSpeed = false;
+    return c;
+  }();
+
+  return &config;
+}
+
+
 auto actorIDListForActor(const ActorID ID) {
   std::vector<ActorID> actorParts;
 
@@ -1030,7 +1043,7 @@ void EntityFactory::configureEntity(
     case 134: // Walking skeleton
       entity.assign<Shootable>(2 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<ai::components::SimpleWalker>();
+      entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
       addDefaultMovingBody(entity, boundingBox);
       break;
 

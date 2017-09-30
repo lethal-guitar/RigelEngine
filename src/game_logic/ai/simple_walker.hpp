@@ -32,6 +32,18 @@ namespace rigel { namespace game_logic { namespace ai {
 namespace components {
 
 struct SimpleWalker {
+  struct Configuration {
+    int mAnimationSteps = 0;
+    int mAnimationDelay = 0;
+    bool mWalkAtFullSpeed = false;
+  };
+
+  SimpleWalker(const Configuration* pConfig)
+    : mpConfig(pConfig)
+  {
+  }
+
+  const Configuration* mpConfig;
   boost::optional<engine::components::Orientation> mOrientation;
 };
 

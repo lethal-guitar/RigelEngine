@@ -29,9 +29,12 @@ using namespace engine::orientation;
 
 
 void updateAnimation(entityx::Entity entity, const Orientation orientation) {
-  const auto startFrame = orientation == Orientation::Left ? 0 : 4;
-  const auto endFrame = startFrame + 3;
-  engine::startAnimationLoop(entity, 2, startFrame, endFrame);
+  const auto& config = *entity.component<components::SimpleWalker>()->mpConfig;
+  const auto startFrame =
+    orientation == Orientation::Left ? 0 : config.mAnimationSteps;
+  const auto endFrame = startFrame + (config.mAnimationSteps - 1);
+  engine::startAnimationLoop(
+    entity, config.mAnimationDelay, startFrame, endFrame);
 }
 
 } // namespace
@@ -64,7 +67,7 @@ void SimpleWalkerSystem::update(entityx::EntityManager& es) {
         updateAnimation(entity, *state.mOrientation);
       }
 
-      if (mIsOddFrame) {
+      if (mIsOddFrame && !state.mpConfig->mWalkAtFullSpeed) {
         return;
       }
 
