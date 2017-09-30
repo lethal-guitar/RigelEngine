@@ -29,6 +29,7 @@ namespace rigel { namespace game_logic {
 
 namespace ex = entityx;
 
+using engine::components::Active;
 using engine::components::BoundingBox;
 using engine::components::CollidedWithWorld;
 using engine::components::Sprite;
@@ -67,16 +68,20 @@ void DamageInflictionSystem::update(
       ex::ComponentHandle<Shootable> shootable;
       ex::ComponentHandle<WorldPosition> shootablePos;
       ex::ComponentHandle<BoundingBox> shootableBboxLocal;
+      ex::ComponentHandle<Active> active;
       for (auto shootableEntity : es.entities_with_components(
-        shootable, shootablePos, shootableBboxLocal)
+        shootable, shootablePos, shootableBboxLocal, active)
       ) {
         const auto shootableBbox =
           engine::toWorldSpace(*shootableBboxLocal, *shootablePos);
         if (
           shootableBbox.intersects(inflictorBbox) &&
-          !shootable->mInvincible
+          !shootable->mInvincible &&
+          active->mIsOnScreen
         ) {
-          inflictorEntity.destroy();
+          if (damage.mDestroyOnContact) {
+            inflictorEntity.destroy();
+          }
 
           mEntityHitSignal(shootableEntity);
           // The onHit() callback mustn't remove the shootable component

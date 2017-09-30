@@ -36,7 +36,7 @@ using namespace game_logic::components;
 const base::Rect<int> DefaultDeadZone{
   {11, 2},
   {
-    data::GameTraits::mapViewPortWidthTiles - 23,
+    data::GameTraits::mapViewPortWidthTiles - 22,
     data::GameTraits::mapViewPortHeightTiles - 3,
   }
 };
@@ -45,7 +45,7 @@ const base::Rect<int> DefaultDeadZone{
 const base::Rect<int> ClimbingDeadZone{
   {11, 7},
   {
-    data::GameTraits::mapViewPortWidthTiles - 23,
+    data::GameTraits::mapViewPortWidthTiles - 22,
     data::GameTraits::mapViewPortHeightTiles - 14,
   }
 };

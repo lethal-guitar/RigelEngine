@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "base/spatial_types.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -24,8 +25,14 @@ RIGEL_RESTORE_WARNINGS
 
 #include <memory>
 
+namespace rigel { struct IGameServiceProvider; }
+namespace rigel { namespace engine { class CollisionChecker; }}
+
 
 namespace rigel { namespace game_logic {
+
+class EntityFactory;
+
 
 /** Provides type erasure for component classes */
 class ComponentHolder {
@@ -75,7 +82,44 @@ struct ItemContainer {
   }
 };
 
+
+struct NapalmBomb {
+  enum class State {
+    Ticking,
+    SpawningFires
+  };
+
+  State mState = State::Ticking;
+  int mFramesElapsed = 0;
+  bool mCanSpawnLeft = true;
+  bool mCanSpawnRight = true;
+};
+
 }
+
+
+class NapalmBombSystem {
+public:
+  NapalmBombSystem(
+    IGameServiceProvider* pServiceProvider,
+    EntityFactory* pEntityFactory,
+    engine::CollisionChecker* pCollisionChecker);
+
+  void update(entityx::EntityManager& es);
+
+  void onEntityHit(entityx::Entity entity);
+
+private:
+  void explode(entityx::Entity entity);
+  void spawnFires(
+    components::NapalmBomb& state,
+    const base::Vector& position,
+    int step);
+
+  IGameServiceProvider* mpServiceProvider;
+  EntityFactory* mpEntityFactory;
+  engine::CollisionChecker* mpCollisionChecker;
+};
 
 
 namespace item_containers {

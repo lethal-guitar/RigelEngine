@@ -19,6 +19,17 @@
 
 namespace rigel { namespace game_logic { namespace components {
 
+namespace parameter_aliases {
+
+using Damage = int;
+using Health = int;
+using GivenScore = int;
+using IgnoreMercyFrames = bool;
+using DestroyOnContact = bool;
+
+}
+
+
 struct PlayerDamaging {
   explicit PlayerDamaging(
     const int amount,
@@ -53,12 +64,16 @@ struct Shootable {
 
 
 struct DamageInflicting {
-  explicit DamageInflicting(const int amount)
+  explicit DamageInflicting(
+    const int amount,
+    const bool destroyOnContact = true)
     : mAmount(amount)
+    , mDestroyOnContact(destroyOnContact)
   {
   }
 
   int mAmount;
+  bool mDestroyOnContact;
 };
 
 }}}

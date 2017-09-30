@@ -590,12 +590,17 @@ void EntityFactory::configureEntity(
       {
         const auto originalDrawOrder =
           entity.component<Sprite>()->mpDrawData->mDrawOrder;
+
+        auto shootable = Shootable{1};
+        shootable.mDestroyWhenKilled = false;
         configureItemBox(
           entity,
           ContainerColor::Red,
           0,
           AnimationLoop{1},
-          boundingBox);
+          shootable,
+          components::NapalmBomb{});
+
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
       }
       break;

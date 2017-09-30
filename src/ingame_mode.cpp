@@ -120,6 +120,7 @@ struct IngameMode::Systems {
         pServiceProvider,
         pEntityFactory)
     , mElevatorSystem(playerEntity, pServiceProvider)
+    , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
     , mBlueGuardSystem(
         playerEntity,
         &mCollisionChecker,
@@ -148,6 +149,8 @@ struct IngameMode::Systems {
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
   game_logic::player::AttackSystem<EntityFactory> mPlayerAttackSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
+
+  game_logic::NapalmBombSystem mNapalmBombSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::HoverBotSystem mHoverBotSystem;
@@ -379,6 +382,7 @@ void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
   mpSystems->mHoverBotSystem.update(mEntities.entities);
   mEntities.systems.update<ai::LaserTurretSystem>(dt);
   mEntities.systems.update<ai::MessengerDroneSystem>(dt);
+  mpSystems->mNapalmBombSystem.update(mEntities.entities);
   mEntities.systems.update<ai::PrisonerSystem>(dt);
   mEntities.systems.update<ai::RocketTurretSystem>(dt);
   mEntities.systems.update<ai::SecurityCameraSystem>(dt);
@@ -498,6 +502,7 @@ void IngameMode::loadLevel(
     [this](entityx::Entity entity) {
       mpSystems->mBlueGuardSystem.onEntityHit(entity);
       item_containers::onEntityHit(entity, mEntities.entities);
+      mpSystems->mNapalmBombSystem.onEntityHit(entity);
       mpSystems->mSlimeBlobSystem.onEntityHit(entity);
       mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
       mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);

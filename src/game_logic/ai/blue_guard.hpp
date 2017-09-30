@@ -26,7 +26,6 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
 
 struct IGameServiceProvider;
-namespace data { namespace map { class Map; }}
 namespace engine { class CollisionChecker; }
 namespace engine { class RandomNumberGenerator; }
 namespace engine { namespace components { struct Sprite; }}
