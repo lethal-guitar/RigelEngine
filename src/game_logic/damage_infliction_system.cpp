@@ -79,7 +79,9 @@ void DamageInflictionSystem::update(
           !shootable->mInvincible &&
           active->mIsOnScreen
         ) {
-          inflictorEntity.destroy();
+          if (damage.mDestroyOnContact) {
+            inflictorEntity.destroy();
+          }
 
           mEntityHitSignal(shootableEntity);
           // The onHit() callback mustn't remove the shootable component
