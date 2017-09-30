@@ -69,7 +69,7 @@ void PhysicsSystem::update(ex::EntityManager& es) {
           toWorldSpace(collisionRect, position),
           position,
           movementX,
-          body.mCanStepUpStairs);
+          body.mIsPlayer);
       }
 
       // Cache new world space BBox after applying horizontal movement
