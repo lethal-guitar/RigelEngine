@@ -50,16 +50,14 @@ void updateAnimatedSprites(entityx::EntityManager& es);
  */
 class RenderingSystem : public entityx::System<RenderingSystem> {
 public:
-  template<typename... MapRendererArgTs>
   RenderingSystem(
     const base::Vector* pScrollOffset,
     engine::Renderer* pRenderer,
-    MapRendererArgTs&&... mapRendererArgs
+    const data::map::Map* pMap,
+    MapRenderer::MapRenderData&& mapRenderData
   )
     : mpRenderer(pRenderer)
-    , mMapRenderer(
-        pRenderer,
-        std::forward<MapRendererArgTs>(mapRendererArgs)...)
+    , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
     , mpScrollOffset(pScrollOffset)
   {
   }

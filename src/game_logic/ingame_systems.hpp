@@ -57,20 +57,13 @@ namespace rigel { namespace game_logic {
 
 class IngameSystems {
 public:
-  struct MapRenderData {
-    data::Image mTileSetImage;
-    data::Image mBackdropImage;
-    boost::optional<data::Image> mSecondaryBackdropImage;
-    data::map::BackdropScrollMode mBackdropScrollMode;
-  };
-
   IngameSystems(
     data::Difficulty difficulty,
     base::Vector* pScrollOffset,
     entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
     data::map::Map* pMap,
-    MapRenderData&& mapRenderData,
+    engine::MapRenderer::MapRenderData&& mapRenderData,
     IGameServiceProvider* pServiceProvider,
     EntityFactory* pEntityFactory,
     engine::RandomNumberGenerator* pRandomGenerator,

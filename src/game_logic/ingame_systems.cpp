@@ -32,7 +32,7 @@ IngameSystems::IngameSystems(
   entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
   data::map::Map* pMap,
-  MapRenderData&& mapRenderData,
+  engine::MapRenderer::MapRenderData&& mapRenderData,
   IGameServiceProvider* pServiceProvider,
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator,
@@ -87,10 +87,7 @@ IngameSystems::IngameSystems(
     mpScrollOffset,
     pRenderer,
     pMap,
-    std::move(mapRenderData.mTileSetImage),
-    std::move(mapRenderData.mBackdropImage),
-    std::move(mapRenderData.mSecondaryBackdropImage),
-    mapRenderData.mBackdropScrollMode);
+    std::move(mapRenderData));
   systems.add<PlayerInteractionSystem>(
     playerEntity,
     pPlayerModel,

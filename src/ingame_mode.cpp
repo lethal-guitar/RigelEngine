@@ -294,11 +294,7 @@ void IngameMode::loadLevel(
     mPlayerEntity,
     &mPlayerModel,
     &mLevelData.mMap,
-    IngameSystems::MapRenderData{
-      std::move(loadedLevel.mTileSetImage),
-      std::move(loadedLevel.mBackdropImage),
-      std::move(loadedLevel.mSecondaryBackdropImage),
-      loadedLevel.mBackdropScrollMode},
+    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
     mpServiceProvider,
     &mEntityFactory,
     &mRandomGenerator,
