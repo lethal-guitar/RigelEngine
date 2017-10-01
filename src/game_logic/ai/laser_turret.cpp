@@ -74,11 +74,7 @@ LaserTurretSystem::LaserTurretSystem(
 }
 
 
-void LaserTurretSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void LaserTurretSystem::update(entityx::EntityManager& es) {
   using namespace engine::components;
   using game_logic::components::PlayerDamaging;
 

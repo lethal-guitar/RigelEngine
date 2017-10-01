@@ -56,7 +56,7 @@ public:
   template <std::size_t N>
   ArrayView(const std::array<T, N>& array) // implicit on purpose
     : mpData(array.data())
-    , mSize(static_cast<size_type>(size))
+    , mSize(static_cast<size_type>(N))
   {
   }
 

@@ -51,22 +51,19 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 MapRenderer::MapRenderer(
   engine::Renderer* pRenderer,
   const data::map::Map* pMap,
-  const data::Image& tileSetImage,
-  const data::Image& backdropImage,
-  const boost::optional<data::Image>& secondaryBackdropImage,
-  const data::map::BackdropScrollMode backdropScrollMode
+  MapRenderData&& renderData
 )
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileRenderer(
-      engine::OwningTexture(pRenderer, tileSetImage),
+      engine::OwningTexture(pRenderer, renderData.mTileSetImage),
       pRenderer)
-  , mBackdropTexture(mpRenderer, backdropImage)
-  , mScrollMode(backdropScrollMode)
+  , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
+  , mScrollMode(renderData.mBackdropScrollMode)
 {
-  if (secondaryBackdropImage) {
+  if (renderData.mSecondaryBackdropImage) {
     mAlternativeBackdropTexture = engine::OwningTexture(
-      mpRenderer, *secondaryBackdropImage);
+      mpRenderer, *renderData.mSecondaryBackdropImage);
   }
 }
 

@@ -54,11 +54,7 @@ SecurityCameraSystem::SecurityCameraSystem(entityx::Entity playerEntity)
 }
 
 
-void SecurityCameraSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void SecurityCameraSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayerEntity.component<WorldPosition>();
 
   es.each<WorldPosition, Sprite, components::SecurityCamera>(

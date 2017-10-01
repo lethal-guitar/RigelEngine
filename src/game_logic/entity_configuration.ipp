@@ -29,6 +29,19 @@ const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
 const auto MUZZLE_FLASH_DRAW_ORDER = 12;
 
 
+const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
+  {0.0f, -3.0f},
+  {0.0f, -2.0f},
+  {0.0f, -1.0f},
+  {0.0f, 0.0f},
+  {0.0f, 1.0f},
+  {0.0f, 2.0f},
+  {0.0f, 3.0f},
+  {0.0f, -1.0f},
+  {0.0f, 1.0f}
+};
+
+
 // NOTE: This is only an animation sequence (as opposed to a simple loop)
 // because we cannot have more than one instance of the same component type
 // per entity, i.e. we can't have two AnimationLoop components.
@@ -435,8 +448,12 @@ void EntityFactory::configureItemBox(
   Args&&... components
 ) {
   auto container = makeContainer(components...);
+  addToContainer(
+    container,
+    MovementSequence{CONTAINER_BOUNCE_SEQUENCE, true, false});
   addDefaultMovingBody(
     container, engine::inferBoundingBox(*entity.component<Sprite>()));
+
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
 }
@@ -707,6 +724,8 @@ void EntityFactory::configureEntity(
           ai::components::SimpleWalker{turkeyAiConfig()});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
 
+        // We don't use configureItemBox here, since we don't want the bounce
+        // we normally get after opening a box.
         turnIntoContainer(
           entity,
           createSpriteForId(actorIdForBoxColor(ContainerColor::Red)),
@@ -1039,6 +1058,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(6 + difficultyOffset, 1000);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      ai::configureSpikeBall(entity);
       break;
 
     case 67: // Green slime blob
@@ -1137,6 +1157,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(1 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      ai::configureRedBird(entity);
       break;
 
     case 253: // Monster in prison cell, aggressive

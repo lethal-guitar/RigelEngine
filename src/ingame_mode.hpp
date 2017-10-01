@@ -36,6 +36,8 @@ RIGEL_RESTORE_WARNINGS
 
 #include <vector>
 
+namespace rigel { namespace game_logic { class IngameSystems; }}
+
 
 namespace rigel {
 
@@ -74,7 +76,8 @@ private:
 private:
   engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
-  entityx::EntityX mEntities;
+  entityx::EventManager mEventManager;
+  entityx::EntityManager mEntities;
   game_logic::EntityFactory mEntityFactory;
 
   data::PlayerModel mPlayerModel;
@@ -96,19 +99,15 @@ private:
     data::map::BackdropSwitchCondition mBackdropSwitchCondition;
   };
 
-  struct Systems;
-
   LevelData mLevelData;
   data::map::Map mMapAtLevelStart;
   entityx::Entity mPlayerEntity;
 
-  std::unique_ptr<Systems> mpSystems;
+  std::unique_ptr<game_logic::IngameSystems> mpSystems;
 
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   engine::RenderTargetTexture mIngameViewPortRenderTarget;
-
-  boost::optional<entityx::Entity> mActiveTeleporter;
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
 };

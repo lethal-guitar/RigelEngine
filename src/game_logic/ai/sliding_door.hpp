@@ -61,16 +61,13 @@ struct VerticalSlidingDoor {
 }
 
 
-class SlidingDoorSystem : public entityx::System<SlidingDoorSystem> {
+class SlidingDoorSystem {
 public:
   SlidingDoorSystem(
     entityx::Entity playerEntity,
     IGameServiceProvider* pServiceProvider);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   template<typename StateT>

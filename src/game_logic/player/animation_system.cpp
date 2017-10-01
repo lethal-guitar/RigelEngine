@@ -122,11 +122,7 @@ AnimationSystem::AnimationSystem(
 }
 
 
-void AnimationSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void AnimationSystem::update(entityx::EntityManager& es) {
   assert(mPlayer.has_component<PlayerControlled>());
   assert(mPlayer.has_component<Sprite>());
   assert(mPlayer.has_component<WorldPosition>());
@@ -191,7 +187,7 @@ void AnimationSystem::update(
     sprite.mFramesToRender[0] % FRAMES_PER_ORIENTATION;
 
   const auto newAnimationFrame = determineAnimationFrame(
-    state, dt, currentAnimationFrame);
+    state, currentAnimationFrame);
 
   const auto orientationOffset =
     state.mOrientation == Orientation::Right ? FRAMES_PER_ORIENTATION : 0;
@@ -201,13 +197,12 @@ void AnimationSystem::update(
 
 int AnimationSystem::determineAnimationFrame(
   PlayerControlled& state,
-  const engine::TimeDelta dt,
   const int currentAnimationFrame
 ) {
   if (state.mState != player::PlayerState::Dieing) {
     auto newAnimationFrame =
       movementAnimationFrame(state, currentAnimationFrame);
-    return attackAnimationFrame(state, dt, newAnimationFrame);
+    return attackAnimationFrame(state, newAnimationFrame);
   } else {
     return deathAnimationFrame(
       *state.mDeathAnimationFramesElapsed,
@@ -284,7 +279,6 @@ int AnimationSystem::movementAnimationFrame(
 
 int AnimationSystem::attackAnimationFrame(
   PlayerControlled& state,
-  engine::TimeDelta dt,
   const int currentAnimationFrame
 ) {
   auto newAnimationFrame = currentAnimationFrame;

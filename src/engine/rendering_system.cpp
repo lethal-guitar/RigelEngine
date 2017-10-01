@@ -146,11 +146,7 @@ struct RenderingSystem::SpriteData {
 };
 
 
-void RenderingSystem::update(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  const ex::TimeDelta dt
-) {
+void RenderingSystem::update(ex::EntityManager& es) {
   using namespace boost::range;
 
   // Collect sprites, then order by draw index

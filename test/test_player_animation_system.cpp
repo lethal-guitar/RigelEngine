@@ -57,7 +57,7 @@ TEST_CASE("Player animation system works as expected") {
 
   const auto runFrames = [&animationSystem, &entityx](const int frames) {
     for (int i = 0; i < frames; ++i) {
-      animationSystem.update(entityx.entities, entityx.events, 0);
+      animationSystem.update(entityx.entities);
     }
   };
 

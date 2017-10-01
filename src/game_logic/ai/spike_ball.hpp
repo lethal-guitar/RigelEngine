@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2017, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,53 +16,52 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "engine/base_components.hpp"
-#include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <functional>
+namespace rigel { struct IGameServiceProvider; }
+namespace rigel { namespace engine { class CollisionChecker; }}
 
-namespace rigel {
-  struct IGameServiceProvider;
 
-  namespace data {
-    struct PlayerModel;
-  }
+namespace rigel { namespace game_logic { namespace ai {
+
+namespace components {
+
+struct SpikeBall {
+  int mJumpBackCooldown = 0;
+};
+
 }
 
 
-namespace rigel { namespace game_logic {
+void configureSpikeBall(entityx::Entity entity);
 
-class PlayerInteractionSystem {
+
+class SpikeBallSystem {
 public:
-  using TeleportCallback = std::function<void(const entityx::Entity&)>;
-
-  PlayerInteractionSystem(
-    entityx::Entity player,
-    data::PlayerModel* pPlayerModel,
-    IGameServiceProvider* pServices,
-    TeleportCallback teleportCallback);
+  SpikeBallSystem(
+    const engine::CollisionChecker* pCollisionChecker,
+    IGameServiceProvider* pServiceProvider);
 
   void update(entityx::EntityManager& es);
 
-private:
-  void performInteraction(
-    entityx::EntityManager& es,
-    entityx::Entity interactable,
-    components::InteractableType type
-  );
+  void onEntityHit(entityx::Entity entity, const base::Point<float>& velocity);
+  void onEntityCollided(
+    entityx::Entity entity,
+    const bool left,
+    const bool right,
+    const bool top,
+    const bool bottom);
 
-  void triggerPlayerInteractionAnimation();
-
 private:
-  entityx::Entity mPlayer;
-  data::PlayerModel* mpPlayerModel;
+  void jump(entityx::Entity entity);
+
+  const engine::CollisionChecker* mpCollisionChecker;
   IGameServiceProvider* mpServiceProvider;
-  TeleportCallback mTeleportCallback;
 };
 
-}}
+}}}

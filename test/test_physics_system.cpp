@@ -16,6 +16,7 @@
 
 #include <catch.hpp>
 
+#include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 
 #include <data/map.hpp>
@@ -28,6 +29,7 @@
 using namespace rigel;
 using namespace engine;
 using namespace engine::components;
+using namespace engine::components::parameter_aliases;
 
 
 namespace ex = entityx;
@@ -257,6 +259,108 @@ TEST_CASE("Physics system works as expected") {
       solidBody.assign<Active>();
       runOneFrame();
       CHECK(solidBody.component<WorldPosition>()->y == 10);
+    }
+  }
+
+
+  auto runFramesAndCollect = [&position, &runOneFrame](
+    const std::size_t numFrames
+  ) {
+    std::vector<base::Vector> positions;
+    for (std::size_t i = 0; i < numFrames; ++i) {
+      runOneFrame();
+      positions.push_back(position);
+    }
+    return positions;
+  };
+
+
+  SECTION("Movement sequences can be played back") {
+    position.x = 10;
+    position.y = 5;
+    body.mVelocity = {42, 48};
+
+    SECTION("Velocity reset after sequence") {
+      std::array<base::Point<float>, 4> sequence{
+        base::Point<float>{0.0f, -1.0f},
+        base::Point<float>{3.0f, -2.0f},
+        base::Point<float>{2.0f, 0.0f},
+        base::Point<float>{-1.0f, 1.0f}
+      };
+      physicalObject.assign<MovementSequence>(
+        sequence, ResetAfterSequence(true));
+
+      const auto collectedPositions = runFramesAndCollect(sequence.size());
+      const auto expectedPositions = std::vector<base::Vector>{
+        {10, 4},
+        {13, 2},
+        {15, 2},
+        {14, 3}
+      };
+
+      CHECK(collectedPositions == expectedPositions);
+
+      SECTION("Gravity takes over again after sequence ended") {
+        const auto expectedPositions2 = std::vector<base::Vector>{
+          {14, 3},
+          {14, 4}
+        };
+        const auto collectedPositions2 =
+          runFramesAndCollect(expectedPositions2.size());
+
+        CHECK(collectedPositions2 == expectedPositions2);
+      }
+    }
+
+    SECTION("Velocity kept after sequence") {
+      body.mGravityAffected = false;
+
+      std::array<base::Point<float>, 4> sequence{
+        base::Point<float>{0.0f, -1.0f},
+        base::Point<float>{3.0f, -2.0f},
+        base::Point<float>{2.0f, 0.0f},
+        base::Point<float>{-1.0f, 1.0f}
+      };
+      physicalObject.assign<MovementSequence>(
+        sequence, ResetAfterSequence(false));
+      for (int i = 0; i < 4; ++i) {
+        runOneFrame();
+      }
+
+      SECTION("Object retains sequence's last velocity after sequence") {
+        const auto expectedPositions = std::vector<base::Vector>{
+          {13, 4},
+          {12, 5}
+        };
+        const auto collectedPositions =
+          runFramesAndCollect(expectedPositions.size());
+
+        CHECK(collectedPositions == expectedPositions);
+      }
+    }
+
+    SECTION("X part of sequence can be ignored") {
+      std::array<base::Point<float>, 4> sequence{
+        base::Point<float>{0.0f, -1.0f},
+        base::Point<float>{3.0f, -2.0f},
+        base::Point<float>{2.0f, 0.0f},
+        base::Point<float>{-1.0f, 1.0f}
+      };
+      physicalObject.assign<MovementSequence>(
+        sequence,
+        ResetAfterSequence(true),
+        EnableX(false));
+      body.mVelocity.x = 1.0f;
+
+      const auto collectedPositions = runFramesAndCollect(sequence.size());
+      const auto expectedPositions = std::vector<base::Vector>{
+        {11, 4},
+        {12, 2},
+        {13, 2},
+        {14, 3}
+      };
+
+      CHECK(collectedPositions == expectedPositions);
     }
   }
 }

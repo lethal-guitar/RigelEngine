@@ -27,13 +27,25 @@ namespace rigel { namespace engine {
 
 class MapRenderer {
 public:
+  struct MapRenderData {
+    MapRenderData(data::map::LevelData&& loadedLevel)
+      : mTileSetImage(std::move(loadedLevel.mTileSetImage))
+      , mBackdropImage(std::move(loadedLevel.mBackdropImage))
+      , mSecondaryBackdropImage(std::move(loadedLevel.mSecondaryBackdropImage))
+      , mBackdropScrollMode(loadedLevel.mBackdropScrollMode)
+    {
+    }
+
+    data::Image mTileSetImage;
+    data::Image mBackdropImage;
+    boost::optional<data::Image> mSecondaryBackdropImage;
+    data::map::BackdropScrollMode mBackdropScrollMode;
+  };
+
   MapRenderer(
     engine::Renderer* renderer,
     const data::map::Map* pMap,
-    const data::Image& tileSetImage,
-    const data::Image& backdropImage,
-    const boost::optional<data::Image>& secondaryBackdropImage,
-    data::map::BackdropScrollMode backdropScrollMode);
+    MapRenderData&& renderData);
 
   void switchBackdrops();
 

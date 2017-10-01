@@ -71,6 +71,8 @@ set(core_sources
     game_logic/ai/messenger_drone.hpp
     game_logic/ai/prisoner.cpp
     game_logic/ai/prisoner.hpp
+    game_logic/ai/red_bird.cpp
+    game_logic/ai/red_bird.hpp
     game_logic/ai/rocket_turret.cpp
     game_logic/ai/rocket_turret.hpp
     game_logic/ai/security_camera.cpp
@@ -83,6 +85,8 @@ set(core_sources
     game_logic/ai/slime_blob.hpp
     game_logic/ai/slime_pipe.cpp
     game_logic/ai/slime_pipe.hpp
+    game_logic/ai/spike_ball.cpp
+    game_logic/ai/spike_ball.hpp
     game_logic/collectable_components.hpp
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp
@@ -91,6 +95,8 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/ingame_systems.cpp
+    game_logic/ingame_systems.hpp
     game_logic/item_container.cpp
     game_logic/item_container.hpp
     game_logic/interaction/elevator.cpp

@@ -25,12 +25,9 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine {
 
-class LifeTimeSystem : public entityx::System<LifeTimeSystem> {
+class LifeTimeSystem {
 public:
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 };
 
 }}

@@ -48,11 +48,7 @@ PrisonerSystem::PrisonerSystem(
 }
 
 
-void PrisonerSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void PrisonerSystem::update(entityx::EntityManager& es) {
   using engine::components::Active;
 
   mIsOddFrame = !mIsOddFrame;

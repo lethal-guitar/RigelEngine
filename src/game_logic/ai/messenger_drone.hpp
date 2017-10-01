@@ -64,14 +64,11 @@ struct MessengerDrone {
 }
 
 
-class MessengerDroneSystem : public entityx::System<MessengerDroneSystem> {
+class MessengerDroneSystem {
 public:
   explicit MessengerDroneSystem(entityx::Entity player);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   entityx::Entity mPlayer;

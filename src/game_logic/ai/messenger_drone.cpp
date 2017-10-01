@@ -103,11 +103,7 @@ MessengerDroneSystem::MessengerDroneSystem(entityx::Entity player)
 }
 
 
-void MessengerDroneSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  const entityx::TimeDelta dt
-) {
+void MessengerDroneSystem::update(entityx::EntityManager& es) {
   using namespace engine::components;
   using namespace engine::orientation;
 

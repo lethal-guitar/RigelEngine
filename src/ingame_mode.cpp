@@ -19,33 +19,9 @@
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
-#include "engine/collision_checker.hpp"
-#include "engine/debugging_system.hpp"
-#include "engine/entity_activation_system.hpp"
-#include "engine/life_time_system.hpp"
-#include "engine/physics_system.hpp"
-#include "engine/rendering_system.hpp"
-#include "game_logic/ai/blue_guard.hpp"
-#include "game_logic/ai/hover_bot.hpp"
-#include "game_logic/ai/laser_turret.hpp"
-#include "game_logic/ai/messenger_drone.hpp"
-#include "game_logic/ai/prisoner.hpp"
-#include "game_logic/ai/rocket_turret.hpp"
-#include "game_logic/ai/security_camera.hpp"
-#include "game_logic/ai/simple_walker.hpp"
-#include "game_logic/ai/sliding_door.hpp"
-#include "game_logic/ai/slime_blob.hpp"
-#include "game_logic/ai/slime_pipe.hpp"
-#include "game_logic/damage_infliction_system.hpp"
-#include "game_logic/item_container.hpp"
-#include "game_logic/interaction/elevator.hpp"
+#include "engine/physical_components.hpp"
+#include "game_logic/ingame_systems.hpp"
 #include "game_logic/interaction/teleporter.hpp"
-#include "game_logic/map_scroll_system.hpp"
-#include "game_logic/player/animation_system.hpp"
-#include "game_logic/player/attack_system.hpp"
-#include "game_logic/player/damage_system.hpp"
-#include "game_logic/player_interaction_system.hpp"
-#include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
@@ -64,8 +40,6 @@ using namespace game_logic;
 using namespace std;
 
 using data::PlayerModel;
-using engine::components::BoundingBox;
-using engine::components::MovingBody;
 using engine::components::WorldPosition;
 
 
@@ -97,68 +71,6 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 }
 
 
-struct IngameMode::Systems {
-  Systems(
-    base::Vector* pScrollOffset,
-    entityx::Entity playerEntity,
-    data::PlayerModel* pPlayerModel,
-    data::map::Map* pMap,
-    IGameServiceProvider* pServiceProvider,
-    EntityFactory* pEntityFactory,
-    RandomNumberGenerator* pRandomGenerator,
-    const data::map::Map& map,
-    entityx::EntityManager& entities,
-    entityx::EventManager& eventManager
-  )
-    : mCollisionChecker(pMap, entities, eventManager)
-    , mPhysicsSystem(&mCollisionChecker)
-    , mMapScrollSystem(pScrollOffset, playerEntity, map)
-    , mPlayerMovementSystem(playerEntity, map)
-    , mPlayerAttackSystem(
-        playerEntity,
-        pPlayerModel,
-        pServiceProvider,
-        pEntityFactory)
-    , mElevatorSystem(playerEntity, pServiceProvider)
-    , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
-    , mBlueGuardSystem(
-        playerEntity,
-        &mCollisionChecker,
-        pEntityFactory,
-        pServiceProvider,
-        pRandomGenerator)
-    , mHoverBotSystem(
-        playerEntity,
-        &mCollisionChecker,
-        pEntityFactory)
-    , mSimpleWalkerSystem(
-        playerEntity,
-        &mCollisionChecker)
-    , mSlimeBlobSystem(
-        playerEntity,
-        &mCollisionChecker,
-        pEntityFactory,
-        pRandomGenerator)
-  {
-  }
-
-  engine::CollisionChecker mCollisionChecker;
-  engine::PhysicsSystem mPhysicsSystem;
-
-  game_logic::MapScrollSystem mMapScrollSystem;
-  game_logic::PlayerMovementSystem mPlayerMovementSystem;
-  game_logic::player::AttackSystem<EntityFactory> mPlayerAttackSystem;
-  game_logic::interaction::ElevatorSystem mElevatorSystem;
-
-  game_logic::NapalmBombSystem mNapalmBombSystem;
-
-  game_logic::ai::BlueGuardSystem mBlueGuardSystem;
-  game_logic::ai::HoverBotSystem mHoverBotSystem;
-  game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
-  game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
-};
-
-
 IngameMode::IngameMode(
   const int episode,
   const int levelNumber,
@@ -168,9 +80,10 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mEntities(mEventManager)
   , mEntityFactory(
       context.mpRenderer,
-      &mEntities.entities,
+      &mEntities,
       &context.mpResources->mActorImagePackage,
       difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
@@ -200,6 +113,7 @@ IngameMode::IngameMode(
   std::cout << "Level load time: " <<
     duration<double>(after - before).count() * 1000.0 << " ms\n";
 }
+
 
 IngameMode::~IngameMode() {
 }
@@ -248,7 +162,7 @@ void IngameMode::handleEvent(const SDL_Event& event) {
       // only allowed if the button is released between two shots. If the
       // release happens between two logic updates, the system wouldn't see it,
       // therefore thinking you're still holding the button.
-      mpSystems->mPlayerAttackSystem.buttonStateChanged(mInputState);
+      mpSystems->buttonStateChanged(mInputState);
       break;
   }
 
@@ -258,7 +172,7 @@ void IngameMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  auto& debuggingSystem = *mEntities.systems.system<DebuggingSystem>();
+  auto& debuggingSystem = mpSystems->debuggingSystem();
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();
@@ -300,19 +214,17 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // Updating
   // **********************************************************************
 
-  constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
   auto doTimeStep = [&, this]() {
-    mEntities.systems.system<RenderingSystem>()->updateAnimatedMapTiles();
-    engine::updateAnimatedSprites(mEntities.entities);
     mHudRenderer.updateAnimation();
-
-    updateGameLogic(timeForOneFrame);
+    mpSystems->update(mCombinedInputState, mEntities);
+    mCombinedInputState = mInputState;
 
     if (mEarthQuakeEffect) {
       screenShakeOffsetX = mEarthQuakeEffect->update();
     }
   };
 
+  constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
   if (mSingleStepping) {
     if (mCanAdvanceSingleStep) {
       doTimeStep();
@@ -332,13 +244,10 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   // Rendering
   // **********************************************************************
-  mpSystems->mMapScrollSystem.updateScrollOffset();
-
   {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
-    mEntities.systems.update<RenderingSystem>(dt);
-    mEntities.systems.update<DebuggingSystem>(dt);
+    mpSystems->render(mEntities);
     mHudRenderer.render();
   }
 
@@ -355,59 +264,6 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   handlePlayerDeath();
   handleLevelExit();
   handleTeleporter();
-}
-
-
-void IngameMode::updateGameLogic(const engine::TimeDelta dt) {
-  engine::markActiveEntities(mEntities.entities, mScrollOffset);
-
-  // TODO: Use Systems struct for everything, stop using entityx::SystemManager
-  // entirely
-
-  // ----------------------------------------------------------------------
-  // Player logic update
-  // ----------------------------------------------------------------------
-  // TODO: Move all player related systems into the player namespace
-  mPlayerModel.updateTemporaryItemExpiry();
-  mpSystems->mElevatorSystem.update(mEntities.entities, mCombinedInputState);
-  mpSystems->mPlayerMovementSystem.update(mCombinedInputState);
-  mEntities.systems.update<PlayerInteractionSystem>(dt);
-
-  mCombinedInputState = mInputState;
-
-  // ----------------------------------------------------------------------
-  // A.I. logic update
-  // ----------------------------------------------------------------------
-  mpSystems->mBlueGuardSystem.update(mEntities.entities);
-  mpSystems->mHoverBotSystem.update(mEntities.entities);
-  mEntities.systems.update<ai::LaserTurretSystem>(dt);
-  mEntities.systems.update<ai::MessengerDroneSystem>(dt);
-  mpSystems->mNapalmBombSystem.update(mEntities.entities);
-  mEntities.systems.update<ai::PrisonerSystem>(dt);
-  mEntities.systems.update<ai::RocketTurretSystem>(dt);
-  mEntities.systems.update<ai::SecurityCameraSystem>(dt);
-  mpSystems->mSimpleWalkerSystem.update(mEntities.entities);
-  mEntities.systems.update<ai::SlidingDoorSystem>(dt);
-  mpSystems->mSlimeBlobSystem.update(mEntities.entities);
-  mEntities.systems.update<ai::SlimePipeSystem>(dt);
-
-  // ----------------------------------------------------------------------
-  // Physics and other updates
-  // ----------------------------------------------------------------------
-  mpSystems->mPhysicsSystem.update(mEntities.entities);
-
-  // Player attacks have to be processed after physics, because:
-  //  1. Player projectiles should spawn at the player's location
-  //  2. Player projectiles mustn't move on the frame they were spawned on
-  mpSystems->mPlayerAttackSystem.update();
-
-  mEntities.systems.update<player::DamageSystem>(dt);
-  mEntities.systems.update<DamageInflictionSystem>(dt);
-  mEntities.systems.update<player::AnimationSystem>(dt);
-
-  mpSystems->mMapScrollSystem.updateManualScrolling(dt);
-
-  mEntities.systems.update<engine::LifeTimeSystem>(dt);
 }
 
 
@@ -433,81 +289,19 @@ void IngameMode::loadLevel(
   };
   mMapAtLevelStart = mLevelData.mMap;
 
-  mEntities.systems.add<game_logic::player::AnimationSystem>(
-    mPlayerEntity,
-    mpServiceProvider,
-    &mEntityFactory);
-  mEntities.systems.add<game_logic::player::DamageSystem>(
-    mPlayerEntity,
-    &mPlayerModel,
-    mpServiceProvider,
-    difficulty);
-  mEntities.systems.add<RenderingSystem>(
-    &mScrollOffset,
-    mpRenderer,
-    &mLevelData.mMap,
-    std::move(loadedLevel.mTileSetImage),
-    std::move(loadedLevel.mBackdropImage),
-    std::move(loadedLevel.mSecondaryBackdropImage),
-    loadedLevel.mBackdropScrollMode);
-  mEntities.systems.add<PlayerInteractionSystem>(
-    mPlayerEntity,
-    &mPlayerModel,
-    mpServiceProvider,
-    [this](const entityx::Entity& teleporter) {
-      mActiveTeleporter = teleporter;
-    });
-  mEntities.systems.add<DamageInflictionSystem>(
-    &mPlayerModel,
-    &mLevelData.mMap,
-    mpServiceProvider);
-  mEntities.systems.add<ai::MessengerDroneSystem>(mPlayerEntity);
-  mEntities.systems.add<ai::PrisonerSystem>(mPlayerEntity, &mRandomGenerator);
-  mEntities.systems.add<ai::LaserTurretSystem>(
-    mPlayerEntity,
-    &mPlayerModel,
-    &mEntityFactory,
-    mpServiceProvider);
-  mEntities.systems.add<ai::RocketTurretSystem>(
-    mPlayerEntity,
-    &mEntityFactory,
-    mpServiceProvider);
-  mEntities.systems.add<ai::SecurityCameraSystem>(mPlayerEntity);
-  mEntities.systems.add<ai::SlidingDoorSystem>(
-    mPlayerEntity,
-    mpServiceProvider);
-  mEntities.systems.add<ai::SlimePipeSystem>(
-    &mEntityFactory,
-    mpServiceProvider);
-  mEntities.systems.add<engine::LifeTimeSystem>();
-  mEntities.systems.add<DebuggingSystem>(
-    mpRenderer,
-    &mScrollOffset,
-    &mLevelData.mMap);
-  mEntities.systems.configure();
-
-  mpSystems = std::make_unique<Systems>(
+  mpSystems = std::make_unique<IngameSystems>(
+    difficulty,
     &mScrollOffset,
     mPlayerEntity,
     &mPlayerModel,
     &mLevelData.mMap,
+    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
     mpServiceProvider,
     &mEntityFactory,
     &mRandomGenerator,
-    mLevelData.mMap,
-    mEntities.entities,
-    mEntities.events);
-
-  mEntities.systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
-    [this](entityx::Entity entity) {
-      mpSystems->mBlueGuardSystem.onEntityHit(entity);
-      item_containers::onEntityHit(entity, mEntities.entities);
-      mpSystems->mNapalmBombSystem.onEntityHit(entity);
-      mpSystems->mSlimeBlobSystem.onEntityHit(entity);
-      mEntities.systems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
-      mEntities.systems.system<ai::PrisonerSystem>()->onEntityHit(entity);
-    });
-
+    mpRenderer,
+    mEntities,
+    mEventManager);
 
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =
@@ -520,10 +314,11 @@ void IngameMode::loadLevel(
 
 void IngameMode::handleLevelExit() {
   using engine::components::Active;
+  using engine::components::BoundingBox;
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
-  mEntities.entities.each<Trigger, WorldPosition, Active>(
+  mEntities.each<Trigger, WorldPosition, Active>(
     [this](
       entityx::Entity,
       const Trigger& trigger,
@@ -567,7 +362,7 @@ void IngameMode::restartLevel() {
 
   mLevelData.mMap = mMapAtLevelStart;
 
-  mEntities.entities.reset();
+  mEntities.reset();
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors);
 
@@ -580,7 +375,8 @@ void IngameMode::restartLevel() {
 
 
 void IngameMode::handleTeleporter() {
-  if (!mActiveTeleporter) {
+  auto activeTeleporter = mpSystems->getAndResetActiveTeleporter();
+  if (!activeTeleporter) {
     return;
   }
 
@@ -588,18 +384,15 @@ void IngameMode::handleTeleporter() {
   mpServiceProvider->fadeOutScreen();
 
   game_logic::interaction::teleportPlayer(
-    mEntities.entities,
+    mEntities,
     mPlayerEntity,
-    *mActiveTeleporter);
-  // It's important to reset mActiveTeleporter before calling updateAndRender,
-  // as there would be an infinite recursion otherwise.
-  mActiveTeleporter = boost::none;
+    activeTeleporter);
 
   const auto switchBackdrop =
     mLevelData.mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (switchBackdrop) {
-    mEntities.systems.system<RenderingSystem>()->switchBackdrops();
+    mpSystems->switchBackdrops();
   }
 
   // Resetting the scroll offset to 0 will cause the scroll position update
@@ -612,6 +405,8 @@ void IngameMode::handleTeleporter() {
 
 
 void IngameMode::showDebugText() {
+  using engine::components::MovingBody;
+
   const auto& playerPos = *mPlayerEntity.component<WorldPosition>();
   const auto& playerVel = mPlayerEntity.component<MovingBody>()->mVelocity;
   std::stringstream infoText;
@@ -619,9 +414,7 @@ void IngameMode::showDebugText() {
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
     << "Player: " << vec2String(playerPos, 4)
     << ", Vel.: " << vec2String(playerVel, 5) << '\n'
-    << "Entities: " << mEntities.entities.size() << '\n'
-    << "Sprites rendered: " <<
-      mEntities.systems.system<RenderingSystem>()->spritesRendered();
+    << "Entities: " << mEntities.size();
 
   mpServiceProvider->showDebugText(infoText.str());
 }

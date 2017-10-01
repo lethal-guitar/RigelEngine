@@ -40,8 +40,7 @@ public:
     entityx::Entity player,
     const data::map::Map& map);
 
-  void updateManualScrolling(entityx::TimeDelta dt);
-
+  void updateManualScrolling();
   void updateScrollOffset();
 
 private:

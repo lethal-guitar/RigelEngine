@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2017, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,59 +16,82 @@
 
 #pragma once
 
+#include "base/boost_variant.hpp"
 #include "base/warnings.hpp"
-#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { namespace engine {
-  class RandomNumberGenerator;
-
-  namespace components { struct Sprite; }
-}}
+namespace rigel { namespace engine { class CollisionChecker; }}
 
 
 namespace rigel { namespace game_logic { namespace ai {
 
 namespace components {
 
-struct Prisoner {
-  explicit Prisoner(const bool isAggressive)
-    : mIsAggressive(isAggressive)
+namespace detail {
+
+struct Flying {};
+
+struct Hovering {
+  explicit Hovering(const int initialHeight)
+    : mInitialHeight(initialHeight)
   {
   }
 
-  int mGrabStep = 0;
-  bool mIsAggressive;
-  bool mIsGrabbing = false;
+  int mInitialHeight;
+  int mFramesElapsed = 0;
+};
+
+struct PlungingDown {
+  int mInitialHeight;
+};
+
+struct RisingUp {
+  explicit RisingUp(const int initialHeight)
+    : mInitialHeight(initialHeight)
+  {
+  }
+
+  int mInitialHeight;
+  bool mBackAtOriginalHeight = false;
+};
+
+}
+
+using StateT = boost::variant<
+  detail::Flying,
+  detail::Hovering,
+  detail::PlungingDown,
+  detail::RisingUp>;
+
+
+struct RedBird {
+  StateT mState;
 };
 
 }
 
 
-class PrisonerSystem {
+void configureRedBird(entityx::Entity entity);
+
+
+class RedBirdSystem {
 public:
-  PrisonerSystem(
-    entityx::Entity player,
-    engine::RandomNumberGenerator* pRandomGenerator);
+  explicit RedBirdSystem(entityx::Entity player);
 
   void update(entityx::EntityManager& es);
 
-  void onEntityHit(entityx::Entity entity);
-
-private:
-  void updateAggressivePrisoner(
+  void onEntityCollided(
     entityx::Entity entity,
-    const engine::components::WorldPosition& position,
-    components::Prisoner& state,
-    engine::components::Sprite& sprite
-  );
+    const bool left,
+    const bool right,
+    const bool top,
+    const bool bottom);
 
 private:
   entityx::Entity mPlayer;
-  engine::RandomNumberGenerator* mpRandomGenerator;
   bool mIsOddFrame = false;
 };
 

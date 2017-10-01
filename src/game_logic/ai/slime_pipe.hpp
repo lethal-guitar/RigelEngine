@@ -38,16 +38,13 @@ struct SlimePipe {
 }
 
 
-class SlimePipeSystem : public entityx::System<SlimePipeSystem> {
+class SlimePipeSystem {
 public:
   SlimePipeSystem(
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   void createSlimeDrop(const base::Vector& position);

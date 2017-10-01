@@ -30,7 +30,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace game_logic { namespace player {
 
-class DamageSystem : public entityx::System<DamageSystem> {
+class DamageSystem {
 public:
   DamageSystem(
     entityx::Entity player,
@@ -38,10 +38,7 @@ public:
     IGameServiceProvider* pServiceProvider,
     data::Difficulty difficulty);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   entityx::Entity mPlayer;
