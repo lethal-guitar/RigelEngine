@@ -80,9 +80,10 @@ IngameMode::IngameMode(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mEntities(mEventManager)
   , mEntityFactory(
       context.mpRenderer,
-      &mEntities.entities,
+      &mEntities,
       &context.mpResources->mActorImagePackage,
       difficulty)
   , mPlayerModelAtLevelStart(mPlayerModel)
@@ -215,7 +216,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 
   auto doTimeStep = [&, this]() {
     mHudRenderer.updateAnimation();
-    mpSystems->update(mCombinedInputState, mEntities.entities);
+    mpSystems->update(mCombinedInputState, mEntities);
     mCombinedInputState = mInputState;
 
     if (mEarthQuakeEffect) {
@@ -246,7 +247,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
-    mpSystems->render(mEntities.entities);
+    mpSystems->render(mEntities);
     mHudRenderer.render();
   }
 
@@ -299,8 +300,8 @@ void IngameMode::loadLevel(
     &mEntityFactory,
     &mRandomGenerator,
     mpRenderer,
-    mEntities.entities,
-    mEntities.events);
+    mEntities,
+    mEventManager);
 
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =
@@ -317,7 +318,7 @@ void IngameMode::handleLevelExit() {
   using game_logic::components::Trigger;
   using game_logic::components::TriggerType;
 
-  mEntities.entities.each<Trigger, WorldPosition, Active>(
+  mEntities.each<Trigger, WorldPosition, Active>(
     [this](
       entityx::Entity,
       const Trigger& trigger,
@@ -361,7 +362,7 @@ void IngameMode::restartLevel() {
 
   mLevelData.mMap = mMapAtLevelStart;
 
-  mEntities.entities.reset();
+  mEntities.reset();
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors);
 
@@ -383,7 +384,7 @@ void IngameMode::handleTeleporter() {
   mpServiceProvider->fadeOutScreen();
 
   game_logic::interaction::teleportPlayer(
-    mEntities.entities,
+    mEntities,
     mPlayerEntity,
     activeTeleporter);
 
@@ -413,7 +414,7 @@ void IngameMode::showDebugText() {
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
     << "Player: " << vec2String(playerPos, 4)
     << ", Vel.: " << vec2String(playerVel, 5) << '\n'
-    << "Entities: " << mEntities.entities.size();
+    << "Entities: " << mEntities.size();
 
   mpServiceProvider->showDebugText(infoText.str());
 }

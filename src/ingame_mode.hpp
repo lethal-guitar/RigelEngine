@@ -76,7 +76,8 @@ private:
 private:
   engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
-  entityx::EntityX mEntities;
+  entityx::EventManager mEventManager;
+  entityx::EntityManager mEntities;
   game_logic::EntityFactory mEntityFactory;
 
   data::PlayerModel mPlayerModel;
