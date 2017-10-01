@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
 
@@ -55,6 +56,34 @@ struct CollidedWithWorld {};
  * SolidBody entity as if it were part of the world.
  * */
 struct SolidBody {};
+
+
+namespace parameter_aliases {
+
+using ResetAfterSequence = bool;
+using EnableX = bool;
+
+}
+
+
+struct MovementSequence {
+  using VelocityList = base::ArrayView<base::Point<float>>;
+
+  explicit MovementSequence(
+    const VelocityList& velocities,
+    const bool resetVelocityAfterSequence = false,
+    const bool enableX = true)
+    : mVelocites(velocities)
+    , mResetVelocityAfterSequence(resetVelocityAfterSequence)
+    , mEnableX(enableX)
+  {
+  }
+
+  VelocityList mVelocites;
+  decltype(mVelocites)::size_type mCurrentStep = 0;
+  bool mResetVelocityAfterSequence = false;
+  bool mEnableX = true;
+};
 
 }
 

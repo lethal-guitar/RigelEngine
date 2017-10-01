@@ -27,9 +27,38 @@ namespace rigel { namespace engine {
 using namespace std;
 
 using components::BoundingBox;
+using components::MovementSequence;
 using components::MovingBody;
 using components::SolidBody;
 using components::WorldPosition;
+
+
+namespace {
+
+base::Point<float> updateMovementSequence(
+  entityx::Entity entity,
+  const base::Point<float>& velocity
+) {
+  auto& sequence = *entity.component<MovementSequence>();
+  if (sequence.mCurrentStep >= sequence.mVelocites.size()) {
+    if (sequence.mResetVelocityAfterSequence) {
+      const auto resetVelocity = sequence.mEnableX ?
+        base::Point<float>{} :
+        base::Point<float>{velocity.x, 0.0f};
+      entity.remove<MovementSequence>();
+      return resetVelocity;
+    }
+
+    return velocity;
+  }
+
+  auto newVelocity = sequence.mVelocites[sequence.mCurrentStep];
+  ++sequence.mCurrentStep;
+
+  return {sequence.mEnableX ? newVelocity.x : velocity.x, newVelocity.y};
+}
+
+}
 
 
 // TODO: This is implemented here, but declared in physical_components.hpp.
@@ -61,6 +90,11 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
+      const auto hasActiveSequence = entity.has_component<MovementSequence>();
+      if (hasActiveSequence) {
+        body.mVelocity = updateMovementSequence(entity, body.mVelocity);
+      }
+
       const auto originalPosition = position;
 
       const auto movementX = static_cast<int16_t>(body.mVelocity.x);
@@ -82,7 +116,7 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       // frame where we applied the horizontal movement. Changing the velocity
       // here will automatically move the entity down when doing the vertical
       // movement.
-      if (body.mGravityAffected) {
+      if (body.mGravityAffected && !hasActiveSequence) {
         body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
       }
 
