@@ -28,6 +28,7 @@
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
 #include "game_logic/ai/prisoner.hpp"
+#include "game_logic/ai/red_bird.hpp"
 #include "game_logic/ai/rocket_turret.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/simple_walker.hpp"
@@ -109,6 +110,7 @@ private:
   game_logic::ai::LaserTurretSystem mLaserTurretSystem;
   game_logic::ai::MessengerDroneSystem mMessengerDroneSystem;
   game_logic::ai::PrisonerSystem mPrisonerSystem;
+  game_logic::ai::RedBirdSystem mRedBirdSystem;
   game_logic::ai::RocketTurretSystem mRocketTurretSystem;
   game_logic::ai::SecurityCameraSystem mSecurityCameraSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;

@@ -92,6 +92,7 @@ IngameSystems::IngameSystems(
       pServiceProvider)
   , mMessengerDroneSystem(playerEntity)
   , mPrisonerSystem(playerEntity, pRandomGenerator)
+  , mRedBirdSystem(playerEntity)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSecurityCameraSystem(playerEntity)
   , mSimpleWalkerSystem(
@@ -129,6 +130,7 @@ IngameSystems::IngameSystems(
       const bool t,
       const bool b
     ) {
+      mRedBirdSystem.onEntityCollided(e, l, r, t, b);
       mSpikeBallSystem.onEntityCollided(e, l, r, t, b);
     });
 }
@@ -167,6 +169,7 @@ void IngameSystems::update(
   mMessengerDroneSystem.update(es);
   mNapalmBombSystem.update(es);
   mPrisonerSystem.update(es);
+  mRedBirdSystem.update(es);
   mRocketTurretSystem.update(es);
   mSecurityCameraSystem.update(es);
   mSimpleWalkerSystem.update(es);

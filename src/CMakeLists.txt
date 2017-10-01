@@ -71,6 +71,8 @@ set(core_sources
     game_logic/ai/messenger_drone.hpp
     game_logic/ai/prisoner.cpp
     game_logic/ai/prisoner.hpp
+    game_logic/ai/red_bird.cpp
+    game_logic/ai/red_bird.hpp
     game_logic/ai/rocket_turret.cpp
     game_logic/ai/rocket_turret.hpp
     game_logic/ai/security_camera.cpp

@@ -1157,6 +1157,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(1 + difficultyOffset, 100);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      ai::configureRedBird(entity);
       break;
 
     case 253: // Monster in prison cell, aggressive
