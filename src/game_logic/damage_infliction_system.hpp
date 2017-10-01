@@ -34,6 +34,11 @@ namespace rigel { namespace game_logic {
 
 class DamageInflictionSystem {
 public:
+  using EntityHitSignal = boost::signals2::signal<void(
+    entityx::Entity,
+    const base::Point<float>& inflictorVelocity
+  )>;
+
   DamageInflictionSystem(
     data::PlayerModel* pPlayerModel,
     data::map::Map* pMap,
@@ -41,7 +46,7 @@ public:
 
   void update(entityx::EntityManager& es);
 
-  boost::signals2::signal<void(entityx::Entity)>& entityHitSignal() {
+  EntityHitSignal& entityHitSignal() {
     return mEntityHitSignal;
   }
 
@@ -50,7 +55,7 @@ private:
   data::map::Map* mpMap;
   IGameServiceProvider* mpServiceProvider;
 
-  boost::signals2::signal<void(entityx::Entity)> mEntityHitSignal;
+  EntityHitSignal mEntityHitSignal;
 };
 
 }}

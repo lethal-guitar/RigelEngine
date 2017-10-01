@@ -32,11 +32,23 @@ namespace ex = entityx;
 using engine::components::Active;
 using engine::components::BoundingBox;
 using engine::components::CollidedWithWorld;
+using engine::components::MovingBody;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
 using game_logic::components::DamageInflicting;
 using game_logic::components::MapGeometryLink;
 using game_logic::components::Shootable;
+
+
+namespace {
+
+auto extractVelocity(entityx::Entity entity) {
+  return entity.has_component<MovingBody>()
+    ? entity.component<MovingBody>()->mVelocity
+    : base::Point<float>{};
+}
+
+}
 
 
 DamageInflictionSystem::DamageInflictionSystem(
@@ -75,11 +87,12 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
           !shootable->mInvincible &&
           active->mIsOnScreen
         ) {
+          const auto inflictorVelocity = extractVelocity(inflictorEntity);
           if (damage.mDestroyOnContact) {
             inflictorEntity.destroy();
           }
 
-          mEntityHitSignal(shootableEntity);
+          mEntityHitSignal(shootableEntity, inflictorVelocity);
           // The onHit() callback mustn't remove the shootable component
           assert(shootableEntity.has_component<Shootable>());
 

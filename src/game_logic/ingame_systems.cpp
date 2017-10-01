@@ -107,7 +107,10 @@ IngameSystems::IngameSystems(
   , mpPlayerModel(pPlayerModel)
 {
   mDamageInflictionSystem.entityHitSignal().connect(
-    [this, &entities](entityx::Entity entity) {
+    [this, &entities](
+      entityx::Entity entity,
+      const base::Point<float>& velocity
+    ) {
       mBlueGuardSystem.onEntityHit(entity);
       item_containers::onEntityHit(entity, entities);
       mNapalmBombSystem.onEntityHit(entity);
