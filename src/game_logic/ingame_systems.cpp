@@ -104,6 +104,7 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       pRandomGenerator)
   , mSlimePipeSystem(pEntityFactory, pServiceProvider)
+  , mSpikeBallSystem(&mCollisionChecker, pServiceProvider)
   , mpPlayerModel(pPlayerModel)
 {
   mDamageInflictionSystem.entityHitSignal().connect(
@@ -115,8 +116,20 @@ IngameSystems::IngameSystems(
       item_containers::onEntityHit(entity, entities);
       mNapalmBombSystem.onEntityHit(entity);
       mSlimeBlobSystem.onEntityHit(entity);
+      mSpikeBallSystem.onEntityHit(entity, velocity);
       mLaserTurretSystem.onEntityHit(entity);
       mPrisonerSystem.onEntityHit(entity);
+    });
+
+  mPhysicsSystem.entityCollidedSignal().connect(
+    [this](
+      entityx::Entity e,
+      const bool l,
+      const bool r,
+      const bool t,
+      const bool b
+    ) {
+      mSpikeBallSystem.onEntityCollided(e, l, r, t, b);
     });
 }
 
@@ -160,6 +173,7 @@ void IngameSystems::update(
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);
   mSlimePipeSystem.update(es);
+  mSpikeBallSystem.update(es);
 
   // ----------------------------------------------------------------------
   // Physics and other updates

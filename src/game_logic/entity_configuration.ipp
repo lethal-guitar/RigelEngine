@@ -1058,6 +1058,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(6 + difficultyOffset, 1000);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      ai::configureSpikeBall(entity);
       break;
 
     case 67: // Green slime blob

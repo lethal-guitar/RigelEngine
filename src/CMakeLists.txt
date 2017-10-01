@@ -83,6 +83,8 @@ set(core_sources
     game_logic/ai/slime_blob.hpp
     game_logic/ai/slime_pipe.cpp
     game_logic/ai/slime_pipe.hpp
+    game_logic/ai/spike_ball.cpp
+    game_logic/ai/spike_ball.hpp
     game_logic/collectable_components.hpp
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp

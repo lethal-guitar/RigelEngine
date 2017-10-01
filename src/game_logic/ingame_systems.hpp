@@ -34,6 +34,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/item_container.hpp"
@@ -114,6 +115,7 @@ private:
   game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
   game_logic::ai::SlimePipeSystem mSlimePipeSystem;
+  game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 
   data::PlayerModel* mpPlayerModel;
 
