@@ -130,9 +130,19 @@ void PhysicsSystem::update(ex::EntityManager& es) {
           body.mGravityAffected);
       }
 
-      const auto collisionOccured =
-        position != originalPosition + WorldPosition{movementX, movementY};
+      const auto targetPosition =
+        originalPosition + WorldPosition{movementX, movementY};
+      const auto collisionOccured = position != targetPosition;
       setTag<CollidedWithWorld>(entity, collisionOccured);
+
+      if (collisionOccured) {
+        const auto left = targetPosition.x != position.x && movementX < 0;
+        const auto right = targetPosition.x != position.x && movementX > 0;
+        const auto top = targetPosition.y != position.y && movementY < 0;
+        const auto bottom = targetPosition.y != position.y && movementY > 0;
+
+        mEntityCollidedSignal(entity, left, right, top, bottom);
+      }
     });
 }
 
