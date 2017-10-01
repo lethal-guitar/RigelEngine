@@ -153,11 +153,7 @@ SlidingDoorSystem::SlidingDoorSystem(
 }
 
 
-void SlidingDoorSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void SlidingDoorSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayerEntity.component<WorldPosition>().get();
 
   using engine::components::BoundingBox;

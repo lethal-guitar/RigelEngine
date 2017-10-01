@@ -69,13 +69,10 @@ public:
     engine::RandomNumberGenerator* pRandomGenerator,
     engine::Renderer* pRenderer,
     entityx::EntityManager& entities,
-    entityx::EventManager& eventManager,
-    entityx::SystemManager& systems);
+    entityx::EventManager& eventManager);
 
-  void update(
-    const PlayerInputState& inputState,
-    entityx::EntityManager& entities);
-  void render();
+  void update(const PlayerInputState& inputState, entityx::EntityManager& es);
+  void render(entityx::EntityManager& es);
 
   void buttonStateChanged(const PlayerInputState& inputState);
 
@@ -89,23 +86,36 @@ private:
   entityx::Entity mPlayerEntity;
   base::Vector* mpScrollOffset;
   engine::CollisionChecker mCollisionChecker;
+
+  engine::RenderingSystem mRenderingSystem;
   engine::PhysicsSystem mPhysicsSystem;
+  engine::LifeTimeSystem mLifeTimeSystem;
+  engine::DebuggingSystem mDebuggingSystem;
 
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
+  game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
   game_logic::player::AttackSystem<EntityFactory> mPlayerAttackSystem;
+  game_logic::player::AnimationSystem mPlayerAnimationSystem;
+  game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
+  game_logic::DamageInflictionSystem mDamageInflictionSystem;
   game_logic::NapalmBombSystem mNapalmBombSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::HoverBotSystem mHoverBotSystem;
+  game_logic::ai::LaserTurretSystem mLaserTurretSystem;
+  game_logic::ai::MessengerDroneSystem mMessengerDroneSystem;
+  game_logic::ai::PrisonerSystem mPrisonerSystem;
+  game_logic::ai::RocketTurretSystem mRocketTurretSystem;
+  game_logic::ai::SecurityCameraSystem mSecurityCameraSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
+  game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
+  game_logic::ai::SlimePipeSystem mSlimePipeSystem;
 
   data::PlayerModel* mpPlayerModel;
-
-  entityx::SystemManager& mSystems;
 
   entityx::Entity mActiveTeleporter;
 };

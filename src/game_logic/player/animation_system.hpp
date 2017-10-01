@@ -32,23 +32,18 @@ namespace rigel { namespace game_logic { class EntityFactory; }}
 
 namespace rigel { namespace game_logic { namespace player {
 
-class AnimationSystem : public entityx::System<AnimationSystem> {
+class AnimationSystem {
 public:
   explicit AnimationSystem(
     entityx::Entity player,
     IGameServiceProvider* pServiceProvider,
     EntityFactory* pFactory);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+  void update(entityx::EntityManager& es);
 
 private:
   int determineAnimationFrame(
     components::PlayerControlled& state,
-    engine::TimeDelta dt,
     int currentAnimationFrame);
 
   int movementAnimationFrame(
@@ -57,7 +52,6 @@ private:
 
   int attackAnimationFrame(
     components::PlayerControlled& state,
-    engine::TimeDelta dt,
     int currentAnimationFrame);
 
 private:

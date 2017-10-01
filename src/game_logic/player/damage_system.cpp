@@ -74,11 +74,7 @@ DamageSystem::DamageSystem(
 }
 
 
-void DamageSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void DamageSystem::update(entityx::EntityManager& es) {
   if (mpPlayerModel->mHealth <= 0) {
     return;
   }

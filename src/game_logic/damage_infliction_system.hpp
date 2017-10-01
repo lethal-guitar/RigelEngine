@@ -32,18 +32,14 @@ namespace rigel { namespace data { struct PlayerModel; }}
 
 namespace rigel { namespace game_logic {
 
-class DamageInflictionSystem : public entityx::System<DamageInflictionSystem> {
+class DamageInflictionSystem {
 public:
   DamageInflictionSystem(
     data::PlayerModel* pPlayerModel,
     data::map::Map* pMap,
     IGameServiceProvider* pServiceProvider);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+  void update(entityx::EntityManager& es);
 
   boost::signals2::signal<void(entityx::Entity)>& entityHitSignal() {
     return mEntityHitSignal;

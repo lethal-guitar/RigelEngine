@@ -33,14 +33,11 @@ struct SecurityCamera {};
 }
 
 
-class SecurityCameraSystem : public entityx::System<SecurityCameraSystem> {
+class SecurityCameraSystem {
 public:
   explicit SecurityCameraSystem(entityx::Entity playerEntity);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   entityx::Entity mPlayerEntity;

@@ -49,11 +49,7 @@ SlimePipeSystem::SlimePipeSystem(
 }
 
 
-void SlimePipeSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void SlimePipeSystem::update(entityx::EntityManager& es) {
   es.each<components::SlimePipe, WorldPosition, Active>(
     [this](
       entityx::Entity,

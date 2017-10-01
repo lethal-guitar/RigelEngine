@@ -48,7 +48,7 @@ void updateAnimatedSprites(entityx::EntityManager& es);
  * are handled by the same system so that draw-order can be done properly
  * (e.g. some sprites are rendered behind certain tiles, others before etc.)
  */
-class RenderingSystem : public entityx::System<RenderingSystem> {
+class RenderingSystem {
 public:
   RenderingSystem(
     const base::Vector* pScrollOffset,
@@ -68,11 +68,7 @@ public:
   }
 
   /** Render everything. Can be called at full frame rate. */
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt
-  ) override;
+  void update(entityx::EntityManager& es);
 
   void switchBackdrops() {
     mMapRenderer.switchBackdrops();

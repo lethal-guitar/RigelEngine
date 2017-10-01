@@ -51,11 +51,7 @@ DamageInflictionSystem::DamageInflictionSystem(
 }
 
 
-void DamageInflictionSystem::update(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  ex::TimeDelta dt
-) {
+void DamageInflictionSystem::update(ex::EntityManager& es) {
   es.each<DamageInflicting, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity inflictorEntity,

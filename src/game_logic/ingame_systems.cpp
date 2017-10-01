@@ -38,20 +38,42 @@ IngameSystems::IngameSystems(
   engine::RandomNumberGenerator* pRandomGenerator,
   engine::Renderer* pRenderer,
   entityx::EntityManager& entities,
-  entityx::EventManager& eventManager,
-  entityx::SystemManager& systems
+  entityx::EventManager& eventManager
 )
   : mpScrollOffset(pScrollOffset)
   , mCollisionChecker(pMap, entities, eventManager)
+  , mRenderingSystem(
+      mpScrollOffset,
+      pRenderer,
+      pMap,
+      std::move(mapRenderData))
   , mPhysicsSystem(&mCollisionChecker)
+  , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
   , mMapScrollSystem(mpScrollOffset, playerEntity, *pMap)
   , mPlayerMovementSystem(playerEntity, *pMap)
+  , mPlayerInteractionSystem(
+      playerEntity,
+      pPlayerModel,
+      pServiceProvider,
+      [this](const entityx::Entity& teleporter) {
+        mActiveTeleporter = teleporter;
+      })
   , mPlayerAttackSystem(
       playerEntity,
       pPlayerModel,
       pServiceProvider,
       pEntityFactory)
+  , mPlayerAnimationSystem(
+      playerEntity,
+      pServiceProvider,
+      pEntityFactory)
+  , mPlayerDamageSystem(
+      playerEntity,
+      pPlayerModel,
+      pServiceProvider,
+      difficulty)
   , mElevatorSystem(playerEntity, pServiceProvider)
+  , mDamageInflictionSystem(pPlayerModel, pMap, pServiceProvider)
   , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
   , mBlueGuardSystem(
       playerEntity,
@@ -63,146 +85,103 @@ IngameSystems::IngameSystems(
       playerEntity,
       &mCollisionChecker,
       pEntityFactory)
+  , mLaserTurretSystem(
+      playerEntity,
+      pPlayerModel,
+      pEntityFactory,
+      pServiceProvider)
+  , mMessengerDroneSystem(playerEntity)
+  , mPrisonerSystem(playerEntity, pRandomGenerator)
+  , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
+  , mSecurityCameraSystem(playerEntity)
   , mSimpleWalkerSystem(
       playerEntity,
       &mCollisionChecker)
+  , mSlidingDoorSystem(playerEntity, pServiceProvider)
   , mSlimeBlobSystem(
       playerEntity,
       &mCollisionChecker,
       pEntityFactory,
       pRandomGenerator)
+  , mSlimePipeSystem(pEntityFactory, pServiceProvider)
   , mpPlayerModel(pPlayerModel)
-  , mSystems(systems)
 {
-  systems.add<game_logic::player::AnimationSystem>(
-    playerEntity,
-    pServiceProvider,
-    pEntityFactory);
-  systems.add<game_logic::player::DamageSystem>(
-    playerEntity,
-    pPlayerModel,
-    pServiceProvider,
-    difficulty);
-  systems.add<RenderingSystem>(
-    mpScrollOffset,
-    pRenderer,
-    pMap,
-    std::move(mapRenderData));
-  systems.add<PlayerInteractionSystem>(
-    playerEntity,
-    pPlayerModel,
-    pServiceProvider,
-    [this](const entityx::Entity& teleporter) {
-      mActiveTeleporter = teleporter;
-    });
-  systems.add<DamageInflictionSystem>(
-    pPlayerModel,
-    pMap,
-    pServiceProvider);
-  systems.add<ai::MessengerDroneSystem>(playerEntity);
-  systems.add<ai::PrisonerSystem>(playerEntity, pRandomGenerator);
-  systems.add<ai::LaserTurretSystem>(
-    playerEntity,
-    pPlayerModel,
-    pEntityFactory,
-    pServiceProvider);
-  systems.add<ai::RocketTurretSystem>(
-    playerEntity,
-    pEntityFactory,
-    pServiceProvider);
-  systems.add<ai::SecurityCameraSystem>(playerEntity);
-  systems.add<ai::SlidingDoorSystem>(
-    playerEntity,
-    pServiceProvider);
-  systems.add<ai::SlimePipeSystem>(
-    pEntityFactory,
-    pServiceProvider);
-  systems.add<engine::LifeTimeSystem>();
-  systems.add<DebuggingSystem>(
-    pRenderer,
-    mpScrollOffset,
-    pMap);
-  systems.configure();
-
-  systems.system<DamageInflictionSystem>()->entityHitSignal().connect(
+  mDamageInflictionSystem.entityHitSignal().connect(
     [this, &entities](entityx::Entity entity) {
       mBlueGuardSystem.onEntityHit(entity);
       item_containers::onEntityHit(entity, entities);
       mNapalmBombSystem.onEntityHit(entity);
       mSlimeBlobSystem.onEntityHit(entity);
-      mSystems.system<ai::LaserTurretSystem>()->onEntityHit(entity);
-      mSystems.system<ai::PrisonerSystem>()->onEntityHit(entity);
+      mLaserTurretSystem.onEntityHit(entity);
+      mPrisonerSystem.onEntityHit(entity);
     });
 }
 
 
 void IngameSystems::update(
   const PlayerInputState& inputState,
-  entityx::EntityManager& entities
+  entityx::EntityManager& es
 ) {
   // ----------------------------------------------------------------------
   // Animation update
   // ----------------------------------------------------------------------
-  mSystems.system<RenderingSystem>()->updateAnimatedMapTiles();
-  engine::updateAnimatedSprites(entities);
+  mRenderingSystem.updateAnimatedMapTiles();
+  engine::updateAnimatedSprites(es);
 
   // ----------------------------------------------------------------------
   // Mark active entities
   // ----------------------------------------------------------------------
-  engine::markActiveEntities(entities, *mpScrollOffset);
-
-  // TODO: Use mSystems struct for everything, stop using entityx::SystemManager
-  // entirely
+  engine::markActiveEntities(es, *mpScrollOffset);
 
   // ----------------------------------------------------------------------
   // Player logic update
   // ----------------------------------------------------------------------
-  // TODO: Move all player related mSystems into the player namespace
+  // TODO: Move all player related systems into the player namespace
   mpPlayerModel->updateTemporaryItemExpiry();
-  mElevatorSystem.update(entities, inputState);
+  mElevatorSystem.update(es, inputState);
   mPlayerMovementSystem.update(inputState);
-  mSystems.update<PlayerInteractionSystem>(0.0);
+  mPlayerInteractionSystem.update(es);
 
   // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
-  mBlueGuardSystem.update(entities);
-  mHoverBotSystem.update(entities);
-  mSystems.update<ai::LaserTurretSystem>(0.0);
-  mSystems.update<ai::MessengerDroneSystem>(0.0);
-  mNapalmBombSystem.update(entities);
-  mSystems.update<ai::PrisonerSystem>(0.0);
-  mSystems.update<ai::RocketTurretSystem>(0.0);
-  mSystems.update<ai::SecurityCameraSystem>(0.0);
-  mSimpleWalkerSystem.update(entities);
-  mSystems.update<ai::SlidingDoorSystem>(0.0);
-  mSlimeBlobSystem.update(entities);
-  mSystems.update<ai::SlimePipeSystem>(0.0);
+  mBlueGuardSystem.update(es);
+  mHoverBotSystem.update(es);
+  mLaserTurretSystem.update(es);
+  mMessengerDroneSystem.update(es);
+  mNapalmBombSystem.update(es);
+  mPrisonerSystem.update(es);
+  mRocketTurretSystem.update(es);
+  mSecurityCameraSystem.update(es);
+  mSimpleWalkerSystem.update(es);
+  mSlidingDoorSystem.update(es);
+  mSlimeBlobSystem.update(es);
+  mSlimePipeSystem.update(es);
 
   // ----------------------------------------------------------------------
   // Physics and other updates
   // ----------------------------------------------------------------------
-  mPhysicsSystem.update(entities);
+  mPhysicsSystem.update(es);
 
   // Player attacks have to be processed after physics, because:
   //  1. Player projectiles should spawn at the player's location
   //  2. Player projectiles mustn't move on the frame they were spawned on
   mPlayerAttackSystem.update();
 
-  mSystems.update<player::DamageSystem>(0.0);
-  mSystems.update<DamageInflictionSystem>(0.0);
-  mSystems.update<player::AnimationSystem>(0.0);
+  mPlayerDamageSystem.update(es);
+  mDamageInflictionSystem.update(es);
+  mPlayerAnimationSystem.update(es);
 
-  mMapScrollSystem.updateManualScrolling(0.0);
+  mMapScrollSystem.updateManualScrolling();
 
-  mSystems.update<engine::LifeTimeSystem>(0.0);
+  mLifeTimeSystem.update(es);
 }
 
 
-void IngameSystems::render() {
+void IngameSystems::render(entityx::EntityManager& es) {
   mMapScrollSystem.updateScrollOffset();
-  mSystems.update<RenderingSystem>(0.0);
-  mSystems.update<DebuggingSystem>(0.0);
+  mRenderingSystem.update(es);
+  mDebuggingSystem.update(es);
 }
 
 
@@ -213,12 +192,12 @@ void IngameSystems::buttonStateChanged(const PlayerInputState& inputState)
 
 
 DebuggingSystem& IngameSystems::debuggingSystem() {
-  return *mSystems.system<DebuggingSystem>();
+  return mDebuggingSystem;
 }
 
 
 void IngameSystems::switchBackdrops() {
-  mSystems.system<RenderingSystem>()->switchBackdrops();
+  mRenderingSystem.switchBackdrops();
 }
 
 

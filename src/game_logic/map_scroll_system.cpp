@@ -78,7 +78,7 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
-void MapScrollSystem::updateManualScrolling(const entityx::TimeDelta dt) {
+void MapScrollSystem::updateManualScrolling() {
   const auto& state = *mPlayer.component<PlayerControlled>();
 
   if (state.mIsLookingDown) {

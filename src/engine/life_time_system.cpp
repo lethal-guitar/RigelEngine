@@ -21,11 +21,7 @@
 
 namespace rigel { namespace engine {
 
-void LifeTimeSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void LifeTimeSystem::update(entityx::EntityManager& es) {
   using Condition = components::AutoDestroy::Condition;
   es.each<components::AutoDestroy>([](
     entityx::Entity entity,

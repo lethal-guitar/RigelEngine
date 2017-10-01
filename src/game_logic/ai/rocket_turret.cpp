@@ -78,11 +78,7 @@ RocketTurretSystem::RocketTurretSystem(
 }
 
 
-void RocketTurretSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta dt
-) {
+void RocketTurretSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
   es.each<components::RocketTurret, WorldPosition, Sprite, Active>(

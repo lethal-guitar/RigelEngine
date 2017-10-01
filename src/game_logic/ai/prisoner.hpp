@@ -48,16 +48,13 @@ struct Prisoner {
 }
 
 
-class PrisonerSystem : public entityx::System<PrisonerSystem> {
+class PrisonerSystem {
 public:
   PrisonerSystem(
     entityx::Entity player,
     engine::RandomNumberGenerator* pRandomGenerator);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
   void onEntityHit(entityx::Entity entity);
 

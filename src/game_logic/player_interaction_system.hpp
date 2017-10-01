@@ -37,10 +37,7 @@ namespace rigel {
 
 namespace rigel { namespace game_logic {
 
-class PlayerInteractionSystem :
-  public entityx::System<PlayerInteractionSystem>,
-  public entityx::Receiver<PlayerInteractionSystem>
-{
+class PlayerInteractionSystem {
 public:
   using TeleportCallback = std::function<void(const entityx::Entity&)>;
 
@@ -50,10 +47,7 @@ public:
     IGameServiceProvider* pServices,
     TeleportCallback teleportCallback);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta) override;
+  void update(entityx::EntityManager& es);
 
 private:
   void performInteraction(

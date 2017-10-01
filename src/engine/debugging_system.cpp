@@ -86,11 +86,7 @@ void DebuggingSystem::toggleGridDisplay() {
 }
 
 
-void DebuggingSystem::update(
-  ex::EntityManager& es,
-  ex::EventManager& events,
-  ex::TimeDelta dt
-) {
+void DebuggingSystem::update(ex::EntityManager& es) {
   if (mShowWorldCollisionData) {
     const auto drawColor = base::Color{255, 255, 0, 255};
 

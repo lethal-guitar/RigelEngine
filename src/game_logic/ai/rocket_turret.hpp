@@ -50,17 +50,14 @@ struct RocketTurret {
 void configureRocketTurret(entityx::Entity& entity, int givenScore);
 
 
-class RocketTurretSystem : public entityx::System<RocketTurretSystem> {
+class RocketTurretSystem {
 public:
   RocketTurretSystem(
     entityx::Entity player,
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   void fireRocket(

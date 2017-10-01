@@ -48,7 +48,7 @@ struct LaserTurret {
 void configureLaserTurret(entityx::Entity& entity, int givenScore);
 
 
-class LaserTurretSystem : public entityx::System<LaserTurretSystem> {
+class LaserTurretSystem {
 public:
   LaserTurretSystem(
     entityx::Entity player,
@@ -58,10 +58,7 @@ public:
 
   void onEntityHit(entityx::Entity entity);
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   entityx::Entity mPlayer;

@@ -28,7 +28,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine {
 
-class DebuggingSystem : public entityx::System<DebuggingSystem> {
+class DebuggingSystem {
 public:
   DebuggingSystem(
     engine::Renderer* pRenderer,
@@ -39,10 +39,7 @@ public:
   void toggleWorldCollisionDataDisplay();
   void toggleGridDisplay();
 
-  void update(
-    entityx::EntityManager& es,
-    entityx::EventManager& events,
-    entityx::TimeDelta dt) override;
+  void update(entityx::EntityManager& es);
 
 private:
   engine::Renderer* mpRenderer;

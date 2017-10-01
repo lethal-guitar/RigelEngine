@@ -246,7 +246,7 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
   {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
-    mpSystems->render();
+    mpSystems->render(mEntities.entities);
     mHudRenderer.render();
   }
 
@@ -300,8 +300,7 @@ void IngameMode::loadLevel(
     &mRandomGenerator,
     mpRenderer,
     mEntities.entities,
-    mEntities.events,
-    mEntities.systems);
+    mEntities.events);
 
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =

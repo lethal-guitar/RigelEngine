@@ -55,11 +55,7 @@ PlayerInteractionSystem::PlayerInteractionSystem(
 }
 
 
-void PlayerInteractionSystem::update(
-  entityx::EntityManager& es,
-  entityx::EventManager& events,
-  entityx::TimeDelta
-) {
+void PlayerInteractionSystem::update(entityx::EntityManager& es) {
   assert(mPlayer.has_component<PlayerControlled>());
   auto& state = *mPlayer.component<PlayerControlled>();
   if (state.isPlayerDead()) {
