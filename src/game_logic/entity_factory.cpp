@@ -186,7 +186,6 @@ entityx::Entity EntityFactory::createProjectile(
 
   const auto boundingBox = engine::inferBoundingBox(sprite);
 
-  // TODO: Player projectiles shouldn't move on the frame they were created
   entity.assign<Active>();
   entity.assign<Sprite>(sprite);
   entity.assign<BoundingBox>(boundingBox);

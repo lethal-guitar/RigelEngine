@@ -5,7 +5,6 @@ set(test_sources
     test_physics_system.cpp
     test_player_animation_system.cpp
     test_player_attack_system.cpp
-    test_player_state_machine.cpp
     test_spike_ball.cpp
 )
 
