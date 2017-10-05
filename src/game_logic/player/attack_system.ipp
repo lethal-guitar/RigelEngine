@@ -23,15 +23,12 @@
 
 namespace rigel { namespace game_logic { namespace player {
 
-using data::WeaponType;
-using engine::components::WorldPosition;
-
-namespace ex = entityx;
-
 namespace {
 
 
-inline ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
+inline ProjectileType projectileTypeForWeapon(const data::WeaponType weaponType) {
+  using data::WeaponType;
+
   switch (weaponType) {
     case WeaponType::Normal:
       return ProjectileType::PlayerRegularShot;
@@ -51,8 +48,9 @@ inline ProjectileType projectileTypeForWeapon(const WeaponType weaponType) {
 }
 
 
-inline data::SoundId soundIdForWeapon(const WeaponType weaponType) {
+inline data::SoundId soundIdForWeapon(const data::WeaponType weaponType) {
   using data::SoundId;
+  using data::WeaponType;
 
   switch (weaponType) {
     case WeaponType::Laser:
@@ -101,6 +99,8 @@ bool AttackSystem<EntityFactoryT>::attackPossible() const {
 
 template<typename EntityFactoryT>
 void AttackSystem<EntityFactoryT>::update() {
+  using engine::components::WorldPosition;
+
   if (!attackPossible()) {
     return;
   }
@@ -147,9 +147,11 @@ void AttackSystem<EntityFactoryT>::buttonStateChanged(
 
 template<typename EntityFactoryT>
 void AttackSystem<EntityFactoryT>::fireShot(
-  const WorldPosition& playerPosition,
+  const engine::components::WorldPosition& playerPosition,
   const components::PlayerControlled& playerState
 ) {
+  using engine::components::WorldPosition;
+
   const auto facingRight =
     playerState.mOrientation == player::Orientation::Right;
   const auto state = playerState.mState;
@@ -174,7 +176,7 @@ void AttackSystem<EntityFactoryT>::fireShot(
     --mpPlayerModel->mAmmo;
 
     if (mpPlayerModel->mAmmo <= 0) {
-      mpPlayerModel->switchToWeapon(WeaponType::Normal);
+      mpPlayerModel->switchToWeapon(data::WeaponType::Normal);
     }
   }
 }
