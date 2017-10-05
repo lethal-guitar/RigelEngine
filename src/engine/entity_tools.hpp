@@ -36,4 +36,14 @@ void setTag(entityx::Entity entity, const bool assignTag) {
 }
 
 
+/** Like Entity::assign, but first removes the component if already present. */
+template<typename ComponentT, typename... Args>
+void reassign(entityx::Entity entity, Args&&... args) {
+  if (entity.has_component<ComponentT>()) {
+    entity.remove<ComponentT>();
+  }
+
+  entity.assign<ComponentT>(std::forward<Args>(args)...);
+}
+
 }}
