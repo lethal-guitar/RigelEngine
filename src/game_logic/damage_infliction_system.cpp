@@ -66,7 +66,7 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
   es.each<DamageInflicting, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity inflictorEntity,
-      const DamageInflicting& damage,
+      DamageInflicting& damage,
       const WorldPosition& inflictorPosition,
       const BoundingBox& bbox
     ) {
@@ -99,13 +99,15 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
 
 void DamageInflictionSystem::inflictDamage(
   entityx::Entity inflictorEntity,
-  const DamageInflicting& damage,
+  DamageInflicting& damage,
   entityx::Entity shootableEntity,
   Shootable& shootable
 ) {
   const auto inflictorVelocity = extractVelocity(inflictorEntity);
   if (damage.mDestroyOnContact) {
     inflictorEntity.destroy();
+  } else {
+    damage.mHasCausedDamage = true;
   }
 
   mEntityHitSignal(shootableEntity, inflictorVelocity);

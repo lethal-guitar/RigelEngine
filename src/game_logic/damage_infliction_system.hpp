@@ -54,7 +54,7 @@ public:
 private:
   void inflictDamage(
     entityx::Entity inflictorEntity,
-    const components::DamageInflicting& damage,
+    components::DamageInflicting& damage,
     entityx::Entity shootableEntity,
     components::Shootable& shootable);
 
