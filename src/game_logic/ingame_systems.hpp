@@ -43,6 +43,7 @@
 #include "game_logic/player/animation_system.hpp"
 #include "game_logic/player/attack_system.hpp"
 #include "game_logic/player/damage_system.hpp"
+#include "game_logic/player/projectile_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 #include "game_logic/player_movement_system.hpp"
 
@@ -101,6 +102,7 @@ private:
   game_logic::player::AttackSystem<EntityFactory> mPlayerAttackSystem;
   game_logic::player::AnimationSystem mPlayerAnimationSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;
+  game_logic::player::ProjectileSystem mPlayerProjectileSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::DamageInflictionSystem mDamageInflictionSystem;
