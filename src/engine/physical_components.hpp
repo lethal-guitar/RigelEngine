@@ -30,17 +30,24 @@ struct MovingBody {
   MovingBody(
     const base::Point<float> velocity,
     const bool gravityAffected,
-    const bool isPlayer = false
+    const bool isPlayer = false,
+    const bool ignoreCollisions = false
   )
     : mVelocity(velocity)
     , mGravityAffected(gravityAffected)
     , mIsPlayer(isPlayer)
+    , mIgnoreCollisions(ignoreCollisions)
   {
   }
 
   base::Point<float> mVelocity;
   bool mGravityAffected;
   bool mIsPlayer;
+
+  /** When set, the body will move through walls, but collision events will
+   * still be emitted.
+   */
+  bool mIgnoreCollisions;
 };
 
 

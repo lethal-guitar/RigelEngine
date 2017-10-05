@@ -20,7 +20,6 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_mode.hpp"
 
@@ -67,7 +66,7 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
   es.each<DamageInflicting, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity inflictorEntity,
-      const DamageInflicting& damage,
+      DamageInflicting& damage,
       const WorldPosition& inflictorPosition,
       const BoundingBox& bbox
     ) {
@@ -87,53 +86,68 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
           !shootable->mInvincible &&
           active->mIsOnScreen
         ) {
-          const auto inflictorVelocity = extractVelocity(inflictorEntity);
-          if (damage.mDestroyOnContact) {
-            inflictorEntity.destroy();
+          const auto destroyOnContact = damage.mDestroyOnContact;
+          inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
+          if (destroyOnContact) {
+            break;
           }
-
-          mEntityHitSignal(shootableEntity, inflictorVelocity);
-          // The onHit() callback mustn't remove the shootable component
-          assert(shootableEntity.has_component<Shootable>());
-
-          shootable->mHealth -= damage.mAmount;
-          if (shootable->mHealth <= 0) {
-            mpPlayerModel->mScore += shootable->mGivenScore;
-
-            // Take care of shootable walls
-            // NOTE: This might move someplace else later - maybe.
-            if (shootableEntity.has_component<MapGeometryLink>()) {
-              const auto mapSection =
-                shootableEntity.component<MapGeometryLink>()
-                  ->mLinkedGeometrySection;
-              mpMap->clearSection(
-                mapSection.topLeft.x, mapSection.topLeft.y,
-                mapSection.size.width, mapSection.size.height);
-            }
-
-            // Generate sound and destroy entity
-            // NOTE: This is only temporary, it will change once we implement
-            // different sounds and particle effects per enemy/object.
-            mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
-
-            if (shootable->mDestroyWhenKilled) {
-              shootableEntity.destroy();
-            } else {
-              shootableEntity.remove<Shootable>();
-            }
-          } else {
-            if (shootable->mEnableHitFeedback) {
-              mpServiceProvider->playSound(data::SoundId::EnemyHit);
-
-              if (shootableEntity.has_component<Sprite>()) {
-                shootableEntity.component<Sprite>()->flashWhite();
-              }
-            }
-          }
-          break;
         }
       }
     });
+}
+
+
+void DamageInflictionSystem::inflictDamage(
+  entityx::Entity inflictorEntity,
+  DamageInflicting& damage,
+  entityx::Entity shootableEntity,
+  Shootable& shootable
+) {
+  const auto inflictorVelocity = extractVelocity(inflictorEntity);
+  if (damage.mDestroyOnContact) {
+    inflictorEntity.destroy();
+  } else {
+    damage.mHasCausedDamage = true;
+  }
+
+  mEntityHitSignal(shootableEntity, inflictorVelocity);
+  // The onHit() callback mustn't remove the shootable component
+  assert(shootableEntity.has_component<Shootable>());
+
+  shootable.mHealth -= damage.mAmount;
+  if (shootable.mHealth <= 0) {
+    mpPlayerModel->mScore += shootable.mGivenScore;
+
+    // Take care of shootable walls
+    // NOTE: This might move someplace else later - maybe.
+    if (shootableEntity.has_component<MapGeometryLink>()) {
+      const auto mapSection =
+        shootableEntity.component<MapGeometryLink>()
+          ->mLinkedGeometrySection;
+      mpMap->clearSection(
+        mapSection.topLeft.x, mapSection.topLeft.y,
+        mapSection.size.width, mapSection.size.height);
+    }
+
+    // Generate sound and destroy entity
+    // NOTE: This is only temporary, it will change once we implement
+    // different sounds and particle effects per enemy/object.
+    mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
+
+    if (shootable.mDestroyWhenKilled) {
+      shootableEntity.destroy();
+    } else {
+      shootableEntity.remove<Shootable>();
+    }
+  } else {
+    if (shootable.mEnableHitFeedback) {
+      mpServiceProvider->playSound(data::SoundId::EnemyHit);
+
+      if (shootableEntity.has_component<Sprite>()) {
+        shootableEntity.component<Sprite>()->flashWhite();
+      }
+    }
+  }
 }
 
 }}

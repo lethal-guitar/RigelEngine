@@ -78,6 +78,12 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
+void MapScrollSystem::update() {
+  updateManualScrolling();
+  updateScrollOffset();
+}
+
+
 void MapScrollSystem::updateManualScrolling() {
   const auto& state = *mPlayer.component<PlayerControlled>();
 
@@ -125,6 +131,12 @@ void MapScrollSystem::updateScrollOffset() {
     base::clamp(mpScrollOffset->x, 0, mMaxScrollOffset.width);
   mpScrollOffset->y =
     base::clamp(mpScrollOffset->y, 0, mMaxScrollOffset.height);
+}
+
+
+void MapScrollSystem::centerViewOnPlayer() {
+  *mpScrollOffset = {};
+  updateScrollOffset();
 }
 
 }}

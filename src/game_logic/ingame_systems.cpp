@@ -192,14 +192,12 @@ void IngameSystems::update(
   mDamageInflictionSystem.update(es);
   mPlayerAnimationSystem.update(es);
 
-  mMapScrollSystem.updateManualScrolling();
-
+  mMapScrollSystem.update();
   mLifeTimeSystem.update(es);
 }
 
 
 void IngameSystems::render(entityx::EntityManager& es) {
-  mMapScrollSystem.updateScrollOffset();
   mRenderingSystem.update(es);
   mDebuggingSystem.update(es);
 }
@@ -225,6 +223,11 @@ entityx::Entity IngameSystems::getAndResetActiveTeleporter() {
   auto activeTeleporter = entityx::Entity{};
   std::swap(activeTeleporter, mActiveTeleporter);
   return activeTeleporter;
+}
+
+
+void IngameSystems::centerViewOnPlayer() {
+  mMapScrollSystem.centerViewOnPlayer();
 }
 
 }}

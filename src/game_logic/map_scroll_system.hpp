@@ -40,10 +40,13 @@ public:
     entityx::Entity player,
     const data::map::Map& map);
 
+  void update();
+  void centerViewOnPlayer();
+
+private:
   void updateManualScrolling();
   void updateScrollOffset();
 
-private:
   entityx::Entity mPlayer;
   base::Vector* mpScrollOffset;
   base::Extents mMaxScrollOffset;

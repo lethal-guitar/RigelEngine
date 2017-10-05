@@ -90,6 +90,8 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
+      const auto originalVelocity = body.mVelocity;
+
       const auto hasActiveSequence = entity.has_component<MovementSequence>();
       if (hasActiveSequence) {
         body.mVelocity = updateMovementSequence(entity, body.mVelocity);
@@ -142,6 +144,11 @@ void PhysicsSystem::update(ex::EntityManager& es) {
         const auto bottom = targetPosition.y != position.y && movementY > 0;
 
         mEntityCollidedSignal(entity, left, right, top, bottom);
+      }
+
+      if (body.mIgnoreCollisions) {
+        position = targetPosition;
+        body.mVelocity = originalVelocity;
       }
     });
 }

@@ -74,6 +74,7 @@ struct DamageInflicting {
 
   int mAmount;
   bool mDestroyOnContact;
+  bool mHasCausedDamage = false;
 };
 
 }}}

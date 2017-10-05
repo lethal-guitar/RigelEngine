@@ -109,6 +109,8 @@ IngameMode::IngameMode(
     *mPlayerEntity.component<WorldPosition>() = *playerPositionOverride;
   }
 
+  mpSystems->centerViewOnPlayer();
+
   auto after = high_resolution_clock::now();
   std::cout << "Level load time: " <<
     duration<double>(after - before).count() * 1000.0 << " ms\n";
@@ -368,6 +370,7 @@ void IngameMode::restartLevel() {
 
   mPlayerModel = mPlayerModelAtLevelStart;
 
+  mpSystems->centerViewOnPlayer();
   updateAndRender(0);
 
   mpServiceProvider->fadeInScreen();
@@ -395,10 +398,7 @@ void IngameMode::handleTeleporter() {
     mpSystems->switchBackdrops();
   }
 
-  // Resetting the scroll offset to 0 will cause the scroll position update
-  // to set the position as if the player started the level at the teleport
-  // destination - which is exactly what we want.
-  mScrollOffset = {0, 0};
+  mpSystems->centerViewOnPlayer();
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
 }
