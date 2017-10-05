@@ -153,4 +153,10 @@ entityx::Entity createOneShotSprite(
   data::ActorID id,
   const base::Vector& position);
 
+
+entityx::Entity createFloatingOneShotSprite(
+  EntityFactory& factory,
+  data::ActorID id,
+  const base::Vector& position);
+
 }}

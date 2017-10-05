@@ -330,4 +330,21 @@ entityx::Entity createOneShotSprite(
   return entity;
 }
 
+
+entityx::Entity createFloatingOneShotSprite(
+  EntityFactory& factory,
+  const data::ActorID id,
+  const base::Vector& position
+) {
+  using namespace engine::components::parameter_aliases;
+
+  auto entity = createOneShotSprite(factory, id, position);
+  entity.assign<MovingBody>(MovingBody{
+    Velocity{0, -1.0f},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true}});
+  return entity;
+}
+
 }}
