@@ -192,9 +192,7 @@ void IngameSystems::update(
   mDamageInflictionSystem.update(es);
   mPlayerAnimationSystem.update(es);
 
-  mMapScrollSystem.updateManualScrolling();
-  mMapScrollSystem.updateScrollOffset();
-
+  mMapScrollSystem.update();
   mLifeTimeSystem.update(es);
 }
 

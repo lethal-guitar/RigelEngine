@@ -78,6 +78,12 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
+void MapScrollSystem::update() {
+  updateManualScrolling();
+  updateScrollOffset();
+}
+
+
 void MapScrollSystem::updateManualScrolling() {
   const auto& state = *mPlayer.component<PlayerControlled>();
 
