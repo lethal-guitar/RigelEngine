@@ -83,6 +83,7 @@ public:
   void switchBackdrops();
 
   entityx::Entity getAndResetActiveTeleporter();
+  void centerViewOnPlayer();
 
 private:
   entityx::Entity mPlayerEntity;

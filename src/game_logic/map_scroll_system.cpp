@@ -127,4 +127,10 @@ void MapScrollSystem::updateScrollOffset() {
     base::clamp(mpScrollOffset->y, 0, mMaxScrollOffset.height);
 }
 
+
+void MapScrollSystem::centerViewOnPlayer() {
+  *mpScrollOffset = {};
+  updateScrollOffset();
+}
+
 }}

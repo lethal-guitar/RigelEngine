@@ -43,6 +43,8 @@ public:
   void updateManualScrolling();
   void updateScrollOffset();
 
+  void centerViewOnPlayer();
+
 private:
   entityx::Entity mPlayer;
   base::Vector* mpScrollOffset;
