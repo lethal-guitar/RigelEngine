@@ -117,10 +117,8 @@ float speedForProjectileType(const ProjectileType type) {
 int damageForProjectileType(const ProjectileType type) {
   switch (type) {
     case ProjectileType::PlayerFlameShot:
-      return 2;
-
     case ProjectileType::PlayerLaserShot:
-      return 4;
+      return 2;
 
     case ProjectileType::PlayerRocketShot:
       return 8;
