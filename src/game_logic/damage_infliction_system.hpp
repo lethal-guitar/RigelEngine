@@ -19,6 +19,7 @@
 #include "base/boost_variant.hpp" // Required because signals2 includes variant
 #include "base/warnings.hpp"
 #include "data/map.hpp"
+#include "game_logic/damage_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/signals2/signal.hpp>
@@ -51,6 +52,12 @@ public:
   }
 
 private:
+  void inflictDamage(
+    entityx::Entity inflictorEntity,
+    const components::DamageInflicting& damage,
+    entityx::Entity shootableEntity,
+    components::Shootable& shootable);
+
   data::PlayerModel* mpPlayerModel;
   data::map::Map* mpMap;
   IGameServiceProvider* mpServiceProvider;
