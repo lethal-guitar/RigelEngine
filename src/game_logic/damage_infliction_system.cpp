@@ -86,8 +86,11 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
           !shootable->mInvincible &&
           active->mIsOnScreen
         ) {
+          const auto destroyOnContact = damage.mDestroyOnContact;
           inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
-          break;
+          if (destroyOnContact) {
+            break;
+          }
         }
       }
     });
