@@ -26,6 +26,19 @@ namespace rigel { namespace engine {
 
 namespace components {
 
+namespace parameter_aliases {
+
+using Velocity = base::Point<float>;
+using GravityAffected = bool;
+using IsPlayer = bool;
+using IgnoreCollisions = bool;
+using ResetAfterSequence = bool;
+using EnableX = bool;
+
+}
+
+
+
 struct MovingBody {
   MovingBody(
     const base::Point<float> velocity,
@@ -63,14 +76,6 @@ struct CollidedWithWorld {};
  * SolidBody entity as if it were part of the world.
  * */
 struct SolidBody {};
-
-
-namespace parameter_aliases {
-
-using ResetAfterSequence = bool;
-using EnableX = bool;
-
-}
 
 
 struct MovementSequence {

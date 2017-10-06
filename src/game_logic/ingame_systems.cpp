@@ -72,6 +72,7 @@ IngameSystems::IngameSystems(
       pPlayerModel,
       pServiceProvider,
       difficulty)
+  , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
   , mDamageInflictionSystem(pPlayerModel, pMap, pServiceProvider)
   , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
@@ -191,6 +192,8 @@ void IngameSystems::update(
   mPlayerDamageSystem.update(es);
   mDamageInflictionSystem.update(es);
   mPlayerAnimationSystem.update(es);
+
+  mPlayerProjectileSystem.update(es);
 
   mMapScrollSystem.update();
   mLifeTimeSystem.update(es);

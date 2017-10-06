@@ -25,8 +25,9 @@ namespace {
 // assign an order (which is higher than all regular actors' draw order).
 const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
 
-// Same thing as for player projectiles
-const auto MUZZLE_FLASH_DRAW_ORDER = 12;
+const auto MUZZLE_FLASH_DRAW_ORDER = PLAYER_PROJECTILE_DRAW_ORDER + 1;
+
+const auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
 
 
 const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
@@ -388,8 +389,14 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 21: case 204: case 205: case 206:
       return PLAYER_PROJECTILE_DRAW_ORDER;
 
-    case 33: case 34: case 35: case 36:
+    case 33: case 34: case 35: case 36: // player muzzle flash
       return MUZZLE_FLASH_DRAW_ORDER;
+
+    case 1: // small explosion
+    case 2: // rocket explosion
+    case 3: // impact flame
+    case 11: // rocket smoke
+      return EFFECT_DRAW_ORDER;
 
     default:
       return baseDrawOrder;

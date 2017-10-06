@@ -83,16 +83,13 @@ void Map::clearSection(
 }
 
 
-bool Map::coordinatesValid(const int xS, const int yS) const {
-  const auto x = static_cast<size_t>(xS);
-  const auto y = static_cast<size_t>(yS);
-  return x < mWidthInTiles && y < mHeightInTiles;
-}
-
-
 CollisionData Map::collisionData(const int x, const int y) const {
-  if (!coordinatesValid(x, y)) {
+  if (static_cast<std::size_t>(x) >= mWidthInTiles) {
     return CollisionData::fullySolid();
+  }
+
+  if (static_cast<std::size_t>(y) >= mHeightInTiles) {
+    return CollisionData{};
   }
 
   const auto data1 = mAttributes.collisionData(tileAt(0, x, y));

@@ -127,6 +127,10 @@ void DamageInflictionSystem::inflictDamage(
       mpMap->clearSection(
         mapSection.topLeft.x, mapSection.topLeft.y,
         mapSection.size.width, mapSection.size.height);
+
+      // When hitting a destructible wall, projectiles always vanish
+      // immediately
+      inflictorEntity.destroy();
     }
 
     // Generate sound and destroy entity

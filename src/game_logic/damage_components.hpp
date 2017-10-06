@@ -77,4 +77,21 @@ struct DamageInflicting {
   bool mHasCausedDamage = false;
 };
 
+
+struct PlayerProjectile {
+  enum class Type {
+    Normal,
+    Laser,
+    Rocket,
+    Flame
+  };
+
+  explicit PlayerProjectile(const Type type)
+    : mType(type)
+  {
+  }
+
+  Type mType;
+};
+
 }}}

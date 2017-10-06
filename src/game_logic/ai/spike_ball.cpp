@@ -18,6 +18,7 @@
 
 #include "data/sound_ids.hpp"
 #include "engine/collision_checker.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 
@@ -40,10 +41,7 @@ base::Point<float> JUMP_ARC[] = {
 
 
 void startJump(entityx::Entity entity) {
-  if (entity.has_component<MovementSequence>()) {
-    entity.remove<MovementSequence>();
-  }
-  entity.assign<MovementSequence>(JUMP_ARC, true, false);
+  engine::reassign<MovementSequence>(entity, JUMP_ARC, true, false);
 }
 
 }

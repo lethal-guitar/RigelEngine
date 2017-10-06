@@ -72,9 +72,6 @@ public:
 
   void clearSection(int x, int y, int width, int height);
 
-  /** Returns true if the given coordinates are valid/inside the map. */
-  bool coordinatesValid(int x, int y) const;
-
   TileAttributes& attributes() {
     return mAttributes;
   }

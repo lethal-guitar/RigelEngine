@@ -81,6 +81,19 @@ void addDefaultMovingBody(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
 }
 
+
+auto toPlayerProjectileType(const ProjectileType type) {
+  using PType = components::PlayerProjectile::Type;
+  static_assert(
+    int(PType::Normal) == int(ProjectileType::PlayerRegularShot) &&
+    int(PType::Laser) == int(ProjectileType::PlayerLaserShot) &&
+    int(PType::Rocket) == int(ProjectileType::PlayerRocketShot) &&
+    int(PType::Flame) == int(ProjectileType::PlayerFlameShot), "");
+  return static_cast<PType>(static_cast<int>(type));
+}
+
+
+
 }
 
 
@@ -217,6 +230,9 @@ void EntityFactory::configureProjectile(
   const ProjectileDirection direction,
   const BoundingBox& boundingBox
 ) {
+  using namespace engine::components::parameter_aliases;
+  using namespace game_logic::components::parameter_aliases;
+
   const auto isGoingLeft = direction == ProjectileDirection::Left;
 
   // Position adjustment for the flame thrower shot
@@ -243,17 +259,28 @@ void EntityFactory::configureProjectile(
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
   entity.assign<WorldPosition>(position);
+
   entity.assign<MovingBody>(
-    MovingBody{directionToVector(direction) * speed, false});
+    Velocity{directionToVector(direction) * speed},
+    GravityAffected{false},
+    IsPlayer{false});
   if (isPlayerProjectile(type)) {
-    entity.assign<DamageInflicting>(damageAmount);
+    // Some player projectiles do have collisions with walls, but that's
+    // handled by player::ProjectileSystem.
+    entity.component<MovingBody>()->mIgnoreCollisions = true;
+
+    entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
+    entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
+
+    entity.assign<AutoDestroy>(AutoDestroy{
+      AutoDestroy::Condition::OnLeavingActiveRegion});
   } else {
     entity.assign<PlayerDamaging>(damageAmount, false, true);
-  }
 
-  entity.assign<AutoDestroy>(AutoDestroy{
-    AutoDestroy::Condition::OnWorldCollision,
-    AutoDestroy::Condition::OnLeavingActiveRegion});
+    entity.assign<AutoDestroy>(AutoDestroy{
+      AutoDestroy::Condition::OnWorldCollision,
+      AutoDestroy::Condition::OnLeavingActiveRegion});
+  }
 
   // For convenience, the enemy laser shot muzzle flash is created along with
   // the projectile.
@@ -327,6 +354,23 @@ entityx::Entity createOneShotSprite(
   const auto numAnimationFrames = static_cast<int>(
     entity.component<Sprite>()->mpDrawData->mFrames.size());
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
+  return entity;
+}
+
+
+entityx::Entity createFloatingOneShotSprite(
+  EntityFactory& factory,
+  const data::ActorID id,
+  const base::Vector& position
+) {
+  using namespace engine::components::parameter_aliases;
+
+  auto entity = createOneShotSprite(factory, id, position);
+  entity.assign<MovingBody>(MovingBody{
+    Velocity{0, -1.0f},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true}});
   return entity;
 }
 
