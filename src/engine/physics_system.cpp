@@ -90,13 +90,12 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
-      const auto originalVelocity = body.mVelocity;
-
       const auto hasActiveSequence = entity.has_component<MovementSequence>();
       if (hasActiveSequence) {
         body.mVelocity = updateMovementSequence(entity, body.mVelocity);
       }
 
+      const auto originalVelocity = body.mVelocity;
       const auto originalPosition = position;
 
       const auto movementX = static_cast<int16_t>(body.mVelocity.x);
