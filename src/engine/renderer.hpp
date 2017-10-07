@@ -117,6 +117,9 @@ public:
     int y2,
     const base::Color& color);
 
+
+  void drawPoint(const base::Vector& position, const base::Color& color);
+
   RenderTarget currentRenderTarget() const;
   void setRenderTarget(const RenderTarget& target);
 
@@ -156,7 +159,8 @@ private:
 
   enum class RenderMode {
     SpriteBatch,
-    NonTexturedRender
+    NonTexturedRender,
+    Points
   };
 
   bool isVisible(const base::Rect<int>& rect) const;

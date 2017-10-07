@@ -117,21 +117,25 @@ void main() {
 
 const auto VERTEX_SOURCE_SOLID = R"shd(
 ATTRIBUTE vec2 position;
+ATTRIBUTE vec4 color;
+
+OUT vec4 colorFrag;
 
 uniform mat4 transform;
 
 void main() {
   gl_Position = transform * vec4(position, 0.0, 1.0);
+  colorFrag = color;
 }
 )shd";
 
 const auto FRAGMENT_SOURCE_SOLID = R"shd(
 OUTPUT_COLOR_DECLARATION
 
-uniform vec4 color;
+IN vec4 colorFrag;
 
 void main() {
-  OUTPUT_COLOR = color;
+  OUTPUT_COLOR = colorFrag;
 }
 )shd";
 
@@ -325,21 +329,39 @@ void Renderer::submitBatch() {
     return;
   }
 
-  glBufferData(
-    GL_ARRAY_BUFFER,
-    sizeof(float) * mBatchData.size(),
-    mBatchData.data(),
-    GL_STREAM_DRAW);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER,
-    sizeof(GLushort) * mBatchIndices.size(),
-    mBatchIndices.data(),
-    GL_STREAM_DRAW);
-  glDrawElements(
-    GL_TRIANGLES,
-    GLsizei(mBatchIndices.size()),
-    GL_UNSIGNED_SHORT,
-    0);
+  switch (mRenderMode) {
+    case RenderMode::SpriteBatch:
+      glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * mBatchData.size(),
+        mBatchData.data(),
+        GL_STREAM_DRAW);
+      glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(GLushort) * mBatchIndices.size(),
+        mBatchIndices.data(),
+        GL_STREAM_DRAW);
+      glDrawElements(
+        GL_TRIANGLES,
+        GLsizei(mBatchIndices.size()),
+        GL_UNSIGNED_SHORT,
+        0);
+      break;
+
+    case RenderMode::Points:
+      glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * mBatchData.size(),
+        mBatchData.data(),
+        GL_STREAM_DRAW);
+      glDrawArrays(GL_POINTS, 0, GLsizei(mBatchData.size() / 6));
+      break;
+
+    case RenderMode::NonTexturedRender:
+      // No batching yet for NonTexturedRender
+      assert(false);
+      break;
+  }
 
   mBatchData.clear();
   mBatchIndices.clear();
@@ -358,20 +380,18 @@ void Renderer::drawRectangle(
 
   setRenderModeIfChanged(RenderMode::NonTexturedRender);
 
-  const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
-  mSolidColorShader.setUniform("color", colorVec);
-
   const auto left = float(rect.left());
   const auto right = float(rect.right());
   const auto top = float(rect.top());
   const auto bottom = float(rect.bottom());
 
+  const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
   float vertices[] = {
-    left, top,
-    left, bottom,
-    right, bottom,
-    right, top,
-    left, top
+    left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+    left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+    right, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+    right, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+    left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a
   };
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
@@ -391,15 +411,38 @@ void Renderer::drawLine(
   setRenderModeIfChanged(RenderMode::NonTexturedRender);
 
   const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
-  mSolidColorShader.setUniform("color", colorVec);
 
   float vertices[] = {
-    float(x1), float(y1),
-    float(x2), float(y2)
+    float(x1), float(y1), colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+    float(x2), float(y2), colorVec.r, colorVec.g, colorVec.b, colorVec.a
   };
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
   glDrawArrays(GL_LINE_STRIP, 0, 2);
+}
+
+
+void Renderer::drawPoint(
+  const base::Vector& position,
+  const base::Color& color
+) {
+  const auto& visibleRect = fullScreenRect();
+  if (!visibleRect.containsPoint(position)) {
+    return;
+  }
+
+  setRenderModeIfChanged(RenderMode::Points);
+
+  float vertices[] = {
+    float(position.x),
+    float(position.y),
+    color.r / 255.0f,
+    color.g / 255.0f,
+    color.b / 255.0f,
+    color.a / 255.0f
+  };
+  mBatchData.insert(
+    std::end(mBatchData), std::cbegin(vertices), std::cend(vertices));
 }
 
 
@@ -472,10 +515,9 @@ void Renderer::setRenderMode(const RenderMode mode) {
         GL_FALSE,
         sizeof(float) * 4,
         toAttribOffset(2 * sizeof(float)));
-      glEnableVertexAttribArray(0);
-      glEnableVertexAttribArray(1);
       break;
 
+    case RenderMode::Points:
     case RenderMode::NonTexturedRender:
       useShaderIfChanged(mSolidColorShader);
       glVertexAttribPointer(
@@ -483,12 +525,20 @@ void Renderer::setRenderMode(const RenderMode mode) {
         2,
         GL_FLOAT,
         GL_FALSE,
-        0,
+        sizeof(float) * 6,
         toAttribOffset(0));
-      glEnableVertexAttribArray(0);
-      glDisableVertexAttribArray(1);
+      glVertexAttribPointer(
+        1,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(2 * sizeof(float)));
       break;
   }
+
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
 
   mRenderMode = mode;
 }
