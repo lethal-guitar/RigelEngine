@@ -110,12 +110,12 @@ void DamageInflictionSystem::inflictDamage(
     damage.mHasCausedDamage = true;
   }
 
-  mEntityHitSignal(shootableEntity, inflictorVelocity);
-  // The onHit() callback mustn't remove the shootable component
-  assert(shootableEntity.has_component<Shootable>());
-
   shootable.mHealth -= damage.mAmount;
   if (shootable.mHealth <= 0) {
+    mShootableKilledSignal(shootableEntity, inflictorVelocity);
+    // The onKilled() callback mustn't remove the shootable component
+    assert(shootableEntity.has_component<Shootable>());
+
     mpPlayerModel->mScore += shootable.mGivenScore;
 
     // Take care of shootable walls
@@ -144,6 +144,8 @@ void DamageInflictionSystem::inflictDamage(
       shootableEntity.remove<Shootable>();
     }
   } else {
+    mEntityHitSignal(shootableEntity, inflictorVelocity);
+
     if (shootable.mEnableHitFeedback) {
       mpServiceProvider->playSound(data::SoundId::EnemyHit);
 

@@ -116,12 +116,19 @@ IngameSystems::IngameSystems(
       const base::Point<float>& velocity
     ) {
       mBlueGuardSystem.onEntityHit(entity);
-      item_containers::onEntityHit(entity, entities);
-      mNapalmBombSystem.onEntityHit(entity);
-      mSlimeBlobSystem.onEntityHit(entity);
       mSpikeBallSystem.onEntityHit(entity, velocity);
       mLaserTurretSystem.onEntityHit(entity);
-      mPrisonerSystem.onEntityHit(entity);
+    });
+
+  mDamageInflictionSystem.shootableKilledSignal().connect(
+    [this, &entities](
+      entityx::Entity entity,
+      const base::Point<float>& velocity
+    ) {
+      item_containers::onShootableKilled(entity, entities);
+      mNapalmBombSystem.onShootableKilled(entity);
+      mSlimeBlobSystem.onShootableKilled(entity);
+      mPrisonerSystem.onShootableKilled(entity);
     });
 
   mPhysicsSystem.entityCollidedSignal().connect(

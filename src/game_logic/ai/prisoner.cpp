@@ -125,7 +125,7 @@ void PrisonerSystem::updateAggressivePrisoner(
 }
 
 
-void PrisonerSystem::onEntityHit(entityx::Entity entity) {
+void PrisonerSystem::onShootableKilled(entityx::Entity entity) {
   using engine::components::AutoDestroy;
 
   if (!entity.has_component<components::Prisoner>()) {

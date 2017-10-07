@@ -51,6 +51,10 @@ public:
     return mEntityHitSignal;
   }
 
+  EntityHitSignal& shootableKilledSignal() {
+    return mShootableKilledSignal;
+  }
+
 private:
   void inflictDamage(
     entityx::Entity inflictorEntity,
@@ -63,6 +67,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
 
   EntityHitSignal mEntityHitSignal;
+  EntityHitSignal mShootableKilledSignal;
 };
 
 }}

@@ -56,7 +56,7 @@ public:
 
   void update(entityx::EntityManager& es);
 
-  void onEntityHit(entityx::Entity entity);
+  void onShootableKilled(entityx::Entity entity);
 
 private:
   void updateAggressivePrisoner(

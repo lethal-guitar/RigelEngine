@@ -30,7 +30,7 @@
 
 namespace rigel { namespace game_logic { namespace item_containers {
 
-void onEntityHit(entityx::Entity entity, entityx::EntityManager& es) {
+void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es) {
   using namespace engine::components;
   using game_logic::components::ItemContainer;
 
@@ -105,7 +105,7 @@ void NapalmBombSystem::update(entityx::EntityManager& es) {
 }
 
 
-void NapalmBombSystem::onEntityHit(entityx::Entity entity) {
+void NapalmBombSystem::onShootableKilled(entityx::Entity entity) {
   if (entity.has_component<components::NapalmBomb>()) {
     explode(entity);
   }
