@@ -49,6 +49,7 @@ base::Point<float> updateMovementSequence(
       return resetVelocity;
     }
 
+    entity.remove<MovementSequence>();
     return velocity;
   }
 

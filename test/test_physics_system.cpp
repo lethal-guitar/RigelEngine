@@ -310,6 +310,11 @@ TEST_CASE("Physics system works as expected") {
 
         CHECK(collectedPositions2 == expectedPositions2);
       }
+
+      SECTION("Sequence component removed after sequence") {
+        runOneFrame();
+        CHECK(!physicalObject.has_component<MovementSequence>());
+      }
     }
 
     SECTION("Velocity kept after sequence (with collision)") {
@@ -336,6 +341,11 @@ TEST_CASE("Physics system works as expected") {
         runFramesAndCollect(expectedPositions.size());
 
       CHECK(collectedPositions == expectedPositions);
+
+      SECTION("Sequence component removed after sequence") {
+        runOneFrame();
+        CHECK(!physicalObject.has_component<MovementSequence>());
+      }
     }
 
     SECTION("Velocity kept after sequence (ignoring collision)") {
@@ -363,6 +373,11 @@ TEST_CASE("Physics system works as expected") {
         runFramesAndCollect(expectedPositions.size());
 
       CHECK(collectedPositions == expectedPositions);
+
+      SECTION("Sequence component removed after sequence") {
+        runOneFrame();
+        CHECK(!physicalObject.has_component<MovementSequence>());
+      }
     }
 
     SECTION("X part of sequence can be ignored") {
