@@ -75,7 +75,10 @@ void addDefaultMovingBody(
   EntityLike& entity,
   const BoundingBox& boundingBox
 ) {
-  entity.template assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true});
+  using namespace engine::components::parameter_aliases;
+
+  entity.template assign<MovingBody>(
+    MovingBody{Velocity{0.0f, 0.0f}, GravityAffected{true}});
   entity.template assign<BoundingBox>(boundingBox);
   entity.template assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);

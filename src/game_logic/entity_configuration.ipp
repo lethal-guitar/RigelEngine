@@ -19,6 +19,10 @@
 
 namespace {
 
+using namespace engine::components::parameter_aliases;
+using namespace game_logic::components::parameter_aliases;
+
+
 // The game draws player projectiles after drawing all regular actors, which
 // makes them appear on top of everything. But in our case, they are rendered
 // using the same mechanism as the other sprites, so we have to explicitly
@@ -437,7 +441,7 @@ void turnIntoContainer(
   entity.remove<Sprite>();
   entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(std::move(container));
-  entity.assign<Shootable>(1, givenScore);
+  entity.assign<Shootable>(Health{1}, givenScore);
   addDefaultMovingBody(entity, engine::inferBoundingBox(containerSprite));
 }
 
@@ -455,7 +459,8 @@ void EntityFactory::configureItemBox(
   auto container = makeContainer(components...);
   addToContainer(
     container,
-    MovementSequence{CONTAINER_BOUNCE_SEQUENCE, true, false});
+    MovementSequence{
+      CONTAINER_BOUNCE_SEQUENCE, ResetAfterSequence{true}, EnableX{false}});
   addDefaultMovingBody(
     container, engine::inferBoundingBox(*entity.component<Sprite>()));
 
@@ -477,7 +482,7 @@ void EntityFactory::configureEntity(
     // Bonus globes
     case 45:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -488,7 +493,7 @@ void EntityFactory::configureEntity(
 
     case 46:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -499,7 +504,7 @@ void EntityFactory::configureEntity(
 
     case 47:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -510,7 +515,7 @@ void EntityFactory::configureEntity(
 
     case 48:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -540,7 +545,7 @@ void EntityFactory::configureEntity(
     case 163: // Empty red box
     case 164: // Empty blue box
     case 161: // Empty white box
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       addDefaultMovingBody(entity, boundingBox);
       break;
 
@@ -613,7 +618,7 @@ void EntityFactory::configureEntity(
         const auto originalDrawOrder =
           entity.component<Sprite>()->mpDrawData->mDrawOrder;
 
-        auto shootable = Shootable{1};
+        auto shootable = Shootable{Health{1}};
         shootable.mDestroyWhenKilled = false;
         configureItemBox(
           entity,
@@ -666,7 +671,7 @@ void EntityFactory::configureEntity(
           boundingBox,
           AnimationLoop{1, 0, 5},
           AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
-          MovingBody{{0.0f, -1.0f}, false},
+          MovingBody{Velocity{0.0f, -1.0f}, GravityAffected{false}},
           AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
 
         configureItemBox(
@@ -675,7 +680,7 @@ void EntityFactory::configureEntity(
           100,
           intactSodaCanCollectable,
           flyingSodaCanContainer,
-          Shootable{1, 0},
+          Shootable{Health{1}, GivenScore{0}},
           AnimationLoop{1, 0, 5});
       }
       break;
@@ -690,7 +695,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Red,
           100,
           item,
-          Shootable{1, 10000});
+          Shootable{Health{1}, GivenScore{10000}});
       }
       break;
 
@@ -1015,7 +1020,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 239: // Special hint globe
-      entity.assign<Shootable>(3, 100);
+      entity.assign<Shootable>(Health{3}, GivenScore{100});
       entity.assign<AnimationLoop>(1);
       addDefaultMovingBody(entity, boundingBox);
       {
@@ -1032,108 +1037,109 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
 
     case 0: // Cylindrical robot with blinking 'head', aka hover-bot
-      entity.assign<Shootable>(1 + difficultyOffset, 150);
+      entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{150});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
       entity.assign<ai::components::HoverBot>();
       break;
 
     case 49: // Bouncing robot with big eye
-      entity.assign<Shootable>(6 + difficultyOffset, 1000);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       break;
 
     case 54: // Rocket launcher turret
       // Shooting the rockets: 10 pts
-      entity.assign<Shootable>(3, 500);
+      entity.assign<Shootable>(Health{3}, GivenScore{500});
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::RocketTurret>();
       break;
 
     case 62: // Bomb dropping space ship
       // Not player damaging, only the bombs are
-      entity.assign<Shootable>(6 + difficultyOffset, 5000);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
     case 64: // Bouncing spike ball
-      entity.assign<Shootable>(6 + difficultyOffset, 1000);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       ai::configureSpikeBall(entity);
       break;
 
     case 67: // Green slime blob
-      entity.assign<Shootable>(6 + difficultyOffset, 1500);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SlimeBlob>();
       addDefaultMovingBody(entity, boundingBox);
       entity.component<MovingBody>()->mGravityAffected = false;
       break;
 
     case 68: // Green slime container
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       ai::configureSlimeContainer(entity);
       break;
 
     case 78: // Snake
       // Not player damaging, but can eat duke
       // Only 1 health when Duke has been eaten
-      entity.assign<Shootable>(8 + difficultyOffset, 5000);
+      entity.assign<Shootable>(Health{8 + difficultyOffset}, GivenScore{5000});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 79: // Security camera, ceiling-mounted
     case 80: // Security camera, floor-mounted
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::SecurityCamera>();
       break;
 
-    case 81:
-      entity.assign<Shootable>(15 + 3 * difficultyOffset, 300);
+    case 81: // Green ceiling-attached suction plant
+      entity.assign<Shootable>(
+        Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 98: // Eye-ball throwing monster
-      entity.assign<Shootable>(8, 2000);
+      entity.assign<Shootable>(Health{8}, GivenScore{2000});
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 115: // hover bot generator
       entity.assign<AnimationLoop>(1, 0, 3);
-      entity.assign<Shootable>(20, 2500);
+      entity.assign<Shootable>(Health{20}, GivenScore{2500});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::HoverBotSpawnMachine>();
       break;
 
     case 134: // Walking skeleton
-      entity.assign<Shootable>(2 + difficultyOffset, 100);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
       addDefaultMovingBody(entity, boundingBox);
       break;
 
     case 151: // Floating ball, opens up and shoots lasers
-      entity.assign<Shootable>(3 + difficultyOffset, 1000);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{3 + difficultyOffset}, GivenScore{1000});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 154: // Spider
-      entity.assign<Shootable>(1 + difficultyOffset, 101);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{101});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 271: // Small flying ship 1
     case 272: // Small flying ship 2
     case 273: // Small flying ship 3
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1141,8 +1147,8 @@ void EntityFactory::configureEntity(
     case 159: // ->
     case 171: // <-
     case 217: // using terminal
-      entity.assign<PlayerDamaging>(1);
-      entity.assign<Shootable>(2 + difficultyOffset, 3000);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{3000});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -1155,12 +1161,12 @@ void EntityFactory::configureEntity(
     case 131:
       // gives one point when shot with normal shot, 500 when destroyed.
       entity.assign<BoundingBox>(boundingBox);
-      ai::configureLaserTurret(entity, 500);
+      ai::configureLaserTurret(entity, GivenScore{500});
       break;
 
     case 203: // Red bird
-      entity.assign<Shootable>(1 + difficultyOffset, 100);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{100});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       ai::configureRedBird(entity);
       break;
@@ -1168,7 +1174,7 @@ void EntityFactory::configureEntity(
     case 253: // Monster in prison cell, aggressive
       entity.assign<ai::components::Prisoner>(true);
       entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
-      entity.assign<Shootable>(1, 500);
+      entity.assign<Shootable>(Health{1}, GivenScore{500});
       entity.component<Shootable>()->mInvincible = true;
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       break;
@@ -1179,8 +1185,9 @@ void EntityFactory::configureEntity(
       break;
 
     case 299: // Rigelatin soldier
-      entity.assign<Shootable>(27 + 2 * difficultyOffset, 2100);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(
+        Health{27 + 2 * difficultyOffset}, GivenScore{2100});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1189,7 +1196,7 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
 
     case 14: // Nuclear waste barrel, empty
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1199,7 +1206,7 @@ void EntityFactory::configureEntity(
         const auto numAnimationFrames = static_cast<int>(
           sprite.mpDrawData->mFrames.size());
         auto container = makeContainer(
-          PlayerDamaging{1},
+          PlayerDamaging{Damage{1}},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
           sprite);
@@ -1211,14 +1218,14 @@ void EntityFactory::configureEntity(
       break;
 
     case 66: // Destroyable reactor
-      entity.assign<Shootable>(10, 20000);
-      entity.assign<PlayerDamaging>(9, true);
+      entity.assign<Shootable>(Health{10}, GivenScore{20000});
+      entity.assign<PlayerDamaging>(Damage{9}, IgnoreMercyFrames{true});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
     case 93: // Blue force field (disabled by cloak)
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1243,7 +1250,7 @@ void EntityFactory::configureEntity(
     case 235: // Slime pool
     case 262: // Fire (variant 1)
     case 263: // Fire (variant 2)
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
@@ -1257,19 +1264,19 @@ void EntityFactory::configureEntity(
 
     case 208: // floating exit sign to right
     case 252: // floating exit sign to left
-      entity.assign<Shootable>(5, 10000);
+      entity.assign<Shootable>(Health{5}, GivenScore{10000});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
     case 296: // floating arrow
-      entity.assign<Shootable>(5, 500);
+      entity.assign<Shootable>(Health{5}, GivenScore{500});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
     case 236: // Radar dish
-      entity.assign<Shootable>(4, 2000);
+      entity.assign<Shootable>(Health{4}, GivenScore{2000});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
@@ -1303,7 +1310,7 @@ void EntityFactory::configureEntity(
         // It's unclear whether this is intentional, it seems like it might not
         // be because this score value is assigned in the update() function,
         // not when constructing the actor.
-        entity.assign<Shootable>(1, typeIndex);
+        entity.assign<Shootable>(Health{1}, GivenScore{typeIndex});
         entity.assign<BoundingBox>(boundingBox);
         entity.component<Sprite>()->mFramesToRender.clear();
 
@@ -1331,7 +1338,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 106: // shootable wall, explodes into small pieces
-      entity.assign<Shootable>(1);
+      entity.assign<Shootable>(Health{1});
       {
         // Shootable walls have a bounding box that's one unit wider than the
         // actual area.
