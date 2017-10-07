@@ -38,6 +38,8 @@ set(core_sources
     engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/particle_system.cpp
+    engine/particle_system.hpp
     engine/physical_components.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp

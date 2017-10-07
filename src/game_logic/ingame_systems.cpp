@@ -42,6 +42,7 @@ IngameSystems::IngameSystems(
 )
   : mpScrollOffset(pScrollOffset)
   , mCollisionChecker(pMap, entities, eventManager)
+  , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
       mpScrollOffset,
       pRenderer,
@@ -197,11 +198,14 @@ void IngameSystems::update(
 
   mMapScrollSystem.update();
   mLifeTimeSystem.update(es);
+
+  mParticles.update();
 }
 
 
 void IngameSystems::render(entityx::EntityManager& es) {
   mRenderingSystem.update(es);
+  mParticles.render(*mpScrollOffset);
   mDebuggingSystem.update(es);
 }
 

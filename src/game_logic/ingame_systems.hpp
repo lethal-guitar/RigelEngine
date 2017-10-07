@@ -20,6 +20,7 @@
 #include "engine/debugging_system.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
+#include "engine/particle_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "engine/rendering_system.hpp"
@@ -90,6 +91,8 @@ private:
   entityx::Entity mPlayerEntity;
   base::Vector* mpScrollOffset;
   engine::CollisionChecker mCollisionChecker;
+
+  engine::ParticleSystem mParticles;
 
   engine::RenderingSystem mRenderingSystem;
   engine::PhysicsSystem mPhysicsSystem;
