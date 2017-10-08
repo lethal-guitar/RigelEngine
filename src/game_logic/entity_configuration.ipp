@@ -1106,6 +1106,16 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::RocketTurret>();
       break;
 
+    // Rocket turret rockets
+    case 55:
+    case 56:
+    case 57:
+      entity.assign<Shootable>(Health{1}, GivenScore{10});
+      entity.assign<BoundingBox>(boundingBox);
+      entity.component<Sprite>()->mFramesToRender.push_back(0);
+      entity.assign<AnimationLoop>(1, 1, 2, 0);
+      break;
+
     case 62: // Bomb dropping space ship
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
@@ -1416,6 +1426,15 @@ void EntityFactory::configureEntity(
     case 250: // airlock effect, left
     case 251: // airlock effect, right
     case 254: // explosion effect trigger
+      break;
+
+    // Various projectiles. Damage, velocity etc. are assigned by the
+    // projectile configurarion functions
+    case 7: case 8: case 9: case 10:
+    case 24: case 25: case 26: case 27:
+    case 21: case 204: case 205: case 206:
+    case 136:
+      entity.assign<BoundingBox>(boundingBox);
       break;
 
     default:

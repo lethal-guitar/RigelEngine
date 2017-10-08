@@ -304,16 +304,15 @@ entityx::Entity EntityFactory::createProjectile(
   const WorldPosition& pos,
   const ProjectileDirection direction
 ) {
-  auto entity = mpEntityManager->create();
-  auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
-
-  const auto boundingBox = engine::inferBoundingBox(sprite);
-
+  auto entity = createActor(actorIdForProjectile(type, direction), pos);
   entity.assign<Active>();
-  entity.assign<Sprite>(sprite);
-  entity.assign<BoundingBox>(boundingBox);
 
-  configureProjectile(entity, type, pos, direction, boundingBox);
+  configureProjectile(
+    entity,
+    type,
+    pos,
+    direction,
+    *entity.component<BoundingBox>());
 
   return entity;
 }
