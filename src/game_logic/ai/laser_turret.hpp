@@ -29,6 +29,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace data { struct PlayerModel; } }
+namespace rigel { namespace engine { class RandomNumberGenerator; } }
 namespace rigel { namespace game_logic { class EntityFactory; } }
 
 
@@ -54,16 +55,23 @@ public:
     entityx::Entity player,
     data::PlayerModel* pPlayerModel,
     EntityFactory* pEntityFactory,
+    engine::RandomNumberGenerator* pRandomGenerator,
     IGameServiceProvider* pServiceProvider);
 
   void onEntityHit(entityx::Entity entity);
+  void onShootableKilled(
+    entityx::Entity entity,
+    const base::Point<float>& inflictorVelocity);
 
   void update(entityx::EntityManager& es);
 
 private:
+  void performBaseHitEffect(entityx::Entity entity);
+
   entityx::Entity mPlayer;
   data::PlayerModel* mpPlayerModel;
   EntityFactory* mpEntityFactory;
+  engine::RandomNumberGenerator* mpRandomGenerator;
   IGameServiceProvider* mpServiceProvider;
 };
 

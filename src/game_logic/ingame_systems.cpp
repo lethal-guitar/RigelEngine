@@ -97,9 +97,15 @@ IngameSystems::IngameSystems(
       playerEntity,
       pPlayerModel,
       pEntityFactory,
+      pRandomGenerator,
       pServiceProvider)
   , mMessengerDroneSystem(playerEntity)
-  , mPrisonerSystem(playerEntity, pRandomGenerator)
+  , mPrisonerSystem(
+      playerEntity,
+      pEntityFactory,
+      pServiceProvider,
+      &mParticles,
+      pRandomGenerator)
   , mRedBirdSystem(playerEntity)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSecurityCameraSystem(playerEntity)
@@ -133,9 +139,10 @@ IngameSystems::IngameSystems(
     ) {
       mEffectsSystem.onShootableKilled(entity, velocity);
       item_containers::onShootableKilled(entity, entities);
+      mLaserTurretSystem.onShootableKilled(entity, velocity);
       mNapalmBombSystem.onShootableKilled(entity);
       mSlimeBlobSystem.onShootableKilled(entity);
-      mPrisonerSystem.onShootableKilled(entity);
+      mPrisonerSystem.onShootableKilled(entity, velocity);
     });
 
   mPhysicsSystem.entityCollidedSignal().connect(

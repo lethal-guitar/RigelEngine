@@ -23,6 +23,7 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
 #include "game_mode.hpp"
@@ -68,6 +69,8 @@ NapalmBombSystem::NapalmBombSystem(
 
 
 void NapalmBombSystem::update(entityx::EntityManager& es) {
+  using components::DestructionEffects;
+
   using State = components::NapalmBomb::State;
   es.each<components::NapalmBomb, WorldPosition, Sprite>(
     [this](
@@ -85,6 +88,7 @@ void NapalmBombSystem::update(entityx::EntityManager& es) {
           }
 
           if (state.mFramesElapsed >= 31) {
+            entity.component<DestructionEffects>()->mActivated = true;
             explode(entity);
           }
           break;
