@@ -96,6 +96,113 @@ auto toPlayerProjectileType(const ProjectileType type) {
 }
 
 
+const base::Point<float> FLY_RIGHT[] = {
+  {3.0f, 0.0f},
+  {3.0f, 0.0f},
+  {3.0f, 0.0f},
+  {2.0f, 0.0f},
+  {2.0f, 1.0f},
+  {2.0f, 1.0f},
+  {2.0f, 2.0f},
+  {1.0f, 2.0f},
+  {1.0f, 3.0f},
+  {1.0f, 3.0f}
+};
+
+
+const base::Point<float> FLY_UPPER_RIGHT[] = {
+  {3.0f, -3.0f},
+  {2.0f, -2.0f},
+  {2.0f, -1.0f},
+  {1.0f,  0.0f},
+  {1.0f,  0.0f},
+  {1.0f,  1.0f},
+  {1.0f,  2.0f},
+  {1.0f,  2.0f},
+  {1.0f,  3.0f},
+  {1.0f,  3.0f}
+};
+
+
+const base::Point<float> FLY_UP[] = {
+  {0.0f, -3.0f},
+  {0.0f, -2.0f},
+  {0.0f, -2.0f},
+  {0.0f, -1.0f},
+  {0.0f, 0.0f},
+  {0.0f, 1.0f},
+  {0.0f, 1.0f},
+  {0.0f, 2.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f}
+};
+
+
+const base::Point<float> FLY_UPPER_LEFT[] = {
+  {-3.0f, -3.0f},
+  {-2.0f, -2.0f},
+  {-2.0f, -1.0f},
+  {-1.0f, 0.0f},
+  {-1.0f, 0.0f},
+  {-1.0f, 1.0f},
+  {-1.0f, 2.0f},
+  {-1.0f, 3.0f},
+  {-1.0f, 4.0f},
+  {-1.0f, 4.0f}
+};
+
+
+const base::Point<float> FLY_LEFT[] = {
+  {-3.0f, 0.0f},
+  {-3.0f, 0.0f},
+  {-3.0f, 0.0f},
+  {-2.0f, 0.0f},
+  {-2.0f, 1.0f},
+  {-2.0f, 1.0f},
+  {-2.0f, 2.0f},
+  {-1.0f, 3.0f},
+  {-1.0f, 3.0f},
+  {-1.0f, 3.0f}
+};
+
+
+const base::Point<float> FLY_DOWN[] = {
+  {0.0f, 1.0f},
+  {0.0f, 2.0f},
+  {0.0f, 2.0f},
+  {0.0f, 2.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f}
+};
+
+
+const base::Point<float> SWIRL_AROUND[] = {
+  {-2.0f, 1.0f},
+  {-2.0f, 1.0f},
+  {-2.0f, 1.0f},
+  {-1.0f, 1.0f},
+  {0.0f, 1.0f},
+  {1.0f, 1.0f},
+  {2.0f, 0.0f},
+  {1.0f, -1.0f},
+  {-2.0f, -1.0f},
+  {-2.0f, 1.0f}
+};
+
+
+const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
+  FLY_RIGHT,
+  FLY_UPPER_RIGHT,
+  FLY_UP,
+  FLY_UPPER_LEFT,
+  FLY_LEFT,
+  FLY_DOWN,
+  SWIRL_AROUND
+};
 
 }
 
@@ -374,6 +481,34 @@ entityx::Entity createFloatingOneShotSprite(
     GravityAffected{false},
     IsPlayer{false},
     IgnoreCollisions{true}});
+  return entity;
+}
+
+
+entityx::Entity spawnMovingEffectSprite(
+  EntityFactory& factory,
+  const ActorID id,
+  const SpriteMovement movement,
+  const base::Vector& position
+) {
+  using namespace engine::components::parameter_aliases;
+
+  auto entity = factory.createSprite(id, position, true);
+  entity.assign<Active>();
+  entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  entity.assign<AnimationLoop>(1);
+  // TODO: To match the original, the condition should actually be
+  // OnLeavingActiveRegion, but only after the movement sequence is
+  // finished.
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(120));
+
+  const auto movementIndex = static_cast<int>(movement);
+  entity.assign<MovementSequence>(MOVEMENT_SEQUENCES[movementIndex]);
+  entity.assign<MovingBody>(
+    Velocity{},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
   return entity;
 }
 
