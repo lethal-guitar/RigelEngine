@@ -53,7 +53,6 @@ private:
   std::vector<data::AudioBuffer> mAudioBuffers;
   std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
   SoundHandle mNextHandle = 0;
-  mutable int mCurrentSoundChannel = -1;
 };
 
 }}
