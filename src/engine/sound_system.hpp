@@ -20,9 +20,9 @@
 #include "data/song.hpp"
 #include "sdl_utils/ptr.hpp"
 
+#include <array>
 #include <memory>
 #include <unordered_map>
-#include <vector>
 
 
 namespace rigel { namespace engine {
@@ -47,11 +47,19 @@ public:
   void clearAll();
 
 private:
+  static const int MAX_CONCURRENT_SOUNDS = 64;
+
+  struct LoadedSound {
+    LoadedSound();
+
+    data::AudioBuffer mBuffer;
+    sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
+  };
+
   SoundHandle addConvertedSound(data::AudioBuffer buffer);
 
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
-  std::vector<data::AudioBuffer> mAudioBuffers;
-  std::unordered_map<SoundHandle, sdl_utils::Ptr<Mix_Chunk>> mLoadedChunks;
+  std::array<LoadedSound, MAX_CONCURRENT_SOUNDS> mSounds;
   SoundHandle mNextHandle = 0;
 };
 

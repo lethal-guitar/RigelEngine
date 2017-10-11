@@ -96,6 +96,12 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
+SoundSystem::LoadedSound::LoadedSound()
+  : mpMixChunk(nullptr)
+{
+}
+
+
 SoundSystem::SoundSystem()
   : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
 {
@@ -115,12 +121,19 @@ SoundSystem::SoundSystem()
       pPlayer->render(pDestination, samplesRequired);
     },
     mpMusicPlayer.get());
+
+  Mix_AllocateChannels(MAX_CONCURRENT_SOUNDS);
 }
 
 
 SoundSystem::~SoundSystem() {
   Mix_HookMusic(nullptr, nullptr);
-  mLoadedChunks.clear();
+
+  // We have to destroy all the MixChunks before we can call Mix_Quit().
+  for (auto& sound : mSounds) {
+    sound.mpMixChunk.reset(nullptr);
+  }
+
   Mix_Quit();
 }
 
@@ -168,11 +181,12 @@ SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
 
 
 SoundHandle SoundSystem::addConvertedSound(data::AudioBuffer buffer) {
-  mAudioBuffers.emplace_back(std::move(buffer));
+  assert(mNextHandle < MAX_CONCURRENT_SOUNDS);
+
   const auto assignedHandle = mNextHandle++;
-  mLoadedChunks.emplace(
-    assignedHandle,
-    createMixChunk(mAudioBuffers.back()));
+  auto& sound = mSounds[assignedHandle];
+  sound.mBuffer = std::move(buffer);
+  sound.mpMixChunk = createMixChunk(sound.mBuffer);
   return assignedHandle;
 }
 
@@ -188,9 +202,8 @@ void SoundSystem::stopMusic() const {
 
 
 void SoundSystem::playSound(const SoundHandle handle) const {
-  const auto it = mLoadedChunks.find(handle);
-  assert(it != mLoadedChunks.end());
-  Mix_PlayChannel(1, it->second.get(), 0);
+  assert(handle < int(mSounds.size()));
+  Mix_PlayChannel(handle, mSounds[handle].mpMixChunk.get(), 0);
 }
 
 }}
