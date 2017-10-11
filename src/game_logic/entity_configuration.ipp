@@ -34,6 +34,33 @@ const auto MUZZLE_FLASH_DRAW_ORDER = PLAYER_PROJECTILE_DRAW_ORDER + 1;
 const auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
 
 
+const auto SCORE_NUMBER_LIFE_TIME = 60;
+
+const base::Point<float> SCORE_NUMBER_MOVE_SEQUENCE[] = {
+  {0.0f, -1.0f},
+  {0.0f, -1.0f},
+  {0.0f, -1.0f},
+  {0.0f, -1.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f},
+  {0.0f, -1.0f}
+};
+
+
+const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
+  0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
+  0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2
+};
+
+
 const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
   {0.0f, -3.0f},
   {0.0f, -2.0f},
@@ -207,6 +234,20 @@ auto turkeyAiConfig() {
   }();
 
   return &config;
+}
+
+
+ActorID scoreNumberActor(const ScoreNumberType type) {
+  static_assert(
+    int(ScoreNumberType::S100) == 0 &&
+    int(ScoreNumberType::S500) == 1 &&
+    int(ScoreNumberType::S2000) == 2 &&
+    int(ScoreNumberType::S5000) == 3 &&
+    int(ScoreNumberType::S10000) == 4,
+    "");
+
+  const auto intType = static_cast<ActorID>(type);
+  return 123 + intType;
 }
 
 
@@ -400,6 +441,14 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 2: // rocket explosion
     case 3: // impact flame
     case 11: // rocket smoke
+      return EFFECT_DRAW_ORDER;
+
+    // floating score numbers
+    case 123:
+    case 124:
+    case 125:
+    case 126:
+    case 127:
       return EFFECT_DRAW_ORDER;
 
     default:

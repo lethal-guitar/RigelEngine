@@ -512,4 +512,24 @@ entityx::Entity spawnMovingEffectSprite(
   return entity;
 }
 
+
+void spawnFloatingScoreNumber(
+  EntityFactory& factory,
+  const ScoreNumberType type,
+  const base::Vector& position
+) {
+  using namespace engine::components::parameter_aliases;
+
+  auto entity = factory.createSprite(scoreNumberActor(type), position, true);
+  engine::startAnimationSequence(entity, SCORE_NUMBER_ANIMATION_SEQUENCE);
+  entity.assign<MovementSequence>(SCORE_NUMBER_MOVE_SEQUENCE);
+  entity.assign<MovingBody>(
+    Velocity{},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
+  entity.assign<Active>();
+}
+
 }}
