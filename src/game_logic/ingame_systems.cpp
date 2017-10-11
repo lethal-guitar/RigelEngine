@@ -76,6 +76,12 @@ IngameSystems::IngameSystems(
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
   , mDamageInflictionSystem(pPlayerModel, pMap, pServiceProvider)
+  , mEffectsSystem(
+      pServiceProvider,
+      pRandomGenerator,
+      &entities,
+      pEntityFactory,
+      &mParticles)
   , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
   , mBlueGuardSystem(
       playerEntity,
@@ -125,6 +131,7 @@ IngameSystems::IngameSystems(
       entityx::Entity entity,
       const base::Point<float>& velocity
     ) {
+      mEffectsSystem.onShootableKilled(entity, velocity);
       item_containers::onShootableKilled(entity, entities);
       mNapalmBombSystem.onShootableKilled(entity);
       mSlimeBlobSystem.onShootableKilled(entity);
@@ -199,6 +206,7 @@ void IngameSystems::update(
 
   mPlayerDamageSystem.update(es);
   mDamageInflictionSystem.update(es);
+  mEffectsSystem.update(es);
   mPlayerAnimationSystem.update(es);
 
   mPlayerProjectileSystem.update(es);
