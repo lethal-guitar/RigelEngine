@@ -20,6 +20,7 @@
 #include "engine/debugging_system.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
+#include "engine/particle_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "engine/rendering_system.hpp"
@@ -37,6 +38,7 @@
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/effects_system.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/item_container.hpp"
 #include "game_logic/map_scroll_system.hpp"
@@ -91,6 +93,8 @@ private:
   base::Vector* mpScrollOffset;
   engine::CollisionChecker mCollisionChecker;
 
+  engine::ParticleSystem mParticles;
+
   engine::RenderingSystem mRenderingSystem;
   engine::PhysicsSystem mPhysicsSystem;
   engine::LifeTimeSystem mLifeTimeSystem;
@@ -106,6 +110,7 @@ private:
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::DamageInflictionSystem mDamageInflictionSystem;
+  game_logic::EffectsSystem mEffectsSystem;
   game_logic::NapalmBombSystem mNapalmBombSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;

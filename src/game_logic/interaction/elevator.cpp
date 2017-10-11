@@ -51,11 +51,12 @@ int determineMovementDirection(const PlayerInputState& inputState) {
 
 
 void configureElevator(entityx::Entity entity) {
+  using namespace engine::components::parameter_aliases;
   using engine::components::ActivationSettings;
 
   entity.assign<components::Elevator>();
   entity.assign<BoundingBox>(BoundingBox{{0, 0}, {4, 3}});
-  entity.assign<MovingBody>(base::Point<float>{0.0f, 0.0f}, true);
+  entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
   entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
   entity.assign<SolidBody>();
 }
@@ -109,13 +110,11 @@ bool ElevatorSystem::isPlayerAttached() const {
 }
 
 
-// TODO: This should be const, but it needs a const overload for
-// the Entity::component() getter
-ex::Entity ElevatorSystem::findAttachableElevator(ex::EntityManager& es) {
+ex::Entity ElevatorSystem::findAttachableElevator(ex::EntityManager& es) const {
   ex::Entity attachableElevator;
 
-  const auto& playerPos = *mPlayer.component<WorldPosition>();
-  const auto& playerBox = *mPlayer.component<BoundingBox>();
+  const auto& playerPos = *mPlayer.component<const WorldPosition>();
+  const auto& playerBox = *mPlayer.component<const BoundingBox>();
   const auto leftAttachPoint = playerPos.x;
   const auto rightAttachPoint = playerPos.x + playerBox.size.width - 1;
 

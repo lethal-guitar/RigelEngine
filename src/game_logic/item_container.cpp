@@ -23,6 +23,7 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
 #include "game_mode.hpp"
@@ -30,7 +31,7 @@
 
 namespace rigel { namespace game_logic { namespace item_containers {
 
-void onEntityHit(entityx::Entity entity, entityx::EntityManager& es) {
+void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es) {
   using namespace engine::components;
   using game_logic::components::ItemContainer;
 
@@ -68,6 +69,8 @@ NapalmBombSystem::NapalmBombSystem(
 
 
 void NapalmBombSystem::update(entityx::EntityManager& es) {
+  using components::DestructionEffects;
+
   using State = components::NapalmBomb::State;
   es.each<components::NapalmBomb, WorldPosition, Sprite>(
     [this](
@@ -85,6 +88,7 @@ void NapalmBombSystem::update(entityx::EntityManager& es) {
           }
 
           if (state.mFramesElapsed >= 31) {
+            entity.component<DestructionEffects>()->mActivated = true;
             explode(entity);
           }
           break;
@@ -105,7 +109,7 @@ void NapalmBombSystem::update(entityx::EntityManager& es) {
 }
 
 
-void NapalmBombSystem::onEntityHit(entityx::Entity entity) {
+void NapalmBombSystem::onShootableKilled(entityx::Entity entity) {
   if (entity.has_component<components::NapalmBomb>()) {
     explode(entity);
   }

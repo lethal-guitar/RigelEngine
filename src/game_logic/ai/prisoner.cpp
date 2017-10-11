@@ -17,10 +17,14 @@
 #include "prisoner.hpp"
 
 #include "engine/life_time_components.hpp"
+#include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/entity_factory.hpp"
+
+#include "game_mode.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -40,9 +44,15 @@ const auto DEATH_FRAMES_TO_LIVE = 6;
 
 PrisonerSystem::PrisonerSystem(
   entityx::Entity player,
+  EntityFactory* pEntityFactory,
+  IGameServiceProvider* pServiceProvider,
+  engine::ParticleSystem* pParticles,
   engine::RandomNumberGenerator* pRandomGenerator
 )
   : mPlayer(player)
+  , mpEntityFactory(pEntityFactory)
+  , mpServiceProvider(pServiceProvider)
+  , mpParticles(pParticles)
   , mpRandomGenerator(pRandomGenerator)
 {
 }
@@ -125,13 +135,17 @@ void PrisonerSystem::updateAggressivePrisoner(
 }
 
 
-void PrisonerSystem::onEntityHit(entityx::Entity entity) {
+void PrisonerSystem::onShootableKilled(
+  entityx::Entity entity,
+  const base::Point<float>& inflictorVelocity
+) {
   using engine::components::AutoDestroy;
 
   if (!entity.has_component<components::Prisoner>()) {
     return;
   }
 
+  const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<Sprite>();
   auto& state = *entity.component<components::Prisoner>();
 
@@ -143,6 +157,18 @@ void PrisonerSystem::onEntityHit(entityx::Entity entity) {
   engine::startAnimationSequence(entity, DEATH_SEQUENCE);
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(DEATH_FRAMES_TO_LIVE));
   entity.remove<components::Prisoner>();
+
+  const auto shotFromLeft = inflictorVelocity.x > 0.0f;
+  const auto debrisMovement = shotFromLeft
+    ? SpriteMovement::FlyUpperRight
+    : SpriteMovement::FlyUpperLeft;
+  spawnMovingEffectSprite(*mpEntityFactory, 255, debrisMovement, position);
+
+  mpParticles->spawnParticles(
+    position + base::Vector{3, 0},
+    loader::INGAME_PALETTE[5]);
+
+  mpServiceProvider->playSound(data::SoundId::BiologicalEnemyDestroyed);
 }
 
 }}}

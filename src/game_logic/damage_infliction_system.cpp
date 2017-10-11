@@ -110,12 +110,12 @@ void DamageInflictionSystem::inflictDamage(
     damage.mHasCausedDamage = true;
   }
 
-  mEntityHitSignal(shootableEntity, inflictorVelocity);
-  // The onHit() callback mustn't remove the shootable component
-  assert(shootableEntity.has_component<Shootable>());
-
   shootable.mHealth -= damage.mAmount;
   if (shootable.mHealth <= 0) {
+    mShootableKilledSignal(shootableEntity, inflictorVelocity);
+    // The onKilled() callback mustn't remove the shootable component
+    assert(shootableEntity.has_component<Shootable>());
+
     mpPlayerModel->mScore += shootable.mGivenScore;
 
     // Take care of shootable walls
@@ -131,12 +131,9 @@ void DamageInflictionSystem::inflictDamage(
       // When hitting a destructible wall, projectiles always vanish
       // immediately
       inflictorEntity.destroy();
-    }
 
-    // Generate sound and destroy entity
-    // NOTE: This is only temporary, it will change once we implement
-    // different sounds and particle effects per enemy/object.
-    mpServiceProvider->playSound(data::SoundId::AlternateExplosion);
+      mpServiceProvider->playSound(data::SoundId::BigExplosion);
+    }
 
     if (shootable.mDestroyWhenKilled) {
       shootableEntity.destroy();
@@ -144,6 +141,8 @@ void DamageInflictionSystem::inflictDamage(
       shootableEntity.remove<Shootable>();
     }
   } else {
+    mEntityHitSignal(shootableEntity, inflictorVelocity);
+
     if (shootable.mEnableHitFeedback) {
       mpServiceProvider->playSound(data::SoundId::EnemyHit);
 

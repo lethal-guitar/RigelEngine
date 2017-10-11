@@ -48,9 +48,11 @@ void startJump(entityx::Entity entity) {
 
 
 void configureSpikeBall(entityx::Entity entity) {
+  using namespace engine::components::parameter_aliases;
+
   entity.assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
-  entity.assign<MovingBody>(MovingBody{{}, true});
+  entity.assign<MovingBody>(Velocity{}, GravityAffected{true});
   entity.assign<components::SpikeBall>();
 
   startJump(entity);

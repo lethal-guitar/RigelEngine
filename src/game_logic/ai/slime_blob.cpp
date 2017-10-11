@@ -299,7 +299,7 @@ base::Vector SlimeBlobSystem::adjustedPlayerPosition() const {
 }
 
 
-void SlimeBlobSystem::onEntityHit(entityx::Entity entity) {
+void SlimeBlobSystem::onShootableKilled(entityx::Entity entity) {
   if (
     !entity.has_component<components::SlimeContainer>() ||
     !entity.has_component<Shootable>()

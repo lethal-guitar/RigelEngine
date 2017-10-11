@@ -19,6 +19,10 @@
 
 namespace {
 
+using namespace engine::components::parameter_aliases;
+using namespace game_logic::components::parameter_aliases;
+
+
 // The game draws player projectiles after drawing all regular actors, which
 // makes them appear on top of everything. But in our case, they are rendered
 // using the same mechanism as the other sprites, so we have to explicitly
@@ -28,6 +32,33 @@ const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
 const auto MUZZLE_FLASH_DRAW_ORDER = PLAYER_PROJECTILE_DRAW_ORDER + 1;
 
 const auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
+
+
+const auto SCORE_NUMBER_LIFE_TIME = 60;
+
+const base::Point<float> SCORE_NUMBER_MOVE_SEQUENCE[] = {
+  {0.0f, -1.0f},
+  {0.0f, -1.0f},
+  {0.0f, -1.0f},
+  {0.0f, -1.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f},
+  {0.0f, 0.0f},
+  {0.0f, -1.0f}
+};
+
+
+const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
+  0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
+  0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2
+};
 
 
 const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
@@ -41,6 +72,9 @@ const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
   {0.0f, -1.0f},
   {0.0f, 1.0f}
 };
+
+
+#include "destruction_effect_specs.ipp"
 
 
 // NOTE: This is only an animation sequence (as opposed to a simple loop)
@@ -203,6 +237,20 @@ auto turkeyAiConfig() {
   }();
 
   return &config;
+}
+
+
+ActorID scoreNumberActor(const ScoreNumberType type) {
+  static_assert(
+    int(ScoreNumberType::S100) == 0 &&
+    int(ScoreNumberType::S500) == 1 &&
+    int(ScoreNumberType::S2000) == 2 &&
+    int(ScoreNumberType::S5000) == 3 &&
+    int(ScoreNumberType::S10000) == 4,
+    "");
+
+  const auto intType = static_cast<ActorID>(type);
+  return 123 + intType;
 }
 
 
@@ -396,6 +444,27 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 2: // rocket explosion
     case 3: // impact flame
     case 11: // rocket smoke
+    case 12: // hover-bot debris
+    case 13: // hover-bot debris
+    case 15: // nuclear waste barrel debris
+    case 16: // nuclear waste barrel debris
+    case 17: // nuclear waste barrel debris
+    case 18: // nuclear waste barrel debris
+    case 72: // bonus globe debris
+    case 73: // bonus globe debris
+    case 84: // smoke cloud
+    case 94: // biological debris
+    case 169: // soda can debris
+    case 170: // soda can debris
+    case 255: // prisoner debris
+      return EFFECT_DRAW_ORDER;
+
+    // floating score numbers
+    case 123:
+    case 124:
+    case 125:
+    case 126:
+    case 127:
       return EFFECT_DRAW_ORDER;
 
     default:
@@ -437,7 +506,7 @@ void turnIntoContainer(
   entity.remove<Sprite>();
   entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(std::move(container));
-  entity.assign<Shootable>(1, givenScore);
+  entity.assign<Shootable>(Health{1}, givenScore);
   addDefaultMovingBody(entity, engine::inferBoundingBox(containerSprite));
 }
 
@@ -455,12 +524,14 @@ void EntityFactory::configureItemBox(
   auto container = makeContainer(components...);
   addToContainer(
     container,
-    MovementSequence{CONTAINER_BOUNCE_SEQUENCE, true, false});
+    MovementSequence{
+      CONTAINER_BOUNCE_SEQUENCE, ResetAfterSequence{true}, EnableX{false}});
   addDefaultMovingBody(
     container, engine::inferBoundingBox(*entity.component<Sprite>()));
 
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
+  entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
 }
 
 
@@ -469,6 +540,8 @@ void EntityFactory::configureEntity(
   const ActorID actorID,
   const BoundingBox& boundingBox
 ) {
+  using namespace effects;
+
   const auto difficultyOffset = mDifficulty != Difficulty::Easy
     ? (mDifficulty == Difficulty::Hard ? 2 : 1)
     : 0;
@@ -477,7 +550,8 @@ void EntityFactory::configureEntity(
     // Bonus globes
     case 45:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
+      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -488,7 +562,8 @@ void EntityFactory::configureEntity(
 
     case 46:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
+      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -499,7 +574,8 @@ void EntityFactory::configureEntity(
 
     case 47:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
+      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -510,7 +586,8 @@ void EntityFactory::configureEntity(
 
     case 48:
       entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
+      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
@@ -540,7 +617,8 @@ void EntityFactory::configureEntity(
     case 163: // Empty red box
     case 164: // Empty blue box
     case 161: // Empty white box
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
+      entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
       break;
 
@@ -613,7 +691,7 @@ void EntityFactory::configureEntity(
         const auto originalDrawOrder =
           entity.component<Sprite>()->mpDrawData->mDrawOrder;
 
-        auto shootable = Shootable{1};
+        auto shootable = Shootable{Health{1}};
         shootable.mDestroyWhenKilled = false;
         configureItemBox(
           entity,
@@ -621,6 +699,7 @@ void EntityFactory::configureEntity(
           0,
           AnimationLoop{1},
           shootable,
+          DestructionEffects{NAPALM_BOMB_KILL_EFFECT_SPEC},
           components::NapalmBomb{});
 
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
@@ -666,7 +745,7 @@ void EntityFactory::configureEntity(
           boundingBox,
           AnimationLoop{1, 0, 5},
           AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
-          MovingBody{{0.0f, -1.0f}, false},
+          MovingBody{Velocity{0.0f, -1.0f}, GravityAffected{false}},
           AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
 
         configureItemBox(
@@ -675,7 +754,7 @@ void EntityFactory::configureEntity(
           100,
           intactSodaCanCollectable,
           flyingSodaCanContainer,
-          Shootable{1, 0},
+          Shootable{Health{1}, GivenScore{0}},
           AnimationLoop{1, 0, 5});
       }
       break;
@@ -690,7 +769,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Red,
           100,
           item,
-          Shootable{1, 10000});
+          Shootable{Health{1}, GivenScore{10000}},
+          DestructionEffects{SODA_SIX_PACK_KILL_EFFECT_SPEC});
       }
       break;
 
@@ -724,6 +804,7 @@ void EntityFactory::configureEntity(
         auto livingTurkeyContainer = makeContainer(
           walkingTurkeyCollectable,
           Shootable{1, 0},
+          DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           boundingBox,
           cookedTurkeyContainer,
           ai::components::SimpleWalker{turkeyAiConfig()});
@@ -736,6 +817,7 @@ void EntityFactory::configureEntity(
           createSpriteForId(actorIdForBoxColor(ContainerColor::Red)),
           100,
           std::move(livingTurkeyContainer));
+        entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
       }
       break;
 
@@ -1015,7 +1097,8 @@ void EntityFactory::configureEntity(
       break;
 
     case 239: // Special hint globe
-      entity.assign<Shootable>(3, 100);
+      entity.assign<Shootable>(Health{3}, GivenScore{100});
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<AnimationLoop>(1);
       addDefaultMovingBody(entity, boundingBox);
       {
@@ -1032,108 +1115,183 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
 
     case 0: // Cylindrical robot with blinking 'head', aka hover-bot
-      entity.assign<Shootable>(1 + difficultyOffset, 150);
+      entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{150});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
       entity.assign<ai::components::HoverBot>();
+      entity.assign<DestructionEffects>(
+        HOVER_BOT_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      break;
+
+    // Green panther
+    case 31:
+    case 32:
+      entity.assign<DestructionEffects>(
+        BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      break;
+
+    // Wall-mounted flame thrower
+    case 38: // ->
+    case 39: // <-
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
     case 49: // Bouncing robot with big eye
-      entity.assign<Shootable>(6 + difficultyOffset, 1000);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<DestructionEffects>(
+        SIMPLE_TECH_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
       break;
 
     case 54: // Rocket launcher turret
-      // Shooting the rockets: 10 pts
-      entity.assign<Shootable>(3, 500);
+      entity.assign<Shootable>(Health{3}, GivenScore{500});
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::RocketTurret>();
+      entity.assign<DestructionEffects>(
+        SIMPLE_TECH_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      break;
+
+    // Rocket turret rockets
+    case 55:
+    case 56:
+    case 57:
+      entity.assign<Shootable>(Health{1}, GivenScore{10});
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.component<Sprite>()->mFramesToRender.push_back(0);
+      entity.assign<AnimationLoop>(1, 1, 2, 0);
+      break;
+
+    case 58: // Watch-bot container carrier
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
     case 62: // Bomb dropping space ship
       // Not player damaging, only the bombs are
-      entity.assign<Shootable>(6 + difficultyOffset, 5000);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
     case 64: // Bouncing spike ball
-      entity.assign<Shootable>(6 + difficultyOffset, 1000);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
+      entity.assign<DestructionEffects>(SPIKE_BALL_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       ai::configureSpikeBall(entity);
       break;
 
     case 67: // Green slime blob
-      entity.assign<Shootable>(6 + difficultyOffset, 1500);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
+      entity.assign<DestructionEffects>(
+        BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SlimeBlob>();
       addDefaultMovingBody(entity, boundingBox);
       entity.component<MovingBody>()->mGravityAffected = false;
       break;
 
     case 68: // Green slime container
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       ai::configureSlimeContainer(entity);
+      entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
       break;
 
     case 78: // Snake
       // Not player damaging, but can eat duke
       // Only 1 health when Duke has been eaten
-      entity.assign<Shootable>(8 + difficultyOffset, 5000);
+      entity.assign<Shootable>(Health{8 + difficultyOffset}, GivenScore{5000});
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 79: // Security camera, ceiling-mounted
     case 80: // Security camera, floor-mounted
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::SecurityCamera>();
+      entity.assign<DestructionEffects>(CAMERA_KILL_EFFECT_SPEC);
       break;
 
-    case 81:
-      entity.assign<Shootable>(15 + 3 * difficultyOffset, 300);
+    case 81: // Green ceiling-attached suction plant
+      entity.assign<Shootable>(
+        Health{15 + 3 * difficultyOffset}, GivenScore{300});
+      entity.assign<DestructionEffects>(
+        BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
       entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 97: // Small eye-shaped robot, walking on wall
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
     case 98: // Eye-ball throwing monster
-      entity.assign<Shootable>(8, 2000);
+      entity.assign<Shootable>(Health{8}, GivenScore{2000});
+      entity.assign<DestructionEffects>(EYE_BALL_THROWER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 115: // hover bot generator
       entity.assign<AnimationLoop>(1, 0, 3);
-      entity.assign<Shootable>(20, 2500);
+      entity.assign<Shootable>(Health{20}, GivenScore{2500});
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::HoverBotSpawnMachine>();
       break;
 
     case 134: // Walking skeleton
-      entity.assign<Shootable>(2 + difficultyOffset, 100);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
+      entity.assign<DestructionEffects>(
+        SKELETON_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
       addDefaultMovingBody(entity, boundingBox);
       break;
 
     case 151: // Floating ball, opens up and shoots lasers
-      entity.assign<Shootable>(3 + difficultyOffset, 1000);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{3 + difficultyOffset}, GivenScore{1000});
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
     case 154: // Spider
-      entity.assign<Shootable>(1 + difficultyOffset, 101);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{101});
+      entity.assign<DestructionEffects>(SPIDER_KILL_EFFECT_SPEC);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case 176: // green bird
+      entity.assign<DestructionEffects>(
+        BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      break;
+
+    // petrified green monster
+    case 189: // <-
+    case 190: // ->
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<DestructionEffects>(
+        EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
       break;
 
     case 271: // Small flying ship 1
     case 272: // Small flying ship 2
     case 273: // Small flying ship 3
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1141,13 +1299,16 @@ void EntityFactory::configureEntity(
     case 159: // ->
     case 171: // <-
     case 217: // using terminal
-      entity.assign<PlayerDamaging>(1);
-      entity.assign<Shootable>(2 + difficultyOffset, 3000);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{3000});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<ai::components::BlueGuard>(
         createBlueGuardAiComponent(actorID));
+      entity.assign<DestructionEffects>(
+        BLUE_GUARD_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(159, 0));
       break;
 
 
@@ -1155,20 +1316,25 @@ void EntityFactory::configureEntity(
     case 131:
       // gives one point when shot with normal shot, 500 when destroyed.
       entity.assign<BoundingBox>(boundingBox);
-      ai::configureLaserTurret(entity, 500);
+      ai::configureLaserTurret(entity, GivenScore{500});
       break;
 
     case 203: // Red bird
-      entity.assign<Shootable>(1 + difficultyOffset, 100);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{100});
+      entity.assign<DestructionEffects>(RED_BIRD_KILL_EFFECT_SPEC);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       ai::configureRedBird(entity);
+      break;
+
+    case 244: // Small uni-cycle robot
+      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
     case 253: // Monster in prison cell, aggressive
       entity.assign<ai::components::Prisoner>(true);
       entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
-      entity.assign<Shootable>(1, 500);
+      entity.assign<Shootable>(Health{1}, GivenScore{500});
       entity.component<Shootable>()->mInvincible = true;
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       break;
@@ -1178,9 +1344,16 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
+    case 280: // final boss projectile
+      entity.assign<DestructionEffects>(
+        BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
+        mpSpritePackage->actorFrameRect(actorID, 0));
+      break;
+
     case 299: // Rigelatin soldier
-      entity.assign<Shootable>(27 + 2 * difficultyOffset, 2100);
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<Shootable>(
+        Health{27 + 2 * difficultyOffset}, GivenScore{2100});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1189,8 +1362,9 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
 
     case 14: // Nuclear waste barrel, empty
-      entity.assign<Shootable>(1, 100);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       break;
 
     case 75: // Nuclear waste barrel, slime inside
@@ -1199,7 +1373,7 @@ void EntityFactory::configureEntity(
         const auto numAnimationFrames = static_cast<int>(
           sprite.mpDrawData->mFrames.size());
         auto container = makeContainer(
-          PlayerDamaging{1},
+          PlayerDamaging{Damage{1}},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
           sprite);
@@ -1207,18 +1381,20 @@ void EntityFactory::configureEntity(
 
         auto barrelSprite = createSpriteForId(14);
         turnIntoContainer(entity, barrelSprite, 200, std::move(container));
+        entity.assign<DestructionEffects>(
+          NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       }
       break;
 
     case 66: // Destroyable reactor
-      entity.assign<Shootable>(10, 20000);
-      entity.assign<PlayerDamaging>(9, true);
+      entity.assign<Shootable>(Health{10}, GivenScore{20000});
+      entity.assign<PlayerDamaging>(Damage{9}, IgnoreMercyFrames{true});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
     case 93: // Blue force field (disabled by cloak)
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1243,7 +1419,7 @@ void EntityFactory::configureEntity(
     case 235: // Slime pool
     case 262: // Fire (variant 1)
     case 263: // Fire (variant 2)
-      entity.assign<PlayerDamaging>(1);
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
@@ -1257,19 +1433,22 @@ void EntityFactory::configureEntity(
 
     case 208: // floating exit sign to right
     case 252: // floating exit sign to left
-      entity.assign<Shootable>(5, 10000);
+      entity.assign<Shootable>(Health{5}, GivenScore{10000});
+      entity.assign<DestructionEffects>(EXIT_SIGN_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
     case 296: // floating arrow
-      entity.assign<Shootable>(5, 500);
+      entity.assign<Shootable>(Health{5}, GivenScore{500});
+      entity.assign<DestructionEffects>(FLOATING_ARROW_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
     case 236: // Radar dish
-      entity.assign<Shootable>(4, 2000);
+      entity.assign<Shootable>(Health{4}, GivenScore{2000});
+      entity.assign<DestructionEffects>(RADAR_DISH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
@@ -1303,7 +1482,8 @@ void EntityFactory::configureEntity(
         // It's unclear whether this is intentional, it seems like it might not
         // be because this score value is assigned in the update() function,
         // not when constructing the actor.
-        entity.assign<Shootable>(1, typeIndex);
+        entity.assign<Shootable>(Health{1}, GivenScore{typeIndex});
+        entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
         entity.assign<BoundingBox>(boundingBox);
         entity.component<Sprite>()->mFramesToRender.clear();
 
@@ -1331,7 +1511,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 106: // shootable wall, explodes into small pieces
-      entity.assign<Shootable>(1);
+      entity.assign<Shootable>(Health{1});
       {
         // Shootable walls have a bounding box that's one unit wider than the
         // actual area.
@@ -1360,6 +1540,15 @@ void EntityFactory::configureEntity(
     case 250: // airlock effect, left
     case 251: // airlock effect, right
     case 254: // explosion effect trigger
+      break;
+
+    // Various projectiles. Damage, velocity etc. are assigned by the
+    // projectile configurarion functions
+    case 7: case 8: case 9: case 10:
+    case 24: case 25: case 26: case 27:
+    case 21: case 204: case 205: case 206:
+    case 136:
+      entity.assign<BoundingBox>(boundingBox);
       break;
 
     default:

@@ -113,14 +113,10 @@ void RocketTurretSystem::fireRocket(
   components::RocketTurret::Orientation myOrientation
 ) {
   const auto orientationIndex = static_cast<int>(myOrientation);
-  auto projectile = mpEntityFactory->createProjectile(
+  mpEntityFactory->createProjectile(
     game_logic::ProjectileType::EnemyRocket,
     myPosition + OFFSET_BY_ORIENTATION[orientationIndex],
     DIRECTION_BY_ORIENTATION[orientationIndex]);
-
-  projectile.assign<game_logic::components::Shootable>(1, 10);
-  projectile.component<Sprite>()->mFramesToRender.push_back(0);
-  projectile.assign<AnimationLoop>(1, 1, 2, 0);
 
   mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
 }

@@ -310,9 +310,14 @@ TEST_CASE("Physics system works as expected") {
 
         CHECK(collectedPositions2 == expectedPositions2);
       }
+
+      SECTION("Sequence component removed after sequence") {
+        runOneFrame();
+        CHECK(!physicalObject.has_component<MovementSequence>());
+      }
     }
 
-    SECTION("Velocity kept after sequence") {
+    SECTION("Velocity kept after sequence (with collision)") {
       body.mGravityAffected = false;
 
       std::array<base::Point<float>, 4> sequence{
@@ -327,15 +332,51 @@ TEST_CASE("Physics system works as expected") {
         runOneFrame();
       }
 
-      SECTION("Object retains sequence's last velocity after sequence") {
-        const auto expectedPositions = std::vector<base::Vector>{
-          {13, 4},
-          {12, 5}
-        };
-        const auto collectedPositions =
-          runFramesAndCollect(expectedPositions.size());
+      const auto expectedPositions = std::vector<base::Vector>{
+        {13, 4},
+        {12, 5},
+        {11, 6}
+      };
+      const auto collectedPositions =
+        runFramesAndCollect(expectedPositions.size());
 
-        CHECK(collectedPositions == expectedPositions);
+      CHECK(collectedPositions == expectedPositions);
+
+      SECTION("Sequence component removed after sequence") {
+        runOneFrame();
+        CHECK(!physicalObject.has_component<MovementSequence>());
+      }
+    }
+
+    SECTION("Velocity kept after sequence (ignoring collision)") {
+      body.mGravityAffected = false;
+      body.mIgnoreCollisions = true;
+
+      std::array<base::Point<float>, 4> sequence{
+        base::Point<float>{0.0f, -1.0f},
+        base::Point<float>{3.0f, -2.0f},
+        base::Point<float>{2.0f, 0.0f},
+        base::Point<float>{-1.0f, 1.0f}
+      };
+      physicalObject.assign<MovementSequence>(
+        sequence, ResetAfterSequence(false));
+      for (int i = 0; i < 4; ++i) {
+        runOneFrame();
+      }
+
+      const auto expectedPositions = std::vector<base::Vector>{
+        {13, 4},
+        {12, 5},
+        {11, 6}
+      };
+      const auto collectedPositions =
+        runFramesAndCollect(expectedPositions.size());
+
+      CHECK(collectedPositions == expectedPositions);
+
+      SECTION("Sequence component removed after sequence") {
+        runOneFrame();
+        CHECK(!physicalObject.has_component<MovementSequence>());
       }
     }
 

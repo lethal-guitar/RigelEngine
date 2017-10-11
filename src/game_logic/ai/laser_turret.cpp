@@ -17,6 +17,7 @@
 #include "laser_turret.hpp"
 
 #include "data/player_data.hpp"
+#include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -64,11 +65,13 @@ LaserTurretSystem::LaserTurretSystem(
   entityx::Entity player,
   data::PlayerModel* pPlayerModel,
   EntityFactory* pEntityFactory,
+  engine::RandomNumberGenerator* pRandomGenerator,
   IGameServiceProvider* pServiceProvider
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
   , mpEntityFactory(pEntityFactory)
+  , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {
 }
@@ -171,6 +174,44 @@ void LaserTurretSystem::onEntityHit(entityx::Entity entity) {
   entity.remove<game_logic::components::PlayerDamaging>();
 
   mpPlayerModel->mScore += 1;
+
+  performBaseHitEffect(entity);
+}
+
+
+void LaserTurretSystem::performBaseHitEffect(entityx::Entity entity) {
+  const auto& position = *entity.component<engine::components::WorldPosition>();
+  createFloatingOneShotSprite(
+    *mpEntityFactory,
+    3,
+    position + base::Vector{-1, 2});
+  const auto randomChoice = mpRandomGenerator->gen();
+  const auto soundId = randomChoice % 2 == 0
+    ? data::SoundId::AlternateExplosion
+    : data::SoundId::Explosion;
+  mpServiceProvider->playSound(soundId);
+}
+
+
+void LaserTurretSystem::onShootableKilled(
+  entityx::Entity entity,
+  const base::Point<float>& inflictorVelocity
+) {
+  if (!entity.has_component<components::LaserTurret>()) {
+    return;
+  }
+
+  performBaseHitEffect(entity);
+
+  const auto& position = *entity.component<engine::components::WorldPosition>();
+  const auto shotFromRight = inflictorVelocity.x < 0.0f;
+  const auto shotFromLeft = inflictorVelocity.x > 0.0f;
+  const auto debrisMovement = shotFromRight
+    ? SpriteMovement::FlyUpperLeft
+    : (shotFromLeft)
+      ? SpriteMovement::FlyUpperRight
+      : SpriteMovement::FlyUp;
+  spawnMovingEffectSprite(*mpEntityFactory, 131, debrisMovement, position);
 }
 
 }}}

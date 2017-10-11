@@ -89,7 +89,7 @@ public:
     engine::RandomNumberGenerator* pRandomGenerator);
 
   void update(entityx::EntityManager& es);
-  void onEntityHit(entityx::Entity entity);
+  void onShootableKilled(entityx::Entity entity);
 
 private:
   base::Vector adjustedPlayerPosition() const;

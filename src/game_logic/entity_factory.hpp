@@ -63,6 +63,26 @@ enum class ProjectileDirection {
 };
 
 
+enum class SpriteMovement {
+  FlyRight = 0,
+  FlyUpperRight = 1,
+  FlyUp = 2,
+  FlyUpperLeft = 3,
+  FlyLeft = 4,
+  FlyDown = 5,
+  SwirlAround = 6
+};
+
+
+enum class ScoreNumberType : std::uint8_t {
+  S100,
+  S500,
+  S2000,
+  S5000,
+  S10000
+};
+
+
 inline bool isHorizontal(const ProjectileDirection direction) {
   return
     direction == ProjectileDirection::Left ||
@@ -157,6 +177,20 @@ entityx::Entity createOneShotSprite(
 entityx::Entity createFloatingOneShotSprite(
   EntityFactory& factory,
   data::ActorID id,
+  const base::Vector& position);
+
+
+entityx::Entity spawnMovingEffectSprite(
+  EntityFactory& factory,
+  const data::ActorID id,
+  const SpriteMovement movement,
+  const base::Vector& position
+);
+
+
+void spawnFloatingScoreNumber(
+  EntityFactory& factory,
+  ScoreNumberType type,
   const base::Vector& position);
 
 }}

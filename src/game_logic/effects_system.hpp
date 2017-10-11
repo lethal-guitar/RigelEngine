@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2017, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,61 +18,49 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "game_logic/damage_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <array>
-
-
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace data { struct PlayerModel; } }
-namespace rigel { namespace engine { class RandomNumberGenerator; } }
-namespace rigel { namespace game_logic { class EntityFactory; } }
+namespace rigel { namespace engine {
+  class RandomNumberGenerator;
+  class ParticleSystem;
+}}
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel { namespace game_logic {
 
-namespace components {
-
-struct LaserTurret {
-  int mAngle = 0;
-  int mSpinningTurnsLeft = 20;
-  int mNextShotCountdown = 0;
-};
-
-}
+namespace components { struct DestructionEffects; }
+class EntityFactory;
 
 
-void configureLaserTurret(entityx::Entity& entity, int givenScore);
-
-
-class LaserTurretSystem {
+class EffectsSystem {
 public:
-  LaserTurretSystem(
-    entityx::Entity player,
-    data::PlayerModel* pPlayerModel,
-    EntityFactory* pEntityFactory,
+  EffectsSystem(
+    IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
-    IGameServiceProvider* pServiceProvider);
+    entityx::EntityManager* pEntityManager,
+    EntityFactory* pEntityFactory,
+    engine::ParticleSystem* pParticles);
 
-  void onEntityHit(entityx::Entity entity);
+  void update(entityx::EntityManager& es);
+
   void onShootableKilled(
     entityx::Entity entity,
     const base::Point<float>& inflictorVelocity);
 
-  void update(entityx::EntityManager& es);
-
 private:
-  void performBaseHitEffect(entityx::Entity entity);
+  void processEffectsAndAdvance(
+    const base::Vector& position,
+    components::DestructionEffects& effects);
 
-  entityx::Entity mPlayer;
-  data::PlayerModel* mpPlayerModel;
-  EntityFactory* mpEntityFactory;
-  engine::RandomNumberGenerator* mpRandomGenerator;
   IGameServiceProvider* mpServiceProvider;
+  engine::RandomNumberGenerator* mpRandomGenerator;
+  entityx::EntityManager* mpEntityManager;
+  EntityFactory* mpEntityFactory;
+  engine::ParticleSystem* mpParticles;
 };
 
-}}}
+}}

@@ -23,11 +23,14 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine {
+  class ParticleSystem;
   class RandomNumberGenerator;
 
   namespace components { struct Sprite; }
 }}
+namespace rigel { namespace game_logic { class EntityFactory; }}
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -52,11 +55,16 @@ class PrisonerSystem {
 public:
   PrisonerSystem(
     entityx::Entity player,
+    EntityFactory* pEntityFactory,
+    IGameServiceProvider* pServiceProvider,
+    engine::ParticleSystem* pParticles,
     engine::RandomNumberGenerator* pRandomGenerator);
 
   void update(entityx::EntityManager& es);
 
-  void onEntityHit(entityx::Entity entity);
+  void onShootableKilled(
+    entityx::Entity entity,
+    const base::Point<float>& inflictorVelocity);
 
 private:
   void updateAggressivePrisoner(
@@ -68,6 +76,9 @@ private:
 
 private:
   entityx::Entity mPlayer;
+  EntityFactory* mpEntityFactory;
+  IGameServiceProvider* mpServiceProvider;
+  engine::ParticleSystem* mpParticles;
   engine::RandomNumberGenerator* mpRandomGenerator;
   bool mIsOddFrame = false;
 };

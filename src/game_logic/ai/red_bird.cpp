@@ -51,7 +51,8 @@ void fly(entityx::Entity entity, const bool left) {
 
 
 void configureRedBird(entityx::Entity entity) {
-  entity.assign<MovingBody>(MovingBody{{-1.0f, 0.0f}, false});
+  using namespace engine::components::parameter_aliases;
+  entity.assign<MovingBody>(Velocity{-1.0f, 0.0f}, GravityAffected{false});
   entity.assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
   entity.assign<components::RedBird>();

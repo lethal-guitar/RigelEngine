@@ -69,15 +69,17 @@ void SlimePipeSystem::update(entityx::EntityManager& es) {
 
 void SlimePipeSystem::createSlimeDrop(const base::Vector& position) {
   using namespace engine::components;
+  using namespace engine::components::parameter_aliases;
+  using namespace game_logic::components::parameter_aliases;
 
   auto entity = mpEntityFactory->createSprite(
     DROP_ACTOR_ID,
     position + DROP_OFFSET,
     true);
   // Gravity handles the drop's movement, so velocity is initally 0.
-  entity.assign<MovingBody>(base::Point<float>{0.0f, 0.0f}, true);
+  entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
 
-  entity.assign<game_logic::components::PlayerDamaging>(1);
+  entity.assign<game_logic::components::PlayerDamaging>(Damage{1});
   entity.assign<AutoDestroy>(AutoDestroy{
     AutoDestroy::Condition::OnWorldCollision,
     AutoDestroy::Condition::OnLeavingActiveRegion});

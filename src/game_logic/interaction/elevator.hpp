@@ -53,7 +53,7 @@ public:
   bool isPlayerAttached() const;
 
 private:
-  entityx::Entity findAttachableElevator(entityx::EntityManager& es);
+  entityx::Entity findAttachableElevator(entityx::EntityManager& es) const;
 
   void updateElevatorAttachment(
     entityx::EntityManager& es,

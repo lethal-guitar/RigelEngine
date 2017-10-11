@@ -38,6 +38,8 @@ set(core_sources
     engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/particle_system.cpp
+    engine/particle_system.hpp
     engine/physical_components.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp
@@ -92,6 +94,8 @@ set(core_sources
     game_logic/damage_infliction_system.cpp
     game_logic/damage_infliction_system.hpp
     game_logic/dynamic_geometry_components.hpp
+    game_logic/effects_system.cpp
+    game_logic/effects_system.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp

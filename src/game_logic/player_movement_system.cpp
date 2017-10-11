@@ -34,6 +34,8 @@ using namespace std;
 
 
 void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
+  using namespace engine::components::parameter_aliases;
+
   PlayerControlled controls;
   controls.mOrientation =
     isFacingRight ? Orientation::Right : Orientation::Left;
@@ -44,7 +46,8 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
   }
   player.assign<PlayerControlled>(controls);
 
-  player.assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true, true});
+  player.assign<MovingBody>(
+    Velocity{0.0f, 0.0f}, GravityAffected{true}, IsPlayer{true});
   player.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 5}});
 }
 

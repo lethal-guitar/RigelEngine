@@ -37,6 +37,7 @@
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
+#include "game_logic/effect_components.hpp"
 #include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
@@ -75,7 +76,10 @@ void addDefaultMovingBody(
   EntityLike& entity,
   const BoundingBox& boundingBox
 ) {
-  entity.template assign<MovingBody>(MovingBody{{0.0f, 0.0f}, true});
+  using namespace engine::components::parameter_aliases;
+
+  entity.template assign<MovingBody>(
+    MovingBody{Velocity{0.0f, 0.0f}, GravityAffected{true}});
   entity.template assign<BoundingBox>(boundingBox);
   entity.template assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -93,6 +97,113 @@ auto toPlayerProjectileType(const ProjectileType type) {
 }
 
 
+const base::Point<float> FLY_RIGHT[] = {
+  {3.0f, 0.0f},
+  {3.0f, 0.0f},
+  {3.0f, 0.0f},
+  {2.0f, 0.0f},
+  {2.0f, 1.0f},
+  {2.0f, 1.0f},
+  {2.0f, 2.0f},
+  {1.0f, 2.0f},
+  {1.0f, 3.0f},
+  {1.0f, 3.0f}
+};
+
+
+const base::Point<float> FLY_UPPER_RIGHT[] = {
+  {3.0f, -3.0f},
+  {2.0f, -2.0f},
+  {2.0f, -1.0f},
+  {1.0f,  0.0f},
+  {1.0f,  0.0f},
+  {1.0f,  1.0f},
+  {1.0f,  2.0f},
+  {1.0f,  2.0f},
+  {1.0f,  3.0f},
+  {1.0f,  3.0f}
+};
+
+
+const base::Point<float> FLY_UP[] = {
+  {0.0f, -3.0f},
+  {0.0f, -2.0f},
+  {0.0f, -2.0f},
+  {0.0f, -1.0f},
+  {0.0f, 0.0f},
+  {0.0f, 1.0f},
+  {0.0f, 1.0f},
+  {0.0f, 2.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f}
+};
+
+
+const base::Point<float> FLY_UPPER_LEFT[] = {
+  {-3.0f, -3.0f},
+  {-2.0f, -2.0f},
+  {-2.0f, -1.0f},
+  {-1.0f, 0.0f},
+  {-1.0f, 0.0f},
+  {-1.0f, 1.0f},
+  {-1.0f, 2.0f},
+  {-1.0f, 3.0f},
+  {-1.0f, 4.0f},
+  {-1.0f, 4.0f}
+};
+
+
+const base::Point<float> FLY_LEFT[] = {
+  {-3.0f, 0.0f},
+  {-3.0f, 0.0f},
+  {-3.0f, 0.0f},
+  {-2.0f, 0.0f},
+  {-2.0f, 1.0f},
+  {-2.0f, 1.0f},
+  {-2.0f, 2.0f},
+  {-1.0f, 3.0f},
+  {-1.0f, 3.0f},
+  {-1.0f, 3.0f}
+};
+
+
+const base::Point<float> FLY_DOWN[] = {
+  {0.0f, 1.0f},
+  {0.0f, 2.0f},
+  {0.0f, 2.0f},
+  {0.0f, 2.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f},
+  {0.0f, 3.0f}
+};
+
+
+const base::Point<float> SWIRL_AROUND[] = {
+  {-2.0f, 1.0f},
+  {-2.0f, 1.0f},
+  {-2.0f, 1.0f},
+  {-1.0f, 1.0f},
+  {0.0f, 1.0f},
+  {1.0f, 1.0f},
+  {2.0f, 0.0f},
+  {1.0f, -1.0f},
+  {-2.0f, -1.0f},
+  {-2.0f, 1.0f}
+};
+
+
+const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
+  FLY_RIGHT,
+  FLY_UPPER_RIGHT,
+  FLY_UP,
+  FLY_UPPER_LEFT,
+  FLY_LEFT,
+  FLY_DOWN,
+  SWIRL_AROUND
+};
 
 }
 
@@ -194,16 +305,15 @@ entityx::Entity EntityFactory::createProjectile(
   const WorldPosition& pos,
   const ProjectileDirection direction
 ) {
-  auto entity = mpEntityManager->create();
-  auto sprite = createSpriteForId(actorIdForProjectile(type, direction));
-
-  const auto boundingBox = engine::inferBoundingBox(sprite);
-
+  auto entity = createActor(actorIdForProjectile(type, direction), pos);
   entity.assign<Active>();
-  entity.assign<Sprite>(sprite);
-  entity.assign<BoundingBox>(boundingBox);
 
-  configureProjectile(entity, type, pos, direction, boundingBox);
+  configureProjectile(
+    entity,
+    type,
+    pos,
+    direction,
+    *entity.component<BoundingBox>());
 
   return entity;
 }
@@ -372,6 +482,54 @@ entityx::Entity createFloatingOneShotSprite(
     IsPlayer{false},
     IgnoreCollisions{true}});
   return entity;
+}
+
+
+entityx::Entity spawnMovingEffectSprite(
+  EntityFactory& factory,
+  const ActorID id,
+  const SpriteMovement movement,
+  const base::Vector& position
+) {
+  using namespace engine::components::parameter_aliases;
+
+  auto entity = factory.createSprite(id, position, true);
+  entity.assign<Active>();
+  entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  entity.assign<AnimationLoop>(1);
+  // TODO: To match the original, the condition should actually be
+  // OnLeavingActiveRegion, but only after the movement sequence is
+  // finished.
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(120));
+
+  const auto movementIndex = static_cast<int>(movement);
+  entity.assign<MovementSequence>(MOVEMENT_SEQUENCES[movementIndex]);
+  entity.assign<MovingBody>(
+    Velocity{},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
+  return entity;
+}
+
+
+void spawnFloatingScoreNumber(
+  EntityFactory& factory,
+  const ScoreNumberType type,
+  const base::Vector& position
+) {
+  using namespace engine::components::parameter_aliases;
+
+  auto entity = factory.createSprite(scoreNumberActor(type), position, true);
+  engine::startAnimationSequence(entity, SCORE_NUMBER_ANIMATION_SEQUENCE);
+  entity.assign<MovementSequence>(SCORE_NUMBER_MOVE_SEQUENCE);
+  entity.assign<MovingBody>(
+    Velocity{},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
+  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
+  entity.assign<Active>();
 }
 
 }}

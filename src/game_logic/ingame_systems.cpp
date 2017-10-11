@@ -42,6 +42,7 @@ IngameSystems::IngameSystems(
 )
   : mpScrollOffset(pScrollOffset)
   , mCollisionChecker(pMap, entities, eventManager)
+  , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
       mpScrollOffset,
       pRenderer,
@@ -75,6 +76,12 @@ IngameSystems::IngameSystems(
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
   , mDamageInflictionSystem(pPlayerModel, pMap, pServiceProvider)
+  , mEffectsSystem(
+      pServiceProvider,
+      pRandomGenerator,
+      &entities,
+      pEntityFactory,
+      &mParticles)
   , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
   , mBlueGuardSystem(
       playerEntity,
@@ -90,9 +97,15 @@ IngameSystems::IngameSystems(
       playerEntity,
       pPlayerModel,
       pEntityFactory,
+      pRandomGenerator,
       pServiceProvider)
   , mMessengerDroneSystem(playerEntity)
-  , mPrisonerSystem(playerEntity, pRandomGenerator)
+  , mPrisonerSystem(
+      playerEntity,
+      pEntityFactory,
+      pServiceProvider,
+      &mParticles,
+      pRandomGenerator)
   , mRedBirdSystem(playerEntity)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSecurityCameraSystem(playerEntity)
@@ -115,12 +128,21 @@ IngameSystems::IngameSystems(
       const base::Point<float>& velocity
     ) {
       mBlueGuardSystem.onEntityHit(entity);
-      item_containers::onEntityHit(entity, entities);
-      mNapalmBombSystem.onEntityHit(entity);
-      mSlimeBlobSystem.onEntityHit(entity);
       mSpikeBallSystem.onEntityHit(entity, velocity);
       mLaserTurretSystem.onEntityHit(entity);
-      mPrisonerSystem.onEntityHit(entity);
+    });
+
+  mDamageInflictionSystem.shootableKilledSignal().connect(
+    [this, &entities](
+      entityx::Entity entity,
+      const base::Point<float>& velocity
+    ) {
+      mEffectsSystem.onShootableKilled(entity, velocity);
+      item_containers::onShootableKilled(entity, entities);
+      mLaserTurretSystem.onShootableKilled(entity, velocity);
+      mNapalmBombSystem.onShootableKilled(entity);
+      mSlimeBlobSystem.onShootableKilled(entity);
+      mPrisonerSystem.onShootableKilled(entity, velocity);
     });
 
   mPhysicsSystem.entityCollidedSignal().connect(
@@ -191,17 +213,21 @@ void IngameSystems::update(
 
   mPlayerDamageSystem.update(es);
   mDamageInflictionSystem.update(es);
+  mEffectsSystem.update(es);
   mPlayerAnimationSystem.update(es);
 
   mPlayerProjectileSystem.update(es);
 
   mMapScrollSystem.update();
   mLifeTimeSystem.update(es);
+
+  mParticles.update();
 }
 
 
 void IngameSystems::render(entityx::EntityManager& es) {
   mRenderingSystem.update(es);
+  mParticles.render(*mpScrollOffset);
   mDebuggingSystem.update(es);
 }
 

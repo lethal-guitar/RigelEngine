@@ -107,7 +107,7 @@ public:
 
   void update(entityx::EntityManager& es);
 
-  void onEntityHit(entityx::Entity entity);
+  void onShootableKilled(entityx::Entity entity);
 
 private:
   void explode(entityx::Entity entity);
@@ -124,7 +124,7 @@ private:
 
 namespace item_containers {
 
-void onEntityHit(entityx::Entity entity, entityx::EntityManager& es);
+void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es);
 
 }
 
