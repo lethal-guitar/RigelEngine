@@ -253,7 +253,6 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mHudRenderer.render();
   }
 
-  mpRenderer->clear();
   mIngameViewPortRenderTarget.render(
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,
