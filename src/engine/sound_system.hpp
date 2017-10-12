@@ -50,8 +50,6 @@ private:
   static const int MAX_CONCURRENT_SOUNDS = 64;
 
   struct LoadedSound {
-    LoadedSound();
-
     data::AudioBuffer mBuffer;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
