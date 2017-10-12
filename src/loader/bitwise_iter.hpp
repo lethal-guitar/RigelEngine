@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 
@@ -24,33 +23,31 @@
 namespace rigel { namespace loader {
 
 /** Adapter iterator which returns individual bits from a sequence of values
+ *
+ * Fulfills the InputIterator concept. Depending on the underlying original
+ * iterator, it can be used in multi-pass algorithms, even though it doesn't
+ * satisfy the requirements for ForwardIterator.
  */
 template<typename OriginalIterType>
 class BitWiseIterator {
 public:
-  using value_type =
-      typename std::iterator_traits<OriginalIterType>::value_type;
+  using value_type = bool;
+  using reference = value_type&;
+  using pointer = value_type*;
+  using difference_type =
+    typename std::iterator_traits<OriginalIterType>::difference_type;
+  using iterator_category = std::input_iterator_tag;
 
-  BitWiseIterator(
-    OriginalIterType originalIter,
-    OriginalIterType originalEnd,
-    bool lsbFirst = false
-  )
+  explicit BitWiseIterator(OriginalIterType originalIter)
     : mOriginalIter(originalIter)
-    , mOriginalEnd(originalEnd)
     , mBitIndex(0)
-    , mLsbFirst(lsbFirst)
-    , mIsAtEnd(originalIter == originalEnd)
   {
   }
 
   bool operator==(const BitWiseIterator& other) {
     return
       other.mOriginalIter == mOriginalIter &&
-      other.mOriginalEnd == mOriginalEnd &&
-      other.mBitIndex == mBitIndex &&
-      other.mLsbFirst == mLsbFirst &&
-      other.mIsAtEnd == mIsAtEnd;
+      other.mBitIndex == mBitIndex;
   }
 
   bool operator!=(const BitWiseIterator& other) {
@@ -64,41 +61,28 @@ public:
   }
 
   BitWiseIterator& operator++() {
-    assert(!mIsAtEnd);
-
-    mBitIndex++;
+    ++mBitIndex;
     if (mBitIndex == NUM_BITS) {
-      mOriginalIter++;
+      ++mOriginalIter;
       mBitIndex = 0;
-
-      if (mOriginalIter == mOriginalEnd) {
-        mIsAtEnd = true;
-      }
     }
 
     return *this;
   }
 
-  int operator*() {
-    assert(!mIsAtEnd);
+  bool operator*() {
+    const auto actualBitIndex = (NUM_BITS - 1) - mBitIndex;
+    const auto bitMask = 1 << actualBitIndex;
 
     const auto bitPack = *mOriginalIter;
-    const auto actualBitIndex = mLsbFirst
-      ? mBitIndex
-      : (NUM_BITS - 1) - mBitIndex;
-
-    const auto bitMask = 1 << actualBitIndex;
     return (bitPack & bitMask) != 0;
   }
 
 private:
-  static const auto NUM_BITS = sizeof(value_type)*8;
+  static const auto NUM_BITS = sizeof(value_type) * 8;
 
   OriginalIterType mOriginalIter;
-  const OriginalIterType mOriginalEnd;
   std::uint8_t mBitIndex;
-  const bool mLsbFirst;
-  bool mIsAtEnd;
 };
 
 }}
