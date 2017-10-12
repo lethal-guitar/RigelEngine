@@ -96,12 +96,6 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
-SoundSystem::LoadedSound::LoadedSound()
-  : mpMixChunk(nullptr)
-{
-}
-
-
 SoundSystem::SoundSystem()
   : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
 {
