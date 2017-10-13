@@ -63,6 +63,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define TEXTURE_LOOKUP texture2D
 #define OUTPUT_COLOR gl_FragColor
 #define OUTPUT_COLOR_DECLARATION
+#define SET_POINT_SIZE(size) gl_PointSize = size;
 )shd";
 
 #else
@@ -76,6 +77,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define TEXTURE_LOOKUP texture
 #define OUTPUT_COLOR outputColor
 #define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
+#define SET_POINT_SIZE
 )shd";
 
 #endif
@@ -124,6 +126,7 @@ OUT vec4 colorFrag;
 uniform mat4 transform;
 
 void main() {
+  SET_POINT_SIZE(1.0);
   gl_Position = transform * vec4(position, 0.0, 1.0);
   colorFrag = color;
 }
