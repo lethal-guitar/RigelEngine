@@ -24,6 +24,7 @@
 #include "utils/container_tools.hpp"
 
 #include <array>
+#include <cassert>
 #include <stdexcept>
 
 
@@ -139,8 +140,7 @@ void applyEgaMask(
 
 template<typename Callable>
 data::PixelBuffer decodeTiledEgaData(
-  const ByteBufferCIter begin,
-  const ByteBufferCIter end,
+  const ByteBufferCIter dataIter,
   const std::size_t widthInTiles,
   const std::size_t heightInTiles,
   Callable decodeRow
@@ -149,7 +149,7 @@ data::PixelBuffer decodeTiledEgaData(
   PixelBuffer pixels(
     widthInTiles * heightInTiles * GameTraits::tileSizeSquared);
 
-  BitWiseIterator<ByteBufferCIter> bitsIter(begin, end);
+  BitWiseIterator<ByteBufferCIter> bitsIter(dataIter);
   for (auto row=0u; row<heightInTiles; ++row) {
     for (auto col=0u; col<widthInTiles; ++col) {
       for (size_t rowInTile=0u; rowInTile<GameTraits::tileSize; ++rowInTile) {
@@ -179,7 +179,7 @@ data::PixelBuffer decodeSimplePlanarEgaBuffer(
     static_cast<size_t>(numBytes / GameTraits::egaPlanes) *
     GameTraits::pixelsPerEgaByte;
 
-  BitWiseIterator<ByteBufferCIter> bitsIter(begin, end);
+  BitWiseIterator<ByteBufferCIter> bitsIter(begin);
   vector<uint8_t> indexedPixels(numPixels, 0);
   readEgaColorData(bitsIter, indexedPixels.begin(), numPixels);
 
@@ -200,7 +200,7 @@ data::Image loadTiledImage(
   const auto heightInTiles =
     inferHeight(begin, end, widthInTiles, GameTraits::bytesPerTile(isMasked));
 
-  auto pixels = decodeTiledEgaData(begin, end, widthInTiles, heightInTiles,
+  auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
     [&palette, isMasked](auto& sourceBitsIter, const auto targetPixelIter) {
       array<bool, GameTraits::tileSize> pixelMask;
       if (isMasked) {
@@ -237,7 +237,7 @@ data::Image loadTiledFontBitmap(
   const auto heightInTiles =
     inferHeight(begin, end, widthInTiles, GameTraits::bytesPerFontTile());
 
-  auto pixels = decodeTiledEgaData(begin, end, widthInTiles, heightInTiles,
+  auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
     [](auto& sourceBitsIter, const auto targetPixelIter) {
       array<bool, GameTraits::tileSize> pixelMask;
       readEgaMaskPlane(sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
