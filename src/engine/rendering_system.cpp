@@ -16,16 +16,13 @@
 
 #include "rendering_system.hpp"
 
-#include "base/warnings.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/range/algorithm/find_if.hpp>
-#include <boost/range/algorithm/sort.hpp>
-RIGEL_RESTORE_WARNINGS
+#include <algorithm>
+#include <functional>
 
 
 namespace ex = entityx;
@@ -147,10 +144,10 @@ struct RenderingSystem::SpriteData {
 
 
 void RenderingSystem::update(ex::EntityManager& es) {
-  using namespace boost::range;
+  using namespace std;
 
   // Collect sprites, then order by draw index
-  std::vector<SpriteData> spritesByDrawOrder;
+  vector<SpriteData> spritesByDrawOrder;
   es.each<Sprite, WorldPosition>([this, &spritesByDrawOrder](
     ex::Entity entity,
     Sprite& sprite,
@@ -159,13 +156,15 @@ void RenderingSystem::update(ex::EntityManager& es) {
     const auto drawTopMost = entity.has_component<DrawTopMost>();
     spritesByDrawOrder.emplace_back(entity, &sprite, drawTopMost, pos);
   });
-  sort(spritesByDrawOrder);
+  sort(begin(spritesByDrawOrder), end(spritesByDrawOrder));
 
   // Render
   mMapRenderer.renderBackground(*mpScrollOffset);
 
-  const auto firstTopMostIt = find_if(spritesByDrawOrder,
-    [](const auto& data) { return data.mDrawTopMost; });
+  const auto firstTopMostIt = find_if(
+    begin(spritesByDrawOrder),
+    end(spritesByDrawOrder),
+    mem_fn(&SpriteData::mDrawTopMost));
 
   // behind foreground
   for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
