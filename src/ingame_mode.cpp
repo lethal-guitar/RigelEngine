@@ -72,6 +72,7 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 
 
 IngameMode::IngameMode(
+  data::PlayerModel* pPlayerModel,
   const int episode,
   const int levelNumber,
   const data::Difficulty difficulty,
@@ -86,12 +87,13 @@ IngameMode::IngameMode(
       &mEntities,
       &context.mpResources->mActorImagePackage,
       difficulty)
-  , mPlayerModelAtLevelStart(mPlayerModel)
+  , mpPlayerModel(pPlayerModel)
+  , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mLevelFinished(false)
   , mAccumulatedTime(0.0)
   , mShowDebugText(false)
   , mHudRenderer(
-      &mPlayerModel,
+      mpPlayerModel,
       levelNumber + 1,
       mpRenderer,
       *context.mpResources)
@@ -294,7 +296,7 @@ void IngameMode::loadLevel(
     difficulty,
     &mScrollOffset,
     mPlayerEntity,
-    &mPlayerModel,
+    mpPlayerModel,
     &mLevelData.mMap,
     engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
     mpServiceProvider,
@@ -351,7 +353,7 @@ void IngameMode::handlePlayerDeath() {
 
   const auto playerDead =
     playerState.mState == player::PlayerState::Dead &&
-    mPlayerModel.mHealth <= 0;
+    mpPlayerModel->mHealth <= 0;
   if (playerDead) {
     restartLevel();
   }
@@ -367,7 +369,7 @@ void IngameMode::restartLevel() {
   mPlayerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors);
 
-  mPlayerModel = mPlayerModelAtLevelStart;
+  *mpPlayerModel = mPlayerModelAtLevelStart;
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);

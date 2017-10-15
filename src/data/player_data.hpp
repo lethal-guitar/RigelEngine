@@ -103,6 +103,13 @@ struct PlayerModel {
     }
   }
 
+  void resetForNewLevel() {
+    mHealth = MAX_HEALTH;
+    mCollectedLetters.clear();
+    mInventory.clear();
+    mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
+  }
+
   std::unordered_set<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
   WeaponType mWeapon = WeaponType::Normal;

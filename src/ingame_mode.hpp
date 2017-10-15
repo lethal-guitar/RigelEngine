@@ -44,6 +44,7 @@ namespace rigel {
 class IngameMode : public GameMode {
 public:
   IngameMode(
+    data::PlayerModel* pPlayerModel,
     int episode,
     int level,
     data::Difficulty difficulty,
@@ -80,7 +81,7 @@ private:
   entityx::EntityManager mEntities;
   game_logic::EntityFactory mEntityFactory;
 
-  data::PlayerModel mPlayerModel;
+  data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
   game_logic::PlayerInputState mInputState;

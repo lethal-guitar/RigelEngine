@@ -33,7 +33,12 @@ GameSessionMode::GameSessionMode(
   boost::optional<base::Vector> playerPositionOverride
 )
   : mCurrentStage(std::make_unique<IngameMode>(
-      episode, level, difficulty, context, playerPositionOverride))
+      &mPlayerModel,
+      episode,
+      level,
+      difficulty,
+      context,
+      playerPositionOverride))
   , mEpisode(episode)
   , mCurrentLevelNr(level)
   , mDifficulty(difficulty)
@@ -66,7 +71,7 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       pIngameMode->updateAndRender(dt);
 
       if (pIngameMode->levelFinished()) {
-        auto bonusScreen = ui::BonusScreen{mContext, {}, 0};
+        auto bonusScreen = ui::BonusScreen{mContext, {}, mPlayerModel.mScore};
         fadeToNewStage(bonusScreen);
         mCurrentStage = std::move(bonusScreen);
       }
@@ -76,8 +81,14 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       bonusScreen.updateAndRender(dt);
 
       if (bonusScreen.finished()) {
+        mPlayerModel.resetForNewLevel();
+
         auto pNextIngameMode = std::make_unique<IngameMode>(
-          mEpisode, ++mCurrentLevelNr, mDifficulty, mContext);
+          &mPlayerModel,
+          mEpisode,
+          ++mCurrentLevelNr,
+          mDifficulty,
+          mContext);
         fadeToNewStage(*pNextIngameMode);
         mCurrentStage = std::move(pNextIngameMode);
       }

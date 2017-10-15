@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/boost_variant.hpp"
+#include "data/player_data.hpp"
 #include "ui/bonus_screen.hpp"
 
 #include "game_mode.hpp"
@@ -47,6 +48,7 @@ private:
     ui::BonusScreen
   >;
 
+  data::PlayerModel mPlayerModel;
   SessionStage mCurrentStage;
   const int mEpisode;
   int mCurrentLevelNr;
