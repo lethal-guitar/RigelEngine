@@ -47,21 +47,22 @@ public:
   using const_iterator = const_pointer;
 
   ArrayView() = default;
-  ArrayView(const T* pData, const size_type size)
+  constexpr ArrayView(const T* pData, const size_type size) noexcept
     : mpData(pData)
     , mSize(size)
   {
   }
 
+  // implicit on purpose
   template <std::size_t N>
-  ArrayView(const std::array<T, N>& array) // implicit on purpose
+  constexpr ArrayView(const std::array<T, N>& array) noexcept
     : mpData(array.data())
     , mSize(static_cast<size_type>(N))
   {
   }
 
   template <std::size_t N>
-  ArrayView(const T (&array)[N]) // implicit on purpose
+  constexpr ArrayView(const T (&array)[N]) noexcept // implicit on purpose
     : mpData(array)
     , mSize(static_cast<size_type>(N))
   {

@@ -51,7 +51,7 @@ struct Point {
   Point() = default;
   Point(const Point&) = default;
   Point(Point&&) = default;
-  Point(const ValueT x_, const ValueT y_)
+  constexpr Point(const ValueT x_, const ValueT y_) noexcept
     : x(x_)
     , y(y_)
   {
@@ -75,7 +75,7 @@ struct Point {
 template<typename ValueT>
 struct Size {
   Size() = default;
-  Size(const ValueT width_, const ValueT height_)
+  constexpr Size(const ValueT width_, const ValueT height_) noexcept
     : width(width_)
     , height(height_)
   {

@@ -152,8 +152,6 @@ void Game::mainLoop() {
 
     mDebugText.clear();
 
-    mRenderer.clear();
-
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
 
@@ -177,6 +175,7 @@ void Game::mainLoop() {
       mpCurrentGameMode->updateAndRender(elapsed);
     }
 
+    mRenderer.clear();
     mRenderTarget.renderScaledToScreen(&mRenderer);
 
     if (!mDebugText.empty()) {

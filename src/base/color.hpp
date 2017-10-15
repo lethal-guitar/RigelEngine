@@ -23,8 +23,8 @@
 namespace rigel { namespace base {
 
 struct Color {
-  Color() = default;
-  Color(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
+  constexpr Color() = default;
+  constexpr Color(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_) noexcept
     : r(r_)
     , g(g_)
     , b(b_)
@@ -32,11 +32,11 @@ struct Color {
   {
   }
 
-  bool operator==(const Color& other) const {
+  bool operator==(const Color& other) const noexcept {
     return std::tie(r, g, b, a) == std::tie(other.r, other.g, other.b, other.a);
   }
 
-  bool operator!=(const Color& other) const {
+  bool operator!=(const Color& other) const noexcept {
     return !(*this == other);
   }
 
