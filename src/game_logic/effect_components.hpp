@@ -39,7 +39,7 @@ enum class ScoreNumberType : std::uint8_t;
 namespace effects {
 
 struct Sound {
-  explicit Sound(const data::SoundId id)
+  constexpr explicit Sound(const data::SoundId id) noexcept
     : mId(id)
   {
   }
