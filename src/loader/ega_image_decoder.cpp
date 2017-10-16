@@ -38,7 +38,6 @@ using data::tilesToPixels;
 namespace {
 
 using PalettizedPixelBuffer = std::vector<std::uint8_t>;
-using PalettizedPixelBufferCIter = PalettizedPixelBuffer::const_iterator;
 
 
 size_t inferHeight(
@@ -59,14 +58,16 @@ size_t inferHeight(
  *   source and target can be advanced pixelCount times.
  */
 template<typename SourceIter, typename TargetIter>
-void readEgaMaskPlane(
-  SourceIter& source,
+SourceIter readEgaMaskPlane(
+  SourceIter source,
   TargetIter target,
   const size_t pixelCount
 ) {
   for (size_t i = 0; i < pixelCount; ++i) {
-    *target++ = *source++ != 0;
+    *target++ = *source++;
   }
+
+  return source;
 }
 
 /** Decode EGA color data (4 planes)
@@ -77,19 +78,21 @@ void readEgaMaskPlane(
  *   source can be advanced pixelCount*4 times.
  */
 template<typename SourceIter, typename TargetIter>
-void readEgaColorData(
-  SourceIter& source,
+SourceIter readEgaColorData(
+  SourceIter source,
   TargetIter target,
   const size_t pixelCount
 ) {
   for (auto plane = 0u; plane < GameTraits::egaPlanes; ++plane) {
-    auto targetWritePassIter = target;
+    auto targetIterForPlane = target;
 
     for (auto pixel = 0u; pixel < pixelCount; ++pixel) {
       const auto planeBit = *source++;
-      *targetWritePassIter++ |= planeBit << plane;
+      *targetIterForPlane++ |= planeBit << plane;
     }
   }
+
+  return source;
 }
 
 
@@ -101,8 +104,8 @@ void readEgaColorData(
  *   source can be advanced pixelCount times.
  */
 template<typename SourceIter, typename TargetIter>
-void readEgaMonochromeData(
-  SourceIter& source,
+SourceIter readEgaMonochromeData(
+  SourceIter source,
   TargetIter target,
   const size_t pixelCount
 ) {
@@ -112,6 +115,8 @@ void readEgaMonochromeData(
       data::Pixel{255, 255, 255, 255} :
       data::Pixel{0, 0, 0, 255};
   }
+
+  return source;
 }
 
 
@@ -157,7 +162,7 @@ data::PixelBuffer decodeTiledEgaData(
           (tilesToPixels(row) + rowInTile)*targetBufferStride;
         const auto targetPixelIter = pixels.begin() + insertStart;
 
-        decodeRow(bitsIter, targetPixelIter);
+        bitsIter = decodeRow(bitsIter, targetPixelIter);
       }
     }
   }
@@ -180,7 +185,7 @@ data::PixelBuffer decodeSimplePlanarEgaBuffer(
     GameTraits::pixelsPerEgaByte;
 
   BitWiseIterator<ByteBufferCIter> bitsIter(begin);
-  vector<uint8_t> indexedPixels(numPixels, 0);
+  PalettizedPixelBuffer indexedPixels(numPixels, 0);
   readEgaColorData(bitsIter, indexedPixels.begin(), numPixels);
 
   return utils::transformed(indexedPixels,
@@ -201,25 +206,27 @@ data::Image loadTiledImage(
     inferHeight(begin, end, widthInTiles, GameTraits::bytesPerTile(isMasked));
 
   auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
-    [&palette, isMasked](auto& sourceBitsIter, const auto targetPixelIter) {
+    [&palette, isMasked](auto sourceBitsIter, const auto targetPixelIter) {
       array<bool, GameTraits::tileSize> pixelMask;
       if (isMasked) {
-        readEgaMaskPlane(
+        sourceBitsIter = readEgaMaskPlane(
           sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
       }
 
       array<uint8_t, GameTraits::tileSize> indexedPixels;
       indexedPixels.fill(0);
-      readEgaColorData(
+      sourceBitsIter = readEgaColorData(
         sourceBitsIter, indexedPixels.begin(), GameTraits::tileSize);
 
       for (auto i=0; i<GameTraits::tileSize; ++i) {
-       *(targetPixelIter + i) = palette[indexedPixels[i]];
+        *(targetPixelIter + i) = palette[indexedPixels[i]];
       }
 
       if (isMasked) {
         applyEgaMask(pixelMask.begin(), targetPixelIter, GameTraits::tileSize);
       }
+
+      return sourceBitsIter;
     });
 
   return data::Image(
@@ -238,13 +245,14 @@ data::Image loadTiledFontBitmap(
     inferHeight(begin, end, widthInTiles, GameTraits::bytesPerFontTile());
 
   auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
-    [](auto& sourceBitsIter, const auto targetPixelIter) {
+    [](auto sourceBitsIter, const auto targetPixelIter) {
       array<bool, GameTraits::tileSize> pixelMask;
-      readEgaMaskPlane(sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
+      sourceBitsIter = readEgaMaskPlane(sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
 
-      readEgaMonochromeData(
+      sourceBitsIter = readEgaMonochromeData(
         sourceBitsIter, targetPixelIter, GameTraits::tileSize);
       applyEgaMask(pixelMask.begin(), targetPixelIter, GameTraits::tileSize);
+      return sourceBitsIter;
     });
 
   return data::Image(

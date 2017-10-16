@@ -35,12 +35,6 @@ namespace detail {
 struct Flying {};
 
 struct Hovering {
-  explicit Hovering(const int initialHeight)
-    : mInitialHeight(initialHeight)
-  {
-  }
-
-  int mInitialHeight;
   int mFramesElapsed = 0;
 };
 

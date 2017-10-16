@@ -88,7 +88,7 @@ void RedBirdSystem::update(entityx::EntityManager& es) {
             position.x > playerPosition.x &&
             position.x < playerPosition.x + 2;
           if (wantsToAttack) {
-            birdState.mState = Hovering{position.y};
+            birdState.mState = Hovering{};
             body.mVelocity = {};
             engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
           }
@@ -97,7 +97,7 @@ void RedBirdSystem::update(entityx::EntityManager& es) {
         [&](Hovering& state) {
           ++state.mFramesElapsed;
           if (state.mFramesElapsed >= 6) {
-            birdState.mState = PlungingDown{state.mInitialHeight};
+            birdState.mState = PlungingDown{position.y};
             body.mGravityAffected = true;
             entity.remove<AnimationSequence>();
             sprite.mFramesToRender[0] = 6;
