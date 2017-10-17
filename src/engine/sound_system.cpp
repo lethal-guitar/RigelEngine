@@ -20,8 +20,6 @@
 #include "engine/imf_player.hpp"
 #include "sdl_utils/error.hpp"
 
-#include <speex/speex_resampler.h>
-
 #include <cassert>
 #include <cmath>
 #include <utility>
@@ -48,32 +46,28 @@ data::AudioBuffer resampleAudio(
   const data::AudioBuffer& buffer,
   const int newSampleRate
 ) {
-  using ResamplerPtr =
-    std::unique_ptr<SpeexResamplerState, decltype(&speex_resampler_destroy)>;
-  ResamplerPtr pResampler(
-    speex_resampler_init(
-      1,
-      buffer.mSampleRate,
-      newSampleRate,
-      5,
-      nullptr),
-    &speex_resampler_destroy);
-  speex_resampler_skip_zeros(pResampler.get());
+  const auto ratio = static_cast<float>(buffer.mSampleRate) / newSampleRate;
 
-  auto inputLength = static_cast<spx_uint32_t>(buffer.mSamples.size());
-  auto outputLength = static_cast<spx_uint32_t>(
-    base::integerDivCeil<spx_uint32_t>(
-      inputLength, buffer.mSampleRate) * newSampleRate);
+  const auto inputLength = buffer.mSamples.size();
+  const auto outputLength = static_cast<std::size_t>(
+    std::round(inputLength / ratio));
 
   std::vector<data::Sample> resampled(outputLength);
-  speex_resampler_process_int(
-    pResampler.get(),
-    0,
-    buffer.mSamples.data(),
-    &inputLength,
-    resampled.data(),
-    &outputLength);
-  resampled.resize(outputLength);
+  for (std::size_t i = 0; i < outputLength; ++i) {
+    const auto sourceIndexFloat = i * ratio;
+
+    const auto sourceIndex1 = static_cast<int>(std::floor(sourceIndexFloat));
+    const auto sourceIndex2 = static_cast<int>(std::ceil(sourceIndexFloat));
+
+    const auto positionBetweenSamples = sourceIndexFloat - sourceIndex1;
+
+    const auto interpolated = base::lerp(
+      buffer.mSamples[sourceIndex1],
+      buffer.mSamples[sourceIndex2],
+      positionBetweenSamples);
+
+    resampled[i] = static_cast<data::Sample>(std::round(interpolated));
+  }
   return {newSampleRate, resampled};
 }
 
@@ -133,7 +127,9 @@ SoundSystem::~SoundSystem() {
 
 
 SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
-  auto buffer = resampleAudio(original, SAMPLE_RATE);
+  auto buffer = original.mSampleRate == SAMPLE_RATE
+    ? original
+    : resampleAudio(original, SAMPLE_RATE);
   if (buffer.mSamples.back() != 0) {
     // Prevent clicks/pops with samples that don't return to 0 at the end
     // by adding a small linear ramp leading back to zero.

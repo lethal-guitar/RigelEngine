@@ -128,7 +128,6 @@ The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):
 
 * [entityx](https://github.com/alecthomas/entityx) Entity-Component-System framework, v. 1.1.2
-* Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * DBOPL AdLib emulator (taken from [DosBox](http://www.dosbox.com/))
 * [Catch](https://github.com/philsquared/Catch) testing framework
 * [atria](https://github.com/Ableton/atria) C++ utilities
