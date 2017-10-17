@@ -179,6 +179,16 @@ void MapRenderer::updateAnimatedMapTiles() {
 }
 
 
+void MapRenderer::renderSingleTile(
+  const data::map::TileIndex index,
+  const base::Vector& position,
+  const base::Vector& scrollPosition
+) {
+  const auto screenPosition = position - scrollPosition;
+  mTileRenderer.renderTile(index, screenPosition);
+}
+
+
 map::TileIndex MapRenderer::animatedTileIndex(
   const map::TileIndex tileIndex
 ) const {

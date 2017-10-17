@@ -54,6 +54,11 @@ public:
 
   void updateAnimatedMapTiles();
 
+  void renderSingleTile(
+    data::map::TileIndex index,
+    const base::Vector& position,
+    const base::Vector& scrollPosition);
+
 private:
   void renderBackdrop(const base::Vector& scrollPosition);
   void renderMapTiles(
