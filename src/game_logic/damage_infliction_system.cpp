@@ -104,7 +104,7 @@ void DamageInflictionSystem::inflictDamage(
   Shootable& shootable
 ) {
   const auto inflictorVelocity = extractVelocity(inflictorEntity);
-  if (damage.mDestroyOnContact) {
+  if (damage.mDestroyOnContact || shootable.mAlwaysConsumeInflictor) {
     inflictorEntity.destroy();
   } else {
     damage.mHasCausedDamage = true;
@@ -124,13 +124,10 @@ void DamageInflictionSystem::inflictDamage(
       const auto mapSection =
         shootableEntity.component<MapGeometryLink>()
           ->mLinkedGeometrySection;
+
       mpMap->clearSection(
         mapSection.topLeft.x, mapSection.topLeft.y,
         mapSection.size.width, mapSection.size.height);
-
-      // When hitting a destructible wall, projectiles always vanish
-      // immediately
-      inflictorEntity.destroy();
 
       mpServiceProvider->playSound(data::SoundId::BigExplosion);
     }
