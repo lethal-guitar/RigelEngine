@@ -25,6 +25,7 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
   struct IGameServiceProvider;
   namespace data { namespace map { class Map; }}
+  namespace engine { class RandomNumberGenerator; }
 }
 
 
@@ -34,13 +35,17 @@ class DynamicGeometrySystem {
 public:
   DynamicGeometrySystem(
     IGameServiceProvider* pServiceProvider,
-    data::map::Map* pMap);
+    entityx::EntityManager* pEntityManager,
+    data::map::Map* pMap,
+    engine::RandomNumberGenerator* pRandomGenerator);
 
   void onShootableKilled(entityx::Entity entity);
 
 private:
   IGameServiceProvider* mpServiceProvider;
+  entityx::EntityManager* mpEntityManager;
   data::map::Map* mpMap;
+  engine::RandomNumberGenerator* mpRandomGenerator;
 };
 
 }}

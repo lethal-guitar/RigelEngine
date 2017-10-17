@@ -76,7 +76,7 @@ IngameSystems::IngameSystems(
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider)
-  , mDynamicGeometrySystem(pServiceProvider, pMap)
+  , mDynamicGeometrySystem(pServiceProvider, &entities, pMap, pRandomGenerator)
   , mEffectsSystem(
       pServiceProvider,
       pRandomGenerator,
