@@ -94,6 +94,8 @@ set(core_sources
     game_logic/damage_infliction_system.cpp
     game_logic/damage_infliction_system.hpp
     game_logic/dynamic_geometry_components.hpp
+    game_logic/dynamic_geometry_system.hpp
+    game_logic/dynamic_geometry_system.cpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
     game_logic/entity_configuration.ipp
