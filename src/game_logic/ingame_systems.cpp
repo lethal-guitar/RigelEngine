@@ -75,7 +75,8 @@ IngameSystems::IngameSystems(
       difficulty)
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
-  , mDamageInflictionSystem(pPlayerModel, pMap, pServiceProvider)
+  , mDamageInflictionSystem(pPlayerModel, pServiceProvider)
+  , mDynamicGeometrySystem(pServiceProvider, &entities, pMap, pRandomGenerator)
   , mEffectsSystem(
       pServiceProvider,
       pRandomGenerator,
@@ -143,6 +144,7 @@ IngameSystems::IngameSystems(
       mNapalmBombSystem.onShootableKilled(entity);
       mSlimeBlobSystem.onShootableKilled(entity);
       mPrisonerSystem.onShootableKilled(entity, velocity);
+      mDynamicGeometrySystem.onShootableKilled(entity);
     });
 
   mPhysicsSystem.entityCollidedSignal().connect(

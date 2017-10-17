@@ -60,6 +60,12 @@ struct Shootable {
   bool mInvincible = false;
   bool mEnableHitFeedback = true;
   bool mDestroyWhenKilled = true;
+
+  /** When set, the shootable will immediately destroy any
+   * inflictor that hits it, even if that inflictor has 'destroy on contact'
+   * set to false.
+   */
+  bool mAlwaysConsumeInflictor = false;
 };
 
 

@@ -20,7 +20,6 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/dynamic_geometry_components.hpp"
 #include "game_mode.hpp"
 
 
@@ -35,7 +34,6 @@ using engine::components::MovingBody;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
 using game_logic::components::DamageInflicting;
-using game_logic::components::MapGeometryLink;
 using game_logic::components::Shootable;
 
 
@@ -52,11 +50,9 @@ auto extractVelocity(entityx::Entity entity) {
 
 DamageInflictionSystem::DamageInflictionSystem(
   data::PlayerModel* pPlayerModel,
-  data::map::Map* pMap,
   IGameServiceProvider* pServiceProvider
 )
   : mpPlayerModel(pPlayerModel)
-  , mpMap(pMap)
   , mpServiceProvider(pServiceProvider)
 {
 }
@@ -104,7 +100,7 @@ void DamageInflictionSystem::inflictDamage(
   Shootable& shootable
 ) {
   const auto inflictorVelocity = extractVelocity(inflictorEntity);
-  if (damage.mDestroyOnContact) {
+  if (damage.mDestroyOnContact || shootable.mAlwaysConsumeInflictor) {
     inflictorEntity.destroy();
   } else {
     damage.mHasCausedDamage = true;
@@ -117,23 +113,6 @@ void DamageInflictionSystem::inflictDamage(
     assert(shootableEntity.has_component<Shootable>());
 
     mpPlayerModel->mScore += shootable.mGivenScore;
-
-    // Take care of shootable walls
-    // NOTE: This might move someplace else later - maybe.
-    if (shootableEntity.has_component<MapGeometryLink>()) {
-      const auto mapSection =
-        shootableEntity.component<MapGeometryLink>()
-          ->mLinkedGeometrySection;
-      mpMap->clearSection(
-        mapSection.topLeft.x, mapSection.topLeft.y,
-        mapSection.size.width, mapSection.size.height);
-
-      // When hitting a destructible wall, projectiles always vanish
-      // immediately
-      inflictorEntity.destroy();
-
-      mpServiceProvider->playSound(data::SoundId::BigExplosion);
-    }
 
     if (shootable.mDestroyWhenKilled) {
       shootableEntity.destroy();

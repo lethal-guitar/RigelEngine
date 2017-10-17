@@ -20,6 +20,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -145,6 +146,7 @@ struct RenderingSystem::SpriteData {
 
 void RenderingSystem::update(ex::EntityManager& es) {
   using namespace std;
+  using game_logic::components::TileDebris;
 
   // Collect sprites, then order by draw index
   vector<SpriteData> spritesByDrawOrder;
@@ -179,6 +181,13 @@ void RenderingSystem::update(ex::EntityManager& es) {
   }
 
   mSpritesRendered = spritesByDrawOrder.size();
+
+
+  // tile debris
+  es.each<TileDebris, WorldPosition>(
+    [this](ex::Entity, const TileDebris& debris, const WorldPosition& pos) {
+      mMapRenderer.renderSingleTile(debris.mTileIndex, pos, *mpScrollOffset);
+    });
 }
 
 

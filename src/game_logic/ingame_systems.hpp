@@ -38,6 +38,7 @@
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/item_container.hpp"
@@ -110,6 +111,7 @@ private:
   game_logic::interaction::ElevatorSystem mElevatorSystem;
 
   game_logic::DamageInflictionSystem mDamageInflictionSystem;
+  game_logic::DynamicGeometrySystem mDynamicGeometrySystem;
   game_logic::EffectsSystem mEffectsSystem;
   game_logic::NapalmBombSystem mNapalmBombSystem;
 

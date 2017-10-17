@@ -17,8 +17,8 @@
 #pragma once
 
 #include "base/boost_variant.hpp" // Required because signals2 includes variant
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/map.hpp"
 #include "game_logic/damage_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -42,7 +42,6 @@ public:
 
   DamageInflictionSystem(
     data::PlayerModel* pPlayerModel,
-    data::map::Map* pMap,
     IGameServiceProvider* pServiceProvider);
 
   void update(entityx::EntityManager& es);
@@ -63,7 +62,6 @@ private:
     components::Shootable& shootable);
 
   data::PlayerModel* mpPlayerModel;
-  data::map::Map* mpMap;
   IGameServiceProvider* mpServiceProvider;
 
   EntityHitSignal mEntityHitSignal;

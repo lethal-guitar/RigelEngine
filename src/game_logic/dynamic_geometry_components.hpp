@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
 
 
@@ -28,6 +29,11 @@ struct MapGeometryLink {
   }
 
   engine::components::BoundingBox mLinkedGeometrySection;
+};
+
+
+struct TileDebris {
+  data::map::TileIndex mTileIndex;
 };
 
 
