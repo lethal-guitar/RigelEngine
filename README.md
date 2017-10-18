@@ -16,30 +16,16 @@ is based on reverse-engineering: A mix of analyzing the original executable's
 disassembly and observing its behaviour based on video captures of the game
 running in DosBox.
 
+I recently gave a presentation about the project at a local C++ meetup. You can find the slides [here](https://github.com/lethal-guitar/presentations).
+
 ## Current state
 
-The project is in a fairly early state. Some areas of the
-code are still rather hacky, early protoypes, and will be replaced in the future.
-Regarding functionality, basic gameplay is already possible, but most of the levels
-cannot be completed at the moment due to missing features, and most of the enemies
-aren't active yet.
-
-Here's a quick list of already working gameplay features:
-
-* Basic player movement (walking, jumping, looking up/crouching, climbing ladders)
-* Player score
-* Item pickup + inventory
-* Level progression (go to next level when reaching exit)
-* Shooting (some features missing, like flame thrower jetpack)
-* Shootable walls
-* Teleporters
-* Player taking damage, player death
-* Unlocking force-fields (access card)
-
-Many of the game's non-gameplay systems, like most of the menus, intro movie and story
-sequences etc. are also already implemented.
-
-The [issue list](https://github.com/lethal-guitar/RigelEngine/issues) should give a comprehensive overview of what's still missing.
+The project is still very much work in progress, but already partially playable. The first level of the 
+Shareware episode is completely playable, the following levels are not completable due to missing
+game mechanics (e.g. player being able to climb on pipes), but some of the enemies found in those levels are already
+functional. Overall, roughly 50 % of the functionality found in the original Shareware episode is reimplemented in
+Rigel Engine so far. The [issue list](https://github.com/lethal-guitar/RigelEngine/issues) should give a 
+comprehensive overview of what's still missing.
 
 ## Building and running
 
