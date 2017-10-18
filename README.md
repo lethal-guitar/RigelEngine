@@ -20,6 +20,10 @@ I recently gave a presentation about the project at a local C++ meetup. You can 
 
 ## Current state
 
+Here's a short video showcasing the project's current state:
+
+<a href="http://www.youtube.com/watch?v=SO1M6gHvFzM"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
+
 The project is still very much work in progress, but already partially playable. The first level of the 
 Shareware episode is completely playable, the following levels are not completable due to missing
 game mechanics (e.g. player being able to climb on pipes), but some of the enemies found in those levels are already
