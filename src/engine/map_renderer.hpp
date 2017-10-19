@@ -64,6 +64,7 @@ private:
   void renderMapTiles(
     const base::Vector& scrollPosition,
     bool renderForeground);
+  void renderTile(data::map::TileIndex index, int x, int y);
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 
 private:
