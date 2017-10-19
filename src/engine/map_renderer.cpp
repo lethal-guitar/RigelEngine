@@ -156,18 +156,11 @@ void MapRenderer::renderMapTiles(
         }
 
         const auto tileIndex = mpMap->tileAt(layer, col, row);
-
-        // Skip drawing for tile index 0, or for tiles which are not on the
-        // meta-layer (foreground/background) we're currently drawing
-        if (
-            tileIndex == 0 ||
-            mpMap->attributes().isForeGround(tileIndex) != renderForeground
-        ) {
+        if (mpMap->attributes().isForeGround(tileIndex) != renderForeground) {
           continue;
         }
 
-        const auto tileIndexToDraw = animatedTileIndex(tileIndex);
-        mTileRenderer.renderTile(tileIndexToDraw, x, y);
+        renderTile(tileIndex, x, y);
       }
     }
   }
@@ -185,7 +178,21 @@ void MapRenderer::renderSingleTile(
   const base::Vector& scrollPosition
 ) {
   const auto screenPosition = position - scrollPosition;
-  mTileRenderer.renderTile(index, screenPosition);
+  renderTile(index, screenPosition.x, screenPosition.y);
+}
+
+
+void MapRenderer::renderTile(
+  const data::map::TileIndex tileIndex,
+  const int x,
+  const int y
+) {
+  // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
+  // should be visible. Therefore, don't draw if the index is 0.
+  if (tileIndex != 0) {
+    const auto tileIndexToDraw = animatedTileIndex(tileIndex);
+    mTileRenderer.renderTile(tileIndexToDraw, x, y);
+  }
 }
 
 
