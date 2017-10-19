@@ -62,6 +62,11 @@ void spawnTileDebris(
   const auto& size = mapSection.size;
   for (auto y = start.y; y < start.y + size.height; ++y) {
     for (auto x = start.x; x < start.x + size.width; ++x) {
+      const auto titleIndex = map.tileAt(0, x, y);
+      if (tileIndex == 0) {
+        continue;
+      }
+
       const auto velocityX = 3 - randomGen.gen() % 6;
       const auto ySequenceOffset = randomGen.gen() % 5;
       auto movement = MovementSequence{
@@ -76,7 +81,7 @@ void spawnTileDebris(
       debris.assign<Active>();
       debris.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       debris.assign<AutoDestroy>(AutoDestroy::afterTimeout(80));
-      debris.assign<TileDebris>(TileDebris{map.tileAt(0, x, y)});
+      debris.assign<TileDebris>(TileDebris{tileIndex});
       debris.assign<MovingBody>(
         Velocity{static_cast<float>(velocityX), 0.0f},
         GravityAffected{false},
