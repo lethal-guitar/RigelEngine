@@ -49,45 +49,57 @@ const base::Point<float> TILE_DEBRIS_MOVEMENT_SEQUENCE[] = {
 
 
 void spawnTileDebris(
-  const engine::components::BoundingBox& mapSection,
-  data::map::Map& map,
   entityx::EntityManager& entities,
-  engine::RandomNumberGenerator& randomGen
+  const int x,
+  const int y,
+  const data::map::TileIndex tileIndex,
+  const int velocityX,
+  const int ySequenceOffset
 ) {
   using namespace engine::components;
   using namespace engine::components::parameter_aliases;
   using components::TileDebris;
 
+  auto movement = MovementSequence{
+    TILE_DEBRIS_MOVEMENT_SEQUENCE,
+    ResetAfterSequence{false},
+    EnableX{false}};
+  movement.mCurrentStep = ySequenceOffset;
+
+  auto debris = entities.create();
+  debris.assign<WorldPosition>(x, y);
+  debris.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
+  debris.assign<Active>();
+  debris.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  debris.assign<AutoDestroy>(AutoDestroy::afterTimeout(80));
+  debris.assign<TileDebris>(TileDebris{tileIndex});
+  debris.assign<MovingBody>(
+    Velocity{static_cast<float>(velocityX), 0.0f},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
+  debris.assign<MovementSequence>(movement);
+}
+
+
+void spawnTileDebrisForSection(
+  const engine::components::BoundingBox& mapSection,
+  data::map::Map& map,
+  entityx::EntityManager& entities,
+  engine::RandomNumberGenerator& randomGen
+) {
   const auto& start = mapSection.topLeft;
   const auto& size = mapSection.size;
   for (auto y = start.y; y < start.y + size.height; ++y) {
     for (auto x = start.x; x < start.x + size.width; ++x) {
-      const auto titleIndex = map.tileAt(0, x, y);
+      const auto tileIndex = map.tileAt(0, x, y);
       if (tileIndex == 0) {
         continue;
       }
 
       const auto velocityX = 3 - randomGen.gen() % 6;
       const auto ySequenceOffset = randomGen.gen() % 5;
-      auto movement = MovementSequence{
-        TILE_DEBRIS_MOVEMENT_SEQUENCE,
-        ResetAfterSequence{false},
-        EnableX{false}};
-      movement.mCurrentStep = ySequenceOffset;
-
-      auto debris = entities.create();
-      debris.assign<WorldPosition>(x, y);
-      debris.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
-      debris.assign<Active>();
-      debris.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-      debris.assign<AutoDestroy>(AutoDestroy::afterTimeout(80));
-      debris.assign<TileDebris>(TileDebris{tileIndex});
-      debris.assign<MovingBody>(
-        Velocity{static_cast<float>(velocityX), 0.0f},
-        GravityAffected{false},
-        IsPlayer{false},
-        IgnoreCollisions{true});
-      debris.assign<MovementSequence>(movement);
+      spawnTileDebris(entities, x, y, tileIndex, velocityX, ySequenceOffset);
     }
   }
 }
@@ -118,7 +130,8 @@ void DynamicGeometrySystem::onShootableKilled(entityx::Entity entity) {
   const auto& mapSection =
     entity.component<MapGeometryLink>()->mLinkedGeometrySection;
 
-  spawnTileDebris(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
+  spawnTileDebrisForSection(
+    mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
 
   mpMap->clearSection(
     mapSection.topLeft.x, mapSection.topLeft.y,
