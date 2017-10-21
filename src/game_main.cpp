@@ -193,7 +193,7 @@ void Game::mainLoop() {
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, &mRenderer, &mSoundSystem, this};
+  return {&mResources, &mRenderer, this};
 }
 
 

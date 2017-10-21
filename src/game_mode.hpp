@@ -36,11 +36,6 @@ namespace loader {
 }
 
 
-namespace engine {
-  class SoundSystem;
-}
-
-
 /** Interface for functionality available to game modes */
 struct IGameServiceProvider {
   virtual ~IGameServiceProvider() = default;
@@ -69,7 +64,6 @@ struct GameMode {
   struct Context {
     const loader::ResourceLoader* mpResources;
     engine::Renderer* mpRenderer;
-    engine::SoundSystem* mpSoundSystem;
     IGameServiceProvider* mpServiceProvider;
   };
 
