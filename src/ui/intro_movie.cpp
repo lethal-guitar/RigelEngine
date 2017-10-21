@@ -130,6 +130,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
 
           case 31:
             // 2 second freeze frame on target (now up close)
+            pServiceProvider->stopSound(SoundId::IntroTargetMovingCloser);
             pServiceProvider->playSound(SoundId::IntroTargetStopsMoving);
             newFrameDelay = 560;
             break;
