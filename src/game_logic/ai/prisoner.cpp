@@ -47,7 +47,8 @@ PrisonerSystem::PrisonerSystem(
   EntityFactory* pEntityFactory,
   IGameServiceProvider* pServiceProvider,
   engine::ParticleSystem* pParticles,
-  engine::RandomNumberGenerator* pRandomGenerator
+  engine::RandomNumberGenerator* pRandomGenerator,
+  entityx::EventManager& events
 )
   : mPlayer(player)
   , mpEntityFactory(pEntityFactory)
@@ -55,6 +56,7 @@ PrisonerSystem::PrisonerSystem(
   , mpParticles(pParticles)
   , mpRandomGenerator(pRandomGenerator)
 {
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -135,12 +137,10 @@ void PrisonerSystem::updateAggressivePrisoner(
 }
 
 
-void PrisonerSystem::onShootableKilled(
-  entityx::Entity entity,
-  const base::Point<float>& inflictorVelocity
-) {
+void PrisonerSystem::receive(const events::ShootableKilled& event) {
   using engine::components::AutoDestroy;
 
+  auto entity = event.mEntity;
   if (!entity.has_component<components::Prisoner>()) {
     return;
   }
@@ -158,7 +158,7 @@ void PrisonerSystem::onShootableKilled(
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(DEATH_FRAMES_TO_LIVE));
   entity.remove<components::Prisoner>();
 
-  const auto shotFromLeft = inflictorVelocity.x > 0.0f;
+  const auto shotFromLeft = event.mInflictorVelocity.x > 0.0f;
   const auto debrisMovement = shotFromLeft
     ? SpriteMovement::FlyUpperRight
     : SpriteMovement::FlyUpperLeft;

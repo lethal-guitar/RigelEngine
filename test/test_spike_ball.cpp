@@ -54,13 +54,11 @@ TEST_CASE("Spike ball") {
   MockServiceProvider mockServiceProvicer;
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
-  PhysicsSystem physicsSystem{&collisionChecker};
-  ai::SpikeBallSystem spikeBallSystem{&collisionChecker, &mockServiceProvicer};
-
-  physicsSystem.entityCollidedSignal().connect(
-    [&spikeBallSystem](auto e, auto l, auto r, auto t, auto b) {
-      spikeBallSystem.onEntityCollided(e, l, r, t, b);
-    });
+  PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
+  ai::SpikeBallSystem spikeBallSystem{
+    &collisionChecker,
+    &mockServiceProvicer,
+    entityx.events};
 
   auto& ballPosition = *spikeBall.component<WorldPosition>();
 

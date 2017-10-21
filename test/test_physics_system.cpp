@@ -42,7 +42,7 @@ TEST_CASE("Physics system works as expected") {
   data::map::Map map{100, 100, data::map::TileAttributes{{0x0, 0xF}}};
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
-  PhysicsSystem physicsSystem{&collisionChecker};
+  PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
 
   auto physicalObject = entities.create();
   physicalObject.assign<BoundingBox>(BoundingBox{{0, 0}, {2, 2}});

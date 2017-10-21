@@ -29,16 +29,31 @@
 #include "game_mode.hpp"
 
 
-namespace rigel { namespace game_logic { namespace item_containers {
+namespace rigel { namespace game_logic {
 
-void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es) {
+using engine::components::BoundingBox;
+using engine::components::Sprite;
+using engine::components::WorldPosition;
+
+ItemContainerSystem::ItemContainerSystem(
+  entityx::EntityManager* pEntityManager,
+  entityx::EventManager& events
+)
+  : mpEntityManager(pEntityManager)
+{
+  events.subscribe<events::ShootableKilled>(*this);
+}
+
+
+void ItemContainerSystem::receive(const events::ShootableKilled& event) {
   using namespace engine::components;
   using game_logic::components::ItemContainer;
 
+  auto entity = event.mEntity;
   if (entity.has_component<ItemContainer>()) {
     const auto& container = *entity.component<const ItemContainer>();
 
-    auto contents = es.create();
+    auto contents = mpEntityManager->create();
     for (auto& component : container.mContainedComponents) {
       component.assignToEntity(contents);
     }
@@ -48,23 +63,18 @@ void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es) {
   }
 }
 
-}
-
-
-using engine::components::BoundingBox;
-using engine::components::Sprite;
-using engine::components::WorldPosition;
-
 
 NapalmBombSystem::NapalmBombSystem(
   IGameServiceProvider* pServiceProvider,
   EntityFactory* pEntityFactory,
-  engine::CollisionChecker* pCollisionChecker
+  engine::CollisionChecker* pCollisionChecker,
+  entityx::EventManager& events
 )
   : mpServiceProvider(pServiceProvider)
   , mpEntityFactory(pEntityFactory)
   , mpCollisionChecker(pCollisionChecker)
 {
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -109,7 +119,8 @@ void NapalmBombSystem::update(entityx::EntityManager& es) {
 }
 
 
-void NapalmBombSystem::onShootableKilled(entityx::Entity entity) {
+void NapalmBombSystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
   if (entity.has_component<components::NapalmBomb>()) {
     explode(entity);
   }

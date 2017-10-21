@@ -18,7 +18,12 @@
 
 #include "base/array_view.hpp"
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "engine/base_components.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <entityx/Entity.h>
+RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace engine {
@@ -95,6 +100,19 @@ struct MovementSequence {
   decltype(mVelocites)::size_type mCurrentStep = 0;
   bool mResetVelocityAfterSequence = false;
   bool mEnableX = true;
+};
+
+}
+
+
+namespace events {
+
+struct CollidedWithWorld {
+  entityx::Entity mEntity;
+  bool mCollidedLeft;
+  bool mCollidedRight;
+  bool mCollidedTop;
+  bool mCollidedBottom;
 };
 
 }

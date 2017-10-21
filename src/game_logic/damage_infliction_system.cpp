@@ -50,10 +50,12 @@ auto extractVelocity(entityx::Entity entity) {
 
 DamageInflictionSystem::DamageInflictionSystem(
   data::PlayerModel* pPlayerModel,
-  IGameServiceProvider* pServiceProvider
+  IGameServiceProvider* pServiceProvider,
+  entityx::EventManager* pEvents
 )
   : mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
+  , mpEvents(pEvents)
 {
 }
 
@@ -108,8 +110,9 @@ void DamageInflictionSystem::inflictDamage(
 
   shootable.mHealth -= damage.mAmount;
   if (shootable.mHealth <= 0) {
-    mShootableKilledSignal(shootableEntity, inflictorVelocity);
-    // The onKilled() callback mustn't remove the shootable component
+    mpEvents->emit(
+      events::ShootableKilled{shootableEntity, inflictorVelocity});
+    // Event listeners mustn't remove the shootable component
     assert(shootableEntity.has_component<Shootable>());
 
     mpPlayerModel->mScore += shootable.mGivenScore;
@@ -120,7 +123,8 @@ void DamageInflictionSystem::inflictDamage(
       shootableEntity.remove<Shootable>();
     }
   } else {
-    mEntityHitSignal(shootableEntity, inflictorVelocity);
+    mpEvents->emit(
+      events::ShootableDamaged{shootableEntity, inflictorVelocity});
 
     if (shootable.mEnableHitFeedback) {
       mpServiceProvider->playSound(data::SoundId::EnemyHit);

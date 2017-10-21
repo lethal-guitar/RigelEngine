@@ -16,14 +16,12 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp" // Required because signals2 includes variant
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/signals2/signal.hpp>
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
@@ -34,7 +32,6 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel { namespace engine {
 
 class CollisionChecker;
-
 
 /** Implements game physics/world interaction
  *
@@ -55,21 +52,11 @@ class CollisionChecker;
  */
 class PhysicsSystem {
 public:
-  using EntityCollidedSignal = boost::signals2::signal<void(
-    entityx::Entity,
-    bool left,
-    bool right,
-    bool top,
-    bool bottom
-  )>;
-
-  explicit PhysicsSystem(const engine::CollisionChecker* pCollisionChecker);
+  PhysicsSystem(
+    const engine::CollisionChecker* pCollisionChecker,
+    entityx::EventManager* pEvents);
 
   void update(entityx::EntityManager& es);
-
-  EntityCollidedSignal& entityCollidedSignal() {
-    return mEntityCollidedSignal;
-  }
 
 private:
   base::Vector applyHorizontalMovement(
@@ -92,8 +79,8 @@ private:
     float currentVelocity);
 
 private:
-  EntityCollidedSignal mEntityCollidedSignal;
   const CollisionChecker* mpCollisionChecker;
+  entityx::EventManager* mpEvents;
 };
 
 }}

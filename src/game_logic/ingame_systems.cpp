@@ -48,7 +48,7 @@ IngameSystems::IngameSystems(
       pRenderer,
       pMap,
       std::move(mapRenderData))
-  , mPhysicsSystem(&mCollisionChecker)
+  , mPhysicsSystem(&mCollisionChecker, &eventManager)
   , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
   , mMapScrollSystem(mpScrollOffset, playerEntity, *pMap)
   , mPlayerMovementSystem(playerEntity, *pMap)
@@ -75,21 +75,33 @@ IngameSystems::IngameSystems(
       difficulty)
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
-  , mDamageInflictionSystem(pPlayerModel, pServiceProvider)
-  , mDynamicGeometrySystem(pServiceProvider, &entities, pMap, pRandomGenerator)
+  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
+  , mDynamicGeometrySystem(
+      pServiceProvider,
+      &entities,
+      pMap,
+      pRandomGenerator,
+      eventManager)
   , mEffectsSystem(
       pServiceProvider,
       pRandomGenerator,
       &entities,
       pEntityFactory,
-      &mParticles)
-  , mNapalmBombSystem(pServiceProvider, pEntityFactory, &mCollisionChecker)
+      &mParticles,
+      eventManager)
+  , mItemContainerSystem(&entities, eventManager)
+  , mNapalmBombSystem(
+      pServiceProvider,
+      pEntityFactory,
+      &mCollisionChecker,
+      eventManager)
   , mBlueGuardSystem(
       playerEntity,
       &mCollisionChecker,
       pEntityFactory,
       pServiceProvider,
-      pRandomGenerator)
+      pRandomGenerator,
+      eventManager)
   , mHoverBotSystem(
       playerEntity,
       &mCollisionChecker,
@@ -99,15 +111,17 @@ IngameSystems::IngameSystems(
       pPlayerModel,
       pEntityFactory,
       pRandomGenerator,
-      pServiceProvider)
+      pServiceProvider,
+      eventManager)
   , mMessengerDroneSystem(playerEntity)
   , mPrisonerSystem(
       playerEntity,
       pEntityFactory,
       pServiceProvider,
       &mParticles,
-      pRandomGenerator)
-  , mRedBirdSystem(playerEntity)
+      pRandomGenerator,
+      eventManager)
+  , mRedBirdSystem(playerEntity, eventManager)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSecurityCameraSystem(playerEntity)
   , mSimpleWalkerSystem(
@@ -118,46 +132,12 @@ IngameSystems::IngameSystems(
       playerEntity,
       &mCollisionChecker,
       pEntityFactory,
-      pRandomGenerator)
+      pRandomGenerator,
+      eventManager)
   , mSlimePipeSystem(pEntityFactory, pServiceProvider)
-  , mSpikeBallSystem(&mCollisionChecker, pServiceProvider)
+  , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
   , mpPlayerModel(pPlayerModel)
 {
-  mDamageInflictionSystem.entityHitSignal().connect(
-    [this, &entities](
-      entityx::Entity entity,
-      const base::Point<float>& velocity
-    ) {
-      mBlueGuardSystem.onEntityHit(entity);
-      mSpikeBallSystem.onEntityHit(entity, velocity);
-      mLaserTurretSystem.onEntityHit(entity);
-    });
-
-  mDamageInflictionSystem.shootableKilledSignal().connect(
-    [this, &entities](
-      entityx::Entity entity,
-      const base::Point<float>& velocity
-    ) {
-      mEffectsSystem.onShootableKilled(entity, velocity);
-      item_containers::onShootableKilled(entity, entities);
-      mLaserTurretSystem.onShootableKilled(entity, velocity);
-      mNapalmBombSystem.onShootableKilled(entity);
-      mSlimeBlobSystem.onShootableKilled(entity);
-      mPrisonerSystem.onShootableKilled(entity, velocity);
-      mDynamicGeometrySystem.onShootableKilled(entity);
-    });
-
-  mPhysicsSystem.entityCollidedSignal().connect(
-    [this](
-      entityx::Entity e,
-      const bool l,
-      const bool r,
-      const bool t,
-      const bool b
-    ) {
-      mRedBirdSystem.onEntityCollided(e, l, r, t, b);
-      mSpikeBallSystem.onEntityCollided(e, l, r, t, b);
-    });
 }
 
 

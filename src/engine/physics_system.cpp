@@ -74,15 +74,17 @@ BoundingBox toWorldSpace(
 }
 
 
-PhysicsSystem::PhysicsSystem(const engine::CollisionChecker* pCollisionChecker)
+PhysicsSystem::PhysicsSystem(
+  const engine::CollisionChecker* pCollisionChecker,
+  entityx::EventManager* pEvents
+)
   : mpCollisionChecker(pCollisionChecker)
+  , mpEvents(pEvents)
 {
 }
 
 
 void PhysicsSystem::update(ex::EntityManager& es) {
-  using components::CollidedWithWorld;
-
   es.each<MovingBody, WorldPosition, BoundingBox, components::Active>(
     [this](
       ex::Entity entity,
@@ -135,7 +137,7 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const auto targetPosition =
         originalPosition + WorldPosition{movementX, movementY};
       const auto collisionOccured = position != targetPosition;
-      setTag<CollidedWithWorld>(entity, collisionOccured);
+      setTag<components::CollidedWithWorld>(entity, collisionOccured);
 
       if (collisionOccured) {
         const auto left = targetPosition.x != position.x && movementX < 0;
@@ -143,7 +145,8 @@ void PhysicsSystem::update(ex::EntityManager& es) {
         const auto top = targetPosition.y != position.y && movementY < 0;
         const auto bottom = targetPosition.y != position.y && movementY > 0;
 
-        mEntityCollidedSignal(entity, left, right, top, bottom);
+        mpEvents->emit(events::CollidedWithWorld{
+          entity, left, right, top, bottom});
       }
 
       if (body.mIgnoreCollisions) {

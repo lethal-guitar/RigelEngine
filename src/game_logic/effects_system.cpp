@@ -49,7 +49,8 @@ EffectsSystem::EffectsSystem(
   engine::RandomNumberGenerator* pRandomGenerator,
   entityx::EntityManager* pEntityManager,
   EntityFactory* pEntityFactory,
-  engine::ParticleSystem* pParticles
+  engine::ParticleSystem* pParticles,
+  entityx::EventManager& events
 )
   : mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
@@ -57,6 +58,7 @@ EffectsSystem::EffectsSystem(
   , mpEntityFactory(pEntityFactory)
   , mpParticles(pParticles)
 {
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -95,12 +97,10 @@ void EffectsSystem::update(entityx::EntityManager& es) {
 }
 
 
-void EffectsSystem::onShootableKilled(
-  entityx::Entity entity,
-  const base::Point<float>& inflictorVelocity
-) {
+void EffectsSystem::receive(const events::ShootableKilled& event) {
   using namespace engine::components;
 
+  auto entity = event.mEntity;
   if (!entity.has_component<DestructionEffects>()) {
     return;
   }

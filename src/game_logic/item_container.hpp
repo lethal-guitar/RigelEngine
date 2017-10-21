@@ -27,6 +27,9 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine { class CollisionChecker; }}
+namespace rigel { namespace game_logic { namespace events {
+  struct ShootableKilled;
+}}}
 
 
 namespace rigel { namespace game_logic {
@@ -97,17 +100,30 @@ struct NapalmBomb {
 
 }
 
+class ItemContainerSystem : public entityx::Receiver<ItemContainerSystem> {
+public:
+  ItemContainerSystem(
+    entityx::EntityManager* pEntityManager,
+    entityx::EventManager& events);
 
-class NapalmBombSystem {
+  void receive(const events::ShootableKilled& event);
+
+private:
+  entityx::EntityManager* mpEntityManager;
+};
+
+
+class NapalmBombSystem : public entityx::Receiver<NapalmBombSystem> {
 public:
   NapalmBombSystem(
     IGameServiceProvider* pServiceProvider,
     EntityFactory* pEntityFactory,
-    engine::CollisionChecker* pCollisionChecker);
+    engine::CollisionChecker* pCollisionChecker,
+    entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
 
-  void onShootableKilled(entityx::Entity entity);
+  void receive(const events::ShootableKilled& event);
 
 private:
   void explode(entityx::Entity entity);
@@ -120,12 +136,5 @@ private:
   EntityFactory* mpEntityFactory;
   engine::CollisionChecker* mpCollisionChecker;
 };
-
-
-namespace item_containers {
-
-void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es);
-
-}
 
 }}

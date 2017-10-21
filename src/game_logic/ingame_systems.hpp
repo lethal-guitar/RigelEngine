@@ -113,6 +113,7 @@ private:
   game_logic::DamageInflictionSystem mDamageInflictionSystem;
   game_logic::DynamicGeometrySystem mDynamicGeometrySystem;
   game_logic::EffectsSystem mEffectsSystem;
+  game_logic::ItemContainerSystem mItemContainerSystem;
   game_logic::NapalmBombSystem mNapalmBombSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;

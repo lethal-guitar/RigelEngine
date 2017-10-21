@@ -22,6 +22,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 
 #include "game_mode.hpp"
@@ -111,17 +112,20 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   IGameServiceProvider* pServiceProvider,
   entityx::EntityManager* pEntityManager,
   data::map::Map* pMap,
-  engine::RandomNumberGenerator* pRandomGenerator
+  engine::RandomNumberGenerator* pRandomGenerator,
+  entityx::EventManager& events
 )
   : mpServiceProvider(pServiceProvider)
   , mpEntityManager(pEntityManager)
   , mpMap(pMap)
   , mpRandomGenerator(pRandomGenerator)
 {
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
-void DynamicGeometrySystem::onShootableKilled(entityx::Entity entity) {
+void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
   // Take care of shootable walls
   if (!entity.has_component<MapGeometryLink>()) {
     return;

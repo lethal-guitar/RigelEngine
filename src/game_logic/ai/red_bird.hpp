@@ -23,7 +23,10 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { namespace engine { class CollisionChecker; }}
+namespace rigel { namespace engine {
+  class CollisionChecker;
+  namespace events { struct CollidedWithWorld; }
+}}
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -71,18 +74,13 @@ struct RedBird {
 void configureRedBird(entityx::Entity entity);
 
 
-class RedBirdSystem {
+class RedBirdSystem : public entityx::Receiver<RedBirdSystem> {
 public:
-  explicit RedBirdSystem(entityx::Entity player);
+  explicit RedBirdSystem(entityx::Entity player, entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
 
-  void onEntityCollided(
-    entityx::Entity entity,
-    const bool left,
-    const bool right,
-    const bool top,
-    const bool bottom);
+  void receive(const engine::events::CollidedWithWorld& event);
 
 private:
   entityx::Entity mPlayer;
