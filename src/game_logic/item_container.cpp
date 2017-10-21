@@ -31,9 +31,12 @@
 
 namespace rigel { namespace game_logic {
 
+using engine::components::Active;
 using engine::components::BoundingBox;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
+using game_logic::components::ItemContainer;
+
 
 ItemContainerSystem::ItemContainerSystem(
   entityx::EntityManager* pEntityManager,
@@ -45,12 +48,8 @@ ItemContainerSystem::ItemContainerSystem(
 }
 
 
-void ItemContainerSystem::receive(const events::ShootableKilled& event) {
-  using namespace engine::components;
-  using game_logic::components::ItemContainer;
-
-  auto entity = event.mEntity;
-  if (entity.has_component<ItemContainer>()) {
+void ItemContainerSystem::update(entityx::EntityManager& es) {
+  for (auto& entity : mShotContainersQueue) {
     const auto& container = *entity.component<const ItemContainer>();
 
     auto contents = mpEntityManager->create();
@@ -60,6 +59,24 @@ void ItemContainerSystem::receive(const events::ShootableKilled& event) {
 
     contents.assign<Active>();
     contents.assign<WorldPosition>(*entity.component<WorldPosition>());
+
+    entity.destroy();
+  }
+  mShotContainersQueue.clear();
+}
+
+
+void ItemContainerSystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
+  if (entity.has_component<ItemContainer>()) {
+    // We can't open up the item container immediately, but have to do it
+    // in our update() function. This is because the container's contents
+    // might be shootable, and this could cause them to be hit by the
+    // same projectile as the one that opened the container. By deferring
+    // opening the container to our update, the damage infliction update
+    // will be finished, so this problem can't occur.
+    entity.component<components::Shootable>()->mDestroyWhenKilled = false;
+    mShotContainersQueue.emplace_back(entity);
   }
 }
 

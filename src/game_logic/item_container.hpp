@@ -24,6 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <memory>
+#include <vector>
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine { class CollisionChecker; }}
@@ -106,10 +107,12 @@ public:
     entityx::EntityManager* pEntityManager,
     entityx::EventManager& events);
 
+  void update(entityx::EntityManager& es);
   void receive(const events::ShootableKilled& event);
 
 private:
   entityx::EntityManager* mpEntityManager;
+  std::vector<entityx::Entity> mShotContainersQueue;
 };
 
 

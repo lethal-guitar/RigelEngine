@@ -195,6 +195,7 @@ void IngameSystems::update(
 
   mPlayerDamageSystem.update(es);
   mDamageInflictionSystem.update(es);
+  mItemContainerSystem.update(es);
   mEffectsSystem.update(es);
   mPlayerAnimationSystem.update(es);
 
