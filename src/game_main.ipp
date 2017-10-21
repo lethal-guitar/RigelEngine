@@ -16,15 +16,17 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "engine/renderer.hpp"
 #include "engine/sound_system.hpp"
 #include "engine/texture.hpp"
-#include "game_mode.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
+
+#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 #include <chrono>
 #include <memory>

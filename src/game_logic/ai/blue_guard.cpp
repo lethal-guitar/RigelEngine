@@ -25,7 +25,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 #include <boost/optional.hpp>
 

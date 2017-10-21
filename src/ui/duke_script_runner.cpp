@@ -26,6 +26,8 @@
 #include "utils/container_tools.hpp"
 #include "ui/utils.hpp"
 
+#include "game_service_provider.hpp"
+
 RIGEL_DISABLE_WARNINGS
 #include <atria/variant/match_boost.hpp>
 RIGEL_RESTORE_WARNINGS

@@ -19,6 +19,8 @@
 #include "data/game_session_data.hpp"
 #include "loader/resource_loader.hpp"
 
+#include "game_service_provider.hpp"
+
 
 namespace rigel {
 

@@ -27,7 +27,7 @@
 #include "game_logic/entity_factory.hpp"
 #include "loader/palette.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <atria/variant/match_boost.hpp>

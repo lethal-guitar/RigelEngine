@@ -20,6 +20,7 @@
 #include <data/sound_ids.hpp>
 #include <data/game_session_data.hpp>
 #include <game_mode.hpp>
+#include <game_service_provider.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>

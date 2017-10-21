@@ -25,7 +25,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic {

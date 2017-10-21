@@ -23,7 +23,7 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/attack_traits.hpp"
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>

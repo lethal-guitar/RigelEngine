@@ -23,7 +23,7 @@
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {

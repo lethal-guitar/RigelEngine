@@ -18,6 +18,8 @@
 
 #include "loader/resource_loader.hpp"
 
+#include "game_service_provider.hpp"
+
 
 // Repetition counts and delays from original exe, determined from disassembly:
 //
