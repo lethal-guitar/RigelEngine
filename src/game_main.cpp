@@ -231,7 +231,6 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 
   engine::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
 
-  // We use the previous frame's mLastTime here as initial value
   engine::TimeDelta elapsedTime = 0.0;
 
   while (mIsRunning) {
