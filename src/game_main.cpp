@@ -285,6 +285,15 @@ void Game::playSound(const data::SoundId id) {
 }
 
 
+void Game::stopSound(const data::SoundId id) {
+  const auto index = static_cast<std::size_t>(id);
+  assert(index < mSoundsById.size());
+
+  const auto handle = mSoundsById[index];
+  mSoundSystem.stopSound(handle);
+}
+
+
 void Game::playMusic(const std::string& name) {
   if (!mMusicEnabled) {
     return;

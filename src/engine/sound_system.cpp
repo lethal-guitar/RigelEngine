@@ -200,4 +200,10 @@ void SoundSystem::playSound(const SoundHandle handle) const {
   Mix_PlayChannel(handle, mSounds[handle].mpMixChunk.get(), 0);
 }
 
+
+void SoundSystem::stopSound(const SoundHandle handle) const {
+  assert(handle < int(mSounds.size()));
+  Mix_HaltChannel(handle);
+}
+
 }}

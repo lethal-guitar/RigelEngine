@@ -34,6 +34,7 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
   void playSound(rigel::data::SoundId id) override {
     mLastTriggeredSoundId = id;
   }
+  void stopSound(rigel::data::SoundId id) override {}
 
   void playMusic(const std::string&) override {}
   void stopMusic() override {}

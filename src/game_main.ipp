@@ -57,6 +57,7 @@ private:
   void fadeOutScreen() override;
   void fadeInScreen() override;
   void playSound(data::SoundId id) override;
+  void stopSound(data::SoundId id) override;
   void playMusic(const std::string& name) override;
   void stopMusic() override;
 

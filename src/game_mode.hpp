@@ -46,6 +46,7 @@ struct IGameServiceProvider {
 
   // Non-blocking calls
   virtual void playSound(data::SoundId id) = 0;
+  virtual void stopSound(data::SoundId id) = 0;
   virtual void playMusic(const std::string& name) = 0;
   virtual void stopMusic() = 0;
   virtual void scheduleNewGameStart(
