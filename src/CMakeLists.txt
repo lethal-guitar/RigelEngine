@@ -237,6 +237,7 @@ set(main_exe_sources
     game_session_mode.hpp
     game_runner.cpp
     game_runner.hpp
+    global_level_events.hpp
     intro_demo_loop_mode.cpp
     intro_demo_loop_mode.hpp
     main.cpp

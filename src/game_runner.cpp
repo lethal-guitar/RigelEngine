@@ -102,6 +102,8 @@ GameRunner::GameRunner(
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
 {
+  mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
 
@@ -219,12 +221,16 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
 
   auto doTimeStep = [&, this]() {
-    mHudRenderer.updateAnimation();
-    mpSystems->update(mCombinedInputState, mEntities);
-    mCombinedInputState = mInputState;
+    if (!mScreenFlashColor) {
+      mHudRenderer.updateAnimation();
+      mpSystems->update(mCombinedInputState, mEntities);
+      mCombinedInputState = mInputState;
 
-    if (mEarthQuakeEffect) {
-      screenShakeOffsetX = mEarthQuakeEffect->update();
+      if (mEarthQuakeEffect) {
+        screenShakeOffsetX = mEarthQuakeEffect->update();
+      }
+    } else {
+      mScreenFlashColor = boost::none;
     }
   };
 
@@ -251,7 +257,11 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
-    mpSystems->render(mEntities);
+    if (!mScreenFlashColor) {
+      mpSystems->render(mEntities);
+    } else {
+      mpRenderer->clear(*mScreenFlashColor);
+    }
     mHudRenderer.render();
   }
 
@@ -277,6 +287,11 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
 bool GameRunner::levelFinished() const {
   return mLevelFinished;
+}
+
+
+void GameRunner::receive(const rigel::events::ScreenFlash& event) {
+  mScreenFlashColor = event.mColor;
 }
 
 
