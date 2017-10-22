@@ -621,7 +621,16 @@ void EntityFactory::configureEntity(
 
     // Circuit card force field
     case 119:
+      entity.assign<PlayerDamaging>(9, true);
       interaction::configureForceField(entity);
+      {
+        const auto& position = *entity.component<WorldPosition>();
+
+        // There is some additional decoration representing the "emitters"
+        // on top/bottom.
+        auto fieldEmitters = createSprite(119, position);
+        fieldEmitters.component<Sprite>()->mFramesToRender = {0, 1};
+      }
       break;
 
     case 120: // Keyhole (circuit board)

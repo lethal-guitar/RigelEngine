@@ -18,6 +18,7 @@
 
 #include "data/player_data.hpp"
 #include "engine/base_components.hpp"
+#include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
@@ -31,15 +32,9 @@ using namespace engine::components;
 using namespace game_logic::components;
 
 void configureForceField(entityx::Entity entity) {
-  entity.assign<AnimationLoop>(1, 2, 4, 2);
-  entity.assign<PlayerDamaging>(9, true);
+  engine::startAnimationLoop(entity, 1, 2, 4);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
   entity.assign<CircuitCardForceField>();
-
-  // The first two render slots represent the static parts of the force field
-  // (the blue emitters on top and bottom), the third is for the force field/
-  // electricity itself.
-  entity.component<Sprite>()->mFramesToRender = {0, 1, 2};
 }
 
 
@@ -64,17 +59,11 @@ bool disableForceField(
   if (canDisable) {
     pPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
 
-    // TODO: Only turn off force fields that are visible on screen
+    // TODO: Turn off force fields in the order they were placed in the level,
+    // to accurately follow the original behavior
     es.each<CircuitCardForceField>(
       [](ex::Entity entity, const CircuitCardForceField&) {
-        entity.remove<AnimationLoop>();
-        entity.remove<BoundingBox>();
-        entity.remove<CircuitCardForceField>();
-        entity.remove<PlayerDamaging>();
-
-        // Stop rendering the electricity/force field part, see
-        // configureForceField() above
-        entity.component<Sprite>()->mFramesToRender.pop_back();
+        entity.destroy();
       });
 
     keyCardSlot.remove<Interactable>();
