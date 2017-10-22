@@ -19,6 +19,7 @@
 #include "data/player_data.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/interaction/force_field.hpp"
 
 
 namespace rigel { namespace game_logic {
@@ -81,7 +82,7 @@ IngameSystems::IngameSystems(
       &entities,
       pMap,
       pRandomGenerator,
-      eventManager)
+      &eventManager)
   , mEffectsSystem(
       pServiceProvider,
       pRandomGenerator,
@@ -137,6 +138,8 @@ IngameSystems::IngameSystems(
   , mSlimePipeSystem(pEntityFactory, pServiceProvider)
   , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
   , mpPlayerModel(pPlayerModel)
+  , mpRandomGenerator(pRandomGenerator)
+  , mpServiceProvider(pServiceProvider)
 {
 }
 
@@ -150,6 +153,7 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   mRenderingSystem.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(es);
+  interaction::animateForceFields(es, *mpRandomGenerator, *mpServiceProvider);
 
   // ----------------------------------------------------------------------
   // Mark active entities

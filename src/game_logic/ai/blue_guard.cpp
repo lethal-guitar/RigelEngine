@@ -216,7 +216,7 @@ void BlueGuardSystem::updateGuard(
       state.mIsCrouched = playerCrouched || playerBelow;
 
       if (state.mIsCrouched) {
-        state.mStanceChangeCountdown = mpRandomGenerator->gen() & 0xF;
+        state.mStanceChangeCountdown = mpRandomGenerator->gen() % 16;
       }
     } else {
       --state.mStanceChangeCountdown;
@@ -224,7 +224,7 @@ void BlueGuardSystem::updateGuard(
 
     // Fire gun
     const auto facingLeft = state.mOrientation == Orientation::Left;
-    const auto wantsToShoot = (mpRandomGenerator->gen() & 7) == 0;
+    const auto wantsToShoot = (mpRandomGenerator->gen() % 8) == 0;
     if (wantsToShoot) {
       // TODO: Only play sound if visible on screen
       mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);

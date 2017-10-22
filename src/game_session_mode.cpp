@@ -34,7 +34,7 @@ GameSessionMode::GameSessionMode(
   Context context,
   boost::optional<base::Vector> playerPositionOverride
 )
-  : mCurrentStage(std::make_unique<IngameMode>(
+  : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
       episode,
       level,
@@ -58,7 +58,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
   }
 
   atria::variant::match(mCurrentStage,
-    [&event](std::unique_ptr<IngameMode>& pIngameMode) {
+    [&event](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
     },
 
@@ -69,7 +69,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
 
 void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
   atria::variant::match(mCurrentStage,
-    [this, &dt](std::unique_ptr<IngameMode>& pIngameMode) {
+    [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->updateAndRender(dt);
 
       if (pIngameMode->levelFinished()) {
@@ -85,7 +85,7 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       if (bonusScreen.finished()) {
         mPlayerModel.resetForNewLevel();
 
-        auto pNextIngameMode = std::make_unique<IngameMode>(
+        auto pNextIngameMode = std::make_unique<GameRunner>(
           &mPlayerModel,
           mEpisode,
           ++mCurrentLevelNr,

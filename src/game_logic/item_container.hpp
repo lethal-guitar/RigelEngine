@@ -80,9 +80,10 @@ namespace components {
 struct ItemContainer {
   std::vector<ComponentHolder> mContainedComponents;
 
-  template<typename TComponent, typename TArg = TComponent>
-  void assign(TArg&& component) {
-    mContainedComponents.emplace_back(std::forward<TArg>(component));
+  template<typename TComponent, typename... TArgs>
+  void assign(TArgs&&... components) {
+    mContainedComponents.emplace_back(
+      TComponent{std::forward<TArgs>(components)...});
   }
 };
 

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/player_data.hpp"
@@ -27,6 +28,7 @@
 #include "ui/hud_renderer.hpp"
 
 #include "game_mode.hpp"
+#include "global_level_events.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -41,21 +43,23 @@ namespace rigel { namespace game_logic { class IngameSystems; }}
 
 namespace rigel {
 
-class IngameMode : public GameMode {
+class GameRunner : public entityx::Receiver<GameRunner> {
 public:
-  IngameMode(
+  GameRunner(
     data::PlayerModel* pPlayerModel,
     int episode,
     int level,
     data::Difficulty difficulty,
-    Context context,
+    GameMode::Context context,
     boost::optional<base::Vector> playerPositionOverride = boost::none);
-  ~IngameMode();
+  ~GameRunner();
 
-  void handleEvent(const SDL_Event& event) override;
-  void updateAndRender(engine::TimeDelta dt) override;
+  void handleEvent(const SDL_Event& event);
+  void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+
+  void receive(const events::ScreenFlash& event);
 
 private:
   void loadLevel(
@@ -111,6 +115,7 @@ private:
   engine::RenderTargetTexture mIngameViewPortRenderTarget;
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
+  boost::optional<base::Color> mScreenFlashColor;
 };
 
 }

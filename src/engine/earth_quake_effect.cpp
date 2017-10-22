@@ -44,7 +44,7 @@ int EarthQuakeEffect::update() {
   } else {
     if (mCountdown < mThreshold) {
       // Shake the screen or play the sound
-      const auto randomNumber = mpRandomGenerator->gen() & 0x3;
+      const auto randomNumber = mpRandomGenerator->gen() % 4;
       if (randomNumber == 0) {
         mpServiceProvider->playSound(data::SoundId::EarthQuake);
       } else {

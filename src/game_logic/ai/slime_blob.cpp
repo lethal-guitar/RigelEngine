@@ -201,7 +201,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
 
         [&](Idle& state) {
           // Randomly decide to fly up
-          if ((mpRandomGenerator->gen() & 0x1F) == 0) {
+          if ((mpRandomGenerator->gen() % 32) == 0) {
             blobState.mState = Ascending{};
             sprite.mFramesToRender[0] = STRETCH_UP_ANIM_START;
             return;
@@ -209,7 +209,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
 
           // Animate
           const auto newAnimFrame =
-            (mpRandomGenerator->gen() & 3) + toOffset(blobState.mOrientation);
+            mpRandomGenerator->gen() % 4 + toOffset(blobState.mOrientation);
           sprite.mFramesToRender[0] = newAnimFrame;
 
           // Wait until time-out elapsed

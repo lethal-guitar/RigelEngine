@@ -26,6 +26,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 
 #include "game_service_provider.hpp"
+#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {
@@ -113,14 +114,15 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   entityx::EntityManager* pEntityManager,
   data::map::Map* pMap,
   engine::RandomNumberGenerator* pRandomGenerator,
-  entityx::EventManager& events
+  entityx::EventManager* pEvents
 )
   : mpServiceProvider(pServiceProvider)
   , mpEntityManager(pEntityManager)
   , mpMap(pMap)
   , mpRandomGenerator(pRandomGenerator)
+  , mpEvents(pEvents)
 {
-  events.subscribe<events::ShootableKilled>(*this);
+  pEvents->subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -142,6 +144,8 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
     mapSection.size.width, mapSection.size.height);
 
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
+
+  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 }}

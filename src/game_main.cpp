@@ -24,7 +24,6 @@
 #include "sdl_utils/error.hpp"
 
 #include "game_session_mode.hpp"
-#include "ingame_mode.hpp"
 #include "intro_demo_loop_mode.hpp"
 #include "menu_mode.hpp"
 

@@ -202,6 +202,30 @@ int messengerDroneTypeIndex(const ActorID id) {
 }
 
 
+template<typename EntityLike>
+void configureMovingEffectSprite(
+  EntityLike& entity,
+  const SpriteMovement movement
+) {
+  using namespace engine::components::parameter_aliases;
+
+  entity.template assign<Active>();
+  entity.template assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  // TODO: To match the original, the condition should actually be
+  // OnLeavingActiveRegion, but only after the movement sequence is
+  // finished.
+  entity.template assign<AutoDestroy>(AutoDestroy::afterTimeout(120));
+
+  const auto movementIndex = static_cast<int>(movement);
+  entity.template assign<MovementSequence>(MOVEMENT_SEQUENCES[movementIndex]);
+  entity.template assign<MovingBody>(
+    Velocity{},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
+}
+
+
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
 
@@ -237,6 +261,38 @@ auto turkeyAiConfig() {
   }();
 
   return &config;
+}
+
+
+void configureBonusGlobe(
+  ex::Entity entity,
+  const BoundingBox& boundingBox,
+  const int scoreValue
+) {
+  entity.assign<AnimationLoop>(1, 0, 3, 0);
+  entity.assign<Shootable>(Health{1}, GivenScore{100});
+  entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
+  addDefaultMovingBody(entity, boundingBox);
+
+  CollectableItem item;
+  item.mGivenScore = scoreValue;
+  entity.assign<CollectableItem>(item);
+
+  // The entity's sprite contains both the "glass ball" background as
+  // well as the colored contents, by using two render slots. The background
+  // is using the 2nd render slot (see actorIDListForActor()), so by removing
+  // that one, we get just the content.
+  auto crystalSprite = *entity.component<Sprite>();
+  crystalSprite.mFramesToRender.pop_back();
+
+  ItemContainer coloredDestructionEffect;
+  coloredDestructionEffect.assign<Sprite>(crystalSprite);
+  coloredDestructionEffect.assign<BoundingBox>(boundingBox);
+  coloredDestructionEffect.assign<OverrideDrawOrder>(EFFECT_DRAW_ORDER);
+  coloredDestructionEffect.assign<AnimationLoop>(1, 0, 3);
+  configureMovingEffectSprite(coloredDestructionEffect, SpriteMovement::FlyUp);
+
+  entity.assign<ItemContainer>(std::move(coloredDestructionEffect));
 }
 
 
@@ -547,58 +603,34 @@ void EntityFactory::configureEntity(
     : 0;
 
   switch (actorID) {
-    // Bonus globes
-    case 45:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 500;
-        entity.assign<CollectableItem>(item);
-      }
+    case 45: // Blue bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{500});
       break;
 
-    case 46:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 1000;
-        entity.assign<CollectableItem>(item);
-      }
+    case 46: // Red bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
       break;
 
-    case 47:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 5000;
-        entity.assign<CollectableItem>(item);
-      }
+    case 47: // Green bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{5000});
       break;
 
-    case 48:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 1000;
-        entity.assign<CollectableItem>(item);
-      }
+    case 48: // White bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
       break;
 
     // Circuit card force field
     case 119:
+      entity.assign<PlayerDamaging>(9, true);
       interaction::configureForceField(entity);
+      {
+        const auto& position = *entity.component<WorldPosition>();
+
+        // There is some additional decoration representing the "emitters"
+        // on top/bottom.
+        auto fieldEmitters = createSprite(119, position);
+        fieldEmitters.component<Sprite>()->mFramesToRender = {0, 1};
+      }
       break;
 
     case 120: // Keyhole (circuit board)
