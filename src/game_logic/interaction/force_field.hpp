@@ -23,7 +23,9 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace data { struct PlayerModel; }}
+namespace rigel { namespace engine { class RandomNumberGenerator; }}
 
 
 namespace rigel { namespace game_logic { namespace interaction {
@@ -47,5 +49,11 @@ bool disableForceField(
   entityx::EntityManager& es,
   entityx::Entity keyCardSlot,
   data::PlayerModel* pPlayerModel);
+
+
+void animateForceFields(
+  entityx::EntityManager& es,
+  engine::RandomNumberGenerator& randomGenerator,
+  IGameServiceProvider& serviceProvider);
 
 }}}

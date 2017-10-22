@@ -131,6 +131,8 @@ private:
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 
   data::PlayerModel* mpPlayerModel;
+  engine::RandomNumberGenerator* mpRandomGenerator;
+  IGameServiceProvider* mpServiceProvider;
 
   entityx::Entity mActiveTeleporter;
 };

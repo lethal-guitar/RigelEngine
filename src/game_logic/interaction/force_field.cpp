@@ -18,13 +18,16 @@
 
 #include "data/player_data.hpp"
 #include "engine/base_components.hpp"
+#include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
 
+#include "game_service_provider.hpp"
 
 namespace ex = entityx;
+
 
 namespace rigel { namespace game_logic { namespace interaction {
 
@@ -72,6 +75,26 @@ bool disableForceField(
   }
 
   return canDisable;
+}
+
+
+void animateForceFields(
+  entityx::EntityManager& es,
+  engine::RandomNumberGenerator& randomGenerator,
+  IGameServiceProvider& serviceProvider
+) {
+  es.each<CircuitCardForceField, Sprite, Active>([&](
+    ex::Entity entity,
+    const CircuitCardForceField&,
+    Sprite& sprite,
+    const Active&
+  ) {
+    const auto fizzle = (randomGenerator.gen() & 0x20) != 0;
+    if (fizzle) {
+      serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
+      sprite.flashWhite();
+    }
+  });
 }
 
 }}}
