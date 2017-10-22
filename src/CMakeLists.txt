@@ -235,8 +235,8 @@ set(main_exe_sources
     game_service_provider.hpp
     game_session_mode.cpp
     game_session_mode.hpp
-    ingame_mode.cpp
-    ingame_mode.hpp
+    game_runner.cpp
+    game_runner.hpp
     intro_demo_loop_mode.cpp
     intro_demo_loop_mode.hpp
     main.cpp

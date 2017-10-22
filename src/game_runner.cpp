@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ingame_mode.hpp"
+#include "game_runner.hpp"
 
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
@@ -71,7 +71,7 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 }
 
 
-IngameMode::IngameMode(
+GameRunner::GameRunner(
   data::PlayerModel* pPlayerModel,
   const int episode,
   const int levelNumber,
@@ -119,11 +119,11 @@ IngameMode::IngameMode(
 }
 
 
-IngameMode::~IngameMode() {
+GameRunner::~GameRunner() {
 }
 
 
-void IngameMode::handleEvent(const SDL_Event& event) {
+void GameRunner::handleEvent(const SDL_Event& event) {
   if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP) {
     return;
   }
@@ -207,7 +207,7 @@ void IngameMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void IngameMode::updateAndRender(engine::TimeDelta dt) {
+void GameRunner::updateAndRender(engine::TimeDelta dt) {
   if (mLevelFinished) {
     return;
   }
@@ -275,12 +275,12 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
 }
 
 
-bool IngameMode::levelFinished() const {
+bool GameRunner::levelFinished() const {
   return mLevelFinished;
 }
 
 
-void IngameMode::loadLevel(
+void GameRunner::loadLevel(
   const int episode,
   const int levelNumber,
   const data::Difficulty difficulty,
@@ -320,7 +320,7 @@ void IngameMode::loadLevel(
 }
 
 
-void IngameMode::handleLevelExit() {
+void GameRunner::handleLevelExit() {
   using engine::components::Active;
   using engine::components::BoundingBox;
   using game_logic::components::Trigger;
@@ -352,7 +352,7 @@ void IngameMode::handleLevelExit() {
 }
 
 
-void IngameMode::handlePlayerDeath() {
+void GameRunner::handlePlayerDeath() {
   const auto& playerState =
     *mPlayerEntity.component<game_logic::components::PlayerControlled>();
 
@@ -365,7 +365,7 @@ void IngameMode::handlePlayerDeath() {
 }
 
 
-void IngameMode::restartLevel() {
+void GameRunner::restartLevel() {
   mpServiceProvider->fadeOutScreen();
 
   mLevelData.mMap = mMapAtLevelStart;
@@ -383,7 +383,7 @@ void IngameMode::restartLevel() {
 }
 
 
-void IngameMode::handleTeleporter() {
+void GameRunner::handleTeleporter() {
   auto activeTeleporter = mpSystems->getAndResetActiveTeleporter();
   if (!activeTeleporter) {
     return;
@@ -410,7 +410,7 @@ void IngameMode::handleTeleporter() {
 }
 
 
-void IngameMode::showDebugText() {
+void GameRunner::showDebugText() {
   using engine::components::MovingBody;
 
   const auto& playerPos = *mPlayerEntity.component<WorldPosition>();

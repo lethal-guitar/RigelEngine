@@ -21,7 +21,7 @@
 #include "ui/bonus_screen.hpp"
 
 #include "game_mode.hpp"
-#include "ingame_mode.hpp"
+#include "game_runner.hpp"
 
 
 namespace rigel {
@@ -44,7 +44,7 @@ private:
 
 private:
   using SessionStage = boost::variant<
-    std::unique_ptr<IngameMode>,
+    std::unique_ptr<GameRunner>,
     ui::BonusScreen
   >;
 

@@ -41,16 +41,16 @@ namespace rigel { namespace game_logic { class IngameSystems; }}
 
 namespace rigel {
 
-class IngameMode {
+class GameRunner {
 public:
-  IngameMode(
+  GameRunner(
     data::PlayerModel* pPlayerModel,
     int episode,
     int level,
     data::Difficulty difficulty,
     GameMode::Context context,
     boost::optional<base::Vector> playerPositionOverride = boost::none);
-  ~IngameMode();
+  ~GameRunner();
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
