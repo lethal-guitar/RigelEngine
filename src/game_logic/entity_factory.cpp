@@ -493,6 +493,7 @@ entityx::Entity spawnMovingEffectSprite(
 ) {
   auto entity = factory.createSprite(id, position, true);
   configureMovingEffectSprite(entity, movement);
+  entity.assign<AnimationLoop>(1);
   return entity;
 }
 

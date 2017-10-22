@@ -211,7 +211,6 @@ void configureMovingEffectSprite(
 
   entity.template assign<Active>();
   entity.template assign<ActivationSettings>(ActivationSettings::Policy::Always);
-  entity.template assign<AnimationLoop>(1);
   // TODO: To match the original, the condition should actually be
   // OnLeavingActiveRegion, but only after the movement sequence is
   // finished.
@@ -278,6 +277,22 @@ void configureBonusGlobe(
   CollectableItem item;
   item.mGivenScore = scoreValue;
   entity.assign<CollectableItem>(item);
+
+  // The entity's sprite contains both the "glass ball" background as
+  // well as the colored contents, by using two render slots. The background
+  // is using the 2nd render slot (see actorIDListForActor()), so by removing
+  // that one, we get just the content.
+  auto crystalSprite = *entity.component<Sprite>();
+  crystalSprite.mFramesToRender.pop_back();
+
+  ItemContainer coloredDestructionEffect;
+  coloredDestructionEffect.assign<Sprite>(crystalSprite);
+  coloredDestructionEffect.assign<BoundingBox>(boundingBox);
+  coloredDestructionEffect.assign<OverrideDrawOrder>(EFFECT_DRAW_ORDER);
+  coloredDestructionEffect.assign<AnimationLoop>(1, 0, 3);
+  configureMovingEffectSprite(coloredDestructionEffect, SpriteMovement::FlyUp);
+
+  entity.assign<ItemContainer>(std::move(coloredDestructionEffect));
 }
 
 

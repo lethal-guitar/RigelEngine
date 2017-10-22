@@ -149,10 +149,11 @@ const effects::EffectSpec SPIKE_BALL_KILL_EFFECT_SPEC[] = {
 };
 
 
+// The bonus globes have one additional destruction effect, which is handled
+// separately - see configureBonusGlobe() in entity_configuration.ipp
 const effects::EffectSpec BONUS_GLOBE_KILL_EFFECT_SPEC[] = {
   {effects::EffectSprite{{}, 72, EffectMovement::FlyLeft}, 0},
   {effects::EffectSprite{{}, 73, EffectMovement::FlyRight}, 0},
-  // TODO: Bonus globe contents effect sprite w/ flyUp, 0 delay
   {effects::ScoreNumber{{}, ScoreNumberType::S100}, 0},
   {effects::Sound{data::SoundId::GlassBreaking}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0}
