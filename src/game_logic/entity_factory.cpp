@@ -491,24 +491,8 @@ entityx::Entity spawnMovingEffectSprite(
   const SpriteMovement movement,
   const base::Vector& position
 ) {
-  using namespace engine::components::parameter_aliases;
-
   auto entity = factory.createSprite(id, position, true);
-  entity.assign<Active>();
-  entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-  entity.assign<AnimationLoop>(1);
-  // TODO: To match the original, the condition should actually be
-  // OnLeavingActiveRegion, but only after the movement sequence is
-  // finished.
-  entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(120));
-
-  const auto movementIndex = static_cast<int>(movement);
-  entity.assign<MovementSequence>(MOVEMENT_SEQUENCES[movementIndex]);
-  entity.assign<MovingBody>(
-    Velocity{},
-    GravityAffected{false},
-    IsPlayer{false},
-    IgnoreCollisions{true});
+  configureMovingEffectSprite(entity, movement);
   return entity;
 }
 

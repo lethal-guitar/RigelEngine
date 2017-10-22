@@ -202,6 +202,31 @@ int messengerDroneTypeIndex(const ActorID id) {
 }
 
 
+template<typename EntityLike>
+void configureMovingEffectSprite(
+  EntityLike& entity,
+  const SpriteMovement movement
+) {
+  using namespace engine::components::parameter_aliases;
+
+  entity.template assign<Active>();
+  entity.template assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  entity.template assign<AnimationLoop>(1);
+  // TODO: To match the original, the condition should actually be
+  // OnLeavingActiveRegion, but only after the movement sequence is
+  // finished.
+  entity.template assign<AutoDestroy>(AutoDestroy::afterTimeout(120));
+
+  const auto movementIndex = static_cast<int>(movement);
+  entity.template assign<MovementSequence>(MOVEMENT_SEQUENCES[movementIndex]);
+  entity.template assign<MovingBody>(
+    Velocity{},
+    GravityAffected{false},
+    IsPlayer{false},
+    IgnoreCollisions{true});
+}
+
+
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
 
