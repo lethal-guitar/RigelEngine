@@ -81,7 +81,7 @@ IngameSystems::IngameSystems(
       &entities,
       pMap,
       pRandomGenerator,
-      eventManager)
+      &eventManager)
   , mEffectsSystem(
       pServiceProvider,
       pRandomGenerator,

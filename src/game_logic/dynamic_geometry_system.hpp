@@ -39,7 +39,7 @@ public:
     entityx::EntityManager* pEntityManager,
     data::map::Map* pMap,
     engine::RandomNumberGenerator* pRandomGenerator,
-    entityx::EventManager& events);
+    entityx::EventManager* pEvents);
 
   void receive(const events::ShootableKilled& event);
 
@@ -48,6 +48,7 @@ private:
   entityx::EntityManager* mpEntityManager;
   data::map::Map* mpMap;
   engine::RandomNumberGenerator* mpRandomGenerator;
+  entityx::EventManager* mpEvents;
 };
 
 }}
