@@ -76,7 +76,7 @@ IngameMode::IngameMode(
   const int episode,
   const int levelNumber,
   const data::Difficulty difficulty,
-  Context context,
+  GameMode::Context context,
   boost::optional<base::Vector> playerPositionOverride
 )
   : mpRenderer(context.mpRenderer)
