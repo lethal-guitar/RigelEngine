@@ -123,7 +123,7 @@ public:
   RenderTarget currentRenderTarget() const;
   void setRenderTarget(const RenderTarget& target);
 
-  void clear();
+  void clear(const base::Color& clearColor = {0, 0, 0, 255});
   void swapBuffers();
 
   void submitBatch();

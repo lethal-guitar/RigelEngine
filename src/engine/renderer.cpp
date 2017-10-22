@@ -485,8 +485,9 @@ void Renderer::swapBuffers() {
 }
 
 
-void Renderer::clear() {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+void Renderer::clear(const base::Color& clearColor) {
+  const auto glColor = toGlColor(clearColor);
+  glClearColor(glColor.r, glColor.g, glColor.b, glColor.a);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
