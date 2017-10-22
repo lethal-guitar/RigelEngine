@@ -31,6 +31,10 @@ namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace data { struct PlayerModel; } }
 namespace rigel { namespace engine { class RandomNumberGenerator; } }
 namespace rigel { namespace game_logic { class EntityFactory; } }
+namespace rigel { namespace game_logic { namespace events {
+  struct ShootableDamaged;
+  struct ShootableKilled;
+}}}
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -49,19 +53,18 @@ struct LaserTurret {
 void configureLaserTurret(entityx::Entity& entity, int givenScore);
 
 
-class LaserTurretSystem {
+class LaserTurretSystem : public entityx::Receiver<LaserTurretSystem> {
 public:
   LaserTurretSystem(
     entityx::Entity player,
     data::PlayerModel* pPlayerModel,
     EntityFactory* pEntityFactory,
     engine::RandomNumberGenerator* pRandomGenerator,
-    IGameServiceProvider* pServiceProvider);
+    IGameServiceProvider* pServiceProvider,
+    entityx::EventManager& events);
 
-  void onEntityHit(entityx::Entity entity);
-  void onShootableKilled(
-    entityx::Entity entity,
-    const base::Point<float>& inflictorVelocity);
+  void receive(const events::ShootableDamaged& event);
+  void receive(const events::ShootableKilled& event);
 
   void update(entityx::EntityManager& es);
 

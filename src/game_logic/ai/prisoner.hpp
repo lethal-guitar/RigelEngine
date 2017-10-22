@@ -31,6 +31,9 @@ namespace rigel { namespace engine {
   namespace components { struct Sprite; }
 }}
 namespace rigel { namespace game_logic { class EntityFactory; }}
+namespace rigel { namespace game_logic { namespace events {
+  struct ShootableKilled;
+}}}
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -51,20 +54,19 @@ struct Prisoner {
 }
 
 
-class PrisonerSystem {
+class PrisonerSystem : public entityx::Receiver<PrisonerSystem> {
 public:
   PrisonerSystem(
     entityx::Entity player,
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider,
     engine::ParticleSystem* pParticles,
-    engine::RandomNumberGenerator* pRandomGenerator);
+    engine::RandomNumberGenerator* pRandomGenerator,
+    entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
 
-  void onShootableKilled(
-    entityx::Entity entity,
-    const base::Point<float>& inflictorVelocity);
+  void receive(const events::ShootableKilled& event);
 
 private:
   void updateAggressivePrisoner(

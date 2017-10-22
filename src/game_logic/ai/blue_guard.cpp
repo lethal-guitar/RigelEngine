@@ -22,9 +22,10 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 #include <boost/optional.hpp>
 
@@ -99,7 +100,8 @@ BlueGuardSystem::BlueGuardSystem(
   CollisionChecker* pCollisionChecker,
   EntityFactory* pEntityFactory,
   IGameServiceProvider* pServiceProvider,
-  engine::RandomNumberGenerator* pRandomGenerator
+  engine::RandomNumberGenerator* pRandomGenerator,
+  entityx::EventManager& events
 )
   : mPlayer(player)
   , mpCollisionChecker(pCollisionChecker)
@@ -107,6 +109,7 @@ BlueGuardSystem::BlueGuardSystem(
   , mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
 {
+  events.subscribe<events::ShootableDamaged>(*this);
 }
 
 
@@ -147,7 +150,8 @@ void BlueGuardSystem::update(entityx::EntityManager& es) {
 }
 
 
-void BlueGuardSystem::onEntityHit(entityx::Entity entity) {
+void BlueGuardSystem::receive(const events::ShootableDamaged& event) {
+  auto entity = event.mEntity;
   if (entity.has_component<components::BlueGuard>()) {
     auto& state = *entity.component<components::BlueGuard>();
 

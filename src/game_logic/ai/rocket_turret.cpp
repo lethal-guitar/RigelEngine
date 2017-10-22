@@ -22,7 +22,7 @@
 #include "game_logic/entity_factory.hpp"
 #include "base/math_tools.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {

@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "engine/physical_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -25,6 +26,9 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine { class CollisionChecker; }}
+namespace rigel { namespace game_logic { namespace events {
+  struct ShootableDamaged;
+}}}
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -41,21 +45,17 @@ struct SpikeBall {
 void configureSpikeBall(entityx::Entity entity);
 
 
-class SpikeBallSystem {
+class SpikeBallSystem : public entityx::Receiver<SpikeBallSystem> {
 public:
   SpikeBallSystem(
     const engine::CollisionChecker* pCollisionChecker,
-    IGameServiceProvider* pServiceProvider);
+    IGameServiceProvider* pServiceProvider,
+    entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
 
-  void onEntityHit(entityx::Entity entity, const base::Point<float>& velocity);
-  void onEntityCollided(
-    entityx::Entity entity,
-    const bool left,
-    const bool right,
-    const bool top,
-    const bool bottom);
+  void receive(const events::ShootableDamaged& event);
+  void receive(const engine::events::CollidedWithWorld& event);
 
 private:
   void jump(entityx::Entity entity);

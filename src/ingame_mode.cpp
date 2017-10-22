@@ -255,6 +255,11 @@ void IngameMode::updateAndRender(engine::TimeDelta dt) {
     mHudRenderer.render();
   }
 
+  // This clear is important, since we might shift the render target's position
+  // on some frames due to the earth quake effect. If we don't clear, traces
+  // of/part of an older frame might incorrectly remain on screen.
+  mpRenderer->clear();
+
   mIngameViewPortRenderTarget.render(
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,

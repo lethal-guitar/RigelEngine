@@ -17,8 +17,6 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "data/sound_ids.hpp"
-#include "data/game_session_data.hpp"
 #include "engine/renderer.hpp"
 #include "engine/timing.hpp"
 
@@ -26,42 +24,14 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <string>
-
 
 namespace rigel {
+
+struct IGameServiceProvider;
 
 namespace loader {
   class ResourceLoader;
 }
-
-
-namespace engine {
-  class SoundSystem;
-}
-
-
-/** Interface for functionality available to game modes */
-struct IGameServiceProvider {
-  virtual ~IGameServiceProvider() = default;
-
-  // Blocking calls
-  virtual void fadeOutScreen() = 0;
-  virtual void fadeInScreen() = 0;
-
-  // Non-blocking calls
-  virtual void playSound(data::SoundId id) = 0;
-  virtual void playMusic(const std::string& name) = 0;
-  virtual void stopMusic() = 0;
-  virtual void scheduleNewGameStart(
-    int episode,
-    data::Difficulty difficulty) = 0;
-  virtual void scheduleEnterMainMenu() = 0;
-  virtual void scheduleGameQuit() = 0;
-  virtual bool isShareWareVersion() const = 0;
-
-  virtual void showDebugText(const std::string& text) = 0;
-};
 
 
 struct GameMode {
@@ -69,7 +39,6 @@ struct GameMode {
   struct Context {
     const loader::ResourceLoader* mpResources;
     engine::Renderer* mpRenderer;
-    engine::SoundSystem* mpSoundSystem;
     IGameServiceProvider* mpServiceProvider;
   };
 

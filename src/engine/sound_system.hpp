@@ -43,6 +43,7 @@ public:
   void stopMusic() const;
 
   void playSound(SoundHandle handle) const;
+  void stopSound(SoundHandle handle) const;
 
   void clearAll();
 

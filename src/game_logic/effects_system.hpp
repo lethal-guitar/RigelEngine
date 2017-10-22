@@ -28,6 +28,9 @@ namespace rigel { namespace engine {
   class RandomNumberGenerator;
   class ParticleSystem;
 }}
+namespace rigel { namespace game_logic { namespace events {
+  struct ShootableKilled;
+}}}
 
 
 namespace rigel { namespace game_logic {
@@ -36,20 +39,19 @@ namespace components { struct DestructionEffects; }
 class EntityFactory;
 
 
-class EffectsSystem {
+class EffectsSystem : public entityx::Receiver<EffectsSystem> {
 public:
   EffectsSystem(
     IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
     entityx::EntityManager* pEntityManager,
     EntityFactory* pEntityFactory,
-    engine::ParticleSystem* pParticles);
+    engine::ParticleSystem* pParticles,
+    entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
 
-  void onShootableKilled(
-    entityx::Entity entity,
-    const base::Point<float>& inflictorVelocity);
+  void receive(const events::ShootableKilled& event);
 
 private:
   void processEffectsAndAdvance(

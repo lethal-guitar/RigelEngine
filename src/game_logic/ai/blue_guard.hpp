@@ -30,6 +30,7 @@ namespace engine { class CollisionChecker; }
 namespace engine { class RandomNumberGenerator; }
 namespace engine { namespace components { struct Sprite; }}
 namespace game_logic { class EntityFactory; }
+namespace game_logic { namespace events { struct ShootableDamaged; }}
 
 }
 
@@ -62,17 +63,18 @@ struct BlueGuard {
 
 }
 
-class BlueGuardSystem {
+class BlueGuardSystem : public entityx::Receiver<BlueGuardSystem> {
 public:
   BlueGuardSystem(
     entityx::Entity player,
     engine::CollisionChecker* pCollisionChecker,
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider,
-    engine::RandomNumberGenerator* pRandomGenerator);
+    engine::RandomNumberGenerator* pRandomGenerator,
+    entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
-  void onEntityHit(entityx::Entity entity);
+  void receive(const events::ShootableDamaged& event);
 
 private:
   void stopTyping(

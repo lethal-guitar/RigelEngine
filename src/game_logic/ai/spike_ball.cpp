@@ -21,8 +21,9 @@
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/damage_components.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -61,10 +62,14 @@ void configureSpikeBall(entityx::Entity entity) {
 
 SpikeBallSystem::SpikeBallSystem(
   const engine::CollisionChecker* pCollisionChecker,
-  IGameServiceProvider* pServiceProvider)
+  IGameServiceProvider* pServiceProvider,
+  entityx::EventManager& events
+)
   : mpCollisionChecker(pCollisionChecker)
   , mpServiceProvider(pServiceProvider)
 {
+  events.subscribe<engine::events::CollidedWithWorld>(*this);
+  events.subscribe<events::ShootableDamaged>(*this);
 }
 
 
@@ -89,38 +94,31 @@ void SpikeBallSystem::update(entityx::EntityManager& es) {
 }
 
 
-void SpikeBallSystem::onEntityHit(
-  entityx::Entity entity,
-  const base::Point<float>& velocity
-) {
+void SpikeBallSystem::receive(const events::ShootableDamaged& event) {
+  auto entity = event.mEntity;
   if (!entity.has_component<components::SpikeBall>()) {
     return;
   }
 
   auto& body = *entity.component<MovingBody>();
-  body.mVelocity.x = velocity.x > 0 ? 1.0f : -1.0f;
+  body.mVelocity.x = event.mInflictorVelocity.x > 0 ? 1.0f : -1.0f;
 }
 
 
-void SpikeBallSystem::onEntityCollided(
-  entityx::Entity entity,
-  const bool left,
-  const bool right,
-  const bool top,
-  const bool bottom
-) {
+void SpikeBallSystem::receive(const engine::events::CollidedWithWorld& event) {
+  auto entity = event.mEntity;
   if (!entity.has_component<components::SpikeBall>()) {
     return;
   }
 
   auto& body = *entity.component<MovingBody>();
-  if (left) {
+  if (event.mCollidedLeft) {
     body.mVelocity.x = 1.0f;
-  } else if (right) {
+  } else if (event.mCollidedRight) {
     body.mVelocity.x = -1.0f;
   }
 
-  if (top) {
+  if (event.mCollidedTop) {
     if (entity.component<Active>()->mIsOnScreen) {
       mpServiceProvider->playSound(data::SoundId::DukeJumping);
     }
@@ -133,7 +131,7 @@ void SpikeBallSystem::onEntityCollided(
     }
   }
 
-  if (bottom) {
+  if (event.mCollidedBottom) {
     jump(entity);
   }
 }

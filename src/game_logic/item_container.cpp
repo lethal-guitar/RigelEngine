@@ -26,45 +26,72 @@
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
-namespace rigel { namespace game_logic { namespace item_containers {
+namespace rigel { namespace game_logic {
 
-void onShootableKilled(entityx::Entity entity, entityx::EntityManager& es) {
-  using namespace engine::components;
-  using game_logic::components::ItemContainer;
+using engine::components::Active;
+using engine::components::BoundingBox;
+using engine::components::Sprite;
+using engine::components::WorldPosition;
+using game_logic::components::ItemContainer;
 
-  if (entity.has_component<ItemContainer>()) {
+
+ItemContainerSystem::ItemContainerSystem(
+  entityx::EntityManager* pEntityManager,
+  entityx::EventManager& events
+)
+  : mpEntityManager(pEntityManager)
+{
+  events.subscribe<events::ShootableKilled>(*this);
+}
+
+
+void ItemContainerSystem::update(entityx::EntityManager& es) {
+  for (auto& entity : mShotContainersQueue) {
     const auto& container = *entity.component<const ItemContainer>();
 
-    auto contents = es.create();
+    auto contents = mpEntityManager->create();
     for (auto& component : container.mContainedComponents) {
       component.assignToEntity(contents);
     }
 
     contents.assign<Active>();
     contents.assign<WorldPosition>(*entity.component<WorldPosition>());
+
+    entity.destroy();
+  }
+  mShotContainersQueue.clear();
+}
+
+
+void ItemContainerSystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
+  if (entity.has_component<ItemContainer>()) {
+    // We can't open up the item container immediately, but have to do it
+    // in our update() function. This is because the container's contents
+    // might be shootable, and this could cause them to be hit by the
+    // same projectile as the one that opened the container. By deferring
+    // opening the container to our update, the damage infliction update
+    // will be finished, so this problem can't occur.
+    entity.component<components::Shootable>()->mDestroyWhenKilled = false;
+    mShotContainersQueue.emplace_back(entity);
   }
 }
-
-}
-
-
-using engine::components::BoundingBox;
-using engine::components::Sprite;
-using engine::components::WorldPosition;
 
 
 NapalmBombSystem::NapalmBombSystem(
   IGameServiceProvider* pServiceProvider,
   EntityFactory* pEntityFactory,
-  engine::CollisionChecker* pCollisionChecker
+  engine::CollisionChecker* pCollisionChecker,
+  entityx::EventManager& events
 )
   : mpServiceProvider(pServiceProvider)
   , mpEntityFactory(pEntityFactory)
   , mpCollisionChecker(pCollisionChecker)
 {
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -109,7 +136,8 @@ void NapalmBombSystem::update(entityx::EntityManager& es) {
 }
 
 
-void NapalmBombSystem::onShootableKilled(entityx::Entity entity) {
+void NapalmBombSystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
   if (entity.has_component<components::NapalmBomb>()) {
     explode(entity);
   }

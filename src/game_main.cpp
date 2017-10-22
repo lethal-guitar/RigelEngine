@@ -193,7 +193,7 @@ void Game::mainLoop() {
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, &mRenderer, &mSoundSystem, this};
+  return {&mResources, &mRenderer, this};
 }
 
 
@@ -231,7 +231,6 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 
   engine::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
 
-  // We use the previous frame's mLastTime here as initial value
   engine::TimeDelta elapsedTime = 0.0;
 
   while (mIsRunning) {
@@ -283,6 +282,15 @@ void Game::playSound(const data::SoundId id) {
 
   const auto handle = mSoundsById[index];
   mSoundSystem.playSound(handle);
+}
+
+
+void Game::stopSound(const data::SoundId id) {
+  const auto index = static_cast<std::size_t>(id);
+  assert(index < mSoundsById.size());
+
+  const auto handle = mSoundsById[index];
+  mSoundSystem.stopSound(handle);
 }
 
 

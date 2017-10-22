@@ -67,7 +67,7 @@ TEST_CASE("Rocket elevator") {
   }
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
-  PhysicsSystem physicsSystem{&collisionChecker};
+  PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
 
 
   SECTION("Elevator is setup correctly") {

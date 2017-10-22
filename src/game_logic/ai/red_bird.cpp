@@ -61,9 +61,13 @@ void configureRedBird(entityx::Entity entity) {
 }
 
 
-RedBirdSystem::RedBirdSystem(entityx::Entity player)
+RedBirdSystem::RedBirdSystem(
+  entityx::Entity player,
+  entityx::EventManager& events
+)
   : mPlayer(player)
 {
+  events.subscribe<engine::events::CollidedWithWorld>(*this);
 }
 
 
@@ -132,15 +136,10 @@ void RedBirdSystem::update(entityx::EntityManager& es) {
 }
 
 
-void RedBirdSystem::onEntityCollided(
-  entityx::Entity entity,
-  const bool collidedLeft,
-  const bool collidedRight,
-  const bool,
-  const bool collidedBottom
-) {
+void RedBirdSystem::receive(const engine::events::CollidedWithWorld& event) {
   using namespace components::detail;
 
+  auto entity = event.mEntity;
   if (!entity.has_component<components::RedBird>()) {
     return;
   }
@@ -150,13 +149,13 @@ void RedBirdSystem::onEntityCollided(
 
   atria::variant::match(birdState.mState,
     [&](const Flying&) {
-      if (collidedLeft || collidedRight) {
-        fly(entity, !collidedLeft);
+      if (event.mCollidedLeft || event.mCollidedRight) {
+        fly(entity, !event.mCollidedLeft);
       }
     },
 
     [&](const PlungingDown& state) {
-      if (collidedBottom) {
+      if (event.mCollidedBottom) {
         birdState.mState = RisingUp{state.mInitialHeight};
         body.mGravityAffected = false;
         engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);

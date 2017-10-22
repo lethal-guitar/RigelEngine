@@ -20,10 +20,11 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "base/math_tools.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -66,7 +67,8 @@ LaserTurretSystem::LaserTurretSystem(
   data::PlayerModel* pPlayerModel,
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator,
-  IGameServiceProvider* pServiceProvider
+  IGameServiceProvider* pServiceProvider,
+  entityx::EventManager& events
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
@@ -74,6 +76,8 @@ LaserTurretSystem::LaserTurretSystem(
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {
+  events.subscribe<events::ShootableDamaged>(*this);
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -160,7 +164,8 @@ void LaserTurretSystem::update(entityx::EntityManager& es) {
 }
 
 
-void LaserTurretSystem::onEntityHit(entityx::Entity entity) {
+void LaserTurretSystem::receive(const events::ShootableDamaged& event) {
+  auto entity = event.mEntity;
   if (!entity.has_component<components::LaserTurret>()) {
     return;
   }
@@ -193,10 +198,8 @@ void LaserTurretSystem::performBaseHitEffect(entityx::Entity entity) {
 }
 
 
-void LaserTurretSystem::onShootableKilled(
-  entityx::Entity entity,
-  const base::Point<float>& inflictorVelocity
-) {
+void LaserTurretSystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
   if (!entity.has_component<components::LaserTurret>()) {
     return;
   }
@@ -204,8 +207,8 @@ void LaserTurretSystem::onShootableKilled(
   performBaseHitEffect(entity);
 
   const auto& position = *entity.component<engine::components::WorldPosition>();
-  const auto shotFromRight = inflictorVelocity.x < 0.0f;
-  const auto shotFromLeft = inflictorVelocity.x > 0.0f;
+  const auto shotFromRight = event.mInflictorVelocity.x < 0.0f;
+  const auto shotFromLeft = event.mInflictorVelocity.x > 0.0f;
   const auto debrisMovement = shotFromRight
     ? SpriteMovement::FlyUpperLeft
     : (shotFromLeft)

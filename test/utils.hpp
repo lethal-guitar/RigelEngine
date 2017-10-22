@@ -20,6 +20,7 @@
 #include <data/sound_ids.hpp>
 #include <data/game_session_data.hpp>
 #include <game_mode.hpp>
+#include <game_service_provider.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -34,6 +35,7 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
   void playSound(rigel::data::SoundId id) override {
     mLastTriggeredSoundId = id;
   }
+  void stopSound(rigel::data::SoundId id) override {}
 
   void playMusic(const std::string&) override {}
   void stopMusic() override {}

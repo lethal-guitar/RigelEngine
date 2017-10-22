@@ -79,13 +79,15 @@ SlimeBlobSystem::SlimeBlobSystem(
   entityx::Entity player,
   CollisionChecker* pCollisionChecker,
   EntityFactory* pEntityFactory,
-  engine::RandomNumberGenerator* pRandomGenerator
+  engine::RandomNumberGenerator* pRandomGenerator,
+  entityx::EventManager& events
 )
   : mPlayer(player)
   , mpCollisionChecker(pCollisionChecker)
   , mpEntityFactory(pEntityFactory)
   , mpRandomGenerator(pRandomGenerator)
 {
+  events.subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -299,7 +301,8 @@ base::Vector SlimeBlobSystem::adjustedPlayerPosition() const {
 }
 
 
-void SlimeBlobSystem::onShootableKilled(entityx::Entity entity) {
+void SlimeBlobSystem::receive(const events::ShootableKilled& event) {
+  auto entity = event.mEntity;
   if (
     !entity.has_component<components::SlimeContainer>() ||
     !entity.has_component<Shootable>()

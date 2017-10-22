@@ -16,8 +16,17 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 
-namespace rigel { namespace game_logic { namespace components {
+RIGEL_DISABLE_WARNINGS
+#include <entityx/Entity.h>
+RIGEL_RESTORE_WARNINGS
+
+
+namespace rigel { namespace game_logic {
+
+namespace components {
 
 namespace parameter_aliases {
 
@@ -100,4 +109,22 @@ struct PlayerProjectile {
   Type mType;
 };
 
-}}}
+}
+
+
+namespace events {
+
+struct ShootableDamaged {
+  entityx::Entity mEntity;
+  base::Point<float> mInflictorVelocity;
+};
+
+
+struct ShootableKilled {
+  entityx::Entity mEntity;
+  base::Point<float> mInflictorVelocity;
+};
+
+}
+
+}}

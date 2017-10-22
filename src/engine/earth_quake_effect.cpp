@@ -17,7 +17,7 @@
 #include "earth_quake_effect.hpp"
 
 #include "engine/random_number_generator.hpp"
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace engine {

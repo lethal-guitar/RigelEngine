@@ -26,20 +26,22 @@ namespace rigel {
   struct IGameServiceProvider;
   namespace data { namespace map { class Map; }}
   namespace engine { class RandomNumberGenerator; }
+  namespace game_logic { namespace events { struct ShootableKilled; }}
 }
 
 
 namespace rigel { namespace game_logic {
 
-class DynamicGeometrySystem {
+class DynamicGeometrySystem : public entityx::Receiver<DynamicGeometrySystem> {
 public:
   DynamicGeometrySystem(
     IGameServiceProvider* pServiceProvider,
     entityx::EntityManager* pEntityManager,
     data::map::Map* pMap,
-    engine::RandomNumberGenerator* pRandomGenerator);
+    engine::RandomNumberGenerator* pRandomGenerator,
+    entityx::EventManager& events);
 
-  void onShootableKilled(entityx::Entity entity);
+  void receive(const events::ShootableKilled& event);
 
 private:
   IGameServiceProvider* mpServiceProvider;

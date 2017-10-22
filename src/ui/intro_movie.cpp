@@ -18,6 +18,8 @@
 
 #include "loader/resource_loader.hpp"
 
+#include "game_service_provider.hpp"
+
 
 // Repetition counts and delays from original exe, determined from disassembly:
 //
@@ -128,6 +130,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
 
           case 31:
             // 2 second freeze frame on target (now up close)
+            pServiceProvider->stopSound(SoundId::IntroTargetMovingCloser);
             pServiceProvider->playSound(SoundId::IntroTargetStopsMoving);
             newFrameDelay = 560;
             break;

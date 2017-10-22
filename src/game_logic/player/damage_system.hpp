@@ -21,7 +21,7 @@
 #include "data/player_data.hpp"
 #include "engine/timing.hpp"
 
-#include "game_mode.hpp"
+#include "game_service_provider.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
