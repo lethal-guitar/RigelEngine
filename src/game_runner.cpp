@@ -118,8 +118,8 @@ GameRunner::GameRunner(
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
 {
-  mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
+  mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -314,13 +314,13 @@ void GameRunner::showWelcomeMessage() {
 }
 
 
-void GameRunner::receive(const rigel::events::ScreenFlash& event) {
-  mScreenFlashColor = event.mColor;
+void GameRunner::receive(const rigel::events::PlayerMessage& event) {
+  mMessageDisplay.setMessage(event.mText);
 }
 
 
-void GameRunner::receive(const rigel::events::PlayerMessage& event) {
-  mMessageDisplay.setMessage(event.mText);
+void GameRunner::receive(const rigel::events::ScreenFlash& event) {
+  mScreenFlashColor = event.mColor;
 }
 
 

@@ -61,8 +61,8 @@ public:
   bool levelFinished() const;
   void showWelcomeMessage();
 
-  void receive(const events::ScreenFlash& event);
   void receive(const events::PlayerMessage& event);
+  void receive(const events::ScreenFlash& event);
 
 private:
   void loadLevel(
