@@ -240,6 +240,22 @@ auto turkeyAiConfig() {
 }
 
 
+void configureBonusGlobe(
+  ex::Entity entity,
+  const BoundingBox& boundingBox,
+  const int scoreValue
+) {
+  entity.assign<AnimationLoop>(1, 0, 3, 0);
+  entity.assign<Shootable>(Health{1}, GivenScore{100});
+  entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
+  addDefaultMovingBody(entity, boundingBox);
+
+  CollectableItem item;
+  item.mGivenScore = scoreValue;
+  entity.assign<CollectableItem>(item);
+}
+
+
 ActorID scoreNumberActor(const ScoreNumberType type) {
   static_assert(
     int(ScoreNumberType::S100) == 0 &&
@@ -547,53 +563,20 @@ void EntityFactory::configureEntity(
     : 0;
 
   switch (actorID) {
-    // Bonus globes
-    case 45:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 500;
-        entity.assign<CollectableItem>(item);
-      }
+    case 45: // Blue bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{500});
       break;
 
-    case 46:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 1000;
-        entity.assign<CollectableItem>(item);
-      }
+    case 46: // Red bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
       break;
 
-    case 47:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 5000;
-        entity.assign<CollectableItem>(item);
-      }
+    case 47: // Green bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{5000});
       break;
 
-    case 48:
-      entity.assign<AnimationLoop>(1, 0, 3, 0);
-      entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
-      addDefaultMovingBody(entity, boundingBox);
-      {
-        CollectableItem item;
-        item.mGivenScore = 1000;
-        entity.assign<CollectableItem>(item);
-      }
+    case 48: // White bonus globe
+      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
       break;
 
     // Circuit card force field
