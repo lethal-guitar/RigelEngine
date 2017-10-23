@@ -225,8 +225,10 @@ void BlueGuardSystem::updateGuard(
     // Fire gun
     const auto facingLeft = state.mOrientation == Orientation::Left;
     const auto wantsToShoot = (mpRandomGenerator->gen() % 8) == 0;
-    if (wantsToShoot) {
-      // TODO: Only play sound if visible on screen
+    const auto isOnScreen =
+      guardEntity.has_component<Active>() &&
+      guardEntity.component<Active>()->mIsOnScreen;
+    if (wantsToShoot && isOnScreen) {
       mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
       mpEntityFactory->createProjectile(
         ProjectileType::EnemyLaserShot,
