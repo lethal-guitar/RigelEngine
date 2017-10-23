@@ -368,7 +368,6 @@ void EntityFactory::configureProjectile(
 
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
-  entity.assign<WorldPosition>(position);
 
   entity.assign<MovingBody>(
     Velocity{directionToVector(direction) * speed},
