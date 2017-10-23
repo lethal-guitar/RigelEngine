@@ -83,6 +83,9 @@ const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
 const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 
 
+const int KEYHOLE_ANIMATION[] = {0, 1, 2, 3, 4, 3, 2, 1};
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -639,7 +642,7 @@ void EntityFactory::configureEntity(
 
     // Keyhole (blue key)
     case 122:
-      entity.assign<AnimationLoop>(1, 4);
+      entity.assign<AnimationSequence>(KEYHOLE_ANIMATION, 0, true);
       break;
 
     // ----------------------------------------------------------------------
