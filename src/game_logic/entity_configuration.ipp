@@ -86,6 +86,11 @@ const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 const int KEYHOLE_ANIMATION[] = {0, 1, 2, 3, 4, 3, 2, 1};
 
 
+const int HINT_GLOBE_ANIMATION[] = {
+  0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -1134,7 +1139,7 @@ void EntityFactory::configureEntity(
     case 239: // Special hint globe
       entity.assign<Shootable>(Health{3}, GivenScore{100});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
-      entity.assign<AnimationLoop>(1);
+      entity.assign<AnimationSequence>(HINT_GLOBE_ANIMATION, 0, true);
       addDefaultMovingBody(entity, boundingBox);
       {
         CollectableItem item;
