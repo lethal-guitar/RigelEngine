@@ -616,7 +616,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 46: // Red bonus globe
-      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
+      configureBonusGlobe(entity, boundingBox, GivenScore{2000});
       break;
 
     case 47: // Green bonus globe
@@ -624,7 +624,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 48: // White bonus globe
-      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
+      configureBonusGlobe(entity, boundingBox, GivenScore{10000});
       break;
 
     // Circuit card force field
