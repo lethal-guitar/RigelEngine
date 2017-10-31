@@ -1202,8 +1202,8 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{1}, GivenScore{10});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
-      entity.component<Sprite>()->mFramesToRender.push_back(0);
-      entity.assign<AnimationLoop>(1, 1, 2, 0);
+      entity.component<Sprite>()->mFramesToRender.push_back(1);
+      entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
     case 58: // Watch-bot container carrier
