@@ -696,7 +696,6 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::RapidFire;
-        item.mGivenPlayerBuff = PlayerBuff::RapidFire;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -712,7 +711,6 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CloakingDevice;
-        item.mGivenPlayerBuff = PlayerBuff::Cloak;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,

@@ -56,12 +56,6 @@ enum class WeaponType {
   FlameThrower = 3
 };
 
-
-enum class PlayerBuff {
-  RapidFire,
-  Cloak
-};
-
 }}
 
 RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::CollectableLetterType)
