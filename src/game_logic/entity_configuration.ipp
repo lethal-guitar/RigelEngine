@@ -1083,7 +1083,7 @@ void EntityFactory::configureEntity(
     case 185: // Computer in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 3000;
+        item.mGivenScore = 500;
         configureItemBox(
           entity,
           ContainerColor::Blue,
