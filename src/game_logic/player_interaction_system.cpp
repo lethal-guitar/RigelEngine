@@ -22,6 +22,7 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/entity_factory.hpp"
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/interaction/teleporter.hpp"
 #include "game_service_provider.hpp"
@@ -40,16 +41,60 @@ using namespace game_logic::components;
 
 namespace ex = entityx;
 
+namespace {
+
+void spawnScoreNumbers(
+  const base::Vector& position,
+  int score,
+  EntityFactory& entityFactory
+) {
+  std::vector<ScoreNumberType> numbers;
+  for (; score >= 10000; score -= 10000) {
+    numbers.push_back(ScoreNumberType::S10000);
+  }
+
+  for (; score >= 5000; score -= 5000) {
+    numbers.push_back(ScoreNumberType::S5000);
+  }
+
+  for (; score >= 2000; score -= 2000) {
+    numbers.push_back(ScoreNumberType::S2000);
+  }
+
+  for (; score >= 500; score -= 500) {
+    numbers.push_back(ScoreNumberType::S500);
+  }
+
+  for (; score >= 100; score -= 100) {
+    numbers.push_back(ScoreNumberType::S100);
+  }
+
+  if (numbers.empty()) {
+    return;
+  }
+
+  auto yOffset = static_cast<int>(numbers.size() - 1);
+  for (const auto numberType : numbers) {
+    const auto offset = base::Vector{0, yOffset};
+    --yOffset;
+    spawnFloatingScoreNumber(entityFactory, numberType, position - offset);
+  }
+}
+
+}
+
 
 PlayerInteractionSystem::PlayerInteractionSystem(
   ex::Entity player,
   PlayerModel* pPlayerModel,
   IGameServiceProvider* pServices,
+  EntityFactory* pEntityFactory,
   TeleportCallback teleportCallback
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
+  , mpEntityFactory(pEntityFactory)
   , mTeleportCallback(teleportCallback)
 {
 }
@@ -112,10 +157,15 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
         boost::optional<data::SoundId> soundToPlay;
 
         if (collectable.mGivenScore) {
-          assert(*collectable.mGivenScore > 0);
-          mpPlayerModel->mScore += *collectable.mGivenScore;
+          const auto score = *collectable.mGivenScore;
+          assert(score > 0);
+          mpPlayerModel->mScore += score;
 
           soundToPlay = SoundId::ItemPickup;
+
+          if (collectable.mSpawnScoreNumbers) {
+            spawnScoreNumbers(pos, score, *mpEntityFactory);
+          }
         }
 
         if (collectable.mGivenHealth) {

@@ -711,6 +711,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CloakingDevice;
+        item.mSpawnScoreNumbers = false;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -936,6 +937,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::N;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -949,6 +951,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::U;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -962,6 +965,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::K;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -975,6 +979,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::E;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -988,6 +993,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::M;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,

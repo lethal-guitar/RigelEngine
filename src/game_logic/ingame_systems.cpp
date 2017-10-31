@@ -57,6 +57,7 @@ IngameSystems::IngameSystems(
       playerEntity,
       pPlayerModel,
       pServiceProvider,
+      pEntityFactory,
       [this](const entityx::Entity& teleporter) {
         mActiveTeleporter = teleporter;
       })

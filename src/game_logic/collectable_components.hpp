@@ -34,6 +34,7 @@ struct CollectableItem {
   boost::optional<data::InventoryItemType> mGivenItem;
   boost::optional<data::WeaponType> mGivenWeapon;
   boost::optional<data::CollectableLetterType> mGivenCollectableLetter;
+  bool mSpawnScoreNumbers = true;
 };
 
 }
