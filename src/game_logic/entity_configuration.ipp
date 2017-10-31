@@ -891,6 +891,7 @@ void EntityFactory::configureEntity(
     case 22: // Default weapon
       {
         CollectableItem item;
+        item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Normal;
         configureItemBox(
           entity,
