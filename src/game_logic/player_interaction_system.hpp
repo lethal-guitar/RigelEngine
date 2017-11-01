@@ -32,6 +32,10 @@ namespace rigel {
   namespace data {
     struct PlayerModel;
   }
+
+  namespace game_logic {
+    class EntityFactory;
+  }
 }
 
 
@@ -45,6 +49,7 @@ public:
     entityx::Entity player,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServices,
+    EntityFactory* pEntityFactory,
     TeleportCallback teleportCallback);
 
   void update(entityx::EntityManager& es);
@@ -62,6 +67,7 @@ private:
   entityx::Entity mPlayer;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
+  EntityFactory* mpEntityFactory;
   TeleportCallback mTeleportCallback;
 };
 

@@ -616,7 +616,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 46: // Red bonus globe
-      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
+      configureBonusGlobe(entity, boundingBox, GivenScore{2000});
       break;
 
     case 47: // Green bonus globe
@@ -624,7 +624,7 @@ void EntityFactory::configureEntity(
       break;
 
     case 48: // White bonus globe
-      configureBonusGlobe(entity, boundingBox, GivenScore{1000});
+      configureBonusGlobe(entity, boundingBox, GivenScore{10000});
       break;
 
     // Circuit card force field
@@ -696,7 +696,6 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::RapidFire;
-        item.mGivenPlayerBuff = PlayerBuff::RapidFire;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -712,7 +711,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CloakingDevice;
-        item.mGivenPlayerBuff = PlayerBuff::Cloak;
+        item.mSpawnScoreNumbers = false;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -893,6 +892,7 @@ void EntityFactory::configureEntity(
     case 22: // Default weapon
       {
         CollectableItem item;
+        item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Normal;
         configureItemBox(
           entity,
@@ -935,8 +935,9 @@ void EntityFactory::configureEntity(
     case 155: // Collectable letter N in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 101000;
+        item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::N;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -948,8 +949,9 @@ void EntityFactory::configureEntity(
     case 156: // Collectable letter U in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 101000;
+        item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::U;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -961,8 +963,9 @@ void EntityFactory::configureEntity(
     case 157: // Collectable letter K in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 101000;
+        item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::K;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -974,8 +977,9 @@ void EntityFactory::configureEntity(
     case 158: // Collectable letter E in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 101000;
+        item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::E;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -987,8 +991,9 @@ void EntityFactory::configureEntity(
     case 187: // Collectable letter M in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 101000;
+        item.mGivenScore = 10100;
         item.mGivenCollectableLetter = CollectableLetterType::M;
+        item.mSpawnScoreNumbers = false;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -1084,7 +1089,7 @@ void EntityFactory::configureEntity(
     case 185: // Computer in blue box
       {
         CollectableItem item;
-        item.mGivenScore = 3000;
+        item.mGivenScore = 500;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -1204,8 +1209,8 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{1}, GivenScore{10});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
-      entity.component<Sprite>()->mFramesToRender.push_back(0);
-      entity.assign<AnimationLoop>(1, 1, 2, 0);
+      entity.component<Sprite>()->mFramesToRender.push_back(1);
+      entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
     case 58: // Watch-bot container carrier
