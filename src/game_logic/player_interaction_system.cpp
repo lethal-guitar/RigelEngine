@@ -16,8 +16,6 @@
 
 #include "player_interaction_system.hpp"
 
-#include "data/player_data.hpp"
-#include "engine/base_components.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/collectable_components.hpp"
@@ -42,6 +40,10 @@ using namespace game_logic::components;
 namespace ex = entityx;
 
 namespace {
+
+constexpr auto BASIC_LETTER_COLLECTION_SCORE = 10100;
+constexpr auto CORRECT_LETTER_COLLECTION_SCORE = 100000;
+
 
 void spawnScoreNumbers(
   const base::Vector& position,
@@ -78,6 +80,20 @@ void spawnScoreNumbers(
     const auto offset = base::Vector{0, yOffset};
     --yOffset;
     spawnFloatingScoreNumber(entityFactory, numberType, position - offset);
+  }
+}
+
+
+void spawnScoreNumbersForLetterCollectionBonus(
+  EntityFactory& factory,
+  const base::Vector& position
+) {
+  constexpr int X_OFFSETS[] = {-3, 0, 3, 0};
+
+  for (int i = 0; i < 10; ++i) {
+    const auto offset = base::Vector{X_OFFSETS[i % 4], -i};
+    spawnFloatingScoreNumber(
+      factory, ScoreNumberType::S10000, position + offset);
   }
 }
 
@@ -192,10 +208,7 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
         }
 
         if (collectable.mGivenCollectableLetter) {
-          mpPlayerModel->mCollectedLetters.insert(
-            *collectable.mGivenCollectableLetter);
-
-          soundToPlay = SoundId::ItemPickup;
+          collectLetter(*collectable.mGivenCollectableLetter, pos);
         }
 
         if (soundToPlay) {
@@ -230,6 +243,34 @@ void PlayerInteractionSystem::performInteraction(
 void PlayerInteractionSystem::triggerPlayerInteractionAnimation() {
   auto& state = *mPlayer.component<PlayerControlled>();
   state.enterTimedInteractionLock();
+}
+
+
+void PlayerInteractionSystem::collectLetter(
+  const data::CollectableLetterType type,
+  const base::Vector& position
+) {
+  using S = data::PlayerModel::LetterCollectionState;
+
+  const auto collectionState = mpPlayerModel->addLetter(type);
+  if (collectionState == S::InOrder) {
+    mpServiceProvider->playSound(data::SoundId::LettersCollectedCorrectly);
+    mpPlayerModel->mScore += CORRECT_LETTER_COLLECTION_SCORE;
+    spawnScoreNumbersForLetterCollectionBonus(*mpEntityFactory, position);
+  } else {
+    mpServiceProvider->playSound(data::SoundId::ItemPickup);
+    mpPlayerModel->mScore += BASIC_LETTER_COLLECTION_SCORE;
+
+    // In the original game, bonus letters spawn a floating 100 on pickup, but
+    // the player is given 10100 points. This seems like a bug. My guess is
+    // that the additional 10000 points are only supposed to be given when all
+    // letters were collected out of order. The game shows a hint message in
+    // this case which mentions a 10000 points bonus, but the actual score
+    // given is still only 10100. So it seems that this "out of order
+    // collection bonus" is accidentally given for every single letter that's
+    // picked up, instead of only when all letters have been collected.
+    spawnFloatingScoreNumber(*mpEntityFactory, ScoreNumberType::S100, position);
+  }
 }
 
 }}
