@@ -919,7 +919,8 @@ void EntityFactory::configureEntity(
     case 28: // Health molecule
       {
         CollectableItem item;
-        item.mGivenScore = 500; // 10000 when at full health
+        item.mGivenScore = 500;
+        item.mGivenScoreAtFullHealth = 10000;
         item.mGivenHealth = 1;
         configureItemBox(
           entity,

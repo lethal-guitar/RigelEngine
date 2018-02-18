@@ -30,6 +30,7 @@ namespace components {
 
 struct CollectableItem {
   boost::optional<int> mGivenScore;
+  boost::optional<int> mGivenScoreAtFullHealth;
   boost::optional<int> mGivenHealth;
   boost::optional<data::InventoryItemType> mGivenItem;
   boost::optional<data::WeaponType> mGivenWeapon;
@@ -37,6 +38,21 @@ struct CollectableItem {
   bool mSpawnScoreNumbers = true;
 };
 
+}
+
+
+inline boost::optional<int> givenScore(
+  const components::CollectableItem& collectable,
+  const bool playerAtFullHealth
+) {
+  if (collectable.mGivenScore && collectable.mGivenScoreAtFullHealth) {
+    const auto score = playerAtFullHealth
+      ? *collectable.mGivenScoreAtFullHealth
+      : *collectable.mGivenScore;
+    return score;
+  }
+
+  return collectable.mGivenScore;
 }
 
 }}

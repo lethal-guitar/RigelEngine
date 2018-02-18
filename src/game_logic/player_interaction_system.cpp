@@ -172,8 +172,9 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
       if (worldSpaceBbox.intersects(playerBBox)) {
         boost::optional<data::SoundId> soundToPlay;
 
-        if (collectable.mGivenScore) {
-          const auto score = *collectable.mGivenScore;
+        const auto playerAtFullHealth = mpPlayerModel->isAtFullHealth();
+        if (auto maybeScore = givenScore(collectable, playerAtFullHealth)) {
+          const auto score = *maybeScore;
           assert(score > 0);
           mpPlayerModel->mScore += score;
 
