@@ -19,6 +19,7 @@
 #include "utils/enum_hash.hpp"
 
 #include <unordered_set>
+#include <vector>
 
 
 namespace rigel { namespace data {
@@ -87,24 +88,19 @@ struct PlayerModel {
     mInventory.erase(type);
   }
 
-  void updateTemporaryItemExpiry() {
-    if (hasItem(InventoryItemType::RapidFire)) {
-      ++mFramesElapsedHavingRapidFire;
-      if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
-        removeItem(InventoryItemType::RapidFire);
-        mFramesElapsedHavingRapidFire = 0;
-      }
-    }
-  }
+  void updateTemporaryItemExpiry();
 
-  void resetForNewLevel() {
-    mHealth = MAX_HEALTH;
-    mCollectedLetters.clear();
-    mInventory.clear();
-    mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
-  }
+  void resetForNewLevel();
 
-  std::unordered_set<CollectableLetterType> mCollectedLetters;
+  enum class LetterCollectionState {
+    Incomplete,
+    WrongOrder,
+    InOrder
+  };
+
+  LetterCollectionState addLetter(CollectableLetterType type);
+
+  std::vector<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
   WeaponType mWeapon = WeaponType::Normal;
   int mScore = 0;
@@ -113,6 +109,5 @@ struct PlayerModel {
   int mFramesElapsedHavingRapidFire = 0;
   int mFramesElapsedHavingCloak = 0;
 };
-
 
 }}

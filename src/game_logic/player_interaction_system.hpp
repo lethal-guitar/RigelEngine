@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/player_data.hpp"
 #include "engine/base_components.hpp"
 #include "game_logic/player/components.hpp"
 
@@ -62,6 +63,10 @@ private:
   );
 
   void triggerPlayerInteractionAnimation();
+
+  void collectLetter(
+    data::CollectableLetterType type,
+    const base::Vector& position);
 
 private:
   entityx::Entity mPlayer;
