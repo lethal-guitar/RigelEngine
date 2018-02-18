@@ -88,6 +88,8 @@ struct PlayerModel {
     mInventory.erase(type);
   }
 
+  bool isAtFullHealth() const;
+
   void updateTemporaryItemExpiry();
 
   void resetForNewLevel();

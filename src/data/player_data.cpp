@@ -19,6 +19,11 @@
 
 namespace rigel { namespace data {
 
+bool PlayerModel::isAtFullHealth() const {
+  return mHealth == MAX_HEALTH;
+}
+
+
 void PlayerModel::updateTemporaryItemExpiry() {
   if (hasItem(InventoryItemType::RapidFire)) {
     ++mFramesElapsedHavingRapidFire;
