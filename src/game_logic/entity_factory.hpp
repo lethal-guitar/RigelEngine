@@ -83,6 +83,22 @@ enum class ScoreNumberType : std::uint8_t {
 };
 
 
+constexpr ScoreNumberType ScoreNumberType_Items[] = {
+  ScoreNumberType::S10000,
+  ScoreNumberType::S5000,
+  ScoreNumberType::S2000,
+  ScoreNumberType::S500,
+  ScoreNumberType::S100
+};
+
+constexpr int ScoreNumberType_Values[] = {100, 500, 2000, 5000, 10000};
+
+
+constexpr int scoreNumberValue(const ScoreNumberType type) {
+  return ScoreNumberType_Values[static_cast<std::size_t>(type)];
+}
+
+
 inline bool isHorizontal(const ProjectileDirection direction) {
   return
     direction == ProjectileDirection::Left ||
