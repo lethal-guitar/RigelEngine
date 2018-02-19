@@ -51,24 +51,11 @@ void spawnScoreNumbers(
   EntityFactory& entityFactory
 ) {
   std::vector<ScoreNumberType> numbers;
-  for (; score >= 10000; score -= 10000) {
-    numbers.push_back(ScoreNumberType::S10000);
-  }
-
-  for (; score >= 5000; score -= 5000) {
-    numbers.push_back(ScoreNumberType::S5000);
-  }
-
-  for (; score >= 2000; score -= 2000) {
-    numbers.push_back(ScoreNumberType::S2000);
-  }
-
-  for (; score >= 500; score -= 500) {
-    numbers.push_back(ScoreNumberType::S500);
-  }
-
-  for (; score >= 100; score -= 100) {
-    numbers.push_back(ScoreNumberType::S100);
+  for (const auto numberType : ScoreNumberType_Items) {
+    const auto value = scoreNumberValue(numberType);
+    for (; score >= value; score -= value) {
+      numbers.push_back(numberType);
+    }
   }
 
   if (numbers.empty()) {
