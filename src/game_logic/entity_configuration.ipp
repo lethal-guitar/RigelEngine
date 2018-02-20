@@ -217,7 +217,6 @@ void configureMovingEffectSprite(
 ) {
   using namespace engine::components::parameter_aliases;
 
-  entity.template assign<Active>();
   entity.template assign<ActivationSettings>(ActivationSettings::Policy::Always);
   // TODO: To match the original, the condition should actually be
   // OnLeavingActiveRegion, but only after the movement sequence is
@@ -844,7 +843,6 @@ void EntityFactory::configureEntity(
           walkingTurkeyCollectable,
           Shootable{1, 0},
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
-          boundingBox,
           cookedTurkeyContainer,
           ai::components::SimpleWalker{turkeyAiConfig()});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
