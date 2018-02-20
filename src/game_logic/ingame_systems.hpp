@@ -52,7 +52,7 @@
 
 namespace rigel {
 
-namespace data { struct PlayerModel; }
+namespace data { class PlayerModel; }
 namespace engine { class RandomNumberGenerator; }
 namespace game_logic { class EntityFactory; }
 

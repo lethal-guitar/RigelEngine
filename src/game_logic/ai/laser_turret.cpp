@@ -178,7 +178,7 @@ void LaserTurretSystem::receive(const events::ShootableDamaged& event) {
   shootable.mInvincible = true;
   entity.remove<game_logic::components::PlayerDamaging>();
 
-  mpPlayerModel->mScore += 1;
+  mpPlayerModel->giveScore(1);
 
   performBaseHitEffect(entity);
 }

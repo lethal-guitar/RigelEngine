@@ -29,7 +29,7 @@ namespace rigel {
 
 namespace data {
   class Image;
-  struct PlayerModel;
+  class PlayerModel;
 }
 
 namespace loader {

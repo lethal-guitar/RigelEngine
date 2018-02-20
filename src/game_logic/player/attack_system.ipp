@@ -167,18 +167,11 @@ void AttackSystem<EntityFactoryT>::fireShot(
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
   mpEntityFactory->createProjectile(
-    projectileTypeForWeapon(mpPlayerModel->mWeapon),
+    projectileTypeForWeapon(mpPlayerModel->weapon()),
     shotOffset + playerPosition,
     shotDirection(playerState.mState, playerState.mOrientation));
-  mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
-
-  if (mpPlayerModel->currentWeaponConsumesAmmo()) {
-    --mpPlayerModel->mAmmo;
-
-    if (mpPlayerModel->mAmmo <= 0) {
-      mpPlayerModel->switchToWeapon(data::WeaponType::Normal);
-    }
-  }
+  mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->weapon()));
+  mpPlayerModel->useAmmo();
 }
 
 }}}

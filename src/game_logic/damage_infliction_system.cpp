@@ -115,7 +115,7 @@ void DamageInflictionSystem::inflictDamage(
     // Event listeners mustn't remove the shootable component
     assert(shootableEntity.has_component<Shootable>());
 
-    mpPlayerModel->mScore += shootable.mGivenScore;
+    mpPlayerModel->giveScore(shootable.mGivenScore);
 
     if (shootable.mDestroyWhenKilled) {
       shootableEntity.destroy();

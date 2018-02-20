@@ -373,7 +373,7 @@ void GameRunner::handlePlayerDeath() {
 
   const auto playerDead =
     playerState.mState == player::PlayerState::Dead &&
-    mpPlayerModel->mHealth <= 0;
+    mpPlayerModel->isDead();
   if (playerDead) {
     restartLevel();
   }

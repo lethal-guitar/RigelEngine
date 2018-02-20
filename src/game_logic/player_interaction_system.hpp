@@ -31,7 +31,7 @@ namespace rigel {
   struct IGameServiceProvider;
 
   namespace data {
-    struct PlayerModel;
+    class PlayerModel;
   }
 
   namespace game_logic {
