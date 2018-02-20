@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/boost_variant.hpp"
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "ui/bonus_screen.hpp"
 
 #include "game_mode.hpp"

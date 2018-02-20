@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
 #include "utils/enum_hash.hpp"
@@ -29,6 +29,7 @@ namespace rigel {
 
 namespace data {
   class Image;
+  struct PlayerModel;
 }
 
 namespace loader {

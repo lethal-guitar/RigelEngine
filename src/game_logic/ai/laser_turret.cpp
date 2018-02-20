@@ -16,7 +16,7 @@
 
 #include "laser_turret.hpp"
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"

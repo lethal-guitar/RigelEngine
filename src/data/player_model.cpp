@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "player_data.hpp"
+#include "player_model.hpp"
 
 
 namespace rigel { namespace data {

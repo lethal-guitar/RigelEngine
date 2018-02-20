@@ -19,7 +19,7 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/texture.hpp"

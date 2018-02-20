@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>

@@ -16,6 +16,7 @@
 
 #include "damage_system.hpp"
 
+#include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"

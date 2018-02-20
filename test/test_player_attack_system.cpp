@@ -20,7 +20,7 @@
 
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
-#include <data/player_data.hpp>
+#include <data/player_model.hpp>
 #include <game_logic/player/attack_system.hpp>
 #include <game_logic/player_movement_system.hpp>
 #include <game_mode.hpp>

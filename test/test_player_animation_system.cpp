@@ -18,7 +18,7 @@
 
 #include "utils.hpp"
 
-#include <data/player_data.hpp>
+#include <data/player_model.hpp>
 #include <engine/visual_components.hpp>
 #include <game_logic/player/animation_system.hpp>
 #include <game_logic/player_movement_system.hpp>

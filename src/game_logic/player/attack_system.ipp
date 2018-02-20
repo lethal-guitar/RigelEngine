@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "game_logic/player/attack_traits.hpp"
 #include "game_service_provider.hpp"
 
