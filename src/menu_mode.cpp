@@ -49,14 +49,14 @@ bool abortedByUser(const DukeScriptRunner::ExecutionResult& result) {
 
 
 MenuMode::MenuMode(Context context)
-  : mScriptRunner(context)
+  : mpScriptRunner(context.mpScriptRunner)
   , mMainScripts(context.mpResources->loadScriptBundle("TEXT.MNI"))
   , mOptionsScripts(context.mpResources->loadScriptBundle("OPTIONS.MNI"))
   , mOrderingInfoScripts(context.mpResources->loadScriptBundle("ORDERTXT.MNI"))
   , mpServices(context.mpServiceProvider)
 {
   mpServices->playMusic("DUKEIIA.IMF");
-  mScriptRunner.executeScript(mMainScripts["Main_Menu"]);
+  mpScriptRunner->executeScript(mMainScripts["Main_Menu"]);
 }
 
 
@@ -70,15 +70,15 @@ void MenuMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  mScriptRunner.handleEvent(event);
+  mpScriptRunner->handleEvent(event);
 }
 
 
 void MenuMode::updateAndRender(engine::TimeDelta dt) {
-  mScriptRunner.updateAndRender(dt);
+  mpScriptRunner->updateAndRender(dt);
 
-  if (mScriptRunner.hasFinishedExecution()) {
-    const auto result = mScriptRunner.result();
+  if (mpScriptRunner->hasFinishedExecution()) {
+    const auto result = mpScriptRunner->result();
     assert(result);
 
     navigateToNextMenu(*result);
@@ -90,7 +90,7 @@ void MenuMode::enterMainMenu() {
   mChosenEpisodeForNewGame = 0;
 
   mMenuState = MenuState::MainMenu;
-  mScriptRunner.executeScript(mMainScripts["Main_Menu"]);
+  mpScriptRunner->executeScript(mMainScripts["Main_Menu"]);
 }
 
 
@@ -100,44 +100,44 @@ void MenuMode::navigateToNextMenu(
   switch (mMenuState) {
     case MenuState::MainMenu:
       if (abortedByUser(result)) {
-        mScriptRunner.executeScript(mMainScripts["Quit_Select"]);
+        mpScriptRunner->executeScript(mMainScripts["Quit_Select"]);
         mMenuState = MenuState::AskIfQuit;
       } else {
         assert(result.mSelectedPage);
 
         switch (*result.mSelectedPage) {
           case 0:
-            mScriptRunner.executeScript(mMainScripts["Episode_Select"]);
+            mpScriptRunner->executeScript(mMainScripts["Episode_Select"]);
             mMenuState = MenuState::SelectNewGameEpisode;
             break;
 
           case 1:
-            mScriptRunner.executeScript(mOptionsScripts["Restore_Game"]);
+            mpScriptRunner->executeScript(mOptionsScripts["Restore_Game"]);
             mMenuState = MenuState::RestoreGame;
             break;
 
           case 2:
-            mScriptRunner.executeScript(mOptionsScripts["My_Options"]);
+            mpScriptRunner->executeScript(mOptionsScripts["My_Options"]);
             mMenuState = MenuState::GameOptions;
             break;
 
           case 3:
             if (mpServices->isShareWareVersion()) {
-              mScriptRunner.executeScript(
+              mpScriptRunner->executeScript(
                 mOrderingInfoScripts["Ordering_Info"]);
             } else {
-              mScriptRunner.executeScript(mMainScripts["V4ORDER"]);
+              mpScriptRunner->executeScript(mMainScripts["V4ORDER"]);
             }
             mMenuState = MenuState::OrderingInformation;
             break;
 
           case 4:
-            mScriptRunner.executeScript(mMainScripts["Both_S_I"]);
+            mpScriptRunner->executeScript(mMainScripts["Both_S_I"]);
             mMenuState = MenuState::ChooseInstructionsOrStory;
             break;
 
           case 5:
-            mScriptRunner.executeScript(mMainScripts["Episode_Select"]);
+            mpScriptRunner->executeScript(mMainScripts["Episode_Select"]);
             mMenuState = MenuState::SelectHighscoresEpisode;
             break;
 
@@ -146,13 +146,13 @@ void MenuMode::navigateToNextMenu(
               auto showCreditsScript = mMainScripts["&Credits"];
               showCreditsScript.emplace_back(data::script::WaitForUserInput{});
 
-              mScriptRunner.executeScript(showCreditsScript);
+              mpScriptRunner->executeScript(showCreditsScript);
               mMenuState = MenuState::ShowCredits;
             }
             break;
 
           case 7:
-            mScriptRunner.executeScript(mMainScripts["Quit_Select"]);
+            mpScriptRunner->executeScript(mMainScripts["Quit_Select"]);
             mMenuState = MenuState::AskIfQuit;
             break;
 
@@ -171,12 +171,12 @@ void MenuMode::navigateToNextMenu(
         const auto chosenEpisode = *result.mSelectedPage;
 
         if (mpServices->isShareWareVersion() && chosenEpisode > 0) {
-          mScriptRunner.executeScript(mMainScripts["No_Can_Order"]);
+          mpScriptRunner->executeScript(mMainScripts["No_Can_Order"]);
           mMenuState = MenuState::EpisodeNotAvailableMessage;
         } else {
           mChosenEpisodeForNewGame = chosenEpisode;
 
-          mScriptRunner.executeScript(mMainScripts["Skill_Select"]);
+          mpScriptRunner->executeScript(mMainScripts["Skill_Select"]);
           mMenuState = MenuState::SelectNewGameSkill;
         }
       }
@@ -184,7 +184,7 @@ void MenuMode::navigateToNextMenu(
 
     case MenuState::SelectNewGameSkill:
       if (abortedByUser(result)) {
-        mScriptRunner.executeScript(mMainScripts["Episode_Select"]);
+        mpScriptRunner->executeScript(mMainScripts["Episode_Select"]);
         mMenuState = MenuState::SelectNewGameEpisode;
       } else {
         assert(result.mSelectedPage);
@@ -201,7 +201,7 @@ void MenuMode::navigateToNextMenu(
       break;
 
     case MenuState::EpisodeNotAvailableMessage:
-      mScriptRunner.executeScript(mMainScripts["Episode_Select"]);
+      mpScriptRunner->executeScript(mMainScripts["Episode_Select"]);
       mMenuState = MenuState::SelectNewGameEpisode;
       break;
 
@@ -212,17 +212,17 @@ void MenuMode::navigateToNextMenu(
         assert(result.mSelectedPage);
         switch (*result.mSelectedPage) {
           case 4:
-            mScriptRunner.executeScript(mOptionsScripts["Key_Config"]);
+            mpScriptRunner->executeScript(mOptionsScripts["Key_Config"]);
             mMenuState = MenuState::KeyboardConfig;
             break;
 
           case 5:
-            mScriptRunner.executeScript(mOptionsScripts["&Calibrate"]);
+            mpScriptRunner->executeScript(mOptionsScripts["&Calibrate"]);
             mMenuState = MenuState::JoystickCalibration;
             break;
 
           case 6:
-            mScriptRunner.executeScript(mOptionsScripts["Game_Speed"]);
+            mpScriptRunner->executeScript(mOptionsScripts["Game_Speed"]);
             mMenuState = MenuState::GameSpeedConfig;
             break;
         }
@@ -232,7 +232,7 @@ void MenuMode::navigateToNextMenu(
     case MenuState::KeyboardConfig:
     case MenuState::JoystickCalibration:
     case MenuState::GameSpeedConfig:
-      mScriptRunner.executeScript(mOptionsScripts["My_Options"]);
+      mpScriptRunner->executeScript(mOptionsScripts["My_Options"]);
       mMenuState = MenuState::GameOptions;
       break;
 
@@ -243,12 +243,12 @@ void MenuMode::navigateToNextMenu(
         assert(result.mSelectedPage);
         switch (*result.mSelectedPage) {
           case 0:
-            mScriptRunner.executeScript(mMainScripts["&Instructions"]);
+            mpScriptRunner->executeScript(mMainScripts["&Instructions"]);
             mMenuState = MenuState::Instructions;
             break;
 
           case 1:
-            mScriptRunner.executeScript(mMainScripts["&Story"]);
+            mpScriptRunner->executeScript(mMainScripts["&Story"]);
             mMenuState = MenuState::Story;
             break;
         }
@@ -268,7 +268,7 @@ void MenuMode::navigateToNextMenu(
         showHiScoreScript.emplace_back(data::script::FadeIn{});
         showHiScoreScript.emplace_back(data::script::WaitForUserInput{});
 
-        mScriptRunner.executeScript(showHiScoreScript);
+        mpScriptRunner->executeScript(showHiScoreScript);
         mMenuState = MenuState::ShowHiscores;
       }
       break;

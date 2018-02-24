@@ -57,12 +57,16 @@ const auto MENU_FONT_HEIGHT = 2;
 }
 
 
-DukeScriptRunner::DukeScriptRunner(const GameMode::Context& context)
-  : mpResourceBundle(context.mpResources)
+DukeScriptRunner::DukeScriptRunner(
+  loader::ResourceLoader* pResourceLoader,
+  engine::Renderer* pRenderer,
+  IGameServiceProvider* pServiceProvider
+)
+  : mpResourceBundle(pResourceLoader)
   , mCurrentPalette(loader::INGAME_PALETTE)
-  , mpRenderer(context.mpRenderer)
-  , mpServices(context.mpServiceProvider)
-  , mMenuElementRenderer(context.mpRenderer, *context.mpResources)
+  , mpRenderer(pRenderer)
+  , mpServices(pServiceProvider)
+  , mMenuElementRenderer(pRenderer, *pResourceLoader)
   , mProgramCounter(0u)
 {
 }

@@ -48,7 +48,10 @@ public:
     boost::optional<int> mSelectedPage;
   };
 
-  explicit DukeScriptRunner(const GameMode::Context& context);
+  DukeScriptRunner(
+    loader::ResourceLoader* pResourceLoader,
+    engine::Renderer* pRenderer,
+    IGameServiceProvider* pServiceProvider);
 
   void executeScript(const data::script::Script& script);
 

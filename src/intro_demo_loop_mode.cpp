@@ -1,6 +1,7 @@
 #include "intro_demo_loop_mode.hpp"
 
 #include "loader/resource_loader.hpp"
+#include "ui/duke_script_runner.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -51,7 +52,7 @@ IntroDemoLoopMode::IntroDemoLoopMode(
 )
   : mpServiceProvider(context.mpServiceProvider)
   , mFirstRunIncludedStoryAnimation(isDuringGameStartup)
-  , mScriptRunner(context)
+  , mpScriptRunner(context.mpScriptRunner)
   , mScripts(context.mpResources->loadScriptBundle("TEXT.MNI"))
   , mCurrentStage(isDuringGameStartup ? 0 : 1)
 {
@@ -59,14 +60,14 @@ IntroDemoLoopMode::IntroDemoLoopMode(
   mStages.emplace_back(ui::IntroMovie(context));
   if (isDuringGameStartup) {
     mStages.emplace_back(ScriptExecutionStage{
-      &mScriptRunner,
+      mpScriptRunner,
       mScripts["&Story"]});
   }
 
   auto creditsScript = mScripts["&Credits"];
   creditsScript.emplace_back(data::script::Delay{700});
   mStages.emplace_back(ScriptExecutionStage{
-    &mScriptRunner,
+    mpScriptRunner,
     std::move(creditsScript)});
 
   // The credits screen is shown twice as long in the registered version. This
@@ -82,7 +83,7 @@ IntroDemoLoopMode::IntroDemoLoopMode(
   }
   orderInfoScript.emplace_back(data::script::Delay{700});
   mStages.emplace_back(ScriptExecutionStage{
-    &mScriptRunner,
+    mpScriptRunner,
     std::move(orderInfoScript)});
 
   startStage(mStages[mCurrentStage]);

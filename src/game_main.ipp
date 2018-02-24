@@ -23,6 +23,7 @@
 #include "engine/texture.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/fps_display.hpp"
+#include "ui/duke_script_runner.hpp"
 #include "ui/menu_element_renderer.hpp"
 
 #include "game_mode.hpp"
@@ -94,6 +95,7 @@ private:
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
 
+  ui::DukeScriptRunner mScriptRunner;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
   std::string mDebugText;
