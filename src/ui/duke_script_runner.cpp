@@ -54,6 +54,10 @@ const auto SELECTED_COLOR_INDEX = 3;
 const auto UNSELECTED_COLOR_INDEX = 2;
 const auto MENU_FONT_HEIGHT = 2;
 
+
+const auto SKILL_LEVEL_SLOT = 0;
+const auto INITIAL_SKILL_SELECTION = 1;
+
 }
 
 
@@ -69,6 +73,8 @@ DukeScriptRunner::DukeScriptRunner(
   , mMenuElementRenderer(pRenderer, *pResourceLoader)
   , mProgramCounter(0u)
 {
+  // Default menu pre-selections at game start
+  mPersistentMenuSelections.emplace(SKILL_LEVEL_SLOT, INITIAL_SKILL_SELECTION);
 }
 
 
