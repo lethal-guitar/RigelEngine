@@ -407,7 +407,7 @@ void DukeScriptRunner::interpretNextAction() {
       const auto slotIndex = action.slot;
       const auto iter = mPersistentMenuSelections.find(slotIndex);
       if (iter == mPersistentMenuSelections.end()) {
-        mPersistentMenuSelections.emplace(0, 0);
+        mPersistentMenuSelections.emplace(slotIndex, 0);
       }
 
       mCurrentPersistentSelectionSlot = slotIndex;
