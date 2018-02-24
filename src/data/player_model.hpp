@@ -24,14 +24,6 @@
 
 namespace rigel { namespace data {
 
-const auto MAX_SCORE = 9999999;
-const auto MAX_AMMO = 32;
-const auto MAX_AMMO_FLAME_THROWER = 64;
-const auto MAX_HEALTH = 9;
-
-const auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
-
-
 enum class InventoryItemType {
   CircuitBoard,
   BlueKey,
@@ -65,49 +57,53 @@ RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::InventoryItemType)
 
 namespace rigel { namespace data {
 
-struct PlayerModel {
-  int currentMaxAmmo() const {
-    return
-      mWeapon == WeaponType::FlameThrower ? MAX_AMMO_FLAME_THROWER : MAX_AMMO;
-  }
-
-  void switchToWeapon(const WeaponType type) {
-    mWeapon = type;
-    mAmmo = currentMaxAmmo();
-  }
-
-  bool currentWeaponConsumesAmmo() const {
-    return mWeapon != WeaponType::Normal;
-  }
-
-  bool hasItem(const InventoryItemType type) const {
-    return mInventory.count(type) != 0;
-  }
-
-  void removeItem(const InventoryItemType type) {
-    mInventory.erase(type);
-  }
-
-  void updateTemporaryItemExpiry();
-
-  void resetForNewLevel();
-
+class PlayerModel {
+public:
   enum class LetterCollectionState {
     Incomplete,
     WrongOrder,
     InOrder
   };
 
+  PlayerModel();
+
+  int score() const;
+  void giveScore(int amount);
+
+  int ammo() const;
+  int currentMaxAmmo() const;
+  WeaponType weapon() const;
+  bool currentWeaponConsumesAmmo() const;
+  void switchToWeapon(const WeaponType type);
+  void useAmmo();
+  void setAmmo(int amount);
+
+  int health() const;
+  bool isAtFullHealth() const;
+  bool isDead() const;
+  void takeHealth(int amount);
+  void giveHealth(int amount);
+
+  const std::unordered_set<InventoryItemType>& inventory() const;
+  bool hasItem(const InventoryItemType type) const;
+  void giveItem(InventoryItemType type);
+  void removeItem(const InventoryItemType type);
+
+  const std::vector<CollectableLetterType>& collectedLetters() const;
   LetterCollectionState addLetter(CollectableLetterType type);
 
+  void resetForNewLevel();
+  void updateTemporaryItemExpiry();
+
+private:
   std::vector<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
-  WeaponType mWeapon = WeaponType::Normal;
-  int mScore = 0;
-  int mAmmo = MAX_AMMO;
-  int mHealth = MAX_HEALTH;
-  int mFramesElapsedHavingRapidFire = 0;
-  int mFramesElapsedHavingCloak = 0;
+  WeaponType mWeapon;
+  int mScore;
+  int mAmmo;
+  int mHealth;
+  int mFramesElapsedHavingRapidFire;
+  int mFramesElapsedHavingCloak;
 };
 
 }}

@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "game_logic/player/attack_traits.hpp"
 #include "game_service_provider.hpp"
 
@@ -167,18 +167,11 @@ void AttackSystem<EntityFactoryT>::fireShot(
     WorldPosition{shotOffsetHorizontal, shotOffsetVertical};
 
   mpEntityFactory->createProjectile(
-    projectileTypeForWeapon(mpPlayerModel->mWeapon),
+    projectileTypeForWeapon(mpPlayerModel->weapon()),
     shotOffset + playerPosition,
     shotDirection(playerState.mState, playerState.mOrientation));
-  mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->mWeapon));
-
-  if (mpPlayerModel->currentWeaponConsumesAmmo()) {
-    --mpPlayerModel->mAmmo;
-
-    if (mpPlayerModel->mAmmo <= 0) {
-      mpPlayerModel->switchToWeapon(data::WeaponType::Normal);
-    }
-  }
+  mpServiceProvider->playSound(soundIdForWeapon(mpPlayerModel->weapon()));
+  mpPlayerModel->useAmmo();
 }
 
 }}}

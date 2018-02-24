@@ -254,10 +254,10 @@ void HudRenderer::render() {
   const auto inventoryStartPos = base::Vector{
     topRightTexturePosX + GameTraits::tileSize,
     2*GameTraits::tileSize};
-  auto inventoryIter = mpPlayerModel->mInventory.cbegin();
+  auto inventoryIter = mpPlayerModel->inventory().cbegin();
   for (int row = 0; row < 3; ++row) {
     for (int col = 0; col < 2; ++col) {
-      if (inventoryIter != mpPlayerModel->mInventory.cend()) {
+      if (inventoryIter != mpPlayerModel->inventory().cend()) {
         const auto itemType = *inventoryIter++;
         const auto drawPos =
           inventoryStartPos + base::Vector{col, row} * GameTraits::tileSize*2;
@@ -271,10 +271,10 @@ void HudRenderer::render() {
 
   // Player state and remaining HUD elements
   // --------------------------------------------------------------------------
-  drawScore(mpPlayerModel->mScore, mStatusSpriteSheetRenderer);
-  drawWeaponIcon(mpPlayerModel->mWeapon, mStatusSpriteSheetRenderer);
+  drawScore(mpPlayerModel->score(), mStatusSpriteSheetRenderer);
+  drawWeaponIcon(mpPlayerModel->weapon(), mStatusSpriteSheetRenderer);
   drawAmmoBar(
-    mpPlayerModel->mAmmo,
+    mpPlayerModel->ammo(),
     mpPlayerModel->currentMaxAmmo(),
     mStatusSpriteSheetRenderer);
   drawHealthBar();
@@ -289,7 +289,7 @@ void HudRenderer::drawHealthBar() const {
 
   // The model has a range of 1-9 for health, but the HUD shows only 8
   // slices, with a special animation for having 1 point of health.
-  const auto numFullSlices = mpPlayerModel->mHealth - 1;
+  const auto numFullSlices = mpPlayerModel->health() - 1;
   if (numFullSlices > 0) {
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = i < numFullSlices ? 9 : 10;
@@ -311,7 +311,7 @@ void HudRenderer::drawHealthBar() const {
 
 
 void HudRenderer::drawCollectedLetters() const {
-  for (const auto letter : mpPlayerModel->mCollectedLetters) {
+  for (const auto letter : mpPlayerModel->collectedLetters()) {
     const auto it = mCollectedLetterIndicatorsByType.find(letter);
     assert(it != mCollectedLetterIndicatorsByType.end());
     it->second.mTexture.render(mpRenderer, it->second.mPxPosition);

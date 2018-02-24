@@ -14,8 +14,8 @@ set(core_sources
     data/image.hpp
     data/map.cpp
     data/map.hpp
-    data/player_data.cpp
-    data/player_data.hpp
+    data/player_model.cpp
+    data/player_model.hpp
     data/song.hpp
     data/sound_ids.hpp
     data/tile_attributes.cpp

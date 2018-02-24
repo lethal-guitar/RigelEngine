@@ -16,7 +16,7 @@
 
 #include "force_field.hpp"
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"

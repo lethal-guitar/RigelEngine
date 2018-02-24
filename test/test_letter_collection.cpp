@@ -17,7 +17,7 @@
 #include <catch.hpp>
 #include "utils.hpp"
 
-#include <data/player_data.hpp>
+#include <data/player_model.hpp>
 #include <utils/container_tools.hpp>
 
 #include <vector>

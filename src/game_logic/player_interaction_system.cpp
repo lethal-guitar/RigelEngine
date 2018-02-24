@@ -51,24 +51,11 @@ void spawnScoreNumbers(
   EntityFactory& entityFactory
 ) {
   std::vector<ScoreNumberType> numbers;
-  for (; score >= 10000; score -= 10000) {
-    numbers.push_back(ScoreNumberType::S10000);
-  }
-
-  for (; score >= 5000; score -= 5000) {
-    numbers.push_back(ScoreNumberType::S5000);
-  }
-
-  for (; score >= 2000; score -= 2000) {
-    numbers.push_back(ScoreNumberType::S2000);
-  }
-
-  for (; score >= 500; score -= 500) {
-    numbers.push_back(ScoreNumberType::S500);
-  }
-
-  for (; score >= 100; score -= 100) {
-    numbers.push_back(ScoreNumberType::S100);
+  for (const auto numberType : ScoreNumberType_Items) {
+    const auto value = scoreNumberValue(numberType);
+    for (; score >= value; score -= value) {
+      numbers.push_back(numberType);
+    }
   }
 
   if (numbers.empty()) {
@@ -172,10 +159,11 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
       if (worldSpaceBbox.intersects(playerBBox)) {
         boost::optional<data::SoundId> soundToPlay;
 
-        if (collectable.mGivenScore) {
-          const auto score = *collectable.mGivenScore;
+        const auto playerAtFullHealth = mpPlayerModel->isAtFullHealth();
+        if (auto maybeScore = givenScore(collectable, playerAtFullHealth)) {
+          const auto score = *maybeScore;
           assert(score > 0);
-          mpPlayerModel->mScore += score;
+          mpPlayerModel->giveScore(score);
 
           soundToPlay = SoundId::ItemPickup;
 
@@ -186,10 +174,7 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
 
         if (collectable.mGivenHealth) {
           assert(*collectable.mGivenHealth > 0);
-          mpPlayerModel->mHealth = std::min(
-            data::MAX_HEALTH,
-            mpPlayerModel->mHealth + *collectable.mGivenHealth);
-
+          mpPlayerModel->giveHealth(*collectable.mGivenHealth);
           soundToPlay = SoundId::HealthPickup;
         }
 
@@ -200,7 +185,7 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
 
         if (collectable.mGivenItem) {
           const auto itemType = *collectable.mGivenItem;
-          mpPlayerModel->mInventory.insert(itemType);
+          mpPlayerModel->giveItem(itemType);
 
           soundToPlay = itemType == InventoryItemType::RapidFire ?
             SoundId::WeaponPickup :
@@ -255,11 +240,11 @@ void PlayerInteractionSystem::collectLetter(
   const auto collectionState = mpPlayerModel->addLetter(type);
   if (collectionState == S::InOrder) {
     mpServiceProvider->playSound(data::SoundId::LettersCollectedCorrectly);
-    mpPlayerModel->mScore += CORRECT_LETTER_COLLECTION_SCORE;
+    mpPlayerModel->giveScore(CORRECT_LETTER_COLLECTION_SCORE);
     spawnScoreNumbersForLetterCollectionBonus(*mpEntityFactory, position);
   } else {
     mpServiceProvider->playSound(data::SoundId::ItemPickup);
-    mpPlayerModel->mScore += BASIC_LETTER_COLLECTION_SCORE;
+    mpPlayerModel->giveScore(BASIC_LETTER_COLLECTION_SCORE);
 
     // In the original game, bonus letters spawn a floating 100 on pickup, but
     // the player is given 10100 points. This seems like a bug. My guess is

@@ -16,7 +16,7 @@
 
 #include "laser_turret.hpp"
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
@@ -178,7 +178,7 @@ void LaserTurretSystem::receive(const events::ShootableDamaged& event) {
   shootable.mInvincible = true;
   entity.remove<game_logic::components::PlayerDamaging>();
 
-  mpPlayerModel->mScore += 1;
+  mpPlayerModel->giveScore(1);
 
   performBaseHitEffect(entity);
 }

@@ -16,6 +16,7 @@
 
 #include "damage_system.hpp"
 
+#include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
@@ -75,7 +76,7 @@ DamageSystem::DamageSystem(
 
 
 void DamageSystem::update(entityx::EntityManager& es) {
-  if (mpPlayerModel->mHealth <= 0) {
+  if (mpPlayerModel->isDead()) {
     return;
   }
 
@@ -102,10 +103,9 @@ void DamageSystem::update(entityx::EntityManager& es) {
         !playerState.isInMercyFrames() || damage.mIgnoreMercyFrames;
 
       if (hasCollision && canTakeDamage) {
-        mpPlayerModel->mHealth =
-          std::max(0, mpPlayerModel->mHealth - damage.mAmount);
+        mpPlayerModel->takeHealth(damage.mAmount);
 
-        if (mpPlayerModel->mHealth > 0) {
+        if (!mpPlayerModel->isDead()) {
           playerState.mMercyFramesRemaining = mNumMercyFrames;
           mpServiceProvider->playSound(data::SoundId::DukePain);
         } else {

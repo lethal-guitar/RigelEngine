@@ -24,7 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace data { struct PlayerModel; }}
+namespace rigel { namespace data { class PlayerModel; }}
 namespace rigel { namespace engine { class RandomNumberGenerator; }}
 
 

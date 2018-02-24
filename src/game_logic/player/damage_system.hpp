@@ -18,7 +18,6 @@
 
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
-#include "data/player_data.hpp"
 #include "engine/timing.hpp"
 
 #include "game_service_provider.hpp"
@@ -26,6 +25,9 @@
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
+
+
+namespace rigel { namespace data { class PlayerModel; }}
 
 
 namespace rigel { namespace game_logic { namespace player {

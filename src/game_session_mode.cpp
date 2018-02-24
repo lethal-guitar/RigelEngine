@@ -73,7 +73,7 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       pIngameMode->updateAndRender(dt);
 
       if (pIngameMode->levelFinished()) {
-        auto bonusScreen = ui::BonusScreen{mContext, {}, mPlayerModel.mScore};
+        auto bonusScreen = ui::BonusScreen{mContext, {}, mPlayerModel.score()};
         fadeToNewStage(bonusScreen);
         mCurrentStage = std::move(bonusScreen);
       }
@@ -83,6 +83,7 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       bonusScreen.updateAndRender(dt);
 
       if (bonusScreen.finished()) {
+        // TODO: Update player model with new score after bonus screen
         mPlayerModel.resetForNewLevel();
 
         auto pNextIngameMode = std::make_unique<GameRunner>(

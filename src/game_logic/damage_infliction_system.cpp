@@ -16,7 +16,7 @@
 
 #include "damage_infliction_system.hpp"
 
-#include "data/player_data.hpp"
+#include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
@@ -115,7 +115,7 @@ void DamageInflictionSystem::inflictDamage(
     // Event listeners mustn't remove the shootable component
     assert(shootableEntity.has_component<Shootable>());
 
-    mpPlayerModel->mScore += shootable.mGivenScore;
+    mpPlayerModel->giveScore(shootable.mGivenScore);
 
     if (shootable.mDestroyWhenKilled) {
       shootableEntity.destroy();

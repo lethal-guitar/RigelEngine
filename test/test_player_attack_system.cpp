@@ -20,7 +20,7 @@
 
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
-#include <data/player_data.hpp>
+#include <data/player_model.hpp>
 #include <game_logic/player/attack_system.hpp>
 #include <game_logic/player_movement_system.hpp>
 #include <game_mode.hpp>
@@ -239,21 +239,21 @@ TEST_CASE("Player attack system works as expected") {
     }
 
     SECTION("Laser shot") {
-      playerModel.mWeapon = data::WeaponType::Laser;
+      playerModel.switchToWeapon(data::WeaponType::Laser);
 
       update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerLaserShot);
     }
 
     SECTION("Rocket shot") {
-      playerModel.mWeapon = data::WeaponType::Rocket;
+      playerModel.switchToWeapon(data::WeaponType::Rocket);
 
       update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerRocketShot);
     }
 
     SECTION("Flame shot") {
-      playerModel.mWeapon = data::WeaponType::FlameThrower;
+      playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
       update(shootingInputState);
       CHECK(fireShotParameters.type == ProjectileType::PlayerFlameShot);
@@ -273,7 +273,7 @@ TEST_CASE("Player attack system works as expected") {
     }
 
     SECTION("Laser") {
-      playerModel.mWeapon = data::WeaponType::Laser;
+      playerModel.switchToWeapon(data::WeaponType::Laser);
 
       update(shootingInputState);
       CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
@@ -283,7 +283,7 @@ TEST_CASE("Player attack system works as expected") {
     }
 
     SECTION("Rocket launcher") {
-      playerModel.mWeapon = data::WeaponType::Rocket;
+      playerModel.switchToWeapon(data::WeaponType::Rocket);
 
       // The rocket launcher also uses the normal shot sound
       update(shootingInputState);
@@ -294,7 +294,7 @@ TEST_CASE("Player attack system works as expected") {
     }
 
     SECTION("Flame thrower") {
-      playerModel.mWeapon = data::WeaponType::FlameThrower;
+      playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
       update(shootingInputState);
       CHECK(mockServiceProvicer.mLastTriggeredSoundId != boost::none);
@@ -304,8 +304,8 @@ TEST_CASE("Player attack system works as expected") {
     }
 
     SECTION("Last shot before ammo depletion still uses appropriate sound") {
-      playerModel.mWeapon = data::WeaponType::Laser;
-      playerModel.mAmmo = 1;
+      playerModel.switchToWeapon(data::WeaponType::Laser);
+      playerModel.setAmmo(1);
 
       update(shootingInputState);
 
@@ -325,55 +325,55 @@ TEST_CASE("Player attack system works as expected") {
 
   SECTION("Ammo consumption for non-regular weapons works") {
     SECTION("Normal shot doesn't consume ammo") {
-      playerModel.mAmmo = 42;
+      playerModel.setAmmo(24);
       fireOneShot();
-      CHECK(playerModel.mAmmo == 42);
+      CHECK(playerModel.ammo() == 24);
     }
 
     SECTION("Laser consumes 1 unit of ammo per shot") {
-      playerModel.mWeapon = data::WeaponType::Laser;
-      playerModel.mAmmo = 10;
+      playerModel.switchToWeapon(data::WeaponType::Laser);
+      playerModel.setAmmo(10);
 
       fireOneShot();
-      CHECK(playerModel.mAmmo == 9);
+      CHECK(playerModel.ammo() == 9);
     }
 
     SECTION("Rocket launcher consumes 1 unit of ammo per shot") {
-      playerModel.mWeapon = data::WeaponType::Rocket;
-      playerModel.mAmmo = 10;
+      playerModel.switchToWeapon(data::WeaponType::Rocket);
+      playerModel.setAmmo(10);
 
       fireOneShot();
-      CHECK(playerModel.mAmmo == 9);
+      CHECK(playerModel.ammo() == 9);
     }
 
     SECTION("Flame thrower consumes 1 unit of ammo per shot") {
-      playerModel.mWeapon = data::WeaponType::FlameThrower;
-      playerModel.mAmmo = 10;
+      playerModel.switchToWeapon(data::WeaponType::FlameThrower);
+      playerModel.setAmmo(10);
 
       fireOneShot();
-      CHECK(playerModel.mAmmo == 9);
+      CHECK(playerModel.ammo() == 9);
     }
 
     SECTION("Multiple shots consume several units of ammo") {
-      playerModel.mWeapon = data::WeaponType::Laser;
-      playerModel.mAmmo = 20;
+      playerModel.switchToWeapon(data::WeaponType::Laser);
+      playerModel.setAmmo(20);
 
       const auto shotsToFire = 15;
       for (int i = 0; i < shotsToFire; ++i) {
         fireOneShot();
       }
 
-      CHECK(playerModel.mAmmo == 20 - shotsToFire);
+      CHECK(playerModel.ammo() == 20 - shotsToFire);
     }
 
     SECTION("Depleting ammo switches back to normal weapon") {
-      playerModel.mWeapon = data::WeaponType::Rocket;
-      playerModel.mAmmo = 1;
+      playerModel.switchToWeapon(data::WeaponType::Rocket);
+      playerModel.setAmmo(1);
 
       fireOneShot();
 
-      CHECK(playerModel.mWeapon == data::WeaponType::Normal);
-      CHECK(playerModel.mAmmo == playerModel.currentMaxAmmo());
+      CHECK(playerModel.weapon() == data::WeaponType::Normal);
+      CHECK(playerModel.ammo() == playerModel.currentMaxAmmo());
     }
   }
 
@@ -399,7 +399,7 @@ TEST_CASE("Player attack system works as expected") {
 
 
   SECTION("Player fires continuously every other frame when owning rapid fire buff") {
-    playerModel.mInventory.insert(data::InventoryItemType::RapidFire);
+    playerModel.giveItem(data::InventoryItemType::RapidFire);
 
     attackSystem.buttonStateChanged(shootingInputState);
     attackSystem.update();
@@ -417,7 +417,7 @@ TEST_CASE("Player attack system works as expected") {
   }
 
   SECTION("Rapid fire expires after timeout") {
-    playerModel.mInventory.insert(data::InventoryItemType::RapidFire);
+    playerModel.giveItem(data::InventoryItemType::RapidFire);
 
     attackSystem.buttonStateChanged(shootingInputState);
     for (int i = 0; i < 700; ++i) {
