@@ -57,7 +57,7 @@ private:
   void navigateToNextMenu(const ui::DukeScriptRunner::ExecutionResult& result);
 
 private:
-  ui::DukeScriptRunner mScriptRunner;
+  ui::DukeScriptRunner* mpScriptRunner;
 
   loader::ScriptBundle mMainScripts;
   loader::ScriptBundle mOptionsScripts;

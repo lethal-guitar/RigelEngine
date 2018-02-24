@@ -69,6 +69,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
+  , mScriptRunner(&mResources, &mRenderer, this)
   , mTextRenderer(&mRenderer, mResources)
   , mFpsDisplay(&mTextRenderer)
 {
@@ -192,7 +193,7 @@ void Game::mainLoop() {
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, &mRenderer, this};
+  return {&mResources, &mRenderer, this, &mScriptRunner};
 }
 
 

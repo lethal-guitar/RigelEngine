@@ -54,17 +54,27 @@ const auto SELECTED_COLOR_INDEX = 3;
 const auto UNSELECTED_COLOR_INDEX = 2;
 const auto MENU_FONT_HEIGHT = 2;
 
+
+const auto SKILL_LEVEL_SLOT = 0;
+const auto INITIAL_SKILL_SELECTION = 1;
+
 }
 
 
-DukeScriptRunner::DukeScriptRunner(const GameMode::Context& context)
-  : mpResourceBundle(context.mpResources)
+DukeScriptRunner::DukeScriptRunner(
+  loader::ResourceLoader* pResourceLoader,
+  engine::Renderer* pRenderer,
+  IGameServiceProvider* pServiceProvider
+)
+  : mpResourceBundle(pResourceLoader)
   , mCurrentPalette(loader::INGAME_PALETTE)
-  , mpRenderer(context.mpRenderer)
-  , mpServices(context.mpServiceProvider)
-  , mMenuElementRenderer(context.mpRenderer, *context.mpResources)
+  , mpRenderer(pRenderer)
+  , mpServices(pServiceProvider)
+  , mMenuElementRenderer(pRenderer, *pResourceLoader)
   , mProgramCounter(0u)
 {
+  // Default menu pre-selections at game start
+  mPersistentMenuSelections.emplace(SKILL_LEVEL_SLOT, INITIAL_SKILL_SELECTION);
 }
 
 
@@ -403,7 +413,7 @@ void DukeScriptRunner::interpretNextAction() {
       const auto slotIndex = action.slot;
       const auto iter = mPersistentMenuSelections.find(slotIndex);
       if (iter == mPersistentMenuSelections.end()) {
-        mPersistentMenuSelections.emplace(0, 0);
+        mPersistentMenuSelections.emplace(slotIndex, 0);
       }
 
       mCurrentPersistentSelectionSlot = slotIndex;

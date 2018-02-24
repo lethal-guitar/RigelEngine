@@ -33,6 +33,10 @@ namespace loader {
   class ResourceLoader;
 }
 
+namespace ui {
+  class DukeScriptRunner;
+}
+
 
 struct GameMode {
   /** Contains everything a mode needs */
@@ -40,6 +44,7 @@ struct GameMode {
     const loader::ResourceLoader* mpResources;
     engine::Renderer* mpRenderer;
     IGameServiceProvider* mpServiceProvider;
+    ui::DukeScriptRunner* mpScriptRunner;
   };
 
   virtual ~GameMode() = default;

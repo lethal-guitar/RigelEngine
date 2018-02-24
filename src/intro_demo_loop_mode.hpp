@@ -3,7 +3,6 @@
 #include "loader/duke_script_loader.hpp"
 #include "ui/apogee_logo.hpp"
 #include "ui/intro_movie.hpp"
-#include "ui/duke_script_runner.hpp"
 #include "game_mode.hpp"
 #include "mode_stage.hpp"
 
@@ -11,6 +10,9 @@
 
 
 namespace rigel {
+
+namespace ui { class DukeScriptRunner; }
+
 
 /** Implements the intro/credits/demo loop
  *
@@ -48,7 +50,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   bool mFirstRunIncludedStoryAnimation;
 
-  ui::DukeScriptRunner mScriptRunner;
+  ui::DukeScriptRunner* mpScriptRunner;
   loader::ScriptBundle mScripts;
 
   std::vector<ModeStage> mStages;
