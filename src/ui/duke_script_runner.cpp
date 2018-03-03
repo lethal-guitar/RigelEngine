@@ -490,16 +490,8 @@ void DukeScriptRunner::selectNextPage(PagerState& state) {
   if (state.mCurrentPageIndex > state.mMaxPageIndex) {
     state.mCurrentPageIndex = 0;
   }
-  executeCurrentPageScript(state);
 
-  if (mPagerState->mMode == PagingMode::Menu) {
-    mpServices->playSound(data::SoundId::MenuSelect);
-  }
-
-  if (mCurrentPersistentSelectionSlot) {
-    mPersistentMenuSelections[*mCurrentPersistentSelectionSlot] =
-      state.mCurrentPageIndex;
-  }
+  onPageChanged(state);
 }
 
 
@@ -508,6 +500,12 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
   if (state.mCurrentPageIndex < 0) {
     state.mCurrentPageIndex = state.mMaxPageIndex;
   }
+
+  onPageChanged(state);
+}
+
+
+void DukeScriptRunner::onPageChanged(PagerState& state) {
   executeCurrentPageScript(state);
 
   if (mPagerState->mMode == PagingMode::Menu) {
