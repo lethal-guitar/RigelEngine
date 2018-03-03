@@ -132,6 +132,7 @@ private:
   bool hasMenuPages() const;
   void selectNextPage(PagerState& state);
   void selectPreviousPage(PagerState& state);
+  void onPageChanged(PagerState& state);
   void executeCurrentPageScript(PagerState& state);
   void selectCurrentMenuItem(PagerState& state);
 
