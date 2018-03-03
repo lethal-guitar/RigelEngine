@@ -82,13 +82,7 @@ DukeScriptRunner::DukeScriptRunner(
 
 
 void DukeScriptRunner::executeScript(const data::script::Script& script) {
-  if (mCurrentPersistentSelectionSlot) {
-    assert(mPagerState);
-    mPersistentMenuSelections[*mCurrentPersistentSelectionSlot]
-      = mPagerState->mCurrentPageIndex;
-    mCurrentPersistentSelectionSlot = boost::none;
-  }
-
+  mCurrentPersistentSelectionSlot = boost::none;
   mPagerState = boost::none;
   mCheckBoxStates = boost::none;
   mFadeInBeforeNextWaitStateScheduled = false;
@@ -413,13 +407,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const ConfigurePersistentMenuSelection& action) {
-      const auto slotIndex = action.slot;
-      const auto iter = mPersistentMenuSelections.find(slotIndex);
-      if (iter == mPersistentMenuSelections.end()) {
-        mPersistentMenuSelections.emplace(slotIndex, 0);
-      }
-
-      mCurrentPersistentSelectionSlot = slotIndex;
+      mCurrentPersistentSelectionSlot = action.slot;
     },
 
     [this](const DisableMenuFunctionality&) {
@@ -507,6 +495,11 @@ void DukeScriptRunner::selectNextPage(PagerState& state) {
   if (mPagerState->mMode == PagingMode::Menu) {
     mpServices->playSound(data::SoundId::MenuSelect);
   }
+
+  if (mCurrentPersistentSelectionSlot) {
+    mPersistentMenuSelections[*mCurrentPersistentSelectionSlot] =
+      state.mCurrentPageIndex;
+  }
 }
 
 
@@ -519,6 +512,11 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
 
   if (mPagerState->mMode == PagingMode::Menu) {
     mpServices->playSound(data::SoundId::MenuSelect);
+  }
+
+  if (mCurrentPersistentSelectionSlot) {
+    mPersistentMenuSelections[*mCurrentPersistentSelectionSlot] =
+      state.mCurrentPageIndex;
   }
 }
 
