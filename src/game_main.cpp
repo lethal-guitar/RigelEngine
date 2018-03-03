@@ -48,12 +48,8 @@ struct NullGameMode : public GameMode {
 }
 
 
-void gameMain(
-  const std::string& gamePath,
-  const StartupOptions& options,
-  SDL_Window* pWindow
-) {
-  Game game(gamePath, pWindow);
+void gameMain(const StartupOptions& options, SDL_Window* pWindow) {
+  Game game(options.mGamePath, pWindow);
   game.run(options);
 }
 

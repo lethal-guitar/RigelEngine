@@ -127,7 +127,7 @@ void showBanner() {
 }
 
 
-void initAndRunGame(const string& gamePath, const StartupOptions& config) {
+void initAndRunGame(const StartupOptions& config) {
   SdlInitializer initializeSDL;
 
   throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
@@ -154,7 +154,7 @@ void initAndRunGame(const string& gamePath, const StartupOptions& config) {
   // Same for the cursor disabling.
   SDL_ShowCursor(SDL_DISABLE);
 
-  gameMain(gamePath, config, pWindow.get());
+  gameMain(config, pWindow.get());
 }
 
 }
@@ -163,7 +163,6 @@ void initAndRunGame(const string& gamePath, const StartupOptions& config) {
 int main(int argc, char** argv) {
   showBanner();
 
-  string gamePath;
   StartupOptions config;
   bool disableMusic = false;
 
@@ -184,7 +183,7 @@ int main(int argc, char** argv) {
      "Specify position to place the player at (to be used in conjunction with\n"
      "'play-level')")
     ("game-path",
-     po::value<string>(&gamePath),
+     po::value<string>(&config.mGamePath),
      "Path to original game's installation. Can also be given as positional "
      "argument.");
 
@@ -253,11 +252,11 @@ int main(int argc, char** argv) {
       config.mPlayerPosition = position;
     }
 
-    if (!gamePath.empty() && gamePath.back() != '/') {
-      gamePath += "/";
+    if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
+      config.mGamePath += "/";
     }
 
-    initAndRunGame(gamePath, config);
+    initAndRunGame(config);
   }
   catch (const po::error& err)
   {
