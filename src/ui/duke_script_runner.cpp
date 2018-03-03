@@ -26,6 +26,7 @@
 #include "utils/container_tools.hpp"
 #include "ui/utils.hpp"
 
+#include "game_options.hpp"
 #include "game_service_provider.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -58,7 +59,6 @@ const auto MENU_FONT_HEIGHT = 2;
 const auto SKILL_LEVEL_SLOT = 0;
 const auto GAME_SPEED_SLOT = 8;
 const auto INITIAL_SKILL_SELECTION = 1;
-const auto INITIAL_GAME_SPEED = 3;
 
 }
 
@@ -77,7 +77,8 @@ DukeScriptRunner::DukeScriptRunner(
 {
   // Default menu pre-selections at game start
   mPersistentMenuSelections.emplace(SKILL_LEVEL_SLOT, INITIAL_SKILL_SELECTION);
-  mPersistentMenuSelections.emplace(GAME_SPEED_SLOT, INITIAL_GAME_SPEED);
+  mPersistentMenuSelections.emplace(
+    GAME_SPEED_SLOT, static_cast<int>(DEFAULT_GAME_SPEED));
 }
 
 

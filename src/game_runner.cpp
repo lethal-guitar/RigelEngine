@@ -26,6 +26,8 @@
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
+#include "game_options.hpp"
+
 #include <cassert>
 #include <chrono>
 #include <iomanip>
@@ -81,6 +83,7 @@ GameRunner::GameRunner(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mpOptions(context.mpOptions)
   , mEntities(mEventManager)
   , mEntityFactory(
       context.mpRenderer,
@@ -234,7 +237,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     }
   };
 
-  constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
+  const auto timeForOneFrame = currentLogicalFrameTime();
   if (mSingleStepping) {
     if (mCanAdvanceSingleStep) {
       doTimeStep();
@@ -332,6 +335,16 @@ void GameRunner::loadLevel(
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+}
+
+
+engine::TimeDelta GameRunner::currentLogicalFrameTime() const {
+  // The original game handles timing by waiting a constant amount of time
+  // between frames. The constant amount depends on what's selected in the
+  // "Game Speed" options menu.
+  const auto gameSpeedIndex = static_cast<int>(mpOptions->mSpeed);
+  const auto baseDelay = engine::slowTicksToTime(11 - gameSpeedIndex);
+  return baseDelay;
 }
 
 
@@ -435,7 +448,8 @@ void GameRunner::showDebugText() {
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
     << "Player: " << vec2String(playerPos, 4)
     << ", Vel.: " << vec2String(playerVel, 5) << '\n'
-    << "Entities: " << mEntities.size();
+    << "Entities: " << mEntities.size() << '\n'
+    << "Speed: " << static_cast<int>(mpOptions->mSpeed);
 
   mpServiceProvider->showDebugText(infoText.str());
 }

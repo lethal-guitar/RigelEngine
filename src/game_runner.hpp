@@ -43,6 +43,9 @@ namespace rigel { namespace game_logic { class IngameSystems; }}
 
 namespace rigel {
 
+struct GameOptions;
+
+
 class GameRunner : public entityx::Receiver<GameRunner> {
 public:
   GameRunner(
@@ -69,6 +72,8 @@ private:
     const loader::ResourceLoader& resources
   );
 
+  engine::TimeDelta currentLogicalFrameTime() const;
+
   void handleLevelExit();
   void handlePlayerDeath();
   void restartLevel();
@@ -79,6 +84,7 @@ private:
 private:
   engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
+  const GameOptions* mpOptions;
   entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;
   game_logic::EntityFactory mEntityFactory;

@@ -19,6 +19,7 @@
 #include "data/game_session_data.hpp"
 #include "loader/resource_loader.hpp"
 
+#include "game_options.hpp"
 #include "game_service_provider.hpp"
 
 
@@ -50,6 +51,7 @@ bool abortedByUser(const DukeScriptRunner::ExecutionResult& result) {
 
 MenuMode::MenuMode(Context context)
   : mpScriptRunner(context.mpScriptRunner)
+  , mpGameOptions(context.mpOptions)
   , mMainScripts(context.mpResources->loadScriptBundle("TEXT.MNI"))
   , mOptionsScripts(context.mpResources->loadScriptBundle("OPTIONS.MNI"))
   , mOrderingInfoScripts(context.mpResources->loadScriptBundle("ORDERTXT.MNI"))
@@ -229,9 +231,24 @@ void MenuMode::navigateToNextMenu(
       }
       break;
 
+    case MenuState::GameSpeedConfig:
+      if (!abortedByUser(result)) {
+        const auto chosenSpeedIndex = *result.mSelectedPage;
+        if (
+          chosenSpeedIndex < static_cast<int>(GameSpeed::Lowest) ||
+          chosenSpeedIndex > static_cast<int>(GameSpeed::Highest)
+        ) {
+          throw std::invalid_argument("Invalid game speed index");
+        }
+        mpGameOptions->mSpeed = static_cast<GameSpeed>(chosenSpeedIndex);
+      }
+
+      mpScriptRunner->executeScript(mOptionsScripts["My_Options"]);
+      mMenuState = MenuState::GameOptions;
+      break;
+
     case MenuState::KeyboardConfig:
     case MenuState::JoystickCalibration:
-    case MenuState::GameSpeedConfig:
       mpScriptRunner->executeScript(mOptionsScripts["My_Options"]);
       mMenuState = MenuState::GameOptions;
       break;

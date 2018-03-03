@@ -189,7 +189,7 @@ void Game::mainLoop() {
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, &mRenderer, this, &mScriptRunner};
+  return {&mResources, &mRenderer, this, &mScriptRunner, &mOptions};
 }
 
 

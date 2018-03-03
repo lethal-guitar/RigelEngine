@@ -16,44 +16,25 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-#include "engine/renderer.hpp"
-#include "engine/timing.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <SDL_events.h>
-RIGEL_RESTORE_WARNINGS
-
 
 namespace rigel {
 
-struct GameOptions;
-struct IGameServiceProvider;
+enum class GameSpeed {
+  Lowest,
+  VeryLow,
+  Low,
+  Medium,
+  High,
+  VeryHigh,
+  Highest
+};
 
-namespace loader {
-  class ResourceLoader;
-}
 
-namespace ui {
-  class DukeScriptRunner;
-}
+constexpr GameSpeed DEFAULT_GAME_SPEED = GameSpeed::Medium;
 
 
-struct GameMode {
-  /** Contains everything a mode needs */
-  struct Context {
-    const loader::ResourceLoader* mpResources;
-    engine::Renderer* mpRenderer;
-    IGameServiceProvider* mpServiceProvider;
-    ui::DukeScriptRunner* mpScriptRunner;
-    GameOptions* mpOptions;
-  };
-
-  virtual ~GameMode() = default;
-
-  virtual void handleEvent(const SDL_Event& event) = 0;
-
-  virtual void updateAndRender(engine::TimeDelta dt) = 0;
+struct GameOptions {
+  GameSpeed mSpeed = DEFAULT_GAME_SPEED;
 };
 
 }

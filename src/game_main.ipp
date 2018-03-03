@@ -27,6 +27,7 @@
 #include "ui/menu_element_renderer.hpp"
 
 #include "game_mode.hpp"
+#include "game_options.hpp"
 #include "game_service_provider.hpp"
 
 #include <chrono>
@@ -89,6 +90,7 @@ private:
 
   std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 
+  GameOptions mOptions;
   bool mMusicEnabled = true;
 
   bool mIsRunning;

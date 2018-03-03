@@ -25,6 +25,9 @@
 
 namespace rigel {
 
+struct GameOptions;
+
+
 class MenuMode : public GameMode {
 public:
   explicit MenuMode(Context context);
@@ -58,6 +61,7 @@ private:
 
 private:
   ui::DukeScriptRunner* mpScriptRunner;
+  GameOptions* mpGameOptions;
 
   loader::ScriptBundle mMainScripts;
   loader::ScriptBundle mOptionsScripts;
