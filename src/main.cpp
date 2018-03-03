@@ -147,11 +147,7 @@ void initAndRunGame(const StartupOptions& config) {
   OpenGlContext glContext(pWindow.get());
   engine::loadGlFunctions();
 
-  // We don't care if screen saver disabling failed, it's not that important.
-  // So no return value checking.
   SDL_DisableScreenSaver();
-
-  // Same for the cursor disabling.
   SDL_ShowCursor(SDL_DISABLE);
 
   gameMain(config, pWindow.get());
