@@ -127,7 +127,7 @@ void showBanner() {
 }
 
 
-void initAndRunGame(const string& gamePath, const GameOptions& gameOptions) {
+void initAndRunGame(const string& gamePath, const StartupOptions& config) {
   SdlInitializer initializeSDL;
 
   throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
@@ -154,7 +154,7 @@ void initAndRunGame(const string& gamePath, const GameOptions& gameOptions) {
   // Same for the cursor disabling.
   SDL_ShowCursor(SDL_DISABLE);
 
-  gameMain(gamePath, gameOptions, pWindow.get());
+  gameMain(gamePath, config, pWindow.get());
 }
 
 }
@@ -164,14 +164,14 @@ int main(int argc, char** argv) {
   showBanner();
 
   string gamePath;
-  GameOptions gameOptions;
+  StartupOptions config;
   bool disableMusic = false;
 
   po::options_description optionsDescription("Options");
   optionsDescription.add_options()
     ("help,h", "Show command line help message")
     ("skip-intro,s",
-     po::bool_switch(&gameOptions.mSkipIntro),
+     po::bool_switch(&config.mSkipIntro),
      "Skip intro movies/Apogee logo, go straight to main menu")
     ("play-level,l",
      po::value<string>(),
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
     }
 
     if (disableMusic) {
-      gameOptions.mEnableMusic = false;
+      config.mEnableMusic = false;
     }
 
     if (options.count("play-level")) {
@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
         throw invalid_argument(string("Invalid level name: ") + levelToPlay);
       }
 
-      gameOptions.mLevelToJumpTo = std::make_pair(episode, level);
+      config.mLevelToJumpTo = std::make_pair(episode, level);
     }
 
     if (options.count("player-pos")) {
@@ -250,14 +250,14 @@ int main(int argc, char** argv) {
         std::stoi(positionParts[0]),
         std::stoi(positionParts[1])
       };
-      gameOptions.mPlayerPosition = position;
+      config.mPlayerPosition = position;
     }
 
     if (!gamePath.empty() && gamePath.back() != '/') {
       gamePath += "/";
     }
 
-    initAndRunGame(gamePath, gameOptions);
+    initAndRunGame(gamePath, config);
   }
   catch (const po::error& err)
   {

@@ -43,7 +43,7 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  void run(const GameOptions& options);
+  void run(const StartupOptions& options);
 
 private:
   void showAntiPiracyScreen();
