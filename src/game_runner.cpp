@@ -344,7 +344,7 @@ engine::TimeDelta GameRunner::currentLogicalFrameTime() const {
   // "Game Speed" options menu.
   const auto gameSpeedIndex = static_cast<int>(mpOptions->mSpeed);
   const auto baseDelay = engine::slowTicksToTime(11 - gameSpeedIndex);
-  return baseDelay;
+  return baseDelay + delayForProfile(mpOptions->mSpeedProfile);
 }
 
 
