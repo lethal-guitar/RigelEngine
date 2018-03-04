@@ -4,16 +4,14 @@
 
 This project is a re-implementation of the game [Duke Nukem II](
 https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee
-Software in 1993. The end goal is to have a (mostly) functionally identical
-runner/interpreter for the original game's files, but running natively on
-modern operating systems, and written in modern C++ code. It is similar to
-projects like [Omnispeak](https://davidgow.net/keen/omnispeak.html) or
-[Commander Genius](http://clonekeenplus.sourceforge.net), which do the same
+Software in 1993. RigelEngine works as a drop-in replacement for the original executable: It reads the original data files and implements (mostly) the same behavior,
+but runs natively on modern operating systems, and is written in modern C++ code with a completely new architecture under the hood. It is similar to
+projects like [Omnispeak](https://davidgow.net/keen/omnispeak.html) or [Commander Genius](http://clonekeenplus.sourceforge.net), which do the same
 thing for the Commander Keen series of games.
 
 There was never any source code released for the original game, so this project
-is based on reverse-engineering: A mix of analyzing the original executable's
-disassembly and observing its behaviour based on video captures of the game
+is based on reverse-engineering: A mix of reading the original executable's
+disassembly and analyzing its behaviour using video captures of the game
 running in DosBox.
 
 I recently gave a presentation about the project at a local C++ meetup. You can find the slides [here](https://github.com/lethal-guitar/presentations).
