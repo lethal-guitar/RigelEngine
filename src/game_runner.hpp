@@ -69,8 +69,6 @@ private:
     const loader::ResourceLoader& resources
   );
 
-  void updateGameLogic(engine::TimeDelta dt);
-
   void handleLevelExit();
   void handlePlayerDeath();
   void restartLevel();
