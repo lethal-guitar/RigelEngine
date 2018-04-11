@@ -61,7 +61,6 @@ set(core_sources
     engine/texture.hpp
     engine/tile_renderer.cpp
     engine/tile_renderer.hpp
-    engine/timing.cpp
     engine/timing.hpp
     engine/visual_components.hpp
     game_logic/ai/blue_guard.cpp
