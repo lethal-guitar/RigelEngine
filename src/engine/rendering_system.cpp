@@ -109,6 +109,10 @@ void updateAnimatedSprites(ex::EntityManager& es) {
       engine::synchronizeBoundingBoxToSprite(entity);
     }
   });
+
+  es.each<Sprite>([](ex::Entity entity, Sprite& sprite) {
+     sprite.mFlashingWhite = false;
+  });
 }
 
 
@@ -211,14 +215,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       assert(frameIndex < int(sprite.mpDrawData->mFrames.size()));
 
       // White flash effect
-      const auto maxFlashWhiteTime = engine::gameFramesToTime(1);
-      const auto elapsedFlashWhiteTime =
-        engine::currentGlobalTime() - sprite.mFlashWhiteTime;
-      const auto flashWhite =
-        sprite.mFlashWhiteTime != 0.0 &&
-        elapsedFlashWhiteTime <= maxFlashWhiteTime;
-
-      if (flashWhite) {
+      if (sprite.mFlashingWhite) {
         mpRenderer->setOverlayColor(base::Color(255, 255, 255, 255));
       }
 
