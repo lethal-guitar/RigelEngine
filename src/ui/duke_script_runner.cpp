@@ -56,7 +56,9 @@ const auto MENU_FONT_HEIGHT = 2;
 
 
 const auto SKILL_LEVEL_SLOT = 0;
+const auto GAME_SPEED_SLOT = 8;
 const auto INITIAL_SKILL_SELECTION = 1;
+const auto INITIAL_GAME_SPEED = 3;
 
 }
 
@@ -75,17 +77,12 @@ DukeScriptRunner::DukeScriptRunner(
 {
   // Default menu pre-selections at game start
   mPersistentMenuSelections.emplace(SKILL_LEVEL_SLOT, INITIAL_SKILL_SELECTION);
+  mPersistentMenuSelections.emplace(GAME_SPEED_SLOT, INITIAL_GAME_SPEED);
 }
 
 
 void DukeScriptRunner::executeScript(const data::script::Script& script) {
-  if (mCurrentPersistentSelectionSlot) {
-    assert(mPagerState);
-    mPersistentMenuSelections[*mCurrentPersistentSelectionSlot]
-      = mPagerState->mCurrentPageIndex;
-    mCurrentPersistentSelectionSlot = boost::none;
-  }
-
+  mCurrentPersistentSelectionSlot = boost::none;
   mPagerState = boost::none;
   mCheckBoxStates = boost::none;
   mFadeInBeforeNextWaitStateScheduled = false;
@@ -410,13 +407,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const ConfigurePersistentMenuSelection& action) {
-      const auto slotIndex = action.slot;
-      const auto iter = mPersistentMenuSelections.find(slotIndex);
-      if (iter == mPersistentMenuSelections.end()) {
-        mPersistentMenuSelections.emplace(slotIndex, 0);
-      }
-
-      mCurrentPersistentSelectionSlot = slotIndex;
+      mCurrentPersistentSelectionSlot = action.slot;
     },
 
     [this](const DisableMenuFunctionality&) {
@@ -499,11 +490,8 @@ void DukeScriptRunner::selectNextPage(PagerState& state) {
   if (state.mCurrentPageIndex > state.mMaxPageIndex) {
     state.mCurrentPageIndex = 0;
   }
-  executeCurrentPageScript(state);
 
-  if (mPagerState->mMode == PagingMode::Menu) {
-    mpServices->playSound(data::SoundId::MenuSelect);
-  }
+  onPageChanged(state);
 }
 
 
@@ -512,10 +500,21 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
   if (state.mCurrentPageIndex < 0) {
     state.mCurrentPageIndex = state.mMaxPageIndex;
   }
+
+  onPageChanged(state);
+}
+
+
+void DukeScriptRunner::onPageChanged(PagerState& state) {
   executeCurrentPageScript(state);
 
   if (mPagerState->mMode == PagingMode::Menu) {
     mpServices->playSound(data::SoundId::MenuSelect);
+  }
+
+  if (mCurrentPersistentSelectionSlot) {
+    mPersistentMenuSelections[*mCurrentPersistentSelectionSlot] =
+      state.mCurrentPageIndex;
   }
 }
 

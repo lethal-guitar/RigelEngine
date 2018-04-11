@@ -81,8 +81,8 @@ set(ENTITYX_DT_TYPE double CACHE INTERNAL "")
 set(ENTITYX_RUN_BENCHMARKS false CACHE INTERNAL "")
 set(ENTITYX_MAX_COMPONENTS 64 CACHE INTERNAL "")
 
-add_subdirectory(3rd_party/entityx)
 add_subdirectory(3rd_party/dbopl)
+add_subdirectory(3rd_party/entityx)
 add_subdirectory(3rd_party/glad)
 add_subdirectory(3rd_party/speex_resampler)
 

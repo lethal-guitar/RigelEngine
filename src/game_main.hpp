@@ -30,7 +30,8 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
 
-struct GameOptions {
+struct StartupOptions {
+  std::string mGamePath;
   boost::optional<std::pair<int, int>> mLevelToJumpTo;
   bool mSkipIntro = false;
   bool mEnableMusic = true;
@@ -38,9 +39,6 @@ struct GameOptions {
 };
 
 
-void gameMain(
-  const std::string& gamePath,
-  const GameOptions& options,
-  SDL_Window* pWindow);
+void gameMain(const StartupOptions& options, SDL_Window* pWindow);
 
 }

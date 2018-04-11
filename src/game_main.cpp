@@ -48,12 +48,8 @@ struct NullGameMode : public GameMode {
 }
 
 
-void gameMain(
-  const std::string& gamePath,
-  const GameOptions& options,
-  SDL_Window* pWindow
-) {
-  Game game(gamePath, pWindow);
+void gameMain(const StartupOptions& options, SDL_Window* pWindow) {
+  Game game(options.mGamePath, pWindow);
   game.run(options);
 }
 
@@ -76,7 +72,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
 }
 
 
-void Game::run(const GameOptions& options) {
+void Game::run(const StartupOptions& startupOptions) {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -84,7 +80,7 @@ void Game::run(const GameOptions& options) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
 
-  mMusicEnabled = options.mEnableMusic;
+  mMusicEnabled = startupOptions.mEnableMusic;
 
   // Check if running registered version
   if (
@@ -94,19 +90,19 @@ void Game::run(const GameOptions& options) {
     mIsShareWareVersion = false;
   }
 
-  if (options.mLevelToJumpTo)
+  if (startupOptions.mLevelToJumpTo)
   {
     int episode, level;
-    std::tie(episode, level) = *options.mLevelToJumpTo;
+    std::tie(episode, level) = *startupOptions.mLevelToJumpTo;
 
     mpNextGameMode = std::make_unique<GameSessionMode>(
       episode,
       level,
       data::Difficulty::Medium,
       makeModeContext(),
-      options.mPlayerPosition);
+      startupOptions.mPlayerPosition);
   }
-  else if (options.mSkipIntro)
+  else if (startupOptions.mSkipIntro)
   {
     mpNextGameMode = std::make_unique<MenuMode>(makeModeContext());
   }
