@@ -76,8 +76,4 @@ constexpr double timeToGameFrames(const TimeDelta time) {
 }
 
 
-void initGlobalTimer();
-
-TimePoint currentGlobalTime();
-
 }}

@@ -16,28 +16,8 @@
 
 #include "timing.hpp"
 
-#include <chrono>
-
 
 namespace rigel { namespace engine {
-
-namespace {
-
-std::chrono::high_resolution_clock::time_point globalTimeStart;
-
-}
-
-
-void initGlobalTimer() {
-  globalTimeStart = std::chrono::high_resolution_clock::now();
-}
-
-
-TimePoint currentGlobalTime() {
-  const auto now = std::chrono::high_resolution_clock::now();
-  return std::chrono::duration<double>(now - globalTimeStart).count();
-}
-
 
 static_assert(fastTicksToTime(280) == 1.0, "");
 static_assert(fastTicksToTime(280 * 2) == 2.0, "");
