@@ -202,7 +202,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
 
     case SDLK_SPACE:
       if (mSingleStepping) {
-        mCanAdvanceSingleStep = true;
+        mDoNextSingleStep = true;
       }
       break;
   }
@@ -236,9 +236,9 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
   constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
   if (mSingleStepping) {
-    if (mCanAdvanceSingleStep) {
+    if (mDoNextSingleStep) {
       doTimeStep();
-      mCanAdvanceSingleStep = false;
+      mDoNextSingleStep = false;
     }
   } else {
     mAccumulatedTime += dt;
