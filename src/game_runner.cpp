@@ -45,6 +45,17 @@ using engine::components::WorldPosition;
 
 namespace {
 
+// Update game logic at 15 FPS. This is not exactly the speed at which the
+// game runs on period-appropriate hardware, but it's very close, and it nicely
+// fits into 60 FPS, giving us 4 render frames for 1 logic update.
+//
+// On a 486 with a fast graphics card, the game runs at roughly 15.5 FPS, with
+// a slower (non-VLB) graphics card, it's roughly 14 FPS. On a fast 386 (40 MHz),
+// it's roughly 13 FPS. With 15 FPS, the feel should therefore be very close to
+// playing the game on a 486 at the default game speed setting.
+constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
+
+
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 
 std::string levelFileName(const int episode, const int level) {
@@ -234,7 +245,6 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     }
   };
 
-  constexpr auto timeForOneFrame = engine::gameFramesToTime(1);
   if (mSingleStepping) {
     if (mDoNextSingleStep) {
       doTimeStep();
@@ -243,8 +253,8 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   } else {
     mAccumulatedTime += dt;
     for (;
-      mAccumulatedTime >= timeForOneFrame;
-      mAccumulatedTime -= timeForOneFrame
+      mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
+      mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
     ) {
       doTimeStep();
     }
