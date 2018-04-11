@@ -7,6 +7,7 @@ set(test_sources
     test_player_animation_system.cpp
     test_player_attack_system.cpp
     test_spike_ball.cpp
+    test_timing.cpp
 )
 
 

@@ -67,12 +67,12 @@ struct Sprite {
   }
 
   void flashWhite() {
-    mFlashWhiteTime = currentGlobalTime();
+    mFlashingWhite = true;
   }
 
   std::vector<int> mFramesToRender;
-  engine::TimePoint mFlashWhiteTime = 0.0;
   const SpriteDrawData* mpDrawData = nullptr;
+  bool mFlashingWhite = false;
   bool mShow = true;
 };
 

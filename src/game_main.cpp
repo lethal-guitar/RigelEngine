@@ -80,8 +80,6 @@ void Game::run(const GameOptions& options) {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
-  engine::initGlobalTimer();
-
   data::forEachSoundId([this](const auto id) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });

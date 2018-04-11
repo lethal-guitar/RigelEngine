@@ -37,7 +37,6 @@ namespace detail {
 
 constexpr auto FAST_TICK_RATE = 280.0;
 constexpr auto SLOW_TICK_RATE = FAST_TICK_RATE / 2.0;
-constexpr auto GAME_FRAME_RATE = FAST_TICK_RATE / 16.0;
 
 }
 
@@ -65,19 +64,5 @@ constexpr double timeToFastTicks(const TimeDelta time) {
   return time * detail::FAST_TICK_RATE;
 }
 
-
-constexpr TimeDelta gameFramesToTime(const int frames) {
-  return frames / detail::GAME_FRAME_RATE;
-}
-
-
-constexpr double timeToGameFrames(const TimeDelta time) {
-  return time * detail::GAME_FRAME_RATE;
-}
-
-
-void initGlobalTimer();
-
-TimePoint currentGlobalTime();
 
 }}
