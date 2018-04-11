@@ -159,6 +159,8 @@ set(core_sources
     loader/music_loader.hpp
     loader/palette.cpp
     loader/palette.hpp
+    loader/png_image.hpp
+    loader/png_image.cpp
     loader/resource_loader.cpp
     loader/resource_loader.hpp
     loader/rle_compression.hpp
