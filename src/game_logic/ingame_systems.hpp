@@ -78,7 +78,7 @@ public:
     entityx::EventManager& eventManager);
 
   void update(const PlayerInputState& inputState, entityx::EntityManager& es);
-  void render(entityx::EntityManager& es);
+  void render(entityx::EntityManager& es, float updateProgress);
 
   void buttonStateChanged(const PlayerInputState& inputState);
 

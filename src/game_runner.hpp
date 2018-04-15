@@ -95,6 +95,7 @@ private:
   bool mShowDebugText;
   bool mSingleStepping = false;
   bool mDoNextSingleStep = false;
+  bool mInterpolateMotion = false;
 
   struct LevelData {
     data::map::Map mMap;

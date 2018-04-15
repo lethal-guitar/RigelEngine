@@ -68,7 +68,7 @@ public:
   }
 
   /** Render everything. Can be called at full frame rate. */
-  void update(entityx::EntityManager& es);
+  void update(entityx::EntityManager& es, float updateProgress);
 
   void switchBackdrops() {
     mMapRenderer.switchBackdrops();
@@ -80,7 +80,7 @@ public:
 
 private:
   struct SpriteData;
-  void renderSprite(const SpriteData& data) const;
+  void renderSprite(const SpriteData& data, float updateProgress) const;
 
 private:
   engine::Renderer* mpRenderer;

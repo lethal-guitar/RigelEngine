@@ -148,7 +148,10 @@ struct RenderingSystem::SpriteData {
 };
 
 
-void RenderingSystem::update(ex::EntityManager& es) {
+void RenderingSystem::update(
+  ex::EntityManager& es,
+  const float updateProgress
+) {
   using namespace std;
   using game_logic::components::TileDebris;
 
@@ -174,14 +177,14 @@ void RenderingSystem::update(ex::EntityManager& es) {
 
   // behind foreground
   for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
-    renderSprite(*it);
+    renderSprite(*it, updateProgress);
   }
 
   mMapRenderer.renderForeground(*mpScrollOffset);
 
   // top most
   for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {
-    renderSprite(*it);
+    renderSprite(*it, updateProgress);
   }
 
   mSpritesRendered = spritesByDrawOrder.size();
@@ -195,7 +198,10 @@ void RenderingSystem::update(ex::EntityManager& es) {
 }
 
 
-void RenderingSystem::renderSprite(const SpriteData& data) const {
+void RenderingSystem::renderSprite(
+  const SpriteData& data,
+  const float updateProgress
+) const {
   const auto& pos = data.mPosition;
   const auto& sprite = *data.mpSprite;
 
@@ -229,7 +235,21 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       const auto drawOffsetPx = data::tileVectorToPixelVector(
         frame.mDrawOffset);
 
-      const auto screenPositionPx = topLeftPx + drawOffsetPx - worldToScreenPx;
+      auto screenPositionPx = topLeftPx + drawOffsetPx - worldToScreenPx;
+
+      if (data.mEntity.has_component<components::MovingBody>()) {
+        const auto velocity =
+          data.mEntity.component<const components::MovingBody>()->mVelocity;
+        const auto velocityInPixels = velocity * 8;
+
+        const auto adjust = -1.0f + updateProgress;
+        const auto offset = base::Vector{
+          static_cast<int>(std::round(velocityInPixels.x * adjust)),
+          static_cast<int>(std::round(velocityInPixels.y * adjust))};
+
+        screenPositionPx = screenPositionPx + offset;
+      }
+
       frame.mImage.render(mpRenderer, screenPositionPx);
 
       mpRenderer->setOverlayColor(base::Color{});

@@ -213,9 +213,12 @@ void IngameSystems::update(
 }
 
 
-void IngameSystems::render(entityx::EntityManager& es) {
-  mRenderingSystem.update(es);
-  mParticles.render(*mpScrollOffset);
+void IngameSystems::render(
+  entityx::EntityManager& es,
+  const float updateProgress
+) {
+  mRenderingSystem.update(es, updateProgress);
+  mParticles.render(*mpScrollOffset, updateProgress);
   mDebuggingSystem.update(es);
 }
 

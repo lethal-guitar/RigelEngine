@@ -211,6 +211,10 @@ void GameRunner::handleEvent(const SDL_Event& event) {
       mSingleStepping = !mSingleStepping;
       break;
 
+    case SDLK_i:
+      mInterpolateMotion = !mInterpolateMotion;
+      break;
+
     case SDLK_SPACE:
       if (mSingleStepping) {
         mDoNextSingleStep = true;
@@ -245,21 +249,26 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     }
   };
 
-  if (mSingleStepping) {
-    if (mDoNextSingleStep) {
-      doTimeStep();
-      mDoNextSingleStep = false;
+  auto updateLogic = [&, this]() {
+    if (mSingleStepping) {
+      if (mDoNextSingleStep) {
+        doTimeStep();
+        mDoNextSingleStep = false;
+      }
+    } else {
+      mAccumulatedTime += dt;
+      for (;
+        mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
+        mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
+      ) {
+        doTimeStep();
+      }
     }
-  } else {
-    mAccumulatedTime += dt;
-    for (;
-      mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
-      mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
-    ) {
-      doTimeStep();
-    }
-  }
+  };
 
+  if (!mInterpolateMotion) {
+    updateLogic();
+  }
 
   // **********************************************************************
   // Rendering
@@ -268,11 +277,18 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
     if (!mScreenFlashColor) {
-      mpSystems->render(mEntities);
+      const auto updateProgress = mInterpolateMotion
+        ? static_cast<float>(mAccumulatedTime / GAME_LOGIC_UPDATE_DELAY)
+        : 1.0f;
+      mpSystems->render(mEntities, updateProgress);
     } else {
       mpRenderer->clear(*mScreenFlashColor);
     }
     mHudRenderer.render();
+  }
+
+  if (mInterpolateMotion) {
+    updateLogic();
   }
 
   // This clear is important, since we might shift the render target's position

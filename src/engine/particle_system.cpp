@@ -105,7 +105,7 @@ struct ParticleCloud {
     ++mFramesElapsed;
   }
 
-  void render(Renderer& renderer, const base::Vector& scrollOffset) {
+  void render(Renderer& renderer, const base::Vector& scrollOffset, const float updateProgress) {
     const auto screenSpaceOrigin =
       data::tileVectorToPixelVector(mOrigin - scrollOffset);
     for (auto& particle : *mpParticles) {
@@ -166,9 +166,9 @@ void ParticleSystem::update() {
 }
 
 
-void ParticleSystem::render(const base::Vector& scrollOffset) {
+void ParticleSystem::render(const base::Vector& scrollOffset, const float updateProgress) {
   for (auto& system : mParticleClouds) {
-    system.render(*mpRenderer, scrollOffset);
+    system.render(*mpRenderer, scrollOffset, updateProgress);
   }
 }
 
