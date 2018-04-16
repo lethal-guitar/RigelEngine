@@ -50,6 +50,7 @@ struct Particle {
       VERTICAL_MOVEMENT_TABLE.size(),
       "");
 
+    mPreviousOffsetY = mOffsetY;
     mOffsetY += VERTICAL_MOVEMENT_TABLE[mMovementIndexY++];
   }
 
@@ -59,6 +60,7 @@ struct Particle {
 
   std::int16_t mVelocityX;
   std::int16_t mOffsetY = 0;
+  std::int16_t mPreviousOffsetY = 0;
   std::int16_t mMovementIndexY;
 };
 
@@ -80,6 +82,15 @@ std::unique_ptr<ParticlesList> createParticles(
       randomGenerator.gen() % (INITIAL_INDEX_LIMIT + 1);
   }
   return pParticles;
+}
+
+
+template<typename T>
+base::Vector roundP(const T& v) {
+  return {
+    static_cast<int>(std::round(v.x)),
+    static_cast<int>(std::round(v.y))
+  };
 }
 
 }
@@ -109,9 +120,16 @@ struct ParticleCloud {
     const auto screenSpaceOrigin =
       data::tileVectorToPixelVector(mOrigin - scrollOffset);
     for (auto& particle : *mpParticles) {
-      const auto particlePosition =
-        screenSpaceOrigin + particle.offsetAtTime(mFramesElapsed);
-      renderer.drawPoint(particlePosition, mColor);
+      const auto oldP = base::Vector{
+        particle.mVelocityX * std::max(0, mFramesElapsed - 1),
+        particle.mPreviousOffsetY};
+      const auto newP = particle.offsetAtTime(mFramesElapsed);
+      const auto interp = base::lerp(oldP, newP, updateProgress);
+
+      renderer.drawPoint(screenSpaceOrigin + roundP(interp), mColor);
+      //const auto particlePosition =
+      //  screenSpaceOrigin + particle.offsetAtTime(mFramesElapsed);
+      //renderer.drawPoint(particlePosition, mColor);
     }
   }
 
