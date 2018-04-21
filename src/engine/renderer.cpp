@@ -221,7 +221,6 @@ Renderer::Renderer(SDL_Window* pWindow)
   mTexturedQuadShader.setUniform("textureData", 0);
 
   // Remaining setup
-  setRenderMode(RenderMode::SpriteBatch);
   onRenderTargetChanged();
 }
 
@@ -494,15 +493,16 @@ void Renderer::clear(const base::Color& clearColor) {
 
 void Renderer::setRenderModeIfChanged(const RenderMode mode) {
   if (mRenderMode != mode) {
-    setRenderMode(mode);
+    submitBatch();
+
+    mRenderMode = mode;
+    updateShaders();
   }
 }
 
 
-void Renderer::setRenderMode(const RenderMode mode) {
-  submitBatch();
-
-  switch (mode) {
+void Renderer::updateShaders() {
+  switch (mRenderMode) {
     case RenderMode::SpriteBatch:
       useShaderIfChanged(mTexturedQuadShader);
       mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
@@ -545,8 +545,6 @@ void Renderer::setRenderMode(const RenderMode mode) {
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
-
-  mRenderMode = mode;
 }
 
 
@@ -663,7 +661,7 @@ void Renderer::onRenderTargetChanged() {
     float(mCurrentFramebufferHeight),
     0.0f);
 
-  setRenderMode(mRenderMode);
+  updateShaders();
 }
 
 }}

@@ -167,7 +167,7 @@ private:
 
   void useShaderIfChanged(Shader& shader);
   void setRenderModeIfChanged(RenderMode mode);
-  void setRenderMode(RenderMode mode);
+  void updateShaders();
   void onRenderTargetChanged();
 
   GLuint createGlTexture(
