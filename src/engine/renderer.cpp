@@ -505,6 +505,7 @@ void Renderer::setRenderMode(const RenderMode mode) {
   switch (mode) {
     case RenderMode::SpriteBatch:
       useShaderIfChanged(mTexturedQuadShader);
+      mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
       glVertexAttribPointer(
         0,
         2,
@@ -524,6 +525,7 @@ void Renderer::setRenderMode(const RenderMode mode) {
     case RenderMode::Points:
     case RenderMode::NonTexturedRender:
       useShaderIfChanged(mSolidColorShader);
+      mSolidColorShader.setUniform("transform", mProjectionMatrix);
       glVertexAttribPointer(
         0,
         2,
@@ -661,14 +663,6 @@ void Renderer::onRenderTargetChanged() {
     float(mCurrentFramebufferHeight),
     0.0f);
 
-  // TODO: Update only for currently used shader, do it lazily for the other
-  // one when switching render mode.
-  useShaderIfChanged(mTexturedQuadShader);
-  mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
-  useShaderIfChanged(mSolidColorShader);
-  mSolidColorShader.setUniform("transform", mProjectionMatrix);
-
-  // Need to re-configure vertex attrib state after switching shaders.
   setRenderMode(mRenderMode);
 }
 
