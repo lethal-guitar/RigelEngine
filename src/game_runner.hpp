@@ -26,6 +26,7 @@
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
+#include "ui/ingame_message_display.hpp"
 
 #include "game_mode.hpp"
 #include "global_level_events.hpp"
@@ -60,6 +61,7 @@ public:
   bool levelFinished() const;
 
   void receive(const events::ScreenFlash& event);
+  void receive(const events::PlayerMessage& event);
 
 private:
   void loadLevel(
@@ -110,6 +112,7 @@ private:
 
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
+  ui::IngameMessageDisplay mMessageDisplay;
   engine::RenderTargetTexture mIngameViewPortRenderTarget;
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;

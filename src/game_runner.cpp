@@ -108,12 +108,14 @@ GameRunner::GameRunner(
       levelNumber + 1,
       mpRenderer,
       *context.mpResources)
+  , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
   , mIngameViewPortRenderTarget(
       context.mpRenderer,
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
 {
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -235,6 +237,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     if (!mScreenFlashColor) {
       mHudRenderer.updateAnimation();
       mpSystems->update(mCombinedInputState, mEntities);
+      mMessageDisplay.update();
       mCombinedInputState = mInputState;
 
       if (mEarthQuakeEffect) {
@@ -284,6 +287,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,
     data::GameTraits::inGameViewPortOffset.y);
+  mMessageDisplay.render();
 
   if (mShowDebugText) {
     showDebugText();
@@ -302,6 +306,11 @@ bool GameRunner::levelFinished() const {
 
 void GameRunner::receive(const rigel::events::ScreenFlash& event) {
   mScreenFlashColor = event.mColor;
+}
+
+
+void GameRunner::receive(const rigel::events::PlayerMessage& event) {
+  mMessageDisplay.setMessage(event.mText);
 }
 
 
