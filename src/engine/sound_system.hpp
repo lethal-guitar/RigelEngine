@@ -45,8 +45,6 @@ public:
   void playSound(SoundHandle handle) const;
   void stopSound(SoundHandle handle) const;
 
-  void clearAll();
-
 private:
   static const int MAX_CONCURRENT_SOUNDS = 64;
 
