@@ -29,6 +29,11 @@ namespace components {
 
 struct RadarDish {};
 
+
+struct RadarComputer {
+  int mAnimationStep = 0;
+};
+
 }
 
 
@@ -48,6 +53,18 @@ public:
 
 private:
   int mNumRadarDishes = 0;
+};
+
+
+class RadarComputerSystem {
+public:
+  explicit RadarComputerSystem(const RadarDishCounter* pCounter);
+
+  void update(entityx::EntityManager& es);
+
+private:
+  const RadarDishCounter* mpCounter;
+  bool mIsOddFrame = false;
 };
 
 }}

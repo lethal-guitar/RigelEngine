@@ -364,6 +364,7 @@ void GameRunner::loadLevel(
     mpServiceProvider,
     &mEntityFactory,
     &mRandomGenerator,
+    &mRadarDishCounter,
     mpRenderer,
     mEntities,
     mEventManager);

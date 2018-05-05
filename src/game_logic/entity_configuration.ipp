@@ -1493,6 +1493,10 @@ void EntityFactory::configureEntity(
       entity.assign<components::RadarDish>();
       break;
 
+    case 237: // Radar dish computer
+      entity.assign<components::RadarComputer>();
+      break;
+
     case 188: // rotating floor spikes
     case 210: // Computer showing "Duke escaped"
     case 222: // Lava fall left

@@ -206,6 +206,30 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
   SWIRL_AROUND
 };
 
+
+void adjustOffsets(
+  std::vector<engine::SpriteFrame>& frames,
+  const int actorId
+) {
+  // Some sprites in the game have offsets that would require more complicated
+  // code to draw them correctly. To simplify that, we adjust the offsets once
+  // at loading time so that no additional adjustment is necessary at run time.
+
+  // Player sprite
+  if (actorId == 5 || actorId == 6) {
+    for (int i=0; i<39; ++i) {
+      frames[i].mDrawOffset.x -= 1;
+    }
+  }
+
+  // Radar computer
+  if (actorId == 237) {
+    for (auto i = 8u; i < frames.size(); ++i) {
+      frames[i].mDrawOffset.x -= 1;
+    }
+  }
+}
+
 }
 
 
@@ -259,11 +283,7 @@ Sprite EntityFactory::createSpriteComponent(const ActorID mainId) {
 
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
-    if (mainId == 5 || mainId == 6) {
-      for (int i=0; i<39; ++i) {
-        drawData.mFrames[i].mDrawOffset.x -= 1;
-      }
-    }
+    adjustOffsets(drawData.mFrames, mainId);
 
     iData = mSpriteDataCache.emplace(
       mainId,
