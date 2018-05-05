@@ -18,6 +18,7 @@ set(core_sources
     data/player_model.hpp
     data/song.hpp
     data/sound_ids.hpp
+    data/strings.hpp
     data/tile_attributes.cpp
     data/tile_attributes.hpp
     data/unit_conversions.cpp
