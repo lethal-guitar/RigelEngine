@@ -59,6 +59,7 @@ public:
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+  void showWelcomeMessage();
 
   void receive(const events::ScreenFlash& event);
   void receive(const events::PlayerMessage& event);

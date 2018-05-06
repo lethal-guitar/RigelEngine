@@ -19,6 +19,7 @@
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "data/strings.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/interaction/teleporter.hpp"
@@ -301,6 +302,11 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
 bool GameRunner::levelFinished() const {
   return mLevelFinished;
+}
+
+
+void GameRunner::showWelcomeMessage() {
+  mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
 }
 
 

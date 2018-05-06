@@ -34,13 +34,17 @@ GameSessionMode::GameSessionMode(
   Context context,
   boost::optional<base::Vector> playerPositionOverride
 )
-  : mCurrentStage(std::make_unique<GameRunner>(
-      &mPlayerModel,
-      episode,
-      level,
-      difficulty,
-      context,
-      playerPositionOverride))
+  : mCurrentStage([&]() {
+      auto pRunner = std::make_unique<GameRunner>(
+        &mPlayerModel,
+        episode,
+        level,
+        difficulty,
+        context,
+        playerPositionOverride);
+      pRunner->showWelcomeMessage();
+      return pRunner;
+    }())
   , mEpisode(episode)
   , mCurrentLevelNr(level)
   , mDifficulty(difficulty)
