@@ -194,6 +194,10 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
           soundToPlay = itemType == InventoryItemType::RapidFire ?
             SoundId::WeaponPickup :
             SoundId::ItemPickup;
+
+          if (itemType == InventoryItemType::SpecialHintGlobe) {
+            showMessage(data::Messages::FoundSpecialHintGlobe);
+          }
         }
 
         if (collectable.mGivenCollectableLetter) {
