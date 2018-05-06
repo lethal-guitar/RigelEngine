@@ -41,6 +41,9 @@ namespace rigel { namespace engine { namespace components {
 namespace rigel { namespace game_logic {
 
 void initializePlayerEntity(entityx::Entity player, bool isFacingRight);
+void resetForRespawn(
+  entityx::Entity player,
+  const base::Vector& checkpointPosition);
 
 
 /** Takes inputs from player (e.g. keypresses, gamepad etc.) and controls the
