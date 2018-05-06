@@ -60,7 +60,8 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       [this](const entityx::Entity& teleporter) {
         mActiveTeleporter = teleporter;
-      })
+      },
+      &eventManager)
   , mPlayerAttackSystem(
       playerEntity,
       pPlayerModel,
