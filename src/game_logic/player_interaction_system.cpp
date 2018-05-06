@@ -232,6 +232,7 @@ void PlayerInteractionSystem::performInteraction(
     case InteractableType::ForceFieldCardReader:
       if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
         triggerPlayerInteractionAnimation();
+        showMessage(data::Messages::AccessGranted);
       }
       break;
   }
