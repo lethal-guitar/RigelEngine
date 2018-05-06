@@ -57,6 +57,7 @@ namespace {
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
 
 constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
+constexpr auto ITEM_ABOUT_TO_EXPIRE_TIME = TEMPORARY_ITEM_EXPIRATION_TIME - 30;
 
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 
@@ -459,6 +460,10 @@ void GameRunner::updateTemporaryItemExpiration() {
 
   if (mpPlayerModel->hasItem(InventoryItemType::RapidFire)) {
     ++mFramesElapsedHavingRapidFire;
+    if (mFramesElapsedHavingRapidFire == ITEM_ABOUT_TO_EXPIRE_TIME) {
+      mMessageDisplay.setMessage(data::Messages::RapidFireTimingOut);
+    }
+
     if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
       mpPlayerModel->removeItem(InventoryItemType::RapidFire);
       mFramesElapsedHavingRapidFire = 0;
