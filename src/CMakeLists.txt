@@ -99,6 +99,8 @@ set(core_sources
     game_logic/dynamic_geometry_system.cpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
+    game_logic/enemy_radar.cpp
+    game_logic/enemy_radar.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp

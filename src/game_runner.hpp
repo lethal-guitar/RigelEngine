@@ -23,6 +23,7 @@
 #include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/texture.hpp"
+#include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
@@ -125,6 +126,7 @@ private:
 
   std::unique_ptr<game_logic::IngameSystems> mpSystems;
 
+  game_logic::RadarDishCounter mRadarDishCounter;
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;

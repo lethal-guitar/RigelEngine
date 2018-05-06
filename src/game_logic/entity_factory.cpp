@@ -38,6 +38,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/effect_components.hpp"
+#include "game_logic/enemy_radar.hpp"
 #include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"

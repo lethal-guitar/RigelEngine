@@ -108,6 +108,7 @@ GameRunner::GameRunner(
   , mLevelFinished(false)
   , mAccumulatedTime(0.0)
   , mShowDebugText(false)
+  , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
       mpPlayerModel,
       levelNumber + 1,
@@ -136,6 +137,10 @@ GameRunner::GameRunner(
 
   if (showWelcomeMessage) {
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
+  }
+
+  if (mRadarDishCounter.radarDishesPresent()) {
+    mMessageDisplay.setMessage(data::Messages::FindAllRadars);
   }
 
   auto after = high_resolution_clock::now();
@@ -399,7 +404,12 @@ void GameRunner::handleLevelExit() {
         triggerPosition.x >= playerBBox.left() &&
         triggerPosition.x <= (playerBBox.right() + 1);
 
-      mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
+      const auto triggerActivated =
+        playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
+
+      if (triggerActivated && !mRadarDishCounter.radarDishesPresent()) {
+        mLevelFinished = true;
+      }
     });
 }
 

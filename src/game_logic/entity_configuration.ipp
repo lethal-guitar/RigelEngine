@@ -1490,6 +1490,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(RADAR_DISH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
+      entity.assign<components::RadarDish>();
       break;
 
     case 188: // rotating floor spikes
