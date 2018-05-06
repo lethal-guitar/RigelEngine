@@ -92,7 +92,8 @@ GameRunner::GameRunner(
   const int levelNumber,
   const data::Difficulty difficulty,
   GameMode::Context context,
-  boost::optional<base::Vector> playerPositionOverride
+  boost::optional<base::Vector> playerPositionOverride,
+  bool showWelcomeMessage
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
@@ -132,6 +133,10 @@ GameRunner::GameRunner(
   }
 
   mpSystems->centerViewOnPlayer();
+
+  if (showWelcomeMessage) {
+    mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
+  }
 
   auto after = high_resolution_clock::now();
   std::cout << "Level load time: " <<
@@ -307,11 +312,6 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
 bool GameRunner::levelFinished() const {
   return mLevelFinished;
-}
-
-
-void GameRunner::showWelcomeMessage() {
-  mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
 }
 
 

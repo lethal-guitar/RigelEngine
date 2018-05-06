@@ -52,14 +52,14 @@ public:
     int level,
     data::Difficulty difficulty,
     GameMode::Context context,
-    boost::optional<base::Vector> playerPositionOverride = boost::none);
+    boost::optional<base::Vector> playerPositionOverride = boost::none,
+    bool showWelcomeMessage = false);
   ~GameRunner();
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
-  void showWelcomeMessage();
 
   void receive(const events::CheckPointActivated& event);
   void receive(const events::PlayerMessage& event);
