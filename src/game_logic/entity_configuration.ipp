@@ -1130,6 +1130,11 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
+    case 133: // respawn checkpoint
+      entity.assign<RespawnCheckpoint>();
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 239: // Special hint globe
       entity.assign<Shootable>(Health{3}, GivenScore{100});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
