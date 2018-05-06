@@ -56,8 +56,10 @@ namespace {
 // playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
 
+constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
 
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
+
 
 std::string levelFileName(const int episode, const int level) {
   assert(episode >=0 && episode < 4);
@@ -237,6 +239,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   auto doTimeStep = [&, this]() {
     if (!mScreenFlashColor) {
       mHudRenderer.updateAnimation();
+      updateTemporaryItemExpiration();
       mpSystems->update(mCombinedInputState, mEntities);
       mMessageDisplay.update();
       mCombinedInputState = mInputState;
@@ -415,6 +418,7 @@ void GameRunner::restartLevel() {
     mLevelData.mInitialActors);
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
+  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);
@@ -447,6 +451,19 @@ void GameRunner::handleTeleporter() {
   mpSystems->centerViewOnPlayer();
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
+}
+
+
+void GameRunner::updateTemporaryItemExpiration() {
+  using data::InventoryItemType;
+
+  if (mpPlayerModel->hasItem(InventoryItemType::RapidFire)) {
+    ++mFramesElapsedHavingRapidFire;
+    if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+      mpPlayerModel->removeItem(InventoryItemType::RapidFire);
+      mFramesElapsedHavingRapidFire = 0;
+    }
+  }
 }
 
 

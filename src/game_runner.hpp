@@ -76,6 +76,7 @@ private:
   void handlePlayerDeath();
   void restartLevel();
   void handleTeleporter();
+  void updateTemporaryItemExpiration();
 
   void showDebugText();
 
@@ -89,6 +90,11 @@ private:
   data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
+
+  // TODO: Find a better place for this
+  int mFramesElapsedHavingRapidFire = 0;
+  int mFramesElapsedHavingCloak = 0;
+
   game_logic::PlayerInputState mInputState;
   game_logic::PlayerInputState mCombinedInputState;
   bool mLevelFinished;

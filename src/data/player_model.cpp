@@ -30,8 +30,6 @@ const auto MAX_AMMO = 32;
 const auto MAX_AMMO_FLAME_THROWER = 64;
 const auto MAX_HEALTH = 9;
 
-const auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
-
 }
 
 
@@ -40,8 +38,6 @@ PlayerModel::PlayerModel()
   , mScore(0)
   , mAmmo(MAX_AMMO)
   , mHealth(MAX_HEALTH)
-  , mFramesElapsedHavingRapidFire(0)
-  , mFramesElapsedHavingCloak(0)
 {
 }
 
@@ -173,18 +169,6 @@ void PlayerModel::resetForNewLevel() {
   mHealth = MAX_HEALTH;
   mCollectedLetters.clear();
   mInventory.clear();
-  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
-}
-
-
-void PlayerModel::updateTemporaryItemExpiry() {
-  if (hasItem(InventoryItemType::RapidFire)) {
-    ++mFramesElapsedHavingRapidFire;
-    if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
-      removeItem(InventoryItemType::RapidFire);
-      mFramesElapsedHavingRapidFire = 0;
-    }
-  }
 }
 
 

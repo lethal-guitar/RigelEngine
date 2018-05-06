@@ -143,6 +143,7 @@ IngameSystems::IngameSystems(
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {
+  (void)mpPlayerModel;
 }
 
 
@@ -166,7 +167,6 @@ void IngameSystems::update(
   // Player logic update
   // ----------------------------------------------------------------------
   // TODO: Move all player related systems into the player namespace
-  mpPlayerModel->updateTemporaryItemExpiry();
   mElevatorSystem.update(es, inputState);
   mPlayerMovementSystem.update(inputState);
   mPlayerInteractionSystem.update(es);
