@@ -118,8 +118,9 @@ GameRunner::GameRunner(
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
 {
-  mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
+  mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -314,13 +315,20 @@ void GameRunner::showWelcomeMessage() {
 }
 
 
-void GameRunner::receive(const rigel::events::ScreenFlash& event) {
-  mScreenFlashColor = event.mColor;
+void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
+  mActivatedCheckpoint = CheckpointData{
+    mpPlayerModel->makeCheckpoint(), event.mPosition};
+  mMessageDisplay.setMessage(data::Messages::FoundRespawnBeacon);
 }
 
 
 void GameRunner::receive(const rigel::events::PlayerMessage& event) {
   mMessageDisplay.setMessage(event.mText);
+}
+
+
+void GameRunner::receive(const rigel::events::ScreenFlash& event) {
+  mScreenFlashColor = event.mColor;
 }
 
 
@@ -404,7 +412,11 @@ void GameRunner::handlePlayerDeath() {
     playerState.mState == player::PlayerState::Dead &&
     mpPlayerModel->isDead();
   if (playerDead) {
-    restartLevel();
+    if (mActivatedCheckpoint) {
+      restartFromCheckpoint();
+    } else {
+      restartLevel();
+    }
   }
 }
 
@@ -420,6 +432,19 @@ void GameRunner::restartLevel() {
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
   mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
+
+  mpSystems->centerViewOnPlayer();
+  updateAndRender(0);
+
+  mpServiceProvider->fadeInScreen();
+}
+
+
+void GameRunner::restartFromCheckpoint() {
+  mpServiceProvider->fadeOutScreen();
+
+  mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
+  resetForRespawn(mPlayerEntity, mActivatedCheckpoint->mPosition);
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);

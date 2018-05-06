@@ -110,6 +110,8 @@ set(core_sources
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
+    game_logic/interaction/respawn_checkpoint.cpp
+    game_logic/interaction/respawn_checkpoint.hpp
     game_logic/interaction/teleporter.cpp
     game_logic/interaction/teleporter.hpp
     game_logic/map_scroll_system.cpp

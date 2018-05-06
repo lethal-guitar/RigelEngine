@@ -49,6 +49,25 @@ void initializePlayerEntity(entityx::Entity player, const bool isFacingRight) {
   player.assign<MovingBody>(
     Velocity{0.0f, 0.0f}, GravityAffected{true}, IsPlayer{true});
   player.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 5}});
+
+}
+
+
+void resetForRespawn(
+  entityx::Entity player,
+  const base::Vector& checkpointPosition
+) {
+  player.remove<PlayerControlled>();
+  player.remove<BoundingBox>();
+
+  player.component<MovingBody>()->mVelocity = {};
+  player.component<Sprite>()->mFramesToRender = {39};
+  player.component<Sprite>()->mShow = true;
+  *player.component<WorldPosition>() = checkpointPosition;
+  PlayerControlled controls;
+  controls.mOrientation = Orientation::Right;
+  player.assign<PlayerControlled>(controls);
+  player.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 5}});
 }
 
 

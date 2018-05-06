@@ -61,8 +61,9 @@ public:
   bool levelFinished() const;
   void showWelcomeMessage();
 
-  void receive(const events::ScreenFlash& event);
+  void receive(const events::CheckPointActivated& event);
   void receive(const events::PlayerMessage& event);
+  void receive(const events::ScreenFlash& event);
 
 private:
   void loadLevel(
@@ -75,12 +76,18 @@ private:
   void handleLevelExit();
   void handlePlayerDeath();
   void restartLevel();
+  void restartFromCheckpoint();
   void handleTeleporter();
   void updateTemporaryItemExpiration();
 
   void showDebugText();
 
 private:
+  struct CheckpointData {
+    data::PlayerModel::CheckpointState mState;
+    base::Vector mPosition;
+  };
+
   engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   entityx::EventManager mEventManager;
@@ -89,6 +96,7 @@ private:
 
   data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
+  boost::optional<CheckpointData> mActivatedCheckpoint;
   base::Vector mScrollOffset;
 
   // TODO: Find a better place for this

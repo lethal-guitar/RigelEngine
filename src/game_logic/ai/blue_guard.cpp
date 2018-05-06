@@ -17,6 +17,7 @@
 #include "blue_guard.hpp"
 
 #include "engine/collision_checker.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
@@ -225,10 +226,7 @@ void BlueGuardSystem::updateGuard(
     // Fire gun
     const auto facingLeft = state.mOrientation == Orientation::Left;
     const auto wantsToShoot = (mpRandomGenerator->gen() % 8) == 0;
-    const auto isOnScreen =
-      guardEntity.has_component<Active>() &&
-      guardEntity.component<Active>()->mIsOnScreen;
-    if (wantsToShoot && isOnScreen) {
+    if (wantsToShoot && engine::isOnScreen(guardEntity)) {
       mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
       mpEntityFactory->createProjectile(
         ProjectileType::EnemyLaserShot,

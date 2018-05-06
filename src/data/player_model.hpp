@@ -59,6 +59,12 @@ namespace rigel { namespace data {
 
 class PlayerModel {
 public:
+  struct CheckpointState {
+    WeaponType mWeapon;
+    int mAmmo;
+    int mHealth;
+  };
+
   enum class LetterCollectionState {
     Incomplete,
     WrongOrder,
@@ -66,6 +72,9 @@ public:
   };
 
   PlayerModel();
+
+  CheckpointState makeCheckpoint() const;
+  void restoreFromCheckpoint(const CheckpointState& state);
 
   int score() const;
   void giveScore(int amount);
