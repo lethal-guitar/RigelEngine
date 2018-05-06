@@ -213,6 +213,37 @@ void MenuElementRenderer::drawText(
 }
 
 
+void MenuElementRenderer::drawSmallWhiteText(
+  int x,
+  int y,
+  const std::string& text
+) const {
+  for (auto i=0u; i<text.size(); ++i) {
+    const auto ch = static_cast<uint8_t>(text[i]);
+
+    int spriteSheetIndex = 0;
+    if (ch == 44) {
+      spriteSheetIndex = 24*40 + 17 + 6;
+    } else if (ch == 46) {
+      spriteSheetIndex = 24*40 + 17 + 7;
+    } else if (ch == 33) {
+      spriteSheetIndex = 24*40 + 17 + 8;
+    } else if (ch == 63) {
+      spriteSheetIndex = 24*40 + 17 + 9;
+    } else if (ch >= 65 && ch <= 84) {
+      spriteSheetIndex = 6*40 + 20 + (ch - 65);
+    } else if (ch >= 85 && ch <= 90) {
+      spriteSheetIndex = 24*40 + 17 + (ch - 85);
+    } else {
+      // Skip non-renderable chars
+      continue;
+    }
+
+    mSpriteSheetRenderer.renderTile(spriteSheetIndex, x + i, y);
+  }
+}
+
+
 void MenuElementRenderer::drawMultiLineText(
   const int x,
   const int y,

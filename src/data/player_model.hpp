@@ -93,7 +93,6 @@ public:
   LetterCollectionState addLetter(CollectableLetterType type);
 
   void resetForNewLevel();
-  void updateTemporaryItemExpiry();
 
 private:
   std::vector<CollectableLetterType> mCollectedLetters;
@@ -102,8 +101,6 @@ private:
   int mScore;
   int mAmmo;
   int mHealth;
-  int mFramesElapsedHavingRapidFire;
-  int mFramesElapsedHavingCloak;
 };
 
 }}

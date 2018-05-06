@@ -18,6 +18,10 @@
 
 #include "base/color.hpp"
 
+#include <string>
+#include <utility>
+
+
 namespace rigel { namespace events {
 
 struct ScreenFlash {
@@ -28,6 +32,17 @@ struct ScreenFlash {
   }
 
   base::Color mColor = base::Color{255, 255, 255, 255};
+};
+
+
+struct PlayerMessage {
+  PlayerMessage() = default;
+  explicit PlayerMessage(std::string text)
+    : mText(std::move(text))
+  {
+  }
+
+  std::string mText;
 };
 
 }}

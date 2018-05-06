@@ -19,6 +19,7 @@
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "data/strings.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/interaction/teleporter.hpp"
@@ -55,8 +56,11 @@ namespace {
 // playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
 
+constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
+constexpr auto ITEM_ABOUT_TO_EXPIRE_TIME = TEMPORARY_ITEM_EXPIRATION_TIME - 30;
 
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
+
 
 std::string levelFileName(const int episode, const int level) {
   assert(episode >=0 && episode < 4);
@@ -108,12 +112,14 @@ GameRunner::GameRunner(
       levelNumber + 1,
       mpRenderer,
       *context.mpResources)
+  , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
   , mIngameViewPortRenderTarget(
       context.mpRenderer,
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
 {
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -234,7 +240,9 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   auto doTimeStep = [&, this]() {
     if (!mScreenFlashColor) {
       mHudRenderer.updateAnimation();
+      updateTemporaryItemExpiration();
       mpSystems->update(mCombinedInputState, mEntities);
+      mMessageDisplay.update();
       mCombinedInputState = mInputState;
 
       if (mEarthQuakeEffect) {
@@ -284,6 +292,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     mpRenderer,
     data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,
     data::GameTraits::inGameViewPortOffset.y);
+  mMessageDisplay.render();
 
   if (mShowDebugText) {
     showDebugText();
@@ -300,8 +309,18 @@ bool GameRunner::levelFinished() const {
 }
 
 
+void GameRunner::showWelcomeMessage() {
+  mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
+}
+
+
 void GameRunner::receive(const rigel::events::ScreenFlash& event) {
   mScreenFlashColor = event.mColor;
+}
+
+
+void GameRunner::receive(const rigel::events::PlayerMessage& event) {
+  mMessageDisplay.setMessage(event.mText);
 }
 
 
@@ -400,6 +419,7 @@ void GameRunner::restartLevel() {
     mLevelData.mInitialActors);
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
+  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);
@@ -432,6 +452,23 @@ void GameRunner::handleTeleporter() {
   mpSystems->centerViewOnPlayer();
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
+}
+
+
+void GameRunner::updateTemporaryItemExpiration() {
+  using data::InventoryItemType;
+
+  if (mpPlayerModel->hasItem(InventoryItemType::RapidFire)) {
+    ++mFramesElapsedHavingRapidFire;
+    if (mFramesElapsedHavingRapidFire == ITEM_ABOUT_TO_EXPIRE_TIME) {
+      mMessageDisplay.setMessage(data::Messages::RapidFireTimingOut);
+    }
+
+    if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+      mpPlayerModel->removeItem(InventoryItemType::RapidFire);
+      mFramesElapsedHavingRapidFire = 0;
+    }
+  }
 }
 
 

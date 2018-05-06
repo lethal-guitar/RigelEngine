@@ -16,6 +16,7 @@
 
 #include "player_interaction_system.hpp"
 
+#include "data/strings.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/collectable_components.hpp"
@@ -24,6 +25,7 @@
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/interaction/teleporter.hpp"
 #include "game_service_provider.hpp"
+#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {
@@ -92,13 +94,15 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   PlayerModel* pPlayerModel,
   IGameServiceProvider* pServices,
   EntityFactory* pEntityFactory,
-  TeleportCallback teleportCallback
+  TeleportCallback teleportCallback,
+  entityx::EventManager* pEvents
 )
   : mPlayer(player)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
   , mpEntityFactory(pEntityFactory)
   , mTeleportCallback(teleportCallback)
+  , mpEvents(pEvents)
 {
 }
 
@@ -190,6 +194,10 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
           soundToPlay = itemType == InventoryItemType::RapidFire ?
             SoundId::WeaponPickup :
             SoundId::ItemPickup;
+
+          if (itemType == InventoryItemType::SpecialHintGlobe) {
+            showMessage(data::Messages::FoundSpecialHintGlobe);
+          }
         }
 
         if (collectable.mGivenCollectableLetter) {
@@ -206,6 +214,11 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
 }
 
 
+void PlayerInteractionSystem::showMessage(const std::string& text) {
+  mpEvents->emit(rigel::events::PlayerMessage{text});
+}
+
+
 void PlayerInteractionSystem::performInteraction(
   entityx::EntityManager& es,
   entityx::Entity interactable,
@@ -219,6 +232,7 @@ void PlayerInteractionSystem::performInteraction(
     case InteractableType::ForceFieldCardReader:
       if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
         triggerPlayerInteractionAnimation();
+        showMessage(data::Messages::AccessGranted);
       }
       break;
   }
@@ -255,6 +269,10 @@ void PlayerInteractionSystem::collectLetter(
     // collection bonus" is accidentally given for every single letter that's
     // picked up, instead of only when all letters have been collected.
     spawnFloatingScoreNumber(*mpEntityFactory, ScoreNumberType::S100, position);
+
+    if (collectionState == S::WrongOrder) {
+      showMessage(data::Messages::LettersCollectedWrongOrder);
+    }
   }
 }
 

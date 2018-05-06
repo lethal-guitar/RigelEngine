@@ -416,18 +416,17 @@ TEST_CASE("Player attack system works as expected") {
     CHECK(fireShotSpy.count() == 3);
   }
 
-  SECTION("Rapid fire expires after timeout") {
+  SECTION("Firing stops when rapid fire is taken away") {
     playerModel.giveItem(data::InventoryItemType::RapidFire);
 
     attackSystem.buttonStateChanged(shootingInputState);
     for (int i = 0; i < 700; ++i) {
-      playerModel.updateTemporaryItemExpiry();
       attackSystem.update();
     }
     CHECK(fireShotSpy.count() == 350);
 
-    // By this point, rapid fire should have expired, so if we keep updating,
-    // no more shots should be fired
+    playerModel.removeItem(data::InventoryItemType::RapidFire);
+
     for (int i = 0; i < 2; ++i) {
       attackSystem.update();
     }

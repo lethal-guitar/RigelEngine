@@ -176,10 +176,12 @@ void Game::mainLoop() {
       mTextRenderer.drawMultiLineText(0, 2, mDebugText);
     }
 
-    const auto afterRender = high_resolution_clock::now();
-    const auto innerRenderTime =
-      duration<engine::TimeDelta>(afterRender - startOfFrame).count();
-    mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+    if (mShowFps) {
+      const auto afterRender = high_resolution_clock::now();
+      const auto innerRenderTime =
+        duration<engine::TimeDelta>(afterRender - startOfFrame).count();
+      mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+    }
 
     mRenderer.swapBuffers();
   }
@@ -187,12 +189,19 @@ void Game::mainLoop() {
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, &mRenderer, this, &mScriptRunner};
+  return {&mResources, &mRenderer, this, &mScriptRunner, &mTextRenderer};
 }
 
 
 void Game::handleEvent(const SDL_Event& event) {
   switch (event.type) {
+    case SDL_KEYUP:
+      if (event.key.keysym.sym == SDLK_F6) {
+        mShowFps = !mShowFps;
+      }
+      mpCurrentGameMode->handleEvent(event);
+      break;
+
     case SDL_QUIT:
       mIsRunning = false;
       break;

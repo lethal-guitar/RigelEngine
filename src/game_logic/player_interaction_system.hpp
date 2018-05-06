@@ -26,6 +26,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <functional>
+#include <string>
 
 namespace rigel {
   struct IGameServiceProvider;
@@ -51,11 +52,14 @@ public:
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServices,
     EntityFactory* pEntityFactory,
-    TeleportCallback teleportCallback);
+    TeleportCallback teleportCallback,
+    entityx::EventManager* pEvents);
 
   void update(entityx::EntityManager& es);
 
 private:
+  void showMessage(const std::string& text);
+
   void performInteraction(
     entityx::EntityManager& es,
     entityx::Entity interactable,
@@ -74,6 +78,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   EntityFactory* mpEntityFactory;
   TeleportCallback mTeleportCallback;
+  entityx::EventManager* mpEvents;
 };
 
 }}

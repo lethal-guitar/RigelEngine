@@ -26,6 +26,7 @@
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
+#include "ui/ingame_message_display.hpp"
 
 #include "game_mode.hpp"
 #include "global_level_events.hpp"
@@ -58,8 +59,10 @@ public:
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+  void showWelcomeMessage();
 
   void receive(const events::ScreenFlash& event);
+  void receive(const events::PlayerMessage& event);
 
 private:
   void loadLevel(
@@ -73,6 +76,7 @@ private:
   void handlePlayerDeath();
   void restartLevel();
   void handleTeleporter();
+  void updateTemporaryItemExpiration();
 
   void showDebugText();
 
@@ -86,6 +90,11 @@ private:
   data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
   base::Vector mScrollOffset;
+
+  // TODO: Find a better place for this
+  int mFramesElapsedHavingRapidFire = 0;
+  int mFramesElapsedHavingCloak = 0;
+
   game_logic::PlayerInputState mInputState;
   game_logic::PlayerInputState mCombinedInputState;
   bool mLevelFinished;
@@ -110,6 +119,7 @@ private:
 
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
+  ui::IngameMessageDisplay mMessageDisplay;
   engine::RenderTargetTexture mIngameViewPortRenderTarget;
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;

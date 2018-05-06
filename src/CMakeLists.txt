@@ -18,6 +18,7 @@ set(core_sources
     data/player_model.hpp
     data/song.hpp
     data/sound_ids.hpp
+    data/strings.hpp
     data/tile_attributes.cpp
     data/tile_attributes.hpp
     data/unit_conversions.cpp
@@ -170,6 +171,8 @@ set(core_sources
     ui/fps_display.hpp
     ui/hud_renderer.cpp
     ui/hud_renderer.hpp
+    ui/ingame_message_display.cpp
+    ui/ingame_message_display.hpp
     ui/intro_movie.cpp
     ui/intro_movie.hpp
     ui/menu_element_renderer.cpp
