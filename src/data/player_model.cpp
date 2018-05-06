@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 
+#include <algorithm>
 #include <cassert>
 
 
@@ -39,6 +40,18 @@ PlayerModel::PlayerModel()
   , mAmmo(MAX_AMMO)
   , mHealth(MAX_HEALTH)
 {
+}
+
+
+PlayerModel::CheckpointState PlayerModel::makeCheckpoint() const {
+  return CheckpointState{mWeapon, mAmmo, mHealth};
+}
+
+
+void PlayerModel::restoreFromCheckpoint(const CheckpointState& state) {
+  mHealth = std::max(2, state.mHealth);
+  mWeapon = state.mWeapon;
+  mAmmo = state.mAmmo;
 }
 
 
