@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -44,6 +45,13 @@ void reassign(entityx::Entity entity, Args&&... args) {
   }
 
   entity.assign<ComponentT>(std::forward<Args>(args)...);
+}
+
+
+inline bool isOnScreen(const entityx::Entity entity) {
+  return
+      entity.has_component<components::Active>() &&
+      entity.component<const components::Active>()->mIsOnScreen;
 }
 
 }}
