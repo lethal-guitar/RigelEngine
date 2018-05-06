@@ -34,6 +34,7 @@ namespace loader {
 }
 
 namespace ui {
+  class MenuElementRenderer;
   class DukeScriptRunner;
 }
 
@@ -45,6 +46,7 @@ struct GameMode {
     engine::Renderer* mpRenderer;
     IGameServiceProvider* mpServiceProvider;
     ui::DukeScriptRunner* mpScriptRunner;
+    ui::MenuElementRenderer* mpUiRenderer;
   };
 
   virtual ~GameMode() = default;
