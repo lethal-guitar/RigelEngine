@@ -204,6 +204,10 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
           collectLetter(*collectable.mGivenCollectableLetter, pos);
         }
 
+        if (collectable.mShownTutorialMessage) {
+          showTutorialMessage(*collectable.mShownTutorialMessage);
+        }
+
         if (soundToPlay) {
           mpServiceProvider->playSound(*soundToPlay);
         }
@@ -216,6 +220,13 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
 
 void PlayerInteractionSystem::showMessage(const std::string& text) {
   mpEvents->emit(rigel::events::PlayerMessage{text});
+}
+
+
+void PlayerInteractionSystem::showTutorialMessage(
+  const data::TutorialMessageId id
+) {
+  mpEvents->emit(rigel::events::TutorialMessage{id});
 }
 
 
@@ -256,6 +267,7 @@ void PlayerInteractionSystem::collectLetter(
     mpServiceProvider->playSound(data::SoundId::LettersCollectedCorrectly);
     mpPlayerModel->giveScore(CORRECT_LETTER_COLLECTION_SCORE);
     spawnScoreNumbersForLetterCollectionBonus(*mpEntityFactory, position);
+    showTutorialMessage(data::TutorialMessageId::LettersCollectedRightOrder);
   } else {
     mpServiceProvider->playSound(data::SoundId::ItemPickup);
     mpPlayerModel->giveScore(BASIC_LETTER_COLLECTION_SCORE);

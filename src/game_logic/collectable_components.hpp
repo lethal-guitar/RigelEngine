@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/player_model.hpp"
+#include "data/tutorial_messages.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -35,6 +36,7 @@ struct CollectableItem {
   boost::optional<data::InventoryItemType> mGivenItem;
   boost::optional<data::WeaponType> mGivenWeapon;
   boost::optional<data::CollectableLetterType> mGivenCollectableLetter;
+  boost::optional<data::TutorialMessageId> mShownTutorialMessage;
   bool mSpawnScoreNumbers = true;
 };
 
