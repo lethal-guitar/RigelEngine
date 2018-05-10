@@ -378,6 +378,7 @@ void GameRunner::loadLevel(
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =
       engine::EarthQuakeEffect{mpServiceProvider, &mRandomGenerator};
+    showTutorialMessage(data::TutorialMessageId::EarthQuake);
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
