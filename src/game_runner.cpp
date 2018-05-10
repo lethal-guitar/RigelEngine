@@ -140,7 +140,11 @@ GameRunner::GameRunner(
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
   }
 
-  if (mRadarDishCounter.radarDishesPresent()) {
+  if (mEarthQuakeEffect) { // overrides welcome message
+    showTutorialMessage(data::TutorialMessageId::EarthQuake);
+  }
+
+  if (mRadarDishCounter.radarDishesPresent()) { // overrides earth quake
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);
   }
 
@@ -378,7 +382,6 @@ void GameRunner::loadLevel(
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =
       engine::EarthQuakeEffect{mpServiceProvider, &mRandomGenerator};
-    showTutorialMessage(data::TutorialMessageId::EarthQuake);
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
