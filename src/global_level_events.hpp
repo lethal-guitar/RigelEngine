@@ -18,6 +18,7 @@
 
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
+#include "data/tutorial_messages.hpp"
 
 #include <string>
 #include <utility>
@@ -44,6 +45,17 @@ struct PlayerMessage {
   }
 
   std::string mText;
+};
+
+
+struct TutorialMessage {
+  TutorialMessage() = default;
+  explicit TutorialMessage(const data::TutorialMessageId id)
+    : mId(id)
+  {
+  }
+
+  data::TutorialMessageId mId;
 };
 
 

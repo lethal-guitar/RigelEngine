@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "data/tutorial_messages.hpp"
 #include "utils/enum_hash.hpp"
 
 #include <unordered_set>
@@ -103,9 +104,13 @@ public:
 
   void resetForNewLevel();
 
+  TutorialMessageState& tutorialMessages();
+  const TutorialMessageState& tutorialMessages() const;
+
 private:
   std::vector<CollectableLetterType> mCollectedLetters;
   std::unordered_set<InventoryItemType> mInventory;
+  TutorialMessageState mTutorialMessages;
   WeaponType mWeapon;
   int mScore;
   int mAmmo;

@@ -185,4 +185,13 @@ void PlayerModel::resetForNewLevel() {
 }
 
 
+TutorialMessageState& PlayerModel::tutorialMessages() {
+  return mTutorialMessages;
+}
+
+
+const TutorialMessageState& PlayerModel::tutorialMessages() const {
+  return mTutorialMessages;
+}
+
 }}

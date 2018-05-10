@@ -20,6 +20,7 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/player_model.hpp"
+#include "data/tutorial_messages.hpp"
 #include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/texture.hpp"
@@ -65,6 +66,7 @@ public:
   void receive(const events::CheckPointActivated& event);
   void receive(const events::PlayerMessage& event);
   void receive(const events::ScreenFlash& event);
+  void receive(const events::TutorialMessage& event);
 
 private:
   void loadLevel(
@@ -80,6 +82,7 @@ private:
   void restartFromCheckpoint();
   void handleTeleporter();
   void updateTemporaryItemExpiration();
+  void showTutorialMessage(const data::TutorialMessageId id);
 
   void showDebugText();
 
