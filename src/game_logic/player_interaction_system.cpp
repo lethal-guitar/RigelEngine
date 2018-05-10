@@ -86,6 +86,21 @@ void spawnScoreNumbersForLetterCollectionBonus(
   }
 }
 
+
+data::TutorialMessageId tutorialFor(const components::InteractableType type) {
+  using TM = data::TutorialMessageId;
+  switch (type) {
+    case InteractableType::Teleporter:
+      return TM::FoundTeleporter;
+
+    case InteractableType::ForceFieldCardReader:
+      return TM::FoundForceField;
+  }
+
+  assert(false);
+  std::terminate();
+}
+
 }
 
 
@@ -117,14 +132,17 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
   if (state.mState != PlayerState::LookingUp) {
     state.mPerformedInteraction = false;
   }
+  const auto interactionWanted =
+    state.mState == PlayerState::LookingUp;
 
-  if (!state.mPerformedInteraction && state.mState == PlayerState::LookingUp) {
+  if (!state.mPerformedInteraction) {
     const auto& playerBox = *mPlayer.component<BoundingBox>();
     const auto& playerPos = *mPlayer.component<WorldPosition>();
     const auto worldSpacePlayerBounds =
       engine::toWorldSpace(playerBox, playerPos);
+
     es.each<Interactable, WorldPosition, BoundingBox>(
-      [this, &es, &state, &worldSpacePlayerBounds](
+      [&, this](
         ex::Entity entity,
         const Interactable& interactable,
         const WorldPosition& pos,
@@ -135,8 +153,12 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
         }
         const auto objectBounds = engine::toWorldSpace(bbox, pos);
         if (worldSpacePlayerBounds.intersects(objectBounds)) {
-          performInteraction(es, entity, interactable.mType);
-          state.mPerformedInteraction = true;
+          if (interactionWanted) {
+            performInteraction(es, entity, interactable.mType);
+            state.mPerformedInteraction = true;
+          } else {
+            showTutorialMessage(tutorialFor(interactable.mType));
+          }
         }
       });
   }
@@ -244,6 +266,8 @@ void PlayerInteractionSystem::performInteraction(
       if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
         triggerPlayerInteractionAnimation();
         showMessage(data::Messages::AccessGranted);
+      } else {
+        showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
       }
       break;
   }
