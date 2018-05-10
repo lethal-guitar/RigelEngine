@@ -21,6 +21,8 @@ set(core_sources
     data/strings.hpp
     data/tile_attributes.cpp
     data/tile_attributes.hpp
+    data/tutorial_messages.cpp
+    data/tutorial_messages.hpp
     data/unit_conversions.cpp
     data/unit_conversions.hpp
     engine/base_components.hpp
