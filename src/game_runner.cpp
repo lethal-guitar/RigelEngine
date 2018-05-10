@@ -414,8 +414,12 @@ void GameRunner::handleLevelExit() {
       const auto triggerActivated =
         playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
 
-      if (triggerActivated && !mRadarDishCounter.radarDishesPresent()) {
-        mLevelFinished = true;
+      if (triggerActivated) {
+        if (mRadarDishCounter.radarDishesPresent()) {
+          showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
+        } else {
+          mLevelFinished = true;
+        }
       }
     });
 }
