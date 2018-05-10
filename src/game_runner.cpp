@@ -92,7 +92,8 @@ GameRunner::GameRunner(
   const int levelNumber,
   const data::Difficulty difficulty,
   GameMode::Context context,
-  boost::optional<base::Vector> playerPositionOverride
+  boost::optional<base::Vector> playerPositionOverride,
+  bool showWelcomeMessage
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
@@ -107,6 +108,7 @@ GameRunner::GameRunner(
   , mLevelFinished(false)
   , mAccumulatedTime(0.0)
   , mShowDebugText(false)
+  , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
       mpPlayerModel,
       levelNumber + 1,
@@ -132,6 +134,14 @@ GameRunner::GameRunner(
   }
 
   mpSystems->centerViewOnPlayer();
+
+  if (showWelcomeMessage) {
+    mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
+  }
+
+  if (mRadarDishCounter.radarDishesPresent()) {
+    mMessageDisplay.setMessage(data::Messages::FindAllRadars);
+  }
 
   auto after = high_resolution_clock::now();
   std::cout << "Level load time: " <<
@@ -310,11 +320,6 @@ bool GameRunner::levelFinished() const {
 }
 
 
-void GameRunner::showWelcomeMessage() {
-  mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
-}
-
-
 void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
   mActivatedCheckpoint = CheckpointData{
     mpPlayerModel->makeCheckpoint(), event.mPosition};
@@ -359,6 +364,7 @@ void GameRunner::loadLevel(
     mpServiceProvider,
     &mEntityFactory,
     &mRandomGenerator,
+    &mRadarDishCounter,
     mpRenderer,
     mEntities,
     mEventManager);
@@ -399,7 +405,12 @@ void GameRunner::handleLevelExit() {
         triggerPosition.x >= playerBBox.left() &&
         triggerPosition.x <= (playerBBox.right() + 1);
 
-      mLevelFinished = playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
+      const auto triggerActivated =
+        playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
+
+      if (triggerActivated && !mRadarDishCounter.radarDishesPresent()) {
+        mLevelFinished = true;
+      }
     });
 }
 

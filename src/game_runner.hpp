@@ -23,6 +23,7 @@
 #include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/texture.hpp"
+#include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
@@ -52,14 +53,14 @@ public:
     int level,
     data::Difficulty difficulty,
     GameMode::Context context,
-    boost::optional<base::Vector> playerPositionOverride = boost::none);
+    boost::optional<base::Vector> playerPositionOverride = boost::none,
+    bool showWelcomeMessage = false);
   ~GameRunner();
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
-  void showWelcomeMessage();
 
   void receive(const events::CheckPointActivated& event);
   void receive(const events::PlayerMessage& event);
@@ -125,6 +126,7 @@ private:
 
   std::unique_ptr<game_logic::IngameSystems> mpSystems;
 
+  game_logic::RadarDishCounter mRadarDishCounter;
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;

@@ -18,6 +18,7 @@
 
 #include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
+#include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interaction/force_field.hpp"
 
@@ -37,6 +38,7 @@ IngameSystems::IngameSystems(
   IGameServiceProvider* pServiceProvider,
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator,
+  const RadarDishCounter* pRadarDishCounter,
   engine::Renderer* pRenderer,
   entityx::EntityManager& entities,
   entityx::EventManager& eventManager
@@ -79,6 +81,7 @@ IngameSystems::IngameSystems(
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(playerEntity, pServiceProvider)
   , mRespawnCheckpointSystem(playerEntity, &eventManager)
+  , mRadarComputerSystem(pRadarDishCounter)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
   , mDynamicGeometrySystem(
       pServiceProvider,
@@ -170,6 +173,7 @@ void IngameSystems::update(
   // TODO: Move all player related systems into the player namespace
   mElevatorSystem.update(es, inputState);
   mRespawnCheckpointSystem.update(es);
+  mRadarComputerSystem.update(es);
   mPlayerMovementSystem.update(inputState);
   mPlayerInteractionSystem.update(es);
 
