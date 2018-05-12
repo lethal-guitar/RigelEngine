@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/player_model.hpp"
+#include "data/tutorial_messages.hpp"
 #include "engine/base_components.hpp"
 #include "game_logic/player/components.hpp"
 
@@ -59,6 +60,7 @@ public:
 
 private:
   void showMessage(const std::string& text);
+  void showTutorialMessage(const data::TutorialMessageId id);
 
   void performInteraction(
     entityx::EntityManager& es,

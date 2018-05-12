@@ -123,6 +123,7 @@ GameRunner::GameRunner(
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -337,6 +338,11 @@ void GameRunner::receive(const rigel::events::ScreenFlash& event) {
 }
 
 
+void GameRunner::receive(const rigel::events::TutorialMessage& event) {
+  showTutorialMessage(event.mId);
+}
+
+
 void GameRunner::loadLevel(
   const int episode,
   const int levelNumber,
@@ -372,6 +378,7 @@ void GameRunner::loadLevel(
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =
       engine::EarthQuakeEffect{mpServiceProvider, &mRandomGenerator};
+    showTutorialMessage(data::TutorialMessageId::EarthQuake);
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
@@ -408,8 +415,12 @@ void GameRunner::handleLevelExit() {
       const auto triggerActivated =
         playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
 
-      if (triggerActivated && !mRadarDishCounter.radarDishesPresent()) {
-        mLevelFinished = true;
+      if (triggerActivated) {
+        if (mRadarDishCounter.radarDishesPresent()) {
+          showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
+        } else {
+          mLevelFinished = true;
+        }
       }
     });
 }
@@ -504,6 +515,14 @@ void GameRunner::updateTemporaryItemExpiration() {
       mpPlayerModel->removeItem(InventoryItemType::RapidFire);
       mFramesElapsedHavingRapidFire = 0;
     }
+  }
+}
+
+
+void GameRunner::showTutorialMessage(const data::TutorialMessageId id) {
+  if (!mpPlayerModel->tutorialMessages().hasBeenShown(id)) {
+    mMessageDisplay.setMessage(data::messageText(id));
+    mpPlayerModel->tutorialMessages().markAsShown(id);
   }
 }
 

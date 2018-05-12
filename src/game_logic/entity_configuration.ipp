@@ -669,6 +669,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CircuitBoard;
+        item.mShownTutorialMessage = TutorialMessageId::FoundAccessCard;
         configureItemBox(
           entity,
           ContainerColor::White,
@@ -682,6 +683,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::BlueKey;
+        item.mShownTutorialMessage = TutorialMessageId::FoundBlueKey;
         configureItemBox(
           entity,
           ContainerColor::White,
@@ -695,6 +697,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::RapidFire;
+        item.mShownTutorialMessage = TutorialMessageId::FoundRapidFire;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -749,6 +752,8 @@ void EntityFactory::configureEntity(
         CollectableItem intactSodaCanCollectable;
         intactSodaCanCollectable.mGivenScore = 100;
         intactSodaCanCollectable.mGivenHealth = 1;
+        intactSodaCanCollectable.mShownTutorialMessage =
+          TutorialMessageId::FoundSoda;
 
         CollectableItem flyingSodaCanCollectable;
         flyingSodaCanCollectable.mGivenScore = 2000;
@@ -802,6 +807,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 100;
         item.mGivenHealth = 6;
+        item.mShownTutorialMessage = TutorialMessageId::FoundSoda;
         configureItemBox(
           entity,
           ContainerColor::Red,
@@ -866,6 +872,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Rocket;
+        item.mShownTutorialMessage = TutorialMessageId::FoundRocketLauncher;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -879,6 +886,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::FlameThrower;
+        item.mShownTutorialMessage = TutorialMessageId::FoundFlameThrower;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -892,6 +900,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Normal;
+        item.mShownTutorialMessage = TutorialMessageId::FoundRegularWeapon;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -905,6 +914,7 @@ void EntityFactory::configureEntity(
         CollectableItem item;
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Laser;
+        item.mShownTutorialMessage = TutorialMessageId::FoundLaser;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -922,6 +932,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenScoreAtFullHealth = 10000;
         item.mGivenHealth = 1;
+        item.mShownTutorialMessage = TutorialMessageId::FoundHealthMolecule;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -935,6 +946,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::N;
+        item.mShownTutorialMessage = TutorialMessageId::FoundLetterN;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -947,6 +959,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::U;
+        item.mShownTutorialMessage = TutorialMessageId::FoundLetterU;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -959,6 +972,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::K;
+        item.mShownTutorialMessage = TutorialMessageId::FoundLetterK;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -971,6 +985,7 @@ void EntityFactory::configureEntity(
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::E;
+        item.mShownTutorialMessage = TutorialMessageId::FoundLetterE;
         configureItemBox(
           entity,
           ContainerColor::Blue,

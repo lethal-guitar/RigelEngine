@@ -86,6 +86,21 @@ void spawnScoreNumbersForLetterCollectionBonus(
   }
 }
 
+
+data::TutorialMessageId tutorialFor(const components::InteractableType type) {
+  using TM = data::TutorialMessageId;
+  switch (type) {
+    case InteractableType::Teleporter:
+      return TM::FoundTeleporter;
+
+    case InteractableType::ForceFieldCardReader:
+      return TM::FoundForceField;
+  }
+
+  assert(false);
+  std::terminate();
+}
+
 }
 
 
@@ -117,14 +132,17 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
   if (state.mState != PlayerState::LookingUp) {
     state.mPerformedInteraction = false;
   }
+  const auto interactionWanted =
+    state.mState == PlayerState::LookingUp;
 
-  if (!state.mPerformedInteraction && state.mState == PlayerState::LookingUp) {
+  if (!state.mPerformedInteraction) {
     const auto& playerBox = *mPlayer.component<BoundingBox>();
     const auto& playerPos = *mPlayer.component<WorldPosition>();
     const auto worldSpacePlayerBounds =
       engine::toWorldSpace(playerBox, playerPos);
+
     es.each<Interactable, WorldPosition, BoundingBox>(
-      [this, &es, &state, &worldSpacePlayerBounds](
+      [&, this](
         ex::Entity entity,
         const Interactable& interactable,
         const WorldPosition& pos,
@@ -135,8 +153,12 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
         }
         const auto objectBounds = engine::toWorldSpace(bbox, pos);
         if (worldSpacePlayerBounds.intersects(objectBounds)) {
-          performInteraction(es, entity, interactable.mType);
-          state.mPerformedInteraction = true;
+          if (interactionWanted) {
+            performInteraction(es, entity, interactable.mType);
+            state.mPerformedInteraction = true;
+          } else {
+            showTutorialMessage(tutorialFor(interactable.mType));
+          }
         }
       });
   }
@@ -204,6 +226,10 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
           collectLetter(*collectable.mGivenCollectableLetter, pos);
         }
 
+        if (collectable.mShownTutorialMessage) {
+          showTutorialMessage(*collectable.mShownTutorialMessage);
+        }
+
         if (soundToPlay) {
           mpServiceProvider->playSound(*soundToPlay);
         }
@@ -216,6 +242,13 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
 
 void PlayerInteractionSystem::showMessage(const std::string& text) {
   mpEvents->emit(rigel::events::PlayerMessage{text});
+}
+
+
+void PlayerInteractionSystem::showTutorialMessage(
+  const data::TutorialMessageId id
+) {
+  mpEvents->emit(rigel::events::TutorialMessage{id});
 }
 
 
@@ -233,6 +266,8 @@ void PlayerInteractionSystem::performInteraction(
       if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
         triggerPlayerInteractionAnimation();
         showMessage(data::Messages::AccessGranted);
+      } else {
+        showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
       }
       break;
   }
@@ -256,6 +291,7 @@ void PlayerInteractionSystem::collectLetter(
     mpServiceProvider->playSound(data::SoundId::LettersCollectedCorrectly);
     mpPlayerModel->giveScore(CORRECT_LETTER_COLLECTION_SCORE);
     spawnScoreNumbersForLetterCollectionBonus(*mpEntityFactory, position);
+    showTutorialMessage(data::TutorialMessageId::LettersCollectedRightOrder);
   } else {
     mpServiceProvider->playSound(data::SoundId::ItemPickup);
     mpPlayerModel->giveScore(BASIC_LETTER_COLLECTION_SCORE);
