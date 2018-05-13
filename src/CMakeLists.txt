@@ -42,6 +42,8 @@ set(core_sources
     engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/movement.cpp
+    engine/movement.hpp
     engine/opengl.cpp
     engine/opengl.hpp
     engine/particle_system.cpp

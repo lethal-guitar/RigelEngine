@@ -18,6 +18,7 @@
 
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
+#include "engine/movement.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
@@ -158,9 +159,10 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
 
           if (movingTowardsPlayer) {
             if (newAnimFrame % 2 == 1) {
-              const auto walkedSuccessfully =
-                mpCollisionChecker->walkEntity(
-                  entity, toMovement(blobState.mOrientation));
+              const auto walkedSuccessfully = engine::walk(
+                *mpCollisionChecker,
+                entity,
+                toMovement(blobState.mOrientation));
 
               if (!walkedSuccessfully) {
                 blobState.mState = Idle{};
@@ -189,7 +191,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
           if (state.mIsOddUpdate) {
             const auto movement = playerIsRight ? 1 : -1;
             const auto walkedSuccessfully =
-              mpCollisionChecker->walkEntityOnCeiling(entity, movement);
+              engine::walkOnCeiling(*mpCollisionChecker, entity, movement);
 
             if (!walkedSuccessfully) {
               sprite.mFramesToRender[0] -= 2;

@@ -17,7 +17,7 @@
 #include "hover_bot.hpp"
 
 #include "engine/base_components.hpp"
-#include "engine/collision_checker.hpp"
+#include "engine/movement.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
@@ -125,7 +125,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
 
         [&](Moving& state) {
           const auto movement = toMovement(state.mOrientation);
-          mpCollisionChecker->walkEntity(entity, movement);
+          engine::walk(*mpCollisionChecker, entity, movement);
 
           // TODO: use wonky player position (orientation dependent)
           const auto& playerPosition = *mPlayer.component<WorldPosition>();

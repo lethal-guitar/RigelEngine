@@ -16,7 +16,7 @@
 
 #include "simple_walker.hpp"
 
-#include "engine/collision_checker.hpp"
+#include "engine/movement.hpp"
 #include "engine/sprite_tools.hpp"
 
 
@@ -72,8 +72,8 @@ void SimpleWalkerSystem::update(entityx::EntityManager& es) {
       }
 
       auto& orientation = *state.mOrientation;
-      const auto walkedSuccessfully = mpCollisionChecker->walkEntity(
-        entity, toMovement(orientation));
+      const auto walkedSuccessfully = engine::walk(
+        *mpCollisionChecker, entity, toMovement(orientation));
       if (!walkedSuccessfully) {
         orientation = opposite(orientation);
         updateAnimation(entity, orientation);

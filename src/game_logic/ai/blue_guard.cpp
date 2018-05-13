@@ -16,14 +16,14 @@
 
 #include "blue_guard.hpp"
 
-#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
+#include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/entity_factory.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
 
 #include "game_service_provider.hpp"
@@ -198,7 +198,7 @@ void BlueGuardSystem::updateGuard(
 
   const auto walkOneStep = [this, &state, &guardEntity]() {
     const auto walkAmount = toMovement(state.mOrientation);
-    return mpCollisionChecker->walkEntity(guardEntity, walkAmount);
+    return engine::walk(*mpCollisionChecker, guardEntity, walkAmount);
   };
 
   // If a guard was previously typing on a terminal, it will not attack the

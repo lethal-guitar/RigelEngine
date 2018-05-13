@@ -44,58 +44,6 @@ CollisionChecker::CollisionChecker(
 }
 
 
-bool CollisionChecker::walkEntity(ex::Entity entity, const int amount) const {
-  auto& position = *entity.component<WorldPosition>();
-  const auto& bbox = *entity.component<BoundingBox>();
-
-  const auto newPosition = position + base::Vector{amount, 0};
-  const auto movingLeft = amount < 0;
-
-  const auto xToTest = newPosition.x + (movingLeft ? 0 : bbox.size.width - 1);
-  const auto stillOnSolidGround =
-    isOnSolidGround({{xToTest, newPosition.y}, {1, 1}});
-
-  const auto collidingWithWorld = movingLeft
-    ? isTouchingLeftWall(position, bbox)
-    : isTouchingRightWall(position, bbox);
-
-  if (stillOnSolidGround && !collidingWithWorld) {
-    position = newPosition;
-    return true;
-  }
-
-  return false;
-}
-
-
-bool CollisionChecker::walkEntityOnCeiling(
-  ex::Entity entity,
-  const int amount
-) const {
-  // TODO: Eliminate duplication with the regular walkEntity()
-  auto& position = *entity.component<WorldPosition>();
-  const auto& bbox = *entity.component<BoundingBox>();
-
-  const auto newPosition = position + base::Vector{amount, 0};
-  const auto movingLeft = amount < 0;
-
-  const auto xOffset = bbox.size.width * amount;
-  const auto offset = base::Vector{xOffset, 0};
-  const auto stillOnCeiling = isTouchingCeiling(position + offset, bbox);
-
-  const auto collidingWithWorld = movingLeft
-    ? isTouchingLeftWall(position, bbox)
-    : isTouchingRightWall(position, bbox);
-
-  if (stillOnCeiling && !collidingWithWorld) {
-    position = newPosition;
-    return true;
-  }
-
-  return false;
-}
-
-
 bool CollisionChecker::isOnSolidGround(
   const WorldPosition& position,
   const BoundingBox& bbox
