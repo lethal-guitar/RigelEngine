@@ -196,8 +196,7 @@ private:
   std::vector<GLushort> mBatchIndices;
 
   GLuint mCurrentFbo;
-  int mCurrentFramebufferWidth;
-  int mCurrentFramebufferHeight;
+  base::Size<int> mCurrentFramebufferSize;
 
   glm::mat4 mProjectionMatrix;
   base::Rect<int> mDefaultViewport;

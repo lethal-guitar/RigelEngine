@@ -200,8 +200,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
   , mCurrentFbo(0)
-  , mCurrentFramebufferWidth(LOGICAL_DISPLAY_WIDTH)
-  , mCurrentFramebufferHeight(LOGICAL_DISPLAY_HEIGHT)
+  , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
   , mDefaultViewport(determineDefaultViewport(pWindow))
 {
   // General configuration
@@ -231,10 +230,7 @@ Renderer::~Renderer() {
 
 
 base::Rect<int> Renderer::fullScreenRect() const {
-  return {
-    {0, 0},
-    {mCurrentFramebufferWidth, mCurrentFramebufferHeight}
-  };
+  return {{0, 0}, mCurrentFramebufferSize};
 }
 
 
@@ -450,8 +446,8 @@ void Renderer::drawPoint(
 
 Renderer::RenderTarget Renderer::currentRenderTarget() const {
   return {
-    mCurrentFramebufferWidth,
-    mCurrentFramebufferHeight,
+    mCurrentFramebufferSize.width,
+    mCurrentFramebufferSize.height,
     mCurrentFbo
   };
 }
@@ -465,12 +461,12 @@ void Renderer::setRenderTarget(const RenderTarget& target) {
   submitBatch();
 
   if (!target.isDefault()) {
-    mCurrentFramebufferWidth = target.mWidth;
-    mCurrentFramebufferHeight = target.mHeight;
+    mCurrentFramebufferSize.width = target.mWidth;
+    mCurrentFramebufferSize.height = target.mHeight;
     mCurrentFbo = target.mFbo;
   } else {
-    mCurrentFramebufferWidth = LOGICAL_DISPLAY_WIDTH;
-    mCurrentFramebufferHeight = LOGICAL_DISPLAY_HEIGHT;
+    mCurrentFramebufferSize.width = LOGICAL_DISPLAY_WIDTH;
+    mCurrentFramebufferSize.height = LOGICAL_DISPLAY_HEIGHT;
     mCurrentFbo = 0;
   }
 
@@ -652,13 +648,13 @@ void Renderer::onRenderTargetChanged() {
       mDefaultViewport.size.width,
       mDefaultViewport.size.height);
   } else {
-    glViewport(0, 0, mCurrentFramebufferWidth, mCurrentFramebufferHeight);
+    glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
   }
 
   mProjectionMatrix = glm::ortho(
     0.0f,
-    float(mCurrentFramebufferWidth),
-    float(mCurrentFramebufferHeight),
+    float(mCurrentFramebufferSize.width),
+    float(mCurrentFramebufferSize.height),
     0.0f);
 
   updateShaders();
