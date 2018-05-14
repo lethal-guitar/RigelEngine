@@ -445,11 +445,7 @@ void Renderer::drawPoint(
 
 
 Renderer::RenderTarget Renderer::currentRenderTarget() const {
-  return {
-    mCurrentFramebufferSize.width,
-    mCurrentFramebufferSize.height,
-    mCurrentFbo
-  };
+  return {mCurrentFramebufferSize, mCurrentFbo};
 }
 
 
@@ -461,8 +457,7 @@ void Renderer::setRenderTarget(const RenderTarget& target) {
   submitBatch();
 
   if (!target.isDefault()) {
-    mCurrentFramebufferSize.width = target.mWidth;
-    mCurrentFramebufferSize.height = target.mHeight;
+    mCurrentFramebufferSize = target.mSize;
     mCurrentFbo = target.mFbo;
   } else {
     mCurrentFramebufferSize.width = LOGICAL_DISPLAY_WIDTH;

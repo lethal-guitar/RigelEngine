@@ -39,9 +39,8 @@ public:
   // TODO: Re-evaluate how render targets work
   struct RenderTarget {
     RenderTarget() = default;
-    RenderTarget(const int width, const int height, const GLuint fbo)
-      : mWidth(width)
-      , mHeight(height)
+    RenderTarget(const base::Size<int> size, const GLuint fbo)
+      : mSize(size)
       , mFbo(fbo)
     {
     }
@@ -51,17 +50,14 @@ public:
     }
 
     bool operator==(const RenderTarget& other) const {
-      return
-        std::tie(mWidth, mHeight, mFbo) ==
-        std::tie(other.mWidth, other.mHeight, other.mFbo);
+      return std::tie(mSize, mFbo) == std::tie(other.mSize, other.mFbo);
     }
 
     bool operator!=(const RenderTarget& other) const {
       return !(*this == other);
     }
 
-    int mWidth = 0;
-    int mHeight = 0;
+    base::Size<int> mSize;
     GLuint mFbo = 0;
   };
 
