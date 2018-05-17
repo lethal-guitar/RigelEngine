@@ -72,7 +72,7 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
     mFilePackage.file(name),
     data::GameTraits::viewPortWidthTiles,
     overridePalette,
-    false);
+    data::TileImageType::Unmasked);
 }
 
 
@@ -131,6 +131,7 @@ loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
 TileSet ResourceLoader::loadCZone(const std::string& name) const {
   using namespace data;
   using namespace map;
+  using T = data::TileImageType;
 
   const auto& data = mFilePackage.file(name);
   LeStreamReader attributeReader(
@@ -160,13 +161,13 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
     maskedTilesBegin,
     GameTraits::CZone::tileSetImageWidth,
     INGAME_PALETTE,
-    false);
+    T::Unmasked);
   const auto maskedTilesImage = loadTiledImage(
     maskedTilesBegin,
     data.cend(),
     GameTraits::CZone::tileSetImageWidth,
     INGAME_PALETTE,
-    true);
+    T::Masked);
   fullImage.insertImage(0, 0, solidTilesImage);
   fullImage.insertImage(
     0,

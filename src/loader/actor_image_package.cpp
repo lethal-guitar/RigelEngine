@@ -119,13 +119,16 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
   const ActorHeader& header,
   const Palette16& palette
 ) const {
+  using T = data::TileImageType;
+
   return utils::transformed(
     header.mFrames,
     [this, &palette](const auto& frameHeader) {
       const auto width = frameHeader.mSizeInTiles.width;
       const auto height = frameHeader.mSizeInTiles.height;
 
-      const auto dataSize = height * width * GameTraits::bytesPerTile(true);
+      const auto dataSize = height * width *
+        GameTraits::bytesPerTile(T::Masked);
       if (frameHeader.mFileOffset + dataSize > mImageData.size()) {
         throw invalid_argument("Not enough data");
       }
@@ -136,7 +139,7 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
         dataStart + dataSize,
         width,
         palette,
-        true);
+        T::Masked);
 
       return ActorData::Frame{
         frameHeader.mDrawOffset,

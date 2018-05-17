@@ -17,7 +17,6 @@
 #include "ega_image_decoder.hpp"
 
 #include "base/math_tools.hpp"
-#include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "loader/bitwise_iter.hpp"
 #include "loader/file_utils.hpp"
@@ -200,13 +199,14 @@ data::Image loadTiledImage(
   const ByteBufferCIter end,
   std::size_t widthInTiles,
   const Palette16& palette,
-  const bool isMasked
+  const data::TileImageType type
 ) {
   const auto heightInTiles =
-    inferHeight(begin, end, widthInTiles, GameTraits::bytesPerTile(isMasked));
+    inferHeight(begin, end, widthInTiles, GameTraits::bytesPerTile(type));
 
   auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
-    [&palette, isMasked](auto sourceBitsIter, const auto targetPixelIter) {
+    [&palette, type](auto sourceBitsIter, const auto targetPixelIter) {
+      const auto isMasked = type == data::TileImageType::Masked;
       array<bool, GameTraits::tileSize> pixelMask;
       if (isMasked) {
         sourceBitsIter = readEgaMaskPlane(
