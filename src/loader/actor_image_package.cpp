@@ -80,6 +80,7 @@ ActorImagePackage::ActorImagePackage(const CMPFilePackage& filePackage)
   }
 }
 
+
 ActorData ActorImagePackage::loadActor(
   const ActorID id,
   const Palette16& palette
