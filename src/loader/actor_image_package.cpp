@@ -119,32 +119,42 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
   const ActorHeader& header,
   const Palette16& palette
 ) const {
-  using T = data::TileImageType;
-
   return utils::transformed(
     header.mFrames,
     [this, &palette](const auto& frameHeader) {
-      const auto width = frameHeader.mSizeInTiles.width;
-      const auto height = frameHeader.mSizeInTiles.height;
-
-      const auto dataSize = height * width *
-        GameTraits::bytesPerTile(T::Masked);
-      if (frameHeader.mFileOffset + dataSize > mImageData.size()) {
-        throw invalid_argument("Not enough data");
-      }
-
-      const auto dataStart = mImageData.cbegin() + frameHeader.mFileOffset;
-      auto image = loadTiledImage(
-        dataStart,
-        dataStart + dataSize,
-        width,
-        palette,
-        T::Masked);
-
+      // TODO: There's a bug in versions of GCC older than 7.1.0 which makes
+      // the this-> down below necessary. Should be removed after upgrading
+      // the GCC version used on CI.
+      // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67274
       return ActorData::Frame{
         frameHeader.mDrawOffset,
-        image};
+        this->loadImage(frameHeader, palette)};
     });
+}
+
+
+data::Image ActorImagePackage::loadImage(
+  const ActorFrameHeader& frameHeader,
+  const Palette16& palette
+) const {
+  using T = data::TileImageType;
+
+  const auto width = frameHeader.mSizeInTiles.width;
+  const auto height = frameHeader.mSizeInTiles.height;
+
+  const auto dataSize = height * width *
+    GameTraits::bytesPerTile(T::Masked);
+  if (frameHeader.mFileOffset + dataSize > mImageData.size()) {
+    throw invalid_argument("Not enough data");
+  }
+
+  const auto dataStart = mImageData.cbegin() + frameHeader.mFileOffset;
+  return loadTiledImage(
+    dataStart,
+    dataStart + dataSize,
+    width,
+    palette,
+    T::Masked);
 }
 
 

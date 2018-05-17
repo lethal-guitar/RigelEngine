@@ -73,6 +73,11 @@ private:
     const ActorHeader& header,
     const Palette16& palette) const;
 
+  data::Image loadImage(
+    const ActorFrameHeader& frameHeader,
+    const Palette16& palette
+  ) const;
+
 private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
