@@ -23,6 +23,12 @@
 
 namespace rigel { namespace data {
 
+enum class TileImageType {
+  Unmasked,
+  Masked
+};
+
+
 struct GameTraits {
 
   static const int tileSize = 8;
@@ -53,12 +59,12 @@ struct GameTraits {
   static const std::size_t fontEgaPlanes = 2u;
   static const std::size_t pixelsPerEgaByte = 8u;
 
-  static constexpr std::size_t numPlanes(const bool isMasked) {
-    return isMasked ? maskedEgaPlanes : egaPlanes;
+  static constexpr std::size_t numPlanes(const TileImageType type) {
+    return type == TileImageType::Masked ? maskedEgaPlanes : egaPlanes;
   }
 
-  static constexpr std::size_t bytesPerTile(const bool isMasked) {
-    return (tileSizeSquared / pixelsPerEgaByte) * numPlanes(isMasked);
+  static constexpr std::size_t bytesPerTile(const TileImageType type) {
+    return (tileSizeSquared / pixelsPerEgaByte) * numPlanes(type);
   }
 
   static constexpr std::size_t bytesPerFontTile() {

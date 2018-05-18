@@ -18,6 +18,7 @@
 
 #include "loader/byte_buffer.hpp"
 #include "loader/palette.hpp"
+#include "data/game_traits.hpp"
 #include "data/image.hpp"
 
 
@@ -34,21 +35,21 @@ data::Image loadTiledImage(
   ByteBufferCIter end,
   std::size_t widthInTiles,
   const Palette16& palette,
-  bool isMasked);
+  data::TileImageType type);
 
 
 inline data::Image loadTiledImage(
   const ByteBuffer& data,
   std::size_t widthInTiles,
   const Palette16& palette,
-  bool isMasked = false
+  const data::TileImageType type = data::TileImageType::Unmasked
 ) {
   return loadTiledImage(
     data.cbegin(),
     data.cend(),
     widthInTiles,
     palette,
-    isMasked);
+    type);
 }
 
 data::Image loadTiledFontBitmap(

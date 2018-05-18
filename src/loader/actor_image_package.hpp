@@ -17,10 +17,15 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "data/image.hpp"
 #include "data/map.hpp"
 #include "loader/byte_buffer.hpp"
 #include "loader/palette.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <map>
 #include <vector>
@@ -47,7 +52,9 @@ using FontData = std::vector<data::Image>;
 
 class ActorImagePackage {
 public:
-  explicit ActorImagePackage(const CMPFilePackage& filePackage);
+  explicit ActorImagePackage(
+    const CMPFilePackage& filePackage,
+    boost::optional<std::string> maybeImageReplacementsPath = boost::none);
 
   ActorData loadActor(
     data::ActorID id,
@@ -70,12 +77,19 @@ private:
   };
 
   std::vector<ActorData::Frame> loadFrameImages(
+    data::ActorID id,
     const ActorHeader& header,
     const Palette16& palette) const;
+
+  data::Image loadImage(
+    const ActorFrameHeader& frameHeader,
+    const Palette16& palette
+  ) const;
 
 private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
+  boost::optional<std::string> mMaybeReplacementsPath;
 };
 
 
