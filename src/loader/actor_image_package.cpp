@@ -22,6 +22,7 @@
 #include "loader/cmp_file_package.hpp"
 #include "loader/ega_image_decoder.hpp"
 #include "loader/file_utils.hpp"
+#include "loader/png_image.hpp"
 
 #include <cassert>
 
@@ -37,11 +38,25 @@ namespace {
 
 const auto FONT_ACTOR_ID = 29;
 
+
+std::string replacementImagePath(
+  const std::string& basePath,
+  const int id,
+  const int frame
+) {
+  return basePath + "/actor" + std::to_string(id) + "_frame" +
+    std::to_string(frame) + ".png";
+}
+
 }
 
 
-ActorImagePackage::ActorImagePackage(const CMPFilePackage& filePackage)
+ActorImagePackage::ActorImagePackage(
+  const CMPFilePackage& filePackage,
+  boost::optional<std::string> maybeImageReplacementsPath
+)
   : mImageData(filePackage.file("ACTORS.MNI"))
+  , mMaybeReplacementsPath(maybeImageReplacementsPath)
 {
   const auto actorInfoData = filePackage.file("ACTRINFO.MNI");
 
@@ -96,7 +111,7 @@ ActorData ActorImagePackage::loadActor(
   const auto& header = it->second;
   return ActorData{
     header.mDrawIndex,
-    loadFrameImages(header, palette)
+    loadFrameImages(id, header, palette)
   };
 }
 
@@ -116,19 +131,26 @@ base::Rect<int> ActorImagePackage::actorFrameRect(
 
 
 std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
+  const data::ActorID id,
   const ActorHeader& header,
   const Palette16& palette
 ) const {
   return utils::transformed(
     header.mFrames,
-    [this, &palette](const auto& frameHeader) {
+    [&, this, frame = 0](const auto& frameHeader) mutable {
+      auto maybeReplacement = mMaybeReplacementsPath
+        ? loadPng(replacementImagePath(*mMaybeReplacementsPath, id, frame))
+        : boost::none;
+      ++frame;
+
       // TODO: There's a bug in versions of GCC older than 7.1.0 which makes
       // the this-> down below necessary. Should be removed after upgrading
       // the GCC version used on CI.
       // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67274
       return ActorData::Frame{
         frameHeader.mDrawOffset,
-        this->loadImage(frameHeader, palette)};
+        maybeReplacement ? *maybeReplacement :
+          this->loadImage(frameHeader, palette)};
     });
 }
 

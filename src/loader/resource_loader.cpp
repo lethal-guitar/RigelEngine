@@ -47,10 +47,27 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 
 }
 
+// When loading assets, the game will first check if a file with an expected
+// name exists at the replacements path, and if it does, it will load this file
+// and use it instead of the asset from the original data file (NUKEM2.CMP).
+//
+// At the moment, this is only implemented for sprites/actors. The expected
+// format for replacement files is:
+//
+//   actor<actor_id>_frame<animation_frame>.png
+//
+// Where <actor_id> and <animation_frame> should be replaced with the
+// corresponding numbers. For example, to replace the images used for the
+// "blue guard" enemy, files named "actor_159_frame0.png" up to
+// "actor_159_frame12.png" should be provided.
+//
+// The files can contain full 32-bit RGBA values, there are no limitations.
+const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
+
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
   : mFilePackage(gamePath + "NUKEM2.CMP")
-  , mActorImagePackage(mFilePackage)
+  , mActorImagePackage(mFilePackage, gamePath + "/" + ASSET_REPLACEMENTS_PATH)
   , mGamePath(gamePath)
   , mAdlibSoundsPackage(mFilePackage)
 {
