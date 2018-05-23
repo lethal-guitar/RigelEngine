@@ -91,7 +91,7 @@ public:
   int health() const;
   bool isAtFullHealth() const;
   bool isDead() const;
-  void takeHealth(int amount);
+  void takeDamage(int amount);
   void giveHealth(int amount);
 
   const std::unordered_set<InventoryItemType>& inventory() const;

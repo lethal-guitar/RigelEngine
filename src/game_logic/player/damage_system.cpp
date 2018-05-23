@@ -103,7 +103,7 @@ void DamageSystem::update(entityx::EntityManager& es) {
         !playerState.isInMercyFrames() || damage.mIgnoreMercyFrames;
 
       if (hasCollision && canTakeDamage) {
-        mpPlayerModel->takeHealth(damage.mAmount);
+        mpPlayerModel->takeDamage(damage.mAmount);
 
         if (!mpPlayerModel->isDead()) {
           playerState.mMercyFramesRemaining = mNumMercyFrames;
