@@ -14,7 +14,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "attack_system.hpp"
+
 #include "data/player_model.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player/attack_traits.hpp"
 #include "game_service_provider.hpp"
 
@@ -67,12 +70,11 @@ inline data::SoundId soundIdForWeapon(const data::WeaponType weaponType) {
 }
 
 
-template<typename EntityFactoryT>
-AttackSystem<EntityFactoryT>::AttackSystem(
+AttackSystem::AttackSystem(
   entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
-  EntityFactoryT* pEntityFactory
+  IEntityFactory* pEntityFactory
 )
   : mPlayerEntity(playerEntity)
   , mpPlayerModel(pPlayerModel)
@@ -84,8 +86,7 @@ AttackSystem<EntityFactoryT>::AttackSystem(
 }
 
 
-template<typename EntityFactoryT>
-bool AttackSystem<EntityFactoryT>::attackPossible() const {
+bool AttackSystem::attackPossible() const {
   auto& playerState =
     *mPlayerEntity.component<const components::PlayerControlled>();
 
@@ -97,8 +98,7 @@ bool AttackSystem<EntityFactoryT>::attackPossible() const {
 }
 
 
-template<typename EntityFactoryT>
-void AttackSystem<EntityFactoryT>::update() {
+void AttackSystem::update() {
   using engine::components::WorldPosition;
 
   if (!attackPossible()) {
@@ -128,8 +128,7 @@ void AttackSystem<EntityFactoryT>::update() {
 }
 
 
-template<typename EntityFactoryT>
-void AttackSystem<EntityFactoryT>::buttonStateChanged(
+void AttackSystem::buttonStateChanged(
   const PlayerInputState& inputState
 ) {
   if (
@@ -145,8 +144,7 @@ void AttackSystem<EntityFactoryT>::buttonStateChanged(
 }
 
 
-template<typename EntityFactoryT>
-void AttackSystem<EntityFactoryT>::fireShot(
+void AttackSystem::fireShot(
   const engine::components::WorldPosition& playerPosition,
   const components::PlayerControlled& playerState
 ) {

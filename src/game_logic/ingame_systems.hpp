@@ -110,7 +110,7 @@ private:
   game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerMovementSystem mPlayerMovementSystem;
   game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
-  game_logic::player::AttackSystem<EntityFactory> mPlayerAttackSystem;
+  game_logic::player::AttackSystem mPlayerAttackSystem;
   game_logic::player::AnimationSystem mPlayerAnimationSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::player::ProjectileSystem mPlayerProjectileSystem;

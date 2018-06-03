@@ -42,6 +42,8 @@ set(core_sources
     engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/opengl.cpp
+    engine/opengl.hpp
     engine/particle_system.cpp
     engine/particle_system.hpp
     engine/physical_components.hpp
@@ -55,11 +57,9 @@ set(core_sources
     engine/rendering_system.hpp
     engine/shader.cpp
     engine/shader.hpp
-    engine/opengl.cpp
-    engine/opengl.hpp
-    engine/sprite_tools.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
+    engine/sprite_tools.hpp
     engine/texture.cpp
     engine/texture.hpp
     engine/tile_renderer.cpp
@@ -97,8 +97,8 @@ set(core_sources
     game_logic/damage_infliction_system.cpp
     game_logic/damage_infliction_system.hpp
     game_logic/dynamic_geometry_components.hpp
-    game_logic/dynamic_geometry_system.hpp
     game_logic/dynamic_geometry_system.cpp
+    game_logic/dynamic_geometry_system.hpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
     game_logic/enemy_radar.cpp
@@ -106,10 +106,9 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
-    game_logic/item_container.cpp
-    game_logic/item_container.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
@@ -118,12 +117,14 @@ set(core_sources
     game_logic/interaction/respawn_checkpoint.hpp
     game_logic/interaction/teleporter.cpp
     game_logic/interaction/teleporter.hpp
+    game_logic/item_container.cpp
+    game_logic/item_container.hpp
     game_logic/map_scroll_system.cpp
     game_logic/map_scroll_system.hpp
     game_logic/player/animation_system.cpp
     game_logic/player/animation_system.hpp
+    game_logic/player/attack_system.cpp
     game_logic/player/attack_system.hpp
-    game_logic/player/attack_system.ipp
     game_logic/player/attack_traits.cpp
     game_logic/player/attack_traits.hpp
     game_logic/player/components.hpp
@@ -159,8 +160,8 @@ set(core_sources
     loader/music_loader.hpp
     loader/palette.cpp
     loader/palette.hpp
-    loader/png_image.hpp
     loader/png_image.cpp
+    loader/png_image.hpp
     loader/resource_loader.cpp
     loader/resource_loader.hpp
     loader/rle_compression.hpp

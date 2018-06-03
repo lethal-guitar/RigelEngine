@@ -123,7 +123,7 @@ bool PlayerModel::isDead() const {
 }
 
 
-void PlayerModel::takeHealth(const int amount) {
+void PlayerModel::takeDamage(const int amount) {
   mHealth = base::clamp(mHealth - amount, 0, MAX_HEALTH);
 }
 

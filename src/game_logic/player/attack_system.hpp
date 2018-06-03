@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "engine/base_components.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -31,6 +31,8 @@ namespace rigel {
 
 namespace rigel { namespace data { class PlayerModel; }}
 
+namespace rigel { namespace game_logic { struct IEntityFactory; }}
+
 namespace rigel { namespace game_logic { namespace components {
   struct PlayerControlled;
 }}}
@@ -38,14 +40,13 @@ namespace rigel { namespace game_logic { namespace components {
 
 namespace rigel { namespace game_logic { namespace player {
 
-template<typename EntityFactoryT>
 class AttackSystem {
 public:
   AttackSystem(
     entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServiceProvider,
-    EntityFactoryT* pEntityFactory);
+    IEntityFactory* pEntityFactory);
 
   void update();
   void buttonStateChanged(const PlayerInputState& inputState);
@@ -62,12 +63,10 @@ private:
   entityx::Entity mPlayerEntity;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
-  EntityFactoryT* mpEntityFactory;
+  IEntityFactory* mpEntityFactory;
   bool mFireButtonPressed;
   bool mShotRequested;
 };
 
 
 }}}
-
-#include "attack_system.ipp"

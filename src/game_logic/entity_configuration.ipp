@@ -1175,7 +1175,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::HoverBot>();
       entity.assign<DestructionEffects>(
         HOVER_BOT_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     // Green panther
@@ -1183,7 +1183,7 @@ void EntityFactory::configureEntity(
     case 32:
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     // Wall-mounted flame thrower
@@ -1198,7 +1198,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     case 54: // Rocket launcher turret
@@ -1208,7 +1208,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::RocketTurret>();
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     // Rocket turret rockets
@@ -1246,7 +1246,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SlimeBlob>();
       addDefaultMovingBody(entity, boundingBox);
@@ -1280,7 +1280,7 @@ void EntityFactory::configureEntity(
         Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<BoundingBox>(boundingBox);
       break;
 
@@ -1307,7 +1307,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(
         SKELETON_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
       addDefaultMovingBody(entity, boundingBox);
@@ -1330,7 +1330,7 @@ void EntityFactory::configureEntity(
     case 176: // green bird
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     // petrified green monster
@@ -1339,7 +1339,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(
         EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     case 271: // Small flying ship 1
@@ -1362,7 +1362,7 @@ void EntityFactory::configureEntity(
         createBlueGuardAiComponent(actorID));
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(159, 0));
+        mSpriteFactory.actorFrameRect(159, 0));
       break;
 
 
@@ -1401,7 +1401,7 @@ void EntityFactory::configureEntity(
     case 280: // final boss projectile
       entity.assign<DestructionEffects>(
         BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
-        mpSpritePackage->actorFrameRect(actorID, 0));
+        mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
     case 299: // Rigelatin soldier

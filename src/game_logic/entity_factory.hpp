@@ -21,6 +21,7 @@
 #include "engine/base_components.hpp"
 #include "engine/renderer.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "loader/level_loader.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -42,24 +43,6 @@ enum class ContainerColor {
   Green,
   White,
   Blue
-};
-
-
-enum class ProjectileType {
-  PlayerRegularShot,
-  PlayerLaserShot,
-  PlayerRocketShot,
-  PlayerFlameShot,
-  EnemyLaserShot,
-  EnemyRocket
-};
-
-
-enum class ProjectileDirection {
-  Left,
-  Right,
-  Up,
-  Down
 };
 
 
@@ -106,7 +89,28 @@ inline bool isHorizontal(const ProjectileDirection direction) {
 }
 
 
-class EntityFactory {
+class SpriteFactory {
+public:
+  SpriteFactory(
+    engine::Renderer* pRenderer,
+    const loader::ActorImagePackage* pSpritePackage);
+
+  engine::components::Sprite createSprite(data::ActorID id);
+  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const;
+
+private:
+  struct SpriteData {
+    engine::SpriteDrawData mDrawData;
+    std::vector<int> mInitialFramesToRender;
+  };
+
+  engine::Renderer* mpRenderer;
+  const loader::ActorImagePackage* mpSpritePackage;
+  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
+};
+
+
+class EntityFactory : public IEntityFactory {
 public:
   EntityFactory(
     engine::Renderer* pRenderer,
@@ -115,7 +119,7 @@ public:
     data::Difficulty difficulty);
 
   entityx::Entity createEntitiesForLevel(
-    const data::map::ActorDescriptionList& actors);
+    const data::map::ActorDescriptionList& actors) override;
 
   /** Create a sprite entity using the given actor ID. If assignBoundingBox is
    * true, the dimensions of the sprite's first frame are used to assign a
@@ -123,21 +127,21 @@ public:
    */
   entityx::Entity createSprite(
     data::ActorID actorID,
-    bool assignBoundingBox = false);
+    bool assignBoundingBox = false) override;
 
   entityx::Entity createSprite(
     data::ActorID actorID,
     const base::Vector& position,
-    bool assignBoundingBox = false);
+    bool assignBoundingBox = false) override;
 
   entityx::Entity createProjectile(
     ProjectileType type,
     const engine::components::WorldPosition& pos,
-    ProjectileDirection direction);
+    ProjectileDirection direction) override;
 
   entityx::Entity createActor(
     data::ActorID actorID,
-    const base::Vector& position);
+    const base::Vector& position) override;
 
 private:
   engine::components::Sprite createSpriteForId(const data::ActorID actorID);
@@ -164,17 +168,9 @@ private:
     const engine::components::BoundingBox& boundingBox
   );
 
-  engine::Renderer* mpRenderer;
+  SpriteFactory mSpriteFactory;
   entityx::EntityManager* mpEntityManager;
-  const loader::ActorImagePackage* mpSpritePackage;
   data::Difficulty mDifficulty;
-
-  struct SpriteData {
-    engine::SpriteDrawData mDrawData;
-    std::vector<int> mInitialFramesToRender;
-  };
-
-  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
 };
 
 
