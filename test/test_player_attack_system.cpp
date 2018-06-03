@@ -21,6 +21,7 @@
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 #include <data/player_model.hpp>
+#include <game_logic/ientity_factory.hpp>
 #include <game_logic/player/attack_system.hpp>
 #include <game_logic/player_movement_system.hpp>
 #include <game_mode.hpp>
@@ -61,6 +62,49 @@ static std::ostream& operator<<(std::ostream& os, const SoundId id) {
 }}
 
 
+struct MockEntityFactory : public IEntityFactory {
+  std::function<void(ProjectileType, const WorldPosition&, ProjectileDirection)>
+    mOnProjectileCreated;
+
+  entityx::Entity createProjectile(
+    ProjectileType type,
+    const WorldPosition& pos,
+    ProjectileDirection direction
+  ) override {
+    mOnProjectileCreated(type, pos, direction);
+    return {};
+  }
+
+  entityx::Entity createEntitiesForLevel(
+    const data::map::ActorDescriptionList& actors
+  ) override {
+    return {};
+  }
+
+  entityx::Entity createSprite(
+    data::ActorID actorID,
+    bool assignBoundingBox = false
+  ) override {
+    return {};
+  }
+
+  entityx::Entity createSprite(
+    data::ActorID actorID,
+    const base::Vector& position,
+    bool assignBoundingBox = false
+  ) override {
+    return {};
+  }
+
+  entityx::Entity createActor(
+    data::ActorID actorID,
+    const base::Vector& position
+  ) override {
+    return {};
+  }
+};
+
+
 TEST_CASE("Player attack system works as expected") {
   ex::EntityX entityx;
   auto player = entityx.entities.create();
@@ -80,16 +124,11 @@ TEST_CASE("Player attack system works as expected") {
     fireShotParameters.direction = direction;
   });
 
-  struct MockEntityFactory {
-    std::function<void(
-      const ProjectileType type,
-      const WorldPosition& position,
-      const ProjectileDirection direction)> createProjectile;
-  } mockEntityFactory{fireShotSpy};
-
+  MockEntityFactory mockEntityFactory;
+  mockEntityFactory.mOnProjectileCreated = fireShotSpy;
 
   MockServiceProvider mockServiceProvicer;
-  player::AttackSystem<MockEntityFactory> attackSystem{
+  player::AttackSystem attackSystem{
     player,
     &playerModel,
     &mockServiceProvicer,
