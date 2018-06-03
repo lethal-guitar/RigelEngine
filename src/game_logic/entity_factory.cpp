@@ -236,27 +236,17 @@ void adjustOffsets(
 #include "entity_configuration.ipp"
 
 
-EntityFactory::EntityFactory(
+SpriteFactory::SpriteFactory(
   engine::Renderer* pRenderer,
-  ex::EntityManager* pEntityManager,
-  const ActorImagePackage* pSpritePackage,
-  const data::Difficulty difficulty)
+  const ActorImagePackage* pSpritePackage
+)
   : mpRenderer(pRenderer)
-  , mpEntityManager(pEntityManager)
   , mpSpritePackage(pSpritePackage)
-  , mDifficulty(difficulty)
 {
 }
 
 
-Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
-  auto sprite = createSpriteComponent(actorID);
-  configureSprite(sprite, actorID);
-  return sprite;
-}
-
-
-Sprite EntityFactory::createSpriteComponent(const ActorID mainId) {
+Sprite SpriteFactory::createSprite(const ActorID mainId) {
   auto iData = mSpriteDataCache.find(mainId);
   if (iData == mSpriteDataCache.end()) {
     engine::SpriteDrawData drawData;
@@ -293,6 +283,33 @@ Sprite EntityFactory::createSpriteComponent(const ActorID mainId) {
 
   const auto& data = iData->second;
   return {&data.mDrawData, data.mInitialFramesToRender};
+}
+
+
+base::Rect<int> SpriteFactory::actorFrameRect(
+  const data::ActorID id,
+  const int frame
+) const {
+  return mpSpritePackage->actorFrameRect(id, frame);
+}
+
+
+EntityFactory::EntityFactory(
+  engine::Renderer* pRenderer,
+  ex::EntityManager* pEntityManager,
+  const loader::ActorImagePackage* pSpritePackage,
+  const data::Difficulty difficulty)
+  : mSpriteFactory(pRenderer, pSpritePackage)
+  , mpEntityManager(pEntityManager)
+  , mDifficulty(difficulty)
+{
+}
+
+
+Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
+  auto sprite = mSpriteFactory.createSprite(actorID);
+  configureSprite(sprite, actorID);
+  return sprite;
 }
 
 

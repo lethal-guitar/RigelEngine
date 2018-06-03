@@ -106,6 +106,27 @@ inline bool isHorizontal(const ProjectileDirection direction) {
 }
 
 
+class SpriteFactory {
+public:
+  SpriteFactory(
+    engine::Renderer* pRenderer,
+    const loader::ActorImagePackage* pSpritePackage);
+
+  engine::components::Sprite createSprite(data::ActorID id);
+  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const;
+
+private:
+  struct SpriteData {
+    engine::SpriteDrawData mDrawData;
+    std::vector<int> mInitialFramesToRender;
+  };
+
+  engine::Renderer* mpRenderer;
+  const loader::ActorImagePackage* mpSpritePackage;
+  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
+};
+
+
 class EntityFactory {
 public:
   EntityFactory(
@@ -164,17 +185,9 @@ private:
     const engine::components::BoundingBox& boundingBox
   );
 
-  engine::Renderer* mpRenderer;
+  SpriteFactory mSpriteFactory;
   entityx::EntityManager* mpEntityManager;
-  const loader::ActorImagePackage* mpSpritePackage;
   data::Difficulty mDifficulty;
-
-  struct SpriteData {
-    engine::SpriteDrawData mDrawData;
-    std::vector<int> mInitialFramesToRender;
-  };
-
-  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
 };
 
 
