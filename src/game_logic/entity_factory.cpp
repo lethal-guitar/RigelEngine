@@ -494,7 +494,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 
 
 entityx::Entity createOneShotSprite(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const ActorID id,
   const base::Vector& position
 ) {
@@ -510,7 +510,7 @@ entityx::Entity createOneShotSprite(
 
 
 entityx::Entity createFloatingOneShotSprite(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const data::ActorID id,
   const base::Vector& position
 ) {
@@ -527,7 +527,7 @@ entityx::Entity createFloatingOneShotSprite(
 
 
 entityx::Entity spawnMovingEffectSprite(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const ActorID id,
   const SpriteMovement movement,
   const base::Vector& position
@@ -543,7 +543,7 @@ entityx::Entity spawnMovingEffectSprite(
 
 
 void spawnFloatingScoreNumber(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const ScoreNumberType type,
   const base::Vector& position
 ) {
