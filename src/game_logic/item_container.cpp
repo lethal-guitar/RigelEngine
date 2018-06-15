@@ -154,6 +154,7 @@ void NapalmBombSystem::explode(entityx::Entity entity) {
   state.mState = components::NapalmBomb::State::SpawningFires;
   state.mFramesElapsed = 0;
   entity.component<Sprite>()->mShow = false;
+  entity.remove<engine::components::MovingBody>();
 }
 
 
