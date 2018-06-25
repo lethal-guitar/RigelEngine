@@ -52,6 +52,7 @@ struct SpriteFrame {
 
 struct SpriteDrawData {
   std::vector<SpriteFrame> mFrames;
+  boost::optional<int> mOrientationOffset;
   int mDrawOrder;
 };
 

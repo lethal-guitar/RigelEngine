@@ -237,6 +237,19 @@ void adjustOffsets(
   }
 }
 
+
+boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
+  switch (actorId) {
+    // Player
+    case 5:
+    case 6:
+      return 39;
+
+    default:
+      return boost::none;
+  }
+}
+
 }
 
 
@@ -278,6 +291,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
       lastFrameCount = int(actorData.mFrames.size());
     }
 
+    drawData.mOrientationOffset = orientationOffsetForActor(mainId);
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
     adjustOffsets(drawData.mFrames, mainId);

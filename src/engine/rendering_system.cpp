@@ -35,6 +35,7 @@ using components::AnimationLoop;
 using components::AnimationSequence;
 using components::CustomRenderFunc;
 using components::DrawTopMost;
+using components::Orientation;
 using components::Sprite;
 using components::WorldPosition;
 
@@ -222,8 +223,19 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       data::tileVectorToPixelVector(pos) - worldToScreenPx;
     renderFunc(mpRenderer, data.mEntity, sprite, screenPos);
   } else {
-    for (const auto frameIndex : sprite.mFramesToRender) {
-      assert(frameIndex < int(sprite.mpDrawData->mFrames.size()));
+    for (const auto baseFrameIndex : sprite.mFramesToRender) {
+      assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
+
+      auto frameIndex = baseFrameIndex;
+      if (
+        sprite.mpDrawData->mOrientationOffset &&
+        data.mEntity.has_component<Orientation>()
+      ) {
+        const auto orientation = *data.mEntity.component<const Orientation>();
+        if (orientation == Orientation::Right) {
+          frameIndex += *sprite.mpDrawData->mOrientationOffset;
+        }
+      }
 
       // White flash effect
       if (sprite.mFlashingWhite) {
