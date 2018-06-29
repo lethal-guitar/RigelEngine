@@ -108,7 +108,6 @@ void EffectsSystem::receive(const events::ShootableKilled& event) {
   auto effects = *entity.component<DestructionEffects>();
   effects.mActivated = true;
   const auto position = *entity.component<WorldPosition>();
-  processEffectsAndAdvance(position, effects);
 
   auto effectSpawner = mpEntityManager->create();
   effectSpawner.assign<DestructionEffects>(effects);
