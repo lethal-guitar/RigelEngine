@@ -75,6 +75,8 @@ struct Shootable {
    * set to false.
    */
   bool mAlwaysConsumeInflictor = false;
+
+  bool mCanBeHitWhenOffscreen = false;
 };
 
 

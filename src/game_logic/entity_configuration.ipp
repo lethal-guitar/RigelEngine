@@ -1572,6 +1572,7 @@ void EntityFactory::configureEntity(
     case 106: // shootable wall, explodes into small pieces
       entity.assign<Shootable>(Health{1});
       entity.component<Shootable>()->mAlwaysConsumeInflictor = true;
+      entity.component<Shootable>()->mCanBeHitWhenOffscreen = true;
       {
         // Shootable walls have a bounding box that's one unit wider than the
         // actual area.
