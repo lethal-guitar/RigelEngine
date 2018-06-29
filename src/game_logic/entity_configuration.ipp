@@ -737,7 +737,7 @@ void EntityFactory::configureEntity(
         configureItemBox(
           entity,
           ContainerColor::Red,
-          0,
+          100,
           AnimationLoop{1},
           shootable,
           DestructionEffects{NAPALM_BOMB_KILL_EFFECT_SPEC},
