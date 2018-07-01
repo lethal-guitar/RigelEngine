@@ -226,6 +226,10 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     for (const auto baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
+      if (baseFrameIndex == IGNORE_RENDER_SLOT) {
+        continue;
+      }
+
       auto frameIndex = baseFrameIndex;
       if (
         sprite.mpDrawData->mOrientationOffset &&

@@ -57,6 +57,9 @@ struct SpriteDrawData {
 };
 
 
+constexpr auto IGNORE_RENDER_SLOT = -1;
+
+
 namespace components {
 
 struct Sprite {
