@@ -30,6 +30,7 @@
 
   #define RIGEL_DISABLE_WARNINGS \
     _Pragma("clang diagnostic push") \
+    _Pragma("clang diagnostic ignored \"-Wunknown-pragmas\"") \
     _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"") \
     _Pragma("clang diagnostic ignored \"-Wold-style-cast\"") \
     _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"") \
