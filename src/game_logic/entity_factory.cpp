@@ -497,9 +497,11 @@ entityx::Entity createOneShotSprite(
   const base::Vector& position
 ) {
   auto entity = factory.createSprite(id, position, true);
-  engine::startAnimationLoop(entity, 1, 0, boost::none);
   const auto numAnimationFrames = static_cast<int>(
     entity.component<Sprite>()->mpDrawData->mFrames.size());
+  if (numAnimationFrames > 1) {
+    engine::startAnimationLoop(entity, 1, 0, boost::none);
+  }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
   return entity;
 }
