@@ -154,8 +154,7 @@ RenderTargetTexture::Binder::Binder(
 )
   : Binder(
       {
-        renderTarget.mData.mWidth,
-        renderTarget.mData.mHeight,
+        base::Size<int>{renderTarget.mData.mWidth, renderTarget.mData.mHeight},
         renderTarget.mFboHandle
       },
       pRenderer)
@@ -183,7 +182,7 @@ RenderTargetTexture::Binder::~Binder() {
 DefaultRenderTargetBinder::DefaultRenderTargetBinder(
   engine::Renderer* pRenderer
 )
-  : Binder({0, 0, 0}, pRenderer)
+  : Binder({{0, 0}, 0}, pRenderer)
 {
 }
 

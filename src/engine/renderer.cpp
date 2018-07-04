@@ -200,8 +200,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
   , mCurrentFbo(0)
-  , mCurrentFramebufferWidth(LOGICAL_DISPLAY_WIDTH)
-  , mCurrentFramebufferHeight(LOGICAL_DISPLAY_HEIGHT)
+  , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
   , mDefaultViewport(determineDefaultViewport(pWindow))
 {
   // General configuration
@@ -221,7 +220,6 @@ Renderer::Renderer(SDL_Window* pWindow)
   mTexturedQuadShader.setUniform("textureData", 0);
 
   // Remaining setup
-  setRenderMode(RenderMode::SpriteBatch);
   onRenderTargetChanged();
 }
 
@@ -232,10 +230,7 @@ Renderer::~Renderer() {
 
 
 base::Rect<int> Renderer::fullScreenRect() const {
-  return {
-    {0, 0},
-    {mCurrentFramebufferWidth, mCurrentFramebufferHeight}
-  };
+  return {{0, 0}, mCurrentFramebufferSize};
 }
 
 
@@ -450,11 +445,7 @@ void Renderer::drawPoint(
 
 
 Renderer::RenderTarget Renderer::currentRenderTarget() const {
-  return {
-    mCurrentFramebufferWidth,
-    mCurrentFramebufferHeight,
-    mCurrentFbo
-  };
+  return {mCurrentFramebufferSize, mCurrentFbo};
 }
 
 
@@ -466,12 +457,11 @@ void Renderer::setRenderTarget(const RenderTarget& target) {
   submitBatch();
 
   if (!target.isDefault()) {
-    mCurrentFramebufferWidth = target.mWidth;
-    mCurrentFramebufferHeight = target.mHeight;
+    mCurrentFramebufferSize = target.mSize;
     mCurrentFbo = target.mFbo;
   } else {
-    mCurrentFramebufferWidth = LOGICAL_DISPLAY_WIDTH;
-    mCurrentFramebufferHeight = LOGICAL_DISPLAY_HEIGHT;
+    mCurrentFramebufferSize.width = LOGICAL_DISPLAY_WIDTH;
+    mCurrentFramebufferSize.height = LOGICAL_DISPLAY_HEIGHT;
     mCurrentFbo = 0;
   }
 
@@ -494,17 +484,19 @@ void Renderer::clear(const base::Color& clearColor) {
 
 void Renderer::setRenderModeIfChanged(const RenderMode mode) {
   if (mRenderMode != mode) {
-    setRenderMode(mode);
+    submitBatch();
+
+    mRenderMode = mode;
+    updateShaders();
   }
 }
 
 
-void Renderer::setRenderMode(const RenderMode mode) {
-  submitBatch();
-
-  switch (mode) {
+void Renderer::updateShaders() {
+  switch (mRenderMode) {
     case RenderMode::SpriteBatch:
       useShaderIfChanged(mTexturedQuadShader);
+      mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
       glVertexAttribPointer(
         0,
         2,
@@ -524,6 +516,7 @@ void Renderer::setRenderMode(const RenderMode mode) {
     case RenderMode::Points:
     case RenderMode::NonTexturedRender:
       useShaderIfChanged(mSolidColorShader);
+      mSolidColorShader.setUniform("transform", mProjectionMatrix);
       glVertexAttribPointer(
         0,
         2,
@@ -543,8 +536,6 @@ void Renderer::setRenderMode(const RenderMode mode) {
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
-
-  mRenderMode = mode;
 }
 
 
@@ -652,24 +643,16 @@ void Renderer::onRenderTargetChanged() {
       mDefaultViewport.size.width,
       mDefaultViewport.size.height);
   } else {
-    glViewport(0, 0, mCurrentFramebufferWidth, mCurrentFramebufferHeight);
+    glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
   }
 
   mProjectionMatrix = glm::ortho(
     0.0f,
-    float(mCurrentFramebufferWidth),
-    float(mCurrentFramebufferHeight),
+    float(mCurrentFramebufferSize.width),
+    float(mCurrentFramebufferSize.height),
     0.0f);
 
-  // TODO: Update only for currently used shader, do it lazily for the other
-  // one when switching render mode.
-  useShaderIfChanged(mTexturedQuadShader);
-  mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
-  useShaderIfChanged(mSolidColorShader);
-  mSolidColorShader.setUniform("transform", mProjectionMatrix);
-
-  // Need to re-configure vertex attrib state after switching shaders.
-  setRenderMode(mRenderMode);
+  updateShaders();
 }
 
 }}
