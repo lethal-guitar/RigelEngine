@@ -109,6 +109,11 @@ bool TileAttributes::isLadder(const TileIndex tile) const {
 }
 
 
+bool TileAttributes::isClimbable(const TileIndex tile) const {
+  return isBitSet(bitPackFor(tile), 0x80);
+}
+
+
 uint16_t TileAttributes::bitPackFor(const TileIndex tile) const {
   assert(tile < mAttributeBitPacks.size());
   return mAttributeBitPacks[tile];
