@@ -120,6 +120,21 @@ void DebuggingSystem::update(ex::EntityManager& es) {
             mpRenderer->drawLine(x1, y1, x2, y2, drawColor);
           }
         }
+
+        const auto isClimbable =
+          mpMap->attributes().isClimbable(mpMap->tileAt(0, col, row));
+        const auto isLadder =
+          mpMap->attributes().isLadder(mpMap->tileAt(0, col, row));
+
+        if (isClimbable) {
+          auto tileBox = base::makeRect<int>(topLeft, bottomRight);
+          mpRenderer->drawRectangle(tileBox, base::Color(255, 100, 255, 220));
+        }
+
+        if (isLadder) {
+          auto tileBox = base::makeRect<int>(topLeft, bottomRight);
+          mpRenderer->drawRectangle(tileBox, base::Color(0, 100, 255, 220));
+        }
       }
     }
   }
