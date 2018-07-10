@@ -143,6 +143,13 @@ struct Rect {
 
 
 template<typename ValueT>
+Rect<ValueT> makeRect(Point<ValueT> topLeft, Point<ValueT> bottomRight) {
+  const auto sizeAsPoint = bottomRight - topLeft;
+  return Rect<ValueT>{topLeft, Size<ValueT>{sizeAsPoint.x, sizeAsPoint.y}};
+}
+
+
+template<typename ValueT>
 Point<ValueT> operator+(
   const Point<ValueT>& lhs,
   const Point<ValueT>& rhs
