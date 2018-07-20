@@ -351,9 +351,7 @@ LevelData loadLevel(
         map.setTileAt(1, x, y, maskedIndex);
       } else {
         const auto index = convertTileIndex(tileSpec);
-        const auto layerToUse =
-          index >= GameTraits::CZone::numSolidTiles ? 1 : 0;
-        map.setTileAt(layerToUse, x, y, index);
+        map.setTileAt(0, x, y, index);
       }
     }
   }
