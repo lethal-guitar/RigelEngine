@@ -404,6 +404,8 @@ void EntityFactory::configureProjectile(
     }
   }
 
+  *entity.component<WorldPosition>() = position;
+
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
 
