@@ -73,18 +73,23 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
       ex::ComponentHandle<Shootable> shootable;
       ex::ComponentHandle<WorldPosition> shootablePos;
       ex::ComponentHandle<BoundingBox> shootableBboxLocal;
-      ex::ComponentHandle<Active> active;
       for (auto shootableEntity : es.entities_with_components(
-        shootable, shootablePos, shootableBboxLocal, active)
+        shootable, shootablePos, shootableBboxLocal)
       ) {
         const auto shootableBbox =
           engine::toWorldSpace(*shootableBboxLocal, *shootablePos);
+
+        const auto shootableOnScreen =
+          shootableEntity.has_component<Active>() &&
+          shootableEntity.component<Active>()->mIsOnScreen;
+
         if (
           shootableBbox.intersects(inflictorBbox) &&
           !shootable->mInvincible &&
-          active->mIsOnScreen
+          (shootableOnScreen || shootable->mCanBeHitWhenOffscreen)
         ) {
-          const auto destroyOnContact = damage.mDestroyOnContact;
+          const auto destroyOnContact = damage.mDestroyOnContact ||
+            shootable->mAlwaysConsumeInflictor;
           inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
           if (destroyOnContact) {
             break;

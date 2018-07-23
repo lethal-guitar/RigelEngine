@@ -40,6 +40,8 @@ const std::array<std::int16_t, 43> VERTICAL_MOVEMENT_TABLE{
   8, 8, 8, 8, 8, 8, 24, 1
 };
 
+constexpr auto SPAWN_OFFSET = base::Vector{0, -1};
+
 
 struct Particle {
   Particle() = default;
@@ -147,7 +149,8 @@ void ParticleSystem::spawnParticles(
   int velocityScaleX
 ) {
   auto pParticles = createParticles(*mpRandomGenerator, velocityScaleX);
-  mParticleClouds.emplace_back(origin, color, std::move(pParticles));
+  mParticleClouds.emplace_back(
+    origin + SPAWN_OFFSET, color, std::move(pParticles));
 }
 
 

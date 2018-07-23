@@ -449,6 +449,11 @@ void GameRunner::handlePlayerDeath() {
 void GameRunner::restartLevel() {
   mpServiceProvider->fadeOutScreen();
 
+  if (mBackdropSwitched) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = false;
+  }
+
   mLevelData.mMap = mMapAtLevelStart;
 
   mEntities.reset();
@@ -467,6 +472,11 @@ void GameRunner::restartLevel() {
 
 void GameRunner::restartFromCheckpoint() {
   mpServiceProvider->fadeOutScreen();
+
+  if (mBackdropSwitched) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = false;
+  }
 
   mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
   resetForRespawn(mPlayerEntity, mActivatedCheckpoint->mPosition);
@@ -497,6 +507,7 @@ void GameRunner::handleTeleporter() {
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (switchBackdrop) {
     mpSystems->switchBackdrops();
+    mBackdropSwitched = !mBackdropSwitched;
   }
 
   mpSystems->centerViewOnPlayer();

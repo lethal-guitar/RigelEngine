@@ -404,6 +404,8 @@ void EntityFactory::configureProjectile(
     }
   }
 
+  *entity.component<WorldPosition>() = position;
+
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
 
@@ -492,21 +494,23 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 
 
 entityx::Entity createOneShotSprite(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const ActorID id,
   const base::Vector& position
 ) {
   auto entity = factory.createSprite(id, position, true);
-  engine::startAnimationLoop(entity, 1, 0, boost::none);
   const auto numAnimationFrames = static_cast<int>(
     entity.component<Sprite>()->mpDrawData->mFrames.size());
+  if (numAnimationFrames > 1) {
+    engine::startAnimationLoop(entity, 1, 0, boost::none);
+  }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
   return entity;
 }
 
 
 entityx::Entity createFloatingOneShotSprite(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const data::ActorID id,
   const base::Vector& position
 ) {
@@ -523,7 +527,7 @@ entityx::Entity createFloatingOneShotSprite(
 
 
 entityx::Entity spawnMovingEffectSprite(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const ActorID id,
   const SpriteMovement movement,
   const base::Vector& position
@@ -539,7 +543,7 @@ entityx::Entity spawnMovingEffectSprite(
 
 
 void spawnFloatingScoreNumber(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const ScoreNumberType type,
   const base::Vector& position
 ) {

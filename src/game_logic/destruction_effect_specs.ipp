@@ -232,11 +232,10 @@ const effects::EffectSpec CONTAINER_BOX_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
 
-  // TODO: Delay by 1 when container white-flash frame implemented
-  {effects::EffectSprite{{1, -1}, 165, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{1, -1}, 166, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{1, -1}, 167, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{1, -1}, 166, EffectMovement::FlyDown}, 0},
+  {effects::EffectSprite{{}, 165, EffectMovement::FlyUp}, 1},
+  {effects::EffectSprite{{}, 166, EffectMovement::FlyUpperLeft}, 1},
+  {effects::EffectSprite{{}, 167, EffectMovement::FlyUpperRight}, 1},
+  {effects::EffectSprite{{}, 166, EffectMovement::FlyDown}, 1},
 };
 
 

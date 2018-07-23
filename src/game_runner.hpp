@@ -110,6 +110,7 @@ private:
   game_logic::PlayerInputState mInputState;
   game_logic::PlayerInputState mCombinedInputState;
   bool mLevelFinished;
+  bool mBackdropSwitched = false;
 
   engine::TimeDelta mAccumulatedTime;
 
