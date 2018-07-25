@@ -1,11 +1,10 @@
 set(test_sources
     test_main.cpp
     test_duke_script_loader.cpp
-    test_elevator.cpp
+    #test_elevator.cpp
     test_letter_collection.cpp
     test_physics_system.cpp
-    test_player_animation_system.cpp
-    test_player_attack_system.cpp
+    test_player.cpp
     test_spike_ball.cpp
     test_timing.cpp
 )

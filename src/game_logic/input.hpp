@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2018, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,22 +14,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "attack_traits.hpp"
+#pragma once
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel { namespace game_logic {
 
-ProjectileDirection shotDirection(
-  const PlayerState state,
-  const Orientation orientation
-) {
-  if (state == PlayerState::LookingUp) {
-    return ProjectileDirection::Up;
-  } else {
-    return orientation == Orientation::Right
-      ? ProjectileDirection::Right
-      : ProjectileDirection::Left;
+struct Button {
+  /** True if the button is currently pressed (down) */
+  bool mIsPressed = false;
+
+  /** True if there was at least one button-down event since the last update */
+  bool mWasTriggered = false;
+};
+
+
+struct PlayerInput {
+  bool mLeft = false;
+  bool mRight = false;
+  bool mUp = false;
+  bool mDown = false;
+
+  Button mInteract;
+  Button mJump;
+  Button mFire;
+
+  void resetTriggeredStates() {
+    mInteract.mWasTriggered = false;
+    mJump.mWasTriggered = false;
+    mFire.mWasTriggered = false;
   }
-}
+};
 
-}}}
+}}

@@ -22,7 +22,6 @@
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interaction/force_field.hpp"
 
-
 namespace rigel { namespace game_logic {
 
 using namespace engine;
@@ -45,6 +44,15 @@ IngameSystems::IngameSystems(
 )
   : mpScrollOffset(pScrollOffset)
   , mCollisionChecker(pMap, entities, eventManager)
+  , mPlayer(
+      playerEntity,
+      difficulty,
+      pPlayerModel,
+      pServiceProvider,
+      &mCollisionChecker,
+      pMap,
+      pEntityFactory,
+      &eventManager)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
       mpScrollOffset,
@@ -53,33 +61,20 @@ IngameSystems::IngameSystems(
       std::move(mapRenderData))
   , mPhysicsSystem(&mCollisionChecker, &eventManager)
   , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
-  , mMapScrollSystem(mpScrollOffset, playerEntity, *pMap)
-  , mPlayerMovementSystem(playerEntity, *pMap)
+  , mMapScrollSystem(mpScrollOffset, &mPlayer, *pMap)
   , mPlayerInteractionSystem(
-      playerEntity,
+      &mPlayer,
       pPlayerModel,
       pServiceProvider,
       pEntityFactory,
-      [this](const entityx::Entity& teleporter) {
-        mActiveTeleporter = teleporter;
-      },
       &eventManager)
-  , mPlayerAttackSystem(
-      playerEntity,
-      pPlayerModel,
-      pServiceProvider,
-      pEntityFactory)
-  , mPlayerAnimationSystem(
-      playerEntity,
-      pServiceProvider,
-      pEntityFactory)
-  , mPlayerDamageSystem(
-      playerEntity,
-      pPlayerModel,
-      pServiceProvider,
-      difficulty)
+  , mPlayerDamageSystem(&mPlayer)
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
-  , mElevatorSystem(playerEntity, pServiceProvider)
+  , mElevatorSystem(
+      playerEntity,
+      pServiceProvider,
+      &mCollisionChecker,
+      &eventManager)
   , mRespawnCheckpointSystem(playerEntity, &eventManager)
   , mRadarComputerSystem(pRadarDishCounter)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
@@ -103,7 +98,7 @@ IngameSystems::IngameSystems(
       &mCollisionChecker,
       eventManager)
   , mBlueGuardSystem(
-      playerEntity,
+      &mPlayer,
       &mCollisionChecker,
       pEntityFactory,
       pServiceProvider,
@@ -136,23 +131,21 @@ IngameSystems::IngameSystems(
       &mCollisionChecker)
   , mSlidingDoorSystem(playerEntity, pServiceProvider)
   , mSlimeBlobSystem(
-      playerEntity,
+      &mPlayer,
       &mCollisionChecker,
       pEntityFactory,
       pRandomGenerator,
       eventManager)
   , mSlimePipeSystem(pEntityFactory, pServiceProvider)
   , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
-  , mpPlayerModel(pPlayerModel)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {
-  (void)mpPlayerModel;
 }
 
 
 void IngameSystems::update(
-  const PlayerInputState& inputState,
+  const PlayerInput& input,
   entityx::EntityManager& es
 ) {
   // ----------------------------------------------------------------------
@@ -163,19 +156,20 @@ void IngameSystems::update(
   interaction::animateForceFields(es, *mpRandomGenerator, *mpServiceProvider);
 
   // ----------------------------------------------------------------------
-  // Mark active entities
+  // Player update, camera, mark active entities
   // ----------------------------------------------------------------------
+  mPlayerInteractionSystem.updatePlayerInteraction(input, es);
+
+  mPlayer.update(input);
+  mMapScrollSystem.update(input);
   engine::markActiveEntities(es, *mpScrollOffset);
 
   // ----------------------------------------------------------------------
-  // Player logic update
+  // Player related logic update
   // ----------------------------------------------------------------------
-  // TODO: Move all player related systems into the player namespace
-  mElevatorSystem.update(es, inputState);
+  mElevatorSystem.update(es);
   mRespawnCheckpointSystem.update(es);
   mRadarComputerSystem.update(es);
-  mPlayerMovementSystem.update(inputState);
-  mPlayerInteractionSystem.update(es);
 
   // ----------------------------------------------------------------------
   // A.I. logic update
@@ -200,20 +194,17 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   mPhysicsSystem.update(es);
 
-  // Player attacks have to be processed after physics, because:
-  //  1. Player projectiles should spawn at the player's location
-  //  2. Player projectiles mustn't move on the frame they were spawned on
-  mPlayerAttackSystem.update();
+  // Collect items after physics, so that any collectible
+  // items are in their final positions for this frame.
+  mPlayerInteractionSystem.updateItemCollection(es);
 
   mPlayerDamageSystem.update(es);
   mDamageInflictionSystem.update(es);
   mItemContainerSystem.update(es);
-  mEffectsSystem.update(es);
-  mPlayerAnimationSystem.update(es);
 
   mPlayerProjectileSystem.update(es);
 
-  mMapScrollSystem.update();
+  mEffectsSystem.update(es);
   mLifeTimeSystem.update(es);
 
   mParticles.update();
@@ -230,12 +221,6 @@ void IngameSystems::render(
 }
 
 
-void IngameSystems::buttonStateChanged(const PlayerInputState& inputState)
-{
-  mPlayerAttackSystem.buttonStateChanged(inputState);
-}
-
-
 DebuggingSystem& IngameSystems::debuggingSystem() {
   return mDebuggingSystem;
 }
@@ -246,10 +231,16 @@ void IngameSystems::switchBackdrops() {
 }
 
 
-entityx::Entity IngameSystems::getAndResetActiveTeleporter() {
-  auto activeTeleporter = entityx::Entity{};
-  std::swap(activeTeleporter, mActiveTeleporter);
-  return activeTeleporter;
+void IngameSystems::restartFromBeginning(entityx::Entity newPlayerEntity) {
+  mPlayer.resetAfterDeath(newPlayerEntity);
+}
+
+
+void IngameSystems::restartFromCheckpoint(
+  const base::Vector& checkpointPosition
+) {
+  mPlayer.position() = checkpointPosition;
+  mPlayer.resetAfterRespawn();
 }
 
 

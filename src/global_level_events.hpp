@@ -63,4 +63,11 @@ struct CheckPointActivated {
   base::Vector mPosition;
 };
 
+
+struct PlayerDied {};
+
+struct PlayerTeleported {
+  base::Vector mNewPosition;
+};
+
 }}

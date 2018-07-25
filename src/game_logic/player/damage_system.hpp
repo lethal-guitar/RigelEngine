@@ -17,36 +17,25 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "data/game_session_data.hpp"
-#include "engine/timing.hpp"
-
-#include "game_service_provider.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace data { class PlayerModel; }}
+namespace rigel { namespace game_logic { class Player; }}
 
 
 namespace rigel { namespace game_logic { namespace player {
 
 class DamageSystem {
 public:
-  DamageSystem(
-    entityx::Entity player,
-    data::PlayerModel* pPlayerModel,
-    IGameServiceProvider* pServiceProvider,
-    data::Difficulty difficulty);
+  explicit DamageSystem(Player* pPlayer);
 
   void update(entityx::EntityManager& es);
 
 private:
-  entityx::Entity mPlayer;
-  data::PlayerModel* mpPlayerModel;
-  IGameServiceProvider* mpServiceProvider;
-  int mNumMercyFrames;
+  Player* mpPlayer;
 };
 
 

@@ -24,7 +24,7 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
-#include "game_logic/player/components.hpp"
+#include "game_logic/player.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -36,7 +36,6 @@ namespace rigel { namespace game_logic { namespace ai {
 using namespace engine::components;
 using namespace engine::orientation;
 using engine::CollisionChecker;
-using game_logic::components::PlayerControlled;
 
 
 namespace {
@@ -63,11 +62,10 @@ bool playerInNoticeableRange(
 bool playerVisible(
   components::BlueGuard& state,
   const WorldPosition& myPosition,
-  const WorldPosition& playerPosition,
-  const PlayerControlled& playerState
+  const Player& player
 ) {
-  const auto playerX = playerPosition.x;
-  const auto playerY = playerPosition.y;
+  const auto playerX = player.position().x;
+  const auto playerY = player.position().y;
   const auto facingLeft = state.mOrientation == Orientation::Left;
 
   const auto hasLineOfSightHorizontal =
@@ -77,9 +75,9 @@ bool playerVisible(
     playerY - 3 < myPosition.y &&
     playerY + 3 > myPosition.y;
 
-  // TODO: Check player not cloaked
+  // TODO: Check player not cloaked, not riding elevator
   return
-    playerState.isPlayerOnGround() &&
+    player.stateIs<OnGround>() &&
     hasLineOfSightHorizontal &&
     hasLineOfSightVertical;
 }
@@ -97,14 +95,14 @@ base::Vector offsetForShot(const components::BlueGuard& state) {
 
 
 BlueGuardSystem::BlueGuardSystem(
-  entityx::Entity player,
+  const Player* pPlayer,
   CollisionChecker* pCollisionChecker,
   EntityFactory* pEntityFactory,
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
   entityx::EventManager& events
 )
-  : mPlayer(player)
+  : mpPlayer(pPlayer)
   , mpCollisionChecker(pCollisionChecker)
   , mpEntityFactory(pEntityFactory)
   , mpServiceProvider(pServiceProvider)
@@ -115,10 +113,8 @@ BlueGuardSystem::BlueGuardSystem(
 
 
 void BlueGuardSystem::update(entityx::EntityManager& es) {
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
-
   es.each<components::BlueGuard, Sprite, WorldPosition, Active>(
-    [this, &playerPosition](
+    [this](
       entityx::Entity entity,
       components::BlueGuard& state,
       Sprite& sprite,
@@ -127,7 +123,7 @@ void BlueGuardSystem::update(entityx::EntityManager& es) {
     ) {
       if (state.mTypingOnTerminal) {
         const auto noticesPlayer =
-          playerInNoticeableRange(position, playerPosition);
+          playerInNoticeableRange(position, mpPlayer->position());
 
         if (noticesPlayer) {
           stopTyping(state, sprite, position);
@@ -174,8 +170,7 @@ void BlueGuardSystem::stopTyping(
   state.mTypingOnTerminal = false;
   state.mOneStepWalkedSinceTypingStop = false;
 
-  // TODO: Use orientation-dependent position here
-  const auto playerX = mPlayer.component<WorldPosition>()->x;
+  const auto playerX = mpPlayer->orientedPosition().x;
   state.mOrientation = position.x <= playerX
     ? Orientation::Right
     : Orientation::Left;
@@ -192,10 +187,6 @@ void BlueGuardSystem::updateGuard(
   engine::components::Sprite& sprite,
   WorldPosition& position
 ) {
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
-  const auto& playerState =
-    *mPlayer.component<game_logic::components::PlayerControlled>();
-
   const auto walkOneStep = [this, &state, &guardEntity]() {
     return engine::walk(*mpCollisionChecker, guardEntity, state.mOrientation);
   };
@@ -205,14 +196,13 @@ void BlueGuardSystem::updateGuard(
   // fulfilled.
   const auto canAttack =
     state.mOneStepWalkedSinceTypingStop &&
-    playerVisible(state, position, playerPosition, playerState);
+    playerVisible(state, position, *mpPlayer);
 
   if (canAttack) {
     // Change stance if necessary
     if (state.mStanceChangeCountdown <= 0) {
-      const auto playerCrouched =
-        playerState.mState == player::PlayerState::Crouching;
-      const auto playerBelow = playerPosition.y > position.y;
+      const auto playerCrouched = mpPlayer->isCrouching();
+      const auto playerBelow = mpPlayer->position().y > position.y;
       state.mIsCrouched = playerCrouched || playerBelow;
 
       if (state.mIsCrouched) {

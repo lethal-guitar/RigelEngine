@@ -25,7 +25,7 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
-#include "game_logic/player/components.hpp"
+#include "game_logic/player.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <atria/variant/match_boost.hpp>
@@ -77,13 +77,13 @@ void configureSlimeContainer(entityx::Entity entity) {
 
 
 SlimeBlobSystem::SlimeBlobSystem(
-  entityx::Entity player,
+  const Player* pPlayer,
   CollisionChecker* pCollisionChecker,
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator,
   entityx::EventManager& events
 )
-  : mPlayer(player)
+  : mpPlayer(pPlayer)
   , mpCollisionChecker(pCollisionChecker)
   , mpEntityFactory(pEntityFactory)
   , mpRandomGenerator(pRandomGenerator)
@@ -138,7 +138,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
     ) {
       using namespace components::detail;
 
-      const auto playerPosition = adjustedPlayerPosition();
+      const auto playerPosition = mpPlayer->orientedPosition();
       atria::variant::match(blobState.mState,
         [&](OnGround& state) {
           // Animate walking
@@ -291,19 +291,6 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
 
       engine::synchronizeBoundingBoxToSprite(entity);
     });
-}
-
-
-base::Vector SlimeBlobSystem::adjustedPlayerPosition() const {
-  using engine::components::WorldPosition;
-  using game_logic::components::PlayerControlled;
-
-  const auto& playerPosition = *mPlayer.component<const WorldPosition>();
-  const auto& playerState = *mPlayer.component<const PlayerControlled>();
-  const auto adjustment =
-    (playerState.mOrientation == player::Orientation::Left ? 1 : 0);
-
-  return playerPosition - base::Vector{adjustment, 0};
 }
 
 

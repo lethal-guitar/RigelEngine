@@ -239,7 +239,6 @@ void configureMovingEffectSprite(
   entity.template assign<MovingBody>(
     Velocity{},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true});
 }
 
@@ -1453,7 +1452,7 @@ void EntityFactory::configureEntity(
 
     case 66: // Destroyable reactor
       entity.assign<Shootable>(Health{10}, GivenScore{20000});
-      entity.assign<PlayerDamaging>(Damage{9}, IgnoreMercyFrames{true});
+      entity.assign<PlayerDamaging>(Damage{9}, IsFatal{true});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       entity.assign<DestructionEffects>(

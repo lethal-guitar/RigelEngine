@@ -19,6 +19,8 @@
 #include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/base_components.hpp"
+#include "game_logic/input.hpp"
+#include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -26,28 +28,29 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace data { namespace map { class Map; }}}
 
-namespace rigel { namespace game_logic { namespace components {
-  struct PlayerControlled;
-}}}
-
 
 namespace rigel { namespace game_logic {
 
+
+class Player;
+
+// TODO: Rename to "Camera"
+// TODO: This should own the scroll offset
 class MapScrollSystem {
 public:
   MapScrollSystem(
     base::Vector* pScrollOffset,
-    entityx::Entity player,
+    const Player* pPlayer,
     const data::map::Map& map);
 
-  void update();
+  void update(const PlayerInput& input);
   void centerViewOnPlayer();
 
 private:
-  void updateManualScrolling();
+  void updateManualScrolling(const PlayerInput& input);
   void updateScrollOffset();
 
-  entityx::Entity mPlayer;
+  const Player* mpPlayer;
   base::Vector* mpScrollOffset;
   base::Extents mMaxScrollOffset;
 };

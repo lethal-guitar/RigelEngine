@@ -111,24 +111,19 @@ set(core_sources
     game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
+    game_logic/input.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
     game_logic/interaction/respawn_checkpoint.cpp
     game_logic/interaction/respawn_checkpoint.hpp
-    game_logic/interaction/teleporter.cpp
-    game_logic/interaction/teleporter.hpp
     game_logic/item_container.cpp
     game_logic/item_container.hpp
     game_logic/map_scroll_system.cpp
     game_logic/map_scroll_system.hpp
-    game_logic/player/animation_system.cpp
-    game_logic/player/animation_system.hpp
-    game_logic/player/attack_system.cpp
-    game_logic/player/attack_system.hpp
-    game_logic/player/attack_traits.cpp
-    game_logic/player/attack_traits.hpp
+    game_logic/player.cpp
+    game_logic/player.hpp
     game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
@@ -136,8 +131,6 @@ set(core_sources
     game_logic/player/projectile_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
-    game_logic/player_movement_system.cpp
-    game_logic/player_movement_system.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp

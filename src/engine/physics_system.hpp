@@ -62,17 +62,14 @@ private:
   base::Vector applyHorizontalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
-    std::int16_t movementX,
-    bool allowStairStepping
-  ) const;
+    std::int16_t movementX) const;
 
   std::tuple<base::Vector, float> applyVerticalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
     float currentVelocity,
     std::int16_t movementY,
-    bool beginFallingOnHittingCeiling
-  ) const;
+    bool beginFallingOnHittingCeiling) const;
 
   float applyGravity(
     const components::BoundingBox& bbox,

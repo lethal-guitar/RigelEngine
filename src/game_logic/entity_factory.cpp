@@ -43,7 +43,6 @@
 #include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
-#include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -220,7 +219,9 @@ void adjustOffsets(
   // Player sprite
   if (actorId == 5 || actorId == 6) {
     for (int i=0; i<39; ++i) {
-      frames[i].mDrawOffset.x -= 1;
+      if (i != 35 && i != 36) {
+        frames[i].mDrawOffset.x -= 1;
+      }
     }
   }
 
@@ -432,12 +433,12 @@ void EntityFactory::configureProjectile(
 
   entity.assign<MovingBody>(
     Velocity{directionToVector(direction) * speed},
-    GravityAffected{false},
-    IsPlayer{false});
+    GravityAffected{false});
   if (isPlayerProjectile(type) || type == ProjectileType::ReactorDebris) {
     // Some player projectiles do have collisions with walls, but that's
     // handled by player::ProjectileSystem.
     entity.component<MovingBody>()->mIgnoreCollisions = true;
+    entity.component<MovingBody>()->mIsActive = false;
 
     entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
     entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
@@ -505,7 +506,10 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {
-      game_logic::initializePlayerEntity(entity, actor.mID == 6);
+      const auto playerOrientation = actor.mID == 5
+        ? Orientation::Left
+        : Orientation::Right;
+      assignPlayerComponents(entity, playerOrientation);
       playerEntity = entity;
     }
   }
@@ -541,7 +545,6 @@ entityx::Entity createFloatingOneShotSprite(
   entity.assign<MovingBody>(MovingBody{
     Velocity{0, -1.0f},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true}});
   return entity;
 }
@@ -576,7 +579,6 @@ void spawnFloatingScoreNumber(
   entity.assign<MovingBody>(
     Velocity{},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true});
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
   entity.assign<Active>();

@@ -27,7 +27,10 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace engine { class CollisionChecker; }}
 namespace rigel { namespace engine { class RandomNumberGenerator; }}
-namespace rigel { namespace game_logic { class EntityFactory; }}
+namespace rigel { namespace game_logic {
+  class EntityFactory;
+  class Player;
+}}
 namespace rigel { namespace game_logic { namespace events {
   struct ShootableKilled;
 }}}
@@ -86,7 +89,7 @@ void configureSlimeContainer(entityx::Entity entity);
 class SlimeBlobSystem : public entityx::Receiver<SlimeBlobSystem> {
 public:
   SlimeBlobSystem(
-    entityx::Entity player,
+    const Player* pPlayer,
     engine::CollisionChecker* pCollisionChecker,
     EntityFactory* pEntityFactory,
     engine::RandomNumberGenerator* pRandomGenerator,
@@ -96,10 +99,7 @@ public:
   void receive(const events::ShootableKilled& event);
 
 private:
-  base::Vector adjustedPlayerPosition() const;
-
-private:
-  entityx::Entity mPlayer;
+  const Player* mpPlayer;
   engine::CollisionChecker* mpCollisionChecker;
   EntityFactory* mpEntityFactory;
   engine::RandomNumberGenerator* mpRandomGenerator;

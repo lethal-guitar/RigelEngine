@@ -93,6 +93,10 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
+      if (!body.mIsActive) {
+        return;
+      }
+
       const auto hasActiveSequence = entity.has_component<MovementSequence>();
       if (hasActiveSequence) {
         body.mVelocity = updateMovementSequence(entity, body.mVelocity);
@@ -106,8 +110,7 @@ void PhysicsSystem::update(ex::EntityManager& es) {
         position = applyHorizontalMovement(
           toWorldSpace(collisionRect, position),
           position,
-          movementX,
-          body.mIsPlayer);
+          movementX);
       }
 
       // Cache new world space BBox after applying horizontal movement
@@ -160,8 +163,7 @@ void PhysicsSystem::update(ex::EntityManager& es) {
 base::Vector PhysicsSystem::applyHorizontalMovement(
   const BoundingBox& bbox,
   const base::Vector& currentPosition,
-  const int16_t movementX,
-  const bool allowStairStepping
+  const int16_t movementX
 ) const {
   const auto movingRight = movementX > 0;
   base::Vector newPosition = currentPosition;
@@ -174,28 +176,6 @@ base::Vector PhysicsSystem::applyHorizontalMovement(
       ? mpCollisionChecker->isTouchingRightWall(movingBbox)
       : mpCollisionChecker->isTouchingLeftWall(movingBbox);
     if (isTouching) {
-      if (allowStairStepping) {
-        // TODO: This stair-stepping logic is only needed for the player.
-        // It should be implemented as part of a dedicated player physics
-        // system/module which is separate from the generic physics system.
-        auto stepUpBbox = movingBbox;
-        stepUpBbox.topLeft.y -= 1;
-        const auto collisionAfterStairStep = movingRight
-          ? mpCollisionChecker->isTouchingRightWall(stepUpBbox)
-          : mpCollisionChecker->isTouchingLeftWall(stepUpBbox);
-
-        if (!collisionAfterStairStep) {
-          stepUpBbox.topLeft.x += move;
-          if (mpCollisionChecker->isOnSolidGround(stepUpBbox)) {
-            movingBbox.topLeft.x += move;
-            movingBbox.topLeft.y -= 1;
-            newPosition.x += move;
-            newPosition.y -= 1;
-            continue;
-          }
-        }
-      }
-
       break;
     }
 
