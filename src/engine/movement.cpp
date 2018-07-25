@@ -23,6 +23,43 @@ namespace rigel { namespace engine {
 using namespace engine::components;
 
 
+namespace {
+
+template<typename CallableT>
+MovementResult move(
+  int* pPosition,
+  const int amount,
+  CallableT isColliding
+) {
+  if (amount == 0) {
+    return MovementResult::Completed;
+  }
+
+  const auto desiredDistance = std::abs(amount);
+  const auto movement = amount < 0 ? -1 : 1;
+
+  const auto previousPosition = *pPosition;
+  for (int i = 0; i < desiredDistance; ++i) {
+    if (isColliding()) {
+      break;
+    }
+
+    *pPosition += movement;
+  }
+
+  const auto actualDistance = std::abs(*pPosition - previousPosition);
+  if (actualDistance == 0) {
+    return MovementResult::Failed;
+  }
+
+  return actualDistance == desiredDistance
+    ? MovementResult::Completed
+    : MovementResult::MovedPartially;
+}
+
+}
+
+
 namespace ex = entityx;
 
 bool walk(
@@ -82,6 +119,40 @@ bool walkOnCeiling(
   }
 
   return false;
+}
+
+
+MovementResult moveHorizontally(
+  const CollisionChecker& collisionChecker,
+  ex::Entity entity,
+  const int amount
+) {
+  auto& position = *entity.component<WorldPosition>();
+  auto& bbox = *entity.component<BoundingBox>();
+
+  return move(&position.x, amount,
+    [&]() {
+      return amount < 0
+        ? collisionChecker.isTouchingLeftWall(position, bbox)
+        : collisionChecker.isTouchingRightWall(position, bbox);
+    });
+}
+
+
+MovementResult moveVertically(
+  const CollisionChecker& collisionChecker,
+  ex::Entity entity,
+  const int amount
+) {
+  auto& position = *entity.component<WorldPosition>();
+  auto& bbox = *entity.component<BoundingBox>();
+
+  return move(&position.y, amount,
+    [&]() {
+      return amount < 0
+        ? collisionChecker.isTouchingCeiling(position, bbox)
+        : collisionChecker.isOnSolidGround(position, bbox);
+    });
 }
 
 }}

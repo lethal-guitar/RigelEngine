@@ -49,4 +49,22 @@ bool walkOnCeiling(
   entityx::Entity entity,
   components::Orientation orientation);
 
+
+enum class MovementResult {
+  Completed,
+  MovedPartially,
+  Failed
+};
+
+
+MovementResult moveHorizontally(
+  const CollisionChecker& collisionChecker,
+  entityx::Entity entity,
+  int amount);
+
+MovementResult moveVertically(
+  const CollisionChecker& collisionChecker,
+  entityx::Entity entity,
+  int amount);
+
 }}
