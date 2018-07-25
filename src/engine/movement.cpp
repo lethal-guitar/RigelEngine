@@ -28,11 +28,12 @@ namespace ex = entityx;
 bool walk(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const int amount
+  const components::Orientation orientation
 ) {
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
 
+  const auto amount = orientation::toMovement(orientation);
   const auto newPosition = position + base::Vector{amount, 0};
   const auto movingLeft = amount < 0;
 
@@ -56,12 +57,13 @@ bool walk(
 bool walkOnCeiling(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const int amount
+  const components::Orientation orientation
 ) {
   // TODO: Eliminate duplication with the regular walk()
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
 
+  const auto amount = orientation::toMovement(orientation);
   const auto newPosition = position + base::Vector{amount, 0};
   const auto movingLeft = amount < 0;
 

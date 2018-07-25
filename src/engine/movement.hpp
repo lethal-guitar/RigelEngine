@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -31,8 +32,8 @@ class CollisionChecker;
 /** Walk entity by the given amount if possible.
  *
  * The entity must have a WorldPosition and a BoundingBox.
- * walk() will try to add the given amount (can be positive or negative)
- * to the entity's position, and return true if it suceeded, false otherwise.
+ * walk() will try to change the entity's position based on the orientation
+ * given, and return true if it suceeded, false otherwise.
  * For the move to suceed, the new position must still be on solid ground
  * (i.e. no walking off the edge of a platform) and there must be no
  * collisions with the world.
@@ -40,12 +41,12 @@ class CollisionChecker;
 bool walk(
   const CollisionChecker& collisionChecker,
   entityx::Entity entity,
-  int amount);
+  components::Orientation orientation);
 
 /** As above, but for walking on the ceiling */
 bool walkOnCeiling(
   const CollisionChecker& collisionChecker,
   entityx::Entity entity,
-  int amount);
+  components::Orientation orientation);
 
 }}

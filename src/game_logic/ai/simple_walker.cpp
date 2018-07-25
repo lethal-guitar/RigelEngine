@@ -72,8 +72,8 @@ void SimpleWalkerSystem::update(entityx::EntityManager& es) {
       }
 
       auto& orientation = *state.mOrientation;
-      const auto walkedSuccessfully = engine::walk(
-        *mpCollisionChecker, entity, toMovement(orientation));
+      const auto walkedSuccessfully =
+        engine::walk(*mpCollisionChecker, entity, orientation);
       if (!walkedSuccessfully) {
         orientation = opposite(orientation);
         updateAnimation(entity, orientation);

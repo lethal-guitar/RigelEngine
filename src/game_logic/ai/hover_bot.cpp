@@ -124,8 +124,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
 
 
         [&](Moving& state) {
-          const auto movement = toMovement(state.mOrientation);
-          engine::walk(*mpCollisionChecker, entity, movement);
+          engine::walk(*mpCollisionChecker, entity, state.mOrientation);
 
           // TODO: use wonky player position (orientation dependent)
           const auto& playerPosition = *mPlayer.component<WorldPosition>();

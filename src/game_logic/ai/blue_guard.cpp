@@ -197,8 +197,7 @@ void BlueGuardSystem::updateGuard(
     *mPlayer.component<game_logic::components::PlayerControlled>();
 
   const auto walkOneStep = [this, &state, &guardEntity]() {
-    const auto walkAmount = toMovement(state.mOrientation);
-    return engine::walk(*mpCollisionChecker, guardEntity, walkAmount);
+    return engine::walk(*mpCollisionChecker, guardEntity, state.mOrientation);
   };
 
   // If a guard was previously typing on a terminal, it will not attack the

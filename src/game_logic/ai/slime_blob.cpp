@@ -162,7 +162,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
               const auto walkedSuccessfully = engine::walk(
                 *mpCollisionChecker,
                 entity,
-                toMovement(blobState.mOrientation));
+                blobState.mOrientation);
 
               if (!walkedSuccessfully) {
                 blobState.mState = Idle{};
@@ -189,9 +189,13 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
 
           // Move
           if (state.mIsOddUpdate) {
-            const auto movement = playerIsRight ? 1 : -1;
-            const auto walkedSuccessfully =
-              engine::walkOnCeiling(*mpCollisionChecker, entity, movement);
+            const auto orientationForMovement = playerIsRight
+              ? Orientation::Right
+              : Orientation::Left;
+            const auto walkedSuccessfully = engine::walkOnCeiling(
+              *mpCollisionChecker,
+              entity,
+              orientationForMovement);
 
             if (!walkedSuccessfully) {
               sprite.mFramesToRender[0] -= 2;
