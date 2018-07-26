@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "data/strings.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/interaction/teleporter.hpp"
 #include "game_logic/trigger_components.hpp"
@@ -124,6 +125,7 @@ GameRunner::GameRunner(
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
+  mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -347,6 +349,28 @@ void GameRunner::receive(const rigel::events::TutorialMessage& event) {
 }
 
 
+void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
+  using game_logic::components::ActorTag;
+  auto entity = event.mEntity;
+  if (!entity.has_component<ActorTag>()) {
+    return;
+  }
+
+  const auto& position = *entity.component<const WorldPosition>();
+
+  using AT = ActorTag::Type;
+  const auto type = entity.component<ActorTag>()->mType;
+  switch (type) {
+    case AT::Reactor:
+      onReactorDestroyed(position);
+      break;
+
+    default:
+      break;
+  }
+}
+
+
 void GameRunner::loadLevel(
   const int episode,
   const int levelNumber,
@@ -385,6 +409,19 @@ void GameRunner::loadLevel(
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+}
+
+
+void GameRunner::onReactorDestroyed(const base::Vector& position) {
+  mScreenFlashColor = loader::INGAME_PALETTE[7];
+  mEntityFactory.createProjectile(
+    ProjectileType::ReactorDebris,
+    position + base::Vector{-1, 0},
+    ProjectileDirection::Left);
+  mEntityFactory.createProjectile(
+    ProjectileType::ReactorDebris,
+    position + base::Vector{3, 0},
+    ProjectileDirection::Right);
 }
 
 

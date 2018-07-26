@@ -126,6 +126,9 @@ ActorID actorIdForProjectile(
         ? (isGoingRight ? 206 : 205)
         : (isGoingUp ? 21 : 204);
 
+    case ProjectileType::ReactorDebris:
+      return isGoingRight ? 86 : 85;
+
     case ProjectileType::EnemyLaserShot:
       assert(isHorizontal(direction));
       return 136;
@@ -148,6 +151,10 @@ float speedForProjectileType(const ProjectileType type) {
     case ProjectileType::PlayerFlameShot:
       return 5.0f;
 
+    case ProjectileType::ReactorDebris:
+      return 3.0f;
+      break;
+
     case ProjectileType::EnemyRocket:
       return 1.0f;
 
@@ -162,6 +169,10 @@ int damageForProjectileType(const ProjectileType type) {
     case ProjectileType::PlayerFlameShot:
     case ProjectileType::PlayerLaserShot:
       return 2;
+
+    case ProjectileType::ReactorDebris:
+      return 5;
+      break;
 
     case ProjectileType::PlayerRocketShot:
       return 8;
@@ -498,6 +509,7 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 7: case 8: case 9: case 10:
     case 24: case 25: case 26: case 27:
     case 21: case 204: case 205: case 206:
+    case 85: case 86:
       return PLAYER_PROJECTILE_DRAW_ORDER;
 
     case 33: case 34: case 35: case 36: // player muzzle flash
@@ -1445,6 +1457,10 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{9}, IgnoreMercyFrames{true});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
+      entity.assign<DestructionEffects>(
+        REACTOR_KILL_EFFECT_SPEC,
+        mSpriteFactory.actorFrameRect(66, 0));
+      entity.assign<ActorTag>(ActorTag::Type::Reactor);
       break;
 
     case 93: // Blue force field (disabled by cloak)
@@ -1609,6 +1625,7 @@ void EntityFactory::configureEntity(
     case 24: case 25: case 26: case 27:
     case 21: case 204: case 205: case 206:
     case 136:
+    case 85: case 86:
       entity.assign<BoundingBox>(boundingBox);
       break;
 

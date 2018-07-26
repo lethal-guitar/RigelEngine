@@ -21,6 +21,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
@@ -93,7 +94,8 @@ auto toPlayerProjectileType(const ProjectileType type) {
     int(PType::Normal) == int(ProjectileType::PlayerRegularShot) &&
     int(PType::Laser) == int(ProjectileType::PlayerLaserShot) &&
     int(PType::Rocket) == int(ProjectileType::PlayerRocketShot) &&
-    int(PType::Flame) == int(ProjectileType::PlayerFlameShot), "");
+    int(PType::Flame) == int(ProjectileType::PlayerFlameShot) &&
+    int(PType::ReactorDebris) == int(ProjectileType::ReactorDebris), "");
   return static_cast<PType>(static_cast<int>(type));
 }
 
@@ -220,6 +222,11 @@ void adjustOffsets(
     for (int i=0; i<39; ++i) {
       frames[i].mDrawOffset.x -= 1;
     }
+  }
+
+  // Destroyed reactor fire
+  if (actorId == 85 || actorId == 86) {
+    frames[0].mDrawOffset.x = 0;
   }
 
   // Radar computer
@@ -413,7 +420,7 @@ void EntityFactory::configureProjectile(
     Velocity{directionToVector(direction) * speed},
     GravityAffected{false},
     IsPlayer{false});
-  if (isPlayerProjectile(type)) {
+  if (isPlayerProjectile(type) || type == ProjectileType::ReactorDebris) {
     // Some player projectiles do have collisions with walls, but that's
     // handled by player::ProjectileSystem.
     entity.component<MovingBody>()->mIgnoreCollisions = true;

@@ -245,3 +245,34 @@ const effects::EffectSpec SLIME_CONTAINER_KILL_EFFECT_SPEC[] = {
 };
 
 
+const effects::EffectSpec REACTOR_KILL_EFFECT_SPEC[] = {
+  {effects::SpriteCascade{74}, 0},
+  {effects::EffectSprite{{}, 66, EffectMovement::None}, 0},
+
+  // Note: The original game's binary has code to spawn 12 of these,
+  // but only 7 actually show up due to the limitations on the number
+  // of simultaneous effects. I've decided to show 9 out of 12, as it
+  // looks good visually.
+  {effects::EffectSprite{{1, -9}, 3, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{{1, -8}, 3, EffectMovement::FlyRight}, 3},
+  {effects::EffectSprite{{1, -7}, 3, EffectMovement::FlyLeft}, 6},
+  {effects::EffectSprite{{1, -6}, 3, EffectMovement::FlyLeft}, 9},
+  {effects::EffectSprite{{1, -5}, 3, EffectMovement::FlyRight}, 12},
+  {effects::EffectSprite{{1, -4}, 3, EffectMovement::FlyRight}, 15},
+  {effects::EffectSprite{{1, -3}, 3, EffectMovement::FlyLeft}, 18},
+  {effects::EffectSprite{{1, -2}, 3, EffectMovement::FlyLeft}, 21},
+  {effects::EffectSprite{{1, -1}, 3, EffectMovement::FlyRight}, 24},
+
+  // Same as above.
+  {effects::EffectSprite{{-1, -9}, 84, EffectMovement::None}, 0},
+  {effects::EffectSprite{{-1, -8}, 84, EffectMovement::None}, 2},
+  {effects::EffectSprite{{-1, -7}, 84, EffectMovement::None}, 4},
+  {effects::EffectSprite{{-1, -6}, 84, EffectMovement::None}, 6},
+  {effects::EffectSprite{{-1, -5}, 84, EffectMovement::None}, 8},
+  {effects::EffectSprite{{-1, -4}, 84, EffectMovement::None}, 10},
+  {effects::EffectSprite{{-1, -3}, 84, EffectMovement::None}, 12},
+  {effects::EffectSprite{{-1, -2}, 84, EffectMovement::None}, 14},
+  {effects::EffectSprite{{-1, -1}, 84, EffectMovement::None}, 16},
+
+  {effects::RandomExplosionSound{}, 0},
+};
