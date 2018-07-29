@@ -79,6 +79,7 @@ private:
   );
 
   void onReactorDestroyed(const base::Vector& position);
+  void updateReactorDestructionEvent();
 
   void handleLevelExit();
   void handlePlayerDeath();
@@ -143,6 +144,7 @@ private:
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
   boost::optional<base::Color> mScreenFlashColor;
   boost::optional<base::Color> mBackdropFlashColor;
+  boost::optional<int> mReactorDestructionFramesElapsed;
 };
 
 }

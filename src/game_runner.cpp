@@ -259,6 +259,10 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     mBackdropFlashColor = boost::none;
     mScreenFlashColor = boost::none;
 
+    if (mReactorDestructionFramesElapsed) {
+      updateReactorDestructionEvent();
+    }
+
     mHudRenderer.updateAnimation();
     updateTemporaryItemExpiration();
     mpSystems->update(mCombinedInputState, mEntities);
@@ -421,6 +425,32 @@ void GameRunner::onReactorDestroyed(const base::Vector& position) {
     ProjectileType::ReactorDebris,
     position + base::Vector{3, 0},
     ProjectileDirection::Right);
+
+  const auto shouldDoSpecialEvent =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnReactorDestruction;
+  if (!mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = true;
+    mReactorDestructionFramesElapsed = 0;
+  }
+}
+
+
+void GameRunner::updateReactorDestructionEvent() {
+  auto& framesElapsed = *mReactorDestructionFramesElapsed;
+  if (framesElapsed >= 14) {
+    return;
+  }
+
+  if (framesElapsed == 13) {
+    mMessageDisplay.setMessage(data::Messages::DestroyedEverything);
+  } else if (framesElapsed % 2 == 1) {
+    mBackdropFlashColor = base::Color{255, 255, 255, 255};
+    mpServiceProvider->playSound(data::SoundId::BigExplosion);
+  }
+
+  ++framesElapsed;
 }
 
 
@@ -509,7 +539,10 @@ void GameRunner::restartLevel() {
 void GameRunner::restartFromCheckpoint() {
   mpServiceProvider->fadeOutScreen();
 
-  if (mBackdropSwitched) {
+  const auto shouldSwitchBackAfterRespawn =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnTeleportation;
+  if (mBackdropSwitched && shouldSwitchBackAfterRespawn) {
     mpSystems->switchBackdrops();
     mBackdropSwitched = false;
   }
