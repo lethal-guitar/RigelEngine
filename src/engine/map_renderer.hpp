@@ -49,6 +49,7 @@ public:
 
   void switchBackdrops();
 
+  void renderBackdrop(const base::Vector& scrollPosition);
   void renderBackground(const base::Vector& scrollPosition);
   void renderForeground(const base::Vector& scrollPosition);
 
@@ -60,7 +61,6 @@ public:
     const base::Vector& scrollPosition);
 
 private:
-  void renderBackdrop(const base::Vector& scrollPosition);
   void renderMapTiles(
     const base::Vector& scrollPosition,
     bool renderForeground);

@@ -165,6 +165,7 @@ void RenderingSystem::update(ex::EntityManager& es) {
   sort(begin(spritesByDrawOrder), end(spritesByDrawOrder));
 
   // Render
+  mMapRenderer.renderBackdrop(*mpScrollOffset);
   mMapRenderer.renderBackground(*mpScrollOffset);
 
   const auto firstTopMostIt = find_if(
