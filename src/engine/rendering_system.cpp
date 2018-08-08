@@ -148,7 +148,10 @@ struct RenderingSystem::SpriteData {
 };
 
 
-void RenderingSystem::update(ex::EntityManager& es) {
+void RenderingSystem::update(
+  ex::EntityManager& es,
+  const boost::optional<base::Color>& backdropFlashColor
+) {
   using namespace std;
   using game_logic::components::TileDebris;
 
@@ -165,7 +168,14 @@ void RenderingSystem::update(ex::EntityManager& es) {
   sort(begin(spritesByDrawOrder), end(spritesByDrawOrder));
 
   // Render
-  mMapRenderer.renderBackdrop(*mpScrollOffset);
+  if (backdropFlashColor) {
+    mpRenderer->setOverlayColor(*backdropFlashColor);
+    mMapRenderer.renderBackdrop(*mpScrollOffset);
+    mpRenderer->setOverlayColor({});
+  } else {
+    mMapRenderer.renderBackdrop(*mpScrollOffset);
+  }
+
   mMapRenderer.renderBackground(*mpScrollOffset);
 
   const auto firstTopMostIt = find_if(

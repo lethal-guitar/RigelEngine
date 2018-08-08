@@ -142,6 +142,7 @@ private:
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
   boost::optional<base::Color> mScreenFlashColor;
+  boost::optional<base::Color> mBackdropFlashColor;
 };
 
 }

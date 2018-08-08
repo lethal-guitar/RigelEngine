@@ -256,6 +256,8 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
 
   auto doTimeStep = [&, this]() {
+    mBackdropFlashColor = boost::none;
+
     if (!mScreenFlashColor) {
       mHudRenderer.updateAnimation();
       updateTemporaryItemExpiration();
@@ -294,7 +296,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
     if (!mScreenFlashColor) {
-      mpSystems->render(mEntities);
+      mpSystems->render(mEntities, mBackdropFlashColor);
     } else {
       mpRenderer->clear(*mScreenFlashColor);
     }
