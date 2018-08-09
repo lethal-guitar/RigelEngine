@@ -154,7 +154,7 @@ void RenderingSystem::update(ex::EntityManager& es) {
 
   // Collect sprites, then order by draw index
   vector<SpriteData> spritesByDrawOrder;
-  es.each<Sprite, WorldPosition>([this, &spritesByDrawOrder](
+  es.each<Sprite, WorldPosition>([&spritesByDrawOrder](
     ex::Entity entity,
     Sprite& sprite,
     const WorldPosition& pos

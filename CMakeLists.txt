@@ -53,6 +53,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wno-sign-conversion
         -Wno-switch-enum
         -Wno-unused-parameter
+        -Wno-unused-lambda-capture
         -Wno-weak-vtables
         -Wno-global-constructors
 
