@@ -100,7 +100,8 @@ struct PlayerProjectile {
     Normal,
     Laser,
     Rocket,
-    Flame
+    Flame,
+    ReactorDebris
   };
 
   explicit PlayerProjectile(const Type type)

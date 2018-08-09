@@ -17,12 +17,17 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/map_renderer.hpp"
 #include "engine/renderer.hpp"
 #include "engine/texture.hpp"
 #include "engine/timing.hpp"
 #include "engine/visual_components.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <entityx/entityx.h>
 #include <cstdint>
@@ -68,7 +73,9 @@ public:
   }
 
   /** Render everything. Can be called at full frame rate. */
-  void update(entityx::EntityManager& es);
+  void update(
+    entityx::EntityManager& es,
+    const boost::optional<base::Color>& backdropFlashColor);
 
   void switchBackdrops() {
     mMapRenderer.switchBackdrops();

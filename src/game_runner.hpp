@@ -24,6 +24,7 @@
 #include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/texture.hpp"
+#include "game_logic/damage_components.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player/components.hpp"
@@ -67,6 +68,7 @@ public:
   void receive(const events::PlayerMessage& event);
   void receive(const events::ScreenFlash& event);
   void receive(const events::TutorialMessage& event);
+  void receive(const game_logic::events::ShootableKilled& event);
 
 private:
   void loadLevel(
@@ -75,6 +77,9 @@ private:
     data::Difficulty difficulty,
     const loader::ResourceLoader& resources
   );
+
+  void onReactorDestroyed(const base::Vector& position);
+  void updateReactorDestructionEvent();
 
   void handleLevelExit();
   void handlePlayerDeath();
@@ -138,6 +143,8 @@ private:
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
   boost::optional<base::Color> mScreenFlashColor;
+  boost::optional<base::Color> mBackdropFlashColor;
+  boost::optional<int> mReactorDestructionFramesElapsed;
 };
 
 }

@@ -343,7 +343,7 @@ void Renderer::submitBatch() {
         GL_TRIANGLES,
         GLsizei(mBatchIndices.size()),
         GL_UNSIGNED_SHORT,
-        0);
+        nullptr);
       break;
 
     case RenderMode::Points:

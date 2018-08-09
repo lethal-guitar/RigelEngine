@@ -84,7 +84,9 @@ public:
     entityx::EventManager& eventManager);
 
   void update(const PlayerInputState& inputState, entityx::EntityManager& es);
-  void render(entityx::EntityManager& es);
+  void render(
+    entityx::EntityManager& es,
+    const boost::optional<base::Color>& backdropFlashColor);
 
   void buttonStateChanged(const PlayerInputState& inputState);
 

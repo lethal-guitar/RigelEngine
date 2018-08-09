@@ -148,13 +148,16 @@ struct RenderingSystem::SpriteData {
 };
 
 
-void RenderingSystem::update(ex::EntityManager& es) {
+void RenderingSystem::update(
+  ex::EntityManager& es,
+  const boost::optional<base::Color>& backdropFlashColor
+) {
   using namespace std;
   using game_logic::components::TileDebris;
 
   // Collect sprites, then order by draw index
   vector<SpriteData> spritesByDrawOrder;
-  es.each<Sprite, WorldPosition>([this, &spritesByDrawOrder](
+  es.each<Sprite, WorldPosition>([&spritesByDrawOrder](
     ex::Entity entity,
     Sprite& sprite,
     const WorldPosition& pos
@@ -165,6 +168,14 @@ void RenderingSystem::update(ex::EntityManager& es) {
   sort(begin(spritesByDrawOrder), end(spritesByDrawOrder));
 
   // Render
+  if (backdropFlashColor) {
+    mpRenderer->setOverlayColor(*backdropFlashColor);
+    mMapRenderer.renderBackdrop(*mpScrollOffset);
+    mpRenderer->setOverlayColor({});
+  } else {
+    mMapRenderer.renderBackdrop(*mpScrollOffset);
+  }
+
   mMapRenderer.renderBackground(*mpScrollOffset);
 
   const auto firstTopMostIt = find_if(

@@ -74,7 +74,6 @@ void MapRenderer::switchBackdrops() {
 
 
 void MapRenderer::renderBackground(const base::Vector& scrollOffset) {
-  renderBackdrop(scrollOffset);
   renderMapTiles(scrollOffset, false);
 }
 

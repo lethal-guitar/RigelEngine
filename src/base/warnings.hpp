@@ -49,6 +49,9 @@
     _Pragma("clang diagnostic ignored \"-Wmissing-prototypes\"") \
     _Pragma("clang diagnostic ignored \"-Wconversion\"") \
     _Pragma("clang diagnostic ignored \"-Wcomma\"") \
+    _Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
+    _Pragma("clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"") \
+    _Pragma("clang diagnostic ignored \"-Wcast-qual\"") \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")

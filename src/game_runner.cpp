@@ -21,6 +21,7 @@
 #include "data/sound_ids.hpp"
 #include "data/strings.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/interaction/teleporter.hpp"
 #include "game_logic/trigger_components.hpp"
@@ -124,6 +125,7 @@ GameRunner::GameRunner(
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
+  mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -254,18 +256,21 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
 
   auto doTimeStep = [&, this]() {
-    if (!mScreenFlashColor) {
-      mHudRenderer.updateAnimation();
-      updateTemporaryItemExpiration();
-      mpSystems->update(mCombinedInputState, mEntities);
-      mMessageDisplay.update();
-      mCombinedInputState = mInputState;
+    mBackdropFlashColor = boost::none;
+    mScreenFlashColor = boost::none;
 
-      if (mEarthQuakeEffect) {
-        screenShakeOffsetX = mEarthQuakeEffect->update();
-      }
-    } else {
-      mScreenFlashColor = boost::none;
+    if (mReactorDestructionFramesElapsed) {
+      updateReactorDestructionEvent();
+    }
+
+    mHudRenderer.updateAnimation();
+    updateTemporaryItemExpiration();
+    mpSystems->update(mCombinedInputState, mEntities);
+    mMessageDisplay.update();
+    mCombinedInputState = mInputState;
+
+    if (mEarthQuakeEffect) {
+      screenShakeOffsetX = mEarthQuakeEffect->update();
     }
   };
 
@@ -292,7 +297,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     engine::RenderTargetTexture::Binder
       bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
     if (!mScreenFlashColor) {
-      mpSystems->render(mEntities);
+      mpSystems->render(mEntities, mBackdropFlashColor);
     } else {
       mpRenderer->clear(*mScreenFlashColor);
     }
@@ -347,6 +352,28 @@ void GameRunner::receive(const rigel::events::TutorialMessage& event) {
 }
 
 
+void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
+  using game_logic::components::ActorTag;
+  auto entity = event.mEntity;
+  if (!entity.has_component<ActorTag>()) {
+    return;
+  }
+
+  const auto& position = *entity.component<const WorldPosition>();
+
+  using AT = ActorTag::Type;
+  const auto type = entity.component<ActorTag>()->mType;
+  switch (type) {
+    case AT::Reactor:
+      onReactorDestroyed(position);
+      break;
+
+    default:
+      break;
+  }
+}
+
+
 void GameRunner::loadLevel(
   const int episode,
   const int levelNumber,
@@ -385,6 +412,45 @@ void GameRunner::loadLevel(
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+}
+
+
+void GameRunner::onReactorDestroyed(const base::Vector& position) {
+  mScreenFlashColor = loader::INGAME_PALETTE[7];
+  mEntityFactory.createProjectile(
+    ProjectileType::ReactorDebris,
+    position + base::Vector{-1, 0},
+    ProjectileDirection::Left);
+  mEntityFactory.createProjectile(
+    ProjectileType::ReactorDebris,
+    position + base::Vector{3, 0},
+    ProjectileDirection::Right);
+
+  const auto shouldDoSpecialEvent =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnReactorDestruction;
+  if (!mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = true;
+    mReactorDestructionFramesElapsed = 0;
+  }
+}
+
+
+void GameRunner::updateReactorDestructionEvent() {
+  auto& framesElapsed = *mReactorDestructionFramesElapsed;
+  if (framesElapsed >= 14) {
+    return;
+  }
+
+  if (framesElapsed == 13) {
+    mMessageDisplay.setMessage(data::Messages::DestroyedEverything);
+  } else if (framesElapsed % 2 == 1) {
+    mBackdropFlashColor = base::Color{255, 255, 255, 255};
+    mpServiceProvider->playSound(data::SoundId::BigExplosion);
+  }
+
+  ++framesElapsed;
 }
 
 
@@ -473,7 +539,10 @@ void GameRunner::restartLevel() {
 void GameRunner::restartFromCheckpoint() {
   mpServiceProvider->fadeOutScreen();
 
-  if (mBackdropSwitched) {
+  const auto shouldSwitchBackAfterRespawn =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnTeleportation;
+  if (mBackdropSwitched && shouldSwitchBackAfterRespawn) {
     mpSystems->switchBackdrops();
     mBackdropSwitched = false;
   }

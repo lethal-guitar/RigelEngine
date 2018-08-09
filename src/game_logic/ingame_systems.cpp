@@ -220,8 +220,11 @@ void IngameSystems::update(
 }
 
 
-void IngameSystems::render(entityx::EntityManager& es) {
-  mRenderingSystem.update(es);
+void IngameSystems::render(
+  entityx::EntityManager& es,
+  const boost::optional<base::Color>& backdropFlashColor
+) {
+  mRenderingSystem.update(es, backdropFlashColor);
   mParticles.render(*mpScrollOffset);
   mDebuggingSystem.update(es);
 }
