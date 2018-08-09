@@ -1441,8 +1441,7 @@ void EntityFactory::configureEntity(
         auto container = makeContainer(
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
-          AutoDestroy::afterTimeout(numAnimationFrames),
-          sprite);
+          AutoDestroy::afterTimeout(numAnimationFrames));
         addDefaultMovingBody(container, boundingBox);
 
         auto barrelSprite = createSpriteForId(14);
