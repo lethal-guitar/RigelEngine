@@ -257,19 +257,16 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
   auto doTimeStep = [&, this]() {
     mBackdropFlashColor = boost::none;
+    mScreenFlashColor = boost::none;
 
-    if (!mScreenFlashColor) {
-      mHudRenderer.updateAnimation();
-      updateTemporaryItemExpiration();
-      mpSystems->update(mCombinedInputState, mEntities);
-      mMessageDisplay.update();
-      mCombinedInputState = mInputState;
+    mHudRenderer.updateAnimation();
+    updateTemporaryItemExpiration();
+    mpSystems->update(mCombinedInputState, mEntities);
+    mMessageDisplay.update();
+    mCombinedInputState = mInputState;
 
-      if (mEarthQuakeEffect) {
-        screenShakeOffsetX = mEarthQuakeEffect->update();
-      }
-    } else {
-      mScreenFlashColor = boost::none;
+    if (mEarthQuakeEffect) {
+      screenShakeOffsetX = mEarthQuakeEffect->update();
     }
   };
 
