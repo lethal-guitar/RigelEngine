@@ -416,15 +416,16 @@ void GameRunner::updateGameLogic() {
     updateReactorDestructionEvent();
   }
 
-  mHudRenderer.updateAnimation();
-  updateTemporaryItemExpiration();
-  mpSystems->update(mPlayerInput, mEntities);
-  mPlayerInput.resetTriggeredStates();
-  mMessageDisplay.update();
-
   if (mEarthQuakeEffect) {
     mScreenShakeOffsetX = mEarthQuakeEffect->update();
   }
+
+  mHudRenderer.updateAnimation();
+  updateTemporaryItemExpiration();
+  mMessageDisplay.update();
+
+  mpSystems->update(mPlayerInput, mEntities);
+  mPlayerInput.resetTriggeredStates();
 }
 
 
