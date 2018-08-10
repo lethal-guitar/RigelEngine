@@ -81,6 +81,8 @@ private:
     const loader::ResourceLoader& resources
   );
 
+  void updateGameLogic();
+
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
 
@@ -148,6 +150,7 @@ private:
   boost::optional<base::Color> mScreenFlashColor;
   boost::optional<base::Color> mBackdropFlashColor;
   boost::optional<int> mReactorDestructionFramesElapsed;
+  int mScreenShakeOffsetX = 0;
 };
 
 }

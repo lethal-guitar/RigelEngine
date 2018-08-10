@@ -250,34 +250,15 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
-  int screenShakeOffsetX = 0;
-
   // **********************************************************************
   // Updating
   // **********************************************************************
 
-  auto doTimeStep = [&, this]() {
-    mBackdropFlashColor = boost::none;
-    mScreenFlashColor = boost::none;
-
-    if (mReactorDestructionFramesElapsed) {
-      updateReactorDestructionEvent();
-    }
-
-    mHudRenderer.updateAnimation();
-    updateTemporaryItemExpiration();
-    mpSystems->update(mPlayerInput, mEntities);
-    mPlayerInput.resetTriggeredStates();
-    mMessageDisplay.update();
-
-    if (mEarthQuakeEffect) {
-      screenShakeOffsetX = mEarthQuakeEffect->update();
-    }
-  };
+  mScreenShakeOffsetX = 0;
 
   if (mSingleStepping) {
     if (mDoNextSingleStep) {
-      doTimeStep();
+      updateGameLogic();
       mDoNextSingleStep = false;
     }
   } else {
@@ -286,7 +267,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
       mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
       mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
     ) {
-      doTimeStep();
+      updateGameLogic();
     }
   }
 
@@ -312,7 +293,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
   mIngameViewPortRenderTarget.render(
     mpRenderer,
-    data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,
+    data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
     data::GameTraits::inGameViewPortOffset.y);
   mMessageDisplay.render();
 
@@ -424,6 +405,26 @@ void GameRunner::loadLevel(
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+}
+
+
+void GameRunner::updateGameLogic() {
+  mBackdropFlashColor = boost::none;
+  mScreenFlashColor = boost::none;
+
+  if (mReactorDestructionFramesElapsed) {
+    updateReactorDestructionEvent();
+  }
+
+  mHudRenderer.updateAnimation();
+  updateTemporaryItemExpiration();
+  mpSystems->update(mPlayerInput, mEntities);
+  mPlayerInput.resetTriggeredStates();
+  mMessageDisplay.update();
+
+  if (mEarthQuakeEffect) {
+    mScreenShakeOffsetX = mEarthQuakeEffect->update();
+  }
 }
 
 
