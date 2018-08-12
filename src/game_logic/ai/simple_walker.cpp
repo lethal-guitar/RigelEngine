@@ -17,7 +17,7 @@
 #include "simple_walker.hpp"
 
 #include "engine/movement.hpp"
-#include "engine/sprite_tools.hpp"
+#include "engine/visual_components.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -26,16 +26,6 @@ namespace {
 
 using namespace engine::components;
 using namespace engine::orientation;
-
-
-void updateAnimation(entityx::Entity entity, const Orientation orientation) {
-  const auto& config = *entity.component<components::SimpleWalker>()->mpConfig;
-  const auto startFrame =
-    orientation == Orientation::Left ? 0 : config.mAnimationSteps;
-  const auto endFrame = startFrame + (config.mAnimationSteps - 1);
-  engine::startAnimationLoop(
-    entity, config.mAnimationDelay, startFrame, endFrame);
-}
 
 } // namespace
 
@@ -53,30 +43,34 @@ SimpleWalkerSystem::SimpleWalkerSystem(
 void SimpleWalkerSystem::update(entityx::EntityManager& es) {
   const auto& playerPosition = *mPlayer.component<WorldPosition>();
 
-  es.each<components::SimpleWalker, WorldPosition, Active>(
+  es.each<components::SimpleWalker, Sprite, WorldPosition, Active>(
     [this, &playerPosition](
       entityx::Entity entity,
       components::SimpleWalker& state,
+      Sprite& sprite,
       WorldPosition& position,
       const Active&
     ) {
-      if (!state.mOrientation) {
-        state.mOrientation = position.x < playerPosition.x
+      if (!entity.has_component<Orientation>()) {
+        const auto initialOrientation = position.x < playerPosition.x
           ? Orientation::Right
           : Orientation::Left;
-        updateAnimation(entity, *state.mOrientation);
+        entity.assign<Orientation>(initialOrientation);
       }
 
-      if (mIsOddFrame && !state.mpConfig->mWalkAtFullSpeed) {
-        return;
-      }
+      if (mIsOddFrame || state.mpConfig->mWalkAtFullSpeed) {
+        auto& orientation = *entity.component<Orientation>();
+        const auto walkedSuccessfully =
+          engine::walk(*mpCollisionChecker, entity, orientation);
+        if (!walkedSuccessfully) {
+          orientation = opposite(orientation);
+        }
 
-      auto& orientation = *state.mOrientation;
-      const auto walkedSuccessfully =
-        engine::walk(*mpCollisionChecker, entity, orientation);
-      if (!walkedSuccessfully) {
-        orientation = opposite(orientation);
-        updateAnimation(entity, orientation);
+        auto& animationFrame = sprite.mFramesToRender[0];
+        ++animationFrame;
+        if (animationFrame == state.mpConfig->mAnimEnd + 1) {
+          animationFrame = state.mpConfig->mAnimStart;
+        }
       }
     });
 

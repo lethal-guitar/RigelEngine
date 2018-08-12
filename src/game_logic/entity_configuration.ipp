@@ -258,8 +258,7 @@ auto createBlueGuardAiComponent(const ActorID id) {
 auto skeletonAiConfig() {
   static auto config = []() {
     ai::components::SimpleWalker::Configuration c;
-    c.mAnimationSteps = 4;
-    c.mAnimationDelay = 2;
+    c.mAnimEnd = 3;
     c.mWalkAtFullSpeed = false;
     return c;
   }();
@@ -271,8 +270,7 @@ auto skeletonAiConfig() {
 auto turkeyAiConfig() {
   static auto config = []() {
     ai::components::SimpleWalker::Configuration c;
-    c.mAnimationSteps = 2;
-    c.mAnimationDelay = 1;
+    c.mAnimEnd = 1;
     c.mWalkAtFullSpeed = true;
     return c;
   }();
@@ -852,8 +850,7 @@ void EntityFactory::configureEntity(
         // the cooked turkey.
         auto cookedTurkeyContainer = makeContainer(
           cookedTurkeyCollectable,
-          cookedTurkeySprite,
-          AnimationLoop{1, 4, 7});
+          cookedTurkeySprite);
         addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
 
         auto livingTurkeyContainer = makeContainer(
@@ -861,6 +858,7 @@ void EntityFactory::configureEntity(
           Shootable{1, 0},
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
+          AnimationLoop{1, 0, 1},
           ai::components::SimpleWalker{turkeyAiConfig()});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
 

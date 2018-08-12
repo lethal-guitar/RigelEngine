@@ -246,6 +246,12 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case 6:
       return 39;
 
+    case 134:
+      return 4;
+
+    case 201:
+      return 2;
+
     default:
       return boost::none;
   }

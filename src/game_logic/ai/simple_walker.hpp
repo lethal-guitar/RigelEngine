@@ -33,8 +33,8 @@ namespace components {
 
 struct SimpleWalker {
   struct Configuration {
-    int mAnimationSteps = 0;
-    int mAnimationDelay = 0;
+    int mAnimStart = 0;
+    int mAnimEnd = 0;
     bool mWalkAtFullSpeed = false;
   };
 
@@ -44,7 +44,6 @@ struct SimpleWalker {
   }
 
   const Configuration* mpConfig;
-  boost::optional<engine::components::Orientation> mOrientation;
 };
 
 }
