@@ -462,6 +462,7 @@ void Player::resetAfterRespawn() {
   mRapidFiredLastFrame = false;
   mRecoilAnimationActive = false;
   mIsOddFrame = false;
+  mAttachedSpiders.reset();
 
   mEntity.component<c::Sprite>()->mFramesToRender = {0};
 }
@@ -713,7 +714,8 @@ void Player::updateShooting(const Button& fireButton) {
     stateIs<ClimbingLadder>() ||
     stateIs<Interacting>() ||
     mIsRidingElevator ||
-    (stateIs<OnPipe>() && mStance == WeaponStance::Upwards)
+    (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
+    hasSpiderOn(SpiderClingPosition::Weapon)
   ) {
     return;
   }
@@ -861,7 +863,9 @@ void Player::updateJumpMovement(
     // On the 3rd frame, check if we should do a high jump (jump key still
     // pressed). If not, we skip part of the jump arc, which then results
     // in the lower jump.
-    const auto isShortJump = state.mFramesElapsed == 2 && !jumpPressed;
+    const auto isShortJump =
+      state.mFramesElapsed == 2 &&
+      (!jumpPressed || hasSpiderOn(SpiderClingPosition::Head));
     if (isShortJump) {
       state.mFramesElapsed = 6;
     } else {

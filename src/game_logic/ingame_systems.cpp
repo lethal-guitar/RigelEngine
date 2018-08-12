@@ -137,6 +137,12 @@ IngameSystems::IngameSystems(
       pRandomGenerator,
       eventManager)
   , mSlimePipeSystem(pEntityFactory, pServiceProvider)
+  , mSpiderSystem(
+      &mPlayer,
+      &mCollisionChecker,
+      pRandomGenerator,
+      pEntityFactory,
+      eventManager)
   , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
@@ -187,6 +193,7 @@ void IngameSystems::update(
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);
   mSlimePipeSystem.update(es);
+  mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
 
   // ----------------------------------------------------------------------

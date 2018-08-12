@@ -28,6 +28,7 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <bitset>
 #include <cstdint>
 
 namespace rigel {
@@ -156,6 +157,13 @@ enum class VisualState {
 struct AnimationConfig;
 
 
+enum class SpiderClingPosition {
+  Head = 0,
+  Weapon = 1,
+  Back = 2
+};
+
+
 class Player : public entityx::Receiver<Player> {
 public:
   Player(
@@ -207,6 +215,18 @@ public:
 
   void receive(const events::ElevatorAttachmentChanged& event);
 
+  bool hasSpiderOn(const SpiderClingPosition position) const {
+    return mAttachedSpiders.test(static_cast<size_t>(position));
+  }
+
+  void attachSpider(const SpiderClingPosition position) {
+    mAttachedSpiders.set(static_cast<size_t>(position));
+  }
+
+  void detachSpider(const SpiderClingPosition position) {
+    mAttachedSpiders.reset(static_cast<size_t>(position));
+  }
+
 private:
   struct VerticalMovementResult {
     engine::MovementResult mMoveResult = engine::MovementResult::Failed;
@@ -257,6 +277,7 @@ private:
   VisualState mVisualState = VisualState::Standing;
   int mMercyFramesPerHit;
   int mMercyFramesRemaining;
+  std::bitset<3> mAttachedSpiders;
   bool mRapidFiredLastFrame = false;
   bool mIsOddFrame = false;
   bool mRecoilAnimationActive = false;

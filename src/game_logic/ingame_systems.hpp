@@ -36,6 +36,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
@@ -139,6 +140,7 @@ private:
   game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
   game_logic::ai::SlimePipeSystem mSlimePipeSystem;
+  game_logic::ai::SpiderSystem mSpiderSystem;
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 
   engine::RandomNumberGenerator* mpRandomGenerator;
