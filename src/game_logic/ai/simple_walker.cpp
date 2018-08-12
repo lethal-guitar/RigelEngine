@@ -60,8 +60,16 @@ void SimpleWalkerSystem::update(entityx::EntityManager& es) {
 
       if (mIsOddFrame || state.mpConfig->mWalkAtFullSpeed) {
         auto& orientation = *entity.component<Orientation>();
-        const auto walkedSuccessfully =
-          engine::walk(*mpCollisionChecker, entity, orientation);
+
+        auto walkedSuccessfully = false;
+        if (state.mpConfig->mWalkOnCeiling) {
+          walkedSuccessfully =
+            engine::walkOnCeiling(*mpCollisionChecker, entity, orientation);
+        } else {
+          walkedSuccessfully =
+            engine::walk(*mpCollisionChecker, entity, orientation);
+        }
+
         if (!walkedSuccessfully) {
           orientation = opposite(orientation);
         }

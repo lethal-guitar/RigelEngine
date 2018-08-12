@@ -36,6 +36,7 @@ struct SimpleWalker {
     int mAnimStart = 0;
     int mAnimEnd = 0;
     bool mWalkAtFullSpeed = false;
+    bool mWalkOnCeiling = false;
   };
 
   SimpleWalker(const Configuration* pConfig)
