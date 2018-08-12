@@ -52,6 +52,7 @@ struct SpriteFrame {
 
 struct SpriteDrawData {
   std::vector<SpriteFrame> mFrames;
+  base::ArrayView<int> mVirtualToRealFrameMap;
   boost::optional<int> mOrientationOffset;
   int mDrawOrder;
 };

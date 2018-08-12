@@ -257,6 +257,12 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
   }
 }
 
+
+
+base::ArrayView<int> frameMapForActor(const ActorID actorId) {
+  return {};
+}
+
 }
 
 
@@ -299,6 +305,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
     }
 
     drawData.mOrientationOffset = orientationOffsetForActor(mainId);
+    drawData.mVirtualToRealFrameMap = frameMapForActor(mainId);
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
     adjustOffsets(drawData.mFrames, mainId);

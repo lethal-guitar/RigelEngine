@@ -226,10 +226,12 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     for (const auto baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
+      // Stage 0: Ignore render slots which are marked accordingly
       if (baseFrameIndex == IGNORE_RENDER_SLOT) {
         continue;
       }
 
+      // Stage 1: Map frame -> fram based on orientation, if applicable
       auto frameIndex = baseFrameIndex;
       if (
         sprite.mpDrawData->mOrientationOffset &&
@@ -239,6 +241,11 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
         if (orientation == Orientation::Right) {
           frameIndex += *sprite.mpDrawData->mOrientationOffset;
         }
+      }
+
+      // Stage 2: Map oriented frame using the virtual-to-real frame map
+      if (!sprite.mpDrawData->mVirtualToRealFrameMap.empty()) {
+        frameIndex = sprite.mpDrawData->mVirtualToRealFrameMap[frameIndex];
       }
 
       // White flash effect
