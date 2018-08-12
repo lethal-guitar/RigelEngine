@@ -249,6 +249,9 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case 134:
       return 4;
 
+    case 154:
+      return 13;
+
     case 201:
       return 2;
 
@@ -258,9 +261,20 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
 }
 
 
+int SPIDER_FRAME_MAP[] = {
+  3, 4, 5, 9, 10, 11, 6, 8, 9, 14, 15, 12, 13, // left
+  0, 1, 2, 6, 7, 8, 6, 8, 9, 12, 13, 14, 15, // right
+};
+
 
 base::ArrayView<int> frameMapForActor(const ActorID actorId) {
-  return {};
+  switch (actorId) {
+    case 154:
+      return base::ArrayView<int>(SPIDER_FRAME_MAP);
+
+    default:
+      return {};
+  }
 }
 
 }
