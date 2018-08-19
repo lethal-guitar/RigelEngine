@@ -52,8 +52,13 @@ struct SpriteFrame {
 
 struct SpriteDrawData {
   std::vector<SpriteFrame> mFrames;
+  base::ArrayView<int> mVirtualToRealFrameMap;
+  boost::optional<int> mOrientationOffset;
   int mDrawOrder;
 };
+
+
+constexpr auto IGNORE_RENDER_SLOT = -1;
 
 
 namespace components {

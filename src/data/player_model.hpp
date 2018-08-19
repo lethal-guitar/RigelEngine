@@ -92,6 +92,9 @@ public:
   bool isAtFullHealth() const;
   bool isDead() const;
   void takeDamage(int amount);
+
+  /** Immediately set health to 0 */
+  void takeFatalDamage();
   void giveHealth(int amount);
 
   const std::unordered_set<InventoryItemType>& inventory() const;

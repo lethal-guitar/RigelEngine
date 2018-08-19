@@ -27,6 +27,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/input.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
@@ -65,7 +66,9 @@ public:
   bool levelFinished() const;
 
   void receive(const events::CheckPointActivated& event);
+  void receive(const events::PlayerDied& event);
   void receive(const events::PlayerMessage& event);
+  void receive(const events::PlayerTeleported& event);
   void receive(const events::ScreenFlash& event);
   void receive(const events::TutorialMessage& event);
   void receive(const game_logic::events::ShootableKilled& event);
@@ -77,6 +80,8 @@ private:
     data::Difficulty difficulty,
     const loader::ResourceLoader& resources
   );
+
+  void updateGameLogic();
 
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
@@ -112,10 +117,11 @@ private:
   int mFramesElapsedHavingRapidFire = 0;
   int mFramesElapsedHavingCloak = 0;
 
-  game_logic::PlayerInputState mInputState;
-  game_logic::PlayerInputState mCombinedInputState;
-  bool mLevelFinished;
+  game_logic::PlayerInput mPlayerInput;
+  boost::optional<base::Vector> mTeleportTargetPosition;
   bool mBackdropSwitched = false;
+  bool mLevelFinished = false;
+  bool mPlayerDied = false;
 
   engine::TimeDelta mAccumulatedTime;
 
@@ -131,7 +137,6 @@ private:
 
   LevelData mLevelData;
   data::map::Map mMapAtLevelStart;
-  entityx::Entity mPlayerEntity;
 
   std::unique_ptr<game_logic::IngameSystems> mpSystems;
 
@@ -145,6 +150,7 @@ private:
   boost::optional<base::Color> mScreenFlashColor;
   boost::optional<base::Color> mBackdropFlashColor;
   boost::optional<int> mReactorDestructionFramesElapsed;
+  int mScreenShakeOffsetX = 0;
 };
 
 }

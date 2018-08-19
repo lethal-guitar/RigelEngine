@@ -78,7 +78,6 @@ void spawnTileDebris(
   debris.assign<MovingBody>(
     Velocity{static_cast<float>(velocityX), 0.0f},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true});
   debris.assign<MovementSequence>(movement);
 }

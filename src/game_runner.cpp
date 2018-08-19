@@ -23,10 +23,11 @@
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/ingame_systems.hpp"
-#include "game_logic/interaction/teleporter.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
+
+#include "game_service_provider.hpp"
 
 #include <cassert>
 #include <chrono>
@@ -106,7 +107,6 @@ GameRunner::GameRunner(
       difficulty)
   , mpPlayerModel(pPlayerModel)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
-  , mLevelFinished(false)
   , mAccumulatedTime(0.0)
   , mShowDebugText(false)
   , mRadarDishCounter(mEntities, mEventManager)
@@ -122,7 +122,9 @@ GameRunner::GameRunner(
       data::GameTraits::inGameViewPortSize.height)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
+  mEventManager.subscribe<rigel::events::PlayerDied>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
+  mEventManager.subscribe<rigel::events::PlayerTeleported>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
   mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
@@ -133,7 +135,7 @@ GameRunner::GameRunner(
   loadLevel(episode, levelNumber, difficulty, *context.mpResources);
 
   if (playerPositionOverride) {
-    *mPlayerEntity.component<WorldPosition>() = *playerPositionOverride;
+    mpSystems->player().position() = *playerPositionOverride;
   }
 
   mpSystems->centerViewOnPlayer();
@@ -161,49 +163,48 @@ GameRunner::~GameRunner() {
 
 
 void GameRunner::handleEvent(const SDL_Event& event) {
-  if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP) {
+  const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
+  if (!isKeyEvent || event.key.repeat != 0) {
     return;
   }
 
   const auto keyPressed = std::uint8_t{event.type == SDL_KEYDOWN};
   switch (event.key.keysym.sym) {
-    // TODO: Refactor: This can be clearer and less repetitive.
+    // TODO: DRY this up a little?
     case SDLK_UP:
-      mCombinedInputState.mMovingUp = mCombinedInputState.mMovingUp || keyPressed;
-      mInputState.mMovingUp = keyPressed;
+      mPlayerInput.mUp = keyPressed;
+      mPlayerInput.mInteract.mIsPressed = keyPressed;
+      if (keyPressed) {
+        mPlayerInput.mInteract.mWasTriggered = true;
+      }
       break;
+
     case SDLK_DOWN:
-      mCombinedInputState.mMovingDown = mCombinedInputState.mMovingDown || keyPressed;
-      mInputState.mMovingDown = keyPressed;
+      mPlayerInput.mDown = keyPressed;
       break;
+
     case SDLK_LEFT:
-      mCombinedInputState.mMovingLeft = mCombinedInputState.mMovingLeft || keyPressed;
-      mInputState.mMovingLeft = keyPressed;
+      mPlayerInput.mLeft = keyPressed;
       break;
+
     case SDLK_RIGHT:
-      mCombinedInputState.mMovingRight = mCombinedInputState.mMovingRight || keyPressed;
-      mInputState.mMovingRight = keyPressed;
+      mPlayerInput.mRight = keyPressed;
       break;
+
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-      mCombinedInputState.mJumping = mCombinedInputState.mJumping || keyPressed;
-      mInputState.mJumping = keyPressed;
+      mPlayerInput.mJump.mIsPressed = keyPressed;
+      if (keyPressed) {
+        mPlayerInput.mJump.mWasTriggered = true;
+      }
       break;
+
     case SDLK_LALT:
     case SDLK_RALT:
-      mCombinedInputState.mShooting = mCombinedInputState.mShooting || keyPressed;
-      mInputState.mShooting = keyPressed;
-
-      // To make shooting feel responsive even when updating the attack system
-      // only at game-logic rate, we notify the system about button presses
-      // immediately. The system will queue up one requested shot for the
-      // next logic update.
-      //
-      // Without this, fire button presses can get lost since firing is
-      // only allowed if the button is released between two shots. If the
-      // release happens between two logic updates, the system wouldn't see it,
-      // therefore thinking you're still holding the button.
-      mpSystems->buttonStateChanged(mInputState);
+      mPlayerInput.mFire.mIsPressed = keyPressed;
+      if (keyPressed) {
+        mPlayerInput.mFire.mWasTriggered = true;
+      }
       break;
   }
 
@@ -249,34 +250,15 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
-  int screenShakeOffsetX = 0;
-
   // **********************************************************************
   // Updating
   // **********************************************************************
 
-  auto doTimeStep = [&, this]() {
-    mBackdropFlashColor = boost::none;
-    mScreenFlashColor = boost::none;
-
-    if (mReactorDestructionFramesElapsed) {
-      updateReactorDestructionEvent();
-    }
-
-    mHudRenderer.updateAnimation();
-    updateTemporaryItemExpiration();
-    mpSystems->update(mCombinedInputState, mEntities);
-    mMessageDisplay.update();
-    mCombinedInputState = mInputState;
-
-    if (mEarthQuakeEffect) {
-      screenShakeOffsetX = mEarthQuakeEffect->update();
-    }
-  };
+  mScreenShakeOffsetX = 0;
 
   if (mSingleStepping) {
     if (mDoNextSingleStep) {
-      doTimeStep();
+      updateGameLogic();
       mDoNextSingleStep = false;
     }
   } else {
@@ -285,7 +267,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
       mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
       mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
     ) {
-      doTimeStep();
+      updateGameLogic();
     }
   }
 
@@ -311,7 +293,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
   mIngameViewPortRenderTarget.render(
     mpRenderer,
-    data::GameTraits::inGameViewPortOffset.x + screenShakeOffsetX,
+    data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
     data::GameTraits::inGameViewPortOffset.y);
   mMessageDisplay.render();
 
@@ -337,8 +319,18 @@ void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
 }
 
 
+void GameRunner::receive(const rigel::events::PlayerDied& event) {
+  mPlayerDied = true;
+}
+
+
 void GameRunner::receive(const rigel::events::PlayerMessage& event) {
   mMessageDisplay.setMessage(event.mText);
+}
+
+
+void GameRunner::receive(const rigel::events::PlayerTeleported& event) {
+  mTeleportTargetPosition = event.mNewPosition;
 }
 
 
@@ -382,7 +374,8 @@ void GameRunner::loadLevel(
 ) {
   auto loadedLevel = loader::loadLevel(
     levelFileName(episode, levelNumber), resources, difficulty);
-  mPlayerEntity = mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+  auto playerEntity =
+    mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),
@@ -394,7 +387,7 @@ void GameRunner::loadLevel(
   mpSystems = std::make_unique<IngameSystems>(
     difficulty,
     &mScrollOffset,
-    mPlayerEntity,
+    playerEntity,
     mpPlayerModel,
     &mLevelData.mMap,
     engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
@@ -412,6 +405,27 @@ void GameRunner::loadLevel(
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+}
+
+
+void GameRunner::updateGameLogic() {
+  mBackdropFlashColor = boost::none;
+  mScreenFlashColor = boost::none;
+
+  if (mReactorDestructionFramesElapsed) {
+    updateReactorDestructionEvent();
+  }
+
+  if (mEarthQuakeEffect) {
+    mScreenShakeOffsetX = mEarthQuakeEffect->update();
+  }
+
+  mHudRenderer.updateAnimation();
+  updateTemporaryItemExpiration();
+  mMessageDisplay.update();
+
+  mpSystems->update(mPlayerInput, mEntities);
+  mPlayerInput.resetTriggeredStates();
 }
 
 
@@ -471,10 +485,7 @@ void GameRunner::handleLevelExit() {
         return;
       }
 
-      const auto& playerPosition = *mPlayerEntity.component<WorldPosition>();
-      const auto playerBBox = toWorldSpace(
-        *mPlayerEntity.component<BoundingBox>(), playerPosition);
-
+      const auto playerBBox = mpSystems->player().worldSpaceHitBox();
       const auto playerAboveOrAtTriggerHeight =
         playerBBox.bottom() <= triggerPosition.y;
       const auto touchingTriggerOnXAxis =
@@ -496,13 +507,9 @@ void GameRunner::handleLevelExit() {
 
 
 void GameRunner::handlePlayerDeath() {
-  const auto& playerState =
-    *mPlayerEntity.component<game_logic::components::PlayerControlled>();
+  if (mPlayerDied) {
+    mPlayerDied = false;
 
-  const auto playerDead =
-    playerState.mState == player::PlayerState::Dead &&
-    mpPlayerModel->isDead();
-  if (playerDead) {
     if (mActivatedCheckpoint) {
       restartFromCheckpoint();
     } else {
@@ -523,8 +530,9 @@ void GameRunner::restartLevel() {
   mLevelData.mMap = mMapAtLevelStart;
 
   mEntities.reset();
-  mPlayerEntity = mEntityFactory.createEntitiesForLevel(
+  auto playerEntity = mEntityFactory.createEntitiesForLevel(
     mLevelData.mInitialActors);
+  mpSystems->restartFromBeginning(playerEntity);
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
   mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
@@ -548,7 +556,7 @@ void GameRunner::restartFromCheckpoint() {
   }
 
   mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
-  resetForRespawn(mPlayerEntity, mActivatedCheckpoint->mPosition);
+  mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);
@@ -558,18 +566,15 @@ void GameRunner::restartFromCheckpoint() {
 
 
 void GameRunner::handleTeleporter() {
-  auto activeTeleporter = mpSystems->getAndResetActiveTeleporter();
-  if (!activeTeleporter) {
+  if (!mTeleportTargetPosition) {
     return;
   }
 
   mpServiceProvider->playSound(data::SoundId::Teleport);
   mpServiceProvider->fadeOutScreen();
 
-  game_logic::interaction::teleportPlayer(
-    mEntities,
-    mPlayerEntity,
-    activeTeleporter);
+  mpSystems->player().position() = *mTeleportTargetPosition;
+  mTeleportTargetPosition = boost::none;
 
   const auto switchBackdrop =
     mLevelData.mBackdropSwitchCondition ==
@@ -611,15 +616,10 @@ void GameRunner::showTutorialMessage(const data::TutorialMessageId id) {
 
 
 void GameRunner::showDebugText() {
-  using engine::components::MovingBody;
-
-  const auto& playerPos = *mPlayerEntity.component<WorldPosition>();
-  const auto& playerVel = mPlayerEntity.component<MovingBody>()->mVelocity;
   std::stringstream infoText;
   infoText
     << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
-    << "Player: " << vec2String(playerPos, 4)
-    << ", Vel.: " << vec2String(playerVel, 5) << '\n'
+    << "Player: " << vec2String(mpSystems->player().position(), 4) << '\n'
     << "Entities: " << mEntities.size();
 
   mpServiceProvider->showDebugText(infoText.str());

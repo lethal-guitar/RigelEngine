@@ -29,7 +29,10 @@ struct IGameServiceProvider;
 namespace engine { class CollisionChecker; }
 namespace engine { class RandomNumberGenerator; }
 namespace engine { namespace components { struct Sprite; }}
-namespace game_logic { class EntityFactory; }
+namespace game_logic {
+  class EntityFactory;
+  class Player;
+}
 namespace game_logic { namespace events { struct ShootableDamaged; }}
 
 }
@@ -66,7 +69,7 @@ struct BlueGuard {
 class BlueGuardSystem : public entityx::Receiver<BlueGuardSystem> {
 public:
   BlueGuardSystem(
-    entityx::Entity player,
+    const Player* pPlayer,
     engine::CollisionChecker* pCollisionChecker,
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider,
@@ -89,7 +92,7 @@ private:
     engine::components::WorldPosition& position);
 
 private:
-  entityx::Entity mPlayer;
+  const Player* mpPlayer;
   engine::CollisionChecker* mpCollisionChecker;
   EntityFactory* mpEntityFactory;
   IGameServiceProvider* mpServiceProvider;

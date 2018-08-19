@@ -24,10 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace engine { namespace components { struct MovingBody; }}}
-namespace rigel { namespace game_logic { namespace components {
-  struct PlayerControlled;
-}}}
+namespace rigel { namespace engine { class CollisionChecker; }}
 
 
 namespace rigel { namespace game_logic { namespace interaction {
@@ -46,29 +43,25 @@ class ElevatorSystem {
 public:
   ElevatorSystem(
     entityx::Entity player,
-    IGameServiceProvider* pServiceProvider);
+    IGameServiceProvider* pServiceProvider,
+    engine::CollisionChecker* pCollisionChecker,
+    entityx::EventManager* pEvents);
 
-  void update(entityx::EntityManager& es, const PlayerInputState& inputState);
-
-  bool isPlayerAttached() const;
+  void update(entityx::EntityManager& es);
 
 private:
   entityx::Entity findAttachableElevator(entityx::EntityManager& es) const;
 
-  void updateElevatorAttachment(
-    entityx::EntityManager& es,
-    const game_logic::components::PlayerControlled& playerState);
-
-  void updateElevatorMovement(
-    int movement,
-    engine::components::MovingBody& playerMovingBody);
+  void updateElevatorAttachment(entityx::EntityManager& es);
 
 private:
   entityx::Entity mPlayer;
-  IGameServiceProvider* mpServiceProvider;
   entityx::Entity mAttachedElevator;
+  IGameServiceProvider* mpServiceProvider;
+  engine::CollisionChecker* mpCollisionChecker;
+  entityx::EventManager* mpEvents;
 
-  int mPreviousMovement;
+  int mActiveElevatorPreviousPosition;
   bool mIsOddFrame = false;
 };
 

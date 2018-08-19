@@ -19,7 +19,8 @@
 #include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
-#include "game_logic/player/components.hpp"
+#include "engine/physical_components.hpp"
+#include "game_logic/player.hpp"
 
 namespace ex = entityx;
 
@@ -28,7 +29,6 @@ namespace rigel { namespace game_logic {
 
 namespace {
 
-using player::PlayerState;
 using namespace engine::components;
 using namespace game_logic::components;
 
@@ -51,14 +51,12 @@ const base::Rect<int> ClimbingDeadZone{
 };
 
 
-base::Rect<int> scrollDeadZoneForState(const PlayerState state) {
-  switch (state) {
-    case PlayerState::ClimbingLadder:
-      return ClimbingDeadZone;
-
-    default:
-      return DefaultDeadZone;
+base::Rect<int> scrollDeadZone(const Player& player) {
+  if (player.stateIs<ClimbingLadder>()) {
+    return ClimbingDeadZone;
   }
+
+  return DefaultDeadZone;
 }
 
 }
@@ -66,10 +64,10 @@ base::Rect<int> scrollDeadZoneForState(const PlayerState state) {
 
 MapScrollSystem::MapScrollSystem(
   base::Vector* pScrollOffset,
-  entityx::Entity player,
+  const Player* pPlayer,
   const data::map::Map& map
 )
-  : mPlayer(player)
+  : mpPlayer(pPlayer)
   , mpScrollOffset(pScrollOffset)
   , mMaxScrollOffset(base::Extents{
     static_cast<int>(map.width() - data::GameTraits::mapViewPortWidthTiles),
@@ -78,39 +76,33 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
-void MapScrollSystem::update() {
-  updateManualScrolling();
+void MapScrollSystem::update(const PlayerInput& input) {
+  updateManualScrolling(input);
   updateScrollOffset();
 }
 
 
-void MapScrollSystem::updateManualScrolling() {
-  const auto& state = *mPlayer.component<PlayerControlled>();
-
-  if (state.mIsLookingDown) {
-    mpScrollOffset->y += 2;
-  }
-  if (state.mIsLookingUp) {
-    mpScrollOffset->y -= 2;
+void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
+  if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>()) {
+    if (input.mDown) {
+      mpScrollOffset->y += 2;
+    }
+    if (input.mUp) {
+      mpScrollOffset->y -= 2;
+    }
   }
 }
 
 
 void MapScrollSystem::updateScrollOffset() {
-  const auto& state = *mPlayer.component<PlayerControlled>();
-  const auto& originalPlayerBounds = *mPlayer.component<BoundingBox>();
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
+  const auto playerBounds = mpPlayer->worldSpaceCollisionBox();
 
-  auto playerBounds = originalPlayerBounds;
-  playerBounds.topLeft =
-    (playerPosition - base::Vector{0, playerBounds.size.height - 1});
-
-  auto worldSpaceDeadZone = scrollDeadZoneForState(state.mState);
+  auto worldSpaceDeadZone = scrollDeadZone(*mpPlayer);
   worldSpaceDeadZone.topLeft += *mpScrollOffset;
 
   // horizontal
   const auto offsetLeft =
-    std::max(0, worldSpaceDeadZone.topLeft.x -  playerPosition.x);
+    std::max(0, worldSpaceDeadZone.topLeft.x -  playerBounds.topLeft.x);
   const auto offsetRight =
     std::min(0,
       worldSpaceDeadZone.bottomRight().x - playerBounds.bottomRight().x);

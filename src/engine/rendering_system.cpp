@@ -35,6 +35,7 @@ using components::AnimationLoop;
 using components::AnimationSequence;
 using components::CustomRenderFunc;
 using components::DrawTopMost;
+using components::Orientation;
 using components::Sprite;
 using components::WorldPosition;
 
@@ -222,8 +223,30 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       data::tileVectorToPixelVector(pos) - worldToScreenPx;
     renderFunc(mpRenderer, data.mEntity, sprite, screenPos);
   } else {
-    for (const auto frameIndex : sprite.mFramesToRender) {
-      assert(frameIndex < int(sprite.mpDrawData->mFrames.size()));
+    for (const auto baseFrameIndex : sprite.mFramesToRender) {
+      assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
+
+      // Stage 0: Ignore render slots which are marked accordingly
+      if (baseFrameIndex == IGNORE_RENDER_SLOT) {
+        continue;
+      }
+
+      // Stage 1: Map frame -> fram based on orientation, if applicable
+      auto frameIndex = baseFrameIndex;
+      if (
+        sprite.mpDrawData->mOrientationOffset &&
+        data.mEntity.has_component<Orientation>()
+      ) {
+        const auto orientation = *data.mEntity.component<const Orientation>();
+        if (orientation == Orientation::Right) {
+          frameIndex += *sprite.mpDrawData->mOrientationOffset;
+        }
+      }
+
+      // Stage 2: Map oriented frame using the virtual-to-real frame map
+      if (!sprite.mpDrawData->mVirtualToRealFrameMap.empty()) {
+        frameIndex = sprite.mpDrawData->mVirtualToRealFrameMap[frameIndex];
+      }
 
       // White flash effect
       if (sprite.mFlashingWhite) {

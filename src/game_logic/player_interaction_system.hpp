@@ -20,13 +20,13 @@
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
 #include "engine/base_components.hpp"
+#include "game_logic/input.hpp"
 #include "game_logic/player/components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <functional>
 #include <string>
 
 namespace rigel {
@@ -44,19 +44,22 @@ namespace rigel {
 
 namespace rigel { namespace game_logic {
 
+class Player;
+
 class PlayerInteractionSystem {
 public:
-  using TeleportCallback = std::function<void(const entityx::Entity&)>;
-
   PlayerInteractionSystem(
-    entityx::Entity player,
+    Player* pPlayer,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServices,
     EntityFactory* pEntityFactory,
-    TeleportCallback teleportCallback,
     entityx::EventManager* pEvents);
 
-  void update(entityx::EntityManager& es);
+  void updatePlayerInteraction(
+    const PlayerInput& input,
+    entityx::EntityManager& es);
+
+  void updateItemCollection(entityx::EntityManager& es);
 
 private:
   void showMessage(const std::string& text);
@@ -68,18 +71,15 @@ private:
     components::InteractableType type
   );
 
-  void triggerPlayerInteractionAnimation();
-
   void collectLetter(
     data::CollectableLetterType type,
     const base::Vector& position);
 
 private:
-  entityx::Entity mPlayer;
+  Player* mpPlayer;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
   EntityFactory* mpEntityFactory;
-  TeleportCallback mTeleportCallback;
   entityx::EventManager* mpEvents;
 };
 

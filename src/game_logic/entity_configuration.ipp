@@ -239,7 +239,6 @@ void configureMovingEffectSprite(
   entity.template assign<MovingBody>(
     Velocity{},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true});
 }
 
@@ -259,8 +258,7 @@ auto createBlueGuardAiComponent(const ActorID id) {
 auto skeletonAiConfig() {
   static auto config = []() {
     ai::components::SimpleWalker::Configuration c;
-    c.mAnimationSteps = 4;
-    c.mAnimationDelay = 2;
+    c.mAnimEnd = 3;
     c.mWalkAtFullSpeed = false;
     return c;
   }();
@@ -272,8 +270,7 @@ auto skeletonAiConfig() {
 auto turkeyAiConfig() {
   static auto config = []() {
     ai::components::SimpleWalker::Configuration c;
-    c.mAnimationSteps = 2;
-    c.mAnimationDelay = 1;
+    c.mAnimEnd = 1;
     c.mWalkAtFullSpeed = true;
     return c;
   }();
@@ -853,8 +850,7 @@ void EntityFactory::configureEntity(
         // the cooked turkey.
         auto cookedTurkeyContainer = makeContainer(
           cookedTurkeyCollectable,
-          cookedTurkeySprite,
-          AnimationLoop{1, 4, 7});
+          cookedTurkeySprite);
         addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
 
         auto livingTurkeyContainer = makeContainer(
@@ -862,6 +858,7 @@ void EntityFactory::configureEntity(
           Shootable{1, 0},
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
+          AnimationLoop{1, 0, 1},
           ai::components::SimpleWalker{turkeyAiConfig()});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
 
@@ -1337,6 +1334,11 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(SPIDER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Orientation>(Orientation::Left);
+      entity.assign<MovingBody>(Velocity{0.f, 0.f}, GravityAffected{false});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<ai::components::Spider>();
       break;
 
     case 176: // green bird
@@ -1453,7 +1455,7 @@ void EntityFactory::configureEntity(
 
     case 66: // Destroyable reactor
       entity.assign<Shootable>(Health{10}, GivenScore{20000});
-      entity.assign<PlayerDamaging>(Damage{9}, IgnoreMercyFrames{true});
+      entity.assign<PlayerDamaging>(Damage{9}, IsFatal{true});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       entity.assign<DestructionEffects>(

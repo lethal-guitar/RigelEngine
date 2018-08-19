@@ -22,10 +22,10 @@ Here's a short video showcasing the project's current state:
 
 <a href="http://www.youtube.com/watch?v=SO1M6gHvFzM"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
-The project is still very much work in progress, but already partially playable. The first level of the 
-Shareware episode is completely playable, the following levels are not completable due to missing
-game mechanics (e.g. player being able to climb on pipes), but some of the enemies found in those levels are already
-functional. Overall, roughly 50 % of the functionality found in the original Shareware episode is reimplemented in
+The project is still very much work in progress, but already partially playable. The first two levels of the 
+Shareware episode are completely playable, not all of the following levels are completable due to missing
+game mechanics, but some of the enemies found in those levels are already
+functional. Overall, over 50 % of the functionality found in the original Shareware episode is reimplemented in
 Rigel Engine so far. The [issue list](https://github.com/lethal-guitar/RigelEngine/issues) should give a 
 comprehensive overview of what's still missing.
 

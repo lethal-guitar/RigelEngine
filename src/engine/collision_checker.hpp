@@ -37,20 +37,6 @@ public:
     entityx::EntityManager& entities,
     entityx::EventManager& eventManager);
 
-  /** Walk entity by the given amount if possible.
-   *
-   * The entity must have a WorldPosition and a BoundingBox.
-   * walk() will try to add the given amount (can be positive or negative)
-   * to the entity's position, and return true if it suceeded, false otherwise.
-   * For the move to suceed, the new position must still be on solid ground
-   * (i.e. no walking off the edge of a platform) and there must be no
-   * collisions with the world.
-   */
-  bool walkEntity(entityx::Entity entity, int amount) const;
-
-  /** As above, but for walking on the ceiling */
-  bool walkEntityOnCeiling(entityx::Entity entity, int amount) const;
-
   bool isOnSolidGround(
     const engine::components::WorldPosition& position,
     const engine::components::BoundingBox& bbox) const;

@@ -128,6 +128,11 @@ void PlayerModel::takeDamage(const int amount) {
 }
 
 
+void PlayerModel::takeFatalDamage() {
+  mHealth = 0;
+}
+
+
 void PlayerModel::giveHealth(const int amount) {
   mHealth = base::clamp(mHealth + amount, 0, MAX_HEALTH);
 }

@@ -138,11 +138,15 @@ void ProjectileSystem::update(entityx::EntityManager& es) {
     [this](
       entityx::Entity entity,
       PlayerProjectile& projectile,
-      const MovingBody& body,
+      MovingBody& body,
       const WorldPosition& position,
       DamageInflicting& damage,
       const Active&
     ) {
+      if (!body.mIsActive) {
+        body.mIsActive = true;
+      }
+
       // TODO: Impact explosions for reactor debris?
       if (
         projectile.mType == PlayerProjectile::Type::Laser ||

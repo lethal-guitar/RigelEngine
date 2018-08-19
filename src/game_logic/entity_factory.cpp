@@ -34,6 +34,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
@@ -43,7 +44,6 @@
 #include "game_logic/item_container.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
-#include "game_logic/player_movement_system.hpp"
 #include "game_logic/trigger_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -220,7 +220,9 @@ void adjustOffsets(
   // Player sprite
   if (actorId == 5 || actorId == 6) {
     for (int i=0; i<39; ++i) {
-      frames[i].mDrawOffset.x -= 1;
+      if (i != 35 && i != 36) {
+        frames[i].mDrawOffset.x -= 1;
+      }
     }
   }
 
@@ -234,6 +236,45 @@ void adjustOffsets(
     for (auto i = 8u; i < frames.size(); ++i) {
       frames[i].mDrawOffset.x -= 1;
     }
+  }
+}
+
+
+boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
+  switch (actorId) {
+    // Player
+    case 5:
+    case 6:
+      return 39;
+
+    case 134:
+      return 4;
+
+    case 154:
+      return 13;
+
+    case 201:
+      return 2;
+
+    default:
+      return boost::none;
+  }
+}
+
+
+int SPIDER_FRAME_MAP[] = {
+  3, 4, 5, 9, 10, 11, 6, 8, 9, 14, 15, 12, 13, // left
+  0, 1, 2, 6, 7, 8, 6, 8, 9, 12, 13, 14, 15, // right
+};
+
+
+base::ArrayView<int> frameMapForActor(const ActorID actorId) {
+  switch (actorId) {
+    case 154:
+      return base::ArrayView<int>(SPIDER_FRAME_MAP);
+
+    default:
+      return {};
   }
 }
 
@@ -278,6 +319,8 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
       lastFrameCount = int(actorData.mFrames.size());
     }
 
+    drawData.mOrientationOffset = orientationOffsetForActor(mainId);
+    drawData.mVirtualToRealFrameMap = frameMapForActor(mainId);
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
     adjustOffsets(drawData.mFrames, mainId);
@@ -418,12 +461,12 @@ void EntityFactory::configureProjectile(
 
   entity.assign<MovingBody>(
     Velocity{directionToVector(direction) * speed},
-    GravityAffected{false},
-    IsPlayer{false});
+    GravityAffected{false});
   if (isPlayerProjectile(type) || type == ProjectileType::ReactorDebris) {
     // Some player projectiles do have collisions with walls, but that's
     // handled by player::ProjectileSystem.
     entity.component<MovingBody>()->mIgnoreCollisions = true;
+    entity.component<MovingBody>()->mIsActive = false;
 
     entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
     entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
@@ -491,7 +534,10 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 
     const auto isPlayer = actor.mID == 5 || actor.mID == 6;
     if (isPlayer) {
-      game_logic::initializePlayerEntity(entity, actor.mID == 6);
+      const auto playerOrientation = actor.mID == 5
+        ? Orientation::Left
+        : Orientation::Right;
+      assignPlayerComponents(entity, playerOrientation);
       playerEntity = entity;
     }
   }
@@ -527,7 +573,6 @@ entityx::Entity createFloatingOneShotSprite(
   entity.assign<MovingBody>(MovingBody{
     Velocity{0, -1.0f},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true}});
   return entity;
 }
@@ -562,7 +607,6 @@ void spawnFloatingScoreNumber(
   entity.assign<MovingBody>(
     Velocity{},
     GravityAffected{false},
-    IsPlayer{false},
     IgnoreCollisions{true});
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
   entity.assign<Active>();

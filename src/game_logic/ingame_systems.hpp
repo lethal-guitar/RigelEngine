@@ -36,6 +36,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
@@ -45,12 +46,10 @@
 #include "game_logic/interaction/respawn_checkpoint.hpp"
 #include "game_logic/item_container.hpp"
 #include "game_logic/map_scroll_system.hpp"
-#include "game_logic/player/animation_system.hpp"
-#include "game_logic/player/attack_system.hpp"
+#include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player/projectile_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
-#include "game_logic/player_movement_system.hpp"
 
 namespace rigel {
 
@@ -65,6 +64,8 @@ namespace game_logic {
 
 
 namespace rigel { namespace game_logic {
+
+class Player;
 
 class IngameSystems {
 public:
@@ -83,24 +84,28 @@ public:
     entityx::EntityManager& entities,
     entityx::EventManager& eventManager);
 
-  void update(const PlayerInputState& inputState, entityx::EntityManager& es);
+  void update(const PlayerInput& inputState, entityx::EntityManager& es);
   void render(
     entityx::EntityManager& es,
     const boost::optional<base::Color>& backdropFlashColor);
-
-  void buttonStateChanged(const PlayerInputState& inputState);
 
   engine::DebuggingSystem& debuggingSystem();
 
   void switchBackdrops();
 
-  entityx::Entity getAndResetActiveTeleporter();
+  void restartFromBeginning(entityx::Entity newPlayerEntity);
+  void restartFromCheckpoint(const base::Vector& checkpointPosition);
+
   void centerViewOnPlayer();
 
+  Player& player() {
+    return mPlayer;
+  }
+
 private:
-  entityx::Entity mPlayerEntity;
   base::Vector* mpScrollOffset;
   engine::CollisionChecker mCollisionChecker;
+  Player mPlayer;
 
   engine::ParticleSystem mParticles;
 
@@ -110,10 +115,7 @@ private:
   engine::DebuggingSystem mDebuggingSystem;
 
   game_logic::MapScrollSystem mMapScrollSystem;
-  game_logic::PlayerMovementSystem mPlayerMovementSystem;
   game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
-  game_logic::player::AttackSystem mPlayerAttackSystem;
-  game_logic::player::AnimationSystem mPlayerAnimationSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::player::ProjectileSystem mPlayerProjectileSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
@@ -138,13 +140,11 @@ private:
   game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
   game_logic::ai::SlimePipeSystem mSlimePipeSystem;
+  game_logic::ai::SpiderSystem mSpiderSystem;
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 
-  data::PlayerModel* mpPlayerModel;
   engine::RandomNumberGenerator* mpRandomGenerator;
   IGameServiceProvider* mpServiceProvider;
-
-  entityx::Entity mActiveTeleporter;
 };
 
 }}

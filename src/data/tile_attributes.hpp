@@ -75,6 +75,7 @@ public:
   bool isFastAnimation(TileIndex tile) const;
   bool isForeGround(TileIndex tile) const;
   bool isLadder(TileIndex tile) const;
+  bool isClimbable(TileIndex tile) const;
 
   CollisionData collisionData(TileIndex tile) const;
 

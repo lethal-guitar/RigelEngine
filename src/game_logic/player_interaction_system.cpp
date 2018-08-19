@@ -23,7 +23,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interaction/force_field.hpp"
-#include "game_logic/interaction/teleporter.hpp"
+#include "game_logic/player.hpp"
 #include "game_service_provider.hpp"
 #include "global_level_events.hpp"
 
@@ -35,7 +35,6 @@ using engine::components::AnimationLoop;
 using engine::components::BoundingBox;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
-using player::PlayerState;
 
 using namespace game_logic::components;
 
@@ -45,6 +44,8 @@ namespace {
 
 constexpr auto BASIC_LETTER_COLLECTION_SCORE = 10100;
 constexpr auto CORRECT_LETTER_COLLECTION_SCORE = 100000;
+
+constexpr auto PLAYER_TO_TELEPORTER_OFFSET = base::Vector{1, 0};
 
 
 void spawnScoreNumbers(
@@ -86,7 +87,6 @@ void spawnScoreNumbersForLetterCollectionBonus(
   }
 }
 
-
 data::TutorialMessageId tutorialFor(const components::InteractableType type) {
   using TM = data::TutorialMessageId;
   switch (type) {
@@ -101,69 +101,93 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
   std::terminate();
 }
 
+
+base::Vector findTeleporterTargetPosition(
+  ex::EntityManager& es,
+  ex::Entity teleporter
+) {
+  const auto sourceTeleporterPosition =
+    *teleporter.component<WorldPosition>();
+
+  base::Vector targetPosition;
+
+  ex::ComponentHandle<components::Interactable> interactable;
+  ex::ComponentHandle<WorldPosition> position;
+
+  ex::Entity targetTeleporter;
+  for (auto entity : es.entities_with_components(interactable, position)) {
+    if (
+      interactable->mType == components::InteractableType::Teleporter &&
+      *position != sourceTeleporterPosition
+    ) {
+      targetTeleporter = entity;
+    }
+  }
+
+  const auto targetTeleporterPosition =
+    *targetTeleporter.component<WorldPosition>();
+  return targetTeleporterPosition + PLAYER_TO_TELEPORTER_OFFSET;
+}
+
 }
 
 
 PlayerInteractionSystem::PlayerInteractionSystem(
-  ex::Entity player,
+  Player* pPlayer,
   PlayerModel* pPlayerModel,
   IGameServiceProvider* pServices,
   EntityFactory* pEntityFactory,
-  TeleportCallback teleportCallback,
   entityx::EventManager* pEvents
 )
-  : mPlayer(player)
+  : mpPlayer(pPlayer)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
   , mpEntityFactory(pEntityFactory)
-  , mTeleportCallback(teleportCallback)
   , mpEvents(pEvents)
 {
 }
 
 
-void PlayerInteractionSystem::update(entityx::EntityManager& es) {
-  assert(mPlayer.has_component<PlayerControlled>());
-  auto& state = *mPlayer.component<PlayerControlled>();
-  if (state.isPlayerDead()) {
+void PlayerInteractionSystem::updatePlayerInteraction(
+  const PlayerInput& input,
+  entityx::EntityManager& es
+) {
+  if (mpPlayer->isDead()) {
     return;
   }
 
-  if (state.mState != PlayerState::LookingUp) {
-    state.mPerformedInteraction = false;
-  }
-  const auto interactionWanted =
-    state.mState == PlayerState::LookingUp;
+  const auto interactionWanted = input.mInteract.mWasTriggered;
+  const auto worldSpacePlayerBounds = mpPlayer->worldSpaceHitBox();
 
-  if (!state.mPerformedInteraction) {
-    const auto& playerBox = *mPlayer.component<BoundingBox>();
-    const auto& playerPos = *mPlayer.component<WorldPosition>();
-    const auto worldSpacePlayerBounds =
-      engine::toWorldSpace(playerBox, playerPos);
+  auto performedInteraction = false;
+  es.each<Interactable, WorldPosition, BoundingBox>(
+    [&, this](
+      ex::Entity entity,
+      const Interactable& interactable,
+      const WorldPosition& pos,
+      const BoundingBox& bbox
+    ) {
+      if (performedInteraction) {
+        return;
+      }
+      const auto objectBounds = engine::toWorldSpace(bbox, pos);
+      if (worldSpacePlayerBounds.intersects(objectBounds)) {
+        if (interactionWanted) {
+          performInteraction(es, entity, interactable.mType);
+          performedInteraction = true;
+        } else {
+          showTutorialMessage(tutorialFor(interactable.mType));
+        }
+      }
+    });
+}
 
-    es.each<Interactable, WorldPosition, BoundingBox>(
-      [&, this](
-        ex::Entity entity,
-        const Interactable& interactable,
-        const WorldPosition& pos,
-        const BoundingBox& bbox
-      ) {
-        if (state.mPerformedInteraction) {
-          return;
-        }
-        const auto objectBounds = engine::toWorldSpace(bbox, pos);
-        if (worldSpacePlayerBounds.intersects(objectBounds)) {
-          if (interactionWanted) {
-            performInteraction(es, entity, interactable.mType);
-            state.mPerformedInteraction = true;
-          } else {
-            showTutorialMessage(tutorialFor(interactable.mType));
-          }
-        }
-      });
+
+void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
+  if (mpPlayer->isDead()) {
+    return;
   }
 
-  // ----------------------------------------------------------------------
   es.each<CollectableItem, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity entity,
@@ -177,11 +201,7 @@ void PlayerInteractionSystem::update(entityx::EntityManager& es) {
       worldSpaceBbox.topLeft +=
         base::Vector{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
 
-      const auto playerPos = *mPlayer.component<WorldPosition>();
-      auto playerBBox = *mPlayer.component<BoundingBox>();
-      playerBBox.topLeft +=
-        base::Vector{playerPos.x, playerPos.y - (playerBBox.size.height - 1)};
-
+      auto playerBBox = mpPlayer->worldSpaceHitBox();
       if (worldSpaceBbox.intersects(playerBBox)) {
         boost::optional<data::SoundId> soundToPlay;
 
@@ -259,24 +279,19 @@ void PlayerInteractionSystem::performInteraction(
 ) {
   switch (type) {
     case InteractableType::Teleporter:
-      mTeleportCallback(interactable);
+      mpEvents->emit(rigel::events::PlayerTeleported{
+        findTeleporterTargetPosition(es, interactable)});
       break;
 
     case InteractableType::ForceFieldCardReader:
       if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
-        triggerPlayerInteractionAnimation();
+        mpPlayer->doInteractionAnimation();
         showMessage(data::Messages::AccessGranted);
       } else {
         showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
       }
       break;
   }
-}
-
-
-void PlayerInteractionSystem::triggerPlayerInteractionAnimation() {
-  auto& state = *mPlayer.component<PlayerControlled>();
-  state.enterTimedInteractionLock();
 }
 
 

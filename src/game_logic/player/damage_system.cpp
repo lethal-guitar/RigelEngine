@@ -21,77 +21,33 @@
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/player/components.hpp"
+#include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel { namespace game_logic {
 
-namespace {
-
-// TODO: Possibly tweak this value
-const auto DEATH_JUMP_IMPULSE = -2.6f;
-
-
-int mercyFramesForDifficulty(const data::Difficulty difficulty) {
-  using data::Difficulty;
-
-  switch (difficulty) {
-    case Difficulty::Easy:
-      return 40;
-
-    case Difficulty::Medium:
-      return 30;
-
-    case Difficulty::Hard:
-      return 20;
-  }
-
-  assert(false);
-  return 40;
-}
-
-}
-
+namespace player {
 
 using engine::components::BoundingBox;
-using engine::components::MovingBody;
 using engine::components::WorldPosition;
 using engine::toWorldSpace;
-using game_logic::components::PlayerControlled;
 using game_logic::components::PlayerDamaging;
 
 
-DamageSystem::DamageSystem(
-  entityx::Entity player,
-  data::PlayerModel* pPlayerModel,
-  IGameServiceProvider* pServiceProvider,
-  const data::Difficulty difficulty
-)
-  : mPlayer(player)
-  , mpPlayerModel(pPlayerModel)
-  , mpServiceProvider(pServiceProvider)
-  , mNumMercyFrames(mercyFramesForDifficulty(difficulty))
+DamageSystem::DamageSystem(Player* pPlayer)
+  : mpPlayer(pPlayer)
 {
 }
 
 
 void DamageSystem::update(entityx::EntityManager& es) {
-  if (mpPlayerModel->isDead()) {
+  if (mpPlayer->isDead()) {
     return;
   }
 
-  assert(mPlayer.has_component<BoundingBox>());
-  assert(mPlayer.has_component<MovingBody>());
-  assert(mPlayer.has_component<PlayerControlled>());
-  assert(mPlayer.has_component<WorldPosition>());
-
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
-  const auto playerBBox = toWorldSpace(
-    *mPlayer.component<BoundingBox>(), playerPosition);
-  auto& playerState = *mPlayer.component<PlayerControlled>();
-
+  const auto playerBBox = mpPlayer->worldSpaceHitBox();
   es.each<PlayerDamaging, BoundingBox, WorldPosition>(
-    [this, &playerBBox, &playerState](
+    [this, &playerBBox](
       entityx::Entity entity,
       const PlayerDamaging& damage,
       const BoundingBox& boundingBox,
@@ -99,23 +55,15 @@ void DamageSystem::update(entityx::EntityManager& es) {
     ) {
       const auto bbox = toWorldSpace(boundingBox, position);
       const auto hasCollision = bbox.intersects(playerBBox);
-      const auto canTakeDamage =
-        !playerState.isInMercyFrames() || damage.mIgnoreMercyFrames;
+      const auto playerCanTakeDamage =
+        mpPlayer->canTakeDamage() || damage.mIsFatal;
 
-      if (hasCollision && canTakeDamage) {
-        mpPlayerModel->takeDamage(damage.mAmount);
-
-        if (!mpPlayerModel->isDead()) {
-          playerState.mMercyFramesRemaining = mNumMercyFrames;
-          mpServiceProvider->playSound(data::SoundId::DukePain);
+      if (hasCollision && playerCanTakeDamage) {
+        if (damage.mIsFatal) {
+          mpPlayer->die();
         } else {
-          auto& body = *mPlayer.component<MovingBody>();
-          body.mVelocity = {0.0f, DEATH_JUMP_IMPULSE};
-
-          playerState.mState = PlayerState::Dieing;
-          mpServiceProvider->playSound(data::SoundId::DukeDeath);
+          mpPlayer->takeDamage(damage.mAmount);
         }
-
         if (damage.mDestroyOnContact) {
           entity.destroy();
         }

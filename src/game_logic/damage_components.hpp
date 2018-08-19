@@ -33,7 +33,7 @@ namespace parameter_aliases {
 using Damage = int;
 using Health = int;
 using GivenScore = int;
-using IgnoreMercyFrames = bool;
+using IsFatal = bool;
 using DestroyOnContact = bool;
 
 }
@@ -42,17 +42,17 @@ using DestroyOnContact = bool;
 struct PlayerDamaging {
   explicit PlayerDamaging(
     const int amount,
-    const bool ignoreMercyFrames = false,
+    const bool isFatal = false,
     const bool destroyOnContact = false
   )
     : mAmount(amount)
-    , mIgnoreMercyFrames(ignoreMercyFrames)
+    , mIsFatal(isFatal)
     , mDestroyOnContact(destroyOnContact)
   {
   }
 
   int mAmount;
-  bool mIgnoreMercyFrames;
+  bool mIsFatal;
   bool mDestroyOnContact;
 };
 

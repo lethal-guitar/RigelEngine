@@ -42,6 +42,8 @@ set(core_sources
     engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/movement.cpp
+    engine/movement.hpp
     engine/opengl.cpp
     engine/opengl.hpp
     engine/particle_system.cpp
@@ -90,6 +92,8 @@ set(core_sources
     game_logic/ai/slime_blob.hpp
     game_logic/ai/slime_pipe.cpp
     game_logic/ai/slime_pipe.hpp
+    game_logic/ai/spider.cpp
+    game_logic/ai/spider.hpp
     game_logic/ai/spike_ball.cpp
     game_logic/ai/spike_ball.hpp
     game_logic/collectable_components.hpp
@@ -109,24 +113,19 @@ set(core_sources
     game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
+    game_logic/input.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
     game_logic/interaction/respawn_checkpoint.cpp
     game_logic/interaction/respawn_checkpoint.hpp
-    game_logic/interaction/teleporter.cpp
-    game_logic/interaction/teleporter.hpp
     game_logic/item_container.cpp
     game_logic/item_container.hpp
     game_logic/map_scroll_system.cpp
     game_logic/map_scroll_system.hpp
-    game_logic/player/animation_system.cpp
-    game_logic/player/animation_system.hpp
-    game_logic/player/attack_system.cpp
-    game_logic/player/attack_system.hpp
-    game_logic/player/attack_traits.cpp
-    game_logic/player/attack_traits.hpp
+    game_logic/player.cpp
+    game_logic/player.hpp
     game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
@@ -134,8 +133,6 @@ set(core_sources
     game_logic/player/projectile_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
-    game_logic/player_movement_system.cpp
-    game_logic/player_movement_system.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
