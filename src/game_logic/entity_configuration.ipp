@@ -1529,6 +1529,11 @@ void EntityFactory::configureEntity(
       entity.assign<components::RadarComputer>();
       break;
 
+    case 240: // Special hint machine
+      entity.assign<Interactable>(InteractableType::HintMachine);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 188: // rotating floor spikes
     case 210: // Computer showing "Duke escaped"
     case 222: // Lava fall left

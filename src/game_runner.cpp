@@ -383,7 +383,7 @@ void GameRunner::loadLevel(
   mMapAtLevelStart = mLevelData.mMap;
 
   mpSystems = std::make_unique<IngameSystems>(
-    sessionId.mDifficulty,
+    sessionId,
     &mScrollOffset,
     playerEntity,
     mpPlayerModel,
@@ -395,7 +395,8 @@ void GameRunner::loadLevel(
     &mRadarDishCounter,
     mpRenderer,
     mEntities,
-    mEventManager);
+    mEventManager,
+    resources);
 
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect =
