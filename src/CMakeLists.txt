@@ -12,6 +12,8 @@ set(core_sources
     data/game_traits.hpp
     data/image.cpp
     data/image.hpp
+    data/level_hints.cpp
+    data/level_hints.hpp
     data/map.cpp
     data/map.hpp
     data/player_model.cpp

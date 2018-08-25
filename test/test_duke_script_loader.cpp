@@ -344,3 +344,29 @@ TEST_CASE("Page definitions are parsed correctly") {
     }
   }
 }
+
+
+TEST_CASE("Level hints are parsed correctly") {
+  const auto testData =
+    "Preceding_Stuff\r\n"
+    "\r\n"
+    "//FADEOUT\r\n"
+    "//WAIT\r\n"
+    "//END\r\n"
+    "\r\n"
+    "Hints\r\n"
+    "\r\n"
+    "//HELPTEXT 1 3 This is the hint for level 3\r\n"
+    "//HELPTEXT 2 2 Hello World\r\n"
+    "//END\r\n";
+
+  const auto parsedHints = loadHintMessages(testData);
+
+  CHECK(parsedHints.mHints.size() == 2u);
+  CHECK(parsedHints.mHints[0].mMessage == "This is the hint for level 3");
+  CHECK(parsedHints.mHints[0].mEpisode == 0);
+  CHECK(parsedHints.mHints[0].mLevel == 2);
+  CHECK(parsedHints.mHints[1].mMessage == "Hello World");
+  CHECK(parsedHints.mHints[1].mEpisode == 1);
+  CHECK(parsedHints.mHints[1].mLevel == 1);
+}

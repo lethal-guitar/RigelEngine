@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2018, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,21 +16,42 @@
 
 #pragma once
 
-#include "data/duke_script.hpp"
-#include "data/level_hints.hpp"
+#include "base/warnings.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 
-namespace rigel { namespace loader {
+namespace rigel { namespace data {
 
-using ScriptBundle = std::unordered_map<std::string, data::script::Script>;
+struct Hint {
+  Hint(const int episode, const int level, std::string message)
+    : mEpisode(episode)
+    , mLevel(level)
+    , mMessage(std::move(message))
+  {
+  }
+
+  int mEpisode;
+  int mLevel;
+  std::string mMessage;
+};
 
 
-ScriptBundle loadScripts(const std::string& scriptSource);
+struct LevelHints {
+  LevelHints() = default;
+  explicit LevelHints(std::vector<Hint> hints)
+    : mHints(hints)
+  {
+  }
 
+  boost::optional<std::string> getHint(int episode, int level) const;
 
-data::LevelHints loadHintMessages(const std::string& scriptSource);
+  std::vector<Hint> mHints;
+};
 
 }}

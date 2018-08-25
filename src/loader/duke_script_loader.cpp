@@ -470,6 +470,24 @@ data::script::Script parseScript(istream& sourceTextStream) {
   return script;
 }
 
+
+bool skipToHintsSection(istream& sourceTextStream) {
+  while (!sourceTextStream.eof()) {
+    skipWhiteSpace(sourceTextStream);
+
+    string sectionName;
+    sourceTextStream >> sectionName;
+    b::trim(sectionName);
+
+    if (sectionName == "Hints") {
+      skipWhiteSpace(sourceTextStream);
+      return true;
+    }
+  }
+
+  return false;
+}
+
 }
 
 
@@ -490,6 +508,54 @@ ScriptBundle loadScripts(const string& scriptSource) {
   }
 
   return bundle;
+}
+
+
+data::LevelHints loadHintMessages(const std::string& scriptSource) {
+  istringstream sourceStream(scriptSource);
+
+  const auto hintsFound = skipToHintsSection(sourceStream);
+  if (!hintsFound) {
+    return {};
+  }
+
+  std::vector<data::Hint> hints;
+
+  for (string line; getline(sourceStream, line, '\r'); ) {
+    skipWhiteSpace(sourceStream);
+
+    if (!isCommand(line)) {
+      continue;
+    }
+
+    b::trim(line);
+
+    istringstream lineTextStream(line);
+
+    string command;
+    lineTextStream >> command;
+    stripCommandPrefix(command);
+
+    if (command == "END") {
+      break;
+    }
+
+    if (command == "HELPTEXT") {
+      int episode;
+      int level;
+      string message;
+
+      lineTextStream >> episode;
+      lineTextStream >> level;
+
+      skipWhiteSpace(lineTextStream);
+
+      getline(lineTextStream, message, '\r');
+      hints.emplace_back(episode - 1, level - 1, move(message));
+    }
+  }
+
+  return data::LevelHints{hints};
 }
 
 }}
