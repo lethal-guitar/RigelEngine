@@ -90,9 +90,7 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 
 GameRunner::GameRunner(
   data::PlayerModel* pPlayerModel,
-  const int episode,
-  const int levelNumber,
-  const data::Difficulty difficulty,
+  const data::GameSessionId& sessionId,
   GameMode::Context context,
   boost::optional<base::Vector> playerPositionOverride,
   bool showWelcomeMessage
@@ -104,7 +102,7 @@ GameRunner::GameRunner(
       context.mpRenderer,
       &mEntities,
       &context.mpResources->mActorImagePackage,
-      difficulty)
+      sessionId.mDifficulty)
   , mpPlayerModel(pPlayerModel)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mAccumulatedTime(0.0)
@@ -112,7 +110,7 @@ GameRunner::GameRunner(
   , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
       mpPlayerModel,
-      levelNumber + 1,
+      sessionId.mLevel + 1,
       mpRenderer,
       *context.mpResources)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
@@ -132,7 +130,7 @@ GameRunner::GameRunner(
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
 
-  loadLevel(episode, levelNumber, difficulty, *context.mpResources);
+  loadLevel(sessionId, *context.mpResources);
 
   if (playerPositionOverride) {
     mpSystems->player().position() = *playerPositionOverride;
@@ -367,13 +365,13 @@ void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
 
 
 void GameRunner::loadLevel(
-  const int episode,
-  const int levelNumber,
-  const data::Difficulty difficulty,
+  const data::GameSessionId& sessionId,
   const loader::ResourceLoader& resources
 ) {
   auto loadedLevel = loader::loadLevel(
-    levelFileName(episode, levelNumber), resources, difficulty);
+    levelFileName(sessionId.mEpisode, sessionId.mLevel),
+    resources,
+    sessionId.mDifficulty);
   auto playerEntity =
     mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
 
@@ -385,7 +383,7 @@ void GameRunner::loadLevel(
   mMapAtLevelStart = mLevelData.mMap;
 
   mpSystems = std::make_unique<IngameSystems>(
-    difficulty,
+    sessionId.mDifficulty,
     &mScrollOffset,
     playerEntity,
     mpPlayerModel,
