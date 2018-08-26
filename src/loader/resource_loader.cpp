@@ -240,10 +240,7 @@ data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const {
 ScriptBundle ResourceLoader::loadScriptBundle(
   const std::string& fileName
 ) const {
-  const auto data = mFilePackage.file(fileName);
-  const auto pBytesAsChars = reinterpret_cast<const char*>(data.data());
-  const std::string text(pBytesAsChars, pBytesAsChars + data.size());
-  return loader::loadScripts(text);
+  return loader::loadScripts(mFilePackage.fileAsText(fileName));
 }
 
 }}

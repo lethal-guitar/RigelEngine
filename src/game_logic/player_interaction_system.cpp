@@ -138,9 +138,7 @@ base::Vector findTeleporterTargetPosition(
 
 
 data::LevelHints loadHints(const loader::ResourceLoader& resources) {
-  const auto data = resources.mFilePackage.file("HELP.MNI");
-  const auto pBytesAsChars = reinterpret_cast<const char*>(data.data());
-  const std::string text(pBytesAsChars, pBytesAsChars + data.size());
+  const auto text = resources.mFilePackage.fileAsText("HELP.MNI");
   return loader::loadHintMessages(text);
 }
 
