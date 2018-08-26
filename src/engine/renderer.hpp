@@ -24,6 +24,7 @@
 #include "engine/shader.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/optional.hpp>
 #include <glm/mat4x4.hpp>
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
@@ -81,6 +82,36 @@ public:
   };
 
 
+  class StateSaver {
+  public:
+    explicit StateSaver(Renderer* pRenderer)
+      : mpRenderer(pRenderer)
+      , mClipRect(pRenderer->clipRect())
+      , mGlobalTranslation(pRenderer->globalTranslation())
+      , mGlobalScale(pRenderer->globalScale())
+      , mRenderTarget(pRenderer->currentRenderTarget())
+    {
+    }
+
+    ~StateSaver() {
+      mpRenderer->setRenderTarget(mRenderTarget);
+      mpRenderer->setClipRect(mClipRect);
+      mpRenderer->setGlobalTranslation(mGlobalTranslation);
+      mpRenderer->setGlobalScale(mGlobalScale);
+    }
+
+    StateSaver(const StateSaver&) = delete;
+    StateSaver& operator=(const StateSaver&) = delete;
+
+  private:
+    Renderer* mpRenderer;
+    boost::optional<base::Rect<int>> mClipRect;
+    base::Vector mGlobalTranslation;
+    base::Point<float> mGlobalScale;
+    RenderTarget mRenderTarget;
+  };
+
+
   explicit Renderer(SDL_Window* pWindow);
   ~Renderer();
 
@@ -115,6 +146,15 @@ public:
 
 
   void drawPoint(const base::Vector& position, const base::Color& color);
+
+  void setGlobalTranslation(const base::Vector& translation);
+  base::Vector globalTranslation() const;
+
+  void setGlobalScale(const base::Point<float>& scale);
+  base::Point<float> globalScale() const;
+
+  void setClipRect(const boost::optional<base::Rect<int>>& clipRect);
+  boost::optional<base::Rect<int>> clipRect() const;
 
   RenderTarget currentRenderTarget() const;
   void setRenderTarget(const RenderTarget& target);
@@ -165,6 +205,7 @@ private:
   void setRenderModeIfChanged(RenderMode mode);
   void updateShaders();
   void onRenderTargetChanged();
+  void updateProjectionMatrix();
 
   GLuint createGlTexture(
     GLsizei width,
@@ -196,6 +237,9 @@ private:
 
   glm::mat4 mProjectionMatrix;
   base::Rect<int> mDefaultViewport;
+  boost::optional<base::Rect<int>> mClipRect;
+  glm::vec2 mGlobalTranslation;
+  glm::vec2 mGlobalScale;
 };
 
 }}

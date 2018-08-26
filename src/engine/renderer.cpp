@@ -181,6 +181,19 @@ glm::vec4 toGlColor(const base::Color& color) {
   return glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
 }
 
+
+void setScissorBox(
+  const base::Rect<int>& clipRect,
+  const base::Size<int>& frameBufferSize
+) {
+  const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
+  glScissor(
+    clipRect.topLeft.x,
+    offsetAtBottom,
+    clipRect.size.width,
+    clipRect.size.height);
+}
+
 }
 
 
@@ -202,6 +215,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mCurrentFbo(0)
   , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
   , mDefaultViewport(determineDefaultViewport(pWindow))
+  , mGlobalScale(1.0f, 1.0f)
 {
   // General configuration
   glDisable(GL_DEPTH_TEST);
@@ -444,6 +458,61 @@ void Renderer::drawPoint(
 }
 
 
+void Renderer::setGlobalTranslation(const base::Vector& translation) {
+  const auto glTranslation = glm::vec2{translation.x, translation.y};
+  if (glTranslation != mGlobalTranslation) {
+    submitBatch();
+
+    mGlobalTranslation = glTranslation;
+    updateProjectionMatrix();
+  }
+}
+
+
+base::Vector Renderer::globalTranslation() const {
+  return base::Vector{
+    static_cast<int>(mGlobalTranslation.x),
+    static_cast<int>(mGlobalTranslation.y)};
+}
+
+
+void Renderer::setGlobalScale(const base::Point<float>& scale) {
+  const auto glScale = glm::vec2{scale.x, scale.y};
+  if (glScale != mGlobalScale) {
+    submitBatch();
+
+    mGlobalScale = glScale;
+    updateProjectionMatrix();
+  }
+}
+
+
+base::Point<float> Renderer::globalScale() const {
+  return {mGlobalScale.x, mGlobalScale.y};
+}
+
+
+void Renderer::setClipRect(const boost::optional<base::Rect<int>>& clipRect) {
+  if (clipRect == mClipRect) {
+    return;
+  }
+
+  mClipRect = clipRect;
+  if (mClipRect) {
+    glEnable(GL_SCISSOR_TEST);
+
+    setScissorBox(*clipRect, mCurrentFramebufferSize);
+  } else {
+    glDisable(GL_SCISSOR_TEST);
+  }
+}
+
+
+boost::optional<base::Rect<int>> Renderer::clipRect() const {
+  return mClipRect;
+}
+
+
 Renderer::RenderTarget Renderer::currentRenderTarget() const {
   return {mCurrentFramebufferSize, mCurrentFbo};
 }
@@ -646,11 +715,24 @@ void Renderer::onRenderTargetChanged() {
     glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
   }
 
-  mProjectionMatrix = glm::ortho(
+  updateProjectionMatrix();
+
+  if (mClipRect) {
+    setScissorBox(*mClipRect, mCurrentFramebufferSize);
+  }
+}
+
+
+void Renderer::updateProjectionMatrix() {
+  const auto projection = glm::ortho(
     0.0f,
     float(mCurrentFramebufferSize.width),
     float(mCurrentFramebufferSize.height),
     0.0f);
+
+  mProjectionMatrix = glm::translate(
+    glm::scale(projection, glm::vec3(mGlobalScale, 1.0f)),
+    glm::vec3(mGlobalTranslation, 0.0f));
 
   updateShaders();
 }
