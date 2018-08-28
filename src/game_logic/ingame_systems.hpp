@@ -59,6 +59,7 @@ namespace game_logic {
   class EntityFactory;
   class RadarDishCounter;
 }
+namespace loader { class ResourceLoader; }
 
 }
 
@@ -70,7 +71,7 @@ class Player;
 class IngameSystems {
 public:
   IngameSystems(
-    data::Difficulty difficulty,
+    const data::GameSessionId& sessionId,
     base::Vector* pScrollOffset,
     entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
@@ -82,7 +83,8 @@ public:
     const RadarDishCounter* pRadarDishCounter,
     engine::Renderer* pRenderer,
     entityx::EntityManager& entities,
-    entityx::EventManager& eventManager);
+    entityx::EventManager& eventManager,
+    const loader::ResourceLoader& resources);
 
   void update(const PlayerInput& inputState, entityx::EntityManager& es);
   void render(

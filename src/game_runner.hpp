@@ -52,9 +52,7 @@ class GameRunner : public entityx::Receiver<GameRunner> {
 public:
   GameRunner(
     data::PlayerModel* pPlayerModel,
-    int episode,
-    int level,
-    data::Difficulty difficulty,
+    const data::GameSessionId& sessionId,
     GameMode::Context context,
     boost::optional<base::Vector> playerPositionOverride = boost::none,
     bool showWelcomeMessage = false);
@@ -75,11 +73,8 @@ public:
 
 private:
   void loadLevel(
-    int episode,
-    int levelNumber,
-    data::Difficulty difficulty,
-    const loader::ResourceLoader& resources
-  );
+    const data::GameSessionId& sessionId,
+    const loader::ResourceLoader& resources);
 
   void updateGameLogic();
 

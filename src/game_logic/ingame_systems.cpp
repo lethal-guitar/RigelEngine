@@ -28,7 +28,7 @@ using namespace engine;
 
 
 IngameSystems::IngameSystems(
-  const data::Difficulty difficulty,
+  const data::GameSessionId& sessionId,
   base::Vector* pScrollOffset,
   entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
@@ -40,13 +40,14 @@ IngameSystems::IngameSystems(
   const RadarDishCounter* pRadarDishCounter,
   engine::Renderer* pRenderer,
   entityx::EntityManager& entities,
-  entityx::EventManager& eventManager
+  entityx::EventManager& eventManager,
+  const loader::ResourceLoader& resources
 )
   : mpScrollOffset(pScrollOffset)
   , mCollisionChecker(pMap, entities, eventManager)
   , mPlayer(
       playerEntity,
-      difficulty,
+      sessionId.mDifficulty,
       pPlayerModel,
       pServiceProvider,
       &mCollisionChecker,
@@ -63,11 +64,13 @@ IngameSystems::IngameSystems(
   , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
   , mMapScrollSystem(mpScrollOffset, &mPlayer, *pMap)
   , mPlayerInteractionSystem(
+      sessionId,
       &mPlayer,
       pPlayerModel,
       pServiceProvider,
       pEntityFactory,
-      &eventManager)
+      &eventManager,
+      resources)
   , mPlayerDamageSystem(&mPlayer)
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(

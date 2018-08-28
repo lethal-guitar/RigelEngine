@@ -26,6 +26,8 @@ RIGEL_DISABLE_WARNINGS
 #include <atria/variant/match_boost.hpp>
 RIGEL_RESTORE_WARNINGS
 
+#include <cctype>
+
 
 namespace rigel { namespace ui {
 
@@ -64,7 +66,7 @@ void IngameMessageDisplay::update() {
 
       const auto foundNextLineMarker = nextChar == NEXT_LINE_MARKER;
       if (!foundNextLineMarker) {
-        mPrintedMessage.push_back(nextChar);
+        mPrintedMessage.push_back(static_cast<char>(std::toupper(nextChar)));
         if (nextChar != ' ') {
           mpServiceProvider->playSound(data::SoundId::IngameMessageTyping);
         }

@@ -36,9 +36,7 @@ GameSessionMode::GameSessionMode(
 )
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
-      episode,
-      level,
-      difficulty,
+      data::GameSessionId{episode, level, difficulty},
       context,
       playerPositionOverride,
       true /* show welcome message */))
@@ -89,9 +87,7 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
 
         auto pNextIngameMode = std::make_unique<GameRunner>(
           &mPlayerModel,
-          mEpisode,
-          ++mCurrentLevelNr,
-          mDifficulty,
+          data::GameSessionId{mEpisode, ++mCurrentLevelNr, mDifficulty},
           mContext);
         fadeToNewStage(*pNextIngameMode);
         mCurrentStage = std::move(pNextIngameMode);

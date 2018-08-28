@@ -26,6 +26,8 @@
 #include "game_logic/player.hpp"
 #include "game_service_provider.hpp"
 #include "global_level_events.hpp"
+#include "loader/duke_script_loader.hpp"
+#include "loader/resource_loader.hpp"
 
 
 namespace rigel { namespace game_logic {
@@ -44,8 +46,10 @@ namespace {
 
 constexpr auto BASIC_LETTER_COLLECTION_SCORE = 10100;
 constexpr auto CORRECT_LETTER_COLLECTION_SCORE = 100000;
+constexpr auto HINT_MACHINE_ACTIVATION_SCORE = 50000;
 
 constexpr auto PLAYER_TO_TELEPORTER_OFFSET = base::Vector{1, 0};
+constexpr auto HINT_MACHINE_GLOBE_OFFSET = base::Vector{1, -4};
 
 
 void spawnScoreNumbers(
@@ -95,6 +99,9 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
 
     case InteractableType::ForceFieldCardReader:
       return TM::FoundForceField;
+
+    case InteractableType::HintMachine:
+      return TM::HintGlobeNeeded;
   }
 
   assert(false);
@@ -129,21 +136,31 @@ base::Vector findTeleporterTargetPosition(
   return targetTeleporterPosition + PLAYER_TO_TELEPORTER_OFFSET;
 }
 
+
+data::LevelHints loadHints(const loader::ResourceLoader& resources) {
+  const auto text = resources.mFilePackage.fileAsText("HELP.MNI");
+  return loader::loadHintMessages(text);
+}
+
 }
 
 
 PlayerInteractionSystem::PlayerInteractionSystem(
+  const data::GameSessionId& sessionId,
   Player* pPlayer,
   PlayerModel* pPlayerModel,
   IGameServiceProvider* pServices,
   EntityFactory* pEntityFactory,
-  entityx::EventManager* pEvents
+  entityx::EventManager* pEvents,
+  const loader::ResourceLoader& resources
 )
   : mpPlayer(pPlayer)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
   , mpEntityFactory(pEntityFactory)
   , mpEvents(pEvents)
+  , mLevelHints(loadHints(resources))
+  , mSessionId(sessionId)
 {
 }
 
@@ -170,9 +187,15 @@ void PlayerInteractionSystem::updatePlayerInteraction(
       if (performedInteraction) {
         return;
       }
+
+      const auto isHintMachine =
+        interactable.mType == InteractableType::HintMachine;
+      const auto playerHasHintGlobe =
+        mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
+
       const auto objectBounds = engine::toWorldSpace(bbox, pos);
       if (worldSpacePlayerBounds.intersects(objectBounds)) {
-        if (interactionWanted) {
+        if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
           performInteraction(es, entity, interactable.mType);
           performedInteraction = true;
         } else {
@@ -291,7 +314,35 @@ void PlayerInteractionSystem::performInteraction(
         showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
       }
       break;
+
+    case InteractableType::HintMachine:
+      activateHintMachine(interactable);
+      break;
   }
+}
+
+
+void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
+  const auto machinePosition = *entity.component<WorldPosition>();
+  mpPlayerModel->removeItem(data::InventoryItemType::SpecialHintGlobe);
+  mpPlayerModel->giveScore(HINT_MACHINE_ACTIVATION_SCORE);
+
+  mpServiceProvider->playSound(data::SoundId::ItemPickup);
+  spawnScoreNumbers(
+    machinePosition,
+    HINT_MACHINE_ACTIVATION_SCORE,
+    *mpEntityFactory);
+
+  const auto maybeHint =
+    mLevelHints.getHint(mSessionId.mEpisode, mSessionId.mLevel);
+  if (maybeHint) {
+    showMessage(*maybeHint);
+  }
+
+  entity.remove<Interactable>();
+  entity.remove<BoundingBox>();
+  mpEntityFactory->createSprite(
+    238, machinePosition + HINT_MACHINE_GLOBE_OFFSET);
 }
 
 

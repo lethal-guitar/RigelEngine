@@ -17,6 +17,8 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/game_session_data.hpp"
+#include "data/level_hints.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
 #include "engine/base_components.hpp"
@@ -39,6 +41,10 @@ namespace rigel {
   namespace game_logic {
     class EntityFactory;
   }
+
+  namespace loader {
+    class ResourceLoader;
+  }
 }
 
 
@@ -49,11 +55,13 @@ class Player;
 class PlayerInteractionSystem {
 public:
   PlayerInteractionSystem(
+    const data::GameSessionId& sessionId,
     Player* pPlayer,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServices,
     EntityFactory* pEntityFactory,
-    entityx::EventManager* pEvents);
+    entityx::EventManager* pEvents,
+    const loader::ResourceLoader& resources);
 
   void updatePlayerInteraction(
     const PlayerInput& input,
@@ -68,8 +76,9 @@ private:
   void performInteraction(
     entityx::EntityManager& es,
     entityx::Entity interactable,
-    components::InteractableType type
-  );
+    components::InteractableType type);
+
+  void activateHintMachine(entityx::Entity entity);
 
   void collectLetter(
     data::CollectableLetterType type,
@@ -81,6 +90,8 @@ private:
   IGameServiceProvider* mpServiceProvider;
   EntityFactory* mpEntityFactory;
   entityx::EventManager* mpEvents;
+  data::LevelHints mLevelHints;
+  data::GameSessionId mSessionId;
 };
 
 }}
