@@ -309,6 +309,8 @@ Renderer::Renderer(SDL_Window* pWindow)
   glGenBuffers(1, &mStreamEbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mStreamEbo);
 
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
   // One-time setup for textured quad shader
   useShaderIfChanged(mTexturedQuadShader);
   mTexturedQuadShader.setUniform("textureData", 0);
@@ -673,8 +675,6 @@ void Renderer::updateShaders() {
       break;
   }
 
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
 }
 
 
