@@ -77,6 +77,10 @@ public:
     return {mData.mWidth, mData.mHeight};
   }
 
+  Renderer::TextureData data() const {
+    return mData;
+  }
+
 protected:
   base::Rect<int> completeSourceRect() const {
     return {{0, 0}, extents()};
