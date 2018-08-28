@@ -195,7 +195,7 @@ Renderer::Renderer(SDL_Window* pWindow)
       SHADER_PREAMBLE,
       VERTEX_SOURCE_SOLID,
       FRAGMENT_SOURCE_SOLID,
-      {"position"})
+      {"position", "color"})
   , mLastUsedShader(0)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
