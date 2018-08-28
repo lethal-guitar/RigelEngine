@@ -147,6 +147,11 @@ public:
 
   void drawPoint(const base::Vector& position, const base::Color& color);
 
+  void drawWaterEffect(
+    const base::Rect<int>& area,
+    TextureData unprocessedScreen,
+    boost::optional<int> surfaceAnimationStep);
+
   void setGlobalTranslation(const base::Vector& translation);
   base::Vector globalTranslation() const;
 
@@ -196,7 +201,8 @@ private:
   enum class RenderMode {
     SpriteBatch,
     NonTexturedRender,
-    Points
+    Points,
+    WaterEffect
   };
 
   template <typename VertexIter>
@@ -227,6 +233,7 @@ private:
 
   Shader mTexturedQuadShader;
   Shader mSolidColorShader;
+  Shader mWaterEffectShader;
 
   GLuint mLastUsedShader;
   GLuint mLastUsedTexture;
@@ -237,6 +244,8 @@ private:
 
   std::vector<GLfloat> mBatchData;
   std::vector<GLushort> mBatchIndices;
+
+  TextureData mWaterSurfaceAnimTexture;
 
   GLuint mCurrentFbo;
   base::Size<int> mCurrentFramebufferSize;

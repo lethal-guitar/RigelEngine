@@ -20,7 +20,9 @@ namespace rigel { namespace game_logic { namespace components {
 
 struct ActorTag {
   enum class Type {
-    Reactor
+    Reactor,
+    WaterArea,
+    AnimatedWaterArea,
   };
 
   explicit ActorTag(const Type type)

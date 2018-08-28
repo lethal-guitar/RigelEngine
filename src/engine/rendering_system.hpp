@@ -59,17 +59,16 @@ public:
     const base::Vector* pScrollOffset,
     engine::Renderer* pRenderer,
     const data::map::Map* pMap,
-    MapRenderer::MapRenderData&& mapRenderData
-  )
-    : mpRenderer(pRenderer)
-    , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
-    , mpScrollOffset(pScrollOffset)
-  {
-  }
+    MapRenderer::MapRenderData&& mapRenderData);
 
   /** Update map tile animation state. Should be called at game-logic rate. */
   void updateAnimatedMapTiles() {
     mMapRenderer.updateAnimatedMapTiles();
+
+    ++mWaterAnimStep;
+    if (mWaterAnimStep >= 4) {
+      mWaterAnimStep = 0;
+    }
   }
 
   /** Render everything. Can be called at full frame rate. */
@@ -88,11 +87,14 @@ public:
 private:
   struct SpriteData;
   void renderSprite(const SpriteData& data) const;
+  void renderWaterEffectAreas(entityx::EntityManager& es);
 
 private:
   engine::Renderer* mpRenderer;
+  engine::RenderTargetTexture mRenderTarget;
   MapRenderer mMapRenderer;
   const base::Vector* mpScrollOffset;
+  int mWaterAnimStep = 0;
   std::size_t mSpritesRendered = 0;
 };
 

@@ -20,6 +20,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 
 #include <algorithm>
@@ -149,6 +150,23 @@ struct RenderingSystem::SpriteData {
 };
 
 
+RenderingSystem::RenderingSystem(
+  const base::Vector* pScrollOffset,
+  engine::Renderer* pRenderer,
+  const data::map::Map* pMap,
+  MapRenderer::MapRenderData&& mapRenderData
+)
+  : mpRenderer(pRenderer)
+  , mRenderTarget(
+      pRenderer,
+      data::GameTraits::inGameViewPortSize.width,
+      data::GameTraits::inGameViewPortSize.height)
+  , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
+  , mpScrollOffset(pScrollOffset)
+{
+}
+
+
 void RenderingSystem::update(
   ex::EntityManager& es,
   const boost::optional<base::Color>& backdropFlashColor
@@ -168,26 +186,35 @@ void RenderingSystem::update(
   });
   sort(begin(spritesByDrawOrder), end(spritesByDrawOrder));
 
-  // Render
-  if (backdropFlashColor) {
-    mpRenderer->setOverlayColor(*backdropFlashColor);
-    mMapRenderer.renderBackdrop(*mpScrollOffset);
-    mpRenderer->setOverlayColor({});
-  } else {
-    mMapRenderer.renderBackdrop(*mpScrollOffset);
-  }
-
-  mMapRenderer.renderBackground(*mpScrollOffset);
-
   const auto firstTopMostIt = find_if(
     begin(spritesByDrawOrder),
     end(spritesByDrawOrder),
     mem_fn(&SpriteData::mDrawTopMost));
 
-  // behind foreground
-  for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
-    renderSprite(*it);
+  {
+    RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
+
+    // Render
+    if (backdropFlashColor) {
+      mpRenderer->setOverlayColor(*backdropFlashColor);
+      mMapRenderer.renderBackdrop(*mpScrollOffset);
+      mpRenderer->setOverlayColor({});
+    } else {
+      mMapRenderer.renderBackdrop(*mpScrollOffset);
+    }
+
+    mMapRenderer.renderBackground(*mpScrollOffset);
+
+    // behind foreground
+    for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
+      renderSprite(*it);
+    }
   }
+
+
+  mRenderTarget.render(mpRenderer, 0, 0);
+
+  renderWaterEffectAreas(es);
 
   mMapRenderer.renderForeground(*mpScrollOffset);
 
@@ -269,6 +296,42 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       mpRenderer->setOverlayColor(base::Color{});
     }
   }
+}
+
+
+void RenderingSystem::renderWaterEffectAreas(entityx::EntityManager& es) {
+  using engine::components::BoundingBox;
+  using game_logic::components::ActorTag;
+
+  es.each<ActorTag, WorldPosition, BoundingBox>(
+    [&, this](
+      entityx::Entity,
+      const ActorTag& tag,
+      const WorldPosition& position,
+      const BoundingBox& bbox
+    ) {
+      using T = ActorTag::Type;
+
+      const auto isWaterArea =
+        tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
+      if (isWaterArea) {
+        const auto screenPosition = position - *mpScrollOffset;
+        const auto worldSpaceBbox = engine::toWorldSpace(bbox, screenPosition);
+        const auto topLeftPx =
+          data::tileVectorToPixelVector(worldSpaceBbox.topLeft);
+        const auto sizePx =
+          data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+
+        const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
+
+        mpRenderer->drawWaterEffect(
+          {topLeftPx, sizePx},
+          mRenderTarget.data(),
+          hasAnimatedSurface
+            ? boost::optional<int>(mWaterAnimStep)
+            : boost::none);
+      }
+    });
 }
 
 }}
