@@ -199,6 +199,12 @@ private:
     Points
   };
 
+  template <typename VertexIter>
+  void batchQuadVertices(
+    VertexIter&& dataBegin,
+    VertexIter&& dataEnd,
+    const std::size_t attributesPerVertex);
+
   bool isVisible(const base::Rect<int>& rect) const;
 
   void useShaderIfChanged(Shader& shader);

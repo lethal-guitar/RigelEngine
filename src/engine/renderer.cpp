@@ -194,6 +194,86 @@ void setScissorBox(
     clipRect.size.height);
 }
 
+
+template <typename Iter>
+void fillVertexData(
+  float left,
+  float right,
+  float top,
+  float bottom,
+  Iter&& destIter,
+  const std::size_t offset,
+  const std::size_t stride
+) {
+  using namespace std;
+  advance(destIter, offset);
+
+  const auto innerStride = stride - 2;
+
+  *destIter++ = left;
+  *destIter++ = bottom;
+  advance(destIter, innerStride);
+
+  *destIter++ = left;
+  *destIter++ = top;
+  advance(destIter, innerStride);
+
+  *destIter++ = right;
+  *destIter++ = bottom;
+  advance(destIter, innerStride);
+
+  *destIter++ = right;
+  *destIter++ = top;
+  advance(destIter, innerStride);
+}
+
+
+template <typename Iter>
+void fillVertexPositions(
+  const base::Rect<int>& rect,
+  Iter&& destIter,
+  const std::size_t offset,
+  const std::size_t stride
+) {
+  glm::vec2 posOffset(float(rect.topLeft.x), float(rect.topLeft.y));
+  glm::vec2 posScale(float(rect.size.width), float(rect.size.height));
+
+  const auto left = posOffset.x;
+  const auto right = posScale.x + posOffset.x;
+  const auto top = posOffset.y;
+  const auto bottom = posScale.y + posOffset.y;
+
+  fillVertexData(
+    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
+}
+
+
+template <typename Iter>
+void fillTexCoords(
+  const base::Rect<int>& rect,
+  Renderer::TextureData textureData,
+  Iter&& destIter,
+  const std::size_t offset,
+  const std::size_t stride
+) {
+  using namespace std;
+
+  glm::vec2 texOffset(
+    rect.topLeft.x / float(textureData.mWidth),
+    rect.topLeft.y / float(textureData.mHeight));
+  glm::vec2 texScale(
+    rect.size.width / float(textureData.mWidth),
+    rect.size.height / float(textureData.mHeight));
+
+  const auto left = texOffset.x;
+  const auto right = texScale.x + texOffset.x;
+  const auto top = texOffset.y;
+  const auto bottom = texScale.y + texOffset.y;
+
+  fillVertexData(
+    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
+}
+
 }
 
 
@@ -289,50 +369,12 @@ void Renderer::drawTexture(
     mLastUsedTexture = textureData.mHandle;
   }
 
-  glm::vec2 spriteOffset(
-    float(destRect.topLeft.x),
-    float(destRect.topLeft.y));
-  glm::vec2 spriteScale(
-    float(destRect.size.width),
-    float(destRect.size.height));
-  glm::vec2 texOffset(
-    sourceRect.topLeft.x / float(textureData.mWidth),
-    sourceRect.topLeft.y / float(textureData.mHeight));
-  glm::vec2 texScale(
-    sourceRect.size.width / float(textureData.mWidth),
-    sourceRect.size.height / float(textureData.mHeight));
+  // x, y, tex_u, tex_v
+  GLfloat vertices[4 * (2 + 2)];
+  fillVertexPositions(destRect, std::begin(vertices), 0, 4);
+  fillTexCoords(sourceRect, textureData, std::begin(vertices), 2, 4);
 
-  const auto left = spriteOffset.x;
-  const auto right = spriteScale.x + spriteOffset.x;
-  const auto top = spriteOffset.y;
-  const auto bottom = spriteScale.y + spriteOffset.y;
-  const auto leftTex = texOffset.x;
-  const auto rightTex = texScale.x + texOffset.x;
-  const auto topTex = texOffset.y;
-  const auto bottomTex = texScale.y + texOffset.y;
-
-  GLfloat vertices[] = {
-    left,  bottom,  leftTex,  bottomTex,
-    left,  top,     leftTex,  topTex,
-    right, bottom,  rightTex, bottomTex,
-    right, top,     rightTex, topTex,
-  };
-
-  const auto currentVertexCount = GLushort(mBatchData.size() / 4);
-  GLushort indices[6];
-  std::transform(
-    std::cbegin(QUAD_INDICES),
-    std::cend(QUAD_INDICES),
-    std::begin(indices),
-    [currentVertexCount](const GLushort index) {
-      return index + currentVertexCount;
-    });
-
-  // TODO: Limit maximum batch size
-  mBatchData.insert(
-    mBatchData.end(), std::cbegin(vertices), std::cend(vertices));
-  mBatchIndices.insert(
-    mBatchIndices.end(), std::cbegin(indices), std::cend(indices));
+  batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4);
 }
 
 
@@ -548,6 +590,34 @@ void Renderer::clear(const base::Color& clearColor) {
   const auto glColor = toGlColor(clearColor);
   glClearColor(glColor.r, glColor.g, glColor.b, glColor.a);
   glClear(GL_COLOR_BUFFER_BIT);
+}
+
+
+template <typename VertexIter>
+void Renderer::batchQuadVertices(
+  VertexIter&& dataBegin,
+  VertexIter&& dataEnd,
+  const std::size_t attributesPerVertex
+) {
+  using namespace std;
+
+  const auto currentIndex = GLushort(mBatchData.size() / attributesPerVertex);
+
+  GLushort indices[6];
+  transform(
+    cbegin(QUAD_INDICES),
+    cend(QUAD_INDICES),
+    begin(indices),
+    [&](const GLushort index) {
+      return index + currentIndex;
+    });
+
+  // TODO: Limit maximum batch size
+  mBatchData.insert(
+    mBatchData.end(),
+    forward<VertexIter>(dataBegin),
+    forward<VertexIter>(dataEnd));
+  mBatchIndices.insert(mBatchIndices.end(), cbegin(indices), cend(indices));
 }
 
 
