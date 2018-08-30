@@ -23,7 +23,6 @@
 #include "data/tutorial_messages.hpp"
 #include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
-#include "engine/texture.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -139,7 +138,6 @@ private:
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
-  engine::RenderTargetTexture mIngameViewPortRenderTarget;
 
   boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
   boost::optional<base::Color> mScreenFlashColor;

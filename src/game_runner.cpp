@@ -20,6 +20,7 @@
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "data/strings.hpp"
+#include "data/unit_conversions.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/ingame_systems.hpp"
@@ -114,10 +115,6 @@ GameRunner::GameRunner(
       mpRenderer,
       *context.mpResources)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
-  , mIngameViewPortRenderTarget(
-      context.mpRenderer,
-      data::GameTraits::inGameViewPortSize.width,
-      data::GameTraits::inGameViewPortSize.height)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::PlayerDied>(*this);
@@ -273,9 +270,20 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   // Rendering
   // **********************************************************************
+  mpRenderer->clear();
+
   {
-    engine::RenderTargetTexture::Binder
-      bindRenderTarget(mIngameViewPortRenderTarget, mpRenderer);
+    Renderer::StateSaver saveState(mpRenderer);
+    mpRenderer->setClipRect(base::Rect<int>{
+      {data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
+      data::GameTraits::inGameViewPortOffset.y},
+      {data::GameTraits::inGameViewPortSize.width,
+      data::GameTraits::inGameViewPortSize.height}});
+
+    mpRenderer->setGlobalTranslation({
+      data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
+      data::GameTraits::inGameViewPortOffset.y});
+
     if (!mScreenFlashColor) {
       mpSystems->render(mEntities, mBackdropFlashColor);
     } else {
@@ -284,15 +292,6 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     mHudRenderer.render();
   }
 
-  // This clear is important, since we might shift the render target's position
-  // on some frames due to the earth quake effect. If we don't clear, traces
-  // of/part of an older frame might incorrectly remain on screen.
-  mpRenderer->clear();
-
-  mIngameViewPortRenderTarget.render(
-    mpRenderer,
-    data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
-    data::GameTraits::inGameViewPortOffset.y);
   mMessageDisplay.render();
 
   if (mShowDebugText) {
