@@ -1616,8 +1616,19 @@ void EntityFactory::configureEntity(
     case 143: // shootable wall, burns away
 
     case 221: // water
-    case 233: // water surface A
-    case 234: // water surface B
+      entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
+      entity.assign<ActorTag>(ActorTag::Type::WaterArea);
+      break;
+
+    case 233: // water with animated surface
+      entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
+      entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
+      break;
+
+    case 234: // water with animated surface (double sized block)
+      entity.assign<BoundingBox>(BoundingBox{{0, 3}, {4, 4}});
+      entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
+      break;
 
     case 241: // windblown-spider generator
     case 250: // airlock effect, left

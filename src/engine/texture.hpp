@@ -77,6 +77,10 @@ public:
     return {mData.mWidth, mData.mHeight};
   }
 
+  Renderer::TextureData data() const {
+    return mData;
+  }
+
 protected:
   base::Rect<int> completeSourceRect() const {
     return {{0, 0}, extents()};
@@ -206,18 +210,12 @@ public:
   class Binder {
   public:
     Binder(RenderTargetTexture& renderTarget, engine::Renderer* pRenderer);
-    ~Binder();
-
-    Binder(const Binder&) = delete;
-    Binder& operator=(const Binder&) = delete;
 
   protected:
     Binder(const engine::Renderer::RenderTarget&, engine::Renderer* pRenderer);
 
   private:
-    engine::Renderer::RenderTarget mRenderTarget;
-    engine::Renderer::RenderTarget mPreviousRenderTarget;
-    engine::Renderer* mpRenderer;
+    engine::Renderer::StateSaver mStateSaver;
   };
 
   RenderTargetTexture(

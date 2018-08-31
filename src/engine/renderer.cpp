@@ -17,10 +17,13 @@
 #include "renderer.hpp"
 
 #include "data/game_traits.hpp"
+#include "loader/palette.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <glm/gtc/matrix_transform.hpp>
 RIGEL_RESTORE_WARNINGS
+
+#include <array>
 
 
 namespace rigel { namespace engine {
@@ -50,6 +53,12 @@ const auto LOGICAL_DISPLAY_HEIGHT =
 
 
 const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
+
+
+constexpr auto WATER_MASK_WIDTH = 8;
+constexpr auto WATER_MASK_HEIGHT = 8;
+constexpr auto WATER_NUM_MASKS = 5;
+constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 
 #ifdef RIGEL_USE_GL_ES
@@ -143,6 +152,56 @@ void main() {
 )shd";
 
 
+const auto VERTEX_SOURCE_WATER_EFFECT = R"shd(
+ATTRIBUTE vec2 position;
+ATTRIBUTE vec2 texCoord;
+ATTRIBUTE vec2 texCoordMask;
+
+OUT vec2 texCoordFrag;
+OUT vec2 texCoordMaskFrag;
+
+uniform mat4 transform;
+
+void main() {
+  SET_POINT_SIZE(1.0);
+  gl_Position = transform * vec4(position, 0.0, 1.0);
+  texCoordFrag = vec2(texCoord.x, 1.0 - texCoord.y);
+  texCoordMaskFrag = vec2(texCoordMask.x, 1.0 - texCoordMask.y);
+}
+)shd";
+
+const auto FRAGMENT_SOURCE_WATER_EFFECT = R"shd(
+OUTPUT_COLOR_DECLARATION
+
+IN vec2 texCoordFrag;
+IN vec2 texCoordMaskFrag;
+
+uniform sampler2D textureData;
+uniform sampler2D maskData;
+uniform vec3 palette[16];
+
+
+vec4 applyWaterEffect(vec4 color) {
+  int index = 0;
+  for (int i = 0; i < 16; ++i) {
+    if (color.rgb == palette[i]) {
+      index = i;
+    }
+  }
+
+  int adjustedIndex = (index & 0x3) | 0x8;
+  return vec4(palette[adjustedIndex], color.a);
+}
+
+void main() {
+  vec4 color = TEXTURE_LOOKUP(textureData, texCoordFrag);
+  vec4 mask = TEXTURE_LOOKUP(maskData, texCoordMaskFrag);
+  float maskValue = mask.r;
+  OUTPUT_COLOR = mix(color, applyWaterEffect(color), maskValue);
+}
+)shd";
+
+
 base::Rect<int> determineDefaultViewport(SDL_Window* pWindow) {
   // This calculates the required view port coordinates to have aspect-ratio
   // correct scaling from the internal display resolution to the window's
@@ -181,6 +240,147 @@ glm::vec4 toGlColor(const base::Color& color) {
   return glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
 }
 
+
+void setScissorBox(
+  const base::Rect<int>& clipRect,
+  const base::Size<int>& frameBufferSize
+) {
+  const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
+  glScissor(
+    clipRect.topLeft.x,
+    offsetAtBottom,
+    clipRect.size.width,
+    clipRect.size.height);
+}
+
+
+template <typename Iter>
+void fillVertexData(
+  float left,
+  float right,
+  float top,
+  float bottom,
+  Iter&& destIter,
+  const std::size_t offset,
+  const std::size_t stride
+) {
+  using namespace std;
+  advance(destIter, offset);
+
+  const auto innerStride = stride - 2;
+
+  *destIter++ = left;
+  *destIter++ = bottom;
+  advance(destIter, innerStride);
+
+  *destIter++ = left;
+  *destIter++ = top;
+  advance(destIter, innerStride);
+
+  *destIter++ = right;
+  *destIter++ = bottom;
+  advance(destIter, innerStride);
+
+  *destIter++ = right;
+  *destIter++ = top;
+  advance(destIter, innerStride);
+}
+
+
+template <typename Iter>
+void fillVertexPositions(
+  const base::Rect<int>& rect,
+  Iter&& destIter,
+  const std::size_t offset,
+  const std::size_t stride
+) {
+  glm::vec2 posOffset(float(rect.topLeft.x), float(rect.topLeft.y));
+  glm::vec2 posScale(float(rect.size.width), float(rect.size.height));
+
+  const auto left = posOffset.x;
+  const auto right = posScale.x + posOffset.x;
+  const auto top = posOffset.y;
+  const auto bottom = posScale.y + posOffset.y;
+
+  fillVertexData(
+    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
+}
+
+
+template <typename Iter>
+void fillTexCoords(
+  const base::Rect<int>& rect,
+  Renderer::TextureData textureData,
+  Iter&& destIter,
+  const std::size_t offset,
+  const std::size_t stride
+) {
+  using namespace std;
+
+  glm::vec2 texOffset(
+    rect.topLeft.x / float(textureData.mWidth),
+    rect.topLeft.y / float(textureData.mHeight));
+  glm::vec2 texScale(
+    rect.size.width / float(textureData.mWidth),
+    rect.size.height / float(textureData.mHeight));
+
+  const auto left = texOffset.x;
+  const auto right = texScale.x + texOffset.x;
+  const auto top = texOffset.y;
+  const auto bottom = texScale.y + texOffset.y;
+
+  fillVertexData(
+    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
+}
+
+
+data::Image createWaterSurfaceAnimImage() {
+  auto pixels = data::PixelBuffer{
+    WATER_MASK_WIDTH * WATER_MASK_HEIGHT * WATER_NUM_MASKS,
+    base::Color{255, 255, 255, 255}};
+
+  const std::array<int, 16> patternCalmSurface{
+    0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1
+  };
+
+  const std::array<int, 16> patternWaveRight{
+    0, 0, 0, 0, 0, 1, 1, 0,
+    1, 0, 0, 1, 1, 1, 1, 1
+  };
+
+  const std::array<int, 16> patternWaveLeft{
+    0, 1, 1, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 0, 1
+  };
+
+  auto applyPattern = [&pixels](
+    const auto& pattern,
+    const auto destOffset
+  ) {
+    std::transform(
+      std::begin(pattern),
+      std::end(pattern),
+      std::begin(pixels) + destOffset,
+      [](const int patternValue) {
+        const auto value = static_cast<uint8_t>(255 * patternValue);
+        return base::Color{value, value, value, value};
+      });
+  };
+
+  const auto pixelsPerAnimStep = WATER_MASK_WIDTH * WATER_MASK_HEIGHT;
+
+  applyPattern(patternCalmSurface, 0);
+  applyPattern(patternWaveRight, pixelsPerAnimStep);
+  applyPattern(patternCalmSurface, pixelsPerAnimStep * 2);
+  applyPattern(patternWaveLeft, pixelsPerAnimStep * 3);
+
+  return data::Image{
+    move(pixels),
+    static_cast<size_t>(WATER_MASK_WIDTH),
+    static_cast<size_t>(WATER_MASK_HEIGHT * WATER_NUM_MASKS)};
+}
+
 }
 
 
@@ -195,14 +395,22 @@ Renderer::Renderer(SDL_Window* pWindow)
       SHADER_PREAMBLE,
       VERTEX_SOURCE_SOLID,
       FRAGMENT_SOURCE_SOLID,
-      {"position"})
+      {"position", "color"})
+  , mWaterEffectShader(
+      SHADER_PREAMBLE,
+      VERTEX_SOURCE_WATER_EFFECT,
+      FRAGMENT_SOURCE_WATER_EFFECT,
+      {"position", "texCoord", "texCoordMask"})
   , mLastUsedShader(0)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
   , mCurrentFbo(0)
   , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
   , mDefaultViewport(determineDefaultViewport(pWindow))
+  , mGlobalScale(1.0f, 1.0f)
 {
+  using namespace std;
+
   // General configuration
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
@@ -215,6 +423,30 @@ Renderer::Renderer(SDL_Window* pWindow)
   glGenBuffers(1, &mStreamEbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mStreamEbo);
 
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+
+  // One-time setup for water effect shader
+  useShaderIfChanged(mWaterEffectShader);
+  array<glm::vec3, 16> palette;
+  transform(
+    begin(loader::INGAME_PALETTE),
+    end(loader::INGAME_PALETTE),
+    begin(palette),
+    [](const base::Color& color) {
+      return glm::vec3{color.r, color.g, color.b} / 255.0f;
+    });
+  mWaterEffectShader.setUniform("palette", palette);
+  mWaterEffectShader.setUniform("textureData", 0);
+  mWaterEffectShader.setUniform("maskData", 1);
+
+  mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture.mHandle);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glActiveTexture(GL_TEXTURE0);
+
   // One-time setup for textured quad shader
   useShaderIfChanged(mTexturedQuadShader);
   mTexturedQuadShader.setUniform("textureData", 0);
@@ -226,6 +458,7 @@ Renderer::Renderer(SDL_Window* pWindow)
 
 Renderer::~Renderer() {
   glDeleteBuffers(1, &mStreamVbo);
+  glDeleteTextures(1, &mWaterSurfaceAnimTexture.mHandle);
 }
 
 
@@ -275,50 +508,12 @@ void Renderer::drawTexture(
     mLastUsedTexture = textureData.mHandle;
   }
 
-  glm::vec2 spriteOffset(
-    float(destRect.topLeft.x),
-    float(destRect.topLeft.y));
-  glm::vec2 spriteScale(
-    float(destRect.size.width),
-    float(destRect.size.height));
-  glm::vec2 texOffset(
-    sourceRect.topLeft.x / float(textureData.mWidth),
-    sourceRect.topLeft.y / float(textureData.mHeight));
-  glm::vec2 texScale(
-    sourceRect.size.width / float(textureData.mWidth),
-    sourceRect.size.height / float(textureData.mHeight));
+  // x, y, tex_u, tex_v
+  GLfloat vertices[4 * (2 + 2)];
+  fillVertexPositions(destRect, std::begin(vertices), 0, 4);
+  fillTexCoords(sourceRect, textureData, std::begin(vertices), 2, 4);
 
-  const auto left = spriteOffset.x;
-  const auto right = spriteScale.x + spriteOffset.x;
-  const auto top = spriteOffset.y;
-  const auto bottom = spriteScale.y + spriteOffset.y;
-  const auto leftTex = texOffset.x;
-  const auto rightTex = texScale.x + texOffset.x;
-  const auto topTex = texOffset.y;
-  const auto bottomTex = texScale.y + texOffset.y;
-
-  GLfloat vertices[] = {
-    left,  bottom,  leftTex,  bottomTex,
-    left,  top,     leftTex,  topTex,
-    right, bottom,  rightTex, bottomTex,
-    right, top,     rightTex, topTex,
-  };
-
-  const auto currentVertexCount = GLushort(mBatchData.size() / 4);
-  GLushort indices[6];
-  std::transform(
-    std::cbegin(QUAD_INDICES),
-    std::cend(QUAD_INDICES),
-    std::begin(indices),
-    [currentVertexCount](const GLushort index) {
-      return index + currentVertexCount;
-    });
-
-  // TODO: Limit maximum batch size
-  mBatchData.insert(
-    mBatchData.end(), std::cbegin(vertices), std::cend(vertices));
-  mBatchIndices.insert(
-    mBatchIndices.end(), std::cbegin(indices), std::cend(indices));
+  batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4);
 }
 
 
@@ -327,23 +522,28 @@ void Renderer::submitBatch() {
     return;
   }
 
+  auto submitBatchedQuads = [this]() {
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(float) * mBatchData.size(),
+      mBatchData.data(),
+      GL_STREAM_DRAW);
+    glBufferData(
+      GL_ELEMENT_ARRAY_BUFFER,
+      sizeof(GLushort) * mBatchIndices.size(),
+      mBatchIndices.data(),
+      GL_STREAM_DRAW);
+    glDrawElements(
+      GL_TRIANGLES,
+      GLsizei(mBatchIndices.size()),
+      GL_UNSIGNED_SHORT,
+      nullptr);
+  };
+
   switch (mRenderMode) {
     case RenderMode::SpriteBatch:
-      glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * mBatchData.size(),
-        mBatchData.data(),
-        GL_STREAM_DRAW);
-      glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(GLushort) * mBatchIndices.size(),
-        mBatchIndices.data(),
-        GL_STREAM_DRAW);
-      glDrawElements(
-        GL_TRIANGLES,
-        GLsizei(mBatchIndices.size()),
-        GL_UNSIGNED_SHORT,
-        nullptr);
+    case RenderMode::WaterEffect:
+      submitBatchedQuads();
       break;
 
     case RenderMode::Points:
@@ -444,6 +644,124 @@ void Renderer::drawPoint(
 }
 
 
+void Renderer::drawWaterEffect(
+  const base::Rect<int>& area,
+  TextureData textureData,
+  boost::optional<int> surfaceAnimationStep
+) {
+  assert(
+    !surfaceAnimationStep ||
+    (*surfaceAnimationStep >= 0 && *surfaceAnimationStep < 4));
+
+  using namespace std;
+
+  if (!isVisible(area)) {
+    return;
+  }
+
+  const auto areaWidth = area.size.width;
+  auto drawWater = [&, this](
+    const base::Rect<int>& destRect,
+    const int maskIndex
+  ) {
+    const auto maskTexStartY = maskIndex * WATER_MASK_HEIGHT;
+    const auto animSourceRect = base::Rect<int>{
+      {0, maskTexStartY},
+      {areaWidth, WATER_MASK_HEIGHT}
+    };
+
+    // x, y, tex_u, tex_v, mask_u, mask_v
+    GLfloat vertices[4 * (2 + 2 + 2)];
+    fillVertexPositions(destRect, std::begin(vertices), 0, 6);
+    fillTexCoords(destRect, textureData, std::begin(vertices), 2, 6);
+    fillTexCoords(
+      animSourceRect, mWaterSurfaceAnimTexture, std::begin(vertices), 4, 6);
+
+    batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 6);
+  };
+
+  setRenderModeIfChanged(RenderMode::WaterEffect);
+
+  if (mLastUsedTexture != textureData.mHandle) {
+    submitBatch();
+    glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
+    mLastUsedTexture = textureData.mHandle;
+  }
+
+  if (surfaceAnimationStep) {
+    const auto waterSurfaceArea = base::Rect<int>{
+      area.topLeft,
+      {areaWidth, WATER_MASK_HEIGHT}
+    };
+
+    drawWater(waterSurfaceArea, *surfaceAnimationStep);
+
+    auto remainingArea = area;
+    remainingArea.topLeft.y += WATER_MASK_HEIGHT;
+    remainingArea.size.height -= WATER_MASK_HEIGHT;
+
+    drawWater(remainingArea, WATER_MASK_INDEX_FILLED);
+  } else {
+    drawWater(area, WATER_MASK_INDEX_FILLED);
+  }
+}
+
+
+void Renderer::setGlobalTranslation(const base::Vector& translation) {
+  const auto glTranslation = glm::vec2{translation.x, translation.y};
+  if (glTranslation != mGlobalTranslation) {
+    submitBatch();
+
+    mGlobalTranslation = glTranslation;
+    updateProjectionMatrix();
+  }
+}
+
+
+base::Vector Renderer::globalTranslation() const {
+  return base::Vector{
+    static_cast<int>(mGlobalTranslation.x),
+    static_cast<int>(mGlobalTranslation.y)};
+}
+
+
+void Renderer::setGlobalScale(const base::Point<float>& scale) {
+  const auto glScale = glm::vec2{scale.x, scale.y};
+  if (glScale != mGlobalScale) {
+    submitBatch();
+
+    mGlobalScale = glScale;
+    updateProjectionMatrix();
+  }
+}
+
+
+base::Point<float> Renderer::globalScale() const {
+  return {mGlobalScale.x, mGlobalScale.y};
+}
+
+
+void Renderer::setClipRect(const boost::optional<base::Rect<int>>& clipRect) {
+  if (clipRect == mClipRect) {
+    return;
+  }
+
+  mClipRect = clipRect;
+  if (mClipRect) {
+    glEnable(GL_SCISSOR_TEST);
+
+    setScissorBox(*clipRect, mCurrentFramebufferSize);
+  } else {
+    glDisable(GL_SCISSOR_TEST);
+  }
+}
+
+
+boost::optional<base::Rect<int>> Renderer::clipRect() const {
+  return mClipRect;
+}
+
+
 Renderer::RenderTarget Renderer::currentRenderTarget() const {
   return {mCurrentFramebufferSize, mCurrentFbo};
 }
@@ -482,6 +800,34 @@ void Renderer::clear(const base::Color& clearColor) {
 }
 
 
+template <typename VertexIter>
+void Renderer::batchQuadVertices(
+  VertexIter&& dataBegin,
+  VertexIter&& dataEnd,
+  const std::size_t attributesPerVertex
+) {
+  using namespace std;
+
+  const auto currentIndex = GLushort(mBatchData.size() / attributesPerVertex);
+
+  GLushort indices[6];
+  transform(
+    cbegin(QUAD_INDICES),
+    cend(QUAD_INDICES),
+    begin(indices),
+    [&](const GLushort index) {
+      return index + currentIndex;
+    });
+
+  // TODO: Limit maximum batch size
+  mBatchData.insert(
+    mBatchData.end(),
+    forward<VertexIter>(dataBegin),
+    forward<VertexIter>(dataEnd));
+  mBatchIndices.insert(mBatchIndices.end(), cbegin(indices), cend(indices));
+}
+
+
 void Renderer::setRenderModeIfChanged(const RenderMode mode) {
   if (mRenderMode != mode) {
     submitBatch();
@@ -511,6 +857,7 @@ void Renderer::updateShaders() {
         GL_FALSE,
         sizeof(float) * 4,
         toAttribOffset(2 * sizeof(float)));
+      glDisableVertexAttribArray(2);
       break;
 
     case RenderMode::Points:
@@ -531,11 +878,36 @@ void Renderer::updateShaders() {
         GL_FALSE,
         sizeof(float) * 6,
         toAttribOffset(2 * sizeof(float)));
+      glDisableVertexAttribArray(2);
+      break;
+
+    case RenderMode::WaterEffect:
+      useShaderIfChanged(mWaterEffectShader);
+      mWaterEffectShader.setUniform("transform", mProjectionMatrix);
+      glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(2 * sizeof(float)));
+      glVertexAttribPointer(
+        2,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(4 * sizeof(float)));
+      glEnableVertexAttribArray(2);
       break;
   }
-
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
 }
 
 
@@ -646,11 +1018,24 @@ void Renderer::onRenderTargetChanged() {
     glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
   }
 
-  mProjectionMatrix = glm::ortho(
+  updateProjectionMatrix();
+
+  if (mClipRect) {
+    setScissorBox(*mClipRect, mCurrentFramebufferSize);
+  }
+}
+
+
+void Renderer::updateProjectionMatrix() {
+  const auto projection = glm::ortho(
     0.0f,
     float(mCurrentFramebufferSize.width),
     float(mCurrentFramebufferSize.height),
     0.0f);
+
+  mProjectionMatrix = glm::translate(
+    glm::scale(projection, glm::vec3(mGlobalScale, 1.0f)),
+    glm::vec3(mGlobalTranslation, 0.0f));
 
   updateShaders();
 }

@@ -89,6 +89,30 @@ public:
     glUniform4fv(location(name), 1, glm::value_ptr(vec4));
   }
 
+  template <std::size_t N>
+  void setUniform(
+    const std::string& name,
+    const std::array<glm::vec2, N>& values
+  ) {
+    glUniform3fv(location(name), N, glm::value_ptr(values.front()));
+  }
+
+  template <std::size_t N>
+  void setUniform(
+    const std::string& name,
+    const std::array<glm::vec3, N>& values
+  ) {
+    glUniform3fv(location(name), N, glm::value_ptr(values.front()));
+  }
+
+  template <std::size_t N>
+  void setUniform(
+    const std::string& name,
+    const std::array<glm::vec4, N>& values
+  ) {
+    glUniform3fv(location(name), N, glm::value_ptr(values.front()));
+  }
+
   void setUniform(const std::string& name, const int value) {
     glUniform1i(location(name), value);
   }
