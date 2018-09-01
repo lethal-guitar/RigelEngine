@@ -16,6 +16,7 @@
 
 #include "wind_blown_spiders_effect.hpp"
 
+#include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -23,6 +24,14 @@
 
 
 namespace rigel { namespace game_logic { namespace components {
+
+namespace {
+
+const auto RIGHT_SCREEN_EDGE = data::GameTraits::mapViewPortSize.width - 1;
+constexpr auto MAX_Y_OFFSET = 16;
+
+}
+
 
 void WindBlownSpiderGenerator::update(
   GlobalDependencies& d,
@@ -37,8 +46,9 @@ void WindBlownSpiderGenerator::update(
     isOddFrame
   ) {
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
-    const auto xPos = d.mpCameraPosition->x + 31;
-    const auto yPos = d.mpCameraPosition->y + d.mpRandomGenerator->gen() % 16;
+    const auto xPos = d.mpCameraPosition->x + RIGHT_SCREEN_EDGE;
+    const auto yPos = d.mpCameraPosition->y +
+      d.mpRandomGenerator->gen() % MAX_Y_OFFSET;
     const auto movementType = d.mpRandomGenerator->gen() % 2 != 0
       ? SpriteMovement::SwirlAround
       : SpriteMovement::FlyLeft;
