@@ -850,7 +850,8 @@ void EntityFactory::configureEntity(
         // the cooked turkey.
         auto cookedTurkeyContainer = makeContainer(
           cookedTurkeyCollectable,
-          cookedTurkeySprite);
+          cookedTurkeySprite,
+          AnimationLoop{1, 4, 7});
         addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
 
         auto livingTurkeyContainer = makeContainer(
