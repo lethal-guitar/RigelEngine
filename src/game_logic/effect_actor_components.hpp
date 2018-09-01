@@ -29,4 +29,13 @@ struct WindBlownSpiderGenerator {
     entityx::Entity entity);
 };
 
+
+struct WaterDropGenerator {
+  void update(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    bool isOnScreen,
+    entityx::Entity entity);
+};
+
 }}}

@@ -14,15 +14,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "wind_blown_spiders_effect.hpp"
+#include "effect_actor_components.hpp"
 
+#include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
 
+#include "game_service_provider.hpp"
+
 
 namespace rigel { namespace game_logic { namespace components {
+
+namespace {
+
+const auto RIGHT_SCREEN_EDGE = data::GameTraits::mapViewPortSize.width - 1;
+constexpr auto MAX_Y_OFFSET = 16;
+
+}
+
 
 void WindBlownSpiderGenerator::update(
   GlobalDependencies& d,
@@ -37,8 +48,9 @@ void WindBlownSpiderGenerator::update(
     isOddFrame
   ) {
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
-    const auto xPos = d.mpCameraPosition->x + 31;
-    const auto yPos = d.mpCameraPosition->y + d.mpRandomGenerator->gen() % 16;
+    const auto xPos = d.mpCameraPosition->x + RIGHT_SCREEN_EDGE;
+    const auto yPos = d.mpCameraPosition->y +
+      d.mpRandomGenerator->gen() % MAX_Y_OFFSET;
     const auto movementType = d.mpRandomGenerator->gen() % 2 != 0
       ? SpriteMovement::SwirlAround
       : SpriteMovement::FlyLeft;
@@ -48,6 +60,25 @@ void WindBlownSpiderGenerator::update(
       static_cast<data::ActorID>(effectActorId),
       movementType,
       {xPos, yPos});
+  }
+}
+
+
+void WaterDropGenerator::update(
+  GlobalDependencies& d,
+  const bool isOddFrame,
+  const bool isOnScreen,
+  entityx::Entity entity
+) {
+  const auto& position = *entity.component<engine::components::WorldPosition>();
+  if (isOddFrame && d.mpRandomGenerator->gen() >= 220) {
+    auto drop = d.mpEntityFactory->createActor(226, position);
+    drop.assign<engine::components::Active>();
+
+
+    if (isOnScreen) {
+      d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
+    }
   }
 }
 

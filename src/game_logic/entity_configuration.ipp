@@ -1621,6 +1621,19 @@ void EntityFactory::configureEntity(
       entity.assign<ActorTag>(ActorTag::Type::WaterArea);
       break;
 
+    case 226: // water drop
+      addDefaultMovingBody(entity, boundingBox);
+      entity.assign<AutoDestroy>(AutoDestroy{
+        AutoDestroy::Condition::OnWorldCollision});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      break;
+
+    case 227: // water drop spawner
+      entity.assign<BehaviorController>(WaterDropGenerator{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 233: // water with animated surface
       entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
       entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
