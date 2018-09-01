@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "wind_blown_spiders_effect.hpp"
+#include "effect_actor_components.hpp"
 
 #include "data/game_traits.hpp"
 #include "engine/base_components.hpp"

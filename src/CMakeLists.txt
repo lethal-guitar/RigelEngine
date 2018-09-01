@@ -108,6 +108,8 @@ set(core_sources
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp
+    game_logic/effect_actor_components.cpp
+    game_logic/effect_actor_components.hpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
     game_logic/enemy_radar.cpp
@@ -139,8 +141,6 @@ set(core_sources
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
     game_logic/trigger_components.hpp
-    game_logic/wind_blown_spiders_effect.cpp
-    game_logic/wind_blown_spiders_effect.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
     loader/adlib_emulator.hpp
