@@ -147,6 +147,15 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       eventManager)
   , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
+  , mBehaviorControllerSystem(GlobalDependencies{
+      &mPlayer,
+      &mCollisionChecker,
+      &mParticles,
+      pRandomGenerator,
+      pEntityFactory,
+      pServiceProvider,
+      &eventManager,
+      pScrollOffset})
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {
@@ -198,6 +207,7 @@ void IngameSystems::update(
   mSlimePipeSystem.update(es);
   mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
+  mBehaviorControllerSystem.update(es);
 
   // ----------------------------------------------------------------------
   // Physics and other updates
