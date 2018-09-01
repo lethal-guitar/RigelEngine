@@ -22,6 +22,8 @@
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
 
+#include "game_service_provider.hpp"
+
 
 namespace rigel { namespace game_logic { namespace components {
 
@@ -58,6 +60,25 @@ void WindBlownSpiderGenerator::update(
       static_cast<data::ActorID>(effectActorId),
       movementType,
       {xPos, yPos});
+  }
+}
+
+
+void WaterDropGenerator::update(
+  GlobalDependencies& d,
+  const bool isOddFrame,
+  const bool isOnScreen,
+  entityx::Entity entity
+) {
+  const auto& position = *entity.component<engine::components::WorldPosition>();
+  if (isOddFrame && d.mpRandomGenerator->gen() >= 220) {
+    auto drop = d.mpEntityFactory->createActor(226, position);
+    drop.assign<engine::components::Active>();
+
+
+    if (isOnScreen) {
+      d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
+    }
   }
 }
 
