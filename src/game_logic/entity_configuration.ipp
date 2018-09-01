@@ -1632,6 +1632,11 @@ void EntityFactory::configureEntity(
       break;
 
     case 241: // windblown-spider generator
+      entity.assign<BehaviorController>(WindBlownSpiderGenerator{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<BoundingBox>(boundingBox);
+      break;
+
     case 250: // airlock effect, left
     case 251: // airlock effect, right
     case 254: // explosion effect trigger

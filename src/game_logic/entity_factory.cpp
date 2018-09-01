@@ -36,6 +36,7 @@
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
+#include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
@@ -45,6 +46,7 @@
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/trigger_components.hpp"
+#include "game_logic/wind_blown_spiders_effect.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/fusion/adapted/std_tuple.hpp>
