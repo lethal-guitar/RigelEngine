@@ -98,6 +98,9 @@ set(core_sources
     game_logic/ai/spider.hpp
     game_logic/ai/spike_ball.cpp
     game_logic/ai/spike_ball.hpp
+    game_logic/behavior_controller.hpp
+    game_logic/behavior_controller_system.cpp
+    game_logic/behavior_controller_system.hpp
     game_logic/collectable_components.hpp
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp
@@ -136,6 +139,8 @@ set(core_sources
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
     game_logic/trigger_components.hpp
+    game_logic/wind_blown_spiders_effect.cpp
+    game_logic/wind_blown_spiders_effect.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
     loader/adlib_emulator.hpp
