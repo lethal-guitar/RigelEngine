@@ -59,13 +59,6 @@ public:
   void update(entityx::EntityManager& es);
 
 private:
-  std::tuple<base::Vector, float> applyVerticalMovement(
-    const components::BoundingBox& bbox,
-    const base::Vector& currentPosition,
-    float currentVelocity,
-    std::int16_t movementY,
-    bool beginFallingOnHittingCeiling) const;
-
   float applyGravity(
     const components::BoundingBox& bbox,
     float currentVelocity);

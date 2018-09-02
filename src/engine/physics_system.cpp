@@ -124,13 +124,18 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       }
 
       const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
-      if (movementY != 0) {
-        std::tie(position, body.mVelocity.y) = applyVerticalMovement(
-          bbox,
-          position,
-          body.mVelocity.y,
-          movementY,
-          body.mGravityAffected);
+      const auto result =
+        moveVertically(*mpCollisionChecker, entity, movementY);
+
+      if (result != MovementResult::Completed) {
+        const auto movingDown = movementY > 0;
+        if (movingDown || !body.mGravityAffected) {
+          // For falling, we reset the Y velocity as soon as we hit the ground
+          body.mVelocity.y = 0.0f;
+        } else {
+          // For jumping, we begin falling early when we hit the ceiling
+          body.mVelocity.y = 1.0f;
+        }
       }
 
       const auto targetPosition =
@@ -175,40 +180,6 @@ float PhysicsSystem::applyGravity(
       return 2.0f;
     }
   }
-}
-
-
-std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
-  const BoundingBox& bbox,
-  const base::Vector& currentPosition,
-  const float currentVelocity,
-  const int16_t movementY,
-  const bool beginFallingOnHittingCeiling
-) const {
-  base::Vector newPosition = currentPosition;
-  const auto movingDown = movementY > 0;
-
-  auto movingBbox = bbox;
-  for (auto step = 0; step < std::abs(movementY); ++step) {
-    const auto isTouching = movingDown
-      ? mpCollisionChecker->isOnSolidGround(movingBbox)
-      : mpCollisionChecker->isTouchingCeiling(movingBbox);
-    if (isTouching) {
-      if (movingDown || !beginFallingOnHittingCeiling) {
-        // For falling, we reset the Y velocity as soon as we hit the ground
-        return make_tuple(newPosition, 0.0f);
-      } else {
-        // For jumping, we begin falling early when we hit the ceiling
-        return make_tuple(newPosition, 1.0f);
-      }
-    }
-
-    const auto move = movingDown ? 1 : -1;
-    movingBbox.topLeft.y += move;
-    newPosition.y += move;
-  }
-
-  return make_tuple(newPosition, currentVelocity);
 }
 
 }}
