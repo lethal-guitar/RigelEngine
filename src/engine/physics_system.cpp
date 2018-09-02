@@ -18,6 +18,7 @@
 
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
+#include "engine/movement.hpp"
 
 namespace ex = entityx;
 
@@ -105,13 +106,8 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const auto originalVelocity = body.mVelocity;
       const auto originalPosition = position;
 
-      const auto movementX = static_cast<int16_t>(body.mVelocity.x);
-      if (movementX != 0) {
-        position = applyHorizontalMovement(
-          toWorldSpace(collisionRect, position),
-          position,
-          movementX);
-      }
+      const auto movementX = static_cast<std::int16_t>(body.mVelocity.x);
+      moveHorizontally(*mpCollisionChecker, entity, movementX);
 
       // Cache new world space BBox after applying horizontal movement
       // for the next steps
@@ -157,33 +153,6 @@ void PhysicsSystem::update(ex::EntityManager& es) {
         body.mVelocity = originalVelocity;
       }
     });
-}
-
-
-base::Vector PhysicsSystem::applyHorizontalMovement(
-  const BoundingBox& bbox,
-  const base::Vector& currentPosition,
-  const int16_t movementX
-) const {
-  const auto movingRight = movementX > 0;
-  base::Vector newPosition = currentPosition;
-
-  auto movingBbox = bbox;
-  for (auto step = 0; step < std::abs(movementX); ++step) {
-    const auto move = movingRight ? 1 : -1;
-
-    const auto isTouching = movingRight
-      ? mpCollisionChecker->isTouchingRightWall(movingBbox)
-      : mpCollisionChecker->isTouchingLeftWall(movingBbox);
-    if (isTouching) {
-      break;
-    }
-
-    movingBbox.topLeft.x += move;
-    newPosition.x += move;
-  }
-
-  return newPosition;
 }
 
 

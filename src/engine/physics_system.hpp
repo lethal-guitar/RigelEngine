@@ -35,8 +35,8 @@ class CollisionChecker;
 
 /** Implements game physics/world interaction
  *
- * Operates on all entities with Physical, BoundingBox and WorldPosition
- * components. The Physical component's velocity is used to change the world
+ * Operates on all entities with MovingBody, BoundingBox and WorldPosition
+ * components. The MovingBody component's velocity is used to change the world
  * position, respecting world collision data. If gravityAffected is true,
  * entities will also fall down until they hit solid ground.
  *
@@ -59,11 +59,6 @@ public:
   void update(entityx::EntityManager& es);
 
 private:
-  base::Vector applyHorizontalMovement(
-    const components::BoundingBox& bbox,
-    const base::Vector& currentPosition,
-    std::int16_t movementX) const;
-
   std::tuple<base::Vector, float> applyVerticalMovement(
     const components::BoundingBox& bbox,
     const base::Vector& currentPosition,
