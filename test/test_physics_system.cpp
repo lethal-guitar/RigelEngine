@@ -124,8 +124,12 @@ TEST_CASE("Physics system works as expected") {
     SECTION("Non-moving object") {
       body.mVelocity = base::Point<float>{0.0f, 0.0f};
       runOneFrame();
-      CHECK(position.y > 5);
+      CHECK(position.y == 5);
       CHECK(body.mVelocity.y > 0.0f);
+
+      runOneFrame();
+      CHECK(position.y > 5);
+      CHECK(body.mVelocity.y >= 1.0f);
 
       SECTION("Falling speed increases until terminal velocity reached") {
         const auto lastPosition = position.y;
@@ -147,11 +151,17 @@ TEST_CASE("Physics system works as expected") {
 
     SECTION("Moving object") {
       body.mVelocity.x = 2;
-      runOneFrame();
-      CHECK(position.x == 12);
 
-      CHECK(position.y > 5);
+      runOneFrame();
+
+      CHECK(position.x == 12);
+      CHECK(position.y == 5);
       CHECK(body.mVelocity.y > 0.0f);
+
+      runOneFrame();
+      CHECK(position.x == 14);
+      CHECK(position.y > 5);
+      CHECK(body.mVelocity.y >= 1.0f);
     }
   }
 

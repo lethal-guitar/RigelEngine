@@ -98,8 +98,11 @@ void PhysicsSystem::update(ex::EntityManager& es) {
         return;
       }
 
-      const auto hasActiveSequence = entity.has_component<MovementSequence>();
-      if (hasActiveSequence) {
+      auto hasActiveSequence = [&]() {
+        return entity.has_component<MovementSequence>();
+      };
+
+      if (hasActiveSequence()) {
         body.mVelocity = updateMovementSequence(entity, body.mVelocity);
       }
 
@@ -113,29 +116,15 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       // for the next steps
       const auto bbox = toWorldSpace(collisionRect, position);
 
-      // Apply Gravity after horizontal movement, but before vertical
-      // movement. This is so that if the horizontal movement results in the
-      // entity floating in the air, we want to drop down already in the same
-      // frame where we applied the horizontal movement. Changing the velocity
-      // here will automatically move the entity down when doing the vertical
-      // movement.
-      if (body.mGravityAffected && !hasActiveSequence) {
+      if (body.mGravityAffected && !hasActiveSequence()) {
         body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
       }
 
       const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
       const auto result =
         moveVertically(*mpCollisionChecker, entity, movementY);
-
       if (result != MovementResult::Completed) {
-        const auto movingDown = movementY > 0;
-        if (movingDown || !body.mGravityAffected) {
-          // For falling, we reset the Y velocity as soon as we hit the ground
-          body.mVelocity.y = 0.0f;
-        } else {
-          // For jumping, we begin falling early when we hit the ceiling
-          body.mVelocity.y = 1.0f;
-        }
+        body.mVelocity.y = 0.0f;
       }
 
       const auto targetPosition =
@@ -171,11 +160,11 @@ float PhysicsSystem::applyGravity(
     }
 
     // We are floating - begin falling
-    return 1.0f;
+    return 0.5f;
   } else {
     // Apply gravity to falling object until terminal velocity reached
     if (currentVelocity < 2.0f) {
-      return currentVelocity + 0.56f;
+      return currentVelocity + 0.5f;
     } else {
       return 2.0f;
     }

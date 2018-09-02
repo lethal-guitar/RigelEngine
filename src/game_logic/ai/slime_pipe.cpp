@@ -34,7 +34,7 @@ namespace {
 
 const data::ActorID DROP_ACTOR_ID = 118;
 const auto DROP_FREQUENCY = 25;
-const auto DROP_OFFSET = WorldPosition{1, 0};
+const auto DROP_OFFSET = WorldPosition{1, 1};
 
 }
 
