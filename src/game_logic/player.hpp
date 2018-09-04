@@ -92,6 +92,9 @@ struct Interacting {
 };
 
 
+struct Incapacitated {};
+
+
 namespace death_animation {
 
 struct FlyingUp {
@@ -126,6 +129,7 @@ using PlayerState = boost::variant<
   ClimbingLadder,
   OnPipe,
   Interacting,
+  Incapacitated,
   Dieing>;
 
 
@@ -186,6 +190,9 @@ public:
   void takeDamage(int amount);
   void die();
 
+  void incapacitate();
+  void setFree();
+
   void doInteractionAnimation();
 
   void resetAfterDeath(entityx::Entity newEntity);
@@ -194,6 +201,7 @@ public:
   bool canTakeDamage() const;
   bool isInMercyFrames() const;
   bool isDead() const;
+  bool isIncapacitated() const;
   bool isLookingUp() const;
   bool isCrouching() const;
   engine::components::Orientation orientation() const;

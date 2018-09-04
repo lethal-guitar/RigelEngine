@@ -328,6 +328,11 @@ bool Player::isDead() const {
 }
 
 
+bool Player::isIncapacitated() const {
+  return stateIs<Incapacitated>();
+}
+
+
 bool Player::isLookingUp() const {
   return mStance == WeaponStance::Upwards;
 }
@@ -388,6 +393,10 @@ void Player::update(const PlayerInput& unfilteredInput) {
     return;
   }
 
+  if (isIncapacitated()) {
+    return;
+  }
+
   updateAnimation();
 
   const auto previousPosY = position().y;
@@ -436,6 +445,20 @@ void Player::die() {
   mState = Dieing{};
   setVisualState(VisualState::Dieing);
   mpServiceProvider->playSound(data::SoundId::DukeDeath);
+}
+
+
+void Player::incapacitate() {
+  mEntity.component<c::Sprite>()->mShow = false;
+  mState = Incapacitated{};
+}
+
+
+void Player::setFree() {
+  mEntity.component<c::Sprite>()->mShow = true;
+  mState = OnGround{};
+  mVisualState = VisualState::Standing;
+  mEntity.component<c::Sprite>()->mFramesToRender = {0};
 }
 
 
@@ -704,6 +727,11 @@ void Player::updateMovement(
 
     [](const Dieing&) {
       // should be handled in updateDeathAnimation()
+      assert(false);
+    },
+
+    [](const Incapacitated&) {
+      // should be handled in top-level update()
       assert(false);
     });
 }
