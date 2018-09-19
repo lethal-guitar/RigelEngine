@@ -1615,6 +1615,7 @@ void EntityFactory::configureEntity(
     case 141: // unknown dynamic geometry
     case 142: // unknown dynamic geometry
     case 143: // shootable wall, burns away
+      break;
 
     case 221: // water
       entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
