@@ -721,7 +721,8 @@ void Player::updateShooting(const Button& fireButton) {
   }
 
   const auto hasRapidFire =
-    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire);
+    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
+    mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
   if (
     fireButton.mWasTriggered ||
