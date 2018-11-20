@@ -124,6 +124,7 @@ TEST_CASE("Spike ball") {
     const auto expectedPositions = std::vector<base::Vector>{
       {2, 18},
       {2, 18},
+      {2, 18},
       {2, 19},
       {2, 20},
       {2, 18}

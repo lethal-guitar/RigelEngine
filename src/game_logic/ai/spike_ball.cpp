@@ -125,14 +125,8 @@ void SpikeBallSystem::receive(const engine::events::CollidedWithWorld& event) {
 
     entity.component<components::SpikeBall>()->mJumpBackCooldown = 3;
 
-    if (entity.has_component<MovementSequence>()) {
-      entity.remove<MovementSequence>();
-      body.mVelocity.y = 0.0f;
-    }
-  }
-
-  if (event.mCollidedBottom) {
-    jump(entity);
+    engine::removeSafely<MovementSequence>(entity);
+    body.mVelocity.y = 0.0f;
   }
 }
 

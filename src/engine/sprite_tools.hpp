@@ -19,6 +19,7 @@
 #include "base/warnings.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -64,9 +65,7 @@ inline void startAnimationLoop(
   boost::optional<int> endFrame,
   const int renderSlot = 0
 ) {
-  if (entity.has_component<components::AnimationLoop>()) {
-    entity.remove<components::AnimationLoop>();
-  }
+  removeSafely<components::AnimationLoop>(entity);
 
   auto& sprite = *entity.component<components::Sprite>();
   sprite.mFramesToRender[renderSlot] = startFrame;
@@ -81,9 +80,7 @@ inline void startAnimationSequence(
   const int renderSlot = 0,
   const bool repeat = false
 ) {
-  if (entity.has_component<components::AnimationSequence>()) {
-    entity.remove<components::AnimationSequence>();
-  }
+  removeSafely<components::AnimationSequence>(entity);
 
   auto& sprite = *entity.component<components::Sprite>();
   sprite.mFramesToRender[renderSlot] = frames.front();

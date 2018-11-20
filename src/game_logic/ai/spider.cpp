@@ -17,6 +17,7 @@
 #include "spider.hpp"
 
 #include "engine/collision_checker.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
@@ -157,9 +158,7 @@ void SpiderSystem::update(entityx::EntityManager& es) {
         self.mPreviousPlayerOrientation = mpPlayer->orientation();
         self.mClingPosition = clingPos;
 
-        if (entity.has_component<ai::components::SimpleWalker>()) {
-          entity.remove<ai::components::SimpleWalker>();
-        }
+        engine::removeSafely<ai::components::SimpleWalker>(entity);
         entity.remove<game_logic::components::Shootable>();
         entity.remove<MovingBody>();
         return true;

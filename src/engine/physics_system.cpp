@@ -18,6 +18,7 @@
 
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
+#include "engine/movement.hpp"
 
 namespace ex = entityx;
 
@@ -97,44 +98,33 @@ void PhysicsSystem::update(ex::EntityManager& es) {
         return;
       }
 
-      const auto hasActiveSequence = entity.has_component<MovementSequence>();
-      if (hasActiveSequence) {
+      auto hasActiveSequence = [&]() {
+        return entity.has_component<MovementSequence>();
+      };
+
+      if (hasActiveSequence()) {
         body.mVelocity = updateMovementSequence(entity, body.mVelocity);
       }
 
       const auto originalVelocity = body.mVelocity;
       const auto originalPosition = position;
 
-      const auto movementX = static_cast<int16_t>(body.mVelocity.x);
-      if (movementX != 0) {
-        position = applyHorizontalMovement(
-          toWorldSpace(collisionRect, position),
-          position,
-          movementX);
-      }
+      const auto movementX = static_cast<std::int16_t>(body.mVelocity.x);
+      moveHorizontally(*mpCollisionChecker, entity, movementX);
 
       // Cache new world space BBox after applying horizontal movement
       // for the next steps
       const auto bbox = toWorldSpace(collisionRect, position);
 
-      // Apply Gravity after horizontal movement, but before vertical
-      // movement. This is so that if the horizontal movement results in the
-      // entity floating in the air, we want to drop down already in the same
-      // frame where we applied the horizontal movement. Changing the velocity
-      // here will automatically move the entity down when doing the vertical
-      // movement.
-      if (body.mGravityAffected && !hasActiveSequence) {
+      if (body.mGravityAffected && !hasActiveSequence()) {
         body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
       }
 
       const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
-      if (movementY != 0) {
-        std::tie(position, body.mVelocity.y) = applyVerticalMovement(
-          bbox,
-          position,
-          body.mVelocity.y,
-          movementY,
-          body.mGravityAffected);
+      const auto result =
+        moveVertically(*mpCollisionChecker, entity, movementY);
+      if (result != MovementResult::Completed) {
+        body.mVelocity.y = 0.0f;
       }
 
       const auto targetPosition =
@@ -160,33 +150,6 @@ void PhysicsSystem::update(ex::EntityManager& es) {
 }
 
 
-base::Vector PhysicsSystem::applyHorizontalMovement(
-  const BoundingBox& bbox,
-  const base::Vector& currentPosition,
-  const int16_t movementX
-) const {
-  const auto movingRight = movementX > 0;
-  base::Vector newPosition = currentPosition;
-
-  auto movingBbox = bbox;
-  for (auto step = 0; step < std::abs(movementX); ++step) {
-    const auto move = movingRight ? 1 : -1;
-
-    const auto isTouching = movingRight
-      ? mpCollisionChecker->isTouchingRightWall(movingBbox)
-      : mpCollisionChecker->isTouchingLeftWall(movingBbox);
-    if (isTouching) {
-      break;
-    }
-
-    movingBbox.topLeft.x += move;
-    newPosition.x += move;
-  }
-
-  return newPosition;
-}
-
-
 float PhysicsSystem::applyGravity(
   const BoundingBox& bbox,
   const float currentVelocity
@@ -197,49 +160,15 @@ float PhysicsSystem::applyGravity(
     }
 
     // We are floating - begin falling
-    return 1.0f;
+    return 0.5f;
   } else {
     // Apply gravity to falling object until terminal velocity reached
     if (currentVelocity < 2.0f) {
-      return currentVelocity + 0.56f;
+      return currentVelocity + 0.5f;
     } else {
       return 2.0f;
     }
   }
-}
-
-
-std::tuple<base::Vector, float> PhysicsSystem::applyVerticalMovement(
-  const BoundingBox& bbox,
-  const base::Vector& currentPosition,
-  const float currentVelocity,
-  const int16_t movementY,
-  const bool beginFallingOnHittingCeiling
-) const {
-  base::Vector newPosition = currentPosition;
-  const auto movingDown = movementY > 0;
-
-  auto movingBbox = bbox;
-  for (auto step = 0; step < std::abs(movementY); ++step) {
-    const auto isTouching = movingDown
-      ? mpCollisionChecker->isOnSolidGround(movingBbox)
-      : mpCollisionChecker->isTouchingCeiling(movingBbox);
-    if (isTouching) {
-      if (movingDown || !beginFallingOnHittingCeiling) {
-        // For falling, we reset the Y velocity as soon as we hit the ground
-        return make_tuple(newPosition, 0.0f);
-      } else {
-        // For jumping, we begin falling early when we hit the ceiling
-        return make_tuple(newPosition, 1.0f);
-      }
-    }
-
-    const auto move = movingDown ? 1 : -1;
-    movingBbox.topLeft.y += move;
-    newPosition.y += move;
-  }
-
-  return make_tuple(newPosition, currentVelocity);
 }
 
 }}
