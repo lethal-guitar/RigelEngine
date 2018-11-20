@@ -215,7 +215,7 @@ public:
 
   void receive(const events::ElevatorAttachmentChanged& event);
 
-  bool hasSpiderOn(const SpiderClingPosition position) const {
+  bool hasSpiderAt(const SpiderClingPosition position) const {
     return mAttachedSpiders.test(static_cast<size_t>(position));
   }
 

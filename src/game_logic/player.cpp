@@ -715,13 +715,14 @@ void Player::updateShooting(const Button& fireButton) {
     stateIs<Interacting>() ||
     mIsRidingElevator ||
     (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
-    hasSpiderOn(SpiderClingPosition::Weapon)
+    hasSpiderAt(SpiderClingPosition::Weapon)
   ) {
     return;
   }
 
   const auto hasRapidFire =
-    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire);
+    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
+    mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
   if (
     fireButton.mWasTriggered ||
@@ -865,7 +866,7 @@ void Player::updateJumpMovement(
     // in the lower jump.
     const auto isShortJump =
       state.mFramesElapsed == 2 &&
-      (!jumpPressed || hasSpiderOn(SpiderClingPosition::Head));
+      (!jumpPressed || hasSpiderAt(SpiderClingPosition::Head));
     if (isShortJump) {
       state.mFramesElapsed = 6;
     } else {
