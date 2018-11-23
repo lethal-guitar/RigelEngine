@@ -36,22 +36,7 @@ void configureKeyCardSlot(
   const engine::components::BoundingBox& boundingBox);
 void disableKeyCardSlot(entityx::Entity entity);
 
-
-/** Disable force-field if possible
- *
- * To be called when the player tries to interact with a key-card slot.
- * If they have the key-card in their inventory, corresponding force-fields
- * will be disabled, and the card removed from their invenotry.
- * Otherwise, nothing happens.
- *
- * @returns true if force field(s) were disabled, false otherwise (i.e. player
- *   didn't have the key-card).
- */
-bool disableForceField(
-  entityx::EntityManager& es,
-  entityx::Entity keyCardSlot,
-  data::PlayerModel* pPlayerModel);
-
+void disableForceField(entityx::EntityManager& es);
 
 void animateForceFields(
   entityx::EntityManager& es,

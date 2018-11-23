@@ -58,28 +58,13 @@ void disableKeyCardSlot(entityx::Entity entity) {
 }
 
 
-bool disableForceField(
-  entityx::EntityManager& es,
-  entityx::Entity keyCardSlot,
-  data::PlayerModel* pPlayerModel
-) {
-  const auto canDisable =
-    pPlayerModel->hasItem(data::InventoryItemType::CircuitBoard);
-
-  if (canDisable) {
-    pPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
-
-    // TODO: Turn off force fields in the order they were placed in the level,
-    // to accurately follow the original behavior
-    es.each<CircuitCardForceField>(
-      [](ex::Entity entity, const CircuitCardForceField&) {
-        entity.destroy();
-      });
-
-    disableKeyCardSlot(keyCardSlot);
-  }
-
-  return canDisable;
+void disableForceField(entityx::EntityManager& es) {
+  // TODO: Turn off force fields in the order they were placed in the level,
+  // to accurately follow the original behavior
+  es.each<CircuitCardForceField>(
+    [](ex::Entity entity, const CircuitCardForceField&) {
+      entity.destroy();
+    });
 }
 
 

@@ -321,7 +321,14 @@ void PlayerInteractionSystem::activateCardReader(
   entityx::EntityManager& es,
   entityx::Entity interactable
 ) {
-  if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
+  const auto hasKey =
+    mpPlayerModel->hasItem(data::InventoryItemType::CircuitBoard);
+
+  if (hasKey) {
+    mpPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
+    interaction::disableKeyCardSlot(interactable);
+    interaction::disableForceField(es);
+
     mpPlayer->doInteractionAnimation();
     showMessage(data::Messages::AccessGranted);
   } else {
