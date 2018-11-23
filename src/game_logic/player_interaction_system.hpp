@@ -78,6 +78,10 @@ private:
     entityx::Entity interactable,
     components::InteractableType type);
 
+
+  void activateCardReader(
+    entityx::EntityManager& es,
+    entityx::Entity interactable);
   void activateHintMachine(entityx::Entity entity);
 
   void collectLetter(

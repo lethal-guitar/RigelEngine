@@ -307,17 +307,25 @@ void PlayerInteractionSystem::performInteraction(
       break;
 
     case InteractableType::ForceFieldCardReader:
-      if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
-        mpPlayer->doInteractionAnimation();
-        showMessage(data::Messages::AccessGranted);
-      } else {
-        showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
-      }
+      activateCardReader(es, interactable);
       break;
 
     case InteractableType::HintMachine:
       activateHintMachine(interactable);
       break;
+  }
+}
+
+
+void PlayerInteractionSystem::activateCardReader(
+  entityx::EntityManager& es,
+  entityx::Entity interactable
+) {
+  if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
+    mpPlayer->doInteractionAnimation();
+    showMessage(data::Messages::AccessGranted);
+  } else {
+    showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
   }
 }
 
