@@ -34,6 +34,8 @@ void configureForceField(entityx::Entity entity);
 void configureKeyCardSlot(
   entityx::Entity entity,
   const engine::components::BoundingBox& boundingBox);
+void disableKeyCardSlot(entityx::Entity entity);
+
 
 /** Disable force-field if possible
  *

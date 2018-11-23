@@ -51,6 +51,13 @@ void configureKeyCardSlot(
 }
 
 
+void disableKeyCardSlot(entityx::Entity entity) {
+  entity.remove<Interactable>();
+  entity.remove<AnimationLoop>();
+  entity.remove<BoundingBox>();
+}
+
+
 bool disableForceField(
   entityx::EntityManager& es,
   entityx::Entity keyCardSlot,
@@ -69,9 +76,7 @@ bool disableForceField(
         entity.destroy();
       });
 
-    keyCardSlot.remove<Interactable>();
-    keyCardSlot.remove<AnimationLoop>();
-    keyCardSlot.remove<BoundingBox>();
+    disableKeyCardSlot(keyCardSlot);
   }
 
   return canDisable;
