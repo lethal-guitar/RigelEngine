@@ -20,6 +20,7 @@ namespace rigel { namespace game_logic { namespace components {
 
 struct ActorTag {
   enum class Type {
+    ForceField,
     Reactor,
     WaterArea,
     AnimatedWaterArea,

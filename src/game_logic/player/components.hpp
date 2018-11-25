@@ -87,8 +87,6 @@ struct Interactable {
 };
 
 
-struct CircuitCardForceField {};
-
 struct RespawnCheckpoint {
   bool mInitialized = false;
   boost::optional<int> mActivationCountdown;

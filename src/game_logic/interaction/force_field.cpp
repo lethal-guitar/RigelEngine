@@ -21,6 +21,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
 
@@ -37,7 +38,7 @@ using namespace game_logic::components;
 void configureForceField(entityx::Entity entity) {
   engine::startAnimationLoop(entity, 1, 2, 4);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
-  entity.assign<CircuitCardForceField>();
+  entity.assign<ActorTag>(ActorTag::Type::ForceField);
 }
 
 
@@ -61,9 +62,11 @@ void disableKeyCardSlot(entityx::Entity entity) {
 void disableForceField(entityx::EntityManager& es) {
   // TODO: Turn off force fields in the order they were placed in the level,
   // to accurately follow the original behavior
-  es.each<CircuitCardForceField>(
-    [](ex::Entity entity, const CircuitCardForceField&) {
-      entity.destroy();
+  es.each<ActorTag>(
+    [](ex::Entity entity, const ActorTag& tag) {
+      if (tag.mType == ActorTag::Type::ForceField) {
+        entity.destroy();
+      }
     });
 }
 
@@ -73,16 +76,18 @@ void animateForceFields(
   engine::RandomNumberGenerator& randomGenerator,
   IGameServiceProvider& serviceProvider
 ) {
-  es.each<CircuitCardForceField, Sprite, Active>([&](
+  es.each<ActorTag, Sprite, Active>([&](
     ex::Entity entity,
-    const CircuitCardForceField&,
+    const ActorTag& tag,
     Sprite& sprite,
     const Active&
   ) {
-    const auto fizzle = (randomGenerator.gen() & 0x20) != 0;
-    if (fizzle) {
-      serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
-      sprite.flashWhite();
+    if (tag.mType == ActorTag::Type::ForceField) {
+      const auto fizzle = (randomGenerator.gen() & 0x20) != 0;
+      if (fizzle) {
+        serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
+        sprite.flashWhite();
+      }
     }
   });
 }
