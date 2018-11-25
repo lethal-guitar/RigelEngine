@@ -59,7 +59,7 @@ void disableKeyCardSlot(entityx::Entity entity) {
 }
 
 
-void disableForceField(entityx::EntityManager& es) {
+void disableNextForceField(entityx::EntityManager& es) {
   auto nextForceField =
     findFirstMatchInSpawnOrder(es, ActorTag::Type::ForceField);
   if (nextForceField) {

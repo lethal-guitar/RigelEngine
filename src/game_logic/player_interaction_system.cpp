@@ -327,7 +327,7 @@ void PlayerInteractionSystem::activateCardReader(
   if (hasKey) {
     mpPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
     interaction::disableKeyCardSlot(interactable);
-    interaction::disableForceField(es);
+    interaction::disableNextForceField(es);
 
     mpPlayer->doInteractionAnimation();
     showMessage(data::Messages::AccessGranted);
