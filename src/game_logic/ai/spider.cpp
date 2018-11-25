@@ -133,8 +133,6 @@ void SpiderSystem::update(entityx::EntityManager& es) {
   using components::Spider;
   using State = Spider::State;
 
-  (void)mpRandomGenerator;
-
   es.each<Spider, Sprite, WorldPosition, BoundingBox, Active>(
     [this](
       entityx::Entity entity,
@@ -174,14 +172,18 @@ void SpiderSystem::update(entityx::EntityManager& es) {
         return worldSpaceBox.intersects(mpPlayer->worldSpaceHitBox());
       };
 
+      auto detachAndDestroy = [&, this]() {
+        mpPlayer->detachSpider(self.mClingPosition);
+        entity.destroy();
+      };
+
       auto fallOff = [&, this]() {
         using M = SpriteMovement;
         const auto movementType = mpRandomGenerator->gen() % 2 != 0
           ? M::FlyUpperLeft
           : M::FlyUpperRight;
         spawnMovingEffectSprite(*mpEntityFactory, 232, movementType, position);
-        mpPlayer->detachSpider(self.mClingPosition);
-        entity.destroy();
+        detachAndDestroy();
       };
 
       auto startFalling = [&, this]() {
@@ -250,7 +252,10 @@ void SpiderSystem::update(entityx::EntityManager& es) {
           break;
 
         case State::ClingingToPlayer:
-          // TODO: Disappear when player gets eaten
+          if (mpPlayer->isIncapacitated()) {
+            detachAndDestroy();
+            return;
+          }
 
           if (mpPlayer->isDead()) {
             fallOff();

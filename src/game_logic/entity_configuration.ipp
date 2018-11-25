@@ -1282,13 +1282,14 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(CAMERA_KILL_EFFECT_SPEC);
       break;
 
-    case 81: // Green ceiling-attached suction plant
+    case 81: // Green creature attached to ceiling, sucking in player
       entity.assign<Shootable>(
         Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::CeilingSucker{});
       break;
 
     case 97: // Small eye-shaped robot, walking on wall

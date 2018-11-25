@@ -38,6 +38,7 @@ namespace rigel { namespace game_logic { namespace ai {
 
 namespace components {
 
+// TODO: Use variant pattern for states
 struct Spider {
   enum class State {
     Uninitialized,
