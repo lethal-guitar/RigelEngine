@@ -23,6 +23,7 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/ai/blue_guard.hpp"
+#include "game_logic/ai/ceiling_sucker.hpp"
 #include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
