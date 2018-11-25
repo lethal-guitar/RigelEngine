@@ -30,7 +30,7 @@ namespace rigel { namespace engine { class RandomNumberGenerator; }}
 
 namespace rigel { namespace game_logic { namespace interaction {
 
-void configureForceField(entityx::Entity entity);
+void configureForceField(entityx::Entity entity, int spawnIndex);
 void configureKeyCardSlot(
   entityx::Entity entity,
   const engine::components::BoundingBox& boundingBox);

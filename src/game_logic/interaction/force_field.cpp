@@ -35,10 +35,10 @@ namespace rigel { namespace game_logic { namespace interaction {
 using namespace engine::components;
 using namespace game_logic::components;
 
-void configureForceField(entityx::Entity entity) {
+void configureForceField(entityx::Entity entity, const int spawnIndex) {
   engine::startAnimationLoop(entity, 1, 2, 4);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
-  entity.assign<ActorTag>(ActorTag::Type::ForceField);
+  entity.assign<ActorTag>(ActorTag::Type::ForceField, spawnIndex);
 }
 
 
@@ -60,14 +60,11 @@ void disableKeyCardSlot(entityx::Entity entity) {
 
 
 void disableForceField(entityx::EntityManager& es) {
-  // TODO: Turn off force fields in the order they were placed in the level,
-  // to accurately follow the original behavior
-  es.each<ActorTag>(
-    [](ex::Entity entity, const ActorTag& tag) {
-      if (tag.mType == ActorTag::Type::ForceField) {
-        entity.destroy();
-      }
-    });
+  auto nextForceField =
+    findFirstMatchInSpawnOrder(es, ActorTag::Type::ForceField);
+  if (nextForceField) {
+    nextForceField.destroy();
+  }
 }
 
 

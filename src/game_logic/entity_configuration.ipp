@@ -638,7 +638,7 @@ void EntityFactory::configureEntity(
     // Circuit card force field
     case 119:
       entity.assign<PlayerDamaging>(9, true);
-      interaction::configureForceField(entity);
+      interaction::configureForceField(entity, mSpawnIndex);
       {
         const auto& position = *entity.component<WorldPosition>();
 
@@ -1669,4 +1669,6 @@ void EntityFactory::configureEntity(
     default:
       break;
   }
+
+  ++mSpawnIndex;
 }
