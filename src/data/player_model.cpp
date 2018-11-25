@@ -138,23 +138,30 @@ void PlayerModel::giveHealth(const int amount) {
 }
 
 
-const std::unordered_set<InventoryItemType>& PlayerModel::inventory() const {
+const std::vector<InventoryItemType>& PlayerModel::inventory() const {
   return mInventory;
 }
 
 
 bool PlayerModel::hasItem(const InventoryItemType type) const {
-  return mInventory.count(type) != 0;
+  using namespace std;
+
+  return find(begin(mInventory), end(mInventory), type) != end(mInventory);
 }
 
 
 void PlayerModel::giveItem(InventoryItemType type) {
-  mInventory.insert(type);
+  mInventory.push_back(type);
 }
 
 
 void PlayerModel::removeItem(const InventoryItemType type) {
-  mInventory.erase(type);
+  using namespace std;
+
+  auto iItem = find(begin(mInventory), end(mInventory), type);
+  if (iItem != end(mInventory)) {
+    mInventory.erase(iItem);
+  }
 }
 
 

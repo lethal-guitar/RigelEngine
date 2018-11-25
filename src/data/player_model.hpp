@@ -97,7 +97,7 @@ public:
   void takeFatalDamage();
   void giveHealth(int amount);
 
-  const std::unordered_set<InventoryItemType>& inventory() const;
+  const std::vector<InventoryItemType>& inventory() const;
   bool hasItem(const InventoryItemType type) const;
   void giveItem(InventoryItemType type);
   void removeItem(const InventoryItemType type);
@@ -112,7 +112,7 @@ public:
 
 private:
   std::vector<CollectableLetterType> mCollectedLetters;
-  std::unordered_set<InventoryItemType> mInventory;
+  std::vector<InventoryItemType> mInventory;
   TutorialMessageState mTutorialMessages;
   WeaponType mWeapon;
   int mScore;
