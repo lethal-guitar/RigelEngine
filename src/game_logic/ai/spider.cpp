@@ -133,8 +133,6 @@ void SpiderSystem::update(entityx::EntityManager& es) {
   using components::Spider;
   using State = Spider::State;
 
-  (void)mpRandomGenerator;
-
   es.each<Spider, Sprite, WorldPosition, BoundingBox, Active>(
     [this](
       entityx::Entity entity,
