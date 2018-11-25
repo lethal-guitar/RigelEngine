@@ -121,6 +121,8 @@ set(core_sources
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
     game_logic/input.hpp
+    game_logic/interaction/locked_door.cpp
+    game_logic/interaction/locked_door.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp

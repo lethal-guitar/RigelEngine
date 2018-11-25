@@ -73,7 +73,8 @@ namespace components {
 enum class InteractableType {
   Teleporter,
   ForceFieldCardReader,
-  HintMachine
+  KeyHole,
+  HintMachine,
 };
 
 

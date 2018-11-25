@@ -122,6 +122,7 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   , mpEvents(pEvents)
 {
   pEvents->subscribe<events::ShootableKilled>(*this);
+  pEvents->subscribe<rigel::events::DoorOpened>(*this);
 }
 
 
@@ -145,6 +146,19 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
 
   mpEvents->emit(rigel::events::ScreenFlash{});
+}
+
+
+void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event) {
+  auto entity = event.mEntity;
+  const auto& mapSection =
+    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
+
+  // TODO: Trigger door sliding down
+  mpMap->clearSection(
+    mapSection.topLeft.x, mapSection.topLeft.y,
+    mapSection.size.width, mapSection.size.height);
+  entity.destroy();
 }
 
 }}

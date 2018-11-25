@@ -83,9 +83,6 @@ const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
 const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 
 
-const int KEYHOLE_ANIMATION[] = {0, 1, 2, 3, 4, 3, 2, 1};
-
-
 const int HINT_GLOBE_ANIMATION[] = {
   0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
@@ -655,7 +652,7 @@ void EntityFactory::configureEntity(
 
     // Keyhole (blue key)
     case 122:
-      entity.assign<AnimationSequence>(KEYHOLE_ANIMATION, 0, true);
+      interaction::configureKeyHole(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
@@ -1608,8 +1605,11 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 102: // dynamic wall: falls down, sinks into ground (when seen)
     case 116: // door, opened by blue key (slides into ground)
+      interaction::configureLockedDoor(entity, mSpawnIndex, boundingBox);
+      break;
+
+    case 102: // dynamic wall: falls down, sinks into ground (when seen)
     case 137: // unknown dynamic geometry
     case 138: // dynamic wall: falls down, stays intact
     case 141: // unknown dynamic geometry

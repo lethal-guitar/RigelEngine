@@ -32,6 +32,7 @@ struct ActorTag {
 
   enum class Type {
     ForceField,
+    Door,
     Reactor,
     WaterArea,
     AnimatedWaterArea,
