@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2018, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,24 +23,17 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace data { class PlayerModel; }}
-namespace rigel { namespace engine { class RandomNumberGenerator; }}
-
 
 namespace rigel { namespace game_logic { namespace interaction {
 
-void configureForceField(entityx::Entity entity, int spawnIndex);
-void configureKeyCardSlot(
+void configureLockedDoor(
+  entityx::Entity entity,
+  int spawnIndex,
+  const engine::components::BoundingBox& boundingBox);
+void configureKeyHole(
   entityx::Entity entity,
   const engine::components::BoundingBox& boundingBox);
-void disableKeyCardSlot(entityx::Entity entity);
-
-void disableNextForceField(entityx::EntityManager& es);
-
-void animateForceFields(
-  entityx::EntityManager& es,
-  engine::RandomNumberGenerator& randomGenerator,
-  IGameServiceProvider& serviceProvider);
+void disableKeyHole(entityx::Entity entity);
 
 }}}
+

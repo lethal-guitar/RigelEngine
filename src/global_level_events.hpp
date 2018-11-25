@@ -20,6 +20,10 @@
 #include "base/spatial_types.hpp"
 #include "data/tutorial_messages.hpp"
 
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
+
 #include <string>
 #include <utility>
 
@@ -68,6 +72,11 @@ struct PlayerDied {};
 
 struct PlayerTeleported {
   base::Vector mNewPosition;
+};
+
+
+struct DoorOpened {
+  entityx::Entity mEntity;
 };
 
 }}

@@ -19,10 +19,12 @@
 #include "data/strings.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interaction/force_field.hpp"
+#include "game_logic/interaction/locked_door.hpp"
 #include "game_logic/player.hpp"
 #include "game_service_provider.hpp"
 #include "global_level_events.hpp"
@@ -99,6 +101,9 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
 
     case InteractableType::ForceFieldCardReader:
       return TM::FoundForceField;
+
+    case InteractableType::KeyHole:
+      return TM::FoundDoor;
 
     case InteractableType::HintMachine:
       return TM::HintGlobeNeeded;
@@ -307,17 +312,57 @@ void PlayerInteractionSystem::performInteraction(
       break;
 
     case InteractableType::ForceFieldCardReader:
-      if (interaction::disableForceField(es, interactable, mpPlayerModel)) {
-        mpPlayer->doInteractionAnimation();
-        showMessage(data::Messages::AccessGranted);
-      } else {
-        showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
-      }
+      activateCardReader(es, interactable);
+      break;
+
+    case InteractableType::KeyHole:
+      activateKeyHole(es, interactable);
       break;
 
     case InteractableType::HintMachine:
       activateHintMachine(interactable);
       break;
+  }
+}
+
+
+void PlayerInteractionSystem::activateCardReader(
+  entityx::EntityManager& es,
+  entityx::Entity interactable
+) {
+  const auto hasKey =
+    mpPlayerModel->hasItem(data::InventoryItemType::CircuitBoard);
+
+  if (hasKey) {
+    mpPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
+    interaction::disableKeyCardSlot(interactable);
+    interaction::disableNextForceField(es);
+
+    mpPlayer->doInteractionAnimation();
+    showMessage(data::Messages::AccessGranted);
+  } else {
+    showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
+  }
+}
+
+
+void PlayerInteractionSystem::activateKeyHole(
+  entityx::EntityManager& es,
+  entityx::Entity interactable
+) {
+  if (mpPlayerModel->hasItem(data::InventoryItemType::BlueKey)) {
+    mpPlayerModel->removeItem(data::InventoryItemType::BlueKey);
+    interaction::disableKeyHole(interactable);
+
+    auto door = findFirstMatchInSpawnOrder(es, ActorTag::Type::Door);
+    if (door) {
+      mpEvents->emit(rigel::events::DoorOpened{door});
+    }
+
+    mpPlayer->doInteractionAnimation();
+    showMessage(data::Messages::OpeningDoor);
+  } else {
+    showTutorialMessage(data::TutorialMessageId::KeyNeeded);
   }
 }
 

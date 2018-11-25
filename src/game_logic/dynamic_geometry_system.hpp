@@ -26,6 +26,7 @@ namespace rigel {
   struct IGameServiceProvider;
   namespace data { namespace map { class Map; }}
   namespace engine { class RandomNumberGenerator; }
+  namespace events { struct DoorOpened; }
   namespace game_logic { namespace events { struct ShootableKilled; }}
 }
 
@@ -42,6 +43,7 @@ public:
     entityx::EventManager* pEvents);
 
   void receive(const events::ShootableKilled& event);
+  void receive(const rigel::events::DoorOpened& event);
 
 private:
   IGameServiceProvider* mpServiceProvider;

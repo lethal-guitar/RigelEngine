@@ -16,21 +16,59 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
+
+#include <limits>
+
+
 namespace rigel { namespace game_logic { namespace components {
 
 struct ActorTag {
+  static constexpr auto INVALID_SPAWN_INDEX = std::numeric_limits<int>::max();
+
   enum class Type {
+    ForceField,
+    Door,
     Reactor,
     WaterArea,
     AnimatedWaterArea,
   };
 
-  explicit ActorTag(const Type type)
+  explicit ActorTag(const Type type, const int spawnIndex = INVALID_SPAWN_INDEX)
     : mType(type)
+    , mSpawnIndex(spawnIndex)
   {
   }
 
   Type mType;
+  int mSpawnIndex = INVALID_SPAWN_INDEX;
 };
+
+
+inline entityx::Entity findFirstMatchInSpawnOrder(
+  entityx::EntityManager& es,
+  const ActorTag::Type desiredType
+) {
+  entityx::Entity candidate;
+  int candidateIndex = std::numeric_limits<int>::max();
+
+  entityx::ComponentHandle<ActorTag> tag;
+  for (auto entity : es.entities_with_components(tag)) {
+    if (tag->mType != desiredType) {
+      continue;
+    }
+
+    if (tag->mSpawnIndex < candidateIndex) {
+      candidate = entity;
+      candidateIndex = tag->mSpawnIndex;
+    }
+  }
+
+  return candidate;
+}
 
 }}}

@@ -21,6 +21,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
 
@@ -34,10 +35,10 @@ namespace rigel { namespace game_logic { namespace interaction {
 using namespace engine::components;
 using namespace game_logic::components;
 
-void configureForceField(entityx::Entity entity) {
+void configureForceField(entityx::Entity entity, const int spawnIndex) {
   engine::startAnimationLoop(entity, 1, 2, 4);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
-  entity.assign<CircuitCardForceField>();
+  entity.assign<ActorTag>(ActorTag::Type::ForceField, spawnIndex);
 }
 
 
@@ -51,30 +52,19 @@ void configureKeyCardSlot(
 }
 
 
-bool disableForceField(
-  entityx::EntityManager& es,
-  entityx::Entity keyCardSlot,
-  data::PlayerModel* pPlayerModel
-) {
-  const auto canDisable =
-    pPlayerModel->hasItem(data::InventoryItemType::CircuitBoard);
+void disableKeyCardSlot(entityx::Entity entity) {
+  entity.remove<Interactable>();
+  entity.remove<AnimationLoop>();
+  entity.remove<BoundingBox>();
+}
 
-  if (canDisable) {
-    pPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
 
-    // TODO: Turn off force fields in the order they were placed in the level,
-    // to accurately follow the original behavior
-    es.each<CircuitCardForceField>(
-      [](ex::Entity entity, const CircuitCardForceField&) {
-        entity.destroy();
-      });
-
-    keyCardSlot.remove<Interactable>();
-    keyCardSlot.remove<AnimationLoop>();
-    keyCardSlot.remove<BoundingBox>();
+void disableNextForceField(entityx::EntityManager& es) {
+  auto nextForceField =
+    findFirstMatchInSpawnOrder(es, ActorTag::Type::ForceField);
+  if (nextForceField) {
+    nextForceField.destroy();
   }
-
-  return canDisable;
 }
 
 
@@ -83,16 +73,18 @@ void animateForceFields(
   engine::RandomNumberGenerator& randomGenerator,
   IGameServiceProvider& serviceProvider
 ) {
-  es.each<CircuitCardForceField, Sprite, Active>([&](
+  es.each<ActorTag, Sprite, Active>([&](
     ex::Entity entity,
-    const CircuitCardForceField&,
+    const ActorTag& tag,
     Sprite& sprite,
     const Active&
   ) {
-    const auto fizzle = (randomGenerator.gen() & 0x20) != 0;
-    if (fizzle) {
-      serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
-      sprite.flashWhite();
+    if (tag.mType == ActorTag::Type::ForceField) {
+      const auto fizzle = (randomGenerator.gen() & 0x20) != 0;
+      if (fizzle) {
+        serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
+        sprite.flashWhite();
+      }
     }
   });
 }

@@ -73,7 +73,8 @@ namespace components {
 enum class InteractableType {
   Teleporter,
   ForceFieldCardReader,
-  HintMachine
+  KeyHole,
+  HintMachine,
 };
 
 
@@ -86,8 +87,6 @@ struct Interactable {
   InteractableType mType;
 };
 
-
-struct CircuitCardForceField {};
 
 struct RespawnCheckpoint {
   bool mInitialized = false;

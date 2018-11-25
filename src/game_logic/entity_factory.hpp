@@ -170,6 +170,7 @@ private:
 
   SpriteFactory mSpriteFactory;
   entityx::EntityManager* mpEntityManager;
+  int mSpawnIndex = 0;
   data::Difficulty mDifficulty;
 };
 
