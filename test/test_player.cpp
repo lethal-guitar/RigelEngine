@@ -14,8 +14,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <catch.hpp>
-
 #include "utils.hpp"
 
 #include <base/array_view.hpp>
@@ -35,6 +33,10 @@
 #include <utils/container_tools.hpp>
 
 #include <global_level_events.hpp>
+
+RIGEL_DISABLE_WARNINGS
+#include <catch.hpp>
+RIGEL_RESTORE_WARNINGS
 
 
 using namespace std;

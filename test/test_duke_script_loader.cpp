@@ -14,11 +14,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <catch.hpp>
-
 #include <base/warnings.hpp>
 #include <loader/duke_script_loader.hpp>
 #include <loader/resource_loader.hpp>
+
+RIGEL_DISABLE_WARNINGS
+#include <catch.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <typeinfo>
 

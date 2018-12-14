@@ -14,5 +14,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <base/warnings.hpp>
+
+RIGEL_DISABLE_WARNINGS
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
+RIGEL_RESTORE_WARNINGS

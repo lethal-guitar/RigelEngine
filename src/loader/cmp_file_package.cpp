@@ -38,7 +38,7 @@ std::string normalizedFileName(const std::string& fileName) {
     normalized.end(),
     normalized.begin(),
     [](const auto ch) {
-      return std::toupper(ch);
+      return static_cast<char>(std::toupper(ch));
     });
   return normalized;
 }

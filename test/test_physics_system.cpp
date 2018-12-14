@@ -14,8 +14,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <catch.hpp>
-
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 
@@ -24,6 +22,10 @@
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
 #include <engine/timing.hpp>
+
+RIGEL_DISABLE_WARNINGS
+#include <catch.hpp>
+RIGEL_RESTORE_WARNINGS
 
 
 using namespace rigel;

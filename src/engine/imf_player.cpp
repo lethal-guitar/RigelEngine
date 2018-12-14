@@ -62,7 +62,7 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
   }
 
   if (mSongData.empty()) {
-    std::fill(pBuffer, pBuffer + samplesRequired, 0);
+    std::fill(pBuffer, pBuffer + samplesRequired, int16_t{0});
     return;
   }
 

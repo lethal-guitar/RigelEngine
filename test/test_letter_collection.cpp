@@ -14,11 +14,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <catch.hpp>
 #include "utils.hpp"
 
 #include <data/player_model.hpp>
 #include <utils/container_tools.hpp>
+
+RIGEL_DISABLE_WARNINGS
+#include <catch.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <vector>
 
