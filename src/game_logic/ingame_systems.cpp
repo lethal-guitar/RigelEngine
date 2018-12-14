@@ -95,11 +95,6 @@ IngameSystems::IngameSystems(
       &mParticles,
       eventManager)
   , mItemContainerSystem(&entities, eventManager)
-  , mNapalmBombSystem(
-      pServiceProvider,
-      pEntityFactory,
-      &mCollisionChecker,
-      eventManager)
   , mBlueGuardSystem(
       &mPlayer,
       &mCollisionChecker,
@@ -196,7 +191,6 @@ void IngameSystems::update(
   mHoverBotSystem.update(es);
   mLaserTurretSystem.update(es);
   mMessengerDroneSystem.update(es);
-  mNapalmBombSystem.update(es);
   mPrisonerSystem.update(es);
   mRedBirdSystem.update(es);
   mRocketTurretSystem.update(es);

@@ -36,6 +36,7 @@ namespace rigel { namespace game_logic { namespace events {
 namespace rigel { namespace game_logic {
 
 class EntityFactory;
+struct GlobalDependencies;
 
 
 /** Provides type erasure for component classes */
@@ -87,19 +88,6 @@ struct ItemContainer {
   }
 };
 
-
-struct NapalmBomb {
-  enum class State {
-    Ticking,
-    SpawningFires
-  };
-
-  State mState = State::Ticking;
-  int mFramesElapsed = 0;
-  bool mCanSpawnLeft = true;
-  bool mCanSpawnRight = true;
-};
-
 }
 
 class ItemContainerSystem : public entityx::Receiver<ItemContainerSystem> {
@@ -117,28 +105,38 @@ private:
 };
 
 
-class NapalmBombSystem : public entityx::Receiver<NapalmBombSystem> {
+namespace behaviors {
+
+class NapalmBomb {
 public:
-  NapalmBombSystem(
-    IGameServiceProvider* pServiceProvider,
-    EntityFactory* pEntityFactory,
-    engine::CollisionChecker* pCollisionChecker,
-    entityx::EventManager& events);
+  void update(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-  void update(entityx::EntityManager& es);
+  void onKilled(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
 
-  void receive(const events::ShootableKilled& event);
+  enum class State {
+    Ticking,
+    SpawningFires
+  };
+
+  State mState = State::Ticking;
+  int mFramesElapsed = 0;
+  bool mCanSpawnLeft = true;
+  bool mCanSpawnRight = true;
 
 private:
-  void explode(entityx::Entity entity);
+  void explode(GlobalDependencies& dependencies, entityx::Entity entity);
   void spawnFires(
-    components::NapalmBomb& state,
-    const base::Vector& position,
-    int step);
-
-  IGameServiceProvider* mpServiceProvider;
-  EntityFactory* mpEntityFactory;
-  engine::CollisionChecker* mpCollisionChecker;
+    GlobalDependencies& d, const base::Vector& bombPosition, int step);
 };
+
+}
 
 }}
