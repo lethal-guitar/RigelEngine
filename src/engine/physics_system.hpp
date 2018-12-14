@@ -59,6 +59,11 @@ public:
   void update(entityx::EntityManager& es);
 
 private:
+  void applyPhysics(
+    entityx::Entity entity,
+    components::MovingBody& body,
+    components::WorldPosition& position,
+    const components::BoundingBox& collisionRect);
   float applyGravity(
     const components::BoundingBox& bbox,
     float currentVelocity);
