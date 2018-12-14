@@ -24,9 +24,33 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <memory>
+#include <type_traits>
 
 
 namespace rigel { namespace game_logic { namespace components {
+
+namespace detail {
+
+template <typename...>
+using void_t = void;
+
+template <typename T, typename = void>
+struct hasOnHit : std::false_type {};
+
+template <typename T>
+struct hasOnHit<T, void_t<decltype(&T::onHit)>> :
+  std::true_type {};
+
+
+template <typename T, typename = void>
+struct hasOnKilled : std::false_type {};
+
+template <typename T>
+struct hasOnKilled<T, void_t<decltype(&T::onKilled)>> :
+  std::true_type {};
+
+}
+
 
 template <typename T>
 void updateBehaviorController(
@@ -37,6 +61,51 @@ void updateBehaviorController(
   entityx::Entity entity
 ) {
   self.update(dependencies, isOddFrame, isOnScreen, entity);
+}
+
+
+template <typename T>
+std::enable_if_t<detail::hasOnHit<T>::value> behaviorControllerOnHit(
+  T& self,
+  GlobalDependencies& dependencies,
+  const bool isOddFrame,
+  const base::Point<float>& inflictorVelocity,
+  entityx::Entity entity
+) {
+  self.onHit(dependencies, isOddFrame, inflictorVelocity, entity);
+}
+
+
+template <typename T>
+std::enable_if_t<!detail::hasOnHit<T>::value> behaviorControllerOnHit(
+  T&,
+  GlobalDependencies&,
+  const bool,
+  const base::Point<float>&,
+  entityx::Entity
+) {
+}
+
+
+template <typename T>
+std::enable_if_t<detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
+  T& self,
+  GlobalDependencies& dependencies,
+  const bool isOddFrame,
+  const base::Point<float>& inflictorVelocity,
+  entityx::Entity entity
+) {
+  self.onKilled(dependencies, isOddFrame, inflictorVelocity, entity);
+}
+
+template <typename T>
+std::enable_if_t<!detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
+  T&,
+  GlobalDependencies&,
+  const bool,
+  const base::Point<float>&,
+  entityx::Entity
+) {
 }
 
 
@@ -57,6 +126,24 @@ public:
     mpSelf->update(dependencies, isOddFrame, isOnScreen, entity);
   }
 
+  void onHit(
+    GlobalDependencies& dependencies,
+    const bool isOddFrame,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity
+  ) {
+    mpSelf->onHit(dependencies, isOddFrame, inflictorVelocity, entity);
+  }
+
+  void onKilled(
+    GlobalDependencies& dependencies,
+    const bool isOddFrame,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity
+  ) {
+    mpSelf->onKilled(dependencies, isOddFrame, inflictorVelocity, entity);
+  }
+
 private:
   struct Concept {
     virtual ~Concept() = default;
@@ -65,6 +152,18 @@ private:
       GlobalDependencies& dependencies,
       bool isOddFrame,
       bool isOnScreen,
+      entityx::Entity entity) = 0;
+
+    virtual void onHit(
+      GlobalDependencies& dependencies,
+      bool isOddFrame,
+      const base::Point<float>& inflictorVelocity,
+      entityx::Entity entity) = 0;
+
+    virtual void onKilled(
+      GlobalDependencies& dependencies,
+      bool isOddFrame,
+      const base::Point<float>& inflictorVelocity,
       entityx::Entity entity) = 0;
   };
 
@@ -86,6 +185,34 @@ private:
         dependencies,
         isOddFrame,
         isOnScreen,
+        entity);
+    }
+
+    void onHit(
+      GlobalDependencies& dependencies,
+      bool isOddFrame,
+      const base::Point<float>& inflictorVelocity,
+      entityx::Entity entity
+    ) override {
+      behaviorControllerOnHit(
+        mData,
+        dependencies,
+        isOddFrame,
+        inflictorVelocity,
+        entity);
+    }
+
+    void onKilled(
+      GlobalDependencies& dependencies,
+      bool isOddFrame,
+      const base::Point<float>& inflictorVelocity,
+      entityx::Entity entity
+    ) override {
+      behaviorControllerOnKilled(
+        mData,
+        dependencies,
+        isOddFrame,
+        inflictorVelocity,
         entity);
     }
 

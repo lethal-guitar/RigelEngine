@@ -25,6 +25,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/global_dependencies.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -49,11 +50,14 @@ ItemContainerSystem::ItemContainerSystem(
 
 
 void ItemContainerSystem::update(entityx::EntityManager& es) {
-  for (auto& entity : mShotContainersQueue) {
-    const auto& container = *entity.component<const ItemContainer>();
+  using RS = ItemContainer::ReleaseStyle;
 
+  auto releaseItem = [this](
+    entityx::Entity entity,
+    const std::vector<ComponentHolder>& containedComponents
+  ) {
     auto contents = mpEntityManager->create();
-    for (auto& component : container.mContainedComponents) {
+    for (auto& component : containedComponents) {
       component.assignToEntity(contents);
     }
 
@@ -61,8 +65,50 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
     contents.assign<WorldPosition>(*entity.component<WorldPosition>());
 
     entity.destroy();
+  };
+
+  for (auto& entity : mShotContainersQueue) {
+    auto& container = *entity.component<ItemContainer>();
+
+    switch (container.mStyle) {
+      case RS::Default:
+        releaseItem(entity, container.mContainedComponents);
+        break;
+
+      case RS::ItemBox:
+        ++container.mFramesElapsed;
+
+        if (container.mFramesElapsed == 1) {
+          entity.component<Sprite>()->flashWhite();
+        } else if (container.mFramesElapsed == 2) {
+          releaseItem(entity, container.mContainedComponents);
+        }
+        break;
+
+      case RS::NuclearWasteBarrel:
+        ++container.mFramesElapsed;
+
+        if (container.mFramesElapsed == 1) {
+          entity.component<Sprite>()->flashWhite();
+        } else if (container.mFramesElapsed == 2) {
+          // Switch to "bulging" state
+          ++entity.component<Sprite>()->mFramesToRender[0];
+        } else if (container.mFramesElapsed == 3) {
+          // At this point, the destruction effects take over
+          entity.component<Sprite>()->mShow = false;
+        } else if (container.mFramesElapsed == 4) {
+          releaseItem(entity, container.mContainedComponents);
+        }
+        break;
+    }
   }
-  mShotContainersQueue.clear();
+
+  mShotContainersQueue.erase(
+    remove_if(begin(mShotContainersQueue), end(mShotContainersQueue),
+      [](const entityx::Entity entity) {
+        return !entity.valid();
+      }),
+    end(mShotContainersQueue));
 }
 
 
@@ -81,98 +127,87 @@ void ItemContainerSystem::receive(const events::ShootableKilled& event) {
 }
 
 
-NapalmBombSystem::NapalmBombSystem(
-  IGameServiceProvider* pServiceProvider,
-  EntityFactory* pEntityFactory,
-  engine::CollisionChecker* pCollisionChecker,
-  entityx::EventManager& events
-)
-  : mpServiceProvider(pServiceProvider)
-  , mpEntityFactory(pEntityFactory)
-  , mpCollisionChecker(pCollisionChecker)
-{
-  events.subscribe<events::ShootableKilled>(*this);
-}
+namespace behaviors {
 
-
-void NapalmBombSystem::update(entityx::EntityManager& es) {
+void NapalmBomb::update(
+  GlobalDependencies& d,
+  const bool,
+  const bool,
+  entityx::Entity entity
+) {
   using components::DestructionEffects;
+  using State = NapalmBomb::State;
 
-  using State = components::NapalmBomb::State;
-  es.each<components::NapalmBomb, WorldPosition, Sprite>(
-    [this](
-      entityx::Entity entity,
-      components::NapalmBomb& state,
-      const WorldPosition& position,
-      Sprite& sprite
-    ) {
-      ++state.mFramesElapsed;
+  ++mFramesElapsed;
 
-      switch (state.mState) {
-        case State::Ticking:
-          if (state.mFramesElapsed >= 25 && state.mFramesElapsed % 2 == 1) {
-            sprite.flashWhite();
-          }
+  const auto& position = *entity.component<WorldPosition>();
+  auto& sprite = *entity.component<Sprite>();
 
-          if (state.mFramesElapsed >= 31) {
-            entity.component<DestructionEffects>()->mActivated = true;
-            explode(entity);
-          }
-          break;
-
-        case State::SpawningFires:
-          if (state.mFramesElapsed > 10) {
-            entity.destroy();
-            return;
-          }
-
-          if (state.mFramesElapsed % 2 == 0) {
-            const auto step = state.mFramesElapsed / 2;
-            spawnFires(state, position, step);
-          }
-          break;
+  switch (mState) {
+    case State::Ticking:
+      if (mFramesElapsed >= 25 && mFramesElapsed % 2 == 1) {
+        sprite.flashWhite();
       }
-    });
-}
 
+      if (mFramesElapsed >= 31) {
+        entity.component<DestructionEffects>()->mActivated = true;
+        explode(d, entity);
+      }
+      break;
 
-void NapalmBombSystem::receive(const events::ShootableKilled& event) {
-  auto entity = event.mEntity;
-  if (entity.has_component<components::NapalmBomb>()) {
-    explode(entity);
+    case State::SpawningFires:
+      if (mFramesElapsed > 10) {
+        entity.destroy();
+        return;
+      }
+
+      if (mFramesElapsed % 2 == 0) {
+        const auto step = mFramesElapsed / 2;
+        spawnFires(d, position, step);
+      }
+      break;
   }
 }
 
 
-void NapalmBombSystem::explode(entityx::Entity entity) {
+void NapalmBomb::onKilled(
+  GlobalDependencies& d,
+  const bool,
+  const base::Point<float>&,
+  entityx::Entity entity
+) {
+  explode(d, entity);
+}
+
+
+void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
   const auto& position = *entity.component<WorldPosition>();
-  auto& state = *entity.component<components::NapalmBomb>();
 
-  mpServiceProvider->playSound(data::SoundId::Explosion);
-  spawnFires(state, position, 0);
+  d.mpServiceProvider->playSound(data::SoundId::Explosion);
+  spawnFires(d, position, 0);
 
-  state.mState = components::NapalmBomb::State::SpawningFires;
-  state.mFramesElapsed = 0;
+  mState = NapalmBomb::State::SpawningFires;
+  mFramesElapsed = 0;
   entity.component<Sprite>()->mShow = false;
   entity.remove<engine::components::MovingBody>();
 }
 
 
-void NapalmBombSystem::spawnFires(
-  components::NapalmBomb& state,
+void NapalmBomb::spawnFires(
+  GlobalDependencies& d,
   const base::Vector& bombPosition,
   const int step
 ) {
   using namespace game_logic::components::parameter_aliases;
 
-  auto spawnOneFire = [this](const base::Vector& position) {
+  auto spawnOneFire = [&, this](const base::Vector& position) {
     const auto canSpawn =
-      mpCollisionChecker->isOnSolidGround(
+      d.mpCollisionChecker->isOnSolidGround(
         position,
         BoundingBox{{}, {2, 1}});
 
     if (canSpawn) {
-      auto fire = createOneShotSprite(*mpEntityFactory, 65, position);
+      auto fire = createOneShotSprite(*d.mpEntityFactory, 65, position);
       fire.assign<components::PlayerDamaging>(Damage{1});
       fire.assign<components::DamageInflicting>(
         Damage{1},
@@ -182,13 +217,13 @@ void NapalmBombSystem::spawnFires(
   };
 
   const auto basePosition = WorldPosition{step + 1, 0};
-  if (state.mCanSpawnLeft) {
-    state.mCanSpawnLeft = spawnOneFire(bombPosition + basePosition * -2);
+  if (mCanSpawnLeft) {
+    mCanSpawnLeft = spawnOneFire(bombPosition + basePosition * -2);
   }
 
-  if (state.mCanSpawnRight) {
-    state.mCanSpawnRight = spawnOneFire(bombPosition + basePosition * 2);
+  if (mCanSpawnRight) {
+    mCanSpawnRight = spawnOneFire(bombPosition + basePosition * 2);
   }
 }
 
-}}
+}}}

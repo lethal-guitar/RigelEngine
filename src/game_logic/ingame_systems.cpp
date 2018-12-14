@@ -95,11 +95,6 @@ IngameSystems::IngameSystems(
       &mParticles,
       eventManager)
   , mItemContainerSystem(&entities, eventManager)
-  , mNapalmBombSystem(
-      pServiceProvider,
-      pEntityFactory,
-      &mCollisionChecker,
-      eventManager)
   , mBlueGuardSystem(
       &mPlayer,
       &mCollisionChecker,
@@ -196,7 +191,6 @@ void IngameSystems::update(
   mHoverBotSystem.update(es);
   mLaserTurretSystem.update(es);
   mMessengerDroneSystem.update(es);
-  mNapalmBombSystem.update(es);
   mPrisonerSystem.update(es);
   mRedBirdSystem.update(es);
   mRocketTurretSystem.update(es);
@@ -212,7 +206,7 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   // Physics and other updates
   // ----------------------------------------------------------------------
-  mPhysicsSystem.update(es);
+  mPhysicsSystem.updatePhase1(es);
 
   // Collect items after physics, so that any collectible
   // items are in their final positions for this frame.
@@ -226,6 +220,9 @@ void IngameSystems::update(
 
   mEffectsSystem.update(es);
   mLifeTimeSystem.update(es);
+
+  // Now process any MovingBody objects that have been spawned after phase 1
+  mPhysicsSystem.updatePhase2(es);
 
   mParticles.update();
 }

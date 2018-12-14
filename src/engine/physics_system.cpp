@@ -82,6 +82,8 @@ PhysicsSystem::PhysicsSystem(
   : mpCollisionChecker(pCollisionChecker)
   , mpEvents(pEvents)
 {
+  mpEvents->subscribe<ex::ComponentAddedEvent<MovingBody>>(*this);
+  mpEvents->subscribe<ex::ComponentRemovedEvent<MovingBody>>(*this);
 }
 
 
@@ -94,59 +96,130 @@ void PhysicsSystem::update(ex::EntityManager& es) {
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
-      if (!body.mIsActive) {
-        return;
-      }
-
-      auto hasActiveSequence = [&]() {
-        return entity.has_component<MovementSequence>();
-      };
-
-      if (hasActiveSequence()) {
-        body.mVelocity = updateMovementSequence(entity, body.mVelocity);
-      }
-
-      const auto originalVelocity = body.mVelocity;
-      const auto originalPosition = position;
-
-      const auto movementX = static_cast<std::int16_t>(body.mVelocity.x);
-      moveHorizontally(*mpCollisionChecker, entity, movementX);
-
-      // Cache new world space BBox after applying horizontal movement
-      // for the next steps
-      const auto bbox = toWorldSpace(collisionRect, position);
-
-      if (body.mGravityAffected && !hasActiveSequence()) {
-        body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
-      }
-
-      const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
-      const auto result =
-        moveVertically(*mpCollisionChecker, entity, movementY);
-      if (result != MovementResult::Completed) {
-        body.mVelocity.y = 0.0f;
-      }
-
-      const auto targetPosition =
-        originalPosition + WorldPosition{movementX, movementY};
-      const auto collisionOccured = position != targetPosition;
-      setTag<components::CollidedWithWorld>(entity, collisionOccured);
-
-      if (collisionOccured) {
-        const auto left = targetPosition.x != position.x && movementX < 0;
-        const auto right = targetPosition.x != position.x && movementX > 0;
-        const auto top = targetPosition.y != position.y && movementY < 0;
-        const auto bottom = targetPosition.y != position.y && movementY > 0;
-
-        mpEvents->emit(events::CollidedWithWorld{
-          entity, left, right, top, bottom});
-      }
-
-      if (body.mIgnoreCollisions) {
-        position = targetPosition;
-        body.mVelocity = originalVelocity;
-      }
+      applyPhysics(entity, body, position, collisionRect);
     });
+}
+
+
+void PhysicsSystem::updatePhase1(ex::EntityManager& es) {
+  update(es);
+  mShouldCollectForPhase2 = true;
+}
+
+
+void PhysicsSystem::updatePhase2(ex::EntityManager& es) {
+  for (auto entity : mPhysicsObjectsForPhase2) {
+    assert(entity.has_component<MovingBody>());
+    const auto hasRequiredComponents =
+      entity.has_component<WorldPosition>() &&
+      entity.has_component<BoundingBox>() &&
+      entity.has_component<components::Active>();
+
+    if (hasRequiredComponents) {
+      applyPhysics(
+        entity,
+        *entity.component<MovingBody>(),
+        *entity.component<WorldPosition>(),
+        *entity.component<BoundingBox>());
+    }
+  }
+
+  mPhysicsObjectsForPhase2.clear();
+  mShouldCollectForPhase2 = false;
+}
+
+
+void PhysicsSystem::applyPhysics(
+  ex::Entity entity,
+  MovingBody& body,
+  WorldPosition& position,
+  const BoundingBox& collisionRect
+) {
+  if (!body.mIsActive) {
+    return;
+  }
+
+  auto hasActiveSequence = [&]() {
+    return entity.has_component<MovementSequence>();
+  };
+
+  if (hasActiveSequence()) {
+    body.mVelocity = updateMovementSequence(entity, body.mVelocity);
+  }
+
+  const auto originalVelocity = body.mVelocity;
+  const auto originalPosition = position;
+
+  const auto movementX = static_cast<std::int16_t>(body.mVelocity.x);
+  moveHorizontally(*mpCollisionChecker, entity, movementX);
+
+  // Cache new world space BBox after applying horizontal movement
+  // for the next steps
+  const auto bbox = toWorldSpace(collisionRect, position);
+
+  if (body.mGravityAffected && !hasActiveSequence()) {
+    body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
+  }
+
+  const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
+  const auto result =
+    moveVertically(*mpCollisionChecker, entity, movementY);
+  if (result != MovementResult::Completed) {
+    body.mVelocity.y = 0.0f;
+  }
+
+  const auto targetPosition =
+    originalPosition + WorldPosition{movementX, movementY};
+  const auto collisionOccured = position != targetPosition;
+  setTag<components::CollidedWithWorld>(entity, collisionOccured);
+
+  if (collisionOccured) {
+    const auto left = targetPosition.x != position.x && movementX < 0;
+    const auto right = targetPosition.x != position.x && movementX > 0;
+    const auto top = targetPosition.y != position.y && movementY < 0;
+    const auto bottom = targetPosition.y != position.y && movementY > 0;
+
+    mpEvents->emit(events::CollidedWithWorld{
+      entity, left, right, top, bottom});
+  }
+
+  if (body.mIgnoreCollisions) {
+    position = targetPosition;
+    body.mVelocity = originalVelocity;
+  }
+}
+
+
+void PhysicsSystem::receive(
+  const entityx::ComponentAddedEvent<components::MovingBody>& event
+) {
+  if (!mShouldCollectForPhase2) {
+    return;
+  }
+
+  mPhysicsObjectsForPhase2.push_back(event.entity);
+}
+
+
+void PhysicsSystem::receive(
+  const entityx::ComponentRemovedEvent<components::MovingBody>& event
+) {
+  using namespace std;
+
+  if (!mShouldCollectForPhase2) {
+    return;
+  }
+
+  const auto it = find_if(
+    begin(mPhysicsObjectsForPhase2),
+    end(mPhysicsObjectsForPhase2),
+    [&event](const auto& entity) {
+      return entity == event.entity;
+    });
+
+  if (it != end(mPhysicsObjectsForPhase2)) {
+    mPhysicsObjectsForPhase2.erase(it);
+  }
 }
 
 

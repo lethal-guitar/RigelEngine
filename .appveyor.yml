@@ -1,14 +1,14 @@
 clone_depth: 50
 
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 branches:
     only:
         - master
 
 environment:
-    BOOST_ROOT: C:\Libraries\boost_1_60_0
-    BOOST_LIBRARYDIR: C:\Libraries\boost_1_60_0\lib64-msvc-14.0
+    BOOST_ROOT: C:\Libraries\boost_1_67_0
+    BOOST_LIBRARYDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
 
 install:
     - git submodule update --init --recursive
@@ -32,7 +32,7 @@ before_build:
 
     - mkdir build
     - cd build
-    - cmake .. -G "Visual Studio 14 2015 Win64"
+    - cmake .. -G "Visual Studio 15 2017 Win64"
     - cd ..
 
 build:
@@ -49,7 +49,7 @@ test_script:
 
 after_build:
   - IF "%CONFIGURATION%" == "Debug" set BOOST_DBG_MARKER=-gd
-  - 7z a rigel_build.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\SDL2_mixer.dll %BOOST_LIBRARYDIR%\boost_program_options-vc140-mt%BOOST_DBG_MARKER%-1_60.dll
+  - 7z a rigel_build.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\SDL2_mixer.dll %BOOST_LIBRARYDIR%\boost_program_options-vc141-mt%BOOST_DBG_MARKER%-x64-1_67.dll
 
 artifacts:
     - path: rigel_build.zip

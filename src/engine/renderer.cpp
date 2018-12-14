@@ -513,7 +513,7 @@ void Renderer::drawTexture(
   fillVertexPositions(destRect, std::begin(vertices), 0, 4);
   fillTexCoords(sourceRect, textureData, std::begin(vertices), 2, 4);
 
-  batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4);
+  batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4u);
 }
 
 
@@ -815,7 +815,7 @@ void Renderer::batchQuadVertices(
     cbegin(QUAD_INDICES),
     cend(QUAD_INDICES),
     begin(indices),
-    [&](const GLushort index) {
+    [&](const GLushort index) -> GLushort {
       return index + currentIndex;
     });
 

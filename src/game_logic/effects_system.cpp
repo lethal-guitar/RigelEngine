@@ -212,18 +212,10 @@ void EffectsSystem::processEffectsAndAdvance(
       },
 
       [&, this](const ScoreNumber& scoreNumber) {
-        // NOTE: We have to offset the score number's Y position by -1 here,
-        // because the damage infliction system (which triggers destruction
-        // effects usually) runs after the physics system. This means that any
-        // score number spawned by this system won't have any movement applied
-        // to it on the frame it was spawned on. In the original game, this is
-        // different though, as score numbers are part of the "effect actors",
-        // which are always updated after the main actors. To compensate,
-        // we apply this offset.
         spawnFloatingScoreNumber(
           *mpEntityFactory,
           scoreNumber.mType,
-          position + scoreNumber.mOffset + base::Vector{0, -1});
+          position + scoreNumber.mOffset);
       });
   }
 

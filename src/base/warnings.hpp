@@ -22,7 +22,9 @@
 
 #if defined(_MSC_VER)
 
-  #define RIGEL_DISABLE_WARNINGS __pragma(warning(push, 0))
+  #define RIGEL_DISABLE_WARNINGS __pragma(warning(push, 0)) \
+    __pragma(warning(disable: 4244)) \
+    /**/
 
   #define RIGEL_RESTORE_WARNINGS __pragma(warning(pop))
 

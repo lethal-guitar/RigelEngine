@@ -36,6 +36,7 @@ namespace rigel { namespace game_logic { namespace events {
 namespace rigel { namespace game_logic {
 
 class EntityFactory;
+struct GlobalDependencies;
 
 
 /** Provides type erasure for component classes */
@@ -78,26 +79,21 @@ private:
 namespace components {
 
 struct ItemContainer {
+  enum class ReleaseStyle : std::uint8_t {
+    Default,
+    ItemBox,
+    NuclearWasteBarrel
+  };
+
   std::vector<ComponentHolder> mContainedComponents;
+  ReleaseStyle mStyle = ReleaseStyle::Default;
+  std::int8_t mFramesElapsed = 0;
 
   template<typename TComponent, typename... TArgs>
   void assign(TArgs&&... components) {
     mContainedComponents.emplace_back(
       TComponent{std::forward<TArgs>(components)...});
   }
-};
-
-
-struct NapalmBomb {
-  enum class State {
-    Ticking,
-    SpawningFires
-  };
-
-  State mState = State::Ticking;
-  int mFramesElapsed = 0;
-  bool mCanSpawnLeft = true;
-  bool mCanSpawnRight = true;
 };
 
 }
@@ -117,28 +113,38 @@ private:
 };
 
 
-class NapalmBombSystem : public entityx::Receiver<NapalmBombSystem> {
+namespace behaviors {
+
+class NapalmBomb {
 public:
-  NapalmBombSystem(
-    IGameServiceProvider* pServiceProvider,
-    EntityFactory* pEntityFactory,
-    engine::CollisionChecker* pCollisionChecker,
-    entityx::EventManager& events);
+  void update(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-  void update(entityx::EntityManager& es);
+  void onKilled(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
 
-  void receive(const events::ShootableKilled& event);
+  enum class State {
+    Ticking,
+    SpawningFires
+  };
+
+  State mState = State::Ticking;
+  int mFramesElapsed = 0;
+  bool mCanSpawnLeft = true;
+  bool mCanSpawnRight = true;
 
 private:
-  void explode(entityx::Entity entity);
+  void explode(GlobalDependencies& dependencies, entityx::Entity entity);
   void spawnFires(
-    components::NapalmBomb& state,
-    const base::Vector& position,
-    int step);
-
-  IGameServiceProvider* mpServiceProvider;
-  EntityFactory* mpEntityFactory;
-  engine::CollisionChecker* mpCollisionChecker;
+    GlobalDependencies& d, const base::Vector& bombPosition, int step);
 };
+
+}
 
 }}

@@ -121,8 +121,6 @@ base::Vector findTeleporterTargetPosition(
   const auto sourceTeleporterPosition =
     *teleporter.component<WorldPosition>();
 
-  base::Vector targetPosition;
-
   ex::ComponentHandle<components::Interactable> interactable;
   ex::ComponentHandle<WorldPosition> position;
 

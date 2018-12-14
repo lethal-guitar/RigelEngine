@@ -590,7 +590,6 @@ entityx::Entity spawnMovingEffectSprite(
 ) {
   auto entity = factory.createSprite(id, position, true);
   configureMovingEffectSprite(entity, movement);
-  entity.assign<Active>();
   if (entity.component<Sprite>()->mpDrawData->mFrames.size() > 1) {
     entity.assign<AnimationLoop>(1);
   }

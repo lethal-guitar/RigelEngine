@@ -218,11 +218,11 @@ const effects::EffectSpec NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[4]}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
-  {effects::EffectSprite{{}, 18, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, 17, EffectMovement::FlyDown}, 0},
-  {effects::EffectSprite{{}, 15, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{}, 16, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{}, 84, EffectMovement::None}, 0}
+  {effects::EffectSprite{{}, 18, EffectMovement::FlyUp}, 2},
+  {effects::EffectSprite{{}, 17, EffectMovement::FlyDown}, 2},
+  {effects::EffectSprite{{}, 15, EffectMovement::FlyUpperLeft}, 2},
+  {effects::EffectSprite{{}, 16, EffectMovement::FlyUpperRight}, 2},
+  {effects::EffectSprite{{}, 84, EffectMovement::None}, 2}
 };
 
 
