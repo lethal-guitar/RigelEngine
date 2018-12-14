@@ -49,6 +49,8 @@ class CollisionChecker;
  * setting a velocity and then letting the PhysicsSystem take care of doing the
  * movement. The system can't perform any corrections to entities which are
  * already positioned so that they collide with the world.
+ *
+ * For directly moving entities, the functions in movement.hpp should be used.
  */
 class PhysicsSystem {
 public:
