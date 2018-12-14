@@ -50,11 +50,14 @@ ItemContainerSystem::ItemContainerSystem(
 
 
 void ItemContainerSystem::update(entityx::EntityManager& es) {
-  for (auto& entity : mShotContainersQueue) {
-    const auto& container = *entity.component<const ItemContainer>();
+  using RS = ItemContainer::ReleaseStyle;
 
+  auto releaseItem = [this](
+    entityx::Entity entity,
+    const std::vector<ComponentHolder>& containedComponents
+  ) {
     auto contents = mpEntityManager->create();
-    for (auto& component : container.mContainedComponents) {
+    for (auto& component : containedComponents) {
       component.assignToEntity(contents);
     }
 
@@ -62,8 +65,50 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
     contents.assign<WorldPosition>(*entity.component<WorldPosition>());
 
     entity.destroy();
+  };
+
+  for (auto& entity : mShotContainersQueue) {
+    auto& container = *entity.component<ItemContainer>();
+
+    switch (container.mStyle) {
+      case RS::Default:
+        releaseItem(entity, container.mContainedComponents);
+        break;
+
+      case RS::ItemBox:
+        ++container.mFramesElapsed;
+
+        if (container.mFramesElapsed == 1) {
+          entity.component<Sprite>()->flashWhite();
+        } else if (container.mFramesElapsed == 2) {
+          releaseItem(entity, container.mContainedComponents);
+        }
+        break;
+
+      case RS::NuclearWasteBarrel:
+        ++container.mFramesElapsed;
+
+        if (container.mFramesElapsed == 1) {
+          entity.component<Sprite>()->flashWhite();
+        } else if (container.mFramesElapsed == 2) {
+          // Switch to "bulging" state
+          ++entity.component<Sprite>()->mFramesToRender[0];
+        } else if (container.mFramesElapsed == 3) {
+          // At this point, the destruction effects take over
+          entity.component<Sprite>()->mShow = false;
+        } else if (container.mFramesElapsed == 4) {
+          releaseItem(entity, container.mContainedComponents);
+        }
+        break;
+    }
   }
-  mShotContainersQueue.clear();
+
+  mShotContainersQueue.erase(
+    remove_if(begin(mShotContainersQueue), end(mShotContainersQueue),
+      [](const entityx::Entity entity) {
+        return !entity.valid();
+      }),
+    end(mShotContainersQueue));
 }
 
 

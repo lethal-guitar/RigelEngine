@@ -580,6 +580,19 @@ void turnIntoContainer(
 }
 
 
+void addBarrelDestroyEffect(ex::Entity entity) {
+  auto container = makeContainer();
+  container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
+  entity.assign<ItemContainer>(std::move(container));
+}
+
+
+void addItemBoxDestroyEffect(ex::Entity entity) {
+  auto container = makeContainer();
+  container.mStyle = ItemContainer::ReleaseStyle::ItemBox;
+  entity.assign<ItemContainer>(std::move(container));
+}
+
 } // namespace
 
 
@@ -591,6 +604,7 @@ void EntityFactory::configureItemBox(
   Args&&... components
 ) {
   auto container = makeContainer(components...);
+  container.mStyle = components::ItemContainer::ReleaseStyle::ItemBox;
   addToContainer(
     container,
     MovementSequence{
@@ -665,6 +679,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
+      addItemBoxDestroyEffect(entity);
       break;
 
     // ----------------------------------------------------------------------
@@ -868,6 +883,8 @@ void EntityFactory::configureEntity(
           100,
           std::move(livingTurkeyContainer));
         entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
+        entity.component<ItemContainer>()->mStyle =
+          ItemContainer::ReleaseStyle::ItemBox;
       }
       break;
 
@@ -1432,6 +1449,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
+      addBarrelDestroyEffect(entity);
       break;
 
     case 75: // Nuclear waste barrel, slime inside
@@ -1443,6 +1461,7 @@ void EntityFactory::configureEntity(
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames));
+        container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
         addDefaultMovingBody(container, boundingBox);
 
         auto barrelSprite = createSpriteForId(14);

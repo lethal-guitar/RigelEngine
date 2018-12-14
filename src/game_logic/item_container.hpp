@@ -79,7 +79,15 @@ private:
 namespace components {
 
 struct ItemContainer {
+  enum class ReleaseStyle : std::uint8_t {
+    Default,
+    ItemBox,
+    NuclearWasteBarrel
+  };
+
   std::vector<ComponentHolder> mContainedComponents;
+  ReleaseStyle mStyle = ReleaseStyle::Default;
+  std::int8_t mFramesElapsed = 0;
 
   template<typename TComponent, typename... TArgs>
   void assign(TArgs&&... components) {
