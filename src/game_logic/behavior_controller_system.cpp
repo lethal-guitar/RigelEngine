@@ -27,6 +27,8 @@ BehaviorControllerSystem::BehaviorControllerSystem(
 )
   : mDependencies(dependencies)
 {
+  mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
+  mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
 }
 
 
@@ -47,6 +49,34 @@ void BehaviorControllerSystem::update(entityx::EntityManager& es) {
   });
 
   mIsOddFrame = !mIsOddFrame;
+}
+
+
+void BehaviorControllerSystem::receive(const events::ShootableDamaged& event) {
+  using game_logic::components::BehaviorController;
+
+  auto entity = event.mEntity;
+  if (entity.has_component<BehaviorController>()) {
+    entity.component<BehaviorController>()->onHit(
+      mDependencies,
+      mIsOddFrame,
+      event.mInflictorVelocity,
+      entity);
+  }
+}
+
+
+void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
+  using game_logic::components::BehaviorController;
+
+  auto entity = event.mEntity;
+  if (entity.has_component<BehaviorController>()) {
+    entity.component<BehaviorController>()->onKilled(
+      mDependencies,
+      mIsOddFrame,
+      event.mInflictorVelocity,
+      entity);
+  }
 }
 
 }}

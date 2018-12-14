@@ -16,16 +16,21 @@
 
 #pragma once
 
+#include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 
 namespace rigel { namespace game_logic {
 
-class BehaviorControllerSystem {
+class BehaviorControllerSystem :
+  public entityx::Receiver<BehaviorControllerSystem> {
 public:
   explicit BehaviorControllerSystem(GlobalDependencies dependencies);
 
   void update(entityx::EntityManager& es);
+
+  void receive(const events::ShootableDamaged& event);
+  void receive(const events::ShootableKilled& event);
 
 private:
   GlobalDependencies mDependencies;
