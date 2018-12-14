@@ -82,6 +82,8 @@ PhysicsSystem::PhysicsSystem(
   : mpCollisionChecker(pCollisionChecker)
   , mpEvents(pEvents)
 {
+  mpEvents->subscribe<ex::ComponentAddedEvent<MovingBody>>(*this);
+  mpEvents->subscribe<ex::ComponentRemovedEvent<MovingBody>>(*this);
 }
 
 
@@ -96,6 +98,34 @@ void PhysicsSystem::update(ex::EntityManager& es) {
     ) {
       applyPhysics(entity, body, position, collisionRect);
     });
+}
+
+
+void PhysicsSystem::updatePhase1(ex::EntityManager& es) {
+  update(es);
+  mShouldCollectForPhase2 = true;
+}
+
+
+void PhysicsSystem::updatePhase2(ex::EntityManager& es) {
+  for (auto entity : mPhysicsObjectsForPhase2) {
+    assert(entity.has_component<MovingBody>());
+    const auto hasRequiredComponents =
+      entity.has_component<WorldPosition>() &&
+      entity.has_component<BoundingBox>() &&
+      entity.has_component<components::Active>();
+
+    if (hasRequiredComponents) {
+      applyPhysics(
+        entity,
+        *entity.component<MovingBody>(),
+        *entity.component<WorldPosition>(),
+        *entity.component<BoundingBox>());
+    }
+  }
+
+  mPhysicsObjectsForPhase2.clear();
+  mShouldCollectForPhase2 = false;
 }
 
 
@@ -156,6 +186,39 @@ void PhysicsSystem::applyPhysics(
   if (body.mIgnoreCollisions) {
     position = targetPosition;
     body.mVelocity = originalVelocity;
+  }
+}
+
+
+void PhysicsSystem::receive(
+  const entityx::ComponentAddedEvent<components::MovingBody>& event
+) {
+  if (!mShouldCollectForPhase2) {
+    return;
+  }
+
+  mPhysicsObjectsForPhase2.push_back(event.entity);
+}
+
+
+void PhysicsSystem::receive(
+  const entityx::ComponentRemovedEvent<components::MovingBody>& event
+) {
+  using namespace std;
+
+  if (!mShouldCollectForPhase2) {
+    return;
+  }
+
+  const auto it = find_if(
+    begin(mPhysicsObjectsForPhase2),
+    end(mPhysicsObjectsForPhase2),
+    [&event](const auto& entity) {
+      return entity == event.entity;
+    });
+
+  if (it != end(mPhysicsObjectsForPhase2)) {
+    mPhysicsObjectsForPhase2.erase(it);
   }
 }
 

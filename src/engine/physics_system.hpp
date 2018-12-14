@@ -52,13 +52,39 @@ class CollisionChecker;
  *
  * For directly moving entities, the functions in movement.hpp should be used.
  */
-class PhysicsSystem {
+class PhysicsSystem  : public entityx::Receiver<PhysicsSystem> {
 public:
   PhysicsSystem(
     const engine::CollisionChecker* pCollisionChecker,
     entityx::EventManager* pEvents);
 
+  /** Process currently existing entities
+   *
+   * Processes physics for all entities with the required components which
+   * exist at the time of the call.
+   */
   void update(entityx::EntityManager& es);
+
+  /** Process currently existing entities
+   *
+   * Processes physics for all entities with the required components which
+   * exist at the time of the call. Starts collecting entities
+   * for the 2nd phase.
+   */
+  void updatePhase1(entityx::EntityManager& es);
+
+  /** Process entities spawned after phase 1
+   *
+   * Processes physics for all entities that have been created or assigned
+   * the right components after the call to updatePhase1().
+   * Stops collecting.
+   */
+  void updatePhase2(entityx::EntityManager& es);
+
+  void receive(
+    const entityx::ComponentAddedEvent<components::MovingBody>& event);
+  void receive(
+    const entityx::ComponentRemovedEvent<components::MovingBody>& event);
 
 private:
   void applyPhysics(
@@ -71,8 +97,10 @@ private:
     float currentVelocity);
 
 private:
+  std::vector<entityx::Entity> mPhysicsObjectsForPhase2;
   const CollisionChecker* mpCollisionChecker;
   entityx::EventManager* mpEvents;
+  bool mShouldCollectForPhase2 = false;
 };
 
 }}
