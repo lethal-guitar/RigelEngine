@@ -16,15 +16,11 @@
 
 #include "ingame_message_display.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "data/sound_ids.hpp"
 #include "ui/menu_element_renderer.hpp"
 
 #include "game_service_provider.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 #include <cctype>
 
@@ -58,7 +54,7 @@ void IngameMessageDisplay::setMessage(std::string message) {
 
 
 void IngameMessageDisplay::update() {
-  atria::variant::match(mState,
+  base::match(mState,
     [](const Idle&) {},
 
     [this](Printing& state) {

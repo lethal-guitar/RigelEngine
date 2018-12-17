@@ -16,9 +16,10 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "engine/movement.hpp"
 #include "game_logic/global_dependencies.hpp"
+
+#include <variant>
 
 namespace rigel { namespace engine { namespace events {
   struct CollidedWithWorld;
@@ -43,7 +44,7 @@ struct Waiting {
 };
 
 
-using State = boost::variant<Ready, Jumping, Waiting>;
+using State = std::variant<Ready, Jumping, Waiting>;
 
 }
 

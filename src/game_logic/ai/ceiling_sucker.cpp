@@ -16,15 +16,11 @@
 
 #include "ceiling_sucker.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/player.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace behaviors {
@@ -63,7 +59,7 @@ void CeilingSucker::update(
     return worldBbox.intersects(s.mpPlayer->worldSpaceHitBox());
   };
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](const Ready&) {
       if (
         playerPos.x + 4 >= position.x &&

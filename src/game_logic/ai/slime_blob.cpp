@@ -16,6 +16,7 @@
 
 #include "slime_blob.hpp"
 
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/movement.hpp"
@@ -26,10 +27,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -139,7 +136,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
       using namespace components::detail;
 
       const auto playerPosition = mpPlayer->orientedPosition();
-      atria::variant::match(blobState.mState,
+      base::match(blobState.mState,
         [&](OnGround& state) {
           // Animate walking
           state.mIsOddUpdate = !state.mIsOddUpdate;

@@ -17,7 +17,6 @@
 #include "utils.hpp"
 
 #include <base/array_view.hpp>
-#include <base/boost_variant.hpp>
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 #include <data/map.hpp>

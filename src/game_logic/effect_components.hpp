@@ -17,7 +17,6 @@
 #pragma once
 
 #include "base/array_view.hpp"
-#include "base/boost_variant.hpp"
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
@@ -31,6 +30,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
+#include <variant>
 
 
 namespace rigel { namespace game_logic {
@@ -110,7 +110,7 @@ struct ScoreNumber {
 };
 
 
-using EffectType = boost::variant<
+using EffectType = std::variant<
   Sound,
   RandomExplosionSound,
   Particles,

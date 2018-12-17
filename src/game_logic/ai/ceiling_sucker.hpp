@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "game_logic/global_dependencies.hpp"
+
+#include <variant>
 
 
 namespace rigel { namespace game_logic {
@@ -42,7 +43,7 @@ struct Waiting {
 };
 
 
-using State = boost::variant<
+using State = std::variant<
   Ready,
   Grabbing,
   HoldingPlayer,

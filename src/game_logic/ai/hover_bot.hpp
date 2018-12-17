@@ -16,13 +16,14 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <variant>
 
 namespace rigel { namespace engine { class CollisionChecker; }}
 namespace rigel { namespace engine { namespace components { struct Sprite; }}}
@@ -70,7 +71,7 @@ struct Reorientation {
 
 
 using HoverBot =
-  boost::variant<detail::TeleportingIn, detail::Moving, detail::Reorientation>;
+  std::variant<detail::TeleportingIn, detail::Moving, detail::Reorientation>;
 
 }
 

@@ -16,8 +16,10 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "game_logic/global_dependencies.hpp"
+
+#include <variant>
+
 
 namespace rigel { namespace engine { namespace events {
   struct CollidedWithWorld;
@@ -35,7 +37,7 @@ struct BomberPlane {
 
   struct FlyingOut {};
 
-  using State = boost::variant<FlyingIn, DroppingBomb, FlyingOut>;
+  using State = std::variant<FlyingIn, DroppingBomb, FlyingOut>;
 
 
   void update(

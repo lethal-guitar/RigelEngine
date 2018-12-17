@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
 #include "engine/base_components.hpp"
@@ -30,6 +29,7 @@ RIGEL_RESTORE_WARNINGS
 
 #include <bitset>
 #include <cstdint>
+#include <variant>
 
 namespace rigel {
   struct IGameServiceProvider;
@@ -114,14 +114,14 @@ struct Finished {};
 }
 
 
-using Dieing = boost::variant<
+using Dieing = std::variant<
   death_animation::FlyingUp,
   death_animation::FallingDown,
   death_animation::Exploding,
   death_animation::Finished>;
 
 
-using PlayerState = boost::variant<
+using PlayerState = std::variant<
   OnGround,
   Jumping,
   Falling,
@@ -215,8 +215,7 @@ public:
 
   template<typename StateT>
   bool stateIs() const {
-    // TODO: static_assert that StateT is part of valid states
-    return mState.type() == typeid(StateT);
+    return std::holds_alternative<StateT>(mState);
   }
 
   base::Vector& position();

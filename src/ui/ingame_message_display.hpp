@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
-
 #include <string>
+#include <variant>
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace ui { class MenuElementRenderer; }}
@@ -72,7 +71,7 @@ private:
     unsigned int mFramesElapsed = NEXT_LINE_DELAY;
   };
 
-  using State = boost::variant<Idle, Printing, Waiting>;
+  using State = std::variant<Idle, Printing, Waiting>;
 
   State mState;
   std::string mMessage;

@@ -16,6 +16,7 @@
 
 #include "effects_system.hpp"
 
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
@@ -27,10 +28,6 @@
 #include "loader/palette.hpp"
 
 #include "game_service_provider.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic {
@@ -167,7 +164,7 @@ void EffectsSystem::processEffectsAndAdvance(
       continue;
     }
 
-    atria::variant::match(spec.mEffect,
+    base::match(spec.mEffect,
       [this](const Sound& sound) {
         mpServiceProvider->playSound(sound.mId);
       },

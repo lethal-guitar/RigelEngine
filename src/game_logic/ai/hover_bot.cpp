@@ -16,16 +16,13 @@
 
 #include "hover_bot.hpp"
 
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -89,7 +86,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
       components::HoverBot& botState,
       const Active&
     ) {
-      atria::variant::match(botState,
+      base::match(botState,
         [&](TeleportingIn& state) {
           // The teleportation sequence begins with a single frame of nothing,
           // followed by 7 frames of teleport animation. The enemy is not
