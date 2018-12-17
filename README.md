@@ -1,4 +1,4 @@
-# Rigel Engine [![Build Status](https://travis-ci.org/lethal-guitar/RigelEngine.svg?branch=master)](https://travis-ci.org/lethal-guitar/RigelEngine) [![Windows build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master)
+# Rigel Engine [![Build Status](https://api.travis-ci.com/lethal-guitar/RigelEngine.svg?branch=master)](https://travis-ci.com/lethal-guitar/RigelEngine) [![Windows build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master)
 
 ## What is Rigel Engine?
 
@@ -100,7 +100,7 @@ Other command line options are:
 To build from source, a C++ 14 compatible compiler is required. The project has been
 built successfully on the following compilers:
 
-* Microsoft Visual Studio 2015 (Update 2 or newer)
+* Microsoft Visual Studio 2017 (version 15.9.4 or newer)
 * gcc 5.4.0
 * clang 3.9
 
@@ -138,7 +138,7 @@ external dependencies listed above. You can get them using the following links:
 * [CMake 3.6.2](https://cmake.org/files/v3.6/cmake-3.6.2-win64-x64.zip)
 * [SDL2 2.0.4](https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip)
 * [SDL2 mixer 2.0.1](https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip)
-* [Boost 1.61](https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-14.0-64.exe/download)
+* [Boost 1.67](https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-14.1-64.exe/download)
 
 In order for CMake (or cmake-gui) to automatically find all dependencies, you
 can set the following environment variables prior to running CMake:
