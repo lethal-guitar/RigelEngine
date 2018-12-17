@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 project(RigelEngine)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -32,6 +32,8 @@ find_package(SDL2_mixer REQUIRED)
 
 if(MSVC)
     add_compile_options(
+        /Zc:__cplusplus
+        /permissive-
         /MP
         /W4
         /WX
