@@ -149,6 +149,7 @@ IngameSystems::IngameSystems(
       pRandomGenerator,
       pEntityFactory,
       pServiceProvider,
+      &entities,
       &eventManager,
       pScrollOffset})
   , mpRandomGenerator(pRandomGenerator)

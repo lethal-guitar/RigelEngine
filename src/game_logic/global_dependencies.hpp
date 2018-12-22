@@ -49,6 +49,7 @@ struct GlobalDependencies {
   engine::RandomNumberGenerator* mpRandomGenerator;
   IEntityFactory* mpEntityFactory;
   IGameServiceProvider* mpServiceProvider;
+  entityx::EntityManager* mpEntityManager;
   entityx::EventManager* mpEvents;
   const base::Vector* mpCameraPosition;
 };
