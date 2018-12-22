@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -46,6 +47,8 @@ public:
   void receive(const rigel::events::DoorOpened& event);
 
 private:
+  void explodeMapSection(const base::Rect<int>& mapSection);
+
   IGameServiceProvider* mpServiceProvider;
   entityx::EntityManager* mpEntityManager;
   data::map::Map* mpMap;
