@@ -761,7 +761,9 @@ void EntityFactory::configureEntity(
           100,
           AnimationLoop{1},
           shootable,
-          DestructionEffects{NAPALM_BOMB_KILL_EFFECT_SPEC},
+          DestructionEffects{
+            NAPALM_BOMB_KILL_EFFECT_SPEC,
+            DestructionEffects::TriggerCondition::Manual},
           BehaviorController{behaviors::NapalmBomb{}});
 
         entity.assign<OverrideDrawOrder>(originalDrawOrder);

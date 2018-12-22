@@ -150,7 +150,6 @@ void NapalmBomb::update(
       }
 
       if (mFramesElapsed >= 31) {
-        entity.component<DestructionEffects>()->mActivated = true;
         explode(d, entity);
       }
       break;
@@ -182,6 +181,8 @@ void NapalmBomb::onKilled(
 
 void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
   const auto& position = *entity.component<WorldPosition>();
+
+  triggerEffects(entity, *d.mpEntityManager);
 
   d.mpServiceProvider->playSound(data::SoundId::Explosion);
   spawnFires(d, position, 0);
