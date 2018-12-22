@@ -809,6 +809,9 @@ void EntityFactory::configureEntity(
           flyingSodaCanCollectable,
           flyingSodaCanSprite,
           boundingBox,
+          DestructionEffects{
+            SODA_CAN_ROCKET_KILL_EFFECT_SPEC,
+            DestructionEffects::TriggerCondition::OnCollision},
           AnimationLoop{1, 0, 5},
           AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
           MovingBody{Velocity{0.0f, -1.0f}, GravityAffected{false}},
