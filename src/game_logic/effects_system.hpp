@@ -39,6 +39,10 @@ namespace components { struct DestructionEffects; }
 class EntityFactory;
 
 
+void triggerEffects(
+  entityx::Entity entity, entityx::EntityManager& entityManager);
+
+
 class EffectsSystem : public entityx::Receiver<EffectsSystem> {
 public:
   EffectsSystem(

@@ -44,6 +44,35 @@ using components::SpriteCascadeSpawner;
 }
 
 
+void triggerEffects(
+  entityx::Entity entity,
+  entityx::EntityManager& entityManager
+) {
+  using namespace engine::components;
+
+  if (!entity.has_component<DestructionEffects>()) {
+    return;
+  }
+
+  auto effects = *entity.component<DestructionEffects>();
+  effects.mActivated = true;
+  const auto position = *entity.component<WorldPosition>();
+
+  auto effectSpawner = entityManager.create();
+  effectSpawner.assign<DestructionEffects>(effects);
+  effectSpawner.assign<WorldPosition>(position);
+
+  const auto iHighestDelaySpec = std::max_element(
+    std::cbegin(effects.mEffectSpecs),
+    std::cend(effects.mEffectSpecs),
+    [](const auto& a, const auto& b) {
+      return a.mDelay < b.mDelay;
+    });
+  const auto timeToLive = iHighestDelaySpec->mDelay;
+  effectSpawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(timeToLive));
+}
+
+
 EffectsSystem::EffectsSystem(
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
@@ -98,29 +127,13 @@ void EffectsSystem::update(entityx::EntityManager& es) {
 
 
 void EffectsSystem::receive(const events::ShootableKilled& event) {
-  using namespace engine::components;
 
   auto entity = event.mEntity;
   if (!entity.has_component<DestructionEffects>()) {
     return;
   }
 
-  auto effects = *entity.component<DestructionEffects>();
-  effects.mActivated = true;
-  const auto position = *entity.component<WorldPosition>();
-
-  auto effectSpawner = mpEntityManager->create();
-  effectSpawner.assign<DestructionEffects>(effects);
-  effectSpawner.assign<WorldPosition>(position);
-
-  const auto iHighestDelaySpec = std::max_element(
-    std::cbegin(effects.mEffectSpecs),
-    std::cend(effects.mEffectSpecs),
-    [](const auto& a, const auto& b) {
-      return a.mDelay < b.mDelay;
-    });
-  const auto timeToLive = iHighestDelaySpec->mDelay;
-  effectSpawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(timeToLive));
+  triggerEffects(entity, *mpEntityManager);
 }
 
 

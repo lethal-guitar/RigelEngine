@@ -26,6 +26,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+#include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
@@ -125,6 +126,8 @@ struct EffectSpec {
 
 }
 
+void triggerEffects(
+  entityx::Entity entity, entityx::EntityManager& entityManager);
 
 namespace components {
 
