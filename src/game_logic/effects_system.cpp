@@ -23,7 +23,6 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "loader/palette.hpp"
 
@@ -88,6 +87,7 @@ EffectsSystem::EffectsSystem(
   , mpParticles(pParticles)
 {
   events.subscribe<events::ShootableKilled>(*this);
+  events.subscribe<engine::events::CollidedWithWorld>(*this);
 }
 
 
@@ -127,13 +127,30 @@ void EffectsSystem::update(entityx::EntityManager& es) {
 
 
 void EffectsSystem::receive(const events::ShootableKilled& event) {
+  triggerEffectsIfConditionMatches(
+    event.mEntity, DestructionEffects::TriggerCondition::OnKilled);
+}
 
-  auto entity = event.mEntity;
+
+void EffectsSystem::receive(const engine::events::CollidedWithWorld& event) {
+  triggerEffectsIfConditionMatches(
+    event.mEntity, DestructionEffects::TriggerCondition::OnCollision);
+}
+
+
+void EffectsSystem::triggerEffectsIfConditionMatches(
+  entityx::Entity entity,
+  const DestructionEffects::TriggerCondition expectedCondition
+) {
   if (!entity.has_component<DestructionEffects>()) {
     return;
   }
 
-  triggerEffects(entity, *mpEntityManager);
+  const auto triggerCondition =
+    entity.component<DestructionEffects>()->mTriggerCondition;
+  if (triggerCondition == expectedCondition) {
+    triggerEffects(entity, *mpEntityManager);
+  }
 }
 
 

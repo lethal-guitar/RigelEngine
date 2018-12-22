@@ -23,6 +23,7 @@
 #include "base/warnings.hpp"
 #include "data/map.hpp" // TODO: This is only here for data::ActorID
 #include "data/sound_ids.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
@@ -132,19 +133,28 @@ void triggerEffects(
 namespace components {
 
 struct DestructionEffects {
+  enum class TriggerCondition {
+    OnKilled,
+    OnCollision,
+    Manual
+  };
+
   using EffectSpecList = base::ArrayView<effects::EffectSpec>;
 
   explicit DestructionEffects(
     EffectSpecList effectSpecs,
+    TriggerCondition condition = TriggerCondition::OnKilled,
     boost::optional<engine::components::BoundingBox> cascadePlacementBox =
       boost::none
   )
     : mEffectSpecs(effectSpecs)
+    , mTriggerCondition(condition)
     , mCascadePlacementBox(cascadePlacementBox)
   {
   }
 
   EffectSpecList mEffectSpecs;
+  TriggerCondition mTriggerCondition;
   boost::optional<engine::components::BoundingBox> mCascadePlacementBox;
   int mFramesElapsed = 0;
   bool mActivated = false;

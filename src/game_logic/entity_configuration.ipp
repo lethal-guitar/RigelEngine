@@ -1199,6 +1199,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::HoverBot>();
       entity.assign<DestructionEffects>(
         HOVER_BOT_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1207,6 +1208,7 @@ void EntityFactory::configureEntity(
     case 32:
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1222,6 +1224,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1232,6 +1235,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::RocketTurret>();
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1270,6 +1274,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SlimeBlob>();
@@ -1304,6 +1309,7 @@ void EntityFactory::configureEntity(
         Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::CeilingSucker{});
@@ -1332,6 +1338,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(
         SKELETON_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
@@ -1360,6 +1367,7 @@ void EntityFactory::configureEntity(
     case 176: // green bird
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1369,6 +1377,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(
         EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1392,6 +1401,7 @@ void EntityFactory::configureEntity(
         createBlueGuardAiComponent(actorID));
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(159, 0));
       break;
 
@@ -1431,6 +1441,7 @@ void EntityFactory::configureEntity(
     case 280: // final boss projectile
       entity.assign<DestructionEffects>(
         BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1478,6 +1489,7 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       entity.assign<DestructionEffects>(
         REACTOR_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(66, 0));
       entity.assign<ActorTag>(ActorTag::Type::Reactor);
       break;
