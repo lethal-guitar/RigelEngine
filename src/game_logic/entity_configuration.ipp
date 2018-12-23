@@ -810,7 +810,6 @@ void EntityFactory::configureEntity(
           flyingSodaCanCollectable,
           flyingSodaCanSprite,
           boundingBox,
-          Active{},
           DestructionEffects{
             SODA_CAN_ROCKET_KILL_EFFECT_SPEC,
             DestructionEffects::TriggerCondition::OnCollision},
