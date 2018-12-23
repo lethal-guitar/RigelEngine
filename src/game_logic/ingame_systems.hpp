@@ -35,7 +35,6 @@
 #include "game_logic/ai/simple_walker.hpp"
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
-#include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/behavior_controller_system.hpp"
@@ -141,7 +140,6 @@ private:
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
   game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
-  game_logic::ai::SlimePipeSystem mSlimePipeSystem;
   game_logic::ai::SpiderSystem mSpiderSystem;
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 

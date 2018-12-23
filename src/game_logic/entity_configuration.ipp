@@ -1538,7 +1538,7 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       entity.assign<DrawTopMost>();
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<ai::components::SlimePipe>();
+      entity.assign<BehaviorController>(behaviors::SlimePipe{});
       break;
 
     case 208: // floating exit sign to right

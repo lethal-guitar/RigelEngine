@@ -24,7 +24,7 @@
 #include "game_service_provider.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel { namespace game_logic { namespace behaviors {
 
 using engine::components::Active;
 using engine::components::WorldPosition;
@@ -36,43 +36,16 @@ const data::ActorID DROP_ACTOR_ID = 118;
 const auto DROP_FREQUENCY = 25;
 const auto DROP_OFFSET = WorldPosition{1, 1};
 
-}
 
-
-SlimePipeSystem::SlimePipeSystem(
-  EntityFactory* pEntityFactory,
-  IGameServiceProvider* pServiceProvider
-)
-  : mpEntityFactory(pEntityFactory)
-  , mpServiceProvider(pServiceProvider)
-{
-}
-
-
-void SlimePipeSystem::update(entityx::EntityManager& es) {
-  es.each<components::SlimePipe, WorldPosition, Active>(
-    [this](
-      entityx::Entity,
-      components::SlimePipe& state,
-      const WorldPosition& position,
-      const Active&
-    ) {
-      ++state.mGameFramesSinceLastDrop;
-      if (state.mGameFramesSinceLastDrop >= DROP_FREQUENCY) {
-        state.mGameFramesSinceLastDrop = 0;
-        createSlimeDrop(position);
-        mpServiceProvider->playSound(data::SoundId::WaterDrop);
-      }
-    });
-}
-
-
-void SlimePipeSystem::createSlimeDrop(const base::Vector& position) {
+void createSlimeDrop(
+  const base::Vector& position,
+  IEntityFactory& entityFactory
+) {
   using namespace engine::components;
   using namespace engine::components::parameter_aliases;
   using namespace game_logic::components::parameter_aliases;
 
-  auto entity = mpEntityFactory->createSprite(
+  auto entity = entityFactory.createSprite(
     DROP_ACTOR_ID,
     position + DROP_OFFSET,
     true);
@@ -84,6 +57,25 @@ void SlimePipeSystem::createSlimeDrop(const base::Vector& position) {
     AutoDestroy::Condition::OnWorldCollision,
     AutoDestroy::Condition::OnLeavingActiveRegion});
   entity.assign<Active>();
+}
+
+}
+
+
+void SlimePipe::update(
+  GlobalDependencies& d,
+  bool isOddFrame,
+  bool isOnScreen,
+  entityx::Entity entity
+) {
+  const auto& position = *entity.component<WorldPosition>();
+
+  ++mGameFramesSinceLastDrop;
+  if (mGameFramesSinceLastDrop >= DROP_FREQUENCY) {
+    mGameFramesSinceLastDrop = 0;
+    createSlimeDrop(position, *d.mpEntityFactory);
+    d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
+  }
 }
 
 }}}
