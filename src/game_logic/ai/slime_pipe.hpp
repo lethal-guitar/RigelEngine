@@ -31,4 +31,20 @@ struct SlimePipe {
     entityx::Entity entity);
 };
 
+
+struct SlimeDrop {
+  void update(
+    GlobalDependencies&,
+    bool,
+    bool,
+    entityx::Entity
+  ) {
+  }
+
+  void onCollision(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    entityx::Entity entity);
+};
+
 }}}

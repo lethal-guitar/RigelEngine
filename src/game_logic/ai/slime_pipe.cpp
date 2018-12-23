@@ -17,8 +17,10 @@
 #include "slime_pipe.hpp"
 
 #include "engine/base_components.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/behavior_controller.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_service_provider.hpp"
@@ -43,6 +45,7 @@ void createSlimeDrop(
 ) {
   using namespace engine::components;
   using namespace engine::components::parameter_aliases;
+  using namespace game_logic::components;
   using namespace game_logic::components::parameter_aliases;
 
   auto entity = entityFactory.createSprite(
@@ -52,11 +55,11 @@ void createSlimeDrop(
   // Gravity handles the drop's movement, so velocity is initally 0.
   entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
 
-  entity.assign<game_logic::components::PlayerDamaging>(Damage{1});
+  entity.assign<PlayerDamaging>(Damage{1});
   entity.assign<AutoDestroy>(AutoDestroy{
-    AutoDestroy::Condition::OnWorldCollision,
     AutoDestroy::Condition::OnLeavingActiveRegion});
   entity.assign<Active>();
+  entity.assign<BehaviorController>(SlimeDrop{});
 }
 
 }
@@ -76,6 +79,20 @@ void SlimePipe::update(
     createSlimeDrop(position, *d.mpEntityFactory);
     d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
   }
+}
+
+
+void SlimeDrop::onCollision(
+  GlobalDependencies& dependencies,
+  bool isOddFrame,
+  entityx::Entity entity
+) {
+  using namespace engine::components;
+
+  auto& sprite = *entity.component<Sprite>();
+  sprite.mFramesToRender[0] = 1;
+
+  engine::reassign<AutoDestroy>(entity, AutoDestroy::afterTimeout(1));
 }
 
 }}}
