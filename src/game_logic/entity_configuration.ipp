@@ -607,6 +607,7 @@ void EntityFactory::configureItemBox(
   container.mStyle = components::ItemContainer::ReleaseStyle::ItemBox;
   addToContainer(
     container,
+    Active{},
     MovementSequence{
       CONTAINER_BOUNCE_SEQUENCE, ResetAfterSequence{true}, EnableX{false}});
   addDefaultMovingBody(
@@ -809,6 +810,7 @@ void EntityFactory::configureEntity(
           flyingSodaCanCollectable,
           flyingSodaCanSprite,
           boundingBox,
+          Active{},
           DestructionEffects{
             SODA_CAN_ROCKET_KILL_EFFECT_SPEC,
             DestructionEffects::TriggerCondition::OnCollision},
@@ -868,7 +870,8 @@ void EntityFactory::configureEntity(
         auto cookedTurkeyContainer = makeContainer(
           cookedTurkeyCollectable,
           cookedTurkeySprite,
-          AnimationLoop{1, 4, 7});
+          AnimationLoop{1, 4, 7},
+          Active{});
         addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
 
         auto livingTurkeyContainer = makeContainer(
@@ -877,7 +880,8 @@ void EntityFactory::configureEntity(
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
           AnimationLoop{1, 0, 1},
-          ai::components::SimpleWalker{turkeyAiConfig()});
+          ai::components::SimpleWalker{turkeyAiConfig()},
+          Active{});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
 
         // We don't use configureItemBox here, since we don't want the bounce
@@ -1476,7 +1480,8 @@ void EntityFactory::configureEntity(
         auto container = makeContainer(
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
-          AutoDestroy::afterTimeout(numAnimationFrames));
+          AutoDestroy::afterTimeout(numAnimationFrames),
+          Active{});
         container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
         addDefaultMovingBody(container, boundingBox);
 

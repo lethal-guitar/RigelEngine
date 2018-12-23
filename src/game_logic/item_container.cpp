@@ -61,7 +61,6 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
       component.assignToEntity(contents);
     }
 
-    contents.assign<Active>();
     contents.assign<WorldPosition>(*entity.component<WorldPosition>());
 
     entity.destroy();
