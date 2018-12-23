@@ -607,6 +607,7 @@ void EntityFactory::configureItemBox(
   container.mStyle = components::ItemContainer::ReleaseStyle::ItemBox;
   addToContainer(
     container,
+    Active{},
     MovementSequence{
       CONTAINER_BOUNCE_SEQUENCE, ResetAfterSequence{true}, EnableX{false}});
   addDefaultMovingBody(
@@ -761,7 +762,9 @@ void EntityFactory::configureEntity(
           100,
           AnimationLoop{1},
           shootable,
-          DestructionEffects{NAPALM_BOMB_KILL_EFFECT_SPEC},
+          DestructionEffects{
+            NAPALM_BOMB_KILL_EFFECT_SPEC,
+            DestructionEffects::TriggerCondition::Manual},
           BehaviorController{behaviors::NapalmBomb{}});
 
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
@@ -807,6 +810,9 @@ void EntityFactory::configureEntity(
           flyingSodaCanCollectable,
           flyingSodaCanSprite,
           boundingBox,
+          DestructionEffects{
+            SODA_CAN_ROCKET_KILL_EFFECT_SPEC,
+            DestructionEffects::TriggerCondition::OnCollision},
           AnimationLoop{1, 0, 5},
           AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
           MovingBody{Velocity{0.0f, -1.0f}, GravityAffected{false}},
@@ -863,7 +869,8 @@ void EntityFactory::configureEntity(
         auto cookedTurkeyContainer = makeContainer(
           cookedTurkeyCollectable,
           cookedTurkeySprite,
-          AnimationLoop{1, 4, 7});
+          AnimationLoop{1, 4, 7},
+          Active{});
         addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
 
         auto livingTurkeyContainer = makeContainer(
@@ -872,7 +879,8 @@ void EntityFactory::configureEntity(
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
           AnimationLoop{1, 0, 1},
-          ai::components::SimpleWalker{turkeyAiConfig()});
+          ai::components::SimpleWalker{turkeyAiConfig()},
+          Active{});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
 
         // We don't use configureItemBox here, since we don't want the bounce
@@ -1199,6 +1207,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::HoverBot>();
       entity.assign<DestructionEffects>(
         HOVER_BOT_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1207,6 +1216,7 @@ void EntityFactory::configureEntity(
     case 32:
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1222,6 +1232,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1232,6 +1243,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::RocketTurret>();
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1270,6 +1282,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SlimeBlob>();
@@ -1304,6 +1317,7 @@ void EntityFactory::configureEntity(
         Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::CeilingSucker{});
@@ -1332,6 +1346,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(
         SKELETON_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
@@ -1360,6 +1375,7 @@ void EntityFactory::configureEntity(
     case 176: // green bird
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1369,6 +1385,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(
         EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1392,6 +1409,7 @@ void EntityFactory::configureEntity(
         createBlueGuardAiComponent(actorID));
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(159, 0));
       break;
 
@@ -1431,6 +1449,7 @@ void EntityFactory::configureEntity(
     case 280: // final boss projectile
       entity.assign<DestructionEffects>(
         BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
@@ -1460,7 +1479,8 @@ void EntityFactory::configureEntity(
         auto container = makeContainer(
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
-          AutoDestroy::afterTimeout(numAnimationFrames));
+          AutoDestroy::afterTimeout(numAnimationFrames),
+          Active{});
         container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
         addDefaultMovingBody(container, boundingBox);
 
@@ -1478,6 +1498,7 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       entity.assign<DestructionEffects>(
         REACTOR_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(66, 0));
       entity.assign<ActorTag>(ActorTag::Type::Reactor);
       break;

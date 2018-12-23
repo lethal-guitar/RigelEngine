@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "game_logic/effect_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -25,6 +26,10 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine {
+  namespace events {
+    struct CollidedWithWorld;
+  }
+
   class RandomNumberGenerator;
   class ParticleSystem;
 }}
@@ -37,6 +42,10 @@ namespace rigel { namespace game_logic {
 
 namespace components { struct DestructionEffects; }
 class EntityFactory;
+
+
+void triggerEffects(
+  entityx::Entity entity, entityx::EntityManager& entityManager);
 
 
 class EffectsSystem : public entityx::Receiver<EffectsSystem> {
@@ -52,8 +61,13 @@ public:
   void update(entityx::EntityManager& es);
 
   void receive(const events::ShootableKilled& event);
+  void receive(const engine::events::CollidedWithWorld& event);
 
 private:
+  void triggerEffectsIfConditionMatches(
+    entityx::Entity entity,
+    components::DestructionEffects::TriggerCondition expectedCondition);
+
   void processEffectsAndAdvance(
     const base::Vector& position,
     components::DestructionEffects& effects);

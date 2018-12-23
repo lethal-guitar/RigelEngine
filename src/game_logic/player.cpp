@@ -938,7 +938,7 @@ void Player::updateDeathAnimation() {
       if (state.mFramesElapsed >= 10) {
         if (state.mFramesElapsed == 10) {
           mEntity.component<c::Sprite>()->mShow = false;
-          // TODO: There should be a "spawnDestructionEffects" function
+          // TODO: Use triggerEffects() here
           auto explosionEffect = components::DestructionEffects{
             PLAYER_DEATH_EFFECT_SPEC};
           explosionEffect.mActivated = true;

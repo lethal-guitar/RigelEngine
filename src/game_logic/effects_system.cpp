@@ -23,7 +23,6 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "loader/palette.hpp"
 
@@ -44,6 +43,35 @@ using components::SpriteCascadeSpawner;
 }
 
 
+void triggerEffects(
+  entityx::Entity entity,
+  entityx::EntityManager& entityManager
+) {
+  using namespace engine::components;
+
+  if (!entity.has_component<DestructionEffects>()) {
+    return;
+  }
+
+  auto effects = *entity.component<DestructionEffects>();
+  effects.mActivated = true;
+  const auto position = *entity.component<WorldPosition>();
+
+  auto effectSpawner = entityManager.create();
+  effectSpawner.assign<DestructionEffects>(effects);
+  effectSpawner.assign<WorldPosition>(position);
+
+  const auto iHighestDelaySpec = std::max_element(
+    std::cbegin(effects.mEffectSpecs),
+    std::cend(effects.mEffectSpecs),
+    [](const auto& a, const auto& b) {
+      return a.mDelay < b.mDelay;
+    });
+  const auto timeToLive = iHighestDelaySpec->mDelay;
+  effectSpawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(timeToLive));
+}
+
+
 EffectsSystem::EffectsSystem(
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
@@ -59,6 +87,7 @@ EffectsSystem::EffectsSystem(
   , mpParticles(pParticles)
 {
   events.subscribe<events::ShootableKilled>(*this);
+  events.subscribe<engine::events::CollidedWithWorld>(*this);
 }
 
 
@@ -98,29 +127,30 @@ void EffectsSystem::update(entityx::EntityManager& es) {
 
 
 void EffectsSystem::receive(const events::ShootableKilled& event) {
-  using namespace engine::components;
+  triggerEffectsIfConditionMatches(
+    event.mEntity, DestructionEffects::TriggerCondition::OnKilled);
+}
 
-  auto entity = event.mEntity;
+
+void EffectsSystem::receive(const engine::events::CollidedWithWorld& event) {
+  triggerEffectsIfConditionMatches(
+    event.mEntity, DestructionEffects::TriggerCondition::OnCollision);
+}
+
+
+void EffectsSystem::triggerEffectsIfConditionMatches(
+  entityx::Entity entity,
+  const DestructionEffects::TriggerCondition expectedCondition
+) {
   if (!entity.has_component<DestructionEffects>()) {
     return;
   }
 
-  auto effects = *entity.component<DestructionEffects>();
-  effects.mActivated = true;
-  const auto position = *entity.component<WorldPosition>();
-
-  auto effectSpawner = mpEntityManager->create();
-  effectSpawner.assign<DestructionEffects>(effects);
-  effectSpawner.assign<WorldPosition>(position);
-
-  const auto iHighestDelaySpec = std::max_element(
-    std::cbegin(effects.mEffectSpecs),
-    std::cend(effects.mEffectSpecs),
-    [](const auto& a, const auto& b) {
-      return a.mDelay < b.mDelay;
-    });
-  const auto timeToLive = iHighestDelaySpec->mDelay;
-  effectSpawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(timeToLive));
+  const auto triggerCondition =
+    entity.component<DestructionEffects>()->mTriggerCondition;
+  if (triggerCondition == expectedCondition) {
+    triggerEffects(entity, *mpEntityManager);
+  }
 }
 
 
