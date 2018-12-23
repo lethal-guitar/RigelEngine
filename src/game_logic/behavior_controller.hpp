@@ -49,6 +49,13 @@ template <typename T>
 struct hasOnKilled<T, void_t<decltype(&T::onKilled)>> :
   std::true_type {};
 
+
+template <typename T, typename = void>
+struct hasOnCollision : std::false_type {};
+
+template <typename T>
+struct hasOnCollision<T, void_t<decltype(&T::onCollision)>> :
+  std::true_type {};
 }
 
 
@@ -98,12 +105,36 @@ std::enable_if_t<detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   self.onKilled(dependencies, isOddFrame, inflictorVelocity, entity);
 }
 
+
 template <typename T>
 std::enable_if_t<!detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   T&,
   GlobalDependencies&,
   const bool,
   const base::Point<float>&,
+  entityx::Entity
+) {
+}
+
+
+template <typename T>
+std::enable_if_t<detail::hasOnCollision<T>::value>
+behaviorControllerOnCollision(
+  T& self,
+  GlobalDependencies& dependencies,
+  const bool isOddFrame,
+  entityx::Entity entity
+) {
+  self.onCollision(dependencies, isOddFrame, entity);
+}
+
+
+template <typename T>
+std::enable_if_t<!detail::hasOnCollision<T>::value>
+behaviorControllerOnCollision(
+  T&,
+  GlobalDependencies&,
+  const bool,
   entityx::Entity
 ) {
 }
@@ -144,6 +175,14 @@ public:
     mpSelf->onKilled(dependencies, isOddFrame, inflictorVelocity, entity);
   }
 
+  void onCollision(
+    GlobalDependencies& dependencies,
+    const bool isOddFrame,
+    entityx::Entity entity
+  ) {
+    mpSelf->onCollision(dependencies, isOddFrame, entity);
+  }
+
 private:
   struct Concept {
     virtual ~Concept() = default;
@@ -164,6 +203,11 @@ private:
       GlobalDependencies& dependencies,
       bool isOddFrame,
       const base::Point<float>& inflictorVelocity,
+      entityx::Entity entity) = 0;
+
+    virtual void onCollision(
+      GlobalDependencies& dependencies,
+      const bool isOddFrame,
       entityx::Entity entity) = 0;
   };
 
@@ -214,6 +258,14 @@ private:
         isOddFrame,
         inflictorVelocity,
         entity);
+    }
+
+    void onCollision(
+      GlobalDependencies& dependencies,
+      const bool isOddFrame,
+      entityx::Entity entity
+    ) override {
+      behaviorControllerOnCollision(mData, dependencies, isOddFrame, entity);
     }
 
     T mData;

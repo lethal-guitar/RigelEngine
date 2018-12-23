@@ -19,6 +19,10 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
+namespace rigel { namespace engine { namespace events {
+  struct CollidedWithWorld;
+}}}
+
 
 namespace rigel { namespace game_logic {
 
@@ -31,6 +35,7 @@ public:
 
   void receive(const events::ShootableDamaged& event);
   void receive(const events::ShootableKilled& event);
+  void receive(const engine::events::CollidedWithWorld& event);
 
 private:
   GlobalDependencies mDependencies;

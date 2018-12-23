@@ -16,42 +16,35 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
-RIGEL_RESTORE_WARNINGS
-
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace game_logic { class EntityFactory; }}
+#include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
-
-namespace components {
+namespace rigel { namespace game_logic { namespace behaviors {
 
 struct SlimePipe {
   int mGameFramesSinceLastDrop = 0;
+
+  void update(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    bool isOnScreen,
+    entityx::Entity entity);
 };
 
-}
 
+struct SlimeDrop {
+  void update(
+    GlobalDependencies&,
+    bool,
+    bool,
+    entityx::Entity
+  ) {
+  }
 
-class SlimePipeSystem {
-public:
-  SlimePipeSystem(
-    EntityFactory* pEntityFactory,
-    IGameServiceProvider* pServiceProvider);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  void createSlimeDrop(const base::Vector& position);
-
-private:
-  EntityFactory* mpEntityFactory;
-  IGameServiceProvider* mpServiceProvider;
+  void onCollision(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    entityx::Entity entity);
 };
 
 }}}

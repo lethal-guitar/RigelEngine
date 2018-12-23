@@ -134,7 +134,6 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       pRandomGenerator,
       eventManager)
-  , mSlimePipeSystem(pEntityFactory, pServiceProvider)
   , mSpiderSystem(
       &mPlayer,
       &mCollisionChecker,
@@ -199,7 +198,6 @@ void IngameSystems::update(
   mSimpleWalkerSystem.update(es);
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);
-  mSlimePipeSystem.update(es);
   mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
   mBehaviorControllerSystem.update(es);
