@@ -17,6 +17,7 @@
 #include "behavior_controller_system.hpp"
 
 #include "engine/base_components.hpp"
+#include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 
 
@@ -29,6 +30,7 @@ BehaviorControllerSystem::BehaviorControllerSystem(
 {
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
+  mDependencies.mpEvents->subscribe<engine::events::CollidedWithWorld>(*this);
 }
 
 
@@ -75,6 +77,21 @@ void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
       mDependencies,
       mIsOddFrame,
       event.mInflictorVelocity,
+      entity);
+  }
+}
+
+
+void BehaviorControllerSystem::receive(
+  const engine::events::CollidedWithWorld& event
+) {
+  using game_logic::components::BehaviorController;
+
+  auto entity = event.mEntity;
+  if (entity.has_component<BehaviorController>()) {
+    entity.component<BehaviorController>()->onCollision(
+      mDependencies,
+      mIsOddFrame,
       entity);
   }
 }
