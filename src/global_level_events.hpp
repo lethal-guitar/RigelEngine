@@ -68,6 +68,12 @@ struct CheckPointActivated {
 };
 
 
+struct MissileDetonated {
+  // Specifies the tile above the missile's top-left
+  base::Vector mImpactPosition;
+};
+
+
 struct PlayerDied {};
 
 struct PlayerTeleported {

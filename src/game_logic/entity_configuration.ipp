@@ -365,6 +365,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(130);
       break;
 
+    case 144:
+      actorParts.push_back(144);
+      actorParts.push_back(149);
+      break;
+
     case 171:
     case 217:
       actorParts.push_back(159);
@@ -418,6 +423,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 115:
       sprite.mFramesToRender = {0, 4};
+      break;
+
+    case 144:
+      sprite.mFramesToRender = {0};
       break;
 
     case 150:
@@ -1548,6 +1557,22 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::HorizontalSlidingDoor>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<engine::components::SolidBody>();
+      break;
+
+    case 144: // Wall-destroying missile
+      {
+        auto shootable = Shootable{Health{1}};
+        shootable.mDestroyWhenKilled = false;
+
+        entity.assign<Shootable>(shootable);
+        entity.assign<BoundingBox>(boundingBox);
+        entity.assign<DestructionEffects>(
+          MISSILE_DETONATE_EFFECT_SPEC,
+          DestructionEffects::TriggerCondition::Manual);
+        entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
+        entity.assign<BehaviorController>(behaviors::Missile{});
+      }
       break;
 
     case 209: // Rocket elevator

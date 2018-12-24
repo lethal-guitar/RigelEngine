@@ -282,3 +282,16 @@ const effects::EffectSpec REACTOR_KILL_EFFECT_SPEC[] = {
 
   {effects::RandomExplosionSound{}, 0},
 };
+
+
+const effects::EffectSpec MISSILE_DETONATE_EFFECT_SPEC[] = {
+  {effects::RandomExplosionSound{}, 0},
+  {effects::EffectSprite{{0, -8}, 96, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{0, -8}, 96, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{2, -8}, 96, EffectMovement::FlyDown}, 1},
+  {effects::EffectSprite{{2, -8}, 96, EffectMovement::FlyRight}, 1},
+  {effects::EffectSprite{{4, -8}, 96, EffectMovement::FlyLeft}, 2},
+  {effects::EffectSprite{{4, -8}, 96, EffectMovement::FlyUp}, 2},
+  {effects::EffectSprite{{6, -8}, 96, EffectMovement::FlyDown}, 3},
+  {effects::EffectSprite{{6, -8}, 96, EffectMovement::FlyRight}, 3}
+};
