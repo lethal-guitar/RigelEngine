@@ -295,3 +295,12 @@ const effects::EffectSpec MISSILE_DETONATE_EFFECT_SPEC[] = {
   {effects::EffectSprite{{6, -8}, 96, EffectMovement::FlyDown}, 3},
   {effects::EffectSprite{{6, -8}, 96, EffectMovement::FlyRight}, 3}
 };
+
+
+const effects::EffectSpec BROKEN_MISSILE_DETONATE_EFFECT_SPEC[] = {
+  {effects::RandomExplosionSound{}, 0},
+  {effects::EffectSprite{{0, 0}, 96, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{2, 0}, 96, EffectMovement::FlyUpperLeft}, 1},
+  {effects::EffectSprite{{4, 0}, 96, EffectMovement::FlyUpperRight}, 2},
+  {effects::EffectSprite{{6, 0}, 96, EffectMovement::FlyUpperLeft}, 3},
+};

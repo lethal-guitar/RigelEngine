@@ -1546,6 +1546,20 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
+    case 95: // Missile, broken (falls over)
+      {
+        auto shootable = Shootable{Health{1}};
+        shootable.mDestroyWhenKilled = false;
+
+        addDefaultMovingBody(entity, boundingBox);
+        entity.assign<Shootable>(shootable);
+        entity.assign<DestructionEffects>(
+          BROKEN_MISSILE_DETONATE_EFFECT_SPEC,
+          DestructionEffects::TriggerCondition::Manual);
+        entity.assign<BehaviorController>(behaviors::BrokenMissile{});
+      }
+      break;
+
     case 128: // Sliding door, vertical
       entity.assign<ai::components::VerticalSlidingDoor>();
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});

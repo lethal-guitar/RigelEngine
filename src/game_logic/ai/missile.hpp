@@ -45,4 +45,22 @@ struct Missile {
   bool mIsActive = false;
 };
 
+
+struct BrokenMissile {
+  void update(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onKilled(
+    GlobalDependencies& dependencies,
+    bool isOddFrame,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
+  int mFramesElapsed = 0;
+  bool mIsActive = false;
+};
+
 }}}

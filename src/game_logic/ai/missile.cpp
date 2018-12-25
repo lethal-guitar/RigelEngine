@@ -22,6 +22,7 @@
 #include "engine/particle_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
@@ -35,6 +36,10 @@ namespace rigel { namespace game_logic { namespace behaviors {
 
 namespace
 {
+
+constexpr int FALL_OVER_ANIM_LEFT[] = { 0, 1, 2, 3, 2, 3, 4, 3 };
+
+constexpr int FALL_OVER_ANIM_RIGHT[] = { 0, 5, 6, 7, 6, 7, 8, 7 };
 
 constexpr auto MISSILE_HEIGHT = 12;
 
@@ -140,6 +145,67 @@ void Missile::onKilled(
   if (!mIsActive) {
     mIsActive = true;
     triggerHitEffect(entity, *d.mpParticles);
+  }
+}
+
+
+void BrokenMissile::update(
+  GlobalDependencies& d,
+  const bool isOddFrame,
+  const bool isOnScreen,
+  entityx::Entity entity
+) {
+  using namespace engine::components;
+
+  if (!mIsActive) {
+    return;
+  }
+
+  auto detonate = [&]() {
+    const auto& position = *entity.component<WorldPosition>();
+    d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
+    triggerEffects(entity, *d.mpEntityManager);
+
+    auto explosion = spawnOneShotSprite(*d.mpEntityFactory, 43, position);
+    explosion.assign<components::PlayerDamaging>(1);
+  };
+
+
+  if (
+    mFramesElapsed == 2 ||
+    mFramesElapsed == 4 ||
+    mFramesElapsed == 6
+  ) {
+    // This is meant to play sound effects along with the animation, i.e.
+    // every time the missile hits the ground
+    d.mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
+  } else if (mFramesElapsed == 11) {
+    detonate();
+    entity.destroy();
+    return;
+  }
+
+  ++mFramesElapsed;
+}
+
+
+void BrokenMissile::onKilled(
+  GlobalDependencies& d,
+  const bool isOddFrame,
+  const base::Point<float>& inflictorVelocity,
+  entityx::Entity entity
+) {
+  if (!mIsActive) {
+    mIsActive = true;
+
+    const auto shotFromLeft = inflictorVelocity.x > 0;
+    const auto fallingLeft = !shotFromLeft;
+
+    triggerHitEffect(entity, *d.mpParticles);
+
+    engine::startAnimationSequence(
+      entity,
+      fallingLeft ? FALL_OVER_ANIM_LEFT : FALL_OVER_ANIM_RIGHT);
   }
 }
 
