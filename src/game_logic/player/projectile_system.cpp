@@ -78,7 +78,7 @@ void generateRocketSmoke(
   const base::Point<float> velocity
 ) {
   const auto offset = rocketSmokeOffset(velocity);
-  createOneShotSprite(entityFactory, 11, position + offset);
+  spawnOneShotSprite(entityFactory, 11, position + offset);
 }
 
 
@@ -98,7 +98,7 @@ void spawnRocketWallImpactEffect(
   const base::Point<float> velocity
 ) {
   const auto offset = rocketWallImpactOffset(velocity);
-  createOneShotSprite(entityFactory, 2, position + offset);
+  spawnOneShotSprite(entityFactory, 2, position + offset);
 }
 
 
@@ -106,7 +106,7 @@ void spawnRocketEnemyImpactEffect(
   EntityFactory& entityFactory,
   const base::Vector& position
 ) {
-  createOneShotSprite(entityFactory, 2, position + base::Vector{-3, 3});
+  spawnOneShotSprite(entityFactory, 2, position + base::Vector{-3, 3});
 }
 
 }

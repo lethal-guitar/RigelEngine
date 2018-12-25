@@ -101,11 +101,11 @@ void Missile::update(
 
   if (mFramesElapsed == 0) {
     // Ignition animation
-    createOneShotSprite(
+    spawnOneShotSprite(
       *d.mpEntityFactory,
       74,
       position + base::Vector{-2, 1});
-    createOneShotSprite(
+    spawnOneShotSprite(
       *d.mpEntityFactory,
       74,
       position + base::Vector{1, 1});

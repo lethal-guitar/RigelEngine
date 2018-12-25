@@ -207,7 +207,7 @@ void NapalmBomb::spawnFires(
         BoundingBox{{}, {2, 1}});
 
     if (canSpawn) {
-      auto fire = createOneShotSprite(*d.mpEntityFactory, 65, position);
+      auto fire = spawnOneShotSprite(*d.mpEntityFactory, 65, position);
       fire.assign<components::PlayerDamaging>(Damage{1});
       fire.assign<components::DamageInflicting>(
         Damage{1},

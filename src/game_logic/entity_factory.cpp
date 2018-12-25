@@ -551,7 +551,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 }
 
 
-entityx::Entity createOneShotSprite(
+entityx::Entity spawnOneShotSprite(
   IEntityFactory& factory,
   const ActorID id,
   const base::Vector& position
@@ -574,7 +574,7 @@ entityx::Entity createFloatingOneShotSprite(
 ) {
   using namespace engine::components::parameter_aliases;
 
-  auto entity = createOneShotSprite(factory, id, position);
+  auto entity = spawnOneShotSprite(factory, id, position);
   entity.assign<MovingBody>(MovingBody{
     Velocity{0, -1.0f},
     GravityAffected{false},
