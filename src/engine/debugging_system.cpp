@@ -21,6 +21,7 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
 
 namespace ex = entityx;
 
@@ -154,6 +155,20 @@ void DebuggingSystem::update(ex::EntityManager& es) {
         };
 
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
+      });
+
+    es.each<WorldPosition, game_logic::components::MapGeometryLink>(
+      [this](
+        ex::Entity entity,
+        const WorldPosition& pos,
+        const game_logic::components::MapGeometryLink& link
+      ) {
+        const auto worldToScreenPx = tileVectorToPixelVector(*mpScrollOffset);
+        const auto boxInPixels = BoundingBox{
+          tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) - worldToScreenPx,
+          tileExtentsToPixelExtents(link.mLinkedGeometrySection.size)};
+
+        mpRenderer->drawRectangle(boxInPixels, base::Color{0, 255, 255, 190});
       });
   }
 
