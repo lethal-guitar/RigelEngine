@@ -193,7 +193,7 @@ void EffectsSystem::processEffectsAndAdvance(
 
       [&, this](const EffectSprite& sprite) {
         if (sprite.mMovement == EffectSprite::Movement::None) {
-          createOneShotSprite(
+          spawnOneShotSprite(
             *mpEntityFactory,
             sprite.mActorId,
             position + sprite.mOffset);

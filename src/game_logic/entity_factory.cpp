@@ -27,6 +27,7 @@
 #include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
+#include "game_logic/ai/missile.hpp"
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/red_bird.hpp"
 #include "game_logic/ai/rocket_turret.hpp"
@@ -550,7 +551,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 }
 
 
-entityx::Entity createOneShotSprite(
+entityx::Entity spawnOneShotSprite(
   IEntityFactory& factory,
   const ActorID id,
   const base::Vector& position
@@ -573,7 +574,7 @@ entityx::Entity createFloatingOneShotSprite(
 ) {
   using namespace engine::components::parameter_aliases;
 
-  auto entity = createOneShotSprite(factory, id, position);
+  auto entity = spawnOneShotSprite(factory, id, position);
   entity.assign<MovingBody>(MovingBody{
     Velocity{0, -1.0f},
     GravityAffected{false},

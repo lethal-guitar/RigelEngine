@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -26,7 +27,7 @@ namespace rigel {
   struct IGameServiceProvider;
   namespace data { namespace map { class Map; }}
   namespace engine { class RandomNumberGenerator; }
-  namespace events { struct DoorOpened; }
+  namespace events { struct DoorOpened; struct MissileDetonated; }
   namespace game_logic { namespace events { struct ShootableKilled; }}
 }
 
@@ -44,8 +45,11 @@ public:
 
   void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::DoorOpened& event);
+  void receive(const rigel::events::MissileDetonated& event);
 
 private:
+  void explodeMapSection(const base::Rect<int>& mapSection);
+
   IGameServiceProvider* mpServiceProvider;
   entityx::EntityManager* mpEntityManager;
   data::map::Map* mpMap;

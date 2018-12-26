@@ -123,6 +123,7 @@ DynamicGeometrySystem::DynamicGeometrySystem(
 {
   pEvents->subscribe<events::ShootableKilled>(*this);
   pEvents->subscribe<rigel::events::DoorOpened>(*this);
+  pEvents->subscribe<rigel::events::MissileDetonated>(*this);
 }
 
 
@@ -135,17 +136,8 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
 
   const auto& mapSection =
     entity.component<MapGeometryLink>()->mLinkedGeometrySection;
-
-  spawnTileDebrisForSection(
-    mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
-
-  mpMap->clearSection(
-    mapSection.topLeft.x, mapSection.topLeft.y,
-    mapSection.size.width, mapSection.size.height);
-
+  explodeMapSection(mapSection);
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
-
-  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 
@@ -159,6 +151,32 @@ void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event) {
     mapSection.topLeft.x, mapSection.topLeft.y,
     mapSection.size.width, mapSection.size.height);
   entity.destroy();
+}
+
+
+void DynamicGeometrySystem::receive(
+  const rigel::events::MissileDetonated& event
+) {
+  // TODO: Add a helper function for creating rectangles based on different
+  // given values, e.g. bottom left and size
+  engine::components::BoundingBox mapSection{
+    event.mImpactPosition - base::Vector{0, 2},
+    {3, 3}};
+  explodeMapSection(mapSection);
+}
+
+
+void DynamicGeometrySystem::explodeMapSection(
+  const base::Rect<int>& mapSection
+) {
+  spawnTileDebrisForSection(
+    mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
+
+  mpMap->clearSection(
+    mapSection.topLeft.x, mapSection.topLeft.y,
+    mapSection.size.width, mapSection.size.height);
+
+  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 }}

@@ -365,6 +365,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(130);
       break;
 
+    case 144:
+      actorParts.push_back(144);
+      actorParts.push_back(149);
+      break;
+
     case 171:
     case 217:
       actorParts.push_back(159);
@@ -418,6 +423,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 115:
       sprite.mFramesToRender = {0, 4};
+      break;
+
+    case 144:
+      sprite.mFramesToRender = {0};
       break;
 
     case 150:
@@ -519,13 +528,42 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 16: // nuclear waste barrel debris
     case 17: // nuclear waste barrel debris
     case 18: // nuclear waste barrel debris
+    case 43: // nuclear explosion
+    case 60: // watch-bot container debris
+    case 61: // watch-bot container debris
+    case 65: // napalm bomb fire
+    case 71: // Duke's death particles
     case 72: // bonus globe debris
     case 73: // bonus globe debris
+    case 74: // white circular flash
+    case 75: // nuclear sludge (from barrel)
     case 84: // smoke cloud
     case 94: // biological debris
+    case 96: // missile debris
+    case 100: // eye ball projectile
+    case 147: // enemy laser muzzle flash
+    case 148: // enemy laser muzzle flash
+    case 152: // metal grabber claw debris
+    case 153: // metal grabber claw debris
+    case 165: // yellow fire ball
+    case 166: // green fire ball
+    case 167: // blue fire ball
     case 169: // soda can debris
     case 170: // soda can debris
+    case 192: // petrified monster stone shell debris
+    case 193: // petrified monster stone shell debris
+    case 194: // petrified monster stone shell debris
+    case 195: // petrified monster stone shell debris
+    case 196: // petrified monster stone shell debris
+    case 197: // petrified monster stone shell debris
+    case 198: // petrified monster stone shell debris
+    case 199: // petrified monster stone shell debris
+    case 232: // spider (shaken off)
+    case 241: // wind-blown spider part
+    case 242: // wind-blown spider part
+    case 243: // wind-blown spider
     case 255: // prisoner debris
+    case 300: // Rigelatin soldier projectile
       return EFFECT_DRAW_ORDER;
 
     // floating score numbers
@@ -1508,6 +1546,20 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
+    case 95: // Missile, broken (falls over)
+      {
+        auto shootable = Shootable{Health{1}};
+        shootable.mDestroyWhenKilled = false;
+
+        addDefaultMovingBody(entity, boundingBox);
+        entity.assign<Shootable>(shootable);
+        entity.assign<DestructionEffects>(
+          BROKEN_MISSILE_DETONATE_EFFECT_SPEC,
+          DestructionEffects::TriggerCondition::Manual);
+        entity.assign<BehaviorController>(behaviors::BrokenMissile{});
+      }
+      break;
+
     case 128: // Sliding door, vertical
       entity.assign<ai::components::VerticalSlidingDoor>();
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
@@ -1519,6 +1571,22 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::HorizontalSlidingDoor>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<engine::components::SolidBody>();
+      break;
+
+    case 144: // Wall-destroying missile
+      {
+        auto shootable = Shootable{Health{1}};
+        shootable.mDestroyWhenKilled = false;
+
+        entity.assign<Shootable>(shootable);
+        entity.assign<BoundingBox>(boundingBox);
+        entity.assign<DestructionEffects>(
+          MISSILE_DETONATE_EFFECT_SPEC,
+          DestructionEffects::TriggerCondition::Manual);
+        entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
+        entity.assign<BehaviorController>(behaviors::Missile{});
+      }
       break;
 
     case 209: // Rocket elevator

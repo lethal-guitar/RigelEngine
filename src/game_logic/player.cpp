@@ -1101,7 +1101,7 @@ void Player::fireShot() {
   mpPlayerModel->useAmmo();
 
   mpServiceProvider->playSound(soundIdForWeapon(weaponType));
-  createOneShotSprite(
+  spawnOneShotSprite(
     *mpEntityFactory,
     muzzleFlashActorId(direction),
     position + muzzleFlashOffset(orientation(), mStance));

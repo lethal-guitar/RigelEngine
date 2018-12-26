@@ -80,6 +80,8 @@ set(core_sources
     game_logic/ai/laser_turret.hpp
     game_logic/ai/messenger_drone.cpp
     game_logic/ai/messenger_drone.hpp
+    game_logic/ai/missile.cpp
+    game_logic/ai/missile.hpp
     game_logic/ai/prisoner.cpp
     game_logic/ai/prisoner.hpp
     game_logic/ai/red_bird.cpp

@@ -181,7 +181,7 @@ private:
  * actor ID, which is set up to play all animation frames in the sprite and
  * then disappear.
  */
-entityx::Entity createOneShotSprite(
+entityx::Entity spawnOneShotSprite(
   IEntityFactory& factory,
   data::ActorID id,
   const base::Vector& position);
