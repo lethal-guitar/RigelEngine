@@ -187,7 +187,7 @@ entityx::Entity spawnOneShotSprite(
   const base::Vector& position);
 
 
-entityx::Entity createFloatingOneShotSprite(
+entityx::Entity spawnFloatingOneShotSprite(
   IEntityFactory& factory,
   data::ActorID id,
   const base::Vector& position);
