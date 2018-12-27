@@ -24,9 +24,16 @@
 namespace rigel { namespace game_logic {
 
 BehaviorControllerSystem::BehaviorControllerSystem(
-  GlobalDependencies dependencies
+  GlobalDependencies dependencies,
+  Player* pPlayer,
+  const base::Vector* pCameraPosition,
+  data::map::Map* pMap
 )
   : mDependencies(dependencies)
+  , mGlobalState(
+      pPlayer,
+      pCameraPosition,
+      pMap)
 {
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
@@ -45,12 +52,12 @@ void BehaviorControllerSystem::update(entityx::EntityManager& es) {
   ) {
     controller.update(
       mDependencies,
-      mIsOddFrame,
+      mGlobalState,
       active.mIsOnScreen,
       entity);
   });
 
-  mIsOddFrame = !mIsOddFrame;
+  mGlobalState.mIsOddFrame = !mGlobalState.mIsOddFrame;
 }
 
 
@@ -61,7 +68,7 @@ void BehaviorControllerSystem::receive(const events::ShootableDamaged& event) {
   if (entity.has_component<BehaviorController>()) {
     entity.component<BehaviorController>()->onHit(
       mDependencies,
-      mIsOddFrame,
+      mGlobalState,
       event.mInflictorVelocity,
       entity);
   }
@@ -75,7 +82,7 @@ void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
   if (entity.has_component<BehaviorController>()) {
     entity.component<BehaviorController>()->onKilled(
       mDependencies,
-      mIsOddFrame,
+      mGlobalState,
       event.mInflictorVelocity,
       entity);
   }
@@ -91,7 +98,7 @@ void BehaviorControllerSystem::receive(
   if (entity.has_component<BehaviorController>()) {
     entity.component<BehaviorController>()->onCollision(
       mDependencies,
-      mIsOddFrame,
+      mGlobalState,
       entity);
   }
 }

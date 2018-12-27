@@ -28,6 +28,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel { namespace engine { class CollisionChecker; }}
+namespace rigel { namespace game_logic { struct GlobalState; }}
 namespace rigel { namespace game_logic { namespace events {
   struct ShootableKilled;
 }}}
@@ -119,13 +120,13 @@ class NapalmBomb {
 public:
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
   void onKilled(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 

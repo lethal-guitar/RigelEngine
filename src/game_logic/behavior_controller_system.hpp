@@ -29,7 +29,11 @@ namespace rigel { namespace game_logic {
 class BehaviorControllerSystem :
   public entityx::Receiver<BehaviorControllerSystem> {
 public:
-  explicit BehaviorControllerSystem(GlobalDependencies dependencies);
+  explicit BehaviorControllerSystem(
+    GlobalDependencies dependencies,
+    Player* pPlayer,
+    const base::Vector* pCameraPosition,
+    data::map::Map* pMap);
 
   void update(entityx::EntityManager& es);
 
@@ -39,7 +43,7 @@ public:
 
 private:
   GlobalDependencies mDependencies;
-  bool mIsOddFrame = false;
+  GlobalState mGlobalState;
 };
 
 }}

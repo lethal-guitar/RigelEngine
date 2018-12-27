@@ -47,7 +47,6 @@ namespace rigel {
 namespace rigel { namespace game_logic {
 
 struct GlobalDependencies {
-  Player* mpPlayer;
   const engine::CollisionChecker* mpCollisionChecker;
   engine::ParticleSystem* mpParticles;
   engine::RandomNumberGenerator* mpRandomGenerator;
@@ -55,8 +54,25 @@ struct GlobalDependencies {
   IGameServiceProvider* mpServiceProvider;
   entityx::EntityManager* mpEntityManager;
   entityx::EventManager* mpEvents;
+};
+
+
+struct GlobalState {
+  GlobalState(
+    Player* pPlayer,
+    const base::Vector* pCameraPosition,
+    data::map::Map* pMap
+  )
+    : mpPlayer(pPlayer)
+    , mpCameraPosition(pCameraPosition)
+    , mpMap(pMap)
+  {
+  }
+
+  Player* mpPlayer;
   const base::Vector* mpCameraPosition;
   data::map::Map* mpMap;
+  bool mIsOddFrame = false;
 };
 
 }}

@@ -141,17 +141,18 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       eventManager)
   , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
-  , mBehaviorControllerSystem(GlobalDependencies{
+  , mBehaviorControllerSystem(
+      GlobalDependencies{
+        &mCollisionChecker,
+        &mParticles,
+        pRandomGenerator,
+        pEntityFactory,
+        pServiceProvider,
+        &entities,
+        &eventManager},
       &mPlayer,
-      &mCollisionChecker,
-      &mParticles,
-      pRandomGenerator,
-      pEntityFactory,
-      pServiceProvider,
-      &entities,
-      &eventManager,
       pScrollOffset,
-      pMap})
+      pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {

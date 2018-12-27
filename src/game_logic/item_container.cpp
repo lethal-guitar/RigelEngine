@@ -130,7 +130,7 @@ namespace behaviors {
 
 void NapalmBomb::update(
   GlobalDependencies& d,
-  const bool,
+  GlobalState&,
   const bool,
   entityx::Entity entity
 ) {
@@ -170,7 +170,7 @@ void NapalmBomb::update(
 
 void NapalmBomb::onKilled(
   GlobalDependencies& d,
-  const bool,
+  GlobalState&,
   const base::Point<float>&,
   entityx::Entity entity
 ) {

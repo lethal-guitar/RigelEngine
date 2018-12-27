@@ -26,7 +26,7 @@ struct SlimePipe {
 
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 };
@@ -35,7 +35,7 @@ struct SlimePipe {
 struct SlimeDrop {
   void update(
     GlobalDependencies&,
-    bool,
+    GlobalState&,
     bool,
     entityx::Entity
   ) {
@@ -43,7 +43,7 @@ struct SlimeDrop {
 
   void onCollision(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     entityx::Entity entity);
 };
 

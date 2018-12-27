@@ -63,11 +63,11 @@ template <typename T>
 void updateBehaviorController(
   T& self,
   GlobalDependencies& dependencies,
-  const bool isOddFrame,
+  GlobalState& state,
   const bool isOnScreen,
   entityx::Entity entity
 ) {
-  self.update(dependencies, isOddFrame, isOnScreen, entity);
+  self.update(dependencies, state, isOnScreen, entity);
 }
 
 
@@ -75,11 +75,11 @@ template <typename T>
 std::enable_if_t<detail::hasOnHit<T>::value> behaviorControllerOnHit(
   T& self,
   GlobalDependencies& dependencies,
-  const bool isOddFrame,
+  GlobalState& state,
   const base::Point<float>& inflictorVelocity,
   entityx::Entity entity
 ) {
-  self.onHit(dependencies, isOddFrame, inflictorVelocity, entity);
+  self.onHit(dependencies, state, inflictorVelocity, entity);
 }
 
 
@@ -87,7 +87,7 @@ template <typename T>
 std::enable_if_t<!detail::hasOnHit<T>::value> behaviorControllerOnHit(
   T&,
   GlobalDependencies&,
-  const bool,
+  GlobalState&,
   const base::Point<float>&,
   entityx::Entity
 ) {
@@ -98,11 +98,11 @@ template <typename T>
 std::enable_if_t<detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   T& self,
   GlobalDependencies& dependencies,
-  const bool isOddFrame,
+  GlobalState& state,
   const base::Point<float>& inflictorVelocity,
   entityx::Entity entity
 ) {
-  self.onKilled(dependencies, isOddFrame, inflictorVelocity, entity);
+  self.onKilled(dependencies, state, inflictorVelocity, entity);
 }
 
 
@@ -110,7 +110,7 @@ template <typename T>
 std::enable_if_t<!detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   T&,
   GlobalDependencies&,
-  const bool,
+  GlobalState& state,
   const base::Point<float>&,
   entityx::Entity
 ) {
@@ -122,10 +122,10 @@ std::enable_if_t<detail::hasOnCollision<T>::value>
 behaviorControllerOnCollision(
   T& self,
   GlobalDependencies& dependencies,
-  const bool isOddFrame,
+  GlobalState& state,
   entityx::Entity entity
 ) {
-  self.onCollision(dependencies, isOddFrame, entity);
+  self.onCollision(dependencies, state, entity);
 }
 
 
@@ -134,7 +134,7 @@ std::enable_if_t<!detail::hasOnCollision<T>::value>
 behaviorControllerOnCollision(
   T&,
   GlobalDependencies&,
-  const bool,
+  GlobalState&,
   entityx::Entity
 ) {
 }
@@ -150,37 +150,37 @@ public:
 
   void update(
     GlobalDependencies& dependencies,
-    const bool isOddFrame,
+    GlobalState& state,
     const bool isOnScreen,
     entityx::Entity entity
   ) {
-    mpSelf->update(dependencies, isOddFrame, isOnScreen, entity);
+    mpSelf->update(dependencies, state, isOnScreen, entity);
   }
 
   void onHit(
     GlobalDependencies& dependencies,
-    const bool isOddFrame,
+    GlobalState& state,
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity
   ) {
-    mpSelf->onHit(dependencies, isOddFrame, inflictorVelocity, entity);
+    mpSelf->onHit(dependencies, state, inflictorVelocity, entity);
   }
 
   void onKilled(
     GlobalDependencies& dependencies,
-    const bool isOddFrame,
+    GlobalState& state,
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity
   ) {
-    mpSelf->onKilled(dependencies, isOddFrame, inflictorVelocity, entity);
+    mpSelf->onKilled(dependencies, state, inflictorVelocity, entity);
   }
 
   void onCollision(
     GlobalDependencies& dependencies,
-    const bool isOddFrame,
+    GlobalState& state,
     entityx::Entity entity
   ) {
-    mpSelf->onCollision(dependencies, isOddFrame, entity);
+    mpSelf->onCollision(dependencies, state, entity);
   }
 
 private:
@@ -189,25 +189,25 @@ private:
 
     virtual void update(
       GlobalDependencies& dependencies,
-      bool isOddFrame,
+      GlobalState& state,
       bool isOnScreen,
       entityx::Entity entity) = 0;
 
     virtual void onHit(
       GlobalDependencies& dependencies,
-      bool isOddFrame,
+      GlobalState& state,
       const base::Point<float>& inflictorVelocity,
       entityx::Entity entity) = 0;
 
     virtual void onKilled(
       GlobalDependencies& dependencies,
-      bool isOddFrame,
+      GlobalState& state,
       const base::Point<float>& inflictorVelocity,
       entityx::Entity entity) = 0;
 
     virtual void onCollision(
       GlobalDependencies& dependencies,
-      const bool isOddFrame,
+      GlobalState& state,
       entityx::Entity entity) = 0;
   };
 
@@ -220,52 +220,52 @@ private:
 
     void update(
       GlobalDependencies& dependencies,
-      bool isOddFrame,
+      GlobalState& state,
       bool isOnScreen,
       entityx::Entity entity
     ) override {
       updateBehaviorController(
         mData,
         dependencies,
-        isOddFrame,
+        state,
         isOnScreen,
         entity);
     }
 
     void onHit(
       GlobalDependencies& dependencies,
-      bool isOddFrame,
+      GlobalState& state,
       const base::Point<float>& inflictorVelocity,
       entityx::Entity entity
     ) override {
       behaviorControllerOnHit(
         mData,
         dependencies,
-        isOddFrame,
+        state,
         inflictorVelocity,
         entity);
     }
 
     void onKilled(
       GlobalDependencies& dependencies,
-      bool isOddFrame,
+      GlobalState& state,
       const base::Point<float>& inflictorVelocity,
       entityx::Entity entity
     ) override {
       behaviorControllerOnKilled(
         mData,
         dependencies,
-        isOddFrame,
+        state,
         inflictorVelocity,
         entity);
     }
 
     void onCollision(
       GlobalDependencies& dependencies,
-      const bool isOddFrame,
+      GlobalState& state,
       entityx::Entity entity
     ) override {
-      behaviorControllerOnCollision(mData, dependencies, isOddFrame, entity);
+      behaviorControllerOnCollision(mData, dependencies, state, entity);
     }
 
     T mData;

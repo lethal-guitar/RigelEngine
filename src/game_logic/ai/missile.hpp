@@ -25,19 +25,20 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { struct GlobalDependencies; }}
+namespace rigel { namespace game_logic { struct GlobalState; } }
 
 namespace rigel { namespace game_logic { namespace behaviors {
 
 struct Missile {
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
   void onKilled(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 
@@ -49,13 +50,13 @@ struct Missile {
 struct BrokenMissile {
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
   void onKilled(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 

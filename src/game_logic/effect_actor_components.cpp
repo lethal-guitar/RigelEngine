@@ -37,19 +37,19 @@ constexpr auto MAX_Y_OFFSET = 16;
 
 void WindBlownSpiderGenerator::update(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& s,
   const bool isOnScreen,
   entityx::Entity entity
 ) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
   if (
-    position.y > d.mpPlayer->position().y &&
+    position.y > s.mpPlayer->position().y &&
     d.mpRandomGenerator->gen() % 2 != 0 &&
-    isOddFrame
+    s.mIsOddFrame
   ) {
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
-    const auto xPos = d.mpCameraPosition->x + RIGHT_SCREEN_EDGE;
-    const auto yPos = d.mpCameraPosition->y +
+    const auto xPos = s.mpCameraPosition->x + RIGHT_SCREEN_EDGE;
+    const auto yPos = s.mpCameraPosition->y +
       d.mpRandomGenerator->gen() % MAX_Y_OFFSET;
     const auto movementType = d.mpRandomGenerator->gen() % 2 != 0
       ? SpriteMovement::SwirlAround
@@ -66,12 +66,12 @@ void WindBlownSpiderGenerator::update(
 
 void WaterDropGenerator::update(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& state,
   const bool isOnScreen,
   entityx::Entity entity
 ) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
-  if (isOddFrame && d.mpRandomGenerator->gen() >= 220) {
+  if (state.mIsOddFrame && d.mpRandomGenerator->gen() >= 220) {
     auto drop = d.mpEntityFactory->createActor(226, position);
     drop.assign<engine::components::Active>();
 
