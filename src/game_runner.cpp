@@ -121,6 +121,7 @@ GameRunner::GameRunner(
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
   mEventManager.subscribe<rigel::events::PlayerTeleported>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  mEventManager.subscribe<rigel::events::ScreenShake>(*this);
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
   mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
 
@@ -333,6 +334,11 @@ void GameRunner::receive(const rigel::events::PlayerTeleported& event) {
 
 void GameRunner::receive(const rigel::events::ScreenFlash& event) {
   mScreenFlashColor = event.mColor;
+}
+
+
+void GameRunner::receive(const rigel::events::ScreenShake& event) {
+  mScreenShakeOffsetX = event.mAmount;
 }
 
 

@@ -41,6 +41,11 @@ struct ScreenFlash {
 };
 
 
+struct ScreenShake {
+  int mAmount;
+};
+
+
 struct PlayerMessage {
   PlayerMessage() = default;
   explicit PlayerMessage(std::string text)
