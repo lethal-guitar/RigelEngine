@@ -73,6 +73,7 @@ struct GlobalState {
   const base::Vector* mpCameraPosition;
   data::map::Map* mpMap;
   bool mIsOddFrame = false;
+  bool mIsEarthShaking = false;
 };
 
 }}

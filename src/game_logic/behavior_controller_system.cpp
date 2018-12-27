@@ -20,6 +20,8 @@
 #include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 
+#include "global_level_events.hpp"
+
 
 namespace rigel { namespace game_logic {
 
@@ -38,6 +40,8 @@ BehaviorControllerSystem::BehaviorControllerSystem(
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
   mDependencies.mpEvents->subscribe<engine::events::CollidedWithWorld>(*this);
+  mDependencies.mpEvents->subscribe<rigel::events::EarthQuakeBegin>(*this);
+  mDependencies.mpEvents->subscribe<rigel::events::EarthQuakeEnd>(*this);
 }
 
 
@@ -101,6 +105,16 @@ void BehaviorControllerSystem::receive(
       mGlobalState,
       entity);
   }
+}
+
+
+void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeBegin&) {
+  mGlobalState.mIsEarthShaking = true;
+}
+
+
+void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeEnd&) {
+  mGlobalState.mIsEarthShaking = false;
 }
 
 }}
