@@ -105,6 +105,20 @@ void spawnTileDebrisForSection(
   }
 }
 
+
+void explodeMapSection(
+  const base::Rect<int>& mapSection,
+  data::map::Map& map,
+  entityx::EntityManager& entityManager,
+  engine::RandomNumberGenerator& randomGenerator
+) {
+  spawnTileDebrisForSection(mapSection, map, entityManager, randomGenerator);
+
+  map.clearSection(
+    mapSection.topLeft.x, mapSection.topLeft.y,
+    mapSection.size.width, mapSection.size.height);
+}
+
 }
 
 
@@ -136,8 +150,9 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
 
   const auto& mapSection =
     entity.component<MapGeometryLink>()->mLinkedGeometrySection;
-  explodeMapSection(mapSection);
+  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
+  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 
@@ -162,20 +177,7 @@ void DynamicGeometrySystem::receive(
   engine::components::BoundingBox mapSection{
     event.mImpactPosition - base::Vector{0, 2},
     {3, 3}};
-  explodeMapSection(mapSection);
-}
-
-
-void DynamicGeometrySystem::explodeMapSection(
-  const base::Rect<int>& mapSection
-) {
-  spawnTileDebrisForSection(
-    mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
-
-  mpMap->clearSection(
-    mapSection.topLeft.x, mapSection.topLeft.y,
-    mapSection.size.width, mapSection.size.height);
-
+  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
