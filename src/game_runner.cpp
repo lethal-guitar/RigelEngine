@@ -404,8 +404,8 @@ void GameRunner::loadLevel(
     resources);
 
   if (loadedLevel.mEarthquake) {
-    mEarthQuakeEffect =
-      engine::EarthQuakeEffect{mpServiceProvider, &mRandomGenerator};
+    mEarthQuakeEffect = engine::EarthQuakeEffect{
+      mpServiceProvider, &mRandomGenerator, &mEventManager};
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
@@ -421,18 +421,7 @@ void GameRunner::updateGameLogic() {
   }
 
   if (mEarthQuakeEffect) {
-    const auto wasShaking = mEarthQuakeEffect->isEarthShaking();
-
-    mScreenShakeOffsetX = mEarthQuakeEffect->update();
-
-    const auto isShaking = mEarthQuakeEffect->isEarthShaking();
-    if (isShaking != wasShaking) {
-      if (isShaking) {
-        mEventManager.emit<rigel::events::EarthQuakeBegin>();
-      } else {
-        mEventManager.emit<rigel::events::EarthQuakeEnd>();
-      }
-    }
+    mEarthQuakeEffect->update();
   }
 
   mHudRenderer.updateAnimation();

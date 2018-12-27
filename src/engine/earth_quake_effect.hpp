@@ -16,6 +16,12 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
+
 
 namespace rigel { struct IGameServiceProvider; }
 
@@ -29,15 +35,14 @@ class EarthQuakeEffect {
 public:
   EarthQuakeEffect(
     IGameServiceProvider* pServiceProvider,
-    RandomNumberGenerator* pRandomGenerator);
+    RandomNumberGenerator* pRandomGenerator,
+    entityx::EventManager* pEvents);
 
-  /** Updates state and returns amount of screen shake for current frame.
+  /** Updates state and emits events (screen shake, earth quake begin/end)
    *
    * To be called at game-logic rate.
    */
-  int update();
-
-  bool isEarthShaking() const;
+  void update();
 
 private:
   int mCountdown;
@@ -45,6 +50,7 @@ private:
 
   IGameServiceProvider* mpServiceProvider;
   RandomNumberGenerator* mpRandomGenerator;
+  entityx::EventManager* mpEvents;
 };
 
 }}
