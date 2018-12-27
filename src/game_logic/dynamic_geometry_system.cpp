@@ -23,6 +23,8 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "game_logic/actor_tag.hpp"
+#include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -219,15 +221,14 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
 
 
 void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event) {
-  auto entity = event.mEntity;
-  const auto& mapSection =
-    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
+  using namespace engine::components;
+  using namespace game_logic::components;
 
-  // TODO: Trigger door sliding down
-  mpMap->clearSection(
-    mapSection.topLeft.x, mapSection.topLeft.y,
-    mapSection.size.width, mapSection.size.height);
-  entity.destroy();
+  auto entity = event.mEntity;
+  entity.remove<ActorTag>();
+  entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+    behaviors::DynamicGeometryController::Type::BlueKeyDoor});
 }
 
 
