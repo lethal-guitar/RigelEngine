@@ -90,4 +90,9 @@ struct DoorOpened {
   entityx::Entity mEntity;
 };
 
+
+struct EarthQuakeBegin {};
+
+struct EarthQuakeEnd {};
+
 }}

@@ -37,6 +37,8 @@ public:
    */
   int update();
 
+  bool isEarthShaking() const;
+
 private:
   int mCountdown;
   int mThreshold;

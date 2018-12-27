@@ -58,4 +58,9 @@ int EarthQuakeEffect::update() {
   return shakeOffset;
 }
 
+
+bool EarthQuakeEffect::isEarthShaking() const {
+  return mCountdown < mThreshold && mCountdown > 0;
+}
+
 }}

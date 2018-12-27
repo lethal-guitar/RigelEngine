@@ -421,7 +421,18 @@ void GameRunner::updateGameLogic() {
   }
 
   if (mEarthQuakeEffect) {
+    const auto wasShaking = mEarthQuakeEffect->isEarthShaking();
+
     mScreenShakeOffsetX = mEarthQuakeEffect->update();
+
+    const auto isShaking = mEarthQuakeEffect->isEarthShaking();
+    if (isShaking != wasShaking) {
+      if (isShaking) {
+        mEventManager.emit<rigel::events::EarthQuakeBegin>();
+      } else {
+        mEventManager.emit<rigel::events::EarthQuakeEnd>();
+      }
+    }
   }
 
   mHudRenderer.updateAnimation();
