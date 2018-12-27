@@ -27,6 +27,10 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
   struct IGameServiceProvider;
 
+  namespace data { namespace map {
+    class Map;
+  }}
+
   namespace engine {
     class CollisionChecker;
     class ParticleSystem;
@@ -52,6 +56,7 @@ struct GlobalDependencies {
   entityx::EntityManager* mpEntityManager;
   entityx::EventManager* mpEvents;
   const base::Vector* mpCameraPosition;
+  data::map::Map* mpMap;
 };
 
 }}

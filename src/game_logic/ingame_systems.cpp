@@ -150,7 +150,8 @@ IngameSystems::IngameSystems(
       pServiceProvider,
       &entities,
       &eventManager,
-      pScrollOffset})
+      pScrollOffset,
+      pMap})
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
 {
