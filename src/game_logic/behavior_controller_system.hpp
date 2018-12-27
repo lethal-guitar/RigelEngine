@@ -19,6 +19,11 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
+namespace rigel { namespace events {
+  struct EarthQuakeBegin;
+  struct EarthQuakeEnd;
+}}
+
 namespace rigel { namespace engine { namespace events {
   struct CollidedWithWorld;
 }}}
@@ -29,17 +34,23 @@ namespace rigel { namespace game_logic {
 class BehaviorControllerSystem :
   public entityx::Receiver<BehaviorControllerSystem> {
 public:
-  explicit BehaviorControllerSystem(GlobalDependencies dependencies);
+  explicit BehaviorControllerSystem(
+    GlobalDependencies dependencies,
+    Player* pPlayer,
+    const base::Vector* pCameraPosition,
+    data::map::Map* pMap);
 
   void update(entityx::EntityManager& es);
 
   void receive(const events::ShootableDamaged& event);
   void receive(const events::ShootableKilled& event);
   void receive(const engine::events::CollidedWithWorld& event);
+  void receive(const rigel::events::EarthQuakeBegin& event);
+  void receive(const rigel::events::EarthQuakeEnd& event);
 
 private:
   GlobalDependencies mDependencies;
-  bool mIsOddFrame = false;
+  GlobalState mGlobalState;
 };
 
 }}

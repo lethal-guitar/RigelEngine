@@ -18,6 +18,7 @@
 
 #include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 
 
 namespace rigel { namespace game_logic { namespace components {
@@ -36,5 +37,41 @@ struct TileDebris {
   data::map::TileIndex mTileIndex;
 };
 
+}
+
+namespace behaviors {
+
+struct DynamicGeometryController {
+  enum class Type : std::uint8_t {
+    FallDownAfterDelayThenSinkIntoGround,
+    BlueKeyDoor,
+    FallDownWhileEarthQuakeActiveThenExplode,
+    FallDownImmediatelyThenStayOnGround,
+    FallDownWhileEarthQuakeActiveThenStayOnGround, // TODO: Not implemented yet
+    FallDownImmediatelyThenExplode,
+    FallDownAfterDelayThenStayOnGround
+  };
+
+  enum class State : std::uint8_t {
+    Waiting,
+    Falling,
+    Sinking
+  };
+
+  explicit DynamicGeometryController(const Type type)
+    : mType(type)
+  {
+  }
+
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  int mFramesElapsed = 0;
+  Type mType;
+  State mState = State::Waiting;
+};
 
 }}}

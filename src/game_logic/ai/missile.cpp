@@ -84,7 +84,7 @@ void triggerHitEffect(
 
 void Missile::update(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& state,
   const bool isOnScreen,
   entityx::Entity entity
 ) {
@@ -138,7 +138,7 @@ void Missile::update(
 
 void Missile::onKilled(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& state,
   const base::Point<float>& inflictorVelocity,
   entityx::Entity entity
 ) {
@@ -151,7 +151,7 @@ void Missile::onKilled(
 
 void BrokenMissile::update(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& state,
   const bool isOnScreen,
   entityx::Entity entity
 ) {
@@ -191,7 +191,7 @@ void BrokenMissile::update(
 
 void BrokenMissile::onKilled(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& state,
   const base::Point<float>& inflictorVelocity,
   entityx::Entity entity
 ) {

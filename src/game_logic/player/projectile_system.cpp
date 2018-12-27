@@ -53,7 +53,7 @@ void spawnRegularShotImpactEffect(
   const base::Point<float> velocity
 ) {
   const auto debrisPosition = position + regularShotDebrisOffset(velocity);
-  createFloatingOneShotSprite(entityFactory, 3, debrisPosition);
+  spawnFloatingOneShotSprite(entityFactory, 3, debrisPosition);
 }
 
 

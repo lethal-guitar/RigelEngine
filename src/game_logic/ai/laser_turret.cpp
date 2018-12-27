@@ -186,7 +186,7 @@ void LaserTurretSystem::receive(const events::ShootableDamaged& event) {
 
 void LaserTurretSystem::performBaseHitEffect(entityx::Entity entity) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
-  createFloatingOneShotSprite(
+  spawnFloatingOneShotSprite(
     *mpEntityFactory,
     3,
     position + base::Vector{-1, 2});

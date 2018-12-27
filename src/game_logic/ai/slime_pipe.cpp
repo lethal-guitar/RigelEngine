@@ -67,7 +67,7 @@ void createSlimeDrop(
 
 void SlimePipe::update(
   GlobalDependencies& d,
-  bool isOddFrame,
+  GlobalState& state,
   bool isOnScreen,
   entityx::Entity entity
 ) {
@@ -84,7 +84,7 @@ void SlimePipe::update(
 
 void SlimeDrop::onCollision(
   GlobalDependencies& dependencies,
-  bool isOddFrame,
+  GlobalState& state,
   entityx::Entity entity
 ) {
   using namespace engine::components;

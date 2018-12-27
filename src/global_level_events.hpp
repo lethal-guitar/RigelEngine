@@ -41,6 +41,11 @@ struct ScreenFlash {
 };
 
 
+struct ScreenShake {
+  int mAmount;
+};
+
+
 struct PlayerMessage {
   PlayerMessage() = default;
   explicit PlayerMessage(std::string text)
@@ -84,5 +89,10 @@ struct PlayerTeleported {
 struct DoorOpened {
   entityx::Entity mEntity;
 };
+
+
+struct EarthQuakeBegin {};
+
+struct EarthQuakeEnd {};
 
 }}

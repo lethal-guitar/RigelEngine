@@ -46,7 +46,7 @@ constexpr int ANIM_SEQUENCE_GRAB_PLAYER[] = {
 
 void CeilingSucker::update(
   GlobalDependencies& d,
-  const bool isOddFrame,
+  GlobalState& s,
   const bool isOnScreen,
   entityx::Entity entity
 ) {
@@ -55,12 +55,12 @@ void CeilingSucker::update(
 
   const auto& position = *entity.component<engine::components::WorldPosition>();
   const auto& bbox = *entity.component<engine::components::BoundingBox>();
-  const auto& playerPos = d.mpPlayer->position();
+  const auto& playerPos = s.mpPlayer->position();
 
   const auto worldBbox = toWorldSpace(bbox, position);
 
   auto touchingPlayer = [&]() {
-    return worldBbox.intersects(d.mpPlayer->worldSpaceHitBox());
+    return worldBbox.intersects(s.mpPlayer->worldSpaceHitBox());
   };
 
   atria::variant::match(mState,
@@ -89,7 +89,7 @@ void CeilingSucker::update(
         position.x + 1 >= playerPos.x
       ) {
         // TODO: Show player for one more frame
-        d.mpPlayer->incapacitate();
+        s.mpPlayer->incapacitate();
         mState = HoldingPlayer{};
         engine::startAnimationSequence(entity, ANIM_SEQUENCE_GRAB_PLAYER);
       }
@@ -98,9 +98,9 @@ void CeilingSucker::update(
     [&, this](HoldingPlayer& state) {
       ++state.mFramesElapsed;
       if (state.mFramesElapsed == 19) {
-        d.mpPlayer->position().x = position.x;
-        d.mpPlayer->setFree();
-        d.mpPlayer->takeDamage(1);
+        s.mpPlayer->position().x = position.x;
+        s.mpPlayer->setFree();
+        s.mpPlayer->takeDamage(1);
       }
 
       if (state.mFramesElapsed >= 24) {

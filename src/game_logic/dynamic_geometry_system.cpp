@@ -19,11 +19,15 @@
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "game_logic/actor_tag.hpp"
+#include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
+#include "game_logic/entity_factory.hpp"
 
 #include "game_service_provider.hpp"
 #include "global_level_events.hpp"
@@ -34,6 +38,8 @@ namespace rigel { namespace game_logic {
 using game_logic::components::MapGeometryLink;
 
 namespace {
+
+constexpr auto GEOMETRY_FALL_SPEED = 2;
 
 const base::Point<float> TILE_DEBRIS_MOVEMENT_SEQUENCE[] = {
   {0.0f, -3.0f},
@@ -105,6 +111,78 @@ void spawnTileDebrisForSection(
   }
 }
 
+
+void explodeMapSection(
+  const base::Rect<int>& mapSection,
+  data::map::Map& map,
+  entityx::EntityManager& entityManager,
+  engine::RandomNumberGenerator& randomGenerator
+) {
+  spawnTileDebrisForSection(mapSection, map, entityManager, randomGenerator);
+
+  map.clearSection(
+    mapSection.topLeft.x, mapSection.topLeft.y,
+    mapSection.size.width, mapSection.size.height);
+}
+
+
+void explodeMapSection(
+  const base::Rect<int>& mapSection,
+  GlobalDependencies& d,
+  GlobalState& s
+) {
+  explodeMapSection(
+    mapSection, *s.mpMap, *d.mpEntityManager, *d.mpRandomGenerator);
+}
+
+
+void moveTileRows(
+  const base::Rect<int>& mapSection,
+  data::map::Map& map
+) {
+  const auto startX = mapSection.left();
+  const auto startY = mapSection.top();
+  const auto width = mapSection.size.width;
+  const auto height = mapSection.size.height;
+
+  for (int layer = 0; layer < 2; ++layer) {
+    for (int row = 0; row < height; ++row) {
+      for (int col = 0; col < width; ++col) {
+        const auto x = startX + col;
+        const auto sourceY = startY + (height - row - 1);
+        const auto targetY = sourceY + 1;
+
+        map.setTileAt(layer, x, targetY, map.tileAt(layer, x, sourceY));
+      }
+    }
+  }
+
+  map.clearSection(startX, startY, width, 1);
+}
+
+
+void moveTileSection(
+  base::Rect<int>& mapSection,
+  data::map::Map& map
+) {
+  moveTileRows(mapSection, map);
+  ++mapSection.topLeft.y;
+}
+
+
+void squashTileSection(
+  base::Rect<int>& mapSection,
+  data::map::Map& map
+) {
+  // By not moving the lower-most row, it gets effectively overwritten by the
+  // row above
+  moveTileRows(
+    {mapSection.topLeft, {mapSection.size.width, mapSection.size.height - 1}},
+    map);
+  ++mapSection.topLeft.y;
+  --mapSection.size.height;
+}
+
 }
 
 
@@ -136,21 +214,21 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
 
   const auto& mapSection =
     entity.component<MapGeometryLink>()->mLinkedGeometrySection;
-  explodeMapSection(mapSection);
+  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
+  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 
 void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event) {
-  auto entity = event.mEntity;
-  const auto& mapSection =
-    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
+  using namespace engine::components;
+  using namespace game_logic::components;
 
-  // TODO: Trigger door sliding down
-  mpMap->clearSection(
-    mapSection.topLeft.x, mapSection.topLeft.y,
-    mapSection.size.width, mapSection.size.height);
-  entity.destroy();
+  auto entity = event.mEntity;
+  entity.remove<ActorTag>();
+  entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+    behaviors::DynamicGeometryController::Type::BlueKeyDoor});
 }
 
 
@@ -162,21 +240,258 @@ void DynamicGeometrySystem::receive(
   engine::components::BoundingBox mapSection{
     event.mImpactPosition - base::Vector{0, 2},
     {3, 3}};
-  explodeMapSection(mapSection);
+  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
+  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 
-void DynamicGeometrySystem::explodeMapSection(
-  const base::Rect<int>& mapSection
+void behaviors::DynamicGeometryController::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const bool isOnScreen,
+  entityx::Entity entity
 ) {
-  spawnTileDebrisForSection(
-    mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
+  using namespace engine::components;
 
-  mpMap->clearSection(
-    mapSection.topLeft.x, mapSection.topLeft.y,
-    mapSection.size.width, mapSection.size.height);
+  auto& position = *entity.component<WorldPosition>();
+  auto& mapSection =
+    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
 
-  mpEvents->emit(rigel::events::ScreenFlash{});
+  auto isOnSolidGround = [&]() {
+    return
+      mapSection.bottom() >= s.mpMap->height() - 1 ||
+      d.mpCollisionChecker->isOnSolidGround(mapSection);
+  };
+
+  auto updateWaiting = [&](const int numFrames) {
+    ++mFramesElapsed;
+    if (mFramesElapsed == numFrames) {
+      d.mpServiceProvider->playSound(data::SoundId::FallingRock);
+    } else if (mFramesElapsed == numFrames + 1) {
+      mState = State::Falling;
+    }
+  };
+
+  auto fall = [&]() {
+    for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i) {
+      if (isOnSolidGround()) {
+        return true;
+      }
+
+      moveTileSection(mapSection, *s.mpMap);
+      ++position.y;
+    }
+
+    return false;
+  };
+
+  auto burnEffect = [&]() {
+    d.mpEvents->emit(rigel::events::ScreenShake{2});
+    d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
+
+    const auto offset = d.mpRandomGenerator->gen() % mapSection.size.width;
+    const auto spawnPosition =
+      base::Vector{mapSection.left() + offset, mapSection.bottom() + 1};
+    spawnFloatingOneShotSprite(*d.mpEntityFactory, 3, spawnPosition);
+  };
+
+  auto sink = [&]() {
+    if (mapSection.size.height == 1) {
+      s.mpMap->clearSection(
+        mapSection.topLeft.x, mapSection.topLeft.y,
+        mapSection.size.width, 1);
+      d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
+      entity.destroy();
+    } else {
+      squashTileSection(mapSection, *s.mpMap);
+      ++position.y;
+    }
+  };
+
+  auto land = [&]() {
+    d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
+    d.mpEvents->emit(rigel::events::ScreenShake{7});
+  };
+
+  auto explode = [&]() {
+    explodeMapSection(mapSection, d, s);
+    d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
+    entity.destroy();
+  };
+
+
+  auto updateType1 = [&, this]() {
+    switch (mState) {
+      case State::Waiting:
+        updateWaiting(20);
+        break;
+
+      case State::Falling:
+        if (fall()) {
+          mState = State::Sinking;
+          burnEffect();
+          sink();
+        }
+        break;
+
+      case State::Sinking:
+        burnEffect();
+        sink();
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+  auto updateType2 = [&, this]() {
+    switch (mState) {
+      case State::Waiting:
+        if (s.mIsEarthShaking) {
+          updateWaiting(2);
+        }
+        break;
+
+      case State::Falling:
+        if (fall()) {
+          explode();
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+  auto updateType3 = [&, this]() {
+    switch (mState) {
+      case State::Waiting:
+        if (!isOnSolidGround()) {
+          mState = State::Falling;
+          if (fall()) {
+            land();
+            mState = State::Waiting;
+          }
+        }
+        break;
+
+      case State::Falling:
+        if (fall()) {
+          land();
+          mState = State::Waiting;
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+  auto updateType5 = [&, this]() {
+    switch (mState) {
+      case State::Waiting:
+        if (!isOnSolidGround()) {
+          mState = State::Falling;
+          if (fall()) {
+            explode();
+          }
+        }
+        break;
+
+      case State::Falling:
+        if (fall()) {
+          explode();
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+  auto updateType6 = [&, this]() {
+    switch (mState) {
+      case State::Waiting:
+        updateWaiting(20);
+        break;
+
+      case State::Falling:
+        for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i) {
+          if (isOnSolidGround()) {
+            land();
+            mType = Type::FallDownImmediatelyThenStayOnGround;
+            mState = State::Waiting;
+          } else {
+            moveTileSection(mapSection, *s.mpMap);
+            ++position.y;
+          }
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+  auto updateDoor = [&]() {
+    switch (mState) {
+      case State::Waiting:
+        ++mFramesElapsed;
+        if (mFramesElapsed == 2) {
+          mState = State::Falling;
+        }
+        break;
+
+      case State::Falling:
+        if (fall()) {
+          mState = State::Sinking;
+          sink();
+        }
+        break;
+
+      case State::Sinking:
+        sink();
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+  switch (mType) {
+    case Type::FallDownAfterDelayThenSinkIntoGround:
+      updateType1();
+      break;
+
+    case Type::BlueKeyDoor:
+      updateDoor();
+      break;
+
+    case Type::FallDownWhileEarthQuakeActiveThenExplode:
+      updateType2();
+      break;
+
+    case Type::FallDownImmediatelyThenStayOnGround:
+      updateType3();
+      break;
+
+    case Type::FallDownImmediatelyThenExplode:
+      updateType5();
+      break;
+
+    case Type::FallDownAfterDelayThenStayOnGround:
+      updateType6();
+      break;
+
+    default:
+      break;
+  }
 }
 
 }}

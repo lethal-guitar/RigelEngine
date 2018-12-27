@@ -121,6 +121,7 @@ GameRunner::GameRunner(
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
   mEventManager.subscribe<rigel::events::PlayerTeleported>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  mEventManager.subscribe<rigel::events::ScreenShake>(*this);
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
   mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
 
@@ -336,6 +337,11 @@ void GameRunner::receive(const rigel::events::ScreenFlash& event) {
 }
 
 
+void GameRunner::receive(const rigel::events::ScreenShake& event) {
+  mScreenShakeOffsetX = event.mAmount;
+}
+
+
 void GameRunner::receive(const rigel::events::TutorialMessage& event) {
   showTutorialMessage(event.mId);
 }
@@ -398,8 +404,8 @@ void GameRunner::loadLevel(
     resources);
 
   if (loadedLevel.mEarthquake) {
-    mEarthQuakeEffect =
-      engine::EarthQuakeEffect{mpServiceProvider, &mRandomGenerator};
+    mEarthQuakeEffect = engine::EarthQuakeEffect{
+      mpServiceProvider, &mRandomGenerator, &mEventManager};
   }
 
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
@@ -415,7 +421,7 @@ void GameRunner::updateGameLogic() {
   }
 
   if (mEarthQuakeEffect) {
-    mScreenShakeOffsetX = mEarthQuakeEffect->update();
+    mEarthQuakeEffect->update();
   }
 
   mHudRenderer.updateAnimation();

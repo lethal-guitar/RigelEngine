@@ -56,7 +56,7 @@ namespace behaviors {
 struct CeilingSucker {
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 

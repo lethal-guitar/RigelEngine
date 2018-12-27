@@ -664,6 +664,8 @@ void EntityFactory::configureEntity(
 ) {
   using namespace effects;
 
+  using DGType = behaviors::DynamicGeometryController::Type;
+
   const auto difficultyOffset = mDifficulty != Difficulty::Easy
     ? (mDifficulty == Difficulty::Hard ? 2 : 1)
     : 0;
@@ -1718,12 +1720,66 @@ void EntityFactory::configureEntity(
       interaction::configureLockedDoor(entity, mSpawnIndex, boundingBox);
       break;
 
-    case 102: // dynamic wall: falls down, sinks into ground (when seen)
-    case 137: // unknown dynamic geometry
-    case 138: // dynamic wall: falls down, stays intact
-    case 141: // unknown dynamic geometry
-    case 142: // unknown dynamic geometry
-    case 143: // shootable wall, burns away
+    case 102: // dynamic geometry
+      {
+        const auto height = boundingBox.size.height;
+        entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
+        entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
+        entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+          DGType::FallDownAfterDelayThenSinkIntoGround});
+      }
+      break;
+
+    case 137: // dynamic geometry
+      {
+        const auto height = boundingBox.size.height;
+        entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
+        entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+          DGType::FallDownWhileEarthQuakeActiveThenExplode});
+      }
+      break;
+
+    case 138: // dynamic geometry
+      {
+        const auto height = boundingBox.size.height;
+        entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+        entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
+        entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+          DGType::FallDownImmediatelyThenStayOnGround});
+      }
+      break;
+
+    case 141: // dynamic geometry
+      {
+        const auto height = boundingBox.size.height;
+        entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
+        entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
+        entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+          DGType::FallDownWhileEarthQuakeActiveThenStayOnGround});
+      }
+      break;
+
+    case 142: // dynamic geometry
+      {
+        const auto height = boundingBox.size.height;
+        entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+        entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
+        entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+          DGType::FallDownImmediatelyThenExplode});
+      }
+      break;
+
+    case 143: // dynamic geometry
+      {
+        const auto height = boundingBox.size.height;
+        entity.assign<ActivationSettings>(
+          ActivationSettings::Policy::AlwaysAfterFirstActivation);
+        entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
+        entity.assign<BehaviorController>(behaviors::DynamicGeometryController{
+          DGType::FallDownAfterDelayThenStayOnGround});
+      }
       break;
 
     case 221: // water

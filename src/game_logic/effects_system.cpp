@@ -115,7 +115,7 @@ void EffectsSystem::update(entityx::EntityManager& es) {
         const auto spawnPosition =
           spawner.mBasePosition + base::Vector{xOffset, -yOffset};
 
-        createFloatingOneShotSprite(
+        spawnFloatingOneShotSprite(
           *mpEntityFactory,
           spawner.mActorId,
           spawnPosition);
@@ -198,7 +198,7 @@ void EffectsSystem::processEffectsAndAdvance(
             sprite.mActorId,
             position + sprite.mOffset);
         } else if (sprite.mMovement == EffectSprite::Movement::FloatUp) {
-          createFloatingOneShotSprite(
+          spawnFloatingOneShotSprite(
             *mpEntityFactory,
             sprite.mActorId,
             position + sprite.mOffset);

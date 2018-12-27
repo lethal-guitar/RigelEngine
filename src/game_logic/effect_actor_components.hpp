@@ -24,7 +24,7 @@ namespace rigel { namespace game_logic { namespace components {
 struct WindBlownSpiderGenerator {
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 };
@@ -33,7 +33,7 @@ struct WindBlownSpiderGenerator {
 struct WaterDropGenerator {
   void update(
     GlobalDependencies& dependencies,
-    bool isOddFrame,
+    GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 };

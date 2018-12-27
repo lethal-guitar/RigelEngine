@@ -67,6 +67,7 @@ public:
   void receive(const events::PlayerMessage& event);
   void receive(const events::PlayerTeleported& event);
   void receive(const events::ScreenFlash& event);
+  void receive(const rigel::events::ScreenShake& event);
   void receive(const events::TutorialMessage& event);
   void receive(const game_logic::events::ShootableKilled& event);
 
