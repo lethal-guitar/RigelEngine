@@ -521,15 +521,20 @@ ActorID actorIdForBoxColor(const ContainerColor color) {
 
 
 int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
+  auto scale = [](const int drawOrderValue) {
+    constexpr auto SCALE_FACTOR = 10;
+    return drawOrderValue * SCALE_FACTOR;
+  };
+
   switch (id) {
     case 7: case 8: case 9: case 10:
     case 24: case 25: case 26: case 27:
     case 21: case 204: case 205: case 206:
     case 85: case 86:
-      return PLAYER_PROJECTILE_DRAW_ORDER;
+      return scale(PLAYER_PROJECTILE_DRAW_ORDER);
 
     case 33: case 34: case 35: case 36: // player muzzle flash
-      return MUZZLE_FLASH_DRAW_ORDER;
+      return scale(MUZZLE_FLASH_DRAW_ORDER);
 
     case 1: // small explosion
     case 2: // rocket explosion
@@ -577,7 +582,7 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 243: // wind-blown spider
     case 255: // prisoner debris
     case 300: // Rigelatin soldier projectile
-      return EFFECT_DRAW_ORDER;
+      return scale(EFFECT_DRAW_ORDER);
 
     // floating score numbers
     case 123:
@@ -585,10 +590,10 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 125:
     case 126:
     case 127:
-      return EFFECT_DRAW_ORDER;
+      return scale(EFFECT_DRAW_ORDER);
 
     default:
-      return baseDrawOrder;
+      return scale(baseDrawOrder);
   }
 }
 
