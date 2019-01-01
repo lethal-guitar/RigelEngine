@@ -63,6 +63,7 @@ const effects::EffectSpec SKELETON_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec SODA_CAN_ROCKET_KILL_EFFECT_SPEC[] = {
+  {effects::RandomExplosionSound{}, 0},
   {effects::EffectSprite{{0, -1}, 169, EffectMovement::FlyLeft}, 0},
   {effects::EffectSprite{{0, -1}, 170, EffectMovement::FlyRight}, 0},
 };
