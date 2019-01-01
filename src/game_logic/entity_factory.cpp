@@ -563,6 +563,7 @@ entityx::Entity spawnOneShotSprite(
     engine::startAnimationLoop(entity, 1, 0, boost::none);
   }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
+  assignSpecialEffectSpriteProperties(entity, id);
   return entity;
 }
 
@@ -594,6 +595,7 @@ entityx::Entity spawnMovingEffectSprite(
   if (entity.component<Sprite>()->mpDrawData->mFrames.size() > 1) {
     entity.assign<AnimationLoop>(1);
   }
+  assignSpecialEffectSpriteProperties(entity, id);
   return entity;
 }
 

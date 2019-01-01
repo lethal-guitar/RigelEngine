@@ -240,6 +240,20 @@ void configureMovingEffectSprite(
 }
 
 
+void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
+  switch (id) {
+    case 43:
+    case 100:
+    case 300:
+      entity.assign<PlayerDamaging>(1);
+      break;
+
+    default:
+      break;
+  }
+}
+
+
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
 
