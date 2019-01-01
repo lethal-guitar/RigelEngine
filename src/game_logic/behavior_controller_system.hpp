@@ -50,6 +50,7 @@ public:
 
 private:
   GlobalDependencies mDependencies;
+  PerFrameState mPerFrameState;
   GlobalState mGlobalState;
 };
 

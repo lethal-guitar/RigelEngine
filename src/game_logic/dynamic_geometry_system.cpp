@@ -348,7 +348,7 @@ void behaviors::DynamicGeometryController::update(
   auto updateType2 = [&, this]() {
     switch (mState) {
       case State::Waiting:
-        if (s.mIsEarthShaking) {
+        if (s.mpPerFrameState->mIsEarthShaking) {
           updateWaiting(2);
         }
         break;

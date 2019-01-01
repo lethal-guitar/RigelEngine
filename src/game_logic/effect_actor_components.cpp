@@ -45,7 +45,7 @@ void WindBlownSpiderGenerator::update(
   if (
     position.y > s.mpPlayer->position().y &&
     d.mpRandomGenerator->gen() % 2 != 0 &&
-    s.mIsOddFrame
+    s.mpPerFrameState->mIsOddFrame
   ) {
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
     const auto xPos = s.mpCameraPosition->x + RIGHT_SCREEN_EDGE;
@@ -71,7 +71,7 @@ void WaterDropGenerator::update(
   entityx::Entity entity
 ) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
-  if (state.mIsOddFrame && d.mpRandomGenerator->gen() >= 220) {
+  if (state.mpPerFrameState->mIsOddFrame && d.mpRandomGenerator->gen() >= 220) {
     auto drop = d.mpEntityFactory->createActor(226, position);
     drop.assign<engine::components::Active>();
 
