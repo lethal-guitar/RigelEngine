@@ -354,7 +354,6 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(59);
       break;
 
-
     case 67:
       actorParts.push_back(67);
       actorParts.push_back(70);
