@@ -82,6 +82,7 @@ const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
 // per entity, i.e. we can't have two AnimationLoop components.
 const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 
+const int BOMB_DROPPING_ANIMATION[] = {0, 1, 1, 2};
 
 const int HINT_GLOBE_ANIMATION[] = {
   0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -591,6 +592,10 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 126:
     case 127:
       return scale(EFFECT_DRAW_ORDER);
+
+    case 63:
+      // Make the bomb appear behind the bomber plane
+      return scale(baseDrawOrder) - 1;
 
     default:
       return scale(baseDrawOrder);
@@ -1326,6 +1331,23 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::BomberPlane{});
+      break;
+
+    case 63: // Big bomb
+      entity.assign<Shootable>(Health{1}, GivenScore{200});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<DestructionEffects>(
+        BIG_BOMB_DETONATE_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnCollision);
+      entity.assign<BehaviorController>(behaviors::BigBomb{});
+      addDefaultMovingBody(entity, boundingBox);
       break;
 
     case 64: // Bouncing spike ball
