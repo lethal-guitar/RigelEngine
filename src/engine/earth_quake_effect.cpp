@@ -52,7 +52,7 @@ void EarthQuakeEffect::update() {
       if (randomNumber == 0) {
         mpServiceProvider->playSound(data::SoundId::EarthQuake);
       } else {
-        mpEvents->emit<events::ScreenShake>(events::ScreenShake{randomNumber});
+        mpEvents->emit(events::ScreenShake{randomNumber});
       }
     }
 
