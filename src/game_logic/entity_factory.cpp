@@ -25,6 +25,7 @@
 #include "game_logic/ai/bomber_plane.hpp"
 #include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/ceiling_sucker.hpp"
+#include "game_logic/ai/eyeball_thrower.hpp"
 #include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"
@@ -252,6 +253,9 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case 5:
     case 6:
       return 39;
+
+    case 98:
+      return 10;
 
     case 134:
       return 4;
