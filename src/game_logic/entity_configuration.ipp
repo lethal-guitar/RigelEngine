@@ -82,6 +82,7 @@ const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
 // per entity, i.e. we can't have two AnimationLoop components.
 const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 
+const int BOMB_DROPPING_ANIMATION[] = {0, 1, 1, 2};
 
 const int HINT_GLOBE_ANIMATION[] = {
   0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -240,6 +241,20 @@ void configureMovingEffectSprite(
 }
 
 
+void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
+  switch (id) {
+    case 43:
+    case 100:
+    case 300:
+      entity.assign<PlayerDamaging>(1);
+      break;
+
+    default:
+      break;
+  }
+}
+
+
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
 
@@ -353,7 +368,6 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(58);
       actorParts.push_back(59);
       break;
-
 
     case 67:
       actorParts.push_back(67);
@@ -508,15 +522,20 @@ ActorID actorIdForBoxColor(const ContainerColor color) {
 
 
 int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
+  auto scale = [](const int drawOrderValue) {
+    constexpr auto SCALE_FACTOR = 10;
+    return drawOrderValue * SCALE_FACTOR;
+  };
+
   switch (id) {
     case 7: case 8: case 9: case 10:
     case 24: case 25: case 26: case 27:
     case 21: case 204: case 205: case 206:
     case 85: case 86:
-      return PLAYER_PROJECTILE_DRAW_ORDER;
+      return scale(PLAYER_PROJECTILE_DRAW_ORDER);
 
     case 33: case 34: case 35: case 36: // player muzzle flash
-      return MUZZLE_FLASH_DRAW_ORDER;
+      return scale(MUZZLE_FLASH_DRAW_ORDER);
 
     case 1: // small explosion
     case 2: // rocket explosion
@@ -564,7 +583,7 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 243: // wind-blown spider
     case 255: // prisoner debris
     case 300: // Rigelatin soldier projectile
-      return EFFECT_DRAW_ORDER;
+      return scale(EFFECT_DRAW_ORDER);
 
     // floating score numbers
     case 123:
@@ -572,10 +591,14 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case 125:
     case 126:
     case 127:
-      return EFFECT_DRAW_ORDER;
+      return scale(EFFECT_DRAW_ORDER);
+
+    case 63:
+      // Make the bomb appear behind the bomber plane
+      return scale(baseDrawOrder) - 1;
 
     default:
-      return baseDrawOrder;
+      return scale(baseDrawOrder);
   }
 }
 
@@ -1308,6 +1331,23 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::BomberPlane{});
+      break;
+
+    case 63: // Big bomb
+      entity.assign<Shootable>(Health{1}, GivenScore{200});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<DestructionEffects>(
+        BIG_BOMB_DETONATE_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnCollision);
+      entity.assign<BehaviorController>(behaviors::BigBomb{});
+      addDefaultMovingBody(entity, boundingBox);
       break;
 
     case 64: // Bouncing spike ball

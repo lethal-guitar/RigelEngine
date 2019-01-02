@@ -63,6 +63,7 @@ const effects::EffectSpec SKELETON_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec SODA_CAN_ROCKET_KILL_EFFECT_SPEC[] = {
+  {effects::RandomExplosionSound{}, 0},
   {effects::EffectSprite{{0, -1}, 169, EffectMovement::FlyLeft}, 0},
   {effects::EffectSprite{{0, -1}, 170, EffectMovement::FlyRight}, 0},
 };
@@ -303,4 +304,17 @@ const effects::EffectSpec BROKEN_MISSILE_DETONATE_EFFECT_SPEC[] = {
   {effects::EffectSprite{{2, 0}, 96, EffectMovement::FlyUpperLeft}, 1},
   {effects::EffectSprite{{4, 0}, 96, EffectMovement::FlyUpperRight}, 2},
   {effects::EffectSprite{{6, 0}, 96, EffectMovement::FlyUpperLeft}, 3},
+};
+
+
+const effects::EffectSpec BIG_BOMB_DETONATE_EFFECT_SPEC[] = {
+  {effects::EffectSprite{{  0, 0}, 43, EffectMovement::None}, 0},
+  {effects::EffectSprite{{ -4, 2}, 43, EffectMovement::None}, 2},
+  {effects::EffectSprite{{ +4, 2}, 43, EffectMovement::None}, 2},
+  {effects::EffectSprite{{ -8, 2}, 43, EffectMovement::None}, 4},
+  {effects::EffectSprite{{ +8, 2}, 43, EffectMovement::None}, 4},
+  {effects::EffectSprite{{-12, 2}, 43, EffectMovement::None}, 6},
+  {effects::EffectSprite{{+12, 2}, 43, EffectMovement::None}, 6},
+  {effects::EffectSprite{{-16, 2}, 43, EffectMovement::None}, 8},
+  {effects::EffectSprite{{+16, 2}, 43, EffectMovement::None}, 8},
 };

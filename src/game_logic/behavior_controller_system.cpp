@@ -35,7 +35,8 @@ BehaviorControllerSystem::BehaviorControllerSystem(
   , mGlobalState(
       pPlayer,
       pCameraPosition,
-      pMap)
+      pMap,
+      &mPerFrameState)
 {
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
@@ -61,7 +62,7 @@ void BehaviorControllerSystem::update(entityx::EntityManager& es) {
       entity);
   });
 
-  mGlobalState.mIsOddFrame = !mGlobalState.mIsOddFrame;
+  mPerFrameState.mIsOddFrame = !mPerFrameState.mIsOddFrame;
 }
 
 
@@ -109,12 +110,12 @@ void BehaviorControllerSystem::receive(
 
 
 void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeBegin&) {
-  mGlobalState.mIsEarthShaking = true;
+  mPerFrameState.mIsEarthShaking = true;
 }
 
 
 void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeEnd&) {
-  mGlobalState.mIsEarthShaking = false;
+  mPerFrameState.mIsEarthShaking = false;
 }
 
 }}

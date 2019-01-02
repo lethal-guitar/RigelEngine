@@ -188,6 +188,14 @@ Point<ValueT>& operator+=(Point<ValueT>& lhs, const Point<ValueT>& rhs) {
 
 
 template<typename ValueT>
+Point<ValueT>& operator-=(Point<ValueT>& lhs, const Point<ValueT>& rhs) {
+  auto newPoint = lhs - rhs;
+  std::swap(lhs, newPoint);
+  return lhs;
+}
+
+
+template<typename ValueT>
 Rect<ValueT> operator+(
   const Rect<ValueT>& rect,
   const Point<ValueT>& translation

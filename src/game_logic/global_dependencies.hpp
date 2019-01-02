@@ -57,23 +57,30 @@ struct GlobalDependencies {
 };
 
 
+struct PerFrameState {
+  bool mIsOddFrame = false;
+  bool mIsEarthShaking = false;
+};
+
+
 struct GlobalState {
   GlobalState(
     Player* pPlayer,
     const base::Vector* pCameraPosition,
-    data::map::Map* pMap
+    data::map::Map* pMap,
+    const PerFrameState* pPerFrameState
   )
     : mpPlayer(pPlayer)
     , mpCameraPosition(pCameraPosition)
     , mpMap(pMap)
+    , mpPerFrameState(pPerFrameState)
   {
   }
 
   Player* mpPlayer;
   const base::Vector* mpCameraPosition;
   data::map::Map* mpMap;
-  bool mIsOddFrame = false;
-  bool mIsEarthShaking = false;
+  const PerFrameState* mpPerFrameState;
 };
 
 }}

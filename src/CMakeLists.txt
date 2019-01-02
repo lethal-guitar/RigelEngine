@@ -72,6 +72,8 @@ set(core_sources
     engine/visual_components.hpp
     game_logic/ai/blue_guard.cpp
     game_logic/ai/blue_guard.hpp
+    game_logic/ai/bomber_plane.cpp
+    game_logic/ai/bomber_plane.hpp
     game_logic/ai/ceiling_sucker.cpp
     game_logic/ai/ceiling_sucker.hpp
     game_logic/ai/hover_bot.cpp
