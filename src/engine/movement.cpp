@@ -25,6 +25,9 @@ using namespace engine::components;
 
 namespace {
 
+constexpr auto WALK_OFF_LEDGE_LEEWAY = 2;
+
+
 template<typename CallableT>
 MovementResult move(
   int* pPosition,
@@ -74,9 +77,10 @@ bool walk(
   const auto newPosition = position + base::Vector{amount, 0};
   const auto movingLeft = amount < 0;
 
-  const auto xToTest = newPosition.x + (movingLeft ? 0 : bbox.size.width - 1);
-  const auto stillOnSolidGround =
-    collisionChecker.isOnSolidGround({{xToTest, newPosition.y}, {1, 1}});
+  const auto xToTest = newPosition.x + WALK_OFF_LEDGE_LEEWAY *
+    (movingLeft ? -1 : 1);
+  const auto stillOnSolidGround = collisionChecker.isOnSolidGround({
+    {xToTest, newPosition.y}, {bbox.size.width, 1}});
 
   const auto collidingWithWorld = movingLeft
     ? collisionChecker.isTouchingLeftWall(position, bbox)

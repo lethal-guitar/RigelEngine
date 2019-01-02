@@ -374,6 +374,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(70);
       break;
 
+    case 98:
+      actorParts.push_back(98);
+      actorParts.push_back(99);
+      break;
+
     case 130:
       actorParts.push_back(260);
       actorParts.push_back(130);
@@ -433,6 +438,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 93:
       sprite.mFramesToRender = {1, 3};
+      break;
+
+    case 98:
+      sprite.mFramesToRender = {0};
       break;
 
     case 115:
@@ -1412,6 +1421,10 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(EYE_BALL_THROWER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Orientation>(Orientation::Left);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::EyeballThrower{});
       break;
 
     case 115: // hover bot generator

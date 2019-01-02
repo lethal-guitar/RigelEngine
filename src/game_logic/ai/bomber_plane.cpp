@@ -122,8 +122,8 @@ void BomberPlane::update(
 
       const auto reachedWall = result != engine::MovementResult::Completed;
       const auto reachedPlayer =
-        position.x <= s.mpPlayer->position().x &&
-        position.x + 6 >= s.mpPlayer->position().x;
+        position.x <= s.mpPlayer->orientedPosition().x &&
+        position.x + 6 >= s.mpPlayer->orientedPosition().x;
       if (reachedWall || reachedPlayer) {
         mState = DroppingBomb{};
       }
