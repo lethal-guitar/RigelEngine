@@ -40,6 +40,7 @@
 #include "game_logic/ai/slime_pipe.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
+#include "game_logic/ai/watch_bot.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
