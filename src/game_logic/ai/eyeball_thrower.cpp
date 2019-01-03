@@ -56,16 +56,19 @@ void EyeballThrower::update(
 
   auto canShootAtPlayer = [&]() {
     // TODO: Extract helper function centerToCenterDistance()
-    const auto playerCenterX = playerPos.x + 1;
+
+    // [playerpos] Using orientation-independent position here
+    const auto playerX = s.mpPlayer->position().x;
+    const auto playerCenterX = playerX + PLAYER_WIDTH/2;
     const auto myCenterX = position.x + EYEBALL_THROWER_WIDTH/2;
     const auto centerToCenterDistance = std::abs(playerCenterX - myCenterX);
 
     const auto facingPlayer =
-      (orientation == Orientation::Left && position.x > playerPos.x) ||
-      (orientation == Orientation::Right && position.x < playerPos.x);
+      (orientation == Orientation::Left && position.x > playerX) ||
+      (orientation == Orientation::Right && position.x < playerX);
     const auto playerInRange =
-      centerToCenterDistance >= 9 &&
-      centerToCenterDistance < 14;
+      centerToCenterDistance > 9 &&
+      centerToCenterDistance <= 14;
 
     return facingPlayer && playerInRange;
   };
