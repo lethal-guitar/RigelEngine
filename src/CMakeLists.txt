@@ -106,6 +106,8 @@ set(core_sources
     game_logic/ai/spider.hpp
     game_logic/ai/spike_ball.cpp
     game_logic/ai/spike_ball.hpp
+    game_logic/ai/watch_bot.cpp
+    game_logic/ai/watch_bot.hpp
     game_logic/behavior_controller.hpp
     game_logic/behavior_controller_system.cpp
     game_logic/behavior_controller_system.hpp

@@ -67,10 +67,14 @@ void BehaviorControllerSystem::update(entityx::EntityManager& es) {
 
 
 void BehaviorControllerSystem::receive(const events::ShootableDamaged& event) {
+  using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   auto entity = event.mEntity;
-  if (entity.has_component<BehaviorController>()) {
+  if (
+    entity.has_component<BehaviorController>() &&
+    entity.has_component<Active>()
+  ) {
     entity.component<BehaviorController>()->onHit(
       mDependencies,
       mGlobalState,
@@ -81,10 +85,14 @@ void BehaviorControllerSystem::receive(const events::ShootableDamaged& event) {
 
 
 void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
+  using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   auto entity = event.mEntity;
-  if (entity.has_component<BehaviorController>()) {
+  if (
+    entity.has_component<BehaviorController>() &&
+    entity.has_component<Active>()
+  ) {
     entity.component<BehaviorController>()->onKilled(
       mDependencies,
       mGlobalState,
@@ -97,10 +105,14 @@ void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
 void BehaviorControllerSystem::receive(
   const engine::events::CollidedWithWorld& event
 ) {
+  using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   auto entity = event.mEntity;
-  if (entity.has_component<BehaviorController>()) {
+  if (
+    entity.has_component<BehaviorController>() &&
+    entity.has_component<Active>()
+  ) {
     entity.component<BehaviorController>()->onCollision(
       mDependencies,
       mGlobalState,

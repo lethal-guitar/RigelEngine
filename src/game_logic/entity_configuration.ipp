@@ -1300,12 +1300,14 @@ void EntityFactory::configureEntity(
 
     case 49: // Bouncing robot with big eye
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
-      entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      addDefaultMovingBody(entity, boundingBox);
+      entity.component<MovingBody>()->mGravityAffected = false;
+      entity.assign<BehaviorController>(behaviors::WatchBot{});
       break;
 
     case 54: // Rocket launcher turret
@@ -1486,6 +1488,9 @@ void EntityFactory::configureEntity(
     case 272: // Small flying ship 2
     case 273: // Small flying ship 3
       entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
