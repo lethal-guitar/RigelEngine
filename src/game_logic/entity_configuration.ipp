@@ -1486,6 +1486,9 @@ void EntityFactory::configureEntity(
     case 272: // Small flying ship 2
     case 273: // Small flying ship 3
       entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
