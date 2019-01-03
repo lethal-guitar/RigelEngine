@@ -186,6 +186,7 @@ void BigBomb::onKilled(
 void BigBomb::onCollision(
   GlobalDependencies& d,
   GlobalState&,
+  const engine::events::CollidedWithWorld&,
   entityx::Entity entity
 ) {
   d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});

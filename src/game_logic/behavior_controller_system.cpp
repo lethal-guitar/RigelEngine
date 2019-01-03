@@ -116,6 +116,7 @@ void BehaviorControllerSystem::receive(
     entity.component<BehaviorController>()->onCollision(
       mDependencies,
       mGlobalState,
+      event,
       entity);
   }
 }

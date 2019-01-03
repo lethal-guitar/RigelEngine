@@ -85,6 +85,7 @@ void SlimePipe::update(
 void SlimeDrop::onCollision(
   GlobalDependencies& dependencies,
   GlobalState& state,
+  const engine::events::CollidedWithWorld&,
   entityx::Entity entity
 ) {
   using namespace engine::components;

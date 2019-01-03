@@ -26,6 +26,10 @@ RIGEL_RESTORE_WARNINGS
 #include <memory>
 #include <type_traits>
 
+namespace rigel { namespace engine { namespace events {
+  struct CollidedWithWorld;
+}}}
+
 
 namespace rigel { namespace game_logic { namespace components {
 
@@ -123,9 +127,10 @@ behaviorControllerOnCollision(
   T& self,
   GlobalDependencies& dependencies,
   GlobalState& state,
+  const engine::events::CollidedWithWorld& event,
   entityx::Entity entity
 ) {
-  self.onCollision(dependencies, state, entity);
+  self.onCollision(dependencies, state, event, entity);
 }
 
 
@@ -135,6 +140,7 @@ behaviorControllerOnCollision(
   T&,
   GlobalDependencies&,
   GlobalState&,
+  const engine::events::CollidedWithWorld&,
   entityx::Entity
 ) {
 }
@@ -178,9 +184,10 @@ public:
   void onCollision(
     GlobalDependencies& dependencies,
     GlobalState& state,
+    const engine::events::CollidedWithWorld& event,
     entityx::Entity entity
   ) {
-    mpSelf->onCollision(dependencies, state, entity);
+    mpSelf->onCollision(dependencies, state, event, entity);
   }
 
 private:
@@ -208,6 +215,7 @@ private:
     virtual void onCollision(
       GlobalDependencies& dependencies,
       GlobalState& state,
+      const engine::events::CollidedWithWorld& event,
       entityx::Entity entity) = 0;
   };
 
@@ -263,9 +271,10 @@ private:
     void onCollision(
       GlobalDependencies& dependencies,
       GlobalState& state,
+      const engine::events::CollidedWithWorld& event,
       entityx::Entity entity
     ) override {
-      behaviorControllerOnCollision(mData, dependencies, state, entity);
+      behaviorControllerOnCollision(mData, dependencies, state, event, entity);
     }
 
     T mData;
