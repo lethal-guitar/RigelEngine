@@ -1352,13 +1352,13 @@ void EntityFactory::configureEntity(
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
-      entity.assign<BoundingBox>(boundingBox);
-      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<DestructionEffects>(
         BIG_BOMB_DETONATE_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnCollision);
       entity.assign<BehaviorController>(behaviors::BigBomb{});
       addDefaultMovingBody(entity, boundingBox);
+      engine::reassign<ActivationSettings>(
+        entity, ActivationSettings{ActivationSettings::Policy::Always});
       break;
 
     case 64: // Bouncing spike ball
