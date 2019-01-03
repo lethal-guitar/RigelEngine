@@ -245,7 +245,6 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
   switch (id) {
     case 43:
     case 100:
-    case 300:
       entity.assign<PlayerDamaging>(1);
       break;
 
@@ -1554,8 +1553,14 @@ void EntityFactory::configureEntity(
     case 299: // Rigelatin soldier
       entity.assign<Shootable>(
         Health{27 + 2 * difficultyOffset}, GivenScore{2100});
-      entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::RigelatinSoldier{});
+      entity.assign<Orientation>(Orientation::Left);
+      addDefaultMovingBody(entity, boundingBox);
+      entity.component<MovingBody>()->mGravityAffected = false;
+      entity.assign<DestructionEffects>(
+        RIGELATIN_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
+        mSpriteFactory.actorFrameRect(299, 0));
       break;
 
     // ----------------------------------------------------------------------
