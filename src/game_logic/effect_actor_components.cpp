@@ -75,7 +75,6 @@ void WaterDropGenerator::update(
     auto drop = d.mpEntityFactory->createActor(226, position);
     drop.assign<engine::components::Active>();
 
-
     if (isOnScreen) {
       d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
     }
