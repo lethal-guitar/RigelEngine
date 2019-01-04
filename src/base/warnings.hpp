@@ -55,6 +55,8 @@
     _Pragma("clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"") \
     _Pragma("clang diagnostic ignored \"-Wcast-qual\"") \
     _Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
+    _Pragma("clang diagnostic ignored \"-Wgnu-anonymous-struct\"") \
+    _Pragma("clang diagnostic ignored \"-Wnested-anon-types\"") \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")
@@ -64,6 +66,7 @@
   #define RIGEL_DISABLE_WARNINGS \
     _Pragma("GCC diagnostic push") \
     _Pragma("GCC diagnostic ignored \"-Wpedantic\"") \
+    _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"") \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("GCC diagnostic pop")

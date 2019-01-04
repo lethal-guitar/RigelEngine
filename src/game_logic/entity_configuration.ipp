@@ -623,7 +623,7 @@ void addToContainer(components::ItemContainer& container, Args&&... components) 
 
 template<typename... Args>
 components::ItemContainer makeContainer(Args&&... components) {
-  components::ItemContainer container;
+  typename components::ItemContainer container;
   addToContainer(container, components...);
   return container;
 }
