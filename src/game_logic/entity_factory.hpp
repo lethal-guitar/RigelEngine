@@ -25,11 +25,11 @@
 #include "loader/level_loader.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <optional>
 #include <unordered_map>
 #include <vector>
 

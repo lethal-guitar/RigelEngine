@@ -20,10 +20,10 @@
 #include "base/spatial_types.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -32,10 +32,10 @@ namespace rigel {
 
 struct StartupOptions {
   std::string mGamePath;
-  boost::optional<std::pair<int, int>> mLevelToJumpTo;
+  std::optional<std::pair<int, int>> mLevelToJumpTo;
   bool mSkipIntro = false;
   bool mEnableMusic = true;
-  boost::optional<base::Vector> mPlayerPosition;
+  std::optional<base::Vector> mPlayerPosition;
 };
 
 

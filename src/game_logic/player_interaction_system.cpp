@@ -229,7 +229,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
 
       auto playerBBox = mpPlayer->worldSpaceHitBox();
       if (worldSpaceBbox.intersects(playerBBox)) {
-        boost::optional<data::SoundId> soundToPlay;
+        std::optional<data::SoundId> soundToPlay;
 
         const auto playerAtFullHealth = mpPlayerModel->isAtFullHealth();
         if (auto maybeScore = givenScore(collectable, playerAtFullHealth)) {

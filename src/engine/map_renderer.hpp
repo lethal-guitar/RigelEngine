@@ -38,7 +38,7 @@ public:
 
     data::Image mTileSetImage;
     data::Image mBackdropImage;
-    boost::optional<data::Image> mSecondaryBackdropImage;
+    std::optional<data::Image> mSecondaryBackdropImage;
     data::map::BackdropScrollMode mBackdropScrollMode;
   };
 

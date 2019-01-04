@@ -23,10 +23,10 @@ RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/optional.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <cctype>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
@@ -144,7 +144,7 @@ vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
 }
 
 
-b::optional<Action> parseSingleActionCommand(
+std::optional<Action> parseSingleActionCommand(
   const string& command,
   istream& lineTextStream
 ) {
@@ -276,7 +276,7 @@ b::optional<Action> parseSingleActionCommand(
     }
   }
 
-  return b::none;
+  return std::nullopt;
 }
 
 

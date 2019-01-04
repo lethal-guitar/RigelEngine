@@ -647,7 +647,7 @@ void Renderer::drawPoint(
 void Renderer::drawWaterEffect(
   const base::Rect<int>& area,
   TextureData textureData,
-  boost::optional<int> surfaceAnimationStep
+  std::optional<int> surfaceAnimationStep
 ) {
   assert(
     !surfaceAnimationStep ||
@@ -741,7 +741,7 @@ base::Point<float> Renderer::globalScale() const {
 }
 
 
-void Renderer::setClipRect(const boost::optional<base::Rect<int>>& clipRect) {
+void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
   if (clipRect == mClipRect) {
     return;
   }
@@ -757,7 +757,7 @@ void Renderer::setClipRect(const boost::optional<base::Rect<int>>& clipRect) {
 }
 
 
-boost::optional<base::Rect<int>> Renderer::clipRect() const {
+std::optional<base::Rect<int>> Renderer::clipRect() const {
   return mClipRect;
 }
 

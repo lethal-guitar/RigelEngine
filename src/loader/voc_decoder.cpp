@@ -20,12 +20,10 @@
 #include "base/warnings.hpp"
 #include "loader/file_utils.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
+#include <cassert>
 #include <cstdint>
 #include <iterator>
+#include <optional>
 
 
 /* Decoder for the Creative Voice File (VOC) format
@@ -294,7 +292,7 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data) {
   }
 
   std::vector<data::Sample> decodedSamples;
-  boost::optional<int> sampleRate;
+  std::optional<int> sampleRate;
 
   while (reader.hasData()) {
     const auto chunkType = determineChunkType(reader.readU8());

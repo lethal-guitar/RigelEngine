@@ -1572,11 +1572,11 @@ TEST_CASE("Player movement") {
 
 
     SECTION("Shooting triggers appropriate sound") {
-      CHECK(mockServiceProvider.mLastTriggeredSoundId == boost::none);
+      CHECK(mockServiceProvider.mLastTriggeredSoundId == std::nullopt);
 
       SECTION("Normal shot") {
         player.update(fireButtonTriggered);
-        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != boost::none);
+        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
             *mockServiceProvider.mLastTriggeredSoundId ==
             data::SoundId::DukeNormalShot);
@@ -1586,7 +1586,7 @@ TEST_CASE("Player movement") {
         playerModel.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
-        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != boost::none);
+        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
             *mockServiceProvider.mLastTriggeredSoundId ==
             data::SoundId::DukeLaserShot);
@@ -1597,7 +1597,7 @@ TEST_CASE("Player movement") {
 
         // The rocket launcher also uses the normal shot sound
         player.update(fireButtonTriggered);
-        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != boost::none);
+        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
             *mockServiceProvider.mLastTriggeredSoundId ==
             data::SoundId::DukeNormalShot);
@@ -1607,7 +1607,7 @@ TEST_CASE("Player movement") {
         playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
-        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != boost::none);
+        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
             *mockServiceProvider.mLastTriggeredSoundId ==
             data::SoundId::FlameThrowerShot);
@@ -1619,7 +1619,7 @@ TEST_CASE("Player movement") {
 
         player.update(fireButtonTriggered);
 
-        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != boost::none);
+        REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
             *mockServiceProvider.mLastTriggeredSoundId ==
             data::SoundId::DukeLaserShot);

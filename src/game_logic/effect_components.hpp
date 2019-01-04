@@ -25,11 +25,11 @@
 #include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
+#include <optional>
 #include <variant>
 
 
@@ -74,7 +74,7 @@ struct Particles {
   {
   }
 
-  boost::optional<base::Color> mColor;
+  std::optional<base::Color> mColor;
   base::Vector mOffset;
   int mVelocityScaleX;
 };
@@ -144,8 +144,8 @@ struct DestructionEffects {
   explicit DestructionEffects(
     EffectSpecList effectSpecs,
     TriggerCondition condition = TriggerCondition::OnKilled,
-    boost::optional<engine::components::BoundingBox> cascadePlacementBox =
-      boost::none
+    std::optional<engine::components::BoundingBox> cascadePlacementBox =
+      std::nullopt
   )
     : mEffectSpecs(effectSpecs)
     , mTriggerCondition(condition)
@@ -155,7 +155,7 @@ struct DestructionEffects {
 
   EffectSpecList mEffectSpecs;
   TriggerCondition mTriggerCondition;
-  boost::optional<engine::components::BoundingBox> mCascadePlacementBox;
+  std::optional<engine::components::BoundingBox> mCascadePlacementBox;
   int mFramesElapsed = 0;
   bool mActivated = false;
 };

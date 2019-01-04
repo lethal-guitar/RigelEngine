@@ -37,7 +37,7 @@ MoviePlayer::MoviePlayer(engine::Renderer* pRenderer)
 void MoviePlayer::playMovie(
   const data::Movie& movie,
   const int frameDelayInFastTicks,
-  const boost::optional<int>& repetitions,
+  const std::optional<int>& repetitions,
   FrameCallbackFunc frameCallback
 ) {
   assert(frameDelayInFastTicks >= 1);

@@ -16,13 +16,10 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
+#include <optional>
 
 
 namespace rigel { namespace game_logic {
@@ -30,20 +27,20 @@ namespace rigel { namespace game_logic {
 namespace components {
 
 struct CollectableItem {
-  boost::optional<int> mGivenScore;
-  boost::optional<int> mGivenScoreAtFullHealth;
-  boost::optional<int> mGivenHealth;
-  boost::optional<data::InventoryItemType> mGivenItem;
-  boost::optional<data::WeaponType> mGivenWeapon;
-  boost::optional<data::CollectableLetterType> mGivenCollectableLetter;
-  boost::optional<data::TutorialMessageId> mShownTutorialMessage;
+  std::optional<int> mGivenScore;
+  std::optional<int> mGivenScoreAtFullHealth;
+  std::optional<int> mGivenHealth;
+  std::optional<data::InventoryItemType> mGivenItem;
+  std::optional<data::WeaponType> mGivenWeapon;
+  std::optional<data::CollectableLetterType> mGivenCollectableLetter;
+  std::optional<data::TutorialMessageId> mShownTutorialMessage;
   bool mSpawnScoreNumbers = true;
 };
 
 }
 
 
-inline boost::optional<int> givenScore(
+inline std::optional<int> givenScore(
   const components::CollectableItem& collectable,
   const bool playerAtFullHealth
 ) {

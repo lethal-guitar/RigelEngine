@@ -432,7 +432,7 @@ void MenuElementRenderer::updateAndRenderAnimatedElements(
       drawSelectionIndicator(yPos, intRotations % NUM_MENU_INDICATOR_STATES);
     } else {
       drawSelectionIndicator(yPos, MENU_INDICATOR_STATE_FOR_CLEARING);
-      mMenuSelectionIndicatorPosition = boost::none;
+      mMenuSelectionIndicatorPosition = std::nullopt;
       mPendingMenuIndicatorErase = false;
     }
   }

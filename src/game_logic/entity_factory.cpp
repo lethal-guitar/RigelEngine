@@ -249,7 +249,7 @@ void adjustOffsets(
 }
 
 
-boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
+std::optional<int> orientationOffsetForActor(const ActorID actorId) {
   switch (actorId) {
     // Player
     case 5:
@@ -272,7 +272,7 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
       return 4;
 
     default:
-      return boost::none;
+      return std::nullopt;
   }
 }
 
@@ -570,7 +570,7 @@ entityx::Entity spawnOneShotSprite(
   const auto numAnimationFrames = static_cast<int>(
     entity.component<Sprite>()->mpDrawData->mFrames.size());
   if (numAnimationFrames > 1) {
-    engine::startAnimationLoop(entity, 1, 0, boost::none);
+    engine::startAnimationLoop(entity, 1, 0, std::nullopt);
   }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
   assignSpecialEffectSpriteProperties(entity, id);

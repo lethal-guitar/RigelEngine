@@ -16,16 +16,12 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "data/movie.hpp"
 #include "engine/texture.hpp"
 #include "engine/timing.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
 #include <functional>
+#include <optional>
 #include <vector>
 
 
@@ -37,14 +33,14 @@ public:
    * shown. If it returns a number, it will be used to set the new frame delay
    * for all subsequent frames.
    */
-  using FrameCallbackFunc = std::function<boost::optional<int>(int)>;
+  using FrameCallbackFunc = std::function<std::optional<int>(int)>;
 
   explicit MoviePlayer(engine::Renderer* pRenderer);
 
   void playMovie(
     const data::Movie& movie,
     int frameDelayInFastTicks,
-    const boost::optional<int>& repetitions = boost::none,
+    const std::optional<int>& repetitions = std::nullopt,
     FrameCallbackFunc frameCallback = nullptr);
 
   void setFrameDelay(int fastTicks);
@@ -68,7 +64,7 @@ private:
 
   bool mHasShownFirstFrame = false;
   int mCurrentFrame = 0;
-  boost::optional<int> mRemainingRepetitions = 0;
+  std::optional<int> mRemainingRepetitions = 0;
   engine::TimeDelta mFrameDelay = 0.0;
   engine::TimeDelta mElapsedTime = 0.0;
 };

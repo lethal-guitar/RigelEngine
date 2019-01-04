@@ -28,7 +28,7 @@ GameSessionMode::GameSessionMode(
   const int level,
   const data::Difficulty difficulty,
   Context context,
-  boost::optional<base::Vector> playerPositionOverride
+  std::optional<base::Vector> playerPositionOverride
 )
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,

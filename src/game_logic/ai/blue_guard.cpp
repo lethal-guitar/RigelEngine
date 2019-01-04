@@ -28,7 +28,7 @@
 
 #include "game_service_provider.hpp"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 
 namespace rigel { namespace game_logic { namespace ai {

@@ -23,10 +23,10 @@
 #include "loader/palette.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <optional>
 #include <string>
 
 
@@ -81,7 +81,7 @@ private:
 
   loader::Palette16 mPalette;
 
-  boost::optional<int> mMenuSelectionIndicatorPosition;
+  std::optional<int> mMenuSelectionIndicatorPosition;
   bool mPendingMenuIndicatorErase = false;
   engine::TimeDelta mElapsedTime = 0;
 };

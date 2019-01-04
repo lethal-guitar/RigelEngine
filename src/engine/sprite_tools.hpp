@@ -62,7 +62,7 @@ inline void startAnimationLoop(
   entityx::Entity& entity,
   const int delayInFrames,
   const int startFrame,
-  boost::optional<int> endFrame,
+  std::optional<int> endFrame,
   const int renderSlot = 0
 ) {
   removeSafely<components::AnimationLoop>(entity);

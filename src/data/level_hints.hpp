@@ -16,12 +16,7 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -49,7 +44,7 @@ struct LevelHints {
   {
   }
 
-  boost::optional<std::string> getHint(int episode, int level) const;
+  std::optional<std::string> getHint(int episode, int level) const;
 
   std::vector<Hint> mHints;
 };

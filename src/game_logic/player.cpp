@@ -247,7 +247,7 @@ base::Vector muzzleFlashOffset(
 }
 
 
-boost::optional<int> recoilAnimationFrame(const VisualState state) {
+std::optional<int> recoilAnimationFrame(const VisualState state) {
   using VS = VisualState;
   switch (state) {
     case VS::Standing:
@@ -273,7 +273,7 @@ boost::optional<int> recoilAnimationFrame(const VisualState state) {
       break;
   }
 
-  return boost::none;
+  return std::nullopt;
 }
 
 }
@@ -807,7 +807,7 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
   if (canAttachToLadder && wantsToAttach) {
     const auto worldBBox = engine::toWorldSpace(bbox, position);
 
-    boost::optional<base::Vector> maybeLadderTouchPoint;
+    std::optional<base::Vector> maybeLadderTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
       const auto candidateTile =
         mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());
@@ -968,7 +968,7 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
       --worldBBox.topLeft.y;
     }
 
-    boost::optional<base::Vector> maybeClimbableTouchPoint;
+    std::optional<base::Vector> maybeClimbableTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
       const auto candidateTile =
         mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());

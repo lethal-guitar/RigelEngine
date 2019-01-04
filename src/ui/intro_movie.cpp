@@ -84,7 +84,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
           pServiceProvider->playSound(SoundId::IntroGunShot);
         }
 
-        return boost::none;
+        return std::nullopt;
       }
     },
 
@@ -98,7 +98,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
           pServiceProvider->playSound(SoundId::IntroGunShotLow);
         }
 
-        return boost::none;
+        return std::nullopt;
       }
     },
 
@@ -108,7 +108,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
       46,
       1,
       [pServiceProvider = mpServiceProvider](const int frame) {
-        boost::optional<int> newFrameDelay = boost::none;
+        std::optional<int> newFrameDelay = std::nullopt;
 
         switch (frame) {
           case 0:

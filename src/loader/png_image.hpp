@@ -16,18 +16,14 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "data/image.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
+#include <optional>
 #include <string>
 
 namespace rigel { namespace loader {
 
-boost::optional<data::Image> loadPng(const std::string& path);
+std::optional<data::Image> loadPng(const std::string& path);
 
 void savePng(const std::string& path, const data::Image& image);
 

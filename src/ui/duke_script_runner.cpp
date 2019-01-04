@@ -34,7 +34,7 @@ namespace rigel { namespace ui {
 using engine::TileRenderer;
 
 using ExecutionResultOptional =
-    boost::optional<DukeScriptRunner::ExecutionResult>;
+    std::optional<DukeScriptRunner::ExecutionResult>;
 
 
 namespace {
@@ -78,9 +78,9 @@ DukeScriptRunner::DukeScriptRunner(
 
 
 void DukeScriptRunner::executeScript(const data::script::Script& script) {
-  mCurrentPersistentSelectionSlot = boost::none;
-  mPagerState = boost::none;
-  mCheckBoxStates = boost::none;
+  mCurrentPersistentSelectionSlot = std::nullopt;
+  mPagerState = std::nullopt;
+  mCheckBoxStates = std::nullopt;
   mFadeInBeforeNextWaitStateScheduled = false;
   mDisableMenuFunctionalityForNextPagesDefinition = false;
 
@@ -109,8 +109,8 @@ ExecutionResultOptional DukeScriptRunner::result() const {
   if (hasFinishedExecution()) {
     const auto selectedPage =
       hasMenuPages() ?
-      boost::optional<int>(mPagerState->mCurrentPageIndex)
-      : boost::none;
+      std::optional<int>(mPagerState->mCurrentPageIndex)
+      : std::nullopt;
 
     auto terminationType = ScriptTerminationType::RanToCompletion;
     if (mState == State::ExecutionInterrupted) {
@@ -122,7 +122,7 @@ ExecutionResultOptional DukeScriptRunner::result() const {
 
     return ExecutionResult{terminationType, selectedPage};
   } else {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
@@ -134,7 +134,7 @@ bool DukeScriptRunner::isInWaitState() const {
 
 void DukeScriptRunner::clearWaitState() {
   mState = State::ExecutingScript;
-  mDelayState = boost::none;
+  mDelayState = std::nullopt;
 }
 
 
@@ -278,7 +278,7 @@ void DukeScriptRunner::stopNewsReporterAnimation() {
   if (mNewsReporterAnimationState) {
     drawSprite(NEWS_REPORTER_ACTOR_ID, 0, 0, 0);
   }
-  mNewsReporterAnimationState = boost::none;
+  mNewsReporterAnimationState = std::nullopt;
 }
 
 

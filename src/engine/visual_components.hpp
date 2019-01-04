@@ -25,10 +25,10 @@
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <optional>
 #include <vector>
 
 
@@ -53,7 +53,7 @@ struct SpriteFrame {
 struct SpriteDrawData {
   std::vector<SpriteFrame> mFrames;
   base::ArrayView<int> mVirtualToRealFrameMap;
-  boost::optional<int> mOrientationOffset;
+  std::optional<int> mOrientationOffset;
   int mDrawOrder;
 };
 
@@ -119,7 +119,7 @@ struct AnimationLoop {
   AnimationLoop() = default;
   explicit AnimationLoop(
     const int delayInFrames,
-    boost::optional<int> endFrame = boost::none
+    std::optional<int> endFrame = std::nullopt
   )
     : AnimationLoop(delayInFrames, 0, endFrame)
   {
@@ -128,7 +128,7 @@ struct AnimationLoop {
   AnimationLoop(
     const int delayInFrames,
     const int startFrame,
-    boost::optional<int> endFrame,
+    std::optional<int> endFrame,
     const int renderSlot = 0
   )
     : mDelayInFrames(delayInFrames)
@@ -141,7 +141,7 @@ struct AnimationLoop {
   int mDelayInFrames = 0;
   int mFramesElapsed = 0;
   int mStartFrame = 0;
-  boost::optional<int> mEndFrame;
+  std::optional<int> mEndFrame;
   int mRenderSlot = 0;
 };
 

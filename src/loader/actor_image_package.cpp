@@ -53,7 +53,7 @@ std::string replacementImagePath(
 
 ActorImagePackage::ActorImagePackage(
   const CMPFilePackage& filePackage,
-  boost::optional<std::string> maybeImageReplacementsPath
+  std::optional<std::string> maybeImageReplacementsPath
 )
   : mImageData(filePackage.file("ACTORS.MNI"))
   , mMaybeReplacementsPath(maybeImageReplacementsPath)
@@ -140,7 +140,7 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
     [&, this, frame = 0](const auto& frameHeader) mutable {
       auto maybeReplacement = mMaybeReplacementsPath
         ? loadPng(replacementImagePath(*mMaybeReplacementsPath, id, frame))
-        : boost::none;
+        : std::nullopt;
       ++frame;
 
       // TODO: There's a bug in versions of GCC older than 7.1.0 which makes
