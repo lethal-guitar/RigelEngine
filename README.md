@@ -14,7 +14,7 @@ is based on reverse-engineering: A mix of reading the original executable's
 disassembly and analyzing its behaviour using video captures of the game
 running in DosBox.
 
-I recently gave a presentation about the project at a local C++ meetup. You can find the slides [here](https://github.com/lethal-guitar/presentations).
+I gave a presentation about the project at a local C++ meetup in 2017. You can find the slides [here](https://github.com/lethal-guitar/presentations).
 
 ## Current state
 
@@ -79,8 +79,8 @@ Currently, the game will abort if the intro movies are missing, but they aren't 
 
 ### Jumping to specific levels, command line options
 
-Since most levels cannot be completed at the moment, only the first level of each episode is accessible
-from the main menu. In order to try different levels, you can use the `-l` command line option:
+Since not all levels can be completed at the moment, not all of each episode's levels are accessible
+by playing the game. In order to try different levels, you can use the `-l` command line option:
 
 ```bash
 # Jump to 6th level of first episode
@@ -97,12 +97,12 @@ Other command line options are:
 
 ### Detailed build pre-requisites and dependencies
 
-To build from source, a C++ 14 compatible compiler is required. The project has been
+To build from source, a C++ 17 compatible compiler is required. The project has been
 built successfully on the following compilers:
 
 * Microsoft Visual Studio 2017 (version 15.9.4 or newer)
-* gcc 5.4.0
-* clang 3.9
+* gcc 7.4.0
+* clang 7.0.0
 
 Slightly older versions of gcc/clang might also work, but I haven't tried that.
 
@@ -110,7 +110,7 @@ The project depends on the following libraries:
 
 * SDL >= 2.0.4
 * SDL\_mixer >= 2.0.1
-* Boost >= 1.55
+* Boost >= 1.67
 
 The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):
@@ -124,10 +124,32 @@ code (in the `3rd_party` directory):
 ### <a name="mac-build-instructions">OS X builds</a>
 
 Building on OS X works almost exactly like the Linux build, except for getting
-the dependencies. If you have homebrew, you can get them using the following:
+the dependencies. If you have Homebrew, you can get them using the following:
 
 ```bash
 brew install cmake sdl2 sdl2_mixer boost
+```
+
+Note that you'll need Xcode 10 and OS X Mojave (10.14) if you want to use Apple's clang compiler. The project builds fine with a non-Apple clang though, so if you're on an older OS X version, you can still build it. Here's how you would install clang via Homebrew and build the project using it:
+
+```bash
+# You might need to run brew update
+brew install llvm
+
+# Set up environment variables so that CMake picks up the newly installed clang -
+# this is only necessary the first time
+export rigel_llvm_path=`brew --prefix llvm`;
+export CC="$rigel_llvm_path/bin/clang";
+export CXX="$CC++";
+export CPPFLAGS="-I$rigel_llvm_path/include";
+export LDFLAGS="-L$rigel_llvm_path/lib -Wl,-rpath,$rigel_llvm_path/lib";
+unset rigel_llvm_path;
+
+# Now, the regular build via CMake should work:
+mkdir build
+cd build
+cmake ..
+make
 ```
 
 ### <a name="windows-build-instructions">Windows builds</a>
@@ -135,7 +157,7 @@ brew install cmake sdl2 sdl2_mixer boost
 To build on Windows, you'll need to install CMake and provide binaries for the
 external dependencies listed above. You can get them using the following links:
 
-* [CMake 3.6.2](https://cmake.org/files/v3.6/cmake-3.6.2-win64-x64.zip)
+* [CMake 3.13.2](https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-win64-x64.zip)
 * [SDL2 2.0.4](https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip)
 * [SDL2 mixer 2.0.1](https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip)
 * [Boost 1.67](https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-14.1-64.exe/download)
@@ -146,7 +168,7 @@ can set the following environment variables prior to running CMake:
 ```bash
 # Assuming you've used the Boost installer linked above, and installed to BOOST_LOCATION
 BOOST_ROOT=<BOOST_LOCATION>
-BOOST_LIBRARYDIR=<BOOST_LOCATION>/lib64-msvc-14.0
+BOOST_LIBRARYDIR=<BOOST_LOCATION>/lib64-msvc-14.1
 
 # These should point to the respective root directory of the unzipped packages linked above
 SDL2DIR=<SDL2_LOCATION>
