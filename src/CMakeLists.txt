@@ -225,9 +225,6 @@ target_include_directories(rigel_core
     ${3rd_party_path}/entityx
     ${Boost_INCLUDE_DIRS}
 
-    ${3rd_party_path}/atria/src
-    ${3rd_party_path}/atria/compat
-
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
 
