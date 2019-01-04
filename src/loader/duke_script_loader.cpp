@@ -459,7 +459,8 @@ data::script::Script parseScript(istream& sourceTextStream) {
 
       if (command == "PAGESSTART") {
         skipWhiteSpace(sourceTextStream);
-        actions.emplace_back(parsePagesDefinition(sourceTextStream));
+        actions.emplace_back(std::make_shared<PagesDefinition>(
+          parsePagesDefinition(sourceTextStream)));
       } else {
         actions = parseCommand(command, sourceTextStream, lineTextStream);
       }

@@ -16,7 +16,7 @@
 
 #include "duke_script_runner.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/random_number_generator.hpp"
@@ -27,10 +27,6 @@
 #include "ui/utils.hpp"
 
 #include "game_service_provider.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace ui {
@@ -294,7 +290,7 @@ void DukeScriptRunner::interpretNextAction() {
     return;
   }
 
-  atria::variant::match(
+  base::match(
     mCurrentInstructions[mProgramCounter++],
 
     [this](const AnimateNewsReporter& action) {
@@ -418,7 +414,9 @@ void DukeScriptRunner::interpretNextAction() {
       }
     },
 
-    [this](const PagesDefinition& definition) {
+    [this](const std::shared_ptr<PagesDefinition>& pDefinition) {
+      const auto& definition = *pDefinition;
+
       mPagerState = PagerState{
         definition.pages,
         PagingMode::Menu,
