@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/boost_variant.hpp"
-#include "engine/base_components.hpp"
+#include "engine/movement.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 namespace rigel { namespace engine { namespace events {
@@ -25,47 +25,32 @@ namespace rigel { namespace engine { namespace events {
 }}}
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel { namespace game_logic {
 
-namespace watch_bot {
+namespace rigelatin_soldier {
+
+struct Ready {};
 
 struct Jumping {
-  Jumping() = default;
-  explicit Jumping(const engine::components::Orientation orientation)
-    : mOrientation(orientation)
-  {
-  }
-
   int mFramesElapsed = 0;
-  engine::components::Orientation mOrientation =
-    engine::components::Orientation::Left;
+  engine::MovementResult mLastHorizontalMovementResult =
+    engine::MovementResult::Failed;
+  int mPreviousPosX = 0;
 };
 
-struct Falling {
-  engine::components::Orientation mOrientation;
-};
-
-struct OnGround {
+struct Waiting {
   int mFramesElapsed = 0;
 };
 
-struct LookingAround {
-  explicit LookingAround(const engine::components::Orientation orientation)
-    : mOrientation(orientation)
-  {
-  }
 
-  int mFramesElapsed = 0;
-  engine::components::Orientation mOrientation;
-};
-
-
-using State = boost::variant<Jumping, Falling, OnGround, LookingAround>;
+using State = boost::variant<Ready, Jumping, Waiting>;
 
 }
 
 
-struct WatchBot {
+namespace behaviors {
+
+struct RigelatinSoldier {
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -78,7 +63,13 @@ struct WatchBot {
     const engine::events::CollidedWithWorld& event,
     entityx::Entity entity);
 
-  watch_bot::State mState;
+  void updateReadyState(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    entityx::Entity entity);
+
+  rigelatin_soldier::State mState;
+  int mDecisionCounter = 3;
 };
 
 }}}

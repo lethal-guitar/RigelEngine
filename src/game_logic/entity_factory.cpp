@@ -32,6 +32,7 @@
 #include "game_logic/ai/missile.hpp"
 #include "game_logic/ai/prisoner.hpp"
 #include "game_logic/ai/red_bird.hpp"
+#include "game_logic/ai/rigelatin_soldier.hpp"
 #include "game_logic/ai/rocket_turret.hpp"
 #include "game_logic/ai/security_camera.hpp"
 #include "game_logic/ai/simple_walker.hpp"
@@ -266,6 +267,9 @@ boost::optional<int> orientationOffsetForActor(const ActorID actorId) {
 
     case 201:
       return 2;
+
+    case 299:
+      return 4;
 
     default:
       return boost::none;

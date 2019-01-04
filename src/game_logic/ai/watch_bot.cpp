@@ -165,6 +165,7 @@ void WatchBot::update(
 void WatchBot::onCollision(
   GlobalDependencies& d,
   GlobalState& s,
+  const engine::events::CollidedWithWorld&,
   entityx::Entity entity
 ) {
   using namespace engine::components;

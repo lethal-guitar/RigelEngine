@@ -18,6 +18,10 @@
 
 #include "game_logic/global_dependencies.hpp"
 
+namespace rigel { namespace engine { namespace events {
+  struct CollidedWithWorld;
+}}}
+
 
 namespace rigel { namespace game_logic { namespace behaviors {
 
@@ -44,6 +48,7 @@ struct SlimeDrop {
   void onCollision(
     GlobalDependencies& dependencies,
     GlobalState& state,
+    const engine::events::CollidedWithWorld& event,
     entityx::Entity entity);
 };
 

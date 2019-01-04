@@ -245,7 +245,6 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
   switch (id) {
     case 43:
     case 100:
-    case 300:
       entity.assign<PlayerDamaging>(1);
       break;
 
@@ -1352,13 +1351,13 @@ void EntityFactory::configureEntity(
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
-      entity.assign<BoundingBox>(boundingBox);
-      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<DestructionEffects>(
         BIG_BOMB_DETONATE_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnCollision);
       entity.assign<BehaviorController>(behaviors::BigBomb{});
       addDefaultMovingBody(entity, boundingBox);
+      engine::reassign<ActivationSettings>(
+        entity, ActivationSettings{ActivationSettings::Policy::Always});
       break;
 
     case 64: // Bouncing spike ball
@@ -1554,8 +1553,14 @@ void EntityFactory::configureEntity(
     case 299: // Rigelatin soldier
       entity.assign<Shootable>(
         Health{27 + 2 * difficultyOffset}, GivenScore{2100});
-      entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::RigelatinSoldier{});
+      entity.assign<Orientation>(Orientation::Left);
+      addDefaultMovingBody(entity, boundingBox);
+      entity.component<MovingBody>()->mGravityAffected = false;
+      entity.assign<DestructionEffects>(
+        RIGELATIN_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
+        mSpriteFactory.actorFrameRect(299, 0));
       break;
 
     // ----------------------------------------------------------------------
