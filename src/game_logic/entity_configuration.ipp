@@ -613,11 +613,7 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
 
 template<typename... Args>
 void addToContainer(components::ItemContainer& container, Args&&... components) {
-  boost::fusion::for_each(
-    std::make_tuple(components...),
-    [&container](auto component) {
-      container.mContainedComponents.emplace_back(std::move(component));
-    });
+  (container.mContainedComponents.emplace_back(std::move(components)), ...);
 }
 
 

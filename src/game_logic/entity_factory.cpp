@@ -55,11 +55,6 @@
 #include "game_logic/item_container.hpp"
 #include "game_logic/trigger_components.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/for_each.hpp>
-RIGEL_RESTORE_WARNINGS
-
 #include <tuple>
 #include <utility>
 
