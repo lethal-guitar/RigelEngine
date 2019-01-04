@@ -27,9 +27,9 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/optional.hpp>
+#include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <entityx/entityx.h>
 #include <cstdint>
 #include <utility>
 #include <vector>
