@@ -119,7 +119,6 @@ code (in the `3rd_party` directory):
 * Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * DBOPL AdLib emulator (taken from [DosBox](http://www.dosbox.com/))
 * [Catch](https://github.com/philsquared/Catch) testing framework
-* [atria](https://github.com/Ableton/atria) C++ utilities
 
 ### <a name="mac-build-instructions">OS X builds</a>
 

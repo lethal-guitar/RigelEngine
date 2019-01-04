@@ -231,7 +231,7 @@ void IngameSystems::update(
 
 void IngameSystems::render(
   entityx::EntityManager& es,
-  const boost::optional<base::Color>& backdropFlashColor
+  const std::optional<base::Color>& backdropFlashColor
 ) {
   mRenderingSystem.update(es, backdropFlashColor);
   mParticles.render(*mpScrollOffset);

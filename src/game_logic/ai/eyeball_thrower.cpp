@@ -16,16 +16,12 @@
 
 #include "eyeball_thrower.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace behaviors {
@@ -91,7 +87,7 @@ void EyeballThrower::update(
   };
 
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](GettingUp& state) {
       if (state.mFramesElapsed == 0) {
         orientation = position.x <= playerPos.x

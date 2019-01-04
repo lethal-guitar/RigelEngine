@@ -16,7 +16,7 @@
 
 #include "bomber_plane.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
@@ -28,10 +28,6 @@
 
 #include "game_service_provider.hpp"
 #include "global_level_events.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace behaviors {
@@ -108,7 +104,7 @@ void BomberPlane::update(
   };
 
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](const FlyingIn&) {
       if (!mBombSprite) {
         mBombSprite = d.mpEntityFactory->createSprite(

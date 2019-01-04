@@ -16,12 +16,13 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <variant>
 
 namespace rigel { namespace engine {
   class CollisionChecker;
@@ -57,7 +58,7 @@ struct RisingUp {
 
 }
 
-using StateT = boost::variant<
+using StateT = std::variant<
   detail::Flying,
   detail::Hovering,
   detail::PlungingDown,

@@ -172,7 +172,7 @@ public:
     mActorGrid.setValueAt(col, row, nullptr);
   }
 
-  boost::optional<base::Rect<int>> findTileSectionRect(
+  std::optional<base::Rect<int>> findTileSectionRect(
     const int startCol,
     const int startRow
   ) {
@@ -202,7 +202,7 @@ public:
       }
     }
 
-    return boost::none;
+    return std::nullopt;
   }
 
 private:
@@ -279,7 +279,7 @@ ActorList preProcessActorDescriptions(
 
         default:
           actors.emplace_back(
-            LevelData::Actor{actor.mPosition, actor.mID, boost::none});
+            LevelData::Actor{actor.mPosition, actor.mID, std::nullopt});
           break;
       }
 
@@ -306,7 +306,7 @@ LevelData loadLevel(
   for (size_t i=0; i<header.numActorWords/3; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
-    actors.emplace_back(LevelData::Actor{position, type, boost::none});
+    actors.emplace_back(LevelData::Actor{position, type, std::nullopt});
   }
 
   auto tileSet = resources.loadCZone(header.CZone);
@@ -380,7 +380,7 @@ LevelData loadLevel(
   }
 
   auto backdropImage = resources.loadTiledFullscreenImage(header.backdrop);
-  boost::optional<data::Image> alternativeBackdropImage;
+  std::optional<data::Image> alternativeBackdropImage;
   if (header.flagBitSet(0x40) || header.flagBitSet(0x80)) {
     alternativeBackdropImage = resources.loadTiledFullscreenImage(
       backdropNameFromNumber(header.alternativeBackdropNumber));

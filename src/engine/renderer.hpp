@@ -24,12 +24,12 @@
 #include "engine/shader.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <glm/mat4x4.hpp>
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
+#include <optional>
 #include <tuple>
 
 
@@ -105,7 +105,7 @@ public:
 
   private:
     Renderer* mpRenderer;
-    boost::optional<base::Rect<int>> mClipRect;
+    std::optional<base::Rect<int>> mClipRect;
     base::Vector mGlobalTranslation;
     base::Point<float> mGlobalScale;
     RenderTarget mRenderTarget;
@@ -150,7 +150,7 @@ public:
   void drawWaterEffect(
     const base::Rect<int>& area,
     TextureData unprocessedScreen,
-    boost::optional<int> surfaceAnimationStep);
+    std::optional<int> surfaceAnimationStep);
 
   void setGlobalTranslation(const base::Vector& translation);
   base::Vector globalTranslation() const;
@@ -158,8 +158,8 @@ public:
   void setGlobalScale(const base::Point<float>& scale);
   base::Point<float> globalScale() const;
 
-  void setClipRect(const boost::optional<base::Rect<int>>& clipRect);
-  boost::optional<base::Rect<int>> clipRect() const;
+  void setClipRect(const std::optional<base::Rect<int>>& clipRect);
+  std::optional<base::Rect<int>> clipRect() const;
 
   RenderTarget currentRenderTarget() const;
   void setRenderTarget(const RenderTarget& target);
@@ -252,7 +252,7 @@ private:
 
   glm::mat4 mProjectionMatrix;
   base::Rect<int> mDefaultViewport;
-  boost::optional<base::Rect<int>> mClipRect;
+  std::optional<base::Rect<int>> mClipRect;
   glm::vec2 mGlobalTranslation;
   glm::vec2 mGlobalScale;
 };

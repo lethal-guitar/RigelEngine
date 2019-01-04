@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2018, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,12 +16,30 @@
 
 #pragma once
 
-#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_LIST_SIZE 30
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
+#include <utility>
+#include <variant>
 
-#include "base/warnings.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/variant.hpp>
-RIGEL_RESTORE_WARNINGS
+namespace rigel::base {
+
+namespace detail {
+
+template<class... Ts>
+struct overloaded : Ts...  {
+  using Ts::operator()...;
+};
+
+template<class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+}
+
+
+template <typename Variant, typename... Matchers>
+auto match(Variant&& variant, Matchers&&... matchers) {
+  return std::visit(
+    detail::overloaded{std::forward<Matchers>(matchers)...},
+    std::forward<Variant>(variant));
+}
+
+}

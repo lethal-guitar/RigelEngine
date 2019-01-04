@@ -21,7 +21,7 @@
 
 namespace rigel { namespace data {
 
-boost::optional<std::string> LevelHints::getHint(
+std::optional<std::string> LevelHints::getHint(
   const int episode,
   const int level
 ) const {
@@ -33,8 +33,8 @@ boost::optional<std::string> LevelHints::getHint(
     });
 
   return iHint != end(mHints)
-    ? boost::optional<std::string>{iHint->mMessage}
-    : boost::none;
+    ? std::optional<std::string>{iHint->mMessage}
+    : std::nullopt;
 }
 
 }}

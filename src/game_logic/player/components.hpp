@@ -20,9 +20,10 @@
 #include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <optional>
 
 
 namespace rigel { namespace game_logic {
@@ -90,7 +91,7 @@ struct Interactable {
 
 struct RespawnCheckpoint {
   bool mInitialized = false;
-  boost::optional<int> mActivationCountdown;
+  std::optional<int> mActivationCountdown;
 };
 
 }

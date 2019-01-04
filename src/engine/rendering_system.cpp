@@ -169,7 +169,7 @@ RenderingSystem::RenderingSystem(
 
 void RenderingSystem::update(
   ex::EntityManager& es,
-  const boost::optional<base::Color>& backdropFlashColor
+  const std::optional<base::Color>& backdropFlashColor
 ) {
   using namespace std;
   using game_logic::components::TileDebris;
@@ -328,8 +328,8 @@ void RenderingSystem::renderWaterEffectAreas(entityx::EntityManager& es) {
           {topLeftPx, sizePx},
           mRenderTarget.data(),
           hasAnimatedSurface
-            ? boost::optional<int>(mWaterAnimStep)
-            : boost::none);
+            ? std::optional<int>(mWaterAnimStep)
+            : std::nullopt);
       }
     });
 }

@@ -16,13 +16,9 @@
 
 #include "game_session_mode.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 
 #include "game_service_provider.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel {
@@ -32,7 +28,7 @@ GameSessionMode::GameSessionMode(
   const int level,
   const data::Difficulty difficulty,
   Context context,
-  boost::optional<base::Vector> playerPositionOverride
+  std::optional<base::Vector> playerPositionOverride
 )
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
@@ -56,7 +52,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  atria::variant::match(mCurrentStage,
+  base::match(mCurrentStage,
     [&event](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
     },
@@ -67,7 +63,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
 
 
 void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
-  atria::variant::match(mCurrentStage,
+  base::match(mCurrentStage,
     [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->updateAndRender(dt);
 

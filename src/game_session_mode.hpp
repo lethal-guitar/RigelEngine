@@ -16,12 +16,13 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "data/player_model.hpp"
 #include "ui/bonus_screen.hpp"
 
 #include "game_mode.hpp"
 #include "game_runner.hpp"
+
+#include <variant>
 
 
 namespace rigel {
@@ -33,7 +34,7 @@ public:
     int level,
     data::Difficulty difficulty,
     Context context,
-    boost::optional<base::Vector> playerPositionOverride = boost::none);
+    std::optional<base::Vector> playerPositionOverride = std::nullopt);
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;
@@ -43,7 +44,7 @@ private:
   void fadeToNewStage(StageT& stage);
 
 private:
-  using SessionStage = boost::variant<
+  using SessionStage = std::variant<
     std::unique_ptr<GameRunner>,
     ui::BonusScreen
   >;

@@ -16,7 +16,7 @@
 
 #include "watch_bot.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
@@ -26,10 +26,6 @@
 #include "game_logic/player.hpp"
 
 #include "game_service_provider.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace behaviors {
@@ -85,7 +81,7 @@ void WatchBot::update(
   };
 
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](Jumping& state) {
       moveHorizontally(
         *d.mpCollisionChecker,
@@ -173,7 +169,7 @@ void WatchBot::onCollision(
 
   const auto isOnScreen = entity.component<Active>()->mIsOnScreen;
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](const Falling& state) {
       if (isOnScreen) {
         d.mpServiceProvider->playSound(data::SoundId::DukeJumping);

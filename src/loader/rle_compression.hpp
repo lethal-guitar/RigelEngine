@@ -16,12 +16,9 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "loader/file_utils.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
+#include <optional>
 
 
 namespace rigel { namespace loader {

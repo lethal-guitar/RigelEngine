@@ -17,17 +17,13 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
 #include "data/image.hpp"
 #include "data/map.hpp"
 #include "loader/byte_buffer.hpp"
 #include "loader/palette.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
 #include <map>
+#include <optional>
 #include <vector>
 
 
@@ -54,7 +50,7 @@ class ActorImagePackage {
 public:
   explicit ActorImagePackage(
     const CMPFilePackage& filePackage,
-    boost::optional<std::string> maybeImageReplacementsPath = boost::none);
+    std::optional<std::string> maybeImageReplacementsPath = std::nullopt);
 
   ActorData loadActor(
     data::ActorID id,
@@ -89,7 +85,7 @@ private:
 private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
-  boost::optional<std::string> mMaybeReplacementsPath;
+  std::optional<std::string> mMaybeReplacementsPath;
 };
 
 

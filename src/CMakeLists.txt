@@ -1,6 +1,5 @@
 set(core_sources
     base/array_view.hpp
-    base/boost_variant.hpp
     base/grid.hpp
     base/math_tools.hpp
     base/spatial_types.hpp
@@ -225,9 +224,6 @@ target_include_directories(rigel_core
     ${SDL2_MIXER_INCLUDE_DIRS}
     ${3rd_party_path}/entityx
     ${Boost_INCLUDE_DIRS}
-
-    ${3rd_party_path}/atria/src
-    ${3rd_party_path}/atria/compat
 
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm

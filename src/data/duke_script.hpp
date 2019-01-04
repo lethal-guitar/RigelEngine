@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
-
+#include <memory>
 #include <string>
+#include <variant>
 #include <vector>
 
 
@@ -199,9 +199,9 @@ struct ShowSaveSlots {
 
 struct PagesDefinition;
 
-using Action = boost::variant<
+using Action = std::variant<
   AnimateNewsReporter,
-  boost::recursive_wrapper<PagesDefinition>,
+  std::shared_ptr<PagesDefinition>,
   ConfigurePersistentMenuSelection,
   Delay,
   DisableMenuFunctionality,

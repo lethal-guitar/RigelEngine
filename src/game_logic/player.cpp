@@ -16,6 +16,7 @@
 
 #include "player.hpp"
 
+#include "base/match.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "data/player_model.hpp"
@@ -25,10 +26,6 @@
 
 #include "game_service_provider.hpp"
 #include "global_level_events.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 #include <cassert>
 
@@ -250,7 +247,7 @@ base::Vector muzzleFlashOffset(
 }
 
 
-boost::optional<int> recoilAnimationFrame(const VisualState state) {
+std::optional<int> recoilAnimationFrame(const VisualState state) {
   using VS = VisualState;
   switch (state) {
     case VS::Standing:
@@ -276,7 +273,7 @@ boost::optional<int> recoilAnimationFrame(const VisualState state) {
       break;
   }
 
-  return boost::none;
+  return std::nullopt;
 }
 
 }
@@ -521,7 +518,7 @@ void Player::updateMovement(
   auto& position = *mEntity.component<c::WorldPosition>();
   auto& bbox = *mEntity.component<c::BoundingBox>();
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](const OnGround&) {
       if (mAttachedElevator && movementVector.y != 0) {
         const auto didMove = updateElevatorMovement(movementVector.y);
@@ -805,12 +802,12 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
 
   const auto canAttachToLadder =
     !stateIs<ClimbingLadder>() &&
-    (!stateIs<Jumping>() || boost::get<Jumping>(mState).mFramesElapsed >= 3);
+    (!stateIs<Jumping>() || std::get<Jumping>(mState).mFramesElapsed >= 3);
   const auto wantsToAttach = movementVector.y < 0;
   if (canAttachToLadder && wantsToAttach) {
     const auto worldBBox = engine::toWorldSpace(bbox, position);
 
-    boost::optional<base::Vector> maybeLadderTouchPoint;
+    std::optional<base::Vector> maybeLadderTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
       const auto candidateTile =
         mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());
@@ -909,9 +906,9 @@ void Player::updateDeathAnimation() {
 
   auto& position = *mEntity.component<c::WorldPosition>();
   auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
-  auto& deathAnimationState = boost::get<Dieing>(mState);
+  auto& deathAnimationState = std::get<Dieing>(mState);
 
-  atria::variant::match(deathAnimationState,
+  base::match(deathAnimationState,
     [&, this](FlyingUp& state) {
       animationFrame =
         DEATH_ANIMATION_SEQUENCE[state.mFramesElapsed];
@@ -971,7 +968,7 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
       --worldBBox.topLeft.y;
     }
 
-    boost::optional<base::Vector> maybeClimbableTouchPoint;
+    std::optional<base::Vector> maybeClimbableTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
       const auto candidateTile =
         mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());

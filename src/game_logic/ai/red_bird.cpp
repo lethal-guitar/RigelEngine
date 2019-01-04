@@ -16,14 +16,11 @@
 
 #include "red_bird.hpp"
 
+#include "base/match.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/sprite_tools.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace ai {
@@ -85,7 +82,7 @@ void RedBirdSystem::update(entityx::EntityManager& es) {
       auto& sprite = *entity.component<Sprite>();
 
       const auto& playerPosition = *mPlayer.component<WorldPosition>();
-      atria::variant::match(birdState.mState,
+      base::match(birdState.mState,
         [&](const Flying&) {
           const auto wantsToAttack =
             position.y + 2 < playerPosition.y &&
@@ -147,7 +144,7 @@ void RedBirdSystem::receive(const engine::events::CollidedWithWorld& event) {
   auto& body = *entity.component<MovingBody>();
   auto& birdState = *entity.component<components::RedBird>();
 
-  atria::variant::match(birdState.mState,
+  base::match(birdState.mState,
     [&](const Flying&) {
       if (event.mCollidedLeft || event.mCollidedRight) {
         fly(entity, !event.mCollidedLeft);

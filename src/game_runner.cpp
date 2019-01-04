@@ -93,7 +93,7 @@ GameRunner::GameRunner(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
-  boost::optional<base::Vector> playerPositionOverride,
+  std::optional<base::Vector> playerPositionOverride,
   bool showWelcomeMessage
 )
   : mpRenderer(context.mpRenderer)
@@ -413,8 +413,8 @@ void GameRunner::loadLevel(
 
 
 void GameRunner::updateGameLogic() {
-  mBackdropFlashColor = boost::none;
-  mScreenFlashColor = boost::none;
+  mBackdropFlashColor = std::nullopt;
+  mScreenFlashColor = std::nullopt;
 
   if (mReactorDestructionFramesElapsed) {
     updateReactorDestructionEvent();
@@ -578,7 +578,7 @@ void GameRunner::handleTeleporter() {
   mpServiceProvider->fadeOutScreen();
 
   mpSystems->player().position() = *mTeleportTargetPosition;
-  mTeleportTargetPosition = boost::none;
+  mTeleportTargetPosition = std::nullopt;
 
   const auto switchBackdrop =
     mLevelData.mBackdropSwitchCondition ==

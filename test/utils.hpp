@@ -22,10 +22,7 @@
 #include <game_mode.hpp>
 #include <game_service_provider.hpp>
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-#include <boost/optional/optional_io.hpp>
-RIGEL_RESTORE_WARNINGS
+#include <optional>
 
 
 struct MockServiceProvider : public rigel::IGameServiceProvider {
@@ -46,5 +43,5 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
 
   void showDebugText(const std::string&) override {}
 
-  boost::optional<rigel::data::SoundId> mLastTriggeredSoundId;
+  std::optional<rigel::data::SoundId> mLastTriggeredSoundId;
 };

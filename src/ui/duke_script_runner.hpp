@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
 #include "engine/texture.hpp"
@@ -26,11 +25,8 @@
 
 #include "game_mode.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
-
 #include <cstddef>
+#include <optional>
 
 
 namespace rigel { namespace ui {
@@ -45,7 +41,7 @@ public:
 
   struct ExecutionResult {
     ScriptTerminationType mTerminationType;
-    boost::optional<int> mSelectedPage;
+    std::optional<int> mSelectedPage;
   };
 
   DukeScriptRunner(
@@ -56,7 +52,7 @@ public:
   void executeScript(const data::script::Script& script);
 
   bool hasFinishedExecution() const;
-  boost::optional<ExecutionResult> result() const;
+  std::optional<ExecutionResult> result() const;
 
   void updateAndRender(engine::TimeDelta dt);
   void handleEvent(const SDL_Event& event);
@@ -157,15 +153,15 @@ private:
   std::size_t mProgramCounter;
   State mState = State::ReadyToExecute;
 
-  boost::optional<DelayState> mDelayState;
-  boost::optional<NewsReporterState> mNewsReporterAnimationState;
+  std::optional<DelayState> mDelayState;
+  std::optional<NewsReporterState> mNewsReporterAnimationState;
 
-  boost::optional<PagerState> mPagerState;
+  std::optional<PagerState> mPagerState;
   bool mMenuItemWasSelected = false;
   std::unordered_map<int, int> mPersistentMenuSelections;
-  boost::optional<int> mCurrentPersistentSelectionSlot;
+  std::optional<int> mCurrentPersistentSelectionSlot;
 
-  boost::optional<CheckBoxesState> mCheckBoxStates;
+  std::optional<CheckBoxesState> mCheckBoxStates;
 
   bool mFadeInBeforeNextWaitStateScheduled = false;
   bool mDisableMenuFunctionalityForNextPagesDefinition = false;

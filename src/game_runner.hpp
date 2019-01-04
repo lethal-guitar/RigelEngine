@@ -35,11 +35,11 @@
 #include "global_level_events.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
 #include <entityx/entityx.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <optional>
 #include <vector>
 
 namespace rigel { namespace game_logic { class IngameSystems; }}
@@ -53,7 +53,7 @@ public:
     data::PlayerModel* pPlayerModel,
     const data::GameSessionId& sessionId,
     GameMode::Context context,
-    boost::optional<base::Vector> playerPositionOverride = boost::none,
+    std::optional<base::Vector> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false);
   ~GameRunner();
 
@@ -105,7 +105,7 @@ private:
 
   data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
-  boost::optional<CheckpointData> mActivatedCheckpoint;
+  std::optional<CheckpointData> mActivatedCheckpoint;
   base::Vector mScrollOffset;
 
   // TODO: Find a better place for this
@@ -113,7 +113,7 @@ private:
   int mFramesElapsedHavingCloak = 0;
 
   game_logic::PlayerInput mPlayerInput;
-  boost::optional<base::Vector> mTeleportTargetPosition;
+  std::optional<base::Vector> mTeleportTargetPosition;
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;
   bool mPlayerDied = false;
@@ -140,10 +140,10 @@ private:
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
 
-  boost::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
-  boost::optional<base::Color> mScreenFlashColor;
-  boost::optional<base::Color> mBackdropFlashColor;
-  boost::optional<int> mReactorDestructionFramesElapsed;
+  std::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
+  std::optional<base::Color> mScreenFlashColor;
+  std::optional<base::Color> mBackdropFlashColor;
+  std::optional<int> mReactorDestructionFramesElapsed;
   int mScreenShakeOffsetX = 0;
 };
 

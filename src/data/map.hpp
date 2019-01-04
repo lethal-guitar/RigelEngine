@@ -17,15 +17,11 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
 #include "data/tile_attributes.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
-RIGEL_RESTORE_WARNINGS
 
 #include <array>
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -101,12 +97,12 @@ struct LevelData {
   struct Actor {
     base::Vector mPosition;
     ActorID mID;
-    boost::optional<base::Rect<int>> mAssignedArea;
+    std::optional<base::Rect<int>> mAssignedArea;
   };
 
   Image mTileSetImage;
   Image mBackdropImage;
-  boost::optional<Image> mSecondaryBackdropImage;
+  std::optional<Image> mSecondaryBackdropImage;
 
   data::map::Map mMap;
   std::vector<Actor> mActors;

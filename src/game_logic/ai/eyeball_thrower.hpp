@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include "base/boost_variant.hpp"
 #include "game_logic/global_dependencies.hpp"
+
+#include <variant>
 
 
 namespace rigel { namespace game_logic { namespace behaviors {
@@ -34,7 +35,7 @@ struct Attacking {
   int mFramesElapsed = 0;
 };
 
-using State = boost::variant<GettingUp, Walking, Attacking>;
+using State = std::variant<GettingUp, Walking, Attacking>;
 
 }
 

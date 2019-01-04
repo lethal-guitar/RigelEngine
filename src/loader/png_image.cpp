@@ -30,7 +30,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace loader {
 
-boost::optional<data::Image> loadPng(const std::string& path) {
+std::optional<data::Image> loadPng(const std::string& path) {
   int width = 0;
   int height = 0;
   const auto imageDeleter = [] (unsigned char* p) { stbi_image_free(p); };

@@ -16,7 +16,7 @@
 
 #include "rigelatin_soldier.hpp"
 
-#include "base/warnings.hpp"
+#include "base/match.hpp"
 #include "base/math_tools.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
@@ -25,10 +25,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <atria/variant/match_boost.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { namespace game_logic { namespace behaviors {
@@ -64,7 +60,7 @@ void RigelatinSoldier::update(
   auto& movingBody = *entity.component<MovingBody>();
   auto& animationFrame = entity.component<Sprite>()->mFramesToRender[0];
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](const Ready&) {
       updateReadyState(d, s, entity);
     },
@@ -117,7 +113,7 @@ void RigelatinSoldier::onCollision(
 
   auto& position = *entity.component<WorldPosition>();
 
-  atria::variant::match(mState,
+  base::match(mState,
     [&, this](const Jumping& state) {
       // In RigelatinSoldier::update(), we don't know if we are going to hit
       // the ground on the current frame or not, as the Physics update happens

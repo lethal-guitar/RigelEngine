@@ -43,14 +43,13 @@ Script loadSingleScript(const string& source) {
 
 template<typename ActionT>
 auto asType(const Action& action) {
-  return boost::get<ActionT>(action);
+  return std::get<ActionT>(action);
 }
 
 
 template<typename ActionT>
 bool isType(const Action& action) {
-  const auto& typeInfo = action.type();
-  return typeInfo == typeid(ActionT);
+  return std::holds_alternative<ActionT>(action);
 }
 
 }
@@ -309,9 +308,10 @@ TEST_CASE("Page definitions are parsed correctly") {
   const auto script = loadSingleScript(testData);
 
   REQUIRE(script.size() == 1);
-  REQUIRE(isType<PagesDefinition>(script.front()));
+  REQUIRE(isType<std::shared_ptr<PagesDefinition>>(script.front()));
 
-  auto pageDefinition = asType<PagesDefinition>(script.front());
+  auto pageDefinition =
+    *asType<std::shared_ptr<PagesDefinition>>(script.front());
   REQUIRE(pageDefinition.pages.size() == 3);
 
   SECTION("Commands after PAGESSTART go into first page") {

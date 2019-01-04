@@ -26,11 +26,11 @@
 #include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/optional.hpp>
+#include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <entityx/entityx.h>
 #include <cstdint>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -74,7 +74,7 @@ public:
   /** Render everything. Can be called at full frame rate. */
   void update(
     entityx::EntityManager& es,
-    const boost::optional<base::Color>& backdropFlashColor);
+    const std::optional<base::Color>& backdropFlashColor);
 
   void switchBackdrops() {
     mMapRenderer.switchBackdrops();
