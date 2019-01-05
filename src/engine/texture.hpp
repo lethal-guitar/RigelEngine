@@ -92,7 +92,7 @@ protected:
     int y,
     const base::Rect<int>& sourceRect) const;
 
-  TextureBase(Renderer::TextureData data)
+  explicit TextureBase(Renderer::TextureData data)
     : mData(data)
     , mModulation({255, 255, 255, 255})
   {
@@ -135,7 +135,7 @@ public:
   friend class NonOwningTexture;
 
 protected:
-  OwningTexture(Renderer::TextureData data)
+  explicit OwningTexture(Renderer::TextureData data)
     : TextureBase(data)
   {
   }

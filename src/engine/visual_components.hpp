@@ -153,7 +153,7 @@ struct AnimationLoop {
 
 
 struct AnimationSequence {
-  AnimationSequence(
+  explicit AnimationSequence(
     const base::ArrayView<int>& frames,
     const int renderSlot = 0,
     const bool repeat = false)

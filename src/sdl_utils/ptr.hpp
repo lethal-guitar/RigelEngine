@@ -63,7 +63,7 @@ public:
   }
 
   template<typename P>
-  Ptr(P&& p)
+  explicit Ptr(P&& p)
     : detail::PtrBase<SDLType>(
         std::forward<P>(p),
         detail::deleterFor<SDLType>())

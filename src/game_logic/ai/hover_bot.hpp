@@ -48,7 +48,7 @@ struct TeleportingIn {
 
 
 struct Moving {
-  Moving(const engine::components::Orientation orientation)
+  explicit Moving(const engine::components::Orientation orientation)
     : mOrientation(orientation)
   {
   }
@@ -58,7 +58,7 @@ struct Moving {
 
 
 struct Reorientation {
-  Reorientation(const engine::components::Orientation targetOrientation)
+  explicit Reorientation(const engine::components::Orientation targetOrientation)
     : mTargetOrientation(targetOrientation)
   {
   }
