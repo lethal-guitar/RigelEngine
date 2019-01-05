@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 
@@ -40,7 +41,7 @@ struct Hint {
 struct LevelHints {
   LevelHints() = default;
   explicit LevelHints(std::vector<Hint> hints)
-    : mHints(hints)
+    : mHints(std::move(hints))
   {
   }
 
