@@ -138,8 +138,7 @@ ParticleSystem::ParticleSystem(
 }
 
 
-ParticleSystem::~ParticleSystem() {
-}
+ParticleSystem::~ParticleSystem() = default;
 
 
 void ParticleSystem::spawnParticles(
