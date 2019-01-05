@@ -328,8 +328,7 @@ ActorID scoreNumberActor(const ScoreNumberType type) {
     int(ScoreNumberType::S500) == 1 &&
     int(ScoreNumberType::S2000) == 2 &&
     int(ScoreNumberType::S5000) == 3 &&
-    int(ScoreNumberType::S10000) == 4,
-    "");
+    int(ScoreNumberType::S10000) == 4);
 
   const auto intType = static_cast<ActorID>(type);
   return 123 + intType;

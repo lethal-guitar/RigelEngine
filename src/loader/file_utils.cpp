@@ -42,7 +42,7 @@ ByteBuffer loadFile(const string& fileName) {
   const auto fileSize = file.tellg();
   file.seekg(0);
   ByteBuffer data(fileSize);
-  static_assert(sizeof(char) == sizeof(uint8_t), "");
+  static_assert(sizeof(char) == sizeof(uint8_t));
   file.read(reinterpret_cast<char*>(data.data()), fileSize);
   return data;
 }

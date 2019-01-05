@@ -49,8 +49,7 @@ struct Particle {
   void update() {
     static_assert(
       (PARTICLE_SYSTEM_LIFE_TIME - 1) + INITIAL_INDEX_LIMIT <
-      VERTICAL_MOVEMENT_TABLE.size(),
-      "");
+      VERTICAL_MOVEMENT_TABLE.size());
 
     mOffsetY += VERTICAL_MOVEMENT_TABLE[mMovementIndexY++];
   }

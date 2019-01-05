@@ -207,8 +207,7 @@ void EffectsSystem::processEffectsAndAdvance(
             int(M::FlyUp) == int(SpriteMovement::FlyUp) &&
             int(M::FlyUpperLeft) == int(SpriteMovement::FlyUpperLeft) &&
             int(M::FlyLeft) == int(SpriteMovement::FlyLeft) &&
-            int(M::FlyDown) == int(SpriteMovement::FlyDown),
-            "");
+            int(M::FlyDown) == int(SpriteMovement::FlyDown));
 
           const auto movementType =
             static_cast<SpriteMovement>(static_cast<int>(sprite.mMovement));

@@ -100,7 +100,7 @@ auto toPlayerProjectileType(const ProjectileType type) {
     int(PType::Laser) == int(ProjectileType::PlayerLaserShot) &&
     int(PType::Rocket) == int(ProjectileType::PlayerRocketShot) &&
     int(PType::Flame) == int(ProjectileType::PlayerFlameShot) &&
-    int(PType::ReactorDebris) == int(ProjectileType::ReactorDebris), "");
+    int(PType::ReactorDebris) == int(ProjectileType::ReactorDebris));
   return static_cast<PType>(static_cast<int>(type));
 }
 
