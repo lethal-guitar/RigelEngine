@@ -158,7 +158,6 @@ struct AnimationSequence {
     const int renderSlot = 0,
     const bool repeat = false)
     : mFrames(frames)
-    , mCurrentFrame(0)
     , mRenderSlot(renderSlot)
     , mRepeat(repeat)
   {

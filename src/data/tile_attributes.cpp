@@ -63,7 +63,6 @@ CollisionData CollisionData::fullySolid() {
 
 
 CollisionData::CollisionData(const std::initializer_list<CollisionData>& items)
-  : mCollisionFlagsBitPack(0)
 {
   for (const auto& item : items) {
     mCollisionFlagsBitPack |= item.mCollisionFlagsBitPack;
