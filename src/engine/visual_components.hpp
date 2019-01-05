@@ -139,7 +139,7 @@ struct AnimationLoop {
   )
     : mDelayInFrames(delayInFrames)
     , mStartFrame(startFrame)
-    , mEndFrame(std::move(endFrame))
+    , mEndFrame(endFrame)
     , mRenderSlot(renderSlot)
   {
   }
