@@ -626,7 +626,7 @@ components::ItemContainer makeContainer(Args&&... components) {
 
 void turnIntoContainer(
   ex::Entity entity,
-  const Sprite containerSprite,
+  Sprite containerSprite,
   const int givenScore,
   components::ItemContainer&& container
 ) {
@@ -636,13 +636,13 @@ void turnIntoContainer(
   auto originalSprite = *entity.component<Sprite>();
   addToContainer(container, originalSprite);
 
-  entity.remove<Sprite>();
-  entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(std::move(container));
   entity.assign<Shootable>(Health{1}, givenScore);
   addDefaultMovingBody(
     entity,
     engine::inferBoundingBox(containerSprite, entity));
+  entity.remove<Sprite>();
+  entity.assign<Sprite>(std::move(containerSprite));
 }
 
 
