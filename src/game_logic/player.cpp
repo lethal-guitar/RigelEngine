@@ -391,6 +391,7 @@ void Player::update(const PlayerInput& unfilteredInput) {
   }
 
   if (isIncapacitated()) {
+    updateIncapacitatedState(std::get<Incapacitated>(mState));
     return;
   }
 
@@ -445,9 +446,11 @@ void Player::die() {
 }
 
 
-void Player::incapacitate() {
-  mEntity.component<c::Sprite>()->mShow = false;
-  mState = Incapacitated{};
+void Player::incapacitate(const int framesToKeepVisible) {
+  if (framesToKeepVisible == 0) {
+    mEntity.component<c::Sprite>()->mShow = false;
+  }
+  mState = Incapacitated{framesToKeepVisible};
 }
 
 
@@ -952,6 +955,21 @@ void Player::updateDeathAnimation() {
     [&, this](const Finished&) {
       // no-op
     });
+}
+
+
+void Player::updateIncapacitatedState(Incapacitated& state) {
+  auto& visibleFramesRemaining = state.mVisibleFramesRemaining;
+  if (visibleFramesRemaining > 0) {
+    --visibleFramesRemaining;
+    if (visibleFramesRemaining == 0) {
+      mEntity.component<c::Sprite>()->mShow = false;
+    }
+  }
+
+  if (mMercyFramesRemaining > 0) {
+    --mMercyFramesRemaining;
+  }
 }
 
 

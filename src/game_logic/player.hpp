@@ -92,7 +92,9 @@ struct Interacting {
 };
 
 
-struct Incapacitated {};
+struct Incapacitated {
+  int mVisibleFramesRemaining;
+};
 
 
 namespace death_animation {
@@ -190,7 +192,7 @@ public:
   void takeDamage(int amount);
   void die();
 
-  void incapacitate();
+  void incapacitate(int framesToKeepVisible = 0);
   void setFree();
 
   void doInteractionAnimation();
@@ -251,6 +253,7 @@ private:
     const base::Vector& movementVector,
     bool jumpPressed);
   void updateDeathAnimation();
+  void updateIncapacitatedState(Incapacitated& state);
 
   VerticalMovementResult moveVerticallyInAir(int amount);
 
