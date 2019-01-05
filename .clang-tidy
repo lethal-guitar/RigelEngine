@@ -1,4 +1,5 @@
-# To run: for f in  $(git ls-files src/); do clang-tidy-3.9 $f -fix -p build; done
+# To run:
+# clang-tidy -fix -p build $(git ls-files src/)
 
 Checks: >
     ,-*,
@@ -7,5 +8,6 @@ Checks: >
     ,misc-string-constructor,
     ,modernize-*,
     ,performance-*,
+    ,-modernize-use-default-member-init,
 
 HeaderFilterRegex: 'src/'
