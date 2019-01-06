@@ -222,6 +222,10 @@ public:
 
   base::Vector& position();
 
+  data::PlayerModel& model() {
+    return *mpPlayerModel;
+  }
+
   void receive(const events::ElevatorAttachmentChanged& event);
 
   bool hasSpiderAt(const SpiderClingPosition position) const {
