@@ -1391,6 +1391,10 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{8 + difficultyOffset}, GivenScore{5000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::Snake{});
+      entity.assign<Orientation>(Orientation::Left);
       break;
 
     case 79: // Security camera, ceiling-mounted

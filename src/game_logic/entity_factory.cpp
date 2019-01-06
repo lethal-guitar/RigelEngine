@@ -39,6 +39,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/snake.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/ai/watch_bot.hpp"
@@ -250,6 +251,9 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case 5:
     case 6:
       return 39;
+
+    case 78:
+      return 9;
 
     case 98:
       return 10;
