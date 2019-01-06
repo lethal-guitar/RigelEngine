@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "game_logic/input.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -58,6 +59,7 @@ struct GlobalDependencies {
 
 
 struct PerFrameState {
+  PlayerInput mInput;
   bool mIsOddFrame = false;
   bool mIsEarthShaking = false;
 };

@@ -641,7 +641,9 @@ void turnIntoContainer(
   entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(std::move(container));
   entity.assign<Shootable>(Health{1}, givenScore);
-  addDefaultMovingBody(entity, engine::inferBoundingBox(containerSprite));
+  addDefaultMovingBody(
+    entity,
+    engine::inferBoundingBox(containerSprite, entity));
 }
 
 
@@ -676,7 +678,8 @@ void EntityFactory::configureItemBox(
     MovementSequence{
       CONTAINER_BOUNCE_SEQUENCE, ResetAfterSequence{true}, EnableX{false}});
   addDefaultMovingBody(
-    container, engine::inferBoundingBox(*entity.component<Sprite>()));
+    container,
+    engine::inferBoundingBox(*entity.component<Sprite>(), entity));
 
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
@@ -1388,6 +1391,10 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{8 + difficultyOffset}, GivenScore{5000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::Snake{});
+      entity.assign<Orientation>(Orientation::Left);
       break;
 
     case 79: // Security camera, ceiling-mounted

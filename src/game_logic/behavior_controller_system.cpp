@@ -46,9 +46,14 @@ BehaviorControllerSystem::BehaviorControllerSystem(
 }
 
 
-void BehaviorControllerSystem::update(entityx::EntityManager& es) {
+void BehaviorControllerSystem::update(
+  entityx::EntityManager& es,
+  const PlayerInput& input
+) {
   using engine::components::Active;
   using game_logic::components::BehaviorController;
+
+  mPerFrameState.mInput = input;
 
   es.each<BehaviorController, Active>([this](
     entityx::Entity entity,

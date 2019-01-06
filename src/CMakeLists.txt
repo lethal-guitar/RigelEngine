@@ -103,6 +103,8 @@ set(core_sources
     game_logic/ai/slime_blob.hpp
     game_logic/ai/slime_pipe.cpp
     game_logic/ai/slime_pipe.hpp
+    game_logic/ai/snake.cpp
+    game_logic/ai/snake.hpp
     game_logic/ai/spider.cpp
     game_logic/ai/spider.hpp
     game_logic/ai/spike_ball.cpp

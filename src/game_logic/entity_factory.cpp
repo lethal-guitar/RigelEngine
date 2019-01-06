@@ -22,8 +22,8 @@
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
-#include "game_logic/ai/bomber_plane.hpp"
 #include "game_logic/ai/blue_guard.hpp"
+#include "game_logic/ai/bomber_plane.hpp"
 #include "game_logic/ai/ceiling_sucker.hpp"
 #include "game_logic/ai/eyeball_thrower.hpp"
 #include "game_logic/ai/hover_bot.hpp"
@@ -39,6 +39,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/snake.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/ai/watch_bot.hpp"
@@ -251,6 +252,9 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case 6:
       return 39;
 
+    case 78:
+      return 9;
+
     case 98:
       return 10;
 
@@ -382,7 +386,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite));
+    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite, entity));
   }
   return entity;
 }
@@ -423,7 +427,7 @@ entityx::Entity EntityFactory::createActor(
 ) {
   auto entity = createSprite(id, position);
   auto& sprite = *entity.component<Sprite>();
-  const auto boundingBox = engine::inferBoundingBox(sprite);
+  const auto boundingBox = engine::inferBoundingBox(sprite, entity);
 
   configureEntity(entity, id, boundingBox);
 
@@ -536,7 +540,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = engine::inferBoundingBox(sprite);
+      boundingBox = engine::inferBoundingBox(sprite, entity);
       entity.assign<Sprite>(sprite);
     }
 

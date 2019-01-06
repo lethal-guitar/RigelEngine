@@ -40,9 +40,12 @@ inline components::BoundingBox inferBoundingBox(
 
 
 inline components::BoundingBox inferBoundingBox(
-  const components::Sprite& sprite
+  const components::Sprite& sprite,
+  entityx::Entity entity
 ) {
-  return inferBoundingBox(sprite.mpDrawData->mFrames[0]);
+  const auto realFrame = virtualToRealFrame(
+    0, *sprite.mpDrawData, entity);
+  return inferBoundingBox(sprite.mpDrawData->mFrames[realFrame]);
 }
 
 
@@ -53,8 +56,11 @@ inline void synchronizeBoundingBoxToSprite(
   auto& sprite = *entity.component<components::Sprite>();
   auto& bbox = *entity.component<components::BoundingBox>();
 
-  bbox = inferBoundingBox(
-    sprite.mpDrawData->mFrames[sprite.mFramesToRender[renderSlot]]);
+  const auto currentRealFrame = virtualToRealFrame(
+    sprite.mFramesToRender[renderSlot],
+    *sprite.mpDrawData,
+    entity);
+  bbox = inferBoundingBox(sprite.mpDrawData->mFrames[currentRealFrame]);
 }
 
 

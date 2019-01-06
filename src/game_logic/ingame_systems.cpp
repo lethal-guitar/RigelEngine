@@ -202,7 +202,7 @@ void IngameSystems::update(
   mSlimeBlobSystem.update(es);
   mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
-  mBehaviorControllerSystem.update(es);
+  mBehaviorControllerSystem.update(es, input);
 
   // ----------------------------------------------------------------------
   // Physics and other updates

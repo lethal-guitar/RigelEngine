@@ -84,8 +84,7 @@ void CeilingSucker::update(
         playerPos.x + 1 >= position.x &&
         position.x + 1 >= playerPos.x
       ) {
-        // TODO: Show player for one more frame
-        s.mpPlayer->incapacitate();
+        s.mpPlayer->incapacitate(1);
         mState = HoldingPlayer{};
         engine::startAnimationSequence(entity, ANIM_SEQUENCE_GRAB_PLAYER);
       }

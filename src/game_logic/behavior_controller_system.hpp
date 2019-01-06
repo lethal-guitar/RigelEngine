@@ -18,6 +18,7 @@
 
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/input.hpp"
 
 namespace rigel { namespace events {
   struct EarthQuakeBegin;
@@ -40,7 +41,9 @@ public:
     const base::Vector* pCameraPosition,
     data::map::Map* pMap);
 
-  void update(entityx::EntityManager& es);
+  void update(
+    entityx::EntityManager& es,
+    const PlayerInput& input);
 
   void receive(const events::ShootableDamaged& event);
   void receive(const events::ShootableKilled& event);

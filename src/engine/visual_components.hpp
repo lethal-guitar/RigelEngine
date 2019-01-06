@@ -61,6 +61,12 @@ struct SpriteDrawData {
 constexpr auto IGNORE_RENDER_SLOT = -1;
 
 
+int virtualToRealFrame(
+  const int virtualFrame,
+  const SpriteDrawData& drawData,
+  const entityx::Entity entity);
+
+
 namespace components {
 
 struct Sprite {
