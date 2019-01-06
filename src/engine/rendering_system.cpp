@@ -66,6 +66,30 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated) {
 }
 
 
+int virtualToRealFrame(
+  const int virtualFrame,
+  const SpriteDrawData& drawData,
+  const entityx::Entity entity
+) {
+  auto realFrame = virtualFrame;
+  if (
+    drawData.mOrientationOffset &&
+    entity.has_component<Orientation>()
+  ) {
+    const auto orientation = *entity.component<const Orientation>();
+    if (orientation == Orientation::Right) {
+      realFrame += *drawData.mOrientationOffset;
+    }
+  }
+
+  if (!drawData.mVirtualToRealFrameMap.empty()) {
+    realFrame = drawData.mVirtualToRealFrameMap[realFrame];
+  }
+
+  return realFrame;
+}
+
+
 void updateAnimatedSprites(ex::EntityManager& es) {
   es.each<Sprite, AnimationLoop>([](
     ex::Entity entity,
@@ -258,22 +282,8 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
         continue;
       }
 
-      // Stage 1: Map frame -> fram based on orientation, if applicable
-      auto frameIndex = baseFrameIndex;
-      if (
-        sprite.mpDrawData->mOrientationOffset &&
-        data.mEntity.has_component<Orientation>()
-      ) {
-        const auto orientation = *data.mEntity.component<const Orientation>();
-        if (orientation == Orientation::Right) {
-          frameIndex += *sprite.mpDrawData->mOrientationOffset;
-        }
-      }
-
-      // Stage 2: Map oriented frame using the virtual-to-real frame map
-      if (!sprite.mpDrawData->mVirtualToRealFrameMap.empty()) {
-        frameIndex = sprite.mpDrawData->mVirtualToRealFrameMap[frameIndex];
-      }
+      const auto frameIndex = virtualToRealFrame(
+        baseFrameIndex, *sprite.mpDrawData, data.mEntity);
 
       // White flash effect
       if (sprite.mFlashingWhite) {
