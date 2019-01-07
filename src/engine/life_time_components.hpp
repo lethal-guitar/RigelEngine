@@ -36,7 +36,7 @@ struct AutoDestroy {
   {
   }
 
-  explicit AutoDestroy(std::initializer_list<Condition> conditions)
+  AutoDestroy(std::initializer_list<Condition> conditions)
   {
     for (const auto condition : conditions) {
       const auto conditionValue = static_cast<int>(condition);

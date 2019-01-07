@@ -139,7 +139,7 @@ struct AnimationLoop {
   )
     : mDelayInFrames(delayInFrames)
     , mStartFrame(startFrame)
-    , mEndFrame(std::move(endFrame))
+    , mEndFrame(endFrame)
     , mRenderSlot(renderSlot)
   {
   }
@@ -153,12 +153,11 @@ struct AnimationLoop {
 
 
 struct AnimationSequence {
-  AnimationSequence(
+  explicit AnimationSequence(
     const base::ArrayView<int>& frames,
     const int renderSlot = 0,
     const bool repeat = false)
     : mFrames(frames)
-    , mCurrentFrame(0)
     , mRenderSlot(renderSlot)
     , mRepeat(repeat)
   {

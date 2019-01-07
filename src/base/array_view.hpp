@@ -55,14 +55,15 @@ public:
 
   // implicit on purpose
   template <std::size_t N>
-  constexpr ArrayView(const std::array<T, N>& array) noexcept
+  constexpr ArrayView(const std::array<T, N>& array) noexcept // NOLINT
     : mpData(array.data())
     , mSize(static_cast<size_type>(N))
   {
   }
 
+  // implicit on purpose
   template <std::size_t N>
-  constexpr ArrayView(const T (&array)[N]) noexcept // implicit on purpose
+  constexpr ArrayView(const T (&array)[N]) noexcept // NOLINT
     : mpData(array)
     , mSize(static_cast<size_type>(N))
   {

@@ -41,7 +41,7 @@ struct SimpleWalker {
     bool mWalkOnCeiling = false;
   };
 
-  SimpleWalker(const Configuration* pConfig)
+  explicit SimpleWalker(const Configuration* pConfig)
     : mpConfig(pConfig)
   {
   }

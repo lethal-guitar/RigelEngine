@@ -28,7 +28,7 @@ namespace rigel { namespace engine {
 class MapRenderer {
 public:
   struct MapRenderData {
-    MapRenderData(data::map::LevelData&& loadedLevel)
+    explicit MapRenderData(data::map::LevelData&& loadedLevel)
       : mTileSetImage(std::move(loadedLevel.mTileSetImage))
       , mBackdropImage(std::move(loadedLevel.mBackdropImage))
       , mSecondaryBackdropImage(std::move(loadedLevel.mSecondaryBackdropImage))

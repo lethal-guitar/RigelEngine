@@ -25,6 +25,7 @@
 #include "loader/png_image.hpp"
 
 #include <cassert>
+#include <utility>
 
 
 namespace rigel { namespace loader {
@@ -56,7 +57,7 @@ ActorImagePackage::ActorImagePackage(
   std::optional<std::string> maybeImageReplacementsPath
 )
   : mImageData(filePackage.file("ACTORS.MNI"))
-  , mMaybeReplacementsPath(maybeImageReplacementsPath)
+  , mMaybeReplacementsPath(std::move(maybeImageReplacementsPath))
 {
   const auto actorInfoData = filePackage.file("ACTRINFO.MNI");
 

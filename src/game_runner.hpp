@@ -55,7 +55,7 @@ public:
     GameMode::Context context,
     std::optional<base::Vector> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false);
-  ~GameRunner();
+  ~GameRunner(); // NOLINT
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);

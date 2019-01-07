@@ -328,8 +328,7 @@ ActorID scoreNumberActor(const ScoreNumberType type) {
     int(ScoreNumberType::S500) == 1 &&
     int(ScoreNumberType::S2000) == 2 &&
     int(ScoreNumberType::S5000) == 3 &&
-    int(ScoreNumberType::S10000) == 4,
-    "");
+    int(ScoreNumberType::S10000) == 4);
 
   const auto intType = static_cast<ActorID>(type);
   return 123 + intType;
@@ -627,7 +626,7 @@ components::ItemContainer makeContainer(Args&&... components) {
 
 void turnIntoContainer(
   ex::Entity entity,
-  const Sprite containerSprite,
+  Sprite containerSprite,
   const int givenScore,
   components::ItemContainer&& container
 ) {
@@ -637,13 +636,13 @@ void turnIntoContainer(
   auto originalSprite = *entity.component<Sprite>();
   addToContainer(container, originalSprite);
 
-  entity.remove<Sprite>();
-  entity.assign<Sprite>(containerSprite);
   entity.assign<components::ItemContainer>(std::move(container));
   entity.assign<Shootable>(Health{1}, givenScore);
   addDefaultMovingBody(
     entity,
     engine::inferBoundingBox(containerSprite, entity));
+  entity.remove<Sprite>();
+  entity.assign<Sprite>(std::move(containerSprite));
 }
 
 

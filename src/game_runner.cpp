@@ -154,8 +154,7 @@ GameRunner::GameRunner(
 }
 
 
-GameRunner::~GameRunner() {
-}
+GameRunner::~GameRunner() = default;
 
 
 void GameRunner::handleEvent(const SDL_Event& event) {
