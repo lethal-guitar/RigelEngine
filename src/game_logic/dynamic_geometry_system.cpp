@@ -285,7 +285,7 @@ void behaviors::DynamicGeometryController::update(
     return false;
   };
 
-  auto burnEffect = [&]() {
+  auto doBurnEffect = [&]() {
     d.mpEvents->emit(rigel::events::ScreenShake{2});
     d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
 
@@ -329,13 +329,13 @@ void behaviors::DynamicGeometryController::update(
       case State::Falling:
         if (fall()) {
           mState = State::Sinking;
-          burnEffect();
+          doBurnEffect();
           sink();
         }
         break;
 
       case State::Sinking:
-        burnEffect();
+        doBurnEffect();
         sink();
         break;
 
