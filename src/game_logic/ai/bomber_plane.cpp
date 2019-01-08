@@ -188,8 +188,6 @@ void BigBomb::onKilled(
   engine::reassign<components::DestructionEffects>(
     entity, BIG_BOMB_DETONATE_IN_AIR_EFFECT_SPEC);
   triggerEffects(entity, *d.mpEntityManager);
-
-  entity.destroy();
 }
 
 
