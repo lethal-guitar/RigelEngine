@@ -1346,7 +1346,6 @@ void EntityFactory::configureEntity(
 
     case 63: // Big bomb
       entity.assign<Shootable>(Health{1}, GivenScore{200});
-      entity.component<Shootable>()->mDestroyWhenKilled = false;
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
       entity.assign<DestructionEffects>(

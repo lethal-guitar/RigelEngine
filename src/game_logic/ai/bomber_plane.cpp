@@ -18,6 +18,7 @@
 
 #include "base/match.hpp"
 #include "engine/base_components.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/movement.hpp"
@@ -160,6 +161,19 @@ void BigBomb::update(
     mStartedFalling = true;
     entity.component<Sprite>()->mShow = true;
   }
+
+  // Normally, the bomb's explosion is triggered in the onCollision callback,
+  // but if the bomb spawns in a location where it's already touching the
+  // ground (this happens in L3, for example), it would get stuck without
+  // exploding if we didn't do this check here.
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& bbox = *entity.component<BoundingBox>();
+  if (d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+    triggerEffects(entity, *d.mpEntityManager);
+    d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
+    d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
+    entity.destroy();
+  }
 }
 
 
@@ -174,8 +188,6 @@ void BigBomb::onKilled(
   engine::reassign<components::DestructionEffects>(
     entity, BIG_BOMB_DETONATE_IN_AIR_EFFECT_SPEC);
   triggerEffects(entity, *d.mpEntityManager);
-
-  entity.destroy();
 }
 
 
