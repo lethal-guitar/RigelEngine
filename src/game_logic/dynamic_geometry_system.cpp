@@ -20,6 +20,7 @@
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
@@ -263,11 +264,17 @@ void behaviors::DynamicGeometryController::update(
       d.mpCollisionChecker->isOnSolidGround(mapSection);
   };
 
+  auto makeAlwaysActive = [&]() {
+    engine::reassign<ActivationSettings>(
+      entity, ActivationSettings::Policy::Always);
+  };
+
   auto updateWaiting = [&](const int numFrames) {
     ++mFramesElapsed;
     if (mFramesElapsed == numFrames) {
       d.mpServiceProvider->playSound(data::SoundId::FallingRock);
     } else if (mFramesElapsed == numFrames + 1) {
+      makeAlwaysActive();
       mState = State::Falling;
     }
   };
@@ -285,7 +292,7 @@ void behaviors::DynamicGeometryController::update(
     return false;
   };
 
-  auto burnEffect = [&]() {
+  auto doBurnEffect = [&]() {
     d.mpEvents->emit(rigel::events::ScreenShake{2});
     d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
 
@@ -329,13 +336,13 @@ void behaviors::DynamicGeometryController::update(
       case State::Falling:
         if (fall()) {
           mState = State::Sinking;
-          burnEffect();
+          doBurnEffect();
           sink();
         }
         break;
 
       case State::Sinking:
-        burnEffect();
+        doBurnEffect();
         sink();
         break;
 
@@ -369,6 +376,7 @@ void behaviors::DynamicGeometryController::update(
     switch (mState) {
       case State::Waiting:
         if (!isOnSolidGround()) {
+          makeAlwaysActive();
           mState = State::Falling;
           if (fall()) {
             land();
@@ -394,6 +402,7 @@ void behaviors::DynamicGeometryController::update(
     switch (mState) {
       case State::Waiting:
         if (!isOnSolidGround()) {
+          makeAlwaysActive();
           mState = State::Falling;
           if (fall()) {
             explode();
@@ -443,6 +452,7 @@ void behaviors::DynamicGeometryController::update(
       case State::Waiting:
         ++mFramesElapsed;
         if (mFramesElapsed == 2) {
+          makeAlwaysActive();
           mState = State::Falling;
         }
         break;
