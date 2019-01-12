@@ -79,6 +79,8 @@ struct WatchBot {
     const engine::events::CollidedWithWorld& event,
     entityx::Entity entity);
 
+  void land(entityx::Entity entity, GlobalDependencies& dependencies);
+
   watch_bot::State mState;
 };
 

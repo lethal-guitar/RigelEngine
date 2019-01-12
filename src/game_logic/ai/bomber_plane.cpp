@@ -148,6 +148,18 @@ void BomberPlane::update(
 }
 
 
+void BomberPlane::onKilled(
+  GlobalDependencies&,
+  GlobalState&,
+  const base::Point<float>&,
+  entityx::Entity
+) {
+  if (mBombSprite) {
+    mBombSprite.destroy();
+  }
+}
+
+
 void BigBomb::update(
   GlobalDependencies& d,
   GlobalState& s,

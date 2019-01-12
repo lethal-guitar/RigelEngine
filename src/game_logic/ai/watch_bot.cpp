@@ -18,6 +18,7 @@
 
 #include "base/match.hpp"
 #include "data/sound_ids.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
@@ -66,6 +67,7 @@ void WatchBot::update(
   using namespace watch_bot;
 
   const auto& position = *entity.component<WorldPosition>();
+  const auto& bbox = *entity.component<BoundingBox>();
   const auto& playerPos = s.mpPlayer->orientedPosition();
 
   auto& animationFrame = entity.component<Sprite>()->mFramesToRender[0];
@@ -109,6 +111,10 @@ void WatchBot::update(
         *d.mpCollisionChecker,
         entity,
         orientation::toMovement(state.mOrientation));
+
+      if (d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+        land(entity, d);
+      }
     },
 
     [&, this](OnGround& state) {
@@ -164,27 +170,36 @@ void WatchBot::onCollision(
   const engine::events::CollidedWithWorld&,
   entityx::Entity entity
 ) {
-  using namespace engine::components;
   using namespace watch_bot;
-
-  const auto isOnScreen = entity.component<Active>()->mIsOnScreen;
 
   base::match(mState,
     [&, this](const Falling& state) {
-      if (isOnScreen) {
-        d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
-      }
-
-      engine::startAnimationSequence(entity, LAND_ON_GROUND_ANIM);
-      entity.component<MovingBody>()->mGravityAffected = false;
-      mState = OnGround{};
-      advanceRandomNumberGenerator(d);
-
-      engine::synchronizeBoundingBoxToSprite(entity);
+      land(entity, d);
     },
 
     [](const auto&) {}
   );
+}
+
+
+void WatchBot::land(
+  entityx::Entity entity,
+  GlobalDependencies& d
+) {
+  using namespace engine::components;
+  using namespace watch_bot;
+
+  const auto isOnScreen = entity.component<Active>()->mIsOnScreen;
+  if (isOnScreen) {
+    d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
+  }
+
+  engine::startAnimationSequence(entity, LAND_ON_GROUND_ANIM);
+  entity.component<MovingBody>()->mGravityAffected = false;
+  mState = OnGround{};
+  advanceRandomNumberGenerator(d);
+
+  engine::synchronizeBoundingBoxToSprite(entity);
 }
 
 }}}
