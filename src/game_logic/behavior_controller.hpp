@@ -190,6 +190,12 @@ public:
     mpSelf->onCollision(dependencies, state, event, entity);
   }
 
+  template<typename T>
+  T& get() {
+    auto pSelf = mpSelf.get();
+    return dynamic_cast<Model<T>*>(pSelf)->mData;
+  }
+
 private:
   struct Concept {
     virtual ~Concept() = default;

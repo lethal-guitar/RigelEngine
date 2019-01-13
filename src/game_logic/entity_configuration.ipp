@@ -1527,6 +1527,14 @@ void EntityFactory::configureEntity(
       ai::configureRedBird(entity);
       break;
 
+    case 219: // Smash hammer
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::SmashHammer{});
+      entity.assign<CustomRenderFunc>(&behaviors::SmashHammer::render);
+      break;
+
     case 244: // Small uni-cycle robot
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
