@@ -1890,7 +1890,12 @@ void EntityFactory::configureEntity(
 
     case 250: // airlock effect, left
     case 251: // airlock effect, right
+      break;
+
     case 254: // explosion effect trigger
+      entity.assign<BehaviorController>(ExplosionEffect{});
+      entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
+      entity.assign<DestructionEffects>(EXPLOSION_EFFECT_EFFECT_SPEC);
       break;
 
     // Various projectiles. Damage, velocity etc. are assigned by the

@@ -38,4 +38,13 @@ struct WaterDropGenerator {
     entityx::Entity entity);
 };
 
+
+struct ExplosionEffect {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+};
+
 }}}
