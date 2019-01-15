@@ -85,6 +85,6 @@ void renderVerticalSlidingDoor(
   engine::Renderer* pRenderer,
   entityx::Entity,
   const engine::components::Sprite& sprite,
-  const base::Vector& screenPosition);
+  const base::Vector& positionInScreenSpace);
 
 }}

@@ -87,6 +87,8 @@ namespace vertical {
 
 namespace {
 
+constexpr auto NUM_DOOR_SEGMENTS = 8;
+
 using State = components::VerticalSlidingDoor::State;
 
 
@@ -244,19 +246,21 @@ void renderVerticalSlidingDoor(
   engine::Renderer* pRenderer,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
-  const base::Vector& screenPosition
+  const base::Vector& positionInScreenSpace
 ) {
+  using namespace ai::vertical;
+
   const auto& state = *entity.component<ai::components::VerticalSlidingDoor>();
 
-  const auto yStep = data::GameTraits::tileSize;
-  const auto topLeftScreenPos = screenPosition - base::Vector{0, 7 * yStep};
-  const auto segmentsToDraw = 8 - std::max(0, state.mSlideStep - 1);
+  const auto segmentsToDraw =
+    NUM_DOOR_SEGMENTS - std::max(0, state.mSlideStep - 1);
 
   for (int i = 0; i < segmentsToDraw; ++i) {
-    const auto segmentIndex = 8 - i - state.mSlideStep;
-    const auto x = topLeftScreenPos.x;
-    const auto y = topLeftScreenPos.y + yStep * i;
-    sprite.mpDrawData->mFrames[segmentIndex].mImage.render(pRenderer, x, y);
+    const auto segmentIndex = NUM_DOOR_SEGMENTS - i - state.mSlideStep;
+    engine::drawSpriteFrame(
+      sprite.mpDrawData->mFrames[segmentIndex],
+      positionInScreenSpace - base::Vector{0, NUM_DOOR_SEGMENTS - i},
+      pRenderer);
   }
 }
 

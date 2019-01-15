@@ -283,13 +283,9 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     return;
   }
 
-  const auto worldToScreenPx = data::tileVectorToPixelVector(*mpScrollOffset);
-
   if (data.mEntity.has_component<CustomRenderFunc>()) {
     const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
-    const auto screenPos =
-      data::tileVectorToPixelVector(pos) - worldToScreenPx;
-    renderFunc(mpRenderer, data.mEntity, sprite, screenPos);
+    renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpScrollOffset);
   } else {
     for (const auto baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
