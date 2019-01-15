@@ -66,6 +66,11 @@ int virtualToRealFrame(
   const SpriteDrawData& drawData,
   const entityx::Entity entity);
 
+void drawSpriteFrame(
+  const SpriteFrame& frame,
+  const base::Vector& position,
+  Renderer* pRenderer);
+
 
 namespace components {
 

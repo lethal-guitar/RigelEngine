@@ -142,6 +142,23 @@ void updateAnimatedSprites(ex::EntityManager& es) {
 }
 
 
+void drawSpriteFrame(
+  const SpriteFrame& frame,
+  const base::Vector& position,
+  Renderer* pRenderer
+) {
+  // World-space tile positions refer to a sprite's bottom left tile,
+  // but we need its top left corner for drawing.
+  const auto heightTiles = data::pixelsToTiles(frame.mImage.height());
+  const auto topLeft = position - base::Vector(0, heightTiles - 1);
+  const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
+  const auto drawOffsetPx = data::tileVectorToPixelVector(
+    frame.mDrawOffset);
+
+  frame.mImage.render(pRenderer, topLeftPx + drawOffsetPx);
+}
+
+
 struct RenderingSystem::SpriteData {
   SpriteData(
     const ex::Entity entity,
@@ -292,16 +309,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       auto& frame = sprite.mpDrawData->mFrames[frameIndex];
 
-      // World-space tile positions refer to a sprite's bottom left tile,
-      // but we need its top left corner for drawing.
-      const auto heightTiles = data::pixelsToTiles(frame.mImage.height());
-      const auto topLeft = pos - base::Vector(0, heightTiles - 1);
-      const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
-      const auto drawOffsetPx = data::tileVectorToPixelVector(
-        frame.mDrawOffset);
-
-      const auto screenPositionPx = topLeftPx + drawOffsetPx - worldToScreenPx;
-      frame.mImage.render(mpRenderer, screenPositionPx);
+      drawSpriteFrame(frame, pos - *mpScrollOffset, mpRenderer);
 
       mpRenderer->setOverlayColor(base::Color{});
     }
