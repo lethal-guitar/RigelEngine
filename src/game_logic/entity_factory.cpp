@@ -39,6 +39,7 @@
 #include "game_logic/ai/sliding_door.hpp"
 #include "game_logic/ai/slime_blob.hpp"
 #include "game_logic/ai/slime_pipe.hpp"
+#include "game_logic/ai/smash_hammer.hpp"
 #include "game_logic/ai/snake.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
