@@ -68,7 +68,7 @@ private:
     }
 
     unsigned int mNextOffset = 0;
-    unsigned int mFramesElapsed = NEXT_LINE_DELAY;
+    unsigned int mFramesRemaining = NEXT_LINE_DELAY;
   };
 
   using State = std::variant<Idle, Printing, Waiting>;
