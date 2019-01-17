@@ -325,3 +325,13 @@ const effects::EffectSpec BIG_BOMB_DETONATE_EFFECT_SPEC[] = {
   {effects::EffectSprite{{-16, 2}, 43, EffectMovement::None}, 8},
   {effects::EffectSprite{{+16, 2}, 43, EffectMovement::None}, 8},
 };
+
+
+const effects::EffectSpec EXPLOSION_EFFECT_EFFECT_SPEC[] = {
+  {effects::RandomExplosionSound{}, 0},
+  {effects::EffectSprite{{0, 0}, 1, EffectMovement::None}, 0},
+  {effects::RandomExplosionSound{}, 1},
+  {effects::EffectSprite{{-1, -2}, 1, EffectMovement::None}, 1},
+  {effects::RandomExplosionSound{}, 2},
+  {effects::EffectSprite{{1, -3}, 1, EffectMovement::None}, 2},
+};

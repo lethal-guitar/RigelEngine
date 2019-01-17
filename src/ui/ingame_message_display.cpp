@@ -82,8 +82,8 @@ void IngameMessageDisplay::update() {
     },
 
     [this](Waiting& state) {
-      --state.mFramesElapsed;
-      if (state.mFramesElapsed == 0) {
+      --state.mFramesRemaining;
+      if (state.mFramesRemaining == 0) {
         mPrintedMessage.clear();
 
         if (state.mNextOffset < mMessage.size()) {

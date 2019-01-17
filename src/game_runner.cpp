@@ -407,6 +407,8 @@ void GameRunner::loadLevel(
       mpServiceProvider, &mRandomGenerator, &mEventManager};
   }
 
+  updateGameLogic();
+
   mpServiceProvider->playMusic(loadedLevel.mMusicFile);
 }
 
