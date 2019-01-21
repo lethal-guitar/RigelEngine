@@ -88,10 +88,9 @@ void Snake::update(
       myX + offset1 == playerX || myX + offset2 == playerX;
     const auto inReachVertically = position.y == playerPos.y;
 
-    // TODO: Check player not riding elevator
     return
       inReachHorizontally && inReachVertically &&
-      s.mpPlayer->stateIs<OnGround>();
+      s.mpPlayer->isInRegularState();
   };
 
   auto walkWhilePlayerSwallowed = [&]() {

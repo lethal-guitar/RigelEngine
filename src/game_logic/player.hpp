@@ -200,6 +200,8 @@ public:
   void resetAfterDeath(entityx::Entity newEntity);
   void resetAfterRespawn();
 
+  bool isInRegularState() const;
+
   bool canTakeDamage() const;
   bool isInMercyFrames() const;
   bool isDead() const;
