@@ -1446,7 +1446,7 @@ void EntityFactory::configureEntity(
     case 80: // Security camera, floor-mounted
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<ai::components::SecurityCamera>();
+      entity.assign<BehaviorController>(behaviors::SecurityCamera{});
       entity.assign<DestructionEffects>(CAMERA_KILL_EFFECT_SPEC);
       entity.assign<ActorTag>(ActorTag::Type::ShootableCamera);
       break;

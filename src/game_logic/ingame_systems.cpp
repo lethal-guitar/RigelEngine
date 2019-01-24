@@ -123,7 +123,6 @@ IngameSystems::IngameSystems(
       eventManager)
   , mRedBirdSystem(playerEntity, eventManager)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
-  , mSecurityCameraSystem(playerEntity)
   , mSimpleWalkerSystem(
       playerEntity,
       &mCollisionChecker)
@@ -196,7 +195,6 @@ void IngameSystems::update(
   mPrisonerSystem.update(es);
   mRedBirdSystem.update(es);
   mRocketTurretSystem.update(es);
-  mSecurityCameraSystem.update(es);
   mSimpleWalkerSystem.update(es);
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);

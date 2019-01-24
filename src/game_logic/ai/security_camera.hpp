@@ -16,31 +16,17 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-#include "engine/base_components.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
-RIGEL_RESTORE_WARNINGS
+#include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::behaviors {
 
-namespace components {
-
-struct SecurityCamera {};
-
-}
-
-
-class SecurityCameraSystem {
-public:
-  explicit SecurityCameraSystem(entityx::Entity playerEntity);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  entityx::Entity mPlayerEntity;
+struct SecurityCamera {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 };
 
-}}}
+}
