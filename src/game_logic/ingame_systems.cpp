@@ -78,7 +78,6 @@ IngameSystems::IngameSystems(
       pServiceProvider,
       &mCollisionChecker,
       &eventManager)
-  , mRespawnCheckpointSystem(playerEntity, &eventManager)
   , mRadarComputerSystem(pRadarDishCounter)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
   , mDynamicGeometrySystem(
@@ -182,7 +181,6 @@ void IngameSystems::update(
   // Player related logic update
   // ----------------------------------------------------------------------
   mElevatorSystem.update(es);
-  mRespawnCheckpointSystem.update(es);
   mRadarComputerSystem.update(es);
 
   // ----------------------------------------------------------------------

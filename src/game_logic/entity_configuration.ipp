@@ -1288,8 +1288,9 @@ void EntityFactory::configureEntity(
       break;
 
     case 133: // respawn checkpoint
-      entity.assign<RespawnCheckpoint>();
+      entity.assign<BehaviorController>(interaction::RespawnCheckpoint{});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       break;
 
     case 239: // Special hint globe

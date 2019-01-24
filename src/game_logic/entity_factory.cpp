@@ -54,6 +54,7 @@
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/interaction/locked_door.hpp"
+#include "game_logic/interaction/respawn_checkpoint.hpp"
 #include "game_logic/item_container.hpp"
 #include "game_logic/trigger_components.hpp"
 

@@ -88,12 +88,6 @@ struct Interactable {
   InteractableType mType;
 };
 
-
-struct RespawnCheckpoint {
-  bool mInitialized = false;
-  std::optional<int> mActivationCountdown;
-};
-
 }
 
 }}

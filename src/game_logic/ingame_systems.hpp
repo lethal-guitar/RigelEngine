@@ -42,7 +42,6 @@
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/interaction/elevator.hpp"
-#include "game_logic/interaction/respawn_checkpoint.hpp"
 #include "game_logic/item_container.hpp"
 #include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player.hpp"
@@ -120,7 +119,6 @@ private:
   game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::player::ProjectileSystem mPlayerProjectileSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
-  game_logic::interaction::RespawnCheckpointSystem mRespawnCheckpointSystem;
   game_logic::RadarComputerSystem mRadarComputerSystem;
 
   game_logic::DamageInflictionSystem mDamageInflictionSystem;
