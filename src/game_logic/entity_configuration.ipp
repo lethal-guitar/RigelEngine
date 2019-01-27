@@ -1863,7 +1863,8 @@ void EntityFactory::configureEntity(
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<AutoDestroy>(AutoDestroy{
         AutoDestroy::Condition::OnWorldCollision});
-      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      engine::reassign<ActivationSettings>(
+        entity, ActivationSettings::Policy::Always);
       break;
 
     case 227: // water drop spawner
