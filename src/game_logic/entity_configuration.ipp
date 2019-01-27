@@ -1574,7 +1574,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(RED_BIRD_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
-      ai::configureRedBird(entity);
+      configureRedBird(entity);
       break;
 
     case 219: // Smash hammer

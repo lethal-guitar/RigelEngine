@@ -16,35 +16,36 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
-RIGEL_RESTORE_WARNINGS
+#include "game_logic/global_dependencies.hpp"
 
 #include <variant>
 
-namespace rigel { namespace engine {
-  class CollisionChecker;
-  namespace events { struct CollidedWithWorld; }
-}}
+namespace rigel::engine::events { struct CollidedWithWorld; }
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic {
 
-namespace components {
+void configureRedBird(entityx::Entity entity);
 
-namespace detail {
+}
+
+
+namespace rigel::game_logic::behaviors {
+
+namespace red_bird {
 
 struct Flying {};
+
 
 struct Hovering {
   int mFramesElapsed = 0;
 };
 
+
 struct PlungingDown {
   int mInitialHeight;
 };
+
 
 struct RisingUp {
   explicit RisingUp(const int initialHeight)
@@ -56,36 +57,26 @@ struct RisingUp {
   bool mBackAtOriginalHeight = false;
 };
 
-}
 
-using StateT = std::variant<
-  detail::Flying,
-  detail::Hovering,
-  detail::PlungingDown,
-  detail::RisingUp>;
+using State = std::variant<Flying, Hovering, PlungingDown, RisingUp>;
+
+}
 
 
 struct RedBird {
-  StateT mState;
+  void update(
+    GlobalDependencies&,
+    GlobalState&,
+    bool,
+    entityx::Entity);
+
+  void onCollision(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const engine::events::CollidedWithWorld& event,
+    entityx::Entity entity);
+
+  red_bird::State mState;
 };
 
 }
-
-
-void configureRedBird(entityx::Entity entity);
-
-
-class RedBirdSystem : public entityx::Receiver<RedBirdSystem> {
-public:
-  explicit RedBirdSystem(entityx::Entity player, entityx::EventManager& events);
-
-  void update(entityx::EntityManager& es);
-
-  void receive(const engine::events::CollidedWithWorld& event);
-
-private:
-  entityx::Entity mPlayer;
-  bool mIsOddFrame = false;
-};
-
-}}}

@@ -120,7 +120,6 @@ IngameSystems::IngameSystems(
       &mParticles,
       pRandomGenerator,
       eventManager)
-  , mRedBirdSystem(playerEntity, eventManager)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSimpleWalkerSystem(
       playerEntity,
@@ -191,7 +190,6 @@ void IngameSystems::update(
   mLaserTurretSystem.update(es);
   mMessengerDroneSystem.update(es);
   mPrisonerSystem.update(es);
-  mRedBirdSystem.update(es);
   mRocketTurretSystem.update(es);
   mSimpleWalkerSystem.update(es);
   mSlidingDoorSystem.update(es);

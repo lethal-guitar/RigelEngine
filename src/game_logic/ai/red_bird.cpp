@@ -21,12 +21,11 @@
 #include "engine/collision_checker.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/sprite_tools.hpp"
+#include "game_logic/behavior_controller.hpp"
+#include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
-
-using namespace engine::components;
-
+using namespace rigel::engine::components;
 
 namespace {
 
@@ -36,7 +35,7 @@ const int HOVER_ANIMATION[] = {6, 7};
 
 
 void fly(entityx::Entity entity, const bool left) {
-  engine::startAnimationSequence(
+  rigel::engine::startAnimationSequence(
     entity,
     left ? FLY_ANIMATION_L : FLY_ANIMATION_R,
     0,
@@ -47,113 +46,100 @@ void fly(entityx::Entity entity, const bool left) {
 }
 
 
-void configureRedBird(entityx::Entity entity) {
+void rigel::game_logic::configureRedBird(entityx::Entity entity) {
   using namespace engine::components::parameter_aliases;
   entity.assign<MovingBody>(Velocity{-1.0f, 0.0f}, GravityAffected{false});
   entity.assign<ActivationSettings>(
     ActivationSettings::Policy::AlwaysAfterFirstActivation);
-  entity.assign<components::RedBird>();
+  entity.assign<components::BehaviorController>(behaviors::RedBird{});
 
   engine::startAnimationSequence(entity, FLY_ANIMATION_L, 0, true);
 }
 
 
-RedBirdSystem::RedBirdSystem(
-  entityx::Entity player,
-  entityx::EventManager& events
-)
-  : mPlayer(player)
-{
-  events.subscribe<engine::events::CollidedWithWorld>(*this);
-}
+namespace rigel::game_logic::behaviors {
 
+void RedBird::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const bool isOnScreen,
+  entityx::Entity entity
+) {
+  using namespace red_bird;
 
-void RedBirdSystem::update(entityx::EntityManager& es) {
-  es.each<components::RedBird, WorldPosition, MovingBody, Active>(
-    [this](
-      entityx::Entity entity,
-      components::RedBird& birdState,
-      WorldPosition& position,
-      MovingBody& body,
-      const Active&
-    ) {
-      using namespace components::detail;
+  auto& position = *entity.component<WorldPosition>();
+  auto& body = *entity.component<MovingBody>();
+  auto& sprite = *entity.component<Sprite>();
 
-      auto& sprite = *entity.component<Sprite>();
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+  base::match(mState,
+    [&, this](const Flying&) {
+      const auto wantsToAttack =
+        position.y + 2 < playerPosition.y &&
+        position.x > playerPosition.x &&
+        position.x < playerPosition.x + 2;
+      if (wantsToAttack) {
+        mState = Hovering{};
+        body.mVelocity = {};
+        engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
+      }
+    },
 
-      const auto& playerPosition = *mPlayer.component<WorldPosition>();
-      base::match(birdState.mState,
-        [&](const Flying&) {
-          const auto wantsToAttack =
-            position.y + 2 < playerPosition.y &&
-            position.x > playerPosition.x &&
-            position.x < playerPosition.x + 2;
-          if (wantsToAttack) {
-            birdState.mState = Hovering{};
-            body.mVelocity = {};
-            engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
-          }
-        },
+    [&, this](Hovering& state) {
+      ++state.mFramesElapsed;
+      if (state.mFramesElapsed >= 6) {
+        mState = PlungingDown{position.y};
+        body.mGravityAffected = true;
+        entity.remove<AnimationSequence>();
+        sprite.mFramesToRender[0] = 6;
+      }
+    },
 
-        [&](Hovering& state) {
-          ++state.mFramesElapsed;
-          if (state.mFramesElapsed >= 6) {
-            birdState.mState = PlungingDown{position.y};
-            body.mGravityAffected = true;
-            entity.remove<AnimationSequence>();
-            sprite.mFramesToRender[0] = 6;
-          }
-        },
+    [&](const PlungingDown&) {
+      // no-op, state transition handled by collision event handler
+    },
 
-        [&](const PlungingDown&) {
-          // no-op, state transition handled by collision event handler
-        },
+    [&, this](RisingUp& state) {
+      if (state.mBackAtOriginalHeight) {
+        mState = Flying{};
+        const auto flyingLeft = !s.mpPerFrameState->mIsOddFrame;
+        fly(entity, flyingLeft);
+        return;
+      }
 
-        [&](RisingUp& state) {
-          if (state.mBackAtOriginalHeight) {
-            birdState.mState = Flying{};
-            const auto flyingLeft = !mIsOddFrame;
-            fly(entity, flyingLeft);
-            return;
-          }
-
-          if (position.y > state.mInitialHeight) {
-            --position.y;
-          } else {
-            // We wait 1 frame in the air before returning to regular flying
-            // mode. This is accomplished using this bool, which is checked
-            // before the position check, and so will only be checked again on
-            // the next frame.
-            state.mBackAtOriginalHeight = true;
-          }
-        });
+      if (position.y > state.mInitialHeight) {
+        --position.y;
+      } else {
+        // We wait 1 frame in the air before returning to regular flying
+        // mode. This is accomplished using this bool, which is checked
+        // before the position check, and so will only be checked again on
+        // the next frame.
+        state.mBackAtOriginalHeight = true;
+      }
     });
-
-  mIsOddFrame = !mIsOddFrame;
 }
 
 
-void RedBirdSystem::receive(const engine::events::CollidedWithWorld& event) {
-  using namespace components::detail;
-
-  auto entity = event.mEntity;
-  if (!entity.has_component<components::RedBird>()) {
-    return;
-  }
+void RedBird::onCollision(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const engine::events::CollidedWithWorld& event,
+  entityx::Entity entity
+) {
+  using namespace red_bird;
 
   auto& body = *entity.component<MovingBody>();
-  auto& birdState = *entity.component<components::RedBird>();
 
-  base::match(birdState.mState,
+  base::match(mState,
     [&](const Flying&) {
       if (event.mCollidedLeft || event.mCollidedRight) {
         fly(entity, !event.mCollidedLeft);
       }
     },
 
-    [&](const PlungingDown& state) {
+    [&, this](const PlungingDown& state) {
       if (event.mCollidedBottom) {
-        birdState.mState = RisingUp{state.mInitialHeight};
+        mState = RisingUp{state.mInitialHeight};
         body.mGravityAffected = false;
         engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
       }
@@ -163,4 +149,4 @@ void RedBirdSystem::receive(const engine::events::CollidedWithWorld& event) {
     [](const RisingUp&) {});
 }
 
-}}}
+}
