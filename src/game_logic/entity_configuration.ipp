@@ -885,6 +885,7 @@ void EntityFactory::configureEntity(
           AnimationLoop{1, 0, 5},
           AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
           MovingBody{Velocity{0.0f, -1.0f}, GravityAffected{false}},
+          ActivationSettings{ActivationSettings::Policy::Always},
           AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
 
         configureItemBox(
