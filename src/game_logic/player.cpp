@@ -310,6 +310,11 @@ Player::Player(
 }
 
 
+bool Player::isInRegularState() const {
+  return stateIs<OnGround>() && !mIsRidingElevator;
+}
+
+
 bool Player::canTakeDamage() const {
   return !isInMercyFrames();
 }

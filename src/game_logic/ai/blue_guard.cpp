@@ -75,9 +75,9 @@ bool playerVisible(
     playerY - 3 < myPosition.y &&
     playerY + 3 > myPosition.y;
 
-  // TODO: Check player not cloaked, not riding elevator
+  // TODO: Check player not cloaked
   return
-    player.stateIs<OnGround>() &&
+    player.isInRegularState() &&
     hasLineOfSightHorizontal &&
     hasLineOfSightVertical;
 }
