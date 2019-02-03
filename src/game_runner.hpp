@@ -19,6 +19,7 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
 #include "engine/earth_quake_effect.hpp"
@@ -61,6 +62,7 @@ public:
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+  std::set<data::Bonus> achievedBonuses() const;
 
   void receive(const events::CheckPointActivated& event);
   void receive(const events::PlayerDied& event);

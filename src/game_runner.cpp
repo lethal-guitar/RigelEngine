@@ -309,6 +309,11 @@ bool GameRunner::levelFinished() const {
 }
 
 
+std::set<data::Bonus> GameRunner::achievedBonuses() const {
+  return {};
+}
+
+
 void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
   mActivatedCheckpoint = CheckpointData{
     mpPlayerModel->makeCheckpoint(), event.mPosition};
