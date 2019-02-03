@@ -5,6 +5,7 @@ set(core_sources
     base/spatial_types.hpp
     base/warnings.hpp
     data/audio_buffer.hpp
+    data/bonus.hpp
     data/duke_script.hpp
     data/game_session_data.hpp
     data/game_traits.cpp

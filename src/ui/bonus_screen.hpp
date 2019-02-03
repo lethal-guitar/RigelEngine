@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "data/bonus.hpp"
 #include "engine/timing.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "game_mode.hpp"
@@ -28,11 +29,9 @@ namespace rigel { namespace ui {
 
 class BonusScreen {
 public:
-  using BonusNumber = int;
-
   BonusScreen(
     GameMode::Context context,
-    const std::set<BonusNumber>& achievedBonuses,
+    const std::set<data::Bonus>& achievedBonuses,
     int scoreBeforeAddingBonuses);
 
   void updateAndRender(engine::TimeDelta dt);
@@ -59,7 +58,7 @@ private:
   };
 
   engine::TimeDelta setupBonusSummationSequence(
-    const std::set<BonusNumber>& achievedBonuses,
+    const std::set<data::Bonus>& achievedBonuses,
     IGameServiceProvider* pServiceProvider);
   engine::TimeDelta setupNoBonusSequence(
     IGameServiceProvider* pServiceProvider);
