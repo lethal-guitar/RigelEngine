@@ -23,6 +23,8 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player.hpp"
 
+#include "global_level_events.hpp"
+
 
 namespace rigel { namespace game_logic {
 
@@ -34,8 +36,9 @@ using engine::toWorldSpace;
 using game_logic::components::PlayerDamaging;
 
 
-DamageSystem::DamageSystem(Player* pPlayer)
+DamageSystem::DamageSystem(Player* pPlayer, entityx::EventManager* pEvents)
   : mpPlayer(pPlayer)
+  , mpEvents(pEvents)
 {
 }
 
@@ -59,6 +62,8 @@ void DamageSystem::update(entityx::EntityManager& es) {
         mpPlayer->canTakeDamage() || damage.mIsFatal;
 
       if (hasCollision && playerCanTakeDamage) {
+        mpEvents->emit(rigel::events::PlayerTookDamage{});
+
         if (damage.mIsFatal) {
           mpPlayer->die();
         } else {

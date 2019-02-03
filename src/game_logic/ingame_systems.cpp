@@ -71,7 +71,7 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &eventManager,
       resources)
-  , mPlayerDamageSystem(&mPlayer)
+  , mPlayerDamageSystem(&mPlayer, &eventManager)
   , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
   , mElevatorSystem(
       playerEntity,
