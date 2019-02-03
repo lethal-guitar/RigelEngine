@@ -298,6 +298,7 @@ void configureBonusGlobe(
   entity.assign<AnimationLoop>(1, 0, 3, 0);
   entity.assign<Shootable>(Health{1}, GivenScore{100});
   entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
+  entity.assign<ActorTag>(ActorTag::Type::ShootableBonusGlobe);
   addDefaultMovingBody(entity, boundingBox);
 
   CollectableItem item;
@@ -831,12 +832,14 @@ void EntityFactory::configureEntity(
           100,
           AnimationLoop{1},
           shootable,
+          ActorTag{ActorTag::Type::FireBomb},
           DestructionEffects{
             NAPALM_BOMB_KILL_EFFECT_SPEC,
             DestructionEffects::TriggerCondition::Manual},
           BehaviorController{behaviors::NapalmBomb{}});
 
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
+        entity.assign<ActorTag>(ActorTag::Type::FireBomb);
       }
       break;
 
@@ -979,7 +982,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item);
+          item,
+          ActorTag{ActorTag::Type::CollectableWeapon});
+        entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
       }
       break;
 
@@ -993,7 +998,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item);
+          item,
+          ActorTag{ActorTag::Type::CollectableWeapon});
+        entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
       }
       break;
 
@@ -1007,7 +1014,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item);
+          item,
+          ActorTag{ActorTag::Type::CollectableWeapon});
+        entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
       }
       break;
 
@@ -1021,7 +1030,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Green,
           100,
-          item);
+          item,
+          ActorTag{ActorTag::Type::CollectableWeapon});
+        entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
       }
       break;
 
@@ -1040,7 +1051,9 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          AnimationLoop{1});
+          AnimationLoop{1},
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1053,7 +1066,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1066,7 +1081,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1079,7 +1096,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1092,7 +1111,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1104,7 +1125,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1116,7 +1139,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1128,7 +1153,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1140,7 +1167,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1152,7 +1181,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1164,7 +1195,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1176,7 +1209,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1188,7 +1223,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1200,7 +1237,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1212,7 +1251,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1224,7 +1265,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1236,7 +1279,9 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::Blue,
           0,
-          item);
+          item,
+          ActorTag{ActorTag::Type::Merchandise});
+        entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
 
@@ -1402,6 +1447,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::SecurityCamera>();
       entity.assign<DestructionEffects>(CAMERA_KILL_EFFECT_SPEC);
+      entity.assign<ActorTag>(ActorTag::Type::ShootableCamera);
       break;
 
     case 81: // Green creature attached to ceiling, sucking in player
@@ -1517,6 +1563,7 @@ void EntityFactory::configureEntity(
     case 131:
       // gives one point when shot with normal shot, 500 when destroyed.
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActorTag>(ActorTag::Type::MountedLaserTurret);
       ai::configureLaserTurret(entity, GivenScore{500});
       break;
 

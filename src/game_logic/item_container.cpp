@@ -22,6 +22,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -190,6 +191,11 @@ void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
   mFramesElapsed = 0;
   entity.component<Sprite>()->mShow = false;
   entity.remove<engine::components::MovingBody>();
+
+  // Once the bomb explodes, it counts towards bonus 6. This means we need to
+  // remove the actor tag (which is used to count remaining fire bombs in the
+  // level when determining which bonuses have been achieved) here.
+  entity.remove<components::ActorTag>();
 }
 
 
