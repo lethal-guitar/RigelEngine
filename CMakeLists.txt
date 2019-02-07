@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(RigelEngine)
 
@@ -21,7 +21,6 @@ option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK)
 find_package(Boost 1.67 COMPONENTS program_options REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)

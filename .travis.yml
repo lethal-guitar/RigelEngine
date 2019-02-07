@@ -1,6 +1,6 @@
 # We need to use trusty in order to get libsdl2
 sudo: required
-dist: trusty
+dist: xenial
 osx_image: xcode10.1
 
 branches:

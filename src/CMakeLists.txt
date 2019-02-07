@@ -228,7 +228,6 @@ target_include_directories(rigel_core
     "${SDL2_INCLUDE_DIR}"
     ${SDL2_MIXER_INCLUDE_DIRS}
     ${3rd_party_path}/entityx
-    ${Boost_INCLUDE_DIRS}
 
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
@@ -242,6 +241,7 @@ target_link_libraries(rigel_core
     "${SDL2_LIBRARY}"
     ${SDL2_MIXER_LIBRARIES}
     entityx
+    Boost::boost
 
     PRIVATE
     dbopl
@@ -282,6 +282,9 @@ add_executable(${main_exe_name} ${main_exe_sources})
 target_link_libraries(${main_exe_name} PRIVATE
     ${SDLMAIN2_LIBRARY}
     rigel_core
-    ${Boost_LIBRARIES}
+    Boost::boost
+    Boost::program_options
+    Boost::disable_autolinking
+    Boost::dynamic_linking
 )
 
