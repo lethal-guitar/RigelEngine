@@ -26,7 +26,6 @@
 #include <engine/collision_checker.hpp>
 #include <engine/sprite_tools.hpp>
 #include <engine/visual_components.hpp>
-#include <game_logic/ientity_factory.hpp>
 #include <game_logic/player/components.hpp>
 #include <game_logic/player.hpp>
 #include <utils/container_tools.hpp>
@@ -161,72 +160,6 @@ void testMovementSequence(Player& player, const std::vector<MoveSpec>& spec) {
     });
   CHECK(actualStateChanges == expectedStateChanges);
 }
-
-
-struct FireShotParameters {
-  ProjectileType type;
-  WorldPosition position;
-  ProjectileDirection direction;
-};
-
-
-struct MockEntityFactory : public IEntityFactory {
-  std::vector<FireShotParameters> mCreateProjectileCalls;
-
-  explicit MockEntityFactory(ex::EntityManager* pEntityManager)
-    : mpEntityManager(pEntityManager)
-  {
-  }
-
-  entityx::Entity createProjectile(
-    ProjectileType type,
-    const WorldPosition& pos,
-    ProjectileDirection direction
-  ) override {
-    mCreateProjectileCalls.push_back(FireShotParameters{type, pos, direction});
-    return createMockSpriteEntity();
-  }
-
-  entityx::Entity createEntitiesForLevel(
-    const data::map::ActorDescriptionList& actors
-  ) override {
-    return {};
-  }
-
-  entityx::Entity createSprite(
-    data::ActorID actorID,
-    bool assignBoundingBox = false
-  ) override {
-    return createMockSpriteEntity();
-  }
-
-  entityx::Entity createSprite(
-    data::ActorID actorID,
-    const base::Vector& position,
-    bool assignBoundingBox = false
-  ) override {
-    return createMockSpriteEntity();
-  }
-
-  entityx::Entity createActor(
-    data::ActorID actorID,
-    const base::Vector& position
-  ) override {
-    return createMockSpriteEntity();
-  }
-
-private:
-  entityx::Entity createMockSpriteEntity() {
-    static rigel::engine::SpriteDrawData dummyDrawData;
-
-    auto entity = mpEntityManager->create();
-    Sprite sprite{&dummyDrawData, {}};
-    entity.assign<Sprite>(sprite);
-    return entity;
-  }
-
-  ex::EntityManager* mpEntityManager;
-};
 
 }
 
