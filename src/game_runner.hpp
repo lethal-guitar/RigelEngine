@@ -19,6 +19,7 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
 #include "engine/earth_quake_effect.hpp"
@@ -61,9 +62,11 @@ public:
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+  std::set<data::Bonus> achievedBonuses() const;
 
   void receive(const events::CheckPointActivated& event);
   void receive(const events::PlayerDied& event);
+  void receive(const events::PlayerTookDamage& event);
   void receive(const events::PlayerMessage& event);
   void receive(const events::PlayerTeleported& event);
   void receive(const events::ScreenFlash& event);
@@ -92,6 +95,17 @@ private:
   void showDebugText();
 
 private:
+  struct LevelBonusInfo {
+    int mInitialCameraCount = 0;
+    int mInitialMerchandiseCount = 0;
+    int mInitialWeaponCount = 0;
+    int mInitialLaserTurretCount = 0;
+    int mInitialBonusGlobeCount = 0;
+
+    int mNumShotBonusGlobes = 0;
+    bool mPlayerTookDamage = false;
+  };
+
   struct CheckpointData {
     data::PlayerModel::CheckpointState mState;
     base::Vector mPosition;
@@ -105,6 +119,7 @@ private:
 
   data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
+  LevelBonusInfo mBonusInfo;
   std::optional<CheckpointData> mActivatedCheckpoint;
   base::Vector mScrollOffset;
 

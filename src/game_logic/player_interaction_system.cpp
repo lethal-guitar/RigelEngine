@@ -268,12 +268,12 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
           }
         }
 
-        if (collectable.mGivenCollectableLetter) {
-          collectLetter(*collectable.mGivenCollectableLetter, pos);
-        }
-
         if (collectable.mShownTutorialMessage) {
           showTutorialMessage(*collectable.mShownTutorialMessage);
+        }
+
+        if (collectable.mGivenCollectableLetter) {
+          collectLetter(*collectable.mGivenCollectableLetter, pos);
         }
 
         if (soundToPlay) {

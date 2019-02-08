@@ -81,6 +81,8 @@ struct MissileDetonated {
 
 struct PlayerDied {};
 
+struct PlayerTookDamage {};
+
 struct PlayerTeleported {
   base::Vector mNewPosition;
 };

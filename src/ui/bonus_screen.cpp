@@ -77,7 +77,7 @@ const std::array<const char*, 27> NO_BONUS_SLIDE_IN{
 
 BonusScreen::BonusScreen(
   GameMode::Context context,
-  const std::set<BonusNumber>& achievedBonuses,
+  const std::set<data::Bonus>& achievedBonuses,
   int scoreBeforeAddingBonuses
 )
   : mState(scoreBeforeAddingBonuses)
@@ -136,7 +136,7 @@ void BonusScreen::updateSequence(const engine::TimeDelta timeDelta) {
 
 
 engine::TimeDelta BonusScreen::setupBonusSummationSequence(
-  const std::set<BonusNumber>& achievedBonuses,
+  const std::set<data::Bonus>& achievedBonuses,
   IGameServiceProvider* pServiceProvider
 ) {
   auto time = slowTicksToTime(INITIAL_DELAY_TICKS);
@@ -158,7 +158,7 @@ engine::TimeDelta BonusScreen::setupBonusSummationSequence(
     mEvents.emplace_back(Event{
       time,
       [pServiceProvider, bonus](State& state) {
-        state.mRunningText += " " + to_string(bonus);
+        state.mRunningText += " " + to_string(asNumber(bonus));
         pServiceProvider->playSound(data::SoundId::BigExplosion);
       }
     });

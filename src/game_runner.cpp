@@ -86,6 +86,40 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
   return stream.str();
 }
 
+
+struct BonusRelatedItemCounts {
+  int mCameraCount = 0;
+  int mFireBombCount = 0;
+  int mWeaponCount = 0;
+  int mMerchandiseCount = 0;
+  int mBonusGlobeCount = 0;
+  int mLaserTurretCount = 0;
+};
+
+
+BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
+  using game_logic::components::ActorTag;
+  using AT = ActorTag::Type;
+
+  BonusRelatedItemCounts counts;
+
+  es.each<ActorTag>([&counts](entityx::Entity, const ActorTag& tag) {
+      switch (tag.mType) {
+        case AT::ShootableCamera: ++counts.mCameraCount; break;
+        case AT::FireBomb: ++counts.mFireBombCount; break;
+        case AT::CollectableWeapon: ++counts.mWeaponCount; break;
+        case AT::Merchandise: ++counts.mMerchandiseCount; break;
+        case AT::ShootableBonusGlobe: ++counts.mBonusGlobeCount; break;
+        case AT::MountedLaserTurret: ++counts.mLaserTurretCount; break;
+
+        default:
+          break;
+      }
+    });
+
+  return counts;
+}
+
 }
 
 
@@ -118,6 +152,7 @@ GameRunner::GameRunner(
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::PlayerDied>(*this);
+  mEventManager.subscribe<rigel::events::PlayerTookDamage>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
   mEventManager.subscribe<rigel::events::PlayerTeleported>(*this);
   mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
@@ -309,6 +344,51 @@ bool GameRunner::levelFinished() const {
 }
 
 
+std::set<data::Bonus> GameRunner::achievedBonuses() const {
+  std::set<data::Bonus> bonuses;
+
+  if (!mBonusInfo.mPlayerTookDamage) {
+    bonuses.insert(data::Bonus::NoDamageTaken);
+  }
+
+  const auto counts =
+    countBonusRelatedItems(const_cast<entityx::EntityManager&>(mEntities));
+
+  if (mBonusInfo.mInitialCameraCount > 0 && counts.mCameraCount == 0) {
+    bonuses.insert(data::Bonus::DestroyedAllCameras);
+  }
+
+  // NOTE: This is a bug (?) in the original game - if a level doesn't contain
+  // any fire bombs, bonus 6 will be awarded, as if the player had destroyed
+  // all fire bombs.
+  if (counts.mFireBombCount == 0) {
+    bonuses.insert(data::Bonus::DestroyedAllFireBombs);
+  }
+
+  if (
+    mBonusInfo.mInitialMerchandiseCount > 0 && counts.mMerchandiseCount == 0
+  ) {
+    bonuses.insert(data::Bonus::CollectedAllMerchandise);
+  }
+
+  if (mBonusInfo.mInitialWeaponCount > 0 && counts.mWeaponCount == 0) {
+    bonuses.insert(data::Bonus::CollectedEveryWeapon);
+  }
+
+  if (
+    mBonusInfo.mInitialLaserTurretCount > 0 && counts.mLaserTurretCount == 0
+  ) {
+    bonuses.insert(data::Bonus::DestroyedAllSpinningLaserTurrets);
+  }
+
+  if (mBonusInfo.mInitialBonusGlobeCount == mBonusInfo.mNumShotBonusGlobes) {
+    bonuses.insert(data::Bonus::ShotAllBonusGlobes);
+  }
+
+  return bonuses;
+}
+
+
 void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
   mActivatedCheckpoint = CheckpointData{
     mpPlayerModel->makeCheckpoint(), event.mPosition};
@@ -318,6 +398,11 @@ void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
 
 void GameRunner::receive(const rigel::events::PlayerDied& event) {
   mPlayerDied = true;
+}
+
+
+void GameRunner::receive(const rigel::events::PlayerTookDamage& event) {
+  mBonusInfo.mPlayerTookDamage = true;
 }
 
 
@@ -362,6 +447,10 @@ void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
       onReactorDestroyed(position);
       break;
 
+    case AT::ShootableBonusGlobe:
+      ++mBonusInfo.mNumShotBonusGlobes;
+      break;
+
     default:
       break;
   }
@@ -378,6 +467,13 @@ void GameRunner::loadLevel(
     sessionId.mDifficulty);
   auto playerEntity =
     mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+
+  const auto counts = countBonusRelatedItems(mEntities);
+  mBonusInfo.mInitialCameraCount = counts.mCameraCount;
+  mBonusInfo.mInitialMerchandiseCount = counts.mMerchandiseCount;
+  mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
+  mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
+  mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
 
   mLevelData = LevelData{
     std::move(loadedLevel.mMap),

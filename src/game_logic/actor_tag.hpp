@@ -36,6 +36,13 @@ struct ActorTag {
     Reactor,
     WaterArea,
     AnimatedWaterArea,
+
+    CollectableWeapon,
+    Merchandise,
+    ShootableBonusGlobe,
+    ShootableCamera,
+    MountedLaserTurret,
+    FireBomb,
   };
 
   explicit ActorTag(const Type type, const int spawnIndex = INVALID_SPAWN_INDEX)

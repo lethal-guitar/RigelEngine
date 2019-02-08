@@ -30,13 +30,13 @@ namespace rigel { namespace game_logic { namespace player {
 
 class DamageSystem {
 public:
-  explicit DamageSystem(Player* pPlayer);
+  explicit DamageSystem(Player* pPlayer, entityx::EventManager* pEvents);
 
   void update(entityx::EntityManager& es);
 
 private:
   Player* mpPlayer;
+  entityx::EventManager* mpEvents;
 };
-
 
 }}}
