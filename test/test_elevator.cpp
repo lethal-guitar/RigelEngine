@@ -19,18 +19,20 @@
 
 #include <base/spatial_types_printing.hpp>
 #include <data/map.hpp>
+#include <data/player_model.hpp>
 #include <engine/collision_checker.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
 #include <engine/timing.hpp>
+#include <game_logic/input.hpp>
 #include <game_logic/interaction/elevator.hpp>
-#include <game_logic/player_movement_system.hpp>
+#include <game_logic/player.hpp>
+#include <game_logic/player/components.hpp>
 
 
 using namespace rigel;
 using namespace game_logic;
 using namespace engine;
-using namespace player;
 using namespace engine::components;
 using namespace game_logic::components;
 
@@ -38,20 +40,17 @@ using namespace game_logic::components;
 namespace ex = entityx;
 
 
+struct MockEventListener : public ex::Receiver<MockEventListener> {
+  bool mIsPlayerAttached = false;
+
+  void receive(const rigel::game_logic::events::ElevatorAttachmentChanged& e) {
+    mIsPlayerAttached = e.mAttachedElevator.valid();
+  }
+};
+
+
 TEST_CASE("Rocket elevator") {
   ex::EntityX entityx;
-  auto player = entityx.entities.create();
-  player.assign<WorldPosition>(6, 100);
-  player.assign<Active>();
-  initializePlayerEntity(player, true);
-
-  auto& playerPosition = *player.component<WorldPosition>();
-  auto& playerState = *player.component<PlayerControlled>();
-
-  auto elevator = entityx.entities.create();
-  elevator.assign<WorldPosition>(2, 103);
-  elevator.assign<Active>();
-  interaction::configureElevator(elevator);
 
   data::map::Map map{300, 300, data::map::TileAttributes{{0x0, 0xF}}};
 
@@ -67,6 +66,33 @@ TEST_CASE("Rocket elevator") {
   }
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
+  data::PlayerModel playerModel;
+  MockEntityFactory mockEntityFactory{&entityx.entities};
+  MockServiceProvider mockServiceProvider;
+
+  auto playerEntity = entityx.entities.create();
+  playerEntity.assign<WorldPosition>(6, 100);
+  playerEntity.assign<Sprite>();
+  assignPlayerComponents(playerEntity, Orientation::Left);
+
+  Player player(
+    playerEntity,
+    data::Difficulty::Medium,
+    &playerModel,
+    &mockServiceProvider,
+    &collisionChecker,
+    &map,
+    &mockEntityFactory,
+    &entityx.events);
+
+  auto& playerPosition = player.position();
+
+  auto elevator = entityx.entities.create();
+  elevator.assign<WorldPosition>(2, 103);
+  elevator.assign<Active>();
+  elevator.assign<Sprite>();
+  interaction::configureElevator(elevator);
+
   PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
 
 
@@ -81,15 +107,17 @@ TEST_CASE("Rocket elevator") {
 
   auto& elevatorPosition = *elevator.component<WorldPosition>();
 
-  MockServiceProvider mockServiceProvicer;
-  interaction::ElevatorSystem elevatorSystem(player, &mockServiceProvicer);
-  const auto runOneFrame =
-    [&elevatorSystem, &physicsSystem, &entityx, &player](
-      const PlayerInputState& inputState
-    ) {
-      elevatorSystem.update(entityx.entities, inputState);
-      physicsSystem.update(entityx.entities);
-    };
+  interaction::ElevatorSystem elevatorSystem(
+    playerEntity,
+    &mockServiceProvider,
+    &collisionChecker,
+    &entityx.events);
+
+  const auto runOneFrame = [&](const PlayerInput& input) {
+    player.update(input);
+    elevatorSystem.update(entityx.entities);
+    physicsSystem.update(entityx.entities);
+  };
 
   const auto verifyPositions = [&playerPosition, &elevatorPosition](
     const WorldPosition& expectedPlayerPosition,
@@ -102,51 +130,64 @@ TEST_CASE("Rocket elevator") {
   };
 
 
-  const auto idleState = PlayerInputState{};
-  PlayerInputState movingUpState;
-  movingUpState.mMovingUp = true;
-  PlayerInputState movingDownState;
-  movingDownState.mMovingDown = true;
+  const auto noInput = PlayerInput{};
+  PlayerInput pressingUp;
+  pressingUp.mUp = true;
+
+  PlayerInput pressingDown;
+  pressingDown.mDown = true;
+
+  PlayerInput jumpPressed;
+  jumpPressed.mJump.mWasTriggered = true;
+  jumpPressed.mJump.mIsPressed = true;
+
+  MockEventListener listener;
+  entityx.events.subscribe<game_logic::events::ElevatorAttachmentChanged>(
+    listener);
+
+  auto isPlayerAttached = [&]() {
+    return listener.mIsPlayerAttached;
+  };
 
 
   SECTION("Player attachment") {
     SECTION("Player is not attached when not completely standing on elevator") {
-      runOneFrame(idleState);
-      CHECK(!elevatorSystem.isPlayerAttached());
+      runOneFrame(noInput);
+      CHECK(!isPlayerAttached());
 
       playerPosition.x = 5;
-      runOneFrame(idleState);
-      CHECK(!elevatorSystem.isPlayerAttached());
+      runOneFrame(noInput);
+      CHECK(!isPlayerAttached());
 
       playerPosition.x = 4;
-      runOneFrame(idleState);
-      CHECK(!elevatorSystem.isPlayerAttached());
+      runOneFrame(noInput);
+      CHECK(!isPlayerAttached());
 
       playerPosition.x = 1;
-      runOneFrame(idleState);
-      CHECK(!elevatorSystem.isPlayerAttached());
+      runOneFrame(noInput);
+      CHECK(!isPlayerAttached());
     }
 
     SECTION("Player is attached when completely on top of elevator") {
       playerPosition.x = 3;
-      runOneFrame(idleState);
-      CHECK(elevatorSystem.isPlayerAttached());
+      runOneFrame(noInput);
+      CHECK(isPlayerAttached());
 
       playerPosition.x = 2;
-      runOneFrame(idleState);
-      CHECK(elevatorSystem.isPlayerAttached());
+      runOneFrame(noInput);
+      CHECK(isPlayerAttached());
     }
   }
 
   playerPosition.x = 3;
-  runOneFrame(idleState);
+  runOneFrame(noInput);
 
 
   SECTION("Movement on elevator") {
     SECTION("No movement while player idle") {
       const auto expectedPos = playerPosition;
 
-      runOneFrame(idleState);
+      runOneFrame(noInput);
 
       verifyPositions(expectedPos);
     }
@@ -154,12 +195,12 @@ TEST_CASE("Rocket elevator") {
     SECTION("Moving up") {
       auto expectedPos = playerPosition;
 
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
 
       expectedPos.y -= 2;
       verifyPositions(expectedPos);
 
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
 
       expectedPos.y -= 2;
       verifyPositions(expectedPos);
@@ -171,12 +212,12 @@ TEST_CASE("Rocket elevator") {
 
       auto expectedPos = playerPosition;
 
-      runOneFrame(movingDownState);
+      runOneFrame(pressingDown);
 
       expectedPos.y += 2;
       verifyPositions(expectedPos);
 
-      runOneFrame(movingDownState);
+      runOneFrame(pressingDown);
 
       expectedPos.y += 2;
       verifyPositions(expectedPos);
@@ -185,26 +226,25 @@ TEST_CASE("Rocket elevator") {
     SECTION("Elevator stays in air when player stops moving") {
       auto expectedPos = playerPosition;
 
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
 
-      runOneFrame(idleState);
+      runOneFrame(noInput);
 
       expectedPos.y -= 2;
       verifyPositions(expectedPos);
     }
 
     SECTION("Elevator is detached when player jumps") {
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
 
       const auto originalPos = playerPosition;
       const auto originalElevatorPos = elevatorPosition;
 
-      player.component<MovingBody>()->mVelocity.y = -3.6f;
-      player.component<MovingBody>()->mGravityAffected = true;
-      player.component<PlayerControlled>()->mPerformedJump = true;
-      runOneFrame(idleState);
+      // Player jump has one frame delay due to the "coil up" animation
+      runOneFrame(jumpPressed);
+      runOneFrame(noInput);
 
-      CHECK(!elevatorSystem.isPlayerAttached());
+      CHECK(!isPlayerAttached());
       CHECK(playerPosition.y < originalPos.y);
       CHECK(elevator.component<MovingBody>()->mVelocity.y == 2.0f);
       CHECK(elevatorPosition.y > originalElevatorPos.y);
@@ -213,19 +253,18 @@ TEST_CASE("Rocket elevator") {
 
     SECTION("Elevator is detached when player walks off") {
       // Setup: Get player+elevator in the air
-      runOneFrame(movingUpState);
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
+      runOneFrame(pressingUp);
 
       const auto originalPlayerY = playerPosition.y;
       const auto originalElevatorY = elevatorPosition.y;
 
-      runOneFrame(idleState);
+      runOneFrame(noInput);
 
       playerPosition.x -= 2;
-      runOneFrame(idleState);
+      runOneFrame(noInput);
 
-      CHECK(!elevatorSystem.isPlayerAttached());
-      CHECK(player.component<MovingBody>()->mGravityAffected);
+      CHECK(!isPlayerAttached());
       CHECK(playerPosition.y >= originalPlayerY);
       CHECK(elevatorPosition.y > originalElevatorY);
       CHECK(elevator.has_component<SolidBody>());
@@ -235,13 +274,13 @@ TEST_CASE("Rocket elevator") {
       const auto expectedPos = playerPosition;
 
       // Setup: Get player+elevator in the air
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
 
       CHECK(playerPosition.y == 98);
       CHECK(elevatorPosition.y == 101);
 
-      runOneFrame(movingDownState);
-      runOneFrame(movingDownState);
+      runOneFrame(pressingDown);
+      runOneFrame(pressingDown);
 
       verifyPositions(expectedPos);
     }
@@ -251,55 +290,55 @@ TEST_CASE("Rocket elevator") {
       elevatorPosition.y = 99;
       const auto initialPos = playerPosition;
 
-      runOneFrame(movingUpState);
+      runOneFrame(pressingUp);
 
       const auto expectedPos = initialPos - WorldPosition{0, 1};
       verifyPositions(expectedPos);
 
-      runOneFrame(idleState);
-      runOneFrame(idleState);
+      runOneFrame(noInput);
+      runOneFrame(noInput);
 
       verifyPositions(expectedPos);
     }
   }
 
 
-  SECTION("Player state is updated correctly") {
-    SECTION("State initially marked as not interacting") {
-      runOneFrame(idleState);
-      CHECK(!playerState.mIsInteracting);
-    }
+  //SECTION("Player state is updated correctly") {
+    //SECTION("State initially marked as not interacting") {
+      //runOneFrame(noInput);
+      //CHECK(!playerState.mIsInteracting);
+    //}
 
-    SECTION("State set to interacting when moving up") {
-      runOneFrame(movingUpState);
-      CHECK(playerState.mIsInteracting);
-    }
+    //SECTION("State set to interacting when moving up") {
+      //runOneFrame(pressingUp);
+      //CHECK(playerState.mIsInteracting);
+    //}
 
-    SECTION("State set to interacting when moving down") {
-      runOneFrame(movingDownState);
-      CHECK(playerState.mIsInteracting);
-    }
+    //SECTION("State set to interacting when moving down") {
+      //runOneFrame(pressingDown);
+      //CHECK(playerState.mIsInteracting);
+    //}
 
-    runOneFrame(movingUpState);
+    //runOneFrame(pressingUp);
 
-    SECTION("State reset to normal after movement stops") {
-      runOneFrame(idleState);
-      CHECK(!playerState.mIsInteracting);
-    }
+    //SECTION("State reset to normal after movement stops") {
+      //runOneFrame(noInput);
+      //CHECK(!playerState.mIsInteracting);
+    //}
 
-    SECTION("State reset to normal after detaching") {
-      playerPosition.x = 0;
-      runOneFrame(idleState);
-      CHECK(!playerState.mIsInteracting);
-    }
+    //SECTION("State reset to normal after detaching") {
+      //playerPosition.x = 0;
+      //runOneFrame(noInput);
+      //CHECK(!playerState.mIsInteracting);
+    //}
 
-    SECTION("Interacting state is not changed when not attached to elevator") {
-      playerPosition.x = 6;
-      runOneFrame(idleState);
+    //SECTION("Interacting state is not changed when not attached to elevator") {
+      //playerPosition.x = 6;
+      //runOneFrame(noInput);
 
-      playerState.mIsInteracting = true;
-      runOneFrame(idleState);
-      CHECK(playerState.mIsInteracting);
-    }
-  }
+      //playerState.mIsInteracting = true;
+      //runOneFrame(noInput);
+      //CHECK(playerState.mIsInteracting);
+    //}
+  //}
 }
