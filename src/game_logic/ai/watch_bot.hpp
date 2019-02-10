@@ -84,4 +84,22 @@ struct WatchBot {
   watch_bot::State mState;
 };
 
+
+struct WatchBotCarrier {
+  enum class State {
+    ApproachingPlayer,
+    ReleasingPayload
+  };
+
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  entityx::Entity mPayload;
+  State mState = State::ApproachingPlayer;
+  int mFramesElapsed = 0;
+};
+
 }}}

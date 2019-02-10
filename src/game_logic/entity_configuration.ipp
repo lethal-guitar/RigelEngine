@@ -363,11 +363,6 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(51);
       break;
 
-    case 58:
-      actorParts.push_back(58);
-      actorParts.push_back(59);
-      break;
-
     case 67:
       actorParts.push_back(67);
       actorParts.push_back(70);
@@ -1376,7 +1371,13 @@ void EntityFactory::configureEntity(
       break;
 
     case 58: // Watch-bot container carrier
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<Shootable>(Health{5}, GivenScore{500});
+      entity.assign<PlayerDamaging>(1);
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::WatchBotCarrier{});
       break;
 
     case 62: // Bomb dropping space ship
