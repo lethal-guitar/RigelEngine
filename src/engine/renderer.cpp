@@ -583,7 +583,7 @@ void Renderer::drawRectangle(
   const auto top = float(rect.top());
   const auto bottom = float(rect.bottom());
 
-  const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
+  const auto colorVec = toGlColor(color);
   float vertices[] = {
     left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
     left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
@@ -608,7 +608,7 @@ void Renderer::drawLine(
   // moment
   setRenderModeIfChanged(RenderMode::NonTexturedRender);
 
-  const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
+  const auto colorVec = toGlColor(color);
 
   float vertices[] = {
     float(x1), float(y1), colorVec.r, colorVec.g, colorVec.b, colorVec.a,
