@@ -407,6 +407,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mCurrentFbo(0)
   , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
   , mDefaultViewport(determineDefaultViewport(pWindow))
+  , mGlobalTranslation(0.0f, 0.0f)
   , mGlobalScale(1.0f, 1.0f)
 {
   using namespace std;
@@ -583,7 +584,7 @@ void Renderer::drawRectangle(
   const auto top = float(rect.top());
   const auto bottom = float(rect.bottom());
 
-  const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
+  const auto colorVec = toGlColor(color);
   float vertices[] = {
     left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
     left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
@@ -608,7 +609,7 @@ void Renderer::drawLine(
   // moment
   setRenderModeIfChanged(RenderMode::NonTexturedRender);
 
-  const auto colorVec = glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
+  const auto colorVec = toGlColor(color);
 
   float vertices[] = {
     float(x1), float(y1), colorVec.r, colorVec.g, colorVec.b, colorVec.a,
