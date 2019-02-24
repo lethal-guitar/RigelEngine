@@ -407,6 +407,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mCurrentFbo(0)
   , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
   , mDefaultViewport(determineDefaultViewport(pWindow))
+  , mGlobalTranslation(0.0f, 0.0f)
   , mGlobalScale(1.0f, 1.0f)
 {
   using namespace std;
