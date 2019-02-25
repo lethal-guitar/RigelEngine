@@ -116,11 +116,8 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
 
 base::Vector findTeleporterTargetPosition(
   ex::EntityManager& es,
-  ex::Entity teleporter
+  ex::Entity sourceTeleporter
 ) {
-  const auto sourceTeleporterPosition =
-    *teleporter.component<WorldPosition>();
-
   ex::ComponentHandle<components::Interactable> interactable;
   ex::ComponentHandle<WorldPosition> position;
 
@@ -128,7 +125,7 @@ base::Vector findTeleporterTargetPosition(
   for (auto entity : es.entities_with_components(interactable, position)) {
     if (
       interactable->mType == components::InteractableType::Teleporter &&
-      *position != sourceTeleporterPosition
+      entity != sourceTeleporter
     ) {
       targetTeleporter = entity;
     }
