@@ -22,6 +22,8 @@
 #include "engine/visual_components.hpp"
 #include "game_service_provider.hpp"
 
+#include "global_level_events.hpp"
+
 namespace ex = entityx;
 
 
@@ -83,6 +85,9 @@ void ElevatorSystem::update(entityx::EntityManager& es) {
     mAttachedElevator = attachableElevator;
 
     if (attachableElevator) {
+      mpEvents->emit(rigel::events::TutorialMessage{
+        data::TutorialMessageId::FoundTurboLift});
+
       // attach new
       mAttachedElevator.component<MovingBody>()->mGravityAffected = false;
       mActiveElevatorPreviousPosition =
