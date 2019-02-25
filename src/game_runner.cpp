@@ -677,7 +677,6 @@ void GameRunner::handleTeleporter() {
     return;
   }
 
-  mpServiceProvider->playSound(data::SoundId::Teleport);
   mpServiceProvider->fadeOutScreen();
 
   mpSystems->player().position() = *mTeleportTargetPosition;

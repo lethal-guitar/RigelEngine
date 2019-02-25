@@ -78,7 +78,9 @@ private:
     entityx::Entity interactable,
     components::InteractableType type);
 
-
+  void activateTeleporter(
+    entityx::EntityManager& es,
+    entityx::Entity interactable);
   void activateCardReader(
     entityx::EntityManager& es,
     entityx::Entity interactable);

@@ -114,7 +114,7 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
 }
 
 
-base::Vector findTeleporterTargetPosition(
+std::optional<base::Vector> findTeleporterTargetPosition(
   ex::EntityManager& es,
   ex::Entity sourceTeleporter
 ) {
@@ -129,6 +129,10 @@ base::Vector findTeleporterTargetPosition(
     ) {
       targetTeleporter = entity;
     }
+  }
+
+  if (!targetTeleporter) {
+    return std::nullopt;
   }
 
   const auto targetTeleporterPosition =
@@ -302,8 +306,7 @@ void PlayerInteractionSystem::performInteraction(
 ) {
   switch (type) {
     case InteractableType::Teleporter:
-      mpEvents->emit(rigel::events::PlayerTeleported{
-        findTeleporterTargetPosition(es, interactable)});
+      activateTeleporter(es, interactable);
       break;
 
     case InteractableType::ForceFieldCardReader:
@@ -317,6 +320,26 @@ void PlayerInteractionSystem::performInteraction(
     case InteractableType::HintMachine:
       activateHintMachine(interactable);
       break;
+  }
+}
+
+
+void PlayerInteractionSystem::activateTeleporter(
+  entityx::EntityManager& es,
+  entityx::Entity interactable
+) {
+  mpServiceProvider->playSound(data::SoundId::Teleport);
+
+  const auto maybeTargetPosition =
+    findTeleporterTargetPosition(es, interactable);
+  if (maybeTargetPosition) {
+    mpEvents->emit(rigel::events::PlayerTeleported{*maybeTargetPosition});
+  } else {
+    // If there is only one teleporter in the level, using it exits the level.
+    // This is used in N7, for example.
+    // Probably an oversight, but this does NOT check for radar dishes in the
+    // original.
+    mpEvents->emit(rigel::events::ExitReached{false});
   }
 }
 
