@@ -151,6 +151,7 @@ GameRunner::GameRunner(
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
+  mEventManager.subscribe<rigel::events::ExitReached>(*this);
   mEventManager.subscribe<rigel::events::PlayerDied>(*this);
   mEventManager.subscribe<rigel::events::PlayerTookDamage>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
@@ -396,6 +397,15 @@ void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
 }
 
 
+void GameRunner::receive(const rigel::events::ExitReached& event) {
+  if (mRadarDishCounter.radarDishesPresent() && event.mCheckRadarDishes) {
+    showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
+  } else {
+    mLevelFinished = true;
+  }
+}
+
+
 void GameRunner::receive(const rigel::events::PlayerDied& event) {
   mPlayerDied = true;
 }
@@ -597,11 +607,7 @@ void GameRunner::handleLevelExit() {
         playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
 
       if (triggerActivated) {
-        if (mRadarDishCounter.radarDishesPresent()) {
-          showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
-        } else {
-          mLevelFinished = true;
-        }
+        mEventManager.emit(rigel::events::ExitReached{});
       }
     });
 }

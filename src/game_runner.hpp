@@ -65,6 +65,7 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
   void receive(const events::CheckPointActivated& event);
+  void receive(const events::ExitReached& event);
   void receive(const events::PlayerDied& event);
   void receive(const events::PlayerTookDamage& event);
   void receive(const events::PlayerMessage& event);
