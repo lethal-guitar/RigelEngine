@@ -290,7 +290,6 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     for (const auto baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
-      // Stage 0: Ignore render slots which are marked accordingly
       if (baseFrameIndex == IGNORE_RENDER_SLOT) {
         continue;
       }
@@ -298,9 +297,13 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       const auto frameIndex = virtualToRealFrame(
         baseFrameIndex, *sprite.mpDrawData, data.mEntity);
 
-      // White flash effect
+      // White flash effect/translucency
+
+      // White flash takes priority over translucency
       if (sprite.mFlashingWhite) {
         mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
+      } else if (sprite.mTranslucent) {
+        mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
       }
 
       auto& frame = sprite.mpDrawData->mFrames[frameIndex];
@@ -308,6 +311,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       drawSpriteFrame(frame, pos - *mpScrollOffset, mpRenderer);
 
       mpRenderer->setOverlayColor(base::Color{});
+      mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
     }
   }
 }
