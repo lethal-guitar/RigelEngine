@@ -699,17 +699,34 @@ void GameRunner::handleTeleporter() {
 void GameRunner::updateTemporaryItemExpiration() {
   using data::InventoryItemType;
 
-  if (mpPlayerModel->hasItem(InventoryItemType::RapidFire)) {
-    ++mFramesElapsedHavingRapidFire;
-    if (mFramesElapsedHavingRapidFire == ITEM_ABOUT_TO_EXPIRE_TIME) {
-      mMessageDisplay.setMessage(data::Messages::RapidFireTimingOut);
-    }
+  auto updateExpiration = [this](
+    const InventoryItemType itemType,
+    const char* message,
+    int& framesElapsedHavingItem
+  ) {
+    if (mpPlayerModel->hasItem(itemType)) {
+      ++framesElapsedHavingItem;
+      if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME) {
+        mMessageDisplay.setMessage(message);
+      }
 
-    if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
-      mpPlayerModel->removeItem(InventoryItemType::RapidFire);
-      mFramesElapsedHavingRapidFire = 0;
+      if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+        mpPlayerModel->removeItem(itemType);
+        framesElapsedHavingItem = 0;
+      }
     }
-  }
+  };
+
+
+  updateExpiration(
+    InventoryItemType::RapidFire,
+    data::Messages::RapidFireTimingOut,
+    mFramesElapsedHavingRapidFire);
+
+  updateExpiration(
+    InventoryItemType::CloakingDevice,
+    data::Messages::CloakTimingOut,
+    mFramesElapsedHavingCloak);
 }
 
 
