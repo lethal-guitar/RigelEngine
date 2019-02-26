@@ -124,10 +124,6 @@ private:
   std::optional<CheckpointData> mActivatedCheckpoint;
   base::Vector mScrollOffset;
 
-  // TODO: Find a better place for this
-  int mFramesElapsedHavingRapidFire = 0;
-  int mFramesElapsedHavingCloak = 0;
-
   game_logic::PlayerInput mPlayerInput;
   std::optional<base::Vector> mTeleportTargetPosition;
   bool mBackdropSwitched = false;

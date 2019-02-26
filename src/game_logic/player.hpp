@@ -248,6 +248,7 @@ private:
     bool mAttachedToClimbable = false;
   };
 
+  void updateTemporaryItemExpiration();
   void updateAnimation();
   void updateMovement(const base::Vector& movementVector, const Button& jumpButton);
   void updateShooting(const Button& fireButton);
@@ -293,6 +294,8 @@ private:
   VisualState mVisualState = VisualState::Standing;
   int mMercyFramesPerHit;
   int mMercyFramesRemaining;
+  int mFramesElapsedHavingRapidFire = 0;
+  int mFramesElapsedHavingCloak = 0;
   std::bitset<3> mAttachedSpiders;
   bool mRapidFiredLastFrame = false;
   bool mIsOddFrame = false;

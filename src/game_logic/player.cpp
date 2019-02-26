@@ -19,6 +19,7 @@
 #include "base/match.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "data/strings.hpp"
 #include "data/player_model.hpp"
 #include "engine/collision_checker.hpp"
 #include "game_logic/effect_components.hpp"
@@ -65,6 +66,9 @@ constexpr auto CLIMB_ON_PIPE_ANIMATION = AnimationConfig{21, 24};
 
 constexpr auto INTERACTION_LOCK_DURATION = 8;
 constexpr auto INITIAL_MERCY_FRAMES = 20;
+
+constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
+constexpr auto ITEM_ABOUT_TO_EXPIRE_TIME = TEMPORARY_ITEM_EXPIRATION_TIME - 30;
 
 
 // Short jump arc: 2, 2, 1, 0, 0
@@ -390,6 +394,8 @@ void Player::receive(const events::ElevatorAttachmentChanged& event) {
 void Player::update(const PlayerInput& unfilteredInput) {
   using namespace engine;
 
+  updateTemporaryItemExpiration();
+
   if (isDead()) {
     updateDeathAnimation();
     return;
@@ -478,6 +484,8 @@ void Player::resetAfterDeath(entityx::Entity newEntity) {
   mEntity = newEntity;
 
   resetAfterRespawn();
+
+  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
 }
 
 
@@ -494,6 +502,42 @@ void Player::resetAfterRespawn() {
 
   mEntity.component<c::Sprite>()->mFramesToRender = {0};
 }
+
+
+void Player::updateTemporaryItemExpiration() {
+  using data::InventoryItemType;
+
+  auto updateExpiration = [this](
+    const InventoryItemType itemType,
+    const char* message,
+    int& framesElapsedHavingItem
+  ) {
+    if (mpPlayerModel->hasItem(itemType)) {
+      ++framesElapsedHavingItem;
+      if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME) {
+        mpEvents->emit(rigel::events::PlayerMessage{message});
+      }
+
+      if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+        mpPlayerModel->removeItem(itemType);
+        framesElapsedHavingItem = 0;
+      }
+    }
+  };
+
+
+  updateExpiration(
+    InventoryItemType::RapidFire,
+    data::Messages::RapidFireTimingOut,
+    mFramesElapsedHavingRapidFire);
+
+  updateExpiration(
+    InventoryItemType::CloakingDevice,
+    data::Messages::CloakTimingOut,
+    mFramesElapsedHavingCloak);
+}
+
+
 
 
 void Player::updateAnimation() {

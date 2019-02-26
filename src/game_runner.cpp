@@ -59,9 +59,6 @@ namespace {
 // playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
 
-constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
-constexpr auto ITEM_ABOUT_TO_EXPIRE_TIME = TEMPORARY_ITEM_EXPIRATION_TIME - 30;
-
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 
 
@@ -532,7 +529,6 @@ void GameRunner::updateGameLogic() {
   }
 
   mHudRenderer.updateAnimation();
-  updateTemporaryItemExpiration();
   mMessageDisplay.update();
 
   mpSystems->update(mPlayerInput, mEntities);
@@ -642,7 +638,6 @@ void GameRunner::restartLevel() {
   mpSystems->restartFromBeginning(playerEntity);
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
-  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);
@@ -693,40 +688,6 @@ void GameRunner::handleTeleporter() {
   mpSystems->centerViewOnPlayer();
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
-}
-
-
-void GameRunner::updateTemporaryItemExpiration() {
-  using data::InventoryItemType;
-
-  auto updateExpiration = [this](
-    const InventoryItemType itemType,
-    const char* message,
-    int& framesElapsedHavingItem
-  ) {
-    if (mpPlayerModel->hasItem(itemType)) {
-      ++framesElapsedHavingItem;
-      if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME) {
-        mMessageDisplay.setMessage(message);
-      }
-
-      if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME) {
-        mpPlayerModel->removeItem(itemType);
-        framesElapsedHavingItem = 0;
-      }
-    }
-  };
-
-
-  updateExpiration(
-    InventoryItemType::RapidFire,
-    data::Messages::RapidFireTimingOut,
-    mFramesElapsedHavingRapidFire);
-
-  updateExpiration(
-    InventoryItemType::CloakingDevice,
-    data::Messages::CloakTimingOut,
-    mFramesElapsedHavingCloak);
 }
 
 
