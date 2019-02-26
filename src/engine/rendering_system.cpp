@@ -300,7 +300,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       // White flash effect
       if (sprite.mFlashingWhite) {
-        mpRenderer->setOverlayColor(base::Color(255, 255, 255, 255));
+        mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
       }
 
       auto& frame = sprite.mpDrawData->mFrames[frameIndex];
