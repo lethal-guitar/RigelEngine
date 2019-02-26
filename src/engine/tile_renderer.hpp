@@ -41,8 +41,6 @@ public:
     int baseIndex,
     const base::Vector& tlPosition) const;
 
-  void setColorMod(int r, int g, int b);
-
   int tilesPerRow() const;
 
 private:

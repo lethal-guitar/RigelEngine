@@ -25,27 +25,6 @@ using data::Image;
 using detail::TextureBase;
 
 
-void TextureBase::setAlphaMod(const int alpha) {
-  mModulation.a = std::uint8_t(alpha);
-}
-
-
-int TextureBase::alphaMod() const {
-  return mModulation.a;
-}
-
-
-void TextureBase::setColorMod(
-  const int red,
-  const int green,
-  const int blue
-) {
-  mModulation.r = std::uint8_t(red);
-  mModulation.g = std::uint8_t(green);
-  mModulation.b = std::uint8_t(blue);
-}
-
-
 void TextureBase::render(
   engine::Renderer* renderer,
   const int x,
@@ -81,7 +60,7 @@ void TextureBase::renderScaled(
   engine::Renderer* pRenderer,
   const base::Rect<int>& destRect
 ) const {
-  pRenderer->drawTexture(mData, completeSourceRect(), destRect, mModulation);
+  pRenderer->drawTexture(mData, completeSourceRect(), destRect);
 }
 
 
@@ -100,11 +79,7 @@ void TextureBase::render(
     {x, y},
     {sourceRect.size.width, sourceRect.size.height}
   };
-  pRenderer->drawTexture(
-    mData,
-    sourceRect,
-    destRect,
-    mModulation);
+  pRenderer->drawTexture(mData, sourceRect, destRect);
 }
 
 

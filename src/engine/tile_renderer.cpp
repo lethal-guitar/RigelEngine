@@ -66,11 +66,6 @@ void TileRenderer::renderTileDoubleQuad(
 }
 
 
-void TileRenderer::setColorMod(const int r, const int g, const int b) {
-  mTileSetTexture.setColorMod(r, g, b);
-}
-
-
 int TileRenderer::tilesPerRow() const {
   return data::pixelsToTiles(mTileSetTexture.width());
 }

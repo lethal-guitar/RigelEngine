@@ -181,6 +181,7 @@ MenuElementRenderer::MenuElementRenderer(
   , mBigTextRenderer(
       createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
       pRenderer)
+  , mpRenderer(pRenderer)
   , mPalette(palette)
 {
 }
@@ -265,8 +266,7 @@ void MenuElementRenderer::drawBigText(
   int colorIndex,
   const std::string& text
 ) const {
-  const auto& color = mPalette.at(colorIndex);
-  mBigTextRenderer.setColorMod(color.r, color.g, color.b);
+  mpRenderer->setColorModulation(mPalette.at(colorIndex));
 
   for (auto i=0u; i<text.size(); ++i) {
     const auto ch = static_cast<uint8_t>(text[i]);
@@ -293,6 +293,8 @@ void MenuElementRenderer::drawBigText(
     const auto position = static_cast<int>(i);
     mBigTextRenderer.renderTileSlice(index, {x + position, y-1});
   }
+
+  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 

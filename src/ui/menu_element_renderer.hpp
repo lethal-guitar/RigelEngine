@@ -78,6 +78,7 @@ private:
 private:
   engine::TileRenderer mSpriteSheetRenderer;
   mutable engine::TileRenderer mBigTextRenderer;
+  engine::Renderer* mpRenderer;
 
   loader::Palette16 mPalette;
 
