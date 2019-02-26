@@ -180,6 +180,27 @@ void PlayerInteractionSystem::updatePlayerInteraction(
   const auto interactionWanted = input.mInteract.mWasTriggered;
   const auto worldSpacePlayerBounds = mpPlayer->worldSpaceHitBox();
 
+  auto isInRange = [&](
+    const BoundingBox& objectBounds,
+    const components::InteractableType type
+  ) {
+    if (!worldSpacePlayerBounds.intersects(objectBounds)) {
+      return false;
+    }
+
+    if (type == InteractableType::Teleporter) {
+      const auto& playerPos = mpPlayer->orientedPosition();
+      return
+        objectBounds.left() <= playerPos.x &&
+        objectBounds.left() + 3 >= playerPos.x &&
+        objectBounds.bottom() == playerPos.y &&
+        mpPlayer->isInRegularState();
+    }
+
+    return true;
+  };
+
+
   auto performedInteraction = false;
   es.each<Interactable, WorldPosition, BoundingBox>(
     [&, this](
@@ -198,7 +219,7 @@ void PlayerInteractionSystem::updatePlayerInteraction(
         mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
 
       const auto objectBounds = engine::toWorldSpace(bbox, pos);
-      if (worldSpacePlayerBounds.intersects(objectBounds)) {
+      if (isInRange(objectBounds, interactable.mType)) {
         if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
           performInteraction(es, entity, interactable.mType);
           performedInteraction = true;
