@@ -430,10 +430,6 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       sprite.mFramesToRender = {0};
       break;
 
-    case 93:
-      sprite.mFramesToRender = {1, 3};
-      break;
-
     case 98:
       sprite.mFramesToRender = {0};
       break;
@@ -1667,7 +1663,12 @@ void EntityFactory::configureEntity(
 
     case 93: // Blue force field (disabled by cloak)
       entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(Health{100});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::SuperForceField{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       break;
 
     case 95: // Missile, broken (falls over)

@@ -43,6 +43,7 @@
 #include "game_logic/ai/snake.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
+#include "game_logic/ai/super_force_field.hpp"
 #include "game_logic/ai/watch_bot.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
