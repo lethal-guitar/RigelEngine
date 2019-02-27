@@ -53,7 +53,7 @@ struct Messages {
     "BRING THIS SPECIAL CRYSTAL GLOBE*BACK TO THE PEDESTAL TO RECEIVE A*"
     "SPECIAL HINT FOR THIS LEVEL.";
 
-  static constexpr auto CloakTimingOut = "*CLOAK IS DISABLING...";
+  static constexpr auto CloakTimingOut = "CLOAK IS DISABLING...";
 
   static constexpr auto RapidFireTimingOut = "RAPID FIRE IS DISABLING...";
 
