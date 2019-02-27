@@ -85,10 +85,18 @@ void Map::clearSection(
 
 CollisionData Map::collisionData(const int x, const int y) const {
   if (static_cast<std::size_t>(x) >= mWidthInTiles) {
+    // Left/right edge of the map are always solid
     return CollisionData::fullySolid();
   }
 
   if (static_cast<std::size_t>(y) >= mHeightInTiles) {
+    // Bottom/top edge of the map are never solid
+    return CollisionData{};
+  }
+
+  if (tileAt(0, x, y) != 0 && tileAt(1, x, y) != 0) {
+    // "Composite" tiles (content on both layers) are ignored for collision
+    // checking
     return CollisionData{};
   }
 
