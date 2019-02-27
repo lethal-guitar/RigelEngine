@@ -26,10 +26,11 @@
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/interaction/locked_door.hpp"
 #include "game_logic/player.hpp"
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
+
+#include "game_service_provider.hpp"
+#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {
