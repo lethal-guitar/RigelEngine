@@ -204,6 +204,7 @@ public:
 
   bool canTakeDamage() const;
   bool isInMercyFrames() const;
+  bool isCloaked() const;
   bool isDead() const;
   bool isIncapacitated() const;
   bool isLookingUp() const;
@@ -267,6 +268,7 @@ private:
   void updateAnimationLoop(const AnimationConfig& config);
   void resetAnimation();
   void updateMercyFramesAnimation();
+  void updateCloakedAppearance();
   void updateCollisionBox();
   void updateHitBox();
 

@@ -320,12 +320,17 @@ bool Player::isInRegularState() const {
 
 
 bool Player::canTakeDamage() const {
-  return !isInMercyFrames();
+  return !(isInMercyFrames() || isCloaked());
 }
 
 
 bool Player::isInMercyFrames() const {
   return mMercyFramesRemaining > 0;
+}
+
+
+bool Player::isCloaked() const {
+  return mpPlayerModel->hasItem(data::InventoryItemType::CloakingDevice);
 }
 
 
@@ -521,6 +526,10 @@ void Player::updateTemporaryItemExpiration() {
       if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME) {
         mpPlayerModel->removeItem(itemType);
         framesElapsedHavingItem = 0;
+
+        if (itemType == InventoryItemType::CloakingDevice) {
+          mpEvents->emit(rigel::events::CloakExpired{});
+        }
       }
     }
   };
@@ -555,6 +564,7 @@ void Player::updateAnimation() {
   }
 
   updateMercyFramesAnimation();
+  updateCloakedAppearance();
 
   mIsOddFrame = !mIsOddFrame;
 }
@@ -1103,6 +1113,22 @@ void Player::updateMercyFramesAnimation() {
     }
 
     --mMercyFramesRemaining;
+  }
+}
+
+
+void Player::updateCloakedAppearance() {
+  const auto hasCloak = isCloaked();
+
+  auto& sprite = *mEntity.component<c::Sprite>();
+  sprite.mTranslucent = hasCloak;
+
+  if (
+    hasCloak &&
+    mFramesElapsedHavingCloak > ITEM_ABOUT_TO_EXPIRE_TIME &&
+    mIsOddFrame
+  ) {
+    sprite.flashWhite();
   }
 }
 

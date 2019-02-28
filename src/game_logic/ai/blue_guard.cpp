@@ -75,9 +75,9 @@ bool playerVisible(
     playerY - 3 < myPosition.y &&
     playerY + 3 > myPosition.y;
 
-  // TODO: Check player not cloaked
   return
     player.isInRegularState() &&
+    !player.isCloaked() &&
     hasLineOfSightHorizontal &&
     hasLineOfSightVertical;
 }

@@ -55,6 +55,10 @@ void SecurityCamera::update(
   const bool isOnScreen,
   entityx::Entity entity
 ) {
+  if (s.mpPlayer->isCloaked()) {
+    return;
+  }
+
   const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<Sprite>();
 

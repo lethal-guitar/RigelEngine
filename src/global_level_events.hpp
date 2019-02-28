@@ -88,6 +88,9 @@ struct PlayerTeleported {
 };
 
 
+struct CloakExpired {};
+
+
 struct ExitReached {
   bool mCheckRadarDishes = true;
 };
