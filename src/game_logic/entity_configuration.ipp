@@ -758,6 +758,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -772,6 +773,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -788,6 +790,7 @@ void EntityFactory::configureEntity(
           100,
           item,
           animation);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -804,6 +807,7 @@ void EntityFactory::configureEntity(
           100,
           item,
           animation);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -831,6 +835,7 @@ void EntityFactory::configureEntity(
 
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
         entity.assign<ActorTag>(ActorTag::Type::FireBomb);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -976,6 +981,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -992,6 +998,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -1008,6 +1015,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -1024,6 +1032,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
