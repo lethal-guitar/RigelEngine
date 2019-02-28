@@ -70,6 +70,8 @@ set(core_sources
     engine/tile_renderer.hpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/blowing_fan.cpp
+    game_logic/ai/blowing_fan.hpp
     game_logic/ai/blue_guard.cpp
     game_logic/ai/blue_guard.hpp
     game_logic/ai/bomber_plane.cpp

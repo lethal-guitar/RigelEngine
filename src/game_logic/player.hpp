@@ -75,6 +75,8 @@ struct Falling {
   int mFramesElapsed = 0;
 };
 
+struct PushedByFan {};
+
 struct RecoveringFromLanding {};
 
 struct ClimbingLadder {};
@@ -127,6 +129,7 @@ using PlayerState = std::variant<
   OnGround,
   Jumping,
   Falling,
+  PushedByFan,
   RecoveringFromLanding,
   ClimbingLadder,
   OnPipe,
@@ -242,6 +245,9 @@ public:
   void detachSpider(const SpiderClingPosition position) {
     mAttachedSpiders.reset(static_cast<size_t>(position));
   }
+
+  void beginBeingPushedByFan();
+  void endBeingPushedByFan();
 
 private:
   struct VerticalMovementResult {

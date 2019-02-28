@@ -374,8 +374,8 @@ auto actorIDListForActor(const ActorID ID) {
       break;
 
     case 130:
-      actorParts.push_back(260);
       actorParts.push_back(130);
+      actorParts.push_back(260);
       break;
 
     case 144:
@@ -1690,6 +1690,13 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
       entity.assign<CustomRenderFunc>(&renderVerticalSlidingDoor);
+      break;
+
+    case 130: // Blowing fan
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::BlowingFan{});
       break;
 
     case 132: // Sliding door, horizontal

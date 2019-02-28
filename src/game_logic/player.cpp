@@ -79,6 +79,8 @@ constexpr auto DEATH_ANIMATION_STEPS = 6;
 
 constexpr auto ELEVATOR_SPEED = 2;
 
+constexpr auto FAN_PUSH_SPEED = 2;
+
 constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_ANIMATION_SEQUENCE{
   29, 29, 29, 29, 30, 31};
 
@@ -396,6 +398,19 @@ void Player::receive(const events::ElevatorAttachmentChanged& event) {
 }
 
 
+void Player::beginBeingPushedByFan() {
+  mState = PushedByFan{};
+}
+
+
+void Player::endBeingPushedByFan() {
+  auto newState = Jumping{};
+  newState.mFramesElapsed = 5;
+  mState = newState;
+  setVisualState(VisualState::Jumping);
+}
+
+
 void Player::update(const PlayerInput& unfilteredInput) {
   using namespace engine;
 
@@ -672,6 +687,12 @@ void Player::updateMovement(
         const auto needRecoveryFrame = reachedTerminalVelocity;
         landOnGround(needRecoveryFrame);
       }
+    },
+
+    [&, this](const PushedByFan&) {
+      setVisualState(VisualState::Jumping);
+      updateHorizontalMovementInAir(movementVector);
+      moveVertically(*mpCollisionChecker, mEntity, -FAN_PUSH_SPEED);
     },
 
     [this](const RecoveringFromLanding&) {

@@ -22,6 +22,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
+#include "game_logic/ai/blowing_fan.hpp"
 #include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/bomber_plane.hpp"
 #include "game_logic/ai/ceiling_sucker.hpp"
