@@ -77,9 +77,11 @@ BoundingBox toWorldSpace(
 
 PhysicsSystem::PhysicsSystem(
   const engine::CollisionChecker* pCollisionChecker,
+  const data::map::Map* pMap,
   entityx::EventManager* pEvents
 )
   : mpCollisionChecker(pCollisionChecker)
+  , mpMap(pMap)
   , mpEvents(pEvents)
 {
   mpEvents->subscribe<ex::ComponentAddedEvent<MovingBody>>(*this);
@@ -159,6 +161,8 @@ void PhysicsSystem::applyPhysics(
 
   if (body.mGravityAffected && !hasActiveSequence()) {
     body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
+
+    applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, entity);
   }
 
   const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);

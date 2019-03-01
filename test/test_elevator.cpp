@@ -93,7 +93,7 @@ TEST_CASE("Rocket elevator") {
   elevator.assign<Sprite>();
   interaction::configureElevator(elevator);
 
-  PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
+  PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
 
 
   SECTION("Elevator is setup correctly") {

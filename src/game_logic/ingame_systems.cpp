@@ -60,7 +60,7 @@ IngameSystems::IngameSystems(
       pRenderer,
       pMap,
       std::move(mapRenderData))
-  , mPhysicsSystem(&mCollisionChecker, &eventManager)
+  , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
   , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
   , mMapScrollSystem(mpScrollOffset, &mPlayer, *pMap)
   , mPlayerInteractionSystem(

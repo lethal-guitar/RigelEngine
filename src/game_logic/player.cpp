@@ -416,6 +416,10 @@ void Player::update(const PlayerInput& unfilteredInput) {
 
   updateTemporaryItemExpiration();
 
+  if (!isIncapacitated() && !mIsRidingElevator) {
+    applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, mEntity);
+  }
+
   if (isDead()) {
     updateDeathAnimation();
     return;

@@ -113,6 +113,16 @@ bool TileAttributes::isClimbable(const TileIndex tile) const {
 }
 
 
+bool TileAttributes::isConveyorBeltLeft(TileIndex tile) const {
+  return isBitSet(bitPackFor(tile), 0x100);
+}
+
+
+bool TileAttributes::isConveyorBeltRight(TileIndex tile) const {
+  return isBitSet(bitPackFor(tile), 0x200);
+}
+
+
 uint16_t TileAttributes::bitPackFor(const TileIndex tile) const {
   assert(tile < mAttributeBitPacks.size());
   return mAttributeBitPacks[tile];

@@ -57,7 +57,7 @@ TEST_CASE("Spike ball") {
   MockServiceProvider mockServiceProvicer;
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
-  PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
+  PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
   ai::SpikeBallSystem spikeBallSystem{
     &collisionChecker,
     &mockServiceProvicer,
