@@ -24,7 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class CollisionChecker;
 
@@ -67,4 +67,4 @@ MovementResult moveVertically(
   entityx::Entity entity,
   int amount);
 
-}}
+}

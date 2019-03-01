@@ -18,7 +18,7 @@
 
 #include "engine/collision_checker.hpp"
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using namespace engine::components;
 
@@ -159,4 +159,4 @@ MovementResult moveVertically(
     });
 }
 
-}}
+}
