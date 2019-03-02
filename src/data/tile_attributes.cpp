@@ -67,7 +67,7 @@ CollisionData::CollisionData(const std::initializer_list<CollisionData>& items)
 }
 
 
-CollisionData::CollisionData(std::uint8_t flagsBitPack)
+CollisionData::CollisionData(const std::uint8_t flagsBitPack)
   : mCollisionFlagsBitPack(flagsBitPack)
 {
 }
