@@ -101,3 +101,5 @@ private:
 };
 
 }
+
+#include "data/tile_attributes.ipp"
