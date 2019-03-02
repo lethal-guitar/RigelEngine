@@ -454,6 +454,8 @@ void Player::update(const PlayerInput& unfilteredInput) {
       updateAnimationLoop(LADDER_CLIMB_ANIMATION);
     }
   }
+
+  dieIfFallenOutOfMap();
 }
 
 
@@ -1198,6 +1200,14 @@ void Player::updateHitBox() {
 
     default:
       break;
+  }
+}
+
+
+void Player::dieIfFallenOutOfMap() {
+  if (position().y > mpMap->height() + 3) {
+    mpServiceProvider->playSound(data::SoundId::DukeDeath);
+    mpEvents->emit<rigel::events::PlayerDied>();
   }
 }
 

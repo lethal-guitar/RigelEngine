@@ -277,6 +277,7 @@ private:
   void updateCloakedAppearance();
   void updateCollisionBox();
   void updateHitBox();
+  void dieIfFallenOutOfMap();
 
   void fireShot();
 
