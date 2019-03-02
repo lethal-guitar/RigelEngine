@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data { namespace map {
+namespace rigel::data::map {
 
 using TileIndex = std::uint32_t;
 
@@ -100,4 +100,4 @@ private:
   AttributeArray mAttributeBitPacks;
 };
 
-}}}
+}

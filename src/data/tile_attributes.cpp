@@ -20,7 +20,7 @@
 #include <stdexcept>
 
 
-namespace rigel { namespace data { namespace map {
+namespace rigel::data::map {
 
 using namespace std;
 
@@ -146,4 +146,4 @@ CollisionData TileAttributeDict::collisionData(const TileIndex tile) const {
   return CollisionData(static_cast<uint8_t>(bitPackFor(tile) & 0xF));
 }
 
-}}}
+}
