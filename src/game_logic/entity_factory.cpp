@@ -632,4 +632,25 @@ void spawnFloatingScoreNumber(
   entity.assign<Active>();
 }
 
+
+void spawnFireEffect(
+  entityx::EntityManager& entityManager,
+  const base::Vector& position,
+  const BoundingBox& coveredArea,
+  const data::ActorID actorToSpawn
+) {
+  // TODO: The initial offset should be based on the size of the actor
+  // that's to be spawned. Currently, it's hard-coded for actor ID 3
+  // (small explosion).
+  auto offset = base::Vector{-1, 1};
+
+  auto spawner = entityManager.create();
+  SpriteCascadeSpawner spawnerConfig;
+  spawnerConfig.mBasePosition = position + offset + coveredArea.topLeft;
+  spawnerConfig.mCoveredArea = coveredArea.size;
+  spawnerConfig.mActorId = actorToSpawn;
+  spawner.assign<SpriteCascadeSpawner>(spawnerConfig);
+  spawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(18));
+}
+
 }}

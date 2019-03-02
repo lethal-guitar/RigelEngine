@@ -220,21 +220,12 @@ void EffectsSystem::processEffectsAndAdvance(
       },
 
       [&, this](const SpriteCascade& cascade) {
-        // TODO: The initial offset should be based on the size of the actor
-        // that's to be spawned. Currently, it's hard-coded for actor ID 3
-        // (small explosion).
-        auto offset = base::Vector{-1, 1};
         auto coveredArea = effects.mCascadePlacementBox
           ? *effects.mCascadePlacementBox
           : BoundingBox{};
 
-        auto spawner = mpEntityManager->create();
-        SpriteCascadeSpawner spawnerConfig;
-        spawnerConfig.mBasePosition = position + offset + coveredArea.topLeft;
-        spawnerConfig.mCoveredArea = coveredArea.size;
-        spawnerConfig.mActorId = cascade.mActorId;
-        spawner.assign<SpriteCascadeSpawner>(spawnerConfig);
-        spawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(18));
+        spawnFireEffect(
+          *mpEntityManager, position, coveredArea, cascade.mActorId);
       },
 
       [&, this](const ScoreNumber& scoreNumber) {
