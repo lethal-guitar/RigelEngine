@@ -243,6 +243,10 @@ void configureMovingEffectSprite(
 
 void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
   switch (id) {
+    case 3:
+      entity.assign<BehaviorController>(behaviors::TileBurner{});
+      break;
+
     case 43:
     case 100:
       entity.assign<PlayerDamaging>(1);
