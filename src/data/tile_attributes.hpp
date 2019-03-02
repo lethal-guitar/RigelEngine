@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include "image.hpp"
+
 #include <cstddef>
 #include <vector>
-
-#include "image.hpp"
 
 
 namespace rigel { namespace data { namespace map {
