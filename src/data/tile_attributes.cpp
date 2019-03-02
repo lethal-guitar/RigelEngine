@@ -76,67 +76,77 @@ CollisionData::CollisionData(std::uint8_t flagsBitPack)
 }
 
 
-TileAttributes::TileAttributes(const AttributeArray& bitpacks)
+TileAttributes::TileAttributes(const std::uint16_t attributesBitPack)
+  : mAttributesBitPack(attributesBitPack)
+{
+}
+
+
+bool TileAttributes::isAnimated() const {
+  return isBitSet(mAttributesBitPack, 0x10);
+}
+
+
+bool TileAttributes::isFastAnimation() const {
+  return !isBitSet(mAttributesBitPack, 0x400);
+}
+
+
+bool TileAttributes::isForeGround() const {
+  return isBitSet(mAttributesBitPack, 0x20);
+}
+
+
+bool TileAttributes::isLadder() const {
+  return isBitSet(mAttributesBitPack, 0x4000);
+}
+
+
+bool TileAttributes::isClimbable() const {
+  return isBitSet(mAttributesBitPack, 0x80);
+}
+
+
+bool TileAttributes::isConveyorBeltLeft() const {
+  return isBitSet(mAttributesBitPack, 0x100);
+}
+
+
+bool TileAttributes::isConveyorBeltRight() const {
+  return isBitSet(mAttributesBitPack, 0x200);
+}
+
+
+bool TileAttributes::isFlammable() const {
+  return isBitSet(mAttributesBitPack, 0x40);
+}
+
+
+TileAttributeDict::TileAttributeDict(const AttributeArray& bitpacks)
   : mAttributeBitPacks(bitpacks)
 {
 }
 
 
-TileAttributes::TileAttributes(AttributeArray&& bitpacks)
+TileAttributeDict::TileAttributeDict(AttributeArray&& bitpacks)
   : mAttributeBitPacks(move(bitpacks))
 {
 }
 
 
-bool TileAttributes::isAnimated(const TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x10);
-}
-
-
-bool TileAttributes::isFastAnimation(const TileIndex tile) const {
-  return !isBitSet(bitPackFor(tile), 0x400);
-}
-
-
-bool TileAttributes::isForeGround(const TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x20);
-}
-
-
-bool TileAttributes::isLadder(const TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x4000);
-}
-
-
-bool TileAttributes::isClimbable(const TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x80);
-}
-
-
-bool TileAttributes::isConveyorBeltLeft(TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x100);
-}
-
-
-bool TileAttributes::isConveyorBeltRight(TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x200);
-}
-
-
-bool TileAttributes::isFlammable(TileIndex tile) const {
-  return isBitSet(bitPackFor(tile), 0x40);
-}
-
-
-uint16_t TileAttributes::bitPackFor(const TileIndex tile) const {
+uint16_t TileAttributeDict::bitPackFor(const TileIndex tile) const {
   assert(tile < mAttributeBitPacks.size());
   return mAttributeBitPacks[tile];
 }
 
 
-CollisionData TileAttributes::collisionData(const TileIndex tile) const {
-  return CollisionData(static_cast<uint8_t>(bitPackFor(tile) & 0xF));
+TileAttributes TileAttributeDict::attributes(const TileIndex tile) const {
+  return TileAttributes(bitPackFor(tile));
 }
 
+
+CollisionData TileAttributeDict::collisionData(const TileIndex tile) const {
+  return CollisionData(static_cast<uint8_t>(bitPackFor(tile) & 0xF));
+}
 
 }}}

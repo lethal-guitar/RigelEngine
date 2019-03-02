@@ -52,7 +52,7 @@ struct MockEventListener : public ex::Receiver<MockEventListener> {
 TEST_CASE("Rocket elevator") {
   ex::EntityX entityx;
 
-  data::map::Map map{300, 300, data::map::TileAttributes{{0x0, 0xF}}};
+  data::map::Map map{300, 300, data::map::TileAttributeDict{{0x0, 0xF}}};
 
   // Floor
   for (int i = 0; i < 8; ++i) {

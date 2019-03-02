@@ -52,7 +52,7 @@ enum class BackdropSwitchCondition {
 class Map {
 public:
   Map() = default;
-  Map(int widthInTiles, int heightInTiles, TileAttributes attributes);
+  Map(int widthInTiles, int heightInTiles, TileAttributeDict attributes);
 
   TileIndex tileAt(int layer, int x, int y) const;
 
@@ -68,13 +68,8 @@ public:
 
   void clearSection(int x, int y, int width, int height);
 
-  TileAttributes& attributes() {
-    return mAttributes;
-  }
-
-  const TileAttributes& attributes() const {
-    return mAttributes;
-  }
+  const TileAttributeDict& attributeDict() const;
+  TileAttributes attributes(int x, int y) const;
 
   CollisionData collisionData(int x, int y) const;
 
@@ -89,7 +84,7 @@ private:
   std::size_t mWidthInTiles;
   std::size_t mHeightInTiles;
 
-  TileAttributes mAttributes;
+  TileAttributeDict mAttributes;
 };
 
 

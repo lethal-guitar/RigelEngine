@@ -32,7 +32,7 @@ using namespace std;
 Map::Map(
   const int widthInTiles,
   const int heightInTiles,
-  TileAttributes attributes
+  TileAttributeDict attributes
 )
   : mLayers({
       TileArray(widthInTiles*heightInTiles, 0),
@@ -80,6 +80,34 @@ void Map::clearSection(
       setTileAt(1, col, row, 0);
     }
   }
+}
+
+
+const TileAttributeDict& Map::attributeDict() const {
+  return mAttributes;
+}
+
+
+TileAttributes Map::attributes(const int x, const int y) const {
+  if (
+    static_cast<std::size_t>(x) >= mWidthInTiles ||
+    static_cast<std::size_t>(y) >= mHeightInTiles
+  ) {
+    // Outside of the map doesn't have any attributes set
+    return TileAttributes{};
+  }
+
+  if (tileAt(0, x, y) != 0 && tileAt(1, x, y) != 0) {
+    // "Composite" tiles (content on both layers) are ignored for attribute
+    // checking
+    return TileAttributes{};
+  }
+
+  if (tileAt(1, x, y) != 0) {
+    return TileAttributes{mAttributes.attributes(tileAt(1, x, y))};
+  }
+
+  return TileAttributes{mAttributes.attributes(tileAt(0, x, y))};
 }
 
 

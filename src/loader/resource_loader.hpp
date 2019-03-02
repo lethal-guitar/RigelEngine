@@ -35,7 +35,7 @@ namespace rigel { namespace loader {
 
 struct TileSet {
   data::Image mTiles;
-  data::map::TileAttributes mAttributes;
+  data::map::TileAttributeDict mAttributes;
 };
 
 

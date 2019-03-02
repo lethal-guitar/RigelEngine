@@ -190,26 +190,14 @@ void applyConveyorBeltMotion(
   using std::end;
 
   auto getFlag = [&map](const int x, const int y) {
-    if (map.tileAt(0, x, y) != 0 && map.tileAt(1, x, y) != 0) {
+    const auto attributes = map.attributes(x, y);
+    if (attributes.isConveyorBeltLeft()) {
+      return ConveyorBeltFlag::Left;
+    } else if (attributes.isConveyorBeltRight()) {
+      return ConveyorBeltFlag::Right;
+    } else {
       return ConveyorBeltFlag::None;
     }
-
-    // TODO: This should be handled by Map, not by the client code
-    if (
-      map.attributes().isConveyorBeltLeft(map.tileAt(0, x, y)) ||
-      map.attributes().isConveyorBeltLeft(map.tileAt(1, x, y))
-    ) {
-      return ConveyorBeltFlag::Left;
-    }
-
-    if (
-      map.attributes().isConveyorBeltRight(map.tileAt(0, x, y)) ||
-      map.attributes().isConveyorBeltRight(map.tileAt(1, x, y))
-    ) {
-      return ConveyorBeltFlag::Right;
-    }
-
-    return ConveyorBeltFlag::None;
   };
 
   bc::static_vector<ConveyorBeltFlag, MAX_WIDTH_FOR_CONVEYOR_CHECK> flags;

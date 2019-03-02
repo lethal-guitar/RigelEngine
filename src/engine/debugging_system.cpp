@@ -122,12 +122,9 @@ void DebuggingSystem::update(ex::EntityManager& es) {
           }
         }
 
-        const auto isClimbable =
-          mpMap->attributes().isClimbable(mpMap->tileAt(0, col, row));
-        const auto isLadder =
-          mpMap->attributes().isLadder(mpMap->tileAt(0, col, row));
-        const auto isFlammable =
-          mpMap->attributes().isFlammable(mpMap->tileAt(0, col, row));
+        const auto isClimbable = mpMap->attributes(col, row).isClimbable();
+        const auto isLadder = mpMap->attributes(col, row).isLadder();
+        const auto isFlammable = mpMap->attributes(col, row).isFlammable();
 
         if (isClimbable) {
           auto tileBox = base::makeRect<int>(topLeft, bottomRight);

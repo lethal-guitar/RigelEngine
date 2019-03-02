@@ -169,7 +169,7 @@ TEST_CASE("Player movement") {
 
   // ---------------------------------------------------------------------------
   // Map
-  data::map::Map map{100, 100, data::map::TileAttributes{{
+  data::map::Map map{100, 100, data::map::TileAttributeDict{{
     0x0,    // index 0: empty
     0xF,    // index 1: solid
     0x4000, // index 2: ladder

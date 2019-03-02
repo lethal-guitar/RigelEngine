@@ -731,8 +731,7 @@ void Player::updateMovement(
           ? worldBBox.top() - 1
           : worldBBox.bottom() + 1;
 
-        const auto canContinue =
-          mpMap->attributes().isLadder(mpMap->tileAt(0, attachX, nextY));
+        const auto canContinue = mpMap->attributes(attachX, nextY).isLadder();
 
         if (canContinue) {
           moveVertically(*mpCollisionChecker, mEntity, movement);
@@ -783,12 +782,11 @@ void Player::updateMovement(
           const auto testX = movementVector.x < 0
             ? worldBBox.topLeft.x
             : worldBBox.right();
-          const auto tileToTest = mpMap->tileAt(0, testX, worldBBox.top() - 1);
 
           const auto result = moveHorizontally(
             *mpCollisionChecker, mEntity, orientationAsMovement);
           if (result != MovementResult::Failed) {
-            if (mpMap->attributes().isClimbable(tileToTest)) {
+            if (mpMap->attributes(testX, worldBBox.top() - 1).isClimbable()) {
               setVisualState(VisualState::MovingOnPipe);
             } else {
               startFallingDelayed();
@@ -896,9 +894,9 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
 
     std::optional<base::Vector> maybeLadderTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
-      const auto candidateTile =
-        mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());
-      if (mpMap->attributes().isLadder(candidateTile)) {
+      const auto attributes =
+        mpMap->attributes(worldBBox.left() + i, worldBBox.top());
+      if (attributes.isLadder()) {
         maybeLadderTouchPoint =
           base::Vector{worldBBox.left() + i, worldBBox.top()};
         break;
@@ -1072,9 +1070,9 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
 
     std::optional<base::Vector> maybeClimbableTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
-      const auto candidateTile =
-        mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());
-      if (mpMap->attributes().isClimbable(candidateTile)) {
+      const auto attributes =
+        mpMap->attributes(worldBBox.left() + i, worldBBox.top());
+      if (attributes.isClimbable()) {
         maybeClimbableTouchPoint =
           base::Vector{worldBBox.left() + i, worldBBox.top()};
         break;
