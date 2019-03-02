@@ -126,6 +126,8 @@ void DebuggingSystem::update(ex::EntityManager& es) {
           mpMap->attributes().isClimbable(mpMap->tileAt(0, col, row));
         const auto isLadder =
           mpMap->attributes().isLadder(mpMap->tileAt(0, col, row));
+        const auto isFlammable =
+          mpMap->attributes().isFlammable(mpMap->tileAt(0, col, row));
 
         if (isClimbable) {
           auto tileBox = base::makeRect<int>(topLeft, bottomRight);
@@ -135,6 +137,11 @@ void DebuggingSystem::update(ex::EntityManager& es) {
         if (isLadder) {
           auto tileBox = base::makeRect<int>(topLeft, bottomRight);
           mpRenderer->drawRectangle(tileBox, base::Color(0, 100, 255, 220));
+        }
+
+        if (isFlammable) {
+          auto tileBox = base::makeRect<int>(topLeft, bottomRight);
+          mpRenderer->drawRectangle(tileBox, base::Color(255, 127, 0, 220));
         }
       }
     }

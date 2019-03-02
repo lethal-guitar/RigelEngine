@@ -78,6 +78,7 @@ public:
   bool isClimbable(TileIndex tile) const;
   bool isConveyorBeltLeft(TileIndex tile) const;
   bool isConveyorBeltRight(TileIndex tile) const;
+  bool isFlammable(TileIndex tile) const;
 
   CollisionData collisionData(TileIndex tile) const;
 

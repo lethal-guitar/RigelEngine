@@ -123,6 +123,11 @@ bool TileAttributes::isConveyorBeltRight(TileIndex tile) const {
 }
 
 
+bool TileAttributes::isFlammable(TileIndex tile) const {
+  return isBitSet(bitPackFor(tile), 0x40);
+}
+
+
 uint16_t TileAttributes::bitPackFor(const TileIndex tile) const {
   assert(tile < mAttributeBitPacks.size());
   return mAttributeBitPacks[tile];
