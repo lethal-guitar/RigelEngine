@@ -88,6 +88,14 @@ struct PlayerTeleported {
 };
 
 
+struct CloakExpired {};
+
+
+struct ExitReached {
+  bool mCheckRadarDishes = true;
+};
+
+
 struct DoorOpened {
   entityx::Entity mEntity;
 };

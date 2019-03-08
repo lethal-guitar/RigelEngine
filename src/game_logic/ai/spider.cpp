@@ -147,7 +147,11 @@ void SpiderSystem::update(entityx::EntityManager& es) {
       const auto playerOrientation = mpPlayer->orientation();
 
       auto tryClingToPlayer = [&, this](const SpiderClingPosition clingPos) {
-        if (mpPlayer->hasSpiderAt(clingPos) || mpPlayer->isDead()) {
+        if (
+          mpPlayer->hasSpiderAt(clingPos) ||
+          mpPlayer->isDead() ||
+          mpPlayer->isCloaked()
+        ) {
           return false;
         }
 

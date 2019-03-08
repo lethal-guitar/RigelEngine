@@ -23,8 +23,10 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel::data::map { class Map; }
 
-namespace rigel { namespace engine {
+
+namespace rigel::engine {
 
 class CollisionChecker;
 
@@ -67,4 +69,10 @@ MovementResult moveVertically(
   entityx::Entity entity,
   int amount);
 
-}}
+
+void applyConveyorBeltMotion(
+  const CollisionChecker& collisionChecker,
+  const data::map::Map& map,
+  entityx::Entity entity);
+
+}

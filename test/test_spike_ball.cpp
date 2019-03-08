@@ -47,7 +47,7 @@ TEST_CASE("Spike ball") {
   spikeBall.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 3}});
   ai::configureSpikeBall(spikeBall);
 
-  data::map::Map map{300, 300, data::map::TileAttributes{{0x0, 0xF}}};
+  data::map::Map map{300, 300, data::map::TileAttributeDict{{0x0, 0xF}}};
 
   // Floor
   for (int i = 0; i < 8; ++i) {
@@ -57,7 +57,7 @@ TEST_CASE("Spike ball") {
   MockServiceProvider mockServiceProvicer;
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
-  PhysicsSystem physicsSystem{&collisionChecker, &entityx.events};
+  PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
   ai::SpikeBallSystem spikeBallSystem{
     &collisionChecker,
     &mockServiceProvicer,

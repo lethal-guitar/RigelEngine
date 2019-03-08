@@ -224,10 +224,7 @@ void Game::handleEvent(const SDL_Event& event) {
 void Game::performScreenFadeBlocking(const bool doFadeIn) {
   using namespace std::chrono;
 
-  if (
-    (doFadeIn && mRenderTarget.alphaMod() == 255) ||
-    (!doFadeIn && mRenderTarget.alphaMod() == 0)
-  ) {
+  if ((doFadeIn && mAlphaMod == 255) || (!doFadeIn && mAlphaMod == 0)) {
     // Already faded in/out, nothing to do
     return;
   }
@@ -247,14 +244,14 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 
     if (fadeFactor < 1.0) {
       const auto alpha = doFadeIn ? fadeFactor : 1.0 - fadeFactor;
-      const auto mod = static_cast<int>(std::round(255.0 * alpha));
-      mRenderTarget.setAlphaMod(mod);
+      mAlphaMod = static_cast<std::uint8_t>(std::round(255.0 * alpha));
     } else {
-      mRenderTarget.setAlphaMod(doFadeIn ? 255 : 0);
+      mAlphaMod = doFadeIn ? 255 : 0;
     }
 
     mRenderer.clear();
 
+    mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
     mRenderTarget.renderScaledToScreen(&mRenderer);
     mRenderer.swapBuffers();
 
@@ -262,6 +259,8 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
       break;
     }
   }
+
+  mRenderer.setColorModulation({255, 255, 255, 255});
 }
 
 

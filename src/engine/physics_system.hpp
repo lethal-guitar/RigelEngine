@@ -29,6 +29,9 @@ RIGEL_RESTORE_WARNINGS
 #include <tuple>
 
 
+namespace rigel::data::map { class Map; }
+
+
 namespace rigel { namespace engine {
 
 class CollisionChecker;
@@ -56,6 +59,7 @@ class PhysicsSystem  : public entityx::Receiver<PhysicsSystem> {
 public:
   PhysicsSystem(
     const engine::CollisionChecker* pCollisionChecker,
+    const data::map::Map* pMap,
     entityx::EventManager* pEvents);
 
   /** Process currently existing entities
@@ -99,6 +103,7 @@ private:
 private:
   std::vector<entityx::Entity> mPhysicsObjectsForPhase2;
   const CollisionChecker* mpCollisionChecker;
+  const data::map::Map* mpMap;
   entityx::EventManager* mpEvents;
   bool mShouldCollectForPhase2 = false;
 };

@@ -155,7 +155,9 @@ void MapRenderer::renderMapTiles(
         }
 
         const auto tileIndex = mpMap->tileAt(layer, col, row);
-        if (mpMap->attributes().isForeGround(tileIndex) != renderForeground) {
+        const auto isForeground =
+          mpMap->attributeDict().attributes(tileIndex).isForeGround();
+        if (isForeground != renderForeground) {
           continue;
         }
 
@@ -198,13 +200,14 @@ void MapRenderer::renderTile(
 map::TileIndex MapRenderer::animatedTileIndex(
   const map::TileIndex tileIndex
 ) const {
-  if (mpMap->attributes().isAnimated(tileIndex)) {
+  if (mpMap->attributeDict().attributes(tileIndex).isAnimated()) {
     const auto fastAnimOffset =
       (mElapsedFrames / FAST_ANIM_FRAME_DELAY) % ANIM_STATES;
     const auto slowAnimOffset =
       (mElapsedFrames / SLOW_ANIM_FRAME_DELAY) % ANIM_STATES;
 
-    const auto isFastAnim = mpMap->attributes().isFastAnimation(tileIndex);
+    const auto isFastAnim =
+      mpMap->attributeDict().attributes(tileIndex).isFastAnimation();
     return tileIndex + (isFastAnim ? fastAnimOffset : slowAnimOffset);
   } else {
     return tileIndex;

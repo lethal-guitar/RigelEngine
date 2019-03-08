@@ -16,13 +16,13 @@
 
 #pragma once
 
+#include "image.hpp"
+
 #include <cstddef>
 #include <vector>
 
-#include "image.hpp"
 
-
-namespace rigel { namespace data { namespace map {
+namespace rigel::data::map {
 
 using TileIndex = std::uint32_t;
 
@@ -65,18 +65,32 @@ private:
 
 class TileAttributes {
 public:
+  TileAttributes() = default;
+  TileAttributes(std::uint16_t attributesBitPack);
+
+  bool isAnimated() const;
+  bool isFastAnimation() const;
+  bool isForeGround() const;
+  bool isLadder() const;
+  bool isClimbable() const;
+  bool isConveyorBeltLeft() const;
+  bool isConveyorBeltRight() const;
+  bool isFlammable() const;
+
+private:
+  std::uint16_t mAttributesBitPack = 0;
+};
+
+
+class TileAttributeDict {
+public:
   using AttributeArray = std::vector<std::uint16_t>;
 
-  TileAttributes() = default;
-  explicit TileAttributes(const AttributeArray& bitpacks);
-  explicit TileAttributes(AttributeArray&& bitpacks);
+  TileAttributeDict() = default;
+  explicit TileAttributeDict(const AttributeArray& bitpacks);
+  explicit TileAttributeDict(AttributeArray&& bitpacks);
 
-  bool isAnimated(TileIndex tile) const;
-  bool isFastAnimation(TileIndex tile) const;
-  bool isForeGround(TileIndex tile) const;
-  bool isLadder(TileIndex tile) const;
-  bool isClimbable(TileIndex tile) const;
-
+  TileAttributes attributes(TileIndex tile) const;
   CollisionData collisionData(TileIndex tile) const;
 
 private:
@@ -86,4 +100,6 @@ private:
   AttributeArray mAttributeBitPacks;
 };
 
-}}}
+}
+
+#include "data/tile_attributes.ipp"

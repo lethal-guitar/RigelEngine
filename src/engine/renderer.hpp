@@ -118,12 +118,12 @@ public:
   base::Rect<int> fullScreenRect() const;
 
   void setOverlayColor(const base::Color& color);
+  void setColorModulation(const base::Color& colorModulation);
 
   void drawTexture(
     const TextureData& textureData,
     const base::Rect<int>& pSourceRect,
-    const base::Rect<int>& pDestRect,
-    const base::Color& colorModulation);
+    const base::Rect<int>& pDestRect);
 
   void drawRectangle(
     const base::Rect<int>& rect,

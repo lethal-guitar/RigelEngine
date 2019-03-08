@@ -21,8 +21,8 @@ set(core_sources
     data/song.hpp
     data/sound_ids.hpp
     data/strings.hpp
-    data/tile_attributes.cpp
     data/tile_attributes.hpp
+    data/tile_attributes.ipp
     data/tutorial_messages.cpp
     data/tutorial_messages.hpp
     data/unit_conversions.cpp
@@ -70,6 +70,8 @@ set(core_sources
     engine/tile_renderer.hpp
     engine/timing.hpp
     engine/visual_components.hpp
+    game_logic/ai/blowing_fan.cpp
+    game_logic/ai/blowing_fan.hpp
     game_logic/ai/blue_guard.cpp
     game_logic/ai/blue_guard.hpp
     game_logic/ai/bomber_plane.cpp
@@ -112,6 +114,8 @@ set(core_sources
     game_logic/ai/spider.hpp
     game_logic/ai/spike_ball.cpp
     game_logic/ai/spike_ball.hpp
+    game_logic/ai/super_force_field.cpp
+    game_logic/ai/super_force_field.hpp
     game_logic/ai/watch_bot.cpp
     game_logic/ai/watch_bot.hpp
     game_logic/behavior_controller.hpp
@@ -158,6 +162,8 @@ set(core_sources
     game_logic/player/projectile_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
+    game_logic/tile_burner.cpp
+    game_logic/tile_burner.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
@@ -228,7 +234,6 @@ target_include_directories(rigel_core
     "${SDL2_INCLUDE_DIR}"
     ${SDL2_MIXER_INCLUDE_DIRS}
     ${3rd_party_path}/entityx
-    ${Boost_INCLUDE_DIRS}
 
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
@@ -242,6 +247,7 @@ target_link_libraries(rigel_core
     "${SDL2_LIBRARY}"
     ${SDL2_MIXER_LIBRARIES}
     entityx
+    Boost::boost
 
     PRIVATE
     dbopl
@@ -282,6 +288,9 @@ add_executable(${main_exe_name} ${main_exe_sources})
 target_link_libraries(${main_exe_name} PRIVATE
     ${SDLMAIN2_LIBRARY}
     rigel_core
-    ${Boost_LIBRARIES}
+    Boost::boost
+    Boost::program_options
+    Boost::disable_autolinking
+    Boost::dynamic_linking
 )
 

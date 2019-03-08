@@ -22,6 +22,7 @@
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
+#include "game_logic/ai/blowing_fan.hpp"
 #include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/bomber_plane.hpp"
 #include "game_logic/ai/ceiling_sucker.hpp"
@@ -43,6 +44,7 @@
 #include "game_logic/ai/snake.hpp"
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
+#include "game_logic/ai/super_force_field.hpp"
 #include "game_logic/ai/watch_bot.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
@@ -54,7 +56,9 @@
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/interaction/locked_door.hpp"
+#include "game_logic/interaction/respawn_checkpoint.hpp"
 #include "game_logic/item_container.hpp"
+#include "game_logic/tile_burner.hpp"
 #include "game_logic/trigger_components.hpp"
 
 #include <tuple>
@@ -626,6 +630,27 @@ void spawnFloatingScoreNumber(
     IgnoreCollisions{true});
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
   entity.assign<Active>();
+}
+
+
+void spawnFireEffect(
+  entityx::EntityManager& entityManager,
+  const base::Vector& position,
+  const BoundingBox& coveredArea,
+  const data::ActorID actorToSpawn
+) {
+  // TODO: The initial offset should be based on the size of the actor
+  // that's to be spawned. Currently, it's hard-coded for actor ID 3
+  // (small explosion).
+  auto offset = base::Vector{-1, 1};
+
+  auto spawner = entityManager.create();
+  SpriteCascadeSpawner spawnerConfig;
+  spawnerConfig.mBasePosition = position + offset + coveredArea.topLeft;
+  spawnerConfig.mCoveredArea = coveredArea.size;
+  spawnerConfig.mActorId = actorToSpawn;
+  spawner.assign<SpriteCascadeSpawner>(spawnerConfig);
+  spawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(18));
 }
 
 }}

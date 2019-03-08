@@ -21,12 +21,13 @@
 #include "engine/physical_components.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/player/components.hpp"
+#include "game_logic/behavior_controller.hpp"
+#include "game_logic/player.hpp"
 
 #include "global_level_events.hpp"
 
 
-namespace rigel { namespace game_logic { namespace interaction {
+namespace rigel::game_logic::interaction {
 
 namespace {
 
@@ -34,7 +35,7 @@ constexpr auto ACTIVATION_COUNTDOWN = 14;
 constexpr auto PERFORM_CHECKPOINT_TIME = 9;
 
 void turnIntoPassiveCheckpoint(entityx::Entity entity) {
-  entity.remove<components::RespawnCheckpoint>();
+  entity.remove<components::BehaviorController>();
   entity.remove<engine::components::BoundingBox>();
   engine::startAnimationLoop(entity, 1, 5, 8);
 }
@@ -42,85 +43,71 @@ void turnIntoPassiveCheckpoint(entityx::Entity entity) {
 }
 
 
-RespawnCheckpointSystem::RespawnCheckpointSystem(
-  entityx::Entity player,
-  entityx::EventManager* pEvents
-)
-  : mPlayer(player)
-  , mpEvents(pEvents)
-{
-}
-
-
-void RespawnCheckpointSystem::update(entityx::EntityManager& es) {
+void RespawnCheckpoint::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const bool isOnScreen,
+  entityx::Entity entity
+) {
   using namespace engine::components;
-  using components::RespawnCheckpoint;
 
-  const auto& playerBox = *mPlayer.component<BoundingBox>();
-  const auto& playerPos = *mPlayer.component<WorldPosition>();
-  const auto worldSpacePlayerBounds =
-    engine::toWorldSpace(playerBox, playerPos);
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& bbox = *entity.component<BoundingBox>();
 
-  es.each<RespawnCheckpoint, WorldPosition, BoundingBox, Sprite>(
-    [this, &worldSpacePlayerBounds](
-      entityx::Entity entity,
-      RespawnCheckpoint& state,
-      const WorldPosition& position,
-      const BoundingBox& bbox,
-      Sprite& sprite
-    ) {
-      if (!state.mInitialized) {
-        // Special case: If a respawn checkpoint is already visible on screen
-        // when the level is loaded, it will immediately go into its "active"
-        // state, and can't be triggered by the player anymore. This is
-        // presumably because restoring from the checkpoint would be kind of
-        // equivalent to restarting the level if the checkpoint is already
-        // visible at the location where the player spawns.
-        if (engine::isOnScreen(entity)) {
-          turnIntoPassiveCheckpoint(entity);
-          return;
-        }
+  auto& sprite = *entity.component<Sprite>();
 
-        state.mInitialized = true;
+  if (!mInitialized) {
+    // Special case: If a respawn checkpoint is already visible on screen
+    // when the level is loaded, it will immediately go into its "active"
+    // state, and can't be triggered by the player anymore. This is
+    // presumably because restoring from the checkpoint would be kind of
+    // equivalent to restarting the level if the checkpoint is already
+    // visible at the location where the player spawns.
+    if (engine::isOnScreen(entity)) {
+      turnIntoPassiveCheckpoint(entity);
+      return;
+    }
+
+    mInitialized = true;
+  }
+
+  if (!mActivationCountdown) {
+    //
+    // Collision check
+    //
+    const auto worldSpacePlayerBounds = s.mpPlayer->worldSpaceCollisionBox();
+    const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
+    if (worldSpaceBbox.intersects(worldSpacePlayerBounds)) {
+      mActivationCountdown = ACTIVATION_COUNTDOWN;
+    }
+  } else {
+    //
+    // Activation sequence
+    //
+    auto& countdown = *mActivationCountdown;
+    if (countdown > 0) {
+      // Part 1: Just flash white, after a few frames, trigger the actual
+      // checkpoint to be made. Keep counting down, once the countdown hits
+      // 0, the animation starts.
+      --countdown;
+      if (countdown % 2 == 0) {
+        sprite.flashWhite();
       }
 
-      if (!state.mActivationCountdown) {
-        //
-        // Collision check
-        //
-        const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
-        if (worldSpaceBbox.intersects(worldSpacePlayerBounds)) {
-          state.mActivationCountdown = ACTIVATION_COUNTDOWN;
-        }
-      } else {
-        //
-        // Activation sequence
-        //
-        auto& countdown = *state.mActivationCountdown;
-        if (countdown > 0) {
-          // Part 1: Just flash white, after a few frames, trigger the actual
-          // checkpoint to be made. Keep counting down, once the countdown hits
-          // 0, the animation starts.
-          --countdown;
-          if (countdown % 2 == 0) {
-            sprite.flashWhite();
-          }
-
-          if (countdown == PERFORM_CHECKPOINT_TIME) {
-            mpEvents->emit(rigel::events::CheckPointActivated{position});
-          }
-        } else {
-          // Part 2: Animate the checkpoint rising up, then switch to a loop
-          // once that's done. This part wouldn't be necessary if we had a way
-          // to express a combined animation sequence/loop, where the looped
-          // part could be separate from a "startup" sequence.
-          ++sprite.mFramesToRender[0];
-          if (sprite.mFramesToRender[0] == 5) {
-            turnIntoPassiveCheckpoint(entity);
-          }
-        }
+      if (countdown == PERFORM_CHECKPOINT_TIME) {
+        d.mpEvents->emit(rigel::events::CheckPointActivated{position});
       }
-    });
+    } else {
+      // Part 2: Animate the checkpoint rising up, then switch to a loop
+      // once that's done. This part wouldn't be necessary if we had a way
+      // to express a combined animation sequence/loop, where the looped
+      // part could be separate from a "startup" sequence.
+      ++sprite.mFramesToRender[0];
+      if (sprite.mFramesToRender[0] == 5) {
+        turnIntoPassiveCheckpoint(entity);
+      }
+    }
+  }
 }
 
-}}}
+}

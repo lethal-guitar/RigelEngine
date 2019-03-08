@@ -65,6 +65,7 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
   void receive(const events::CheckPointActivated& event);
+  void receive(const events::ExitReached& event);
   void receive(const events::PlayerDied& event);
   void receive(const events::PlayerTookDamage& event);
   void receive(const events::PlayerMessage& event);
@@ -122,10 +123,6 @@ private:
   LevelBonusInfo mBonusInfo;
   std::optional<CheckpointData> mActivatedCheckpoint;
   base::Vector mScrollOffset;
-
-  // TODO: Find a better place for this
-  int mFramesElapsedHavingRapidFire = 0;
-  int mFramesElapsedHavingCloak = 0;
 
   game_logic::PlayerInput mPlayerInput;
   std::optional<base::Vector> mTeleportTargetPosition;

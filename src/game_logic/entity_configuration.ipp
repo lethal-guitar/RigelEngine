@@ -243,6 +243,10 @@ void configureMovingEffectSprite(
 
 void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
   switch (id) {
+    case 3:
+      entity.assign<BehaviorController>(behaviors::TileBurner{});
+      break;
+
     case 43:
     case 100:
       entity.assign<PlayerDamaging>(1);
@@ -374,8 +378,8 @@ auto actorIDListForActor(const ActorID ID) {
       break;
 
     case 130:
-      actorParts.push_back(260);
       actorParts.push_back(130);
+      actorParts.push_back(260);
       break;
 
     case 144:
@@ -428,10 +432,6 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case 67:
       sprite.mFramesToRender = {0};
-      break;
-
-    case 93:
-      sprite.mFramesToRender = {1, 3};
       break;
 
     case 98:
@@ -762,6 +762,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -776,6 +777,7 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -792,6 +794,7 @@ void EntityFactory::configureEntity(
           100,
           item,
           animation);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -808,6 +811,7 @@ void EntityFactory::configureEntity(
           100,
           item,
           animation);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -835,6 +839,7 @@ void EntityFactory::configureEntity(
 
         entity.assign<OverrideDrawOrder>(originalDrawOrder);
         entity.assign<ActorTag>(ActorTag::Type::FireBomb);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -980,6 +985,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -996,6 +1002,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -1012,6 +1019,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -1028,6 +1036,7 @@ void EntityFactory::configureEntity(
           item,
           ActorTag{ActorTag::Type::CollectableWeapon});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.remove<ActivationSettings>();
       }
       break;
 
@@ -1288,8 +1297,9 @@ void EntityFactory::configureEntity(
       break;
 
     case 133: // respawn checkpoint
-      entity.assign<RespawnCheckpoint>();
+      entity.assign<BehaviorController>(interaction::RespawnCheckpoint{});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       break;
 
     case 239: // Special hint globe
@@ -1446,7 +1456,7 @@ void EntityFactory::configureEntity(
     case 80: // Security camera, floor-mounted
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<ai::components::SecurityCamera>();
+      entity.assign<BehaviorController>(behaviors::SecurityCamera{});
       entity.assign<DestructionEffects>(CAMERA_KILL_EFFECT_SPEC);
       entity.assign<ActorTag>(ActorTag::Type::ShootableCamera);
       break;
@@ -1573,7 +1583,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(RED_BIRD_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
-      ai::configureRedBird(entity);
+      configureRedBird(entity);
       break;
 
     case 219: // Smash hammer
@@ -1666,7 +1676,12 @@ void EntityFactory::configureEntity(
 
     case 93: // Blue force field (disabled by cloak)
       entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(Health{100});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::SuperForceField{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       break;
 
     case 95: // Missile, broken (falls over)
@@ -1688,6 +1703,13 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
       entity.assign<CustomRenderFunc>(&renderVerticalSlidingDoor);
+      break;
+
+    case 130: // Blowing fan
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::BlowingFan{});
       break;
 
     case 132: // Sliding door, horizontal

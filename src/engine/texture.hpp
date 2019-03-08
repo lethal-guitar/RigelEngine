@@ -60,11 +60,6 @@ public:
   /** Render entire texture scaled to fill the entire screen */
   void renderScaledToScreen(engine::Renderer* pRenderer) const;
 
-  void setAlphaMod(int alpha);
-  int alphaMod() const;
-
-  void setColorMod(int r, int g, int b);
-
   int width() const {
     return mData.mWidth;
   }
@@ -94,12 +89,10 @@ protected:
 
   explicit TextureBase(Renderer::TextureData data)
     : mData(data)
-    , mModulation({255, 255, 255, 255})
   {
   }
 
   Renderer::TextureData mData;
-  base::Color mModulation;
 };
 
 }

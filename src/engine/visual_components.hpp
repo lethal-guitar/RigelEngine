@@ -89,6 +89,7 @@ struct Sprite {
   std::vector<int> mFramesToRender;
   const SpriteDrawData* mpDrawData = nullptr;
   bool mFlashingWhite = false;
+  bool mTranslucent = false;
   bool mShow = true;
 };
 

@@ -191,7 +191,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
     tilesToPixels(GameTraits::CZone::solidTilesImageHeight),
     maskedTilesImage);
 
-  return {move(fullImage), TileAttributes{move(attributes)}};
+  return {move(fullImage), TileAttributeDict{move(attributes)}};
 }
 
 

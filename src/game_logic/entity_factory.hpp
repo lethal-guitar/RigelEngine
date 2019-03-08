@@ -206,4 +206,11 @@ void spawnFloatingScoreNumber(
   ScoreNumberType type,
   const base::Vector& position);
 
+
+void spawnFireEffect(
+  entityx::EntityManager& entityManager,
+  const base::Vector& position,
+  const engine::components::BoundingBox& coveredArea,
+  data::ActorID actorToSpawn);
+
 }}

@@ -16,16 +16,34 @@
 
 #include "movement.hpp"
 
+#include "base/warnings.hpp"
+#include "data/map.hpp"
 #include "engine/collision_checker.hpp"
 
-namespace rigel { namespace engine {
+RIGEL_DISABLE_WARNINGS
+#include <boost/container/static_vector.hpp>
+RIGEL_RESTORE_WARNINGS
+
+#include <algorithm>
+
+
+namespace rigel::engine {
 
 using namespace engine::components;
 
 
 namespace {
 
+enum class ConveyorBeltFlag {
+  None,
+  Left,
+  Right
+};
+
+
 constexpr auto WALK_OFF_LEDGE_LEEWAY = 2;
+
+constexpr auto MAX_WIDTH_FOR_CONVEYOR_CHECK = 16u;
 
 
 template<typename CallableT>
@@ -159,4 +177,51 @@ MovementResult moveVertically(
     });
 }
 
-}}
+
+void applyConveyorBeltMotion(
+  const CollisionChecker& collisionChecker,
+  const data::map::Map& map,
+  entityx::Entity entity
+) {
+  namespace bc = boost::container;
+
+  using std::any_of;
+  using std::begin;
+  using std::end;
+
+  auto getFlag = [&map](const int x, const int y) {
+    const auto attributes = map.attributes(x, y);
+    if (attributes.isConveyorBeltLeft()) {
+      return ConveyorBeltFlag::Left;
+    } else if (attributes.isConveyorBeltRight()) {
+      return ConveyorBeltFlag::Right;
+    } else {
+      return ConveyorBeltFlag::None;
+    }
+  };
+
+  bc::static_vector<ConveyorBeltFlag, MAX_WIDTH_FOR_CONVEYOR_CHECK> flags;
+
+  {
+    const auto& position = *entity.component<WorldPosition>();
+    const auto& bbox = *entity.component<BoundingBox>();
+    const auto worldBbox = toWorldSpace(bbox, position);
+    for (auto x = 0; x < worldBbox.size.width; ++x) {
+      flags.push_back(getFlag(worldBbox.left() + x, worldBbox.bottom() + 1));
+    }
+  }
+
+  auto anyFlagIs = [&flags](const ConveyorBeltFlag desiredFlag) {
+    return any_of(begin(flags), end(flags), [&](const ConveyorBeltFlag flag) {
+      return flag == desiredFlag;
+    });
+  };
+
+  if (anyFlagIs(ConveyorBeltFlag::Left)) {
+    moveHorizontally(collisionChecker, entity, -1);
+  } else if (anyFlagIs(ConveyorBeltFlag::Right)) {
+    moveHorizontally(collisionChecker, entity, 1);
+  }
+}
+
+}

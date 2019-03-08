@@ -1,4 +1,4 @@
-/* Copyright (C) 2017, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2019, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,65 +18,26 @@
 
 #include "game_logic/global_dependencies.hpp"
 
-#include <variant>
-
-namespace rigel::engine::events { struct CollidedWithWorld; }
-
-
-namespace rigel::game_logic {
-
-void configureRedBird(entityx::Entity entity);
-
-}
+#include <cstdint>
 
 
 namespace rigel::game_logic::behaviors {
 
-namespace red_bird {
+struct BlowingFan {
+  enum class State : std::uint8_t {
+    SpeedingUp,
+    SlowingDown,
+  };
 
-struct Flying {};
-
-
-struct Hovering {
-  int mFramesElapsed = 0;
-};
-
-
-struct PlungingDown {
-  int mInitialHeight;
-};
-
-
-struct RisingUp {
-  explicit RisingUp(const int initialHeight)
-    : mInitialHeight(initialHeight)
-  {
-  }
-
-  int mInitialHeight;
-  bool mBackAtOriginalHeight = false;
-};
-
-
-using State = std::variant<Flying, Hovering, PlungingDown, RisingUp>;
-
-}
-
-
-struct RedBird {
   void update(
-    GlobalDependencies&,
-    GlobalState&,
-    bool,
-    entityx::Entity);
-
-  void onCollision(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const engine::events::CollidedWithWorld& event,
+    bool isOnScreen,
     entityx::Entity entity);
 
-  red_bird::State mState;
+  int mStep = 0;
+  State mState = State::SpeedingUp;
+  bool mIsPushingPlayer = false;
 };
 
 }

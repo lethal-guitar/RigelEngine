@@ -38,6 +38,10 @@ namespace rigel {
     class PlayerModel;
   }
 
+  namespace events {
+    struct CloakExpired;
+  }
+
   namespace game_logic {
     class EntityFactory;
   }
@@ -52,7 +56,9 @@ namespace rigel { namespace game_logic {
 
 class Player;
 
-class PlayerInteractionSystem {
+class PlayerInteractionSystem :
+  public entityx::Receiver<PlayerInteractionSystem>
+{
 public:
   PlayerInteractionSystem(
     const data::GameSessionId& sessionId,
@@ -69,6 +75,8 @@ public:
 
   void updateItemCollection(entityx::EntityManager& es);
 
+  void receive(const rigel::events::CloakExpired& event);
+
 private:
   void showMessage(const std::string& text);
   void showTutorialMessage(const data::TutorialMessageId id);
@@ -78,7 +86,9 @@ private:
     entityx::Entity interactable,
     components::InteractableType type);
 
-
+  void activateTeleporter(
+    entityx::EntityManager& es,
+    entityx::Entity interactable);
   void activateCardReader(
     entityx::EntityManager& es,
     entityx::Entity interactable);
@@ -99,6 +109,8 @@ private:
   entityx::EventManager* mpEvents;
   data::LevelHints mLevelHints;
   data::GameSessionId mSessionId;
+
+  std::optional<base::Vector> mCloakPickupPosition;
 };
 
 }}

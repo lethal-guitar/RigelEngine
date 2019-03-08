@@ -19,11 +19,20 @@
 #include <base/warnings.hpp>
 #include <data/sound_ids.hpp>
 #include <data/game_session_data.hpp>
+#include <game_logic/ientity_factory.hpp>
+#include <engine/visual_components.hpp>
+
 #include <game_mode.hpp>
 #include <game_service_provider.hpp>
 
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
+
 #include <optional>
 
+
+namespace rigel {
 
 struct MockServiceProvider : public rigel::IGameServiceProvider {
   void fadeOutScreen() override {}
@@ -45,3 +54,71 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
 
   std::optional<rigel::data::SoundId> mLastTriggeredSoundId;
 };
+
+
+struct FireShotParameters {
+  rigel::game_logic::ProjectileType type;
+  rigel::engine::components::WorldPosition position;
+  rigel::game_logic::ProjectileDirection direction;
+};
+
+
+struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
+  std::vector<FireShotParameters> mCreateProjectileCalls;
+
+  explicit MockEntityFactory(entityx::EntityManager* pEntityManager)
+    : mpEntityManager(pEntityManager)
+  {
+  }
+
+  entityx::Entity createProjectile(
+    game_logic::ProjectileType type,
+    const engine::components::WorldPosition& pos,
+    game_logic::ProjectileDirection direction
+  ) override {
+    mCreateProjectileCalls.push_back(FireShotParameters{type, pos, direction});
+    return createMockSpriteEntity();
+  }
+
+  entityx::Entity createEntitiesForLevel(
+    const data::map::ActorDescriptionList& actors
+  ) override {
+    return {};
+  }
+
+  entityx::Entity createSprite(
+    data::ActorID actorID,
+    bool assignBoundingBox = false
+  ) override {
+    return createMockSpriteEntity();
+  }
+
+  entityx::Entity createSprite(
+    data::ActorID actorID,
+    const base::Vector& position,
+    bool assignBoundingBox = false
+  ) override {
+    return createMockSpriteEntity();
+  }
+
+  entityx::Entity createActor(
+    data::ActorID actorID,
+    const base::Vector& position
+  ) override {
+    return createMockSpriteEntity();
+  }
+
+private:
+  entityx::Entity createMockSpriteEntity() {
+    static rigel::engine::SpriteDrawData dummyDrawData;
+
+    auto entity = mpEntityManager->create();
+    rigel::engine::components::Sprite sprite{&dummyDrawData, {}};
+    entity.assign<rigel::engine::components::Sprite>(sprite);
+    return entity;
+  }
+
+  entityx::EntityManager* mpEntityManager;
+};
+
+}

@@ -17,9 +17,10 @@
 #include "security_camera.hpp"
 
 #include "engine/visual_components.hpp"
+#include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::behaviors {
 
 using engine::components::Sprite;
 using engine::components::WorldPosition;
@@ -48,26 +49,22 @@ int determineFrameForCameraPosition(
 }
 
 
-SecurityCameraSystem::SecurityCameraSystem(entityx::Entity playerEntity)
-  : mPlayerEntity(playerEntity)
-{
+void SecurityCamera::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const bool isOnScreen,
+  entityx::Entity entity
+) {
+  if (s.mpPlayer->isCloaked()) {
+    return;
+  }
+
+  const auto& position = *entity.component<WorldPosition>();
+  auto& sprite = *entity.component<Sprite>();
+
+  const auto newFrame = determineFrameForCameraPosition(
+    position, s.mpPlayer->position());
+  sprite.mFramesToRender[0] = newFrame;
 }
 
-
-void SecurityCameraSystem::update(entityx::EntityManager& es) {
-  const auto& playerPosition = *mPlayerEntity.component<WorldPosition>();
-
-  es.each<WorldPosition, Sprite, components::SecurityCamera>(
-    [&playerPosition](
-      entityx::Entity,
-      const WorldPosition& position,
-      Sprite& sprite,
-      const components::SecurityCamera&
-    ) {
-      const auto newFrame = determineFrameForCameraPosition(
-        position, playerPosition);
-      sprite.mFramesToRender[0] = newFrame;
-    });
 }
-
-}}}

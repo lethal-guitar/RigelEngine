@@ -60,7 +60,7 @@ IngameSystems::IngameSystems(
       pRenderer,
       pMap,
       std::move(mapRenderData))
-  , mPhysicsSystem(&mCollisionChecker, &eventManager)
+  , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
   , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
   , mMapScrollSystem(mpScrollOffset, &mPlayer, *pMap)
   , mPlayerInteractionSystem(
@@ -78,7 +78,6 @@ IngameSystems::IngameSystems(
       pServiceProvider,
       &mCollisionChecker,
       &eventManager)
-  , mRespawnCheckpointSystem(playerEntity, &eventManager)
   , mRadarComputerSystem(pRadarDishCounter)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
   , mDynamicGeometrySystem(
@@ -121,9 +120,7 @@ IngameSystems::IngameSystems(
       &mParticles,
       pRandomGenerator,
       eventManager)
-  , mRedBirdSystem(playerEntity, eventManager)
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
-  , mSecurityCameraSystem(playerEntity)
   , mSimpleWalkerSystem(
       playerEntity,
       &mCollisionChecker)
@@ -183,7 +180,6 @@ void IngameSystems::update(
   // Player related logic update
   // ----------------------------------------------------------------------
   mElevatorSystem.update(es);
-  mRespawnCheckpointSystem.update(es);
   mRadarComputerSystem.update(es);
 
   // ----------------------------------------------------------------------
@@ -194,9 +190,7 @@ void IngameSystems::update(
   mLaserTurretSystem.update(es);
   mMessengerDroneSystem.update(es);
   mPrisonerSystem.update(es);
-  mRedBirdSystem.update(es);
   mRocketTurretSystem.update(es);
-  mSecurityCameraSystem.update(es);
   mSimpleWalkerSystem.update(es);
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);

@@ -16,25 +16,22 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
+#include "game_logic/global_dependencies.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
-RIGEL_RESTORE_WARNINGS
+#include <optional>
 
-namespace rigel { namespace game_logic { namespace interaction {
 
-class RespawnCheckpointSystem {
-public:
-  RespawnCheckpointSystem(
-    entityx::Entity player,
-    entityx::EventManager* pEvents);
+namespace rigel::game_logic::interaction {
 
-  void update(entityx::EntityManager& es);
+struct RespawnCheckpoint {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-private:
-  entityx::Entity mPlayer;
-  entityx::EventManager* mpEvents;
+  bool mInitialized = false;
+  std::optional<int> mActivationCountdown;
 };
 
-}}}
+}

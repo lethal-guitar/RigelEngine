@@ -19,6 +19,7 @@
 #include "base/match.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
+#include "data/strings.hpp"
 #include "data/player_model.hpp"
 #include "engine/collision_checker.hpp"
 #include "game_logic/effect_components.hpp"
@@ -66,6 +67,9 @@ constexpr auto CLIMB_ON_PIPE_ANIMATION = AnimationConfig{21, 24};
 constexpr auto INTERACTION_LOCK_DURATION = 8;
 constexpr auto INITIAL_MERCY_FRAMES = 20;
 
+constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
+constexpr auto ITEM_ABOUT_TO_EXPIRE_TIME = TEMPORARY_ITEM_EXPIRATION_TIME - 30;
+
 
 // Short jump arc: 2, 2, 1, 0, 0
 constexpr std::array<int, 8> JUMP_ARC{2, 2, 1, 1, 1, 0, 0, 0};
@@ -74,6 +78,8 @@ constexpr std::array<int, 8> JUMP_ARC{2, 2, 1, 1, 1, 0, 0, 0};
 constexpr auto DEATH_ANIMATION_STEPS = 6;
 
 constexpr auto ELEVATOR_SPEED = 2;
+
+constexpr auto FAN_PUSH_SPEED = 2;
 
 constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_ANIMATION_SEQUENCE{
   29, 29, 29, 29, 30, 31};
@@ -316,12 +322,17 @@ bool Player::isInRegularState() const {
 
 
 bool Player::canTakeDamage() const {
-  return !isInMercyFrames();
+  return !(isInMercyFrames() || isCloaked());
 }
 
 
 bool Player::isInMercyFrames() const {
   return mMercyFramesRemaining > 0;
+}
+
+
+bool Player::isCloaked() const {
+  return mpPlayerModel->hasItem(data::InventoryItemType::CloakingDevice);
 }
 
 
@@ -387,8 +398,27 @@ void Player::receive(const events::ElevatorAttachmentChanged& event) {
 }
 
 
+void Player::beginBeingPushedByFan() {
+  mState = PushedByFan{};
+}
+
+
+void Player::endBeingPushedByFan() {
+  auto newState = Jumping{};
+  newState.mFramesElapsed = 5;
+  mState = newState;
+  setVisualState(VisualState::Jumping);
+}
+
+
 void Player::update(const PlayerInput& unfilteredInput) {
   using namespace engine;
+
+  updateTemporaryItemExpiration();
+
+  if (!isIncapacitated() && !mIsRidingElevator) {
+    applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, mEntity);
+  }
 
   if (isDead()) {
     updateDeathAnimation();
@@ -424,6 +454,8 @@ void Player::update(const PlayerInput& unfilteredInput) {
       updateAnimationLoop(LADDER_CLIMB_ANIMATION);
     }
   }
+
+  dieIfFallenOutOfMap();
 }
 
 
@@ -478,6 +510,8 @@ void Player::resetAfterDeath(entityx::Entity newEntity) {
   mEntity = newEntity;
 
   resetAfterRespawn();
+
+  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
 }
 
 
@@ -496,6 +530,46 @@ void Player::resetAfterRespawn() {
 }
 
 
+void Player::updateTemporaryItemExpiration() {
+  using data::InventoryItemType;
+
+  auto updateExpiration = [this](
+    const InventoryItemType itemType,
+    const char* message,
+    int& framesElapsedHavingItem
+  ) {
+    if (mpPlayerModel->hasItem(itemType)) {
+      ++framesElapsedHavingItem;
+      if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME) {
+        mpEvents->emit(rigel::events::PlayerMessage{message});
+      }
+
+      if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+        mpPlayerModel->removeItem(itemType);
+        framesElapsedHavingItem = 0;
+
+        if (itemType == InventoryItemType::CloakingDevice) {
+          mpEvents->emit(rigel::events::CloakExpired{});
+        }
+      }
+    }
+  };
+
+
+  updateExpiration(
+    InventoryItemType::RapidFire,
+    data::Messages::RapidFireTimingOut,
+    mFramesElapsedHavingRapidFire);
+
+  updateExpiration(
+    InventoryItemType::CloakingDevice,
+    data::Messages::CloakTimingOut,
+    mFramesElapsedHavingCloak);
+}
+
+
+
+
 void Player::updateAnimation() {
   if (mVisualState == VisualState::Walking && mIsOddFrame) {
     updateAnimationLoop(WALK_ANIMATION);
@@ -511,6 +585,7 @@ void Player::updateAnimation() {
   }
 
   updateMercyFramesAnimation();
+  updateCloakedAppearance();
 
   mIsOddFrame = !mIsOddFrame;
 }
@@ -620,6 +695,12 @@ void Player::updateMovement(
       }
     },
 
+    [&, this](const PushedByFan&) {
+      setVisualState(VisualState::Jumping);
+      updateHorizontalMovementInAir(movementVector);
+      moveVertically(*mpCollisionChecker, mEntity, -FAN_PUSH_SPEED);
+    },
+
     [this](const RecoveringFromLanding&) {
       // TODO: What if ground disappears on this frame?
       mState = OnGround{};
@@ -652,8 +733,7 @@ void Player::updateMovement(
           ? worldBBox.top() - 1
           : worldBBox.bottom() + 1;
 
-        const auto canContinue =
-          mpMap->attributes().isLadder(mpMap->tileAt(0, attachX, nextY));
+        const auto canContinue = mpMap->attributes(attachX, nextY).isLadder();
 
         if (canContinue) {
           moveVertically(*mpCollisionChecker, mEntity, movement);
@@ -704,12 +784,11 @@ void Player::updateMovement(
           const auto testX = movementVector.x < 0
             ? worldBBox.topLeft.x
             : worldBBox.right();
-          const auto tileToTest = mpMap->tileAt(0, testX, worldBBox.top() - 1);
 
           const auto result = moveHorizontally(
             *mpCollisionChecker, mEntity, orientationAsMovement);
           if (result != MovementResult::Failed) {
-            if (mpMap->attributes().isClimbable(tileToTest)) {
+            if (mpMap->attributes(testX, worldBBox.top() - 1).isClimbable()) {
               setVisualState(VisualState::MovingOnPipe);
             } else {
               startFallingDelayed();
@@ -817,9 +896,9 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
 
     std::optional<base::Vector> maybeLadderTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
-      const auto candidateTile =
-        mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());
-      if (mpMap->attributes().isLadder(candidateTile)) {
+      const auto attributes =
+        mpMap->attributes(worldBBox.left() + i, worldBBox.top());
+      if (attributes.isLadder()) {
         maybeLadderTouchPoint =
           base::Vector{worldBBox.left() + i, worldBBox.top()};
         break;
@@ -993,9 +1072,9 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
 
     std::optional<base::Vector> maybeClimbableTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i) {
-      const auto candidateTile =
-        mpMap->tileAt(0, worldBBox.left() + i, worldBBox.top());
-      if (mpMap->attributes().isClimbable(candidateTile)) {
+      const auto attributes =
+        mpMap->attributes(worldBBox.left() + i, worldBBox.top());
+      if (attributes.isClimbable()) {
         maybeClimbableTouchPoint =
           base::Vector{worldBBox.left() + i, worldBBox.top()};
         break;
@@ -1063,6 +1142,22 @@ void Player::updateMercyFramesAnimation() {
 }
 
 
+void Player::updateCloakedAppearance() {
+  const auto hasCloak = isCloaked();
+
+  auto& sprite = *mEntity.component<c::Sprite>();
+  sprite.mTranslucent = hasCloak;
+
+  if (
+    hasCloak &&
+    mFramesElapsedHavingCloak > ITEM_ABOUT_TO_EXPIRE_TIME &&
+    mIsOddFrame
+  ) {
+    sprite.flashWhite();
+  }
+}
+
+
 void Player::updateCollisionBox() {
   auto& bbox = *mEntity.component<c::BoundingBox>();
   bbox.size.height = isCrouching() ? PLAYER_HEIGHT_CROUCHED : PLAYER_HEIGHT;
@@ -1105,6 +1200,14 @@ void Player::updateHitBox() {
 
     default:
       break;
+  }
+}
+
+
+void Player::dieIfFallenOutOfMap() {
+  if (position().y > mpMap->height() + 3) {
+    mpServiceProvider->playSound(data::SoundId::DukeDeath);
+    mpEvents->emit<rigel::events::PlayerDied>();
   }
 }
 

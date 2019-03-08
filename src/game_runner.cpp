@@ -59,9 +59,6 @@ namespace {
 // playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
 
-constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
-constexpr auto ITEM_ABOUT_TO_EXPIRE_TIME = TEMPORARY_ITEM_EXPIRATION_TIME - 30;
-
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 
 
@@ -151,6 +148,7 @@ GameRunner::GameRunner(
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
+  mEventManager.subscribe<rigel::events::ExitReached>(*this);
   mEventManager.subscribe<rigel::events::PlayerDied>(*this);
   mEventManager.subscribe<rigel::events::PlayerTookDamage>(*this);
   mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
@@ -396,6 +394,15 @@ void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
 }
 
 
+void GameRunner::receive(const rigel::events::ExitReached& event) {
+  if (mRadarDishCounter.radarDishesPresent() && event.mCheckRadarDishes) {
+    showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
+  } else {
+    mLevelFinished = true;
+  }
+}
+
+
 void GameRunner::receive(const rigel::events::PlayerDied& event) {
   mPlayerDied = true;
 }
@@ -522,7 +529,6 @@ void GameRunner::updateGameLogic() {
   }
 
   mHudRenderer.updateAnimation();
-  updateTemporaryItemExpiration();
   mMessageDisplay.update();
 
   mpSystems->update(mPlayerInput, mEntities);
@@ -597,11 +603,7 @@ void GameRunner::handleLevelExit() {
         playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
 
       if (triggerActivated) {
-        if (mRadarDishCounter.radarDishesPresent()) {
-          showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
-        } else {
-          mLevelFinished = true;
-        }
+        mEventManager.emit(rigel::events::ExitReached{});
       }
     });
 }
@@ -636,7 +638,6 @@ void GameRunner::restartLevel() {
   mpSystems->restartFromBeginning(playerEntity);
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
-  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
 
   mpSystems->centerViewOnPlayer();
   updateAndRender(0);
@@ -671,7 +672,6 @@ void GameRunner::handleTeleporter() {
     return;
   }
 
-  mpServiceProvider->playSound(data::SoundId::Teleport);
   mpServiceProvider->fadeOutScreen();
 
   mpSystems->player().position() = *mTeleportTargetPosition;
@@ -688,23 +688,6 @@ void GameRunner::handleTeleporter() {
   mpSystems->centerViewOnPlayer();
   updateAndRender(0.0);
   mpServiceProvider->fadeInScreen();
-}
-
-
-void GameRunner::updateTemporaryItemExpiration() {
-  using data::InventoryItemType;
-
-  if (mpPlayerModel->hasItem(InventoryItemType::RapidFire)) {
-    ++mFramesElapsedHavingRapidFire;
-    if (mFramesElapsedHavingRapidFire == ITEM_ABOUT_TO_EXPIRE_TIME) {
-      mMessageDisplay.setMessage(data::Messages::RapidFireTimingOut);
-    }
-
-    if (mFramesElapsedHavingRapidFire >= TEMPORARY_ITEM_EXPIRATION_TIME) {
-      mpPlayerModel->removeItem(InventoryItemType::RapidFire);
-      mFramesElapsedHavingRapidFire = 0;
-    }
-  }
 }
 
 

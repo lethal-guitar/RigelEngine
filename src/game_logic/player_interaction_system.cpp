@@ -26,10 +26,11 @@
 #include "game_logic/interaction/force_field.hpp"
 #include "game_logic/interaction/locked_door.hpp"
 #include "game_logic/player.hpp"
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
+
+#include "game_service_provider.hpp"
+#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {
@@ -114,13 +115,10 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
 }
 
 
-base::Vector findTeleporterTargetPosition(
+std::optional<base::Vector> findTeleporterTargetPosition(
   ex::EntityManager& es,
-  ex::Entity teleporter
+  ex::Entity sourceTeleporter
 ) {
-  const auto sourceTeleporterPosition =
-    *teleporter.component<WorldPosition>();
-
   ex::ComponentHandle<components::Interactable> interactable;
   ex::ComponentHandle<WorldPosition> position;
 
@@ -128,10 +126,14 @@ base::Vector findTeleporterTargetPosition(
   for (auto entity : es.entities_with_components(interactable, position)) {
     if (
       interactable->mType == components::InteractableType::Teleporter &&
-      *position != sourceTeleporterPosition
+      entity != sourceTeleporter
     ) {
       targetTeleporter = entity;
     }
+  }
+
+  if (!targetTeleporter) {
+    return std::nullopt;
   }
 
   const auto targetTeleporterPosition =
@@ -165,6 +167,7 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   , mLevelHints(loadHints(resources))
   , mSessionId(sessionId)
 {
+  mpEvents->subscribe<rigel::events::CloakExpired>(*this);
 }
 
 
@@ -178,6 +181,27 @@ void PlayerInteractionSystem::updatePlayerInteraction(
 
   const auto interactionWanted = input.mInteract.mWasTriggered;
   const auto worldSpacePlayerBounds = mpPlayer->worldSpaceHitBox();
+
+  auto isInRange = [&](
+    const BoundingBox& objectBounds,
+    const components::InteractableType type
+  ) {
+    if (!worldSpacePlayerBounds.intersects(objectBounds)) {
+      return false;
+    }
+
+    if (type == InteractableType::Teleporter) {
+      const auto& playerPos = mpPlayer->orientedPosition();
+      return
+        objectBounds.left() <= playerPos.x &&
+        objectBounds.left() + 3 >= playerPos.x &&
+        objectBounds.bottom() == playerPos.y &&
+        mpPlayer->isInRegularState();
+    }
+
+    return true;
+  };
+
 
   auto performedInteraction = false;
   es.each<Interactable, WorldPosition, BoundingBox>(
@@ -197,7 +221,7 @@ void PlayerInteractionSystem::updatePlayerInteraction(
         mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
 
       const auto objectBounds = engine::toWorldSpace(bbox, pos);
-      if (worldSpacePlayerBounds.intersects(objectBounds)) {
+      if (isInRange(objectBounds, interactable.mType)) {
         if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
           performInteraction(es, entity, interactable.mType);
           performedInteraction = true;
@@ -266,6 +290,11 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
           if (itemType == InventoryItemType::SpecialHintGlobe) {
             showMessage(data::Messages::FoundSpecialHintGlobe);
           }
+
+          if (itemType == InventoryItemType::CloakingDevice) {
+            showMessage(data::Messages::FoundCloak);
+            mCloakPickupPosition = pos;
+          }
         }
 
         if (collectable.mShownTutorialMessage) {
@@ -283,6 +312,13 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
         es.destroy(entity.id());
       }
     });
+}
+
+
+void PlayerInteractionSystem::receive(const rigel::events::CloakExpired&) {
+  if (mCloakPickupPosition) {
+    mpEntityFactory->createActor(114, *mCloakPickupPosition);
+  }
 }
 
 
@@ -305,8 +341,7 @@ void PlayerInteractionSystem::performInteraction(
 ) {
   switch (type) {
     case InteractableType::Teleporter:
-      mpEvents->emit(rigel::events::PlayerTeleported{
-        findTeleporterTargetPosition(es, interactable)});
+      activateTeleporter(es, interactable);
       break;
 
     case InteractableType::ForceFieldCardReader:
@@ -320,6 +355,26 @@ void PlayerInteractionSystem::performInteraction(
     case InteractableType::HintMachine:
       activateHintMachine(interactable);
       break;
+  }
+}
+
+
+void PlayerInteractionSystem::activateTeleporter(
+  entityx::EntityManager& es,
+  entityx::Entity interactable
+) {
+  mpServiceProvider->playSound(data::SoundId::Teleport);
+
+  const auto maybeTargetPosition =
+    findTeleporterTargetPosition(es, interactable);
+  if (maybeTargetPosition) {
+    mpEvents->emit(rigel::events::PlayerTeleported{*maybeTargetPosition});
+  } else {
+    // If there is only one teleporter in the level, using it exits the level.
+    // This is used in N7, for example.
+    // Probably an oversight, but this does NOT check for radar dishes in the
+    // original.
+    mpEvents->emit(rigel::events::ExitReached{false});
   }
 }
 

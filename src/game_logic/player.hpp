@@ -75,6 +75,8 @@ struct Falling {
   int mFramesElapsed = 0;
 };
 
+struct PushedByFan {};
+
 struct RecoveringFromLanding {};
 
 struct ClimbingLadder {};
@@ -127,6 +129,7 @@ using PlayerState = std::variant<
   OnGround,
   Jumping,
   Falling,
+  PushedByFan,
   RecoveringFromLanding,
   ClimbingLadder,
   OnPipe,
@@ -204,6 +207,7 @@ public:
 
   bool canTakeDamage() const;
   bool isInMercyFrames() const;
+  bool isCloaked() const;
   bool isDead() const;
   bool isIncapacitated() const;
   bool isLookingUp() const;
@@ -242,12 +246,16 @@ public:
     mAttachedSpiders.reset(static_cast<size_t>(position));
   }
 
+  void beginBeingPushedByFan();
+  void endBeingPushedByFan();
+
 private:
   struct VerticalMovementResult {
     engine::MovementResult mMoveResult = engine::MovementResult::Failed;
     bool mAttachedToClimbable = false;
   };
 
+  void updateTemporaryItemExpiration();
   void updateAnimation();
   void updateMovement(const base::Vector& movementVector, const Button& jumpButton);
   void updateShooting(const Button& fireButton);
@@ -266,8 +274,10 @@ private:
   void updateAnimationLoop(const AnimationConfig& config);
   void resetAnimation();
   void updateMercyFramesAnimation();
+  void updateCloakedAppearance();
   void updateCollisionBox();
   void updateHitBox();
+  void dieIfFallenOutOfMap();
 
   void fireShot();
 
@@ -293,6 +303,8 @@ private:
   VisualState mVisualState = VisualState::Standing;
   int mMercyFramesPerHit;
   int mMercyFramesRemaining;
+  int mFramesElapsedHavingRapidFire = 0;
+  int mFramesElapsedHavingCloak = 0;
   std::bitset<3> mAttachedSpiders;
   bool mRapidFiredLastFrame = false;
   bool mIsOddFrame = false;

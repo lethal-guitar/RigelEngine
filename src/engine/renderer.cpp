@@ -454,6 +454,8 @@ Renderer::Renderer(SDL_Window* pWindow)
 
   // Remaining setup
   onRenderTargetChanged();
+
+  setColorModulation({255, 255, 255, 255});
 }
 
 
@@ -479,11 +481,22 @@ void Renderer::setOverlayColor(const base::Color& color) {
 }
 
 
+void Renderer::setColorModulation(const base::Color& colorModulation) {
+  if (colorModulation != mLastColorModulation) {
+    submitBatch();
+
+    setRenderModeIfChanged(RenderMode::SpriteBatch);
+    mTexturedQuadShader.setUniform(
+      "colorModulation", toGlColor(colorModulation));
+    mLastColorModulation = colorModulation;
+  }
+}
+
+
 void Renderer::drawTexture(
   const TextureData& textureData,
   const base::Rect<int>& sourceRect,
-  const base::Rect<int>& destRect,
-  const base::Color& colorModulation
+  const base::Rect<int>& destRect
 ) {
   if (!isVisible(destRect)) {
     return;
@@ -491,20 +504,9 @@ void Renderer::drawTexture(
 
   setRenderModeIfChanged(RenderMode::SpriteBatch);
 
-  const auto colorModulationChanged = colorModulation != mLastColorModulation;
-  const auto textureChanged = textureData.mHandle != mLastUsedTexture;
-
-  if (colorModulationChanged || textureChanged) {
+  if (textureData.mHandle != mLastUsedTexture) {
     submitBatch();
-  }
 
-  if (colorModulationChanged) {
-    mTexturedQuadShader.setUniform(
-      "colorModulation", toGlColor(colorModulation));
-    mLastColorModulation = colorModulation;
-  }
-
-  if (textureChanged) {
     glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
     mLastUsedTexture = textureData.mHandle;
   }

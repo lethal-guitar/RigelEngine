@@ -22,6 +22,8 @@
 #include "engine/visual_components.hpp"
 #include "game_service_provider.hpp"
 
+#include "global_level_events.hpp"
+
 namespace ex = entityx;
 
 
@@ -83,6 +85,9 @@ void ElevatorSystem::update(entityx::EntityManager& es) {
     mAttachedElevator = attachableElevator;
 
     if (attachableElevator) {
+      mpEvents->emit(rigel::events::TutorialMessage{
+        data::TutorialMessageId::FoundTurboLift});
+
       // attach new
       mAttachedElevator.component<MovingBody>()->mGravityAffected = false;
       mActiveElevatorPreviousPosition =
@@ -129,6 +134,9 @@ ex::Entity ElevatorSystem::findAttachableElevator(ex::EntityManager& es) const {
   const auto& playerBox = *mPlayer.component<const BoundingBox>();
   const auto leftAttachPoint = playerPos.x;
   const auto rightAttachPoint = playerPos.x + playerBox.size.width - 1;
+
+  // TODO: This can be simplified now that the Player takes care of moving
+  // the elevator
 
   // Note: We don't use the elvator's bounding box to check if we can attach,
   // but hardcoded values. This is because the bounding box will be modified
