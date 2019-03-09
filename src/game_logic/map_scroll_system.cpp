@@ -135,8 +135,7 @@ void MapScrollSystem::setPosition(const base::Vector position) {
 
 
 void MapScrollSystem::centerViewOnPlayer() {
-  *mpScrollOffset = {};
-  updateScrollOffset();
+  setPosition(offsetToDeadZone(*mpPlayer, {}));
 }
 
 }}
