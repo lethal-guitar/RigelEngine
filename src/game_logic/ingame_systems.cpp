@@ -53,7 +53,8 @@ IngameSystems::IngameSystems(
       &mCollisionChecker,
       pMap,
       pEntityFactory,
-      &eventManager)
+      &eventManager,
+      pRandomGenerator)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
       mpScrollOffset,

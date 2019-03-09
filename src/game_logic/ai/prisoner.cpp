@@ -76,7 +76,7 @@ void PrisonerSystem::update(entityx::EntityManager& es) {
       if (state.mIsAggressive) {
         updateAggressivePrisoner(entity, position, state, sprite);
       } else {
-        const auto shakeIronBars = (mpRandomGenerator->gen() & 4) != 0;
+        const auto shakeIronBars = (mpRandomGenerator->gen() / 4) % 2 != 0;
         // The animation has two frames, 0 is "idle" and 1 is "shaking".
         sprite.mFramesToRender[0] = int{shakeIronBars};
       }
@@ -104,7 +104,7 @@ void PrisonerSystem::updateAggressivePrisoner(
 
     if (playerInRange) {
       const auto wantsToGrab =
-        (mpRandomGenerator->gen() & 0x10) != 0 && mIsOddFrame;
+        (mpRandomGenerator->gen() / 16) % 2 != 0 && mIsOddFrame;
       if (wantsToGrab) {
         state.mIsGrabbing = true;
         state.mGrabStep = 0;

@@ -40,7 +40,10 @@ namespace rigel {
     namespace map { class Map; }
   }
 
-  namespace engine { class CollisionChecker; }
+  namespace engine {
+    class CollisionChecker;
+    class RandomNumberGenerator;
+  }
 
   namespace game_logic { struct IEntityFactory; }
 }
@@ -69,6 +72,7 @@ struct Jumping {
 
   std::uint16_t mFramesElapsed = 0;
   bool mJumpedFromLadder = false;
+  bool mDoingSomersault = false;
 };
 
 struct Falling {
@@ -152,7 +156,7 @@ enum class VisualState {
   PullingLegsUpOnPipe = 28,
   CoilingForJumpOrLanding = 5,
   Jumping = 6,
-  DoingSalto = 9,
+  DoingSomersault = 9,
   Falling = 7,
   FallingFullSpeed = 8,
   Interacting = 33,
@@ -183,7 +187,8 @@ public:
     const engine::CollisionChecker* pCollisionChecker,
     const data::map::Map* pMap,
     IEntityFactory* pEntityFactory,
-    entityx::EventManager* pEvents);
+    entityx::EventManager* pEvents,
+    engine::RandomNumberGenerator* pRandomGenerator);
   Player(const Player&) = delete;
   Player(Player&&) = default;
 
@@ -298,6 +303,7 @@ private:
   const data::map::Map* mpMap;
   IEntityFactory* mpEntityFactory;
   entityx::EventManager* mpEvents;
+  engine::RandomNumberGenerator* mpRandomGenerator;
   engine::components::BoundingBox mHitBox;
   WeaponStance mStance = WeaponStance::Regular;
   VisualState mVisualState = VisualState::Standing;
