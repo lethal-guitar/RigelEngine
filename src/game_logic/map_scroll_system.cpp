@@ -51,7 +51,7 @@ const base::Rect<int> ClimbingDeadZone{
 };
 
 
-base::Rect<int> scrollDeadZone(const Player& player) {
+base::Rect<int> deadZone(const Player& player) {
   if (player.stateIs<ClimbingLadder>()) {
     return ClimbingDeadZone;
   }
@@ -66,7 +66,7 @@ base::Vector offsetToDeadZone(
 ) {
   const auto playerBounds = player.worldSpaceCollisionBox();
 
-  auto worldSpaceDeadZone = scrollDeadZone(player);
+  auto worldSpaceDeadZone = deadZone(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
   // horizontal
