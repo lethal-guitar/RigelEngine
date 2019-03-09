@@ -33,30 +33,46 @@ using namespace engine::components;
 using namespace game_logic::components;
 
 
-const base::Rect<int> DefaultDeadZone{
-  {11, 2},
-  {
-    data::GameTraits::mapViewPortWidthTiles - 22,
-    data::GameTraits::mapViewPortHeightTiles - 3,
-  }
+struct VerticalDeadZone {
+  int mStart;
+  int mEnd;
 };
 
 
-const base::Rect<int> ClimbingDeadZone{
-  {11, 7},
-  {
-    data::GameTraits::mapViewPortWidthTiles - 22,
-    data::GameTraits::mapViewPortHeightTiles - 14,
-  }
-};
+constexpr auto MANUAL_SCROLL_ADJUST = 2;
+constexpr auto MAX_ADJUST_X = 2;
+constexpr auto MAX_ADJUST_UP = 2;
+constexpr auto MAX_ADJUST_DOWN = 2;
+constexpr auto MAX_ADJUST_DOWN_ELEVATOR = 3;
+
+constexpr auto DEAD_ZONE_START_X = 11;
+constexpr auto DEAD_ZONE_END_X = 21;
+
+constexpr auto DEFAULT_VERTICAL_DEAD_ZONE = VerticalDeadZone{2, 19};
+constexpr auto TIGHT_VERTICAL_DEAD_ZONE = VerticalDeadZone{7, 13};
 
 
-base::Rect<int> deadZone(const Player& player) {
-  if (player.stateIs<ClimbingLadder>()) {
-    return ClimbingDeadZone;
-  }
+bool shouldUseTightDeadZone(const Player& player) {
+  return
+    player.stateIs<ClimbingLadder>() ||
+    player.stateIs<PushedByFan>() ||
+    player.isRidingElevator();
+}
 
-  return DefaultDeadZone;
+
+const VerticalDeadZone& deadZoneForStateOf(const Player& player) {
+  return shouldUseTightDeadZone(player)
+    ? TIGHT_VERTICAL_DEAD_ZONE
+    : DEFAULT_VERTICAL_DEAD_ZONE;
+}
+
+
+base::Rect<int> deadZoneRect(const Player& player) {
+  const auto& verticalDeadZone = deadZoneForStateOf(player);
+
+  return base::makeRect<int>(
+    {DEAD_ZONE_START_X, verticalDeadZone.mStart},
+    {DEAD_ZONE_END_X, verticalDeadZone.mEnd});
 }
 
 
@@ -66,7 +82,7 @@ base::Vector offsetToDeadZone(
 ) {
   const auto playerBounds = player.worldSpaceCollisionBox();
 
-  auto worldSpaceDeadZone = deadZone(player);
+  auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
   // horizontal
@@ -114,10 +130,10 @@ void MapScrollSystem::update(const PlayerInput& input) {
 void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
   if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>()) {
     if (input.mDown) {
-      mpScrollOffset->y += 2;
+      mpScrollOffset->y += MANUAL_SCROLL_ADJUST;
     }
     if (input.mUp) {
-      mpScrollOffset->y -= 2;
+      mpScrollOffset->y -= MANUAL_SCROLL_ADJUST;
     }
   }
 }
