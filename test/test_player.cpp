@@ -24,6 +24,7 @@
 #include <data/sound_ids.hpp>
 #include <engine/base_components.hpp>
 #include <engine/collision_checker.hpp>
+#include <engine/random_number_generator.hpp>
 #include <engine/sprite_tools.hpp>
 #include <engine/visual_components.hpp>
 #include <game_logic/player/components.hpp>
@@ -187,6 +188,7 @@ TEST_CASE("Player movement") {
   data::PlayerModel playerModel;
   MockEntityFactory mockEntityFactory{&entityx.entities};
   MockServiceProvider mockServiceProvider;
+  engine::RandomNumberGenerator randomGenerator;
 
   // ---------------------------------------------------------------------------
   // Player entity
@@ -204,7 +206,8 @@ TEST_CASE("Player movement") {
     &collisionChecker,
     &map,
     &mockEntityFactory,
-    &entityx.events);
+    &entityx.events,
+    &randomGenerator);
 
   auto resetOrientation = [&](const Orientation newOrientation) {
     *playerEntity.component<Orientation>() = newOrientation;

@@ -22,6 +22,7 @@
 #include "data/strings.hpp"
 #include "data/player_model.hpp"
 #include "engine/collision_checker.hpp"
+#include "engine/random_number_generator.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
@@ -293,7 +294,8 @@ Player::Player(
   const engine::CollisionChecker* pCollisionChecker,
   const data::map::Map* pMap,
   IEntityFactory* pEntityFactory,
-  ex::EventManager* pEvents
+  ex::EventManager* pEvents,
+  engine::RandomNumberGenerator* pRandomGenerator
 )
   : mEntity(entity)
   , mpPlayerModel(pPlayerModel)
@@ -302,6 +304,7 @@ Player::Player(
   , mpMap(pMap)
   , mpEntityFactory(pEntityFactory)
   , mpEvents(pEvents)
+  , mpRandomGenerator(pRandomGenerator)
   , mMercyFramesPerHit(mercyFramesForDifficulty(difficulty))
   , mMercyFramesRemaining(INITIAL_MERCY_FRAMES)
 {
@@ -938,6 +941,32 @@ void Player::updateJumpMovement(
   const base::Vector& movementVector,
   const bool jumpPressed
 ) {
+  auto updateSomersaultAnimation = [&, this]() {
+    if (state.mDoingSomersault) {
+      auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
+      ++animationFrame;
+
+      if (animationFrame == 16 || movementVector.x == 0) {
+        state.mDoingSomersault = false;
+        setVisualState(VisualState::Jumping);
+      }
+    }
+
+    if (
+      state.mFramesElapsed == 1 &&
+      !state.mDoingSomersault &&
+      movementVector.x != 0 &&
+      mAttachedSpiders.none()
+    ) {
+      const auto shouldDoSomersault = mpRandomGenerator->gen() % 6 == 0;
+      if (shouldDoSomersault) {
+        state.mDoingSomersault = true;
+        setVisualState(VisualState::DoingSomersault);
+      }
+    }
+  };
+
+
   if (state.mFramesElapsed == 0) {
     setVisualState(VisualState::Jumping);
   }
@@ -972,6 +1001,8 @@ void Player::updateJumpMovement(
         return;
       }
     }
+
+    updateSomersaultAnimation();
 
     // On the 3rd frame, check if we should do a high jump (jump key still
     // pressed). If not, we skip part of the jump arc, which then results
@@ -1174,7 +1205,7 @@ void Player::updateHitBox() {
       mHitBox.size.height = 4;
       break;
 
-    case VS::DoingSalto:
+    case VS::DoingSomersault:
       mHitBox.size = {4, 4};
       break;
 

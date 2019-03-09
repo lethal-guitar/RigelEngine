@@ -23,6 +23,7 @@
 #include <engine/collision_checker.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
+#include <engine/random_number_generator.hpp>
 #include <engine/timing.hpp>
 #include <game_logic/input.hpp>
 #include <game_logic/interaction/elevator.hpp>
@@ -69,6 +70,7 @@ TEST_CASE("Rocket elevator") {
   data::PlayerModel playerModel;
   MockEntityFactory mockEntityFactory{&entityx.entities};
   MockServiceProvider mockServiceProvider;
+  engine::RandomNumberGenerator randomGenerator;
 
   auto playerEntity = entityx.entities.create();
   playerEntity.assign<WorldPosition>(6, 100);
@@ -83,7 +85,8 @@ TEST_CASE("Rocket elevator") {
     &collisionChecker,
     &map,
     &mockEntityFactory,
-    &entityx.events);
+    &entityx.events,
+    &randomGenerator);
 
   auto& playerPosition = player.position();
 
