@@ -126,13 +126,13 @@ void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
 void MapScrollSystem::updateScrollOffset() {
   const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, *mpScrollOffset);
 
-  // Update and clamp
-  *mpScrollOffset += base::Vector(offsetX, offsetY);
+  setPosition(*mpScrollOffset + base::Vector(offsetX, offsetY));
+}
 
-  mpScrollOffset->x =
-    base::clamp(mpScrollOffset->x, 0, mMaxScrollOffset.width);
-  mpScrollOffset->y =
-    base::clamp(mpScrollOffset->y, 0, mMaxScrollOffset.height);
+
+void MapScrollSystem::setPosition(const base::Vector position) {
+  mpScrollOffset->x = base::clamp(position.x, 0, mMaxScrollOffset.width);
+  mpScrollOffset->y = base::clamp(position.y, 0, mMaxScrollOffset.height);
 }
 
 

@@ -49,6 +49,7 @@ public:
 private:
   void updateManualScrolling(const PlayerInput& input);
   void updateScrollOffset();
+  void setPosition(base::Vector position);
 
   const Player* mpPlayer;
   base::Vector* mpScrollOffset;
