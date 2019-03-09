@@ -141,7 +141,10 @@ void WatchBot::update(
     },
 
     [&, this](OnGround& state) {
-      const auto shouldLookAround = (d.mpRandomGenerator->gen() & 0x21) != 0;
+      const auto randomChoice = d.mpRandomGenerator->gen();
+      const auto shouldLookAround =
+        randomChoice % 2 != 0 &&
+        (randomChoice / 32) % 2 != 0;
 
       ++state.mFramesElapsed;
       if (shouldLookAround && state.mFramesElapsed == 1) {

@@ -80,7 +80,7 @@ void animateForceFields(
     const Active&
   ) {
     if (tag.mType == ActorTag::Type::ForceField) {
-      const auto fizzle = (randomGenerator.gen() & 0x20) != 0;
+      const auto fizzle = (randomGenerator.gen() / 32) % 2 != 0;
       if (fizzle) {
         serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
         sprite.flashWhite();

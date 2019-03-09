@@ -130,7 +130,7 @@ void BlueGuardSystem::update(entityx::EntityManager& es) {
           updateGuard(entity, state, sprite, position);
         } else {
           // Animate typing on terminal
-          const auto skipOneMove = (mpRandomGenerator->gen() & 4) != 0;
+          const auto skipOneMove = (mpRandomGenerator->gen() / 4) % 2 != 0;
           const auto moveHand = mIsOddFrame && !skipOneMove;
           const auto typingFrameOffset = moveHand ? 1 : 0;
 
