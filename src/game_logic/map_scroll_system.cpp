@@ -59,6 +59,35 @@ base::Rect<int> scrollDeadZone(const Player& player) {
   return DefaultDeadZone;
 }
 
+
+base::Vector offsetToDeadZone(
+  const Player& player,
+  const base::Vector& cameraPosition
+) {
+  const auto playerBounds = player.worldSpaceCollisionBox();
+
+  auto worldSpaceDeadZone = scrollDeadZone(player);
+  worldSpaceDeadZone.topLeft += cameraPosition;
+
+  // horizontal
+  const auto offsetLeft =
+    std::max(0, worldSpaceDeadZone.topLeft.x -  playerBounds.topLeft.x);
+  const auto offsetRight =
+    std::min(0,
+      worldSpaceDeadZone.bottomRight().x - playerBounds.bottomRight().x);
+  const auto offsetX = -offsetLeft - offsetRight;
+
+  // vertical
+  const auto offsetTop =
+    std::max(0, worldSpaceDeadZone.top() - playerBounds.top());
+  const auto offsetBottom =
+    std::min(0,
+      worldSpaceDeadZone.bottom() - playerBounds.bottom());
+  const auto offsetY = -offsetTop - offsetBottom;
+
+  return {offsetX, offsetY};
+}
+
 }
 
 
@@ -95,26 +124,7 @@ void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
 
 
 void MapScrollSystem::updateScrollOffset() {
-  const auto playerBounds = mpPlayer->worldSpaceCollisionBox();
-
-  auto worldSpaceDeadZone = scrollDeadZone(*mpPlayer);
-  worldSpaceDeadZone.topLeft += *mpScrollOffset;
-
-  // horizontal
-  const auto offsetLeft =
-    std::max(0, worldSpaceDeadZone.topLeft.x -  playerBounds.topLeft.x);
-  const auto offsetRight =
-    std::min(0,
-      worldSpaceDeadZone.bottomRight().x - playerBounds.bottomRight().x);
-  const auto offsetX = -offsetLeft - offsetRight;
-
-  // vertical
-  const auto offsetTop =
-    std::max(0, worldSpaceDeadZone.top() - playerBounds.top());
-  const auto offsetBottom =
-    std::min(0,
-      worldSpaceDeadZone.bottom() - playerBounds.bottom());
-  const auto offsetY = -offsetTop - offsetBottom;
+  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, *mpScrollOffset);
 
   // Update and clamp
   *mpScrollOffset += base::Vector(offsetX, offsetY);
