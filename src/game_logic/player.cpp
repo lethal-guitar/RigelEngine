@@ -609,6 +609,8 @@ void Player::updateMovement(
   auto& position = *mEntity.component<c::WorldPosition>();
   auto& bbox = *mEntity.component<c::BoundingBox>();
 
+  updateJumpButtonStateTracking(jumpButton);
+
   base::match(mState,
     [&, this](const OnGround&) {
       if (mAttachedElevator && movementVector.y != 0) {
@@ -663,7 +665,7 @@ void Player::updateMovement(
       }
 
       if (
-        jumpButton.mWasTriggered &&
+        mJumpRequested &&
         !mpCollisionChecker->isTouchingCeiling(position, bbox)
       ) {
         jump();
@@ -718,7 +720,7 @@ void Player::updateMovement(
 
     [&, this](ClimbingLadder& state) {
       if (
-        jumpButton.mWasTriggered &&
+        mJumpRequested &&
         !mpCollisionChecker->isTouchingCeiling(position, bbox)
       ) {
         jumpFromLadder(movementVector);
@@ -754,7 +756,7 @@ void Player::updateMovement(
     [&, this](OnPipe& state) {
       if (
         movementVector.y <= 0 &&
-        jumpButton.mWasTriggered &&
+        mJumpRequested &&
         !mpCollisionChecker->isTouchingCeiling(position, bbox)
       ) {
         jumpFromLadder(movementVector);
@@ -781,7 +783,7 @@ void Player::updateMovement(
           switchOrientation();
         }
 
-        if (jumpButton.mWasTriggered && movement > 0) {
+        if (mJumpRequested && movement > 0) {
           startFallingDelayed();
         }
       } else if (movementVector.x != 0) {
@@ -826,6 +828,16 @@ void Player::updateMovement(
       // should be handled in top-level update()
       assert(false);
     });
+}
+
+
+void Player::updateJumpButtonStateTracking(const Button& jumpButton) {
+  if (jumpButton.mWasTriggered) {
+    mJumpRequested = true;
+  }
+  if (!jumpButton.mIsPressed) {
+    mJumpRequested = false;
+  }
 }
 
 
@@ -1284,6 +1296,7 @@ void Player::jump() {
   mState = Jumping{};
   setVisualState(VisualState::CoilingForJumpOrLanding);
   mpServiceProvider->playSound(data::SoundId::DukeJumping);
+  mJumpRequested = false;
 }
 
 
@@ -1294,6 +1307,7 @@ void Player::jumpFromLadder(const base::Vector& movementVector) {
   mState = newState;
   setVisualState(VisualState::Jumping);
   mpServiceProvider->playSound(data::SoundId::DukeJumping);
+  mJumpRequested = false;
 }
 
 

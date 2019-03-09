@@ -264,6 +264,7 @@ private:
   void updateTemporaryItemExpiration();
   void updateAnimation();
   void updateMovement(const base::Vector& movementVector, const Button& jumpButton);
+  void updateJumpButtonStateTracking(const Button& jumpButton);
   void updateShooting(const Button& fireButton);
   void updateLadderAttachment(const base::Vector& movementVector);
   bool updateElevatorMovement(int movement);
@@ -317,6 +318,7 @@ private:
   bool mIsOddFrame = false;
   bool mRecoilAnimationActive = false;
   bool mIsRidingElevator = false;
+  bool mJumpRequested = false;
 };
 
 }}
