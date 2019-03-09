@@ -140,7 +140,17 @@ void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
 
 
 void MapScrollSystem::updateScrollOffset() {
-  setPosition(*mpScrollOffset + offsetToDeadZone(*mpPlayer, *mpScrollOffset));
+  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, *mpScrollOffset);
+
+  const auto maxAdjustDown = mpPlayer->isRidingElevator()
+    ? MAX_ADJUST_DOWN_ELEVATOR
+    : MAX_ADJUST_DOWN;
+  const auto adjustment = base::Vector{
+    std::clamp(offsetX, -MAX_ADJUST_X, MAX_ADJUST_X),
+    std::clamp(offsetY, -MAX_ADJUST_UP, maxAdjustDown)
+  };
+
+  setPosition(*mpScrollOffset + adjustment);
 }
 
 
