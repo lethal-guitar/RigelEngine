@@ -359,6 +359,11 @@ bool Player::isCrouching() const {
 }
 
 
+bool Player::isRidingElevator() const {
+  return mIsRidingElevator;
+}
+
+
 engine::components::Orientation Player::orientation() const {
   return *mEntity.component<const c::Orientation>();
 }
