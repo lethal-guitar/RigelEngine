@@ -73,17 +73,17 @@ void MapRenderer::switchBackdrops() {
 }
 
 
-void MapRenderer::renderBackground(const base::Vector& scrollOffset) {
-  renderMapTiles(scrollOffset, false);
+void MapRenderer::renderBackground(const base::Vector& cameraPosition) {
+  renderMapTiles(cameraPosition, false);
 }
 
 
-void MapRenderer::renderForeground(const base::Vector& scrollOffset) {
-  renderMapTiles(scrollOffset, true);
+void MapRenderer::renderForeground(const base::Vector& cameraPosition) {
+  renderMapTiles(cameraPosition, true);
 }
 
 
-void MapRenderer::renderBackdrop(const base::Vector& scrollOffset) {
+void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
   base::Vector offset;
 
   const auto parallaxBoth = mScrollMode == BackdropScrollMode::ParallaxBoth;
@@ -95,8 +95,8 @@ void MapRenderer::renderBackdrop(const base::Vector& scrollOffset) {
 
   if (parallaxHorizontal || parallaxBoth) {
     offset = wrapBackgroundOffset({
-      parallaxHorizontal ?  scrollOffset.x*PARALLAX_FACTOR : 0,
-      parallaxBoth ?  scrollOffset.y*PARALLAX_FACTOR : 0
+      parallaxHorizontal ?  cameraPosition.x*PARALLAX_FACTOR : 0,
+      parallaxBoth ?  cameraPosition.y*PARALLAX_FACTOR : 0
     });
   } else if (autoScrollX || autoScrollY) {
     // TODO Currently this only works right when running at 60 FPS.
@@ -142,14 +142,14 @@ void MapRenderer::renderBackdrop(const base::Vector& scrollOffset) {
 
 
 void MapRenderer::renderMapTiles(
-  const base::Vector& scrollOffset,
+  const base::Vector& cameraPosition,
   const bool renderForeground
 ) {
   for (int layer=0; layer<2; ++layer) {
     for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
-        const auto col = x + scrollOffset.x;
-        const auto row = y + scrollOffset.y;
+        const auto col = x + cameraPosition.x;
+        const auto row = y + cameraPosition.y;
         if (col >= mpMap->width() || row >= mpMap->height()) {
           continue;
         }
@@ -176,9 +176,9 @@ void MapRenderer::updateAnimatedMapTiles() {
 void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
   const base::Vector& position,
-  const base::Vector& scrollPosition
+  const base::Vector& cameraPosition
 ) {
-  const auto screenPosition = position - scrollPosition;
+  const auto screenPosition = position - cameraPosition;
   renderTile(index, screenPosition.x, screenPosition.y);
 }
 
