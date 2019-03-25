@@ -21,6 +21,7 @@
 #include "data/map.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/player.hpp"
+#include "global_level_events.hpp"
 
 namespace ex = entityx;
 
@@ -50,6 +51,8 @@ constexpr auto DEAD_ZONE_END_X = 21;
 
 constexpr auto DEFAULT_VERTICAL_DEAD_ZONE = VerticalDeadZone{2, 19};
 constexpr auto TIGHT_VERTICAL_DEAD_ZONE = VerticalDeadZone{7, 13};
+
+constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
 
 
 bool shouldUseTightDeadZone(const Player& player) {
@@ -110,7 +113,8 @@ base::Vector offsetToDeadZone(
 MapScrollSystem::MapScrollSystem(
   base::Vector* pScrollOffset,
   const Player* pPlayer,
-  const data::map::Map& map
+  const data::map::Map& map,
+  entityx::EventManager& eventManager
 )
   : mpPlayer(pPlayer)
   , mpScrollOffset(pScrollOffset)
@@ -118,6 +122,7 @@ MapScrollSystem::MapScrollSystem(
     static_cast<int>(map.width() - data::GameTraits::mapViewPortWidthTiles),
     static_cast<int>(map.height() - data::GameTraits::mapViewPortHeightTiles)})
 {
+  eventManager.subscribe<rigel::events::PlayerFiredShot>(*this);
 }
 
 
@@ -128,6 +133,16 @@ void MapScrollSystem::update(const PlayerInput& input) {
 
 
 void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
+  if (mManualScrollCooldown > 0) {
+    const auto isApplicable =
+      (mpPlayer->stateIs<OnGround>() && input.mDown) ||
+      (mpPlayer->stateIs<OnPipe>() && input.mUp);
+    if (isApplicable) {
+      --mManualScrollCooldown;
+      return;
+    }
+  }
+
   if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>()) {
     if (input.mDown) {
       mpScrollOffset->y += MANUAL_SCROLL_ADJUST;
@@ -162,6 +177,11 @@ void MapScrollSystem::setPosition(const base::Vector position) {
 
 void MapScrollSystem::centerViewOnPlayer() {
   setPosition(offsetToDeadZone(*mpPlayer, {}));
+}
+
+
+void MapScrollSystem::receive(const rigel::events::PlayerFiredShot& event) {
+  mManualScrollCooldown = MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING;
 }
 
 }}

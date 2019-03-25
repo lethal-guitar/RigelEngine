@@ -1269,6 +1269,8 @@ void Player::fireShot() {
     mEntity.component<c::Sprite>()->mFramesToRender[0] = *maybeRecoilFrame;
     mRecoilAnimationActive = true;
   }
+
+  mpEvents->emit(rigel::events::PlayerFiredShot{});
 }
 
 
