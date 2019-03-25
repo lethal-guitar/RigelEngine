@@ -36,13 +36,13 @@
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/behavior_controller_system.hpp"
+#include "game_logic/camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/item_container.hpp"
-#include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player/projectile_system.hpp"
@@ -107,7 +107,7 @@ public:
 private:
   engine::CollisionChecker mCollisionChecker;
   Player mPlayer;
-  MapScrollSystem mMapScrollSystem;
+  Camera mCamera;
 
   engine::ParticleSystem mParticles;
 

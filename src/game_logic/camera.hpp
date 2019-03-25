@@ -35,10 +35,9 @@ namespace rigel { namespace game_logic {
 
 class Player;
 
-// TODO: Rename to "Camera"
-class MapScrollSystem : public entityx::Receiver<MapScrollSystem> {
+class Camera : public entityx::Receiver<Camera> {
 public:
-  MapScrollSystem(
+  Camera(
     const Player* pPlayer,
     const data::map::Map& map,
     entityx::EventManager& eventManager);
@@ -62,7 +61,7 @@ private:
 };
 
 
-inline const base::Vector& MapScrollSystem::scrollOffset() const {
+inline const base::Vector& Camera::scrollOffset() const {
   return mScrollOffset;
 }
 

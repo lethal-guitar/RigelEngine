@@ -121,6 +121,8 @@ set(core_sources
     game_logic/behavior_controller.hpp
     game_logic/behavior_controller_system.cpp
     game_logic/behavior_controller_system.hpp
+    game_logic/camera.cpp
+    game_logic/camera.hpp
     game_logic/collectable_components.hpp
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp
@@ -151,8 +153,6 @@ set(core_sources
     game_logic/interaction/respawn_checkpoint.hpp
     game_logic/item_container.cpp
     game_logic/item_container.hpp
-    game_logic/map_scroll_system.cpp
-    game_logic/map_scroll_system.hpp
     game_logic/player.cpp
     game_logic/player.hpp
     game_logic/player/components.hpp

@@ -70,15 +70,15 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &eventManager,
       pRandomGenerator)
-  , mMapScrollSystem(&mPlayer, *pMap, eventManager)
+  , mCamera(&mPlayer, *pMap, eventManager)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
-      &mMapScrollSystem.scrollOffset(),
+      &mCamera.scrollOffset(),
       pRenderer,
       pMap,
       std::move(mapRenderData))
   , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
-  , mDebuggingSystem(pRenderer, &mMapScrollSystem.scrollOffset(), pMap)
+  , mDebuggingSystem(pRenderer, &mCamera.scrollOffset(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,
@@ -164,7 +164,7 @@ IngameSystems::IngameSystems(
         &entities,
         &eventManager},
       &mPlayer,
-      &mMapScrollSystem.scrollOffset(),
+      &mCamera.scrollOffset(),
       pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
@@ -189,8 +189,8 @@ void IngameSystems::update(
   mPlayerInteractionSystem.updatePlayerInteraction(input, es);
 
   mPlayer.update(input);
-  mMapScrollSystem.update(input);
-  engine::markActiveEntities(es, mMapScrollSystem.scrollOffset());
+  mCamera.update(input);
+  engine::markActiveEntities(es, mCamera.scrollOffset());
 
   // ----------------------------------------------------------------------
   // Player related logic update
@@ -244,7 +244,7 @@ void IngameSystems::render(
   const std::optional<base::Color>& backdropFlashColor
 ) {
   mRenderingSystem.update(es, backdropFlashColor);
-  mParticles.render(mMapScrollSystem.scrollOffset());
+  mParticles.render(mCamera.scrollOffset());
   mDebuggingSystem.update(es);
 }
 
@@ -273,13 +273,13 @@ void IngameSystems::restartFromCheckpoint(
 
 
 void IngameSystems::centerViewOnPlayer() {
-  mMapScrollSystem.centerViewOnPlayer();
+  mCamera.centerViewOnPlayer();
 }
 
 
 void IngameSystems::printDebugText(std::ostream& stream) const {
   stream
-    << "Scroll: " << vec2String(mMapScrollSystem.scrollOffset(), 4) << '\n'
+    << "Scroll: " << vec2String(mCamera.scrollOffset(), 4) << '\n'
     << "Player: " << vec2String(mPlayer.position(), 4) << '\n';
 }
 

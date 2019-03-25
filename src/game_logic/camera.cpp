@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "map_scroll_system.hpp"
+#include "camera.hpp"
 
 #include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
@@ -110,7 +110,7 @@ base::Vector offsetToDeadZone(
 }
 
 
-MapScrollSystem::MapScrollSystem(
+Camera::Camera(
   const Player* pPlayer,
   const data::map::Map& map,
   entityx::EventManager& eventManager
@@ -124,13 +124,13 @@ MapScrollSystem::MapScrollSystem(
 }
 
 
-void MapScrollSystem::update(const PlayerInput& input) {
+void Camera::update(const PlayerInput& input) {
   updateManualScrolling(input);
   updateScrollOffset();
 }
 
 
-void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
+void Camera::updateManualScrolling(const PlayerInput& input) {
   if (mManualScrollCooldown > 0) {
     const auto isApplicable =
       (mpPlayer->stateIs<OnGround>() && input.mDown) ||
@@ -152,7 +152,7 @@ void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
 }
 
 
-void MapScrollSystem::updateScrollOffset() {
+void Camera::updateScrollOffset() {
   const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, mScrollOffset);
 
   const auto maxAdjustDown = mpPlayer->isRidingElevator()
@@ -167,18 +167,18 @@ void MapScrollSystem::updateScrollOffset() {
 }
 
 
-void MapScrollSystem::setPosition(const base::Vector position) {
+void Camera::setPosition(const base::Vector position) {
   mScrollOffset.x = base::clamp(position.x, 0, mMaxScrollOffset.width);
   mScrollOffset.y = base::clamp(position.y, 0, mMaxScrollOffset.height);
 }
 
 
-void MapScrollSystem::centerViewOnPlayer() {
+void Camera::centerViewOnPlayer() {
   setPosition(offsetToDeadZone(*mpPlayer, {}));
 }
 
 
-void MapScrollSystem::receive(const rigel::events::PlayerFiredShot& event) {
+void Camera::receive(const rigel::events::PlayerFiredShot& event) {
   mManualScrollCooldown = MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING;
 }
 
