@@ -122,7 +122,6 @@ private:
   data::PlayerModel mPlayerModelAtLevelStart;
   LevelBonusInfo mBonusInfo;
   std::optional<CheckpointData> mActivatedCheckpoint;
-  base::Vector mScrollOffset;
 
   game_logic::PlayerInput mPlayerInput;
   std::optional<base::Vector> mTeleportTargetPosition;

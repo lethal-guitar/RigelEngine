@@ -480,7 +480,6 @@ void GameRunner::loadLevel(
 
   mpSystems = std::make_unique<IngameSystems>(
     sessionId,
-    &mScrollOffset,
     playerEntity,
     mpPlayerModel,
     &mLevelData.mMap,

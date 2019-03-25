@@ -111,13 +111,11 @@ base::Vector offsetToDeadZone(
 
 
 MapScrollSystem::MapScrollSystem(
-  base::Vector* pScrollOffset,
   const Player* pPlayer,
   const data::map::Map& map,
   entityx::EventManager& eventManager
 )
   : mpPlayer(pPlayer)
-  , mpScrollOffset(pScrollOffset)
   , mMaxScrollOffset(base::Extents{
     static_cast<int>(map.width() - data::GameTraits::mapViewPortWidthTiles),
     static_cast<int>(map.height() - data::GameTraits::mapViewPortHeightTiles)})
@@ -145,17 +143,17 @@ void MapScrollSystem::updateManualScrolling(const PlayerInput& input) {
 
   if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>()) {
     if (input.mDown) {
-      mpScrollOffset->y += MANUAL_SCROLL_ADJUST;
+      mScrollOffset.y += MANUAL_SCROLL_ADJUST;
     }
     if (input.mUp) {
-      mpScrollOffset->y -= MANUAL_SCROLL_ADJUST;
+      mScrollOffset.y -= MANUAL_SCROLL_ADJUST;
     }
   }
 }
 
 
 void MapScrollSystem::updateScrollOffset() {
-  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, *mpScrollOffset);
+  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, mScrollOffset);
 
   const auto maxAdjustDown = mpPlayer->isRidingElevator()
     ? MAX_ADJUST_DOWN_ELEVATOR
@@ -165,13 +163,13 @@ void MapScrollSystem::updateScrollOffset() {
     std::clamp(offsetY, -MAX_ADJUST_UP, maxAdjustDown)
   };
 
-  setPosition(*mpScrollOffset + adjustment);
+  setPosition(mScrollOffset + adjustment);
 }
 
 
 void MapScrollSystem::setPosition(const base::Vector position) {
-  mpScrollOffset->x = base::clamp(position.x, 0, mMaxScrollOffset.width);
-  mpScrollOffset->y = base::clamp(position.y, 0, mMaxScrollOffset.height);
+  mScrollOffset.x = base::clamp(position.x, 0, mMaxScrollOffset.width);
+  mScrollOffset.y = base::clamp(position.y, 0, mMaxScrollOffset.height);
 }
 
 

@@ -46,7 +46,6 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 
 IngameSystems::IngameSystems(
   const data::GameSessionId& sessionId,
-  base::Vector* pScrollOffset,
   entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
   data::map::Map* pMap,
@@ -60,8 +59,7 @@ IngameSystems::IngameSystems(
   entityx::EventManager& eventManager,
   const loader::ResourceLoader& resources
 )
-  : mpScrollOffset(pScrollOffset)
-  , mCollisionChecker(pMap, entities, eventManager)
+  : mCollisionChecker(pMap, entities, eventManager)
   , mPlayer(
       playerEntity,
       sessionId.mDifficulty,
@@ -72,15 +70,15 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &eventManager,
       pRandomGenerator)
+  , mMapScrollSystem(&mPlayer, *pMap, eventManager)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
-      mpScrollOffset,
+      &mMapScrollSystem.scrollOffset(),
       pRenderer,
       pMap,
       std::move(mapRenderData))
   , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
-  , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
-  , mMapScrollSystem(mpScrollOffset, &mPlayer, *pMap, eventManager)
+  , mDebuggingSystem(pRenderer, &mMapScrollSystem.scrollOffset(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,
@@ -166,7 +164,7 @@ IngameSystems::IngameSystems(
         &entities,
         &eventManager},
       &mPlayer,
-      pScrollOffset,
+      &mMapScrollSystem.scrollOffset(),
       pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
@@ -192,7 +190,7 @@ void IngameSystems::update(
 
   mPlayer.update(input);
   mMapScrollSystem.update(input);
-  engine::markActiveEntities(es, *mpScrollOffset);
+  engine::markActiveEntities(es, mMapScrollSystem.scrollOffset());
 
   // ----------------------------------------------------------------------
   // Player related logic update
@@ -246,7 +244,7 @@ void IngameSystems::render(
   const std::optional<base::Color>& backdropFlashColor
 ) {
   mRenderingSystem.update(es, backdropFlashColor);
-  mParticles.render(*mpScrollOffset);
+  mParticles.render(mMapScrollSystem.scrollOffset());
   mDebuggingSystem.update(es);
 }
 
@@ -281,7 +279,7 @@ void IngameSystems::centerViewOnPlayer() {
 
 void IngameSystems::printDebugText(std::ostream& stream) const {
   stream
-    << "Scroll: " << vec2String(*mpScrollOffset, 4) << '\n'
+    << "Scroll: " << vec2String(mMapScrollSystem.scrollOffset(), 4) << '\n'
     << "Player: " << vec2String(mPlayer.position(), 4) << '\n';
 }
 

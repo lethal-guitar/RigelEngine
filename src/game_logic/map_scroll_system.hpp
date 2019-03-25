@@ -36,17 +36,17 @@ namespace rigel { namespace game_logic {
 class Player;
 
 // TODO: Rename to "Camera"
-// TODO: This should own the scroll offset
 class MapScrollSystem : public entityx::Receiver<MapScrollSystem> {
 public:
   MapScrollSystem(
-    base::Vector* pScrollOffset,
     const Player* pPlayer,
     const data::map::Map& map,
     entityx::EventManager& eventManager);
 
   void update(const PlayerInput& input);
   void centerViewOnPlayer();
+
+  const base::Vector& scrollOffset() const;
 
   void receive(const rigel::events::PlayerFiredShot& event);
 
@@ -56,9 +56,14 @@ private:
   void setPosition(base::Vector position);
 
   const Player* mpPlayer;
-  base::Vector* mpScrollOffset;
+  base::Vector mScrollOffset;
   base::Extents mMaxScrollOffset;
   int mManualScrollCooldown = 0;
 };
+
+
+inline const base::Vector& MapScrollSystem::scrollOffset() const {
+  return mScrollOffset;
+}
 
 }}
