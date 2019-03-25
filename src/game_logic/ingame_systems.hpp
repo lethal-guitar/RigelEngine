@@ -48,6 +48,8 @@
 #include "game_logic/player/projectile_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
 
+#include <iosfwd>
+
 namespace rigel {
 
 namespace data { class PlayerModel; }
@@ -100,6 +102,8 @@ public:
   Player& player() {
     return mPlayer;
   }
+
+  void printDebugText(std::ostream& stream) const;
 
 private:
   base::Vector* mpScrollOffset;
