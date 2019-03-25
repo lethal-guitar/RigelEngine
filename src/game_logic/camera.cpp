@@ -116,7 +116,7 @@ Camera::Camera(
   entityx::EventManager& eventManager
 )
   : mpPlayer(pPlayer)
-  , mMaxScrollOffset(base::Extents{
+  , mMaxPosition(base::Extents{
     static_cast<int>(map.width() - data::GameTraits::mapViewPortWidthTiles),
     static_cast<int>(map.height() - data::GameTraits::mapViewPortHeightTiles)})
 {
@@ -126,7 +126,7 @@ Camera::Camera(
 
 void Camera::update(const PlayerInput& input) {
   updateManualScrolling(input);
-  updateScrollOffset();
+  updateAutomaticScrolling();
 }
 
 
@@ -143,17 +143,17 @@ void Camera::updateManualScrolling(const PlayerInput& input) {
 
   if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>()) {
     if (input.mDown) {
-      mScrollOffset.y += MANUAL_SCROLL_ADJUST;
+      mPosition.y += MANUAL_SCROLL_ADJUST;
     }
     if (input.mUp) {
-      mScrollOffset.y -= MANUAL_SCROLL_ADJUST;
+      mPosition.y -= MANUAL_SCROLL_ADJUST;
     }
   }
 }
 
 
-void Camera::updateScrollOffset() {
-  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, mScrollOffset);
+void Camera::updateAutomaticScrolling() {
+  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, mPosition);
 
   const auto maxAdjustDown = mpPlayer->isRidingElevator()
     ? MAX_ADJUST_DOWN_ELEVATOR
@@ -163,13 +163,13 @@ void Camera::updateScrollOffset() {
     std::clamp(offsetY, -MAX_ADJUST_UP, maxAdjustDown)
   };
 
-  setPosition(mScrollOffset + adjustment);
+  setPosition(mPosition + adjustment);
 }
 
 
 void Camera::setPosition(const base::Vector position) {
-  mScrollOffset.x = base::clamp(position.x, 0, mMaxScrollOffset.width);
-  mScrollOffset.y = base::clamp(position.y, 0, mMaxScrollOffset.height);
+  mPosition.x = base::clamp(position.x, 0, mMaxPosition.width);
+  mPosition.y = base::clamp(position.y, 0, mMaxPosition.height);
 }
 
 

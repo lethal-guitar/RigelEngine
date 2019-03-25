@@ -73,12 +73,12 @@ IngameSystems::IngameSystems(
   , mCamera(&mPlayer, *pMap, eventManager)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
-      &mCamera.scrollOffset(),
+      &mCamera.position(),
       pRenderer,
       pMap,
       std::move(mapRenderData))
   , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
-  , mDebuggingSystem(pRenderer, &mCamera.scrollOffset(), pMap)
+  , mDebuggingSystem(pRenderer, &mCamera.position(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,
@@ -164,7 +164,7 @@ IngameSystems::IngameSystems(
         &entities,
         &eventManager},
       &mPlayer,
-      &mCamera.scrollOffset(),
+      &mCamera.position(),
       pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
@@ -190,7 +190,7 @@ void IngameSystems::update(
 
   mPlayer.update(input);
   mCamera.update(input);
-  engine::markActiveEntities(es, mCamera.scrollOffset());
+  engine::markActiveEntities(es, mCamera.position());
 
   // ----------------------------------------------------------------------
   // Player related logic update
@@ -244,7 +244,7 @@ void IngameSystems::render(
   const std::optional<base::Color>& backdropFlashColor
 ) {
   mRenderingSystem.update(es, backdropFlashColor);
-  mParticles.render(mCamera.scrollOffset());
+  mParticles.render(mCamera.position());
   mDebuggingSystem.update(es);
 }
 
@@ -279,7 +279,7 @@ void IngameSystems::centerViewOnPlayer() {
 
 void IngameSystems::printDebugText(std::ostream& stream) const {
   stream
-    << "Scroll: " << vec2String(mCamera.scrollOffset(), 4) << '\n'
+    << "Scroll: " << vec2String(mCamera.position(), 4) << '\n'
     << "Player: " << vec2String(mPlayer.position(), 4) << '\n';
 }
 

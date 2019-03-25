@@ -45,24 +45,24 @@ public:
   void update(const PlayerInput& input);
   void centerViewOnPlayer();
 
-  const base::Vector& scrollOffset() const;
+  const base::Vector& position() const;
 
   void receive(const rigel::events::PlayerFiredShot& event);
 
 private:
   void updateManualScrolling(const PlayerInput& input);
-  void updateScrollOffset();
+  void updateAutomaticScrolling();
   void setPosition(base::Vector position);
 
   const Player* mpPlayer;
-  base::Vector mScrollOffset;
-  base::Extents mMaxScrollOffset;
+  base::Vector mPosition;
+  base::Extents mMaxPosition;
   int mManualScrollCooldown = 0;
 };
 
 
-inline const base::Vector& Camera::scrollOffset() const {
-  return mScrollOffset;
+inline const base::Vector& Camera::position() const {
+  return mPosition;
 }
 
 }}
