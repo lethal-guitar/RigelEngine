@@ -62,7 +62,7 @@ base::Color colorForEntity(entityx::Entity entity) {
 
 DebuggingSystem::DebuggingSystem(
   engine::Renderer* pRenderer,
-  base::Vector* pScrollOffset,
+  const base::Vector* pScrollOffset,
   data::map::Map* pMap
 )
   : mpRenderer(pRenderer)
