@@ -32,7 +32,6 @@
 
 #include <cassert>
 #include <chrono>
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -71,16 +70,6 @@ std::string levelFileName(const int episode, const int level) {
   fileName += std::to_string(level + 1);
   fileName += ".MNI";
   return fileName;
-}
-
-
-template<typename ValueT>
-std::string vec2String(const base::Point<ValueT>& vec, const int width) {
-  std::stringstream stream;
-  stream
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
-  return stream.str();
 }
 
 
@@ -491,7 +480,6 @@ void GameRunner::loadLevel(
 
   mpSystems = std::make_unique<IngameSystems>(
     sessionId,
-    &mScrollOffset,
     playerEntity,
     mpPlayerModel,
     &mLevelData.mMap,
@@ -701,9 +689,8 @@ void GameRunner::showTutorialMessage(const data::TutorialMessageId id) {
 
 void GameRunner::showDebugText() {
   std::stringstream infoText;
+  mpSystems->printDebugText(infoText);
   infoText
-    << "Scroll: " << vec2String(mScrollOffset, 4) << '\n'
-    << "Player: " << vec2String(mpSystems->player().position(), 4) << '\n'
     << "Entities: " << mEntities.size();
 
   mpServiceProvider->showDebugText(infoText.str());

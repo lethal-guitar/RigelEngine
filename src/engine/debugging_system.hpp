@@ -32,7 +32,7 @@ class DebuggingSystem {
 public:
   DebuggingSystem(
     engine::Renderer* pRenderer,
-    base::Vector* pScrollOffset,
+    const base::Vector* pCameraPos,
     data::map::Map* pMap);
 
   void toggleBoundingBoxDisplay();
@@ -43,7 +43,7 @@ public:
 
 private:
   engine::Renderer* mpRenderer;
-  base::Vector* mpScrollOffset;
+  const base::Vector* mpCameraPos;
   data::map::Map* mpMap;
 
   bool mShowBoundingBoxes = false;

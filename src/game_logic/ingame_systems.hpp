@@ -36,17 +36,19 @@
 #include "game_logic/ai/spider.hpp"
 #include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/behavior_controller_system.hpp"
+#include "game_logic/camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/interaction/elevator.hpp"
 #include "game_logic/item_container.hpp"
-#include "game_logic/map_scroll_system.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player/projectile_system.hpp"
 #include "game_logic/player_interaction_system.hpp"
+
+#include <iosfwd>
 
 namespace rigel {
 
@@ -69,7 +71,6 @@ class IngameSystems {
 public:
   IngameSystems(
     const data::GameSessionId& sessionId,
-    base::Vector* pScrollOffset,
     entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
     data::map::Map* pMap,
@@ -101,10 +102,12 @@ public:
     return mPlayer;
   }
 
+  void printDebugText(std::ostream& stream) const;
+
 private:
-  base::Vector* mpScrollOffset;
   engine::CollisionChecker mCollisionChecker;
   Player mPlayer;
+  Camera mCamera;
 
   engine::ParticleSystem mParticles;
 
@@ -113,7 +116,6 @@ private:
   engine::LifeTimeSystem mLifeTimeSystem;
   engine::DebuggingSystem mDebuggingSystem;
 
-  game_logic::MapScrollSystem mMapScrollSystem;
   game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::player::ProjectileSystem mPlayerProjectileSystem;

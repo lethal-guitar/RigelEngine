@@ -41,7 +41,7 @@ public:
     int velocityScaleX = 0);
 
   void update();
-  void render(const base::Vector& scrollOffset);
+  void render(const base::Vector& cameraPosition);
 
 private:
   std::vector<ParticleCloud> mParticleClouds;

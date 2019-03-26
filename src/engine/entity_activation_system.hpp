@@ -28,6 +28,6 @@ namespace rigel { namespace engine {
 
 void markActiveEntities(
   entityx::EntityManager& es,
-  const base::Vector& scrollOffset);
+  const base::Vector& cameraPosition);
 
 }}

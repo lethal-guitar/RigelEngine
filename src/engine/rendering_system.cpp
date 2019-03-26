@@ -192,7 +192,7 @@ struct RenderingSystem::SpriteData {
 
 
 RenderingSystem::RenderingSystem(
-  const base::Vector* pScrollOffset,
+  const base::Vector* pCameraPosition,
   engine::Renderer* pRenderer,
   const data::map::Map* pMap,
   MapRenderer::MapRenderData&& mapRenderData
@@ -203,7 +203,7 @@ RenderingSystem::RenderingSystem(
       data::GameTraits::inGameViewPortSize.width,
       data::GameTraits::inGameViewPortSize.height)
   , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
-  , mpScrollOffset(pScrollOffset)
+  , mpCameraPosition(pCameraPosition)
 {
 }
 
@@ -238,13 +238,13 @@ void RenderingSystem::update(
     // Render
     if (backdropFlashColor) {
       mpRenderer->setOverlayColor(*backdropFlashColor);
-      mMapRenderer.renderBackdrop(*mpScrollOffset);
+      mMapRenderer.renderBackdrop(*mpCameraPosition);
       mpRenderer->setOverlayColor({});
     } else {
-      mMapRenderer.renderBackdrop(*mpScrollOffset);
+      mMapRenderer.renderBackdrop(*mpCameraPosition);
     }
 
-    mMapRenderer.renderBackground(*mpScrollOffset);
+    mMapRenderer.renderBackground(*mpCameraPosition);
 
     // behind foreground
     for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
@@ -257,7 +257,7 @@ void RenderingSystem::update(
 
   renderWaterEffectAreas(es);
 
-  mMapRenderer.renderForeground(*mpScrollOffset);
+  mMapRenderer.renderForeground(*mpCameraPosition);
 
   // top most
   for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {
@@ -270,7 +270,7 @@ void RenderingSystem::update(
   // tile debris
   es.each<TileDebris, WorldPosition>(
     [this](ex::Entity, const TileDebris& debris, const WorldPosition& pos) {
-      mMapRenderer.renderSingleTile(debris.mTileIndex, pos, *mpScrollOffset);
+      mMapRenderer.renderSingleTile(debris.mTileIndex, pos, *mpCameraPosition);
     });
 }
 
@@ -285,7 +285,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
   if (data.mEntity.has_component<CustomRenderFunc>()) {
     const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
-    renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpScrollOffset);
+    renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpCameraPosition);
   } else {
     for (const auto baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
@@ -308,7 +308,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       auto& frame = sprite.mpDrawData->mFrames[frameIndex];
 
-      drawSpriteFrame(frame, pos - *mpScrollOffset, mpRenderer);
+      drawSpriteFrame(frame, pos - *mpCameraPosition, mpRenderer);
 
       mpRenderer->setOverlayColor(base::Color{});
       mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
@@ -333,7 +333,7 @@ void RenderingSystem::renderWaterEffectAreas(entityx::EntityManager& es) {
       const auto isWaterArea =
         tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
       if (isWaterArea) {
-        const auto screenPosition = position - *mpScrollOffset;
+        const auto screenPosition = position - *mpCameraPosition;
         const auto worldSpaceBbox = engine::toWorldSpace(bbox, screenPosition);
         const auto topLeftPx =
           data::tileVectorToPixelVector(worldSpaceBbox.topLeft);

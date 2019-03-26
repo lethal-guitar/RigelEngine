@@ -49,20 +49,20 @@ public:
 
   void switchBackdrops();
 
-  void renderBackdrop(const base::Vector& scrollPosition);
-  void renderBackground(const base::Vector& scrollPosition);
-  void renderForeground(const base::Vector& scrollPosition);
+  void renderBackdrop(const base::Vector& cameraPosition);
+  void renderBackground(const base::Vector& cameraPosition);
+  void renderForeground(const base::Vector& cameraPosition);
 
   void updateAnimatedMapTiles();
 
   void renderSingleTile(
     data::map::TileIndex index,
     const base::Vector& position,
-    const base::Vector& scrollPosition);
+    const base::Vector& cameraPosition);
 
 private:
   void renderMapTiles(
-    const base::Vector& scrollPosition,
+    const base::Vector& cameraPosition,
     bool renderForeground);
   void renderTile(data::map::TileIndex index, int x, int y);
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;

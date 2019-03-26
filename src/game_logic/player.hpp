@@ -217,6 +217,7 @@ public:
   bool isIncapacitated() const;
   bool isLookingUp() const;
   bool isCrouching() const;
+  bool isRidingElevator() const;
   engine::components::Orientation orientation() const;
   engine::components::BoundingBox worldSpaceHitBox() const;
   engine::components::BoundingBox worldSpaceCollisionBox() const;

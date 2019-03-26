@@ -58,7 +58,7 @@ void SuperForceField::update(
     ++framesElapsed;
 
     animationFrame = (s.mpPerFrameState->mIsOddFrame ? 0 : 1) + 1;
-    if (d.mpRandomGenerator->gen() & 8) {
+    if ((d.mpRandomGenerator->gen() / 8) % 2 != 0) {
       d.mpServiceProvider->playSound(data::SoundId::ForceFieldFizzle);
       sprite.flashWhite();
     }

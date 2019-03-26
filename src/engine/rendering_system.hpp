@@ -56,7 +56,7 @@ void updateAnimatedSprites(entityx::EntityManager& es);
 class RenderingSystem {
 public:
   RenderingSystem(
-    const base::Vector* pScrollOffset,
+    const base::Vector* pCameraPosition,
     engine::Renderer* pRenderer,
     const data::map::Map* pMap,
     MapRenderer::MapRenderData&& mapRenderData);
@@ -93,7 +93,7 @@ private:
   engine::Renderer* mpRenderer;
   engine::RenderTargetTexture mRenderTarget;
   MapRenderer mMapRenderer;
-  const base::Vector* mpScrollOffset;
+  const base::Vector* mpCameraPosition;
   int mWaterAnimStep = 0;
   std::size_t mSpritesRendered = 0;
 };

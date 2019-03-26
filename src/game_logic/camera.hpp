@@ -27,6 +27,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { namespace data { namespace map { class Map; }}}
+namespace rigel::events { struct PlayerFiredShot; }
 
 
 namespace rigel { namespace game_logic {
@@ -34,25 +35,34 @@ namespace rigel { namespace game_logic {
 
 class Player;
 
-// TODO: Rename to "Camera"
-// TODO: This should own the scroll offset
-class MapScrollSystem {
+class Camera : public entityx::Receiver<Camera> {
 public:
-  MapScrollSystem(
-    base::Vector* pScrollOffset,
+  Camera(
     const Player* pPlayer,
-    const data::map::Map& map);
+    const data::map::Map& map,
+    entityx::EventManager& eventManager);
 
   void update(const PlayerInput& input);
   void centerViewOnPlayer();
 
+  const base::Vector& position() const;
+
+  void receive(const rigel::events::PlayerFiredShot& event);
+
 private:
   void updateManualScrolling(const PlayerInput& input);
-  void updateScrollOffset();
+  void updateAutomaticScrolling();
+  void setPosition(base::Vector position);
 
   const Player* mpPlayer;
-  base::Vector* mpScrollOffset;
-  base::Extents mMaxScrollOffset;
+  base::Vector mPosition;
+  base::Extents mMaxPosition;
+  int mManualScrollCooldown = 0;
 };
+
+
+inline const base::Vector& Camera::position() const {
+  return mPosition;
+}
 
 }}

@@ -22,14 +22,30 @@
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interaction/force_field.hpp"
 
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
 namespace rigel { namespace game_logic {
 
 using namespace engine;
 
+namespace {
+
+template<typename ValueT>
+std::string vec2String(const base::Point<ValueT>& vec, const int width) {
+  std::stringstream stream;
+  stream
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
+  return stream.str();
+}
+
+}
+
 
 IngameSystems::IngameSystems(
   const data::GameSessionId& sessionId,
-  base::Vector* pScrollOffset,
   entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
   data::map::Map* pMap,
@@ -43,8 +59,7 @@ IngameSystems::IngameSystems(
   entityx::EventManager& eventManager,
   const loader::ResourceLoader& resources
 )
-  : mpScrollOffset(pScrollOffset)
-  , mCollisionChecker(pMap, entities, eventManager)
+  : mCollisionChecker(pMap, entities, eventManager)
   , mPlayer(
       playerEntity,
       sessionId.mDifficulty,
@@ -55,15 +70,15 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &eventManager,
       pRandomGenerator)
+  , mCamera(&mPlayer, *pMap, eventManager)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
-      mpScrollOffset,
+      &mCamera.position(),
       pRenderer,
       pMap,
       std::move(mapRenderData))
   , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
-  , mDebuggingSystem(pRenderer, mpScrollOffset, pMap)
-  , mMapScrollSystem(mpScrollOffset, &mPlayer, *pMap)
+  , mDebuggingSystem(pRenderer, &mCamera.position(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,
@@ -149,7 +164,7 @@ IngameSystems::IngameSystems(
         &entities,
         &eventManager},
       &mPlayer,
-      pScrollOffset,
+      &mCamera.position(),
       pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
@@ -174,8 +189,8 @@ void IngameSystems::update(
   mPlayerInteractionSystem.updatePlayerInteraction(input, es);
 
   mPlayer.update(input);
-  mMapScrollSystem.update(input);
-  engine::markActiveEntities(es, *mpScrollOffset);
+  mCamera.update(input);
+  engine::markActiveEntities(es, mCamera.position());
 
   // ----------------------------------------------------------------------
   // Player related logic update
@@ -229,7 +244,7 @@ void IngameSystems::render(
   const std::optional<base::Color>& backdropFlashColor
 ) {
   mRenderingSystem.update(es, backdropFlashColor);
-  mParticles.render(*mpScrollOffset);
+  mParticles.render(mCamera.position());
   mDebuggingSystem.update(es);
 }
 
@@ -258,7 +273,14 @@ void IngameSystems::restartFromCheckpoint(
 
 
 void IngameSystems::centerViewOnPlayer() {
-  mMapScrollSystem.centerViewOnPlayer();
+  mCamera.centerViewOnPlayer();
+}
+
+
+void IngameSystems::printDebugText(std::ostream& stream) const {
+  stream
+    << "Scroll: " << vec2String(mCamera.position(), 4) << '\n'
+    << "Player: " << vec2String(mPlayer.position(), 4) << '\n';
 }
 
 }}

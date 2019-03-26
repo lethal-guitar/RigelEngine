@@ -359,6 +359,11 @@ bool Player::isCrouching() const {
 }
 
 
+bool Player::isRidingElevator() const {
+  return mIsRidingElevator;
+}
+
+
 engine::components::Orientation Player::orientation() const {
   return *mEntity.component<const c::Orientation>();
 }
@@ -1264,6 +1269,8 @@ void Player::fireShot() {
     mEntity.component<c::Sprite>()->mFramesToRender[0] = *maybeRecoilFrame;
     mRecoilAnimationActive = true;
   }
+
+  mpEvents->emit(rigel::events::PlayerFiredShot{});
 }
 
 

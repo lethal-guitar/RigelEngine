@@ -62,11 +62,11 @@ base::Color colorForEntity(entityx::Entity entity) {
 
 DebuggingSystem::DebuggingSystem(
   engine::Renderer* pRenderer,
-  base::Vector* pScrollOffset,
+  const base::Vector* pCameraPos,
   data::map::Map* pMap
 )
   : mpRenderer(pRenderer)
-  , mpScrollOffset(pScrollOffset)
+  , mpCameraPos(pCameraPos)
   , mpMap(pMap)
 {
 }
@@ -93,8 +93,8 @@ void DebuggingSystem::update(ex::EntityManager& es) {
 
     for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
       for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
-        const auto col = x + mpScrollOffset->x;
-        const auto row = y + mpScrollOffset->y;
+        const auto col = x + mpCameraPos->x;
+        const auto row = y + mpCameraPos->y;
         if (col >= mpMap->width() || row >= mpMap->height()) {
           continue;
         }
@@ -151,7 +151,7 @@ void DebuggingSystem::update(ex::EntityManager& es) {
         const WorldPosition& pos,
         const BoundingBox& bbox
       ) {
-        const auto worldToScreenPx = tileVectorToPixelVector(*mpScrollOffset);
+        const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
@@ -167,7 +167,7 @@ void DebuggingSystem::update(ex::EntityManager& es) {
         const WorldPosition& pos,
         const game_logic::components::MapGeometryLink& link
       ) {
-        const auto worldToScreenPx = tileVectorToPixelVector(*mpScrollOffset);
+        const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) - worldToScreenPx,
           tileExtentsToPixelExtents(link.mLinkedGeometrySection.size)};
