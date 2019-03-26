@@ -177,6 +177,9 @@ enum class SpiderClingPosition {
 };
 
 
+constexpr auto INTERACTION_LOCK_DURATION = 8;
+
+
 class Player : public entityx::Receiver<Player> {
 public:
   Player(

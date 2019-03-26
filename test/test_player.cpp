@@ -1250,8 +1250,7 @@ TEST_CASE("Player movement") {
   //
 
   auto finishInteractionAnimation = [&]() {
-    // TODO: Use shared constant here instead of magic number?
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < INTERACTION_LOCK_DURATION; ++i) {
       player.update({});
     }
 

@@ -65,7 +65,6 @@ constexpr auto LADDER_CLIMB_ANIMATION = AnimationConfig{35, 36};
 constexpr auto WALK_ANIMATION = AnimationConfig{1, 4};
 constexpr auto CLIMB_ON_PIPE_ANIMATION = AnimationConfig{21, 24};
 
-constexpr auto INTERACTION_LOCK_DURATION = 8;
 constexpr auto INITIAL_MERCY_FRAMES = 20;
 
 constexpr auto TEMPORARY_ITEM_EXPIRATION_TIME = 700;
