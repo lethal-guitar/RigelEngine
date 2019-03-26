@@ -243,6 +243,7 @@ TEST_CASE("Player movement") {
   pressingFire.mFire.mIsPressed = true;
 
   PlayerInput jumpButtonTriggered;
+  jumpButtonTriggered.mJump.mIsPressed = true;
   jumpButtonTriggered.mJump.mWasTriggered = true;
 
   PlayerInput fireButtonTriggered;
