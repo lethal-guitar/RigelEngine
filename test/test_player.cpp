@@ -1316,6 +1316,22 @@ TEST_CASE("Player movement") {
 
       CHECK(position != previousPosition);
     }
+
+    SECTION("Can move immediately after interaction animation finished") {
+      const auto previousPosition = position;
+
+      for (int i = 0; i < INTERACTION_LOCK_DURATION - 1; ++i) {
+        player.update(pressingLeft);
+      }
+
+      CHECK(position == previousPosition);
+      CHECK(animationFrame == 33);
+
+      player.update(pressingLeft);
+
+      CHECK(position != previousPosition);
+      CHECK(animationFrame != 33);
+    }
   }
 
 

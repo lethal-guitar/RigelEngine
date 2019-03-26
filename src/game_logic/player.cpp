@@ -810,9 +810,8 @@ void Player::updateMovement(
     [this](Interacting& state) {
       setVisualState(VisualState::Interacting);
 
-      if (state.mFramesElapsed >= state.mDuration) {
+      if (state.mFramesElapsed == state.mDuration - 1) {
         mState = OnGround{};
-        setVisualState(VisualState::Standing);
       } else {
         ++state.mFramesElapsed;
       }
