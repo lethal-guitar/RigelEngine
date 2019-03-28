@@ -80,6 +80,8 @@ set(core_sources
     game_logic/ai/ceiling_sucker.hpp
     game_logic/ai/eyeball_thrower.cpp
     game_logic/ai/eyeball_thrower.hpp
+    game_logic/ai/floating_laser_bot.cpp
+    game_logic/ai/floating_laser_bot.hpp
     game_logic/ai/hover_bot.cpp
     game_logic/ai/hover_bot.hpp
     game_logic/ai/laser_turret.cpp

@@ -27,6 +27,7 @@
 #include "game_logic/ai/bomber_plane.hpp"
 #include "game_logic/ai/ceiling_sucker.hpp"
 #include "game_logic/ai/eyeball_thrower.hpp"
+#include "game_logic/ai/floating_laser_bot.hpp"
 #include "game_logic/ai/hover_bot.hpp"
 #include "game_logic/ai/laser_turret.hpp"
 #include "game_logic/ai/messenger_drone.hpp"

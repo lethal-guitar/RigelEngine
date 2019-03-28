@@ -1511,6 +1511,9 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::FloatingLaserBot{});
       break;
 
     case 154: // Spider
