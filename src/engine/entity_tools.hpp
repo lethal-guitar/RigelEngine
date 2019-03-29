@@ -59,4 +59,17 @@ inline bool isOnScreen(const entityx::Entity entity) {
       entity.component<const components::Active>()->mIsOnScreen;
 }
 
+
+/** Resets activation for entities with policy AlwaysAfterFirstActivation.
+ *
+ * Entities with an activation policy of AlwaysAfterFirstActivation will remain
+ * active after they have been on screen once, even when they are subsequently
+ * off screen. This function resets their activation. This means that they will
+ * be back to inactive until they come on-screen again.
+ */
+inline void resetActivation(entityx::Entity entity) {
+  removeSafely<components::Active>(entity);
+  entity.component<components::ActivationSettings>()->mHasBeenActivated = false;
+}
+
 }}
