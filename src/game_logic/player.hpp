@@ -290,6 +290,7 @@ private:
   void dieIfFallenOutOfMap();
 
   void fireShot();
+  bool canFire() const;
 
   void setVisualState(VisualState visualState);
   void jump();

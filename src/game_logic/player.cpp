@@ -840,13 +840,7 @@ void Player::updateJumpButtonStateTracking(const Button& jumpButton) {
 
 
 void Player::updateShooting(const Button& fireButton) {
-  if (
-    stateIs<ClimbingLadder>() ||
-    stateIs<Interacting>() ||
-    mIsRidingElevator ||
-    (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
-    hasSpiderAt(SpiderClingPosition::Weapon)
-  ) {
+  if (!canFire()) {
     return;
   }
 
@@ -1281,6 +1275,18 @@ void Player::fireShot() {
   }
 
   mpEvents->emit(rigel::events::PlayerFiredShot{});
+}
+
+
+bool Player::canFire() const {
+  const auto firingBlocked =
+    stateIs<ClimbingLadder>() ||
+    stateIs<Interacting>() ||
+    mIsRidingElevator ||
+    (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
+    hasSpiderAt(SpiderClingPosition::Weapon);
+
+  return !firingBlocked;
 }
 
 
