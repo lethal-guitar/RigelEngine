@@ -59,6 +59,7 @@ bool shouldUseTightDeadZone(const Player& player) {
   return
     player.stateIs<ClimbingLadder>() ||
     player.stateIs<PushedByFan>() ||
+    player.stateIs<UsingJetpack>() ||
     player.isRidingElevator();
 }
 
