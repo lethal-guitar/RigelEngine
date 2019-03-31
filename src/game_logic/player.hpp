@@ -55,7 +55,8 @@ enum class WeaponStance {
   Regular,
   RegularCrouched,
   Upwards,
-  Downwards
+  Downwards,
+  UsingJetpack
 };
 
 
@@ -80,6 +81,8 @@ struct Falling {
 };
 
 struct PushedByFan {};
+
+struct UsingJetpack {};
 
 struct RecoveringFromLanding {};
 
@@ -134,6 +137,7 @@ using PlayerState = std::variant<
   Jumping,
   Falling,
   PushedByFan,
+  UsingJetpack,
   RecoveringFromLanding,
   ClimbingLadder,
   OnPipe,
@@ -266,7 +270,10 @@ private:
 
   void updateTemporaryItemExpiration();
   void updateAnimation();
-  void updateMovement(const base::Vector& movementVector, const Button& jumpButton);
+  void updateMovement(
+    const base::Vector& movementVector,
+    const Button& jumpButton,
+    const Button& fireButton);
   void updateJumpButtonStateTracking(const Button& jumpButton);
   void updateShooting(const Button& fireButton);
   void updateLadderAttachment(const base::Vector& movementVector);
@@ -290,6 +297,7 @@ private:
   void dieIfFallenOutOfMap();
 
   void fireShot();
+  bool canFire() const;
 
   void setVisualState(VisualState visualState);
   void jump();

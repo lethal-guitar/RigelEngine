@@ -81,6 +81,8 @@ constexpr auto ELEVATOR_SPEED = 2;
 
 constexpr auto FAN_PUSH_SPEED = 2;
 
+constexpr auto JETPACK_SPEED = 1;
+
 constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_ANIMATION_SEQUENCE{
   29, 29, 29, 29, 30, 31};
 
@@ -195,7 +197,10 @@ ProjectileDirection shotDirection(
 ) {
   if (stance == WeaponStance::Upwards) {
     return ProjectileDirection::Up;
-  } else if (stance == WeaponStance::Downwards) {
+  } else if (
+    stance == WeaponStance::Downwards ||
+    stance == WeaponStance::UsingJetpack
+  ) {
     return ProjectileDirection::Down;
   } else {
     return orientation == c::Orientation::Right
@@ -209,6 +214,10 @@ base::Vector shotOffset(
   const c::Orientation orientation,
   const WeaponStance stance
 ) {
+  if (stance == WeaponStance::UsingJetpack) {
+    return {1, 1};
+  }
+
   const auto facingRight = orientation == c::Orientation::Right;
 
   if (stance == WeaponStance::Downwards) {
@@ -236,6 +245,10 @@ base::Vector muzzleFlashOffset(
   const c::Orientation orientation,
   const WeaponStance stance
 ) {
+  if (stance == WeaponStance::UsingJetpack) {
+    return {1, 1};
+  }
+
   const auto facingRight = orientation == c::Orientation::Right;
 
   if (stance == WeaponStance::Downwards) {
@@ -446,7 +459,7 @@ void Player::update(const PlayerInput& unfilteredInput) {
   const auto movementVector = inputToVec(input);
 
   updateLadderAttachment(movementVector);
-  updateMovement(movementVector, input.mJump);
+  updateMovement(movementVector, input.mJump, input.mFire);
   updateShooting(input.mFire);
   updateCollisionBox();
 
@@ -600,7 +613,8 @@ void Player::updateAnimation() {
 
 void Player::updateMovement(
   const base::Vector& movementVector,
-  const Button& jumpButton
+  const Button& jumpButton,
+  const Button& fireButton
 ) {
   mStance = WeaponStance::Regular;
   mIsRidingElevator = false;
@@ -609,6 +623,16 @@ void Player::updateMovement(
   auto& bbox = *mEntity.component<c::BoundingBox>();
 
   updateJumpButtonStateTracking(jumpButton);
+
+  const auto shouldActivateJetpack =
+    canFire() &&
+    mpPlayerModel->weapon() == data::WeaponType::FlameThrower &&
+    movementVector.y > 0 &&
+    fireButton.mIsPressed;
+
+  if (shouldActivateJetpack && !stateIs<UsingJetpack>()) {
+    mState = UsingJetpack{};
+  }
 
   base::match(mState,
     [&, this](const OnGround&) {
@@ -708,6 +732,18 @@ void Player::updateMovement(
       setVisualState(VisualState::Jumping);
       updateHorizontalMovementInAir(movementVector);
       moveVertically(*mpCollisionChecker, mEntity, -FAN_PUSH_SPEED);
+    },
+
+    [&, this](const UsingJetpack&) {
+      if (!shouldActivateJetpack) {
+        startFallingDelayed();
+        return;
+      }
+
+      mStance = WeaponStance::UsingJetpack;
+      setVisualState(VisualState::UsingJetpack);
+      updateHorizontalMovementInAir(movementVector);
+      moveVertically(*mpCollisionChecker, mEntity, -JETPACK_SPEED);
     },
 
     [this](const RecoveringFromLanding&) {
@@ -840,13 +876,7 @@ void Player::updateJumpButtonStateTracking(const Button& jumpButton) {
 
 
 void Player::updateShooting(const Button& fireButton) {
-  if (
-    stateIs<ClimbingLadder>() ||
-    stateIs<Interacting>() ||
-    mIsRidingElevator ||
-    (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
-    hasSpiderAt(SpiderClingPosition::Weapon)
-  ) {
+  if (!canFire()) {
     return;
   }
 
@@ -1281,6 +1311,18 @@ void Player::fireShot() {
   }
 
   mpEvents->emit(rigel::events::PlayerFiredShot{});
+}
+
+
+bool Player::canFire() const {
+  const auto firingBlocked =
+    stateIs<ClimbingLadder>() ||
+    stateIs<Interacting>() ||
+    mIsRidingElevator ||
+    (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
+    hasSpiderAt(SpiderClingPosition::Weapon);
+
+  return !firingBlocked;
 }
 
 
