@@ -171,15 +171,12 @@ engine::OwningTexture createFontTexture(
 MenuElementRenderer::MenuElementRenderer(
   engine::TileRenderer* pSpriteSheetRenderer,
   engine::Renderer* pRenderer,
-  const loader::ResourceLoader& resources,
-  const loader::Palette16& palette
+  const loader::ResourceLoader& resources
 )
   : mpSpriteSheetRenderer(pSpriteSheetRenderer)
   , mBigTextRenderer(
       createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
       pRenderer)
-  , mpRenderer(pRenderer)
-  , mPalette(palette)
 {
 }
 
@@ -260,11 +257,8 @@ void MenuElementRenderer::drawMultiLineText(
 void MenuElementRenderer::drawBigText(
   int x,
   int y,
-  int colorIndex,
   const std::string& text
 ) const {
-  mpRenderer->setColorModulation(mPalette.at(colorIndex));
-
   for (auto i=0u; i<text.size(); ++i) {
     const auto ch = static_cast<uint8_t>(text[i]);
 
@@ -290,8 +284,6 @@ void MenuElementRenderer::drawBigText(
     const auto position = static_cast<int>(i);
     mBigTextRenderer.renderTileSlice(index, {x + position, y-1});
   }
-
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 

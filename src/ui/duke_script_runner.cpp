@@ -286,6 +286,18 @@ void DukeScriptRunner::stopNewsReporterAnimation() {
 }
 
 
+void DukeScriptRunner::drawBigText(
+  const int x,
+  const int y,
+  const int colorIndex,
+  const std::string& text
+) const {
+  mpRenderer->setColorModulation(mCurrentPalette.at(colorIndex));
+  mMenuElementRenderer.drawBigText(x, y, text);
+  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
+}
+
+
 void DukeScriptRunner::interpretNextAction() {
   using namespace data::script;
 
@@ -342,7 +354,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const DrawBigText& action) {
-      mMenuElementRenderer.drawBigText(
+      drawBigText(
         action.x + 2,
         action.y,
         action.colorIndex,
@@ -551,7 +563,7 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
 
 void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
   for (auto i = 0; i < 8; ++i) {
-    mMenuElementRenderer.drawBigText(
+    drawBigText(
       SAVE_SLOT_START_X,
       SAVE_SLOT_START_Y + i*MENU_FONT_HEIGHT,
       i == selectedIndex ? SELECTED_COLOR_INDEX : UNSELECTED_COLOR_INDEX,
@@ -592,11 +604,6 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
         mpResourceBundle->loadTiledFullscreenImage(
           "STATUS.MNI", mCurrentPalette)},
       mpRenderer};
-  mMenuElementRenderer = MenuElementRenderer{
-    &mUiSpriteSheetRenderer,
-    mpRenderer,
-    *mpResourceBundle,
-    mCurrentPalette};
 }
 
 

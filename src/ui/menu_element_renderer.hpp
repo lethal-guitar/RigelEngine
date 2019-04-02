@@ -42,15 +42,14 @@ public:
   MenuElementRenderer(
     engine::TileRenderer* pSpriteSheetRenderer,
     engine::Renderer* pRenderer,
-    const loader::ResourceLoader& resources,
-    const loader::Palette16& palette = loader::INGAME_PALETTE);
+    const loader::ResourceLoader& resources);
 
   // Stateless API
   // --------------------------------------------------------------------------
   void drawText(int x, int y, const std::string& text) const;
   void drawSmallWhiteText(int x, int y, const std::string& text) const;
   void drawMultiLineText(int x, int y, const std::string& text) const;
-  void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
+  void drawBigText(int x, int y, const std::string& text) const;
   void drawMessageBox(int x, int y, int width, int height) const;
 
   void drawCheckBox(int x, int y, bool isChecked) const;
@@ -79,9 +78,6 @@ private:
 private:
   engine::TileRenderer* mpSpriteSheetRenderer;
   engine::TileRenderer mBigTextRenderer;
-  engine::Renderer* mpRenderer;
-
-  loader::Palette16 mPalette;
 
   std::optional<int> mMenuSelectionIndicatorPosition;
   bool mPendingMenuIndicatorErase = false;

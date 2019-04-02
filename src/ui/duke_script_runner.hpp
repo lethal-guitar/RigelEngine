@@ -141,6 +141,8 @@ private:
     engine::TimeDelta timeDelta);
   void stopNewsReporterAnimation();
 
+  void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
+
 private:
   const loader::ResourceLoader* mpResourceBundle;
   loader::Palette16 mCurrentPalette;
