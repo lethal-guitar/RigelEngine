@@ -58,6 +58,9 @@ public:
 
   // Stateful API
   // --------------------------------------------------------------------------
+  // TODO: This should move into DukeScriptRunner, so that this class' API
+  // can be fully stateless. It could be turned into a set of free functions
+  // at that point.
   void showMenuSelectionIndicator(int y);
   void hideMenuSelectionIndicator();
 
