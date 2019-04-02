@@ -73,7 +73,7 @@ private:
 
   engine::Renderer* mpRenderer;
   engine::OwningTexture mBackgroundTexture;
-  ui::MenuElementRenderer mTextRenderer;
+  ui::MenuElementRenderer* mpTextRenderer;
 };
 
 }}
