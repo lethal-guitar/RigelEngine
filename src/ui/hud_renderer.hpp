@@ -47,7 +47,8 @@ public:
     data::PlayerModel* pPlayerModel,
     int levelNumber,
     engine::Renderer* pRenderer,
-    const loader::ResourceLoader& bundle);
+    const loader::ResourceLoader& bundle,
+    engine::TileRenderer* pStatusSpriteSheetRenderer);
 
   void updateAnimation();
   void render();
@@ -70,7 +71,7 @@ private:
     const loader::ActorData& actorData,
     InventoryItemTextureMap&& inventoryItemTextures,
     CollectedLetterIndicatorMap&& collectedLetterTextures,
-    const data::Image& statusSpriteSheetImage);
+    engine::TileRenderer* pStatusSpriteSheetRenderer);
 
   static InventoryItemTextureMap makeInventoryItemTextureMap(
     engine::Renderer* pRenderer,
@@ -94,7 +95,7 @@ private:
   engine::OwningTexture mBottomRightTexture;
   InventoryItemTextureMap mInventoryTexturesByType;
   CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
-  engine::TileRenderer mStatusSpriteSheetRenderer;
+  engine::TileRenderer* mpStatusSpriteSheetRenderer;
 };
 
 }}

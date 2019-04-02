@@ -133,7 +133,8 @@ GameRunner::GameRunner(
       mpPlayerModel,
       sessionId.mLevel + 1,
       mpRenderer,
-      *context.mpResources)
+      *context.mpResources,
+      context.mpUiSpriteSheetRenderer)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
