@@ -76,6 +76,8 @@ set(core_sources
     game_logic/ai/blue_guard.hpp
     game_logic/ai/bomber_plane.cpp
     game_logic/ai/bomber_plane.hpp
+    game_logic/ai/boss_episode_1.cpp
+    game_logic/ai/boss_episode_1.hpp
     game_logic/ai/ceiling_sucker.cpp
     game_logic/ai/ceiling_sucker.hpp
     game_logic/ai/eyeball_thrower.cpp
