@@ -56,6 +56,20 @@ const auto GAME_SPEED_SLOT = 8;
 const auto INITIAL_SKILL_SELECTION = 1;
 const auto INITIAL_GAME_SPEED = 3;
 
+
+auto makeSpriteSheet(
+  engine::Renderer* pRenderer,
+  const loader::ResourceLoader& resourceLoader,
+  const loader::Palette16& palette
+) {
+  return engine::TileRenderer{
+    engine::OwningTexture{
+      pRenderer,
+      resourceLoader.loadTiledFullscreenImage(
+        "STATUS.MNI", palette)},
+    pRenderer};
+}
+
 }
 
 
@@ -69,9 +83,7 @@ DukeScriptRunner::DukeScriptRunner(
   , mpRenderer(pRenderer)
   , mpServices(pServiceProvider)
   , mUiSpriteSheetRenderer(
-     engine::OwningTexture{
-        pRenderer, pResourceLoader->loadTiledFullscreenImage("STATUS.MNI")},
-      pRenderer)
+      makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
   , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
   , mProgramCounter(0u)
 {
@@ -598,12 +610,8 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
   // which can be compared to determine if update needed.
 
   mCurrentPalette = palette;
-  mUiSpriteSheetRenderer = engine::TileRenderer{
-     engine::OwningTexture{
-        mpRenderer,
-        mpResourceBundle->loadTiledFullscreenImage(
-          "STATUS.MNI", mCurrentPalette)},
-      mpRenderer};
+  mUiSpriteSheetRenderer =
+    makeSpriteSheet(mpRenderer, *mpResourceBundle, mCurrentPalette);
 }
 
 
