@@ -20,6 +20,7 @@
 #include "base/warnings.hpp"
 #include "engine/renderer.hpp"
 #include "engine/sound_system.hpp"
+#include "engine/tile_renderer.hpp"
 #include "engine/texture.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/fps_display.hpp"
@@ -98,6 +99,7 @@ private:
   std::chrono::high_resolution_clock::time_point mLastTime;
 
   ui::DukeScriptRunner mScriptRunner;
+  engine::TileRenderer mUiSpriteSheetRenderer;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
   std::string mDebugText;

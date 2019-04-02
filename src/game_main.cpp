@@ -66,7 +66,11 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mIsRunning(true)
   , mIsMinimized(false)
   , mScriptRunner(&mResources, &mRenderer, this)
-  , mTextRenderer(&mRenderer, mResources)
+  , mUiSpriteSheetRenderer(
+      engine::OwningTexture{
+        &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
+      &mRenderer)
+  , mTextRenderer(&mUiSpriteSheetRenderer, &mRenderer, mResources)
   , mFpsDisplay(&mTextRenderer)
 {
 }
@@ -189,7 +193,13 @@ void Game::mainLoop() {
 
 
 GameMode::Context Game::makeModeContext() {
-  return {&mResources, &mRenderer, this, &mScriptRunner, &mTextRenderer};
+  return {
+    &mResources,
+    &mRenderer,
+    this,
+    &mScriptRunner,
+    &mTextRenderer,
+    &mUiSpriteSheetRenderer};
 }
 
 

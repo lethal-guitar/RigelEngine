@@ -68,7 +68,11 @@ DukeScriptRunner::DukeScriptRunner(
   , mCurrentPalette(loader::INGAME_PALETTE)
   , mpRenderer(pRenderer)
   , mpServices(pServiceProvider)
-  , mMenuElementRenderer(pRenderer, *pResourceLoader)
+  , mUiSpriteSheetRenderer(
+     engine::OwningTexture{
+        pRenderer, pResourceLoader->loadTiledFullscreenImage("STATUS.MNI")},
+      pRenderer)
+  , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
   , mProgramCounter(0u)
 {
   // Default menu pre-selections at game start
@@ -582,8 +586,17 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
   // which can be compared to determine if update needed.
 
   mCurrentPalette = palette;
-  mMenuElementRenderer =
-    MenuElementRenderer(mpRenderer, *mpResourceBundle, palette);
+  mUiSpriteSheetRenderer = engine::TileRenderer{
+     engine::OwningTexture{
+        mpRenderer,
+        mpResourceBundle->loadTiledFullscreenImage(
+          "STATUS.MNI", mCurrentPalette)},
+      mpRenderer};
+  mMenuElementRenderer = MenuElementRenderer{
+    &mUiSpriteSheetRenderer,
+    mpRenderer,
+    *mpResourceBundle,
+    mCurrentPalette};
 }
 
 

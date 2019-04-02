@@ -19,6 +19,7 @@
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
 #include "engine/texture.hpp"
+#include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
 #include "loader/palette.hpp"
 #include "ui/menu_element_renderer.hpp"
@@ -111,7 +112,6 @@ private:
     int mCurrentMenuPosY;
   };
 
-
   void startExecution(const data::script::Script& script);
   void interpretNextAction();
 
@@ -146,6 +146,7 @@ private:
   loader::Palette16 mCurrentPalette;
   engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServices;
+  engine::TileRenderer mUiSpriteSheetRenderer;
   MenuElementRenderer mMenuElementRenderer;
 
 

@@ -169,15 +169,12 @@ engine::OwningTexture createFontTexture(
 
 
 MenuElementRenderer::MenuElementRenderer(
+  engine::TileRenderer* pSpriteSheetRenderer,
   engine::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const loader::Palette16& palette
 )
-  : mSpriteSheetRenderer(
-      engine::OwningTexture(
-        pRenderer,
-        resources.loadTiledFullscreenImage("STATUS.MNI", palette)),
-      pRenderer)
+  : mpSpriteSheetRenderer(pSpriteSheetRenderer)
   , mBigTextRenderer(
       createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
       pRenderer)
@@ -209,7 +206,7 @@ void MenuElementRenderer::drawText(
       continue;
     }
 
-    mSpriteSheetRenderer.renderTile(spriteSheetIndex, x + i, y);
+    mpSpriteSheetRenderer->renderTile(spriteSheetIndex, x + i, y);
   }
 }
 
@@ -240,7 +237,7 @@ void MenuElementRenderer::drawSmallWhiteText(
       continue;
     }
 
-    mSpriteSheetRenderer.renderTile(spriteSheetIndex, x + i, y);
+    mpSpriteSheetRenderer->renderTile(spriteSheetIndex, x + i, y);
   }
 }
 
@@ -323,9 +320,9 @@ void MenuElementRenderer::drawCheckBox(
   const bool isChecked
 ) const {
   const auto offset = isChecked ? 2 : 0;
-  const auto index = 7*mSpriteSheetRenderer.tilesPerRow() + 20 + offset;
+  const auto index = 7*mpSpriteSheetRenderer->tilesPerRow() + 20 + offset;
 
-  mSpriteSheetRenderer.renderTileQuad(index, base::Vector{x - 1, y - 1});
+  mpSpriteSheetRenderer->renderTileQuad(index, base::Vector{x - 1, y - 1});
 }
 
 
@@ -347,7 +344,7 @@ void MenuElementRenderer::drawBonusScreenText(
       spriteSheetIndex = 20 + (ch - 65) * 2;
     } else if (ch >= 75 && ch <= 90) {
       spriteSheetIndex =
-        mSpriteSheetRenderer.tilesPerRow() * 2 + (ch - 75) * 2;
+        mpSpriteSheetRenderer->tilesPerRow() * 2 + (ch - 75) * 2;
     } else if (ch == 37) {
       spriteSheetIndex = 112;
     } else if (ch == 61) {
@@ -362,7 +359,7 @@ void MenuElementRenderer::drawBonusScreenText(
     }
 
     const auto index = static_cast<int>(i);
-    mSpriteSheetRenderer.renderTileQuad(
+    mpSpriteSheetRenderer->renderTileQuad(
       spriteSheetIndex, base::Vector{x + index*2, y});
   }
 }
@@ -372,8 +369,8 @@ void MenuElementRenderer::drawSelectionIndicator(
   const int y,
   const int state
 ) const {
-  const auto index = 9*mSpriteSheetRenderer.tilesPerRow() + state*2;
-  mSpriteSheetRenderer.renderTileQuad(index, base::Vector{8, y - 1});
+  const auto index = 9*mpSpriteSheetRenderer->tilesPerRow() + state*2;
+  mpSpriteSheetRenderer->renderTileQuad(index, base::Vector{8, y - 1});
 }
 
 
@@ -396,14 +393,14 @@ void MenuElementRenderer::drawMessageBoxRow(
 ) const {
   const auto baseIndex = 4*40;
 
-  mSpriteSheetRenderer.renderTile(baseIndex + leftIndex, x, y);
+  mpSpriteSheetRenderer->renderTile(baseIndex + leftIndex, x, y);
 
   const auto untilX = x + width - 1;
   for (int col = x + 1; col < untilX; ++col) {
-    mSpriteSheetRenderer.renderTile(baseIndex + middleIndex, col, y);
+    mpSpriteSheetRenderer->renderTile(baseIndex + middleIndex, col, y);
   }
 
-  mSpriteSheetRenderer.renderTile(baseIndex + rightIndex, x + width - 1, y);
+  mpSpriteSheetRenderer->renderTile(baseIndex + rightIndex, x + width - 1, y);
 }
 
 

@@ -29,6 +29,10 @@ namespace rigel {
 
 struct IGameServiceProvider;
 
+namespace engine {
+  class TileRenderer;
+}
+
 namespace loader {
   class ResourceLoader;
 }
@@ -47,6 +51,7 @@ struct GameMode {
     IGameServiceProvider* mpServiceProvider;
     ui::DukeScriptRunner* mpScriptRunner;
     ui::MenuElementRenderer* mpUiRenderer;
+    engine::TileRenderer* mpUiSpriteSheetRenderer;
   };
 
   virtual ~GameMode() = default;
