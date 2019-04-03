@@ -125,6 +125,7 @@ private:
   data::PlayerModel mPlayerModelAtLevelStart;
   LevelBonusInfo mBonusInfo;
   std::optional<CheckpointData> mActivatedCheckpoint;
+  std::optional<std::string> mLevelMusicFile;
 
   game_logic::PlayerInput mPlayerInput;
   std::optional<base::Vector> mTeleportTargetPosition;

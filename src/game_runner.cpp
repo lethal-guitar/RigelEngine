@@ -74,6 +74,9 @@ std::string levelFileName(const int episode, const int level) {
 }
 
 
+constexpr auto BOSS_LEVEL_INTRO_MUSIC = "CALM.IMF";
+
+
 struct BonusRelatedItemCounts {
   int mCameraCount = 0;
   int mFireBombCount = 0;
@@ -488,6 +491,7 @@ void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
 
 void GameRunner::receive(const rigel::events::BossActivated& event) {
   mActiveBossEntity = event.mBossEntity;
+  mpServiceProvider->playMusic(*mLevelMusicFile);
 }
 
 
@@ -538,7 +542,12 @@ void GameRunner::loadLevel(
 
   updateGameLogic();
 
-  mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+  if (data::isBossLevel(sessionId.mLevel)) {
+    mLevelMusicFile = loadedLevel.mMusicFile;
+    mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
+  } else {
+    mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+  }
 }
 
 
