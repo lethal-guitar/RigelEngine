@@ -30,6 +30,7 @@
 #include "game_logic/player.hpp"
 
 #include "game_service_provider.hpp"
+#include "global_level_events.hpp"
 
 
 namespace rigel::game_logic::behaviors {
@@ -77,6 +78,7 @@ void BossEpisode1::update(
 
   base::match(mState,
     [&, this](const AwaitingActivation&) {
+      d.mpEvents->emit(rigel::events::BossActivated{entity});
       mStartingAltitude = position.y;
       startSlammingDown();
     },

@@ -74,6 +74,7 @@ public:
   void receive(const rigel::events::ScreenShake& event);
   void receive(const events::TutorialMessage& event);
   void receive(const game_logic::events::ShootableKilled& event);
+  void receive(const rigel::events::BossActivated& event);
 
 private:
   void loadLevel(
@@ -114,6 +115,8 @@ private:
 
   engine::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
+  engine::TileRenderer* mpUiSpriteSheet;
+  ui::MenuElementRenderer* mpTextRenderer;
   entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;
   game_logic::EntityFactory mEntityFactory;
@@ -125,6 +128,7 @@ private:
 
   game_logic::PlayerInput mPlayerInput;
   std::optional<base::Vector> mTeleportTargetPosition;
+  entityx::Entity mActiveBossEntity;
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;
   bool mPlayerDied = false;

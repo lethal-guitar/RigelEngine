@@ -26,6 +26,7 @@
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
+#include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"
 
 #include "game_service_provider.hpp"
@@ -106,6 +107,26 @@ BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
   return counts;
 }
 
+
+constexpr auto HEALTH_BAR_LABEL_START_X = 1;
+constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
+constexpr auto HEALTH_BAR_TILE_INDEX = 4*40 + 1;
+constexpr auto HEALTH_BAR_START_PX = base::Vector{data::tilesToPixels(6), 0};
+
+
+void drawBossHealthBar(
+  const int health,
+  const ui::MenuElementRenderer& textRenderer,
+  const engine::TileRenderer& uiSpriteSheet
+) {
+  textRenderer.drawSmallWhiteText(
+    HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
+
+  const auto healthBarSize = base::Extents{health, data::GameTraits::tileSize};
+  uiSpriteSheet.renderTileStretched(
+    HEALTH_BAR_TILE_INDEX, {HEALTH_BAR_START_PX, healthBarSize});
+}
+
 }
 
 
@@ -118,6 +139,8 @@ GameRunner::GameRunner(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
+  , mpUiSpriteSheet(context.mpUiSpriteSheetRenderer)
+  , mpTextRenderer(context.mpUiRenderer)
   , mEntities(mEventManager)
   , mEntityFactory(
       context.mpRenderer,
@@ -147,6 +170,7 @@ GameRunner::GameRunner(
   mEventManager.subscribe<rigel::events::ScreenShake>(*this);
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
   mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
+  mEventManager.subscribe<rigel::events::BossActivated>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -315,7 +339,15 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     mHudRenderer.render();
   }
 
-  mMessageDisplay.render();
+  if (mActiveBossEntity) {
+    using game_logic::components::Shootable;
+
+    const auto health = mActiveBossEntity.has_component<Shootable>()
+      ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
+    drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+  } else {
+    mMessageDisplay.render();
+  }
 
   if (mShowDebugText) {
     showDebugText();
@@ -451,6 +483,11 @@ void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
     default:
       break;
   }
+}
+
+
+void GameRunner::receive(const rigel::events::BossActivated& event) {
+  mActiveBossEntity = event.mBossEntity;
 }
 
 
