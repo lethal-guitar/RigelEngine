@@ -33,6 +33,15 @@ TileRenderer::TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer)
 }
 
 
+void TileRenderer::renderTileStretched(
+  const int index,
+  const base::Rect<int>& destRect
+) const {
+  mpRenderer->drawTexture(
+    mTileSetTexture.data(), sourceRect(index, 1, 1), destRect);
+}
+
+
 void TileRenderer::renderTile(
   const int index,
   const int x,
