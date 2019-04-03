@@ -23,12 +23,12 @@
 namespace rigel { namespace data {
 
 template<typename T>
-T pixelsToTiles(const T pixels) {
+constexpr T pixelsToTiles(const T pixels) {
   return pixels / static_cast<T>(GameTraits::tileSize);
 }
 
 template<typename T>
-T tilesToPixels(const T tiles) {
+constexpr T tilesToPixels(const T tiles) {
   return tiles * static_cast<T>(GameTraits::tileSize);
 }
 
