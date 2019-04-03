@@ -42,6 +42,7 @@ public:
 private:
   template<typename StageT>
   void fadeToNewStage(StageT& stage);
+  void finishGameSession();
 
 private:
   using SessionStage = std::variant<

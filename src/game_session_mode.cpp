@@ -47,8 +47,7 @@ GameSessionMode::GameSessionMode(
 void GameSessionMode::handleEvent(const SDL_Event& event) {
   // This is temporary - remove when in-game menu implemented
   if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-    mContext.mpServiceProvider->fadeOutScreen();
-    mContext.mpServiceProvider->scheduleEnterMainMenu();
+    finishGameSession();
     return;
   }
 
@@ -102,6 +101,13 @@ void GameSessionMode::fadeToNewStage(StageT& stage) {
   mContext.mpServiceProvider->fadeOutScreen();
   stage.updateAndRender(0);
   mContext.mpServiceProvider->fadeInScreen();
+}
+
+
+void GameSessionMode::finishGameSession() {
+  // TODO: Record and show hiscore
+  mContext.mpServiceProvider->fadeOutScreen();
+  mContext.mpServiceProvider->scheduleEnterMainMenu();
 }
 
 }
