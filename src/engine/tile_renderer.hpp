@@ -49,8 +49,12 @@ private:
     const int posX,
     const int posY,
     const int tileSpanX,
-    const int tileSpanY
-  ) const;
+    const int tileSpanY) const;
+
+  base::Rect<int> sourceRect(
+    int index,
+    const int tileSpanX,
+    const int tileSpanY) const;
 
 private:
   OwningTexture mTileSetTexture;
