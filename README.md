@@ -22,10 +22,9 @@ Here's a short video showcasing the project's current state:
 
 <a href="http://www.youtube.com/watch?v=SO1M6gHvFzM"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
-The project is still very much work in progress, but already playable to a large extent. The first four levels of the 
-Shareware episode are completely playable. Level 5 is missing some mechanics and enemies, but can be completed. The remaining levels can't be completed yet due to missing  game mechanics, but they are partially playable. Overall, about 75 % of the functionality found in the original Shareware episode is reimplemented in
-Rigel Engine so far. The [issue list](https://github.com/lethal-guitar/RigelEngine/issues) should give a 
-comprehensive overview of what's still missing.
+The project is still work in progress, but the original Shareware episode is already fully playable.
+Only the hiscore list and being able to save/load your game is missing to make RigelEngine fully functional
+for playing Duke Nukem II!
 
 ## Building and running
 
@@ -75,20 +74,11 @@ The only files actually required for RigelEngine are:
 Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
 
 
-### Jumping to specific levels, command line options
+### Command line options
 
-Since not all levels can be completed at the moment, not all of each episode's levels are accessible
-by playing the game. In order to try different levels, you can use the `-l` command line option:
+The most important command line options are:
 
-```bash
-# Jump to 6th level of first episode
-./src/RigelEngine <PATH_TO_YOUR_GAME_FILES> -l L6
-```
-
-This will skip the intro movies and main menu, and jump straight to the specified level at Medium difficulty.
-
-Other command line options are:
-
+* `-l`: jump to a specific level. E.g. `-l L5` to play the 5th level of episode 1.
 * `-s`: skip intro movies, go straight to main menu
 * `--no-music`: don't play music
 * `-h`/`--help`: show all command line options
