@@ -18,7 +18,7 @@ I gave a presentation about the project at a local C++ meetup in 2017. You can f
 
 ## Current state
 
-Here's a short video showcasing the project's current state:
+Here's a short video showcasing the project. It's outdated by now, but still mostly representative.
 
 <a href="http://www.youtube.com/watch?v=SO1M6gHvFzM"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
