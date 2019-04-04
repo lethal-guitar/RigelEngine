@@ -56,6 +56,20 @@ const auto GAME_SPEED_SLOT = 8;
 const auto INITIAL_SKILL_SELECTION = 1;
 const auto INITIAL_GAME_SPEED = 3;
 
+
+auto makeSpriteSheet(
+  engine::Renderer* pRenderer,
+  const loader::ResourceLoader& resourceLoader,
+  const loader::Palette16& palette
+) {
+  return engine::TileRenderer{
+    engine::OwningTexture{
+      pRenderer,
+      resourceLoader.loadTiledFullscreenImage(
+        "STATUS.MNI", palette)},
+    pRenderer};
+}
+
 }
 
 
@@ -68,7 +82,9 @@ DukeScriptRunner::DukeScriptRunner(
   , mCurrentPalette(loader::INGAME_PALETTE)
   , mpRenderer(pRenderer)
   , mpServices(pServiceProvider)
-  , mMenuElementRenderer(pRenderer, *pResourceLoader)
+  , mUiSpriteSheetRenderer(
+      makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
+  , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
   , mProgramCounter(0u)
 {
   // Default menu pre-selections at game start
@@ -282,6 +298,18 @@ void DukeScriptRunner::stopNewsReporterAnimation() {
 }
 
 
+void DukeScriptRunner::drawBigText(
+  const int x,
+  const int y,
+  const int colorIndex,
+  const std::string& text
+) const {
+  mpRenderer->setColorModulation(mCurrentPalette.at(colorIndex));
+  mMenuElementRenderer.drawBigText(x, y, text);
+  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
+}
+
+
 void DukeScriptRunner::interpretNextAction() {
   using namespace data::script;
 
@@ -338,7 +366,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const DrawBigText& action) {
-      mMenuElementRenderer.drawBigText(
+      drawBigText(
         action.x + 2,
         action.y,
         action.colorIndex,
@@ -547,7 +575,7 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
 
 void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
   for (auto i = 0; i < 8; ++i) {
-    mMenuElementRenderer.drawBigText(
+    drawBigText(
       SAVE_SLOT_START_X,
       SAVE_SLOT_START_Y + i*MENU_FONT_HEIGHT,
       i == selectedIndex ? SELECTED_COLOR_INDEX : UNSELECTED_COLOR_INDEX,
@@ -582,8 +610,8 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
   // which can be compared to determine if update needed.
 
   mCurrentPalette = palette;
-  mMenuElementRenderer =
-    MenuElementRenderer(mpRenderer, *mpResourceBundle, palette);
+  mUiSpriteSheetRenderer =
+    makeSpriteSheet(mpRenderer, *mpResourceBundle, mCurrentPalette);
 }
 
 

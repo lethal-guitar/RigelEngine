@@ -40,16 +40,16 @@ namespace rigel { namespace ui {
 class MenuElementRenderer {
 public:
   MenuElementRenderer(
+    engine::TileRenderer* pSpriteSheetRenderer,
     engine::Renderer* pRenderer,
-    const loader::ResourceLoader& resources,
-    const loader::Palette16& palette = loader::INGAME_PALETTE);
+    const loader::ResourceLoader& resources);
 
   // Stateless API
   // --------------------------------------------------------------------------
   void drawText(int x, int y, const std::string& text) const;
   void drawSmallWhiteText(int x, int y, const std::string& text) const;
   void drawMultiLineText(int x, int y, const std::string& text) const;
-  void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
+  void drawBigText(int x, int y, const std::string& text) const;
   void drawMessageBox(int x, int y, int width, int height) const;
 
   void drawCheckBox(int x, int y, bool isChecked) const;
@@ -58,6 +58,9 @@ public:
 
   // Stateful API
   // --------------------------------------------------------------------------
+  // TODO: This should move into DukeScriptRunner, so that this class' API
+  // can be fully stateless. It could be turned into a set of free functions
+  // at that point.
   void showMenuSelectionIndicator(int y);
   void hideMenuSelectionIndicator();
 
@@ -76,11 +79,8 @@ private:
     int rightIndex) const;
 
 private:
-  engine::TileRenderer mSpriteSheetRenderer;
-  mutable engine::TileRenderer mBigTextRenderer;
-  engine::Renderer* mpRenderer;
-
-  loader::Palette16 mPalette;
+  engine::TileRenderer* mpSpriteSheetRenderer;
+  engine::TileRenderer mBigTextRenderer;
 
   std::optional<int> mMenuSelectionIndicatorPosition;
   bool mPendingMenuIndicatorErase = false;

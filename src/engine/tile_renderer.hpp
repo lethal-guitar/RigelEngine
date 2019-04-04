@@ -25,6 +25,8 @@ class TileRenderer {
 public:
   TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer);
 
+  void renderTileStretched(int index, const base::Rect<int>& destRect) const;
+
   void renderTile(int index, int posX, int posY) const;
   void renderTile(const int index, const base::Vector& tlPosition) const {
     renderTile(index, tlPosition.x, tlPosition.y);
@@ -49,8 +51,12 @@ private:
     const int posX,
     const int posY,
     const int tileSpanX,
-    const int tileSpanY
-  ) const;
+    const int tileSpanY) const;
+
+  base::Rect<int> sourceRect(
+    int index,
+    const int tileSpanX,
+    const int tileSpanY) const;
 
 private:
   OwningTexture mTileSetTexture;

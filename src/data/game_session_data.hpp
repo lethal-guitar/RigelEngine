@@ -24,4 +24,11 @@ struct GameSessionId {
   Difficulty mDifficulty = Difficulty::Medium;
 };
 
+
+constexpr bool isBossLevel(const int level) {
+  return level == 7;
+}
+
+
+
 }}

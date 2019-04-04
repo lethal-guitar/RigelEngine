@@ -47,8 +47,7 @@ GameSessionMode::GameSessionMode(
 void GameSessionMode::handleEvent(const SDL_Event& event) {
   // This is temporary - remove when in-game menu implemented
   if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-    mContext.mpServiceProvider->fadeOutScreen();
-    mContext.mpServiceProvider->scheduleEnterMainMenu();
+    finishGameSession();
     return;
   }
 
@@ -57,8 +56,11 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
       pIngameMode->handleEvent(event);
     },
 
-    [](auto&) {}
-    );
+    [&event](ui::EpisodeEndSequence& endScreens) {
+      endScreens.handleEvent(event);
+    },
+
+    [](auto&) {});
 }
 
 
@@ -75,8 +77,17 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
 
         data::addBonusScore(mPlayerModel, achievedBonuses);
 
-        fadeToNewStage(bonusScreen);
-        mCurrentStage = std::move(bonusScreen);
+        if (data::isBossLevel(mCurrentLevelNr)) {
+          mContext.mpServiceProvider->playMusic("NEVRENDA.IMF");
+
+          auto endScreens = ui::EpisodeEndSequence{
+            mContext, mEpisode, std::move(bonusScreen)};
+          mContext.mpServiceProvider->fadeOutScreen();
+          mCurrentStage = std::move(endScreens);
+        } else {
+          fadeToNewStage(bonusScreen);
+          mCurrentStage = std::move(bonusScreen);
+        }
       }
     },
 
@@ -93,6 +104,14 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
         fadeToNewStage(*pNextIngameMode);
         mCurrentStage = std::move(pNextIngameMode);
       }
+    },
+
+    [this, &dt](ui::EpisodeEndSequence& endScreens) {
+      endScreens.updateAndRender(dt);
+
+      if (endScreens.finished()) {
+        finishGameSession();
+      }
     });
 }
 
@@ -102,6 +121,13 @@ void GameSessionMode::fadeToNewStage(StageT& stage) {
   mContext.mpServiceProvider->fadeOutScreen();
   stage.updateAndRender(0);
   mContext.mpServiceProvider->fadeInScreen();
+}
+
+
+void GameSessionMode::finishGameSession() {
+  // TODO: Record and show hiscore
+  mContext.mpServiceProvider->fadeOutScreen();
+  mContext.mpServiceProvider->scheduleEnterMainMenu();
 }
 
 }

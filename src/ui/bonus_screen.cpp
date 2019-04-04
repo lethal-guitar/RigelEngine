@@ -86,7 +86,7 @@ BonusScreen::BonusScreen(
       context.mpRenderer,
       *context.mpResources,
       "BONUSSCN.MNI"))
-  , mTextRenderer(context.mpRenderer, *context.mpResources)
+  , mpTextRenderer(context.mpUiRenderer)
 {
   context.mpServiceProvider->playMusic("OPNGATEA.IMF");
 
@@ -112,12 +112,12 @@ void BonusScreen::updateAndRender(engine::TimeDelta dt) {
   updateSequence(dt);
 
   mBackgroundTexture.render(mpRenderer, 0, 0);
-  mTextRenderer.drawBonusScreenText(6, 8, "SCORE");
-  mTextRenderer.drawBonusScreenText(6, 17, mState.mRunningText);
+  mpTextRenderer->drawBonusScreenText(6, 8, "SCORE");
+  mpTextRenderer->drawBonusScreenText(6, 17, mState.mRunningText);
 
   const auto scoreAsText = to_string(mState.mScore);
   const auto scorePosX = static_cast<int>(34 - scoreAsText.size() * 2);
-  mTextRenderer.drawBonusScreenText(scorePosX, 8, scoreAsText);
+  mpTextRenderer->drawBonusScreenText(scorePosX, 8, scoreAsText);
 }
 
 

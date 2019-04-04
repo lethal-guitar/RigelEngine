@@ -76,6 +76,8 @@ set(core_sources
     game_logic/ai/blue_guard.hpp
     game_logic/ai/bomber_plane.cpp
     game_logic/ai/bomber_plane.hpp
+    game_logic/ai/boss_episode_1.cpp
+    game_logic/ai/boss_episode_1.hpp
     game_logic/ai/ceiling_sucker.cpp
     game_logic/ai/ceiling_sucker.hpp
     game_logic/ai/eyeball_thrower.cpp
@@ -206,6 +208,8 @@ set(core_sources
     ui/bonus_screen.hpp
     ui/duke_script_runner.cpp
     ui/duke_script_runner.hpp
+    ui/episode_end_sequence.cpp
+    ui/episode_end_sequence.hpp
     ui/fps_display.cpp
     ui/fps_display.hpp
     ui/hud_renderer.cpp

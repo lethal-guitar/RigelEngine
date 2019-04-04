@@ -1440,6 +1440,18 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
       break;
 
+    case 76: // Small bomb
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
+      entity.assign<DestructionEffects>(
+        SMALL_BOMB_DETONATE_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnCollision);
+      entity.assign<BehaviorController>(behaviors::BigBomb{});
+      addDefaultMovingBody(entity, boundingBox);
+      engine::reassign<ActivationSettings>(
+        entity, ActivationSettings{ActivationSettings::Policy::Always});
+      break;
+
     case 78: // Snake
       // Not player damaging, but can eat duke
       // Only 1 health when Duke has been eaten
@@ -1579,6 +1591,19 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActorTag>(ActorTag::Type::MountedLaserTurret);
       ai::configureLaserTurret(entity, GivenScore{500});
+      break;
+
+    case 200: // Boss (episode 1)
+      entity.assign<AnimationLoop>(1, 0, 1);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(
+        Health{110 + 20 * difficultyOffset}, GivenScore{0});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<MovingBody>(Velocity{}, GravityAffected{false});
+      entity.assign<BehaviorController>(behaviors::BossEpisode1{});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
       break;
 
     case 203: // Red bird

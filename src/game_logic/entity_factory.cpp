@@ -25,6 +25,7 @@
 #include "game_logic/ai/blowing_fan.hpp"
 #include "game_logic/ai/blue_guard.hpp"
 #include "game_logic/ai/bomber_plane.hpp"
+#include "game_logic/ai/boss_episode_1.hpp"
 #include "game_logic/ai/ceiling_sucker.hpp"
 #include "game_logic/ai/eyeball_thrower.hpp"
 #include "game_logic/ai/floating_laser_bot.hpp"

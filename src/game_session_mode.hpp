@@ -18,6 +18,7 @@
 
 #include "data/player_model.hpp"
 #include "ui/bonus_screen.hpp"
+#include "ui/episode_end_sequence.hpp"
 
 #include "game_mode.hpp"
 #include "game_runner.hpp"
@@ -42,11 +43,13 @@ public:
 private:
   template<typename StageT>
   void fadeToNewStage(StageT& stage);
+  void finishGameSession();
 
 private:
   using SessionStage = std::variant<
     std::unique_ptr<GameRunner>,
-    ui::BonusScreen
+    ui::BonusScreen,
+    ui::EpisodeEndSequence
   >;
 
   data::PlayerModel mPlayerModel;

@@ -189,7 +189,8 @@ HudRenderer::HudRenderer(
   data::PlayerModel* pPlayerModel,
   const int levelNumber,
   engine::Renderer* pRenderer,
-  const loader::ResourceLoader& bundle
+  const loader::ResourceLoader& bundle,
+  engine::TileRenderer* pStatusSpriteSheetRenderer
 )
   : HudRenderer(
       pPlayerModel,
@@ -198,7 +199,7 @@ HudRenderer::HudRenderer(
       bundle.mActorImagePackage.loadActor(HUD_BACKGROUND_ACTOR_ID),
       makeInventoryItemTextureMap(pRenderer, bundle.mActorImagePackage),
       makeCollectedLetterTextureMap(pRenderer, bundle.mActorImagePackage),
-      bundle.loadTiledFullscreenImage("STATUS.MNI"))
+      pStatusSpriteSheetRenderer)
 {
 }
 
@@ -210,7 +211,7 @@ HudRenderer::HudRenderer(
   const loader::ActorData& actorData,
   InventoryItemTextureMap&& inventoryItemTextures,
   CollectedLetterIndicatorMap&& collectedLetterTextures,
-  const data::Image& statusSpriteSheetImage
+  engine::TileRenderer* pStatusSpriteSheetRenderer
 )
   : mpPlayerModel(pPlayerModel)
   , mLevelNumber(levelNumber)
@@ -220,9 +221,7 @@ HudRenderer::HudRenderer(
   , mBottomRightTexture(mpRenderer, actorData.mFrames[2].mFrameImage)
   , mInventoryTexturesByType(std::move(inventoryItemTextures))
   , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
-  , mStatusSpriteSheetRenderer(
-      OwningTexture(pRenderer, statusSpriteSheetImage),
-      pRenderer)
+  , mpStatusSpriteSheetRenderer(pStatusSpriteSheetRenderer)
 {
 }
 
@@ -271,14 +270,14 @@ void HudRenderer::render() {
 
   // Player state and remaining HUD elements
   // --------------------------------------------------------------------------
-  drawScore(mpPlayerModel->score(), mStatusSpriteSheetRenderer);
-  drawWeaponIcon(mpPlayerModel->weapon(), mStatusSpriteSheetRenderer);
+  drawScore(mpPlayerModel->score(), *mpStatusSpriteSheetRenderer);
+  drawWeaponIcon(mpPlayerModel->weapon(), *mpStatusSpriteSheetRenderer);
   drawAmmoBar(
     mpPlayerModel->ammo(),
     mpPlayerModel->currentMaxAmmo(),
-    mStatusSpriteSheetRenderer);
+    *mpStatusSpriteSheetRenderer);
   drawHealthBar();
-  drawLevelNumber(mLevelNumber, mStatusSpriteSheetRenderer);
+  drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer);
   drawCollectedLetters();
 }
 
@@ -293,7 +292,7 @@ void HudRenderer::drawHealthBar() const {
   if (numFullSlices > 0) {
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = i < numFullSlices ? 9 : 10;
-      mStatusSpriteSheetRenderer.renderTileSlice(
+      mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
     }
@@ -302,7 +301,7 @@ void HudRenderer::drawHealthBar() const {
 
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = (i + animationOffset) % 9;
-      mStatusSpriteSheetRenderer.renderTileSlice(
+      mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
     }

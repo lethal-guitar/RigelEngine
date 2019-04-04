@@ -33,6 +33,15 @@ TileRenderer::TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer)
 }
 
 
+void TileRenderer::renderTileStretched(
+  const int index,
+  const base::Rect<int>& destRect
+) const {
+  mpRenderer->drawTexture(
+    mTileSetTexture.data(), sourceRect(index, 1, 1), destRect);
+}
+
+
 void TileRenderer::renderTile(
   const int index,
   const int x,
@@ -78,17 +87,25 @@ void TileRenderer::renderTileGroup(
   const int tileSpanX,
   const int tileSpanY
 ) const {
-  const base::Vector tileSetStartPosition{
-    index % tilesPerRow(),
-    index / tilesPerRow()};
-
   mTileSetTexture.render(
     mpRenderer,
     tileVectorToPixelVector({posX, posY}),
-    {
-      tileVectorToPixelVector(tileSetStartPosition),
-      tileExtentsToPixelExtents({tileSpanX, tileSpanY})
-    });
+    sourceRect(index, tileSpanX, tileSpanY));
+}
+
+
+base::Rect<int> TileRenderer::sourceRect(
+  const int index,
+  const int tileSpanX,
+  const int tileSpanY
+) const {
+  const base::Vector tileSetStartPosition{
+    index % tilesPerRow(),
+    index / tilesPerRow()};
+  return {
+    tileVectorToPixelVector(tileSetStartPosition),
+    tileExtentsToPixelExtents({tileSpanX, tileSpanY})
+  };
 }
 
 }}
