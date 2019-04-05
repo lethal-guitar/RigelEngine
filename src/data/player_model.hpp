@@ -49,6 +49,12 @@ enum class WeaponType {
 };
 
 
+constexpr auto MAX_SCORE = 9999999;
+constexpr auto MAX_AMMO = 32;
+constexpr auto MAX_AMMO_FLAME_THROWER = 64;
+constexpr auto MAX_HEALTH = 9;
+
+
 class PlayerModel {
 public:
   struct CheckpointState {
