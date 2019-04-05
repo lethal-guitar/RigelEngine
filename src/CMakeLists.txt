@@ -225,7 +225,6 @@ set(core_sources
     ui/utils.cpp
     ui/utils.hpp
     utils/container_tools.hpp
-    utils/enum_hash.hpp
 )
 
 

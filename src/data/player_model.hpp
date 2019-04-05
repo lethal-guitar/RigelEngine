@@ -17,7 +17,6 @@
 #pragma once
 
 #include "data/tutorial_messages.hpp"
-#include "utils/enum_hash.hpp"
 
 #include <vector>
 
@@ -49,13 +48,6 @@ enum class WeaponType {
   FlameThrower = 3
 };
 
-}}
-
-RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::CollectableLetterType)
-RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::InventoryItemType)
-
-
-namespace rigel { namespace data {
 
 class PlayerModel {
 public:
