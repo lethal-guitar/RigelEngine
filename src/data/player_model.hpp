@@ -19,7 +19,6 @@
 #include "data/tutorial_messages.hpp"
 #include "utils/enum_hash.hpp"
 
-#include <unordered_set>
 #include <vector>
 
 
