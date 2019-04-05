@@ -186,6 +186,8 @@ GameRunner::GameRunner(
 
   mpSystems->centerViewOnPlayer();
 
+  updateGameLogic();
+
   if (showWelcomeMessage) {
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
   }
@@ -539,8 +541,6 @@ void GameRunner::loadLevel(
     mEarthQuakeEffect = engine::EarthQuakeEffect{
       mpServiceProvider, &mRandomGenerator, &mEventManager};
   }
-
-  updateGameLogic();
 
   if (data::isBossLevel(sessionId.mLevel)) {
     mLevelMusicFile = loadedLevel.mMusicFile;
