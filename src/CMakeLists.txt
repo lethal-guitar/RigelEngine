@@ -245,6 +245,7 @@ target_include_directories(rigel_core
 
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
+    ${3rd_party_path}/nlohmann
 
     PRIVATE
     ${3rd_party_path}/dbopl
