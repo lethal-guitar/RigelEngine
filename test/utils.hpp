@@ -46,6 +46,7 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
   void playMusic(const std::string&) override {}
   void stopMusic() override {}
   void scheduleNewGameStart(int, rigel::data::Difficulty) override {}
+  void scheduleStartFromSavedGame(const rigel::data::SavedGame&) override {}
   void scheduleEnterMainMenu() override {}
   void scheduleGameQuit() override {}
   bool isShareWareVersion() const override { return false; }

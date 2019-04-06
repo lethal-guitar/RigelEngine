@@ -69,6 +69,7 @@ private:
   void scheduleNewGameStart(
     int episode,
     data::Difficulty difficulty) override;
+  void scheduleStartFromSavedGame(const data::SavedGame& save) override;
   void scheduleEnterMainMenu() override;
   void scheduleGameQuit() override;
 

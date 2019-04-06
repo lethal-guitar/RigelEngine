@@ -21,6 +21,8 @@
 
 #include <string>
 
+namespace rigel::data { struct SavedGame; }
+
 
 namespace rigel {
 
@@ -40,6 +42,7 @@ struct IGameServiceProvider {
   virtual void scheduleNewGameStart(
     int episode,
     data::Difficulty difficulty) = 0;
+  virtual void scheduleStartFromSavedGame(const data::SavedGame& save) = 0;
   virtual void scheduleEnterMainMenu() = 0;
   virtual void scheduleGameQuit() = 0;
   virtual bool isShareWareVersion() const = 0;

@@ -332,6 +332,13 @@ void Game::scheduleNewGameStart(
 }
 
 
+void Game::scheduleStartFromSavedGame(const data::SavedGame& save) {
+  mpNextGameMode = std::make_unique<GameSessionMode>(
+    save,
+    makeModeContext());
+}
+
+
 void Game::scheduleEnterMainMenu() {
   mpNextGameMode = std::make_unique<MenuMode>(makeModeContext());
 }

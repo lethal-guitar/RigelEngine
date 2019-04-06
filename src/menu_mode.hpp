@@ -37,6 +37,7 @@ private:
     AskIfQuit,
     ChooseInstructionsOrStory,
     EpisodeNotAvailableMessage,
+    NoSavedGameInSlotMessage,
     GameOptions,
     GameSpeedConfig,
     Instructions,
@@ -67,6 +68,7 @@ private:
   int mChosenEpisodeForNewGame = 0;
 
   IGameServiceProvider* mpServices;
+  UserProfile* mpUserProfile;
 };
 
 }

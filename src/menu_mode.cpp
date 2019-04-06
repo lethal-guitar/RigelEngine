@@ -20,6 +20,7 @@
 #include "loader/resource_loader.hpp"
 
 #include "game_service_provider.hpp"
+#include "user_profile.hpp"
 
 
 namespace rigel {
@@ -54,6 +55,7 @@ MenuMode::MenuMode(Context context)
   , mOptionsScripts(context.mpResources->loadScriptBundle("OPTIONS.MNI"))
   , mOrderingInfoScripts(context.mpResources->loadScriptBundle("ORDERTXT.MNI"))
   , mpServices(context.mpServiceProvider)
+  , mpUserProfile(context.mpUserProfile)
 {
   mpServices->playMusic("DUKEIIA.IMF");
   mpScriptRunner->executeScript(mMainScripts["Main_Menu"]);
@@ -203,6 +205,27 @@ void MenuMode::navigateToNextMenu(
     case MenuState::EpisodeNotAvailableMessage:
       mpScriptRunner->executeScript(mMainScripts["Episode_Select"]);
       mMenuState = MenuState::SelectNewGameEpisode;
+      break;
+
+    case MenuState::RestoreGame:
+      if (abortedByUser(result)) {
+        enterMainMenu();
+      } else {
+        assert(result.mSelectedPage);
+        const auto slotIndex = *result.mSelectedPage;
+        const auto& slot = mpUserProfile->mSaveSlots[slotIndex];
+        if (slot) {
+          mpServices->scheduleStartFromSavedGame(*slot);
+        } else {
+          mpScriptRunner->executeScript(mOptionsScripts["No_Game_Restore"]);
+          mMenuState = MenuState::NoSavedGameInSlotMessage;
+        }
+      }
+      break;
+
+    case MenuState::NoSavedGameInSlotMessage:
+      mpScriptRunner->executeScript(mOptionsScripts["Restore_Game"]);
+      mMenuState = MenuState::RestoreGame;
       break;
 
     case MenuState::GameOptions:
