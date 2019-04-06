@@ -16,8 +16,8 @@
 
 #include "utils.hpp"
 
+#include <base/container_utils.hpp>
 #include <data/player_model.hpp>
-#include <utils/container_tools.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>

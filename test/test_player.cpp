@@ -17,6 +17,7 @@
 #include "utils.hpp"
 
 #include <base/array_view.hpp>
+#include <base/container_utils.hpp>
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 #include <data/map.hpp>
@@ -29,7 +30,6 @@
 #include <engine/visual_components.hpp>
 #include <game_logic/player/components.hpp>
 #include <game_logic/player.hpp>
-#include <utils/container_tools.hpp>
 
 #include <global_level_events.hpp>
 

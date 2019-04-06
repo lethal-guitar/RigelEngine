@@ -16,6 +16,7 @@
 
 #include "level_loader.hpp"
 
+#include "base/container_utils.hpp"
 #include "base/grid.hpp"
 #include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
@@ -24,7 +25,6 @@
 #include "loader/file_utils.hpp"
 #include "loader/resource_loader.hpp"
 #include "loader/rle_compression.hpp"
-#include "utils/container_tools.hpp"
 
 #include <fstream>
 #include <string>

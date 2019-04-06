@@ -1,5 +1,6 @@
 set(core_sources
     base/array_view.hpp
+    base/container_utils.hpp
     base/grid.hpp
     base/math_tools.hpp
     base/spatial_types.hpp
@@ -224,7 +225,6 @@ set(core_sources
     ui/movie_player.hpp
     ui/utils.cpp
     ui/utils.hpp
-    utils/container_tools.hpp
 )
 
 
