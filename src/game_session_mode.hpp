@@ -25,6 +25,8 @@
 
 #include <variant>
 
+namespace rigel::data { struct SavedGame; }
+
 
 namespace rigel {
 
@@ -36,6 +38,8 @@ public:
     data::Difficulty difficulty,
     Context context,
     std::optional<base::Vector> playerPositionOverride = std::nullopt);
+
+  GameSessionMode(const data::SavedGame& save, Context context);
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;

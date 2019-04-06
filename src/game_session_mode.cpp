@@ -17,6 +17,7 @@
 #include "game_session_mode.hpp"
 
 #include "base/match.hpp"
+#include "data/saved_game.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -39,6 +40,22 @@ GameSessionMode::GameSessionMode(
   , mEpisode(episode)
   , mCurrentLevelNr(level)
   , mDifficulty(difficulty)
+  , mContext(context)
+{
+}
+
+
+GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
+  : mPlayerModel(save)
+  , mCurrentStage(std::make_unique<GameRunner>(
+      &mPlayerModel,
+      save.mSessionId,
+      context,
+      std::nullopt,
+      true /* show welcome message */))
+  , mEpisode(save.mSessionId.mEpisode)
+  , mCurrentLevelNr(save.mSessionId.mLevel)
+  , mDifficulty(save.mSessionId.mDifficulty)
   , mContext(context)
 {
 }
