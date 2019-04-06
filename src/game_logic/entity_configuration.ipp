@@ -1815,6 +1815,10 @@ void EntityFactory::configureEntity(
       break;
 
     case 188: // rotating floor spikes
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<AnimationLoop>(1);
+      break;
+
     case 210: // Computer showing "Duke escaped"
     case 222: // Lava fall left
     case 223: // Lava fall right

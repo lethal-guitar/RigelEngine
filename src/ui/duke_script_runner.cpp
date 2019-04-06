@@ -16,6 +16,7 @@
 
 #include "duke_script_runner.hpp"
 
+#include "base/container_utils.hpp"
 #include "base/match.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
@@ -23,7 +24,6 @@
 #include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
 #include "loader/resource_loader.hpp"
-#include "utils/container_tools.hpp"
 #include "ui/utils.hpp"
 
 #include "game_service_provider.hpp"

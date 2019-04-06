@@ -24,16 +24,6 @@
 
 namespace rigel { namespace data {
 
-namespace {
-
-const auto MAX_SCORE = 9999999;
-const auto MAX_AMMO = 32;
-const auto MAX_AMMO_FLAME_THROWER = 64;
-const auto MAX_HEALTH = 9;
-
-}
-
-
 PlayerModel::PlayerModel()
   : mWeapon(WeaponType::Normal)
   , mScore(0)

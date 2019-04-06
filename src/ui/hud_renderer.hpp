@@ -19,7 +19,6 @@
 #include "data/player_model.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
-#include "utils/enum_hash.hpp"
 
 #include <cstdint>
 #include <unordered_map>

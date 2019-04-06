@@ -17,9 +17,7 @@
 #pragma once
 
 #include "data/tutorial_messages.hpp"
-#include "utils/enum_hash.hpp"
 
-#include <unordered_set>
 #include <vector>
 
 
@@ -50,13 +48,12 @@ enum class WeaponType {
   FlameThrower = 3
 };
 
-}}
 
-RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::CollectableLetterType)
-RIGEL_PROVIDE_ENUM_CLASS_HASH(rigel::data::InventoryItemType)
+constexpr auto MAX_SCORE = 9999999;
+constexpr auto MAX_AMMO = 32;
+constexpr auto MAX_AMMO_FLAME_THROWER = 64;
+constexpr auto MAX_HEALTH = 9;
 
-
-namespace rigel { namespace data {
 
 class PlayerModel {
 public:
