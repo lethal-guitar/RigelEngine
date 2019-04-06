@@ -19,6 +19,7 @@ set(core_sources
     data/map.hpp
     data/player_model.cpp
     data/player_model.hpp
+    data/saved_game.hpp
     data/song.hpp
     data/sound_ids.hpp
     data/strings.hpp
@@ -198,6 +199,8 @@ set(core_sources
     loader/resource_loader.cpp
     loader/resource_loader.hpp
     loader/rle_compression.hpp
+    loader/user_profile_import.cpp
+    loader/user_profile_import.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
     sdl_utils/error.cpp
