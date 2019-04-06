@@ -18,6 +18,7 @@
 
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
+#include "data/saved_game.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
@@ -48,6 +49,7 @@ public:
   DukeScriptRunner(
     loader::ResourceLoader* pResourceLoader,
     engine::Renderer* pRenderer,
+    const data::SaveSlotArray* pSaveSlots,
     IGameServiceProvider* pServiceProvider);
 
   void executeScript(const data::script::Script& script);
@@ -147,6 +149,7 @@ private:
   const loader::ResourceLoader* mpResourceBundle;
   loader::Palette16 mCurrentPalette;
   engine::Renderer* mpRenderer;
+  const data::SaveSlotArray* mpSaveSlots;
   IGameServiceProvider* mpServices;
   engine::TileRenderer mUiSpriteSheetRenderer;
   MenuElementRenderer mMenuElementRenderer;

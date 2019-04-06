@@ -76,11 +76,13 @@ auto makeSpriteSheet(
 DukeScriptRunner::DukeScriptRunner(
   loader::ResourceLoader* pResourceLoader,
   engine::Renderer* pRenderer,
+  const data::SaveSlotArray* pSaveSlots,
   IGameServiceProvider* pServiceProvider
 )
   : mpResourceBundle(pResourceLoader)
   , mCurrentPalette(loader::INGAME_PALETTE)
   , mpRenderer(pRenderer)
+  , mpSaveSlots(pSaveSlots)
   , mpServices(pServiceProvider)
   , mUiSpriteSheetRenderer(
       makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
@@ -575,11 +577,12 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
 
 void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
   for (auto i = 0; i < 8; ++i) {
+    const auto& saveSlot = (*mpSaveSlots)[i];
     drawBigText(
       SAVE_SLOT_START_X,
       SAVE_SLOT_START_Y + i*MENU_FONT_HEIGHT,
       i == selectedIndex ? SELECTED_COLOR_INDEX : UNSELECTED_COLOR_INDEX,
-      "Empty");
+      saveSlot ? saveSlot->mName : "Empty");
   }
 }
 

@@ -66,7 +66,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mIsRunning(true)
   , mIsMinimized(false)
   , mUserProfile(loadOrCreateUserProfile(gamePath))
-  , mScriptRunner(&mResources, &mRenderer, this)
+  , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
   , mUiSpriteSheetRenderer(
       engine::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
