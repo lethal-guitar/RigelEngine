@@ -25,21 +25,19 @@
 namespace rigel {
 
 GameSessionMode::GameSessionMode(
-  const int episode,
-  const int level,
-  const data::Difficulty difficulty,
+  const data::GameSessionId& sessionId,
   Context context,
   std::optional<base::Vector> playerPositionOverride
 )
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
-      data::GameSessionId{episode, level, difficulty},
+      sessionId,
       context,
       playerPositionOverride,
       true /* show welcome message */))
-  , mEpisode(episode)
-  , mCurrentLevelNr(level)
-  , mDifficulty(difficulty)
+  , mEpisode(sessionId.mEpisode)
+  , mCurrentLevelNr(sessionId.mLevel)
+  , mDifficulty(sessionId.mDifficulty)
   , mContext(context)
 {
 }

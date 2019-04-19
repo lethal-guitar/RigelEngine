@@ -101,9 +101,7 @@ void Game::run(const StartupOptions& startupOptions) {
     std::tie(episode, level) = *startupOptions.mLevelToJumpTo;
 
     mpNextGameMode = std::make_unique<GameSessionMode>(
-      episode,
-      level,
-      data::Difficulty::Medium,
+      data::GameSessionId{episode, level, data::Difficulty::Medium},
       makeModeContext(),
       startupOptions.mPlayerPosition);
   }
@@ -329,9 +327,7 @@ void Game::scheduleNewGameStart(
   const data::Difficulty difficulty
 ) {
   mpNextGameMode = std::make_unique<GameSessionMode>(
-    episode,
-    0,
-    difficulty,
+    data::GameSessionId{episode, 0, difficulty},
     makeModeContext());
 }
 
