@@ -307,9 +307,7 @@ void DukeScriptRunner::drawBigText(
   const int colorIndex,
   const std::string& text
 ) const {
-  mpRenderer->setColorModulation(mCurrentPalette.at(colorIndex));
-  mMenuElementRenderer.drawBigText(x, y, text);
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
+  mMenuElementRenderer.drawBigText(x, y, text, mCurrentPalette.at(colorIndex));
 }
 
 

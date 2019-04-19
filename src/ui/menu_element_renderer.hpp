@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/color.hpp"
 #include "base/warnings.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
@@ -49,7 +50,11 @@ public:
   void drawText(int x, int y, const std::string& text) const;
   void drawSmallWhiteText(int x, int y, const std::string& text) const;
   void drawMultiLineText(int x, int y, const std::string& text) const;
-  void drawBigText(int x, int y, const std::string& text) const;
+  void drawBigText(
+    int x,
+    int y,
+    const std::string& text,
+    const base::Color& color) const;
   void drawMessageBox(int x, int y, int width, int height) const;
 
   void drawCheckBox(int x, int y, bool isChecked) const;
@@ -84,6 +89,7 @@ private:
     int rightIndex) const;
 
 private:
+  engine::Renderer* mpRenderer;
   engine::TileRenderer* mpSpriteSheetRenderer;
   engine::TileRenderer mBigTextRenderer;
 
