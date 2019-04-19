@@ -19,6 +19,9 @@
 
 namespace rigel { namespace data {
 
+constexpr auto NUM_EPISODES = 4;
+constexpr auto NUM_LEVELS_PER_EPISODE = 8;
+
 enum class Difficulty {
   Easy = 0,
   Medium = 1,
@@ -42,7 +45,7 @@ struct GameSessionId {
 
 
 constexpr bool isBossLevel(const int level) {
-  return level == 7;
+  return level == NUM_LEVELS_PER_EPISODE - 1;
 }
 
 
