@@ -54,8 +54,17 @@ GameRunner::GameRunner(
 
 
 void GameRunner::handleEvent(const SDL_Event& event) {
+  if (mGameWasQuit) {
+    return;
+  }
+
   const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
   if (!isKeyEvent || event.key.repeat != 0) {
+    return;
+  }
+
+  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+    mGameWasQuit = true;
     return;
   }
 
@@ -137,7 +146,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
 
 
 void GameRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mWorld.levelFinished()) {
+  if (mGameWasQuit || mWorld.levelFinished()) {
     return;
   }
 

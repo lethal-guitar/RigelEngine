@@ -44,21 +44,27 @@ public:
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+  bool gameQuit() const;
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
   game_logic::GameWorld mWorld;
   game_logic::PlayerInput mPlayerInput;
   engine::TimeDelta mAccumulatedTime = 0.0;
+  bool mGameWasQuit = false;
   bool mShowDebugText = false;
   bool mSingleStepping = false;
   bool mDoNextSingleStep = false;
-
 };
 
 
 inline bool GameRunner::levelFinished() const {
   return mWorld.levelFinished();
+}
+
+
+inline bool GameRunner::gameQuit() const {
+  return mGameWasQuit;
 }
 
 

@@ -60,15 +60,13 @@ GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
 
 
 void GameSessionMode::handleEvent(const SDL_Event& event) {
-  // This is temporary - remove when in-game menu implemented
-  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-    finishGameSession();
-    return;
-  }
-
   base::match(mCurrentStage,
-    [&event](std::unique_ptr<GameRunner>& pIngameMode) {
+    [&event, this](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
+
+      if (pIngameMode->gameQuit()) {
+        finishGameSession();
+      }
     },
 
     [&event](ui::EpisodeEndSequence& endScreens) {
