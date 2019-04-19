@@ -133,7 +133,7 @@ void drawBossHealthBar(
 }
 
 
-GameRunner::GameRunner(
+GameWorld::GameWorld(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
@@ -152,8 +152,6 @@ GameRunner::GameRunner(
       sessionId.mDifficulty)
   , mpPlayerModel(pPlayerModel)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
-  , mAccumulatedTime(0.0)
-  , mShowDebugText(false)
   , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
       mpPlayerModel,
@@ -186,7 +184,7 @@ GameRunner::GameRunner(
 
   mpSystems->centerViewOnPlayer();
 
-  updateGameLogic();
+  updateGameLogic({});
 
   if (showWelcomeMessage) {
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
@@ -206,7 +204,447 @@ GameRunner::GameRunner(
 }
 
 
-GameRunner::~GameRunner() = default;
+GameWorld::~GameWorld() = default;
+
+
+bool GameWorld::levelFinished() const {
+  return mLevelFinished;
+}
+
+
+std::set<data::Bonus> GameWorld::achievedBonuses() const {
+  std::set<data::Bonus> bonuses;
+
+  if (!mBonusInfo.mPlayerTookDamage) {
+    bonuses.insert(data::Bonus::NoDamageTaken);
+  }
+
+  const auto counts =
+    countBonusRelatedItems(const_cast<entityx::EntityManager&>(mEntities));
+
+  if (mBonusInfo.mInitialCameraCount > 0 && counts.mCameraCount == 0) {
+    bonuses.insert(data::Bonus::DestroyedAllCameras);
+  }
+
+  // NOTE: This is a bug (?) in the original game - if a level doesn't contain
+  // any fire bombs, bonus 6 will be awarded, as if the player had destroyed
+  // all fire bombs.
+  if (counts.mFireBombCount == 0) {
+    bonuses.insert(data::Bonus::DestroyedAllFireBombs);
+  }
+
+  if (
+    mBonusInfo.mInitialMerchandiseCount > 0 && counts.mMerchandiseCount == 0
+  ) {
+    bonuses.insert(data::Bonus::CollectedAllMerchandise);
+  }
+
+  if (mBonusInfo.mInitialWeaponCount > 0 && counts.mWeaponCount == 0) {
+    bonuses.insert(data::Bonus::CollectedEveryWeapon);
+  }
+
+  if (
+    mBonusInfo.mInitialLaserTurretCount > 0 && counts.mLaserTurretCount == 0
+  ) {
+    bonuses.insert(data::Bonus::DestroyedAllSpinningLaserTurrets);
+  }
+
+  if (mBonusInfo.mInitialBonusGlobeCount == mBonusInfo.mNumShotBonusGlobes) {
+    bonuses.insert(data::Bonus::ShotAllBonusGlobes);
+  }
+
+  return bonuses;
+}
+
+
+void GameWorld::receive(const rigel::events::CheckPointActivated& event) {
+  mActivatedCheckpoint = CheckpointData{
+    mpPlayerModel->makeCheckpoint(), event.mPosition};
+  mMessageDisplay.setMessage(data::Messages::FoundRespawnBeacon);
+}
+
+
+void GameWorld::receive(const rigel::events::ExitReached& event) {
+  if (mRadarDishCounter.radarDishesPresent() && event.mCheckRadarDishes) {
+    showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
+  } else {
+    mLevelFinished = true;
+  }
+}
+
+
+void GameWorld::receive(const rigel::events::PlayerDied& event) {
+  mPlayerDied = true;
+}
+
+
+void GameWorld::receive(const rigel::events::PlayerTookDamage& event) {
+  mBonusInfo.mPlayerTookDamage = true;
+}
+
+
+void GameWorld::receive(const rigel::events::PlayerMessage& event) {
+  mMessageDisplay.setMessage(event.mText);
+}
+
+
+void GameWorld::receive(const rigel::events::PlayerTeleported& event) {
+  mTeleportTargetPosition = event.mNewPosition;
+}
+
+
+void GameWorld::receive(const rigel::events::ScreenFlash& event) {
+  mScreenFlashColor = event.mColor;
+}
+
+
+void GameWorld::receive(const rigel::events::ScreenShake& event) {
+  mScreenShakeOffsetX = event.mAmount;
+}
+
+
+void GameWorld::receive(const rigel::events::TutorialMessage& event) {
+  showTutorialMessage(event.mId);
+}
+
+
+void GameWorld::receive(const game_logic::events::ShootableKilled& event) {
+  using game_logic::components::ActorTag;
+  auto entity = event.mEntity;
+  if (!entity.has_component<ActorTag>()) {
+    return;
+  }
+
+  const auto& position = *entity.component<const WorldPosition>();
+
+  using AT = ActorTag::Type;
+  const auto type = entity.component<ActorTag>()->mType;
+  switch (type) {
+    case AT::Reactor:
+      onReactorDestroyed(position);
+      break;
+
+    case AT::ShootableBonusGlobe:
+      ++mBonusInfo.mNumShotBonusGlobes;
+      break;
+
+    default:
+      break;
+  }
+}
+
+
+void GameWorld::receive(const rigel::events::BossActivated& event) {
+  mActiveBossEntity = event.mBossEntity;
+  mpServiceProvider->playMusic(*mLevelMusicFile);
+}
+
+
+void GameWorld::loadLevel(
+  const data::GameSessionId& sessionId,
+  const loader::ResourceLoader& resources
+) {
+  auto loadedLevel = loader::loadLevel(
+    levelFileName(sessionId.mEpisode, sessionId.mLevel),
+    resources,
+    sessionId.mDifficulty);
+  auto playerEntity =
+    mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+
+  const auto counts = countBonusRelatedItems(mEntities);
+  mBonusInfo.mInitialCameraCount = counts.mCameraCount;
+  mBonusInfo.mInitialMerchandiseCount = counts.mMerchandiseCount;
+  mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
+  mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
+  mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
+
+  mLevelData = LevelData{
+    std::move(loadedLevel.mMap),
+    std::move(loadedLevel.mActors),
+    loadedLevel.mBackdropSwitchCondition
+  };
+  mMapAtLevelStart = mLevelData.mMap;
+
+  mpSystems = std::make_unique<IngameSystems>(
+    sessionId,
+    playerEntity,
+    mpPlayerModel,
+    &mLevelData.mMap,
+    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
+    mpServiceProvider,
+    &mEntityFactory,
+    &mRandomGenerator,
+    &mRadarDishCounter,
+    mpRenderer,
+    mEntities,
+    mEventManager,
+    resources);
+
+  if (loadedLevel.mEarthquake) {
+    mEarthQuakeEffect = engine::EarthQuakeEffect{
+      mpServiceProvider, &mRandomGenerator, &mEventManager};
+  }
+
+  if (data::isBossLevel(sessionId.mLevel)) {
+    mLevelMusicFile = loadedLevel.mMusicFile;
+    mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
+  } else {
+    mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+  }
+}
+
+
+void GameWorld::updateGameLogic(const PlayerInput& input) {
+  mBackdropFlashColor = std::nullopt;
+  mScreenFlashColor = std::nullopt;
+
+  if (mReactorDestructionFramesElapsed) {
+    updateReactorDestructionEvent();
+  }
+
+  if (mEarthQuakeEffect) {
+    mEarthQuakeEffect->update();
+  }
+
+  mHudRenderer.updateAnimation();
+  mMessageDisplay.update();
+
+  mpSystems->update(input, mEntities);
+}
+
+
+void GameWorld::render() {
+  mpRenderer->clear();
+
+  {
+    Renderer::StateSaver saveState(mpRenderer);
+    mpRenderer->setClipRect(base::Rect<int>{
+      {data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
+      data::GameTraits::inGameViewPortOffset.y},
+      {data::GameTraits::inGameViewPortSize.width,
+      data::GameTraits::inGameViewPortSize.height}});
+
+    mpRenderer->setGlobalTranslation({
+      data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
+      data::GameTraits::inGameViewPortOffset.y});
+
+    if (!mScreenFlashColor) {
+      mpSystems->render(mEntities, mBackdropFlashColor);
+    } else {
+      mpRenderer->clear(*mScreenFlashColor);
+    }
+    mHudRenderer.render();
+  }
+
+  if (mActiveBossEntity) {
+    using game_logic::components::Shootable;
+
+    const auto health = mActiveBossEntity.has_component<Shootable>()
+      ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
+    drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+  } else {
+    mMessageDisplay.render();
+  }
+}
+
+
+void GameWorld::processEndOfFrameActions() {
+  handlePlayerDeath();
+  handleLevelExit();
+  handleTeleporter();
+
+  mScreenShakeOffsetX = 0;
+}
+
+
+void GameWorld::onReactorDestroyed(const base::Vector& position) {
+  mScreenFlashColor = loader::INGAME_PALETTE[7];
+  mEntityFactory.createProjectile(
+    ProjectileType::ReactorDebris,
+    position + base::Vector{-1, 0},
+    ProjectileDirection::Left);
+  mEntityFactory.createProjectile(
+    ProjectileType::ReactorDebris,
+    position + base::Vector{3, 0},
+    ProjectileDirection::Right);
+
+  const auto shouldDoSpecialEvent =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnReactorDestruction;
+  if (!mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = true;
+    mReactorDestructionFramesElapsed = 0;
+  }
+}
+
+
+void GameWorld::updateReactorDestructionEvent() {
+  auto& framesElapsed = *mReactorDestructionFramesElapsed;
+  if (framesElapsed >= 14) {
+    return;
+  }
+
+  if (framesElapsed == 13) {
+    mMessageDisplay.setMessage(data::Messages::DestroyedEverything);
+  } else if (framesElapsed % 2 == 1) {
+    mBackdropFlashColor = base::Color{255, 255, 255, 255};
+    mpServiceProvider->playSound(data::SoundId::BigExplosion);
+  }
+
+  ++framesElapsed;
+}
+
+
+void GameWorld::handleLevelExit() {
+  using engine::components::Active;
+  using engine::components::BoundingBox;
+  using game_logic::components::Trigger;
+  using game_logic::components::TriggerType;
+
+  mEntities.each<Trigger, WorldPosition, Active>(
+    [this](
+      entityx::Entity,
+      const Trigger& trigger,
+      const WorldPosition& triggerPosition,
+      const Active&
+    ) {
+      if (trigger.mType != TriggerType::LevelExit || mLevelFinished) {
+        return;
+      }
+
+      const auto playerBBox = mpSystems->player().worldSpaceHitBox();
+      const auto playerAboveOrAtTriggerHeight =
+        playerBBox.bottom() <= triggerPosition.y;
+      const auto touchingTriggerOnXAxis =
+        triggerPosition.x >= playerBBox.left() &&
+        triggerPosition.x <= (playerBBox.right() + 1);
+
+      const auto triggerActivated =
+        playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
+
+      if (triggerActivated) {
+        mEventManager.emit(rigel::events::ExitReached{});
+      }
+    });
+}
+
+
+void GameWorld::handlePlayerDeath() {
+  if (mPlayerDied) {
+    mPlayerDied = false;
+
+    if (mActivatedCheckpoint) {
+      restartFromCheckpoint();
+    } else {
+      restartLevel();
+    }
+  }
+}
+
+
+void GameWorld::restartLevel() {
+  mpServiceProvider->fadeOutScreen();
+
+  if (mBackdropSwitched) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = false;
+  }
+
+  mLevelData.mMap = mMapAtLevelStart;
+
+  mEntities.reset();
+  auto playerEntity = mEntityFactory.createEntitiesForLevel(
+    mLevelData.mInitialActors);
+  mpSystems->restartFromBeginning(playerEntity);
+
+  *mpPlayerModel = mPlayerModelAtLevelStart;
+
+  mpSystems->centerViewOnPlayer();
+  render();
+
+  mpServiceProvider->fadeInScreen();
+}
+
+
+void GameWorld::restartFromCheckpoint() {
+  mpServiceProvider->fadeOutScreen();
+
+  const auto shouldSwitchBackAfterRespawn =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnTeleportation;
+  if (mBackdropSwitched && shouldSwitchBackAfterRespawn) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = false;
+  }
+
+  mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
+  mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
+
+  mpSystems->centerViewOnPlayer();
+  render();
+
+  mpServiceProvider->fadeInScreen();
+}
+
+
+void GameWorld::handleTeleporter() {
+  if (!mTeleportTargetPosition) {
+    return;
+  }
+
+  mpServiceProvider->fadeOutScreen();
+
+  mpSystems->player().position() = *mTeleportTargetPosition;
+  mTeleportTargetPosition = std::nullopt;
+
+  const auto switchBackdrop =
+    mLevelData.mBackdropSwitchCondition ==
+      data::map::BackdropSwitchCondition::OnTeleportation;
+  if (switchBackdrop) {
+    mpSystems->switchBackdrops();
+    mBackdropSwitched = !mBackdropSwitched;
+  }
+
+  mpSystems->centerViewOnPlayer();
+  render();
+  mpServiceProvider->fadeInScreen();
+}
+
+
+void GameWorld::showTutorialMessage(const data::TutorialMessageId id) {
+  if (!mpPlayerModel->tutorialMessages().hasBeenShown(id)) {
+    mMessageDisplay.setMessage(data::messageText(id));
+    mpPlayerModel->tutorialMessages().markAsShown(id);
+  }
+}
+
+
+void GameWorld::showDebugText() {
+  std::stringstream infoText;
+  mpSystems->printDebugText(infoText);
+  infoText
+    << "Entities: " << mEntities.size();
+
+  mpServiceProvider->showDebugText(infoText.str());
+}
+
+
+GameRunner::GameRunner(
+  data::PlayerModel* pPlayerModel,
+  const data::GameSessionId& sessionId,
+  GameMode::Context context,
+  const std::optional<base::Vector> playerPositionOverride,
+  const bool showWelcomeMessage
+)
+  : mWorld(
+      pPlayerModel,
+      sessionId,
+      context,
+      playerPositionOverride,
+      showWelcomeMessage)
+{
+}
 
 
 void GameRunner::handleEvent(const SDL_Event& event) {
@@ -261,7 +699,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  auto& debuggingSystem = mpSystems->debuggingSystem();
+  auto& debuggingSystem = mWorld.mpSystems->debuggingSystem();
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();
@@ -293,7 +731,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
 
 
 void GameRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mLevelFinished) {
+  if (mWorld.levelFinished()) {
     return;
   }
 
@@ -301,11 +739,14 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   // Updating
   // **********************************************************************
 
-  mScreenShakeOffsetX = 0;
+  auto update = [this]() {
+    mWorld.updateGameLogic(mPlayerInput);
+    mPlayerInput.resetTriggeredStates();
+  };
 
   if (mSingleStepping) {
     if (mDoNextSingleStep) {
-      updateGameLogic();
+      update();
       mDoNextSingleStep = false;
     }
   } else {
@@ -314,7 +755,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
       mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
       mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
     ) {
-      updateGameLogic();
+      update();
     }
   }
 
@@ -322,425 +763,13 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   // **********************************************************************
   // Rendering
   // **********************************************************************
-  mpRenderer->clear();
-
-  {
-    Renderer::StateSaver saveState(mpRenderer);
-    mpRenderer->setClipRect(base::Rect<int>{
-      {data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
-      data::GameTraits::inGameViewPortOffset.y},
-      {data::GameTraits::inGameViewPortSize.width,
-      data::GameTraits::inGameViewPortSize.height}});
-
-    mpRenderer->setGlobalTranslation({
-      data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
-      data::GameTraits::inGameViewPortOffset.y});
-
-    if (!mScreenFlashColor) {
-      mpSystems->render(mEntities, mBackdropFlashColor);
-    } else {
-      mpRenderer->clear(*mScreenFlashColor);
-    }
-    mHudRenderer.render();
-  }
-
-  if (mActiveBossEntity) {
-    using game_logic::components::Shootable;
-
-    const auto health = mActiveBossEntity.has_component<Shootable>()
-      ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
-    drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-  } else {
-    mMessageDisplay.render();
-  }
+  mWorld.render();
 
   if (mShowDebugText) {
-    showDebugText();
+    mWorld.showDebugText();
   }
 
-  handlePlayerDeath();
-  handleLevelExit();
-  handleTeleporter();
-}
-
-
-bool GameRunner::levelFinished() const {
-  return mLevelFinished;
-}
-
-
-std::set<data::Bonus> GameRunner::achievedBonuses() const {
-  std::set<data::Bonus> bonuses;
-
-  if (!mBonusInfo.mPlayerTookDamage) {
-    bonuses.insert(data::Bonus::NoDamageTaken);
-  }
-
-  const auto counts =
-    countBonusRelatedItems(const_cast<entityx::EntityManager&>(mEntities));
-
-  if (mBonusInfo.mInitialCameraCount > 0 && counts.mCameraCount == 0) {
-    bonuses.insert(data::Bonus::DestroyedAllCameras);
-  }
-
-  // NOTE: This is a bug (?) in the original game - if a level doesn't contain
-  // any fire bombs, bonus 6 will be awarded, as if the player had destroyed
-  // all fire bombs.
-  if (counts.mFireBombCount == 0) {
-    bonuses.insert(data::Bonus::DestroyedAllFireBombs);
-  }
-
-  if (
-    mBonusInfo.mInitialMerchandiseCount > 0 && counts.mMerchandiseCount == 0
-  ) {
-    bonuses.insert(data::Bonus::CollectedAllMerchandise);
-  }
-
-  if (mBonusInfo.mInitialWeaponCount > 0 && counts.mWeaponCount == 0) {
-    bonuses.insert(data::Bonus::CollectedEveryWeapon);
-  }
-
-  if (
-    mBonusInfo.mInitialLaserTurretCount > 0 && counts.mLaserTurretCount == 0
-  ) {
-    bonuses.insert(data::Bonus::DestroyedAllSpinningLaserTurrets);
-  }
-
-  if (mBonusInfo.mInitialBonusGlobeCount == mBonusInfo.mNumShotBonusGlobes) {
-    bonuses.insert(data::Bonus::ShotAllBonusGlobes);
-  }
-
-  return bonuses;
-}
-
-
-void GameRunner::receive(const rigel::events::CheckPointActivated& event) {
-  mActivatedCheckpoint = CheckpointData{
-    mpPlayerModel->makeCheckpoint(), event.mPosition};
-  mMessageDisplay.setMessage(data::Messages::FoundRespawnBeacon);
-}
-
-
-void GameRunner::receive(const rigel::events::ExitReached& event) {
-  if (mRadarDishCounter.radarDishesPresent() && event.mCheckRadarDishes) {
-    showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
-  } else {
-    mLevelFinished = true;
-  }
-}
-
-
-void GameRunner::receive(const rigel::events::PlayerDied& event) {
-  mPlayerDied = true;
-}
-
-
-void GameRunner::receive(const rigel::events::PlayerTookDamage& event) {
-  mBonusInfo.mPlayerTookDamage = true;
-}
-
-
-void GameRunner::receive(const rigel::events::PlayerMessage& event) {
-  mMessageDisplay.setMessage(event.mText);
-}
-
-
-void GameRunner::receive(const rigel::events::PlayerTeleported& event) {
-  mTeleportTargetPosition = event.mNewPosition;
-}
-
-
-void GameRunner::receive(const rigel::events::ScreenFlash& event) {
-  mScreenFlashColor = event.mColor;
-}
-
-
-void GameRunner::receive(const rigel::events::ScreenShake& event) {
-  mScreenShakeOffsetX = event.mAmount;
-}
-
-
-void GameRunner::receive(const rigel::events::TutorialMessage& event) {
-  showTutorialMessage(event.mId);
-}
-
-
-void GameRunner::receive(const game_logic::events::ShootableKilled& event) {
-  using game_logic::components::ActorTag;
-  auto entity = event.mEntity;
-  if (!entity.has_component<ActorTag>()) {
-    return;
-  }
-
-  const auto& position = *entity.component<const WorldPosition>();
-
-  using AT = ActorTag::Type;
-  const auto type = entity.component<ActorTag>()->mType;
-  switch (type) {
-    case AT::Reactor:
-      onReactorDestroyed(position);
-      break;
-
-    case AT::ShootableBonusGlobe:
-      ++mBonusInfo.mNumShotBonusGlobes;
-      break;
-
-    default:
-      break;
-  }
-}
-
-
-void GameRunner::receive(const rigel::events::BossActivated& event) {
-  mActiveBossEntity = event.mBossEntity;
-  mpServiceProvider->playMusic(*mLevelMusicFile);
-}
-
-
-void GameRunner::loadLevel(
-  const data::GameSessionId& sessionId,
-  const loader::ResourceLoader& resources
-) {
-  auto loadedLevel = loader::loadLevel(
-    levelFileName(sessionId.mEpisode, sessionId.mLevel),
-    resources,
-    sessionId.mDifficulty);
-  auto playerEntity =
-    mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
-
-  const auto counts = countBonusRelatedItems(mEntities);
-  mBonusInfo.mInitialCameraCount = counts.mCameraCount;
-  mBonusInfo.mInitialMerchandiseCount = counts.mMerchandiseCount;
-  mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
-  mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
-  mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
-
-  mLevelData = LevelData{
-    std::move(loadedLevel.mMap),
-    std::move(loadedLevel.mActors),
-    loadedLevel.mBackdropSwitchCondition
-  };
-  mMapAtLevelStart = mLevelData.mMap;
-
-  mpSystems = std::make_unique<IngameSystems>(
-    sessionId,
-    playerEntity,
-    mpPlayerModel,
-    &mLevelData.mMap,
-    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
-    mpServiceProvider,
-    &mEntityFactory,
-    &mRandomGenerator,
-    &mRadarDishCounter,
-    mpRenderer,
-    mEntities,
-    mEventManager,
-    resources);
-
-  if (loadedLevel.mEarthquake) {
-    mEarthQuakeEffect = engine::EarthQuakeEffect{
-      mpServiceProvider, &mRandomGenerator, &mEventManager};
-  }
-
-  if (data::isBossLevel(sessionId.mLevel)) {
-    mLevelMusicFile = loadedLevel.mMusicFile;
-    mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
-  } else {
-    mpServiceProvider->playMusic(loadedLevel.mMusicFile);
-  }
-}
-
-
-void GameRunner::updateGameLogic() {
-  mBackdropFlashColor = std::nullopt;
-  mScreenFlashColor = std::nullopt;
-
-  if (mReactorDestructionFramesElapsed) {
-    updateReactorDestructionEvent();
-  }
-
-  if (mEarthQuakeEffect) {
-    mEarthQuakeEffect->update();
-  }
-
-  mHudRenderer.updateAnimation();
-  mMessageDisplay.update();
-
-  mpSystems->update(mPlayerInput, mEntities);
-  mPlayerInput.resetTriggeredStates();
-}
-
-
-void GameRunner::onReactorDestroyed(const base::Vector& position) {
-  mScreenFlashColor = loader::INGAME_PALETTE[7];
-  mEntityFactory.createProjectile(
-    ProjectileType::ReactorDebris,
-    position + base::Vector{-1, 0},
-    ProjectileDirection::Left);
-  mEntityFactory.createProjectile(
-    ProjectileType::ReactorDebris,
-    position + base::Vector{3, 0},
-    ProjectileDirection::Right);
-
-  const auto shouldDoSpecialEvent =
-    mLevelData.mBackdropSwitchCondition ==
-      data::map::BackdropSwitchCondition::OnReactorDestruction;
-  if (!mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
-    mpSystems->switchBackdrops();
-    mBackdropSwitched = true;
-    mReactorDestructionFramesElapsed = 0;
-  }
-}
-
-
-void GameRunner::updateReactorDestructionEvent() {
-  auto& framesElapsed = *mReactorDestructionFramesElapsed;
-  if (framesElapsed >= 14) {
-    return;
-  }
-
-  if (framesElapsed == 13) {
-    mMessageDisplay.setMessage(data::Messages::DestroyedEverything);
-  } else if (framesElapsed % 2 == 1) {
-    mBackdropFlashColor = base::Color{255, 255, 255, 255};
-    mpServiceProvider->playSound(data::SoundId::BigExplosion);
-  }
-
-  ++framesElapsed;
-}
-
-
-void GameRunner::handleLevelExit() {
-  using engine::components::Active;
-  using engine::components::BoundingBox;
-  using game_logic::components::Trigger;
-  using game_logic::components::TriggerType;
-
-  mEntities.each<Trigger, WorldPosition, Active>(
-    [this](
-      entityx::Entity,
-      const Trigger& trigger,
-      const WorldPosition& triggerPosition,
-      const Active&
-    ) {
-      if (trigger.mType != TriggerType::LevelExit || mLevelFinished) {
-        return;
-      }
-
-      const auto playerBBox = mpSystems->player().worldSpaceHitBox();
-      const auto playerAboveOrAtTriggerHeight =
-        playerBBox.bottom() <= triggerPosition.y;
-      const auto touchingTriggerOnXAxis =
-        triggerPosition.x >= playerBBox.left() &&
-        triggerPosition.x <= (playerBBox.right() + 1);
-
-      const auto triggerActivated =
-        playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
-
-      if (triggerActivated) {
-        mEventManager.emit(rigel::events::ExitReached{});
-      }
-    });
-}
-
-
-void GameRunner::handlePlayerDeath() {
-  if (mPlayerDied) {
-    mPlayerDied = false;
-
-    if (mActivatedCheckpoint) {
-      restartFromCheckpoint();
-    } else {
-      restartLevel();
-    }
-  }
-}
-
-
-void GameRunner::restartLevel() {
-  mpServiceProvider->fadeOutScreen();
-
-  if (mBackdropSwitched) {
-    mpSystems->switchBackdrops();
-    mBackdropSwitched = false;
-  }
-
-  mLevelData.mMap = mMapAtLevelStart;
-
-  mEntities.reset();
-  auto playerEntity = mEntityFactory.createEntitiesForLevel(
-    mLevelData.mInitialActors);
-  mpSystems->restartFromBeginning(playerEntity);
-
-  *mpPlayerModel = mPlayerModelAtLevelStart;
-
-  mpSystems->centerViewOnPlayer();
-  updateAndRender(0);
-
-  mpServiceProvider->fadeInScreen();
-}
-
-
-void GameRunner::restartFromCheckpoint() {
-  mpServiceProvider->fadeOutScreen();
-
-  const auto shouldSwitchBackAfterRespawn =
-    mLevelData.mBackdropSwitchCondition ==
-      data::map::BackdropSwitchCondition::OnTeleportation;
-  if (mBackdropSwitched && shouldSwitchBackAfterRespawn) {
-    mpSystems->switchBackdrops();
-    mBackdropSwitched = false;
-  }
-
-  mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
-  mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
-
-  mpSystems->centerViewOnPlayer();
-  updateAndRender(0);
-
-  mpServiceProvider->fadeInScreen();
-}
-
-
-void GameRunner::handleTeleporter() {
-  if (!mTeleportTargetPosition) {
-    return;
-  }
-
-  mpServiceProvider->fadeOutScreen();
-
-  mpSystems->player().position() = *mTeleportTargetPosition;
-  mTeleportTargetPosition = std::nullopt;
-
-  const auto switchBackdrop =
-    mLevelData.mBackdropSwitchCondition ==
-      data::map::BackdropSwitchCondition::OnTeleportation;
-  if (switchBackdrop) {
-    mpSystems->switchBackdrops();
-    mBackdropSwitched = !mBackdropSwitched;
-  }
-
-  mpSystems->centerViewOnPlayer();
-  updateAndRender(0.0);
-  mpServiceProvider->fadeInScreen();
-}
-
-
-void GameRunner::showTutorialMessage(const data::TutorialMessageId id) {
-  if (!mpPlayerModel->tutorialMessages().hasBeenShown(id)) {
-    mMessageDisplay.setMessage(data::messageText(id));
-    mpPlayerModel->tutorialMessages().markAsShown(id);
-  }
-}
-
-
-void GameRunner::showDebugText() {
-  std::stringstream infoText;
-  mpSystems->printDebugText(infoText);
-  infoText
-    << "Entities: " << mEntities.size();
-
-  mpServiceProvider->showDebugText(infoText.str());
+  mWorld.processEndOfFrameActions();
 }
 
 }

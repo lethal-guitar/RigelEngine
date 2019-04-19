@@ -48,18 +48,15 @@ namespace rigel { namespace game_logic { class IngameSystems; }}
 
 namespace rigel {
 
-class GameRunner : public entityx::Receiver<GameRunner> {
+class GameWorld : public entityx::Receiver<GameWorld> {
 public:
-  GameRunner(
+  GameWorld(
     data::PlayerModel* pPlayerModel,
     const data::GameSessionId& sessionId,
     GameMode::Context context,
     std::optional<base::Vector> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false);
-  ~GameRunner(); // NOLINT
-
-  void handleEvent(const SDL_Event& event);
-  void updateAndRender(engine::TimeDelta dt);
+  ~GameWorld(); // NOLINT
 
   bool levelFinished() const;
   std::set<data::Bonus> achievedBonuses() const;
@@ -76,12 +73,16 @@ public:
   void receive(const game_logic::events::ShootableKilled& event);
   void receive(const rigel::events::BossActivated& event);
 
+  void updateGameLogic(const game_logic::PlayerInput& input);
+  void render();
+  void processEndOfFrameActions();
+
+  friend class GameRunner;
+
 private:
   void loadLevel(
     const data::GameSessionId& sessionId,
     const loader::ResourceLoader& resources);
-
-  void updateGameLogic();
 
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
@@ -127,18 +128,11 @@ private:
   std::optional<CheckpointData> mActivatedCheckpoint;
   std::optional<std::string> mLevelMusicFile;
 
-  game_logic::PlayerInput mPlayerInput;
   std::optional<base::Vector> mTeleportTargetPosition;
   entityx::Entity mActiveBossEntity;
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;
   bool mPlayerDied = false;
-
-  engine::TimeDelta mAccumulatedTime;
-
-  bool mShowDebugText;
-  bool mSingleStepping = false;
-  bool mDoNextSingleStep = false;
 
   struct LevelData {
     data::map::Map mMap;
@@ -162,5 +156,41 @@ private:
   std::optional<int> mReactorDestructionFramesElapsed;
   int mScreenShakeOffsetX = 0;
 };
+
+
+class GameRunner : public entityx::Receiver<GameRunner> {
+public:
+  GameRunner(
+    data::PlayerModel* pPlayerModel,
+    const data::GameSessionId& sessionId,
+    GameMode::Context context,
+    std::optional<base::Vector> playerPositionOverride = std::nullopt,
+    bool showWelcomeMessage = false);
+
+  void handleEvent(const SDL_Event& event);
+  void updateAndRender(engine::TimeDelta dt);
+
+  bool levelFinished() const;
+  std::set<data::Bonus> achievedBonuses() const;
+
+private:
+  GameWorld mWorld;
+  game_logic::PlayerInput mPlayerInput;
+  engine::TimeDelta mAccumulatedTime = 0.0;
+  bool mShowDebugText = false;
+  bool mSingleStepping = false;
+  bool mDoNextSingleStep = false;
+
+};
+
+
+inline bool GameRunner::levelFinished() const {
+  return mWorld.levelFinished();
+}
+
+
+inline std::set<data::Bonus> GameRunner::achievedBonuses() const {
+  return mWorld.achievedBonuses();
+}
 
 }
