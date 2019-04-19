@@ -145,6 +145,8 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/game_world.cpp
+    game_logic/game_world.hpp
     game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
