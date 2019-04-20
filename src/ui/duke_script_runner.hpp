@@ -171,6 +171,7 @@ private:
 
   bool mFadeInBeforeNextWaitStateScheduled = false;
   bool mDisableMenuFunctionalityForNextPagesDefinition = false;
+  bool mTextBoxOffsetEnabled = false;
 };
 
 }}

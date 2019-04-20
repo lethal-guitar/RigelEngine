@@ -101,6 +101,7 @@ void DukeScriptRunner::executeScript(const data::script::Script& script) {
   mCheckBoxStates = std::nullopt;
   mFadeInBeforeNextWaitStateScheduled = false;
   mDisableMenuFunctionalityForNextPagesDefinition = false;
+  mTextBoxOffsetEnabled = false;
 
   startExecution(script);
 }
@@ -410,7 +411,8 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const ShowMessageBox& messageBoxDefinition) {
-      const auto xPos = (40 - messageBoxDefinition.width) / 2;
+      const auto xOffset = mTextBoxOffsetEnabled ? 3 : 0;
+      const auto xPos = (40 - messageBoxDefinition.width) / 2 - xOffset;
       mMenuElementRenderer.drawMessageBox(
         xPos,
         messageBoxDefinition.y,
@@ -468,7 +470,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const EnableTextOffset&) {
-      // TODO
+      mTextBoxOffsetEnabled = true;
     },
 
     [this](const EnableTimeOutToDemo&) {
