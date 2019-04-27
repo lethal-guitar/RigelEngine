@@ -99,7 +99,7 @@ void drawLevelNumber(const int number, const TileRenderer& spriteSheet) {
     number,
     1,
     base::Vector{
-      GameTraits::mapViewPortSize.width + 1,
+      GameTraits::mapViewPortSize.width + 2,
       GameTraits::mapViewPortSize.height},
     spriteSheet);
 }
