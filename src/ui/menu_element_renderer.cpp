@@ -371,7 +371,9 @@ void MenuElementRenderer::drawTextEntryCursor(
   const int y,
   const int state
 ) const {
-
+  const auto baseIndex = 4*mpSpriteSheetRenderer->tilesPerRow() + 9;
+  const auto index = baseIndex + std::clamp(state, 0, 3);
+  mpSpriteSheetRenderer->renderTile(index, x, y);
 }
 
 

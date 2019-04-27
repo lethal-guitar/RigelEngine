@@ -56,6 +56,12 @@ public:
 
   void drawBonusScreenText(int x, int y, const std::string& text) const;
 
+  /** Draw text entry cursor icon at given position/state.
+   *
+   * Valid range for state: 0..3 (will be clamped automatically)
+   */
+  void drawTextEntryCursor(int x, int y, int state) const;
+
   // Stateful API
   // --------------------------------------------------------------------------
   // TODO: This should move into DukeScriptRunner, so that this class' API
@@ -68,7 +74,6 @@ public:
 
 private:
   void drawSelectionIndicator(int y, int state) const;
-  void drawTextEntryCursor(int x, int y, int state) const;
 
   void drawMessageBoxRow(
     int x,
