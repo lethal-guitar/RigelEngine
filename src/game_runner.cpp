@@ -50,6 +50,7 @@ GameRunner::GameRunner(
       playerPositionOverride,
       showWelcomeMessage)
 {
+  mStateStack.emplace(World{&mWorld});
 }
 
 
@@ -63,30 +64,44 @@ void GameRunner::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  std::visit(
+    [&event](auto& state) { state.handleEvent(event); },
+    mStateStack.top());
+}
+
+
+void GameRunner::updateAndRender(engine::TimeDelta dt) {
+  if (mGameWasQuit || levelFinished()) {
+    return;
+  }
+
+  std::visit(
+    [dt](auto& state) { state.updateAndRender(dt); },
+    mStateStack.top());
+}
+
+
+void GameRunner::World::handleEvent(const SDL_Event& event) {
   handlePlayerInput(event);
   handleDebugKeys(event);
 }
 
 
-void GameRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mGameWasQuit || mWorld.levelFinished()) {
-    return;
-  }
-
+void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   updateWorld(dt);
-  mWorld.render();
+  mpWorld->render();
 
   if (mShowDebugText) {
-    mWorld.showDebugText();
+    mpWorld->showDebugText();
   }
 
-  mWorld.processEndOfFrameActions();
+  mpWorld->processEndOfFrameActions();
 }
 
 
-void GameRunner::updateWorld(const engine::TimeDelta dt) {
+void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
   auto update = [this]() {
-    mWorld.updateGameLogic(mPlayerInput);
+    mpWorld->updateGameLogic(mPlayerInput);
     mPlayerInput.resetTriggeredStates();
   };
 
@@ -108,7 +123,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt) {
 }
 
 
-void GameRunner::handlePlayerInput(const SDL_Event& event) {
+void GameRunner::World::handlePlayerInput(const SDL_Event& event) {
   const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
   if (!isKeyEvent || event.key.repeat != 0) {
     return;
@@ -156,12 +171,12 @@ void GameRunner::handlePlayerInput(const SDL_Event& event) {
 }
 
 
-void GameRunner::handleDebugKeys(const SDL_Event& event) {
+void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
   if (event.type != SDL_KEYDOWN || event.key.repeat != 0) {
     return;
   }
 
-  auto& debuggingSystem = mWorld.mpSystems->debuggingSystem();
+  auto& debuggingSystem = mpWorld->mpSystems->debuggingSystem();
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();

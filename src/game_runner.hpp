@@ -28,6 +28,9 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <stack>
+#include <variant>
+
 
 namespace rigel {
 
@@ -48,17 +51,32 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
-  void updateWorld(engine::TimeDelta dt);
-  void handlePlayerInput(const SDL_Event& event);
-  void handleDebugKeys(const SDL_Event& event);
+  struct World {
+    explicit World(game_logic::GameWorld* pWorld)
+      : mpWorld(pWorld)
+    {
+    }
+
+    void handleEvent(const SDL_Event& event);
+    void updateAndRender(engine::TimeDelta dt);
+
+    void updateWorld(engine::TimeDelta dt);
+    void handlePlayerInput(const SDL_Event& event);
+    void handleDebugKeys(const SDL_Event& event);
+
+    game_logic::GameWorld* mpWorld;
+    game_logic::PlayerInput mPlayerInput;
+    engine::TimeDelta mAccumulatedTime = 0.0;
+    bool mShowDebugText = false;
+    bool mSingleStepping = false;
+    bool mDoNextSingleStep = false;
+  };
+
+  using State = std::variant<World>;
 
   game_logic::GameWorld mWorld;
-  game_logic::PlayerInput mPlayerInput;
-  engine::TimeDelta mAccumulatedTime = 0.0;
+  std::stack<State, std::vector<State>> mStateStack;
   bool mGameWasQuit = false;
-  bool mShowDebugText = false;
-  bool mSingleStepping = false;
-  bool mDoNextSingleStep = false;
 };
 
 
