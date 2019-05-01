@@ -257,6 +257,7 @@ target_link_libraries(rigel_core
     ${SDL2_MIXER_LIBRARIES}
     entityx
     Boost::boost
+    std::filesystem
 
     PRIVATE
     dbopl
@@ -290,6 +291,8 @@ set(main_exe_sources
     menu_mode.cpp
     menu_mode.hpp
     mode_stage.hpp
+    user_profile.cpp
+    user_profile.hpp
 )
 
 

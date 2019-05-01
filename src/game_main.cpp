@@ -65,6 +65,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
+  , mUserProfile(loadOrCreateUserProfile(gamePath))
   , mScriptRunner(&mResources, &mRenderer, this)
   , mUiSpriteSheetRenderer(
       engine::OwningTexture{
@@ -121,6 +122,8 @@ void Game::run(const StartupOptions& startupOptions) {
   }
 
   mainLoop();
+
+  mUserProfile.saveToDisk();
 }
 
 
@@ -199,7 +202,8 @@ GameMode::Context Game::makeModeContext() {
     this,
     &mScriptRunner,
     &mTextRenderer,
-    &mUiSpriteSheetRenderer};
+    &mUiSpriteSheetRenderer,
+    &mUserProfile};
 }
 
 
