@@ -58,13 +58,59 @@ void GameRunner::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
-  if (!isKeyEvent || event.key.repeat != 0) {
+  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+    mGameWasQuit = true;
     return;
   }
 
-  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-    mGameWasQuit = true;
+  handlePlayerInput(event);
+  handleDebugKeys(event);
+}
+
+
+void GameRunner::updateAndRender(engine::TimeDelta dt) {
+  if (mGameWasQuit || mWorld.levelFinished()) {
+    return;
+  }
+
+  updateWorld(dt);
+  mWorld.render();
+
+  if (mShowDebugText) {
+    mWorld.showDebugText();
+  }
+
+  mWorld.processEndOfFrameActions();
+}
+
+
+void GameRunner::updateWorld(const engine::TimeDelta dt) {
+  auto update = [this]() {
+    mWorld.updateGameLogic(mPlayerInput);
+    mPlayerInput.resetTriggeredStates();
+  };
+
+
+  if (mSingleStepping) {
+    if (mDoNextSingleStep) {
+      update();
+      mDoNextSingleStep = false;
+    }
+  } else {
+    mAccumulatedTime += dt;
+    for (;
+      mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
+      mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
+    ) {
+      update();
+    }
+  }
+}
+
+
+void GameRunner::handlePlayerInput(const SDL_Event& event) {
+  const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
+  if (!isKeyEvent || event.key.repeat != 0) {
     return;
   }
 
@@ -107,10 +153,11 @@ void GameRunner::handleEvent(const SDL_Event& event) {
       }
       break;
   }
+}
 
-  // Debug keys
-  // ----------------------------------------------------------------------
-  if (keyPressed) {
+
+void GameRunner::handleDebugKeys(const SDL_Event& event) {
+  if (event.type != SDL_KEYDOWN || event.key.repeat != 0) {
     return;
   }
 
@@ -141,46 +188,6 @@ void GameRunner::handleEvent(const SDL_Event& event) {
         mDoNextSingleStep = true;
       }
       break;
-  }
-}
-
-
-void GameRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mGameWasQuit || mWorld.levelFinished()) {
-    return;
-  }
-
-  updateWorld(dt);
-  mWorld.render();
-
-  if (mShowDebugText) {
-    mWorld.showDebugText();
-  }
-
-  mWorld.processEndOfFrameActions();
-}
-
-
-void GameRunner::updateWorld(const engine::TimeDelta dt) {
-  auto update = [this]() {
-    mWorld.updateGameLogic(mPlayerInput);
-    mPlayerInput.resetTriggeredStates();
-  };
-
-
-  if (mSingleStepping) {
-    if (mDoNextSingleStep) {
-      update();
-      mDoNextSingleStep = false;
-    }
-  } else {
-    mAccumulatedTime += dt;
-    for (;
-      mAccumulatedTime >= GAME_LOGIC_UPDATE_DELAY;
-      mAccumulatedTime -= GAME_LOGIC_UPDATE_DELAY
-    ) {
-      update();
-    }
   }
 }
 

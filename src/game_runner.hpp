@@ -49,6 +49,8 @@ public:
 
 private:
   void updateWorld(engine::TimeDelta dt);
+  void handlePlayerInput(const SDL_Event& event);
+  void handleDebugKeys(const SDL_Event& event);
 
   game_logic::GameWorld mWorld;
   game_logic::PlayerInput mPlayerInput;
