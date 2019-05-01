@@ -228,6 +228,8 @@ set(core_sources
     ui/menu_element_renderer.hpp
     ui/movie_player.cpp
     ui/movie_player.hpp
+    ui/text_entry_widget.cpp
+    ui/text_entry_widget.hpp
     ui/utils.cpp
     ui/utils.hpp
 )
