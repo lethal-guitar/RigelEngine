@@ -76,11 +76,13 @@ auto makeSpriteSheet(
 DukeScriptRunner::DukeScriptRunner(
   loader::ResourceLoader* pResourceLoader,
   engine::Renderer* pRenderer,
+  const data::SaveSlotArray* pSaveSlots,
   IGameServiceProvider* pServiceProvider
 )
   : mpResourceBundle(pResourceLoader)
   , mCurrentPalette(loader::INGAME_PALETTE)
   , mpRenderer(pRenderer)
+  , mpSaveSlots(pSaveSlots)
   , mpServices(pServiceProvider)
   , mUiSpriteSheetRenderer(
       makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
@@ -99,6 +101,7 @@ void DukeScriptRunner::executeScript(const data::script::Script& script) {
   mCheckBoxStates = std::nullopt;
   mFadeInBeforeNextWaitStateScheduled = false;
   mDisableMenuFunctionalityForNextPagesDefinition = false;
+  mTextBoxOffsetEnabled = false;
 
   startExecution(script);
 }
@@ -166,6 +169,7 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
   // Escape always aborts
   if (event.key.keysym.sym == SDLK_ESCAPE) {
     mState = State::ExecutionInterrupted;
+    mMenuElementRenderer.hideMenuSelectionIndicator();
     return;
   }
 
@@ -304,9 +308,7 @@ void DukeScriptRunner::drawBigText(
   const int colorIndex,
   const std::string& text
 ) const {
-  mpRenderer->setColorModulation(mCurrentPalette.at(colorIndex));
-  mMenuElementRenderer.drawBigText(x, y, text);
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
+  mMenuElementRenderer.drawBigText(x, y, text, mCurrentPalette.at(colorIndex));
 }
 
 
@@ -315,6 +317,7 @@ void DukeScriptRunner::interpretNextAction() {
 
   if (mProgramCounter >= mCurrentInstructions.size()) {
     mState = State::FinishedExecution;
+    mMenuElementRenderer.hideMenuSelectionIndicator();
     return;
   }
 
@@ -408,7 +411,8 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const ShowMessageBox& messageBoxDefinition) {
-      const auto xPos = (40 - messageBoxDefinition.width) / 2;
+      const auto xOffset = mTextBoxOffsetEnabled ? 3 : 0;
+      const auto xPos = (40 - messageBoxDefinition.width) / 2 - xOffset;
       mMenuElementRenderer.drawMessageBox(
         xPos,
         messageBoxDefinition.y,
@@ -466,7 +470,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const EnableTextOffset&) {
-      // TODO
+      mTextBoxOffsetEnabled = true;
     },
 
     [this](const EnableTimeOutToDemo&) {
@@ -575,11 +579,12 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
 
 void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
   for (auto i = 0; i < 8; ++i) {
+    const auto& saveSlot = (*mpSaveSlots)[i];
     drawBigText(
       SAVE_SLOT_START_X,
       SAVE_SLOT_START_Y + i*MENU_FONT_HEIGHT,
       i == selectedIndex ? SELECTED_COLOR_INDEX : UNSELECTED_COLOR_INDEX,
-      "Empty");
+      saveSlot ? saveSlot->mName : "Empty");
   }
 }
 

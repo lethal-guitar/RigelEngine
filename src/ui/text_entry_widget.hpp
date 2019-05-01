@@ -16,38 +16,41 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
+#include "engine/timing.hpp"
 
-namespace rigel { namespace data {
+RIGEL_DISABLE_WARNINGS
+#include <SDL.h>
+RIGEL_RESTORE_WARNINGS
 
-constexpr auto NUM_EPISODES = 4;
-constexpr auto NUM_LEVELS_PER_EPISODE = 8;
+#include <string>
 
-enum class Difficulty {
-  Easy = 0,
-  Medium = 1,
-  Hard = 2
+
+namespace rigel::ui {
+
+class MenuElementRenderer;
+
+class TextEntryWidget {
+public:
+  // Position is given in tiles
+  TextEntryWidget(
+    const ui::MenuElementRenderer* pUiRenderer,
+    int posX,
+    int posY,
+    int maxTextLength);
+
+  void handleEvent(const SDL_Event& event);
+  void updateAndRender(engine::TimeDelta dt);
+
+  std::string_view text() const;
+
+private:
+  std::string mText;
+  engine::TimeDelta mElapsedTime = 0.0;
+  const ui::MenuElementRenderer* mpUiRenderer;
+  int mPosX;
+  int mPosY;
+  int mMaxTextLength;
 };
 
-
-struct GameSessionId {
-  GameSessionId() = default;
-  GameSessionId(const int episode, const int level, const Difficulty difficulty)
-    : mEpisode(episode)
-    , mLevel(level)
-    , mDifficulty(difficulty)
-  {
-  }
-
-  int mEpisode = 0;
-  int mLevel = 0;
-  Difficulty mDifficulty = Difficulty::Medium;
-};
-
-
-constexpr bool isBossLevel(const int level) {
-  return level == NUM_LEVELS_PER_EPISODE - 1;
 }
-
-
-
-}}

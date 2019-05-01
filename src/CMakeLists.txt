@@ -19,6 +19,7 @@ set(core_sources
     data/map.hpp
     data/player_model.cpp
     data/player_model.hpp
+    data/saved_game.hpp
     data/song.hpp
     data/sound_ids.hpp
     data/strings.hpp
@@ -144,16 +145,18 @@ set(core_sources
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
+    game_logic/game_world.cpp
+    game_logic/game_world.hpp
     game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
     game_logic/input.hpp
-    game_logic/interaction/locked_door.cpp
-    game_logic/interaction/locked_door.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
+    game_logic/interaction/locked_door.cpp
+    game_logic/interaction/locked_door.hpp
     game_logic/interaction/respawn_checkpoint.cpp
     game_logic/interaction/respawn_checkpoint.hpp
     game_logic/item_container.cpp
@@ -198,6 +201,8 @@ set(core_sources
     loader/resource_loader.cpp
     loader/resource_loader.hpp
     loader/rle_compression.hpp
+    loader/user_profile_import.cpp
+    loader/user_profile_import.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
     sdl_utils/error.cpp
@@ -223,6 +228,8 @@ set(core_sources
     ui/menu_element_renderer.hpp
     ui/movie_player.cpp
     ui/movie_player.hpp
+    ui/text_entry_widget.cpp
+    ui/text_entry_widget.hpp
     ui/utils.cpp
     ui/utils.hpp
 )
@@ -242,6 +249,7 @@ target_include_directories(rigel_core
 
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
+    ${3rd_party_path}/nlohmann
 
     PRIVATE
     ${3rd_party_path}/dbopl
@@ -253,6 +261,7 @@ target_link_libraries(rigel_core
     ${SDL2_MIXER_LIBRARIES}
     entityx
     Boost::boost
+    std::filesystem
 
     PRIVATE
     dbopl
@@ -286,6 +295,8 @@ set(main_exe_sources
     menu_mode.cpp
     menu_mode.hpp
     mode_stage.hpp
+    user_profile.cpp
+    user_profile.hpp
 )
 
 

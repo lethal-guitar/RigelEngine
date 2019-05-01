@@ -23,6 +23,9 @@
 
 namespace rigel { namespace data {
 
+struct SavedGame;
+
+
 enum class InventoryItemType {
   CircuitBoard,
   BlueKey,
@@ -70,6 +73,7 @@ public:
   };
 
   PlayerModel();
+  explicit PlayerModel(const SavedGame& save);
 
   CheckpointState makeCheckpoint() const;
   void restoreFromCheckpoint(const CheckpointState& state);

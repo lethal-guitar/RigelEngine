@@ -16,38 +16,28 @@
 
 #pragma once
 
+#include "data/saved_game.hpp"
 
-namespace rigel { namespace data {
+#include <string>
 
-constexpr auto NUM_EPISODES = 4;
-constexpr auto NUM_LEVELS_PER_EPISODE = 8;
 
-enum class Difficulty {
-  Easy = 0,
-  Medium = 1,
-  Hard = 2
+namespace rigel {
+
+class UserProfile {
+public:
+  UserProfile() = default;
+  UserProfile(const std::string& profilePath);
+
+  void saveToDisk();
+  void loadFromDisk();
+
+  data::SaveSlotArray mSaveSlots;
+
+private:
+  std::optional<std::string> mProfilePath;
 };
 
 
-struct GameSessionId {
-  GameSessionId() = default;
-  GameSessionId(const int episode, const int level, const Difficulty difficulty)
-    : mEpisode(episode)
-    , mLevel(level)
-    , mDifficulty(difficulty)
-  {
-  }
+UserProfile loadOrCreateUserProfile(const std::string gamePath);
 
-  int mEpisode = 0;
-  int mLevel = 0;
-  Difficulty mDifficulty = Difficulty::Medium;
-};
-
-
-constexpr bool isBossLevel(const int level) {
-  return level == NUM_LEVELS_PER_EPISODE - 1;
 }
-
-
-
-}}

@@ -19,7 +19,7 @@ matrix:
           packages:
             - libsdl2-dev
             - libsdl2-mixer-dev
-            - g++-7
+            - g++-8
             - boost1.67
           sources:
             - ubuntu-toolchain-r-test
@@ -43,8 +43,8 @@ before_install:
       unset rigel_llvm_path;
     fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      export CC=gcc-7;
-      export CXX=g++-7;
+      export CC=gcc-8;
+      export CXX=g++-8;
     fi
 
 before_script:

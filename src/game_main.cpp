@@ -65,7 +65,8 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mScriptRunner(&mResources, &mRenderer, this)
+  , mUserProfile(loadOrCreateUserProfile(gamePath))
+  , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
   , mUiSpriteSheetRenderer(
       engine::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
@@ -100,9 +101,7 @@ void Game::run(const StartupOptions& startupOptions) {
     std::tie(episode, level) = *startupOptions.mLevelToJumpTo;
 
     mpNextGameMode = std::make_unique<GameSessionMode>(
-      episode,
-      level,
-      data::Difficulty::Medium,
+      data::GameSessionId{episode, level, data::Difficulty::Medium},
       makeModeContext(),
       startupOptions.mPlayerPosition);
   }
@@ -121,6 +120,8 @@ void Game::run(const StartupOptions& startupOptions) {
   }
 
   mainLoop();
+
+  mUserProfile.saveToDisk();
 }
 
 
@@ -199,7 +200,8 @@ GameMode::Context Game::makeModeContext() {
     this,
     &mScriptRunner,
     &mTextRenderer,
-    &mUiSpriteSheetRenderer};
+    &mUiSpriteSheetRenderer,
+    &mUserProfile};
 }
 
 
@@ -325,9 +327,14 @@ void Game::scheduleNewGameStart(
   const data::Difficulty difficulty
 ) {
   mpNextGameMode = std::make_unique<GameSessionMode>(
-    episode,
-    0,
-    difficulty,
+    data::GameSessionId{episode, 0, difficulty},
+    makeModeContext());
+}
+
+
+void Game::scheduleStartFromSavedGame(const data::SavedGame& save) {
+  mpNextGameMode = std::make_unique<GameSessionMode>(
+    save,
     makeModeContext());
 }
 

@@ -25,17 +25,19 @@
 
 #include <variant>
 
+namespace rigel::data { struct SavedGame; }
+
 
 namespace rigel {
 
 class GameSessionMode : public GameMode {
 public:
   GameSessionMode(
-    int episode,
-    int level,
-    data::Difficulty difficulty,
+    const data::GameSessionId& sessionId,
     Context context,
     std::optional<base::Vector> playerPositionOverride = std::nullopt);
+
+  GameSessionMode(const data::SavedGame& save, Context context);
 
   void handleEvent(const SDL_Event& event) override;
   void updateAndRender(engine::TimeDelta dt) override;

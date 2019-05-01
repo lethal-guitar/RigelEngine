@@ -28,6 +28,7 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
 
 struct IGameServiceProvider;
+class UserProfile;
 
 namespace engine {
   class TileRenderer;
@@ -52,6 +53,7 @@ struct GameMode {
     ui::DukeScriptRunner* mpScriptRunner;
     ui::MenuElementRenderer* mpUiRenderer;
     engine::TileRenderer* mpUiSpriteSheetRenderer;
+    UserProfile* mpUserProfile;
   };
 
   virtual ~GameMode() = default;

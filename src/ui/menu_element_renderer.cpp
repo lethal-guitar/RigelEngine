@@ -173,7 +173,8 @@ MenuElementRenderer::MenuElementRenderer(
   engine::Renderer* pRenderer,
   const loader::ResourceLoader& resources
 )
-  : mpSpriteSheetRenderer(pSpriteSheetRenderer)
+  : mpRenderer(pRenderer)
+  , mpSpriteSheetRenderer(pSpriteSheetRenderer)
   , mBigTextRenderer(
       createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
       pRenderer)
@@ -257,8 +258,11 @@ void MenuElementRenderer::drawMultiLineText(
 void MenuElementRenderer::drawBigText(
   int x,
   int y,
-  const std::string& text
+  const std::string& text,
+  const base::Color& color
 ) const {
+  mpRenderer->setColorModulation(color);
+
   for (auto i=0u; i<text.size(); ++i) {
     const auto ch = static_cast<uint8_t>(text[i]);
 
@@ -284,6 +288,8 @@ void MenuElementRenderer::drawBigText(
     const auto position = static_cast<int>(i);
     mBigTextRenderer.renderTileSlice(index, {x + position, y-1});
   }
+
+  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 
@@ -371,7 +377,9 @@ void MenuElementRenderer::drawTextEntryCursor(
   const int y,
   const int state
 ) const {
-
+  const auto baseIndex = 4*mpSpriteSheetRenderer->tilesPerRow() + 9;
+  const auto index = baseIndex + std::clamp(state, 0, 3);
+  mpSpriteSheetRenderer->renderTile(index, x, y);
 }
 
 
@@ -403,7 +411,9 @@ void MenuElementRenderer::showMenuSelectionIndicator(int y) {
 
 
 void MenuElementRenderer::hideMenuSelectionIndicator() {
-  mPendingMenuIndicatorErase = true;
+  if (mMenuSelectionIndicatorPosition) {
+    mPendingMenuIndicatorErase = true;
+  }
 }
 
 

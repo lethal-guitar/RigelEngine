@@ -17,6 +17,7 @@
 #include "game_session_mode.hpp"
 
 #include "base/match.hpp"
+#include "data/saved_game.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -24,36 +25,48 @@
 namespace rigel {
 
 GameSessionMode::GameSessionMode(
-  const int episode,
-  const int level,
-  const data::Difficulty difficulty,
+  const data::GameSessionId& sessionId,
   Context context,
   std::optional<base::Vector> playerPositionOverride
 )
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
-      data::GameSessionId{episode, level, difficulty},
+      sessionId,
       context,
       playerPositionOverride,
       true /* show welcome message */))
-  , mEpisode(episode)
-  , mCurrentLevelNr(level)
-  , mDifficulty(difficulty)
+  , mEpisode(sessionId.mEpisode)
+  , mCurrentLevelNr(sessionId.mLevel)
+  , mDifficulty(sessionId.mDifficulty)
+  , mContext(context)
+{
+}
+
+
+GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
+  : mPlayerModel(save)
+  , mCurrentStage(std::make_unique<GameRunner>(
+      &mPlayerModel,
+      save.mSessionId,
+      context,
+      std::nullopt,
+      true /* show welcome message */))
+  , mEpisode(save.mSessionId.mEpisode)
+  , mCurrentLevelNr(save.mSessionId.mLevel)
+  , mDifficulty(save.mSessionId.mDifficulty)
   , mContext(context)
 {
 }
 
 
 void GameSessionMode::handleEvent(const SDL_Event& event) {
-  // This is temporary - remove when in-game menu implemented
-  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-    finishGameSession();
-    return;
-  }
-
   base::match(mCurrentStage,
-    [&event](std::unique_ptr<GameRunner>& pIngameMode) {
+    [&event, this](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
+
+      if (pIngameMode->gameQuit()) {
+        finishGameSession();
+      }
     },
 
     [&event](ui::EpisodeEndSequence& endScreens) {

@@ -17,6 +17,7 @@
 #include "player_model.hpp"
 
 #include "base/math_tools.hpp"
+#include "data/saved_game.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -28,6 +29,16 @@ PlayerModel::PlayerModel()
   : mWeapon(WeaponType::Normal)
   , mScore(0)
   , mAmmo(MAX_AMMO)
+  , mHealth(MAX_HEALTH)
+{
+}
+
+
+PlayerModel::PlayerModel(const SavedGame& save)
+  : mTutorialMessages(save.mTutorialMessagesAlreadySeen)
+  , mWeapon(save.mWeapon)
+  , mScore(save.mScore)
+  , mAmmo(save.mAmmo)
   , mHealth(MAX_HEALTH)
 {
 }

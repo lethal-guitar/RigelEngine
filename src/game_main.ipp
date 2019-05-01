@@ -29,6 +29,7 @@
 
 #include "game_mode.hpp"
 #include "game_service_provider.hpp"
+#include "user_profile.hpp"
 
 #include <chrono>
 #include <memory>
@@ -68,6 +69,7 @@ private:
   void scheduleNewGameStart(
     int episode,
     data::Difficulty difficulty) override;
+  void scheduleStartFromSavedGame(const data::SavedGame& save) override;
   void scheduleEnterMainMenu() override;
   void scheduleGameQuit() override;
 
@@ -97,6 +99,8 @@ private:
   bool mIsRunning;
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
+
+  UserProfile mUserProfile;
 
   ui::DukeScriptRunner mScriptRunner;
   engine::TileRenderer mUiSpriteSheetRenderer;

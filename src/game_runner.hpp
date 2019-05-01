@@ -16,34 +16,25 @@
 
 #pragma once
 
-#include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/bonus.hpp"
-#include "data/player_model.hpp"
-#include "data/tutorial_messages.hpp"
-#include "engine/earth_quake_effect.hpp"
-#include "engine/random_number_generator.hpp"
-#include "game_logic/damage_components.hpp"
-#include "game_logic/enemy_radar.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "data/saved_game.hpp"
+#include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
-#include "game_logic/player/components.hpp"
-#include "ui/hud_renderer.hpp"
-#include "ui/ingame_message_display.hpp"
+#include "loader/duke_script_loader.hpp"
+#include "ui/duke_script_runner.hpp"
+#include "ui/text_entry_widget.hpp"
 
 #include "game_mode.hpp"
-#include "global_level_events.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <optional>
-#include <vector>
-
-namespace rigel { namespace game_logic { class IngameSystems; }}
+#include <functional>
+#include <stack>
+#include <variant>
 
 
 namespace rigel {
@@ -56,111 +47,131 @@ public:
     GameMode::Context context,
     std::optional<base::Vector> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false);
-  ~GameRunner(); // NOLINT
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
 
   bool levelFinished() const;
+  bool gameQuit() const;
   std::set<data::Bonus> achievedBonuses() const;
 
-  void receive(const events::CheckPointActivated& event);
-  void receive(const events::ExitReached& event);
-  void receive(const events::PlayerDied& event);
-  void receive(const events::PlayerTookDamage& event);
-  void receive(const events::PlayerMessage& event);
-  void receive(const events::PlayerTeleported& event);
-  void receive(const events::ScreenFlash& event);
-  void receive(const rigel::events::ScreenShake& event);
-  void receive(const events::TutorialMessage& event);
-  void receive(const game_logic::events::ShootableKilled& event);
-  void receive(const rigel::events::BossActivated& event);
-
 private:
-  void loadLevel(
-    const data::GameSessionId& sessionId,
-    const loader::ResourceLoader& resources);
+  using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
 
-  void updateGameLogic();
+  struct World {
+    explicit World(game_logic::GameWorld* pWorld)
+      : mpWorld(pWorld)
+    {
+    }
 
-  void onReactorDestroyed(const base::Vector& position);
-  void updateReactorDestructionEvent();
+    void handleEvent(const SDL_Event& event);
+    void updateAndRender(engine::TimeDelta dt);
 
-  void handleLevelExit();
-  void handlePlayerDeath();
-  void restartLevel();
-  void restartFromCheckpoint();
-  void handleTeleporter();
-  void updateTemporaryItemExpiration();
-  void showTutorialMessage(const data::TutorialMessageId id);
+    void updateWorld(engine::TimeDelta dt);
+    void handlePlayerInput(const SDL_Event& event);
+    void handleDebugKeys(const SDL_Event& event);
 
-  void showDebugText();
-
-private:
-  struct LevelBonusInfo {
-    int mInitialCameraCount = 0;
-    int mInitialMerchandiseCount = 0;
-    int mInitialWeaponCount = 0;
-    int mInitialLaserTurretCount = 0;
-    int mInitialBonusGlobeCount = 0;
-
-    int mNumShotBonusGlobes = 0;
-    bool mPlayerTookDamage = false;
+    game_logic::GameWorld* mpWorld;
+    game_logic::PlayerInput mPlayerInput;
+    engine::TimeDelta mAccumulatedTime = 0.0;
+    bool mShowDebugText = false;
+    bool mSingleStepping = false;
+    bool mDoNextSingleStep = false;
   };
 
-  struct CheckpointData {
-    data::PlayerModel::CheckpointState mState;
-    base::Vector mPosition;
+  struct Menu {
+    template <typename ScriptEndHook, typename EventHook>
+    Menu(
+      ui::DukeScriptRunner* pScriptRunner,
+      ScriptEndHook&& scriptEndHook,
+      EventHook&& eventHook
+    )
+      : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
+      , mEventHook(std::forward<EventHook>(eventHook))
+      , mpScriptRunner(pScriptRunner)
+    {
+    }
+
+    void handleEvent(const SDL_Event& event);
+    void updateAndRender(engine::TimeDelta dt);
+
+    std::function<void(const ExecutionResult&)> mScriptFinishedHook;
+    std::function<bool(const SDL_Event&)> mEventHook;
+    ui::DukeScriptRunner* mpScriptRunner;
   };
 
-  engine::Renderer* mpRenderer;
-  IGameServiceProvider* mpServiceProvider;
-  engine::TileRenderer* mpUiSpriteSheet;
-  ui::MenuElementRenderer* mpTextRenderer;
-  entityx::EventManager mEventManager;
-  entityx::EntityManager mEntities;
-  game_logic::EntityFactory mEntityFactory;
+  struct SavedGameNameEntry {
+    SavedGameNameEntry(GameMode::Context context, const int slotIndex);
 
-  data::PlayerModel* mpPlayerModel;
-  data::PlayerModel mPlayerModelAtLevelStart;
-  LevelBonusInfo mBonusInfo;
-  std::optional<CheckpointData> mActivatedCheckpoint;
-  std::optional<std::string> mLevelMusicFile;
+    void updateAndRender(engine::TimeDelta dt);
 
-  game_logic::PlayerInput mPlayerInput;
-  std::optional<base::Vector> mTeleportTargetPosition;
-  entityx::Entity mActiveBossEntity;
-  bool mBackdropSwitched = false;
-  bool mLevelFinished = false;
-  bool mPlayerDied = false;
-
-  engine::TimeDelta mAccumulatedTime;
-
-  bool mShowDebugText;
-  bool mSingleStepping = false;
-  bool mDoNextSingleStep = false;
-
-  struct LevelData {
-    data::map::Map mMap;
-    std::vector<data::map::LevelData::Actor> mInitialActors;
-    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
+    ui::TextEntryWidget mTextEntryWidget;
+    int mSlotIndex;
   };
 
-  LevelData mLevelData;
-  data::map::Map mMapAtLevelStart;
+  using State = std::variant<World, Menu, SavedGameNameEntry>;
 
-  std::unique_ptr<game_logic::IngameSystems> mpSystems;
+  static bool noopEventHook(const SDL_Event&) { return false; }
 
-  game_logic::RadarDishCounter mRadarDishCounter;
-  engine::RandomNumberGenerator mRandomGenerator;
-  ui::HudRenderer mHudRenderer;
-  ui::IngameMessageDisplay mMessageDisplay;
+  bool handleMenuEnterEvent(const SDL_Event& event);
+  void runScript(const char* scriptName);
 
-  std::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
-  std::optional<base::Color> mScreenFlashColor;
-  std::optional<base::Color> mBackdropFlashColor;
-  std::optional<int> mReactorDestructionFramesElapsed;
-  int mScreenShakeOffsetX = 0;
+  template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
+  void enterMenu(
+    const char* scriptName,
+    ScriptEndHook&& scriptEndedHook,
+    EventHook&& eventHook = noopEventHook);
+  void leaveMenu();
+  void fadeToWorld();
+
+  void onRestoreGameMenuFinished(const ExecutionResult& result);
+  void onSaveGameMenuFinished(const ExecutionResult& result);
+  void saveGame(int slotIndex, std::string_view name);
+
+  GameMode::Context mContext;
+  data::SavedGame mSavedGame;
+  game_logic::GameWorld mWorld;
+  std::stack<State, std::vector<State>> mStateStack;
+  loader::ScriptBundle mScripts;
+  bool mGameWasQuit = false;
 };
+
+
+inline bool GameRunner::levelFinished() const {
+  return mWorld.levelFinished();
+}
+
+
+inline bool GameRunner::gameQuit() const {
+  return mGameWasQuit;
+}
+
+
+inline std::set<data::Bonus> GameRunner::achievedBonuses() const {
+  return mWorld.achievedBonuses();
+}
+
+
+inline void GameRunner::Menu::handleEvent(const SDL_Event& event) {
+  if (!mEventHook(event)) {
+    mpScriptRunner->handleEvent(event);
+  }
+}
+
+
+inline void GameRunner::Menu::updateAndRender(const engine::TimeDelta dt) {
+  mpScriptRunner->updateAndRender(dt);
+
+  if (mpScriptRunner->hasFinishedExecution()) {
+    mScriptFinishedHook(*mpScriptRunner->result());
+  }
+}
+
+
+inline void GameRunner::SavedGameNameEntry::updateAndRender(
+  const engine::TimeDelta dt
+) {
+  mTextEntryWidget.updateAndRender(dt);
+}
 
 }
