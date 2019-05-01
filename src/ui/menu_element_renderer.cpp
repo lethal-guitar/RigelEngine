@@ -411,7 +411,9 @@ void MenuElementRenderer::showMenuSelectionIndicator(int y) {
 
 
 void MenuElementRenderer::hideMenuSelectionIndicator() {
-  mPendingMenuIndicatorErase = true;
+  if (mMenuSelectionIndicatorPosition) {
+    mPendingMenuIndicatorErase = true;
+  }
 }
 
 

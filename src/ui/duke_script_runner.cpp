@@ -169,6 +169,7 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
   // Escape always aborts
   if (event.key.keysym.sym == SDLK_ESCAPE) {
     mState = State::ExecutionInterrupted;
+    mMenuElementRenderer.hideMenuSelectionIndicator();
     return;
   }
 
@@ -316,6 +317,7 @@ void DukeScriptRunner::interpretNextAction() {
 
   if (mProgramCounter >= mCurrentInstructions.size()) {
     mState = State::FinishedExecution;
+    mMenuElementRenderer.hideMenuSelectionIndicator();
     return;
   }
 
