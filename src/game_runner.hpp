@@ -48,6 +48,8 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
+  void updateWorld(engine::TimeDelta dt);
+
   game_logic::GameWorld mWorld;
   game_logic::PlayerInput mPlayerInput;
   engine::TimeDelta mAccumulatedTime = 0.0;

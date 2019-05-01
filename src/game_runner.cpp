@@ -150,14 +150,23 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
-  // **********************************************************************
-  // Updating
-  // **********************************************************************
+  updateWorld(dt);
+  mWorld.render();
 
+  if (mShowDebugText) {
+    mWorld.showDebugText();
+  }
+
+  mWorld.processEndOfFrameActions();
+}
+
+
+void GameRunner::updateWorld(const engine::TimeDelta dt) {
   auto update = [this]() {
     mWorld.updateGameLogic(mPlayerInput);
     mPlayerInput.resetTriggeredStates();
   };
+
 
   if (mSingleStepping) {
     if (mDoNextSingleStep) {
@@ -173,18 +182,6 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
       update();
     }
   }
-
-
-  // **********************************************************************
-  // Rendering
-  // **********************************************************************
-  mWorld.render();
-
-  if (mShowDebugText) {
-    mWorld.showDebugText();
-  }
-
-  mWorld.processEndOfFrameActions();
 }
 
 }
