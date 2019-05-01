@@ -19,8 +19,12 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/bonus.hpp"
+#include "data/saved_game.hpp"
 #include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
+#include "loader/duke_script_loader.hpp"
+#include "ui/duke_script_runner.hpp"
+#include "ui/text_entry_widget.hpp"
 
 #include "game_mode.hpp"
 
@@ -28,6 +32,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <functional>
 #include <stack>
 #include <variant>
 
@@ -51,6 +56,8 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
+  using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
+
   struct World {
     explicit World(game_logic::GameWorld* pWorld)
       : mpWorld(pWorld)
@@ -72,10 +79,60 @@ private:
     bool mDoNextSingleStep = false;
   };
 
-  using State = std::variant<World>;
+  struct Menu {
+    template <typename ScriptEndHook, typename EventHook>
+    Menu(
+      ui::DukeScriptRunner* pScriptRunner,
+      ScriptEndHook&& scriptEndHook,
+      EventHook&& eventHook
+    )
+      : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
+      , mEventHook(std::forward<EventHook>(eventHook))
+      , mpScriptRunner(pScriptRunner)
+    {
+    }
 
+    void handleEvent(const SDL_Event& event);
+    void updateAndRender(engine::TimeDelta dt);
+
+    std::function<void(const ExecutionResult&)> mScriptFinishedHook;
+    std::function<bool(const SDL_Event&)> mEventHook;
+    ui::DukeScriptRunner* mpScriptRunner;
+  };
+
+  struct SavedGameNameEntry {
+    SavedGameNameEntry(GameMode::Context context, const int slotIndex);
+
+    void updateAndRender(engine::TimeDelta dt);
+
+    ui::TextEntryWidget mTextEntryWidget;
+    int mSlotIndex;
+  };
+
+  using State = std::variant<World, Menu, SavedGameNameEntry>;
+
+  static bool noopEventHook(const SDL_Event&) { return false; }
+
+  bool handleMenuEnterEvent(const SDL_Event& event);
+  void runScript(const char* scriptName);
+
+  template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
+  void enterMenu(
+    const char* scriptName,
+    ScriptEndHook&& scriptEndedHook,
+    EventHook&& eventHook = noopEventHook);
+  void leaveMenu();
+  void fadeToWorld();
+
+  void onRestoreGameMenuFinished(const ExecutionResult& result);
+  void onSaveGameMenuFinished(const ExecutionResult& result);
+  void saveGame(int slotIndex, std::string_view name);
+
+  GameMode::Context mContext;
+  data::SavedGame mSavedGame;
   game_logic::GameWorld mWorld;
   std::stack<State, std::vector<State>> mStateStack;
+  loader::ScriptBundle mScripts;
   bool mGameWasQuit = false;
 };
 
@@ -92,6 +149,29 @@ inline bool GameRunner::gameQuit() const {
 
 inline std::set<data::Bonus> GameRunner::achievedBonuses() const {
   return mWorld.achievedBonuses();
+}
+
+
+inline void GameRunner::Menu::handleEvent(const SDL_Event& event) {
+  if (!mEventHook(event)) {
+    mpScriptRunner->handleEvent(event);
+  }
+}
+
+
+inline void GameRunner::Menu::updateAndRender(const engine::TimeDelta dt) {
+  mpScriptRunner->updateAndRender(dt);
+
+  if (mpScriptRunner->hasFinishedExecution()) {
+    mScriptFinishedHook(*mpScriptRunner->result());
+  }
+}
+
+
+inline void GameRunner::SavedGameNameEntry::updateAndRender(
+  const engine::TimeDelta dt
+) {
+  mTextEntryWidget.updateAndRender(dt);
 }
 
 }

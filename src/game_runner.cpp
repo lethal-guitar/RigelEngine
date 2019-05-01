@@ -16,7 +16,12 @@
 
 #include "game_runner.hpp"
 
+#include "base/match.hpp"
 #include "game_logic/ingame_systems.hpp"
+#include "loader/resource_loader.hpp"
+
+#include "game_service_provider.hpp"
+#include "user_profile.hpp"
 
 
 namespace rigel {
@@ -33,6 +38,42 @@ namespace {
 // playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
 
+constexpr auto SAVE_SLOT_NAME_ENTRY_POS_X = 14;
+constexpr auto SAVE_SLOT_NAME_ENTRY_START_POS_Y = 6;
+constexpr auto SAVE_SLOT_NAME_HEIGHT = 2;
+
+constexpr auto MAX_SAVE_SLOT_NAME_LENGTH = 18;
+
+
+bool isNonRepeatKeyDown(const SDL_Event& event) {
+  return event.type == SDL_KEYDOWN && event.key.repeat == 0;
+}
+
+
+auto loadScripts(const loader::ResourceLoader& resources) {
+  auto allScripts = resources.loadScriptBundle("TEXT.MNI");
+  const auto optionsScripts = resources.loadScriptBundle("OPTIONS.MNI");
+
+  allScripts.insert(std::begin(optionsScripts), std::end(optionsScripts));
+
+  return allScripts;
+}
+
+
+auto createSavedGame(
+  const data::GameSessionId& sessionId,
+  const data::PlayerModel& playerModel
+) {
+  return data::SavedGame{
+    sessionId,
+    playerModel.tutorialMessages(),
+    "", // will be filled in on saving
+    playerModel.weapon(),
+    playerModel.ammo(),
+    playerModel.score()
+  };
+}
+
 }
 
 
@@ -43,30 +84,71 @@ GameRunner::GameRunner(
   const std::optional<base::Vector> playerPositionOverride,
   const bool showWelcomeMessage
 )
-  : mWorld(
+  : mContext(context)
+  , mSavedGame(createSavedGame(sessionId, *pPlayerModel))
+  , mWorld(
       pPlayerModel,
       sessionId,
       context,
       playerPositionOverride,
       showWelcomeMessage)
+  // TODO: Loading the script bundles should happen at top level, and the bundles
+  // should be passed via the mode context
+  , mScripts(loadScripts(*context.mpResources))
 {
   mStateStack.emplace(World{&mWorld});
 }
 
 
 void GameRunner::handleEvent(const SDL_Event& event) {
+  auto handleSavedGameNameEntryEvent = [&, this](
+    SavedGameNameEntry& state
+  ) {
+    auto leaveTextEntry = [this]() {
+      SDL_StopTextInput();
+      mStateStack.pop();
+      mStateStack.pop();
+      fadeToWorld();
+    };
+
+    if (isNonRepeatKeyDown(event)) {
+      switch (event.key.keysym.sym) {
+        case SDLK_ESCAPE:
+          leaveTextEntry();
+          return;
+
+        case SDLK_RETURN:
+          saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
+          leaveTextEntry();
+          return;
+
+        default:
+          break;
+      }
+    }
+
+    state.mTextEntryWidget.handleEvent(event);
+  };
+
+
   if (mGameWasQuit) {
     return;
   }
 
-  if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-    mGameWasQuit = true;
-    return;
-  }
+  base::match(mStateStack.top(),
+    [&event, this](World& state) {
+      if (!handleMenuEnterEvent(event)) {
+        state.handleEvent(event);
+      }
+    },
 
-  std::visit(
-    [&event](auto& state) { state.handleEvent(event); },
-    mStateStack.top());
+    [&, this](SavedGameNameEntry& state) {
+      handleSavedGameNameEntryEvent(state);
+    },
+
+    [&event](Menu& state) {
+      state.handleEvent(event);
+    });
 }
 
 
@@ -78,6 +160,155 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   std::visit(
     [dt](auto& state) { state.updateAndRender(dt); },
     mStateStack.top());
+}
+
+
+bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
+  auto leaveMenuHook = [this](const ExecutionResult&) {
+    leaveMenu();
+  };
+
+  auto leaveMenuWithFadeHook = [this](const ExecutionResult&) {
+    leaveMenu();
+    fadeToWorld();
+  };
+
+  auto quitConfirmEventHook = [this](const SDL_Event& ev) {
+    if (isNonRepeatKeyDown(ev) && ev.key.keysym.sym == SDLK_y) {
+      mGameWasQuit = true;
+      return true;
+    }
+
+    return false;
+  };
+
+
+  if (!isNonRepeatKeyDown(event)) {
+    return false;
+  }
+
+  switch (event.key.keysym.sym) {
+    case SDLK_ESCAPE:
+      enterMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook);
+      break;
+
+    case SDLK_F2:
+      enterMenu(
+        "Save_Game",
+        [this](const auto& result) { onSaveGameMenuFinished(result); });
+      break;
+
+    case SDLK_F3:
+      enterMenu(
+        "Restore_Game",
+        [this](const auto& result) { onRestoreGameMenuFinished(result); });
+      break;
+
+    case SDLK_h:
+      enterMenu("&Instructions", leaveMenuWithFadeHook);
+      break;
+
+    case SDLK_p:
+      enterMenu("Paused", leaveMenuHook);
+      break;
+
+    default:
+      return false;
+  }
+
+  return true;
+}
+
+
+void GameRunner::runScript(const char* scriptName) {
+  mContext.mpScriptRunner->executeScript(mScripts[scriptName]);
+}
+
+
+template <typename ScriptEndHook, typename EventHook>
+void GameRunner::enterMenu(
+  const char* scriptName,
+  ScriptEndHook&& scriptEndedHook,
+  EventHook&& eventHook
+) {
+  if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
+    pWorld->mPlayerInput = {};
+  }
+
+  runScript(scriptName);
+  mStateStack.push(Menu{
+    mContext.mpScriptRunner,
+    std::forward<ScriptEndHook>(scriptEndedHook),
+    std::forward<EventHook>(eventHook)});
+}
+
+
+void GameRunner::leaveMenu() {
+  mStateStack.pop();
+}
+
+
+void GameRunner::fadeToWorld() {
+  mContext.mpServiceProvider->fadeOutScreen();
+  mWorld.render();
+  mContext.mpServiceProvider->fadeInScreen();
+}
+
+
+void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
+  using STT = ui::DukeScriptRunner::ScriptTerminationType;
+
+  if (result.mTerminationType == STT::AbortedByUser) {
+    leaveMenu();
+    fadeToWorld();
+  } else {
+    const auto slotIndex = result.mSelectedPage;
+    const auto& slot = mContext.mpUserProfile->mSaveSlots[*slotIndex];
+    if (slot) {
+      mContext.mpServiceProvider->scheduleStartFromSavedGame(*slot);
+    } else {
+      // When selecting an empty slot, we show a message ("no game in this
+      // slot") and then return to the save slot selection menu.
+      // The latter stays on the stack, we push another menu state on top of
+      // the stack for showing the message.
+      enterMenu(
+        "No_Game_Restore",
+        [this](const auto&) {
+          leaveMenu();
+          runScript("Restore_Game");
+        });
+    }
+  }
+}
+
+
+void GameRunner::onSaveGameMenuFinished(const ExecutionResult& result) {
+  using STT = ui::DukeScriptRunner::ScriptTerminationType;
+
+  if (result.mTerminationType == STT::AbortedByUser) {
+    leaveMenu();
+    fadeToWorld();
+  } else {
+    // HACK: This is to make the menu selection indicator (spinning arrow)
+    // disappear.
+    // TODO: Find a more obvious/clear way to do this. Ideally, the script
+    // runner would do this as part of the updateAndRender() call that runs the
+    // script's final instruction.
+    mContext.mpScriptRunner->updateAndRender(0.0);
+
+    const auto slotIndex = *result.mSelectedPage;
+    SDL_StartTextInput();
+    mStateStack.push(SavedGameNameEntry{mContext, slotIndex});
+  }
+}
+
+
+void GameRunner::saveGame(const int slotIndex, std::string_view name) {
+  auto savedGame = mSavedGame;
+  savedGame.mName = name;
+
+  mContext.mpUserProfile->mSaveSlots[slotIndex] = savedGame;
+  mContext.mpUserProfile->saveToDisk();
 }
 
 
@@ -172,7 +403,7 @@ void GameRunner::World::handlePlayerInput(const SDL_Event& event) {
 
 
 void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
-  if (event.type != SDL_KEYDOWN || event.key.repeat != 0) {
+  if (!isNonRepeatKeyDown(event)) {
     return;
   }
 
@@ -204,6 +435,20 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
       }
       break;
   }
+}
+
+
+GameRunner::SavedGameNameEntry::SavedGameNameEntry(
+  GameMode::Context context,
+  const int slotIndex
+)
+  : mTextEntryWidget(
+      context.mpUiRenderer,
+      SAVE_SLOT_NAME_ENTRY_POS_X,
+      SAVE_SLOT_NAME_ENTRY_START_POS_Y + slotIndex * SAVE_SLOT_NAME_HEIGHT,
+      MAX_SAVE_SLOT_NAME_LENGTH)
+  , mSlotIndex(slotIndex)
+{
 }
 
 }
