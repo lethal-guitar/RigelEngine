@@ -18,6 +18,7 @@
 
 #include "data/game_session_data.hpp"
 #include "loader/resource_loader.hpp"
+#include "ui/high_score_list.hpp"
 
 #include "game_service_provider.hpp"
 #include "user_profile.hpp"
@@ -201,6 +202,11 @@ void MenuMode::navigateToNextMenu(
       mMenuState = MenuState::SelectNewGameEpisode;
       break;
 
+    case MenuState::EpisodeNotAvailableMessageHighScores:
+      runScript(mContext, "Episode_Select");
+      mMenuState = MenuState::SelectHighscoresEpisode;
+      break;
+
     case MenuState::RestoreGame:
       if (abortedByUser(result)) {
         enterMainMenu();
@@ -278,15 +284,14 @@ void MenuMode::navigateToNextMenu(
       } else {
         assert(result.mSelectedPage);
         const auto chosenEpisode = *result.mSelectedPage;
-        const auto hiscoreBackgroundScript =
-          std::string("Volume") + std::to_string(chosenEpisode + 1);
 
-        auto showHiScoreScript = mContext.mpScripts->at(hiscoreBackgroundScript);
-        showHiScoreScript.emplace_back(data::script::FadeIn{});
-        showHiScoreScript.emplace_back(data::script::WaitForUserInput{});
-
-        mContext.mpScriptRunner->executeScript(showHiScoreScript);
-        mMenuState = MenuState::ShowHiscores;
+        if (mContext.mpServiceProvider->isShareWareVersion() && chosenEpisode > 0) {
+          runScript(mContext, "No_Can_Order");
+          mMenuState = MenuState::EpisodeNotAvailableMessageHighScores;
+        } else {
+          ui::setupHighScoreListDisplay(mContext, chosenEpisode);
+          mMenuState = MenuState::ShowHiscores;
+        }
       }
       break;
 

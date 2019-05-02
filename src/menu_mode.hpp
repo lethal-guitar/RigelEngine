@@ -37,6 +37,7 @@ private:
     AskIfQuit,
     ChooseInstructionsOrStory,
     EpisodeNotAvailableMessage,
+    EpisodeNotAvailableMessageHighScores,
     NoSavedGameInSlotMessage,
     GameOptions,
     GameSpeedConfig,

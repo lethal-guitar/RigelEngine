@@ -220,6 +220,8 @@ set(core_sources
     ui/episode_end_sequence.hpp
     ui/fps_display.cpp
     ui/fps_display.hpp
+    ui/high_score_list.cpp
+    ui/high_score_list.hpp
     ui/hud_renderer.cpp
     ui/hud_renderer.hpp
     ui/ingame_message_display.cpp
