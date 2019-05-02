@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "data/high_score_list.hpp"
 #include "data/saved_game.hpp"
 
 #include <array>
@@ -25,4 +26,7 @@
 namespace rigel::loader {
 
 data::SaveSlotArray loadSavedGames(const std::string& gamePath);
+
+std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
+  const std::string& gamePath);
 }

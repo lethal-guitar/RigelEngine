@@ -100,6 +100,22 @@ data::SavedGame loadSavedGame(
   };
 }
 
+
+data::HighScoreList loadHighScoreList(const std::string& filename) {
+  data::HighScoreList list;
+
+  const auto data = loadFile(filename);
+  auto reader = LeStreamReader{data};
+
+  for (auto i = 0u; i < data::NUM_HIGH_SCORE_ENTRIES; ++i) {
+    list[i].mName = readFixedSizeString(reader, 15);
+    list[i].mScore = std::min<std::uint32_t>(reader.readU32(), data::MAX_SCORE);
+  }
+
+  // TODO: Ensure the list is sorted
+  return list;
+}
+
 }
 
 
@@ -117,6 +133,25 @@ data::SaveSlotArray loadSavedGames(const std::string& gamePath) {
       }
     }
   } catch (const std::exception&) {
+  }
+
+  return result;
+}
+
+
+std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
+  const std::string& gamePath
+) {
+  using namespace std::literals;
+
+  std::array<data::HighScoreList, data::NUM_EPISODES> result;
+
+  for (auto i = 0; i < data::NUM_EPISODES; ++i) {
+    try {
+      result[i] = loadHighScoreList(
+        gamePath + "NUKEM2.-V"s + std::to_string(i + 1));
+    } catch (const std::exception&) {
+    }
   }
 
   return result;
