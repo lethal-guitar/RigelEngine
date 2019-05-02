@@ -17,6 +17,7 @@
 #pragma once
 
 #include "data/high_score_list.hpp"
+#include "ui/text_entry_widget.hpp"
 
 #include "game_mode.hpp"
 
@@ -24,4 +25,6 @@
 namespace rigel::ui {
 
 void setupHighScoreListDisplay(GameMode::Context& context, int episode);
+
+ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context);
 }

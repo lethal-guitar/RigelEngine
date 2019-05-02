@@ -46,14 +46,20 @@ private:
   template<typename StageT>
   void fadeToNewStage(StageT& stage);
   void finishGameSession();
+  void enterHighScore(std::string_view name);
 
 private:
+  struct HighScoreNameEntry {
+    ui::TextEntryWidget mNameEntryWidget;
+  };
+
   struct HighScoreListDisplay {};
 
   using SessionStage = std::variant<
     std::unique_ptr<GameRunner>,
     ui::BonusScreen,
     ui::EpisodeEndSequence,
+    HighScoreNameEntry,
     HighScoreListDisplay
   >;
 

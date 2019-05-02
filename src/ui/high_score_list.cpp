@@ -24,6 +24,21 @@
 
 namespace rigel::ui {
 
+namespace {
+
+constexpr auto HIGH_SCORE_NAME_ENTRY_POS_X = 12;
+constexpr auto HIGH_SCORE_NAME_ENTRY_POS_Y = 14;
+constexpr auto MAX_HIGH_SCORE_NAME_ENTRY_LENGTH = 15;
+
+void awaitScriptCompletion(GameMode::Context& context) {
+  while (!context.mpScriptRunner->hasFinishedExecution()) {
+    context.mpScriptRunner->updateAndRender(0.0);
+  }
+}
+
+}
+
+
 void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
   using namespace std::literals;
 
@@ -34,9 +49,7 @@ void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
 
 
   runScript(context, "Volume"s + std::to_string(episode + 1));
-  while (!context.mpScriptRunner->hasFinishedExecution()) {
-    context.mpScriptRunner->updateAndRender(0.0);
-  }
+  awaitScriptCompletion(context);
 
   {
     const auto& list = context.mpUserProfile->mHighScoreLists[episode];
@@ -56,6 +69,19 @@ void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
 
     context.mpScriptRunner->executeScript(awaitInput);
   }
+}
+
+ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context) {
+  runScript(context, "New_Highscore");
+  awaitScriptCompletion(context);
+
+  return {
+    context.mpUiRenderer,
+    HIGH_SCORE_NAME_ENTRY_POS_X,
+    HIGH_SCORE_NAME_ENTRY_POS_Y,
+    MAX_HIGH_SCORE_NAME_ENTRY_LENGTH,
+    ui::TextEntryWidget::Style::Regular
+  };
 }
 
 }

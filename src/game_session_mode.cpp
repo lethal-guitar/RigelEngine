@@ -21,6 +21,7 @@
 #include "ui/high_score_list.hpp"
 
 #include "game_service_provider.hpp"
+#include "user_profile.hpp"
 
 
 namespace rigel {
@@ -72,6 +73,25 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
 
     [&event](ui::EpisodeEndSequence& endScreens) {
       endScreens.handleEvent(event);
+    },
+
+    [&event, this](HighScoreNameEntry& state) {
+      if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
+        switch (event.key.keysym.sym) {
+          case SDLK_ESCAPE:
+            enterHighScore("");
+            return;
+
+          case SDLK_RETURN:
+            enterHighScore(state.mNameEntryWidget.text());
+            return;
+
+          default:
+            break;
+        }
+      }
+
+      state.mNameEntryWidget.handleEvent(event);
     },
 
     [&event, this](const HighScoreListDisplay&) {
@@ -133,6 +153,10 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       }
     },
 
+    [this, &dt](HighScoreNameEntry& state) {
+      state.mNameEntryWidget.updateAndRender(dt);
+    },
+
     [this, &dt](const HighScoreListDisplay&) {
       mContext.mpScriptRunner->updateAndRender(dt);
       if (mContext.mpScriptRunner->hasFinishedExecution()) {
@@ -153,6 +177,28 @@ void GameSessionMode::fadeToNewStage(StageT& stage) {
 
 void GameSessionMode::finishGameSession() {
   mContext.mpServiceProvider->stopMusic();
+
+  const auto scoreQualifies = data::scoreQualifiesForHighScoreList(
+    mPlayerModel.score(),
+    mContext.mpUserProfile->mHighScoreLists[mEpisode]);
+  if (scoreQualifies) {
+    SDL_StartTextInput();
+    mCurrentStage = HighScoreNameEntry{ui::setupHighScoreNameEntry(mContext)};
+  } else {
+    ui::setupHighScoreListDisplay(mContext, mEpisode);
+    mCurrentStage = HighScoreListDisplay{};
+  }
+}
+
+void GameSessionMode::enterHighScore(std::string_view name) {
+  SDL_StopTextInput();
+
+  data::insertNewScore(
+    mPlayerModel.score(),
+    std::string{name},
+    mContext.mpUserProfile->mHighScoreLists[mEpisode]);
+  mContext.mpUserProfile->saveToDisk();
+
   ui::setupHighScoreListDisplay(mContext, mEpisode);
   mCurrentStage = HighScoreListDisplay{};
 }
