@@ -48,10 +48,13 @@ private:
   void finishGameSession();
 
 private:
+  struct HighScoreListDisplay {};
+
   using SessionStage = std::variant<
     std::unique_ptr<GameRunner>,
     ui::BonusScreen,
-    ui::EpisodeEndSequence
+    ui::EpisodeEndSequence,
+    HighScoreListDisplay
   >;
 
   data::PlayerModel mPlayerModel;

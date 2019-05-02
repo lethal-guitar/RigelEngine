@@ -18,6 +18,7 @@
 
 #include "base/match.hpp"
 #include "data/saved_game.hpp"
+#include "ui/high_score_list.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -73,7 +74,12 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
       endScreens.handleEvent(event);
     },
 
-    [](auto&) {});
+    [&event, this](const HighScoreListDisplay&) {
+      mContext.mpScriptRunner->handleEvent(event);
+    },
+
+    [](const auto&) {
+	});
 }
 
 
@@ -125,6 +131,14 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       if (endScreens.finished()) {
         finishGameSession();
       }
+    },
+
+    [this, &dt](const HighScoreListDisplay&) {
+      mContext.mpScriptRunner->updateAndRender(dt);
+      if (mContext.mpScriptRunner->hasFinishedExecution()) {
+        mContext.mpServiceProvider->fadeOutScreen();
+        mContext.mpServiceProvider->scheduleEnterMainMenu();
+      }
     });
 }
 
@@ -138,9 +152,9 @@ void GameSessionMode::fadeToNewStage(StageT& stage) {
 
 
 void GameSessionMode::finishGameSession() {
-  // TODO: Record and show hiscore
-  mContext.mpServiceProvider->fadeOutScreen();
-  mContext.mpServiceProvider->scheduleEnterMainMenu();
+  mContext.mpServiceProvider->stopMusic();
+  ui::setupHighScoreListDisplay(mContext, mEpisode);
+  mCurrentStage = HighScoreListDisplay{};
 }
 
 }
