@@ -139,6 +139,7 @@ namespace rigel { namespace ui {
 
 namespace {
 
+constexpr auto MENU_INDICATOR_ANIM_DELAY = 7;
 constexpr auto NUM_MENU_INDICATOR_STATES = 8;
 constexpr auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
@@ -370,10 +371,10 @@ void MenuElementRenderer::drawTextEntryCursor(
   const int y,
   const engine::TimeDelta elapsedTime
 ) const {
-  const auto cursorAnimTicks = static_cast<int>(
-    engine::timeToSlowTicks(elapsedTime) / CURSOR_ANIM_DELAY);
-  const auto cursorAnimState = cursorAnimTicks % NUM_CURSOR_ANIM_STATES;
-  drawTextEntryCursor(x, y, cursorAnimState);
+  const auto animTicks =
+    engine::timeToSlowTicks(elapsedTime) / CURSOR_ANIM_DELAY;
+  const auto animState = static_cast<int>(std::round(animTicks));
+  drawTextEntryCursor(x, y, animState % NUM_CURSOR_ANIM_STATES);
 }
 
 
@@ -382,7 +383,8 @@ void MenuElementRenderer::drawSelectionIndicator(
   const int y,
   const engine::TimeDelta elapsedTime
 ) const {
-  const auto animTicks = engine::timeToSlowTicks(elapsedTime) / 7.0;
+  const auto animTicks =
+    engine::timeToSlowTicks(elapsedTime) / MENU_INDICATOR_ANIM_DELAY;
   const auto animState = static_cast<int>(std::round(animTicks));
   drawSelectionIndicator(x, y, animState % NUM_MENU_INDICATOR_STATES);
 }
