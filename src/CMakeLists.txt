@@ -11,6 +11,8 @@ set(core_sources
     data/game_session_data.hpp
     data/game_traits.cpp
     data/game_traits.hpp
+    data/high_score_list.cpp
+    data/high_score_list.hpp
     data/image.cpp
     data/image.hpp
     data/level_hints.cpp
