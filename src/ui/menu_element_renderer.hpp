@@ -19,6 +19,7 @@
 #include "base/color.hpp"
 #include "base/warnings.hpp"
 #include "engine/texture.hpp"
+#include "engine/timing.hpp"
 #include "engine/tile_renderer.hpp"
 #include "loader/palette.hpp"
 
@@ -36,8 +37,6 @@ namespace rigel { namespace loader {
 
 
 namespace rigel { namespace ui {
-
-constexpr auto NUM_MENU_INDICATOR_STATES = 8;
 
 
 class MenuElementRenderer {
@@ -65,15 +64,17 @@ public:
 
   /** Draw text entry cursor icon at given position/state.
    *
-   * Valid range for state: 0..3 (will be clamped automatically)
+   * elapsedTime should be the total elapsed time since the text entry cursor
+   * is being drawn.
    */
-  void drawTextEntryCursor(int x, int y, int state) const;
+  void drawTextEntryCursor(int x, int y, engine::TimeDelta elapsedTime) const;
 
   /** Draw menu selection indicator (spinning arrow) at given position.
    *
-   * Valid range for state: 0..7
+   * elapsedTime should be the total elapsed time since the selection indicator
+   * is being drawn.
    */
-  void drawSelectionIndicator(int x, int y, int state) const;
+  void drawSelectionIndicator(int x, int y, engine::TimeDelta elapsedTime) const;
 
   /** Draws a black rectangle at given position.
    *
@@ -82,7 +83,8 @@ public:
   void clearSelectionIndicator(int x, int y);
 
 private:
-
+  void drawTextEntryCursor(int x, int y, int state) const;
+  void drawSelectionIndicator(int x, int y, int state) const;
   void drawMessageBoxRow(
     int x,
     int y,

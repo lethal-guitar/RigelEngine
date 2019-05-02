@@ -139,7 +139,11 @@ namespace rigel { namespace ui {
 
 namespace {
 
-const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
+constexpr auto NUM_MENU_INDICATOR_STATES = 8;
+constexpr auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
+
+constexpr auto CURSOR_ANIM_DELAY = 5;
+constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
 engine::OwningTexture createFontTexture(
@@ -359,6 +363,29 @@ void MenuElementRenderer::drawBonusScreenText(
     mpSpriteSheetRenderer->renderTileQuad(
       spriteSheetIndex, base::Vector{x + index*2, y});
   }
+}
+
+void MenuElementRenderer::drawTextEntryCursor(
+  const int x,
+  const int y,
+  const engine::TimeDelta elapsedTime
+) const {
+  const auto cursorAnimTicks = static_cast<int>(
+    engine::timeToSlowTicks(elapsedTime) / CURSOR_ANIM_DELAY);
+  const auto cursorAnimState = cursorAnimTicks % NUM_CURSOR_ANIM_STATES;
+  drawTextEntryCursor(x, y, cursorAnimState);
+}
+
+
+void MenuElementRenderer::drawSelectionIndicator(
+  const int x,
+  const int y,
+  const engine::TimeDelta elapsedTime
+) const {
+  // This timing is approximate
+  const auto rotations = engine::timeToFastTicks(elapsedTime) / 15.0;
+  const auto intRotations = static_cast<int>(std::round(rotations));
+  drawSelectionIndicator(x, y, intRotations % NUM_MENU_INDICATOR_STATES);
 }
 
 

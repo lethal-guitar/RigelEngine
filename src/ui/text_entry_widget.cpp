@@ -24,9 +24,6 @@ namespace rigel::ui {
 
 namespace {
 
-constexpr auto CURSOR_ANIM_DELAY = 5;
-constexpr auto NUM_CURSOR_ANIM_STATES = 4;
-
 constexpr auto TEXT_COLOR = base::Color{109, 109, 109, 255};
 
 
@@ -90,13 +87,9 @@ void TextEntryWidget::updateAndRender(const engine::TimeDelta dt) {
 
   // Cursor
   {
-    const auto cursorAnimTicks = static_cast<int>(
-      engine::timeToSlowTicks(mElapsedTime) / CURSOR_ANIM_DELAY);
-    const auto cursorAnimState = cursorAnimTicks % NUM_CURSOR_ANIM_STATES;
     const auto cursorOffset = static_cast<int>(mText.size());
-
     mpUiRenderer->drawTextEntryCursor(
-      mPosX + cursorOffset, mPosY, cursorAnimState);
+      mPosX + cursorOffset, mPosY, mElapsedTime);
   }
 }
 

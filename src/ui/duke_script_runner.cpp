@@ -608,14 +608,8 @@ void DukeScriptRunner::drawMenuSelectionIndicator(
 ) {
   state.mElapsedTime += dt;
 
-  // This timing is approximate
-  const auto rotations = engine::timeToFastTicks(state.mElapsedTime) / 15.0;
-  const auto intRotations = static_cast<int>(std::round(rotations));
-
   mMenuElementRenderer.drawSelectionIndicator(
-    8,
-    state.mPosY,
-    intRotations % NUM_MENU_INDICATOR_STATES);
+    8, state.mPosY, state.mElapsedTime);
 }
 
 
