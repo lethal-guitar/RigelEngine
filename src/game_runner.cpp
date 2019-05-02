@@ -428,7 +428,8 @@ GameRunner::SavedGameNameEntry::SavedGameNameEntry(
       context.mpUiRenderer,
       SAVE_SLOT_NAME_ENTRY_POS_X,
       SAVE_SLOT_NAME_ENTRY_START_POS_Y + slotIndex * SAVE_SLOT_NAME_HEIGHT,
-      MAX_SAVE_SLOT_NAME_LENGTH)
+      MAX_SAVE_SLOT_NAME_LENGTH,
+      ui::TextEntryWidget::Style::BigText)
   , mSlotIndex(slotIndex)
 {
 }

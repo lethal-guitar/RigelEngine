@@ -32,12 +32,18 @@ class MenuElementRenderer;
 
 class TextEntryWidget {
 public:
+  enum class Style {
+    Regular,
+    BigText
+  };
+
   // Position is given in tiles
   TextEntryWidget(
     const ui::MenuElementRenderer* pUiRenderer,
     int posX,
     int posY,
-    int maxTextLength);
+    int maxTextLength,
+    Style textStyle);
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
@@ -51,6 +57,7 @@ private:
   int mPosX;
   int mPosY;
   int mMaxTextLength;
+  Style mTextStyle;
 };
 
 }
