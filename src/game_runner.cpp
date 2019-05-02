@@ -50,16 +50,6 @@ bool isNonRepeatKeyDown(const SDL_Event& event) {
 }
 
 
-auto loadScripts(const loader::ResourceLoader& resources) {
-  auto allScripts = resources.loadScriptBundle("TEXT.MNI");
-  const auto optionsScripts = resources.loadScriptBundle("OPTIONS.MNI");
-
-  allScripts.insert(std::begin(optionsScripts), std::end(optionsScripts));
-
-  return allScripts;
-}
-
-
 auto createSavedGame(
   const data::GameSessionId& sessionId,
   const data::PlayerModel& playerModel
@@ -92,9 +82,6 @@ GameRunner::GameRunner(
       context,
       playerPositionOverride,
       showWelcomeMessage)
-  // TODO: Loading the script bundles should happen at top level, and the bundles
-  // should be passed via the mode context
-  , mScripts(loadScripts(*context.mpResources))
 {
   mStateStack.emplace(World{&mWorld});
 }
@@ -220,11 +207,6 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
 }
 
 
-void GameRunner::runScript(const char* scriptName) {
-  mContext.mpScriptRunner->executeScript(mScripts[scriptName]);
-}
-
-
 template <typename ScriptEndHook, typename EventHook>
 void GameRunner::enterMenu(
   const char* scriptName,
@@ -235,7 +217,7 @@ void GameRunner::enterMenu(
     pWorld->mPlayerInput = {};
   }
 
-  runScript(scriptName);
+  runScript(mContext, scriptName);
   mStateStack.push(Menu{
     mContext.mpScriptRunner,
     std::forward<ScriptEndHook>(scriptEndedHook),
@@ -275,7 +257,7 @@ void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
         "No_Game_Restore",
         [this](const auto&) {
           leaveMenu();
-          runScript("Restore_Game");
+          runScript(mContext, "Restore_Game");
         });
     }
   }
@@ -446,7 +428,8 @@ GameRunner::SavedGameNameEntry::SavedGameNameEntry(
       context.mpUiRenderer,
       SAVE_SLOT_NAME_ENTRY_POS_X,
       SAVE_SLOT_NAME_ENTRY_START_POS_Y + slotIndex * SAVE_SLOT_NAME_HEIGHT,
-      MAX_SAVE_SLOT_NAME_LENGTH)
+      MAX_SAVE_SLOT_NAME_LENGTH,
+      ui::TextEntryWidget::Style::BigText)
   , mSlotIndex(slotIndex)
 {
 }

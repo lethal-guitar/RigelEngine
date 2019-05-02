@@ -24,9 +24,6 @@ namespace rigel::ui {
 
 namespace {
 
-constexpr auto CURSOR_ANIM_DELAY = 5;
-constexpr auto NUM_CURSOR_ANIM_STATES = 4;
-
 constexpr auto TEXT_COLOR = base::Color{109, 109, 109, 255};
 
 
@@ -42,12 +39,14 @@ TextEntryWidget::TextEntryWidget(
   const ui::MenuElementRenderer* pUiRenderer,
   const int posX,
   const int posY,
-  const int maxTextLength
+  const int maxTextLength,
+  const Style textStyle
 )
   : mpUiRenderer(pUiRenderer)
   , mPosX(posX)
   , mPosY(posY)
   , mMaxTextLength(maxTextLength)
+  , mTextStyle(textStyle)
 {
 }
 
@@ -75,6 +74,15 @@ void TextEntryWidget::handleEvent(const SDL_Event& event) {
 
 
 void TextEntryWidget::updateAndRender(const engine::TimeDelta dt) {
+  auto drawText = [this](const std::string& text) {
+    if (mTextStyle == Style::BigText) {
+      mpUiRenderer->drawBigText(mPosX, mPosY, text, TEXT_COLOR);
+    } else {
+      mpUiRenderer->drawText(mPosX, mPosY, text);
+    }
+  };
+
+
   mElapsedTime += dt;
 
   // Text
@@ -83,20 +91,15 @@ void TextEntryWidget::updateAndRender(const engine::TimeDelta dt) {
     // rectangle
     const auto spaces =
       std::string(static_cast<size_t>(mMaxTextLength + 1), ' ');
-    mpUiRenderer->drawBigText(mPosX, mPosY, spaces, TEXT_COLOR);
-
-    mpUiRenderer->drawBigText(mPosX, mPosY, mText, TEXT_COLOR);
+    drawText(spaces);
+    drawText(mText);
   }
 
   // Cursor
   {
-    const auto cursorAnimTicks = static_cast<int>(
-      engine::timeToSlowTicks(mElapsedTime) / CURSOR_ANIM_DELAY);
-    const auto cursorAnimState = cursorAnimTicks % NUM_CURSOR_ANIM_STATES;
     const auto cursorOffset = static_cast<int>(mText.size());
-
     mpUiRenderer->drawTextEntryCursor(
-      mPosX + cursorOffset, mPosY, cursorAnimState);
+      mPosX + cursorOffset, mPosY, mElapsedTime);
   }
 }
 

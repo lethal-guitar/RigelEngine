@@ -2,6 +2,7 @@ set(test_sources
     test_main.cpp
     test_duke_script_loader.cpp
     test_elevator.cpp
+    test_high_score_list.cpp
     test_letter_collection.cpp
     test_physics_system.cpp
     test_player.cpp

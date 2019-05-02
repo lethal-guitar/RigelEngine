@@ -14,32 +14,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "game_mode.hpp"
 
-#include "data/high_score_list.hpp"
-#include "data/saved_game.hpp"
-
-#include <string>
+#include "ui/duke_script_runner.hpp"
 
 
 namespace rigel {
 
-class UserProfile {
-public:
-  UserProfile() = default;
-  UserProfile(const std::string& profilePath);
-
-  void saveToDisk();
-  void loadFromDisk();
-
-  data::SaveSlotArray mSaveSlots;
-  std::array<data::HighScoreList, data::NUM_EPISODES> mHighScoreLists;
-
-private:
-  std::optional<std::string> mProfilePath;
-};
-
-
-UserProfile loadOrCreateUserProfile(const std::string gamePath);
+void runScript(GameMode::Context& context, const std::string& scriptName) {
+  context.mpScriptRunner->executeScript(context.mpScripts->at(scriptName));
+}
 
 }

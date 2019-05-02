@@ -16,48 +16,15 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-#include "engine/timing.hpp"
+#include "data/high_score_list.hpp"
+#include "ui/text_entry_widget.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <SDL.h>
-RIGEL_RESTORE_WARNINGS
-
-#include <string>
+#include "game_mode.hpp"
 
 
 namespace rigel::ui {
 
-class MenuElementRenderer;
+void setupHighScoreListDisplay(GameMode::Context& context, int episode);
 
-class TextEntryWidget {
-public:
-  enum class Style {
-    Regular,
-    BigText
-  };
-
-  // Position is given in tiles
-  TextEntryWidget(
-    const ui::MenuElementRenderer* pUiRenderer,
-    int posX,
-    int posY,
-    int maxTextLength,
-    Style textStyle);
-
-  void handleEvent(const SDL_Event& event);
-  void updateAndRender(engine::TimeDelta dt);
-
-  std::string_view text() const;
-
-private:
-  std::string mText;
-  engine::TimeDelta mElapsedTime = 0.0;
-  const ui::MenuElementRenderer* mpUiRenderer;
-  int mPosX;
-  int mPosY;
-  int mMaxTextLength;
-  Style mTextStyle;
-};
-
+ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context);
 }

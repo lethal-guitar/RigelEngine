@@ -11,6 +11,8 @@ set(core_sources
     data/game_session_data.hpp
     data/game_traits.cpp
     data/game_traits.hpp
+    data/high_score_list.cpp
+    data/high_score_list.hpp
     data/image.cpp
     data/image.hpp
     data/level_hints.cpp
@@ -218,6 +220,8 @@ set(core_sources
     ui/episode_end_sequence.hpp
     ui/fps_display.cpp
     ui/fps_display.hpp
+    ui/high_score_list.cpp
+    ui/high_score_list.hpp
     ui/hud_renderer.cpp
     ui/hud_renderer.hpp
     ui/ingame_message_display.cpp
@@ -261,9 +265,9 @@ target_link_libraries(rigel_core
     ${SDL2_MIXER_LIBRARIES}
     entityx
     Boost::boost
-    std::filesystem
 
     PRIVATE
+    std::filesystem
     dbopl
     speex_resampler
     glad
@@ -283,6 +287,7 @@ set(main_exe_sources
     game_main.hpp
     game_main.ipp
     game_mode.hpp
+    game_mode.cpp
     game_service_provider.hpp
     game_session_mode.cpp
     game_session_mode.hpp

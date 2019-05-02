@@ -19,10 +19,13 @@
 #include "base/warnings.hpp"
 #include "engine/renderer.hpp"
 #include "engine/timing.hpp"
+#include "loader/duke_script_loader.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <string>
 
 
 namespace rigel {
@@ -51,6 +54,7 @@ struct GameMode {
     engine::Renderer* mpRenderer;
     IGameServiceProvider* mpServiceProvider;
     ui::DukeScriptRunner* mpScriptRunner;
+    loader::ScriptBundle* mpScripts;
     ui::MenuElementRenderer* mpUiRenderer;
     engine::TileRenderer* mpUiSpriteSheetRenderer;
     UserProfile* mpUserProfile;
@@ -62,5 +66,8 @@ struct GameMode {
 
   virtual void updateAndRender(engine::TimeDelta dt) = 0;
 };
+
+
+void runScript(GameMode::Context& context, const std::string& scriptName);
 
 }

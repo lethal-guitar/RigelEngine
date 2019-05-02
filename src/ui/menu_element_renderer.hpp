@@ -19,8 +19,8 @@
 #include "base/color.hpp"
 #include "base/warnings.hpp"
 #include "engine/texture.hpp"
-#include "engine/tile_renderer.hpp"
 #include "engine/timing.hpp"
+#include "engine/tile_renderer.hpp"
 #include "loader/palette.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -37,6 +37,7 @@ namespace rigel { namespace loader {
 
 
 namespace rigel { namespace ui {
+
 
 class MenuElementRenderer {
 public:
@@ -63,23 +64,27 @@ public:
 
   /** Draw text entry cursor icon at given position/state.
    *
-   * Valid range for state: 0..3 (will be clamped automatically)
+   * elapsedTime should be the total elapsed time since the text entry cursor
+   * is being drawn.
    */
-  void drawTextEntryCursor(int x, int y, int state) const;
+  void drawTextEntryCursor(int x, int y, engine::TimeDelta elapsedTime) const;
 
-  // Stateful API
-  // --------------------------------------------------------------------------
-  // TODO: This should move into DukeScriptRunner, so that this class' API
-  // can be fully stateless. It could be turned into a set of free functions
-  // at that point.
-  void showMenuSelectionIndicator(int y);
-  void hideMenuSelectionIndicator();
+  /** Draw menu selection indicator (spinning arrow) at given position.
+   *
+   * elapsedTime should be the total elapsed time since the selection indicator
+   * is being drawn.
+   */
+  void drawSelectionIndicator(int x, int y, engine::TimeDelta elapsedTime) const;
 
-  void updateAndRenderAnimatedElements(engine::TimeDelta timeDelta);
+  /** Draws a black rectangle at given position.
+   *
+   * Meant to erase a previously drawn menu selection indicator.
+   */
+  void clearSelectionIndicator(int x, int y);
 
 private:
-  void drawSelectionIndicator(int y, int state) const;
-
+  void drawTextEntryCursor(int x, int y, int state) const;
+  void drawSelectionIndicator(int x, int y, int state) const;
   void drawMessageBoxRow(
     int x,
     int y,
@@ -92,10 +97,6 @@ private:
   engine::Renderer* mpRenderer;
   engine::TileRenderer* mpSpriteSheetRenderer;
   engine::TileRenderer mBigTextRenderer;
-
-  std::optional<int> mMenuSelectionIndicatorPosition;
-  bool mPendingMenuIndicatorErase = false;
-  engine::TimeDelta mElapsedTime = 0;
 };
 
 }}

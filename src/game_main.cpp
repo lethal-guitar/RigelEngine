@@ -45,6 +45,18 @@ struct NullGameMode : public GameMode {
   void updateAndRender(engine::TimeDelta) override {}
 };
 
+
+auto loadScripts(const loader::ResourceLoader& resources) {
+  auto allScripts = resources.loadScriptBundle("TEXT.MNI");
+  const auto optionsScripts = resources.loadScriptBundle("OPTIONS.MNI");
+  const auto orderInfoScripts = resources.loadScriptBundle("ORDERTXT.MNI");
+
+  allScripts.insert(std::begin(optionsScripts), std::end(optionsScripts));
+  allScripts.insert(std::begin(orderInfoScripts), std::end(orderInfoScripts));
+
+  return allScripts;
+}
+
 }
 
 
@@ -67,6 +79,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mIsMinimized(false)
   , mUserProfile(loadOrCreateUserProfile(gamePath))
   , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
+  , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheetRenderer(
       engine::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
@@ -199,6 +212,7 @@ GameMode::Context Game::makeModeContext() {
     &mRenderer,
     this,
     &mScriptRunner,
+    &mAllScripts,
     &mTextRenderer,
     &mUiSpriteSheetRenderer,
     &mUserProfile};

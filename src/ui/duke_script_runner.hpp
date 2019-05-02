@@ -90,6 +90,16 @@ private:
     engine::TimeDelta mElapsedTime = 0;
   };
 
+  struct MenuSelectionIndicatorState {
+    explicit MenuSelectionIndicatorState(const int posY)
+      : mPosY(posY)
+    {
+    }
+
+    int mPosY;
+    engine::TimeDelta mElapsedTime = 0;
+  };
+
   enum PagingMode {
     Menu,
     PagingOnly
@@ -133,6 +143,12 @@ private:
   void onPageChanged(PagerState& state);
   void executeCurrentPageScript(PagerState& state);
   void selectCurrentMenuItem(PagerState& state);
+  void showMenuSelectionIndicator(int y);
+  void hideMenuSelectionIndicator();
+
+  void drawMenuSelectionIndicator(
+    MenuSelectionIndicatorState& state, engine::TimeDelta dt);
+  void clearMenuSelectionIndicator(const MenuSelectionIndicatorState& state);
 
   bool hasCheckBoxes() const;
   void displayCheckBoxes(const CheckBoxesState& state);
@@ -165,6 +181,8 @@ private:
   std::optional<PagerState> mPagerState;
   bool mMenuItemWasSelected = false;
   std::unordered_map<int, int> mPersistentMenuSelections;
+  std::optional<MenuSelectionIndicatorState> mMenuSelectionIndicatorState;
+  std::optional<MenuSelectionIndicatorState> mPreviousSelectionIndicatorState;
   std::optional<int> mCurrentPersistentSelectionSlot;
 
   std::optional<CheckBoxesState> mCheckBoxStates;

@@ -113,7 +113,7 @@ void DukeScriptRunner::startExecution(const data::script::Script& script) {
   mState = State::ExecutingScript;
 
   mMenuItemWasSelected = false;
-  mMenuElementRenderer.hideMenuSelectionIndicator();
+  hideMenuSelectionIndicator();
   stopNewsReporterAnimation();
 }
 
@@ -169,7 +169,7 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
   // Escape always aborts
   if (event.key.keysym.sym == SDLK_ESCAPE) {
     mState = State::ExecutionInterrupted;
-    mMenuElementRenderer.hideMenuSelectionIndicator();
+    hideMenuSelectionIndicator();
     return;
   }
 
@@ -217,7 +217,9 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 
 
 void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
-  mMenuElementRenderer.updateAndRenderAnimatedElements(dt);
+  if (mMenuSelectionIndicatorState) {
+    drawMenuSelectionIndicator(*mMenuSelectionIndicatorState, dt);
+  }
 
   if (mDelayState) {
     handleDelay(*mDelayState, dt);
@@ -234,6 +236,19 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   while (mState == State::ExecutingScript) {
     interpretNextAction();
   }
+
+  if (mPreviousSelectionIndicatorState) {
+    const auto indicatorNowHidden = !mMenuSelectionIndicatorState.has_value();
+    const auto needsClear =
+      indicatorNowHidden ||
+      mPreviousSelectionIndicatorState->mPosY !=
+        mMenuSelectionIndicatorState->mPosY;
+
+    if (needsClear) {
+      clearMenuSelectionIndicator(*mPreviousSelectionIndicatorState);
+    }
+  }
+  mPreviousSelectionIndicatorState = mMenuSelectionIndicatorState;
 
   if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
     mpServices->fadeInScreen();
@@ -317,7 +332,7 @@ void DukeScriptRunner::interpretNextAction() {
 
   if (mProgramCounter >= mCurrentInstructions.size()) {
     mState = State::FinishedExecution;
-    mMenuElementRenderer.hideMenuSelectionIndicator();
+    hideMenuSelectionIndicator();
     return;
   }
 
@@ -337,7 +352,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const ShowMenuSelectionIndicator& action) {
-      mMenuElementRenderer.showMenuSelectionIndicator(action.yPos);
+      showMenuSelectionIndicator(action.yPos);
       if (hasCheckBoxes()) {
         mCheckBoxStates->mCurrentMenuPosY = action.yPos;
       }
@@ -576,6 +591,34 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
 
   mMenuItemWasSelected = true;
 }
+
+
+void DukeScriptRunner::showMenuSelectionIndicator(const int y) {
+  mMenuSelectionIndicatorState = MenuSelectionIndicatorState{y};
+}
+
+
+void DukeScriptRunner::hideMenuSelectionIndicator() {
+  mMenuSelectionIndicatorState = std::nullopt;
+}
+
+void DukeScriptRunner::drawMenuSelectionIndicator(
+  MenuSelectionIndicatorState& state,
+  const engine::TimeDelta dt
+) {
+  state.mElapsedTime += dt;
+
+  mMenuElementRenderer.drawSelectionIndicator(
+    8, state.mPosY, state.mElapsedTime);
+}
+
+
+void DukeScriptRunner::clearMenuSelectionIndicator(
+  const MenuSelectionIndicatorState& state
+) {
+  mMenuElementRenderer.clearSelectionIndicator(8, state.mPosY);
+}
+
 
 void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
   for (auto i = 0; i < 8; ++i) {

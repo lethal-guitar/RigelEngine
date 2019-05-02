@@ -114,7 +114,6 @@ private:
   static bool noopEventHook(const SDL_Event&) { return false; }
 
   bool handleMenuEnterEvent(const SDL_Event& event);
-  void runScript(const char* scriptName);
 
   template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
   void enterMenu(
@@ -132,7 +131,6 @@ private:
   data::SavedGame mSavedGame;
   game_logic::GameWorld mWorld;
   std::stack<State, std::vector<State>> mStateStack;
-  loader::ScriptBundle mScripts;
   bool mGameWasQuit = false;
 };
 

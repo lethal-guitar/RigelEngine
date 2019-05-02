@@ -98,6 +98,7 @@ UserProfile importProfile(
 ) {
   UserProfile profile{profileFile};
   profile.mSaveSlots = loader::loadSavedGames(gamePath);
+  profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
   profile.saveToDisk();
   return profile;
 }
@@ -134,6 +135,16 @@ nlohmann::json serialize(const data::SavedGame& savedGame) {
 }
 
 
+nlohmann::json serialize(const data::HighScoreEntry& entry) {
+  using json = nlohmann::json;
+
+  json serialized;
+  serialized["name"] = entry.mName;
+  serialized["score"] = entry.mScore;
+  return serialized;
+}
+
+
 data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
   using namespace data;
 
@@ -160,6 +171,16 @@ data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
     : MAX_AMMO;
   result.mAmmo = std::clamp(json.at("ammo").get<int>(), 0, maxAmmo);
   result.mScore = std::clamp(json.at("score").get<int>(), 0, MAX_SCORE);
+  return result;
+}
+
+
+data::HighScoreEntry deserializeHighScoreEntry(const nlohmann::json& json) {
+  data::HighScoreEntry result;
+
+  result.mName = json.at("name").get<std::string>();
+  result.mScore = std::clamp(json.at("score").get<int>(), 0, data::MAX_SCORE);
+
   return result;
 }
 
@@ -192,6 +213,8 @@ void UserProfile::saveToDisk() {
 
   json serializedProfile;
 
+  // TODO: Refactor this long function into sub-functions
+
   auto serializedSaveSlots = json::array();
   for (const auto& slot : mSaveSlots) {
     if (slot) {
@@ -202,6 +225,18 @@ void UserProfile::saveToDisk() {
   }
 
   serializedProfile["saveSlots"] = serializedSaveSlots;
+
+  auto serializedHighScoreLists = json::array();
+  for (const auto& list : mHighScoreLists) {
+    auto serializedList = json::array();
+    for (const auto& entry : list) {
+      serializedList.push_back(serialize(entry));
+    }
+
+    serializedHighScoreLists.push_back(serializedList);
+  }
+
+  serializedProfile["highScoreLists"] = serializedHighScoreLists;
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
@@ -214,6 +249,7 @@ void UserProfile::loadFromDisk() {
   }
 
   mSaveSlots.fill(std::nullopt);
+  mHighScoreLists.fill(data::HighScoreList{});
 
   try {
     const auto buffer = loader::loadFile(*mProfilePath);
@@ -221,12 +257,45 @@ void UserProfile::loadFromDisk() {
 
     const auto serializedSaveSlots = serializedProfile.at("saveSlots");
 
-    std::size_t i = 0;
-    for (const auto& serializedSlot : serializedSaveSlots) {
-      if (!serializedSlot.is_null()) {
-        mSaveSlots[i] = deserializeSavedGame(serializedSlot);
+    // TODO: Refactor this long function into sub-functions
+    {
+      std::size_t i = 0;
+      for (const auto& serializedSlot : serializedSaveSlots) {
+        if (!serializedSlot.is_null()) {
+          mSaveSlots[i] = deserializeSavedGame(serializedSlot);
+        }
+        ++i;
+        if (i >= mSaveSlots.size()) {
+          break;
+        }
       }
-      ++i;
+    }
+
+    const auto serializedHighScoreLists =
+      serializedProfile.at("highScoreLists");
+
+    {
+      std::size_t i = 0;
+      for (const auto& serializedList : serializedHighScoreLists) {
+        {
+          std::size_t j = 0;
+          for (const auto& serializedEntry : serializedList) {
+            mHighScoreLists[i][j] = deserializeHighScoreEntry(serializedEntry);
+
+            ++j;
+            if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
+              break;
+            }
+          }
+        }
+
+        // TODO: Ensure the list is sorted
+
+        ++i;
+        if (i >= mHighScoreLists.size()) {
+          break;
+        }
+      }
     }
   } catch (const std::exception& ex) {
     std::cerr << "WARNING: Failed to load user profile\n";

@@ -18,8 +18,10 @@
 
 #include "base/match.hpp"
 #include "data/saved_game.hpp"
+#include "ui/high_score_list.hpp"
 
 #include "game_service_provider.hpp"
+#include "user_profile.hpp"
 
 
 namespace rigel {
@@ -73,7 +75,31 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
       endScreens.handleEvent(event);
     },
 
-    [](auto&) {});
+    [&event, this](HighScoreNameEntry& state) {
+      if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
+        switch (event.key.keysym.sym) {
+          case SDLK_ESCAPE:
+            enterHighScore("");
+            return;
+
+          case SDLK_RETURN:
+            enterHighScore(state.mNameEntryWidget.text());
+            return;
+
+          default:
+            break;
+        }
+      }
+
+      state.mNameEntryWidget.handleEvent(event);
+    },
+
+    [&event, this](const HighScoreListDisplay&) {
+      mContext.mpScriptRunner->handleEvent(event);
+    },
+
+    [](const auto&) {
+	});
 }
 
 
@@ -125,6 +151,18 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
       if (endScreens.finished()) {
         finishGameSession();
       }
+    },
+
+    [this, &dt](HighScoreNameEntry& state) {
+      state.mNameEntryWidget.updateAndRender(dt);
+    },
+
+    [this, &dt](const HighScoreListDisplay&) {
+      mContext.mpScriptRunner->updateAndRender(dt);
+      if (mContext.mpScriptRunner->hasFinishedExecution()) {
+        mContext.mpServiceProvider->fadeOutScreen();
+        mContext.mpServiceProvider->scheduleEnterMainMenu();
+      }
     });
 }
 
@@ -138,9 +176,31 @@ void GameSessionMode::fadeToNewStage(StageT& stage) {
 
 
 void GameSessionMode::finishGameSession() {
-  // TODO: Record and show hiscore
-  mContext.mpServiceProvider->fadeOutScreen();
-  mContext.mpServiceProvider->scheduleEnterMainMenu();
+  mContext.mpServiceProvider->stopMusic();
+
+  const auto scoreQualifies = data::scoreQualifiesForHighScoreList(
+    mPlayerModel.score(),
+    mContext.mpUserProfile->mHighScoreLists[mEpisode]);
+  if (scoreQualifies) {
+    SDL_StartTextInput();
+    mCurrentStage = HighScoreNameEntry{ui::setupHighScoreNameEntry(mContext)};
+  } else {
+    ui::setupHighScoreListDisplay(mContext, mEpisode);
+    mCurrentStage = HighScoreListDisplay{};
+  }
+}
+
+void GameSessionMode::enterHighScore(std::string_view name) {
+  SDL_StopTextInput();
+
+  data::insertNewScore(
+    mPlayerModel.score(),
+    std::string{name},
+    mContext.mpUserProfile->mHighScoreLists[mEpisode]);
+  mContext.mpUserProfile->saveToDisk();
+
+  ui::setupHighScoreListDisplay(mContext, mEpisode);
+  mCurrentStage = HighScoreListDisplay{};
 }
 
 }

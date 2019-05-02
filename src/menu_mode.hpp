@@ -37,6 +37,7 @@ private:
     AskIfQuit,
     ChooseInstructionsOrStory,
     EpisodeNotAvailableMessage,
+    EpisodeNotAvailableMessageHighScores,
     NoSavedGameInSlotMessage,
     GameOptions,
     GameSpeedConfig,
@@ -58,17 +59,9 @@ private:
   void navigateToNextMenu(const ui::DukeScriptRunner::ExecutionResult& result);
 
 private:
-  ui::DukeScriptRunner* mpScriptRunner;
-
-  loader::ScriptBundle mMainScripts;
-  loader::ScriptBundle mOptionsScripts;
-  loader::ScriptBundle mOrderingInfoScripts;
-
+  Context mContext;
   MenuState mMenuState = MenuState::MainMenu;
   int mChosenEpisodeForNewGame = 0;
-
-  IGameServiceProvider* mpServices;
-  UserProfile* mpUserProfile;
 };
 
 }
