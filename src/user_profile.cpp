@@ -244,6 +244,10 @@ void UserProfile::saveToDisk() {
 
 
 void UserProfile::loadFromDisk() {
+  using std::begin;
+  using std::end;
+  using std::sort;
+
   if (!mProfilePath) {
     return;
   }
@@ -289,7 +293,7 @@ void UserProfile::loadFromDisk() {
           }
         }
 
-        // TODO: Ensure the list is sorted
+        sort(begin(mHighScoreLists[i]), end(mHighScoreLists[i]));
 
         ++i;
         if (i >= mHighScoreLists.size()) {

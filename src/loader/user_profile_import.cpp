@@ -102,6 +102,10 @@ data::SavedGame loadSavedGame(
 
 
 data::HighScoreList loadHighScoreList(const std::string& filename) {
+  using std::begin;
+  using std::end;
+  using std::sort;
+
   data::HighScoreList list;
 
   const auto data = loadFile(filename);
@@ -112,7 +116,7 @@ data::HighScoreList loadHighScoreList(const std::string& filename) {
     list[i].mScore = std::min<std::uint32_t>(reader.readU32(), data::MAX_SCORE);
   }
 
-  // TODO: Ensure the list is sorted
+  sort(begin(list), end(list));
   return list;
 }
 
