@@ -20,7 +20,6 @@
 #include "base/warnings.hpp"
 #include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
-#include "engine/timing.hpp"
 #include "loader/palette.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -37,6 +36,9 @@ namespace rigel { namespace loader {
 
 
 namespace rigel { namespace ui {
+
+constexpr auto NUM_MENU_INDICATOR_STATES = 8;
+
 
 class MenuElementRenderer {
 public:
@@ -67,18 +69,19 @@ public:
    */
   void drawTextEntryCursor(int x, int y, int state) const;
 
-  // Stateful API
-  // --------------------------------------------------------------------------
-  // TODO: This should move into DukeScriptRunner, so that this class' API
-  // can be fully stateless. It could be turned into a set of free functions
-  // at that point.
-  void showMenuSelectionIndicator(int y);
-  void hideMenuSelectionIndicator();
+  /** Draw menu selection indicator (spinning arrow) at given position.
+   *
+   * Valid range for state: 0..7
+   */
+  void drawSelectionIndicator(int x, int y, int state) const;
 
-  void updateAndRenderAnimatedElements(engine::TimeDelta timeDelta);
+  /** Draws a black rectangle at given position.
+   *
+   * Meant to erase a previously drawn menu selection indicator.
+   */
+  void clearSelectionIndicator(int x, int y);
 
 private:
-  void drawSelectionIndicator(int y, int state) const;
 
   void drawMessageBoxRow(
     int x,
@@ -92,10 +95,6 @@ private:
   engine::Renderer* mpRenderer;
   engine::TileRenderer* mpSpriteSheetRenderer;
   engine::TileRenderer mBigTextRenderer;
-
-  std::optional<int> mMenuSelectionIndicatorPosition;
-  bool mPendingMenuIndicatorErase = false;
-  engine::TimeDelta mElapsedTime = 0;
 };
 
 }}

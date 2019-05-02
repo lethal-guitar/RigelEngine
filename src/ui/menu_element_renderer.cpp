@@ -139,7 +139,6 @@ namespace rigel { namespace ui {
 
 namespace {
 
-const auto NUM_MENU_INDICATOR_STATES = 8;
 const auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
 
@@ -364,11 +363,17 @@ void MenuElementRenderer::drawBonusScreenText(
 
 
 void MenuElementRenderer::drawSelectionIndicator(
+  const int x,
   const int y,
   const int state
 ) const {
   const auto index = 9*mpSpriteSheetRenderer->tilesPerRow() + state*2;
-  mpSpriteSheetRenderer->renderTileQuad(index, base::Vector{8, y - 1});
+  mpSpriteSheetRenderer->renderTileQuad(index, base::Vector{x, y - 1});
+}
+
+
+void MenuElementRenderer::clearSelectionIndicator(const int x, const int y) {
+  drawSelectionIndicator(x, y, MENU_INDICATOR_STATE_FOR_CLEARING);
 }
 
 
@@ -402,42 +407,5 @@ void MenuElementRenderer::drawMessageBoxRow(
 
   mpSpriteSheetRenderer->renderTile(baseIndex + rightIndex, x + width - 1, y);
 }
-
-
-void MenuElementRenderer::showMenuSelectionIndicator(int y) {
-  mMenuSelectionIndicatorPosition = y;
-  mPendingMenuIndicatorErase = false;
-}
-
-
-void MenuElementRenderer::hideMenuSelectionIndicator() {
-  if (mMenuSelectionIndicatorPosition) {
-    mPendingMenuIndicatorErase = true;
-  }
-}
-
-
-void MenuElementRenderer::updateAndRenderAnimatedElements(
-  const engine::TimeDelta timeDelta
-) {
-  mElapsedTime += timeDelta;
-
-  if (mMenuSelectionIndicatorPosition) {
-    const auto yPos = *mMenuSelectionIndicatorPosition;
-
-    if (!mPendingMenuIndicatorErase) {
-      // This timing is approximate
-      const auto rotations = engine::timeToFastTicks(mElapsedTime) / 15.0;
-      const auto intRotations = static_cast<int>(std::round(rotations));
-
-      drawSelectionIndicator(yPos, intRotations % NUM_MENU_INDICATOR_STATES);
-    } else {
-      drawSelectionIndicator(yPos, MENU_INDICATOR_STATE_FOR_CLEARING);
-      mMenuSelectionIndicatorPosition = std::nullopt;
-      mPendingMenuIndicatorErase = false;
-    }
-  }
-}
-
 
 }}
