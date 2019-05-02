@@ -382,10 +382,9 @@ void MenuElementRenderer::drawSelectionIndicator(
   const int y,
   const engine::TimeDelta elapsedTime
 ) const {
-  // This timing is approximate
-  const auto rotations = engine::timeToFastTicks(elapsedTime) / 15.0;
-  const auto intRotations = static_cast<int>(std::round(rotations));
-  drawSelectionIndicator(x, y, intRotations % NUM_MENU_INDICATOR_STATES);
+  const auto animTicks = engine::timeToSlowTicks(elapsedTime) / 7.0;
+  const auto animState = static_cast<int>(std::round(animTicks));
+  drawSelectionIndicator(x, y, animState % NUM_MENU_INDICATOR_STATES);
 }
 
 
