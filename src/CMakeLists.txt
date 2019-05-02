@@ -283,6 +283,7 @@ set(main_exe_sources
     game_main.hpp
     game_main.ipp
     game_mode.hpp
+    game_mode.cpp
     game_service_provider.hpp
     game_session_mode.cpp
     game_session_mode.hpp

@@ -22,6 +22,7 @@
 #include "engine/sound_system.hpp"
 #include "engine/tile_renderer.hpp"
 #include "engine/texture.hpp"
+#include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/fps_display.hpp"
 #include "ui/duke_script_runner.hpp"
@@ -103,6 +104,7 @@ private:
   UserProfile mUserProfile;
 
   ui::DukeScriptRunner mScriptRunner;
+  loader::ScriptBundle mAllScripts;
   engine::TileRenderer mUiSpriteSheetRenderer;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
