@@ -261,9 +261,9 @@ target_link_libraries(rigel_core
     ${SDL2_MIXER_LIBRARIES}
     entityx
     Boost::boost
-    std::filesystem
 
     PRIVATE
+    std::filesystem
     dbopl
     speex_resampler
     glad
