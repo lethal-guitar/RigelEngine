@@ -12,9 +12,9 @@ thing for the Commander Keen series of games.
 There was never any source code released for the original game, so this project
 is based on reverse-engineering: A mix of reading assembly and analyzing video captures from DosBox.
 
-Here's a short video showcasing the project (quite outdated, but still mostly representative):
+Here's a video showcasing the project:
 
-<a href="http://www.youtube.com/watch?v=SO1M6gHvFzM"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
+<a href="http://www.youtube.com/watch?v=Z3gCS5LvC2s"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
 ## Current state
 
