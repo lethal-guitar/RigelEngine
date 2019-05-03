@@ -12,19 +12,65 @@ thing for the Commander Keen series of games.
 There was never any source code released for the original game, so this project
 is based on reverse-engineering: A mix of reading assembly and analyzing video captures from DosBox.
 
-I gave a presentation about the project at a local C++ meetup in 2017. You can find the slides [here](https://github.com/lethal-guitar/presentations).
-
-## Current state
-
-Here's a short video showcasing the project. It's outdated by now, but still mostly representative.
+Here's a short video showcasing the project (quite outdated, but still mostly representative):
 
 <a href="http://www.youtube.com/watch?v=SO1M6gHvFzM"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
-The project is still work in progress, but the original Shareware episode is already fully playable.
-Only the hiscore list and being able to save/load your game is missing to make RigelEngine fully functional
-for playing Duke Nukem II!
+## Current state
 
-## Building and running
+RigelEngine implements all the game mechanics and enemies found in the original game's first episode, i.e. the shareware episode. The intro movie, story sequence and most of the menu system are implemented as well. It's possible to load and save the game, and the high score lists work (saved games and high scores from the original game will be imported into RigelEngine's user profile when launching it for the first time). Therefore, the shareware episode is fully playable with RigelEngine.
+
+The levels from the registered version (i.e. episodes 2, 3 and 4) can also be loaded, and they should mostly work, but not all of the enemies found in those levels are functional yet. In addition, Duke's space ship is not implemented yet, which means the levels where it is required can't be completed yet.
+
+Some other features that still need to be implemented:
+
+* Demo playback
+* Enemy radar in game
+* Options menu/configuring the game
+
+Plus, it would be nice to make launching the game easier in the future, e.g. by having some kind of launcher application or setup program.
+
+## Running RigelEngine
+
+In order to run RigelEngine, the game data from the original game is required. Both the shareware version and the registered version work. To make RigelEngine find the game data, you can either:
+
+a) copy the RigelEngine executable (and accompanying DLLs) into the directory containing the game data, and launch `RigelEngine.exe` instead of `NUKEM2.EXE`. This is the recommended way to run it on Windows.
+b) pass the path to the game data as a command line argument to RigelEngine. This is the recommended way to run it on Linux/OS X.
+
+For example, let's say you have your copy of Duke Nukem II in `/home/niko/Duke2`, and a build of RigelEngine in `/home/niko/RigelEngine/build`. You would then start the game as follows:
+
+```
+cd /home/niko/RigelEngine/build
+./src/RigelEngine /home/niko/Duke2
+```
+
+### Acquiring the game data
+
+The full version of the game (aka registered version) is not available currently, but you can still download the freely available shareware version from [the old 3D Realms site](http://legacy.3drealms.com/duke2/) - look for a download link for the file `4duke.zip`. You can also find the same file on various websites if you Google for "Duke Nukem 2 shareware".
+
+The download contains an installer which only runs on MS-DOS, but you don't need that - you can simply rename the file `DN2SW10.SHR` (also part of the download) to `.zip` and open it using your favorite archive manager. After that, you can point RigelEngine to the directory where you extracted the files, and it should work.
+
+If you already have a copy of the game, you can also point RigelEngine to that existing installation.
+
+The only files actually required for RigelEngine are:
+
+* `NUKEM2.CMP` (the main data file)
+* `NUKEM2.F1`, `.F2`, `.F3` etc. up to `.F5` (intro movie files)
+
+Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
+
+
+### Command line options
+
+The most important command line options are:
+
+* `-l`: jump to a specific level. E.g. `-l L5` to play the 5th level of episode 1.
+* `-s`: skip intro movies, go straight to main menu
+* `--no-music`: don't play music
+* `-h`/`--help`: show all command line options
+
+
+## Building from source
 
 ### Linux build quick start guide
 
@@ -55,39 +101,13 @@ make
 ./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
 ```
 
-### Acquiring the game data
-
-In order to run RigelEngine, the game data from the original game is required. Both the shareware version and the registered version work.
-The game is currently not being sold anymore after the rights to the whole Duke Nukem franchise went to Gearbox, but you can still download the freely available shareware version from [the old 3D Realms site](http://legacy.3drealms.com/duke2/) - look for a download link for the file `4duke.zip`. You can also find the same file on various websites if you Google for "Duke Nukem 2 shareware".
-
-The download contains an installer which only runs on MS-DOS, but you don't need that - you can simply rename the file `DN2SW10.SHR` (also part of the download) to `.zip` and open it using your favorite archive manager. After that, you can point RigelEngine to the directory where you extracted the files, and it should work.
-
-If you already have a copy of the game, you can also point RigelEngine to that existing installation.
-
-The only files actually required for RigelEngine are:
-
-* `NUKEM2.CMP` (the main data file)
-* `NUKEM2.F1`, `.F2`, `.F3` etc. up to `.F5` (intro movie files)
-
-Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
-
-
-### Command line options
-
-The most important command line options are:
-
-* `-l`: jump to a specific level. E.g. `-l L5` to play the 5th level of episode 1.
-* `-s`: skip intro movies, go straight to main menu
-* `--no-music`: don't play music
-* `-h`/`--help`: show all command line options
-
 ### Detailed build pre-requisites and dependencies
 
 To build from source, a C++ 17 compatible compiler is required. The project has been
 built successfully on the following compilers:
 
 * Microsoft Visual Studio 2017 (version 15.9.4 or newer)
-* gcc 7.4.0
+* gcc 8.1.0
 * clang 7.0.0
 
 Slightly older versions of gcc/clang might also work, but I haven't tried that.
