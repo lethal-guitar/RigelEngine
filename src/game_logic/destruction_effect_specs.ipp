@@ -64,8 +64,17 @@ const effects::EffectSpec SKELETON_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec RIGELATIN_KILL_EFFECT_SPEC[] = {
   {effects::SpriteCascade{1}, 0},
+  {effects::Particles{{1, 0}}, 0},
   {effects::RandomExplosionSound{}, 0},
-  {effects::Particles{{1, 0}}, 0}
+  {effects::RandomExplosionSound{}, 1},
+  {effects::RandomExplosionSound{}, 3},
+  {effects::RandomExplosionSound{}, 5},
+  {effects::RandomExplosionSound{}, 7},
+  {effects::RandomExplosionSound{}, 9},
+  {effects::RandomExplosionSound{}, 11},
+  {effects::RandomExplosionSound{}, 13},
+  {effects::RandomExplosionSound{}, 15},
+  {effects::RandomExplosionSound{}, 17},
 };
 
 
