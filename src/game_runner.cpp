@@ -161,8 +161,23 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
   };
 
   auto quitConfirmEventHook = [this](const SDL_Event& ev) {
-    if (isNonRepeatKeyDown(ev) && ev.key.keysym.sym == SDLK_y) {
-      mGameWasQuit = true;
+    // The user needs to press Y in order to confirm quitting the game, but we
+    // want the confirmation to happen when the key is released, not when it's
+    // pressed. This is because the "a new high score" screen may appear after
+    // quitting the game, and if we were to quit on key down, it's very likely
+    // for the key to still be pressed while the new screen appears. This in
+    // turn would lead to an undesired letter Y being entered into the high
+    // score name entry field, because the text input system would see the key
+    // being released and treated as an input.
+    //
+    // Therefore, we quit on key up. Nevertheless, we still need to prevent the
+    // key down event from reaching the script runner, as it would cancel out
+    // the quit confirmation dialog otherwise.
+    if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_y) {
+      return true;
+    }
+    if (ev.type == SDL_KEYUP && ev.key.keysym.sym == SDLK_y) {
+      mGameWasQuit = ev.type == SDL_KEYUP;
       return true;
     }
 
