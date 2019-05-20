@@ -98,7 +98,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
     },
 
     [](const auto&) {
-	});
+  });
 }
 
 
