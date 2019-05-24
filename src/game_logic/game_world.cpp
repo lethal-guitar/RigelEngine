@@ -370,7 +370,7 @@ void GameWorld::loadLevel(
     resources);
 
   if (loadedLevel.mEarthquake) {
-    mEarthQuakeEffect = engine::EarthQuakeEffect{
+    mEarthQuakeEffect = EarthQuakeEffect{
       mpServiceProvider, &mRandomGenerator, &mEventManager};
   }
 

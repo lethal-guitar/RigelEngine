@@ -22,11 +22,11 @@
 #include "global_level_events.hpp"
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace game_logic {
 
 EarthQuakeEffect::EarthQuakeEffect(
   IGameServiceProvider* pServiceProvider,
-  RandomNumberGenerator* pRandomGenerator,
+  engine::RandomNumberGenerator* pRandomGenerator,
   entityx::EventManager* pEvents
 )
   : mCountdown(0)

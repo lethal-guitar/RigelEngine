@@ -22,9 +22,9 @@
 #include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
-#include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/earth_quake_effect.hpp"
 #include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/input.hpp"
@@ -152,7 +152,7 @@ private:
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
 
-  std::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
+  std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;
   std::optional<base::Color> mBackdropFlashColor;
   std::optional<int> mReactorDestructionFramesElapsed;

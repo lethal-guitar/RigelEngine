@@ -36,8 +36,6 @@ set(core_sources
     engine/collision_checker.hpp
     engine/debugging_system.cpp
     engine/debugging_system.hpp
-    engine/earth_quake_effect.cpp
-    engine/earth_quake_effect.hpp
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
@@ -138,6 +136,8 @@ set(core_sources
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp
+    game_logic/earth_quake_effect.cpp
+    game_logic/earth_quake_effect.hpp
     game_logic/effect_actor_components.cpp
     game_logic/effect_actor_components.hpp
     game_logic/effects_system.cpp

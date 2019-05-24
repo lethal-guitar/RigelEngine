@@ -24,18 +24,16 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { struct IGameServiceProvider; }
+namespace rigel::engine { class RandomNumberGenerator; }
 
 
-namespace rigel { namespace engine {
-
-class RandomNumberGenerator;
-
+namespace rigel { namespace game_logic {
 
 class EarthQuakeEffect {
 public:
   EarthQuakeEffect(
     IGameServiceProvider* pServiceProvider,
-    RandomNumberGenerator* pRandomGenerator,
+    engine::RandomNumberGenerator* pRandomGenerator,
     entityx::EventManager* pEvents);
 
   /** Updates state and emits events (screen shake, earth quake begin/end)
@@ -49,7 +47,7 @@ private:
   int mThreshold;
 
   IGameServiceProvider* mpServiceProvider;
-  RandomNumberGenerator* mpRandomGenerator;
+  engine::RandomNumberGenerator* mpRandomGenerator;
   entityx::EventManager* mpEvents;
 };
 
