@@ -36,33 +36,43 @@ constexpr auto PARTICLE_SYSTEM_LIFE_TIME = 28;
 
 constexpr auto INITIAL_INDEX_LIMIT = 15;
 
-constexpr std::array<std::int16_t, 43> VERTICAL_MOVEMENT_TABLE{
-  -8, -8, -8, -8, -4, -4, -4, -2, -1, 0, 0, 1, 2, 4, 4, 4,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 24, 1
+constexpr std::array<std::int16_t, 44> VERTICAL_MOVEMENT_TABLE{
+  0, -8, -16, -24, -32, -36, -40, -44, -46, -47, -47, -47, -46, -44, -40, -36,
+  -32, -24, -16, -8, 0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104,
+  112, 120, 128, 136, 144, 152, 160, 168, 192, 193
 };
 
 constexpr auto SPAWN_OFFSET = base::Vector{0, -1};
 
 
+static_assert(INITIAL_INDEX_LIMIT + PARTICLE_SYSTEM_LIFE_TIME <
+  VERTICAL_MOVEMENT_TABLE.size());
+
+
+auto yOffsetAtTime(
+  const std::int16_t initialOffsetIndex,
+  const int framesElapsed
+) {
+  assert(initialOffsetIndex + framesElapsed <
+    static_cast<int>(VERTICAL_MOVEMENT_TABLE.size()));
+
+  const auto baseOffset =
+    VERTICAL_MOVEMENT_TABLE[initialOffsetIndex + framesElapsed];
+
+  return baseOffset - VERTICAL_MOVEMENT_TABLE[initialOffsetIndex];
+}
+
+
 struct Particle {
-  Particle() = default;
-
-  void update() {
-    static_assert(
-      (PARTICLE_SYSTEM_LIFE_TIME - 1) + INITIAL_INDEX_LIMIT <
-      VERTICAL_MOVEMENT_TABLE.size());
-
-    mOffsetY += VERTICAL_MOVEMENT_TABLE[mMovementIndexY++];
-  }
-
   base::Vector offsetAtTime(const int framesElapsed) const {
-    return {mVelocityX * framesElapsed, mOffsetY};
+    return {
+      mVelocityX * framesElapsed,
+      yOffsetAtTime(mInitialOffsetIndexY, framesElapsed)
+    };
   }
 
   std::int16_t mVelocityX;
-  std::int16_t mOffsetY = 0;
-  std::int16_t mMovementIndexY;
+  std::int16_t mInitialOffsetIndexY;
 };
 
 
@@ -79,7 +89,7 @@ std::unique_ptr<ParticlesList> createParticles(
     particle.mVelocityX = static_cast<std::int16_t>(velocityScaleX == 0
       ? 10 - randomVariation
       : velocityScaleX * (randomVariation + 1));
-    particle.mMovementIndexY =
+    particle.mInitialOffsetIndexY =
       randomGenerator.gen() % (INITIAL_INDEX_LIMIT + 1);
   }
   return pParticles;
@@ -101,10 +111,6 @@ struct ParticleGroup {
   }
 
   void update() {
-    for (auto& particle : *mpParticles) {
-      particle.update();
-    }
-
     ++mFramesElapsed;
   }
 
