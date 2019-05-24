@@ -26,7 +26,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace game_logic {
 
 using namespace data;
 using namespace engine::components;

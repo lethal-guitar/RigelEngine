@@ -26,7 +26,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace game_logic {
 
 class DebuggingSystem {
 public:

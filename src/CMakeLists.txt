@@ -34,8 +34,6 @@ set(core_sources
     engine/base_components.hpp
     engine/collision_checker.cpp
     engine/collision_checker.hpp
-    engine/debugging_system.cpp
-    engine/debugging_system.hpp
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
@@ -125,6 +123,8 @@ set(core_sources
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp
     game_logic/damage_infliction_system.hpp
+    game_logic/debugging_system.cpp
+    game_logic/debugging_system.hpp
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp

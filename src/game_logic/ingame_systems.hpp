@@ -17,7 +17,6 @@
 #pragma once
 
 #include "engine/collision_checker.hpp"
-#include "engine/debugging_system.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
 #include "engine/particle_system.hpp"
@@ -38,6 +37,7 @@
 #include "game_logic/behavior_controller_system.hpp"
 #include "game_logic/camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/debugging_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemy_radar.hpp"
@@ -89,7 +89,7 @@ public:
     entityx::EntityManager& es,
     const std::optional<base::Color>& backdropFlashColor);
 
-  engine::DebuggingSystem& debuggingSystem();
+  DebuggingSystem& debuggingSystem();
 
   void switchBackdrops();
 
@@ -114,7 +114,8 @@ private:
   engine::RenderingSystem mRenderingSystem;
   engine::PhysicsSystem mPhysicsSystem;
   engine::LifeTimeSystem mLifeTimeSystem;
-  engine::DebuggingSystem mDebuggingSystem;
+
+  game_logic::DebuggingSystem mDebuggingSystem;
 
   game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;
