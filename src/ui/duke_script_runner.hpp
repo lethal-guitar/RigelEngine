@@ -19,7 +19,7 @@
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
 #include "data/saved_game.hpp"
-#include "engine/tile_renderer.hpp"
+#include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
 #include "loader/palette.hpp"
 #include "renderer/texture.hpp"
@@ -167,7 +167,7 @@ private:
   renderer::Renderer* mpRenderer;
   const data::SaveSlotArray* mpSaveSlots;
   IGameServiceProvider* mpServices;
-  engine::TileRenderer mUiSpriteSheetRenderer;
+  engine::TiledTexture mUiSpriteSheetRenderer;
   MenuElementRenderer mMenuElementRenderer;
 
 

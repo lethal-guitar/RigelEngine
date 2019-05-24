@@ -58,8 +58,8 @@ set(core_sources
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/sprite_tools.hpp
-    engine/tile_renderer.cpp
-    engine/tile_renderer.hpp
+    engine/tiled_texture.cpp
+    engine/tiled_texture.hpp
     engine/timing.hpp
     engine/visual_components.hpp
     game_logic/ai/blowing_fan.cpp

@@ -17,7 +17,7 @@
 #pragma once
 
 #include "data/player_model.hpp"
-#include "engine/tile_renderer.hpp"
+#include "engine/tiled_texture.hpp"
 #include "renderer/texture.hpp"
 
 #include <cstdint>
@@ -47,7 +47,7 @@ public:
     int levelNumber,
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader& bundle,
-    engine::TileRenderer* pStatusSpriteSheetRenderer);
+    engine::TiledTexture* pStatusSpriteSheetRenderer);
 
   void updateAnimation();
   void render();
@@ -70,7 +70,7 @@ private:
     const loader::ActorData& actorData,
     InventoryItemTextureMap&& inventoryItemTextures,
     CollectedLetterIndicatorMap&& collectedLetterTextures,
-    engine::TileRenderer* pStatusSpriteSheetRenderer);
+    engine::TiledTexture* pStatusSpriteSheetRenderer);
 
   static InventoryItemTextureMap makeInventoryItemTextureMap(
     renderer::Renderer* pRenderer,
@@ -94,7 +94,7 @@ private:
   renderer::OwningTexture mBottomRightTexture;
   InventoryItemTextureMap mInventoryTexturesByType;
   CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
-  engine::TileRenderer* mpStatusSpriteSheetRenderer;
+  engine::TiledTexture* mpStatusSpriteSheetRenderer;
 };
 
 }}

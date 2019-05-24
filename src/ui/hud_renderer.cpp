@@ -40,7 +40,7 @@ void drawNumbersBig(
   const int number,
   const int maxDigits,
   const base::Vector& tlPosition,
-  const TileRenderer& spriteSheet
+  const TiledTexture& spriteSheet
 ) {
   const auto printed = std::to_string(number);
 
@@ -60,7 +60,7 @@ void drawNumbersBig(
 }
 
 
-void drawScore(const int score, const TileRenderer& spriteSheet) {
+void drawScore(const int score, const TiledTexture& spriteSheet) {
   drawNumbersBig(
     score,
     7,
@@ -69,7 +69,7 @@ void drawScore(const int score, const TileRenderer& spriteSheet) {
 }
 
 
-void drawWeaponIcon(const WeaponType type, const TileRenderer& spriteSheet) {
+void drawWeaponIcon(const WeaponType type, const TiledTexture& spriteSheet) {
   const auto weaponIndex = static_cast<int>(type);
   spriteSheet.renderTileDoubleQuad(
     weaponIndex*4 + 4 + 5*40,
@@ -80,7 +80,7 @@ void drawWeaponIcon(const WeaponType type, const TileRenderer& spriteSheet) {
 void drawAmmoBar(
   const int currentAmmo,
   const int maxAmmo,
-  const TileRenderer& spriteSheet
+  const TiledTexture& spriteSheet
 ) {
   // The sprite sheet has 17 bar sizes; index 0 is full, 16 is empty.
   // Starting at col 0, row 23. Each bar is 2 tiles high
@@ -95,7 +95,7 @@ void drawAmmoBar(
 }
 
 
-void drawLevelNumber(const int number, const TileRenderer& spriteSheet) {
+void drawLevelNumber(const int number, const TiledTexture& spriteSheet) {
   drawNumbersBig(
     number,
     1,
@@ -191,7 +191,7 @@ HudRenderer::HudRenderer(
   const int levelNumber,
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& bundle,
-  engine::TileRenderer* pStatusSpriteSheetRenderer
+  engine::TiledTexture* pStatusSpriteSheet
 )
   : HudRenderer(
       pPlayerModel,
@@ -200,7 +200,7 @@ HudRenderer::HudRenderer(
       bundle.mActorImagePackage.loadActor(HUD_BACKGROUND_ACTOR_ID),
       makeInventoryItemTextureMap(pRenderer, bundle.mActorImagePackage),
       makeCollectedLetterTextureMap(pRenderer, bundle.mActorImagePackage),
-      pStatusSpriteSheetRenderer)
+      pStatusSpriteSheet)
 {
 }
 
@@ -212,7 +212,7 @@ HudRenderer::HudRenderer(
   const loader::ActorData& actorData,
   InventoryItemTextureMap&& inventoryItemTextures,
   CollectedLetterIndicatorMap&& collectedLetterTextures,
-  engine::TileRenderer* pStatusSpriteSheetRenderer
+  engine::TiledTexture* pStatusSpriteSheet
 )
   : mpPlayerModel(pPlayerModel)
   , mLevelNumber(levelNumber)
@@ -222,7 +222,7 @@ HudRenderer::HudRenderer(
   , mBottomRightTexture(mpRenderer, actorData.mFrames[2].mFrameImage)
   , mInventoryTexturesByType(std::move(inventoryItemTextures))
   , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
-  , mpStatusSpriteSheetRenderer(pStatusSpriteSheetRenderer)
+  , mpStatusSpriteSheetRenderer(pStatusSpriteSheet)
 {
 }
 

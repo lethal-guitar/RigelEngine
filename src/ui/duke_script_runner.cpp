@@ -21,7 +21,7 @@
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/random_number_generator.hpp"
-#include "engine/tile_renderer.hpp"
+#include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
@@ -31,7 +31,7 @@
 
 namespace rigel { namespace ui {
 
-using engine::TileRenderer;
+using engine::TiledTexture;
 
 using ExecutionResultOptional =
     std::optional<DukeScriptRunner::ExecutionResult>;
@@ -62,7 +62,7 @@ auto makeSpriteSheet(
   const loader::ResourceLoader& resourceLoader,
   const loader::Palette16& palette
 ) {
-  return engine::TileRenderer{
+  return engine::TiledTexture{
     renderer::OwningTexture{
       pRenderer,
       resourceLoader.loadTiledFullscreenImage(

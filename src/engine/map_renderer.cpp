@@ -55,7 +55,7 @@ MapRenderer::MapRenderer(
 )
   : mpRenderer(pRenderer)
   , mpMap(pMap)
-  , mTileRenderer(
+  , mTileSetTexture(
       renderer::OwningTexture(pRenderer, renderData.mTileSetImage),
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
@@ -192,7 +192,7 @@ void MapRenderer::renderTile(
   // should be visible. Therefore, don't draw if the index is 0.
   if (tileIndex != 0) {
     const auto tileIndexToDraw = animatedTileIndex(tileIndex);
-    mTileRenderer.renderTile(tileIndexToDraw, x, y);
+    mTileSetTexture.renderTile(tileIndexToDraw, x, y);
   }
 }
 

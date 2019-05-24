@@ -21,9 +21,9 @@
 
 namespace rigel { namespace engine {
 
-class TileRenderer {
+class TiledTexture {
 public:
-  TileRenderer(renderer::OwningTexture&& tileSet, renderer::Renderer* pRenderer);
+  TiledTexture(renderer::OwningTexture&& tileSet, renderer::Renderer* pRenderer);
 
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
 

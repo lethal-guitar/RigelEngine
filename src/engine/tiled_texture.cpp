@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tile_renderer.hpp"
+#include "tiled_texture.hpp"
 
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
@@ -27,14 +27,14 @@ namespace rigel { namespace engine {
 using namespace data;
 using namespace renderer;
 
-TileRenderer::TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer)
+TiledTexture::TiledTexture(OwningTexture&& tileSet, Renderer* pRenderer)
   : mTileSetTexture(std::move(tileSet))
   , mpRenderer(pRenderer)
 {
 }
 
 
-void TileRenderer::renderTileStretched(
+void TiledTexture::renderTileStretched(
   const int index,
   const base::Rect<int>& destRect
 ) const {
@@ -43,7 +43,7 @@ void TileRenderer::renderTileStretched(
 }
 
 
-void TileRenderer::renderTile(
+void TiledTexture::renderTile(
   const int index,
   const int x,
   const int y
@@ -52,7 +52,7 @@ void TileRenderer::renderTile(
 }
 
 
-void TileRenderer::renderTileSlice(
+void TiledTexture::renderTileSlice(
   const int baseIndex,
   const base::Vector& tlPosition
 ) const {
@@ -60,7 +60,7 @@ void TileRenderer::renderTileSlice(
 }
 
 
-void TileRenderer::renderTileQuad(
+void TiledTexture::renderTileQuad(
   const int baseIndex,
   const base::Vector& tlPosition
 ) const {
@@ -68,7 +68,7 @@ void TileRenderer::renderTileQuad(
 }
 
 
-void TileRenderer::renderTileDoubleQuad(
+void TiledTexture::renderTileDoubleQuad(
   const int baseIndex,
   const base::Vector& tlPosition
 ) const {
@@ -76,12 +76,12 @@ void TileRenderer::renderTileDoubleQuad(
 }
 
 
-int TileRenderer::tilesPerRow() const {
+int TiledTexture::tilesPerRow() const {
   return data::pixelsToTiles(mTileSetTexture.width());
 }
 
 
-void TileRenderer::renderTileGroup(
+void TiledTexture::renderTileGroup(
   const int index,
   const int posX,
   const int posY,
@@ -95,7 +95,7 @@ void TileRenderer::renderTileGroup(
 }
 
 
-base::Rect<int> TileRenderer::sourceRect(
+base::Rect<int> TiledTexture::sourceRect(
   const int index,
   const int tileSpanX,
   const int tileSpanY

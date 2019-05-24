@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
-#include "engine/tile_renderer.hpp"
+#include "engine/tiled_texture.hpp"
 #include "loader/level_loader.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
@@ -71,7 +71,7 @@ private:
   renderer::Renderer* mpRenderer;
   const data::map::Map* mpMap;
 
-  TileRenderer mTileRenderer;
+  TiledTexture mTileSetTexture;
   renderer::OwningTexture mBackdropTexture;
   renderer::OwningTexture mAlternativeBackdropTexture;
 

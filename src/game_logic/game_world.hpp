@@ -118,7 +118,7 @@ private:
 
   renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
-  engine::TileRenderer* mpUiSpriteSheet;
+  engine::TiledTexture* mpUiSpriteSheet;
   ui::MenuElementRenderer* mpTextRenderer;
   entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;

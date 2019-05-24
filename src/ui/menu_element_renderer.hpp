@@ -18,7 +18,7 @@
 
 #include "base/color.hpp"
 #include "base/warnings.hpp"
-#include "engine/tile_renderer.hpp"
+#include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
 #include "loader/palette.hpp"
 #include "renderer/texture.hpp"
@@ -42,7 +42,7 @@ namespace rigel { namespace ui {
 class MenuElementRenderer {
 public:
   MenuElementRenderer(
-    engine::TileRenderer* pSpriteSheetRenderer,
+    engine::TiledTexture* pSpriteSheet,
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader& resources);
 
@@ -95,8 +95,8 @@ private:
 
 private:
   renderer::Renderer* mpRenderer;
-  engine::TileRenderer* mpSpriteSheetRenderer;
-  engine::TileRenderer mBigTextRenderer;
+  engine::TiledTexture* mpSpriteSheet;
+  engine::TiledTexture mBigTextTexture;
 };
 
 }}

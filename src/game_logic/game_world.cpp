@@ -109,7 +109,7 @@ constexpr auto HEALTH_BAR_START_PX = base::Vector{data::tilesToPixels(6), 0};
 void drawBossHealthBar(
   const int health,
   const ui::MenuElementRenderer& textRenderer,
-  const engine::TileRenderer& uiSpriteSheet
+  const engine::TiledTexture& uiSpriteSheet
 ) {
   textRenderer.drawSmallWhiteText(
     HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
@@ -131,7 +131,7 @@ GameWorld::GameWorld(
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
-  , mpUiSpriteSheet(context.mpUiSpriteSheetRenderer)
+  , mpUiSpriteSheet(context.mpUiSpriteSheet)
   , mpTextRenderer(context.mpUiRenderer)
   , mEntities(mEventManager)
   , mEntityFactory(
@@ -147,7 +147,7 @@ GameWorld::GameWorld(
       sessionId.mLevel + 1,
       mpRenderer,
       *context.mpResources,
-      context.mpUiSpriteSheetRenderer)
+      context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);

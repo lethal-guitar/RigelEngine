@@ -34,7 +34,7 @@ struct IGameServiceProvider;
 class UserProfile;
 
 namespace engine {
-  class TileRenderer;
+  class TiledTexture;
 }
 
 namespace loader {
@@ -56,7 +56,7 @@ struct GameMode {
     ui::DukeScriptRunner* mpScriptRunner;
     loader::ScriptBundle* mpScripts;
     ui::MenuElementRenderer* mpUiRenderer;
-    engine::TileRenderer* mpUiSpriteSheetRenderer;
+    engine::TiledTexture* mpUiSpriteSheet;
     UserProfile* mpUserProfile;
   };
 

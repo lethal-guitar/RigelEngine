@@ -80,11 +80,11 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mUserProfile(loadOrCreateUserProfile(gamePath))
   , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
-  , mUiSpriteSheetRenderer(
+  , mUiSpriteSheet(
       renderer::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
-  , mTextRenderer(&mUiSpriteSheetRenderer, &mRenderer, mResources)
+  , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
   , mFpsDisplay(&mTextRenderer)
 {
 }
@@ -214,7 +214,7 @@ GameMode::Context Game::makeModeContext() {
     &mScriptRunner,
     &mAllScripts,
     &mTextRenderer,
-    &mUiSpriteSheetRenderer,
+    &mUiSpriteSheet,
     &mUserProfile};
 }
 
