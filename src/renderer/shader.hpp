@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/opengl.hpp"
+#include "renderer/opengl.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <glm/gtc/type_ptr.hpp>
@@ -29,7 +29,7 @@ RIGEL_RESTORE_WARNINGS
 #include <unordered_map>
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 class GlHandleWrapper {
 public:

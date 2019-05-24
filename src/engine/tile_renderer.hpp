@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include "engine/texture.hpp"
+#include "renderer/texture.hpp"
 
 
 namespace rigel { namespace engine {
 
 class TileRenderer {
 public:
-  TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer);
+  TileRenderer(renderer::OwningTexture&& tileSet, renderer::Renderer* pRenderer);
 
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
 
@@ -59,8 +59,8 @@ private:
     const int tileSpanY) const;
 
 private:
-  OwningTexture mTileSetTexture;
-  Renderer* mpRenderer;
+  renderer::OwningTexture mTileSetTexture;
+  renderer::Renderer* mpRenderer;
 };
 
 }}

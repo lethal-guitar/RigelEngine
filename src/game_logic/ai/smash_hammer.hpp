@@ -20,8 +20,8 @@
 
 #include <variant>
 
-namespace rigel::engine { class Renderer; }
 namespace rigel::engine::components { struct Sprite; }
+namespace rigel::renderer { class Renderer; }
 
 
 namespace rigel::game_logic::behaviors {
@@ -48,7 +48,7 @@ struct SmashHammer {
     entityx::Entity entity);
 
   static void render(
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     entityx::Entity entity,
     const engine::components::Sprite& sprite,
     const base::Vector& positionInScreenSpace);

@@ -306,7 +306,7 @@ base::ArrayView<int> frameMapForActor(const ActorID actorId) {
 
 
 SpriteFactory::SpriteFactory(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const ActorImagePackage* pSpritePackage
 )
   : mpRenderer(pRenderer)
@@ -330,7 +330,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
       lastDrawOrder = actorData.mDrawIndex;
 
       for (const auto& frameData : actorData.mFrames) {
-        auto texture = engine::OwningTexture{
+        auto texture = renderer::OwningTexture{
           mpRenderer, frameData.mFrameImage};
         drawData.mFrames.emplace_back(
           std::move(texture), frameData.mDrawOffset);
@@ -366,7 +366,7 @@ base::Rect<int> SpriteFactory::actorFrameRect(
 
 
 EntityFactory::EntityFactory(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   ex::EntityManager* pEntityManager,
   const loader::ActorImagePackage* pSpritePackage,
   const data::Difficulty difficulty)

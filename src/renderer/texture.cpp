@@ -19,14 +19,14 @@
 #include <cassert>
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 using data::Image;
 using detail::TextureBase;
 
 
 void TextureBase::render(
-  engine::Renderer* renderer,
+  renderer::Renderer* renderer,
   const int x,
   const int y
 ) const {
@@ -36,7 +36,7 @@ void TextureBase::render(
 
 
 void TextureBase::render(
-  engine::Renderer* renderer,
+  renderer::Renderer* renderer,
   const base::Vector& position
 ) const {
   render(renderer, position.x, position.y);
@@ -44,7 +44,7 @@ void TextureBase::render(
 
 
 void TextureBase::render(
-  engine::Renderer* renderer,
+  renderer::Renderer* renderer,
   const base::Vector& position,
   const base::Rect<int>& sourceRect
 ) const {
@@ -57,20 +57,20 @@ void TextureBase::render(
 
 
 void TextureBase::renderScaled(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const base::Rect<int>& destRect
 ) const {
   pRenderer->drawTexture(mData, completeSourceRect(), destRect);
 }
 
 
-void TextureBase::renderScaledToScreen(engine::Renderer* pRenderer) const {
+void TextureBase::renderScaledToScreen(renderer::Renderer* pRenderer) const {
   renderScaled(pRenderer, pRenderer->fullScreenRect());
 }
 
 
 void TextureBase::render(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const int x,
   const int y,
   const base::Rect<int>& sourceRect
@@ -83,7 +83,7 @@ void TextureBase::render(
 }
 
 
-OwningTexture::OwningTexture(engine::Renderer* pRenderer, const Image& image)
+OwningTexture::OwningTexture(renderer::Renderer* pRenderer, const Image& image)
   : TextureBase(pRenderer->createTexture(image))
 {
 }
@@ -95,7 +95,7 @@ OwningTexture::~OwningTexture() {
 
 
 RenderTargetTexture::RenderTargetTexture(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const std::size_t width,
   const std::size_t height
 )
@@ -125,7 +125,7 @@ RenderTargetTexture::~RenderTargetTexture() {
 
 RenderTargetTexture::Binder::Binder(
   RenderTargetTexture& renderTarget,
-  engine::Renderer* pRenderer
+  renderer::Renderer* pRenderer
 )
   : Binder(
       {
@@ -138,8 +138,8 @@ RenderTargetTexture::Binder::Binder(
 
 
 RenderTargetTexture::Binder::Binder(
-  const engine::Renderer::RenderTarget& target,
-  engine::Renderer* pRenderer
+  const renderer::Renderer::RenderTarget& target,
+  renderer::Renderer* pRenderer
 )
   : mStateSaver(pRenderer)
 {
@@ -151,7 +151,7 @@ RenderTargetTexture::Binder::Binder(
 
 
 DefaultRenderTargetBinder::DefaultRenderTargetBinder(
-  engine::Renderer* pRenderer
+  renderer::Renderer* pRenderer
 )
   : Binder({{0, 0}, 0}, pRenderer)
 {

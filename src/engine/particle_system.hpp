@@ -21,18 +21,21 @@
 
 #include <vector>
 
+namespace rigel::renderer { class Renderer; }
+
 
 namespace rigel { namespace engine {
 
 class RandomNumberGenerator;
-class Renderer;
 
 struct ParticleCloud;
 
 
 class ParticleSystem {
 public:
-  ParticleSystem(RandomNumberGenerator* pRandomGenerator, Renderer* pRenderer);
+  ParticleSystem(
+    RandomNumberGenerator* pRandomGenerator,
+    renderer::Renderer* pRenderer);
   ~ParticleSystem();
 
   void spawnParticles(
@@ -46,7 +49,7 @@ public:
 private:
   std::vector<ParticleCloud> mParticleClouds;
   RandomNumberGenerator* mpRandomGenerator;
-  Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
 };
 
 }}

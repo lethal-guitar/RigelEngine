@@ -19,13 +19,13 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
-#include "engine/renderer.hpp"
-#include "engine/opengl.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/opengl.hpp"
 
 #include <cstddef>
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 namespace detail {
 
@@ -34,10 +34,10 @@ public:
   TextureBase() = default;
 
   /** Render entire texture at given position */
-  void render(engine::Renderer* renderer, const base::Vector& position) const;
+  void render(Renderer* renderer, const base::Vector& position) const;
 
   /** Render entire texture at given position */
-  void render(engine::Renderer* renderer, int x, int y) const;
+  void render(Renderer* renderer, int x, int y) const;
 
   /** Render a part of the texture at given position
    *
@@ -46,19 +46,19 @@ public:
    * texture.
    */
   void render(
-    engine::Renderer* renderer,
+    Renderer* renderer,
     const base::Vector& position,
     const base::Rect<int>& sourceRect
   ) const;
 
   /** Render entire texture scaled to fill the given rectangle */
   void renderScaled(
-    engine::Renderer* renderer,
+    Renderer* renderer,
     const base::Rect<int>& destRect
   ) const;
 
   /** Render entire texture scaled to fill the entire screen */
-  void renderScaledToScreen(engine::Renderer* pRenderer) const;
+  void renderScaledToScreen(Renderer* pRenderer) const;
 
   int width() const {
     return mData.mWidth;
@@ -82,7 +82,7 @@ protected:
   }
 
   void render(
-    engine::Renderer* renderer,
+    Renderer* renderer,
     int x,
     int y,
     const base::Rect<int>& sourceRect) const;
@@ -107,7 +107,7 @@ protected:
 class OwningTexture : public detail::TextureBase {
 public:
   OwningTexture() = default;
-  OwningTexture(engine::Renderer* renderer, const data::Image& image);
+  OwningTexture(Renderer* renderer, const data::Image& image);
   ~OwningTexture();
 
   OwningTexture(OwningTexture&& other) noexcept
@@ -202,17 +202,17 @@ public:
 
   class Binder {
   public:
-    Binder(RenderTargetTexture& renderTarget, engine::Renderer* pRenderer);
+    Binder(RenderTargetTexture& renderTarget, Renderer* pRenderer);
 
   protected:
-    Binder(const engine::Renderer::RenderTarget&, engine::Renderer* pRenderer);
+    Binder(const Renderer::RenderTarget&, Renderer* pRenderer);
 
   private:
-    engine::Renderer::StateSaver mStateSaver;
+    Renderer::StateSaver mStateSaver;
   };
 
   RenderTargetTexture(
-    engine::Renderer* pRenderer,
+    Renderer* pRenderer,
     std::size_t width,
     std::size_t height);
   ~RenderTargetTexture();
@@ -230,7 +230,7 @@ private:
 
 class DefaultRenderTargetBinder : public RenderTargetTexture::Binder {
 public:
-  explicit DefaultRenderTargetBinder(engine::Renderer* pRenderer);
+  explicit DefaultRenderTargetBinder(renderer::Renderer* pRenderer);
 };
 
 }}

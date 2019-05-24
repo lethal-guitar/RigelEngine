@@ -28,7 +28,7 @@ RIGEL_RESTORE_WARNINGS
 #endif
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 void loadGlFunctions();
 

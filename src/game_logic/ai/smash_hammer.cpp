@@ -20,11 +20,11 @@
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/movement.hpp"
-#include "engine/renderer.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "renderer/renderer.hpp"
 
 #include "game_service_provider.hpp"
 
@@ -83,7 +83,7 @@ void SmashHammer::update(
 
 
 void SmashHammer::render(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace

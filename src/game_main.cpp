@@ -36,7 +36,7 @@ namespace rigel {
 using namespace engine;
 using namespace sdl_utils;
 
-using RenderTargetBinder = engine::RenderTargetTexture::Binder;
+using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
 
@@ -81,7 +81,7 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheetRenderer(
-      engine::OwningTexture{
+      renderer::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheetRenderer, &mRenderer, mResources)
@@ -140,7 +140,7 @@ void Game::run(const StartupOptions& startupOptions) {
 
 void Game::showAntiPiracyScreen() {
   auto antiPiracyImage = mResources.loadAntiPiracyImage();
-  engine::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
+  renderer::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
   imageTexture.renderScaledToScreen(&mRenderer);
   mRenderer.submitBatch();
   mRenderer.swapBuffers();
@@ -255,7 +255,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
     return;
   }
 
-  engine::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
+  renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
 
   engine::TimeDelta elapsedTime = 0.0;
 

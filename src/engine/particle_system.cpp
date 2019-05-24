@@ -18,7 +18,7 @@
 
 #include "data/unit_conversions.hpp"
 #include "engine/random_number_generator.hpp"
-#include "engine/renderer.hpp"
+#include "renderer/renderer.hpp"
 
 #include <algorithm>
 #include <array>
@@ -27,6 +27,8 @@
 
 
 namespace rigel { namespace engine {
+
+using renderer::Renderer;
 
 namespace {
 

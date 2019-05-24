@@ -147,9 +147,9 @@ constexpr auto CURSOR_ANIM_DELAY = 5;
 constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
-engine::OwningTexture createFontTexture(
+renderer::OwningTexture createFontTexture(
   const loader::FontData& font,
-  engine::Renderer* pRenderer
+  renderer::Renderer* pRenderer
 ) {
   if (font.size() != 67u) {
     throw std::runtime_error("Wrong number of bitmaps in menu font");
@@ -166,7 +166,7 @@ engine::OwningTexture createFontTexture(
     insertPosX += characterWidth;
   }
 
-  return engine::OwningTexture{pRenderer, combinedBitmaps};
+  return renderer::OwningTexture{pRenderer, combinedBitmaps};
 }
 
 }
@@ -174,7 +174,7 @@ engine::OwningTexture createFontTexture(
 
 MenuElementRenderer::MenuElementRenderer(
   engine::TileRenderer* pSpriteSheetRenderer,
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources
 )
   : mpRenderer(pRenderer)

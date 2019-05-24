@@ -18,8 +18,8 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/renderer.hpp"
 #include "engine/visual_components.hpp"
+#include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -82,7 +82,7 @@ private:
 
 
 void renderVerticalSlidingDoor(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   entityx::Entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace);

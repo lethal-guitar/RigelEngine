@@ -18,14 +18,14 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "engine/renderer.hpp"
 #include "engine/sound_system.hpp"
 #include "engine/tile_renderer.hpp"
-#include "engine/texture.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
-#include "ui/fps_display.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/texture.hpp"
 #include "ui/duke_script_runner.hpp"
+#include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
 
 #include "game_mode.hpp"
@@ -81,12 +81,12 @@ private:
   void showDebugText(const std::string& text) override;
 
 private:
-  engine::Renderer mRenderer;
+  renderer::Renderer mRenderer;
   engine::SoundSystem mSoundSystem;
   loader::ResourceLoader mResources;
   bool mIsShareWareVersion;
 
-  engine::RenderTargetTexture mRenderTarget;
+  renderer::RenderTargetTexture mRenderTarget;
   std::uint8_t mAlphaMod = 255;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;

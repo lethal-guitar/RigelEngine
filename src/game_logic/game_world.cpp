@@ -406,7 +406,7 @@ void GameWorld::render() {
   mpRenderer->clear();
 
   {
-    Renderer::StateSaver saveState(mpRenderer);
+    renderer::Renderer::StateSaver saveState(mpRenderer);
     mpRenderer->setClipRect(base::Rect<int>{
       {data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
       data::GameTraits::inGameViewPortOffset.y},

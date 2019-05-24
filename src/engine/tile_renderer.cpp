@@ -25,6 +25,7 @@
 namespace rigel { namespace engine {
 
 using namespace data;
+using namespace renderer;
 
 TileRenderer::TileRenderer(OwningTexture&& tileSet, Renderer* pRenderer)
   : mTileSetTexture(std::move(tileSet))

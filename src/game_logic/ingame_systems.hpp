@@ -79,7 +79,7 @@ public:
     EntityFactory* pEntityFactory,
     engine::RandomNumberGenerator* pRandomGenerator,
     const RadarDishCounter* pRadarDishCounter,
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     entityx::EntityManager& entities,
     entityx::EventManager& eventManager,
     const loader::ResourceLoader& resources);

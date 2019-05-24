@@ -49,7 +49,7 @@ constexpr const char* EPISODE_4_END_IMAGES[] = {
 };
 
 
-std::vector<engine::OwningTexture> loadImagesForEpisode(
+std::vector<renderer::OwningTexture> loadImagesForEpisode(
   GameMode::Context context,
   const int episode
 ) {

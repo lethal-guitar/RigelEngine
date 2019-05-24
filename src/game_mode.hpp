@@ -17,9 +17,9 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/renderer.hpp"
 #include "engine/timing.hpp"
 #include "loader/duke_script_loader.hpp"
+#include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>
@@ -51,7 +51,7 @@ struct GameMode {
   /** Contains everything a mode needs */
   struct Context {
     const loader::ResourceLoader* mpResources;
-    engine::Renderer* mpRenderer;
+    renderer::Renderer* mpRenderer;
     IGameServiceProvider* mpServiceProvider;
     ui::DukeScriptRunner* mpScriptRunner;
     loader::ScriptBundle* mpScripts;

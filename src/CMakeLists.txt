@@ -48,8 +48,6 @@ set(core_sources
     engine/map_renderer.hpp
     engine/movement.cpp
     engine/movement.hpp
-    engine/opengl.cpp
-    engine/opengl.hpp
     engine/particle_system.cpp
     engine/particle_system.hpp
     engine/physical_components.hpp
@@ -57,17 +55,11 @@ set(core_sources
     engine/physics_system.hpp
     engine/random_number_generator.cpp
     engine/random_number_generator.hpp
-    engine/renderer.cpp
-    engine/renderer.hpp
     engine/rendering_system.cpp
     engine/rendering_system.hpp
-    engine/shader.cpp
-    engine/shader.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/sprite_tools.hpp
-    engine/texture.cpp
-    engine/texture.hpp
     engine/tile_renderer.cpp
     engine/tile_renderer.hpp
     engine/timing.hpp
@@ -207,6 +199,14 @@ set(core_sources
     loader/user_profile_import.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
+    renderer/opengl.cpp
+    renderer/opengl.hpp
+    renderer/renderer.cpp
+    renderer/renderer.hpp
+    renderer/shader.cpp
+    renderer/shader.hpp
+    renderer/texture.cpp
+    renderer/texture.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp

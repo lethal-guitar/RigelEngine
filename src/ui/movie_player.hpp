@@ -17,8 +17,8 @@
 #pragma once
 
 #include "data/movie.hpp"
-#include "engine/texture.hpp"
 #include "engine/timing.hpp"
+#include "renderer/texture.hpp"
 
 #include <functional>
 #include <optional>
@@ -35,7 +35,7 @@ public:
    */
   using FrameCallbackFunc = std::function<std::optional<int>(int)>;
 
-  explicit MoviePlayer(engine::Renderer* pRenderer);
+  explicit MoviePlayer(renderer::Renderer* pRenderer);
 
   void playMovie(
     const data::Movie& movie,
@@ -50,15 +50,15 @@ public:
 
 private:
   struct FrameData {
-    engine::OwningTexture mImage;
+    renderer::OwningTexture mImage;
     int mStartRow;
   };
 
   void invokeFrameCallbackIfPresent(int whichFrame);
 
 private:
-  engine::Renderer* mpRenderer;
-  engine::OwningTexture mBaseImage;
+  renderer::Renderer* mpRenderer;
+  renderer::OwningTexture mBaseImage;
   std::vector<FrameData> mAnimationFrames;
   FrameCallbackFunc mFrameCallback = nullptr;
 

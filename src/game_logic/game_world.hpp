@@ -116,7 +116,7 @@ private:
     base::Vector mPosition;
   };
 
-  engine::Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   engine::TileRenderer* mpUiSpriteSheet;
   ui::MenuElementRenderer* mpTextRenderer;

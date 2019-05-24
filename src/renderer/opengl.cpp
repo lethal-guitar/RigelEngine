@@ -23,7 +23,7 @@ RIGEL_RESTORE_WARNINGS
 #include <stdexcept>
 
 
-void rigel::engine::loadGlFunctions() {
+void rigel::renderer::loadGlFunctions() {
   int result = 0;
 #ifdef RIGEL_USE_GL_ES
   result = gladLoadGLES2Loader(SDL_GL_GetProcAddress);

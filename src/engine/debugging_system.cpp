@@ -61,7 +61,7 @@ base::Color colorForEntity(entityx::Entity entity) {
 
 
 DebuggingSystem::DebuggingSystem(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const base::Vector* pCameraPos,
   data::map::Map* pMap
 )

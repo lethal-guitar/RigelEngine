@@ -20,8 +20,8 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
-#include "engine/opengl.hpp"
-#include "engine/shader.hpp"
+#include "renderer/opengl.hpp"
+#include "renderer/shader.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <glm/mat4x4.hpp>
@@ -33,7 +33,7 @@ RIGEL_RESTORE_WARNINGS
 #include <tuple>
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 class Renderer {
 public:

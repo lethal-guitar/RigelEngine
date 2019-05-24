@@ -145,7 +145,7 @@ void updateAnimatedSprites(ex::EntityManager& es) {
 void drawSpriteFrame(
   const SpriteFrame& frame,
   const base::Vector& position,
-  Renderer* pRenderer
+  renderer::Renderer* pRenderer
 ) {
   // World-space tile positions refer to a sprite's bottom left tile,
   // but we need its top left corner for drawing.
@@ -193,7 +193,7 @@ struct RenderingSystem::SpriteData {
 
 RenderingSystem::RenderingSystem(
   const base::Vector* pCameraPosition,
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const data::map::Map* pMap,
   MapRenderer::MapRenderData&& mapRenderData
 )
@@ -233,7 +233,7 @@ void RenderingSystem::update(
     mem_fn(&SpriteData::mDrawTopMost));
 
   {
-    RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
+    renderer::RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
 
     // Render
     if (backdropFlashColor) {

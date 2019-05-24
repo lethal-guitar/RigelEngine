@@ -19,7 +19,7 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/map.hpp"
-#include "engine/renderer.hpp"
+#include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -31,7 +31,7 @@ namespace rigel { namespace engine {
 class DebuggingSystem {
 public:
   DebuggingSystem(
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const base::Vector* pCameraPos,
     data::map::Map* pMap);
 
@@ -42,7 +42,7 @@ public:
   void update(entityx::EntityManager& es);
 
 private:
-  engine::Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
   const base::Vector* mpCameraPos;
   data::map::Map* mpMap;
 

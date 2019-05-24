@@ -26,7 +26,7 @@ RIGEL_RESTORE_WARNINGS
 #include <array>
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 namespace {
 

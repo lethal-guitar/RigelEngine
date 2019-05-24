@@ -21,7 +21,7 @@
 #include <string>
 
 
-namespace rigel { namespace engine {
+namespace rigel { namespace renderer {
 
 namespace {
 

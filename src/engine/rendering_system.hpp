@@ -20,10 +20,10 @@
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/map_renderer.hpp"
-#include "engine/renderer.hpp"
-#include "engine/texture.hpp"
 #include "engine/timing.hpp"
 #include "engine/visual_components.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -57,7 +57,7 @@ class RenderingSystem {
 public:
   RenderingSystem(
     const base::Vector* pCameraPosition,
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const data::map::Map* pMap,
     MapRenderer::MapRenderData&& mapRenderData);
 
@@ -90,8 +90,8 @@ private:
   void renderWaterEffectAreas(entityx::EntityManager& es);
 
 private:
-  engine::Renderer* mpRenderer;
-  engine::RenderTargetTexture mRenderTarget;
+  renderer::Renderer* mpRenderer;
+  renderer::RenderTargetTexture mRenderTarget;
   MapRenderer mMapRenderer;
   const base::Vector* mpCameraPosition;
   int mWaterAnimStep = 0;

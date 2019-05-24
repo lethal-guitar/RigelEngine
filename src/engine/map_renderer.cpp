@@ -49,20 +49,20 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 }
 
 MapRenderer::MapRenderer(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const data::map::Map* pMap,
   MapRenderData&& renderData
 )
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileRenderer(
-      engine::OwningTexture(pRenderer, renderData.mTileSetImage),
+      renderer::OwningTexture(pRenderer, renderData.mTileSetImage),
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
   , mScrollMode(renderData.mBackdropScrollMode)
 {
   if (renderData.mSecondaryBackdropImage) {
-    mAlternativeBackdropTexture = engine::OwningTexture(
+    mAlternativeBackdropTexture = renderer::OwningTexture(
       mpRenderer, *renderData.mSecondaryBackdropImage);
   }
 }

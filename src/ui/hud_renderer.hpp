@@ -17,8 +17,8 @@
 #pragma once
 
 #include "data/player_model.hpp"
-#include "engine/texture.hpp"
 #include "engine/tile_renderer.hpp"
+#include "renderer/texture.hpp"
 
 #include <cstdint>
 #include <unordered_map>
@@ -45,7 +45,7 @@ public:
   HudRenderer(
     data::PlayerModel* pPlayerModel,
     int levelNumber,
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const loader::ResourceLoader& bundle,
     engine::TileRenderer* pStatusSpriteSheetRenderer);
 
@@ -54,30 +54,30 @@ public:
 
 private:
   struct CollectedLetterIndicator {
-    engine::OwningTexture mTexture;
+    renderer::OwningTexture mTexture;
     base::Vector mPxPosition;
   };
 
   using InventoryItemTextureMap =
-    std::unordered_map<data::InventoryItemType, engine::OwningTexture>;
+    std::unordered_map<data::InventoryItemType, renderer::OwningTexture>;
   using CollectedLetterIndicatorMap =
     std::unordered_map<data::CollectableLetterType, CollectedLetterIndicator>;
 
   HudRenderer(
     data::PlayerModel* pPlayerModel,
     int levelNumber,
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const loader::ActorData& actorData,
     InventoryItemTextureMap&& inventoryItemTextures,
     CollectedLetterIndicatorMap&& collectedLetterTextures,
     engine::TileRenderer* pStatusSpriteSheetRenderer);
 
   static InventoryItemTextureMap makeInventoryItemTextureMap(
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const loader::ActorImagePackage& imagePack);
 
   static CollectedLetterIndicatorMap makeCollectedLetterTextureMap(
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const loader::ActorImagePackage& imagePack);
 
   void drawHealthBar() const;
@@ -85,13 +85,13 @@ private:
 
   data::PlayerModel* mpPlayerModel;
   const int mLevelNumber;
-  engine::Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
 
   std::uint32_t mElapsedFrames = 0;
 
-  engine::OwningTexture mTopRightTexture;
-  engine::OwningTexture mBottomLeftTexture;
-  engine::OwningTexture mBottomRightTexture;
+  renderer::OwningTexture mTopRightTexture;
+  renderer::OwningTexture mBottomLeftTexture;
+  renderer::OwningTexture mBottomRightTexture;
   InventoryItemTextureMap mInventoryTexturesByType;
   CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
   engine::TileRenderer* mpStatusSpriteSheetRenderer;

@@ -58,12 +58,12 @@ const auto INITIAL_GAME_SPEED = 3;
 
 
 auto makeSpriteSheet(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resourceLoader,
   const loader::Palette16& palette
 ) {
   return engine::TileRenderer{
-    engine::OwningTexture{
+    renderer::OwningTexture{
       pRenderer,
       resourceLoader.loadTiledFullscreenImage(
         "STATUS.MNI", palette)},
@@ -75,7 +75,7 @@ auto makeSpriteSheet(
 
 DukeScriptRunner::DukeScriptRunner(
   loader::ResourceLoader* pResourceLoader,
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const data::SaveSlotArray* pSaveSlots,
   IGameServiceProvider* pServiceProvider
 )
@@ -524,7 +524,7 @@ void DukeScriptRunner::drawSprite(
   const auto drawOffsetPx =
     data::tileVectorToPixelVector(frameData.mDrawOffset);
 
-  engine::OwningTexture spriteTexture(mpRenderer, image);
+  renderer::OwningTexture spriteTexture(mpRenderer, image);
   spriteTexture.render(mpRenderer, topLeftPx + drawOffsetPx);
   mpRenderer->submitBatch();
 }

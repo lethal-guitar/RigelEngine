@@ -18,10 +18,10 @@
 
 #include "base/color.hpp"
 #include "base/warnings.hpp"
-#include "engine/texture.hpp"
-#include "engine/timing.hpp"
 #include "engine/tile_renderer.hpp"
+#include "engine/timing.hpp"
 #include "loader/palette.hpp"
+#include "renderer/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
@@ -43,7 +43,7 @@ class MenuElementRenderer {
 public:
   MenuElementRenderer(
     engine::TileRenderer* pSpriteSheetRenderer,
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     const loader::ResourceLoader& resources);
 
   // Stateless API
@@ -94,7 +94,7 @@ private:
     int rightIndex) const;
 
 private:
-  engine::Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
   engine::TileRenderer* mpSpriteSheetRenderer;
   engine::TileRenderer mBigTextRenderer;
 };
