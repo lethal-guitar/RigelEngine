@@ -88,8 +88,8 @@ std::unique_ptr<ParticlesList> createParticles(
 }
 
 
-struct ParticleCloud {
-  ParticleCloud(
+struct ParticleGroup {
+  ParticleGroup(
     const base::Vector& origin,
     const base::Color& color,
     std::unique_ptr<ParticlesList> pParticles
@@ -149,7 +149,7 @@ void ParticleSystem::spawnParticles(
   int velocityScaleX
 ) {
   auto pParticles = createParticles(*mpRandomGenerator, velocityScaleX);
-  mParticleClouds.emplace_back(
+  mParticleGroups.emplace_back(
     origin + SPAWN_OFFSET, color, std::move(pParticles));
 }
 
@@ -158,20 +158,20 @@ void ParticleSystem::update() {
   using namespace std;
 
   const auto it = remove_if(
-    begin(mParticleClouds),
-    end(mParticleClouds),
-    mem_fn(&ParticleCloud::isExpired));
-  mParticleClouds.erase(it, end(mParticleClouds));
+    begin(mParticleGroups),
+    end(mParticleGroups),
+    mem_fn(&ParticleGroup::isExpired));
+  mParticleGroups.erase(it, end(mParticleGroups));
 
-  for (auto& system : mParticleClouds) {
-    system.update();
+  for (auto& group : mParticleGroups) {
+    group.update();
   }
 }
 
 
 void ParticleSystem::render(const base::Vector& cameraPosition) {
-  for (auto& system : mParticleClouds) {
-    system.render(*mpRenderer, cameraPosition);
+  for (auto& group : mParticleGroups) {
+    group.render(*mpRenderer, cameraPosition);
   }
 }
 

@@ -28,7 +28,7 @@ namespace rigel { namespace engine {
 
 class RandomNumberGenerator;
 
-struct ParticleCloud;
+struct ParticleGroup;
 
 
 class ParticleSystem {
@@ -47,7 +47,7 @@ public:
   void render(const base::Vector& cameraPosition);
 
 private:
-  std::vector<ParticleCloud> mParticleClouds;
+  std::vector<ParticleGroup> mParticleGroups;
   RandomNumberGenerator* mpRandomGenerator;
   renderer::Renderer* mpRenderer;
 };
