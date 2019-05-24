@@ -32,11 +32,11 @@ using renderer::Renderer;
 
 namespace {
 
-const auto PARTICLE_SYSTEM_LIFE_TIME = 28;
+constexpr auto PARTICLE_SYSTEM_LIFE_TIME = 28;
 
-const auto INITIAL_INDEX_LIMIT = 15;
+constexpr auto INITIAL_INDEX_LIMIT = 15;
 
-const std::array<std::int16_t, 43> VERTICAL_MOVEMENT_TABLE{
+constexpr std::array<std::int16_t, 43> VERTICAL_MOVEMENT_TABLE{
   -8, -8, -8, -8, -4, -4, -4, -2, -1, 0, 0, 1, 2, 4, 4, 4,
   8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
   8, 8, 8, 8, 8, 8, 24, 1
