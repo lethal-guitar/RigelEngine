@@ -72,6 +72,17 @@ The most important command line options are:
 
 ## Building from source
 
+### Get the sources
+
+First of all get the sources:
+
+```bash
+# Clone the repo and initialize submodules:
+git clone git@github.com:lethal-guitar/RigelEngine.git
+cd RigelEngine
+git submodule update --init --recursive
+``` 
+
 ### Linux build quick start guide
 
 If you're on Linux and running a recent enough Ubuntu/Debian-like distro<sup>[1](#foot-note-linux)</sup>,
@@ -82,11 +93,6 @@ be found further down.
 ```bash
 # Install all external dependencies, as well as the CMake build system:
 sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
-
-# Clone the repo and initialize submodules:
-git clone git@github.com:lethal-guitar/RigelEngine.git
-cd RigelEngine
-git submodule update --init --recursive
 
 # Configure and build:
 mkdir build
