@@ -188,7 +188,7 @@ data::SoundId soundIdForWeapon(const data::WeaponType weaponType) {
 
     default:
       return SoundId::DukeNormalShot;
-  };
+  }
 }
 
 
