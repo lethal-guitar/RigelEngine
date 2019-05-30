@@ -71,12 +71,17 @@ The most important command line options are:
 * `--no-music`: don't play music
 * `-h`/`--help`: show all command line options
 
+## Getting binaries
+
+Pre-built binaries are provided for Windows. You can grab them from the [Releases tab](https://github.com/lethal-guitar/RigelEngine/releases). Alternatively, you can grab a build of the latest `master` branch by going to [AppVeyor](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master), clicking on "Configuration: Release", and then clicking on "Artifacts".
+
+I'm planning to also provide binaries for OS X and Linux in the future. But right now, you have to build the project yourself on these platforms.
 
 ## Building from source
 
 ### Get the sources
 
-First of all get the sources:
+First of all, get the sources:
 
 ```bash
 # Clone the repo and initialize submodules:
@@ -167,7 +172,10 @@ make
 
 ### <a name="windows-build-instructions">Windows builds</a>
 
-:exclamation: Currently only 64bit builds are possible.
+:exclamation: Currently, only 64-bit builds are possible.
+
+To build on Windows, you'll need to install CMake and provide binaries for the
+external dependencies listed above. You can grab CMake 3.13.2 from [here](https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-win64-x64.zip).
 
 #### Using vcpkg
 
@@ -179,10 +187,8 @@ Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcp
 
 #### Adding dependencies manually
 
-To build on Windows, you'll need to install CMake and provide binaries for the
-external dependencies listed above. You can get them using the following links:
+Grab binaries for the dependencies here:
 
-* [CMake 3.13.2](https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-win64-x64.zip)
 * [SDL2 2.0.4](https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip)
 * [SDL2 mixer 2.0.1](https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip)
 * [Boost 1.67](https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-14.1-64.exe/download)
@@ -202,10 +208,6 @@ SDL2MIXERDIR=<SDL2_MIXER_LOCATION>
 
 If you're using git-bash on Windows, an easy way to do so is by adding the
 corresponding `export` commands in your`.bashrc`.
-
-_Note_: All of the above would need slight adjustments in order to create a
-32-bit build. Also I haven't tried building 32-bit so far, so it's possible
-that some additional changes would be necessary.
 
 ***
 
