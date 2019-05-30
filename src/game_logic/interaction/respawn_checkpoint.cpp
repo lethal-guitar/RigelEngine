@@ -16,7 +16,7 @@
 
 #include "respawn_checkpoint.hpp"
 
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"

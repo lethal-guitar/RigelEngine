@@ -17,7 +17,7 @@
 #include "super_force_field.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "data/player_model.hpp"
 #include "data/strings.hpp"
 #include "engine/particle_system.hpp"

@@ -20,7 +20,7 @@
 #include <base/container_utils.hpp>
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
-#include <common/global_level_events.hpp>
+#include <common/global.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
 #include <data/sound_ids.hpp>

@@ -17,7 +17,7 @@
 #include "earth_quake_effect.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "engine/random_number_generator.hpp"
 
 

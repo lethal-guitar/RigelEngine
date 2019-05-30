@@ -18,7 +18,7 @@
 
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "data/map.hpp"
 #include "data/player_model.hpp"
 #include "data/sound_ids.hpp"

@@ -17,7 +17,7 @@
 #include "player_interaction_system.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "data/strings.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/visual_components.hpp"

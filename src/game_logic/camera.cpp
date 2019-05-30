@@ -17,7 +17,7 @@
 #include "camera.hpp"
 
 #include "base/math_tools.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "engine/physical_components.hpp"

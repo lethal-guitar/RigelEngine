@@ -7,7 +7,7 @@ set(core_sources
     base/warnings.hpp
     common/user_profile.cpp
     common/user_profile.hpp
-    common/global_level_events.hpp
+    common/global.hpp
     common/game_mode.hpp
     common/game_mode.cpp
     common/game_service_provider.hpp

@@ -20,7 +20,7 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "common/game_mode.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"

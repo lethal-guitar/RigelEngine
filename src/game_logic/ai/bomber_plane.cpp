@@ -18,7 +18,7 @@
 
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"

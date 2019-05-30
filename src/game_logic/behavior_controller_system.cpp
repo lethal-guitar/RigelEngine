@@ -16,7 +16,7 @@
 
 #include "behavior_controller_system.hpp"
 
-#include "common/global_level_events.hpp"
+#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
