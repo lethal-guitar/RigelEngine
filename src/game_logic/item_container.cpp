@@ -16,6 +16,7 @@
 
 #include "item_container.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
@@ -27,8 +28,6 @@
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic {

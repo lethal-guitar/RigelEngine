@@ -16,6 +16,7 @@
 
 #include "blue_guard.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/movement.hpp"
@@ -25,8 +26,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-#include "game_service_provider.hpp"
 
 #include <optional>
 

@@ -17,19 +17,18 @@
 #include "watch_bot.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
+#include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
-#include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace behaviors {

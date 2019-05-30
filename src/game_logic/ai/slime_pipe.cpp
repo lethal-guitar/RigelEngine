@@ -16,14 +16,14 @@
 
 #include "slime_pipe.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
-#include "game_logic/entity_factory.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_service_provider.hpp"
+#include "game_logic/entity_factory.hpp"
 
 
 namespace rigel { namespace game_logic { namespace behaviors {

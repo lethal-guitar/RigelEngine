@@ -5,6 +5,12 @@ set(core_sources
     base/math_tools.hpp
     base/spatial_types.hpp
     base/warnings.hpp
+    common/user_profile.cpp
+    common/user_profile.hpp
+    common/global_level_events.hpp
+    common/game_mode.hpp
+    common/game_mode.cpp
+    common/game_service_provider.hpp
     data/audio_buffer.hpp
     data/bonus.hpp
     data/duke_script.hpp
@@ -286,22 +292,16 @@ set(main_exe_sources
     game_main.cpp
     game_main.hpp
     game_main.ipp
-    game_mode.hpp
-    game_mode.cpp
-    game_service_provider.hpp
     game_session_mode.cpp
     game_session_mode.hpp
     game_runner.cpp
     game_runner.hpp
-    global_level_events.hpp
     intro_demo_loop_mode.cpp
     intro_demo_loop_mode.hpp
     main.cpp
     menu_mode.cpp
     menu_mode.hpp
     mode_stage.hpp
-    user_profile.cpp
-    user_profile.hpp
 )
 
 

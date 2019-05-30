@@ -16,14 +16,13 @@
 
 #include "effect_actor_components.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace components {

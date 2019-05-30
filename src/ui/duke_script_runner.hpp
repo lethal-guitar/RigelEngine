@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "common/game_mode.hpp"
 #include "data/duke_script.hpp"
 #include "data/map.hpp"
 #include "data/saved_game.hpp"
@@ -24,8 +25,6 @@
 #include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
-
-#include "game_mode.hpp"
 
 #include <cstddef>
 #include <optional>

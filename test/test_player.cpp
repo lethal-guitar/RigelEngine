@@ -20,6 +20,7 @@
 #include <base/container_utils.hpp>
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
+#include <common/global_level_events.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
 #include <data/sound_ids.hpp>
@@ -28,10 +29,8 @@
 #include <engine/random_number_generator.hpp>
 #include <engine/sprite_tools.hpp>
 #include <engine/visual_components.hpp>
-#include <game_logic/player/components.hpp>
 #include <game_logic/player.hpp>
-
-#include <global_level_events.hpp>
+#include <game_logic/player/components.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>

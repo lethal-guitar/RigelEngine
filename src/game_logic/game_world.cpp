@@ -16,6 +16,7 @@
 
 #include "game_world.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
@@ -28,8 +29,6 @@
 #include "loader/resource_loader.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"
-
-#include "game_service_provider.hpp"
 
 #include <cassert>
 #include <chrono>

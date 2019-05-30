@@ -16,11 +16,11 @@
 
 #include "damage_infliction_system.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic {

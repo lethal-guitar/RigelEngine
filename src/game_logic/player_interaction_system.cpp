@@ -16,6 +16,8 @@
 
 #include "player_interaction_system.hpp"
 
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "data/strings.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/visual_components.hpp"
@@ -28,9 +30,6 @@
 #include "game_logic/player.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {

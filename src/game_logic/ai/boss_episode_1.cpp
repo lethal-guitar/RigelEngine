@@ -17,6 +17,8 @@
 #include "boss_episode_1.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "data/player_model.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/movement.hpp"
@@ -28,9 +30,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 
 
 namespace rigel::game_logic::behaviors {

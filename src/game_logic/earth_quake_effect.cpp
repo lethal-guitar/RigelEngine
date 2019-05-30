@@ -16,10 +16,9 @@
 
 #include "earth_quake_effect.hpp"
 
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "engine/random_number_generator.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {

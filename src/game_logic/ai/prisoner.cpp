@@ -16,6 +16,7 @@
 
 #include "prisoner.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
@@ -23,8 +24,6 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace ai {

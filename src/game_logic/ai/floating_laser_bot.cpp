@@ -17,6 +17,7 @@
 #include "floating_laser_bot.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
@@ -25,8 +26,6 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-#include "game_service_provider.hpp"
 
 #include <algorithm>
 

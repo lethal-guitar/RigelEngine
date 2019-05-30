@@ -19,6 +19,8 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "common/game_mode.hpp"
+#include "common/global_level_events.hpp"
 #include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
@@ -31,9 +33,6 @@
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
-
-#include "game_mode.hpp"
-#include "global_level_events.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

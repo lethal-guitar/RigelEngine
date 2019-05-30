@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "common/game_mode.hpp"
 #include "data/bonus.hpp"
 #include "data/saved_game.hpp"
 #include "game_logic/game_world.hpp"
@@ -25,8 +26,6 @@
 #include "loader/duke_script_loader.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/text_entry_widget.hpp"
-
-#include "game_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL.h>

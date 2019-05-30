@@ -17,10 +17,9 @@
 #include "ingame_message_display.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "ui/menu_element_renderer.hpp"
-
-#include "game_service_provider.hpp"
 
 #include <cctype>
 

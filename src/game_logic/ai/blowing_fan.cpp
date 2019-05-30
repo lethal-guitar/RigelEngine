@@ -16,10 +16,9 @@
 
 #include "blowing_fan.hpp"
 
-#include "game_logic/player.hpp"
+#include "common/game_service_provider.hpp"
 #include "engine/visual_components.hpp"
-
-#include "game_service_provider.hpp"
+#include "game_logic/player.hpp"
 
 
 namespace rigel::game_logic::behaviors {

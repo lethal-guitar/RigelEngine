@@ -17,18 +17,17 @@
 #include "player.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "data/map.hpp"
+#include "data/player_model.hpp"
 #include "data/sound_ids.hpp"
 #include "data/strings.hpp"
-#include "data/player_model.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 
 #include <cassert>
 

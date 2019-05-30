@@ -17,6 +17,8 @@
 #include "bomber_plane.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
@@ -26,9 +28,6 @@
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic { namespace behaviors {

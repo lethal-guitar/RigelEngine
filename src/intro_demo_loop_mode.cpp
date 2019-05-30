@@ -1,9 +1,8 @@
 #include "intro_demo_loop_mode.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/duke_script_runner.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel {

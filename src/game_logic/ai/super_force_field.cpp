@@ -16,19 +16,18 @@
 
 #include "super_force_field.hpp"
 
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "data/player_model.hpp"
 #include "data/strings.hpp"
-#include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
-#include "game_logic/player.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
+#include "game_logic/damage_components.hpp"
+#include "game_logic/entity_factory.hpp"
+#include "game_logic/player.hpp"
 
 
 namespace rigel::game_logic::behaviors {

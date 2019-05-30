@@ -16,6 +16,7 @@
 
 #include "force_field.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
@@ -24,8 +25,6 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
-
-#include "game_service_provider.hpp"
 
 namespace ex = entityx;
 

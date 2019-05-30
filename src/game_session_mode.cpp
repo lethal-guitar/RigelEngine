@@ -17,11 +17,10 @@
 #include "game_session_mode.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
 #include "data/saved_game.hpp"
 #include "ui/high_score_list.hpp"
-
-#include "game_service_provider.hpp"
-#include "user_profile.hpp"
 
 
 namespace rigel {

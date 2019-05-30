@@ -16,10 +16,9 @@
 
 #include "high_score_list.hpp"
 
+#include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
 #include "ui/duke_script_runner.hpp"
-
-#include "game_service_provider.hpp"
-#include "user_profile.hpp"
 
 
 namespace rigel::ui {

@@ -16,10 +16,9 @@
 
 #pragma once
 
+#include "common/game_mode.hpp"
 #include "renderer/texture.hpp"
 #include "ui/bonus_screen.hpp"
-
-#include "game_mode.hpp"
 
 #include <vector>
 

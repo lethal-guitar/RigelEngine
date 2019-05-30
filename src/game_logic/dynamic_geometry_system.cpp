@@ -16,6 +16,8 @@
 
 #include "dynamic_geometry_system.hpp"
 
+#include "common/game_service_provider.hpp"
+#include "common/global_level_events.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
@@ -29,9 +31,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/entity_factory.hpp"
-
-#include "game_service_provider.hpp"
-#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {
