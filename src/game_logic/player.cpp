@@ -22,6 +22,7 @@
 #include "data/strings.hpp"
 #include "data/player_model.hpp"
 #include "engine/collision_checker.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -547,6 +548,7 @@ void Player::resetAfterRespawn() {
   mAttachedSpiders.reset();
 
   mEntity.component<c::Sprite>()->mFramesToRender = {0};
+  engine::removeSafely<components::DestructionEffects>(mEntity);
 }
 
 
