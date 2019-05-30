@@ -141,26 +141,26 @@ set(core_sources
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
     game_logic/input.hpp
-    game_logic/interaction/blowing_fan.cpp
-    game_logic/interaction/blowing_fan.hpp
-    game_logic/interaction/elevator.cpp
-    game_logic/interaction/elevator.hpp
-    game_logic/interaction/enemy_radar.cpp
-    game_logic/interaction/enemy_radar.hpp
-    game_logic/interaction/force_field.cpp
-    game_logic/interaction/force_field.hpp
-    game_logic/interaction/locked_door.cpp
-    game_logic/interaction/locked_door.hpp
-    game_logic/interaction/missile.cpp
-    game_logic/interaction/missile.hpp
-    game_logic/interaction/respawn_checkpoint.cpp
-    game_logic/interaction/respawn_checkpoint.hpp
-    game_logic/interaction/sliding_door.cpp
-    game_logic/interaction/sliding_door.hpp
-    game_logic/interaction/super_force_field.cpp
-    game_logic/interaction/super_force_field.hpp
-    game_logic/interaction/tile_burner.cpp
-    game_logic/interaction/tile_burner.hpp
+    game_logic/interactive/blowing_fan.cpp
+    game_logic/interactive/blowing_fan.hpp
+    game_logic/interactive/elevator.cpp
+    game_logic/interactive/elevator.hpp
+    game_logic/interactive/enemy_radar.cpp
+    game_logic/interactive/enemy_radar.hpp
+    game_logic/interactive/force_field.cpp
+    game_logic/interactive/force_field.hpp
+    game_logic/interactive/locked_door.cpp
+    game_logic/interactive/locked_door.hpp
+    game_logic/interactive/missile.cpp
+    game_logic/interactive/missile.hpp
+    game_logic/interactive/respawn_checkpoint.cpp
+    game_logic/interactive/respawn_checkpoint.hpp
+    game_logic/interactive/sliding_door.cpp
+    game_logic/interactive/sliding_door.hpp
+    game_logic/interactive/super_force_field.cpp
+    game_logic/interactive/super_force_field.hpp
+    game_logic/interactive/tile_burner.cpp
+    game_logic/interactive/tile_burner.hpp
     game_logic/item_container.cpp
     game_logic/item_container.hpp
     game_logic/player.cpp

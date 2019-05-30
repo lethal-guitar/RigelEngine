@@ -19,8 +19,8 @@
 #include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
-#include "game_logic/interaction/enemy_radar.hpp"
-#include "game_logic/interaction/force_field.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
+#include "game_logic/interactive/force_field.hpp"
 
 #include <iomanip>
 #include <iostream>

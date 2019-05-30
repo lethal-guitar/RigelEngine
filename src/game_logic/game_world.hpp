@@ -29,7 +29,7 @@
 #include "game_logic/earth_quake_effect.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/input.hpp"
-#include "game_logic/interaction/enemy_radar.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
