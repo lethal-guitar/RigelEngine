@@ -14,6 +14,7 @@ set(main_exe_name RigelEngine)
 ###############################################################################
 
 option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
+option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 
 # Dependencies
@@ -36,16 +37,18 @@ if(MSVC)
         /permissive-
         /MP
         /W4
-        /WX
         /EHsc
         /wd4100 # Unused parameter
         /wd4503 # Decorated name length exceeded
         /wd4800 # Forcing value to bool
     )
     add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+
+    if (WARNINGS_AS_ERRORS)
+        add_compile_options(/WX)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(
-        -Werror
         -Weverything
         -Wno-unknown-warning-option
         -Wno-c++98-compat
@@ -63,15 +66,22 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
         -fcolor-diagnostics
     )
+
+    if (WARNINGS_AS_ERRORS)
+        add_compile_options(-Werror)
+    endif()
 elseif(CMAKE_COMPILER_IS_GNUCXX)
     add_compile_options(
-        -Werror
         -Wall
         -Wextra
         -pedantic
         -Wno-maybe-uninitialized
         -Wno-unused-parameter
     )
+
+    if (WARNINGS_AS_ERRORS)
+        add_compile_options(-Werror)
+    endif()
 else()
     message(FATAL_ERROR "Unrecognized compiler")
 endif()
