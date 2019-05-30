@@ -24,7 +24,6 @@
 namespace rigel { namespace data {
 
 struct MovieFrame {
-  MovieFrame() = default;
   MovieFrame(Image&& replacementImage, const int startRow)
     : mReplacementImage(std::move(replacementImage))
     , mStartRow(startRow)
