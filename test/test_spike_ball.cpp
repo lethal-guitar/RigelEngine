@@ -18,12 +18,12 @@
 
 #include <base/spatial_types_printing.hpp>
 #include <data/map.hpp>
-#include <game_logic/ai/spike_ball.hpp>
 #include <engine/base_components.hpp>
 #include <engine/collision_checker.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
 #include <engine/timing.hpp>
+#include <game_logic/enemies/spike_ball.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>

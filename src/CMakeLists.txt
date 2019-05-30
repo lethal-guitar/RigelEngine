@@ -68,50 +68,6 @@ set(core_sources
     engine/tiled_texture.hpp
     engine/timing.hpp
     engine/visual_components.hpp
-    game_logic/ai/blue_guard.cpp
-    game_logic/ai/blue_guard.hpp
-    game_logic/ai/bomber_plane.cpp
-    game_logic/ai/bomber_plane.hpp
-    game_logic/ai/boss_episode_1.cpp
-    game_logic/ai/boss_episode_1.hpp
-    game_logic/ai/ceiling_sucker.cpp
-    game_logic/ai/ceiling_sucker.hpp
-    game_logic/ai/eyeball_thrower.cpp
-    game_logic/ai/eyeball_thrower.hpp
-    game_logic/ai/floating_laser_bot.cpp
-    game_logic/ai/floating_laser_bot.hpp
-    game_logic/ai/hover_bot.cpp
-    game_logic/ai/hover_bot.hpp
-    game_logic/ai/laser_turret.cpp
-    game_logic/ai/laser_turret.hpp
-    game_logic/ai/messenger_drone.cpp
-    game_logic/ai/messenger_drone.hpp
-    game_logic/ai/prisoner.cpp
-    game_logic/ai/prisoner.hpp
-    game_logic/ai/red_bird.cpp
-    game_logic/ai/red_bird.hpp
-    game_logic/ai/rigelatin_soldier.cpp
-    game_logic/ai/rigelatin_soldier.hpp
-    game_logic/ai/rocket_turret.cpp
-    game_logic/ai/rocket_turret.hpp
-    game_logic/ai/security_camera.cpp
-    game_logic/ai/security_camera.hpp
-    game_logic/ai/simple_walker.cpp
-    game_logic/ai/simple_walker.hpp
-    game_logic/ai/slime_blob.cpp
-    game_logic/ai/slime_blob.hpp
-    game_logic/ai/slime_pipe.cpp
-    game_logic/ai/slime_pipe.hpp
-    game_logic/ai/smash_hammer.cpp
-    game_logic/ai/smash_hammer.hpp
-    game_logic/ai/snake.cpp
-    game_logic/ai/snake.hpp
-    game_logic/ai/spider.cpp
-    game_logic/ai/spider.hpp
-    game_logic/ai/spike_ball.cpp
-    game_logic/ai/spike_ball.hpp
-    game_logic/ai/watch_bot.cpp
-    game_logic/ai/watch_bot.hpp
     game_logic/behavior_controller.hpp
     game_logic/behavior_controller_system.cpp
     game_logic/behavior_controller_system.hpp
@@ -132,6 +88,50 @@ set(core_sources
     game_logic/effect_actor_components.hpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
+    game_logic/enemies/blue_guard.cpp
+    game_logic/enemies/blue_guard.hpp
+    game_logic/enemies/bomber_plane.cpp
+    game_logic/enemies/bomber_plane.hpp
+    game_logic/enemies/boss_episode_1.cpp
+    game_logic/enemies/boss_episode_1.hpp
+    game_logic/enemies/ceiling_sucker.cpp
+    game_logic/enemies/ceiling_sucker.hpp
+    game_logic/enemies/eyeball_thrower.cpp
+    game_logic/enemies/eyeball_thrower.hpp
+    game_logic/enemies/floating_laser_bot.cpp
+    game_logic/enemies/floating_laser_bot.hpp
+    game_logic/enemies/hover_bot.cpp
+    game_logic/enemies/hover_bot.hpp
+    game_logic/enemies/laser_turret.cpp
+    game_logic/enemies/laser_turret.hpp
+    game_logic/enemies/messenger_drone.cpp
+    game_logic/enemies/messenger_drone.hpp
+    game_logic/enemies/prisoner.cpp
+    game_logic/enemies/prisoner.hpp
+    game_logic/enemies/red_bird.cpp
+    game_logic/enemies/red_bird.hpp
+    game_logic/enemies/rigelatin_soldier.cpp
+    game_logic/enemies/rigelatin_soldier.hpp
+    game_logic/enemies/rocket_turret.cpp
+    game_logic/enemies/rocket_turret.hpp
+    game_logic/enemies/security_camera.cpp
+    game_logic/enemies/security_camera.hpp
+    game_logic/enemies/simple_walker.cpp
+    game_logic/enemies/simple_walker.hpp
+    game_logic/enemies/slime_blob.cpp
+    game_logic/enemies/slime_blob.hpp
+    game_logic/enemies/slime_pipe.cpp
+    game_logic/enemies/slime_pipe.hpp
+    game_logic/enemies/smash_hammer.cpp
+    game_logic/enemies/smash_hammer.hpp
+    game_logic/enemies/snake.cpp
+    game_logic/enemies/snake.hpp
+    game_logic/enemies/spider.cpp
+    game_logic/enemies/spider.hpp
+    game_logic/enemies/spike_ball.cpp
+    game_logic/enemies/spike_ball.hpp
+    game_logic/enemies/watch_bot.cpp
+    game_logic/enemies/watch_bot.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp

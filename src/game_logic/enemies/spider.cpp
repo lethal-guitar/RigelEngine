@@ -21,8 +21,8 @@
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/ai/simple_walker.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/entity_factory.hpp"
 
 
