@@ -48,6 +48,8 @@ cd /home/niko/RigelEngine/build
 
 The full version of the game (aka registered version) is not available currently, but you can still download the freely available shareware version from [the old 3D Realms site](http://legacy.3drealms.com/duke2/) - look for a download link for the file `4duke.zip`. You can also find the same file on various websites if you Google for "Duke Nukem 2 shareware".
 
+Note that on macOS you might need to unzip from the terminal - `unzip 4duke.zip`, since the built-in unarchiver seems to dislike the shareware download.
+
 The download contains an installer which only runs on MS-DOS, but you don't need that - you can simply rename the file `DN2SW10.SHR` (also part of the download) to `.zip` and open it using your favorite archive manager. After that, you can point RigelEngine to the directory where you extracted the files, and it should work.
 
 If you already have a copy of the game, you can also point RigelEngine to that existing installation.
