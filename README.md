@@ -90,6 +90,17 @@ cd RigelEngine
 git submodule update --init --recursive
 ``` 
 
+### A note about warnings as errors
+
+By default, warnings during compilation are treated as errors. This behavior
+can be changed by passing `-DWARNINGS_AS_ERRORS=OFF` to CMake when configuring.
+If you plan to work on RigelEngine, I'd recommend leaving this on, as you might
+otherwise have your build fail on CI despite it building successfully locally.
+
+On the other hand, if you only want to use RigelEngine, but there are no
+pre-built binaries for your platform, disabling warnings as errors is
+recommended.
+
 ### Linux build quick start guide
 
 If you're on Linux and running a recent enough Ubuntu/Debian-like distro<sup>[1](#foot-note-linux)</sup>,
@@ -104,11 +115,14 @@ sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
 # Configure and build:
 mkdir build
 cd build
-cmake ..
+cmake .. -DWARNINGS_AS_ERRORS=OFF
 make
 
 # NOTE:  Pass -j<NUM_PROCESSES> to 'make' in order to get multi-core
 # compilation, '8' is a good number for a 4-core machine with hyperthreading
+#
+# If you plan to develop RigelEngine, I recommend dropping the
+# -DWARNINGS_AS_ERRORS part - see the note about warnings as errors above.
 
 # Now run it!
 ./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
@@ -166,7 +180,7 @@ unset rigel_llvm_path;
 # Now, the regular build via CMake should work:
 mkdir build
 cd build
-cmake ..
+cmake .. -DWARNINGS_AS_ERRORS=OFF
 make
 ```
 
