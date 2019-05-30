@@ -167,6 +167,18 @@ make
 
 ### <a name="windows-build-instructions">Windows builds</a>
 
+:exclamation: Currently only 64bit builds are possible.
+
+#### Using vcpkg
+
+```bash
+vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows
+```
+
+Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
+
+#### Adding dependencies manually
+
 To build on Windows, you'll need to install CMake and provide binaries for the
 external dependencies listed above. You can get them using the following links:
 
