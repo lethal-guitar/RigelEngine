@@ -5,12 +5,12 @@ set(core_sources
     base/math_tools.hpp
     base/spatial_types.hpp
     base/warnings.hpp
+    common/game_mode.cpp
+    common/game_mode.hpp
+    common/game_service_provider.hpp
+    common/global.hpp
     common/user_profile.cpp
     common/user_profile.hpp
-    common/global.hpp
-    common/game_mode.hpp
-    common/game_mode.cpp
-    common/game_service_provider.hpp
     data/audio_buffer.hpp
     data/bonus.hpp
     data/duke_script.hpp
@@ -68,8 +68,6 @@ set(core_sources
     engine/tiled_texture.hpp
     engine/timing.hpp
     engine/visual_components.hpp
-    game_logic/ai/blowing_fan.cpp
-    game_logic/ai/blowing_fan.hpp
     game_logic/ai/blue_guard.cpp
     game_logic/ai/blue_guard.hpp
     game_logic/ai/bomber_plane.cpp
@@ -88,8 +86,6 @@ set(core_sources
     game_logic/ai/laser_turret.hpp
     game_logic/ai/messenger_drone.cpp
     game_logic/ai/messenger_drone.hpp
-    game_logic/ai/missile.cpp
-    game_logic/ai/missile.hpp
     game_logic/ai/prisoner.cpp
     game_logic/ai/prisoner.hpp
     game_logic/ai/red_bird.cpp
@@ -102,8 +98,6 @@ set(core_sources
     game_logic/ai/security_camera.hpp
     game_logic/ai/simple_walker.cpp
     game_logic/ai/simple_walker.hpp
-    game_logic/ai/sliding_door.cpp
-    game_logic/ai/sliding_door.hpp
     game_logic/ai/slime_blob.cpp
     game_logic/ai/slime_blob.hpp
     game_logic/ai/slime_pipe.cpp
@@ -116,8 +110,6 @@ set(core_sources
     game_logic/ai/spider.hpp
     game_logic/ai/spike_ball.cpp
     game_logic/ai/spike_ball.hpp
-    game_logic/ai/super_force_field.cpp
-    game_logic/ai/super_force_field.hpp
     game_logic/ai/watch_bot.cpp
     game_logic/ai/watch_bot.hpp
     game_logic/behavior_controller.hpp
@@ -140,8 +132,6 @@ set(core_sources
     game_logic/effect_actor_components.hpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
-    game_logic/enemy_radar.cpp
-    game_logic/enemy_radar.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
@@ -151,14 +141,26 @@ set(core_sources
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
     game_logic/input.hpp
+    game_logic/interaction/blowing_fan.cpp
+    game_logic/interaction/blowing_fan.hpp
     game_logic/interaction/elevator.cpp
     game_logic/interaction/elevator.hpp
+    game_logic/interaction/enemy_radar.cpp
+    game_logic/interaction/enemy_radar.hpp
     game_logic/interaction/force_field.cpp
     game_logic/interaction/force_field.hpp
     game_logic/interaction/locked_door.cpp
     game_logic/interaction/locked_door.hpp
+    game_logic/interaction/missile.cpp
+    game_logic/interaction/missile.hpp
     game_logic/interaction/respawn_checkpoint.cpp
     game_logic/interaction/respawn_checkpoint.hpp
+    game_logic/interaction/sliding_door.cpp
+    game_logic/interaction/sliding_door.hpp
+    game_logic/interaction/super_force_field.cpp
+    game_logic/interaction/super_force_field.hpp
+    game_logic/interaction/tile_burner.cpp
+    game_logic/interaction/tile_burner.hpp
     game_logic/item_container.cpp
     game_logic/item_container.hpp
     game_logic/player.cpp
@@ -170,8 +172,6 @@ set(core_sources
     game_logic/player/projectile_system.hpp
     game_logic/player_interaction_system.cpp
     game_logic/player_interaction_system.hpp
-    game_logic/tile_burner.cpp
-    game_logic/tile_burner.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
