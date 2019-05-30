@@ -37,6 +37,7 @@ if(MSVC)
         /MP
         /W4
         /WX
+        /EHsc
         /wd4100 # Unused parameter
         /wd4503 # Decorated name length exceeded
         /wd4800 # Forcing value to bool
