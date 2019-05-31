@@ -22,45 +22,45 @@
 #include "engine/physics_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
-#include "game_logic/ai/blowing_fan.hpp"
-#include "game_logic/ai/blue_guard.hpp"
-#include "game_logic/ai/bomber_plane.hpp"
-#include "game_logic/ai/boss_episode_1.hpp"
-#include "game_logic/ai/ceiling_sucker.hpp"
-#include "game_logic/ai/eyeball_thrower.hpp"
-#include "game_logic/ai/floating_laser_bot.hpp"
-#include "game_logic/ai/hover_bot.hpp"
-#include "game_logic/ai/laser_turret.hpp"
-#include "game_logic/ai/messenger_drone.hpp"
-#include "game_logic/ai/missile.hpp"
-#include "game_logic/ai/prisoner.hpp"
-#include "game_logic/ai/red_bird.hpp"
-#include "game_logic/ai/rigelatin_soldier.hpp"
-#include "game_logic/ai/rocket_turret.hpp"
-#include "game_logic/ai/security_camera.hpp"
-#include "game_logic/ai/simple_walker.hpp"
-#include "game_logic/ai/sliding_door.hpp"
-#include "game_logic/ai/slime_blob.hpp"
-#include "game_logic/ai/slime_pipe.hpp"
-#include "game_logic/ai/smash_hammer.hpp"
-#include "game_logic/ai/snake.hpp"
-#include "game_logic/ai/spider.hpp"
-#include "game_logic/ai/spike_ball.hpp"
-#include "game_logic/ai/super_force_field.hpp"
-#include "game_logic/ai/watch_bot.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/effect_actor_components.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/enemy_radar.hpp"
-#include "game_logic/interaction/elevator.hpp"
-#include "game_logic/interaction/force_field.hpp"
-#include "game_logic/interaction/locked_door.hpp"
-#include "game_logic/interaction/respawn_checkpoint.hpp"
-#include "game_logic/item_container.hpp"
-#include "game_logic/tile_burner.hpp"
+#include "game_logic/enemies/blue_guard.hpp"
+#include "game_logic/enemies/bomber_plane.hpp"
+#include "game_logic/enemies/boss_episode_1.hpp"
+#include "game_logic/enemies/ceiling_sucker.hpp"
+#include "game_logic/enemies/eyeball_thrower.hpp"
+#include "game_logic/enemies/floating_laser_bot.hpp"
+#include "game_logic/enemies/hover_bot.hpp"
+#include "game_logic/enemies/laser_turret.hpp"
+#include "game_logic/enemies/messenger_drone.hpp"
+#include "game_logic/enemies/prisoner.hpp"
+#include "game_logic/enemies/red_bird.hpp"
+#include "game_logic/enemies/rigelatin_soldier.hpp"
+#include "game_logic/enemies/rocket_turret.hpp"
+#include "game_logic/enemies/security_camera.hpp"
+#include "game_logic/enemies/simple_walker.hpp"
+#include "game_logic/enemies/slime_blob.hpp"
+#include "game_logic/enemies/snake.hpp"
+#include "game_logic/enemies/spider.hpp"
+#include "game_logic/enemies/spike_ball.hpp"
+#include "game_logic/enemies/watch_bot.hpp"
+#include "game_logic/hazards/slime_pipe.hpp"
+#include "game_logic/hazards/smash_hammer.hpp"
+#include "game_logic/interactive/blowing_fan.hpp"
+#include "game_logic/interactive/elevator.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
+#include "game_logic/interactive/force_field.hpp"
+#include "game_logic/interactive/item_container.hpp"
+#include "game_logic/interactive/locked_door.hpp"
+#include "game_logic/interactive/missile.hpp"
+#include "game_logic/interactive/respawn_checkpoint.hpp"
+#include "game_logic/interactive/sliding_door.hpp"
+#include "game_logic/interactive/super_force_field.hpp"
+#include "game_logic/interactive/tile_burner.hpp"
 #include "game_logic/trigger_components.hpp"
 
 #include <tuple>
@@ -306,7 +306,7 @@ base::ArrayView<int> frameMapForActor(const ActorID actorId) {
 
 
 SpriteFactory::SpriteFactory(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const ActorImagePackage* pSpritePackage
 )
   : mpRenderer(pRenderer)
@@ -330,7 +330,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
       lastDrawOrder = actorData.mDrawIndex;
 
       for (const auto& frameData : actorData.mFrames) {
-        auto texture = engine::OwningTexture{
+        auto texture = renderer::OwningTexture{
           mpRenderer, frameData.mFrameImage};
         drawData.mFrames.emplace_back(
           std::move(texture), frameData.mDrawOffset);
@@ -366,7 +366,7 @@ base::Rect<int> SpriteFactory::actorFrameRect(
 
 
 EntityFactory::EntityFactory(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   ex::EntityManager* pEntityManager,
   const loader::ActorImagePackage* pSpritePackage,
   const data::Difficulty difficulty)

@@ -17,6 +17,7 @@
 #include "effects_system.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
@@ -26,8 +27,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "loader/palette.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic {

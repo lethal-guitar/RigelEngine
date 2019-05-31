@@ -36,7 +36,7 @@ namespace rigel {
 using namespace engine;
 using namespace sdl_utils;
 
-using RenderTargetBinder = engine::RenderTargetTexture::Binder;
+using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
 
@@ -80,11 +80,11 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mUserProfile(loadOrCreateUserProfile(gamePath))
   , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
-  , mUiSpriteSheetRenderer(
-      engine::OwningTexture{
+  , mUiSpriteSheet(
+      renderer::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
-  , mTextRenderer(&mUiSpriteSheetRenderer, &mRenderer, mResources)
+  , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
   , mFpsDisplay(&mTextRenderer)
 {
 }
@@ -110,8 +110,7 @@ void Game::run(const StartupOptions& startupOptions) {
 
   if (startupOptions.mLevelToJumpTo)
   {
-    int episode, level;
-    std::tie(episode, level) = *startupOptions.mLevelToJumpTo;
+    auto [episode, level] = *startupOptions.mLevelToJumpTo;
 
     mpNextGameMode = std::make_unique<GameSessionMode>(
       data::GameSessionId{episode, level, data::Difficulty::Medium},
@@ -140,7 +139,7 @@ void Game::run(const StartupOptions& startupOptions) {
 
 void Game::showAntiPiracyScreen() {
   auto antiPiracyImage = mResources.loadAntiPiracyImage();
-  engine::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
+  renderer::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
   imageTexture.renderScaledToScreen(&mRenderer);
   mRenderer.submitBatch();
   mRenderer.swapBuffers();
@@ -214,7 +213,7 @@ GameMode::Context Game::makeModeContext() {
     &mScriptRunner,
     &mAllScripts,
     &mTextRenderer,
-    &mUiSpriteSheetRenderer,
+    &mUiSpriteSheet,
     &mUserProfile};
 }
 
@@ -255,7 +254,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
     return;
   }
 
-  engine::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
+  renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
 
   engine::TimeDelta elapsedTime = 0.0;
 

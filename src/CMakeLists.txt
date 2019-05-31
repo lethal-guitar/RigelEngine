@@ -5,6 +5,12 @@ set(core_sources
     base/math_tools.hpp
     base/spatial_types.hpp
     base/warnings.hpp
+    common/game_mode.cpp
+    common/game_mode.hpp
+    common/game_service_provider.hpp
+    common/global.hpp
+    common/user_profile.cpp
+    common/user_profile.hpp
     data/audio_buffer.hpp
     data/bonus.hpp
     data/duke_script.hpp
@@ -34,10 +40,6 @@ set(core_sources
     engine/base_components.hpp
     engine/collision_checker.cpp
     engine/collision_checker.hpp
-    engine/debugging_system.cpp
-    engine/debugging_system.hpp
-    engine/earth_quake_effect.cpp
-    engine/earth_quake_effect.hpp
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
@@ -50,8 +52,6 @@ set(core_sources
     engine/map_renderer.hpp
     engine/movement.cpp
     engine/movement.hpp
-    engine/opengl.cpp
-    engine/opengl.hpp
     engine/particle_system.cpp
     engine/particle_system.hpp
     engine/physical_components.hpp
@@ -59,73 +59,15 @@ set(core_sources
     engine/physics_system.hpp
     engine/random_number_generator.cpp
     engine/random_number_generator.hpp
-    engine/renderer.cpp
-    engine/renderer.hpp
     engine/rendering_system.cpp
     engine/rendering_system.hpp
-    engine/shader.cpp
-    engine/shader.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/sprite_tools.hpp
-    engine/texture.cpp
-    engine/texture.hpp
-    engine/tile_renderer.cpp
-    engine/tile_renderer.hpp
+    engine/tiled_texture.cpp
+    engine/tiled_texture.hpp
     engine/timing.hpp
     engine/visual_components.hpp
-    game_logic/ai/blowing_fan.cpp
-    game_logic/ai/blowing_fan.hpp
-    game_logic/ai/blue_guard.cpp
-    game_logic/ai/blue_guard.hpp
-    game_logic/ai/bomber_plane.cpp
-    game_logic/ai/bomber_plane.hpp
-    game_logic/ai/boss_episode_1.cpp
-    game_logic/ai/boss_episode_1.hpp
-    game_logic/ai/ceiling_sucker.cpp
-    game_logic/ai/ceiling_sucker.hpp
-    game_logic/ai/eyeball_thrower.cpp
-    game_logic/ai/eyeball_thrower.hpp
-    game_logic/ai/floating_laser_bot.cpp
-    game_logic/ai/floating_laser_bot.hpp
-    game_logic/ai/hover_bot.cpp
-    game_logic/ai/hover_bot.hpp
-    game_logic/ai/laser_turret.cpp
-    game_logic/ai/laser_turret.hpp
-    game_logic/ai/messenger_drone.cpp
-    game_logic/ai/messenger_drone.hpp
-    game_logic/ai/missile.cpp
-    game_logic/ai/missile.hpp
-    game_logic/ai/prisoner.cpp
-    game_logic/ai/prisoner.hpp
-    game_logic/ai/red_bird.cpp
-    game_logic/ai/red_bird.hpp
-    game_logic/ai/rigelatin_soldier.cpp
-    game_logic/ai/rigelatin_soldier.hpp
-    game_logic/ai/rocket_turret.cpp
-    game_logic/ai/rocket_turret.hpp
-    game_logic/ai/security_camera.cpp
-    game_logic/ai/security_camera.hpp
-    game_logic/ai/simple_walker.cpp
-    game_logic/ai/simple_walker.hpp
-    game_logic/ai/sliding_door.cpp
-    game_logic/ai/sliding_door.hpp
-    game_logic/ai/slime_blob.cpp
-    game_logic/ai/slime_blob.hpp
-    game_logic/ai/slime_pipe.cpp
-    game_logic/ai/slime_pipe.hpp
-    game_logic/ai/smash_hammer.cpp
-    game_logic/ai/smash_hammer.hpp
-    game_logic/ai/snake.cpp
-    game_logic/ai/snake.hpp
-    game_logic/ai/spider.cpp
-    game_logic/ai/spider.hpp
-    game_logic/ai/spike_ball.cpp
-    game_logic/ai/spike_ball.hpp
-    game_logic/ai/super_force_field.cpp
-    game_logic/ai/super_force_field.hpp
-    game_logic/ai/watch_bot.cpp
-    game_logic/ai/watch_bot.hpp
     game_logic/behavior_controller.hpp
     game_logic/behavior_controller_system.cpp
     game_logic/behavior_controller_system.hpp
@@ -135,45 +77,101 @@ set(core_sources
     game_logic/damage_components.hpp
     game_logic/damage_infliction_system.cpp
     game_logic/damage_infliction_system.hpp
+    game_logic/debugging_system.cpp
+    game_logic/debugging_system.hpp
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp
+    game_logic/earth_quake_effect.cpp
+    game_logic/earth_quake_effect.hpp
     game_logic/effect_actor_components.cpp
     game_logic/effect_actor_components.hpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
-    game_logic/enemy_radar.cpp
-    game_logic/enemy_radar.hpp
+    game_logic/enemies/blue_guard.cpp
+    game_logic/enemies/blue_guard.hpp
+    game_logic/enemies/bomber_plane.cpp
+    game_logic/enemies/bomber_plane.hpp
+    game_logic/enemies/boss_episode_1.cpp
+    game_logic/enemies/boss_episode_1.hpp
+    game_logic/enemies/ceiling_sucker.cpp
+    game_logic/enemies/ceiling_sucker.hpp
+    game_logic/enemies/eyeball_thrower.cpp
+    game_logic/enemies/eyeball_thrower.hpp
+    game_logic/enemies/floating_laser_bot.cpp
+    game_logic/enemies/floating_laser_bot.hpp
+    game_logic/enemies/hover_bot.cpp
+    game_logic/enemies/hover_bot.hpp
+    game_logic/enemies/laser_turret.cpp
+    game_logic/enemies/laser_turret.hpp
+    game_logic/enemies/messenger_drone.cpp
+    game_logic/enemies/messenger_drone.hpp
+    game_logic/enemies/prisoner.cpp
+    game_logic/enemies/prisoner.hpp
+    game_logic/enemies/red_bird.cpp
+    game_logic/enemies/red_bird.hpp
+    game_logic/enemies/rigelatin_soldier.cpp
+    game_logic/enemies/rigelatin_soldier.hpp
+    game_logic/enemies/rocket_turret.cpp
+    game_logic/enemies/rocket_turret.hpp
+    game_logic/enemies/security_camera.cpp
+    game_logic/enemies/security_camera.hpp
+    game_logic/enemies/simple_walker.cpp
+    game_logic/enemies/simple_walker.hpp
+    game_logic/enemies/slime_blob.cpp
+    game_logic/enemies/slime_blob.hpp
+    game_logic/enemies/snake.cpp
+    game_logic/enemies/snake.hpp
+    game_logic/enemies/spider.cpp
+    game_logic/enemies/spider.hpp
+    game_logic/enemies/spike_ball.cpp
+    game_logic/enemies/spike_ball.hpp
+    game_logic/enemies/watch_bot.cpp
+    game_logic/enemies/watch_bot.hpp
     game_logic/entity_configuration.ipp
     game_logic/entity_factory.cpp
     game_logic/entity_factory.hpp
     game_logic/game_world.cpp
     game_logic/game_world.hpp
+    game_logic/hazards/slime_pipe.cpp
+    game_logic/hazards/slime_pipe.hpp
+    game_logic/hazards/smash_hammer.cpp
+    game_logic/hazards/smash_hammer.hpp
     game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
     game_logic/input.hpp
-    game_logic/interaction/elevator.cpp
-    game_logic/interaction/elevator.hpp
-    game_logic/interaction/force_field.cpp
-    game_logic/interaction/force_field.hpp
-    game_logic/interaction/locked_door.cpp
-    game_logic/interaction/locked_door.hpp
-    game_logic/interaction/respawn_checkpoint.cpp
-    game_logic/interaction/respawn_checkpoint.hpp
-    game_logic/item_container.cpp
-    game_logic/item_container.hpp
+    game_logic/interactive/blowing_fan.cpp
+    game_logic/interactive/blowing_fan.hpp
+    game_logic/interactive/elevator.cpp
+    game_logic/interactive/elevator.hpp
+    game_logic/interactive/enemy_radar.cpp
+    game_logic/interactive/enemy_radar.hpp
+    game_logic/interactive/force_field.cpp
+    game_logic/interactive/force_field.hpp
+    game_logic/interactive/item_container.cpp
+    game_logic/interactive/item_container.hpp
+    game_logic/interactive/locked_door.cpp
+    game_logic/interactive/locked_door.hpp
+    game_logic/interactive/missile.cpp
+    game_logic/interactive/missile.hpp
+    game_logic/interactive/respawn_checkpoint.cpp
+    game_logic/interactive/respawn_checkpoint.hpp
+    game_logic/interactive/sliding_door.cpp
+    game_logic/interactive/sliding_door.hpp
+    game_logic/interactive/super_force_field.cpp
+    game_logic/interactive/super_force_field.hpp
+    game_logic/interactive/tile_burner.cpp
+    game_logic/interactive/tile_burner.hpp
     game_logic/player.cpp
     game_logic/player.hpp
     game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
+    game_logic/player/interaction_system.cpp
+    game_logic/player/interaction_system.hpp
     game_logic/player/projectile_system.cpp
     game_logic/player/projectile_system.hpp
-    game_logic/player_interaction_system.cpp
-    game_logic/player_interaction_system.hpp
-    game_logic/tile_burner.cpp
-    game_logic/tile_burner.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
@@ -207,6 +205,14 @@ set(core_sources
     loader/user_profile_import.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
+    renderer/opengl.cpp
+    renderer/opengl.hpp
+    renderer/renderer.cpp
+    renderer/renderer.hpp
+    renderer/shader.cpp
+    renderer/shader.hpp
+    renderer/texture.cpp
+    renderer/texture.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
@@ -286,22 +292,16 @@ set(main_exe_sources
     game_main.cpp
     game_main.hpp
     game_main.ipp
-    game_mode.hpp
-    game_mode.cpp
-    game_service_provider.hpp
     game_session_mode.cpp
     game_session_mode.hpp
     game_runner.cpp
     game_runner.hpp
-    global_level_events.hpp
     intro_demo_loop_mode.cpp
     intro_demo_loop_mode.hpp
     main.cpp
     menu_mode.cpp
     menu_mode.hpp
     mode_stage.hpp
-    user_profile.cpp
-    user_profile.hpp
 )
 
 

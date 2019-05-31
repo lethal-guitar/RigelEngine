@@ -17,10 +17,9 @@
 #include "episode_end_sequence.hpp"
 
 #include "base/container_utils.hpp"
+#include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
 #include "ui/utils.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel::ui {
@@ -49,7 +48,7 @@ constexpr const char* EPISODE_4_END_IMAGES[] = {
 };
 
 
-std::vector<engine::OwningTexture> loadImagesForEpisode(
+std::vector<renderer::OwningTexture> loadImagesForEpisode(
   GameMode::Context context,
   const int episode
 ) {

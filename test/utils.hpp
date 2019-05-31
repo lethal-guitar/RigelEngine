@@ -17,13 +17,12 @@
 #pragma once
 
 #include <base/warnings.hpp>
-#include <data/sound_ids.hpp>
+#include <common/game_mode.hpp>
+#include <common/game_service_provider.hpp>
 #include <data/game_session_data.hpp>
-#include <game_logic/ientity_factory.hpp>
+#include <data/sound_ids.hpp>
 #include <engine/visual_components.hpp>
-
-#include <game_mode.hpp>
-#include <game_service_provider.hpp>
+#include <game_logic/ientity_factory.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

@@ -17,12 +17,12 @@
 #pragma once
 
 #include "base/array_view.hpp"
-#include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/renderer.hpp"
-#include "engine/texture.hpp"
 #include "engine/timing.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -37,7 +37,7 @@ namespace rigel { namespace engine {
 struct SpriteFrame {
   SpriteFrame() = default;
   SpriteFrame(
-    engine::OwningTexture image,
+    renderer::OwningTexture image,
     base::Vector drawOffset
   )
     : mImage(std::move(image))
@@ -45,7 +45,7 @@ struct SpriteFrame {
   {
   }
 
-  engine::OwningTexture mImage;
+  renderer::OwningTexture mImage;
   base::Vector mDrawOffset;
 };
 
@@ -69,7 +69,7 @@ int virtualToRealFrame(
 void drawSpriteFrame(
   const SpriteFrame& frame,
   const base::Vector& position,
-  Renderer* pRenderer);
+  renderer::Renderer* pRenderer);
 
 
 namespace components {
@@ -103,7 +103,7 @@ struct Sprite {
  * pixel position.
  */
 using CustomRenderFunc = void(*)(
-  engine::Renderer*,
+  renderer::Renderer*,
   entityx::Entity,
   const engine::components::Sprite&,
   const base::Vector&);

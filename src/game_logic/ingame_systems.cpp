@@ -18,9 +18,9 @@
 
 #include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
-#include "game_logic/enemy_radar.hpp"
 #include "game_logic/entity_factory.hpp"
-#include "game_logic/interaction/force_field.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
+#include "game_logic/interactive/force_field.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -54,7 +54,7 @@ IngameSystems::IngameSystems(
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator,
   const RadarDishCounter* pRadarDishCounter,
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   entityx::EntityManager& entities,
   entityx::EventManager& eventManager,
   const loader::ResourceLoader& resources

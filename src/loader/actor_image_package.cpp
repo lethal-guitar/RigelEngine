@@ -144,14 +144,9 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
         : std::nullopt;
       ++frame;
 
-      // TODO: There's a bug in versions of GCC older than 7.1.0 which makes
-      // the this-> down below necessary. Should be removed after upgrading
-      // the GCC version used on CI.
-      // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67274
       return ActorData::Frame{
         frameHeader.mDrawOffset,
-        maybeReplacement ? *maybeReplacement :
-          this->loadImage(frameHeader, palette)};
+        maybeReplacement ? *maybeReplacement : loadImage(frameHeader, palette)};
     });
 }
 

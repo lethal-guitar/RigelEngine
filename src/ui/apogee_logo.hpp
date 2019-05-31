@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include "common/game_mode.hpp"
 #include "engine/timing.hpp"
 #include "ui/movie_player.hpp"
-#include "game_mode.hpp"
 
 
 namespace rigel { namespace ui {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/texture.hpp"
+#include "renderer/texture.hpp"
 
 
 namespace rigel { namespace loader {
@@ -9,8 +9,8 @@ namespace rigel { namespace loader {
 
 namespace rigel { namespace ui {
 
-engine::OwningTexture fullScreenImageAsTexture(
-  engine::Renderer* pRenderer,
+renderer::OwningTexture fullScreenImageAsTexture(
+  renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName);
 

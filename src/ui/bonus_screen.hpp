@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include "common/game_mode.hpp"
 #include "data/bonus.hpp"
 #include "engine/timing.hpp"
 #include "ui/menu_element_renderer.hpp"
-#include "game_mode.hpp"
 
 #include <functional>
 #include <set>
@@ -71,8 +71,8 @@ private:
   std::vector<Event> mEvents;
   std::size_t mNextEvent = 0;
 
-  engine::Renderer* mpRenderer;
-  engine::OwningTexture mBackgroundTexture;
+  renderer::Renderer* mpRenderer;
+  renderer::OwningTexture mBackgroundTexture;
   ui::MenuElementRenderer* mpTextRenderer;
 };
 

@@ -21,18 +21,21 @@
 
 #include <vector>
 
+namespace rigel::renderer { class Renderer; }
+
 
 namespace rigel { namespace engine {
 
 class RandomNumberGenerator;
-class Renderer;
 
-struct ParticleCloud;
+struct ParticleGroup;
 
 
 class ParticleSystem {
 public:
-  ParticleSystem(RandomNumberGenerator* pRandomGenerator, Renderer* pRenderer);
+  ParticleSystem(
+    RandomNumberGenerator* pRandomGenerator,
+    renderer::Renderer* pRenderer);
   ~ParticleSystem();
 
   void spawnParticles(
@@ -44,9 +47,9 @@ public:
   void render(const base::Vector& cameraPosition);
 
 private:
-  std::vector<ParticleCloud> mParticleClouds;
+  std::vector<ParticleGroup> mParticleGroups;
   RandomNumberGenerator* mpRandomGenerator;
-  Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
 };
 
 }}

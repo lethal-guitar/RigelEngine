@@ -16,10 +16,9 @@
 
 #pragma once
 
-#include "engine/texture.hpp"
+#include "common/game_mode.hpp"
+#include "renderer/texture.hpp"
 #include "ui/bonus_screen.hpp"
-
-#include "game_mode.hpp"
 
 #include <vector>
 
@@ -36,9 +35,9 @@ public:
   bool finished() const;
 
 private:
-  std::vector<engine::OwningTexture> mScreenImages;
+  std::vector<renderer::OwningTexture> mScreenImages;
   std::size_t mCurrentImage = 0;
-  engine::Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
 };
 

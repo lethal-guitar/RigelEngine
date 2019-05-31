@@ -17,36 +17,36 @@
 #pragma once
 
 #include "engine/collision_checker.hpp"
-#include "engine/debugging_system.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/rendering_system.hpp"
 #include "engine/rendering_system.hpp"
-#include "game_logic/ai/blue_guard.hpp"
-#include "game_logic/ai/hover_bot.hpp"
-#include "game_logic/ai/laser_turret.hpp"
-#include "game_logic/ai/messenger_drone.hpp"
-#include "game_logic/ai/prisoner.hpp"
-#include "game_logic/ai/rocket_turret.hpp"
-#include "game_logic/ai/simple_walker.hpp"
-#include "game_logic/ai/sliding_door.hpp"
-#include "game_logic/ai/slime_blob.hpp"
-#include "game_logic/ai/spider.hpp"
-#include "game_logic/ai/spike_ball.hpp"
 #include "game_logic/behavior_controller_system.hpp"
 #include "game_logic/camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
+#include "game_logic/debugging_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
-#include "game_logic/enemy_radar.hpp"
-#include "game_logic/interaction/elevator.hpp"
-#include "game_logic/item_container.hpp"
+#include "game_logic/enemies/blue_guard.hpp"
+#include "game_logic/enemies/hover_bot.hpp"
+#include "game_logic/enemies/laser_turret.hpp"
+#include "game_logic/enemies/messenger_drone.hpp"
+#include "game_logic/enemies/prisoner.hpp"
+#include "game_logic/enemies/rocket_turret.hpp"
+#include "game_logic/enemies/simple_walker.hpp"
+#include "game_logic/enemies/slime_blob.hpp"
+#include "game_logic/enemies/spider.hpp"
+#include "game_logic/enemies/spike_ball.hpp"
+#include "game_logic/interactive/elevator.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
+#include "game_logic/interactive/item_container.hpp"
+#include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
+#include "game_logic/player/interaction_system.hpp"
 #include "game_logic/player/projectile_system.hpp"
-#include "game_logic/player_interaction_system.hpp"
 
 #include <iosfwd>
 
@@ -79,7 +79,7 @@ public:
     EntityFactory* pEntityFactory,
     engine::RandomNumberGenerator* pRandomGenerator,
     const RadarDishCounter* pRadarDishCounter,
-    engine::Renderer* pRenderer,
+    renderer::Renderer* pRenderer,
     entityx::EntityManager& entities,
     entityx::EventManager& eventManager,
     const loader::ResourceLoader& resources);
@@ -89,7 +89,7 @@ public:
     entityx::EntityManager& es,
     const std::optional<base::Color>& backdropFlashColor);
 
-  engine::DebuggingSystem& debuggingSystem();
+  DebuggingSystem& debuggingSystem();
 
   void switchBackdrops();
 
@@ -114,7 +114,8 @@ private:
   engine::RenderingSystem mRenderingSystem;
   engine::PhysicsSystem mPhysicsSystem;
   engine::LifeTimeSystem mLifeTimeSystem;
-  engine::DebuggingSystem mDebuggingSystem;
+
+  game_logic::DebuggingSystem mDebuggingSystem;
 
   game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;

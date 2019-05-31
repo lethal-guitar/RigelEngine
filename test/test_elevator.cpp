@@ -26,7 +26,7 @@
 #include <engine/random_number_generator.hpp>
 #include <engine/timing.hpp>
 #include <game_logic/input.hpp>
-#include <game_logic/interaction/elevator.hpp>
+#include <game_logic/interactive/elevator.hpp>
 #include <game_logic/player.hpp>
 #include <game_logic/player/components.hpp>
 

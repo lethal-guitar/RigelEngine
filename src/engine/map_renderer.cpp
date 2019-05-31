@@ -49,20 +49,20 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 }
 
 MapRenderer::MapRenderer(
-  engine::Renderer* pRenderer,
+  renderer::Renderer* pRenderer,
   const data::map::Map* pMap,
   MapRenderData&& renderData
 )
   : mpRenderer(pRenderer)
   , mpMap(pMap)
-  , mTileRenderer(
-      engine::OwningTexture(pRenderer, renderData.mTileSetImage),
+  , mTileSetTexture(
+      renderer::OwningTexture(pRenderer, renderData.mTileSetImage),
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
   , mScrollMode(renderData.mBackdropScrollMode)
 {
   if (renderData.mSecondaryBackdropImage) {
-    mAlternativeBackdropTexture = engine::OwningTexture(
+    mAlternativeBackdropTexture = renderer::OwningTexture(
       mpRenderer, *renderData.mSecondaryBackdropImage);
   }
 }
@@ -192,7 +192,7 @@ void MapRenderer::renderTile(
   // should be visible. Therefore, don't draw if the index is 0.
   if (tileIndex != 0) {
     const auto tileIndexToDraw = animatedTileIndex(tileIndex);
-    mTileRenderer.renderTile(tileIndexToDraw, x, y);
+    mTileSetTexture.renderTile(tileIndexToDraw, x, y);
   }
 }
 

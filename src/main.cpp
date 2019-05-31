@@ -15,7 +15,7 @@
  */
 
 #include "base/warnings.hpp"
-#include "engine/opengl.hpp"
+#include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
 
@@ -145,7 +145,7 @@ void initAndRunGame(const StartupOptions& config) {
 
   Ptr<SDL_Window> pWindow(createWindow());
   OpenGlContext glContext(pWindow.get());
-  engine::loadGlFunctions();
+  renderer::loadGlFunctions();
 
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);

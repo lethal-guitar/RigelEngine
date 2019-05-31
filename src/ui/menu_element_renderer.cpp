@@ -147,9 +147,9 @@ constexpr auto CURSOR_ANIM_DELAY = 5;
 constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
-engine::OwningTexture createFontTexture(
+renderer::OwningTexture createFontTexture(
   const loader::FontData& font,
-  engine::Renderer* pRenderer
+  renderer::Renderer* pRenderer
 ) {
   if (font.size() != 67u) {
     throw std::runtime_error("Wrong number of bitmaps in menu font");
@@ -166,20 +166,20 @@ engine::OwningTexture createFontTexture(
     insertPosX += characterWidth;
   }
 
-  return engine::OwningTexture{pRenderer, combinedBitmaps};
+  return renderer::OwningTexture{pRenderer, combinedBitmaps};
 }
 
 }
 
 
 MenuElementRenderer::MenuElementRenderer(
-  engine::TileRenderer* pSpriteSheetRenderer,
-  engine::Renderer* pRenderer,
+  engine::TiledTexture* pSpriteSheet,
+  renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources
 )
   : mpRenderer(pRenderer)
-  , mpSpriteSheetRenderer(pSpriteSheetRenderer)
-  , mBigTextRenderer(
+  , mpSpriteSheet(pSpriteSheet)
+  , mBigTextTexture(
       createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
       pRenderer)
 {
@@ -208,7 +208,7 @@ void MenuElementRenderer::drawText(
       continue;
     }
 
-    mpSpriteSheetRenderer->renderTile(spriteSheetIndex, x + i, y);
+    mpSpriteSheet->renderTile(spriteSheetIndex, x + i, y);
   }
 }
 
@@ -239,7 +239,7 @@ void MenuElementRenderer::drawSmallWhiteText(
       continue;
     }
 
-    mpSpriteSheetRenderer->renderTile(spriteSheetIndex, x + i, y);
+    mpSpriteSheet->renderTile(spriteSheetIndex, x + i, y);
   }
 }
 
@@ -290,7 +290,7 @@ void MenuElementRenderer::drawBigText(
     }
 
     const auto position = static_cast<int>(i);
-    mBigTextRenderer.renderTileSlice(index, {x + position, y-1});
+    mBigTextTexture.renderTileSlice(index, {x + position, y-1});
   }
 
   mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
@@ -322,9 +322,9 @@ void MenuElementRenderer::drawCheckBox(
   const bool isChecked
 ) const {
   const auto offset = isChecked ? 2 : 0;
-  const auto index = 7*mpSpriteSheetRenderer->tilesPerRow() + 20 + offset;
+  const auto index = 7*mpSpriteSheet->tilesPerRow() + 20 + offset;
 
-  mpSpriteSheetRenderer->renderTileQuad(index, base::Vector{x - 1, y - 1});
+  mpSpriteSheet->renderTileQuad(index, base::Vector{x - 1, y - 1});
 }
 
 
@@ -346,7 +346,7 @@ void MenuElementRenderer::drawBonusScreenText(
       spriteSheetIndex = 20 + (ch - 65) * 2;
     } else if (ch >= 75 && ch <= 90) {
       spriteSheetIndex =
-        mpSpriteSheetRenderer->tilesPerRow() * 2 + (ch - 75) * 2;
+        mpSpriteSheet->tilesPerRow() * 2 + (ch - 75) * 2;
     } else if (ch == 37) {
       spriteSheetIndex = 112;
     } else if (ch == 61) {
@@ -361,7 +361,7 @@ void MenuElementRenderer::drawBonusScreenText(
     }
 
     const auto index = static_cast<int>(i);
-    mpSpriteSheetRenderer->renderTileQuad(
+    mpSpriteSheet->renderTileQuad(
       spriteSheetIndex, base::Vector{x + index*2, y});
   }
 }
@@ -395,8 +395,8 @@ void MenuElementRenderer::drawSelectionIndicator(
   const int y,
   const int state
 ) const {
-  const auto index = 9*mpSpriteSheetRenderer->tilesPerRow() + state*2;
-  mpSpriteSheetRenderer->renderTileQuad(index, base::Vector{x, y - 1});
+  const auto index = 9*mpSpriteSheet->tilesPerRow() + state*2;
+  mpSpriteSheet->renderTileQuad(index, base::Vector{x, y - 1});
 }
 
 
@@ -410,9 +410,9 @@ void MenuElementRenderer::drawTextEntryCursor(
   const int y,
   const int state
 ) const {
-  const auto baseIndex = 4*mpSpriteSheetRenderer->tilesPerRow() + 9;
+  const auto baseIndex = 4*mpSpriteSheet->tilesPerRow() + 9;
   const auto index = baseIndex + std::clamp(state, 0, 3);
-  mpSpriteSheetRenderer->renderTile(index, x, y);
+  mpSpriteSheet->renderTile(index, x, y);
 }
 
 
@@ -426,14 +426,14 @@ void MenuElementRenderer::drawMessageBoxRow(
 ) const {
   const auto baseIndex = 4*40;
 
-  mpSpriteSheetRenderer->renderTile(baseIndex + leftIndex, x, y);
+  mpSpriteSheet->renderTile(baseIndex + leftIndex, x, y);
 
   const auto untilX = x + width - 1;
   for (int col = x + 1; col < untilX; ++col) {
-    mpSpriteSheetRenderer->renderTile(baseIndex + middleIndex, col, y);
+    mpSpriteSheet->renderTile(baseIndex + middleIndex, col, y);
   }
 
-  mpSpriteSheetRenderer->renderTile(baseIndex + rightIndex, x + width - 1, y);
+  mpSpriteSheet->renderTile(baseIndex + rightIndex, x + width - 1, y);
 }
 
 }}

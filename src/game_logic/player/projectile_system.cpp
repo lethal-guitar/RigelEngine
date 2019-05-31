@@ -16,14 +16,13 @@
 
 #include "projectile_system.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "data/map.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace game_logic { namespace player {

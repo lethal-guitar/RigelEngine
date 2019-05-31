@@ -264,8 +264,6 @@ TEST_CASE("Physics system works as expected") {
       CHECK(position.x == 1);
     }
 
-    // TODO: Make stair-stepping work with solid bodies
-
     SECTION("SolidBody doesn't collide with itself") {
       solidBody.assign<MovingBody>(base::Point<float>{0, 2.0f}, false);
       solidBody.assign<Active>();

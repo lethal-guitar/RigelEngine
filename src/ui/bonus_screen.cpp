@@ -16,11 +16,10 @@
 
 #include "bonus_screen.hpp"
 
+#include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
-
-#include "game_service_provider.hpp"
 
 
 namespace rigel { namespace ui {

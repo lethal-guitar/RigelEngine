@@ -19,21 +19,20 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "common/game_mode.hpp"
+#include "common/global.hpp"
 #include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
-#include "engine/earth_quake_effect.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/enemy_radar.hpp"
+#include "game_logic/earth_quake_effect.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/input.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
-
-#include "game_mode.hpp"
-#include "global_level_events.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -116,9 +115,9 @@ private:
     base::Vector mPosition;
   };
 
-  engine::Renderer* mpRenderer;
+  renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
-  engine::TileRenderer* mpUiSpriteSheet;
+  engine::TiledTexture* mpUiSpriteSheet;
   ui::MenuElementRenderer* mpTextRenderer;
   entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;
@@ -152,7 +151,7 @@ private:
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
 
-  std::optional<engine::EarthQuakeEffect> mEarthQuakeEffect;
+  std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;
   std::optional<base::Color> mBackdropFlashColor;
   std::optional<int> mReactorDestructionFramesElapsed;

@@ -16,10 +16,9 @@
 
 #pragma once
 
+#include "common/game_mode.hpp"
 #include "data/movie.hpp"
 #include "ui/movie_player.hpp"
-
-#include "game_mode.hpp"
 
 #include <cstddef>
 #include <vector>

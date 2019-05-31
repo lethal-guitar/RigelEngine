@@ -17,11 +17,11 @@
 #include "camera.hpp"
 
 #include "base/math_tools.hpp"
+#include "common/global.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/player.hpp"
-#include "global_level_events.hpp"
 
 namespace ex = entityx;
 

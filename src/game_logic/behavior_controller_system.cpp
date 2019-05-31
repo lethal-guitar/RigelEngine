@@ -16,11 +16,10 @@
 
 #include "behavior_controller_system.hpp"
 
+#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
-
-#include "global_level_events.hpp"
 
 
 namespace rigel { namespace game_logic {

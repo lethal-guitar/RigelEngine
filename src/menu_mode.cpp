@@ -16,12 +16,11 @@
 
 #include "menu_mode.hpp"
 
+#include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
 #include "data/game_session_data.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/high_score_list.hpp"
-
-#include "game_service_provider.hpp"
-#include "user_profile.hpp"
 
 
 namespace rigel {

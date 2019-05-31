@@ -17,11 +17,10 @@
 #include "game_runner.hpp"
 
 #include "base/match.hpp"
+#include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "loader/resource_loader.hpp"
-
-#include "game_service_provider.hpp"
-#include "user_profile.hpp"
 
 
 namespace rigel {
