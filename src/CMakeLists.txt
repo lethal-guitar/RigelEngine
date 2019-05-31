@@ -149,6 +149,8 @@ set(core_sources
     game_logic/interactive/enemy_radar.hpp
     game_logic/interactive/force_field.cpp
     game_logic/interactive/force_field.hpp
+    game_logic/interactive/item_container.cpp
+    game_logic/interactive/item_container.hpp
     game_logic/interactive/locked_door.cpp
     game_logic/interactive/locked_door.hpp
     game_logic/interactive/missile.cpp
@@ -161,8 +163,6 @@ set(core_sources
     game_logic/interactive/super_force_field.hpp
     game_logic/interactive/tile_burner.cpp
     game_logic/interactive/tile_burner.hpp
-    game_logic/item_container.cpp
-    game_logic/item_container.hpp
     game_logic/player.cpp
     game_logic/player.hpp
     game_logic/player/components.hpp

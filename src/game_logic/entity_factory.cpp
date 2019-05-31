@@ -54,13 +54,13 @@
 #include "game_logic/interactive/elevator.hpp"
 #include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/interactive/force_field.hpp"
+#include "game_logic/interactive/item_container.hpp"
 #include "game_logic/interactive/locked_door.hpp"
 #include "game_logic/interactive/missile.hpp"
 #include "game_logic/interactive/respawn_checkpoint.hpp"
 #include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/interactive/super_force_field.hpp"
 #include "game_logic/interactive/tile_burner.hpp"
-#include "game_logic/item_container.hpp"
 #include "game_logic/trigger_components.hpp"
 
 #include <tuple>
