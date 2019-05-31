@@ -6,19 +6,16 @@ branches:
     only:
         - master
 
+cache:
+    - c:\tools\vcpkg\installed\
+
 environment:
     BOOST_ROOT: C:\Libraries\boost_1_67_0
     BOOST_LIBRARYDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
 
 install:
     - git submodule update --init --recursive
-
-      # Download headers and pre-built binaries for SDL2 and SDL2_mixer
-    - mkdir C:\RigelLibs
-    - ps: Invoke-WebRequest -Uri https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip -OutFile C:\RigelLibs\SDL2.zip
-    - ps: Invoke-WebRequest -Uri https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip -OutFile C:\RigelLibs\SDL2_mixer.zip
-    - 7z x C:\RigelLibs\SDL2.zip -oC:\RigelLibs
-    - 7z x C:\RigelLibs\SDL2_mixer.zip -oC:\RigelLibs
+    - vcpkg install sdl2:x64-windows sdl2-mixer:x64-windows
 
 platform: x64
 
@@ -27,12 +24,9 @@ configuration:
     - Release
 
 before_build:
-    - set SDL2DIR=C:\RigelLibs\SDL2-2.0.4
-    - set SDL2MIXERDIR=C:\RigelLibs\SDL2_mixer-2.0.1
-
     - mkdir build
     - cd build
-    - cmake .. -G "Visual Studio 15 2017 Win64"
+    - cmake .. -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64"
     - cd ..
 
 build:
@@ -40,16 +34,12 @@ build:
     project: build/RigelEngine.sln
     verbosity: minimal
 
-before_test:
-    - set PATH=%PATH%;%SDL2DIR%\lib\x64;%SDL2MIXERDIR%\lib\x64
-
 test_script:
     - cd build
     - ctest
 
 after_build:
-  - IF "%CONFIGURATION%" == "Debug" set BOOST_DBG_MARKER=-gd
-  - 7z a rigel_build.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\SDL2_mixer.dll %BOOST_LIBRARYDIR%\boost_program_options-vc141-mt%BOOST_DBG_MARKER%-x64-1_67.dll
+  - 7z a rigel_build.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe C:\projects\rigelengine\build\src\%CONFIGURATION%\SDL*.dll %BOOST_LIBRARYDIR%\boost_program_options-vc141-mt%BOOST_DBG_MARKER%-x64-1_67.dll
 
 artifacts:
     - path: rigel_build.zip
