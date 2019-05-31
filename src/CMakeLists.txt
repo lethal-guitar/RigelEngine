@@ -120,10 +120,6 @@ set(core_sources
     game_logic/enemies/simple_walker.hpp
     game_logic/enemies/slime_blob.cpp
     game_logic/enemies/slime_blob.hpp
-    game_logic/enemies/slime_pipe.cpp
-    game_logic/enemies/slime_pipe.hpp
-    game_logic/enemies/smash_hammer.cpp
-    game_logic/enemies/smash_hammer.hpp
     game_logic/enemies/snake.cpp
     game_logic/enemies/snake.hpp
     game_logic/enemies/spider.cpp
@@ -137,6 +133,10 @@ set(core_sources
     game_logic/entity_factory.hpp
     game_logic/game_world.cpp
     game_logic/game_world.hpp
+    game_logic/hazards/slime_pipe.cpp
+    game_logic/hazards/slime_pipe.hpp
+    game_logic/hazards/smash_hammer.cpp
+    game_logic/hazards/smash_hammer.hpp
     game_logic/ientity_factory.hpp
     game_logic/ingame_systems.cpp
     game_logic/ingame_systems.hpp
