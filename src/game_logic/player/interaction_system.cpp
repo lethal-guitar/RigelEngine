@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "player_interaction_system.hpp"
+#include "interaction_system.hpp"
 
 #include "common/game_service_provider.hpp"
 #include "common/global.hpp"

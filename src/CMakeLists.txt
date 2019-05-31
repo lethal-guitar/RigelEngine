@@ -168,8 +168,8 @@ set(core_sources
     game_logic/player/components.hpp
     game_logic/player/damage_system.cpp
     game_logic/player/damage_system.hpp
-    game_logic/player/player_interaction_system.cpp
-    game_logic/player/player_interaction_system.hpp
+    game_logic/player/interaction_system.cpp
+    game_logic/player/interaction_system.hpp
     game_logic/player/projectile_system.cpp
     game_logic/player/projectile_system.hpp
     game_logic/trigger_components.hpp
