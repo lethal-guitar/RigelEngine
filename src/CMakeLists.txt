@@ -253,8 +253,6 @@ add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${SDL2_INCLUDE_DIR}"
-    ${SDL2_MIXER_INCLUDE_DIRS}
     ${3rd_party_path}/entityx
 
     ${3rd_party_path}/glad/include
@@ -267,8 +265,8 @@ target_include_directories(rigel_core
 )
 target_link_libraries(rigel_core
     PUBLIC
-    "${SDL2_LIBRARY}"
-    ${SDL2_MIXER_LIBRARIES}
+    SDL2::Core
+    SDL2::Mixer
     entityx
     Boost::boost
 
@@ -307,7 +305,7 @@ set(main_exe_sources
 
 add_executable(${main_exe_name} ${main_exe_sources})
 target_link_libraries(${main_exe_name} PRIVATE
-    ${SDLMAIN2_LIBRARY}
+    SDL2::Main
     rigel_core
     Boost::boost
     Boost::program_options
