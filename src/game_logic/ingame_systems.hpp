@@ -45,8 +45,8 @@
 #include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
+#include "game_logic/player/player_interaction_system.hpp"
 #include "game_logic/player/projectile_system.hpp"
-#include "game_logic/player_interaction_system.hpp"
 
 #include <iosfwd>
 
