@@ -188,40 +188,30 @@ make
 
 :exclamation: Currently, only 64-bit builds are possible.
 
-To build on Windows, you'll need to install CMake and provide binaries for the
-external dependencies listed above. You can grab CMake 3.13.2 from [here](https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-win64-x64.zip).
+First, you need to install CMake if you don't have it already.
+You can grab it from [the Kitware website](https://cmake.org/download/), I went
+for the `Windows win64-x64 Installer` variant.
 
-#### Using vcpkg
+For getting the dependencies, I strongly recommend using
+[vcpkg](https://github.com/microsoft/vcpkg):
+
 
 ```bash
 vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows
 ```
 
-Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
-
-#### Adding dependencies manually
-
-Grab binaries for the dependencies here:
-
-* [SDL2 2.0.4](https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip)
-* [SDL2 mixer 2.0.1](https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip)
-* [Boost 1.67](https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-14.1-64.exe/download)
-
-In order for CMake (or cmake-gui) to automatically find all dependencies, you
-can set the following environment variables prior to running CMake:
+Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake:
 
 ```bash
-# Assuming you've used the Boost installer linked above, and installed to BOOST_LOCATION
-BOOST_ROOT=<BOOST_LOCATION>
-BOOST_LIBRARYDIR=<BOOST_LOCATION>/lib64-msvc-14.1
+mkdir build
+cd build
 
-# These should point to the respective root directory of the unzipped packages linked above
-SDL2DIR=<SDL2_LOCATION>
-SDL2MIXERDIR=<SDL2_MIXER_LOCATION>
+# Remember to replace <vcpkg_root> with the path to where you installed vcpkg!
+cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>/scripts/buildystems/vcpkg.cmake
+
+# This will open the generated Visual Studio solution
+start RigelEngine.sln
 ```
-
-If you're using git-bash on Windows, an easy way to do so is by adding the
-corresponding `export` commands in your`.bashrc`.
 
 ***
 
