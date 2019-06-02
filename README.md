@@ -200,7 +200,10 @@ For getting the dependencies, I strongly recommend using
 vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows
 ```
 
-Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake:
+Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
+
+When using Visual Studio 2019, CMake defaults to creating a 64-bit build. But when using Visual Studio 2017, you have to specify
+this by passing `-G "Visual Studio 15 2017 Win64"` to CMake. The example below assumes you're using Visual Studio 2019.
 
 ```bash
 mkdir build
