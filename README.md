@@ -1,4 +1,4 @@
-# Rigel Engine [![Build Status](https://api.travis-ci.com/lethal-guitar/RigelEngine.svg?branch=master)](https://travis-ci.com/lethal-guitar/RigelEngine) [![Windows build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master)
+# Rigel Engine [![Build Status](https://api.travis-ci.com/lethal-guitar/RigelEngine.svg?branch=master)](https://travis-ci.com/lethal-guitar/RigelEngine) [![Windows build status](https://ci.appveyor.com/api/projects/status/7yen9qaccci2vklw/branch/master?svg=true)](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master) [![Join the chat at https://gitter.im/RigelEngine/community](https://badges.gitter.im/RigelEngine/community.svg)](https://gitter.im/RigelEngine/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## What is Rigel Engine?
 
