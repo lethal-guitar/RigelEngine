@@ -197,7 +197,7 @@ For getting the dependencies, I strongly recommend using
 
 
 ```bash
-vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows
+vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
 ```
 
 Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
@@ -210,7 +210,7 @@ mkdir build
 cd build
 
 # Remember to replace <vcpkg_root> with the path to where you installed vcpkg!
-cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>/scripts/buildystems/vcpkg.cmake
+cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_GENERATOR_PLATFORM=x64
 
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
