@@ -52,7 +52,7 @@ void spawnRegularShotImpactEffect(
   const base::Point<float> velocity
 ) {
   const auto debrisPosition = position + regularShotDebrisOffset(velocity);
-  spawnFloatingOneShotSprite(entityFactory, 3, debrisPosition);
+  spawnFloatingOneShotSprite(entityFactory, data::ActorID::Shot_impact_FX_tile_burning, debrisPosition);
 }
 
 
@@ -77,7 +77,7 @@ void generateRocketSmoke(
   const base::Point<float> velocity
 ) {
   const auto offset = rocketSmokeOffset(velocity);
-  spawnOneShotSprite(entityFactory, 11, position + offset);
+  spawnOneShotSprite(entityFactory, data::ActorID::Smoke_puff_FX, position + offset);
 }
 
 
@@ -97,7 +97,7 @@ void spawnRocketWallImpactEffect(
   const base::Point<float> velocity
 ) {
   const auto offset = rocketWallImpactOffset(velocity);
-  spawnOneShotSprite(entityFactory, 2, position + offset);
+  spawnOneShotSprite(entityFactory, data::ActorID::Explosion_FX_2, position + offset);
 }
 
 
@@ -105,7 +105,7 @@ void spawnRocketEnemyImpactEffect(
   EntityFactory& entityFactory,
   const base::Vector& position
 ) {
-  spawnOneShotSprite(entityFactory, 2, position + base::Vector{-3, 3});
+  spawnOneShotSprite(entityFactory, data::ActorID::Explosion_FX_2, position + base::Vector{-3, 3});
 }
 
 }

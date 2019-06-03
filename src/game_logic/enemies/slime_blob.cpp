@@ -113,7 +113,7 @@ void SlimeBlobSystem::update(entityx::EntityManager& es) {
           entity.remove<BoundingBox>();
           entity.remove<Active>();
 
-          mpEntityFactory->createActor(67, position + SLIME_BLOB_SPAWN_OFFSET);
+          mpEntityFactory->createActor(rigel::data::ActorID::Green_slime_blob, position + SLIME_BLOB_SPAWN_OFFSET);
         }
 
         const auto visibleFrame =

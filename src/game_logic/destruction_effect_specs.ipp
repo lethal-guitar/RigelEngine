@@ -21,16 +21,16 @@ using EffectMovement = effects::EffectSprite::Movement;
 
 
 const effects::EffectSpec HOVER_BOT_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{3}, 0},
-  {effects::EffectSprite{{0, -2}, 12, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, 13, EffectMovement::FlyDown}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
+  {effects::EffectSprite{{0, -2}, rigel::data::ActorID::Hoverbot_debris_1, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Hoverbot_debris_2, EffectMovement::FlyDown}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3]}, 0},
   {effects::RandomExplosionSound{}, 0}
 };
 
 
 const effects::EffectSpec SIMPLE_TECH_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{3}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
   {effects::Particles{{1, 0}}, 0},
   {effects::RandomExplosionSound{}, 0}
 };
@@ -43,27 +43,27 @@ const effects::EffectSpec NAPALM_BOMB_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec SPIDER_KILL_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{-1, 1}, 1, EffectMovement::None}, 0},
+  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 0},
   {effects::RandomExplosionSound{}, 0}
 };
 
 
 const effects::EffectSpec RED_BIRD_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{}, loader::INGAME_PALETTE[5]}, 0},
-  {effects::EffectSprite{{}, 1, EffectMovement::None}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 0},
   {effects::RandomExplosionSound{}, 0}
 };
 
 
 const effects::EffectSpec SKELETON_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{3}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
   {effects::RandomExplosionSound{}, 0},
   {effects::Particles{{1, 0}}, 0}
 };
 
 
 const effects::EffectSpec RIGELATIN_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{1}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Explosion_FX_auto_sound}, 0},
   {effects::Particles{{1, 0}}, 0},
   {effects::RandomExplosionSound{}, 0},
   {effects::RandomExplosionSound{}, 1},
@@ -80,48 +80,48 @@ const effects::EffectSpec RIGELATIN_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec SODA_CAN_ROCKET_KILL_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{0, -1}, 169, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{0, -1}, 170, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{{0, -1}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{0, -1}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyRight}, 0},
 };
 
 
 const effects::EffectSpec SODA_SIX_PACK_KILL_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{0, 0}, 169, EffectMovement::FlyRight}, 0},
-  {effects::EffectSprite{{0, 1}, 169, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{1, 0}, 169, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{0, 1}, 169, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{1, 0}, 169, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{0, 1}, 169, EffectMovement::FlyDown}, 0},
-  {effects::EffectSprite{{0, 0}, 170, EffectMovement::FlyRight}, 0},
-  {effects::EffectSprite{{0, 1}, 170, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{1, 0}, 170, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{0, 1}, 170, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{1, 0}, 170, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{0, 1}, 170, EffectMovement::FlyDown}, 0},
+  {effects::EffectSprite{{0, 0}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{{0, 1}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{1, 0}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{0, 1}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{1, 0}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{0, 1}, rigel::data::ActorID::Coke_can_debris_1, EffectMovement::FlyDown}, 0},
+  {effects::EffectSprite{{0, 0}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{{0, 1}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{1, 0}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{0, 1}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{1, 0}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{0, 1}, rigel::data::ActorID::Coke_can_debris_2, EffectMovement::FlyDown}, 0},
   {effects::ScoreNumber{{}, ScoreNumberType::S10000}, 0}
 };
 
 
 const effects::EffectSpec EYE_BALL_THROWER_KILL_EFFECT_SPEC[] = {
   {effects::Sound{data::SoundId::BiologicalEnemyDestroyed}, 0},
-  {effects::EffectSprite{{0, -6}, 100, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{0, -5}, 100, EffectMovement::FlyLeft}, 1},
-  {effects::EffectSprite{{0, -4}, 100, EffectMovement::FlyRight}, 1},
-  {effects::EffectSprite{{0, -3}, 100, EffectMovement::FlyUpperLeft}, 1},
-  {effects::EffectSprite{{0, -1}, 100, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{0, -6}, rigel::data::ActorID::Eyeball_projectile, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{0, -5}, rigel::data::ActorID::Eyeball_projectile, EffectMovement::FlyLeft}, 1},
+  {effects::EffectSprite{{0, -4}, rigel::data::ActorID::Eyeball_projectile, EffectMovement::FlyRight}, 1},
+  {effects::EffectSprite{{0, -3}, rigel::data::ActorID::Eyeball_projectile, EffectMovement::FlyUpperLeft}, 1},
+  {effects::EffectSprite{{0, -1}, rigel::data::ActorID::Eyeball_projectile, EffectMovement::FlyUp}, 0},
   {effects::Particles{{}, loader::INGAME_PALETTE[13]}, 0}
 };
 
 
 const effects::EffectSpec LIVING_TURKEY_KILL_EFFECT_SPEC[] = {
   {effects::Sound{data::SoundId::BiologicalEnemyDestroyed}, 0},
-  {effects::EffectSprite{{}, 84, EffectMovement::None}, 0}
+  {effects::EffectSprite{{}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 0}
 };
 
 
 const effects::EffectSpec BOSS4_PROJECTILE_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{3}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3]}, 0},
   {effects::RandomExplosionSound{}, 0}
 };
@@ -129,11 +129,11 @@ const effects::EffectSpec BOSS4_PROJECTILE_KILL_EFFECT_SPEC[] = {
 
 #define M_TECH_KILL_EFFECT_SPEC_DEFINITION \
   {effects::RandomExplosionSound{}, 0}, \
-  {effects::EffectSprite{{}, 1, EffectMovement::None}, 0}, \
+  {effects::EffectSprite{{}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 0}, \
   {effects::RandomExplosionSound{}, 2}, \
-  {effects::EffectSprite{{-1, -2}, 1, EffectMovement::None}, 2}, \
+  {effects::EffectSprite{{-1, -2}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 2}, \
   {effects::RandomExplosionSound{}, 4}, \
-  {effects::EffectSprite{{1, -3}, 1, EffectMovement::None}, 4}, \
+  {effects::EffectSprite{{1, -3}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 4}, \
   {effects::Particles{{}}, 0}, \
   {effects::Particles{{-1, -1}, -1}, 0}, \
   {effects::Particles{{1, -2}, 1}, 0}
@@ -167,7 +167,7 @@ const effects::EffectSpec FLOATING_ARROW_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec SPIKE_BALL_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
-  {effects::EffectSprite{{-1, 1}, 1, EffectMovement::None}, 0},
+  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 0},
   {effects::RandomExplosionSound{}, 0}
 };
 
@@ -175,8 +175,8 @@ const effects::EffectSpec SPIKE_BALL_KILL_EFFECT_SPEC[] = {
 // The bonus globes have one additional destruction effect, which is handled
 // separately - see configureBonusGlobe() in entity_configuration.ipp
 const effects::EffectSpec BONUS_GLOBE_KILL_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{}, 72, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{}, 73, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Bonus_globe_debris_1, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Bonus_globe_debris_2, EffectMovement::FlyRight}, 0},
   {effects::ScoreNumber{{}, ScoreNumberType::S100}, 0},
   {effects::Sound{data::SoundId::GlassBreaking}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0}
@@ -184,41 +184,41 @@ const effects::EffectSpec BONUS_GLOBE_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{3}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
   {effects::Particles{{1, 0}}, 0},
   {effects::Sound{data::SoundId::BiologicalEnemyDestroyed}, 0},
-  {effects::EffectSprite{{1, 2}, 94, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, 94, EffectMovement::FlyUpperRight}, 1},
-  {effects::EffectSprite{{-1, 1}, 94, EffectMovement::FlyUpperLeft}, 2},
-  {effects::EffectSprite{{1, -1}, 94, EffectMovement::FlyDown}, 3},
-  {effects::EffectSprite{{-1, 2}, 94, EffectMovement::FlyUpperRight}, 4},
-  {effects::EffectSprite{{1, 2}, 94, EffectMovement::FlyUpperLeft}, 5}
+  {effects::EffectSprite{{1, 2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 1},
+  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 2},
+  {effects::EffectSprite{{1, -1}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyDown}, 3},
+  {effects::EffectSprite{{-1, 2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 4},
+  {effects::EffectSprite{{1, 2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 5}
 };
 
 
 const effects::EffectSpec EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{3}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
   {effects::Particles{{1, 0}}, 0},
   {effects::Sound{data::SoundId::BiologicalEnemyDestroyed}, 0},
-  {effects::EffectSprite{{1, 2}, 94, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, 94, EffectMovement::FlyUpperRight}, 1},
-  {effects::EffectSprite{{-1, 1}, 94, EffectMovement::FlyUpperLeft}, 2},
-  {effects::EffectSprite{{1, -1}, 94, EffectMovement::FlyDown}, 3},
-  {effects::EffectSprite{{-1, 2}, 94, EffectMovement::FlyUpperRight}, 4},
-  {effects::EffectSprite{{1, 2}, 94, EffectMovement::FlyUpperLeft}, 5},
+  {effects::EffectSprite{{1, 2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 1},
+  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 2},
+  {effects::EffectSprite{{1, -1}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyDown}, 3},
+  {effects::EffectSprite{{-1, 2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 4},
+  {effects::EffectSprite{{1, 2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 5},
 
-  {effects::EffectSprite{{-1, 0}, 94, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{-2, -2}, 94, EffectMovement::FlyUpperRight}, 1},
-  {effects::EffectSprite{{-3, -1}, 94, EffectMovement::FlyUpperLeft}, 2},
-  {effects::EffectSprite{{-1, -3}, 94, EffectMovement::FlyDown}, 3},
-  {effects::EffectSprite{{-3, 0}, 94, EffectMovement::FlyUpperRight}, 4},
-  {effects::EffectSprite{{-1, 0}, 94, EffectMovement::FlyUpperLeft}, 5},
-  {effects::EffectSprite{{3, -2}, 94, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{2, -4}, 94, EffectMovement::FlyUpperRight}, 1},
-  {effects::EffectSprite{{1, -3}, 94, EffectMovement::FlyUpperLeft}, 2},
-  {effects::EffectSprite{{3, -5}, 94, EffectMovement::FlyDown}, 3},
-  {effects::EffectSprite{{1, -2}, 94, EffectMovement::FlyUpperRight}, 4},
-  {effects::EffectSprite{{3, -2}, 94, EffectMovement::FlyUpperLeft}, 5}
+  {effects::EffectSprite{{-1, 0}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{-2, -2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 1},
+  {effects::EffectSprite{{-3, -1}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 2},
+  {effects::EffectSprite{{-1, -3}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyDown}, 3},
+  {effects::EffectSprite{{-3, 0}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 4},
+  {effects::EffectSprite{{-1, 0}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 5},
+  {effects::EffectSprite{{3, -2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{2, -4}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 1},
+  {effects::EffectSprite{{1, -3}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 2},
+  {effects::EffectSprite{{3, -5}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyDown}, 3},
+  {effects::EffectSprite{{1, -2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperRight}, 4},
+  {effects::EffectSprite{{3, -2}, rigel::data::ActorID::Biological_enemy_debris, EffectMovement::FlyUpperLeft}, 5}
 };
 
 
@@ -232,7 +232,7 @@ const effects::EffectSpec CAMERA_KILL_EFFECT_SPEC[] = {
 const effects::EffectSpec BLUE_GUARD_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
   {effects::RandomExplosionSound{}, 0},
-  {effects::SpriteCascade{3}, 0}
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0}
 };
 
 
@@ -241,11 +241,11 @@ const effects::EffectSpec NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[4]}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
-  {effects::EffectSprite{{}, 18, EffectMovement::FlyUp}, 2},
-  {effects::EffectSprite{{}, 17, EffectMovement::FlyDown}, 2},
-  {effects::EffectSprite{{}, 15, EffectMovement::FlyUpperLeft}, 2},
-  {effects::EffectSprite{{}, 16, EffectMovement::FlyUpperRight}, 2},
-  {effects::EffectSprite{{}, 84, EffectMovement::None}, 2}
+  {effects::EffectSprite{{}, rigel::data::ActorID::Nuclear_waste_can_debris_4, EffectMovement::FlyUp}, 2},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Nuclear_waste_can_debris_3, EffectMovement::FlyDown}, 2},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Nuclear_waste_can_debris_2, EffectMovement::FlyUpperLeft}, 2},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Nuclear_waste_can_debris_1, EffectMovement::FlyUpperRight}, 2},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 2}
 };
 
 
@@ -255,10 +255,10 @@ const effects::EffectSpec CONTAINER_BOX_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
 
-  {effects::EffectSprite{{}, 165, EffectMovement::FlyUp}, 1},
-  {effects::EffectSprite{{}, 166, EffectMovement::FlyUpperLeft}, 1},
-  {effects::EffectSprite{{}, 167, EffectMovement::FlyUpperRight}, 1},
-  {effects::EffectSprite{{}, 166, EffectMovement::FlyDown}, 1},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Yellow_fireball_FX, EffectMovement::FlyUp}, 1},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Green_fireball_FX, EffectMovement::FlyUpperLeft}, 1},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Blue_fireball_FX, EffectMovement::FlyUpperRight}, 1},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Green_fireball_FX, EffectMovement::FlyDown}, 1},
 };
 
 
@@ -269,33 +269,33 @@ const effects::EffectSpec SLIME_CONTAINER_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec REACTOR_KILL_EFFECT_SPEC[] = {
-  {effects::SpriteCascade{74}, 0},
-  {effects::EffectSprite{{}, 66, EffectMovement::None}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::White_circle_flash_FX}, 0},
+  {effects::EffectSprite{{}, rigel::data::ActorID::Electric_reactor, EffectMovement::None}, 0},
 
   // Note: The original game's binary has code to spawn 12 of these,
   // but only 7 actually show up due to the limitations on the number
   // of simultaneous effects. I've decided to show 9 out of 12, as it
   // looks good visually.
-  {effects::EffectSprite{{1, -9}, 3, EffectMovement::FlyRight}, 0},
-  {effects::EffectSprite{{1, -8}, 3, EffectMovement::FlyRight}, 3},
-  {effects::EffectSprite{{1, -7}, 3, EffectMovement::FlyLeft}, 6},
-  {effects::EffectSprite{{1, -6}, 3, EffectMovement::FlyLeft}, 9},
-  {effects::EffectSprite{{1, -5}, 3, EffectMovement::FlyRight}, 12},
-  {effects::EffectSprite{{1, -4}, 3, EffectMovement::FlyRight}, 15},
-  {effects::EffectSprite{{1, -3}, 3, EffectMovement::FlyLeft}, 18},
-  {effects::EffectSprite{{1, -2}, 3, EffectMovement::FlyLeft}, 21},
-  {effects::EffectSprite{{1, -1}, 3, EffectMovement::FlyRight}, 24},
+  {effects::EffectSprite{{1, -9}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{{1, -8}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyRight}, 3},
+  {effects::EffectSprite{{1, -7}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyLeft}, 6},
+  {effects::EffectSprite{{1, -6}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyLeft}, 9},
+  {effects::EffectSprite{{1, -5}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyRight}, 12},
+  {effects::EffectSprite{{1, -4}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyRight}, 15},
+  {effects::EffectSprite{{1, -3}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyLeft}, 18},
+  {effects::EffectSprite{{1, -2}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyLeft}, 21},
+  {effects::EffectSprite{{1, -1}, rigel::data::ActorID::Shot_impact_FX_tile_burning, EffectMovement::FlyRight}, 24},
 
   // Same as above.
-  {effects::EffectSprite{{-1, -9}, 84, EffectMovement::None}, 0},
-  {effects::EffectSprite{{-1, -8}, 84, EffectMovement::None}, 2},
-  {effects::EffectSprite{{-1, -7}, 84, EffectMovement::None}, 4},
-  {effects::EffectSprite{{-1, -6}, 84, EffectMovement::None}, 6},
-  {effects::EffectSprite{{-1, -5}, 84, EffectMovement::None}, 8},
-  {effects::EffectSprite{{-1, -4}, 84, EffectMovement::None}, 10},
-  {effects::EffectSprite{{-1, -3}, 84, EffectMovement::None}, 12},
-  {effects::EffectSprite{{-1, -2}, 84, EffectMovement::None}, 14},
-  {effects::EffectSprite{{-1, -1}, 84, EffectMovement::None}, 16},
+  {effects::EffectSprite{{-1, -9}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 0},
+  {effects::EffectSprite{{-1, -8}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 2},
+  {effects::EffectSprite{{-1, -7}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 4},
+  {effects::EffectSprite{{-1, -6}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 6},
+  {effects::EffectSprite{{-1, -5}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 8},
+  {effects::EffectSprite{{-1, -4}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 10},
+  {effects::EffectSprite{{-1, -3}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 12},
+  {effects::EffectSprite{{-1, -2}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 14},
+  {effects::EffectSprite{{-1, -1}, rigel::data::ActorID::Smoke_cloud_FX, EffectMovement::None}, 16},
 
   {effects::RandomExplosionSound{}, 0},
 };
@@ -303,49 +303,49 @@ const effects::EffectSpec REACTOR_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec MISSILE_DETONATE_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{0, -8}, 96, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{0, -8}, 96, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{2, -8}, 96, EffectMovement::FlyDown}, 1},
-  {effects::EffectSprite{{2, -8}, 96, EffectMovement::FlyRight}, 1},
-  {effects::EffectSprite{{4, -8}, 96, EffectMovement::FlyLeft}, 2},
-  {effects::EffectSprite{{4, -8}, 96, EffectMovement::FlyUp}, 2},
-  {effects::EffectSprite{{6, -8}, 96, EffectMovement::FlyDown}, 3},
-  {effects::EffectSprite{{6, -8}, 96, EffectMovement::FlyRight}, 3}
+  {effects::EffectSprite{{0, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{0, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{2, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyDown}, 1},
+  {effects::EffectSprite{{2, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyRight}, 1},
+  {effects::EffectSprite{{4, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyLeft}, 2},
+  {effects::EffectSprite{{4, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyUp}, 2},
+  {effects::EffectSprite{{6, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyDown}, 3},
+  {effects::EffectSprite{{6, -8}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyRight}, 3}
 };
 
 
 const effects::EffectSpec BROKEN_MISSILE_DETONATE_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{0, 0}, 96, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{2, 0}, 96, EffectMovement::FlyUpperLeft}, 1},
-  {effects::EffectSprite{{4, 0}, 96, EffectMovement::FlyUpperRight}, 2},
-  {effects::EffectSprite{{6, 0}, 96, EffectMovement::FlyUpperLeft}, 3},
+  {effects::EffectSprite{{0, 0}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{2, 0}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyUpperLeft}, 1},
+  {effects::EffectSprite{{4, 0}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyUpperRight}, 2},
+  {effects::EffectSprite{{6, 0}, rigel::data::ActorID::Missile_debris, EffectMovement::FlyUpperLeft}, 3},
 };
 
 
 const effects::EffectSpec BIG_BOMB_DETONATE_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{  0, 0}, 43, EffectMovement::None}, 0},
-  {effects::EffectSprite{{ -4, 2}, 43, EffectMovement::None}, 2},
-  {effects::EffectSprite{{ +4, 2}, 43, EffectMovement::None}, 2},
-  {effects::EffectSprite{{ -8, 2}, 43, EffectMovement::None}, 4},
-  {effects::EffectSprite{{ +8, 2}, 43, EffectMovement::None}, 4},
-  {effects::EffectSprite{{-12, 2}, 43, EffectMovement::None}, 6},
-  {effects::EffectSprite{{+12, 2}, 43, EffectMovement::None}, 6},
-  {effects::EffectSprite{{-16, 2}, 43, EffectMovement::None}, 8},
-  {effects::EffectSprite{{+16, 2}, 43, EffectMovement::None}, 8},
+  {effects::EffectSprite{{  0, 0}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 0},
+  {effects::EffectSprite{{ -4, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 2},
+  {effects::EffectSprite{{ +4, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 2},
+  {effects::EffectSprite{{ -8, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 4},
+  {effects::EffectSprite{{ +8, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 4},
+  {effects::EffectSprite{{-12, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 6},
+  {effects::EffectSprite{{+12, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 6},
+  {effects::EffectSprite{{-16, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 8},
+  {effects::EffectSprite{{+16, 2}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 8},
 };
 
 
 const effects::EffectSpec SMALL_BOMB_DETONATE_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{0, 0}, 43, EffectMovement::None}, 0},
+  {effects::EffectSprite{{0, 0}, rigel::data::ActorID::Nuclear_explosion, EffectMovement::None}, 0},
 };
 
 
 const effects::EffectSpec EXPLOSION_EFFECT_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{0, 0}, 1, EffectMovement::None}, 0},
+  {effects::EffectSprite{{0, 0}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 0},
   {effects::RandomExplosionSound{}, 1},
-  {effects::EffectSprite{{-1, -2}, 1, EffectMovement::None}, 1},
+  {effects::EffectSprite{{-1, -2}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 1},
   {effects::RandomExplosionSound{}, 2},
-  {effects::EffectSprite{{1, -3}, 1, EffectMovement::None}, 2},
+  {effects::EffectSprite{{1, -3}, rigel::data::ActorID::Explosion_FX_auto_sound, EffectMovement::None}, 2},
 };

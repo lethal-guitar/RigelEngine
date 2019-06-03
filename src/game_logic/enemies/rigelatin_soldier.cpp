@@ -160,7 +160,7 @@ void RigelatinSoldier::updateReadyState(
     const auto xOffset = facingLeft ? 0 : 4;
 
     auto projectile = spawnMovingEffectSprite(
-      *d.mpEntityFactory, 300, movement, position + base::Vector{xOffset, -4});
+      *d.mpEntityFactory, data::ActorID::Rigelatin_soldier_shot, movement, position + base::Vector{xOffset, -4});
     projectile.assign<components::PlayerDamaging>(1);
 
     animationFrame = 3;

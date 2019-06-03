@@ -77,7 +77,7 @@ void EyeballThrower::update(
 
     spawnMovingEffectSprite(
       *d.mpEntityFactory,
-      100,
+      data::ActorID::Eyeball_projectile,
       movement,
       position + base::Vector{offsetX, -6});
   };

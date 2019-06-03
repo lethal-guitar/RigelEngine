@@ -37,8 +37,6 @@ using data::GameTraits;
 
 namespace {
 
-const auto FONT_ACTOR_ID = 29;
-
 
 std::string replacementImagePath(
   const std::string& basePath,
@@ -102,7 +100,7 @@ ActorData ActorImagePackage::loadActor(
   const Palette16& palette
 ) const {
   // Font has to be loaded using loadFont()
-  assert(id != FONT_ACTOR_ID);
+  assert(id != data::ActorID::Menu_font_grayscale);
 
   const auto it = mHeadersById.find(id);
   if (it == mHeadersById.end()) {
@@ -140,7 +138,7 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
     header.mFrames,
     [&, this, frame = 0](const auto& frameHeader) mutable {
       auto maybeReplacement = mMaybeReplacementsPath
-        ? loadPng(replacementImagePath(*mMaybeReplacementsPath, id, frame))
+        ? loadPng(replacementImagePath(*mMaybeReplacementsPath, static_cast<int>(id), frame))
         : std::nullopt;
       ++frame;
 
@@ -177,7 +175,7 @@ data::Image ActorImagePackage::loadImage(
 
 
 FontData ActorImagePackage::loadFont() const {
-  const auto it = mHeadersById.find(FONT_ACTOR_ID);
+  const auto it = mHeadersById.find(data::ActorID::Menu_font_grayscale);
   if (it == mHeadersById.end() || it->second.mFrames.empty()) {
     throw runtime_error("Font data missing");
   }

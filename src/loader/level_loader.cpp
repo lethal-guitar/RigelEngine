@@ -179,7 +179,7 @@ public:
     for (auto x=startCol; x<int(mActorGrid.width()); ++x) {
       auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
 
-      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == 103) {
+      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == ActorID::META_Dynamic_geometry_marker_1) {
         const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
 
         for (auto y=startRow+1; y<int(mActorGrid.height()); ++y) {
@@ -187,7 +187,7 @@ public:
 
           if (
             pBottomRightMarkerCandidate &&
-            pBottomRightMarkerCandidate->mID == 104
+            pBottomRightMarkerCandidate->mID == ActorID::META_Dynamic_geometry_marker_2
           ) {
             const auto bottomRow = y;
             removeActorAt(rightCol, startRow);
@@ -246,25 +246,27 @@ ActorList preProcessActorDescriptions(
 
       const auto& actor = grid.actorAt(col, row);
       switch (actor.mID) {
-        case 82:
+        case ActorID::META_Appear_only_in_med_hard_difficulty:
           applyDifficultyMarker(Difficulty::Medium);
           break;
 
-        case 83:
+        case ActorID::META_Appear_only_in_hard_difficulty:
           applyDifficultyMarker(Difficulty::Hard);
           break;
 
-        case 103: // stray tile section marker, ignore
-        case 104: // stray tile section marker, ignore
+        case ActorID::META_Dynamic_geometry_marker_1:
+        case ActorID::META_Dynamic_geometry_marker_2:
+          // stray tile section marker, ignore
           break;
 
-        case 102:
-        case 106:
-        case 116:
-        case 137:
-        case 138:
-        case 142:
-        case 143:
+        case ActorID::Dynamic_geometry_1:
+        case ActorID::Dynamic_geometry_2:
+        case ActorID::Dynamic_geometry_3:
+        case ActorID::Dynamic_geometry_4:
+        case ActorID::Dynamic_geometry_5:
+        case ActorID::Dynamic_geometry_6:
+        case ActorID::Dynamic_geometry_7:
+        case ActorID::Dynamic_geometry_8:
           {
             auto tileSection = grid.findTileSectionRect(col, row);
             if (tileSection) {
@@ -306,7 +308,7 @@ LevelData loadLevel(
   for (size_t i=0; i<header.numActorWords/3; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
-    actors.emplace_back(LevelData::Actor{position, type, std::nullopt});
+    actors.emplace_back(LevelData::Actor{position, static_cast<ActorID>(type), std::nullopt});
   }
 
   auto tileSet = resources.loadCZone(header.CZone);

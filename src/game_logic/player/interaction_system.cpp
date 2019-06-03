@@ -316,7 +316,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
 
 void PlayerInteractionSystem::receive(const rigel::events::CloakExpired&) {
   if (mCloakPickupPosition) {
-    mpEntityFactory->createActor(114, *mCloakPickupPosition);
+    mpEntityFactory->createActor(rigel::data::ActorID::White_box_cloaking_device, *mCloakPickupPosition);
   }
 }
 
@@ -439,7 +439,7 @@ void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
   entity.remove<Interactable>();
   entity.remove<BoundingBox>();
   mpEntityFactory->createSprite(
-    238, machinePosition + HINT_MACHINE_GLOBE_OFFSET);
+    data::ActorID::Special_hint_globe_icon, machinePosition + HINT_MACHINE_GLOBE_OFFSET);
 }
 
 

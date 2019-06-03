@@ -186,7 +186,7 @@ void SpiderSystem::update(entityx::EntityManager& es) {
         const auto movementType = mpRandomGenerator->gen() % 2 != 0
           ? M::FlyUpperLeft
           : M::FlyUpperRight;
-        spawnMovingEffectSprite(*mpEntityFactory, 232, movementType, position);
+        spawnMovingEffectSprite(*mpEntityFactory, data::ActorID::Spider_shaken_off, movementType, position);
         detachAndDestroy();
       };
 

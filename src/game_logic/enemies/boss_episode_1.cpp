@@ -102,7 +102,7 @@ void BossEpisode1::update(
 
     [&, this](const FlyingRightDroppingBombs&) {
       if (s.mpPerFrameState->mIsOddFrame) {
-        d.mpEntityFactory->createActor(76, position + BOMB_DROP_OFFSET);
+        d.mpEntityFactory->createActor(rigel::data::ActorID::Napalm_bomb_small, position + BOMB_DROP_OFFSET);
       }
       const auto result = engine::moveHorizontally(
         *d.mpCollisionChecker,
@@ -192,11 +192,11 @@ void BossEpisode1::update(
             rand() % 2 - 1);
           spawnOneShotSprite(
             *d.mpEntityFactory,
-            1,
+            data::ActorID::Explosion_FX_auto_sound,
             position + base::Vector{rand() % 4, -(rand() % 8)});
           spawnMovingEffectSprite(
             *d.mpEntityFactory,
-            3,
+            data::ActorID::Shot_impact_FX_tile_burning,
             SpriteMovement::FlyDown,
             position + base::Vector{rand() % 4, -(rand() % 8)});
           break;

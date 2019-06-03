@@ -62,7 +62,7 @@ void SmashHammer::update(
       if (result != engine::MovementResult::Completed) {
         d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
         spawnOneShotSprite(
-          *d.mpEntityFactory, 84, position + base::Vector{0, 4});
+          *d.mpEntityFactory, data::ActorID::Smoke_cloud_FX, position + base::Vector{0, 4});
         mState = PullingUp{};
       } else {
         ++mExtensionStep;

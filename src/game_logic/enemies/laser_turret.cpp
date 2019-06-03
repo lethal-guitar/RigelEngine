@@ -187,7 +187,7 @@ void LaserTurretSystem::performBaseHitEffect(entityx::Entity entity) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
   spawnFloatingOneShotSprite(
     *mpEntityFactory,
-    3,
+    data::ActorID::Shot_impact_FX_tile_burning,
     position + base::Vector{-1, 2});
   const auto randomChoice = mpRandomGenerator->gen();
   const auto soundId = randomChoice % 2 == 0
@@ -213,7 +213,7 @@ void LaserTurretSystem::receive(const events::ShootableKilled& event) {
     : (shotFromLeft)
       ? SpriteMovement::FlyUpperRight
       : SpriteMovement::FlyUp;
-  spawnMovingEffectSprite(*mpEntityFactory, 131, debrisMovement, position);
+  spawnMovingEffectSprite(*mpEntityFactory, data::ActorID::Laser_turret, debrisMovement, position);
 }
 
 }}}

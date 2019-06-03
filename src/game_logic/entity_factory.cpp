@@ -223,14 +223,14 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
 
 void adjustOffsets(
   std::vector<engine::SpriteFrame>& frames,
-  const int actorId
+  const ActorID actorId
 ) {
   // Some sprites in the game have offsets that would require more complicated
   // code to draw them correctly. To simplify that, we adjust the offsets once
   // at loading time so that no additional adjustment is necessary at run time.
 
   // Player sprite
-  if (actorId == 5 || actorId == 6) {
+  if (actorId == ActorID::Duke_LEFT || actorId == ActorID::Duke_RIGHT) {
     for (int i=0; i<39; ++i) {
       if (i != 35 && i != 36) {
         frames[i].mDrawOffset.x -= 1;
@@ -239,12 +239,12 @@ void adjustOffsets(
   }
 
   // Destroyed reactor fire
-  if (actorId == 85 || actorId == 86) {
+  if (actorId == ActorID::Reactor_fire_LEFT || actorId == ActorID::Reactor_fire_RIGHT) {
     frames[0].mDrawOffset.x = 0;
   }
 
   // Radar computer
-  if (actorId == 237) {
+  if (actorId == ActorID::Radar_computer_terminal) {
     for (auto i = 8u; i < frames.size(); ++i) {
       frames[i].mDrawOffset.x -= 1;
     }
@@ -254,27 +254,26 @@ void adjustOffsets(
 
 std::optional<int> orientationOffsetForActor(const ActorID actorId) {
   switch (actorId) {
-    // Player
-    case 5:
-    case 6:
+    case ActorID::Duke_LEFT:
+    case ActorID::Duke_RIGHT:
       return 39;
 
-    case 78:
+    case ActorID::Snake:
       return 9;
 
-    case 98:
+    case ActorID::Eyeball_thrower_LEFT:
       return 10;
 
-    case 134:
+    case ActorID::Skeleton:
       return 4;
 
-    case 154:
+    case ActorID::Spider:
       return 13;
 
-    case 201:
+    case ActorID::Red_box_turkey:
       return 2;
 
-    case 299:
+    case ActorID::Rigelatin_soldier:
       return 4;
 
     default:
@@ -291,7 +290,7 @@ int SPIDER_FRAME_MAP[] = {
 
 base::ArrayView<int> frameMapForActor(const ActorID actorId) {
   switch (actorId) {
-    case 154:
+    case ActorID::Spider:
       return base::ArrayView<int>(SPIDER_FRAME_MAP);
 
     default:
@@ -523,8 +522,8 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
     assert(
-      actor.mID != 82 && actor.mID != 83 &&
-      actor.mID != 103 && actor.mID != 104);
+      actor.mID != ActorID::META_Appear_only_in_med_hard_difficulty && actor.mID != ActorID::META_Appear_only_in_hard_difficulty &&
+      actor.mID != ActorID::META_Dynamic_geometry_marker_1 && actor.mID != ActorID::META_Dynamic_geometry_marker_2);
 
     auto entity = mpEntityManager->create();
 
@@ -553,9 +552,9 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
 
     configureEntity(entity, actor.mID, boundingBox);
 
-    const auto isPlayer = actor.mID == 5 || actor.mID == 6;
+    const auto isPlayer = actor.mID == ActorID::Duke_LEFT || actor.mID == ActorID::Duke_RIGHT;
     if (isPlayer) {
-      const auto playerOrientation = actor.mID == 5
+      const auto playerOrientation = actor.mID == ActorID::Duke_LEFT
         ? Orientation::Left
         : Orientation::Right;
       assignPlayerComponents(entity, playerOrientation);
