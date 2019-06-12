@@ -213,7 +213,7 @@ void SlidingDoorSystem::update(entityx::EntityManager& es) {
       state.mState = vertical::nextState(state, inRange);
 
       const auto stepChange = vertical::stepChangeForState(state.mState);
-      state.mSlideStep = base::clamp(state.mSlideStep + stepChange, 0, 7);
+      state.mSlideStep = std::clamp(state.mSlideStep + stepChange, 0, 7);
 
       if (state.mState == vertical::State::Closed) {
         boundingBox.topLeft.y = 0;

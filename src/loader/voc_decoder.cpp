@@ -188,7 +188,7 @@ public:
       difference = -difference;
     }
 
-    const auto newSample = base::clamp(
+    const auto newSample = std::clamp(
       mPrediction + difference, -16384, 16384);
     mPrediction = newSample;
 

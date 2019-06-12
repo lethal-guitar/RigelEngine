@@ -62,7 +62,7 @@ int PlayerModel::score() const {
 
 
 void PlayerModel::giveScore(const int amount) {
-  mScore = base::clamp(mScore + amount, 0, MAX_SCORE);
+  mScore = std::clamp(mScore + amount, 0, MAX_SCORE);
 }
 
 
@@ -125,7 +125,7 @@ bool PlayerModel::isDead() const {
 
 
 void PlayerModel::takeDamage(const int amount) {
-  mHealth = base::clamp(mHealth - amount, 0, MAX_HEALTH);
+  mHealth = std::clamp(mHealth - amount, 0, MAX_HEALTH);
 }
 
 
@@ -135,7 +135,7 @@ void PlayerModel::takeFatalDamage() {
 
 
 void PlayerModel::giveHealth(const int amount) {
-  mHealth = base::clamp(mHealth + amount, 0, MAX_HEALTH);
+  mHealth = std::clamp(mHealth + amount, 0, MAX_HEALTH);
 }
 
 

@@ -63,7 +63,7 @@ public:
         destination,
         [volumeScale](const auto sample32Bit) {
           return static_cast<std::int16_t>(
-            base::clamp(sample32Bit * volumeScale, -16384, 16384));
+            std::clamp(sample32Bit * volumeScale, -16384, 16384));
         });
 
       numSamples -= samplesForIteration;

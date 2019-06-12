@@ -189,7 +189,7 @@ void RigelatinSoldier::updateReadyState(
     if (mDecisionCounter > 0 && mDecisionCounter < 6) {
       jump();
     } else {
-      mDecisionCounter = base::clamp(mDecisionCounter, 1, 5);
+      mDecisionCounter = std::clamp(mDecisionCounter, 1, 5);
 
       if (d.mpRandomGenerator->gen() % 2 != 0) {
         attack();

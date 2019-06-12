@@ -169,8 +169,8 @@ void Camera::updateAutomaticScrolling() {
 
 
 void Camera::setPosition(const base::Vector position) {
-  mPosition.x = base::clamp(position.x, 0, mMaxPosition.width);
-  mPosition.y = base::clamp(position.y, 0, mMaxPosition.height);
+  mPosition.x = std::clamp(position.x, 0, mMaxPosition.width);
+  mPosition.y = std::clamp(position.y, 0, mMaxPosition.height);
 }
 
 
