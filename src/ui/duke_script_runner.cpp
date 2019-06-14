@@ -193,6 +193,7 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 
       case SDLK_RETURN:
       case SDLK_SPACE:
+      case SDLK_KP_ENTER:
         if (mPagerState->mMode == PagingMode::Menu) {
           selectCurrentMenuItem(state);
         } else {

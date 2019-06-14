@@ -81,6 +81,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
             enterHighScore("");
             return;
 
+          case SDLK_KP_ENTER:
           case SDLK_RETURN:
             enterHighScore(state.mNameEntryWidget.text());
             return;

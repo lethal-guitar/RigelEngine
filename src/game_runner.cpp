@@ -104,6 +104,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
           return;
 
         case SDLK_RETURN:
+        case SDLK_KP_ENTER:
           saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
           leaveTextEntry();
           return;
