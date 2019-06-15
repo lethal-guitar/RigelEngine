@@ -104,7 +104,7 @@ ActorData ActorImagePackage::loadActor(
 
   const auto it = mHeadersById.find(id);
   if (it == mHeadersById.end()) {
-    throw invalid_argument("No actor at this ID");
+    throw invalid_argument("loadActor(): No actor at this ID " + std::to_string(static_cast<int>(id)));
   }
 
   const auto& header = it->second;
@@ -121,7 +121,7 @@ base::Rect<int> ActorImagePackage::actorFrameRect(
 ) const {
   const auto it = mHeadersById.find(id);
   if (it == mHeadersById.end()) {
-    throw invalid_argument("No actor at this ID");
+    throw invalid_argument("actorFrameRect(): No actor at this ID " + std::to_string(static_cast<int>(id)));
   }
 
   const auto& frameHeader = it->second.mFrames.at(frame);
