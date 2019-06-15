@@ -17,7 +17,6 @@
 #include "rigelatin_soldier.hpp"
 
 #include "base/match.hpp"
-#include "base/math_tools.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/physical_components.hpp"
@@ -25,6 +24,8 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/player.hpp"
+
+#include <algorithm>
 
 
 namespace rigel { namespace game_logic { namespace behaviors {

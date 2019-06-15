@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include "base/math_tools.hpp"
-
 #include <dbopl.h>
 
 #include <algorithm>

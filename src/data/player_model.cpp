@@ -16,7 +16,6 @@
 
 #include "player_model.hpp"
 
-#include "base/math_tools.hpp"
 #include "data/saved_game.hpp"
 
 #include <algorithm>

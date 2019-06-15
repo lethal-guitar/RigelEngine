@@ -16,10 +16,10 @@
 
 #include "voc_decoder.hpp"
 
-#include "base/math_tools.hpp"
 #include "base/warnings.hpp"
 #include "loader/file_utils.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iterator>

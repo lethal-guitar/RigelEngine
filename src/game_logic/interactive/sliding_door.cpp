@@ -16,13 +16,14 @@
 
 #include "sliding_door.hpp"
 
-#include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
+
+#include <algorithm>
 
 
 namespace rigel { namespace game_logic { namespace ai {
