@@ -39,7 +39,6 @@ using ExecutionResultOptional =
 namespace {
 
 const auto NUM_NEWS_REPORTER_STATES = 4;
-const auto NEWS_REPORTER_ACTOR_ID = 297;
 
 const auto KEY_BINDINGS_START_X = 26;
 const auto KEY_BINDINGS_START_Y = 7;
@@ -296,7 +295,7 @@ void DukeScriptRunner::animateNewsReporter(
 
     if (newTalkFrame != state.mLastTalkFrame) {
       drawSprite(
-        NEWS_REPORTER_ACTOR_ID,
+        data::ActorID::News_reporter_talking_mouth_animation,
         newTalkFrame,
         0,
         0);
@@ -310,7 +309,7 @@ void DukeScriptRunner::animateNewsReporter(
 
 void DukeScriptRunner::stopNewsReporterAnimation() {
   if (mNewsReporterAnimationState) {
-    drawSprite(NEWS_REPORTER_ACTOR_ID, 0, 0, 0);
+    drawSprite(data::ActorID::News_reporter_talking_mouth_animation, 0, 0, 0);
   }
   mNewsReporterAnimationState = std::nullopt;
 }

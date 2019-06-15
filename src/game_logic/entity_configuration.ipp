@@ -109,37 +109,37 @@ ActorID actorIdForProjectile(
 
   switch (type) {
     case ProjectileType::PlayerRegularShot:
-      return isHorizontal(direction) ? 26 : 27;
+      return isHorizontal(direction) ? data::ActorID::Duke_regular_shot_horizontal : data::ActorID::Duke_regular_shot_vertical;
 
     case ProjectileType::PlayerLaserShot:
-      return isHorizontal(direction) ? 24 : 25;
+      return isHorizontal(direction) ? data::ActorID::Duke_laser_shot_horizontal : data::ActorID::Duke_laser_shot_vertical;
 
     case ProjectileType::PlayerRocketShot:
       return isHorizontal(direction)
-        ? (isGoingRight ? 10 : 9)
-        : (isGoingUp ? 7 : 8);
+        ? (isGoingRight ? data::ActorID::Dukes_rocket_right : data::ActorID::Dukes_rocket_left)
+        : (isGoingUp ? data::ActorID::Dukes_rocket_up : data::ActorID::Dukes_rocket_down);
 
     case ProjectileType::PlayerFlameShot:
       return isHorizontal(direction)
-        ? (isGoingRight ? 206 : 205)
-        : (isGoingUp ? 21 : 204);
+        ? (isGoingRight ? data::ActorID::Duke_flame_shot_right : data::ActorID::Duke_flame_shot_left)
+        : (isGoingUp ? data::ActorID::Duke_flame_shot_up : data::ActorID::Duke_flame_shot_down);
 
     case ProjectileType::ReactorDebris:
-      return isGoingRight ? 86 : 85;
+      return isGoingRight ? data::ActorID::Reactor_fire_RIGHT : data::ActorID::Reactor_fire_LEFT;
 
     case ProjectileType::EnemyLaserShot:
       assert(isHorizontal(direction));
-      return 136;
+      return data::ActorID::Enemy_laser_shot_RIGHT;
 
     case ProjectileType::EnemyRocket:
       return isHorizontal(direction)
-        ? (isGoingRight ? 57 : 55)
-        : 56;
+        ? (isGoingRight ? data::ActorID::Enemy_rocket_right : data::ActorID::Enemy_rocket_left)
+        : data::ActorID::Enemy_rocket_up;
 
   }
 
   assert(false);
-  return 0;
+  return data::ActorID::Hoverbot;
 }
 
 
@@ -203,13 +203,15 @@ Message MESSAGE_TYPE_BY_INDEX[] = {
 
 int messengerDroneTypeIndex(const ActorID id) {
   switch (id) {
-    case 213:
-    case 214:
-    case 215:
-    case 216:
-      return id - 213; // 0 to 3
-
-    case 220:
+    case ActorID::Messenger_drone_YOUR_BRAIN_IS_OURS:
+      return 0;
+    case ActorID::Messenger_drone_BRING_BACK_THE_BRAIN:
+      return 1;
+    case ActorID::Messenger_drone_LIVE_FROM_RIGEL_ITS_SATURDAY_NIGHT:
+      return 2;
+    case ActorID::Messenger_drone_DIE:
+      return 3;
+    case ActorID::Messenger_drone_YOU_CANNOT_ESCAPE_US_YOU_WILL_GET_YOUR_BRAIN_SUCKED:
       return 4;
 
     default:
@@ -243,12 +245,12 @@ void configureMovingEffectSprite(
 
 void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
   switch (id) {
-    case 3:
+    case ActorID::Shot_impact_FX_tile_burning:
       entity.assign<BehaviorController>(behaviors::TileBurner{});
       break;
 
-    case 43:
-    case 100:
+    case ActorID::Nuclear_explosion:
+    case ActorID::Eyeball_projectile:
       entity.assign<PlayerDamaging>(1);
       break;
 
@@ -261,10 +263,10 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
 auto createBlueGuardAiComponent(const ActorID id) {
   using ai::components::BlueGuard;
 
-  if (id == 217) {
+  if (id == ActorID::Blue_guard_using_a_terminal) {
     return BlueGuard::typingOnTerminal();
   } else {
-    const auto orientation = id == 159 ? Orientation::Right : Orientation::Left;
+    const auto orientation = id == ActorID::Blue_guard_RIGHT ? Orientation::Right : Orientation::Left;
     return BlueGuard::patrolling(orientation);
   }
 }
@@ -328,15 +330,17 @@ void configureBonusGlobe(
 
 
 ActorID scoreNumberActor(const ScoreNumberType type) {
-  static_assert(
-    int(ScoreNumberType::S100) == 0 &&
-    int(ScoreNumberType::S500) == 1 &&
-    int(ScoreNumberType::S2000) == 2 &&
-    int(ScoreNumberType::S5000) == 3 &&
-    int(ScoreNumberType::S10000) == 4);
+  switch (type)
+  {
+    case ScoreNumberType::S100: return ActorID::Score_number_FX_100;
+    case ScoreNumberType::S500: return ActorID::Score_number_FX_500;
+    case ScoreNumberType::S2000: return ActorID::Score_number_FX_2000;
+    case ScoreNumberType::S5000: return ActorID::Score_number_FX_5000;
+    case ScoreNumberType::S10000: return ActorID::Score_number_FX_10000;
+  }
 
-  const auto intType = static_cast<ActorID>(type);
-  return 123 + intType;
+  assert(false);
+  return ActorID::Score_number_FX_100;
 }
 
 
@@ -344,71 +348,70 @@ auto actorIDListForActor(const ActorID ID) {
   std::vector<ActorID> actorParts;
 
   switch (ID) {
-    case 0:
-      actorParts.push_back(0);
-      actorParts.push_back(69);
+    case ActorID::Hoverbot:
+      actorParts.push_back(ActorID::Hoverbot);
+      actorParts.push_back(ActorID::Hoverbot_teleport_FX);
       break;
 
-    case 5: // player facing left
-    case 6: // player facing right
-      actorParts.push_back(5);
-      actorParts.push_back(6);
+    case ActorID::Duke_LEFT:
+    case ActorID::Duke_RIGHT:
+      actorParts.push_back(ActorID::Duke_LEFT);
+      actorParts.push_back(ActorID::Duke_RIGHT);
       break;
 
-    case 45:
-    case 46:
-    case 47:
-    case 48:
+    case ActorID::Blue_bonus_globe_1:
+    case ActorID::Blue_bonus_globe_2:
+    case ActorID::Blue_bonus_globe_3:
+    case ActorID::Blue_bonus_globe_4:
       actorParts.push_back(ID);
-      actorParts.push_back(44);
+      actorParts.push_back(ActorID::Bonus_globe_shell);
       break;
 
-    case 50:
-      actorParts.push_back(51);
+    case ActorID::Teleporter_1:
+      actorParts.push_back(ActorID::Teleporter_2);
       break;
 
-    case 67:
-      actorParts.push_back(67);
-      actorParts.push_back(70);
+    case ActorID::Green_slime_blob:
+      actorParts.push_back(ActorID::Green_slime_blob);
+      actorParts.push_back(ActorID::Green_slime_blob_flying_on_ceiling);
       break;
 
-    case 98:
-      actorParts.push_back(98);
-      actorParts.push_back(99);
+    case ActorID::Eyeball_thrower_LEFT:
+      actorParts.push_back(ActorID::Eyeball_thrower_LEFT);
+      actorParts.push_back(ActorID::Eyeball_thrower_RIGHT);
       break;
 
-    case 130:
-      actorParts.push_back(130);
-      actorParts.push_back(260);
+    case ActorID::Blowing_fan:
+      actorParts.push_back(ActorID::Blowing_fan);
+      actorParts.push_back(ActorID::Blowing_fan_threads_on_top);
       break;
 
-    case 144:
-      actorParts.push_back(144);
-      actorParts.push_back(149);
+    case ActorID::Missile_intact:
+      actorParts.push_back(ActorID::Missile_intact);
+      actorParts.push_back(ActorID::Missile_exhaust_flame);
       break;
 
-    case 171:
-    case 217:
-      actorParts.push_back(159);
+    case ActorID::Blue_guard_LEFT:
+    case ActorID::Blue_guard_using_a_terminal:
+      actorParts.push_back(ActorID::Blue_guard_RIGHT);
       break;
 
-    case 201:
-      actorParts.push_back(202);
+    case ActorID::Red_box_turkey:
+      actorParts.push_back(ActorID::Turkey);
       break;
 
-    // Flying message ships
-    case 213:
-    case 214:
-    case 215:
-    case 216:
-    case 220:
-      actorParts.push_back(107);
-      actorParts.push_back(108);
-      actorParts.push_back(109);
-      actorParts.push_back(110);
-      actorParts.push_back(111);
-      actorParts.push_back(112);
-      actorParts.push_back(113);
+    case ActorID::Messenger_drone_YOUR_BRAIN_IS_OURS:
+    case ActorID::Messenger_drone_BRING_BACK_THE_BRAIN:
+    case ActorID::Messenger_drone_LIVE_FROM_RIGEL_ITS_SATURDAY_NIGHT:
+    case ActorID::Messenger_drone_DIE:
+    case ActorID::Messenger_drone_YOU_CANNOT_ESCAPE_US_YOU_WILL_GET_YOUR_BRAIN_SUCKED:
+      actorParts.push_back(ActorID::Messenger_drone_body);
+      actorParts.push_back(ActorID::Messenger_drone_part_1);
+      actorParts.push_back(ActorID::Messenger_drone_part_2);
+      actorParts.push_back(ActorID::Messenger_drone_part_3);
+      actorParts.push_back(ActorID::Messenger_drone_exhaust_flame_1);
+      actorParts.push_back(ActorID::Messenger_drone_exhaust_flame_2);
+      actorParts.push_back(ActorID::Messenger_drone_exhaust_flame_3);
       actorParts.push_back(ID);
       break;
 
@@ -422,64 +425,67 @@ auto actorIDListForActor(const ActorID ID) {
 
 void configureSprite(Sprite& sprite, const ActorID actorID) {
   switch (actorID) {
-    case 0:
+    case ActorID::Hoverbot:
       sprite.mFramesToRender = {0};
       break;
 
-    case 62:
+    case ActorID::Bomb_dropping_spaceship:
       sprite.mFramesToRender = {0, 1};
       break;
 
-    case 67:
+    case ActorID::Green_slime_blob:
       sprite.mFramesToRender = {0};
       break;
 
-    case 98:
+    case ActorID::Eyeball_thrower_LEFT:
       sprite.mFramesToRender = {0};
       break;
 
-    case 115:
+    case ActorID::Sentry_robot_generator:
       sprite.mFramesToRender = {0, 4};
       break;
 
-    case 144:
+    case ActorID::Missile_intact:
       sprite.mFramesToRender = {0};
       break;
 
-    case 150:
+    case ActorID::Metal_grabber_claw:
       sprite.mFramesToRender = {1};
       break;
 
-    case 154:
+    case ActorID::Spider:
       sprite.mFramesToRender = {6};
       break;
 
-    case 171:
+    case ActorID::Blue_guard_LEFT:
       sprite.mFramesToRender = {6};
       break;
 
-    case 200:
+    case ActorID::BOSS_Episode_1:
       sprite.mFramesToRender = {0, 2};
       break;
 
-    case 209:
+    case ActorID::Rocket_elevator:
       sprite.mFramesToRender = {5, 0};
       break;
 
-    case 217:
+    case ActorID::Blue_guard_using_a_terminal:
       sprite.mFramesToRender = {12};
       break;
 
-    case 231:
+    case ActorID::Lava_riser:
       sprite.mFramesToRender = {3};
       break;
 
-    case 237:
+    case ActorID::Radar_computer_terminal:
       sprite.mFramesToRender = {0, 1, 2, 3};
       break;
 
-    case 279:
+    case ActorID::BOSS_Episode_4:
       sprite.mFramesToRender = {0, 2};
+      break;
+
+    default:
       break;
   }
 }
@@ -490,22 +496,22 @@ bool hasAssociatedSprite(const ActorID actorID) {
     default:
       return true;
 
-    case 102:
-    case 106:
-    case 116:
-    case 137:
-    case 138:
-    case 141:
-    case 142:
-    case 143:
-    case 139:
-    case 221:
-    case 233:
-    case 234:
-    case 241:
-    case 250:
-    case 251:
-    case 254:
+    case ActorID::Dynamic_geometry_1:
+    case ActorID::Dynamic_geometry_2:
+    case ActorID::Dynamic_geometry_3:
+    case ActorID::Dynamic_geometry_4:
+    case ActorID::Dynamic_geometry_5:
+    case ActorID::Dynamic_geometry_6:
+    case ActorID::Dynamic_geometry_7:
+    case ActorID::Dynamic_geometry_8:
+    case ActorID::Exit_trigger:
+    case ActorID::Water_depths:
+    case ActorID::Water_surface_1:
+    case ActorID::Water_surface_2:
+    case ActorID::Windblown_spider_generator:
+    case ActorID::Airlock_effect_LEFT:
+    case ActorID::Airlock_effect_RIGHT:
+    case ActorID::Explosion_FX_trigger:
       return false;
   }
 }
@@ -513,14 +519,14 @@ bool hasAssociatedSprite(const ActorID actorID) {
 
 ActorID actorIdForBoxColor(const ContainerColor color) {
   switch (color) {
-    case ContainerColor::White: return 161;
-    case ContainerColor::Green: return 162;
-    case ContainerColor::Red: return 163;
-    case ContainerColor::Blue: return 164;
+    case ContainerColor::White: return ActorID::White_box_empty;
+    case ContainerColor::Green: return ActorID::Green_box_empty;
+    case ContainerColor::Red: return ActorID::Red_box_empty;
+    case ContainerColor::Blue: return ActorID::Blue_box_empty;
   }
 
   assert(false);
-  return 161;
+  return ActorID::White_box_empty;
 }
 
 
@@ -531,72 +537,71 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
   };
 
   switch (id) {
-    case 7: case 8: case 9: case 10:
-    case 24: case 25: case 26: case 27:
-    case 21: case 204: case 205: case 206:
-    case 85: case 86:
+    case ActorID::Dukes_rocket_up: case ActorID::Dukes_rocket_down: case ActorID::Dukes_rocket_left: case ActorID::Dukes_rocket_right:
+    case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
+    case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
+    case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
       return scale(PLAYER_PROJECTILE_DRAW_ORDER);
 
-    case 33: case 34: case 35: case 36: // player muzzle flash
+    case ActorID::Muzzle_flash_up: case ActorID::Muzzle_flash_down: case ActorID::Muzzle_flash_left: case ActorID::Muzzle_flash_right: // player muzzle flash
       return scale(MUZZLE_FLASH_DRAW_ORDER);
 
-    case 1: // small explosion
-    case 2: // rocket explosion
-    case 3: // impact flame
-    case 11: // rocket smoke
-    case 12: // hover-bot debris
-    case 13: // hover-bot debris
-    case 15: // nuclear waste barrel debris
-    case 16: // nuclear waste barrel debris
-    case 17: // nuclear waste barrel debris
-    case 18: // nuclear waste barrel debris
-    case 43: // nuclear explosion
-    case 60: // watch-bot container debris
-    case 61: // watch-bot container debris
-    case 65: // napalm bomb fire
-    case 71: // Duke's death particles
-    case 72: // bonus globe debris
-    case 73: // bonus globe debris
-    case 74: // white circular flash
-    case 75: // nuclear sludge (from barrel)
-    case 84: // smoke cloud
-    case 94: // biological debris
-    case 96: // missile debris
-    case 100: // eye ball projectile
-    case 147: // enemy laser muzzle flash
-    case 148: // enemy laser muzzle flash
-    case 152: // metal grabber claw debris
-    case 153: // metal grabber claw debris
-    case 165: // yellow fire ball
-    case 166: // green fire ball
-    case 167: // blue fire ball
-    case 169: // soda can debris
-    case 170: // soda can debris
-    case 192: // petrified monster stone shell debris
-    case 193: // petrified monster stone shell debris
-    case 194: // petrified monster stone shell debris
-    case 195: // petrified monster stone shell debris
-    case 196: // petrified monster stone shell debris
-    case 197: // petrified monster stone shell debris
-    case 198: // petrified monster stone shell debris
-    case 199: // petrified monster stone shell debris
-    case 232: // spider (shaken off)
-    case 241: // wind-blown spider part
-    case 242: // wind-blown spider part
-    case 243: // wind-blown spider
-    case 255: // prisoner debris
-    case 300: // Rigelatin soldier projectile
+    case ActorID::Explosion_FX_auto_sound:
+    case ActorID::Explosion_FX_2:
+    case ActorID::Shot_impact_FX_tile_burning:
+    case ActorID::Smoke_puff_FX:
+    case ActorID::Hoverbot_debris_1:
+    case ActorID::Hoverbot_debris_2:
+    case ActorID::Nuclear_waste_can_debris_1:
+    case ActorID::Nuclear_waste_can_debris_2:
+    case ActorID::Nuclear_waste_can_debris_3:
+    case ActorID::Nuclear_waste_can_debris_4:
+    case ActorID::Nuclear_explosion:
+    case ActorID::Watchbot_container_debris_1:
+    case ActorID::Watchbot_container_debris_2:
+    case ActorID::Fire_bomb_fire:
+    case ActorID::Duke_death_particles:
+    case ActorID::Bonus_globe_debris_1:
+    case ActorID::Bonus_globe_debris_2:
+    case ActorID::White_circle_flash_FX:
+    case ActorID::Nuclear_waste_can_green_slime_inside:
+    case ActorID::Smoke_cloud_FX:
+    case ActorID::Biological_enemy_debris:
+    case ActorID::Missile_debris:
+    case ActorID::Eyeball_projectile:
+    case ActorID::Enemy_laser_muzzle_flash_1:
+    case ActorID::Enemy_laser_muzzle_flash_2:
+    case ActorID::Metal_grabber_claw_debris_1:
+    case ActorID::Metal_grabber_claw_debris_2:
+    case ActorID::Yellow_fireball_FX:
+    case ActorID::Green_fireball_FX:
+    case ActorID::Blue_fireball_FX:
+    case ActorID::Coke_can_debris_1:
+    case ActorID::Coke_can_debris_2:
+    case ActorID::Petrified_monster_stone_debris_1:
+    case ActorID::Petrified_monster_stone_debris_2:
+    case ActorID::Petrified_monster_stone_debris_3:
+    case ActorID::Petrified_monster_stone_debris_4:
+    case ActorID::Petrified_monster_stone_debris_5:
+    case ActorID::Petrified_monster_stone_debris_6:
+    case ActorID::Petrified_monster_stone_debris_7:
+    case ActorID::Petrified_monster_stone_debris_8:
+    case ActorID::Spider_shaken_off:
+    case ActorID::Windblown_spider_generator:
+    case ActorID::Spider_debris_2:
+    case ActorID::Spider_blowing_in_wind:
+    case ActorID::Prisoner_hand_debris:
+    case ActorID::Rigelatin_soldier_shot:
       return scale(EFFECT_DRAW_ORDER);
 
-    // floating score numbers
-    case 123:
-    case 124:
-    case 125:
-    case 126:
-    case 127:
+    case ActorID::Score_number_FX_100:
+    case ActorID::Score_number_FX_500:
+    case ActorID::Score_number_FX_2000:
+    case ActorID::Score_number_FX_5000:
+    case ActorID::Score_number_FX_10000:
       return scale(EFFECT_DRAW_ORDER);
 
-    case 63:
+    case ActorID::Napalm_bomb:
       // Make the bomb appear behind the bomber plane
       return scale(baseDrawOrder) - 1;
 
@@ -696,24 +701,24 @@ void EntityFactory::configureEntity(
     : 0;
 
   switch (actorID) {
-    case 45: // Blue bonus globe
+    case ActorID::Blue_bonus_globe_1: // Blue bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{500});
       break;
 
-    case 46: // Red bonus globe
+    case ActorID::Blue_bonus_globe_2: // Red bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{2000});
       break;
 
-    case 47: // Green bonus globe
+    case ActorID::Blue_bonus_globe_3: // Green bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{5000});
       break;
 
-    case 48: // White bonus globe
+    case ActorID::Blue_bonus_globe_4: // White bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{10000});
       break;
 
     // Circuit card force field
-    case 119:
+    case ActorID::Force_field:
       entity.assign<PlayerDamaging>(9, true);
       interaction::configureForceField(entity, mSpawnIndex);
       {
@@ -721,27 +726,27 @@ void EntityFactory::configureEntity(
 
         // There is some additional decoration representing the "emitters"
         // on top/bottom.
-        auto fieldEmitters = createSprite(119, position);
+        auto fieldEmitters = createSprite(ActorID::Force_field, position);
         fieldEmitters.component<Sprite>()->mFramesToRender = {0, 1};
       }
       break;
 
-    case 120: // Keyhole (circuit board)
+    case ActorID::Circuit_card_keyhole: // Keyhole (circuit board)
       interaction::configureKeyCardSlot(entity, boundingBox);
       break;
 
     // Keyhole (blue key)
-    case 122:
+    case ActorID::Blue_key_keyhole:
       interaction::configureKeyHole(entity, boundingBox);
       break;
 
     // ----------------------------------------------------------------------
     // Empty boxes
     // ----------------------------------------------------------------------
-    case 162: // Empty green box
-    case 163: // Empty red box
-    case 164: // Empty blue box
-    case 161: // Empty white box
+    case ActorID::Green_box_empty: // Empty green box
+    case ActorID::Red_box_empty: // Empty red box
+    case ActorID::Blue_box_empty: // Empty blue box
+    case ActorID::White_box_empty: // Empty white box
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
@@ -751,7 +756,7 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
     // White boxes
     // ----------------------------------------------------------------------
-    case 37: // Circuit board
+    case ActorID::White_box_circuit_card: // Circuit board
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -766,7 +771,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 121: // Blue key
+    case ActorID::White_box_blue_key: // Blue key
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -781,7 +786,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 53: // Rapid fire item
+    case ActorID::White_box_rapid_fire: // Rapid fire item
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -798,7 +803,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 114: // Cloaking device
+    case ActorID::White_box_cloaking_device: // Cloaking device
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -818,7 +823,7 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
     // Red boxes
     // ----------------------------------------------------------------------
-    case 42: // Napalm Bomb
+    case ActorID::Red_box_bomb: // Napalm Bomb
       {
         const auto originalDrawOrder =
           entity.component<Sprite>()->mpDrawData->mDrawOrder;
@@ -843,7 +848,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 168: // Soda can
+    case ActorID::Red_box_cola: // Soda can
       {
         CollectableItem intactSodaCanCollectable;
         intactSodaCanCollectable.mGivenScore = 100;
@@ -902,7 +907,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 174: // 6-pack soda
+    case ActorID::Red_box_6_pack_cola: // 6-pack soda
       {
         CollectableItem item;
         item.mGivenScore = 100;
@@ -918,7 +923,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 201: // Turkey
+    case ActorID::Red_box_turkey: // Turkey
       {
         // BUG in the original game: The turkey triggers a floating '100', but
         // doesn't actually give the player any score. Therefore, we don't
@@ -972,7 +977,7 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
     // Green boxes
     // ----------------------------------------------------------------------
-    case 19: // Rocket launcher
+    case ActorID::Green_box_rocket_launcher: // Rocket launcher
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -989,7 +994,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 20: // Flame thrower
+    case ActorID::Green_box_flame_thrower: // Flame thrower
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -1006,7 +1011,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 22: // Default weapon
+    case ActorID::Green_box_normal_weapon: // Default weapon
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -1023,7 +1028,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 23: // Laser
+    case ActorID::Green_box_laser: // Laser
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -1043,7 +1048,7 @@ void EntityFactory::configureEntity(
     // ----------------------------------------------------------------------
     // Blue boxes
     // ----------------------------------------------------------------------
-    case 28: // Health molecule
+    case ActorID::Blue_box_health_molecule: // Health molecule
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1061,7 +1066,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 155: // Collectable letter N in blue box
+    case ActorID::Blue_box_N: // Collectable letter N in blue box
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::N;
@@ -1076,7 +1081,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 156: // Collectable letter U in blue box
+    case ActorID::Blue_box_U: // Collectable letter U in blue box
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::U;
@@ -1091,7 +1096,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 157: // Collectable letter K in blue box
+    case ActorID::Blue_box_K: // Collectable letter K in blue box
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::K;
@@ -1106,7 +1111,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 158: // Collectable letter E in blue box
+    case ActorID::Blue_box_E: // Collectable letter E in blue box
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::E;
@@ -1121,7 +1126,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 187: // Collectable letter M in blue box
+    case ActorID::Blue_box_M: // Collectable letter M in blue box
       {
         CollectableItem item;
         item.mGivenCollectableLetter = CollectableLetterType::M;
@@ -1135,7 +1140,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 160: // Video game cartridge in blue box
+    case ActorID::Blue_box_video_game_cartridge: // Video game cartridge in blue box
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1149,7 +1154,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 172: // Sunglasses in blue box
+    case ActorID::Blue_box_sunglasses: // Sunglasses in blue box
       {
         CollectableItem item;
         item.mGivenScore = 100;
@@ -1163,7 +1168,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 173: // Phone in blue box
+    case ActorID::Blue_box_phone: // Phone in blue box
       {
         CollectableItem item;
         item.mGivenScore = 2000;
@@ -1177,7 +1182,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 181: // Boom box in blue box
+    case ActorID::Blue_box_boom_box: // Boom box in blue box
       {
         CollectableItem item;
         item.mGivenScore = 1000;
@@ -1191,7 +1196,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 182: // Game disk in blue box
+    case ActorID::Blue_box_disk: // Game disk in blue box
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1205,7 +1210,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 183: // TV in blue box
+    case ActorID::Blue_box_TV: // TV in blue box
       {
         CollectableItem item;
         item.mGivenScore = 1500;
@@ -1219,7 +1224,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 184: // Camera in blue box
+    case ActorID::Blue_box_camera: // Camera in blue box
       {
         CollectableItem item;
         item.mGivenScore = 2500;
@@ -1233,7 +1238,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 185: // Computer in blue box
+    case ActorID::Blue_box_PC: // Computer in blue box
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1247,7 +1252,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 186: // CD in blue box
+    case ActorID::Blue_box_CD: // CD in blue box
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1261,7 +1266,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 274: // T-Shirt in blue box
+    case ActorID::Blue_box_T_shirt: // T-Shirt in blue box
       {
         CollectableItem item;
         item.mGivenScore = 5000;
@@ -1275,7 +1280,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 275: // Video tape in blue box
+    case ActorID::Blue_box_videocassette: // Video tape in blue box
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1289,20 +1294,20 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 50: // teleporter
-    case 51: // teleporter
+    case ActorID::Teleporter_1: // teleporter
+    case ActorID::Teleporter_2: // teleporter
       entity.assign<AnimationLoop>(1);
       entity.assign<Interactable>(InteractableType::Teleporter);
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
-    case 133: // respawn checkpoint
+    case ActorID::Restart_beacon: // respawn checkpoint
       entity.assign<BehaviorController>(interaction::RespawnCheckpoint{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       break;
 
-    case 239: // Special hint globe
+    case ActorID::Special_hint_globe: // Special hint globe
       entity.assign<Shootable>(Health{3}, GivenScore{100});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<AnimationSequence>(HINT_GLOBE_ANIMATION, 0, true);
@@ -1320,7 +1325,7 @@ void EntityFactory::configureEntity(
     // Enemies
     // ----------------------------------------------------------------------
 
-    case 0: // Cylindrical robot with blinking 'head', aka hover-bot
+    case ActorID::Hoverbot: // Cylindrical robot with blinking 'head', aka hover-bot
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{150});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
@@ -1332,8 +1337,8 @@ void EntityFactory::configureEntity(
       break;
 
     // Green panther
-    case 31:
-    case 32:
+    case ActorID::Fast_green_cat_LEFT:
+    case ActorID::Fast_green_cat_RIGHT:
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1341,12 +1346,12 @@ void EntityFactory::configureEntity(
       break;
 
     // Wall-mounted flame thrower
-    case 38: // ->
-    case 39: // <-
+    case ActorID::Wall_mounted_flamethrower_RIGHT: // ->
+    case ActorID::Wall_mounted_flamethrower_LEFT: // <-
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
-    case 49: // Bouncing robot with big eye
+    case ActorID::Watchbot: // Bouncing robot with big eye
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<DestructionEffects>(
@@ -1358,7 +1363,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::WatchBot{});
       break;
 
-    case 54: // Rocket launcher turret
+    case ActorID::Rocket_launcher_turret: // Rocket launcher turret
       entity.assign<Shootable>(Health{3}, GivenScore{500});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1370,9 +1375,9 @@ void EntityFactory::configureEntity(
       break;
 
     // Rocket turret rockets
-    case 55:
-    case 56:
-    case 57:
+    case ActorID::Enemy_rocket_left:
+    case ActorID::Enemy_rocket_up:
+    case ActorID::Enemy_rocket_right:
       entity.assign<Shootable>(Health{1}, GivenScore{10});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
@@ -1380,7 +1385,7 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       break;
 
-    case 58: // Watch-bot container carrier
+    case ActorID::Watchbot_container_carrier: // Watch-bot container carrier
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<Shootable>(Health{5}, GivenScore{500});
       entity.assign<PlayerDamaging>(1);
@@ -1390,7 +1395,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::WatchBotCarrier{});
       break;
 
-    case 62: // Bomb dropping space ship
+    case ActorID::Bomb_dropping_spaceship: // Bomb dropping space ship
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
@@ -1401,7 +1406,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::BomberPlane{});
       break;
 
-    case 63: // Big bomb
+    case ActorID::Napalm_bomb: // Big bomb
       entity.assign<Shootable>(Health{1}, GivenScore{200});
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
@@ -1414,7 +1419,7 @@ void EntityFactory::configureEntity(
         entity, ActivationSettings{ActivationSettings::Policy::Always});
       break;
 
-    case 64: // Bouncing spike ball
+    case ActorID::Bouncing_spike_ball: // Bouncing spike ball
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(SPIKE_BALL_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
@@ -1422,7 +1427,7 @@ void EntityFactory::configureEntity(
       ai::configureSpikeBall(entity);
       break;
 
-    case 67: // Green slime blob
+    case ActorID::Green_slime_blob: // Green slime blob
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
@@ -1434,13 +1439,13 @@ void EntityFactory::configureEntity(
       entity.component<MovingBody>()->mGravityAffected = false;
       break;
 
-    case 68: // Green slime container
+    case ActorID::Green_slime_container: // Green slime container
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       ai::configureSlimeContainer(entity);
       entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
       break;
 
-    case 76: // Small bomb
+    case ActorID::Napalm_bomb_small: // Small bomb
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
       entity.assign<DestructionEffects>(
@@ -1452,7 +1457,7 @@ void EntityFactory::configureEntity(
         entity, ActivationSettings{ActivationSettings::Policy::Always});
       break;
 
-    case 78: // Snake
+    case ActorID::Snake: // Snake
       // Not player damaging, but can eat duke
       // Only 1 health when Duke has been eaten
       entity.assign<Shootable>(Health{8 + difficultyOffset}, GivenScore{5000});
@@ -1464,8 +1469,8 @@ void EntityFactory::configureEntity(
       entity.assign<Orientation>(Orientation::Left);
       break;
 
-    case 79: // Security camera, ceiling-mounted
-    case 80: // Security camera, floor-mounted
+    case ActorID::Camera_on_ceiling: // Security camera, ceiling-mounted
+    case ActorID::Camera_on_floor: // Security camera, floor-mounted
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::SecurityCamera{});
@@ -1473,7 +1478,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActorTag>(ActorTag::Type::ShootableCamera);
       break;
 
-    case 81: // Green creature attached to ceiling, sucking in player
+    case ActorID::Green_hanging_suction_plant: // Green creature attached to ceiling, sucking in player
       entity.assign<Shootable>(
         Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<DestructionEffects>(
@@ -1484,11 +1489,11 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::CeilingSucker{});
       break;
 
-    case 97: // Small eye-shaped robot, walking on wall
+    case ActorID::Cross_walker: // Small eye-shaped robot, walking on wall
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
-    case 98: // Eye-ball throwing monster
+    case ActorID::Eyeball_thrower_LEFT: // Eye-ball throwing monster
       entity.assign<Shootable>(Health{8}, GivenScore{2000});
       entity.assign<DestructionEffects>(EYE_BALL_THROWER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
@@ -1499,7 +1504,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::EyeballThrower{});
       break;
 
-    case 115: // hover bot generator
+    case ActorID::Sentry_robot_generator: // hover bot generator
       entity.assign<AnimationLoop>(1, 0, 3);
       entity.assign<Shootable>(Health{20}, GivenScore{2500});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
@@ -1507,7 +1512,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::HoverBotSpawnMachine>();
       break;
 
-    case 134: // Walking skeleton
+    case ActorID::Skeleton: // Walking skeleton
       entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(
         SKELETON_KILL_EFFECT_SPEC,
@@ -1518,7 +1523,7 @@ void EntityFactory::configureEntity(
       addDefaultMovingBody(entity, boundingBox);
       break;
 
-    case 151: // Floating ball, opens up and shoots lasers
+    case ActorID::Hovering_laser_turret: // Floating ball, opens up and shoots lasers
       entity.assign<Shootable>(Health{3 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1528,7 +1533,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::FloatingLaserBot{});
       break;
 
-    case 154: // Spider
+    case ActorID::Spider: // Spider
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{101});
       entity.assign<DestructionEffects>(SPIDER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1540,7 +1545,7 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::Spider>();
       break;
 
-    case 176: // green bird
+    case ActorID::Ugly_green_bird: // green bird
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1548,8 +1553,8 @@ void EntityFactory::configureEntity(
       break;
 
     // petrified green monster
-    case 189: // <-
-    case 190: // ->
+    case ActorID::Petrified_monster_LEFT: // <-
+    case ActorID::Petrified_monster_RIGHT: // ->
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(
         EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
@@ -1557,9 +1562,9 @@ void EntityFactory::configureEntity(
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
-    case 271: // Small flying ship 1
-    case 272: // Small flying ship 2
-    case 273: // Small flying ship 3
+    case ActorID::Small_flying_ship_1: // Small flying ship 1
+    case ActorID::Small_flying_ship_2: // Small flying ship 2
+    case ActorID::Small_flying_ship_3: // Small flying ship 3
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
       entity.assign<ActivationSettings>(
@@ -1568,9 +1573,9 @@ void EntityFactory::configureEntity(
       break;
 
     // Guard wearing blue space suit
-    case 159: // ->
-    case 171: // <-
-    case 217: // using terminal
+    case ActorID::Blue_guard_RIGHT: // ->
+    case ActorID::Blue_guard_LEFT: // <-
+    case ActorID::Blue_guard_using_a_terminal: // using terminal
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{3000});
       entity.assign<BoundingBox>(boundingBox);
@@ -1581,19 +1586,19 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
-        mSpriteFactory.actorFrameRect(159, 0));
+        mSpriteFactory.actorFrameRect(ActorID::Blue_guard_RIGHT, 0));
       break;
 
 
     // Laser turret
-    case 131:
+    case ActorID::Laser_turret:
       // gives one point when shot with normal shot, 500 when destroyed.
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActorTag>(ActorTag::Type::MountedLaserTurret);
       ai::configureLaserTurret(entity, GivenScore{500});
       break;
 
-    case 200: // Boss (episode 1)
+    case ActorID::BOSS_Episode_1: // Boss (episode 1)
       entity.assign<AnimationLoop>(1, 0, 1);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(
@@ -1606,7 +1611,7 @@ void EntityFactory::configureEntity(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       break;
 
-    case 203: // Red bird
+    case ActorID::Red_bird: // Red bird
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(RED_BIRD_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1614,7 +1619,7 @@ void EntityFactory::configureEntity(
       configureRedBird(entity);
       break;
 
-    case 219: // Smash hammer
+    case ActorID::Smash_hammer: // Smash hammer
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -1622,11 +1627,11 @@ void EntityFactory::configureEntity(
       entity.assign<CustomRenderFunc>(&behaviors::SmashHammer::render);
       break;
 
-    case 244: // Small uni-cycle robot
+    case ActorID::Small_unicycle: // Small uni-cycle robot
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       break;
 
-    case 253: // Monster in prison cell, aggressive
+    case ActorID::Aggressive_prisoner: // Monster in prison cell, aggressive
       entity.assign<ai::components::Prisoner>(true);
       entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
       entity.assign<Shootable>(Health{1}, GivenScore{500});
@@ -1634,19 +1639,19 @@ void EntityFactory::configureEntity(
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       break;
 
-    case 261: // Monster in prison cell, passive
+    case ActorID::Passive_prisoner: // Monster in prison cell, passive
       entity.assign<ai::components::Prisoner>(false);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    case 280: // final boss projectile
+    case ActorID::BOSS_Episode_4_projectile: // final boss projectile
       entity.assign<DestructionEffects>(
         BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
-    case 299: // Rigelatin soldier
+    case ActorID::Rigelatin_soldier: // Rigelatin soldier
       entity.assign<Shootable>(
         Health{27 + 2 * difficultyOffset}, GivenScore{2100});
       entity.assign<BehaviorController>(behaviors::RigelatinSoldier{});
@@ -1656,21 +1661,21 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(
         RIGELATIN_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
-        mSpriteFactory.actorFrameRect(299, 0));
+        mSpriteFactory.actorFrameRect(ActorID::Rigelatin_soldier, 0));
       break;
 
     // ----------------------------------------------------------------------
     // Various
     // ----------------------------------------------------------------------
 
-    case 14: // Nuclear waste barrel, empty
+    case ActorID::Nuclear_waste_can_empty: // Nuclear waste barrel, empty
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       addBarrelDestroyEffect(entity);
       break;
 
-    case 75: // Nuclear waste barrel, slime inside
+    case ActorID::Nuclear_waste_can_green_slime_inside: // Nuclear waste barrel, slime inside
       {
         const auto& sprite = *entity.component<Sprite>();
         const auto numAnimationFrames = static_cast<int>(
@@ -1683,14 +1688,14 @@ void EntityFactory::configureEntity(
         container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
         addDefaultMovingBody(container, boundingBox);
 
-        auto barrelSprite = createSpriteForId(14);
+        auto barrelSprite = createSpriteForId(ActorID::Nuclear_waste_can_empty);
         turnIntoContainer(entity, barrelSprite, 200, std::move(container));
         entity.assign<DestructionEffects>(
           NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       }
       break;
 
-    case 66: // Destroyable reactor
+    case ActorID::Electric_reactor: // Destroyable reactor
       entity.assign<Shootable>(Health{10}, GivenScore{20000});
       entity.assign<PlayerDamaging>(Damage{9}, IsFatal{true});
       entity.assign<BoundingBox>(boundingBox);
@@ -1698,11 +1703,11 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(
         REACTOR_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
-        mSpriteFactory.actorFrameRect(66, 0));
+        mSpriteFactory.actorFrameRect(ActorID::Electric_reactor, 0));
       entity.assign<ActorTag>(ActorTag::Type::Reactor);
       break;
 
-    case 93: // Blue force field (disabled by cloak)
+    case ActorID::Super_force_field_LEFT: // Blue force field (disabled by cloak)
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{100});
       entity.component<Shootable>()->mDestroyWhenKilled = false;
@@ -1712,7 +1717,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       break;
 
-    case 95: // Missile, broken (falls over)
+    case ActorID::Missile_broken: // Missile, broken (falls over)
       {
         auto shootable = Shootable{Health{1}};
         shootable.mDestroyWhenKilled = false;
@@ -1726,27 +1731,27 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 128: // Sliding door, vertical
+    case ActorID::Auto_open_vertical_door: // Sliding door, vertical
       entity.assign<ai::components::VerticalSlidingDoor>();
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
       entity.assign<CustomRenderFunc>(&renderVerticalSlidingDoor);
       break;
 
-    case 130: // Blowing fan
+    case ActorID::Blowing_fan: // Blowing fan
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::BlowingFan{});
       break;
 
-    case 132: // Sliding door, horizontal
+    case ActorID::Auto_open_horizontal_door: // Sliding door, horizontal
       entity.assign<ai::components::HorizontalSlidingDoor>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<engine::components::SolidBody>();
       break;
 
-    case 144: // Wall-destroying missile
+    case ActorID::Missile_intact: // Wall-destroying missile
       {
         auto shootable = Shootable{Health{1}};
         shootable.mDestroyWhenKilled = false;
@@ -1762,42 +1767,42 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 209: // Rocket elevator
+    case ActorID::Rocket_elevator: // Rocket elevator
       interaction::configureElevator(entity);
       break;
 
-    case 212: // Lava pool
-    case 235: // Slime pool
-    case 262: // Fire (variant 1)
-    case 263: // Fire (variant 2)
+    case ActorID::Lava_pit: // Lava pool
+    case ActorID::Green_acid_pit: // Slime pool
+    case ActorID::Fire_on_floor_1: // Fire (variant 1)
+    case ActorID::Fire_on_floor_2: // Fire (variant 2)
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
-    case 117: // Pipe dripping green stuff
+    case ActorID::Pipe_dripping_green_slime: // Pipe dripping green stuff
       entity.assign<AnimationLoop>(1);
       entity.assign<DrawTopMost>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::SlimePipe{});
       break;
 
-    case 208: // floating exit sign to right
-    case 252: // floating exit sign to left
+    case ActorID::Floating_exit_sign_RIGHT: // floating exit sign to right
+    case ActorID::Floating_exit_sign_LEFT: // floating exit sign to left
       entity.assign<Shootable>(Health{5}, GivenScore{10000});
       entity.assign<DestructionEffects>(EXIT_SIGN_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
-    case 296: // floating arrow
+    case ActorID::Floating_arrow: // floating arrow
       entity.assign<Shootable>(Health{5}, GivenScore{500});
       entity.assign<DestructionEffects>(FLOATING_ARROW_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       break;
 
-    case 236: // Radar dish
+    case ActorID::Radar_dish: // Radar dish
       entity.assign<Shootable>(Health{4}, GivenScore{2000});
       entity.assign<DestructionEffects>(RADAR_DISH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
@@ -1805,39 +1810,39 @@ void EntityFactory::configureEntity(
       entity.assign<components::RadarDish>();
       break;
 
-    case 237: // Radar dish computer
+    case ActorID::Radar_computer_terminal: // Radar dish computer
       entity.assign<components::RadarComputer>();
       break;
 
-    case 240: // Special hint machine
+    case ActorID::Special_hint_machine: // Special hint machine
       entity.assign<Interactable>(InteractableType::HintMachine);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    case 188: // rotating floor spikes
+    case ActorID::Rotating_floor_spikes: // rotating floor spikes
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationLoop>(1);
       break;
 
-    case 210: // Computer showing "Duke escaped"
-    case 222: // Lava fall left
-    case 223: // Lava fall right
-    case 224: // Water fall left
-    case 225: // Water fall right
-    case 228: // Water surface splash left
-    case 229: // Water surface splash center
-    case 230: // Water surface splash right
-    case 257: // Shallow water (variant 1)
-    case 258: // Shallow water (variant 2)
+    case ActorID::Computer_Terminal_Duke_Escaped: // Computer showing "Duke escaped"
+    case ActorID::Lava_fall_1: // Lava fall left
+    case ActorID::Lava_fall_2: // Lava fall right
+    case ActorID::Water_fall_1: // Water fall left
+    case ActorID::Water_fall_2: // Water fall right
+    case ActorID::Water_fall_splash_left: // Water surface splash left
+    case ActorID::Water_fall_splash_center: // Water surface splash center
+    case ActorID::Water_fall_splash_right: // Water surface splash right
+    case ActorID::Water_on_floor_1: // Shallow water (variant 1)
+    case ActorID::Water_on_floor_2: // Shallow water (variant 2)
       entity.assign<AnimationLoop>(1);
       break;
 
     // Flying message ships
-    case 213: // "Your brain is ours!"
-    case 214: // "Bring back the brain! ... Please stand by"
-    case 215: // "Live from Rigel it's Saturday night!"
-    case 216: // "Die!"
-    case 220: // "You cannot escape us! You will get your brain sucked!"
+    case ActorID::Messenger_drone_YOUR_BRAIN_IS_OURS: // "Your brain is ours!"
+    case ActorID::Messenger_drone_BRING_BACK_THE_BRAIN: // "Bring back the brain! ... Please stand by"
+    case ActorID::Messenger_drone_LIVE_FROM_RIGEL_ITS_SATURDAY_NIGHT: // "Live from Rigel it's Saturday night!"
+    case ActorID::Messenger_drone_DIE: // "Die!"
+    case ActorID::Messenger_drone_YOU_CANNOT_ESCAPE_US_YOU_WILL_GET_YOUR_BRAIN_SUCKED: // "You cannot escape us! You will get your brain sucked!"
       {
         const auto typeIndex = messengerDroneTypeIndex(actorID);
 
@@ -1859,23 +1864,23 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 231: // Lava riser
+    case ActorID::Lava_riser: // Lava riser
       entity.assign<AnimationLoop>(1, 3, 5);
       break;
 
-    case 246: // Rocket exhaust flame left
-    case 247: // Rocket exhaust flame right
-    case 248: // Small rocket exhaust flame left
-    case 249: // Small rocket exhaust flame right
+    case ActorID::Flame_jet_1: // Rocket exhaust flame left
+    case ActorID::Flame_jet_2: // Rocket exhaust flame right
+    case ActorID::Flame_jet_3: // Small rocket exhaust flame left
+    case ActorID::Flame_jet_4: // Small rocket exhaust flame right
       entity.assign<AnimationLoop>(2);
       break;
 
-    case 139: // level exit
+    case ActorID::Exit_trigger: // level exit
       entity.assign<Trigger>(TriggerType::LevelExit);
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 1}});
       break;
 
-    case 106: // shootable wall, explodes into small pieces
+    case ActorID::Dynamic_geometry_2: // shootable wall, explodes into small pieces
       entity.assign<Shootable>(Health{1});
       entity.component<Shootable>()->mAlwaysConsumeInflictor = true;
       entity.component<Shootable>()->mCanBeHitWhenOffscreen = true;
@@ -1891,11 +1896,11 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 116: // door, opened by blue key (slides into ground)
+    case ActorID::Dynamic_geometry_3: // door, opened by blue key (slides into ground)
       interaction::configureLockedDoor(entity, mSpawnIndex, boundingBox);
       break;
 
-    case 102: // dynamic geometry
+    case ActorID::Dynamic_geometry_1: // dynamic geometry
       {
         const auto height = boundingBox.size.height;
         entity.assign<ActivationSettings>(
@@ -1906,7 +1911,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 137: // dynamic geometry
+    case ActorID::Dynamic_geometry_4: // dynamic geometry
       {
         const auto height = boundingBox.size.height;
         entity.assign<BoundingBox>(BoundingBox{{-1, -(height - 1)}, {1, 1}});
@@ -1915,7 +1920,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 138: // dynamic geometry
+    case ActorID::Dynamic_geometry_5: // dynamic geometry
       {
         const auto height = boundingBox.size.height;
         entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
@@ -1925,7 +1930,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 141: // dynamic geometry
+    case ActorID::Dynamic_geometry_6: // dynamic geometry
       {
         const auto height = boundingBox.size.height;
         entity.assign<ActivationSettings>(
@@ -1936,7 +1941,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 142: // dynamic geometry
+    case ActorID::Dynamic_geometry_7: // dynamic geometry
       {
         const auto height = boundingBox.size.height;
         entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
@@ -1946,7 +1951,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 143: // dynamic geometry
+    case ActorID::Dynamic_geometry_8: // dynamic geometry
       {
         const auto height = boundingBox.size.height;
         entity.assign<ActivationSettings>(
@@ -1957,12 +1962,12 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case 221: // water
+    case ActorID::Water_depths: // water
       entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
       entity.assign<ActorTag>(ActorTag::Type::WaterArea);
       break;
 
-    case 226: // water drop
+    case ActorID::Water_drop: // water drop
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<AutoDestroy>(AutoDestroy{
         AutoDestroy::Condition::OnWorldCollision});
@@ -1970,33 +1975,33 @@ void EntityFactory::configureEntity(
         entity, ActivationSettings::Policy::Always);
       break;
 
-    case 227: // water drop spawner
+    case ActorID::Water_drop_spawner: // water drop spawner
       entity.assign<BehaviorController>(WaterDropGenerator{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    case 233: // water with animated surface
+    case ActorID::Water_surface_1: // water with animated surface
       entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
       entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
       break;
 
-    case 234: // water with animated surface (double sized block)
+    case ActorID::Water_surface_2: // water with animated surface (double sized block)
       entity.assign<BoundingBox>(BoundingBox{{0, 3}, {4, 4}});
       entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
       break;
 
-    case 241: // windblown-spider generator
+    case ActorID::Windblown_spider_generator: // windblown-spider generator
       entity.assign<BehaviorController>(WindBlownSpiderGenerator{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    case 250: // airlock effect, left
-    case 251: // airlock effect, right
+    case ActorID::Airlock_effect_LEFT: // airlock effect, left
+    case ActorID::Airlock_effect_RIGHT: // airlock effect, right
       break;
 
-    case 254: // explosion effect trigger
+    case ActorID::Explosion_FX_trigger: // explosion effect trigger
       entity.assign<BehaviorController>(ExplosionEffect{});
       entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       entity.assign<DestructionEffects>(EXPLOSION_EFFECT_EFFECT_SPEC);
@@ -2004,11 +2009,11 @@ void EntityFactory::configureEntity(
 
     // Various projectiles. Damage, velocity etc. are assigned by the
     // projectile configurarion functions
-    case 7: case 8: case 9: case 10:
-    case 24: case 25: case 26: case 27:
-    case 21: case 204: case 205: case 206:
-    case 136:
-    case 85: case 86:
+    case ActorID::Dukes_rocket_up: case ActorID::Dukes_rocket_down: case ActorID::Dukes_rocket_left: case ActorID::Dukes_rocket_right:
+    case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
+    case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
+    case ActorID::Enemy_laser_shot_RIGHT:
+    case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
       entity.assign<BoundingBox>(boundingBox);
       break;
 

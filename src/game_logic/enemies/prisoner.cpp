@@ -161,7 +161,7 @@ void PrisonerSystem::receive(const events::ShootableKilled& event) {
   const auto debrisMovement = shotFromLeft
     ? SpriteMovement::FlyUpperRight
     : SpriteMovement::FlyUpperLeft;
-  spawnMovingEffectSprite(*mpEntityFactory, 255, debrisMovement, position);
+  spawnMovingEffectSprite(*mpEntityFactory, data::ActorID::Prisoner_hand_debris, debrisMovement, position);
 
   mpParticles->spawnParticles(
     position + base::Vector{3, 0},

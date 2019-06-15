@@ -71,7 +71,7 @@ void TileBurner::update(
 
   for (const auto& info : mBurnersToSpawn) {
     if (mFramesElapsed == info.mFramesToWait) {
-      spawnOneShotSprite(*d.mpEntityFactory, 3, info.mPosition);
+      spawnOneShotSprite(*d.mpEntityFactory, data::ActorID::Shot_impact_FX_tile_burning, info.mPosition);
     }
   }
 

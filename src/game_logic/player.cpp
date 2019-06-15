@@ -51,7 +51,7 @@ namespace {
 using EffectMovement = effects::EffectSprite::Movement;
 
 const effects::EffectSpec PLAYER_DEATH_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{}, 71, EffectMovement::None}, 0},
+  {effects::EffectSprite{{}, data::ActorID::Duke_death_particles, EffectMovement::None}, 0},
   {effects::Particles{{2, 0}, loader::INGAME_PALETTE[6]}, 0},
   {effects::RandomExplosionSound{}, 1},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3], 1}, 2},
@@ -236,7 +236,12 @@ base::Vector shotOffset(
 
 
 data::ActorID muzzleFlashActorId(const ProjectileDirection direction) {
-  static const data::ActorID DIRECTION_MAP[] = { 35, 36, 33, 34 };
+  static const data::ActorID DIRECTION_MAP[] = {
+    data::ActorID::Muzzle_flash_left,
+    data::ActorID::Muzzle_flash_right,
+    data::ActorID::Muzzle_flash_up,
+    data::ActorID::Muzzle_flash_down
+  };
   return DIRECTION_MAP[static_cast<std::size_t>(direction)];
 }
 

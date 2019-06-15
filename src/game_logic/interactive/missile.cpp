@@ -107,11 +107,11 @@ void Missile::update(
     // Ignition animation
     spawnOneShotSprite(
       *d.mpEntityFactory,
-      74,
+      data::ActorID::White_circle_flash_FX,
       position + base::Vector{-2, 1});
     spawnOneShotSprite(
       *d.mpEntityFactory,
-      74,
+      data::ActorID::White_circle_flash_FX,
       position + base::Vector{1, 1});
   } else if (mFramesElapsed == 5) {
     startFlameAnimation(entity);
@@ -165,7 +165,7 @@ void BrokenMissile::update(
     d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
     triggerEffects(entity, *d.mpEntityManager);
 
-    auto explosion = spawnOneShotSprite(*d.mpEntityFactory, 43, position);
+    auto explosion = spawnOneShotSprite(*d.mpEntityFactory, data::ActorID::Nuclear_explosion, position);
     explosion.assign<components::PlayerDamaging>(1);
   };
 

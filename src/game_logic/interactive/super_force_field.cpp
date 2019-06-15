@@ -46,7 +46,8 @@ void SuperForceField::update(
   auto& playerPos = s.mpPlayer->position();
 
   if (!mEmitter) {
-    mEmitter = d.mpEntityFactory->createSprite(93, position);
+    mEmitter = d.mpEntityFactory->createSprite(
+      data::ActorID::Super_force_field_LEFT, position);
     mEmitter.component<Sprite>()->mFramesToRender[0] = 3;
   }
 
@@ -92,17 +93,17 @@ void SuperForceField::update(
       d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
-        2,
+        data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyUpperLeft,
         position + base::Vector{-1, 5});
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
-        2,
+        data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyUpperRight,
         position + base::Vector{-1, 5});
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
-        2,
+        data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyDown,
         position + base::Vector{-1, 5});
       mEmitter.destroy();

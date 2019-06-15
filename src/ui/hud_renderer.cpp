@@ -32,7 +32,6 @@ using namespace rigel::renderer;
 
 namespace {
 
-const auto HUD_BACKGROUND_ACTOR_ID = 77;
 const auto NUM_HEALTH_SLICES = 8;
 
 
@@ -125,19 +124,19 @@ HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
 
   map.emplace(
     InventoryItemType::CircuitBoard,
-    actorToTexture(pRenderer, imagePack.loadActor(37)));
+    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::White_box_circuit_card)));
   map.emplace(
     InventoryItemType::BlueKey,
-    actorToTexture(pRenderer, imagePack.loadActor(121)));
+    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::White_box_blue_key)));
   map.emplace(
     InventoryItemType::RapidFire,
-    actorToTexture(pRenderer, imagePack.loadActor(52)));
+    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::Rapid_fire_icon)));
   map.emplace(
     InventoryItemType::SpecialHintGlobe,
-    actorToTexture(pRenderer, imagePack.loadActor(238)));
+    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::Special_hint_globe_icon)));
   map.emplace(
     InventoryItemType::CloakingDevice,
-    actorToTexture(pRenderer, imagePack.loadActor(211)));
+    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::Cloaking_device_icon)));
   return map;
 }
 
@@ -160,27 +159,27 @@ HudRenderer::makeCollectedLetterTextureMap(
   map.emplace(
     CollectableLetterType::N,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(290)),
+      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_N)),
       letterDrawStart});
   map.emplace(
     CollectableLetterType::U,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(291)),
+      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_U)),
       letterDrawStart});
   map.emplace(
     CollectableLetterType::K,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(292)),
+      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_K)),
       letterDrawStart + letterSize * 1});
   map.emplace(
     CollectableLetterType::E,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(293)),
+      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_E)),
       letterDrawStart + letterSize * 2});
   map.emplace(
     CollectableLetterType::M,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(294)),
+      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_M)),
       letterDrawStart + letterSize * 3});
   return map;
 }
@@ -197,7 +196,7 @@ HudRenderer::HudRenderer(
       pPlayerModel,
       levelNumber,
       pRenderer,
-      bundle.mActorImagePackage.loadActor(HUD_BACKGROUND_ACTOR_ID),
+      bundle.mActorImagePackage.loadActor(ActorID::HUD_frame_background),
       makeInventoryItemTextureMap(pRenderer, bundle.mActorImagePackage),
       makeCollectedLetterTextureMap(pRenderer, bundle.mActorImagePackage),
       pStatusSpriteSheet)

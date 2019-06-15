@@ -38,15 +38,15 @@ using EffectMovement = effects::EffectSprite::Movement;
 
 const effects::EffectSpec BIG_BOMB_DETONATE_IN_AIR_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{  0, 0}, 43, EffectMovement::None},    0},
-  {effects::EffectSprite{{ -4, 0}, 43, EffectMovement::FlyDown}, 2},
-  {effects::EffectSprite{{ +4, 0}, 43, EffectMovement::FlyDown}, 2},
-  {effects::EffectSprite{{ -8, 0}, 43, EffectMovement::FlyDown}, 4},
-  {effects::EffectSprite{{ +8, 0}, 43, EffectMovement::FlyDown}, 4},
-  {effects::EffectSprite{{-12, 0}, 43, EffectMovement::FlyDown}, 6},
-  {effects::EffectSprite{{+12, 0}, 43, EffectMovement::FlyDown}, 6},
-  {effects::EffectSprite{{-16, 0}, 43, EffectMovement::FlyDown}, 8},
-  {effects::EffectSprite{{+16, 0}, 43, EffectMovement::FlyDown}, 8},
+  {effects::EffectSprite{{  0, 0}, data::ActorID::Nuclear_explosion, EffectMovement::None},    0},
+  {effects::EffectSprite{{ -4, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 2},
+  {effects::EffectSprite{{ +4, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 2},
+  {effects::EffectSprite{{ -8, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 4},
+  {effects::EffectSprite{{ +8, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 4},
+  {effects::EffectSprite{{-12, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 6},
+  {effects::EffectSprite{{+12, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 6},
+  {effects::EffectSprite{{-16, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 8},
+  {effects::EffectSprite{{+16, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 8},
 };
 
 
@@ -94,7 +94,7 @@ void BomberPlane::update(
     // Together, this results in no visual glitch, but no brief disappearance
     // of the bomb either.
     mBombSprite.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
-    auto bomb = d.mpEntityFactory->createActor(63, position + BOMB_DROP_OFFSET);
+    auto bomb = d.mpEntityFactory->createActor(data::ActorID::Napalm_bomb, position + BOMB_DROP_OFFSET);
     bomb.component<Sprite>()->mShow = false;
   };
 
@@ -108,7 +108,7 @@ void BomberPlane::update(
     [&, this](const FlyingIn&) {
       if (!mBombSprite) {
         mBombSprite = d.mpEntityFactory->createSprite(
-          63, position + BOMB_OFFSET);
+          data::ActorID::Napalm_bomb, position + BOMB_OFFSET);
       }
 
       const auto result =

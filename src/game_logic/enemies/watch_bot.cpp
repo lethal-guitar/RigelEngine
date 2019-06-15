@@ -40,7 +40,7 @@ constexpr auto CONTAINER_OFFSET = base::Vector{0, -2};
 
 const effects::EffectSpec CARRIER_SELF_DESTRUCT_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::SpriteCascade{3}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
 };
 
 
@@ -277,7 +277,7 @@ void WatchBotCarrier::update(
 
   if (!mPayload && mState == State::ApproachingPlayer) {
     mPayload = d.mpEntityFactory->createSprite(
-      59, position + CONTAINER_OFFSET, true);
+      data::ActorID::Watchbot_container, position + CONTAINER_OFFSET, true);
   }
 
   switch (mState) {
@@ -342,17 +342,17 @@ void WatchBotContainer::update(
 
     spawnMovingEffectSprite(
       *d.mpEntityFactory,
-      60,
+      data::ActorID::Watchbot_container_debris_1,
       SpriteMovement::FlyLeft,
       position);
     spawnMovingEffectSprite(
       *d.mpEntityFactory,
-      61,
+      data::ActorID::Watchbot_container_debris_2,
       SpriteMovement::FlyRight,
       position);
     d.mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
 
-    d.mpEntityFactory->createActor(49, position + base::Vector{1, 3});
+    d.mpEntityFactory->createActor(data::ActorID::Watchbot, position + base::Vector{1, 3});
 
     entity.destroy();
   }
