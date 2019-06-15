@@ -10,8 +10,8 @@ projects like [Omnispeak](https://davidgow.net/keen/omnispeak.html) or [Commande
 thing for the Commander Keen series of games.
 
 There was never any source code released for the original game, so this project
-is based on reverse-engineering: Transcribing the original executable's assembly code, and verifying implemented behavior
-using video captures of the original running in DosBox. See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing-an-old-dos-game-in-c-17/) to learn more about this process.
+is based on reverse-engineering the original executable's assembly code. Video captures from DosBox are used to verify re-implemented behavior.
+See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing-an-old-dos-game-in-c-17/) to learn more about the process.
 
 Here's a video showcasing the project:
 
