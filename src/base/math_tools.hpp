@@ -22,12 +22,6 @@
 namespace rigel { namespace base {
 
 template<typename T>
-T clamp(const T value, const T minValue, const T maxValue) {
-  return std::clamp(value, minValue, maxValue);
-}
-
-
-template<typename T>
 T integerDivCeil(const T value, const T divisor) {
   return (value + divisor - 1) / divisor;
 }
