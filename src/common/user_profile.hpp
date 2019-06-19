@@ -40,6 +40,6 @@ private:
 };
 
 
-UserProfile loadOrCreateUserProfile(const std::string gamePath);
+UserProfile loadOrCreateUserProfile(const std::string& gamePath);
 
 }

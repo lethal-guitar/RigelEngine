@@ -94,7 +94,7 @@ UserProfile loadProfile(const std::string& profileFile) {
 
 UserProfile importProfile(
   const std::string& profileFile,
-  const std::string gamePath
+  const std::string& gamePath
 ) {
   UserProfile profile{profileFile};
   profile.mSaveSlots = loader::loadSavedGames(gamePath);
@@ -308,7 +308,7 @@ void UserProfile::loadFromDisk() {
 }
 
 
-UserProfile loadOrCreateUserProfile(const std::string gamePath) {
+UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
   namespace fs = std::filesystem;
 
   auto deleter = [](char* path) { SDL_free(path); };
