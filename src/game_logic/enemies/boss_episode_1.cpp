@@ -192,11 +192,11 @@ void BossEpisode1::update(
             rand() % 2 - 1);
           spawnOneShotSprite(
             *d.mpEntityFactory,
-            data::ActorID::Explosion_FX_auto_sound,
+            data::ActorID::Explosion_FX_1,
             position + base::Vector{rand() % 4, -(rand() % 8)});
           spawnMovingEffectSprite(
             *d.mpEntityFactory,
-            data::ActorID::Shot_impact_FX_tile_burning,
+            data::ActorID::Shot_impact_FX,
             SpriteMovement::FlyDown,
             position + base::Vector{rand() % 4, -(rand() % 8)});
           break;
