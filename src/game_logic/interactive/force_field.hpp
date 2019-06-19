@@ -24,11 +24,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace data { class PlayerModel; }}
-namespace rigel { namespace engine { class RandomNumberGenerator; }}
+namespace rigel::data { class PlayerModel; }
+namespace rigel::engine { class RandomNumberGenerator; }
 
 
-namespace rigel { namespace game_logic { namespace interaction {
+namespace rigel::game_logic::interaction {
 
 void configureForceField(entityx::Entity entity, int spawnIndex);
 void configureKeyCardSlot(
@@ -43,4 +43,4 @@ void animateForceFields(
   engine::RandomNumberGenerator& randomGenerator,
   IGameServiceProvider& serviceProvider);
 
-}}}
+}

@@ -25,7 +25,7 @@
 #include "game_logic/entity_factory.hpp"
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel::game_logic::player {
 
 namespace {
 
@@ -210,4 +210,4 @@ void ProjectileSystem::spawnWallImpactEffect(
   }
 }
 
-}}}
+}

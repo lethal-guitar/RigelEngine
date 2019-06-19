@@ -24,7 +24,7 @@
 #include <stdexcept>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace std;
 
@@ -112,4 +112,4 @@ CMPFilePackage::DictEntry::DictEntry(
 }
 
 
-}}
+}

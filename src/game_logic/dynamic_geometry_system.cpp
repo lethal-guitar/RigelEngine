@@ -33,7 +33,7 @@
 #include "game_logic/entity_factory.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 using game_logic::components::MapGeometryLink;
 
@@ -506,4 +506,4 @@ void behaviors::DynamicGeometryController::update(
   }
 }
 
-}}
+}

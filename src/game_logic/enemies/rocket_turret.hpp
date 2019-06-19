@@ -25,10 +25,10 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace game_logic { class EntityFactory; }}
+namespace rigel::game_logic { class EntityFactory; }
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace components {
 
@@ -70,4 +70,4 @@ private:
   IGameServiceProvider* mpServiceProvider;
 };
 
-}}}
+}

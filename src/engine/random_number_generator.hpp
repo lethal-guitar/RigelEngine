@@ -20,7 +20,7 @@
 #include <cstdint>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 extern const std::array<int, 256> RANDOM_NUMBER_TABLE;
 
@@ -33,4 +33,4 @@ private:
   std::size_t mNextNumberIndex = 0;
 };
 
-}}
+}

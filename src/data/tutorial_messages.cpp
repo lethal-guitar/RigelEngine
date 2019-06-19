@@ -19,7 +19,7 @@
 #include <array>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 namespace {
 
@@ -76,4 +76,4 @@ bool TutorialMessageState::hasBeenShown(TutorialMessageId id) const {
   return mMessagesShownMask.test(toIndex(id));
 }
 
-}}
+}

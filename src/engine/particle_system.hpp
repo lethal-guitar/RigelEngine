@@ -24,7 +24,7 @@
 namespace rigel::renderer { class Renderer; }
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class RandomNumberGenerator;
 
@@ -52,4 +52,4 @@ private:
   renderer::Renderer* mpRenderer;
 };
 
-}}
+}

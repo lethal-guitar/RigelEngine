@@ -21,7 +21,7 @@
 #include <variant>
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace ceiling_sucker {
 
@@ -64,4 +64,4 @@ struct CeilingSucker {
   ceiling_sucker::State mState;
 };
 
-}}}
+}}

@@ -26,7 +26,7 @@ RIGEL_RESTORE_WARNINGS
 #include <memory>
 
 
-namespace rigel { namespace sdl_utils {
+namespace rigel::sdl_utils {
 
 namespace detail {
 
@@ -71,4 +71,4 @@ public:
   }
 };
 
-}}
+}

@@ -26,7 +26,7 @@
 #include "game_logic/entity_factory.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 using game_logic::components::Shootable;
 
@@ -216,4 +216,4 @@ void LaserTurretSystem::receive(const events::ShootableKilled& event) {
   spawnMovingEffectSprite(*mpEntityFactory, data::ActorID::Laser_turret, debrisMovement, position);
 }
 
-}}}
+}

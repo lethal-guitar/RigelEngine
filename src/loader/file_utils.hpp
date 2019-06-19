@@ -22,7 +22,7 @@
 #include <string>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 /** Load entire contents of file with given name into ByteBuffer
  *
@@ -78,4 +78,4 @@ private:
 std::string readFixedSizeString(LeStreamReader& reader, std::size_t len);
 
 
-}}
+}

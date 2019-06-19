@@ -17,7 +17,7 @@
 #pragma once
 
 
-namespace rigel { namespace game_logic { namespace components {
+namespace rigel::game_logic::components {
 
 enum class TriggerType {
   LevelExit
@@ -33,4 +33,4 @@ struct Trigger {
   TriggerType mType;
 };
 
-}}}
+}

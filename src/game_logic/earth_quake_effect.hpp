@@ -27,7 +27,7 @@ namespace rigel { struct IGameServiceProvider; }
 namespace rigel::engine { class RandomNumberGenerator; }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class EarthQuakeEffect {
 public:
@@ -51,4 +51,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}}
+}

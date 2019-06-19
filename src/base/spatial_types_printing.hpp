@@ -21,7 +21,7 @@
 #include <iostream>
 
 
-namespace rigel { namespace base {
+namespace rigel::base {
 
 template<typename ValueT>
 std::ostream& operator<<(std::ostream& stream, const Point<ValueT>& point) {
@@ -29,4 +29,4 @@ std::ostream& operator<<(std::ostream& stream, const Point<ValueT>& point) {
   return stream;
 }
 
-}}
+}

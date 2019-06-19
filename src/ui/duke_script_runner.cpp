@@ -28,7 +28,7 @@
 #include "ui/utils.hpp"
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 using engine::TiledTexture;
 
@@ -671,4 +671,4 @@ bool DukeScriptRunner::hasCheckBoxes() const {
   return static_cast<bool>(mCheckBoxStates);
 }
 
-}}
+}

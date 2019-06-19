@@ -26,7 +26,7 @@
 #include "game_logic/entity_factory.hpp"
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 using engine::components::Active;
 using engine::components::WorldPosition;
@@ -96,4 +96,4 @@ void SlimeDrop::onCollision(
   engine::reassign<AutoDestroy>(entity, AutoDestroy::afterTimeout(1));
 }
 
-}}}
+}

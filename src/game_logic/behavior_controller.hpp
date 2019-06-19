@@ -26,12 +26,12 @@ RIGEL_RESTORE_WARNINGS
 #include <memory>
 #include <type_traits>
 
-namespace rigel { namespace engine { namespace events {
+namespace rigel::engine::events {
   struct CollidedWithWorld;
-}}}
+}
 
 
-namespace rigel { namespace game_logic { namespace components {
+namespace rigel::game_logic::components {
 
 namespace detail {
 
@@ -289,4 +289,4 @@ private:
   std::shared_ptr<Concept> mpSelf;
 };
 
-}}}
+}

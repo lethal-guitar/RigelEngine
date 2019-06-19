@@ -28,17 +28,17 @@ namespace rigel {
 struct IGameServiceProvider;
 namespace engine { class CollisionChecker; }
 namespace engine { class RandomNumberGenerator; }
-namespace engine { namespace components { struct Sprite; }}
+namespace engine::components { struct Sprite; }
 namespace game_logic {
   class EntityFactory;
   class Player;
 }
-namespace game_logic { namespace events { struct ShootableDamaged; }}
+namespace game_logic::events { struct ShootableDamaged; }
 
 }
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace components {
 
@@ -101,4 +101,4 @@ private:
   bool mIsOddFrame = false;
 };
 
-}}}
+}

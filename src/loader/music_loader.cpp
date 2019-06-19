@@ -19,7 +19,7 @@
 #include "loader/file_utils.hpp"
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 namespace {
 
@@ -43,4 +43,4 @@ data::Song loadSong(const ByteBuffer& imfData) {
   return song;
 }
 
-}}
+}

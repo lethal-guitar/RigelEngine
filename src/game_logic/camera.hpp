@@ -26,11 +26,11 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { namespace data { namespace map { class Map; }}}
+namespace rigel::data::map { class Map; }
 namespace rigel::events { struct PlayerFiredShot; }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 
 class Player;
@@ -65,4 +65,4 @@ inline const base::Vector& Camera::position() const {
   return mPosition;
 }
 
-}}
+}

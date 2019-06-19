@@ -24,7 +24,7 @@
 #include <cctype>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 namespace {
 
@@ -101,4 +101,4 @@ void IngameMessageDisplay::render() {
   }
 }
 
-}}
+}

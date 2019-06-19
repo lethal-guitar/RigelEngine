@@ -28,7 +28,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 namespace {
 
@@ -198,4 +198,4 @@ void RigelatinSoldier::updateReadyState(
     }
   }
 }
-}}}
+}

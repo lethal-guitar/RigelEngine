@@ -19,7 +19,7 @@
 #include "base/spatial_types.hpp"
 
 
-namespace rigel { namespace engine { namespace components {
+namespace rigel::engine { namespace components {
 
 using WorldPosition = base::Vector;
 using BoundingBox = base::Rect<int>;
@@ -86,4 +86,4 @@ inline int toMovement(const components::Orientation orientation) {
 
 }
 
-}}
+}

@@ -28,16 +28,16 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace data { class PlayerModel; } }
-namespace rigel { namespace engine { class RandomNumberGenerator; } }
-namespace rigel { namespace game_logic { class EntityFactory; } }
-namespace rigel { namespace game_logic { namespace events {
+namespace rigel::data { class PlayerModel; }
+namespace rigel::engine { class RandomNumberGenerator; }
+namespace rigel::game_logic { class EntityFactory; }
+namespace rigel::game_logic::events {
   struct ShootableDamaged;
   struct ShootableKilled;
-}}}
+}
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace components {
 
@@ -78,4 +78,4 @@ private:
   IGameServiceProvider* mpServiceProvider;
 };
 
-}}}
+}

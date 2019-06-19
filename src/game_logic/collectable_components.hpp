@@ -22,7 +22,7 @@
 #include <optional>
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace components {
 
@@ -54,4 +54,4 @@ inline std::optional<int> givenScore(
   return collectable.mGivenScore;
 }
 
-}}
+}

@@ -19,7 +19,7 @@
 #include "engine/physical_components.hpp"
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 void LifeTimeSystem::update(entityx::EntityManager& es) {
   using Condition = components::AutoDestroy::Condition;
@@ -52,5 +52,5 @@ void LifeTimeSystem::update(entityx::EntityManager& es) {
   });
 }
 
-}}
+}
 

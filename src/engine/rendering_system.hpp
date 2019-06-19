@@ -35,7 +35,7 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 /** Animates sprites with an AnimationLoop component
  *
@@ -98,4 +98,4 @@ private:
   std::size_t mSpritesRendered = 0;
 };
 
-}}
+}

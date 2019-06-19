@@ -135,7 +135,7 @@ RIGEL_RESTORE_WARNINGS
 
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 namespace {
 
@@ -436,4 +436,4 @@ void MenuElementRenderer::drawMessageBoxRow(
   mpSpriteSheet->renderTile(baseIndex + rightIndex, x + width - 1, y);
 }
 
-}}
+}

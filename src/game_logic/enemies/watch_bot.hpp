@@ -21,12 +21,12 @@
 
 #include <variant>
 
-namespace rigel { namespace engine { namespace events {
+namespace rigel::engine::events {
   struct CollidedWithWorld;
-}}}
+}
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 namespace watch_bot {
 
@@ -102,4 +102,4 @@ struct WatchBotCarrier {
   int mFramesElapsed = 0;
 };
 
-}}}
+}

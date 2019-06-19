@@ -19,7 +19,7 @@
 #include "renderer/texture.hpp"
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class TiledTexture {
 public:
@@ -63,4 +63,4 @@ private:
   renderer::Renderer* mpRenderer;
 };
 
-}}
+}

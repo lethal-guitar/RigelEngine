@@ -27,14 +27,14 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace engine { class CollisionChecker; }}
-namespace rigel { namespace game_logic { struct GlobalState; }}
-namespace rigel { namespace game_logic { namespace events {
+namespace rigel::engine { class CollisionChecker; }
+namespace rigel::game_logic { struct GlobalState; }
+namespace rigel::game_logic::events {
   struct ShootableKilled;
-}}}
+}
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class EntityFactory;
 struct GlobalDependencies;
@@ -148,4 +148,4 @@ private:
 
 }
 
-}}
+}

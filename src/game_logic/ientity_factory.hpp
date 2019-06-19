@@ -24,7 +24,7 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 enum class ProjectileType {
   PlayerRegularShot,
@@ -74,4 +74,4 @@ struct IEntityFactory {
     const base::Vector& position) = 0;
 };
 
-}}
+}

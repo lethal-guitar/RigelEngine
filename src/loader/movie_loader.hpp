@@ -20,9 +20,9 @@
 #include "loader/byte_buffer.hpp"
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 data::Movie loadMovie(const ByteBuffer& file);
 
 
-}}
+}

@@ -26,7 +26,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 using namespace engine;
 
@@ -283,4 +283,4 @@ void IngameSystems::printDebugText(std::ostream& stream) const {
     << "Player: " << vec2String(mPlayer.position(), 4) << '\n';
 }
 
-}}
+}

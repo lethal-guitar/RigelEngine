@@ -23,7 +23,7 @@
 #include <iostream>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using namespace std;
 using namespace data;
@@ -214,4 +214,4 @@ map::TileIndex MapRenderer::animatedTileIndex(
   }
 }
 
-}}
+}

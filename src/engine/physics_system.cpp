@@ -23,7 +23,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using namespace std;
 
@@ -248,4 +248,4 @@ float PhysicsSystem::applyGravity(
   }
 }
 
-}}
+}

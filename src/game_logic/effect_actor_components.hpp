@@ -19,7 +19,7 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel { namespace game_logic { namespace components {
+namespace rigel::game_logic::components {
 
 struct WindBlownSpiderGenerator {
   void update(
@@ -47,4 +47,4 @@ struct ExplosionEffect {
     entityx::Entity entity);
 };
 
-}}}
+}

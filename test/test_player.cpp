@@ -51,14 +51,14 @@ using engine::components::WorldPosition;
 namespace ex = entityx;
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 static std::ostream& operator<<(std::ostream& os, const SoundId id) {
   os << static_cast<int>(id);
   return os;
 }
 
-}}
+}
 
 
 namespace {

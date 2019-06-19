@@ -17,7 +17,7 @@
 #pragma once
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 enum class SoundId {
   DukeNormalShot = 0,
@@ -88,4 +88,4 @@ void forEachSoundId(Callable callback) {
   callback(LastSoundId);
 }
 
-}}
+}

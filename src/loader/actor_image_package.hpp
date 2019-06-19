@@ -27,7 +27,7 @@
 #include <vector>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 class CMPFilePackage;
 
@@ -89,4 +89,4 @@ private:
 };
 
 
-}}
+}

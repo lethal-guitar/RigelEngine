@@ -30,7 +30,7 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 namespace {
 
@@ -213,4 +213,4 @@ void BigBomb::onCollision(
   entity.destroy();
 }
 
-}}}
+}

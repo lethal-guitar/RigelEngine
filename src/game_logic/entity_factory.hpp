@@ -34,9 +34,9 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel { namespace loader { class ActorImagePackage; }}
+namespace rigel::loader { class ActorImagePackage; }
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 enum class ContainerColor {
   Red,
@@ -213,4 +213,4 @@ void spawnFireEffect(
   const engine::components::BoundingBox& coveredArea,
   data::ActorID actorToSpawn);
 
-}}
+}

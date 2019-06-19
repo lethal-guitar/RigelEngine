@@ -27,7 +27,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data { namespace map {
+namespace rigel::data::map {
 
 enum class BackdropScrollMode {
   None,
@@ -107,4 +107,4 @@ struct LevelData {
 
 using ActorDescriptionList = std::vector<LevelData::Actor>;
 
-}}}
+}

@@ -63,7 +63,7 @@ namespace loader { class ResourceLoader; }
 }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class Player;
 
@@ -146,4 +146,4 @@ private:
   IGameServiceProvider* mpServiceProvider;
 };
 
-}}
+}

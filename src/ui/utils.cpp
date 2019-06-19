@@ -3,7 +3,7 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 renderer::OwningTexture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
@@ -15,4 +15,4 @@ renderer::OwningTexture fullScreenImageAsTexture(
     resources.loadStandaloneFullscreenImage(imageName));
 }
 
-}}
+}

@@ -22,9 +22,9 @@
 #include <variant>
 
 
-namespace rigel { namespace engine { namespace events {
+namespace rigel::engine::events {
   struct CollidedWithWorld;
-}}}
+}
 
 
 namespace rigel::game_logic {

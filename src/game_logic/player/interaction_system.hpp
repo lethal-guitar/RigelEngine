@@ -52,7 +52,7 @@ namespace rigel {
 }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class Player;
 
@@ -113,4 +113,4 @@ private:
   std::optional<base::Vector> mCloakPickupPosition;
 };
 
-}}
+}

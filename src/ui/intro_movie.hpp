@@ -24,7 +24,7 @@
 #include <vector>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 class IntroMovie {
 public:
@@ -61,4 +61,4 @@ private:
 };
 
 
-}}
+}

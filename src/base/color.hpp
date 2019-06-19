@@ -20,7 +20,7 @@
 #include <tuple>
 
 
-namespace rigel { namespace base {
+namespace rigel::base {
 
 struct Color {
   constexpr Color() = default;
@@ -46,4 +46,4 @@ struct Color {
   std::uint8_t a = 0;
 };
 
-}}
+}

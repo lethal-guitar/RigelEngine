@@ -20,7 +20,7 @@
 #include <string>
 
 
-namespace rigel { namespace sdl_utils {
+namespace rigel::sdl_utils {
 
 class Error : public std::runtime_error {
 public:
@@ -48,4 +48,4 @@ auto throwIfCreationFailed(CallableT operation) {
   return result;
 }
 
-}}
+}

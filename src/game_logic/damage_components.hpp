@@ -24,7 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace components {
 
@@ -130,4 +130,4 @@ struct ShootableKilled {
 
 }
 
-}}
+}

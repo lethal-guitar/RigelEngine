@@ -23,7 +23,7 @@
 #include <cstdint>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using Palette16 = std::array<data::Pixel, 16>;
 using Palette256 = std::array<data::Pixel, 256>;
@@ -47,4 +47,4 @@ inline Palette256 load6bitPalette256(const ByteBuffer& buffer) {
   return load6bitPalette256(buffer.cbegin(), buffer.cend());
 }
 
-}}
+}

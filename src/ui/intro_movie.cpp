@@ -56,7 +56,7 @@
 // | 55 |   SB_1 |  1120 | // 4 seconds
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 using data::SoundId;
 
@@ -232,4 +232,4 @@ void IntroMovie::startNextMovie() {
     config.mFrameCallback);
 }
 
-}}
+}

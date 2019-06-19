@@ -32,7 +32,7 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 struct SpriteFrame {
   SpriteFrame() = default;
@@ -175,4 +175,4 @@ struct AnimationSequence {
   bool mRepeat = false;
 };
 
-}}}
+}}

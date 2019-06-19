@@ -32,7 +32,7 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 using data::PlayerModel;
 using engine::components::AnimationLoop;
@@ -475,4 +475,4 @@ void PlayerInteractionSystem::collectLetter(
   }
 }
 
-}}
+}

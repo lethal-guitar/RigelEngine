@@ -31,7 +31,7 @@
  */
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace std;
 
@@ -233,4 +233,4 @@ data::Movie loadMovie(const ByteBuffer& file) {
 }
 
 
-}}
+}

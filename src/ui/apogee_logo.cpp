@@ -20,7 +20,7 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 namespace {
 
@@ -86,4 +86,4 @@ bool ApogeeLogo::isFinished() const {
   return mElapsedTime >= TOTAL_TIME;
 }
 
-}}
+}

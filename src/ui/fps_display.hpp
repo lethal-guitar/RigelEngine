@@ -19,10 +19,10 @@
 #include "engine/timing.hpp"
 
 
-namespace rigel { namespace ui { class MenuElementRenderer; }}
+namespace rigel::ui { class MenuElementRenderer; }
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 class FpsDisplay {
 public:
@@ -39,4 +39,4 @@ private:
   float mWeightedFrameTime = 0.0f;
 };
 
-}}
+}

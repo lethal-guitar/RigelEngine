@@ -24,7 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 template<typename TagComponent>
 void setTag(entityx::Entity entity, const bool assignTag) {
@@ -72,4 +72,4 @@ inline void resetActivation(entityx::Entity entity) {
   entity.component<components::ActivationSettings>()->mHasBeenActivated = false;
 }
 
-}}
+}

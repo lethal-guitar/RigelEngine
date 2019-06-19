@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data { namespace script {
+namespace rigel::data::script {
 
 struct DisableMenuFunctionality {};
 struct EnableTextOffset {};
@@ -237,4 +237,4 @@ struct PagesDefinition {
   std::vector<Script> pages;
 };
 
-}}}
+}

@@ -26,7 +26,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace game_logic { namespace interaction {
+namespace rigel::game_logic::interaction {
 
 using engine::components::BoundingBox;
 using engine::components::MovingBody;
@@ -161,4 +161,4 @@ ex::Entity ElevatorSystem::findAttachableElevator(ex::EntityManager& es) const {
   return attachableElevator;
 }
 
-}}}
+}

@@ -20,7 +20,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 using Sample = std::int16_t;
 
@@ -31,4 +31,4 @@ struct AudioBuffer {
 };
 
 
-}}
+}

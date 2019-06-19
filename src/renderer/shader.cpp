@@ -21,7 +21,7 @@
 #include <string>
 
 
-namespace rigel { namespace renderer {
+namespace rigel::renderer {
 
 namespace {
 
@@ -118,4 +118,4 @@ GLint Shader::location(const std::string& name) const {
   return it->second;
 }
 
-}}
+}

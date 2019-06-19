@@ -33,7 +33,7 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 enum class ScoreNumberType : std::uint8_t;
 
@@ -168,4 +168,4 @@ struct SpriteCascadeSpawner {
   bool mSpawnedLastFrame = true;
 };
 
-}}}
+}}

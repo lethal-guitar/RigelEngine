@@ -25,7 +25,7 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace components {
+namespace rigel::game_logic::components {
 
 namespace {
 
@@ -92,4 +92,4 @@ void ExplosionEffect::update(
   entity.destroy();
 }
 
-}}}
+}

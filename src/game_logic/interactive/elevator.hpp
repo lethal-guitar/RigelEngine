@@ -24,10 +24,10 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace engine { class CollisionChecker; }}
+namespace rigel::engine { class CollisionChecker; }
 
 
-namespace rigel { namespace game_logic { namespace interaction {
+namespace rigel::game_logic::interaction {
 
 namespace components {
 
@@ -65,4 +65,4 @@ private:
   bool mIsOddFrame = false;
 };
 
-}}}
+}

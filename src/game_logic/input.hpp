@@ -17,7 +17,7 @@
 #pragma once
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 struct Button {
   /** True if the button is currently pressed (down) */
@@ -45,4 +45,4 @@ struct PlayerInput {
   }
 };
 
-}}
+}

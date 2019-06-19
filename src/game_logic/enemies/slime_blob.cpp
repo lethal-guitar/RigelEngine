@@ -29,7 +29,7 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 using namespace engine::components;
 using namespace engine::orientation;
@@ -307,4 +307,4 @@ void SlimeBlobSystem::receive(const events::ShootableKilled& event) {
   sprite.flashWhite();
 }
 
-}}}
+}

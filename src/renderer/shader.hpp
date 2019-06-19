@@ -29,7 +29,7 @@ RIGEL_RESTORE_WARNINGS
 #include <unordered_map>
 
 
-namespace rigel { namespace renderer {
+namespace rigel::renderer {
 
 class GlHandleWrapper {
 public:
@@ -133,4 +133,4 @@ private:
   mutable std::unordered_map<std::string, GLint> mLocationCache;
 };
 
-}}
+}

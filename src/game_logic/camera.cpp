@@ -27,7 +27,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace {
 
@@ -184,4 +184,4 @@ void Camera::receive(const rigel::events::PlayerFiredShot& event) {
   mManualScrollCooldown = MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING;
 }
 
-}}
+}

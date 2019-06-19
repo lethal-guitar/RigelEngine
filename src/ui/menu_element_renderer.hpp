@@ -31,12 +31,12 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
   class ResourceLoader;
-}}
+}
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 
 class MenuElementRenderer {
@@ -99,4 +99,4 @@ private:
   engine::TiledTexture mBigTextTexture;
 };
 
-}}
+}

@@ -19,7 +19,7 @@
 #include <cassert>
 
 
-namespace rigel { namespace renderer {
+namespace rigel::renderer {
 
 using data::Image;
 using detail::TextureBase;
@@ -157,4 +157,4 @@ DefaultRenderTargetBinder::DefaultRenderTargetBinder(
 {
 }
 
-}}
+}

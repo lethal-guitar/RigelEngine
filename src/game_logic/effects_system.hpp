@@ -25,20 +25,20 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace engine {
+namespace rigel::engine {
   namespace events {
     struct CollidedWithWorld;
   }
 
   class RandomNumberGenerator;
   class ParticleSystem;
-}}
-namespace rigel { namespace game_logic { namespace events {
+}
+namespace rigel::game_logic::events {
   struct ShootableKilled;
-}}}
+}
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace components { struct DestructionEffects; }
 class EntityFactory;
@@ -79,4 +79,4 @@ private:
   engine::ParticleSystem* mpParticles;
 };
 
-}}
+}

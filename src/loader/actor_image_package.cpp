@@ -28,7 +28,7 @@
 #include <utility>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace std;
 using data::ActorID;
@@ -206,4 +206,4 @@ FontData ActorImagePackage::loadFont() const {
   return fontBitmaps;
 }
 
-}}
+}

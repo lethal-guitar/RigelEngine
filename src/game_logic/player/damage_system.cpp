@@ -25,9 +25,7 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic {
-
-namespace player {
+namespace rigel::game_logic::player {
 
 using engine::components::BoundingBox;
 using engine::components::WorldPosition;
@@ -75,4 +73,4 @@ void DamageSystem::update(entityx::EntityManager& es) {
     });
 }
 
-}}}
+}

@@ -30,7 +30,7 @@
 #include <optional>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 class DukeScriptRunner {
 public:
@@ -191,4 +191,4 @@ private:
   bool mTextBoxOffsetEnabled = false;
 };
 
-}}
+}

@@ -17,7 +17,7 @@
 #pragma once
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 constexpr auto NUM_EPISODES = 4;
 constexpr auto NUM_LEVELS_PER_EPISODE = 8;
@@ -50,4 +50,4 @@ constexpr bool isBossLevel(const int level) {
 
 
 
-}}
+}

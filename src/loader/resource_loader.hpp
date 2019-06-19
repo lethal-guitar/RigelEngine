@@ -31,7 +31,7 @@
 #include <string>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 struct TileSet {
   data::Image mTiles;
@@ -72,4 +72,4 @@ private:
   loader::AudioPackage mAdlibSoundsPackage;
 };
 
-}}
+}

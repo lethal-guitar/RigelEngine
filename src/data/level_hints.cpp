@@ -19,7 +19,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 std::optional<std::string> LevelHints::getHint(
   const int episode,
@@ -37,4 +37,4 @@ std::optional<std::string> LevelHints::getHint(
     : std::nullopt;
 }
 
-}}
+}

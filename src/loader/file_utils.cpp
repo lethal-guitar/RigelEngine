@@ -21,7 +21,7 @@
 #include <stdexcept>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace std;
 
@@ -199,4 +199,4 @@ string readFixedSizeString(LeStreamReader& reader, const size_t len) {
   return string(characters.data());
 }
 
-}}
+}

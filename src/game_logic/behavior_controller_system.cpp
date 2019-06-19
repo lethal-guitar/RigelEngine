@@ -22,7 +22,7 @@
 #include "game_logic/behavior_controller.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 BehaviorControllerSystem::BehaviorControllerSystem(
   GlobalDependencies dependencies,
@@ -135,4 +135,4 @@ void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeEnd&) {
   mPerFrameState.mIsEarthShaking = false;
 }
 
-}}
+}

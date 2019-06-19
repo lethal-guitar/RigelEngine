@@ -24,7 +24,7 @@
 #include <sstream>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 namespace {
 
@@ -65,4 +65,4 @@ void FpsDisplay::updateAndRender(
   mpTextRenderer->drawText(0, 0, statsReport.str());
 }
 
-}}
+}

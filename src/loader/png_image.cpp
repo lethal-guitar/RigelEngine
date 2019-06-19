@@ -28,7 +28,7 @@ RIGEL_RESTORE_WARNINGS
 
 #include <memory>
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 std::optional<data::Image> loadPng(const std::string& path) {
   int width = 0;
@@ -56,4 +56,4 @@ void savePng(const std::string& path, const data::Image& image) {
     path.c_str(), width, height, 4, image.pixelData().data(), width * 4);
 }
 
-}}
+}

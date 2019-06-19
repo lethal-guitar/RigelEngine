@@ -31,7 +31,7 @@
 #include <map>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace data;
 using namespace std;
@@ -243,5 +243,5 @@ ScriptBundle ResourceLoader::loadScriptBundle(
   return loader::loadScripts(mFilePackage.fileAsText(fileName));
 }
 
-}}
+}
 

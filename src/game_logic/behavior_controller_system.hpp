@@ -20,17 +20,17 @@
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/input.hpp"
 
-namespace rigel { namespace events {
+namespace rigel::events {
   struct EarthQuakeBegin;
   struct EarthQuakeEnd;
-}}
+}
 
-namespace rigel { namespace engine { namespace events {
+namespace rigel::engine::events {
   struct CollidedWithWorld;
-}}}
+}
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class BehaviorControllerSystem :
   public entityx::Receiver<BehaviorControllerSystem> {
@@ -57,4 +57,4 @@ private:
   GlobalState mGlobalState;
 };
 
-}}
+}

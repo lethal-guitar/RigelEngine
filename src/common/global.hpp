@@ -28,7 +28,7 @@ RIGEL_RESTORE_WARNINGS
 #include <utility>
 
 
-namespace rigel { namespace events {
+namespace rigel::events {
 
 struct ScreenFlash {
   ScreenFlash() = default;
@@ -111,4 +111,4 @@ struct BossActivated {
   entityx::Entity mBossEntity;
 };
 
-}}
+}

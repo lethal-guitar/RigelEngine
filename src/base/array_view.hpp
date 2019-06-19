@@ -22,7 +22,7 @@
 #include <string>
 
 
-namespace rigel { namespace base {
+namespace rigel::base {
 
 /** Read-only array view type
  *
@@ -123,4 +123,4 @@ private:
   size_type mSize = 0;
 };
 
-}}
+}

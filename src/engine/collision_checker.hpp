@@ -28,7 +28,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class CollisionChecker : public entityx::Receiver<CollisionChecker> {
 public:
@@ -79,4 +79,4 @@ private:
   const data::map::Map* mpMap;
 };
 
-}}
+}

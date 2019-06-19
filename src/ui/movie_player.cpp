@@ -23,7 +23,7 @@
 #include <cassert>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 using engine::fastTicksToTime;
 
@@ -130,4 +130,4 @@ void MoviePlayer::invokeFrameCallbackIfPresent(const int frameNumber) {
   }
 }
 
-}}
+}

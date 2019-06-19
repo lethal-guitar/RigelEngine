@@ -26,7 +26,7 @@ RIGEL_RESTORE_WARNINGS
 #include <array>
 
 
-namespace rigel { namespace renderer {
+namespace rigel::renderer {
 
 namespace {
 
@@ -1043,4 +1043,4 @@ void Renderer::updateProjectionMatrix() {
   updateShaders();
 }
 
-}}
+}

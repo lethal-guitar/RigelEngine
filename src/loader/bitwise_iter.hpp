@@ -20,7 +20,7 @@
 #include <iterator>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 /** Adapter iterator which returns individual bits from a sequence of values
  *
@@ -85,4 +85,4 @@ private:
   std::uint8_t mBitIndex;
 };
 
-}}
+}

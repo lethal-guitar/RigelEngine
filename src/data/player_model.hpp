@@ -21,7 +21,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 struct SavedGame;
 
@@ -121,4 +121,4 @@ private:
   int mHealth;
 };
 
-}}
+}

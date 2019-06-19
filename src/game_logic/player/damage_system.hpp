@@ -23,10 +23,10 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace game_logic { class Player; }}
+namespace rigel::game_logic { class Player; }
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel::game_logic::player {
 
 class DamageSystem {
 public:
@@ -39,4 +39,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}}}
+}

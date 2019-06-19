@@ -25,12 +25,12 @@ RIGEL_RESTORE_WARNINGS
 
 #include <variant>
 
-namespace rigel { namespace engine { class CollisionChecker; }}
-namespace rigel { namespace engine { namespace components { struct Sprite; }}}
-namespace rigel { namespace game_logic { class EntityFactory; }}
+namespace rigel::engine { class CollisionChecker; }
+namespace rigel::engine::components { struct Sprite; }
+namespace rigel::game_logic { class EntityFactory; }
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace components {
 
@@ -98,4 +98,4 @@ private:
   bool mIsOddFrame = false;
 };
 
-}}}
+}

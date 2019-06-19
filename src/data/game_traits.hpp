@@ -21,7 +21,7 @@
 #include <cstddef>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 enum class TileImageType {
   Unmasked,
@@ -107,4 +107,4 @@ struct GameTraits {
 };
 
 
-}}
+}

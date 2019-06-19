@@ -26,7 +26,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 using namespace data;
 using namespace engine::components;
@@ -195,4 +195,4 @@ void DebuggingSystem::update(ex::EntityManager& es) {
   }
 }
 
-}}
+}

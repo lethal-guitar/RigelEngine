@@ -23,7 +23,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace game_logic { namespace interaction {
+namespace rigel::game_logic::interaction {
 
 using namespace engine::components;
 using namespace game_logic::components;
@@ -64,4 +64,4 @@ void disableKeyHole(entityx::Entity entity) {
   entity.component<Sprite>()->mFramesToRender[0] = KEYHOLE_UNLOCKED_FRAME;
 }
 
-}}}
+}
