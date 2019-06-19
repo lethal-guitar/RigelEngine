@@ -27,7 +27,7 @@ namespace rigel {
 class UserProfile {
 public:
   UserProfile() = default;
-  UserProfile(const std::string& profilePath);
+  explicit UserProfile(const std::string& profilePath);
 
   void saveToDisk();
   void loadFromDisk();

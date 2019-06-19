@@ -66,7 +66,7 @@ private:
 class TileAttributes {
 public:
   TileAttributes() = default;
-  TileAttributes(std::uint16_t attributesBitPack);
+  explicit TileAttributes(std::uint16_t attributesBitPack);
 
   bool isAnimated() const;
   bool isFastAnimation() const;
