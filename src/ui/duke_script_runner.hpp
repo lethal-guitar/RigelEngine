@@ -17,8 +17,8 @@
 #pragma once
 
 #include "common/game_mode.hpp"
+#include "data/actor_ids.hpp"
 #include "data/duke_script.hpp"
-#include "data/map.hpp"
 #include "data/saved_game.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"

@@ -11,6 +11,7 @@ set(core_sources
     common/global.hpp
     common/user_profile.cpp
     common/user_profile.hpp
+    data/actor_ids.hpp
     data/audio_buffer.hpp
     data/bonus.hpp
     data/duke_script.hpp

@@ -17,8 +17,8 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "data/actor_ids.hpp"
 #include "data/image.hpp"
-#include "data/map.hpp"
 #include "loader/byte_buffer.hpp"
 #include "loader/palette.hpp"
 

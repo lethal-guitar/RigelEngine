@@ -20,7 +20,7 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/map.hpp" // TODO: This is only here for data::ActorID
+#include "data/actor_ids.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 
