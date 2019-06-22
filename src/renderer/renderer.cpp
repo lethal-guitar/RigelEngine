@@ -24,6 +24,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
+#include <algorithm>
 
 
 namespace rigel::renderer {
