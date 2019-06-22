@@ -40,7 +40,7 @@ constexpr auto CONTAINER_OFFSET = base::Vector{0, -2};
 
 const effects::EffectSpec CARRIER_SELF_DESTRUCT_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX}, 0},
+  {effects::SpriteCascade{data::ActorID::Shot_impact_FX}, 0},
 };
 
 

@@ -316,7 +316,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
 
 void PlayerInteractionSystem::receive(const rigel::events::CloakExpired&) {
   if (mCloakPickupPosition) {
-    mpEntityFactory->createActor(rigel::data::ActorID::White_box_cloaking_device, *mCloakPickupPosition);
+    mpEntityFactory->createActor(data::ActorID::White_box_cloaking_device, *mCloakPickupPosition);
   }
 }
 
