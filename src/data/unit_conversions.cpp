@@ -19,7 +19,7 @@
 #include "game_traits.hpp"
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 using namespace base;
 
@@ -60,4 +60,4 @@ Extents pixelExtentsToTileExtents(
 }
 
 
-}}
+}

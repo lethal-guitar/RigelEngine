@@ -20,11 +20,11 @@
 #include <vector>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using ByteBuffer = std::vector<std::uint8_t>;
 using ByteBuferIter = ByteBuffer::iterator;
 using ByteBufferCIter = ByteBuffer::const_iterator;
 
 
-}}
+}

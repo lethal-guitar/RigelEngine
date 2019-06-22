@@ -20,10 +20,10 @@
 #include <variant>
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace ui { class MenuElementRenderer; }}
+namespace rigel::ui { class MenuElementRenderer; }
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 class IngameMessageDisplay {
 public:
@@ -82,4 +82,4 @@ private:
   IGameServiceProvider* mpServiceProvider;
 };
 
-}}
+}

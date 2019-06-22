@@ -25,7 +25,7 @@
 #include <cstddef>
 
 
-namespace rigel { namespace renderer {
+namespace rigel::renderer {
 
 namespace detail {
 
@@ -233,4 +233,4 @@ public:
   explicit DefaultRenderTargetBinder(renderer::Renderer* pRenderer);
 };
 
-}}
+}

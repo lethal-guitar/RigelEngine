@@ -25,14 +25,14 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
   struct IGameServiceProvider;
-  namespace data { namespace map { class Map; }}
+  namespace data::map { class Map; }
   namespace engine { class RandomNumberGenerator; }
   namespace events { struct DoorOpened; struct MissileDetonated; }
-  namespace game_logic { namespace events { struct ShootableKilled; }}
+  namespace game_logic::events { struct ShootableKilled; }
 }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class DynamicGeometrySystem : public entityx::Receiver<DynamicGeometrySystem> {
 public:
@@ -55,4 +55,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}}
+}

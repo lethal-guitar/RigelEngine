@@ -46,7 +46,7 @@ RIGEL_RESTORE_WARNINGS
 //            we just hardcode those keys for Quit_Select.
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 namespace b = boost;
 using namespace std;
@@ -559,4 +559,4 @@ data::LevelHints loadHintMessages(const std::string& scriptSource) {
   return data::LevelHints{hints};
 }
 
-}}
+}

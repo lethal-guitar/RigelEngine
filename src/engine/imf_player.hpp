@@ -23,7 +23,7 @@
 #include <mutex>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class ImfPlayer {
 public:
@@ -51,4 +51,4 @@ private:
   std::atomic<bool> mSongSwitchPending;
 };
 
-}}
+}

@@ -28,7 +28,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 namespace {
 
@@ -160,7 +160,7 @@ void RigelatinSoldier::updateReadyState(
     const auto xOffset = facingLeft ? 0 : 4;
 
     auto projectile = spawnMovingEffectSprite(
-      *d.mpEntityFactory, data::ActorID::Rigelatin_soldier_shot, movement, position + base::Vector{xOffset, -4});
+      *d.mpEntityFactory, data::ActorID::Rigelatin_soldier_projectile, movement, position + base::Vector{xOffset, -4});
     projectile.assign<components::PlayerDamaging>(1);
 
     animationFrame = 3;
@@ -198,4 +198,4 @@ void RigelatinSoldier::updateReadyState(
     }
   }
 }
-}}}
+}

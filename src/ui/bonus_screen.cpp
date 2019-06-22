@@ -22,7 +22,7 @@
 #include "ui/utils.hpp"
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 using namespace std;
 using engine::slowTicksToTime;
@@ -270,4 +270,4 @@ engine::TimeDelta BonusScreen::setupNoBonusSequence(
   return time;
 }
 
-}}
+}

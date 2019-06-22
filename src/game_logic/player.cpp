@@ -32,7 +32,7 @@
 #include <cassert>
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 using engine::moveHorizontally;
 using engine::moveVertically;
@@ -1390,4 +1390,4 @@ void Player::switchOrientation() {
   orientation = engine::orientation::opposite(orientation);
 }
 
-}}
+}

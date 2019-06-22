@@ -30,7 +30,7 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 using engine::components::Active;
 using engine::components::BoundingBox;
@@ -231,4 +231,4 @@ void NapalmBomb::spawnFires(
   }
 }
 
-}}}
+}}

@@ -28,7 +28,7 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel { struct IGameServiceProvider; }
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic { namespace ai {
 
 namespace components {
 
@@ -87,4 +87,4 @@ void renderVerticalSlidingDoor(
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace);
 
-}}
+}

@@ -21,7 +21,7 @@
 #include <variant>
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 namespace eyeball_thrower {
 
@@ -54,4 +54,4 @@ struct EyeballThrower {
   int mFramesElapsedInWalkingState = 0;
 };
 
-}}}
+}

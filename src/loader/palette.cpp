@@ -22,7 +22,7 @@
 #include <iostream>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 namespace {
 
@@ -108,4 +108,4 @@ Palette256 load6bitPalette256(
   });
 }
 
-}}
+}

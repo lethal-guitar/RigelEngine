@@ -22,7 +22,7 @@
 #include <cassert>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using namespace data;
 using namespace renderer;
@@ -109,4 +109,4 @@ base::Rect<int> TiledTexture::sourceRect(
   };
 }
 
-}}
+}

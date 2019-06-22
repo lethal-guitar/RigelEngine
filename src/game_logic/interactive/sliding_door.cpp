@@ -26,7 +26,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic { namespace ai {
 
 using engine::components::Sprite;
 using engine::components::WorldPosition;
@@ -265,4 +265,4 @@ void renderVerticalSlidingDoor(
   }
 }
 
-}}
+}

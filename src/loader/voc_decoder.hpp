@@ -20,8 +20,8 @@
 #include "loader/byte_buffer.hpp"
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 data::AudioBuffer decodeVoc(const ByteBuffer& data);
 
-}}
+}

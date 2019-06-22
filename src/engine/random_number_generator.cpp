@@ -17,7 +17,7 @@
 #include "random_number_generator.hpp"
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 
 /* The random number lookup table embedded in the original game's executable,
@@ -55,4 +55,4 @@ int RandomNumberGenerator::gen() {
   return RANDOM_NUMBER_TABLE[mNextNumberIndex];
 }
 
-}}
+}

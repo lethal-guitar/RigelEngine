@@ -25,11 +25,11 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace data { namespace map { class Map; }}}
-namespace rigel { namespace game_logic { class EntityFactory; }}
+namespace rigel::data::map { class Map; }
+namespace rigel::game_logic { class EntityFactory; }
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel::game_logic::player {
 
 class ProjectileSystem {
 public:
@@ -52,4 +52,4 @@ private:
   base::Extents mMapSize;
 };
 
-}}}
+}

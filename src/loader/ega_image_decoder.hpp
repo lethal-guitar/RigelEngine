@@ -22,7 +22,7 @@
 #include "data/image.hpp"
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 data::PixelBuffer decodeSimplePlanarEgaBuffer(
   ByteBufferCIter begin,
@@ -58,4 +58,4 @@ data::Image loadTiledFontBitmap(
   std::size_t widthInTiles
 );
 
-}}
+}

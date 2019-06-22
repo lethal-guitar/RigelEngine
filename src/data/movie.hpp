@@ -21,7 +21,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 struct MovieFrame {
   MovieFrame(Image&& replacementImage, const int startRow)
@@ -40,4 +40,4 @@ struct Movie {
   std::vector<MovieFrame> mFrames;
 };
 
-}}
+}

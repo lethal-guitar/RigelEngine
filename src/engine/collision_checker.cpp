@@ -19,7 +19,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 namespace ex = entityx;
 
@@ -200,4 +200,4 @@ void CollisionChecker::receive(
   }
 }
 
-}}
+}

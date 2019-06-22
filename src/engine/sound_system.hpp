@@ -25,7 +25,7 @@
 #include <unordered_map>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class ImfPlayer;
 
@@ -60,4 +60,4 @@ private:
   SoundHandle mNextHandle = 0;
 };
 
-}}
+}

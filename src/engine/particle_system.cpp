@@ -26,7 +26,7 @@
 #include <memory>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using renderer::Renderer;
 
@@ -181,4 +181,4 @@ void ParticleSystem::render(const base::Vector& cameraPosition) {
   }
 }
 
-}}
+}

@@ -21,7 +21,7 @@
 #include "engine/random_number_generator.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 EarthQuakeEffect::EarthQuakeEffect(
   IGameServiceProvider* pServiceProvider,
@@ -68,4 +68,4 @@ void EarthQuakeEffect::update() {
   }
 }
 
-}}
+}

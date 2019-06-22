@@ -27,7 +27,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 inline components::BoundingBox inferBoundingBox(
   const SpriteFrame& frame
@@ -94,4 +94,4 @@ inline void startAnimationSequence(
 }
 
 
-}}
+}

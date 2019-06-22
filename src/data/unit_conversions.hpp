@@ -20,7 +20,7 @@
 #include "data/game_traits.hpp"
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 template<typename T>
 constexpr T pixelsToTiles(const T pixels) {
@@ -41,4 +41,4 @@ base::Extents tileExtentsToPixelExtents(
 base::Extents pixelExtentsToTileExtents(
   const base::Extents& pixelExtents);
 
-}}
+}

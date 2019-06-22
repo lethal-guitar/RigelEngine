@@ -17,17 +17,18 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "data/actor_ids.hpp"
 #include "data/image.hpp"
-#include "data/map.hpp"
 #include "loader/byte_buffer.hpp"
 #include "loader/palette.hpp"
 
 #include <map>
 #include <optional>
+#include <string>
 #include <vector>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 class CMPFilePackage;
 
@@ -89,4 +90,4 @@ private:
 };
 
 
-}}
+}

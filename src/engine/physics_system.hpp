@@ -32,7 +32,7 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel::data::map { class Map; }
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class CollisionChecker;
 
@@ -108,4 +108,4 @@ private:
   bool mShouldCollectForPhase2 = false;
 };
 
-}}
+}

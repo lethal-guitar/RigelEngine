@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace rigel { namespace utils {
+namespace rigel::utils {
 
 template<typename RangeT, typename Callable>
 auto transformed(const RangeT& range, Callable elementTransform) {
@@ -60,4 +60,4 @@ auto concatenated(ContainerT&& first, const ContainerT& second) {
 }
 
 
-}}
+}

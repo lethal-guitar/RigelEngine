@@ -25,7 +25,7 @@
 #include <vector>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 class MoviePlayer {
 public:
@@ -69,4 +69,4 @@ private:
   engine::TimeDelta mElapsedTime = 0.0;
 };
 
-}}
+}

@@ -28,7 +28,7 @@ RIGEL_RESTORE_WARNINGS
 #include <tuple>
 
 
-namespace rigel { namespace base {
+namespace rigel::base {
 
 template<typename ValueT>
 struct Rect;
@@ -224,4 +224,4 @@ bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs) {
 using Vector = Point<int>;
 using Extents = Size<int>;
 
-}}
+}

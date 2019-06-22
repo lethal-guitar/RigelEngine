@@ -40,7 +40,7 @@
  *   https://www.ffmpeg.org/doxygen/2.4/adpcm_8c_source.html#l00295
  */
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace std;
 
@@ -371,4 +371,4 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data) {
 }
 
 
-}}
+}

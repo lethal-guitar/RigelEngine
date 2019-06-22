@@ -21,7 +21,7 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel { namespace game_logic { namespace components {
+namespace rigel::game_logic { namespace components {
 
 struct MapGeometryLink {
   explicit MapGeometryLink(engine::components::BoundingBox geometrySection)
@@ -74,4 +74,4 @@ struct DynamicGeometryController {
   State mState = State::Waiting;
 };
 
-}}}
+}}

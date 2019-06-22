@@ -26,7 +26,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 
 namespace components {
@@ -118,4 +118,4 @@ struct CollidedWithWorld {
 components::BoundingBox toWorldSpace(
   const components::BoundingBox& bbox, const base::Vector& entityPosition);
 
-}}
+}

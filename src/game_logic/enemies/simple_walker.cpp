@@ -20,7 +20,7 @@
 #include "engine/visual_components.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace {
 
@@ -85,4 +85,4 @@ void SimpleWalkerSystem::update(entityx::EntityManager& es) {
   mIsOddFrame = !mIsOddFrame;
 }
 
-}}}
+}

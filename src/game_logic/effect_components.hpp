@@ -20,7 +20,7 @@
 #include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "data/map.hpp" // TODO: This is only here for data::ActorID
+#include "data/actor_ids.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 
@@ -33,7 +33,7 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 enum class ScoreNumberType : std::uint8_t;
 
@@ -168,4 +168,4 @@ struct SpriteCascadeSpawner {
   bool mSpawnedLastFrame = true;
 };
 
-}}}
+}}

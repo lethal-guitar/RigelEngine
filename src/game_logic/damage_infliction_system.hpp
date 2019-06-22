@@ -26,10 +26,10 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 
-namespace rigel { namespace data { class PlayerModel; }}
+namespace rigel::data { class PlayerModel; }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 class DamageInflictionSystem {
 public:
@@ -52,4 +52,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}}
+}

@@ -23,7 +23,7 @@
 #include <unordered_map>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using ScriptBundle = std::unordered_map<std::string, data::script::Script>;
 
@@ -33,4 +33,4 @@ ScriptBundle loadScripts(const std::string& scriptSource);
 
 data::LevelHints loadHintMessages(const std::string& scriptSource);
 
-}}
+}

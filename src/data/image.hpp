@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 using Pixel = rigel::base::Color;
 using PixelBuffer = std::vector<Pixel>;
@@ -64,4 +64,4 @@ private:
 };
 
 
-}}
+}

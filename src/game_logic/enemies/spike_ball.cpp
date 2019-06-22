@@ -25,7 +25,7 @@
 #include "game_logic/damage_components.hpp"
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 using namespace engine::components;
 
@@ -145,4 +145,4 @@ void SpikeBallSystem::jump(entityx::Entity entity) {
 }
 
 
-}}}
+}

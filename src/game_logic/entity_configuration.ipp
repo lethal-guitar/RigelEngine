@@ -116,8 +116,8 @@ ActorID actorIdForProjectile(
 
     case ProjectileType::PlayerRocketShot:
       return isHorizontal(direction)
-        ? (isGoingRight ? data::ActorID::Dukes_rocket_right : data::ActorID::Dukes_rocket_left)
-        : (isGoingUp ? data::ActorID::Dukes_rocket_up : data::ActorID::Dukes_rocket_down);
+        ? (isGoingRight ? data::ActorID::Duke_rocket_right : data::ActorID::Duke_rocket_left)
+        : (isGoingUp ? data::ActorID::Duke_rocket_up : data::ActorID::Duke_rocket_down);
 
     case ProjectileType::PlayerFlameShot:
       return isHorizontal(direction)
@@ -203,15 +203,15 @@ Message MESSAGE_TYPE_BY_INDEX[] = {
 
 int messengerDroneTypeIndex(const ActorID id) {
   switch (id) {
-    case ActorID::Messenger_drone_YOUR_BRAIN_IS_OURS:
+    case ActorID::Messenger_drone_1:
       return 0;
-    case ActorID::Messenger_drone_BRING_BACK_THE_BRAIN:
+    case ActorID::Messenger_drone_2:
       return 1;
-    case ActorID::Messenger_drone_LIVE_FROM_RIGEL_ITS_SATURDAY_NIGHT:
+    case ActorID::Messenger_drone_3:
       return 2;
-    case ActorID::Messenger_drone_DIE:
+    case ActorID::Messenger_drone_4:
       return 3;
-    case ActorID::Messenger_drone_YOU_CANNOT_ESCAPE_US_YOU_WILL_GET_YOUR_BRAIN_SUCKED:
+    case ActorID::Messenger_drone_5:
       return 4;
 
     default:
@@ -245,7 +245,7 @@ void configureMovingEffectSprite(
 
 void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
   switch (id) {
-    case ActorID::Shot_impact_FX_tile_burning:
+    case ActorID::Shot_impact_FX:
       entity.assign<BehaviorController>(behaviors::TileBurner{});
       break;
 
@@ -400,11 +400,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ActorID::Turkey);
       break;
 
-    case ActorID::Messenger_drone_YOUR_BRAIN_IS_OURS:
-    case ActorID::Messenger_drone_BRING_BACK_THE_BRAIN:
-    case ActorID::Messenger_drone_LIVE_FROM_RIGEL_ITS_SATURDAY_NIGHT:
-    case ActorID::Messenger_drone_DIE:
-    case ActorID::Messenger_drone_YOU_CANNOT_ESCAPE_US_YOU_WILL_GET_YOUR_BRAIN_SUCKED:
+    case ActorID::Messenger_drone_1:
+    case ActorID::Messenger_drone_2:
+    case ActorID::Messenger_drone_3:
+    case ActorID::Messenger_drone_4:
+    case ActorID::Messenger_drone_5:
       actorParts.push_back(ActorID::Messenger_drone_body);
       actorParts.push_back(ActorID::Messenger_drone_part_1);
       actorParts.push_back(ActorID::Messenger_drone_part_2);
@@ -473,7 +473,7 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       sprite.mFramesToRender = {12};
       break;
 
-    case ActorID::Lava_riser:
+    case ActorID::Lava_fountain:
       sprite.mFramesToRender = {3};
       break;
 
@@ -505,7 +505,7 @@ bool hasAssociatedSprite(const ActorID actorID) {
     case ActorID::Dynamic_geometry_7:
     case ActorID::Dynamic_geometry_8:
     case ActorID::Exit_trigger:
-    case ActorID::Water_depths:
+    case ActorID::Water_body:
     case ActorID::Water_surface_1:
     case ActorID::Water_surface_2:
     case ActorID::Windblown_spider_generator:
@@ -537,7 +537,7 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
   };
 
   switch (id) {
-    case ActorID::Dukes_rocket_up: case ActorID::Dukes_rocket_down: case ActorID::Dukes_rocket_left: case ActorID::Dukes_rocket_right:
+    case ActorID::Duke_rocket_up: case ActorID::Duke_rocket_down: case ActorID::Duke_rocket_left: case ActorID::Duke_rocket_right:
     case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
     case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
     case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
@@ -546,9 +546,9 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case ActorID::Muzzle_flash_up: case ActorID::Muzzle_flash_down: case ActorID::Muzzle_flash_left: case ActorID::Muzzle_flash_right: // player muzzle flash
       return scale(MUZZLE_FLASH_DRAW_ORDER);
 
-    case ActorID::Explosion_FX_auto_sound:
+    case ActorID::Explosion_FX_1:
     case ActorID::Explosion_FX_2:
-    case ActorID::Shot_impact_FX_tile_burning:
+    case ActorID::Shot_impact_FX:
     case ActorID::Smoke_puff_FX:
     case ActorID::Hoverbot_debris_1:
     case ActorID::Hoverbot_debris_2:
@@ -591,7 +591,7 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case ActorID::Spider_debris_2:
     case ActorID::Spider_blowing_in_wind:
     case ActorID::Prisoner_hand_debris:
-    case ActorID::Rigelatin_soldier_shot:
+    case ActorID::Rigelatin_soldier_projectile:
       return scale(EFFECT_DRAW_ORDER);
 
     case ActorID::Score_number_FX_100:
@@ -1301,7 +1301,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
-    case ActorID::Restart_beacon: // respawn checkpoint
+    case ActorID::Respawn_checkpoin: // respawn checkpoint
       entity.assign<BehaviorController>(interaction::RespawnCheckpoint{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
@@ -1337,8 +1337,8 @@ void EntityFactory::configureEntity(
       break;
 
     // Green panther
-    case ActorID::Fast_green_cat_LEFT:
-    case ActorID::Fast_green_cat_RIGHT:
+    case ActorID::Green_panther_LEFT:
+    case ActorID::Green_panther_RIGHT:
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1731,7 +1731,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Auto_open_vertical_door: // Sliding door, vertical
+    case ActorID::Sliding_door_vertical: // Sliding door, vertical
       entity.assign<ai::components::VerticalSlidingDoor>();
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
@@ -1745,7 +1745,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::BlowingFan{});
       break;
 
-    case ActorID::Auto_open_horizontal_door: // Sliding door, horizontal
+    case ActorID::Sliding_door_horizontal: // Sliding door, horizontal
       entity.assign<ai::components::HorizontalSlidingDoor>();
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<engine::components::SolidBody>();
@@ -1780,7 +1780,7 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       break;
 
-    case ActorID::Pipe_dripping_green_slime: // Pipe dripping green stuff
+    case ActorID::Slime_pipe: // Pipe dripping green stuff
       entity.assign<AnimationLoop>(1);
       entity.assign<DrawTopMost>();
       entity.assign<BoundingBox>(boundingBox);
@@ -1838,11 +1838,11 @@ void EntityFactory::configureEntity(
       break;
 
     // Flying message ships
-    case ActorID::Messenger_drone_YOUR_BRAIN_IS_OURS: // "Your brain is ours!"
-    case ActorID::Messenger_drone_BRING_BACK_THE_BRAIN: // "Bring back the brain! ... Please stand by"
-    case ActorID::Messenger_drone_LIVE_FROM_RIGEL_ITS_SATURDAY_NIGHT: // "Live from Rigel it's Saturday night!"
-    case ActorID::Messenger_drone_DIE: // "Die!"
-    case ActorID::Messenger_drone_YOU_CANNOT_ESCAPE_US_YOU_WILL_GET_YOUR_BRAIN_SUCKED: // "You cannot escape us! You will get your brain sucked!"
+    case ActorID::Messenger_drone_1: // "Your brain is ours!"
+    case ActorID::Messenger_drone_2: // "Bring back the brain! ... Please stand by"
+    case ActorID::Messenger_drone_3: // "Live from Rigel it's Saturday night!"
+    case ActorID::Messenger_drone_4: // "Die!"
+    case ActorID::Messenger_drone_5: // "You cannot escape us! You will get your brain sucked!"
       {
         const auto typeIndex = messengerDroneTypeIndex(actorID);
 
@@ -1864,7 +1864,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Lava_riser: // Lava riser
+    case ActorID::Lava_fountain: // Lava riser
       entity.assign<AnimationLoop>(1, 3, 5);
       break;
 
@@ -1962,7 +1962,7 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Water_depths: // water
+    case ActorID::Water_body: // water
       entity.assign<BoundingBox>(BoundingBox{{0, 1}, {2, 2}});
       entity.assign<ActorTag>(ActorTag::Type::WaterArea);
       break;
@@ -2009,7 +2009,7 @@ void EntityFactory::configureEntity(
 
     // Various projectiles. Damage, velocity etc. are assigned by the
     // projectile configurarion functions
-    case ActorID::Dukes_rocket_up: case ActorID::Dukes_rocket_down: case ActorID::Dukes_rocket_left: case ActorID::Dukes_rocket_right:
+    case ActorID::Duke_rocket_up: case ActorID::Duke_rocket_down: case ActorID::Duke_rocket_left: case ActorID::Duke_rocket_right:
     case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
     case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
     case ActorID::Enemy_laser_shot_RIGHT:

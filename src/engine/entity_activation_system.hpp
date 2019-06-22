@@ -24,10 +24,10 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 void markActiveEntities(
   entityx::EntityManager& es,
   const base::Vector& cameraPosition);
 
-}}
+}

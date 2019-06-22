@@ -29,7 +29,7 @@
 #include "loader/palette.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace {
 
@@ -238,4 +238,4 @@ void EffectsSystem::processEffectsAndAdvance(
   ++effects.mFramesElapsed;
 }
 
-}}
+}

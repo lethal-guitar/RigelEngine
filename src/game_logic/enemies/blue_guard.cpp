@@ -30,7 +30,7 @@
 #include <optional>
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 using namespace engine::components;
 using namespace engine::orientation;
@@ -261,4 +261,4 @@ void BlueGuardSystem::updateGuard(
   }
 }
 
-}}}
+}

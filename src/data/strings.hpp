@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 struct Messages {
 
@@ -68,4 +68,4 @@ struct Messages {
   static constexpr auto WelcomeToDukeNukem2 = "WELCOME TO DUKE NUKEM II!";
 };
 
-}}
+}

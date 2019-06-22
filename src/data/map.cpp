@@ -24,7 +24,7 @@
 #include <utility>
 
 
-namespace rigel { namespace data { namespace map {
+namespace rigel::data::map {
 
 using namespace std;
 
@@ -166,4 +166,4 @@ map::TileIndex& Map::tileRefAt(
 }
 
 
-}}}
+}

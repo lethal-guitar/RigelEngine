@@ -23,7 +23,7 @@
 #include <cstdint>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 class AdlibEmulator {
 public:
@@ -73,4 +73,4 @@ private:
   std::array<std::int32_t, 256> mTempBuffer;
 };
 
-}}
+}

@@ -19,7 +19,7 @@
 #include <stdexcept>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 using namespace std;
 
@@ -83,4 +83,4 @@ void Image::insertImage(
 }
 
 
-}}
+}

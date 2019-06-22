@@ -30,7 +30,7 @@
 namespace ex = entityx;
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using components::AnimationLoop;
 using components::AnimationSequence;
@@ -352,4 +352,4 @@ void RenderingSystem::renderWaterEffectAreas(entityx::EntityManager& es) {
     });
 }
 
-}}
+}

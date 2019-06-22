@@ -49,7 +49,7 @@ namespace rigel {
 }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 enum class WeaponStance {
   Regular,
@@ -332,4 +332,4 @@ private:
   bool mJumpRequested = false;
 };
 
-}}
+}

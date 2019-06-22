@@ -25,7 +25,7 @@
 #include <set>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 class BonusScreen {
 public:
@@ -76,4 +76,4 @@ private:
   ui::MenuElementRenderer* mpTextRenderer;
 };
 
-}}
+}

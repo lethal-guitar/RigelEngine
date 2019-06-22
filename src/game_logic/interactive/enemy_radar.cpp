@@ -23,7 +23,7 @@
 
 namespace ex = entityx;
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace {
 
@@ -135,4 +135,4 @@ void RadarComputerSystem::update(entityx::EntityManager& es) {
   mIsOddFrame = !mIsOddFrame;
 }
 
-}}
+}

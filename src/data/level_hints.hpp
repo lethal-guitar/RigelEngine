@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 struct Hint {
   Hint(const int episode, const int level, std::string message)
@@ -50,4 +50,4 @@ struct LevelHints {
   std::vector<Hint> mHints;
 };
 
-}}
+}

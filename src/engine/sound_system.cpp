@@ -26,7 +26,7 @@
 #include <cmath>
 #include <utility>
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 namespace {
 
@@ -206,4 +206,4 @@ void SoundSystem::stopSound(const SoundHandle handle) const {
   Mix_HaltChannel(handle);
 }
 
-}}
+}

@@ -18,12 +18,12 @@
 
 #include "game_logic/global_dependencies.hpp"
 
-namespace rigel { namespace engine { namespace events {
+namespace rigel::engine::events {
   struct CollidedWithWorld;
-}}}
+}
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 struct SlimePipe {
   int mGameFramesSinceLastDrop = 0;
@@ -52,4 +52,4 @@ struct SlimeDrop {
     entityx::Entity entity);
 };
 
-}}}
+}

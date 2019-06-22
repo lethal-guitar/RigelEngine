@@ -26,18 +26,18 @@ RIGEL_RESTORE_WARNINGS
 
 #include <variant>
 
-namespace rigel { namespace engine { class CollisionChecker; }}
-namespace rigel { namespace engine { class RandomNumberGenerator; }}
-namespace rigel { namespace game_logic {
+namespace rigel::engine { class CollisionChecker; }
+namespace rigel::engine { class RandomNumberGenerator; }
+namespace rigel::game_logic {
   class EntityFactory;
   class Player;
-}}
-namespace rigel { namespace game_logic { namespace events {
+}
+namespace rigel::game_logic::events {
   struct ShootableKilled;
-}}}
+}
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace components {
 
@@ -106,4 +106,4 @@ private:
   engine::RandomNumberGenerator* mpRandomGenerator;
 };
 
-}}}
+}

@@ -21,7 +21,7 @@
 #include <optional>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 /** Expand single RLE word by calling callback for each output byte */
 template<typename Callable>
@@ -75,4 +75,4 @@ void decompressRle(
 }
 
 
-}}
+}

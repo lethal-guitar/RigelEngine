@@ -23,7 +23,7 @@
 #include <string>
 
 
-namespace rigel { namespace ui {
+namespace rigel::ui {
 
 using namespace rigel::data;
 using namespace rigel::engine;
@@ -318,4 +318,4 @@ void HudRenderer::drawCollectedLetters() const {
 }
 
 
-}}
+}

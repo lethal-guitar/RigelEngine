@@ -25,7 +25,7 @@
 #include <cstdint>
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 class LeStreamReader;
 
@@ -51,4 +51,4 @@ private:
 };
 
 
-}}
+}

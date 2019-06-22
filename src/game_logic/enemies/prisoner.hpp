@@ -24,19 +24,19 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
-namespace rigel { namespace engine {
+namespace rigel::engine {
   class ParticleSystem;
   class RandomNumberGenerator;
 
   namespace components { struct Sprite; }
-}}
-namespace rigel { namespace game_logic { class EntityFactory; }}
-namespace rigel { namespace game_logic { namespace events {
+}
+namespace rigel::game_logic { class EntityFactory; }
+namespace rigel::game_logic::events {
   struct ShootableKilled;
-}}}
+}
 
 
-namespace rigel { namespace game_logic { namespace ai {
+namespace rigel::game_logic::ai {
 
 namespace components {
 
@@ -85,4 +85,4 @@ private:
   bool mIsOddFrame = false;
 };
 
-}}}
+}

@@ -22,7 +22,7 @@
 #include "engine/physical_components.hpp"
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 using namespace components;
 
@@ -81,4 +81,4 @@ void markActiveEntities(
   });
 }
 
-}}
+}

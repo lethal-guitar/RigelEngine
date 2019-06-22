@@ -26,7 +26,7 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 constexpr auto PLAYER_WIDTH = 3;
 constexpr auto PLAYER_HEIGHT = 5;
@@ -90,4 +90,4 @@ struct Interactable {
 
 }
 
-}}
+}

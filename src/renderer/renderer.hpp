@@ -33,7 +33,7 @@ RIGEL_RESTORE_WARNINGS
 #include <tuple>
 
 
-namespace rigel { namespace renderer {
+namespace rigel::renderer {
 
 class Renderer {
 public:
@@ -257,4 +257,4 @@ private:
   glm::vec2 mGlobalScale;
 };
 
-}}
+}

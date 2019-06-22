@@ -24,10 +24,10 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace game_logic { struct GlobalDependencies; }}
-namespace rigel { namespace game_logic { struct GlobalState; } }
+namespace rigel::game_logic { struct GlobalDependencies; }
+namespace rigel::game_logic { struct GlobalState; }
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 struct Missile {
   void update(
@@ -64,4 +64,4 @@ struct BrokenMissile {
   bool mIsActive = false;
 };
 
-}}}
+}

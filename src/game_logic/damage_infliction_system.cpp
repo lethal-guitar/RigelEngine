@@ -23,7 +23,7 @@
 #include "engine/visual_components.hpp"
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 namespace ex = entityx;
 
@@ -141,4 +141,4 @@ void DamageInflictionSystem::inflictDamage(
   }
 }
 
-}}
+}

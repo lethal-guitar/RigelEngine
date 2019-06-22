@@ -23,7 +23,7 @@
 #include "renderer/texture.hpp"
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class MapRenderer {
 public:
@@ -81,4 +81,4 @@ private:
   std::uint32_t mElapsedFrames60Fps = 0;
 };
 
-}}
+}

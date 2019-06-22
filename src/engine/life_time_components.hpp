@@ -21,7 +21,7 @@
 #include <initializer_list>
 
 
-namespace rigel { namespace engine { namespace components {
+namespace rigel::engine::components {
 
 /** Marks entity to be destroyed when some condition is fulfilled */
 struct AutoDestroy {
@@ -54,4 +54,4 @@ struct AutoDestroy {
   int mFramesToLive = 0;
 };
 
-}}}
+}

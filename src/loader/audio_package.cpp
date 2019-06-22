@@ -20,7 +20,7 @@
 #include "loader/file_utils.hpp"
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 using namespace std;
 using data::SoundId;
@@ -158,4 +158,4 @@ data::AudioBuffer AudioPackage::renderAdlibSound(
   return {sampleRate, renderedSamples};
 }
 
-}}
+}

@@ -22,7 +22,7 @@
 #include <cassert>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 PlayerModel::PlayerModel()
   : mWeapon(WeaponType::Normal)
@@ -206,4 +206,4 @@ const TutorialMessageState& PlayerModel::tutorialMessages() const {
   return mTutorialMessages;
 }
 
-}}
+}

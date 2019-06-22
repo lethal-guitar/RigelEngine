@@ -28,9 +28,9 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
   struct IGameServiceProvider;
 
-  namespace data { namespace map {
+  namespace data::map {
     class Map;
-  }}
+  }
 
   namespace engine {
     class CollisionChecker;
@@ -45,7 +45,7 @@ namespace rigel {
 }
 
 
-namespace rigel { namespace game_logic {
+namespace rigel::game_logic {
 
 struct GlobalDependencies {
   const engine::CollisionChecker* mpCollisionChecker;
@@ -85,4 +85,4 @@ struct GlobalState {
   const PerFrameState* mpPerFrameState;
 };
 
-}}
+}

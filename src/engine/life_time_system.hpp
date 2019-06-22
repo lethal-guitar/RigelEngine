@@ -23,11 +23,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 class LifeTimeSystem {
 public:
   void update(entityx::EntityManager& es);
 };
 
-}}
+}

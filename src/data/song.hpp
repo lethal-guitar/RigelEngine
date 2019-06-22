@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 struct ImfCommand {
   std::uint8_t reg;
@@ -30,4 +30,4 @@ struct ImfCommand {
 
 using Song = std::vector<ImfCommand>;
 
-}}
+}

@@ -31,7 +31,7 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel { namespace game_logic { namespace behaviors {
+namespace rigel::game_logic::behaviors {
 
 namespace {
 
@@ -40,7 +40,7 @@ constexpr auto CONTAINER_OFFSET = base::Vector{0, -2};
 
 const effects::EffectSpec CARRIER_SELF_DESTRUCT_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX_tile_burning}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX}, 0},
 };
 
 
@@ -358,4 +358,4 @@ void WatchBotContainer::update(
   }
 }
 
-}}}
+}

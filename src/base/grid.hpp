@@ -19,7 +19,7 @@
 #include <vector>
 
 
-namespace rigel { namespace base {
+namespace rigel::base {
 
 template<typename ValueT>
 class Grid {
@@ -65,4 +65,4 @@ private:
   const std::size_t mHeight = 0;
 };
 
-}}
+}

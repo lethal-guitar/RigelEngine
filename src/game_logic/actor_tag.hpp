@@ -25,7 +25,7 @@ RIGEL_RESTORE_WARNINGS
 #include <limits>
 
 
-namespace rigel { namespace game_logic { namespace components {
+namespace rigel::game_logic::components {
 
 struct ActorTag {
   static constexpr auto INVALID_SPAWN_INDEX = std::numeric_limits<int>::max();
@@ -78,4 +78,4 @@ inline entityx::Entity findFirstMatchInSpawnOrder(
   return candidate;
 }
 
-}}}
+}

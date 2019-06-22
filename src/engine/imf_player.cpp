@@ -21,7 +21,7 @@
 #include <cmath>
 
 
-namespace rigel { namespace engine {
+namespace rigel::engine {
 
 namespace {
 
@@ -90,4 +90,4 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
 }
 
 
-}}
+}

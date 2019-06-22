@@ -25,7 +25,7 @@
 #include "game_logic/entity_factory.hpp"
 
 
-namespace rigel { namespace game_logic { namespace player {
+namespace rigel::game_logic::player {
 
 namespace {
 
@@ -52,7 +52,7 @@ void spawnRegularShotImpactEffect(
   const base::Point<float> velocity
 ) {
   const auto debrisPosition = position + regularShotDebrisOffset(velocity);
-  spawnFloatingOneShotSprite(entityFactory, data::ActorID::Shot_impact_FX_tile_burning, debrisPosition);
+  spawnFloatingOneShotSprite(entityFactory, data::ActorID::Shot_impact_FX, debrisPosition);
 }
 
 
@@ -210,4 +210,4 @@ void ProjectileSystem::spawnWallImpactEffect(
   }
 }
 
-}}}
+}

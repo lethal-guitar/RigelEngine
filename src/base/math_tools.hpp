@@ -19,7 +19,7 @@
 #include <algorithm>
 
 
-namespace rigel { namespace base {
+namespace rigel::base {
 
 template<typename T>
 T integerDivCeil(const T value, const T divisor) {
@@ -38,4 +38,4 @@ bool inRange(const T value, const T min, const T max) {
   return value >= min && value <= max;
 }
 
-}}
+}

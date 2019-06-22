@@ -19,7 +19,7 @@
 #include <bitset>
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 // The values are explicitly given in order to easily see which message has
 // which id. The ids are chosen to match how the original game references these
@@ -71,4 +71,4 @@ private:
   std::bitset<NUM_TUTORIAL_MESSAGES> mMessagesShownMask;
 };
 
-}}
+}

@@ -25,7 +25,7 @@
 #include "loader/actor_image_package.hpp"
 
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 class ResourceLoader;
 
@@ -35,4 +35,4 @@ data::map::LevelData loadLevel(
   const ResourceLoader& resources,
   data::Difficulty chosenDifficulty);
 
-}}
+}

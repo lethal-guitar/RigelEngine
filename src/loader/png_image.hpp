@@ -21,10 +21,10 @@
 #include <optional>
 #include <string>
 
-namespace rigel { namespace loader {
+namespace rigel::loader {
 
 std::optional<data::Image> loadPng(const std::string& path);
 
 void savePng(const std::string& path, const data::Image& image);
 
-}}
+}

@@ -19,7 +19,7 @@
 #include "base/warnings.hpp"
 
 
-namespace rigel { namespace data {
+namespace rigel::data {
 
 const base::Vector GameTraits::inGameViewPortOffset(8, 8);
 
@@ -33,4 +33,4 @@ const base::Extents GameTraits::mapViewPortSize(
 
 const base::Extents GameTraits::menuFontCharacterBitmapSizeTiles(1, 2);
 
-}}
+}
