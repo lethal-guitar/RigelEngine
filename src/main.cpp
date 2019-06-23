@@ -59,7 +59,7 @@ const auto DEFAULT_RESOLUTION_Y = 1080;
 
 struct SdlInitializer {
   SdlInitializer() {
-    throwIfFailed([]() { return SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO); });
+    check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
   }
   ~SdlInitializer() {
     SDL_Quit();
@@ -73,8 +73,7 @@ struct SdlInitializer {
 class OpenGlContext {
 public:
   explicit OpenGlContext(SDL_Window* pWindow)
-    : mpOpenGLContext(
-        throwIfCreationFailed([=]() { return SDL_GL_CreateContext(pWindow); }))
+    : mpOpenGLContext(check(SDL_GL_CreateContext(pWindow)))
   {
   }
   ~OpenGlContext() {
@@ -121,15 +120,13 @@ SDL_Window* createWindow() {
     displayMode.h = DEFAULT_RESOLUTION_Y;
   }
 
-  return throwIfCreationFailed([&displayMode]() {
-    return SDL_CreateWindow(
+  return check(SDL_CreateWindow(
       "Rigel Engine",
       SDL_WINDOWPOS_UNDEFINED,
       SDL_WINDOWPOS_UNDEFINED,
       displayMode.w,
       displayMode.h,
-      WINDOW_FLAGS | SDL_WINDOW_OPENGL);
-  });
+      WINDOW_FLAGS | SDL_WINDOW_OPENGL));
 }
 
 
@@ -156,7 +153,7 @@ void showBanner() {
 void initAndRunGame(const StartupOptions& config) {
   SdlInitializer initializeSDL;
 
-  throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
+  check(SDL_GL_LoadLibrary(nullptr));
 
 #ifdef RIGEL_USE_GL_ES
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
