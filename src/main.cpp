@@ -89,6 +89,17 @@ SDL_Window* createWindow() {
     displayMode.h = DEFAULT_RESOLUTION_Y;
   }
 
+#ifdef RIGEL_USE_GL_ES
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
   return sdl_utils::check(SDL_CreateWindow(
       "Rigel Engine",
       SDL_WINDOWPOS_UNDEFINED,
@@ -124,17 +135,6 @@ void initAndRunGame(const StartupOptions& config) {
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
-
-#ifdef RIGEL_USE_GL_ES
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
   SDL_GLContext pGlContext =
