@@ -99,13 +99,11 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 SoundSystem::SoundSystem()
   : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
 {
-  sdl_utils::throwIfFailed([]() {
-    return Mix_OpenAudio(
+  sdl_utils::check(Mix_OpenAudio(
       SAMPLE_RATE,
       MIX_DEFAULT_FORMAT,
       1, // mono
-      BUFFER_SIZE);
-  });
+      BUFFER_SIZE));
   Mix_HookMusic(
     [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
       auto pPlayer = static_cast<ImfPlayer*>(pUserData);

@@ -77,9 +77,8 @@ private:
     return mIsShareWareVersion;
   }
 
-  void showDebugText(const std::string& text) override;
-
 private:
+  SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
   engine::SoundSystem mSoundSystem;
   loader::ResourceLoader mResources;
@@ -107,7 +106,6 @@ private:
   engine::TiledTexture mUiSpriteSheet;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
-  std::string mDebugText;
 };
 
 }

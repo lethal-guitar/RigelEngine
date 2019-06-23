@@ -31,21 +31,18 @@ public:
 };
 
 
-template<typename CallableT>
-void throwIfFailed(CallableT operation) {
-  const auto result = operation();
+inline void check(int result) {
   if (result < 0) {
     throw Error();
   }
 }
 
-template<typename CallableT>
-auto throwIfCreationFailed(CallableT operation) {
-  auto result = operation();
-  if (result == nullptr) {
+template <typename ObjectPtr>
+auto check(ObjectPtr pObject) {
+  if (pObject == nullptr) {
     throw Error();
   }
-  return result;
+  return pObject;
 }
 
 }

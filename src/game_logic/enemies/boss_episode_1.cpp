@@ -102,7 +102,7 @@ void BossEpisode1::update(
 
     [&, this](const FlyingRightDroppingBombs&) {
       if (s.mpPerFrameState->mIsOddFrame) {
-        d.mpEntityFactory->createActor(rigel::data::ActorID::Napalm_bomb_small, position + BOMB_DROP_OFFSET);
+        d.mpEntityFactory->createActor(data::ActorID::Napalm_bomb_small, position + BOMB_DROP_OFFSET);
       }
       const auto result = engine::moveHorizontally(
         *d.mpCollisionChecker,

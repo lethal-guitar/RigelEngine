@@ -231,6 +231,8 @@ set(core_sources
     ui/high_score_list.hpp
     ui/hud_renderer.cpp
     ui/hud_renderer.hpp
+    ui/imgui_integration.cpp
+    ui/imgui_integration.hpp
     ui/ingame_message_display.cpp
     ui/ingame_message_display.hpp
     ui/intro_movie.cpp
@@ -270,6 +272,7 @@ target_link_libraries(rigel_core
     SDL2::Mixer
     entityx
     Boost::boost
+    dear_imgui
 
     PRIVATE
     std::filesystem

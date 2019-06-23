@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2019, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,20 +16,20 @@
 
 #pragma once
 
-#include "engine/timing.hpp"
+#include "base/warnings.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <SDL.h>
+RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::ui {
+namespace rigel::ui::imgui_integration {
 
-class FpsDisplay {
-public:
-  void updateAndRender(
-    engine::TimeDelta totalElapsed,
-    engine::TimeDelta renderingElapsed);
+void init(SDL_Window* pWindow, void* pGlContext);
+void shutdown();
 
-private:
-  float mSmoothedFrameTime = 0.0f;
-  float mWeightedFrameTime = 0.0f;
-};
+bool handleEvent(const SDL_Event& event);
+void beginFrame(SDL_Window* pWindow);
+void endFrame();
 
 }

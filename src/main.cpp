@@ -18,6 +18,7 @@
 #include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
+#include "ui/imgui_integration.hpp"
 
 #include "game_main.hpp"
 
@@ -34,7 +35,6 @@ RIGEL_RESTORE_WARNINGS
 
 
 using namespace rigel;
-using namespace rigel::sdl_utils;
 using namespace std;
 
 namespace ba = boost::algorithm;
@@ -56,36 +56,30 @@ const auto DEFAULT_RESOLUTION_X = 1920;
 const auto DEFAULT_RESOLUTION_Y = 1080;
 
 
-struct SdlInitializer {
-  SdlInitializer() {
-    throwIfFailed([]() { return SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO); });
-  }
-  ~SdlInitializer() {
-    SDL_Quit();
-  }
-
-  SdlInitializer(const SdlInitializer&) = delete;
-  SdlInitializer& operator=(const SdlInitializer&) = delete;
-};
-
-
-class OpenGlContext {
+template <typename Callback>
+class CallOnDestruction {
 public:
-  explicit OpenGlContext(SDL_Window* pWindow)
-    : mpOpenGLContext(
-        throwIfCreationFailed([=]() { return SDL_GL_CreateContext(pWindow); }))
+  explicit CallOnDestruction(Callback&& callback)
+    : mCallback(std::forward<Callback>(callback))
   {
   }
-  ~OpenGlContext() {
-    SDL_GL_DeleteContext(mpOpenGLContext);
+
+  ~CallOnDestruction() {
+    mCallback();
   }
 
-  OpenGlContext(const OpenGlContext&) = delete;
-  OpenGlContext& operator=(const OpenGlContext&) = delete;
+  CallOnDestruction(const CallOnDestruction&) = delete;
+  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
 
 private:
-  SDL_GLContext mpOpenGLContext;
+  Callback mCallback;
 };
+
+
+template <typename Callback>
+[[nodiscard]] auto defer(Callback&& callback) {
+  return CallOnDestruction{std::forward<Callback>(callback)};
+}
 
 
 SDL_Window* createWindow() {
@@ -95,15 +89,24 @@ SDL_Window* createWindow() {
     displayMode.h = DEFAULT_RESOLUTION_Y;
   }
 
-  return throwIfCreationFailed([&displayMode]() {
-    return SDL_CreateWindow(
+#ifdef RIGEL_USE_GL_ES
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+  return sdl_utils::check(SDL_CreateWindow(
       "Rigel Engine",
       SDL_WINDOWPOS_UNDEFINED,
       SDL_WINDOWPOS_UNDEFINED,
       displayMode.w,
       displayMode.h,
-      WINDOW_FLAGS | SDL_WINDOW_OPENGL);
-  });
+      WINDOW_FLAGS | SDL_WINDOW_OPENGL));
 }
 
 
@@ -128,27 +131,23 @@ void showBanner() {
 
 
 void initAndRunGame(const StartupOptions& config) {
-  SdlInitializer initializeSDL;
+  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+  auto sdlGuard = defer([]() { SDL_Quit(); });
 
-  throwIfFailed([]() { return SDL_GL_LoadLibrary(nullptr); });
+  sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
 
-#ifdef RIGEL_USE_GL_ES
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
+  SDL_GLContext pGlContext =
+    sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
+  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
-  Ptr<SDL_Window> pWindow(createWindow());
-  OpenGlContext glContext(pWindow.get());
   renderer::loadGlFunctions();
 
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
+
+  ui::imgui_integration::init(pWindow.get(), pGlContext);
+  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
   gameMain(config, pWindow.get());
 }

@@ -22,10 +22,15 @@
 #include "engine/timing.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "sdl_utils/error.hpp"
+#include "ui/imgui_integration.hpp"
 
 #include "game_session_mode.hpp"
 #include "intro_demo_loop_mode.hpp"
 #include "menu_mode.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <imgui.h>
+RIGEL_RESTORE_WARNINGS
 
 #include <cassert>
 #include <cmath>
@@ -67,7 +72,8 @@ void gameMain(const StartupOptions& options, SDL_Window* pWindow) {
 
 
 Game::Game(const std::string& gamePath, SDL_Window* pWindow)
-  : mRenderer(pWindow)
+  : mpWindow(pWindow)
+  , mRenderer(pWindow)
   , mResources(gamePath)
   , mIsShareWareVersion(true)
   , mRenderTarget(
@@ -85,7 +91,6 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
-  , mFpsDisplay(&mTextRenderer)
 {
 }
 
@@ -161,7 +166,8 @@ void Game::mainLoop() {
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
     mLastTime = startOfFrame;
 
-    mDebugText.clear();
+    ui::imgui_integration::beginFrame(mpWindow);
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
@@ -188,10 +194,7 @@ void Game::mainLoop() {
 
     mRenderer.clear();
     mRenderTarget.renderScaledToScreen(&mRenderer);
-
-    if (!mDebugText.empty()) {
-      mTextRenderer.drawMultiLineText(0, 2, mDebugText);
-    }
+    mRenderer.submitBatch();
 
     if (mShowFps) {
       const auto afterRender = high_resolution_clock::now();
@@ -200,6 +203,7 @@ void Game::mainLoop() {
       mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
     }
 
+    ui::imgui_integration::endFrame();
     mRenderer.swapBuffers();
   }
 }
@@ -219,6 +223,10 @@ GameMode::Context Game::makeModeContext() {
 
 
 void Game::handleEvent(const SDL_Event& event) {
+  if (ui::imgui_integration::handleEvent(event)) {
+    return;
+  }
+
   switch (event.type) {
     case SDL_KEYUP:
       if (event.key.keysym.sym == SDLK_F6) {
@@ -359,11 +367,6 @@ void Game::scheduleEnterMainMenu() {
 
 void Game::scheduleGameQuit() {
   mIsRunning = false;
-}
-
-
-void Game::showDebugText(const std::string& text) {
-  mDebugText = text;
 }
 
 }
