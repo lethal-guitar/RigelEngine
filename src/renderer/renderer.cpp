@@ -42,15 +42,8 @@ namespace {
 // slightly bigger vertical resolution in order to get a 4:3 aspect ratio.
 const auto ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT = 240;
 
-// By making the logical display bigger than the aspect-ratio corrected
-// original resolution, we can show text with debug info (e.g. FPS) without it
-// taking up too much space or being hard to read.
-const auto SCALE_FACTOR = 2;
-
-const auto LOGICAL_DISPLAY_WIDTH =
-  data::GameTraits::viewPortWidthPx * SCALE_FACTOR;
-const auto LOGICAL_DISPLAY_HEIGHT =
-  ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT * SCALE_FACTOR;
+const auto LOGICAL_DISPLAY_WIDTH = data::GameTraits::viewPortWidthPx;
+const auto LOGICAL_DISPLAY_HEIGHT = ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT;
 
 
 const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
