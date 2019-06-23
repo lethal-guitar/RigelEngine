@@ -614,7 +614,7 @@ void GameWorld::showDebugText() {
   infoText
     << "Entities: " << mEntities.size();
 
-  mpServiceProvider->showDebugText(infoText.str());
+  ui::drawText(infoText.str(), 0, 32, {255, 255, 255, 255});
 }
 
 }

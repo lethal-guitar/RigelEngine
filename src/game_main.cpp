@@ -169,8 +169,6 @@ void Game::mainLoop() {
     ui::imgui_integration::beginFrame(mpWindow);
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-    mDebugText.clear();
-
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
 
@@ -197,10 +195,6 @@ void Game::mainLoop() {
     mRenderer.clear();
     mRenderTarget.renderScaledToScreen(&mRenderer);
     mRenderer.submitBatch();
-
-    if (!mDebugText.empty()) {
-      mTextRenderer.drawMultiLineText(0, 2, mDebugText);
-    }
 
     if (mShowFps) {
       const auto afterRender = high_resolution_clock::now();
@@ -373,11 +367,6 @@ void Game::scheduleEnterMainMenu() {
 
 void Game::scheduleGameQuit() {
   mIsRunning = false;
-}
-
-
-void Game::showDebugText(const std::string& text) {
-  mDebugText = text;
 }
 
 }
