@@ -56,36 +56,6 @@ const auto DEFAULT_RESOLUTION_X = 1920;
 const auto DEFAULT_RESOLUTION_Y = 1080;
 
 
-struct SdlInitializer {
-  SdlInitializer() {
-    sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
-  }
-  ~SdlInitializer() {
-    SDL_Quit();
-  }
-
-  SdlInitializer(const SdlInitializer&) = delete;
-  SdlInitializer& operator=(const SdlInitializer&) = delete;
-};
-
-
-class OpenGlContext {
-public:
-  explicit OpenGlContext(SDL_Window* pWindow)
-    : mpOpenGLContext(sdl_utils::check(SDL_GL_CreateContext(pWindow)))
-  {
-  }
-  ~OpenGlContext() {
-    SDL_GL_DeleteContext(mpOpenGLContext);
-  }
-
-  OpenGlContext(const OpenGlContext&) = delete;
-  OpenGlContext& operator=(const OpenGlContext&) = delete;
-
-  SDL_GLContext mpOpenGLContext;
-};
-
-
 template <typename Callback>
 class CallOnDestruction {
 public:
@@ -150,7 +120,8 @@ void showBanner() {
 
 
 void initAndRunGame(const StartupOptions& config) {
-  SdlInitializer initializeSDL;
+  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+  auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
 
@@ -166,13 +137,16 @@ void initAndRunGame(const StartupOptions& config) {
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
-  OpenGlContext glContext(pWindow.get());
+  SDL_GLContext pGlContext =
+    sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
+  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
+
   renderer::loadGlFunctions();
 
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
 
-  ui::imgui_integration::init(pWindow.get(), glContext.mpOpenGLContext);
+  ui::imgui_integration::init(pWindow.get(), pGlContext);
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
   gameMain(config, pWindow.get());
