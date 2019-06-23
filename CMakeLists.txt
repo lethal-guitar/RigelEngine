@@ -100,6 +100,7 @@ add_subdirectory(3rd_party/dbopl)
 add_subdirectory(3rd_party/entityx)
 add_subdirectory(3rd_party/glad)
 add_subdirectory(3rd_party/speex_resampler)
+add_subdirectory(3rd_party/imgui)
 
 target_compile_options(entityx PRIVATE
     -w

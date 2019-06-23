@@ -18,6 +18,7 @@
 #include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
+#include "ui/imgui_integration.hpp"
 
 #include "game_main.hpp"
 
@@ -83,9 +84,34 @@ public:
   OpenGlContext(const OpenGlContext&) = delete;
   OpenGlContext& operator=(const OpenGlContext&) = delete;
 
-private:
   SDL_GLContext mpOpenGLContext;
 };
+
+
+template <typename Callback>
+class CallOnDestruction {
+public:
+  explicit CallOnDestruction(Callback&& callback)
+    : mCallback(std::forward<Callback>(callback))
+  {
+  }
+
+  ~CallOnDestruction() {
+    mCallback();
+  }
+
+  CallOnDestruction(const CallOnDestruction&) = delete;
+  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
+
+private:
+  Callback mCallback;
+};
+
+
+template <typename Callback>
+[[nodiscard]] auto defer(Callback&& callback) {
+  return CallOnDestruction{std::forward<Callback>(callback)};
+}
 
 
 SDL_Window* createWindow() {
@@ -149,6 +175,9 @@ void initAndRunGame(const StartupOptions& config) {
 
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
+
+  ui::imgui_integration::init(pWindow.get(), glContext.mpOpenGLContext);
+  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
   gameMain(config, pWindow.get());
 }

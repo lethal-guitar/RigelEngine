@@ -80,6 +80,7 @@ private:
   void showDebugText(const std::string& text) override;
 
 private:
+  SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
   engine::SoundSystem mSoundSystem;
   loader::ResourceLoader mResources;
