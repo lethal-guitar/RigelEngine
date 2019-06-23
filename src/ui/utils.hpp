@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include "base/color.hpp"
 #include "renderer/texture.hpp"
+
+#include <string_view>
 
 
 namespace rigel::loader {
@@ -29,5 +32,8 @@ renderer::OwningTexture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName);
+
+
+void drawText(std::string_view text, int x, int y, const base::Color& color);
 
 }
