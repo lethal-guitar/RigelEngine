@@ -16,7 +16,7 @@
 
 #include "fps_display.hpp"
 
-#include "menu_element_renderer.hpp"
+#include "utils.hpp"
 
 #include <cmath>
 #include <iomanip>
@@ -31,12 +31,6 @@ namespace {
 const auto SMOOTHING = 0.7f;
 const auto NEW_FRAME_TIME_WEIGHT = 0.1f;
 
-}
-
-
-FpsDisplay::FpsDisplay(MenuElementRenderer* pTextRenderer)
-  : mpTextRenderer(pTextRenderer)
-{
 }
 
 
@@ -62,7 +56,8 @@ void FpsDisplay::updateAndRender(
     << totalElapsed * 1000.0 << " ms, "
     << renderingElapsed * 1000.0 << " ms (inner)";
 
-  mpTextRenderer->drawText(0, 0, statsReport.str());
+  const auto reportString = statsReport.str();
+  drawText(reportString, 0, 0, {255, 255, 255, 255});
 }
 
 }

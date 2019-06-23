@@ -91,7 +91,6 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
-  , mFpsDisplay(&mTextRenderer)
 {
 }
 
@@ -199,8 +198,6 @@ void Game::mainLoop() {
     mRenderTarget.renderScaledToScreen(&mRenderer);
     mRenderer.submitBatch();
 
-    ui::imgui_integration::endFrame();
-
     if (!mDebugText.empty()) {
       mTextRenderer.drawMultiLineText(0, 2, mDebugText);
     }
@@ -212,6 +209,7 @@ void Game::mainLoop() {
       mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
     }
 
+    ui::imgui_integration::endFrame();
     mRenderer.swapBuffers();
   }
 }

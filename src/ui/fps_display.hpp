@@ -19,22 +19,15 @@
 #include "engine/timing.hpp"
 
 
-namespace rigel::ui { class MenuElementRenderer; }
-
-
 namespace rigel::ui {
 
 class FpsDisplay {
 public:
-  explicit FpsDisplay(MenuElementRenderer* pTextRenderer);
-
   void updateAndRender(
     engine::TimeDelta totalElapsed,
     engine::TimeDelta renderingElapsed);
 
 private:
-  MenuElementRenderer* mpTextRenderer;
-
   float mSmoothedFrameTime = 0.0f;
   float mWeightedFrameTime = 0.0f;
 };
