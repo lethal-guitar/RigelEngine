@@ -35,7 +35,6 @@ RIGEL_RESTORE_WARNINGS
 
 
 using namespace rigel;
-using namespace rigel::sdl_utils;
 using namespace std;
 
 namespace ba = boost::algorithm;
@@ -59,7 +58,7 @@ const auto DEFAULT_RESOLUTION_Y = 1080;
 
 struct SdlInitializer {
   SdlInitializer() {
-    check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+    sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
   }
   ~SdlInitializer() {
     SDL_Quit();
@@ -73,7 +72,7 @@ struct SdlInitializer {
 class OpenGlContext {
 public:
   explicit OpenGlContext(SDL_Window* pWindow)
-    : mpOpenGLContext(check(SDL_GL_CreateContext(pWindow)))
+    : mpOpenGLContext(sdl_utils::check(SDL_GL_CreateContext(pWindow)))
   {
   }
   ~OpenGlContext() {
@@ -120,7 +119,7 @@ SDL_Window* createWindow() {
     displayMode.h = DEFAULT_RESOLUTION_Y;
   }
 
-  return check(SDL_CreateWindow(
+  return sdl_utils::check(SDL_CreateWindow(
       "Rigel Engine",
       SDL_WINDOWPOS_UNDEFINED,
       SDL_WINDOWPOS_UNDEFINED,
@@ -153,7 +152,7 @@ void showBanner() {
 void initAndRunGame(const StartupOptions& config) {
   SdlInitializer initializeSDL;
 
-  check(SDL_GL_LoadLibrary(nullptr));
+  sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
 
 #ifdef RIGEL_USE_GL_ES
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -166,7 +165,7 @@ void initAndRunGame(const StartupOptions& config) {
 #endif
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-  Ptr<SDL_Window> pWindow(createWindow());
+  sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
   OpenGlContext glContext(pWindow.get());
   renderer::loadGlFunctions();
 
