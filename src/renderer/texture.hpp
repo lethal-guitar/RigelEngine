@@ -217,6 +217,10 @@ public:
     std::size_t height);
   ~RenderTargetTexture();
 
+  // TODO: Remove these once we have VS 2019 on CI
+  RenderTargetTexture(RenderTargetTexture&&) = default;
+  RenderTargetTexture& operator=(RenderTargetTexture&&) = default;
+
 private:
   RenderTargetTexture(
     const Renderer::RenderTargetHandles& handles,
