@@ -57,9 +57,6 @@ public:
     const base::Rect<int>& destRect
   ) const;
 
-  /** Render entire texture scaled to fill the entire screen */
-  void renderScaledToScreen(Renderer* pRenderer) const;
-
   int width() const {
     return mData.mWidth;
   }
