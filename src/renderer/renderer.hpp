@@ -102,6 +102,8 @@ public:
 
     StateSaver(const StateSaver&) = delete;
     StateSaver& operator=(const StateSaver&) = delete;
+    StateSaver(StateSaver&&) = default;
+    StateSaver& operator=(StateSaver&&) = default;
 
   private:
     Renderer* mpRenderer;
@@ -116,6 +118,9 @@ public:
   ~Renderer();
 
   base::Rect<int> fullScreenRect() const;
+  base::Size<int> windowSize() const {
+    return mWindowSize;
+  }
 
   void setOverlayColor(const base::Color& color);
   void setColorModulation(const base::Color& colorModulation);
@@ -248,10 +253,10 @@ private:
   TextureData mWaterSurfaceAnimTexture;
 
   GLuint mCurrentFbo;
+  base::Size<int> mWindowSize;
   base::Size<int> mCurrentFramebufferSize;
 
   glm::mat4 mProjectionMatrix;
-  base::Rect<int> mDefaultViewport;
   std::optional<base::Rect<int>> mClipRect;
   glm::vec2 mGlobalTranslation;
   glm::vec2 mGlobalScale;

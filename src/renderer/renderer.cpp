@@ -31,21 +31,6 @@ namespace rigel::renderer {
 
 namespace {
 
-// The game's original 320x200 resolution would give us a 16:10 aspect ratio
-// when using square pixels, but monitors of the time had a 4:3 aspect ratio,
-// and that's what the game's graphics were designed for (very noticeable e.g.
-// with the earth in the Apogee logo). It worked out fine back then because
-// CRTs can show non-square pixels, but that's not possible with today's
-// screens anymore. Therefore, we need to stretch the image slightly before
-// actually rendering it. We do that by rendering the game into a 320x200
-// render target, and then stretching that onto our logical display which has a
-// slightly bigger vertical resolution in order to get a 4:3 aspect ratio.
-const auto ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT = 240;
-
-const auto LOGICAL_DISPLAY_WIDTH = data::GameTraits::viewPortWidthPx;
-const auto LOGICAL_DISPLAY_HEIGHT = ASPECT_RATIO_CORRECTED_VIEW_PORT_HEIGHT;
-
-
 const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
 
 
@@ -194,35 +179,6 @@ void main() {
   OUTPUT_COLOR = mix(color, applyWaterEffect(color), maskValue);
 }
 )shd";
-
-
-base::Rect<int> determineDefaultViewport(SDL_Window* pWindow) {
-  // This calculates the required view port coordinates to have aspect-ratio
-  // correct scaling from the internal display resolution to the window's
-  // actual size.
-  int windowWidthInt = 0;
-  int windowHeightInt = 0;
-  SDL_GetWindowSize(pWindow, &windowWidthInt, &windowHeightInt);
-
-  const auto windowWidth = float(windowWidthInt);
-  const auto windowHeight = float(windowHeightInt);
-
-  const auto widthRatio = windowWidth / LOGICAL_DISPLAY_WIDTH;
-  const auto heightRatio = windowHeight / LOGICAL_DISPLAY_HEIGHT;
-
-  const auto smallerRatio = std::min(widthRatio, heightRatio);
-  const auto usableWidth = LOGICAL_DISPLAY_WIDTH * smallerRatio;
-  const auto usableHeight = LOGICAL_DISPLAY_HEIGHT * smallerRatio;
-
-  // Calculate the appropriate offset to center the viewport inside the window
-  const auto offsetX = (windowWidth - usableWidth) / 2.0f;
-  const auto offsetY = (windowHeight - usableHeight) / 2.0f;
-
-  return {
-    {int(offsetX), int(offsetY)},
-    {int(usableWidth), int(usableHeight)}
-  };
-}
 
 
 void* toAttribOffset(std::uintptr_t offset) {
@@ -399,8 +355,14 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
   , mCurrentFbo(0)
-  , mCurrentFramebufferSize(LOGICAL_DISPLAY_WIDTH, LOGICAL_DISPLAY_HEIGHT)
-  , mDefaultViewport(determineDefaultViewport(pWindow))
+  , mWindowSize(
+      [&]() {
+        int windowWidth = 0;
+        int windowHeight = 0;
+        SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
+        return base::Size<int>{windowWidth, windowHeight};
+      }())
+  , mCurrentFramebufferSize(mWindowSize)
   , mGlobalTranslation(0.0f, 0.0f)
   , mGlobalScale(1.0f, 1.0f)
 {
@@ -728,6 +690,7 @@ void Renderer::setGlobalScale(const base::Point<float>& scale) {
     submitBatch();
 
     mGlobalScale = glScale;
+    glPointSize(std::min(scale.x, scale.y));
     updateProjectionMatrix();
   }
 }
@@ -775,8 +738,8 @@ void Renderer::setRenderTarget(const RenderTarget& target) {
     mCurrentFramebufferSize = target.mSize;
     mCurrentFbo = target.mFbo;
   } else {
-    mCurrentFramebufferSize.width = LOGICAL_DISPLAY_WIDTH;
-    mCurrentFramebufferSize.height = LOGICAL_DISPLAY_HEIGHT;
+    mCurrentFramebufferSize.width = mWindowSize.width;
+    mCurrentFramebufferSize.height = mWindowSize.height;
     mCurrentFbo = 0;
   }
 
@@ -1005,15 +968,7 @@ bool Renderer::isVisible(const base::Rect<int>& rect) const {
 
 void Renderer::onRenderTargetChanged() {
   glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFbo);
-  if (mCurrentFbo == 0) {
-    glViewport(
-      mDefaultViewport.topLeft.x,
-      mDefaultViewport.topLeft.y,
-      mDefaultViewport.size.width,
-      mDefaultViewport.size.height);
-  } else {
-    glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
-  }
+  glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
 
   updateProjectionMatrix();
 
@@ -1030,9 +985,9 @@ void Renderer::updateProjectionMatrix() {
     float(mCurrentFramebufferSize.height),
     0.0f);
 
-  mProjectionMatrix = glm::translate(
-    glm::scale(projection, glm::vec3(mGlobalScale, 1.0f)),
-    glm::vec3(mGlobalTranslation, 0.0f));
+  mProjectionMatrix = glm::scale(
+    glm::translate(projection, glm::vec3(mGlobalTranslation, 0.0f)),
+    glm::vec3(mGlobalScale, 1.0f));
 
   updateShaders();
 }

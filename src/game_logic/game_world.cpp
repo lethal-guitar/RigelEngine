@@ -118,6 +118,48 @@ void drawBossHealthBar(
     HEALTH_BAR_TILE_INDEX, {HEALTH_BAR_START_PX, healthBarSize});
 }
 
+
+auto asVec(const base::Size<int>& size) {
+  return base::Vector{size.width, size.height};
+}
+
+
+auto asSize(const base::Vector& vec) {
+  return base::Size{vec.x, vec.y};
+}
+
+
+[[nodiscard]] auto setupIngameViewport(
+  renderer::Renderer* pRenderer,
+  const int screenShakeOffsetX
+) {
+  auto saved = renderer::Renderer::StateSaver{pRenderer};
+
+  const auto translation = pRenderer->globalTranslation();
+  const auto scale = pRenderer->globalScale();
+
+  auto applyScale = [&](const base::Vector& vec) {
+    return base::Vector{
+      base::roundToInt(vec.x * scale.x),
+      base::roundToInt(vec.y * scale.y)};
+  };
+
+  auto transform = [&](const base::Vector& vec) {
+    return translation + applyScale(vec);
+  };
+
+
+  const auto offset = data::GameTraits::inGameViewPortOffset +
+    base::Vector{screenShakeOffsetX, 0};
+
+  pRenderer->setClipRect(base::Rect<int>{
+    transform(offset),
+    asSize(applyScale(asVec(data::GameTraits::inGameViewPortSize)))});
+  pRenderer->setGlobalTranslation(transform(offset));
+
+  return saved;
+}
+
 }
 
 
@@ -405,16 +447,7 @@ void GameWorld::render() {
   mpRenderer->clear();
 
   {
-    renderer::Renderer::StateSaver saveState(mpRenderer);
-    mpRenderer->setClipRect(base::Rect<int>{
-      {data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
-      data::GameTraits::inGameViewPortOffset.y},
-      {data::GameTraits::inGameViewPortSize.width,
-      data::GameTraits::inGameViewPortSize.height}});
-
-    mpRenderer->setGlobalTranslation({
-      data::GameTraits::inGameViewPortOffset.x + mScreenShakeOffsetX,
-      data::GameTraits::inGameViewPortOffset.y});
+    const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
 
     if (!mScreenFlashColor) {
       mpSystems->render(mEntities, mBackdropFlashColor);

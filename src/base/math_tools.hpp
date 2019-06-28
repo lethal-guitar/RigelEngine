@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cmath>
+
 
 namespace rigel::base {
 
@@ -34,6 +36,12 @@ auto lerp(const T a, const T b, const float factor) {
 template<typename T>
 bool inRange(const T value, const T min, const T max) {
   return value >= min && value <= max;
+}
+
+
+template<typename T>
+int roundToInt(const T value) {
+  return static_cast<int>(std::round(value));
 }
 
 }

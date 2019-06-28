@@ -57,9 +57,6 @@ public:
     const base::Rect<int>& destRect
   ) const;
 
-  /** Render entire texture scaled to fill the entire screen */
-  void renderScaledToScreen(Renderer* pRenderer) const;
-
   int width() const {
     return mData.mWidth;
   }
@@ -216,6 +213,10 @@ public:
     std::size_t width,
     std::size_t height);
   ~RenderTargetTexture();
+
+  // TODO: Remove these once we have VS 2019 on CI
+  RenderTargetTexture(RenderTargetTexture&&) = default;
+  RenderTargetTexture& operator=(RenderTargetTexture&&) = default;
 
 private:
   RenderTargetTexture(

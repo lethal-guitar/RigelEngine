@@ -62,6 +62,46 @@ auto loadScripts(const loader::ResourceLoader& resources) {
   return allScripts;
 }
 
+
+// The game's original 320x200 resolution would give us a 16:10 aspect ratio
+// when using square pixels, but monitors of the time had a 4:3 aspect ratio,
+// and that's what the game's graphics were designed for (very noticeable e.g.
+// with the earth in the Apogee logo). CRTs are not limited to square pixels,
+// and the monitor would stretch the 320x200 into the right shape for a 4:3
+// picture.
+const auto TARGET_ASPECT_RATIO = 4.0f / 3.0f;
+
+
+[[nodiscard]] auto setupSimpleUpscaling(renderer::Renderer* pRenderer) {
+  auto saved = renderer::Renderer::StateSaver{pRenderer};
+
+  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
+  const auto windowWidth = float(windowWidthInt);
+  const auto windowHeight = float(windowHeightInt);
+
+  const auto usableWidth = windowWidth > windowHeight
+    ? TARGET_ASPECT_RATIO * windowHeight
+    : windowWidth;
+  const auto usableHeight = windowHeight >= windowWidth
+    ? 1.0f / TARGET_ASPECT_RATIO * windowWidth
+    : windowHeight;
+
+  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
+  const auto heightScale = usableHeight / data::GameTraits::viewPortHeightPx;
+
+  pRenderer->setGlobalScale({widthScale, heightScale});
+
+  const auto offsetX = (windowWidth - usableWidth) / 2.0f;
+  const auto offsetY = (windowHeight - usableHeight) / 2.0f;
+  const auto offset = base::Vector{int(offsetX), int(offsetY)};
+  pRenderer->setGlobalTranslation(offset);
+
+  pRenderer->setClipRect(base::Rect<int>{
+    offset, {int(usableWidth), int(usableHeight)}});
+
+  return saved;
+}
+
 }
 
 
@@ -77,9 +117,14 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mResources(gamePath)
   , mIsShareWareVersion(true)
   , mRenderTarget(
-      &mRenderer,
-      data::GameTraits::viewPortWidthPx,
-      data::GameTraits::viewPortHeightPx)
+      [&]() {
+        int windowWidth = 0;
+        int windowHeight = 0;
+        SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
+
+        return renderer::RenderTargetTexture{
+          &mRenderer, static_cast<size_t>(windowWidth), static_cast<size_t>(windowHeight)};
+      }())
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
@@ -143,9 +188,11 @@ void Game::run(const StartupOptions& startupOptions) {
 
 
 void Game::showAntiPiracyScreen() {
+  auto saved = setupSimpleUpscaling(&mRenderer);
+
   auto antiPiracyImage = mResources.loadAntiPiracyImage();
   renderer::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
-  imageTexture.renderScaledToScreen(&mRenderer);
+  imageTexture.render(&mRenderer, 0, 0);
   mRenderer.submitBatch();
   mRenderer.swapBuffers();
 
@@ -171,6 +218,7 @@ void Game::mainLoop() {
 
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+      auto saved = setupSimpleUpscaling(&mRenderer);
 
       while (mIsMinimized && SDL_WaitEvent(&event)) {
         handleEvent(event);
@@ -193,7 +241,7 @@ void Game::mainLoop() {
     }
 
     mRenderer.clear();
-    mRenderTarget.renderScaledToScreen(&mRenderer);
+    mRenderTarget.render(&mRenderer, 0, 0);
     mRenderer.submitBatch();
 
     if (mShowFps) {
@@ -285,7 +333,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
     mRenderer.clear();
 
     mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
-    mRenderTarget.renderScaledToScreen(&mRenderer);
+    mRenderTarget.render(&mRenderer, 0, 0);
     mRenderer.swapBuffers();
 
     if (fadeFactor >= 1.0) {

@@ -64,11 +64,6 @@ void TextureBase::renderScaled(
 }
 
 
-void TextureBase::renderScaledToScreen(renderer::Renderer* pRenderer) const {
-  renderScaled(pRenderer, pRenderer->fullScreenRect());
-}
-
-
 void TextureBase::render(
   renderer::Renderer* pRenderer,
   const int x,
