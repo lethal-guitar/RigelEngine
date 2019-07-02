@@ -93,17 +93,38 @@ public:
     {
     }
 
+    StateSaver(StateSaver&& other) noexcept
+      : mpRenderer(other.mpRenderer)
+      , mClipRect(other.mClipRect)
+      , mGlobalTranslation(other.mGlobalTranslation)
+      , mGlobalScale(other.mGlobalScale)
+      , mRenderTarget(other.mRenderTarget)
+    {
+      // Mark the moved-from object as such (see ~StateSaver)
+      other.mpRenderer = nullptr;
+    }
+
+    StateSaver& operator=(StateSaver&& other) noexcept {
+      if (&other != this) {
+        *this = std::move(other);
+      }
+
+      return *this;
+    }
+
     ~StateSaver() {
-      mpRenderer->setRenderTarget(mRenderTarget);
-      mpRenderer->setClipRect(mClipRect);
-      mpRenderer->setGlobalTranslation(mGlobalTranslation);
-      mpRenderer->setGlobalScale(mGlobalScale);
+      // A nullptr renderer indicates a moved-from state, where we shouldn't
+      // reset anything
+      if (mpRenderer) {
+        mpRenderer->setRenderTarget(mRenderTarget);
+        mpRenderer->setClipRect(mClipRect);
+        mpRenderer->setGlobalTranslation(mGlobalTranslation);
+        mpRenderer->setGlobalScale(mGlobalScale);
+      }
     }
 
     StateSaver(const StateSaver&) = delete;
     StateSaver& operator=(const StateSaver&) = delete;
-    StateSaver(StateSaver&&) = default;
-    StateSaver& operator=(StateSaver&&) = default;
 
   private:
     Renderer* mpRenderer;
