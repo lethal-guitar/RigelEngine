@@ -40,7 +40,7 @@ bool inRange(const T value, const T min, const T max) {
 
 
 template<typename T>
-int roundToInt(const T value) {
+int round(const T value) {
   return static_cast<int>(std::round(value));
 }
 
