@@ -23,7 +23,6 @@
 #include <speex/speex_resampler.h>
 
 #include <cassert>
-#include <cmath>
 #include <utility>
 
 namespace rigel::engine {
@@ -88,8 +87,7 @@ void appendRampToZero(data::AudioBuffer& buffer) {
   for (int i=1; i<rampLength; ++i) {
     const auto interpolation = i / static_cast<double>(rampLength);
     const auto rampedValue = lastSample * (1.0 - interpolation);
-    buffer.mSamples.push_back(static_cast<data::Sample>(
-      std::round(rampedValue)));
+    buffer.mSamples.push_back(base::roundTo<data::Sample>(rampedValue));
   }
 }
 
