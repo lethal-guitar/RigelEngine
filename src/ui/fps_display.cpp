@@ -16,9 +16,10 @@
 
 #include "fps_display.hpp"
 
+#include "base/math_tools.hpp"
+
 #include "utils.hpp"
 
-#include <cmath>
 #include <iomanip>
 #include <string>
 #include <sstream>
@@ -46,8 +47,7 @@ void FpsDisplay::updateAndRender(
     + mSmoothedFrameTime*NEW_FRAME_TIME_WEIGHT;
 
 
-  const auto smoothedFps =
-    static_cast<int>(std::round(1.0f / mWeightedFrameTime));
+  const auto smoothedFps = base::round(1.0f / mWeightedFrameTime);
 
   std::stringstream statsReport;
   statsReport
