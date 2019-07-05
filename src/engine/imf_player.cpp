@@ -16,9 +16,8 @@
 
 #include "imf_player.hpp"
 
+#include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
-
-#include <cmath>
 
 
 namespace rigel::engine {
@@ -28,7 +27,7 @@ namespace {
 int imfDelayToSamples(const int delay, const int sampleRate) {
   const auto samplesPerImfTick =
     static_cast<double>(sampleRate) / data::GameTraits::musicPlaybackRate;
-  return static_cast<int>(std::round(delay * samplesPerImfTick));
+  return base::round(delay * samplesPerImfTick);
 }
 
 }

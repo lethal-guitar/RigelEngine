@@ -28,8 +28,8 @@ public:
     engine::TimeDelta renderingElapsed);
 
 private:
-  float mSmoothedFrameTime = 0.0f;
-  float mWeightedFrameTime = 0.0f;
+  float mPreFilteredFrameTime = 0.0f;
+  float mFilteredFrameTime = 0.0f;
 };
 
 }

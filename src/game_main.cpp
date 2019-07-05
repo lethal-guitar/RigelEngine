@@ -17,6 +17,7 @@
 #include "game_main.hpp"
 #include "game_main.ipp"
 
+#include "base/math_tools.hpp"
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
@@ -33,7 +34,6 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <cassert>
-#include <cmath>
 
 
 namespace rigel {
@@ -325,7 +325,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 
     if (fadeFactor < 1.0) {
       const auto alpha = doFadeIn ? fadeFactor : 1.0 - fadeFactor;
-      mAlphaMod = static_cast<std::uint8_t>(std::round(255.0 * alpha));
+      mAlphaMod = base::roundTo<std::uint8_t>(255.0 * alpha);
     } else {
       mAlphaMod = doFadeIn ? 255 : 0;
     }

@@ -140,8 +140,8 @@ auto asSize(const base::Vector& vec) {
 
   auto applyScale = [&](const base::Vector& vec) {
     return base::Vector{
-      base::roundToInt(vec.x * scale.x),
-      base::roundToInt(vec.y * scale.y)};
+      base::round(vec.x * scale.x),
+      base::round(vec.y * scale.y)};
   };
 
   auto transform = [&](const base::Vector& vec) {

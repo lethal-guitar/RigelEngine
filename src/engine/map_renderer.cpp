@@ -16,10 +16,10 @@
 
 #include "map_renderer.hpp"
 
+#include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
 
 #include <cfenv>
-#include <cmath>
 #include <iostream>
 
 
@@ -104,8 +104,7 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
     // then.
     const double speedFactor = autoScrollX ? 2.0 : 1.0;
     std::fesetround(FE_TONEAREST);
-    const auto offsetPixels = static_cast<int>(
-      std::round(mElapsedFrames60Fps / speedFactor));
+    const auto offsetPixels = base::round(mElapsedFrames60Fps / speedFactor);
     ++mElapsedFrames60Fps;
 
     if (autoScrollX) {

@@ -16,6 +16,7 @@
 
 #include "menu_element_renderer.hpp"
 
+#include "base/math_tools.hpp"
 #include "base/warnings.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
@@ -28,7 +29,6 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <cassert>
-#include <cmath>
 #include <stdexcept>
 
 
@@ -373,7 +373,7 @@ void MenuElementRenderer::drawTextEntryCursor(
 ) const {
   const auto animTicks =
     engine::timeToSlowTicks(elapsedTime) / CURSOR_ANIM_DELAY;
-  const auto animState = static_cast<int>(std::round(animTicks));
+  const auto animState = base::round(animTicks);
   drawTextEntryCursor(x, y, animState % NUM_CURSOR_ANIM_STATES);
 }
 
@@ -385,7 +385,7 @@ void MenuElementRenderer::drawSelectionIndicator(
 ) const {
   const auto animTicks =
     engine::timeToSlowTicks(elapsedTime) / MENU_INDICATOR_ANIM_DELAY;
-  const auto animState = static_cast<int>(std::round(animTicks));
+  const auto animState = base::round(animTicks);
   drawSelectionIndicator(x, y, animState % NUM_MENU_INDICATOR_STATES);
 }
 

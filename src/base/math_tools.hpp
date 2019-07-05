@@ -39,9 +39,15 @@ bool inRange(const T value, const T min, const T max) {
 }
 
 
+template<typename U, typename T>
+U roundTo(const T value) {
+  return static_cast<U>(std::round(value));
+}
+
+
 template<typename T>
-int roundToInt(const T value) {
-  return static_cast<int>(std::round(value));
+int round(const T value) {
+  return roundTo<int>(value);
 }
 
 }

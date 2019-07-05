@@ -16,9 +16,10 @@
 
 #include "fps_display.hpp"
 
+#include "base/math_tools.hpp"
+
 #include "utils.hpp"
 
-#include <cmath>
 #include <iomanip>
 #include <string>
 #include <sstream>
@@ -28,8 +29,8 @@ namespace rigel::ui {
 
 namespace {
 
-const auto SMOOTHING = 0.7f;
-const auto NEW_FRAME_TIME_WEIGHT = 0.1f;
+const auto PRE_FILTER_WEIGHT = 0.7f;
+const auto FILTER_WEIGHT = 0.9f;
 
 }
 
@@ -38,16 +39,12 @@ void FpsDisplay::updateAndRender(
   const engine::TimeDelta totalElapsed,
   const engine::TimeDelta renderingElapsed
 ) {
-  mSmoothedFrameTime = (mSmoothedFrameTime * SMOOTHING) +
-    (static_cast<float>(totalElapsed) * (1.0f-SMOOTHING));
+  mPreFilteredFrameTime = base::lerp(
+    static_cast<float>(totalElapsed), mPreFilteredFrameTime, PRE_FILTER_WEIGHT);
+  mFilteredFrameTime = base::lerp(
+    mPreFilteredFrameTime, mFilteredFrameTime, FILTER_WEIGHT);
 
-  mWeightedFrameTime =
-    mWeightedFrameTime * (1.0f - NEW_FRAME_TIME_WEIGHT)
-    + mSmoothedFrameTime*NEW_FRAME_TIME_WEIGHT;
-
-
-  const auto smoothedFps =
-    static_cast<int>(std::round(1.0f / mWeightedFrameTime));
+  const auto smoothedFps = base::round(1.0f / mFilteredFrameTime);
 
   std::stringstream statsReport;
   statsReport
