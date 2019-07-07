@@ -362,6 +362,16 @@ void Game::applyChangedOptions() {
     mSoundSystem.setMusicVolume(newVolume);
   }
 
+  if (
+    currentOptions.mSoundVolume != mPreviousOptions.mSoundVolume ||
+    currentOptions.mSoundOn != mPreviousOptions.mSoundOn
+  ) {
+    const auto newVolume = currentOptions.mSoundOn
+      ? currentOptions.mSoundVolume
+      : 0.0f;
+    mSoundSystem.setSoundVolume(newVolume);
+  }
+
   if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
     SDL_GL_SetSwapInterval(mUserProfile.mOptions.mEnableVsync ? 1 : 0);
   }

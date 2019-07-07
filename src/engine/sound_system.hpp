@@ -46,6 +46,7 @@ public:
   void stopSound(SoundHandle handle) const;
 
   void setMusicVolume(float volume);
+  void setSoundVolume(float volume);
 
 private:
   static const int MAX_CONCURRENT_SOUNDS = 64;

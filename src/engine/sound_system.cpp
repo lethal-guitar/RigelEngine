@@ -116,6 +116,7 @@ SoundSystem::SoundSystem()
   Mix_AllocateChannels(MAX_CONCURRENT_SOUNDS);
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
+  setSoundVolume(data::SOUND_VOLUME_DEFAULT);
 }
 
 
@@ -208,6 +209,18 @@ void SoundSystem::stopSound(const SoundHandle handle) const {
 
 void SoundSystem::setMusicVolume(const float volume) {
   mpMusicPlayer->setVolume(volume);
+}
+
+
+void SoundSystem::setSoundVolume(const float volume) {
+  const auto sdlVolume = static_cast<int>(
+    std::clamp(volume, 0.0f, 1.0f) * MIX_MAX_VOLUME);
+
+  for (auto& sound : mSounds) {
+    if (sound.mpMixChunk) {
+      Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
+    }
+  }
 }
 
 }
