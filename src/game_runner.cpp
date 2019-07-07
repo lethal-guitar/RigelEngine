@@ -135,6 +135,14 @@ void GameRunner::handleEvent(const SDL_Event& event) {
 
     [&event](Menu& state) {
       state.handleEvent(event);
+    },
+
+    [&, this](const ui::OptionsMenu& options) {
+      const auto escapePressed = isNonRepeatKeyDown(event) &&
+        event.key.keysym.sym == SDLK_ESCAPE;
+      if (escapePressed || options.isFinished()) {
+        mStateStack.pop();
+      }
     });
 }
 
@@ -192,6 +200,13 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
   switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
       enterMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook);
+      break;
+
+    case SDLK_F1:
+      if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
+        pWorld->mPlayerInput = {};
+      }
+      mStateStack.push(ui::OptionsMenu{&mContext.mpUserProfile->mOptions});
       break;
 
     case SDLK_F2:

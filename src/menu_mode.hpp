@@ -20,6 +20,9 @@
 #include "data/duke_script.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "ui/duke_script_runner.hpp"
+#include "ui/options_menu.hpp"
+
+#include <optional>
 
 
 namespace rigel {
@@ -38,11 +41,7 @@ private:
     EpisodeNotAvailableMessage,
     EpisodeNotAvailableMessageHighScores,
     NoSavedGameInSlotMessage,
-    GameOptions,
-    GameSpeedConfig,
     Instructions,
-    JoystickCalibration,
-    KeyboardConfig,
     MainMenu,
     OrderingInformation,
     RestoreGame,
@@ -59,6 +58,7 @@ private:
 
 private:
   Context mContext;
+  std::optional<ui::OptionsMenu> mOptionsMenu;
   MenuState mMenuState = MenuState::MainMenu;
   int mChosenEpisodeForNewGame = 0;
 };

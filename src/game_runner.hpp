@@ -25,6 +25,7 @@
 #include "game_logic/input.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "ui/duke_script_runner.hpp"
+#include "ui/options_menu.hpp"
 #include "ui/text_entry_widget.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -108,7 +109,7 @@ private:
     int mSlotIndex;
   };
 
-  using State = std::variant<World, Menu, SavedGameNameEntry>;
+  using State = std::variant<World, Menu, SavedGameNameEntry, ui::OptionsMenu>;
 
   static bool noopEventHook(const SDL_Event&) { return false; }
 

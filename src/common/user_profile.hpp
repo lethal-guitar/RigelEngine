@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "data/game_options.hpp"
 #include "data/high_score_list.hpp"
 #include "data/saved_game.hpp"
 
@@ -34,6 +35,7 @@ public:
 
   data::SaveSlotArray mSaveSlots;
   std::array<data::HighScoreList, data::NUM_EPISODES> mHighScoreLists;
+  data::GameOptions mOptions;
 
 private:
   std::optional<std::string> mProfilePath;

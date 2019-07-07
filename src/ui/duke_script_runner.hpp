@@ -59,6 +59,12 @@ public:
   void updateAndRender(engine::TimeDelta dt);
   void handleEvent(const SDL_Event& event);
 
+  std::optional<int> currentPageIndex() const {
+    return mPagerState
+      ? std::make_optional(mPagerState->mCurrentPageIndex)
+      : std::nullopt;
+  }
+
 private:
   enum class State {
     ReadyToExecute,
