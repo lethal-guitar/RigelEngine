@@ -150,6 +150,8 @@ void Game::run(const StartupOptions& startupOptions) {
 
   mMusicEnabled = startupOptions.mEnableMusic;
 
+  applyChangedOptions();
+
   // Check if running registered version
   if (
     mResources.hasFile("LCR.MNI") &&
@@ -253,6 +255,8 @@ void Game::mainLoop() {
 
     ui::imgui_integration::endFrame();
     mRenderer.swapBuffers();
+
+    applyChangedOptions();
   }
 }
 
@@ -342,6 +346,17 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
   }
 
   mRenderer.setColorModulation({255, 255, 255, 255});
+}
+
+
+void Game::applyChangedOptions() {
+  const auto& currentOptions = mUserProfile.mOptions;
+
+  if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
+    SDL_GL_SetSwapInterval(mUserProfile.mOptions.mEnableVsync ? 1 : 0);
+  }
+
+  mPreviousOptions = mUserProfile.mOptions;
 }
 
 

@@ -58,6 +58,8 @@ private:
 
   void performScreenFadeBlocking(bool doFadeIn);
 
+  void applyChangedOptions();
+
   // IGameServiceProvider implementation
   void fadeOutScreen() override;
   void fadeInScreen() override;
@@ -100,6 +102,7 @@ private:
   std::chrono::high_resolution_clock::time_point mLastTime;
 
   UserProfile mUserProfile;
+  data::GameOptions mPreviousOptions;
 
   ui::DukeScriptRunner mScriptRunner;
   loader::ScriptBundle mAllScripts;

@@ -16,6 +16,7 @@
 
 #include "renderer.hpp"
 
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "loader/palette.hpp"
 
@@ -372,7 +373,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  SDL_GL_SetSwapInterval(1);
+  SDL_GL_SetSwapInterval(data::ENABLE_VSYNC_DEFAULT ? 1 : 0);
 
   // Setup a VBO for streaming data to the GPU, stays bound all the time
   glGenBuffers(1, &mStreamVbo);
