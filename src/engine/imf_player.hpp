@@ -32,6 +32,7 @@ public:
   ImfPlayer& operator=(const ImfPlayer&) = delete;
 
   void playSong(data::Song&& song);
+  void setVolume(const float volume);
 
   void render(std::int16_t* pBuffer, std::size_t samplesRequired);
 
@@ -45,6 +46,7 @@ private:
   std::size_t mSamplesAvailable = 0;
   int mSampleRate;
 
+  std::atomic<float> mVolume;
   std::atomic<bool> mSongSwitchPending;
 };
 

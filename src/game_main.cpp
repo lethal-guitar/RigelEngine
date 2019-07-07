@@ -352,6 +352,16 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 void Game::applyChangedOptions() {
   const auto& currentOptions = mUserProfile.mOptions;
 
+  if (
+    currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
+    currentOptions.mMusicOn != mPreviousOptions.mMusicOn
+  ) {
+    const auto newVolume = currentOptions.mMusicOn
+      ? currentOptions.mMusicVolume
+      : 0.0f;
+    mSoundSystem.setMusicVolume(newVolume);
+  }
+
   if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
     SDL_GL_SetSwapInterval(mUserProfile.mOptions.mEnableVsync ? 1 : 0);
   }
