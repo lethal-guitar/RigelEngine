@@ -29,10 +29,7 @@ class ImfPlayer {
 public:
   explicit ImfPlayer(int sampleRate);
   ImfPlayer(const ImfPlayer&) = delete;
-  ImfPlayer(ImfPlayer&&) = delete;
-
   ImfPlayer& operator=(const ImfPlayer&) = delete;
-  ImfPlayer& operator=(ImfPlayer&&) = delete;
 
   void playSong(data::Song&& song);
 
