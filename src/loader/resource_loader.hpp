@@ -29,6 +29,7 @@
 #include "loader/palette.hpp"
 
 #include <string>
+#include <filesystem>
 
 
 namespace rigel::loader {
@@ -69,7 +70,7 @@ public:
   bool hasFile(const std::string& name) const;
 
 private:
-  std::string mGamePath;
+  std::filesystem::path mGamePath;
   loader::CMPFilePackage mFilePackage;
 
 public:

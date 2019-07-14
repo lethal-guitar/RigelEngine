@@ -30,6 +30,8 @@
 #include <iostream>
 #include <map>
 
+namespace fs = std::filesystem;
+
 
 namespace rigel::loader {
 
@@ -66,7 +68,7 @@ const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
 
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
-  : mGamePath(gamePath)
+  : mGamePath(fs::u8path(gamePath))
   , mFilePackage(gamePath + "NUKEM2.CMP")
   , mActorImagePackage(mFilePackage, gamePath + "/" + ASSET_REPLACEMENTS_PATH)
   , mAdlibSoundsPackage(mFilePackage)
@@ -196,7 +198,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
 
 
 data::Movie ResourceLoader::loadMovie(const std::string& name) const {
-  return loader::loadMovie(loadFile(mGamePath + name));
+  return loader::loadMovie(loadFile(mGamePath / fs::u8path(name)));
 }
 
 
