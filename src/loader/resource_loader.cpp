@@ -252,6 +252,11 @@ ScriptBundle ResourceLoader::loadScriptBundle(
 
 
 ByteBuffer ResourceLoader::file(const std::string& name) const {
+  const auto unpackedFilePath = mGamePath / fs::u8path(name);
+  if (fs::exists(unpackedFilePath)) {
+    return loadFile(unpackedFilePath);
+  }
+
   return mFilePackage.file(name);
 }
 
@@ -261,7 +266,8 @@ std::string ResourceLoader::fileAsText(const std::string& name) const {
 }
 
 bool ResourceLoader::hasFile(const std::string& name) const {
-  return mFilePackage.hasFile(name);
+  const auto unpackedFilePath = mGamePath / fs::u8path(name);
+  return fs::exists(unpackedFilePath) || mFilePackage.hasFile(name);
 }
 
 }
