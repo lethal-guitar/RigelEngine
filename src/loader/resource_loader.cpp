@@ -70,7 +70,10 @@ const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
 ResourceLoader::ResourceLoader(const std::string& gamePath)
   : mGamePath(fs::u8path(gamePath))
   , mFilePackage(gamePath + "NUKEM2.CMP")
-  , mActorImagePackage(mFilePackage, gamePath + "/" + ASSET_REPLACEMENTS_PATH)
+  , mActorImagePackage(
+      file(ActorImagePackage::IMAGE_DATA_FILE),
+      file(ActorImagePackage::ACTOR_INFO_FILE),
+      gamePath + "/" + ASSET_REPLACEMENTS_PATH)
   , mAdlibSoundsPackage(mFilePackage)
 {
 }

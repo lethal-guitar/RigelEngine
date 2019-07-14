@@ -30,9 +30,6 @@
 
 namespace rigel::loader {
 
-class CMPFilePackage;
-
-
 struct ActorData {
   struct Frame {
     base::Vector mDrawOffset;
@@ -49,8 +46,12 @@ using FontData = std::vector<data::Image>;
 
 class ActorImagePackage {
 public:
+  static constexpr auto IMAGE_DATA_FILE = "ACTORS.MNI";
+  static constexpr auto ACTOR_INFO_FILE = "ACTRINFO.MNI";
+
   explicit ActorImagePackage(
-    const CMPFilePackage& filePackage,
+    ByteBuffer imageData,
+    const ByteBuffer& actorInfoData,
     std::optional<std::string> maybeImageReplacementsPath = std::nullopt);
 
   ActorData loadActor(

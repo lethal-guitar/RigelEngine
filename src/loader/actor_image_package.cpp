@@ -19,7 +19,6 @@
 #include "base/container_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
-#include "loader/cmp_file_package.hpp"
 #include "loader/ega_image_decoder.hpp"
 #include "loader/file_utils.hpp"
 #include "loader/png_image.hpp"
@@ -51,14 +50,13 @@ std::string replacementImagePath(
 
 
 ActorImagePackage::ActorImagePackage(
-  const CMPFilePackage& filePackage,
+  ByteBuffer imageData,
+  const ByteBuffer& actorInfoData,
   std::optional<std::string> maybeImageReplacementsPath
 )
-  : mImageData(filePackage.file("ACTORS.MNI"))
+  : mImageData(std::move(imageData))
   , mMaybeReplacementsPath(std::move(maybeImageReplacementsPath))
 {
-  const auto actorInfoData = filePackage.file("ACTRINFO.MNI");
-
   LeStreamReader actorInfoReader(actorInfoData);
   const auto numEntries = actorInfoReader.peekU16();
 
