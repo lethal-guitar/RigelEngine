@@ -64,11 +64,18 @@ public:
 
   ScriptBundle loadScriptBundle(const std::string& fileName) const;
 
-  loader::CMPFilePackage mFilePackage;
-  loader::ActorImagePackage mActorImagePackage;
+  ByteBuffer file(const std::string& name) const;
+  std::string fileAsText(const std::string& name) const;
+  bool hasFile(const std::string& name) const;
 
 private:
   std::string mGamePath;
+  loader::CMPFilePackage mFilePackage;
+
+public:
+  loader::ActorImagePackage mActorImagePackage;
+
+private:
   loader::AudioPackage mAdlibSoundsPackage;
 };
 
