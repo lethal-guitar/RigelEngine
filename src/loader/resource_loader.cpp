@@ -58,8 +58,8 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 //
 // Where <actor_id> and <animation_frame> should be replaced with the
 // corresponding numbers. For example, to replace the images used for the
-// "blue guard" enemy, files named "actor_159_frame0.png" up to
-// "actor_159_frame12.png" should be provided.
+// "blue guard" enemy, files named "actor159_frame0.png" up to
+// "actor159_frame12.png" should be provided.
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
