@@ -152,8 +152,8 @@ void Game::run(const StartupOptions& startupOptions) {
 
   // Check if running registered version
   if (
-    mResources.mFilePackage.hasFile("LCR.MNI") &&
-    mResources.mFilePackage.hasFile("O1.MNI")
+    mResources.hasFile("LCR.MNI") &&
+    mResources.hasFile("O1.MNI")
   ) {
     mIsShareWareVersion = false;
   }

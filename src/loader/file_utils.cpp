@@ -48,6 +48,12 @@ ByteBuffer loadFile(const string& fileName) {
 }
 
 
+std::string asText(const ByteBuffer& buffer) {
+  const auto pBytesAsChars = reinterpret_cast<const char*>(buffer.data());
+  return std::string(pBytesAsChars, pBytesAsChars + buffer.size());
+}
+
+
 LeStreamReader::LeStreamReader(const ByteBuffer& data)
   : LeStreamReader(data.cbegin(), data.cend())
 {

@@ -404,7 +404,7 @@ void DukeScriptRunner::interpretNextAction() {
 
     [this](const SetPalette& action) {
       updatePalette(loader::load6bitPalette16(
-        mpResourceBundle->mFilePackage.file(action.paletteFile)));
+        mpResourceBundle->file(action.paletteFile)));
     },
 
     [this](const SetupCheckBoxes& action) {

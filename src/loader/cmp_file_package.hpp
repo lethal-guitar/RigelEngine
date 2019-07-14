@@ -32,7 +32,6 @@ public:
   explicit CMPFilePackage(const std::string& filePath);
 
   ByteBuffer file(const std::string& name) const;
-  std::string fileAsText(const std::string& name) const;
 
   bool hasFile(const std::string& name) const;
 

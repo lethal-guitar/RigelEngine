@@ -19,6 +19,7 @@
 #include "loader/byte_buffer.hpp"
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 
 
@@ -29,6 +30,12 @@ namespace rigel::loader {
  * Throws an exception if the file can't be opened.
  */
 ByteBuffer loadFile(const std::string& fileName);
+
+inline ByteBuffer loadFile(const std::filesystem::path& path) {
+  return loadFile(path.u8string());
+}
+
+std::string asText(const ByteBuffer& buffer);
 
 
 /** Offers checked reading of little-endian data from a byte buffer

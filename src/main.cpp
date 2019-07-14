@@ -131,6 +131,10 @@ void showBanner() {
 
 
 void initAndRunGame(const StartupOptions& config) {
+#ifdef _WIN32
+  SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
+#endif
+
   sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
   auto sdlGuard = defer([]() { SDL_Quit(); });
 

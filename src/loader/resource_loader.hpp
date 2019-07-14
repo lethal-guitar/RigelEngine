@@ -29,6 +29,7 @@
 #include "loader/palette.hpp"
 
 #include <string>
+#include <filesystem>
 
 
 namespace rigel::loader {
@@ -64,11 +65,18 @@ public:
 
   ScriptBundle loadScriptBundle(const std::string& fileName) const;
 
+  ByteBuffer file(const std::string& name) const;
+  std::string fileAsText(const std::string& name) const;
+  bool hasFile(const std::string& name) const;
+
+private:
+  std::filesystem::path mGamePath;
   loader::CMPFilePackage mFilePackage;
+
+public:
   loader::ActorImagePackage mActorImagePackage;
 
 private:
-  std::string mGamePath;
   loader::AudioPackage mAdlibSoundsPackage;
 };
 

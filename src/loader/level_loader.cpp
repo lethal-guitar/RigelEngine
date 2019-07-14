@@ -300,7 +300,7 @@ LevelData loadLevel(
   const ResourceLoader& resources,
   const Difficulty chosenDifficulty
 ) {
-  const auto levelData = resources.mFilePackage.file(mapName);
+  const auto levelData = resources.file(mapName);
   LeStreamReader levelReader(levelData);
 
   LevelHeader header(levelReader);
