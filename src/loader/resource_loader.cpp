@@ -252,7 +252,7 @@ ByteBuffer ResourceLoader::file(const std::string& name) const {
 
 
 std::string ResourceLoader::fileAsText(const std::string& name) const {
-  return mFilePackage.fileAsText(name);
+  return asText(file(name));
 }
 
 bool ResourceLoader::hasFile(const std::string& name) const {

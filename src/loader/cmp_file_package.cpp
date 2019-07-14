@@ -83,13 +83,6 @@ ByteBuffer CMPFilePackage::file(const std::string& name) const {
 }
 
 
-std::string CMPFilePackage::fileAsText(const std::string& name) const {
-  const auto bytes = file(name);
-  const auto pBytesAsChars = reinterpret_cast<const char*>(bytes.data());
-  return std::string(pBytesAsChars, pBytesAsChars + bytes.size());
-}
-
-
 bool CMPFilePackage::hasFile(const std::string& name) const {
   return findFileEntry(name) != mFileDict.end();
 }

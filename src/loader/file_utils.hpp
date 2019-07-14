@@ -35,6 +35,8 @@ inline ByteBuffer loadFile(const std::filesystem::path& path) {
   return loadFile(path.u8string());
 }
 
+std::string asText(const ByteBuffer& buffer);
+
 
 /** Offers checked reading of little-endian data from a byte buffer
  *
