@@ -88,13 +88,15 @@ AudioPackage::AdlibSound::AdlibSound(LeStreamReader& reader) {
 }
 
 
-AudioPackage::AudioPackage(const CMPFilePackage& filePackage) {
-  const auto audioDict = readAudioDict(filePackage.file("AUDIOHED.MNI"));
+AudioPackage::AudioPackage(
+  const ByteBuffer& audioDictData,
+  const ByteBuffer& bundledAudioData
+) {
+  const auto audioDict = readAudioDict(audioDictData);
   if (audioDict.size() < 68u) {
     throw std::invalid_argument("Corrupt Duke Nukem II AUDIOT/AUDIOHED");
   }
 
-  const auto bundledAudioData = filePackage.file("AUDIOT.MNI");
   for (auto i=34u; i<68u; ++i) {
     const auto& dictEntry = audioDict[i];
 

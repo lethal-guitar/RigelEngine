@@ -19,7 +19,6 @@
 #include "data/audio_buffer.hpp"
 #include "data/sound_ids.hpp"
 #include "loader/byte_buffer.hpp"
-#include "loader/cmp_file_package.hpp"
 
 #include <array>
 #include <cstdint>
@@ -31,7 +30,12 @@ class LeStreamReader;
 
 class AudioPackage {
 public:
-  explicit AudioPackage(const CMPFilePackage& filePackage);
+  static constexpr auto AUDIO_DICT_FILE = "AUDIOHED.MNI";
+  static constexpr auto AUDIO_DATA_FILE = "AUDIOT.MNI";
+
+  AudioPackage(
+    const ByteBuffer& audioDictData,
+    const ByteBuffer& bundledAudioData);
 
   data::AudioBuffer loadAdlibSound(data::SoundId id) const;
 

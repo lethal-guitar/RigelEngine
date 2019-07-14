@@ -74,7 +74,9 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
       file(ActorImagePackage::IMAGE_DATA_FILE),
       file(ActorImagePackage::ACTOR_INFO_FILE),
       gamePath + "/" + ASSET_REPLACEMENTS_PATH)
-  , mAdlibSoundsPackage(mFilePackage)
+  , mAdlibSoundsPackage(
+      file(AudioPackage::AUDIO_DICT_FILE),
+      file(AudioPackage::AUDIO_DATA_FILE))
 {
 }
 
