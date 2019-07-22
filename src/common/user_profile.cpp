@@ -145,6 +145,19 @@ nlohmann::json serialize(const data::HighScoreEntry& entry) {
 }
 
 
+nlohmann::json serialize(const data::GameOptions& options) {
+  using json = nlohmann::json;
+
+  json serialized;
+  serialized["enableVsync"] = options.mEnableVsync;
+  serialized["musicVolume"] = options.mMusicVolume;
+  serialized["soundVolume"] = options.mSoundVolume;
+  serialized["musicOn"] = options.mMusicOn;
+  serialized["soundOn"] = options.mSoundOn;
+  return serialized;
+}
+
+
 data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
   using namespace data;
 
@@ -180,6 +193,34 @@ data::HighScoreEntry deserializeHighScoreEntry(const nlohmann::json& json) {
 
   result.mName = json.at("name").get<std::string>();
   result.mScore = std::clamp(json.at("score").get<int>(), 0, data::MAX_SCORE);
+
+  return result;
+}
+
+
+template <typename TargetType>
+void extractValueIfExists(
+  const char* key,
+  TargetType& value,
+  const nlohmann::json& json
+) {
+  if (json.contains(key)) {
+    try {
+      value = json.at(key).get<TargetType>();
+    } catch (const std::exception&) {
+    }
+  }
+}
+
+
+data::GameOptions deserializeGameOptions(const nlohmann::json& json) {
+  data::GameOptions result;
+
+  extractValueIfExists("enableVsync", result.mEnableVsync, json);
+  extractValueIfExists("musicVolume", result.mMusicVolume, json);
+  extractValueIfExists("soundVolume", result.mSoundVolume, json);
+  extractValueIfExists("musicOn", result.mMusicOn, json);
+  extractValueIfExists("soundOn", result.mSoundOn, json);
 
   return result;
 }
@@ -237,6 +278,8 @@ void UserProfile::saveToDisk() {
   }
 
   serializedProfile["highScoreLists"] = serializedHighScoreLists;
+
+  serializedProfile["options"] = serialize(mOptions);
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
@@ -300,6 +343,10 @@ void UserProfile::loadFromDisk() {
           break;
         }
       }
+    }
+
+    if (serializedProfile.contains("options")) {
+      mOptions = deserializeGameOptions(serializedProfile.at("options"));
     }
   } catch (const std::exception& ex) {
     std::cerr << "WARNING: Failed to load user profile\n";
