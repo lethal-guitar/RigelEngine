@@ -60,6 +60,12 @@ data::TutorialMessageState readTutorialMessageFlags(LeStreamReader& reader) {
 }
 
 
+data::Difficulty readDifficulty(LeStreamReader& reader) {
+  const auto difficultyIndex = std::clamp<std::uint16_t>(reader.readU16(), 1, 3);
+  return static_cast<data::Difficulty>(difficultyIndex - 1);
+}
+
+
 data::SavedGame loadSavedGame(
   const std::string& filename,
   std::string saveSlotName
@@ -81,8 +87,7 @@ data::SavedGame loadSavedGame(
     weapon == data::WeaponType::FlameThrower
       ? data::MAX_AMMO_FLAME_THROWER
       : data::MAX_AMMO);
-  const auto difficultyIndex = std::clamp<std::uint16_t>(reader.readU16(), 1, 3);
-  const auto difficulty = static_cast<data::Difficulty>(difficultyIndex - 1);
+  const auto difficulty = readDifficulty(reader);
   const auto episode =
     std::min<std::uint16_t>(reader.readU16(), data::NUM_EPISODES - 1);
   const auto level =
@@ -159,6 +164,40 @@ std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
   }
 
   return result;
+}
+
+std::optional<GameOptions> loadOptions(const std::string& gamePath) {
+  try {
+    GameOptions result;
+
+    const auto data = loadFile(gamePath + "NUKEM2.-GT");
+    auto reader = LeStreamReader{data};
+
+    result.mKeyBindingUp = static_cast<std::uint8_t>(reader.readU16());
+    result.mKeyBindingDown = static_cast<std::uint8_t>(reader.readU16());
+    result.mKeyBindingLeft = static_cast<std::uint8_t>(reader.readU16());
+    result.mKeyBindingRight = static_cast<std::uint8_t>(reader.readU16());
+    result.mKeyBindingJump = static_cast<std::uint8_t>(reader.readU16());
+    result.mKeyBindingFire = static_cast<std::uint8_t>(reader.readU16());
+
+    result.mDifficulty = readDifficulty(reader);
+
+    result.mSoundBlasterSoundsOn = static_cast<bool>(reader.readU16());
+    result.mAdlibSoundsOn = static_cast<bool>(reader.readU16());
+    result.mPcSpeakersSoundsOn = static_cast<bool>(reader.readU16());
+    result.mMusicOn = static_cast<bool>(reader.readU16());
+
+    // Skip over joystick calibration data
+    reader.skipBytes(12);
+
+    result.mGameSpeedIndex = static_cast<std::uint8_t>(
+      std::min<std::uint16_t>(reader.readU16(), 7));
+
+    return result;
+  } catch (const std::exception&) {
+  }
+
+  return {};
 }
 
 }

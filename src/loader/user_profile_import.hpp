@@ -25,8 +25,31 @@
 
 namespace rigel::loader {
 
+struct GameOptions {
+  using ScanCode = std::uint8_t;
+
+  ScanCode mKeyBindingUp;
+  ScanCode mKeyBindingDown;
+  ScanCode mKeyBindingLeft;
+  ScanCode mKeyBindingRight;
+  ScanCode mKeyBindingJump;
+  ScanCode mKeyBindingFire;
+
+  data::Difficulty mDifficulty;
+
+  bool mSoundBlasterSoundsOn;
+  bool mAdlibSoundsOn;
+  bool mPcSpeakersSoundsOn;
+  bool mMusicOn;
+
+  std::uint8_t mGameSpeedIndex;
+};
+
+
 data::SaveSlotArray loadSavedGames(const std::string& gamePath);
 
 std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
   const std::string& gamePath);
+
+std::optional<GameOptions> loadOptions(const std::string& gamePath);
 }

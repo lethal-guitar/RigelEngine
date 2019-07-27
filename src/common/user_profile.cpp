@@ -85,6 +85,19 @@ constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 
 
+data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
+  data::GameOptions result;
+
+  result.mSoundOn =
+    originalOptions.mSoundBlasterSoundsOn ||
+    originalOptions.mAdlibSoundsOn ||
+    originalOptions.mPcSpeakersSoundsOn;
+  result.mMusicOn = originalOptions.mMusicOn;
+
+  return result;
+}
+
+
 UserProfile loadProfile(const std::string& profileFile) {
   UserProfile profile{profileFile};
   profile.loadFromDisk();
@@ -97,8 +110,14 @@ UserProfile importProfile(
   const std::string& gamePath
 ) {
   UserProfile profile{profileFile};
+
   profile.mSaveSlots = loader::loadSavedGames(gamePath);
   profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
+
+  if (const auto options = loader::loadOptions(gamePath)) {
+    profile.mOptions = importOptions(*options);
+  }
+
   profile.saveToDisk();
   return profile;
 }
