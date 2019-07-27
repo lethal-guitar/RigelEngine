@@ -154,12 +154,44 @@ nlohmann::json serialize(const data::SavedGame& savedGame) {
 }
 
 
+nlohmann::json serialize(const data::SaveSlotArray& saveSlots) {
+  auto serialized = nlohmann::json::array();
+  for (const auto& slot : saveSlots) {
+    if (slot) {
+      serialized.push_back(serialize(*slot));
+    } else {
+      serialized.push_back(nullptr);
+    }
+  }
+  return serialized;
+}
+
+
 nlohmann::json serialize(const data::HighScoreEntry& entry) {
   using json = nlohmann::json;
 
   json serialized;
   serialized["name"] = entry.mName;
   serialized["score"] = entry.mScore;
+  return serialized;
+}
+
+
+nlohmann::json serialize(
+  const std::array<data::HighScoreList, data::NUM_EPISODES>& highScoreLists
+) {
+  using json = nlohmann::json;
+
+  auto serialized = json::array();
+  for (const auto& list : highScoreLists) {
+    auto serializedList = json::array();
+    for (const auto& entry : list) {
+      serializedList.push_back(serialize(entry));
+    }
+
+    serialized.push_back(serializedList);
+  }
+
   return serialized;
 }
 
@@ -272,32 +304,8 @@ void UserProfile::saveToDisk() {
   using json = nlohmann::json;
 
   json serializedProfile;
-
-  // TODO: Refactor this long function into sub-functions
-
-  auto serializedSaveSlots = json::array();
-  for (const auto& slot : mSaveSlots) {
-    if (slot) {
-      serializedSaveSlots.push_back(serialize(*slot));
-    } else {
-      serializedSaveSlots.push_back(nullptr);
-    }
-  }
-
-  serializedProfile["saveSlots"] = serializedSaveSlots;
-
-  auto serializedHighScoreLists = json::array();
-  for (const auto& list : mHighScoreLists) {
-    auto serializedList = json::array();
-    for (const auto& entry : list) {
-      serializedList.push_back(serialize(entry));
-    }
-
-    serializedHighScoreLists.push_back(serializedList);
-  }
-
-  serializedProfile["highScoreLists"] = serializedHighScoreLists;
-
+  serializedProfile["saveSlots"] = serialize(mSaveSlots);
+  serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
   serializedProfile["options"] = serialize(mOptions);
 
   const auto buffer = json::to_msgpack(serializedProfile);
