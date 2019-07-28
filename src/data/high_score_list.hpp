@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "data/game_session_data.hpp"
+
 #include <array>
 #include <string>
 #include <tuple>
@@ -48,7 +50,7 @@ inline bool operator!=(const HighScoreEntry& lhs, const HighScoreEntry& rhs) {
 
 
 using HighScoreList = std::array<HighScoreEntry, NUM_HIGH_SCORE_ENTRIES>;
-
+using HighScoreListArray = std::array<HighScoreList, NUM_EPISODES>;
 
 bool scoreQualifiesForHighScoreList(int score, const HighScoreList& list);
 

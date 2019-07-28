@@ -177,9 +177,7 @@ nlohmann::json serialize(const data::HighScoreEntry& entry) {
 }
 
 
-nlohmann::json serialize(
-  const std::array<data::HighScoreList, data::NUM_EPISODES>& highScoreLists
-) {
+nlohmann::json serialize(const data::HighScoreListArray& highScoreLists) {
   using json = nlohmann::json;
 
   auto serialized = json::array();

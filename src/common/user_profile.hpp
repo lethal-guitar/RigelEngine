@@ -34,7 +34,7 @@ public:
   void loadFromDisk();
 
   data::SaveSlotArray mSaveSlots;
-  std::array<data::HighScoreList, data::NUM_EPISODES> mHighScoreLists;
+  data::HighScoreListArray mHighScoreLists;
   data::GameOptions mOptions;
 
 private:
