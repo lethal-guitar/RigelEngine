@@ -209,7 +209,12 @@ nlohmann::json serialize(const data::GameOptions& options) {
 }
 
 
-data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
+template<typename T>
+T deserialize(const nlohmann::json& json);
+
+
+template<>
+data::SavedGame deserialize<data::SavedGame>(const nlohmann::json& json) {
   using namespace data;
 
   // TODO: Does it make sense to share the clamping/validation code with the
@@ -239,7 +244,10 @@ data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
 }
 
 
-data::HighScoreEntry deserializeHighScoreEntry(const nlohmann::json& json) {
+template<>
+data::HighScoreEntry deserialize<data::HighScoreEntry>(
+  const nlohmann::json& json
+) {
   data::HighScoreEntry result;
 
   result.mName = json.at("name").get<std::string>();
@@ -264,7 +272,8 @@ void extractValueIfExists(
 }
 
 
-data::GameOptions deserializeGameOptions(const nlohmann::json& json) {
+template<>
+data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   data::GameOptions result;
 
   extractValueIfExists("enableVsync", result.mEnableVsync, json);
@@ -336,7 +345,7 @@ void UserProfile::loadFromDisk() {
       std::size_t i = 0;
       for (const auto& serializedSlot : serializedSaveSlots) {
         if (!serializedSlot.is_null()) {
-          mSaveSlots[i] = deserializeSavedGame(serializedSlot);
+          mSaveSlots[i] = deserialize<data::SavedGame>(serializedSlot);
         }
         ++i;
         if (i >= mSaveSlots.size()) {
@@ -354,7 +363,8 @@ void UserProfile::loadFromDisk() {
         {
           std::size_t j = 0;
           for (const auto& serializedEntry : serializedList) {
-            mHighScoreLists[i][j] = deserializeHighScoreEntry(serializedEntry);
+            mHighScoreLists[i][j] = deserialize<data::HighScoreEntry>(
+              serializedEntry);
 
             ++j;
             if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
@@ -373,7 +383,8 @@ void UserProfile::loadFromDisk() {
     }
 
     if (serializedProfile.contains("options")) {
-      mOptions = deserializeGameOptions(serializedProfile.at("options"));
+      mOptions = deserialize<data::GameOptions>(
+        serializedProfile.at("options"));
     }
   } catch (const std::exception& ex) {
     std::cerr << "WARNING: Failed to load user profile\n";
