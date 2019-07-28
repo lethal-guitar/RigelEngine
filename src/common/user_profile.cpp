@@ -243,6 +243,27 @@ data::SavedGame deserialize<data::SavedGame>(const nlohmann::json& json) {
 
 
 template<>
+data::SaveSlotArray deserialize<data::SaveSlotArray>(
+  const nlohmann::json& json
+) {
+  data::SaveSlotArray result;
+
+  std::size_t i = 0;
+  for (const auto& serializedSlot : json) {
+    if (!serializedSlot.is_null()) {
+      result[i] = deserialize<data::SavedGame>(serializedSlot);
+    }
+    ++i;
+    if (i >= result.size()) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+
+template<>
 data::HighScoreEntry deserialize<data::HighScoreEntry>(
   const nlohmann::json& json
 ) {
@@ -250,6 +271,40 @@ data::HighScoreEntry deserialize<data::HighScoreEntry>(
 
   result.mName = json.at("name").get<std::string>();
   result.mScore = std::clamp(json.at("score").get<int>(), 0, data::MAX_SCORE);
+
+  return result;
+}
+
+
+template<>
+data::HighScoreListArray deserialize<data::HighScoreListArray>(
+  const nlohmann::json& json
+) {
+  using std::begin;
+  using std::end;
+  using std::sort;
+
+  data::HighScoreListArray result;
+
+  std::size_t i = 0;
+  for (const auto& serializedList : json) {
+    std::size_t j = 0;
+    for (const auto& serializedEntry : serializedList) {
+      result[i][j] = deserialize<data::HighScoreEntry>(serializedEntry);
+
+      ++j;
+      if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
+        break;
+      }
+    }
+
+    sort(begin(result[i]), end(result[i]));
+
+    ++i;
+    if (i >= result.size()) {
+      break;
+    }
+  }
 
   return result;
 }
@@ -332,56 +387,10 @@ void UserProfile::loadFromDisk() {
     const auto buffer = loader::loadFile(*mProfilePath);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
 
-    const auto serializedSaveSlots = serializedProfile.at("saveSlots");
-
-    // TODO: Refactor this long function into sub-functions
-    {
-      data::SaveSlotArray result;
-      std::size_t i = 0;
-      for (const auto& serializedSlot : serializedSaveSlots) {
-        if (!serializedSlot.is_null()) {
-          result[i] = deserialize<data::SavedGame>(serializedSlot);
-        }
-        ++i;
-        if (i >= result.size()) {
-          break;
-        }
-      }
-      mSaveSlots = result;
-    }
-
-    const auto serializedHighScoreLists =
-      serializedProfile.at("highScoreLists");
-
-    {
-      using std::begin;
-      using std::end;
-      using std::sort;
-
-      data::HighScoreListArray result;
-      std::size_t i = 0;
-      for (const auto& serializedList : serializedHighScoreLists) {
-        {
-          std::size_t j = 0;
-          for (const auto& serializedEntry : serializedList) {
-            result[i][j] = deserialize<data::HighScoreEntry>(serializedEntry);
-
-            ++j;
-            if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
-              break;
-            }
-          }
-        }
-
-        sort(begin(result[i]), end(result[i]));
-
-        ++i;
-        if (i >= result.size()) {
-          break;
-        }
-      }
-      mHighScoreLists = result;
-    }
+    mSaveSlots = deserialize<data::SaveSlotArray>(
+      serializedProfile.at("saveSlots"));
+    mHighScoreLists = deserialize<data::HighScoreListArray>(
+      serializedProfile.at("highScoreLists"));
 
     if (serializedProfile.contains("options")) {
       mOptions = deserialize<data::GameOptions>(
