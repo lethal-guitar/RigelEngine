@@ -321,10 +321,6 @@ void UserProfile::saveToDisk() {
 
 
 void UserProfile::loadFromDisk() {
-  using std::begin;
-  using std::end;
-  using std::sort;
-
   if (!mProfilePath) {
     return;
   }
@@ -340,29 +336,35 @@ void UserProfile::loadFromDisk() {
 
     // TODO: Refactor this long function into sub-functions
     {
+      data::SaveSlotArray result;
       std::size_t i = 0;
       for (const auto& serializedSlot : serializedSaveSlots) {
         if (!serializedSlot.is_null()) {
-          mSaveSlots[i] = deserialize<data::SavedGame>(serializedSlot);
+          result[i] = deserialize<data::SavedGame>(serializedSlot);
         }
         ++i;
-        if (i >= mSaveSlots.size()) {
+        if (i >= result.size()) {
           break;
         }
       }
+      mSaveSlots = result;
     }
 
     const auto serializedHighScoreLists =
       serializedProfile.at("highScoreLists");
 
     {
+      using std::begin;
+      using std::end;
+      using std::sort;
+
+      data::HighScoreListArray result;
       std::size_t i = 0;
       for (const auto& serializedList : serializedHighScoreLists) {
         {
           std::size_t j = 0;
           for (const auto& serializedEntry : serializedList) {
-            mHighScoreLists[i][j] = deserialize<data::HighScoreEntry>(
-              serializedEntry);
+            result[i][j] = deserialize<data::HighScoreEntry>(serializedEntry);
 
             ++j;
             if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
@@ -371,13 +373,14 @@ void UserProfile::loadFromDisk() {
           }
         }
 
-        sort(begin(mHighScoreLists[i]), end(mHighScoreLists[i]));
+        sort(begin(result[i]), end(result[i]));
 
         ++i;
-        if (i >= mHighScoreLists.size()) {
+        if (i >= result.size()) {
           break;
         }
       }
+      mHighScoreLists = result;
     }
 
     if (serializedProfile.contains("options")) {
