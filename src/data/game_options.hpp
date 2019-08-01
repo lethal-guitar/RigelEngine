@@ -16,35 +16,22 @@
 
 #pragma once
 
-#include "data/game_options.hpp"
-#include "data/high_score_list.hpp"
-#include "data/saved_game.hpp"
 
-#include <filesystem>
-#include <string>
+namespace rigel::data {
 
+constexpr auto ENABLE_VSYNC_DEFAULT = true;
+constexpr auto MUSIC_VOLUME_DEFAULT = 1.0f;
+constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
 
-namespace rigel {
+struct GameOptions {
+  // Graphics
+  bool mEnableVsync = ENABLE_VSYNC_DEFAULT;
 
-class UserProfile {
-public:
-  UserProfile() = default;
-  explicit UserProfile(const std::filesystem::path& profilePath);
-
-  void saveToDisk();
-  void loadFromDisk();
-
-  data::SaveSlotArray mSaveSlots;
-  data::HighScoreListArray mHighScoreLists;
-  data::GameOptions mOptions;
-
-private:
-  std::optional<std::filesystem::path> mProfilePath;
+  // Sound
+  float mMusicVolume = MUSIC_VOLUME_DEFAULT;
+  float mSoundVolume = SOUND_VOLUME_DEFAULT;
+  bool mMusicOn = true;
+  bool mSoundOn = true;
 };
-
-
-UserProfile loadOrCreateUserProfile(const std::string& gamePath);
-
-std::optional<std::filesystem::path> createOrGetPreferencesPath();
 
 }

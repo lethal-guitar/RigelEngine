@@ -15,6 +15,7 @@ set(core_sources
     data/audio_buffer.hpp
     data/bonus.hpp
     data/duke_script.hpp
+    data/game_options.hpp
     data/game_session_data.hpp
     data/game_traits.cpp
     data/game_traits.hpp
@@ -241,6 +242,8 @@ set(core_sources
     ui/menu_element_renderer.hpp
     ui/movie_player.cpp
     ui/movie_player.hpp
+    ui/options_menu.cpp
+    ui/options_menu.hpp
     ui/text_entry_widget.cpp
     ui/text_entry_widget.hpp
     ui/utils.cpp

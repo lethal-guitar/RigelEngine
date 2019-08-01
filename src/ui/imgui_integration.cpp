@@ -27,6 +27,8 @@ namespace rigel::ui::imgui_integration {
 
 namespace {
 
+std::string gIniFilePath;
+
 bool shouldConsumeEvent(const SDL_Event& event) {
   const auto& io = ImGui::GetIO();
 
@@ -47,7 +49,11 @@ bool shouldConsumeEvent(const SDL_Event& event) {
 }
 
 
-void init(SDL_Window* pWindow, void* pGlContext) {
+void init(
+  SDL_Window* pWindow,
+  void* pGlContext,
+  const std::optional<std::filesystem::path>& preferencesPath
+) {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
@@ -60,6 +66,14 @@ void init(SDL_Window* pWindow, void* pGlContext) {
   // GL ES as well as regular GL.
   ImGui_ImplOpenGL3_Init(nullptr);
 #endif
+
+  if (preferencesPath) {
+    const auto iniFilePath = *preferencesPath / "ImGui.ini";
+    gIniFilePath = iniFilePath.u8string();
+    ImGui::GetIO().IniFilename = gIniFilePath.c_str();
+  } else {
+    ImGui::GetIO().WantSaveIniSettings = false;
+  }
 }
 
 
@@ -67,6 +81,8 @@ void shutdown() {
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
+
+  gIniFilePath.clear();
 }
 
 

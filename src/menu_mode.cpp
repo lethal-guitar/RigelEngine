@@ -58,6 +58,16 @@ MenuMode::MenuMode(Context context)
 
 
 void MenuMode::handleEvent(const SDL_Event& event) {
+  if (mOptionsMenu) {
+    if (
+      event.type == SDL_KEYDOWN &&
+      event.key.keysym.sym == SDLK_ESCAPE
+    ) {
+      mOptionsMenu = std::nullopt;
+    }
+    return;
+  }
+
   if (
     mMenuState == MenuState::AskIfQuit &&
     event.type == SDL_KEYDOWN &&
@@ -67,11 +77,35 @@ void MenuMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  if (mMenuState == MenuState::MainMenu) {
+    const auto maybeIndex = mContext.mpScriptRunner->currentPageIndex();
+    const auto optionsMenuSelected = maybeIndex && *maybeIndex == 2;
+    if (
+      optionsMenuSelected &&
+      event.type == SDL_KEYDOWN &&
+      (event.key.keysym.sym == SDLK_RETURN ||
+       event.key.keysym.sym == SDLK_KP_ENTER ||
+       event.key.keysym.sym == SDLK_SPACE)
+    ) {
+      mOptionsMenu = ui::OptionsMenu{&mContext.mpUserProfile->mOptions};
+      return;
+    }
+  }
+
   mContext.mpScriptRunner->handleEvent(event);
 }
 
 
 void MenuMode::updateAndRender(engine::TimeDelta dt) {
+  if (mOptionsMenu) {
+    mOptionsMenu->updateAndRender(dt);
+    if (mOptionsMenu->isFinished()) {
+      mOptionsMenu = std::nullopt;
+    } else {
+      return;
+    }
+  }
+
   mContext.mpScriptRunner->updateAndRender(dt);
 
   if (mContext.mpScriptRunner->hasFinishedExecution()) {
@@ -111,11 +145,6 @@ void MenuMode::navigateToNextMenu(
           case 1:
             runScript(mContext, "Restore_Game");
             mMenuState = MenuState::RestoreGame;
-            break;
-
-          case 2:
-            runScript(mContext, "My_Options");
-            mMenuState = MenuState::GameOptions;
             break;
 
           case 3:
@@ -225,37 +254,6 @@ void MenuMode::navigateToNextMenu(
     case MenuState::NoSavedGameInSlotMessage:
       runScript(mContext, "Restore_Game");
       mMenuState = MenuState::RestoreGame;
-      break;
-
-    case MenuState::GameOptions:
-      if (abortedByUser(result)) {
-        enterMainMenu();
-      } else {
-        assert(result.mSelectedPage);
-        switch (*result.mSelectedPage) {
-          case 4:
-            runScript(mContext, "Key_Config");
-            mMenuState = MenuState::KeyboardConfig;
-            break;
-
-          case 5:
-            runScript(mContext, "&Calibrate");
-            mMenuState = MenuState::JoystickCalibration;
-            break;
-
-          case 6:
-            runScript(mContext, "Game_Speed");
-            mMenuState = MenuState::GameSpeedConfig;
-            break;
-        }
-      }
-      break;
-
-    case MenuState::KeyboardConfig:
-    case MenuState::JoystickCalibration:
-    case MenuState::GameSpeedConfig:
-      runScript(mContext, "My_Options");
-      mMenuState = MenuState::GameOptions;
       break;
 
     case MenuState::ChooseInstructionsOrStory:

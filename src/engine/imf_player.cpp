@@ -38,6 +38,7 @@ ImfPlayer::ImfPlayer(const int sampleRate)
   , mSampleRate(sampleRate)
   , mSongSwitchPending(false)
 {
+  mVolume.store(1.0f);
 }
 
 
@@ -47,6 +48,11 @@ void ImfPlayer::playSong(data::Song&& song) {
     mNextSongData = std::move(song);
   }
   mSongSwitchPending = true;
+}
+
+
+void ImfPlayer::setVolume(const float volume) {
+  mVolume.store(std::clamp(volume, 0.0f, 1.0f));
 }
 
 
@@ -65,8 +71,10 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
     return;
   }
 
+  const auto volume = mVolume.load();
+
   while (samplesRequired > mSamplesAvailable) {
-    mEmulator.render(mSamplesAvailable, pBuffer);
+    mEmulator.render(mSamplesAvailable, pBuffer, volume);
     pBuffer += mSamplesAvailable;
     samplesRequired -= mSamplesAvailable;
 
@@ -84,7 +92,7 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
     mSamplesAvailable = imfDelayToSamples(commandDelay, mSampleRate);
   }
 
-  mEmulator.render(samplesRequired, pBuffer);
+  mEmulator.render(samplesRequired, pBuffer, volume);
   mSamplesAvailable -= samplesRequired;
 }
 

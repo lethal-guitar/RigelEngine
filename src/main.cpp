@@ -15,6 +15,7 @@
  */
 
 #include "base/warnings.hpp"
+#include "common/user_profile.hpp"
 #include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
@@ -150,7 +151,8 @@ void initAndRunGame(const StartupOptions& config) {
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
 
-  ui::imgui_integration::init(pWindow.get(), pGlContext);
+  ui::imgui_integration::init(
+    pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
   gameMain(config, pWindow.get());

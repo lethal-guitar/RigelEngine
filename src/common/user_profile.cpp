@@ -26,7 +26,6 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 
 
@@ -85,7 +84,20 @@ constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 
 
-UserProfile loadProfile(const std::string& profileFile) {
+data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
+  data::GameOptions result;
+
+  result.mSoundOn =
+    originalOptions.mSoundBlasterSoundsOn ||
+    originalOptions.mAdlibSoundsOn ||
+    originalOptions.mPcSpeakersSoundsOn;
+  result.mMusicOn = originalOptions.mMusicOn;
+
+  return result;
+}
+
+
+UserProfile loadProfile(const std::filesystem::path& profileFile) {
   UserProfile profile{profileFile};
   profile.loadFromDisk();
   return profile;
@@ -93,12 +105,18 @@ UserProfile loadProfile(const std::string& profileFile) {
 
 
 UserProfile importProfile(
-  const std::string& profileFile,
+  const std::filesystem::path& profileFile,
   const std::string& gamePath
 ) {
   UserProfile profile{profileFile};
+
   profile.mSaveSlots = loader::loadSavedGames(gamePath);
   profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
+
+  if (const auto options = loader::loadOptions(gamePath)) {
+    profile.mOptions = importOptions(*options);
+  }
+
   profile.saveToDisk();
   return profile;
 }
@@ -135,6 +153,19 @@ nlohmann::json serialize(const data::SavedGame& savedGame) {
 }
 
 
+nlohmann::json serialize(const data::SaveSlotArray& saveSlots) {
+  auto serialized = nlohmann::json::array();
+  for (const auto& slot : saveSlots) {
+    if (slot) {
+      serialized.push_back(serialize(*slot));
+    } else {
+      serialized.push_back(nullptr);
+    }
+  }
+  return serialized;
+}
+
+
 nlohmann::json serialize(const data::HighScoreEntry& entry) {
   using json = nlohmann::json;
 
@@ -145,7 +176,42 @@ nlohmann::json serialize(const data::HighScoreEntry& entry) {
 }
 
 
-data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
+nlohmann::json serialize(const data::HighScoreListArray& highScoreLists) {
+  using json = nlohmann::json;
+
+  auto serialized = json::array();
+  for (const auto& list : highScoreLists) {
+    auto serializedList = json::array();
+    for (const auto& entry : list) {
+      serializedList.push_back(serialize(entry));
+    }
+
+    serialized.push_back(serializedList);
+  }
+
+  return serialized;
+}
+
+
+nlohmann::json serialize(const data::GameOptions& options) {
+  using json = nlohmann::json;
+
+  json serialized;
+  serialized["enableVsync"] = options.mEnableVsync;
+  serialized["musicVolume"] = options.mMusicVolume;
+  serialized["soundVolume"] = options.mSoundVolume;
+  serialized["musicOn"] = options.mMusicOn;
+  serialized["soundOn"] = options.mSoundOn;
+  return serialized;
+}
+
+
+template<typename T>
+T deserialize(const nlohmann::json& json);
+
+
+template<>
+data::SavedGame deserialize<data::SavedGame>(const nlohmann::json& json) {
   using namespace data;
 
   // TODO: Does it make sense to share the clamping/validation code with the
@@ -175,7 +241,31 @@ data::SavedGame deserializeSavedGame(const nlohmann::json& json) {
 }
 
 
-data::HighScoreEntry deserializeHighScoreEntry(const nlohmann::json& json) {
+template<>
+data::SaveSlotArray deserialize<data::SaveSlotArray>(
+  const nlohmann::json& json
+) {
+  data::SaveSlotArray result;
+
+  std::size_t i = 0;
+  for (const auto& serializedSlot : json) {
+    if (!serializedSlot.is_null()) {
+      result[i] = deserialize<data::SavedGame>(serializedSlot);
+    }
+    ++i;
+    if (i >= result.size()) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+
+template<>
+data::HighScoreEntry deserialize<data::HighScoreEntry>(
+  const nlohmann::json& json
+) {
   data::HighScoreEntry result;
 
   result.mName = json.at("name").get<std::string>();
@@ -185,8 +275,74 @@ data::HighScoreEntry deserializeHighScoreEntry(const nlohmann::json& json) {
 }
 
 
-void saveToFile(const loader::ByteBuffer& buffer, const std::string& filename) {
-  std::ofstream file(filename, std::ios::binary);
+template<>
+data::HighScoreListArray deserialize<data::HighScoreListArray>(
+  const nlohmann::json& json
+) {
+  using std::begin;
+  using std::end;
+  using std::sort;
+
+  data::HighScoreListArray result;
+
+  std::size_t i = 0;
+  for (const auto& serializedList : json) {
+    std::size_t j = 0;
+    for (const auto& serializedEntry : serializedList) {
+      result[i][j] = deserialize<data::HighScoreEntry>(serializedEntry);
+
+      ++j;
+      if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
+        break;
+      }
+    }
+
+    sort(begin(result[i]), end(result[i]));
+
+    ++i;
+    if (i >= result.size()) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+
+template <typename TargetType>
+void extractValueIfExists(
+  const char* key,
+  TargetType& value,
+  const nlohmann::json& json
+) {
+  if (json.contains(key)) {
+    try {
+      value = json.at(key).get<TargetType>();
+    } catch (const std::exception&) {
+    }
+  }
+}
+
+
+template<>
+data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
+  data::GameOptions result;
+
+  extractValueIfExists("enableVsync", result.mEnableVsync, json);
+  extractValueIfExists("musicVolume", result.mMusicVolume, json);
+  extractValueIfExists("soundVolume", result.mSoundVolume, json);
+  extractValueIfExists("musicOn", result.mMusicOn, json);
+  extractValueIfExists("soundOn", result.mSoundOn, json);
+
+  return result;
+}
+
+
+void saveToFile(
+  const loader::ByteBuffer& buffer,
+  const std::filesystem::path& filePath
+) {
+  std::ofstream file(filePath.u8string(), std::ios::binary);
   if (!file.is_open()) {
     std::cerr << "WARNING: Failed to store user profile\n";
     return;
@@ -198,7 +354,7 @@ void saveToFile(const loader::ByteBuffer& buffer, const std::string& filename) {
 }
 
 
-UserProfile::UserProfile(const std::string& profilePath)
+UserProfile::UserProfile(const std::filesystem::path& profilePath)
   : mProfilePath(profilePath)
 {
 }
@@ -212,31 +368,9 @@ void UserProfile::saveToDisk() {
   using json = nlohmann::json;
 
   json serializedProfile;
-
-  // TODO: Refactor this long function into sub-functions
-
-  auto serializedSaveSlots = json::array();
-  for (const auto& slot : mSaveSlots) {
-    if (slot) {
-      serializedSaveSlots.push_back(serialize(*slot));
-    } else {
-      serializedSaveSlots.push_back(nullptr);
-    }
-  }
-
-  serializedProfile["saveSlots"] = serializedSaveSlots;
-
-  auto serializedHighScoreLists = json::array();
-  for (const auto& list : mHighScoreLists) {
-    auto serializedList = json::array();
-    for (const auto& entry : list) {
-      serializedList.push_back(serialize(entry));
-    }
-
-    serializedHighScoreLists.push_back(serializedList);
-  }
-
-  serializedProfile["highScoreLists"] = serializedHighScoreLists;
+  serializedProfile["saveSlots"] = serialize(mSaveSlots);
+  serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
+  serializedProfile["options"] = serialize(mOptions);
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
@@ -244,10 +378,6 @@ void UserProfile::saveToDisk() {
 
 
 void UserProfile::loadFromDisk() {
-  using std::begin;
-  using std::end;
-  using std::sort;
-
   if (!mProfilePath) {
     return;
   }
@@ -259,47 +389,14 @@ void UserProfile::loadFromDisk() {
     const auto buffer = loader::loadFile(*mProfilePath);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
 
-    const auto serializedSaveSlots = serializedProfile.at("saveSlots");
+    mSaveSlots = deserialize<data::SaveSlotArray>(
+      serializedProfile.at("saveSlots"));
+    mHighScoreLists = deserialize<data::HighScoreListArray>(
+      serializedProfile.at("highScoreLists"));
 
-    // TODO: Refactor this long function into sub-functions
-    {
-      std::size_t i = 0;
-      for (const auto& serializedSlot : serializedSaveSlots) {
-        if (!serializedSlot.is_null()) {
-          mSaveSlots[i] = deserializeSavedGame(serializedSlot);
-        }
-        ++i;
-        if (i >= mSaveSlots.size()) {
-          break;
-        }
-      }
-    }
-
-    const auto serializedHighScoreLists =
-      serializedProfile.at("highScoreLists");
-
-    {
-      std::size_t i = 0;
-      for (const auto& serializedList : serializedHighScoreLists) {
-        {
-          std::size_t j = 0;
-          for (const auto& serializedEntry : serializedList) {
-            mHighScoreLists[i][j] = deserializeHighScoreEntry(serializedEntry);
-
-            ++j;
-            if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
-              break;
-            }
-          }
-        }
-
-        sort(begin(mHighScoreLists[i]), end(mHighScoreLists[i]));
-
-        ++i;
-        if (i >= mHighScoreLists.size()) {
-          break;
-        }
-      }
+    if (serializedProfile.contains("options")) {
+      mOptions = deserialize<data::GameOptions>(
+        serializedProfile.at("options"));
     }
   } catch (const std::exception& ex) {
     std::cerr << "WARNING: Failed to load user profile\n";
@@ -308,7 +405,7 @@ void UserProfile::loadFromDisk() {
 }
 
 
-UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+std::optional<std::filesystem::path> createOrGetPreferencesPath() {
   namespace fs = std::filesystem;
 
   auto deleter = [](char* path) { SDL_free(path); };
@@ -316,19 +413,28 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     SDL_GetPrefPath(PREF_PATH_ORG_NAME, PREF_PATH_APP_NAME), deleter};
 
   if (!pPreferencesDirName) {
+    return {};
+  }
+
+  return fs::u8path(std::string{pPreferencesDirName.get()});
+}
+
+
+UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+  namespace fs = std::filesystem;
+
+  const auto preferencesPath = createOrGetPreferencesPath();
+  if (!preferencesPath) {
     std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
-  const auto preferencesDirName = std::string{pPreferencesDirName.get()};
-
-  const auto profileFilePath =
-    fs::u8path(preferencesDirName) / "UserProfile.rigel";
+  const auto profileFilePath = *preferencesPath / "UserProfile.rigel";
 
   if (fs::exists(profileFilePath)) {
-    return loadProfile(profileFilePath.u8string());
+    return loadProfile(profileFilePath);
   } else {
-    return importProfile(profileFilePath.u8string(), gamePath);
+    return importProfile(profileFilePath, gamePath);
   }
 }
 

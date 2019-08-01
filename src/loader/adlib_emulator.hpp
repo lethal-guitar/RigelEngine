@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "base/math_tools.hpp"
+
 #include <dbopl.h>
 
 #include <algorithm>
@@ -43,7 +45,7 @@ public:
   void render(
     std::size_t numSamples,
     OutputIt destination,
-    const int volumeScale = 1
+    const float volumeScale = 1.0f
   ) {
     // DBOPL outputs 32 bit samples, but they never exceed the 16 bit range
     // (compare source code comment in MixerChannel::AddSamples() in mixer.cpp
@@ -61,7 +63,7 @@ public:
         destination,
         [volumeScale](const auto sample32Bit) {
           return static_cast<std::int16_t>(
-            std::clamp(sample32Bit * volumeScale, -16384, 16384));
+            std::clamp(base::round(sample32Bit * volumeScale), -16384, 16384));
         });
 
       numSamples -= samplesForIteration;

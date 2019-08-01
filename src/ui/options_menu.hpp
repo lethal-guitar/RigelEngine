@@ -17,34 +17,24 @@
 #pragma once
 
 #include "data/game_options.hpp"
-#include "data/high_score_list.hpp"
-#include "data/saved_game.hpp"
-
-#include <filesystem>
-#include <string>
+#include "engine/timing.hpp"
 
 
-namespace rigel {
+namespace rigel::ui {
 
-class UserProfile {
+class OptionsMenu {
 public:
-  UserProfile() = default;
-  explicit UserProfile(const std::filesystem::path& profilePath);
+  OptionsMenu(data::GameOptions* pOptions)
+    : mpOptions(pOptions)
+  {
+  }
 
-  void saveToDisk();
-  void loadFromDisk();
-
-  data::SaveSlotArray mSaveSlots;
-  data::HighScoreListArray mHighScoreLists;
-  data::GameOptions mOptions;
+  void updateAndRender(engine::TimeDelta dt);
+  bool isFinished() const;
 
 private:
-  std::optional<std::filesystem::path> mProfilePath;
+  data::GameOptions* mpOptions;
+  bool mMenuOpen = true;
 };
-
-
-UserProfile loadOrCreateUserProfile(const std::string& gamePath);
-
-std::optional<std::filesystem::path> createOrGetPreferencesPath();
 
 }

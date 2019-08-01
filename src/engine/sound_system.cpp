@@ -17,6 +17,7 @@
 #include "sound_system.hpp"
 
 #include "base/math_tools.hpp"
+#include "data/game_options.hpp"
 #include "engine/imf_player.hpp"
 #include "sdl_utils/error.hpp"
 
@@ -113,6 +114,9 @@ SoundSystem::SoundSystem()
     mpMusicPlayer.get());
 
   Mix_AllocateChannels(MAX_CONCURRENT_SOUNDS);
+
+  setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
+  setSoundVolume(data::SOUND_VOLUME_DEFAULT);
 }
 
 
@@ -200,6 +204,23 @@ void SoundSystem::playSound(const SoundHandle handle) const {
 void SoundSystem::stopSound(const SoundHandle handle) const {
   assert(handle < int(mSounds.size()));
   Mix_HaltChannel(handle);
+}
+
+
+void SoundSystem::setMusicVolume(const float volume) {
+  mpMusicPlayer->setVolume(volume);
+}
+
+
+void SoundSystem::setSoundVolume(const float volume) {
+  const auto sdlVolume = static_cast<int>(
+    std::clamp(volume, 0.0f, 1.0f) * MIX_MAX_VOLUME);
+
+  for (auto& sound : mSounds) {
+    if (sound.mpMixChunk) {
+      Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
+    }
+  }
 }
 
 }
