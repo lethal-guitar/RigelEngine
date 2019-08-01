@@ -22,10 +22,16 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <filesystem>
+#include <optional>
+
 
 namespace rigel::ui::imgui_integration {
 
-void init(SDL_Window* pWindow, void* pGlContext);
+void init(
+  SDL_Window* pWindow,
+  void* pGlContext,
+  const std::optional<std::filesystem::path>& preferencesPath);
 void shutdown();
 
 bool handleEvent(const SDL_Event& event);
