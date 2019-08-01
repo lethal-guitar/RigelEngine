@@ -27,7 +27,6 @@ Some other features that still need to be implemented:
 
 * Demo playback
 * Enemy radar in game
-* Options menu/configuring the game
 
 Plus, it would be nice to make launching the game easier in the future, e.g. by having some kind of launcher application or setup program.
 
@@ -70,7 +69,6 @@ The most important command line options are:
 
 * `-l`: jump to a specific level. E.g. `-l L5` to play the 5th level of episode 1.
 * `-s`: skip intro movies, go straight to main menu
-* `--no-music`: don't play music
 * `-h`/`--help`: show all command line options
 
 ### Debugging tools, more info
