@@ -45,4 +45,6 @@ private:
 
 UserProfile loadOrCreateUserProfile(const std::string& gamePath);
 
+std::optional<std::filesystem::path> createOrGetPreferencesPath();
+
 }

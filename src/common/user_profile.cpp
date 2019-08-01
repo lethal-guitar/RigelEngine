@@ -405,7 +405,7 @@ void UserProfile::loadFromDisk() {
 }
 
 
-UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+std::optional<std::filesystem::path> createOrGetPreferencesPath() {
   namespace fs = std::filesystem;
 
   auto deleter = [](char* path) { SDL_free(path); };
@@ -413,14 +413,23 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     SDL_GetPrefPath(PREF_PATH_ORG_NAME, PREF_PATH_APP_NAME), deleter};
 
   if (!pPreferencesDirName) {
+    return {};
+  }
+
+  return fs::u8path(std::string{pPreferencesDirName.get()});
+}
+
+
+UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+  namespace fs = std::filesystem;
+
+  const auto preferencesPath = createOrGetPreferencesPath();
+  if (!preferencesPath) {
     std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
-  const auto preferencesDirName = std::string{pPreferencesDirName.get()};
-
-  const auto profileFilePath =
-    fs::u8path(preferencesDirName) / "UserProfile.rigel";
+  const auto profileFilePath = *preferencesPath / "UserProfile.rigel";
 
   if (fs::exists(profileFilePath)) {
     return loadProfile(profileFilePath);
