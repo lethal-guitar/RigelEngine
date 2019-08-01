@@ -95,8 +95,8 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
 
   if (parallaxHorizontal || parallaxBoth) {
     offset = wrapBackgroundOffset({
-      parallaxHorizontal ?  cameraPosition.x*PARALLAX_FACTOR : 0,
-      parallaxBoth ?  cameraPosition.y*PARALLAX_FACTOR : 0
+      parallaxHorizontal ? cameraPosition.x*PARALLAX_FACTOR : 0,
+      parallaxBoth ? cameraPosition.y*PARALLAX_FACTOR : 0
     });
   } else if (autoScrollX || autoScrollY) {
     // TODO Currently this only works right when running at 60 FPS.
