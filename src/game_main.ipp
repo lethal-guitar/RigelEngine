@@ -94,7 +94,6 @@ private:
 
   std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 
-  bool mMusicEnabled = true;
   bool mShowFps = false;
 
   bool mIsRunning;

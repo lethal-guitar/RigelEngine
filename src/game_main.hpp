@@ -34,7 +34,6 @@ struct StartupOptions {
   std::string mGamePath;
   std::optional<std::pair<int, int>> mLevelToJumpTo;
   bool mSkipIntro = false;
-  bool mEnableMusic = true;
   std::optional<base::Vector> mPlayerPosition;
 };
 

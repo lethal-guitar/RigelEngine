@@ -148,8 +148,6 @@ void Game::run(const StartupOptions& startupOptions) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
 
-  mMusicEnabled = startupOptions.mEnableMusic;
-
   applyChangedOptions();
 
   // Check if running registered version
@@ -413,10 +411,6 @@ void Game::stopSound(const data::SoundId id) {
 
 
 void Game::playMusic(const std::string& name) {
-  if (!mMusicEnabled) {
-    return;
-  }
-
   mSoundSystem.playSong(mResources.loadMusic(name));
 }
 
