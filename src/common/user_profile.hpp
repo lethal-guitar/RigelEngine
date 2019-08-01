@@ -20,6 +20,7 @@
 #include "data/high_score_list.hpp"
 #include "data/saved_game.hpp"
 
+#include <filesystem>
 #include <string>
 
 
@@ -28,7 +29,7 @@ namespace rigel {
 class UserProfile {
 public:
   UserProfile() = default;
-  explicit UserProfile(const std::string& profilePath);
+  explicit UserProfile(const std::filesystem::path& profilePath);
 
   void saveToDisk();
   void loadFromDisk();
@@ -38,7 +39,7 @@ public:
   data::GameOptions mOptions;
 
 private:
-  std::optional<std::string> mProfilePath;
+  std::optional<std::filesystem::path> mProfilePath;
 };
 
 

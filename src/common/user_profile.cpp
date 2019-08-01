@@ -26,7 +26,6 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 
 
@@ -98,7 +97,7 @@ data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
 }
 
 
-UserProfile loadProfile(const std::string& profileFile) {
+UserProfile loadProfile(const std::filesystem::path& profileFile) {
   UserProfile profile{profileFile};
   profile.loadFromDisk();
   return profile;
@@ -106,7 +105,7 @@ UserProfile loadProfile(const std::string& profileFile) {
 
 
 UserProfile importProfile(
-  const std::string& profileFile,
+  const std::filesystem::path& profileFile,
   const std::string& gamePath
 ) {
   UserProfile profile{profileFile};
@@ -339,8 +338,11 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
 }
 
 
-void saveToFile(const loader::ByteBuffer& buffer, const std::string& filename) {
-  std::ofstream file(filename, std::ios::binary);
+void saveToFile(
+  const loader::ByteBuffer& buffer,
+  const std::filesystem::path& filePath
+) {
+  std::ofstream file(filePath.u8string(), std::ios::binary);
   if (!file.is_open()) {
     std::cerr << "WARNING: Failed to store user profile\n";
     return;
@@ -352,7 +354,7 @@ void saveToFile(const loader::ByteBuffer& buffer, const std::string& filename) {
 }
 
 
-UserProfile::UserProfile(const std::string& profilePath)
+UserProfile::UserProfile(const std::filesystem::path& profilePath)
   : mProfilePath(profilePath)
 {
 }
@@ -421,9 +423,9 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     fs::u8path(preferencesDirName) / "UserProfile.rigel";
 
   if (fs::exists(profileFilePath)) {
-    return loadProfile(profileFilePath.u8string());
+    return loadProfile(profileFilePath);
   } else {
-    return importProfile(profileFilePath.u8string(), gamePath);
+    return importProfile(profileFilePath, gamePath);
   }
 }
 
