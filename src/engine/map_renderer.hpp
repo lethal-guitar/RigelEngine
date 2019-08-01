@@ -49,9 +49,15 @@ public:
 
   void switchBackdrops();
 
-  void renderBackdrop(const base::Vector& cameraPosition);
-  void renderBackground(const base::Vector& cameraPosition);
-  void renderForeground(const base::Vector& cameraPosition);
+  void renderBackdrop(
+    const base::Vector& cameraPosition,
+    const base::Extents& viewPortSize);
+  void renderBackground(
+    const base::Vector& sectionStart,
+    const base::Extents& sectionSize);
+  void renderForeground(
+    const base::Vector& sectionStart,
+    const base::Extents& sectionSize);
 
   void updateAnimatedMapTiles();
 
@@ -67,7 +73,8 @@ private:
   };
 
   void renderMapTiles(
-    const base::Vector& cameraPosition,
+    const base::Vector& sectionStart,
+    const base::Extents& sectionSize,
     DrawMode drawMode);
   void renderTile(data::map::TileIndex index, int x, int y);
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;

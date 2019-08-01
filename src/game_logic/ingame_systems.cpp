@@ -241,9 +241,10 @@ void IngameSystems::update(
 
 void IngameSystems::render(
   entityx::EntityManager& es,
-  const std::optional<base::Color>& backdropFlashColor
+  const std::optional<base::Color>& backdropFlashColor,
+  const base::Extents& viewPortSize
 ) {
-  mRenderingSystem.update(es, backdropFlashColor);
+  mRenderingSystem.update(es, backdropFlashColor, viewPortSize);
   mParticles.render(mCamera.position());
   mDebuggingSystem.update(es);
 }

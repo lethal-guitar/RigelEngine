@@ -74,7 +74,8 @@ public:
   /** Render everything. Can be called at full frame rate. */
   void update(
     entityx::EntityManager& es,
-    const std::optional<base::Color>& backdropFlashColor);
+    const std::optional<base::Color>& backdropFlashColor,
+    const base::Extents& viewPortSize);
 
   void switchBackdrops() {
     mMapRenderer.switchBackdrops();

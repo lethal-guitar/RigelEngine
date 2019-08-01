@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
 
 #include <cfenv>
 #include <iostream>
@@ -73,17 +74,26 @@ void MapRenderer::switchBackdrops() {
 }
 
 
-void MapRenderer::renderBackground(const base::Vector& cameraPosition) {
-  renderMapTiles(cameraPosition, DrawMode::Background);
+void MapRenderer::renderBackground(
+  const base::Vector& sectionStart,
+  const base::Extents& sectionSize
+) {
+  renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
 }
 
 
-void MapRenderer::renderForeground(const base::Vector& cameraPosition) {
-  renderMapTiles(cameraPosition, DrawMode::Foreground);
+void MapRenderer::renderForeground(
+  const base::Vector& sectionStart,
+  const base::Extents& sectionSize
+) {
+  renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
 }
 
 
-void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
+void MapRenderer::renderBackdrop(
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
   base::Vector offset;
 
   const auto parallaxBoth = mScrollMode == BackdropScrollMode::ParallaxBoth;
@@ -115,23 +125,38 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
     }
   }
 
+  const auto backdropWidth = mBackdropTexture.extents().width;
+  const auto numRepetitions =
+    base::integerDivCeil(tilesToPixels(viewPortSize.width), backdropWidth);
+
+  const auto sourceRectSize = base::Extents{
+    mBackdropTexture.extents().width * numRepetitions,
+    mBackdropTexture.extents().height
+  };
+
+  const auto targetRectWidth = backdropWidth * numRepetitions;
+  const auto targetRectSize = base::Extents{
+    targetRectWidth,
+    tilesToPixels(viewPortSize.height)
+  };
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
-    {offset, mBackdropTexture.extents()},
-    {{}, mBackdropTexture.extents()},
+    {offset, sourceRectSize},
+    {{}, targetRectSize},
     true);
 }
 
 
 void MapRenderer::renderMapTiles(
-  const base::Vector& cameraPosition,
+  const base::Vector& sectionStart,
+  const base::Extents& sectionSize,
   const DrawMode drawMode
 ) {
   for (int layer=0; layer<2; ++layer) {
-    for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
-      for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
-        const auto col = x + cameraPosition.x;
-        const auto row = y + cameraPosition.y;
+    for (int y=0; y<sectionSize.height; ++y) {
+      for (int x=0; x<sectionSize.width; ++x) {
+        const auto col = x + sectionStart.x;
+        const auto row = y + sectionStart.y;
         if (col >= mpMap->width() || row >= mpMap->height()) {
           continue;
         }

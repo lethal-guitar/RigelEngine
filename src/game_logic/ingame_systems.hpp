@@ -87,7 +87,8 @@ public:
   void update(const PlayerInput& inputState, entityx::EntityManager& es);
   void render(
     entityx::EntityManager& es,
-    const std::optional<base::Color>& backdropFlashColor);
+    const std::optional<base::Color>& backdropFlashColor,
+    const base::Extents& viewPortSize);
 
   DebuggingSystem& debuggingSystem();
 

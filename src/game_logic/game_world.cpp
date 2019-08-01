@@ -453,7 +453,8 @@ void GameWorld::render() {
     const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
 
     if (!mScreenFlashColor) {
-      mpSystems->render(mEntities, mBackdropFlashColor);
+      mpSystems->render(
+        mEntities, mBackdropFlashColor, data::GameTraits::mapViewPortSize);
     } else {
       mpRenderer->clear(*mScreenFlashColor);
     }
