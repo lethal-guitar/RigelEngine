@@ -61,9 +61,14 @@ public:
     const base::Vector& cameraPosition);
 
 private:
+  enum class DrawMode {
+    Background,
+    Foreground
+  };
+
   void renderMapTiles(
     const base::Vector& cameraPosition,
-    bool renderForeground);
+    DrawMode drawMode);
   void renderTile(data::map::TileIndex index, int x, int y);
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 

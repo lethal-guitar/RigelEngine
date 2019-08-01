@@ -74,12 +74,12 @@ void MapRenderer::switchBackdrops() {
 
 
 void MapRenderer::renderBackground(const base::Vector& cameraPosition) {
-  renderMapTiles(cameraPosition, false);
+  renderMapTiles(cameraPosition, DrawMode::Background);
 }
 
 
 void MapRenderer::renderForeground(const base::Vector& cameraPosition) {
-  renderMapTiles(cameraPosition, true);
+  renderMapTiles(cameraPosition, DrawMode::Foreground);
 }
 
 
@@ -142,7 +142,7 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
 
 void MapRenderer::renderMapTiles(
   const base::Vector& cameraPosition,
-  const bool renderForeground
+  const DrawMode drawMode
 ) {
   for (int layer=0; layer<2; ++layer) {
     for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
@@ -156,7 +156,9 @@ void MapRenderer::renderMapTiles(
         const auto tileIndex = mpMap->tileAt(layer, col, row);
         const auto isForeground =
           mpMap->attributeDict().attributes(tileIndex).isForeGround();
-        if (isForeground != renderForeground) {
+        const auto shouldRenderForeground = drawMode == DrawMode::Foreground;
+
+        if (isForeground != shouldRenderForeground) {
           continue;
         }
 
