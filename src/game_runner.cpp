@@ -152,9 +152,13 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
     return;
   }
 
-  std::visit(
-    [dt](auto& state) { state.updateAndRender(dt); },
-    mStateStack.top());
+  base::match(mStateStack.top(),
+    [dt, this](ui::OptionsMenu& state) {
+      state.updateAndRender(dt);
+      mWorld.render();
+    },
+
+    [dt](auto& state) { state.updateAndRender(dt); });
 }
 
 
