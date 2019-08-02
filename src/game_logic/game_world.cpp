@@ -447,17 +447,22 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
 
 void GameWorld::render() {
+  auto drawWorld = [this](const base::Extents& viewPortSize) {
+    if (!mScreenFlashColor) {
+      mpSystems->render(
+        mEntities, mBackdropFlashColor, viewPortSize);
+    } else {
+      mpRenderer->clear(*mScreenFlashColor);
+    }
+  };
+
+
   mpRenderer->clear();
 
   {
     const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
 
-    if (!mScreenFlashColor) {
-      mpSystems->render(
-        mEntities, mBackdropFlashColor, data::GameTraits::mapViewPortSize);
-    } else {
-      mpRenderer->clear(*mScreenFlashColor);
-    }
+    drawWorld(data::GameTraits::mapViewPortSize);
     mHudRenderer.render();
   }
 
