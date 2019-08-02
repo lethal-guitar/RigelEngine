@@ -707,6 +707,8 @@ void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
     return;
   }
 
+  submitBatch();
+
   mClipRect = clipRect;
   if (mClipRect) {
     glEnable(GL_SCISSOR_TEST);
