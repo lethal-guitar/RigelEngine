@@ -82,6 +82,14 @@ struct GameTraits {
   static const int minDrawOrder = -1;
   static const int maxDrawOrder = 4;
 
+  // The game's original 320x200 resolution would give us a 16:10 aspect ratio
+  // when using square pixels, but monitors of the time had a 4:3 aspect ratio,
+  // and that's what the game's graphics were designed for (very noticeable e.g.
+  // with the earth in the Apogee logo). CRTs are not limited to square pixels,
+  // and the monitor would stretch the 320x200 into the right shape for a 4:3
+  // picture.
+  static constexpr auto aspectRatio = 4.0f / 3.0f;
+
   struct CZone {
     static const std::size_t numSolidTiles = 1000u;
     static const std::size_t numMaskedTiles = 160u;
