@@ -17,6 +17,8 @@
 #include "game_world.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
@@ -190,6 +192,7 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
+  , mpOptions(&context.mpUserProfile->mOptions)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::ExitReached>(*this);
