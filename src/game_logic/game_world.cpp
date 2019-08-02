@@ -131,33 +131,37 @@ auto asSize(const base::Vector& vec) {
 }
 
 
+auto scaleVec(const base::Vector& vec, const base::Point<float>& scale) {
+  return base::Vector{
+    base::round(vec.x * scale.x),
+    base::round(vec.y * scale.y)};
+}
+
+
+auto localToGlobalTranslation(
+  const renderer::Renderer* pRenderer,
+  const base::Vector& translation
+) {
+  return pRenderer->globalTranslation() +
+    scaleVec(translation, pRenderer->globalScale());
+}
+
+
 [[nodiscard]] auto setupIngameViewport(
   renderer::Renderer* pRenderer,
   const int screenShakeOffsetX
 ) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
 
-  const auto translation = pRenderer->globalTranslation();
-  const auto scale = pRenderer->globalScale();
-
-  auto applyScale = [&](const base::Vector& vec) {
-    return base::Vector{
-      base::round(vec.x * scale.x),
-      base::round(vec.y * scale.y)};
-  };
-
-  auto transform = [&](const base::Vector& vec) {
-    return translation + applyScale(vec);
-  };
-
-
   const auto offset = data::GameTraits::inGameViewPortOffset +
     base::Vector{screenShakeOffsetX, 0};
+  const auto newTranslation = localToGlobalTranslation(pRenderer, offset);
 
+  const auto scale = pRenderer->globalScale();
   pRenderer->setClipRect(base::Rect<int>{
-    transform(offset),
-    asSize(applyScale(asVec(data::GameTraits::inGameViewPortSize)))});
-  pRenderer->setGlobalTranslation(transform(offset));
+    newTranslation,
+    asSize(scaleVec(asVec(data::GameTraits::inGameViewPortSize), scale))});
+  pRenderer->setGlobalTranslation(newTranslation);
 
   return saved;
 }
