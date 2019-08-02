@@ -456,6 +456,18 @@ void GameWorld::render() {
     }
   };
 
+  auto drawTopRow = [this]() {
+    if (mActiveBossEntity) {
+      using game_logic::components::Shootable;
+
+      const auto health = mActiveBossEntity.has_component<Shootable>()
+        ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
+      drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+    } else {
+      mMessageDisplay.render();
+    }
+  };
+
 
   mpRenderer->clear();
 
@@ -466,15 +478,7 @@ void GameWorld::render() {
     mHudRenderer.render();
   }
 
-  if (mActiveBossEntity) {
-    using game_logic::components::Shootable;
-
-    const auto health = mActiveBossEntity.has_component<Shootable>()
-      ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
-    drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-  } else {
-    mMessageDisplay.render();
-  }
+  drawTopRow();
 }
 
 
