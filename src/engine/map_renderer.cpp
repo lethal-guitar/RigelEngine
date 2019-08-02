@@ -115,28 +115,11 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
     }
   }
 
-  const auto offsetForDrawing = offset * -1;
-  const auto offsetForRepeating = base::Vector{
-    GameTraits::viewPortWidthPx - offset.x,
-    GameTraits::viewPortHeightPx - offset.y};
-
-  // TODO: This can be simplified by using texture wrap mode (GL_REPEAT)
-  mBackdropTexture.render(mpRenderer, offsetForDrawing);
-  if (!autoScrollY) {
-    mBackdropTexture.render(
-      mpRenderer,
-      base::Vector{offsetForRepeating.x, offsetForDrawing.y});
-  }
-
-  if (parallaxBoth || autoScrollY) {
-    mBackdropTexture.render(
-      mpRenderer,
-      base::Vector{offsetForDrawing.x, offsetForRepeating.y});
-  }
-
-  if (parallaxBoth) {
-    mBackdropTexture.render(mpRenderer, offsetForRepeating);
-  }
+  mpRenderer->drawTexture(
+    mBackdropTexture.data(),
+    {offset, mBackdropTexture.extents()},
+    {{}, mBackdropTexture.extents()},
+    true);
 }
 
 

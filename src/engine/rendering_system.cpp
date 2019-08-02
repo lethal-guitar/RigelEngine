@@ -200,8 +200,8 @@ RenderingSystem::RenderingSystem(
   : mpRenderer(pRenderer)
   , mRenderTarget(
       pRenderer,
-      data::GameTraits::inGameViewPortSize.width,
-      data::GameTraits::inGameViewPortSize.height)
+      pRenderer->windowSize().width,
+      pRenderer->windowSize().height)
   , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
   , mpCameraPosition(pCameraPosition)
 {
@@ -234,7 +234,6 @@ void RenderingSystem::update(
 
   {
     renderer::RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
-    auto saved = renderer::setupDefaultState(mpRenderer);
 
     // Render
     if (backdropFlashColor) {
@@ -253,8 +252,12 @@ void RenderingSystem::update(
     }
   }
 
-
-  mRenderTarget.render(mpRenderer, 0, 0);
+  {
+    auto saved = renderer::Renderer::StateSaver(mpRenderer);
+    mpRenderer->setGlobalScale({1.0f, 1.0f});
+    mpRenderer->setGlobalTranslation({});
+    mRenderTarget.render(mpRenderer, 0, 0);
+  }
 
   renderWaterEffectAreas(es);
 
