@@ -83,9 +83,20 @@ base::Rect<int> deadZoneRect(const Player& player) {
 
 base::Vector offsetToDeadZone(
   const Player& player,
-  const base::Vector& cameraPosition
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
 ) {
-  const auto playerBounds = player.worldSpaceCollisionBox();
+  const auto extraTiles =
+    viewPortSize.width - data::GameTraits::mapViewPortSize.width;
+  const auto offsetToCenter = extraTiles / 2;
+  auto playerBounds = player.worldSpaceCollisionBox();
+
+  // This makes the camera code work correctly when in widescreen mode. The
+  // dead zone is tailored towards normal (i.e. not widescreen) mode, which
+  // would cause the player to be constrained to move inside the left half of
+  // the screen when in widescreen mode. By shifting the player position, we
+  // effectively move the dead zone to the center of the screen instead.
+  playerBounds.topLeft.x -= offsetToCenter;
 
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
@@ -119,12 +130,14 @@ Camera::Camera(
 )
   : mpPlayer(pPlayer)
   , mpMap(&map)
+  , mViewPortSize(data::GameTraits::mapViewPortSize)
 {
   eventManager.subscribe<rigel::events::PlayerFiredShot>(*this);
 }
 
 
-void Camera::update(const PlayerInput& input) {
+void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize) {
+  mViewPortSize = viewPortSize;
   updateManualScrolling(input);
   updateAutomaticScrolling();
 }
@@ -153,7 +166,8 @@ void Camera::updateManualScrolling(const PlayerInput& input) {
 
 
 void Camera::updateAutomaticScrolling() {
-  const auto [offsetX, offsetY] = offsetToDeadZone(*mpPlayer, mPosition);
+  const auto [offsetX, offsetY] =
+    offsetToDeadZone(*mpPlayer, mPosition, mViewPortSize);
 
   const auto maxAdjustDown = mpPlayer->isRidingElevator()
     ? MAX_ADJUST_DOWN_ELEVATOR
@@ -169,15 +183,15 @@ void Camera::updateAutomaticScrolling() {
 
 void Camera::setPosition(const base::Vector position) {
   const auto maxPosition = base::Extents{
-    static_cast<int>(mpMap->width() - data::GameTraits::mapViewPortWidthTiles),
-    static_cast<int>(mpMap->height() - data::GameTraits::mapViewPortHeightTiles)};
+    static_cast<int>(mpMap->width() - mViewPortSize.width),
+    static_cast<int>(mpMap->height() - mViewPortSize.height)};
   mPosition.x = std::clamp(position.x, 0, maxPosition.width);
   mPosition.y = std::clamp(position.y, 0, maxPosition.height);
 }
 
 
 void Camera::centerViewOnPlayer() {
-  setPosition(offsetToDeadZone(*mpPlayer, {}));
+  setPosition(offsetToDeadZone(*mpPlayer, {}, mViewPortSize));
 }
 
 

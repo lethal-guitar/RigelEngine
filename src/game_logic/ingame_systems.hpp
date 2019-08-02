@@ -84,7 +84,10 @@ public:
     entityx::EventManager& eventManager,
     const loader::ResourceLoader& resources);
 
-  void update(const PlayerInput& inputState, entityx::EntityManager& es);
+  void update(
+    const PlayerInput& inputState,
+    entityx::EntityManager& es,
+    const base::Extents& viewPortSize);
   void render(
     entityx::EntityManager& es,
     const std::optional<base::Color>& backdropFlashColor,

@@ -28,6 +28,7 @@ namespace rigel::engine {
 
 void markActiveEntities(
   entityx::EntityManager& es,
-  const base::Vector& cameraPosition);
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize);
 
 }

@@ -32,6 +32,9 @@ struct GameOptions {
   float mSoundVolume = SOUND_VOLUME_DEFAULT;
   bool mMusicOn = true;
   bool mSoundOn = true;
+
+  // Enhancements
+  bool mWidescreenModeOn = false;
 };
 
 }

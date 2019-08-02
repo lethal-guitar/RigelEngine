@@ -60,6 +60,7 @@ struct GlobalDependencies {
 
 struct PerFrameState {
   PlayerInput mInput;
+  base::Extents mCurrentViewPortSize;
   bool mIsOddFrame = false;
   bool mIsEarthShaking = false;
 };

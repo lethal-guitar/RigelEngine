@@ -39,7 +39,7 @@ public:
   void toggleWorldCollisionDataDisplay();
   void toggleGridDisplay();
 
-  void update(entityx::EntityManager& es);
+  void update(entityx::EntityManager& es, const base::Extents& viewPortSize);
 
 private:
   renderer::Renderer* mpRenderer;

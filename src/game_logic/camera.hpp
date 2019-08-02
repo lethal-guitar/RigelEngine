@@ -42,7 +42,7 @@ public:
     const data::map::Map& map,
     entityx::EventManager& eventManager);
 
-  void update(const PlayerInput& input);
+  void update(const PlayerInput& input, const base::Extents& viewPortSize);
   void centerViewOnPlayer();
 
   const base::Vector& position() const;
@@ -57,6 +57,7 @@ private:
   const Player* mpPlayer;
   const data::map::Map* mpMap;
   base::Vector mPosition;
+  base::Extents mViewPortSize;
   int mManualScrollCooldown = 0;
 };
 
