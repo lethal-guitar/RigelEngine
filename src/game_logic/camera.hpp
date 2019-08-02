@@ -55,8 +55,8 @@ private:
   void setPosition(base::Vector position);
 
   const Player* mpPlayer;
+  const data::map::Map* mpMap;
   base::Vector mPosition;
-  base::Extents mMaxPosition;
   int mManualScrollCooldown = 0;
 };
 

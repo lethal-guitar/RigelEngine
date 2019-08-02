@@ -118,9 +118,7 @@ Camera::Camera(
   entityx::EventManager& eventManager
 )
   : mpPlayer(pPlayer)
-  , mMaxPosition(base::Extents{
-    static_cast<int>(map.width() - data::GameTraits::mapViewPortWidthTiles),
-    static_cast<int>(map.height() - data::GameTraits::mapViewPortHeightTiles)})
+  , mpMap(&map)
 {
   eventManager.subscribe<rigel::events::PlayerFiredShot>(*this);
 }
@@ -170,8 +168,11 @@ void Camera::updateAutomaticScrolling() {
 
 
 void Camera::setPosition(const base::Vector position) {
-  mPosition.x = std::clamp(position.x, 0, mMaxPosition.width);
-  mPosition.y = std::clamp(position.y, 0, mMaxPosition.height);
+  const auto maxPosition = base::Extents{
+    static_cast<int>(mpMap->width() - data::GameTraits::mapViewPortWidthTiles),
+    static_cast<int>(mpMap->height() - data::GameTraits::mapViewPortHeightTiles)};
+  mPosition.x = std::clamp(position.x, 0, maxPosition.width);
+  mPosition.y = std::clamp(position.y, 0, maxPosition.height);
 }
 
 
