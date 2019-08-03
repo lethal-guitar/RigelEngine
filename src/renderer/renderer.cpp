@@ -199,7 +199,7 @@ void setScissorBox(
   const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
   glScissor(
     clipRect.topLeft.x,
-    offsetAtBottom,
+    offsetAtBottom - 1,
     clipRect.size.width,
     clipRect.size.height);
 }
