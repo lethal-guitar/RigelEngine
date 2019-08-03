@@ -234,6 +234,7 @@ void RenderingSystem::update(
 
   {
     renderer::RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
+    auto saved = renderer::setupDefaultState(mpRenderer);
 
     // Render
     if (backdropFlashColor) {

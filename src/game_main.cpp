@@ -304,6 +304,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
   }
 
   renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
+  auto saved = renderer::setupDefaultState(&mRenderer);
 
   engine::TimeDelta elapsedTime = 0.0;
 
@@ -374,6 +375,8 @@ void Game::fadeOutScreen() {
 
   // Clear render canvas after a fade-out
   RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+  auto saved = renderer::setupDefaultState(&mRenderer);
+
   mRenderer.clear();
 }
 
