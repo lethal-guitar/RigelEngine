@@ -16,7 +16,6 @@
 
 #include "debugging_system.hpp"
 
-#include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
@@ -87,12 +86,15 @@ void DebuggingSystem::toggleGridDisplay() {
 }
 
 
-void DebuggingSystem::update(ex::EntityManager& es) {
+void DebuggingSystem::update(
+  ex::EntityManager& es,
+  const base::Extents& viewPortSize
+) {
   if (mShowWorldCollisionData) {
     const auto drawColor = base::Color{255, 255, 0, 255};
 
-    for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
-      for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
+    for (int y=0; y<viewPortSize.height; ++y) {
+      for (int x=0; x<viewPortSize.width; ++x) {
         const auto col = x + mpCameraPos->x;
         const auto row = y + mpCameraPos->y;
         if (col >= mpMap->width() || row >= mpMap->height()) {
@@ -178,17 +180,17 @@ void DebuggingSystem::update(ex::EntityManager& es) {
 
   if (mShowGrid) {
     const auto drawColor = base::Color{255, 255, 255, 190};
-    const auto maxX = tilesToPixels(GameTraits::mapViewPortWidthTiles);
-    const auto maxY = tilesToPixels(GameTraits::mapViewPortHeightTiles);
+    const auto maxX = tilesToPixels(viewPortSize.width);
+    const auto maxY = tilesToPixels(viewPortSize.height);
 
     // Horizontal lines
-    for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
+    for (int y=0; y<viewPortSize.height; ++y) {
       const auto pxY = tilesToPixels(y);
       mpRenderer->drawLine(0, pxY, maxX, pxY, drawColor);
     }
 
     // Vertical lines
-    for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
+    for (int x=0; x<viewPortSize.width; ++x) {
       const auto pxX = tilesToPixels(x);
       mpRenderer->drawLine(pxX, 0, pxX, maxY, drawColor);
     }

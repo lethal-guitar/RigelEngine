@@ -95,9 +95,16 @@ uniform sampler2D textureData;
 uniform vec4 overlayColor;
 
 uniform vec4 colorModulation;
+uniform bool enableRepeat;
 
 void main() {
-  vec4 baseColor = TEXTURE_LOOKUP(textureData, texCoordFrag);
+  vec2 texCoords = texCoordFrag;
+  if (enableRepeat) {
+    texCoords.x = fract(texCoords.x);
+    texCoords.y = fract(texCoords.y);
+  }
+
+  vec4 baseColor = TEXTURE_LOOKUP(textureData, texCoords);
   vec4 modulated = baseColor * colorModulation;
   float targetAlpha = modulated.a;
 
@@ -199,7 +206,7 @@ void setScissorBox(
   const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
   glScissor(
     clipRect.topLeft.x,
-    offsetAtBottom,
+    offsetAtBottom - 1,
     clipRect.size.width,
     clipRect.size.height);
 }
@@ -453,7 +460,8 @@ void Renderer::setColorModulation(const base::Color& colorModulation) {
 void Renderer::drawTexture(
   const TextureData& textureData,
   const base::Rect<int>& sourceRect,
-  const base::Rect<int>& destRect
+  const base::Rect<int>& destRect,
+  const bool repeat
 ) {
   if (!isVisible(destRect)) {
     return;
@@ -466,6 +474,13 @@ void Renderer::drawTexture(
 
     glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
     mLastUsedTexture = textureData.mHandle;
+  }
+
+  if (repeat != mTextureRepeatOn) {
+    submitBatch();
+
+    mTexturedQuadShader.setUniform("enableRepeat", repeat);
+    mTextureRepeatOn = repeat;
   }
 
   // x, y, tex_u, tex_v
@@ -707,6 +722,8 @@ void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
     return;
   }
 
+  submitBatch();
+
   mClipRect = clipRect;
   if (mClipRect) {
     glEnable(GL_SCISSOR_TEST);
@@ -803,6 +820,7 @@ void Renderer::updateShaders() {
   switch (mRenderMode) {
     case RenderMode::SpriteBatch:
       useShaderIfChanged(mTexturedQuadShader);
+      mTexturedQuadShader.setUniform("enableRepeat", mTextureRepeatOn);
       mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
       glVertexAttribPointer(
         0,

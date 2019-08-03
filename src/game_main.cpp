@@ -63,15 +63,6 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 }
 
 
-// The game's original 320x200 resolution would give us a 16:10 aspect ratio
-// when using square pixels, but monitors of the time had a 4:3 aspect ratio,
-// and that's what the game's graphics were designed for (very noticeable e.g.
-// with the earth in the Apogee logo). CRTs are not limited to square pixels,
-// and the monitor would stretch the 320x200 into the right shape for a 4:3
-// picture.
-const auto TARGET_ASPECT_RATIO = 4.0f / 3.0f;
-
-
 [[nodiscard]] auto setupSimpleUpscaling(renderer::Renderer* pRenderer) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
 
@@ -80,10 +71,10 @@ const auto TARGET_ASPECT_RATIO = 4.0f / 3.0f;
   const auto windowHeight = float(windowHeightInt);
 
   const auto usableWidth = windowWidth > windowHeight
-    ? TARGET_ASPECT_RATIO * windowHeight
+    ? data::GameTraits::aspectRatio * windowHeight
     : windowWidth;
   const auto usableHeight = windowHeight >= windowWidth
-    ? 1.0f / TARGET_ASPECT_RATIO * windowWidth
+    ? 1.0f / data::GameTraits::aspectRatio * windowWidth
     : windowHeight;
 
   const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
@@ -147,8 +138,6 @@ void Game::run(const StartupOptions& startupOptions) {
   data::forEachSoundId([this](const auto id) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
-
-  mMusicEnabled = startupOptions.mEnableMusic;
 
   applyChangedOptions();
 
@@ -315,6 +304,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
   }
 
   renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
+  auto saved = renderer::setupDefaultState(&mRenderer);
 
   engine::TimeDelta elapsedTime = 0.0;
 
@@ -385,6 +375,8 @@ void Game::fadeOutScreen() {
 
   // Clear render canvas after a fade-out
   RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+  auto saved = renderer::setupDefaultState(&mRenderer);
+
   mRenderer.clear();
 }
 
@@ -413,10 +405,6 @@ void Game::stopSound(const data::SoundId id) {
 
 
 void Game::playMusic(const std::string& name) {
-  if (!mMusicEnabled) {
-    return;
-  }
-
   mSoundSystem.playSong(mResources.loadMusic(name));
 }
 

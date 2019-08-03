@@ -149,7 +149,8 @@ public:
   void drawTexture(
     const TextureData& textureData,
     const base::Rect<int>& pSourceRect,
-    const base::Rect<int>& pDestRect);
+    const base::Rect<int>& pDestRect,
+    bool repeat = false);
 
   void drawRectangle(
     const base::Rect<int>& rect,
@@ -265,6 +266,7 @@ private:
   GLuint mLastUsedTexture;
   base::Color mLastColorModulation;
   base::Color mLastOverlayColor;
+  bool mTextureRepeatOn = false;
 
   RenderMode mRenderMode;
 

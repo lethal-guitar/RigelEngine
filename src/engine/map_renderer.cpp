@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
 
 #include <cfenv>
 #include <iostream>
@@ -73,17 +74,26 @@ void MapRenderer::switchBackdrops() {
 }
 
 
-void MapRenderer::renderBackground(const base::Vector& cameraPosition) {
-  renderMapTiles(cameraPosition, false);
+void MapRenderer::renderBackground(
+  const base::Vector& sectionStart,
+  const base::Extents& sectionSize
+) {
+  renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
 }
 
 
-void MapRenderer::renderForeground(const base::Vector& cameraPosition) {
-  renderMapTiles(cameraPosition, true);
+void MapRenderer::renderForeground(
+  const base::Vector& sectionStart,
+  const base::Extents& sectionSize
+) {
+  renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
 }
 
 
-void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
+void MapRenderer::renderBackdrop(
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
   base::Vector offset;
 
   const auto parallaxBoth = mScrollMode == BackdropScrollMode::ParallaxBoth;
@@ -95,8 +105,8 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
 
   if (parallaxHorizontal || parallaxBoth) {
     offset = wrapBackgroundOffset({
-      parallaxHorizontal ?  cameraPosition.x*PARALLAX_FACTOR : 0,
-      parallaxBoth ?  cameraPosition.y*PARALLAX_FACTOR : 0
+      parallaxHorizontal ? cameraPosition.x*PARALLAX_FACTOR : 0,
+      parallaxBoth ? cameraPosition.y*PARALLAX_FACTOR : 0
     });
   } else if (autoScrollX || autoScrollY) {
     // TODO Currently this only works right when running at 60 FPS.
@@ -115,40 +125,38 @@ void MapRenderer::renderBackdrop(const base::Vector& cameraPosition) {
     }
   }
 
-  const auto offsetForDrawing = offset * -1;
-  const auto offsetForRepeating = base::Vector{
-    GameTraits::viewPortWidthPx - offset.x,
-    GameTraits::viewPortHeightPx - offset.y};
+  const auto backdropWidth = mBackdropTexture.extents().width;
+  const auto numRepetitions =
+    base::integerDivCeil(tilesToPixels(viewPortSize.width), backdropWidth);
 
-  // TODO: This can be simplified by using texture wrap mode (GL_REPEAT)
-  mBackdropTexture.render(mpRenderer, offsetForDrawing);
-  if (!autoScrollY) {
-    mBackdropTexture.render(
-      mpRenderer,
-      base::Vector{offsetForRepeating.x, offsetForDrawing.y});
-  }
+  const auto sourceRectSize = base::Extents{
+    mBackdropTexture.extents().width * numRepetitions,
+    mBackdropTexture.extents().height
+  };
 
-  if (parallaxBoth || autoScrollY) {
-    mBackdropTexture.render(
-      mpRenderer,
-      base::Vector{offsetForDrawing.x, offsetForRepeating.y});
-  }
-
-  if (parallaxBoth) {
-    mBackdropTexture.render(mpRenderer, offsetForRepeating);
-  }
+  const auto targetRectWidth = backdropWidth * numRepetitions;
+  const auto targetRectSize = base::Extents{
+    targetRectWidth,
+    tilesToPixels(viewPortSize.height)
+  };
+  mpRenderer->drawTexture(
+    mBackdropTexture.data(),
+    {offset, sourceRectSize},
+    {{}, targetRectSize},
+    true);
 }
 
 
 void MapRenderer::renderMapTiles(
-  const base::Vector& cameraPosition,
-  const bool renderForeground
+  const base::Vector& sectionStart,
+  const base::Extents& sectionSize,
+  const DrawMode drawMode
 ) {
   for (int layer=0; layer<2; ++layer) {
-    for (int y=0; y<GameTraits::mapViewPortHeightTiles; ++y) {
-      for (int x=0; x<GameTraits::mapViewPortWidthTiles; ++x) {
-        const auto col = x + cameraPosition.x;
-        const auto row = y + cameraPosition.y;
+    for (int y=0; y<sectionSize.height; ++y) {
+      for (int x=0; x<sectionSize.width; ++x) {
+        const auto col = x + sectionStart.x;
+        const auto row = y + sectionStart.y;
         if (col >= mpMap->width() || row >= mpMap->height()) {
           continue;
         }
@@ -156,7 +164,9 @@ void MapRenderer::renderMapTiles(
         const auto tileIndex = mpMap->tileAt(layer, col, row);
         const auto isForeground =
           mpMap->attributeDict().attributes(tileIndex).isForeGround();
-        if (isForeground != renderForeground) {
+        const auto shouldRenderForeground = drawMode == DrawMode::Foreground;
+
+        if (isForeground != shouldRenderForeground) {
           continue;
         }
 

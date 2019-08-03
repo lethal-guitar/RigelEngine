@@ -174,7 +174,8 @@ IngameSystems::IngameSystems(
 
 void IngameSystems::update(
   const PlayerInput& input,
-  entityx::EntityManager& es
+  entityx::EntityManager& es,
+  const base::Extents& viewPortSize
 ) {
   // ----------------------------------------------------------------------
   // Animation update
@@ -189,8 +190,8 @@ void IngameSystems::update(
   mPlayerInteractionSystem.updatePlayerInteraction(input, es);
 
   mPlayer.update(input);
-  mCamera.update(input);
-  engine::markActiveEntities(es, mCamera.position());
+  mCamera.update(input, viewPortSize);
+  engine::markActiveEntities(es, mCamera.position(), viewPortSize);
 
   // ----------------------------------------------------------------------
   // Player related logic update
@@ -212,7 +213,7 @@ void IngameSystems::update(
   mSlimeBlobSystem.update(es);
   mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
-  mBehaviorControllerSystem.update(es, input);
+  mBehaviorControllerSystem.update(es, input, viewPortSize);
 
   // ----------------------------------------------------------------------
   // Physics and other updates
@@ -241,11 +242,12 @@ void IngameSystems::update(
 
 void IngameSystems::render(
   entityx::EntityManager& es,
-  const std::optional<base::Color>& backdropFlashColor
+  const std::optional<base::Color>& backdropFlashColor,
+  const base::Extents& viewPortSize
 ) {
-  mRenderingSystem.update(es, backdropFlashColor);
+  mRenderingSystem.update(es, backdropFlashColor, viewPortSize);
   mParticles.render(mCamera.position());
-  mDebuggingSystem.update(es);
+  mDebuggingSystem.update(es, viewPortSize);
 }
 
 

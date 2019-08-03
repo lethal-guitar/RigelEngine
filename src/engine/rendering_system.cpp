@@ -200,8 +200,8 @@ RenderingSystem::RenderingSystem(
   : mpRenderer(pRenderer)
   , mRenderTarget(
       pRenderer,
-      data::GameTraits::inGameViewPortSize.width,
-      data::GameTraits::inGameViewPortSize.height)
+      pRenderer->windowSize().width,
+      pRenderer->windowSize().height)
   , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
   , mpCameraPosition(pCameraPosition)
 {
@@ -210,7 +210,8 @@ RenderingSystem::RenderingSystem(
 
 void RenderingSystem::update(
   ex::EntityManager& es,
-  const std::optional<base::Color>& backdropFlashColor
+  const std::optional<base::Color>& backdropFlashColor,
+  const base::Extents& viewPortSize
 ) {
   using namespace std;
   using game_logic::components::TileDebris;
@@ -238,13 +239,13 @@ void RenderingSystem::update(
     // Render
     if (backdropFlashColor) {
       mpRenderer->setOverlayColor(*backdropFlashColor);
-      mMapRenderer.renderBackdrop(*mpCameraPosition);
+      mMapRenderer.renderBackdrop(*mpCameraPosition, viewPortSize);
       mpRenderer->setOverlayColor({});
     } else {
-      mMapRenderer.renderBackdrop(*mpCameraPosition);
+      mMapRenderer.renderBackdrop(*mpCameraPosition, viewPortSize);
     }
 
-    mMapRenderer.renderBackground(*mpCameraPosition);
+    mMapRenderer.renderBackground(*mpCameraPosition, viewPortSize);
 
     // behind foreground
     for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
@@ -252,12 +253,16 @@ void RenderingSystem::update(
     }
   }
 
-
-  mRenderTarget.render(mpRenderer, 0, 0);
+  {
+    auto saved = renderer::Renderer::StateSaver(mpRenderer);
+    mpRenderer->setGlobalScale({1.0f, 1.0f});
+    mpRenderer->setGlobalTranslation({});
+    mRenderTarget.render(mpRenderer, 0, 0);
+  }
 
   renderWaterEffectAreas(es);
 
-  mMapRenderer.renderForeground(*mpCameraPosition);
+  mMapRenderer.renderForeground(*mpCameraPosition, viewPortSize);
 
   // top most
   for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {

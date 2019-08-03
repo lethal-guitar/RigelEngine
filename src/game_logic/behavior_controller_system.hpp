@@ -43,7 +43,8 @@ public:
 
   void update(
     entityx::EntityManager& es,
-    const PlayerInput& input);
+    const PlayerInput& input,
+    const base::Extents& viewPortSize);
 
   void receive(const events::ShootableDamaged& event);
   void receive(const events::ShootableKilled& event);

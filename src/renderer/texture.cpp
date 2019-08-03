@@ -136,12 +136,15 @@ RenderTargetTexture::Binder::Binder(
   const renderer::Renderer::RenderTarget& target,
   renderer::Renderer* pRenderer
 )
-  : mStateSaver(pRenderer)
+  : mPreviousRenderTarget(pRenderer->currentRenderTarget())
+  , mpRenderer(pRenderer)
 {
   pRenderer->setRenderTarget(target);
-  pRenderer->setGlobalTranslation({});
-  pRenderer->setGlobalScale({1.0f, 1.0f});
-  pRenderer->setClipRect({});
+}
+
+
+RenderTargetTexture::Binder::~Binder() {
+  mpRenderer->setRenderTarget(mPreviousRenderTarget);
 }
 
 

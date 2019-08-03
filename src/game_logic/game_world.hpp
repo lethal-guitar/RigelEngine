@@ -42,6 +42,7 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 namespace rigel { class GameRunner; }
+namespace rigel::data { struct GameOptions; }
 
 
 namespace rigel::game_logic {
@@ -150,6 +151,7 @@ private:
   engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
+  const data::GameOptions* mpOptions;
 
   std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;

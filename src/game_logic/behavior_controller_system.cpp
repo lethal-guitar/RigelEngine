@@ -47,12 +47,14 @@ BehaviorControllerSystem::BehaviorControllerSystem(
 
 void BehaviorControllerSystem::update(
   entityx::EntityManager& es,
-  const PlayerInput& input
+  const PlayerInput& input,
+  const base::Extents& viewPortSize
 ) {
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   mPerFrameState.mInput = input;
+  mPerFrameState.mCurrentViewPortSize = viewPortSize;
 
   es.each<BehaviorController, Active>([this](
     entityx::Entity entity,

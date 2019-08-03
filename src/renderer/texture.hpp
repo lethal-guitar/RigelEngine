@@ -200,12 +200,17 @@ public:
   class Binder {
   public:
     Binder(RenderTargetTexture& renderTarget, Renderer* pRenderer);
+    ~Binder();
+
+    Binder(Binder&&) = delete;
+    Binder& operator=(Binder&&) = delete;
 
   protected:
     Binder(const Renderer::RenderTarget&, Renderer* pRenderer);
 
   private:
-    Renderer::StateSaver mStateSaver;
+    Renderer::RenderTarget mPreviousRenderTarget;
+    Renderer* mpRenderer;
   };
 
   RenderTargetTexture(
@@ -233,5 +238,14 @@ class DefaultRenderTargetBinder : public RenderTargetTexture::Binder {
 public:
   explicit DefaultRenderTargetBinder(renderer::Renderer* pRenderer);
 };
+
+
+[[nodiscard]] inline auto setupDefaultState(Renderer* pRenderer) {
+  auto saved = Renderer::StateSaver{pRenderer};
+  pRenderer->setGlobalTranslation({});
+  pRenderer->setGlobalScale({1.0f, 1.0f});
+  pRenderer->setClipRect({});
+  return saved;
+}
 
 }

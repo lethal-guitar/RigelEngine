@@ -17,6 +17,8 @@
 #include "game_world.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
@@ -99,10 +101,12 @@ BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
 }
 
 
-constexpr auto HEALTH_BAR_LABEL_START_X = 1;
+constexpr auto HEALTH_BAR_LABEL_START_X = 0;
 constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
 constexpr auto HEALTH_BAR_TILE_INDEX = 4*40 + 1;
-constexpr auto HEALTH_BAR_START_PX = base::Vector{data::tilesToPixels(6), 0};
+constexpr auto HEALTH_BAR_START_PX = base::Vector{data::tilesToPixels(5), 0};
+
+constexpr auto HUD_WIDTH = 6;
 
 
 void drawBossHealthBar(
@@ -129,34 +133,135 @@ auto asSize(const base::Vector& vec) {
 }
 
 
+auto scaleVec(const base::Vector& vec, const base::Point<float>& scale) {
+  return base::Vector{
+    base::round(vec.x * scale.x),
+    base::round(vec.y * scale.y)};
+}
+
+
+auto localToGlobalTranslation(
+  const renderer::Renderer* pRenderer,
+  const base::Vector& translation
+) {
+  return pRenderer->globalTranslation() +
+    scaleVec(translation, pRenderer->globalScale());
+}
+
+
 [[nodiscard]] auto setupIngameViewport(
   renderer::Renderer* pRenderer,
   const int screenShakeOffsetX
 ) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
 
-  const auto translation = pRenderer->globalTranslation();
-  const auto scale = pRenderer->globalScale();
-
-  auto applyScale = [&](const base::Vector& vec) {
-    return base::Vector{
-      base::round(vec.x * scale.x),
-      base::round(vec.y * scale.y)};
-  };
-
-  auto transform = [&](const base::Vector& vec) {
-    return translation + applyScale(vec);
-  };
-
-
   const auto offset = data::GameTraits::inGameViewPortOffset +
     base::Vector{screenShakeOffsetX, 0};
+  const auto newTranslation = localToGlobalTranslation(pRenderer, offset);
 
+  const auto scale = pRenderer->globalScale();
   pRenderer->setClipRect(base::Rect<int>{
-    transform(offset),
-    asSize(applyScale(asVec(data::GameTraits::inGameViewPortSize)))});
-  pRenderer->setGlobalTranslation(transform(offset));
+    newTranslation,
+    asSize(scaleVec(asVec(data::GameTraits::inGameViewPortSize), scale))});
+  pRenderer->setGlobalTranslation(newTranslation);
 
+  return saved;
+}
+
+
+void clearFullScreen(renderer::Renderer* pRenderer) {
+  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  pRenderer->setGlobalTranslation({0, 0});
+  pRenderer->setGlobalScale({1.0f, 1.0f});
+  pRenderer->setClipRect({});
+  pRenderer->clear();
+}
+
+
+struct WidescreenViewPortInfo {
+  int mWidthTiles;
+  int mWidthPx;
+  int mLeftPaddingPx;
+};
+
+
+WidescreenViewPortInfo determineWidescreenViewPort(
+  const renderer::Renderer* pRenderer
+) {
+  // TODO: Eliminate duplication with setupSimpleUpscaling () in game_main.cpp
+  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
+  const auto windowWidth = float(windowWidthInt);
+  const auto windowHeight = float(windowHeightInt);
+
+  const auto usableWidth = windowWidth > windowHeight
+    ? data::GameTraits::aspectRatio * windowHeight
+    : windowWidth;
+
+  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
+
+  const auto tileWidthScaled =
+    base::round(data::GameTraits::tileSize * widthScale);
+  const auto maxTilesOnScreen =
+    pRenderer->windowSize().width / tileWidthScaled;
+
+  const auto widthInPixels =
+    static_cast<int>(maxTilesOnScreen * data::GameTraits::tileSize * widthScale);
+  const auto paddingPixels =
+    pRenderer->windowSize().width - widthInPixels;
+
+  return {
+    maxTilesOnScreen,
+    widthInPixels,
+    paddingPixels / 2
+  };
+}
+
+
+[[nodiscard]] auto setupIngameViewportWidescreen(
+  renderer::Renderer* pRenderer,
+  const WidescreenViewPortInfo& info,
+  const int screenShakeOffsetX
+) {
+  auto saved = renderer::Renderer::StateSaver{pRenderer};
+
+  const auto scale = pRenderer->globalScale();
+  const auto offset = base::Vector{
+    screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
+  const auto newTranslation =
+    scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
+  pRenderer->setGlobalTranslation(newTranslation);
+
+  const auto viewPortSize = base::Extents{
+    info.mWidthPx,
+    base::round(data::GameTraits::inGameViewPortSize.height * scale.y)
+  };
+  pRenderer->setClipRect(base::Rect<int>{newTranslation, viewPortSize});
+
+  return saved;
+}
+
+
+void setupWidescreenHudOffset(
+  renderer::Renderer* pRenderer,
+  const WidescreenViewPortInfo& info
+) {
+  const auto extraTiles =
+    info.mWidthTiles - data::GameTraits::mapViewPortWidthTiles;
+  const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
+  pRenderer->setGlobalTranslation(
+    localToGlobalTranslation(pRenderer, {hudOffset, 0}));
+}
+
+
+[[nodiscard]] auto setupWidescreenTopRowViewPort(
+  renderer::Renderer* pRenderer,
+  const WidescreenViewPortInfo& info
+) {
+  auto saved = renderer::Renderer::StateSaver{pRenderer};
+
+  pRenderer->setGlobalTranslation({
+    info.mLeftPaddingPx, pRenderer->globalTranslation().y});
+  pRenderer->setClipRect({});
   return saved;
 }
 
@@ -190,6 +295,7 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
+  , mpOptions(&context.mpUserProfile->mOptions)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::ExitReached>(*this);
@@ -439,32 +545,81 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mHudRenderer.updateAnimation();
   mMessageDisplay.update();
 
-  mpSystems->update(input, mEntities);
+  if (mpOptions->mWidescreenModeOn) {
+    const auto info = determineWidescreenViewPort(mpRenderer);
+    const auto viewPortSize = base::Extents{
+      info.mWidthTiles - HUD_WIDTH,
+      data::GameTraits::mapViewPortSize.height};
+    mpSystems->update(input, mEntities, viewPortSize);
+  } else {
+    mpSystems->update(input, mEntities, data::GameTraits::mapViewPortSize);
+  }
 }
 
 
 void GameWorld::render() {
-  mpRenderer->clear();
-
-  {
-    const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
-
+  auto drawWorld = [this](const base::Extents& viewPortSize) {
     if (!mScreenFlashColor) {
-      mpSystems->render(mEntities, mBackdropFlashColor);
+      mpSystems->render(
+        mEntities, mBackdropFlashColor, viewPortSize);
     } else {
       mpRenderer->clear(*mScreenFlashColor);
     }
-    mHudRenderer.render();
-  }
+  };
 
-  if (mActiveBossEntity) {
-    using game_logic::components::Shootable;
+  auto drawTopRow = [this]() {
+    if (mActiveBossEntity) {
+      using game_logic::components::Shootable;
 
-    const auto health = mActiveBossEntity.has_component<Shootable>()
-      ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
-    drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+      const auto health = mActiveBossEntity.has_component<Shootable>()
+        ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
+
+      if (mpOptions->mWidescreenModeOn) {
+        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+      } else {
+        auto saved = renderer::Renderer::StateSaver{mpRenderer};
+        mpRenderer->setGlobalTranslation(localToGlobalTranslation(
+          mpRenderer, {data::GameTraits::tileSize, 0}));
+
+        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+      }
+    } else {
+      mMessageDisplay.render();
+    }
+  };
+
+
+  // In case the previous frame was drawn with widescreen mode enabled, we need
+  // to make sure the entire screen is cleared, not just the 4:3 subsection
+  // used for non-widescreen drawing. Otherwise, the remains of the previous
+  // widescreen frame would remain visible at the left and right sides of the
+  // screen.
+  clearFullScreen(mpRenderer);
+
+  if (mpOptions->mWidescreenModeOn) {
+    const auto info = determineWidescreenViewPort(mpRenderer);
+
+    {
+      const auto saved = setupIngameViewportWidescreen(
+        mpRenderer, info, mScreenShakeOffsetX);
+
+      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles});
+
+      setupWidescreenHudOffset(mpRenderer, info);
+      mHudRenderer.render();
+    }
+
+    auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
+    drawTopRow();
   } else {
-    mMessageDisplay.render();
+    {
+      const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
+
+      drawWorld(data::GameTraits::mapViewPortSize);
+      mHudRenderer.render();
+    }
+
+    drawTopRow();
   }
 }
 

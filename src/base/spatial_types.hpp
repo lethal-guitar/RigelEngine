@@ -196,6 +196,52 @@ Point<ValueT>& operator-=(Point<ValueT>& lhs, const Point<ValueT>& rhs) {
 
 
 template<typename ValueT>
+Size<ValueT> operator+(
+  const Size<ValueT>& lhs,
+  const Size<ValueT>& rhs
+) {
+  return Size<ValueT>(lhs.width + rhs.width, lhs.height + rhs.height);
+}
+
+
+template<typename ValueT>
+Size<ValueT> operator-(
+  const Size<ValueT>& lhs,
+  const Size<ValueT>& rhs
+) {
+  return Size<ValueT>(lhs.width - rhs.width, lhs.height - rhs.height);
+}
+
+
+template<typename ValueT, typename ScalarT>
+auto operator*(
+  const Size<ValueT>& size,
+  const ScalarT scalar
+) {
+  return Size<decltype(size.width * scalar)>{
+    size.width * scalar,
+    size.height * scalar
+  };
+}
+
+
+template<typename ValueT>
+Size<ValueT>& operator+=(Size<ValueT>& lhs, const Size<ValueT>& rhs) {
+  auto newSize = lhs + rhs;
+  std::swap(lhs, newSize);
+  return lhs;
+}
+
+
+template<typename ValueT>
+Size<ValueT>& operator-=(Size<ValueT>& lhs, const Size<ValueT>& rhs) {
+  auto newSize = lhs - rhs;
+  std::swap(lhs, newSize);
+  return lhs;
+}
+
+
+template<typename ValueT>
 Rect<ValueT> operator+(
   const Rect<ValueT>& rect,
   const Point<ValueT>& translation

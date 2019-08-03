@@ -29,7 +29,6 @@ namespace rigel::game_logic::components {
 
 namespace {
 
-const auto RIGHT_SCREEN_EDGE = data::GameTraits::mapViewPortSize.width - 1;
 constexpr auto MAX_Y_OFFSET = 16;
 
 }
@@ -47,8 +46,10 @@ void WindBlownSpiderGenerator::update(
     d.mpRandomGenerator->gen() % 2 != 0 &&
     s.mpPerFrameState->mIsOddFrame
   ) {
+    const auto rightScreenEdge =
+      s.mpPerFrameState->mCurrentViewPortSize.width - 1;
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
-    const auto xPos = s.mpCameraPosition->x + RIGHT_SCREEN_EDGE;
+    const auto xPos = s.mpCameraPosition->x + rightScreenEdge;
     const auto yPos = s.mpCameraPosition->y +
       d.mpRandomGenerator->gen() % MAX_Y_OFFSET;
     const auto movementType = d.mpRandomGenerator->gen() % 2 != 0

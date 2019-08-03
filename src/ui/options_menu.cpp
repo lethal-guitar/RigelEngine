@@ -76,6 +76,13 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
       ImGui::EndTabItem();
     }
 
+    if (ImGui::BeginTabItem("Enhancements"))
+    {
+      ImGui::NewLine();
+      ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
+      ImGui::EndTabItem();
+    }
+
     ImGui::EndTabBar();
   }
 

@@ -60,11 +60,10 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion) {
 
 void markActiveEntities(
   entityx::EntityManager& es,
-  const base::Vector& cameraPosition
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
 ) {
-  const BoundingBox activeRegionBox{
-    cameraPosition,
-    data::GameTraits::mapViewPortSize};
+  const BoundingBox activeRegionBox{cameraPosition, viewPortSize};
 
   es.each<WorldPosition, BoundingBox>([&activeRegionBox](
     entityx::Entity entity,
