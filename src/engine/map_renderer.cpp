@@ -38,6 +38,8 @@ const auto ANIM_STATES = 4;
 const auto FAST_ANIM_FRAME_DELAY = 1;
 const auto SLOW_ANIM_FRAME_DELAY = 2;
 const auto PARALLAX_FACTOR = 4;
+const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30;
+const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60;
 
 
 base::Vector wrapBackgroundOffset(base::Vector offset) {
@@ -45,6 +47,28 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
     offset.x % GameTraits::viewPortWidthPx,
     offset.y % GameTraits::viewPortHeightPx
   };
+}
+
+
+float speedForScrollMode(const BackdropScrollMode mode) {
+  if (mode == BackdropScrollMode::AutoHorizontal) {
+    return AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL;
+  } else if (mode == BackdropScrollMode::AutoVertical) {
+    return AUTO_SCROLL_PX_PER_SECOND_VERTICAL;
+  } else {
+    return 0.0f;
+  }
+}
+
+
+float maxOffsetForScrollMode(const BackdropScrollMode mode) {
+  if (mode == BackdropScrollMode::AutoHorizontal) {
+    return data::GameTraits::viewPortWidthPx;
+  } else if (mode == BackdropScrollMode::AutoVertical) {
+    return data::GameTraits::viewPortHeightPx;
+  } else {
+    return 1.0f;
+  }
 }
 
 }
@@ -109,19 +133,13 @@ void MapRenderer::renderBackdrop(
       parallaxBoth ? cameraPosition.y*PARALLAX_FACTOR : 0
     });
   } else if (autoScrollX || autoScrollY) {
-    // TODO Currently this only works right when running at 60 FPS.
-    // It should be time-based instead, but it's trickier to get it smooth
-    // then.
-    const double speedFactor = autoScrollX ? 2.0 : 1.0;
     std::fesetround(FE_TONEAREST);
-    const auto offsetPixels = base::round(mElapsedFrames60Fps / speedFactor);
-    ++mElapsedFrames60Fps;
+    const auto offsetPixels = base::round(mBackdropAutoScrollOffset);
 
     if (autoScrollX) {
-      offset.x = offsetPixels % GameTraits::viewPortWidthPx;
+      offset.x = offsetPixels;
     } else {
-      const auto baseOffset = offsetPixels % GameTraits::viewPortHeightPx;
-      offset.y = GameTraits::viewPortHeightPx - baseOffset;
+      offset.y = GameTraits::viewPortHeightPx - offsetPixels;
     }
   }
 
@@ -179,6 +197,13 @@ void MapRenderer::renderMapTiles(
 
 void MapRenderer::updateAnimatedMapTiles() {
   ++mElapsedFrames;
+}
+
+
+void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt) {
+  mBackdropAutoScrollOffset += dt * speedForScrollMode(mScrollMode);
+  mBackdropAutoScrollOffset =
+    std::fmod(mBackdropAutoScrollOffset, maxOffsetForScrollMode(mScrollMode));
 }
 
 

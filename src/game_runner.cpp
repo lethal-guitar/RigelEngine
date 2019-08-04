@@ -366,6 +366,8 @@ void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
     ) {
       update();
     }
+
+    mpWorld->mpSystems->updateBackdropAutoScrolling(dt);
   }
 }
 
