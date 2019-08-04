@@ -706,7 +706,6 @@ void Renderer::setGlobalScale(const base::Point<float>& scale) {
     submitBatch();
 
     mGlobalScale = glScale;
-    glPointSize(std::min(scale.x, scale.y));
     updateProjectionMatrix();
   }
 }

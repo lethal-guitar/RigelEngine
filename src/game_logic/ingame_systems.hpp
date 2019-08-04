@@ -148,6 +148,8 @@ private:
 
   engine::RandomNumberGenerator* mpRandomGenerator;
   IGameServiceProvider* mpServiceProvider;
+  renderer::Renderer* mpRenderer;
+  renderer::RenderTargetTexture mLowResLayer;
 };
 
 }
