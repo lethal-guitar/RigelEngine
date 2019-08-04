@@ -50,6 +50,38 @@ base::Vector wrapBackgroundOffset(base::Vector offset) {
 }
 
 
+base::Vector backdropOffset(
+  const base::Vector& cameraPosition,
+  const BackdropScrollMode scrollMode,
+  const double backdropAutoScrollOffset
+) {
+  const auto parallaxBoth = scrollMode == BackdropScrollMode::ParallaxBoth;
+  const auto parallaxHorizontal =
+    scrollMode == BackdropScrollMode::ParallaxHorizontal || parallaxBoth;
+
+  const auto autoScrollX = scrollMode == BackdropScrollMode::AutoHorizontal;
+  const auto autoScrollY = scrollMode == BackdropScrollMode::AutoVertical;
+
+  if (parallaxHorizontal || parallaxBoth) {
+    return wrapBackgroundOffset({
+      parallaxHorizontal ? cameraPosition.x*PARALLAX_FACTOR : 0,
+      parallaxBoth ? cameraPosition.y*PARALLAX_FACTOR : 0
+    });
+  } else if (autoScrollX || autoScrollY) {
+    std::fesetround(FE_TONEAREST);
+    const auto offsetPixels = base::round(backdropAutoScrollOffset);
+
+    if (autoScrollX) {
+      return {offsetPixels, 0};
+    } else {
+      return {0, GameTraits::viewPortHeightPx - offsetPixels};
+    }
+  }
+
+  return {};
+}
+
+
 float speedForScrollMode(const BackdropScrollMode mode) {
   if (mode == BackdropScrollMode::AutoHorizontal) {
     return AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL;
@@ -118,30 +150,8 @@ void MapRenderer::renderBackdrop(
   const base::Vector& cameraPosition,
   const base::Extents& viewPortSize
 ) {
-  base::Vector offset;
-
-  const auto parallaxBoth = mScrollMode == BackdropScrollMode::ParallaxBoth;
-  const auto parallaxHorizontal =
-    mScrollMode == BackdropScrollMode::ParallaxHorizontal || parallaxBoth;
-
-  const auto autoScrollX = mScrollMode == BackdropScrollMode::AutoHorizontal;
-  const auto autoScrollY = mScrollMode == BackdropScrollMode::AutoVertical;
-
-  if (parallaxHorizontal || parallaxBoth) {
-    offset = wrapBackgroundOffset({
-      parallaxHorizontal ? cameraPosition.x*PARALLAX_FACTOR : 0,
-      parallaxBoth ? cameraPosition.y*PARALLAX_FACTOR : 0
-    });
-  } else if (autoScrollX || autoScrollY) {
-    std::fesetround(FE_TONEAREST);
-    const auto offsetPixels = base::round(mBackdropAutoScrollOffset);
-
-    if (autoScrollX) {
-      offset.x = offsetPixels;
-    } else {
-      offset.y = GameTraits::viewPortHeightPx - offsetPixels;
-    }
-  }
+  const auto offset =
+    backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset);
 
   const auto backdropWidth = mBackdropTexture.extents().width;
   const auto numRepetitions =
