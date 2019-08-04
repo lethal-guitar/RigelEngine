@@ -64,6 +64,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wno-weak-vtables
         -Wno-global-constructors
         -Wno-float-equal
+        -Wno-double-promotion
 
         -fcolor-diagnostics
     )

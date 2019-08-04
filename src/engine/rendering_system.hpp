@@ -81,6 +81,10 @@ public:
     mMapRenderer.switchBackdrops();
   }
 
+  void updateBackdropAutoScrolling(const engine::TimeDelta dt) {
+    mMapRenderer.updateBackdropAutoScrolling(dt);
+  }
+
   std::size_t spritesRendered() const {
     return mSpritesRendered;
   }

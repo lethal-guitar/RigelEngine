@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "engine/tiled_texture.hpp"
+#include "engine/timing.hpp"
 #include "loader/level_loader.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
@@ -60,6 +61,7 @@ public:
     const base::Extents& sectionSize);
 
   void updateAnimatedMapTiles();
+  void updateBackdropAutoScrolling(engine::TimeDelta dt);
 
   void renderSingleTile(
     data::map::TileIndex index,
@@ -89,8 +91,8 @@ private:
 
   data::map::BackdropScrollMode mScrollMode;
 
+  double mBackdropAutoScrollOffset = 0.0;
   std::uint32_t mElapsedFrames = 0;
-  std::uint32_t mElapsedFrames60Fps = 0;
 };
 
 }

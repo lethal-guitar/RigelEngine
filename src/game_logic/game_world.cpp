@@ -29,6 +29,7 @@
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
+#include "renderer/upscaling_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"
 
@@ -178,48 +179,9 @@ void clearFullScreen(renderer::Renderer* pRenderer) {
 }
 
 
-struct WidescreenViewPortInfo {
-  int mWidthTiles;
-  int mWidthPx;
-  int mLeftPaddingPx;
-};
-
-
-WidescreenViewPortInfo determineWidescreenViewPort(
-  const renderer::Renderer* pRenderer
-) {
-  // TODO: Eliminate duplication with setupSimpleUpscaling () in game_main.cpp
-  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
-  const auto windowWidth = float(windowWidthInt);
-  const auto windowHeight = float(windowHeightInt);
-
-  const auto usableWidth = windowWidth > windowHeight
-    ? data::GameTraits::aspectRatio * windowHeight
-    : windowWidth;
-
-  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
-
-  const auto tileWidthScaled =
-    base::round(data::GameTraits::tileSize * widthScale);
-  const auto maxTilesOnScreen =
-    pRenderer->windowSize().width / tileWidthScaled;
-
-  const auto widthInPixels =
-    static_cast<int>(maxTilesOnScreen * data::GameTraits::tileSize * widthScale);
-  const auto paddingPixels =
-    pRenderer->windowSize().width - widthInPixels;
-
-  return {
-    maxTilesOnScreen,
-    widthInPixels,
-    paddingPixels / 2
-  };
-}
-
-
 [[nodiscard]] auto setupIngameViewportWidescreen(
   renderer::Renderer* pRenderer,
-  const WidescreenViewPortInfo& info,
+  const renderer::WidescreenViewPortInfo& info,
   const int screenShakeOffsetX
 ) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
@@ -243,7 +205,7 @@ WidescreenViewPortInfo determineWidescreenViewPort(
 
 void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
-  const WidescreenViewPortInfo& info
+  const renderer::WidescreenViewPortInfo& info
 ) {
   const auto extraTiles =
     info.mWidthTiles - data::GameTraits::mapViewPortWidthTiles;
@@ -255,7 +217,7 @@ void setupWidescreenHudOffset(
 
 [[nodiscard]] auto setupWidescreenTopRowViewPort(
   renderer::Renderer* pRenderer,
-  const WidescreenViewPortInfo& info
+  const renderer::WidescreenViewPortInfo& info
 ) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
 
@@ -546,7 +508,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mMessageDisplay.update();
 
   if (mpOptions->mWidescreenModeOn) {
-    const auto info = determineWidescreenViewPort(mpRenderer);
+    const auto info = renderer::determineWidescreenViewPort(mpRenderer);
     const auto viewPortSize = base::Extents{
       info.mWidthTiles - HUD_WIDTH,
       data::GameTraits::mapViewPortSize.height};
@@ -597,7 +559,7 @@ void GameWorld::render() {
   clearFullScreen(mpRenderer);
 
   if (mpOptions->mWidescreenModeOn) {
-    const auto info = determineWidescreenViewPort(mpRenderer);
+    const auto info = renderer::determineWidescreenViewPort(mpRenderer);
 
     {
       const auto saved = setupIngameViewportWidescreen(

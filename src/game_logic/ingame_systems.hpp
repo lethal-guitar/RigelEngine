@@ -92,6 +92,9 @@ public:
     entityx::EntityManager& es,
     const std::optional<base::Color>& backdropFlashColor,
     const base::Extents& viewPortSize);
+  void updateBackdropAutoScrolling(const engine::TimeDelta dt) {
+    mRenderingSystem.updateBackdropAutoScrolling(dt);
+  }
 
   DebuggingSystem& debuggingSystem();
 
@@ -148,6 +151,8 @@ private:
 
   engine::RandomNumberGenerator* mpRandomGenerator;
   IGameServiceProvider* mpServiceProvider;
+  renderer::Renderer* mpRenderer;
+  renderer::RenderTargetTexture mLowResLayer;
 };
 
 }

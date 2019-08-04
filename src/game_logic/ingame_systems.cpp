@@ -16,11 +16,13 @@
 
 #include "ingame_systems.hpp"
 
+#include "data/game_traits.hpp"
 #include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/interactive/force_field.hpp"
+#include "renderer/upscaling_utils.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -168,6 +170,11 @@ IngameSystems::IngameSystems(
       pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpServiceProvider(pServiceProvider)
+  , mpRenderer(pRenderer)
+  , mLowResLayer(
+      pRenderer,
+      renderer::determineWidescreenViewPort(pRenderer).mWidthPx,
+      data::GameTraits::viewPortHeightPx)
 {
 }
 
@@ -246,8 +253,18 @@ void IngameSystems::render(
   const base::Extents& viewPortSize
 ) {
   mRenderingSystem.update(es, backdropFlashColor, viewPortSize);
-  mParticles.render(mCamera.position());
-  mDebuggingSystem.update(es, viewPortSize);
+
+  {
+    const auto binder =
+      renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
+    const auto saved = renderer::setupDefaultState(mpRenderer);
+
+    mpRenderer->clear({0, 0, 0, 0});
+    mParticles.render(mCamera.position());
+    mDebuggingSystem.update(es, viewPortSize);
+  }
+
+  mLowResLayer.render(mpRenderer, 0, 0);
 }
 
 
