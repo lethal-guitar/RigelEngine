@@ -20,6 +20,8 @@
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
 
+#include <algorithm>
+
 
 namespace rigel::renderer {
 
@@ -35,13 +37,12 @@ WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
 
   const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
 
-  const auto tileWidthScaled =
-    base::round(data::GameTraits::tileSize * widthScale);
+  const auto tileWidthScaled = data::GameTraits::tileSize * widthScale;
   const auto maxTilesOnScreen =
-    pRenderer->windowSize().width / tileWidthScaled;
+    base::round(pRenderer->windowSize().width / tileWidthScaled);
 
   const auto widthInPixels =
-    static_cast<int>(maxTilesOnScreen * data::GameTraits::tileSize * widthScale);
+    std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidthInt);
   const auto paddingPixels =
     pRenderer->windowSize().width - widthInPixels;
 
