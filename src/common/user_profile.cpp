@@ -82,7 +82,8 @@ namespace {
 
 constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
-constexpr auto USER_PROFILE_FILENAME = "UserProfile.rigel";
+constexpr auto USER_PROFILE_FILENAME = "UserProfile_v2.rigel";
+constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 
 
 data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
@@ -335,11 +336,14 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
 }
 
 
-UserProfile loadProfile(const std::filesystem::path& profileFile) {
-  UserProfile profile{profileFile};
+UserProfile loadProfile(
+  const std::filesystem::path& fileOnDisk,
+  const std::filesystem::path& pathForSaving
+) {
+  UserProfile profile{pathForSaving};
 
   try {
-    const auto buffer = loader::loadFile(profileFile);
+    const auto buffer = loader::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
 
     profile.mSaveSlots = deserialize<data::SaveSlotArray>(
@@ -357,6 +361,11 @@ UserProfile loadProfile(const std::filesystem::path& profileFile) {
   }
 
   return profile;
+}
+
+
+UserProfile loadProfile(const std::filesystem::path& profileFile) {
+  return loadProfile(profileFile, profileFile);
 }
 
 
@@ -424,12 +433,16 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
   }
 
   const auto profileFilePath = *preferencesPath / USER_PROFILE_FILENAME;
-
   if (fs::exists(profileFilePath)) {
     return loadProfile(profileFilePath);
-  } else {
-    return importProfile(profileFilePath, gamePath);
   }
+
+  const auto profileFilePath_v1 = *preferencesPath / USER_PROFILE_FILENAME_V1;
+  if (fs::exists(profileFilePath_v1)) {
+    return loadProfile(profileFilePath_v1, profileFilePath);
+  }
+
+  return importProfile(profileFilePath, gamePath);
 }
 
 }
