@@ -19,6 +19,7 @@ install:
     - ps: Invoke-WebRequest -Uri https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip -OutFile C:\RigelLibs\SDL2_mixer.zip
     - 7z x C:\RigelLibs\SDL2.zip -oC:\RigelLibs
     - 7z x C:\RigelLibs\SDL2_mixer.zip -oC:\RigelLibs
+    - vcpkg version
 
 platform: x64
 
