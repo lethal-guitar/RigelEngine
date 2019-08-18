@@ -32,7 +32,6 @@ public:
   explicit UserProfile(const std::filesystem::path& profilePath);
 
   void saveToDisk();
-  void loadFromDisk();
 
   data::SaveSlotArray mSaveSlots;
   data::HighScoreListArray mHighScoreLists;

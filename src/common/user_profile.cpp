@@ -98,13 +98,6 @@ data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
 }
 
 
-UserProfile loadProfile(const std::filesystem::path& profileFile) {
-  UserProfile profile{profileFile};
-  profile.loadFromDisk();
-  return profile;
-}
-
-
 UserProfile importProfile(
   const std::filesystem::path& profileFile,
   const std::string& gamePath
@@ -342,6 +335,31 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
 }
 
 
+UserProfile loadProfile(const std::filesystem::path& profileFile) {
+  UserProfile profile{profileFile};
+
+  try {
+    const auto buffer = loader::loadFile(profileFile);
+    const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
+
+    profile.mSaveSlots = deserialize<data::SaveSlotArray>(
+      serializedProfile.at("saveSlots"));
+    profile.mHighScoreLists = deserialize<data::HighScoreListArray>(
+      serializedProfile.at("highScoreLists"));
+
+    if (serializedProfile.contains("options")) {
+      profile.mOptions = deserialize<data::GameOptions>(
+        serializedProfile.at("options"));
+    }
+  } catch (const std::exception& ex) {
+    std::cerr << "WARNING: Failed to load user profile\n";
+    std::cerr << ex.what() << '\n';
+  }
+
+  return profile;
+}
+
+
 void saveToFile(
   const loader::ByteBuffer& buffer,
   const std::filesystem::path& filePath
@@ -378,34 +396,6 @@ void UserProfile::saveToDisk() {
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
-}
-
-
-void UserProfile::loadFromDisk() {
-  if (!mProfilePath) {
-    return;
-  }
-
-  mSaveSlots.fill(std::nullopt);
-  mHighScoreLists.fill(data::HighScoreList{});
-
-  try {
-    const auto buffer = loader::loadFile(*mProfilePath);
-    const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
-
-    mSaveSlots = deserialize<data::SaveSlotArray>(
-      serializedProfile.at("saveSlots"));
-    mHighScoreLists = deserialize<data::HighScoreListArray>(
-      serializedProfile.at("highScoreLists"));
-
-    if (serializedProfile.contains("options")) {
-      mOptions = deserialize<data::GameOptions>(
-        serializedProfile.at("options"));
-    }
-  } catch (const std::exception& ex) {
-    std::cerr << "WARNING: Failed to load user profile\n";
-    std::cerr << ex.what() << '\n';
-  }
 }
 
 
