@@ -193,6 +193,7 @@ nlohmann::json serialize(const data::GameOptions& options) {
 
   json serialized;
   serialized["enableVsync"] = options.mEnableVsync;
+  serialized["showFpsCounter"] = options.mShowFpsCounter;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
   serialized["musicOn"] = options.mMusicOn;
@@ -325,6 +326,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   data::GameOptions result;
 
   extractValueIfExists("enableVsync", result.mEnableVsync, json);
+  extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
   extractValueIfExists("musicOn", result.mMusicOn, json);

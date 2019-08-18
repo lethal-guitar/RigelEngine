@@ -235,7 +235,7 @@ void Game::mainLoop() {
     mRenderTarget.render(&mRenderer, 0, 0);
     mRenderer.submitBatch();
 
-    if (mShowFps) {
+    if (mUserProfile.mOptions.mShowFpsCounter) {
       const auto afterRender = high_resolution_clock::now();
       const auto innerRenderTime =
         duration<engine::TimeDelta>(afterRender - startOfFrame).count();
@@ -271,7 +271,8 @@ void Game::handleEvent(const SDL_Event& event) {
   switch (event.type) {
     case SDL_KEYUP:
       if (event.key.keysym.sym == SDLK_F6) {
-        mShowFps = !mShowFps;
+        mUserProfile.mOptions.mShowFpsCounter =
+          !mUserProfile.mOptions.mShowFpsCounter;
       }
       mpCurrentGameMode->handleEvent(event);
       break;
