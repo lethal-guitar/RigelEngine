@@ -340,11 +340,11 @@ UserProfile loadProfile(
   const std::filesystem::path& fileOnDisk,
   const std::filesystem::path& pathForSaving
 ) {
-  UserProfile profile{pathForSaving};
-
   try {
     const auto buffer = loader::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
+
+    UserProfile profile{pathForSaving, std::move(buffer)};
 
     profile.mSaveSlots = deserialize<data::SaveSlotArray>(
       serializedProfile.at("saveSlots"));
@@ -355,12 +355,14 @@ UserProfile loadProfile(
       profile.mOptions = deserialize<data::GameOptions>(
         serializedProfile.at("options"));
     }
+
+    return profile;
   } catch (const std::exception& ex) {
     std::cerr << "WARNING: Failed to load user profile\n";
     std::cerr << ex.what() << '\n';
   }
 
-  return profile;
+  return UserProfile{pathForSaving};
 }
 
 
@@ -382,11 +384,38 @@ void saveToFile(
   file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
+
+nlohmann::json merge(nlohmann::json primary, nlohmann::json secondary) {
+  if (!primary.is_structured()) {
+    return primary;
+  }
+
+  if (primary.is_object()) {
+    primary.insert(secondary.begin(), secondary.end());
+
+    for (auto& [key, value] : primary.items()) {
+      value = merge(secondary[key], value);
+    }
+  } else { // array
+    auto index = 0u;
+    for (auto& value : primary) {
+      value = merge(secondary[index], value);
+      ++index;
+    }
+  }
+
+  return primary;
+}
+
 }
 
 
-UserProfile::UserProfile(const std::filesystem::path& profilePath)
+UserProfile::UserProfile(
+  const std::filesystem::path& profilePath,
+  loader::ByteBuffer originalJson
+)
   : mProfilePath(profilePath)
+  , mOriginalJson(std::move(originalJson))
 {
 }
 
@@ -402,6 +431,9 @@ void UserProfile::saveToDisk() {
   serializedProfile["saveSlots"] = serialize(mSaveSlots);
   serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
   serializedProfile["options"] = serialize(mOptions);
+
+  const auto previousProfile = json::from_msgpack(mOriginalJson);
+  serializedProfile = merge(serializedProfile, previousProfile);
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);

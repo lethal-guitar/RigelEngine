@@ -19,6 +19,7 @@
 #include "data/game_options.hpp"
 #include "data/high_score_list.hpp"
 #include "data/saved_game.hpp"
+#include "loader/byte_buffer.hpp"
 
 #include <filesystem>
 #include <string>
@@ -29,7 +30,9 @@ namespace rigel {
 class UserProfile {
 public:
   UserProfile() = default;
-  explicit UserProfile(const std::filesystem::path& profilePath);
+  UserProfile(
+    const std::filesystem::path& profilePath,
+    loader::ByteBuffer originalJson = {});
 
   void saveToDisk();
 
@@ -39,6 +42,7 @@ public:
 
 private:
   std::optional<std::filesystem::path> mProfilePath;
+  loader::ByteBuffer mOriginalJson;
 };
 
 
