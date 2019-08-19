@@ -57,6 +57,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     {
       ImGui::NewLine();
       ImGui::Checkbox("V-Sync on", &mpOptions->mEnableVsync);
+      ImGui::Checkbox("Show FPS", &mpOptions->mShowFpsCounter);
       ImGui::EndTabItem();
     }
 

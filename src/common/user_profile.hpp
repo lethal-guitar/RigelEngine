@@ -19,6 +19,7 @@
 #include "data/game_options.hpp"
 #include "data/high_score_list.hpp"
 #include "data/saved_game.hpp"
+#include "loader/byte_buffer.hpp"
 
 #include <filesystem>
 #include <string>
@@ -26,13 +27,31 @@
 
 namespace rigel {
 
+/** Store for user specific data
+ *
+ * The user profile stores data like saved games, high score lists, and game
+ * options. It knows how to serialize that data into a file on disk, so that it
+ * can persist between game sessions. To load the stored user profile, call
+ * loadOrCreateUserProfile().
+ *
+ * The public members of this class represent all the data that will be saved
+ * in the user profile file. Loading the profile using the aforementioned
+ * function will fill these members with data accordingly. You can call
+ * saveToDisk() at any time, and it will serialize the state of these members
+ * into the file.
+ *
+ * When changing any of the types used for the public members, or any of the
+ * types used within one of those types, you need to adapt the serialization
+ * and deserialization code in the implementation of this class!
+ */
 class UserProfile {
 public:
   UserProfile() = default;
-  explicit UserProfile(const std::filesystem::path& profilePath);
+  UserProfile(
+    const std::filesystem::path& profilePath,
+    loader::ByteBuffer originalJson = {});
 
   void saveToDisk();
-  void loadFromDisk();
 
   data::SaveSlotArray mSaveSlots;
   data::HighScoreListArray mHighScoreLists;
@@ -40,11 +59,37 @@ public:
 
 private:
   std::optional<std::filesystem::path> mProfilePath;
+  loader::ByteBuffer mOriginalJson;
 };
 
 
+/** Load existing profile from disk, or create a new one
+ *
+ * This function looks for an existing user profile file in the location
+ * returned by createOrGetPreferencesPath(). If it finds a file, it will load
+ * it and return the corresponding UserProfile object. If it doesn't find the
+ * file, it will create a new user profile with default settings, store it on
+ * disk, and return that. It also checks if it can find any existing saved
+ * games, high score lists, or options from the original Duke Nukem in the
+ * given gamePath. If it does, it will import them into the newly created
+ * profile before returning it.
+ *
+ * Note that the name of the profile file is an implementation detail of this
+ * function, and you normally don't need to care.
+ */
 UserProfile loadOrCreateUserProfile(const std::string& gamePath);
 
+/** Return path for storing preferences
+ *
+ * Returns path to a directory which can be used to store user-specific data
+ * and settings. The exact path depends on the platform/operating system, but
+ * is guaranteed to have write permissions, and will typically be located
+ * somewhere under the user's home directory.
+ *
+ * The function will create a new directory if it doesn't already exist. If the
+ * path cannot be determined due to an error, and empty optional will be
+ * returned instead.
+ */
 std::optional<std::filesystem::path> createOrGetPreferencesPath();
 
 }

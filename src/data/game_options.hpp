@@ -26,6 +26,7 @@ constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
 struct GameOptions {
   // Graphics
   bool mEnableVsync = ENABLE_VSYNC_DEFAULT;
+  bool mShowFpsCounter = false;
 
   // Sound
   float mMusicVolume = MUSIC_VOLUME_DEFAULT;

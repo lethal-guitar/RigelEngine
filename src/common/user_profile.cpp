@@ -82,6 +82,8 @@ namespace {
 
 constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
+constexpr auto USER_PROFILE_FILENAME = "UserProfile_v2.rigel";
+constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 
 
 data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
@@ -94,13 +96,6 @@ data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
   result.mMusicOn = originalOptions.mMusicOn;
 
   return result;
-}
-
-
-UserProfile loadProfile(const std::filesystem::path& profileFile) {
-  UserProfile profile{profileFile};
-  profile.loadFromDisk();
-  return profile;
 }
 
 
@@ -198,6 +193,7 @@ nlohmann::json serialize(const data::GameOptions& options) {
 
   json serialized;
   serialized["enableVsync"] = options.mEnableVsync;
+  serialized["showFpsCounter"] = options.mShowFpsCounter;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
   serialized["musicOn"] = options.mMusicOn;
@@ -330,6 +326,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   data::GameOptions result;
 
   extractValueIfExists("enableVsync", result.mEnableVsync, json);
+  extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
   extractValueIfExists("musicOn", result.mMusicOn, json);
@@ -338,6 +335,41 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
 
 
   return result;
+}
+
+
+UserProfile loadProfile(
+  const std::filesystem::path& fileOnDisk,
+  const std::filesystem::path& pathForSaving
+) {
+  try {
+    const auto buffer = loader::loadFile(fileOnDisk);
+    const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
+
+    UserProfile profile{pathForSaving, std::move(buffer)};
+
+    profile.mSaveSlots = deserialize<data::SaveSlotArray>(
+      serializedProfile.at("saveSlots"));
+    profile.mHighScoreLists = deserialize<data::HighScoreListArray>(
+      serializedProfile.at("highScoreLists"));
+
+    if (serializedProfile.contains("options")) {
+      profile.mOptions = deserialize<data::GameOptions>(
+        serializedProfile.at("options"));
+    }
+
+    return profile;
+  } catch (const std::exception& ex) {
+    std::cerr << "WARNING: Failed to load user profile\n";
+    std::cerr << ex.what() << '\n';
+  }
+
+  return UserProfile{pathForSaving};
+}
+
+
+UserProfile loadProfile(const std::filesystem::path& profileFile) {
+  return loadProfile(profileFile, profileFile);
 }
 
 
@@ -354,11 +386,38 @@ void saveToFile(
   file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
+
+nlohmann::json merge(nlohmann::json primary, nlohmann::json secondary) {
+  if (!primary.is_structured()) {
+    return primary;
+  }
+
+  if (primary.is_object()) {
+    primary.insert(secondary.begin(), secondary.end());
+
+    for (auto& [key, value] : primary.items()) {
+      value = merge(secondary[key], value);
+    }
+  } else { // array
+    auto index = 0u;
+    for (auto& value : primary) {
+      value = merge(secondary[index], value);
+      ++index;
+    }
+  }
+
+  return primary;
+}
+
 }
 
 
-UserProfile::UserProfile(const std::filesystem::path& profilePath)
+UserProfile::UserProfile(
+  const std::filesystem::path& profilePath,
+  loader::ByteBuffer originalJson
+)
   : mProfilePath(profilePath)
+  , mOriginalJson(std::move(originalJson))
 {
 }
 
@@ -375,36 +434,11 @@ void UserProfile::saveToDisk() {
   serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
   serializedProfile["options"] = serialize(mOptions);
 
+  const auto previousProfile = json::from_msgpack(mOriginalJson);
+  serializedProfile = merge(serializedProfile, previousProfile);
+
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
-}
-
-
-void UserProfile::loadFromDisk() {
-  if (!mProfilePath) {
-    return;
-  }
-
-  mSaveSlots.fill(std::nullopt);
-  mHighScoreLists.fill(data::HighScoreList{});
-
-  try {
-    const auto buffer = loader::loadFile(*mProfilePath);
-    const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
-
-    mSaveSlots = deserialize<data::SaveSlotArray>(
-      serializedProfile.at("saveSlots"));
-    mHighScoreLists = deserialize<data::HighScoreListArray>(
-      serializedProfile.at("highScoreLists"));
-
-    if (serializedProfile.contains("options")) {
-      mOptions = deserialize<data::GameOptions>(
-        serializedProfile.at("options"));
-    }
-  } catch (const std::exception& ex) {
-    std::cerr << "WARNING: Failed to load user profile\n";
-    std::cerr << ex.what() << '\n';
-  }
 }
 
 
@@ -432,13 +466,17 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     return {};
   }
 
-  const auto profileFilePath = *preferencesPath / "UserProfile.rigel";
-
+  const auto profileFilePath = *preferencesPath / USER_PROFILE_FILENAME;
   if (fs::exists(profileFilePath)) {
     return loadProfile(profileFilePath);
-  } else {
-    return importProfile(profileFilePath, gamePath);
   }
+
+  const auto profileFilePath_v1 = *preferencesPath / USER_PROFILE_FILENAME_V1;
+  if (fs::exists(profileFilePath_v1)) {
+    return loadProfile(profileFilePath_v1, profileFilePath);
+  }
+
+  return importProfile(profileFilePath, gamePath);
 }
 
 }

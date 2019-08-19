@@ -94,8 +94,6 @@ private:
 
   std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 
-  bool mShowFps = false;
-
   bool mIsRunning;
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
