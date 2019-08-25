@@ -209,6 +209,15 @@ std::unique_ptr<GameMode> createInitialGameMode(
   return std::make_unique<IntroDemoLoopMode>(context, true);
 }
 
+
+std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
+  if (options.mEnableFpsLimit && !options.mEnableVsync) {
+    return FpsLimiter{options.mMaxFps};
+  } else {
+    return std::nullopt;
+  }
+}
+
 }
 
 
@@ -245,6 +254,31 @@ void gameMain(const StartupOptions& options) {
 }
 
 
+FpsLimiter::FpsLimiter(const int targetFps)
+  : mLastTime(std::chrono::high_resolution_clock::now())
+  , mTargetFrameTime(1.0 / targetFps)
+{
+}
+
+
+void FpsLimiter::updateAndWait() {
+  using namespace std::chrono;
+
+  const auto now = high_resolution_clock::now();
+  const auto delta = duration<double>(now - mLastTime).count();
+  mLastTime = now;
+
+  mError += mTargetFrameTime - delta;
+
+  const auto timeToWaitFor = mTargetFrameTime + mError;
+  if (timeToWaitFor > 0.0) {
+    // We use SDL_Delay instead of std::this_thread::sleep_for, because the
+    // former is more accurate on some platforms.
+    SDL_Delay(static_cast<Uint32>(timeToWaitFor * 1000.0));
+  }
+}
+
+
 Game::Game(
   const StartupOptions& startupOptions,
   UserProfile* pUserProfile,
@@ -264,6 +298,7 @@ Game::Game(
         mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
       return !hasRegisteredVersionFiles;
     }())
+  , mFpsLimiter(createLimiter(pUserProfile->mOptions))
   , mRenderTarget(
       &mRenderer,
       mRenderer.maxWindowSize().width,
@@ -353,7 +388,7 @@ void Game::mainLoop() {
     }
 
     ui::imgui_integration::endFrame();
-    mRenderer.swapBuffers();
+    swapBuffers();
 
     applyChangedOptions();
   }
@@ -470,7 +505,7 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
     mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
     mRenderTarget.render(&mRenderer, 0, 0);
-    mRenderer.swapBuffers();
+    swapBuffers();
 
     if (fadeFactor >= 1.0) {
       break;
@@ -481,6 +516,15 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
   // Pretend that the fade didn't take any time
   mLastTime = high_resolution_clock::now();
+}
+
+
+void Game::swapBuffers() {
+  mRenderer.swapBuffers();
+
+  if (mFpsLimiter) {
+    mFpsLimiter->updateAndWait();
+  }
 }
 
 
@@ -499,6 +543,14 @@ void Game::applyChangedOptions() {
 
   if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
     SDL_GL_SetSwapInterval(mpUserProfile->mOptions.mEnableVsync ? 1 : 0);
+  }
+
+  if (
+    currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync ||
+    currentOptions.mEnableFpsLimit != mPreviousOptions.mEnableFpsLimit ||
+    currentOptions.mMaxFps != mPreviousOptions.mMaxFps
+  ) {
+    mFpsLimiter = createLimiter(currentOptions);
   }
 
   if (

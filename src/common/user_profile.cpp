@@ -210,6 +210,8 @@ nlohmann::json serialize(const data::GameOptions& options) {
   serialized["windowWidth"] = options.mWindowWidth;
   serialized["windowHeight"] = options.mWindowHeight;
   serialized["enableVsync"] = options.mEnableVsync;
+  serialized["enableFpsLimit"] = options.mEnableFpsLimit;
+  serialized["maxFps"] = options.mMaxFps;
   serialized["showFpsCounter"] = options.mShowFpsCounter;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
@@ -352,6 +354,8 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("windowWidth", result.mWindowWidth, json);
   extractValueIfExists("windowHeight", result.mWindowHeight, json);
   extractValueIfExists("enableVsync", result.mEnableVsync, json);
+  extractValueIfExists("enableFpsLimit", result.mEnableFpsLimit, json);
+  extractValueIfExists("maxFps", result.mMaxFps, json);
   extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);

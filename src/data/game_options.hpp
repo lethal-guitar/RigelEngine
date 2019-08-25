@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 
 namespace rigel::data {
 
@@ -70,6 +72,8 @@ struct GameOptions {
   int mWindowHeight = 1080;
 
   bool mEnableVsync = ENABLE_VSYNC_DEFAULT;
+  bool mEnableFpsLimit = true; // Only relevant when mEnableVsync == false
+  int mMaxFps = 60; // Only relevant when mEnableFpsLimit == true
   bool mShowFpsCounter = false;
 
   // Sound

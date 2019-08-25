@@ -33,10 +33,23 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <string>
 
 
 namespace rigel {
+
+class FpsLimiter {
+public:
+  explicit FpsLimiter(int targetFps);
+
+  void updateAndWait();
+
+private:
+  std::chrono::high_resolution_clock::time_point mLastTime = {};
+  double mTargetFrameTime;
+  double mError = 0.0;
+};
 
 
 class Game : public IGameServiceProvider {
@@ -65,6 +78,7 @@ private:
 
   void performScreenFadeBlocking(FadeType type);
 
+  void swapBuffers();
   void applyChangedOptions();
 
   // IGameServiceProvider implementation
@@ -88,6 +102,7 @@ private:
   loader::ResourceLoader mResources;
   bool mIsShareWareVersion;
 
+  std::optional<FpsLimiter> mFpsLimiter;
   renderer::RenderTargetTexture mRenderTarget;
   std::uint8_t mAlphaMod = 255;
 
