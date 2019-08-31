@@ -97,12 +97,18 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 
 
 void gameMain(const StartupOptions& options, SDL_Window* pWindow) {
-  Game game(options.mGamePath, pWindow);
+  auto userProfile = loadOrCreateUserProfile(options.mGamePath);
+
+  Game game(options.mGamePath, &userProfile, pWindow);
   game.run(options);
 }
 
 
-Game::Game(const std::string& gamePath, SDL_Window* pWindow)
+Game::Game(
+  const std::string& gamePath,
+  UserProfile* pUserProfile,
+  SDL_Window* pWindow
+)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(gamePath)
@@ -119,8 +125,8 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mUserProfile(loadOrCreateUserProfile(gamePath))
-  , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
+  , mpUserProfile(pUserProfile)
+  , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
       renderer::OwningTexture{
@@ -174,7 +180,7 @@ void Game::run(const StartupOptions& startupOptions) {
 
   mainLoop();
 
-  mUserProfile.saveToDisk();
+  mpUserProfile->saveToDisk();
 }
 
 
@@ -235,7 +241,7 @@ void Game::mainLoop() {
     mRenderTarget.render(&mRenderer, 0, 0);
     mRenderer.submitBatch();
 
-    if (mUserProfile.mOptions.mShowFpsCounter) {
+    if (mpUserProfile->mOptions.mShowFpsCounter) {
       const auto afterRender = high_resolution_clock::now();
       const auto innerRenderTime =
         duration<engine::TimeDelta>(afterRender - startOfFrame).count();
@@ -259,7 +265,7 @@ GameMode::Context Game::makeModeContext() {
     &mAllScripts,
     &mTextRenderer,
     &mUiSpriteSheet,
-    &mUserProfile};
+    mpUserProfile};
 }
 
 
@@ -271,8 +277,8 @@ void Game::handleEvent(const SDL_Event& event) {
   switch (event.type) {
     case SDL_KEYUP:
       if (event.key.keysym.sym == SDLK_F6) {
-        mUserProfile.mOptions.mShowFpsCounter =
-          !mUserProfile.mOptions.mShowFpsCounter;
+        mpUserProfile->mOptions.mShowFpsCounter =
+          !mpUserProfile->mOptions.mShowFpsCounter;
       }
       mpCurrentGameMode->handleEvent(event);
       break;
@@ -341,7 +347,7 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 
 
 void Game::applyChangedOptions() {
-  const auto& currentOptions = mUserProfile.mOptions;
+  const auto& currentOptions = mpUserProfile->mOptions;
 
   if (
     currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
@@ -364,10 +370,10 @@ void Game::applyChangedOptions() {
   }
 
   if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
-    SDL_GL_SetSwapInterval(mUserProfile.mOptions.mEnableVsync ? 1 : 0);
+    SDL_GL_SetSwapInterval(mpUserProfile->mOptions.mEnableVsync ? 1 : 0);
   }
 
-  mPreviousOptions = mUserProfile.mOptions;
+  mPreviousOptions = mpUserProfile->mOptions;
 }
 
 

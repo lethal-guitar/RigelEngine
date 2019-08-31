@@ -41,7 +41,10 @@ namespace rigel {
 
 class Game : public IGameServiceProvider {
 public:
-  Game(const std::string& gamePath, SDL_Window* pWindow);
+  Game(
+    const std::string& gamePath,
+    UserProfile* pUserProfile,
+    SDL_Window* pWindow);
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
@@ -98,7 +101,7 @@ private:
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
 
-  UserProfile mUserProfile;
+  UserProfile* mpUserProfile;
   data::GameOptions mPreviousOptions;
 
   ui::DukeScriptRunner mScriptRunner;
