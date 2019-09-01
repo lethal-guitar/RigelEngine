@@ -142,6 +142,9 @@ public:
   base::Size<int> windowSize() const {
     return mWindowSize;
   }
+  base::Size<int> maxWindowSize() const {
+    return mMaxWindowSize;
+  }
 
   void setOverlayColor(const base::Color& color);
   void setColorModulation(const base::Color& colorModulation);
@@ -277,6 +280,7 @@ private:
 
   GLuint mCurrentFbo;
   base::Size<int> mWindowSize;
+  base::Size<int> mMaxWindowSize;
   base::Size<int> mCurrentFramebufferSize;
 
   glm::mat4 mProjectionMatrix;

@@ -268,14 +268,9 @@ Game::Game(
   , mResources(gamePath)
   , mIsShareWareVersion(true)
   , mRenderTarget(
-      [&]() {
-        int windowWidth = 0;
-        int windowHeight = 0;
-        SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
-
-        return renderer::RenderTargetTexture{
-          &mRenderer, static_cast<size_t>(windowWidth), static_cast<size_t>(windowHeight)};
-      }())
+      &mRenderer,
+      mRenderer.maxWindowSize().width,
+      mRenderer.maxWindowSize().height)
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)

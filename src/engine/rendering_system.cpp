@@ -200,8 +200,8 @@ RenderingSystem::RenderingSystem(
   : mpRenderer(pRenderer)
   , mRenderTarget(
       pRenderer,
-      pRenderer->windowSize().width,
-      pRenderer->windowSize().height)
+      pRenderer->maxWindowSize().width,
+      pRenderer->maxWindowSize().height)
   , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
   , mpCameraPosition(pCameraPosition)
 {
