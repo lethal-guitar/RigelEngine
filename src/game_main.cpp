@@ -51,14 +51,8 @@ namespace {
 #if defined( __APPLE__) || defined(RIGEL_USE_GL_ES)
   const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
 #else
-  const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
+  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
-
-
-// Default values for screen resolution in case we can't figure out the
-// current Desktop size
-const auto DEFAULT_RESOLUTION_X = 1920;
-const auto DEFAULT_RESOLUTION_Y = 1080;
 
 
 template <typename Callback>
@@ -88,12 +82,6 @@ template <typename Callback>
 
 
 auto createWindow() {
-  SDL_DisplayMode displayMode;
-  if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
-    displayMode.w = DEFAULT_RESOLUTION_X;
-    displayMode.h = DEFAULT_RESOLUTION_Y;
-  }
-
 #ifdef RIGEL_USE_GL_ES
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -105,13 +93,25 @@ auto createWindow() {
 #endif
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-  return sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
+  SDL_DisplayMode displayMode;
+  sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
+
+  auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
     "Rigel Engine",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
     displayMode.w,
     displayMode.h,
     WINDOW_FLAGS | SDL_WINDOW_OPENGL))};
+
+
+  // Setting a display mode is necessary to make sure that exclusive
+  // full-screen mode keeps using the desktop resolution. Without this,
+  // switching to exclusive full-screen mode from windowed mode would result in
+  // a screen resolution matching the window's last size.
+  sdl_utils::check(SDL_SetWindowDisplayMode(pWindow.get(), &displayMode));
+
+  return pWindow;
 }
 
 
