@@ -14,6 +14,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Welcome to the RigelEngine code base! If you are looking for the place in
+// the code where everything starts, you found it. This file contains the
+// executable's main() function entry point. Its responsibility is parsing
+// command line options, and then handing off control to gameMain(). Most of
+// the interesting stuff like the main loop, initialization, and management of
+// game modes happens in there, so if you're looking for any of these things,
+// you might want to hop over to game_main.cpp instead of looking at this file
+// here.
+
 #include "base/warnings.hpp"
 
 #include "game_main.hpp"
