@@ -15,11 +15,6 @@
  */
 
 #include "base/warnings.hpp"
-#include "common/user_profile.hpp"
-#include "renderer/opengl.hpp"
-#include "sdl_utils/error.hpp"
-#include "sdl_utils/ptr.hpp"
-#include "ui/imgui_integration.hpp"
 
 #include "game_main.hpp"
 
@@ -27,7 +22,6 @@ RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/program_options.hpp>
-#include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
@@ -43,73 +37,6 @@ namespace po = boost::program_options;
 
 
 namespace {
-
-#if defined( __APPLE__) || defined(RIGEL_USE_GL_ES)
-  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
-#else
-  const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
-#endif
-
-
-// Default values for screen resolution in case we can't figure out the
-// current Desktop size
-const auto DEFAULT_RESOLUTION_X = 1920;
-const auto DEFAULT_RESOLUTION_Y = 1080;
-
-
-template <typename Callback>
-class CallOnDestruction {
-public:
-  explicit CallOnDestruction(Callback&& callback)
-    : mCallback(std::forward<Callback>(callback))
-  {
-  }
-
-  ~CallOnDestruction() {
-    mCallback();
-  }
-
-  CallOnDestruction(const CallOnDestruction&) = delete;
-  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
-
-private:
-  Callback mCallback;
-};
-
-
-template <typename Callback>
-[[nodiscard]] auto defer(Callback&& callback) {
-  return CallOnDestruction{std::forward<Callback>(callback)};
-}
-
-
-SDL_Window* createWindow() {
-  SDL_DisplayMode displayMode;
-  if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
-    displayMode.w = DEFAULT_RESOLUTION_X;
-    displayMode.h = DEFAULT_RESOLUTION_Y;
-  }
-
-#ifdef RIGEL_USE_GL_ES
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-  return sdl_utils::check(SDL_CreateWindow(
-      "Rigel Engine",
-      SDL_WINDOWPOS_UNDEFINED,
-      SDL_WINDOWPOS_UNDEFINED,
-      displayMode.w,
-      displayMode.h,
-      WINDOW_FLAGS | SDL_WINDOW_OPENGL));
-}
-
 
 void showBanner() {
   cout <<
@@ -128,34 +55,6 @@ void showBanner() {
     "For details, see https://www.gnu.org/licenses/gpl-2.0.html\n"
     "================================================================================\n"
     "\n";
-}
-
-
-void initAndRunGame(const StartupOptions& config) {
-#ifdef _WIN32
-  SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
-#endif
-
-  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
-  auto sdlGuard = defer([]() { SDL_Quit(); });
-
-  sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
-
-  sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
-  SDL_GLContext pGlContext =
-    sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
-  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
-
-  renderer::loadGlFunctions();
-
-  SDL_DisableScreenSaver();
-  SDL_ShowCursor(SDL_DISABLE);
-
-  ui::imgui_integration::init(
-    pWindow.get(), pGlContext, createOrGetPreferencesPath());
-  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
-
-  gameMain(config, pWindow.get());
 }
 
 }
@@ -249,7 +148,7 @@ int main(int argc, char** argv) {
       config.mGamePath += "/";
     }
 
-    initAndRunGame(config);
+    gameMain(config);
   }
   catch (const po::error& err)
   {
