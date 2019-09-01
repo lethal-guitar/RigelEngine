@@ -87,7 +87,7 @@ template <typename Callback>
 }
 
 
-SDL_Window* createWindow() {
+auto createWindow() {
   SDL_DisplayMode displayMode;
   if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
     displayMode.w = DEFAULT_RESOLUTION_X;
@@ -105,13 +105,13 @@ SDL_Window* createWindow() {
 #endif
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-  return sdl_utils::check(SDL_CreateWindow(
+  return sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
     "Rigel Engine",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
     displayMode.w,
     displayMode.h,
-    WINDOW_FLAGS | SDL_WINDOW_OPENGL));
+    WINDOW_FLAGS | SDL_WINDOW_OPENGL))};
 }
 
 
@@ -177,7 +177,7 @@ void gameMain(const StartupOptions& options) {
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
 
-  sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
+  auto pWindow = createWindow();
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
