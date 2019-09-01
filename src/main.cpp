@@ -57,6 +57,22 @@ void showBanner() {
     "\n";
 }
 
+
+auto parseLevelToJumpTo(const std::string& levelToPlay) {
+  if (levelToPlay.size() != 2) {
+    throw invalid_argument("Invalid level name");
+  }
+
+  const auto episode = static_cast<int>(levelToPlay[0] - 'L');
+  const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
+
+  if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
+    throw invalid_argument(string("Invalid level name: ") + levelToPlay);
+  }
+  return std::make_pair(episode, level);
+}
+
+
 base::Vector parsePlayerPosition(const std::string& playerPosString) {
   std::vector<std::string> positionParts;
   ba::split(positionParts, playerPosString, ba::is_any_of(","));
@@ -118,19 +134,8 @@ int main(int argc, char** argv) {
     }
 
     if (options.count("play-level")) {
-      const auto levelToPlay = options["play-level"].as<string>();
-      if (levelToPlay.size() != 2) {
-        throw invalid_argument("Invalid level name");
-      }
-
-      const auto episode = static_cast<int>(levelToPlay[0] - 'L');
-      const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
-
-      if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
-        throw invalid_argument(string("Invalid level name: ") + levelToPlay);
-      }
-
-      config.mLevelToJumpTo = std::make_pair(episode, level);
+      config.mLevelToJumpTo =
+        parseLevelToJumpTo(options["play-level"].as<string>());
     }
 
     if (options.count("player-pos")) {
