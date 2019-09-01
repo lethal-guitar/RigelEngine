@@ -774,8 +774,18 @@ void Renderer::setRenderTarget(const RenderTarget& target) {
 
 
 void Renderer::swapBuffers() {
+  assert(mCurrentFbo == 0);
+
   submitBatch();
   SDL_GL_SwapWindow(mpWindow);
+
+  const auto actualWindowSize = getSize(mpWindow);
+  if (mWindowSize != actualWindowSize) {
+    mWindowSize = actualWindowSize;
+    mCurrentFramebufferSize.width = mWindowSize.width;
+    mCurrentFramebufferSize.height = mWindowSize.height;
+    onRenderTargetChanged();
+  }
 }
 
 
