@@ -34,6 +34,18 @@ constexpr auto ENABLE_VSYNC_DEFAULT = true;
 constexpr auto MUSIC_VOLUME_DEFAULT = 1.0f;
 constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
 
+enum class WindowMode {
+  Fullscreen,
+  ExclusiveFullscreen,
+  Windowed
+};
+
+#if defined(__APPLE__) || defined(RIGEL_USE_GL_ES)
+  constexpr auto DEFAULT_WINDOW_MODE = WindowMode::ExclusiveFullscreen;
+#else
+  constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Fullscreen;
+#endif
+
 
 /** Data-model for user-configurable options/settings
  *
@@ -46,6 +58,17 @@ constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
  */
 struct GameOptions {
   // Graphics
+  WindowMode mWindowMode = DEFAULT_WINDOW_MODE;
+
+  // Note: These are not meant to be directly changed by the user. Instead,
+  // they are automatically updated every time the window is moved or resized
+  // when in windowed mode. This way, the window's position and size will be
+  // remembered until next time.
+  int mWindowPosX = 0;
+  int mWindowPosY = 0;
+  int mWindowWidth = 1920;
+  int mWindowHeight = 1080;
+
   bool mEnableVsync = ENABLE_VSYNC_DEFAULT;
   bool mShowFpsCounter = false;
 

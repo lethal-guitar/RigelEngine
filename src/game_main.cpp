@@ -54,13 +54,6 @@ using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
 
-#if defined( __APPLE__) || defined(RIGEL_USE_GL_ES)
-  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
-#else
-  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN_DESKTOP;
-#endif
-
-
 template <typename Callback>
 class CallOnDestruction {
 public:
@@ -101,18 +94,36 @@ void setGLAttributes() {
 }
 
 
-auto createWindow() {
+int flagsForWindowMode(const data::WindowMode mode) {
+  using WM = data::WindowMode;
+
+  switch (mode) {
+    case WM::Fullscreen: return SDL_WINDOW_FULLSCREEN_DESKTOP;
+    case WM::ExclusiveFullscreen: return SDL_WINDOW_FULLSCREEN;
+    case WM::Windowed: return 0;
+  }
+
+  return 0;
+}
+
+
+auto createWindow(const data::GameOptions& options) {
   SDL_DisplayMode displayMode;
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
 
+  const auto isFullscreen = options.mWindowMode != data::WindowMode::Windowed;
+  const auto windowFlags =
+    flagsForWindowMode(options.mWindowMode) |
+    SDL_WINDOW_RESIZABLE |
+    SDL_WINDOW_OPENGL;
+
   auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
     "Rigel Engine",
-    SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOWPOS_UNDEFINED,
-    displayMode.w,
-    displayMode.h,
-    WINDOW_FLAGS | SDL_WINDOW_OPENGL))};
-
+    options.mWindowPosX,
+    options.mWindowPosY,
+    isFullscreen ? displayMode.w : options.mWindowWidth,
+    isFullscreen ? displayMode.h : options.mWindowHeight,
+    windowFlags))};
 
   // Setting a display mode is necessary to make sure that exclusive
   // full-screen mode keeps using the desktop resolution. Without this,
@@ -122,7 +133,6 @@ auto createWindow() {
 
   return pWindow;
 }
-
 
 
 struct NullGameMode : public GameMode {
@@ -225,7 +235,9 @@ void gameMain(const StartupOptions& options) {
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   setGLAttributes();
 
-  auto pWindow = createWindow();
+  auto userProfile = loadOrCreateUserProfile(options.mGamePath);
+
+  auto pWindow = createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
@@ -238,8 +250,6 @@ void gameMain(const StartupOptions& options) {
   ui::imgui_integration::init(
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
-
-  auto userProfile = loadOrCreateUserProfile(options.mGamePath);
 
   Game game(options.mGamePath, &userProfile, pWindow.get());
   game.run(options);
@@ -415,6 +425,20 @@ bool Game::handleEvent(const SDL_Event& event) {
         case SDL_WINDOWEVENT_RESTORED:
           mIsMinimized = false;
           break;
+
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+          if (options.mWindowMode == data::WindowMode::Windowed) {
+            options.mWindowWidth = event.window.data1;
+            options.mWindowHeight = event.window.data2;
+          }
+          break;
+
+        case SDL_WINDOWEVENT_MOVED:
+          if (options.mWindowMode == data::WindowMode::Windowed) {
+            options.mWindowPosX = event.window.data1;
+            options.mWindowPosY = event.window.data2;
+          }
+          break;
       }
       break;
 
@@ -472,6 +496,16 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
 void Game::applyChangedOptions() {
   const auto& currentOptions = mpUserProfile->mOptions;
+
+  if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode) {
+    SDL_SetWindowFullscreen(
+      mpWindow, flagsForWindowMode(currentOptions.mWindowMode));
+
+    if (currentOptions.mWindowMode == data::WindowMode::Windowed) {
+      SDL_SetWindowSize(
+        mpWindow, currentOptions.mWindowWidth, currentOptions.mWindowHeight);
+    }
+  }
 
   if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
     SDL_GL_SetSwapInterval(mpUserProfile->mOptions.mEnableVsync ? 1 : 0);

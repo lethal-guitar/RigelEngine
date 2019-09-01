@@ -76,6 +76,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(TutorialMessageId, {
   {TutorialMessageId::FoundDoor, "FoundDoor"},
 })
 
+
+NLOHMANN_JSON_SERIALIZE_ENUM(WindowMode, {
+  {WindowMode::Fullscreen, "Fullscreen"},
+  {WindowMode::ExclusiveFullscreen, "ExclusiveFullscreen"},
+  {WindowMode::Windowed, "Windowed"},
+})
+
 }
 
 
@@ -197,6 +204,11 @@ nlohmann::json serialize(const data::GameOptions& options) {
   // add the deserialization counterpart to the deserialization function
   // further down in this file, i.e. `deserialize<data::GameOptions>()`.
   json serialized;
+  serialized["windowMode"] = options.mWindowMode;
+  serialized["windowPosX"] = options.mWindowPosX;
+  serialized["windowPosY"] = options.mWindowPosY;
+  serialized["windowWidth"] = options.mWindowWidth;
+  serialized["windowHeight"] = options.mWindowHeight;
   serialized["enableVsync"] = options.mEnableVsync;
   serialized["showFpsCounter"] = options.mShowFpsCounter;
   serialized["musicVolume"] = options.mMusicVolume;
@@ -334,6 +346,11 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   // likely want to add a corresponding entry here as well. You also need to
   // add the serialization counterpart to the serialization function further
   // up in this file, i.e. `serialize(const data::GameOptions& options)`.
+  extractValueIfExists("windowMode", result.mWindowMode, json);
+  extractValueIfExists("windowPosX", result.mWindowPosX, json);
+  extractValueIfExists("windowPosY", result.mWindowPosY, json);
+  extractValueIfExists("windowWidth", result.mWindowWidth, json);
+  extractValueIfExists("windowHeight", result.mWindowHeight, json);
   extractValueIfExists("enableVsync", result.mEnableVsync, json);
   extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);

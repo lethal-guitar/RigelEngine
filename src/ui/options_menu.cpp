@@ -60,6 +60,16 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     if (ImGui::BeginTabItem("Graphics"))
     {
       ImGui::NewLine();
+      {
+        auto windowModeIndex = static_cast<int>(mpOptions->mWindowMode);
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 20);
+        ImGui::Combo(
+          "Window mode",
+          &windowModeIndex,
+          "Fullscreen (borderless)\0Exclusive fullscreen\0Windowed\0");
+        mpOptions->mWindowMode = static_cast<data::WindowMode>(windowModeIndex);
+      }
+
       ImGui::Checkbox("V-Sync on", &mpOptions->mEnableVsync);
       ImGui::Checkbox("Show FPS", &mpOptions->mShowFpsCounter);
       ImGui::EndTabItem();
