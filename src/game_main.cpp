@@ -81,7 +81,7 @@ template <typename Callback>
 }
 
 
-auto createWindow() {
+void setGLAttributes() {
 #ifdef RIGEL_USE_GL_ES
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -92,7 +92,10 @@ auto createWindow() {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+}
 
+
+auto createWindow() {
   SDL_DisplayMode displayMode;
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
 
@@ -176,6 +179,7 @@ void gameMain(const StartupOptions& options) {
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
+  setGLAttributes();
 
   auto pWindow = createWindow();
   SDL_GLContext pGlContext =
