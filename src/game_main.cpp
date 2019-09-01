@@ -368,11 +368,11 @@ void Game::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  auto& options = mpUserProfile->mOptions;
   switch (event.type) {
     case SDL_KEYUP:
       if (event.key.keysym.sym == SDLK_F6) {
-        mpUserProfile->mOptions.mShowFpsCounter =
-          !mpUserProfile->mOptions.mShowFpsCounter;
+        options.mShowFpsCounter = !options.mShowFpsCounter;
       }
       mpCurrentGameMode->handleEvent(event);
       break;
