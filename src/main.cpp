@@ -30,7 +30,6 @@ RIGEL_RESTORE_WARNINGS
 
 
 using namespace rigel;
-using namespace std;
 
 namespace ba = boost::algorithm;
 namespace po = boost::program_options;
@@ -39,7 +38,7 @@ namespace po = boost::program_options;
 namespace {
 
 void showBanner() {
-  cout <<
+  std::cout <<
     "================================================================================\n"
     "                            Welcome to RIGEL ENGINE!\n"
     "\n"
@@ -60,14 +59,14 @@ void showBanner() {
 
 auto parseLevelToJumpTo(const std::string& levelToPlay) {
   if (levelToPlay.size() != 2) {
-    throw invalid_argument("Invalid level name");
+    throw std::invalid_argument("Invalid level name");
   }
 
   const auto episode = static_cast<int>(levelToPlay[0] - 'L');
   const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
 
   if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
-    throw invalid_argument(string("Invalid level name: ") + levelToPlay);
+    throw std::invalid_argument(std::string("Invalid level name: ") + levelToPlay);
   }
   return std::make_pair(episode, level);
 }
@@ -82,7 +81,7 @@ base::Vector parsePlayerPosition(const std::string& playerPosString) {
     positionParts[0].empty() ||
     positionParts[1].empty()
   ) {
-    throw invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
+    throw std::invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
   }
 
   return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
@@ -103,14 +102,14 @@ int main(int argc, char** argv) {
      po::bool_switch(&config.mSkipIntro),
      "Skip intro movies/Apogee logo, go straight to main menu")
     ("play-level,l",
-     po::value<string>(),
+     po::value<std::string>(),
      "Directly jump to given map, skipping intro/menu etc.")
     ("player-pos",
-     po::value<string>(),
+     po::value<std::string>(),
      "Specify position to place the player at (to be used in conjunction with\n"
      "'play-level')")
     ("game-path",
-     po::value<string>(&config.mGamePath),
+     po::value<std::string>(&config.mGamePath),
      "Path to original game's installation. Can also be given as positional "
      "argument.");
 
@@ -129,23 +128,23 @@ int main(int argc, char** argv) {
     po::notify(options);
 
     if (options.count("help")) {
-      cout << optionsDescription << '\n';
+      std::cout << optionsDescription << '\n';
       return 0;
     }
 
     if (options.count("play-level")) {
       config.mLevelToJumpTo =
-        parseLevelToJumpTo(options["play-level"].as<string>());
+        parseLevelToJumpTo(options["play-level"].as<std::string>());
     }
 
     if (options.count("player-pos")) {
       if (!options.count("play-level")) {
-        throw invalid_argument(
+        throw std::invalid_argument(
           "This option requires also using the play-level option");
       }
 
       config.mPlayerPosition = parsePlayerPosition(
-        options["player-pos"].as<string>());
+        options["player-pos"].as<std::string>());
     }
 
     if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
@@ -156,18 +155,18 @@ int main(int argc, char** argv) {
   }
   catch (const po::error& err)
   {
-    cerr << "ERROR: " << err.what() << "\n\n";
-    cerr << optionsDescription << '\n';
+    std::cerr << "ERROR: " << err.what() << "\n\n";
+    std::cerr << optionsDescription << '\n';
     return -1;
   }
   catch (const std::exception& ex)
   {
-    cerr << "ERROR: " << ex.what() << '\n';
+    std::cerr << "ERROR: " << ex.what() << '\n';
     return -2;
   }
   catch (...)
   {
-    cerr << "UNKNOWN ERROR\n";
+    std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
 
