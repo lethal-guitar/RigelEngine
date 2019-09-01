@@ -19,10 +19,31 @@
 
 namespace rigel::data {
 
+// In the majority of cases, the value of an option can be re-evaluated every
+// frame, and whatever code implements the option can adjust accordingly.
+// But some options require additional action to make them effective, e.g.
+// the v-sync option has to be applied by calling SDL_GL_SetSwapInterval.
+//
+// For these options, you should define their default value here, and make use
+// of that constant in the code that applies the setting initially. The v-sync
+// default value is used in renderer/renderer.cpp, for example.
+//
+// To react to changes for options that require additional actions, look at
+// Game::applyChangedOptions() in game_main.cpp.
 constexpr auto ENABLE_VSYNC_DEFAULT = true;
 constexpr auto MUSIC_VOLUME_DEFAULT = 1.0f;
 constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
 
+
+/** Data-model for user-configurable options/settings
+ *
+ * This struct contains everything that can be configured by the user in
+ * RigelEngine. The corresponding UI is located in ui/options_menu.cpp
+ * Serialization code is found in common/user_profile.cpp
+ *
+ * If you add something to this struct, you most likely want to add
+ * serialization and UI as well!
+ */
 struct GameOptions {
   // Graphics
   bool mEnableVsync = ENABLE_VSYNC_DEFAULT;
