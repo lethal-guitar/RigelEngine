@@ -57,6 +57,21 @@ void showBanner() {
     "\n";
 }
 
+base::Vector parsePlayerPosition(const std::string& playerPosString) {
+  std::vector<std::string> positionParts;
+  ba::split(positionParts, playerPosString, ba::is_any_of(","));
+
+  if (
+    positionParts.size() != 2 ||
+    positionParts[0].empty() ||
+    positionParts[1].empty()
+  ) {
+    throw invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
+  }
+
+  return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
+}
+
 }
 
 
@@ -124,24 +139,8 @@ int main(int argc, char** argv) {
           "This option requires also using the play-level option");
       }
 
-      const auto playerPosString = options["player-pos"].as<string>();
-      std::vector<std::string> positionParts;
-      ba::split(positionParts, playerPosString, ba::is_any_of(","));
-
-      if (
-        positionParts.size() != 2 ||
-        positionParts[0].empty() ||
-        positionParts[1].empty()
-      ) {
-        throw invalid_argument(
-          "Invalid x/y-position (specify using '<X>,<Y>')");
-      }
-
-      const auto position = base::Vector{
-        std::stoi(positionParts[0]),
-        std::stoi(positionParts[1])
-      };
-      config.mPlayerPosition = position;
+      config.mPlayerPosition = parsePlayerPosition(
+        options["player-pos"].as<string>());
     }
 
     if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
