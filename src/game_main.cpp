@@ -382,10 +382,14 @@ void Game::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_WINDOWEVENT:
-      if (event.window.event == SDL_WINDOWEVENT_MINIMIZED) {
-        mIsMinimized = true;
-      } else if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
-        mIsMinimized = false;
+      switch (event.window.event) {
+        case SDL_WINDOWEVENT_MINIMIZED:
+          mIsMinimized = true;
+          break;
+
+        case SDL_WINDOWEVENT_RESTORED:
+          mIsMinimized = false;
+          break;
       }
       break;
 
