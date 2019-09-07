@@ -191,6 +191,10 @@ nlohmann::json serialize(const data::HighScoreListArray& highScoreLists) {
 nlohmann::json serialize(const data::GameOptions& options) {
   using json = nlohmann::json;
 
+  // NOTE: When adding a new member to the data::GameOptions struct, you most
+  // likely want to add a corresponding entry here as well. You also need to
+  // add the deserialization counterpart to the deserialization function
+  // further down in this file, i.e. `deserialize<data::GameOptions>()`.
   json serialized;
   serialized["enableVsync"] = options.mEnableVsync;
   serialized["showFpsCounter"] = options.mShowFpsCounter;
@@ -325,6 +329,10 @@ template<>
 data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   data::GameOptions result;
 
+  // NOTE: When adding a new member to the data::GameOptions struct, you most
+  // likely want to add a corresponding entry here as well. You also need to
+  // add the serialization counterpart to the serialization function further
+  // up in this file, i.e. `serialize(const data::GameOptions& options)`.
   extractValueIfExists("enableVsync", result.mEnableVsync, json);
   extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
