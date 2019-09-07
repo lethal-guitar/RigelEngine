@@ -14,6 +14,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// In this file, we define the UI for the game's options menu. When adding
+// a new member to the data::GameOptions struct, you most likely want to add
+// corresponding UI code here as well!
+
 #include "options_menu.hpp"
 
 #include "base/warnings.hpp"
