@@ -14,12 +14,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Welcome to the RigelEngine code base! If you are looking for the place in
+// the code where everything starts, you found it. This file contains the
+// executable's main() function entry point. Its responsibility is parsing
+// command line options, and then handing off control to gameMain(). Most of
+// the interesting stuff like the main loop, initialization, and management of
+// game modes happens in there, so if you're looking for any of these things,
+// you might want to hop over to game_main.cpp instead of looking at this file
+// here.
+
 #include "base/warnings.hpp"
-#include "common/user_profile.hpp"
-#include "renderer/opengl.hpp"
-#include "sdl_utils/error.hpp"
-#include "sdl_utils/ptr.hpp"
-#include "ui/imgui_integration.hpp"
 
 #include "game_main.hpp"
 
@@ -27,7 +31,6 @@ RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/program_options.hpp>
-#include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
@@ -36,7 +39,6 @@ RIGEL_RESTORE_WARNINGS
 
 
 using namespace rigel;
-using namespace std;
 
 namespace ba = boost::algorithm;
 namespace po = boost::program_options;
@@ -44,75 +46,8 @@ namespace po = boost::program_options;
 
 namespace {
 
-#if defined( __APPLE__) || defined(RIGEL_USE_GL_ES)
-  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
-#else
-  const auto WINDOW_FLAGS = SDL_WINDOW_BORDERLESS;
-#endif
-
-
-// Default values for screen resolution in case we can't figure out the
-// current Desktop size
-const auto DEFAULT_RESOLUTION_X = 1920;
-const auto DEFAULT_RESOLUTION_Y = 1080;
-
-
-template <typename Callback>
-class CallOnDestruction {
-public:
-  explicit CallOnDestruction(Callback&& callback)
-    : mCallback(std::forward<Callback>(callback))
-  {
-  }
-
-  ~CallOnDestruction() {
-    mCallback();
-  }
-
-  CallOnDestruction(const CallOnDestruction&) = delete;
-  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
-
-private:
-  Callback mCallback;
-};
-
-
-template <typename Callback>
-[[nodiscard]] auto defer(Callback&& callback) {
-  return CallOnDestruction{std::forward<Callback>(callback)};
-}
-
-
-SDL_Window* createWindow() {
-  SDL_DisplayMode displayMode;
-  if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
-    displayMode.w = DEFAULT_RESOLUTION_X;
-    displayMode.h = DEFAULT_RESOLUTION_Y;
-  }
-
-#ifdef RIGEL_USE_GL_ES
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-  return sdl_utils::check(SDL_CreateWindow(
-      "Rigel Engine",
-      SDL_WINDOWPOS_UNDEFINED,
-      SDL_WINDOWPOS_UNDEFINED,
-      displayMode.w,
-      displayMode.h,
-      WINDOW_FLAGS | SDL_WINDOW_OPENGL));
-}
-
-
 void showBanner() {
-  cout <<
+  std::cout <<
     "================================================================================\n"
     "                            Welcome to RIGEL ENGINE!\n"
     "\n"
@@ -131,31 +66,34 @@ void showBanner() {
 }
 
 
-void initAndRunGame(const StartupOptions& config) {
-#ifdef _WIN32
-  SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
-#endif
+auto parseLevelToJumpTo(const std::string& levelToPlay) {
+  if (levelToPlay.size() != 2) {
+    throw std::invalid_argument("Invalid level name");
+  }
 
-  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
-  auto sdlGuard = defer([]() { SDL_Quit(); });
+  const auto episode = static_cast<int>(levelToPlay[0] - 'L');
+  const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
 
-  sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
+  if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
+    throw std::invalid_argument(std::string("Invalid level name: ") + levelToPlay);
+  }
+  return std::make_pair(episode, level);
+}
 
-  sdl_utils::Ptr<SDL_Window> pWindow(createWindow());
-  SDL_GLContext pGlContext =
-    sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
-  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
-  renderer::loadGlFunctions();
+base::Vector parsePlayerPosition(const std::string& playerPosString) {
+  std::vector<std::string> positionParts;
+  ba::split(positionParts, playerPosString, ba::is_any_of(","));
 
-  SDL_DisableScreenSaver();
-  SDL_ShowCursor(SDL_DISABLE);
+  if (
+    positionParts.size() != 2 ||
+    positionParts[0].empty() ||
+    positionParts[1].empty()
+  ) {
+    throw std::invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
+  }
 
-  ui::imgui_integration::init(
-    pWindow.get(), pGlContext, createOrGetPreferencesPath());
-  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
-
-  gameMain(config, pWindow.get());
+  return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
 }
 
 }
@@ -173,14 +111,14 @@ int main(int argc, char** argv) {
      po::bool_switch(&config.mSkipIntro),
      "Skip intro movies/Apogee logo, go straight to main menu")
     ("play-level,l",
-     po::value<string>(),
+     po::value<std::string>(),
      "Directly jump to given map, skipping intro/menu etc.")
     ("player-pos",
-     po::value<string>(),
+     po::value<std::string>(),
      "Specify position to place the player at (to be used in conjunction with\n"
      "'play-level')")
     ("game-path",
-     po::value<string>(&config.mGamePath),
+     po::value<std::string>(&config.mGamePath),
      "Path to original game's installation. Can also be given as positional "
      "argument.");
 
@@ -199,72 +137,45 @@ int main(int argc, char** argv) {
     po::notify(options);
 
     if (options.count("help")) {
-      cout << optionsDescription << '\n';
+      std::cout << optionsDescription << '\n';
       return 0;
     }
 
     if (options.count("play-level")) {
-      const auto levelToPlay = options["play-level"].as<string>();
-      if (levelToPlay.size() != 2) {
-        throw invalid_argument("Invalid level name");
-      }
-
-      const auto episode = static_cast<int>(levelToPlay[0] - 'L');
-      const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
-
-      if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
-        throw invalid_argument(string("Invalid level name: ") + levelToPlay);
-      }
-
-      config.mLevelToJumpTo = std::make_pair(episode, level);
+      config.mLevelToJumpTo =
+        parseLevelToJumpTo(options["play-level"].as<std::string>());
     }
 
     if (options.count("player-pos")) {
       if (!options.count("play-level")) {
-        throw invalid_argument(
+        throw std::invalid_argument(
           "This option requires also using the play-level option");
       }
 
-      const auto playerPosString = options["player-pos"].as<string>();
-      std::vector<std::string> positionParts;
-      ba::split(positionParts, playerPosString, ba::is_any_of(","));
-
-      if (
-        positionParts.size() != 2 ||
-        positionParts[0].empty() ||
-        positionParts[1].empty()
-      ) {
-        throw invalid_argument(
-          "Invalid x/y-position (specify using '<X>,<Y>')");
-      }
-
-      const auto position = base::Vector{
-        std::stoi(positionParts[0]),
-        std::stoi(positionParts[1])
-      };
-      config.mPlayerPosition = position;
+      config.mPlayerPosition = parsePlayerPosition(
+        options["player-pos"].as<std::string>());
     }
 
     if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
       config.mGamePath += "/";
     }
 
-    initAndRunGame(config);
+    gameMain(config);
   }
   catch (const po::error& err)
   {
-    cerr << "ERROR: " << err.what() << "\n\n";
-    cerr << optionsDescription << '\n';
+    std::cerr << "ERROR: " << err.what() << "\n\n";
+    std::cerr << optionsDescription << '\n';
     return -1;
   }
   catch (const std::exception& ex)
   {
-    cerr << "ERROR: " << ex.what() << '\n';
+    std::cerr << "ERROR: " << ex.what() << '\n';
     return -2;
   }
   catch (...)
   {
-    cerr << "UNKNOWN ERROR\n";
+    std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
 

@@ -22,7 +22,9 @@
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
 #include "loader/duke_script_loader.hpp"
+#include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
+#include "sdl_utils/ptr.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "game_session_mode.hpp"
@@ -31,6 +33,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
+#include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <cassert>
@@ -44,6 +47,77 @@ using namespace sdl_utils;
 using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
+
+#if defined( __APPLE__) || defined(RIGEL_USE_GL_ES)
+  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN;
+#else
+  const auto WINDOW_FLAGS = SDL_WINDOW_FULLSCREEN_DESKTOP;
+#endif
+
+
+template <typename Callback>
+class CallOnDestruction {
+public:
+  explicit CallOnDestruction(Callback&& callback)
+    : mCallback(std::forward<Callback>(callback))
+  {
+  }
+
+  ~CallOnDestruction() {
+    mCallback();
+  }
+
+  CallOnDestruction(const CallOnDestruction&) = delete;
+  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
+
+private:
+  Callback mCallback;
+};
+
+
+template <typename Callback>
+[[nodiscard]] auto defer(Callback&& callback) {
+  return CallOnDestruction{std::forward<Callback>(callback)};
+}
+
+
+void setGLAttributes() {
+#ifdef RIGEL_USE_GL_ES
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+}
+
+
+auto createWindow() {
+  SDL_DisplayMode displayMode;
+  sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
+
+  auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
+    "Rigel Engine",
+    SDL_WINDOWPOS_UNDEFINED,
+    SDL_WINDOWPOS_UNDEFINED,
+    displayMode.w,
+    displayMode.h,
+    WINDOW_FLAGS | SDL_WINDOW_OPENGL))};
+
+
+  // Setting a display mode is necessary to make sure that exclusive
+  // full-screen mode keeps using the desktop resolution. Without this,
+  // switching to exclusive full-screen mode from windowed mode would result in
+  // a screen resolution matching the window's last size.
+  sdl_utils::check(SDL_SetWindowDisplayMode(pWindow.get(), &displayMode));
+
+  return pWindow;
+}
+
+
 
 struct NullGameMode : public GameMode {
   void handleEvent(const SDL_Event&) override {}
@@ -96,13 +170,43 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 }
 
 
-void gameMain(const StartupOptions& options, SDL_Window* pWindow) {
-  Game game(options.mGamePath, pWindow);
+void gameMain(const StartupOptions& options) {
+#ifdef _WIN32
+  SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
+#endif
+
+  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+  auto sdlGuard = defer([]() { SDL_Quit(); });
+
+  sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
+  setGLAttributes();
+
+  auto pWindow = createWindow();
+  SDL_GLContext pGlContext =
+    sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
+  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
+
+  renderer::loadGlFunctions();
+
+  SDL_DisableScreenSaver();
+  SDL_ShowCursor(SDL_DISABLE);
+
+  ui::imgui_integration::init(
+    pWindow.get(), pGlContext, createOrGetPreferencesPath());
+  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
+
+  auto userProfile = loadOrCreateUserProfile(options.mGamePath);
+
+  Game game(options.mGamePath, &userProfile, pWindow.get());
   game.run(options);
 }
 
 
-Game::Game(const std::string& gamePath, SDL_Window* pWindow)
+Game::Game(
+  const std::string& gamePath,
+  UserProfile* pUserProfile,
+  SDL_Window* pWindow
+)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(gamePath)
@@ -119,8 +223,8 @@ Game::Game(const std::string& gamePath, SDL_Window* pWindow)
   , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mUserProfile(loadOrCreateUserProfile(gamePath))
-  , mScriptRunner(&mResources, &mRenderer, &mUserProfile.mSaveSlots, this)
+  , mpUserProfile(pUserProfile)
+  , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
       renderer::OwningTexture{
@@ -174,7 +278,7 @@ void Game::run(const StartupOptions& startupOptions) {
 
   mainLoop();
 
-  mUserProfile.saveToDisk();
+  mpUserProfile->saveToDisk();
 }
 
 
@@ -235,7 +339,7 @@ void Game::mainLoop() {
     mRenderTarget.render(&mRenderer, 0, 0);
     mRenderer.submitBatch();
 
-    if (mUserProfile.mOptions.mShowFpsCounter) {
+    if (mpUserProfile->mOptions.mShowFpsCounter) {
       const auto afterRender = high_resolution_clock::now();
       const auto innerRenderTime =
         duration<engine::TimeDelta>(afterRender - startOfFrame).count();
@@ -259,7 +363,7 @@ GameMode::Context Game::makeModeContext() {
     &mAllScripts,
     &mTextRenderer,
     &mUiSpriteSheet,
-    &mUserProfile};
+    mpUserProfile};
 }
 
 
@@ -268,11 +372,11 @@ void Game::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  auto& options = mpUserProfile->mOptions;
   switch (event.type) {
     case SDL_KEYUP:
       if (event.key.keysym.sym == SDLK_F6) {
-        mUserProfile.mOptions.mShowFpsCounter =
-          !mUserProfile.mOptions.mShowFpsCounter;
+        options.mShowFpsCounter = !options.mShowFpsCounter;
       }
       mpCurrentGameMode->handleEvent(event);
       break;
@@ -282,10 +386,14 @@ void Game::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_WINDOWEVENT:
-      if (event.window.event == SDL_WINDOWEVENT_MINIMIZED) {
-        mIsMinimized = true;
-      } else if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
-        mIsMinimized = false;
+      switch (event.window.event) {
+        case SDL_WINDOWEVENT_MINIMIZED:
+          mIsMinimized = true;
+          break;
+
+        case SDL_WINDOWEVENT_RESTORED:
+          mIsMinimized = false;
+          break;
       }
       break;
 
@@ -341,7 +449,11 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
 
 
 void Game::applyChangedOptions() {
-  const auto& currentOptions = mUserProfile.mOptions;
+  const auto& currentOptions = mpUserProfile->mOptions;
+
+  if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
+    SDL_GL_SetSwapInterval(mpUserProfile->mOptions.mEnableVsync ? 1 : 0);
+  }
 
   if (
     currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
@@ -363,11 +475,7 @@ void Game::applyChangedOptions() {
     mSoundSystem.setSoundVolume(newVolume);
   }
 
-  if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
-    SDL_GL_SetSwapInterval(mUserProfile.mOptions.mEnableVsync ? 1 : 0);
-  }
-
-  mPreviousOptions = mUserProfile.mOptions;
+  mPreviousOptions = mpUserProfile->mOptions;
 }
 
 

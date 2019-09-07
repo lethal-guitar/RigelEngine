@@ -16,12 +16,7 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <SDL_video.h>
-RIGEL_RESTORE_WARNINGS
 
 #include <optional>
 #include <string>
@@ -38,6 +33,6 @@ struct StartupOptions {
 };
 
 
-void gameMain(const StartupOptions& options, SDL_Window* pWindow);
+void gameMain(const StartupOptions& options);
 
 }

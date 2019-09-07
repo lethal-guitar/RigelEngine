@@ -339,6 +339,14 @@ data::Image createWaterSurfaceAnimImage() {
     static_cast<size_t>(WATER_MASK_HEIGHT * WATER_NUM_MASKS)};
 }
 
+
+auto getSize(SDL_Window* pWindow) {
+  int windowWidth = 0;
+  int windowHeight = 0;
+  SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
+  return base::Size<int>{windowWidth, windowHeight};
+}
+
 }
 
 
@@ -363,13 +371,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
   , mCurrentFbo(0)
-  , mWindowSize(
-      [&]() {
-        int windowWidth = 0;
-        int windowHeight = 0;
-        SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
-        return base::Size<int>{windowWidth, windowHeight};
-      }())
+  , mWindowSize(getSize(pWindow))
   , mCurrentFramebufferSize(mWindowSize)
   , mGlobalTranslation(0.0f, 0.0f)
   , mGlobalScale(1.0f, 1.0f)
