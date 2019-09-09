@@ -30,6 +30,14 @@ Some other features that still need to be implemented:
 
 Plus, it would be nice to make launching the game easier in the future, e.g. by having some kind of launcher application or setup program.
 
+## Contributing
+
+Contributions to RigelEngine are very welcome! 
+
+There is a growing body of documentation on the Wiki, to help with getting into the code base. A good place to start is [Architecture Overview](https://github.com/lethal-guitar/RigelEngine/wiki/Architecture-overview)
+
+If you are looking for some easy tasks to get started, take a look at issues labeled [good first issue](https://github.com/lethal-guitar/RigelEngine/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
 ## Running RigelEngine
 
 In order to run RigelEngine, the game data from the original game is required. Both the shareware version and the registered version work. To make RigelEngine find the game data, you can either:
