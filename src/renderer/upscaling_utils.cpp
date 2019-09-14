@@ -31,12 +31,12 @@ base::Size<float> determineUsableSize(
   const float windowWidth,
   const float windowHeight
 ) {
-  if (windowWidth > windowHeight) {
+  const auto actualAspectRatioIsWiderThanTarget =
+    windowWidth / windowHeight > data::GameTraits::aspectRatio;
+  if (actualAspectRatioIsWiderThanTarget) {
     return {data::GameTraits::aspectRatio * windowHeight, windowHeight};
-  } else if (windowHeight >= windowWidth) {
-    return {windowWidth, 1.0f / data::GameTraits::aspectRatio * windowWidth};
   } else {
-    return {windowWidth, windowHeight};
+    return {windowWidth, 1.0f / data::GameTraits::aspectRatio * windowWidth};
   }
 }
 
