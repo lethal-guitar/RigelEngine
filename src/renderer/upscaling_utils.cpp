@@ -64,23 +64,14 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer) {
 
 
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
-  // TODO: Eliminate duplication with setupSimpleUpscaling () in game_main.cpp
-  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
-  const auto windowWidth = float(windowWidthInt);
-  const auto windowHeight = float(windowHeightInt);
+  const auto info = determineViewPort(pRenderer);
 
-  const auto usableWidth = windowWidth > windowHeight
-    ? data::GameTraits::aspectRatio * windowHeight
-    : windowWidth;
-
-  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
-
-  const auto tileWidthScaled = data::GameTraits::tileSize * widthScale;
-  const auto maxTilesOnScreen =
-    base::round(pRenderer->windowSize().width / tileWidthScaled);
+  const auto windowWidth = pRenderer->windowSize().width;
+  const auto tileWidthScaled = data::GameTraits::tileSize * info.mScale.x;
+  const auto maxTilesOnScreen = base::round(windowWidth / tileWidthScaled);
 
   const auto widthInPixels =
-    std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidthInt);
+    std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidth);
   const auto paddingPixels =
     pRenderer->windowSize().width - widthInPixels;
 
