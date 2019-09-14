@@ -498,7 +498,9 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mHudRenderer.updateAnimation();
   mMessageDisplay.update();
 
-  if (mpOptions->mWidescreenModeOn) {
+  if (
+    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
+  ) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
     const auto viewPortSize = base::Extents{
       info.mWidthTiles - HUD_WIDTH,
@@ -511,6 +513,9 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
 
 void GameWorld::render() {
+  const auto widescreenModeOn =
+    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
+
   auto drawWorld = [this](const base::Extents& viewPortSize) {
     if (!mScreenFlashColor) {
       mpSystems->render(
@@ -520,14 +525,14 @@ void GameWorld::render() {
     }
   };
 
-  auto drawTopRow = [this]() {
+  auto drawTopRow = [&, this]() {
     if (mActiveBossEntity) {
       using game_logic::components::Shootable;
 
       const auto health = mActiveBossEntity.has_component<Shootable>()
         ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
 
-      if (mpOptions->mWidescreenModeOn) {
+      if (widescreenModeOn) {
         drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
       } else {
         auto saved = renderer::Renderer::StateSaver{mpRenderer};
@@ -542,7 +547,7 @@ void GameWorld::render() {
   };
 
 
-  if (mpOptions->mWidescreenModeOn) {
+  if (widescreenModeOn) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
 
     {

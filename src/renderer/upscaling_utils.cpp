@@ -63,6 +63,13 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer) {
 }
 
 
+bool canUseWidescreenMode(const Renderer* pRenderer) {
+  const auto windowWidth = float(pRenderer->windowSize().width);
+  const auto windowHeight = float(pRenderer->windowSize().height);
+  return windowWidth / windowHeight > data::GameTraits::aspectRatio;
+}
+
+
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
   const auto info = determineViewPort(pRenderer);
 
