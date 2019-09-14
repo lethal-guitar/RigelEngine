@@ -86,8 +86,8 @@ Most other menus, screens etc. in Duke Nukem are implemented using [DukeScript](
 ## "Main" code
 
 The remaining code consists of:
-* `main.cpp`: parses command line options and sets up the application window
-* `game_main`: contains the main loop, and manages game modes
+* `main.cpp`: command line option parsing
+* `game_main`: startup and initialization, main loop, game mode management
 * game mode implementations (menu, game session, intro/demo loop)
 
 
