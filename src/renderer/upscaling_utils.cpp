@@ -26,9 +26,8 @@
 namespace rigel::renderer {
 
 ViewPortInfo determineViewPort(const Renderer* pRenderer) {
-  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
-  const auto windowWidth = float(windowWidthInt);
-  const auto windowHeight = float(windowHeightInt);
+  const auto windowWidth = float(pRenderer->windowSize().width);
+  const auto windowHeight = float(pRenderer->windowSize().height);
 
   const auto usableWidth = windowWidth > windowHeight
     ? data::GameTraits::aspectRatio * windowHeight
