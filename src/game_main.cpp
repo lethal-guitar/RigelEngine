@@ -38,6 +38,10 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #include <cassert>
 
 
@@ -212,6 +216,7 @@ std::unique_ptr<GameMode> createInitialGameMode(
 void gameMain(const StartupOptions& options) {
 #ifdef _WIN32
   SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
+  SetProcessDPIAware();
 #endif
 
   sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
