@@ -25,6 +25,31 @@
 
 namespace rigel::renderer {
 
+ViewPortInfo determineViewPort(const Renderer* pRenderer) {
+  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
+  const auto windowWidth = float(windowWidthInt);
+  const auto windowHeight = float(windowHeightInt);
+
+  const auto usableWidth = windowWidth > windowHeight
+    ? data::GameTraits::aspectRatio * windowHeight
+    : windowWidth;
+  const auto usableHeight = windowHeight >= windowWidth
+    ? 1.0f / data::GameTraits::aspectRatio * windowWidth
+    : windowHeight;
+
+  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
+  const auto heightScale = usableHeight / data::GameTraits::viewPortHeightPx;
+  const auto offsetX = (windowWidth - usableWidth) / 2.0f;
+  const auto offsetY = (windowHeight - usableHeight) / 2.0f;
+
+  return {
+    base::Vector{int(offsetX), int(offsetY)},
+    base::Size<int>{int(usableWidth), int(usableHeight)},
+    base::Point<float>{widthScale, heightScale}
+  };
+}
+
+
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
   // TODO: Eliminate duplication with setupSimpleUpscaling () in game_main.cpp
   const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();

@@ -23,6 +23,7 @@
 #include "engine/timing.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "renderer/opengl.hpp"
+#include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/error.hpp"
 #include "sdl_utils/ptr.hpp"
 #include "ui/imgui_integration.hpp"
@@ -169,29 +170,11 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 [[nodiscard]] auto setupSimpleUpscaling(renderer::Renderer* pRenderer) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
 
-  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
-  const auto windowWidth = float(windowWidthInt);
-  const auto windowHeight = float(windowHeightInt);
-
-  const auto usableWidth = windowWidth > windowHeight
-    ? data::GameTraits::aspectRatio * windowHeight
-    : windowWidth;
-  const auto usableHeight = windowHeight >= windowWidth
-    ? 1.0f / data::GameTraits::aspectRatio * windowWidth
-    : windowHeight;
-
-  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
-  const auto heightScale = usableHeight / data::GameTraits::viewPortHeightPx;
-
-  pRenderer->setGlobalScale({widthScale, heightScale});
-
-  const auto offsetX = (windowWidth - usableWidth) / 2.0f;
-  const auto offsetY = (windowHeight - usableHeight) / 2.0f;
-  const auto offset = base::Vector{int(offsetX), int(offsetY)};
+  const auto [offset, size, scale] =
+    renderer::determineViewPort(pRenderer);
+  pRenderer->setGlobalScale(scale);
   pRenderer->setGlobalTranslation(offset);
-
-  pRenderer->setClipRect(base::Rect<int>{
-    offset, {int(usableWidth), int(usableHeight)}});
+  pRenderer->setClipRect(base::Rect<int>{offset, size});
 
   return saved;
 }

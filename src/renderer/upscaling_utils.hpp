@@ -16,10 +16,18 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
+
 
 namespace rigel::renderer {
 
 class Renderer;
+
+struct ViewPortInfo {
+  base::Vector mOffset;
+  base::Size<int> mSize;
+  base::Point<float> mScale;
+};
 
 
 struct WidescreenViewPortInfo {
@@ -28,6 +36,8 @@ struct WidescreenViewPortInfo {
   int mLeftPaddingPx;
 };
 
+
+ViewPortInfo determineViewPort(const Renderer* pRenderer);
 
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
 
