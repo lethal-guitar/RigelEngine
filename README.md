@@ -32,7 +32,7 @@ Plus, it would be nice to make launching the game easier in the future, e.g. by 
 
 ## Contributing
 
-Contributions to RigelEngine are very welcome! 
+Contributions to RigelEngine are very welcome! Please have a look at the [contribution guide](CONTRIBUTING.md) before making a PR.
 
 There is a growing body of documentation on the Wiki, to help with getting into the code base. A good place to start is [Architecture Overview](https://github.com/lethal-guitar/RigelEngine/wiki/Architecture-overview)
 
