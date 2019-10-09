@@ -24,26 +24,26 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
 
-inline nlohmann::json merge(nlohmann::json secondary, nlohmann::json primary) {
-  if (!primary.is_structured()) {
-    return primary;
+inline nlohmann::json merge(nlohmann::json base, nlohmann::json extension) {
+  if (!extension.is_structured()) {
+    return extension;
   }
 
-  if (primary.is_object()) {
-    primary.insert(secondary.begin(), secondary.end());
+  if (extension.is_object()) {
+    extension.insert(base.begin(), base.end());
 
-    for (auto& [key, value] : primary.items()) {
-      value = merge(value, secondary[key]);
+    for (auto& [key, value] : extension.items()) {
+      value = merge(value, base[key]);
     }
   } else { // array
     auto index = 0u;
-    for (auto& value : primary) {
-      value = merge(value, secondary[index]);
+    for (auto& value : extension) {
+      value = merge(value, base[index]);
       ++index;
     }
   }
 
-  return primary;
+  return extension;
 }
 
 }
