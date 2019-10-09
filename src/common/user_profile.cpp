@@ -17,6 +17,7 @@
 #include "user_profile.hpp"
 
 #include "base/warnings.hpp"
+#include "common/json_utils.hpp"
 #include "loader/file_utils.hpp"
 #include "loader/user_profile_import.hpp"
 
@@ -392,29 +393,6 @@ void saveToFile(
   }
 
   file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-}
-
-
-nlohmann::json merge(nlohmann::json primary, nlohmann::json secondary) {
-  if (!primary.is_structured()) {
-    return primary;
-  }
-
-  if (primary.is_object()) {
-    primary.insert(secondary.begin(), secondary.end());
-
-    for (auto& [key, value] : primary.items()) {
-      value = merge(secondary[key], value);
-    }
-  } else { // array
-    auto index = 0u;
-    for (auto& value : primary) {
-      value = merge(secondary[index], value);
-      ++index;
-    }
-  }
-
-  return primary;
 }
 
 }

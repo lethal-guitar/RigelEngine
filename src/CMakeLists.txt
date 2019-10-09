@@ -9,6 +9,7 @@ set(core_sources
     common/game_mode.hpp
     common/game_service_provider.hpp
     common/global.hpp
+    common/json_utils.hpp
     common/user_profile.cpp
     common/user_profile.hpp
     data/actor_ids.hpp
