@@ -24,7 +24,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
 
-inline nlohmann::json merge(nlohmann::json primary, nlohmann::json secondary) {
+inline nlohmann::json merge(nlohmann::json secondary, nlohmann::json primary) {
   if (!primary.is_structured()) {
     return primary;
   }
@@ -33,12 +33,12 @@ inline nlohmann::json merge(nlohmann::json primary, nlohmann::json secondary) {
     primary.insert(secondary.begin(), secondary.end());
 
     for (auto& [key, value] : primary.items()) {
-      value = merge(secondary[key], value);
+      value = merge(value, secondary[key]);
     }
   } else { // array
     auto index = 0u;
     for (auto& value : primary) {
-      value = merge(secondary[index], value);
+      value = merge(value, secondary[index]);
       ++index;
     }
   }

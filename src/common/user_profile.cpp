@@ -421,7 +421,7 @@ void UserProfile::saveToDisk() {
   serializedProfile["options"] = serialize(mOptions);
 
   const auto previousProfile = json::from_msgpack(mOriginalJson);
-  serializedProfile = merge(serializedProfile, previousProfile);
+  serializedProfile = merge(previousProfile, serializedProfile);
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
