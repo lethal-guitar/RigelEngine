@@ -204,6 +204,7 @@ nlohmann::json serialize(const data::GameOptions& options) {
   serialized["musicOn"] = options.mMusicOn;
   serialized["soundOn"] = options.mSoundOn;
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
+  serialized["motionSmoothing"] = options.mMotionSmoothing;
   return serialized;
 }
 
@@ -341,6 +342,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("musicOn", result.mMusicOn, json);
   extractValueIfExists("soundOn", result.mSoundOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
+  extractValueIfExists("motionSmoothing", result.mMotionSmoothing, json);
 
 
   return result;

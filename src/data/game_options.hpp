@@ -57,6 +57,7 @@ struct GameOptions {
 
   // Enhancements
   bool mWidescreenModeOn = false;
+  bool mMotionSmoothing = false;
 };
 
 }

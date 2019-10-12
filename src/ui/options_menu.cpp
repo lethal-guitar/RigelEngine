@@ -85,6 +85,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     {
       ImGui::NewLine();
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
+      ImGui::Checkbox("Motion smoothing", &mpOptions->mMotionSmoothing);
       ImGui::EndTabItem();
     }
 
