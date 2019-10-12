@@ -519,11 +519,11 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 }
 
 
-void GameWorld::render() {
-  auto drawWorld = [this](const base::Extents& viewPortSize) {
+void GameWorld::render(const float interpolation) {
+  auto drawWorld = [&, this](const base::Extents& viewPortSize) {
     if (!mScreenFlashColor) {
       mpSystems->render(
-        mEntities, mBackdropFlashColor, viewPortSize);
+        mEntities, mBackdropFlashColor, viewPortSize, interpolation);
     } else {
       mpRenderer->clear(*mScreenFlashColor);
     }
@@ -699,7 +699,7 @@ void GameWorld::restartLevel() {
   *mpPlayerModel = mPlayerModelAtLevelStart;
 
   mpSystems->centerViewOnPlayer();
-  render();
+  render(0.0f);
 
   mpServiceProvider->fadeInScreen();
 }
@@ -720,7 +720,7 @@ void GameWorld::restartFromCheckpoint() {
   mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
 
   mpSystems->centerViewOnPlayer();
-  render();
+  render(0.0f);
 
   mpServiceProvider->fadeInScreen();
 }
@@ -745,7 +745,7 @@ void GameWorld::handleTeleporter() {
   }
 
   mpSystems->centerViewOnPlayer();
-  render();
+  render(0.0f);
   mpServiceProvider->fadeInScreen();
 }
 

@@ -82,7 +82,7 @@ GameRunner::GameRunner(
       playerPositionOverride,
       showWelcomeMessage)
 {
-  mStateStack.emplace(World{&mWorld});
+  mStateStack.emplace(World{&mWorld, &mContext.mpUserProfile->mOptions});
 }
 
 
@@ -155,7 +155,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
   base::match(mStateStack.top(),
     [dt, this](ui::OptionsMenu& state) {
       state.updateAndRender(dt);
-      mWorld.render();
+      mWorld.render(0.0f);
     },
 
     [dt](auto& state) { state.updateAndRender(dt); });
@@ -266,7 +266,7 @@ void GameRunner::leaveMenu() {
 
 void GameRunner::fadeToWorld() {
   mContext.mpServiceProvider->fadeOutScreen();
-  mWorld.render();
+  mWorld.render(0.0f);
   mContext.mpServiceProvider->fadeInScreen();
 }
 
@@ -336,7 +336,11 @@ void GameRunner::World::handleEvent(const SDL_Event& event) {
 
 void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   updateWorld(dt);
-  mpWorld->render();
+
+  const auto interpolation = mpOptions->mMotionSmoothing
+    ? static_cast<float>(mAccumulatedTime / GAME_LOGIC_UPDATE_DELAY)
+    : 0.0f;
+  mpWorld->render(interpolation);
 
   if (mShowDebugText) {
     mpWorld->showDebugText();

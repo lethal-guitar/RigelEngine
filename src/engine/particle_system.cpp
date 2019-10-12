@@ -16,6 +16,7 @@
 
 #include "particle_system.hpp"
 
+#include "base/math_tools.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/random_number_generator.hpp"
 #include "renderer/renderer.hpp"
@@ -51,10 +52,10 @@ static_assert(INITIAL_INDEX_LIMIT + PARTICLE_SYSTEM_LIFE_TIME <
 
 auto yOffsetAtTime(
   const std::int16_t initialOffsetIndex,
-  const int framesElapsed
+  const int framesElapsedRaw
 ) {
-  assert(initialOffsetIndex + framesElapsed <
-    static_cast<int>(VERTICAL_MOVEMENT_TABLE.size()));
+  const auto framesElapsed =
+    std::min(framesElapsedRaw, PARTICLE_SYSTEM_LIFE_TIME);
 
   const auto baseOffset =
     VERTICAL_MOVEMENT_TABLE[initialOffsetIndex + framesElapsed];
@@ -97,6 +98,13 @@ std::unique_ptr<ParticlesList> createParticles(
 
 }
 
+base::Vector lerp(const base::Vector& a, const base::Vector& b, const float f) {
+  return {
+    base::round(base::lerp(a.x, b.x, f)),
+    base::round(base::lerp(a.y, b.y, f)),
+  };
+}
+
 
 struct ParticleGroup {
   ParticleGroup(
@@ -114,13 +122,21 @@ struct ParticleGroup {
     ++mFramesElapsed;
   }
 
-  void render(Renderer& renderer, const base::Vector& cameraPosition) {
+  void render(
+    Renderer& renderer,
+    const base::Vector& cameraPosition,
+    const float interpolation
+  ) {
     const auto screenSpaceOrigin =
       data::tileVectorToPixelVector(mOrigin - cameraPosition);
     for (auto& particle : *mpParticles) {
+      const auto currentParticlePosition = particle.offsetAtTime(mFramesElapsed);
+      const auto futureParticlePosition =
+        particle.offsetAtTime(mFramesElapsed + 1);
+
       const auto particlePosition =
-        screenSpaceOrigin + particle.offsetAtTime(mFramesElapsed);
-      renderer.drawPoint(particlePosition, mColor);
+        lerp(currentParticlePosition, futureParticlePosition, interpolation);
+      renderer.drawPoint(screenSpaceOrigin + particlePosition, mColor);
     }
   }
 
@@ -175,9 +191,12 @@ void ParticleSystem::update() {
 }
 
 
-void ParticleSystem::render(const base::Vector& cameraPosition) {
+void ParticleSystem::render(
+  const base::Vector& cameraPosition,
+  const float interpolation
+) {
   for (auto& group : mParticleGroups) {
-    group.render(*mpRenderer, cameraPosition);
+    group.render(*mpRenderer, cameraPosition, interpolation);
   }
 }
 

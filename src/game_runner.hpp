@@ -59,8 +59,9 @@ private:
   using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
 
   struct World {
-    explicit World(game_logic::GameWorld* pWorld)
+    explicit World(game_logic::GameWorld* pWorld, data::GameOptions* pOptions)
       : mpWorld(pWorld)
+      , mpOptions(pOptions)
     {
     }
 
@@ -72,6 +73,7 @@ private:
     void handleDebugKeys(const SDL_Event& event);
 
     game_logic::GameWorld* mpWorld;
+    data::GameOptions* mpOptions;
     game_logic::PlayerInput mPlayerInput;
     engine::TimeDelta mAccumulatedTime = 0.0;
     bool mShowDebugText = false;

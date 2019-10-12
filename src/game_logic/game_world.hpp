@@ -76,7 +76,7 @@ public:
   void receive(const rigel::events::BossActivated& event);
 
   void updateGameLogic(const PlayerInput& input);
-  void render();
+  void render(float interpolation);
   void processEndOfFrameActions();
 
   friend class rigel::GameRunner;

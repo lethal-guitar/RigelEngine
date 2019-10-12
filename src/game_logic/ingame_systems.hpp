@@ -91,7 +91,8 @@ public:
   void render(
     entityx::EntityManager& es,
     const std::optional<base::Color>& backdropFlashColor,
-    const base::Extents& viewPortSize);
+    const base::Extents& viewPortSize,
+    float interpolation);
   void updateBackdropAutoScrolling(const engine::TimeDelta dt) {
     mRenderingSystem.updateBackdropAutoScrolling(dt);
   }

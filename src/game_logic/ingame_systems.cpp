@@ -250,7 +250,8 @@ void IngameSystems::update(
 void IngameSystems::render(
   entityx::EntityManager& es,
   const std::optional<base::Color>& backdropFlashColor,
-  const base::Extents& viewPortSize
+  const base::Extents& viewPortSize,
+  const float interpolation
 ) {
   mRenderingSystem.update(es, backdropFlashColor, viewPortSize);
 
@@ -260,7 +261,7 @@ void IngameSystems::render(
     const auto saved = renderer::setupDefaultState(mpRenderer);
 
     mpRenderer->clear({0, 0, 0, 0});
-    mParticles.render(mCamera.position());
+    mParticles.render(mCamera.position(), interpolation);
     mDebuggingSystem.update(es, viewPortSize);
   }
 
