@@ -451,6 +451,10 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
       mSingleStepping = !mSingleStepping;
       break;
 
+    case SDLK_i:
+      mpOptions->mMotionSmoothing = !mpOptions->mMotionSmoothing;
+      break;
+
     case SDLK_SPACE:
       if (mSingleStepping) {
         mDoNextSingleStep = true;

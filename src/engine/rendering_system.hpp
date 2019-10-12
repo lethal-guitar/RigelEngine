@@ -75,7 +75,8 @@ public:
   void update(
     entityx::EntityManager& es,
     const std::optional<base::Color>& backdropFlashColor,
-    const base::Extents& viewPortSize);
+    const base::Extents& viewPortSize,
+    float interpolation);
 
   void switchBackdrops() {
     mMapRenderer.switchBackdrops();
@@ -91,7 +92,7 @@ public:
 
 private:
   struct SpriteData;
-  void renderSprite(const SpriteData& data) const;
+  void renderSprite(const SpriteData& data, float) const;
   void renderWaterEffectAreas(entityx::EntityManager& es);
 
 private:

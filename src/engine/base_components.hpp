@@ -19,10 +19,18 @@
 #include "base/spatial_types.hpp"
 
 
-namespace rigel::engine { namespace components {
+namespace rigel::engine {
+
+base::Vector lerp(const base::Vector&, const base::Vector&, float);
+
+namespace components {
 
 using WorldPosition = base::Vector;
 using BoundingBox = base::Rect<int>;
+
+struct FuturePosition {
+  base::Vector mPos;
+};
 
 /** Marks entity as active
  *

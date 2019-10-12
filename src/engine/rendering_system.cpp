@@ -211,7 +211,8 @@ RenderingSystem::RenderingSystem(
 void RenderingSystem::update(
   ex::EntityManager& es,
   const std::optional<base::Color>& backdropFlashColor,
-  const base::Extents& viewPortSize
+  const base::Extents& viewPortSize,
+  const float interpolation
 ) {
   using namespace std;
   using game_logic::components::TileDebris;
@@ -249,7 +250,7 @@ void RenderingSystem::update(
 
     // behind foreground
     for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
-      renderSprite(*it);
+      renderSprite(*it, interpolation);
     }
   }
 
@@ -266,22 +267,30 @@ void RenderingSystem::update(
 
   // top most
   for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {
-    renderSprite(*it);
+    renderSprite(*it, interpolation);
   }
 
   mSpritesRendered = spritesByDrawOrder.size();
 
 
   // tile debris
-  es.each<TileDebris, WorldPosition>(
-    [this](ex::Entity, const TileDebris& debris, const WorldPosition& pos) {
-      mMapRenderer.renderSingleTile(debris.mTileIndex, pos, *mpCameraPosition);
+  es.each<TileDebris, WorldPosition, components::FuturePosition>(
+    [&, this](ex::Entity, const TileDebris& debris, const WorldPosition& pos, const components::FuturePosition& futurePos) {
+      mMapRenderer.renderSingleTile(debris.mTileIndex, lerp(pos, futurePos.mPos, interpolation), *mpCameraPosition);
     });
 }
 
 
-void RenderingSystem::renderSprite(const SpriteData& data) const {
-  const auto& pos = data.mPosition;
+void RenderingSystem::renderSprite(const SpriteData& data, const float interpolation) const {
+  const auto& pos1 = data.mPosition;
+  auto pos = pos1;
+
+  if (data.mEntity.has_component<components::FuturePosition>() &&
+      data.mEntity.component<const components::FuturePosition>()->mPos != base::Vector{}) {
+    pos =
+      lerp(pos1, data.mEntity.component<const components::FuturePosition>()->mPos, interpolation);
+  }
+
   const auto& sprite = *data.mpSprite;
 
   if (!sprite.mShow) {

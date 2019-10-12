@@ -510,6 +510,8 @@ void EntityFactory::configureProjectile(
     muzzleFlash.assign<WorldPosition>(position);
     muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
   }
+
+  entity.assign<engine::components::FuturePosition>();
 }
 
 
@@ -579,6 +581,7 @@ entityx::Entity spawnOneShotSprite(
   }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
   assignSpecialEffectSpriteProperties(entity, id);
+  entity.assign<engine::components::FuturePosition>();
   return entity;
 }
 
@@ -611,6 +614,7 @@ entityx::Entity spawnMovingEffectSprite(
     entity.assign<AnimationLoop>(1);
   }
   assignSpecialEffectSpriteProperties(entity, id);
+  entity.assign<engine::components::FuturePosition>();
   return entity;
 }
 
@@ -631,6 +635,7 @@ void spawnFloatingScoreNumber(
     IgnoreCollisions{true});
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
   entity.assign<Active>();
+  entity.assign<engine::components::FuturePosition>();
 }
 
 

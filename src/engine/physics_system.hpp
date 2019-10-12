@@ -92,6 +92,7 @@ public:
 
 private:
   void applyPhysics(
+    entityx::EntityManager& es,
     entityx::Entity entity,
     components::MovingBody& body,
     components::WorldPosition& position,

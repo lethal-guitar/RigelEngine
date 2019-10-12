@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "data/unit_conversions.hpp"
+#include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "renderer/renderer.hpp"
 

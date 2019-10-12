@@ -28,6 +28,7 @@ namespace rigel::engine {
 using namespace std;
 
 using components::BoundingBox;
+using components::FuturePosition;
 using components::MovementSequence;
 using components::MovingBody;
 using components::SolidBody;
@@ -91,14 +92,14 @@ PhysicsSystem::PhysicsSystem(
 
 void PhysicsSystem::update(ex::EntityManager& es) {
   es.each<MovingBody, WorldPosition, BoundingBox, components::Active>(
-    [this](
+    [&, this](
       ex::Entity entity,
       MovingBody& body,
       WorldPosition& position,
       const BoundingBox& collisionRect,
       const components::Active&
     ) {
-      applyPhysics(entity, body, position, collisionRect);
+      applyPhysics(es, entity, body, position, collisionRect);
     });
 }
 
@@ -119,6 +120,7 @@ void PhysicsSystem::updatePhase2(ex::EntityManager& es) {
 
     if (hasRequiredComponents) {
       applyPhysics(
+        es,
         entity,
         *entity.component<MovingBody>(),
         *entity.component<WorldPosition>(),
@@ -132,6 +134,7 @@ void PhysicsSystem::updatePhase2(ex::EntityManager& es) {
 
 
 void PhysicsSystem::applyPhysics(
+  ex::EntityManager& es,
   ex::Entity entity,
   MovingBody& body,
   WorldPosition& position,
@@ -190,6 +193,21 @@ void PhysicsSystem::applyPhysics(
   if (body.mIgnoreCollisions) {
     position = targetPosition;
     body.mVelocity = originalVelocity;
+  }
+
+  if (entity.has_component<FuturePosition>()) {
+    auto entityCopy = es.create_from_copy(entity);
+    entityCopy.remove<FuturePosition>();
+    applyPhysics(
+      es,
+      entityCopy,
+      *entityCopy.component<MovingBody>(),
+      *entityCopy.component<WorldPosition>(),
+      *entityCopy.component<BoundingBox>());
+    entity.component<FuturePosition>()->mPos =
+      *entityCopy.component<WorldPosition>();
+
+    entityCopy.destroy();
   }
 }
 

@@ -253,7 +253,7 @@ void IngameSystems::render(
   const base::Extents& viewPortSize,
   const float interpolation
 ) {
-  mRenderingSystem.update(es, backdropFlashColor, viewPortSize);
+  mRenderingSystem.update(es, backdropFlashColor, viewPortSize, interpolation);
 
   {
     const auto binder =
