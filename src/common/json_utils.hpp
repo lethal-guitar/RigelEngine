@@ -25,6 +25,19 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
 
+/** Merges values from extension into base
+ *
+ * This function merges the contents of extension into base by overwriting
+ * any properties that exist in both objects with the values from extension.
+ * Properties that don't exist in extension will be left unchanged in base.
+ *
+ * base and extension must be structurally equivalent. This means:
+ *
+ *   * if a property in one of the two is an object or array, it must also be
+ *     an object or array in the other JSON tree, respectively.
+ *   * if a property is an array, it must have the same number of elements in
+ *     both JSON trees.
+ */
 nlohmann::json merge(nlohmann::json base, nlohmann::json extension);
 
 }
