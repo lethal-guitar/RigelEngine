@@ -440,8 +440,10 @@ void UserProfile::saveToDisk() {
   // disk, we merge our serializedProfile into the previously read JSON data.
   // This ensures that any settings present in the profile file are kept,
   // even if they are not part of the serializedProfile we are currently writing.
-  const auto previousProfile = json::from_msgpack(mOriginalJson);
-  serializedProfile = merge(previousProfile, serializedProfile);
+  if (mOriginalJson.size() > 0) {
+    const auto previousProfile = json::from_msgpack(mOriginalJson);
+    serializedProfile = merge(previousProfile, serializedProfile);
+  }
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
