@@ -1,7 +1,7 @@
 # We need to use trusty in order to get libsdl2
 sudo: required
 dist: xenial
-osx_image: xcode10.2
+osx_image: xcode11
 
 branches:
   only:
@@ -32,15 +32,8 @@ matrix:
           packages:
             - sdl2
             - sdl2_mixer
-            - llvm@8
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      export CC="/usr/local/opt/llvm@8/bin/clang";
-      export CXX="$CC++";
-      export CPPFLAGS="-I/usr/local/opt/llvm@8/include";
-      export LDFLAGS="-L/usr/local/opt/llvm@8/lib -Wl,-rpath,/usr/local/opt/llvm/lib";
-    fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       export CC=gcc-8;
       export CXX=g++-8;
