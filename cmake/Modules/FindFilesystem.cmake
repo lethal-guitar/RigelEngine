@@ -1,6 +1,9 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# This is copied from:
+#   https://github.com/vector-of-bool/CMakeCM/blob/master/modules/FindFilesystem.cmake
+
 #[=======================================================================[.rst:
 
 FindFilesystem
