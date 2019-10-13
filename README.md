@@ -167,22 +167,19 @@ code (in the `3rd_party` directory):
 
 ### <a name="mac-build-instructions">OS X builds</a>
 
-Building on OS X works almost exactly like the Linux build, except for getting
-the dependencies. If you have Homebrew, you can get them using the following:
+:exclamation: Currently, the project needs to be built using clang installed via Homebrew - it does _not_ build successfully using Apple's clang.
 
-```bash
-brew install cmake sdl2 sdl2_mixer boost
-```
+Note that you'll need Xcode 10 and OS X Mojave (10.14) if you want to use clang 8. In the past, I have successfully built the project on OS X Sierra (10.12) when using clang 7 (`brew install llvm@7`), and I'm not aware of any reason why the project shouldn't build on clang 7 anymore. However, I'm building with clang 8 these days, so it's possible that something broke.
 
-Note that you'll need Xcode 10 and OS X Mojave (10.14) if you want to use Apple's clang compiler. The project builds fine with a non-Apple clang though, so if you're on an older OS X version, you can still build it. Here's how you would install clang via Homebrew and build the project using it:
+Here's how you would install all dependencies as well as clang 8 via Homebrew and build the project using it:
 
 ```bash
 # You might need to run brew update
-brew install llvm
+brew install llvm@8 cmake sdl2 sdl2_mixer boost
 
 # Set up environment variables so that CMake picks up the newly installed clang -
 # this is only necessary the first time
-export rigel_llvm_path=`brew --prefix llvm`;
+export rigel_llvm_path=`brew --prefix llvm@8`;
 export CC="$rigel_llvm_path/bin/clang";
 export CXX="$CC++";
 export CPPFLAGS="-I$rigel_llvm_path/include";
