@@ -32,14 +32,14 @@ matrix:
           packages:
             - sdl2
             - sdl2_mixer
-            - llvm
+            - llvm@8
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      export CC="/usr/local/opt/llvm/bin/clang";
+      export CC="/usr/local/opt/llvm@8/bin/clang";
       export CXX="$CC++";
-      export CPPFLAGS="-I/usr/local/opt/llvm/include";
-      export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib";
+      export CPPFLAGS="-I/usr/local/opt/llvm@8/include";
+      export LDFLAGS="-L/usr/local/opt/llvm@8/lib -Wl,-rpath,/usr/local/opt/llvm/lib";
     fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       export CC=gcc-8;

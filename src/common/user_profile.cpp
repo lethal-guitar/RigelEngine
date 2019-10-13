@@ -17,6 +17,7 @@
 #include "user_profile.hpp"
 
 #include "base/warnings.hpp"
+#include "common/json_utils.hpp"
 #include "loader/file_utils.hpp"
 #include "loader/user_profile_import.hpp"
 
@@ -394,29 +395,6 @@ void saveToFile(
   file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 }
 
-
-nlohmann::json merge(nlohmann::json primary, nlohmann::json secondary) {
-  if (!primary.is_structured()) {
-    return primary;
-  }
-
-  if (primary.is_object()) {
-    primary.insert(secondary.begin(), secondary.end());
-
-    for (auto& [key, value] : primary.items()) {
-      value = merge(secondary[key], value);
-    }
-  } else { // array
-    auto index = 0u;
-    for (auto& value : primary) {
-      value = merge(secondary[index], value);
-      ++index;
-    }
-  }
-
-  return primary;
-}
-
 }
 
 
@@ -442,8 +420,30 @@ void UserProfile::saveToDisk() {
   serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
   serializedProfile["options"] = serialize(mOptions);
 
-  const auto previousProfile = json::from_msgpack(mOriginalJson);
-  serializedProfile = merge(serializedProfile, previousProfile);
+  // This step merges the newly serialized profile into the 'old' profile
+  // previously read from disk. The reason this is necessary is compatibility
+  // between different versions of RigelEngine. An older version of RigelEngine
+  // doesn't know about properties that are added in later versions. If we
+  // would write serializedProfile to disk directly, we would therefore lose
+  // any properties written by a newer version. Imagine a user has two versions
+  // of RigelEngine installed, version A and B. Version B features some
+  // additional options that are not present in A. Let's say the user configures
+  // these options to their liking while running version B. The settings are
+  // written to disk. Now the user launches version A. That version is not
+  // aware of the additional settings, so it overwrites the profile on disk
+  // and erases the user's settings. When the user launches version B again,
+  // all these configuration settings will be reset to their defaults.
+  //
+  // This would be quite annoying, so we take some measures to prevent it from
+  // happening. When reading the profile from disk, we keep the original JSON
+  // data in addition to the deserialized C++ objects. When writing back to
+  // disk, we merge our serializedProfile into the previously read JSON data.
+  // This ensures that any settings present in the profile file are kept,
+  // even if they are not part of the serializedProfile we are currently writing.
+  if (mOriginalJson.size() > 0) {
+    const auto previousProfile = json::from_msgpack(mOriginalJson);
+    serializedProfile = merge(previousProfile, serializedProfile);
+  }
 
   const auto buffer = json::to_msgpack(serializedProfile);
   saveToFile(buffer, *mProfilePath);
