@@ -51,6 +51,11 @@ public:
   void run(const StartupOptions& options);
 
 private:
+  enum class FadeType {
+    In,
+    Out
+  };
+
   void showAntiPiracyScreen();
 
   void mainLoop();
@@ -59,7 +64,7 @@ private:
 
   void handleEvent(const SDL_Event& event);
 
-  void performScreenFadeBlocking(bool doFadeIn);
+  void performScreenFadeBlocking(FadeType type);
 
   void applyChangedOptions();
 

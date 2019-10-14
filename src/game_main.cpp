@@ -404,10 +404,13 @@ void Game::handleEvent(const SDL_Event& event) {
 }
 
 
-void Game::performScreenFadeBlocking(const bool doFadeIn) {
+void Game::performScreenFadeBlocking(const FadeType type) {
   using namespace std::chrono;
 
-  if ((doFadeIn && mAlphaMod == 255) || (!doFadeIn && mAlphaMod == 0)) {
+  if (
+    (type == FadeType::In && mAlphaMod == 255) ||
+    (type == FadeType::Out && mAlphaMod == 0)
+  ) {
     // Already faded in/out, nothing to do
     return;
   }
@@ -421,14 +424,11 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
     const auto now = high_resolution_clock::now();
     const auto elapsedTime = duration<double>(now - startTime).count();
     const auto fastTicksElapsed = engine::timeToFastTicks(elapsedTime);
-    const auto fadeFactor = (fastTicksElapsed / 4.0) / 16.0;
-
-    if (fadeFactor < 1.0) {
-      const auto alpha = doFadeIn ? fadeFactor : 1.0 - fadeFactor;
-      mAlphaMod = base::roundTo<std::uint8_t>(255.0 * alpha);
-    } else {
-      mAlphaMod = doFadeIn ? 255 : 0;
-    }
+    const auto fadeFactor =
+      std::clamp((fastTicksElapsed / 4.0) / 16.0, 0.0, 1.0);
+    const auto alpha = type == FadeType::In ? fadeFactor : 1.0 - fadeFactor;
+    mAlphaMod =
+      base::roundTo<std::uint8_t>(255.0 * alpha);
 
     mRenderer.clear();
 
@@ -480,7 +480,7 @@ void Game::applyChangedOptions() {
 
 
 void Game::fadeOutScreen() {
-  performScreenFadeBlocking(false);
+  performScreenFadeBlocking(FadeType::Out);
 
   // Clear render canvas after a fade-out
   RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
@@ -491,7 +491,7 @@ void Game::fadeOutScreen() {
 
 
 void Game::fadeInScreen() {
-  performScreenFadeBlocking(true);
+  performScreenFadeBlocking(FadeType::In);
 }
 
 
