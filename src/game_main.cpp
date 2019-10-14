@@ -415,14 +415,11 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
   renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
   auto saved = renderer::setupDefaultState(&mRenderer);
 
-  engine::TimeDelta elapsedTime = 0.0;
+  auto startTime = high_resolution_clock::now();
 
   while (mIsRunning) {
     const auto now = high_resolution_clock::now();
-    const auto timeDelta = duration<double>(now - mLastTime).count();
-    mLastTime = now;
-
-    elapsedTime += timeDelta;
+    const auto elapsedTime = duration<double>(now - startTime).count();
     const auto fastTicksElapsed = engine::timeToFastTicks(elapsedTime);
     const auto fadeFactor = (fastTicksElapsed / 4.0) / 16.0;
 
@@ -445,6 +442,9 @@ void Game::performScreenFadeBlocking(const bool doFadeIn) {
   }
 
   mRenderer.setColorModulation({255, 255, 255, 255});
+
+  // Pretend that the fade didn't take any time
+  mLastTime = high_resolution_clock::now();
 }
 
 
