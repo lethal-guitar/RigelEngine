@@ -53,6 +53,15 @@ public:
 
   void executeScript(const data::script::Script& script);
 
+  /** Clear canvas to transparent
+   *
+   * Allows starting off with a transparent canvas, in order to make it possible
+   * to overlay script-based content on another image - e.g. when hitting
+   * Escape while in-game, the "Confirm Quit" dialog box is shown on top of
+   * the game.
+   */
+  void clearCanvas();
+
   bool hasFinishedExecution() const;
   std::optional<ExecutionResult> result() const;
 
@@ -72,6 +81,20 @@ private:
     AwaitingUserInput,
     FinishedExecution,
     ExecutionInterrupted
+  };
+
+  struct CanvasBinder {
+    CanvasBinder(
+      renderer::RenderTargetTexture& canvas,
+      renderer::Renderer* pRenderer
+    )
+      : mBinder(canvas, pRenderer)
+      , mStateSaver(renderer::setupDefaultState(pRenderer))
+    {
+    }
+
+    renderer::RenderTargetTexture::Binder mBinder;
+    renderer::Renderer::StateSaver mStateSaver;
   };
 
   struct DelayState {
@@ -168,6 +191,9 @@ private:
 
   void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
 
+  void bindCanvas();
+  void unbindCanvas();
+
 private:
   const loader::ResourceLoader* mpResourceBundle;
   loader::Palette16 mCurrentPalette;
@@ -177,6 +203,8 @@ private:
   engine::TiledTexture mUiSpriteSheetRenderer;
   MenuElementRenderer mMenuElementRenderer;
 
+  renderer::RenderTargetTexture mCanvas;
+  std::optional<CanvasBinder> mBoundCanvasState;
 
   data::script::Script mCurrentInstructions;
   std::size_t mProgramCounter;

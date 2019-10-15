@@ -251,6 +251,8 @@ void GameRunner::enterMenu(
     pWorld->mPlayerInput = {};
   }
 
+  mContext.mpScriptRunner->clearCanvas();
+
   runScript(mContext, scriptName);
   mStateStack.push(Menu{
     mContext.mpScriptRunner,
