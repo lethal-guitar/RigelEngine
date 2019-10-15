@@ -62,7 +62,7 @@ private:
 
   GameMode::Context makeModeContext();
 
-  void handleEvent(const SDL_Event& event);
+  bool handleEvent(const SDL_Event& event);
 
   void performScreenFadeBlocking(FadeType type);
 

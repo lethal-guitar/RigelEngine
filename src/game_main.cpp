@@ -299,7 +299,7 @@ void Game::showAntiPiracyScreen() {
 void Game::mainLoop() {
   using namespace std::chrono;
 
-  SDL_Event event;
+  std::vector<SDL_Event> eventQueue;
   mLastTime = high_resolution_clock::now();
 
   for (;;) {
@@ -315,15 +315,27 @@ void Game::mainLoop() {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
       auto saved = setupSimpleUpscaling(&mRenderer);
 
-      while (mIsMinimized && SDL_WaitEvent(&event)) {
-        handleEvent(event);
-      }
-      while (SDL_PollEvent(&event)) {
-        handleEvent(event);
+      {
+        SDL_Event event;
+        while (mIsMinimized && SDL_WaitEvent(&event)) {
+          if (!handleEvent(event)) {
+            eventQueue.push_back(event);
+          }
+        }
+        while (SDL_PollEvent(&event)) {
+          if (!handleEvent(event)) {
+            eventQueue.push_back(event);
+          }
+        }
       }
       if (!mIsRunning) {
         break;
       }
+
+      for (const auto& event : eventQueue) {
+        mpCurrentGameMode->handleEvent(event);
+      }
+      eventQueue.clear();
 
       if (mpNextGameMode) {
         fadeOutScreen();
@@ -367,9 +379,9 @@ GameMode::Context Game::makeModeContext() {
 }
 
 
-void Game::handleEvent(const SDL_Event& event) {
+bool Game::handleEvent(const SDL_Event& event) {
   if (ui::imgui_integration::handleEvent(event)) {
-    return;
+    return true;
   }
 
   auto& options = mpUserProfile->mOptions;
@@ -378,8 +390,7 @@ void Game::handleEvent(const SDL_Event& event) {
       if (event.key.keysym.sym == SDLK_F6) {
         options.mShowFpsCounter = !options.mShowFpsCounter;
       }
-      mpCurrentGameMode->handleEvent(event);
-      break;
+      return false;
 
     case SDL_QUIT:
       mIsRunning = false;
@@ -398,9 +409,10 @@ void Game::handleEvent(const SDL_Event& event) {
       break;
 
     default:
-      mpCurrentGameMode->handleEvent(event);
-      break;
+      return false;
   }
+
+  return true;
 }
 
 
