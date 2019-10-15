@@ -56,7 +56,8 @@ private:
 
   void handleEvent(const SDL_Event& event);
   void enterMainMenu();
-  void navigateToNextMenu(const ui::DukeScriptRunner::ExecutionResult& result);
+  std::unique_ptr<GameMode> navigateToNextMenu(
+    const ui::DukeScriptRunner::ExecutionResult& result);
 
 private:
   Context mContext;

@@ -16,6 +16,8 @@
 
 #include "menu_mode.hpp"
 
+#include "game_session_mode.hpp"
+
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "data/game_session_data.hpp"
@@ -119,7 +121,7 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
     const auto result = mContext.mpScriptRunner->result();
     assert(result);
 
-    navigateToNextMenu(*result);
+    return navigateToNextMenu(*result);
   }
 
   return {};
@@ -134,7 +136,7 @@ void MenuMode::enterMainMenu() {
 }
 
 
-void MenuMode::navigateToNextMenu(
+std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
   const ui::DukeScriptRunner::ExecutionResult& result
 ) {
   switch (mMenuState) {
@@ -227,10 +229,12 @@ void MenuMode::navigateToNextMenu(
           throw std::invalid_argument("Invalid skill index");
         }
 
-        mContext.mpServiceProvider->scheduleNewGameStart(
-          mChosenEpisodeForNewGame,
-          DIFFICULTY_MAPPING[chosenSkill]);
-        return;
+        return std::make_unique<GameSessionMode>(
+          data::GameSessionId{
+            mChosenEpisodeForNewGame,
+            0,
+            DIFFICULTY_MAPPING[chosenSkill]},
+          mContext);
       }
       break;
 
@@ -252,7 +256,7 @@ void MenuMode::navigateToNextMenu(
         const auto slotIndex = *result.mSelectedPage;
         const auto& slot = mContext.mpUserProfile->mSaveSlots[slotIndex];
         if (slot) {
-          mContext.mpServiceProvider->scheduleStartFromSavedGame(*slot);
+          return std::make_unique<GameSessionMode>(*slot, mContext);
         } else {
           runScript(mContext, "No_Game_Restore");
           mMenuState = MenuState::NoSavedGameInSlotMessage;
@@ -305,6 +309,8 @@ void MenuMode::navigateToNextMenu(
       enterMainMenu();
       break;
   }
+
+  return {};
 }
 
 }
