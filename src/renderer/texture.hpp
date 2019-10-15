@@ -202,8 +202,11 @@ public:
     Binder(RenderTargetTexture& renderTarget, Renderer* pRenderer);
     ~Binder();
 
-    Binder(Binder&&) = delete;
-    Binder& operator=(Binder&&) = delete;
+    Binder(const Binder&) = delete;
+    Binder& operator=(const Binder&) = delete;
+
+    Binder(Binder&&);
+    Binder& operator=(Binder&&);
 
   protected:
     Binder(const Renderer::RenderTarget&, Renderer* pRenderer);
