@@ -226,19 +226,7 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
     interpretNextAction();
   }
 
-  if (mPreviousSelectionIndicatorState) {
-    const auto indicatorNowHidden = !mMenuSelectionIndicatorState.has_value();
-    const auto needsClear =
-      indicatorNowHidden ||
-      mPreviousSelectionIndicatorState->mPosY !=
-        mMenuSelectionIndicatorState->mPosY;
-
-    if (needsClear) {
-      mMenuElementRenderer.clearSelectionIndicator(
-        8, mPreviousSelectionIndicatorState->mPosY);
-    }
-  }
-  mPreviousSelectionIndicatorState = mMenuSelectionIndicatorState;
+  clearOldSelectionIndicator();
 
   if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
     mpServices->fadeInScreen();
@@ -261,6 +249,23 @@ void DukeScriptRunner::updateAndRenderDynamicElements(
   if (hasCheckBoxes()) {
     displayCheckBoxes(*mCheckBoxStates);
   }
+}
+
+
+void DukeScriptRunner::clearOldSelectionIndicator() {
+  if (mPreviousSelectionIndicatorState) {
+    const auto indicatorNowHidden = !mMenuSelectionIndicatorState.has_value();
+    const auto needsClear =
+      indicatorNowHidden ||
+      mPreviousSelectionIndicatorState->mPosY !=
+        mMenuSelectionIndicatorState->mPosY;
+
+    if (needsClear) {
+      mMenuElementRenderer.clearSelectionIndicator(
+        8, mPreviousSelectionIndicatorState->mPosY);
+    }
+  }
+  mPreviousSelectionIndicatorState = mMenuSelectionIndicatorState;
 }
 
 

@@ -153,6 +153,7 @@ private:
 
   void drawMenuSelectionIndicator(
     MenuSelectionIndicatorState& state, engine::TimeDelta dt);
+  void clearOldSelectionIndicator();
 
   bool hasCheckBoxes() const;
   void displayCheckBoxes(const CheckBoxesState& state);
