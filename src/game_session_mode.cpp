@@ -103,7 +103,14 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
+void GameSessionMode::updateAndRender(
+  const engine::TimeDelta dt,
+  const std::vector<SDL_Event>& events
+) {
+  for (const auto& event : events) {
+    handleEvent(event);
+  }
+
   base::match(mCurrentStage,
     [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->updateAndRender(dt);

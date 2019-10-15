@@ -96,7 +96,14 @@ void MenuMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void MenuMode::updateAndRender(engine::TimeDelta dt) {
+void MenuMode::updateAndRender(
+  const engine::TimeDelta dt,
+  const std::vector<SDL_Event>& events
+) {
+  for (const auto& event : events) {
+    handleEvent(event);
+  }
+
   if (mOptionsMenu) {
     mOptionsMenu->updateAndRender(dt);
     if (mOptionsMenu->isFinished()) {

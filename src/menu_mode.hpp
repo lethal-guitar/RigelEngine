@@ -31,8 +31,9 @@ class MenuMode : public GameMode {
 public:
   explicit MenuMode(Context context);
 
-  void handleEvent(const SDL_Event& event) override;
-  void updateAndRender(engine::TimeDelta dt) override;
+  void updateAndRender(
+    engine::TimeDelta dt,
+    const std::vector<SDL_Event>& events) override;
 
 private:
   enum class MenuState {
@@ -53,6 +54,7 @@ private:
     Story
   };
 
+  void handleEvent(const SDL_Event& event);
   void enterMainMenu();
   void navigateToNextMenu(const ui::DukeScriptRunner::ExecutionResult& result);
 

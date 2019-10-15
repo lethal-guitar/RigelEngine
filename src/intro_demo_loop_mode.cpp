@@ -117,7 +117,14 @@ void IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void IntroDemoLoopMode::updateAndRender(const engine::TimeDelta dt) {
+void IntroDemoLoopMode::updateAndRender(
+  const engine::TimeDelta dt,
+  const std::vector<SDL_Event>& events
+) {
+  for (const auto& event : events) {
+    handleEvent(event);
+  }
+
   updateStage(mStages[mCurrentStage], dt);
 
   if (isStageFinished(mStages[mCurrentStage])) {

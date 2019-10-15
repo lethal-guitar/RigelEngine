@@ -42,10 +42,12 @@ public:
    */
   IntroDemoLoopMode(Context context, bool isDuringGameStartup);
 
-  void handleEvent(const SDL_Event& event) override;
-  void updateAndRender(engine::TimeDelta dt) override;
+  void updateAndRender(
+    engine::TimeDelta dt,
+    const std::vector<SDL_Event>& events) override;
 
 private:
+  void handleEvent(const SDL_Event& event);
 
 private:
   IGameServiceProvider* mpServiceProvider;
