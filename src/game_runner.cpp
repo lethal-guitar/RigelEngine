@@ -305,13 +305,6 @@ void GameRunner::onSaveGameMenuFinished(const ExecutionResult& result) {
     leaveMenu();
     fadeToWorld();
   } else {
-    // HACK: This is to make the menu selection indicator (spinning arrow)
-    // disappear.
-    // TODO: Find a more obvious/clear way to do this. Ideally, the script
-    // runner would do this as part of the updateAndRender() call that runs the
-    // script's final instruction.
-    mContext.mpScriptRunner->updateAndRender(0.0);
-
     const auto slotIndex = *result.mSelectedPage;
     SDL_StartTextInput();
     mStateStack.push(SavedGameNameEntry{mContext, slotIndex});
