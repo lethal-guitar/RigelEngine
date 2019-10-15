@@ -322,6 +322,8 @@ void Game::mainLoop() {
 
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+      mRenderer.clear();
+
       auto saved = setupSimpleUpscaling(&mRenderer);
 
       auto pMaybeNextMode =

@@ -90,8 +90,13 @@ void GameRunner::handleEvent(const SDL_Event& event) {
   auto handleSavedGameNameEntryEvent = [&, this](
     SavedGameNameEntry& state
   ) {
-    auto leaveTextEntry = [this]() {
+    auto leaveTextEntry = [&, this]() {
       SDL_StopTextInput();
+
+      // Render one last time so we have something to fade out from
+      mContext.mpScriptRunner->updateAndRender(0.0);
+      state.updateAndRender(0.0);
+
       mStateStack.pop();
       mStateStack.pop();
       fadeToWorld();
@@ -149,13 +154,29 @@ void GameRunner::handleEvent(const SDL_Event& event) {
 
 void GameRunner::updateAndRender(engine::TimeDelta dt) {
   if (mGameWasQuit || levelFinished() || mRequestedGameToLoad) {
+    // TODO: This is a workaround to make the fadeout on quitting work.
+    // Would be good to find a better way to do this.
+    mWorld.render();
     return;
   }
 
   base::match(mStateStack.top(),
-    [dt, this](ui::OptionsMenu& state) {
+    [dt, this](Menu& state) {
+      if (state.mIsTransparent) {
+        mWorld.render();
+      }
+
       state.updateAndRender(dt);
+    },
+
+    [dt, this](ui::OptionsMenu& state) {
       mWorld.render();
+      state.updateAndRender(dt);
+    },
+
+    [dt, this](SavedGameNameEntry& state) {
+      mContext.mpScriptRunner->updateAndRender(dt);
+      state.updateAndRender(dt);
     },
 
     [dt](auto& state) { state.updateAndRender(dt); });
@@ -203,7 +224,7 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
 
   switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
-      enterMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook);
+      enterMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
       break;
 
     case SDLK_F1:
@@ -230,7 +251,7 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
       break;
 
     case SDLK_p:
-      enterMenu("Paused", leaveMenuHook);
+      enterMenu("Paused", leaveMenuHook, noopEventHook, true);
       break;
 
     default:
@@ -245,10 +266,12 @@ template <typename ScriptEndHook, typename EventHook>
 void GameRunner::enterMenu(
   const char* scriptName,
   ScriptEndHook&& scriptEndedHook,
-  EventHook&& eventHook
+  EventHook&& eventHook,
+  const bool isTransparent
 ) {
   if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
     pWorld->mPlayerInput = {};
+    pWorld->mpWorld->render();
   }
 
   mContext.mpScriptRunner->clearCanvas();
@@ -257,7 +280,8 @@ void GameRunner::enterMenu(
   mStateStack.push(Menu{
     mContext.mpScriptRunner,
     std::forward<ScriptEndHook>(scriptEndedHook),
-    std::forward<EventHook>(eventHook)});
+    std::forward<EventHook>(eventHook),
+    isTransparent});
 }
 
 

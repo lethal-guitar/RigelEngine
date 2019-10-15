@@ -107,7 +107,9 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
   }
 
   if (mOptionsMenu) {
+    mContext.mpScriptRunner->updateAndRender(0.0);
     mOptionsMenu->updateAndRender(dt);
+
     if (mOptionsMenu->isFinished()) {
       mOptionsMenu = std::nullopt;
     } else {
@@ -116,6 +118,10 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
   }
 
   mContext.mpScriptRunner->updateAndRender(dt);
+
+  if (mMenuState == MenuState::ShowHiscores) {
+    ui::drawHighScoreList(mContext, mChosenEpisode);
+  }
 
   if (mContext.mpScriptRunner->hasFinishedExecution()) {
     const auto result = mContext.mpScriptRunner->result();
@@ -129,7 +135,7 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
 
 
 void MenuMode::enterMainMenu() {
-  mChosenEpisodeForNewGame = 0;
+  mChosenEpisode = 0;
 
   mMenuState = MenuState::MainMenu;
   runScript(mContext, "Main_Menu");
@@ -210,7 +216,7 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
           runScript(mContext, "No_Can_Order");
           mMenuState = MenuState::EpisodeNotAvailableMessage;
         } else {
-          mChosenEpisodeForNewGame = chosenEpisode;
+          mChosenEpisode = chosenEpisode;
 
           runScript(mContext, "Skill_Select");
           mMenuState = MenuState::SelectNewGameSkill;
@@ -231,7 +237,7 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
 
         return std::make_unique<GameSessionMode>(
           data::GameSessionId{
-            mChosenEpisodeForNewGame,
+            mChosenEpisode,
             0,
             DIFFICULTY_MAPPING[chosenSkill]},
           mContext);
@@ -300,9 +306,15 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
           mMenuState = MenuState::EpisodeNotAvailableMessageHighScores;
         } else {
           ui::setupHighScoreListDisplay(mContext, chosenEpisode);
+          mChosenEpisode = chosenEpisode;
           mMenuState = MenuState::ShowHiscores;
         }
       }
+      break;
+
+    case MenuState::ShowHiscores:
+      mContext.mpServiceProvider->fadeOutScreen();
+      enterMainMenu();
       break;
 
     default:

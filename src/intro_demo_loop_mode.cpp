@@ -99,6 +99,7 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
 
   if (mCurrentStage == 0) {
     // Pressing any key on the Apogee Logo skips forward to the intro movie
+    updateStage(mStages[mCurrentStage], 0);
     mpServiceProvider->fadeOutScreen();
     mCurrentStage = 1;
 
@@ -129,6 +130,8 @@ std::unique_ptr<GameMode> IntroDemoLoopMode::updateAndRender(
   for (const auto& event : events) {
     const auto shouldQuit = handleEvent(event);
     if (shouldQuit) {
+      updateStage(mStages[mCurrentStage], 0.0);
+      mpServiceProvider->fadeOutScreen();
       return std::make_unique<MenuMode>(mContext);
     }
   }

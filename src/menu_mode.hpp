@@ -63,7 +63,7 @@ private:
   Context mContext;
   std::optional<ui::OptionsMenu> mOptionsMenu;
   MenuState mMenuState = MenuState::MainMenu;
-  int mChosenEpisodeForNewGame = 0;
+  int mChosenEpisode = 0;
 };
 
 }

@@ -86,11 +86,13 @@ private:
     Menu(
       ui::DukeScriptRunner* pScriptRunner,
       ScriptEndHook&& scriptEndHook,
-      EventHook&& eventHook
+      EventHook&& eventHook,
+      const bool isTransparent
     )
       : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
       , mEventHook(std::forward<EventHook>(eventHook))
       , mpScriptRunner(pScriptRunner)
+      , mIsTransparent(isTransparent)
     {
     }
 
@@ -100,6 +102,7 @@ private:
     std::function<void(const ExecutionResult&)> mScriptFinishedHook;
     std::function<bool(const SDL_Event&)> mEventHook;
     ui::DukeScriptRunner* mpScriptRunner;
+    bool mIsTransparent;
   };
 
   struct SavedGameNameEntry {
@@ -121,7 +124,8 @@ private:
   void enterMenu(
     const char* scriptName,
     ScriptEndHook&& scriptEndedHook,
-    EventHook&& eventHook = noopEventHook);
+    EventHook&& eventHook = noopEventHook,
+    bool isTransparent = false);
   void leaveMenu();
   void fadeToWorld();
 

@@ -67,10 +67,6 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
   base::match(mCurrentStage,
     [&event, this](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
-
-      if (pIngameMode->gameQuit()) {
-        finishGameSession();
-      }
     },
 
     [&event](ui::EpisodeEndSequence& endScreens) {
@@ -78,14 +74,22 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
     },
 
     [&event, this](HighScoreNameEntry& state) {
+      auto fadeOut = [&state, this]() {
+        mContext.mpScriptRunner->updateAndRender(0);
+        state.mNameEntryWidget.updateAndRender(0);
+        mContext.mpServiceProvider->fadeOutScreen();
+      };
+
       if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
         switch (event.key.keysym.sym) {
           case SDLK_ESCAPE:
+            fadeOut();
             enterHighScore("");
             return;
 
           case SDLK_KP_ENTER:
           case SDLK_RETURN:
+            fadeOut();
             enterHighScore(state.mNameEntryWidget.text());
             return;
 
@@ -119,6 +123,11 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
   return base::match(mCurrentStage,
     [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) -> GameModePtr {
       pIngameMode->updateAndRender(dt);
+
+      if (pIngameMode->gameQuit()) {
+        finishGameSession();
+        return nullptr;
+      }
 
       if (auto maybeSavedGame = pIngameMode->requestedGameToLoad()) {
         mContext.mpServiceProvider->fadeOutScreen();
@@ -177,12 +186,14 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
     },
 
     [this, &dt](HighScoreNameEntry& state) -> GameModePtr {
+      mContext.mpScriptRunner->updateAndRender(dt);
       state.mNameEntryWidget.updateAndRender(dt);
       return nullptr;
     },
 
     [this, &dt](const HighScoreListDisplay&) -> GameModePtr {
       mContext.mpScriptRunner->updateAndRender(dt);
+      ui::drawHighScoreList(mContext, mEpisode);
 
       if (mContext.mpScriptRunner->hasFinishedExecution()) {
         mContext.mpServiceProvider->fadeOutScreen();

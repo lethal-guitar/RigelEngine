@@ -90,6 +90,7 @@ void EpisodeEndScreen::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  updateAndRender(0);
   mpServiceProvider->fadeOutScreen();
 
   if (mCurrentImage < mScreenImages.size()) {
