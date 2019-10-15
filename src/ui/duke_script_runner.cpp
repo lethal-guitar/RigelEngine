@@ -217,7 +217,7 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 
 void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   if (mDelayState) {
-    handleDelay(*mDelayState, dt);
+    updateDelayState(*mDelayState, dt);
   }
 
   updateAndRenderDynamicElements(dt);
@@ -273,7 +273,7 @@ void DukeScriptRunner::displayCheckBoxes(const CheckBoxesState& state) {
 }
 
 
-void DukeScriptRunner::handleDelay(
+void DukeScriptRunner::updateDelayState(
   DelayState& state,
   const engine::TimeDelta timeDelta
 ) {

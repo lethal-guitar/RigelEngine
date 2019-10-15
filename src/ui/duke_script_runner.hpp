@@ -158,7 +158,7 @@ private:
   bool hasCheckBoxes() const;
   void displayCheckBoxes(const CheckBoxesState& state);
 
-  void handleDelay(DelayState& state, engine::TimeDelta timeDelta);
+  void updateDelayState(DelayState& state, engine::TimeDelta timeDelta);
   void animateNewsReporter(
     NewsReporterState& state,
     engine::TimeDelta timeDelta);
