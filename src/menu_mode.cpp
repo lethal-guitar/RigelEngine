@@ -96,7 +96,7 @@ void MenuMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void MenuMode::updateAndRender(
+std::unique_ptr<GameMode> MenuMode::updateAndRender(
   const engine::TimeDelta dt,
   const std::vector<SDL_Event>& events
 ) {
@@ -109,7 +109,7 @@ void MenuMode::updateAndRender(
     if (mOptionsMenu->isFinished()) {
       mOptionsMenu = std::nullopt;
     } else {
-      return;
+      return {};
     }
   }
 
@@ -121,6 +121,8 @@ void MenuMode::updateAndRender(
 
     navigateToNextMenu(*result);
   }
+
+  return {};
 }
 
 

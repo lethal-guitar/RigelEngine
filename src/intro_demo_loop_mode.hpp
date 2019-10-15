@@ -42,7 +42,7 @@ public:
    */
   IntroDemoLoopMode(Context context, bool isDuringGameStartup);
 
-  void updateAndRender(
+  std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta dt,
     const std::vector<SDL_Event>& events) override;
 

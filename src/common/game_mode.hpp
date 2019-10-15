@@ -25,6 +25,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <memory>
 #include <string>
 
 
@@ -62,7 +63,7 @@ struct GameMode {
 
   virtual ~GameMode() = default;
 
-  virtual void updateAndRender(
+  virtual std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta dt,
     const std::vector<SDL_Event>& events) = 0;
 };

@@ -117,7 +117,7 @@ void IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void IntroDemoLoopMode::updateAndRender(
+std::unique_ptr<GameMode> IntroDemoLoopMode::updateAndRender(
   const engine::TimeDelta dt,
   const std::vector<SDL_Event>& events
 ) {
@@ -142,6 +142,8 @@ void IntroDemoLoopMode::updateAndRender(
 
     startStage(mStages[mCurrentStage]);
   }
+
+  return {};
 }
 
 }

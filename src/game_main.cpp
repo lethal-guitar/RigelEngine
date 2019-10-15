@@ -120,9 +120,12 @@ auto createWindow() {
 
 
 struct NullGameMode : public GameMode {
-  void updateAndRender(
+  std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta,
-    const std::vector<SDL_Event>&) override {}
+    const std::vector<SDL_Event>&
+  ) override {
+    return nullptr;
+  }
 };
 
 
@@ -321,8 +324,13 @@ void Game::mainLoop() {
         break;
       }
 
-      mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
+      auto pMaybeNextMode =
+        mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
       eventQueue.clear();
+
+      if (pMaybeNextMode) {
+        mpNextGameMode = std::move(pMaybeNextMode);
+      }
 
       if (mpNextGameMode) {
         fadeOutScreen();

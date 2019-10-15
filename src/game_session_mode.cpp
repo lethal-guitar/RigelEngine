@@ -103,7 +103,7 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void GameSessionMode::updateAndRender(
+std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
   const engine::TimeDelta dt,
   const std::vector<SDL_Event>& events
 ) {
@@ -171,6 +171,8 @@ void GameSessionMode::updateAndRender(
         mContext.mpServiceProvider->scheduleEnterMainMenu();
       }
     });
+
+  return {};
 }
 
 
