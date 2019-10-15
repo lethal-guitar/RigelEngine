@@ -234,7 +234,8 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
         mMenuSelectionIndicatorState->mPosY;
 
     if (needsClear) {
-      clearMenuSelectionIndicator(*mPreviousSelectionIndicatorState);
+      mMenuElementRenderer.clearSelectionIndicator(
+        8, mPreviousSelectionIndicatorState->mPosY);
     }
   }
   mPreviousSelectionIndicatorState = mMenuSelectionIndicatorState;
@@ -616,13 +617,6 @@ void DukeScriptRunner::drawMenuSelectionIndicator(
 
   mMenuElementRenderer.drawSelectionIndicator(
     8, state.mPosY, state.mElapsedTime);
-}
-
-
-void DukeScriptRunner::clearMenuSelectionIndicator(
-  const MenuSelectionIndicatorState& state
-) {
-  mMenuElementRenderer.clearSelectionIndicator(8, state.mPosY);
 }
 
 
