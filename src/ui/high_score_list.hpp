@@ -25,5 +25,7 @@ namespace rigel::ui {
 
 void setupHighScoreListDisplay(GameMode::Context& context, int episode);
 
+void drawHighScoreList(GameMode::Context& context, int episode);
+
 ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context);
 }
