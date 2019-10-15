@@ -164,6 +164,8 @@ private:
     engine::TimeDelta timeDelta);
   void stopNewsReporterAnimation();
 
+  void updateAndRenderDynamicElements(engine::TimeDelta dt);
+
   void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
 
 private:

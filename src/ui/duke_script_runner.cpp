@@ -216,21 +216,11 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 
 
 void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mMenuSelectionIndicatorState) {
-    drawMenuSelectionIndicator(*mMenuSelectionIndicatorState, dt);
-  }
-
   if (mDelayState) {
     handleDelay(*mDelayState, dt);
   }
 
-  if (mNewsReporterAnimationState) {
-    animateNewsReporter(*mNewsReporterAnimationState, dt);
-  }
-
-  if (hasCheckBoxes()) {
-    displayCheckBoxes(*mCheckBoxStates);
-  }
+  updateAndRenderDynamicElements(dt);
 
   while (mState == State::ExecutingScript) {
     interpretNextAction();
@@ -252,6 +242,23 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
     mpServices->fadeInScreen();
     mFadeInBeforeNextWaitStateScheduled = false;
+  }
+}
+
+
+void DukeScriptRunner::updateAndRenderDynamicElements(
+  const engine::TimeDelta dt
+) {
+  if (mMenuSelectionIndicatorState) {
+    drawMenuSelectionIndicator(*mMenuSelectionIndicatorState, dt);
+  }
+
+  if (mNewsReporterAnimationState) {
+    animateNewsReporter(*mNewsReporterAnimationState, dt);
+  }
+
+  if (hasCheckBoxes()) {
+    displayCheckBoxes(*mCheckBoxStates);
   }
 }
 
