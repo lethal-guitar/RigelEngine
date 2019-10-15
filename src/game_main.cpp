@@ -312,17 +312,17 @@ void Game::mainLoop() {
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
     mLastTime = startOfFrame;
 
+    pumpEvents(eventQueue);
+    if (!mIsRunning) {
+      break;
+    }
+
     ui::imgui_integration::beginFrame(mpWindow);
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
     {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
       auto saved = setupSimpleUpscaling(&mRenderer);
-
-      pumpEvents(eventQueue);
-      if (!mIsRunning) {
-        break;
-      }
 
       auto pMaybeNextMode =
         mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
