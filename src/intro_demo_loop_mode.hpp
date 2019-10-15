@@ -47,9 +47,10 @@ public:
     const std::vector<SDL_Event>& events) override;
 
 private:
-  void handleEvent(const SDL_Event& event);
+  bool handleEvent(const SDL_Event& event);
 
 private:
+  Context mContext;
   IGameServiceProvider* mpServiceProvider;
   bool mFirstRunIncludedStoryAnimation;
 
