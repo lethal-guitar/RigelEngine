@@ -59,6 +59,7 @@ private:
   void showAntiPiracyScreen();
 
   void mainLoop();
+  void pumpEvents(std::vector<SDL_Event>& eventQueue);
 
   GameMode::Context makeModeContext();
 

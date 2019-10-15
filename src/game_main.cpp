@@ -315,19 +315,7 @@ void Game::mainLoop() {
       RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
       auto saved = setupSimpleUpscaling(&mRenderer);
 
-      {
-        SDL_Event event;
-        while (mIsMinimized && SDL_WaitEvent(&event)) {
-          if (!handleEvent(event)) {
-            eventQueue.push_back(event);
-          }
-        }
-        while (SDL_PollEvent(&event)) {
-          if (!handleEvent(event)) {
-            eventQueue.push_back(event);
-          }
-        }
-      }
+      pumpEvents(eventQueue);
       if (!mIsRunning) {
         break;
       }
@@ -362,6 +350,22 @@ void Game::mainLoop() {
     mRenderer.swapBuffers();
 
     applyChangedOptions();
+  }
+}
+
+
+void Game::pumpEvents(std::vector<SDL_Event>& eventQueue) {
+  SDL_Event event;
+  while (mIsMinimized && SDL_WaitEvent(&event)) {
+    if (!handleEvent(event)) {
+      eventQueue.push_back(event);
+    }
+  }
+
+  while (SDL_PollEvent(&event)) {
+    if (!handleEvent(event)) {
+      eventQueue.push_back(event);
+    }
   }
 }
 
