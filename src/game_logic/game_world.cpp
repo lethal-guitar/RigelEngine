@@ -170,15 +170,6 @@ auto localToGlobalTranslation(
 }
 
 
-void clearFullScreen(renderer::Renderer* pRenderer) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
-  pRenderer->setGlobalTranslation({0, 0});
-  pRenderer->setGlobalScale({1.0f, 1.0f});
-  pRenderer->setClipRect({});
-  pRenderer->clear();
-}
-
-
 [[nodiscard]] auto setupIngameViewportWidescreen(
   renderer::Renderer* pRenderer,
   const renderer::WidescreenViewPortInfo& info,
@@ -550,13 +541,6 @@ void GameWorld::render() {
     }
   };
 
-
-  // In case the previous frame was drawn with widescreen mode enabled, we need
-  // to make sure the entire screen is cleared, not just the 4:3 subsection
-  // used for non-widescreen drawing. Otherwise, the remains of the previous
-  // widescreen frame would remain visible at the left and right sides of the
-  // screen.
-  clearFullScreen(mpRenderer);
 
   if (mpOptions->mWidescreenModeOn) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
