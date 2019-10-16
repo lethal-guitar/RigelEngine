@@ -17,6 +17,7 @@
 #include "movie_player.hpp"
 
 #include "base/container_utils.hpp"
+#include "data/game_traits.hpp"
 #include "engine/timing.hpp"
 #include "utility"
 
@@ -30,6 +31,10 @@ using engine::fastTicksToTime;
 
 MoviePlayer::MoviePlayer(renderer::Renderer* pRenderer)
   : mpRenderer(pRenderer)
+  , mCanvas(
+      pRenderer,
+      data::GameTraits::viewPortWidthPx,
+      data::GameTraits::viewPortHeightPx)
 {
 }
 
@@ -42,7 +47,15 @@ void MoviePlayer::playMovie(
 ) {
   assert(frameDelayInFastTicks >= 1);
 
-  mBaseImage = renderer::OwningTexture(mpRenderer, movie.mBaseImage);
+  {
+    auto binder = renderer::RenderTargetTexture::Binder{mCanvas, mpRenderer};
+    auto saved = renderer::setupDefaultState(mpRenderer);
+
+    auto baseImage = renderer::OwningTexture(mpRenderer, movie.mBaseImage);
+    baseImage.render(mpRenderer, 0, 0);
+    mpRenderer->submitBatch();
+  }
+
   mAnimationFrames = utils::transformed(movie.mFrames,
     [this](const auto& frame) {
       auto texture =
@@ -65,7 +78,8 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
   }
 
   if (!mHasShownFirstFrame) {
-    mBaseImage.render(mpRenderer, 0, 0);
+    // TODO: Get rid of this special case, it should be possible to handle it
+    // as part of the regular update logic
     invokeFrameCallbackIfPresent(0);
     mHasShownFirstFrame = true;
   }
@@ -101,9 +115,14 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
   }
 
   {
+    auto binder = renderer::RenderTargetTexture::Binder{mCanvas, mpRenderer};
+    auto saved = renderer::setupDefaultState(mpRenderer);
+
     const auto& frameData = mAnimationFrames[mCurrentFrame];
     frameData.mImage.render(mpRenderer, 0, frameData.mStartRow);
   }
+
+  mCanvas.render(mpRenderer, 0, 0);
 }
 
 

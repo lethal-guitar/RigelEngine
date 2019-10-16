@@ -58,7 +58,7 @@ private:
 
 private:
   renderer::Renderer* mpRenderer;
-  renderer::OwningTexture mBaseImage;
+  renderer::RenderTargetTexture mCanvas;
   std::vector<FrameData> mAnimationFrames;
   FrameCallbackFunc mFrameCallback = nullptr;
 
