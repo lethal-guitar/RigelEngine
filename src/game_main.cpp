@@ -342,15 +342,17 @@ void Game::mainLoop() {
       }
     }
 
-    mRenderer.clear();
-    mRenderTarget.render(&mRenderer, 0, 0);
-    mRenderer.submitBatch();
+    if (mAlphaMod != 0) {
+      mRenderer.clear();
+      mRenderTarget.render(&mRenderer, 0, 0);
+      mRenderer.submitBatch();
 
-    if (mpUserProfile->mOptions.mShowFpsCounter) {
-      const auto afterRender = high_resolution_clock::now();
-      const auto innerRenderTime =
-        duration<engine::TimeDelta>(afterRender - startOfFrame).count();
-      mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+      if (mpUserProfile->mOptions.mShowFpsCounter) {
+        const auto afterRender = high_resolution_clock::now();
+        const auto innerRenderTime =
+          duration<engine::TimeDelta>(afterRender - startOfFrame).count();
+        mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+      }
     }
 
     ui::imgui_integration::endFrame();
