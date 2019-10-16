@@ -47,10 +47,7 @@ void MoviePlayer::playMovie(
     [this](const auto& frame) {
       auto texture =
         renderer::OwningTexture(mpRenderer, frame.mReplacementImage);
-      return FrameData{
-      std::move(texture),
-        frame.mStartRow
-      };
+      return FrameData{std::move(texture), frame.mStartRow};
     });
 
   mFrameCallback = std::move(frameCallback);
