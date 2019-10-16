@@ -118,7 +118,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
   };
 
 
-  if (mGameWasQuit) {
+  if (mGameWasQuit || mRequestedGameToLoad) {
     return;
   }
 
@@ -148,7 +148,7 @@ void GameRunner::handleEvent(const SDL_Event& event) {
 
 
 void GameRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mGameWasQuit || levelFinished()) {
+  if (mGameWasQuit || levelFinished() || mRequestedGameToLoad) {
     return;
   }
 
@@ -283,7 +283,7 @@ void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
     const auto slotIndex = result.mSelectedPage;
     const auto& slot = mContext.mpUserProfile->mSaveSlots[*slotIndex];
     if (slot) {
-      mContext.mpServiceProvider->scheduleStartFromSavedGame(*slot);
+      mRequestedGameToLoad = *slot;
     } else {
       // When selecting an empty slot, we show a message ("no game in this
       // slot") and then return to the save slot selection menu.

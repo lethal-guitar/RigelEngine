@@ -53,6 +53,8 @@ public:
 
   bool levelFinished() const;
   bool gameQuit() const;
+  std::optional<data::SavedGame> requestedGameToLoad() const;
+
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
@@ -131,6 +133,7 @@ private:
   data::SavedGame mSavedGame;
   game_logic::GameWorld mWorld;
   std::stack<State, std::vector<State>> mStateStack;
+  std::optional<data::SavedGame> mRequestedGameToLoad;
   bool mGameWasQuit = false;
 };
 
@@ -142,6 +145,11 @@ inline bool GameRunner::levelFinished() const {
 
 inline bool GameRunner::gameQuit() const {
   return mGameWasQuit;
+}
+
+
+inline std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const {
+  return mRequestedGameToLoad;
 }
 
 
