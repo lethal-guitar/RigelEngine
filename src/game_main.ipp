@@ -77,11 +77,6 @@ private:
   void playMusic(const std::string& name) override;
   void stopMusic() override;
 
-  void scheduleNewGameStart(
-    int episode,
-    data::Difficulty difficulty) override;
-  void scheduleStartFromSavedGame(const data::SavedGame& save) override;
-  void scheduleEnterMainMenu() override;
   void scheduleGameQuit() override;
 
   bool isShareWareVersion() const override {

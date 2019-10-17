@@ -548,28 +548,6 @@ void Game::stopMusic() {
 }
 
 
-void Game::scheduleNewGameStart(
-  const int episode,
-  const data::Difficulty difficulty
-) {
-  mpNextGameMode = std::make_unique<GameSessionMode>(
-    data::GameSessionId{episode, 0, difficulty},
-    makeModeContext());
-}
-
-
-void Game::scheduleStartFromSavedGame(const data::SavedGame& save) {
-  mpNextGameMode = std::make_unique<GameSessionMode>(
-    save,
-    makeModeContext());
-}
-
-
-void Game::scheduleEnterMainMenu() {
-  mpNextGameMode = std::make_unique<MenuMode>(makeModeContext());
-}
-
-
 void Game::scheduleGameQuit() {
   mIsRunning = false;
 }
