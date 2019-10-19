@@ -56,8 +56,6 @@ private:
     Out
   };
 
-  void showAntiPiracyScreen();
-
   void mainLoop();
   void pumpEvents(std::vector<SDL_Event>& eventQueue);
 

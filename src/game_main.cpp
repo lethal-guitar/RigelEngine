@@ -27,6 +27,7 @@
 #include "sdl_utils/ptr.hpp"
 #include "ui/imgui_integration.hpp"
 
+#include "anti_piracy_screen_mode.hpp"
 #include "game_session_mode.hpp"
 #include "intro_demo_loop_mode.hpp"
 #include "menu_mode.hpp"
@@ -273,30 +274,18 @@ void Game::run(const StartupOptions& startupOptions) {
   else
   {
     if (!mIsShareWareVersion) {
-      showAntiPiracyScreen();
+      mpNextGameMode = std::make_unique<AntiPiracyScreenMode>(
+        makeModeContext());
+    } else {
+      mpNextGameMode = std::make_unique<IntroDemoLoopMode>(
+        makeModeContext(),
+        true);
     }
-    mpNextGameMode = std::make_unique<IntroDemoLoopMode>(
-      makeModeContext(),
-      true);
   }
 
   mainLoop();
 
   mpUserProfile->saveToDisk();
-}
-
-
-void Game::showAntiPiracyScreen() {
-  auto saved = setupSimpleUpscaling(&mRenderer);
-
-  auto antiPiracyImage = mResources.loadAntiPiracyImage();
-  renderer::OwningTexture imageTexture(&mRenderer, antiPiracyImage);
-  imageTexture.render(&mRenderer, 0, 0);
-  mRenderer.submitBatch();
-  mRenderer.swapBuffers();
-
-  SDL_Event event;
-  while (SDL_WaitEvent(&event) && event.type != SDL_KEYDOWN);
 }
 
 

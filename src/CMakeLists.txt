@@ -298,6 +298,8 @@ endif()
 
 # Main executable
 set(main_exe_sources
+    anti_piracy_screen_mode.cpp
+    anti_piracy_screen_mode.hpp
     game_main.cpp
     game_main.hpp
     game_main.ipp
