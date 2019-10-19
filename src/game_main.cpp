@@ -172,6 +172,33 @@ auto loadScripts(const loader::ResourceLoader& resources) {
   return saved;
 }
 
+
+std::unique_ptr<GameMode> createInitialGameMode(
+  GameMode::Context context,
+  const StartupOptions& startupOptions,
+  const bool isShareWareVersion)
+{
+  if (startupOptions.mLevelToJumpTo)
+  {
+    auto [episode, level] = *startupOptions.mLevelToJumpTo;
+
+    return std::make_unique<GameSessionMode>(
+      data::GameSessionId{episode, level, data::Difficulty::Medium},
+      context,
+      startupOptions.mPlayerPosition);
+  }
+  else if (startupOptions.mSkipIntro)
+  {
+    return std::make_unique<MenuMode>(context);
+  }
+
+  if (!isShareWareVersion) {
+    return std::make_unique<AntiPiracyScreenMode>(context);
+  }
+
+  return std::make_unique<IntroDemoLoopMode>(context, true);
+}
+
 }
 
 
@@ -258,30 +285,8 @@ void Game::run(const StartupOptions& startupOptions) {
     mIsShareWareVersion = false;
   }
 
-  if (startupOptions.mLevelToJumpTo)
-  {
-    auto [episode, level] = *startupOptions.mLevelToJumpTo;
-
-    mpNextGameMode = std::make_unique<GameSessionMode>(
-      data::GameSessionId{episode, level, data::Difficulty::Medium},
-      makeModeContext(),
-      startupOptions.mPlayerPosition);
-  }
-  else if (startupOptions.mSkipIntro)
-  {
-    mpNextGameMode = std::make_unique<MenuMode>(makeModeContext());
-  }
-  else
-  {
-    if (!mIsShareWareVersion) {
-      mpNextGameMode = std::make_unique<AntiPiracyScreenMode>(
-        makeModeContext());
-    } else {
-      mpNextGameMode = std::make_unique<IntroDemoLoopMode>(
-        makeModeContext(),
-        true);
-    }
-  }
+  mpNextGameMode = createInitialGameMode(
+    makeModeContext(), startupOptions, mIsShareWareVersion);
 
   mainLoop();
 
