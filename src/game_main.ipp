@@ -92,7 +92,6 @@ private:
   std::uint8_t mAlphaMod = 255;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;
-  std::unique_ptr<GameMode> mpNextGameMode;
 
   std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 

@@ -130,6 +130,30 @@ struct NullGameMode : public GameMode {
 };
 
 
+class InitialFadeInWrapper : public GameMode {
+public:
+  explicit InitialFadeInWrapper(std::unique_ptr<GameMode> pModeToSwitchTo)
+    : mpModeToSwitchTo(std::move(pModeToSwitchTo))
+  {
+  }
+
+  std::unique_ptr<GameMode> updateAndRender(
+    engine::TimeDelta,
+    const std::vector<SDL_Event>&
+  ) override {
+    return std::move(mpModeToSwitchTo);
+  }
+
+private:
+  std::unique_ptr<GameMode> mpModeToSwitchTo;
+};
+
+
+auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
+  return std::make_unique<InitialFadeInWrapper>(std::move(mode));
+}
+
+
 auto loadScripts(const loader::ResourceLoader& resources) {
   auto allScripts = resources.loadScriptBundle("TEXT.MNI");
   const auto optionsScripts = resources.loadScriptBundle("OPTIONS.MNI");
@@ -285,8 +309,8 @@ void Game::run(const StartupOptions& startupOptions) {
     mIsShareWareVersion = false;
   }
 
-  mpNextGameMode = createInitialGameMode(
-    makeModeContext(), startupOptions, mIsShareWareVersion);
+  mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
+    makeModeContext(), startupOptions, mIsShareWareVersion));
 
   mainLoop();
 
@@ -325,12 +349,8 @@ void Game::mainLoop() {
       eventQueue.clear();
 
       if (pMaybeNextMode) {
-        mpNextGameMode = std::move(pMaybeNextMode);
-      }
-
-      if (mpNextGameMode) {
         fadeOutScreen();
-        mpCurrentGameMode = std::move(mpNextGameMode);
+        mpCurrentGameMode = std::move(pMaybeNextMode);
         mpCurrentGameMode->updateAndRender(0, {});
         fadeInScreen();
       }
