@@ -145,26 +145,25 @@ struct NullGameMode : public GameMode {
 };
 
 
-class InitialFadeInWrapper : public GameMode {
-public:
-  explicit InitialFadeInWrapper(std::unique_ptr<GameMode> pModeToSwitchTo)
-    : mpModeToSwitchTo(std::move(pModeToSwitchTo))
-  {
-  }
-
-  std::unique_ptr<GameMode> updateAndRender(
-    engine::TimeDelta,
-    const std::vector<SDL_Event>&
-  ) override {
-    return std::move(mpModeToSwitchTo);
-  }
-
-private:
-  std::unique_ptr<GameMode> mpModeToSwitchTo;
-};
-
-
 auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
+  class InitialFadeInWrapper : public GameMode {
+  public:
+    explicit InitialFadeInWrapper(std::unique_ptr<GameMode> pModeToSwitchTo)
+      : mpModeToSwitchTo(std::move(pModeToSwitchTo))
+    {
+    }
+
+    std::unique_ptr<GameMode> updateAndRender(
+      engine::TimeDelta,
+      const std::vector<SDL_Event>&
+    ) override {
+      return std::move(mpModeToSwitchTo);
+    }
+
+  private:
+    std::unique_ptr<GameMode> mpModeToSwitchTo;
+  };
+
   return std::make_unique<InitialFadeInWrapper>(std::move(mode));
 }
 
