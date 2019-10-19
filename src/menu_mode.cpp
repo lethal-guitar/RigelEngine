@@ -16,6 +16,8 @@
 
 #include "menu_mode.hpp"
 
+#include "game_session_mode.hpp"
+
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "data/game_session_data.hpp"
@@ -96,36 +98,51 @@ void MenuMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void MenuMode::updateAndRender(engine::TimeDelta dt) {
+std::unique_ptr<GameMode> MenuMode::updateAndRender(
+  const engine::TimeDelta dt,
+  const std::vector<SDL_Event>& events
+) {
+  for (const auto& event : events) {
+    handleEvent(event);
+  }
+
   if (mOptionsMenu) {
+    mContext.mpScriptRunner->updateAndRender(0.0);
     mOptionsMenu->updateAndRender(dt);
+
     if (mOptionsMenu->isFinished()) {
       mOptionsMenu = std::nullopt;
     } else {
-      return;
+      return {};
     }
   }
 
   mContext.mpScriptRunner->updateAndRender(dt);
 
+  if (mMenuState == MenuState::ShowHiscores) {
+    ui::drawHighScoreList(mContext, mChosenEpisode);
+  }
+
   if (mContext.mpScriptRunner->hasFinishedExecution()) {
     const auto result = mContext.mpScriptRunner->result();
     assert(result);
 
-    navigateToNextMenu(*result);
+    return navigateToNextMenu(*result);
   }
+
+  return {};
 }
 
 
 void MenuMode::enterMainMenu() {
-  mChosenEpisodeForNewGame = 0;
+  mChosenEpisode = 0;
 
   mMenuState = MenuState::MainMenu;
   runScript(mContext, "Main_Menu");
 }
 
 
-void MenuMode::navigateToNextMenu(
+std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
   const ui::DukeScriptRunner::ExecutionResult& result
 ) {
   switch (mMenuState) {
@@ -199,7 +216,7 @@ void MenuMode::navigateToNextMenu(
           runScript(mContext, "No_Can_Order");
           mMenuState = MenuState::EpisodeNotAvailableMessage;
         } else {
-          mChosenEpisodeForNewGame = chosenEpisode;
+          mChosenEpisode = chosenEpisode;
 
           runScript(mContext, "Skill_Select");
           mMenuState = MenuState::SelectNewGameSkill;
@@ -218,10 +235,12 @@ void MenuMode::navigateToNextMenu(
           throw std::invalid_argument("Invalid skill index");
         }
 
-        mContext.mpServiceProvider->scheduleNewGameStart(
-          mChosenEpisodeForNewGame,
-          DIFFICULTY_MAPPING[chosenSkill]);
-        return;
+        return std::make_unique<GameSessionMode>(
+          data::GameSessionId{
+            mChosenEpisode,
+            0,
+            DIFFICULTY_MAPPING[chosenSkill]},
+          mContext);
       }
       break;
 
@@ -243,7 +262,7 @@ void MenuMode::navigateToNextMenu(
         const auto slotIndex = *result.mSelectedPage;
         const auto& slot = mContext.mpUserProfile->mSaveSlots[slotIndex];
         if (slot) {
-          mContext.mpServiceProvider->scheduleStartFromSavedGame(*slot);
+          return std::make_unique<GameSessionMode>(*slot, mContext);
         } else {
           runScript(mContext, "No_Game_Restore");
           mMenuState = MenuState::NoSavedGameInSlotMessage;
@@ -287,15 +306,23 @@ void MenuMode::navigateToNextMenu(
           mMenuState = MenuState::EpisodeNotAvailableMessageHighScores;
         } else {
           ui::setupHighScoreListDisplay(mContext, chosenEpisode);
+          mChosenEpisode = chosenEpisode;
           mMenuState = MenuState::ShowHiscores;
         }
       }
+      break;
+
+    case MenuState::ShowHiscores:
+      mContext.mpServiceProvider->fadeOutScreen();
+      enterMainMenu();
       break;
 
     default:
       enterMainMenu();
       break;
   }
+
+  return {};
 }
 
 }

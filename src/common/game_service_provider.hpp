@@ -39,11 +39,6 @@ struct IGameServiceProvider {
   virtual void stopSound(data::SoundId id) = 0;
   virtual void playMusic(const std::string& name) = 0;
   virtual void stopMusic() = 0;
-  virtual void scheduleNewGameStart(
-    int episode,
-    data::Difficulty difficulty) = 0;
-  virtual void scheduleStartFromSavedGame(const data::SavedGame& save) = 0;
-  virtual void scheduleEnterMainMenu() = 0;
   virtual void scheduleGameQuit() = 0;
   virtual bool isShareWareVersion() const = 0;
 };

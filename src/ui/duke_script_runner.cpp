@@ -27,6 +27,8 @@
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
+#include <cassert>
+
 
 namespace rigel::ui {
 
@@ -85,6 +87,10 @@ DukeScriptRunner::DukeScriptRunner(
   , mUiSpriteSheetRenderer(
       makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
   , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
+  , mCanvas(
+      pRenderer,
+      data::GameTraits::viewPortWidthPx,
+      data::GameTraits::viewPortHeightPx)
   , mProgramCounter(0u)
 {
   // Default menu pre-selections at game start
@@ -102,6 +108,14 @@ void DukeScriptRunner::executeScript(const data::script::Script& script) {
   mTextBoxOffsetEnabled = false;
 
   startExecution(script);
+}
+
+
+void DukeScriptRunner::clearCanvas() {
+  assert(hasFinishedExecution() || mState == State::ReadyToExecute);
+
+  const auto binder = CanvasBinder{mCanvas, mpRenderer};
+  mpRenderer->clear({0, 0, 0, 0});
 }
 
 
@@ -216,12 +230,34 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 
 
 void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mMenuSelectionIndicatorState) {
-    drawMenuSelectionIndicator(*mMenuSelectionIndicatorState, dt);
+  if (mDelayState) {
+    updateDelayState(*mDelayState, dt);
   }
 
-  if (mDelayState) {
-    handleDelay(*mDelayState, dt);
+  bindCanvas();
+  updateAndRenderDynamicElements(dt);
+
+  while (mState == State::ExecutingScript) {
+    interpretNextAction();
+  }
+
+  clearOldSelectionIndicator();
+
+  unbindCanvas();
+  mCanvas.render(mpRenderer, 0, 0);
+
+  if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
+    mpServices->fadeInScreen();
+    mFadeInBeforeNextWaitStateScheduled = false;
+  }
+}
+
+
+void DukeScriptRunner::updateAndRenderDynamicElements(
+  const engine::TimeDelta dt
+) {
+  if (mMenuSelectionIndicatorState) {
+    drawMenuSelectionIndicator(*mMenuSelectionIndicatorState, dt);
   }
 
   if (mNewsReporterAnimationState) {
@@ -231,11 +267,10 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   if (hasCheckBoxes()) {
     displayCheckBoxes(*mCheckBoxStates);
   }
+}
 
-  while (mState == State::ExecutingScript) {
-    interpretNextAction();
-  }
 
+void DukeScriptRunner::clearOldSelectionIndicator() {
   if (mPreviousSelectionIndicatorState) {
     const auto indicatorNowHidden = !mMenuSelectionIndicatorState.has_value();
     const auto needsClear =
@@ -244,15 +279,11 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
         mMenuSelectionIndicatorState->mPosY;
 
     if (needsClear) {
-      clearMenuSelectionIndicator(*mPreviousSelectionIndicatorState);
+      mMenuElementRenderer.clearSelectionIndicator(
+        8, mPreviousSelectionIndicatorState->mPosY);
     }
   }
   mPreviousSelectionIndicatorState = mMenuSelectionIndicatorState;
-
-  if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
-    mpServices->fadeInScreen();
-    mFadeInBeforeNextWaitStateScheduled = false;
-  }
 }
 
 
@@ -266,7 +297,7 @@ void DukeScriptRunner::displayCheckBoxes(const CheckBoxesState& state) {
 }
 
 
-void DukeScriptRunner::handleDelay(
+void DukeScriptRunner::updateDelayState(
   DelayState& state,
   const engine::TimeDelta timeDelta
 ) {
@@ -343,11 +374,20 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const FadeIn&) {
+      unbindCanvas();
+      mCanvas.render(mpRenderer, 0, 0);
       mpServices->fadeInScreen();
+      bindCanvas();
     },
 
     [this](const FadeOut&) {
+      unbindCanvas();
+      mCanvas.render(mpRenderer, 0, 0);
       mpServices->fadeOutScreen();
+      bindCanvas();
+
+      // Reset canvas to black after a fade-out.
+      mpRenderer->clear();
     },
 
     [this](const ShowMenuSelectionIndicator& action) {
@@ -612,13 +652,6 @@ void DukeScriptRunner::drawMenuSelectionIndicator(
 }
 
 
-void DukeScriptRunner::clearMenuSelectionIndicator(
-  const MenuSelectionIndicatorState& state
-) {
-  mMenuElementRenderer.clearSelectionIndicator(8, state.mPosY);
-}
-
-
 void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
   for (auto i = 0; i < 8; ++i) {
     const auto& saveSlot = (*mpSaveSlots)[i];
@@ -669,6 +702,16 @@ bool DukeScriptRunner::hasMenuPages() const {
 
 bool DukeScriptRunner::hasCheckBoxes() const {
   return static_cast<bool>(mCheckBoxStates);
+}
+
+
+void DukeScriptRunner::bindCanvas() {
+  mBoundCanvasState = CanvasBinder{mCanvas, mpRenderer};
+}
+
+
+void DukeScriptRunner::unbindCanvas() {
+  mBoundCanvasState = std::nullopt;
 }
 
 }

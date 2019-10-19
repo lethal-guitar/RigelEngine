@@ -90,6 +90,7 @@ void EpisodeEndScreen::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  updateAndRender(0);
   mpServiceProvider->fadeOutScreen();
 
   if (mCurrentImage < mScreenImages.size()) {
@@ -146,6 +147,11 @@ void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
     !mEndScreen.finished()
   ) {
     mEndScreen.handleEvent(event);
+
+    if (mEndScreen.finished()) {
+      mBonusScreen.updateAndRender(0.0);
+      mpServiceProvider->fadeInScreen();
+    }
   }
 }
 

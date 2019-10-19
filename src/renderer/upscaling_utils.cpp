@@ -25,24 +25,60 @@
 
 namespace rigel::renderer {
 
-WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
-  // TODO: Eliminate duplication with setupSimpleUpscaling () in game_main.cpp
-  const auto [windowWidthInt, windowHeightInt] = pRenderer->windowSize();
-  const auto windowWidth = float(windowWidthInt);
-  const auto windowHeight = float(windowHeightInt);
+namespace {
 
-  const auto usableWidth = windowWidth > windowHeight
-    ? data::GameTraits::aspectRatio * windowHeight
-    : windowWidth;
+base::Size<float> determineUsableSize(
+  const float windowWidth,
+  const float windowHeight
+) {
+  const auto actualAspectRatioIsWiderThanTarget =
+    windowWidth / windowHeight > data::GameTraits::aspectRatio;
+  if (actualAspectRatioIsWiderThanTarget) {
+    return {data::GameTraits::aspectRatio * windowHeight, windowHeight};
+  } else {
+    return {windowWidth, 1.0f / data::GameTraits::aspectRatio * windowWidth};
+  }
+}
+
+}
+
+
+ViewPortInfo determineViewPort(const Renderer* pRenderer) {
+  const auto windowWidth = float(pRenderer->windowSize().width);
+  const auto windowHeight = float(pRenderer->windowSize().height);
+
+  const auto [usableWidth, usableHeight] =
+    determineUsableSize(windowWidth, windowHeight);
 
   const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
+  const auto heightScale = usableHeight / data::GameTraits::viewPortHeightPx;
+  const auto offsetX = (windowWidth - usableWidth) / 2.0f;
+  const auto offsetY = (windowHeight - usableHeight) / 2.0f;
 
-  const auto tileWidthScaled = data::GameTraits::tileSize * widthScale;
-  const auto maxTilesOnScreen =
-    base::round(pRenderer->windowSize().width / tileWidthScaled);
+  return {
+    base::Vector{int(offsetX), int(offsetY)},
+    base::Size<int>{int(usableWidth), int(usableHeight)},
+    base::Point<float>{widthScale, heightScale}
+  };
+}
+
+
+bool canUseWidescreenMode(const Renderer* pRenderer) {
+  const auto windowWidth = float(pRenderer->windowSize().width);
+  const auto windowHeight = float(pRenderer->windowSize().height);
+  return windowWidth / windowHeight > data::GameTraits::aspectRatio;
+}
+
+
+WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
+  const auto info = determineViewPort(pRenderer);
+
+  const auto windowWidth = pRenderer->windowSize().width;
+  const auto tileWidthScaled = data::GameTraits::tileSize * info.mScale.x;
+  const auto maxTilesOnScreen = base::round(windowWidth / tileWidthScaled);
 
   const auto widthInPixels =
-    std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidthInt);
+    std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidth);
   const auto paddingPixels =
     pRenderer->windowSize().width - widthInPixels;
 

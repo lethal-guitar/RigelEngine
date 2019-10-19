@@ -144,7 +144,30 @@ RenderTargetTexture::Binder::Binder(
 
 
 RenderTargetTexture::Binder::~Binder() {
-  mpRenderer->setRenderTarget(mPreviousRenderTarget);
+  if (mpRenderer) {
+    mpRenderer->setRenderTarget(mPreviousRenderTarget);
+  }
+}
+
+
+RenderTargetTexture::Binder::Binder(Binder&& other)
+  : mPreviousRenderTarget(other.mPreviousRenderTarget)
+  , mpRenderer(other.mpRenderer)
+{
+  // Mark other as "moved from"
+  other.mpRenderer = nullptr;
+}
+
+
+auto RenderTargetTexture::Binder::operator=(
+  RenderTargetTexture::Binder&& other
+) -> Binder& {
+  mPreviousRenderTarget = other.mPreviousRenderTarget;
+  mpRenderer = other.mpRenderer;
+
+  // Mark other as "moved from"
+  other.mpRenderer = nullptr;
+  return *this;
 }
 
 

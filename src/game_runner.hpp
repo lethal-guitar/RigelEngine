@@ -53,6 +53,8 @@ public:
 
   bool levelFinished() const;
   bool gameQuit() const;
+  std::optional<data::SavedGame> requestedGameToLoad() const;
+
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
@@ -84,11 +86,13 @@ private:
     Menu(
       ui::DukeScriptRunner* pScriptRunner,
       ScriptEndHook&& scriptEndHook,
-      EventHook&& eventHook
+      EventHook&& eventHook,
+      const bool isTransparent
     )
       : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
       , mEventHook(std::forward<EventHook>(eventHook))
       , mpScriptRunner(pScriptRunner)
+      , mIsTransparent(isTransparent)
     {
     }
 
@@ -98,6 +102,7 @@ private:
     std::function<void(const ExecutionResult&)> mScriptFinishedHook;
     std::function<bool(const SDL_Event&)> mEventHook;
     ui::DukeScriptRunner* mpScriptRunner;
+    bool mIsTransparent;
   };
 
   struct SavedGameNameEntry {
@@ -119,7 +124,8 @@ private:
   void enterMenu(
     const char* scriptName,
     ScriptEndHook&& scriptEndedHook,
-    EventHook&& eventHook = noopEventHook);
+    EventHook&& eventHook = noopEventHook,
+    bool isTransparent = false);
   void leaveMenu();
   void fadeToWorld();
 
@@ -131,6 +137,7 @@ private:
   data::SavedGame mSavedGame;
   game_logic::GameWorld mWorld;
   std::stack<State, std::vector<State>> mStateStack;
+  std::optional<data::SavedGame> mRequestedGameToLoad;
   bool mGameWasQuit = false;
 };
 
@@ -142,6 +149,11 @@ inline bool GameRunner::levelFinished() const {
 
 inline bool GameRunner::gameQuit() const {
   return mGameWasQuit;
+}
+
+
+inline std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const {
+  return mRequestedGameToLoad;
 }
 
 

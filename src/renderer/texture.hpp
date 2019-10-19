@@ -202,8 +202,11 @@ public:
     Binder(RenderTargetTexture& renderTarget, Renderer* pRenderer);
     ~Binder();
 
-    Binder(Binder&&) = delete;
-    Binder& operator=(Binder&&) = delete;
+    Binder(const Binder&) = delete;
+    Binder& operator=(const Binder&) = delete;
+
+    Binder(Binder&&);
+    Binder& operator=(Binder&&);
 
   protected:
     Binder(const Renderer::RenderTarget&, Renderer* pRenderer);
@@ -219,9 +222,23 @@ public:
     std::size_t height);
   ~RenderTargetTexture();
 
-  // TODO: Remove these once we have VS 2019 on CI
-  RenderTargetTexture(RenderTargetTexture&&) = default;
-  RenderTargetTexture& operator=(RenderTargetTexture&&) = default;
+  RenderTargetTexture(const RenderTargetTexture&) = delete;
+  RenderTargetTexture& operator=(const RenderTargetTexture&) = delete;
+
+  RenderTargetTexture(RenderTargetTexture&& other) noexcept
+    : OwningTexture(std::move(other))
+    , mFboHandle(other.mFboHandle)
+  {
+    other.mFboHandle = 0;
+  }
+
+
+  RenderTargetTexture& operator=(RenderTargetTexture&& other) noexcept {
+    static_cast<OwningTexture&>(*this) = std::move(other);
+    mFboHandle = other.mFboHandle;
+    other.mFboHandle = 0;
+    return *this;
+  }
 
 private:
   RenderTargetTexture(

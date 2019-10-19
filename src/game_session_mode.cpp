@@ -16,6 +16,9 @@
 
 #include "game_session_mode.hpp"
 
+// TODO: Remove this cyclic include
+#include "menu_mode.hpp"
+
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
@@ -64,10 +67,6 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
   base::match(mCurrentStage,
     [&event, this](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
-
-      if (pIngameMode->gameQuit()) {
-        finishGameSession();
-      }
     },
 
     [&event](ui::EpisodeEndSequence& endScreens) {
@@ -75,14 +74,22 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
     },
 
     [&event, this](HighScoreNameEntry& state) {
+      auto fadeOut = [&state, this]() {
+        mContext.mpScriptRunner->updateAndRender(0);
+        state.mNameEntryWidget.updateAndRender(0);
+        mContext.mpServiceProvider->fadeOutScreen();
+      };
+
       if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
         switch (event.key.keysym.sym) {
           case SDLK_ESCAPE:
+            fadeOut();
             enterHighScore("");
             return;
 
           case SDLK_KP_ENTER:
           case SDLK_RETURN:
+            fadeOut();
             enterHighScore(state.mNameEntryWidget.text());
             return;
 
@@ -103,10 +110,29 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
 }
 
 
-void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
-  base::match(mCurrentStage,
-    [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) {
+std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
+  const engine::TimeDelta dt,
+  const std::vector<SDL_Event>& events
+) {
+  using GameModePtr = std::unique_ptr<GameMode>;
+
+  for (const auto& event : events) {
+    handleEvent(event);
+  }
+
+  return base::match(mCurrentStage,
+    [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) -> GameModePtr {
       pIngameMode->updateAndRender(dt);
+
+      if (pIngameMode->gameQuit()) {
+        finishGameSession();
+        return nullptr;
+      }
+
+      if (auto maybeSavedGame = pIngameMode->requestedGameToLoad()) {
+        mContext.mpServiceProvider->fadeOutScreen();
+        return std::make_unique<GameSessionMode>(*maybeSavedGame, mContext);
+      }
 
       if (pIngameMode->levelFinished()) {
         const auto achievedBonuses = pIngameMode->achievedBonuses();
@@ -128,9 +154,11 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
           mCurrentStage = std::move(bonusScreen);
         }
       }
+
+      return nullptr;
     },
 
-    [this, &dt](ui::BonusScreen& bonusScreen) {
+    [this, &dt](ui::BonusScreen& bonusScreen) -> GameModePtr {
       bonusScreen.updateAndRender(dt);
 
       if (bonusScreen.finished()) {
@@ -143,26 +171,36 @@ void GameSessionMode::updateAndRender(engine::TimeDelta dt) {
         fadeToNewStage(*pNextIngameMode);
         mCurrentStage = std::move(pNextIngameMode);
       }
+
+      return nullptr;
     },
 
-    [this, &dt](ui::EpisodeEndSequence& endScreens) {
+    [this, &dt](ui::EpisodeEndSequence& endScreens) -> GameModePtr {
       endScreens.updateAndRender(dt);
 
       if (endScreens.finished()) {
         finishGameSession();
       }
+
+      return nullptr;
     },
 
-    [this, &dt](HighScoreNameEntry& state) {
-      state.mNameEntryWidget.updateAndRender(dt);
-    },
-
-    [this, &dt](const HighScoreListDisplay&) {
+    [this, &dt](HighScoreNameEntry& state) -> GameModePtr {
       mContext.mpScriptRunner->updateAndRender(dt);
+      state.mNameEntryWidget.updateAndRender(dt);
+      return nullptr;
+    },
+
+    [this, &dt](const HighScoreListDisplay&) -> GameModePtr {
+      mContext.mpScriptRunner->updateAndRender(dt);
+      ui::drawHighScoreList(mContext, mEpisode);
+
       if (mContext.mpScriptRunner->hasFinishedExecution()) {
         mContext.mpServiceProvider->fadeOutScreen();
-        mContext.mpServiceProvider->scheduleEnterMainMenu();
+        return std::make_unique<MenuMode>(mContext);
       }
+
+      return nullptr;
     });
 }
 

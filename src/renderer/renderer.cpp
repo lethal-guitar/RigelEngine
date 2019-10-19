@@ -19,6 +19,7 @@
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "loader/palette.hpp"
+#include "sdl_utils/error.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <glm/gtc/matrix_transform.hpp>
@@ -372,6 +373,12 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mRenderMode(RenderMode::SpriteBatch)
   , mCurrentFbo(0)
   , mWindowSize(getSize(pWindow))
+  , mMaxWindowSize(
+      [pWindow]() {
+        SDL_DisplayMode displayMode;
+        sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
+        return base::Size<int>{displayMode.w, displayMode.h};
+      }())
   , mCurrentFramebufferSize(mWindowSize)
   , mGlobalTranslation(0.0f, 0.0f)
   , mGlobalScale(1.0f, 1.0f)
@@ -767,8 +774,18 @@ void Renderer::setRenderTarget(const RenderTarget& target) {
 
 
 void Renderer::swapBuffers() {
+  assert(mCurrentFbo == 0);
+
   submitBatch();
   SDL_GL_SwapWindow(mpWindow);
+
+  const auto actualWindowSize = getSize(mpWindow);
+  if (mWindowSize != actualWindowSize) {
+    mWindowSize = actualWindowSize;
+    mCurrentFramebufferSize.width = mWindowSize.width;
+    mCurrentFramebufferSize.height = mWindowSize.height;
+    onRenderTargetChanged();
+  }
 }
 
 

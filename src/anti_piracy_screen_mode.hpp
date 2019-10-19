@@ -17,15 +17,28 @@
 #pragma once
 
 #include "common/game_mode.hpp"
-#include "data/high_score_list.hpp"
-#include "ui/text_entry_widget.hpp"
+#include "renderer/texture.hpp"
 
 
-namespace rigel::ui {
+namespace rigel {
 
-void setupHighScoreListDisplay(GameMode::Context& context, int episode);
+/** Shows anti-piracy screen for registered version
+ *
+ * Shows the anti-piracy screen (LCR.MNI) until any key is pressed, then
+ * switches to Intro/Demo loop.
+ */
+class AntiPiracyScreenMode : public GameMode {
+public:
+  explicit AntiPiracyScreenMode(Context context);
 
-void drawHighScoreList(GameMode::Context& context, int episode);
+  std::unique_ptr<GameMode> updateAndRender(
+    engine::TimeDelta,
+    const std::vector<SDL_Event>& events
+  ) override;
 
-ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context);
+private:
+  Context mContext;
+  renderer::OwningTexture mTexture;
+};
+
 }

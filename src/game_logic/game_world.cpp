@@ -170,15 +170,6 @@ auto localToGlobalTranslation(
 }
 
 
-void clearFullScreen(renderer::Renderer* pRenderer) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
-  pRenderer->setGlobalTranslation({0, 0});
-  pRenderer->setGlobalScale({1.0f, 1.0f});
-  pRenderer->setClipRect({});
-  pRenderer->clear();
-}
-
-
 [[nodiscard]] auto setupIngameViewportWidescreen(
   renderer::Renderer* pRenderer,
   const renderer::WidescreenViewPortInfo& info,
@@ -507,7 +498,9 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mHudRenderer.updateAnimation();
   mMessageDisplay.update();
 
-  if (mpOptions->mWidescreenModeOn) {
+  if (
+    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
+  ) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
     const auto viewPortSize = base::Extents{
       info.mWidthTiles - HUD_WIDTH,
@@ -520,6 +513,9 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
 
 void GameWorld::render() {
+  const auto widescreenModeOn =
+    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
+
   auto drawWorld = [this](const base::Extents& viewPortSize) {
     if (!mScreenFlashColor) {
       mpSystems->render(
@@ -529,14 +525,14 @@ void GameWorld::render() {
     }
   };
 
-  auto drawTopRow = [this]() {
+  auto drawTopRow = [&, this]() {
     if (mActiveBossEntity) {
       using game_logic::components::Shootable;
 
       const auto health = mActiveBossEntity.has_component<Shootable>()
         ? mActiveBossEntity.component<Shootable>()->mHealth : 0;
 
-      if (mpOptions->mWidescreenModeOn) {
+      if (widescreenModeOn) {
         drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
       } else {
         auto saved = renderer::Renderer::StateSaver{mpRenderer};
@@ -551,14 +547,7 @@ void GameWorld::render() {
   };
 
 
-  // In case the previous frame was drawn with widescreen mode enabled, we need
-  // to make sure the entire screen is cleared, not just the 4:3 subsection
-  // used for non-widescreen drawing. Otherwise, the remains of the previous
-  // widescreen frame would remain visible at the left and right sides of the
-  // screen.
-  clearFullScreen(mpRenderer);
-
-  if (mpOptions->mWidescreenModeOn) {
+  if (widescreenModeOn) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
 
     {

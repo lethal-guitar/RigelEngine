@@ -51,15 +51,19 @@ public:
   void run(const StartupOptions& options);
 
 private:
-  void showAntiPiracyScreen();
+  enum class FadeType {
+    In,
+    Out
+  };
 
   void mainLoop();
+  void pumpEvents(std::vector<SDL_Event>& eventQueue);
 
   GameMode::Context makeModeContext();
 
-  void handleEvent(const SDL_Event& event);
+  bool handleEvent(const SDL_Event& event);
 
-  void performScreenFadeBlocking(bool doFadeIn);
+  void performScreenFadeBlocking(FadeType type);
 
   void applyChangedOptions();
 
@@ -71,11 +75,6 @@ private:
   void playMusic(const std::string& name) override;
   void stopMusic() override;
 
-  void scheduleNewGameStart(
-    int episode,
-    data::Difficulty difficulty) override;
-  void scheduleStartFromSavedGame(const data::SavedGame& save) override;
-  void scheduleEnterMainMenu() override;
   void scheduleGameQuit() override;
 
   bool isShareWareVersion() const override {
@@ -93,7 +92,6 @@ private:
   std::uint8_t mAlphaMod = 255;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;
-  std::unique_ptr<GameMode> mpNextGameMode;
 
   std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 

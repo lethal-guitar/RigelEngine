@@ -16,10 +16,18 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
+
 
 namespace rigel::renderer {
 
 class Renderer;
+
+struct ViewPortInfo {
+  base::Vector mOffset;
+  base::Size<int> mSize;
+  base::Point<float> mScale;
+};
 
 
 struct WidescreenViewPortInfo {
@@ -28,6 +36,15 @@ struct WidescreenViewPortInfo {
   int mLeftPaddingPx;
 };
 
+
+ViewPortInfo determineViewPort(const Renderer* pRenderer);
+
+/** Returns true if wide-screen mode is feasible for the current window size.
+ *
+ * If the current window size has an aspect ratio that is less than 4:3, there
+ * is no point in using wide-screen mode.
+ */
+bool canUseWidescreenMode(const Renderer* pRenderer);
 
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
 

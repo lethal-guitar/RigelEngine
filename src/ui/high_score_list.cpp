@@ -37,29 +37,29 @@ void awaitScriptCompletion(GameMode::Context& context) {
 
 }
 
-
-void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
-  using namespace std::literals;
-
+void drawHighScoreList(GameMode::Context& context, int episode) {
   auto drawScoreEntry = [&](int yPos, const data::HighScoreEntry& entry) {
     context.mpUiRenderer->drawText(10, yPos, std::to_string(entry.mScore));
     context.mpUiRenderer->drawText(20, yPos, entry.mName);
   };
 
+  const auto& list = context.mpUserProfile->mHighScoreLists[episode];
+  drawScoreEntry(6, list[0]);
+
+  for (auto i = 1u; i < list.size(); ++i) {
+    drawScoreEntry(7 + i, list[i]);
+  }
+}
+
+
+void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
+  using namespace std::literals;
 
   runScript(context, "Volume"s + std::to_string(episode + 1));
   awaitScriptCompletion(context);
 
-  {
-    const auto& list = context.mpUserProfile->mHighScoreLists[episode];
-    drawScoreEntry(6, list[0]);
-
-    for (auto i = 1u; i < list.size(); ++i) {
-      drawScoreEntry(7 + i, list[i]);
-    }
-
-    context.mpServiceProvider->fadeInScreen();
-  }
+  drawHighScoreList(context, episode);
+  context.mpServiceProvider->fadeInScreen();
 
   {
     auto awaitInput = data::script::Script{
@@ -69,6 +69,7 @@ void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
     context.mpScriptRunner->executeScript(awaitInput);
   }
 }
+
 
 ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context) {
   runScript(context, "New_Highscore");

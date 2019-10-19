@@ -1,5 +1,7 @@
 #include "intro_demo_loop_mode.hpp"
 
+#include "menu_mode.hpp"
+
 #include "common/game_service_provider.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/duke_script_runner.hpp"
@@ -49,7 +51,8 @@ IntroDemoLoopMode::IntroDemoLoopMode(
   Context context,
   const bool isDuringGameStartup
 )
-  : mpServiceProvider(context.mpServiceProvider)
+  : mContext(context)
+  , mpServiceProvider(context.mpServiceProvider)
   , mFirstRunIncludedStoryAnimation(isDuringGameStartup)
   , mpScriptRunner(context.mpScriptRunner)
   , mScripts(context.mpResources->loadScriptBundle("TEXT.MNI"))
@@ -89,13 +92,14 @@ IntroDemoLoopMode::IntroDemoLoopMode(
 }
 
 
-void IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
+bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
   if (event.type != SDL_KEYDOWN) {
-    return;
+    return false;
   }
 
   if (mCurrentStage == 0) {
     // Pressing any key on the Apogee Logo skips forward to the intro movie
+    updateStage(mStages[mCurrentStage], 0);
     mpServiceProvider->fadeOutScreen();
     mCurrentStage = 1;
 
@@ -109,15 +113,29 @@ void IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
       event.key.keysym.sym == SDLK_ESCAPE
       || !canStageHandleEvents(currentStage)
     ) {
-      mpServiceProvider->scheduleEnterMainMenu();
+      return true;
     } else {
       forwardEventToStage(currentStage, event);
     }
   }
+
+  return false;
 }
 
 
-void IntroDemoLoopMode::updateAndRender(const engine::TimeDelta dt) {
+std::unique_ptr<GameMode> IntroDemoLoopMode::updateAndRender(
+  const engine::TimeDelta dt,
+  const std::vector<SDL_Event>& events
+) {
+  for (const auto& event : events) {
+    const auto shouldQuit = handleEvent(event);
+    if (shouldQuit) {
+      updateStage(mStages[mCurrentStage], 0.0);
+      mpServiceProvider->fadeOutScreen();
+      return std::make_unique<MenuMode>(mContext);
+    }
+  }
+
   updateStage(mStages[mCurrentStage], dt);
 
   if (isStageFinished(mStages[mCurrentStage])) {
@@ -135,6 +153,8 @@ void IntroDemoLoopMode::updateAndRender(const engine::TimeDelta dt) {
 
     startStage(mStages[mCurrentStage]);
   }
+
+  return {};
 }
 
 }
