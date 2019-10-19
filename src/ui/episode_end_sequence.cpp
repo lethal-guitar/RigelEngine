@@ -146,6 +146,11 @@ void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
     !mEndScreen.finished()
   ) {
     mEndScreen.handleEvent(event);
+
+    if (mEndScreen.finished()) {
+      mBonusScreen.updateAndRender(0.0);
+      mpServiceProvider->fadeInScreen();
+    }
   }
 }
 
