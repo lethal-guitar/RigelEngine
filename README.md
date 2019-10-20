@@ -91,6 +91,15 @@ I'm planning to also provide binaries for OS X and Linux in the future. But righ
 
 ## Building from source
 
+* [Get the sources](#get-the-sources)
+* [A note about warnings as errors](#a-note-about-warnings-as-errors)
+* [Pre-requisites and dependencies](#dependencies)
+* [Linux builds](#linux-build-instructions)
+    * [Ubuntu 19.04 or newer](#linux-build-instructions-194)
+    * [Ubuntu 18.04](#linux-build-instructions-184)
+* [OS X builds](#mac-build-instructions)
+* [Windows builds](#windows-build-instructions)
+
 ### Get the sources
 
 First of all, get the sources:
@@ -100,7 +109,7 @@ First of all, get the sources:
 git clone git@github.com:lethal-guitar/RigelEngine.git
 cd RigelEngine
 git submodule update --init --recursive
-``` 
+```
 
 ### A note about warnings as errors
 
@@ -113,34 +122,7 @@ On the other hand, if you only want to use RigelEngine, but there are no
 pre-built binaries for your platform, disabling warnings as errors is
 recommended.
 
-### Linux build quick start guide
-
-If you're on Linux and running a recent enough Ubuntu/Debian-like distro<sup>[1](#foot-note-linux)</sup>,
-here's how to quickly get the project up and running. Instructions for
-[OS X](#mac-build-instructions) and [Windows](#windows-build-instructions) can
-be found further down.
-
-```bash
-# Install all external dependencies, as well as the CMake build system:
-sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
-
-# Configure and build:
-mkdir build
-cd build
-cmake .. -DWARNINGS_AS_ERRORS=OFF
-make
-
-# NOTE:  Pass -j<NUM_PROCESSES> to 'make' in order to get multi-core
-# compilation, '8' is a good number for a 4-core machine with hyperthreading
-#
-# If you plan to develop RigelEngine, I recommend dropping the
-# -DWARNINGS_AS_ERRORS part - see the note about warnings as errors above.
-
-# Now run it!
-./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
-```
-
-### Detailed build pre-requisites and dependencies
+### <a name="dependencies">Pre-requisites and dependencies</a>
 
 To build from source, a C++ 17 compatible compiler is required. The project has been
 built successfully on the following compilers:
@@ -151,11 +133,13 @@ built successfully on the following compilers:
 
 Slightly older versions of gcc/clang might also work, but I haven't tried that.
 
+CMake version 3.12 or newer is required in order to generate build files.
+
 The project depends on the following libraries:
 
 * SDL >= 2.0.4
 * SDL\_mixer >= 2.0.1
-* Boost >= 1.67
+* Boost >= 1.65
 
 The following further dependencies are already provided as submodules or source
 code (in the `3rd_party` directory):
@@ -164,6 +148,84 @@ code (in the `3rd_party` directory):
 * Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * DBOPL AdLib emulator (taken from [DosBox](http://www.dosbox.com/))
 * [Catch](https://github.com/philsquared/Catch) testing framework
+
+
+### <a name="linux-build-instructions">Linux builds</a>
+
+In order to be able to install all required dependencies from the system's
+package manager, a fairly recent distro is required. I have successfully built
+the project using the following instructions on Ubuntu 19.04 and 19.10.
+Building on Ubuntu 18.04 is also possible, but it requires a few more steps.
+
+#### <a name="linux-build-instructions-194">Ubuntu 19.04 or newer</a>
+
+```bash
+# Install all external dependencies, as well as the CMake build system:
+sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
+
+# Configure and build (run inside your clone of the repo):
+mkdir build
+cd build
+cmake .. -DWARNINGS_AS_ERRORS=OFF
+make -j8
+
+# NOTE: The -j<NUM_PROCESSES> argument to 'make' enables multi-core
+# compilation, '8' is a good number for a 4-core machine with hyperthreading.
+# You may want to tweak this number depending on your actual CPU configuration.
+#
+# If you plan to develop RigelEngine, I recommend dropping the
+# -DWARNINGS_AS_ERRORS part - see the note about warnings as errors above.
+
+# Now run it!
+./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
+```
+
+#### <a name="linux-build-instructions-184">Ubuntu 18.04</a>
+
+Ubuntu 18.04 almost provides everything we need out of the box, aside from
+CMake and gcc. Fortunately, we can install gcc 8 alongside the system
+default of gcc 7, and it's available in the package manager. CMake, however,
+has to be built from source or installed via a PPA.
+
+```bash
+# Install all external dependencies, and gcc 8. CMake will be built from source.
+sudo apt-get install g++-8 libboost-all-dev libsdl2-dev libsdl2-mixer-dev
+
+# Now we need to install a newer version of CMake. If you already have CMake
+# installed, you can uninstall it by running:
+#
+# sudo apt purge --auto-remove cmake
+#
+# If not, proceed directly with the following:
+mkdir ~/temp
+cd ~/temp
+wget https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4.tar.gz
+tar -xzvf cmake-3.15.4.tar.gz
+cd cmake-3.15.4
+
+./bootstrap
+make -j8 # adjust depending on number of CPU cores in your machine
+sudo make install
+
+# Now, when you run cmake --version, it should say 3.15. You can delete the
+# ~/temp folder.
+
+# Now we can build. Navigate to where you've cloned the repo, then:
+mkdir build
+cd build
+
+# Now we need to tell CMake to use gcc 8 instead of the system default
+# (which is 7). You only need to do this when running CMake for the first time.
+export CC=`which gcc-8`
+export CXX=`which g++-8`
+
+# Finally, we can configure and build as usual (see above).
+cmake .. -DWARNINGS_AS_ERRORS=OFF
+make -j8 # adjust depending on number of CPU cores in your machine
+
+# Now run it!
+./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
+```
 
 ### <a name="mac-build-instructions">OS X builds</a>
 
@@ -224,7 +286,3 @@ cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/b
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
 ```
-
-***
-
-<a name="foot-note-linux">[1]</a>: I'm using Linux Mint 18, based on Ubuntu 16.04 Xenial Xerus
