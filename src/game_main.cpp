@@ -263,7 +263,17 @@ Game::Game(
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(gamePath)
-  , mIsShareWareVersion(true)
+  , mIsShareWareVersion([this]() {
+      // The registered version has 24 additional level files, and a
+      // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
+      // all of these files, as that would be fairly tedious. Instead, we just
+      // check for the presence of one of the registered version's levels, and
+      // the anti-piracy screen, and assume that we're dealing with a
+      // registered version data set if these two are present.
+      const auto hasRegisteredVersionFiles =
+        mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
+      return !hasRegisteredVersionFiles;
+    }())
   , mRenderTarget(
       &mRenderer,
       mRenderer.maxWindowSize().width,
@@ -292,14 +302,6 @@ void Game::run(const StartupOptions& startupOptions) {
   });
 
   applyChangedOptions();
-
-  // Check if running registered version
-  if (
-    mResources.hasFile("LCR.MNI") &&
-    mResources.hasFile("O1.MNI")
-  ) {
-    mIsShareWareVersion = false;
-  }
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
     makeModeContext(), startupOptions, mIsShareWareVersion));
