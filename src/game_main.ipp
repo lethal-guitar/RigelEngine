@@ -42,7 +42,7 @@ namespace rigel {
 class Game : public IGameServiceProvider {
 public:
   Game(
-    const std::string& gamePath,
+    const StartupOptions& startupOptions,
     UserProfile* pUserProfile,
     SDL_Window* pWindow);
   Game(const Game&) = delete;

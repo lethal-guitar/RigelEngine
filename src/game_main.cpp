@@ -250,19 +250,19 @@ void gameMain(const StartupOptions& options) {
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
-  Game game(options.mGamePath, &userProfile, pWindow.get());
+  Game game(options, &userProfile, pWindow.get());
   game.run(options);
 }
 
 
 Game::Game(
-  const std::string& gamePath,
+  const StartupOptions& startupOptions,
   UserProfile* pUserProfile,
   SDL_Window* pWindow
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(gamePath)
+  , mResources(startupOptions.mGamePath)
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
