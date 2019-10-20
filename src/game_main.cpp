@@ -135,36 +135,25 @@ auto createWindow(const data::GameOptions& options) {
 }
 
 
-struct NullGameMode : public GameMode {
-  std::unique_ptr<GameMode> updateAndRender(
-    engine::TimeDelta,
-    const std::vector<SDL_Event>&
-  ) override {
-    return nullptr;
-  }
-};
-
-
-class InitialFadeInWrapper : public GameMode {
-public:
-  explicit InitialFadeInWrapper(std::unique_ptr<GameMode> pModeToSwitchTo)
-    : mpModeToSwitchTo(std::move(pModeToSwitchTo))
-  {
-  }
-
-  std::unique_ptr<GameMode> updateAndRender(
-    engine::TimeDelta,
-    const std::vector<SDL_Event>&
-  ) override {
-    return std::move(mpModeToSwitchTo);
-  }
-
-private:
-  std::unique_ptr<GameMode> mpModeToSwitchTo;
-};
-
-
 auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
+  class InitialFadeInWrapper : public GameMode {
+  public:
+    explicit InitialFadeInWrapper(std::unique_ptr<GameMode> pModeToSwitchTo)
+      : mpModeToSwitchTo(std::move(pModeToSwitchTo))
+    {
+    }
+
+    std::unique_ptr<GameMode> updateAndRender(
+      engine::TimeDelta,
+      const std::vector<SDL_Event>&
+    ) override {
+      return std::move(mpModeToSwitchTo);
+    }
+
+  private:
+    std::unique_ptr<GameMode> mpModeToSwitchTo;
+  };
+
   return std::make_unique<InitialFadeInWrapper>(std::move(mode));
 }
 
@@ -220,6 +209,15 @@ std::unique_ptr<GameMode> createInitialGameMode(
   return std::make_unique<IntroDemoLoopMode>(context, true);
 }
 
+
+std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
+  if (options.mEnableFpsLimit && !options.mEnableVsync) {
+    return FpsLimiter{options.mMaxFps};
+  } else {
+    return std::nullopt;
+  }
+}
+
 }
 
 
@@ -251,25 +249,60 @@ void gameMain(const StartupOptions& options) {
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
-  Game game(options.mGamePath, &userProfile, pWindow.get());
+  Game game(options, &userProfile, pWindow.get());
   game.run(options);
 }
 
 
+FpsLimiter::FpsLimiter(const int targetFps)
+  : mLastTime(std::chrono::high_resolution_clock::now())
+  , mTargetFrameTime(1.0 / targetFps)
+{
+}
+
+
+void FpsLimiter::updateAndWait() {
+  using namespace std::chrono;
+
+  const auto now = high_resolution_clock::now();
+  const auto delta = duration<double>(now - mLastTime).count();
+  mLastTime = now;
+
+  mError += mTargetFrameTime - delta;
+
+  const auto timeToWaitFor = mTargetFrameTime + mError;
+  if (timeToWaitFor > 0.0) {
+    // We use SDL_Delay instead of std::this_thread::sleep_for, because the
+    // former is more accurate on some platforms.
+    SDL_Delay(static_cast<Uint32>(timeToWaitFor * 1000.0));
+  }
+}
+
+
 Game::Game(
-  const std::string& gamePath,
+  const StartupOptions& startupOptions,
   UserProfile* pUserProfile,
   SDL_Window* pWindow
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(gamePath)
-  , mIsShareWareVersion(true)
+  , mResources(startupOptions.mGamePath)
+  , mIsShareWareVersion([this]() {
+      // The registered version has 24 additional level files, and a
+      // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
+      // all of these files, as that would be fairly tedious. Instead, we just
+      // check for the presence of one of the registered version's levels, and
+      // the anti-piracy screen, and assume that we're dealing with a
+      // registered version data set if these two are present.
+      const auto hasRegisteredVersionFiles =
+        mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
+      return !hasRegisteredVersionFiles;
+    }())
+  , mFpsLimiter(createLimiter(pUserProfile->mOptions))
   , mRenderTarget(
       &mRenderer,
       mRenderer.maxWindowSize().width,
       mRenderer.maxWindowSize().height)
-  , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
   , mpUserProfile(pUserProfile)
@@ -293,14 +326,6 @@ void Game::run(const StartupOptions& startupOptions) {
   });
 
   applyChangedOptions();
-
-  // Check if running registered version
-  if (
-    mResources.hasFile("LCR.MNI") &&
-    mResources.hasFile("O1.MNI")
-  ) {
-    mIsShareWareVersion = false;
-  }
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
     makeModeContext(), startupOptions, mIsShareWareVersion));
@@ -363,7 +388,7 @@ void Game::mainLoop() {
     }
 
     ui::imgui_integration::endFrame();
-    mRenderer.swapBuffers();
+    swapBuffers();
 
     applyChangedOptions();
   }
@@ -480,7 +505,7 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
     mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
     mRenderTarget.render(&mRenderer, 0, 0);
-    mRenderer.swapBuffers();
+    swapBuffers();
 
     if (fadeFactor >= 1.0) {
       break;
@@ -491,6 +516,15 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
   // Pretend that the fade didn't take any time
   mLastTime = high_resolution_clock::now();
+}
+
+
+void Game::swapBuffers() {
+  mRenderer.swapBuffers();
+
+  if (mFpsLimiter) {
+    mFpsLimiter->updateAndWait();
+  }
 }
 
 
@@ -509,6 +543,14 @@ void Game::applyChangedOptions() {
 
   if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
     SDL_GL_SetSwapInterval(mpUserProfile->mOptions.mEnableVsync ? 1 : 0);
+  }
+
+  if (
+    currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync ||
+    currentOptions.mEnableFpsLimit != mPreviousOptions.mEnableFpsLimit ||
+    currentOptions.mMaxFps != mPreviousOptions.mMaxFps
+  ) {
+    mFpsLimiter = createLimiter(currentOptions);
   }
 
   if (

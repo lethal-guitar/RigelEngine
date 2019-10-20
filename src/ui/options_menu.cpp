@@ -24,7 +24,10 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
+#include <imgui_internal.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <array>
 
 
 namespace rigel::ui {
@@ -32,6 +35,57 @@ namespace rigel::ui {
 namespace {
 
 constexpr auto SCALE = 0.8f;
+
+constexpr auto STANDARD_FPS_LIMITS = std::array<int, 8>{
+  30, 60, 70, 72, 90, 120, 144, 240};
+
+
+template <typename Callback>
+void withEnabledState(const bool enabled, Callback&& callback) {
+  if (!enabled) {
+    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+  }
+
+  callback();
+
+  if (!enabled) {
+    ImGui::PopItemFlag();
+    ImGui::PopStyleVar();
+  }
+}
+
+
+void fpsLimitUi(data::GameOptions* pOptions) {
+  withEnabledState(!pOptions->mEnableVsync, [=]() {
+    if (pOptions->mEnableVsync) {
+      // When V-Sync is on, we always want to show FPS limiting as off,
+      // regardless of the actual setting in the options.
+      bool alwaysFalse = false;
+      ImGui::Checkbox("Limit max FPS", &alwaysFalse);
+    } else {
+      ImGui::Checkbox("Limit max FPS", &pOptions->mEnableFpsLimit);
+    }
+    ImGui::SameLine();
+
+    ImGui::SetNextItemWidth(64);
+    if (ImGui::BeginCombo("Limit", std::to_string(pOptions->mMaxFps).c_str())) {
+      for (const auto item : STANDARD_FPS_LIMITS) {
+        const auto isSelected = item == pOptions->mMaxFps;
+
+        if (ImGui::Selectable(std::to_string(item).c_str(), isSelected)) {
+          pOptions->mMaxFps = item;
+        }
+
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+
+      ImGui::EndCombo();
+    }
+  });
+}
 
 }
 
@@ -71,6 +125,10 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
       }
 
       ImGui::Checkbox("V-Sync on", &mpOptions->mEnableVsync);
+      ImGui::SameLine();
+      fpsLimitUi(mpOptions);
+      ImGui::NewLine();
+
       ImGui::Checkbox("Show FPS", &mpOptions->mShowFpsCounter);
       ImGui::EndTabItem();
     }
