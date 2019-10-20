@@ -68,7 +68,7 @@ void fpsLimitUi(data::GameOptions* pOptions) {
     }
     ImGui::SameLine();
 
-    ImGui::SetNextItemWidth(64);
+    ImGui::SetNextItemWidth(ImGui::GetFontSize() * 3.8f);
     if (ImGui::BeginCombo("Limit", std::to_string(pOptions->mMaxFps).c_str())) {
       for (const auto item : STANDARD_FPS_LIMITS) {
         const auto isSelected = item == pOptions->mMaxFps;
