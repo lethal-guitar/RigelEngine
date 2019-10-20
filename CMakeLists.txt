@@ -22,7 +22,7 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-find_package(Boost 1.67 COMPONENTS program_options REQUIRED)
+find_package(Boost 1.65 COMPONENTS program_options REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(Filesystem)
