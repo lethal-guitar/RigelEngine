@@ -135,16 +135,6 @@ auto createWindow(const data::GameOptions& options) {
 }
 
 
-struct NullGameMode : public GameMode {
-  std::unique_ptr<GameMode> updateAndRender(
-    engine::TimeDelta,
-    const std::vector<SDL_Event>&
-  ) override {
-    return nullptr;
-  }
-};
-
-
 auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
   class InitialFadeInWrapper : public GameMode {
   public:
@@ -278,7 +268,6 @@ Game::Game(
       &mRenderer,
       mRenderer.maxWindowSize().width,
       mRenderer.maxWindowSize().height)
-  , mpCurrentGameMode(std::make_unique<NullGameMode>())
   , mIsRunning(true)
   , mIsMinimized(false)
   , mpUserProfile(pUserProfile)
