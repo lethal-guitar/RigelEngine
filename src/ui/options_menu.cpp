@@ -68,7 +68,7 @@ void fpsLimitUi(data::GameOptions* pOptions) {
     }
     ImGui::SameLine();
 
-    ImGui::SetNextItemWidth(64);
+    ImGui::SetNextItemWidth(ImGui::GetFontSize() * 3.8f);
     if (ImGui::BeginCombo("Limit", std::to_string(pOptions->mMaxFps).c_str())) {
       for (const auto item : STANDARD_FPS_LIMITS) {
         const auto isSelected = item == pOptions->mMaxFps;
@@ -135,12 +135,16 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
 
     if (ImGui::BeginTabItem("Sound"))
     {
+      const auto sliderWidth = ImGui::GetFontSize() * 24;
+
       ImGui::NewLine();
+      ImGui::SetNextItemWidth(sliderWidth);
       ImGui::SliderFloat("Music volume", &mpOptions->mMusicVolume, 0.0f, 1.0f);
       ImGui::SameLine();
       ImGui::Checkbox("Music on", &mpOptions->mMusicOn);
       ImGui::NewLine();
 
+      ImGui::SetNextItemWidth(sliderWidth);
       ImGui::SliderFloat("Sound volume", &mpOptions->mSoundVolume, 0.0f, 1.0f);
       ImGui::SameLine();
       ImGui::Checkbox("Sound on", &mpOptions->mSoundOn);
