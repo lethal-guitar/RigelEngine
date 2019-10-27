@@ -142,7 +142,6 @@ void main() {
 
 const auto VERTEX_SOURCE_WATER_EFFECT = R"shd(
 ATTRIBUTE vec2 position;
-ATTRIBUTE vec2 texCoord;
 ATTRIBUTE vec2 texCoordMask;
 
 OUT vec2 texCoordFrag;
@@ -152,9 +151,21 @@ uniform mat4 transform;
 
 void main() {
   SET_POINT_SIZE(1.0);
-  gl_Position = transform * vec4(position, 0.0, 1.0);
-  texCoordFrag = vec2(texCoord.x, 1.0 - texCoord.y);
+  vec4 transformedPos = transform * vec4(position, 0.0, 1.0);
+
+  // Applying the transform gives us a position in normalized device
+  // coordinates (from -1.0 to 1.0). For sampling the render target texture,
+  // we need texture coordinates in the range 0.0 to 1.0, however.
+  // Therefore, we transform the position from normalized device coordinates
+  // into the 0.0 to 1.0 range by adding 1 and dividing by 2.
+  //
+  // We assume that the texture is as large as the screen, therefore sampling
+  // with the resulting tex coords should be equivalent to reading the pixel
+  // located at 'position'.
+  texCoordFrag = (transformedPos.xy + vec2(1.0, 1.0)) / 2.0;
   texCoordMaskFrag = vec2(texCoordMask.x, 1.0 - texCoordMask.y);
+
+  gl_Position = transformedPos;
 }
 )shd";
 
@@ -367,7 +378,7 @@ Renderer::Renderer(SDL_Window* pWindow)
       SHADER_PREAMBLE,
       VERTEX_SOURCE_WATER_EFFECT,
       FRAGMENT_SOURCE_WATER_EFFECT,
-      {"position", "texCoord", "texCoordMask"})
+      {"position", "texCoordMask"})
   , mLastUsedShader(0)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
@@ -654,14 +665,13 @@ void Renderer::drawWaterEffect(
       {areaWidth, WATER_MASK_HEIGHT}
     };
 
-    // x, y, tex_u, tex_v, mask_u, mask_v
-    GLfloat vertices[4 * (2 + 2 + 2)];
-    fillVertexPositions(destRect, std::begin(vertices), 0, 6);
-    fillTexCoords(destRect, textureData, std::begin(vertices), 2, 6);
+    // x, y, mask_u, mask_v
+    GLfloat vertices[4 * (2 + 2)];
+    fillVertexPositions(destRect, std::begin(vertices), 0, 4);
     fillTexCoords(
-      animSourceRect, mWaterSurfaceAnimTexture, std::begin(vertices), 4, 6);
+      animSourceRect, mWaterSurfaceAnimTexture, std::begin(vertices), 2, 4);
 
-    batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 6);
+    batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4);
   };
 
   setRenderModeIfChanged(RenderMode::WaterEffect);
@@ -854,7 +864,6 @@ void Renderer::updateShaders() {
         GL_FALSE,
         sizeof(float) * 4,
         toAttribOffset(2 * sizeof(float)));
-      glDisableVertexAttribArray(2);
       break;
 
     case RenderMode::Points:
@@ -875,7 +884,6 @@ void Renderer::updateShaders() {
         GL_FALSE,
         sizeof(float) * 6,
         toAttribOffset(2 * sizeof(float)));
-      glDisableVertexAttribArray(2);
       break;
 
     case RenderMode::WaterEffect:
@@ -886,23 +894,15 @@ void Renderer::updateShaders() {
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(float) * 6,
+        sizeof(float) * 4,
         toAttribOffset(0));
       glVertexAttribPointer(
-        1,
+        2,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(float) * 6,
+        sizeof(float) * 4,
         toAttribOffset(2 * sizeof(float)));
-      glVertexAttribPointer(
-        2,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 6,
-        toAttribOffset(4 * sizeof(float)));
-      glEnableVertexAttribArray(2);
       break;
   }
 }
