@@ -27,11 +27,24 @@ namespace {
 constexpr auto CANNOT_MERGE_MESSAGE =
   "JSON trees are not structurally equivalent";
 
+
+bool isArrayOfPrimitives(const nlohmann::json& item) {
+  using std::all_of;
+  using std::begin;
+  using std::end;
+
+  return
+    item.is_array() &&
+    all_of(begin(item), end(item), [](const nlohmann::json& element) {
+      return !element.is_structured();
+    });
+}
+
 }
 
 
 nlohmann::json merge(nlohmann::json base, nlohmann::json extension) {
-  if (!base.is_structured()) {
+  if (!base.is_structured() || isArrayOfPrimitives(base)) {
     return extension;
   }
 
