@@ -127,4 +127,38 @@ TEST_CASE("JSON merging") {
       CHECK(merged == base);
     }
   }
+
+  SECTION("Array of primitives in extension overwrites counterpart in base") {
+    auto objectWithValues = nlohmann::json{};
+    objectWithValues["values"] = nlohmann::json::array();
+    objectWithValues["values"].push_back(1);
+    objectWithValues["values"].push_back("Test");
+    objectWithValues["values"].push_back(false);
+
+    auto extension = objectWithValues;
+    extension["values"] = nlohmann::json::array();
+    extension["values"].push_back("testing1");
+    extension["values"].push_back("testing2");
+
+    auto merged = merge(objectWithValues, extension);
+
+    auto expectedValues = extension["values"];
+    CHECK(merged["values"] == expectedValues);
+  }
+
+  SECTION("Array of primitives in base remains unchanged when not present in extension") {
+    auto objectWithValues = nlohmann::json{};
+    objectWithValues["values"] = nlohmann::json::array();
+    objectWithValues["values"].push_back(1);
+    objectWithValues["values"].push_back("Test");
+    objectWithValues["values"].push_back(false);
+
+    auto extension = nlohmann::json{};
+    extension["something"] = 1.0f;
+
+    auto merged = merge(objectWithValues, extension);
+
+    auto expectedValues = objectWithValues["values"];
+    CHECK(merged["values"] == expectedValues);
+  }
 }
