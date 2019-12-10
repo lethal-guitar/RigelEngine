@@ -47,9 +47,12 @@ constexpr auto RADAR_POS_Y =
   RADAR_CENTER_POS_Y -
   RADAR_SIZE_PX/2 -
   data::GameTraits::inGameViewPortOffset.y;
+constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
+  base::Vector{RADAR_SIZE_PX/2, RADAR_SIZE_PX/2 + 1};
 
 constexpr auto NUM_RADAR_BLINK_STEPS = 4;
 constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
+const auto RADAR_DOT_COLOR = loader::INGAME_PALETTE[15];
 
 
 void drawNumbersBig(
@@ -245,7 +248,10 @@ void HudRenderer::updateAnimation() {
 }
 
 
-void HudRenderer::render(const data::PlayerModel& playerModel) {
+void HudRenderer::render(
+  const data::PlayerModel& playerModel,
+  const base::ArrayView<base::Vector> radarPositions
+) {
   // Hud background
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
@@ -293,7 +299,7 @@ void HudRenderer::render(const data::PlayerModel& playerModel) {
   drawHealthBar(playerModel);
   drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer);
   drawCollectedLetters(playerModel);
-  drawRadar();
+  drawRadar(radarPositions);
 }
 
 
@@ -335,7 +341,9 @@ void HudRenderer::drawCollectedLetters(
 }
 
 
-void HudRenderer::drawRadar() const {
+void HudRenderer::drawRadar(
+  const base::ArrayView<base::Vector> positions
+) const {
   {
     auto binder =
       renderer::RenderTargetTexture::Binder{mRadarSurface, mpRenderer};
@@ -343,10 +351,16 @@ void HudRenderer::drawRadar() const {
 
     mpRenderer->clear({0, 0, 0, 0});
 
+    for (const auto& position : positions)
+    {
+      const auto dotPosition = position + RADAR_CENTER_OFFSET_RELATIVE;
+      mpRenderer->drawPoint(dotPosition, RADAR_DOT_COLOR);
+    }
+
     const auto blinkColorIndex =
       mElapsedFrames % NUM_RADAR_BLINK_STEPS + RADAR_BLINK_START_COLOR_INDEX;
     const auto blinkColor = loader::INGAME_PALETTE[blinkColorIndex];
-    mpRenderer->drawPoint({RADAR_SIZE_PX/2, RADAR_SIZE_PX/2 + 1}, blinkColor);
+    mpRenderer->drawPoint(RADAR_CENTER_OFFSET_RELATIVE, blinkColor);
   }
 
   mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);

@@ -218,6 +218,33 @@ void setupWidescreenHudOffset(
   return saved;
 }
 
+
+std::vector<base::Vector> collectRadarDots(
+  entityx::EntityManager& entities,
+  const base::Vector& playerPosition
+) {
+  using engine::components::Active;
+  using engine::components::WorldPosition;
+  using game_logic::components::AppearsOnRadar;
+
+  std::vector<base::Vector> radarDots;
+
+  entities.each<WorldPosition, AppearsOnRadar, Active>(
+    [&](
+      entityx::Entity,
+      const WorldPosition& position,
+      const AppearsOnRadar&,
+      const Active&
+    ) {
+      const auto positionRelativeToPlayer = position - playerPosition;
+      if (ui::isVisibleOnRadar(positionRelativeToPlayer)) {
+        radarDots.push_back(positionRelativeToPlayer);
+      }
+    });
+
+  return radarDots;
+}
+
 }
 
 
@@ -546,7 +573,9 @@ void GameWorld::render() {
   };
 
   auto drawHud = [&, this]() {
-    mHudRenderer.render(*mpPlayerModel);
+    const auto radarDots =
+      collectRadarDots(mEntities, mpSystems->player().position());
+    mHudRenderer.render(*mpPlayerModel, radarDots);
   };
 
 

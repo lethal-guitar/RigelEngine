@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "data/player_model.hpp"
 #include "engine/tiled_texture.hpp"
 #include "renderer/texture.hpp"
@@ -40,6 +41,13 @@ namespace loader {
 
 namespace ui {
 
+inline bool isVisibleOnRadar(const base::Vector& position) {
+  return
+    position.x >= -16 && position.x < 16 &&
+    position.y >= -16 && position.y < 16;
+}
+
+
 class HudRenderer {
 public:
   HudRenderer(
@@ -49,7 +57,9 @@ public:
     engine::TiledTexture* pStatusSpriteSheetRenderer);
 
   void updateAnimation();
-  void render(const data::PlayerModel& playerModel);
+  void render(
+    const data::PlayerModel& playerModel,
+    base::ArrayView<base::Vector> radarPositions);
 
 private:
   struct CollectedLetterIndicator {
@@ -80,7 +90,7 @@ private:
 
   void drawHealthBar(const data::PlayerModel& playerModel) const;
   void drawCollectedLetters(const data::PlayerModel& playerModel) const;
-  void drawRadar() const;
+  void drawRadar(base::ArrayView<base::Vector> positions) const;
 
   const int mLevelNumber;
   renderer::Renderer* mpRenderer;

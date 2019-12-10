@@ -21,6 +21,7 @@
 #include "engine/movement.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
@@ -110,6 +111,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
 
             // draw the robot's eye
             sprite.mFramesToRender.push_back(6);
+            entity.assign<game_logic::components::AppearsOnRadar>();
           } else if (state.mFramesElapsed == 16) {
             botState = Moving{Orientation::Left};
             return; // We must'n access 'state' after this point
