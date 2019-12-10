@@ -242,7 +242,6 @@ GameWorld::GameWorld(
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
-      mpPlayerModel,
       sessionId.mLevel + 1,
       mpRenderer,
       *context.mpResources,
@@ -546,6 +545,10 @@ void GameWorld::render() {
     }
   };
 
+  auto drawHud = [&, this]() {
+    mHudRenderer.render(*mpPlayerModel);
+  };
+
 
   if (widescreenModeOn) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
@@ -557,7 +560,7 @@ void GameWorld::render() {
       drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles});
 
       setupWidescreenHudOffset(mpRenderer, info);
-      mHudRenderer.render();
+      drawHud();
     }
 
     auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
@@ -567,7 +570,7 @@ void GameWorld::render() {
       const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
 
       drawWorld(data::GameTraits::mapViewPortSize);
-      mHudRenderer.render();
+      drawHud();
     }
 
     drawTopRow();

@@ -43,14 +43,13 @@ namespace ui {
 class HudRenderer {
 public:
   HudRenderer(
-    data::PlayerModel* pPlayerModel,
     int levelNumber,
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader& bundle,
     engine::TiledTexture* pStatusSpriteSheetRenderer);
 
   void updateAnimation();
-  void render();
+  void render(const data::PlayerModel& playerModel);
 
 private:
   struct CollectedLetterIndicator {
@@ -64,7 +63,6 @@ private:
     std::unordered_map<data::CollectableLetterType, CollectedLetterIndicator>;
 
   HudRenderer(
-    data::PlayerModel* pPlayerModel,
     int levelNumber,
     renderer::Renderer* pRenderer,
     const loader::ActorData& actorData,
@@ -80,11 +78,10 @@ private:
     renderer::Renderer* pRenderer,
     const loader::ActorImagePackage& imagePack);
 
-  void drawHealthBar() const;
-  void drawCollectedLetters() const;
+  void drawHealthBar(const data::PlayerModel& playerModel) const;
+  void drawCollectedLetters(const data::PlayerModel& playerModel) const;
   void drawRadar() const;
 
-  data::PlayerModel* mpPlayerModel;
   const int mLevelNumber;
   renderer::Renderer* mpRenderer;
 
