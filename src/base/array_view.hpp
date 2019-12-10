@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 
 namespace rigel::base {
@@ -66,6 +67,13 @@ public:
   constexpr ArrayView(const T (&array)[N]) noexcept // NOLINT
     : mpData(array)
     , mSize(static_cast<size_type>(N))
+  {
+  }
+
+  // implicit on purpose
+  ArrayView(const std::vector<T>& vec) noexcept // NOLINT
+    : mpData(vec.data())
+    , mSize(static_cast<size_type>(vec.size()))
   {
   }
 
