@@ -82,6 +82,7 @@ private:
 
   void drawHealthBar() const;
   void drawCollectedLetters() const;
+  void drawRadar() const;
 
   data::PlayerModel* mpPlayerModel;
   const int mLevelNumber;
@@ -95,6 +96,7 @@ private:
   InventoryItemTextureMap mInventoryTexturesByType;
   CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
   engine::TiledTexture* mpStatusSpriteSheetRenderer;
+  mutable renderer::RenderTargetTexture mRadarSurface;
 };
 
 }}

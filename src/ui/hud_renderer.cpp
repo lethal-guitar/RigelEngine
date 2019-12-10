@@ -17,6 +17,7 @@
 #include "hud_renderer.hpp"
 
 #include "data/game_traits.hpp"
+#include "loader/palette.hpp"
 #include "loader/resource_loader.hpp"
 
 #include <cmath>
@@ -32,7 +33,23 @@ using namespace rigel::renderer;
 
 namespace {
 
-const auto NUM_HEALTH_SLICES = 8;
+constexpr auto NUM_HEALTH_SLICES = 8;
+
+constexpr auto RADAR_SIZE_PX = 32;
+constexpr auto RADAR_CENTER_POS_X = 288;
+constexpr auto RADAR_CENTER_POS_Y = 136;
+
+constexpr auto RADAR_POS_X =
+  RADAR_CENTER_POS_X -
+  RADAR_SIZE_PX/2 -
+  data::GameTraits::inGameViewPortOffset.x;
+constexpr auto RADAR_POS_Y =
+  RADAR_CENTER_POS_Y -
+  RADAR_SIZE_PX/2 -
+  data::GameTraits::inGameViewPortOffset.y;
+
+constexpr auto NUM_RADAR_BLINK_STEPS = 4;
+constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
 
 
 void drawNumbersBig(
@@ -222,6 +239,7 @@ HudRenderer::HudRenderer(
   , mInventoryTexturesByType(std::move(inventoryItemTextures))
   , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
   , mpStatusSpriteSheetRenderer(pStatusSpriteSheet)
+  , mRadarSurface(pRenderer, RADAR_SIZE_PX, RADAR_SIZE_PX)
 {
 }
 
@@ -279,6 +297,7 @@ void HudRenderer::render() {
   drawHealthBar();
   drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer);
   drawCollectedLetters();
+  drawRadar();
 }
 
 
@@ -317,5 +336,22 @@ void HudRenderer::drawCollectedLetters() const {
   }
 }
 
+
+void HudRenderer::drawRadar() const {
+  {
+    auto binder =
+      renderer::RenderTargetTexture::Binder{mRadarSurface, mpRenderer};
+    auto stateSaver = renderer::setupDefaultState(mpRenderer);
+
+    mpRenderer->clear({0, 0, 0, 0});
+
+    const auto blinkColorIndex =
+      mElapsedFrames % NUM_RADAR_BLINK_STEPS + RADAR_BLINK_START_COLOR_INDEX;
+    const auto blinkColor = loader::INGAME_PALETTE[blinkColorIndex];
+    mpRenderer->drawPoint({RADAR_SIZE_PX/2, RADAR_SIZE_PX/2 + 1}, blinkColor);
+  }
+
+  mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);
+}
 
 }
