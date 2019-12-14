@@ -61,6 +61,9 @@ const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
 };
 
 
+const int GREEN_BIRD_FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
+
+
 const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
   {0.0f, -3.0f},
   {0.0f, -2.0f},
@@ -1610,10 +1613,24 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Ugly_green_bird: // green bird
+      // Unclear if this is intentional or accidental, but the green bird's
+      // score is equal to its y position...
+      {
+        const auto& position = *entity.component<WorldPosition>();
+        entity.assign<Shootable>(Health{2}, GivenScore{position.y});
+      }
+
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::GreenBird{});
+      entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AnimationSequence>(
+        GREEN_BIRD_FLY_ANIMATION_SEQUENCE, 0, true);
       entity.assign<AppearsOnRadar>();
       break;
 

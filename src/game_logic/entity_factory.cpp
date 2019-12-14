@@ -34,6 +34,7 @@
 #include "game_logic/enemies/ceiling_sucker.hpp"
 #include "game_logic/enemies/eyeball_thrower.hpp"
 #include "game_logic/enemies/floating_laser_bot.hpp"
+#include "game_logic/enemies/green_bird.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
 #include "game_logic/enemies/laser_turret.hpp"
 #include "game_logic/enemies/messenger_drone.hpp"
@@ -275,6 +276,9 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
 
     case ActorID::Rigelatin_soldier:
       return 4;
+
+    case ActorID::Ugly_green_bird:
+      return 3;
 
     default:
       return std::nullopt;
