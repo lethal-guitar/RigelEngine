@@ -8,7 +8,6 @@ branches:
 
 environment:
     BOOST_ROOT: C:\Libraries\boost_1_67_0
-    BOOST_LIBRARYDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
 
 install:
     - git submodule update --init --recursive
@@ -48,8 +47,7 @@ test_script:
     - ctest
 
 after_build:
-  - IF "%CONFIGURATION%" == "Debug" set BOOST_DBG_MARKER=-gd
-  - 7z a rigel_build.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\SDL2_mixer.dll %BOOST_LIBRARYDIR%\boost_program_options-vc141-mt%BOOST_DBG_MARKER%-x64-1_67.dll
+  - 7z a rigel_build.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\SDL2_mixer.dll
 
 artifacts:
     - path: rigel_build.zip

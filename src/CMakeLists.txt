@@ -323,6 +323,5 @@ target_link_libraries(${main_exe_name} PRIVATE
     Boost::boost
     Boost::program_options
     Boost::disable_autolinking
-    Boost::dynamic_linking
 )
 

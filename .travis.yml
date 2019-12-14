@@ -1,6 +1,4 @@
-# We need to use trusty in order to get libsdl2
-sudo: required
-dist: xenial
+dist: bionic
 osx_image: xcode10.2
 
 branches:
@@ -19,11 +17,9 @@ matrix:
           packages:
             - libsdl2-dev
             - libsdl2-mixer-dev
+            - libboost-dev
+            - libboost-program-options-dev
             - g++-8
-            - boost1.67
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'ppa:mhier/libboost-latest'
 
     - os: osx
       addons:
