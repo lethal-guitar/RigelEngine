@@ -103,6 +103,8 @@ set(core_sources
     game_logic/enemies/eyeball_thrower.hpp
     game_logic/enemies/floating_laser_bot.cpp
     game_logic/enemies/floating_laser_bot.hpp
+    game_logic/enemies/green_bird.cpp
+    game_logic/enemies/green_bird.hpp
     game_logic/enemies/hover_bot.cpp
     game_logic/enemies/hover_bot.hpp
     game_logic/enemies/laser_turret.cpp
