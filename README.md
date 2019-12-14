@@ -21,14 +21,12 @@ Here's a video showcasing the project:
 
 RigelEngine implements all the game mechanics and enemies found in the original game's first episode, i.e. the shareware episode. The intro movie, story sequence and most of the menu system are implemented as well. It's possible to load and save the game, and the high score lists work (saved games and high scores from the original game will be imported into RigelEngine's user profile when launching it for the first time). Therefore, the shareware episode is fully playable with RigelEngine.
 
-The levels from the registered version (i.e. episodes 2, 3 and 4) can also be loaded, and they should mostly work, but not all of the enemies found in those levels are functional yet. In addition, Duke's space ship is not implemented yet, which means the levels where it is required can't be completed yet.
+Support for the registered version (i.e. episodes 2, 3 and 4) is still work in progress at this point.
+The registered version's levels can be loaded, and they mostly work, but not all of the enemies found in those levels are functional yet. In addition, Duke's space ship is not implemented yet, which means the levels where it is required can't be completed yet.
 
-Some other features that still need to be implemented:
+The only other major feature that's still missing is demo playback.
 
-* Demo playback
-* Enemy radar in game
-
-Plus, it would be nice to make launching the game easier in the future, e.g. by having some kind of launcher application or setup program.
+Plus, it would be nice to make launching the game easier in the future by having a UI for selecting the path to the game files, and possibly even downloading the Shareware files automatically.
 
 ## Contributing
 
