@@ -1301,7 +1301,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
       break;
 
-    case ActorID::Respawn_checkpoin: // respawn checkpoint
+    case ActorID::Respawn_checkpoint: // respawn checkpoint
       entity.assign<BehaviorController>(interaction::RespawnCheckpoint{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);

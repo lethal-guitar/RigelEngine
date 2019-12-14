@@ -144,7 +144,7 @@ enum class ActorID {
     Blowing_fan = 130,
     Laser_turret = 131,
     Sliding_door_horizontal = 132,
-    Respawn_checkpoin = 133,
+    Respawn_checkpoint = 133,
     Skeleton = 134,
     Enemy_laser_shot_LEFT = 135,
     Enemy_laser_shot_RIGHT = 136,
