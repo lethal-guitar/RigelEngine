@@ -127,7 +127,7 @@ recommended.
 To build from source, a C++ 17 compatible compiler is required. The project has been
 built successfully on the following compilers:
 
-* Microsoft Visual Studio 2017 (version 15.9.4 or newer)
+* Microsoft Visual Studio 2019 (version 16.1.6 or newer)
 * gcc 8.1.0
 * clang 7.0.0
 
@@ -272,9 +272,6 @@ vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2
 ```
 
 Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
-
-When using Visual Studio 2019, CMake defaults to creating a 64-bit build. But when using Visual Studio 2017, you have to specify
-this by passing `-G "Visual Studio 15 2017 Win64"` to CMake. The example below assumes you're using Visual Studio 2019.
 
 ```bash
 mkdir build

@@ -1,13 +1,13 @@
 clone_depth: 50
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 branches:
     only:
         - master
 
 environment:
-    BOOST_ROOT: C:\Libraries\boost_1_67_0
+    BOOST_ROOT: C:\Libraries\boost_1_71_0
 
 install:
     - git submodule update --init --recursive
@@ -31,7 +31,7 @@ before_build:
 
     - mkdir build
     - cd build
-    - cmake .. -G "Visual Studio 15 2017 Win64"
+    - cmake .. -G "Visual Studio 16 2019"
     - cd ..
 
 build:
