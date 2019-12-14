@@ -218,6 +218,33 @@ void setupWidescreenHudOffset(
   return saved;
 }
 
+
+std::vector<base::Vector> collectRadarDots(
+  entityx::EntityManager& entities,
+  const base::Vector& playerPosition
+) {
+  using engine::components::Active;
+  using engine::components::WorldPosition;
+  using game_logic::components::AppearsOnRadar;
+
+  std::vector<base::Vector> radarDots;
+
+  entities.each<WorldPosition, AppearsOnRadar, Active>(
+    [&](
+      entityx::Entity,
+      const WorldPosition& position,
+      const AppearsOnRadar&,
+      const Active&
+    ) {
+      const auto positionRelativeToPlayer = position - playerPosition;
+      if (ui::isVisibleOnRadar(positionRelativeToPlayer)) {
+        radarDots.push_back(positionRelativeToPlayer);
+      }
+    });
+
+  return radarDots;
+}
+
 }
 
 
@@ -242,7 +269,6 @@ GameWorld::GameWorld(
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
-      mpPlayerModel,
       sessionId.mLevel + 1,
       mpRenderer,
       *context.mpResources,
@@ -546,6 +572,12 @@ void GameWorld::render() {
     }
   };
 
+  auto drawHud = [&, this]() {
+    const auto radarDots =
+      collectRadarDots(mEntities, mpSystems->player().position());
+    mHudRenderer.render(*mpPlayerModel, radarDots);
+  };
+
 
   if (widescreenModeOn) {
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
@@ -557,7 +589,7 @@ void GameWorld::render() {
       drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles});
 
       setupWidescreenHudOffset(mpRenderer, info);
-      mHudRenderer.render();
+      drawHud();
     }
 
     auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
@@ -567,7 +599,7 @@ void GameWorld::render() {
       const auto saved = setupIngameViewport(mpRenderer, mScreenShakeOffsetX);
 
       drawWorld(data::GameTraits::mapViewPortSize);
-      mHudRenderer.render();
+      drawHud();
     }
 
     drawTopRow();

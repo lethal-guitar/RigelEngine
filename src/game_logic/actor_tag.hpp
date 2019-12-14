@@ -27,6 +27,9 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::game_logic::components {
 
+// TODO: Consider finding a better place for this?
+struct AppearsOnRadar {};
+
 struct ActorTag {
   static constexpr auto INVALID_SPAWN_INDEX = std::numeric_limits<int>::max();
 

@@ -22,6 +22,7 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.65 COMPONENTS program_options REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)

@@ -190,6 +190,7 @@ void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
   mFramesElapsed = 0;
   entity.component<Sprite>()->mShow = false;
   entity.remove<engine::components::MovingBody>();
+  entity.remove<game_logic::components::AppearsOnRadar>();
 
   // Once the bomb explodes, it counts towards bonus 6. This means we need to
   // remove the actor tag (which is used to count remaining fire bombs in the

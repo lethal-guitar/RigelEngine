@@ -21,6 +21,7 @@
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -54,6 +55,7 @@ void createSlimeDrop(
     true);
   // Gravity handles the drop's movement, so velocity is initally 0.
   entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
+  entity.assign<AppearsOnRadar>();
 
   entity.assign<PlayerDamaging>(Damage{1});
   entity.assign<AutoDestroy>(AutoDestroy{

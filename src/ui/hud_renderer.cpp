@@ -17,6 +17,7 @@
 #include "hud_renderer.hpp"
 
 #include "data/game_traits.hpp"
+#include "loader/palette.hpp"
 #include "loader/resource_loader.hpp"
 
 #include <cmath>
@@ -32,7 +33,26 @@ using namespace rigel::renderer;
 
 namespace {
 
-const auto NUM_HEALTH_SLICES = 8;
+constexpr auto NUM_HEALTH_SLICES = 8;
+
+constexpr auto RADAR_SIZE_PX = 32;
+constexpr auto RADAR_CENTER_POS_X = 288;
+constexpr auto RADAR_CENTER_POS_Y = 136;
+
+constexpr auto RADAR_POS_X =
+  RADAR_CENTER_POS_X -
+  RADAR_SIZE_PX/2 -
+  data::GameTraits::inGameViewPortOffset.x;
+constexpr auto RADAR_POS_Y =
+  RADAR_CENTER_POS_Y -
+  RADAR_SIZE_PX/2 -
+  data::GameTraits::inGameViewPortOffset.y;
+constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
+  base::Vector{RADAR_SIZE_PX/2, RADAR_SIZE_PX/2 + 1};
+
+constexpr auto NUM_RADAR_BLINK_STEPS = 4;
+constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
+const auto RADAR_DOT_COLOR = loader::INGAME_PALETTE[15];
 
 
 void drawNumbersBig(
@@ -186,14 +206,12 @@ HudRenderer::makeCollectedLetterTextureMap(
 
 
 HudRenderer::HudRenderer(
-  data::PlayerModel* pPlayerModel,
   const int levelNumber,
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& bundle,
   engine::TiledTexture* pStatusSpriteSheet
 )
   : HudRenderer(
-      pPlayerModel,
       levelNumber,
       pRenderer,
       bundle.mActorImagePackage.loadActor(ActorID::HUD_frame_background),
@@ -205,7 +223,6 @@ HudRenderer::HudRenderer(
 
 
 HudRenderer::HudRenderer(
-  data::PlayerModel* pPlayerModel,
   const int levelNumber,
   renderer::Renderer* pRenderer,
   const loader::ActorData& actorData,
@@ -213,8 +230,7 @@ HudRenderer::HudRenderer(
   CollectedLetterIndicatorMap&& collectedLetterTextures,
   engine::TiledTexture* pStatusSpriteSheet
 )
-  : mpPlayerModel(pPlayerModel)
-  , mLevelNumber(levelNumber)
+  : mLevelNumber(levelNumber)
   , mpRenderer(pRenderer)
   , mTopRightTexture(mpRenderer, actorData.mFrames[0].mFrameImage)
   , mBottomLeftTexture(mpRenderer, actorData.mFrames[1].mFrameImage)
@@ -222,6 +238,7 @@ HudRenderer::HudRenderer(
   , mInventoryTexturesByType(std::move(inventoryItemTextures))
   , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
   , mpStatusSpriteSheetRenderer(pStatusSpriteSheet)
+  , mRadarSurface(pRenderer, RADAR_SIZE_PX, RADAR_SIZE_PX)
 {
 }
 
@@ -231,7 +248,10 @@ void HudRenderer::updateAnimation() {
 }
 
 
-void HudRenderer::render() {
+void HudRenderer::render(
+  const data::PlayerModel& playerModel,
+  const base::ArrayView<base::Vector> radarPositions
+) {
   // Hud background
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
@@ -253,10 +273,10 @@ void HudRenderer::render() {
   const auto inventoryStartPos = base::Vector{
     topRightTexturePosX + GameTraits::tileSize,
     2*GameTraits::tileSize};
-  auto inventoryIter = mpPlayerModel->inventory().cbegin();
+  auto inventoryIter = playerModel.inventory().cbegin();
   for (int row = 0; row < 3; ++row) {
     for (int col = 0; col < 2; ++col) {
-      if (inventoryIter != mpPlayerModel->inventory().cend()) {
+      if (inventoryIter != playerModel.inventory().cend()) {
         const auto itemType = *inventoryIter++;
         const auto drawPos =
           inventoryStartPos + base::Vector{col, row} * GameTraits::tileSize*2;
@@ -270,25 +290,26 @@ void HudRenderer::render() {
 
   // Player state and remaining HUD elements
   // --------------------------------------------------------------------------
-  drawScore(mpPlayerModel->score(), *mpStatusSpriteSheetRenderer);
-  drawWeaponIcon(mpPlayerModel->weapon(), *mpStatusSpriteSheetRenderer);
+  drawScore(playerModel.score(), *mpStatusSpriteSheetRenderer);
+  drawWeaponIcon(playerModel.weapon(), *mpStatusSpriteSheetRenderer);
   drawAmmoBar(
-    mpPlayerModel->ammo(),
-    mpPlayerModel->currentMaxAmmo(),
+    playerModel.ammo(),
+    playerModel.currentMaxAmmo(),
     *mpStatusSpriteSheetRenderer);
-  drawHealthBar();
+  drawHealthBar(playerModel);
   drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer);
-  drawCollectedLetters();
+  drawCollectedLetters(playerModel);
+  drawRadar(radarPositions);
 }
 
 
-void HudRenderer::drawHealthBar() const {
+void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const {
   // Health slices start at col 20, row 4. The first 9 are for the "0 health"
   // animation
 
   // The model has a range of 1-9 for health, but the HUD shows only 8
   // slices, with a special animation for having 1 point of health.
-  const auto numFullSlices = mpPlayerModel->health() - 1;
+  const auto numFullSlices = playerModel.health() - 1;
   if (numFullSlices > 0) {
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = i < numFullSlices ? 9 : 10;
@@ -309,13 +330,40 @@ void HudRenderer::drawHealthBar() const {
 }
 
 
-void HudRenderer::drawCollectedLetters() const {
-  for (const auto letter : mpPlayerModel->collectedLetters()) {
+void HudRenderer::drawCollectedLetters(
+  const data::PlayerModel& playerModel
+) const {
+  for (const auto letter : playerModel.collectedLetters()) {
     const auto it = mCollectedLetterIndicatorsByType.find(letter);
     assert(it != mCollectedLetterIndicatorsByType.end());
     it->second.mTexture.render(mpRenderer, it->second.mPxPosition);
   }
 }
 
+
+void HudRenderer::drawRadar(
+  const base::ArrayView<base::Vector> positions
+) const {
+  {
+    auto binder =
+      renderer::RenderTargetTexture::Binder{mRadarSurface, mpRenderer};
+    auto stateSaver = renderer::setupDefaultState(mpRenderer);
+
+    mpRenderer->clear({0, 0, 0, 0});
+
+    for (const auto& position : positions)
+    {
+      const auto dotPosition = position + RADAR_CENTER_OFFSET_RELATIVE;
+      mpRenderer->drawPoint(dotPosition, RADAR_DOT_COLOR);
+    }
+
+    const auto blinkColorIndex =
+      mElapsedFrames % NUM_RADAR_BLINK_STEPS + RADAR_BLINK_START_COLOR_INDEX;
+    const auto blinkColor = loader::INGAME_PALETTE[blinkColorIndex];
+    mpRenderer->drawPoint(RADAR_CENTER_OFFSET_RELATIVE, blinkColor);
+  }
+
+  mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);
+}
 
 }

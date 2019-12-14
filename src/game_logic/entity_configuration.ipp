@@ -684,6 +684,7 @@ void EntityFactory::configureItemBox(
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
   entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
+  entity.assign<AppearsOnRadar>();
 }
 
 
@@ -703,18 +704,22 @@ void EntityFactory::configureEntity(
   switch (actorID) {
     case ActorID::Blue_bonus_globe_1: // Blue bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{500});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_2: // Red bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{2000});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_3: // Green bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{5000});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_4: // White bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{10000});
+      entity.assign<AppearsOnRadar>();
       break;
 
     // Circuit card force field
@@ -733,11 +738,13 @@ void EntityFactory::configureEntity(
 
     case ActorID::Circuit_card_keyhole: // Keyhole (circuit board)
       interaction::configureKeyCardSlot(entity, boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     // Keyhole (blue key)
     case ActorID::Blue_key_keyhole:
       interaction::configureKeyHole(entity, boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     // ----------------------------------------------------------------------
@@ -751,6 +758,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
       addItemBoxDestroyEffect(entity);
+      entity.assign<AppearsOnRadar>();
       break;
 
     // ----------------------------------------------------------------------
@@ -766,7 +774,8 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::White,
           100,
-          item);
+          item,
+          AppearsOnRadar{});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -781,7 +790,8 @@ void EntityFactory::configureEntity(
           entity,
           ContainerColor::White,
           100,
-          item);
+          item,
+          AppearsOnRadar{});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -798,7 +808,8 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item,
-          animation);
+          animation,
+          AppearsOnRadar{});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -815,7 +826,8 @@ void EntityFactory::configureEntity(
           ContainerColor::White,
           100,
           item,
-          animation);
+          animation,
+          AppearsOnRadar{});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -837,6 +849,7 @@ void EntityFactory::configureEntity(
           AnimationLoop{1},
           shootable,
           ActorTag{ActorTag::Type::FireBomb},
+          AppearsOnRadar{},
           DestructionEffects{
             NAPALM_BOMB_KILL_EFFECT_SPEC,
             DestructionEffects::TriggerCondition::Manual},
@@ -894,7 +907,8 @@ void EntityFactory::configureEntity(
           AnimationSequence{SODA_CAN_ROCKET_FIRE_ANIMATION, 1, true},
           MovingBody{Velocity{0.0f, -1.0f}, GravityAffected{false}},
           ActivationSettings{ActivationSettings::Policy::Always},
-          AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
+          AutoDestroy{AutoDestroy::Condition::OnWorldCollision},
+          AppearsOnRadar{});
 
         configureItemBox(
           entity,
@@ -903,7 +917,8 @@ void EntityFactory::configureEntity(
           intactSodaCanCollectable,
           flyingSodaCanContainer,
           Shootable{Health{1}, GivenScore{0}},
-          AnimationLoop{1, 0, 5});
+          AnimationLoop{1, 0, 5},
+          AppearsOnRadar{});
       }
       break;
 
@@ -919,7 +934,8 @@ void EntityFactory::configureEntity(
           100,
           item,
           Shootable{Health{1}, GivenScore{10000}},
-          DestructionEffects{SODA_SIX_PACK_KILL_EFFECT_SPEC});
+          DestructionEffects{SODA_SIX_PACK_KILL_EFFECT_SPEC},
+          AppearsOnRadar{});
       }
       break;
 
@@ -948,7 +964,8 @@ void EntityFactory::configureEntity(
           cookedTurkeyCollectable,
           cookedTurkeySprite,
           AnimationLoop{1, 4, 7},
-          Active{});
+          Active{},
+          AppearsOnRadar{});
         addDefaultMovingBody(cookedTurkeyContainer, boundingBox);
 
         auto livingTurkeyContainer = makeContainer(
@@ -958,7 +975,8 @@ void EntityFactory::configureEntity(
           cookedTurkeyContainer,
           AnimationLoop{1, 0, 1},
           ai::components::SimpleWalker{turkeyAiConfig()},
-          Active{});
+          Active{},
+          AppearsOnRadar{});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
 
         // We don't use configureItemBox here, since we don't want the bounce
@@ -971,6 +989,7 @@ void EntityFactory::configureEntity(
         entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
         entity.component<ItemContainer>()->mStyle =
           ItemContainer::ReleaseStyle::ItemBox;
+        entity.assign<AppearsOnRadar>();
       }
       break;
 
@@ -988,7 +1007,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Green,
           100,
           item,
-          ActorTag{ActorTag::Type::CollectableWeapon});
+          ActorTag{ActorTag::Type::CollectableWeapon},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
         entity.remove<ActivationSettings>();
       }
@@ -1005,7 +1025,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Green,
           100,
           item,
-          ActorTag{ActorTag::Type::CollectableWeapon});
+          ActorTag{ActorTag::Type::CollectableWeapon},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
         entity.remove<ActivationSettings>();
       }
@@ -1022,7 +1043,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Green,
           100,
           item,
-          ActorTag{ActorTag::Type::CollectableWeapon});
+          ActorTag{ActorTag::Type::CollectableWeapon},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
         entity.remove<ActivationSettings>();
       }
@@ -1039,7 +1061,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Green,
           100,
           item,
-          ActorTag{ActorTag::Type::CollectableWeapon});
+          ActorTag{ActorTag::Type::CollectableWeapon},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
         entity.remove<ActivationSettings>();
       }
@@ -1061,7 +1084,8 @@ void EntityFactory::configureEntity(
           0,
           item,
           AnimationLoop{1},
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1076,7 +1100,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1091,7 +1116,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1106,7 +1132,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1121,7 +1148,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1135,7 +1163,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1149,7 +1178,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1163,7 +1193,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1177,7 +1208,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1191,7 +1223,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1205,7 +1238,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1219,7 +1253,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1233,7 +1268,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1247,7 +1283,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1261,7 +1298,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1275,7 +1313,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1289,7 +1328,8 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
-          ActorTag{ActorTag::Type::Merchandise});
+          ActorTag{ActorTag::Type::Merchandise},
+          AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
       }
       break;
@@ -1299,12 +1339,14 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       entity.assign<Interactable>(InteractableType::Teleporter);
       entity.assign<BoundingBox>(BoundingBox{{2, 0}, {2, 5}});
+      entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Respawn_checkpoin: // respawn checkpoint
+    case ActorID::Respawn_checkpoint: // respawn checkpoint
       entity.assign<BehaviorController>(interaction::RespawnCheckpoint{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Special_hint_globe: // Special hint globe
@@ -1318,6 +1360,7 @@ void EntityFactory::configureEntity(
         item.mGivenItem = InventoryItemType::SpecialHintGlobe;
         entity.assign<CollectableItem>(item);
       }
+      entity.assign<AppearsOnRadar>();
       break;
 
 
@@ -1343,12 +1386,14 @@ void EntityFactory::configureEntity(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
     // Wall-mounted flame thrower
     case ActorID::Wall_mounted_flamethrower_RIGHT: // ->
     case ActorID::Wall_mounted_flamethrower_LEFT: // <-
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Watchbot: // Bouncing robot with big eye
@@ -1361,6 +1406,7 @@ void EntityFactory::configureEntity(
       addDefaultMovingBody(entity, boundingBox);
       entity.component<MovingBody>()->mGravityAffected = false;
       entity.assign<BehaviorController>(behaviors::WatchBot{});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Rocket_launcher_turret: // Rocket launcher turret
@@ -1372,6 +1418,7 @@ void EntityFactory::configureEntity(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
     // Rocket turret rockets
@@ -1383,6 +1430,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.component<Sprite>()->mFramesToRender.push_back(1);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Watchbot_container_carrier: // Watch-bot container carrier
@@ -1393,6 +1441,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::WatchBotCarrier{});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Bomb_dropping_spaceship: // Bomb dropping space ship
@@ -1404,6 +1453,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::BomberPlane{});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Napalm_bomb: // Big bomb
@@ -1417,6 +1467,7 @@ void EntityFactory::configureEntity(
       addDefaultMovingBody(entity, boundingBox);
       engine::reassign<ActivationSettings>(
         entity, ActivationSettings{ActivationSettings::Policy::Always});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Bouncing_spike_ball: // Bouncing spike ball
@@ -1425,6 +1476,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       ai::configureSpikeBall(entity);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Green_slime_blob: // Green slime blob
@@ -1437,12 +1489,14 @@ void EntityFactory::configureEntity(
       entity.assign<ai::components::SlimeBlob>();
       addDefaultMovingBody(entity, boundingBox);
       entity.component<MovingBody>()->mGravityAffected = false;
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Green_slime_container: // Green slime container
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       ai::configureSlimeContainer(entity);
       entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Napalm_bomb_small: // Small bomb
@@ -1455,6 +1509,7 @@ void EntityFactory::configureEntity(
       addDefaultMovingBody(entity, boundingBox);
       engine::reassign<ActivationSettings>(
         entity, ActivationSettings{ActivationSettings::Policy::Always});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Snake: // Snake
@@ -1467,6 +1522,7 @@ void EntityFactory::configureEntity(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::Snake{});
       entity.assign<Orientation>(Orientation::Left);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Camera_on_ceiling: // Security camera, ceiling-mounted
@@ -1476,6 +1532,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::SecurityCamera{});
       entity.assign<DestructionEffects>(CAMERA_KILL_EFFECT_SPEC);
       entity.assign<ActorTag>(ActorTag::Type::ShootableCamera);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Green_hanging_suction_plant: // Green creature attached to ceiling, sucking in player
@@ -1487,10 +1544,12 @@ void EntityFactory::configureEntity(
         mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::CeilingSucker{});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Cross_walker: // Small eye-shaped robot, walking on wall
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Eyeball_thrower_LEFT: // Eye-ball throwing monster
@@ -1502,6 +1561,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::EyeballThrower{});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Sentry_robot_generator: // hover bot generator
@@ -1510,6 +1570,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ai::components::HoverBotSpawnMachine>();
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Skeleton: // Walking skeleton
@@ -1521,6 +1582,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
       addDefaultMovingBody(entity, boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Hovering_laser_turret: // Floating ball, opens up and shoots lasers
@@ -1531,6 +1593,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::FloatingLaserBot{});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Spider: // Spider
@@ -1543,6 +1606,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<ai::components::Spider>();
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Ugly_green_bird: // green bird
@@ -1550,6 +1614,7 @@ void EntityFactory::configureEntity(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
     // petrified green monster
@@ -1560,6 +1625,7 @@ void EntityFactory::configureEntity(
         EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Small_flying_ship_1: // Small flying ship 1
@@ -1570,6 +1636,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     // Guard wearing blue space suit
@@ -1587,6 +1654,7 @@ void EntityFactory::configureEntity(
         BLUE_GUARD_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(ActorID::Blue_guard_RIGHT, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
 
@@ -1596,6 +1664,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActorTag>(ActorTag::Type::MountedLaserTurret);
       ai::configureLaserTurret(entity, GivenScore{500});
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::BOSS_Episode_1: // Boss (episode 1)
@@ -1609,6 +1678,7 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::BossEpisode1{});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Red_bird: // Red bird
@@ -1617,6 +1687,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       configureRedBird(entity);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Smash_hammer: // Smash hammer
@@ -1625,10 +1696,12 @@ void EntityFactory::configureEntity(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::SmashHammer{});
       entity.assign<CustomRenderFunc>(&behaviors::SmashHammer::render);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Small_unicycle: // Small uni-cycle robot
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Aggressive_prisoner: // Monster in prison cell, aggressive
@@ -1637,11 +1710,13 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{1}, GivenScore{500});
       entity.component<Shootable>()->mInvincible = true;
       entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Passive_prisoner: // Monster in prison cell, passive
       entity.assign<ai::components::Prisoner>(false);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::BOSS_Episode_4_projectile: // final boss projectile
@@ -1649,6 +1724,7 @@ void EntityFactory::configureEntity(
         BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Rigelatin_soldier: // Rigelatin soldier
@@ -1662,6 +1738,7 @@ void EntityFactory::configureEntity(
         RIGELATIN_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(ActorID::Rigelatin_soldier, 0));
+      entity.assign<AppearsOnRadar>();
       break;
 
     // ----------------------------------------------------------------------
@@ -1673,6 +1750,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       addBarrelDestroyEffect(entity);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Nuclear_waste_can_green_slime_inside: // Nuclear waste barrel, slime inside
@@ -1692,6 +1770,7 @@ void EntityFactory::configureEntity(
         turnIntoContainer(entity, barrelSprite, 200, std::move(container));
         entity.assign<DestructionEffects>(
           NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
+        entity.assign<AppearsOnRadar>();
       }
       break;
 
@@ -1705,6 +1784,7 @@ void EntityFactory::configureEntity(
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(ActorID::Electric_reactor, 0));
       entity.assign<ActorTag>(ActorTag::Type::Reactor);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Super_force_field_LEFT: // Blue force field (disabled by cloak)
@@ -1715,6 +1795,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::SuperForceField{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Missile_broken: // Missile, broken (falls over)
@@ -1728,6 +1809,7 @@ void EntityFactory::configureEntity(
           BROKEN_MISSILE_DETONATE_EFFECT_SPEC,
           DestructionEffects::TriggerCondition::Manual);
         entity.assign<BehaviorController>(behaviors::BrokenMissile{});
+        entity.assign<AppearsOnRadar>();
       }
       break;
 
@@ -1764,20 +1846,28 @@ void EntityFactory::configureEntity(
         entity.assign<ActivationSettings>(
           ActivationSettings::Policy::AlwaysAfterFirstActivation);
         entity.assign<BehaviorController>(behaviors::Missile{});
+        entity.assign<AppearsOnRadar>();
       }
       break;
 
     case ActorID::Rocket_elevator: // Rocket elevator
       interaction::configureElevator(entity);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Lava_pit: // Lava pool
     case ActorID::Green_acid_pit: // Slime pool
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AnimationLoop>(1);
+      break;
+
     case ActorID::Fire_on_floor_1: // Fire (variant 1)
     case ActorID::Fire_on_floor_2: // Fire (variant 2)
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Slime_pipe: // Pipe dripping green stuff
@@ -1793,6 +1883,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(EXIT_SIGN_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Floating_arrow: // floating arrow
@@ -1800,6 +1891,7 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(FLOATING_ARROW_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Radar_dish: // Radar dish
@@ -1808,6 +1900,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AnimationLoop>(1);
       entity.assign<components::RadarDish>();
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Radar_computer_terminal: // Radar dish computer
@@ -1817,11 +1910,13 @@ void EntityFactory::configureEntity(
     case ActorID::Special_hint_machine: // Special hint machine
       entity.assign<Interactable>(InteractableType::HintMachine);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Rotating_floor_spikes: // rotating floor spikes
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationLoop>(1);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Computer_Terminal_Duke_Escaped: // Computer showing "Duke escaped"
@@ -1861,11 +1956,13 @@ void EntityFactory::configureEntity(
           MESSAGE_TYPE_BY_INDEX[typeIndex]);
         entity.assign<ActivationSettings>(
           ActivationSettings::Policy::AlwaysAfterFirstActivation);
+        entity.assign<AppearsOnRadar>();
       }
       break;
 
     case ActorID::Lava_fountain: // Lava riser
       entity.assign<AnimationLoop>(1, 3, 5);
+      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Flame_jet_1: // Rocket exhaust flame left
@@ -2012,9 +2109,13 @@ void EntityFactory::configureEntity(
     case ActorID::Duke_rocket_up: case ActorID::Duke_rocket_down: case ActorID::Duke_rocket_left: case ActorID::Duke_rocket_right:
     case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
     case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
-    case ActorID::Enemy_laser_shot_RIGHT:
     case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
       entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case ActorID::Enemy_laser_shot_RIGHT:
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AppearsOnRadar>();
       break;
 
     default:
