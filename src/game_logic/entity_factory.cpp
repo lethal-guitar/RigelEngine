@@ -33,6 +33,7 @@
 #include "game_logic/enemies/boss_episode_1.hpp"
 #include "game_logic/enemies/ceiling_sucker.hpp"
 #include "game_logic/enemies/eyeball_thrower.hpp"
+#include "game_logic/enemies/flame_thrower_bot.hpp"
 #include "game_logic/enemies/floating_laser_bot.hpp"
 #include "game_logic/enemies/green_bird.hpp"
 #include "game_logic/enemies/hover_bot.hpp"

@@ -101,6 +101,8 @@ set(core_sources
     game_logic/enemies/ceiling_sucker.hpp
     game_logic/enemies/eyeball_thrower.cpp
     game_logic/enemies/eyeball_thrower.hpp
+    game_logic/enemies/flame_thrower_bot.cpp
+    game_logic/enemies/flame_thrower_bot.hpp
     game_logic/enemies/floating_laser_bot.cpp
     game_logic/enemies/floating_laser_bot.hpp
     game_logic/enemies/green_bird.cpp

@@ -254,6 +254,8 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
 
     case ActorID::Nuclear_explosion:
     case ActorID::Eyeball_projectile:
+    case ActorID::Flame_thrower_fire_RIGHT:
+    case ActorID::Flame_thrower_fire_LEFT:
       entity.assign<PlayerDamaging>(1);
       break;
 
@@ -559,6 +561,8 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case ActorID::Nuclear_waste_can_debris_2:
     case ActorID::Nuclear_waste_can_debris_3:
     case ActorID::Nuclear_waste_can_debris_4:
+    case ActorID::Flame_thrower_fire_RIGHT:
+    case ActorID::Flame_thrower_fire_LEFT:
     case ActorID::Nuclear_explosion:
     case ActorID::Watchbot_container_debris_1:
     case ActorID::Watchbot_container_debris_2:
@@ -1395,6 +1399,14 @@ void EntityFactory::configureEntity(
     // Wall-mounted flame thrower
     case ActorID::Wall_mounted_flamethrower_RIGHT: // ->
     case ActorID::Wall_mounted_flamethrower_LEFT: // <-
+      entity.assign<Shootable>(Health{12}, GivenScore{5000});
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Orientation>(
+        actorID == ActorID::Wall_mounted_flamethrower_RIGHT
+          ? Orientation::Right
+          : Orientation::Left);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::FlameThrowerBot{});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<AppearsOnRadar>();
       break;
