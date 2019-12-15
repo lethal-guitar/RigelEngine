@@ -127,6 +127,8 @@ set(core_sources
     game_logic/enemies/simple_walker.hpp
     game_logic/enemies/slime_blob.cpp
     game_logic/enemies/slime_blob.hpp
+    game_logic/enemies/small_flying_ship.cpp
+    game_logic/enemies/small_flying_ship.hpp
     game_logic/enemies/snake.cpp
     game_logic/enemies/snake.hpp
     game_logic/enemies/spider.cpp

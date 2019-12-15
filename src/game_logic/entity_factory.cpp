@@ -46,6 +46,7 @@
 #include "game_logic/enemies/security_camera.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/enemies/slime_blob.hpp"
+#include "game_logic/enemies/small_flying_ship.hpp"
 #include "game_logic/enemies/snake.hpp"
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"

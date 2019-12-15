@@ -61,7 +61,7 @@ const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
 };
 
 
-const int GREEN_BIRD_FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
+const int FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
 
 
 const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
@@ -1641,8 +1641,7 @@ void EntityFactory::configureEntity(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mSpriteFactory.actorFrameRect(actorID, 0));
-      entity.assign<AnimationSequence>(
-        GREEN_BIRD_FLY_ANIMATION_SEQUENCE, 0, true);
+      entity.assign<AnimationSequence>(FLY_ANIMATION_SEQUENCE, 0, true);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1661,10 +1660,13 @@ void EntityFactory::configureEntity(
     case ActorID::Small_flying_ship_2: // Small flying ship 2
     case ActorID::Small_flying_ship_3: // Small flying ship 3
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<Shootable>(Health{2 + difficultyOffset}, GivenScore{100});
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AnimationSequence>(FLY_ANIMATION_SEQUENCE, 0, true);
+      entity.assign<DestructionEffects>(SMALL_FLYING_SHIP_KILL_EFFECT_SPEC);
+      entity.assign<BehaviorController>(behaviors::SmallFlyingShip{});
       entity.assign<AppearsOnRadar>();
       break;
 
