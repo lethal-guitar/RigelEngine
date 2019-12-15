@@ -28,6 +28,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/effect_actor_components.hpp"
 #include "game_logic/effect_components.hpp"
+#include "game_logic/enemies/big_green_cat.hpp"
 #include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/bomber_plane.hpp"
 #include "game_logic/enemies/boss_episode_1.hpp"
@@ -281,6 +282,10 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
       return 4;
 
     case ActorID::Ugly_green_bird:
+      return 3;
+
+    case ActorID::Big_green_cat_LEFT:
+    case ActorID::Big_green_cat_RIGHT:
       return 3;
 
     default:

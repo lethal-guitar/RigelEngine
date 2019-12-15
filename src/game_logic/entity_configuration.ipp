@@ -420,6 +420,12 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ID);
       break;
 
+    case ActorID::Big_green_cat_LEFT:
+    case ActorID::Big_green_cat_RIGHT:
+      actorParts.push_back(ActorID::Big_green_cat_LEFT);
+      actorParts.push_back(ActorID::Big_green_cat_RIGHT);
+      break;
+
     default:
       actorParts.push_back(ID);
       break;
@@ -489,6 +495,11 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case ActorID::BOSS_Episode_4:
       sprite.mFramesToRender = {0, 2};
+      break;
+
+    case ActorID::Big_green_cat_LEFT:
+    case ActorID::Big_green_cat_RIGHT:
+      sprite.mFramesToRender = {0};
       break;
 
     default:
@@ -1387,9 +1398,16 @@ void EntityFactory::configureEntity(
         mSpriteFactory.actorFrameRect(actorID, 0));
       break;
 
-    // Green panther
-    case ActorID::Green_panther_LEFT:
-    case ActorID::Green_panther_RIGHT:
+    case ActorID::Big_green_cat_LEFT:
+    case ActorID::Big_green_cat_RIGHT:
+      entity.assign<Shootable>(Health{5}, GivenScore{1000});
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Orientation>(
+        actorID == ActorID::Big_green_cat_LEFT
+          ? Orientation::Left
+          : Orientation::Right);
+      addDefaultMovingBody(entity, boundingBox);
+      entity.assign<BehaviorController>(behaviors::BigGreenCat{});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,

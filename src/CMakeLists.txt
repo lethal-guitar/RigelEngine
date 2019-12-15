@@ -91,6 +91,8 @@ set(core_sources
     game_logic/effect_actor_components.hpp
     game_logic/effects_system.cpp
     game_logic/effects_system.hpp
+    game_logic/enemies/big_green_cat.cpp
+    game_logic/enemies/big_green_cat.hpp
     game_logic/enemies/blue_guard.cpp
     game_logic/enemies/blue_guard.hpp
     game_logic/enemies/bomber_plane.cpp
