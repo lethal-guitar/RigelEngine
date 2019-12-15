@@ -57,6 +57,8 @@ enum class ActorID {
     White_box_circuit_card = 37,
     Wall_mounted_flamethrower_RIGHT = 38,
     Wall_mounted_flamethrower_LEFT = 39,
+    Flame_thrower_fire_RIGHT = 40,
+    Flame_thrower_fire_LEFT = 41,
     Red_box_bomb = 42,
     Nuclear_explosion = 43,
     Bonus_globe_shell = 44,
