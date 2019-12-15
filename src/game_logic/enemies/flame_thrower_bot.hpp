@@ -22,8 +22,6 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <variant>
-
 
 namespace rigel::game_logic {
   struct GlobalDependencies;
