@@ -35,6 +35,7 @@
 namespace rigel::game_logic {
 
 using engine::moveHorizontally;
+using engine::moveHorizontallyWithStairStepping;
 using engine::moveVertically;
 using engine::MovementResult;
 
@@ -129,26 +130,6 @@ base::Vector inputToVec(const PlayerInput& input) {
   const auto x = input.mLeft ? -1 : (input.mRight ? 1 : 0);
   const auto y = input.mUp ? -1 : (input.mDown ? 1 : 0);
   return {x, y};
-}
-
-
-bool canWalkUpStairStep(
-  const engine::CollisionChecker& collisionChecker,
-  const engine::components::BoundingBox worldBBox,
-  const int movement
-) {
-  auto stairSteppedBbox = worldBBox;
-  stairSteppedBbox.topLeft.y -= 1;
-
-  if (
-    (movement < 0 && collisionChecker.isTouchingLeftWall(stairSteppedBbox)) ||
-    (movement > 0 && collisionChecker.isTouchingRightWall(stairSteppedBbox))
-  ) {
-    return false;
-  }
-
-  stairSteppedBbox.topLeft.x += movement;
-  return collisionChecker.isOnSolidGround(stairSteppedBbox);
 }
 
 
@@ -676,17 +657,9 @@ void Player::updateMovement(
           if (walkingDirection != movement) {
             switchOrientation();
           } else {
-            const auto worldBBox = engine::toWorldSpace(bbox, position);
-
-            const auto result =
-              moveHorizontally(*mpCollisionChecker, mEntity, movement);
+            const auto result = moveHorizontallyWithStairStepping(
+              *mpCollisionChecker, mEntity, movement);
             if (result == MovementResult::Completed) {
-              setVisualState(VisualState::Walking);
-            } else if (
-              canWalkUpStairStep(*mpCollisionChecker, worldBBox, movement)
-            ) {
-              position.x += movement;
-              position.y -= 1;
               setVisualState(VisualState::Walking);
             }
           }

@@ -69,6 +69,11 @@ MovementResult moveVertically(
   entityx::Entity entity,
   int amount);
 
+MovementResult moveHorizontallyWithStairStepping(
+  const CollisionChecker& collisionChecker,
+  entityx::Entity entity,
+  int amount);
+
 
 void applyConveyorBeltMotion(
   const CollisionChecker& collisionChecker,

@@ -78,6 +78,28 @@ MovementResult move(
     : MovementResult::MovedPartially;
 }
 
+
+bool canWalkUpStairStep(
+  const CollisionChecker& collisionChecker,
+  entityx::Entity entity,
+  const int movement
+) {
+  auto stairSteppedBbox = toWorldSpace(
+    *entity.component<BoundingBox>(),
+    *entity.component<WorldPosition>());
+  stairSteppedBbox.topLeft.y -= 1;
+
+  if (
+    (movement < 0 && collisionChecker.isTouchingLeftWall(stairSteppedBbox)) ||
+    (movement > 0 && collisionChecker.isTouchingRightWall(stairSteppedBbox))
+  ) {
+    return false;
+  }
+
+  stairSteppedBbox.topLeft.x += movement;
+  return collisionChecker.isOnSolidGround(stairSteppedBbox);
+}
+
 }
 
 
@@ -175,6 +197,40 @@ MovementResult moveVertically(
         ? collisionChecker.isTouchingCeiling(position, bbox)
         : collisionChecker.isOnSolidGround(position, bbox);
     });
+}
+
+
+MovementResult moveHorizontallyWithStairStepping(
+  const CollisionChecker& collisionChecker,
+  ex::Entity entity,
+  const int amount
+) {
+  if (amount == 0) {
+    return MovementResult::Completed;
+  }
+
+  const auto desiredDistance = std::abs(amount);
+  const auto step = amount < 0 ? -1 : 1;
+
+  auto& position = *entity.component<WorldPosition>();
+
+  MovementResult finalResult = MovementResult::Completed;
+  for (int i = 0; i < desiredDistance; ++i) {
+    const auto result = moveHorizontally(collisionChecker, entity, step);
+    if (result != MovementResult::Completed) {
+      if (canWalkUpStairStep(collisionChecker, entity, step)) {
+        position.x += step;
+        position.y -= 1;
+      } else {
+        finalResult = i > 0
+          ? MovementResult::MovedPartially
+          : MovementResult::Failed;
+        break;
+      }
+    }
+  }
+
+  return finalResult;
 }
 
 
