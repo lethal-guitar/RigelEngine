@@ -34,7 +34,7 @@ enum class SoundId {
   Swoosh = 11,
   FlameThrowerShot = 12,
   DukeJumping = 13,
-  LavaRiser = 14,
+  LavaFountain = 14,
   DukeLanding = 15,
   DukeAttachClimbable = 16,
   IngameMessageTyping = 17,

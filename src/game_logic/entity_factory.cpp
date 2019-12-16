@@ -51,6 +51,7 @@
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
 #include "game_logic/enemies/watch_bot.hpp"
+#include "game_logic/hazards/lava_fountain.hpp"
 #include "game_logic/hazards/slime_pipe.hpp"
 #include "game_logic/hazards/smash_hammer.hpp"
 #include "game_logic/interactive/blowing_fan.hpp"

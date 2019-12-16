@@ -1992,8 +1992,11 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Lava_fountain: // Lava riser
-      entity.assign<AnimationLoop>(1, 3, 5);
-      entity.assign<AppearsOnRadar>();
+      entity.assign<BoundingBox>(BoundingBox{{0, 0}, {2, 4}});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::LavaFountain{});
+      entity.assign<CustomRenderFunc>(&behaviors::LavaFountain::render);
       break;
 
     case ActorID::Flame_jet_1: // Rocket exhaust flame left

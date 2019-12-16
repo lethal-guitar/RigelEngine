@@ -142,6 +142,8 @@ set(core_sources
     game_logic/entity_factory.hpp
     game_logic/game_world.cpp
     game_logic/game_world.hpp
+    game_logic/hazards/lava_fountain.cpp
+    game_logic/hazards/lava_fountain.hpp
     game_logic/hazards/slime_pipe.cpp
     game_logic/hazards/slime_pipe.hpp
     game_logic/hazards/smash_hammer.cpp
