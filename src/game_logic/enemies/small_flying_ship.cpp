@@ -29,7 +29,7 @@ namespace rigel::game_logic::behaviors {
 void SmallFlyingShip::update(
   GlobalDependencies& d,
   GlobalState& s,
-  bool isOnScreen,
+  bool,
   entityx::Entity entity
 ) {
   using engine::components::BoundingBox;
@@ -84,18 +84,10 @@ void SmallFlyingShip::update(
 
   --position.x;
 
-  {
-    // TODO: Maybe extract a helper function for this check, to avoid the
-    // duplication with the code in EntityActivationSystem
-    const BoundingBox activeRegionBox{
-      *s.mpCameraPosition,
-      s.mpPerFrameState->mCurrentViewPortSize};
-    const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
-    const auto stillOnScreen = worldSpaceBbox.intersects(activeRegionBox);
-
-    if (!stillOnScreen && position.x - 20 == s.mpPlayer->orientedPosition().x) {
-      entity.destroy();
-    }
+  const auto stillOnScreen =
+    isBboxOnScreen(s, engine::toWorldSpace(bbox, position));
+  if (!stillOnScreen && position.x - 20 == s.mpPlayer->orientedPosition().x) {
+    entity.destroy();
   }
 }
 

@@ -69,6 +69,12 @@ enum class Orientation {
 }
 
 
+bool isOnScreen(
+  const components::BoundingBox& bounds,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize);
+
+
 namespace orientation {
 
 inline components::Orientation opposite(

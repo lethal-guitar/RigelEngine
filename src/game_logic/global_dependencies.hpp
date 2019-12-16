@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 #include "game_logic/input.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -85,5 +86,16 @@ struct GlobalState {
   data::map::Map* mpMap;
   const PerFrameState* mpPerFrameState;
 };
+
+
+inline bool isBboxOnScreen(
+  const GlobalState& s,
+  const engine::components::BoundingBox& bounds
+) {
+  return engine::isOnScreen(
+    bounds,
+    *s.mpCameraPosition,
+    s.mpPerFrameState->mCurrentViewPortSize);
+}
 
 }
