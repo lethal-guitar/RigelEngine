@@ -479,7 +479,8 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       break;
 
     case ActorID::Lava_fountain:
-      sprite.mFramesToRender = {3};
+      // Handled by custom render func
+      sprite.mFramesToRender = {};
       break;
 
     case ActorID::Radar_computer_terminal:
