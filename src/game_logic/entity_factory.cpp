@@ -20,6 +20,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
+#include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
@@ -52,6 +53,7 @@
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
 #include "game_logic/enemies/unicycle_bot.hpp"
+#include "game_logic/enemies/wall_walker.hpp"
 #include "game_logic/enemies/watch_bot.hpp"
 #include "game_logic/hazards/lava_fountain.hpp"
 #include "game_logic/hazards/slime_pipe.hpp"
@@ -392,10 +394,12 @@ base::Rect<int> SpriteFactory::actorFrameRect(
 EntityFactory::EntityFactory(
   renderer::Renderer* pRenderer,
   ex::EntityManager* pEntityManager,
+  engine::RandomNumberGenerator* pRandomGenerator,
   const loader::ActorImagePackage* pSpritePackage,
   const data::Difficulty difficulty)
   : mSpriteFactory(pRenderer, pSpritePackage)
   , mpEntityManager(pEntityManager)
+  , mpRandomGenerator(pRandomGenerator)
   , mDifficulty(difficulty)
 {
 }

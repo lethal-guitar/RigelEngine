@@ -139,6 +139,8 @@ set(core_sources
     game_logic/enemies/spike_ball.hpp
     game_logic/enemies/unicycle_bot.cpp
     game_logic/enemies/unicycle_bot.hpp
+    game_logic/enemies/wall_walker.cpp
+    game_logic/enemies/wall_walker.hpp
     game_logic/enemies/watch_bot.cpp
     game_logic/enemies/watch_bot.hpp
     game_logic/entity_configuration.ipp

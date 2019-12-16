@@ -263,6 +263,7 @@ GameWorld::GameWorld(
   , mEntityFactory(
       context.mpRenderer,
       &mEntities,
+      &mRandomGenerator,
       &context.mpResources->mActorImagePackage,
       sessionId.mDifficulty)
   , mpPlayerModel(pPlayerModel)

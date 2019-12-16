@@ -111,7 +111,7 @@ enum class ActorID {
     Biological_enemy_debris = 94,
     Missile_broken = 95,
     Missile_debris = 96,
-    Cross_walker = 97,
+    Wall_walker = 97,
     Eyeball_thrower_LEFT = 98,
     Eyeball_thrower_RIGHT = 99,
     Eyeball_projectile = 100,

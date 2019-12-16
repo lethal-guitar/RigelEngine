@@ -1581,7 +1581,12 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Cross_walker: // Small eye-shaped robot, walking on wall
+    case ActorID::Wall_walker: // Small eye-shaped robot, walking on wall
+      entity.assign<Shootable>(Health{2}, GivenScore{100});
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(
+        behaviors::WallWalker{*mpRandomGenerator});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<AppearsOnRadar>();
       break;

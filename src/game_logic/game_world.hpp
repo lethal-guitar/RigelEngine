@@ -122,6 +122,7 @@ private:
   ui::MenuElementRenderer* mpTextRenderer;
   entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;
+  engine::RandomNumberGenerator mRandomGenerator;
   EntityFactory mEntityFactory;
 
   data::PlayerModel* mpPlayerModel;
@@ -148,7 +149,6 @@ private:
   std::unique_ptr<IngameSystems> mpSystems;
 
   RadarDishCounter mRadarDishCounter;
-  engine::RandomNumberGenerator mRandomGenerator;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
   const data::GameOptions* mpOptions;
