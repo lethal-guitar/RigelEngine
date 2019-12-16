@@ -1749,7 +1749,12 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Small_unicycle: // Small uni-cycle robot
+    case ActorID::Unicycle_bot:
+      entity.assign<Shootable>(Health{2}, GivenScore{300});
+      entity.assign<PlayerDamaging>(1);
+      addDefaultMovingBody(entity, boundingBox);
+      entity.assign<Orientation>(Orientation::Left);
+      entity.assign<BehaviorController>(behaviors::UnicycleBot{});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<AppearsOnRadar>();
       break;

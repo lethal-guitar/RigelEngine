@@ -51,6 +51,7 @@
 #include "game_logic/enemies/snake.hpp"
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
+#include "game_logic/enemies/unicycle_bot.hpp"
 #include "game_logic/enemies/watch_bot.hpp"
 #include "game_logic/hazards/lava_fountain.hpp"
 #include "game_logic/hazards/slime_pipe.hpp"
@@ -288,6 +289,9 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case ActorID::Big_green_cat_RIGHT:
       return 3;
 
+    case ActorID::Unicycle_bot:
+      return 4;
+
     default:
       return std::nullopt;
   }
@@ -300,10 +304,19 @@ int SPIDER_FRAME_MAP[] = {
 };
 
 
+int UNICYCLE_FRAME_MAP[] = {
+  0, 5, 1, 2, // left
+  0, 5, 3, 4, // right
+};
+
+
 base::ArrayView<int> frameMapForActor(const ActorID actorId) {
   switch (actorId) {
     case ActorID::Spider:
       return base::ArrayView<int>(SPIDER_FRAME_MAP);
+
+    case ActorID::Unicycle_bot:
+      return base::ArrayView<int>(UNICYCLE_FRAME_MAP);
 
     default:
       return {};

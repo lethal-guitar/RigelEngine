@@ -249,7 +249,7 @@ enum class ActorID {
     Windblown_spider_generator = 241,
     Spider_debris_2 = 242,
     Spider_blowing_in_wind = 243,
-    Small_unicycle = 244,
+    Unicycle_bot = 244,
     Flame_jet_1 = 246,
     Flame_jet_2 = 247,
     Flame_jet_3 = 248,
