@@ -16,7 +16,6 @@
 
 #include "flame_thrower_bot.hpp"
 
-#include "base/match.hpp"
 #include "data/actor_ids.hpp"
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"

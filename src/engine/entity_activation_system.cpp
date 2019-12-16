@@ -58,6 +58,18 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion) {
 }
 
 
+// TODO: Declaration for this is currently in base_components.hpp, maybe
+// straighten that out (i.e. move the implementation into base.components.cpp)?
+bool isOnScreen(
+  const BoundingBox& bounds,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  const BoundingBox activeRegionBox{cameraPosition, viewPortSize};
+  return bounds.intersects(activeRegionBox);
+}
+
+
 void markActiveEntities(
   entityx::EntityManager& es,
   const base::Vector& cameraPosition,

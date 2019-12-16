@@ -16,26 +16,35 @@
 
 #pragma once
 
+#include <base/spatial_types.hpp>
 #include <base/warnings.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <variant>
 
 namespace rigel::game_logic {
   struct GlobalDependencies;
   struct GlobalState;
 }
+namespace rigel::engine::components { struct Sprite; }
+namespace rigel::renderer { class Renderer; }
 
 
 namespace rigel::game_logic::behaviors {
 
-struct FlameThrowerBot {
-  enum class MovementDirection {
-    Up,
-    Down
+struct LavaFountain {
+  struct Waiting {
+    int mFramesElapsed = 0;
   };
+
+  struct Erupting {
+    int mSequenceIndex = 0;
+  };
+
+  using State = std::variant<Waiting, Erupting>;
 
   void update(
     GlobalDependencies& dependencies,
@@ -43,8 +52,13 @@ struct FlameThrowerBot {
     bool isOnScreen,
     entityx::Entity entity);
 
-  int mFramesRemainingForFiring = 0;
-  MovementDirection mMovementDirection = MovementDirection::Down;
+  static void render(
+    renderer::Renderer* pRenderer,
+    entityx::Entity entity,
+    const engine::components::Sprite& sprite,
+    const base::Vector& positionInScreenSpace);
+
+  State mState;
 };
 
 }

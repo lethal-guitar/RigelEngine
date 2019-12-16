@@ -229,6 +229,12 @@ const effects::EffectSpec CAMERA_KILL_EFFECT_SPEC[] = {
 };
 
 
+const effects::EffectSpec SMALL_FLYING_SHIP_KILL_EFFECT_SPEC[] = {
+  {effects::Particles{{}}, 0},
+  {effects::RandomExplosionSound{}, 0}
+};
+
+
 const effects::EffectSpec BLUE_GUARD_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
   {effects::RandomExplosionSound{}, 0},

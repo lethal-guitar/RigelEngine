@@ -22,6 +22,8 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <optional>
+
 
 namespace rigel::game_logic {
   struct GlobalDependencies;
@@ -31,20 +33,14 @@ namespace rigel::game_logic {
 
 namespace rigel::game_logic::behaviors {
 
-struct FlameThrowerBot {
-  enum class MovementDirection {
-    Up,
-    Down
-  };
-
+struct SmallFlyingShip {
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  int mFramesRemainingForFiring = 0;
-  MovementDirection mMovementDirection = MovementDirection::Down;
+  std::optional<int> mInitialHeight;
 };
 
 }
