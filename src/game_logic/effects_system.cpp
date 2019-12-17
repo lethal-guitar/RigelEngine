@@ -43,19 +43,28 @@ void triggerEffects(
   entityx::Entity entity,
   entityx::EntityManager& entityManager
 ) {
-  using namespace engine::components;
-
   if (!entity.has_component<DestructionEffects>()) {
     return;
   }
 
-  auto effects = *entity.component<DestructionEffects>();
-  effects.mActivated = true;
-  const auto position = *entity.component<WorldPosition>();
+  spawnEffects(
+    *entity.component<DestructionEffects>(),
+    *entity.component<engine::components::WorldPosition>(),
+    entityManager);
+}
+
+
+void spawnEffects(
+  const DestructionEffects& effects,
+  const base::Vector& position,
+  entityx::EntityManager& entityManager
+) {
+  using namespace engine::components;
 
   auto effectSpawner = entityManager.create();
   effectSpawner.assign<DestructionEffects>(effects);
   effectSpawner.assign<WorldPosition>(position);
+  effectSpawner.component<DestructionEffects>()->mActivated = true;
 
   const auto iHighestDelaySpec = std::max_element(
     std::cbegin(effects.mEffectSpecs),

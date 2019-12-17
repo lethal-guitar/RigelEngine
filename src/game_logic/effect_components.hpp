@@ -127,9 +127,6 @@ struct EffectSpec {
 
 }
 
-void triggerEffects(
-  entityx::Entity entity, entityx::EntityManager& entityManager);
-
 namespace components {
 
 struct DestructionEffects {
@@ -168,4 +165,14 @@ struct SpriteCascadeSpawner {
   bool mSpawnedLastFrame = true;
 };
 
-}}
+}
+
+
+void triggerEffects(
+  entityx::Entity entity, entityx::EntityManager& entityManager);
+
+void spawnEffects(
+  const components::DestructionEffects& effects,
+  const base::Vector& position,
+  entityx::EntityManager& entityManager);
+}
