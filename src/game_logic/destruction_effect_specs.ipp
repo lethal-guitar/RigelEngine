@@ -235,6 +235,14 @@ const effects::EffectSpec SMALL_FLYING_SHIP_KILL_EFFECT_SPEC[] = {
 };
 
 
+const effects::EffectSpec GRABBER_CLAW_KILL_EFFECT_SPEC[] = {
+  {effects::EffectSprite{{}, rigel::data::ActorID::Metal_grabber_claw_debris_1, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{2, 0}, rigel::data::ActorID::Metal_grabber_claw_debris_2, EffectMovement::FlyUpperRight}, 0},
+  {effects::RandomExplosionSound{}, 0},
+  {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX}, 0}
+};
+
+
 const effects::EffectSpec BLUE_GUARD_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
   {effects::RandomExplosionSound{}, 0},

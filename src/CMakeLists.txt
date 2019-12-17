@@ -107,6 +107,8 @@ set(core_sources
     game_logic/enemies/flame_thrower_bot.hpp
     game_logic/enemies/floating_laser_bot.cpp
     game_logic/enemies/floating_laser_bot.hpp
+    game_logic/enemies/grabber_claw.cpp
+    game_logic/enemies/grabber_claw.hpp
     game_logic/enemies/green_bird.cpp
     game_logic/enemies/green_bird.hpp
     game_logic/enemies/hover_bot.cpp

@@ -1624,6 +1624,21 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
+    case ActorID::Metal_grabber_claw:
+      entity.component<WorldPosition>()->y += 1;
+      entity.assign<BoundingBox>(BoundingBox{{0, -1}, {1, 1}});
+      entity.assign<Shootable>(Health{1}, GivenScore{250});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::GrabberClaw{});
+      entity.assign<DestructionEffects>(
+        GRABBER_CLAW_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
+        mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<CustomRenderFunc>(&behaviors::GrabberClaw::render);
+      entity.assign<AppearsOnRadar>();
+      break;
+
     case ActorID::Hovering_laser_turret: // Floating ball, opens up and shoots lasers
       entity.assign<Shootable>(Health{3 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);

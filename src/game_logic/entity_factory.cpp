@@ -37,6 +37,7 @@
 #include "game_logic/enemies/eyeball_thrower.hpp"
 #include "game_logic/enemies/flame_thrower_bot.hpp"
 #include "game_logic/enemies/floating_laser_bot.hpp"
+#include "game_logic/enemies/grabber_claw.hpp"
 #include "game_logic/enemies/green_bird.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
 #include "game_logic/enemies/laser_turret.hpp"
