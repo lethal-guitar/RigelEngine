@@ -115,6 +115,8 @@ set(core_sources
     game_logic/enemies/hover_bot.hpp
     game_logic/enemies/laser_turret.cpp
     game_logic/enemies/laser_turret.hpp
+    game_logic/enemies/living_statue.cpp
+    game_logic/enemies/living_statue.hpp
     game_logic/enemies/messenger_drone.cpp
     game_logic/enemies/messenger_drone.hpp
     game_logic/enemies/prisoner.cpp

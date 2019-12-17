@@ -41,6 +41,7 @@
 #include "game_logic/enemies/green_bird.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
 #include "game_logic/enemies/laser_turret.hpp"
+#include "game_logic/enemies/living_statue.hpp"
 #include "game_logic/enemies/messenger_drone.hpp"
 #include "game_logic/enemies/prisoner.hpp"
 #include "game_logic/enemies/red_bird.hpp"
@@ -291,6 +292,10 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case ActorID::Big_green_cat_LEFT:
     case ActorID::Big_green_cat_RIGHT:
       return 3;
+
+    case ActorID::Living_statue_LEFT:
+    case ActorID::Living_statue_RIGHT:
+      return 6;
 
     case ActorID::Unicycle_bot:
       return 4;

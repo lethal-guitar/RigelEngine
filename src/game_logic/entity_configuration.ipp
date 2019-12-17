@@ -426,6 +426,12 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ActorID::Big_green_cat_RIGHT);
       break;
 
+    case ActorID::Living_statue_LEFT:
+    case ActorID::Living_statue_RIGHT:
+      actorParts.push_back(ActorID::Living_statue_LEFT);
+      actorParts.push_back(ActorID::Living_statue_RIGHT);
+      break;
+
     default:
       actorParts.push_back(ID);
       break;
@@ -499,6 +505,8 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case ActorID::Big_green_cat_LEFT:
     case ActorID::Big_green_cat_RIGHT:
+    case ActorID::Living_statue_LEFT:
+    case ActorID::Living_statue_RIGHT:
       sprite.mFramesToRender = {0};
       break;
 
@@ -597,14 +605,16 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
     case ActorID::Blue_fireball_FX:
     case ActorID::Coke_can_debris_1:
     case ActorID::Coke_can_debris_2:
-    case ActorID::Petrified_monster_stone_debris_1:
-    case ActorID::Petrified_monster_stone_debris_2:
-    case ActorID::Petrified_monster_stone_debris_3:
-    case ActorID::Petrified_monster_stone_debris_4:
-    case ActorID::Petrified_monster_stone_debris_5:
-    case ActorID::Petrified_monster_stone_debris_6:
-    case ActorID::Petrified_monster_stone_debris_7:
-    case ActorID::Petrified_monster_stone_debris_8:
+    case ActorID::Living_statue_eye_FX_LEFT:
+    case ActorID::Living_statue_eye_FX_RIGHT:
+    case ActorID::Living_statue_stone_debris_1_LEFT:
+    case ActorID::Living_statue_stone_debris_2_LEFT:
+    case ActorID::Living_statue_stone_debris_3_LEFT:
+    case ActorID::Living_statue_stone_debris_4_LEFT:
+    case ActorID::Living_statue_stone_debris_1_RIGHT:
+    case ActorID::Living_statue_stone_debris_2_RIGHT:
+    case ActorID::Living_statue_stone_debris_3_RIGHT:
+    case ActorID::Living_statue_stone_debris_4_RIGHT:
     case ActorID::Spider_shaken_off:
     case ActorID::Windblown_spider_generator:
     case ActorID::Spider_debris_2:
@@ -1684,10 +1694,18 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    // petrified green monster
-    case ActorID::Petrified_monster_LEFT: // <-
-    case ActorID::Petrified_monster_RIGHT: // ->
+    case ActorID::Living_statue_LEFT:
+    case ActorID::Living_statue_RIGHT:
+      entity.assign<Shootable>(Health{5}, GivenScore{1000});
+      entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<MovingBody>(Velocity{}, GravityAffected{false});
+      entity.assign<Orientation>(actorID == ActorID::Living_statue_LEFT
+        ? Orientation::Left
+        : Orientation::Right);
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<BehaviorController>(behaviors::LivingStatue{});
       entity.assign<DestructionEffects>(
         EXTENDED_BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
