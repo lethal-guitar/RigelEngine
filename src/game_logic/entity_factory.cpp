@@ -20,6 +20,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
+#include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
@@ -28,6 +29,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/effect_actor_components.hpp"
 #include "game_logic/effect_components.hpp"
+#include "game_logic/enemies/big_green_cat.hpp"
 #include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/bomber_plane.hpp"
 #include "game_logic/enemies/boss_episode_1.hpp"
@@ -35,9 +37,11 @@
 #include "game_logic/enemies/eyeball_thrower.hpp"
 #include "game_logic/enemies/flame_thrower_bot.hpp"
 #include "game_logic/enemies/floating_laser_bot.hpp"
+#include "game_logic/enemies/grabber_claw.hpp"
 #include "game_logic/enemies/green_bird.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
 #include "game_logic/enemies/laser_turret.hpp"
+#include "game_logic/enemies/living_statue.hpp"
 #include "game_logic/enemies/messenger_drone.hpp"
 #include "game_logic/enemies/prisoner.hpp"
 #include "game_logic/enemies/red_bird.hpp"
@@ -50,6 +54,8 @@
 #include "game_logic/enemies/snake.hpp"
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
+#include "game_logic/enemies/unicycle_bot.hpp"
+#include "game_logic/enemies/wall_walker.hpp"
 #include "game_logic/enemies/watch_bot.hpp"
 #include "game_logic/hazards/lava_fountain.hpp"
 #include "game_logic/hazards/slime_pipe.hpp"
@@ -283,6 +289,17 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case ActorID::Ugly_green_bird:
       return 3;
 
+    case ActorID::Big_green_cat_LEFT:
+    case ActorID::Big_green_cat_RIGHT:
+      return 3;
+
+    case ActorID::Living_statue_LEFT:
+    case ActorID::Living_statue_RIGHT:
+      return 6;
+
+    case ActorID::Unicycle_bot:
+      return 4;
+
     default:
       return std::nullopt;
   }
@@ -295,10 +312,19 @@ int SPIDER_FRAME_MAP[] = {
 };
 
 
+int UNICYCLE_FRAME_MAP[] = {
+  0, 5, 1, 2, // left
+  0, 5, 3, 4, // right
+};
+
+
 base::ArrayView<int> frameMapForActor(const ActorID actorId) {
   switch (actorId) {
     case ActorID::Spider:
       return base::ArrayView<int>(SPIDER_FRAME_MAP);
+
+    case ActorID::Unicycle_bot:
+      return base::ArrayView<int>(UNICYCLE_FRAME_MAP);
 
     default:
       return {};
@@ -374,10 +400,12 @@ base::Rect<int> SpriteFactory::actorFrameRect(
 EntityFactory::EntityFactory(
   renderer::Renderer* pRenderer,
   ex::EntityManager* pEntityManager,
+  engine::RandomNumberGenerator* pRandomGenerator,
   const loader::ActorImagePackage* pSpritePackage,
   const data::Difficulty difficulty)
   : mSpriteFactory(pRenderer, pSpritePackage)
   , mpEntityManager(pEntityManager)
+  , mpRandomGenerator(pRandomGenerator)
   , mDifficulty(difficulty)
 {
 }
