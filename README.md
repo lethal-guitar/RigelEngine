@@ -19,10 +19,8 @@ Here's a video showcasing the project:
 
 ## Current state
 
-RigelEngine implements all the game mechanics and enemies found in the original game's first episode, i.e. the shareware episode. The intro movie, story sequence and most of the menu system are implemented as well. It's possible to load and save the game, and the high score lists work (saved games and high scores from the original game will be imported into RigelEngine's user profile when launching it for the first time). Therefore, the shareware episode is fully playable with RigelEngine.
-
-Support for the registered version (i.e. episodes 2, 3 and 4) is currently still work in progress.
-The registered version's levels can be loaded and played, but not all of the enemies found in those levels are functional yet. In addition, Duke's space ship is not implemented yet, which means the levels where it is required can't be completed. [See the milestone](https://github.com/lethal-guitar/RigelEngine/milestone/14) for a list of remaining work.
+RigelEngine fully supports the shareware version of the original game.
+Support for the registered version is close to being finished, but the AI for the boss enemies and Duke's space ship aren't implemented yet.
 
 The only other major feature that's still missing is demo playback.
 
