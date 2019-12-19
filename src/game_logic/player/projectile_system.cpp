@@ -94,11 +94,17 @@ base::Vector rocketWallImpactOffset(const base::Point<float>& velocity) {
 void spawnRocketWallImpactEffect(
   EntityFactory& entityFactory,
   const base::Vector& position,
+  const engine::components::BoundingBox& bbox,
   const base::Point<float> velocity
 ) {
   const auto offset = rocketWallImpactOffset(velocity);
   spawnOneShotSprite(
     entityFactory, data::ActorID::Explosion_FX_2, position + offset);
+  spawnFireEffect(
+    entityFactory.entityManager(),
+    position,
+    bbox,
+    data::ActorID::Shot_impact_FX);
 }
 
 
@@ -208,7 +214,7 @@ void ProjectileSystem::spawnWallImpactEffect(
 
   if (isRocket) {
     mpServiceProvider->playSound(data::SoundId::Explosion);
-    spawnRocketWallImpactEffect(*mpEntityFactory, position, velocity);
+    spawnRocketWallImpactEffect(*mpEntityFactory, position, bbox, velocity);
   } else {
     spawnRegularShotImpactEffect(*mpEntityFactory, position, velocity);
   }
