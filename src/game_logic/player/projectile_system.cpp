@@ -97,7 +97,8 @@ void spawnRocketWallImpactEffect(
   const base::Point<float> velocity
 ) {
   const auto offset = rocketWallImpactOffset(velocity);
-  spawnOneShotSprite(entityFactory, data::ActorID::Explosion_FX_2, position + offset);
+  spawnOneShotSprite(
+    entityFactory, data::ActorID::Explosion_FX_2, position + offset);
 }
 
 
@@ -105,7 +106,10 @@ void spawnRocketEnemyImpactEffect(
   EntityFactory& entityFactory,
   const base::Vector& position
 ) {
-  spawnOneShotSprite(entityFactory, data::ActorID::Explosion_FX_2, position + base::Vector{-3, 3});
+  spawnOneShotSprite(
+    entityFactory,
+    data::ActorID::Explosion_FX_2,
+    position + base::Vector{-3, 3});
 }
 
 }
