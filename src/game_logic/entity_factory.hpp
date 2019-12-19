@@ -145,6 +145,10 @@ public:
     data::ActorID actorID,
     const base::Vector& position) override;
 
+  entityx::EntityManager& entityManager() {
+    return *mpEntityManager;
+  }
+
 private:
   engine::components::Sprite createSpriteForId(const data::ActorID actorID);
 

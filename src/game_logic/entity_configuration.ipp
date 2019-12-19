@@ -2007,6 +2007,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Rotating_floor_spikes: // rotating floor spikes
+      entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationLoop>(1);
       entity.assign<AppearsOnRadar>();

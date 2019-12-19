@@ -287,6 +287,7 @@ private:
   void updateIncapacitatedState(Incapacitated& state);
 
   VerticalMovementResult moveVerticallyInAir(int amount);
+  bool tryAttachToClimbable();
 
   void updateAnimationLoop(const AnimationConfig& config);
   void resetAnimation();
