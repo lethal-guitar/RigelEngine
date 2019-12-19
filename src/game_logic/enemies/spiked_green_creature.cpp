@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "living_statue.hpp"
+#include "spiked_green_creature.hpp"
 
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
@@ -38,18 +38,18 @@ namespace {
 using EffectMovement = effects::EffectSprite::Movement;
 
 const effects::EffectSpec SHELL_BURST_FX_LEFT[] = {
-  {effects::EffectSprite{{0, -2}, data::ActorID::Living_statue_stone_debris_1_LEFT, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{-2, 0}, data::ActorID::Living_statue_stone_debris_2_LEFT, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{2, -2}, data::ActorID::Living_statue_stone_debris_3_LEFT, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Living_statue_stone_debris_4_LEFT, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{0, -2}, data::ActorID::Spiked_green_creature_stone_debris_1_LEFT, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{-2, 0}, data::ActorID::Spiked_green_creature_stone_debris_2_LEFT, EffectMovement::FlyLeft}, 0},
+  {effects::EffectSprite{{2, -2}, data::ActorID::Spiked_green_creature_stone_debris_3_LEFT, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_4_LEFT, EffectMovement::FlyUpperRight}, 0},
 };
 
 
 const effects::EffectSpec SHELL_BURST_FX_RIGHT[] = {
-  {effects::EffectSprite{{}, data::ActorID::Living_statue_stone_debris_1_RIGHT, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Living_statue_stone_debris_2_RIGHT, EffectMovement::FlyRight}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Living_statue_stone_debris_3_RIGHT, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Living_statue_stone_debris_4_RIGHT, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{0, -2}, data::ActorID::Spiked_green_creature_stone_debris_1_RIGHT, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{-2, 0}, data::ActorID::Spiked_green_creature_stone_debris_2_RIGHT, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{2, -2}, data::ActorID::Spiked_green_creature_stone_debris_3_RIGHT, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_4_RIGHT, EffectMovement::FlyRight}, 0},
 };
 
 
@@ -61,7 +61,7 @@ constexpr auto MOVEMENT_SPEED = 2;
 }
 
 
-void LivingStatue::update(
+void SpikedGreenCreature::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
@@ -81,8 +81,8 @@ void LivingStatue::update(
       ++state.mFramesElapsed;
       if (state.mFramesElapsed == 5 || state.mFramesElapsed == 9) {
         const auto type = orientation == Orientation::Left
-          ? data::ActorID::Living_statue_eye_FX_LEFT
-          : data::ActorID::Living_statue_eye_FX_RIGHT;
+          ? data::ActorID::Spiked_green_creature_eye_FX_LEFT
+          : data::ActorID::Spiked_green_creature_eye_FX_RIGHT;
         spawnOneShotSprite(*d.mpEntityFactory, type, position);
       }
 
@@ -124,7 +124,6 @@ void LivingStatue::update(
       if (state.mFramesElapsed == 0) {
         engine::startAnimationSequence(entity, POUNCE_ANIM_SEQ);
         engine::synchronizeBoundingBoxToSprite(entity);
-        ensureNotStuckInWall(d, entity);
       }
 
       if (state.mFramesElapsed < 6) {
@@ -132,8 +131,10 @@ void LivingStatue::update(
       }
 
       if (state.mFramesElapsed > 1) {
-        moveHorizontallyInAir(d, entity);
+        const auto offset = engine::orientation::toMovement(orientation);
+        position.x += offset * MOVEMENT_SPEED;
       }
+      ensureNotStuckInWall(d, entity);
 
       ++state.mFramesElapsed;
       if (state.mFramesElapsed == 8) {
@@ -151,14 +152,14 @@ void LivingStatue::update(
         return;
       }
 
-      moveHorizontallyInAir(d, entity);
+      moveWhileFalling(d, entity);
     });
 
     engine::synchronizeBoundingBoxToSprite(entity);
 }
 
 
-void LivingStatue::onCollision(
+void SpikedGreenCreature::onCollision(
   GlobalDependencies& d,
   GlobalState&,
   const engine::events::CollidedWithWorld& event,
@@ -170,7 +171,7 @@ void LivingStatue::onCollision(
 }
 
 
-void LivingStatue::landOnGround(
+void SpikedGreenCreature::landOnGround(
   const GlobalDependencies& d,
   entityx::Entity entity
 ) {
@@ -182,13 +183,13 @@ void LivingStatue::landOnGround(
   animationFrame = 2;
   engine::synchronizeBoundingBoxToSprite(entity);
 
-  moveHorizontallyInAir(d, entity);
+  moveWhileFalling(d, entity);
 
   mState = Waiting{};
 }
 
 
-void LivingStatue::ensureNotStuckInWall(
+void SpikedGreenCreature::ensureNotStuckInWall(
   const GlobalDependencies& d,
   entityx::Entity entity
 ) {
@@ -211,7 +212,7 @@ void LivingStatue::ensureNotStuckInWall(
 }
 
 
-void LivingStatue::moveHorizontallyInAir(
+void SpikedGreenCreature::moveWhileFalling(
   const GlobalDependencies& d,
   entityx::Entity entity
 ) {
@@ -221,9 +222,12 @@ void LivingStatue::moveHorizontallyInAir(
 
   const auto orientation = *entity.component<Orientation>();
   const auto offset = engine::orientation::toMovement(orientation);
-  position.x += offset * MOVEMENT_SPEED;
 
-  ensureNotStuckInWall(d, entity);
+  position.x += offset;
+  engine::moveHorizontallyWithStairStepping(
+    *d.mpCollisionChecker,
+    entity,
+    offset);
 }
 
 }
