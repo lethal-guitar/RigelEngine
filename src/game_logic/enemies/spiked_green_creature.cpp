@@ -46,10 +46,10 @@ const effects::EffectSpec SHELL_BURST_FX_LEFT[] = {
 
 
 const effects::EffectSpec SHELL_BURST_FX_RIGHT[] = {
-  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_1_RIGHT, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_2_RIGHT, EffectMovement::FlyRight}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_3_RIGHT, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_4_RIGHT, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{0, -2}, data::ActorID::Spiked_green_creature_stone_debris_1_RIGHT, EffectMovement::FlyUp}, 0},
+  {effects::EffectSprite{{-2, 0}, data::ActorID::Spiked_green_creature_stone_debris_2_RIGHT, EffectMovement::FlyUpperLeft}, 0},
+  {effects::EffectSprite{{2, -2}, data::ActorID::Spiked_green_creature_stone_debris_3_RIGHT, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_4_RIGHT, EffectMovement::FlyRight}, 0},
 };
 
 
