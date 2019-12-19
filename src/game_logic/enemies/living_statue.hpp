@@ -70,7 +70,7 @@ struct LivingStatue {
   void ensureNotStuckInWall(
     const GlobalDependencies& d,
     entityx::Entity entity);
-  void moveHorizontallyInAir(
+  void moveWhileFalling(
     const GlobalDependencies& d,
     entityx::Entity entity);
 

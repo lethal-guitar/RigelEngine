@@ -124,7 +124,6 @@ void LivingStatue::update(
       if (state.mFramesElapsed == 0) {
         engine::startAnimationSequence(entity, POUNCE_ANIM_SEQ);
         engine::synchronizeBoundingBoxToSprite(entity);
-        ensureNotStuckInWall(d, entity);
       }
 
       if (state.mFramesElapsed < 6) {
@@ -132,8 +131,10 @@ void LivingStatue::update(
       }
 
       if (state.mFramesElapsed > 1) {
-        moveHorizontallyInAir(d, entity);
+        const auto offset = engine::orientation::toMovement(orientation);
+        position.x += offset * MOVEMENT_SPEED;
       }
+      ensureNotStuckInWall(d, entity);
 
       ++state.mFramesElapsed;
       if (state.mFramesElapsed == 8) {
@@ -151,7 +152,7 @@ void LivingStatue::update(
         return;
       }
 
-      moveHorizontallyInAir(d, entity);
+      moveWhileFalling(d, entity);
     });
 
     engine::synchronizeBoundingBoxToSprite(entity);
@@ -182,7 +183,7 @@ void LivingStatue::landOnGround(
   animationFrame = 2;
   engine::synchronizeBoundingBoxToSprite(entity);
 
-  moveHorizontallyInAir(d, entity);
+  moveWhileFalling(d, entity);
 
   mState = Waiting{};
 }
@@ -211,7 +212,7 @@ void LivingStatue::ensureNotStuckInWall(
 }
 
 
-void LivingStatue::moveHorizontallyInAir(
+void LivingStatue::moveWhileFalling(
   const GlobalDependencies& d,
   entityx::Entity entity
 ) {
@@ -221,9 +222,12 @@ void LivingStatue::moveHorizontallyInAir(
 
   const auto orientation = *entity.component<Orientation>();
   const auto offset = engine::orientation::toMovement(orientation);
-  position.x += offset * MOVEMENT_SPEED;
 
-  ensureNotStuckInWall(d, entity);
+  position.x += offset;
+  engine::moveHorizontallyWithStairStepping(
+    *d.mpCollisionChecker,
+    entity,
+    offset);
 }
 
 }
