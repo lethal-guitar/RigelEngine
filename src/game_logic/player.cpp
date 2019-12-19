@@ -1118,29 +1118,13 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
 
   VerticalMovementResult result;
   result.mMoveResult = engine::MovementResult::Completed;
+  if (distance == 0) {
+    result.mAttachedToClimbable = tryAttachToClimbable();
+    return result;
+  }
+
   for (int step = 0; step < distance; ++step) {
-    auto worldBBox = worldSpaceCollisionBox();
-
-    if (movement < 0) {
-      --worldBBox.topLeft.y;
-    }
-
-    std::optional<base::Vector> maybeClimbableTouchPoint;
-    for (int i = 0; i < worldBBox.size.width; ++i) {
-      const auto attributes =
-        mpMap->attributes(worldBBox.left() + i, worldBBox.top());
-      if (attributes.isClimbable()) {
-        maybeClimbableTouchPoint =
-          base::Vector{worldBBox.left() + i, worldBBox.top()};
-        break;
-      }
-    }
-
-    if (maybeClimbableTouchPoint) {
-      setVisualState(VisualState::HangingFromPipe);
-      mState = OnPipe{};
-      mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
-      position().y = maybeClimbableTouchPoint->y + PLAYER_HEIGHT;
+    if (tryAttachToClimbable()) {
       result.mAttachedToClimbable = true;
       break;
     }
@@ -1157,6 +1141,36 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
   }
 
   return result;
+}
+
+
+bool Player::tryAttachToClimbable() {
+  auto worldBBox = worldSpaceCollisionBox();
+
+  if (stateIs<Jumping>()) {
+    --worldBBox.topLeft.y;
+  }
+
+  std::optional<base::Vector> maybeClimbableTouchPoint;
+  for (int i = 0; i < worldBBox.size.width; ++i) {
+    const auto attributes =
+      mpMap->attributes(worldBBox.left() + i, worldBBox.top());
+    if (attributes.isClimbable()) {
+      maybeClimbableTouchPoint =
+        base::Vector{worldBBox.left() + i, worldBBox.top()};
+      break;
+    }
+  }
+
+  if (maybeClimbableTouchPoint) {
+    setVisualState(VisualState::HangingFromPipe);
+    mState = OnPipe{};
+    mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
+    position().y = maybeClimbableTouchPoint->y + PLAYER_HEIGHT;
+    return true;
+  }
+
+  return false;
 }
 
 

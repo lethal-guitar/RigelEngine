@@ -1111,7 +1111,7 @@ TEST_CASE("Player movement") {
         }
 
         SECTION("Doesn't attach when pipe out of reach") {
-          const auto newPipeY = position.y - 10;
+          const auto newPipeY = position.y - 11;
           for (int i = 0; i < pipeLength; ++i) {
             map.setTileAt(0, pipeStartX + i, newPipeY, 3);
           }
@@ -1157,6 +1157,31 @@ TEST_CASE("Player movement") {
           });
         }
       }
+    }
+
+    SECTION("Regression test: Large jump to wooden beam in M5") {
+      position = {50, 50};
+
+      const auto pipeLength = 8;
+      const auto pipeStartX = position.x - 6;
+      const auto pipeEndX = pipeStartX - pipeLength;
+      const auto pipeY = position.y - 12;
+      for (int i = 0; i < pipeLength; ++i) {
+        map.setTileAt(0, pipeStartX + i, pipeY, 3);
+      }
+
+      PlayerInput input;
+      input.mLeft = true;
+      input.mJump.mIsPressed = true;
+      input.mJump.mWasTriggered = true;
+      player.update(input);
+
+      input.mJump.mWasTriggered = false;
+      for (int i = 0; i < 6; ++i) {
+        player.update(input);
+      }
+
+      CHECK(animationFrame == 20);
     }
 
     SECTION("Death sequence") {
