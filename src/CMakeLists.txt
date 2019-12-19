@@ -115,8 +115,6 @@ set(core_sources
     game_logic/enemies/hover_bot.hpp
     game_logic/enemies/laser_turret.cpp
     game_logic/enemies/laser_turret.hpp
-    game_logic/enemies/living_statue.cpp
-    game_logic/enemies/living_statue.hpp
     game_logic/enemies/messenger_drone.cpp
     game_logic/enemies/messenger_drone.hpp
     game_logic/enemies/prisoner.cpp
@@ -141,6 +139,8 @@ set(core_sources
     game_logic/enemies/spider.hpp
     game_logic/enemies/spike_ball.cpp
     game_logic/enemies/spike_ball.hpp
+    game_logic/enemies/spiked_green_creature.cpp
+    game_logic/enemies/spiked_green_creature.hpp
     game_logic/enemies/unicycle_bot.cpp
     game_logic/enemies/unicycle_bot.hpp
     game_logic/enemies/wall_walker.cpp

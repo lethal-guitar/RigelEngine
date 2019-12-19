@@ -41,7 +41,6 @@
 #include "game_logic/enemies/green_bird.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
 #include "game_logic/enemies/laser_turret.hpp"
-#include "game_logic/enemies/living_statue.hpp"
 #include "game_logic/enemies/messenger_drone.hpp"
 #include "game_logic/enemies/prisoner.hpp"
 #include "game_logic/enemies/red_bird.hpp"
@@ -54,6 +53,7 @@
 #include "game_logic/enemies/snake.hpp"
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
+#include "game_logic/enemies/spiked_green_creature.hpp"
 #include "game_logic/enemies/unicycle_bot.hpp"
 #include "game_logic/enemies/wall_walker.hpp"
 #include "game_logic/enemies/watch_bot.hpp"
@@ -293,8 +293,8 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case ActorID::Big_green_cat_RIGHT:
       return 3;
 
-    case ActorID::Living_statue_LEFT:
-    case ActorID::Living_statue_RIGHT:
+    case ActorID::Spiked_green_creature_LEFT:
+    case ActorID::Spiked_green_creature_RIGHT:
       return 6;
 
     case ActorID::Unicycle_bot:

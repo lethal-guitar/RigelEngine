@@ -35,7 +35,7 @@ namespace rigel::game_logic {
 
 namespace rigel::game_logic::behaviors {
 
-struct LivingStatue {
+struct SpikedGreenCreature {
   struct Awakening {
     int mFramesElapsed = 0;
   };
