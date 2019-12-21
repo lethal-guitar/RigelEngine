@@ -125,7 +125,8 @@ private:
     const char* scriptName,
     ScriptEndHook&& scriptEndedHook,
     EventHook&& eventHook = noopEventHook,
-    bool isTransparent = false);
+    bool isTransparent = false,
+    bool shouldClearScriptCanvas = true);
   void leaveMenu();
   void fadeToWorld();
 
