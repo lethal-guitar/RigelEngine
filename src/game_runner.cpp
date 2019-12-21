@@ -267,14 +267,17 @@ void GameRunner::enterMenu(
   const char* scriptName,
   ScriptEndHook&& scriptEndedHook,
   EventHook&& eventHook,
-  const bool isTransparent
+  const bool isTransparent,
+  const bool shouldClearScriptCanvas
 ) {
   if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
     pWorld->mPlayerInput = {};
     pWorld->mpWorld->render();
   }
 
-  mContext.mpScriptRunner->clearCanvas();
+  if (shouldClearScriptCanvas) {
+    mContext.mpScriptRunner->clearCanvas();
+  }
 
   runScript(mContext, scriptName);
   mStateStack.push(Menu{
@@ -318,7 +321,10 @@ void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
         [this](const auto&) {
           leaveMenu();
           runScript(mContext, "Restore_Game");
-        });
+        },
+        noopEventHook,
+        false, // isTransparent
+        false); // shouldClearScriptCanvas
     }
   }
 }
