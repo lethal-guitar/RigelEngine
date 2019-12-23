@@ -539,8 +539,9 @@ void EntityFactory::configureProjectile(
   // For convenience, the enemy laser shot muzzle flash is created along with
   // the projectile.
   if (type == ProjectileType::EnemyLaserShot) {
-    const auto muzzleFlashSpriteId = static_cast<data::ActorID>(
-      direction == ProjectileDirection::Left ? 147 : 148);
+    const auto muzzleFlashSpriteId = direction == ProjectileDirection::Left
+      ? data::ActorID::Enemy_laser_muzzle_flash_1
+      : data::ActorID::Enemy_laser_muzzle_flash_2;
     auto muzzleFlash = createSprite(muzzleFlashSpriteId);
     muzzleFlash.assign<WorldPosition>(position);
     muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
