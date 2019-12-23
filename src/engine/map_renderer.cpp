@@ -163,7 +163,7 @@ void MapRenderer::renderBackdrop(
   };
   const auto targetRectSize = base::Extents{
     backdropWidth * numRepetitions,
-    tilesToPixels(viewPortSize.height)
+    mBackdropTexture.extents().height,
   };
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
