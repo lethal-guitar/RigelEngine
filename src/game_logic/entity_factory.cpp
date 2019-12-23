@@ -231,6 +231,15 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
 };
 
 
+auto createFrameDrawData(
+  const loader::ActorData::Frame& frameData,
+  renderer::Renderer* pRenderer
+) {
+  auto texture = renderer::OwningTexture{pRenderer, frameData.mFrameImage};
+  return engine::SpriteFrame{std::move(texture), frameData.mDrawOffset};
+}
+
+
 void applyTweaks(
   std::vector<engine::SpriteFrame>& frames,
   const ActorID actorId
@@ -362,10 +371,8 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
       lastDrawOrder = actorData.mDrawIndex;
 
       for (const auto& frameData : actorData.mFrames) {
-        auto texture = renderer::OwningTexture{
-          mpRenderer, frameData.mFrameImage};
         drawData.mFrames.emplace_back(
-          std::move(texture), frameData.mDrawOffset);
+          createFrameDrawData(frameData, mpRenderer));
       }
 
       framesToRender.push_back(lastFrameCount);
