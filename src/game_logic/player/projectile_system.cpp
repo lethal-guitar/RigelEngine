@@ -156,13 +156,19 @@ void ProjectileSystem::update(entityx::EntityManager& es) {
         body.mIsActive = true;
       }
 
-      // TODO: Impact explosions for reactor debris?
       if (
         projectile.mType == PlayerProjectile::Type::Laser ||
         projectile.mType == PlayerProjectile::Type::ReactorDebris
       ) {
+        if (
+          damage.mHasCausedDamage &&
+          projectile.mType == PlayerProjectile::Type::ReactorDebris
+        ) {
+          spawnEnemyImpactEffect(*mpEntityFactory, position);
+        }
+
         // These projectiles pass through enemies and walls, so there's nothing
-        // we have to do.
+        // more we have to do.
         return;
       }
 
