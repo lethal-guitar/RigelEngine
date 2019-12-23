@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
+#include "engine/visual_components.hpp"
 #include "data/map.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -31,6 +32,7 @@ enum class ProjectileType {
   PlayerLaserShot,
   PlayerRocketShot,
   PlayerFlameShot,
+  PlayerShipLaserShot,
   ReactorDebris,
   EnemyLaserShot,
   EnemyRocket,
@@ -50,6 +52,9 @@ struct IEntityFactory {
 
   virtual entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) = 0;
+
+  virtual engine::components::Sprite createSpriteForId(
+    const data::ActorID actorID) = 0;
 
   /** Create a sprite entity using the given actor ID. If assignBoundingBox is
    * true, the dimensions of the sprite's first frame are used to assign a

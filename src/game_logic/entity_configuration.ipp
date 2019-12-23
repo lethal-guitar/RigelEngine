@@ -127,6 +127,9 @@ ActorID actorIdForProjectile(
         ? (isGoingRight ? data::ActorID::Duke_flame_shot_right : data::ActorID::Duke_flame_shot_left)
         : (isGoingUp ? data::ActorID::Duke_flame_shot_up : data::ActorID::Duke_flame_shot_down);
 
+    case ProjectileType::PlayerShipLaserShot:
+      return data::ActorID::Dukes_ship_laser_shot;
+
     case ProjectileType::ReactorDebris:
       return isGoingRight ? data::ActorID::Reactor_fire_RIGHT : data::ActorID::Reactor_fire_LEFT;
 
@@ -153,6 +156,7 @@ float speedForProjectileType(const ProjectileType type) {
       return 5.0f;
 
     case ProjectileType::ReactorDebris:
+    case ProjectileType::PlayerShipLaserShot:
       return 3.0f;
       break;
 
@@ -172,6 +176,7 @@ int damageForProjectileType(const ProjectileType type) {
       return 2;
 
     case ProjectileType::ReactorDebris:
+    case ProjectileType::PlayerShipLaserShot:
       return 5;
       break;
 
@@ -189,7 +194,8 @@ constexpr bool isPlayerProjectile(const ProjectileType type) {
     type == ProjectileType::PlayerRegularShot ||
     type == ProjectileType::PlayerLaserShot ||
     type == ProjectileType::PlayerFlameShot ||
-    type == ProjectileType::PlayerRocketShot;
+    type == ProjectileType::PlayerRocketShot ||
+    type == ProjectileType::PlayerShipLaserShot;
 }
 
 
@@ -432,6 +438,15 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ActorID::Spiked_green_creature_RIGHT);
       break;
 
+    case ActorID::Dukes_ship_LEFT:
+    case ActorID::Dukes_ship_RIGHT:
+    case ActorID::Dukes_ship_after_exiting_LEFT:
+    case ActorID::Dukes_ship_after_exiting_RIGHT:
+      actorParts.push_back(ActorID::Dukes_ship_LEFT);
+      actorParts.push_back(ActorID::Dukes_ship_RIGHT);
+      actorParts.push_back(ActorID::Dukes_ship_exhaust_flames);
+      break;
+
     default:
       actorParts.push_back(ID);
       break;
@@ -507,6 +522,12 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
     case ActorID::Big_green_cat_RIGHT:
     case ActorID::Spiked_green_creature_LEFT:
     case ActorID::Spiked_green_creature_RIGHT:
+    case ActorID::Duke_LEFT:
+    case ActorID::Duke_RIGHT:
+    case ActorID::Dukes_ship_LEFT:
+    case ActorID::Dukes_ship_RIGHT:
+    case ActorID::Dukes_ship_after_exiting_LEFT:
+    case ActorID::Dukes_ship_after_exiting_RIGHT:
       sprite.mFramesToRender = {0};
       break;
 
@@ -1838,6 +1859,27 @@ void EntityFactory::configureEntity(
     // Various
     // ----------------------------------------------------------------------
 
+    case ActorID::Dukes_ship_LEFT:
+    case ActorID::Dukes_ship_RIGHT:
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::PlayerShip{false});
+      entity.assign<Orientation>(actorID == ActorID::Dukes_ship_LEFT
+        ? Orientation::Left
+        : Orientation::Right);
+      entity.assign<AppearsOnRadar>();
+      break;
+
+    case ActorID::Dukes_ship_after_exiting_LEFT:
+    case ActorID::Dukes_ship_after_exiting_RIGHT:
+      addDefaultMovingBody(entity, boundingBox);
+      entity.assign<BehaviorController>(behaviors::PlayerShip{true});
+      entity.assign<Orientation>(
+        actorID == ActorID::Dukes_ship_after_exiting_LEFT
+          ? Orientation::Left
+          : Orientation::Right);
+      entity.assign<AppearsOnRadar>();
+      break;
+
     case ActorID::Nuclear_waste_can_empty: // Nuclear waste barrel, empty
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<BoundingBox>(boundingBox);
@@ -2208,6 +2250,11 @@ void EntityFactory::configureEntity(
     case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
     case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
       entity.assign<BoundingBox>(boundingBox);
+      break;
+
+    case ActorID::Dukes_ship_laser_shot:
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<AnimationLoop>(1);
       break;
 
     case ActorID::Enemy_laser_shot_RIGHT:

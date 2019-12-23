@@ -72,6 +72,7 @@
 #include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/interactive/super_force_field.hpp"
 #include "game_logic/interactive/tile_burner.hpp"
+#include "game_logic/player/ship.hpp"
 #include "game_logic/trigger_components.hpp"
 
 #include <tuple>
@@ -118,6 +119,7 @@ auto toPlayerProjectileType(const ProjectileType type) {
     int(PType::Laser) == int(ProjectileType::PlayerLaserShot) &&
     int(PType::Rocket) == int(ProjectileType::PlayerRocketShot) &&
     int(PType::Flame) == int(ProjectileType::PlayerFlameShot) &&
+    int(PType::ShipLaser) == int(ProjectileType::PlayerShipLaserShot) &&
     int(PType::ReactorDebris) == int(ProjectileType::ReactorDebris));
   return static_cast<PType>(static_cast<int>(type));
 }
@@ -243,7 +245,9 @@ auto createFrameDrawData(
 
 void applyTweaks(
   std::vector<engine::SpriteFrame>& frames,
-  const ActorID actorId
+  const ActorID actorId,
+  const std::vector<loader::ActorData>& actorParts,
+  renderer::Renderer* pRenderer
 ) {
   // Some sprites in the game have offsets that would require more complicated
   // code to draw them correctly. To simplify that, we adjust the offsets once
@@ -268,6 +272,47 @@ void applyTweaks(
     for (auto i = 8u; i < frames.size(); ++i) {
       frames[i].mDrawOffset.x -= 1;
     }
+  }
+
+  // Duke's ship
+  if (
+    actorId == ActorID::Dukes_ship_LEFT ||
+    actorId == ActorID::Dukes_ship_RIGHT ||
+    actorId == ActorID::Dukes_ship_after_exiting_LEFT ||
+    actorId == ActorID::Dukes_ship_after_exiting_RIGHT
+  ) {
+    // The incoming frame list is based on IDs 87, 88, and 92. The frames
+    // are laid out as follows:
+    //
+    //  0, 1: Duke's ship, facing right
+    //  2, 3: Duke's ship, facing left
+    //  4, 5: exhaust flames, facing down
+    //  6, 7: exhaust flames, facing left
+    //  8, 9: exhaust flames, facing right
+    //
+    // In order to display the down facing exhaust flames correctly when
+    // Duke's ship is facing left, we need to apply an additional X offset to
+    // frames 4 and 5. But currently, RigelEngine doesn't support changing the
+    // X offset temporarily, so we need to first create a copy of those frames,
+    // insert them after 8 and 9, and then adjust their offset.
+    //
+    // After this tweak, the frame layout is as follows:
+    //
+    //   0,  1: Duke's ship, facing right
+    //   2,  3: Duke's ship, facing left
+    //   4,  5: exhaust flames, facing down, x-offset for facing left
+    //   6,  7: exhaust flames, facing left
+    //   8,  9: exhaust flames, facing down, x-offset for facing right
+    //  10, 11: exhaust flames, facing right
+    frames.insert(
+      frames.begin() + 8,
+      createFrameDrawData(actorParts[2].mFrames[0], pRenderer));
+    frames.insert(
+      frames.begin() + 9,
+      createFrameDrawData(actorParts[2].mFrames[1], pRenderer));
+
+    frames[8].mDrawOffset.x += 1;
+    frames[9].mDrawOffset.x += 1;
   }
 }
 
@@ -310,6 +355,12 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
     case ActorID::Unicycle_bot:
       return 4;
 
+    case ActorID::Dukes_ship_LEFT:
+    case ActorID::Dukes_ship_RIGHT:
+    case ActorID::Dukes_ship_after_exiting_LEFT:
+    case ActorID::Dukes_ship_after_exiting_RIGHT:
+      return 6;
+
     default:
       return std::nullopt;
   }
@@ -328,6 +379,12 @@ int UNICYCLE_FRAME_MAP[] = {
 };
 
 
+int DUKES_SHIP_FRAME_MAP[] = {
+  0, 1, 10, 11, 8, 9, // left
+  2, 3, 6, 7, 4, 5, // right
+};
+
+
 base::ArrayView<int> frameMapForActor(const ActorID actorId) {
   switch (actorId) {
     case ActorID::Spider:
@@ -335,6 +392,12 @@ base::ArrayView<int> frameMapForActor(const ActorID actorId) {
 
     case ActorID::Unicycle_bot:
       return base::ArrayView<int>(UNICYCLE_FRAME_MAP);
+
+    case ActorID::Dukes_ship_LEFT:
+    case ActorID::Dukes_ship_RIGHT:
+    case ActorID::Dukes_ship_after_exiting_LEFT:
+    case ActorID::Dukes_ship_after_exiting_RIGHT:
+      return base::ArrayView<int>(DUKES_SHIP_FRAME_MAP);
 
     default:
       return {};
@@ -388,7 +451,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
     drawData.mVirtualToRealFrameMap = frameMapForActor(mainId);
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
-    applyTweaks(drawData.mFrames, mainId);
+    applyTweaks(drawData.mFrames, mainId, actorParts, mpRenderer);
 
     iData = mSpriteDataCache.emplace(
       mainId,

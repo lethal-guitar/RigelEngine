@@ -81,6 +81,12 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
     return {};
   }
 
+  engine::components::Sprite createSpriteForId(
+    const data::ActorID actorID
+  ) override {
+    return {};
+  }
+
   entityx::Entity createSprite(
     data::ActorID actorID,
     bool assignBoundingBox = false

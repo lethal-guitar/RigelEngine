@@ -26,6 +26,7 @@
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/sprite_tools.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
@@ -481,11 +482,56 @@ void Player::takeDamage(const int amount) {
 
 
 void Player::die() {
+  if (stateIs<InShip>()) {
+    exitShip();
+  }
+
   mpPlayerModel->takeFatalDamage();
   mEntity.component<c::Sprite>()->mShow = true;
   mState = Dieing{};
   setVisualState(VisualState::Dieing);
   mpServiceProvider->playSound(data::SoundId::DukeDeath);
+}
+
+
+void Player::enterShip(
+  const base::Vector& shipPosition,
+  const c::Orientation shipOrientation
+) {
+  position() = shipPosition;
+  *mEntity.component<c::Orientation>() = shipOrientation;
+  mState = InShip{};
+
+  auto& sprite = *mEntity.component<c::Sprite>();
+  sprite = mpEntityFactory->createSpriteForId(data::ActorID::Dukes_ship_RIGHT);
+  sprite.mFramesToRender[0] = 1;
+  engine::synchronizeBoundingBoxToSprite(mEntity);
+
+  // Reserve spots for exhaust flame animation
+  sprite.mFramesToRender.push_back(engine::IGNORE_RENDER_SLOT);
+  sprite.mFramesToRender.push_back(engine::IGNORE_RENDER_SLOT);
+
+  setVisualState(VisualState::InShip);
+}
+
+
+void Player::exitShip() {
+  mState = OnGround{};
+
+  const auto facingLeft = orientation() == c::Orientation::Left;
+  mpEntityFactory->createActor(facingLeft
+    ? data::ActorID::Dukes_ship_after_exiting_LEFT
+    : data::ActorID::Dukes_ship_after_exiting_RIGHT,
+    position());
+
+  position().x += facingLeft ? 3 : 1;
+
+  auto& sprite = *mEntity.component<c::Sprite>();
+  sprite = mpEntityFactory->createSpriteForId(data::ActorID::Duke_LEFT);
+  *mEntity.component<c::BoundingBox>() = DEFAULT_PLAYER_BOUNDS;
+
+  setVisualState(VisualState::Standing);
+  updateCollisionBox();
 }
 
 
@@ -822,6 +868,68 @@ void Player::updateMovement(
       }
     },
 
+    [&, this](InShip& state) {
+      auto movementDirection = [&]() {
+        return engine::orientation::toMovement(orientation());
+      };
+
+      if (movementVector.x != 0 && movementVector.x != movementDirection()) {
+        state.mSpeed = 0;
+        switchOrientation();
+      }
+
+      if (movementVector.x != 0) {
+        if (state.mSpeed < 4) {
+          ++state.mSpeed;
+        }
+
+        const auto numSteps = state.mSpeed == 4 ? 2 : 1;
+        for (int i = 0; i < numSteps; ++i) {
+          const auto result = moveHorizontally(
+            *mpCollisionChecker, mEntity, movementDirection());
+
+          const auto worldBBox = engine::toWorldSpace(bbox, position);
+          if (result != MovementResult::Completed) {
+            if (mpCollisionChecker->isOnSolidGround(worldBBox)) {
+              moveVertically(
+                *mpCollisionChecker, mEntity, -1);
+            } else if (mpCollisionChecker->isTouchingCeiling(worldBBox)) {
+              moveVertically(
+                *mpCollisionChecker, mEntity, 1);
+            }
+          }
+        }
+      } else {
+        state.mSpeed = 0;
+      }
+
+      moveVertically(
+        *mpCollisionChecker, mEntity, movementVector.y);
+
+      auto& sprite = *mEntity.component<c::Sprite>();
+      if (movementVector.x != 0) {
+        sprite.mFramesToRender[1] = mIsOddFrame ? 3 : 2;
+      } else {
+        sprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
+      }
+
+      if (movementVector.y < 0) {
+        sprite.mFramesToRender[2] = mIsOddFrame ? 5 : 4;
+      } else {
+        sprite.mFramesToRender[2] = engine::IGNORE_RENDER_SLOT;
+      }
+
+      if (mJumpRequested) {
+        exitShip();
+
+        if (!mpCollisionChecker->isTouchingCeiling(position, bbox)) {
+          jump();
+        } else {
+          startFalling();
+        }
+      }
+    },
+
     [this](Interacting& state) {
       setVisualState(VisualState::Interacting);
 
@@ -860,6 +968,7 @@ void Player::updateShooting(const Button& fireButton) {
   }
 
   const auto hasRapidFire =
+    stateIs<InShip>() ||
     mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
     mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
@@ -916,6 +1025,7 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
 
   const auto canAttachToLadder =
     !stateIs<ClimbingLadder>() &&
+    !stateIs<InShip>() &&
     (!stateIs<Jumping>() || std::get<Jumping>(mState).mFramesElapsed >= 3);
   const auto wantsToAttach = movementVector.y < 0;
   if (canAttachToLadder && wantsToAttach) {
@@ -1228,8 +1338,10 @@ void Player::updateCloakedAppearance() {
 
 
 void Player::updateCollisionBox() {
-  auto& bbox = *mEntity.component<c::BoundingBox>();
-  bbox.size.height = isCrouching() ? PLAYER_HEIGHT_CROUCHED : PLAYER_HEIGHT;
+  if (!stateIs<InShip>()) {
+    auto& bbox = *mEntity.component<c::BoundingBox>();
+    bbox.size.height = isCrouching() ? PLAYER_HEIGHT_CROUCHED : PLAYER_HEIGHT;
+  }
 }
 
 
@@ -1267,6 +1379,10 @@ void Player::updateHitBox() {
       mHitBox.size.width = 4;
       break;
 
+    case VS::InShip:
+      mHitBox = *mEntity.component<c::BoundingBox>();
+      break;
+
     default:
       break;
   }
@@ -1283,24 +1399,39 @@ void Player::dieIfFallenOutOfMap() {
 
 void Player::fireShot() {
   const auto& position = *mEntity.component<c::WorldPosition>();
-  const auto weaponType = mpPlayerModel->weapon();
   const auto direction = shotDirection(orientation(), mStance);
 
-  mpEntityFactory->createProjectile(
-    projectileTypeForWeapon(weaponType),
-    position + shotOffset(orientation(), mStance),
-    direction);
-  mpPlayerModel->useAmmo();
+  if (stateIs<InShip>()) {
+    const auto isFacingLeft = orientation() == c::Orientation::Left;
 
-  mpServiceProvider->playSound(soundIdForWeapon(weaponType));
-  spawnOneShotSprite(
-    *mpEntityFactory,
-    muzzleFlashActorId(direction),
-    position + muzzleFlashOffset(orientation(), mStance));
+    mpEntityFactory->createProjectile(
+      ProjectileType::PlayerShipLaserShot,
+      position + base::Vector{isFacingLeft ? -1 : 8, 0},
+      direction);
+    spawnOneShotSprite(
+      *mpEntityFactory,
+      muzzleFlashActorId(direction),
+      position + base::Vector{isFacingLeft ? -3 : 8, -1});
+    mpServiceProvider->playSound(data::SoundId::DukeLaserShot);
+  } else {
+    const auto weaponType = mpPlayerModel->weapon();
 
-  if (auto maybeRecoilFrame = recoilAnimationFrame(mVisualState)) {
-    mEntity.component<c::Sprite>()->mFramesToRender[0] = *maybeRecoilFrame;
-    mRecoilAnimationActive = true;
+    mpEntityFactory->createProjectile(
+      projectileTypeForWeapon(weaponType),
+      position + shotOffset(orientation(), mStance),
+      direction);
+    mpPlayerModel->useAmmo();
+
+    mpServiceProvider->playSound(soundIdForWeapon(weaponType));
+    spawnOneShotSprite(
+      *mpEntityFactory,
+      muzzleFlashActorId(direction),
+      position + muzzleFlashOffset(orientation(), mStance));
+
+    if (auto maybeRecoilFrame = recoilAnimationFrame(mVisualState)) {
+      mEntity.component<c::Sprite>()->mFramesToRender[0] = *maybeRecoilFrame;
+      mRecoilAnimationActive = true;
+    }
   }
 
   mpEvents->emit(rigel::events::PlayerFiredShot{});

@@ -193,6 +193,8 @@ set(core_sources
     game_logic/player/interaction_system.hpp
     game_logic/player/projectile_system.cpp
     game_logic/player/projectile_system.hpp
+    game_logic/player/ship.cpp
+    game_logic/player/ship.hpp
     game_logic/trigger_components.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp

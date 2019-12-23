@@ -108,7 +108,7 @@ void spawnRocketWallImpactEffect(
 }
 
 
-void spawnRocketEnemyImpactEffect(
+void spawnEnemyImpactEffect(
   EntityFactory& entityFactory,
   const base::Vector& position
 ) {
@@ -170,15 +170,21 @@ void ProjectileSystem::update(entityx::EntityManager& es) {
 
       // Check if we hit an enemy, deactivate if so.
       if (damage.mHasCausedDamage) {
-        if (isRocket) {
-          spawnRocketEnemyImpactEffect(*mpEntityFactory, position);
+        if (
+          isRocket ||
+          projectile.mType == PlayerProjectile::Type::ShipLaser
+        ) {
+          spawnEnemyImpactEffect(*mpEntityFactory, position);
         }
         deactivateProjectile(entity);
         return;
       }
 
-      if (projectile.mType == PlayerProjectile::Type::Flame) {
-        // The flame thrower passes through walls, so no further checking
+      if (
+        projectile.mType == PlayerProjectile::Type::Flame ||
+        projectile.mType == PlayerProjectile::Type::ShipLaser
+      ) {
+        // These projectiles pass through walls, so no further checking
         // necessary.
         return;
       }
