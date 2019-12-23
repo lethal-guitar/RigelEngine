@@ -231,7 +231,7 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
 };
 
 
-void adjustOffsets(
+void applyTweaks(
   std::vector<engine::SpriteFrame>& frames,
   const ActorID actorId
 ) {
@@ -376,7 +376,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
     drawData.mVirtualToRealFrameMap = frameMapForActor(mainId);
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
-    adjustOffsets(drawData.mFrames, mainId);
+    applyTweaks(drawData.mFrames, mainId);
 
     iData = mSpriteDataCache.emplace(
       mainId,
