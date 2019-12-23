@@ -16,6 +16,7 @@
 
 #include "entity_factory.hpp"
 
+#include "base/container_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
@@ -365,9 +366,13 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
     int lastFrameCount = 0;
     std::vector<int> framesToRender;
 
-    const auto actorParts = actorIDListForActor(mainId);
-    for (const auto part : actorParts) {
-      const auto& actorData = mpSpritePackage->loadActor(part);
+    const auto actorPartIds = actorIDListForActor(mainId);
+    const auto actorParts = utils::transformed(actorPartIds,
+      [&](const ActorID partId) {
+        return mpSpritePackage->loadActor(partId);
+      });
+
+    for (const auto& actorData : actorParts) {
       lastDrawOrder = actorData.mDrawIndex;
 
       for (const auto& frameData : actorData.mFrames) {
