@@ -101,6 +101,7 @@ struct PlayerProjectile {
     Laser,
     Rocket,
     Flame,
+    ShipLaser,
     ReactorDebris
   };
 

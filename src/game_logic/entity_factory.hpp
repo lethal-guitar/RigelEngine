@@ -123,6 +123,9 @@ public:
   entityx::Entity createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) override;
 
+  engine::components::Sprite createSpriteForId(
+    const data::ActorID actorID) override;
+
   /** Create a sprite entity using the given actor ID. If assignBoundingBox is
    * true, the dimensions of the sprite's first frame are used to assign a
    * bounding box.
@@ -150,8 +153,6 @@ public:
   }
 
 private:
-  engine::components::Sprite createSpriteForId(const data::ActorID actorID);
-
   void configureEntity(
     entityx::Entity entity,
     const data::ActorID actorID,

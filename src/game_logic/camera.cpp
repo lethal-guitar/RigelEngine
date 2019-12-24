@@ -48,6 +48,7 @@ constexpr auto MAX_ADJUST_DOWN = 2;
 constexpr auto MAX_ADJUST_DOWN_ELEVATOR = 3;
 
 constexpr auto DEAD_ZONE_START_X = 11;
+constexpr auto IN_SHIP_DEAD_ZONE_START_X = 12;
 constexpr auto DEAD_ZONE_END_X = 21;
 
 constexpr auto DEFAULT_VERTICAL_DEAD_ZONE = VerticalDeadZone{2, 19};
@@ -61,6 +62,7 @@ bool shouldUseTightDeadZone(const Player& player) {
     player.stateIs<ClimbingLadder>() ||
     player.stateIs<PushedByFan>() ||
     player.stateIs<UsingJetpack>() ||
+    player.stateIs<InShip>() ||
     player.isRidingElevator();
 }
 
@@ -74,9 +76,11 @@ const VerticalDeadZone& deadZoneForStateOf(const Player& player) {
 
 base::Rect<int> deadZoneRect(const Player& player) {
   const auto& verticalDeadZone = deadZoneForStateOf(player);
+  const auto deadZoneStartX = player.stateIs<InShip>()
+    ? IN_SHIP_DEAD_ZONE_START_X : DEAD_ZONE_START_X;
 
   return base::makeRect<int>(
-    {DEAD_ZONE_START_X, verticalDeadZone.mStart},
+    {deadZoneStartX, verticalDeadZone.mStart},
     {DEAD_ZONE_END_X, verticalDeadZone.mEnd});
 }
 

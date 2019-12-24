@@ -90,6 +90,10 @@ struct ClimbingLadder {};
 
 struct OnPipe {};
 
+struct InShip {
+  int mSpeed = 0;
+};
+
 struct Interacting {
   explicit Interacting(const int duration)
     : mDuration(duration)
@@ -141,6 +145,7 @@ using PlayerState = std::variant<
   RecoveringFromLanding,
   ClimbingLadder,
   OnPipe,
+  InShip,
   Interacting,
   Incapacitated,
   Dieing>;
@@ -167,7 +172,8 @@ enum class VisualState {
   ClimbingLadder = 35,
   UsingJetpack = 37,
   Dieing = 29,
-  Dead = 32
+  Dead = 32,
+  InShip = 100
 };
 
 
@@ -206,6 +212,11 @@ public:
 
   void takeDamage(int amount);
   void die();
+
+  void enterShip(
+    const base::Vector& shipPosition,
+    engine::components::Orientation shipOrientation);
+  void exitShip();
 
   void incapacitate(int framesToKeepVisible = 0);
   void setFree();
