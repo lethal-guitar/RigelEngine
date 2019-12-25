@@ -62,8 +62,9 @@ MenuMode::MenuMode(Context context)
 void MenuMode::handleEvent(const SDL_Event& event) {
   if (mOptionsMenu) {
     if (
-      event.type == SDL_KEYDOWN &&
-      event.key.keysym.sym == SDLK_ESCAPE
+      (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) ||
+      (event.type == SDL_CONTROLLERBUTTONDOWN &&
+       event.cbutton.button == SDL_CONTROLLER_BUTTON_B)
     ) {
       mOptionsMenu = std::nullopt;
     }
@@ -72,8 +73,9 @@ void MenuMode::handleEvent(const SDL_Event& event) {
 
   if (
     mMenuState == MenuState::AskIfQuit &&
-    event.type == SDL_KEYDOWN &&
-    event.key.keysym.sym == SDLK_y
+    ((event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_y) ||
+     (event.type == SDL_CONTROLLERBUTTONDOWN &&
+      event.cbutton.button == SDL_CONTROLLER_BUTTON_A))
   ) {
     mContext.mpServiceProvider->scheduleGameQuit();
     return;
@@ -84,10 +86,13 @@ void MenuMode::handleEvent(const SDL_Event& event) {
     const auto optionsMenuSelected = maybeIndex && *maybeIndex == 2;
     if (
       optionsMenuSelected &&
-      event.type == SDL_KEYDOWN &&
-      (event.key.keysym.sym == SDLK_RETURN ||
-       event.key.keysym.sym == SDLK_KP_ENTER ||
-       event.key.keysym.sym == SDLK_SPACE)
+      ((event.type == SDL_KEYDOWN && (
+        event.key.keysym.sym == SDLK_RETURN ||
+        event.key.keysym.sym == SDLK_KP_ENTER ||
+        event.key.keysym.sym == SDLK_SPACE))
+      ||
+      (event.type == SDL_CONTROLLERBUTTONDOWN &&
+       event.cbutton.button == SDL_CONTROLLER_BUTTON_A))
     ) {
       mOptionsMenu = ui::OptionsMenu{&mContext.mpUserProfile->mOptions};
       return;

@@ -93,7 +93,7 @@ IntroDemoLoopMode::IntroDemoLoopMode(
 
 
 bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
-  if (event.type != SDL_KEYDOWN) {
+  if ((event.type != SDL_KEYDOWN) && (event.type != SDL_CONTROLLERBUTTONDOWN)) {
     return false;
   }
 
@@ -110,8 +110,10 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
     auto& currentStage = mStages[mCurrentStage];
 
     if (
-      event.key.keysym.sym == SDLK_ESCAPE
-      || !canStageHandleEvents(currentStage)
+      (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) ||
+      (event.type == SDL_CONTROLLERBUTTONDOWN &&
+       event.cbutton.button == SDL_CONTROLLER_BUTTON_B) ||
+      !canStageHandleEvents(currentStage)
     ) {
       return true;
     } else {

@@ -43,6 +43,11 @@ struct DeleterFor<SDL_Window> {
 };
 
 template<>
+struct DeleterFor<SDL_GameController> {
+  static auto deleter() { return &SDL_GameControllerClose; }
+};
+
+template<>
 struct DeleterFor<Mix_Chunk> {
   static auto deleter() { return &Mix_FreeChunk; }
 };

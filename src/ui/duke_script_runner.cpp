@@ -174,20 +174,34 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  if (event.type != SDL_KEYDOWN) {
+  if (event.type != SDL_KEYDOWN && event.type != SDL_CONTROLLERBUTTONDOWN) {
     return;
   }
 
-  // Escape always aborts
-  if (event.key.keysym.sym == SDLK_ESCAPE) {
+  // Escape or controller button B always abort
+  if (
+    (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) ||
+    (event.type == SDL_CONTROLLERBUTTONDOWN &&
+     event.cbutton.button == SDL_CONTROLLER_BUTTON_B)
+  ) {
     mState = State::ExecutionInterrupted;
     hideMenuSelectionIndicator();
     return;
   }
 
-  // Any key stops a wait state (Delay or WaitForInput)
+  // Any key or controller button stops a wait state (Delay or WaitForInput)
   if (isInWaitState()) {
     clearWaitState();
+  }
+
+  handleKeyboardEvent(event);
+  handleGameControllerEvent(event);
+}
+
+
+void DukeScriptRunner::handleKeyboardEvent(const SDL_Event& event) {
+  if (event.type != SDL_KEYDOWN) {
+    return;
   }
 
   // Arrow keys, Enter and Space are used for pager interaction
@@ -208,21 +222,42 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
       case SDLK_RETURN:
       case SDLK_SPACE:
       case SDLK_KP_ENTER:
-        if (mPagerState->mMode == PagingMode::Menu) {
-          selectCurrentMenuItem(state);
-        } else {
-          selectNextPage(state);
-        }
+        confirmOrSelectNextPage(state);
         break;
 
       default:
-        if (mPagerState->mMode == PagingMode::Menu) {
-          // Since we cleared the wait state previously, we have to go back
-          // to the current page
-          executeCurrentPageScript(state);
-        } else {
-          selectNextPage(state);
-        }
+        handleUnassignedButton(state);
+        break;
+    }
+  }
+}
+
+void DukeScriptRunner::handleGameControllerEvent(const SDL_Event& event) {
+  if (event.type != SDL_CONTROLLERBUTTONDOWN) {
+    return;
+  }
+
+  // Menu interaction using dpad, button B and A
+  if (hasMenuPages()) {
+    auto& state = *mPagerState;
+
+    switch (event.cbutton.button) {
+      case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+      case SDL_CONTROLLER_BUTTON_DPAD_UP:
+        selectPreviousPage(state);
+        break;
+
+      case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+      case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+        selectNextPage(state);
+        break;
+
+      case SDL_CONTROLLER_BUTTON_A:
+        confirmOrSelectNextPage(state);
+        break;
+
+      default:
+        handleUnassignedButton(state);
         break;
     }
   }
@@ -586,6 +621,28 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
   }
 
   onPageChanged(state);
+}
+
+
+void DukeScriptRunner::confirmOrSelectNextPage(PagerState& state) {
+  if (mPagerState->mMode == PagingMode::Menu) {
+    selectCurrentMenuItem(state);
+  }
+  else {
+    selectNextPage(state);
+  }
+}
+
+
+void DukeScriptRunner::handleUnassignedButton(PagerState& state) {
+  if (mPagerState->mMode == PagingMode::Menu) {
+    // Since we cleared the wait state previously, we have to go back
+    // to the current page
+    executeCurrentPageScript(state);
+  }
+  else {
+    selectNextPage(state);
+  }
 }
 
 
