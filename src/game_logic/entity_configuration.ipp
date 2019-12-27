@@ -142,6 +142,17 @@ ActorID actorIdForProjectile(
         ? (isGoingRight ? data::ActorID::Enemy_rocket_right : data::ActorID::Enemy_rocket_left)
         : data::ActorID::Enemy_rocket_up;
 
+    case ProjectileType::EnemyBossRocket:
+      if (isHorizontal(direction)) {
+        return isGoingRight
+          ? data::ActorID::Enemy_rocket_right
+          : data::ActorID::Enemy_rocket_left;
+      } else {
+        return isGoingUp
+          ? data::ActorID::Enemy_rocket_2_up
+          : data::ActorID::Enemy_rocket_2_down;
+      }
+
   }
 
   assert(false);
@@ -161,6 +172,7 @@ float speedForProjectileType(const ProjectileType type) {
       break;
 
     case ProjectileType::EnemyRocket:
+    case ProjectileType::EnemyBossRocket:
       return 1.0f;
 
     default:
@@ -495,6 +507,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case ActorID::BOSS_Episode_1:
       sprite.mFramesToRender = {0, 2};
+      break;
+
+    case ActorID::BOSS_Episode_3:
+      sprite.mFramesToRender = {engine::IGNORE_RENDER_SLOT, 1, 0};
       break;
 
     case ActorID::Rocket_elevator:
@@ -1486,10 +1502,11 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    // Rocket turret rockets
     case ActorID::Enemy_rocket_left:
     case ActorID::Enemy_rocket_up:
     case ActorID::Enemy_rocket_right:
+    case ActorID::Enemy_rocket_2_up:
+    case ActorID::Enemy_rocket_2_down:
       entity.assign<Shootable>(Health{1}, GivenScore{10});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
@@ -1785,6 +1802,19 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<MovingBody>(Velocity{}, GravityAffected{false});
       entity.assign<BehaviorController>(behaviors::BossEpisode1{});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<AppearsOnRadar>();
+      break;
+
+    case ActorID::BOSS_Episode_3:
+      entity.assign<AnimationLoop>(1, 1, 2, 1);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(
+        Health{675 + 75 * difficultyOffset}, GivenScore{0});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<BoundingBox>(mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<BehaviorController>(behaviors::BossEpisode3{});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<AppearsOnRadar>();
