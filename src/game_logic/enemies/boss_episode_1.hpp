@@ -55,10 +55,6 @@ struct ZigZagging {
     engine::components::Orientation::Left;
 };
 
-struct Dieing {
-  int mFramesElapsed = 0;
-};
-
 
 using State = std::variant<
   AwaitingActivation,
@@ -69,8 +65,7 @@ using State = std::variant<
   MovingDownOnRightSide,
   FlyingLeftOnLowerLevel,
   MovingUpOnLeftSide,
-  ZigZagging,
-  Dieing>;
+  ZigZagging>;
 
 }
 

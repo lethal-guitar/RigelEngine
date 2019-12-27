@@ -24,7 +24,6 @@
 #include "engine/movement.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/physical_components.hpp"
-#include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
@@ -35,8 +34,6 @@
 namespace rigel::game_logic::behaviors {
 
 namespace {
-
-constexpr auto BOSS_KILL_SCORE = 50'000;
 
 constexpr auto BOMB_DROP_OFFSET = base::Vector{3, 1};
 
@@ -54,11 +51,9 @@ void BossEpisode1::update(
 ) {
   using namespace boss_episode_1;
   using namespace engine::components;
-  using boss_episode_1::Dieing;
 
   auto& position = *entity.component<WorldPosition>();
   auto& body = *entity.component<MovingBody>();
-  auto& sprite = *entity.component<Sprite>();
   auto& playerPos = s.mpPlayer->position();
 
   auto startSlammingDown = [&, this]() {
@@ -155,80 +150,6 @@ void BossEpisode1::update(
       }
     },
 
-    [&, this](Dieing& state) {
-      auto bigExplosionEffect = [&]() {
-        d.mpEvents->emit(rigel::events::ScreenFlash{});
-        d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
-      };
-
-      auto rand = [&]() {
-        return d.mpRandomGenerator->gen();
-      };
-
-      auto randomExplosionSound = [&]() {
-        // TODO: Eliminate duplication with code in effects_system.cpp
-        const auto randomChoice = d.mpRandomGenerator->gen();
-        const auto soundId = randomChoice % 2 == 0
-          ? data::SoundId::AlternateExplosion
-          : data::SoundId::Explosion;
-        d.mpServiceProvider->playSound(soundId);
-      };
-
-
-      if (state.mFramesElapsed == 0) {
-        d.mpServiceProvider->stopMusic();
-        s.mpPlayer->model().giveScore(BOSS_KILL_SCORE);
-        body.mGravityAffected = false;
-        sprite.mFramesToRender[1] = 3;
-      }
-
-      switch (state.mFramesElapsed) {
-        case 1: case 5: case 12: case 14: case 19: case 23: case 25: case 28:
-        case 30: case 34: case 38: case 41: case 46: case 48:
-          randomExplosionSound();
-          d.mpParticles->spawnParticles(
-            position + base::Vector{rand() % 4, -(rand() % 8)},
-            loader::INGAME_PALETTE[rand() % 16],
-            rand() % 2 - 1);
-          spawnOneShotSprite(
-            *d.mpEntityFactory,
-            data::ActorID::Explosion_FX_1,
-            position + base::Vector{rand() % 4, -(rand() % 8)});
-          spawnMovingEffectSprite(
-            *d.mpEntityFactory,
-            data::ActorID::Shot_impact_FX,
-            SpriteMovement::FlyDown,
-            position + base::Vector{rand() % 4, -(rand() % 8)});
-          break;
-
-        default:
-          break;
-      }
-
-      if (state.mFramesElapsed < 48) {
-        sprite.mShow = !s.mpPerFrameState->mIsOddFrame;
-
-        if ((rand() / 4) % 2 != 0 && s.mpPerFrameState->mIsOddFrame) {
-          bigExplosionEffect();
-        } else {
-          randomExplosionSound();
-        }
-      } else if (state.mFramesElapsed == 48) {
-        sprite.mShow = true;
-        bigExplosionEffect();
-      } else { // > 50
-        if (position.y > 3) {
-          position.y -= 2;
-        }
-      }
-
-      if (state.mFramesElapsed == 58) {
-        d.mpEvents->emit(rigel::events::ExitReached{false});
-      }
-
-      ++state.mFramesElapsed;
-    },
-
     [](const auto&) {});
 }
 
@@ -261,13 +182,19 @@ void BossEpisode1::onCollision(
 
 
 void BossEpisode1::onKilled(
-  GlobalDependencies&,
+  GlobalDependencies& d,
   GlobalState&,
   const base::Point<float>&,
   entityx::Entity entity
 ) {
+  using engine::components::MovingBody;
+  using engine::components::Sprite;
+
+  entity.component<MovingBody>()->mGravityAffected = false;
+  entity.component<Sprite>()->mFramesToRender[1] = 3;
   engine::removeSafely<game_logic::components::PlayerDamaging>(entity);
-  mState = boss_episode_1::Dieing{};
+
+  d.mpEvents->emit(rigel::events::BossDestroyed{entity});
 }
 
 }

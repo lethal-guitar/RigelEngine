@@ -74,6 +74,7 @@ public:
   void receive(const rigel::events::TutorialMessage& event);
   void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::BossActivated& event);
+  void receive(const rigel::events::BossDestroyed& event);
 
   void updateGameLogic(const PlayerInput& input);
   void render();
@@ -133,6 +134,7 @@ private:
 
   std::optional<base::Vector> mTeleportTargetPosition;
   entityx::Entity mActiveBossEntity;
+  bool mBossDeathAnimationStartPending = false;
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;
   bool mPlayerDied = false;

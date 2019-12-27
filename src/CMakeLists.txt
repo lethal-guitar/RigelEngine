@@ -101,6 +101,8 @@ set(core_sources
     game_logic/enemies/boss_episode_1.hpp
     game_logic/enemies/ceiling_sucker.cpp
     game_logic/enemies/ceiling_sucker.hpp
+    game_logic/enemies/dying_boss.cpp
+    game_logic/enemies/dying_boss.hpp
     game_logic/enemies/eyeball_thrower.cpp
     game_logic/enemies/eyeball_thrower.hpp
     game_logic/enemies/flame_thrower_bot.cpp

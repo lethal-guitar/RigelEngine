@@ -111,4 +111,8 @@ struct BossActivated {
   entityx::Entity mBossEntity;
 };
 
+struct BossDestroyed {
+  entityx::Entity mBossEntity;
+};
+
 }
