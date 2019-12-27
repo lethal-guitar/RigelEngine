@@ -35,6 +35,7 @@
 #include "game_logic/enemies/bomber_plane.hpp"
 #include "game_logic/enemies/boss_episode_1.hpp"
 #include "game_logic/enemies/boss_episode_3.hpp"
+#include "game_logic/enemies/boss_episode_4.hpp"
 #include "game_logic/enemies/ceiling_sucker.hpp"
 #include "game_logic/enemies/eyeball_thrower.hpp"
 #include "game_logic/enemies/flame_thrower_bot.hpp"

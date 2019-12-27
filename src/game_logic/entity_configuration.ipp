@@ -64,6 +64,9 @@ const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
 const int FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
 
 
+const int BOSS4_PROJECTILE_SPAWN_ANIM_SEQ[] = { 0, 1, 1, 2, 2, 3, 3, 4 };
+
+
 const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
   {0.0f, -3.0f},
   {0.0f, -2.0f},
@@ -513,6 +516,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       sprite.mFramesToRender = {engine::IGNORE_RENDER_SLOT, 1, 0};
       break;
 
+    case ActorID::BOSS_Episode_4:
+      sprite.mFramesToRender = {0, 1};
+      break;
+
     case ActorID::Rocket_elevator:
       sprite.mFramesToRender = {5, 0};
       break;
@@ -528,10 +535,6 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case ActorID::Radar_computer_terminal:
       sprite.mFramesToRender = {0, 1, 2, 3};
-      break;
-
-    case ActorID::BOSS_Episode_4:
-      sprite.mFramesToRender = {0, 2};
       break;
 
     case ActorID::Big_green_cat_LEFT:
@@ -1820,6 +1823,33 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
+    case ActorID::BOSS_Episode_4:
+      entity.assign<AnimationLoop>(1, 1, 4, 1);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(
+        Health{140 + 40 * difficultyOffset}, GivenScore{0});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::BossEpisode4{});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<AppearsOnRadar>();
+      break;
+
+    case ActorID::BOSS_Episode_4_projectile:
+      entity.assign<AnimationSequence>(BOSS4_PROJECTILE_SPAWN_ANIM_SEQ);
+      entity.assign<Shootable>(Health{1}, GivenScore{100});
+      entity.assign<PlayerDamaging>(1);
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BehaviorController>(behaviors::BossEpisode4Projectile{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<DestructionEffects>(
+        BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
+        DestructionEffects::TriggerCondition::OnKilled,
+        mSpriteFactory.actorFrameRect(actorID, 0));
+      entity.assign<AppearsOnRadar>();
+      break;
+
     case ActorID::Red_bird: // Red bird
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(RED_BIRD_KILL_EFFECT_SPEC);
@@ -1860,14 +1890,6 @@ void EntityFactory::configureEntity(
     case ActorID::Passive_prisoner: // Monster in prison cell, passive
       entity.assign<ai::components::Prisoner>(false);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<AppearsOnRadar>();
-      break;
-
-    case ActorID::BOSS_Episode_4_projectile: // final boss projectile
-      entity.assign<DestructionEffects>(
-        BOSS4_PROJECTILE_KILL_EFFECT_SPEC,
-        DestructionEffects::TriggerCondition::OnKilled,
-        mSpriteFactory.actorFrameRect(actorID, 0));
       entity.assign<AppearsOnRadar>();
       break;
 
