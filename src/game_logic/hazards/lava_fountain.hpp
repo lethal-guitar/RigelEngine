@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <base/spatial_types.hpp>
-#include <base/warnings.hpp>
+#include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

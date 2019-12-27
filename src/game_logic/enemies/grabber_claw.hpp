@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <base/warnings.hpp>
-#include <engine/base_components.hpp>
+#include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
