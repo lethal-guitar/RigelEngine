@@ -395,6 +395,10 @@ int Player::animationFrame() const {
 
 
 base::Vector Player::orientedPosition() const {
+  if (stateIs<InShip>()) {
+    return position();
+  }
+
   const auto adjustment = orientation() == c::Orientation::Left ? 1 : 0;
   return position() - base::Vector{adjustment, 0};
 }
