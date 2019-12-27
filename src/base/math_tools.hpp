@@ -50,4 +50,9 @@ int round(const T value) {
   return roundTo<int>(value);
 }
 
+
+inline int sgn(const int value) {
+  return value > 0 ? 1 : (value < 0 ? -1 : 0);
+}
+
 }

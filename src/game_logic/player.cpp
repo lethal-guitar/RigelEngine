@@ -17,6 +17,7 @@
 #include "player.hpp"
 
 #include "base/match.hpp"
+#include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/global.hpp"
 #include "data/map.hpp"
@@ -1233,7 +1234,7 @@ void Player::updateIncapacitatedState(Incapacitated& state) {
 
 Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
   const auto distance = std::abs(amount);
-  const auto movement = amount < 0 ? -1 : 1;
+  const auto movement = base::sgn(amount);
 
   VerticalMovementResult result;
   result.mMoveResult = engine::MovementResult::Completed;

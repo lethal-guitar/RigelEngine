@@ -16,6 +16,7 @@
 
 #include "movement.hpp"
 
+#include "base/math_tools.hpp"
 #include "base/warnings.hpp"
 #include "data/map.hpp"
 #include "engine/collision_checker.hpp"
@@ -57,7 +58,7 @@ MovementResult move(
   }
 
   const auto desiredDistance = std::abs(amount);
-  const auto movement = amount < 0 ? -1 : 1;
+  const auto movement = base::sgn(amount);
 
   const auto previousPosition = *pPosition;
   for (int i = 0; i < desiredDistance; ++i) {
@@ -210,7 +211,7 @@ MovementResult moveHorizontallyWithStairStepping(
   }
 
   const auto desiredDistance = std::abs(amount);
-  const auto step = amount < 0 ? -1 : 1;
+  const auto step = base::sgn(amount);
 
   auto& position = *entity.component<WorldPosition>();
 
