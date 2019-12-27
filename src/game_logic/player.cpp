@@ -1160,6 +1160,11 @@ void Player::updateDeathAnimation() {
   auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
   auto& deathAnimationState = std::get<Dieing>(mState);
 
+  if (position.y > mpMap->height() + 3) {
+    mpEvents->emit<rigel::events::PlayerDied>();
+    return;
+  }
+
   base::match(deathAnimationState,
     [&, this](FlyingUp& state) {
       animationFrame =
