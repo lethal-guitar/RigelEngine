@@ -693,6 +693,7 @@ void GameWorld::handleLevelExit() {
 void GameWorld::handlePlayerDeath() {
   if (mPlayerDied) {
     mPlayerDied = false;
+    mActiveBossEntity = {};
 
     if (mActivatedCheckpoint) {
       restartFromCheckpoint();
