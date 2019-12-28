@@ -35,6 +35,10 @@ inline ByteBuffer loadFile(const std::filesystem::path& path) {
   return loadFile(path.u8string());
 }
 
+void saveToFile(
+  const loader::ByteBuffer& buffer,
+  const std::filesystem::path& filePath);
+
 std::string asText(const ByteBuffer& buffer);
 
 

@@ -402,20 +402,6 @@ UserProfile loadProfile(const std::filesystem::path& profileFile) {
   return loadProfile(profileFile, profileFile);
 }
 
-
-void saveToFile(
-  const loader::ByteBuffer& buffer,
-  const std::filesystem::path& filePath
-) {
-  std::ofstream file(filePath.u8string(), std::ios::binary);
-  if (!file.is_open()) {
-    std::cerr << "WARNING: Failed to store user profile\n";
-    return;
-  }
-
-  file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-}
-
 }
 
 
@@ -467,7 +453,11 @@ void UserProfile::saveToDisk() {
   }
 
   const auto buffer = json::to_msgpack(serializedProfile);
-  saveToFile(buffer, *mProfilePath);
+  try {
+    loader::saveToFile(buffer, *mProfilePath);
+  } catch (const std::exception&) {
+    std::cerr << "WARNING: Failed to store user profile\n";
+  }
 }
 
 
