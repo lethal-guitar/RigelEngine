@@ -27,6 +27,9 @@
 
 namespace rigel {
 
+constexpr auto USER_PROFILE_BASE_NAME = "UserProfile_v2";
+constexpr auto USER_PROFILE_FILE_EXTENSION = ".rigel";
+
 /** Store for user specific data
  *
  * The user profile stores data like saved games, high score lists, and game

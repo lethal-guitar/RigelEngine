@@ -115,5 +115,6 @@ target_compile_options(entityx PRIVATE
 
 enable_testing()
 
+add_subdirectory(modding_tools)
 add_subdirectory(src)
 add_subdirectory(test)

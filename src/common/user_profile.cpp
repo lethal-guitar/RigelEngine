@@ -90,7 +90,6 @@ namespace {
 
 constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
-constexpr auto USER_PROFILE_FILENAME = "UserProfile_v2.rigel";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 
 
@@ -485,7 +484,8 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     return {};
   }
 
-  const auto profileFilePath = *preferencesPath / USER_PROFILE_FILENAME;
+  const auto profileFilePath = *preferencesPath /
+    (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
   if (fs::exists(profileFilePath)) {
     return loadProfile(profileFilePath);
   }
