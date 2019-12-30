@@ -48,6 +48,20 @@ ByteBuffer loadFile(const string& fileName) {
 }
 
 
+void saveToFile(
+  const loader::ByteBuffer& buffer,
+  const std::filesystem::path& filePath
+) {
+  std::ofstream file(filePath.u8string(), std::ios::binary);
+  if (!file.is_open()) {
+    throw runtime_error(string("File can't be opened: ") + filePath.u8string());
+  }
+  file.exceptions(ios::failbit | ios::badbit);
+
+  file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+}
+
+
 std::string asText(const ByteBuffer& buffer) {
   const auto pBytesAsChars = reinterpret_cast<const char*>(buffer.data());
   return std::string(pBytesAsChars, pBytesAsChars + buffer.size());
