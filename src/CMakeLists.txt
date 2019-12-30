@@ -99,6 +99,8 @@ set(core_sources
     game_logic/enemies/bomber_plane.hpp
     game_logic/enemies/boss_episode_1.cpp
     game_logic/enemies/boss_episode_1.hpp
+    game_logic/enemies/boss_episode_2.cpp
+    game_logic/enemies/boss_episode_2.hpp
     game_logic/enemies/boss_episode_3.cpp
     game_logic/enemies/boss_episode_3.hpp
     game_logic/enemies/boss_episode_4.cpp
