@@ -20,7 +20,8 @@ Here's a video showcasing the project:
 ## Current state
 
 RigelEngine fully supports the shareware version of the original game.
-Support for the registered version is close to being finished, but the AI for the boss enemies and Duke's space ship aren't implemented yet.
+Support for the registered version is almost finished, but the AI for the boss enemy in episode 2 isn't implemented yet.
+In addition, the levels from the registered version haven't been thoroughly tested yet, so there might be bugs.
 
 The only other major feature that's still missing is demo playback.
 

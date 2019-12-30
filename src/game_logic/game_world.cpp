@@ -24,8 +24,11 @@
 #include "data/sound_ids.hpp"
 #include "data/strings.hpp"
 #include "data/unit_conversions.hpp"
+#include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
+#include "game_logic/behavior_controller.hpp"
+#include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
@@ -288,6 +291,7 @@ GameWorld::GameWorld(
   mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
   mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
   mEventManager.subscribe<rigel::events::BossActivated>(*this);
+  mEventManager.subscribe<rigel::events::BossDestroyed>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -456,6 +460,11 @@ void GameWorld::receive(const rigel::events::BossActivated& event) {
 }
 
 
+void GameWorld::receive(const rigel::events::BossDestroyed& event) {
+  mBossDeathAnimationStartPending = true;
+}
+
+
 void GameWorld::loadLevel(
   const data::GameSessionId& sessionId,
   const loader::ResourceLoader& resources
@@ -524,6 +533,14 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
   mHudRenderer.updateAnimation();
   mMessageDisplay.update();
+
+  if (mActiveBossEntity && mBossDeathAnimationStartPending) {
+    engine::removeSafely<game_logic::components::PlayerDamaging>(
+      mActiveBossEntity);
+    mActiveBossEntity.replace<game_logic::components::BehaviorController>(
+      behaviors::DyingBoss{});
+    mBossDeathAnimationStartPending = false;
+  }
 
   if (
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
@@ -693,6 +710,7 @@ void GameWorld::handleLevelExit() {
 void GameWorld::handlePlayerDeath() {
   if (mPlayerDied) {
     mPlayerDied = false;
+    mActiveBossEntity = {};
 
     if (mActivatedCheckpoint) {
       restartFromCheckpoint();

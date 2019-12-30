@@ -16,11 +16,14 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <variant>
 
 
 namespace rigel::game_logic {
@@ -31,17 +34,32 @@ namespace rigel::game_logic {
 
 namespace rigel::game_logic::behaviors {
 
-struct BigGreenCat {
-  static constexpr auto FRAMES_TO_WAIT = 10;
+struct BossEpisode4 {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+  void onKilled(
+    GlobalDependencies& d,
+    GlobalState&,
+    const base::Point<float>&,
+    entityx::Entity entity);
 
+  int mCoolDownFrames = 0;
+  int mFramesSinceLastShot = 0;
+  bool mHasBeenSighted = false;
+};
+
+
+struct BossEpisode4Projectile {
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  int mWaitFramesRemaining = FRAMES_TO_WAIT;
-  int mAnimationStep = 0;
+  int mFramesElapsed = 0;
 };
 
 }

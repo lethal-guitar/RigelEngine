@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -31,17 +32,20 @@ namespace rigel::game_logic {
 
 namespace rigel::game_logic::behaviors {
 
-struct BigGreenCat {
-  static constexpr auto FRAMES_TO_WAIT = 10;
-
+struct BossEpisode3 {
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  int mWaitFramesRemaining = FRAMES_TO_WAIT;
-  int mAnimationStep = 0;
+  void onKilled(
+    GlobalDependencies&,
+    GlobalState&,
+    const base::Point<float>&,
+    entityx::Entity entity);
+
+  bool mHasBeenSighted = false;
 };
 
 }

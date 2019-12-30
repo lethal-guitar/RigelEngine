@@ -17,6 +17,7 @@
 #include "player.hpp"
 
 #include "base/match.hpp"
+#include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/global.hpp"
 #include "data/map.hpp"
@@ -395,6 +396,10 @@ int Player::animationFrame() const {
 
 
 base::Vector Player::orientedPosition() const {
+  if (stateIs<InShip>()) {
+    return position();
+  }
+
   const auto adjustment = orientation() == c::Orientation::Left ? 1 : 0;
   return position() - base::Vector{adjustment, 0};
 }
@@ -1160,6 +1165,11 @@ void Player::updateDeathAnimation() {
   auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
   auto& deathAnimationState = std::get<Dieing>(mState);
 
+  if (position.y > mpMap->height() + 3) {
+    mpEvents->emit<rigel::events::PlayerDied>();
+    return;
+  }
+
   base::match(deathAnimationState,
     [&, this](FlyingUp& state) {
       animationFrame =
@@ -1224,7 +1234,7 @@ void Player::updateIncapacitatedState(Incapacitated& state) {
 
 Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
   const auto distance = std::abs(amount);
-  const auto movement = amount < 0 ? -1 : 1;
+  const auto movement = base::sgn(amount);
 
   VerticalMovementResult result;
   result.mMoveResult = engine::MovementResult::Completed;
