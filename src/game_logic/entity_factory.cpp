@@ -34,6 +34,7 @@
 #include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/bomber_plane.hpp"
 #include "game_logic/enemies/boss_episode_1.hpp"
+#include "game_logic/enemies/boss_episode_2.hpp"
 #include "game_logic/enemies/boss_episode_3.hpp"
 #include "game_logic/enemies/boss_episode_4.hpp"
 #include "game_logic/enemies/ceiling_sucker.hpp"

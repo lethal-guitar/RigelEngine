@@ -1810,6 +1810,21 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
+    case ActorID::BOSS_Episode_2:
+      entity.assign<AnimationLoop>(1, 0, 1);
+      entity.assign<PlayerDamaging>(Damage{1});
+      entity.assign<Shootable>(
+        Health{110 + 20 * difficultyOffset}, GivenScore{0});
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<MovingBody>(
+        Velocity{}, GravityAffected{false}, IgnoreCollisions{true});
+      entity.assign<BehaviorController>(behaviors::BossEpisode2{});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
+      entity.assign<AppearsOnRadar>();
+      break;
+
     case ActorID::BOSS_Episode_3:
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       entity.assign<PlayerDamaging>(Damage{1});
