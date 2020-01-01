@@ -19,11 +19,14 @@ Here's a video showcasing the project:
 
 ## Current state
 
-RigelEngine fully supports the shareware version of the original game.
-Support for the registered version is almost finished, but the AI for the boss enemy in episode 2 isn't implemented yet.
-In addition, the levels from the registered version haven't been thoroughly tested yet, so there might be bugs.
+Some minor visual effects are still missing,
+and demo playback isn't implemented yet.
+Aside from that, RigelEngine is fairly complete.
 
-The only other major feature that's still missing is demo playback.
+All 4 episodes of the game (shareware and registered version)
+are fully supported, including all gameplay features.
+Note however, that at this point, episode 1 has been tested much more thoroughly than episodes 2 to 4,
+so there might be undiscovered bugs which only occur in the registered version's episodes.
 
 Plus, it would be nice to make launching the game easier in the future by having a UI for selecting the path to the game files, and possibly even downloading the Shareware files automatically.
 
