@@ -574,8 +574,8 @@ bool hasAssociatedSprite(const ActorID actorID) {
     case ActorID::Water_surface_1:
     case ActorID::Water_surface_2:
     case ActorID::Windblown_spider_generator:
-    case ActorID::Airlock_effect_LEFT:
-    case ActorID::Airlock_effect_RIGHT:
+    case ActorID::Airlock_death_trigger_LEFT:
+    case ActorID::Airlock_death_trigger_RIGHT:
     case ActorID::Explosion_FX_trigger:
       return false;
   }
@@ -2300,8 +2300,12 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       break;
 
-    case ActorID::Airlock_effect_LEFT: // airlock effect, left
-    case ActorID::Airlock_effect_RIGHT: // airlock effect, right
+    case ActorID::Airlock_death_trigger_LEFT:
+    case ActorID::Airlock_death_trigger_RIGHT:
+      entity.assign<BehaviorController>(AirLockDeathTrigger{});
+      entity.assign<Orientation>(actorID == ActorID::Airlock_death_trigger_LEFT
+        ? Orientation::Left : Orientation::Right);
+      entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       break;
 
     case ActorID::Explosion_FX_trigger: // explosion effect trigger

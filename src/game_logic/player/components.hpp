@@ -66,6 +66,10 @@ struct ElevatorAttachmentChanged {
   entityx::Entity mAttachedElevator;
 };
 
+struct AirLockOpened {
+  engine::components::Orientation mOrientation;
+};
+
 }
 
 

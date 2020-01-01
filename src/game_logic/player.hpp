@@ -110,6 +110,10 @@ struct Incapacitated {
 };
 
 
+struct GettingSuckedIntoSpace {
+  int mFramesElapsed;
+};
+
 namespace death_animation {
 
 struct FlyingUp {
@@ -148,6 +152,7 @@ using PlayerState = std::variant<
   InShip,
   Interacting,
   Incapacitated,
+  GettingSuckedIntoSpace,
   Dieing>;
 
 
@@ -257,6 +262,7 @@ public:
   }
 
   void receive(const events::ElevatorAttachmentChanged& event);
+  void receive(const events::AirLockOpened& event);
 
   bool hasSpiderAt(const SpiderClingPosition position) const {
     return mAttachedSpiders.test(static_cast<size_t>(position));
@@ -295,6 +301,7 @@ private:
     const base::Vector& movementVector,
     bool jumpPressed);
   void updateDeathAnimation();
+  void updateGettingSuckedIntoSpaceAnimation(GettingSuckedIntoSpace& state);
   void updateIncapacitatedState(Incapacitated& state);
 
   VerticalMovementResult moveVerticallyInAir(int amount);

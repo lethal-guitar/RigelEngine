@@ -143,7 +143,14 @@ Camera::Camera(
 void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize) {
   mViewPortSize = viewPortSize;
   updateManualScrolling(input);
-  updateAutomaticScrolling();
+
+  if (!mpPlayer->stateIs<GettingSuckedIntoSpace>()) {
+    updateAutomaticScrolling();
+  } else {
+    const auto offset = 2 *
+      engine::orientation::toMovement(mpPlayer->orientation());
+    setPosition(mPosition + base::Vector{offset, 0});
+  }
 }
 
 
