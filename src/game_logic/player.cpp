@@ -92,6 +92,9 @@ constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_ANIMATION_SEQUENCE{
 constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_FLY_UP_SEQUENCE{
   -2, -1, 0, 0, 1, 1};
 
+constexpr std::array<int, 4> GETTING_SUCKED_INTO_SPACE_Y_SEQ{
+  -2, -2, -1, -1};
+
 
 
 int mercyFramesForDifficulty(const data::Difficulty difficulty) {
@@ -316,6 +319,7 @@ Player::Player(
   mEntity.component<c::Sprite>()->mFramesToRender = {0};
 
   pEvents->subscribe<events::ElevatorAttachmentChanged>(*this);
+  pEvents->subscribe<events::AirLockOpened>(*this);
 }
 
 
@@ -340,7 +344,7 @@ bool Player::isCloaked() const {
 
 
 bool Player::isDead() const {
-  return stateIs<Dieing>();
+  return stateIs<Dieing>() || stateIs<GettingSuckedIntoSpace>();
 }
 
 
@@ -410,6 +414,15 @@ void Player::receive(const events::ElevatorAttachmentChanged& event) {
 }
 
 
+void Player::receive(const events::AirLockOpened& event) {
+  mState = GettingSuckedIntoSpace{};
+
+  *mEntity.component<c::Orientation>() = event.mOrientation;
+  mEntity.component<c::Sprite>()->mShow = true;
+
+  engine::startAnimationLoop(mEntity, 1, 8, 15);
+}
+
 void Player::beginBeingPushedByFan() {
   mState = PushedByFan{};
 }
@@ -427,6 +440,11 @@ void Player::update(const PlayerInput& unfilteredInput) {
   using namespace engine;
 
   updateTemporaryItemExpiration();
+
+  if (auto pState = std::get_if<GettingSuckedIntoSpace>(&mState)) {
+    updateGettingSuckedIntoSpaceAnimation(*pState);
+    return;
+  }
 
   if (!isIncapacitated() && !mIsRidingElevator) {
     applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, mEntity);
@@ -950,6 +968,11 @@ void Player::updateMovement(
       assert(false);
     },
 
+    [](const GettingSuckedIntoSpace&) {
+      // should be handled in updateGettingSuckedIntoSpaceAnimation()
+      assert(false);
+    },
+
     [](const Incapacitated&) {
       // should be handled in top-level update()
       assert(false);
@@ -1214,6 +1237,31 @@ void Player::updateDeathAnimation() {
     [&, this](const Finished&) {
       // no-op
     });
+}
+
+
+void Player::updateGettingSuckedIntoSpaceAnimation(
+  GettingSuckedIntoSpace& state
+) {
+  if (state.mFramesElapsed == 0) {
+    mpServiceProvider->playSound(data::SoundId::DukePain);
+  }
+
+  if (
+    state.mFramesElapsed < int(GETTING_SUCKED_INTO_SPACE_Y_SEQ.size())
+  ) {
+    position().y += GETTING_SUCKED_INTO_SPACE_Y_SEQ[
+      state.mFramesElapsed];
+  }
+
+  ++state.mFramesElapsed;
+
+  position().x += 2 *
+    engine::orientation::toMovement(orientation());
+  if (position().x < 0 || position().x >= mpMap->width()) {
+    mpServiceProvider->playSound(data::SoundId::DukeDeath);
+    mpEvents->emit<rigel::events::PlayerDied>();
+  }
 }
 
 

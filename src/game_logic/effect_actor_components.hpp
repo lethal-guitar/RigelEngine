@@ -47,4 +47,13 @@ struct ExplosionEffect {
     entityx::Entity entity);
 };
 
+
+struct AirLockDeathTrigger {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+};
+
 }

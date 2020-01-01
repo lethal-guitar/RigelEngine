@@ -93,4 +93,25 @@ void ExplosionEffect::update(
   entity.destroy();
 }
 
+
+void AirLockDeathTrigger::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool,
+  entityx::Entity entity
+) {
+  using engine::components::Orientation;
+
+  const auto& position = *entity.component<engine::components::WorldPosition>();
+  const auto orientation = *entity.component<Orientation>();
+
+  const auto xToCheck = orientation == Orientation::Left
+    ? position.x - 3
+    : position.x + 3;
+  if (s.mpMap->tileAt(0, xToCheck, position.y) == 0) {
+    d.mpEvents->emit(events::AirLockOpened{orientation});
+    entity.destroy();
+  }
+}
+
 }
