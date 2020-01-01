@@ -164,9 +164,8 @@ void BrokenMissile::update(
     const auto& position = *entity.component<WorldPosition>();
     d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
     triggerEffects(entity, *d.mpEntityManager);
-
-    auto explosion = spawnOneShotSprite(*d.mpEntityFactory, data::ActorID::Nuclear_explosion, position);
-    explosion.assign<components::PlayerDamaging>(1);
+    spawnOneShotSprite(
+      *d.mpEntityFactory, data::ActorID::Nuclear_explosion, position);
   };
 
 
