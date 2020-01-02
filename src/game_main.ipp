@@ -27,9 +27,12 @@
 #include "loader/resource_loader.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
+#include "sdl_utils/ptr.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
+
+#include "SDL_gamecontroller.h"
 
 #include <chrono>
 #include <memory>
@@ -122,6 +125,7 @@ private:
   engine::TiledTexture mUiSpriteSheet;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
+  sdl_utils::Ptr<SDL_GameController> mpGameController;
 };
 
 }

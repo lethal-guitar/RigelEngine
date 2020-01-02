@@ -43,7 +43,6 @@ constexpr auto SAVE_SLOT_NAME_HEIGHT = 2;
 
 constexpr auto MAX_SAVE_SLOT_NAME_LENGTH = 18;
 
-
 bool isNonRepeatKeyDown(const SDL_Event& event) {
   return event.type == SDL_KEYDOWN && event.key.repeat == 0;
 }
@@ -354,7 +353,8 @@ void GameRunner::saveGame(const int slotIndex, std::string_view name) {
 
 
 void GameRunner::World::handleEvent(const SDL_Event& event) {
-  handlePlayerInput(event);
+  handlePlayerKeyboardInput(event);
+  handlePlayerGameControllerInput(event);
   handleDebugKeys(event);
 }
 
@@ -397,7 +397,7 @@ void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
 }
 
 
-void GameRunner::World::handlePlayerInput(const SDL_Event& event) {
+void GameRunner::World::handlePlayerKeyboardInput(const SDL_Event& event) {
   const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
   if (!isKeyEvent || event.key.repeat != 0) {
     return;
@@ -439,6 +439,102 @@ void GameRunner::World::handlePlayerInput(const SDL_Event& event) {
       mPlayerInput.mFire.mIsPressed = keyPressed;
       if (keyPressed) {
         mPlayerInput.mFire.mWasTriggered = true;
+      }
+      break;
+  }
+}
+
+
+void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) {
+  // bigger the deadzone, less wrong movements on diagonal stick movement
+  const auto SDL_DEAD_ZONE = 10000;
+
+  switch (event.type)
+  {
+    case SDL_CONTROLLERAXISMOTION:
+      if (
+        event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX ||
+        event.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX
+      ) { // x axis
+        if (event.caxis.value < -SDL_DEAD_ZONE) {
+          mPlayerInput.mLeft = true;
+          mPlayerInput.mRight = false;
+        }
+        else if (event.caxis.value > SDL_DEAD_ZONE) {
+          mPlayerInput.mRight = true;
+          mPlayerInput.mLeft = false;
+        }
+        else {
+          mPlayerInput.mLeft = false;
+          mPlayerInput.mRight = false;
+        }
+      } else if (
+        event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY ||
+        event.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY
+      ) { // y axis
+        if (event.caxis.value < -SDL_DEAD_ZONE) {
+          mPlayerInput.mUp = true;
+          mPlayerInput.mDown = false;
+          mPlayerInput.mInteract.mIsPressed = true;
+          mPlayerInput.mInteract.mWasTriggered = true;
+        }
+        else if (event.caxis.value > SDL_DEAD_ZONE) {
+          mPlayerInput.mDown = true;
+          mPlayerInput.mUp = false;
+        }
+        else {
+          mPlayerInput.mDown = false;
+          mPlayerInput.mUp = false;
+          mPlayerInput.mInteract.mIsPressed = false;
+        }
+      }
+      break;
+
+    // handling of dpad and rest of buttons in game controllers
+    case SDL_CONTROLLERBUTTONDOWN:
+    case SDL_CONTROLLERBUTTONUP:
+      {
+        const auto buttonPressed = event.type == SDL_CONTROLLERBUTTONDOWN;
+
+        switch (event.cbutton.button) {
+          case SDL_CONTROLLER_BUTTON_DPAD_UP:
+            mPlayerInput.mUp = buttonPressed;
+            mPlayerInput.mInteract.mIsPressed = buttonPressed;
+            if (buttonPressed) {
+                mPlayerInput.mInteract.mWasTriggered = true;
+            }
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            mPlayerInput.mDown = buttonPressed;
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            mPlayerInput.mLeft = buttonPressed;
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            mPlayerInput.mRight = buttonPressed;
+            break;
+
+          case SDL_CONTROLLER_BUTTON_A:
+          case SDL_CONTROLLER_BUTTON_B:
+          case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+            mPlayerInput.mJump.mIsPressed = buttonPressed;
+            if (buttonPressed) {
+                mPlayerInput.mJump.mWasTriggered = true;
+            }
+            break;
+
+          case SDL_CONTROLLER_BUTTON_X:
+          case SDL_CONTROLLER_BUTTON_Y:
+          case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+            mPlayerInput.mFire.mIsPressed = buttonPressed;
+            if (buttonPressed) {
+                mPlayerInput.mFire.mWasTriggered = true;
+            }
+            break;
+        }
       }
       break;
   }

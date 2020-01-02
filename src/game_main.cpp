@@ -25,7 +25,6 @@
 #include "renderer/opengl.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/error.hpp"
-#include "sdl_utils/ptr.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"
@@ -227,7 +226,7 @@ void gameMain(const StartupOptions& options) {
   SetProcessDPIAware();
 #endif
 
-  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
@@ -330,8 +329,18 @@ void Game::run(const StartupOptions& startupOptions) {
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
     makeModeContext(), startupOptions, mIsShareWareVersion));
 
+  //TODO : support multiple controllers
+  for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i) {
+    if (SDL_IsGameController(i)) {
+      mpGameController =
+        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)};
+      break;
+    }
+  }
+
   mainLoop();
 
+  // exiting the game
   mpUserProfile->saveToDisk();
 }
 

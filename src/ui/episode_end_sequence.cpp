@@ -86,7 +86,7 @@ void EpisodeEndScreen::updateAndRender(engine::TimeDelta dt) {
 
 
 void EpisodeEndScreen::handleEvent(const SDL_Event& event) {
-  if (event.type != SDL_KEYDOWN) {
+  if ((event.type != SDL_KEYDOWN) && (event.type != SDL_CONTROLLERBUTTONDOWN)) {
     return;
   }
 

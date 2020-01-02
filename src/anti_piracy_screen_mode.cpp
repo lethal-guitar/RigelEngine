@@ -42,7 +42,7 @@ std::unique_ptr<GameMode> AntiPiracyScreenMode::updateAndRender(
 
   const auto anyButtonPressed = any_of(begin(events), end(events),
     [](const SDL_Event& event) {
-      return event.type == SDL_KEYDOWN;
+      return (event.type == SDL_KEYDOWN) || (event.type == SDL_CONTROLLERBUTTONDOWN);
     });
 
   if (anyButtonPressed) {
