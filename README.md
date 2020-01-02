@@ -13,9 +13,11 @@ There was never any source code released for the original game, so this project
 is based on reverse-engineering the original executable's assembly code. Video captures from DosBox are used to verify re-implemented behavior.
 See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing-an-old-dos-game-in-c-17/) to learn more about the process.
 
-Here's a video showcasing the project:
+A quick impression of some gameplay:
 
-<a href="http://www.youtube.com/watch?v=Z3gCS5LvC2s"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
+<img src="https://i.imgur.com/YRE2AXN.gif" />
+
+Check out the [demo video](http://www.youtube.com/watch?v=Z3gCS5LvC2s) for a full playthrough of the 1st level.
 
 ## Current state
 
