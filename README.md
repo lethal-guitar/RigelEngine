@@ -19,14 +19,15 @@ Here's a video showcasing the project:
 
 ## Current state
 
-Some minor visual effects are still missing,
-and demo playback isn't implemented yet.
-Aside from that, RigelEngine is fairly complete.
+RigelEngine is fairly complete. Only some [minor visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5)
+and [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4) are currently missing,
+and [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13) isn't implemented yet.
 
 All 4 episodes of the game (shareware and registered version)
 are fully supported, including all gameplay features.
-Note however, that at this point, episode 1 has been tested much more thoroughly than episodes 2 to 4,
-so there might be undiscovered bugs which only occur in the registered version's episodes.
+Episode 1 has been tested quite thorougly, and is playable without issues.
+However, I'm still in the process of testing episodes 2 to 4,
+so there might be bugs.
 
 Plus, it would be nice to make launching the game easier in the future by having a UI for selecting the path to the game files, and possibly even downloading the Shareware files automatically.
 
