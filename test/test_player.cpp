@@ -1067,6 +1067,11 @@ TEST_CASE("Player movement") {
           }
 
           SECTION("Can jump off pipe") {
+            testMovementSequence(player, {
+              {jumpButtonTriggered, {0, -3}, 6},
+              {{}, {0, -2}, 6},
+              {{}, {0, -1}, 6}
+            });
           }
 
           // TODO: Jumping respects world collision even when checking for
