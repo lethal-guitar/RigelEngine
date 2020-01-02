@@ -842,6 +842,7 @@ void Player::updateMovement(
         mJumpRequested &&
         !mpCollisionChecker->isTouchingCeiling(position, bbox)
       ) {
+        position.y -= 1;
         jumpFromLadder(movementVector);
         return;
       }
