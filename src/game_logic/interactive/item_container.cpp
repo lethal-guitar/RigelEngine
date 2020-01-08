@@ -150,6 +150,11 @@ void NapalmBomb::update(
 
       if (mFramesElapsed >= 31) {
         explode(d, entity);
+
+        // Remove the shootable to prevent explode() being called twice
+        // in case the timeout happens on the same frame as the bomb being hit
+        // by a shot.
+        entity.remove<game_logic::components::Shootable>();
       }
       break;
 
