@@ -10,6 +10,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 * Evo Stamatov ([@avioli](https://github.com/avioli)): README improvements
 * Pratik Anand ([@pratikone](https://github.com/pratikone)): Widescreen support, README improvements
 * Ryan Brown ([@rbrown46](https://github.com/rbrown46)): Actor image modding (replace sprites using `png` files)
+* [@mnhauke](https://github.com/mnhauke): OpenSUSE package
 * [@s-martin](https://github.com/s-martin): Refactoring, code cleanups, README improvements
 
 ## Contributors (issues/reports)
