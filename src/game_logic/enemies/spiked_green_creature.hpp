@@ -74,7 +74,7 @@ struct SpikedGreenCreature {
     const GlobalDependencies& d,
     entityx::Entity entity);
 
-  State mState;
+  State mState = Awakening{};
 };
 
 }

@@ -58,7 +58,7 @@ struct LavaFountain {
     const engine::components::Sprite& sprite,
     const base::Vector& positionInScreenSpace);
 
-  State mState;
+  State mState = Waiting{};
 };
 
 }

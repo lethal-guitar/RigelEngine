@@ -52,7 +52,7 @@ struct UnicycleBot {
     bool isOnScreen,
     entityx::Entity entity);
 
-  State mState;
+  State mState = Waiting{};
   int mFramesUntilNextTurn = 0;
 };
 
