@@ -58,7 +58,7 @@ const int LOOK_RIGHT_LEFT_ANIM[] = {
 
 
 void advanceRandomNumberGenerator(GlobalDependencies& d) {
-  // The result isn't used, this is just done in order to exactly mimick
+  // The result isn't used, this is just done in order to exactly mimic
   // how the original game uses the random number generator (since each
   // invocation influences subsequent calls).
   d.mpRandomGenerator->gen();
@@ -287,7 +287,7 @@ void WatchBotCarrier::update(
       } else {
         const auto shouldMoveRight = position.x < playerPos.x;
         if (shouldMoveRight) {
-          // This is assymetrical with the else branch, but it's like this
+          // This is asymmetrical with the else branch, but it's like this
           // in the original code.
           if (position.x + 3 < playerPos.x) {
             move(1);

@@ -111,7 +111,7 @@ using CustomRenderFunc = void(*)(
 
 /** Indicates that an entity should always be drawn last
  *
- * An entity marked with this component will alwyas have its Sprite drawn after
+ * An entity marked with this component will always have its Sprite drawn after
  * drawing the world, even if it is placed on top of foreground tiles.
  */
 struct DrawTopMost {};

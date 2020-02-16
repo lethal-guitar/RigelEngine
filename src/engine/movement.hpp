@@ -35,8 +35,8 @@ class CollisionChecker;
  *
  * The entity must have a WorldPosition and a BoundingBox.
  * walk() will try to change the entity's position based on the orientation
- * given, and return true if it suceeded, false otherwise.
- * For the move to suceed, the new position must still be on solid ground
+ * given, and return true if it succeeded, false otherwise.
+ * For the move to succeed, the new position must still be on solid ground
  * (i.e. no walking off the edge of a platform) and there must be no
  * collisions with the world.
  */
