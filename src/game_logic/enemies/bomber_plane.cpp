@@ -88,7 +88,7 @@ void BomberPlane::update(
     //
     // 1) The placeholder sprite (mBombSprite) is shown for one frame longer
     //    after the bomb has been dropped.
-    // 2) The bomb is initially made invisibile, to prevent it from overlapping
+    // 2) The bomb is initially made invisible, to prevent it from overlapping
     //    with the placeholder. It is made visible in BigBomb::update().
     //
     // Together, this results in no visual glitch, but no brief disappearance

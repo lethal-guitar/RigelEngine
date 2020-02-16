@@ -91,6 +91,6 @@ The remaining code consists of:
 * game mode implementations (menu, game session, intro/demo loop)
 
 
-# Module depdency graph
+# Module dependency graph
 
 TBD

@@ -53,7 +53,7 @@ void createSlimeDrop(
     DROP_ACTOR_ID,
     position + DROP_OFFSET,
     true);
-  // Gravity handles the drop's movement, so velocity is initally 0.
+  // Gravity handles the drop's movement, so velocity is initially 0.
   entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
   entity.assign<AppearsOnRadar>();
 
