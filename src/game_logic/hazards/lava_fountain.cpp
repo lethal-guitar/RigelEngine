@@ -93,7 +93,7 @@ void LavaFountain::update(
       if (state.mSequenceIndex == 0) {
         entity.assign<game_logic::components::PlayerDamaging>(1);
       }
-      if (state.mSequenceIndex == ERUPTION_SEQUENCE.size()) {
+      if (state.mSequenceIndex == static_cast<int>(ERUPTION_SEQUENCE.size())) {
         resetBbox();
         entity.remove<game_logic::components::PlayerDamaging>();
 

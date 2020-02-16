@@ -91,7 +91,7 @@ struct BossEpisode2 {
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 
-  State mState;
+  State mState = WarmingUp{};
   int mStartingHeight = 0;
   int mCoolDownFrames = 0;
   bool mDestructionPending = false;
