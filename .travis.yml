@@ -1,5 +1,4 @@
 dist: bionic
-osx_image: xcode10.2
 
 branches:
   only:
@@ -22,6 +21,7 @@ matrix:
             - g++-8
 
     - os: osx
+      osx_image: xcode10.2
       addons:
         homebrew:
           update: true
