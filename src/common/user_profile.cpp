@@ -353,6 +353,8 @@ UserProfile loadProfile(
   const std::filesystem::path& fileOnDisk,
   const std::filesystem::path& pathForSaving
 ) {
+  namespace fs = std::filesystem;
+
   try {
     const auto buffer = loader::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
@@ -367,6 +369,12 @@ UserProfile loadProfile(
     if (serializedProfile.contains("options")) {
       profile.mOptions = deserialize<data::GameOptions>(
         serializedProfile.at("options"));
+    }
+
+    if (serializedProfile.contains("gamePath")) {
+      const auto gamePathStr =
+        serializedProfile.at("gamePath").get<std::string>();
+      profile.mGamePath = fs::u8path(gamePathStr);
     }
 
     return profile;
@@ -407,6 +415,9 @@ void UserProfile::saveToDisk() {
   serializedProfile["saveSlots"] = serialize(mSaveSlots);
   serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
   serializedProfile["options"] = serialize(mOptions);
+  if (mGamePath) {
+    serializedProfile["gamePath"] = mGamePath->u8string();
+  }
 
   // This step merges the newly serialized profile into the 'old' profile
   // previously read from disk. The reason this is necessary is compatibility

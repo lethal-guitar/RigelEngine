@@ -61,6 +61,8 @@ public:
   data::HighScoreListArray mHighScoreLists;
   data::GameOptions mOptions;
 
+  std::optional<std::filesystem::path> mGamePath;
+
 private:
   std::optional<std::filesystem::path> mProfilePath;
   loader::ByteBuffer mOriginalJson;

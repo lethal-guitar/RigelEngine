@@ -217,6 +217,20 @@ std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
   }
 }
 
+
+std::string effectiveGamePath(
+  const StartupOptions& options,
+  const UserProfile& profile
+) {
+  using namespace std::string_literals;
+
+  if (!options.mGamePath.empty()) {
+    return options.mGamePath;
+  }
+
+  return profile.mGamePath ? profile.mGamePath->u8string() + "/"s : ""s;
+}
+
 }
 
 
@@ -233,6 +247,10 @@ void gameMain(const StartupOptions& options) {
   setGLAttributes();
 
   auto userProfile = loadOrCreateUserProfile(options.mGamePath);
+  if (!options.mGamePath.empty())
+  {
+    userProfile.mGamePath = options.mGamePath;
+  }
 
   auto pWindow = createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
@@ -285,7 +303,7 @@ Game::Game(
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(startupOptions.mGamePath)
+  , mResources(effectiveGamePath(startupOptions, *pUserProfile))
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
