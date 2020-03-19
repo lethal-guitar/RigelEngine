@@ -33,6 +33,7 @@
 #include "menu_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <imfilebrowser.h>
 #include <imgui.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
@@ -42,6 +43,7 @@ RIGEL_RESTORE_WARNINGS
 #endif
 
 #include <cassert>
+#include <filesystem>
 
 
 namespace rigel {
@@ -255,6 +257,13 @@ std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
 }
 
 
+/** Returns game path to be used for loading resources
+ *
+ * A game path specified on the command line takes priority over the path
+ * stored in the user profile. This function implements that priority by
+ * returning the right path based on the given command line options and user
+ * profile.
+ */
 std::string effectiveGamePath(
   const StartupOptions& options,
   const UserProfile& profile
@@ -269,16 +278,124 @@ std::string effectiveGamePath(
 }
 
 
-UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+UserProfile loadOrCreateUserProfile() {
   if (auto profile = loadUserProfile())
   {
     return *profile;
   }
 
   auto profile = createEmptyUserProfile();
-  importOriginalGameProfileData(profile, gamePath);
   profile.saveToDisk();
   return profile;
+}
+
+
+// Note : This should graduate into its own file if more complexity is added
+std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
+{
+  auto folderPath = std::filesystem::path();
+  auto folderBrowser =
+    ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
+  folderBrowser.Open();
+
+  do
+  {
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+      ui::imgui_integration::handleEvent(event);
+    }
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    ui::imgui_integration::beginFrame(pWindow);
+
+    folderBrowser.Display();
+    if (folderBrowser.HasSelected())
+    {
+      folderPath = folderBrowser.GetSelected();
+      folderBrowser.Close();
+    }
+
+    ui::imgui_integration::endFrame();
+    SDL_GL_SwapWindow(pWindow);
+  } while (folderBrowser.IsOpened());
+
+  return folderPath;
+}
+
+
+void setupForFirstLaunch(
+  SDL_Window* pWindow,
+  UserProfile& userProfile,
+  const std::string& commandLineGamePath
+) {
+  namespace fs = std::filesystem;
+
+  auto gamePath = fs::path{};
+
+  // Case 1: A path is given on the command line on first launch. Use that.
+  if (!commandLineGamePath.empty()) {
+    gamePath = fs::u8path(commandLineGamePath);
+  }
+
+  const auto dataFilePath = fs::u8path("NUKEM2.CMP");
+
+  // Case 2: The current working directory is set to a Duke Nukem II
+  // installation, most likely because the RigelEngine executable has been
+  // copied there. Use the current working directory as game path.
+  if (gamePath.empty()) {
+    const auto currentWorkingDir = fs::current_path();
+    if (
+      commandLineGamePath.empty() &&
+      fs::exists(currentWorkingDir / dataFilePath)
+    ) {
+      gamePath = currentWorkingDir;
+    }
+  }
+
+  // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
+  // the user select their Duke Nukem II installation.
+  if (gamePath.empty()) {
+    gamePath = runFolderBrowser(pWindow);
+  }
+
+  // If we still don't have a game path, stop here.
+  if (gamePath.empty()) {
+    throw std::runtime_error(
+R"(No game path given. RigelEngine needs the original Duke Nukem II data files in order to function.
+You can download the Shareware version for free, see
+https://github.com/lethal-guitar/RigelEngine/blob/master/README.md#acquiring-the-game-data
+for more info.)");
+  }
+
+  // Make sure there is a data file at the game path.
+  if (!fs::exists(gamePath / dataFilePath)) {
+    throw std::runtime_error("No game data (NUKEM2.CMP file) found in game path");
+  }
+
+  // Import original game's profile data, if our profile is still 'empty'
+  if (!userProfile.hasProgressData()) {
+    importOriginalGameProfileData(userProfile, gamePath.u8string() + "/");
+  }
+
+  // Finally, persist the chosen game path in the user profile for the next
+  // launch.
+  userProfile.mGamePath = fs::canonical(gamePath);
+  userProfile.saveToDisk();
+}
+
+
+void initAndRunGame(
+  SDL_Window* pWindow,
+  UserProfile& userProfile,
+  const StartupOptions& options
+) {
+  if (!userProfile.mGamePath) {
+    setupForFirstLaunch(pWindow, userProfile, options.mGamePath);
+  }
+
+  Game game(options, &userProfile, pWindow);
+  game.run(options);
 }
 
 }
@@ -296,12 +413,7 @@ void gameMain(const StartupOptions& options) {
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   setGLAttributes();
 
-  auto userProfile = loadOrCreateUserProfile(options.mGamePath);
-  if (!options.mGamePath.empty())
-  {
-    userProfile.mGamePath = options.mGamePath;
-  }
-
+  auto userProfile = loadOrCreateUserProfile();
   auto pWindow = createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
@@ -317,8 +429,7 @@ void gameMain(const StartupOptions& options) {
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
   try {
-    Game game(options, &userProfile, pWindow.get());
-    game.run(options);
+    initAndRunGame(pWindow.get(), userProfile, options);
   } catch (const std::exception& error) {
     showErrorMessage(pWindow.get(), error.what());
   }
