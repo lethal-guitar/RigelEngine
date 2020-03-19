@@ -106,19 +106,6 @@ data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
 }
 
 
-UserProfile importProfile(
-  const std::filesystem::path& profileFile,
-  const std::string& gamePath
-) {
-  UserProfile profile{profileFile};
-
-  importOriginalGameProfileData(profile, gamePath);
-
-  profile.saveToDisk();
-  return profile;
-}
-
-
 nlohmann::json serialize(const data::TutorialMessageState& messageState) {
   auto serialized = nlohmann::json::array();
 
@@ -521,7 +508,11 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
 
   const auto profileFilePath = *preferencesPath /
     (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
-  return importProfile(profileFilePath, gamePath);
+  UserProfile profile{profileFilePath};
+
+  importOriginalGameProfileData(profile, gamePath);
+  profile.saveToDisk();
+  return profile;
 }
 
 }
