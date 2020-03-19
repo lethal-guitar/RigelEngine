@@ -77,6 +77,15 @@ private:
  */
 std::optional<UserProfile> loadUserProfile();
 
+/** Import original game's profile data
+ *
+ * Imports saved games, high score lists, and some options from the original
+ * Duke Nukem II formats found at the given game path. Overwrites the contents
+ * of the passed in profile, so best used on an empty one.
+ */
+void importOriginalGameProfileData(
+  UserProfile& profile, const std::string& gamePath);
+
 /** Load existing profile, or create new one
  *
  * Like loadUserProfile, but if it doesn't find one, it will create a new

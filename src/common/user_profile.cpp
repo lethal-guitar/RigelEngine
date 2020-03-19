@@ -112,12 +112,7 @@ UserProfile importProfile(
 ) {
   UserProfile profile{profileFile};
 
-  profile.mSaveSlots = loader::loadSavedGames(gamePath);
-  profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
-
-  if (const auto options = loader::loadOptions(gamePath)) {
-    profile.mOptions = importOptions(*options);
-  }
+  importOriginalGameProfileData(profile, gamePath);
 
   profile.saveToDisk();
   return profile;
@@ -497,6 +492,19 @@ std::optional<UserProfile> loadUserProfile()
   }
 
   return {};
+}
+
+
+void importOriginalGameProfileData(
+  UserProfile& profile,
+  const std::string& gamePath)
+{
+  profile.mSaveSlots = loader::loadSavedGames(gamePath);
+  profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
+
+  if (const auto options = loader::loadOptions(gamePath)) {
+    profile.mOptions = importOptions(*options);
+  }
 }
 
 
