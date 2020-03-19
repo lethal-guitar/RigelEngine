@@ -457,6 +457,20 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath() {
 }
 
 
+UserProfile createEmptyUserProfile()
+{
+  const auto preferencesPath = createOrGetPreferencesPath();
+  if (!preferencesPath) {
+    std::cerr << "WARNING: Cannot open user preferences directory\n";
+    return {};
+  }
+
+  const auto profileFilePath = *preferencesPath /
+    (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
+  return UserProfile{profileFilePath};
+}
+
+
 std::optional<UserProfile> loadUserProfile()
 {
   namespace fs = std::filesystem;
@@ -501,15 +515,7 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     return *profile;
   }
 
-  const auto preferencesPath = createOrGetPreferencesPath();
-  if (!preferencesPath) {
-    return {};
-  }
-
-  const auto profileFilePath = *preferencesPath /
-    (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
-  UserProfile profile{profileFilePath};
-
+  auto profile = createEmptyUserProfile();
   importOriginalGameProfileData(profile, gamePath);
   profile.saveToDisk();
   return profile;

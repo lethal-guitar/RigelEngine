@@ -67,6 +67,9 @@ private:
 };
 
 
+UserProfile createEmptyUserProfile();
+
+
 /** Load existing profile from disk
  *
  * This function looks for an existing user profile file in the location
