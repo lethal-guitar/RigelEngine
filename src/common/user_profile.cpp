@@ -475,7 +475,8 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath() {
 }
 
 
-UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+std::optional<UserProfile> loadUserProfile()
+{
   namespace fs = std::filesystem;
 
   const auto preferencesPath = createOrGetPreferencesPath();
@@ -495,6 +496,23 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     return loadProfile(profileFilePath_v1, profileFilePath);
   }
 
+  return {};
+}
+
+
+UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+  if (auto profile = loadUserProfile())
+  {
+    return *profile;
+  }
+
+  const auto preferencesPath = createOrGetPreferencesPath();
+  if (!preferencesPath) {
+    return {};
+  }
+
+  const auto profileFilePath = *preferencesPath /
+    (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
   return importProfile(profileFilePath, gamePath);
 }
 

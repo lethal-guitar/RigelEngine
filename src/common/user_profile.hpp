@@ -23,6 +23,7 @@
 
 #include <filesystem>
 #include <string>
+#include <optional>
 
 
 namespace rigel {
@@ -35,7 +36,7 @@ constexpr auto USER_PROFILE_FILE_EXTENSION = ".rigel";
  * The user profile stores data like saved games, high score lists, and game
  * options. It knows how to serialize that data into a file on disk, so that it
  * can persist between game sessions. To load the stored user profile, call
- * loadOrCreateUserProfile().
+ * loadUserProfile().
  *
  * The public members of this class represent all the data that will be saved
  * in the user profile file. Loading the profile using the aforementioned
@@ -66,19 +67,23 @@ private:
 };
 
 
-/** Load existing profile from disk, or create a new one
+/** Load existing profile from disk
  *
  * This function looks for an existing user profile file in the location
  * returned by createOrGetPreferencesPath(). If it finds a file, it will load
- * it and return the corresponding UserProfile object. If it doesn't find the
- * file, it will create a new user profile with default settings, store it on
- * disk, and return that. It also checks if it can find any existing saved
- * games, high score lists, or options from the original Duke Nukem in the
- * given gamePath. If it does, it will import them into the newly created
- * profile before returning it.
- *
+ * it and return the corresponding UserProfile object.
  * Note that the name of the profile file is an implementation detail of this
  * function, and you normally don't need to care.
+ */
+std::optional<UserProfile> loadUserProfile();
+
+/** Load existing profile, or create new one
+ *
+ * Like loadUserProfile, but if it doesn't find one, it will create a new
+ * user profile with default settings, store it on disk, and return that. It
+ * also checks if it can find any existing saved games, high score lists, or
+ * options from the original Duke Nukem in the given gamePath. If it does, it
+ * will import them into the newly created profile before returning it.
  */
 UserProfile loadOrCreateUserProfile(const std::string& gamePath);
 
