@@ -91,16 +91,6 @@ std::optional<UserProfile> loadUserProfile();
 void importOriginalGameProfileData(
   UserProfile& profile, const std::string& gamePath);
 
-/** Load existing profile, or create new one
- *
- * Like loadUserProfile, but if it doesn't find one, it will create a new
- * user profile with default settings, store it on disk, and return that. It
- * also checks if it can find any existing saved games, high score lists, or
- * options from the original Duke Nukem in the given gamePath. If it does, it
- * will import them into the newly created profile before returning it.
- */
-UserProfile loadOrCreateUserProfile(const std::string& gamePath);
-
 /** Return path for storing preferences
  *
  * Returns path to a directory which can be used to store user-specific data

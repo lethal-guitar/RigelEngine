@@ -231,6 +231,19 @@ std::string effectiveGamePath(
   return profile.mGamePath ? profile.mGamePath->u8string() + "/"s : ""s;
 }
 
+
+UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+  if (auto profile = loadUserProfile())
+  {
+    return *profile;
+  }
+
+  auto profile = createEmptyUserProfile();
+  importOriginalGameProfileData(profile, gamePath);
+  profile.saveToDisk();
+  return profile;
+}
+
 }
 
 
