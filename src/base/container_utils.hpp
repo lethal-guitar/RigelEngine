@@ -26,11 +26,10 @@ namespace rigel::utils {
 
 template<typename RangeT, typename Callable>
 auto transformed(const RangeT& range, Callable elementTransform) {
-  std::vector<typename std::result_of<
-      Callable(typename std::iterator_traits<
-          decltype(std::cbegin(range))
-        >::value_type)
-    >::type
+  std::vector<
+    std::invoke_result_t<
+      Callable,
+      typename std::iterator_traits<decltype(std::cbegin(range))>::value_type>
   > result;
 
   const auto start = std::cbegin(range);
