@@ -453,6 +453,28 @@ void UserProfile::saveToDisk() {
 }
 
 
+bool UserProfile::hasProgressData() const
+{
+  using std::any_of;
+  using std::begin;
+  using std::end;
+
+  const auto hasSavedGames =
+    any_of(begin(mSaveSlots), end(mSaveSlots), [](const auto& slot) {
+      return slot.has_value();
+    });
+
+  const auto hasHighScores =
+    any_of(begin(mHighScoreLists), end(mHighScoreLists), [](const auto& list) {
+      return any_of(begin(list), end(list), [](const auto& entry) {
+        return entry.mScore > 0;
+      });
+    });
+
+  return hasSavedGames || hasHighScores;
+}
+
+
 std::optional<std::filesystem::path> createOrGetPreferencesPath() {
   namespace fs = std::filesystem;
 

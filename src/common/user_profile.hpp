@@ -57,6 +57,9 @@ public:
 
   void saveToDisk();
 
+  /** Returns true if the profile contains saved games and/or high scores */
+  bool hasProgressData() const;
+
   data::SaveSlotArray mSaveSlots;
   data::HighScoreListArray mHighScoreLists;
   data::GameOptions mOptions;
