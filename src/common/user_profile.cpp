@@ -93,16 +93,15 @@ constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 
 
-data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
-  data::GameOptions result;
-
-  result.mSoundOn =
+void importOptions(
+  data::GameOptions& options,
+  const loader::GameOptions& originalOptions
+) {
+  options.mSoundOn =
     originalOptions.mSoundBlasterSoundsOn ||
     originalOptions.mAdlibSoundsOn ||
     originalOptions.mPcSpeakersSoundsOn;
-  result.mMusicOn = originalOptions.mMusicOn;
-
-  return result;
+  options.mMusicOn = originalOptions.mMusicOn;
 }
 
 
@@ -537,7 +536,7 @@ void importOriginalGameProfileData(
   profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
 
   if (const auto options = loader::loadOptions(gamePath)) {
-    profile.mOptions = importOptions(*options);
+    importOptions(profile.mOptions, *options);
   }
 }
 
