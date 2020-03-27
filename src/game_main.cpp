@@ -407,7 +407,8 @@ void gameMain(const StartupOptions& options) {
   SetProcessDPIAware();
 #endif
 
-  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
+  sdl_utils::check(SDL_Init(
+    SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
