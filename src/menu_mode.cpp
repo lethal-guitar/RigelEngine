@@ -95,7 +95,8 @@ void MenuMode::handleEvent(const SDL_Event& event) {
        event.cbutton.button == SDL_CONTROLLER_BUTTON_A))
     ) {
       mOptionsMenu = ui::OptionsMenu{
-        &mContext.mpUserProfile->mOptions,
+        mContext.mpUserProfile,
+        mContext.mpServiceProvider,
         ui::OptionsMenu::Type::Main};
       return;
     }

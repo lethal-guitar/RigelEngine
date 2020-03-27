@@ -388,14 +388,34 @@ for more info.)");
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
-  const StartupOptions& options
+  const StartupOptions& startupOptions
 ) {
+  auto run = [&](const StartupOptions& options) {
+    Game game(options, &userProfile, pWindow);
+    return game.run(options);
+  };
+
   if (!userProfile.mGamePath) {
-    setupForFirstLaunch(pWindow, userProfile, options.mGamePath);
+    setupForFirstLaunch(pWindow, userProfile, startupOptions.mGamePath);
   }
 
-  Game game(options, &userProfile, pWindow);
-  game.run(options);
+  auto result = run(startupOptions);
+
+  // Some game option changes (like choosing a new game path) require
+  // restarting the game to make the change effective. If the first game run
+  // ended with a result of RestartNeeded, launch a new game, but start from
+  // the main menu and discard startup options.
+  if (result == Game::RunResult::RestartNeeded) {
+    auto optionsForRestartedGame = StartupOptions{};
+    optionsForRestartedGame.mSkipIntro = true;
+
+    while (result == Game::RunResult::RestartNeeded) {
+      result = run(optionsForRestartedGame);
+    }
+  }
+
+  // We're exiting, save the user profile
+  userProfile.saveToDisk();
 }
 
 }
@@ -500,7 +520,7 @@ Game::Game(
 }
 
 
-void Game::run(const StartupOptions& startupOptions) {
+auto Game::run(const StartupOptions& startupOptions) -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -522,14 +542,11 @@ void Game::run(const StartupOptions& startupOptions) {
     }
   }
 
-  mainLoop();
-
-  // exiting the game
-  mpUserProfile->saveToDisk();
+  return mainLoop();
 }
 
 
-void Game::mainLoop() {
+auto Game::mainLoop() -> RunResult {
   using namespace std::chrono;
 
   std::vector<SDL_Event> eventQueue;
@@ -558,7 +575,15 @@ void Game::mainLoop() {
     swapBuffers();
 
     applyChangedOptions();
+
+    if (!mGamePathToSwitchTo.empty()) {
+      mpUserProfile->mGamePath = mGamePathToSwitchTo;
+      mpUserProfile->saveToDisk();
+      return RunResult::RestartNeeded;
+    }
   }
+
+  return RunResult::GameEnded;
 }
 
 
@@ -823,6 +848,13 @@ void Game::stopMusic() {
 
 void Game::scheduleGameQuit() {
   mIsRunning = false;
+}
+
+
+void Game::switchGamePath(const std::filesystem::path& newGamePath) {
+  if (newGamePath != mpUserProfile->mGamePath) {
+    mGamePathToSwitchTo = newGamePath;
+  }
 }
 
 }

@@ -45,6 +45,7 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
   void playMusic(const std::string&) override {}
   void stopMusic() override {}
   void scheduleGameQuit() override {}
+  void switchGamePath(const std::filesystem::path&) override {}
   bool isShareWareVersion() const override { return false; }
 
   std::optional<rigel::data::SoundId> mLastTriggeredSoundId;

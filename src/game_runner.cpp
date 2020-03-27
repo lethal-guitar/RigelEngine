@@ -231,7 +231,8 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
         pWorld->mPlayerInput = {};
       }
       mStateStack.push(ui::OptionsMenu{
-        &mContext.mpUserProfile->mOptions,
+        mContext.mpUserProfile,
+        mContext.mpServiceProvider,
         ui::OptionsMenu::Type::InGame});
       break;
 
