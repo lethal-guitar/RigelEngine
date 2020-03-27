@@ -230,7 +230,9 @@ bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
       if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
         pWorld->mPlayerInput = {};
       }
-      mStateStack.push(ui::OptionsMenu{&mContext.mpUserProfile->mOptions});
+      mStateStack.push(ui::OptionsMenu{
+        &mContext.mpUserProfile->mOptions,
+        ui::OptionsMenu::Type::InGame});
       break;
 
     case SDLK_F2:

@@ -24,8 +24,14 @@ namespace rigel::ui {
 
 class OptionsMenu {
 public:
-  OptionsMenu(data::GameOptions* pOptions)
+  enum class Type {
+    Main,
+    InGame
+  };
+
+  OptionsMenu(data::GameOptions* pOptions, const Type type)
     : mpOptions(pOptions)
+    , mType(type)
   {
   }
 
@@ -34,6 +40,7 @@ public:
 
 private:
   data::GameOptions* mpOptions;
+  Type mType;
   bool mMenuOpen = true;
 };
 

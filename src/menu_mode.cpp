@@ -94,7 +94,9 @@ void MenuMode::handleEvent(const SDL_Event& event) {
       (event.type == SDL_CONTROLLERBUTTONDOWN &&
        event.cbutton.button == SDL_CONTROLLER_BUTTON_A))
     ) {
-      mOptionsMenu = ui::OptionsMenu{&mContext.mpUserProfile->mOptions};
+      mOptionsMenu = ui::OptionsMenu{
+        &mContext.mpUserProfile->mOptions,
+        ui::OptionsMenu::Type::Main};
       return;
     }
   }
