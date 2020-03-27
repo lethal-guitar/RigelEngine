@@ -33,6 +33,7 @@
 #include "menu_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <imfilebrowser.h>
 #include <imgui.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
@@ -42,6 +43,7 @@ RIGEL_RESTORE_WARNINGS
 #endif
 
 #include <cassert>
+#include <filesystem>
 
 
 namespace rigel {
@@ -209,12 +211,191 @@ std::unique_ptr<GameMode> createInitialGameMode(
 }
 
 
+void showErrorMessage(SDL_Window* pWindow, const std::string& error) {
+  SDL_Event event;
+  auto boxIsVisible = true;
+  auto firstTime = true;
+
+  while (boxIsVisible) {
+    while (SDL_PollEvent(&event)) {
+      ui::imgui_integration::handleEvent(event);
+    }
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    ui::imgui_integration::beginFrame(pWindow);
+
+    if (firstTime) {
+      firstTime = false;
+      ImGui::OpenPopup("Error!");
+    }
+
+    const auto flags =
+      ImGuiWindowFlags_NoResize |
+      ImGuiWindowFlags_NoMove;
+    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, flags)) {
+      ImGui::Text("%s", error.c_str());
+
+      if (ImGui::Button("Ok")) {
+        boxIsVisible = false;
+      }
+
+      ImGui::EndPopup();
+    }
+
+    ui::imgui_integration::endFrame();
+    SDL_GL_SwapWindow(pWindow);
+  }
+}
+
+
 std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
   if (options.mEnableFpsLimit && !options.mEnableVsync) {
     return FpsLimiter{options.mMaxFps};
   } else {
     return std::nullopt;
   }
+}
+
+
+/** Returns game path to be used for loading resources
+ *
+ * A game path specified on the command line takes priority over the path
+ * stored in the user profile. This function implements that priority by
+ * returning the right path based on the given command line options and user
+ * profile.
+ */
+std::string effectiveGamePath(
+  const StartupOptions& options,
+  const UserProfile& profile
+) {
+  using namespace std::string_literals;
+
+  if (!options.mGamePath.empty()) {
+    return options.mGamePath;
+  }
+
+  return profile.mGamePath ? profile.mGamePath->u8string() + "/"s : ""s;
+}
+
+
+UserProfile loadOrCreateUserProfile() {
+  if (auto profile = loadUserProfile())
+  {
+    return *profile;
+  }
+
+  auto profile = createEmptyUserProfile();
+  profile.saveToDisk();
+  return profile;
+}
+
+
+// Note : This should graduate into its own file if more complexity is added
+std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
+{
+  auto folderPath = std::filesystem::path();
+  auto folderBrowser =
+    ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
+  folderBrowser.Open();
+
+  do
+  {
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+      ui::imgui_integration::handleEvent(event);
+    }
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    ui::imgui_integration::beginFrame(pWindow);
+
+    folderBrowser.Display();
+    if (folderBrowser.HasSelected())
+    {
+      folderPath = folderBrowser.GetSelected();
+      folderBrowser.Close();
+    }
+
+    ui::imgui_integration::endFrame();
+    SDL_GL_SwapWindow(pWindow);
+  } while (folderBrowser.IsOpened());
+
+  return folderPath;
+}
+
+
+void setupForFirstLaunch(
+  SDL_Window* pWindow,
+  UserProfile& userProfile,
+  const std::string& commandLineGamePath
+) {
+  namespace fs = std::filesystem;
+
+  auto gamePath = fs::path{};
+
+  // Case 1: A path is given on the command line on first launch. Use that.
+  if (!commandLineGamePath.empty()) {
+    gamePath = fs::u8path(commandLineGamePath);
+  }
+
+  const auto dataFilePath = fs::u8path("NUKEM2.CMP");
+
+  // Case 2: The current working directory is set to a Duke Nukem II
+  // installation, most likely because the RigelEngine executable has been
+  // copied there. Use the current working directory as game path.
+  if (gamePath.empty()) {
+    const auto currentWorkingDir = fs::current_path();
+    if (
+      commandLineGamePath.empty() &&
+      fs::exists(currentWorkingDir / dataFilePath)
+    ) {
+      gamePath = currentWorkingDir;
+    }
+  }
+
+  // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
+  // the user select their Duke Nukem II installation.
+  if (gamePath.empty()) {
+    gamePath = runFolderBrowser(pWindow);
+  }
+
+  // If we still don't have a game path, stop here.
+  if (gamePath.empty()) {
+    throw std::runtime_error(
+R"(No game path given. RigelEngine needs the original Duke Nukem II data files in order to function.
+You can download the Shareware version for free, see
+https://github.com/lethal-guitar/RigelEngine/blob/master/README.md#acquiring-the-game-data
+for more info.)");
+  }
+
+  // Make sure there is a data file at the game path.
+  if (!fs::exists(gamePath / dataFilePath)) {
+    throw std::runtime_error("No game data (NUKEM2.CMP file) found in game path");
+  }
+
+  // Import original game's profile data, if our profile is still 'empty'
+  if (!userProfile.hasProgressData()) {
+    importOriginalGameProfileData(userProfile, gamePath.u8string() + "/");
+  }
+
+  // Finally, persist the chosen game path in the user profile for the next
+  // launch.
+  userProfile.mGamePath = fs::canonical(gamePath);
+  userProfile.saveToDisk();
+}
+
+
+void initAndRunGame(
+  SDL_Window* pWindow,
+  UserProfile& userProfile,
+  const StartupOptions& options
+) {
+  if (!userProfile.mGamePath) {
+    setupForFirstLaunch(pWindow, userProfile, options.mGamePath);
+  }
+
+  Game game(options, &userProfile, pWindow);
+  game.run(options);
 }
 
 }
@@ -232,8 +413,7 @@ void gameMain(const StartupOptions& options) {
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   setGLAttributes();
 
-  auto userProfile = loadOrCreateUserProfile(options.mGamePath);
-
+  auto userProfile = loadOrCreateUserProfile();
   auto pWindow = createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
@@ -248,8 +428,11 @@ void gameMain(const StartupOptions& options) {
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
-  Game game(options, &userProfile, pWindow.get());
-  game.run(options);
+  try {
+    initAndRunGame(pWindow.get(), userProfile, options);
+  } catch (const std::exception& error) {
+    showErrorMessage(pWindow.get(), error.what());
+  }
 }
 
 
@@ -285,7 +468,7 @@ Game::Game(
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(startupOptions.mGamePath)
+  , mResources(effectiveGamePath(startupOptions, *pUserProfile))
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
@@ -362,41 +545,43 @@ void Game::mainLoop() {
       break;
     }
 
-    ui::imgui_integration::beginFrame(mpWindow);
-    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-
     {
-      RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
-      mRenderer.clear();
+      ui::imgui_integration::beginFrame(mpWindow);
+      auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
+      ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-      auto saved = setupSimpleUpscaling(&mRenderer);
+      {
+        RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+        mRenderer.clear();
 
-      auto pMaybeNextMode =
-        mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
-      eventQueue.clear();
+        auto saved = setupSimpleUpscaling(&mRenderer);
 
-      if (pMaybeNextMode) {
-        fadeOutScreen();
-        mpCurrentGameMode = std::move(pMaybeNextMode);
-        mpCurrentGameMode->updateAndRender(0, {});
-        fadeInScreen();
+        auto pMaybeNextMode =
+          mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
+        eventQueue.clear();
+
+        if (pMaybeNextMode) {
+          fadeOutScreen();
+          mpCurrentGameMode = std::move(pMaybeNextMode);
+          mpCurrentGameMode->updateAndRender(0, {});
+          fadeInScreen();
+        }
+      }
+
+      if (mAlphaMod != 0) {
+        mRenderer.clear();
+        mRenderTarget.render(&mRenderer, 0, 0);
+        mRenderer.submitBatch();
+
+        if (mpUserProfile->mOptions.mShowFpsCounter) {
+          const auto afterRender = high_resolution_clock::now();
+          const auto innerRenderTime =
+            duration<engine::TimeDelta>(afterRender - startOfFrame).count();
+          mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+        }
       }
     }
 
-    if (mAlphaMod != 0) {
-      mRenderer.clear();
-      mRenderTarget.render(&mRenderer, 0, 0);
-      mRenderer.submitBatch();
-
-      if (mpUserProfile->mOptions.mShowFpsCounter) {
-        const auto afterRender = high_resolution_clock::now();
-        const auto innerRenderTime =
-          duration<engine::TimeDelta>(afterRender - startOfFrame).count();
-        mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
-      }
-    }
-
-    ui::imgui_integration::endFrame();
     swapBuffers();
 
     applyChangedOptions();

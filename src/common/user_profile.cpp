@@ -93,34 +93,15 @@ constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 
 
-data::GameOptions importOptions(const loader::GameOptions& originalOptions) {
-  data::GameOptions result;
-
-  result.mSoundOn =
+void importOptions(
+  data::GameOptions& options,
+  const loader::GameOptions& originalOptions
+) {
+  options.mSoundOn =
     originalOptions.mSoundBlasterSoundsOn ||
     originalOptions.mAdlibSoundsOn ||
     originalOptions.mPcSpeakersSoundsOn;
-  result.mMusicOn = originalOptions.mMusicOn;
-
-  return result;
-}
-
-
-UserProfile importProfile(
-  const std::filesystem::path& profileFile,
-  const std::string& gamePath
-) {
-  UserProfile profile{profileFile};
-
-  profile.mSaveSlots = loader::loadSavedGames(gamePath);
-  profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
-
-  if (const auto options = loader::loadOptions(gamePath)) {
-    profile.mOptions = importOptions(*options);
-  }
-
-  profile.saveToDisk();
-  return profile;
+  options.mMusicOn = originalOptions.mMusicOn;
 }
 
 
@@ -371,6 +352,8 @@ UserProfile loadProfile(
   const std::filesystem::path& fileOnDisk,
   const std::filesystem::path& pathForSaving
 ) {
+  namespace fs = std::filesystem;
+
   try {
     const auto buffer = loader::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
@@ -385,6 +368,12 @@ UserProfile loadProfile(
     if (serializedProfile.contains("options")) {
       profile.mOptions = deserialize<data::GameOptions>(
         serializedProfile.at("options"));
+    }
+
+    if (serializedProfile.contains("gamePath")) {
+      const auto gamePathStr =
+        serializedProfile.at("gamePath").get<std::string>();
+      profile.mGamePath = fs::u8path(gamePathStr);
     }
 
     return profile;
@@ -425,6 +414,9 @@ void UserProfile::saveToDisk() {
   serializedProfile["saveSlots"] = serialize(mSaveSlots);
   serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
   serializedProfile["options"] = serialize(mOptions);
+  if (mGamePath) {
+    serializedProfile["gamePath"] = mGamePath->u8string();
+  }
 
   // This step merges the newly serialized profile into the 'old' profile
   // previously read from disk. The reason this is necessary is compatibility
@@ -460,6 +452,28 @@ void UserProfile::saveToDisk() {
 }
 
 
+bool UserProfile::hasProgressData() const
+{
+  using std::any_of;
+  using std::begin;
+  using std::end;
+
+  const auto hasSavedGames =
+    any_of(begin(mSaveSlots), end(mSaveSlots), [](const auto& slot) {
+      return slot.has_value();
+    });
+
+  const auto hasHighScores =
+    any_of(begin(mHighScoreLists), end(mHighScoreLists), [](const auto& list) {
+      return any_of(begin(list), end(list), [](const auto& entry) {
+        return entry.mScore > 0;
+      });
+    });
+
+  return hasSavedGames || hasHighScores;
+}
+
+
 std::optional<std::filesystem::path> createOrGetPreferencesPath() {
   namespace fs = std::filesystem;
 
@@ -475,7 +489,22 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath() {
 }
 
 
-UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
+UserProfile createEmptyUserProfile()
+{
+  const auto preferencesPath = createOrGetPreferencesPath();
+  if (!preferencesPath) {
+    std::cerr << "WARNING: Cannot open user preferences directory\n";
+    return {};
+  }
+
+  const auto profileFilePath = *preferencesPath /
+    (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
+  return UserProfile{profileFilePath};
+}
+
+
+std::optional<UserProfile> loadUserProfile()
+{
   namespace fs = std::filesystem;
 
   const auto preferencesPath = createOrGetPreferencesPath();
@@ -495,7 +524,20 @@ UserProfile loadOrCreateUserProfile(const std::string& gamePath) {
     return loadProfile(profileFilePath_v1, profileFilePath);
   }
 
-  return importProfile(profileFilePath, gamePath);
+  return {};
+}
+
+
+void importOriginalGameProfileData(
+  UserProfile& profile,
+  const std::string& gamePath)
+{
+  profile.mSaveSlots = loader::loadSavedGames(gamePath);
+  profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
+
+  if (const auto options = loader::loadOptions(gamePath)) {
+    importOptions(profile.mOptions, *options);
+  }
 }
 
 }

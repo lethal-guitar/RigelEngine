@@ -29,8 +29,6 @@ Episode 1 has been tested quite thorougly, and is playable without issues.
 However, I'm still in the process of testing episodes 2 to 4,
 so there might be bugs.
 
-Plus, it would be nice to make launching the game easier in the future by having a UI for selecting the path to the game files, and possibly even downloading the Shareware files automatically.
-
 ## Contributing
 
 Contributions to RigelEngine are very welcome! Please have a look at the [contribution guide](CONTRIBUTING.md) before making a PR.
@@ -41,24 +39,17 @@ If you are looking for some easy tasks to get started, take a look at issues lab
 
 ## Running RigelEngine
 
-In order to run RigelEngine, the game data from the original game is required. Both the shareware version and the registered version work. To make RigelEngine find the game data, you can either:
+In order to run RigelEngine, the game data from the original game is required. Both the shareware version and the registered version work.
+When launching RigelEngine for the first time, it will show a file browser UI and ask you to select the location of your Duke Nukem II installation.
+The chosen path will be stored in the game's user profile, so that you don't have to select it again next time.
 
-a) copy the RigelEngine executable (and accompanying DLLs) into the directory containing the game data, and launch `RigelEngine.exe` instead of `NUKEM2.EXE`. This is the recommended way to run it on Windows.
-
-b) pass the path to the game data as a command line argument to RigelEngine. This is the recommended way to run it on Linux/OS X.
-
-For example, let's say you have your copy of Duke Nukem II in `/home/niko/Duke2`, and a build of RigelEngine in `/home/niko/RigelEngine/build`. You would then start the game as follows:
-
-```
-cd /home/niko/RigelEngine/build
-./src/RigelEngine /home/niko/Duke2
-```
+It's also possible to pass the path to the game files as argument on the command line, which can be handy during development.
 
 ### Acquiring the game data
 
 The full version of the game (aka registered version) is not available currently, but you can still download the freely available shareware version from [the old 3D Realms site](http://legacy.3drealms.com/duke2/) - look for a download link for the file `4duke.zip`. You can also find the same file on various websites if you Google for "Duke Nukem 2 shareware".
 
-Note that on macOS you might need to unzip from the terminal - `unzip 4duke.zip`, since the built-in unarchiver seems to dislike the shareware download.
+Note that on MacOS you might need to unzip from the terminal - `unzip 4duke.zip`, since the built-in unarchiver seems to dislike the shareware download.
 
 The download contains an installer which only runs on MS-DOS, but you don't need that - you can simply rename the file `DN2SW10.SHR` (also part of the download) to `.zip` and open it using your favorite archive manager. After that, you can point RigelEngine to the directory where you extracted the files, and it should work.
 
@@ -180,7 +171,7 @@ make -j8
 # -DWARNINGS_AS_ERRORS part - see the note about warnings as errors above.
 
 # Now run it!
-./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
+./src/RigelEngine
 ```
 
 #### <a name="linux-build-instructions-184">Ubuntu 18.04</a>
@@ -227,7 +218,7 @@ cmake .. -DWARNINGS_AS_ERRORS=OFF
 make -j8 # adjust depending on number of CPU cores in your machine
 
 # Now run it!
-./src/RigelEngine <PATH_TO_YOUR_GAME_FILES>
+./src/RigelEngine
 ```
 
 ### <a name="mac-build-instructions">OS X builds</a>

@@ -118,9 +118,9 @@ int main(int argc, char** argv) {
      "Specify position to place the player at (to be used in conjunction with\n"
      "'play-level')")
     ("game-path",
-     po::value<std::string>(&config.mGamePath),
+     po::value<std::string>(&config.mGamePath)->default_value(""),
      "Path to original game's installation. Can also be given as positional "
-     "argument.");
+     "argument. If not provided here, a folder browser ui will ask for it");
 
   po::positional_options_description positionalArgsDescription;
   positionalArgsDescription.add("game-path", -1);
