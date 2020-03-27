@@ -74,6 +74,9 @@ private:
 
   void mainLoop();
   void pumpEvents(std::vector<SDL_Event>& eventQueue);
+  void updateAndRender(
+    entityx::TimeDelta elapsed,
+    const std::vector<SDL_Event>& eventQueue);
 
   GameMode::Context makeModeContext();
 

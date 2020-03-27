@@ -551,33 +551,8 @@ void Game::mainLoop() {
       auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
       ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-      {
-        RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
-        mRenderer.clear();
-
-        auto saved = setupSimpleUpscaling(&mRenderer);
-
-        auto pMaybeNextMode =
-          mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
-        eventQueue.clear();
-
-        if (pMaybeNextMode) {
-          fadeOutScreen();
-          mpCurrentGameMode = std::move(pMaybeNextMode);
-          mpCurrentGameMode->updateAndRender(0, {});
-          fadeInScreen();
-        }
-      }
-
-      if (mAlphaMod != 0) {
-        mRenderer.clear();
-        mRenderTarget.render(&mRenderer, 0, 0);
-        mRenderer.submitBatch();
-
-        if (mpUserProfile->mOptions.mShowFpsCounter) {
-          mFpsDisplay.updateAndRender(elapsed);
-        }
-      }
+      updateAndRender(elapsed, eventQueue);
+      eventQueue.clear();
     }
 
     swapBuffers();
@@ -598,6 +573,39 @@ void Game::pumpEvents(std::vector<SDL_Event>& eventQueue) {
   while (SDL_PollEvent(&event)) {
     if (!handleEvent(event)) {
       eventQueue.push_back(event);
+    }
+  }
+}
+
+
+void Game::updateAndRender(
+  const entityx::TimeDelta elapsed,
+  const std::vector<SDL_Event>& eventQueue
+) {
+  {
+    RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+    mRenderer.clear();
+
+    auto saved = setupSimpleUpscaling(&mRenderer);
+
+    auto pMaybeNextMode =
+      mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
+
+    if (pMaybeNextMode) {
+      fadeOutScreen();
+      mpCurrentGameMode = std::move(pMaybeNextMode);
+      mpCurrentGameMode->updateAndRender(0, {});
+      fadeInScreen();
+    }
+  }
+
+  if (mAlphaMod != 0) {
+    mRenderer.clear();
+    mRenderTarget.render(&mRenderer, 0, 0);
+    mRenderer.submitBatch();
+
+    if (mpUserProfile->mOptions.mShowFpsCounter) {
+      mFpsDisplay.updateAndRender(elapsed);
     }
   }
 }
