@@ -45,8 +45,8 @@ inline data::Image loadTiledImage(
   const data::TileImageType type = data::TileImageType::Unmasked
 ) {
   return loadTiledImage(
-    data.cbegin(),
-    data.cend(),
+    data.begin(),
+    data.end(),
     widthInTiles,
     palette,
     type);

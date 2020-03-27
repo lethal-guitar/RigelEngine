@@ -73,7 +73,7 @@ void Image::insertImage(
     throw invalid_argument("Source image doesn't fit");
   }
 
-  auto sourceIter = pixels.cbegin();
+  auto sourceIter = pixels.begin();
   for (size_t row=0; row<inferredHeight; ++row) {
     for (size_t col=0; col<sourceWidth; ++col) {
       const auto targetOffset = (x+col) + (y+row)*mWidth;

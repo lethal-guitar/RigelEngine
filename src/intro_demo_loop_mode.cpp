@@ -147,7 +147,7 @@ std::unique_ptr<GameMode> IntroDemoLoopMode::updateAndRender(
       mCurrentStage = 0;
 
       if (mFirstRunIncludedStoryAnimation) {
-        const auto storyStageIter = mStages.cbegin() + 2;
+        const auto storyStageIter = mStages.begin() + 2;
         mStages.erase(storyStageIter);
         mFirstRunIncludedStoryAnimation = false;
       }

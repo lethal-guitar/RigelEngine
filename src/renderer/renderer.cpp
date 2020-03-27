@@ -508,7 +508,7 @@ void Renderer::drawTexture(
   fillVertexPositions(destRect, std::begin(vertices), 0, 4);
   fillTexCoords(sourceRect, textureData, std::begin(vertices), 2, 4);
 
-  batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4u);
+  batchQuadVertices(std::begin(vertices), std::end(vertices), 4u);
 }
 
 
@@ -635,7 +635,7 @@ void Renderer::drawPoint(
     color.a / 255.0f
   };
   mBatchData.insert(
-    std::end(mBatchData), std::cbegin(vertices), std::cend(vertices));
+    std::end(mBatchData), std::begin(vertices), std::end(vertices));
 }
 
 
@@ -671,7 +671,7 @@ void Renderer::drawWaterEffect(
     fillTexCoords(
       animSourceRect, mWaterSurfaceAnimTexture, std::begin(vertices), 2, 4);
 
-    batchQuadVertices(std::cbegin(vertices), std::cend(vertices), 4);
+    batchQuadVertices(std::begin(vertices), std::end(vertices), 4);
   };
 
   setRenderModeIfChanged(RenderMode::WaterEffect);
@@ -818,8 +818,8 @@ void Renderer::batchQuadVertices(
 
   GLushort indices[6];
   transform(
-    cbegin(QUAD_INDICES),
-    cend(QUAD_INDICES),
+    begin(QUAD_INDICES),
+    end(QUAD_INDICES),
     begin(indices),
     [&](const GLushort index) -> GLushort {
       return index + currentIndex;
@@ -830,7 +830,7 @@ void Renderer::batchQuadVertices(
     mBatchData.end(),
     forward<VertexIter>(dataBegin),
     forward<VertexIter>(dataEnd));
-  mBatchIndices.insert(mBatchIndices.end(), cbegin(indices), cend(indices));
+  mBatchIndices.insert(mBatchIndices.end(), begin(indices), end(indices));
 }
 
 

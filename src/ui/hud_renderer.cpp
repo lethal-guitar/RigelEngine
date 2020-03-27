@@ -273,10 +273,10 @@ void HudRenderer::render(
   const auto inventoryStartPos = base::Vector{
     topRightTexturePosX + GameTraits::tileSize,
     2*GameTraits::tileSize};
-  auto inventoryIter = playerModel.inventory().cbegin();
+  auto inventoryIter = playerModel.inventory().begin();
   for (int row = 0; row < 3; ++row) {
     for (int col = 0; col < 2; ++col) {
-      if (inventoryIter != playerModel.inventory().cend()) {
+      if (inventoryIter != playerModel.inventory().end()) {
         const auto itemType = *inventoryIter++;
         const auto drawPos =
           inventoryStartPos + base::Vector{col, row} * GameTraits::tileSize*2;

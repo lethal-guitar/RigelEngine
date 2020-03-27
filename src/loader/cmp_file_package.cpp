@@ -49,7 +49,7 @@ std::string normalizedFileName(const std::string& fileName) {
 CMPFilePackage::CMPFilePackage(const string& filePath)
   : mFileData(loadFile(filePath))
 {
-  LeStreamReader dictReader(mFileData.cbegin(), mFileData.cend());
+  LeStreamReader dictReader(mFileData.begin(), mFileData.end());
 
   while (dictReader.hasData()) {
     const auto fileName = readFixedSizeString(dictReader, 12);

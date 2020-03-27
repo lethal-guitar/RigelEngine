@@ -62,7 +62,7 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
     mSongSwitchPending = false;
     mAudioLock.unlock();
 
-    miNextCommand = mSongData.cbegin();
+    miNextCommand = mSongData.begin();
     mSamplesAvailable = 0;
   }
 
@@ -84,8 +84,8 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
       commandDelay = command.delay;
       mEmulator.writeRegister(command.reg, command.value);
       ++miNextCommand;
-      if (miNextCommand == mSongData.cend()) {
-        miNextCommand = mSongData.cbegin();
+      if (miNextCommand == mSongData.end()) {
+        miNextCommand = mSongData.begin();
       }
     } while (commandDelay == 0);
 

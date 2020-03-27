@@ -162,7 +162,7 @@ data::Image ActorImagePackage::loadImage(
     throw invalid_argument("Not enough data");
   }
 
-  const auto dataStart = mImageData.cbegin() + frameHeader.mFileOffset;
+  const auto dataStart = mImageData.begin() + frameHeader.mFileOffset;
   return loadTiledImage(
     dataStart,
     dataStart + dataSize,
@@ -193,7 +193,7 @@ FontData ActorImagePackage::loadFont() const {
       throw runtime_error("Not enough data");
     }
 
-    const auto dataStart = mImageData.cbegin() + frameHeader.mFileOffset;
+    const auto dataStart = mImageData.begin() + frameHeader.mFileOffset;
     auto characterBitmap = loadTiledFontBitmap(
       dataStart,
       dataStart + dataSize,

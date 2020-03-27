@@ -158,15 +158,15 @@ SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
     conversionSpecs.len * conversionSpecs.len_mult);
   conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
   std::copy(
-    buffer.mSamples.cbegin(), buffer.mSamples.cend(), tempBuffer.begin());
+    buffer.mSamples.begin(), buffer.mSamples.end(), tempBuffer.begin());
 
   SDL_ConvertAudio(&conversionSpecs);
 
   data::AudioBuffer convertedBuffer{SAMPLE_RATE};
   convertedBuffer.mSamples.insert(
     convertedBuffer.mSamples.end(),
-    tempBuffer.cbegin(),
-    tempBuffer.cbegin() + conversionSpecs.len_cvt);
+    tempBuffer.begin(),
+    tempBuffer.begin() + conversionSpecs.len_cvt);
   return addConvertedSound(convertedBuffer);
 #else
   return addConvertedSound(buffer);

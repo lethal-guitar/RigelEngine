@@ -39,12 +39,12 @@ Palette256 load6bitPalette256(ByteBufferCIter begin, ByteBufferCIter end);
 
 
 inline Palette16 load6bitPalette16(const ByteBuffer& buffer) {
-  return load6bitPalette16(buffer.cbegin(), buffer.cend());
+  return load6bitPalette16(buffer.begin(), buffer.end());
 }
 
 
 inline Palette256 load6bitPalette256(const ByteBuffer& buffer) {
-  return load6bitPalette256(buffer.cbegin(), buffer.cend());
+  return load6bitPalette256(buffer.begin(), buffer.end());
 }
 
 }
