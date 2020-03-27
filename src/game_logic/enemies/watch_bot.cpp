@@ -319,6 +319,18 @@ void WatchBotCarrier::update(
 }
 
 
+void WatchBotCarrier::onKilled(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const base::Point<float>&,
+  entityx::Entity entity
+) {
+  if (mPayload) {
+    mPayload.destroy();
+  }
+}
+
+
 void WatchBotContainer::update(
   GlobalDependencies& d,
   GlobalState& s,
