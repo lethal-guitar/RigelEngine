@@ -38,6 +38,10 @@ struct GameSessionId {
   {
   }
 
+  bool needsRegisteredVersion() const {
+    return mEpisode > 0;
+  }
+
   int mEpisode = 0;
   int mLevel = 0;
   Difficulty mDifficulty = Difficulty::Medium;

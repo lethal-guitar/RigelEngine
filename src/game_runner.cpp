@@ -326,7 +326,14 @@ void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
     const auto slotIndex = result.mSelectedPage;
     const auto& slot = mContext.mpUserProfile->mSaveSlots[*slotIndex];
     if (slot) {
-      mRequestedGameToLoad = *slot;
+      if (
+        mContext.mpServiceProvider->isShareWareVersion() &&
+        slot->mSessionId.needsRegisteredVersion()
+      ) {
+        showErrorMessageScript("No_Can_Order");
+      } else {
+        mRequestedGameToLoad = *slot;
+      }
     } else {
       showErrorMessageScript("No_Game_Restore");
     }

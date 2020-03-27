@@ -267,7 +267,15 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
         const auto slotIndex = *result.mSelectedPage;
         const auto& slot = mContext.mpUserProfile->mSaveSlots[slotIndex];
         if (slot) {
-          return std::make_unique<GameSessionMode>(*slot, mContext);
+          if (
+            mContext.mpServiceProvider->isShareWareVersion() &&
+            slot->mSessionId.needsRegisteredVersion()
+          ) {
+            runScript(mContext, "No_Can_Order");
+            mMenuState = MenuState::NoSavedGameInSlotMessage;
+          } else {
+            return std::make_unique<GameSessionMode>(*slot, mContext);
+          }
         } else {
           runScript(mContext, "No_Game_Restore");
           mMenuState = MenuState::NoSavedGameInSlotMessage;
