@@ -300,6 +300,23 @@ void GameRunner::fadeToWorld() {
 
 
 void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
+  auto showErrorMessageScript = [this](const char* scriptName) {
+    // When selecting a slot that can't be loaded, we show a message and
+    // then return to the save slot selection menu.  The latter stays on the
+    // stack, we push another menu state on top of the stack for showing the
+    // message.
+    enterMenu(
+      scriptName,
+      [this](const auto&) {
+        leaveMenu();
+        runScript(mContext, "Restore_Game");
+      },
+      noopEventHook,
+      false, // isTransparent
+      false); // shouldClearScriptCanvas
+  };
+
+
   using STT = ui::DukeScriptRunner::ScriptTerminationType;
 
   if (result.mTerminationType == STT::AbortedByUser) {
@@ -311,19 +328,7 @@ void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
     if (slot) {
       mRequestedGameToLoad = *slot;
     } else {
-      // When selecting an empty slot, we show a message ("no game in this
-      // slot") and then return to the save slot selection menu.
-      // The latter stays on the stack, we push another menu state on top of
-      // the stack for showing the message.
-      enterMenu(
-        "No_Game_Restore",
-        [this](const auto&) {
-          leaveMenu();
-          runScript(mContext, "Restore_Game");
-        },
-        noopEventHook,
-        false, // isTransparent
-        false); // shouldClearScriptCanvas
+      showErrorMessageScript("No_Game_Restore");
     }
   }
 }
