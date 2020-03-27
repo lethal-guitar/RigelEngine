@@ -23,9 +23,8 @@ namespace rigel::ui {
 
 class FpsDisplay {
 public:
-  void updateAndRender(
-    engine::TimeDelta totalElapsed,
-    engine::TimeDelta renderingElapsed);
+  void updateAndRender(engine::TimeDelta elapsed);
+
 
 private:
   float mPreFilteredFrameTime = 0.0f;

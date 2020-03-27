@@ -575,10 +575,7 @@ void Game::mainLoop() {
         mRenderer.submitBatch();
 
         if (mpUserProfile->mOptions.mShowFpsCounter) {
-          const auto afterRender = high_resolution_clock::now();
-          const auto innerRenderTime =
-            duration<engine::TimeDelta>(afterRender - startOfFrame).count();
-          mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
+          mFpsDisplay.updateAndRender(elapsed);
         }
       }
     }
