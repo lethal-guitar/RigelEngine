@@ -17,6 +17,7 @@
 #include "boss_episode_3.hpp"
 
 #include "base/math_tools.hpp"
+#include "common/game_service_provider.hpp"
 #include "common/global.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
@@ -92,6 +93,7 @@ void BossEpisode3::update(
       attackRangeBbox.topLeft += area.mBboxOffset;
 
       if (attackRangeBbox.intersects(playerBbox)) {
+        d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
         d.mpEntityFactory->createProjectile(
           ProjectileType::EnemyBossRocket,
           position + area.mShotOffset,

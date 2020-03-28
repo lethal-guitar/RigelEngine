@@ -210,6 +210,188 @@ private:
 };
 
 
+bool isValidActorId(const uint16_t id) {
+  using ID = data::ActorID;
+
+  switch (static_cast<data::ActorID>(id)) {
+    case ID::Keyhole_mounting_pole:
+    case ID::Duke_LEFT:
+    case ID::Duke_RIGHT:
+    case ID::META_Dynamic_geometry_marker_1:
+    case ID::META_Dynamic_geometry_marker_2:
+    case ID::Laser_turret_mounting_post:
+    case ID::META_Appear_only_in_med_hard_difficulty:
+    case ID::META_Appear_only_in_hard_difficulty:
+    case ID::Blue_bonus_globe_1:
+    case ID::Blue_bonus_globe_2:
+    case ID::Blue_bonus_globe_3:
+    case ID::Blue_bonus_globe_4:
+    case ID::Force_field:
+    case ID::Circuit_card_keyhole:
+    case ID::Blue_key_keyhole:
+    case ID::Green_box_empty:
+    case ID::Red_box_empty:
+    case ID::Blue_box_empty:
+    case ID::White_box_empty:
+    case ID::White_box_circuit_card:
+    case ID::White_box_blue_key:
+    case ID::White_box_rapid_fire:
+    case ID::White_box_cloaking_device:
+    case ID::Red_box_bomb:
+    case ID::Red_box_cola:
+    case ID::Red_box_6_pack_cola:
+    case ID::Red_box_turkey:
+    case ID::Green_box_rocket_launcher:
+    case ID::Green_box_flame_thrower:
+    case ID::Green_box_normal_weapon:
+    case ID::Green_box_laser:
+    case ID::Blue_box_health_molecule:
+    case ID::Blue_box_N:
+    case ID::Blue_box_U:
+    case ID::Blue_box_K:
+    case ID::Blue_box_E:
+    case ID::Blue_box_M:
+    case ID::Blue_box_video_game_cartridge:
+    case ID::Blue_box_sunglasses:
+    case ID::Blue_box_phone:
+    case ID::Blue_box_boom_box:
+    case ID::Blue_box_disk:
+    case ID::Blue_box_TV:
+    case ID::Blue_box_camera:
+    case ID::Blue_box_PC:
+    case ID::Blue_box_CD:
+    case ID::Blue_box_T_shirt:
+    case ID::Blue_box_videocassette:
+    case ID::Teleporter_1:
+    case ID::Teleporter_2:
+    case ID::Respawn_checkpoint:
+    case ID::Special_hint_globe:
+    case ID::Hoverbot:
+    case ID::Big_green_cat_LEFT:
+    case ID::Big_green_cat_RIGHT:
+    case ID::Wall_mounted_flamethrower_RIGHT:
+    case ID::Wall_mounted_flamethrower_LEFT:
+    case ID::Watchbot:
+    case ID::Rocket_launcher_turret:
+    case ID::Enemy_rocket_left:
+    case ID::Enemy_rocket_up:
+    case ID::Enemy_rocket_right:
+    case ID::Enemy_rocket_2_up:
+    case ID::Enemy_rocket_2_down:
+    case ID::Watchbot_container_carrier:
+    case ID::Bomb_dropping_spaceship:
+    case ID::Napalm_bomb:
+    case ID::Bouncing_spike_ball:
+    case ID::Green_slime_blob:
+    case ID::Green_slime_container:
+    case ID::Napalm_bomb_small:
+    case ID::Snake:
+    case ID::Camera_on_ceiling:
+    case ID::Camera_on_floor:
+    case ID::Green_hanging_suction_plant:
+    case ID::Wall_walker:
+    case ID::Eyeball_thrower_LEFT:
+    case ID::Sentry_robot_generator:
+    case ID::Skeleton:
+    case ID::Metal_grabber_claw:
+    case ID::Hovering_laser_turret:
+    case ID::Spider:
+    case ID::Ugly_green_bird:
+    case ID::Spiked_green_creature_LEFT:
+    case ID::Spiked_green_creature_RIGHT:
+    case ID::Small_flying_ship_1:
+    case ID::Small_flying_ship_2:
+    case ID::Small_flying_ship_3:
+    case ID::Blue_guard_RIGHT:
+    case ID::Blue_guard_LEFT:
+    case ID::Blue_guard_using_a_terminal:
+    case ID::Laser_turret:
+    case ID::BOSS_Episode_1:
+    case ID::BOSS_Episode_2:
+    case ID::BOSS_Episode_3:
+    case ID::BOSS_Episode_4:
+    case ID::BOSS_Episode_4_projectile:
+    case ID::Red_bird:
+    case ID::Smash_hammer:
+    case ID::Unicycle_bot:
+    case ID::Aggressive_prisoner:
+    case ID::Passive_prisoner:
+    case ID::Rigelatin_soldier:
+    case ID::Dukes_ship_LEFT:
+    case ID::Dukes_ship_RIGHT:
+    case ID::Dukes_ship_after_exiting_LEFT:
+    case ID::Dukes_ship_after_exiting_RIGHT:
+    case ID::Nuclear_waste_can_empty:
+    case ID::Nuclear_waste_can_green_slime_inside:
+    case ID::Electric_reactor:
+    case ID::Super_force_field_LEFT:
+    case ID::Missile_broken:
+    case ID::Sliding_door_vertical:
+    case ID::Blowing_fan:
+    case ID::Sliding_door_horizontal:
+    case ID::Missile_intact:
+    case ID::Rocket_elevator:
+    case ID::Lava_pit:
+    case ID::Green_acid_pit:
+    case ID::Fire_on_floor_1:
+    case ID::Fire_on_floor_2:
+    case ID::Slime_pipe:
+    case ID::Floating_exit_sign_RIGHT:
+    case ID::Floating_exit_sign_LEFT:
+    case ID::Floating_arrow:
+    case ID::Radar_dish:
+    case ID::Radar_computer_terminal:
+    case ID::Special_hint_machine:
+    case ID::Rotating_floor_spikes:
+    case ID::Computer_Terminal_Duke_Escaped:
+    case ID::Lava_fall_1:
+    case ID::Lava_fall_2:
+    case ID::Water_fall_1:
+    case ID::Water_fall_2:
+    case ID::Water_fall_splash_left:
+    case ID::Water_fall_splash_center:
+    case ID::Water_fall_splash_right:
+    case ID::Water_on_floor_1:
+    case ID::Water_on_floor_2:
+    case ID::Messenger_drone_1:
+    case ID::Messenger_drone_2:
+    case ID::Messenger_drone_3:
+    case ID::Messenger_drone_4:
+    case ID::Messenger_drone_5:
+    case ID::Lava_fountain:
+    case ID::Flame_jet_1:
+    case ID::Flame_jet_2:
+    case ID::Flame_jet_3:
+    case ID::Flame_jet_4:
+    case ID::Exit_trigger:
+    case ID::Dynamic_geometry_2:
+    case ID::Dynamic_geometry_3:
+    case ID::Dynamic_geometry_1:
+    case ID::Dynamic_geometry_4:
+    case ID::Dynamic_geometry_5:
+    case ID::Dynamic_geometry_6:
+    case ID::Dynamic_geometry_7:
+    case ID::Dynamic_geometry_8:
+    case ID::Water_body:
+    case ID::Water_drop:
+    case ID::Water_drop_spawner:
+    case ID::Water_surface_1:
+    case ID::Water_surface_2:
+    case ID::Windblown_spider_generator:
+    case ID::Airlock_death_trigger_LEFT:
+    case ID::Airlock_death_trigger_RIGHT:
+    case ID::Explosion_FX_trigger:
+    case ID::Enemy_laser_shot_RIGHT:
+      return true;
+
+    default:
+      break;
+  }
+
+  return false;
+}
+
+
 /** Transforms actor list to be more useful in subsequent stages
  *
  * This does two things:
@@ -308,7 +490,10 @@ LevelData loadLevel(
   for (size_t i=0; i<header.numActorWords/3; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
-    actors.emplace_back(LevelData::Actor{position, static_cast<ActorID>(type), std::nullopt});
+    if (isValidActorId(type)) {
+      actors.emplace_back(LevelData::Actor{
+          position, static_cast<ActorID>(type), std::nullopt});
+    }
   }
 
   auto tileSet = resources.loadCZone(header.CZone);

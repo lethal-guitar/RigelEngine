@@ -266,7 +266,7 @@ enum class ActorID {
     Prisoner_hand_debris = 255,
     Enemy_rocket_2_up = 256,
     Water_on_floor_1 = 257,
-    Water_on_floor_2 = 268,
+    Water_on_floor_2 = 258,
     Enemy_rocket_2_down = 259,
     Blowing_fan_threads_on_top = 260,
     Passive_prisoner = 261,
