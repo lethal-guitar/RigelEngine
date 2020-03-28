@@ -296,6 +296,24 @@ std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
   auto folderPath = std::filesystem::path();
   auto folderBrowser =
     ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
+
+  // TODO: There is some code duplication with the game path browser in the
+  // options menu for setting the size and title, but until we've decided if we
+  // will merge those two into one by showing the options menu at first launch
+  // or not, we'll leave it like this. Should we decide against showing the
+  // options menu at first launch, we should extract some constants and helper
+  // functions to avoid this duplication.
+  folderBrowser.SetTitle("Choose Duke Nukem II installation");
+
+  {
+    int windowWidth = 0;
+    int windowHeight = 0;
+    SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
+    folderBrowser.SetWindowSize(
+      base::round(windowWidth * 0.64f),
+      base::round(windowHeight * 0.64f));
+  }
+
   folderBrowser.Open();
 
   do
