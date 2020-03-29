@@ -58,12 +58,6 @@ public:
   bool isTouchingLeftWall(const engine::components::BoundingBox& bbox) const;
   bool isTouchingRightWall(const engine::components::BoundingBox& bbox) const;
 
-  void receive(
-    const entityx::ComponentAddedEvent<components::SolidBody>& event);
-  void receive(
-    const entityx::ComponentRemovedEvent<components::SolidBody>& event);
-
-private:
   bool testHorizontalSpan(
     int startX,
     int endX,
@@ -74,6 +68,13 @@ private:
     int endY,
     int x,
     data::map::SolidEdge edge) const;
+
+  void receive(
+    const entityx::ComponentAddedEvent<components::SolidBody>& event);
+  void receive(
+    const entityx::ComponentRemovedEvent<components::SolidBody>& event);
+
+private:
   bool testSolidBodyCollision(
     const engine::components::BoundingBox& bbox) const;
 
