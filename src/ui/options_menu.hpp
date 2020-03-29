@@ -16,25 +16,46 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
 #include "data/game_options.hpp"
 #include "engine/timing.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <imfilebrowser.h>
+RIGEL_RESTORE_WARNINGS
+
+
+namespace rigel {
+  struct IGameServiceProvider;
+  class UserProfile;
+}
 
 
 namespace rigel::ui {
 
 class OptionsMenu {
 public:
-  OptionsMenu(data::GameOptions* pOptions)
-    : mpOptions(pOptions)
-  {
-  }
+  enum class Type {
+    Main,
+    InGame
+  };
+
+  OptionsMenu(
+    UserProfile* pUserProfile,
+    IGameServiceProvider* pServiceProvider,
+    Type type);
 
   void updateAndRender(engine::TimeDelta dt);
   bool isFinished() const;
 
 private:
+  ImGui::FileBrowser mGamePathBrowser;
+  UserProfile* mpUserProfile;
   data::GameOptions* mpOptions;
+  IGameServiceProvider* mpServiceProvider;
+  Type mType;
   bool mMenuOpen = true;
+  bool mShowErrorBox = false;
 };
 
 }

@@ -131,7 +131,7 @@ bool CollisionChecker::testVerticalSpan(
 bool CollisionChecker::testSolidBodyCollision(
   const BoundingBox& bboxToTest
 ) const {
-  return any_of(cbegin(mSolidBodies), cend(mSolidBodies),
+  return any_of(begin(mSolidBodies), end(mSolidBodies),
     [&bboxToTest](const ex::Entity& entity) {
       if (
         entity.has_component<BoundingBox>() &&

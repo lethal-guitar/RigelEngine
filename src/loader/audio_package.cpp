@@ -100,7 +100,7 @@ AudioPackage::AudioPackage(
   for (auto i=34u; i<68u; ++i) {
     const auto& dictEntry = audioDict[i];
 
-    const auto soundStartIter = bundledAudioData.cbegin() + dictEntry.mOffset;
+    const auto soundStartIter = bundledAudioData.begin() + dictEntry.mOffset;
     LeStreamReader reader(soundStartIter, soundStartIter + dictEntry.mSize);
     mSounds.emplace_back(reader);
   }

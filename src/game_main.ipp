@@ -57,6 +57,11 @@ private:
 
 class Game : public IGameServiceProvider {
 public:
+  enum class RunResult {
+    GameEnded,
+    RestartNeeded
+  };
+
   Game(
     const StartupOptions& startupOptions,
     UserProfile* pUserProfile,
@@ -64,7 +69,7 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  void run(const StartupOptions& options);
+  RunResult run(const StartupOptions& options);
 
 private:
   enum class FadeType {
@@ -72,8 +77,11 @@ private:
     Out
   };
 
-  void mainLoop();
+  RunResult mainLoop();
   void pumpEvents(std::vector<SDL_Event>& eventQueue);
+  void updateAndRender(
+    entityx::TimeDelta elapsed,
+    const std::vector<SDL_Event>& eventQueue);
 
   GameMode::Context makeModeContext();
 
@@ -93,6 +101,8 @@ private:
   void stopMusic() override;
 
   void scheduleGameQuit() override;
+
+  void switchGamePath(const std::filesystem::path& newGamePath) override;
 
   bool isShareWareVersion() const override {
     return mIsShareWareVersion;
@@ -119,6 +129,7 @@ private:
 
   UserProfile* mpUserProfile;
   data::GameOptions mPreviousOptions;
+  std::filesystem::path mGamePathToSwitchTo;
 
   ui::DukeScriptRunner mScriptRunner;
   loader::ScriptBundle mAllScripts;

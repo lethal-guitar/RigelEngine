@@ -67,8 +67,8 @@ void spawnEffects(
   effectSpawner.component<DestructionEffects>()->mActivated = true;
 
   const auto iHighestDelaySpec = std::max_element(
-    std::cbegin(effects.mEffectSpecs),
-    std::cend(effects.mEffectSpecs),
+    std::begin(effects.mEffectSpecs),
+    std::end(effects.mEffectSpecs),
     [](const auto& a, const auto& b) {
       return a.mDelay < b.mDelay;
     });

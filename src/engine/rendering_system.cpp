@@ -248,7 +248,7 @@ void RenderingSystem::update(
     mMapRenderer.renderBackground(*mpCameraPosition, viewPortSize);
 
     // behind foreground
-    for (auto it = spritesByDrawOrder.cbegin(); it != firstTopMostIt; ++it) {
+    for (auto it = spritesByDrawOrder.begin(); it != firstTopMostIt; ++it) {
       renderSprite(*it);
     }
   }
@@ -265,7 +265,7 @@ void RenderingSystem::update(
   mMapRenderer.renderForeground(*mpCameraPosition, viewPortSize);
 
   // top most
-  for (auto it = firstTopMostIt; it != spritesByDrawOrder.cend(); ++it) {
+  for (auto it = firstTopMostIt; it != spritesByDrawOrder.end(); ++it) {
     renderSprite(*it);
   }
 

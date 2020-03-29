@@ -69,7 +69,7 @@ std::string asText(const ByteBuffer& buffer) {
 
 
 LeStreamReader::LeStreamReader(const ByteBuffer& data)
-  : LeStreamReader(data.cbegin(), data.cend())
+  : LeStreamReader(data.begin(), data.end())
 {
 }
 

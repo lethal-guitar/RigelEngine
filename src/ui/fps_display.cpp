@@ -35,10 +35,7 @@ const auto FILTER_WEIGHT = 0.9f;
 }
 
 
-void FpsDisplay::updateAndRender(
-  const engine::TimeDelta totalElapsed,
-  const engine::TimeDelta renderingElapsed
-) {
+void FpsDisplay::updateAndRender(const engine::TimeDelta totalElapsed) {
   mPreFilteredFrameTime = base::lerp(
     static_cast<float>(totalElapsed), mPreFilteredFrameTime, PRE_FILTER_WEIGHT);
   mFilteredFrameTime = base::lerp(
@@ -50,8 +47,7 @@ void FpsDisplay::updateAndRender(
   statsReport
     << smoothedFps << " FPS, "
     << std::setw(4) << std::fixed << std::setprecision(2)
-    << totalElapsed * 1000.0 << " ms, "
-    << renderingElapsed * 1000.0 << " ms (inner)";
+    << totalElapsed * 1000.0 << " ms";
 
   const auto reportString = statsReport.str();
   drawText(reportString, 0, 0, {255, 255, 255, 255});

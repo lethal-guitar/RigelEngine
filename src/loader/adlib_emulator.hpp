@@ -58,8 +58,8 @@ public:
       mEmulator.GenerateBlock2(
         static_cast<DBOPL::Bitu>(samplesForIteration), mTempBuffer.data());
       destination = std::transform(
-        mTempBuffer.cbegin(),
-        mTempBuffer.cbegin() + samplesForIteration,
+        mTempBuffer.begin(),
+        mTempBuffer.begin() + samplesForIteration,
         destination,
         [volumeScale](const auto sample32Bit) {
           return static_cast<std::int16_t>(

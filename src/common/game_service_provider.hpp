@@ -19,6 +19,7 @@
 #include "data/game_session_data.hpp"
 #include "data/sound_ids.hpp"
 
+#include <filesystem>
 #include <string>
 
 namespace rigel::data { struct SavedGame; }
@@ -40,6 +41,7 @@ struct IGameServiceProvider {
   virtual void playMusic(const std::string& name) = 0;
   virtual void stopMusic() = 0;
   virtual void scheduleGameQuit() = 0;
+  virtual void switchGamePath(const std::filesystem::path& newGamePath) = 0;
   virtual bool isShareWareVersion() const = 0;
 };
 

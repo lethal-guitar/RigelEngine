@@ -289,9 +289,9 @@ vector<Action> parseTextCommandWithBigText(
   vector<Action> textActions;
 
   const auto numPrecedingCharacters = static_cast<int>(
-    distance(sourceText.cbegin(), bigTextMarkerIter));
+    distance(sourceText.begin(), bigTextMarkerIter));
   if (numPrecedingCharacters > 0) {
-    string regularTextPart(sourceText.cbegin(), bigTextMarkerIter);
+    string regularTextPart(sourceText.begin(), bigTextMarkerIter);
     textActions.emplace_back(DrawText{x, y, regularTextPart});
   }
 
@@ -299,7 +299,7 @@ vector<Action> parseTextCommandWithBigText(
     numPrecedingCharacters * GameTraits::menuFontCharacterBitmapSizeTiles.width;
 
   const auto colorIndex = static_cast<uint8_t>(*bigTextMarkerIter) - 0xF0;
-  string bigTextPart(next(bigTextMarkerIter), sourceText.cend());
+  string bigTextPart(next(bigTextMarkerIter), sourceText.end());
   textActions.emplace_back(DrawBigText{
     x + positionOffset,
     y,
@@ -316,8 +316,8 @@ Action parseDrawSpriteCommand(const int x, const int y, const string& source) {
     throw invalid_argument("Corrupt Duke Script file");
   }
 
-  string actorNumberString(source.cbegin() + 1, source.cbegin() + 4);
-  string frameNumberString(source.cbegin() + 4, source.cbegin() + 6);
+  string actorNumberString(source.begin() + 1, source.begin() + 4);
+  string frameNumberString(source.begin() + 4, source.begin() + 6);
 
   return {DrawSprite{
     x + 2,
@@ -372,11 +372,11 @@ vector<Action> parseTextCommand(istream& lineTextStream) {
     textActions.emplace_back(parseDrawSpriteCommand(x, y, sourceText));
   } else {
     const auto bigTextMarkerIter =
-      std::find_if(sourceText.cbegin(), sourceText.cend(), [](const auto ch) {
+      std::find_if(sourceText.begin(), sourceText.end(), [](const auto ch) {
         return static_cast<uint8_t>(ch) >= 0xF0;
       });
 
-    if (bigTextMarkerIter != sourceText.cend()) {
+    if (bigTextMarkerIter != sourceText.end()) {
       return parseTextCommandWithBigText(x, y, sourceText, bigTextMarkerIter);
     } else {
       textActions.emplace_back(DrawText{x, y, sourceText});
@@ -442,7 +442,7 @@ PagesDefinition parsePagesDefinition(
         const auto actions = parseCommand(
           command, sourceTextStream, lineTextStream);
         auto& currentPage = pages.back();
-        currentPage.insert(currentPage.end(), actions.cbegin(), actions.cend());
+        currentPage.insert(currentPage.end(), actions.begin(), actions.end());
       }
     });
 
@@ -465,7 +465,7 @@ data::script::Script parseScript(istream& sourceTextStream) {
         actions = parseCommand(command, sourceTextStream, lineTextStream);
       }
 
-      script.insert(script.end(), actions.cbegin(), actions.cend());
+      script.insert(script.end(), actions.begin(), actions.end());
     });
 
   return script;

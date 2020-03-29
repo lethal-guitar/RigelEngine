@@ -296,6 +296,24 @@ std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
   auto folderPath = std::filesystem::path();
   auto folderBrowser =
     ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
+
+  // TODO: There is some code duplication with the game path browser in the
+  // options menu for setting the size and title, but until we've decided if we
+  // will merge those two into one by showing the options menu at first launch
+  // or not, we'll leave it like this. Should we decide against showing the
+  // options menu at first launch, we should extract some constants and helper
+  // functions to avoid this duplication.
+  folderBrowser.SetTitle("Choose Duke Nukem II installation");
+
+  {
+    int windowWidth = 0;
+    int windowHeight = 0;
+    SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
+    folderBrowser.SetWindowSize(
+      base::round(windowWidth * 0.64f),
+      base::round(windowHeight * 0.64f));
+  }
+
   folderBrowser.Open();
 
   do
@@ -388,14 +406,34 @@ for more info.)");
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
-  const StartupOptions& options
+  const StartupOptions& startupOptions
 ) {
+  auto run = [&](const StartupOptions& options) {
+    Game game(options, &userProfile, pWindow);
+    return game.run(options);
+  };
+
   if (!userProfile.mGamePath) {
-    setupForFirstLaunch(pWindow, userProfile, options.mGamePath);
+    setupForFirstLaunch(pWindow, userProfile, startupOptions.mGamePath);
   }
 
-  Game game(options, &userProfile, pWindow);
-  game.run(options);
+  auto result = run(startupOptions);
+
+  // Some game option changes (like choosing a new game path) require
+  // restarting the game to make the change effective. If the first game run
+  // ended with a result of RestartNeeded, launch a new game, but start from
+  // the main menu and discard startup options.
+  if (result == Game::RunResult::RestartNeeded) {
+    auto optionsForRestartedGame = StartupOptions{};
+    optionsForRestartedGame.mSkipIntro = true;
+
+    while (result == Game::RunResult::RestartNeeded) {
+      result = run(optionsForRestartedGame);
+    }
+  }
+
+  // We're exiting, save the user profile
+  userProfile.saveToDisk();
 }
 
 }
@@ -407,7 +445,8 @@ void gameMain(const StartupOptions& options) {
   SetProcessDPIAware();
 #endif
 
-  sdl_utils::check(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
+  sdl_utils::check(SDL_Init(
+    SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
@@ -499,7 +538,7 @@ Game::Game(
 }
 
 
-void Game::run(const StartupOptions& startupOptions) {
+auto Game::run(const StartupOptions& startupOptions) -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -521,14 +560,11 @@ void Game::run(const StartupOptions& startupOptions) {
     }
   }
 
-  mainLoop();
-
-  // exiting the game
-  mpUserProfile->saveToDisk();
+  return mainLoop();
 }
 
 
-void Game::mainLoop() {
+auto Game::mainLoop() -> RunResult {
   using namespace std::chrono;
 
   std::vector<SDL_Event> eventQueue;
@@ -550,42 +586,22 @@ void Game::mainLoop() {
       auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
       ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-      {
-        RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
-        mRenderer.clear();
-
-        auto saved = setupSimpleUpscaling(&mRenderer);
-
-        auto pMaybeNextMode =
-          mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
-        eventQueue.clear();
-
-        if (pMaybeNextMode) {
-          fadeOutScreen();
-          mpCurrentGameMode = std::move(pMaybeNextMode);
-          mpCurrentGameMode->updateAndRender(0, {});
-          fadeInScreen();
-        }
-      }
-
-      if (mAlphaMod != 0) {
-        mRenderer.clear();
-        mRenderTarget.render(&mRenderer, 0, 0);
-        mRenderer.submitBatch();
-
-        if (mpUserProfile->mOptions.mShowFpsCounter) {
-          const auto afterRender = high_resolution_clock::now();
-          const auto innerRenderTime =
-            duration<engine::TimeDelta>(afterRender - startOfFrame).count();
-          mFpsDisplay.updateAndRender(elapsed, innerRenderTime);
-        }
-      }
+      updateAndRender(elapsed, eventQueue);
+      eventQueue.clear();
     }
 
     swapBuffers();
 
     applyChangedOptions();
+
+    if (!mGamePathToSwitchTo.empty()) {
+      mpUserProfile->mGamePath = mGamePathToSwitchTo;
+      mpUserProfile->saveToDisk();
+      return RunResult::RestartNeeded;
+    }
   }
+
+  return RunResult::GameEnded;
 }
 
 
@@ -600,6 +616,39 @@ void Game::pumpEvents(std::vector<SDL_Event>& eventQueue) {
   while (SDL_PollEvent(&event)) {
     if (!handleEvent(event)) {
       eventQueue.push_back(event);
+    }
+  }
+}
+
+
+void Game::updateAndRender(
+  const entityx::TimeDelta elapsed,
+  const std::vector<SDL_Event>& eventQueue
+) {
+  {
+    RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+    mRenderer.clear();
+
+    auto saved = setupSimpleUpscaling(&mRenderer);
+
+    auto pMaybeNextMode =
+      mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
+
+    if (pMaybeNextMode) {
+      fadeOutScreen();
+      mpCurrentGameMode = std::move(pMaybeNextMode);
+      mpCurrentGameMode->updateAndRender(0, {});
+      fadeInScreen();
+    }
+  }
+
+  if (mAlphaMod != 0) {
+    mRenderer.clear();
+    mRenderTarget.render(&mRenderer, 0, 0);
+    mRenderer.submitBatch();
+
+    if (mpUserProfile->mOptions.mShowFpsCounter) {
+      mFpsDisplay.updateAndRender(elapsed);
     }
   }
 }
@@ -817,6 +866,13 @@ void Game::stopMusic() {
 
 void Game::scheduleGameQuit() {
   mIsRunning = false;
+}
+
+
+void Game::switchGamePath(const std::filesystem::path& newGamePath) {
+  if (newGamePath != mpUserProfile->mGamePath) {
+    mGamePathToSwitchTo = newGamePath;
+  }
 }
 
 }

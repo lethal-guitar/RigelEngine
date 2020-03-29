@@ -104,14 +104,14 @@ data::Image ResourceLoader::loadStandaloneFullscreenImage(
   const std::string& name
 ) const {
   const auto& data = file(name);
-  const auto paletteStart = data.cbegin() + FULL_SCREEN_IMAGE_DATA_SIZE;
+  const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
   const auto palette = load6bitPalette16(
     paletteStart,
-    data.cend());
+    data.end());
 
   auto pixels = decodeSimplePlanarEgaBuffer(
-    data.cbegin(),
-    data.cbegin() + FULL_SCREEN_IMAGE_DATA_SIZE,
+    data.begin(),
+    data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE,
     palette);
   return data::Image(
     std::move(pixels),
@@ -129,12 +129,12 @@ data::Image ResourceLoader::loadAntiPiracyImage() const {
   //
   // See http://www.shikadi.net/moddingwiki/Duke_Nukem_II_Full-screen_Images
   const auto& data = file(ANTI_PIRACY_SCREEN_FILENAME);
-  const auto iImageStart = cbegin(data) + 256*3;
-  const auto palette = load6bitPalette256(cbegin(data), iImageStart);
+  const auto iImageStart = begin(data) + 256*3;
+  const auto palette = load6bitPalette256(begin(data), iImageStart);
 
   data::PixelBuffer pixels;
   pixels.reserve(GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx);
-  transform(iImageStart, cend(data), back_inserter(pixels),
+  transform(iImageStart, end(data), back_inserter(pixels),
     [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
   return data::Image(
     move(pixels),
@@ -147,8 +147,8 @@ loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
   const std::string& imageName
 ) const {
   const auto& data = file(imageName);
-  const auto paletteStart = data.cbegin() + FULL_SCREEN_IMAGE_DATA_SIZE;
-  return load6bitPalette16(paletteStart, data.cend());
+  const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
+  return load6bitPalette16(paletteStart, data.end());
 }
 
 
@@ -159,7 +159,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
 
   const auto& data = file(name);
   LeStreamReader attributeReader(
-    data.cbegin(), data.cbegin() + GameTraits::CZone::attributeBytesTotal);
+    data.begin(), data.begin() + GameTraits::CZone::attributeBytesTotal);
 
   vector<uint16_t> attributes;
   attributes.reserve(GameTraits::CZone::numTilesTotal);
@@ -176,7 +176,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
     tilesToPixels(GameTraits::CZone::tileSetImageHeight));
 
   const auto tilesBegin =
-    data.cbegin() + GameTraits::CZone::attributeBytesTotal;
+    data.begin() + GameTraits::CZone::attributeBytesTotal;
   const auto maskedTilesBegin =
     tilesBegin + GameTraits::CZone::numSolidTiles*GameTraits::CZone::tileBytes;
 
@@ -188,7 +188,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
     T::Unmasked);
   const auto maskedTilesImage = loadTiledImage(
     maskedTilesBegin,
-    data.cend(),
+    data.end(),
     GameTraits::CZone::tileSetImageWidth,
     INGAME_PALETTE,
     T::Masked);

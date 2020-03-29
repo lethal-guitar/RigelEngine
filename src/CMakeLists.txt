@@ -307,6 +307,7 @@ target_link_libraries(rigel_core
     entityx
     Boost::boost
     dear_imgui
+    imgui-filebrowser
 
     PRIVATE
     std::filesystem
@@ -350,6 +351,5 @@ target_link_libraries(${main_exe_name} PRIVATE
     Boost::boost
     Boost::program_options
     Boost::disable_autolinking
-    imgui-filebrowser
 )
 
