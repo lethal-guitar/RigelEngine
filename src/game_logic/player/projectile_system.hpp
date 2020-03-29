@@ -36,7 +36,7 @@ public:
   ProjectileSystem(
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider,
-    data::map::Map& map);
+    const data::map::Map& map);
 
   void update(entityx::EntityManager& es);
 

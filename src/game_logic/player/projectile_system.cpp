@@ -124,7 +124,7 @@ void spawnEnemyImpactEffect(
 ProjectileSystem::ProjectileSystem(
   EntityFactory* pEntityFactory,
   IGameServiceProvider* pServiceProvider,
-  data::map::Map& map
+  const data::map::Map& map
 )
   : mpEntityFactory(pEntityFactory)
   , mpServiceProvider(pServiceProvider)
