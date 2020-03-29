@@ -21,7 +21,6 @@
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
-#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
@@ -258,9 +257,17 @@ void behaviors::DynamicGeometryController::update(
     entity.component<MapGeometryLink>()->mLinkedGeometrySection;
 
   auto isOnSolidGround = [&]() {
+    if (mapSection.bottom() >= s.mpMap->height() - 1) {
+      return true;
+    }
+
+    const auto bottomLeft =
+      s.mpMap->collisionData(mapSection.left(), mapSection.bottom() + 1);
+    const auto bottomRight =
+      s.mpMap->collisionData(mapSection.right(), mapSection.bottom() + 1);
     return
-      mapSection.bottom() >= s.mpMap->height() - 1 ||
-      d.mpCollisionChecker->isOnSolidGround(mapSection);
+      bottomLeft.isSolidOn(data::map::SolidEdge::top()) ||
+      bottomRight.isSolidOn(data::map::SolidEdge::top());
   };
 
   auto makeAlwaysActive = [&]() {
