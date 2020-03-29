@@ -26,6 +26,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { struct IGameServiceProvider; }
 namespace rigel::data::map { class Map; }
+namespace rigel::engine { class CollisionChecker; }
 namespace rigel::game_logic { class EntityFactory; }
 
 
@@ -36,7 +37,8 @@ public:
   ProjectileSystem(
     EntityFactory* pEntityFactory,
     IGameServiceProvider* pServiceProvider,
-    const data::map::Map& map);
+    const engine::CollisionChecker* pCollisionChecker,
+    const data::map::Map* pMap);
 
   void update(entityx::EntityManager& es);
 
@@ -46,10 +48,12 @@ private:
     const base::Vector& position,
     const base::Point<float>& velocity,
     bool isRocket);
+  bool isCollidingWithWorld(const base::Rect<int>& bbox);
 
   EntityFactory* mpEntityFactory;
   IGameServiceProvider* mpServiceProvider;
-  base::Extents mMapSize;
+  const engine::CollisionChecker* mpCollisionChecker;
+  const data::map::Map* mpMap;
 };
 
 }

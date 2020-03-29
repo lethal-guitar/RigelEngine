@@ -33,6 +33,7 @@ public:
   static SolidEdge bottom();
   static SolidEdge left();
   static SolidEdge right();
+  static SolidEdge any();
 
   friend class CollisionData;
 

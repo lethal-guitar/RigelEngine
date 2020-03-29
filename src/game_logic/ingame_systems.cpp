@@ -90,7 +90,11 @@ IngameSystems::IngameSystems(
       &eventManager,
       resources)
   , mPlayerDamageSystem(&mPlayer, &eventManager)
-  , mPlayerProjectileSystem(pEntityFactory, pServiceProvider, *pMap)
+  , mPlayerProjectileSystem(
+      pEntityFactory,
+      pServiceProvider,
+      &mCollisionChecker,
+      pMap)
   , mElevatorSystem(
       playerEntity,
       pServiceProvider,
