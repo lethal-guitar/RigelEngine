@@ -65,11 +65,13 @@ public:
 
 private:
   bool testHorizontalSpan(
-    const engine::components::BoundingBox& bbox,
+    int startX,
+    int endX,
     int y,
     data::map::SolidEdge edge) const;
   bool testVerticalSpan(
-    const engine::components::BoundingBox& bbox,
+    int startY,
+    int endY,
     int x,
     data::map::SolidEdge edge) const;
   bool testSolidBodyCollision(
