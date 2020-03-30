@@ -81,19 +81,19 @@ bool CollisionChecker::isTouchingRightWall(
 
 
 bool CollisionChecker::testHorizontalSpan(
-  const BoundingBox& bbox,
+  const int startX,
+  const int endX,
   const int y,
   const SolidEdge edge
 ) const {
-  auto bboxForSolidBodyTest = bbox;
-  bboxForSolidBodyTest.topLeft.y = y;
-  bboxForSolidBodyTest.size.height = 1;
-  if (testSolidBodyCollision(bboxForSolidBodyTest)) {
-    return true;
+  {
+    const auto width = endX - startX + 1;
+    const auto bboxForSolidBodyTest = BoundingBox{{startX, y}, {width, 1}};
+    if (testSolidBodyCollision(bboxForSolidBodyTest)) {
+      return true;
+    }
   }
 
-  const auto startX = bbox.left();
-  const auto endX = bbox.right();
   for (int x = startX; x <= endX; ++x) {
     if (mpMap->collisionData(x, y).isSolidOn(edge)) {
       return true;
@@ -105,19 +105,19 @@ bool CollisionChecker::testHorizontalSpan(
 
 
 bool CollisionChecker::testVerticalSpan(
-  const BoundingBox& bbox,
+  const int startY,
+  const int endY,
   const int x,
   const SolidEdge edge
 ) const {
-  auto bboxForSolidBodyTest = bbox;
-  bboxForSolidBodyTest.topLeft.x = x;
-  bboxForSolidBodyTest.size.width = 1;
-  if (testSolidBodyCollision(bboxForSolidBodyTest)) {
-    return true;
+  {
+    const auto height = endY - startY + 1;
+    const auto bboxForSolidBodyTest = BoundingBox{{x, startY}, {1, height}};
+    if (testSolidBodyCollision(bboxForSolidBodyTest)) {
+      return true;
+    }
   }
 
-  const auto startY = bbox.top();
-  const auto endY = bbox.bottom();
   for (int y = startY; y <= endY; ++y) {
     if (mpMap->collisionData(x, y).isSolidOn(edge)) {
       return true;
@@ -151,32 +151,44 @@ bool CollisionChecker::testSolidBodyCollision(
 bool CollisionChecker::isTouchingCeiling(
   const BoundingBox& worldSpaceBbox
 ) const {
-  const auto y = worldSpaceBbox.top() - 1;
-  return testHorizontalSpan(worldSpaceBbox, y, SolidEdge::bottom());
+  return testHorizontalSpan(
+    worldSpaceBbox.left(),
+    worldSpaceBbox.right(),
+    worldSpaceBbox.top() - 1,
+    SolidEdge::bottom());
 }
 
 
 bool CollisionChecker::isOnSolidGround(
   const BoundingBox& worldSpaceBbox
 ) const {
-  const auto y = worldSpaceBbox.bottom() + 1;
-  return testHorizontalSpan(worldSpaceBbox, y, SolidEdge::top());
+  return testHorizontalSpan(
+    worldSpaceBbox.left(),
+    worldSpaceBbox.right(),
+    worldSpaceBbox.bottom() + 1,
+    SolidEdge::top());
 }
 
 
 bool CollisionChecker::isTouchingLeftWall(
   const BoundingBox& worldSpaceBbox
 ) const {
-  const auto x = worldSpaceBbox.left() - 1;
-  return testVerticalSpan(worldSpaceBbox, x, SolidEdge::right());
+  return testVerticalSpan(
+    worldSpaceBbox.top(),
+    worldSpaceBbox.bottom(),
+    worldSpaceBbox.left() - 1,
+    SolidEdge::right());
 }
 
 
 bool CollisionChecker::isTouchingRightWall(
   const BoundingBox& worldSpaceBbox
 ) const {
-  const auto x = worldSpaceBbox.right() + 1;
-  return testVerticalSpan(worldSpaceBbox, x, SolidEdge::left());
+  return testVerticalSpan(
+    worldSpaceBbox.top(),
+    worldSpaceBbox.bottom(),
+    worldSpaceBbox.right() + 1,
+    SolidEdge::left());
 }
 
 

@@ -52,6 +52,11 @@ inline SolidEdge SolidEdge::right() {
 }
 
 
+inline SolidEdge SolidEdge::any() {
+  return SolidEdge{0x0F};
+}
+
+
 inline CollisionData CollisionData::fullySolid() {
   return CollisionData{0xFF};
 }
