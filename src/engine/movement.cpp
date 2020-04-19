@@ -274,10 +274,40 @@ void applyConveyorBeltMotion(
     });
   };
 
+  // NOTE: Using stair stepping is not 100% reproducing what the original game
+  // does, but it works out to the same as far as I can tell.
+  // In the original, the player always uses stair stepping when in regular
+  // state (OnGround). Other actors don't use stair stepping, but there is some
+  // code in the physics update right before applying conveyor belt motion,
+  // which makes the sloped conveyors in N7 work. It looks roughly like this:
+  //
+  //  if (actor currently colliding with ground) {
+  //    --actor.y;
+  //  }
+  //
+  // Due to the way the level is laid out in N7, this works out to pushing
+  // the actor upwards by one first, before doing the conveyor belt motion.
+  // Due to being pushed up, the actor is not colliding on the right anymore,
+  // and can be moved. Visually, this looks as follows:
+  //
+  //   1.         2.         3.         4.
+  //       _          _          _          _
+  //     _ _|       _ _|       X _|       _ X|
+  //   X _|       _ X|       _ _|       _ _|
+  //
+  // On step 2, the actor has reached the beginning of the slope. Due to the
+  // solid edge on the right, the actor cannot move to the right. But, notice
+  // the horizontal edge above the actor. This effectively makes the actor
+  // 'stuck in the ground', which triggers the code above and pushes the actor
+  // up by one in step 3. On step 4, the actor is now free to move to the
+  // right.
+  //
+  // I'm not sure why this was done this way, instead of using stair stepping
+  // for conveyor belt motion.
   if (anyFlagIs(ConveyorBeltFlag::Left)) {
-    moveHorizontally(collisionChecker, entity, -1);
+    moveHorizontallyWithStairStepping(collisionChecker, entity, -1);
   } else if (anyFlagIs(ConveyorBeltFlag::Right)) {
-    moveHorizontally(collisionChecker, entity, 1);
+    moveHorizontallyWithStairStepping(collisionChecker, entity, 1);
   }
 }
 
