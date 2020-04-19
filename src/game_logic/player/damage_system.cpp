@@ -33,9 +33,8 @@ using engine::toWorldSpace;
 using game_logic::components::PlayerDamaging;
 
 
-DamageSystem::DamageSystem(Player* pPlayer, entityx::EventManager* pEvents)
+DamageSystem::DamageSystem(Player* pPlayer)
   : mpPlayer(pPlayer)
-  , mpEvents(pEvents)
 {
 }
 
@@ -59,8 +58,6 @@ void DamageSystem::update(entityx::EntityManager& es) {
         mpPlayer->canTakeDamage() || damage.mIsFatal;
 
       if (hasCollision && playerCanTakeDamage) {
-        mpEvents->emit(rigel::events::PlayerTookDamage{});
-
         if (damage.mIsFatal) {
           mpPlayer->takeFatalDamage();
         } else {

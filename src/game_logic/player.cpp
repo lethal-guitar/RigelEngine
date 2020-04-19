@@ -494,6 +494,7 @@ void Player::takeDamage(const int amount) {
     return;
   }
 
+  mpEvents->emit(rigel::events::PlayerTookDamage{});
   mpPlayerModel->takeDamage(amount);
   if (!mpPlayerModel->isDead()) {
     mMercyFramesRemaining = mMercyFramesPerHit;
@@ -505,6 +506,7 @@ void Player::takeDamage(const int amount) {
 
 
 void Player::takeFatalDamage() {
+  mpEvents->emit(rigel::events::PlayerTookDamage{});
   die();
 }
 
