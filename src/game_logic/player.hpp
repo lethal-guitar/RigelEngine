@@ -216,6 +216,7 @@ public:
   void update(const PlayerInput& inputs);
 
   void takeDamage(int amount);
+  void takeFatalDamage();
   void die();
 
   void enterShip(

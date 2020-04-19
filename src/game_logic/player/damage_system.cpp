@@ -62,7 +62,7 @@ void DamageSystem::update(entityx::EntityManager& es) {
         mpEvents->emit(rigel::events::PlayerTookDamage{});
 
         if (damage.mIsFatal) {
-          mpPlayer->die();
+          mpPlayer->takeFatalDamage();
         } else {
           mpPlayer->takeDamage(damage.mAmount);
         }

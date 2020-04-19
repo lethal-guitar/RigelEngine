@@ -504,6 +504,11 @@ void Player::takeDamage(const int amount) {
 }
 
 
+void Player::takeFatalDamage() {
+  die();
+}
+
+
 void Player::die() {
   if (stateIs<InShip>()) {
     exitShip();
