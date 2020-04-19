@@ -386,16 +386,7 @@ void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   updateWorld(dt);
   mpWorld->render();
 
-  std::stringstream debugText;
-  if (mpWorld->mpSystems->player().mGodModeOn) {
-    debugText << "GOD MODE on\n";
-  }
-
-  if (mShowDebugText) {
-    mpWorld->printDebugText(debugText);
-  }
-
-  ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
+  renderDebugText();
 
   mpWorld->processEndOfFrameActions();
 }
@@ -568,6 +559,21 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
       }
       break;
   }
+}
+
+
+void GameRunner::World::renderDebugText() {
+  std::stringstream debugText;
+
+  if (mpWorld->mpSystems->player().mGodModeOn) {
+    debugText << "GOD MODE on\n";
+  }
+
+  if (mShowDebugText) {
+    mpWorld->printDebugText(debugText);
+  }
+
+  ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
 }
 
 

@@ -73,6 +73,7 @@ private:
     void updateWorld(engine::TimeDelta dt);
     void handlePlayerKeyboardInput(const SDL_Event& event);
     void handlePlayerGameControllerInput(const SDL_Event& event);
+    void renderDebugText();
 
     game_logic::GameWorld* mpWorld;
     game_logic::PlayerInput mPlayerInput;
