@@ -186,19 +186,19 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 
 std::unique_ptr<GameMode> createInitialGameMode(
   GameMode::Context context,
-  const StartupOptions& startupOptions,
+  const CommandLineOptions& commandLineOptions,
   const bool isShareWareVersion)
 {
-  if (startupOptions.mLevelToJumpTo)
+  if (commandLineOptions.mLevelToJumpTo)
   {
-    auto [episode, level] = *startupOptions.mLevelToJumpTo;
+    auto [episode, level] = *commandLineOptions.mLevelToJumpTo;
 
     return std::make_unique<GameSessionMode>(
       data::GameSessionId{episode, level, data::Difficulty::Medium},
       context,
-      startupOptions.mPlayerPosition);
+      commandLineOptions.mPlayerPosition);
   }
-  else if (startupOptions.mSkipIntro)
+  else if (commandLineOptions.mSkipIntro)
   {
     return std::make_unique<MenuMode>(context);
   }
@@ -265,7 +265,7 @@ std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
  * profile.
  */
 std::string effectiveGamePath(
-  const StartupOptions& options,
+  const CommandLineOptions& options,
   const UserProfile& profile
 ) {
   using namespace std::string_literals;
@@ -406,25 +406,25 @@ for more info.)");
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
-  const StartupOptions& startupOptions
+  const CommandLineOptions& commandLineOptions
 ) {
-  auto run = [&](const StartupOptions& options) {
+  auto run = [&](const CommandLineOptions& options) {
     Game game(options, &userProfile, pWindow);
     return game.run();
   };
 
   if (!userProfile.mGamePath) {
-    setupForFirstLaunch(pWindow, userProfile, startupOptions.mGamePath);
+    setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
 
-  auto result = run(startupOptions);
+  auto result = run(commandLineOptions);
 
   // Some game option changes (like choosing a new game path) require
   // restarting the game to make the change effective. If the first game run
   // ended with a result of RestartNeeded, launch a new game, but start from
-  // the main menu and discard startup options.
+  // the main menu and discard command line options.
   if (result == Game::RunResult::RestartNeeded) {
-    auto optionsForRestartedGame = StartupOptions{};
+    auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
 
     while (result == Game::RunResult::RestartNeeded) {
@@ -439,7 +439,7 @@ void initAndRunGame(
 }
 
 
-void gameMain(const StartupOptions& options) {
+void gameMain(const CommandLineOptions& options) {
 #ifdef _WIN32
   SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
   SetProcessDPIAware();
@@ -501,13 +501,13 @@ void FpsLimiter::updateAndWait() {
 
 
 Game::Game(
-  const StartupOptions& startupOptions,
+  const CommandLineOptions& commandLineOptions,
   UserProfile* pUserProfile,
   SDL_Window* pWindow
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(effectiveGamePath(startupOptions, *pUserProfile))
+  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
@@ -526,7 +526,7 @@ Game::Game(
       mRenderer.maxWindowSize().height)
   , mIsRunning(true)
   , mIsMinimized(false)
-  , mCommandLineOptions(startupOptions)
+  , mCommandLineOptions(commandLineOptions)
   , mpUserProfile(pUserProfile)
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))

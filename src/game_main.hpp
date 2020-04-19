@@ -21,6 +21,6 @@
 
 namespace rigel {
 
-void gameMain(const StartupOptions& options);
+void gameMain(const CommandLineOptions& options);
 
 }

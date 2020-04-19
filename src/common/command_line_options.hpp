@@ -25,7 +25,7 @@
 
 namespace rigel {
 
-struct StartupOptions {
+struct CommandLineOptions {
   std::string mGamePath;
   std::optional<std::pair<int, int>> mLevelToJumpTo;
   bool mSkipIntro = false;

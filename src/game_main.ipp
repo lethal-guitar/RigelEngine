@@ -63,7 +63,7 @@ public:
   };
 
   Game(
-    const StartupOptions& startupOptions,
+    const CommandLineOptions& commandLineOptions,
     UserProfile* pUserProfile,
     SDL_Window* pWindow);
   Game(const Game&) = delete;
@@ -108,7 +108,7 @@ private:
     return mIsShareWareVersion;
   }
 
-  const StartupOptions& commandLineOptions() const override {
+  const CommandLineOptions& commandLineOptions() const override {
     return mCommandLineOptions;
   }
 
@@ -131,7 +131,7 @@ private:
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
 
-  StartupOptions mCommandLineOptions;
+  CommandLineOptions mCommandLineOptions;
   UserProfile* mpUserProfile;
   data::GameOptions mPreviousOptions;
   std::filesystem::path mGamePathToSwitchTo;

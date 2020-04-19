@@ -102,7 +102,7 @@ base::Vector parsePlayerPosition(const std::string& playerPosString) {
 int main(int argc, char** argv) {
   showBanner();
 
-  StartupOptions config;
+  CommandLineOptions config;
 
   po::options_description optionsDescription("Options");
   optionsDescription.add_options()
