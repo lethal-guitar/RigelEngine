@@ -38,6 +38,7 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <iosfwd>
 #include <optional>
 #include <vector>
 
@@ -98,7 +99,7 @@ private:
   void updateTemporaryItemExpiration();
   void showTutorialMessage(const data::TutorialMessageId id);
 
-  void showDebugText();
+  void printDebugText(std::ostream& stream) const;
 
 private:
   struct LevelBonusInfo {

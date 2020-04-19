@@ -22,6 +22,8 @@
 #include "game_logic/ingame_systems.hpp"
 #include "loader/resource_loader.hpp"
 
+#include <sstream>
+
 
 namespace rigel {
 
@@ -384,7 +386,9 @@ void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   mpWorld->render();
 
   if (mShowDebugText) {
-    mpWorld->showDebugText();
+    std::stringstream debugText;
+    mpWorld->printDebugText(debugText);
+    ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
   }
 
   mpWorld->processEndOfFrameActions();
