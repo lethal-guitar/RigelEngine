@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "common/command_line_options.hpp"
 #include "data/game_session_data.hpp"
 #include "data/sound_ids.hpp"
 
@@ -43,6 +44,7 @@ struct IGameServiceProvider {
   virtual void scheduleGameQuit() = 0;
   virtual void switchGamePath(const std::filesystem::path& newGamePath) = 0;
   virtual bool isShareWareVersion() const = 0;
+  virtual const StartupOptions& commandLineOptions() const = 0;
 };
 
 }

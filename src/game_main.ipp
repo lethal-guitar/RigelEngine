@@ -69,7 +69,7 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  RunResult run(const StartupOptions& options);
+  RunResult run();
 
 private:
   enum class FadeType {
@@ -108,6 +108,10 @@ private:
     return mIsShareWareVersion;
   }
 
+  const StartupOptions& commandLineOptions() const override {
+    return mCommandLineOptions;
+  }
+
 private:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
@@ -127,6 +131,7 @@ private:
   bool mIsMinimized;
   std::chrono::high_resolution_clock::time_point mLastTime;
 
+  StartupOptions mCommandLineOptions;
   UserProfile* mpUserProfile;
   data::GameOptions mPreviousOptions;
   std::filesystem::path mGamePathToSwitchTo;

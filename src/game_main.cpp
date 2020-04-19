@@ -410,7 +410,7 @@ void initAndRunGame(
 ) {
   auto run = [&](const StartupOptions& options) {
     Game game(options, &userProfile, pWindow);
-    return game.run(options);
+    return game.run();
   };
 
   if (!userProfile.mGamePath) {
@@ -526,6 +526,7 @@ Game::Game(
       mRenderer.maxWindowSize().height)
   , mIsRunning(true)
   , mIsMinimized(false)
+  , mCommandLineOptions(startupOptions)
   , mpUserProfile(pUserProfile)
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
@@ -538,7 +539,7 @@ Game::Game(
 }
 
 
-auto Game::run(const StartupOptions& startupOptions) -> RunResult {
+auto Game::run() -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -549,7 +550,7 @@ auto Game::run(const StartupOptions& startupOptions) -> RunResult {
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
-    makeModeContext(), startupOptions, mIsShareWareVersion));
+    makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
 
   //TODO : support multiple controllers
   for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i) {

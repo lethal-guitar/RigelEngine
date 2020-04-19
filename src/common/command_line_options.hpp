@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2020, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,21 @@
 
 #pragma once
 
-#include "common/command_line_options.hpp"
+#include "base/spatial_types.hpp"
+
+#include <optional>
+#include <string>
+#include <utility>
 
 
 namespace rigel {
 
-void gameMain(const StartupOptions& options);
+struct StartupOptions {
+  std::string mGamePath;
+  std::optional<std::pair<int, int>> mLevelToJumpTo;
+  bool mSkipIntro = false;
+  bool mDebugModeEnabled = false;
+  std::optional<base::Vector> mPlayerPosition;
+};
 
 }
