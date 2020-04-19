@@ -30,13 +30,12 @@ namespace rigel::game_logic::player {
 
 class DamageSystem {
 public:
-  explicit DamageSystem(Player* pPlayer, entityx::EventManager* pEvents);
+  explicit DamageSystem(Player* pPlayer);
 
   void update(entityx::EntityManager& es);
 
 private:
   Player* mpPlayer;
-  entityx::EventManager* mpEvents;
 };
 
 }

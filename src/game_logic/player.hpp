@@ -216,7 +216,14 @@ public:
   void update(const PlayerInput& inputs);
 
   void takeDamage(int amount);
+  void takeFatalDamage();
   void die();
+
+  /** Set to true to prevent player taking damage (fatal or regular) */
+  // For simplicity, this a public member instead of a getter/setter pair.
+  // There is no need to encapsulate this state, and should we ever need to
+  // in the future, it's easy to introduce a setter/getter then.
+  bool mGodModeOn = false;
 
   void enterShip(
     const base::Vector& shipPosition,

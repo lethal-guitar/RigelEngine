@@ -5,6 +5,7 @@ set(core_sources
     base/math_tools.hpp
     base/spatial_types.hpp
     base/warnings.hpp
+    common/command_line_options.hpp
     common/game_mode.cpp
     common/game_mode.hpp
     common/game_service_provider.hpp

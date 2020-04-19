@@ -29,6 +29,7 @@ matrix:
             - sdl2
             - sdl2_mixer
             - llvm@8
+            - z3
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then

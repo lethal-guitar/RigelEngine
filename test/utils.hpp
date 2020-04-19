@@ -48,6 +48,11 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
   void switchGamePath(const std::filesystem::path&) override {}
   bool isShareWareVersion() const override { return false; }
 
+  const CommandLineOptions& commandLineOptions() const override {
+    static auto dummyOptions = CommandLineOptions{};
+    return dummyOptions;
+  }
+
   std::optional<rigel::data::SoundId> mLastTriggeredSoundId;
 };
 

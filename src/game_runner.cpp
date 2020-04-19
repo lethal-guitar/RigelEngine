@@ -21,6 +21,9 @@
 #include "common/user_profile.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "loader/resource_loader.hpp"
+#include "ui/utils.hpp"
+
+#include <sstream>
 
 
 namespace rigel {
@@ -130,6 +133,12 @@ void GameRunner::handleEvent(const SDL_Event& event) {
     [&event, this](World& state) {
       if (!handleMenuEnterEvent(event)) {
         state.handleEvent(event);
+
+        const auto debugModeEnabled =
+          mContext.mpServiceProvider->commandLineOptions().mDebugModeEnabled;
+        if (debugModeEnabled) {
+          state.handleDebugKeys(event);
+        }
       }
     },
 
@@ -370,7 +379,6 @@ void GameRunner::saveGame(const int slotIndex, std::string_view name) {
 void GameRunner::World::handleEvent(const SDL_Event& event) {
   handlePlayerKeyboardInput(event);
   handlePlayerGameControllerInput(event);
-  handleDebugKeys(event);
 }
 
 
@@ -378,9 +386,7 @@ void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   updateWorld(dt);
   mpWorld->render();
 
-  if (mShowDebugText) {
-    mpWorld->showDebugText();
-  }
+  renderDebugText();
 
   mpWorld->processEndOfFrameActions();
 }
@@ -556,6 +562,21 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
 }
 
 
+void GameRunner::World::renderDebugText() {
+  std::stringstream debugText;
+
+  if (mpWorld->mpSystems->player().mGodModeOn) {
+    debugText << "GOD MODE on\n";
+  }
+
+  if (mShowDebugText) {
+    mpWorld->printDebugText(debugText);
+  }
+
+  ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
+}
+
+
 void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
   if (!isNonRepeatKeyDown(event)) {
     return;
@@ -586,6 +607,13 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
     case SDLK_SPACE:
       if (mSingleStepping) {
         mDoNextSingleStep = true;
+      }
+      break;
+
+    case SDLK_F10:
+      {
+        auto& player = mpWorld->mpSystems->player();
+        player.mGodModeOn = !player.mGodModeOn;
       }
       break;
   }

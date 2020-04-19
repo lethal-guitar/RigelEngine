@@ -89,7 +89,7 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &eventManager,
       resources)
-  , mPlayerDamageSystem(&mPlayer, &eventManager)
+  , mPlayerDamageSystem(&mPlayer)
   , mPlayerProjectileSystem(
       pEntityFactory,
       pServiceProvider,

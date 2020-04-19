@@ -490,15 +490,24 @@ void Player::update(const PlayerInput& unfilteredInput) {
 
 
 void Player::takeDamage(const int amount) {
-  if (isDead() || mMercyFramesRemaining > 0) {
+  if (isDead() || mMercyFramesRemaining > 0 || mGodModeOn) {
     return;
   }
 
+  mpEvents->emit(rigel::events::PlayerTookDamage{});
   mpPlayerModel->takeDamage(amount);
   if (!mpPlayerModel->isDead()) {
     mMercyFramesRemaining = mMercyFramesPerHit;
     mpServiceProvider->playSound(data::SoundId::DukePain);
   } else {
+    die();
+  }
+}
+
+
+void Player::takeFatalDamage() {
+  if (!mGodModeOn) {
+    mpEvents->emit(rigel::events::PlayerTookDamage{});
     die();
   }
 }

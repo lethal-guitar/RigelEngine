@@ -39,7 +39,6 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
-#include <sstream>
 
 
 namespace rigel::game_logic {
@@ -798,13 +797,9 @@ void GameWorld::showTutorialMessage(const data::TutorialMessageId id) {
 }
 
 
-void GameWorld::showDebugText() {
-  std::stringstream infoText;
-  mpSystems->printDebugText(infoText);
-  infoText
-    << "Entities: " << mEntities.size();
-
-  ui::drawText(infoText.str(), 0, 32, {255, 255, 255, 255});
+void GameWorld::printDebugText(std::ostream& stream) const {
+  mpSystems->printDebugText(stream);
+  stream << "Entities: " << mEntities.size() << '\n';
 }
 
 }

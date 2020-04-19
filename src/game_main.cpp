@@ -186,19 +186,19 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 
 std::unique_ptr<GameMode> createInitialGameMode(
   GameMode::Context context,
-  const StartupOptions& startupOptions,
+  const CommandLineOptions& commandLineOptions,
   const bool isShareWareVersion)
 {
-  if (startupOptions.mLevelToJumpTo)
+  if (commandLineOptions.mLevelToJumpTo)
   {
-    auto [episode, level] = *startupOptions.mLevelToJumpTo;
+    auto [episode, level] = *commandLineOptions.mLevelToJumpTo;
 
     return std::make_unique<GameSessionMode>(
       data::GameSessionId{episode, level, data::Difficulty::Medium},
       context,
-      startupOptions.mPlayerPosition);
+      commandLineOptions.mPlayerPosition);
   }
-  else if (startupOptions.mSkipIntro)
+  else if (commandLineOptions.mSkipIntro)
   {
     return std::make_unique<MenuMode>(context);
   }
@@ -265,7 +265,7 @@ std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
  * profile.
  */
 std::string effectiveGamePath(
-  const StartupOptions& options,
+  const CommandLineOptions& options,
   const UserProfile& profile
 ) {
   using namespace std::string_literals;
@@ -406,26 +406,28 @@ for more info.)");
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
-  const StartupOptions& startupOptions
+  const CommandLineOptions& commandLineOptions
 ) {
-  auto run = [&](const StartupOptions& options) {
+  auto run = [&](const CommandLineOptions& options) {
     Game game(options, &userProfile, pWindow);
-    return game.run(options);
+    return game.run();
   };
 
   if (!userProfile.mGamePath) {
-    setupForFirstLaunch(pWindow, userProfile, startupOptions.mGamePath);
+    setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
 
-  auto result = run(startupOptions);
+  auto result = run(commandLineOptions);
 
   // Some game option changes (like choosing a new game path) require
   // restarting the game to make the change effective. If the first game run
   // ended with a result of RestartNeeded, launch a new game, but start from
-  // the main menu and discard startup options.
+  // the main menu and discard most command line options.
   if (result == Game::RunResult::RestartNeeded) {
-    auto optionsForRestartedGame = StartupOptions{};
+    auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
+    optionsForRestartedGame.mDebugModeEnabled =
+      commandLineOptions.mDebugModeEnabled;
 
     while (result == Game::RunResult::RestartNeeded) {
       result = run(optionsForRestartedGame);
@@ -439,7 +441,7 @@ void initAndRunGame(
 }
 
 
-void gameMain(const StartupOptions& options) {
+void gameMain(const CommandLineOptions& options) {
 #ifdef _WIN32
   SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
   SetProcessDPIAware();
@@ -501,13 +503,13 @@ void FpsLimiter::updateAndWait() {
 
 
 Game::Game(
-  const StartupOptions& startupOptions,
+  const CommandLineOptions& commandLineOptions,
   UserProfile* pUserProfile,
   SDL_Window* pWindow
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(effectiveGamePath(startupOptions, *pUserProfile))
+  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
@@ -526,6 +528,7 @@ Game::Game(
       mRenderer.maxWindowSize().height)
   , mIsRunning(true)
   , mIsMinimized(false)
+  , mCommandLineOptions(commandLineOptions)
   , mpUserProfile(pUserProfile)
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
@@ -538,7 +541,7 @@ Game::Game(
 }
 
 
-auto Game::run(const StartupOptions& startupOptions) -> RunResult {
+auto Game::run() -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -549,7 +552,7 @@ auto Game::run(const StartupOptions& startupOptions) -> RunResult {
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
-    makeModeContext(), startupOptions, mIsShareWareVersion));
+    makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
 
   //TODO : support multiple controllers
   for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i) {
