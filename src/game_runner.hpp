@@ -67,12 +67,12 @@ private:
     }
 
     void handleEvent(const SDL_Event& event);
+    void handleDebugKeys(const SDL_Event& event);
     void updateAndRender(engine::TimeDelta dt);
 
     void updateWorld(engine::TimeDelta dt);
     void handlePlayerKeyboardInput(const SDL_Event& event);
     void handlePlayerGameControllerInput(const SDL_Event& event);
-    void handleDebugKeys(const SDL_Event& event);
 
     game_logic::GameWorld* mpWorld;
     game_logic::PlayerInput mPlayerInput;

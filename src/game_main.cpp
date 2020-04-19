@@ -422,10 +422,12 @@ void initAndRunGame(
   // Some game option changes (like choosing a new game path) require
   // restarting the game to make the change effective. If the first game run
   // ended with a result of RestartNeeded, launch a new game, but start from
-  // the main menu and discard command line options.
+  // the main menu and discard most command line options.
   if (result == Game::RunResult::RestartNeeded) {
     auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
+    optionsForRestartedGame.mDebugModeEnabled =
+      commandLineOptions.mDebugModeEnabled;
 
     while (result == Game::RunResult::RestartNeeded) {
       result = run(optionsForRestartedGame);

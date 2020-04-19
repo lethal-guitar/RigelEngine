@@ -130,6 +130,12 @@ void GameRunner::handleEvent(const SDL_Event& event) {
     [&event, this](World& state) {
       if (!handleMenuEnterEvent(event)) {
         state.handleEvent(event);
+
+        const auto debugModeEnabled =
+          mContext.mpServiceProvider->commandLineOptions().mDebugModeEnabled;
+        if (debugModeEnabled) {
+          state.handleDebugKeys(event);
+        }
       }
     },
 
@@ -370,7 +376,6 @@ void GameRunner::saveGame(const int slotIndex, std::string_view name) {
 void GameRunner::World::handleEvent(const SDL_Event& event) {
   handlePlayerKeyboardInput(event);
   handlePlayerGameControllerInput(event);
-  handleDebugKeys(event);
 }
 
 

@@ -117,6 +117,9 @@ int main(int argc, char** argv) {
      po::value<std::string>(),
      "Specify position to place the player at (to be used in conjunction with\n"
      "'play-level')")
+    ("debug-mode,d",
+     po::bool_switch(&config.mDebugModeEnabled),
+     "Enable debugging features")
     ("game-path",
      po::value<std::string>(&config.mGamePath)->default_value(""),
      "Path to original game's installation. Can also be given as positional "
