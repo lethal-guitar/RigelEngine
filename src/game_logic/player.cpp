@@ -490,7 +490,7 @@ void Player::update(const PlayerInput& unfilteredInput) {
 
 
 void Player::takeDamage(const int amount) {
-  if (isDead() || mMercyFramesRemaining > 0) {
+  if (isDead() || mMercyFramesRemaining > 0 || mGodModeOn) {
     return;
   }
 
@@ -506,8 +506,10 @@ void Player::takeDamage(const int amount) {
 
 
 void Player::takeFatalDamage() {
-  mpEvents->emit(rigel::events::PlayerTookDamage{});
-  die();
+  if (!mGodModeOn) {
+    mpEvents->emit(rigel::events::PlayerTookDamage{});
+    die();
+  }
 }
 
 

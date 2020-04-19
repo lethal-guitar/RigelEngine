@@ -21,6 +21,7 @@
 #include "common/user_profile.hpp"
 #include "game_logic/ingame_systems.hpp"
 #include "loader/resource_loader.hpp"
+#include "ui/utils.hpp"
 
 #include <sstream>
 
@@ -385,11 +386,16 @@ void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   updateWorld(dt);
   mpWorld->render();
 
-  if (mShowDebugText) {
-    std::stringstream debugText;
-    mpWorld->printDebugText(debugText);
-    ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
+  std::stringstream debugText;
+  if (mpWorld->mpSystems->player().mGodModeOn) {
+    debugText << "GOD MODE on\n";
   }
+
+  if (mShowDebugText) {
+    mpWorld->printDebugText(debugText);
+  }
+
+  ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
 
   mpWorld->processEndOfFrameActions();
 }
@@ -595,6 +601,13 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
     case SDLK_SPACE:
       if (mSingleStepping) {
         mDoNextSingleStep = true;
+      }
+      break;
+
+    case SDLK_F10:
+      {
+        auto& player = mpWorld->mpSystems->player();
+        player.mGodModeOn = !player.mGodModeOn;
       }
       break;
   }
