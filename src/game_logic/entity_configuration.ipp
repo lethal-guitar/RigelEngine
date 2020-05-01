@@ -1517,12 +1517,15 @@ void EntityFactory::configureEntity(
       break;
 
 
-    // Laser turret
     case ActorID::Laser_turret:
       // gives one point when shot with normal shot, 500 when destroyed.
+      entity.assign<Shootable>(Shootable{2, GivenScore{500}});
+      entity.component<Shootable>()->mInvincible = true;
+      entity.component<Shootable>()->mEnableHitFeedback = false;
+
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActorTag>(ActorTag::Type::MountedLaserTurret);
-      ai::configureLaserTurret(entity, GivenScore{500});
+      entity.assign<BehaviorController>(behaviors::LaserTurret{});
       entity.assign<AppearsOnRadar>();
       break;
 
