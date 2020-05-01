@@ -30,7 +30,6 @@
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
-#include "game_logic/enemies/laser_turret.hpp"
 #include "game_logic/enemies/messenger_drone.hpp"
 #include "game_logic/enemies/prisoner.hpp"
 #include "game_logic/enemies/rocket_turret.hpp"
@@ -135,7 +134,6 @@ private:
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::HoverBotSystem mHoverBotSystem;
-  game_logic::ai::LaserTurretSystem mLaserTurretSystem;
   game_logic::ai::MessengerDroneSystem mMessengerDroneSystem;
   game_logic::ai::PrisonerSystem mPrisonerSystem;
   game_logic::ai::RocketTurretSystem mRocketTurretSystem;

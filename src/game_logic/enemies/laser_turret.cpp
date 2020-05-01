@@ -24,12 +24,11 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/global_dependencies.hpp"
+#include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::ai {
-
-using game_logic::components::Shootable;
-
+namespace rigel::game_logic::behaviors {
 
 namespace {
 
@@ -47,173 +46,144 @@ int angleAdjustment(const int currentAngle, const bool playerIsRight) {
   return 0;
 }
 
+
+void performBaseHitEffect(GlobalDependencies& d, const base::Vector& position) {
+  spawnFloatingOneShotSprite(
+    *d.mpEntityFactory,
+    data::ActorID::Shot_impact_FX,
+    position + base::Vector{-1, 2});
+  const auto randomChoice = d.mpRandomGenerator->gen();
+  const auto soundId = randomChoice % 2 == 0
+    ? data::SoundId::AlternateExplosion
+    : data::SoundId::Explosion;
+  d.mpServiceProvider->playSound(soundId);
+}
+
 }
 
 
-void configureLaserTurret(entityx::Entity& entity, const int givenScore) {
-  using game_logic::components::Shootable;
+void LaserTurret::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool isOnScreen,
+  entityx::Entity entity
+) {
+  const auto& position = *entity.component<engine::components::WorldPosition>();
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+  auto& sprite = *entity.component<engine::components::Sprite>();
 
-  auto shootable = Shootable{2, givenScore};
-  shootable.mInvincible = true;
-  shootable.mEnableHitFeedback = false;
-  entity.assign<Shootable>(shootable);
-  entity.assign<ai::components::LaserTurret>();
-}
+  const auto isSpinning = mSpinningTurnsLeft > 0;
+  if (!isSpinning) {
+    // Flash the sprite before checking orientation and potentially firing.
+    // This mirrors what the original game does. It has the effect that the
+    // turret stays in the 'flashed' state for longer than one frame if the
+    // player moves while it's about to fire, which seems kind of buggy.
+    if (mNextShotCountdown < 7 && mNextShotCountdown % 2 != 0) {
+      sprite.flashWhite();
+    }
 
+    // See if we need to re-adjust our orientation
+    const auto playerIsRight = position.x <= playerPosition.x;
+    const auto isInPosition =
+      (playerIsRight && mAngle == 4) ||
+      (!playerIsRight && mAngle == 0);
 
-LaserTurretSystem::LaserTurretSystem(
-  entityx::Entity player,
-  data::PlayerModel* pPlayerModel,
-  EntityFactory* pEntityFactory,
-  engine::RandomNumberGenerator* pRandomGenerator,
-  IGameServiceProvider* pServiceProvider,
-  entityx::EventManager& events
-)
-  : mPlayer(player)
-  , mpPlayerModel(pPlayerModel)
-  , mpEntityFactory(pEntityFactory)
-  , mpRandomGenerator(pRandomGenerator)
-  , mpServiceProvider(pServiceProvider)
-{
-  events.subscribe<events::ShootableDamaged>(*this);
-  events.subscribe<events::ShootableKilled>(*this);
-}
+    if (isInPosition) {
+      // Count down and maybe fire
+      --mNextShotCountdown;
+      if (mNextShotCountdown <= 0) {
+        mNextShotCountdown = 40;
 
-
-void LaserTurretSystem::update(entityx::EntityManager& es) {
-  using namespace engine::components;
-  using game_logic::components::PlayerDamaging;
-
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
-
-  es.each<components::LaserTurret, WorldPosition, Sprite, Shootable, Active>(
-    [this, &playerPosition](
-      entityx::Entity entity,
-      components::LaserTurret& state,
-      const WorldPosition& myPosition,
-      Sprite& sprite,
-      Shootable& shootable,
-      const Active&
-    ) {
-      const auto isSpinning = state.mSpinningTurnsLeft > 0;
-      if (!isSpinning) {
-        // Flash the sprite before checking orientation and potentially firing.
-        // This mirrors what the original game does. It has the effect that the
-        // turret stays in the 'flashed' state for longer than one frame if the
-        // player moves while it's about to fire, which seems kind of buggy.
-        if (state.mNextShotCountdown < 7 && state.mNextShotCountdown % 2 != 0) {
-          sprite.flashWhite();
-        }
-
-        // See if we need to re-adjust our orientation
-        const auto playerIsRight = myPosition.x <= playerPosition.x;
-        const auto isInPosition =
-          (playerIsRight && state.mAngle == 4) ||
-          (!playerIsRight && state.mAngle == 0);
-
-        if (isInPosition) {
-          // Count down and maybe fire
-          --state.mNextShotCountdown;
-          if (state.mNextShotCountdown <= 0) {
-            state.mNextShotCountdown = 40;
-
-            const auto facingLeft = state.mAngle == 0;
-            const auto offset = facingLeft ? -2 : 2;
-            mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-            mpEntityFactory->createProjectile(
-              game_logic::ProjectileType::EnemyLaserShot,
-              myPosition + base::Vector{offset, 0},
-              facingLeft
-                ? game_logic::ProjectileDirection::Left
-                : game_logic::ProjectileDirection::Right);
-          }
-        } else {
-          state.mAngle += angleAdjustment(state.mAngle, playerIsRight);
-        }
-      } else {
-        // Spin around
-        --state.mSpinningTurnsLeft;
-        int rotationAmount = 0;
-        if (state.mSpinningTurnsLeft > 20) {
-          rotationAmount = 2;
-        } else if (state.mSpinningTurnsLeft >= 10) {
-          rotationAmount = 1;
-        } else {
-          const auto doSpin = state.mSpinningTurnsLeft % 2 == 0;
-          rotationAmount = doSpin ? 1 : 0;
-        }
-
-        state.mAngle = (state.mAngle + rotationAmount) % 8;
-
-        if (state.mAngle == 5 || state.mAngle == 6) {
-          mpServiceProvider->playSound(data::SoundId::Swoosh);
-        }
-
-        if (state.mSpinningTurnsLeft <= 0) {
-          // Go back to normal state
-          state.mNextShotCountdown = 40;
-          shootable.mInvincible = false;
-          entity.assign<PlayerDamaging>(1);
-        }
+        const auto facingLeft = mAngle == 0;
+        const auto offset = facingLeft ? -2 : 2;
+        d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
+        d.mpEntityFactory->createProjectile(
+          game_logic::ProjectileType::EnemyLaserShot,
+          position + base::Vector{offset, 0},
+          facingLeft
+            ? game_logic::ProjectileDirection::Left
+            : game_logic::ProjectileDirection::Right);
       }
+    } else {
+      mAngle += angleAdjustment(mAngle, playerIsRight);
+    }
+  } else {
+    // Spin around
+    --mSpinningTurnsLeft;
+    int rotationAmount = 0;
+    if (mSpinningTurnsLeft > 20) {
+      rotationAmount = 2;
+    } else if (mSpinningTurnsLeft >= 10) {
+      rotationAmount = 1;
+    } else {
+      const auto doSpin = mSpinningTurnsLeft % 2 == 0;
+      rotationAmount = doSpin ? 1 : 0;
+    }
 
-      sprite.mFramesToRender[0] = state.mAngle;
-      engine::synchronizeBoundingBoxToSprite(entity);
-    });
-}
+    mAngle = (mAngle + rotationAmount) % 8;
 
+    if (mAngle == 5 || mAngle == 6) {
+      d.mpServiceProvider->playSound(data::SoundId::Swoosh);
+    }
 
-void LaserTurretSystem::receive(const events::ShootableDamaged& event) {
-  auto entity = event.mEntity;
-  if (!entity.has_component<components::LaserTurret>()) {
-    return;
+    if (mSpinningTurnsLeft <= 0) {
+      // Go back to normal state
+      mNextShotCountdown = 40;
+
+      auto& shootable = *entity.component<game_logic::components::Shootable>();
+      shootable.mInvincible = false;
+      entity.assign<game_logic::components::PlayerDamaging>(1);
+    }
   }
 
-  // When hit, go into spinning mode
-  entity.component<components::LaserTurret>()->mSpinningTurnsLeft = 40;
+  sprite.mFramesToRender[0] = mAngle;
+  engine::synchronizeBoundingBoxToSprite(entity);
+}
 
-  auto& shootable = *entity.component<Shootable>();
+
+void LaserTurret::onHit(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const base::Point<float>& inflictorVelocity,
+  entityx::Entity entity
+) {
+  // When hit, go into spinning mode
+  mSpinningTurnsLeft = 40;
+
+  auto& shootable = *entity.component<game_logic::components::Shootable>();
   shootable.mHealth = 2;
   shootable.mInvincible = true;
   entity.remove<game_logic::components::PlayerDamaging>();
 
-  mpPlayerModel->giveScore(1);
+  s.mpPlayer->model().giveScore(1);
 
-  performBaseHitEffect(entity);
+  performBaseHitEffect(
+    d, *entity.component<engine::components::WorldPosition>());
 }
 
 
-void LaserTurretSystem::performBaseHitEffect(entityx::Entity entity) {
+void LaserTurret::onKilled(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const base::Point<float>& inflictorVelocity,
+  entityx::Entity entity
+) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
-  spawnFloatingOneShotSprite(
-    *mpEntityFactory,
-    data::ActorID::Shot_impact_FX,
-    position + base::Vector{-1, 2});
-  const auto randomChoice = mpRandomGenerator->gen();
-  const auto soundId = randomChoice % 2 == 0
-    ? data::SoundId::AlternateExplosion
-    : data::SoundId::Explosion;
-  mpServiceProvider->playSound(soundId);
-}
 
+  performBaseHitEffect(d, position);
 
-void LaserTurretSystem::receive(const events::ShootableKilled& event) {
-  auto entity = event.mEntity;
-  if (!entity.has_component<components::LaserTurret>()) {
-    return;
-  }
-
-  performBaseHitEffect(entity);
-
-  const auto& position = *entity.component<engine::components::WorldPosition>();
-  const auto shotFromRight = event.mInflictorVelocity.x < 0.0f;
-  const auto shotFromLeft = event.mInflictorVelocity.x > 0.0f;
+  const auto shotFromRight = inflictorVelocity.x < 0.0f;
+  const auto shotFromLeft = inflictorVelocity.x > 0.0f;
   const auto debrisMovement = shotFromRight
     ? SpriteMovement::FlyUpperLeft
     : (shotFromLeft)
       ? SpriteMovement::FlyUpperRight
       : SpriteMovement::FlyUp;
-  spawnMovingEffectSprite(*mpEntityFactory, data::ActorID::Laser_turret, debrisMovement, position);
+  spawnMovingEffectSprite(
+    *d.mpEntityFactory,
+    data::ActorID::Laser_turret,
+    debrisMovement,
+    position);
 }
 
 }

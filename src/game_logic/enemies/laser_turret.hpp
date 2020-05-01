@@ -16,66 +16,44 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "game_logic/damage_components.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <array>
 
-
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::data { class PlayerModel; }
-namespace rigel::engine { class RandomNumberGenerator; }
-namespace rigel::game_logic { class EntityFactory; }
-namespace rigel::game_logic::events {
-  struct ShootableDamaged;
-  struct ShootableKilled;
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct LaserTurret {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onHit(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
+  void onKilled(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
   int mAngle = 0;
   int mSpinningTurnsLeft = 20;
   int mNextShotCountdown = 0;
-};
-
-}
-
-
-void configureLaserTurret(entityx::Entity& entity, int givenScore);
-
-
-class LaserTurretSystem : public entityx::Receiver<LaserTurretSystem> {
-public:
-  LaserTurretSystem(
-    entityx::Entity player,
-    data::PlayerModel* pPlayerModel,
-    EntityFactory* pEntityFactory,
-    engine::RandomNumberGenerator* pRandomGenerator,
-    IGameServiceProvider* pServiceProvider,
-    entityx::EventManager& events);
-
-  void receive(const events::ShootableDamaged& event);
-  void receive(const events::ShootableKilled& event);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  void performBaseHitEffect(entityx::Entity entity);
-
-  entityx::Entity mPlayer;
-  data::PlayerModel* mpPlayerModel;
-  EntityFactory* mpEntityFactory;
-  engine::RandomNumberGenerator* mpRandomGenerator;
-  IGameServiceProvider* mpServiceProvider;
 };
 
 }
