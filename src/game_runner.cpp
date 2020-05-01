@@ -439,7 +439,7 @@ void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
       update();
     }
 
-    mpWorld->mpSystems->updateBackdropAutoScrolling(dt);
+    mpWorld->mpState->mpSystems->updateBackdropAutoScrolling(dt);
   }
 }
 
@@ -510,7 +510,7 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
             // up/down while flying. Therefore, we use a different vertical
             // deadzone when not in the ship.
             const auto deadZone =
-              mpWorld->mpSystems->player().stateIs<game_logic::InShip>()
+              mpWorld->mpState->mpSystems->player().stateIs<game_logic::InShip>()
               ? ANALOG_STICK_DEADZONE_X
               : ANALOG_STICK_DEADZONE_Y;
 
@@ -596,7 +596,7 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
 void GameRunner::World::renderDebugText() {
   std::stringstream debugText;
 
-  if (mpWorld->mpSystems->player().mGodModeOn) {
+  if (mpWorld->mpState->mpSystems->player().mGodModeOn) {
     debugText << "GOD MODE on\n";
   }
 
@@ -613,7 +613,7 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
     return;
   }
 
-  auto& debuggingSystem = mpWorld->mpSystems->debuggingSystem();
+  auto& debuggingSystem = mpWorld->mpState->mpSystems->debuggingSystem();
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();
@@ -643,7 +643,7 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
 
     case SDLK_F10:
       {
-        auto& player = mpWorld->mpSystems->player();
+        auto& player = mpWorld->mpState->mpSystems->player();
         player.mGodModeOn = !player.mGodModeOn;
       }
       break;

@@ -113,6 +113,40 @@ private:
     bool mPlayerTookDamage = false;
   };
 
+  struct WorldState {
+    WorldState(
+      entityx::EventManager& eventManager,
+      SpriteFactory* pSpriteFactory,
+      data::GameSessionId sessionId);
+    ~WorldState();
+
+    entityx::EntityManager mEntities;
+    engine::RandomNumberGenerator mRandomGenerator;
+    EntityFactory mEntityFactory;
+    RadarDishCounter mRadarDishCounter;
+
+    data::map::Map mMap;
+    std::vector<data::map::LevelData::Actor> mInitialActors;
+    data::map::Map mMapAtLevelStart;
+    LevelBonusInfo mBonusInfo;
+    std::optional<std::string> mLevelMusicFile;
+
+    std::unique_ptr<IngameSystems> mpSystems;
+
+    std::optional<EarthQuakeEffect> mEarthQuakeEffect;
+    std::optional<base::Color> mScreenFlashColor;
+    std::optional<base::Color> mBackdropFlashColor;
+    std::optional<base::Vector> mTeleportTargetPosition;
+    entityx::Entity mActiveBossEntity;
+    std::optional<int> mReactorDestructionFramesElapsed;
+    int mScreenShakeOffsetX = 0;
+    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
+    bool mBossDeathAnimationStartPending = false;
+    bool mBackdropSwitched = false;
+    bool mLevelFinished = false;
+    bool mPlayerDied = false;
+  };
+
   struct CheckpointData {
     data::PlayerModel::CheckpointState mState;
     base::Vector mPosition;
@@ -132,34 +166,7 @@ private:
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
 
-  entityx::EntityManager mEntities;
-  engine::RandomNumberGenerator mRandomGenerator;
-  EntityFactory mEntityFactory;
-
-  LevelBonusInfo mBonusInfo;
-  std::optional<std::string> mLevelMusicFile;
-
-  std::optional<base::Vector> mTeleportTargetPosition;
-  entityx::Entity mActiveBossEntity;
-  bool mBossDeathAnimationStartPending = false;
-  bool mBackdropSwitched = false;
-  bool mLevelFinished = false;
-  bool mPlayerDied = false;
-
-  data::map::Map mMap;
-  std::vector<data::map::LevelData::Actor> mInitialActors;
-  data::map::BackdropSwitchCondition mBackdropSwitchCondition;
-  data::map::Map mMapAtLevelStart;
-
-  std::unique_ptr<IngameSystems> mpSystems;
-
-  RadarDishCounter mRadarDishCounter;
-
-  std::optional<EarthQuakeEffect> mEarthQuakeEffect;
-  std::optional<base::Color> mScreenFlashColor;
-  std::optional<base::Color> mBackdropFlashColor;
-  std::optional<int> mReactorDestructionFramesElapsed;
-  int mScreenShakeOffsetX = 0;
+  std::unique_ptr<WorldState> mpState;
 };
 
 }
