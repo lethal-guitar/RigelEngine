@@ -126,6 +126,7 @@ private:
   const data::GameOptions* mpOptions;
 
   entityx::EventManager mEventManager;
+  SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
   std::optional<CheckpointData> mActivatedCheckpoint;
   ui::HudRenderer mHudRenderer;

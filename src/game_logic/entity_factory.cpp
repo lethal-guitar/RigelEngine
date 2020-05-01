@@ -477,12 +477,11 @@ base::Rect<int> SpriteFactory::actorFrameRect(
 
 
 EntityFactory::EntityFactory(
-  renderer::Renderer* pRenderer,
+  SpriteFactory* pSpriteFactory,
   ex::EntityManager* pEntityManager,
   engine::RandomNumberGenerator* pRandomGenerator,
-  const loader::ActorImagePackage* pSpritePackage,
   const data::Difficulty difficulty)
-  : mSpriteFactory(pRenderer, pSpritePackage)
+  : mpSpriteFactory(pSpriteFactory)
   , mpEntityManager(pEntityManager)
   , mpRandomGenerator(pRandomGenerator)
   , mDifficulty(difficulty)
@@ -491,7 +490,7 @@ EntityFactory::EntityFactory(
 
 
 Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
-  auto sprite = mSpriteFactory.createSprite(actorID);
+  auto sprite = mpSpriteFactory->createSprite(actorID);
   configureSprite(sprite, actorID);
   return sprite;
 }

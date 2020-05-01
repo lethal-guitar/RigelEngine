@@ -263,6 +263,7 @@ GameWorld::GameWorld(
   , mpTextRenderer(context.mpUiRenderer)
   , mpPlayerModel(pPlayerModel)
   , mpOptions(&context.mpUserProfile->mOptions)
+  , mSpriteFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mHudRenderer(
       sessionId.mLevel + 1,
@@ -272,10 +273,9 @@ GameWorld::GameWorld(
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
   , mEntities(mEventManager)
   , mEntityFactory(
-      context.mpRenderer,
+      &mSpriteFactory,
       &mEntities,
       &mRandomGenerator,
-      &context.mpResources->mActorImagePackage,
       sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, mEventManager)
 {

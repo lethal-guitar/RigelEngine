@@ -114,10 +114,9 @@ private:
 class EntityFactory : public IEntityFactory {
 public:
   EntityFactory(
-    renderer::Renderer* pRenderer,
+    SpriteFactory* pSpriteFactory,
     entityx::EntityManager* pEntityManager,
     engine::RandomNumberGenerator* pRandomGenerator,
-    const loader::ActorImagePackage* pSpritePackage,
     data::Difficulty difficulty);
 
   entityx::Entity createEntitiesForLevel(
@@ -175,7 +174,7 @@ private:
     const engine::components::BoundingBox& boundingBox
   );
 
-  SpriteFactory mSpriteFactory;
+  SpriteFactory* mpSpriteFactory;
   entityx::EntityManager* mpEntityManager;
   engine::RandomNumberGenerator* mpRandomGenerator;
   int mSpawnIndex = 0;
