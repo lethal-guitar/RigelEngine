@@ -126,13 +126,16 @@ private:
   const data::GameOptions* mpOptions;
 
   entityx::EventManager mEventManager;
+  data::PlayerModel mPlayerModelAtLevelStart;
+  std::optional<CheckpointData> mActivatedCheckpoint;
+  ui::HudRenderer mHudRenderer;
+  ui::IngameMessageDisplay mMessageDisplay;
+
   entityx::EntityManager mEntities;
   engine::RandomNumberGenerator mRandomGenerator;
   EntityFactory mEntityFactory;
 
-  data::PlayerModel mPlayerModelAtLevelStart;
   LevelBonusInfo mBonusInfo;
-  std::optional<CheckpointData> mActivatedCheckpoint;
   std::optional<std::string> mLevelMusicFile;
 
   std::optional<base::Vector> mTeleportTargetPosition;
@@ -154,8 +157,6 @@ private:
   std::unique_ptr<IngameSystems> mpSystems;
 
   RadarDishCounter mRadarDishCounter;
-  ui::HudRenderer mHudRenderer;
-  ui::IngameMessageDisplay mMessageDisplay;
 
   std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;
