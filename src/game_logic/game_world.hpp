@@ -122,12 +122,14 @@ private:
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture* mpUiSpriteSheet;
   ui::MenuElementRenderer* mpTextRenderer;
+  data::PlayerModel* mpPlayerModel;
+  const data::GameOptions* mpOptions;
+
   entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;
   engine::RandomNumberGenerator mRandomGenerator;
   EntityFactory mEntityFactory;
 
-  data::PlayerModel* mpPlayerModel;
   data::PlayerModel mPlayerModelAtLevelStart;
   LevelBonusInfo mBonusInfo;
   std::optional<CheckpointData> mActivatedCheckpoint;
@@ -154,7 +156,6 @@ private:
   RadarDishCounter mRadarDishCounter;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
-  const data::GameOptions* mpOptions;
 
   std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;

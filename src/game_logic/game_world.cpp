@@ -261,6 +261,8 @@ GameWorld::GameWorld(
   , mpServiceProvider(context.mpServiceProvider)
   , mpUiSpriteSheet(context.mpUiSpriteSheet)
   , mpTextRenderer(context.mpUiRenderer)
+  , mpPlayerModel(pPlayerModel)
+  , mpOptions(&context.mpUserProfile->mOptions)
   , mEntities(mEventManager)
   , mEntityFactory(
       context.mpRenderer,
@@ -268,7 +270,6 @@ GameWorld::GameWorld(
       &mRandomGenerator,
       &context.mpResources->mActorImagePackage,
       sessionId.mDifficulty)
-  , mpPlayerModel(pPlayerModel)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mRadarDishCounter(mEntities, mEventManager)
   , mHudRenderer(
@@ -277,7 +278,6 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
-  , mpOptions(&context.mpUserProfile->mOptions)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::ExitReached>(*this);
