@@ -146,13 +146,9 @@ private:
   bool mLevelFinished = false;
   bool mPlayerDied = false;
 
-  struct LevelData {
-    data::map::Map mMap;
-    std::vector<data::map::LevelData::Actor> mInitialActors;
-    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
-  };
-
-  LevelData mLevelData;
+  data::map::Map mMap;
+  std::vector<data::map::LevelData::Actor> mInitialActors;
+  data::map::BackdropSwitchCondition mBackdropSwitchCondition;
   data::map::Map mMapAtLevelStart;
 
   std::unique_ptr<IngameSystems> mpSystems;

@@ -482,18 +482,16 @@ void GameWorld::loadLevel(
   mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
   mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
 
-  mLevelData = LevelData{
-    std::move(loadedLevel.mMap),
-    std::move(loadedLevel.mActors),
-    loadedLevel.mBackdropSwitchCondition
-  };
-  mMapAtLevelStart = mLevelData.mMap;
+  mMap = std::move(loadedLevel.mMap);
+  mInitialActors = std::move(loadedLevel.mActors);
+  mBackdropSwitchCondition = loadedLevel.mBackdropSwitchCondition;
+  mMapAtLevelStart = mMap;
 
   mpSystems = std::make_unique<IngameSystems>(
     sessionId,
     playerEntity,
     mpPlayerModel,
-    &mLevelData.mMap,
+    &mMap,
     engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
     mpServiceProvider,
     &mEntityFactory,
@@ -645,7 +643,7 @@ void GameWorld::onReactorDestroyed(const base::Vector& position) {
     ProjectileDirection::Right);
 
   const auto shouldDoSpecialEvent =
-    mLevelData.mBackdropSwitchCondition ==
+    mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnReactorDestruction;
   if (!mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
     mpSystems->switchBackdrops();
@@ -728,13 +726,13 @@ void GameWorld::restartLevel() {
     mBackdropSwitched = false;
   }
 
-  mLevelData.mMap = mMapAtLevelStart;
+  mMap = mMapAtLevelStart;
   mBonusInfo.mNumShotBonusGlobes = 0;
   mBonusInfo.mPlayerTookDamage = false;
 
   mEntities.reset();
   auto playerEntity = mEntityFactory.createEntitiesForLevel(
-    mLevelData.mInitialActors);
+    mInitialActors);
   mpSystems->restartFromBeginning(playerEntity);
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
@@ -751,7 +749,7 @@ void GameWorld::restartFromCheckpoint() {
   mpServiceProvider->fadeOutScreen();
 
   const auto shouldSwitchBackAfterRespawn =
-    mLevelData.mBackdropSwitchCondition ==
+    mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (mBackdropSwitched && shouldSwitchBackAfterRespawn) {
     mpSystems->switchBackdrops();
@@ -780,7 +778,7 @@ void GameWorld::handleTeleporter() {
   mTeleportTargetPosition = std::nullopt;
 
   const auto switchBackdrop =
-    mLevelData.mBackdropSwitchCondition ==
+    mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (switchBackdrop) {
     mpSystems->switchBackdrops();
