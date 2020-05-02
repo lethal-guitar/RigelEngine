@@ -266,6 +266,7 @@ GameWorld::WorldState::WorldState(
     &mRandomGenerator,
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, eventManager)
+  , mCollisionChecker(&mMap, mEntities, eventManager)
 {
   auto loadedLevel = loader::loadLevel(
     levelFileName(sessionId.mEpisode, sessionId.mLevel),
@@ -295,6 +296,7 @@ GameWorld::WorldState::WorldState(
     &mEntityFactory,
     &mRandomGenerator,
     &mRadarDishCounter,
+    &mCollisionChecker,
     pRenderer,
     mEntities,
     eventManager,

@@ -56,18 +56,18 @@ IngameSystems::IngameSystems(
   EntityFactory* pEntityFactory,
   engine::RandomNumberGenerator* pRandomGenerator,
   const RadarDishCounter* pRadarDishCounter,
+  const engine::CollisionChecker* pCollisionChecker,
   renderer::Renderer* pRenderer,
   entityx::EntityManager& entities,
   entityx::EventManager& eventManager,
   const loader::ResourceLoader& resources
 )
-  : mCollisionChecker(pMap, entities, eventManager)
-  , mPlayer(
+  : mPlayer(
       playerEntity,
       sessionId.mDifficulty,
       pPlayerModel,
       pServiceProvider,
-      &mCollisionChecker,
+      pCollisionChecker,
       pMap,
       pEntityFactory,
       &eventManager,
@@ -79,7 +79,7 @@ IngameSystems::IngameSystems(
       pRenderer,
       pMap,
       std::move(mapRenderData))
-  , mPhysicsSystem(&mCollisionChecker, pMap, &eventManager)
+  , mPhysicsSystem(pCollisionChecker, pMap, &eventManager)
   , mDebuggingSystem(pRenderer, &mCamera.position(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
@@ -93,12 +93,12 @@ IngameSystems::IngameSystems(
   , mPlayerProjectileSystem(
       pEntityFactory,
       pServiceProvider,
-      &mCollisionChecker,
+      pCollisionChecker,
       pMap)
   , mElevatorSystem(
       playerEntity,
       pServiceProvider,
-      &mCollisionChecker,
+      const_cast<engine::CollisionChecker*>(pCollisionChecker),
       &eventManager)
   , mRadarComputerSystem(pRadarDishCounter)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
@@ -115,17 +115,17 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &mParticles,
       eventManager)
-  , mItemContainerSystem(&entities, &mCollisionChecker, eventManager)
+  , mItemContainerSystem(&entities, pCollisionChecker, eventManager)
   , mBlueGuardSystem(
       &mPlayer,
-      &mCollisionChecker,
+      const_cast<engine::CollisionChecker*>(pCollisionChecker),
       pEntityFactory,
       pServiceProvider,
       pRandomGenerator,
       eventManager)
   , mHoverBotSystem(
       playerEntity,
-      &mCollisionChecker,
+      const_cast<engine::CollisionChecker*>(pCollisionChecker),
       pEntityFactory)
   , mLaserTurretSystem(
       playerEntity,
@@ -145,24 +145,24 @@ IngameSystems::IngameSystems(
   , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSimpleWalkerSystem(
       playerEntity,
-      &mCollisionChecker)
+      const_cast<engine::CollisionChecker*>(pCollisionChecker))
   , mSlidingDoorSystem(playerEntity, pServiceProvider)
   , mSlimeBlobSystem(
       &mPlayer,
-      &mCollisionChecker,
+      const_cast<engine::CollisionChecker*>(pCollisionChecker),
       pEntityFactory,
       pRandomGenerator,
       eventManager)
   , mSpiderSystem(
       &mPlayer,
-      &mCollisionChecker,
+      const_cast<engine::CollisionChecker*>(pCollisionChecker),
       pRandomGenerator,
       pEntityFactory,
       eventManager)
-  , mSpikeBallSystem(&mCollisionChecker, pServiceProvider, eventManager)
+  , mSpikeBallSystem(pCollisionChecker, pServiceProvider, eventManager)
   , mBehaviorControllerSystem(
       GlobalDependencies{
-        &mCollisionChecker,
+        pCollisionChecker,
         &mParticles,
         pRandomGenerator,
         pEntityFactory,

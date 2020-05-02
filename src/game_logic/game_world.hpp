@@ -24,6 +24,7 @@
 #include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/earth_quake_effect.hpp"
@@ -131,6 +132,7 @@ private:
     LevelBonusInfo mBonusInfo;
     std::string mLevelMusicFile;
 
+    engine::CollisionChecker mCollisionChecker;
     std::unique_ptr<IngameSystems> mpSystems;
 
     std::optional<EarthQuakeEffect> mEarthQuakeEffect;

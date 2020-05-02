@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "engine/collision_checker.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
 #include "engine/particle_system.hpp"
@@ -79,6 +78,7 @@ public:
     EntityFactory* pEntityFactory,
     engine::RandomNumberGenerator* pRandomGenerator,
     const RadarDishCounter* pRadarDishCounter,
+    const engine::CollisionChecker* pCollisionChecker,
     renderer::Renderer* pRenderer,
     entityx::EntityManager& entities,
     entityx::EventManager& eventManager,
@@ -111,7 +111,6 @@ public:
   void printDebugText(std::ostream& stream) const;
 
 private:
-  engine::CollisionChecker mCollisionChecker;
   Player mPlayer;
   Camera mCamera;
 
