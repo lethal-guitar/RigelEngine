@@ -23,12 +23,14 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <vector>
+
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct MessengerDrone {
   enum class Message {
@@ -40,17 +42,23 @@ struct MessengerDrone {
     CantEscape = 4
   };
 
+  explicit MessengerDrone(const Message message)
+    : mMessage(message)
+  {
+  }
+
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
   enum class State {
     AwaitActivation,
     FlyIn,
     ShowingMessage,
     FlyOut
   };
-
-  explicit MessengerDrone(const Message message)
-    : mMessage(message)
-  {
-  }
 
   State mState = State::AwaitActivation;
   engine::components::Orientation mOrientation =
@@ -59,19 +67,6 @@ struct MessengerDrone {
 
   std::uint32_t mMessageStep = 0;
   int mElapsedFrames = 0;
-};
-
-}
-
-
-class MessengerDroneSystem {
-public:
-  explicit MessengerDroneSystem(entityx::Entity player);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  entityx::Entity mPlayer;
 };
 
 }

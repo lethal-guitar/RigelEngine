@@ -29,7 +29,6 @@
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemies/blue_guard.hpp"
-#include "game_logic/enemies/messenger_drone.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/enemies/slime_blob.hpp"
 #include "game_logic/enemies/spider.hpp"
@@ -130,7 +129,6 @@ private:
   game_logic::ItemContainerSystem mItemContainerSystem;
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
-  game_logic::ai::MessengerDroneSystem mMessengerDroneSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
   game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
