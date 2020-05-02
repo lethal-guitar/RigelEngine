@@ -745,24 +745,16 @@ void GameWorld::handlePlayerDeath() {
 void GameWorld::restartLevel() {
   mpServiceProvider->fadeOutScreen();
 
-  if (mpState->mBackdropSwitched) {
-    mpState->mpSystems->switchBackdrops();
-    mpState->mBackdropSwitched = false;
-  }
-
-  mpState->mMap = mpState->mMapAtLevelStart;
-  mpState->mBonusInfo.mNumShotBonusGlobes = 0;
-  mpState->mBonusInfo.mPlayerTookDamage = false;
-
-  mpState->mEntities.reset();
-  auto playerEntity = mpState->mEntityFactory.createEntitiesForLevel(
-    mpState->mInitialActors);
-  mpState->mpSystems->restartFromBeginning(playerEntity);
-
   *mpPlayerModel = mPlayerModelAtLevelStart;
+  loadLevel();
 
   mpState->mpSystems->centerViewOnPlayer();
   updateGameLogic({});
+
+  if (mpState->mRadarDishCounter.radarDishesPresent()) {
+    mMessageDisplay.setMessage(data::Messages::FindAllRadars);
+  }
+
   render();
 
   mpServiceProvider->fadeInScreen();
