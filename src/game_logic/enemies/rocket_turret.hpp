@@ -16,23 +16,29 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::game_logic { class EntityFactory; }
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct RocketTurret {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
   enum class Orientation {
     Left = 0,
     Top = 1,
@@ -42,32 +48,6 @@ struct RocketTurret {
   Orientation mOrientation = Orientation::Left;
   bool mNeedsReorientation = true;
   int mNextShotCountdown = 0;
-};
-
-}
-
-
-void configureRocketTurret(entityx::Entity& entity, int givenScore);
-
-
-class RocketTurretSystem {
-public:
-  RocketTurretSystem(
-    entityx::Entity player,
-    EntityFactory* pEntityFactory,
-    IGameServiceProvider* pServiceProvider);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  void fireRocket(
-    const base::Vector& myPosition,
-    components::RocketTurret::Orientation myOrientation);
-
-private:
-  entityx::Entity mPlayer;
-  EntityFactory* mpEntityFactory;
-  IGameServiceProvider* mpServiceProvider;
 };
 
 }

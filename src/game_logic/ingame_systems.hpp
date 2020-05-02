@@ -31,7 +31,6 @@
 #include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/hover_bot.hpp"
 #include "game_logic/enemies/messenger_drone.hpp"
-#include "game_logic/enemies/rocket_turret.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/enemies/slime_blob.hpp"
 #include "game_logic/enemies/spider.hpp"
@@ -134,7 +133,6 @@ private:
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::HoverBotSystem mHoverBotSystem;
   game_logic::ai::MessengerDroneSystem mMessengerDroneSystem;
-  game_logic::ai::RocketTurretSystem mRocketTurretSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
   game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;

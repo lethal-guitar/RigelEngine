@@ -1210,11 +1210,11 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Rocket_launcher_turret: // Rocket launcher turret
+    case ActorID::Rocket_launcher_turret:
       entity.assign<Shootable>(Health{3}, GivenScore{500});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<ai::components::RocketTurret>();
+      entity.assign<BehaviorController>(behaviors::RocketTurret{});
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
