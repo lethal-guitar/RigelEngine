@@ -189,7 +189,7 @@ constexpr bool isPlayerProjectile(const ProjectileType type) {
 }
 
 
-using Message = ai::components::MessengerDrone::Message;
+using Message = behaviors::MessengerDrone::Message;
 
 Message MESSAGE_TYPE_BY_INDEX[] = {
   Message::YourBrainIsOurs,
@@ -1869,7 +1869,6 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       break;
 
-    // Flying message ships
     case ActorID::Messenger_drone_1: // "Your brain is ours!"
     case ActorID::Messenger_drone_2: // "Bring back the brain! ... Please stand by"
     case ActorID::Messenger_drone_3: // "Live from Rigel it's Saturday night!"
@@ -1889,8 +1888,8 @@ void EntityFactory::configureEntity(
         entity.assign<BoundingBox>(boundingBox);
         entity.component<Sprite>()->mFramesToRender.clear();
 
-        entity.assign<ai::components::MessengerDrone>(
-          MESSAGE_TYPE_BY_INDEX[typeIndex]);
+        entity.assign<BehaviorController>(
+          behaviors::MessengerDrone{MESSAGE_TYPE_BY_INDEX[typeIndex]});
         entity.assign<ActivationSettings>(
           ActivationSettings::Policy::AlwaysAfterFirstActivation);
         entity.assign<AppearsOnRadar>();

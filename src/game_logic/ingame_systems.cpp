@@ -123,7 +123,6 @@ IngameSystems::IngameSystems(
       pServiceProvider,
       pRandomGenerator,
       eventManager)
-  , mMessengerDroneSystem(playerEntity)
   , mSimpleWalkerSystem(
       playerEntity,
       const_cast<engine::CollisionChecker*>(pCollisionChecker))
@@ -195,7 +194,6 @@ void IngameSystems::update(
   // A.I. logic update
   // ----------------------------------------------------------------------
   mBlueGuardSystem.update(es);
-  mMessengerDroneSystem.update(es);
   mSimpleWalkerSystem.update(es);
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);
