@@ -128,7 +128,6 @@ IngameSystems::IngameSystems(
       const_cast<engine::CollisionChecker*>(pCollisionChecker),
       pEntityFactory)
   , mMessengerDroneSystem(playerEntity)
-  , mRocketTurretSystem(playerEntity, pEntityFactory, pServiceProvider)
   , mSimpleWalkerSystem(
       playerEntity,
       const_cast<engine::CollisionChecker*>(pCollisionChecker))
@@ -202,7 +201,6 @@ void IngameSystems::update(
   mBlueGuardSystem.update(es);
   mHoverBotSystem.update(es);
   mMessengerDroneSystem.update(es);
-  mRocketTurretSystem.update(es);
   mSimpleWalkerSystem.update(es);
   mSlidingDoorSystem.update(es);
   mSlimeBlobSystem.update(es);
