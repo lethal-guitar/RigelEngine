@@ -25,77 +25,60 @@ RIGEL_RESTORE_WARNINGS
 
 #include <variant>
 
-namespace rigel::engine { class CollisionChecker; }
-namespace rigel::engine::components { struct Sprite; }
-namespace rigel::game_logic { class EntityFactory; }
+
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct HoverBotSpawnMachine {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
   int mSpawnsRemaining = 30;
   int mNextSpawnCountdown = 0;
 };
 
 
-namespace detail {
+struct HoverBot {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-struct TeleportingIn {
-  int mFramesElapsed = 0;
-};
+  struct TeleportingIn {
+    int mFramesElapsed = 0;
+  };
 
+  struct Moving {
+    explicit Moving(const engine::components::Orientation orientation)
+      : mOrientation(orientation)
+    {
+    }
 
-struct Moving {
-  explicit Moving(const engine::components::Orientation orientation)
-    : mOrientation(orientation)
-  {
-  }
+    engine::components::Orientation mOrientation;
+  };
 
-  engine::components::Orientation mOrientation;
-};
+  struct Reorientation {
+    explicit Reorientation(const engine::components::Orientation targetOrientation)
+      : mTargetOrientation(targetOrientation)
+    {
+    }
 
+    engine::components::Orientation mTargetOrientation;
+    int mStep = 0;
+  };
 
-struct Reorientation {
-  explicit Reorientation(const engine::components::Orientation targetOrientation)
-    : mTargetOrientation(targetOrientation)
-  {
-  }
+  using State = std::variant<TeleportingIn, Moving, Reorientation>;
 
-  engine::components::Orientation mTargetOrientation;
-  int mStep = 0;
-};
-
-} // namespace detail
-
-
-using HoverBot =
-  std::variant<detail::TeleportingIn, detail::Moving, detail::Reorientation>;
-
-}
-
-
-class HoverBotSystem {
-public:
-  HoverBotSystem(
-    entityx::Entity player,
-    engine::CollisionChecker* pCollisionChecker,
-    EntityFactory* pEntityFactory);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  void updateReorientation(
-    components::detail::Reorientation& state,
-    components::HoverBot& robotState,
-    engine::components::Sprite& sprite);
-
-private:
-  entityx::Entity mPlayer;
-  engine::CollisionChecker* mpCollisionChecker;
-  EntityFactory* mpEntityFactory;
-  bool mIsOddFrame = false;
+  State mState;
 };
 
 }
