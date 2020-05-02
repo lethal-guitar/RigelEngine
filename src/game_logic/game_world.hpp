@@ -113,6 +113,10 @@ private:
 
   struct WorldState {
     WorldState(
+      IGameServiceProvider* pServiceProvider,
+      renderer::Renderer* pRenderer,
+      const loader::ResourceLoader* pResources,
+      data::PlayerModel* pPlayerModel,
       entityx::EventManager& eventManager,
       SpriteFactory* pSpriteFactory,
       data::GameSessionId sessionId);
@@ -127,7 +131,7 @@ private:
     std::vector<data::map::LevelData::Actor> mInitialActors;
     data::map::Map mMapAtLevelStart;
     LevelBonusInfo mBonusInfo;
-    std::optional<std::string> mLevelMusicFile;
+    std::string mLevelMusicFile;
 
     std::unique_ptr<IngameSystems> mpSystems;
 

@@ -251,9 +251,13 @@ std::vector<base::Vector> collectRadarDots(
 
 
 GameWorld::WorldState::WorldState(
+  IGameServiceProvider* pServiceProvider,
+  renderer::Renderer* pRenderer,
+  const loader::ResourceLoader* pResources,
+  data::PlayerModel* pPlayerModel,
   entityx::EventManager& eventManager,
   SpriteFactory* pSpriteFactory,
-  data::GameSessionId sessionId
+  const data::GameSessionId sessionId
 )
   : mEntities(eventManager)
   , mEntityFactory(
@@ -263,6 +267,45 @@ GameWorld::WorldState::WorldState(
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, eventManager)
 {
+  auto loadedLevel = loader::loadLevel(
+    levelFileName(sessionId.mEpisode, sessionId.mLevel),
+    *pResources,
+    sessionId.mDifficulty);
+  auto playerEntity =
+    mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+
+  const auto counts = countBonusRelatedItems(mEntities);
+  mBonusInfo.mInitialCameraCount = counts.mCameraCount;
+  mBonusInfo.mInitialMerchandiseCount = counts.mMerchandiseCount;
+  mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
+  mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
+  mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
+
+  mMap = std::move(loadedLevel.mMap);
+  mInitialActors = std::move(loadedLevel.mActors);
+  mBackdropSwitchCondition = loadedLevel.mBackdropSwitchCondition;
+  mLevelMusicFile = loadedLevel.mMusicFile;
+  mMapAtLevelStart = mMap;
+
+  mpSystems = std::make_unique<IngameSystems>(
+    sessionId,
+    playerEntity,
+    pPlayerModel,
+    &mMap,
+    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
+    pServiceProvider,
+    &mEntityFactory,
+    &mRandomGenerator,
+    &mRadarDishCounter,
+    pRenderer,
+    mEntities,
+    eventManager,
+    *pResources);
+
+  if (loadedLevel.mEarthquake) {
+    mEarthQuakeEffect = EarthQuakeEffect{
+      pServiceProvider, &mRandomGenerator, &eventManager};
+  }
 }
 
 
@@ -292,8 +335,6 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
-  , mpState(std::make_unique<WorldState>(
-      mEventManager, &mSpriteFactory, sessionId))
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::ExitReached>(*this);
@@ -472,7 +513,7 @@ void GameWorld::receive(const game_logic::events::ShootableKilled& event) {
 
 void GameWorld::receive(const rigel::events::BossActivated& event) {
   mpState->mActiveBossEntity = event.mBossEntity;
-  mpServiceProvider->playMusic(*mpState->mLevelMusicFile);
+  mpServiceProvider->playMusic(mpState->mLevelMusicFile);
 }
 
 
@@ -482,50 +523,19 @@ void GameWorld::receive(const rigel::events::BossDestroyed& event) {
 
 
 void GameWorld::loadLevel() {
-  auto loadedLevel = loader::loadLevel(
-    levelFileName(mSessionId.mEpisode, mSessionId.mLevel),
-    *mpResources,
-    mSessionId.mDifficulty);
-  auto playerEntity =
-    mpState->mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
-
-  const auto counts = countBonusRelatedItems(mpState->mEntities);
-  mpState->mBonusInfo.mInitialCameraCount = counts.mCameraCount;
-  mpState->mBonusInfo.mInitialMerchandiseCount = counts.mMerchandiseCount;
-  mpState->mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
-  mpState->mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
-  mpState->mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
-
-  mpState->mMap = std::move(loadedLevel.mMap);
-  mpState->mInitialActors = std::move(loadedLevel.mActors);
-  mpState->mBackdropSwitchCondition = loadedLevel.mBackdropSwitchCondition;
-  mpState->mMapAtLevelStart = mpState->mMap;
-
-  mpState->mpSystems = std::make_unique<IngameSystems>(
-    mSessionId,
-    playerEntity,
-    mpPlayerModel,
-    &mpState->mMap,
-    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
+  mpState = std::make_unique<WorldState>(
     mpServiceProvider,
-    &mpState->mEntityFactory,
-    &mpState->mRandomGenerator,
-    &mpState->mRadarDishCounter,
     mpRenderer,
-    mpState->mEntities,
+    mpResources,
+    mpPlayerModel,
     mEventManager,
-    *mpResources);
-
-  if (loadedLevel.mEarthquake) {
-    mpState->mEarthQuakeEffect = EarthQuakeEffect{
-      mpServiceProvider, &mpState->mRandomGenerator, &mEventManager};
-  }
+    &mSpriteFactory,
+    mSessionId);
 
   if (data::isBossLevel(mSessionId.mLevel)) {
-    mpState->mLevelMusicFile = loadedLevel.mMusicFile;
     mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
   } else {
-    mpServiceProvider->playMusic(loadedLevel.mMusicFile);
+    mpServiceProvider->playMusic(mpState->mLevelMusicFile);
   }
 }
 
