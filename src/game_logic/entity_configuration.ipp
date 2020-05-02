@@ -1627,7 +1627,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Aggressive_prisoner: // Monster in prison cell, aggressive
-      entity.assign<ai::components::Prisoner>(true);
+      entity.assign<BehaviorController>(behaviors::AggressivePrisoner{});
       entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
       entity.assign<Shootable>(Health{1}, GivenScore{500});
       entity.component<Shootable>()->mInvincible = true;
@@ -1636,7 +1636,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Passive_prisoner: // Monster in prison cell, passive
-      entity.assign<ai::components::Prisoner>(false);
+      entity.assign<BehaviorController>(behaviors::PassivePrisoner{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AppearsOnRadar>();
       break;
