@@ -100,7 +100,6 @@ public:
 
   void switchBackdrops();
 
-  void restartFromBeginning(entityx::Entity newPlayerEntity);
   void restartFromCheckpoint(const base::Vector& checkpointPosition);
 
   void centerViewOnPlayer();

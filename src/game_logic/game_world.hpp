@@ -128,8 +128,6 @@ private:
     RadarDishCounter mRadarDishCounter;
 
     data::map::Map mMap;
-    std::vector<data::map::LevelData::Actor> mInitialActors;
-    data::map::Map mMapAtLevelStart;
     LevelBonusInfo mBonusInfo;
     std::string mLevelMusicFile;
 

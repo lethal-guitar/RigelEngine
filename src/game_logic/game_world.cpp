@@ -282,10 +282,8 @@ GameWorld::WorldState::WorldState(
   mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
 
   mMap = std::move(loadedLevel.mMap);
-  mInitialActors = std::move(loadedLevel.mActors);
   mBackdropSwitchCondition = loadedLevel.mBackdropSwitchCondition;
   mLevelMusicFile = loadedLevel.mMusicFile;
-  mMapAtLevelStart = mMap;
 
   mpSystems = std::make_unique<IngameSystems>(
     sessionId,

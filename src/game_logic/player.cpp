@@ -629,19 +629,9 @@ void Player::doInteractionAnimation() {
 }
 
 
-void Player::resetAfterDeath(entityx::Entity newEntity) {
+void Player::resetAfterRespawn() {
   // TODO: Refactor this - it would be much nicer if we could just consruct
   // a new player.
-  mEntity = newEntity;
-
-  resetAfterRespawn();
-
-  mFramesElapsedHavingRapidFire = mFramesElapsedHavingCloak = 0;
-}
-
-
-void Player::resetAfterRespawn() {
-  // TODO: Same as with resetAfterDeath()
   mState = OnGround{};
   mStance = WeaponStance::Regular;
   mVisualState = VisualState::Standing;
