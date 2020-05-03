@@ -19,14 +19,17 @@
 #include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
-#include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
+#include "engine/visual_components.hpp"
+#include "game_logic/behavior_controller.hpp"
+#include "game_logic/global_dependencies.hpp"
+#include "game_logic/player.hpp"
 
 #include <algorithm>
 
 
-namespace rigel::game_logic { namespace ai {
+namespace rigel::game_logic::behaviors {
 
 using engine::components::Sprite;
 using engine::components::WorldPosition;
@@ -34,8 +37,9 @@ using engine::components::WorldPosition;
 
 namespace {
 
-const auto HORIZONTAL_DOOR_RANGE = base::Rect<int>{{-2, -2}, {8, 9}};
-const auto VERTICAL_DOOR_RANGE = base::Rect<int>{{-8, -6}, {15, 7}};
+constexpr auto HORIZONTAL_DOOR_RANGE = base::Rect<int>{{-2, -2}, {8, 9}};
+constexpr auto VERTICAL_DOOR_RANGE = base::Rect<int>{{-8, -6}, {15, 7}};
+constexpr auto NUM_VERTICAL_DOOR_SEGMENTS = 8;
 
 
 bool playerInRange(
@@ -50,217 +54,177 @@ bool playerInRange(
 }
 
 
-namespace horizontal {
-
-namespace {
-
-using State = components::HorizontalSlidingDoor::State;
-
-
-State nextState(const State currentState, const bool playerInRange) {
-  auto newState = currentState;
-
-  switch (currentState) {
-    case State::Closed:
-      if (playerInRange) {
-        newState = State::HalfOpen;
-      }
-      break;
-
-    case State::HalfOpen:
-      newState = playerInRange ? State::Open : State::Closed;
-      break;
-
-    case State::Open:
-      if (!playerInRange) {
-        newState = State::HalfOpen;
-      }
-      break;
-  }
-
-  return newState;
-}
-
-}} // namespace horizontal
-
-
-namespace vertical {
-
-namespace {
-
-constexpr auto NUM_DOOR_SEGMENTS = 8;
-
-using State = components::VerticalSlidingDoor::State;
-
-
-State nextState(
-  const components::VerticalSlidingDoor& state,
-  const bool playerInRange
+void HorizontalSlidingDoor::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool,
+  entityx::Entity entity
 ) {
-  auto newState = state.mState;
-
-  switch (state.mState) {
-    case State::Closed:
-      if (playerInRange) {
-        newState = State::Opening;
-      }
-      break;
-
-    case State::Opening:
-      if (!playerInRange) {
-        newState = State::Closing;
-      } else if (state.mSlideStep >= 7) {
-        newState = State::Open;
-      }
-      break;
-
-    case State::Closing:
-      if (playerInRange) {
-        newState = State::Opening;
-      } else if (state.mSlideStep <= 0) {
-        newState = State::Closed;
-      }
-      break;
-
-    case State::Open:
-      if (!playerInRange) {
-        newState = State::Closing;
-      }
-      break;
-  }
-
-  return newState;
-}
-
-
-int stepChangeForState(const State state) {
-  if (state == vertical::State::Opening) {
-    return 1;
-  } else if (state == vertical::State::Closing) {
-    return -1;
-  }
-
-  return 0;
-}
-
-}} // namespace vertical
-
-
-SlidingDoorSystem::SlidingDoorSystem(
-  entityx::Entity playerEntity,
-  IGameServiceProvider* pServiceProvider
-)
-  : mPlayerEntity(playerEntity)
-  , mpServiceProvider(pServiceProvider)
-{
-}
-
-
-void SlidingDoorSystem::update(entityx::EntityManager& es) {
-  const auto& playerPosition = *mPlayerEntity.component<WorldPosition>().get();
-
   using engine::components::BoundingBox;
   using engine::components::SolidBody;
-  using components::HorizontalSlidingDoor;
-  es.each<WorldPosition, BoundingBox, Sprite, HorizontalSlidingDoor>(
-    [this, &playerPosition, &es](
-      entityx::Entity entity,
-      const WorldPosition& position,
-      BoundingBox& boundingBox,
-      Sprite& sprite,
-      HorizontalSlidingDoor& state
-    ) {
-      if (!state.mCollisionHelper) {
-        auto collisionHelper = es.create();
-        collisionHelper.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
-        collisionHelper.assign<WorldPosition>(position);
-        collisionHelper.assign<engine::components::Active>();
-        collisionHelper.assign<SolidBody>();
-        state.mCollisionHelper = collisionHelper;
-      }
 
-      const auto inRange =
-        playerInRange(playerPosition, position, HORIZONTAL_DOOR_RANGE);
-      const auto previousState = state.mState;
-      state.mState = horizontal::nextState(previousState, inRange);
+  auto nextState = [&](const bool playerInRange) {
+    auto newState = mState;
 
-      if (state.mState == horizontal::State::Closed) {
-        boundingBox.topLeft.x = 0;
-        boundingBox.size.width = 6;
-      } else {
-        boundingBox.topLeft.x = 5;
-        boundingBox.size.width = 1;
-      }
+    switch (mState) {
+      case State::Closed:
+        if (playerInRange) {
+          newState = State::HalfOpen;
+        }
+        break;
 
-      const auto missingLeftEdgeCollision =
-        previousState == horizontal::State::Closed &&
-        state.mState == horizontal::State::HalfOpen;
-      engine::setTag<SolidBody>(
-        state.mCollisionHelper, !missingLeftEdgeCollision);
+      case State::HalfOpen:
+        newState = playerInRange ? State::Open : State::Closed;
+        break;
 
-      sprite.mFramesToRender[0] = static_cast<int>(state.mState);
-      updateSoundGeneration(inRange, state);
-    });
+      case State::Open:
+        if (!playerInRange) {
+          newState = State::HalfOpen;
+        }
+        break;
+    }
 
-  es.each<WorldPosition, BoundingBox, components::VerticalSlidingDoor>(
-    [this, &playerPosition](
-      entityx::Entity entity,
-      const WorldPosition& position,
-      BoundingBox& boundingBox,
-      components::VerticalSlidingDoor& state
-    ) {
-      const auto inRange =
-        playerInRange(playerPosition, position, VERTICAL_DOOR_RANGE);
-      state.mState = vertical::nextState(state, inRange);
-
-      const auto stepChange = vertical::stepChangeForState(state.mState);
-      state.mSlideStep = std::clamp(state.mSlideStep + stepChange, 0, 7);
-
-      if (state.mState == vertical::State::Closed) {
-        boundingBox.topLeft.y = 0;
-        boundingBox.size.height = 8;
-      } else {
-        boundingBox.topLeft.y = -7;
-        boundingBox.size.height = 1;
-      }
-
-      updateSoundGeneration(inRange, state);
-    });
-}
+    return newState;
+  };
 
 
-template<typename StateT>
-void SlidingDoorSystem::updateSoundGeneration(
-  const bool inRange,
-  StateT& state
-) {
-  if (inRange != state.mPlayerWasInRange) {
-    mpServiceProvider->playSound(data::SoundId::SlidingDoor);
-    state.mPlayerWasInRange = inRange;
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+  auto& boundingBox = *entity.component<BoundingBox>();
+
+  if (!mCollisionHelper) {
+    auto collisionHelper = d.mpEntityManager->create();
+    collisionHelper.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
+    collisionHelper.assign<WorldPosition>(position);
+    collisionHelper.assign<engine::components::Active>();
+    collisionHelper.assign<SolidBody>();
+    mCollisionHelper = collisionHelper;
+  }
+
+  const auto inRange =
+    playerInRange(playerPosition, position, HORIZONTAL_DOOR_RANGE);
+  const auto previousState = mState;
+  mState = nextState(inRange);
+
+  if (mState == State::Closed) {
+    boundingBox.topLeft.x = 0;
+    boundingBox.size.width = 6;
+  } else {
+    boundingBox.topLeft.x = 5;
+    boundingBox.size.width = 1;
+  }
+
+  const auto missingLeftEdgeCollision =
+    previousState == State::Closed &&
+    mState == State::HalfOpen;
+  engine::setTag<SolidBody>(
+    mCollisionHelper, !missingLeftEdgeCollision);
+
+  auto& sprite = *entity.component<engine::components::Sprite>();
+  sprite.mFramesToRender[0] = static_cast<int>(mState);
+
+  if (inRange != mPlayerWasInRange) {
+    d.mpServiceProvider->playSound(data::SoundId::SlidingDoor);
+    mPlayerWasInRange = inRange;
   }
 }
 
-} // namespace ai
+
+void VerticalSlidingDoor::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool,
+  entityx::Entity entity
+) {
+  using engine::components::BoundingBox;
+
+  auto nextState = [&](const bool playerInRange) {
+    auto newState = mState;
+
+    switch (mState) {
+      case State::Closed:
+        if (playerInRange) {
+          newState = State::Opening;
+        }
+        break;
+
+      case State::Opening:
+        if (!playerInRange) {
+          newState = State::Closing;
+        } else if (mSlideStep >= 7) {
+          newState = State::Open;
+        }
+        break;
+
+      case State::Closing:
+        if (playerInRange) {
+          newState = State::Opening;
+        } else if (mSlideStep <= 0) {
+          newState = State::Closed;
+        }
+        break;
+
+      case State::Open:
+        if (!playerInRange) {
+          newState = State::Closing;
+        }
+        break;
+    }
+
+    return newState;
+  };
+
+  auto stepChange = [&]() {
+    if (mState == State::Opening) {
+      return 1;
+    } else if (mState == State::Closing) {
+      return -1;
+    }
+
+    return 0;
+  };
+
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+  auto& boundingBox = *entity.component<BoundingBox>();
+
+  const auto inRange =
+    playerInRange(playerPosition, position, VERTICAL_DOOR_RANGE);
+  mState = nextState(inRange);
+  mSlideStep = std::clamp(mSlideStep + stepChange(), 0, 7);
+
+  if (mState == State::Closed) {
+    boundingBox.topLeft.y = 0;
+    boundingBox.size.height = 8;
+  } else {
+    boundingBox.topLeft.y = -7;
+    boundingBox.size.height = 1;
+  }
+
+  if (inRange != mPlayerWasInRange) {
+    d.mpServiceProvider->playSound(data::SoundId::SlidingDoor);
+    mPlayerWasInRange = inRange;
+  }
+}
 
 
-void renderVerticalSlidingDoor(
+void VerticalSlidingDoor::render(
   renderer::Renderer* pRenderer,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace
 ) {
-  using namespace ai::vertical;
-
-  const auto& state = *entity.component<ai::components::VerticalSlidingDoor>();
+  const auto& state =
+    entity.component<components::BehaviorController>()->get<VerticalSlidingDoor>();
 
   const auto segmentsToDraw =
-    NUM_DOOR_SEGMENTS - std::max(0, state.mSlideStep - 1);
+    NUM_VERTICAL_DOOR_SEGMENTS - std::max(0, state.mSlideStep - 1);
 
   for (int i = 0; i < segmentsToDraw; ++i) {
-    const auto segmentIndex = NUM_DOOR_SEGMENTS - i - state.mSlideStep;
+    const auto segmentIndex = NUM_VERTICAL_DOOR_SEGMENTS - i - state.mSlideStep;
     engine::drawSpriteFrame(
       sprite.mpDrawData->mFrames[segmentIndex],
-      positionInScreenSpace - base::Vector{0, NUM_DOOR_SEGMENTS - i},
+      positionInScreenSpace - base::Vector{0, NUM_VERTICAL_DOOR_SEGMENTS - i},
       pRenderer);
   }
 }

@@ -1749,11 +1749,11 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Sliding_door_vertical: // Sliding door, vertical
-      entity.assign<ai::components::VerticalSlidingDoor>();
+    case ActorID::Sliding_door_vertical:
+      entity.assign<BehaviorController>(behaviors::VerticalSlidingDoor{});
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
-      entity.assign<CustomRenderFunc>(&renderVerticalSlidingDoor);
+      entity.assign<CustomRenderFunc>(&behaviors::VerticalSlidingDoor::render);
       break;
 
     case ActorID::Blowing_fan: // Blowing fan
@@ -1763,8 +1763,8 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::BlowingFan{});
       break;
 
-    case ActorID::Sliding_door_horizontal: // Sliding door, horizontal
-      entity.assign<ai::components::HorizontalSlidingDoor>();
+    case ActorID::Sliding_door_horizontal:
+      entity.assign<BehaviorController>(behaviors::HorizontalSlidingDoor{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<engine::components::SolidBody>();
       break;

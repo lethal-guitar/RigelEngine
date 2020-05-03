@@ -18,21 +18,28 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/visual_components.hpp"
-#include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
+namespace rigel::renderer { class Renderer; }
+namespace rigel::engine::components { struct Sprite; }
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
 
 
-namespace rigel::game_logic { namespace ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct HorizontalSlidingDoor {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
   enum class State {
     Closed = 0,
     HalfOpen = 1,
@@ -46,6 +53,18 @@ struct HorizontalSlidingDoor {
 
 
 struct VerticalSlidingDoor {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  static void render(
+    renderer::Renderer* pRenderer,
+    entityx::Entity,
+    const engine::components::Sprite& sprite,
+    const base::Vector& positionInScreenSpace);
+
   enum class State {
     Closed,
     Opening,
@@ -57,34 +76,5 @@ struct VerticalSlidingDoor {
   bool mPlayerWasInRange = false;
   int mSlideStep = 0;
 };
-
-}
-
-
-class SlidingDoorSystem {
-public:
-  SlidingDoorSystem(
-    entityx::Entity playerEntity,
-    IGameServiceProvider* pServiceProvider);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  template<typename StateT>
-  void updateSoundGeneration(const bool inRange, StateT& state);
-
-private:
-  entityx::Entity mPlayerEntity;
-  IGameServiceProvider* mpServiceProvider;
-};
-
-}
-
-
-void renderVerticalSlidingDoor(
-  renderer::Renderer* pRenderer,
-  entityx::Entity,
-  const engine::components::Sprite& sprite,
-  const base::Vector& positionInScreenSpace);
 
 }
