@@ -36,7 +36,6 @@
 #include "game_logic/interactive/elevator.hpp"
 #include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/interactive/item_container.hpp"
-#include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
 #include "game_logic/player/interaction_system.hpp"
@@ -130,7 +129,6 @@ private:
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
-  game_logic::ai::SlidingDoorSystem mSlidingDoorSystem;
   game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
   game_logic::ai::SpiderSystem mSpiderSystem;
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;
