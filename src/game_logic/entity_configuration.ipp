@@ -509,9 +509,9 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    // Circuit card force field
     case ActorID::Force_field:
       entity.assign<PlayerDamaging>(9, true);
+      entity.assign<BehaviorController>(behaviors::ForceField{});
       interaction::configureForceField(entity, mSpawnIndex);
       {
         const auto& position = *entity.component<WorldPosition>();

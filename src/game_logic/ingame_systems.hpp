@@ -135,8 +135,6 @@ private:
 
   game_logic::BehaviorControllerSystem mBehaviorControllerSystem;
 
-  engine::RandomNumberGenerator* mpRandomGenerator;
-  IGameServiceProvider* mpServiceProvider;
   renderer::Renderer* mpRenderer;
   renderer::RenderTargetTexture mLowResLayer;
 };

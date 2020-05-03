@@ -21,7 +21,6 @@
 #include "engine/random_number_generator.hpp"
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/interactive/enemy_radar.hpp"
-#include "game_logic/interactive/force_field.hpp"
 #include "renderer/upscaling_utils.hpp"
 
 #include <iomanip>
@@ -151,8 +150,6 @@ IngameSystems::IngameSystems(
       &mPlayer,
       &mCamera.position(),
       pMap)
-  , mpRandomGenerator(pRandomGenerator)
-  , mpServiceProvider(pServiceProvider)
   , mpRenderer(pRenderer)
   , mLowResLayer(
       pRenderer,
@@ -172,7 +169,6 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   mRenderingSystem.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(es);
-  interaction::animateForceFields(es, *mpRandomGenerator, *mpServiceProvider);
 
   // ----------------------------------------------------------------------
   // Player update, camera, mark active entities
