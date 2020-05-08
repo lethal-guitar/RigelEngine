@@ -886,7 +886,7 @@ void Player::updateMovement(
           const auto result = moveHorizontally(
             *mpCollisionChecker, mEntity, orientationAsMovement);
           if (result != MovementResult::Failed) {
-            if (mpMap->attributes(testX, worldBBox.top() - 1).isClimbable()) {
+            if (mpMap->attributes(testX, worldBBox.top()).isClimbable()) {
               setVisualState(VisualState::MovingOnPipe);
             } else {
               startFallingDelayed();
@@ -1324,22 +1324,13 @@ bool Player::tryAttachToClimbable() {
     --worldBBox.topLeft.y;
   }
 
-  std::optional<base::Vector> maybeClimbableTouchPoint;
-  for (int i = 0; i < worldBBox.size.width; ++i) {
-    const auto attributes =
-      mpMap->attributes(worldBBox.left() + i, worldBBox.top());
-    if (attributes.isClimbable()) {
-      maybeClimbableTouchPoint =
-        base::Vector{worldBBox.left() + i, worldBBox.top()};
-      break;
-    }
-  }
-
-  if (maybeClimbableTouchPoint) {
+  const auto attributes =
+    mpMap->attributes(worldBBox.left() + 1, worldBBox.top());
+  if (attributes.isClimbable()) {
     setVisualState(VisualState::HangingFromPipe);
     mState = OnPipe{};
     mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
-    position().y = maybeClimbableTouchPoint->y + PLAYER_HEIGHT;
+    position().y = worldBBox.top() + PLAYER_HEIGHT;
     return true;
   }
 
@@ -1403,7 +1394,15 @@ void Player::updateCloakedAppearance() {
 void Player::updateCollisionBox() {
   if (!stateIs<InShip>()) {
     auto& bbox = *mEntity.component<c::BoundingBox>();
-    bbox.size.height = isCrouching() ? PLAYER_HEIGHT_CROUCHED : PLAYER_HEIGHT;
+    bbox.size.height = PLAYER_HEIGHT;
+
+    if (isCrouching()) {
+      bbox.size.height = PLAYER_HEIGHT_CROUCHED;
+    }
+
+    if (stateIs<OnPipe>()) {
+      bbox.size.height = PLAYER_HEIGHT_ON_PIPE;
+    }
   }
 }
 

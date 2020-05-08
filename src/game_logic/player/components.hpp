@@ -31,6 +31,7 @@ namespace rigel::game_logic {
 constexpr auto PLAYER_WIDTH = 3;
 constexpr auto PLAYER_HEIGHT = 5;
 constexpr auto PLAYER_HEIGHT_CROUCHED = 4;
+constexpr auto PLAYER_HEIGHT_ON_PIPE = 6;
 
 // Interestingly, Duke's head is outside of his hitbox when crouching,
 // so shots/enemies hitting Duke's head won't do any damage.
