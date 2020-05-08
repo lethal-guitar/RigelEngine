@@ -70,6 +70,7 @@ auto createSavedGame(
 // TODO: This should move into its own file at some point.
 constexpr auto ANALOG_STICK_DEADZONE_X = 10'000;
 constexpr auto ANALOG_STICK_DEADZONE_Y = 24'000;
+constexpr auto TRIGGER_THRESHOLD = 3'000;
 
 
 std::int16_t applyDeadZone(
@@ -516,6 +517,21 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
         case SDL_CONTROLLER_AXIS_RIGHTY:
           mAnalogStickVector.y =
             applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_Y);
+          break;
+
+        case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+        case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+          {
+            const auto triggerPressed = event.caxis.value > TRIGGER_THRESHOLD;
+
+            auto& input = event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT
+              ? mPlayerInput.mJump
+              : mPlayerInput.mFire;
+            if (!input.mIsPressed && triggerPressed) {
+              input.mWasTriggered = true;
+            }
+            input.mIsPressed = triggerPressed;
+          }
           break;
 
         default:
