@@ -328,11 +328,6 @@ bool Player::isInRegularState() const {
 }
 
 
-bool Player::canTakeDamage() const {
-  return !(isInMercyFrames() || isCloaked());
-}
-
-
 bool Player::isInMercyFrames() const {
   return mMercyFramesRemaining > 0;
 }

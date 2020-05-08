@@ -240,7 +240,6 @@ public:
 
   bool isInRegularState() const;
 
-  bool canTakeDamage() const;
   bool isInMercyFrames() const;
   bool isCloaked() const;
   bool isDead() const;
