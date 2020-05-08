@@ -77,6 +77,7 @@ private:
 
     game_logic::GameWorld* mpWorld;
     game_logic::PlayerInput mPlayerInput;
+    base::Vector mAnalogStickVector;
     engine::TimeDelta mAccumulatedTime = 0.0;
     bool mShowDebugText = false;
     bool mSingleStepping = false;

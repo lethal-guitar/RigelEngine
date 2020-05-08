@@ -554,14 +554,7 @@ auto Game::run() -> RunResult {
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
     makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
 
-  //TODO : support multiple controllers
-  for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i) {
-    if (SDL_IsGameController(i)) {
-      mpGameController =
-        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)};
-      break;
-    }
-  }
+  enumerateGameControllers();
 
   return mainLoop();
 }
@@ -713,6 +706,11 @@ bool Game::handleEvent(const SDL_Event& event) {
       }
       break;
 
+    case SDL_CONTROLLERDEVICEADDED:
+    case SDL_CONTROLLERDEVICEREMOVED:
+      enumerateGameControllers();
+      break;
+
     default:
       return false;
   }
@@ -820,6 +818,22 @@ void Game::applyChangedOptions() {
   }
 
   mPreviousOptions = mpUserProfile->mOptions;
+}
+
+
+void Game::enumerateGameControllers() {
+  // TODO : support multiple controllers.
+  // At the moment, this opens only the first available controller.
+
+  mpGameController.reset();
+
+  for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i) {
+    if (SDL_IsGameController(i)) {
+      mpGameController =
+        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)};
+      break;
+    }
+  }
 }
 
 

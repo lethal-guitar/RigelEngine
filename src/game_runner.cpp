@@ -65,6 +65,43 @@ auto createSavedGame(
   };
 }
 
+
+// Controller handling stuff.
+// TODO: This should move into its own file at some point.
+constexpr auto ANALOG_STICK_DEADZONE_X = 10'000;
+constexpr auto ANALOG_STICK_DEADZONE_Y = 24'000;
+constexpr auto TRIGGER_THRESHOLD = 3'000;
+
+
+std::int16_t applyDeadZone(
+  const std::int16_t value,
+  const std::int16_t deadZone
+) {
+  if (std::abs(value) < deadZone) {
+    return 0;
+  }
+
+  return value;
+}
+
+
+game_logic::PlayerInput combinedInput(
+  const game_logic::PlayerInput& baseInput,
+  const base::Vector& analogStickVector
+) {
+  auto combined = baseInput;
+
+  // "Overlay" analog stick movement on top of the digital d-pad movement.
+  // This way, button presses and analog stick movements don't cancel each
+  // other out.
+  combined.mLeft |= analogStickVector.x < 0;
+  combined.mRight |= analogStickVector.x > 0;
+  combined.mUp |= analogStickVector.y < 0;
+  combined.mDown |= analogStickVector.y > 0;
+
+  return combined;
+}
+
 }
 
 
@@ -394,7 +431,7 @@ void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
 
 void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
   auto update = [this]() {
-    mpWorld->updateGameLogic(mPlayerInput);
+    mpWorld->updateGameLogic(combinedInput(mPlayerInput, mAnalogStickVector));
     mPlayerInput.resetTriggeredStates();
   };
 
@@ -467,51 +504,41 @@ void GameRunner::World::handlePlayerKeyboardInput(const SDL_Event& event) {
 
 
 void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) {
-  // bigger the deadzone, less wrong movements on diagonal stick movement
-  const auto SDL_DEAD_ZONE = 10000;
-
-  switch (event.type)
-  {
+  switch (event.type) {
     case SDL_CONTROLLERAXISMOTION:
-      if (
-        event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX ||
-        event.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX
-      ) { // x axis
-        if (event.caxis.value < -SDL_DEAD_ZONE) {
-          mPlayerInput.mLeft = true;
-          mPlayerInput.mRight = false;
-        }
-        else if (event.caxis.value > SDL_DEAD_ZONE) {
-          mPlayerInput.mRight = true;
-          mPlayerInput.mLeft = false;
-        }
-        else {
-          mPlayerInput.mLeft = false;
-          mPlayerInput.mRight = false;
-        }
-      } else if (
-        event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY ||
-        event.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY
-      ) { // y axis
-        if (event.caxis.value < -SDL_DEAD_ZONE) {
-          mPlayerInput.mUp = true;
-          mPlayerInput.mDown = false;
-          mPlayerInput.mInteract.mIsPressed = true;
-          mPlayerInput.mInteract.mWasTriggered = true;
-        }
-        else if (event.caxis.value > SDL_DEAD_ZONE) {
-          mPlayerInput.mDown = true;
-          mPlayerInput.mUp = false;
-        }
-        else {
-          mPlayerInput.mDown = false;
-          mPlayerInput.mUp = false;
-          mPlayerInput.mInteract.mIsPressed = false;
-        }
+      switch (event.caxis.axis) {
+        case SDL_CONTROLLER_AXIS_LEFTX:
+        case SDL_CONTROLLER_AXIS_RIGHTX:
+          mAnalogStickVector.x =
+            applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_X);
+          break;
+
+        case SDL_CONTROLLER_AXIS_LEFTY:
+        case SDL_CONTROLLER_AXIS_RIGHTY:
+          mAnalogStickVector.y =
+            applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_Y);
+          break;
+
+        case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+        case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+          {
+            const auto triggerPressed = event.caxis.value > TRIGGER_THRESHOLD;
+
+            auto& input = event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT
+              ? mPlayerInput.mJump
+              : mPlayerInput.mFire;
+            if (!input.mIsPressed && triggerPressed) {
+              input.mWasTriggered = true;
+            }
+            input.mIsPressed = triggerPressed;
+          }
+          break;
+
+        default:
+          break;
       }
       break;
 
-    // handling of dpad and rest of buttons in game controllers
     case SDL_CONTROLLERBUTTONDOWN:
     case SDL_CONTROLLERBUTTONUP:
       {
