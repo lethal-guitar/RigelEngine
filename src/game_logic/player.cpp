@@ -490,7 +490,7 @@ void Player::update(const PlayerInput& unfilteredInput) {
 
 
 void Player::takeDamage(const int amount) {
-  if (isDead() || mMercyFramesRemaining > 0 || mGodModeOn) {
+  if (isDead() || isInMercyFrames() || isCloaked() || mGodModeOn) {
     return;
   }
 
