@@ -27,6 +27,11 @@ void LifeTimeSystem::update(entityx::EntityManager& es) {
     entityx::Entity entity,
     components::AutoDestroy& autoDestroyProperties
   ) {
+    auto entityIsOnScreen = [&]() {
+      return entity.has_component<components::Active>() &&
+        entity.component<components::Active>()->mIsOnScreen;
+    };
+
     const auto flags = autoDestroyProperties.mConditionFlags;
 
     const auto conditionIsSet = [&flags](const Condition condition) {
@@ -43,7 +48,7 @@ void LifeTimeSystem::update(entityx::EntityManager& es) {
       (conditionIsSet(Condition::OnWorldCollision) &&
         entity.has_component<components::CollidedWithWorld>()) ||
       (conditionIsSet(Condition::OnLeavingActiveRegion) &&
-        !entity.has_component<components::Active>()) ||
+        !entityIsOnScreen()) ||
       (hasTimeout && autoDestroyProperties.mFramesToLive < 0);
 
     if (mustDestroy) {
