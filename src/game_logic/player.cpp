@@ -1324,22 +1324,13 @@ bool Player::tryAttachToClimbable() {
     --worldBBox.topLeft.y;
   }
 
-  std::optional<base::Vector> maybeClimbableTouchPoint;
-  for (int i = 0; i < worldBBox.size.width; ++i) {
-    const auto attributes =
-      mpMap->attributes(worldBBox.left() + i, worldBBox.top());
-    if (attributes.isClimbable()) {
-      maybeClimbableTouchPoint =
-        base::Vector{worldBBox.left() + i, worldBBox.top()};
-      break;
-    }
-  }
-
-  if (maybeClimbableTouchPoint) {
+  const auto attributes =
+    mpMap->attributes(worldBBox.left() + 1, worldBBox.top());
+  if (attributes.isClimbable()) {
     setVisualState(VisualState::HangingFromPipe);
     mState = OnPipe{};
     mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
-    position().y = maybeClimbableTouchPoint->y + PLAYER_HEIGHT;
+    position().y = worldBBox.top() + PLAYER_HEIGHT;
     return true;
   }
 
