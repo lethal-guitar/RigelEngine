@@ -245,6 +245,21 @@ int messengerDroneTypeIndex(const ActorID id) {
 }
 
 
+base::Vector directionVectorForRocketType(const ActorID id) {
+  switch (id) {
+    case ActorID::Enemy_rocket_left: return {-1, 0};
+    case ActorID::Enemy_rocket_right: return {+1, 0};
+    case ActorID::Enemy_rocket_up: return {0, -1};
+    case ActorID::Enemy_rocket_2_up: return {0, -1};
+    case ActorID::Enemy_rocket_2_down: return {0, +1};
+
+    default:
+      assert(false);
+      return {};
+  }
+}
+
+
 template<typename EntityLike>
 void configureMovingEffectSprite(
   EntityLike& entity,
@@ -1510,12 +1525,25 @@ void EntityFactory::configureEntity(
     case ActorID::Enemy_rocket_right:
     case ActorID::Enemy_rocket_2_up:
     case ActorID::Enemy_rocket_2_down:
-      entity.assign<Shootable>(Health{1}, GivenScore{10});
-      entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      entity.assign<BehaviorController>(behaviors::EnemyRocket{
+        directionVectorForRocketType(actorID)});
+      entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<AutoDestroy>(AutoDestroy{
+        AutoDestroy::Condition::OnLeavingActiveRegion});
       entity.component<Sprite>()->mFramesToRender.push_back(1);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       entity.assign<AppearsOnRadar>();
+
+      // The "up/down 2" variants are not destructible
+      if (
+        actorID != ActorID::Enemy_rocket_2_up &&
+        actorID != ActorID::Enemy_rocket_2_down
+      ) {
+        entity.assign<Shootable>(Health{1}, GivenScore{10});
+        entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
+      }
       break;
 
     case ActorID::Watchbot_container_carrier: // Watch-bot container carrier
