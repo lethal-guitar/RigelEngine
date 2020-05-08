@@ -54,15 +54,14 @@ void DamageSystem::update(entityx::EntityManager& es) {
     ) {
       const auto bbox = toWorldSpace(boundingBox, position);
       const auto hasCollision = bbox.intersects(playerBBox);
-      const auto playerCanTakeDamage =
-        mpPlayer->canTakeDamage() || damage.mIsFatal;
 
-      if (hasCollision && playerCanTakeDamage) {
+      if (hasCollision) {
         if (damage.mIsFatal) {
           mpPlayer->takeFatalDamage();
         } else {
           mpPlayer->takeDamage(damage.mAmount);
         }
+
         if (damage.mDestroyOnContact) {
           entity.destroy();
         }

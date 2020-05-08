@@ -328,11 +328,6 @@ bool Player::isInRegularState() const {
 }
 
 
-bool Player::canTakeDamage() const {
-  return !(isInMercyFrames() || isCloaked());
-}
-
-
 bool Player::isInMercyFrames() const {
   return mMercyFramesRemaining > 0;
 }
@@ -490,7 +485,7 @@ void Player::update(const PlayerInput& unfilteredInput) {
 
 
 void Player::takeDamage(const int amount) {
-  if (isDead() || mMercyFramesRemaining > 0 || mGodModeOn) {
+  if (isDead() || isInMercyFrames() || isCloaked() || mGodModeOn) {
     return;
   }
 

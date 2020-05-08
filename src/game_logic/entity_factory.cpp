@@ -38,6 +38,7 @@
 #include "game_logic/enemies/boss_episode_3.hpp"
 #include "game_logic/enemies/boss_episode_4.hpp"
 #include "game_logic/enemies/ceiling_sucker.hpp"
+#include "game_logic/enemies/enemy_rocket.hpp"
 #include "game_logic/enemies/eyeball_thrower.hpp"
 #include "game_logic/enemies/flame_thrower_bot.hpp"
 #include "game_logic/enemies/floating_laser_bot.hpp"
@@ -591,6 +592,19 @@ void EntityFactory::configureProjectile(
 
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
+
+  // TODO: The way projectile creation works needs an overhaul, it's quite
+  // messy and convoluted right now. Having this weird special case here
+  // for rockets is the easiest way to add rockets without doing the full
+  // refactoring, which is planned for later.
+  //
+  // See configureEntity() for the rocket configuration.
+  if (
+    type == ProjectileType::EnemyRocket ||
+    type == ProjectileType::EnemyBossRocket
+  ) {
+    return;
+  }
 
   entity.assign<MovingBody>(
     Velocity{directionToVector(direction) * speed},
