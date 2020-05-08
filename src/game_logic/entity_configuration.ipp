@@ -1980,6 +1980,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       addBarrelDestroyEffect(entity);
+      addDefaultMovingBody(entity, boundingBox);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1994,7 +1995,6 @@ void EntityFactory::configureEntity(
           AutoDestroy::afterTimeout(numAnimationFrames),
           Active{});
         container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
-        addDefaultMovingBody(container, boundingBox);
 
         auto barrelSprite = createSpriteForId(ActorID::Nuclear_waste_can_empty);
         turnIntoContainer(entity, barrelSprite, 200, std::move(container));
