@@ -91,6 +91,7 @@ private:
 
   void swapBuffers();
   void applyChangedOptions();
+  void enumerateGameControllers();
 
   // IGameServiceProvider implementation
   void fadeOutScreen() override;
