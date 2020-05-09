@@ -17,6 +17,7 @@
 #include "enemy_radar.hpp"
 
 #include "engine/visual_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 
 #include <array>
 
@@ -88,51 +89,48 @@ void RadarDishCounter::receive(
 }
 
 
-RadarComputerSystem::RadarComputerSystem(const RadarDishCounter* pCounter)
-  : mpCounter(pCounter)
-{
-}
-
-
-void RadarComputerSystem::update(entityx::EntityManager& es) {
-  using components::RadarComputer;
+void behaviors::RadarComputer::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool,
+  entityx::Entity entity
+) {
   using engine::components::Sprite;
 
-  if (mIsOddFrame) {
-    es.each<RadarComputer, Sprite>(
-      [this](entityx::Entity, RadarComputer& state, Sprite& sprite) {
-        ++state.mAnimationStep;
-        if (state.mAnimationStep >= NUM_ANIMATION_STEPS) {
-          state.mAnimationStep = 0;
-        }
-
-        const auto previousFrame = sprite.mFramesToRender[0];
-
-        const auto& sequence = mpCounter->radarDishesPresent()
-          ? DISHES_FUNCTIONAL_SEQUENCE
-          : DISHES_DESTROYED_SEQUENCE;
-
-        const auto newFrame = sequence[state.mAnimationStep];
-
-        sprite.mFramesToRender[0] = newFrame;
-
-        if (previousFrame != SHOW_COUNT_FRAME && newFrame == SHOW_COUNT_FRAME) {
-          sprite.mFramesToRender.push_back(DISH_COUNT_BASE_FRAME);
-        }
-
-        if (previousFrame == SHOW_COUNT_FRAME && newFrame != SHOW_COUNT_FRAME) {
-          sprite.mFramesToRender.pop_back();
-        }
-
-        if (newFrame == SHOW_COUNT_FRAME) {
-          const auto dishCountFrame =
-            DISH_COUNT_BASE_FRAME + mpCounter->numRadarDishes();
-          sprite.mFramesToRender.back() = dishCountFrame;
-        }
-      });
+  if (!s.mpPerFrameState->mIsOddFrame) {
+    return;
   }
 
-  mIsOddFrame = !mIsOddFrame;
+  ++mAnimationStep;
+  if (mAnimationStep >= NUM_ANIMATION_STEPS) {
+    mAnimationStep = 0;
+  }
+
+  auto& sprite = *entity.component<Sprite>();
+  const auto previousFrame = sprite.mFramesToRender[0];
+
+  const auto radarDishesPresent = s.mpPerFrameState->mNumRadarDishes > 0;
+  const auto& sequence = radarDishesPresent
+    ? DISHES_FUNCTIONAL_SEQUENCE
+    : DISHES_DESTROYED_SEQUENCE;
+
+  const auto newFrame = sequence[mAnimationStep];
+
+  sprite.mFramesToRender[0] = newFrame;
+
+  if (previousFrame != SHOW_COUNT_FRAME && newFrame == SHOW_COUNT_FRAME) {
+    sprite.mFramesToRender.push_back(DISH_COUNT_BASE_FRAME);
+  }
+
+  if (previousFrame == SHOW_COUNT_FRAME && newFrame != SHOW_COUNT_FRAME) {
+    sprite.mFramesToRender.pop_back();
+  }
+
+  if (newFrame == SHOW_COUNT_FRAME) {
+    const auto dishCountFrame =
+      DISH_COUNT_BASE_FRAME + s.mpPerFrameState->mNumRadarDishes;
+    sprite.mFramesToRender.back() = dishCountFrame;
+  }
 }
 
 }

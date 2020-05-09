@@ -33,7 +33,6 @@
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
 #include "game_logic/interactive/elevator.hpp"
-#include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/interactive/item_container.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
@@ -119,7 +118,6 @@ private:
   game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::player::ProjectileSystem mPlayerProjectileSystem;
   game_logic::interaction::ElevatorSystem mElevatorSystem;
-  game_logic::RadarComputerSystem mRadarComputerSystem;
 
   game_logic::DamageInflictionSystem mDamageInflictionSystem;
   game_logic::DynamicGeometrySystem mDynamicGeometrySystem;

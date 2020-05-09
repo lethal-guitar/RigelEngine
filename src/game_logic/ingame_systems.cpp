@@ -99,7 +99,6 @@ IngameSystems::IngameSystems(
       pServiceProvider,
       const_cast<engine::CollisionChecker*>(pCollisionChecker),
       &eventManager)
-  , mRadarComputerSystem(pRadarDishCounter)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
   , mDynamicGeometrySystem(
       pServiceProvider,
@@ -141,6 +140,7 @@ IngameSystems::IngameSystems(
         pServiceProvider,
         &entities,
         &eventManager},
+      pRadarDishCounter,
       &mPlayer,
       &mCamera.position(),
       pMap)
@@ -177,7 +177,6 @@ void IngameSystems::update(
   // Player related logic update
   // ----------------------------------------------------------------------
   mElevatorSystem.update(es);
-  mRadarComputerSystem.update(es);
 
   // ----------------------------------------------------------------------
   // A.I. logic update
