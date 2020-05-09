@@ -1977,7 +1977,6 @@ void EntityFactory::configureEntity(
 
     case ActorID::Nuclear_waste_can_empty: // Nuclear waste barrel, empty
       entity.assign<Shootable>(Health{1}, GivenScore{100});
-      entity.assign<BoundingBox>(boundingBox);
       entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       addBarrelDestroyEffect(entity);
       addDefaultMovingBody(entity, boundingBox);
@@ -1990,6 +1989,7 @@ void EntityFactory::configureEntity(
         const auto numAnimationFrames = static_cast<int>(
           sprite.mpDrawData->mFrames.size());
         auto container = makeContainer(
+          boundingBox,
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),

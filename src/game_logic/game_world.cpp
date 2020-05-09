@@ -729,6 +729,8 @@ void GameWorld::restartLevel() {
   }
 
   mLevelData.mMap = mMapAtLevelStart;
+  mBonusInfo.mNumShotBonusGlobes = 0;
+  mBonusInfo.mPlayerTookDamage = false;
 
   mEntities.reset();
   auto playerEntity = mEntityFactory.createEntitiesForLevel(
