@@ -97,8 +97,7 @@ bool canWalkUpStairStep(
     return false;
   }
 
-  stairSteppedBbox.topLeft.x += movement;
-  return collisionChecker.isOnSolidGround(stairSteppedBbox);
+  return true;
 }
 
 }
