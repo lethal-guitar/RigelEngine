@@ -70,6 +70,7 @@ void HoverBotSystem::update(entityx::EntityManager& es) {
         ++state.mNextSpawnCountdown;
         if (state.mNextSpawnCountdown == SPAWN_DELAY) {
           state.mNextSpawnCountdown = 0;
+          --state.mSpawnsRemaining;
           auto robot =
             mpEntityFactory->createActor(data::ActorID::Hoverbot, position + BOT_SPAWN_OFFSET);
           robot.assign<Active>();
