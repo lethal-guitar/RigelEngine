@@ -1294,22 +1294,26 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Green_slime_blob: // Green slime blob
+    case ActorID::Green_slime_blob:
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mpSpriteFactory->actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<ai::components::SlimeBlob>();
+      entity.assign<BehaviorController>(behaviors::SlimeBlob{});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<MovingBody>()->mGravityAffected = false;
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Green_slime_container: // Green slime container
+    case ActorID::Green_slime_container:
       entity.assign<Shootable>(Health{1}, GivenScore{100});
-      ai::configureSlimeContainer(entity);
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      // Render slots: Main part, roof, animated glass contents
+      entity.component<Sprite>()->mFramesToRender = {2, 8, 0};
+      entity.assign<BoundingBox>(BoundingBox{{1, -2}, {3, 3}});
+      entity.assign<BehaviorController>(behaviors::SlimeContainer{});
       entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
       entity.assign<AppearsOnRadar>();
       break;
