@@ -409,7 +409,13 @@ void Player::receive(const events::ElevatorAttachmentChanged& event) {
     return;
   }
 
-  mAttachedElevator = event.mAttachedElevator;
+  using CT = events::ElevatorAttachmentChanged;
+
+  if (event.mType == CT::Attach) {
+    mAttachedElevator = event.mElevator;
+  } else if (event.mType == CT::Detach && mAttachedElevator == event.mElevator) {
+    mAttachedElevator = {};
+  }
 }
 
 

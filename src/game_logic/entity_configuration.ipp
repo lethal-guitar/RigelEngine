@@ -1792,8 +1792,14 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Rocket_elevator: // Rocket elevator
-      interaction::configureElevator(entity);
+    case ActorID::Rocket_elevator:
+      entity.assign<BehaviorController>(behaviors::Elevator{});
+      entity.assign<BoundingBox>(BoundingBox{{0, 0}, {4, 3}});
+      entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<SolidBody>();
+      entity.component<Sprite>()->mFramesToRender.push_back(
+        engine::IGNORE_RENDER_SLOT);
       entity.assign<AppearsOnRadar>();
       break;
 
