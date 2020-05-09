@@ -30,7 +30,6 @@
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
-#include "game_logic/enemies/slime_blob.hpp"
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
 #include "game_logic/interactive/elevator.hpp"
@@ -129,7 +128,6 @@ private:
 
   game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
-  game_logic::ai::SlimeBlobSystem mSlimeBlobSystem;
   game_logic::ai::SpiderSystem mSpiderSystem;
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 

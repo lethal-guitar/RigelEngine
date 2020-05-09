@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 
@@ -26,84 +25,60 @@ RIGEL_RESTORE_WARNINGS
 
 #include <variant>
 
-namespace rigel::engine { class CollisionChecker; }
-namespace rigel::engine { class RandomNumberGenerator; }
+
 namespace rigel::game_logic {
-  class EntityFactory;
-  class Player;
-}
-namespace rigel::game_logic::events {
-  struct ShootableKilled;
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
-
-namespace detail {
-
-struct OnGround {
-  bool mIsOddUpdate = false;
-};
-
-struct Idle {
-  int mFramesElapsed = 0;
-};
-
-struct Ascending {};
-
-struct Descending {};
-
-struct OnCeiling {
-  bool mIsOddUpdate = false;
-};
-
-
-using StateT = std::variant<
-  detail::OnGround,
-  detail::OnCeiling,
-  detail::Idle,
-  detail::Ascending,
-  detail::Descending>;
-
-} // namespace detail
-
+namespace rigel::game_logic::behaviors {
 
 struct SlimeContainer {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onKilled(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
   int mBreakAnimationStep = 0;
 };
 
 
 struct SlimeBlob {
-  detail::StateT mState = detail::Idle{};
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  struct OnGround {
+    bool mIsOddUpdate = false;
+  };
+
+  struct Idle {
+    int mFramesElapsed = 0;
+  };
+
+  struct Ascending {};
+
+  struct Descending {};
+
+  struct OnCeiling {
+    bool mIsOddUpdate = false;
+  };
+
+  using State = std::variant<OnGround, OnCeiling, Idle, Ascending, Descending>;
+
+  State mState = Idle{};
   engine::components::Orientation mOrientation =
     engine::components::Orientation::Left;
-};
-
-} // namespace components
-
-
-void configureSlimeContainer(entityx::Entity entity);
-
-
-class SlimeBlobSystem : public entityx::Receiver<SlimeBlobSystem> {
-public:
-  SlimeBlobSystem(
-    const Player* pPlayer,
-    engine::CollisionChecker* pCollisionChecker,
-    EntityFactory* pEntityFactory,
-    engine::RandomNumberGenerator* pRandomGenerator,
-    entityx::EventManager& events);
-
-  void update(entityx::EntityManager& es);
-  void receive(const events::ShootableKilled& event);
-
-private:
-  const Player* mpPlayer;
-  engine::CollisionChecker* mpCollisionChecker;
-  EntityFactory* mpEntityFactory;
-  engine::RandomNumberGenerator* mpRandomGenerator;
 };
 
 }

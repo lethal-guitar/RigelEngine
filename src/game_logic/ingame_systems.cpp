@@ -125,12 +125,6 @@ IngameSystems::IngameSystems(
   , mSimpleWalkerSystem(
       playerEntity,
       const_cast<engine::CollisionChecker*>(pCollisionChecker))
-  , mSlimeBlobSystem(
-      &mPlayer,
-      const_cast<engine::CollisionChecker*>(pCollisionChecker),
-      pEntityFactory,
-      pRandomGenerator,
-      eventManager)
   , mSpiderSystem(
       &mPlayer,
       const_cast<engine::CollisionChecker*>(pCollisionChecker),
@@ -190,7 +184,6 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   mBlueGuardSystem.update(es);
   mSimpleWalkerSystem.update(es);
-  mSlimeBlobSystem.update(es);
   mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
   mBehaviorControllerSystem.update(es, input, viewPortSize);
