@@ -1989,6 +1989,7 @@ void EntityFactory::configureEntity(
         const auto numAnimationFrames = static_cast<int>(
           sprite.mpDrawData->mFrames.size());
         auto container = makeContainer(
+          boundingBox,
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
