@@ -59,12 +59,19 @@ inline void assignPlayerComponents(
 namespace events {
 
 struct ElevatorAttachmentChanged {
-  explicit ElevatorAttachmentChanged(entityx::Entity attachedElevator)
-    : mAttachedElevator(attachedElevator)
+  enum ChangeType {
+    Attach,
+    Detach
+  };
+
+  ElevatorAttachmentChanged(entityx::Entity elevator, ChangeType type)
+    : mElevator(elevator)
+    , mType(type)
   {
   }
 
-  entityx::Entity mAttachedElevator;
+  entityx::Entity mElevator;
+  ChangeType mType;
 };
 
 struct AirLockOpened {

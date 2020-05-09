@@ -94,11 +94,6 @@ IngameSystems::IngameSystems(
       pServiceProvider,
       pCollisionChecker,
       pMap)
-  , mElevatorSystem(
-      playerEntity,
-      pServiceProvider,
-      const_cast<engine::CollisionChecker*>(pCollisionChecker),
-      &eventManager)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
   , mDynamicGeometrySystem(
       pServiceProvider,
@@ -165,11 +160,6 @@ void IngameSystems::update(
   mPlayer.update(input);
   mCamera.update(input, viewPortSize);
   engine::markActiveEntities(es, mCamera.position(), viewPortSize);
-
-  // ----------------------------------------------------------------------
-  // Player related logic update
-  // ----------------------------------------------------------------------
-  mElevatorSystem.update(es);
 
   // ----------------------------------------------------------------------
   // A.I. logic update

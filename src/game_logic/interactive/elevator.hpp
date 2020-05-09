@@ -17,52 +17,36 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "game_logic/player/components.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::engine { class CollisionChecker; }
+#include <optional>
 
 
-namespace rigel::game_logic::interaction {
-
-namespace components {
-
-struct Elevator {};
-
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-void configureElevator(entityx::Entity entity);
+namespace rigel::game_logic::behaviors {
 
+struct Elevator {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-class ElevatorSystem {
-public:
-  ElevatorSystem(
-    entityx::Entity player,
-    IGameServiceProvider* pServiceProvider,
-    engine::CollisionChecker* pCollisionChecker,
-    entityx::EventManager* pEvents);
+  struct State {
+    int mPreviousPosY = 0;
+  };
 
-  void update(entityx::EntityManager& es);
-
-private:
-  entityx::Entity findAttachableElevator(entityx::EntityManager& es) const;
-
-  void updateElevatorAttachment(entityx::EntityManager& es);
-
-private:
-  entityx::Entity mPlayer;
-  entityx::Entity mAttachedElevator;
-  IGameServiceProvider* mpServiceProvider;
-  engine::CollisionChecker* mpCollisionChecker;
-  entityx::EventManager* mpEvents;
-
-  int mActiveElevatorPreviousPosition;
-  bool mIsOddFrame = false;
+  // Only present while player is attached
+  std::optional<State> mState;
 };
 
 }
