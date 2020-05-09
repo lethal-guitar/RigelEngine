@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -24,15 +25,16 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
+
+
+namespace rigel::game_logic {
 
 namespace components {
 
 struct RadarDish {};
-
-
-struct RadarComputer {
-  int mAnimationStep = 0;
-};
 
 }
 
@@ -56,15 +58,18 @@ private:
 };
 
 
-class RadarComputerSystem {
-public:
-  explicit RadarComputerSystem(const RadarDishCounter* pCounter);
+namespace behaviors {
 
-  void update(entityx::EntityManager& es);
+struct RadarComputer {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-private:
-  const RadarDishCounter* mpCounter;
-  bool mIsOddFrame = false;
+  int mAnimationStep = 0;
 };
+
+}
 
 }

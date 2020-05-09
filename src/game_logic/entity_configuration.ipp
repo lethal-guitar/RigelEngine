@@ -1834,7 +1834,7 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Radar_dish: // Radar dish
+    case ActorID::Radar_dish:
       entity.assign<Shootable>(Health{4}, GivenScore{2000});
       entity.assign<DestructionEffects>(RADAR_DISH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
@@ -1843,8 +1843,9 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Radar_computer_terminal: // Radar dish computer
-      entity.assign<components::RadarComputer>();
+    case ActorID::Radar_computer_terminal:
+      entity.assign<BehaviorController>(behaviors::RadarComputer{});
+      entity.assign<BoundingBox>(boundingBox);
       break;
 
     case ActorID::Special_hint_machine: // Special hint machine

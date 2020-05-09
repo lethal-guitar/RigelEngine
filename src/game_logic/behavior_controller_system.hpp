@@ -29,6 +29,8 @@ namespace rigel::engine::events {
   struct CollidedWithWorld;
 }
 
+namespace rigel::game_logic { class RadarDishCounter; }
+
 
 namespace rigel::game_logic {
 
@@ -37,6 +39,7 @@ class BehaviorControllerSystem :
 public:
   explicit BehaviorControllerSystem(
     GlobalDependencies dependencies,
+    const RadarDishCounter* pRadarDishCounter,
     Player* pPlayer,
     const base::Vector* pCameraPosition,
     data::map::Map* pMap);
@@ -56,6 +59,7 @@ private:
   GlobalDependencies mDependencies;
   PerFrameState mPerFrameState;
   GlobalState mGlobalState;
+  const RadarDishCounter* mpRadarDishCounter;
 };
 
 }

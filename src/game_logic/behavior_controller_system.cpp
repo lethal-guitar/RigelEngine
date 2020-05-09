@@ -20,12 +20,14 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
+#include "game_logic/interactive/enemy_radar.hpp"
 
 
 namespace rigel::game_logic {
 
 BehaviorControllerSystem::BehaviorControllerSystem(
   GlobalDependencies dependencies,
+  const RadarDishCounter* pRadarDishCounter,
   Player* pPlayer,
   const base::Vector* pCameraPosition,
   data::map::Map* pMap
@@ -36,6 +38,7 @@ BehaviorControllerSystem::BehaviorControllerSystem(
       pCameraPosition,
       pMap,
       &mPerFrameState)
+  , mpRadarDishCounter(pRadarDishCounter)
 {
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
@@ -55,6 +58,7 @@ void BehaviorControllerSystem::update(
 
   mPerFrameState.mInput = input;
   mPerFrameState.mCurrentViewPortSize = viewPortSize;
+  mPerFrameState.mNumRadarDishes = mpRadarDishCounter->numRadarDishes();
 
   es.each<BehaviorController, Active>([this](
     entityx::Entity entity,
