@@ -83,6 +83,7 @@ struct ItemContainer {
   enum class ReleaseStyle : std::uint8_t {
     Default,
     ItemBox,
+    ItemBoxNoBounce,
     NuclearWasteBarrel
   };
 
@@ -103,13 +104,16 @@ class ItemContainerSystem : public entityx::Receiver<ItemContainerSystem> {
 public:
   ItemContainerSystem(
     entityx::EntityManager* pEntityManager,
+    const engine::CollisionChecker* pCollisionChecker,
     entityx::EventManager& events);
 
   void update(entityx::EntityManager& es);
+  void updateItemBounce(entityx::EntityManager& es);
   void receive(const events::ShootableKilled& event);
 
 private:
   entityx::EntityManager* mpEntityManager;
+  const engine::CollisionChecker* mpCollisionChecker;
   std::vector<entityx::Entity> mShotContainersQueue;
 };
 

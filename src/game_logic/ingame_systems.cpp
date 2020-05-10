@@ -115,7 +115,7 @@ IngameSystems::IngameSystems(
       pEntityFactory,
       &mParticles,
       eventManager)
-  , mItemContainerSystem(&entities, eventManager)
+  , mItemContainerSystem(&entities, &mCollisionChecker, eventManager)
   , mBlueGuardSystem(
       &mPlayer,
       &mCollisionChecker,
@@ -230,6 +230,7 @@ void IngameSystems::update(
   // Physics and other updates
   // ----------------------------------------------------------------------
   mPhysicsSystem.updatePhase1(es);
+  mItemContainerSystem.updateItemBounce(es);
 
   // Collect items after physics, so that any collectible
   // items are in their final positions for this frame.
