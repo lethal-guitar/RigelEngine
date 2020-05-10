@@ -356,11 +356,9 @@ GameWorld::GameWorld(
 
   if (playerPositionOverride) {
     mpState->mpSystems->player().position() = *playerPositionOverride;
+    mpState->mpSystems->centerViewOnPlayer();
+    updateGameLogic({});
   }
-
-  mpState->mpSystems->centerViewOnPlayer();
-
-  updateGameLogic({});
 
   if (showWelcomeMessage) {
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
@@ -531,6 +529,9 @@ void GameWorld::loadLevel() {
     mEventManager,
     &mSpriteFactory,
     mSessionId);
+
+  mpState->mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
 
   if (data::isBossLevel(mSessionId.mLevel)) {
     mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
@@ -747,9 +748,6 @@ void GameWorld::restartLevel() {
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
   loadLevel();
-
-  mpState->mpSystems->centerViewOnPlayer();
-  updateGameLogic({});
 
   if (mpState->mRadarDishCounter.radarDishesPresent()) {
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);
