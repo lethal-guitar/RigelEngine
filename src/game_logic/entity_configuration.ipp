@@ -67,19 +67,6 @@ const int FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
 const int BOSS4_PROJECTILE_SPAWN_ANIM_SEQ[] = { 0, 1, 1, 2, 2, 3, 3, 4 };
 
 
-const base::Point<float> CONTAINER_BOUNCE_SEQUENCE[] = {
-  {0.0f, -3.0f},
-  {0.0f, -2.0f},
-  {0.0f, -1.0f},
-  {0.0f, 0.0f},
-  {0.0f, 1.0f},
-  {0.0f, 2.0f},
-  {0.0f, 3.0f},
-  {0.0f, -1.0f},
-  {0.0f, 1.0f}
-};
-
-
 #include "destruction_effect_specs.ipp"
 
 
@@ -759,11 +746,9 @@ void EntityFactory::configureItemBox(
   addToContainer(
     container,
     Active{},
-    MovementSequence{
-      CONTAINER_BOUNCE_SEQUENCE, ResetAfterSequence{true}, EnableX{false}});
-  addDefaultMovingBody(
-    container,
-    engine::inferBoundingBox(*entity.component<Sprite>(), entity));
+    MovingBody{Velocity{0.0f, 0.0f}, GravityAffected{false}},
+    engine::inferBoundingBox(*entity.component<Sprite>(), entity),
+    ActivationSettings{ActivationSettings::Policy::Always});
 
   auto containerSprite = createSpriteForId(actorIdForBoxColor(color));
   turnIntoContainer(entity, containerSprite, givenScore, std::move(container));
@@ -1072,7 +1057,7 @@ void EntityFactory::configureEntity(
           std::move(livingTurkeyContainer));
         entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
         entity.component<ItemContainer>()->mStyle =
-          ItemContainer::ReleaseStyle::ItemBox;
+          ItemContainer::ReleaseStyle::ItemBoxNoBounce;
         entity.assign<AppearsOnRadar>();
       }
       break;
@@ -1993,6 +1978,7 @@ void EntityFactory::configureEntity(
           PlayerDamaging{Damage{1}},
           AnimationLoop{1},
           AutoDestroy::afterTimeout(numAnimationFrames),
+          ActivationSettings{ActivationSettings::Policy::Always},
           Active{});
         container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
 

@@ -32,18 +32,38 @@
 
 namespace rigel::game_logic {
 
+namespace {
+
 using engine::components::Active;
 using engine::components::BoundingBox;
+using engine::components::MovingBody;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
 using game_logic::components::ItemContainer;
 
+constexpr int ITEM_BOUNCE_SEQUENCE[] = {-3, -2, -1, 0, 1, 2, 3, -1, 1};
+
+
+struct ItemBounceEffect {
+  explicit ItemBounceEffect(const float fallVelocity)
+    : mFallVelocity(fallVelocity)
+  {
+  }
+
+  int mFramesElapsed = 1;
+  float mFallVelocity = 0.0f;
+};
+
+}
+
 
 ItemContainerSystem::ItemContainerSystem(
   entityx::EntityManager* pEntityManager,
+  const engine::CollisionChecker* pCollisionChecker,
   entityx::EventManager& events
 )
   : mpEntityManager(pEntityManager)
+  , mpCollisionChecker(pCollisionChecker)
 {
   events.subscribe<events::ShootableKilled>(*this);
 }
@@ -62,8 +82,7 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
     }
 
     contents.assign<WorldPosition>(*entity.component<WorldPosition>());
-
-    entity.destroy();
+    return contents;
   };
 
   for (auto& entity : mShotContainersQueue) {
@@ -72,15 +91,26 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
     switch (container.mStyle) {
       case RS::Default:
         releaseItem(entity, container.mContainedComponents);
+        entity.destroy();
         break;
 
       case RS::ItemBox:
+      case RS::ItemBoxNoBounce:
         ++container.mFramesElapsed;
 
         if (container.mFramesElapsed == 1) {
           entity.component<Sprite>()->flashWhite();
         } else if (container.mFramesElapsed == 2) {
-          releaseItem(entity, container.mContainedComponents);
+          auto item = releaseItem(entity, container.mContainedComponents);
+
+          if (container.mStyle != RS::ItemBoxNoBounce) {
+            const auto fallVelocity =
+              entity.component<MovingBody>()->mVelocity.y;
+            item.assign<ItemBounceEffect>(fallVelocity);
+            item.component<WorldPosition>()->y += ITEM_BOUNCE_SEQUENCE[0];
+          }
+
+          entity.destroy();
         }
         break;
 
@@ -97,6 +127,7 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
           entity.component<Sprite>()->mShow = false;
         } else if (container.mFramesElapsed == 4) {
           releaseItem(entity, container.mContainedComponents);
+          entity.destroy();
         }
         break;
     }
@@ -108,6 +139,35 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
         return !entity.valid();
       }),
     end(mShotContainersQueue));
+}
+
+
+void ItemContainerSystem::updateItemBounce(entityx::EntityManager& es) {
+  es.each<WorldPosition, BoundingBox, MovingBody, ItemBounceEffect>(
+    [this](
+      entityx::Entity entity,
+      WorldPosition& position,
+      const BoundingBox& bbox,
+      MovingBody& body,
+      ItemBounceEffect& state
+    ) {
+      position.y += ITEM_BOUNCE_SEQUENCE[state.mFramesElapsed];
+
+      const auto hasLanded =
+        mpCollisionChecker->isOnSolidGround(position, bbox);
+      if (
+        (state.mFramesElapsed == 7 && !hasLanded) ||
+        state.mFramesElapsed == 9
+      ) {
+        body.mGravityAffected = true;
+        body.mVelocity.y = state.mFallVelocity;
+      }
+
+      ++state.mFramesElapsed;
+      if (state.mFramesElapsed == 9) {
+        entity.remove<ItemBounceEffect>();
+      }
+    });
 }
 
 
@@ -194,7 +254,7 @@ void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
   mState = NapalmBomb::State::SpawningFires;
   mFramesElapsed = 0;
   entity.component<Sprite>()->mShow = false;
-  entity.remove<engine::components::MovingBody>();
+  entity.remove<MovingBody>();
   entity.remove<game_logic::components::AppearsOnRadar>();
 
   // Once the bomb explodes, it counts towards bonus 6. This means we need to
