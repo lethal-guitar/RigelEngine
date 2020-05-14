@@ -405,11 +405,19 @@ base::Vector Player::orientedPosition() const {
 
 
 void Player::receive(const events::ElevatorAttachmentChanged& event) {
+  if (isDead()) {
+    return;
+  }
+
   mAttachedElevator = event.mAttachedElevator;
 }
 
 
 void Player::receive(const events::AirLockOpened& event) {
+  if (isDead()) {
+    return;
+  }
+
   mState = GettingSuckedIntoSpace{};
 
   *mEntity.component<c::Orientation>() = event.mOrientation;
@@ -419,11 +427,19 @@ void Player::receive(const events::AirLockOpened& event) {
 }
 
 void Player::beginBeingPushedByFan() {
+  if (isDead()) {
+    return;
+  }
+
   mState = PushedByFan{};
 }
 
 
 void Player::endBeingPushedByFan() {
+  if (isDead()) {
+    return;
+  }
+
   auto newState = Jumping{};
   newState.mFramesElapsed = 5;
   mState = newState;
@@ -509,6 +525,10 @@ void Player::takeFatalDamage() {
 
 
 void Player::die() {
+  if (isDead()) {
+    return;
+  }
+
   if (stateIs<InShip>()) {
     exitShip();
   }
@@ -525,6 +545,10 @@ void Player::enterShip(
   const base::Vector& shipPosition,
   const c::Orientation shipOrientation
 ) {
+  if (isDead()) {
+    return;
+  }
+
   position() = shipPosition;
   *mEntity.component<c::Orientation>() = shipOrientation;
   mState = InShip{};
@@ -543,6 +567,10 @@ void Player::enterShip(
 
 
 void Player::exitShip() {
+  if (isDead()) {
+    return;
+  }
+
   mState = OnGround{};
 
   const auto facingLeft = orientation() == c::Orientation::Left;
@@ -563,6 +591,10 @@ void Player::exitShip() {
 
 
 void Player::incapacitate(const int framesToKeepVisible) {
+  if (isDead()) {
+    return;
+  }
+
   if (framesToKeepVisible == 0) {
     mEntity.component<c::Sprite>()->mShow = false;
   }
@@ -571,6 +603,10 @@ void Player::incapacitate(const int framesToKeepVisible) {
 
 
 void Player::setFree() {
+  if (isDead()) {
+    return;
+  }
+
   mEntity.component<c::Sprite>()->mShow = true;
   mState = OnGround{};
   mVisualState = VisualState::Standing;
@@ -579,6 +615,10 @@ void Player::setFree() {
 
 
 void Player::doInteractionAnimation() {
+  if (isDead()) {
+    return;
+  }
+
   mState = Interacting{INTERACTION_LOCK_DURATION};
 }
 
