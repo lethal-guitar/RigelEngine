@@ -91,6 +91,7 @@ I'm planning to provide binaries for OS X and Ubuntu/Debian in the future, but r
 * [Linux builds](#linux-build-instructions)
     * [Ubuntu 19.04 or newer](#linux-build-instructions-194)
     * [Ubuntu 18.04](#linux-build-instructions-184)
+    * [Fedora](#linux-build-instructions-fedora)
 * [OS X builds](#mac-build-instructions)
 * [Windows builds](#windows-build-instructions)
 
@@ -150,6 +151,10 @@ In order to be able to install all required dependencies from the system's
 package manager, a fairly recent distro is required. I have successfully built
 the project using the following instructions on Ubuntu 19.04 and 19.10.
 Building on Ubuntu 18.04 is also possible, but it requires a few more steps.
+
+For other distros (not based on Debian), the same instructions should work as well,
+with only the package installation command needing adaptation,
+as long as all necessary dependencies are available at recent enough versions.
 
 #### <a name="linux-build-instructions-194">Ubuntu 19.04 or newer</a>
 
@@ -220,6 +225,17 @@ make -j8 # adjust depending on number of CPU cores in your machine
 # Now run it!
 ./src/RigelEngine
 ```
+
+#### <a name="linux-build-instructions-fedora">Fedora</a>
+
+On Fedora (tested with version 31), the following command installs all
+required dependencies:
+
+```bash
+sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel SDL2_mixer-devel
+```
+
+This assumes that `make`, `gcc` and `gcc-c++` are already installed.
 
 ### <a name="mac-build-instructions">OS X builds</a>
 
