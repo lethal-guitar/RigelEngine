@@ -81,6 +81,7 @@ void CeilingSucker::update(
       if (
         state.mFramesElapsed == 5 &&
         touchingPlayer() &&
+        !s.mpPlayer->isDead() &&
         playerPos.x + 1 >= position.x &&
         position.x + 1 >= playerPos.x
       ) {
