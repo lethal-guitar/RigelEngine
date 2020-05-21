@@ -56,10 +56,13 @@ void BlowingFan::update(
   const auto& position = *entity.component<WorldPosition>();
   auto& spriteFrames = entity.component<Sprite>()->mFramesToRender;
 
+  auto playerInHorizontalRange = [&]() {
+    return position.x <= playerPos.x && position.x + 5 > playerPos.x;
+  };
+
   auto playerInRange = [&]() {
     return
-      position.x <= playerPos.x &&
-      position.x + 5 > playerPos.x &&
+      playerInHorizontalRange() &&
       position.y > playerPos.y &&
       playerPos.y + 25 > position.y;
   };
@@ -99,7 +102,9 @@ void BlowingFan::update(
     }
   }
 
-  if (mIsPushingPlayer && (mStep < 25 || !playerInRange())) {
+  const auto playerHasLeftRange =
+    !playerInHorizontalRange() || position.y > playerPos.y + 25;
+  if (mIsPushingPlayer && (mStep < 25 || playerHasLeftRange)) {
     s.mpPlayer->endBeingPushedByFan();
     mIsPushingPlayer = false;
   }
