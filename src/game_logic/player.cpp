@@ -441,7 +441,7 @@ void Player::endBeingPushedByFan() {
   }
 
   auto newState = Jumping{};
-  newState.mFramesElapsed = 5;
+  newState.mFramesElapsed = 4;
   mState = newState;
   setVisualState(VisualState::Jumping);
 }
