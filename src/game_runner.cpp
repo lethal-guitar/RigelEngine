@@ -515,8 +515,15 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
 
         case SDL_CONTROLLER_AXIS_LEFTY:
         case SDL_CONTROLLER_AXIS_RIGHTY:
-          mAnalogStickVector.y =
-            applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_Y);
+          {
+            const auto newY =
+              applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_Y);
+            if (mAnalogStickVector.y >= 0 && newY < 0) {
+              mPlayerInput.mInteract.mWasTriggered = true;
+            }
+            mPlayerInput.mInteract.mIsPressed = newY < 0;
+            mAnalogStickVector.y = newY;
+          }
           break;
 
         case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
