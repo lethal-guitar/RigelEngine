@@ -505,8 +505,16 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
         case SDL_CONTROLLER_AXIS_LEFTY:
         case SDL_CONTROLLER_AXIS_RIGHTY:
           {
-            const auto newY =
-              base::applyThreshold(event.caxis.value, ANALOG_STICK_DEADZONE_Y);
+            // We want to avoid accidental crouching/looking up while the
+            // player is walking, but still make it easy to move the ship
+            // up/down while flying. Therefore, we use a different vertical
+            // deadzone when not in the ship.
+            const auto deadZone =
+              mpWorld->mpSystems->player().stateIs<game_logic::InShip>()
+              ? ANALOG_STICK_DEADZONE_X
+              : ANALOG_STICK_DEADZONE_Y;
+
+            const auto newY = base::applyThreshold(event.caxis.value, deadZone);
             if (mAnalogStickVector.y >= 0 && newY < 0) {
               mPlayerInput.mInteract.mWasTriggered = true;
             }
