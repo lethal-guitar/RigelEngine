@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdlib>
 
 
 namespace rigel::base {
@@ -53,6 +54,17 @@ int round(const T value) {
 
 inline int sgn(const int value) {
   return value > 0 ? 1 : (value < 0 ? -1 : 0);
+}
+
+
+template<typename T, typename U>
+T applyThreshold(const T value, const U threshold)
+{
+  if (std::abs(value) < threshold) {
+    return T{0};
+  }
+
+  return value;
 }
 
 }
