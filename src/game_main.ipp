@@ -71,13 +71,13 @@ public:
 
   RunResult run();
 
-private:
+public:
   enum class FadeType {
     In,
     Out
   };
 
-  RunResult mainLoop();
+  // void mainLoop(void *arg);
   void pumpEvents(std::vector<SDL_Event>& eventQueue);
   void updateAndRender(
     entityx::TimeDelta elapsed,
@@ -113,7 +113,7 @@ private:
     return mCommandLineOptions;
   }
 
-private:
+public:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
   engine::SoundSystem mSoundSystem;
@@ -143,6 +143,7 @@ private:
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
   sdl_utils::Ptr<SDL_GameController> mpGameController;
+  std::vector<SDL_Event> eventQueue;
 };
 
 }

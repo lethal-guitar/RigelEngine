@@ -30,7 +30,7 @@
 RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/program_options.hpp>
+// #include <boost/program_options.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
@@ -41,7 +41,7 @@ RIGEL_RESTORE_WARNINGS
 using namespace rigel;
 
 namespace ba = boost::algorithm;
-namespace po = boost::program_options;
+// namespace po = boost::program_options;
 
 
 namespace {
@@ -100,77 +100,77 @@ base::Vector parsePlayerPosition(const std::string& playerPosString) {
 
 
 int main(int argc, char** argv) {
-  showBanner();
+  // showBanner();
 
   CommandLineOptions config;
 
-  po::options_description optionsDescription("Options");
-  optionsDescription.add_options()
-    ("help,h", "Show command line help message")
-    ("skip-intro,s",
-     po::bool_switch(&config.mSkipIntro),
-     "Skip intro movies/Apogee logo, go straight to main menu")
-    ("play-level,l",
-     po::value<std::string>(),
-     "Directly jump to given map, skipping intro/menu etc.")
-    ("player-pos",
-     po::value<std::string>(),
-     "Specify position to place the player at (to be used in conjunction with\n"
-     "'play-level')")
-    ("debug-mode,d",
-     po::bool_switch(&config.mDebugModeEnabled),
-     "Enable debugging features")
-    ("game-path",
-     po::value<std::string>(&config.mGamePath)->default_value(""),
-     "Path to original game's installation. Can also be given as positional "
-     "argument. If not provided here, a folder browser ui will ask for it");
+  // po::options_description optionsDescription("Options");
+  // optionsDescription.add_options()
+  //   ("help,h", "Show command line help message")
+  //   ("skip-intro,s",
+  //    po::bool_switch(&config.mSkipIntro),
+  //    "Skip intro movies/Apogee logo, go straight to main menu")
+  //   ("play-level,l",
+  //    po::value<std::string>(),
+  //    "Directly jump to given map, skipping intro/menu etc.")
+  //   ("player-pos",
+  //    po::value<std::string>(),
+  //    "Specify position to place the player at (to be used in conjunction with\n"
+  //    "'play-level')")
+  //   ("debug-mode,d",
+  //    po::bool_switch(&config.mDebugModeEnabled),
+  //    "Enable debugging features")
+  //   ("game-path",
+  //    po::value<std::string>(&config.mGamePath)->default_value(""),
+  //    "Path to original game's installation. Can also be given as positional "
+  //    "argument. If not provided here, a folder browser ui will ask for it");
 
-  po::positional_options_description positionalArgsDescription;
-  positionalArgsDescription.add("game-path", -1);
+  // po::positional_options_description positionalArgsDescription;
+  // positionalArgsDescription.add("game-path", -1);
 
   try
   {
-    po::variables_map options;
-    po::store(
-      po::command_line_parser(argc, argv)
-        .options(optionsDescription)
-        .positional(positionalArgsDescription)
-        .run(),
-      options);
-    po::notify(options);
+  //   po::variables_map options;
+  //   po::store(
+  //     po::command_line_parser(argc, argv)
+  //       .options(optionsDescription)
+  //       .positional(positionalArgsDescription)
+  //       .run(),
+  //     options);
+  //   po::notify(options);
 
-    if (options.count("help")) {
-      std::cout << optionsDescription << '\n';
-      return 0;
-    }
+  //   if (options.count("help")) {
+  //     std::cout << optionsDescription << '\n';
+  //     return 0;
+  //   }
 
-    if (options.count("play-level")) {
-      config.mLevelToJumpTo =
-        parseLevelToJumpTo(options["play-level"].as<std::string>());
-    }
+  //   if (options.count("play-level")) {
+  //     config.mLevelToJumpTo =
+  //       parseLevelToJumpTo(options["play-level"].as<std::string>());
+  //   }
 
-    if (options.count("player-pos")) {
-      if (!options.count("play-level")) {
-        throw std::invalid_argument(
-          "This option requires also using the play-level option");
-      }
+  //   if (options.count("player-pos")) {
+  //     if (!options.count("play-level")) {
+  //       throw std::invalid_argument(
+  //         "This option requires also using the play-level option");
+  //     }
 
-      config.mPlayerPosition = parsePlayerPosition(
-        options["player-pos"].as<std::string>());
-    }
+  //     config.mPlayerPosition = parsePlayerPosition(
+  //       options["player-pos"].as<std::string>());
+  //   }
 
-    if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
-      config.mGamePath += "/";
-    }
+  //   if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
+  //     config.mGamePath += "/";
+  //   }
 
     gameMain(config);
   }
-  catch (const po::error& err)
-  {
-    std::cerr << "ERROR: " << err.what() << "\n\n";
-    std::cerr << optionsDescription << '\n';
-    return -1;
-  }
+  // catch (const po::error& err)
+  // {
+  //   std::cerr << "ERROR: " << err.what() << "\n\n";
+  //   std::cerr << optionsDescription << '\n';
+  //   return -1;
+  // }
   catch (const std::exception& ex)
   {
     std::cerr << "ERROR: " << ex.what() << '\n';

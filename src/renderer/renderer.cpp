@@ -44,9 +44,8 @@ constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 #ifdef RIGEL_USE_GL_ES
 
-const auto SHADER_PREAMBLE = R"shd(
-#version 100
-
+const auto SHADER_PREAMBLE = R"shd(#version 100
+precision highp float;
 #define ATTRIBUTE attribute
 #define OUT varying
 #define IN varying
@@ -61,6 +60,7 @@ const auto SHADER_PREAMBLE = R"shd(
 const auto SHADER_PREAMBLE = R"shd(
 #version 150
 
+precision highp float;
 #define ATTRIBUTE in
 #define OUT out
 #define IN in
@@ -89,7 +89,6 @@ void main() {
 
 const auto FRAGMENT_SOURCE = R"shd(
 OUTPUT_COLOR_DECLARATION
-
 IN vec2 texCoordFrag;
 
 uniform sampler2D textureData;
@@ -117,7 +116,6 @@ void main() {
 const auto VERTEX_SOURCE_SOLID = R"shd(
 ATTRIBUTE vec2 position;
 ATTRIBUTE vec4 color;
-
 OUT vec4 colorFrag;
 
 uniform mat4 transform;
@@ -131,7 +129,6 @@ void main() {
 
 const auto FRAGMENT_SOURCE_SOLID = R"shd(
 OUTPUT_COLOR_DECLARATION
-
 IN vec4 colorFrag;
 
 void main() {
@@ -143,7 +140,6 @@ void main() {
 const auto VERTEX_SOURCE_WATER_EFFECT = R"shd(
 ATTRIBUTE vec2 position;
 ATTRIBUTE vec2 texCoordMask;
-
 OUT vec2 texCoordFrag;
 OUT vec2 texCoordMaskFrag;
 
@@ -188,7 +184,7 @@ vec4 applyWaterEffect(vec4 color) {
     }
   }
 
-  int adjustedIndex = (index & 0x3) | 0x8;
+  const int adjustedIndex = 0x8;//(index & 0x3) | 0x8;
   return vec4(palette[adjustedIndex], color.a);
 }
 

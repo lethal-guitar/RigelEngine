@@ -289,12 +289,41 @@ set(3rd_party_path ${CMAKE_SOURCE_DIR}/3rd_party)
 
 
 # Core library
+# add_library(rigel_core STATIC ${core_sources})
+# target_include_directories(rigel_core
+#     PUBLIC
+#     "${CMAKE_CURRENT_SOURCE_DIR}"
+#     ${3rd_party_path}/entityx
+
+#     ${3rd_party_path}/glad/include
+#     ${3rd_party_path}/glm
+#     ${3rd_party_path}/nlohmann
+
+#     PRIVATE
+#     ${3rd_party_path}/dbopl
+#     ${3rd_party_path}/speex_resampler
+# )
+# target_link_libraries(rigel_core
+#     PUBLIC
+#     SDL2::Core
+#     SDL2::Mixer
+#     entityx
+#     Boost::boost
+#     dear_imgui
+#     imgui-filebrowser
+
+#     PRIVATE
+#     std::filesystem
+#     dbopl
+#     speex_resampler
+#     glad
+# )
+
 add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
     ${3rd_party_path}/entityx
-
     ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
     ${3rd_party_path}/nlohmann
@@ -305,10 +334,7 @@ target_include_directories(rigel_core
 )
 target_link_libraries(rigel_core
     PUBLIC
-    SDL2::Core
-    SDL2::Mixer
     entityx
-    Boost::boost
     dear_imgui
     imgui-filebrowser
 
@@ -348,11 +374,13 @@ set(main_exe_sources
 
 
 add_executable(${main_exe_name} ${main_exe_sources})
+# target_link_libraries(${main_exe_name} PRIVATE
+#     SDL2::Main
+#     rigel_core
+#     Boost::boost
+#     Boost::program_options
+#     Boost::disable_autolinking
+# )
 target_link_libraries(${main_exe_name} PRIVATE
-    SDL2::Main
     rigel_core
-    Boost::boost
-    Boost::program_options
-    Boost::disable_autolinking
 )
-

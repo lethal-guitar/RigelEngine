@@ -14,10 +14,13 @@ target_include_directories(dear_imgui
     PRIVATE
     ${CMAKE_SOURCE_DIR}/3rd_party/glad/include
 )
+# target_link_libraries(dear_imgui
+#     PRIVATE
+#     SDL2::Core
+#     glad
+# )
 target_link_libraries(dear_imgui
     PRIVATE
-    SDL2::Core
-    glad
 )
 
 if (APPLE)

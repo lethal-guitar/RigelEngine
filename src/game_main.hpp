@@ -18,7 +18,7 @@
 
 #include "common/command_line_options.hpp"
 
-
+#include "emscripten.h"
 namespace rigel {
 
 void gameMain(const CommandLineOptions& options);
