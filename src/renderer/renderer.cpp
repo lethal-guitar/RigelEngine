@@ -188,7 +188,7 @@ vec4 applyWaterEffect(vec4 color) {
     }
   }
 
-  int adjustedIndex = (index & 0x3) | 0x8;
+  int adjustedIndex = int(mod(float(index), 4.0f) + 8.0f);
   return vec4(palette[adjustedIndex], color.a);
 }
 
