@@ -108,6 +108,13 @@ void makeFloor(data::map::Map& map, const int y, const int xStart, const int xEn
 }
 
 
+void makePipe(data::map::Map& map, const int x, const int y, const int length) {
+  for (int i = 0; i < length; ++i) {
+    map.setTileAt(0, x + i, y, 3);
+  }
+}
+
+
 struct StateChange {
   base::Vector move;
   int frame;
@@ -1166,14 +1173,7 @@ TEST_CASE("Player movement") {
 
     SECTION("Regression test: Large jump to wooden beam in M5") {
       position = {50, 50};
-
-      const auto pipeLength = 8;
-      const auto pipeStartX = position.x - 6;
-      const auto pipeEndX = pipeStartX - pipeLength;
-      const auto pipeY = position.y - 12;
-      for (int i = 0; i < pipeLength; ++i) {
-        map.setTileAt(0, pipeStartX + i, pipeY, 3);
-      }
+      makePipe(map, position.x - 6, position.y - 12, 8);
 
       PlayerInput input;
       input.mLeft = true;
