@@ -181,6 +181,14 @@ uniform vec3 palette[16];
 
 
 vec4 applyWaterEffect(vec4 color) {
+  // The original game runs in a palette-based video mode, where the frame
+  // buffer stores indices into a palette of 16 colors instead of directly
+  // storing color values. The water effect is implemented as a modification
+  // of these index values in the frame buffer. To replicate it, we first have
+  // to transform our RGBA color values into indices, by searching the palette
+  // for a matching color. Once we have that, we can apply the same
+  // transformation on the index as done in the original game, and then convert
+  // back to RGBA space by doing a palette lookup with the modified index.
   int index = 0;
   for (int i = 0; i < 16; ++i) {
     if (color.rgb == palette[i]) {
@@ -188,7 +196,13 @@ vec4 applyWaterEffect(vec4 color) {
     }
   }
 
-  int adjustedIndex = (index & 0x3) | 0x8;
+  // The color index transformation for achieving the water effect consists of
+  // remapping any incoming color to one out of 4 indices starting at index 8.
+  // The palette contains 3 shades of blue and a dark green in that area, which
+  // leads to the watery look.
+  // The original game does this via bitwise AND and OR operations, but using
+  // modulo and addition produces the same outcome in this case.
+  int adjustedIndex = int(mod(float(index), 4.0f) + 8.0f);
   return vec4(palette[adjustedIndex], color.a);
 }
 

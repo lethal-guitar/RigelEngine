@@ -108,6 +108,13 @@ void makeFloor(data::map::Map& map, const int y, const int xStart, const int xEn
 }
 
 
+void makePipe(data::map::Map& map, const int x, const int y, const int length) {
+  for (int i = 0; i < length; ++i) {
+    map.setTileAt(0, x + i, y, 3);
+  }
+}
+
+
 struct StateChange {
   base::Vector move;
   int frame;
@@ -1166,14 +1173,7 @@ TEST_CASE("Player movement") {
 
     SECTION("Regression test: Large jump to wooden beam in M5") {
       position = {50, 50};
-
-      const auto pipeLength = 8;
-      const auto pipeStartX = position.x - 6;
-      const auto pipeEndX = pipeStartX - pipeLength;
-      const auto pipeY = position.y - 12;
-      for (int i = 0; i < pipeLength; ++i) {
-        map.setTileAt(0, pipeStartX + i, pipeY, 3);
-      }
+      makePipe(map, position.x - 6, position.y - 12, 8);
 
       PlayerInput input;
       input.mLeft = true;
@@ -1185,6 +1185,47 @@ TEST_CASE("Player movement") {
       for (int i = 0; i < 6; ++i) {
         player.update(input);
       }
+
+      CHECK(animationFrame == 20);
+    }
+
+    SECTION("Regression test: Pipe to pipe jump in O1") {
+      makePipe(map, 10, 50, 7);
+      makePipe(map, 21, 43, 5);
+      resetOrientation(Orientation::Right);
+      position = {12, 53};
+      player.update({});
+      player.update({});
+      REQUIRE(animationFrame == 20);
+
+      PlayerInput input;
+      input.mRight = true;
+      input.mJump.mIsPressed = true;
+      input.mJump.mWasTriggered = true;
+      player.update(input);
+
+      input.mJump.mWasTriggered = false;
+      for (int i = 0; i < 10; ++i) {
+        player.update(input);
+      }
+
+      player.update({});
+
+      CHECK(animationFrame == 20);
+    }
+
+    SECTION("Regression test: Walk off elevator into pipe hang in O8") {
+      makePipe(map, 10, 20, 15);
+      makeFloor(map, 25, 10, 12);
+      resetOrientation(Orientation::Right);
+      position = {12, 24};
+      player.update({});
+      REQUIRE(animationFrame == 0);
+
+      PlayerInput input;
+      input.mRight = true;
+      player.update(input);
+      player.update({});
 
       CHECK(animationFrame == 20);
     }
