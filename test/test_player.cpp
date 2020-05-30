@@ -1189,6 +1189,47 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 20);
     }
 
+    SECTION("Regression test: Pipe to pipe jump in O1") {
+      makePipe(map, 10, 50, 7);
+      makePipe(map, 21, 43, 5);
+      resetOrientation(Orientation::Right);
+      position = {12, 53};
+      player.update({});
+      player.update({});
+      REQUIRE(animationFrame == 20);
+
+      PlayerInput input;
+      input.mRight = true;
+      input.mJump.mIsPressed = true;
+      input.mJump.mWasTriggered = true;
+      player.update(input);
+
+      input.mJump.mWasTriggered = false;
+      for (int i = 0; i < 10; ++i) {
+        player.update(input);
+      }
+
+      player.update({});
+
+      CHECK(animationFrame == 20);
+    }
+
+    SECTION("Regression test: Walk off elevator into pipe hang in O8") {
+      makePipe(map, 10, 20, 15);
+      makeFloor(map, 25, 10, 12);
+      resetOrientation(Orientation::Right);
+      position = {12, 24};
+      player.update({});
+      REQUIRE(animationFrame == 0);
+
+      PlayerInput input;
+      input.mRight = true;
+      player.update(input);
+      player.update({});
+
+      CHECK(animationFrame == 20);
+    }
+
     SECTION("Death sequence") {
       drainMercyFrames();
 

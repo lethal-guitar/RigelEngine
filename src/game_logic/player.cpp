@@ -1584,7 +1584,7 @@ void Player::startFalling() {
   } else {
     mState = Falling{};
     setVisualState(VisualState::Falling);
-    position().y += 1;
+    moveVerticallyInAir(1);
   }
 }
 
