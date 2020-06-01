@@ -76,6 +76,8 @@ struct RedBird {
     const engine::events::CollidedWithWorld& event,
     entityx::Entity entity);
 
+  void startRisingUp(int initialHeight, entityx::Entity entity);
+
   red_bird::State mState;
 };
 

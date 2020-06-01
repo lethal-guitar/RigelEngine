@@ -95,8 +95,11 @@ void RedBird::update(
       }
     },
 
-    [&](const PlungingDown&) {
-      // no-op, state transition handled by collision event handler
+    [&](const PlungingDown& state) {
+      const auto bbox = *entity.component<BoundingBox>();
+      if (d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+        startRisingUp(state.mInitialHeight, entity);
+      }
     },
 
     [&, this](RisingUp& state) {
@@ -128,8 +131,6 @@ void RedBird::onCollision(
 ) {
   using namespace red_bird;
 
-  auto& body = *entity.component<MovingBody>();
-
   base::match(mState,
     [&](const Flying&) {
       if (event.mCollidedLeft || event.mCollidedRight) {
@@ -139,14 +140,21 @@ void RedBird::onCollision(
 
     [&, this](const PlungingDown& state) {
       if (event.mCollidedBottom) {
-        mState = RisingUp{state.mInitialHeight};
-        body.mGravityAffected = false;
-        engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
+        startRisingUp(state.mInitialHeight, entity);
       }
     },
 
     [](const Hovering&) {},
     [](const RisingUp&) {});
+}
+
+
+void RedBird::startRisingUp(const int initialHeight, entityx::Entity entity) {
+  auto& body = *entity.component<MovingBody>();
+
+  mState = red_bird::RisingUp{initialHeight};
+  body.mGravityAffected = false;
+  engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
 }
 
 }
