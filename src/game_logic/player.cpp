@@ -534,7 +534,13 @@ void Player::die() {
   }
 
   mpPlayerModel->takeFatalDamage();
-  mEntity.component<c::Sprite>()->mShow = true;
+  mpPlayerModel->removeItem(data::InventoryItemType::CloakingDevice);
+  mpEvents->emit(rigel::events::CloakExpired{});
+
+  auto& sprite = *mEntity.component<c::Sprite>();
+  sprite.mTranslucent = false;
+  sprite.mShow = true;
+
   mState = Dieing{};
   setVisualState(VisualState::Dieing);
   mpServiceProvider->playSound(data::SoundId::DukeDeath);
