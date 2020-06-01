@@ -85,23 +85,42 @@ base::Rect<int> deadZoneRect(const Player& player) {
 }
 
 
-base::Vector offsetToDeadZone(
+/** Calculate 'normalized' player bounds
+ *
+ * Returns player collision box in world space, adjusted to always be in the
+ * center of the screen with regards to the original game's horizontal screen
+ * size.
+ *
+ * This makes the camera code work correctly when in widescreen mode. The
+ * dead zone is tailored towards normal (i.e. not widescreen) mode, which
+ * would cause the player to be constrained to move inside the left half of
+ * the screen when in widescreen mode. By shifting the player position, we
+ * effectively move the dead zone to the center of the screen instead.
+ *
+ * When the view port is not wide, the result is identical with the player's
+ * world space collision box.
+ */
+base::Rect<int> normalizedPlayerBounds(
   const Player& player,
-  const base::Vector& cameraPosition,
   const base::Extents& viewPortSize
 ) {
   const auto extraTiles =
     viewPortSize.width - data::GameTraits::mapViewPortSize.width;
   const auto offsetToCenter = extraTiles / 2;
-  auto playerBounds = player.worldSpaceCollisionBox();
 
-  // This makes the camera code work correctly when in widescreen mode. The
-  // dead zone is tailored towards normal (i.e. not widescreen) mode, which
-  // would cause the player to be constrained to move inside the left half of
-  // the screen when in widescreen mode. By shifting the player position, we
-  // effectively move the dead zone to the center of the screen instead.
+  auto playerBounds = player.worldSpaceCollisionBox();
   playerBounds.topLeft.x -= offsetToCenter;
 
+  return playerBounds;
+}
+
+
+base::Vector offsetToDeadZone(
+  const Player& player,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
