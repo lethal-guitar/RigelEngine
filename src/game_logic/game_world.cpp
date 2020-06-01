@@ -786,6 +786,7 @@ void GameWorld::handleTeleporter() {
   }
 
   mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
   render();
   mpServiceProvider->fadeInScreen();
 }
