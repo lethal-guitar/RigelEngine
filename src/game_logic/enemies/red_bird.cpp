@@ -65,8 +65,6 @@ void RedBird::update(
   const bool isOnScreen,
   entityx::Entity entity
 ) {
-  using namespace red_bird;
-
   auto& position = *entity.component<WorldPosition>();
   auto& body = *entity.component<MovingBody>();
   auto& sprite = *entity.component<Sprite>();
@@ -129,8 +127,6 @@ void RedBird::onCollision(
   const engine::events::CollidedWithWorld& event,
   entityx::Entity entity
 ) {
-  using namespace red_bird;
-
   base::match(mState,
     [&](const Flying&) {
       if (event.mCollidedLeft || event.mCollidedRight) {
@@ -152,7 +148,7 @@ void RedBird::onCollision(
 void RedBird::startRisingUp(const int initialHeight, entityx::Entity entity) {
   auto& body = *entity.component<MovingBody>();
 
-  mState = red_bird::RisingUp{initialHeight};
+  mState = RisingUp{initialHeight};
   body.mGravityAffected = false;
   engine::startAnimationSequence(entity, HOVER_ANIMATION, 0, true);
 }

@@ -32,37 +32,6 @@ void configureRedBird(entityx::Entity entity);
 
 namespace rigel::game_logic::behaviors {
 
-namespace red_bird {
-
-struct Flying {};
-
-
-struct Hovering {
-  int mFramesElapsed = 0;
-};
-
-
-struct PlungingDown {
-  int mInitialHeight;
-};
-
-
-struct RisingUp {
-  explicit RisingUp(const int initialHeight)
-    : mInitialHeight(initialHeight)
-  {
-  }
-
-  int mInitialHeight;
-  bool mBackAtOriginalHeight = false;
-};
-
-
-using State = std::variant<Flying, Hovering, PlungingDown, RisingUp>;
-
-}
-
-
 struct RedBird {
   void update(
     GlobalDependencies&,
@@ -78,7 +47,29 @@ struct RedBird {
 
   void startRisingUp(int initialHeight, entityx::Entity entity);
 
-  red_bird::State mState;
+
+  struct Flying {};
+
+  struct Hovering {
+    int mFramesElapsed = 0;
+  };
+
+  struct PlungingDown {
+    int mInitialHeight;
+  };
+
+  struct RisingUp {
+    explicit RisingUp(const int initialHeight)
+      : mInitialHeight(initialHeight)
+    {
+    }
+
+    int mInitialHeight;
+    bool mBackAtOriginalHeight = false;
+  };
+
+  using State = std::variant<Flying, Hovering, PlungingDown, RisingUp>;
+  State mState;
 };
 
 }
