@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "engine/base_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 #include <variant>
@@ -48,7 +49,17 @@ struct RedBird {
   void startRisingUp(int initialHeight, entityx::Entity entity);
 
 
-  struct Flying {};
+  struct Flying {
+    Flying() noexcept = default;
+    explicit Flying(const engine::components::Orientation orientation)
+      : mOrientation(orientation)
+    {
+    }
+
+    engine::components::Orientation mOrientation =
+      engine::components::Orientation::Left;
+    unsigned int mAnimStep = 0;
+  };
 
   struct Hovering {
     int mFramesElapsed = 0;
