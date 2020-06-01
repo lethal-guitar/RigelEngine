@@ -54,6 +54,8 @@ constexpr auto DEAD_ZONE_END_X = 21;
 constexpr auto DEFAULT_VERTICAL_DEAD_ZONE = VerticalDeadZone{2, 19};
 constexpr auto TIGHT_VERTICAL_DEAD_ZONE = VerticalDeadZone{7, 13};
 
+constexpr auto INITIAL_CAMERA_OFFSET = base::Vector{15, 19};
+
 constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
 
 
@@ -221,7 +223,12 @@ void Camera::setPosition(const base::Vector position) {
 
 
 void Camera::centerViewOnPlayer() {
-  setPosition(offsetToDeadZone(*mpPlayer, {}, mViewPortSize));
+  auto playerPos = normalizedPlayerBounds(*mpPlayer, mViewPortSize).bottomLeft();
+  if (mpPlayer->orientation() == Orientation::Left) {
+    playerPos.x -= 1;
+  }
+
+  setPosition(playerPos - INITIAL_CAMERA_OFFSET);
 }
 
 
