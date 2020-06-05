@@ -23,24 +23,14 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel {
 
-struct IGameServiceProvider;
-namespace engine { class CollisionChecker; }
-namespace engine { class RandomNumberGenerator; }
-namespace engine::components { struct Sprite; }
-namespace game_logic {
-  class EntityFactory;
-  class Player;
-}
-namespace game_logic::events { struct ShootableDamaged; }
-
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct BlueGuard {
   static BlueGuard typingOnTerminal() {
@@ -55,6 +45,20 @@ struct BlueGuard {
     return instance;
   }
 
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onHit(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
+  void stopTyping(GlobalState& state, entityx::Entity entity);
+
   engine::components::Orientation mOrientation =
     engine::components::Orientation::Left;
   int mStanceChangeCountdown = 0;
@@ -62,43 +66,6 @@ struct BlueGuard {
   bool mTypingOnTerminal = false;
   bool mOneStepWalkedSinceTypingStop = true;
   bool mIsCrouched = false;
-};
-
-}
-
-class BlueGuardSystem : public entityx::Receiver<BlueGuardSystem> {
-public:
-  BlueGuardSystem(
-    const Player* pPlayer,
-    engine::CollisionChecker* pCollisionChecker,
-    EntityFactory* pEntityFactory,
-    IGameServiceProvider* pServiceProvider,
-    engine::RandomNumberGenerator* pRandomGenerator,
-    entityx::EventManager& events);
-
-  void update(entityx::EntityManager& es);
-  void receive(const events::ShootableDamaged& event);
-
-private:
-  void stopTyping(
-    components::BlueGuard& state,
-    engine::components::Sprite& sprite,
-    engine::components::WorldPosition& position);
-
-  void updateGuard(
-    entityx::Entity guardEntity,
-    components::BlueGuard& state,
-    engine::components::Sprite& sprite,
-    engine::components::WorldPosition& position);
-
-private:
-  const Player* mpPlayer;
-  engine::CollisionChecker* mpCollisionChecker;
-  EntityFactory* mpEntityFactory;
-  IGameServiceProvider* mpServiceProvider;
-  engine::RandomNumberGenerator* mpRandomGenerator;
-
-  bool mIsOddFrame = false;
 };
 
 }

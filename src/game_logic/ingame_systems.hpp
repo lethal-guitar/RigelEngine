@@ -28,7 +28,6 @@
 #include "game_logic/debugging_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
-#include "game_logic/enemies/blue_guard.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/enemies/spider.hpp"
 #include "game_logic/enemies/spike_ball.hpp"
@@ -124,7 +123,6 @@ private:
   game_logic::EffectsSystem mEffectsSystem;
   game_logic::ItemContainerSystem mItemContainerSystem;
 
-  game_logic::ai::BlueGuardSystem mBlueGuardSystem;
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
   game_logic::ai::SpiderSystem mSpiderSystem;
   game_logic::ai::SpikeBallSystem mSpikeBallSystem;

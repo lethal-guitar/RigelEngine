@@ -276,13 +276,15 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
 }
 
 
-auto createBlueGuardAiComponent(const ActorID id) {
-  using ai::components::BlueGuard;
+auto createBlueGuardBehavior(const ActorID id) {
+  using behaviors::BlueGuard;
 
   if (id == ActorID::Blue_guard_using_a_terminal) {
     return BlueGuard::typingOnTerminal();
   } else {
-    const auto orientation = id == ActorID::Blue_guard_RIGHT ? Orientation::Right : Orientation::Left;
+    const auto orientation = id == ActorID::Blue_guard_RIGHT
+      ? Orientation::Right
+      : Orientation::Left;
     return BlueGuard::patrolling(orientation);
   }
 }
@@ -1511,8 +1513,8 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
-      entity.assign<ai::components::BlueGuard>(
-        createBlueGuardAiComponent(actorID));
+      entity.assign<BehaviorController>(
+        createBlueGuardBehavior(actorID));
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
