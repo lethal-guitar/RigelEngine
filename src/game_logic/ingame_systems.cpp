@@ -114,13 +114,6 @@ IngameSystems::IngameSystems(
       &mParticles,
       eventManager)
   , mItemContainerSystem(&entities, pCollisionChecker, eventManager)
-  , mBlueGuardSystem(
-      &mPlayer,
-      const_cast<engine::CollisionChecker*>(pCollisionChecker),
-      pEntityFactory,
-      pServiceProvider,
-      pRandomGenerator,
-      eventManager)
   , mSimpleWalkerSystem(
       playerEntity,
       const_cast<engine::CollisionChecker*>(pCollisionChecker))
@@ -181,7 +174,6 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
-  mBlueGuardSystem.update(es);
   mSimpleWalkerSystem.update(es);
   mSpiderSystem.update(es);
   mSpikeBallSystem.update(es);
