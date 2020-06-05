@@ -740,6 +740,7 @@ void GameWorld::restartLevel() {
   *mpPlayerModel = mPlayerModelAtLevelStart;
 
   mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
   render();
 
   mpServiceProvider->fadeInScreen();
@@ -761,6 +762,7 @@ void GameWorld::restartFromCheckpoint() {
   mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
 
   mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
   render();
 
   mpServiceProvider->fadeInScreen();
