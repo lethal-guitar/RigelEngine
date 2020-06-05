@@ -4,7 +4,7 @@
 
 This project is a re-implementation of the game [Duke Nukem II](
 https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee
-Software in 1993. RigelEngine works as a drop-in replacement for the original executable: It reads the original data files and offers the same experience (plus some improvements),
+Software in 1993. RigelEngine works as a drop-in replacement for the original executable: It reads the original data files and offers the same experience (with some improvements),
 but runs natively on modern operating systems, and is written in modern C++ code with a completely new architecture under the hood. It is similar to
 projects like [Omnispeak](https://davidgow.net/keen/omnispeak.html) or [Commander Genius](http://clonekeenplus.sourceforge.net), which do the same
 thing for the Commander Keen series of games.
@@ -19,15 +19,13 @@ Here's a video showcasing the project:
 
 ## Current state
 
-RigelEngine is fairly complete. Only some [minor visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5)
-and [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4) are currently missing,
-and [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13) isn't implemented yet.
+Gameplay-wise, RigelEngine is feature-complete: All four episodes of the game (shareware and registered version) are fully playable and on par with the original game.
 
-All 4 episodes of the game (shareware and registered version)
-are fully supported, including all gameplay features.
-Episode 1 has been tested quite thorougly, and is playable without issues.
-However, I'm still in the process of testing episodes 2 to 4,
-so there might be bugs.
+The project overall is far from finished, though. There are still some pieces missing to reach full parity with the original game (configurable controls/key bindings, [a few visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5), some [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4), [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13)). On top of that, more [modern enhancements](https://github.com/lethal-guitar/RigelEngine/labels/enhancement) and [usability improvements](https://github.com/lethal-guitar/RigelEngine/labels/usability) are planned.
+
+### Differences to the original Duke Nukem II
+
+See [list of differences](https://github.com/lethal-guitar/RigelEngine/wiki#differences-to-the-original-duke-nukem-ii-executable).
 
 ## Contributing
 
@@ -58,16 +56,7 @@ The only files actually required for RigelEngine are:
 
 Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
 
-
-### Command line options
-
-The most important command line options are:
-
-* `-l`: jump to a specific level. E.g. `-l L5` to play the 5th level of episode 1.
-* `-s`: skip intro movies, go straight to main menu
-* `-h`/`--help`: show all command line options
-
-### Debugging tools, more info
+### Command line options, debugging tools, more info
 
 You can find more info that didn't quite fit in this README over on [the Wiki](https://github.com/lethal-guitar/RigelEngine/wiki). For example, you'll find info on how to activate the built-in debugging tools, a list of bugs in the original version that have been fixed in Rigel Engine, etc.
 
@@ -75,7 +64,7 @@ You can find more info that didn't quite fit in this README over on [the Wiki](h
 
 Pre-built binaries for Windows are provided with each [Release](https://github.com/lethal-guitar/RigelEngine/releases). You can also grab a build of the latest `master` branch by going to [AppVeyor](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master), clicking on "Configuration: Release", and then clicking on "Artifacts".
 
-Thanks to [@mnhauke](https://github.com/mnhauke), there is now also a [Linux package for OpenSUSE Tumbleweed](https://software.opensuse.org/package/RigelEngine).
+Thanks to [@mnhauke](https://github.com/mnhauke), there is now also a [Linux package (version 0.5.1) for OpenSUSE Tumbleweed](https://software.opensuse.org/package/RigelEngine).
 
 I'm planning to provide binaries for OS X and Ubuntu/Debian in the future, but right now, you need to build the project yourself on these platforms.
 
