@@ -228,7 +228,7 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
       return true;
     }
     if (ev.type == SDL_KEYUP && ev.key.keysym.sym == SDLK_y) {
-      mQuitRequested = ev.type == SDL_KEYUP;
+      mQuitRequested = true;
       return true;
     }
 
