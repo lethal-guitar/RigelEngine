@@ -51,6 +51,27 @@ bool isNonRepeatKeyDown(const SDL_Event& event) {
   return event.type == SDL_KEYDOWN && event.key.repeat == 0;
 }
 
+
+bool isConfirmButton(const SDL_Event& event) {
+  const auto enterPressed = isNonRepeatKeyDown(event) &&
+    (event.key.keysym.sym == SDLK_RETURN ||
+     event.key.keysym.sym == SDLK_KP_ENTER);
+  const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
+
+  return enterPressed || buttonAPressed;
+}
+
+
+bool isCancelButton(const SDL_Event& event) {
+  const auto escapePressed = isNonRepeatKeyDown(event) &&
+    event.key.keysym.sym == SDLK_ESCAPE;
+  const auto buttonBPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_B;
+
+  return escapePressed || buttonBPressed;
+}
+
 }
 
 
@@ -227,7 +248,11 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
     if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_y) {
       return true;
     }
-    if (ev.type == SDL_KEYUP && ev.key.keysym.sym == SDLK_y) {
+    if (
+      (ev.type == SDL_KEYUP && ev.key.keysym.sym == SDLK_y) ||
+      (ev.type == SDL_CONTROLLERBUTTONDOWN &&
+       ev.cbutton.button == SDL_CONTROLLER_BUTTON_A)
+    ) {
       mQuitRequested = true;
       return true;
     }
@@ -295,24 +320,14 @@ void IngameMenu::handleMenuActiveEvents() {
       mFadeoutNeeded = true;
     };
 
-    if (isNonRepeatKeyDown(event)) {
-      switch (event.key.keysym.sym) {
-        case SDLK_ESCAPE:
-          leaveTextEntry();
-          return;
-
-        case SDLK_RETURN:
-        case SDLK_KP_ENTER:
-          saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
-          leaveTextEntry();
-          return;
-
-        default:
-          break;
-      }
+    if (isConfirmButton(event)) {
+      saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
+      leaveTextEntry();
+    } else if (isCancelButton(event)) {
+      leaveTextEntry();
+    } else {
+      state.mTextEntryWidget.handleEvent(event);
     }
-
-    state.mTextEntryWidget.handleEvent(event);
   };
 
 
@@ -331,9 +346,7 @@ void IngameMenu::handleMenuActiveEvents() {
       },
 
       [&, this](const ui::OptionsMenu& options) {
-        const auto escapePressed = isNonRepeatKeyDown(event) &&
-          event.key.keysym.sym == SDLK_ESCAPE;
-        if (escapePressed || options.isFinished()) {
+        if (isCancelButton(event) || options.isFinished()) {
           mStateStack.pop();
         }
       });
