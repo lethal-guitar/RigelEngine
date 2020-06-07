@@ -15,7 +15,7 @@ See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing
 
 Here's a video showcasing the project:
 
-<a href="http://www.youtube.com/watch?v=Z3gCS5LvC2s"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
+<a href="http://www.youtube.com/watch?v=U7-eotm8Xoo"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
 ## Current state
 
