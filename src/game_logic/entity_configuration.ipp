@@ -1042,7 +1042,6 @@ void EntityFactory::configureEntity(
           Shootable{1, 0},
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
-          AnimationLoop{1, 0, 1},
           ai::components::SimpleWalker{turkeyAiConfig()},
           Active{},
           AppearsOnRadar{});
