@@ -204,7 +204,7 @@ vec4 applyWaterEffect(vec4 color) {
   // leads to the watery look.
   // The original game does this via bitwise AND and OR operations, but using
   // modulo and addition produces the same outcome in this case.
-  int adjustedIndex = int(mod(float(index), 4.0f) + 8.0f);
+  int adjustedIndex = int(mod(float(index), 4.0) + 8.0);
   return vec4(palette[adjustedIndex], color.a);
 }
 
