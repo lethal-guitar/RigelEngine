@@ -81,6 +81,20 @@ auto parseLevelToJumpTo(const std::string& levelToPlay) {
 }
 
 
+auto parseDifficulty(const std::string& difficultySpec) {
+  if (difficultySpec == "easy") {
+    return data::Difficulty::Easy;
+  } else if (difficultySpec == "medium") {
+    return data::Difficulty::Medium;
+  } else if (difficultySpec == "hard") {
+    return data::Difficulty::Hard;
+  }
+
+  throw std::invalid_argument(
+    std::string("Invalid difficulty: ") + difficultySpec);
+}
+
+
 base::Vector parsePlayerPosition(const std::string& playerPosString) {
   std::vector<std::string> positionParts;
   ba::split(positionParts, playerPosString, ba::is_any_of(","));
@@ -113,6 +127,9 @@ int main(int argc, char** argv) {
     ("play-level,l",
      po::value<std::string>(),
      "Directly jump to given map, skipping intro/menu etc.")
+    ("difficulty",
+     po::value<std::string>(),
+     "Difficulty to use when jumping to a level via 'play-level'")
     ("player-pos",
      po::value<std::string>(),
      "Specify position to place the player at (to be used in conjunction with\n"
@@ -145,8 +162,21 @@ int main(int argc, char** argv) {
     }
 
     if (options.count("play-level")) {
-      config.mLevelToJumpTo =
+      auto sessionId = data::GameSessionId{};
+      std::tie(sessionId.mEpisode, sessionId.mLevel) =
         parseLevelToJumpTo(options["play-level"].as<std::string>());
+
+      config.mLevelToJumpTo = sessionId;
+    }
+
+    if (options.count("difficulty")) {
+      if (!options.count("play-level")) {
+        throw std::invalid_argument(
+          "This option requires also using the play-level option");
+      }
+
+      config.mLevelToJumpTo->mDifficulty =
+        parseDifficulty(options["difficulty"].as<std::string>());
     }
 
     if (options.count("player-pos")) {
