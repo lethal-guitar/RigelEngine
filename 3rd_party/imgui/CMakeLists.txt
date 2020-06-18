@@ -38,6 +38,7 @@ if (USE_GL_ES)
     target_compile_definitions(dear_imgui
         PRIVATE
         -DIMGUI_IMPL_OPENGL_ES2
+        -DIMGUI_IMPL_OPENGL_ES_USE_LOADER
     )
 endif()
 
