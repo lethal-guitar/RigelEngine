@@ -54,6 +54,8 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR gl_FragColor
 #define OUTPUT_COLOR_DECLARATION
 #define SET_POINT_SIZE(size) gl_PointSize = size;
+
+precision mediump float;
 )shd";
 
 #else
