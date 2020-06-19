@@ -1,8 +1,14 @@
+if (USE_GL_ES)
+    set(gl_variant "es2.0")
+else()
+    set(gl_variant "3.0")
+endif()
+
 set(sources
-    src/glad.c
+    "${gl_variant}/src/glad.c"
 )
 
-set(glad_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(glad_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/${gl_variant}/include")
 
 add_library(glad STATIC ${sources})
 target_include_directories(glad PUBLIC ${glad_include_dir})
