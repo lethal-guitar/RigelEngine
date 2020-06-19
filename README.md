@@ -35,7 +35,7 @@ Android and iOS versions might happen someday, but there are no concrete plans a
 
 RigelEngine is not very demanding, but it does require OpenGL-capable graphics hardware.
 Either OpenGL 3.0 or OpenGL ES 2.0 can be used, depending on what's chosen at compile time.
-To build in GL ES mode, pass `-DUSE_GL_ES=1` to CMake.
+To build in GL ES mode, pass `-DUSE_GL_ES=ON` to CMake.
 
 Most Desktop/laptop graphics cards support OpenGL 3.0 nowadays.
 However, some older integrated GPUs might only support OpenGL 2.
@@ -74,6 +74,9 @@ The only files actually required for RigelEngine are:
 * `NUKEM2.F1`, `.F2`, `.F3` etc. up to `.F5` (intro movie files)
 
 Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
+
+If there are existing saved games, high score lists, or settings found in the game files,
+RigelEngine imports them into its own user profile when running for the first time.
 
 ### Command line options, debugging tools, more info
 
@@ -253,12 +256,12 @@ Older versions like Stretch don't have recent enough versions of CMake, Boost an
 
 Installing the dependencies on Buster works exactly like [on Ubuntu](#linux-build-instructions-194).
 
-When building, you need to enable OpenGL ES Support, and I also recommend doing a release build:
+When building, you need to enable OpenGL ES Support:
 
 ```bash
 mkdir build
 cd build
-cmake .. -DUSE_GL_ES=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -DUSE_GL_ES=ON -DWARNINGS_AS_ERRORS=OFF
 make
 ```
 
