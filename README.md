@@ -23,6 +23,25 @@ Gameplay-wise, RigelEngine is feature-complete: All four episodes of the game (s
 
 The project overall is far from finished, though. There are still some pieces missing to reach full parity with the original game (configurable controls/key bindings, [a few visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5), some [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4), [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13)). On top of that, more [modern enhancements](https://github.com/lethal-guitar/RigelEngine/labels/enhancement) and [usability improvements](https://github.com/lethal-guitar/RigelEngine/labels/usability) are planned.
 
+### Supported platforms
+
+RigelEngine runs on Windows, Linux, and Mac OS X.
+
+It also runs on the Raspberry Pi, but that's work in progress as there are still [some issues](https://github.com/lethal-guitar/RigelEngine/labels/raspberry-pi-support) to be sorted out. See [build instructions](#raspi-build-instructions).
+
+Android and iOS versions might happen someday, but there are no concrete plans at the moment.
+
+### System requirements
+
+RigelEngine is not very demanding, but it does require OpenGL-capable graphics hardware.
+Either OpenGL 3.0 or OpenGL ES 2.0 can be used, depending on what's chosen at compile time.
+To build in GL ES mode, pass `-DUSE_GL_ES=1` to CMake.
+
+Most Desktop/laptop graphics cards support OpenGL 3.0 nowadays.
+However, some older integrated GPUs might only support OpenGL 2.
+For these systems, using GL ES can be an option as well.
+This has been confirmed to work on Ubuntu 18.04 on an older laptop.
+
 ### Differences to the original Duke Nukem II
 
 See [list of differences](https://github.com/lethal-guitar/RigelEngine/wiki#differences-to-the-original-duke-nukem-ii-executable).
@@ -66,7 +85,7 @@ Pre-built binaries for Windows are provided with each [Release](https://github.c
 
 Thanks to [@mnhauke](https://github.com/mnhauke), there is now also a [Linux package for OpenSUSE Tumbleweed](https://software.opensuse.org/package/RigelEngine).
 
-I'm planning to provide binaries for OS X and Ubuntu/Debian in the future, but right now, you need to build the project yourself on these platforms.
+I'm planning to provide binaries for OS X, Ubuntu/Debian, and Raspberry Pi in the future, but right now, you need to build the project yourself on these platforms.
 
 ## Building from source
 
@@ -76,7 +95,8 @@ I'm planning to provide binaries for OS X and Ubuntu/Debian in the future, but r
 * [Linux builds](#linux-build-instructions)
     * [Ubuntu 19.04 or newer](#linux-build-instructions-194)
     * [Ubuntu 18.04](#linux-build-instructions-184)
-    * [Fedora](#linux-build-instructions-fedora)
+    * [Fedora 31 or newer](#linux-build-instructions-fedora)
+* [Raspberry Pi builds](#raspi-build-instructions)
 * [OS X builds](#mac-build-instructions)
 * [Windows builds](#windows-build-instructions)
 
@@ -211,16 +231,39 @@ make -j8 # adjust depending on number of CPU cores in your machine
 ./src/RigelEngine
 ```
 
-#### <a name="linux-build-instructions-fedora">Fedora</a>
+#### <a name="linux-build-instructions-fedora">Fedora 31 or newer</a>
 
-On Fedora (tested with version 31), the following command installs all
+On Fedora, the following command installs all
 required dependencies:
 
 ```bash
 sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel SDL2_mixer-devel
 ```
 
-This assumes that `make`, `gcc` and `gcc-c++` are already installed.
+Note the additional `boost-static` package - without it, there will be linker errors.
+
+This also assumes that `make`, `gcc` and `gcc-c++` are already installed.
+
+### <a name="raspi-build-instructions">Raspberry Pi builds</a>
+
+:warning: Note that Raspberry Pi support is still work in progress, and there are [some issues](https://github.com/lethal-guitar/RigelEngine/labels/raspberry-pi-support).
+
+To build on the Pi itself, I recommend Raspbian (aka Raspberry Pi OS) _Buster_.
+Older versions like Stretch don't have recent enough versions of CMake, Boost and Gcc.
+
+Installing the dependencies on Buster works exactly like [on Ubuntu](#linux-build-instructions-194).
+
+When building, you need to enable OpenGL ES Support, and I also recommend doing a release build:
+
+```bash
+mkdir build
+cd build
+cmake .. -DUSE_GL_ES=1 -DCMAKE_BUILD_TYPE=Release
+make
+```
+
+To get playable performance, I had to run the game outside of the Desktop environment (X server).
+To do that, switch to a new terminal using Ctrl+Alt+F1 and launch the game there.
 
 ### <a name="mac-build-instructions">OS X builds</a>
 
