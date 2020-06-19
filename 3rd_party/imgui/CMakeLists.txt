@@ -11,9 +11,6 @@ target_include_directories(dear_imgui
     PUBLIC
     ${CMAKE_SOURCE_DIR}/3rd_party/imgui/imgui
     ${CMAKE_SOURCE_DIR}/3rd_party/imgui/imgui/examples
-
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}/3rd_party/glad/include
 )
 target_link_libraries(dear_imgui
     PRIVATE

@@ -5,7 +5,7 @@ set(sources
 set(glad_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_library(glad STATIC ${sources})
-target_include_directories(glad PRIVATE ${glad_include_dir})
+target_include_directories(glad PUBLIC ${glad_include_dir})
 target_link_libraries(glad PRIVATE ${CMAKE_DL_LIBS})
 
 if (MSVC)
