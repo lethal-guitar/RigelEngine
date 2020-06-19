@@ -22,9 +22,8 @@ RIGEL_DISABLE_WARNINGS
 #include <glad/glad.h>
 RIGEL_RESTORE_WARNINGS
 
-// Undefine stupid macros from Windows.h which lead to name clashes otherwise
-#ifdef DrawText
-#undef DrawText
+#ifdef APIENTRY
+#undef APIENTRY
 #endif
 
 

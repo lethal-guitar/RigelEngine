@@ -295,7 +295,6 @@ target_include_directories(rigel_core
     "${CMAKE_CURRENT_SOURCE_DIR}"
     ${3rd_party_path}/entityx
 
-    ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
     ${3rd_party_path}/nlohmann
 
@@ -311,12 +310,12 @@ target_link_libraries(rigel_core
     Boost::boost
     dear_imgui
     imgui-filebrowser
+    glad
 
     PRIVATE
     std::filesystem
     dbopl
     speex_resampler
-    glad
 )
 
 if(USE_GL_ES)
