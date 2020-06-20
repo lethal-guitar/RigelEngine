@@ -111,7 +111,7 @@ private:
   static bool noopEventHook(const SDL_Event&) { return false; }
 
   template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
-  void enterMenu(
+  void enterScriptedMenu(
     const char* scriptName,
     ScriptEndHook&& scriptEndedHook,
     EventHook&& eventHook = noopEventHook,

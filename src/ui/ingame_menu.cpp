@@ -163,7 +163,7 @@ void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result) {
     // then return to the save slot selection menu.  The latter stays on the
     // stack, we push another menu state on top of the stack for showing the
     // message.
-    enterMenu(
+    enterScriptedMenu(
       scriptName,
       [this](const auto&) {
         leaveMenu();
@@ -267,7 +267,8 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
 
   switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
-      enterMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
+      enterScriptedMenu(
+        "2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
       break;
 
     case SDLK_F1:
@@ -278,23 +279,23 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
       break;
 
     case SDLK_F2:
-      enterMenu(
+      enterScriptedMenu(
         "Save_Game",
         [this](const auto& result) { onSaveGameMenuFinished(result); });
       break;
 
     case SDLK_F3:
-      enterMenu(
+      enterScriptedMenu(
         "Restore_Game",
         [this](const auto& result) { onRestoreGameMenuFinished(result); });
       break;
 
     case SDLK_h:
-      enterMenu("&Instructions", leaveMenuWithFadeHook);
+      enterScriptedMenu("&Instructions", leaveMenuWithFadeHook);
       break;
 
     case SDLK_p:
-      enterMenu("Paused", leaveMenuHook, noopEventHook, true);
+      enterScriptedMenu("Paused", leaveMenuHook, noopEventHook, true);
       break;
 
     default:
@@ -357,7 +358,7 @@ void IngameMenu::handleMenuActiveEvents() {
 
 
 template <typename ScriptEndHook, typename EventHook>
-void IngameMenu::enterMenu(
+void IngameMenu::enterScriptedMenu(
   const char* scriptName,
   ScriptEndHook&& scriptEndedHook,
   EventHook&& eventHook,
