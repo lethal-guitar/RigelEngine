@@ -17,6 +17,8 @@
 #pragma once
 
 #include "base/color.hpp"
+#include "engine/tiled_texture.hpp"
+#include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 
 #include <string_view>
@@ -33,6 +35,10 @@ renderer::OwningTexture fullScreenImageAsTexture(
   const loader::ResourceLoader& resources,
   const std::string& imageName);
 
+engine::TiledTexture makeUiSpriteSheet(
+  renderer::Renderer* pRenderer,
+  const loader::ResourceLoader& resourceLoader,
+  const loader::Palette16& palette);
 
 void drawText(std::string_view text, int x, int y, const base::Color& color);
 

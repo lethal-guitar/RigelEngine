@@ -48,6 +48,20 @@ renderer::OwningTexture fullScreenImageAsTexture(
 }
 
 
+engine::TiledTexture makeUiSpriteSheet(
+  renderer::Renderer* pRenderer,
+  const loader::ResourceLoader& resourceLoader,
+  const loader::Palette16& palette
+) {
+  return engine::TiledTexture{
+    renderer::OwningTexture{
+      pRenderer,
+      resourceLoader.loadTiledFullscreenImage(
+        "STATUS.MNI", palette)},
+    pRenderer};
+}
+
+
 void drawText(
   const std::string_view text,
   const int x,

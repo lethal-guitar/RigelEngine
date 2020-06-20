@@ -59,20 +59,6 @@ const auto INITIAL_GAME_SPEED = 3;
 
 constexpr auto ANALOG_STICK_DEADZONE = 20'000;
 
-
-auto makeSpriteSheet(
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resourceLoader,
-  const loader::Palette16& palette
-) {
-  return engine::TiledTexture{
-    renderer::OwningTexture{
-      pRenderer,
-      resourceLoader.loadTiledFullscreenImage(
-        "STATUS.MNI", palette)},
-    pRenderer};
-}
-
 }
 
 
@@ -88,7 +74,7 @@ DukeScriptRunner::DukeScriptRunner(
   , mpSaveSlots(pSaveSlots)
   , mpServices(pServiceProvider)
   , mUiSpriteSheetRenderer(
-      makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
+      makeUiSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
   , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
   , mCanvas(
       pRenderer,
@@ -791,7 +777,7 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
 
   mCurrentPalette = palette;
   mUiSpriteSheetRenderer =
-    makeSpriteSheet(mpRenderer, *mpResourceBundle, mCurrentPalette);
+    makeUiSpriteSheet(mpRenderer, *mpResourceBundle, mCurrentPalette);
 }
 
 
