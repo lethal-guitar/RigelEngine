@@ -282,6 +282,20 @@ set(core_sources
     ui/text_entry_widget.hpp
     ui/utils.cpp
     ui/utils.hpp
+    anti_piracy_screen_mode.cpp
+    anti_piracy_screen_mode.hpp
+    game_main.cpp
+    game_main.hpp
+    game_main.ipp
+    game_session_mode.cpp
+    game_session_mode.hpp
+    game_runner.cpp
+    game_runner.hpp
+    intro_demo_loop_mode.cpp
+    intro_demo_loop_mode.hpp
+    menu_mode.cpp
+    menu_mode.hpp
+    mode_stage.hpp
 )
 
 
@@ -289,14 +303,13 @@ set(3rd_party_path ${CMAKE_SOURCE_DIR}/3rd_party)
 
 # conditional compilation for emscripten (webassemly) to work
 if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-  Core library
+  # Core library
   add_library(rigel_core STATIC ${core_sources})
   target_include_directories(rigel_core
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
     ${3rd_party_path}/entityx
 
-    ${3rd_party_path}/glad/include
     ${3rd_party_path}/glm
     ${3rd_party_path}/nlohmann
 
@@ -312,39 +325,14 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
     Boost::boost
     dear_imgui
     imgui-filebrowser
+    glad
 
     PRIVATE
     std::filesystem
     dbopl
     speex_resampler
-    glad
   )
 endif()
-
-add_library(rigel_core STATIC ${core_sources})
-target_include_directories(rigel_core
-    PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    ${3rd_party_path}/entityx
-    ${3rd_party_path}/glm
-    ${3rd_party_path}/nlohmann
-
-    PRIVATE
-    ${3rd_party_path}/dbopl
-    ${3rd_party_path}/speex_resampler
-)
-target_link_libraries(rigel_core
-    PUBLIC
-    entityx
-    dear_imgui
-    imgui-filebrowser
-    glad
-
-    PRIVATE
-    std::filesystem
-    dbopl
-    speex_resampler
-)
 
 if(USE_GL_ES)
     target_compile_definitions(rigel_core PUBLIC
@@ -352,41 +340,19 @@ if(USE_GL_ES)
     )
 endif()
 
-
-
 # Main executable
-set(main_exe_sources
-    anti_piracy_screen_mode.cpp
-    anti_piracy_screen_mode.hpp
-    game_main.cpp
-    game_main.hpp
-    game_main.ipp
-    game_session_mode.cpp
-    game_session_mode.hpp
-    game_runner.cpp
-    game_runner.hpp
-    intro_demo_loop_mode.cpp
-    intro_demo_loop_mode.hpp
-    main.cpp
-    menu_mode.cpp
-    menu_mode.hpp
-    mode_stage.hpp
-)
-
-
-add_executable(${main_exe_name} ${main_exe_sources})
-
-# conditional compilation for emscripten (webassemly) to work
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-  target_link_libraries(${main_exe_name} PRIVATE
-    rigel_core
-  )
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+    add_executable(${main_exe_name} emscripten_main.cpp)
+    target_link_libraries(${main_exe_name} PRIVATE
+        rigel_core
+    )
 else()
-  target_link_libraries(${main_exe_name} PRIVATE
-    SDL2::Main
-    rigel_core
-    Boost::boost
-    Boost::program_options
-    Boost::disable_autolinking
-  )
+    add_executable(${main_exe_name} main.cpp)
+    target_link_libraries(${main_exe_name} PRIVATE
+        SDL2::Main
+        rigel_core
+        Boost::boost
+        Boost::program_options
+        Boost::disable_autolinking
+    )
 endif()

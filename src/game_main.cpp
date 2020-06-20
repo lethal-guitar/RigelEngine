@@ -289,10 +289,8 @@ UserProfile loadOrCreateUserProfile() {
 
 
 // Note : This should graduate into its own file if more complexity is added
-// std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
-void runFolderBrowser(void* arg)
+std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
 {
-  auto pWindow = static_cast<SDL_Window*>(arg);
   auto folderPath = std::filesystem::path();
   auto folderBrowser =
     ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
@@ -316,28 +314,8 @@ void runFolderBrowser(void* arg)
 
   folderBrowser.Open();
 
-  // do
-  // {
-  //   SDL_Event event;
-  //   while (SDL_PollEvent(&event))
-  //   {
-  //     ui::imgui_integration::handleEvent(event);
-  //   }
-
-  //   glClear(GL_COLOR_BUFFER_BIT);
-  //   ui::imgui_integration::beginFrame(pWindow);
-
-  //   folderBrowser.Display();
-  //   if (folderBrowser.HasSelected())
-  //   {
-  //     folderPath = folderBrowser.GetSelected();
-  //     folderBrowser.Close();
-  //   }
-
-  //   ui::imgui_integration::endFrame();
-  //   SDL_GL_SwapWindow(pWindow);
-  // } while (folderBrowser.IsOpened());
-
+  do
+  {
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -356,8 +334,9 @@ void runFolderBrowser(void* arg)
 
     ui::imgui_integration::endFrame();
     SDL_GL_SwapWindow(pWindow);
+  } while (folderBrowser.IsOpened());
 
-  // return folderPath;
+  return folderPath;
 }
 
 
@@ -381,11 +360,11 @@ void setupForFirstLaunch(
   // installation, most likely because the RigelEngine executable has been
   // copied there. Use the current working directory as game path.
   if (gamePath.empty()) {
-    const auto currentWorkingDir = fs::u8path("/home/pratikone/Desktop/duke");
+    const auto currentWorkingDir = fs::current_path();
     if (
-        fs::exists(currentWorkingDir / dataFilePath)
+      commandLineGamePath.empty() &&
+      fs::exists(currentWorkingDir / dataFilePath)
     ) {
-      std::cout<<"mila re mila, path mila \n";
       gamePath = currentWorkingDir;
     }
   }
@@ -393,9 +372,7 @@ void setupForFirstLaunch(
   // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
   // the user select their Duke Nukem II installation.
   if (gamePath.empty()) {
-    std::cout<<"loop par aaye \n";
-    // gamePath = runFolderBrowser(pWindow);
-    emscripten_set_main_loop_arg(&runFolderBrowser,pWindow, 0, true);
+    gamePath = runFolderBrowser(pWindow);
   }
 
   // If we still don't have a game path, stop here.
@@ -406,16 +383,16 @@ You can download the Shareware version for free, see
 https://github.com/lethal-guitar/RigelEngine/blob/master/README.md#acquiring-the-game-data
 for more info.)");
   }
-  
+
   // Make sure there is a data file at the game path.
   if (!fs::exists(gamePath / dataFilePath)) {
     throw std::runtime_error("No game data (NUKEM2.CMP file) found in game path");
   }
 
   // Import original game's profile data, if our profile is still 'empty'
-  // if (!userProfile.hasProgressData()) {
-  //   importOriginalGameProfileData(userProfile, gamePath.u8string() + "/");
-  // }
+  if (!userProfile.hasProgressData()) {
+    importOriginalGameProfileData(userProfile, gamePath.u8string() + "/");
+  }
 
   // Finally, persist the chosen game path in the user profile for the next
   // launch.
@@ -430,16 +407,14 @@ void initAndRunGame(
   const CommandLineOptions& commandLineOptions
 ) {
   auto run = [&](const CommandLineOptions& options) {
-    std::cout<<"lambda start\n";
     Game game(options, &userProfile, pWindow);
-    std::cout<<"lambda before run\n";
     return game.run();
   };
 
   if (!userProfile.mGamePath) {
     setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
-  std::cout<<"after init and setting game path \n";
+
   auto result = run(commandLineOptions);
 
   // Some game option changes (like choosing a new game path) require
@@ -491,7 +466,7 @@ void gameMain(const CommandLineOptions& options) {
   ui::imgui_integration::init(
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
-  
+
   try {
     initAndRunGame(pWindow.get(), userProfile, options);
   } catch (const std::exception& error) {
@@ -533,7 +508,17 @@ Game::Game(
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
-  , mIsShareWareVersion(true)
+  , mIsShareWareVersion([this]() {
+      // The registered version has 24 additional level files, and a
+      // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
+      // all of these files, as that would be fairly tedious. Instead, we just
+      // check for the presence of one of the registered version's levels, and
+      // the anti-piracy screen, and assume that we're dealing with a
+      // registered version data set if these two are present.
+      const auto hasRegisteredVersionFiles =
+        mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
+      return !hasRegisteredVersionFiles;
+    }())
   , mFpsLimiter(createLimiter(pUserProfile->mOptions))
   , mRenderTarget(
       &mRenderer,
@@ -551,10 +536,9 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-  std::cout<<"Game game\n";
 }
 
-void mainLoop(void *arg);
+
 auto Game::run() -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
@@ -569,50 +553,49 @@ auto Game::run() -> RunResult {
     makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
 
   enumerateGameControllers();
-  std::cout<<"main loop tak aaye \n";
-  // mainLoop();
-  using namespace std::chrono;
-  mLastTime = high_resolution_clock::now();
-  
-  emscripten_set_main_loop_arg(&mainLoop, this, 0, true);
-  return RunResult::GameEnded;
+
+  return mainLoop();
 }
 
 
-void mainLoop(void *arg) {
+auto Game::mainLoop() -> RunResult {
   using namespace std::chrono;
-  auto game = static_cast<Game*>(arg);
 
-  const auto startOfFrame = high_resolution_clock::now();
-  const auto elapsed =
-    duration<entityx::TimeDelta>(startOfFrame - game->mLastTime).count();
-  game->mLastTime = startOfFrame;
+  std::vector<SDL_Event> eventQueue;
+  mLastTime = high_resolution_clock::now();
 
-  game->pumpEvents(game->eventQueue);
-  // if (!game->mIsRunning) {
-  //   break;
-  // }
+  for (;;) {
+    const auto startOfFrame = high_resolution_clock::now();
+    const auto elapsed =
+      duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
+    mLastTime = startOfFrame;
 
-  {
-    ui::imgui_integration::beginFrame(game->mpWindow);
-    auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
-    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+    pumpEvents(eventQueue);
+    if (!mIsRunning) {
+      break;
+    }
 
-    game->updateAndRender(elapsed, game->eventQueue);
-    game->eventQueue.clear();
+    {
+      ui::imgui_integration::beginFrame(mpWindow);
+      auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
+      ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
+      updateAndRender(elapsed, eventQueue);
+      eventQueue.clear();
+    }
+
+    swapBuffers();
+
+    applyChangedOptions();
+
+    if (!mGamePathToSwitchTo.empty()) {
+      mpUserProfile->mGamePath = mGamePathToSwitchTo;
+      mpUserProfile->saveToDisk();
+      return RunResult::RestartNeeded;
+    }
   }
 
-  game->swapBuffers();
-
-  game->applyChangedOptions();
-
-  if (!game->mGamePathToSwitchTo.empty()) {
-    game->mpUserProfile->mGamePath = game->mGamePathToSwitchTo;
-    game->mpUserProfile->saveToDisk();
-    // return RunResult::RestartNeeded;
-  }
-
-  // return RunResult::GameEnded;
+  return RunResult::GameEnded;
 }
 
 
