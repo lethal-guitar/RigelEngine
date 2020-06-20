@@ -563,8 +563,7 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
 void DukeScriptRunner::confirmOrSelectNextPage(PagerState& state) {
   if (mPagerState->mMode == PagingMode::Menu) {
     selectCurrentMenuItem(state);
-  }
-  else {
+  } else {
     selectNextPage(state);
   }
 }
@@ -575,8 +574,7 @@ void DukeScriptRunner::handleUnassignedButton(PagerState& state) {
     // Since we cleared the wait state previously, we have to go back
     // to the current page
     executeCurrentPageScript(state);
-  }
-  else {
+  } else {
     selectNextPage(state);
   }
 }
