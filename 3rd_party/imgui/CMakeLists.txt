@@ -14,15 +14,20 @@ target_include_directories(dear_imgui
     PRIVATE
     ${CMAKE_SOURCE_DIR}/3rd_party/glad/include
 )
-# target_link_libraries(dear_imgui
-#     PRIVATE
-#     SDL2::Core
-#     glad
-# )
-target_link_libraries(dear_imgui
+
+# conditional compilation for emscripten (webassemly) to work
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+    target_link_libraries(dear_imgui
     PRIVATE
     glad
-)
+    )
+else()
+    target_link_libraries(dear_imgui
+        PRIVATE
+        SDL2::Core
+        glad
+    )  
+endif()
 
 if (APPLE)
     target_link_libraries(dear_imgui
