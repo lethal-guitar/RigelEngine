@@ -287,37 +287,39 @@ set(core_sources
 
 set(3rd_party_path ${CMAKE_SOURCE_DIR}/3rd_party)
 
+# conditional compilation for emscripten (webassemly) to work
+if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+  Core library
+  add_library(rigel_core STATIC ${core_sources})
+  target_include_directories(rigel_core
+    PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    ${3rd_party_path}/entityx
 
-# Core library
-# add_library(rigel_core STATIC ${core_sources})
-# target_include_directories(rigel_core
-#     PUBLIC
-#     "${CMAKE_CURRENT_SOURCE_DIR}"
-#     ${3rd_party_path}/entityx
+    ${3rd_party_path}/glad/include
+    ${3rd_party_path}/glm
+    ${3rd_party_path}/nlohmann
 
-#     ${3rd_party_path}/glad/include
-#     ${3rd_party_path}/glm
-#     ${3rd_party_path}/nlohmann
+    PRIVATE
+    ${3rd_party_path}/dbopl
+    ${3rd_party_path}/speex_resampler
+  )
+  target_link_libraries(rigel_core
+    PUBLIC
+    SDL2::Core
+    SDL2::Mixer
+    entityx
+    Boost::boost
+    dear_imgui
+    imgui-filebrowser
 
-#     PRIVATE
-#     ${3rd_party_path}/dbopl
-#     ${3rd_party_path}/speex_resampler
-# )
-# target_link_libraries(rigel_core
-#     PUBLIC
-#     SDL2::Core
-#     SDL2::Mixer
-#     entityx
-#     Boost::boost
-#     dear_imgui
-#     imgui-filebrowser
-
-#     PRIVATE
-#     std::filesystem
-#     dbopl
-#     speex_resampler
-#     glad
-# )
+    PRIVATE
+    std::filesystem
+    dbopl
+    speex_resampler
+    glad
+  )
+endif()
 
 add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
