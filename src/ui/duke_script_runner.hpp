@@ -25,6 +25,7 @@
 #include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
+#include "ui/menu_navigation_helper.hpp"
 
 #include <cstddef>
 #include <optional>
@@ -165,9 +166,6 @@ private:
 
   void drawCurrentKeyBindings();
 
-  void handleKeyboardEvent(const SDL_Event& event);
-  void handleGameControllerEvent(const SDL_Event& event);
-
   bool hasMenuPages() const;
   void selectNextPage(PagerState& state);
   void selectPreviousPage(PagerState& state);
@@ -227,7 +225,7 @@ private:
 
   std::optional<CheckBoxesState> mCheckBoxStates;
 
-  base::Vector mAnalogStickVector;
+  MenuNavigationHelper mNavigationHelper;
 
   bool mFadeInBeforeNextWaitStateScheduled = false;
   bool mDisableMenuFunctionalityForNextPagesDefinition = false;
