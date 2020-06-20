@@ -100,7 +100,7 @@ base::Vector parsePlayerPosition(const std::string& playerPosString) {
 
 
 int main(int argc, char** argv) {
-  // showBanner();
+  showBanner();
 
   CommandLineOptions config;
 
