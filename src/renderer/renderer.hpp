@@ -277,6 +277,7 @@ private:
   std::vector<GLushort> mBatchIndices;
 
   TextureData mWaterSurfaceAnimTexture;
+  TextureData mPaletteTexture;
 
   GLuint mCurrentFbo;
   base::Size<int> mWindowSize;

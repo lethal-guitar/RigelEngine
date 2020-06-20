@@ -261,6 +261,10 @@ void WatchBotCarrier::update(
 
     mPayload.component<Sprite>()->mFramesToRender.push_back(1);
     engine::startAnimationLoop(mPayload, 1, 1, 5, 1);
+
+    // Disassociate from payload, so that it keeps living if the carrier
+    // is destroyed
+    mPayload = {};
   };
 
   auto explode = [&]() {

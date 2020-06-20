@@ -191,10 +191,8 @@ std::unique_ptr<GameMode> createInitialGameMode(
 {
   if (commandLineOptions.mLevelToJumpTo)
   {
-    auto [episode, level] = *commandLineOptions.mLevelToJumpTo;
-
     return std::make_unique<GameSessionMode>(
-      data::GameSessionId{episode, level, data::Difficulty::Medium},
+      *commandLineOptions.mLevelToJumpTo,
       context,
       commandLineOptions.mPlayerPosition);
   }

@@ -53,6 +53,8 @@ precision highp float;
 #define OUTPUT_COLOR gl_FragColor
 #define OUTPUT_COLOR_DECLARATION
 #define SET_POINT_SIZE(size) gl_PointSize = size;
+
+precision mediump float;
 )shd";
 
 #else
@@ -173,19 +175,38 @@ IN vec2 texCoordMaskFrag;
 
 uniform sampler2D textureData;
 uniform sampler2D maskData;
-uniform vec3 palette[16];
+uniform sampler2D paletteData;
+
+
+vec3 paletteColor(int index) {
+  return TEXTURE_LOOKUP(paletteData, vec2(float(index) / 16.0, 0.0)).rgb;
+}
 
 
 vec4 applyWaterEffect(vec4 color) {
+  // The original game runs in a palette-based video mode, where the frame
+  // buffer stores indices into a palette of 16 colors instead of directly
+  // storing color values. The water effect is implemented as a modification
+  // of these index values in the frame buffer. To replicate it, we first have
+  // to transform our RGBA color values into indices, by searching the palette
+  // for a matching color. Once we have that, we can apply the same
+  // transformation on the index as done in the original game, and then convert
+  // back to RGBA space by doing a palette lookup with the modified index.
   int index = 0;
   for (int i = 0; i < 16; ++i) {
-    if (color.rgb == palette[i]) {
+    if (color.rgb == paletteColor(i)) {
       index = i;
     }
   }
 
-  const int adjustedIndex = 0x8;//(index & 0x3) | 0x8;
-  return vec4(palette[adjustedIndex], color.a);
+  // The color index transformation for achieving the water effect consists of
+  // remapping any incoming color to one out of 4 indices starting at index 8.
+  // The palette contains 3 shades of blue and a dark green in that area, which
+  // leads to the watery look.
+  // The original game does this via bitwise AND and OR operations, but using
+  // modulo and addition produces the same outcome in this case.
+  int adjustedIndex = int(mod(float(index), 4.0) + 8.0);
+  return vec4(paletteColor(adjustedIndex), color.a);
 }
 
 void main() {
@@ -348,6 +369,15 @@ data::Image createWaterSurfaceAnimImage() {
 }
 
 
+data::Image createPaletteImage() {
+  return data::Image{
+    data::PixelBuffer{
+      begin(loader::INGAME_PALETTE), end(loader::INGAME_PALETTE)},
+    loader::INGAME_PALETTE.size(),
+    1};
+}
+
+
 auto getSize(SDL_Window* pWindow) {
   int windowWidth = 0;
   int windowHeight = 0;
@@ -409,23 +439,18 @@ Renderer::Renderer(SDL_Window* pWindow)
 
   // One-time setup for water effect shader
   useShaderIfChanged(mWaterEffectShader);
-  array<glm::vec3, 16> palette;
-  transform(
-    begin(loader::INGAME_PALETTE),
-    end(loader::INGAME_PALETTE),
-    begin(palette),
-    [](const base::Color& color) {
-      return glm::vec3{color.r, color.g, color.b} / 255.0f;
-    });
-  mWaterEffectShader.setUniform("palette", palette);
   mWaterEffectShader.setUniform("textureData", 0);
   mWaterEffectShader.setUniform("maskData", 1);
+  mWaterEffectShader.setUniform("paletteData", 2);
 
   mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
+  mPaletteTexture = createTexture(createPaletteImage());
 
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture.mHandle);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, mPaletteTexture.mHandle);
   glActiveTexture(GL_TEXTURE0);
 
   // One-time setup for textured quad shader
@@ -442,6 +467,7 @@ Renderer::Renderer(SDL_Window* pWindow)
 Renderer::~Renderer() {
   glDeleteBuffers(1, &mStreamVbo);
   glDeleteTextures(1, &mWaterSurfaceAnimTexture.mHandle);
+  glDeleteTextures(1, &mPaletteTexture.mHandle);
 }
 
 

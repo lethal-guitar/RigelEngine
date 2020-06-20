@@ -729,6 +729,8 @@ void GameWorld::restartLevel() {
   }
 
   mLevelData.mMap = mMapAtLevelStart;
+  mBonusInfo.mNumShotBonusGlobes = 0;
+  mBonusInfo.mPlayerTookDamage = false;
 
   mEntities.reset();
   auto playerEntity = mEntityFactory.createEntitiesForLevel(
@@ -738,6 +740,7 @@ void GameWorld::restartLevel() {
   *mpPlayerModel = mPlayerModelAtLevelStart;
 
   mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
   render();
 
   mpServiceProvider->fadeInScreen();
@@ -759,6 +762,7 @@ void GameWorld::restartFromCheckpoint() {
   mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
 
   mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
   render();
 
   mpServiceProvider->fadeInScreen();
@@ -784,6 +788,7 @@ void GameWorld::handleTeleporter() {
   }
 
   mpSystems->centerViewOnPlayer();
+  updateGameLogic({});
   render();
   mpServiceProvider->fadeInScreen();
 }

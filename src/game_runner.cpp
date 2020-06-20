@@ -17,6 +17,7 @@
 #include "game_runner.hpp"
 
 #include "base/match.hpp"
+#include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "game_logic/ingame_systems.hpp"
@@ -71,18 +72,6 @@ auto createSavedGame(
 constexpr auto ANALOG_STICK_DEADZONE_X = 10'000;
 constexpr auto ANALOG_STICK_DEADZONE_Y = 24'000;
 constexpr auto TRIGGER_THRESHOLD = 3'000;
-
-
-std::int16_t applyDeadZone(
-  const std::int16_t value,
-  const std::int16_t deadZone
-) {
-  if (std::abs(value) < deadZone) {
-    return 0;
-  }
-
-  return value;
-}
 
 
 game_logic::PlayerInput combinedInput(
@@ -510,13 +499,28 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
         case SDL_CONTROLLER_AXIS_LEFTX:
         case SDL_CONTROLLER_AXIS_RIGHTX:
           mAnalogStickVector.x =
-            applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_X);
+            base::applyThreshold(event.caxis.value, ANALOG_STICK_DEADZONE_X);
           break;
 
         case SDL_CONTROLLER_AXIS_LEFTY:
         case SDL_CONTROLLER_AXIS_RIGHTY:
-          mAnalogStickVector.y =
-            applyDeadZone(event.caxis.value, ANALOG_STICK_DEADZONE_Y);
+          {
+            // We want to avoid accidental crouching/looking up while the
+            // player is walking, but still make it easy to move the ship
+            // up/down while flying. Therefore, we use a different vertical
+            // deadzone when not in the ship.
+            const auto deadZone =
+              mpWorld->mpSystems->player().stateIs<game_logic::InShip>()
+              ? ANALOG_STICK_DEADZONE_X
+              : ANALOG_STICK_DEADZONE_Y;
+
+            const auto newY = base::applyThreshold(event.caxis.value, deadZone);
+            if (mAnalogStickVector.y >= 0 && newY < 0) {
+              mPlayerInput.mInteract.mWasTriggered = true;
+            }
+            mPlayerInput.mInteract.mIsPressed = newY < 0;
+            mAnalogStickVector.y = newY;
+          }
           break;
 
         case SDL_CONTROLLER_AXIS_TRIGGERLEFT:

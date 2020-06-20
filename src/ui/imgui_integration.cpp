@@ -96,13 +96,9 @@ void init(
 
   ImGui_ImplSDL2_InitForOpenGL(pWindow, pGlContext);
 
-#if defined(__APPLE__)
-  ImGui_ImplOpenGL3_Init("#version 150");
-#else
   // Dear ImGui can figure out the correct GLSL version by itself. This handles
   // GL ES as well as regular GL.
   ImGui_ImplOpenGL3_Init(nullptr);
-#endif
 
   if (preferencesPath) {
     const auto iniFilePath = *preferencesPath / "ImGui.ini";

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "engine/base_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 #include <variant>
@@ -32,37 +33,6 @@ void configureRedBird(entityx::Entity entity);
 
 namespace rigel::game_logic::behaviors {
 
-namespace red_bird {
-
-struct Flying {};
-
-
-struct Hovering {
-  int mFramesElapsed = 0;
-};
-
-
-struct PlungingDown {
-  int mInitialHeight;
-};
-
-
-struct RisingUp {
-  explicit RisingUp(const int initialHeight)
-    : mInitialHeight(initialHeight)
-  {
-  }
-
-  int mInitialHeight;
-  bool mBackAtOriginalHeight = false;
-};
-
-
-using State = std::variant<Flying, Hovering, PlungingDown, RisingUp>;
-
-}
-
-
 struct RedBird {
   void update(
     GlobalDependencies&,
@@ -76,7 +46,41 @@ struct RedBird {
     const engine::events::CollidedWithWorld& event,
     entityx::Entity entity);
 
-  red_bird::State mState;
+  void startRisingUp(int initialHeight, entityx::Entity entity);
+
+
+  struct Flying {
+    Flying() noexcept = default;
+    explicit Flying(const engine::components::Orientation orientation)
+      : mOrientation(orientation)
+    {
+    }
+
+    engine::components::Orientation mOrientation =
+      engine::components::Orientation::Left;
+    unsigned int mAnimStep = 0;
+  };
+
+  struct Hovering {
+    int mFramesElapsed = 0;
+  };
+
+  struct PlungingDown {
+    int mInitialHeight;
+  };
+
+  struct RisingUp {
+    explicit RisingUp(const int initialHeight)
+      : mInitialHeight(initialHeight)
+    {
+    }
+
+    int mInitialHeight;
+    bool mBackAtOriginalHeight = false;
+  };
+
+  using State = std::variant<Flying, Hovering, PlungingDown, RisingUp>;
+  State mState;
 };
 
 }

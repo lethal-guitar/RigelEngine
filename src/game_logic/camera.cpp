@@ -54,6 +54,8 @@ constexpr auto DEAD_ZONE_END_X = 21;
 constexpr auto DEFAULT_VERTICAL_DEAD_ZONE = VerticalDeadZone{2, 19};
 constexpr auto TIGHT_VERTICAL_DEAD_ZONE = VerticalDeadZone{7, 13};
 
+constexpr auto INITIAL_CAMERA_OFFSET = base::Vector{15, 19};
+
 constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
 
 
@@ -85,23 +87,42 @@ base::Rect<int> deadZoneRect(const Player& player) {
 }
 
 
-base::Vector offsetToDeadZone(
+/** Calculate 'normalized' player bounds
+ *
+ * Returns player collision box in world space, adjusted to always be in the
+ * center of the screen with regards to the original game's horizontal screen
+ * size.
+ *
+ * This makes the camera code work correctly when in widescreen mode. The
+ * dead zone is tailored towards normal (i.e. not widescreen) mode, which
+ * would cause the player to be constrained to move inside the left half of
+ * the screen when in widescreen mode. By shifting the player position, we
+ * effectively move the dead zone to the center of the screen instead.
+ *
+ * When the view port is not wide, the result is identical with the player's
+ * world space collision box.
+ */
+base::Rect<int> normalizedPlayerBounds(
   const Player& player,
-  const base::Vector& cameraPosition,
   const base::Extents& viewPortSize
 ) {
   const auto extraTiles =
     viewPortSize.width - data::GameTraits::mapViewPortSize.width;
   const auto offsetToCenter = extraTiles / 2;
-  auto playerBounds = player.worldSpaceCollisionBox();
 
-  // This makes the camera code work correctly when in widescreen mode. The
-  // dead zone is tailored towards normal (i.e. not widescreen) mode, which
-  // would cause the player to be constrained to move inside the left half of
-  // the screen when in widescreen mode. By shifting the player position, we
-  // effectively move the dead zone to the center of the screen instead.
+  auto playerBounds = player.worldSpaceCollisionBox();
   playerBounds.topLeft.x -= offsetToCenter;
 
+  return playerBounds;
+}
+
+
+base::Vector offsetToDeadZone(
+  const Player& player,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
@@ -202,7 +223,12 @@ void Camera::setPosition(const base::Vector position) {
 
 
 void Camera::centerViewOnPlayer() {
-  setPosition(offsetToDeadZone(*mpPlayer, {}, mViewPortSize));
+  auto playerPos = normalizedPlayerBounds(*mpPlayer, mViewPortSize).bottomLeft();
+  if (mpPlayer->orientation() == Orientation::Left) {
+    playerPos.x -= 1;
+  }
+
+  setPosition(playerPos - INITIAL_CAMERA_OFFSET);
 }
 
 

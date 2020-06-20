@@ -4,7 +4,7 @@
 
 This project is a re-implementation of the game [Duke Nukem II](
 https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee
-Software in 1993. RigelEngine works as a drop-in replacement for the original executable: It reads the original data files and offers the same experience (plus some improvements),
+Software in 1993. RigelEngine works as a drop-in replacement for the original executable: It reads the original data files and offers the same experience (with some improvements),
 but runs natively on modern operating systems, and is written in modern C++ code with a completely new architecture under the hood. It is similar to
 projects like [Omnispeak](https://davidgow.net/keen/omnispeak.html) or [Commander Genius](http://clonekeenplus.sourceforge.net), which do the same
 thing for the Commander Keen series of games.
@@ -15,19 +15,36 @@ See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing
 
 Here's a video showcasing the project:
 
-<a href="http://www.youtube.com/watch?v=Z3gCS5LvC2s"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
+<a href="http://www.youtube.com/watch?v=U7-eotm8Xoo"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
 ## Current state
 
-RigelEngine is fairly complete. Only some [minor visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5)
-and [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4) are currently missing,
-and [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13) isn't implemented yet.
+Gameplay-wise, RigelEngine is feature-complete: All four episodes of the game (shareware and registered version) are fully playable and on par with the original game.
 
-All 4 episodes of the game (shareware and registered version)
-are fully supported, including all gameplay features.
-Episode 1 has been tested quite thorougly, and is playable without issues.
-However, I'm still in the process of testing episodes 2 to 4,
-so there might be bugs.
+The project overall is far from finished, though. There are still some pieces missing to reach full parity with the original game (configurable controls/key bindings, [a few visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5), some [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4), [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13)). On top of that, more [modern enhancements](https://github.com/lethal-guitar/RigelEngine/labels/enhancement) and [usability improvements](https://github.com/lethal-guitar/RigelEngine/labels/usability) are planned.
+
+### Supported platforms
+
+RigelEngine runs on Windows, Linux, and Mac OS X.
+
+It also runs on the Raspberry Pi, but that's work in progress as there are still [some issues](https://github.com/lethal-guitar/RigelEngine/labels/raspberry-pi-support) to be sorted out. See [build instructions](#raspi-build-instructions).
+
+Android and iOS versions might happen someday, but there are no concrete plans at the moment.
+
+### System requirements
+
+RigelEngine is not very demanding, but it does require OpenGL-capable graphics hardware.
+Either OpenGL 3.0 or OpenGL ES 2.0 can be used, depending on what's chosen at compile time.
+To build in GL ES mode, pass `-DUSE_GL_ES=ON` to CMake.
+
+Most Desktop/laptop graphics cards support OpenGL 3.0 nowadays.
+However, some older integrated GPUs might only support OpenGL 2.
+For these systems, using GL ES can be an option as well.
+This has been confirmed to work on Ubuntu 18.04 on an older laptop.
+
+### Differences to the original Duke Nukem II
+
+See [list of differences](https://github.com/lethal-guitar/RigelEngine/wiki#differences-to-the-original-duke-nukem-ii-executable).
 
 ## Contributing
 
@@ -47,11 +64,7 @@ It's also possible to pass the path to the game files as argument on the command
 
 ### Acquiring the game data
 
-The full version of the game (aka registered version) is not available currently, but you can still download the freely available shareware version from [the old 3D Realms site](http://legacy.3drealms.com/duke2/) - look for a download link for the file `4duke.zip`. You can also find the same file on various websites if you Google for "Duke Nukem 2 shareware".
-
-Note that on MacOS you might need to unzip from the terminal - `unzip 4duke.zip`, since the built-in unarchiver seems to dislike the shareware download.
-
-The download contains an installer which only runs on MS-DOS, but you don't need that - you can simply rename the file `DN2SW10.SHR` (also part of the download) to `.zip` and open it using your favorite archive manager. After that, you can point RigelEngine to the directory where you extracted the files, and it should work.
+The full version of the game (aka registered version) is not available currently, but you can still download the freely available shareware version, e.g. from [archive.org](https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip).
 
 If you already have a copy of the game, you can also point RigelEngine to that existing installation.
 
@@ -62,16 +75,10 @@ The only files actually required for RigelEngine are:
 
 Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
 
+If there are existing saved games, high score lists, or settings found in the game files,
+RigelEngine imports them into its own user profile when running for the first time.
 
-### Command line options
-
-The most important command line options are:
-
-* `-l`: jump to a specific level. E.g. `-l L5` to play the 5th level of episode 1.
-* `-s`: skip intro movies, go straight to main menu
-* `-h`/`--help`: show all command line options
-
-### Debugging tools, more info
+### Command line options, debugging tools, more info
 
 You can find more info that didn't quite fit in this README over on [the Wiki](https://github.com/lethal-guitar/RigelEngine/wiki). For example, you'll find info on how to activate the built-in debugging tools, a list of bugs in the original version that have been fixed in Rigel Engine, etc.
 
@@ -81,7 +88,7 @@ Pre-built binaries for Windows are provided with each [Release](https://github.c
 
 Thanks to [@mnhauke](https://github.com/mnhauke), there is now also a [Linux package for OpenSUSE Tumbleweed](https://software.opensuse.org/package/RigelEngine).
 
-I'm planning to provide binaries for OS X and Ubuntu/Debian in the future, but right now, you need to build the project yourself on these platforms.
+I'm planning to provide binaries for OS X, Ubuntu/Debian, and Raspberry Pi in the future, but right now, you need to build the project yourself on these platforms.
 
 ## Building from source
 
@@ -91,6 +98,8 @@ I'm planning to provide binaries for OS X and Ubuntu/Debian in the future, but r
 * [Linux builds](#linux-build-instructions)
     * [Ubuntu 19.04 or newer](#linux-build-instructions-194)
     * [Ubuntu 18.04](#linux-build-instructions-184)
+    * [Fedora 31 or newer](#linux-build-instructions-fedora)
+* [Raspberry Pi builds](#raspi-build-instructions)
 * [OS X builds](#mac-build-instructions)
 * [Windows builds](#windows-build-instructions)
 
@@ -150,6 +159,10 @@ In order to be able to install all required dependencies from the system's
 package manager, a fairly recent distro is required. I have successfully built
 the project using the following instructions on Ubuntu 19.04 and 19.10.
 Building on Ubuntu 18.04 is also possible, but it requires a few more steps.
+
+For other distros (not based on Debian), the same instructions should work as well,
+with only the package installation command needing adaptation,
+as long as all necessary dependencies are available at recent enough versions.
 
 #### <a name="linux-build-instructions-194">Ubuntu 19.04 or newer</a>
 
@@ -220,6 +233,40 @@ make -j8 # adjust depending on number of CPU cores in your machine
 # Now run it!
 ./src/RigelEngine
 ```
+
+#### <a name="linux-build-instructions-fedora">Fedora 31 or newer</a>
+
+On Fedora, the following command installs all
+required dependencies:
+
+```bash
+sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel SDL2_mixer-devel
+```
+
+Note the additional `boost-static` package - without it, there will be linker errors.
+
+This also assumes that `make`, `gcc` and `gcc-c++` are already installed.
+
+### <a name="raspi-build-instructions">Raspberry Pi builds</a>
+
+:warning: Note that Raspberry Pi support is still work in progress, and there are [some issues](https://github.com/lethal-guitar/RigelEngine/labels/raspberry-pi-support).
+
+To build on the Pi itself, I recommend Raspbian (aka Raspberry Pi OS) _Buster_.
+Older versions like Stretch don't have recent enough versions of CMake, Boost and Gcc.
+
+Installing the dependencies on Buster works exactly like [on Ubuntu](#linux-build-instructions-194).
+
+When building, you need to enable OpenGL ES Support:
+
+```bash
+mkdir build
+cd build
+cmake .. -DUSE_GL_ES=ON -DWARNINGS_AS_ERRORS=OFF
+make
+```
+
+To get playable performance, I had to run the game outside of the Desktop environment (X server).
+To do that, switch to a new terminal using Ctrl+Alt+F1 and launch the game there.
 
 ### <a name="mac-build-instructions">OS X builds</a>
 

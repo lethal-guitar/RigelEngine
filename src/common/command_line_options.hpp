@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "data/game_session_data.hpp"
 
 #include <optional>
 #include <string>
@@ -27,7 +28,7 @@ namespace rigel {
 
 struct CommandLineOptions {
   std::string mGamePath;
-  std::optional<std::pair<int, int>> mLevelToJumpTo;
+  std::optional<data::GameSessionId> mLevelToJumpTo;
   bool mSkipIntro = false;
   bool mDebugModeEnabled = false;
   std::optional<base::Vector> mPlayerPosition;

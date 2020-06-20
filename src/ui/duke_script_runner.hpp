@@ -227,6 +227,8 @@ private:
 
   std::optional<CheckBoxesState> mCheckBoxStates;
 
+  base::Vector mAnalogStickVector;
+
   bool mFadeInBeforeNextWaitStateScheduled = false;
   bool mDisableMenuFunctionalityForNextPagesDefinition = false;
   bool mTextBoxOffsetEnabled = false;

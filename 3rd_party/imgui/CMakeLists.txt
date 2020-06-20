@@ -1,18 +1,16 @@
 add_library(dear_imgui STATIC
+    imgui_impl_opengl3.cpp
+
     imgui/imgui.cpp
     imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_widgets.cpp
-    imgui/examples/imgui_impl_opengl3.cpp
     imgui/examples/imgui_impl_sdl.cpp
 )
 target_include_directories(dear_imgui
     PUBLIC
     ${CMAKE_SOURCE_DIR}/3rd_party/imgui/imgui
     ${CMAKE_SOURCE_DIR}/3rd_party/imgui/imgui/examples
-
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}/3rd_party/glad/include
 )
 
 # conditional compilation for emscripten (webassemly) to work
@@ -46,6 +44,7 @@ if (USE_GL_ES)
     target_compile_definitions(dear_imgui
         PRIVATE
         -DIMGUI_IMPL_OPENGL_ES2
+        -DIMGUI_IMPL_OPENGL_ES_USE_LOADER
     )
 endif()
 
