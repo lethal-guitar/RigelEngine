@@ -69,7 +69,9 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
+  std::chrono::high_resolution_clock::time_point mLastTime;
   RunResult run();
+  void runOneFrame(std::vector<SDL_Event>& eventQueue, bool &breakOut);
 
 private:
   enum class FadeType {
@@ -77,7 +79,6 @@ private:
     Out
   };
 
-  RunResult mainLoop();
   void pumpEvents(std::vector<SDL_Event>& eventQueue);
   void updateAndRender(
     entityx::TimeDelta elapsed,
@@ -130,7 +131,6 @@ private:
 
   bool mIsRunning;
   bool mIsMinimized;
-  std::chrono::high_resolution_clock::time_point mLastTime;
 
   CommandLineOptions mCommandLineOptions;
   UserProfile* mpUserProfile;

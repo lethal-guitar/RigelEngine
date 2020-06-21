@@ -50,6 +50,7 @@ namespace rigel {
 
 using namespace engine;
 using namespace sdl_utils;
+using namespace std::chrono;
 
 using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
@@ -408,7 +409,18 @@ void initAndRunGame(
 ) {
   auto run = [&](const CommandLineOptions& options) {
     Game game(options, &userProfile, pWindow);
-    return game.run();
+    
+    
+    std::vector<SDL_Event> eventQueue;
+    game.mLastTime = high_resolution_clock::now();
+    for(;;){
+      bool breakOut = false;
+      game.runOneFrame(eventQueue, breakOut);
+      if (breakOut){
+        break;
+      }
+    }
+    return Game::RunResult::GameEnded; //TODO : figure out restart case
   };
 
   if (!userProfile.mGamePath) {
@@ -536,10 +548,6 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-}
-
-
-auto Game::run() -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -553,18 +561,9 @@ auto Game::run() -> RunResult {
     makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
 
   enumerateGameControllers();
-
-  return mainLoop();
 }
 
-
-auto Game::mainLoop() -> RunResult {
-  using namespace std::chrono;
-
-  std::vector<SDL_Event> eventQueue;
-  mLastTime = high_resolution_clock::now();
-
-  for (;;) {
+void Game::runOneFrame(std::vector<SDL_Event>& eventQueue, bool &breakOut) {
     const auto startOfFrame = high_resolution_clock::now();
     const auto elapsed =
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
@@ -572,7 +571,8 @@ auto Game::mainLoop() -> RunResult {
 
     pumpEvents(eventQueue);
     if (!mIsRunning) {
-      break;
+      breakOut = true;
+      return;
     }
 
     {
@@ -588,16 +588,12 @@ auto Game::mainLoop() -> RunResult {
 
     applyChangedOptions();
 
-    if (!mGamePathToSwitchTo.empty()) {
-      mpUserProfile->mGamePath = mGamePathToSwitchTo;
-      mpUserProfile->saveToDisk();
-      return RunResult::RestartNeeded;
-    }
-  }
-
-  return RunResult::GameEnded;
+    // if (!mGamePathToSwitchTo.empty()) {
+    //   mpUserProfile->mGamePath = mGamePathToSwitchTo;
+    //   mpUserProfile->saveToDisk();
+    //   return RunResult::RestartNeeded;
+    // }
 }
-
 
 void Game::pumpEvents(std::vector<SDL_Event>& eventQueue) {
   SDL_Event event;
