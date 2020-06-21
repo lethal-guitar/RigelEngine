@@ -24,6 +24,7 @@
 #include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
 #include "ui/duke_script_runner.hpp"
+#include "ui/menu_navigation_helper.hpp"
 #include "ui/options_menu.hpp"
 #include "ui/text_entry_widget.hpp"
 
@@ -71,6 +72,25 @@ public:
 private:
   using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
 
+  struct TopLevelMenu {
+    explicit TopLevelMenu(GameMode::Context context);
+
+    TopLevelMenu(const TopLevelMenu&) = delete;
+    TopLevelMenu& operator=(const TopLevelMenu&) = delete;
+
+    void handleEvent(const SDL_Event& event);
+    void updateAndRender(engine::TimeDelta dt);
+
+    GameMode::Context mContext;
+    loader::Palette16 mPalette;
+    engine::TiledTexture mUiSpriteSheet;
+    MenuElementRenderer mMenuElementRenderer;
+    renderer::OwningTexture mMenuBackground;
+    MenuNavigationHelper mNavigationHelper;
+    engine::TimeDelta mElapsedTime = 0;
+    int mSelectedIndex = 0;
+  };
+
   struct ScriptedMenu {
     template <typename ScriptEndHook, typename EventHook>
     ScriptedMenu(
@@ -106,9 +126,15 @@ private:
     int mSlotIndex;
   };
 
-  using State = std::variant<ScriptedMenu, SavedGameNameEntry, ui::OptionsMenu>;
+  using State = std::variant<
+    std::unique_ptr<TopLevelMenu>,
+    ScriptedMenu,
+    SavedGameNameEntry,
+    ui::OptionsMenu>;
 
   enum class MenuType {
+    TopLevel,
+    ConfirmQuitInGame,
     ConfirmQuit,
     Options,
     SaveGame,
@@ -128,6 +154,7 @@ private:
     bool shouldClearScriptCanvas = true);
   void enterMenu(MenuType type);
   void leaveMenu();
+  void fadeout();
 
   void onRestoreGameMenuFinished(const ExecutionResult& result);
   void onSaveGameMenuFinished(const ExecutionResult& result);
@@ -141,6 +168,7 @@ private:
   std::stack<State, std::vector<State>> mStateStack;
   std::vector<SDL_Event> mEventQueue;
   std::optional<MenuType> mMenuToEnter;
+  TopLevelMenu* mpTopLevelMenu = nullptr;
   bool mQuitRequested = false;
   bool mFadeoutNeeded = false;
 };
