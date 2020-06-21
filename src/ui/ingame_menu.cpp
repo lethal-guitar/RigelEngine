@@ -223,6 +223,42 @@ void IngameMenu::saveGame(const int slotIndex, std::string_view name) {
 
 
 void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
+  if (!isNonRepeatKeyDown(event)) {
+    return;
+  }
+
+  switch (event.key.keysym.sym) {
+    case SDLK_ESCAPE:
+      enterMenu(MenuType::ConfirmQuit);
+      break;
+
+    case SDLK_F1:
+      enterMenu(MenuType::Options);
+      break;
+
+    case SDLK_F2:
+      enterMenu(MenuType::SaveGame);
+      break;
+
+    case SDLK_F3:
+      enterMenu(MenuType::LoadGame);
+      break;
+
+    case SDLK_h:
+      enterMenu(MenuType::Help);
+      break;
+
+    case SDLK_p:
+      enterMenu(MenuType::Pause);
+      break;
+
+    default:
+      break;
+  }
+}
+
+
+void IngameMenu::enterMenu(const MenuType type) {
   auto leaveMenuHook = [this](const ExecutionResult&) {
     leaveMenu();
   };
@@ -261,44 +297,37 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
   };
 
 
-  if (!isNonRepeatKeyDown(event)) {
-    return;
-  }
-
-  switch (event.key.keysym.sym) {
-    case SDLK_ESCAPE:
+  switch (type) {
+    case MenuType::ConfirmQuit:
       enterScriptedMenu(
         "2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
       break;
 
-    case SDLK_F1:
+    case MenuType::Options:
       mStateStack.push(ui::OptionsMenu{
         mContext.mpUserProfile,
         mContext.mpServiceProvider,
         ui::OptionsMenu::Type::InGame});
       break;
 
-    case SDLK_F2:
+    case MenuType::SaveGame:
       enterScriptedMenu(
         "Save_Game",
         [this](const auto& result) { onSaveGameMenuFinished(result); });
       break;
 
-    case SDLK_F3:
+    case MenuType::LoadGame:
       enterScriptedMenu(
         "Restore_Game",
         [this](const auto& result) { onRestoreGameMenuFinished(result); });
       break;
 
-    case SDLK_h:
+    case MenuType::Help:
       enterScriptedMenu("&Instructions", leaveMenuWithFadeHook);
       break;
 
-    case SDLK_p:
+    case MenuType::Pause:
       enterScriptedMenu("Paused", leaveMenuHook, noopEventHook, true);
-      break;
-
-    default:
       break;
   }
 }

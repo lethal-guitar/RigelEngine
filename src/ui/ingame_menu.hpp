@@ -108,6 +108,15 @@ private:
 
   using State = std::variant<ScriptedMenu, SavedGameNameEntry, ui::OptionsMenu>;
 
+  enum class MenuType {
+    ConfirmQuit,
+    Options,
+    SaveGame,
+    LoadGame,
+    Help,
+    Pause
+  };
+
   static bool noopEventHook(const SDL_Event&) { return false; }
 
   template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
@@ -117,6 +126,7 @@ private:
     EventHook&& eventHook = noopEventHook,
     bool isTransparent = false,
     bool shouldClearScriptCanvas = true);
+  void enterMenu(MenuType type);
   void leaveMenu();
 
   void onRestoreGameMenuFinished(const ExecutionResult& result);
