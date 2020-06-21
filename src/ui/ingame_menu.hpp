@@ -65,7 +65,7 @@ public:
   }
 
   bool isActive() const {
-    return !mStateStack.empty();
+    return !mStateStack.empty() || mMenuToEnter;
   }
 
 private:
@@ -140,6 +140,7 @@ private:
   std::optional<data::SavedGame> mRequestedGameToLoad;
   std::stack<State, std::vector<State>> mStateStack;
   std::vector<SDL_Event> mEventQueue;
+  std::optional<MenuType> mMenuToEnter;
   bool mQuitRequested = false;
   bool mFadeoutNeeded = false;
 };

@@ -122,7 +122,7 @@ void IngameMenu::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  if (mStateStack.empty()) {
+  if (!isActive()) {
     handleMenuEnterEvent(event);
   } else {
     // We want to process menu navigation and similar events in updateAndRender,
@@ -133,6 +133,11 @@ void IngameMenu::handleEvent(const SDL_Event& event) {
 
 
 auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult {
+  if (mMenuToEnter) {
+    enterMenu(*mMenuToEnter);
+    mMenuToEnter.reset();
+  }
+
   mFadeoutNeeded = false;
 
   handleMenuActiveEvents();
@@ -229,27 +234,27 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
 
   switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
-      enterMenu(MenuType::ConfirmQuit);
+      mMenuToEnter = MenuType::ConfirmQuit;
       break;
 
     case SDLK_F1:
-      enterMenu(MenuType::Options);
+      mMenuToEnter = MenuType::Options;
       break;
 
     case SDLK_F2:
-      enterMenu(MenuType::SaveGame);
+      mMenuToEnter = MenuType::SaveGame;
       break;
 
     case SDLK_F3:
-      enterMenu(MenuType::LoadGame);
+      mMenuToEnter = MenuType::LoadGame;
       break;
 
     case SDLK_h:
-      enterMenu(MenuType::Help);
+      mMenuToEnter = MenuType::Help;
       break;
 
     case SDLK_p:
-      enterMenu(MenuType::Pause);
+      mMenuToEnter = MenuType::Pause;
       break;
 
     default:
