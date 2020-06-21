@@ -71,9 +71,9 @@ public:
 private:
   using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
 
-  struct Menu {
+  struct ScriptedMenu {
     template <typename ScriptEndHook, typename EventHook>
-    Menu(
+    ScriptedMenu(
       ui::DukeScriptRunner* pScriptRunner,
       ScriptEndHook&& scriptEndHook,
       EventHook&& eventHook,
@@ -106,7 +106,7 @@ private:
     int mSlotIndex;
   };
 
-  using State = std::variant<Menu, SavedGameNameEntry, ui::OptionsMenu>;
+  using State = std::variant<ScriptedMenu, SavedGameNameEntry, ui::OptionsMenu>;
 
   static bool noopEventHook(const SDL_Event&) { return false; }
 

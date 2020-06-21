@@ -75,14 +75,14 @@ bool isCancelButton(const SDL_Event& event) {
 }
 
 
-void IngameMenu::Menu::handleEvent(const SDL_Event& event) {
+void IngameMenu::ScriptedMenu::handleEvent(const SDL_Event& event) {
   if (!mEventHook(event)) {
     mpScriptRunner->handleEvent(event);
   }
 }
 
 
-void IngameMenu::Menu::updateAndRender(const engine::TimeDelta dt) {
+void IngameMenu::ScriptedMenu::updateAndRender(const engine::TimeDelta dt) {
   mpScriptRunner->updateAndRender(dt);
 
   if (mpScriptRunner->hasFinishedExecution()) {
@@ -342,7 +342,7 @@ void IngameMenu::handleMenuActiveEvents() {
         handleSavedGameNameEntryEvent(state, event);
       },
 
-      [&event](Menu& state) {
+      [&event](ScriptedMenu& state) {
         state.handleEvent(event);
       },
 
@@ -370,7 +370,7 @@ void IngameMenu::enterScriptedMenu(
   }
 
   runScript(mContext, scriptName);
-  mStateStack.push(Menu{
+  mStateStack.push(ScriptedMenu{
     mContext.mpScriptRunner,
     std::forward<ScriptEndHook>(scriptEndedHook),
     std::forward<EventHook>(eventHook),
