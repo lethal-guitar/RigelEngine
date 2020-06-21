@@ -227,10 +227,7 @@ void showErrorMessage(SDL_Window* pWindow, const std::string& error) {
       ImGui::OpenPopup("Error!");
     }
 
-    const auto flags =
-      ImGuiWindowFlags_NoResize |
-      ImGuiWindowFlags_NoMove;
-    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, flags)) {
+    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, 0)) {
       ImGui::Text("%s", error.c_str());
 
       if (ImGui::Button("Ok")) {
