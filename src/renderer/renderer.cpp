@@ -60,6 +60,12 @@ precision mediump float;
 
 #else
 
+// We generally want to stick to GLSL version 130 (from OpenGL 3.0) in order to
+// maximize compatibility with older graphics cards. Unfortunately, Mac OS only
+// supports GLSL 150 (from OpenGL 3.2), even when requesting a OpenGL 3.0
+// context. Therefore, we use different GLSL versions depending on the
+// platform.
+#if defined(__APPLE__)
 const auto SHADER_PREAMBLE = R"shd(
 #version 150
 
@@ -71,6 +77,19 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
 #define SET_POINT_SIZE
 )shd";
+#else
+const auto SHADER_PREAMBLE = R"shd(
+#version 130
+
+#define ATTRIBUTE in
+#define OUT out
+#define IN in
+#define TEXTURE_LOOKUP texture2D
+#define OUTPUT_COLOR outputColor
+#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
+#define SET_POINT_SIZE
+)shd";
+#endif
 
 #endif
 

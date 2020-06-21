@@ -16,6 +16,8 @@
 
 #include "opengl.hpp"
 
+#include "sdl_utils/error.hpp"
+
 RIGEL_DISABLE_WARNINGS
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
@@ -26,9 +28,13 @@ RIGEL_RESTORE_WARNINGS
 void rigel::renderer::loadGlFunctions() {
   int result = 0;
 #ifdef RIGEL_USE_GL_ES
-  result = gladLoadGLES2Loader(SDL_GL_GetProcAddress);
+  result = gladLoadGLES2Loader([](const char* proc) {
+    return sdl_utils::check(SDL_GL_GetProcAddress(proc));
+  });
 #else
-  result = gladLoadGLLoader(SDL_GL_GetProcAddress);
+  result = gladLoadGLLoader([](const char* proc) {
+    return sdl_utils::check(SDL_GL_GetProcAddress(proc));
+  });
 #endif
 
   if (!result) {
