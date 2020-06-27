@@ -1,4 +1,4 @@
-/* Copyright (C) 2019, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2020, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,30 +16,32 @@
 
 #pragma once
 
-#include "base/color.hpp"
-#include "engine/tiled_texture.hpp"
-#include "loader/palette.hpp"
-#include "renderer/texture.hpp"
+#include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 
-#include <string_view>
+RIGEL_DISABLE_WARNINGS
+#include <SDL.h>
+RIGEL_RESTORE_WARNINGS
 
-
-namespace rigel::loader {
-  class ResourceLoader;
-}
 
 namespace rigel::ui {
 
-renderer::OwningTexture fullScreenImageAsTexture(
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resources,
-  const std::string& imageName);
+enum class NavigationEvent {
+  None,
+  NavigateUp,
+  NavigateDown,
+  Confirm,
+  Cancel,
+  UnassignedButtonPress
+};
 
-engine::TiledTexture makeUiSpriteSheet(
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resourceLoader,
-  const loader::Palette16& palette);
 
-void drawText(std::string_view text, int x, int y, const base::Color& color);
+class MenuNavigationHelper {
+public:
+  NavigationEvent convert(const SDL_Event& event);
+
+private:
+  base::Vector mAnalogStickVector;
+};
 
 }

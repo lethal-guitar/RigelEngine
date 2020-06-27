@@ -24,6 +24,7 @@
 #include "data/bonus.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/earth_quake_effect.hpp"
@@ -84,9 +85,7 @@ public:
   friend class rigel::GameRunner;
 
 private:
-  void loadLevel(
-    const data::GameSessionId& sessionId,
-    const loader::ResourceLoader& resources);
+  void loadLevel();
 
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
@@ -113,6 +112,43 @@ private:
     bool mPlayerTookDamage = false;
   };
 
+  struct WorldState {
+    WorldState(
+      IGameServiceProvider* pServiceProvider,
+      renderer::Renderer* pRenderer,
+      const loader::ResourceLoader* pResources,
+      data::PlayerModel* pPlayerModel,
+      entityx::EventManager& eventManager,
+      SpriteFactory* pSpriteFactory,
+      data::GameSessionId sessionId);
+    ~WorldState();
+
+    entityx::EntityManager mEntities;
+    engine::RandomNumberGenerator mRandomGenerator;
+    EntityFactory mEntityFactory;
+    RadarDishCounter mRadarDishCounter;
+
+    data::map::Map mMap;
+    LevelBonusInfo mBonusInfo;
+    std::string mLevelMusicFile;
+
+    engine::CollisionChecker mCollisionChecker;
+    std::unique_ptr<IngameSystems> mpSystems;
+
+    std::optional<EarthQuakeEffect> mEarthQuakeEffect;
+    std::optional<base::Color> mScreenFlashColor;
+    std::optional<base::Color> mBackdropFlashColor;
+    std::optional<base::Vector> mTeleportTargetPosition;
+    entityx::Entity mActiveBossEntity;
+    std::optional<int> mReactorDestructionFramesElapsed;
+    int mScreenShakeOffsetX = 0;
+    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
+    bool mBossDeathAnimationStartPending = false;
+    bool mBackdropSwitched = false;
+    bool mLevelFinished = false;
+    bool mPlayerDied = false;
+  };
+
   struct CheckpointData {
     data::PlayerModel::CheckpointState mState;
     base::Vector mPosition;
@@ -122,45 +158,19 @@ private:
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture* mpUiSpriteSheet;
   ui::MenuElementRenderer* mpTextRenderer;
-  entityx::EventManager mEventManager;
-  entityx::EntityManager mEntities;
-  engine::RandomNumberGenerator mRandomGenerator;
-  EntityFactory mEntityFactory;
-
   data::PlayerModel* mpPlayerModel;
+  const data::GameOptions* mpOptions;
+  const loader::ResourceLoader* mpResources;
+  data::GameSessionId mSessionId;
+
+  entityx::EventManager mEventManager;
+  SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
-  LevelBonusInfo mBonusInfo;
   std::optional<CheckpointData> mActivatedCheckpoint;
-  std::optional<std::string> mLevelMusicFile;
-
-  std::optional<base::Vector> mTeleportTargetPosition;
-  entityx::Entity mActiveBossEntity;
-  bool mBossDeathAnimationStartPending = false;
-  bool mBackdropSwitched = false;
-  bool mLevelFinished = false;
-  bool mPlayerDied = false;
-
-  struct LevelData {
-    data::map::Map mMap;
-    std::vector<data::map::LevelData::Actor> mInitialActors;
-    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
-  };
-
-  LevelData mLevelData;
-  data::map::Map mMapAtLevelStart;
-
-  std::unique_ptr<IngameSystems> mpSystems;
-
-  RadarDishCounter mRadarDishCounter;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
-  const data::GameOptions* mpOptions;
 
-  std::optional<EarthQuakeEffect> mEarthQuakeEffect;
-  std::optional<base::Color> mScreenFlashColor;
-  std::optional<base::Color> mBackdropFlashColor;
-  std::optional<int> mReactorDestructionFramesElapsed;
-  int mScreenShakeOffsetX = 0;
+  std::unique_ptr<WorldState> mpState;
 };
 
 }

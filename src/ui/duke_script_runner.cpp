@@ -57,22 +57,6 @@ const auto GAME_SPEED_SLOT = 8;
 const auto INITIAL_SKILL_SELECTION = 1;
 const auto INITIAL_GAME_SPEED = 3;
 
-constexpr auto ANALOG_STICK_DEADZONE = 20'000;
-
-
-auto makeSpriteSheet(
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resourceLoader,
-  const loader::Palette16& palette
-) {
-  return engine::TiledTexture{
-    renderer::OwningTexture{
-      pRenderer,
-      resourceLoader.loadTiledFullscreenImage(
-        "STATUS.MNI", palette)},
-    pRenderer};
-}
-
 }
 
 
@@ -88,7 +72,7 @@ DukeScriptRunner::DukeScriptRunner(
   , mpSaveSlots(pSaveSlots)
   , mpServices(pServiceProvider)
   , mUiSpriteSheetRenderer(
-      makeSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
+      makeUiSpriteSheet(pRenderer, *pResourceLoader, mCurrentPalette))
   , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
   , mCanvas(
       pRenderer,
@@ -177,132 +161,41 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  // Escape or controller button B always abort
-  if (
-    (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) ||
-    (event.type == SDL_CONTROLLERBUTTONDOWN &&
-     event.cbutton.button == SDL_CONTROLLER_BUTTON_B)
-  ) {
+  const auto navigationEvent = mNavigationHelper.convert(event);
+
+  if (navigationEvent == NavigationEvent::Cancel) {
     mState = State::ExecutionInterrupted;
     hideMenuSelectionIndicator();
     return;
   }
 
-  // Any key or controller button stops a wait state (Delay or WaitForInput)
-  if (
-    isInWaitState() &&
-    (event.type == SDL_KEYDOWN || event.type == SDL_CONTROLLERBUTTONDOWN)
-  ) {
+  if (isInWaitState() && navigationEvent != NavigationEvent::None) {
     clearWaitState();
   }
 
-  handleKeyboardEvent(event);
-  handleGameControllerEvent(event);
-}
-
-
-void DukeScriptRunner::handleKeyboardEvent(const SDL_Event& event) {
-  if (event.type != SDL_KEYDOWN) {
-    return;
-  }
-
-  // Arrow keys, Enter and Space are used for pager interaction
   if (hasMenuPages()) {
     auto& state = *mPagerState;
 
-    switch (event.key.keysym.sym) {
-      case SDLK_LEFT:
-      case SDLK_UP:
+    switch (navigationEvent) {
+      case NavigationEvent::NavigateUp:
         selectPreviousPage(state);
         break;
 
-      case SDLK_RIGHT:
-      case SDLK_DOWN:
+      case NavigationEvent::NavigateDown:
         selectNextPage(state);
         break;
 
-      case SDLK_RETURN:
-      case SDLK_SPACE:
-      case SDLK_KP_ENTER:
+      case NavigationEvent::Confirm:
         confirmOrSelectNextPage(state);
         break;
 
-      default:
+      case NavigationEvent::UnassignedButtonPress:
         handleUnassignedButton(state);
         break;
+
+      default:
+        break;
     }
-  }
-}
-
-void DukeScriptRunner::handleGameControllerEvent(const SDL_Event& event) {
-  if (!hasMenuPages()) {
-    return;
-  }
-
-  auto& state = *mPagerState;
-
-  auto handleAxisMotion = [&](
-    const int currentValue,
-    const std::int16_t newValueRaw
-  ) {
-    const auto newValue =
-      base::applyThreshold(newValueRaw, ANALOG_STICK_DEADZONE);
-    if (currentValue >= 0 && newValue < 0) {
-      selectPreviousPage(state);
-    }
-
-    if (currentValue <= 0 && newValue > 0) {
-      selectNextPage(state);
-    }
-
-    return newValue;
-  };
-
-  // The analog sticks and D-Pad select menu items/pages, the A button confirms
-  switch (event.type) {
-    case SDL_CONTROLLERAXISMOTION:
-      switch (event.caxis.axis) {
-        case SDL_CONTROLLER_AXIS_LEFTX:
-        case SDL_CONTROLLER_AXIS_RIGHTX:
-          mAnalogStickVector.x = handleAxisMotion(
-            mAnalogStickVector.x, event.caxis.value);
-          break;
-
-        case SDL_CONTROLLER_AXIS_LEFTY:
-        case SDL_CONTROLLER_AXIS_RIGHTY:
-          mAnalogStickVector.y = handleAxisMotion(
-            mAnalogStickVector.y, event.caxis.value);
-          break;
-
-        default:
-          break;
-      }
-      break;
-
-    case SDL_CONTROLLERBUTTONDOWN:
-      switch (event.cbutton.button) {
-        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-        case SDL_CONTROLLER_BUTTON_DPAD_UP:
-          selectPreviousPage(state);
-          break;
-
-        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-          selectNextPage(state);
-          break;
-
-        case SDL_CONTROLLER_BUTTON_A:
-          confirmOrSelectNextPage(state);
-          break;
-
-        default:
-          handleUnassignedButton(state);
-          break;
-      }
-      break;
-
-    default:
-      break;
   }
 }
 
@@ -670,8 +563,7 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
 void DukeScriptRunner::confirmOrSelectNextPage(PagerState& state) {
   if (mPagerState->mMode == PagingMode::Menu) {
     selectCurrentMenuItem(state);
-  }
-  else {
+  } else {
     selectNextPage(state);
   }
 }
@@ -682,8 +574,7 @@ void DukeScriptRunner::handleUnassignedButton(PagerState& state) {
     // Since we cleared the wait state previously, we have to go back
     // to the current page
     executeCurrentPageScript(state);
-  }
-  else {
+  } else {
     selectNextPage(state);
   }
 }
@@ -791,7 +682,7 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
 
   mCurrentPalette = palette;
   mUiSpriteSheetRenderer =
-    makeSpriteSheet(mpRenderer, *mpResourceBundle, mCurrentPalette);
+    makeUiSpriteSheet(mpRenderer, *mpResourceBundle, mCurrentPalette);
 }
 
 

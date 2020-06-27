@@ -23,18 +23,11 @@
 #include "data/saved_game.hpp"
 #include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
-#include "loader/duke_script_loader.hpp"
-#include "ui/duke_script_runner.hpp"
-#include "ui/options_menu.hpp"
-#include "ui/text_entry_widget.hpp"
+#include "ui/ingame_menu.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
-
-#include <functional>
-#include <stack>
-#include <variant>
 
 
 namespace rigel {
@@ -58,91 +51,24 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
-  using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
-
-  struct World {
-    explicit World(game_logic::GameWorld* pWorld)
-      : mpWorld(pWorld)
-    {
-    }
-
-    void handleEvent(const SDL_Event& event);
-    void handleDebugKeys(const SDL_Event& event);
-    void updateAndRender(engine::TimeDelta dt);
-
-    void updateWorld(engine::TimeDelta dt);
-    void handlePlayerKeyboardInput(const SDL_Event& event);
-    void handlePlayerGameControllerInput(const SDL_Event& event);
-    void renderDebugText();
-
-    game_logic::GameWorld* mpWorld;
-    game_logic::PlayerInput mPlayerInput;
-    base::Vector mAnalogStickVector;
-    engine::TimeDelta mAccumulatedTime = 0.0;
-    bool mShowDebugText = false;
-    bool mSingleStepping = false;
-    bool mDoNextSingleStep = false;
-  };
-
-  struct Menu {
-    template <typename ScriptEndHook, typename EventHook>
-    Menu(
-      ui::DukeScriptRunner* pScriptRunner,
-      ScriptEndHook&& scriptEndHook,
-      EventHook&& eventHook,
-      const bool isTransparent
-    )
-      : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
-      , mEventHook(std::forward<EventHook>(eventHook))
-      , mpScriptRunner(pScriptRunner)
-      , mIsTransparent(isTransparent)
-    {
-    }
-
-    void handleEvent(const SDL_Event& event);
-    void updateAndRender(engine::TimeDelta dt);
-
-    std::function<void(const ExecutionResult&)> mScriptFinishedHook;
-    std::function<bool(const SDL_Event&)> mEventHook;
-    ui::DukeScriptRunner* mpScriptRunner;
-    bool mIsTransparent;
-  };
-
-  struct SavedGameNameEntry {
-    SavedGameNameEntry(GameMode::Context context, const int slotIndex);
-
-    void updateAndRender(engine::TimeDelta dt);
-
-    ui::TextEntryWidget mTextEntryWidget;
-    int mSlotIndex;
-  };
-
-  using State = std::variant<World, Menu, SavedGameNameEntry, ui::OptionsMenu>;
-
-  static bool noopEventHook(const SDL_Event&) { return false; }
-
-  bool handleMenuEnterEvent(const SDL_Event& event);
-
-  template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
-  void enterMenu(
-    const char* scriptName,
-    ScriptEndHook&& scriptEndedHook,
-    EventHook&& eventHook = noopEventHook,
-    bool isTransparent = false,
-    bool shouldClearScriptCanvas = true);
-  void leaveMenu();
-  void fadeToWorld();
-
-  void onRestoreGameMenuFinished(const ExecutionResult& result);
-  void onSaveGameMenuFinished(const ExecutionResult& result);
-  void saveGame(int slotIndex, std::string_view name);
+  void updateWorld(engine::TimeDelta dt);
+  bool updateMenu(engine::TimeDelta dt);
+  void handlePlayerKeyboardInput(const SDL_Event& event);
+  void handlePlayerGameControllerInput(const SDL_Event& event);
+  void handleDebugKeys(const SDL_Event& event);
+  void renderDebugText();
 
   GameMode::Context mContext;
-  data::SavedGame mSavedGame;
+
+  ui::IngameMenu mMenu;
+
   game_logic::GameWorld mWorld;
-  std::stack<State, std::vector<State>> mStateStack;
-  std::optional<data::SavedGame> mRequestedGameToLoad;
-  bool mGameWasQuit = false;
+  game_logic::PlayerInput mPlayerInput;
+  base::Vector mAnalogStickVector;
+  engine::TimeDelta mAccumulatedTime = 0.0;
+  bool mShowDebugText = false;
+  bool mSingleStepping = false;
+  bool mDoNextSingleStep = false;
 };
 
 
@@ -152,40 +78,17 @@ inline bool GameRunner::levelFinished() const {
 
 
 inline bool GameRunner::gameQuit() const {
-  return mGameWasQuit;
+  return mMenu.quitRequested();
 }
 
 
 inline std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const {
-  return mRequestedGameToLoad;
+  return mMenu.requestedGameToLoad();
 }
 
 
 inline std::set<data::Bonus> GameRunner::achievedBonuses() const {
   return mWorld.achievedBonuses();
-}
-
-
-inline void GameRunner::Menu::handleEvent(const SDL_Event& event) {
-  if (!mEventHook(event)) {
-    mpScriptRunner->handleEvent(event);
-  }
-}
-
-
-inline void GameRunner::Menu::updateAndRender(const engine::TimeDelta dt) {
-  mpScriptRunner->updateAndRender(dt);
-
-  if (mpScriptRunner->hasFinishedExecution()) {
-    mScriptFinishedHook(*mpScriptRunner->result());
-  }
-}
-
-
-inline void GameRunner::SavedGameNameEntry::updateAndRender(
-  const engine::TimeDelta dt
-) {
-  mTextEntryWidget.updateAndRender(dt);
 }
 
 }

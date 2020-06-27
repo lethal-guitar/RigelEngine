@@ -16,12 +16,9 @@
 
 #include "game_runner.hpp"
 
-#include "base/match.hpp"
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
-#include "common/user_profile.hpp"
 #include "game_logic/ingame_systems.hpp"
-#include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -40,32 +37,6 @@ namespace {
 // it's roughly 13 FPS. With 15 FPS, the feel should therefore be very close to
 // playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0/15.0;
-
-constexpr auto SAVE_SLOT_NAME_ENTRY_POS_X = 14;
-constexpr auto SAVE_SLOT_NAME_ENTRY_START_POS_Y = 6;
-constexpr auto SAVE_SLOT_NAME_HEIGHT = 2;
-
-constexpr auto MAX_SAVE_SLOT_NAME_LENGTH = 18;
-
-bool isNonRepeatKeyDown(const SDL_Event& event) {
-  return event.type == SDL_KEYDOWN && event.key.repeat == 0;
-}
-
-
-auto createSavedGame(
-  const data::GameSessionId& sessionId,
-  const data::PlayerModel& playerModel
-) {
-  return data::SavedGame{
-    sessionId,
-    playerModel.tutorialMessages(),
-    "", // will be filled in on saving
-    playerModel.weapon(),
-    playerModel.ammo(),
-    playerModel.score()
-  };
-}
-
 
 // Controller handling stuff.
 // TODO: This should move into its own file at some point.
@@ -102,7 +73,7 @@ GameRunner::GameRunner(
   const bool showWelcomeMessage
 )
   : mContext(context)
-  , mSavedGame(createSavedGame(sessionId, *pPlayerModel))
+  , mMenu(context, pPlayerModel, sessionId)
   , mWorld(
       pPlayerModel,
       sessionId,
@@ -110,317 +81,54 @@ GameRunner::GameRunner(
       playerPositionOverride,
       showWelcomeMessage)
 {
-  mStateStack.emplace(World{&mWorld});
 }
 
 
 void GameRunner::handleEvent(const SDL_Event& event) {
-  auto handleSavedGameNameEntryEvent = [&, this](
-    SavedGameNameEntry& state
-  ) {
-    auto leaveTextEntry = [&, this]() {
-      SDL_StopTextInput();
-
-      // Render one last time so we have something to fade out from
-      mContext.mpScriptRunner->updateAndRender(0.0);
-      state.updateAndRender(0.0);
-
-      mStateStack.pop();
-      mStateStack.pop();
-      fadeToWorld();
-    };
-
-    if (isNonRepeatKeyDown(event)) {
-      switch (event.key.keysym.sym) {
-        case SDLK_ESCAPE:
-          leaveTextEntry();
-          return;
-
-        case SDLK_RETURN:
-        case SDLK_KP_ENTER:
-          saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
-          leaveTextEntry();
-          return;
-
-        default:
-          break;
-      }
-    }
-
-    state.mTextEntryWidget.handleEvent(event);
-  };
-
-
-  if (mGameWasQuit || mRequestedGameToLoad) {
+  if (gameQuit() || requestedGameToLoad()) {
     return;
   }
 
-  base::match(mStateStack.top(),
-    [&event, this](World& state) {
-      if (!handleMenuEnterEvent(event)) {
-        state.handleEvent(event);
+  mMenu.handleEvent(event);
+  if (mMenu.isActive()) {
+    // The menu overrides game event handling when it is active, therefore
+    // stop here
+    return;
+  }
 
-        const auto debugModeEnabled =
-          mContext.mpServiceProvider->commandLineOptions().mDebugModeEnabled;
-        if (debugModeEnabled) {
-          state.handleDebugKeys(event);
-        }
-      }
-    },
+  handlePlayerKeyboardInput(event);
+  handlePlayerGameControllerInput(event);
 
-    [&, this](SavedGameNameEntry& state) {
-      handleSavedGameNameEntryEvent(state);
-    },
-
-    [&event](Menu& state) {
-      state.handleEvent(event);
-    },
-
-    [&, this](const ui::OptionsMenu& options) {
-      const auto escapePressed = isNonRepeatKeyDown(event) &&
-        event.key.keysym.sym == SDLK_ESCAPE;
-      if (escapePressed || options.isFinished()) {
-        mStateStack.pop();
-      }
-    });
+  const auto debugModeEnabled =
+    mContext.mpServiceProvider->commandLineOptions().mDebugModeEnabled;
+  if (debugModeEnabled) {
+    handleDebugKeys(event);
+  }
 }
 
 
 void GameRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mGameWasQuit || levelFinished() || mRequestedGameToLoad) {
+  if (gameQuit() || levelFinished() || requestedGameToLoad()) {
     // TODO: This is a workaround to make the fadeout on quitting work.
     // Would be good to find a better way to do this.
     mWorld.render();
     return;
   }
 
-  base::match(mStateStack.top(),
-    [dt, this](Menu& state) {
-      if (state.mIsTransparent) {
-        mWorld.render();
-      }
-
-      state.updateAndRender(dt);
-    },
-
-    [dt, this](ui::OptionsMenu& state) {
-      mWorld.render();
-      state.updateAndRender(dt);
-    },
-
-    [dt, this](SavedGameNameEntry& state) {
-      mContext.mpScriptRunner->updateAndRender(dt);
-      state.updateAndRender(dt);
-    },
-
-    [dt](auto& state) { state.updateAndRender(dt); });
-}
-
-
-bool GameRunner::handleMenuEnterEvent(const SDL_Event& event) {
-  auto leaveMenuHook = [this](const ExecutionResult&) {
-    leaveMenu();
-  };
-
-  auto leaveMenuWithFadeHook = [this](const ExecutionResult&) {
-    leaveMenu();
-    fadeToWorld();
-  };
-
-  auto quitConfirmEventHook = [this](const SDL_Event& ev) {
-    // The user needs to press Y in order to confirm quitting the game, but we
-    // want the confirmation to happen when the key is released, not when it's
-    // pressed. This is because the "a new high score" screen may appear after
-    // quitting the game, and if we were to quit on key down, it's very likely
-    // for the key to still be pressed while the new screen appears. This in
-    // turn would lead to an undesired letter Y being entered into the high
-    // score name entry field, because the text input system would see the key
-    // being released and treated as an input.
-    //
-    // Therefore, we quit on key up. Nevertheless, we still need to prevent the
-    // key down event from reaching the script runner, as it would cancel out
-    // the quit confirmation dialog otherwise.
-    if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_y) {
-      return true;
-    }
-    if (ev.type == SDL_KEYUP && ev.key.keysym.sym == SDLK_y) {
-      mGameWasQuit = ev.type == SDL_KEYUP;
-      return true;
-    }
-
-    return false;
-  };
-
-
-  if (!isNonRepeatKeyDown(event)) {
-    return false;
+  if (updateMenu(dt)) {
+    return;
   }
 
-  switch (event.key.keysym.sym) {
-    case SDLK_ESCAPE:
-      enterMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
-      break;
-
-    case SDLK_F1:
-      if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
-        pWorld->mPlayerInput = {};
-      }
-      mStateStack.push(ui::OptionsMenu{
-        mContext.mpUserProfile,
-        mContext.mpServiceProvider,
-        ui::OptionsMenu::Type::InGame});
-      break;
-
-    case SDLK_F2:
-      enterMenu(
-        "Save_Game",
-        [this](const auto& result) { onSaveGameMenuFinished(result); });
-      break;
-
-    case SDLK_F3:
-      enterMenu(
-        "Restore_Game",
-        [this](const auto& result) { onRestoreGameMenuFinished(result); });
-      break;
-
-    case SDLK_h:
-      enterMenu("&Instructions", leaveMenuWithFadeHook);
-      break;
-
-    case SDLK_p:
-      enterMenu("Paused", leaveMenuHook, noopEventHook, true);
-      break;
-
-    default:
-      return false;
-  }
-
-  return true;
-}
-
-
-template <typename ScriptEndHook, typename EventHook>
-void GameRunner::enterMenu(
-  const char* scriptName,
-  ScriptEndHook&& scriptEndedHook,
-  EventHook&& eventHook,
-  const bool isTransparent,
-  const bool shouldClearScriptCanvas
-) {
-  if (auto pWorld = std::get_if<World>(&mStateStack.top())) {
-    pWorld->mPlayerInput = {};
-    pWorld->mpWorld->render();
-  }
-
-  if (shouldClearScriptCanvas) {
-    mContext.mpScriptRunner->clearCanvas();
-  }
-
-  runScript(mContext, scriptName);
-  mStateStack.push(Menu{
-    mContext.mpScriptRunner,
-    std::forward<ScriptEndHook>(scriptEndedHook),
-    std::forward<EventHook>(eventHook),
-    isTransparent});
-}
-
-
-void GameRunner::leaveMenu() {
-  mStateStack.pop();
-}
-
-
-void GameRunner::fadeToWorld() {
-  mContext.mpServiceProvider->fadeOutScreen();
-  mWorld.render();
-  mContext.mpServiceProvider->fadeInScreen();
-}
-
-
-void GameRunner::onRestoreGameMenuFinished(const ExecutionResult& result) {
-  auto showErrorMessageScript = [this](const char* scriptName) {
-    // When selecting a slot that can't be loaded, we show a message and
-    // then return to the save slot selection menu.  The latter stays on the
-    // stack, we push another menu state on top of the stack for showing the
-    // message.
-    enterMenu(
-      scriptName,
-      [this](const auto&) {
-        leaveMenu();
-        runScript(mContext, "Restore_Game");
-      },
-      noopEventHook,
-      false, // isTransparent
-      false); // shouldClearScriptCanvas
-  };
-
-
-  using STT = ui::DukeScriptRunner::ScriptTerminationType;
-
-  if (result.mTerminationType == STT::AbortedByUser) {
-    leaveMenu();
-    fadeToWorld();
-  } else {
-    const auto slotIndex = result.mSelectedPage;
-    const auto& slot = mContext.mpUserProfile->mSaveSlots[*slotIndex];
-    if (slot) {
-      if (
-        mContext.mpServiceProvider->isShareWareVersion() &&
-        slot->mSessionId.needsRegisteredVersion()
-      ) {
-        showErrorMessageScript("No_Can_Order");
-      } else {
-        mRequestedGameToLoad = *slot;
-      }
-    } else {
-      showErrorMessageScript("No_Game_Restore");
-    }
-  }
-}
-
-
-void GameRunner::onSaveGameMenuFinished(const ExecutionResult& result) {
-  using STT = ui::DukeScriptRunner::ScriptTerminationType;
-
-  if (result.mTerminationType == STT::AbortedByUser) {
-    leaveMenu();
-    fadeToWorld();
-  } else {
-    const auto slotIndex = *result.mSelectedPage;
-    SDL_StartTextInput();
-    mStateStack.push(SavedGameNameEntry{mContext, slotIndex});
-  }
-}
-
-
-void GameRunner::saveGame(const int slotIndex, std::string_view name) {
-  auto savedGame = mSavedGame;
-  savedGame.mName = name;
-
-  mContext.mpUserProfile->mSaveSlots[slotIndex] = savedGame;
-  mContext.mpUserProfile->saveToDisk();
-}
-
-
-void GameRunner::World::handleEvent(const SDL_Event& event) {
-  handlePlayerKeyboardInput(event);
-  handlePlayerGameControllerInput(event);
-}
-
-
-void GameRunner::World::updateAndRender(const engine::TimeDelta dt) {
   updateWorld(dt);
-  mpWorld->render();
-
+  mWorld.render();
   renderDebugText();
-
-  mpWorld->processEndOfFrameActions();
+  mWorld.processEndOfFrameActions();
 }
 
 
-void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
+void GameRunner::updateWorld(const engine::TimeDelta dt) {
   auto update = [this]() {
-    mpWorld->updateGameLogic(combinedInput(mPlayerInput, mAnalogStickVector));
+    mWorld.updateGameLogic(combinedInput(mPlayerInput, mAnalogStickVector));
     mPlayerInput.resetTriggeredStates();
   };
 
@@ -439,12 +147,35 @@ void GameRunner::World::updateWorld(const engine::TimeDelta dt) {
       update();
     }
 
-    mpWorld->mpSystems->updateBackdropAutoScrolling(dt);
+    mWorld.mpState->mpSystems->updateBackdropAutoScrolling(dt);
   }
 }
 
 
-void GameRunner::World::handlePlayerKeyboardInput(const SDL_Event& event) {
+bool GameRunner::updateMenu(const engine::TimeDelta dt) {
+  if (mMenu.isActive()) {
+    // Still render the world if the menu is active, as some menus don't cover
+    // the entire screen. But we don't update the world, since the game is
+    // paused when the menu is active.
+    mPlayerInput = {};
+    mWorld.render();
+
+    const auto result = mMenu.updateAndRender(dt);
+
+    if (result == ui::IngameMenu::UpdateResult::FinishedNeedsFadeout) {
+      mContext.mpServiceProvider->fadeOutScreen();
+      mWorld.render();
+      mContext.mpServiceProvider->fadeInScreen();
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+
+void GameRunner::handlePlayerKeyboardInput(const SDL_Event& event) {
   const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
   if (!isKeyEvent || event.key.repeat != 0) {
     return;
@@ -492,7 +223,7 @@ void GameRunner::World::handlePlayerKeyboardInput(const SDL_Event& event) {
 }
 
 
-void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) {
+void GameRunner::handlePlayerGameControllerInput(const SDL_Event& event) {
   switch (event.type) {
     case SDL_CONTROLLERAXISMOTION:
       switch (event.caxis.axis) {
@@ -510,7 +241,7 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
             // up/down while flying. Therefore, we use a different vertical
             // deadzone when not in the ship.
             const auto deadZone =
-              mpWorld->mpSystems->player().stateIs<game_logic::InShip>()
+              mWorld.mpState->mpSystems->player().stateIs<game_logic::InShip>()
               ? ANALOG_STICK_DEADZONE_X
               : ANALOG_STICK_DEADZONE_Y;
 
@@ -593,27 +324,12 @@ void GameRunner::World::handlePlayerGameControllerInput(const SDL_Event& event) 
 }
 
 
-void GameRunner::World::renderDebugText() {
-  std::stringstream debugText;
-
-  if (mpWorld->mpSystems->player().mGodModeOn) {
-    debugText << "GOD MODE on\n";
-  }
-
-  if (mShowDebugText) {
-    mpWorld->printDebugText(debugText);
-  }
-
-  ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
-}
-
-
-void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
-  if (!isNonRepeatKeyDown(event)) {
+void GameRunner::handleDebugKeys(const SDL_Event& event) {
+  if (event.type != SDL_KEYDOWN || event.key.repeat != 0) {
     return;
   }
 
-  auto& debuggingSystem = mpWorld->mpSystems->debuggingSystem();
+  auto& debuggingSystem = mWorld.mpState->mpSystems->debuggingSystem();
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();
@@ -643,7 +359,7 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
 
     case SDLK_F10:
       {
-        auto& player = mpWorld->mpSystems->player();
+        auto& player = mWorld.mpState->mpSystems->player();
         player.mGodModeOn = !player.mGodModeOn;
       }
       break;
@@ -651,18 +367,18 @@ void GameRunner::World::handleDebugKeys(const SDL_Event& event) {
 }
 
 
-GameRunner::SavedGameNameEntry::SavedGameNameEntry(
-  GameMode::Context context,
-  const int slotIndex
-)
-  : mTextEntryWidget(
-      context.mpUiRenderer,
-      SAVE_SLOT_NAME_ENTRY_POS_X,
-      SAVE_SLOT_NAME_ENTRY_START_POS_Y + slotIndex * SAVE_SLOT_NAME_HEIGHT,
-      MAX_SAVE_SLOT_NAME_LENGTH,
-      ui::TextEntryWidget::Style::BigText)
-  , mSlotIndex(slotIndex)
-{
+void GameRunner::renderDebugText() {
+  std::stringstream debugText;
+
+  if (mWorld.mpState->mpSystems->player().mGodModeOn) {
+    debugText << "GOD MODE on\n";
+  }
+
+  if (mShowDebugText) {
+    mWorld.printDebugText(debugText);
+  }
+
+  ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
 }
 
 }

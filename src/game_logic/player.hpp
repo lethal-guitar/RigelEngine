@@ -235,7 +235,6 @@ public:
 
   void doInteractionAnimation();
 
-  void resetAfterDeath(entityx::Entity newEntity);
   void resetAfterRespawn();
 
   bool isInRegularState() const;

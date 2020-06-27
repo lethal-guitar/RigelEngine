@@ -268,12 +268,16 @@ set(core_sources
     ui/hud_renderer.hpp
     ui/imgui_integration.cpp
     ui/imgui_integration.hpp
+    ui/ingame_menu.cpp
+    ui/ingame_menu.hpp
     ui/ingame_message_display.cpp
     ui/ingame_message_display.hpp
     ui/intro_movie.cpp
     ui/intro_movie.hpp
     ui/menu_element_renderer.cpp
     ui/menu_element_renderer.hpp
+    ui/menu_navigation_helper.cpp
+    ui/menu_navigation_helper.hpp
     ui/movie_player.cpp
     ui/movie_player.hpp
     ui/options_menu.cpp
