@@ -284,7 +284,6 @@ void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result) {
         runScript(mContext, "Restore_Game");
       },
       noopEventHook,
-      false, // isTransparent
       false); // shouldClearScriptCanvas
   };
 
@@ -421,13 +420,11 @@ void IngameMenu::enterMenu(const MenuType type) {
 
   switch (type) {
     case MenuType::ConfirmQuitInGame:
-      enterScriptedMenu(
-        "2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
+      enterScriptedMenu("2Quit_Select", leaveMenuHook, quitConfirmEventHook);
       break;
 
     case MenuType::ConfirmQuit:
-      enterScriptedMenu(
-        "Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
+      enterScriptedMenu("Quit_Select", leaveMenuHook, quitConfirmEventHook);
       break;
 
     case MenuType::Options:
@@ -454,7 +451,7 @@ void IngameMenu::enterMenu(const MenuType type) {
       break;
 
     case MenuType::Pause:
-      enterScriptedMenu("Paused", leaveMenuHook, noopEventHook, true);
+      enterScriptedMenu("Paused", leaveMenuHook, noopEventHook);
       break;
 
     case MenuType::TopLevel:
@@ -566,7 +563,6 @@ void IngameMenu::enterScriptedMenu(
   const char* scriptName,
   ScriptEndHook&& scriptEndedHook,
   EventHook&& eventHook,
-  const bool isTransparent,
   const bool shouldClearScriptCanvas
 ) {
   if (shouldClearScriptCanvas) {
@@ -577,8 +573,7 @@ void IngameMenu::enterScriptedMenu(
   mStateStack.push(ScriptedMenu{
     mContext.mpScriptRunner,
     std::forward<ScriptEndHook>(scriptEndedHook),
-    std::forward<EventHook>(eventHook),
-    isTransparent});
+    std::forward<EventHook>(eventHook)});
 }
 
 
