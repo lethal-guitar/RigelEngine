@@ -84,9 +84,7 @@ public:
   friend class rigel::GameRunner;
 
 private:
-  void loadLevel(
-    const data::GameSessionId& sessionId,
-    const loader::ResourceLoader& resources);
+  void loadLevel();
 
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
@@ -158,6 +156,8 @@ private:
   ui::MenuElementRenderer* mpTextRenderer;
   data::PlayerModel* mpPlayerModel;
   const data::GameOptions* mpOptions;
+  const loader::ResourceLoader* mpResources;
+  data::GameSessionId mSessionId;
 
   entityx::EventManager mEventManager;
   SpriteFactory mSpriteFactory;

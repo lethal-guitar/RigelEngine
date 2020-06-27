@@ -282,6 +282,8 @@ GameWorld::GameWorld(
   , mpTextRenderer(context.mpUiRenderer)
   , mpPlayerModel(pPlayerModel)
   , mpOptions(&context.mpUserProfile->mOptions)
+  , mpResources(context.mpResources)
+  , mSessionId(sessionId)
   , mSpriteFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mHudRenderer(
@@ -309,7 +311,7 @@ GameWorld::GameWorld(
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
 
-  loadLevel(sessionId, *context.mpResources);
+  loadLevel();
 
   if (playerPositionOverride) {
     mpState->mpSystems->player().position() = *playerPositionOverride;
@@ -479,14 +481,11 @@ void GameWorld::receive(const rigel::events::BossDestroyed& event) {
 }
 
 
-void GameWorld::loadLevel(
-  const data::GameSessionId& sessionId,
-  const loader::ResourceLoader& resources
-) {
+void GameWorld::loadLevel() {
   auto loadedLevel = loader::loadLevel(
-    levelFileName(sessionId.mEpisode, sessionId.mLevel),
-    resources,
-    sessionId.mDifficulty);
+    levelFileName(mSessionId.mEpisode, mSessionId.mLevel),
+    *mpResources,
+    mSessionId.mDifficulty);
   auto playerEntity =
     mpState->mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
 
@@ -503,7 +502,7 @@ void GameWorld::loadLevel(
   mpState->mMapAtLevelStart = mpState->mMap;
 
   mpState->mpSystems = std::make_unique<IngameSystems>(
-    sessionId,
+    mSessionId,
     playerEntity,
     mpPlayerModel,
     &mpState->mMap,
@@ -515,14 +514,14 @@ void GameWorld::loadLevel(
     mpRenderer,
     mpState->mEntities,
     mEventManager,
-    resources);
+    *mpResources);
 
   if (loadedLevel.mEarthquake) {
     mpState->mEarthQuakeEffect = EarthQuakeEffect{
       mpServiceProvider, &mpState->mRandomGenerator, &mEventManager};
   }
 
-  if (data::isBossLevel(sessionId.mLevel)) {
+  if (data::isBossLevel(mSessionId.mLevel)) {
     mpState->mLevelMusicFile = loadedLevel.mMusicFile;
     mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
   } else {
