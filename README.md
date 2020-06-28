@@ -324,3 +324,11 @@ cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/b
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
 ```
+### <a name="wasm-build-instructions">Webassembly (Emscripten) build </a>
+You can run Rigel Engine on a web browser too using (Emscripten)[https://emscripten.org/]. Refer to Emscripten website for installation of emscripten and activating it in the current terminal environment. A verification check can be made by trying to run `emcc` command in local terminal environment. If it executes then then everything is correctly configured.
+
+The instructions to build are same as above, except for the cmake part. 
+```bash
+emcmake cmake .. -DWARNINGS_AS_ERRORS=OFF
+make
+```

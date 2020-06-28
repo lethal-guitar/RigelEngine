@@ -8,7 +8,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 
 * Alain Martin ([@McMartin](https://github.com/McMartin)): Help with OS X port, clang-tidy, compiler upgrades and lots of other things
 * Evo Stamatov ([@avioli](https://github.com/avioli)): README improvements
-* Pratik Anand ([@pratikone](https://github.com/pratikone)): Widescreen support, README improvements
+* Pratik Anand ([@pratikone](https://github.com/pratikone)): Webassembly, widescreen support, gamepad, README improvements
 * Ryan Brown ([@rbrown46](https://github.com/rbrown46)): Actor image modding (replace sprites using `png` files)
 * [@mnhauke](https://github.com/mnhauke): OpenSUSE package
 * [@s-martin](https://github.com/s-martin): Refactoring, code cleanups, README improvements
