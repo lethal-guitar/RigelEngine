@@ -102,6 +102,7 @@ I'm planning to provide binaries for OS X, Ubuntu/Debian, and Raspberry Pi in th
 * [Raspberry Pi builds](#raspi-build-instructions)
 * [OS X builds](#mac-build-instructions)
 * [Windows builds](#windows-build-instructions)
+* [Webassembly (emscripten) builds](#wasm-build-instructions)
 
 ### Get the sources
 
@@ -325,10 +326,10 @@ cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/b
 start RigelEngine.sln
 ```
 ### <a name="wasm-build-instructions">Webassembly (Emscripten) build </a>
-You can run Rigel Engine on a web browser too using (Emscripten)[https://emscripten.org/]. Refer to Emscripten website for installation of emscripten and activating it in the current terminal environment. A verification check can be made by trying to run `emcc` command in local terminal environment. If it executes then then everything is correctly configured.
+You can run Rigel Engine on a web browser too using [Emscripten](https://emscripten.org/). Refer to Emscripten website for installation of emscripten and activating it in the current terminal environment. A verification check can be made by trying to run `emcc` command in local terminal environment. If it executes then then everything is correctly configured.
 
 The instructions to build are same as above, except for the cmake part. 
 ```bash
-emcmake cmake .. -DWARNINGS_AS_ERRORS=OFF
+emcmake cmake .. -DWARNINGS_AS_ERRORS=OFF -DWEBASSEMBLY_GAME_PATH=<path-to-duke2-folder>
 make
 ```
