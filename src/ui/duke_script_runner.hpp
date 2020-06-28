@@ -25,7 +25,7 @@
 #include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
-#include "ui/menu_navigation_helper.hpp"
+#include "ui/menu_navigation.hpp"
 
 #include <cstddef>
 #include <optional>

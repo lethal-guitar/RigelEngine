@@ -24,7 +24,7 @@
 #include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
 #include "ui/duke_script_runner.hpp"
-#include "ui/menu_navigation_helper.hpp"
+#include "ui/menu_navigation.hpp"
 #include "ui/options_menu.hpp"
 #include "ui/text_entry_widget.hpp"
 

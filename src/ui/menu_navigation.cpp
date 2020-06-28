@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "menu_navigation_helper.hpp"
+#include "menu_navigation.hpp"
 
 
 namespace rigel::ui {
