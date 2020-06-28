@@ -23,6 +23,7 @@
 #include "data/game_session_data.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/high_score_list.hpp"
+#include "ui/menu_navigation.hpp"
 
 
 namespace rigel {
@@ -60,23 +61,12 @@ MenuMode::MenuMode(Context context)
 
 
 void MenuMode::handleEvent(const SDL_Event& event) {
-  if (mOptionsMenu) {
-    if (
-      (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) ||
-      (event.type == SDL_CONTROLLERBUTTONDOWN &&
-       event.cbutton.button == SDL_CONTROLLER_BUTTON_B)
-    ) {
-      mOptionsMenu = std::nullopt;
-    }
+  if (mOptionsMenu && ui::isCancelButton(event)) {
+    mOptionsMenu = std::nullopt;
     return;
   }
 
-  if (
-    mMenuState == MenuState::AskIfQuit &&
-    ((event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_y) ||
-     (event.type == SDL_CONTROLLERBUTTONDOWN &&
-      event.cbutton.button == SDL_CONTROLLER_BUTTON_A))
-  ) {
+  if (mMenuState == MenuState::AskIfQuit && ui::isQuitConfirmButton(event)) {
     mContext.mpServiceProvider->scheduleGameQuit();
     return;
   }
@@ -84,16 +74,7 @@ void MenuMode::handleEvent(const SDL_Event& event) {
   if (mMenuState == MenuState::MainMenu) {
     const auto maybeIndex = mContext.mpScriptRunner->currentPageIndex();
     const auto optionsMenuSelected = maybeIndex && *maybeIndex == 2;
-    if (
-      optionsMenuSelected &&
-      ((event.type == SDL_KEYDOWN && (
-        event.key.keysym.sym == SDLK_RETURN ||
-        event.key.keysym.sym == SDLK_KP_ENTER ||
-        event.key.keysym.sym == SDLK_SPACE))
-      ||
-      (event.type == SDL_CONTROLLERBUTTONDOWN &&
-       event.cbutton.button == SDL_CONTROLLER_BUTTON_A))
-    ) {
+    if (optionsMenuSelected && ui::isConfirmButton(event)) {
       mOptionsMenu = ui::OptionsMenu{
         mContext.mpUserProfile,
         mContext.mpServiceProvider,

@@ -31,14 +31,20 @@ bool isNonRepeatKeyDown(const SDL_Event& event) {
 }
 
 
+bool isButtonPress(const SDL_Event& event) {
+  return event.type == SDL_KEYDOWN || event.type == SDL_CONTROLLERBUTTONDOWN;
+}
+
+
 bool isConfirmButton(const SDL_Event& event) {
-  const auto enterPressed = isNonRepeatKeyDown(event) &&
+  const auto enterOrSpacePressed = isNonRepeatKeyDown(event) &&
     (event.key.keysym.sym == SDLK_RETURN ||
-     event.key.keysym.sym == SDLK_KP_ENTER);
+     event.key.keysym.sym == SDLK_KP_ENTER ||
+     event.key.keysym.sym == SDLK_SPACE);
   const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
     event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
 
-  return enterPressed || buttonAPressed;
+  return enterOrSpacePressed || buttonAPressed;
 }
 
 
@@ -49,6 +55,16 @@ bool isCancelButton(const SDL_Event& event) {
     event.cbutton.button == SDL_CONTROLLER_BUTTON_B;
 
   return escapePressed || buttonBPressed;
+}
+
+
+bool isQuitConfirmButton(const SDL_Event& event) {
+  const auto yPressed =
+    event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_y;
+  const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
+
+  return yPressed || buttonAPressed;
 }
 
 

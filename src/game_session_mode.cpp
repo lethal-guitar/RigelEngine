@@ -24,6 +24,7 @@
 #include "common/user_profile.hpp"
 #include "data/saved_game.hpp"
 #include "ui/high_score_list.hpp"
+#include "ui/menu_navigation.hpp"
 
 
 namespace rigel {
@@ -80,22 +81,14 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
         mContext.mpServiceProvider->fadeOutScreen();
       };
 
-      if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
-        switch (event.key.keysym.sym) {
-          case SDLK_ESCAPE:
-            fadeOut();
-            enterHighScore("");
-            return;
-
-          case SDLK_KP_ENTER:
-          case SDLK_RETURN:
-            fadeOut();
-            enterHighScore(state.mNameEntryWidget.text());
-            return;
-
-          default:
-            break;
-        }
+      if (ui::isCancelButton(event)) {
+        fadeOut();
+        enterHighScore("");
+        return;
+      } else if (ui::isConfirmButton(event)) {
+        fadeOut();
+        enterHighScore(state.mNameEntryWidget.text());
+        return;
       }
 
       state.mNameEntryWidget.handleEvent(event);

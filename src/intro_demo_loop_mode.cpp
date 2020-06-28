@@ -5,6 +5,7 @@
 #include "common/game_service_provider.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/duke_script_runner.hpp"
+#include "ui/menu_navigation.hpp"
 
 
 namespace rigel {
@@ -93,7 +94,7 @@ IntroDemoLoopMode::IntroDemoLoopMode(
 
 
 bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
-  if ((event.type != SDL_KEYDOWN) && (event.type != SDL_CONTROLLERBUTTONDOWN)) {
+  if (!ui::isButtonPress(event)) {
     return false;
   }
 
@@ -109,12 +110,7 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
   } else {
     auto& currentStage = mStages[mCurrentStage];
 
-    if (
-      (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) ||
-      (event.type == SDL_CONTROLLERBUTTONDOWN &&
-       event.cbutton.button == SDL_CONTROLLER_BUTTON_B) ||
-      !canStageHandleEvents(currentStage)
-    ) {
+    if (ui::isCancelButton(event) && !canStageHandleEvents(currentStage)) {
       return true;
     } else {
       forwardEventToStage(currentStage, event);
