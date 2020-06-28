@@ -31,6 +31,8 @@
 #include "ui/duke_script_runner.hpp"
 #include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
+#include "sdl_utils/error.hpp"
+#include "ui/imgui_integration.hpp"
 
 #include "SDL_gamecontroller.h"
 
@@ -38,6 +40,43 @@
 #include <memory>
 #include <optional>
 #include <string>
+
+
+namespace rigel::misc
+{
+  template <typename Callback>
+  class CallOnDestruction
+  {
+  public:
+    explicit CallOnDestruction(Callback &&callback)
+        : mCallback(std::forward<Callback>(callback))
+    {
+    }
+
+    ~CallOnDestruction()
+    {
+      mCallback();
+    }
+
+    CallOnDestruction(const CallOnDestruction &) = delete;
+    CallOnDestruction &operator=(const CallOnDestruction &) = delete;
+
+  private:
+    Callback mCallback;
+  };
+
+  template <typename Callback>
+  [[nodiscard]] auto defer(Callback &&callback)
+  {
+    return CallOnDestruction{std::forward<Callback>(callback)};
+  }
+  
+  rigel::UserProfile loadOrCreateUserProfile();
+  rigel::sdl_utils::Ptr<SDL_Window> createWindow(const rigel::data::GameOptions& options);
+  void setGLAttributes();
+} // namespace
+
+
 
 
 namespace rigel {

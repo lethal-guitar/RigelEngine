@@ -332,6 +332,34 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
     dbopl
     speex_resampler
   )
+else()
+  # Core library
+  add_library(rigel_core STATIC ${core_sources})
+  target_include_directories(rigel_core
+    PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    ${3rd_party_path}/entityx
+
+    ${3rd_party_path}/glm
+    ${3rd_party_path}/nlohmann
+
+    PRIVATE
+    ${3rd_party_path}/dbopl
+    ${3rd_party_path}/speex_resampler
+  )
+  target_link_libraries(rigel_core
+    PUBLIC
+    entityx
+    dear_imgui
+    imgui-filebrowser
+    glad
+
+    PRIVATE
+    std::filesystem
+    dbopl
+    speex_resampler
+  )
+
 endif()
 
 if(USE_GL_ES)
@@ -342,17 +370,23 @@ endif()
 
 # Main executable
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-    add_executable(${main_exe_name} emscripten_main.cpp)
-    target_link_libraries(${main_exe_name} PRIVATE
-        rigel_core
-    )
+  add_executable(${main_exe_name} emscripten_main.cpp)
+  target_link_libraries(${main_exe_name} PRIVATE
+    rigel_core
+  )
+  
+  # copy html file for hosting wasm and generated js to destination
+  # a better solution will be to find out a way for emscripten to generate html file instead of js file
+  # and use --shell-file to provide a custom html template
+  file(COPY "${CMAKE_SOURCE_DIR}/Rigel.html" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 else()
-    add_executable(${main_exe_name} main.cpp)
-    target_link_libraries(${main_exe_name} PRIVATE
-        SDL2::Main
-        rigel_core
-        Boost::boost
-        Boost::program_options
-        Boost::disable_autolinking
-    )
+  add_executable(${main_exe_name} main.cpp)
+  target_link_libraries(${main_exe_name} PRIVATE
+    SDL2::Main
+    rigel_core
+    Boost::boost
+    Boost::program_options
+    Boost::disable_autolinking
+  )
 endif()

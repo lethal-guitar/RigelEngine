@@ -15,7 +15,7 @@ set(main_exe_name RigelEngine)
 
 option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
-
+option(WEBASSEMBLY_GAME_PATH "Path to folder containing Duke Nukem II files" "OFF")
 # Dependencies
 ###############################################################################
 
@@ -24,8 +24,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # conditional compilation for emscripten (webassemly) to work
 # it provides its own version of SDL2 and Boost headers
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+  
+ if ("${WEBASSEMBLY_GAME_PATH}" STREQUAL "OFF")
+    message(FATAL_ERROR "WEBASSEMBLY_GAME_PATH not defined. Point it to folder containing Duke Nukem II files. Remove any trailing / from the path")
+  else()
+    message(STATUS "WEBASSEMBLY_GAME_PATH defined: ${WEBASSEMBLY_GAME_PATH}")
+  endif()
+
   set(USE_GL_ES ON)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++1z -s WASM=1 -s USE_BOOST_HEADERS=1 -s USE_SDL=2 -s USE_SDL_MIXER=2 -s ALLOW_MEMORY_GROWTH=1 -s MIN_WEBGL_VERSION=1 -s MAX_WEBGL_VERSION=2 -s FULL_ES2=1 --preload-file /home/pratikone/Desktop/duke/")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++1z -s WASM=1 -s USE_BOOST_HEADERS=1 -s USE_SDL=2 -s USE_SDL_MIXER=2 --no-heap-copy -s ALLOW_MEMORY_GROWTH=1 -s MIN_WEBGL_VERSION=1 -s MAX_WEBGL_VERSION=2 -s FULL_ES2=1 --preload-file ${WEBASSEMBLY_GAME_PATH}/@/duke")
 else()
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost 1.65 COMPONENTS program_options REQUIRED)

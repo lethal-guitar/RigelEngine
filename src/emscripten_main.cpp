@@ -15,202 +15,81 @@
  */
 
 // Welcome to the RigelEngine code base! If you are looking for the place in
-// the code where everything starts, you found it. This file contains the
-// executable's main() function entry point. Its responsibility is parsing
-// command line options, and then handing off control to gameMain(). Most of
-// the interesting stuff like the main loop, initialization, and management of
-// game modes happens in there, so if you're looking for any of these things,
-// you might want to hop over to game_main.cpp instead of looking at this file
-// here.
+// the code where everything starts, that would be in main.cpp. This file contains the
+// main() function entry point for running RigelEngine in webassembly using emscripten.
+// During all non-webassembly compilations, this file is ignored.
 
 #include "base/warnings.hpp"
-
-#include "game_main.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-// #include <boost/program_options.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include "game_main.hpp"
+#include "game_main.ipp"
 
+RIGEL_DISABLE_WARNINGS
+#include <imfilebrowser.h>
+#include <imgui.h>
+#include <SDL.h>
+RIGEL_RESTORE_WARNINGS
+#include <emscripten.h>
 
 using namespace rigel;
+using namespace rigel::misc;
 
-namespace ba = boost::algorithm;
-// namespace po = boost::program_options;
+// Emscripten only takes a single argument. Therefore, all the needed arguments are combined in this struct and sent
+struct em_args
+{
+  Game &game;
+  std::vector<SDL_Event> &eventQueue;
+  bool &breakOut; // for breaking out of the loop
+  em_args(Game &game_ref, std::vector<SDL_Event> &eventQueue_ref, bool &breakOut_ref) : game(game_ref), eventQueue(eventQueue_ref), breakOut(breakOut_ref) {}
+};
 
-
-namespace {
-
-void showBanner() {
-  std::cout <<
-    "================================================================================\n"
-    "                            Welcome to RIGEL ENGINE!\n"
-    "\n"
-    "  A modern reimplementation of the game Duke Nukem II, originally released in\n"
-    "  1993 for MS-DOS by Apogee Software.\n"
-    "\n"
-    "You need the original game's data files in order to play, e.g. the freely\n"
-    "available shareware version.\n"
-    "\n"
-    "Rigel Engine Copyright (C) 2016, Nikolai Wuttke.\n"
-    "Rigel Engine comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
-    "are welcome to redistribute it under certain conditions.\n"
-    "For details, see https://www.gnu.org/licenses/gpl-2.0.html\n"
-    "================================================================================\n"
-    "\n";
+void runOneFrameWrapper(void *data)
+{
+  em_args *gameArgs = static_cast<em_args *>(data);
+  gameArgs->game.runOneFrame(gameArgs->eventQueue, gameArgs->breakOut);
 }
 
+int main()
+{
+  sdl_utils::check(SDL_Init(
+      SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
+  auto sdlGuard = defer([]() { SDL_Quit(); });
 
-auto parseLevelToJumpTo(const std::string& levelToPlay) {
-  if (levelToPlay.size() != 2) {
-    throw std::invalid_argument("Invalid level name");
-  }
+  sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
+  setGLAttributes();
 
-  const auto episode = static_cast<int>(levelToPlay[0] - 'L');
-  const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
+  auto userProfile = loadOrCreateUserProfile();
+  auto pWindow = createWindow(userProfile.mOptions);
+  SDL_GLContext pGlContext =
+      sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
+  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
-  if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
-    throw std::invalid_argument(std::string("Invalid level name: ") + levelToPlay);
-  }
-  return std::make_pair(episode, level);
-}
+  renderer::loadGlFunctions();
 
+  SDL_DisableScreenSaver();
+  SDL_ShowCursor(SDL_DISABLE);
 
-auto parseDifficulty(const std::string& difficultySpec) {
-  if (difficultySpec == "easy") {
-    return data::Difficulty::Easy;
-  } else if (difficultySpec == "medium") {
-    return data::Difficulty::Medium;
-  } else if (difficultySpec == "hard") {
-    return data::Difficulty::Hard;
-  }
+  ui::imgui_integration::init(
+      pWindow.get(), pGlContext, createOrGetPreferencesPath());
+  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
-  throw std::invalid_argument(
-    std::string("Invalid difficulty: ") + difficultySpec);
-}
+  CommandLineOptions options;
+  options.mGamePath = "/duke/";  // this is the path in virtual file system (provided by emscripten, defined in cmake) where resource data of Duke Nukem II will exist
+  Game game{options, &userProfile, pWindow.get()};
+  game.mLastTime = std::chrono::high_resolution_clock::now();
+  std::vector<SDL_Event> eventQueue;
+  bool breakOut = false;
 
-
-base::Vector parsePlayerPosition(const std::string& playerPosString) {
-  std::vector<std::string> positionParts;
-  ba::split(positionParts, playerPosString, ba::is_any_of(","));
-
-  if (
-    positionParts.size() != 2 ||
-    positionParts[0].empty() ||
-    positionParts[1].empty()
-  ) {
-    throw std::invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
-  }
-
-  return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
-}
-
-}
-
-
-int main(int argc, char** argv) {
-  showBanner();
-
-  CommandLineOptions config;
-
-  // po::options_description optionsDescription("Options");
-  // optionsDescription.add_options()
-  //   ("help,h", "Show command line help message")
-  //   ("skip-intro,s",
-  //    po::bool_switch(&config.mSkipIntro),
-  //    "Skip intro movies/Apogee logo, go straight to main menu")
-  //   ("play-level,l",
-  //    po::value<std::string>(),
-  //    "Directly jump to given map, skipping intro/menu etc.")
-  //   ("difficulty",
-  //    po::value<std::string>(),
-  //    "Difficulty to use when jumping to a level via 'play-level'")
-  //   ("player-pos",
-  //    po::value<std::string>(),
-  //    "Specify position to place the player at (to be used in conjunction with\n"
-  //    "'play-level')")
-  //   ("debug-mode,d",
-  //    po::bool_switch(&config.mDebugModeEnabled),
-  //    "Enable debugging features")
-  //   ("game-path",
-  //    po::value<std::string>(&config.mGamePath)->default_value(""),
-  //    "Path to original game's installation. Can also be given as positional "
-  //    "argument. If not provided here, a folder browser ui will ask for it");
-
-  // po::positional_options_description positionalArgsDescription;
-  // positionalArgsDescription.add("game-path", -1);
-
-  try
-  {
-    // po::variables_map options;
-    // po::store(
-    //   po::command_line_parser(argc, argv)
-    //     .options(optionsDescription)
-    //     .positional(positionalArgsDescription)
-    //     .run(),
-    //   options);
-    // po::notify(options);
-
-    // if (options.count("help")) {
-    //   std::cout << optionsDescription << '\n';
-    //   return 0;
-    // }
-
-    // if (options.count("play-level")) {
-    //   auto sessionId = data::GameSessionId{};
-    //   std::tie(sessionId.mEpisode, sessionId.mLevel) =
-    //     parseLevelToJumpTo(options["play-level"].as<std::string>());
-
-    //   config.mLevelToJumpTo = sessionId;
-    // }
-
-    // if (options.count("difficulty")) {
-    //   if (!options.count("play-level")) {
-    //     throw std::invalid_argument(
-    //       "This option requires also using the play-level option");
-    //   }
-
-    //   config.mLevelToJumpTo->mDifficulty =
-    //     parseDifficulty(options["difficulty"].as<std::string>());
-    // }
-
-    // if (options.count("player-pos")) {
-    //   if (!options.count("play-level")) {
-    //     throw std::invalid_argument(
-    //       "This option requires also using the play-level option");
-    //   }
-
-    //   config.mPlayerPosition = parsePlayerPosition(
-    //     options["player-pos"].as<std::string>());
-    // }
-
-    // if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
-    //   config.mGamePath += "/";
-    // }
-
-    gameMain(config);
-  }
-  // catch (const po::error& err)
-  // {
-  //   std::cerr << "ERROR: " << err.what() << "\n\n";
-  //   std::cerr << optionsDescription << '\n';
-  //   return -1;
-  // }
-  catch (const std::exception& ex)
-  {
-    std::cerr << "ERROR: " << ex.what() << '\n';
-    return -2;
-  }
-  catch (...)
-  {
-    std::cerr << "UNKNOWN ERROR\n";
-    return -3;
-  }
+  em_args gameArgs(game, eventQueue, breakOut);
+  emscripten_set_main_loop_arg(runOneFrameWrapper, &gameArgs, 0, true);
 
   return 0;
 }

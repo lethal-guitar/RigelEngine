@@ -19,7 +19,7 @@
 #include <cassert>
 #include <fstream>
 #include <stdexcept>
-
+#include<iostream>
 
 namespace rigel::loader {
 

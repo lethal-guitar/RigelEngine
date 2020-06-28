@@ -24,8 +24,6 @@
 #include "loader/duke_script_loader.hpp"
 #include "renderer/opengl.hpp"
 #include "renderer/upscaling_utils.hpp"
-#include "sdl_utils/error.hpp"
-#include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"
 #include "game_session_mode.hpp"
@@ -54,33 +52,7 @@ using namespace std::chrono;
 
 using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
-namespace {
-
-template <typename Callback>
-class CallOnDestruction {
-public:
-  explicit CallOnDestruction(Callback&& callback)
-    : mCallback(std::forward<Callback>(callback))
-  {
-  }
-
-  ~CallOnDestruction() {
-    mCallback();
-  }
-
-  CallOnDestruction(const CallOnDestruction&) = delete;
-  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
-
-private:
-  Callback mCallback;
-};
-
-
-template <typename Callback>
-[[nodiscard]] auto defer(Callback&& callback) {
-  return CallOnDestruction{std::forward<Callback>(callback)};
-}
-
+namespace misc{
 
 void setGLAttributes() {
 #ifdef RIGEL_USE_GL_ES
@@ -109,7 +81,7 @@ int flagsForWindowMode(const data::WindowMode mode) {
 }
 
 
-auto createWindow(const data::GameOptions& options) {
+sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options) {
   SDL_DisplayMode displayMode;
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
 
@@ -459,16 +431,16 @@ void gameMain(const CommandLineOptions& options) {
 
   sdl_utils::check(SDL_Init(
     SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
-  auto sdlGuard = defer([]() { SDL_Quit(); });
+  auto sdlGuard = misc::defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
-  setGLAttributes();
+  misc::setGLAttributes();
 
-  auto userProfile = loadOrCreateUserProfile();
-  auto pWindow = createWindow(userProfile.mOptions);
+  auto userProfile = misc::loadOrCreateUserProfile();
+  auto pWindow = misc::createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
-  auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
+  auto glGuard = misc::defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
   renderer::loadGlFunctions();
 
@@ -477,12 +449,12 @@ void gameMain(const CommandLineOptions& options) {
 
   ui::imgui_integration::init(
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
-  auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
+  auto imGuiGuard = misc::defer([]() { ui::imgui_integration::shutdown(); });
 
   try {
-    initAndRunGame(pWindow.get(), userProfile, options);
+    misc::initAndRunGame(pWindow.get(), userProfile, options);
   } catch (const std::exception& error) {
-    showErrorMessage(pWindow.get(), error.what());
+    misc::showErrorMessage(pWindow.get(), error.what());
   }
 }
 
@@ -519,7 +491,7 @@ Game::Game(
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
+  , mResources(misc::effectiveGamePath(commandLineOptions, *pUserProfile))
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
@@ -531,7 +503,7 @@ Game::Game(
         mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
       return !hasRegisteredVersionFiles;
     }())
-  , mFpsLimiter(createLimiter(pUserProfile->mOptions))
+  , mFpsLimiter(misc::createLimiter(pUserProfile->mOptions))
   , mRenderTarget(
       &mRenderer,
       mRenderer.maxWindowSize().width,
@@ -541,7 +513,7 @@ Game::Game(
   , mCommandLineOptions(commandLineOptions)
   , mpUserProfile(pUserProfile)
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
-  , mAllScripts(loadScripts(mResources))
+  , mAllScripts(misc::loadScripts(mResources))
   , mUiSpriteSheet(
       renderer::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
@@ -557,13 +529,13 @@ Game::Game(
 
   applyChangedOptions();
 
-  mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
+  mpCurrentGameMode = misc::wrapWithInitialFadeIn(misc::createInitialGameMode(
     makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
 
   enumerateGameControllers();
 }
 
-void Game::runOneFrame(std::vector<SDL_Event>& eventQueue, bool &breakOut) {
+void Game::runOneFrame(std::vector<SDL_Event>& eventQueue, bool& breakOut) {
     const auto startOfFrame = high_resolution_clock::now();
     const auto elapsed =
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
@@ -577,7 +549,7 @@ void Game::runOneFrame(std::vector<SDL_Event>& eventQueue, bool &breakOut) {
 
     {
       ui::imgui_integration::beginFrame(mpWindow);
-      auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
+      auto imGuiFrameGuard = misc::defer([]() { ui::imgui_integration::endFrame(); });
       ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
       updateAndRender(elapsed, eventQueue);
@@ -619,7 +591,7 @@ void Game::updateAndRender(
     RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
     mRenderer.clear();
 
-    auto saved = setupSimpleUpscaling(&mRenderer);
+    auto saved = misc::setupSimpleUpscaling(&mRenderer);
 
     auto pMaybeNextMode =
       mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
@@ -771,7 +743,7 @@ void Game::applyChangedOptions() {
 
   if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode) {
     SDL_SetWindowFullscreen(
-      mpWindow, flagsForWindowMode(currentOptions.mWindowMode));
+      mpWindow, misc::flagsForWindowMode(currentOptions.mWindowMode));
 
     if (currentOptions.mWindowMode == data::WindowMode::Windowed) {
       SDL_SetWindowSize(
@@ -788,7 +760,7 @@ void Game::applyChangedOptions() {
     currentOptions.mEnableFpsLimit != mPreviousOptions.mEnableFpsLimit ||
     currentOptions.mMaxFps != mPreviousOptions.mMaxFps
   ) {
-    mFpsLimiter = createLimiter(currentOptions);
+    mFpsLimiter = misc::createLimiter(currentOptions);
   }
 
   if (

@@ -19,7 +19,6 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include<iostream>
 
 
 namespace rigel::renderer {
@@ -44,7 +43,6 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type) {
       glGetShaderInfoLog(
         shader.mHandle, infoLogSize, nullptr, infoLogBuffer.get());
 
-      std::cout<<infoLogBuffer.get();
       throw std::runtime_error(
         std::string{"Shader compilation failed:\n\n"} + infoLogBuffer.get());
     } else {
@@ -66,15 +64,10 @@ Shader::Shader(
   std::initializer_list<std::string> attributesToBind)
   : mProgram(glCreateProgram(), glDeleteProgram)
 {
-  std::cout<<"shader constructor \n";
   auto vertexShader = compileShader(
     std::string{preamble} + vertexSource, GL_VERTEX_SHADER);
-  
-  std::cout<<"vertex shader done \n";
   auto fragmentShader = compileShader(
     std::string{preamble} + fragmentSource, GL_FRAGMENT_SHADER);
-
-  std::cout<<"frag shader done \n";
 
   glAttachShader(mProgram.mHandle, vertexShader.mHandle);
   glAttachShader(mProgram.mHandle, fragmentShader.mHandle);

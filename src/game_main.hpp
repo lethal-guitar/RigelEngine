@@ -18,9 +18,9 @@
 
 #include "common/command_line_options.hpp"
 
+namespace rigel
+{
 
-namespace rigel {
-
-void gameMain(const CommandLineOptions& options);
+  void gameMain(const CommandLineOptions &options);
 
 }
