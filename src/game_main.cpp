@@ -358,10 +358,6 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-}
-
-
-auto Game::run() -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -376,6 +372,11 @@ auto Game::run() -> RunResult {
 
   enumerateGameControllers();
 
+  mLastTime = std::chrono::high_resolution_clock::now();
+}
+
+
+auto Game::run() -> RunResult {
   return mainLoop();
 }
 
@@ -385,7 +386,6 @@ auto Game::mainLoop() -> RunResult {
   using base::defer;
 
   std::vector<SDL_Event> eventQueue;
-  mLastTime = high_resolution_clock::now();
 
   for (;;) {
     const auto startOfFrame = high_resolution_clock::now();
