@@ -228,7 +228,13 @@ void initAndRunGame(
 ) {
   auto run = [&](const CommandLineOptions& options) {
     Game game(options, &userProfile, pWindow);
-    return game.run();
+
+    for (;;) {
+      auto maybeStopReason = game.runOneFrame();
+      if (maybeStopReason) {
+        return *maybeStopReason;
+      }
+    }
   };
 
   if (!userProfile.mGamePath) {
@@ -376,47 +382,40 @@ Game::Game(
 }
 
 
-auto Game::run() -> StopReason {
-  return mainLoop();
-}
-
-
-auto Game::mainLoop() -> StopReason {
+auto Game::runOneFrame() -> std::optional<StopReason> {
   using namespace std::chrono;
   using base::defer;
 
-  for (;;) {
-    const auto startOfFrame = high_resolution_clock::now();
-    const auto elapsed =
-      duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
-    mLastTime = startOfFrame;
+  const auto startOfFrame = high_resolution_clock::now();
+  const auto elapsed =
+    duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
+  mLastTime = startOfFrame;
 
-    pumpEvents();
-    if (!mIsRunning) {
-      break;
-    }
-
-    {
-      ui::imgui_integration::beginFrame(mpWindow);
-      auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
-      ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-
-      updateAndRender(elapsed);
-      mEventQueue.clear();
-    }
-
-    swapBuffers();
-
-    applyChangedOptions();
-
-    if (!mGamePathToSwitchTo.empty()) {
-      mpUserProfile->mGamePath = mGamePathToSwitchTo;
-      mpUserProfile->saveToDisk();
-      return StopReason::RestartNeeded;
-    }
+  pumpEvents();
+  if (!mIsRunning) {
+    return StopReason::GameEnded;
   }
 
-  return StopReason::GameEnded;
+  {
+    ui::imgui_integration::beginFrame(mpWindow);
+    auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
+    updateAndRender(elapsed);
+    mEventQueue.clear();
+  }
+
+  swapBuffers();
+
+  applyChangedOptions();
+
+  if (!mGamePathToSwitchTo.empty()) {
+    mpUserProfile->mGamePath = mGamePathToSwitchTo;
+    mpUserProfile->saveToDisk();
+    return StopReason::RestartNeeded;
+  }
+
+  return {};
 }
 
 

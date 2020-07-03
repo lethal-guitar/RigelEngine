@@ -69,7 +69,19 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  StopReason run();
+  /** Run one frame of the game
+   *
+   * Should be called in an infinite loop to implement the game's main loop,
+   * or given as a callback to environments which own the main loop like
+   * Emscripten.
+   *
+   * If an empty optional is returned, the game wants to keep running,
+   * otherwise, the loop should be terminated. If the reason for stopping is
+   * RestartNeeded, the game would like a new Game to be started after
+   * terminating the loop, otherwise, the game is done and the whole program
+   * can be terminated.
+   */
+  std::optional<StopReason> runOneFrame();
 
 private:
   enum class FadeType {
@@ -77,7 +89,6 @@ private:
     Out
   };
 
-  StopReason mainLoop();
   void pumpEvents();
   void updateAndRender(entityx::TimeDelta elapsed);
 
