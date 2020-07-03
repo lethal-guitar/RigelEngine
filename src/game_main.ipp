@@ -78,10 +78,8 @@ private:
   };
 
   RunResult mainLoop();
-  void pumpEvents(std::vector<SDL_Event>& eventQueue);
-  void updateAndRender(
-    entityx::TimeDelta elapsed,
-    const std::vector<SDL_Event>& eventQueue);
+  void pumpEvents();
+  void updateAndRender(entityx::TimeDelta elapsed);
 
   GameMode::Context makeModeContext();
 
@@ -142,6 +140,7 @@ private:
   engine::TiledTexture mUiSpriteSheet;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
+  std::vector<SDL_Event> mEventQueue;
   sdl_utils::Ptr<SDL_GameController> mpGameController;
 };
 

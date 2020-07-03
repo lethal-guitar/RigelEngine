@@ -385,15 +385,13 @@ auto Game::mainLoop() -> RunResult {
   using namespace std::chrono;
   using base::defer;
 
-  std::vector<SDL_Event> eventQueue;
-
   for (;;) {
     const auto startOfFrame = high_resolution_clock::now();
     const auto elapsed =
       duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
     mLastTime = startOfFrame;
 
-    pumpEvents(eventQueue);
+    pumpEvents();
     if (!mIsRunning) {
       break;
     }
@@ -403,8 +401,8 @@ auto Game::mainLoop() -> RunResult {
       auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
       ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-      updateAndRender(elapsed, eventQueue);
-      eventQueue.clear();
+      updateAndRender(elapsed);
+      mEventQueue.clear();
     }
 
     swapBuffers();
@@ -422,26 +420,23 @@ auto Game::mainLoop() -> RunResult {
 }
 
 
-void Game::pumpEvents(std::vector<SDL_Event>& eventQueue) {
+void Game::pumpEvents() {
   SDL_Event event;
   while (mIsMinimized && SDL_WaitEvent(&event)) {
     if (!handleEvent(event)) {
-      eventQueue.push_back(event);
+      mEventQueue.push_back(event);
     }
   }
 
   while (SDL_PollEvent(&event)) {
     if (!handleEvent(event)) {
-      eventQueue.push_back(event);
+      mEventQueue.push_back(event);
     }
   }
 }
 
 
-void Game::updateAndRender(
-  const entityx::TimeDelta elapsed,
-  const std::vector<SDL_Event>& eventQueue
-) {
+void Game::updateAndRender(const entityx::TimeDelta elapsed) {
   {
     RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
     mRenderer.clear();
@@ -449,7 +444,7 @@ void Game::updateAndRender(
     auto saved = setupSimpleUpscaling(&mRenderer);
 
     auto pMaybeNextMode =
-      mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
+      mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
 
     if (pMaybeNextMode) {
       fadeOutScreen();
