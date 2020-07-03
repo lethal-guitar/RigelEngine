@@ -241,13 +241,13 @@ void initAndRunGame(
   // restarting the game to make the change effective. If the first game run
   // ended with a result of RestartNeeded, launch a new game, but start from
   // the main menu and discard most command line options.
-  if (result == Game::RunResult::RestartNeeded) {
+  if (result == Game::StopReason::RestartNeeded) {
     auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
     optionsForRestartedGame.mDebugModeEnabled =
       commandLineOptions.mDebugModeEnabled;
 
-    while (result == Game::RunResult::RestartNeeded) {
+    while (result == Game::StopReason::RestartNeeded) {
       result = run(optionsForRestartedGame);
     }
   }
@@ -376,12 +376,12 @@ Game::Game(
 }
 
 
-auto Game::run() -> RunResult {
+auto Game::run() -> StopReason {
   return mainLoop();
 }
 
 
-auto Game::mainLoop() -> RunResult {
+auto Game::mainLoop() -> StopReason {
   using namespace std::chrono;
   using base::defer;
 
@@ -412,11 +412,11 @@ auto Game::mainLoop() -> RunResult {
     if (!mGamePathToSwitchTo.empty()) {
       mpUserProfile->mGamePath = mGamePathToSwitchTo;
       mpUserProfile->saveToDisk();
-      return RunResult::RestartNeeded;
+      return StopReason::RestartNeeded;
     }
   }
 
-  return RunResult::GameEnded;
+  return StopReason::GameEnded;
 }
 
 

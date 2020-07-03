@@ -57,7 +57,7 @@ private:
 
 class Game : public IGameServiceProvider {
 public:
-  enum class RunResult {
+  enum class StopReason {
     GameEnded,
     RestartNeeded
   };
@@ -69,7 +69,7 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  RunResult run();
+  StopReason run();
 
 private:
   enum class FadeType {
@@ -77,7 +77,7 @@ private:
     Out
   };
 
-  RunResult mainLoop();
+  StopReason mainLoop();
   void pumpEvents();
   void updateAndRender(entityx::TimeDelta elapsed);
 
