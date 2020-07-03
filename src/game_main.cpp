@@ -303,6 +303,26 @@ void gameMain(const CommandLineOptions& options) {
 }
 
 
+void GameDeleter::operator()(Game* pGame) {
+  delete pGame;
+}
+
+
+std::unique_ptr<Game, GameDeleter> createGame(
+  SDL_Window* pWindow,
+  UserProfile* pUserProfile,
+  const CommandLineOptions& commandLineOptions
+) {
+  return std::unique_ptr<Game, GameDeleter>(
+    new Game{commandLineOptions, pUserProfile, pWindow});
+}
+
+
+void runOneFrame(Game* pGame) {
+  pGame->runOneFrame();
+}
+
+
 FpsLimiter::FpsLimiter(const int targetFps)
   : mLastTime(std::chrono::high_resolution_clock::now())
   , mTargetFrameTime(1.0 / targetFps)
