@@ -239,18 +239,6 @@ std::string effectiveGamePath(
 }
 
 
-UserProfile loadOrCreateUserProfile() {
-  if (auto profile = loadUserProfile())
-  {
-    return *profile;
-  }
-
-  auto profile = createEmptyUserProfile();
-  profile.saveToDisk();
-  return profile;
-}
-
-
 void setupForFirstLaunch(
   SDL_Window* pWindow,
   UserProfile& userProfile,
