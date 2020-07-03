@@ -17,6 +17,7 @@
 #include "game_main.hpp"
 #include "game_main.ipp"
 
+#include "base/defer.hpp"
 #include "base/math_tools.hpp"
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
@@ -54,32 +55,6 @@ using namespace sdl_utils;
 using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
-
-template <typename Callback>
-class CallOnDestruction {
-public:
-  explicit CallOnDestruction(Callback&& callback)
-    : mCallback(std::forward<Callback>(callback))
-  {
-  }
-
-  ~CallOnDestruction() {
-    mCallback();
-  }
-
-  CallOnDestruction(const CallOnDestruction&) = delete;
-  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
-
-private:
-  Callback mCallback;
-};
-
-
-template <typename Callback>
-[[nodiscard]] auto defer(Callback&& callback) {
-  return CallOnDestruction{std::forward<Callback>(callback)};
-}
-
 
 void setGLAttributes() {
 #ifdef RIGEL_USE_GL_ES
@@ -339,6 +314,8 @@ void initAndRunGame(
 
 
 void gameMain(const CommandLineOptions& options) {
+  using base::defer;
+
 #ifdef _WIN32
   SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
   SetProcessDPIAware();
@@ -459,6 +436,7 @@ auto Game::run() -> RunResult {
 
 auto Game::mainLoop() -> RunResult {
   using namespace std::chrono;
+  using base::defer;
 
   std::vector<SDL_Event> eventQueue;
   mLastTime = high_resolution_clock::now();
