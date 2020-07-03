@@ -25,6 +25,7 @@
 #include "renderer/opengl.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/error.hpp"
+#include "ui/game_path_browser.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"
@@ -33,7 +34,6 @@
 #include "menu_mode.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <imfilebrowser.h>
 #include <imgui.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
@@ -209,40 +209,6 @@ std::unique_ptr<GameMode> createInitialGameMode(
 }
 
 
-void showErrorMessage(SDL_Window* pWindow, const std::string& error) {
-  SDL_Event event;
-  auto boxIsVisible = true;
-  auto firstTime = true;
-
-  while (boxIsVisible) {
-    while (SDL_PollEvent(&event)) {
-      ui::imgui_integration::handleEvent(event);
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    ui::imgui_integration::beginFrame(pWindow);
-
-    if (firstTime) {
-      firstTime = false;
-      ImGui::OpenPopup("Error!");
-    }
-
-    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, 0)) {
-      ImGui::Text("%s", error.c_str());
-
-      if (ImGui::Button("Ok")) {
-        boxIsVisible = false;
-      }
-
-      ImGui::EndPopup();
-    }
-
-    ui::imgui_integration::endFrame();
-    SDL_GL_SwapWindow(pWindow);
-  }
-}
-
-
 std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
   if (options.mEnableFpsLimit && !options.mEnableVsync) {
     return FpsLimiter{options.mMaxFps};
@@ -285,58 +251,6 @@ UserProfile loadOrCreateUserProfile() {
 }
 
 
-// Note : This should graduate into its own file if more complexity is added
-std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
-{
-  auto folderPath = std::filesystem::path();
-  auto folderBrowser =
-    ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
-
-  // TODO: There is some code duplication with the game path browser in the
-  // options menu for setting the size and title, but until we've decided if we
-  // will merge those two into one by showing the options menu at first launch
-  // or not, we'll leave it like this. Should we decide against showing the
-  // options menu at first launch, we should extract some constants and helper
-  // functions to avoid this duplication.
-  folderBrowser.SetTitle("Choose Duke Nukem II installation");
-
-  {
-    int windowWidth = 0;
-    int windowHeight = 0;
-    SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
-    folderBrowser.SetWindowSize(
-      base::round(windowWidth * 0.64f),
-      base::round(windowHeight * 0.64f));
-  }
-
-  folderBrowser.Open();
-
-  do
-  {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-      ui::imgui_integration::handleEvent(event);
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    ui::imgui_integration::beginFrame(pWindow);
-
-    folderBrowser.Display();
-    if (folderBrowser.HasSelected())
-    {
-      folderPath = folderBrowser.GetSelected();
-      folderBrowser.Close();
-    }
-
-    ui::imgui_integration::endFrame();
-    SDL_GL_SwapWindow(pWindow);
-  } while (folderBrowser.IsOpened());
-
-  return folderPath;
-}
-
-
 void setupForFirstLaunch(
   SDL_Window* pWindow,
   UserProfile& userProfile,
@@ -369,7 +283,7 @@ void setupForFirstLaunch(
   // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
   // the user select their Duke Nukem II installation.
   if (gamePath.empty()) {
-    gamePath = runFolderBrowser(pWindow);
+    gamePath = ui::runFolderBrowser(pWindow);
   }
 
   // If we still don't have a game path, stop here.
@@ -467,7 +381,7 @@ void gameMain(const CommandLineOptions& options) {
   try {
     initAndRunGame(pWindow.get(), userProfile, options);
   } catch (const std::exception& error) {
-    showErrorMessage(pWindow.get(), error.what());
+    ui::showErrorMessage(pWindow.get(), error.what());
   }
 }
 
