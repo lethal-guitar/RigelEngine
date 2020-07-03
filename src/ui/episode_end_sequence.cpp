@@ -19,6 +19,7 @@
 #include "base/container_utils.hpp"
 #include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
+#include "ui/menu_navigation.hpp"
 #include "ui/utils.hpp"
 
 
@@ -86,7 +87,7 @@ void EpisodeEndScreen::updateAndRender(engine::TimeDelta dt) {
 
 
 void EpisodeEndScreen::handleEvent(const SDL_Event& event) {
-  if ((event.type != SDL_KEYDOWN) && (event.type != SDL_CONTROLLERBUTTONDOWN)) {
+  if (!ui::isButtonPress(event)) {
     return;
   }
 

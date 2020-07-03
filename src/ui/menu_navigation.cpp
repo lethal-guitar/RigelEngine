@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "menu_navigation_helper.hpp"
+#include "menu_navigation.hpp"
 
 
 namespace rigel::ui {
@@ -23,6 +23,48 @@ namespace {
 
 constexpr auto ANALOG_STICK_DEADZONE = 20'000;
 
+}
+
+
+bool isNonRepeatKeyDown(const SDL_Event& event) {
+  return event.type == SDL_KEYDOWN && event.key.repeat == 0;
+}
+
+
+bool isButtonPress(const SDL_Event& event) {
+  return event.type == SDL_KEYDOWN || event.type == SDL_CONTROLLERBUTTONDOWN;
+}
+
+
+bool isConfirmButton(const SDL_Event& event) {
+  const auto enterOrSpacePressed = isNonRepeatKeyDown(event) &&
+    (event.key.keysym.sym == SDLK_RETURN ||
+     event.key.keysym.sym == SDLK_KP_ENTER ||
+     event.key.keysym.sym == SDLK_SPACE);
+  const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
+
+  return enterOrSpacePressed || buttonAPressed;
+}
+
+
+bool isCancelButton(const SDL_Event& event) {
+  const auto escapePressed = isNonRepeatKeyDown(event) &&
+    event.key.keysym.sym == SDLK_ESCAPE;
+  const auto buttonBPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_B;
+
+  return escapePressed || buttonBPressed;
+}
+
+
+bool isQuitConfirmButton(const SDL_Event& event) {
+  const auto yPressed =
+    event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_y;
+  const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
+
+  return yPressed || buttonAPressed;
 }
 
 

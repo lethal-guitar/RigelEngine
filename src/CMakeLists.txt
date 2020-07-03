@@ -276,8 +276,8 @@ set(core_sources
     ui/intro_movie.hpp
     ui/menu_element_renderer.cpp
     ui/menu_element_renderer.hpp
-    ui/menu_navigation_helper.cpp
-    ui/menu_navigation_helper.hpp
+    ui/menu_navigation.cpp
+    ui/menu_navigation.hpp
     ui/movie_player.cpp
     ui/movie_player.hpp
     ui/options_menu.cpp
