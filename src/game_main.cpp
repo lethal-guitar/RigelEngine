@@ -33,6 +33,7 @@
 #include "game_session_mode.hpp"
 #include "intro_demo_loop_mode.hpp"
 #include "menu_mode.hpp"
+#include "platform.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
@@ -55,61 +56,6 @@ using namespace sdl_utils;
 using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
-
-void setGLAttributes() {
-#ifdef RIGEL_USE_GL_ES
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-}
-
-
-int flagsForWindowMode(const data::WindowMode mode) {
-  using WM = data::WindowMode;
-
-  switch (mode) {
-    case WM::Fullscreen: return SDL_WINDOW_FULLSCREEN_DESKTOP;
-    case WM::ExclusiveFullscreen: return SDL_WINDOW_FULLSCREEN;
-    case WM::Windowed: return 0;
-  }
-
-  return 0;
-}
-
-
-auto createWindow(const data::GameOptions& options) {
-  SDL_DisplayMode displayMode;
-  sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
-
-  const auto isFullscreen = options.mWindowMode != data::WindowMode::Windowed;
-  const auto windowFlags =
-    flagsForWindowMode(options.mWindowMode) |
-    SDL_WINDOW_RESIZABLE |
-    SDL_WINDOW_OPENGL;
-
-  auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
-    "Rigel Engine",
-    options.mWindowPosX,
-    options.mWindowPosY,
-    isFullscreen ? displayMode.w : options.mWindowWidth,
-    isFullscreen ? displayMode.h : options.mWindowHeight,
-    windowFlags))};
-
-  // Setting a display mode is necessary to make sure that exclusive
-  // full-screen mode keeps using the desktop resolution. Without this,
-  // switching to exclusive full-screen mode from windowed mode would result in
-  // a screen resolution matching the window's last size.
-  sdl_utils::check(SDL_SetWindowDisplayMode(pWindow.get(), &displayMode));
-
-  return pWindow;
-}
-
 
 auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
   class InitialFadeInWrapper : public GameMode {
@@ -326,10 +272,10 @@ void gameMain(const CommandLineOptions& options) {
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
-  setGLAttributes();
+  platform::setGLAttributes();
 
   auto userProfile = loadOrCreateUserProfile();
-  auto pWindow = createWindow(userProfile.mOptions);
+  auto pWindow = platform::createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
@@ -652,7 +598,7 @@ void Game::applyChangedOptions() {
 
   if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode) {
     const auto result = SDL_SetWindowFullscreen(
-      mpWindow, flagsForWindowMode(currentOptions.mWindowMode));
+      mpWindow, platform::flagsForWindowMode(currentOptions.mWindowMode));
 
     if (result != 0) {
       std::cerr <<

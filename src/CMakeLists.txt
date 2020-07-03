@@ -290,6 +290,9 @@ set(core_sources
     ui/utils.cpp
     ui/utils.hpp
 
+    platform.cpp
+    platform.hpp
+
     # TODO: Move these into a common folder, like `menu_system` or similar
     anti_piracy_screen_mode.cpp
     anti_piracy_screen_mode.hpp
