@@ -8,7 +8,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 
 * Alain Martin ([@McMartin](https://github.com/McMartin)): Help with OS X port, clang-tidy, compiler upgrades and lots of other things
 * Evo Stamatov ([@avioli](https://github.com/avioli)): README improvements
-* Pratik Anand ([@pratikone](https://github.com/pratikone)): Widescreen support, README improvements
+* Pratik Anand ([@pratikone](https://github.com/pratikone)): Webassembly port, widescreen support, game path browser, initial gamepad support, README improvements
 * Ryan Brown ([@rbrown46](https://github.com/rbrown46)): Actor image modding (replace sprites using `png` files)
 * [@mnhauke](https://github.com/mnhauke): OpenSUSE package
 * [@s-martin](https://github.com/s-martin): Refactoring, code cleanups, README improvements
@@ -16,6 +16,9 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 ## Contributors (issues/reports)
 
 * Jomon John ([@jomonjohnn](https://github.com/jomonjohnn))
+* Julius Schwartzenberg ([@jschwartzenberg](https://github.com/jschwartzenberg))
 * Kyle Falconer ([@Kyle-Falconer](https://github.com/Kyle-Falconer))
+* [@Exarkuniv](https://github.com/Exarkuniv)
 * [@necros2k7](https://github.com/necros2k7)
+* [@NeonLightning](https://github.com/NeonLightning)
 * [@ZeroDiamond](https://github.com/ZeroDiamond)
