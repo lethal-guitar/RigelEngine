@@ -110,7 +110,7 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event) {
   } else {
     auto& currentStage = mStages[mCurrentStage];
 
-    if (ui::isCancelButton(event) && !canStageHandleEvents(currentStage)) {
+    if (ui::isCancelButton(event) || !canStageHandleEvents(currentStage)) {
       return true;
     } else {
       forwardEventToStage(currentStage, event);

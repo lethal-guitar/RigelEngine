@@ -37,14 +37,13 @@ bool isButtonPress(const SDL_Event& event) {
 
 
 bool isConfirmButton(const SDL_Event& event) {
-  const auto enterOrSpacePressed = isNonRepeatKeyDown(event) &&
+  const auto enterPressed = isNonRepeatKeyDown(event) &&
     (event.key.keysym.sym == SDLK_RETURN ||
-     event.key.keysym.sym == SDLK_KP_ENTER ||
-     event.key.keysym.sym == SDLK_SPACE);
+     event.key.keysym.sym == SDLK_KP_ENTER);
   const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
     event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
 
-  return enterOrSpacePressed || buttonAPressed;
+  return enterPressed || buttonAPressed;
 }
 
 
