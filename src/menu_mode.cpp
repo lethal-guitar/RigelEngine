@@ -74,7 +74,11 @@ void MenuMode::handleEvent(const SDL_Event& event) {
   if (mMenuState == MenuState::MainMenu) {
     const auto maybeIndex = mContext.mpScriptRunner->currentPageIndex();
     const auto optionsMenuSelected = maybeIndex && *maybeIndex == 2;
-    if (optionsMenuSelected && ui::isConfirmButton(event)) {
+    if (
+      optionsMenuSelected &&
+      (ui::isConfirmButton(event) ||
+       (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE))
+    ) {
       mOptionsMenu = ui::OptionsMenu{
         mContext.mpUserProfile,
         mContext.mpServiceProvider,
