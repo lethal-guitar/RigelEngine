@@ -66,6 +66,11 @@ void MenuMode::handleEvent(const SDL_Event& event) {
     return;
   }
 
+  if (mOptionsMenu) {
+    // Options menu blocks all input
+    return;
+  }
+
   if (mMenuState == MenuState::AskIfQuit && ui::isQuitConfirmButton(event)) {
     mContext.mpServiceProvider->scheduleGameQuit();
     return;
