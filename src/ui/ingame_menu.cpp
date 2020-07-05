@@ -22,6 +22,8 @@
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
+#include <sstream>
+
 
 namespace rigel::ui {
 
@@ -73,6 +75,22 @@ auto createSavedGame(
     playerModel.ammo(),
     playerModel.score()
   };
+}
+
+
+std::string makePrefillName(const data::SavedGame& savedGame) {
+  std::stringstream stream;
+  stream
+    << "Ep " << savedGame.mSessionId.mEpisode + 1 << ", "
+    << "Lv " << savedGame.mSessionId.mLevel + 1 << ", ";
+
+  switch (savedGame.mSessionId.mDifficulty) {
+    case data::Difficulty::Easy: stream << "Easy"; break;
+    case data::Difficulty::Medium: stream << "Medium"; break;
+    case data::Difficulty::Hard: stream << "Hard"; break;
+  }
+
+  return stream.str();
 }
 
 }
@@ -169,14 +187,16 @@ void IngameMenu::ScriptedMenu::updateAndRender(const engine::TimeDelta dt) {
 
 IngameMenu::SavedGameNameEntry::SavedGameNameEntry(
   GameMode::Context context,
-  const int slotIndex
+  const int slotIndex,
+  const std::string_view initialName
 )
   : mTextEntryWidget(
       context.mpUiRenderer,
       SAVE_SLOT_NAME_ENTRY_POS_X,
       SAVE_SLOT_NAME_ENTRY_START_POS_Y + slotIndex * SAVE_SLOT_NAME_HEIGHT,
       MAX_SAVE_SLOT_NAME_LENGTH,
-      ui::TextEntryWidget::Style::BigText)
+      ui::TextEntryWidget::Style::BigText,
+      initialName)
   , mSlotIndex(slotIndex)
 {
 }
@@ -304,20 +324,6 @@ void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result) {
 }
 
 
-void IngameMenu::onSaveGameMenuFinished(const ExecutionResult& result) {
-  using STT = ui::DukeScriptRunner::ScriptTerminationType;
-
-  if (result.mTerminationType == STT::AbortedByUser) {
-    leaveMenu();
-    fadeout();
-  } else {
-    const auto slotIndex = *result.mSelectedPage;
-    SDL_StartTextInput();
-    mStateStack.push(SavedGameNameEntry{mContext, slotIndex});
-  }
-}
-
-
 void IngameMenu::saveGame(const int slotIndex, std::string_view name) {
   auto savedGame = mSavedGame;
   savedGame.mName = name;
@@ -409,6 +415,30 @@ void IngameMenu::enterMenu(const MenuType type) {
     return false;
   };
 
+  auto saveSlotSelectionEventHook = [this](const SDL_Event& event) {
+    if (isConfirmButton(event)) {
+      const auto enteredViaGamepad =
+        event.type == SDL_CONTROLLERBUTTONDOWN;
+
+      const auto slotIndex = *mContext.mpScriptRunner->currentPageIndex();
+      SDL_StartTextInput();
+      mStateStack.push(SavedGameNameEntry{
+        mContext,
+        slotIndex,
+        enteredViaGamepad ? makePrefillName(mSavedGame) : ""});
+    }
+
+    return false;
+  };
+
+  auto onSaveSlotSelectionFinished = [this](const ExecutionResult& result) {
+    using STT = ui::DukeScriptRunner::ScriptTerminationType;
+    if (result.mTerminationType == STT::AbortedByUser) {
+      leaveMenu();
+      fadeout();
+    }
+  };
+
 
   switch (type) {
     case MenuType::ConfirmQuitInGame:
@@ -429,8 +459,7 @@ void IngameMenu::enterMenu(const MenuType type) {
 
     case MenuType::SaveGame:
       enterScriptedMenu(
-        "Save_Game",
-        [this](const auto& result) { onSaveGameMenuFinished(result); });
+        "Save_Game", onSaveSlotSelectionFinished, saveSlotSelectionEventHook);
       break;
 
     case MenuType::LoadGame:
