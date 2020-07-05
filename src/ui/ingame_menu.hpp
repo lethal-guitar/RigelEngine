@@ -54,6 +54,14 @@ public:
     const data::PlayerModel* pPlayerModel,
     const data::GameSessionId& sessionId);
 
+  /** Indicates that the game should be rendered before rendering the menu
+   *
+   * If this returns true, the menu is currently using only parts of the
+   * screen. The game world should be rendered before rendering the menu, in
+   * order to make the menu appear overlaid on top of the gameplay.
+   */
+  bool isTransparent() const;
+
   void handleEvent(const SDL_Event& event);
   UpdateResult updateAndRender(engine::TimeDelta dt);
 
@@ -96,11 +104,13 @@ private:
     ScriptedMenu(
       ui::DukeScriptRunner* pScriptRunner,
       ScriptEndHook&& scriptEndHook,
-      EventHook&& eventHook
+      EventHook&& eventHook,
+      const bool isTransparent
     )
       : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
       , mEventHook(std::forward<EventHook>(eventHook))
       , mpScriptRunner(pScriptRunner)
+      , mIsTransparent(isTransparent)
     {
     }
 
@@ -110,6 +120,7 @@ private:
     std::function<void(const ExecutionResult&)> mScriptFinishedHook;
     std::function<bool(const SDL_Event&)> mEventHook;
     ui::DukeScriptRunner* mpScriptRunner;
+    bool mIsTransparent;
   };
 
   struct SavedGameNameEntry {
@@ -147,6 +158,7 @@ private:
     const char* scriptName,
     ScriptEndHook&& scriptEndedHook,
     EventHook&& eventHook = noopEventHook,
+    bool isTransparent = false,
     bool shouldClearScriptCanvas = true);
   void enterMenu(MenuType type);
   void leaveMenu();

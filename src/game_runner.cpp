@@ -154,11 +154,11 @@ void GameRunner::updateWorld(const engine::TimeDelta dt) {
 
 bool GameRunner::updateMenu(const engine::TimeDelta dt) {
   if (mMenu.isActive()) {
-    // Still render the world if the menu is active, as some menus don't cover
-    // the entire screen. But we don't update the world, since the game is
-    // paused when the menu is active.
     mPlayerInput = {};
-    mWorld.render();
+
+    if (mMenu.isTransparent()) {
+      mWorld.render();
+    }
 
     const auto result = mMenu.updateAndRender(dt);
 
