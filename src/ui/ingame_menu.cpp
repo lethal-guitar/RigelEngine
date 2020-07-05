@@ -42,6 +42,7 @@ constexpr auto MAX_SAVE_SLOT_NAME_LENGTH = 18;
 constexpr auto TOP_LEVEL_MENU_ITEMS = std::array{
   "Save Game",
   "Restore Game",
+  "Options",
   "Help",
   "Quit Game"
 };
@@ -493,6 +494,10 @@ void IngameMenu::handleMenuActiveEvents() {
 
             case itemIndex("Restore Game"):
               enterMenu(MenuType::LoadGame);
+              break;
+
+            case itemIndex("Options"):
+              enterMenu(MenuType::Options);
               break;
 
             case itemIndex("Help"):
