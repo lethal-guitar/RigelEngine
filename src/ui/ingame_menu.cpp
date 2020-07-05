@@ -521,14 +521,21 @@ void IngameMenu::handleMenuActiveEvents() {
         state.handleEvent(event);
       },
 
-      [&, this](const ui::OptionsMenu& options) {
-        if (isCancelButton(event) || options.isFinished()) {
-          mStateStack.pop();
-        }
+      [&](const ui::OptionsMenu&) {
+        // handled by Dear ImGui
       });
   }
 
   mEventQueue.clear();
+
+  // Handle options menu being closed
+  if (
+    !mStateStack.empty() &&
+    std::holds_alternative<ui::OptionsMenu>(mStateStack.top()) &&
+    std::get<ui::OptionsMenu>(mStateStack.top()).isFinished()
+  ) {
+    mStateStack.pop();
+  }
 }
 
 

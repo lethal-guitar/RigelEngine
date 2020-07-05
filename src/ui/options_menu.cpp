@@ -116,8 +116,18 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
 
   ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 
-  const auto& io = ImGui::GetIO();
+  if (mPopupOpened && !ImGui::IsPopupOpen("Options")) {
+    // Popup was closed, quit the options menu
+    mMenuOpen = false;
+    return;
+  }
 
+  if (mMenuOpen && !mPopupOpened) {
+    ImGui::OpenPopup("Options");
+    mPopupOpened = true;
+  }
+
+  const auto& io = ImGui::GetIO();
   const auto windowSize = io.DisplaySize;
   const auto sizeToUse = ImVec2{windowSize.x * SCALE, windowSize.y * SCALE};
   const auto offset = ImVec2{
@@ -126,11 +136,14 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
 
   ImGui::SetNextWindowSize(sizeToUse);
   ImGui::SetNextWindowPos(offset);
-  ImGui::Begin(
+
+  if (!ImGui::BeginPopup(
     "Options",
-    &mMenuOpen,
     ImGuiWindowFlags_NoCollapse |
-    ImGuiWindowFlags_NoResize);
+    ImGuiWindowFlags_NoResize))
+  {
+    return;
+  }
 
   if (ImGui::BeginTabBar("Tabs"))
   {
@@ -253,7 +266,7 @@ Going back to a registered version will make them work again.)");
     }
   }
 
-  ImGui::End();
+  ImGui::EndPopup();
 }
 
 

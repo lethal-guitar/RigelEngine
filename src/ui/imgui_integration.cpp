@@ -81,6 +81,9 @@ void init(
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
 
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
   {
     // We rasterize the font at a size that looks good at a 4k resolution, and
     // then scale it down for smaller screen sizes.

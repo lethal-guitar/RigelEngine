@@ -61,11 +61,6 @@ MenuMode::MenuMode(Context context)
 
 
 void MenuMode::handleEvent(const SDL_Event& event) {
-  if (mOptionsMenu && ui::isCancelButton(event)) {
-    mOptionsMenu = std::nullopt;
-    return;
-  }
-
   if (mOptionsMenu) {
     // Options menu blocks all input
     return;
