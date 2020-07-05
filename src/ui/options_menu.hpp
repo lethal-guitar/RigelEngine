@@ -55,6 +55,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   Type mType;
   bool mMenuOpen = true;
+  bool mPopupOpened = false;
   bool mShowErrorBox = false;
 };
 

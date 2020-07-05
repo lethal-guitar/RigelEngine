@@ -62,7 +62,10 @@ void updateUiScale(const int, const int newHeight) {
   // (3840 x 2160) represents "full" size, and smaller vertical resolutions are
   // scaled down accordingly, i.e. half of 4k resolution (1080) would result in
   // a scale factor of 0.5.
-  const auto scaleFactor = std::clamp(newHeight / VERTICAL_4K_RES, 0.0f, 1.0f);
+  const auto scaleFactor = std::clamp(
+    newHeight / VERTICAL_4K_RES,
+    1.0f / INITIAL_UI_SCALE,
+    1.0f);
 
   ImGui::GetIO().FontGlobalScale = scaleFactor;
   ImGui::GetStyle() = ImGuiStyle{};
@@ -80,6 +83,9 @@ void init(
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
+
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
   {
     // We rasterize the font at a size that looks good at a 4k resolution, and
