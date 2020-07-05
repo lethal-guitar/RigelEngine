@@ -771,12 +771,18 @@ void Game::applyChangedOptions() {
   const auto& currentOptions = mpUserProfile->mOptions;
 
   if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode) {
-    SDL_SetWindowFullscreen(
+    const auto result = SDL_SetWindowFullscreen(
       mpWindow, flagsForWindowMode(currentOptions.mWindowMode));
 
-    if (currentOptions.mWindowMode == data::WindowMode::Windowed) {
-      SDL_SetWindowSize(
-        mpWindow, currentOptions.mWindowWidth, currentOptions.mWindowHeight);
+    if (result != 0) {
+      std::cerr <<
+        "WARNING: Failed to set window mode: " << SDL_GetError() << '\n';
+      mpUserProfile->mOptions.mWindowMode = mPreviousOptions.mWindowMode;
+    } else {
+      if (currentOptions.mWindowMode == data::WindowMode::Windowed) {
+        SDL_SetWindowSize(
+          mpWindow, currentOptions.mWindowWidth, currentOptions.mWindowHeight);
+      }
     }
   }
 
