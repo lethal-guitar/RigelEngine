@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      html, body, canvas {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <script>
+      Module = {
+        canvas: document.getElementById('canvas')
+      }
+    </script>
+    <script async type="text/javascript" src="RigelEngine.js"></script>
+  </body>
+</html>

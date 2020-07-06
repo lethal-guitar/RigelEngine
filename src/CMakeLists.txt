@@ -353,12 +353,31 @@ endif()
 
 
 # Main executable
-add_executable(${main_exe_name} main.cpp)
-target_link_libraries(${main_exe_name} PRIVATE
-    SDL2::Main
-    rigel_core
-    Boost::boost
-    Boost::program_options
-    Boost::disable_autolinking
-)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+    add_executable(${main_exe_name} emscripten_main.cpp)
+    target_link_libraries(${main_exe_name} PRIVATE
+      rigel_core
+    )
+    target_link_options(${main_exe_name} PRIVATE
+        "SHELL:-s ALLOW_MEMORY_GROWTH=1"
+        "SHELL:-s MIN_WEBGL_VERSION=1"
+        "SHELL:-s MAX_WEBGL_VERSION=2"
+        "SHELL:-s FULL_ES2=1"
+        "SHELL:--preload-file ${WEBASSEMBLY_GAME_PATH}/@/duke"
+        --no-heap-copy
+    )
 
+    # copy html file for hosting wasm and generated js to destination
+    # a better solution will be to find out a way for emscripten to generate html file instead of js file
+    # and use --shell-file to provide a custom html template
+    file(COPY "${CMAKE_SOURCE_DIR}/emscripten/Rigel.html" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+    add_executable(${main_exe_name} main.cpp)
+    target_link_libraries(${main_exe_name} PRIVATE
+        SDL2::Main
+        rigel_core
+        Boost::boost
+        Boost::program_options
+        Boost::disable_autolinking
+    )
+endif()
