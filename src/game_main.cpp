@@ -17,6 +17,7 @@
 #include "game_main.hpp"
 #include "game_main.ipp"
 
+#include "base/defer.hpp"
 #include "base/math_tools.hpp"
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
@@ -25,15 +26,16 @@
 #include "renderer/opengl.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/error.hpp"
+#include "ui/game_path_browser.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"
 #include "game_session_mode.hpp"
 #include "intro_demo_loop_mode.hpp"
 #include "menu_mode.hpp"
+#include "platform.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <imfilebrowser.h>
 #include <imgui.h>
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
@@ -54,87 +56,6 @@ using namespace sdl_utils;
 using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
-
-template <typename Callback>
-class CallOnDestruction {
-public:
-  explicit CallOnDestruction(Callback&& callback)
-    : mCallback(std::forward<Callback>(callback))
-  {
-  }
-
-  ~CallOnDestruction() {
-    mCallback();
-  }
-
-  CallOnDestruction(const CallOnDestruction&) = delete;
-  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
-
-private:
-  Callback mCallback;
-};
-
-
-template <typename Callback>
-[[nodiscard]] auto defer(Callback&& callback) {
-  return CallOnDestruction{std::forward<Callback>(callback)};
-}
-
-
-void setGLAttributes() {
-#ifdef RIGEL_USE_GL_ES
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-}
-
-
-int flagsForWindowMode(const data::WindowMode mode) {
-  using WM = data::WindowMode;
-
-  switch (mode) {
-    case WM::Fullscreen: return SDL_WINDOW_FULLSCREEN_DESKTOP;
-    case WM::ExclusiveFullscreen: return SDL_WINDOW_FULLSCREEN;
-    case WM::Windowed: return 0;
-  }
-
-  return 0;
-}
-
-
-auto createWindow(const data::GameOptions& options) {
-  SDL_DisplayMode displayMode;
-  sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
-
-  const auto isFullscreen = options.mWindowMode != data::WindowMode::Windowed;
-  const auto windowFlags =
-    flagsForWindowMode(options.mWindowMode) |
-    SDL_WINDOW_RESIZABLE |
-    SDL_WINDOW_OPENGL;
-
-  auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
-    "Rigel Engine",
-    options.mWindowPosX,
-    options.mWindowPosY,
-    isFullscreen ? displayMode.w : options.mWindowWidth,
-    isFullscreen ? displayMode.h : options.mWindowHeight,
-    windowFlags))};
-
-  // Setting a display mode is necessary to make sure that exclusive
-  // full-screen mode keeps using the desktop resolution. Without this,
-  // switching to exclusive full-screen mode from windowed mode would result in
-  // a screen resolution matching the window's last size.
-  sdl_utils::check(SDL_SetWindowDisplayMode(pWindow.get(), &displayMode));
-
-  return pWindow;
-}
-
 
 auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
   class InitialFadeInWrapper : public GameMode {
@@ -209,40 +130,6 @@ std::unique_ptr<GameMode> createInitialGameMode(
 }
 
 
-void showErrorMessage(SDL_Window* pWindow, const std::string& error) {
-  SDL_Event event;
-  auto boxIsVisible = true;
-  auto firstTime = true;
-
-  while (boxIsVisible) {
-    while (SDL_PollEvent(&event)) {
-      ui::imgui_integration::handleEvent(event);
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    ui::imgui_integration::beginFrame(pWindow);
-
-    if (firstTime) {
-      firstTime = false;
-      ImGui::OpenPopup("Error!");
-    }
-
-    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, 0)) {
-      ImGui::Text("%s", error.c_str());
-
-      if (ImGui::Button("Ok")) {
-        boxIsVisible = false;
-      }
-
-      ImGui::EndPopup();
-    }
-
-    ui::imgui_integration::endFrame();
-    SDL_GL_SwapWindow(pWindow);
-  }
-}
-
-
 std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
   if (options.mEnableFpsLimit && !options.mEnableVsync) {
     return FpsLimiter{options.mMaxFps};
@@ -270,70 +157,6 @@ std::string effectiveGamePath(
   }
 
   return profile.mGamePath ? profile.mGamePath->u8string() + "/"s : ""s;
-}
-
-
-UserProfile loadOrCreateUserProfile() {
-  if (auto profile = loadUserProfile())
-  {
-    return *profile;
-  }
-
-  auto profile = createEmptyUserProfile();
-  profile.saveToDisk();
-  return profile;
-}
-
-
-// Note : This should graduate into its own file if more complexity is added
-std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
-{
-  auto folderPath = std::filesystem::path();
-  auto folderBrowser =
-    ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
-
-  // TODO: There is some code duplication with the game path browser in the
-  // options menu for setting the size and title, but until we've decided if we
-  // will merge those two into one by showing the options menu at first launch
-  // or not, we'll leave it like this. Should we decide against showing the
-  // options menu at first launch, we should extract some constants and helper
-  // functions to avoid this duplication.
-  folderBrowser.SetTitle("Choose Duke Nukem II installation");
-
-  {
-    int windowWidth = 0;
-    int windowHeight = 0;
-    SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
-    folderBrowser.SetWindowSize(
-      base::round(windowWidth * 0.64f),
-      base::round(windowHeight * 0.64f));
-  }
-
-  folderBrowser.Open();
-
-  do
-  {
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-      ui::imgui_integration::handleEvent(event);
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    ui::imgui_integration::beginFrame(pWindow);
-
-    folderBrowser.Display();
-    if (folderBrowser.HasSelected())
-    {
-      folderPath = folderBrowser.GetSelected();
-      folderBrowser.Close();
-    }
-
-    ui::imgui_integration::endFrame();
-    SDL_GL_SwapWindow(pWindow);
-  } while (folderBrowser.IsOpened());
-
-  return folderPath;
 }
 
 
@@ -369,7 +192,7 @@ void setupForFirstLaunch(
   // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
   // the user select their Duke Nukem II installation.
   if (gamePath.empty()) {
-    gamePath = runFolderBrowser(pWindow);
+    gamePath = ui::runFolderBrowser(pWindow);
   }
 
   // If we still don't have a game path, stop here.
@@ -405,7 +228,13 @@ void initAndRunGame(
 ) {
   auto run = [&](const CommandLineOptions& options) {
     Game game(options, &userProfile, pWindow);
-    return game.run();
+
+    for (;;) {
+      auto maybeStopReason = game.runOneFrame();
+      if (maybeStopReason) {
+        return *maybeStopReason;
+      }
+    }
   };
 
   if (!userProfile.mGamePath) {
@@ -418,13 +247,13 @@ void initAndRunGame(
   // restarting the game to make the change effective. If the first game run
   // ended with a result of RestartNeeded, launch a new game, but start from
   // the main menu and discard most command line options.
-  if (result == Game::RunResult::RestartNeeded) {
+  if (result == Game::StopReason::RestartNeeded) {
     auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
     optionsForRestartedGame.mDebugModeEnabled =
       commandLineOptions.mDebugModeEnabled;
 
-    while (result == Game::RunResult::RestartNeeded) {
+    while (result == Game::StopReason::RestartNeeded) {
       result = run(optionsForRestartedGame);
     }
   }
@@ -437,6 +266,8 @@ void initAndRunGame(
 
 
 void gameMain(const CommandLineOptions& options) {
+  using base::defer;
+
 #ifdef _WIN32
   SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
   SetProcessDPIAware();
@@ -447,10 +278,10 @@ void gameMain(const CommandLineOptions& options) {
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
-  setGLAttributes();
+  platform::setGLAttributes();
 
   auto userProfile = loadOrCreateUserProfile();
-  auto pWindow = createWindow(userProfile.mOptions);
+  auto pWindow = platform::createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
@@ -467,8 +298,28 @@ void gameMain(const CommandLineOptions& options) {
   try {
     initAndRunGame(pWindow.get(), userProfile, options);
   } catch (const std::exception& error) {
-    showErrorMessage(pWindow.get(), error.what());
+    ui::showErrorMessage(pWindow.get(), error.what());
   }
+}
+
+
+void GameDeleter::operator()(Game* pGame) {
+  delete pGame;
+}
+
+
+std::unique_ptr<Game, GameDeleter> createGame(
+  SDL_Window* pWindow,
+  UserProfile* pUserProfile,
+  const CommandLineOptions& commandLineOptions
+) {
+  return std::unique_ptr<Game, GameDeleter>(
+    new Game{commandLineOptions, pUserProfile, pWindow});
+}
+
+
+void runOneFrame(Game* pGame) {
+  pGame->runOneFrame();
 }
 
 
@@ -533,10 +384,6 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-}
-
-
-auto Game::run() -> RunResult {
   mRenderer.clear();
   mRenderer.swapBuffers();
 
@@ -551,71 +398,64 @@ auto Game::run() -> RunResult {
 
   enumerateGameControllers();
 
-  return mainLoop();
+  mLastTime = std::chrono::high_resolution_clock::now();
 }
 
 
-auto Game::mainLoop() -> RunResult {
+auto Game::runOneFrame() -> std::optional<StopReason> {
   using namespace std::chrono;
+  using base::defer;
 
-  std::vector<SDL_Event> eventQueue;
-  mLastTime = high_resolution_clock::now();
+  const auto startOfFrame = high_resolution_clock::now();
+  const auto elapsed =
+    duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
+  mLastTime = startOfFrame;
 
-  for (;;) {
-    const auto startOfFrame = high_resolution_clock::now();
-    const auto elapsed =
-      duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
-    mLastTime = startOfFrame;
-
-    pumpEvents(eventQueue);
-    if (!mIsRunning) {
-      break;
-    }
-
-    {
-      ui::imgui_integration::beginFrame(mpWindow);
-      auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
-      ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-
-      updateAndRender(elapsed, eventQueue);
-      eventQueue.clear();
-    }
-
-    swapBuffers();
-
-    applyChangedOptions();
-
-    if (!mGamePathToSwitchTo.empty()) {
-      mpUserProfile->mGamePath = mGamePathToSwitchTo;
-      mpUserProfile->saveToDisk();
-      return RunResult::RestartNeeded;
-    }
+  pumpEvents();
+  if (!mIsRunning) {
+    return StopReason::GameEnded;
   }
 
-  return RunResult::GameEnded;
+  {
+    ui::imgui_integration::beginFrame(mpWindow);
+    auto imGuiFrameGuard = defer([]() { ui::imgui_integration::endFrame(); });
+    ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+
+    updateAndRender(elapsed);
+    mEventQueue.clear();
+  }
+
+  swapBuffers();
+
+  applyChangedOptions();
+
+  if (!mGamePathToSwitchTo.empty()) {
+    mpUserProfile->mGamePath = mGamePathToSwitchTo;
+    mpUserProfile->saveToDisk();
+    return StopReason::RestartNeeded;
+  }
+
+  return {};
 }
 
 
-void Game::pumpEvents(std::vector<SDL_Event>& eventQueue) {
+void Game::pumpEvents() {
   SDL_Event event;
   while (mIsMinimized && SDL_WaitEvent(&event)) {
     if (!handleEvent(event)) {
-      eventQueue.push_back(event);
+      mEventQueue.push_back(event);
     }
   }
 
   while (SDL_PollEvent(&event)) {
     if (!handleEvent(event)) {
-      eventQueue.push_back(event);
+      mEventQueue.push_back(event);
     }
   }
 }
 
 
-void Game::updateAndRender(
-  const entityx::TimeDelta elapsed,
-  const std::vector<SDL_Event>& eventQueue
-) {
+void Game::updateAndRender(const entityx::TimeDelta elapsed) {
   {
     RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
     mRenderer.clear();
@@ -623,7 +463,7 @@ void Game::updateAndRender(
     auto saved = setupSimpleUpscaling(&mRenderer);
 
     auto pMaybeNextMode =
-      mpCurrentGameMode->updateAndRender(elapsed, eventQueue);
+      mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
 
     if (pMaybeNextMode) {
       fadeOutScreen();
@@ -772,7 +612,7 @@ void Game::applyChangedOptions() {
 
   if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode) {
     const auto result = SDL_SetWindowFullscreen(
-      mpWindow, flagsForWindowMode(currentOptions.mWindowMode));
+      mpWindow, platform::flagsForWindowMode(currentOptions.mWindowMode));
 
     if (result != 0) {
       std::cerr <<

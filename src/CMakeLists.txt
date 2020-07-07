@@ -1,6 +1,7 @@
 set(core_sources
     base/array_view.hpp
     base/container_utils.hpp
+    base/defer.hpp
     base/grid.hpp
     base/math_tools.hpp
     base/spatial_types.hpp
@@ -262,6 +263,8 @@ set(core_sources
     ui/episode_end_sequence.hpp
     ui/fps_display.cpp
     ui/fps_display.hpp
+    ui/game_path_browser.cpp
+    ui/game_path_browser.hpp
     ui/high_score_list.cpp
     ui/high_score_list.hpp
     ui/hud_renderer.cpp
@@ -286,6 +289,25 @@ set(core_sources
     ui/text_entry_widget.hpp
     ui/utils.cpp
     ui/utils.hpp
+
+    platform.cpp
+    platform.hpp
+
+    # TODO: Move these into a common folder, like `menu_system` or similar
+    anti_piracy_screen_mode.cpp
+    anti_piracy_screen_mode.hpp
+    game_main.cpp
+    game_main.hpp
+    game_main.ipp
+    game_runner.cpp
+    game_runner.hpp
+    game_session_mode.cpp
+    game_session_mode.hpp
+    intro_demo_loop_mode.cpp
+    intro_demo_loop_mode.hpp
+    menu_mode.cpp
+    menu_mode.hpp
+    mode_stage.hpp
 )
 
 
@@ -331,26 +353,7 @@ endif()
 
 
 # Main executable
-set(main_exe_sources
-    anti_piracy_screen_mode.cpp
-    anti_piracy_screen_mode.hpp
-    game_main.cpp
-    game_main.hpp
-    game_main.ipp
-    game_session_mode.cpp
-    game_session_mode.hpp
-    game_runner.cpp
-    game_runner.hpp
-    intro_demo_loop_mode.cpp
-    intro_demo_loop_mode.hpp
-    main.cpp
-    menu_mode.cpp
-    menu_mode.hpp
-    mode_stage.hpp
-)
-
-
-add_executable(${main_exe_name} ${main_exe_sources})
+add_executable(${main_exe_name} main.cpp)
 target_link_libraries(${main_exe_name} PRIVATE
     SDL2::Main
     rigel_core

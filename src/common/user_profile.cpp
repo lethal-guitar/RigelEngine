@@ -540,4 +540,16 @@ void importOriginalGameProfileData(
   }
 }
 
+
+UserProfile loadOrCreateUserProfile() {
+  if (auto profile = loadUserProfile())
+  {
+    return *profile;
+  }
+
+  auto profile = createEmptyUserProfile();
+  profile.saveToDisk();
+  return profile;
+}
+
 }

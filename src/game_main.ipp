@@ -57,7 +57,7 @@ private:
 
 class Game : public IGameServiceProvider {
 public:
-  enum class RunResult {
+  enum class StopReason {
     GameEnded,
     RestartNeeded
   };
@@ -69,7 +69,19 @@ public:
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  RunResult run();
+  /** Run one frame of the game
+   *
+   * Should be called in an infinite loop to implement the game's main loop,
+   * or given as a callback to environments which own the main loop like
+   * Emscripten.
+   *
+   * If an empty optional is returned, the game wants to keep running,
+   * otherwise, the loop should be terminated. If the reason for stopping is
+   * RestartNeeded, the game would like a new Game to be started after
+   * terminating the loop, otherwise, the game is done and the whole program
+   * can be terminated.
+   */
+  std::optional<StopReason> runOneFrame();
 
 private:
   enum class FadeType {
@@ -77,11 +89,8 @@ private:
     Out
   };
 
-  RunResult mainLoop();
-  void pumpEvents(std::vector<SDL_Event>& eventQueue);
-  void updateAndRender(
-    entityx::TimeDelta elapsed,
-    const std::vector<SDL_Event>& eventQueue);
+  void pumpEvents();
+  void updateAndRender(entityx::TimeDelta elapsed);
 
   GameMode::Context makeModeContext();
 
@@ -142,6 +151,7 @@ private:
   engine::TiledTexture mUiSpriteSheet;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
+  std::vector<SDL_Event> mEventQueue;
   sdl_utils::Ptr<SDL_GameController> mpGameController;
 };
 

@@ -94,6 +94,10 @@ std::optional<UserProfile> loadUserProfile();
 void importOriginalGameProfileData(
   UserProfile& profile, const std::string& gamePath);
 
+/** Loads existing profile if found, creates a new one otherwise. */
+UserProfile loadOrCreateUserProfile();
+
+
 /** Return path for storing preferences
  *
  * Returns path to a directory which can be used to store user-specific data
