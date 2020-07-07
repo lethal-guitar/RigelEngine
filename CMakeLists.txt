@@ -22,10 +22,51 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.65 COMPONENTS program_options REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+    set(WEBASSEMBLY_GAME_PATH "" CACHE PATH "Path to folder containing Duke Nukem II files")
+    set(USE_GL_ES ON)
+
+    if (NOT WEBASSEMBLY_GAME_PATH)
+        message(FATAL_ERROR
+            "WEBASSEMBLY_GAME_PATH not defined. This is required for a Webassembly build. Point it to a folder containing Duke Nukem II data files. Remove any trailing '/' from the path.")
+    else()
+        message(STATUS "Bundling game data from path: ${WEBASSEMBLY_GAME_PATH}")
+    endif()
+
+    add_compile_options(
+        "SHELL:-s WASM=1"
+        -O3
+    )
+
+    add_library(SDL2::Core INTERFACE IMPORTED)
+    set_target_properties(SDL2::Core PROPERTIES
+        INTERFACE_COMPILE_OPTIONS
+        "SHELL:-s USE_SDL=2"
+        INTERFACE_LINK_OPTIONS
+        "SHELL:-s USE_SDL=2"
+    )
+
+    add_library(SDL2::Mixer INTERFACE IMPORTED)
+    set_target_properties(SDL2::Mixer PROPERTIES
+        INTERFACE_COMPILE_OPTIONS
+        "SHELL:-s USE_SDL_MIXER=2"
+        INTERFACE_LINK_OPTIONS
+        "SHELL:-s USE_SDL_MIXER=2"
+    )
+
+    add_library(Boost::boost INTERFACE IMPORTED)
+    set_target_properties(Boost::boost PROPERTIES
+        INTERFACE_COMPILE_OPTIONS
+        "SHELL:-s USE_BOOST_HEADERS=1"
+    )
+else()
+    set(Boost_USE_STATIC_LIBS ON)
+    find_package(Boost 1.65 COMPONENTS program_options REQUIRED)
+    find_package(SDL2 REQUIRED)
+    find_package(SDL2_mixer REQUIRED)
+endif()
+
 find_package(Filesystem REQUIRED)
 
 
@@ -114,8 +155,11 @@ target_compile_options(entityx PRIVATE
 # RigelEngine build targets
 ###############################################################################
 
-enable_testing()
-
-add_subdirectory(modding_tools)
 add_subdirectory(src)
-add_subdirectory(test)
+
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
+    enable_testing()
+
+    add_subdirectory(modding_tools)
+    add_subdirectory(test)
+endif()

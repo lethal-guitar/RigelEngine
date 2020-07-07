@@ -102,6 +102,7 @@ I'm planning to provide binaries for OS X, Ubuntu/Debian, and Raspberry Pi in th
 * [Raspberry Pi builds](#raspi-build-instructions)
 * [OS X builds](#mac-build-instructions)
 * [Windows builds](#windows-build-instructions)
+* [Webassembly (Emscripten) builds](#wasm-build-instructions)
 
 ### Get the sources
 
@@ -324,3 +325,34 @@ cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/b
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
 ```
+### <a name="wasm-build-instructions">Webassembly (Emscripten) build </a>
+
+Rigel Engine can be built to run on a web browser using [Emscripten](https://emscripten.org/).
+Note that this is still work in progress, as there are some [issues](https://github.com/lethal-guitar/RigelEngine/milestone/16) to resolve.
+
+Refer to Emscripten's [README](https://github.com/emscripten-core/emsdk) for instructions on how to install and activate Emscripten.
+You can verify the installation by running the `emcc` command. If it executes then everything is configured correctly.
+
+The instructions to build are the same as above, except for the CMake part:
+
+```bash
+emcmake cmake .. -DWARNINGS_AS_ERRORS=OFF -DWEBASSEMBLY_GAME_PATH=<path-to-duke2-folder>
+make
+```
+
+This will produce a couple of files in the `<path-to-cmake-build-dir>/src` folder.
+To run the game, you need to run a web server to host the files in that folder,
+and then open `Rigel.html` in your browser.
+Just opening `Rigel.html` directly will not work, as the web page needs to load the wasm code and data, which most browsers don't allow when using the local `file:///` protocol.
+
+The easiest way to host the files is using Python. In the CMake build directory, run:
+
+```bash
+# Python 2
+python -m SimpleHTTPServer
+
+# Python 3
+python3 -m http.server
+```
+
+This will host the game at `localhost:8000/src/Rigel.html`.
