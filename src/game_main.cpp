@@ -356,6 +356,7 @@ Game::Game(
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
+  , mSoundSystem(mResources)
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
@@ -384,10 +385,6 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-  data::forEachSoundId([this](const auto id) {
-    mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
-  });
-
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
@@ -692,20 +689,12 @@ void Game::fadeInScreen() {
 
 
 void Game::playSound(const data::SoundId id) {
-  const auto index = static_cast<std::size_t>(id);
-  assert(index < mSoundsById.size());
-
-  const auto handle = mSoundsById[index];
-  mSoundSystem.playSound(handle);
+  mSoundSystem.playSound(id);
 }
 
 
 void Game::stopSound(const data::SoundId id) {
-  const auto index = static_cast<std::size_t>(id);
-  assert(index < mSoundsById.size());
-
-  const auto handle = mSoundsById[index];
-  mSoundSystem.stopSound(handle);
+  mSoundSystem.stopSound(id);
 }
 
 

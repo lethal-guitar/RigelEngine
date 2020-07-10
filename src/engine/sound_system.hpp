@@ -18,11 +18,15 @@
 
 #include "data/audio_buffer.hpp"
 #include "data/song.hpp"
+#include "data/sound_ids.hpp"
 #include "sdl_utils/ptr.hpp"
 
 #include <array>
 #include <memory>
 #include <unordered_map>
+
+
+namespace rigel::loader { class ResourceLoader; }
 
 
 namespace rigel::engine {
@@ -32,18 +36,14 @@ class ImfPlayer;
 
 class SoundSystem {
 public:
-  using SoundHandle = int;
-
-  SoundSystem();
+  explicit SoundSystem(const loader::ResourceLoader& resources);
   ~SoundSystem();
-
-  SoundHandle addSound(const data::AudioBuffer& buffer);
 
   void playSong(data::Song&& song);
   void stopMusic() const;
 
-  void playSound(SoundHandle handle) const;
-  void stopSound(SoundHandle handle) const;
+  void playSound(data::SoundId id) const;
+  void stopSound(data::SoundId id) const;
 
   void setMusicVolume(float volume);
   void setSoundVolume(float volume);
@@ -51,15 +51,19 @@ public:
 private:
   static const int MAX_CONCURRENT_SOUNDS = 64;
 
+  using SoundHandle = int;
+
   struct LoadedSound {
     data::AudioBuffer mBuffer;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
 
+  SoundHandle addSound(const data::AudioBuffer& buffer);
   SoundHandle addConvertedSound(data::AudioBuffer buffer);
 
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
   std::array<LoadedSound, MAX_CONCURRENT_SOUNDS> mSounds;
+  std::vector<SoundHandle> mSoundsById;
   SoundHandle mNextHandle = 0;
 };
 

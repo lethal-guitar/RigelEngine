@@ -19,6 +19,7 @@
 #include "base/math_tools.hpp"
 #include "data/game_options.hpp"
 #include "engine/imf_player.hpp"
+#include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
 
 #include <speex/speex_resampler.h>
@@ -29,8 +30,6 @@
 namespace rigel::engine {
 
 namespace {
-
-using SoundHandle = SoundSystem::SoundHandle;
 
 const auto SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
@@ -95,7 +94,7 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
-SoundSystem::SoundSystem()
+SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
 {
   sdl_utils::check(Mix_OpenAudio(
@@ -115,6 +114,10 @@ SoundSystem::SoundSystem()
 
   Mix_AllocateChannels(MAX_CONCURRENT_SOUNDS);
 
+  data::forEachSoundId([&](const auto id) {
+    mSoundsById.emplace_back(addSound(resources.loadSound(id)));
+  });
+
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
   setSoundVolume(data::SOUND_VOLUME_DEFAULT);
 }
@@ -132,7 +135,7 @@ SoundSystem::~SoundSystem() {
 }
 
 
-SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
+auto SoundSystem::addSound(const data::AudioBuffer& original) -> SoundHandle {
   auto buffer = resampleAudio(original, SAMPLE_RATE);
   if (buffer.mSamples.back() != 0) {
     // Prevent clicks/pops with samples that don't return to 0 at the end
@@ -174,7 +177,7 @@ SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
 }
 
 
-SoundHandle SoundSystem::addConvertedSound(data::AudioBuffer buffer) {
+auto SoundSystem::addConvertedSound(data::AudioBuffer buffer) -> SoundHandle {
   assert(mNextHandle < MAX_CONCURRENT_SOUNDS);
 
   const auto assignedHandle = mNextHandle++;
@@ -195,14 +198,22 @@ void SoundSystem::stopMusic() const {
 }
 
 
-void SoundSystem::playSound(const SoundHandle handle) const {
+void SoundSystem::playSound(const data::SoundId id) const {
+  const auto index = static_cast<std::size_t>(id);
+  assert(index < mSoundsById.size());
+  const auto handle = mSoundsById[index];
   assert(handle < int(mSounds.size()));
+
   Mix_PlayChannel(handle, mSounds[handle].mpMixChunk.get(), 0);
 }
 
 
-void SoundSystem::stopSound(const SoundHandle handle) const {
+void SoundSystem::stopSound(const data::SoundId id) const {
+  const auto index = static_cast<std::size_t>(id);
+  assert(index < mSoundsById.size());
+  const auto handle = mSoundsById[index];
   assert(handle < int(mSounds.size()));
+
   Mix_HaltChannel(handle);
 }
 
