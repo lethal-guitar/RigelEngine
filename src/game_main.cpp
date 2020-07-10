@@ -384,9 +384,6 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-  mRenderer.clear();
-  mRenderer.swapBuffers();
-
   data::forEachSoundId([this](const auto id) {
     mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
   });
