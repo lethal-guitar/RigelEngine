@@ -25,7 +25,25 @@
 #include <speex/speex_resampler.h>
 
 #include <cassert>
+#include <iostream>
 #include <utility>
+
+
+namespace rigel::sdl_mixer {
+
+namespace {
+
+void check(int result) {
+  using namespace std::string_literals;
+
+  if (result != 0) {
+    throw std::runtime_error{"SDL_mixer error: "s + Mix_GetError()};
+  }
+}
+
+}
+
+}
 
 
 namespace rigel::engine {
@@ -34,7 +52,6 @@ namespace {
 
 const auto SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
-
 
 sdl_utils::Ptr<Mix_Chunk> createMixChunk(data::AudioBuffer& buffer) {
   const auto bufferSize = buffer.mSamples.size() * sizeof(data::Sample);
@@ -152,11 +169,12 @@ SoundSystem::LoadedSound::LoadedSound(data::AudioBuffer buffer)
 SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
 {
-  sdl_utils::check(Mix_OpenAudio(
-      SAMPLE_RATE,
-      MIX_DEFAULT_FORMAT,
-      1, // mono
-      BUFFER_SIZE));
+  sdl_mixer::check(Mix_OpenAudio(
+    SAMPLE_RATE,
+    MIX_DEFAULT_FORMAT,
+    1, // mono
+    BUFFER_SIZE));
+
   Mix_HookMusic(
     [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
       auto pPlayer = static_cast<ImfPlayer*>(pUserData);
