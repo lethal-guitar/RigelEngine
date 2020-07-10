@@ -33,6 +33,9 @@ namespace rigel::engine {
 class ImfPlayer;
 
 
+using RawBuffer = std::vector<std::uint8_t>;
+
+
 class SoundSystem {
 public:
   explicit SoundSystem(const loader::ResourceLoader& resources);
@@ -48,11 +51,14 @@ public:
   void setSoundVolume(float volume);
 
 private:
+  struct MusicConversionWrapper;
+
   struct LoadedSound {
     LoadedSound() = default;
-    explicit LoadedSound(data::AudioBuffer buffer);
+    explicit LoadedSound(const data::AudioBuffer& buffer);
+    explicit LoadedSound(RawBuffer buffer);
 
-    data::AudioBuffer mBuffer;
+    RawBuffer mData;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
 

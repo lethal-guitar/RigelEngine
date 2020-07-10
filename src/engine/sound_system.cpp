@@ -25,6 +25,7 @@
 #include <speex/speex_resampler.h>
 
 #include <cassert>
+#include <cstring>
 #include <iostream>
 #include <utility>
 
@@ -52,14 +53,6 @@ namespace {
 
 const auto SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
-
-sdl_utils::Ptr<Mix_Chunk> createMixChunk(data::AudioBuffer& buffer) {
-  const auto bufferSize = buffer.mSamples.size() * sizeof(data::Sample);
-  return sdl_utils::Ptr<Mix_Chunk>(
-    Mix_QuickLoad_RAW(reinterpret_cast<Uint8*>(buffer.mSamples.data()),
-    static_cast<Uint32>(bufferSize)));
-}
-
 
 data::AudioBuffer resampleAudio(
   const data::AudioBuffer& buffer,
@@ -156,12 +149,27 @@ auto idToIndex(const data::SoundId id) {
   return static_cast<int>(id);
 }
 
+
+RawBuffer asRawBuffer(const data::AudioBuffer& buffer) {
+  const auto sizeInBytes = buffer.mSamples.size() * sizeof(data::Sample);
+  auto rawBuffer = RawBuffer(sizeInBytes);
+  std::memcpy(rawBuffer.data(), buffer.mSamples.data(), sizeInBytes);
+  return rawBuffer;
+}
+
 }
 
 
-SoundSystem::LoadedSound::LoadedSound(data::AudioBuffer buffer)
-  : mBuffer(std::move(buffer))
-  , mpMixChunk(createMixChunk(mBuffer))
+SoundSystem::LoadedSound::LoadedSound(const data::AudioBuffer& buffer)
+  : LoadedSound(asRawBuffer(buffer))
+{
+}
+
+
+SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
+  : mData(std::move(buffer))
+  , mpMixChunk(sdl_utils::Ptr<Mix_Chunk>{
+      Mix_QuickLoad_RAW(mData.data(), static_cast<Uint32>(mData.size()))})
 {
 }
 
