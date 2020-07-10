@@ -65,27 +65,14 @@ enum class SoundId {
   IntroDukeSpeaks2 = 40
 };
 
-
-namespace detail {
-
-const auto FirstSoundId = SoundId::DukeNormalShot;
-const auto LastSoundId = SoundId::IntroDukeSpeaks2;
-
-inline SoundId nextSoundId(const SoundId id) {
-  const auto nextIndex = static_cast<int>(id) + 1;
-  return static_cast<SoundId>(nextIndex);
-}
-
-}
+constexpr auto NUM_SOUND_IDS = 41;
 
 
 template<typename Callable>
 void forEachSoundId(Callable callback) {
-  using namespace data::detail;
-  for (auto id = FirstSoundId; id != LastSoundId; id = nextSoundId(id)) {
-    callback(id);
+  for (auto i = 0; i < NUM_SOUND_IDS; ++i) {
+    callback(static_cast<SoundId>(i));
   }
-  callback(LastSoundId);
 }
 
 }

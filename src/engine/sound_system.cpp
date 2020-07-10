@@ -27,6 +27,7 @@
 #include <cassert>
 #include <utility>
 
+
 namespace rigel::engine {
 
 namespace {
@@ -91,6 +92,18 @@ void appendRampToZero(data::AudioBuffer& buffer) {
   }
 }
 
+
+auto idToIndex(const data::SoundId id) {
+  return static_cast<int>(id);
+}
+
+}
+
+
+SoundSystem::LoadedSound::LoadedSound(data::AudioBuffer buffer)
+  : mBuffer(std::move(buffer))
+  , mpMixChunk(createMixChunk(mBuffer))
+{
 }
 
 
@@ -112,10 +125,10 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
     },
     mpMusicPlayer.get());
 
-  Mix_AllocateChannels(MAX_CONCURRENT_SOUNDS);
+  Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
-    mSoundsById.emplace_back(addSound(resources.loadSound(id)));
+    mSounds[idToIndex(id)] = prepareSound(resources.loadSound(id));
   });
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
@@ -135,7 +148,9 @@ SoundSystem::~SoundSystem() {
 }
 
 
-auto SoundSystem::addSound(const data::AudioBuffer& original) -> SoundHandle {
+auto SoundSystem::prepareSound(const data::AudioBuffer& original)
+  -> LoadedSound
+{
   auto buffer = resampleAudio(original, SAMPLE_RATE);
   if (buffer.mSamples.back() != 0) {
     // Prevent clicks/pops with samples that don't return to 0 at the end
@@ -170,21 +185,10 @@ auto SoundSystem::addSound(const data::AudioBuffer& original) -> SoundHandle {
     convertedBuffer.mSamples.end(),
     tempBuffer.begin(),
     tempBuffer.begin() + conversionSpecs.len_cvt);
-  return addConvertedSound(convertedBuffer);
+  return LoadedSound{std::move(convertedBuffer)};
 #else
-  return addConvertedSound(buffer);
+  return LoadedSound{std::move(buffer)};
 #endif
-}
-
-
-auto SoundSystem::addConvertedSound(data::AudioBuffer buffer) -> SoundHandle {
-  assert(mNextHandle < MAX_CONCURRENT_SOUNDS);
-
-  const auto assignedHandle = mNextHandle++;
-  auto& sound = mSounds[assignedHandle];
-  sound.mBuffer = std::move(buffer);
-  sound.mpMixChunk = createMixChunk(sound.mBuffer);
-  return assignedHandle;
 }
 
 
@@ -199,22 +203,14 @@ void SoundSystem::stopMusic() const {
 
 
 void SoundSystem::playSound(const data::SoundId id) const {
-  const auto index = static_cast<std::size_t>(id);
-  assert(index < mSoundsById.size());
-  const auto handle = mSoundsById[index];
-  assert(handle < int(mSounds.size()));
-
-  Mix_PlayChannel(handle, mSounds[handle].mpMixChunk.get(), 0);
+  const auto index = idToIndex(id);
+  Mix_PlayChannel(index, mSounds[index].mpMixChunk.get(), 0);
 }
 
 
 void SoundSystem::stopSound(const data::SoundId id) const {
-  const auto index = static_cast<std::size_t>(id);
-  assert(index < mSoundsById.size());
-  const auto handle = mSoundsById[index];
-  assert(handle < int(mSounds.size()));
-
-  Mix_HaltChannel(handle);
+  const auto index = idToIndex(id);
+  Mix_HaltChannel(index);
 }
 
 

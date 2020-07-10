@@ -23,7 +23,6 @@
 
 #include <array>
 #include <memory>
-#include <unordered_map>
 
 
 namespace rigel::loader { class ResourceLoader; }
@@ -49,22 +48,18 @@ public:
   void setSoundVolume(float volume);
 
 private:
-  static const int MAX_CONCURRENT_SOUNDS = 64;
-
-  using SoundHandle = int;
-
   struct LoadedSound {
+    LoadedSound() = default;
+    explicit LoadedSound(data::AudioBuffer buffer);
+
     data::AudioBuffer mBuffer;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
 
-  SoundHandle addSound(const data::AudioBuffer& buffer);
-  SoundHandle addConvertedSound(data::AudioBuffer buffer);
+  LoadedSound prepareSound(const data::AudioBuffer& buffer);
 
+  std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
-  std::array<LoadedSound, MAX_CONCURRENT_SOUNDS> mSounds;
-  std::vector<SoundHandle> mSoundsById;
-  SoundHandle mNextHandle = 0;
 };
 
 }
