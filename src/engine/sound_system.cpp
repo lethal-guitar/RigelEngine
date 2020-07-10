@@ -93,6 +93,48 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
+data::AudioBuffer convertBuffer(const data::AudioBuffer& original) {
+  auto buffer = resampleAudio(original, SAMPLE_RATE);
+  if (buffer.mSamples.back() != 0) {
+    // Prevent clicks/pops with samples that don't return to 0 at the end
+    // by adding a small linear ramp leading back to zero.
+    appendRampToZero(buffer);
+  }
+
+#if MIX_DEFAULT_FORMAT != AUDIO_S16LSB
+  SDL_AudioSpec originalSoundSpec{
+    buffer.mSampleRate,
+    AUDIO_S16LSB,
+    1,
+    0, 0, 0, 0, nullptr};
+  SDL_AudioCVT conversionSpecs;
+  SDL_BuildAudioCVT(
+    &conversionSpecs,
+    AUDIO_S16LSB, 1, buffer.mSampleRate,
+    MIX_DEFAULT_FORMAT, 1, SAMPLE_RATE);
+
+  conversionSpecs.len = static_cast<int>(
+    buffer.mSamples.size() * 2);
+  std::vector<data::Sample> tempBuffer(
+    conversionSpecs.len * conversionSpecs.len_mult);
+  conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
+  std::copy(
+    buffer.mSamples.begin(), buffer.mSamples.end(), tempBuffer.begin());
+
+  SDL_ConvertAudio(&conversionSpecs);
+
+  data::AudioBuffer convertedBuffer{SAMPLE_RATE};
+  convertedBuffer.mSamples.insert(
+    convertedBuffer.mSamples.end(),
+    tempBuffer.begin(),
+    tempBuffer.begin() + conversionSpecs.len_cvt);
+  return convertedBuffer;
+#else
+  return buffer;
+#endif
+}
+
+
 auto idToIndex(const data::SoundId id) {
   return static_cast<int>(id);
 }
@@ -128,7 +170,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
-    mSounds[idToIndex(id)] = prepareSound(resources.loadSound(id));
+    mSounds[idToIndex(id)] = LoadedSound{convertBuffer(resources.loadSound(id))};
   });
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
@@ -145,50 +187,6 @@ SoundSystem::~SoundSystem() {
   }
 
   Mix_Quit();
-}
-
-
-auto SoundSystem::prepareSound(const data::AudioBuffer& original)
-  -> LoadedSound
-{
-  auto buffer = resampleAudio(original, SAMPLE_RATE);
-  if (buffer.mSamples.back() != 0) {
-    // Prevent clicks/pops with samples that don't return to 0 at the end
-    // by adding a small linear ramp leading back to zero.
-    appendRampToZero(buffer);
-  }
-
-#if MIX_DEFAULT_FORMAT != AUDIO_S16LSB
-  SDL_AudioSpec originalSoundSpec{
-    buffer.mSampleRate,
-    AUDIO_S16LSB,
-    1,
-    0, 0, 0, 0, nullptr};
-  SDL_AudioCVT conversionSpecs;
-  SDL_BuildAudioCVT(
-    &conversionSpecs,
-    AUDIO_S16LSB, 1, buffer.mSampleRate,
-    MIX_DEFAULT_FORMAT, 1, SAMPLE_RATE);
-
-  conversionSpecs.len = static_cast<int>(
-    buffer.mSamples.size() * 2);
-  std::vector<data::Sample> tempBuffer(
-    conversionSpecs.len * conversionSpecs.len_mult);
-  conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
-  std::copy(
-    buffer.mSamples.begin(), buffer.mSamples.end(), tempBuffer.begin());
-
-  SDL_ConvertAudio(&conversionSpecs);
-
-  data::AudioBuffer convertedBuffer{SAMPLE_RATE};
-  convertedBuffer.mSamples.insert(
-    convertedBuffer.mSamples.end(),
-    tempBuffer.begin(),
-    tempBuffer.begin() + conversionSpecs.len_cvt);
-  return LoadedSound{std::move(convertedBuffer)};
-#else
-  return LoadedSound{std::move(buffer)};
-#endif
 }
 
 

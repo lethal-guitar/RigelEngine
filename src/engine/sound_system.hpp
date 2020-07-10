@@ -56,8 +56,6 @@ private:
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
 
-  LoadedSound prepareSound(const data::AudioBuffer& buffer);
-
   std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
 };
