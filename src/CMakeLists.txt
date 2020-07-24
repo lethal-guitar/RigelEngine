@@ -319,8 +319,6 @@ add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    ${3rd_party_path}/entityx
-
     ${3rd_party_path}/glm
     ${3rd_party_path}/nlohmann
 
