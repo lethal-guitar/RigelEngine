@@ -40,9 +40,11 @@ TextEntryWidget::TextEntryWidget(
   const int posX,
   const int posY,
   const int maxTextLength,
-  const Style textStyle
+  const Style textStyle,
+  const std::string_view initialText
 )
-  : mpUiRenderer(pUiRenderer)
+  : mText(initialText)
+  , mpUiRenderer(pUiRenderer)
   , mPosX(posX)
   , mPosY(posY)
   , mMaxTextLength(maxTextLength)

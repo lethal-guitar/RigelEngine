@@ -43,7 +43,8 @@ public:
     int posX,
     int posY,
     int maxTextLength,
-    Style textStyle);
+    Style textStyle,
+    std::string_view initialText = "");
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);

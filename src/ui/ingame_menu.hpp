@@ -124,7 +124,10 @@ private:
   };
 
   struct SavedGameNameEntry {
-    SavedGameNameEntry(GameMode::Context context, const int slotIndex);
+    SavedGameNameEntry(
+      GameMode::Context context,
+      int slotIndex,
+      std::string_view initialName);
 
     void updateAndRender(engine::TimeDelta dt) {
       mTextEntryWidget.updateAndRender(dt);
@@ -165,7 +168,6 @@ private:
   void fadeout();
 
   void onRestoreGameMenuFinished(const ExecutionResult& result);
-  void onSaveGameMenuFinished(const ExecutionResult& result);
   void saveGame(int slotIndex, std::string_view name);
   void handleMenuEnterEvent(const SDL_Event& event);
   void handleMenuActiveEvents();
