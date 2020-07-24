@@ -64,6 +64,7 @@ private:
 
   std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
+  std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
 };
 
 }

@@ -51,7 +51,7 @@ namespace rigel::engine {
 
 namespace {
 
-const auto SAMPLE_RATE = 44100;
+const auto DESIRED_SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
 
 data::AudioBuffer resampleAudio(
@@ -88,9 +88,9 @@ data::AudioBuffer resampleAudio(
 }
 
 
-void appendRampToZero(data::AudioBuffer& buffer) {
+void appendRampToZero(data::AudioBuffer& buffer, const int sampleRate) {
   // Roughly 10 ms of linear ramp
-  const auto rampLength = (SAMPLE_RATE / 100);
+  const auto rampLength = (sampleRate / 100);
 
   buffer.mSamples.reserve(buffer.mSamples.size() + rampLength - 1);
   const auto lastSample = buffer.mSamples.back();
@@ -103,50 +103,58 @@ void appendRampToZero(data::AudioBuffer& buffer) {
 }
 
 
-data::AudioBuffer convertBuffer(const data::AudioBuffer& original) {
-  auto buffer = resampleAudio(original, SAMPLE_RATE);
+data::AudioBuffer prepareBuffer(
+  const data::AudioBuffer& original,
+  const int sampleRate
+) {
+  auto buffer = resampleAudio(original, sampleRate);
   if (buffer.mSamples.back() != 0) {
     // Prevent clicks/pops with samples that don't return to 0 at the end
     // by adding a small linear ramp leading back to zero.
-    appendRampToZero(buffer);
+    appendRampToZero(buffer, sampleRate);
   }
 
-#if MIX_DEFAULT_FORMAT != AUDIO_S16LSB
-  SDL_AudioSpec originalSoundSpec{
-    buffer.mSampleRate,
-    AUDIO_S16LSB,
-    1,
-    0, 0, 0, 0, nullptr};
+  return buffer;
+}
+
+
+RawBuffer convertBuffer(
+  const data::AudioBuffer& buffer,
+  const std::uint16_t audioFormat
+) {
   SDL_AudioCVT conversionSpecs;
   SDL_BuildAudioCVT(
     &conversionSpecs,
     AUDIO_S16LSB, 1, buffer.mSampleRate,
-    MIX_DEFAULT_FORMAT, 1, SAMPLE_RATE);
+    audioFormat, 1, buffer.mSampleRate);
 
-  conversionSpecs.len = static_cast<int>(
-    buffer.mSamples.size() * 2);
-  std::vector<data::Sample> tempBuffer(
-    conversionSpecs.len * conversionSpecs.len_mult);
-  conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
-  std::copy(
-    buffer.mSamples.begin(), buffer.mSamples.end(), tempBuffer.begin());
+  const auto sizeInBytes = buffer.mSamples.size() * sizeof(std::int16_t);
+  auto converted = RawBuffer(sizeInBytes * conversionSpecs.len_mult);
+  std::memcpy(converted.data(), buffer.mSamples.data(), sizeInBytes);
 
+  conversionSpecs.len = static_cast<int>(sizeInBytes);
+  conversionSpecs.buf = converted.data();
   SDL_ConvertAudio(&conversionSpecs);
 
-  data::AudioBuffer convertedBuffer{SAMPLE_RATE};
-  convertedBuffer.mSamples.insert(
-    convertedBuffer.mSamples.end(),
-    tempBuffer.begin(),
-    tempBuffer.begin() + conversionSpecs.len_cvt);
-  return convertedBuffer;
-#else
-  return buffer;
-#endif
+  return converted;
 }
 
 
 auto idToIndex(const data::SoundId id) {
   return static_cast<int>(id);
+}
+
+
+void simpleMusicCallback(
+  void* pUserData,
+  Uint8* pOutBuffer,
+  const int bytesRequired
+) {
+  auto pPlayer = static_cast<ImfPlayer*>(pUserData);
+  auto pDestination = reinterpret_cast<std::int16_t*>(pOutBuffer);
+  const auto samplesRequired = bytesRequired / sizeof(std::int16_t);
+
+  pPlayer->render(pDestination, samplesRequired);
 }
 
 
@@ -158,6 +166,43 @@ RawBuffer asRawBuffer(const data::AudioBuffer& buffer) {
 }
 
 }
+
+
+struct SoundSystem::MusicConversionWrapper {
+  MusicConversionWrapper(
+    ImfPlayer* pPlayer,
+    const std::uint16_t audioFormat,
+    const int sampleRate)
+    : mpPlayer(pPlayer)
+    , mBytesPerSample(SDL_AUDIO_BITSIZE(audioFormat) / 8)
+  {
+    SDL_BuildAudioCVT(
+      &mConversionSpecs,
+      AUDIO_S16LSB, 1, sampleRate,
+      audioFormat, 1, sampleRate);
+
+    const auto bufferSize =
+      BUFFER_SIZE * mBytesPerSample * mConversionSpecs.len_mult;
+    mpBuffer = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[bufferSize]};
+    mConversionSpecs.buf = mpBuffer.get();
+  }
+
+  void render(Uint8* pOutBuffer, int bytesRequired) {
+    auto pBuffer = mpBuffer.get();
+    const auto samplesToRender = bytesRequired / mBytesPerSample;
+    mpPlayer->render(reinterpret_cast<std::int16_t*>(pBuffer), samplesToRender);
+
+    mConversionSpecs.len = bytesRequired;
+    SDL_ConvertAudio(&mConversionSpecs);
+    std::memcpy(pOutBuffer, pBuffer, mConversionSpecs.len_cvt);
+  }
+
+  SDL_AudioCVT mConversionSpecs;
+  std::unique_ptr<std::uint8_t[]> mpBuffer;
+  ImfPlayer* mpPlayer;
+  int mBytesPerSample;
+};
+
 
 
 SoundSystem::LoadedSound::LoadedSound(const data::AudioBuffer& buffer)
@@ -175,28 +220,43 @@ SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
 
 
 SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
-  : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
 {
   sdl_mixer::check(Mix_OpenAudio(
-    SAMPLE_RATE,
-    MIX_DEFAULT_FORMAT,
+    DESIRED_SAMPLE_RATE,
+    AUDIO_S16LSB,
     1, // mono
     BUFFER_SIZE));
 
-  Mix_HookMusic(
-    [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
-      auto pPlayer = static_cast<ImfPlayer*>(pUserData);
-      auto pDestination = reinterpret_cast<std::int16_t*>(pOutBuffer);
-      const auto samplesRequired = bytesRequired / sizeof(std::int16_t);
+  int sampleRate = 0;
+  std::uint16_t audioFormat = 0;
+  {
+    int numChannels;
+    Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
+  }
 
-      pPlayer->render(pDestination, samplesRequired);
-    },
-    mpMusicPlayer.get());
+  mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
+
+  if (audioFormat == AUDIO_S16LSB) {
+    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
+  } else {
+    mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
+      mpMusicPlayer.get(), audioFormat, sampleRate);
+    Mix_HookMusic(
+      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
+        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
+        pWrapper->render(pOutBuffer, bytesRequired);
+      },
+      mpMusicConversionWrapper.get());
+  }
 
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
-    mSounds[idToIndex(id)] = LoadedSound{convertBuffer(resources.loadSound(id))};
+    auto buffer = prepareBuffer(resources.loadSound(id), sampleRate);
+
+    mSounds[idToIndex(id)] = audioFormat == AUDIO_S16LSB
+      ? LoadedSound{std::move(buffer)}
+      : LoadedSound{convertBuffer(buffer, audioFormat)};
   });
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
