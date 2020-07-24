@@ -110,28 +110,10 @@ else()
 endif()
 
 
-# 3rd party build targets
+# Build targets
 ###############################################################################
 
-set(ENTITYX_BUILD_SHARED false CACHE INTERNAL "")
-set(ENTITYX_BUILD_TESTING false CACHE INTERNAL "")
-set(ENTITYX_DT_TYPE double CACHE INTERNAL "")
-set(ENTITYX_RUN_BENCHMARKS false CACHE INTERNAL "")
-set(ENTITYX_MAX_COMPONENTS 64 CACHE INTERNAL "")
-
-add_subdirectory(3rd_party/dbopl)
-add_subdirectory(3rd_party/entityx)
-add_subdirectory(3rd_party/glad)
-add_subdirectory(3rd_party/speex_resampler)
-add_subdirectory(3rd_party/imgui)
-add_subdirectory(3rd_party/imgui-filebrowser)
-
-rigel_disable_warnings(entityx)
-
-
-# RigelEngine build targets
-###############################################################################
-
+add_subdirectory(3rd_party)
 add_subdirectory(src)
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
