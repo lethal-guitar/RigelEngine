@@ -311,16 +311,11 @@ set(core_sources
 )
 
 
-set(3rd_party_path ${CMAKE_SOURCE_DIR}/3rd_party)
-
-
 # Core library
 add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    ${3rd_party_path}/glm
-    ${3rd_party_path}/nlohmann
 )
 target_link_libraries(rigel_core
     PUBLIC
@@ -330,7 +325,9 @@ target_link_libraries(rigel_core
     Boost::boost
     dear_imgui
     imgui-filebrowser
+    nlohmann-json
     glad
+    glm
 
     PRIVATE
     std::filesystem
