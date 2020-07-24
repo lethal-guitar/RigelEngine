@@ -13,12 +13,4 @@ target_compile_definitions(speex_resampler PUBLIC
     FLOATING_POINT
 )
 
-if (MSVC)
-    target_compile_options(speex_resampler PRIVATE
-        /w
-    )
-elseif (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-    target_compile_options(speex_resampler PRIVATE
-        -w
-    )
-endif()
+rigel_disable_warnings(speex_resampler)

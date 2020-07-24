@@ -126,9 +126,7 @@ add_subdirectory(3rd_party/speex_resampler)
 add_subdirectory(3rd_party/imgui)
 add_subdirectory(3rd_party/imgui-filebrowser)
 
-target_compile_options(entityx PRIVATE
-    -w
-)
+rigel_disable_warnings(entityx)
 
 
 # RigelEngine build targets
