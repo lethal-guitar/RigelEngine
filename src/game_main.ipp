@@ -125,8 +125,8 @@ private:
 private:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
-  engine::SoundSystem mSoundSystem;
   loader::ResourceLoader mResources;
+  std::unique_ptr<engine::SoundSystem> mpSoundSystem;
   bool mIsShareWareVersion;
 
   std::optional<FpsLimiter> mFpsLimiter;
@@ -134,8 +134,6 @@ private:
   std::uint8_t mAlphaMod = 255;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;
-
-  std::vector<engine::SoundSystem::SoundHandle> mSoundsById;
 
   bool mIsRunning;
   bool mIsMinimized;

@@ -484,6 +484,9 @@ Renderer::Renderer(SDL_Window* pWindow)
   onRenderTargetChanged();
 
   setColorModulation({255, 255, 255, 255});
+
+  clear();
+  swapBuffers();
 }
 
 

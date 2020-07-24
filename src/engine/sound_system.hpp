@@ -18,11 +18,14 @@
 
 #include "data/audio_buffer.hpp"
 #include "data/song.hpp"
+#include "data/sound_ids.hpp"
 #include "sdl_utils/ptr.hpp"
 
 #include <array>
 #include <memory>
-#include <unordered_map>
+
+
+namespace rigel::loader { class ResourceLoader; }
 
 
 namespace rigel::engine {
@@ -30,37 +33,62 @@ namespace rigel::engine {
 class ImfPlayer;
 
 
+using RawBuffer = std::vector<std::uint8_t>;
+
+
+/** Provides sound and music playback functionality
+ *
+ * This class implements sound and music playback. When constructed, it opens
+ * an audio device and loads all sound effects from the game's data files. From
+ * that point on, sound effects and music playback can be triggered at any time
+ * using the class' interface. Sound and music volume can also be adjusted.
+ */
 class SoundSystem {
 public:
-  using SoundHandle = int;
-
-  SoundSystem();
+  explicit SoundSystem(const loader::ResourceLoader& resources);
   ~SoundSystem();
 
-  SoundHandle addSound(const data::AudioBuffer& buffer);
-
+  /** Start playing given music data
+   *
+   * Starts playback of the song stored in the given Song object, and returns
+   * immediately. Music plays in parallel to any sound effects.
+   */
   void playSong(data::Song&& song);
+
+  /** Stop playing current song (if playing) */
   void stopMusic() const;
 
-  void playSound(SoundHandle handle) const;
-  void stopSound(SoundHandle handle) const;
+  /** Start playing specified sound effect
+   *
+   * Starts playback of the sound effect specified by the given sound ID, and
+   * returns immediately. The sound effect will play in parallel to any other
+   * currently playing sound effects, unless the same sound ID is already
+   * playing. In the latter case, the already playing sound effect will be cut
+   * off and playback will restart from the beginning.
+   */
+  void playSound(data::SoundId id) const;
+
+  /** Stop playing specified sound effect (if currently playing) */
+  void stopSound(data::SoundId id) const;
 
   void setMusicVolume(float volume);
   void setSoundVolume(float volume);
 
 private:
-  static const int MAX_CONCURRENT_SOUNDS = 64;
+  struct MusicConversionWrapper;
 
   struct LoadedSound {
-    data::AudioBuffer mBuffer;
+    LoadedSound() = default;
+    explicit LoadedSound(const data::AudioBuffer& buffer);
+    explicit LoadedSound(RawBuffer buffer);
+
+    RawBuffer mData;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
 
-  SoundHandle addConvertedSound(data::AudioBuffer buffer);
-
+  std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
-  std::array<LoadedSound, MAX_CONCURRENT_SOUNDS> mSounds;
-  SoundHandle mNextHandle = 0;
+  std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
 };
 
 }

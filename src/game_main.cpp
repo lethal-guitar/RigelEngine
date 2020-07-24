@@ -356,6 +356,16 @@ Game::Game(
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
+  , mpSoundSystem([this]() {
+      std::unique_ptr<engine::SoundSystem> pResult;
+      try {
+        pResult = std::make_unique<engine::SoundSystem>(mResources);
+      } catch (const std::exception& ex) {
+        std::cerr << "WARNING: Failed to initialize audio: " << ex.what() << '\n';
+      }
+
+      return pResult;
+    }())
   , mIsShareWareVersion([this]() {
       // The registered version has 24 additional level files, and a
       // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
@@ -384,13 +394,6 @@ Game::Game(
       &mRenderer)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
-  mRenderer.clear();
-  mRenderer.swapBuffers();
-
-  data::forEachSoundId([this](const auto id) {
-    mSoundsById.emplace_back(mSoundSystem.addSound(mResources.loadSound(id)));
-  });
-
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
@@ -638,24 +641,26 @@ void Game::applyChangedOptions() {
     mFpsLimiter = createLimiter(currentOptions);
   }
 
-  if (
-    currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
-    currentOptions.mMusicOn != mPreviousOptions.mMusicOn
-  ) {
-    const auto newVolume = currentOptions.mMusicOn
-      ? currentOptions.mMusicVolume
-      : 0.0f;
-    mSoundSystem.setMusicVolume(newVolume);
-  }
+  if (mpSoundSystem) {
+    if (
+      currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
+      currentOptions.mMusicOn != mPreviousOptions.mMusicOn
+    ) {
+      const auto newVolume = currentOptions.mMusicOn
+        ? currentOptions.mMusicVolume
+        : 0.0f;
+      mpSoundSystem->setMusicVolume(newVolume);
+    }
 
-  if (
-    currentOptions.mSoundVolume != mPreviousOptions.mSoundVolume ||
-    currentOptions.mSoundOn != mPreviousOptions.mSoundOn
-  ) {
-    const auto newVolume = currentOptions.mSoundOn
-      ? currentOptions.mSoundVolume
-      : 0.0f;
-    mSoundSystem.setSoundVolume(newVolume);
+    if (
+      currentOptions.mSoundVolume != mPreviousOptions.mSoundVolume ||
+      currentOptions.mSoundOn != mPreviousOptions.mSoundOn
+    ) {
+      const auto newVolume = currentOptions.mSoundOn
+        ? currentOptions.mSoundVolume
+        : 0.0f;
+      mpSoundSystem->setSoundVolume(newVolume);
+    }
   }
 
   mPreviousOptions = mpUserProfile->mOptions;
@@ -695,30 +700,30 @@ void Game::fadeInScreen() {
 
 
 void Game::playSound(const data::SoundId id) {
-  const auto index = static_cast<std::size_t>(id);
-  assert(index < mSoundsById.size());
-
-  const auto handle = mSoundsById[index];
-  mSoundSystem.playSound(handle);
+  if (mpSoundSystem) {
+    mpSoundSystem->playSound(id);
+  }
 }
 
 
 void Game::stopSound(const data::SoundId id) {
-  const auto index = static_cast<std::size_t>(id);
-  assert(index < mSoundsById.size());
-
-  const auto handle = mSoundsById[index];
-  mSoundSystem.stopSound(handle);
+  if (mpSoundSystem) {
+    mpSoundSystem->stopSound(id);
+  }
 }
 
 
 void Game::playMusic(const std::string& name) {
-  mSoundSystem.playSong(mResources.loadMusic(name));
+  if (mpSoundSystem) {
+    mpSoundSystem->playSong(mResources.loadMusic(name));
+  }
 }
 
 
 void Game::stopMusic() {
-  mSoundSystem.stopMusic();
+  if (mpSoundSystem) {
+    mpSoundSystem->stopMusic();
+  }
 }
 
 

@@ -19,30 +19,40 @@
 #include "base/math_tools.hpp"
 #include "data/game_options.hpp"
 #include "engine/imf_player.hpp"
+#include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
 
 #include <speex/speex_resampler.h>
 
 #include <cassert>
+#include <cstring>
+#include <iostream>
 #include <utility>
+
+
+namespace rigel::sdl_mixer {
+
+namespace {
+
+void check(int result) {
+  using namespace std::string_literals;
+
+  if (result != 0) {
+    throw std::runtime_error{"SDL_mixer error: "s + Mix_GetError()};
+  }
+}
+
+}
+
+}
+
 
 namespace rigel::engine {
 
 namespace {
 
-using SoundHandle = SoundSystem::SoundHandle;
-
-const auto SAMPLE_RATE = 44100;
+const auto DESIRED_SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
-
-
-sdl_utils::Ptr<Mix_Chunk> createMixChunk(data::AudioBuffer& buffer) {
-  const auto bufferSize = buffer.mSamples.size() * sizeof(data::Sample);
-  return sdl_utils::Ptr<Mix_Chunk>(
-    Mix_QuickLoad_RAW(reinterpret_cast<Uint8*>(buffer.mSamples.data()),
-    static_cast<Uint32>(bufferSize)));
-}
-
 
 data::AudioBuffer resampleAudio(
   const data::AudioBuffer& buffer,
@@ -78,9 +88,9 @@ data::AudioBuffer resampleAudio(
 }
 
 
-void appendRampToZero(data::AudioBuffer& buffer) {
+void appendRampToZero(data::AudioBuffer& buffer, const int sampleRate) {
   // Roughly 10 ms of linear ramp
-  const auto rampLength = (SAMPLE_RATE / 100);
+  const auto rampLength = (sampleRate / 100);
 
   buffer.mSamples.reserve(buffer.mSamples.size() + rampLength - 1);
   const auto lastSample = buffer.mSamples.back();
@@ -92,28 +102,200 @@ void appendRampToZero(data::AudioBuffer& buffer) {
   }
 }
 
+
+// Prepares the given audio buffer to be loaded into a Mix_Chunk. This includes
+// resampling to the given sample rate and making sure the buffer ends in a
+// zero value to avoid clicks/pops.
+data::AudioBuffer prepareBuffer(
+  const data::AudioBuffer& original,
+  const int sampleRate
+) {
+  auto buffer = resampleAudio(original, sampleRate);
+  if (buffer.mSamples.back() != 0) {
+    // Prevent clicks/pops with samples that don't return to 0 at the end
+    // by adding a small linear ramp leading back to zero.
+    appendRampToZero(buffer, sampleRate);
+  }
+
+  return buffer;
 }
 
 
-SoundSystem::SoundSystem()
-  : mpMusicPlayer(std::make_unique<ImfPlayer>(SAMPLE_RATE))
+// Converts the given audio buffer into the given audio format and returns it
+// as a raw buffer
+RawBuffer convertBuffer(
+  const data::AudioBuffer& buffer,
+  const std::uint16_t audioFormat
+) {
+  SDL_AudioCVT conversionSpecs;
+  SDL_BuildAudioCVT(
+    &conversionSpecs,
+    AUDIO_S16LSB, 1, buffer.mSampleRate,
+    audioFormat, 1, buffer.mSampleRate);
+
+  const auto sizeInBytes = buffer.mSamples.size() * sizeof(std::int16_t);
+  auto converted = RawBuffer(sizeInBytes * conversionSpecs.len_mult);
+  std::memcpy(converted.data(), buffer.mSamples.data(), sizeInBytes);
+
+  conversionSpecs.len = static_cast<int>(sizeInBytes);
+  conversionSpecs.buf = converted.data();
+  SDL_ConvertAudio(&conversionSpecs);
+
+  return converted;
+}
+
+
+auto idToIndex(const data::SoundId id) {
+  return static_cast<int>(id);
+}
+
+
+void simpleMusicCallback(
+  void* pUserData,
+  Uint8* pOutBuffer,
+  const int bytesRequired
+) {
+  auto pPlayer = static_cast<ImfPlayer*>(pUserData);
+  auto pDestination = reinterpret_cast<std::int16_t*>(pOutBuffer);
+  const auto samplesRequired = bytesRequired / sizeof(std::int16_t);
+
+  pPlayer->render(pDestination, samplesRequired);
+}
+
+
+// Turns the given audio buffer into a raw buffer without any conversion
+RawBuffer asRawBuffer(const data::AudioBuffer& buffer) {
+  const auto sizeInBytes = buffer.mSamples.size() * sizeof(data::Sample);
+  auto rawBuffer = RawBuffer(sizeInBytes);
+  std::memcpy(rawBuffer.data(), buffer.mSamples.data(), sizeInBytes);
+  return rawBuffer;
+}
+
+}
+
+
+struct SoundSystem::MusicConversionWrapper {
+  MusicConversionWrapper(
+    ImfPlayer* pPlayer,
+    const std::uint16_t audioFormat,
+    const int sampleRate)
+    : mpPlayer(pPlayer)
+    , mBytesPerSample(SDL_AUDIO_BITSIZE(audioFormat) / 8)
+  {
+    SDL_BuildAudioCVT(
+      &mConversionSpecs,
+      AUDIO_S16LSB, 1, sampleRate,
+      audioFormat, 1, sampleRate);
+
+    const auto bufferSize =
+      BUFFER_SIZE * mBytesPerSample * mConversionSpecs.len_mult;
+    mpBuffer = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[bufferSize]};
+    mConversionSpecs.buf = mpBuffer.get();
+  }
+
+  void render(Uint8* pOutBuffer, int bytesRequired) {
+    auto pBuffer = mpBuffer.get();
+    const auto samplesToRender = bytesRequired / mBytesPerSample;
+    mpPlayer->render(reinterpret_cast<std::int16_t*>(pBuffer), samplesToRender);
+
+    mConversionSpecs.len = bytesRequired;
+    SDL_ConvertAudio(&mConversionSpecs);
+    std::memcpy(pOutBuffer, pBuffer, mConversionSpecs.len_cvt);
+  }
+
+  SDL_AudioCVT mConversionSpecs;
+  std::unique_ptr<std::uint8_t[]> mpBuffer;
+  ImfPlayer* mpPlayer;
+  int mBytesPerSample;
+};
+
+
+
+SoundSystem::LoadedSound::LoadedSound(const data::AudioBuffer& buffer)
+  : LoadedSound(asRawBuffer(buffer))
 {
-  sdl_utils::check(Mix_OpenAudio(
-      SAMPLE_RATE,
-      MIX_DEFAULT_FORMAT,
-      1, // mono
-      BUFFER_SIZE));
-  Mix_HookMusic(
-    [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
-      auto pPlayer = static_cast<ImfPlayer*>(pUserData);
-      auto pDestination = reinterpret_cast<std::int16_t*>(pOutBuffer);
-      const auto samplesRequired = bytesRequired / sizeof(std::int16_t);
+}
 
-      pPlayer->render(pDestination, samplesRequired);
-    },
-    mpMusicPlayer.get());
 
-  Mix_AllocateChannels(MAX_CONCURRENT_SOUNDS);
+SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
+  : mData(std::move(buffer))
+  , mpMixChunk(sdl_utils::Ptr<Mix_Chunk>{
+      Mix_QuickLoad_RAW(mData.data(), static_cast<Uint32>(mData.size()))})
+{
+}
+
+
+SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
+{
+  sdl_mixer::check(Mix_OpenAudio(
+    DESIRED_SAMPLE_RATE,
+    AUDIO_S16LSB,
+    1, // mono
+    BUFFER_SIZE));
+
+  int sampleRate = 0;
+  std::uint16_t audioFormat = 0;
+  {
+    int numChannels;
+    Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
+  }
+
+  mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
+
+  // Our music is in a format which SDL_mixer does not understand (IMF format
+  // aka raw AdLib commands). Therefore, we cannot use any of the high-level
+  // music playback functionality offered by the library. Instead, we register
+  // our own callback handler and then use an AdLib emulator to generate audio
+  // from the music data (ImfPlayer class).
+  //
+  // Once we add the ability to override the original music with custom high
+  // fidelity music files in modern formats, this will have to be extended to
+  // alternate between IMF playback and playing back other formats.
+  //
+  // The ImfPlayer class only knows how to produce audio data in 16-bit integer
+  // format (AUDIO_S16LSB). If the audio device uses that same audio format, we
+  // can directly write the player's output into the output buffer (using
+  // simpleMusicCallback). But if the audio device uses a different format, we
+  // have to convert from the player's format into the device format. That's
+  // handled by the MusicConversionWrapper class.
+  if (audioFormat == AUDIO_S16LSB) {
+    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
+  } else {
+    mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
+      mpMusicPlayer.get(), audioFormat, sampleRate);
+    Mix_HookMusic(
+      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
+        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
+        pWrapper->render(pOutBuffer, bytesRequired);
+      },
+      mpMusicConversionWrapper.get());
+  }
+
+  // For sound playback, we want to be able to play as many sound effects in
+  // parallel as possible. In the original game, the number of available sound
+  // effects is hardcoded into the executable, with sounds being identified by
+  // a numerical index (sound ID). This allows us to implement a very simple
+  // scheme: We allocate as many mixer channels as there are sound effects. We
+  // then create one playable audio buffer (aka Mix_Chunk) for each sound
+  // effect, and use its sound ID to determine which mixer channel it should be
+  // played on. This way, all possible sound effects can play simultaneously,
+  // but when the same sound effect is triggered multiple times in a row, it
+  // results in the sound being cut off and played again from the beginning as
+  // in the original game.
+  //
+  // Similarly to the music, the resource loader can only produce audio samples
+  // in AUDIO_S16LSB format. Consequently, we also need to convert if the audio
+  // device is using a different format, but we can directly load our data into
+  // Mix_Chunks if the format matches.
+  Mix_AllocateChannels(data::NUM_SOUND_IDS);
+
+  data::forEachSoundId([&](const auto id) {
+    auto buffer = prepareBuffer(resources.loadSound(id), sampleRate);
+
+    mSounds[idToIndex(id)] = audioFormat == AUDIO_S16LSB
+      ? LoadedSound{std::move(buffer)}
+      : LoadedSound{convertBuffer(buffer, audioFormat)};
+  });
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
   setSoundVolume(data::SOUND_VOLUME_DEFAULT);
@@ -132,59 +314,6 @@ SoundSystem::~SoundSystem() {
 }
 
 
-SoundHandle SoundSystem::addSound(const data::AudioBuffer& original) {
-  auto buffer = resampleAudio(original, SAMPLE_RATE);
-  if (buffer.mSamples.back() != 0) {
-    // Prevent clicks/pops with samples that don't return to 0 at the end
-    // by adding a small linear ramp leading back to zero.
-    appendRampToZero(buffer);
-  }
-
-#if MIX_DEFAULT_FORMAT != AUDIO_S16LSB
-  SDL_AudioSpec originalSoundSpec{
-    buffer.mSampleRate,
-    AUDIO_S16LSB,
-    1,
-    0, 0, 0, 0, nullptr};
-  SDL_AudioCVT conversionSpecs;
-  SDL_BuildAudioCVT(
-    &conversionSpecs,
-    AUDIO_S16LSB, 1, buffer.mSampleRate,
-    MIX_DEFAULT_FORMAT, 1, SAMPLE_RATE);
-
-  conversionSpecs.len = static_cast<int>(
-    buffer.mSamples.size() * 2);
-  std::vector<data::Sample> tempBuffer(
-    conversionSpecs.len * conversionSpecs.len_mult);
-  conversionSpecs.buf = reinterpret_cast<Uint8*>(tempBuffer.data());
-  std::copy(
-    buffer.mSamples.begin(), buffer.mSamples.end(), tempBuffer.begin());
-
-  SDL_ConvertAudio(&conversionSpecs);
-
-  data::AudioBuffer convertedBuffer{SAMPLE_RATE};
-  convertedBuffer.mSamples.insert(
-    convertedBuffer.mSamples.end(),
-    tempBuffer.begin(),
-    tempBuffer.begin() + conversionSpecs.len_cvt);
-  return addConvertedSound(convertedBuffer);
-#else
-  return addConvertedSound(buffer);
-#endif
-}
-
-
-SoundHandle SoundSystem::addConvertedSound(data::AudioBuffer buffer) {
-  assert(mNextHandle < MAX_CONCURRENT_SOUNDS);
-
-  const auto assignedHandle = mNextHandle++;
-  auto& sound = mSounds[assignedHandle];
-  sound.mBuffer = std::move(buffer);
-  sound.mpMixChunk = createMixChunk(sound.mBuffer);
-  return assignedHandle;
-}
-
-
 void SoundSystem::playSong(data::Song&& song) {
   mpMusicPlayer->playSong(std::move(song));
 }
@@ -195,15 +324,15 @@ void SoundSystem::stopMusic() const {
 }
 
 
-void SoundSystem::playSound(const SoundHandle handle) const {
-  assert(handle < int(mSounds.size()));
-  Mix_PlayChannel(handle, mSounds[handle].mpMixChunk.get(), 0);
+void SoundSystem::playSound(const data::SoundId id) const {
+  const auto index = idToIndex(id);
+  Mix_PlayChannel(index, mSounds[index].mpMixChunk.get(), 0);
 }
 
 
-void SoundSystem::stopSound(const SoundHandle handle) const {
-  assert(handle < int(mSounds.size()));
-  Mix_HaltChannel(handle);
+void SoundSystem::stopSound(const data::SoundId id) const {
+  const auto index = idToIndex(id);
+  Mix_HaltChannel(index);
 }
 
 
