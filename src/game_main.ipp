@@ -126,7 +126,7 @@ private:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
   loader::ResourceLoader mResources;
-  engine::SoundSystem mSoundSystem;
+  std::unique_ptr<engine::SoundSystem> mpSoundSystem;
   bool mIsShareWareVersion;
 
   std::optional<FpsLimiter> mFpsLimiter;
