@@ -359,6 +359,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
       rigel_core
     )
     target_link_options(${main_exe_name} PRIVATE
+        "SHELL:-s WASM=1"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
         "SHELL:-s MIN_WEBGL_VERSION=1"
         "SHELL:-s MAX_WEBGL_VERSION=2"
