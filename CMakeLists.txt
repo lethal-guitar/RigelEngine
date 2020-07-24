@@ -34,7 +34,10 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         message(STATUS "Bundling game data from path: ${WEBASSEMBLY_GAME_PATH}")
     endif()
 
-    add_compile_options(-O3)
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+        # Emscripten's CMake toolchain defaults to O2, but we want O3
+        add_compile_options(-O3)
+    endif()
 
     add_library(SDL2::Core INTERFACE IMPORTED)
     set_target_properties(SDL2::Core PROPERTIES
