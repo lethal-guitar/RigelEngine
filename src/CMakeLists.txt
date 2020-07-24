@@ -354,11 +354,11 @@ endif()
 
 # Main executable
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-    add_executable(${main_exe_name} emscripten_main.cpp)
-    target_link_libraries(${main_exe_name} PRIVATE
+    add_executable(RigelEngine emscripten_main.cpp)
+    target_link_libraries(RigelEngine PRIVATE
       rigel_core
     )
-    target_link_options(${main_exe_name} PRIVATE
+    target_link_options(RigelEngine PRIVATE
         "SHELL:-s WASM=1"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
         "SHELL:-s MIN_WEBGL_VERSION=1"
@@ -373,8 +373,8 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         ".html"
     )
 else()
-    add_executable(${main_exe_name} main.cpp)
-    target_link_libraries(${main_exe_name} PRIVATE
+    add_executable(RigelEngine main.cpp)
+    target_link_libraries(RigelEngine PRIVATE
         SDL2::Main
         rigel_core
         Boost::boost
