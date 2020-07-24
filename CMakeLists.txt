@@ -19,6 +19,7 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 ###############################################################################
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+include("${CMAKE_SOURCE_DIR}/cmake/rigel.cmake")
 
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
@@ -37,27 +38,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         add_compile_options(-O3)
     endif()
 
-    add_library(SDL2::Core INTERFACE IMPORTED)
-    set_target_properties(SDL2::Core PROPERTIES
-        INTERFACE_COMPILE_OPTIONS
-        "SHELL:-s USE_SDL=2"
-        INTERFACE_LINK_OPTIONS
-        "SHELL:-s USE_SDL=2"
-    )
-
-    add_library(SDL2::Mixer INTERFACE IMPORTED)
-    set_target_properties(SDL2::Mixer PROPERTIES
-        INTERFACE_COMPILE_OPTIONS
-        "SHELL:-s USE_SDL_MIXER=2"
-        INTERFACE_LINK_OPTIONS
-        "SHELL:-s USE_SDL_MIXER=2"
-    )
-
-    add_library(Boost::boost INTERFACE IMPORTED)
-    set_target_properties(Boost::boost PROPERTIES
-        INTERFACE_COMPILE_OPTIONS
-        "SHELL:-s USE_BOOST_HEADERS=1"
-    )
+    rigel_define_wasm_targets_for_dependencies()
 else()
     set(Boost_USE_STATIC_LIBS ON)
     find_package(Boost 1.65 COMPONENTS program_options REQUIRED)
