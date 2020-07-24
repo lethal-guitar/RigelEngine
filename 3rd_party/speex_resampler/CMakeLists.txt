@@ -7,6 +7,10 @@ set(sources
 
 
 add_library(speex_resampler STATIC ${sources})
+target_include_directories(speex_resampler
+    INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 target_compile_definitions(speex_resampler PUBLIC
     OUTSIDE_SPEEX
     RANDOM_PREFIX=rigel

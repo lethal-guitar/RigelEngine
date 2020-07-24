@@ -321,9 +321,6 @@ target_include_directories(rigel_core
     "${CMAKE_CURRENT_SOURCE_DIR}"
     ${3rd_party_path}/glm
     ${3rd_party_path}/nlohmann
-
-    PRIVATE
-    ${3rd_party_path}/speex_resampler
 )
 target_link_libraries(rigel_core
     PUBLIC
