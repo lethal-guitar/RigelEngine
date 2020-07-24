@@ -36,15 +36,39 @@ class ImfPlayer;
 using RawBuffer = std::vector<std::uint8_t>;
 
 
+/** Provides sound and music playback functionality
+ *
+ * This class implements sound and music playback. When constructed, it opens
+ * an audio device and loads all sound effects from the game's data files. From
+ * that point on, sound effects and music playback can be triggered at any time
+ * using the class' interface. Sound and music volume can also be adjusted.
+ */
 class SoundSystem {
 public:
   explicit SoundSystem(const loader::ResourceLoader& resources);
   ~SoundSystem();
 
+  /** Start playing given music data
+   *
+   * Starts playback of the song stored in the given Song object, and returns
+   * immediately. Music plays in parallel to any sound effects.
+   */
   void playSong(data::Song&& song);
+
+  /** Stop playing current song (if playing) */
   void stopMusic() const;
 
+  /** Start playing specified sound effect
+   *
+   * Starts playback of the sound effect specified by the given sound ID, and
+   * returns immediately. The sound effect will play in parallel to any other
+   * currently playing sound effects, unless the same sound ID is already
+   * playing. In the latter case, the already playing sound effect will be cut
+   * off and playback will restart from the beginning.
+   */
   void playSound(data::SoundId id) const;
+
+  /** Stop playing specified sound effect (if currently playing) */
   void stopSound(data::SoundId id) const;
 
   void setMusicVolume(float volume);

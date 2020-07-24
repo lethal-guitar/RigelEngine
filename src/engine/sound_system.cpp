@@ -103,6 +103,9 @@ void appendRampToZero(data::AudioBuffer& buffer, const int sampleRate) {
 }
 
 
+// Prepares the given audio buffer to be loaded into a Mix_Chunk. This includes
+// resampling to the given sample rate and making sure the buffer ends in a
+// zero value to avoid clicks/pops.
 data::AudioBuffer prepareBuffer(
   const data::AudioBuffer& original,
   const int sampleRate
@@ -118,6 +121,8 @@ data::AudioBuffer prepareBuffer(
 }
 
 
+// Converts the given audio buffer into the given audio format and returns it
+// as a raw buffer
 RawBuffer convertBuffer(
   const data::AudioBuffer& buffer,
   const std::uint16_t audioFormat
@@ -158,6 +163,7 @@ void simpleMusicCallback(
 }
 
 
+// Turns the given audio buffer into a raw buffer without any conversion
 RawBuffer asRawBuffer(const data::AudioBuffer& buffer) {
   const auto sizeInBytes = buffer.mSamples.size() * sizeof(data::Sample);
   auto rawBuffer = RawBuffer(sizeInBytes);
@@ -236,6 +242,22 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
 
   mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
 
+  // Our music is in a format which SDL_mixer does not understand (IMF format
+  // aka raw AdLib commands). Therefore, we cannot use any of the high-level
+  // music playback functionality offered by the library. Instead, we register
+  // our own callback handler and then use an AdLib emulator to generate audio
+  // from the music data (ImfPlayer class).
+  //
+  // Once we add the ability to override the original music with custom high
+  // fidelity music files in modern formats, this will have to be extended to
+  // alternate between IMF playback and playing back other formats.
+  //
+  // The ImfPlayer class only knows how to produce audio data in 16-bit integer
+  // format (AUDIO_S16LSB). If the audio device uses that same audio format, we
+  // can directly write the player's output into the output buffer (using
+  // simpleMusicCallback). But if the audio device uses a different format, we
+  // have to convert from the player's format into the device format. That's
+  // handled by the MusicConversionWrapper class.
   if (audioFormat == AUDIO_S16LSB) {
     Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
   } else {
@@ -249,6 +271,22 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
       mpMusicConversionWrapper.get());
   }
 
+  // For sound playback, we want to be able to play as many sound effects in
+  // parallel as possible. In the original game, the number of available sound
+  // effects is hardcoded into the executable, with sounds being identified by
+  // a numerical index (sound ID). This allows us to implement a very simple
+  // scheme: We allocate as many mixer channels as there are sound effects. We
+  // then create one playable audio buffer (aka Mix_Chunk) for each sound
+  // effect, and use its sound ID to determine which mixer channel it should be
+  // played on. This way, all possible sound effects can play simultaneously,
+  // but when the same sound effect is triggered multiple times in a row, it
+  // results in the sound being cut off and played again from the beginning as
+  // in the original game.
+  //
+  // Similarly to the music, the resource loader can only produce audio samples
+  // in AUDIO_S16LSB format. Consequently, we also need to convert if the audio
+  // device is using a different format, but we can directly load our data into
+  // Mix_Chunks if the format matches.
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
