@@ -66,56 +66,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-if(MSVC)
-    add_compile_options(
-        /W4
-        /wd4100 # Unused parameter
-        /wd4503 # Decorated name length exceeded
-        /wd4800 # Forcing value to bool
-    )
-    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-
-    if (WARNINGS_AS_ERRORS)
-        add_compile_options(/WX)
-    endif()
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(
-        -Weverything
-        -Wno-unknown-warning-option
-        -Wno-c++98-compat
-        -Wno-c++98-compat-pedantic
-        -Wno-covered-switch-default
-        -Wno-exit-time-destructors
-        -Wno-missing-braces
-        -Wno-padded
-        -Wno-sign-conversion
-        -Wno-switch-enum
-        -Wno-unused-parameter
-        -Wno-unused-lambda-capture
-        -Wno-weak-vtables
-        -Wno-global-constructors
-        -Wno-float-equal
-        -Wno-double-promotion
-    )
-
-    if (WARNINGS_AS_ERRORS)
-        add_compile_options(-Werror)
-    endif()
-elseif(CMAKE_COMPILER_IS_GNUCXX)
-    add_compile_options(
-        -Wall
-        -Wextra
-        -pedantic
-        -Wno-maybe-uninitialized
-        -Wno-unused-parameter
-    )
-
-    if (WARNINGS_AS_ERRORS)
-        add_compile_options(-Werror)
-    endif()
-else()
-    message(FATAL_ERROR "Unrecognized compiler")
-endif()
+rigel_configure_compiler_warnings()
 
 
 # Build targets
