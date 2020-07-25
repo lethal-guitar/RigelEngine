@@ -57,8 +57,18 @@ if(MSVC)
         /Zc:__cplusplus
         /permissive-
         /MP
-        /W4
         /EHsc
+    )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(
+        -fcolor-diagnostics
+    )
+endif()
+
+
+if(MSVC)
+    add_compile_options(
+        /W4
         /wd4100 # Unused parameter
         /wd4503 # Decorated name length exceeded
         /wd4800 # Forcing value to bool
@@ -86,8 +96,6 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wno-global-constructors
         -Wno-float-equal
         -Wno-double-promotion
-
-        -fcolor-diagnostics
     )
 
     if (WARNINGS_AS_ERRORS)
