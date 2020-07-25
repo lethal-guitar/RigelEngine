@@ -66,13 +66,12 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-rigel_configure_compiler_warnings()
-
-
 # Build targets
 ###############################################################################
 
 add_subdirectory(3rd_party)
+
+rigel_configure_compiler_warnings()
 add_subdirectory(src)
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
