@@ -54,6 +54,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR gl_FragColor
 #define OUTPUT_COLOR_DECLARATION
 #define SET_POINT_SIZE(size) gl_PointSize = size;
+#define HIGHP highp
 
 precision mediump float;
 )shd";
@@ -76,6 +77,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR outputColor
 #define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
 #define SET_POINT_SIZE
+#define HIGHP
 )shd";
 #else
 const auto SHADER_PREAMBLE = R"shd(
@@ -88,6 +90,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR outputColor
 #define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
 #define SET_POINT_SIZE
+#define HIGHP
 )shd";
 #endif
 
@@ -95,10 +98,10 @@ const auto SHADER_PREAMBLE = R"shd(
 
 
 const auto VERTEX_SOURCE = R"shd(
-ATTRIBUTE vec2 position;
-ATTRIBUTE vec2 texCoord;
+ATTRIBUTE HIGHP vec2 position;
+ATTRIBUTE HIGHP vec2 texCoord;
 
-OUT vec2 texCoordFrag;
+OUT HIGHP vec2 texCoordFrag;
 
 uniform mat4 transform;
 
@@ -111,7 +114,7 @@ void main() {
 const auto FRAGMENT_SOURCE = R"shd(
 OUTPUT_COLOR_DECLARATION
 
-IN vec2 texCoordFrag;
+IN HIGHP vec2 texCoordFrag;
 
 uniform sampler2D textureData;
 uniform vec4 overlayColor;
