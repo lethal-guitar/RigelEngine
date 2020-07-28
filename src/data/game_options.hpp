@@ -42,7 +42,9 @@ enum class WindowMode {
   Windowed
 };
 
-#if defined(__APPLE__) || defined(RIGEL_USE_GL_ES)
+#if defined(__EMSCRIPTEN__)
+  constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Windowed;
+#elif defined(__APPLE__) || defined(RIGEL_USE_GL_ES)
   constexpr auto DEFAULT_WINDOW_MODE = WindowMode::ExclusiveFullscreen;
 #else
   constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Fullscreen;

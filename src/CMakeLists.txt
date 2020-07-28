@@ -364,13 +364,13 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         "SHELL:-s MAX_WEBGL_VERSION=2"
         "SHELL:-s FULL_ES2=1"
         "SHELL:--preload-file ${WEBASSEMBLY_GAME_PATH}/@/duke"
+        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/emscripten/shell.html"
         --no-heap-copy
     )
-
-    # copy html file for hosting wasm and generated js to destination
-    # a better solution will be to find out a way for emscripten to generate html file instead of js file
-    # and use --shell-file to provide a custom html template
-    file(COPY "${CMAKE_SOURCE_DIR}/emscripten/Rigel.html" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    set_target_properties(RigelEngine PROPERTIES
+        SUFFIX
+        ".html"
+    )
 else()
     add_executable(${main_exe_name} main.cpp)
     target_link_libraries(${main_exe_name} PRIVATE
