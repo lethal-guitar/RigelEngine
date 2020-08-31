@@ -202,33 +202,25 @@ void PlayerInteractionSystem::updatePlayerInteraction(
   };
 
 
-  auto performedInteraction = false;
-  es.each<Interactable, WorldPosition, BoundingBox>(
-    [&, this](
-      ex::Entity entity,
-      const Interactable& interactable,
-      const WorldPosition& pos,
-      const BoundingBox& bbox
-    ) {
-      if (performedInteraction) {
-        return;
-      }
+  ex::ComponentHandle<Interactable> interactable;
+  ex::ComponentHandle<WorldPosition> pos;
+  ex::ComponentHandle<BoundingBox> bbox;
+  for (auto entity : es.entities_with_components(interactable, pos, bbox)) {
+    const auto isHintMachine =
+      interactable->mType == InteractableType::HintMachine;
+    const auto playerHasHintGlobe =
+      mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
 
-      const auto isHintMachine =
-        interactable.mType == InteractableType::HintMachine;
-      const auto playerHasHintGlobe =
-        mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
-
-      const auto objectBounds = engine::toWorldSpace(bbox, pos);
-      if (isInRange(objectBounds, interactable.mType)) {
-        if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
-          performInteraction(es, entity, interactable.mType);
-          performedInteraction = true;
-        } else {
-          showTutorialMessage(tutorialFor(interactable.mType));
-        }
+    const auto objectBounds = engine::toWorldSpace(*bbox, *pos);
+    if (isInRange(objectBounds, interactable->mType)) {
+      if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
+        performInteraction(es, entity, interactable->mType);
+        break;
+      } else {
+        showTutorialMessage(tutorialFor(interactable->mType));
       }
-    });
+    }
+  }
 }
 
 
