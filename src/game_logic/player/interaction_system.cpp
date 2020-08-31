@@ -219,7 +219,6 @@ void PlayerInteractionSystem::updatePlayerInteraction(
     return;
   }
 
-  const auto interactionWanted = input.mInteract.mWasTriggered;
   if (auto entity = currentlyTouchedInteractable(es, mpPlayer)) {
     const auto type = entity.component<Interactable>()->mType;
     const auto isHintMachine = type == InteractableType::HintMachine;
@@ -228,7 +227,7 @@ void PlayerInteractionSystem::updatePlayerInteraction(
 
     // The hint machine activates on touch, all other interactables require
     // pressing the interact button/key.
-    if (interactionWanted || isHintMachine) {
+    if (input.mInteract.mWasTriggered || isHintMachine) {
       performInteraction(es, entity, type);
     }
   }
