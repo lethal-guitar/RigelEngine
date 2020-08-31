@@ -141,6 +141,47 @@ std::optional<base::Vector> findTeleporterTargetPosition(
 }
 
 
+ex::Entity currentlyTouchedInteractable(
+  entityx::EntityManager& es,
+  const Player* pPlayer
+) {
+  const auto worldSpacePlayerBounds = pPlayer->worldSpaceHitBox();
+
+  auto isInRange = [&](
+    const BoundingBox& objectBounds,
+    const components::InteractableType type
+  ) {
+    if (!worldSpacePlayerBounds.intersects(objectBounds)) {
+      return false;
+    }
+
+    if (type == InteractableType::Teleporter) {
+      const auto& playerPos = pPlayer->orientedPosition();
+      return
+        objectBounds.left() <= playerPos.x &&
+        objectBounds.left() + 3 >= playerPos.x &&
+        objectBounds.bottom() == playerPos.y &&
+        pPlayer->isInRegularState();
+    }
+
+    return true;
+  };
+
+
+  ex::ComponentHandle<Interactable> interactable;
+  ex::ComponentHandle<WorldPosition> pos;
+  ex::ComponentHandle<BoundingBox> bbox;
+  for (auto entity : es.entities_with_components(interactable, pos, bbox)) {
+    const auto objectBounds = engine::toWorldSpace(*bbox, *pos);
+    if (isInRange(objectBounds, interactable->mType)) {
+      return entity;
+    }
+  }
+
+  return {};
+}
+
+
 data::LevelHints loadHints(const loader::ResourceLoader& resources) {
   const auto text = resources.fileAsText("HELP.MNI");
   return loader::loadHintMessages(text);
@@ -178,57 +219,18 @@ void PlayerInteractionSystem::updatePlayerInteraction(
     return;
   }
 
-  const auto interactionWanted = input.mInteract.mWasTriggered;
-  const auto worldSpacePlayerBounds = mpPlayer->worldSpaceHitBox();
+  if (auto entity = currentlyTouchedInteractable(es, mpPlayer)) {
+    const auto type = entity.component<Interactable>()->mType;
+    const auto isHintMachine = type == InteractableType::HintMachine;
 
-  auto isInRange = [&](
-    const BoundingBox& objectBounds,
-    const components::InteractableType type
-  ) {
-    if (!worldSpacePlayerBounds.intersects(objectBounds)) {
-      return false;
+    showTutorialMessage(tutorialFor(type));
+
+    // The hint machine activates on touch, all other interactables require
+    // pressing the interact button/key.
+    if (input.mInteract.mWasTriggered || isHintMachine) {
+      performInteraction(es, entity, type);
     }
-
-    if (type == InteractableType::Teleporter) {
-      const auto& playerPos = mpPlayer->orientedPosition();
-      return
-        objectBounds.left() <= playerPos.x &&
-        objectBounds.left() + 3 >= playerPos.x &&
-        objectBounds.bottom() == playerPos.y &&
-        mpPlayer->isInRegularState();
-    }
-
-    return true;
-  };
-
-
-  auto performedInteraction = false;
-  es.each<Interactable, WorldPosition, BoundingBox>(
-    [&, this](
-      ex::Entity entity,
-      const Interactable& interactable,
-      const WorldPosition& pos,
-      const BoundingBox& bbox
-    ) {
-      if (performedInteraction) {
-        return;
-      }
-
-      const auto isHintMachine =
-        interactable.mType == InteractableType::HintMachine;
-      const auto playerHasHintGlobe =
-        mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
-
-      const auto objectBounds = engine::toWorldSpace(bbox, pos);
-      if (isInRange(objectBounds, interactable.mType)) {
-        if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
-          performInteraction(es, entity, interactable.mType);
-          performedInteraction = true;
-        } else {
-          showTutorialMessage(tutorialFor(interactable.mType));
-        }
-      }
-    });
+  }
 }
 
 
@@ -420,6 +422,10 @@ void PlayerInteractionSystem::activateKeyHole(
 
 
 void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
+  if (!mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe)) {
+    return;
+  }
+
   const auto machinePosition = *entity.component<WorldPosition>();
   mpPlayerModel->removeItem(data::InventoryItemType::SpecialHintGlobe);
   mpPlayerModel->giveScore(HINT_MACHINE_ACTIVATION_SCORE);

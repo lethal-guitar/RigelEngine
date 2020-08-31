@@ -521,6 +521,13 @@ void GameWorld::receive(const rigel::events::BossDestroyed& event) {
 
 
 void GameWorld::loadLevel() {
+  // In case we already have a world state, e.g. when restarting the level,
+  // it's important to destroy the old state first. This is because the
+  // event manager outlives the world state, and thus the old state would
+  // receive events triggered from the new state while the new state is being
+  // constructed. This can have unwanted side-effects.
+  mpState.reset();
+
   mpState = std::make_unique<WorldState>(
     mpServiceProvider,
     mpRenderer,
