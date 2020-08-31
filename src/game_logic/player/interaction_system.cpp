@@ -223,13 +223,13 @@ void PlayerInteractionSystem::updatePlayerInteraction(
   if (auto entity = currentlyTouchedInteractable(es, mpPlayer)) {
     const auto type = entity.component<Interactable>()->mType;
     const auto isHintMachine = type == InteractableType::HintMachine;
-    const auto playerHasHintGlobe =
-      mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe);
 
-    if (interactionWanted || (isHintMachine && playerHasHintGlobe)) {
+    showTutorialMessage(tutorialFor(type));
+
+    // The hint machine activates on touch, all other interactables require
+    // pressing the interact button/key.
+    if (interactionWanted || isHintMachine) {
       performInteraction(es, entity, type);
-    } else {
-      showTutorialMessage(tutorialFor(type));
     }
   }
 }
@@ -423,6 +423,10 @@ void PlayerInteractionSystem::activateKeyHole(
 
 
 void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
+  if (!mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe)) {
+    return;
+  }
+
   const auto machinePosition = *entity.component<WorldPosition>();
   mpPlayerModel->removeItem(data::InventoryItemType::SpecialHintGlobe);
   mpPlayerModel->giveScore(HINT_MACHINE_ACTIVATION_SCORE);
