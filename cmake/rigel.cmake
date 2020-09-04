@@ -5,24 +5,15 @@
 # referring to external libraries.
 function(rigel_define_wasm_targets_for_dependencies)
     add_library(SDL2::Core INTERFACE IMPORTED)
-    set_target_properties(SDL2::Core PROPERTIES
-        INTERFACE_COMPILE_OPTIONS
-        "SHELL:-s USE_SDL=2"
-        INTERFACE_LINK_OPTIONS
-        "SHELL:-s USE_SDL=2"
-    )
+    target_compile_options(SDL2::Core INTERFACE "SHELL:-s USE_SDL=2")
+    target_link_options(SDL2::Core INTERFACE "SHELL:-s USE_SDL=2")
 
     add_library(SDL2::Mixer INTERFACE IMPORTED)
-    set_target_properties(SDL2::Mixer PROPERTIES
-        INTERFACE_COMPILE_OPTIONS
-        "SHELL:-s USE_SDL_MIXER=2"
-        INTERFACE_LINK_OPTIONS
-        "SHELL:-s USE_SDL_MIXER=2"
-    )
+    target_compile_options(SDL2::Mixer INTERFACE "SHELL:-s USE_SDL_MIXER=2")
+    target_link_options(SDL2::Mixer INTERFACE "SHELL:-s USE_SDL_MIXER=2")
 
     add_library(Boost::boost INTERFACE IMPORTED)
-    set_target_properties(Boost::boost PROPERTIES
-        INTERFACE_COMPILE_OPTIONS
+    target_compile_options(Boost::boost INTERFACE
         "SHELL:-s USE_BOOST_HEADERS=1"
     )
 endfunction()
