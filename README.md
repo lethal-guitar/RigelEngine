@@ -141,7 +141,7 @@ built successfully on the following compilers:
 
 Slightly older versions of gcc/clang might also work, but I haven't tried that.
 
-CMake version 3.12 or newer is required in order to generate build files.
+CMake version 3.13 or newer is required in order to generate build files.
 
 The project depends on the following libraries:
 
