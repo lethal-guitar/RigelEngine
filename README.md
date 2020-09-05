@@ -46,6 +46,10 @@ This has been confirmed to work on Ubuntu 18.04 on an older laptop.
 
 See [list of differences](https://github.com/lethal-guitar/RigelEngine/wiki#differences-to-the-original-duke-nukem-ii-executable).
 
+### What about Duke Nukem 1 and Cosmo's Cosmic Adventure?
+
+RigelEngine focuses exlusively on Duke Nukem II. For Cosmo and Duke 1, there are already other projects: [Cosmo-Engine](https://github.com/yuv422/cosmo-engine) and [ReDuke](http://k1n9duk3.shikadi.net/reduke.html). Aside from that, Duke Nukem 1 is using a completely different engine, so supporting it with this same project doesn't really make sense. This is a bit different for Cosmo, since its engine actually served as basis for Duke Nukem II's engine. Still, the two are different enough that supporting both games with one engine is not really feasible or useful.
+
 ## Contributing
 
 Contributions to RigelEngine are very welcome! Please have a look at the [contribution guide](CONTRIBUTING.md) before making a PR.
