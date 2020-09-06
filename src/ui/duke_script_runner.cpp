@@ -57,6 +57,8 @@ const auto GAME_SPEED_SLOT = 8;
 const auto INITIAL_SKILL_SELECTION = 1;
 const auto INITIAL_GAME_SPEED = 3;
 
+constexpr auto START_DEMO_TIMEOUT = 30.0; // seconds
+
 }
 
 
@@ -119,7 +121,8 @@ void DukeScriptRunner::startExecution(const data::script::Script& script) {
 
 bool DukeScriptRunner::hasFinishedExecution() const {
   return mState == State::FinishedExecution ||
-    mState == State::ExecutionInterrupted;
+    mState == State::ExecutionInterrupted ||
+    mState == State::ExecutionTimedOut;
 }
 
 
@@ -133,6 +136,9 @@ ExecutionResultOptional DukeScriptRunner::result() const {
     auto terminationType = ScriptTerminationType::RanToCompletion;
     if (mState == State::ExecutionInterrupted) {
       terminationType = ScriptTerminationType::AbortedByUser;
+    }
+    if (mState == State::ExecutionTimedOut) {
+      terminationType = ScriptTerminationType::TimedOut;
     }
     if (hasMenuPages() && mMenuItemWasSelected) {
       terminationType = ScriptTerminationType::MenuItemSelected;
@@ -165,12 +171,18 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 
   if (navigationEvent == NavigationEvent::Cancel) {
     mState = State::ExecutionInterrupted;
+    mTimeSinceLastUserInput = std::nullopt;
     hideMenuSelectionIndicator();
     return;
   }
 
   if (isInWaitState() && navigationEvent != NavigationEvent::None) {
     clearWaitState();
+  }
+
+  if (mTimeSinceLastUserInput && navigationEvent != NavigationEvent::None) {
+    // Any user input resets the "timeout to demo" timer
+    *mTimeSinceLastUserInput = 0.0;
   }
 
   if (hasMenuPages()) {
@@ -221,6 +233,8 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
     mpServices->fadeInScreen();
     mFadeInBeforeNextWaitStateScheduled = false;
   }
+
+  updateTimeoutToDemo(dt);
 }
 
 
@@ -280,6 +294,17 @@ void DukeScriptRunner::updateDelayState(
 }
 
 
+void DukeScriptRunner::updateTimeoutToDemo(const engine::TimeDelta dt) {
+  if (mTimeSinceLastUserInput) {
+    *mTimeSinceLastUserInput += dt;
+    if (*mTimeSinceLastUserInput >= START_DEMO_TIMEOUT) {
+      mState = State::ExecutionTimedOut;
+      mTimeSinceLastUserInput = std::nullopt;
+    }
+  }
+}
+
+
 void DukeScriptRunner::animateNewsReporter(
   NewsReporterState& state,
   const engine::TimeDelta timeDelta
@@ -333,6 +358,7 @@ void DukeScriptRunner::interpretNextAction() {
 
   if (mProgramCounter >= mCurrentInstructions.size()) {
     mState = State::FinishedExecution;
+    mTimeSinceLastUserInput = std::nullopt;
     hideMenuSelectionIndicator();
     return;
   }
@@ -499,7 +525,7 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const EnableTimeOutToDemo&) {
-      // TODO
+      mTimeSinceLastUserInput = 0.0;
     },
 
     [this](const ShowKeyBindings&) {

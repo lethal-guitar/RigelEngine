@@ -38,7 +38,8 @@ public:
   enum class ScriptTerminationType {
     RanToCompletion,
     AbortedByUser,
-    MenuItemSelected
+    MenuItemSelected,
+    TimedOut
   };
 
   struct ExecutionResult {
@@ -81,7 +82,8 @@ private:
     ExecutingScript,
     AwaitingUserInput,
     FinishedExecution,
-    ExecutionInterrupted
+    ExecutionInterrupted,
+    ExecutionTimedOut,
   };
 
   struct CanvasBinder {
@@ -185,6 +187,7 @@ private:
   void displayCheckBoxes(const CheckBoxesState& state);
 
   void updateDelayState(DelayState& state, engine::TimeDelta timeDelta);
+  void updateTimeoutToDemo(engine::TimeDelta timeDelta);
   void animateNewsReporter(
     NewsReporterState& state,
     engine::TimeDelta timeDelta);
@@ -224,6 +227,8 @@ private:
   std::optional<int> mCurrentPersistentSelectionSlot;
 
   std::optional<CheckBoxesState> mCheckBoxStates;
+
+  std::optional<engine::TimeDelta> mTimeSinceLastUserInput;
 
   MenuNavigationHelper mNavigationHelper;
 
