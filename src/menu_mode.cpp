@@ -17,6 +17,7 @@
 #include "menu_mode.hpp"
 
 #include "game_session_mode.hpp"
+#include "intro_demo_loop_mode.hpp"
 
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
@@ -119,6 +120,11 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
   if (mContext.mpScriptRunner->hasFinishedExecution()) {
     const auto result = mContext.mpScriptRunner->result();
     assert(result);
+
+    using STT = ui::DukeScriptRunner::ScriptTerminationType;
+    if (result->mTerminationType == STT::TimedOut) {
+      return std::make_unique<IntroDemoLoopMode>(mContext, false);
+    }
 
     return navigateToNextMenu(*result);
   }
