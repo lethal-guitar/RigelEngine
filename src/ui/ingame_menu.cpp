@@ -426,6 +426,7 @@ void IngameMenu::enterMenu(const MenuType type) {
         mContext,
         slotIndex,
         enteredViaGamepad ? makePrefillName(mSavedGame) : ""});
+      return true;
     }
 
     return false;
@@ -496,7 +497,7 @@ void IngameMenu::handleMenuActiveEvents() {
     SavedGameNameEntry& state,
     const SDL_Event& event
   ) {
-    auto leaveTextEntry = [&, this]() {
+    auto leaveSaveGameMenu = [&, this]() {
       SDL_StopTextInput();
 
       // Render one last time so we have something to fade out from
@@ -509,7 +510,7 @@ void IngameMenu::handleMenuActiveEvents() {
 
     if (isConfirmButton(event)) {
       saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
-      leaveTextEntry();
+      leaveSaveGameMenu();
       if (mpTopLevelMenu) {
         mpTopLevelMenu = nullptr;
         mStateStack.pop();
@@ -517,8 +518,8 @@ void IngameMenu::handleMenuActiveEvents() {
 
       fadeout();
     } else if (isCancelButton(event)) {
-      leaveTextEntry();
-      fadeout();
+      SDL_StopTextInput();
+      mStateStack.pop();
     } else {
       state.mTextEntryWidget.handleEvent(event);
     }
