@@ -13,9 +13,10 @@ set(test_sources
 
 
 add_executable(tests ${test_sources})
-target_link_libraries(tests rigel_core)
-target_include_directories(tests PRIVATE
-    ${CMAKE_SOURCE_DIR}/3rd_party/catch
+target_link_libraries(tests
+    PRIVATE
+    rigel_core
+    catch2
 )
 
 add_test(all-tests tests)

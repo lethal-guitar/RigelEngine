@@ -39,3 +39,23 @@ jobs:
       run: emcmake cmake -H. -Bbuild_wasm -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=Off -DWEBASSEMBLY_GAME_PATH=$(pwd)/DUKE2
     - name: Build
       run: make -j2 -Cbuild_wasm
+  build_linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install libsdl2-dev libsdl2-mixer-dev libboost-dev libboost-program-options-dev g++-8
+    - name: Run CMake (debug)
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug
+    - name: Run CMake (release)
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+    - name: Build (debug)
+      run: cd build_dbg && make -j2
+    - name: Build (release)
+      run: cd build && make -j2
+    - name: Test (debug)
+      run: cd build_dbg && ctest
+    - name: Test (release)
+      run: cd build_dbg && ctest

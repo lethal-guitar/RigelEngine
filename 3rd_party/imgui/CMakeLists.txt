@@ -39,16 +39,4 @@ if (USE_GL_ES)
     )
 endif()
 
-if (MSVC)
-    target_compile_options(dear_imgui PRIVATE
-        /w
-    )
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(dear_imgui PRIVATE
-        -w
-    )
-elseif (CMAKE_COMPILER_IS_GNUCXX)
-    target_compile_options(dear_imgui PRIVATE
-        -w
-    )
-endif()
+rigel_disable_warnings(dear_imgui)
