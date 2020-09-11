@@ -1,4 +1,13 @@
-dist: bionic
+os: osx
+osx_image: xcode10.2
+addons:
+  homebrew:
+    update: true
+    packages:
+      - sdl2
+      - sdl2_mixer
+      - llvm@8
+      - z3
 
 branches:
   only:
@@ -7,41 +16,11 @@ branches:
 # 'language: c++' doesn't help us, since it won't use the custom gcc we install
 language: generic
 
-matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          update: true
-          packages:
-            - libsdl2-dev
-            - libsdl2-mixer-dev
-            - libboost-dev
-            - libboost-program-options-dev
-            - g++-8
-
-    - os: osx
-      osx_image: xcode10.2
-      addons:
-        homebrew:
-          update: true
-          packages:
-            - sdl2
-            - sdl2_mixer
-            - llvm@8
-            - z3
-
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      export CC="/usr/local/opt/llvm@8/bin/clang";
-      export CXX="$CC++";
-      export CPPFLAGS="-I/usr/local/opt/llvm@8/include";
-      export LDFLAGS="-L/usr/local/opt/llvm@8/lib -Wl,-rpath,/usr/local/opt/llvm/lib";
-    fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      export CC=gcc-8;
-      export CXX=g++-8;
-    fi
+  - export CC="/usr/local/opt/llvm@8/bin/clang"
+  - export CXX="$CC++"
+  - export CPPFLAGS="-I/usr/local/opt/llvm@8/include"
+  - export LDFLAGS="-L/usr/local/opt/llvm@8/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
 
 before_script:
   - (mkdir build_dbg && cd build_dbg && cmake .. -DCMAKE_BUILD_TYPE=Debug)
