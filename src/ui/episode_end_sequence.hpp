@@ -19,6 +19,7 @@
 #include "common/game_mode.hpp"
 #include "renderer/texture.hpp"
 #include "ui/bonus_screen.hpp"
+#include "ui/duke_3d_teaser_screen.hpp"
 
 #include <variant>
 #include <vector>
@@ -67,6 +68,7 @@ private:
   using Stage = std::variant<
     InitialWait,
     ui::EpisodeEndScreen,
+    ui::Duke3DTeaserScreen,
     ui::BonusScreen>;
 
   Stage mStage = InitialWait{};

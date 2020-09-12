@@ -190,6 +190,7 @@ enum class ActorID {
     Blue_box_sunglasses = 172,
     Blue_box_phone = 173,
     Red_box_6_pack_cola = 174,
+    Duke_3d_teaser_text = 175,
     Ugly_green_bird = 176,
     Blue_box_boom_box = 181,
     Blue_box_disk = 182,

@@ -135,6 +135,15 @@ void EpisodeEndSequence::updateAndRender(engine::TimeDelta dt) {
       }
     },
 
+    [this, dt](ui::Duke3DTeaserScreen& duke3DTeaser) {
+      duke3DTeaser.updateAndRender(dt);
+
+      if (duke3DTeaser.isFinished()) {
+        startNewStage(
+          ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
+      }
+    },
+
     [dt](auto& state) {
       state.updateAndRender(dt);
     });
@@ -147,6 +156,18 @@ void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
       endScreen.handleEvent(event);
 
       if (endScreen.finished()) {
+        if (mEpisode == 3) {
+          startNewStage(
+            ui::Duke3DTeaserScreen{*mContext.mpResources, mContext.mpRenderer});
+        } else {
+          startNewStage(
+            ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
+        }
+      }
+    },
+
+    [&](ui::Duke3DTeaserScreen&) {
+      if (ui::isButtonPress(event)) {
         startNewStage(
           ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
       }
@@ -170,6 +191,7 @@ bool EpisodeEndSequence::finished() const {
 
 template <typename T>
 void EpisodeEndSequence::startNewStage(T&& newStage) {
+  mContext.mpServiceProvider->fadeOutScreen();
   newStage.updateAndRender(0.0);
   mContext.mpServiceProvider->fadeInScreen();
 
