@@ -65,21 +65,31 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated) {
 
 }
 
-
 int virtualToRealFrame(
   const int virtualFrame,
   const SpriteDrawData& drawData,
   const entityx::Entity entity
 ) {
+  const auto orientation = entity.has_component<const Orientation>()
+    ? std::make_optional(*entity.component<const Orientation>())
+    : std::optional<Orientation>{};
+
+  return virtualToRealFrame(virtualFrame, drawData, orientation);
+}
+
+
+int virtualToRealFrame(
+  const int virtualFrame,
+  const SpriteDrawData& drawData,
+  const std::optional<Orientation>& orientation
+) {
   auto realFrame = virtualFrame;
   if (
     drawData.mOrientationOffset &&
-    entity.has_component<Orientation>()
+    orientation &&
+    *orientation == Orientation::Right
   ) {
-    const auto orientation = *entity.component<const Orientation>();
-    if (orientation == Orientation::Right) {
-      realFrame += *drawData.mOrientationOffset;
-    }
+    realFrame += *drawData.mOrientationOffset;
   }
 
   if (!drawData.mVirtualToRealFrameMap.empty()) {
