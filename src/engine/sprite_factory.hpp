@@ -53,6 +53,8 @@ private:
     std::vector<int> mInitialFramesToRender;
   };
 
+  const SpriteData& createOrFindData(data::ActorID id);
+
   renderer::Renderer* mpRenderer;
   const loader::ActorImagePackage* mpSpritePackage;
   std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
