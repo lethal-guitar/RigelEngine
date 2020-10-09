@@ -363,6 +363,10 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
         player.mGodModeOn = !player.mGodModeOn;
       }
       break;
+
+    case SDLK_F11:
+      mLevelFinishedByDebugKey = true;
+      break;
   }
 }
 

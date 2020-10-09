@@ -69,11 +69,12 @@ private:
   bool mShowDebugText = false;
   bool mSingleStepping = false;
   bool mDoNextSingleStep = false;
+  bool mLevelFinishedByDebugKey = false;
 };
 
 
 inline bool GameRunner::levelFinished() const {
-  return mWorld.levelFinished();
+  return mWorld.levelFinished() || mLevelFinishedByDebugKey;
 }
 
 

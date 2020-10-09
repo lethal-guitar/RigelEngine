@@ -43,8 +43,6 @@ public:
     const std::optional<int>& repetitions = std::nullopt,
     FrameCallbackFunc frameCallback = nullptr);
 
-  void setFrameDelay(int fastTicks);
-
   void updateAndRender(engine::TimeDelta timeDelta);
   bool hasCompletedPlayback() const;
 

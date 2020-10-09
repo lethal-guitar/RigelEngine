@@ -17,6 +17,7 @@
 #include "episode_end_sequence.hpp"
 
 #include "base/container_utils.hpp"
+#include "base/match.hpp"
 #include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
 #include "ui/menu_navigation.hpp"
@@ -113,52 +114,88 @@ bool EpisodeEndScreen::finished() const {
 EpisodeEndSequence::EpisodeEndSequence(
   GameMode::Context context,
   const int episode,
-  ui::BonusScreen bonusScreen
+  std::set<data::Bonus> achievedBonuses,
+  int scoreWithoutBonuses
 )
-  : mEndScreen(context, episode)
-  , mBonusScreen(std::move(bonusScreen))
-  , mpServiceProvider(context.mpServiceProvider)
+  : mContext(context)
+  , mAchievedBonuses(std::move(achievedBonuses))
+  , mEpisode(episode)
+  , mScoreWithoutBonuses(scoreWithoutBonuses)
 {
 }
 
 
 void EpisodeEndSequence::updateAndRender(engine::TimeDelta dt) {
-  if (mElapsedTime < EPISODE_END_SCREEN_INITIAL_DELAY) {
-    mElapsedTime += dt;
+  base::match(mStage,
+    [this, dt](InitialWait& state) {
+      state.mElapsedTime += dt;
 
-    if (mElapsedTime >= EPISODE_END_SCREEN_INITIAL_DELAY) {
-      mEndScreen.updateAndRender(0);
-      mpServiceProvider->fadeInScreen();
-    }
+      if (state.mElapsedTime >= EPISODE_END_SCREEN_INITIAL_DELAY) {
+        startNewStage(ui::EpisodeEndScreen{mContext, mEpisode});
+      }
+    },
 
-    return;
-  }
+    [this, dt](ui::Duke3DTeaserScreen& duke3DTeaser) {
+      duke3DTeaser.updateAndRender(dt);
 
-  if (mEndScreen.finished()) {
-    mBonusScreen.updateAndRender(dt);
-  } else {
-    mEndScreen.updateAndRender(dt);
-  }
+      if (duke3DTeaser.isFinished()) {
+        startNewStage(
+          ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
+      }
+    },
+
+    [dt](auto& state) {
+      state.updateAndRender(dt);
+    });
 }
 
 
 void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
-  if (
-    mElapsedTime >= EPISODE_END_SCREEN_INITIAL_DELAY &&
-    !mEndScreen.finished()
-  ) {
-    mEndScreen.handleEvent(event);
+  base::match(mStage,
+    [&](ui::EpisodeEndScreen& endScreen) {
+      endScreen.handleEvent(event);
 
-    if (mEndScreen.finished()) {
-      mBonusScreen.updateAndRender(0.0);
-      mpServiceProvider->fadeInScreen();
-    }
-  }
+      if (endScreen.finished()) {
+        if (mEpisode == 3) {
+          startNewStage(
+            ui::Duke3DTeaserScreen{*mContext.mpResources, mContext.mpRenderer});
+        } else {
+          startNewStage(
+            ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
+        }
+      }
+    },
+
+    [&](ui::Duke3DTeaserScreen&) {
+      if (ui::isButtonPress(event)) {
+        startNewStage(
+          ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
+      }
+    },
+
+    [](auto&&) {});
 }
 
 
 bool EpisodeEndSequence::finished() const {
-  return mBonusScreen.finished();
+  return base::match(mStage,
+    [](const ui::BonusScreen& bonusScreen) {
+      return bonusScreen.finished();
+    },
+
+    [](auto&&) {
+      return false;
+    });
+}
+
+
+template <typename T>
+void EpisodeEndSequence::startNewStage(T&& newStage) {
+  mContext.mpServiceProvider->fadeOutScreen();
+  newStage.updateAndRender(0.0);
+  mContext.mpServiceProvider->fadeInScreen();
+
+  mStage = std::forward<T>(newStage);
 }
 
 }
