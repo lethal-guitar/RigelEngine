@@ -69,6 +69,8 @@ set(core_sources
     engine/rendering_system.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
+    engine/sprite_factory.cpp
+    engine/sprite_factory.hpp
     engine/sprite_tools.hpp
     engine/tiled_texture.cpp
     engine/tiled_texture.hpp

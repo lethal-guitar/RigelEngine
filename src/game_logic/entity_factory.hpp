@@ -91,27 +91,6 @@ inline bool isHorizontal(const ProjectileDirection direction) {
 }
 
 
-class SpriteFactory : public engine::ISpriteFactory {
-public:
-  SpriteFactory(
-    renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage* pSpritePackage);
-
-  engine::components::Sprite createSprite(data::ActorID id) override;
-  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override;
-
-private:
-  struct SpriteData {
-    engine::SpriteDrawData mDrawData;
-    std::vector<int> mInitialFramesToRender;
-  };
-
-  renderer::Renderer* mpRenderer;
-  const loader::ActorImagePackage* mpSpritePackage;
-  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
-};
-
-
 class EntityFactory : public IEntityFactory {
 public:
   EntityFactory(
