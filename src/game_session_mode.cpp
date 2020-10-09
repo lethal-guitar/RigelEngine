@@ -129,9 +129,7 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
 
       if (pIngameMode->levelFinished()) {
         const auto achievedBonuses = pIngameMode->achievedBonuses();
-
-        auto bonusScreen =
-          ui::BonusScreen{mContext, achievedBonuses, mPlayerModel.score()};
+        const auto scoreWithoutBonuses = mPlayerModel.score();
 
         data::addBonusScore(mPlayerModel, achievedBonuses);
 
@@ -139,10 +137,15 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
           mContext.mpServiceProvider->playMusic("NEVRENDA.IMF");
 
           auto endScreens = ui::EpisodeEndSequence{
-            mContext, mEpisode, std::move(bonusScreen)};
+            mContext, mEpisode, achievedBonuses, scoreWithoutBonuses};
           mContext.mpServiceProvider->fadeOutScreen();
           mCurrentStage = std::move(endScreens);
         } else {
+          mContext.mpServiceProvider->playMusic("OPNGATEA.IMF");
+
+          auto bonusScreen =
+            ui::BonusScreen{mContext, achievedBonuses, scoreWithoutBonuses};
+
           fadeToNewStage(bonusScreen);
           mCurrentStage = std::move(bonusScreen);
         }

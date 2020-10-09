@@ -20,6 +20,7 @@
 #include "renderer/texture.hpp"
 #include "ui/bonus_screen.hpp"
 
+#include <variant>
 #include <vector>
 
 
@@ -47,7 +48,8 @@ public:
   EpisodeEndSequence(
     GameMode::Context context,
     int episode,
-    ui::BonusScreen bonusScreen);
+    std::set<data::Bonus> achievedBonuses,
+    int scoreWithoutBonuses);
 
   void updateAndRender(engine::TimeDelta dt);
   void handleEvent(const SDL_Event& event);
@@ -55,10 +57,23 @@ public:
   bool finished() const;
 
 private:
-  ui::EpisodeEndScreen mEndScreen;
-  ui::BonusScreen mBonusScreen;
-  engine::TimeDelta mElapsedTime = {};
-  IGameServiceProvider* mpServiceProvider;
+  template <typename T>
+  void startNewStage(T&& newStage);
+
+  struct InitialWait {
+    engine::TimeDelta mElapsedTime = {};
+  };
+
+  using Stage = std::variant<
+    InitialWait,
+    ui::EpisodeEndScreen,
+    ui::BonusScreen>;
+
+  Stage mStage = InitialWait{};
+  GameMode::Context mContext;
+  std::set<data::Bonus> mAchievedBonuses;
+  int mEpisode;
+  int mScoreWithoutBonuses;
 };
 
 }

@@ -87,8 +87,6 @@ BonusScreen::BonusScreen(
       "BONUSSCN.MNI"))
   , mpTextRenderer(context.mpUiRenderer)
 {
-  context.mpServiceProvider->playMusic("OPNGATEA.IMF");
-
   engine::TimeDelta time = 0.0;
   if (!achievedBonuses.empty()) {
     time =
