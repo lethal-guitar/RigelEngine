@@ -17,6 +17,7 @@
 #include "sprite_factory.hpp"
 
 #include "base/container_utils.hpp"
+#include "data/unit_conversions.hpp"
 #include "loader/actor_image_package.hpp"
 
 
@@ -493,10 +494,18 @@ base::Rect<int> SpriteFactory::actorFrameRect(
   const data::ActorID id,
   const int frame
 ) const {
-  return mpSpritePackage->actorFrameRect(id, frame);
+  const auto& data = createOrFindData(id);
+  const auto realFrame = virtualToRealFrame(0, data.mDrawData, std::nullopt);
+  const auto& frameData = data.mDrawData.mFrames[realFrame];
+
+  const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
+    frameData.mImage.extents());
+  return {frameData.mDrawOffset, dimensionsInTiles};
 }
 
-auto SpriteFactory::createOrFindData(const ActorID mainId) -> const SpriteData& {
+auto SpriteFactory::createOrFindData(const ActorID mainId) const
+  -> const SpriteData&
+{
   auto iData = mSpriteDataCache.find(mainId);
   if (iData == mSpriteDataCache.end()) {
     engine::SpriteDrawData drawData;
