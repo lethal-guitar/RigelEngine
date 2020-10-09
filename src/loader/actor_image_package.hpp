@@ -58,8 +58,6 @@ public:
     data::ActorID id,
     const Palette16& palette = INGAME_PALETTE) const;
 
-  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const;
-
   FontData loadFont() const;
 
 private:
