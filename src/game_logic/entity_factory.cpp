@@ -271,7 +271,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite, entity));
+    entity.assign<BoundingBox>(mpSpriteFactory->actorFrameRect(actorID, 0));
   }
   return entity;
 }
@@ -311,8 +311,7 @@ entityx::Entity EntityFactory::createActor(
   const base::Vector& position
 ) {
   auto entity = createSprite(id, position);
-  auto& sprite = *entity.component<Sprite>();
-  const auto boundingBox = engine::inferBoundingBox(sprite, entity);
+  const auto boundingBox = mpSpriteFactory->actorFrameRect(id, 0);
 
   configureEntity(entity, id, boundingBox);
 
@@ -439,7 +438,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = engine::inferBoundingBox(sprite, entity);
+      boundingBox = mpSpriteFactory->actorFrameRect(actor.mID, 0);
       entity.assign<Sprite>(sprite);
     }
 
