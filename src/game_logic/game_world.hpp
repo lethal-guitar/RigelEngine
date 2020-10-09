@@ -26,6 +26,7 @@
 #include "data/tutorial_messages.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/sprite_factory.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/earth_quake_effect.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -119,7 +120,7 @@ private:
       const loader::ResourceLoader* pResources,
       data::PlayerModel* pPlayerModel,
       entityx::EventManager& eventManager,
-      SpriteFactory* pSpriteFactory,
+      engine::SpriteFactory* pSpriteFactory,
       data::GameSessionId sessionId);
     ~WorldState();
 
@@ -164,7 +165,7 @@ private:
   data::GameSessionId mSessionId;
 
   entityx::EventManager mEventManager;
-  SpriteFactory mSpriteFactory;
+  engine::SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
   std::optional<CheckpointData> mActivatedCheckpoint;
   ui::HudRenderer mHudRenderer;
