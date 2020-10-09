@@ -126,11 +126,6 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
 }
 
 
-void MoviePlayer::setFrameDelay(const int fastTicks) {
-  mFrameDelay = fastTicksToTime(fastTicks);
-}
-
-
 bool MoviePlayer::hasCompletedPlayback() const {
   return mRemainingRepetitions && *mRemainingRepetitions == 0;
 }
@@ -141,7 +136,7 @@ void MoviePlayer::invokeFrameCallbackIfPresent(const int frameNumber) {
     const auto maybeNewFrameDelay = mFrameCallback(frameNumber);
 
     if (maybeNewFrameDelay) {
-      setFrameDelay(*maybeNewFrameDelay);
+      mFrameDelay = fastTicksToTime(*maybeNewFrameDelay);
     }
   }
 }
