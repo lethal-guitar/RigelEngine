@@ -481,7 +481,22 @@ SpriteFactory::SpriteFactory(
 }
 
 
-Sprite SpriteFactory::createSprite(const ActorID mainId) {
+Sprite SpriteFactory::createSprite(const ActorID id) {
+  const auto& data = createOrFindData(id);
+  auto sprite = Sprite{&data.mDrawData, data.mInitialFramesToRender};
+  configureSprite(sprite, id);
+  return sprite;
+}
+
+
+base::Rect<int> SpriteFactory::actorFrameRect(
+  const data::ActorID id,
+  const int frame
+) const {
+  return mpSpritePackage->actorFrameRect(id, frame);
+}
+
+auto SpriteFactory::createOrFindData(const ActorID mainId) -> const SpriteData& {
   auto iData = mSpriteDataCache.find(mainId);
   if (iData == mSpriteDataCache.end()) {
     engine::SpriteDrawData drawData;
@@ -520,18 +535,7 @@ Sprite SpriteFactory::createSprite(const ActorID mainId) {
     ).first;
   }
 
-  const auto& data = iData->second;
-  auto sprite = Sprite{&data.mDrawData, data.mInitialFramesToRender};
-  configureSprite(sprite, mainId);
-  return sprite;
-}
-
-
-base::Rect<int> SpriteFactory::actorFrameRect(
-  const data::ActorID id,
-  const int frame
-) const {
-  return mpSpritePackage->actorFrameRect(id, frame);
+  return iData->second;
 }
 
 }
