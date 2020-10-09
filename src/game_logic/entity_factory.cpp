@@ -477,7 +477,7 @@ base::Rect<int> SpriteFactory::actorFrameRect(
 
 
 EntityFactory::EntityFactory(
-  SpriteFactory* pSpriteFactory,
+  engine::ISpriteFactory* pSpriteFactory,
   ex::EntityManager* pEntityManager,
   engine::RandomNumberGenerator* pRandomGenerator,
   const data::Difficulty difficulty)

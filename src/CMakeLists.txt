@@ -50,6 +50,7 @@ set(core_sources
     engine/entity_tools.hpp
     engine/imf_player.cpp
     engine/imf_player.hpp
+    engine/isprite_factory.hpp
     engine/life_time_components.hpp
     engine/life_time_system.cpp
     engine/life_time_system.hpp
