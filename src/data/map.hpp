@@ -97,6 +97,8 @@ struct LevelData {
 
   data::map::Map mMap;
   std::vector<Actor> mActors;
+  base::Vector mPlayerSpawnPosition;
+  bool mPlayerFacingLeft;
 
   BackdropScrollMode mBackdropScrollMode;
   BackdropSwitchCondition mBackdropSwitchCondition;

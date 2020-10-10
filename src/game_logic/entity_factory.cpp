@@ -405,11 +405,9 @@ void EntityFactory::configureProjectile(
 }
 
 
-entityx::Entity EntityFactory::createEntitiesForLevel(
+void EntityFactory::createEntitiesForLevel(
   const data::map::ActorDescriptionList& actors
 ) {
-  entityx::Entity playerEntity;
-
   for (const auto& actor : actors) {
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
@@ -443,18 +441,7 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
     }
 
     configureEntity(entity, actor.mID, boundingBox);
-
-    const auto isPlayer = actor.mID == ActorID::Duke_LEFT || actor.mID == ActorID::Duke_RIGHT;
-    if (isPlayer) {
-      const auto playerOrientation = actor.mID == ActorID::Duke_LEFT
-        ? Orientation::Left
-        : Orientation::Right;
-      assignPlayerComponents(entity, playerOrientation);
-      playerEntity = entity;
-    }
   }
-
-  return playerEntity;
 }
 
 

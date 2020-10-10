@@ -81,10 +81,9 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
     return createMockSpriteEntity();
   }
 
-  entityx::Entity createEntitiesForLevel(
+  void createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors
   ) override {
-    return {};
   }
 
   engine::components::Sprite createSpriteForId(

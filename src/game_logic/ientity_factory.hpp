@@ -51,7 +51,7 @@ enum class ProjectileDirection {
 struct IEntityFactory {
   virtual ~IEntityFactory() = default;
 
-  virtual entityx::Entity createEntitiesForLevel(
+  virtual void createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) = 0;
 
   virtual engine::components::Sprite createSpriteForId(

@@ -394,21 +394,24 @@ bool isValidActorId(const uint16_t id) {
 
 /** Transforms actor list to be more useful in subsequent stages
  *
- * This does two things:
+ * This does three things:
  *  - Applies the selected difficulty, i.e. removes actors that only appear
  *    in higher difficulties than the selected one
  *  - Assigns an area/bounding box to actors that require it, e.g. shootable
  *    walls
+ *  - Extracts the player spawn position and orientation
  *
- * Actors which are only relevant for these two purposes will be removed from
- * the list (difficulty markers and section markers).
+ * Actors which are only relevant for these purposes will be removed from
+ * the list (difficulty markers and section markers, player).
  */
-ActorList preProcessActorDescriptions(
+std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
   const data::map::Map& map,
   const ActorList& originalActors,
   const Difficulty chosenDifficulty
 ) {
   ActorList actors;
+  base::Vector playerSpawnPosition;
+  bool playerFacingLeft = false;
 
   ActorGrid grid(map, originalActors);
   for (int row=0; row<map.height(); ++row) {
@@ -461,6 +464,12 @@ ActorList preProcessActorDescriptions(
           }
           break;
 
+        case ActorID::Duke_LEFT:
+        case ActorID::Duke_RIGHT:
+          playerSpawnPosition = actor.mPosition;
+          playerFacingLeft = actor.mID == ActorID::Duke_LEFT;
+          break;
+
         default:
           actors.emplace_back(
             LevelData::Actor{actor.mPosition, actor.mID, std::nullopt});
@@ -471,7 +480,7 @@ ActorList preProcessActorDescriptions(
     }
   }
 
-  return actors;
+  return {std::move(actors), playerSpawnPosition, playerFacingLeft};
 }
 
 }
@@ -572,14 +581,16 @@ LevelData loadLevel(
     alternativeBackdropImage = resources.loadTiledFullscreenImage(
       backdropNameFromNumber(header.alternativeBackdropNumber));
   }
-  auto actorDescriptions =
-      preProcessActorDescriptions(map, actors, chosenDifficulty);
+  auto [actorDescriptions, playerSpawnPosition, playerFacingLeft] =
+    preProcessActorDescriptions(map, actors, chosenDifficulty);
   return LevelData{
     std::move(tileSet.mTiles),
     std::move(backdropImage),
     std::move(alternativeBackdropImage),
     std::move(map),
     std::move(actorDescriptions),
+    playerSpawnPosition,
+    playerFacingLeft,
     scrollMode,
     backdropSwitchCondition,
     header.flagBitSet(0x20),
