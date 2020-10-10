@@ -259,6 +259,32 @@ GameWorld::WorldState::WorldState(
   SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId
 )
+  : WorldState(
+      pServiceProvider,
+      pRenderer,
+      pResources,
+      pPlayerModel,
+      eventManager,
+      pSpriteFactory,
+      sessionId,
+      loader::loadLevel(
+        levelFileName(sessionId.mEpisode, sessionId.mLevel),
+        *pResources,
+        sessionId.mDifficulty))
+{
+}
+
+
+GameWorld::WorldState::WorldState(
+  IGameServiceProvider* pServiceProvider,
+  renderer::Renderer* pRenderer,
+  const loader::ResourceLoader* pResources,
+  data::PlayerModel* pPlayerModel,
+  entityx::EventManager& eventManager,
+  SpriteFactory* pSpriteFactory,
+  const data::GameSessionId sessionId,
+  data::map::LevelData&& loadedLevel
+)
   : mEntities(eventManager)
   , mEntityFactory(
     pSpriteFactory,
@@ -266,14 +292,13 @@ GameWorld::WorldState::WorldState(
     &mRandomGenerator,
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, eventManager)
+  , mMap(std::move(loadedLevel.mMap))
   , mCollisionChecker(&mMap, mEntities, eventManager)
+  , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
+  , mLevelMusicFile(loadedLevel.mMusicFile)
 {
   using engine::components::Orientation;
 
-  auto loadedLevel = loader::loadLevel(
-    levelFileName(sessionId.mEpisode, sessionId.mLevel),
-    *pResources,
-    sessionId.mDifficulty);
   mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
   auto playerEntity = mEntityFactory.createActor(
     data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
@@ -287,10 +312,6 @@ GameWorld::WorldState::WorldState(
   mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
   mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
   mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
-
-  mMap = std::move(loadedLevel.mMap);
-  mBackdropSwitchCondition = loadedLevel.mBackdropSwitchCondition;
-  mLevelMusicFile = loadedLevel.mMusicFile;
 
   mpSystems = std::make_unique<IngameSystems>(
     sessionId,
