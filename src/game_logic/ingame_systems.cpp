@@ -204,14 +204,6 @@ void IngameSystems::switchBackdrops() {
 }
 
 
-void IngameSystems::restartFromCheckpoint(
-  const base::Vector& checkpointPosition
-) {
-  mpPlayer->position() = checkpointPosition;
-  mpPlayer->resetAfterRespawn();
-}
-
-
 void IngameSystems::centerViewOnPlayer() {
   mCamera.centerViewOnPlayer();
 }

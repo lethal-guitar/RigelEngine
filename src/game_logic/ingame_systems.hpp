@@ -87,13 +87,7 @@ public:
 
   void switchBackdrops();
 
-  void restartFromCheckpoint(const base::Vector& checkpointPosition);
-
   void centerViewOnPlayer();
-
-  Player& player() {
-    return *mpPlayer;
-  }
 
   void printDebugText(std::ostream& stream) const;
 
