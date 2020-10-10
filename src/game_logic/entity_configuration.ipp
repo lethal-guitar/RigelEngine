@@ -1437,7 +1437,7 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Spider: // Spider
+    case ActorID::Spider:
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{101});
       entity.assign<DestructionEffects>(SPIDER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1446,7 +1446,7 @@ void EntityFactory::configureEntity(
       entity.assign<MovingBody>(Velocity{0.f, 0.f}, GravityAffected{false});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
-      entity.assign<ai::components::Spider>();
+      entity.assign<BehaviorController>(behaviors::Spider{});
       entity.assign<AppearsOnRadar>();
       break;
 
