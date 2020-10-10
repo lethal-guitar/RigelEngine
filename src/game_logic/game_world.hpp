@@ -27,6 +27,7 @@
 #include "engine/collision_checker.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_factory.hpp"
+#include "game_logic/camera.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/earth_quake_effect.hpp"
 #include "game_logic/entity_factory.hpp"
@@ -146,6 +147,7 @@ private:
 
     engine::CollisionChecker mCollisionChecker;
     Player mPlayer;
+    Camera mCamera;
     std::unique_ptr<IngameSystems> mpSystems;
 
     std::optional<EarthQuakeEffect> mEarthQuakeEffect;
