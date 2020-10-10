@@ -112,7 +112,6 @@ IngameSystems::IngameSystems(
   , mSimpleWalkerSystem(
       playerEntity,
       const_cast<engine::CollisionChecker*>(pCollisionChecker))
-  , mSpikeBallSystem(pCollisionChecker, pServiceProvider, eventManager)
   , mBehaviorControllerSystem(
       GlobalDependencies{
         pCollisionChecker,
@@ -159,7 +158,6 @@ void IngameSystems::update(
   // A.I. logic update
   // ----------------------------------------------------------------------
   mSimpleWalkerSystem.update(es);
-  mSpikeBallSystem.update(es);
   mBehaviorControllerSystem.update(es, input, viewPortSize);
 
   // ----------------------------------------------------------------------

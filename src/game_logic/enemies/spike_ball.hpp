@@ -16,52 +16,43 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::engine { class CollisionChecker; }
-namespace rigel::game_logic::events {
-  struct ShootableDamaged;
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct SpikeBall {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onHit(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
+  void onCollision(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const engine::events::CollidedWithWorld& event,
+    entityx::Entity entity);
+
   int mJumpBackCooldown = 0;
-};
-
-}
-
-
-void configureSpikeBall(entityx::Entity entity);
-
-
-class SpikeBallSystem : public entityx::Receiver<SpikeBallSystem> {
-public:
-  SpikeBallSystem(
-    const engine::CollisionChecker* pCollisionChecker,
-    IGameServiceProvider* pServiceProvider,
-    entityx::EventManager& events);
-
-  void update(entityx::EntityManager& es);
-
-  void receive(const events::ShootableDamaged& event);
-  void receive(const engine::events::CollidedWithWorld& event);
-
-private:
-  void jump(entityx::Entity entity);
-
-  const engine::CollisionChecker* mpCollisionChecker;
-  IGameServiceProvider* mpServiceProvider;
+  bool mInitialized = false;
 };
 
 }

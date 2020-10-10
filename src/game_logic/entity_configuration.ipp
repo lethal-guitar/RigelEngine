@@ -1287,12 +1287,15 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Bouncing_spike_ball: // Bouncing spike ball
+    case ActorID::Bouncing_spike_ball:
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(SPIKE_BALL_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
-      ai::configureSpikeBall(entity);
+      entity.assign<BehaviorController>(behaviors::SpikeBall{});
+      entity.assign<MovingBody>(Velocity{}, GravityAffected{true});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<AppearsOnRadar>();
       break;
 
