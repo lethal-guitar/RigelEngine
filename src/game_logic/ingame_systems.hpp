@@ -88,10 +88,6 @@ public:
 
   void switchBackdrops();
 
-  void centerViewOnPlayer();
-
-  void printDebugText(std::ostream& stream) const;
-
 private:
   Player* mpPlayer;
   Camera* mpCamera;

@@ -23,26 +23,9 @@
 #include "game_logic/interactive/enemy_radar.hpp"
 #include "renderer/upscaling_utils.hpp"
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
 namespace rigel::game_logic {
 
 using namespace engine;
-
-namespace {
-
-template<typename ValueT>
-std::string vec2String(const base::Point<ValueT>& vec, const int width) {
-  std::stringstream stream;
-  stream
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
-  return stream.str();
-}
-
-}
 
 
 IngameSystems::IngameSystems(
@@ -202,18 +185,6 @@ DebuggingSystem& IngameSystems::debuggingSystem() {
 
 void IngameSystems::switchBackdrops() {
   mRenderingSystem.switchBackdrops();
-}
-
-
-void IngameSystems::centerViewOnPlayer() {
-  mpCamera->centerViewOnPlayer();
-}
-
-
-void IngameSystems::printDebugText(std::ostream& stream) const {
-  stream
-    << "Scroll: " << vec2String(mpCamera->position(), 4) << '\n'
-    << "Player: " << vec2String(mpPlayer->position(), 4) << '\n';
 }
 
 }
