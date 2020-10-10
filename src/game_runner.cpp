@@ -241,7 +241,7 @@ void GameRunner::handlePlayerGameControllerInput(const SDL_Event& event) {
             // up/down while flying. Therefore, we use a different vertical
             // deadzone when not in the ship.
             const auto deadZone =
-              mWorld.mpState->mpSystems->player().stateIs<game_logic::InShip>()
+              mWorld.mpState->mPlayer.stateIs<game_logic::InShip>()
               ? ANALOG_STICK_DEADZONE_X
               : ANALOG_STICK_DEADZONE_Y;
 
@@ -359,7 +359,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
 
     case SDLK_F10:
       {
-        auto& player = mWorld.mpState->mpSystems->player();
+        auto& player = mWorld.mpState->mPlayer;
         player.mGodModeOn = !player.mGodModeOn;
       }
       break;
@@ -374,7 +374,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
 void GameRunner::renderDebugText() {
   std::stringstream debugText;
 
-  if (mWorld.mpState->mpSystems->player().mGodModeOn) {
+  if (mWorld.mpState->mPlayer.mGodModeOn) {
     debugText << "GOD MODE on\n";
   }
 

@@ -393,7 +393,7 @@ GameWorld::GameWorld(
   loadLevel();
 
   if (playerPositionOverride) {
-    mpState->mpSystems->player().position() = *playerPositionOverride;
+    mpState->mPlayer.position() = *playerPositionOverride;
     mpState->mpSystems->centerViewOnPlayer();
     updateGameLogic({});
   }
@@ -659,7 +659,7 @@ void GameWorld::render() {
 
   auto drawHud = [&, this]() {
     const auto radarDots =
-      collectRadarDots(mpState->mEntities, mpState->mpSystems->player().position());
+      collectRadarDots(mpState->mEntities, mpState->mPlayer.position());
     mHudRenderer.render(*mpPlayerModel, radarDots);
   };
 
@@ -757,7 +757,7 @@ void GameWorld::handleLevelExit() {
         return;
       }
 
-      const auto playerBBox = mpState->mpSystems->player().worldSpaceHitBox();
+      const auto playerBBox = mpState->mPlayer.worldSpaceHitBox();
       const auto playerAboveOrAtTriggerHeight =
         playerBBox.bottom() <= triggerPosition.y;
       const auto touchingTriggerOnXAxis =
@@ -816,7 +816,8 @@ void GameWorld::restartFromCheckpoint() {
   }
 
   mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
-  mpState->mpSystems->restartFromCheckpoint(mActivatedCheckpoint->mPosition);
+  mpState->mPlayer.position() = mActivatedCheckpoint->mPosition;
+  mpState->mPlayer.resetAfterRespawn();
 
   mpState->mpSystems->centerViewOnPlayer();
   updateGameLogic({});
@@ -833,7 +834,7 @@ void GameWorld::handleTeleporter() {
 
   mpServiceProvider->fadeOutScreen();
 
-  mpState->mpSystems->player().position() = *mpState->mTeleportTargetPosition;
+  mpState->mPlayer.position() = *mpState->mTeleportTargetPosition;
   mpState->mTeleportTargetPosition = std::nullopt;
 
   const auto switchBackdrop =
