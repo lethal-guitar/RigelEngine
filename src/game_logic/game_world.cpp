@@ -38,7 +38,10 @@
 
 #include <cassert>
 #include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+
 
 
 namespace rigel::game_logic {
@@ -247,6 +250,16 @@ std::vector<base::Vector> collectRadarDots(
   return radarDots;
 }
 
+
+template<typename ValueT>
+std::string vec2String(const base::Point<ValueT>& vec, const int width) {
+  std::stringstream stream;
+  stream
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
+  return stream.str();
+}
+
 }
 
 
@@ -396,7 +409,7 @@ GameWorld::GameWorld(
 
   if (playerPositionOverride) {
     mpState->mPlayer.position() = *playerPositionOverride;
-    mpState->mpSystems->centerViewOnPlayer();
+    mpState->mCamera.centerViewOnPlayer();
     updateGameLogic({});
   }
 
@@ -577,7 +590,7 @@ void GameWorld::loadLevel() {
     &mSpriteFactory,
     mSessionId);
 
-  mpState->mpSystems->centerViewOnPlayer();
+  mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
 
   if (data::isBossLevel(mSessionId.mLevel)) {
@@ -821,7 +834,7 @@ void GameWorld::restartFromCheckpoint() {
   mpState->mPlayer.position() = mActivatedCheckpoint->mPosition;
   mpState->mPlayer.resetAfterRespawn();
 
-  mpState->mpSystems->centerViewOnPlayer();
+  mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
   render();
 
@@ -847,7 +860,7 @@ void GameWorld::handleTeleporter() {
     mpState->mBackdropSwitched = !mpState->mBackdropSwitched;
   }
 
-  mpState->mpSystems->centerViewOnPlayer();
+  mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
   mpServiceProvider->fadeInScreen();
 }
@@ -862,8 +875,10 @@ void GameWorld::showTutorialMessage(const data::TutorialMessageId id) {
 
 
 void GameWorld::printDebugText(std::ostream& stream) const {
-  mpState->mpSystems->printDebugText(stream);
-  stream << "Entities: " << mpState->mEntities.size() << '\n';
+  stream
+    << "Scroll: " << vec2String(mpState->mCamera.position(), 4) << '\n'
+    << "Player: " << vec2String(mpState->mPlayer.position(), 4) << '\n'
+    << "Entities: " << mpState->mEntities.size() << '\n';
 }
 
 }
