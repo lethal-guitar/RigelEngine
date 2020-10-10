@@ -17,21 +17,19 @@
 #pragma once
 
 #include "base/warnings.hpp"
-#include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <optional>
+
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
 
 
-namespace rigel::engine { class CollisionChecker; }
-
-
-namespace rigel::game_logic::ai {
-
-namespace components {
+namespace rigel::game_logic::behaviors {
 
 struct SimpleWalker {
   struct Configuration {
@@ -46,24 +44,13 @@ struct SimpleWalker {
   {
   }
 
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
   const Configuration* mpConfig;
-};
-
-}
-
-
-class SimpleWalkerSystem {
-public:
-  SimpleWalkerSystem(
-    entityx::Entity player,
-    engine::CollisionChecker* pCollisionChecker);
-
-  void update(entityx::EntityManager& es);
-
-private:
-  entityx::Entity mPlayer;
-  engine::CollisionChecker* mpCollisionChecker;
-  bool mIsOddFrame = false;
 };
 
 }

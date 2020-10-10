@@ -20,6 +20,7 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/player.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -59,6 +60,7 @@ struct Spider {
   };
 
   // TODO: Use variant pattern for states?
+  behaviors::SimpleWalker mWalkerBehavior{nullptr};
   State mState = State::Uninitialized;
   engine::components::Orientation mPreviousPlayerOrientation;
   int mShakeOffProgress = 0;

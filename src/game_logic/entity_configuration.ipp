@@ -290,9 +290,9 @@ auto createBlueGuardBehavior(const ActorID id) {
 }
 
 
-auto skeletonAiConfig() {
+auto skeletonWalkerConfig() {
   static auto config = []() {
-    ai::components::SimpleWalker::Configuration c;
+    behaviors::SimpleWalker::Configuration c;
     c.mAnimEnd = 3;
     c.mWalkAtFullSpeed = false;
     return c;
@@ -302,9 +302,9 @@ auto skeletonAiConfig() {
 }
 
 
-auto turkeyAiConfig() {
+auto turkeyWalkerConfig() {
   static auto config = []() {
-    ai::components::SimpleWalker::Configuration c;
+    behaviors::SimpleWalker::Configuration c;
     c.mAnimEnd = 1;
     c.mWalkAtFullSpeed = true;
     return c;
@@ -762,7 +762,7 @@ void EntityFactory::configureEntity(
           Shootable{1, 0},
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
-          ai::components::SimpleWalker{turkeyAiConfig()},
+          BehaviorController{behaviors::SimpleWalker{turkeyWalkerConfig()}},
           Active{},
           AppearsOnRadar{});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
@@ -1409,7 +1409,8 @@ void EntityFactory::configureEntity(
         DestructionEffects::TriggerCondition::OnKilled,
         mpSpriteFactory->actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
+      entity.assign<BehaviorController>(
+        behaviors::SimpleWalker{skeletonWalkerConfig()});
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<AppearsOnRadar>();
       break;

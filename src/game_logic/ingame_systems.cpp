@@ -109,9 +109,6 @@ IngameSystems::IngameSystems(
       &mParticles,
       eventManager)
   , mItemContainerSystem(&entities, pCollisionChecker, eventManager)
-  , mSimpleWalkerSystem(
-      playerEntity,
-      const_cast<engine::CollisionChecker*>(pCollisionChecker))
   , mBehaviorControllerSystem(
       GlobalDependencies{
         pCollisionChecker,
@@ -157,7 +154,6 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   // A.I. logic update
   // ----------------------------------------------------------------------
-  mSimpleWalkerSystem.update(es);
   mBehaviorControllerSystem.update(es, input, viewPortSize);
 
   // ----------------------------------------------------------------------

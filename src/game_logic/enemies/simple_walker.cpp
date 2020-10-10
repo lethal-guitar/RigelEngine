@@ -16,11 +16,14 @@
 
 #include "simple_walker.hpp"
 
+#include "engine/base_components.hpp"
 #include "engine/movement.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/global_dependencies.hpp"
+#include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::ai {
+namespace rigel::game_logic::behaviors {
 
 namespace {
 
@@ -30,59 +33,45 @@ using namespace engine::orientation;
 } // namespace
 
 
-SimpleWalkerSystem::SimpleWalkerSystem(
-  entityx::Entity player,
-  engine::CollisionChecker* pCollisionChecker
-)
-  : mPlayer(player)
-  , mpCollisionChecker(pCollisionChecker)
-{
-}
+void SimpleWalker::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool isOnScreen,
+  entityx::Entity entity
+) {
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+  auto& sprite = *entity.component<Sprite>();
 
+  if (!entity.has_component<Orientation>()) {
+    const auto initialOrientation = position.x < playerPosition.x
+      ? Orientation::Right
+      : Orientation::Left;
+    entity.assign<Orientation>(initialOrientation);
+  }
 
-void SimpleWalkerSystem::update(entityx::EntityManager& es) {
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
+  if (s.mpPerFrameState->mIsOddFrame || mpConfig->mWalkAtFullSpeed) {
+    auto& orientation = *entity.component<Orientation>();
 
-  es.each<components::SimpleWalker, Sprite, WorldPosition, Active>(
-    [this, &playerPosition](
-      entityx::Entity entity,
-      components::SimpleWalker& state,
-      Sprite& sprite,
-      WorldPosition& position,
-      const Active&
-    ) {
-      if (!entity.has_component<Orientation>()) {
-        const auto initialOrientation = position.x < playerPosition.x
-          ? Orientation::Right
-          : Orientation::Left;
-        entity.assign<Orientation>(initialOrientation);
-      }
+    auto walkedSuccessfully = false;
+    if (mpConfig->mWalkOnCeiling) {
+      walkedSuccessfully =
+        engine::walkOnCeiling(*d.mpCollisionChecker, entity, orientation);
+    } else {
+      walkedSuccessfully =
+        engine::walk(*d.mpCollisionChecker, entity, orientation);
+    }
 
-      if (mIsOddFrame || state.mpConfig->mWalkAtFullSpeed) {
-        auto& orientation = *entity.component<Orientation>();
+    if (!walkedSuccessfully) {
+      orientation = opposite(orientation);
+    }
 
-        auto walkedSuccessfully = false;
-        if (state.mpConfig->mWalkOnCeiling) {
-          walkedSuccessfully =
-            engine::walkOnCeiling(*mpCollisionChecker, entity, orientation);
-        } else {
-          walkedSuccessfully =
-            engine::walk(*mpCollisionChecker, entity, orientation);
-        }
-
-        if (!walkedSuccessfully) {
-          orientation = opposite(orientation);
-        }
-
-        auto& animationFrame = sprite.mFramesToRender[0];
-        ++animationFrame;
-        if (animationFrame == state.mpConfig->mAnimEnd + 1) {
-          animationFrame = state.mpConfig->mAnimStart;
-        }
-      }
-    });
-
-  mIsOddFrame = !mIsOddFrame;
+    auto& animationFrame = sprite.mFramesToRender[0];
+    ++animationFrame;
+    if (animationFrame == mpConfig->mAnimEnd + 1) {
+      animationFrame = mpConfig->mAnimStart;
+    }
+  }
 }
 
 }

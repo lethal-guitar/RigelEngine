@@ -22,7 +22,6 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/enemies/simple_walker.hpp"
 #include "game_logic/entity_factory.hpp"
 
 
@@ -39,7 +38,7 @@ constexpr auto SHAKE_OFF_THRESHOLD = 2;
 
 auto floorWalkerConfig() {
   static auto config = []() {
-    ai::components::SimpleWalker::Configuration c;
+    behaviors::SimpleWalker::Configuration c;
     c.mAnimStart = 3;
     c.mAnimEnd = 5;
     return c;
@@ -51,7 +50,7 @@ auto floorWalkerConfig() {
 
 auto ceilingWalkerConfig() {
   static auto config = []() {
-    ai::components::SimpleWalker::Configuration c;
+    behaviors::SimpleWalker::Configuration c;
     c.mAnimStart = 0;
     c.mAnimEnd = 2;
     c.mWalkOnCeiling = true;
@@ -115,6 +114,10 @@ void Spider::update(
   const auto& playerPosition = s.mpPlayer->orientedPosition();
   const auto playerOrientation = s.mpPlayer->orientation();
 
+  auto stopWalking = [&]() {
+    mWalkerBehavior.mpConfig = nullptr;
+  };
+
   auto tryClingToPlayer = [&, this](const SpiderClingPosition clingPos) {
     if (
       s.mpPlayer->hasSpiderAt(clingPos) ||
@@ -129,7 +132,7 @@ void Spider::update(
     mPreviousPlayerOrientation = s.mpPlayer->orientation();
     mClingPosition = clingPos;
 
-    engine::removeSafely<ai::components::SimpleWalker>(entity);
+    stopWalking();
     entity.remove<game_logic::components::Shootable>();
     entity.remove<MovingBody>();
     return true;
@@ -137,7 +140,7 @@ void Spider::update(
 
   auto walkOnCeiling = [&, this]() {
     mState = State::OnCeiling;
-    entity.assign<ai::components::SimpleWalker>(ceilingWalkerConfig());
+    mWalkerBehavior.mpConfig = ceilingWalkerConfig();
     sprite.mFramesToRender[0] = 0;
   };
 
@@ -165,7 +168,7 @@ void Spider::update(
 
   auto startFalling = [&, this]() {
     sprite.mFramesToRender[0] = 6;
-    entity.remove<ai::components::SimpleWalker>();
+    stopWalking();
     mState = State::Falling;
     entity.component<MovingBody>()->mGravityAffected = true;
   };
@@ -245,6 +248,10 @@ void Spider::update(
     default:
       break;
   }
+
+  if (entity && mWalkerBehavior.mpConfig) {
+    mWalkerBehavior.update(d, s, isOnScreen, entity);
+  }
 }
 
 
@@ -266,7 +273,7 @@ void Spider::walkOnFloor(entityx::Entity entity) {
   auto& sprite = *entity.component<Sprite>();
   sprite.mFramesToRender[0] = 3;
 
-  entity.assign<ai::components::SimpleWalker>(floorWalkerConfig());
+  mWalkerBehavior.mpConfig = floorWalkerConfig();
 }
 
 }
