@@ -46,6 +46,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { class GameRunner; }
 namespace rigel::data { struct GameOptions; }
+namespace rigel::data::map { struct LevelData; }
 
 
 namespace rigel::game_logic {
@@ -122,6 +123,15 @@ private:
       entityx::EventManager& eventManager,
       engine::SpriteFactory* pSpriteFactory,
       data::GameSessionId sessionId);
+    WorldState(
+      IGameServiceProvider* pServiceProvider,
+      renderer::Renderer* pRenderer,
+      const loader::ResourceLoader* pResources,
+      data::PlayerModel* pPlayerModel,
+      entityx::EventManager& eventManager,
+      engine::SpriteFactory* pSpriteFactory,
+      data::GameSessionId sessionId,
+      data::map::LevelData&& loadedLevel);
     ~WorldState();
 
     entityx::EntityManager mEntities;
