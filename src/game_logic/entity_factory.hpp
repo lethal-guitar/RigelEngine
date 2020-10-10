@@ -99,7 +99,7 @@ public:
     engine::RandomNumberGenerator* pRandomGenerator,
     data::Difficulty difficulty);
 
-  entityx::Entity createEntitiesForLevel(
+  void createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) override;
 
   engine::components::Sprite createSpriteForId(

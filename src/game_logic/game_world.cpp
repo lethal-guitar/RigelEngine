@@ -268,12 +268,18 @@ GameWorld::WorldState::WorldState(
   , mRadarDishCounter(mEntities, eventManager)
   , mCollisionChecker(&mMap, mEntities, eventManager)
 {
+  using engine::components::Orientation;
+
   auto loadedLevel = loader::loadLevel(
     levelFileName(sessionId.mEpisode, sessionId.mLevel),
     *pResources,
     sessionId.mDifficulty);
-  auto playerEntity =
-    mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+  mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+  auto playerEntity = mEntityFactory.createActor(
+    data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
+  assignPlayerComponents(
+    playerEntity,
+    loadedLevel.mPlayerFacingLeft ? Orientation::Left : Orientation::Right);
 
   const auto counts = countBonusRelatedItems(mEntities);
   mBonusInfo.mInitialCameraCount = counts.mCameraCount;
