@@ -312,6 +312,7 @@ GameWorld::WorldState::WorldState(
       &mEntityFactory,
       &eventManager,
       &mRandomGenerator)
+  , mCamera(&mPlayer, mMap, eventManager)
   , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
   , mLevelMusicFile(loadedLevel.mMusicFile)
 {
@@ -328,6 +329,7 @@ GameWorld::WorldState::WorldState(
     sessionId,
     pPlayerModel,
     &mPlayer,
+    &mCamera,
     &mMap,
     engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
     pServiceProvider,

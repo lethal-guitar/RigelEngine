@@ -59,6 +59,7 @@ public:
     const data::GameSessionId& sessionId,
     data::PlayerModel* pPlayerModel,
     Player* pPlayer,
+    Camera* pCamera,
     data::map::Map* pMap,
     engine::MapRenderer::MapRenderData&& mapRenderData,
     IGameServiceProvider* pServiceProvider,
@@ -93,7 +94,7 @@ public:
 
 private:
   Player* mpPlayer;
-  Camera mCamera;
+  Camera* mpCamera;
 
   engine::ParticleSystem mParticles;
 

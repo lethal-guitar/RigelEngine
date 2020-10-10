@@ -49,6 +49,7 @@ IngameSystems::IngameSystems(
   const data::GameSessionId& sessionId,
   data::PlayerModel* pPlayerModel,
   Player* pPlayer,
+  Camera* pCamera,
   data::map::Map* pMap,
   engine::MapRenderer::MapRenderData&& mapRenderData,
   IGameServiceProvider* pServiceProvider,
@@ -62,15 +63,15 @@ IngameSystems::IngameSystems(
   const loader::ResourceLoader& resources
 )
   : mpPlayer(pPlayer)
-  , mCamera(pPlayer, *pMap, eventManager)
+  , mpCamera(pCamera)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
-      &mCamera.position(),
+      &mpCamera->position(),
       pRenderer,
       pMap,
       std::move(mapRenderData))
   , mPhysicsSystem(pCollisionChecker, pMap, &eventManager)
-  , mDebuggingSystem(pRenderer, &mCamera.position(), pMap)
+  , mDebuggingSystem(pRenderer, &mpCamera->position(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
       pPlayer,
@@ -111,7 +112,7 @@ IngameSystems::IngameSystems(
         &eventManager},
       pRadarDishCounter,
       pPlayer,
-      &mCamera.position(),
+      &mpCamera->position(),
       pMap)
   , mpRenderer(pRenderer)
   , mLowResLayer(
@@ -139,8 +140,8 @@ void IngameSystems::update(
   mPlayerInteractionSystem.updatePlayerInteraction(input, es);
 
   mpPlayer->update(input);
-  mCamera.update(input, viewPortSize);
-  engine::markActiveEntities(es, mCamera.position(), viewPortSize);
+  mpCamera->update(input, viewPortSize);
+  engine::markActiveEntities(es, mpCamera->position(), viewPortSize);
 
   // ----------------------------------------------------------------------
   // A.I. logic update
@@ -186,7 +187,7 @@ void IngameSystems::render(
     const auto saved = renderer::setupDefaultState(mpRenderer);
 
     mpRenderer->clear({0, 0, 0, 0});
-    mParticles.render(mCamera.position());
+    mParticles.render(mpCamera->position());
     mDebuggingSystem.update(es, viewPortSize);
   }
 
@@ -205,13 +206,13 @@ void IngameSystems::switchBackdrops() {
 
 
 void IngameSystems::centerViewOnPlayer() {
-  mCamera.centerViewOnPlayer();
+  mpCamera->centerViewOnPlayer();
 }
 
 
 void IngameSystems::printDebugText(std::ostream& stream) const {
   stream
-    << "Scroll: " << vec2String(mCamera.position(), 4) << '\n'
+    << "Scroll: " << vec2String(mpCamera->position(), 4) << '\n'
     << "Player: " << vec2String(mpPlayer->position(), 4) << '\n';
 }
 
