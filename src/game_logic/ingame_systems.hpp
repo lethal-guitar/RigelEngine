@@ -29,7 +29,6 @@
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
-#include "game_logic/enemies/spike_ball.hpp"
 #include "game_logic/interactive/item_container.hpp"
 #include "game_logic/player.hpp"
 #include "game_logic/player/damage_system.hpp"
@@ -121,7 +120,6 @@ private:
   game_logic::ItemContainerSystem mItemContainerSystem;
 
   game_logic::ai::SimpleWalkerSystem mSimpleWalkerSystem;
-  game_logic::ai::SpikeBallSystem mSpikeBallSystem;
 
   game_logic::BehaviorControllerSystem mBehaviorControllerSystem;
 

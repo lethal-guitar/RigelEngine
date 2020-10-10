@@ -17,13 +17,23 @@
 #include "utils.hpp"
 
 #include <base/spatial_types_printing.hpp>
+#include <data/game_traits.hpp>
 #include <data/map.hpp>
+#include <data/player_model.hpp>
 #include <engine/base_components.hpp>
 #include <engine/collision_checker.hpp>
+#include <engine/entity_activation_system.hpp>
+#include <engine/particle_system.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
+#include <engine/random_number_generator.hpp>
 #include <engine/timing.hpp>
+#include <game_logic/behavior_controller_system.hpp>
 #include <game_logic/enemies/spike_ball.hpp>
+#include <game_logic/entity_factory.hpp>
+#include <game_logic/interactive/enemy_radar.hpp>
+#include <game_logic/player.hpp>
+#include <game_logic/player/components.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>
@@ -39,13 +49,21 @@ using namespace game_logic;
 namespace ex = entityx;
 
 
+struct MockSpriteFactory : public rigel::engine::ISpriteFactory {
+  engine::components::Sprite createSprite(data::ActorID id) override {
+    static rigel::engine::SpriteDrawData dummyDrawData;
+    return {&dummyDrawData, {}};
+  }
+
+  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override {
+    // Bounds for spike ball
+    return {{}, {3, 3}};
+  }
+};
+
+
 TEST_CASE("Spike ball") {
   ex::EntityX entityx;
-  auto spikeBall = entityx.entities.create();
-  spikeBall.assign<Active>();
-  spikeBall.assign<WorldPosition>(2, 20);
-  spikeBall.assign<BoundingBox>(BoundingBox{{0, 0}, {3, 3}});
-  ai::configureSpikeBall(spikeBall);
 
   data::map::Map map{300, 300, data::map::TileAttributeDict{{0x0, 0xF}}};
 
@@ -54,19 +72,62 @@ TEST_CASE("Spike ball") {
     map.setTileAt(0, i, 21, 1);
   }
 
-  MockServiceProvider mockServiceProvicer;
+  MockServiceProvider mockServiceProvider;
+  engine::RandomNumberGenerator randomGenerator;
+  MockSpriteFactory mockSpriteFactory;
+  EntityFactory entityFactory{
+    &mockSpriteFactory,
+    &entityx.entities,
+    &randomGenerator,
+    data::Difficulty::Medium};
+
+  auto spikeBall =
+    entityFactory.createActor(data::ActorID::Bouncing_spike_ball, {2, 20});
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
   PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
-  ai::SpikeBallSystem spikeBallSystem{
+
+  auto playerEntity = entityx.entities.create();
+  playerEntity.assign<WorldPosition>(6, 100);
+  playerEntity.assign<Sprite>();
+  assignPlayerComponents(playerEntity, Orientation::Left);
+
+  data::PlayerModel playerModel;
+  Player player(
+    playerEntity,
+    data::Difficulty::Medium,
+    &playerModel,
+    &mockServiceProvider,
     &collisionChecker,
-    &mockServiceProvicer,
-    entityx.events};
+    &map,
+    &entityFactory,
+    &entityx.events,
+    &randomGenerator);
+
+  base::Vector cameraPosition{0, 0};
+  engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
+  RadarDishCounter radarDishCounter{entityx.entities, entityx.events};
+  BehaviorControllerSystem behaviorControllerSystem{
+    GlobalDependencies{
+      &collisionChecker,
+      &particleSystem,
+      &randomGenerator,
+      &entityFactory,
+      &mockServiceProvider,
+      &entityx.entities,
+      &entityx.events},
+    &radarDishCounter,
+    &player,
+    &cameraPosition,
+    &map};
 
   auto& ballPosition = *spikeBall.component<WorldPosition>();
 
   auto runOneFrame = [&]() {
-    spikeBallSystem.update(entityx.entities);
+    const auto& viewPortSize = data::GameTraits::mapViewPortSize;
+    engine::markActiveEntities(
+      entityx.entities, {0, 0}, viewPortSize);
+    behaviorControllerSystem.update(entityx.entities, {}, viewPortSize);
     physicsSystem.update(entityx.entities);
   };
 
