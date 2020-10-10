@@ -531,7 +531,7 @@ std::set<data::Bonus> GameWorld::achievedBonuses() const {
 
 
 void GameWorld::receive(const rigel::events::CheckPointActivated& event) {
-  mActivatedCheckpoint = CheckpointData{
+  mpState->mActivatedCheckpoint = CheckpointData{
     mpPlayerModel->makeCheckpoint(), event.mPosition};
   mMessageDisplay.setMessage(data::Messages::FoundRespawnBeacon);
 }
@@ -877,7 +877,7 @@ void GameWorld::handlePlayerDeath() {
     mpState->mPlayerDied = false;
     mpState->mActiveBossEntity = {};
 
-    if (mActivatedCheckpoint) {
+    if (mpState->mActivatedCheckpoint) {
       restartFromCheckpoint();
     } else {
       restartLevel();
@@ -913,8 +913,8 @@ void GameWorld::restartFromCheckpoint() {
     mpState->mBackdropSwitched = false;
   }
 
-  mpPlayerModel->restoreFromCheckpoint(mActivatedCheckpoint->mState);
-  mpState->mPlayer.position() = mActivatedCheckpoint->mPosition;
+  mpPlayerModel->restoreFromCheckpoint(mpState->mActivatedCheckpoint->mState);
+  mpState->mPlayer.position() = mpState->mActivatedCheckpoint->mPosition;
   mpState->mPlayer.resetAfterRespawn();
 
   mpState->mCamera.centerViewOnPlayer();
