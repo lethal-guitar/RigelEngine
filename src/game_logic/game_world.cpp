@@ -29,7 +29,6 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
-#include "game_logic/ingame_systems.hpp"
 #include "game_logic/trigger_components.hpp"
 #include "loader/resource_loader.hpp"
 #include "renderer/upscaling_utils.hpp"
@@ -199,6 +198,14 @@ auto localToGlobalTranslation(
 }
 
 
+auto viewPortSizeWideScreen(renderer::Renderer* pRenderer) {
+  const auto info = renderer::determineWidescreenViewPort(pRenderer);
+  return base::Extents{
+    info.mWidthTiles - HUD_WIDTH,
+    data::GameTraits::mapViewPortSize.height};
+}
+
+
 void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
   const renderer::WidescreenViewPortInfo& info
@@ -306,6 +313,7 @@ GameWorld::WorldState::WorldState(
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, eventManager)
   , mMap(std::move(loadedLevel.mMap))
+  , mLevelMusicFile(loadedLevel.mMusicFile)
   , mCollisionChecker(&mMap, mEntities, eventManager)
   , mPlayer(
       [&]() {
@@ -326,8 +334,61 @@ GameWorld::WorldState::WorldState(
       &eventManager,
       &mRandomGenerator)
   , mCamera(&mPlayer, mMap, eventManager)
+  , mParticles(&mRandomGenerator, pRenderer)
+  , mRenderingSystem(
+      &mCamera.position(),
+      pRenderer,
+      &mMap,
+      engine::MapRenderer::MapRenderData{
+        std::move(loadedLevel.mTileSetImage),
+        std::move(loadedLevel.mBackdropImage),
+        std::move(loadedLevel.mSecondaryBackdropImage),
+        loadedLevel.mBackdropScrollMode})
+  , mPhysicsSystem(&mCollisionChecker, &mMap, &eventManager)
+  , mDebuggingSystem(pRenderer, &mCamera.position(), &mMap)
+  , mPlayerInteractionSystem(
+      sessionId,
+      &mPlayer,
+      pPlayerModel,
+      pServiceProvider,
+      &mEntityFactory,
+      &eventManager,
+      *pResources)
+  , mPlayerDamageSystem(&mPlayer)
+  , mPlayerProjectileSystem(
+      &mEntityFactory,
+      pServiceProvider,
+      &mCollisionChecker,
+      &mMap)
+  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
+  , mDynamicGeometrySystem(
+      pServiceProvider,
+      &mEntities,
+      &mMap,
+      &mRandomGenerator,
+      &eventManager)
+  , mEffectsSystem(
+      pServiceProvider,
+      &mRandomGenerator,
+      &mEntities,
+      &mEntityFactory,
+      &mParticles,
+      eventManager)
+  , mItemContainerSystem(&mEntities, &mCollisionChecker, eventManager)
+  , mBehaviorControllerSystem(
+      GlobalDependencies{
+        &mCollisionChecker,
+        &mParticles,
+        &mRandomGenerator,
+        &mEntityFactory,
+        pServiceProvider,
+        &mEntities,
+        &eventManager},
+      &mRadarDishCounter,
+      &mPlayer,
+      &mCamera.position(),
+      &mMap)
   , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
-  , mLevelMusicFile(loadedLevel.mMusicFile)
 {
   mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
 
@@ -338,31 +399,11 @@ GameWorld::WorldState::WorldState(
   mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
   mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
 
-  mpSystems = std::make_unique<IngameSystems>(
-    sessionId,
-    pPlayerModel,
-    &mPlayer,
-    &mCamera,
-    &mMap,
-    engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
-    pServiceProvider,
-    &mEntityFactory,
-    &mRandomGenerator,
-    &mRadarDishCounter,
-    &mCollisionChecker,
-    pRenderer,
-    mEntities,
-    eventManager,
-    *pResources);
-
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect = EarthQuakeEffect{
       pServiceProvider, &mRandomGenerator, &eventManager};
   }
 }
-
-
-GameWorld::WorldState::~WorldState() = default;
 
 
 GameWorld::GameWorld(
@@ -388,6 +429,10 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
+  , mLowResLayer(
+      mpRenderer,
+      renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
+      data::GameTraits::viewPortHeightPx)
 {
   mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   mEventManager.subscribe<rigel::events::ExitReached>(*this);
@@ -624,17 +669,42 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
     mpState->mBossDeathAnimationStartPending = false;
   }
 
-  if (
+  const auto& viewPortSize =
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
-  ) {
-    const auto info = renderer::determineWidescreenViewPort(mpRenderer);
-    const auto viewPortSize = base::Extents{
-      info.mWidthTiles - HUD_WIDTH,
-      data::GameTraits::mapViewPortSize.height};
-    mpState->mpSystems->update(input, mpState->mEntities, viewPortSize);
-  } else {
-    mpState->mpSystems->update(input, mpState->mEntities, data::GameTraits::mapViewPortSize);
-  }
+      ? viewPortSizeWideScreen(mpRenderer)
+      : data::GameTraits::mapViewPortSize;
+
+  mpState->mRenderingSystem.updateAnimatedMapTiles();
+  engine::updateAnimatedSprites(mpState->mEntities);
+
+  mpState->mPlayerInteractionSystem.updatePlayerInteraction(
+    input, mpState->mEntities);
+  mpState->mPlayer.update(input);
+  mpState->mCamera.update(input, viewPortSize);
+
+  engine::markActiveEntities(
+    mpState->mEntities, mpState->mCamera.position(), viewPortSize);
+  mpState->mBehaviorControllerSystem.update(
+    mpState->mEntities, input, viewPortSize);
+
+  mpState->mPhysicsSystem.updatePhase1(mpState->mEntities);
+
+  // Collect items after physics, so that any collectible
+  // items are in their final positions for this frame.
+  mpState->mItemContainerSystem.updateItemBounce(mpState->mEntities);
+  mpState->mPlayerInteractionSystem.updateItemCollection(mpState->mEntities);
+  mpState->mPlayerDamageSystem.update(mpState->mEntities);
+  mpState->mDamageInflictionSystem.update(mpState->mEntities);
+  mpState->mItemContainerSystem.update(mpState->mEntities);
+  mpState->mPlayerProjectileSystem.update(mpState->mEntities);
+
+  mpState->mEffectsSystem.update(mpState->mEntities);
+  mpState->mLifeTimeSystem.update(mpState->mEntities);
+
+  // Now process any MovingBody objects that have been spawned after phase 1
+  mpState->mPhysicsSystem.updatePhase2(mpState->mEntities);
+
+  mpState->mParticles.update();
 }
 
 
@@ -643,12 +713,25 @@ void GameWorld::render() {
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
-    if (!mpState->mScreenFlashColor) {
-      mpState->mpSystems->render(
-        mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
-    } else {
+    if (mpState->mScreenFlashColor) {
       mpRenderer->clear(*mpState->mScreenFlashColor);
+      return;
     }
+
+    mpState->mRenderingSystem.update(
+      mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
+
+    {
+      const auto binder =
+        renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
+      const auto saved = renderer::setupDefaultState(mpRenderer);
+
+      mpRenderer->clear({0, 0, 0, 0});
+      mpState->mParticles.render(mpState->mCamera.position());
+      mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
+    }
+
+    mLowResLayer.render(mpRenderer, 0, 0);
   };
 
   auto drawTopRow = [&, this]() {
@@ -731,7 +814,7 @@ void GameWorld::onReactorDestroyed(const base::Vector& position) {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnReactorDestruction;
   if (!mpState->mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
-    mpState->mpSystems->switchBackdrops();
+    mpState->mRenderingSystem.switchBackdrops();
     mpState->mBackdropSwitched = true;
     mpState->mReactorDestructionFramesElapsed = 0;
   }
@@ -826,7 +909,7 @@ void GameWorld::restartFromCheckpoint() {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (mpState->mBackdropSwitched && shouldSwitchBackAfterRespawn) {
-    mpState->mpSystems->switchBackdrops();
+    mpState->mRenderingSystem.switchBackdrops();
     mpState->mBackdropSwitched = false;
   }
 
@@ -856,7 +939,7 @@ void GameWorld::handleTeleporter() {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (switchBackdrop) {
-    mpState->mpSystems->switchBackdrops();
+    mpState->mRenderingSystem.switchBackdrops();
     mpState->mBackdropSwitched = !mpState->mBackdropSwitched;
   }
 
