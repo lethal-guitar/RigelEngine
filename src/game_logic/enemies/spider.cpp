@@ -26,11 +26,10 @@
 #include "game_logic/entity_factory.hpp"
 
 
-namespace rigel::game_logic::ai {
+namespace rigel::game_logic::behaviors {
 
 using namespace engine::components;
 using namespace engine::orientation;
-using engine::CollisionChecker;
 
 
 namespace {
@@ -100,196 +99,174 @@ base::Vector offsetForClinging(
   return base::Vector{0, 0};
 }
 
+}
 
-void walkOnFloor(components::Spider& self, entityx::Entity entity) {
-  self.mState = components::Spider::State::OnFloor;
+
+void Spider::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool isOnScreen,
+  entityx::Entity entity
+) {
+  auto& position = *entity.component<WorldPosition>();
+  const auto& bbox = *entity.component<BoundingBox>();
+  auto& sprite = *entity.component<Sprite>();
+  const auto worldSpaceBox = engine::toWorldSpace(bbox, position);
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+  const auto playerOrientation = s.mpPlayer->orientation();
+
+  auto tryClingToPlayer = [&, this](const SpiderClingPosition clingPos) {
+    if (
+      s.mpPlayer->hasSpiderAt(clingPos) ||
+      s.mpPlayer->isDead() ||
+      s.mpPlayer->isCloaked()
+    ) {
+      return false;
+    }
+
+    s.mpPlayer->attachSpider(clingPos);
+    mState = State::ClingingToPlayer;
+    mPreviousPlayerOrientation = s.mpPlayer->orientation();
+    mClingPosition = clingPos;
+
+    engine::removeSafely<ai::components::SimpleWalker>(entity);
+    entity.remove<game_logic::components::Shootable>();
+    entity.remove<MovingBody>();
+    return true;
+  };
+
+  auto walkOnCeiling = [&, this]() {
+    mState = State::OnCeiling;
+    entity.assign<ai::components::SimpleWalker>(ceilingWalkerConfig());
+    sprite.mFramesToRender[0] = 0;
+  };
+
+  auto isTouchingPlayer = [&, this]() {
+    return worldSpaceBox.intersects(s.mpPlayer->worldSpaceHitBox());
+  };
+
+  auto detachAndDestroy = [&, this]() {
+    s.mpPlayer->detachSpider(mClingPosition);
+    entity.destroy();
+  };
+
+  auto fallOff = [&, this]() {
+    using M = SpriteMovement;
+    const auto movementType = d.mpRandomGenerator->gen() % 2 != 0
+      ? M::FlyUpperLeft
+      : M::FlyUpperRight;
+    spawnMovingEffectSprite(
+      *d.mpEntityFactory,
+      data::ActorID::Spider_shaken_off,
+      movementType,
+      position);
+    detachAndDestroy();
+  };
+
+  auto startFalling = [&, this]() {
+    sprite.mFramesToRender[0] = 6;
+    entity.remove<ai::components::SimpleWalker>();
+    mState = State::Falling;
+    entity.component<MovingBody>()->mGravityAffected = true;
+  };
+
+  auto clingToPlayer = [&, this]() {
+    *entity.component<Orientation>() = playerOrientation;
+    position = playerPosition +
+      offsetForClinging(mClingPosition, playerOrientation);
+    sprite.mFramesToRender[0] =
+      baseFrameForClinging(mClingPosition) +
+      d.mpRandomGenerator->gen() % 2;
+  };
+
+  auto updateShakeOff = [&, this]() {
+    const auto playerTurnedThisFrame =
+      playerOrientation != mPreviousPlayerOrientation;
+    mPreviousPlayerOrientation = playerOrientation;
+
+    if (playerTurnedThisFrame) {
+      ++mShakeOffProgress;
+    } else if (s.mpPerFrameState->mIsOddFrame && mShakeOffProgress > 0) {
+      --mShakeOffProgress;
+    }
+
+    if (mShakeOffProgress >= SHAKE_OFF_THRESHOLD) {
+      fallOff();
+    }
+  };
+
+  switch (mState) {
+    case State::Uninitialized:
+      if (d.mpCollisionChecker->isOnSolidGround(worldSpaceBox)) {
+        walkOnFloor(entity);
+      } else {
+        walkOnCeiling();
+      }
+      break;
+
+    case State::OnCeiling:
+      if (
+        position.x == playerPosition.x &&
+        position.y < playerPosition.y - 3
+      ) {
+        startFalling();
+      }
+      break;
+
+    case State::Falling:
+      if (isTouchingPlayer()) {
+        tryClingToPlayer(SpiderClingPosition::Head);
+      }
+      break;
+
+    case State::OnFloor:
+      if (isTouchingPlayer()) {
+        const auto success = tryClingToPlayer(SpiderClingPosition::Weapon);
+        if (!success) {
+          tryClingToPlayer(SpiderClingPosition::Back);
+        }
+      }
+      break;
+
+    case State::ClingingToPlayer:
+      if (s.mpPlayer->isIncapacitated()) {
+        detachAndDestroy();
+        return;
+      }
+
+      if (s.mpPlayer->isDead()) {
+        fallOff();
+      } else {
+        clingToPlayer();
+        updateShakeOff();
+      }
+      break;
+
+    default:
+      break;
+  }
+}
+
+
+void Spider::onCollision(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const engine::events::CollidedWithWorld& event,
+  entityx::Entity entity
+) {
+  if (mState == State::Falling) {
+    walkOnFloor(entity);
+  }
+}
+
+
+void Spider::walkOnFloor(entityx::Entity entity) {
+  mState = State::OnFloor;
 
   auto& sprite = *entity.component<Sprite>();
   sprite.mFramesToRender[0] = 3;
 
   entity.assign<ai::components::SimpleWalker>(floorWalkerConfig());
-}
-
-}
-
-
-SpiderSystem::SpiderSystem(
-  Player* pPlayer,
-  CollisionChecker* pCollisionChecker,
-  engine::RandomNumberGenerator* pRandomGenerator,
-  IEntityFactory* pEntityFactory,
-  entityx::EventManager& events
-)
-  : mpPlayer(pPlayer)
-  , mpCollisionChecker(pCollisionChecker)
-  , mpRandomGenerator(pRandomGenerator)
-  , mpEntityFactory(pEntityFactory)
-{
-  events.subscribe<engine::events::CollidedWithWorld>(*this);
-}
-
-
-void SpiderSystem::update(entityx::EntityManager& es) {
-  using components::Spider;
-  using State = Spider::State;
-
-  es.each<Spider, Sprite, WorldPosition, BoundingBox, Active>(
-    [this](
-      entityx::Entity entity,
-      Spider& self,
-      Sprite& sprite,
-      WorldPosition& position,
-      const BoundingBox& bbox,
-      const Active&
-    ) {
-      const auto worldSpaceBox = engine::toWorldSpace(bbox, position);
-      const auto& playerPosition = mpPlayer->orientedPosition();
-      const auto playerOrientation = mpPlayer->orientation();
-
-      auto tryClingToPlayer = [&, this](const SpiderClingPosition clingPos) {
-        if (
-          mpPlayer->hasSpiderAt(clingPos) ||
-          mpPlayer->isDead() ||
-          mpPlayer->isCloaked()
-        ) {
-          return false;
-        }
-
-        mpPlayer->attachSpider(clingPos);
-        self.mState = State::ClingingToPlayer;
-        self.mPreviousPlayerOrientation = mpPlayer->orientation();
-        self.mClingPosition = clingPos;
-
-        engine::removeSafely<ai::components::SimpleWalker>(entity);
-        entity.remove<game_logic::components::Shootable>();
-        entity.remove<MovingBody>();
-        return true;
-      };
-
-      auto walkOnCeiling = [&, this]() {
-        self.mState = State::OnCeiling;
-        entity.assign<ai::components::SimpleWalker>(ceilingWalkerConfig());
-        sprite.mFramesToRender[0] = 0;
-      };
-
-      auto isTouchingPlayer = [&, this]() {
-        return worldSpaceBox.intersects(mpPlayer->worldSpaceHitBox());
-      };
-
-      auto detachAndDestroy = [&, this]() {
-        mpPlayer->detachSpider(self.mClingPosition);
-        entity.destroy();
-      };
-
-      auto fallOff = [&, this]() {
-        using M = SpriteMovement;
-        const auto movementType = mpRandomGenerator->gen() % 2 != 0
-          ? M::FlyUpperLeft
-          : M::FlyUpperRight;
-        spawnMovingEffectSprite(*mpEntityFactory, data::ActorID::Spider_shaken_off, movementType, position);
-        detachAndDestroy();
-      };
-
-      auto startFalling = [&, this]() {
-        sprite.mFramesToRender[0] = 6;
-        entity.remove<ai::components::SimpleWalker>();
-        self.mState = State::Falling;
-        entity.component<MovingBody>()->mGravityAffected = true;
-      };
-
-      auto clingToPlayer = [&, this]() {
-        *entity.component<Orientation>() = playerOrientation;
-        position = playerPosition +
-          offsetForClinging(self.mClingPosition, playerOrientation);
-        sprite.mFramesToRender[0] =
-          baseFrameForClinging(self.mClingPosition) +
-          mpRandomGenerator->gen() % 2;
-      };
-
-      auto updateShakeOff = [&, this]() {
-        const auto playerTurnedThisFrame =
-          playerOrientation != self.mPreviousPlayerOrientation;
-        self.mPreviousPlayerOrientation = playerOrientation;
-
-        if (playerTurnedThisFrame) {
-          ++self.mShakeOffProgress;
-        } else if (mIsOddFrame && self.mShakeOffProgress > 0) {
-          --self.mShakeOffProgress;
-        }
-
-        if (self.mShakeOffProgress >= SHAKE_OFF_THRESHOLD) {
-          fallOff();
-        }
-      };
-
-      switch (self.mState) {
-        case State::Uninitialized:
-          if (mpCollisionChecker->isOnSolidGround(worldSpaceBox)) {
-            walkOnFloor(self, entity);
-          } else {
-            walkOnCeiling();
-          }
-          break;
-
-        case State::OnCeiling:
-          if (
-            position.x == playerPosition.x &&
-            position.y < playerPosition.y - 3
-          ) {
-            startFalling();
-          }
-          break;
-
-        case State::Falling:
-          if (isTouchingPlayer()) {
-            tryClingToPlayer(SpiderClingPosition::Head);
-          }
-          break;
-
-        case State::OnFloor:
-          if (isTouchingPlayer()) {
-            const auto success = tryClingToPlayer(SpiderClingPosition::Weapon);
-            if (!success) {
-              tryClingToPlayer(SpiderClingPosition::Back);
-            }
-          }
-          break;
-
-        case State::ClingingToPlayer:
-          if (mpPlayer->isIncapacitated()) {
-            detachAndDestroy();
-            return;
-          }
-
-          if (mpPlayer->isDead()) {
-            fallOff();
-          } else {
-            clingToPlayer();
-            updateShakeOff();
-          }
-          break;
-
-        default:
-          break;
-      }
-    });
-
-  mIsOddFrame = !mIsOddFrame;
-}
-
-
-void SpiderSystem::receive(const engine::events::CollidedWithWorld& event) {
-  using State = components::Spider::State;
-
-  auto entity = event.mEntity;
-  if (!entity.has_component<components::Spider>()) {
-    return;
-  }
-
-  auto& self = *entity.component<components::Spider>();
-  if (self.mState == State::Falling) {
-    walkOnFloor(self, entity);
-  }
 }
 
 }

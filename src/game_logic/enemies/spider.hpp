@@ -19,27 +19,37 @@
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel {
 
-namespace engine { class CollisionChecker; }
-namespace engine { class RandomNumberGenerator; }
-namespace game_logic { struct IEntityFactory; }
-
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-namespace rigel::game_logic::ai {
+namespace rigel::game_logic::behaviors {
 
-namespace components {
-
-// TODO: Use variant pattern for states
 struct Spider {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onCollision(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const engine::events::CollidedWithWorld& event,
+    entityx::Entity entity);
+
+  void walkOnFloor(entityx::Entity entity);
+
   enum class State {
     Uninitialized,
     OnCeiling,
@@ -48,34 +58,11 @@ struct Spider {
     ClingingToPlayer
   };
 
+  // TODO: Use variant pattern for states?
   State mState = State::Uninitialized;
   engine::components::Orientation mPreviousPlayerOrientation;
   int mShakeOffProgress = 0;
   SpiderClingPosition mClingPosition;
-};
-
-}
-
-
-class SpiderSystem : public entityx::Receiver<SpiderSystem> {
-public:
-  SpiderSystem(
-    Player* pPlayer,
-    engine::CollisionChecker* pCollisionChecker,
-    engine::RandomNumberGenerator* pRandomGenerator,
-    IEntityFactory* pEntityFactory,
-    entityx::EventManager& events);
-
-  void update(entityx::EntityManager& es);
-  void receive(const engine::events::CollidedWithWorld& event);
-
-private:
-  Player* mpPlayer;
-  engine::CollisionChecker* mpCollisionChecker;
-  engine::RandomNumberGenerator* mpRandomGenerator;
-  IEntityFactory* mpEntityFactory;
-
-  bool mIsOddFrame = false;
 };
 
 }
