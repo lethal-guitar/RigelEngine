@@ -128,6 +128,11 @@ private:
     bool mPlayerTookDamage = false;
   };
 
+  struct CheckpointData {
+    data::PlayerModel::CheckpointState mState;
+    base::Vector mPosition;
+  };
+
   struct WorldState {
     WorldState(
       IGameServiceProvider* pServiceProvider,
@@ -173,6 +178,7 @@ private:
     game_logic::ItemContainerSystem mItemContainerSystem;
     game_logic::BehaviorControllerSystem mBehaviorControllerSystem;
 
+    std::optional<CheckpointData> mActivatedCheckpoint;
     std::optional<EarthQuakeEffect> mEarthQuakeEffect;
     std::optional<base::Color> mScreenFlashColor;
     std::optional<base::Color> mBackdropFlashColor;
@@ -187,11 +193,6 @@ private:
     bool mPlayerDied = false;
   };
 
-  struct CheckpointData {
-    data::PlayerModel::CheckpointState mState;
-    base::Vector mPosition;
-  };
-
   renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture* mpUiSpriteSheet;
@@ -204,7 +205,6 @@ private:
   entityx::EventManager mEventManager;
   engine::SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
-  std::optional<CheckpointData> mActivatedCheckpoint;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
   renderer::RenderTargetTexture mLowResLayer;
