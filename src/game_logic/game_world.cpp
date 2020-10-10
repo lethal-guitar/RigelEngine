@@ -294,17 +294,28 @@ GameWorld::WorldState::WorldState(
   , mRadarDishCounter(mEntities, eventManager)
   , mMap(std::move(loadedLevel.mMap))
   , mCollisionChecker(&mMap, mEntities, eventManager)
+  , mPlayer(
+      [&]() {
+        using engine::components::Orientation;
+        auto playerEntity = mEntityFactory.createActor(
+          data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
+        assignPlayerComponents(
+          playerEntity,
+          loadedLevel.mPlayerFacingLeft ? Orientation::Left : Orientation::Right);
+        return playerEntity;
+      }(),
+      sessionId.mDifficulty,
+      pPlayerModel,
+      pServiceProvider,
+      &mCollisionChecker,
+      &mMap,
+      &mEntityFactory,
+      &eventManager,
+      &mRandomGenerator)
   , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
   , mLevelMusicFile(loadedLevel.mMusicFile)
 {
-  using engine::components::Orientation;
-
   mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
-  auto playerEntity = mEntityFactory.createActor(
-    data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
-  assignPlayerComponents(
-    playerEntity,
-    loadedLevel.mPlayerFacingLeft ? Orientation::Left : Orientation::Right);
 
   const auto counts = countBonusRelatedItems(mEntities);
   mBonusInfo.mInitialCameraCount = counts.mCameraCount;
@@ -315,8 +326,8 @@ GameWorld::WorldState::WorldState(
 
   mpSystems = std::make_unique<IngameSystems>(
     sessionId,
-    playerEntity,
     pPlayerModel,
+    &mPlayer,
     &mMap,
     engine::MapRenderer::MapRenderData{std::move(loadedLevel)},
     pServiceProvider,

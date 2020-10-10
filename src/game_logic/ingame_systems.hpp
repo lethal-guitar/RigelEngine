@@ -57,8 +57,8 @@ class IngameSystems {
 public:
   IngameSystems(
     const data::GameSessionId& sessionId,
-    entityx::Entity playerEntity,
     data::PlayerModel* pPlayerModel,
+    Player* pPlayer,
     data::map::Map* pMap,
     engine::MapRenderer::MapRenderData&& mapRenderData,
     IGameServiceProvider* pServiceProvider,
@@ -92,13 +92,13 @@ public:
   void centerViewOnPlayer();
 
   Player& player() {
-    return mPlayer;
+    return *mpPlayer;
   }
 
   void printDebugText(std::ostream& stream) const;
 
 private:
-  Player mPlayer;
+  Player* mpPlayer;
   Camera mCamera;
 
   engine::ParticleSystem mParticles;

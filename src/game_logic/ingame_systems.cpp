@@ -47,8 +47,8 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 
 IngameSystems::IngameSystems(
   const data::GameSessionId& sessionId,
-  entityx::Entity playerEntity,
   data::PlayerModel* pPlayerModel,
+  Player* pPlayer,
   data::map::Map* pMap,
   engine::MapRenderer::MapRenderData&& mapRenderData,
   IGameServiceProvider* pServiceProvider,
@@ -61,17 +61,8 @@ IngameSystems::IngameSystems(
   entityx::EventManager& eventManager,
   const loader::ResourceLoader& resources
 )
-  : mPlayer(
-      playerEntity,
-      sessionId.mDifficulty,
-      pPlayerModel,
-      pServiceProvider,
-      pCollisionChecker,
-      pMap,
-      pEntityFactory,
-      &eventManager,
-      pRandomGenerator)
-  , mCamera(&mPlayer, *pMap, eventManager)
+  : mpPlayer(pPlayer)
+  , mCamera(pPlayer, *pMap, eventManager)
   , mParticles(pRandomGenerator, pRenderer)
   , mRenderingSystem(
       &mCamera.position(),
@@ -82,13 +73,13 @@ IngameSystems::IngameSystems(
   , mDebuggingSystem(pRenderer, &mCamera.position(), pMap)
   , mPlayerInteractionSystem(
       sessionId,
-      &mPlayer,
+      pPlayer,
       pPlayerModel,
       pServiceProvider,
       pEntityFactory,
       &eventManager,
       resources)
-  , mPlayerDamageSystem(&mPlayer)
+  , mPlayerDamageSystem(pPlayer)
   , mPlayerProjectileSystem(
       pEntityFactory,
       pServiceProvider,
@@ -119,7 +110,7 @@ IngameSystems::IngameSystems(
         &entities,
         &eventManager},
       pRadarDishCounter,
-      &mPlayer,
+      pPlayer,
       &mCamera.position(),
       pMap)
   , mpRenderer(pRenderer)
@@ -147,7 +138,7 @@ void IngameSystems::update(
   // ----------------------------------------------------------------------
   mPlayerInteractionSystem.updatePlayerInteraction(input, es);
 
-  mPlayer.update(input);
+  mpPlayer->update(input);
   mCamera.update(input, viewPortSize);
   engine::markActiveEntities(es, mCamera.position(), viewPortSize);
 
@@ -216,8 +207,8 @@ void IngameSystems::switchBackdrops() {
 void IngameSystems::restartFromCheckpoint(
   const base::Vector& checkpointPosition
 ) {
-  mPlayer.position() = checkpointPosition;
-  mPlayer.resetAfterRespawn();
+  mpPlayer->position() = checkpointPosition;
+  mpPlayer->resetAfterRespawn();
 }
 
 
@@ -229,7 +220,7 @@ void IngameSystems::centerViewOnPlayer() {
 void IngameSystems::printDebugText(std::ostream& stream) const {
   stream
     << "Scroll: " << vec2String(mCamera.position(), 4) << '\n'
-    << "Player: " << vec2String(mPlayer.position(), 4) << '\n';
+    << "Player: " << vec2String(mpPlayer->position(), 4) << '\n';
 }
 
 }

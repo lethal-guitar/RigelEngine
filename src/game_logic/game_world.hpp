@@ -32,6 +32,7 @@
 #include "game_logic/entity_factory.hpp"
 #include "game_logic/input.hpp"
 #include "game_logic/interactive/enemy_radar.hpp"
+#include "game_logic/player.hpp"
 #include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
@@ -144,6 +145,7 @@ private:
     std::string mLevelMusicFile;
 
     engine::CollisionChecker mCollisionChecker;
+    Player mPlayer;
     std::unique_ptr<IngameSystems> mpSystems;
 
     std::optional<EarthQuakeEffect> mEarthQuakeEffect;
