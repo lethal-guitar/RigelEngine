@@ -18,7 +18,6 @@
 
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
-#include "game_logic/ingame_systems.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -147,7 +146,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt) {
       update();
     }
 
-    mWorld.mpState->mpSystems->updateBackdropAutoScrolling(dt);
+    mWorld.mpState->mRenderingSystem.updateBackdropAutoScrolling(dt);
   }
 }
 
@@ -329,7 +328,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
     return;
   }
 
-  auto& debuggingSystem = mWorld.mpState->mpSystems->debuggingSystem();
+  auto& debuggingSystem = mWorld.mpState->mDebuggingSystem;
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();

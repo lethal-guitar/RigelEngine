@@ -174,8 +174,6 @@ set(core_sources
     game_logic/hazards/smash_hammer.cpp
     game_logic/hazards/smash_hammer.hpp
     game_logic/ientity_factory.hpp
-    game_logic/ingame_systems.cpp
-    game_logic/ingame_systems.hpp
     game_logic/input.hpp
     game_logic/interactive/blowing_fan.cpp
     game_logic/interactive/blowing_fan.hpp
