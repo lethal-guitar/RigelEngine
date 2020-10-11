@@ -213,6 +213,8 @@ public:
   Player& operator=(const Player&) = delete;
   Player& operator=(Player&&) = default;
 
+  void synchronizeTo(const Player& other, entityx::EntityManager& es);
+
   void update(const PlayerInput& inputs);
 
   void takeDamage(int amount);
@@ -264,6 +266,10 @@ public:
 
   data::PlayerModel& model() {
     return *mpPlayerModel;
+  }
+
+  const entityx::Entity& entity() const {
+    return mEntity;
   }
 
   void receive(const events::ElevatorAttachmentChanged& event);

@@ -161,6 +161,12 @@ Camera::Camera(
 }
 
 
+void Camera::synchronizeTo(const Camera& other) {
+  mPosition = other.mPosition;
+  mManualScrollCooldown = other.mManualScrollCooldown;
+}
+
+
 void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize) {
   mViewPortSize = viewPortSize;
   updateManualScrolling(input);

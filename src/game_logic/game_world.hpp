@@ -80,6 +80,9 @@ public:
   void render();
   void processEndOfFrameActions();
 
+  void quickSave();
+  void quickLoad();
+
   friend class rigel::GameRunner;
 
 private:
@@ -102,6 +105,11 @@ private:
   void printDebugText(std::ostream& stream) const;
 
 private:
+  struct QuickSaveData {
+    data::PlayerModel mPlayerModel;
+    std::unique_ptr<WorldState> mpState;
+  };
+
   renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture* mpUiSpriteSheet;
@@ -118,6 +126,7 @@ private:
   renderer::RenderTargetTexture mLowResLayer;
 
   std::unique_ptr<WorldState> mpState;
+  std::unique_ptr<QuickSaveData> mpQuickSave;
 };
 
 }

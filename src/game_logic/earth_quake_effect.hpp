@@ -36,6 +36,8 @@ public:
     engine::RandomNumberGenerator* pRandomGenerator,
     entityx::EventManager* pEvents);
 
+  void synchronizeTo(const EarthQuakeEffect& other);
+
   void update();
   bool isQuaking() const;
 

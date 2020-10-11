@@ -659,6 +659,46 @@ void GameWorld::processEndOfFrameActions() {
 }
 
 
+void GameWorld::quickSave() {
+  if (!mpOptions->mQuickSavingEnabled) {
+    return;
+  }
+
+  auto pStateCopy = std::make_unique<WorldState>(
+    mpServiceProvider,
+    mpRenderer,
+    mpResources,
+    mpPlayerModel,
+    &mSpriteFactory,
+    mSessionId);
+  pStateCopy->synchronizeTo(
+    *mpState,
+    mpServiceProvider,
+    mpPlayerModel,
+    mSessionId);
+
+  mpQuickSave = std::make_unique<QuickSaveData>(
+    QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
+
+  mMessageDisplay.setMessage("Quick saved.");
+}
+
+
+void GameWorld::quickLoad() {
+  if (!mpOptions->mQuickSavingEnabled || !mpQuickSave) {
+    return;
+  }
+
+  *mpPlayerModel = mpQuickSave->mPlayerModel;
+  mpState->synchronizeTo(
+    *mpQuickSave->mpState,
+    mpServiceProvider,
+    mpPlayerModel,
+    mSessionId);
+  mMessageDisplay.setMessage("Quick save restored.");
+}
+
+
 void GameWorld::onReactorDestroyed(const base::Vector& position) {
   mpState->mScreenFlashColor = loader::INGAME_PALETTE[7];
   mpState->mEntityFactory.createProjectile(

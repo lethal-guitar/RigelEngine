@@ -98,6 +98,17 @@ private:
 
 namespace components {
 
+struct ItemBounceEffect {
+  explicit ItemBounceEffect(const float fallVelocity)
+    : mFallVelocity(fallVelocity)
+  {
+  }
+
+  int mFramesElapsed = 1;
+  float mFallVelocity = 0.0f;
+};
+
+
 struct ItemContainer {
   enum class ReleaseStyle : std::uint8_t {
     Default,

@@ -105,6 +105,12 @@ struct WorldState {
     data::GameSessionId sessionId,
     data::map::LevelData&& loadedLevel);
 
+  void synchronizeTo(
+    const WorldState& other,
+    IGameServiceProvider* pServiceProvider,
+    data::PlayerModel* pPlayerModel,
+    data::GameSessionId sessionId);
+
   data::map::Map mMap;
 
   entityx::EventManager mEventManager;

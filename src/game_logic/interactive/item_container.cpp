@@ -39,20 +39,10 @@ using engine::components::BoundingBox;
 using engine::components::MovingBody;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
+using game_logic::components::ItemBounceEffect;
 using game_logic::components::ItemContainer;
 
 constexpr int ITEM_BOUNCE_SEQUENCE[] = {-3, -2, -1, 0, 1, 2, 3, -1, 1};
-
-
-struct ItemBounceEffect {
-  explicit ItemBounceEffect(const float fallVelocity)
-    : mFallVelocity(fallVelocity)
-  {
-  }
-
-  int mFramesElapsed = 1;
-  float mFallVelocity = 0.0f;
-};
 
 }
 

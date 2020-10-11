@@ -110,6 +110,25 @@ struct ParticleGroup {
   {
   }
 
+  ParticleGroup(const ParticleGroup& other)
+    : mpParticles(std::make_unique<ParticlesList>(*other.mpParticles))
+    , mOrigin(other.mOrigin)
+    , mColor(other.mColor)
+  {
+  }
+
+  ParticleGroup& operator=(const ParticleGroup& other) {
+    auto copy = other;
+    std::swap(mpParticles, copy.mpParticles);
+    mOrigin = copy.mOrigin;
+    mColor = copy.mColor;
+    mFramesElapsed = copy.mFramesElapsed;
+    return *this;
+  }
+
+  ParticleGroup(ParticleGroup&&) = default;
+  ParticleGroup& operator=(ParticleGroup&&) = default;
+
   void update() {
     ++mFramesElapsed;
   }
@@ -147,6 +166,11 @@ ParticleSystem::ParticleSystem(
 
 
 ParticleSystem::~ParticleSystem() = default;
+
+
+void ParticleSystem::synchronizeTo(const ParticleSystem& other) {
+  mParticleGroups = other.mParticleGroups;
+}
 
 
 void ParticleSystem::spawnParticles(

@@ -22,6 +22,7 @@
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -40,6 +41,7 @@ void Elevator::update(
   using engine::components::MovingBody;
   using engine::components::Sprite;
   using engine::components::WorldPosition;
+  using game_logic::components::ActorTag;
 
   const auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
@@ -57,6 +59,7 @@ void Elevator::update(
 
   auto attach = [&]() {
     entity.component<MovingBody>()->mGravityAffected = false;
+    entity.assign<ActorTag>(ActorTag::Type::ActiveElevator);
     mState = State{position.y};
 
     d.mpEvents->emit(rigel::events::TutorialMessage{
@@ -70,6 +73,7 @@ void Elevator::update(
     sprite.mFramesToRender.back() = engine::IGNORE_RENDER_SLOT;
     entity.component<MovingBody>()->mVelocity.y = 2.0f;
     entity.component<MovingBody>()->mGravityAffected = true;
+    entity.remove<ActorTag>();
     mState.reset();
 
     d.mpEvents->emit(events::ElevatorAttachmentChanged{

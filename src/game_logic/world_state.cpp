@@ -17,8 +17,18 @@
 #include "world_state.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "engine/base_components.hpp"
+#include "engine/life_time_components.hpp"
+#include "engine/physical_components.hpp"
 #include "engine/sprite_factory.hpp"
+#include "engine/visual_components.hpp"
 #include "game_logic/actor_tag.hpp"
+#include "game_logic/behavior_controller.hpp"
+#include "game_logic/collectable_components.hpp"
+#include "game_logic/damage_components.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
+#include "game_logic/effect_components.hpp"
+#include "game_logic/interactive/item_container.hpp"
 #include "loader/resource_loader.hpp"
 #include "renderer/renderer.hpp"
 
@@ -39,6 +49,55 @@ std::string levelFileName(const int episode, const int level) {
   fileName += std::to_string(level + 1);
   fileName += ".MNI";
   return fileName;
+}
+
+
+template <typename T>
+void copyComponentIfPresent(entityx::Entity from, entityx::Entity to) {
+  if (from.has_component<T>()) {
+    to.assign<T>(*from.component<const T>());
+  }
+}
+
+
+void copyAllComponents(entityx::Entity from, entityx::Entity to) {
+  using namespace engine::components;
+  using namespace game_logic::components;
+
+  copyComponentIfPresent<AppearsOnRadar>(from, to);
+  copyComponentIfPresent<ActivationSettings>(from, to);
+  copyComponentIfPresent<Active>(from, to);
+  copyComponentIfPresent<ActorTag>(from, to);
+  copyComponentIfPresent<AnimationLoop>(from, to);
+  copyComponentIfPresent<AnimationSequence>(from, to);
+  copyComponentIfPresent<AutoDestroy>(from, to);
+  copyComponentIfPresent<BehaviorController>(from, to);
+  copyComponentIfPresent<BoundingBox>(from, to);
+  copyComponentIfPresent<CollectableItem>(from, to);
+  copyComponentIfPresent<CollidedWithWorld>(from, to);
+  copyComponentIfPresent<CustomRenderFunc>(from, to);
+  copyComponentIfPresent<DamageInflicting>(from, to);
+  copyComponentIfPresent<DestructionEffects>(from, to);
+  copyComponentIfPresent<DrawTopMost>(from, to);
+  copyComponentIfPresent<Interactable>(from, to);
+  copyComponentIfPresent<ItemBounceEffect>(from, to);
+  copyComponentIfPresent<ItemContainer>(from, to);
+  copyComponentIfPresent<MapGeometryLink>(from, to);
+  copyComponentIfPresent<MovementSequence>(from, to);
+  copyComponentIfPresent<MovingBody>(from, to);
+  copyComponentIfPresent<Orientation>(from, to);
+  copyComponentIfPresent<OverrideDrawOrder>(from, to);
+  copyComponentIfPresent<PlayerDamaging>(from, to);
+  copyComponentIfPresent<PlayerProjectile>(from, to);
+  copyComponentIfPresent<RadarDish>(from, to);
+  copyComponentIfPresent<Shootable>(from, to);
+  copyComponentIfPresent<SolidBody>(from, to);
+  copyComponentIfPresent<Sprite>(from, to);
+  copyComponentIfPresent<SpriteCascadeSpawner>(from, to);
+  copyComponentIfPresent<TileDebris>(from, to);
+  copyComponentIfPresent<WorldPosition>(from, to);
+
+  assert(from.component_mask() == to.component_mask());
 }
 
 }
@@ -196,6 +255,79 @@ WorldState::WorldState(
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect = EarthQuakeEffect{
       pServiceProvider, &mRandomGenerator, &mEventManager};
+  }
+}
+
+
+void WorldState::synchronizeTo(
+  const WorldState& other,
+  IGameServiceProvider* pServiceProvider,
+  data::PlayerModel* pPlayerModel,
+  const data::GameSessionId sessionId
+) {
+  mBonusInfo = other.mBonusInfo;
+  mLevelMusicFile = other.mLevelMusicFile;
+  mActivatedCheckpoint = other.mActivatedCheckpoint;
+  mScreenFlashColor = other.mScreenFlashColor;
+  mBackdropFlashColor = other.mBackdropFlashColor;
+  mTeleportTargetPosition = other.mTeleportTargetPosition;
+  mCloakPickupPosition = other.mCloakPickupPosition;
+  mReactorDestructionFramesElapsed = other.mReactorDestructionFramesElapsed;
+  mScreenShakeOffsetX = other.mScreenShakeOffsetX;
+  mBossDeathAnimationStartPending = other.mBossDeathAnimationStartPending;
+  mBackdropSwitched = other.mBackdropSwitched;
+  mLevelFinished = other.mLevelFinished;
+  mPlayerDied = other.mPlayerDied;
+  mIsOddFrame = other.mIsOddFrame;
+
+  mMap = other.mMap;
+  mRandomGenerator = other.mRandomGenerator;
+  mCamera.synchronizeTo(other.mCamera);
+  mParticles.synchronizeTo(other.mParticles);
+
+  if (other.mEarthQuakeEffect) {
+    mEarthQuakeEffect = EarthQuakeEffect{
+      pServiceProvider, &mRandomGenerator, &mEventManager};
+    mEarthQuakeEffect->synchronizeTo(*other.mEarthQuakeEffect);
+  } else {
+    mEarthQuakeEffect.reset();
+  }
+
+  mEntities.reset();
+
+  entityx::Entity playerEntity;
+  for (
+    const auto entity :
+      const_cast<entityx::EntityManager&>(other.mEntities)
+        .entities_for_debugging()
+  ) {
+    auto clone = mEntities.create();
+
+    copyAllComponents(entity, clone);
+
+    if (entity == other.mPlayer.entity())
+    {
+      playerEntity = clone;
+    }
+
+    if (entity == other.mActiveBossEntity)
+    {
+      mActiveBossEntity = clone;
+    }
+  }
+
+  {
+    mPlayer = Player{
+      playerEntity,
+      sessionId.mDifficulty,
+      pPlayerModel,
+      pServiceProvider,
+      &mCollisionChecker,
+      &mMap,
+      &mEntityFactory,
+      &mEventManager,
+      &mRandomGenerator};
+    mPlayer.synchronizeTo(other.mPlayer, mEntities);
   }
 }
 

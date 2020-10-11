@@ -37,6 +37,12 @@ EarthQuakeEffect::EarthQuakeEffect(
 }
 
 
+void EarthQuakeEffect::synchronizeTo(const EarthQuakeEffect& other) {
+  mCountdown = other.mCountdown;
+  mThreshold = other.mThreshold;
+}
+
+
 void EarthQuakeEffect::update() {
   if (mCountdown <= 0) {
     // Once the countdown reaches 0, determine a new countdown and threshold

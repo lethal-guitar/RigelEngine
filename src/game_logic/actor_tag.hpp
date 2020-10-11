@@ -37,6 +37,7 @@ struct ActorTag {
     ForceField,
     Door,
     Reactor,
+    ActiveElevator,
     WaterArea,
     AnimatedWaterArea,
 
