@@ -45,9 +45,23 @@ class ComponentHolder {
 public:
   template<typename T>
   explicit ComponentHolder(T component_)
-    : mpSelf(std::make_shared<Model<T>>(std::move(component_)))
+    : mpSelf(std::make_unique<Model<T>>(std::move(component_)))
   {
   }
+
+  ComponentHolder(const ComponentHolder& other)
+    : mpSelf(other.mpSelf->clone())
+  {
+  }
+
+  ComponentHolder& operator=(const ComponentHolder& other) {
+    auto copy = other;
+    std::swap(mpSelf, copy.mpSelf);
+    return *this;
+  }
+
+  ComponentHolder(ComponentHolder&&) = default;
+  ComponentHolder& operator=(ComponentHolder&&) = default;
 
   void assignToEntity(entityx::Entity entity) const {
     mpSelf->assignToEntity(entity);
@@ -56,6 +70,7 @@ public:
 private:
   struct Concept {
     virtual ~Concept() = default;
+    virtual std::unique_ptr<Concept> clone() const = 0;
     virtual void assignToEntity(entityx::Entity entity) const = 0;
   };
 
@@ -66,6 +81,10 @@ private:
     {
     }
 
+    std::unique_ptr<Concept> clone() const override {
+      return std::make_unique<Model>(mData);
+    }
+
     void assignToEntity(entityx::Entity entity) const override {
       entity.assign<T>(mData);
     }
@@ -73,7 +92,7 @@ private:
     T mData;
   };
 
-  std::shared_ptr<Concept> mpSelf;
+  std::unique_ptr<Concept> mpSelf;
 };
 
 
