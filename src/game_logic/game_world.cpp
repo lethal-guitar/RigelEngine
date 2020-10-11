@@ -729,8 +729,7 @@ void GameWorld::restartFromCheckpoint() {
   }
 
   mpPlayerModel->restoreFromCheckpoint(mpState->mActivatedCheckpoint->mState);
-  mpState->mPlayer.position() = mpState->mActivatedCheckpoint->mPosition;
-  mpState->mPlayer.resetAfterRespawn();
+  mpState->mPlayer.reSpawnAt(mpState->mActivatedCheckpoint->mPosition);
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});

@@ -235,7 +235,7 @@ public:
 
   void doInteractionAnimation();
 
-  void resetAfterRespawn();
+  void reSpawnAt(const base::Vector& spawnPosition);
 
   bool isInRegularState() const;
 
