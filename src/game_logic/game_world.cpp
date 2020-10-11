@@ -248,21 +248,6 @@ GameWorld::GameWorld(
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
       data::GameTraits::viewPortHeightPx)
 {
-  mEventManager.subscribe<rigel::events::CheckPointActivated>(*this);
-  mEventManager.subscribe<rigel::events::ExitReached>(*this);
-  mEventManager.subscribe<rigel::events::PlayerDied>(*this);
-  mEventManager.subscribe<rigel::events::PlayerTookDamage>(*this);
-  mEventManager.subscribe<rigel::events::PlayerMessage>(*this);
-  mEventManager.subscribe<rigel::events::PlayerTeleported>(*this);
-  mEventManager.subscribe<rigel::events::ScreenFlash>(*this);
-  mEventManager.subscribe<rigel::events::ScreenShake>(*this);
-  mEventManager.subscribe<rigel::events::TutorialMessage>(*this);
-  mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
-  mEventManager.subscribe<rigel::events::BossActivated>(*this);
-  mEventManager.subscribe<rigel::events::BossDestroyed>(*this);
-  mEventManager.subscribe<rigel::events::CloakPickedUp>(*this);
-  mEventManager.subscribe<rigel::events::CloakExpired>(*this);
-
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
 
@@ -448,21 +433,7 @@ void GameWorld::receive(const rigel::events::CloakExpired&) {
 
 
 void GameWorld::loadLevel() {
-  // In case we already have a world state, e.g. when restarting the level,
-  // it's important to destroy the old state first. This is because the
-  // event manager outlives the world state, and thus the old state would
-  // receive events triggered from the new state while the new state is being
-  // constructed. This can have unwanted side-effects.
-  mpState.reset();
-
-  mpState = std::make_unique<WorldState>(
-    mpServiceProvider,
-    mpRenderer,
-    mpResources,
-    mpPlayerModel,
-    mEventManager,
-    &mSpriteFactory,
-    mSessionId);
+  createNewState();
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
@@ -472,6 +443,59 @@ void GameWorld::loadLevel() {
   } else {
     mpServiceProvider->playMusic(mpState->mLevelMusicFile);
   }
+}
+
+
+void GameWorld::createNewState() {
+  if (mpState) {
+    unsubscribe(mpState->mEventManager);
+  }
+
+  mpState = std::make_unique<WorldState>(
+    mpServiceProvider,
+    mpRenderer,
+    mpResources,
+    mpPlayerModel,
+    &mSpriteFactory,
+    mSessionId);
+
+  subscribe(mpState->mEventManager);
+}
+
+
+void GameWorld::subscribe(entityx::EventManager& eventManager) {
+  eventManager.subscribe<rigel::events::CheckPointActivated>(*this);
+  eventManager.subscribe<rigel::events::ExitReached>(*this);
+  eventManager.subscribe<rigel::events::PlayerDied>(*this);
+  eventManager.subscribe<rigel::events::PlayerTookDamage>(*this);
+  eventManager.subscribe<rigel::events::PlayerMessage>(*this);
+  eventManager.subscribe<rigel::events::PlayerTeleported>(*this);
+  eventManager.subscribe<rigel::events::ScreenFlash>(*this);
+  eventManager.subscribe<rigel::events::ScreenShake>(*this);
+  eventManager.subscribe<rigel::events::TutorialMessage>(*this);
+  eventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
+  eventManager.subscribe<rigel::events::BossActivated>(*this);
+  eventManager.subscribe<rigel::events::BossDestroyed>(*this);
+  eventManager.subscribe<rigel::events::CloakPickedUp>(*this);
+  eventManager.subscribe<rigel::events::CloakExpired>(*this);
+}
+
+
+void GameWorld::unsubscribe(entityx::EventManager& eventManager) {
+  eventManager.unsubscribe<rigel::events::CheckPointActivated>(*this);
+  eventManager.unsubscribe<rigel::events::ExitReached>(*this);
+  eventManager.unsubscribe<rigel::events::PlayerDied>(*this);
+  eventManager.unsubscribe<rigel::events::PlayerTookDamage>(*this);
+  eventManager.unsubscribe<rigel::events::PlayerMessage>(*this);
+  eventManager.unsubscribe<rigel::events::PlayerTeleported>(*this);
+  eventManager.unsubscribe<rigel::events::ScreenFlash>(*this);
+  eventManager.unsubscribe<rigel::events::ScreenShake>(*this);
+  eventManager.unsubscribe<rigel::events::TutorialMessage>(*this);
+  eventManager.unsubscribe<rigel::game_logic::events::ShootableKilled>(*this);
+  eventManager.unsubscribe<rigel::events::BossActivated>(*this);
+  eventManager.unsubscribe<rigel::events::BossDestroyed>(*this);
+  eventManager.unsubscribe<rigel::events::CloakPickedUp>(*this);
+  eventManager.unsubscribe<rigel::events::CloakExpired>(*this);
 }
 
 

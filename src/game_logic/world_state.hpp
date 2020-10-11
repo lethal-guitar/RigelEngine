@@ -94,7 +94,6 @@ struct WorldState {
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader* pResources,
     data::PlayerModel* pPlayerModel,
-    entityx::EventManager& eventManager,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId);
   WorldState(
@@ -102,13 +101,13 @@ struct WorldState {
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader* pResources,
     data::PlayerModel* pPlayerModel,
-    entityx::EventManager& eventManager,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId,
     data::map::LevelData&& loadedLevel);
 
   data::map::Map mMap;
 
+  entityx::EventManager mEventManager;
   entityx::EntityManager mEntities;
   engine::RandomNumberGenerator mRandomGenerator;
   EntityFactory mEntityFactory;
