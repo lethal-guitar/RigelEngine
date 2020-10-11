@@ -22,33 +22,12 @@
 #include "common/game_mode.hpp"
 #include "common/global.hpp"
 #include "data/bonus.hpp"
+#include "data/game_session_data.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
-#include "engine/collision_checker.hpp"
-#include "engine/entity_activation_system.hpp"
-#include "engine/life_time_system.hpp"
-#include "engine/particle_system.hpp"
-#include "engine/physics_system.hpp"
-#include "engine/random_number_generator.hpp"
-#include "engine/rendering_system.hpp"
 #include "engine/sprite_factory.hpp"
-#include "game_logic/behavior_controller_system.hpp"
-#include "game_logic/camera.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/damage_infliction_system.hpp"
-#include "game_logic/debugging_system.hpp"
-#include "game_logic/dynamic_geometry_system.hpp"
-#include "game_logic/earth_quake_effect.hpp"
-#include "game_logic/effects_system.hpp"
-#include "game_logic/entity_factory.hpp"
 #include "game_logic/input.hpp"
-#include "game_logic/interactive/enemy_radar.hpp"
-#include "game_logic/interactive/item_container.hpp"
-#include "game_logic/player.hpp"
-#include "game_logic/player/components.hpp"
-#include "game_logic/player/damage_system.hpp"
-#include "game_logic/player/interaction_system.hpp"
-#include "game_logic/player/projectile_system.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
 
@@ -67,6 +46,7 @@ namespace rigel::data::map { struct LevelData; }
 
 namespace rigel::game_logic {
 
+struct WorldState;
 
 class GameWorld : public entityx::Receiver<GameWorld> {
 public:
@@ -117,82 +97,6 @@ private:
   void printDebugText(std::ostream& stream) const;
 
 private:
-  struct LevelBonusInfo {
-    int mInitialCameraCount = 0;
-    int mInitialMerchandiseCount = 0;
-    int mInitialWeaponCount = 0;
-    int mInitialLaserTurretCount = 0;
-    int mInitialBonusGlobeCount = 0;
-
-    int mNumShotBonusGlobes = 0;
-    bool mPlayerTookDamage = false;
-  };
-
-  struct CheckpointData {
-    data::PlayerModel::CheckpointState mState;
-    base::Vector mPosition;
-  };
-
-  struct WorldState {
-    WorldState(
-      IGameServiceProvider* pServiceProvider,
-      renderer::Renderer* pRenderer,
-      const loader::ResourceLoader* pResources,
-      data::PlayerModel* pPlayerModel,
-      entityx::EventManager& eventManager,
-      engine::SpriteFactory* pSpriteFactory,
-      data::GameSessionId sessionId);
-    WorldState(
-      IGameServiceProvider* pServiceProvider,
-      renderer::Renderer* pRenderer,
-      const loader::ResourceLoader* pResources,
-      data::PlayerModel* pPlayerModel,
-      entityx::EventManager& eventManager,
-      engine::SpriteFactory* pSpriteFactory,
-      data::GameSessionId sessionId,
-      data::map::LevelData&& loadedLevel);
-
-    entityx::EntityManager mEntities;
-    engine::RandomNumberGenerator mRandomGenerator;
-    EntityFactory mEntityFactory;
-    RadarDishCounter mRadarDishCounter;
-
-    data::map::Map mMap;
-    LevelBonusInfo mBonusInfo;
-    std::string mLevelMusicFile;
-
-    engine::CollisionChecker mCollisionChecker;
-    Player mPlayer;
-    Camera mCamera;
-    engine::ParticleSystem mParticles;
-    engine::RenderingSystem mRenderingSystem;
-    engine::PhysicsSystem mPhysicsSystem;
-    engine::LifeTimeSystem mLifeTimeSystem;
-    game_logic::DebuggingSystem mDebuggingSystem;
-    game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
-    game_logic::player::DamageSystem mPlayerDamageSystem;
-    game_logic::player::ProjectileSystem mPlayerProjectileSystem;
-    game_logic::DamageInflictionSystem mDamageInflictionSystem;
-    game_logic::DynamicGeometrySystem mDynamicGeometrySystem;
-    game_logic::EffectsSystem mEffectsSystem;
-    game_logic::ItemContainerSystem mItemContainerSystem;
-    game_logic::BehaviorControllerSystem mBehaviorControllerSystem;
-
-    std::optional<CheckpointData> mActivatedCheckpoint;
-    std::optional<EarthQuakeEffect> mEarthQuakeEffect;
-    std::optional<base::Color> mScreenFlashColor;
-    std::optional<base::Color> mBackdropFlashColor;
-    std::optional<base::Vector> mTeleportTargetPosition;
-    entityx::Entity mActiveBossEntity;
-    std::optional<int> mReactorDestructionFramesElapsed;
-    int mScreenShakeOffsetX = 0;
-    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
-    bool mBossDeathAnimationStartPending = false;
-    bool mBackdropSwitched = false;
-    bool mLevelFinished = false;
-    bool mPlayerDied = false;
-  };
-
   renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture* mpUiSpriteSheet;

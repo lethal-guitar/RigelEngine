@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
+#include "game_logic/world_state.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>

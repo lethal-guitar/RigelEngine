@@ -209,6 +209,8 @@ set(core_sources
     game_logic/player/ship.cpp
     game_logic/player/ship.hpp
     game_logic/trigger_components.hpp
+    game_logic/world_state.cpp
+    game_logic/world_state.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
     loader/adlib_emulator.hpp

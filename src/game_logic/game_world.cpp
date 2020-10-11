@@ -30,6 +30,7 @@
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/trigger_components.hpp"
+#include "game_logic/world_state.hpp"
 #include "loader/resource_loader.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
@@ -54,57 +55,7 @@ using engine::components::WorldPosition;
 
 namespace {
 
-char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
-
-
-std::string levelFileName(const int episode, const int level) {
-  assert(episode >=0 && episode < 4);
-  assert(level >=0 && level < 8);
-
-  std::string fileName;
-  fileName += EPISODE_PREFIXES[episode];
-  fileName += std::to_string(level + 1);
-  fileName += ".MNI";
-  return fileName;
-}
-
-
 constexpr auto BOSS_LEVEL_INTRO_MUSIC = "CALM.IMF";
-
-
-struct BonusRelatedItemCounts {
-  int mCameraCount = 0;
-  int mFireBombCount = 0;
-  int mWeaponCount = 0;
-  int mMerchandiseCount = 0;
-  int mBonusGlobeCount = 0;
-  int mLaserTurretCount = 0;
-};
-
-
-BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
-  using game_logic::components::ActorTag;
-  using AT = ActorTag::Type;
-
-  BonusRelatedItemCounts counts;
-
-  es.each<ActorTag>([&counts](entityx::Entity, const ActorTag& tag) {
-      switch (tag.mType) {
-        case AT::ShootableCamera: ++counts.mCameraCount; break;
-        case AT::FireBomb: ++counts.mFireBombCount; break;
-        case AT::CollectableWeapon: ++counts.mWeaponCount; break;
-        case AT::Merchandise: ++counts.mMerchandiseCount; break;
-        case AT::ShootableBonusGlobe: ++counts.mBonusGlobeCount; break;
-        case AT::MountedLaserTurret: ++counts.mLaserTurretCount; break;
-
-        default:
-          break;
-      }
-    });
-
-  return counts;
-}
-
 
 constexpr auto HEALTH_BAR_LABEL_START_X = 0;
 constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
@@ -267,142 +218,6 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
   return stream.str();
 }
 
-}
-
-
-GameWorld::WorldState::WorldState(
-  IGameServiceProvider* pServiceProvider,
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader* pResources,
-  data::PlayerModel* pPlayerModel,
-  entityx::EventManager& eventManager,
-  SpriteFactory* pSpriteFactory,
-  const data::GameSessionId sessionId
-)
-  : WorldState(
-      pServiceProvider,
-      pRenderer,
-      pResources,
-      pPlayerModel,
-      eventManager,
-      pSpriteFactory,
-      sessionId,
-      loader::loadLevel(
-        levelFileName(sessionId.mEpisode, sessionId.mLevel),
-        *pResources,
-        sessionId.mDifficulty))
-{
-}
-
-
-GameWorld::WorldState::WorldState(
-  IGameServiceProvider* pServiceProvider,
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader* pResources,
-  data::PlayerModel* pPlayerModel,
-  entityx::EventManager& eventManager,
-  SpriteFactory* pSpriteFactory,
-  const data::GameSessionId sessionId,
-  data::map::LevelData&& loadedLevel
-)
-  : mEntities(eventManager)
-  , mEntityFactory(
-    pSpriteFactory,
-    &mEntities,
-    &mRandomGenerator,
-    sessionId.mDifficulty)
-  , mRadarDishCounter(mEntities, eventManager)
-  , mMap(std::move(loadedLevel.mMap))
-  , mLevelMusicFile(loadedLevel.mMusicFile)
-  , mCollisionChecker(&mMap, mEntities, eventManager)
-  , mPlayer(
-      [&]() {
-        using engine::components::Orientation;
-        auto playerEntity = mEntityFactory.createActor(
-          data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
-        assignPlayerComponents(
-          playerEntity,
-          loadedLevel.mPlayerFacingLeft ? Orientation::Left : Orientation::Right);
-        return playerEntity;
-      }(),
-      sessionId.mDifficulty,
-      pPlayerModel,
-      pServiceProvider,
-      &mCollisionChecker,
-      &mMap,
-      &mEntityFactory,
-      &eventManager,
-      &mRandomGenerator)
-  , mCamera(&mPlayer, mMap, eventManager)
-  , mParticles(&mRandomGenerator, pRenderer)
-  , mRenderingSystem(
-      &mCamera.position(),
-      pRenderer,
-      &mMap,
-      engine::MapRenderer::MapRenderData{
-        std::move(loadedLevel.mTileSetImage),
-        std::move(loadedLevel.mBackdropImage),
-        std::move(loadedLevel.mSecondaryBackdropImage),
-        loadedLevel.mBackdropScrollMode})
-  , mPhysicsSystem(&mCollisionChecker, &mMap, &eventManager)
-  , mDebuggingSystem(pRenderer, &mCamera.position(), &mMap)
-  , mPlayerInteractionSystem(
-      sessionId,
-      &mPlayer,
-      pPlayerModel,
-      pServiceProvider,
-      &mEntityFactory,
-      &eventManager,
-      *pResources)
-  , mPlayerDamageSystem(&mPlayer)
-  , mPlayerProjectileSystem(
-      &mEntityFactory,
-      pServiceProvider,
-      &mCollisionChecker,
-      &mMap)
-  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
-  , mDynamicGeometrySystem(
-      pServiceProvider,
-      &mEntities,
-      &mMap,
-      &mRandomGenerator,
-      &eventManager)
-  , mEffectsSystem(
-      pServiceProvider,
-      &mRandomGenerator,
-      &mEntities,
-      &mEntityFactory,
-      &mParticles,
-      eventManager)
-  , mItemContainerSystem(&mEntities, &mCollisionChecker, eventManager)
-  , mBehaviorControllerSystem(
-      GlobalDependencies{
-        &mCollisionChecker,
-        &mParticles,
-        &mRandomGenerator,
-        &mEntityFactory,
-        pServiceProvider,
-        &mEntities,
-        &eventManager},
-      &mRadarDishCounter,
-      &mPlayer,
-      &mCamera.position(),
-      &mMap)
-  , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
-{
-  mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
-
-  const auto counts = countBonusRelatedItems(mEntities);
-  mBonusInfo.mInitialCameraCount = counts.mCameraCount;
-  mBonusInfo.mInitialMerchandiseCount = counts.mMerchandiseCount;
-  mBonusInfo.mInitialWeaponCount = counts.mWeaponCount;
-  mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
-  mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
-
-  if (loadedLevel.mEarthquake) {
-    mEarthQuakeEffect = EarthQuakeEffect{
-      pServiceProvider, &mRandomGenerator, &eventManager};
-  }
 }
 
 
