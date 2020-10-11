@@ -635,7 +635,9 @@ void Player::doInteractionAnimation() {
 }
 
 
-void Player::resetAfterRespawn() {
+void Player::reSpawnAt(const base::Vector& spawnPosition) {
+  position() = spawnPosition;
+
   // TODO: Refactor this - it would be much nicer if we could just consruct
   // a new player.
   mState = OnGround{};
