@@ -204,11 +204,12 @@ set(core_sources
     game_logic/player/damage_system.hpp
     game_logic/player/interaction_system.cpp
     game_logic/player/interaction_system.hpp
+    game_logic/player/level_exit_trigger.cpp
+    game_logic/player/level_exit_trigger.hpp
     game_logic/player/projectile_system.cpp
     game_logic/player/projectile_system.hpp
     game_logic/player/ship.cpp
     game_logic/player/ship.hpp
-    game_logic/trigger_components.hpp
     game_logic/world_state.cpp
     game_logic/world_state.hpp
     loader/actor_image_package.cpp

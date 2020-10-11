@@ -77,8 +77,8 @@
 #include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/interactive/super_force_field.hpp"
 #include "game_logic/interactive/tile_burner.hpp"
+#include "game_logic/player/level_exit_trigger.hpp"
 #include "game_logic/player/ship.hpp"
-#include "game_logic/trigger_components.hpp"
 
 #include <tuple>
 #include <utility>

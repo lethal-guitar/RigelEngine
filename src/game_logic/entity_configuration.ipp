@@ -1928,8 +1928,8 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(2);
       break;
 
-    case ActorID::Exit_trigger: // level exit
-      entity.assign<Trigger>(TriggerType::LevelExit);
+    case ActorID::Exit_trigger:
+      entity.assign<BehaviorController>(behaviors::LevelExitTrigger{});
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 1}});
       break;
 
