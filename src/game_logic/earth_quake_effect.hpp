@@ -36,11 +36,8 @@ public:
     engine::RandomNumberGenerator* pRandomGenerator,
     entityx::EventManager* pEvents);
 
-  /** Updates state and emits events (screen shake, earth quake begin/end)
-   *
-   * To be called at game-logic rate.
-   */
   void update();
+  bool isQuaking() const;
 
 private:
   int mCountdown;

@@ -20,14 +20,12 @@
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/behavior_controller.hpp"
-#include "game_logic/interactive/enemy_radar.hpp"
 
 
 namespace rigel::game_logic {
 
 BehaviorControllerSystem::BehaviorControllerSystem(
   GlobalDependencies dependencies,
-  const RadarDishCounter* pRadarDishCounter,
   Player* pPlayer,
   const base::Vector* pCameraPosition,
   data::map::Map* pMap
@@ -38,27 +36,21 @@ BehaviorControllerSystem::BehaviorControllerSystem(
       pCameraPosition,
       pMap,
       &mPerFrameState)
-  , mpRadarDishCounter(pRadarDishCounter)
 {
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
   mDependencies.mpEvents->subscribe<engine::events::CollidedWithWorld>(*this);
-  mDependencies.mpEvents->subscribe<rigel::events::EarthQuakeBegin>(*this);
-  mDependencies.mpEvents->subscribe<rigel::events::EarthQuakeEnd>(*this);
 }
 
 
 void BehaviorControllerSystem::update(
   entityx::EntityManager& es,
-  const PlayerInput& input,
-  const base::Extents& viewPortSize
+  const PerFrameState& s
 ) {
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
-  mPerFrameState.mInput = input;
-  mPerFrameState.mCurrentViewPortSize = viewPortSize;
-  mPerFrameState.mNumRadarDishes = mpRadarDishCounter->numRadarDishes();
+  mPerFrameState = s;
 
   es.each<BehaviorController, Active>([this](
     entityx::Entity entity,
@@ -71,8 +63,6 @@ void BehaviorControllerSystem::update(
       active.mIsOnScreen,
       entity);
   });
-
-  mPerFrameState.mIsOddFrame = !mPerFrameState.mIsOddFrame;
 }
 
 
@@ -129,16 +119,6 @@ void BehaviorControllerSystem::receive(
       event,
       entity);
   }
-}
-
-
-void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeBegin&) {
-  mPerFrameState.mIsEarthShaking = true;
-}
-
-
-void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeEnd&) {
-  mPerFrameState.mIsEarthShaking = false;
 }
 
 }

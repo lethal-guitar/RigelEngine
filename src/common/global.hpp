@@ -107,10 +107,6 @@ struct DoorOpened {
 };
 
 
-struct EarthQuakeBegin {};
-
-struct EarthQuakeEnd {};
-
 struct BossActivated {
   entityx::Entity mBossEntity;
 };

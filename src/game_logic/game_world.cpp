@@ -514,7 +514,13 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   engine::markActiveEntities(
     mpState->mEntities, mpState->mCamera.position(), viewPortSize);
   mpState->mBehaviorControllerSystem.update(
-    mpState->mEntities, input, viewPortSize);
+    mpState->mEntities,
+    PerFrameState{
+      input,
+      viewPortSize,
+      mpState->mRadarDishCounter.numRadarDishes(),
+      mpState->mIsOddFrame,
+      mpState->mEarthQuakeEffect && mpState->mEarthQuakeEffect->isQuaking()});
 
   mpState->mPhysicsSystem.updatePhase1(mpState->mEntities);
 
@@ -534,6 +540,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mpState->mPhysicsSystem.updatePhase2(mpState->mEntities);
 
   mpState->mParticles.update();
+
+  mpState->mIsOddFrame = !mpState->mIsOddFrame;
 }
 
 

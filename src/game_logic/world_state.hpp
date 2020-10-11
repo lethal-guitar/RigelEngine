@@ -147,6 +147,7 @@ struct WorldState {
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;
   bool mPlayerDied = false;
+  bool mIsOddFrame = false;
 };
 
 }
