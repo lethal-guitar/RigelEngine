@@ -29,7 +29,6 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
-#include "game_logic/trigger_components.hpp"
 #include "game_logic/world_state.hpp"
 #include "loader/resource_loader.hpp"
 #include "renderer/upscaling_utils.hpp"
@@ -607,7 +606,6 @@ void GameWorld::render() {
 
 void GameWorld::processEndOfFrameActions() {
   handlePlayerDeath();
-  handleLevelExit();
   handleTeleporter();
 
   mpState->mScreenShakeOffsetX = 0;
@@ -650,40 +648,6 @@ void GameWorld::updateReactorDestructionEvent() {
   }
 
   ++framesElapsed;
-}
-
-
-void GameWorld::handleLevelExit() {
-  using engine::components::Active;
-  using engine::components::BoundingBox;
-  using game_logic::components::Trigger;
-  using game_logic::components::TriggerType;
-
-  mpState->mEntities.each<Trigger, WorldPosition, Active>(
-    [this](
-      entityx::Entity,
-      const Trigger& trigger,
-      const WorldPosition& triggerPosition,
-      const Active&
-    ) {
-      if (trigger.mType != TriggerType::LevelExit || mpState->mLevelFinished) {
-        return;
-      }
-
-      const auto playerBBox = mpState->mPlayer.worldSpaceHitBox();
-      const auto playerAboveOrAtTriggerHeight =
-        playerBBox.bottom() <= triggerPosition.y;
-      const auto touchingTriggerOnXAxis =
-        triggerPosition.x >= playerBBox.left() &&
-        triggerPosition.x <= (playerBBox.right() + 1);
-
-      const auto triggerActivated =
-        playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis;
-
-      if (triggerActivated) {
-        mEventManager.emit(rigel::events::ExitReached{});
-      }
-    });
 }
 
 
