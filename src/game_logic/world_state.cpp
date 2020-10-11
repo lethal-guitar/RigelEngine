@@ -181,7 +181,6 @@ WorldState::WorldState(
         pServiceProvider,
         &mEntities,
         &eventManager},
-      &mRadarDishCounter,
       &mPlayer,
       &mCamera.position(),
       &mMap)

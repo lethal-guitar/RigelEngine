@@ -32,7 +32,6 @@
 #include <game_logic/entity_factory.hpp>
 #include <game_logic/input.hpp>
 #include <game_logic/interactive/elevator.hpp>
-#include <game_logic/interactive/enemy_radar.hpp>
 #include <game_logic/player.hpp>
 #include <game_logic/player/components.hpp>
 
@@ -123,7 +122,6 @@ TEST_CASE("Rocket elevator") {
   base::Vector cameraPosition{0, 0};
   engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
   PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
-  RadarDishCounter radarDishCounter{entityx.entities, entityx.events};
   BehaviorControllerSystem behaviorControllerSystem{
     GlobalDependencies{
       &collisionChecker,
@@ -133,7 +131,6 @@ TEST_CASE("Rocket elevator") {
       &mockServiceProvider,
       &entityx.entities,
       &entityx.events},
-    &radarDishCounter,
     &player,
     &cameraPosition,
     &map};
@@ -149,14 +146,18 @@ TEST_CASE("Rocket elevator") {
 
   auto& elevatorPosition = *elevator.component<WorldPosition>();
 
+  PerFrameState perFrameState;
   const auto runOneFrame = [&](const PlayerInput& input) {
     const auto& viewPortSize = data::GameTraits::mapViewPortSize;
+    perFrameState.mInput = input;
+    perFrameState.mCurrentViewPortSize = viewPortSize;
 
     player.update(input);
     engine::markActiveEntities(
       entityx.entities, {0, 0}, viewPortSize);
-    behaviorControllerSystem.update(entityx.entities, input, viewPortSize);
+    behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
+    perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;
   };
 
   const auto verifyPositions = [&playerPosition, &elevatorPosition](

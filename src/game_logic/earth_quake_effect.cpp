@@ -38,8 +38,6 @@ EarthQuakeEffect::EarthQuakeEffect(
 
 
 void EarthQuakeEffect::update() {
-  const auto wasActive = mCountdown < mThreshold && mCountdown != 0;
-
   if (mCountdown <= 0) {
     // Once the countdown reaches 0, determine a new countdown and threshold
     mCountdown = mpRandomGenerator->gen() - 1;
@@ -57,15 +55,11 @@ void EarthQuakeEffect::update() {
 
     --mCountdown;
   }
+}
 
-  const auto isActive = mCountdown < mThreshold && mCountdown != 0;
-  if (wasActive != isActive) {
-    if (isActive) {
-      mpEvents->emit<events::EarthQuakeBegin>();
-    } else {
-      mpEvents->emit<events::EarthQuakeEnd>();
-    }
-  }
+
+bool EarthQuakeEffect::isQuaking() const {
+  return mCountdown < mThreshold && mCountdown != 0;
 }
 
 }

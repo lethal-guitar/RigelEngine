@@ -31,7 +31,6 @@
 #include <game_logic/behavior_controller_system.hpp>
 #include <game_logic/enemies/spike_ball.hpp>
 #include <game_logic/entity_factory.hpp>
-#include <game_logic/interactive/enemy_radar.hpp>
 #include <game_logic/player.hpp>
 #include <game_logic/player/components.hpp>
 
@@ -106,7 +105,6 @@ TEST_CASE("Spike ball") {
 
   base::Vector cameraPosition{0, 0};
   engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
-  RadarDishCounter radarDishCounter{entityx.entities, entityx.events};
   BehaviorControllerSystem behaviorControllerSystem{
     GlobalDependencies{
       &collisionChecker,
@@ -116,19 +114,22 @@ TEST_CASE("Spike ball") {
       &mockServiceProvider,
       &entityx.entities,
       &entityx.events},
-    &radarDishCounter,
     &player,
     &cameraPosition,
     &map};
 
   auto& ballPosition = *spikeBall.component<WorldPosition>();
 
+  const auto& viewPortSize = data::GameTraits::mapViewPortSize;
+  PerFrameState perFrameState;
+  perFrameState.mCurrentViewPortSize = viewPortSize;
+
   auto runOneFrame = [&]() {
-    const auto& viewPortSize = data::GameTraits::mapViewPortSize;
     engine::markActiveEntities(
       entityx.entities, {0, 0}, viewPortSize);
-    behaviorControllerSystem.update(entityx.entities, {}, viewPortSize);
+    behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
+    perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;
   };
 
   auto runFramesAndCollect = [&](std::size_t numFrames) {
