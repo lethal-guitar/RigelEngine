@@ -150,9 +150,23 @@ class BehaviorController {
 public:
   template<typename T>
   explicit BehaviorController(T controller)
-    : mpSelf(std::make_shared<Model<T>>(std::move(controller)))
+    : mpSelf(std::make_unique<Model<T>>(std::move(controller)))
   {
   }
+
+  BehaviorController(const BehaviorController& other)
+    : mpSelf(other.mpSelf->clone())
+  {
+  }
+
+  BehaviorController& operator=(const BehaviorController& other) {
+    auto copy = other;
+    std::swap(mpSelf, copy.mpSelf);
+    return *this;
+  }
+
+  BehaviorController(BehaviorController&&) = default;
+  BehaviorController& operator=(BehaviorController&&) = default;
 
   void update(
     GlobalDependencies& dependencies,
@@ -200,6 +214,8 @@ private:
   struct Concept {
     virtual ~Concept() = default;
 
+    virtual std::unique_ptr<Concept> clone() const = 0;
+
     virtual void update(
       GlobalDependencies& dependencies,
       GlobalState& state,
@@ -230,6 +246,10 @@ private:
     explicit Model(T data_)
       : mData(std::move(data_))
     {
+    }
+
+    std::unique_ptr<Concept> clone() const override {
+      return std::make_unique<Model>(mData);
     }
 
     void update(
@@ -286,7 +306,7 @@ private:
     T mData;
   };
 
-  std::shared_ptr<Concept> mpSelf;
+  std::unique_ptr<Concept> mpSelf;
 };
 
 }
