@@ -73,6 +73,8 @@ public:
   void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::BossActivated& event);
   void receive(const rigel::events::BossDestroyed& event);
+  void receive(const rigel::events::CloakPickedUp& event);
+  void receive(const rigel::events::CloakExpired& event);
 
   void updateGameLogic(const PlayerInput& input);
   void render();
