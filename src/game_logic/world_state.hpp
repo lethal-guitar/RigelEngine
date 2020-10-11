@@ -107,16 +107,14 @@ struct WorldState {
     data::GameSessionId sessionId,
     data::map::LevelData&& loadedLevel);
 
+  data::map::Map mMap;
+
   entityx::EntityManager mEntities;
   engine::RandomNumberGenerator mRandomGenerator;
   EntityFactory mEntityFactory;
   RadarDishCounter mRadarDishCounter;
-
-  data::map::Map mMap;
-  LevelBonusInfo mBonusInfo;
-  std::string mLevelMusicFile;
-
   engine::CollisionChecker mCollisionChecker;
+
   Player mPlayer;
   Camera mCamera;
   engine::ParticleSystem mParticles;
@@ -133,6 +131,8 @@ struct WorldState {
   game_logic::ItemContainerSystem mItemContainerSystem;
   game_logic::BehaviorControllerSystem mBehaviorControllerSystem;
 
+  LevelBonusInfo mBonusInfo;
+  std::string mLevelMusicFile;
   std::optional<CheckpointData> mActivatedCheckpoint;
   std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;

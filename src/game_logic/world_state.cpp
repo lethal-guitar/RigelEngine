@@ -103,15 +103,14 @@ WorldState::WorldState(
   const data::GameSessionId sessionId,
   data::map::LevelData&& loadedLevel
 )
-  : mEntities(eventManager)
+  : mMap(std::move(loadedLevel.mMap))
+  , mEntities(eventManager)
   , mEntityFactory(
     pSpriteFactory,
     &mEntities,
     &mRandomGenerator,
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, eventManager)
-  , mMap(std::move(loadedLevel.mMap))
-  , mLevelMusicFile(loadedLevel.mMusicFile)
   , mCollisionChecker(&mMap, mEntities, eventManager)
   , mPlayer(
       [&]() {
@@ -186,6 +185,7 @@ WorldState::WorldState(
       &mPlayer,
       &mCamera.position(),
       &mMap)
+  , mLevelMusicFile(loadedLevel.mMusicFile)
   , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
 {
   mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
