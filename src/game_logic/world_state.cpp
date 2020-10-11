@@ -73,7 +73,6 @@ WorldState::WorldState(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader* pResources,
   data::PlayerModel* pPlayerModel,
-  entityx::EventManager& eventManager,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId
 )
@@ -82,7 +81,6 @@ WorldState::WorldState(
       pRenderer,
       pResources,
       pPlayerModel,
-      eventManager,
       pSpriteFactory,
       sessionId,
       loader::loadLevel(
@@ -98,20 +96,19 @@ WorldState::WorldState(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader* pResources,
   data::PlayerModel* pPlayerModel,
-  entityx::EventManager& eventManager,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId,
   data::map::LevelData&& loadedLevel
 )
   : mMap(std::move(loadedLevel.mMap))
-  , mEntities(eventManager)
+  , mEntities(mEventManager)
   , mEntityFactory(
     pSpriteFactory,
     &mEntities,
     &mRandomGenerator,
     sessionId.mDifficulty)
-  , mRadarDishCounter(mEntities, eventManager)
-  , mCollisionChecker(&mMap, mEntities, eventManager)
+  , mRadarDishCounter(mEntities, mEventManager)
+  , mCollisionChecker(&mMap, mEntities, mEventManager)
   , mPlayer(
       [&]() {
         using engine::components::Orientation;
@@ -128,9 +125,9 @@ WorldState::WorldState(
       &mCollisionChecker,
       &mMap,
       &mEntityFactory,
-      &eventManager,
+      &mEventManager,
       &mRandomGenerator)
-  , mCamera(&mPlayer, mMap, eventManager)
+  , mCamera(&mPlayer, mMap, mEventManager)
   , mParticles(&mRandomGenerator, pRenderer)
   , mRenderingSystem(
       &mCamera.position(),
@@ -141,7 +138,7 @@ WorldState::WorldState(
         std::move(loadedLevel.mBackdropImage),
         std::move(loadedLevel.mSecondaryBackdropImage),
         loadedLevel.mBackdropScrollMode})
-  , mPhysicsSystem(&mCollisionChecker, &mMap, &eventManager)
+  , mPhysicsSystem(&mCollisionChecker, &mMap, &mEventManager)
   , mDebuggingSystem(pRenderer, &mCamera.position(), &mMap)
   , mPlayerInteractionSystem(
       sessionId,
@@ -149,7 +146,7 @@ WorldState::WorldState(
       pPlayerModel,
       pServiceProvider,
       &mEntityFactory,
-      &eventManager,
+      &mEventManager,
       *pResources)
   , mPlayerDamageSystem(&mPlayer)
   , mPlayerProjectileSystem(
@@ -157,21 +154,21 @@ WorldState::WorldState(
       pServiceProvider,
       &mCollisionChecker,
       &mMap)
-  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &eventManager)
+  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &mEventManager)
   , mDynamicGeometrySystem(
       pServiceProvider,
       &mEntities,
       &mMap,
       &mRandomGenerator,
-      &eventManager)
+      &mEventManager)
   , mEffectsSystem(
       pServiceProvider,
       &mRandomGenerator,
       &mEntities,
       &mEntityFactory,
       &mParticles,
-      eventManager)
-  , mItemContainerSystem(&mEntities, &mCollisionChecker, eventManager)
+      mEventManager)
+  , mItemContainerSystem(&mEntities, &mCollisionChecker, mEventManager)
   , mBehaviorControllerSystem(
       GlobalDependencies{
         &mCollisionChecker,
@@ -180,7 +177,7 @@ WorldState::WorldState(
         &mEntityFactory,
         pServiceProvider,
         &mEntities,
-        &eventManager},
+        &mEventManager},
       &mPlayer,
       &mCamera.position(),
       &mMap)
@@ -198,7 +195,7 @@ WorldState::WorldState(
 
   if (loadedLevel.mEarthquake) {
     mEarthQuakeEffect = EarthQuakeEffect{
-      pServiceProvider, &mRandomGenerator, &eventManager};
+      pServiceProvider, &mRandomGenerator, &mEventManager};
   }
 }
 

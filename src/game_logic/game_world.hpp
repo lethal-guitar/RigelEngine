@@ -84,6 +84,9 @@ public:
 
 private:
   void loadLevel();
+  void createNewState();
+  void subscribe(entityx::EventManager& eventManager);
+  void unsubscribe(entityx::EventManager& eventManager);
 
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
@@ -108,7 +111,6 @@ private:
   const loader::ResourceLoader* mpResources;
   data::GameSessionId mSessionId;
 
-  entityx::EventManager mEventManager;
   engine::SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
