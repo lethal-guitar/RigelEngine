@@ -260,6 +260,8 @@ GameWorld::GameWorld(
   mEventManager.subscribe<rigel::game_logic::events::ShootableKilled>(*this);
   mEventManager.subscribe<rigel::events::BossActivated>(*this);
   mEventManager.subscribe<rigel::events::BossDestroyed>(*this);
+  mEventManager.subscribe<rigel::events::CloakPickedUp>(*this);
+  mEventManager.subscribe<rigel::events::CloakExpired>(*this);
 
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -429,6 +431,19 @@ void GameWorld::receive(const rigel::events::BossActivated& event) {
 
 void GameWorld::receive(const rigel::events::BossDestroyed& event) {
   mpState->mBossDeathAnimationStartPending = true;
+}
+
+
+void GameWorld::receive(const rigel::events::CloakPickedUp& event) {
+  mpState->mCloakPickupPosition = event.mPosition;
+}
+
+
+void GameWorld::receive(const rigel::events::CloakExpired&) {
+  if (mpState->mCloakPickupPosition) {
+    mpState->mEntityFactory.createActor(
+      data::ActorID::White_box_cloaking_device, *mpState->mCloakPickupPosition);
+  }
 }
 
 

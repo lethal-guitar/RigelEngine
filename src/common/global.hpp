@@ -90,6 +90,10 @@ struct PlayerTeleported {
 };
 
 
+struct CloakPickedUp {
+  base::Vector mPosition;
+};
+
 struct CloakExpired {};
 
 

@@ -138,6 +138,7 @@ struct WorldState {
   std::optional<base::Color> mScreenFlashColor;
   std::optional<base::Color> mBackdropFlashColor;
   std::optional<base::Vector> mTeleportTargetPosition;
+  std::optional<base::Vector> mCloakPickupPosition;
   entityx::Entity mActiveBossEntity;
   std::optional<int> mReactorDestructionFramesElapsed;
   int mScreenShakeOffsetX = 0;
