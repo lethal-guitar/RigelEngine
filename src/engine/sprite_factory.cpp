@@ -108,6 +108,11 @@ void applyTweaks(
     frames[8].mDrawOffset.x += 1;
     frames[9].mDrawOffset.x += 1;
   }
+
+  if (actorId == ActorID::Bomb_dropping_spaceship) {
+    frames[3].mDrawOffset += base::Vector{2, 0};
+    frames.erase(std::next(frames.begin(), 4), frames.end());
+  }
 }
 
 
@@ -236,6 +241,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ActorID::Eyeball_thrower_RIGHT);
       break;
 
+    case ActorID::Bomb_dropping_spaceship:
+      actorParts.push_back(ActorID::Bomb_dropping_spaceship);
+      actorParts.push_back(ActorID::Napalm_bomb);
+      break;
+
     case ActorID::Blowing_fan:
       actorParts.push_back(ActorID::Blowing_fan);
       actorParts.push_back(ActorID::Blowing_fan_threads_on_top);
@@ -306,7 +316,7 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       break;
 
     case ActorID::Bomb_dropping_spaceship:
-      sprite.mFramesToRender = {0, 1};
+      sprite.mFramesToRender = {3, 0, 1};
       break;
 
     case ActorID::Green_slime_blob:

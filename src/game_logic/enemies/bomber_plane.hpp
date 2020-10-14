@@ -46,14 +46,7 @@ struct BomberPlane {
     bool isOnScreen,
     entityx::Entity entity);
 
-  void onKilled(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
-    entityx::Entity entity);
-
   State mState;
-  entityx::Entity mBombSprite;
 };
 
 

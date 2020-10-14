@@ -1266,7 +1266,7 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<AnimationLoop>(1, 1, 2, 1);
+      entity.assign<AnimationLoop>(1, 1, 2, 2);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::BomberPlane{});

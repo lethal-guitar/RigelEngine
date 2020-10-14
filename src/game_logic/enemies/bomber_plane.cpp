@@ -51,7 +51,6 @@ const effects::EffectSpec BIG_BOMB_DETONATE_IN_AIR_EFFECT_SPEC[] = {
 
 
 constexpr auto FLY_AWAY_SPEED_VECTOR = base::Vector{2, 1};
-constexpr auto BOMB_OFFSET = base::Vector{2, 0};
 constexpr auto BOMB_DROP_OFFSET = base::Vector{2, 1};
 
 }
@@ -93,8 +92,8 @@ void BomberPlane::update(
     //
     // Together, this results in no visual glitch, but no brief disappearance
     // of the bomb either.
-    mBombSprite.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
-    auto bomb = d.mpEntityFactory->createActor(data::ActorID::Napalm_bomb, position + BOMB_DROP_OFFSET);
+    auto bomb = d.mpEntityFactory->createActor(
+      data::ActorID::Napalm_bomb, position + BOMB_DROP_OFFSET);
     bomb.component<Sprite>()->mShow = false;
   };
 
@@ -106,15 +105,8 @@ void BomberPlane::update(
 
   base::match(mState,
     [&, this](const FlyingIn&) {
-      if (!mBombSprite) {
-        mBombSprite = d.mpEntityFactory->createSprite(
-          data::ActorID::Napalm_bomb, position + BOMB_OFFSET);
-      }
-
       const auto result =
         engine::moveHorizontally(*d.mpCollisionChecker, entity, -1);
-
-      *mBombSprite.component<WorldPosition>() = position + BOMB_OFFSET;
 
       const auto reachedWall = result != engine::MovementResult::Completed;
       const auto reachedPlayer =
@@ -130,6 +122,9 @@ void BomberPlane::update(
 
       if (state.mFramesElapsed == 9) {
         dropBomb();
+      } else if (state.mFramesElapsed == 10) {
+        entity.component<Sprite>()->mFramesToRender[0] =
+          engine::IGNORE_RENDER_SLOT;
       } else if (state.mFramesElapsed == 29) {
         entity.remove<ActivationSettings>();
         entity.assign<AutoDestroy>(
@@ -144,18 +139,6 @@ void BomberPlane::update(
       flyAway();
     }
   );
-}
-
-
-void BomberPlane::onKilled(
-  GlobalDependencies&,
-  GlobalState&,
-  const base::Point<float>&,
-  entityx::Entity
-) {
-  if (mBombSprite) {
-    mBombSprite.destroy();
-  }
 }
 
 
