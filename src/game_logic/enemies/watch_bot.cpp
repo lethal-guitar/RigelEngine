@@ -64,17 +64,6 @@ void advanceRandomNumberGenerator(GlobalDependencies& d) {
   d.mpRandomGenerator->gen();
 }
 
-
-struct WatchBotContainer {
-  void update(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    bool isOnScreen,
-    entityx::Entity entity);
-
-  int mFramesElapsed = 0;
-};
-
 }
 
 
@@ -251,20 +240,12 @@ void WatchBotCarrier::update(
     if (result != engine::MovementResult::Completed) {
       mState = State::ReleasingPayload;
     }
-
-    *mPayload.component<WorldPosition>() = position + CONTAINER_OFFSET;
   };
 
   auto releasePayload = [&, this]() {
-    mPayload.assign<components::BehaviorController>(WatchBotContainer{});
-    mPayload.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-
-    mPayload.component<Sprite>()->mFramesToRender.push_back(1);
-    engine::startAnimationLoop(mPayload, 1, 1, 5, 1);
-
-    // Disassociate from payload, so that it keeps living if the carrier
-    // is destroyed
-    mPayload = {};
+    d.mpEntityFactory->createActor(
+      data::ActorID::Watchbot_container, position + CONTAINER_OFFSET);
+    entity.component<Sprite>()->mFramesToRender.pop_back();
   };
 
   auto explode = [&]() {
@@ -278,11 +259,6 @@ void WatchBotCarrier::update(
     triggerEffects(entity, *d.mpEntityManager);
   };
 
-
-  if (!mPayload && mState == State::ApproachingPlayer) {
-    mPayload = d.mpEntityFactory->createSprite(
-      data::ActorID::Watchbot_container, position + CONTAINER_OFFSET, true);
-  }
 
   switch (mState) {
     case State::ApproachingPlayer:
@@ -306,7 +282,6 @@ void WatchBotCarrier::update(
       ++mFramesElapsed;
       if (mFramesElapsed == 6) {
         animationFrame = 1;
-      } else if (mFramesElapsed == 7) {
         releasePayload();
       } else if (mFramesElapsed == 20) {
         animationFrame = 0;
@@ -319,18 +294,6 @@ void WatchBotCarrier::update(
 
   if (entity) {
     engine::synchronizeBoundingBoxToSprite(entity);
-  }
-}
-
-
-void WatchBotCarrier::onKilled(
-  GlobalDependencies& d,
-  GlobalState& s,
-  const base::Point<float>&,
-  entityx::Entity entity
-) {
-  if (mPayload) {
-    mPayload.destroy();
   }
 }
 

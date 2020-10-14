@@ -1261,6 +1261,13 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
+    case ActorID::Watchbot_container:
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<components::BehaviorController>(behaviors::WatchBotContainer{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<AnimationLoop>(1, 1, 5, 1);
+      break;
+
     case ActorID::Bomb_dropping_spaceship: // Bomb dropping space ship
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});

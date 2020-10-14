@@ -113,6 +113,11 @@ void applyTweaks(
     frames[3].mDrawOffset += base::Vector{2, 0};
     frames.erase(std::next(frames.begin(), 4), frames.end());
   }
+
+  if (actorId == ActorID::Watchbot_container_carrier) {
+    frames[2].mDrawOffset += base::Vector{0, -2};
+    frames.erase(std::next(frames.begin(), 3), frames.end());
+  }
 }
 
 
@@ -301,6 +306,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ActorID::Dukes_ship_exhaust_flames);
       break;
 
+    case ActorID::Watchbot_container_carrier:
+      actorParts.push_back(ActorID::Watchbot_container_carrier);
+      actorParts.push_back(ActorID::Watchbot_container);
+      break;
+
     default:
       actorParts.push_back(ID);
       break;
@@ -374,6 +384,14 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 
     case ActorID::Radar_computer_terminal:
       sprite.mFramesToRender = {0, 1, 2, 3};
+      break;
+
+    case ActorID::Watchbot_container:
+      sprite.mFramesToRender = {0, 1};
+      break;
+
+    case ActorID::Watchbot_container_carrier:
+      sprite.mFramesToRender = {0, 2};
       break;
 
     case ActorID::Big_green_cat_LEFT:
