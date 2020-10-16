@@ -38,7 +38,6 @@ struct SuperForceField {
 
   void startFizzle();
 
-  entityx::Entity mEmitter;
   std::optional<int> mFizzleFramesElapsed;
   std::optional<int> mDestructionFramesElapsed;
 };

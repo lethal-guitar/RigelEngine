@@ -1744,6 +1744,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{100});
       entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.component<Shootable>()->mEnableHitFeedback = false;
 
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::SuperForceField{});

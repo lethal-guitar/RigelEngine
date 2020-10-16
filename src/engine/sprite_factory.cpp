@@ -394,6 +394,10 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
       sprite.mFramesToRender = {0, 2};
       break;
 
+    case ActorID::Super_force_field_LEFT:
+      sprite.mFramesToRender = {0, 3};
+      break;
+
     case ActorID::Big_green_cat_LEFT:
     case ActorID::Big_green_cat_RIGHT:
     case ActorID::Spiked_green_creature_LEFT:
