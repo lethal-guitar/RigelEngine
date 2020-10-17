@@ -85,8 +85,10 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
     return contents;
   };
 
-  for (auto& entity : mShotContainersQueue) {
-    auto& container = *entity.component<ItemContainer>();
+  es.each<ItemContainer>([&](entityx::Entity entity, ItemContainer& container) {
+    if (!container.mHasBeenShot) {
+      return;
+    }
 
     switch (container.mStyle) {
       case RS::Default:
@@ -131,14 +133,7 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
         }
         break;
     }
-  }
-
-  mShotContainersQueue.erase(
-    remove_if(begin(mShotContainersQueue), end(mShotContainersQueue),
-      [](const entityx::Entity entity) {
-        return !entity.valid();
-      }),
-    end(mShotContainersQueue));
+  });
 }
 
 
@@ -181,7 +176,7 @@ void ItemContainerSystem::receive(const events::ShootableKilled& event) {
     // opening the container to our update, the damage infliction update
     // will be finished, so this problem can't occur.
     entity.component<components::Shootable>()->mDestroyWhenKilled = false;
-    mShotContainersQueue.emplace_back(entity);
+    entity.component<ItemContainer>()->mHasBeenShot = true;
   }
 }
 

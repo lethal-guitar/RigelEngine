@@ -90,6 +90,7 @@ struct ItemContainer {
   std::vector<ComponentHolder> mContainedComponents;
   ReleaseStyle mStyle = ReleaseStyle::Default;
   std::int8_t mFramesElapsed = 0;
+  bool mHasBeenShot = false;
 
   template<typename TComponent, typename... TArgs>
   void assign(TArgs&&... components) {
@@ -114,7 +115,6 @@ public:
 private:
   entityx::EntityManager* mpEntityManager;
   const engine::CollisionChecker* mpCollisionChecker;
-  std::vector<entityx::Entity> mShotContainersQueue;
 };
 
 
