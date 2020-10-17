@@ -82,6 +82,7 @@ public:
 
   void quickSave();
   void quickLoad();
+  bool canQuickLoad() const;
 
   friend class rigel::GameRunner;
 

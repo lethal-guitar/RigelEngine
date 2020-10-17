@@ -39,6 +39,9 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
+namespace rigel::game_logic { class GameWorld; }
+
+
 namespace rigel::ui {
 
 class IngameMenu {
@@ -52,6 +55,7 @@ public:
   IngameMenu(
     GameMode::Context context,
     const data::PlayerModel* pPlayerModel,
+    game_logic::GameWorld* pGameWorld,
     const data::GameSessionId& sessionId);
 
   /** Indicates that the game should be rendered before rendering the menu
@@ -81,7 +85,7 @@ private:
   using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
 
   struct TopLevelMenu {
-    explicit TopLevelMenu(GameMode::Context context);
+    TopLevelMenu(GameMode::Context context, bool canQuickLoad);
 
     TopLevelMenu(const TopLevelMenu&) = delete;
     TopLevelMenu& operator=(const TopLevelMenu&) = delete;
@@ -95,6 +99,7 @@ private:
     MenuElementRenderer mMenuElementRenderer;
     renderer::OwningTexture mMenuBackground;
     MenuNavigationHelper mNavigationHelper;
+    std::vector<int> mItems;
     engine::TimeDelta mElapsedTime = 0;
     int mSelectedIndex = 0;
   };
@@ -178,6 +183,7 @@ private:
   std::stack<State, std::vector<State>> mStateStack;
   std::vector<SDL_Event> mEventQueue;
   std::optional<MenuType> mMenuToEnter;
+  game_logic::GameWorld* mpGameWorld;
   TopLevelMenu* mpTopLevelMenu = nullptr;
   bool mQuitRequested = false;
   bool mFadeoutNeeded = false;

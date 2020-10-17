@@ -86,6 +86,7 @@ struct GameOptions {
 
   // Enhancements
   bool mWidescreenModeOn = false;
+  bool mQuickSavingEnabled = false;
 };
 
 }

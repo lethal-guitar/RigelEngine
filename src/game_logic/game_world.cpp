@@ -685,7 +685,7 @@ void GameWorld::quickSave() {
 
 
 void GameWorld::quickLoad() {
-  if (!mpOptions->mQuickSavingEnabled || !mpQuickSave) {
+  if (!canQuickLoad()) {
     return;
   }
 
@@ -696,6 +696,11 @@ void GameWorld::quickLoad() {
     mpPlayerModel,
     mSessionId);
   mMessageDisplay.setMessage("Quick save restored.");
+}
+
+
+bool GameWorld::canQuickLoad() const {
+  return mpOptions->mQuickSavingEnabled && mpQuickSave;
 }
 
 

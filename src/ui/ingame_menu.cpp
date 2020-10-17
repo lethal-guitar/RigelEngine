@@ -19,6 +19,7 @@
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
+#include "game_logic/game_world.hpp"
 #include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
@@ -44,6 +45,7 @@ constexpr auto MAX_SAVE_SLOT_NAME_LENGTH = 18;
 constexpr auto TOP_LEVEL_MENU_ITEMS = std::array{
   "Save Game",
   "Restore Game",
+  "Restore Quick Save",
   "Options",
   "Help",
   "Quit Game"
@@ -96,7 +98,9 @@ std::string makePrefillName(const data::SavedGame& savedGame) {
 }
 
 
-IngameMenu::TopLevelMenu::TopLevelMenu(GameMode::Context context)
+IngameMenu::TopLevelMenu::TopLevelMenu(
+  GameMode::Context context,
+  const bool canQuickLoad)
   : mContext(context)
   , mPalette(context.mpResources->loadPaletteFromFullScreenImage("MESSAGE.MNI"))
   , mUiSpriteSheet(makeUiSpriteSheet(
@@ -105,14 +109,26 @@ IngameMenu::TopLevelMenu::TopLevelMenu(GameMode::Context context)
       &mUiSpriteSheet, context.mpRenderer, *context.mpResources)
   , mMenuBackground(fullScreenImageAsTexture(
     context.mpRenderer, *context.mpResources, "MESSAGE.MNI"))
+  , mItems{
+    itemIndex("Save Game"),
+    itemIndex("Restore Game"),
+    itemIndex("Options"),
+    itemIndex("Help"),
+    itemIndex("Quit Game")}
 {
+  using std::begin;
+  using std::next;
+
+  if (canQuickLoad) {
+    mItems.insert(next(begin(mItems), 2), itemIndex("Restore Quick Save"));
+  }
 }
 
 
 void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
   auto selectNext = [this]() {
     ++mSelectedIndex;
-    if (mSelectedIndex >= int(TOP_LEVEL_MENU_ITEMS.size())) {
+    if (mSelectedIndex >= int(mItems.size())) {
       mSelectedIndex = 0;
     }
 
@@ -122,7 +138,7 @@ void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
   auto selectPrevious = [this]() {
     --mSelectedIndex;
     if (mSelectedIndex < 0) {
-      mSelectedIndex = int(TOP_LEVEL_MENU_ITEMS.size()) - 1;
+      mSelectedIndex = int(mItems.size()) - 1;
     }
 
     mContext.mpServiceProvider->playSound(data::SoundId::MenuSelect);
@@ -149,14 +165,14 @@ void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt) {
   mMenuBackground.render(mContext.mpRenderer, 0, 0);
 
   auto index = 0;
-  for (const auto item : TOP_LEVEL_MENU_ITEMS) {
+  for (const auto item : mItems) {
     const auto colorIndex = index == mSelectedIndex
       ? MENU_ITEM_COLOR_SELECTED
       : MENU_ITEM_COLOR;
     mMenuElementRenderer.drawBigText(
       MENU_START_POS_X,
       MENU_START_POS_Y + index * MENU_ITEM_HEIGHT,
-      item,
+      TOP_LEVEL_MENU_ITEMS[item],
       mPalette[colorIndex]);
     ++index;
   }
@@ -205,10 +221,12 @@ IngameMenu::SavedGameNameEntry::SavedGameNameEntry(
 IngameMenu::IngameMenu(
   GameMode::Context context,
   const data::PlayerModel* pPlayerModel,
+  game_logic::GameWorld* pGameWorld,
   const data::GameSessionId& sessionId
 )
   : mContext(context)
   , mSavedGame(createSavedGame(sessionId, *pPlayerModel))
+  , mpGameWorld(pGameWorld)
 {
 }
 
@@ -479,7 +497,8 @@ void IngameMenu::enterMenu(const MenuType type) {
 
     case MenuType::TopLevel:
       {
-        auto pMenu = std::make_unique<TopLevelMenu>(mContext);
+        auto pMenu =
+          std::make_unique<TopLevelMenu>(mContext, mpGameWorld->canQuickLoad());
         mContext.mpServiceProvider->fadeOutScreen();
         pMenu->updateAndRender(0.0);
         mContext.mpServiceProvider->fadeInScreen();
@@ -525,6 +544,13 @@ void IngameMenu::handleMenuActiveEvents() {
     }
   };
 
+  auto leaveTopLevelMenu = [this](TopLevelMenu& state) {
+    state.updateAndRender(0.0);
+    mpTopLevelMenu = nullptr;
+    mStateStack.pop();
+    fadeout();
+  };
+
 
   for (const auto& event : mEventQueue) {
     if (mStateStack.empty()) {
@@ -535,13 +561,18 @@ void IngameMenu::handleMenuActiveEvents() {
       [&](std::unique_ptr<TopLevelMenu>& pState) {
         auto& state = *pState;
         if (isConfirmButton(event)) {
-          switch (state.mSelectedIndex) {
+          switch (state.mItems[state.mSelectedIndex]) {
             case itemIndex("Save Game"):
               enterMenu(MenuType::SaveGame);
               break;
 
             case itemIndex("Restore Game"):
               enterMenu(MenuType::LoadGame);
+              break;
+
+            case itemIndex("Restore Quick Save"):
+              mpGameWorld->quickLoad();
+              leaveTopLevelMenu(state);
               break;
 
             case itemIndex("Options"):
@@ -557,10 +588,7 @@ void IngameMenu::handleMenuActiveEvents() {
               break;
           }
         } else if (isCancelButton(event)) {
-          state.updateAndRender(0.0);
-          mpTopLevelMenu = nullptr;
-          mStateStack.pop();
-          fadeout();
+          leaveTopLevelMenu(state);
         } else {
           state.handleEvent(event);
         }

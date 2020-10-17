@@ -73,13 +73,13 @@ GameRunner::GameRunner(
   const bool showWelcomeMessage
 )
   : mContext(context)
-  , mMenu(context, pPlayerModel, sessionId)
   , mWorld(
       pPlayerModel,
       sessionId,
       context,
       playerPositionOverride,
       showWelcomeMessage)
+  , mMenu(context, pPlayerModel, &mWorld, sessionId)
 {
 }
 
@@ -219,6 +219,18 @@ void GameRunner::handlePlayerKeyboardInput(const SDL_Event& event) {
         mPlayerInput.mFire.mWasTriggered = true;
       }
       break;
+
+    case SDLK_F5:
+      if (keyPressed) {
+        mWorld.quickSave();
+      }
+      break;
+
+    case SDLK_F7:
+      if (keyPressed) {
+        mWorld.quickLoad();
+      }
+      break;
   }
 }
 
@@ -315,6 +327,12 @@ void GameRunner::handlePlayerGameControllerInput(const SDL_Event& event) {
             mPlayerInput.mFire.mIsPressed = buttonPressed;
             if (buttonPressed) {
                 mPlayerInput.mFire.mWasTriggered = true;
+            }
+            break;
+
+          case SDL_CONTROLLER_BUTTON_BACK:
+            if (buttonPressed) {
+              mWorld.quickSave();
             }
             break;
         }
