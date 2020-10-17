@@ -570,10 +570,6 @@ void Player::enterShip(
   sprite.mFramesToRender[0] = 1;
   engine::synchronizeBoundingBoxToSprite(mEntity);
 
-  // Reserve spots for exhaust flame animation
-  sprite.mFramesToRender.push_back(engine::IGNORE_RENDER_SLOT);
-  sprite.mFramesToRender.push_back(engine::IGNORE_RENDER_SLOT);
-
   setVisualState(VisualState::InShip);
 }
 

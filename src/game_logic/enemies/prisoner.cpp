@@ -68,7 +68,7 @@ void AggressivePrisoner::update(
       if (wantsToGrab) {
         mIsGrabbing = true;
         mGrabStep = 0;
-        sprite.mFramesToRender.push_back(1);
+        sprite.mFramesToRender[1] = 1;
         shootable.mInvincible = false;
         entity.assign<PlayerDamaging>(1);
       }
@@ -82,7 +82,7 @@ void AggressivePrisoner::update(
 
     if (mGrabStep >= 4) {
       mIsGrabbing = false;
-      sprite.mFramesToRender.pop_back();
+      sprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
       shootable.mInvincible = true;
       entity.remove<PlayerDamaging>();
     }
@@ -110,7 +110,7 @@ void AggressivePrisoner::onKilled(
   auto& sprite = *entity.component<Sprite>();
 
   if (mIsGrabbing) {
-    sprite.mFramesToRender.pop_back();
+    sprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
     entity.remove<game_logic::components::PlayerDamaging>();
   }
 

@@ -245,7 +245,7 @@ void WatchBotCarrier::update(
   auto releasePayload = [&, this]() {
     d.mpEntityFactory->createActor(
       data::ActorID::Watchbot_container, position + CONTAINER_OFFSET);
-    entity.component<Sprite>()->mFramesToRender.pop_back();
+    entity.component<Sprite>()->mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
   };
 
   auto explode = [&]() {

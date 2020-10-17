@@ -114,7 +114,7 @@ void HoverBot::update(
         engine::startAnimationLoop(entity, 1, 0, 5);
 
         // draw the robot's eye
-        sprite.mFramesToRender.push_back(6);
+        sprite.mFramesToRender[1] = 6;
         entity.assign<game_logic::components::AppearsOnRadar>();
       } else if (state.mFramesElapsed == 16) {
         mState = Moving{Orientation::Left};

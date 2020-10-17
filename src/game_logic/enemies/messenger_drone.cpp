@@ -154,7 +154,7 @@ void MessengerDrone::update(
       entity.assign<AnimationLoop>(1, 4, 5, 3);
 
       // Start showing message on screen, use 5th render slot (index 4)
-      sprite.mFramesToRender.push_back(10);
+      sprite.mFramesToRender[4] = 10;
 
       mMessageStep = 0;
       mElapsedFrames = 0;
@@ -176,7 +176,7 @@ void MessengerDrone::update(
 
       if (mMessageStep >= messageSequence.size()) {
         // Go back to blank screen
-        sprite.mFramesToRender.pop_back();
+        sprite.mFramesToRender[4] = engine::IGNORE_RENDER_SLOT;
 
         // Switch back to horizontal engine
         const auto exhaustStartFrame =

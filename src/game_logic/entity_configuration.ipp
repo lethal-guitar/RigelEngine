@@ -334,7 +334,7 @@ void configureBonusGlobe(
   // is using the 2nd render slot (see actorIDListForActor()), so by removing
   // that one, we get just the content.
   auto crystalSprite = *entity.component<Sprite>();
-  crystalSprite.mFramesToRender.pop_back();
+  crystalSprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
 
   ItemContainer coloredDestructionEffect;
   coloredDestructionEffect.assign<Sprite>(crystalSprite);
@@ -683,7 +683,7 @@ void EntityFactory::configureEntity(
         // "intact/not shot" version. This is barely noticeable though, and
         // would require a custom Component and System in order to fix -
         // doesn't seem worth it for such a small detail.
-        flyingSodaCanSprite.mFramesToRender.push_back(0);
+        flyingSodaCanSprite.mFramesToRender[1] = 1;
 
         auto flyingSodaCanContainer = makeContainer(
           flyingSodaCanCollectable,
@@ -1236,7 +1236,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<AutoDestroy>(AutoDestroy{
         AutoDestroy::Condition::OnLeavingActiveRegion});
-      entity.component<Sprite>()->mFramesToRender.push_back(1);
+      entity.component<Sprite>()->mFramesToRender[1] = 1;
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       entity.assign<AppearsOnRadar>();
 
@@ -1809,8 +1809,6 @@ void EntityFactory::configureEntity(
       entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<SolidBody>();
-      entity.component<Sprite>()->mFramesToRender.push_back(
-        engine::IGNORE_RENDER_SLOT);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1910,7 +1908,7 @@ void EntityFactory::configureEntity(
         entity.assign<Shootable>(Health{1}, GivenScore{typeIndex});
         entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
         entity.assign<BoundingBox>(boundingBox);
-        entity.component<Sprite>()->mFramesToRender.clear();
+        entity.component<Sprite>()->mFramesToRender = {};
 
         entity.assign<BehaviorController>(
           behaviors::MessengerDrone{MESSAGE_TYPE_BY_INDEX[typeIndex]});

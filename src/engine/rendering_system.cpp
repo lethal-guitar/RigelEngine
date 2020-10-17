@@ -302,7 +302,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
     renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpCameraPosition);
   } else {
-    for (const auto baseFrameIndex : sprite.mFramesToRender) {
+    for (const auto& baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
       if (baseFrameIndex == IGNORE_RENDER_SLOT) {

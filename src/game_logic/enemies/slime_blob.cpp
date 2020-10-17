@@ -95,7 +95,7 @@ void SlimeContainer::onKilled(
   using namespace engine::components;
 
   auto& sprite = *entity.component<Sprite>();
-  sprite.mFramesToRender.pop_back();
+  sprite.mFramesToRender[2] = engine::IGNORE_RENDER_SLOT;
   sprite.mFramesToRender[0] = 2;
   sprite.flashWhite();
 }

@@ -107,7 +107,6 @@ void behaviors::RadarComputer::update(
   }
 
   auto& sprite = *entity.component<Sprite>();
-  const auto previousFrame = sprite.mFramesToRender[0];
 
   const auto radarDishesPresent = s.mpPerFrameState->mNumRadarDishes > 0;
   const auto& sequence = radarDishesPresent
@@ -118,18 +117,12 @@ void behaviors::RadarComputer::update(
 
   sprite.mFramesToRender[0] = newFrame;
 
-  if (previousFrame != SHOW_COUNT_FRAME && newFrame == SHOW_COUNT_FRAME) {
-    sprite.mFramesToRender.push_back(DISH_COUNT_BASE_FRAME);
-  }
-
-  if (previousFrame == SHOW_COUNT_FRAME && newFrame != SHOW_COUNT_FRAME) {
-    sprite.mFramesToRender.pop_back();
-  }
-
   if (newFrame == SHOW_COUNT_FRAME) {
     const auto dishCountFrame =
       DISH_COUNT_BASE_FRAME + s.mpPerFrameState->mNumRadarDishes;
-    sprite.mFramesToRender.back() = dishCountFrame;
+    sprite.mFramesToRender[4] = dishCountFrame;
+  } else {
+    sprite.mFramesToRender[4] = engine::IGNORE_RENDER_SLOT;
   }
 }
 

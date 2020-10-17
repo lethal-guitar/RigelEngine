@@ -28,6 +28,7 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <array>
 #include <optional>
 #include <vector>
 
@@ -58,6 +59,7 @@ struct SpriteDrawData {
 };
 
 
+constexpr auto NUM_RENDER_SLOTS = 8;
 constexpr auto IGNORE_RENDER_SLOT = -1;
 
 
@@ -80,19 +82,81 @@ void drawSpriteFrame(
 namespace components {
 
 struct Sprite {
+  struct RenderSlot {
+    RenderSlot() = default;
+    RenderSlot(const int frame)
+      : mFrame(static_cast<std::int8_t>(frame))
+    {
+      assert(
+        frame == IGNORE_RENDER_SLOT ||
+        (frame >= 0 && frame < std::numeric_limits<std::int8_t>::max()));
+    }
+
+    RenderSlot& operator=(const int frame) {
+      assert(
+        frame == IGNORE_RENDER_SLOT ||
+        (frame >= 0 && frame < std::numeric_limits<std::int8_t>::max()));
+
+      mFrame = static_cast<std::int8_t>(frame);
+      return *this;
+    }
+
+    operator int() const {
+      return mFrame;
+    }
+
+    RenderSlot& operator++() {
+      ++mFrame;
+      return *this;
+    }
+
+    RenderSlot operator++(int) {
+      auto copy = *this;
+      ++mFrame;
+      return copy;
+    }
+
+    RenderSlot& operator--() {
+      --mFrame;
+      return *this;
+    }
+
+    RenderSlot operator--(int) {
+      auto copy = *this;
+      --mFrame;
+      return copy;
+    }
+
+    RenderSlot& operator+=(const int offset) {
+      mFrame += static_cast<std::int8_t>(offset);
+      return *this;
+    }
+
+    RenderSlot& operator-=(const int offset) {
+      mFrame -= static_cast<std::int8_t>(offset);
+      return *this;
+    }
+
+    std::int8_t mFrame = IGNORE_RENDER_SLOT;
+  };
+
   Sprite() = default;
-  Sprite(const SpriteDrawData* pDrawData, std::vector<int> framesToRender)
-    : mFramesToRender(std::move(framesToRender))
-    , mpDrawData(pDrawData)
+  Sprite(const SpriteDrawData* pDrawData, const std::vector<int>& framesToRender)
+    : mpDrawData(pDrawData)
   {
+    auto index = 0;
+    for (const auto frame : framesToRender) {
+      mFramesToRender[index] = frame;
+      ++index;
+    }
   }
 
   void flashWhite() {
     mFlashingWhite = true;
   }
 
-  std::vector<int> mFramesToRender;
   const SpriteDrawData* mpDrawData = nullptr;
+  std::array<RenderSlot, NUM_RENDER_SLOTS> mFramesToRender;
   bool mFlashingWhite = false;
   bool mTranslucent = false;
   bool mShow = true;
