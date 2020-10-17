@@ -147,7 +147,7 @@ void updateAnimatedSprites(ex::EntityManager& es) {
   });
 
   es.each<Sprite>([](ex::Entity entity, Sprite& sprite) {
-     sprite.mFlashingWhite = false;
+     sprite.mFlashingWhiteStates.reset();
   });
 }
 
@@ -302,6 +302,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
     const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
     renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpCameraPosition);
   } else {
+    auto slotIndex = 0;
     for (const auto& baseFrameIndex : sprite.mFramesToRender) {
       assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
@@ -315,7 +316,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       // White flash effect/translucency
 
       // White flash takes priority over translucency
-      if (sprite.mFlashingWhite) {
+      if (sprite.mFlashingWhiteStates.test(slotIndex)) {
         mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
       } else if (sprite.mTranslucent) {
         mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
@@ -327,6 +328,8 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       mpRenderer->setOverlayColor(base::Color{});
       mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
+
+      ++slotIndex;
     }
   }
 }

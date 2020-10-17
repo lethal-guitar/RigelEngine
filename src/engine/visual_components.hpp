@@ -29,6 +29,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
+#include <bitset>
 #include <optional>
 #include <vector>
 
@@ -152,12 +153,16 @@ struct Sprite {
   }
 
   void flashWhite() {
-    mFlashingWhite = true;
+    mFlashingWhiteStates.set();
+  }
+
+  void flashWhite(const int renderSlot) {
+    mFlashingWhiteStates.set(renderSlot);
   }
 
   const SpriteDrawData* mpDrawData = nullptr;
   std::array<RenderSlot, NUM_RENDER_SLOTS> mFramesToRender;
-  bool mFlashingWhite = false;
+  std::bitset<NUM_RENDER_SLOTS> mFlashingWhiteStates;
   bool mTranslucent = false;
   bool mShow = true;
 };
