@@ -23,11 +23,11 @@
 
 #include "base/defer.hpp"
 #include "common/user_profile.hpp"
+#include "frontend/game.hpp"
 #include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "ui/imgui_integration.hpp"
 
-#include "game.hpp"
 #include "platform.hpp"
 
 RIGEL_DISABLE_WARNINGS

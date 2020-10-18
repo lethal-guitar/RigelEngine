@@ -17,12 +17,12 @@
 #include "game_main.hpp"
 
 #include "base/defer.hpp"
+#include "frontend/game.hpp"
 #include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "ui/game_path_browser.hpp"
 #include "ui/imgui_integration.hpp"
 
-#include "game.hpp"
 #include "platform.hpp"
 
 RIGEL_DISABLE_WARNINGS
