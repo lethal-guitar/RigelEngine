@@ -5,9 +5,8 @@
 #include "ui/apogee_logo.hpp"
 #include "ui/intro_movie.hpp"
 
-#include "mode_stage.hpp"
-
 #include <memory>
+#include <variant>
 
 
 namespace rigel {
@@ -47,18 +46,25 @@ public:
     const std::vector<SDL_Event>& events) override;
 
 private:
+  struct ScriptedStep {};
+  struct Credits : ScriptedStep {};
+  struct Story : ScriptedStep {};
+
+  using Step = std::variant<
+    ui::ApogeeLogo,
+    ui::IntroMovie,
+    Story,
+    Credits>;
+
   bool handleEvent(const SDL_Event& event);
+  void startCurrentStep();
+  void updateCurrentStep(engine::TimeDelta dt);
+  bool isCurrentStepFinished() const;
+  void advanceToNextStep();
 
-private:
   Context mContext;
-  IGameServiceProvider* mpServiceProvider;
-  bool mFirstRunIncludedStoryAnimation;
-
-  ui::DukeScriptRunner* mpScriptRunner;
-  loader::ScriptBundle mScripts;
-
-  std::vector<ModeStage> mStages;
-  std::size_t mCurrentStage;
+  std::vector<Step> mSteps;
+  std::size_t mCurrentStep = 0;
 };
 
 }
