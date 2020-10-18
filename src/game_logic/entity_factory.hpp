@@ -19,6 +19,7 @@
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
 #include "engine/base_components.hpp"
+#include "engine/isprite_factory.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "loader/level_loader.hpp"
@@ -90,36 +91,15 @@ inline bool isHorizontal(const ProjectileDirection direction) {
 }
 
 
-class SpriteFactory {
-public:
-  SpriteFactory(
-    renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage* pSpritePackage);
-
-  engine::components::Sprite createSprite(data::ActorID id);
-  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const;
-
-private:
-  struct SpriteData {
-    engine::SpriteDrawData mDrawData;
-    std::vector<int> mInitialFramesToRender;
-  };
-
-  renderer::Renderer* mpRenderer;
-  const loader::ActorImagePackage* mpSpritePackage;
-  std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
-};
-
-
 class EntityFactory : public IEntityFactory {
 public:
   EntityFactory(
-    SpriteFactory* pSpriteFactory,
+    engine::ISpriteFactory* pSpriteFactory,
     entityx::EntityManager* pEntityManager,
     engine::RandomNumberGenerator* pRandomGenerator,
     data::Difficulty difficulty);
 
-  entityx::Entity createEntitiesForLevel(
+  void createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) override;
 
   engine::components::Sprite createSpriteForId(
@@ -174,7 +154,7 @@ private:
     const engine::components::BoundingBox& boundingBox
   );
 
-  SpriteFactory* mpSpriteFactory;
+  engine::ISpriteFactory* mpSpriteFactory;
   entityx::EntityManager* mpEntityManager;
   engine::RandomNumberGenerator* mpRandomGenerator;
   int mSpawnIndex = 0;

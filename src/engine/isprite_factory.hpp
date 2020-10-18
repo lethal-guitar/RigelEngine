@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2020, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,38 +16,18 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
-#include "engine/base_components.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
-RIGEL_RESTORE_WARNINGS
+#include "base/spatial_types.hpp"
+#include "data/actor_ids.hpp"
+#include "engine/visual_components.hpp"
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::engine {
 
+struct ISpriteFactory {
+  virtual ~ISpriteFactory() = default;
 
-namespace rigel::game_logic::behaviors {
-
-struct RocketTurret {
-  void update(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    bool isOnScreen,
-    entityx::Entity entity);
-
-  enum class Orientation {
-    Left = 0,
-    Top = 1,
-    Right = 2
-  };
-
-  Orientation mOrientation = Orientation::Left;
-  bool mNeedsReorientation = true;
-  int mNextShotCountdown = 0;
+  virtual engine::components::Sprite createSprite(data::ActorID id) = 0;
+  virtual base::Rect<int> actorFrameRect(data::ActorID id, int frame) const = 0;
 };
 
 }

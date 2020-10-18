@@ -18,7 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
-#include "game_logic/ingame_systems.hpp"
+#include "game_logic/world_state.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -73,13 +73,13 @@ GameRunner::GameRunner(
   const bool showWelcomeMessage
 )
   : mContext(context)
-  , mMenu(context, pPlayerModel, sessionId)
   , mWorld(
       pPlayerModel,
       sessionId,
       context,
       playerPositionOverride,
       showWelcomeMessage)
+  , mMenu(context, pPlayerModel, &mWorld, sessionId)
 {
 }
 
@@ -147,7 +147,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt) {
       update();
     }
 
-    mWorld.mpState->mpSystems->updateBackdropAutoScrolling(dt);
+    mWorld.mpState->mRenderingSystem.updateBackdropAutoScrolling(dt);
   }
 }
 
@@ -219,6 +219,18 @@ void GameRunner::handlePlayerKeyboardInput(const SDL_Event& event) {
         mPlayerInput.mFire.mWasTriggered = true;
       }
       break;
+
+    case SDLK_F5:
+      if (keyPressed) {
+        mWorld.quickSave();
+      }
+      break;
+
+    case SDLK_F7:
+      if (keyPressed) {
+        mWorld.quickLoad();
+      }
+      break;
   }
 }
 
@@ -241,7 +253,7 @@ void GameRunner::handlePlayerGameControllerInput(const SDL_Event& event) {
             // up/down while flying. Therefore, we use a different vertical
             // deadzone when not in the ship.
             const auto deadZone =
-              mWorld.mpState->mpSystems->player().stateIs<game_logic::InShip>()
+              mWorld.mpState->mPlayer.stateIs<game_logic::InShip>()
               ? ANALOG_STICK_DEADZONE_X
               : ANALOG_STICK_DEADZONE_Y;
 
@@ -317,6 +329,12 @@ void GameRunner::handlePlayerGameControllerInput(const SDL_Event& event) {
                 mPlayerInput.mFire.mWasTriggered = true;
             }
             break;
+
+          case SDL_CONTROLLER_BUTTON_BACK:
+            if (buttonPressed) {
+              mWorld.quickSave();
+            }
+            break;
         }
       }
       break;
@@ -329,7 +347,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
     return;
   }
 
-  auto& debuggingSystem = mWorld.mpState->mpSystems->debuggingSystem();
+  auto& debuggingSystem = mWorld.mpState->mDebuggingSystem;
   switch (event.key.keysym.sym) {
     case SDLK_b:
       debuggingSystem.toggleBoundingBoxDisplay();
@@ -359,7 +377,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
 
     case SDLK_F10:
       {
-        auto& player = mWorld.mpState->mpSystems->player();
+        auto& player = mWorld.mpState->mPlayer;
         player.mGodModeOn = !player.mGodModeOn;
       }
       break;
@@ -374,7 +392,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event) {
 void GameRunner::renderDebugText() {
   std::stringstream debugText;
 
-  if (mWorld.mpState->mpSystems->player().mGodModeOn) {
+  if (mWorld.mpState->mPlayer.mGodModeOn) {
     debugText << "GOD MODE on\n";
   }
 

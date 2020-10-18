@@ -113,20 +113,6 @@ ActorData ActorImagePackage::loadActor(
 }
 
 
-base::Rect<int> ActorImagePackage::actorFrameRect(
-  const data::ActorID id,
-  const int frame
-) const {
-  const auto it = mHeadersById.find(id);
-  if (it == mHeadersById.end()) {
-    throw invalid_argument("actorFrameRect(): No actor at this ID " + std::to_string(static_cast<int>(id)));
-  }
-
-  const auto& frameHeader = it->second.mFrames.at(frame);
-  return {frameHeader.mDrawOffset, frameHeader.mSizeInTiles};
-}
-
-
 std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
   const data::ActorID id,
   const ActorHeader& header,

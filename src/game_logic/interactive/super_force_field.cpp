@@ -45,12 +45,6 @@ void SuperForceField::update(
   auto& sprite = *entity.component<Sprite>();
   auto& playerPos = s.mpPlayer->position();
 
-  if (!mEmitter) {
-    mEmitter = d.mpEntityFactory->createSprite(
-      data::ActorID::Super_force_field_LEFT, position);
-    mEmitter.component<Sprite>()->mFramesToRender[0] = 3;
-  }
-
   if (mFizzleFramesElapsed) {
     auto& animationFrame = sprite.mFramesToRender[0];
 
@@ -60,7 +54,7 @@ void SuperForceField::update(
     animationFrame = (s.mpPerFrameState->mIsOddFrame ? 0 : 1) + 1;
     if ((d.mpRandomGenerator->gen() / 8) % 2 != 0) {
       d.mpServiceProvider->playSound(data::SoundId::ForceFieldFizzle);
-      sprite.flashWhite();
+      sprite.flashWhite(0);
     }
 
     if (framesElapsed == 19) {
@@ -106,7 +100,6 @@ void SuperForceField::update(
         data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyDown,
         position + base::Vector{-1, 5});
-      mEmitter.destroy();
       entity.destroy();
       return;
     }

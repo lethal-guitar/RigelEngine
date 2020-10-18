@@ -22,18 +22,6 @@ namespace {
 using namespace engine::components::parameter_aliases;
 using namespace game_logic::components::parameter_aliases;
 
-
-// The game draws player projectiles after drawing all regular actors, which
-// makes them appear on top of everything. But in our case, they are rendered
-// using the same mechanism as the other sprites, so we have to explicitly
-// assign an order (which is higher than all regular actors' draw order).
-const auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
-
-const auto MUZZLE_FLASH_DRAW_ORDER = PLAYER_PROJECTILE_DRAW_ORDER + 1;
-
-const auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
-
-
 const auto SCORE_NUMBER_LIFE_TIME = 60;
 
 const base::Point<float> SCORE_NUMBER_MOVE_SEQUENCE[] = {
@@ -201,7 +189,7 @@ constexpr bool isPlayerProjectile(const ProjectileType type) {
 }
 
 
-using Message = ai::components::MessengerDrone::Message;
+using Message = behaviors::MessengerDrone::Message;
 
 Message MESSAGE_TYPE_BY_INDEX[] = {
   Message::YourBrainIsOurs,
@@ -288,21 +276,23 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
 }
 
 
-auto createBlueGuardAiComponent(const ActorID id) {
-  using ai::components::BlueGuard;
+auto createBlueGuardBehavior(const ActorID id) {
+  using behaviors::BlueGuard;
 
   if (id == ActorID::Blue_guard_using_a_terminal) {
     return BlueGuard::typingOnTerminal();
   } else {
-    const auto orientation = id == ActorID::Blue_guard_RIGHT ? Orientation::Right : Orientation::Left;
+    const auto orientation = id == ActorID::Blue_guard_RIGHT
+      ? Orientation::Right
+      : Orientation::Left;
     return BlueGuard::patrolling(orientation);
   }
 }
 
 
-auto skeletonAiConfig() {
+auto skeletonWalkerConfig() {
   static auto config = []() {
-    ai::components::SimpleWalker::Configuration c;
+    behaviors::SimpleWalker::Configuration c;
     c.mAnimEnd = 3;
     c.mWalkAtFullSpeed = false;
     return c;
@@ -312,9 +302,9 @@ auto skeletonAiConfig() {
 }
 
 
-auto turkeyAiConfig() {
+auto turkeyWalkerConfig() {
   static auto config = []() {
-    ai::components::SimpleWalker::Configuration c;
+    behaviors::SimpleWalker::Configuration c;
     c.mAnimEnd = 1;
     c.mWalkAtFullSpeed = true;
     return c;
@@ -344,12 +334,12 @@ void configureBonusGlobe(
   // is using the 2nd render slot (see actorIDListForActor()), so by removing
   // that one, we get just the content.
   auto crystalSprite = *entity.component<Sprite>();
-  crystalSprite.mFramesToRender.pop_back();
+  crystalSprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
 
   ItemContainer coloredDestructionEffect;
   coloredDestructionEffect.assign<Sprite>(crystalSprite);
   coloredDestructionEffect.assign<BoundingBox>(boundingBox);
-  coloredDestructionEffect.assign<OverrideDrawOrder>(EFFECT_DRAW_ORDER);
+  coloredDestructionEffect.assign<OverrideDrawOrder>(engine::EFFECT_DRAW_ORDER);
   coloredDestructionEffect.assign<AnimationLoop>(1, 0, 3);
   configureMovingEffectSprite(coloredDestructionEffect, SpriteMovement::FlyUp);
 
@@ -371,191 +361,6 @@ ActorID scoreNumberActor(const ScoreNumberType type) {
   return ActorID::Score_number_FX_100;
 }
 
-
-auto actorIDListForActor(const ActorID ID) {
-  std::vector<ActorID> actorParts;
-
-  switch (ID) {
-    case ActorID::Hoverbot:
-      actorParts.push_back(ActorID::Hoverbot);
-      actorParts.push_back(ActorID::Hoverbot_teleport_FX);
-      break;
-
-    case ActorID::Duke_LEFT:
-    case ActorID::Duke_RIGHT:
-      actorParts.push_back(ActorID::Duke_LEFT);
-      actorParts.push_back(ActorID::Duke_RIGHT);
-      break;
-
-    case ActorID::Blue_bonus_globe_1:
-    case ActorID::Blue_bonus_globe_2:
-    case ActorID::Blue_bonus_globe_3:
-    case ActorID::Blue_bonus_globe_4:
-      actorParts.push_back(ID);
-      actorParts.push_back(ActorID::Bonus_globe_shell);
-      break;
-
-    case ActorID::Teleporter_1:
-      actorParts.push_back(ActorID::Teleporter_2);
-      break;
-
-    case ActorID::Green_slime_blob:
-      actorParts.push_back(ActorID::Green_slime_blob);
-      actorParts.push_back(ActorID::Green_slime_blob_flying_on_ceiling);
-      break;
-
-    case ActorID::Eyeball_thrower_LEFT:
-      actorParts.push_back(ActorID::Eyeball_thrower_LEFT);
-      actorParts.push_back(ActorID::Eyeball_thrower_RIGHT);
-      break;
-
-    case ActorID::Blowing_fan:
-      actorParts.push_back(ActorID::Blowing_fan);
-      actorParts.push_back(ActorID::Blowing_fan_threads_on_top);
-      break;
-
-    case ActorID::Missile_intact:
-      actorParts.push_back(ActorID::Missile_intact);
-      actorParts.push_back(ActorID::Missile_exhaust_flame);
-      break;
-
-    case ActorID::Blue_guard_LEFT:
-    case ActorID::Blue_guard_using_a_terminal:
-      actorParts.push_back(ActorID::Blue_guard_RIGHT);
-      break;
-
-    case ActorID::Red_box_turkey:
-      actorParts.push_back(ActorID::Turkey);
-      break;
-
-    case ActorID::Messenger_drone_1:
-    case ActorID::Messenger_drone_2:
-    case ActorID::Messenger_drone_3:
-    case ActorID::Messenger_drone_4:
-    case ActorID::Messenger_drone_5:
-      actorParts.push_back(ActorID::Messenger_drone_body);
-      actorParts.push_back(ActorID::Messenger_drone_part_1);
-      actorParts.push_back(ActorID::Messenger_drone_part_2);
-      actorParts.push_back(ActorID::Messenger_drone_part_3);
-      actorParts.push_back(ActorID::Messenger_drone_exhaust_flame_1);
-      actorParts.push_back(ActorID::Messenger_drone_exhaust_flame_2);
-      actorParts.push_back(ActorID::Messenger_drone_exhaust_flame_3);
-      actorParts.push_back(ID);
-      break;
-
-    case ActorID::Big_green_cat_LEFT:
-    case ActorID::Big_green_cat_RIGHT:
-      actorParts.push_back(ActorID::Big_green_cat_LEFT);
-      actorParts.push_back(ActorID::Big_green_cat_RIGHT);
-      break;
-
-    case ActorID::Spiked_green_creature_LEFT:
-    case ActorID::Spiked_green_creature_RIGHT:
-      actorParts.push_back(ActorID::Spiked_green_creature_LEFT);
-      actorParts.push_back(ActorID::Spiked_green_creature_RIGHT);
-      break;
-
-    case ActorID::Dukes_ship_LEFT:
-    case ActorID::Dukes_ship_RIGHT:
-    case ActorID::Dukes_ship_after_exiting_LEFT:
-    case ActorID::Dukes_ship_after_exiting_RIGHT:
-      actorParts.push_back(ActorID::Dukes_ship_LEFT);
-      actorParts.push_back(ActorID::Dukes_ship_RIGHT);
-      actorParts.push_back(ActorID::Dukes_ship_exhaust_flames);
-      break;
-
-    default:
-      actorParts.push_back(ID);
-      break;
-  }
-  return actorParts;
-}
-
-
-void configureSprite(Sprite& sprite, const ActorID actorID) {
-  switch (actorID) {
-    case ActorID::Hoverbot:
-      sprite.mFramesToRender = {0};
-      break;
-
-    case ActorID::Bomb_dropping_spaceship:
-      sprite.mFramesToRender = {0, 1};
-      break;
-
-    case ActorID::Green_slime_blob:
-      sprite.mFramesToRender = {0};
-      break;
-
-    case ActorID::Eyeball_thrower_LEFT:
-      sprite.mFramesToRender = {0};
-      break;
-
-    case ActorID::Sentry_robot_generator:
-      sprite.mFramesToRender = {0, 4};
-      break;
-
-    case ActorID::Missile_intact:
-      sprite.mFramesToRender = {0};
-      break;
-
-    case ActorID::Metal_grabber_claw:
-      sprite.mFramesToRender = {1};
-      break;
-
-    case ActorID::Spider:
-      sprite.mFramesToRender = {6};
-      break;
-
-    case ActorID::Blue_guard_LEFT:
-      sprite.mFramesToRender = {6};
-      break;
-
-    case ActorID::BOSS_Episode_1:
-      sprite.mFramesToRender = {0, 2};
-      break;
-
-    case ActorID::BOSS_Episode_3:
-      sprite.mFramesToRender = {engine::IGNORE_RENDER_SLOT, 1, 0};
-      break;
-
-    case ActorID::BOSS_Episode_4:
-      sprite.mFramesToRender = {0, 1};
-      break;
-
-    case ActorID::Rocket_elevator:
-      sprite.mFramesToRender = {5, 0};
-      break;
-
-    case ActorID::Blue_guard_using_a_terminal:
-      sprite.mFramesToRender = {12};
-      break;
-
-    case ActorID::Lava_fountain:
-      // Handled by custom render func
-      sprite.mFramesToRender = {};
-      break;
-
-    case ActorID::Radar_computer_terminal:
-      sprite.mFramesToRender = {0, 1, 2, 3};
-      break;
-
-    case ActorID::Big_green_cat_LEFT:
-    case ActorID::Big_green_cat_RIGHT:
-    case ActorID::Spiked_green_creature_LEFT:
-    case ActorID::Spiked_green_creature_RIGHT:
-    case ActorID::Duke_LEFT:
-    case ActorID::Duke_RIGHT:
-    case ActorID::Dukes_ship_LEFT:
-    case ActorID::Dukes_ship_RIGHT:
-    case ActorID::Dukes_ship_after_exiting_LEFT:
-    case ActorID::Dukes_ship_after_exiting_RIGHT:
-      sprite.mFramesToRender = {0};
-      break;
-
-    default:
-      break;
-  }
-}
 
 
 bool hasAssociatedSprite(const ActorID actorID) {
@@ -594,91 +399,6 @@ ActorID actorIdForBoxColor(const ContainerColor color) {
 
   assert(false);
   return ActorID::White_box_empty;
-}
-
-
-int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
-  auto scale = [](const int drawOrderValue) {
-    constexpr auto SCALE_FACTOR = 10;
-    return drawOrderValue * SCALE_FACTOR;
-  };
-
-  switch (id) {
-    case ActorID::Duke_rocket_up: case ActorID::Duke_rocket_down: case ActorID::Duke_rocket_left: case ActorID::Duke_rocket_right:
-    case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
-    case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
-    case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
-      return scale(PLAYER_PROJECTILE_DRAW_ORDER);
-
-    case ActorID::Muzzle_flash_up: case ActorID::Muzzle_flash_down: case ActorID::Muzzle_flash_left: case ActorID::Muzzle_flash_right: // player muzzle flash
-      return scale(MUZZLE_FLASH_DRAW_ORDER);
-
-    case ActorID::Explosion_FX_1:
-    case ActorID::Explosion_FX_2:
-    case ActorID::Shot_impact_FX:
-    case ActorID::Smoke_puff_FX:
-    case ActorID::Hoverbot_debris_1:
-    case ActorID::Hoverbot_debris_2:
-    case ActorID::Nuclear_waste_can_debris_1:
-    case ActorID::Nuclear_waste_can_debris_2:
-    case ActorID::Nuclear_waste_can_debris_3:
-    case ActorID::Nuclear_waste_can_debris_4:
-    case ActorID::Flame_thrower_fire_RIGHT:
-    case ActorID::Flame_thrower_fire_LEFT:
-    case ActorID::Nuclear_explosion:
-    case ActorID::Watchbot_container_debris_1:
-    case ActorID::Watchbot_container_debris_2:
-    case ActorID::Fire_bomb_fire:
-    case ActorID::Duke_death_particles:
-    case ActorID::Bonus_globe_debris_1:
-    case ActorID::Bonus_globe_debris_2:
-    case ActorID::White_circle_flash_FX:
-    case ActorID::Nuclear_waste_can_green_slime_inside:
-    case ActorID::Smoke_cloud_FX:
-    case ActorID::Biological_enemy_debris:
-    case ActorID::Missile_debris:
-    case ActorID::Eyeball_projectile:
-    case ActorID::Enemy_laser_muzzle_flash_1:
-    case ActorID::Enemy_laser_muzzle_flash_2:
-    case ActorID::Metal_grabber_claw_debris_1:
-    case ActorID::Metal_grabber_claw_debris_2:
-    case ActorID::Yellow_fireball_FX:
-    case ActorID::Green_fireball_FX:
-    case ActorID::Blue_fireball_FX:
-    case ActorID::Coke_can_debris_1:
-    case ActorID::Coke_can_debris_2:
-    case ActorID::Spiked_green_creature_eye_FX_LEFT:
-    case ActorID::Spiked_green_creature_eye_FX_RIGHT:
-    case ActorID::Spiked_green_creature_stone_debris_1_LEFT:
-    case ActorID::Spiked_green_creature_stone_debris_2_LEFT:
-    case ActorID::Spiked_green_creature_stone_debris_3_LEFT:
-    case ActorID::Spiked_green_creature_stone_debris_4_LEFT:
-    case ActorID::Spiked_green_creature_stone_debris_1_RIGHT:
-    case ActorID::Spiked_green_creature_stone_debris_2_RIGHT:
-    case ActorID::Spiked_green_creature_stone_debris_3_RIGHT:
-    case ActorID::Spiked_green_creature_stone_debris_4_RIGHT:
-    case ActorID::Spider_shaken_off:
-    case ActorID::Windblown_spider_generator:
-    case ActorID::Spider_debris_2:
-    case ActorID::Spider_blowing_in_wind:
-    case ActorID::Prisoner_hand_debris:
-    case ActorID::Rigelatin_soldier_projectile:
-      return scale(EFFECT_DRAW_ORDER);
-
-    case ActorID::Score_number_FX_100:
-    case ActorID::Score_number_FX_500:
-    case ActorID::Score_number_FX_2000:
-    case ActorID::Score_number_FX_5000:
-    case ActorID::Score_number_FX_10000:
-      return scale(EFFECT_DRAW_ORDER);
-
-    case ActorID::Napalm_bomb:
-      // Make the bomb appear behind the bomber plane
-      return scale(baseDrawOrder) - 1;
-
-    default:
-      return scale(baseDrawOrder);
-  }
 }
 
 
@@ -791,9 +511,9 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    // Circuit card force field
     case ActorID::Force_field:
       entity.assign<PlayerDamaging>(9, true);
+      entity.assign<BehaviorController>(behaviors::ForceField{});
       interaction::configureForceField(entity, mSpawnIndex);
       {
         const auto& position = *entity.component<WorldPosition>();
@@ -963,7 +683,7 @@ void EntityFactory::configureEntity(
         // "intact/not shot" version. This is barely noticeable though, and
         // would require a custom Component and System in order to fix -
         // doesn't seem worth it for such a small detail.
-        flyingSodaCanSprite.mFramesToRender.push_back(0);
+        flyingSodaCanSprite.mFramesToRender[1] = 1;
 
         auto flyingSodaCanContainer = makeContainer(
           flyingSodaCanCollectable,
@@ -1042,7 +762,7 @@ void EntityFactory::configureEntity(
           Shootable{1, 0},
           DestructionEffects{LIVING_TURKEY_KILL_EFFECT_SPEC},
           cookedTurkeyContainer,
-          ai::components::SimpleWalker{turkeyAiConfig()},
+          BehaviorController{behaviors::SimpleWalker{turkeyWalkerConfig()}},
           Active{},
           AppearsOnRadar{});
         addDefaultMovingBody(livingTurkeyContainer, boundingBox);
@@ -1436,11 +1156,11 @@ void EntityFactory::configureEntity(
     // Enemies
     // ----------------------------------------------------------------------
 
-    case ActorID::Hoverbot: // Cylindrical robot with blinking 'head', aka hover-bot
+    case ActorID::Hoverbot:
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{150});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
-      entity.assign<ai::components::HoverBot>();
+      entity.assign<BehaviorController>(behaviors::HoverBot{});
       entity.assign<DestructionEffects>(
         HOVER_BOT_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1492,11 +1212,11 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Rocket_launcher_turret: // Rocket launcher turret
+    case ActorID::Rocket_launcher_turret:
       entity.assign<Shootable>(Health{3}, GivenScore{500});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<ai::components::RocketTurret>();
+      entity.assign<BehaviorController>(behaviors::RocketTurret{});
       entity.assign<DestructionEffects>(
         SIMPLE_TECH_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1516,7 +1236,7 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<AutoDestroy>(AutoDestroy{
         AutoDestroy::Condition::OnLeavingActiveRegion});
-      entity.component<Sprite>()->mFramesToRender.push_back(1);
+      entity.component<Sprite>()->mFramesToRender[1] = 1;
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       entity.assign<AppearsOnRadar>();
 
@@ -1541,12 +1261,19 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
+    case ActorID::Watchbot_container:
+      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<components::BehaviorController>(behaviors::WatchBotContainer{});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<AnimationLoop>(1, 1, 5, 1);
+      break;
+
     case ActorID::Bomb_dropping_spaceship: // Bomb dropping space ship
       // Not player damaging, only the bombs are
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<AnimationLoop>(1, 1, 2, 1);
+      entity.assign<AnimationLoop>(1, 1, 2, 2);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::BomberPlane{});
@@ -1567,31 +1294,38 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Bouncing_spike_ball: // Bouncing spike ball
+    case ActorID::Bouncing_spike_ball:
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(SPIKE_BALL_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
-      ai::configureSpikeBall(entity);
+      entity.assign<BehaviorController>(behaviors::SpikeBall{});
+      entity.assign<MovingBody>(Velocity{}, GravityAffected{true});
+      entity.assign<ActivationSettings>(
+        ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Green_slime_blob: // Green slime blob
+    case ActorID::Green_slime_blob:
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mpSpriteFactory->actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<ai::components::SlimeBlob>();
+      entity.assign<BehaviorController>(behaviors::SlimeBlob{});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<MovingBody>()->mGravityAffected = false;
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Green_slime_container: // Green slime container
+    case ActorID::Green_slime_container:
       entity.assign<Shootable>(Health{1}, GivenScore{100});
-      ai::configureSlimeContainer(entity);
+      entity.component<Shootable>()->mDestroyWhenKilled = false;
+      // Render slots: Main part, roof, animated glass contents
+      entity.component<Sprite>()->mFramesToRender = {2, 8, 0};
+      entity.assign<BoundingBox>(BoundingBox{{1, -2}, {3, 3}});
+      entity.assign<BehaviorController>(behaviors::SlimeContainer{});
       entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
       entity.assign<AppearsOnRadar>();
       break;
@@ -1666,12 +1400,12 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Sentry_robot_generator: // hover bot generator
+    case ActorID::Sentry_robot_generator:
       entity.assign<AnimationLoop>(1, 0, 3);
       entity.assign<Shootable>(Health{20}, GivenScore{2500});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<ai::components::HoverBotSpawnMachine>();
+      entity.assign<BehaviorController>(behaviors::HoverBotSpawnMachine{});
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1682,7 +1416,8 @@ void EntityFactory::configureEntity(
         DestructionEffects::TriggerCondition::OnKilled,
         mpSpriteFactory->actorFrameRect(actorID, 0));
       entity.assign<PlayerDamaging>(Damage{1});
-      entity.assign<ai::components::SimpleWalker>(skeletonAiConfig());
+      entity.assign<BehaviorController>(
+        behaviors::SimpleWalker{skeletonWalkerConfig()});
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<AppearsOnRadar>();
       break;
@@ -1713,7 +1448,7 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Spider: // Spider
+    case ActorID::Spider:
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{101});
       entity.assign<DestructionEffects>(SPIDER_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1722,7 +1457,7 @@ void EntityFactory::configureEntity(
       entity.assign<MovingBody>(Velocity{0.f, 0.f}, GravityAffected{false});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
-      entity.assign<ai::components::Spider>();
+      entity.assign<BehaviorController>(behaviors::Spider{});
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1789,8 +1524,8 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
-      entity.assign<ai::components::BlueGuard>(
-        createBlueGuardAiComponent(actorID));
+      entity.assign<BehaviorController>(
+        createBlueGuardBehavior(actorID));
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1799,12 +1534,15 @@ void EntityFactory::configureEntity(
       break;
 
 
-    // Laser turret
     case ActorID::Laser_turret:
       // gives one point when shot with normal shot, 500 when destroyed.
+      entity.assign<Shootable>(Shootable{2, GivenScore{500}});
+      entity.component<Shootable>()->mInvincible = true;
+      entity.component<Shootable>()->mEnableHitFeedback = false;
+
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActorTag>(ActorTag::Type::MountedLaserTurret);
-      ai::configureLaserTurret(entity, GivenScore{500});
+      entity.assign<BehaviorController>(behaviors::LaserTurret{});
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1906,7 +1644,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Aggressive_prisoner: // Monster in prison cell, aggressive
-      entity.assign<ai::components::Prisoner>(true);
+      entity.assign<BehaviorController>(behaviors::AggressivePrisoner{});
       entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
       entity.assign<Shootable>(Health{1}, GivenScore{500});
       entity.component<Shootable>()->mInvincible = true;
@@ -1915,7 +1653,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Passive_prisoner: // Monster in prison cell, passive
-      entity.assign<ai::components::Prisoner>(false);
+      entity.assign<BehaviorController>(behaviors::PassivePrisoner{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AppearsOnRadar>();
       break;
@@ -2006,6 +1744,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{100});
       entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.component<Shootable>()->mEnableHitFeedback = false;
 
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::SuperForceField{});
@@ -2028,11 +1767,11 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Sliding_door_vertical: // Sliding door, vertical
-      entity.assign<ai::components::VerticalSlidingDoor>();
+    case ActorID::Sliding_door_vertical:
+      entity.assign<BehaviorController>(behaviors::VerticalSlidingDoor{});
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
-      entity.assign<CustomRenderFunc>(&renderVerticalSlidingDoor);
+      entity.assign<CustomRenderFunc>(&behaviors::VerticalSlidingDoor::render);
       break;
 
     case ActorID::Blowing_fan: // Blowing fan
@@ -2042,8 +1781,8 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::BlowingFan{});
       break;
 
-    case ActorID::Sliding_door_horizontal: // Sliding door, horizontal
-      entity.assign<ai::components::HorizontalSlidingDoor>();
+    case ActorID::Sliding_door_horizontal:
+      entity.assign<BehaviorController>(behaviors::HorizontalSlidingDoor{});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<engine::components::SolidBody>();
       break;
@@ -2065,8 +1804,12 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Rocket_elevator: // Rocket elevator
-      interaction::configureElevator(entity);
+    case ActorID::Rocket_elevator:
+      entity.assign<BehaviorController>(behaviors::Elevator{});
+      entity.assign<BoundingBox>(BoundingBox{{0, 0}, {4, 3}});
+      entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
+      entity.assign<SolidBody>();
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -2109,7 +1852,7 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Radar_dish: // Radar dish
+    case ActorID::Radar_dish:
       entity.assign<Shootable>(Health{4}, GivenScore{2000});
       entity.assign<DestructionEffects>(RADAR_DISH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
@@ -2118,8 +1861,9 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Radar_computer_terminal: // Radar dish computer
-      entity.assign<components::RadarComputer>();
+    case ActorID::Radar_computer_terminal:
+      entity.assign<BehaviorController>(behaviors::RadarComputer{});
+      entity.assign<BoundingBox>(boundingBox);
       break;
 
     case ActorID::Special_hint_machine: // Special hint machine
@@ -2148,7 +1892,6 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       break;
 
-    // Flying message ships
     case ActorID::Messenger_drone_1: // "Your brain is ours!"
     case ActorID::Messenger_drone_2: // "Bring back the brain! ... Please stand by"
     case ActorID::Messenger_drone_3: // "Live from Rigel it's Saturday night!"
@@ -2166,10 +1909,10 @@ void EntityFactory::configureEntity(
         entity.assign<Shootable>(Health{1}, GivenScore{typeIndex});
         entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
         entity.assign<BoundingBox>(boundingBox);
-        entity.component<Sprite>()->mFramesToRender.clear();
+        entity.component<Sprite>()->mFramesToRender = {};
 
-        entity.assign<ai::components::MessengerDrone>(
-          MESSAGE_TYPE_BY_INDEX[typeIndex]);
+        entity.assign<BehaviorController>(
+          behaviors::MessengerDrone{MESSAGE_TYPE_BY_INDEX[typeIndex]});
         entity.assign<ActivationSettings>(
           ActivationSettings::Policy::AlwaysAfterFirstActivation);
         entity.assign<AppearsOnRadar>();
@@ -2191,8 +1934,8 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(2);
       break;
 
-    case ActorID::Exit_trigger: // level exit
-      entity.assign<Trigger>(TriggerType::LevelExit);
+    case ActorID::Exit_trigger:
+      entity.assign<BehaviorController>(behaviors::LevelExitTrigger{});
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 1}});
       break;
 

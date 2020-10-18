@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2020, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,21 +16,27 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
 
-namespace rigel::game_logic::components {
-
-enum class TriggerType {
-  LevelExit
-};
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
 
 
-struct Trigger {
-  explicit Trigger(const TriggerType type)
-    : mType(type)
-  {
-  }
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
+}
 
-  TriggerType mType;
+
+namespace rigel::game_logic::behaviors {
+
+struct LevelExitTrigger {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 };
 
 }

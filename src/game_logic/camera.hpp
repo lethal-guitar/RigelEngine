@@ -42,6 +42,8 @@ public:
     const data::map::Map& map,
     entityx::EventManager& eventManager);
 
+  void synchronizeTo(const Camera& other);
+
   void update(const PlayerInput& input, const base::Extents& viewPortSize);
   void centerViewOnPlayer();
 

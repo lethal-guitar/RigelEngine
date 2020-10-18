@@ -40,21 +40,17 @@ BehaviorControllerSystem::BehaviorControllerSystem(
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
   mDependencies.mpEvents->subscribe<engine::events::CollidedWithWorld>(*this);
-  mDependencies.mpEvents->subscribe<rigel::events::EarthQuakeBegin>(*this);
-  mDependencies.mpEvents->subscribe<rigel::events::EarthQuakeEnd>(*this);
 }
 
 
 void BehaviorControllerSystem::update(
   entityx::EntityManager& es,
-  const PlayerInput& input,
-  const base::Extents& viewPortSize
+  const PerFrameState& s
 ) {
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
-  mPerFrameState.mInput = input;
-  mPerFrameState.mCurrentViewPortSize = viewPortSize;
+  mPerFrameState = s;
 
   es.each<BehaviorController, Active>([this](
     entityx::Entity entity,
@@ -67,8 +63,6 @@ void BehaviorControllerSystem::update(
       active.mIsOnScreen,
       entity);
   });
-
-  mPerFrameState.mIsOddFrame = !mPerFrameState.mIsOddFrame;
 }
 
 
@@ -125,16 +119,6 @@ void BehaviorControllerSystem::receive(
       event,
       entity);
   }
-}
-
-
-void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeBegin&) {
-  mPerFrameState.mIsEarthShaking = true;
-}
-
-
-void BehaviorControllerSystem::receive(const rigel::events::EarthQuakeEnd&) {
-  mPerFrameState.mIsEarthShaking = false;
 }
 
 }

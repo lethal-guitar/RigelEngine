@@ -17,14 +17,12 @@
 #include "force_field.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "data/player_model.hpp"
-#include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/actor_tag.hpp"
-#include "game_logic/damage_components.hpp"
 #include "game_logic/player/components.hpp"
+#include "game_logic/global_dependencies.hpp"
 
 namespace ex = entityx;
 
@@ -66,26 +64,24 @@ void disableNextForceField(entityx::EntityManager& es) {
   }
 }
 
+}
 
-void animateForceFields(
-  entityx::EntityManager& es,
-  engine::RandomNumberGenerator& randomGenerator,
-  IGameServiceProvider& serviceProvider
+
+namespace rigel::game_logic::behaviors {
+
+void ForceField::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool,
+  entityx::Entity entity
 ) {
-  es.each<ActorTag, Sprite, Active>([&](
-    ex::Entity entity,
-    const ActorTag& tag,
-    Sprite& sprite,
-    const Active&
-  ) {
-    if (tag.mType == ActorTag::Type::ForceField) {
-      const auto fizzle = (randomGenerator.gen() / 32) % 2 != 0;
-      if (fizzle) {
-        serviceProvider.playSound(data::SoundId::ForceFieldFizzle);
-        sprite.flashWhite();
-      }
-    }
-  });
+  auto& sprite = *entity.component<engine::components::Sprite>();
+
+  const auto fizzle = (d.mpRandomGenerator->gen() / 32) % 2 != 0;
+  if (fizzle) {
+    d.mpServiceProvider->playSound(data::SoundId::ForceFieldFizzle);
+    sprite.flashWhite();
+  }
 }
 
 }

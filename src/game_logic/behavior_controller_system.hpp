@@ -20,11 +20,6 @@
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/input.hpp"
 
-namespace rigel::events {
-  struct EarthQuakeBegin;
-  struct EarthQuakeEnd;
-}
-
 namespace rigel::engine::events {
   struct CollidedWithWorld;
 }
@@ -35,22 +30,17 @@ namespace rigel::game_logic {
 class BehaviorControllerSystem :
   public entityx::Receiver<BehaviorControllerSystem> {
 public:
-  explicit BehaviorControllerSystem(
+  BehaviorControllerSystem(
     GlobalDependencies dependencies,
     Player* pPlayer,
     const base::Vector* pCameraPosition,
     data::map::Map* pMap);
 
-  void update(
-    entityx::EntityManager& es,
-    const PlayerInput& input,
-    const base::Extents& viewPortSize);
+  void update(entityx::EntityManager& es, const PerFrameState& s);
 
   void receive(const events::ShootableDamaged& event);
   void receive(const events::ShootableKilled& event);
   void receive(const engine::events::CollidedWithWorld& event);
-  void receive(const rigel::events::EarthQuakeBegin& event);
-  void receive(const rigel::events::EarthQuakeEnd& event);
 
 private:
   GlobalDependencies mDependencies;

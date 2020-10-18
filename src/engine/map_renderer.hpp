@@ -29,14 +29,6 @@ namespace rigel::engine {
 class MapRenderer {
 public:
   struct MapRenderData {
-    explicit MapRenderData(data::map::LevelData&& loadedLevel)
-      : mTileSetImage(std::move(loadedLevel.mTileSetImage))
-      , mBackdropImage(std::move(loadedLevel.mBackdropImage))
-      , mSecondaryBackdropImage(std::move(loadedLevel.mSecondaryBackdropImage))
-      , mBackdropScrollMode(loadedLevel.mBackdropScrollMode)
-    {
-    }
-
     data::Image mTileSetImage;
     data::Image mBackdropImage;
     std::optional<data::Image> mSecondaryBackdropImage;

@@ -22,6 +22,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/sprite_factory.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
@@ -76,8 +77,8 @@
 #include "game_logic/interactive/sliding_door.hpp"
 #include "game_logic/interactive/super_force_field.hpp"
 #include "game_logic/interactive/tile_burner.hpp"
+#include "game_logic/player/level_exit_trigger.hpp"
 #include "game_logic/player/ship.hpp"
-#include "game_logic/trigger_components.hpp"
 
 #include <tuple>
 #include <utility>
@@ -237,247 +238,14 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
   SWIRL_AROUND
 };
 
-
-auto createFrameDrawData(
-  const loader::ActorData::Frame& frameData,
-  renderer::Renderer* pRenderer
-) {
-  auto texture = renderer::OwningTexture{pRenderer, frameData.mFrameImage};
-  return engine::SpriteFrame{std::move(texture), frameData.mDrawOffset};
-}
-
-
-void applyTweaks(
-  std::vector<engine::SpriteFrame>& frames,
-  const ActorID actorId,
-  const std::vector<loader::ActorData>& actorParts,
-  renderer::Renderer* pRenderer
-) {
-  // Some sprites in the game have offsets that would require more complicated
-  // code to draw them correctly. To simplify that, we adjust the offsets once
-  // at loading time so that no additional adjustment is necessary at run time.
-
-  // Player sprite
-  if (actorId == ActorID::Duke_LEFT || actorId == ActorID::Duke_RIGHT) {
-    for (int i=0; i<39; ++i) {
-      if (i != 35 && i != 36) {
-        frames[i].mDrawOffset.x -= 1;
-      }
-    }
-  }
-
-  // Destroyed reactor fire
-  if (actorId == ActorID::Reactor_fire_LEFT || actorId == ActorID::Reactor_fire_RIGHT) {
-    frames[0].mDrawOffset.x = 0;
-  }
-
-  // Radar computer
-  if (actorId == ActorID::Radar_computer_terminal) {
-    for (auto i = 8u; i < frames.size(); ++i) {
-      frames[i].mDrawOffset.x -= 1;
-    }
-  }
-
-  // Duke's ship
-  if (
-    actorId == ActorID::Dukes_ship_LEFT ||
-    actorId == ActorID::Dukes_ship_RIGHT ||
-    actorId == ActorID::Dukes_ship_after_exiting_LEFT ||
-    actorId == ActorID::Dukes_ship_after_exiting_RIGHT
-  ) {
-    // The incoming frame list is based on IDs 87, 88, and 92. The frames
-    // are laid out as follows:
-    //
-    //  0, 1: Duke's ship, facing right
-    //  2, 3: Duke's ship, facing left
-    //  4, 5: exhaust flames, facing down
-    //  6, 7: exhaust flames, facing left
-    //  8, 9: exhaust flames, facing right
-    //
-    // In order to display the down facing exhaust flames correctly when
-    // Duke's ship is facing left, we need to apply an additional X offset to
-    // frames 4 and 5. But currently, RigelEngine doesn't support changing the
-    // X offset temporarily, so we need to first create a copy of those frames,
-    // insert them after 8 and 9, and then adjust their offset.
-    //
-    // After this tweak, the frame layout is as follows:
-    //
-    //   0,  1: Duke's ship, facing right
-    //   2,  3: Duke's ship, facing left
-    //   4,  5: exhaust flames, facing down, x-offset for facing left
-    //   6,  7: exhaust flames, facing left
-    //   8,  9: exhaust flames, facing down, x-offset for facing right
-    //  10, 11: exhaust flames, facing right
-    frames.insert(
-      frames.begin() + 8,
-      createFrameDrawData(actorParts[2].mFrames[0], pRenderer));
-    frames.insert(
-      frames.begin() + 9,
-      createFrameDrawData(actorParts[2].mFrames[1], pRenderer));
-
-    frames[8].mDrawOffset.x += 1;
-    frames[9].mDrawOffset.x += 1;
-  }
-}
-
-
-std::optional<int> orientationOffsetForActor(const ActorID actorId) {
-  switch (actorId) {
-    case ActorID::Duke_LEFT:
-    case ActorID::Duke_RIGHT:
-      return 39;
-
-    case ActorID::Snake:
-      return 9;
-
-    case ActorID::Eyeball_thrower_LEFT:
-      return 10;
-
-    case ActorID::Skeleton:
-      return 4;
-
-    case ActorID::Spider:
-      return 13;
-
-    case ActorID::Red_box_turkey:
-      return 2;
-
-    case ActorID::Rigelatin_soldier:
-      return 4;
-
-    case ActorID::Ugly_green_bird:
-      return 3;
-
-    case ActorID::Big_green_cat_LEFT:
-    case ActorID::Big_green_cat_RIGHT:
-      return 3;
-
-    case ActorID::Spiked_green_creature_LEFT:
-    case ActorID::Spiked_green_creature_RIGHT:
-      return 6;
-
-    case ActorID::Unicycle_bot:
-      return 4;
-
-    case ActorID::Dukes_ship_LEFT:
-    case ActorID::Dukes_ship_RIGHT:
-    case ActorID::Dukes_ship_after_exiting_LEFT:
-    case ActorID::Dukes_ship_after_exiting_RIGHT:
-      return 6;
-
-    default:
-      return std::nullopt;
-  }
-}
-
-
-int SPIDER_FRAME_MAP[] = {
-  3, 4, 5, 9, 10, 11, 6, 8, 9, 14, 15, 12, 13, // left
-  0, 1, 2, 6, 7, 8, 6, 8, 9, 12, 13, 14, 15, // right
-};
-
-
-int UNICYCLE_FRAME_MAP[] = {
-  0, 5, 1, 2, // left
-  0, 5, 3, 4, // right
-};
-
-
-int DUKES_SHIP_FRAME_MAP[] = {
-  0, 1, 10, 11, 8, 9, // left
-  2, 3, 6, 7, 4, 5, // right
-};
-
-
-base::ArrayView<int> frameMapForActor(const ActorID actorId) {
-  switch (actorId) {
-    case ActorID::Spider:
-      return base::ArrayView<int>(SPIDER_FRAME_MAP);
-
-    case ActorID::Unicycle_bot:
-      return base::ArrayView<int>(UNICYCLE_FRAME_MAP);
-
-    case ActorID::Dukes_ship_LEFT:
-    case ActorID::Dukes_ship_RIGHT:
-    case ActorID::Dukes_ship_after_exiting_LEFT:
-    case ActorID::Dukes_ship_after_exiting_RIGHT:
-      return base::ArrayView<int>(DUKES_SHIP_FRAME_MAP);
-
-    default:
-      return {};
-  }
-}
-
 }
 
 
 #include "entity_configuration.ipp"
 
 
-SpriteFactory::SpriteFactory(
-  renderer::Renderer* pRenderer,
-  const ActorImagePackage* pSpritePackage
-)
-  : mpRenderer(pRenderer)
-  , mpSpritePackage(pSpritePackage)
-{
-}
-
-
-Sprite SpriteFactory::createSprite(const ActorID mainId) {
-  auto iData = mSpriteDataCache.find(mainId);
-  if (iData == mSpriteDataCache.end()) {
-    engine::SpriteDrawData drawData;
-
-    int lastDrawOrder = 0;
-    int lastFrameCount = 0;
-    std::vector<int> framesToRender;
-
-    const auto actorPartIds = actorIDListForActor(mainId);
-    const auto actorParts = utils::transformed(actorPartIds,
-      [&](const ActorID partId) {
-        return mpSpritePackage->loadActor(partId);
-      });
-
-    for (const auto& actorData : actorParts) {
-      lastDrawOrder = actorData.mDrawIndex;
-
-      for (const auto& frameData : actorData.mFrames) {
-        drawData.mFrames.emplace_back(
-          createFrameDrawData(frameData, mpRenderer));
-      }
-
-      framesToRender.push_back(lastFrameCount);
-      lastFrameCount = int(actorData.mFrames.size());
-    }
-
-    drawData.mOrientationOffset = orientationOffsetForActor(mainId);
-    drawData.mVirtualToRealFrameMap = frameMapForActor(mainId);
-    drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
-
-    applyTweaks(drawData.mFrames, mainId, actorParts, mpRenderer);
-
-    iData = mSpriteDataCache.emplace(
-      mainId,
-      SpriteData{std::move(drawData), std::move(framesToRender)}
-    ).first;
-  }
-
-  const auto& data = iData->second;
-  return {&data.mDrawData, data.mInitialFramesToRender};
-}
-
-
-base::Rect<int> SpriteFactory::actorFrameRect(
-  const data::ActorID id,
-  const int frame
-) const {
-  return mpSpritePackage->actorFrameRect(id, frame);
-}
-
-
 EntityFactory::EntityFactory(
-  SpriteFactory* pSpriteFactory,
+  engine::ISpriteFactory* pSpriteFactory,
   ex::EntityManager* pEntityManager,
   engine::RandomNumberGenerator* pRandomGenerator,
   const data::Difficulty difficulty)
@@ -490,9 +258,7 @@ EntityFactory::EntityFactory(
 
 
 Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
-  auto sprite = mpSpriteFactory->createSprite(actorID);
-  configureSprite(sprite, actorID);
-  return sprite;
+  return mpSpriteFactory->createSprite(actorID);
 }
 
 
@@ -505,7 +271,7 @@ entityx::Entity EntityFactory::createSprite(
   entity.assign<Sprite>(sprite);
 
   if (assignBoundingBox) {
-    entity.assign<BoundingBox>(engine::inferBoundingBox(sprite, entity));
+    entity.assign<BoundingBox>(mpSpriteFactory->actorFrameRect(actorID, 0));
   }
   return entity;
 }
@@ -545,8 +311,7 @@ entityx::Entity EntityFactory::createActor(
   const base::Vector& position
 ) {
   auto entity = createSprite(id, position);
-  auto& sprite = *entity.component<Sprite>();
-  const auto boundingBox = engine::inferBoundingBox(sprite, entity);
+  const auto boundingBox = mpSpriteFactory->actorFrameRect(id, 0);
 
   configureEntity(entity, id, boundingBox);
 
@@ -640,11 +405,9 @@ void EntityFactory::configureProjectile(
 }
 
 
-entityx::Entity EntityFactory::createEntitiesForLevel(
+void EntityFactory::createEntitiesForLevel(
   const data::map::ActorDescriptionList& actors
 ) {
-  entityx::Entity playerEntity;
-
   for (const auto& actor : actors) {
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
@@ -673,23 +436,12 @@ entityx::Entity EntityFactory::createEntitiesForLevel(
       boundingBox.topLeft = {0, 0};
     } else if (hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
-      boundingBox = engine::inferBoundingBox(sprite, entity);
+      boundingBox = mpSpriteFactory->actorFrameRect(actor.mID, 0);
       entity.assign<Sprite>(sprite);
     }
 
     configureEntity(entity, actor.mID, boundingBox);
-
-    const auto isPlayer = actor.mID == ActorID::Duke_LEFT || actor.mID == ActorID::Duke_RIGHT;
-    if (isPlayer) {
-      const auto playerOrientation = actor.mID == ActorID::Duke_LEFT
-        ? Orientation::Left
-        : Orientation::Right;
-      assignPlayerComponents(entity, playerOrientation);
-      playerEntity = entity;
-    }
   }
-
-  return playerEntity;
 }
 
 

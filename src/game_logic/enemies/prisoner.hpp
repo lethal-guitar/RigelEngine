@@ -23,66 +23,39 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::engine {
-  class ParticleSystem;
-  class RandomNumberGenerator;
 
-  namespace components { struct Sprite; }
-}
-namespace rigel::game_logic { class EntityFactory; }
-namespace rigel::game_logic::events {
-  struct ShootableKilled;
+namespace rigel::game_logic {
+  struct GlobalDependencies;
+  struct GlobalState;
 }
 
 
-namespace rigel::game_logic::ai {
+namespace rigel::game_logic::behaviors {
 
-namespace components {
+struct AggressivePrisoner {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 
-struct Prisoner {
-  explicit Prisoner(const bool isAggressive)
-    : mIsAggressive(isAggressive)
-  {
-  }
+  void onKilled(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
 
   int mGrabStep = 0;
-  bool mIsAggressive;
   bool mIsGrabbing = false;
 };
 
-}
 
-
-class PrisonerSystem : public entityx::Receiver<PrisonerSystem> {
-public:
-  PrisonerSystem(
-    entityx::Entity player,
-    EntityFactory* pEntityFactory,
-    IGameServiceProvider* pServiceProvider,
-    engine::ParticleSystem* pParticles,
-    engine::RandomNumberGenerator* pRandomGenerator,
-    entityx::EventManager& events);
-
-  void update(entityx::EntityManager& es);
-
-  void receive(const events::ShootableKilled& event);
-
-private:
-  void updateAggressivePrisoner(
-    entityx::Entity entity,
-    const engine::components::WorldPosition& position,
-    components::Prisoner& state,
-    engine::components::Sprite& sprite
-  );
-
-private:
-  entityx::Entity mPlayer;
-  EntityFactory* mpEntityFactory;
-  IGameServiceProvider* mpServiceProvider;
-  engine::ParticleSystem* mpParticles;
-  engine::RandomNumberGenerator* mpRandomGenerator;
-  bool mIsOddFrame = false;
+struct PassivePrisoner {
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
 };
 
 }

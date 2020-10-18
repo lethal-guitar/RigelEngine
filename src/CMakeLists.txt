@@ -50,6 +50,7 @@ set(core_sources
     engine/entity_tools.hpp
     engine/imf_player.cpp
     engine/imf_player.hpp
+    engine/isprite_factory.hpp
     engine/life_time_components.hpp
     engine/life_time_system.cpp
     engine/life_time_system.hpp
@@ -68,6 +69,8 @@ set(core_sources
     engine/rendering_system.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
+    engine/sprite_factory.cpp
+    engine/sprite_factory.hpp
     engine/sprite_tools.hpp
     engine/tiled_texture.cpp
     engine/tiled_texture.hpp
@@ -171,8 +174,6 @@ set(core_sources
     game_logic/hazards/smash_hammer.cpp
     game_logic/hazards/smash_hammer.hpp
     game_logic/ientity_factory.hpp
-    game_logic/ingame_systems.cpp
-    game_logic/ingame_systems.hpp
     game_logic/input.hpp
     game_logic/interactive/blowing_fan.cpp
     game_logic/interactive/blowing_fan.hpp
@@ -203,11 +204,14 @@ set(core_sources
     game_logic/player/damage_system.hpp
     game_logic/player/interaction_system.cpp
     game_logic/player/interaction_system.hpp
+    game_logic/player/level_exit_trigger.cpp
+    game_logic/player/level_exit_trigger.hpp
     game_logic/player/projectile_system.cpp
     game_logic/player/projectile_system.hpp
     game_logic/player/ship.cpp
     game_logic/player/ship.hpp
-    game_logic/trigger_components.hpp
+    game_logic/world_state.cpp
+    game_logic/world_state.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
     loader/adlib_emulator.hpp

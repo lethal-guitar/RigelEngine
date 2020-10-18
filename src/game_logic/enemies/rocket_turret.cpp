@@ -20,16 +20,14 @@
 #include "common/game_service_provider.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/damage_components.hpp"
 #include "game_logic/entity_factory.hpp"
+#include "game_logic/global_dependencies.hpp"
+#include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::ai {
+namespace rigel::game_logic::behaviors {
 
 namespace {
-
-using namespace engine::components;
-
 
 const base::Vector OFFSET_BY_ORIENTATION[] = {
   {1, -1},
@@ -46,16 +44,16 @@ const ProjectileDirection DIRECTION_BY_ORIENTATION[] = {
 
 
 auto determineOrientation(
-  const base::Vector& myPosition,
+  const base::Vector& position,
   const base::Vector& playerPosition
 ) {
-  using Orientation = components::RocketTurret::Orientation;
+  using Orientation = behaviors::RocketTurret::Orientation;
 
-  if (playerPosition.x + 3 <= myPosition.x) {
+  if (playerPosition.x + 3 <= position.x) {
     return Orientation::Left;
-  } else if (playerPosition.x - 3 >= myPosition.x) {
+  } else if (playerPosition.x - 3 >= position.x) {
     return Orientation::Right;
-  } else if (playerPosition.y <= myPosition.y) {
+  } else if (playerPosition.y <= position.y) {
     return Orientation::Top;
   }
 
@@ -65,59 +63,38 @@ auto determineOrientation(
 }
 
 
-RocketTurretSystem::RocketTurretSystem(
-  entityx::Entity player,
-  EntityFactory* pEntityFactory,
-  IGameServiceProvider* pServiceProvider
-)
-  : mPlayer(player)
-  , mpEntityFactory(pEntityFactory)
-  , mpServiceProvider(pServiceProvider)
-{
-}
-
-
-void RocketTurretSystem::update(entityx::EntityManager& es) {
-  const auto& playerPosition = *mPlayer.component<WorldPosition>();
-
-  es.each<components::RocketTurret, WorldPosition, Sprite, Active>(
-    [this, &playerPosition](
-      entityx::Entity entity,
-      components::RocketTurret& state,
-      const WorldPosition& myPosition,
-      Sprite& sprite,
-      const Active&
-    ) {
-      if (state.mNeedsReorientation) {
-        state.mOrientation = determineOrientation(myPosition, playerPosition);
-        state.mNeedsReorientation = false;
-      } else {
-        ++state.mNextShotCountdown;
-        if (state.mNextShotCountdown >= 25) {
-          state.mNextShotCountdown = 0;
-          state.mNeedsReorientation = true;
-
-          fireRocket(myPosition, state.mOrientation);
-        }
-      }
-
-      sprite.mFramesToRender[0] = static_cast<int>(state.mOrientation);
-      engine::synchronizeBoundingBoxToSprite(entity);
-    });
-}
-
-
-void RocketTurretSystem::fireRocket(
-  const base::Vector& myPosition,
-  components::RocketTurret::Orientation myOrientation
+void RocketTurret::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool isOnScreen,
+  entityx::Entity entity
 ) {
-  const auto orientationIndex = static_cast<int>(myOrientation);
-  mpEntityFactory->createProjectile(
-    game_logic::ProjectileType::EnemyRocket,
-    myPosition + OFFSET_BY_ORIENTATION[orientationIndex],
-    DIRECTION_BY_ORIENTATION[orientationIndex]);
+  using engine::components::WorldPosition;
 
-  mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& playerPosition = s.mpPlayer->orientedPosition();
+
+  if (mNeedsReorientation) {
+    mOrientation = determineOrientation(position, playerPosition);
+    mNeedsReorientation = false;
+  } else {
+    ++mNextShotCountdown;
+    if (mNextShotCountdown >= 25) {
+      mNextShotCountdown = 0;
+      mNeedsReorientation = true;
+
+      const auto orientationIndex = static_cast<int>(mOrientation);
+      d.mpEntityFactory->createProjectile(
+        game_logic::ProjectileType::EnemyRocket,
+        position + OFFSET_BY_ORIENTATION[orientationIndex],
+        DIRECTION_BY_ORIENTATION[orientationIndex]);
+      d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
+    }
+  }
+
+  auto& sprite = *entity.component<engine::components::Sprite>();
+  sprite.mFramesToRender[0] = static_cast<int>(mOrientation);
+  engine::synchronizeBoundingBoxToSprite(entity);
 }
 
 }

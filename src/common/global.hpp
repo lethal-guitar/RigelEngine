@@ -90,6 +90,10 @@ struct PlayerTeleported {
 };
 
 
+struct CloakPickedUp {
+  base::Vector mPosition;
+};
+
 struct CloakExpired {};
 
 
@@ -102,10 +106,6 @@ struct DoorOpened {
   entityx::Entity mEntity;
 };
 
-
-struct EarthQuakeBegin {};
-
-struct EarthQuakeEnd {};
 
 struct BossActivated {
   entityx::Entity mBossEntity;

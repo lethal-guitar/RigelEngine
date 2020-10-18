@@ -38,6 +38,8 @@ public:
     renderer::Renderer* pRenderer);
   ~ParticleSystem();
 
+  void synchronizeTo(const ParticleSystem& other);
+
   void spawnParticles(
     const base::Vector& origin,
     const base::Color& color,

@@ -97,14 +97,18 @@ struct WatchBotCarrier {
     bool isOnScreen,
     entityx::Entity entity);
 
-  void onKilled(
+  State mState = State::ApproachingPlayer;
+  int mFramesElapsed = 0;
+};
+
+
+struct WatchBotContainer {
+  void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    bool isOnScreen,
     entityx::Entity entity);
 
-  entityx::Entity mPayload;
-  State mState = State::ApproachingPlayer;
   int mFramesElapsed = 0;
 };
 

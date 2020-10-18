@@ -207,7 +207,6 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   , mLevelHints(loadHints(resources))
   , mSessionId(sessionId)
 {
-  mpEvents->subscribe<rigel::events::CloakExpired>(*this);
 }
 
 
@@ -294,7 +293,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
 
           if (itemType == InventoryItemType::CloakingDevice) {
             showMessage(data::Messages::FoundCloak);
-            mCloakPickupPosition = pos;
+            mpEvents->emit(rigel::events::CloakPickedUp{pos});
           }
         }
 
@@ -313,13 +312,6 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
         es.destroy(entity.id());
       }
     });
-}
-
-
-void PlayerInteractionSystem::receive(const rigel::events::CloakExpired&) {
-  if (mCloakPickupPosition) {
-    mpEntityFactory->createActor(data::ActorID::White_box_cloaking_device, *mCloakPickupPosition);
-  }
 }
 
 

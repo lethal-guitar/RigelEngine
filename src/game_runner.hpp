@@ -60,12 +60,11 @@ private:
 
   GameMode::Context mContext;
 
-  ui::IngameMenu mMenu;
-
   game_logic::GameWorld mWorld;
   game_logic::PlayerInput mPlayerInput;
   base::Vector mAnalogStickVector;
   engine::TimeDelta mAccumulatedTime = 0.0;
+  ui::IngameMenu mMenu;
   bool mShowDebugText = false;
   bool mSingleStepping = false;
   bool mDoNextSingleStep = false;

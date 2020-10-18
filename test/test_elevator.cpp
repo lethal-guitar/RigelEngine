@@ -18,13 +18,18 @@
 #include "utils.hpp"
 
 #include <base/spatial_types_printing.hpp>
+#include <data/game_traits.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
 #include <engine/collision_checker.hpp>
+#include <engine/entity_activation_system.hpp>
+#include <engine/particle_system.hpp>
 #include <engine/physical_components.hpp>
 #include <engine/physics_system.hpp>
 #include <engine/random_number_generator.hpp>
 #include <engine/timing.hpp>
+#include <game_logic/behavior_controller_system.hpp>
+#include <game_logic/entity_factory.hpp>
 #include <game_logic/input.hpp>
 #include <game_logic/interactive/elevator.hpp>
 #include <game_logic/player.hpp>
@@ -44,10 +49,26 @@ namespace ex = entityx;
 struct MockEventListener : public ex::Receiver<MockEventListener> {
   bool mIsPlayerAttached = false;
 
-  void receive(const rigel::game_logic::events::ElevatorAttachmentChanged& e) {
-    mIsPlayerAttached = e.mAttachedElevator.valid();
+  void receive(const game_logic::events::ElevatorAttachmentChanged& e) {
+    mIsPlayerAttached =
+      e.mType == game_logic::events::ElevatorAttachmentChanged::Attach;
   }
 };
+
+
+struct MockSpriteFactory : public rigel::engine::ISpriteFactory {
+  engine::components::Sprite createSprite(data::ActorID id) override {
+    static rigel::engine::SpriteDrawData dummyDrawData;
+    return {&dummyDrawData, {}};
+  }
+
+  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override {
+    // Bounds for elevator
+    return {{}, {4, 3}};
+  }
+};
+
+
 
 
 TEST_CASE("Rocket elevator") {
@@ -68,9 +89,14 @@ TEST_CASE("Rocket elevator") {
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
   data::PlayerModel playerModel;
-  MockEntityFactory mockEntityFactory{&entityx.entities};
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
+  MockSpriteFactory mockSpriteFactory;
+  EntityFactory entityFactory{
+    &mockSpriteFactory,
+    &entityx.entities,
+    &randomGenerator,
+    data::Difficulty::Medium};
 
   auto playerEntity = entityx.entities.create();
   playerEntity.assign<WorldPosition>(6, 100);
@@ -84,23 +110,33 @@ TEST_CASE("Rocket elevator") {
     &mockServiceProvider,
     &collisionChecker,
     &map,
-    &mockEntityFactory,
+    &entityFactory,
     &entityx.events,
     &randomGenerator);
 
   auto& playerPosition = player.position();
 
-  auto elevator = entityx.entities.create();
-  elevator.assign<WorldPosition>(2, 103);
-  elevator.assign<Active>();
-  elevator.assign<Sprite>();
-  interaction::configureElevator(elevator);
+  auto elevator =
+    entityFactory.createActor(data::ActorID::Rocket_elevator, {2, 103});
 
+  base::Vector cameraPosition{0, 0};
+  engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
   PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
+  BehaviorControllerSystem behaviorControllerSystem{
+    GlobalDependencies{
+      &collisionChecker,
+      &particleSystem,
+      &randomGenerator,
+      &entityFactory,
+      &mockServiceProvider,
+      &entityx.entities,
+      &entityx.events},
+    &player,
+    &cameraPosition,
+    &map};
 
 
   SECTION("Elevator is setup correctly") {
-    CHECK(elevator.has_component<interaction::components::Elevator>());
     CHECK(elevator.has_component<SolidBody>());
     CHECK(elevator.has_component<BoundingBox>());
 
@@ -110,16 +146,18 @@ TEST_CASE("Rocket elevator") {
 
   auto& elevatorPosition = *elevator.component<WorldPosition>();
 
-  interaction::ElevatorSystem elevatorSystem(
-    playerEntity,
-    &mockServiceProvider,
-    &collisionChecker,
-    &entityx.events);
-
+  PerFrameState perFrameState;
   const auto runOneFrame = [&](const PlayerInput& input) {
+    const auto& viewPortSize = data::GameTraits::mapViewPortSize;
+    perFrameState.mInput = input;
+    perFrameState.mCurrentViewPortSize = viewPortSize;
+
     player.update(input);
-    elevatorSystem.update(entityx.entities);
+    engine::markActiveEntities(
+      entityx.entities, {0, 0}, viewPortSize);
+    behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
+    perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;
   };
 
   const auto verifyPositions = [&playerPosition, &elevatorPosition](

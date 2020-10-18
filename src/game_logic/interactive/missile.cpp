@@ -59,8 +59,8 @@ void startFlameAnimation(entityx::Entity entity) {
   // This seems preferable to making animation system more complex, e.g. by
   // allowing to configure which render slot is used for the bounding box.
   entity.component<Sprite>()->mFramesToRender[0] = engine::IGNORE_RENDER_SLOT;
-  entity.component<Sprite>()->mFramesToRender.push_back(1);
-  entity.component<Sprite>()->mFramesToRender.push_back(0);
+  entity.component<Sprite>()->mFramesToRender[1] = 1;
+  entity.component<Sprite>()->mFramesToRender[2] = 0;
   engine::startAnimationLoop(entity, 1, 1, 2, 1);
 }
 

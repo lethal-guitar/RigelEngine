@@ -23,15 +23,16 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::ai {
+namespace rigel::game_logic::behaviors {
 
 using namespace engine::components;
 
 namespace {
 
-base::Point<float> JUMP_ARC[] = {
+constexpr base::Point<float> JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
   {0.0f, -1.0f},
@@ -39,77 +40,61 @@ base::Point<float> JUMP_ARC[] = {
   {0.0f, -1.0f}
 };
 
-
-void startJump(entityx::Entity entity) {
-  engine::reassign<MovementSequence>(entity, JUMP_ARC, true, false);
-}
-
 }
 
 
-void configureSpikeBall(entityx::Entity entity) {
-  using namespace engine::components::parameter_aliases;
+void SpikeBall::update(
+  GlobalDependencies& d,
+  GlobalState& s,
+  bool isOnScreen,
+  entityx::Entity entity
+) {
+  auto jump = [&]() {
+    mJumpBackCooldown = 9;
+    engine::reassign<MovementSequence>(entity, JUMP_ARC, true, false);
 
-  entity.assign<ActivationSettings>(
-    ActivationSettings::Policy::AlwaysAfterFirstActivation);
-  entity.assign<MovingBody>(Velocity{}, GravityAffected{true});
-  entity.assign<components::SpikeBall>();
-
-  startJump(entity);
-}
-
-
-SpikeBallSystem::SpikeBallSystem(
-  const engine::CollisionChecker* pCollisionChecker,
-  IGameServiceProvider* pServiceProvider,
-  entityx::EventManager& events
-)
-  : mpCollisionChecker(pCollisionChecker)
-  , mpServiceProvider(pServiceProvider)
-{
-  events.subscribe<engine::events::CollidedWithWorld>(*this);
-  events.subscribe<events::ShootableDamaged>(*this);
-}
-
-
-void SpikeBallSystem::update(entityx::EntityManager& es) {
-  es.each<components::SpikeBall, WorldPosition, BoundingBox, Active>([this](
-    entityx::Entity entity,
-    components::SpikeBall& state,
-    const WorldPosition& position,
-    const BoundingBox& bounds,
-    const Active&
-  ) {
-    if (state.mJumpBackCooldown > 0) {
-      --state.mJumpBackCooldown;
+    if (isOnScreen) {
+      d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
     }
-
-    const auto onSolidGround = mpCollisionChecker->isOnSolidGround(
-      position, bounds);
-    if (state.mJumpBackCooldown == 0 && onSolidGround) {
-      jump(entity);
-    }
-  });
-}
+  };
 
 
-void SpikeBallSystem::receive(const events::ShootableDamaged& event) {
-  auto entity = event.mEntity;
-  if (!entity.has_component<components::SpikeBall>()) {
-    return;
+  if (!mInitialized) {
+    entity.assign<MovementSequence>(JUMP_ARC, true, false);
+    mInitialized = true;
   }
 
+  if (mJumpBackCooldown > 0) {
+    --mJumpBackCooldown;
+  }
+
+  const auto& position = *entity.component<WorldPosition>();
+  const auto& bounds = *entity.component<BoundingBox>();
+  const auto onSolidGround = d.mpCollisionChecker->isOnSolidGround(
+    position, bounds);
+  if (mJumpBackCooldown == 0 && onSolidGround) {
+    jump();
+  }
+}
+
+
+void SpikeBall::onHit(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const base::Point<float>& inflictorVelocity,
+  entityx::Entity entity
+) {
   auto& body = *entity.component<MovingBody>();
-  body.mVelocity.x = event.mInflictorVelocity.x > 0 ? 1.0f : -1.0f;
+  body.mVelocity.x = inflictorVelocity.x > 0 ? 1.0f : -1.0f;
 }
 
 
-void SpikeBallSystem::receive(const engine::events::CollidedWithWorld& event) {
-  auto entity = event.mEntity;
-  if (!entity.has_component<components::SpikeBall>()) {
-    return;
-  }
-
+void SpikeBall::onCollision(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const engine::events::CollidedWithWorld& event,
+  entityx::Entity entity
+) {
   auto& body = *entity.component<MovingBody>();
   if (event.mCollidedLeft) {
     body.mVelocity.x = 1.0f;
@@ -119,30 +104,14 @@ void SpikeBallSystem::receive(const engine::events::CollidedWithWorld& event) {
 
   if (event.mCollidedTop) {
     if (entity.component<Active>()->mIsOnScreen) {
-      mpServiceProvider->playSound(data::SoundId::DukeJumping);
+      d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
     }
 
-    entity.component<components::SpikeBall>()->mJumpBackCooldown = 3;
+    mJumpBackCooldown = 3;
 
     engine::removeSafely<MovementSequence>(entity);
     body.mVelocity.y = 0.0f;
   }
 }
-
-
-void SpikeBallSystem::jump(entityx::Entity entity) {
-  auto& state = *entity.component<components::SpikeBall>();
-  if (state.mJumpBackCooldown > 0) {
-    return;
-  }
-
-  state.mJumpBackCooldown = 9;
-  startJump(entity);
-
-  if (entity.component<Active>()->mIsOnScreen) {
-    mpServiceProvider->playSound(data::SoundId::DukeJumping);
-  }
-}
-
 
 }

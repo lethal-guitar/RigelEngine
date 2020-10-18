@@ -22,16 +22,12 @@
 #include "common/game_mode.hpp"
 #include "common/global.hpp"
 #include "data/bonus.hpp"
+#include "data/game_session_data.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
-#include "engine/collision_checker.hpp"
-#include "engine/random_number_generator.hpp"
+#include "engine/sprite_factory.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/earth_quake_effect.hpp"
-#include "game_logic/entity_factory.hpp"
 #include "game_logic/input.hpp"
-#include "game_logic/interactive/enemy_radar.hpp"
-#include "game_logic/player/components.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
 
@@ -45,12 +41,12 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel { class GameRunner; }
 namespace rigel::data { struct GameOptions; }
+namespace rigel::data::map { struct LevelData; }
 
 
 namespace rigel::game_logic {
 
-class IngameSystems;
-
+struct WorldState;
 
 class GameWorld : public entityx::Receiver<GameWorld> {
 public:
@@ -77,15 +73,24 @@ public:
   void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::BossActivated& event);
   void receive(const rigel::events::BossDestroyed& event);
+  void receive(const rigel::events::CloakPickedUp& event);
+  void receive(const rigel::events::CloakExpired& event);
 
   void updateGameLogic(const PlayerInput& input);
   void render();
   void processEndOfFrameActions();
 
+  void quickSave();
+  void quickLoad();
+  bool canQuickLoad() const;
+
   friend class rigel::GameRunner;
 
 private:
   void loadLevel();
+  void createNewState();
+  void subscribe(entityx::EventManager& eventManager);
+  void unsubscribe(entityx::EventManager& eventManager);
 
   void onReactorDestroyed(const base::Vector& position);
   void updateReactorDestructionEvent();
@@ -101,57 +106,9 @@ private:
   void printDebugText(std::ostream& stream) const;
 
 private:
-  struct LevelBonusInfo {
-    int mInitialCameraCount = 0;
-    int mInitialMerchandiseCount = 0;
-    int mInitialWeaponCount = 0;
-    int mInitialLaserTurretCount = 0;
-    int mInitialBonusGlobeCount = 0;
-
-    int mNumShotBonusGlobes = 0;
-    bool mPlayerTookDamage = false;
-  };
-
-  struct WorldState {
-    WorldState(
-      IGameServiceProvider* pServiceProvider,
-      renderer::Renderer* pRenderer,
-      const loader::ResourceLoader* pResources,
-      data::PlayerModel* pPlayerModel,
-      entityx::EventManager& eventManager,
-      SpriteFactory* pSpriteFactory,
-      data::GameSessionId sessionId);
-    ~WorldState();
-
-    entityx::EntityManager mEntities;
-    engine::RandomNumberGenerator mRandomGenerator;
-    EntityFactory mEntityFactory;
-    RadarDishCounter mRadarDishCounter;
-
-    data::map::Map mMap;
-    LevelBonusInfo mBonusInfo;
-    std::string mLevelMusicFile;
-
-    engine::CollisionChecker mCollisionChecker;
-    std::unique_ptr<IngameSystems> mpSystems;
-
-    std::optional<EarthQuakeEffect> mEarthQuakeEffect;
-    std::optional<base::Color> mScreenFlashColor;
-    std::optional<base::Color> mBackdropFlashColor;
-    std::optional<base::Vector> mTeleportTargetPosition;
-    entityx::Entity mActiveBossEntity;
-    std::optional<int> mReactorDestructionFramesElapsed;
-    int mScreenShakeOffsetX = 0;
-    data::map::BackdropSwitchCondition mBackdropSwitchCondition;
-    bool mBossDeathAnimationStartPending = false;
-    bool mBackdropSwitched = false;
-    bool mLevelFinished = false;
-    bool mPlayerDied = false;
-  };
-
-  struct CheckpointData {
-    data::PlayerModel::CheckpointState mState;
-    base::Vector mPosition;
+  struct QuickSaveData {
+    data::PlayerModel mPlayerModel;
+    std::unique_ptr<WorldState> mpState;
   };
 
   renderer::Renderer* mpRenderer;
@@ -163,14 +120,14 @@ private:
   const loader::ResourceLoader* mpResources;
   data::GameSessionId mSessionId;
 
-  entityx::EventManager mEventManager;
-  SpriteFactory mSpriteFactory;
+  engine::SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
-  std::optional<CheckpointData> mActivatedCheckpoint;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
+  renderer::RenderTargetTexture mLowResLayer;
 
   std::unique_ptr<WorldState> mpState;
+  std::unique_ptr<QuickSaveData> mpQuickSave;
 };
 
 }

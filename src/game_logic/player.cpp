@@ -28,6 +28,7 @@
 #include "engine/entity_tools.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
+#include "game_logic/actor_tag.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/entity_factory.hpp"
 
@@ -323,6 +324,44 @@ Player::Player(
 }
 
 
+void Player::synchronizeTo(
+  const Player& other,
+  entityx::EntityManager& es
+) {
+  using game_logic::components::ActorTag;
+
+  mGodModeOn = other.mGodModeOn;
+  mState = other.mState;
+  mHitBox = other.mHitBox;
+  mStance = other.mStance;
+  mVisualState = other.mVisualState;
+  mMercyFramesPerHit = other.mMercyFramesPerHit;
+  mMercyFramesRemaining = other.mMercyFramesRemaining;
+  mFramesElapsedHavingRapidFire = other.mFramesElapsedHavingRapidFire;
+  mFramesElapsedHavingCloak = other.mFramesElapsedHavingCloak;
+  mAttachedSpiders = other.mAttachedSpiders;
+  mRapidFiredLastFrame = other.mRapidFiredLastFrame;
+  mIsOddFrame = other.mIsOddFrame;
+  mRecoilAnimationActive = other.mRecoilAnimationActive;
+  mIsRidingElevator = other.mIsRidingElevator;
+  mJumpRequested = other.mJumpRequested;
+
+  *mEntity.component<c::Sprite>() = *other.mEntity.component<const c::Sprite>();
+  *mEntity.component<c::BoundingBox>() =
+    *other.mEntity.component<const c::BoundingBox>();
+
+  if (other.mAttachedElevator) {
+    entityx::ComponentHandle<ActorTag> tag;
+    for (auto entity : es.entities_with_components(tag)) {
+      if (tag->mType == ActorTag::Type::ActiveElevator) {
+        mAttachedElevator = entity;
+        break;
+      }
+    }
+  }
+}
+
+
 bool Player::isInRegularState() const {
   return stateIs<OnGround>() && !mIsRidingElevator;
 }
@@ -409,7 +448,13 @@ void Player::receive(const events::ElevatorAttachmentChanged& event) {
     return;
   }
 
-  mAttachedElevator = event.mAttachedElevator;
+  using CT = events::ElevatorAttachmentChanged;
+
+  if (event.mType == CT::Attach) {
+    mAttachedElevator = event.mElevator;
+  } else if (event.mType == CT::Detach && mAttachedElevator == event.mElevator) {
+    mAttachedElevator = {};
+  }
 }
 
 
@@ -564,10 +609,6 @@ void Player::enterShip(
   sprite.mFramesToRender[0] = 1;
   engine::synchronizeBoundingBoxToSprite(mEntity);
 
-  // Reserve spots for exhaust flame animation
-  sprite.mFramesToRender.push_back(engine::IGNORE_RENDER_SLOT);
-  sprite.mFramesToRender.push_back(engine::IGNORE_RENDER_SLOT);
-
   setVisualState(VisualState::InShip);
 }
 
@@ -629,7 +670,9 @@ void Player::doInteractionAnimation() {
 }
 
 
-void Player::resetAfterRespawn() {
+void Player::reSpawnAt(const base::Vector& spawnPosition) {
+  position() = spawnPosition;
+
   // TODO: Refactor this - it would be much nicer if we could just consruct
   // a new player.
   mState = OnGround{};
