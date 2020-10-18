@@ -33,7 +33,7 @@
 #include "ui/fps_display.hpp"
 #include "ui/menu_element_renderer.hpp"
 
-#include "SDL_gamecontroller.h"
+#include <SDL_gamecontroller.h>
 
 #include <chrono>
 #include <memory>
