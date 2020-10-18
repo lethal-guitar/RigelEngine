@@ -21,7 +21,7 @@ Here's a video showcasing the project:
 
 Gameplay-wise, RigelEngine is feature-complete: All four episodes of the game (shareware and registered version) are fully playable and on par with the original game.
 
-The project overall is far from finished, though. There are still some pieces missing to reach full parity with the original game (configurable controls/key bindings, [a few visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5), some [screens in the menu](https://github.com/lethal-guitar/RigelEngine/milestone/4), [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13)). On top of that, more [modern enhancements](https://github.com/lethal-guitar/RigelEngine/labels/enhancement) and [usability improvements](https://github.com/lethal-guitar/RigelEngine/labels/usability) are planned.
+The project overall is far from finished, though. There are still some pieces missing to reach full parity with the original game (configurable controls/key bindings, [a few visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5), [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13)). On top of that, more [modern enhancements](https://github.com/lethal-guitar/RigelEngine/labels/enhancement) and [usability improvements](https://github.com/lethal-guitar/RigelEngine/labels/usability) are planned.
 
 ### Supported platforms
 
