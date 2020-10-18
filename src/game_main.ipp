@@ -65,7 +65,8 @@ public:
   Game(
     const CommandLineOptions& commandLineOptions,
     UserProfile* pUserProfile,
-    SDL_Window* pWindow);
+    SDL_Window* pWindow,
+    bool isFirstLaunch);
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 

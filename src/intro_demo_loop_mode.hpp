@@ -29,17 +29,20 @@ namespace ui { class DukeScriptRunner; }
  */
 class IntroDemoLoopMode : public GameMode {
 public:
+  enum class Type {
+    Regular,
+    DuringGameStart,
+    AtFirstLaunch
+  };
+
   /** Construct an IntroDemoLoopMode instance
    *
    * When the game starts, the behavior is slightly different from the normal
    * intro/demo loop: The Apogee Logo is shown first, and the story cutscene
    * is shown after the intro movie.
    * Normally, the Apogee Logo comes last, and the story is not shown.
-   *
-   * The boolean argument `isDuringGameStartup` controls this behavior
-   * accordingly.
    */
-  IntroDemoLoopMode(Context context, bool isDuringGameStartup);
+  IntroDemoLoopMode(Context context, Type type);
 
   std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta dt,
@@ -48,12 +51,14 @@ public:
 private:
   struct ScriptedStep {};
   struct Credits : ScriptedStep {};
+  struct HypeScreen : ScriptedStep {};
   struct Story : ScriptedStep {};
 
   using Step = std::variant<
     ui::ApogeeLogo,
     ui::IntroMovie,
     Story,
+    HypeScreen,
     Credits>;
 
   bool handleEvent(const SDL_Event& event);

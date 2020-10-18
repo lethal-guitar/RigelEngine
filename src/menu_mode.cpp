@@ -123,7 +123,8 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
 
     using STT = ui::DukeScriptRunner::ScriptTerminationType;
     if (result->mTerminationType == STT::TimedOut) {
-      return std::make_unique<IntroDemoLoopMode>(mContext, false);
+      return std::make_unique<IntroDemoLoopMode>(
+        mContext, IntroDemoLoopMode::Type::Regular);
     }
 
     return navigateToNextMenu(*result);

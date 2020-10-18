@@ -13,19 +13,23 @@ namespace rigel {
 
 IntroDemoLoopMode::IntroDemoLoopMode(
   Context context,
-  const bool isDuringGameStartup
+  const Type type
 )
   : mContext(context)
 {
-  if (isDuringGameStartup) {
+  if (type == Type::Regular) {
+    mSteps.push_back(ui::IntroMovie(context));
+    mSteps.push_back(Credits{});
+    mSteps.push_back(ui::ApogeeLogo(context));
+  } else {
+    if (type == Type::AtFirstLaunch) {
+      mSteps.push_back(HypeScreen{});
+    }
+
     mSteps.push_back(ui::ApogeeLogo(context));
     mSteps.push_back(ui::IntroMovie(context));
     mSteps.push_back(Story{});
     mSteps.push_back(Credits{});
-  } else {
-    mSteps.push_back(ui::IntroMovie(context));
-    mSteps.push_back(Credits{});
-    mSteps.push_back(ui::ApogeeLogo(context));
   }
 
   startCurrentStep();
@@ -94,6 +98,10 @@ void IntroDemoLoopMode::startCurrentStep() {
       runScript(mContext, "&Story");
     },
 
+    [this](HypeScreen& state) {
+      runScript(mContext, "HYPE");
+    },
+
     [this](Credits& state) {
       auto creditsScript = mContext.mpScripts->at("&Credits");
       creditsScript.emplace_back(data::script::Delay{700});
@@ -153,8 +161,10 @@ bool IntroDemoLoopMode::isCurrentStepFinished() const {
 
 
 void IntroDemoLoopMode::advanceToNextStep() {
-  const auto wasStory = std::holds_alternative<Story>(mSteps[mCurrentStep]);
-  if (wasStory) {
+  const auto isOneTimeStep =
+    std::holds_alternative<Story>(mSteps[mCurrentStep]) ||
+    std::holds_alternative<HypeScreen>(mSteps[mCurrentStep]);
+  if (isOneTimeStep) {
     mSteps.erase(next(begin(mSteps), mCurrentStep));
   } else {
     ++mCurrentStep;
