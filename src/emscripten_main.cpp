@@ -27,8 +27,8 @@
 #include "sdl_utils/error.hpp"
 #include "ui/imgui_integration.hpp"
 
+#include "game.hpp"
 #include "platform.hpp"
-#include "game_main.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <emscripten.h>
@@ -49,7 +49,7 @@ namespace {
 constexpr auto WASM_GAME_PATH = "/duke/";
 
 void runOneFrameWrapper(void *pData) {
-  runOneFrame(static_cast<Game*>(pData));
+  static_cast<Game*>(pData)->runOneFrame();
 }
 
 }
@@ -84,8 +84,8 @@ int main()
   CommandLineOptions options;
   options.mGamePath = WASM_GAME_PATH;
 
-  auto pGame = createGame(pWindow.get(), &userProfile, options);
-  emscripten_set_main_loop_arg(runOneFrameWrapper, pGame.get(), 0, true);
+  Game game(options, &userProfile, pWindow.get(), false);
+  emscripten_set_main_loop_arg(runOneFrameWrapper, &game, 0, true);
 
   return 0;
 }

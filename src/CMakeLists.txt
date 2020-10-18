@@ -304,9 +304,10 @@ set(core_sources
     # TODO: Move these into a common folder, like `menu_system` or similar
     anti_piracy_screen_mode.cpp
     anti_piracy_screen_mode.hpp
+    game.cpp
+    game.hpp
     game_main.cpp
     game_main.hpp
-    game_main.ipp
     game_runner.cpp
     game_runner.hpp
     game_session_mode.cpp
