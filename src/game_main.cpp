@@ -108,7 +108,8 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 std::unique_ptr<GameMode> createInitialGameMode(
   GameMode::Context context,
   const CommandLineOptions& commandLineOptions,
-  const bool isShareWareVersion)
+  const bool isShareWareVersion,
+  const bool isFirstLaunch)
 {
   if (commandLineOptions.mLevelToJumpTo)
   {
@@ -123,10 +124,14 @@ std::unique_ptr<GameMode> createInitialGameMode(
   }
 
   if (!isShareWareVersion) {
-    return std::make_unique<AntiPiracyScreenMode>(context);
+    return std::make_unique<AntiPiracyScreenMode>(context, isFirstLaunch);
   }
 
-  return std::make_unique<IntroDemoLoopMode>(context, true);
+  return std::make_unique<IntroDemoLoopMode>(
+    context,
+    isFirstLaunch
+      ? IntroDemoLoopMode::Type::AtFirstLaunch
+      : IntroDemoLoopMode::Type::DuringGameStart);
 }
 
 
@@ -226,8 +231,8 @@ void initAndRunGame(
   UserProfile& userProfile,
   const CommandLineOptions& commandLineOptions
 ) {
-  auto run = [&](const CommandLineOptions& options) {
-    Game game(options, &userProfile, pWindow);
+  auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
+    Game game(options, &userProfile, pWindow, isFirstLaunch);
 
     for (;;) {
       auto maybeStopReason = game.runOneFrame();
@@ -237,11 +242,14 @@ void initAndRunGame(
     }
   };
 
-  if (!userProfile.mGamePath) {
+  const auto needsProfileSetup = !userProfile.mGamePath.has_value();
+  if (needsProfileSetup) {
     setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
 
-  auto result = run(commandLineOptions);
+  auto result = run(
+    commandLineOptions,
+    needsProfileSetup && !userProfile.hasProgressData());
 
   // Some game option changes (like choosing a new game path) require
   // restarting the game to make the change effective. If the first game run
@@ -254,7 +262,7 @@ void initAndRunGame(
       commandLineOptions.mDebugModeEnabled;
 
     while (result == Game::StopReason::RestartNeeded) {
-      result = run(optionsForRestartedGame);
+      result = run(optionsForRestartedGame, false);
     }
   }
 
@@ -314,7 +322,7 @@ std::unique_ptr<Game, GameDeleter> createGame(
   const CommandLineOptions& commandLineOptions
 ) {
   return std::unique_ptr<Game, GameDeleter>(
-    new Game{commandLineOptions, pUserProfile, pWindow});
+    new Game{commandLineOptions, pUserProfile, pWindow, false});
 }
 
 
@@ -351,7 +359,8 @@ void FpsLimiter::updateAndWait() {
 Game::Game(
   const CommandLineOptions& commandLineOptions,
   UserProfile* pUserProfile,
-  SDL_Window* pWindow
+  SDL_Window* pWindow,
+  const bool isFirstLaunch
 )
   : mpWindow(pWindow)
   , mRenderer(pWindow)
@@ -397,7 +406,7 @@ Game::Game(
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
-    makeModeContext(), mCommandLineOptions, mIsShareWareVersion));
+    makeModeContext(), mCommandLineOptions, mIsShareWareVersion, isFirstLaunch));
 
   enumerateGameControllers();
 

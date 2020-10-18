@@ -309,7 +309,6 @@ set(core_sources
     intro_demo_loop_mode.hpp
     menu_mode.cpp
     menu_mode.hpp
-    mode_stage.hpp
 )
 
 

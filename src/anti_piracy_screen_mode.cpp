@@ -25,9 +25,12 @@
 
 namespace rigel {
 
-AntiPiracyScreenMode::AntiPiracyScreenMode(Context context)
+AntiPiracyScreenMode::AntiPiracyScreenMode(
+  Context context,
+  const bool isFirstLaunch)
   : mContext(context)
   , mTexture(context.mpRenderer, context.mpResources->loadAntiPiracyImage())
+  , mIsFirstLaunch(isFirstLaunch)
 {
 }
 
@@ -48,7 +51,11 @@ std::unique_ptr<GameMode> AntiPiracyScreenMode::updateAndRender(
     });
 
   if (anyButtonPressed) {
-    return std::make_unique<IntroDemoLoopMode>(mContext, true);
+    return std::make_unique<IntroDemoLoopMode>(
+      mContext,
+      mIsFirstLaunch
+        ? IntroDemoLoopMode::Type::AtFirstLaunch
+        : IntroDemoLoopMode::Type::DuringGameStart);
   }
 
   return {};

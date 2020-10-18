@@ -29,7 +29,7 @@ namespace rigel {
  */
 class AntiPiracyScreenMode : public GameMode {
 public:
-  explicit AntiPiracyScreenMode(Context context);
+  AntiPiracyScreenMode(Context context, bool isFirstLaunch);
 
   std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta,
@@ -39,6 +39,7 @@ public:
 private:
   Context mContext;
   renderer::OwningTexture mTexture;
+  bool mIsFirstLaunch;
 };
 
 }

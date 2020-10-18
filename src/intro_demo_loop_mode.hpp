@@ -5,9 +5,8 @@
 #include "ui/apogee_logo.hpp"
 #include "ui/intro_movie.hpp"
 
-#include "mode_stage.hpp"
-
 #include <memory>
+#include <variant>
 
 
 namespace rigel {
@@ -30,35 +29,47 @@ namespace ui { class DukeScriptRunner; }
  */
 class IntroDemoLoopMode : public GameMode {
 public:
+  enum class Type {
+    Regular,
+    DuringGameStart,
+    AtFirstLaunch
+  };
+
   /** Construct an IntroDemoLoopMode instance
    *
    * When the game starts, the behavior is slightly different from the normal
    * intro/demo loop: The Apogee Logo is shown first, and the story cutscene
    * is shown after the intro movie.
    * Normally, the Apogee Logo comes last, and the story is not shown.
-   *
-   * The boolean argument `isDuringGameStartup` controls this behavior
-   * accordingly.
    */
-  IntroDemoLoopMode(Context context, bool isDuringGameStartup);
+  IntroDemoLoopMode(Context context, Type type);
 
   std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta dt,
     const std::vector<SDL_Event>& events) override;
 
 private:
+  struct ScriptedStep {};
+  struct Credits : ScriptedStep {};
+  struct HypeScreen : ScriptedStep {};
+  struct Story : ScriptedStep {};
+
+  using Step = std::variant<
+    ui::ApogeeLogo,
+    ui::IntroMovie,
+    Story,
+    HypeScreen,
+    Credits>;
+
   bool handleEvent(const SDL_Event& event);
+  void startCurrentStep();
+  void updateCurrentStep(engine::TimeDelta dt);
+  bool isCurrentStepFinished() const;
+  void advanceToNextStep();
 
-private:
   Context mContext;
-  IGameServiceProvider* mpServiceProvider;
-  bool mFirstRunIncludedStoryAnimation;
-
-  ui::DukeScriptRunner* mpScriptRunner;
-  loader::ScriptBundle mScripts;
-
-  std::vector<ModeStage> mStages;
-  std::size_t mCurrentStage;
+  std::vector<Step> mSteps;
+  std::size_t mCurrentStep = 0;
 };
 
 }
