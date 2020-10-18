@@ -135,9 +135,11 @@ std::unique_ptr<GameMode> createInitialGameMode(
 }
 
 
-std::optional<FpsLimiter> createLimiter(const data::GameOptions& options) {
+std::optional<renderer::FpsLimiter> createLimiter(
+  const data::GameOptions& options
+) {
   if (options.mEnableFpsLimit && !options.mEnableVsync) {
-    return FpsLimiter{options.mMaxFps};
+    return renderer::FpsLimiter{options.mMaxFps};
   } else {
     return std::nullopt;
   }
@@ -328,31 +330,6 @@ std::unique_ptr<Game, GameDeleter> createGame(
 
 void runOneFrame(Game* pGame) {
   pGame->runOneFrame();
-}
-
-
-FpsLimiter::FpsLimiter(const int targetFps)
-  : mLastTime(std::chrono::high_resolution_clock::now())
-  , mTargetFrameTime(1.0 / targetFps)
-{
-}
-
-
-void FpsLimiter::updateAndWait() {
-  using namespace std::chrono;
-
-  const auto now = high_resolution_clock::now();
-  const auto delta = duration<double>(now - mLastTime).count();
-  mLastTime = now;
-
-  mError += mTargetFrameTime - delta;
-
-  const auto timeToWaitFor = mTargetFrameTime + mError;
-  if (timeToWaitFor > 0.0) {
-    // We use SDL_Delay instead of std::this_thread::sleep_for, because the
-    // former is more accurate on some platforms.
-    SDL_Delay(static_cast<Uint32>(timeToWaitFor * 1000.0));
-  }
 }
 
 

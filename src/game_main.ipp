@@ -25,6 +25,7 @@
 #include "engine/tiled_texture.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
+#include "renderer/fps_limiter.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
 #include "sdl_utils/ptr.hpp"
@@ -41,19 +42,6 @@
 
 
 namespace rigel {
-
-class FpsLimiter {
-public:
-  explicit FpsLimiter(int targetFps);
-
-  void updateAndWait();
-
-private:
-  std::chrono::high_resolution_clock::time_point mLastTime = {};
-  double mTargetFrameTime;
-  double mError = 0.0;
-};
-
 
 class Game : public IGameServiceProvider {
 public:
@@ -130,7 +118,7 @@ private:
   std::unique_ptr<engine::SoundSystem> mpSoundSystem;
   bool mIsShareWareVersion;
 
-  std::optional<FpsLimiter> mFpsLimiter;
+  std::optional<renderer::FpsLimiter> mFpsLimiter;
   renderer::RenderTargetTexture mRenderTarget;
   std::uint8_t mAlphaMod = 255;
 

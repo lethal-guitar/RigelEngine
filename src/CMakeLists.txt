@@ -244,6 +244,8 @@ set(core_sources
     loader/user_profile_import.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
+    renderer/fps_limiter.cpp
+    renderer/fps_limiter.hpp
     renderer/opengl.cpp
     renderer/opengl.hpp
     renderer/renderer.cpp
