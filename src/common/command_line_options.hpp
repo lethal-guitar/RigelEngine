@@ -26,6 +26,16 @@
 
 namespace rigel {
 
+/** Settings that can be changed via command-line arguments/switches
+ *
+ * This represents the parsed representation of all command line arguments
+ * (argc/argv). The parsing happens in main.cpp
+ * For documentation on the individual members, refer to the parser code over
+ * there.
+ *
+ * If you add something here, you'll want to extend the code in main.cpp
+ * as well!
+ */
 struct CommandLineOptions {
   std::string mGamePath;
   std::optional<data::GameSessionId> mLevelToJumpTo;
