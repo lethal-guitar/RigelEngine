@@ -43,6 +43,14 @@ blurry, and could be refined in the future. A (incomplete) list of responsibilit
 * Entity movement/physics
 * Controlling entity life time
 
+### `frontend`
+
+Contains the top-level game mode management.
+The game can be in three top-level modes: Intro/demo, main menu, and in-game.
+Each of these is represented by a corresponding class.
+The `Game` class implements mode management and ties together all the infrastructure required for the game modes to do their job.
+For the platform startup code, it acts as the main facade for the game.
+
 ### `game_logic`
 
 This is where all the game logic is implemented. See corresponding README for more
@@ -80,6 +88,7 @@ Contains some general UI-related building blocks, UI components like the HUD, an
 * Episode End screen (short story sequence after beating a boss)
 * High Score list
 * Options Menu
+* In-game Menu
 
 Most other menus, screens etc. in Duke Nukem are implemented using [DukeScript](https://github.com/lethal-guitar/RigelEngine/wiki/DukeScript). `DukeScriptRunner`, which implements DukeScript for RigelEngine, can also be found here.
 
@@ -87,10 +96,5 @@ Most other menus, screens etc. in Duke Nukem are implemented using [DukeScript](
 
 The remaining code consists of:
 * `main.cpp`: command line option parsing
-* `game_main`: startup and initialization, main loop, game mode management
-* game mode implementations (menu, game session, intro/demo loop)
-
-
-# Module dependency graph
-
-TBD
+* `game_main`: startup and initialization, main loop
+* `emscripten_main.cpp`: startup and main loop setup for Webassembly builds using Emscripten

@@ -76,6 +76,18 @@ set(core_sources
     engine/tiled_texture.hpp
     engine/timing.hpp
     engine/visual_components.hpp
+    frontend/anti_piracy_screen_mode.cpp
+    frontend/anti_piracy_screen_mode.hpp
+    frontend/game.cpp
+    frontend/game.hpp
+    frontend/game_runner.cpp
+    frontend/game_runner.hpp
+    frontend/game_session_mode.cpp
+    frontend/game_session_mode.hpp
+    frontend/intro_demo_loop_mode.cpp
+    frontend/intro_demo_loop_mode.hpp
+    frontend/menu_mode.cpp
+    frontend/menu_mode.hpp
     game_logic/behavior_controller.hpp
     game_logic/behavior_controller_system.cpp
     game_logic/behavior_controller_system.hpp
@@ -244,6 +256,8 @@ set(core_sources
     loader/user_profile_import.hpp
     loader/voc_decoder.cpp
     loader/voc_decoder.hpp
+    renderer/fps_limiter.cpp
+    renderer/fps_limiter.hpp
     renderer/opengl.cpp
     renderer/opengl.hpp
     renderer/renderer.cpp
@@ -295,24 +309,8 @@ set(core_sources
     ui/text_entry_widget.hpp
     ui/utils.cpp
     ui/utils.hpp
-
     platform.cpp
     platform.hpp
-
-    # TODO: Move these into a common folder, like `menu_system` or similar
-    anti_piracy_screen_mode.cpp
-    anti_piracy_screen_mode.hpp
-    game_main.cpp
-    game_main.hpp
-    game_main.ipp
-    game_runner.cpp
-    game_runner.hpp
-    game_session_mode.cpp
-    game_session_mode.hpp
-    intro_demo_loop_mode.cpp
-    intro_demo_loop_mode.hpp
-    menu_mode.cpp
-    menu_mode.hpp
 )
 
 
@@ -369,7 +367,11 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         ".html"
     )
 else()
-    add_executable(RigelEngine main.cpp)
+    add_executable(RigelEngine
+        game_main.cpp
+        game_main.hpp
+        main.cpp
+    )
     target_link_libraries(RigelEngine PRIVATE
         SDL2::Main
         rigel_core

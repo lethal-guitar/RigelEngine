@@ -16,32 +16,21 @@
 
 #pragma once
 
-#include "base/spatial_types.hpp"
-#include "data/game_session_data.hpp"
-
-#include <optional>
-#include <string>
-#include <utility>
+#include <chrono>
 
 
-namespace rigel {
+namespace rigel::renderer {
 
-/** Settings that can be changed via command-line arguments/switches
- *
- * This represents the parsed representation of all command line arguments
- * (argc/argv). The parsing happens in main.cpp
- * For documentation on the individual members, refer to the parser code over
- * there.
- *
- * If you add something here, you'll want to extend the code in main.cpp
- * as well!
- */
-struct CommandLineOptions {
-  std::string mGamePath;
-  std::optional<data::GameSessionId> mLevelToJumpTo;
-  bool mSkipIntro = false;
-  bool mDebugModeEnabled = false;
-  std::optional<base::Vector> mPlayerPosition;
+class FpsLimiter {
+public:
+  explicit FpsLimiter(int targetFps);
+
+  void updateAndWait();
+
+private:
+  std::chrono::high_resolution_clock::time_point mLastTime = {};
+  double mTargetFrameTime;
+  double mError = 0.0;
 };
 
 }
