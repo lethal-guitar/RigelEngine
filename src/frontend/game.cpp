@@ -21,6 +21,7 @@
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
+#include "game_logic/demo_player.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "ui/imgui_integration.hpp"
@@ -117,6 +118,25 @@ std::unique_ptr<GameMode> createInitialGameMode(
   const bool isShareWareVersion,
   const bool isFirstLaunch)
 {
+  class DemoTestMode : public GameMode {
+  public:
+    explicit DemoTestMode(Context context)
+      : mDemoPlayer(context)
+    {
+    }
+
+    std::unique_ptr<GameMode> updateAndRender(
+      engine::TimeDelta dt,
+      const std::vector<SDL_Event>&
+    ) override {
+      mDemoPlayer.updateAndRender(dt);
+      return nullptr;
+    }
+
+  private:
+    game_logic::DemoPlayer mDemoPlayer;
+  };
+
   if (commandLineOptions.mLevelToJumpTo)
   {
     return std::make_unique<GameSessionMode>(
@@ -127,6 +147,9 @@ std::unique_ptr<GameMode> createInitialGameMode(
   else if (commandLineOptions.mSkipIntro)
   {
     return std::make_unique<MenuMode>(context);
+  }
+  else if (commandLineOptions.mPlayDemo) {
+    return std::make_unique<DemoTestMode>(context);
   }
 
   if (!isShareWareVersion) {

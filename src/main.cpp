@@ -137,6 +137,9 @@ int main(int argc, char** argv) {
     ("debug-mode,d",
      po::bool_switch(&config.mDebugModeEnabled),
      "Enable debugging features")
+    ("play-demo",
+     po::bool_switch(&config.mPlayDemo),
+     "Play pre-recorded demo")
     ("game-path",
      po::value<std::string>(&config.mGamePath)->default_value(""),
      "Path to original game's installation. Can also be given as positional "
