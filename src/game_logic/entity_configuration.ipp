@@ -1327,6 +1327,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{1, -2}, {3, 3}});
       entity.assign<BehaviorController>(behaviors::SlimeContainer{});
       entity.assign<DestructionEffects>(SLIME_CONTAINER_KILL_EFFECT_SPEC);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1655,6 +1656,7 @@ void EntityFactory::configureEntity(
     case ActorID::Passive_prisoner: // Monster in prison cell, passive
       entity.assign<BehaviorController>(behaviors::PassivePrisoner{});
       entity.assign<BoundingBox>(boundingBox);
+      entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<AppearsOnRadar>();
       break;
 

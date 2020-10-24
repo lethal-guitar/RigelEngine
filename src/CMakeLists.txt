@@ -99,6 +99,8 @@ set(core_sources
     game_logic/damage_infliction_system.hpp
     game_logic/debugging_system.cpp
     game_logic/debugging_system.hpp
+    game_logic/demo_player.cpp
+    game_logic/demo_player.hpp
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp
