@@ -225,7 +225,8 @@ GameWorld::GameWorld(
   const data::GameSessionId& sessionId,
   GameMode::Context context,
   std::optional<base::Vector> playerPositionOverride,
-  bool showWelcomeMessage
+  bool showWelcomeMessage,
+  const PlayerInput& initialInput
 )
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
@@ -251,12 +252,12 @@ GameWorld::GameWorld(
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
 
-  loadLevel();
+  loadLevel(initialInput);
 
   if (playerPositionOverride) {
     mpState->mPlayer.position() = *playerPositionOverride;
     mpState->mCamera.centerViewOnPlayer();
-    updateGameLogic({});
+    updateGameLogic(initialInput);
   }
 
   if (showWelcomeMessage) {
@@ -432,11 +433,11 @@ void GameWorld::receive(const rigel::events::CloakExpired&) {
 }
 
 
-void GameWorld::loadLevel() {
+void GameWorld::loadLevel(const PlayerInput& initialInput) {
   createNewState();
 
   mpState->mCamera.centerViewOnPlayer();
-  updateGameLogic({});
+  updateGameLogic(initialInput);
 
   if (data::isBossLevel(mSessionId.mLevel)) {
     mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
@@ -762,7 +763,7 @@ void GameWorld::restartLevel() {
   mpServiceProvider->fadeOutScreen();
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
-  loadLevel();
+  loadLevel({});
 
   if (mpState->mRadarDishCounter.radarDishesPresent()) {
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);

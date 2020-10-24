@@ -47,13 +47,13 @@ public:
 private:
   GameMode::Context mContext;
   data::PlayerModel mPlayerModel;
-  std::unique_ptr<GameWorld> mpWorld;
 
   std::vector<DemoInput> mFrames;
-  std::size_t mCurrentFrameIndex = 0;
+  std::size_t mCurrentFrameIndex = 1;
   std::size_t mLevelIndex = 0;
-
   engine::TimeDelta mElapsedTime = 0;
+
+  std::unique_ptr<GameWorld> mpWorld;
 };
 
 }

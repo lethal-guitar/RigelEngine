@@ -86,13 +86,14 @@ data::GameSessionId demoSessionId(const std::size_t levelIndex) {
 
 DemoPlayer::DemoPlayer(GameMode::Context context)
   : mContext(context)
+  , mFrames(loadDemo(*context.mpResources))
   , mpWorld(std::make_unique<GameWorld>(
       &mPlayerModel,
       demoSessionId(0),
       context,
       std::nullopt,
-      true))
-  , mFrames(loadDemo(*context.mpResources))
+      true,
+      mFrames[0].mInput))
 {
 }
 

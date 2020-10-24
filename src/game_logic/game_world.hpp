@@ -66,7 +66,8 @@ public:
     const data::GameSessionId& sessionId,
     GameMode::Context context,
     std::optional<base::Vector> playerPositionOverride = std::nullopt,
-    bool showWelcomeMessage = false);
+    bool showWelcomeMessage = false,
+    const PlayerInput& initialInput = PlayerInput{});
   ~GameWorld(); // NOLINT
 
   bool levelFinished() const;
@@ -98,7 +99,7 @@ public:
   friend class rigel::GameRunner;
 
 private:
-  void loadLevel();
+  void loadLevel(const PlayerInput& initialInput);
   void createNewState();
   void subscribe(entityx::EventManager& eventManager);
   void unsubscribe(entityx::EventManager& eventManager);
