@@ -64,8 +64,8 @@ struct BlueGuard {
   int mStanceChangeCountdown = 0;
   int mStepsWalked = 0;
   bool mTypingOnTerminal = false;
-  bool mOneStepWalkedSinceTypingStop = true;
   bool mIsCrouched = false;
+  bool mTypingInterruptedByAttack = false;
 };
 
 }
