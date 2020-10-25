@@ -558,7 +558,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mpState->mPlayerProjectileSystem.update(mpState->mEntities);
 
   mpState->mEffectsSystem.update(mpState->mEntities);
-  mpState->mLifeTimeSystem.update(mpState->mEntities);
+  mpState->mLifeTimeSystem.update(
+    mpState->mEntities, mpState->mCamera.position(), viewPortSize);
 
   // Now process any MovingBody objects that have been spawned after phase 1
   mpState->mPhysicsSystem.updatePhase2(mpState->mEntities);

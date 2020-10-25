@@ -21,15 +21,33 @@
 
 namespace rigel::engine {
 
-void LifeTimeSystem::update(entityx::EntityManager& es) {
+void LifeTimeSystem::update(
+  entityx::EntityManager& es,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  namespace c = components;
   using Condition = components::AutoDestroy::Condition;
-  es.each<components::AutoDestroy>([](
+
+  es.each<c::AutoDestroy>([&](
     entityx::Entity entity,
-    components::AutoDestroy& autoDestroyProperties
+    c::AutoDestroy& autoDestroyProperties
   ) {
     auto entityIsOnScreen = [&]() {
-      return entity.has_component<components::Active>() &&
-        entity.component<components::Active>()->mIsOnScreen;
+      if (
+        entity.has_component<c::WorldPosition>() &&
+        entity.has_component<c::BoundingBox>()
+      ) {
+        const auto& position = *entity.component<c::WorldPosition>();
+        const auto& bbox = *entity.component<c::BoundingBox>();
+        return engine::isOnScreen(
+          engine::toWorldSpace(bbox, position),
+          cameraPosition,
+          viewPortSize);
+      }
+
+      return entity.has_component<c::Active>() &&
+        entity.component<c::Active>()->mIsOnScreen;
     };
 
     const auto flags = autoDestroyProperties.mConditionFlags;
