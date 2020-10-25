@@ -60,6 +60,7 @@ ActorImagePackage::ActorImagePackage(
   LeStreamReader actorInfoReader(actorInfoData);
   const auto numEntries = actorInfoReader.peekU16();
 
+  mDrawIndexById.reserve(numEntries);
   for (uint16_t index=0; index<numEntries; ++index) {
     const auto offset = actorInfoReader.readU16();
 
@@ -68,6 +69,8 @@ ActorImagePackage::ActorImagePackage(
 
     const auto numFrames = entryReader.readU16();
     const auto drawIndex = entryReader.readS16();
+
+    mDrawIndexById.push_back(drawIndex);
 
     vector<ActorFrameHeader> frameHeaders;
     for (size_t frame=0; frame<numFrames; ++frame) {

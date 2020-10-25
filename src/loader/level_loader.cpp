@@ -26,7 +26,7 @@
 #include "loader/resource_loader.hpp"
 #include "loader/rle_compression.hpp"
 
-#include <fstream>
+#include <algorithm>
 #include <string>
 #include <type_traits>
 
@@ -483,6 +483,15 @@ std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
   return {std::move(actors), playerSpawnPosition, playerFacingLeft};
 }
 
+
+void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources) {
+  std::stable_sort(begin(actors), end(actors),
+    [&](const LevelData::Actor& lhs, const LevelData::Actor& rhs) {
+      return resources.mActorImagePackage.drawIndexFor(lhs.mID) <
+        resources.mActorImagePackage.drawIndexFor(rhs.mID);
+    });
+}
+
 }
 
 
@@ -581,8 +590,11 @@ LevelData loadLevel(
     alternativeBackdropImage = resources.loadTiledFullscreenImage(
       backdropNameFromNumber(header.alternativeBackdropNumber));
   }
+
   auto [actorDescriptions, playerSpawnPosition, playerFacingLeft] =
     preProcessActorDescriptions(map, actors, chosenDifficulty);
+  sortByDrawIndex(actorDescriptions, resources);
+
   return LevelData{
     std::move(tileSet.mTiles),
     std::move(backdropImage),

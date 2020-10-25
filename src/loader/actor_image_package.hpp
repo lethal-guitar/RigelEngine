@@ -49,7 +49,7 @@ public:
   static constexpr auto IMAGE_DATA_FILE = "ACTORS.MNI";
   static constexpr auto ACTOR_INFO_FILE = "ACTRINFO.MNI";
 
-  explicit ActorImagePackage(
+  ActorImagePackage(
     ByteBuffer imageData,
     const ByteBuffer& actorInfoData,
     std::optional<std::string> maybeImageReplacementsPath = std::nullopt);
@@ -59,6 +59,10 @@ public:
     const Palette16& palette = INGAME_PALETTE) const;
 
   FontData loadFont() const;
+
+  int drawIndexFor(data::ActorID id) const {
+    return mDrawIndexById.at(static_cast<size_t>(id));
+  }
 
 private:
   struct ActorFrameHeader {
@@ -85,6 +89,7 @@ private:
 private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
+  std::vector<int> mDrawIndexById;
   std::optional<std::string> mMaybeReplacementsPath;
 };
 
