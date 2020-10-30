@@ -43,15 +43,13 @@ const effects::EffectSpec NAPALM_BOMB_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec SPIDER_KILL_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0},
-  {effects::RandomExplosionSound{}, 0}
+  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0}
 };
 
 
 const effects::EffectSpec RED_BIRD_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{}, loader::INGAME_PALETTE[5]}, 0},
-  {effects::EffectSprite{{}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0},
-  {effects::RandomExplosionSound{}, 0}
+  {effects::EffectSprite{{}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0}
 };
 
 
@@ -65,16 +63,6 @@ const effects::EffectSpec SKELETON_KILL_EFFECT_SPEC[] = {
 const effects::EffectSpec RIGELATIN_KILL_EFFECT_SPEC[] = {
   {effects::SpriteCascade{rigel::data::ActorID::Explosion_FX_1}, 0},
   {effects::Particles{{1, 0}}, 0},
-  {effects::RandomExplosionSound{}, 0},
-  {effects::RandomExplosionSound{}, 1},
-  {effects::RandomExplosionSound{}, 3},
-  {effects::RandomExplosionSound{}, 5},
-  {effects::RandomExplosionSound{}, 7},
-  {effects::RandomExplosionSound{}, 9},
-  {effects::RandomExplosionSound{}, 11},
-  {effects::RandomExplosionSound{}, 13},
-  {effects::RandomExplosionSound{}, 15},
-  {effects::RandomExplosionSound{}, 17},
 };
 
 
@@ -128,11 +116,8 @@ const effects::EffectSpec BOSS4_PROJECTILE_KILL_EFFECT_SPEC[] = {
 
 
 #define M_TECH_KILL_EFFECT_SPEC_DEFINITION \
-  {effects::RandomExplosionSound{}, 0}, \
   {effects::EffectSprite{{}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0}, \
-  {effects::RandomExplosionSound{}, 2}, \
   {effects::EffectSprite{{-1, -2}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 2}, \
-  {effects::RandomExplosionSound{}, 4}, \
   {effects::EffectSprite{{1, -3}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 4}, \
   {effects::Particles{{}}, 0}, \
   {effects::Particles{{-1, -1}, -1}, 0}, \
@@ -167,8 +152,7 @@ const effects::EffectSpec FLOATING_ARROW_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec SPIKE_BALL_KILL_EFFECT_SPEC[] = {
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
-  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0},
-  {effects::RandomExplosionSound{}, 0}
+  {effects::EffectSprite{{-1, 1}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0}
 };
 
 
@@ -356,10 +340,7 @@ const effects::EffectSpec SMALL_BOMB_DETONATE_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec EXPLOSION_EFFECT_EFFECT_SPEC[] = {
-  {effects::RandomExplosionSound{}, 0},
   {effects::EffectSprite{{0, 0}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 0},
-  {effects::RandomExplosionSound{}, 1},
   {effects::EffectSprite{{-1, -2}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 1},
-  {effects::RandomExplosionSound{}, 2},
   {effects::EffectSprite{{1, -3}, rigel::data::ActorID::Explosion_FX_1, EffectMovement::None}, 2},
 };

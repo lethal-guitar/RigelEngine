@@ -77,6 +77,7 @@ TEST_CASE("Spike ball") {
   EntityFactory entityFactory{
     &mockSpriteFactory,
     &entityx.entities,
+    &mockServiceProvider,
     &randomGenerator,
     data::Difficulty::Medium};
 

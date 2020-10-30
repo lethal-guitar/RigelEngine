@@ -17,6 +17,7 @@
 #include "entity_factory.hpp"
 
 #include "base/container_utils.hpp"
+#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
@@ -247,10 +248,12 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
 EntityFactory::EntityFactory(
   engine::ISpriteFactory* pSpriteFactory,
   ex::EntityManager* pEntityManager,
+  IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
   const data::Difficulty difficulty)
   : mpSpriteFactory(pSpriteFactory)
   , mpEntityManager(pEntityManager)
+  , mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
   , mDifficulty(difficulty)
 {
@@ -273,6 +276,16 @@ entityx::Entity EntityFactory::spawnSprite(
   if (assignBoundingBox) {
     entity.assign<BoundingBox>(mpSpriteFactory->actorFrameRect(actorID, 0));
   }
+
+  if (actorID == data::ActorID::Explosion_FX_1) {
+    // TODO: Eliminate duplication with code in effects_system.cpp
+    const auto randomChoice = mpRandomGenerator->gen();
+    const auto soundId = randomChoice % 2 == 0
+      ? data::SoundId::AlternateExplosion
+      : data::SoundId::Explosion;
+    mpServiceProvider->playSound(soundId);
+  }
+
   return entity;
 }
 
@@ -458,6 +471,7 @@ entityx::Entity spawnOneShotSprite(
   }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
   assignSpecialEffectSpriteProperties(entity, id);
+
   return entity;
 }
 

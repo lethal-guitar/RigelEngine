@@ -35,6 +35,7 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
+namespace rigel { struct IGameServiceProvider; }
 namespace rigel::engine { class RandomNumberGenerator; }
 namespace rigel::loader { class ActorImagePackage; }
 
@@ -60,6 +61,7 @@ public:
   EntityFactory(
     engine::ISpriteFactory* pSpriteFactory,
     entityx::EntityManager* pEntityManager,
+    IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
     data::Difficulty difficulty);
 
@@ -120,6 +122,7 @@ private:
 
   engine::ISpriteFactory* mpSpriteFactory;
   entityx::EntityManager* mpEntityManager;
+  IGameServiceProvider* mpServiceProvider;
   engine::RandomNumberGenerator* mpRandomGenerator;
   int mSpawnIndex = 0;
   data::Difficulty mDifficulty;

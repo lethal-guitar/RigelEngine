@@ -164,6 +164,7 @@ WorldState::WorldState(
   , mEntityFactory(
     pSpriteFactory,
     &mEntities,
+    pServiceProvider,
     &mRandomGenerator,
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, mEventManager)

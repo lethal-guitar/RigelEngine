@@ -95,6 +95,7 @@ TEST_CASE("Rocket elevator") {
   EntityFactory entityFactory{
     &mockSpriteFactory,
     &entityx.entities,
+    &mockServiceProvider,
     &randomGenerator,
     data::Difficulty::Medium};
 

@@ -16,14 +16,11 @@
 
 #include "enemy_rocket.hpp"
 
-#include "common/game_service_provider.hpp"
-#include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"
 #include "engine/physical_components.hpp"
-#include "engine/random_number_generator.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
@@ -50,13 +47,6 @@ void EnemyRocket::update(
   };
 
   auto explode = [&]() {
-    // TODO: Eliminate duplication with code in effects_system.cpp
-    const auto randomChoice = d.mpRandomGenerator->gen();
-    const auto soundId = randomChoice % 2 == 0
-      ? data::SoundId::AlternateExplosion
-      : data::SoundId::Explosion;
-    d.mpServiceProvider->playSound(soundId);
-
     spawnOneShotSprite(
       *d.mpEntityFactory,
       data::ActorID::Explosion_FX_1,
