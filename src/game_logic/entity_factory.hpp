@@ -48,42 +48,6 @@ enum class ContainerColor {
 };
 
 
-enum class SpriteMovement {
-  FlyRight = 0,
-  FlyUpperRight = 1,
-  FlyUp = 2,
-  FlyUpperLeft = 3,
-  FlyLeft = 4,
-  FlyDown = 5,
-  SwirlAround = 6
-};
-
-
-enum class ScoreNumberType : std::uint8_t {
-  S100,
-  S500,
-  S2000,
-  S5000,
-  S10000
-};
-
-
-constexpr ScoreNumberType ScoreNumberType_Items[] = {
-  ScoreNumberType::S10000,
-  ScoreNumberType::S5000,
-  ScoreNumberType::S2000,
-  ScoreNumberType::S500,
-  ScoreNumberType::S100
-};
-
-constexpr int ScoreNumberType_Values[] = {100, 500, 2000, 5000, 10000};
-
-
-constexpr int scoreNumberValue(const ScoreNumberType type) {
-  return ScoreNumberType_Values[static_cast<std::size_t>(type)];
-}
-
-
 inline bool isHorizontal(const ProjectileDirection direction) {
   return
     direction == ProjectileDirection::Left ||
@@ -160,44 +124,5 @@ private:
   int mSpawnIndex = 0;
   data::Difficulty mDifficulty;
 };
-
-
-/** Creates a temporary sprite (destroyed after showing last animation frame)
- *
- * This sets up a sprite entity using the sprite corresponding to the given
- * actor ID, which is set up to play all animation frames in the sprite and
- * then disappear.
- */
-entityx::Entity spawnOneShotSprite(
-  IEntityFactory& factory,
-  data::ActorID id,
-  const base::Vector& position);
-
-
-entityx::Entity spawnFloatingOneShotSprite(
-  IEntityFactory& factory,
-  data::ActorID id,
-  const base::Vector& position);
-
-
-entityx::Entity spawnMovingEffectSprite(
-  IEntityFactory& factory,
-  const data::ActorID id,
-  const SpriteMovement movement,
-  const base::Vector& position
-);
-
-
-void spawnFloatingScoreNumber(
-  IEntityFactory& factory,
-  ScoreNumberType type,
-  const base::Vector& position);
-
-
-void spawnFireEffect(
-  entityx::EntityManager& entityManager,
-  const base::Vector& position,
-  const engine::components::BoundingBox& coveredArea,
-  data::ActorID actorToSpawn);
 
 }
