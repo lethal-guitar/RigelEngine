@@ -91,7 +91,7 @@ public:
     data::ActorID actorID,
     const base::Vector& position) override;
 
-  entityx::EntityManager& entityManager() {
+  entityx::EntityManager& entityManager() override {
     return *mpEntityManager;
   }
 

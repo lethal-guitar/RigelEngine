@@ -24,7 +24,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/interactive/force_field.hpp"
 #include "game_logic/interactive/locked_door.hpp"
 #include "game_logic/player.hpp"
@@ -57,7 +57,7 @@ constexpr auto HINT_MACHINE_GLOBE_OFFSET = base::Vector{1, -4};
 void spawnScoreNumbers(
   const base::Vector& position,
   int score,
-  EntityFactory& entityFactory
+  IEntityFactory& entityFactory
 ) {
   std::vector<ScoreNumberType> numbers;
   for (const auto numberType : ScoreNumberType_Items) {
@@ -81,7 +81,7 @@ void spawnScoreNumbers(
 
 
 void spawnScoreNumbersForLetterCollectionBonus(
-  EntityFactory& factory,
+  IEntityFactory& factory,
   const base::Vector& position
 ) {
   constexpr int X_OFFSETS[] = {-3, 0, 3, 0};
@@ -195,7 +195,7 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   Player* pPlayer,
   PlayerModel* pPlayerModel,
   IGameServiceProvider* pServices,
-  EntityFactory* pEntityFactory,
+  IEntityFactory* pEntityFactory,
   entityx::EventManager* pEvents,
   const loader::ResourceLoader& resources
 )

@@ -26,8 +26,9 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
+#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors {

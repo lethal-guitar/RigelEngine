@@ -21,7 +21,7 @@
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 

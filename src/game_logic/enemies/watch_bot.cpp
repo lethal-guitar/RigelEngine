@@ -27,7 +27,7 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 

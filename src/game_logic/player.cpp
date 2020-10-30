@@ -30,7 +30,8 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
+#include "loader/palette.hpp"
 
 #include <cassert>
 

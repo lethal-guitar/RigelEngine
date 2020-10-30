@@ -41,7 +41,7 @@ namespace rigel::game_logic::events {
 namespace rigel::game_logic {
 
 namespace components { struct DestructionEffects; }
-class EntityFactory;
+struct IEntityFactory;
 
 
 void triggerEffects(
@@ -54,7 +54,7 @@ public:
     IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
     entityx::EntityManager* pEntityManager,
-    EntityFactory* pEntityFactory,
+    IEntityFactory* pEntityFactory,
     engine::ParticleSystem* pParticles,
     entityx::EventManager& events);
 
@@ -75,7 +75,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   engine::RandomNumberGenerator* mpRandomGenerator;
   entityx::EntityManager* mpEntityManager;
-  EntityFactory* mpEntityFactory;
+  IEntityFactory* mpEntityFactory;
   engine::ParticleSystem* mpParticles;
 };
 

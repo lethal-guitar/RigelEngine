@@ -36,7 +36,6 @@ namespace rigel::game_logic::events {
 
 namespace rigel::game_logic {
 
-class EntityFactory;
 struct GlobalDependencies;
 
 

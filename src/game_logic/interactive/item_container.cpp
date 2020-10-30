@@ -26,7 +26,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 

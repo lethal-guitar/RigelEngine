@@ -21,9 +21,10 @@
 #include "common/global.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
+#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors {

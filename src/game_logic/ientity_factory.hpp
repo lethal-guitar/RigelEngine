@@ -114,6 +114,8 @@ struct IEntityFactory {
   virtual entityx::Entity spawnActor(
     data::ActorID actorID,
     const base::Vector& position) = 0;
+
+  virtual entityx::EntityManager& entityManager() = 0;
 };
 
 

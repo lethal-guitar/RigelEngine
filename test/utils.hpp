@@ -114,6 +114,10 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
     return createMockSpriteEntity();
   }
 
+  entityx::EntityManager& entityManager() override {
+    return *mpEntityManager;
+  }
+
 private:
   entityx::Entity createMockSpriteEntity() {
     static rigel::engine::SpriteDrawData dummyDrawData;
