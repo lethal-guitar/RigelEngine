@@ -92,7 +92,7 @@ void BomberPlane::update(
     //
     // Together, this results in no visual glitch, but no brief disappearance
     // of the bomb either.
-    auto bomb = d.mpEntityFactory->createActor(
+    auto bomb = d.mpEntityFactory->spawnActor(
       data::ActorID::Napalm_bomb, position + BOMB_DROP_OFFSET);
     bomb.component<Sprite>()->mShow = false;
   };

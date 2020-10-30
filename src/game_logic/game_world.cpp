@@ -426,7 +426,7 @@ void GameWorld::receive(const rigel::events::CloakPickedUp& event) {
 
 void GameWorld::receive(const rigel::events::CloakExpired&) {
   if (mpState->mCloakPickupPosition) {
-    mpState->mEntityFactory.createActor(
+    mpState->mEntityFactory.spawnActor(
       data::ActorID::White_box_cloaking_device, *mpState->mCloakPickupPosition);
   }
 }
@@ -706,11 +706,11 @@ bool GameWorld::canQuickLoad() const {
 
 void GameWorld::onReactorDestroyed(const base::Vector& position) {
   mpState->mScreenFlashColor = loader::INGAME_PALETTE[7];
-  mpState->mEntityFactory.createProjectile(
+  mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
     position + base::Vector{-1, 0},
     ProjectileDirection::Left);
-  mpState->mEntityFactory.createProjectile(
+  mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
     position + base::Vector{3, 0},
     ProjectileDirection::Right);

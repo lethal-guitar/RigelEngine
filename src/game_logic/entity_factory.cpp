@@ -262,7 +262,7 @@ Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
 }
 
 
-entityx::Entity EntityFactory::createSprite(
+entityx::Entity EntityFactory::spawnSprite(
   const data::ActorID actorID,
   const bool assignBoundingBox
 ) {
@@ -276,23 +276,23 @@ entityx::Entity EntityFactory::createSprite(
   return entity;
 }
 
-entityx::Entity EntityFactory::createSprite(
+entityx::Entity EntityFactory::spawnSprite(
   const data::ActorID actorID,
   const base::Vector& position,
   const bool assignBoundingBox
 ) {
-  auto entity = createSprite(actorID, assignBoundingBox);
+  auto entity = spawnSprite(actorID, assignBoundingBox);
   entity.assign<WorldPosition>(position);
   return entity;
 }
 
 
-entityx::Entity EntityFactory::createProjectile(
+entityx::Entity EntityFactory::spawnProjectile(
   const ProjectileType type,
   const WorldPosition& pos,
   const ProjectileDirection direction
 ) {
-  auto entity = createActor(actorIdForProjectile(type, direction), pos);
+  auto entity = spawnActor(actorIdForProjectile(type, direction), pos);
   entity.assign<Active>();
 
   configureProjectile(
@@ -306,11 +306,11 @@ entityx::Entity EntityFactory::createProjectile(
 }
 
 
-entityx::Entity EntityFactory::createActor(
+entityx::Entity EntityFactory::spawnActor(
   const data::ActorID id,
   const base::Vector& position
 ) {
-  auto entity = createSprite(id, position);
+  auto entity = spawnSprite(id, position);
   const auto boundingBox = mpSpriteFactory->actorFrameRect(id, 0);
 
   configureEntity(entity, id, boundingBox);
@@ -398,7 +398,7 @@ void EntityFactory::configureProjectile(
     const auto muzzleFlashSpriteId = direction == ProjectileDirection::Left
       ? data::ActorID::Enemy_laser_muzzle_flash_1
       : data::ActorID::Enemy_laser_muzzle_flash_2;
-    auto muzzleFlash = createSprite(muzzleFlashSpriteId);
+    auto muzzleFlash = spawnSprite(muzzleFlashSpriteId);
     muzzleFlash.assign<WorldPosition>(position);
     muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
   }
@@ -450,7 +450,7 @@ entityx::Entity spawnOneShotSprite(
   const ActorID id,
   const base::Vector& position
 ) {
-  auto entity = factory.createSprite(id, position, true);
+  auto entity = factory.spawnSprite(id, position, true);
   const auto numAnimationFrames = static_cast<int>(
     entity.component<Sprite>()->mpDrawData->mFrames.size());
   if (numAnimationFrames > 1) {
@@ -484,7 +484,7 @@ entityx::Entity spawnMovingEffectSprite(
   const SpriteMovement movement,
   const base::Vector& position
 ) {
-  auto entity = factory.createSprite(id, position, true);
+  auto entity = factory.spawnSprite(id, position, true);
   configureMovingEffectSprite(entity, movement);
   if (entity.component<Sprite>()->mpDrawData->mFrames.size() > 1) {
     entity.assign<AnimationLoop>(1);
@@ -501,7 +501,7 @@ void spawnFloatingScoreNumber(
 ) {
   using namespace engine::components::parameter_aliases;
 
-  auto entity = factory.createSprite(scoreNumberActor(type), position, true);
+  auto entity = factory.spawnSprite(scoreNumberActor(type), position, true);
   engine::startAnimationSequence(entity, SCORE_NUMBER_ANIMATION_SEQUENCE);
   entity.assign<MovementSequence>(SCORE_NUMBER_MOVE_SEQUENCE);
   entity.assign<MovingBody>(

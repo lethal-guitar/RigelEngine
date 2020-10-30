@@ -621,7 +621,7 @@ void Player::exitShip() {
   mState = OnGround{};
 
   const auto facingLeft = orientation() == c::Orientation::Left;
-  mpEntityFactory->createActor(facingLeft
+  mpEntityFactory->spawnActor(facingLeft
     ? data::ActorID::Dukes_ship_after_exiting_LEFT
     : data::ActorID::Dukes_ship_after_exiting_RIGHT,
     position());
@@ -1545,7 +1545,7 @@ void Player::fireShot() {
   if (stateIs<InShip>()) {
     const auto isFacingLeft = orientation() == c::Orientation::Left;
 
-    mpEntityFactory->createProjectile(
+    mpEntityFactory->spawnProjectile(
       ProjectileType::PlayerShipLaserShot,
       position + base::Vector{isFacingLeft ? -1 : 8, 0},
       direction);
@@ -1557,7 +1557,7 @@ void Player::fireShot() {
   } else {
     const auto weaponType = mpPlayerModel->weapon();
 
-    mpEntityFactory->createProjectile(
+    mpEntityFactory->spawnProjectile(
       projectileTypeForWeapon(weaponType),
       position + shotOffset(orientation(), mStance),
       direction);

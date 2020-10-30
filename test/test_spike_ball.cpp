@@ -81,7 +81,7 @@ TEST_CASE("Spike ball") {
     data::Difficulty::Medium};
 
   auto spikeBall =
-    entityFactory.createActor(data::ActorID::Bouncing_spike_ball, {2, 20});
+    entityFactory.spawnActor(data::ActorID::Bouncing_spike_ball, {2, 20});
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
   PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};

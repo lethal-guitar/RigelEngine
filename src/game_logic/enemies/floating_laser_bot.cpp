@@ -75,7 +75,7 @@ void FloatingLaserBot::update(
 
   auto attack = [&, this](int gunIndex) {
     d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-    d.mpEntityFactory->createProjectile(
+    d.mpEntityFactory->spawnProjectile(
       ProjectileType::EnemyLaserShot,
       position + GUN_SPECS[gunIndex].mOffset,
       GUN_SPECS[gunIndex].mDirection);

@@ -109,21 +109,21 @@ public:
    * true, the dimensions of the sprite's first frame are used to assign a
    * bounding box.
    */
-  entityx::Entity createSprite(
+  entityx::Entity spawnSprite(
     data::ActorID actorID,
     bool assignBoundingBox = false) override;
 
-  entityx::Entity createSprite(
+  entityx::Entity spawnSprite(
     data::ActorID actorID,
     const base::Vector& position,
     bool assignBoundingBox = false) override;
 
-  entityx::Entity createProjectile(
+  entityx::Entity spawnProjectile(
     ProjectileType type,
     const engine::components::WorldPosition& pos,
     ProjectileDirection direction) override;
 
-  entityx::Entity createActor(
+  entityx::Entity spawnActor(
     data::ActorID actorID,
     const base::Vector& position) override;
 

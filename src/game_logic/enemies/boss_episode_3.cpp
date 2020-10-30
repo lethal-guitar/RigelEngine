@@ -94,7 +94,7 @@ void BossEpisode3::update(
 
       if (attackRangeBbox.intersects(playerBbox)) {
         d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
-        d.mpEntityFactory->createProjectile(
+        d.mpEntityFactory->spawnProjectile(
           ProjectileType::EnemyBossRocket,
           position + area.mShotOffset,
           area.mDirection);

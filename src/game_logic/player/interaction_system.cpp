@@ -436,7 +436,7 @@ void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
 
   entity.remove<Interactable>();
   entity.remove<BoundingBox>();
-  mpEntityFactory->createSprite(
+  mpEntityFactory->spawnSprite(
     data::ActorID::Special_hint_globe_icon, machinePosition + HINT_MACHINE_GLOBE_OFFSET);
 }
 

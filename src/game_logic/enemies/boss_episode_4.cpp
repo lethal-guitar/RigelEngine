@@ -67,7 +67,7 @@ void BossEpisode4::update(
   };
 
   auto fireShot = [&]() {
-    d.mpEntityFactory->createActor(
+    d.mpEntityFactory->spawnActor(
       data::ActorID::BOSS_Episode_4_projectile,
       position + SHOT_OFFSET);
   };

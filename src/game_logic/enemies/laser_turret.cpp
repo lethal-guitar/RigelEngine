@@ -97,7 +97,7 @@ void LaserTurret::update(
         const auto facingLeft = mAngle == 0;
         const auto offset = facingLeft ? -2 : 2;
         d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-        d.mpEntityFactory->createProjectile(
+        d.mpEntityFactory->spawnProjectile(
           game_logic::ProjectileType::EnemyLaserShot,
           position + base::Vector{offset, 0},
           facingLeft

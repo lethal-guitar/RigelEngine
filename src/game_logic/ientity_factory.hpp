@@ -61,21 +61,21 @@ struct IEntityFactory {
    * true, the dimensions of the sprite's first frame are used to assign a
    * bounding box.
    */
-  virtual entityx::Entity createSprite(
+  virtual entityx::Entity spawnSprite(
     data::ActorID actorID,
     bool assignBoundingBox = false) = 0;
 
-  virtual entityx::Entity createSprite(
+  virtual entityx::Entity spawnSprite(
     data::ActorID actorID,
     const base::Vector& position,
     bool assignBoundingBox = false) = 0;
 
-  virtual entityx::Entity createProjectile(
+  virtual entityx::Entity spawnProjectile(
     ProjectileType type,
     const engine::components::WorldPosition& pos,
     ProjectileDirection direction) = 0;
 
-  virtual entityx::Entity createActor(
+  virtual entityx::Entity spawnActor(
     data::ActorID actorID,
     const base::Vector& position) = 0;
 };

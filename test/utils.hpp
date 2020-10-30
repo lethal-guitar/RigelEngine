@@ -72,7 +72,7 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
   {
   }
 
-  entityx::Entity createProjectile(
+  entityx::Entity spawnProjectile(
     game_logic::ProjectileType type,
     const engine::components::WorldPosition& pos,
     game_logic::ProjectileDirection direction
@@ -92,14 +92,14 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
     return {};
   }
 
-  entityx::Entity createSprite(
+  entityx::Entity spawnSprite(
     data::ActorID actorID,
     bool assignBoundingBox = false
   ) override {
     return createMockSpriteEntity();
   }
 
-  entityx::Entity createSprite(
+  entityx::Entity spawnSprite(
     data::ActorID actorID,
     const base::Vector& position,
     bool assignBoundingBox = false
@@ -107,7 +107,7 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
     return createMockSpriteEntity();
   }
 
-  entityx::Entity createActor(
+  entityx::Entity spawnActor(
     data::ActorID actorID,
     const base::Vector& position
   ) override {

@@ -171,7 +171,7 @@ WorldState::WorldState(
   , mPlayer(
       [&]() {
         using engine::components::Orientation;
-        auto playerEntity = mEntityFactory.createActor(
+        auto playerEntity = mEntityFactory.spawnActor(
           data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
         assignPlayerComponents(
           playerEntity,

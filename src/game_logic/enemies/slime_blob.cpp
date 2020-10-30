@@ -76,7 +76,7 @@ void SlimeContainer::update(
 
     if (mBreakAnimationStep >= NUM_BREAK_ANIMATION_STEPS) {
       const auto& position = *entity.component<WorldPosition>();
-      d.mpEntityFactory->createActor(
+      d.mpEntityFactory->spawnActor(
         data::ActorID::Green_slime_blob, position + SLIME_BLOB_SPAWN_OFFSET);
 
       entity.remove<BoundingBox>();

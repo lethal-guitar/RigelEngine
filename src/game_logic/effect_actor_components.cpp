@@ -73,7 +73,7 @@ void WaterDropGenerator::update(
 ) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
   if (state.mpPerFrameState->mIsOddFrame && d.mpRandomGenerator->gen() >= 220) {
-    auto drop = d.mpEntityFactory->createActor(data::ActorID::Water_drop, position);
+    auto drop = d.mpEntityFactory->spawnActor(data::ActorID::Water_drop, position);
     drop.assign<engine::components::Active>();
 
     if (isOnScreen) {

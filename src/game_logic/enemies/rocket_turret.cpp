@@ -84,7 +84,7 @@ void RocketTurret::update(
       mNeedsReorientation = true;
 
       const auto orientationIndex = static_cast<int>(mOrientation);
-      d.mpEntityFactory->createProjectile(
+      d.mpEntityFactory->spawnProjectile(
         game_logic::ProjectileType::EnemyRocket,
         position + OFFSET_BY_ORIENTATION[orientationIndex],
         DIRECTION_BY_ORIENTATION[orientationIndex]);
