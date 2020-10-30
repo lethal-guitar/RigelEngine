@@ -95,6 +95,7 @@ TEST_CASE("Rocket elevator") {
   EntityFactory entityFactory{
     &mockSpriteFactory,
     &entityx.entities,
+    &mockServiceProvider,
     &randomGenerator,
     data::Difficulty::Medium};
 
@@ -117,7 +118,7 @@ TEST_CASE("Rocket elevator") {
   auto& playerPosition = player.position();
 
   auto elevator =
-    entityFactory.createActor(data::ActorID::Rocket_elevator, {2, 103});
+    entityFactory.spawnActor(data::ActorID::Rocket_elevator, {2, 103});
 
   base::Vector cameraPosition{0, 0};
   engine::ParticleSystem particleSystem{&randomGenerator, nullptr};

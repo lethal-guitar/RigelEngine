@@ -23,7 +23,7 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -57,7 +57,7 @@ void HoverBotSpawnMachine::update(
       --mSpawnsRemaining;
 
       const auto& position = *entity.component<WorldPosition>();
-      auto robot = d.mpEntityFactory->createActor(
+      auto robot = d.mpEntityFactory->spawnActor(
         data::ActorID::Hoverbot, position + BOT_SPAWN_OFFSET);
       robot.assign<engine::components::Active>();
     }

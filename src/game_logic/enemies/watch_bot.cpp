@@ -27,7 +27,7 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
@@ -243,7 +243,7 @@ void WatchBotCarrier::update(
   };
 
   auto releasePayload = [&, this]() {
-    d.mpEntityFactory->createActor(
+    d.mpEntityFactory->spawnActor(
       data::ActorID::Watchbot_container, position + CONTAINER_OFFSET);
     entity.component<Sprite>()->mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
   };
@@ -331,7 +331,7 @@ void WatchBotContainer::update(
       position);
     d.mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
 
-    d.mpEntityFactory->createActor(data::ActorID::Watchbot, position + base::Vector{1, 3});
+    d.mpEntityFactory->spawnActor(data::ActorID::Watchbot, position + base::Vector{1, 3});
 
     entity.destroy();
   }

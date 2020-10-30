@@ -20,7 +20,7 @@
 #include "common/game_service_provider.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -84,7 +84,7 @@ void RocketTurret::update(
       mNeedsReorientation = true;
 
       const auto orientationIndex = static_cast<int>(mOrientation);
-      d.mpEntityFactory->createProjectile(
+      d.mpEntityFactory->spawnProjectile(
         game_logic::ProjectileType::EnemyRocket,
         position + OFFSET_BY_ORIENTATION[orientationIndex],
         DIRECTION_BY_ORIENTATION[orientationIndex]);

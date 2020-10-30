@@ -21,9 +21,10 @@
 #include "common/global.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
+#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors {
@@ -71,7 +72,6 @@ void DyingBoss::update(
   switch (mFramesElapsed) {
     case 1: case 5: case 12: case 14: case 19: case 23: case 25: case 28:
     case 30: case 34: case 38: case 41: case 46: case 48:
-      randomExplosionSound();
       d.mpParticles->spawnParticles(
         position + base::Vector{rand() % 4, -(rand() % 8)},
         loader::INGAME_PALETTE[rand() % 16],

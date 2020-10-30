@@ -25,7 +25,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "loader/palette.hpp"
 
 
@@ -81,7 +81,7 @@ EffectsSystem::EffectsSystem(
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
   entityx::EntityManager* pEntityManager,
-  EntityFactory* pEntityFactory,
+  IEntityFactory* pEntityFactory,
   engine::ParticleSystem* pParticles,
   entityx::EventManager& events
 )

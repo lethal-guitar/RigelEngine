@@ -426,7 +426,7 @@ void GameWorld::receive(const rigel::events::CloakPickedUp& event) {
 
 void GameWorld::receive(const rigel::events::CloakExpired&) {
   if (mpState->mCloakPickupPosition) {
-    mpState->mEntityFactory.createActor(
+    mpState->mEntityFactory.spawnActor(
       data::ActorID::White_box_cloaking_device, *mpState->mCloakPickupPosition);
   }
 }
@@ -558,7 +558,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mpState->mPlayerProjectileSystem.update(mpState->mEntities);
 
   mpState->mEffectsSystem.update(mpState->mEntities);
-  mpState->mLifeTimeSystem.update(mpState->mEntities);
+  mpState->mLifeTimeSystem.update(
+    mpState->mEntities, mpState->mCamera.position(), viewPortSize);
 
   // Now process any MovingBody objects that have been spawned after phase 1
   mpState->mPhysicsSystem.updatePhase2(mpState->mEntities);
@@ -618,7 +619,7 @@ void GameWorld::render() {
 
   auto drawHud = [&, this]() {
     const auto radarDots =
-      collectRadarDots(mpState->mEntities, mpState->mPlayer.position());
+      collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
     mHudRenderer.render(*mpPlayerModel, radarDots);
   };
 
@@ -706,11 +707,11 @@ bool GameWorld::canQuickLoad() const {
 
 void GameWorld::onReactorDestroyed(const base::Vector& position) {
   mpState->mScreenFlashColor = loader::INGAME_PALETTE[7];
-  mpState->mEntityFactory.createProjectile(
+  mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
     position + base::Vector{-1, 0},
     ProjectileDirection::Left);
-  mpState->mEntityFactory.createProjectile(
+  mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
     position + base::Vector{3, 0},
     ProjectileDirection::Right);

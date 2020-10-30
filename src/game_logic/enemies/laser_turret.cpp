@@ -23,7 +23,7 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -97,7 +97,7 @@ void LaserTurret::update(
         const auto facingLeft = mAngle == 0;
         const auto offset = facingLeft ? -2 : 2;
         d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-        d.mpEntityFactory->createProjectile(
+        d.mpEntityFactory->spawnProjectile(
           game_logic::ProjectileType::EnemyLaserShot,
           position + base::Vector{offset, 0},
           facingLeft

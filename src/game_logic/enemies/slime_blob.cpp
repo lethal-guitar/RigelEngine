@@ -25,7 +25,7 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -76,7 +76,7 @@ void SlimeContainer::update(
 
     if (mBreakAnimationStep >= NUM_BREAK_ANIMATION_STEPS) {
       const auto& position = *entity.component<WorldPosition>();
-      d.mpEntityFactory->createActor(
+      d.mpEntityFactory->spawnActor(
         data::ActorID::Green_slime_blob, position + SLIME_BLOB_SPAWN_OFFSET);
 
       entity.remove<BoundingBox>();

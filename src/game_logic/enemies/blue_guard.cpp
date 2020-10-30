@@ -22,7 +22,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -106,12 +106,17 @@ void BlueGuard::update(
   };
 
   auto updatePatrolling = [&]() {
-    // If a guard was previously typing on a terminal, it will not attack the
-    // player until after the next walked step, even if all other conditions are
-    // fulfilled.
+    // There is a bug in the original game which we replicate here. When a blue
+    // guard is hit by the player while typing on a terminal, he will
+    // immediately attack the player _only_ if the player is to the left of the
+    // guard. Otherwise, the guard will walk one step first before attacking.
+    //
+    // This bug makes it quite easy to kill the guard protecting the key
+    // card in level L1 without taking damage.
     const auto canAttack =
-      mOneStepWalkedSinceTypingStop &&
-      playerVisible(*this, position, *s.mpPlayer);
+      playerVisible(*this, position, *s.mpPlayer) &&
+      (!mTypingInterruptedByAttack || s.mpPlayer->position().x < position.x);
+    mTypingInterruptedByAttack = false;
 
     if (canAttack) {
       // Change stance if necessary
@@ -132,7 +137,7 @@ void BlueGuard::update(
       const auto wantsToShoot = (d.mpRandomGenerator->gen() % 8) == 0;
       if (wantsToShoot && engine::isOnScreen(entity)) {
         d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-        d.mpEntityFactory->createProjectile(
+        d.mpEntityFactory->spawnProjectile(
           ProjectileType::EnemyLaserShot,
           position + offsetForShot(*this),
           facingLeft ? ProjectileDirection::Left : ProjectileDirection::Right);
@@ -165,8 +170,6 @@ void BlueGuard::update(
           walkOneStep();
           mStepsWalked = 1;
         }
-
-        mOneStepWalkedSinceTypingStop = true;
       }
 
       // Update sprite
@@ -209,23 +212,19 @@ void BlueGuard::onHit(
 ) {
   if (mTypingOnTerminal) {
     stopTyping(s, entity);
+    mTypingInterruptedByAttack = true;
   }
 }
 
 
 void BlueGuard::stopTyping(GlobalState& s, entityx::Entity entity) {
   mTypingOnTerminal = false;
-  mOneStepWalkedSinceTypingStop = false;
 
   const auto& position = *entity.component<WorldPosition>();
   const auto playerX = s.mpPlayer->orientedPosition().x;
   mOrientation = position.x <= playerX
     ? Orientation::Right
     : Orientation::Left;
-
-  const auto orientationOffset =
-    mOrientation == Orientation::Left ? SPRITE_ORIENTATION_OFFSET : 0;
-  entity.component<Sprite>()->mFramesToRender[0] = 0 + orientationOffset;
 }
 
 }

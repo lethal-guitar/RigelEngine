@@ -23,7 +23,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 
 
 namespace rigel::game_logic::player {
@@ -48,7 +48,7 @@ base::Vector regularShotDebrisOffset(const base::Point<float>& velocity) {
 
 
 void spawnRegularShotImpactEffect(
-  EntityFactory& entityFactory,
+  IEntityFactory& entityFactory,
   const base::Vector& position,
   const base::Point<float> velocity
 ) {
@@ -73,7 +73,7 @@ base::Vector rocketSmokeOffset(const base::Point<float>& velocity) {
 
 
 void generateRocketSmoke(
-  EntityFactory& entityFactory,
+  IEntityFactory& entityFactory,
   const base::Vector& position,
   const base::Point<float> velocity
 ) {
@@ -93,7 +93,7 @@ base::Vector rocketWallImpactOffset(const base::Point<float>& velocity) {
 
 
 void spawnRocketWallImpactEffect(
-  EntityFactory& entityFactory,
+  IEntityFactory& entityFactory,
   const base::Vector& position,
   const engine::components::BoundingBox& bbox,
   const base::Point<float> velocity
@@ -110,7 +110,7 @@ void spawnRocketWallImpactEffect(
 
 
 void spawnEnemyImpactEffect(
-  EntityFactory& entityFactory,
+  IEntityFactory& entityFactory,
   const base::Vector& position
 ) {
   spawnOneShotSprite(
@@ -123,7 +123,7 @@ void spawnEnemyImpactEffect(
 
 
 ProjectileSystem::ProjectileSystem(
-  EntityFactory* pEntityFactory,
+  IEntityFactory* pEntityFactory,
   IGameServiceProvider* pServiceProvider,
   const engine::CollisionChecker* pCollisionChecker,
   const data::map::Map* pMap

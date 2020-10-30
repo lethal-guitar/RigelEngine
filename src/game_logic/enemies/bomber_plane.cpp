@@ -26,8 +26,9 @@
 #include "engine/movement.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
+#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors {
@@ -92,7 +93,7 @@ void BomberPlane::update(
     //
     // Together, this results in no visual glitch, but no brief disappearance
     // of the bomb either.
-    auto bomb = d.mpEntityFactory->createActor(
+    auto bomb = d.mpEntityFactory->spawnActor(
       data::ActorID::Napalm_bomb, position + BOMB_DROP_OFFSET);
     bomb.component<Sprite>()->mShow = false;
   };

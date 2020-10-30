@@ -24,7 +24,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 #include <algorithm>
@@ -75,7 +75,7 @@ void FloatingLaserBot::update(
 
   auto attack = [&, this](int gunIndex) {
     d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-    d.mpEntityFactory->createProjectile(
+    d.mpEntityFactory->spawnProjectile(
       ProjectileType::EnemyLaserShot,
       position + GUN_SPECS[gunIndex].mOffset,
       GUN_SPECS[gunIndex].mDirection);

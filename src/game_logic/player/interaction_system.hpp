@@ -43,7 +43,7 @@ namespace rigel {
   }
 
   namespace game_logic {
-    class EntityFactory;
+    struct IEntityFactory;
   }
 
   namespace loader {
@@ -64,7 +64,7 @@ public:
     Player* pPlayer,
     data::PlayerModel* pPlayerModel,
     IGameServiceProvider* pServices,
-    EntityFactory* pEntityFactory,
+    IEntityFactory* pEntityFactory,
     entityx::EventManager* pEvents,
     const loader::ResourceLoader& resources);
 
@@ -102,7 +102,7 @@ private:
   Player* mpPlayer;
   data::PlayerModel* mpPlayerModel;
   IGameServiceProvider* mpServiceProvider;
-  EntityFactory* mpEntityFactory;
+  IEntityFactory* mpEntityFactory;
   entityx::EventManager* mpEvents;
   data::LevelHints mLevelHints;
   data::GameSessionId mSessionId;

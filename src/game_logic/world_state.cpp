@@ -164,6 +164,7 @@ WorldState::WorldState(
   , mEntityFactory(
     pSpriteFactory,
     &mEntities,
+    pServiceProvider,
     &mRandomGenerator,
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, mEventManager)
@@ -171,7 +172,7 @@ WorldState::WorldState(
   , mPlayer(
       [&]() {
         using engine::components::Orientation;
-        auto playerEntity = mEntityFactory.createActor(
+        auto playerEntity = mEntityFactory.spawnActor(
           data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
         assignPlayerComponents(
           playerEntity,

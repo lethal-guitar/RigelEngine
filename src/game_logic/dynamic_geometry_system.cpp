@@ -29,7 +29,7 @@
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 
 
 namespace rigel::game_logic {

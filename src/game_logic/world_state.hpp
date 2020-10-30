@@ -36,7 +36,6 @@
 #include "game_logic/earth_quake_effect.hpp"
 #include "game_logic/effects_system.hpp"
 #include "game_logic/entity_factory.hpp"
-#include "game_logic/entity_factory.hpp"
 #include "game_logic/interactive/enemy_radar.hpp"
 #include "game_logic/interactive/item_container.hpp"
 #include "game_logic/player.hpp"
@@ -152,7 +151,7 @@ struct WorldState {
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;
   bool mPlayerDied = false;
-  bool mIsOddFrame = false;
+  bool mIsOddFrame = true;
 };
 
 }

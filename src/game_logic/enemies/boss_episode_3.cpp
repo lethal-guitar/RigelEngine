@@ -23,7 +23,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -94,7 +94,7 @@ void BossEpisode3::update(
 
       if (attackRangeBbox.intersects(playerBbox)) {
         d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
-        d.mpEntityFactory->createProjectile(
+        d.mpEntityFactory->spawnProjectile(
           ProjectileType::EnemyBossRocket,
           position + area.mShotOffset,
           area.mDirection);

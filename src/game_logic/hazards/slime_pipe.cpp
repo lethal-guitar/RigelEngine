@@ -24,7 +24,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 
 
 namespace rigel::game_logic::behaviors {
@@ -49,7 +49,7 @@ void createSlimeDrop(
   using namespace game_logic::components;
   using namespace game_logic::components::parameter_aliases;
 
-  auto entity = entityFactory.createSprite(
+  auto entity = entityFactory.spawnSprite(
     DROP_ACTOR_ID,
     position + DROP_OFFSET,
     true);

@@ -17,7 +17,6 @@
 #include "boss_episode_4.hpp"
 
 #include "base/math_tools.hpp"
-#include "common/game_service_provider.hpp"
 #include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
@@ -25,7 +24,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
@@ -67,7 +66,7 @@ void BossEpisode4::update(
   };
 
   auto fireShot = [&]() {
-    d.mpEntityFactory->createActor(
+    d.mpEntityFactory->spawnActor(
       data::ActorID::BOSS_Episode_4_projectile,
       position + SHOT_OFFSET);
   };
@@ -130,13 +129,6 @@ void BossEpisode4Projectile::update(
 
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
   if (s.mpPlayer->worldSpaceHitBox().intersects(worldSpaceBbox)) {
-    // TODO: Eliminate duplication with code in effects_system.cpp
-    const auto randomChoice = d.mpRandomGenerator->gen();
-    const auto soundId = randomChoice % 2 == 0
-      ? data::SoundId::AlternateExplosion
-      : data::SoundId::Explosion;
-    d.mpServiceProvider->playSound(soundId);
-
     spawnOneShotSprite(
       *d.mpEntityFactory,
       data::ActorID::Explosion_FX_1,

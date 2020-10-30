@@ -520,7 +520,7 @@ void EntityFactory::configureEntity(
 
         // There is some additional decoration representing the "emitters"
         // on top/bottom.
-        auto fieldEmitters = createSprite(ActorID::Force_field, position);
+        auto fieldEmitters = spawnSprite(ActorID::Force_field, position);
         fieldEmitters.component<Sprite>()->mFramesToRender = {0, 1};
       }
       break;

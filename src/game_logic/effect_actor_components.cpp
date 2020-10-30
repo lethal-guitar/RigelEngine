@@ -21,7 +21,7 @@
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/entity_factory.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
@@ -73,7 +73,7 @@ void WaterDropGenerator::update(
 ) {
   const auto& position = *entity.component<engine::components::WorldPosition>();
   if (state.mpPerFrameState->mIsOddFrame && d.mpRandomGenerator->gen() >= 220) {
-    auto drop = d.mpEntityFactory->createActor(data::ActorID::Water_drop, position);
+    auto drop = d.mpEntityFactory->spawnActor(data::ActorID::Water_drop, position);
     drop.assign<engine::components::Active>();
 
     if (isOnScreen) {

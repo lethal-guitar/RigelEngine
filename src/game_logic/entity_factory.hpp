@@ -35,6 +35,7 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
+namespace rigel { struct IGameServiceProvider; }
 namespace rigel::engine { class RandomNumberGenerator; }
 namespace rigel::loader { class ActorImagePackage; }
 
@@ -46,42 +47,6 @@ enum class ContainerColor {
   White,
   Blue
 };
-
-
-enum class SpriteMovement {
-  FlyRight = 0,
-  FlyUpperRight = 1,
-  FlyUp = 2,
-  FlyUpperLeft = 3,
-  FlyLeft = 4,
-  FlyDown = 5,
-  SwirlAround = 6
-};
-
-
-enum class ScoreNumberType : std::uint8_t {
-  S100,
-  S500,
-  S2000,
-  S5000,
-  S10000
-};
-
-
-constexpr ScoreNumberType ScoreNumberType_Items[] = {
-  ScoreNumberType::S10000,
-  ScoreNumberType::S5000,
-  ScoreNumberType::S2000,
-  ScoreNumberType::S500,
-  ScoreNumberType::S100
-};
-
-constexpr int ScoreNumberType_Values[] = {100, 500, 2000, 5000, 10000};
-
-
-constexpr int scoreNumberValue(const ScoreNumberType type) {
-  return ScoreNumberType_Values[static_cast<std::size_t>(type)];
-}
 
 
 inline bool isHorizontal(const ProjectileDirection direction) {
@@ -96,6 +61,7 @@ public:
   EntityFactory(
     engine::ISpriteFactory* pSpriteFactory,
     entityx::EntityManager* pEntityManager,
+    IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
     data::Difficulty difficulty);
 
@@ -109,25 +75,25 @@ public:
    * true, the dimensions of the sprite's first frame are used to assign a
    * bounding box.
    */
-  entityx::Entity createSprite(
+  entityx::Entity spawnSprite(
     data::ActorID actorID,
     bool assignBoundingBox = false) override;
 
-  entityx::Entity createSprite(
+  entityx::Entity spawnSprite(
     data::ActorID actorID,
     const base::Vector& position,
     bool assignBoundingBox = false) override;
 
-  entityx::Entity createProjectile(
+  entityx::Entity spawnProjectile(
     ProjectileType type,
     const engine::components::WorldPosition& pos,
     ProjectileDirection direction) override;
 
-  entityx::Entity createActor(
+  entityx::Entity spawnActor(
     data::ActorID actorID,
     const base::Vector& position) override;
 
-  entityx::EntityManager& entityManager() {
+  entityx::EntityManager& entityManager() override {
     return *mpEntityManager;
   }
 
@@ -156,48 +122,10 @@ private:
 
   engine::ISpriteFactory* mpSpriteFactory;
   entityx::EntityManager* mpEntityManager;
+  IGameServiceProvider* mpServiceProvider;
   engine::RandomNumberGenerator* mpRandomGenerator;
   int mSpawnIndex = 0;
   data::Difficulty mDifficulty;
 };
-
-
-/** Creates a temporary sprite (destroyed after showing last animation frame)
- *
- * This sets up a sprite entity using the sprite corresponding to the given
- * actor ID, which is set up to play all animation frames in the sprite and
- * then disappear.
- */
-entityx::Entity spawnOneShotSprite(
-  IEntityFactory& factory,
-  data::ActorID id,
-  const base::Vector& position);
-
-
-entityx::Entity spawnFloatingOneShotSprite(
-  IEntityFactory& factory,
-  data::ActorID id,
-  const base::Vector& position);
-
-
-entityx::Entity spawnMovingEffectSprite(
-  IEntityFactory& factory,
-  const data::ActorID id,
-  const SpriteMovement movement,
-  const base::Vector& position
-);
-
-
-void spawnFloatingScoreNumber(
-  IEntityFactory& factory,
-  ScoreNumberType type,
-  const base::Vector& position);
-
-
-void spawnFireEffect(
-  entityx::EntityManager& entityManager,
-  const base::Vector& position,
-  const engine::components::BoundingBox& coveredArea,
-  data::ActorID actorToSpawn);
 
 }

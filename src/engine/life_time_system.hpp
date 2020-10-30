@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/spatial_types.hpp"
 #include "engine/life_time_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -27,7 +28,10 @@ namespace rigel::engine {
 
 class LifeTimeSystem {
 public:
-  void update(entityx::EntityManager& es);
+  void update(
+    entityx::EntityManager& es,
+    const base::Vector& cameraPosition,
+    const base::Extents& viewPortSize);
 };
 
 }
