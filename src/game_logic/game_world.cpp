@@ -618,7 +618,7 @@ void GameWorld::render() {
 
   auto drawHud = [&, this]() {
     const auto radarDots =
-      collectRadarDots(mpState->mEntities, mpState->mPlayer.position());
+      collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
     mHudRenderer.render(*mpPlayerModel, radarDots);
   };
 

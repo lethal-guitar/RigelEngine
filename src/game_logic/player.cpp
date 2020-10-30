@@ -800,6 +800,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != walkingDirection) {
           switchOrientation();
+          position.x -= movementVector.x;
         }
       } else {
         setVisualState(VisualState::Standing);
@@ -949,6 +950,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != orientationAsMovement) {
           switchOrientation();
+          position.x -= movementVector.x;
         }
 
         if (mJumpRequested && movement > 0) {
