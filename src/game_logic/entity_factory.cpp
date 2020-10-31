@@ -338,19 +338,34 @@ entityx::Entity EntityFactory::spawnProjectile(
   const WorldPosition& pos,
   const ProjectileDirection direction
 ) {
+  using namespace engine::components::parameter_aliases;
+  using namespace game_logic::components::parameter_aliases;
+
   auto entity = spawnSprite(actorIdForProjectile(type, direction), true);
-  entity.assign<Active>();
 
   const auto& boundingBox = *entity.component<BoundingBox>();
+  const auto damageAmount = damageForProjectileType(type);
+
+  entity.assign<Active>();
   entity.assign<WorldPosition>(adjustedPosition(
     type, pos, direction, boundingBox));
+  entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
+  entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnLeavingActiveRegion});
 
-  configureProjectile(
-    entity,
-    type,
-    pos,
-    direction,
-    boundingBox);
+  const auto speed = speedForProjectileType(type);
+  entity.assign<MovingBody>(
+    Velocity{directionToVector(direction) * speed},
+    GravityAffected{false});
+  // Some player projectiles do have collisions with walls, but that's
+  // handled by player::ProjectileSystem.
+  entity.component<MovingBody>()->mIgnoreCollisions = true;
+  entity.component<MovingBody>()->mIsActive = false;
+
+  if (type == ProjectileType::PlayerShipLaserShot) {
+    entity.assign<AnimationLoop>(1);
+  }
 
   return entity;
 }
@@ -366,39 +381,6 @@ entityx::Entity EntityFactory::spawnActor(
   configureEntity(entity, id, boundingBox);
 
   return entity;
-}
-
-
-void EntityFactory::configureProjectile(
-  entityx::Entity entity,
-  const ProjectileType type,
-  WorldPosition position,
-  const ProjectileDirection direction,
-  const BoundingBox& boundingBox
-) {
-  using namespace engine::components::parameter_aliases;
-  using namespace game_logic::components::parameter_aliases;
-
-  const auto speed = speedForProjectileType(type);
-  const auto damageAmount = damageForProjectileType(type);
-
-  entity.assign<MovingBody>(
-    Velocity{directionToVector(direction) * speed},
-    GravityAffected{false});
-  // Some player projectiles do have collisions with walls, but that's
-  // handled by player::ProjectileSystem.
-  entity.component<MovingBody>()->mIgnoreCollisions = true;
-  entity.component<MovingBody>()->mIsActive = false;
-
-  entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
-  entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
-
-  if (type == ProjectileType::PlayerShipLaserShot) {
-    entity.assign<AnimationLoop>(1);
-  }
-
-  entity.assign<AutoDestroy>(AutoDestroy{
-    AutoDestroy::Condition::OnLeavingActiveRegion});
 }
 
 
