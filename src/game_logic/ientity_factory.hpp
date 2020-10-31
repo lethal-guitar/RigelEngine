@@ -34,7 +34,6 @@ enum class ProjectileType {
   PlayerFlameShot,
   PlayerShipLaserShot,
   ReactorDebris,
-  EnemyLaserShot,
 };
 
 
@@ -154,5 +153,11 @@ void spawnFireEffect(
   const base::Vector& position,
   const engine::components::BoundingBox& coveredArea,
   data::ActorID actorToSpawn);
+
+
+void spawnEnemyLaserShot(
+  IEntityFactory& factory,
+  base::Vector position,
+  engine::components::Orientation orientation);
 
 }

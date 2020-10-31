@@ -373,35 +373,16 @@ void EntityFactory::configureProjectile(
   entity.assign<MovingBody>(
     Velocity{directionToVector(direction) * speed},
     GravityAffected{false});
-  if (isPlayerProjectile(type) || type == ProjectileType::ReactorDebris) {
-    // Some player projectiles do have collisions with walls, but that's
-    // handled by player::ProjectileSystem.
-    entity.component<MovingBody>()->mIgnoreCollisions = true;
-    entity.component<MovingBody>()->mIsActive = false;
+  // Some player projectiles do have collisions with walls, but that's
+  // handled by player::ProjectileSystem.
+  entity.component<MovingBody>()->mIgnoreCollisions = true;
+  entity.component<MovingBody>()->mIsActive = false;
 
-    entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
-    entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
+  entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
+  entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
 
-    entity.assign<AutoDestroy>(AutoDestroy{
-      AutoDestroy::Condition::OnLeavingActiveRegion});
-  } else {
-    entity.assign<PlayerDamaging>(damageAmount, false, true);
-
-    entity.assign<AutoDestroy>(AutoDestroy{
-      AutoDestroy::Condition::OnWorldCollision,
-      AutoDestroy::Condition::OnLeavingActiveRegion});
-  }
-
-  // For convenience, the enemy laser shot muzzle flash is created along with
-  // the projectile.
-  if (type == ProjectileType::EnemyLaserShot) {
-    const auto muzzleFlashSpriteId = direction == ProjectileDirection::Left
-      ? data::ActorID::Enemy_laser_muzzle_flash_1
-      : data::ActorID::Enemy_laser_muzzle_flash_2;
-    auto muzzleFlash = spawnSprite(muzzleFlashSpriteId);
-    muzzleFlash.assign<WorldPosition>(position);
-    muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
-  }
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnLeavingActiveRegion});
 }
 
 
@@ -532,6 +513,33 @@ void spawnFireEffect(
   spawnerConfig.mActorId = actorToSpawn;
   spawner.assign<SpriteCascadeSpawner>(spawnerConfig);
   spawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(18));
+}
+
+
+void spawnEnemyLaserShot(
+  IEntityFactory& factory,
+  base::Vector position,
+  const engine::components::Orientation orientation
+) {
+  const auto isFacingLeft = orientation == Orientation::Left;
+  if (isFacingLeft) {
+    position.x -= 1;
+  }
+
+  auto entity = factory.spawnActor(
+    isFacingLeft
+      ? data::ActorID::Enemy_laser_shot_LEFT
+      : data::ActorID::Enemy_laser_shot_RIGHT,
+    position);
+  entity.assign<Active>();
+
+  // For convenience, the enemy laser shot muzzle flash is created along with
+  // the projectile.
+  const auto muzzleFlashSpriteId = isFacingLeft
+    ? data::ActorID::Enemy_laser_muzzle_flash_1
+    : data::ActorID::Enemy_laser_muzzle_flash_2;
+  auto muzzleFlash = factory.spawnSprite(muzzleFlashSpriteId, position);
+  muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
 }
 
 }

@@ -110,10 +110,6 @@ ActorID actorIdForProjectile(
 
     case ProjectileType::ReactorDebris:
       return isGoingRight ? data::ActorID::Reactor_fire_RIGHT : data::ActorID::Reactor_fire_LEFT;
-
-    case ProjectileType::EnemyLaserShot:
-      assert(isHorizontal(direction));
-      return data::ActorID::Enemy_laser_shot_RIGHT;
   }
 
   assert(false);
@@ -2065,7 +2061,15 @@ void EntityFactory::configureEntity(
       entity.assign<AnimationLoop>(1);
       break;
 
+    case ActorID::Enemy_laser_shot_LEFT:
     case ActorID::Enemy_laser_shot_RIGHT:
+      entity.assign<PlayerDamaging>(1, false, true);
+      entity.assign<MovingBody>(
+        Velocity{actorID == ActorID::Enemy_laser_shot_LEFT ? -2.0f : 2.0f, 0.0f},
+        GravityAffected{false});
+      entity.assign<AutoDestroy>(AutoDestroy{
+        AutoDestroy::Condition::OnWorldCollision,
+        AutoDestroy::Condition::OnLeavingActiveRegion});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<AppearsOnRadar>();
       break;
