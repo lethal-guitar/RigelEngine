@@ -154,16 +154,6 @@ int damageForProjectileType(const ProjectileType type) {
 }
 
 
-constexpr bool isPlayerProjectile(const ProjectileType type) {
-  return
-    type == ProjectileType::PlayerRegularShot ||
-    type == ProjectileType::PlayerLaserShot ||
-    type == ProjectileType::PlayerFlameShot ||
-    type == ProjectileType::PlayerRocketShot ||
-    type == ProjectileType::PlayerShipLaserShot;
-}
-
-
 using Message = behaviors::MessengerDrone::Message;
 
 Message MESSAGE_TYPE_BY_INDEX[] = {
