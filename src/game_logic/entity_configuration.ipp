@@ -2047,20 +2047,6 @@ void EntityFactory::configureEntity(
       entity.assign<DestructionEffects>(EXPLOSION_EFFECT_EFFECT_SPEC);
       break;
 
-    // Various projectiles. Damage, velocity etc. are assigned by the
-    // projectile configurarion functions
-    case ActorID::Duke_rocket_up: case ActorID::Duke_rocket_down: case ActorID::Duke_rocket_left: case ActorID::Duke_rocket_right:
-    case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
-    case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
-    case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
-      entity.assign<BoundingBox>(boundingBox);
-      break;
-
-    case ActorID::Dukes_ship_laser_shot:
-      entity.assign<BoundingBox>(boundingBox);
-      entity.assign<AnimationLoop>(1);
-      break;
-
     case ActorID::Enemy_laser_shot_LEFT:
     case ActorID::Enemy_laser_shot_RIGHT:
       entity.assign<PlayerDamaging>(1, false, true);

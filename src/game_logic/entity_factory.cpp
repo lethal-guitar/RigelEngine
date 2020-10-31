@@ -131,6 +131,39 @@ auto toPlayerProjectileType(const ProjectileType type) {
 }
 
 
+base::Vector adjustedPosition(
+  const ProjectileType type,
+  WorldPosition position,
+  const ProjectileDirection direction,
+  const BoundingBox& boundingBox
+) {
+  const auto isGoingLeft = direction == ProjectileDirection::Left;
+
+  // Position adjustment for the flame thrower shot
+  if (type == ProjectileType::PlayerFlameShot) {
+    if (isHorizontal(direction)) {
+      position.y += 1;
+    } else {
+      position.x -= 1;
+    }
+  }
+
+  // Position adjustment for left-facing projectiles. We want the incoming
+  // position to always represent the projectile's origin, which means we need
+  // to adjust the position by the projectile's length to match the left-bottom
+  // corner positioning system.
+  if (isHorizontal(direction) && isGoingLeft) {
+    position.x -= boundingBox.size.width - 1;
+
+    if (type == ProjectileType::PlayerFlameShot) {
+      position.x += 3;
+    }
+  }
+
+  return position;
+}
+
+
 const base::Point<float> FLY_RIGHT[] = {
   {3.0f, 0.0f},
   {3.0f, 0.0f},
@@ -305,15 +338,19 @@ entityx::Entity EntityFactory::spawnProjectile(
   const WorldPosition& pos,
   const ProjectileDirection direction
 ) {
-  auto entity = spawnActor(actorIdForProjectile(type, direction), pos);
+  auto entity = spawnSprite(actorIdForProjectile(type, direction), true);
   entity.assign<Active>();
+
+  const auto& boundingBox = *entity.component<BoundingBox>();
+  entity.assign<WorldPosition>(adjustedPosition(
+    type, pos, direction, boundingBox));
 
   configureProjectile(
     entity,
     type,
     pos,
     direction,
-    *entity.component<BoundingBox>());
+    boundingBox);
 
   return entity;
 }
@@ -342,31 +379,6 @@ void EntityFactory::configureProjectile(
   using namespace engine::components::parameter_aliases;
   using namespace game_logic::components::parameter_aliases;
 
-  const auto isGoingLeft = direction == ProjectileDirection::Left;
-
-  // Position adjustment for the flame thrower shot
-  if (type == ProjectileType::PlayerFlameShot) {
-    if (isHorizontal(direction)) {
-      position.y += 1;
-    } else {
-      position.x -= 1;
-    }
-  }
-
-  // Position adjustment for left-facing projectiles. We want the incoming
-  // position to always represent the projectile's origin, which means we need
-  // to adjust the position by the projectile's length to match the left-bottom
-  // corner positioning system.
-  if (isHorizontal(direction) && isGoingLeft) {
-    position.x -= boundingBox.size.width - 1;
-
-    if (type == ProjectileType::PlayerFlameShot) {
-      position.x += 3;
-    }
-  }
-
-  *entity.component<WorldPosition>() = position;
-
   const auto speed = speedForProjectileType(type);
   const auto damageAmount = damageForProjectileType(type);
 
@@ -380,6 +392,10 @@ void EntityFactory::configureProjectile(
 
   entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
   entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
+
+  if (type == ProjectileType::PlayerShipLaserShot) {
+    entity.assign<AnimationLoop>(1);
+  }
 
   entity.assign<AutoDestroy>(AutoDestroy{
     AutoDestroy::Condition::OnLeavingActiveRegion});
