@@ -1567,28 +1567,28 @@ TEST_CASE("Player movement") {
     SECTION("Shot type depends on player's current weapon") {
       SECTION("Regular shot") {
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerRegularShot);
+        CHECK(lastFiredShot().type == ProjectileType::Normal);
       }
 
       SECTION("Laser shot") {
         playerModel.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerLaserShot);
+        CHECK(lastFiredShot().type == ProjectileType::Laser);
       }
 
       SECTION("Rocket shot") {
         playerModel.switchToWeapon(data::WeaponType::Rocket);
 
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerRocketShot);
+        CHECK(lastFiredShot().type == ProjectileType::Rocket);
       }
 
       SECTION("Flame shot") {
         playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerFlameShot);
+        CHECK(lastFiredShot().type == ProjectileType::Flame);
       }
     }
 

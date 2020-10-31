@@ -145,20 +145,20 @@ ProjectileType projectileTypeForWeapon(const data::WeaponType weaponType) {
 
   switch (weaponType) {
     case WeaponType::Normal:
-      return ProjectileType::PlayerRegularShot;
+      return ProjectileType::Normal;
 
     case WeaponType::Laser:
-      return ProjectileType::PlayerLaserShot;
+      return ProjectileType::Laser;
 
     case WeaponType::Rocket:
-      return ProjectileType::PlayerRocketShot;
+      return ProjectileType::Rocket;
 
     case WeaponType::FlameThrower:
-      return ProjectileType::PlayerFlameShot;
+      return ProjectileType::Flame;
   }
 
   assert(false);
-  return ProjectileType::PlayerRegularShot;
+  return ProjectileType::Normal;
 }
 
 
@@ -1551,7 +1551,7 @@ void Player::fireShot() {
     const auto isFacingLeft = orientation() == c::Orientation::Left;
 
     mpEntityFactory->spawnProjectile(
-      ProjectileType::PlayerShipLaserShot,
+      ProjectileType::ShipLaser,
       position + base::Vector{isFacingLeft ? -1 : 8, 0},
       direction);
     spawnOneShotSprite(

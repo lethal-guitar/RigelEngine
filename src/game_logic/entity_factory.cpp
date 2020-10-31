@@ -118,19 +118,6 @@ void addDefaultMovingBody(
 }
 
 
-auto toPlayerProjectileType(const ProjectileType type) {
-  using PType = components::PlayerProjectile::Type;
-  static_assert(
-    int(PType::Normal) == int(ProjectileType::PlayerRegularShot) &&
-    int(PType::Laser) == int(ProjectileType::PlayerLaserShot) &&
-    int(PType::Rocket) == int(ProjectileType::PlayerRocketShot) &&
-    int(PType::Flame) == int(ProjectileType::PlayerFlameShot) &&
-    int(PType::ShipLaser) == int(ProjectileType::PlayerShipLaserShot) &&
-    int(PType::ReactorDebris) == int(ProjectileType::ReactorDebris));
-  return static_cast<PType>(static_cast<int>(type));
-}
-
-
 base::Vector adjustedPosition(
   const ProjectileType type,
   WorldPosition position,
@@ -140,7 +127,7 @@ base::Vector adjustedPosition(
   const auto isGoingLeft = direction == ProjectileDirection::Left;
 
   // Position adjustment for the flame thrower shot
-  if (type == ProjectileType::PlayerFlameShot) {
+  if (type == ProjectileType::Flame) {
     if (isHorizontal(direction)) {
       position.y += 1;
     } else {
@@ -155,7 +142,7 @@ base::Vector adjustedPosition(
   if (isHorizontal(direction) && isGoingLeft) {
     position.x -= boundingBox.size.width - 1;
 
-    if (type == ProjectileType::PlayerFlameShot) {
+    if (type == ProjectileType::Flame) {
       position.x += 3;
     }
   }
@@ -350,7 +337,7 @@ entityx::Entity EntityFactory::spawnProjectile(
   entity.assign<WorldPosition>(adjustedPosition(
     type, pos, direction, boundingBox));
   entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
-  entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
+  entity.assign<PlayerProjectile>(type);
   entity.assign<AutoDestroy>(AutoDestroy{
     AutoDestroy::Condition::OnLeavingActiveRegion});
 
@@ -363,7 +350,7 @@ entityx::Entity EntityFactory::spawnProjectile(
   entity.component<MovingBody>()->mIgnoreCollisions = true;
   entity.component<MovingBody>()->mIsActive = false;
 
-  if (type == ProjectileType::PlayerShipLaserShot) {
+  if (type == ProjectileType::ShipLaser) {
     entity.assign<AnimationLoop>(1);
   }
 

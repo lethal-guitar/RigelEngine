@@ -89,23 +89,23 @@ ActorID actorIdForProjectile(
   const auto isGoingUp = direction == ProjectileDirection::Up;
 
   switch (type) {
-    case ProjectileType::PlayerRegularShot:
+    case ProjectileType::Normal:
       return isHorizontal(direction) ? data::ActorID::Duke_regular_shot_horizontal : data::ActorID::Duke_regular_shot_vertical;
 
-    case ProjectileType::PlayerLaserShot:
+    case ProjectileType::Laser:
       return isHorizontal(direction) ? data::ActorID::Duke_laser_shot_horizontal : data::ActorID::Duke_laser_shot_vertical;
 
-    case ProjectileType::PlayerRocketShot:
+    case ProjectileType::Rocket:
       return isHorizontal(direction)
         ? (isGoingRight ? data::ActorID::Duke_rocket_right : data::ActorID::Duke_rocket_left)
         : (isGoingUp ? data::ActorID::Duke_rocket_up : data::ActorID::Duke_rocket_down);
 
-    case ProjectileType::PlayerFlameShot:
+    case ProjectileType::Flame:
       return isHorizontal(direction)
         ? (isGoingRight ? data::ActorID::Duke_flame_shot_right : data::ActorID::Duke_flame_shot_left)
         : (isGoingUp ? data::ActorID::Duke_flame_shot_up : data::ActorID::Duke_flame_shot_down);
 
-    case ProjectileType::PlayerShipLaserShot:
+    case ProjectileType::ShipLaser:
       return data::ActorID::Dukes_ship_laser_shot;
 
     case ProjectileType::ReactorDebris:
@@ -119,12 +119,12 @@ ActorID actorIdForProjectile(
 
 float speedForProjectileType(const ProjectileType type) {
   switch (type) {
-    case ProjectileType::PlayerLaserShot:
-    case ProjectileType::PlayerFlameShot:
+    case ProjectileType::Laser:
+    case ProjectileType::Flame:
       return 5.0f;
 
     case ProjectileType::ReactorDebris:
-    case ProjectileType::PlayerShipLaserShot:
+    case ProjectileType::ShipLaser:
       return 3.0f;
       break;
 
@@ -136,16 +136,16 @@ float speedForProjectileType(const ProjectileType type) {
 
 int damageForProjectileType(const ProjectileType type) {
   switch (type) {
-    case ProjectileType::PlayerFlameShot:
-    case ProjectileType::PlayerLaserShot:
+    case ProjectileType::Flame:
+    case ProjectileType::Laser:
       return 2;
 
     case ProjectileType::ReactorDebris:
-    case ProjectileType::PlayerShipLaserShot:
+    case ProjectileType::ShipLaser:
       return 5;
       break;
 
-    case ProjectileType::PlayerRocketShot:
+    case ProjectileType::Rocket:
       return 8;
 
     default:
