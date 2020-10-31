@@ -209,7 +209,7 @@ base::Vector shotOffset(
   const auto facingRight = orientation == c::Orientation::Right;
 
   if (stance == WeaponStance::Downwards) {
-    return facingRight ? base::Vector{0, 1} : base::Vector{2, 1};
+    return facingRight ? base::Vector{0, 0} : base::Vector{2, 0};
   }
 
   const auto shotOffsetHorizontal = stance == WeaponStance::Upwards

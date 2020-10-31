@@ -124,7 +124,7 @@ base::Vector adjustedPosition(
   const ProjectileDirection direction,
   const BoundingBox& boundingBox
 ) {
-  const auto isGoingLeft = direction == ProjectileDirection::Left;
+  using D = ProjectileDirection;
 
   // Position adjustment for the flame thrower shot
   if (type == ProjectileType::Flame) {
@@ -139,12 +139,17 @@ base::Vector adjustedPosition(
   // position to always represent the projectile's origin, which means we need
   // to adjust the position by the projectile's length to match the left-bottom
   // corner positioning system.
-  if (isHorizontal(direction) && isGoingLeft) {
+  if (isHorizontal(direction) && direction == D::Left) {
     position.x -= boundingBox.size.width - 1;
 
     if (type == ProjectileType::Flame) {
       position.x += 3;
     }
+  }
+
+  // Same, but for downwards-facing projectiles.
+  if (direction == D::Down && type != ProjectileType::Flame) {
+    position.y += boundingBox.size.height - 1;
   }
 
   return position;
