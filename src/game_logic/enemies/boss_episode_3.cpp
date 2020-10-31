@@ -38,15 +38,15 @@ namespace {
 struct AttackArea {
   base::Vector mBboxOffset;
   base::Vector mShotOffset;
-  ProjectileDirection mDirection;
+  data::ActorID mActorId;
 };
 
 
 constexpr AttackArea ATTACK_AREAS[] = {
-  {{-9,  0}, { 0, -4}, ProjectileDirection::Left},
-  {{ 9,  0}, { 8, -4}, ProjectileDirection::Right},
-  {{ 0, -9}, { 4, -8}, ProjectileDirection::Up},
-  {{ 0,  9}, { 4,  3}, ProjectileDirection::Down},
+  {{-9,  0}, {-4, -4}, data::ActorID::Enemy_rocket_left},
+  {{ 9,  0}, { 8, -4}, data::ActorID::Enemy_rocket_right},
+  {{ 0, -9}, { 4, -8}, data::ActorID::Enemy_rocket_2_up},
+  {{ 0,  9}, { 4,  3}, data::ActorID::Enemy_rocket_2_down},
 };
 
 
@@ -94,10 +94,8 @@ void BossEpisode3::update(
 
       if (attackRangeBbox.intersects(playerBbox)) {
         d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
-        d.mpEntityFactory->spawnProjectile(
-          ProjectileType::EnemyBossRocket,
-          position + area.mShotOffset,
-          area.mDirection);
+        d.mpEntityFactory->spawnActor(
+          area.mActorId, position + area.mShotOffset);
       }
     }
   }

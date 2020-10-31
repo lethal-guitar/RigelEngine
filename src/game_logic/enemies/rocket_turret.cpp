@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
+#include "engine/base_components.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/ientity_factory.hpp"
@@ -29,17 +30,17 @@ namespace rigel::game_logic::behaviors {
 
 namespace {
 
-const base::Vector OFFSET_BY_ORIENTATION[] = {
-  {1, -1},
+constexpr base::Vector OFFSET_BY_ORIENTATION[] = {
+  {-2, -1},
   {1, -2},
   {2, -1}
 };
 
 
-const ProjectileDirection DIRECTION_BY_ORIENTATION[] = {
-  ProjectileDirection::Left,
-  ProjectileDirection::Up,
-  ProjectileDirection::Right
+constexpr data::ActorID ACTOR_ID_BY_ORIENTATION[] = {
+  data::ActorID::Enemy_rocket_left,
+  data::ActorID::Enemy_rocket_up,
+  data::ActorID::Enemy_rocket_right
 };
 
 
@@ -84,10 +85,9 @@ void RocketTurret::update(
       mNeedsReorientation = true;
 
       const auto orientationIndex = static_cast<int>(mOrientation);
-      d.mpEntityFactory->spawnProjectile(
-        game_logic::ProjectileType::EnemyRocket,
-        position + OFFSET_BY_ORIENTATION[orientationIndex],
-        DIRECTION_BY_ORIENTATION[orientationIndex]);
+      d.mpEntityFactory->spawnActor(
+        ACTOR_ID_BY_ORIENTATION[orientationIndex],
+        position + OFFSET_BY_ORIENTATION[orientationIndex]);
       d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
     }
   }

@@ -114,23 +114,6 @@ ActorID actorIdForProjectile(
     case ProjectileType::EnemyLaserShot:
       assert(isHorizontal(direction));
       return data::ActorID::Enemy_laser_shot_RIGHT;
-
-    case ProjectileType::EnemyRocket:
-      return isHorizontal(direction)
-        ? (isGoingRight ? data::ActorID::Enemy_rocket_right : data::ActorID::Enemy_rocket_left)
-        : data::ActorID::Enemy_rocket_up;
-
-    case ProjectileType::EnemyBossRocket:
-      if (isHorizontal(direction)) {
-        return isGoingRight
-          ? data::ActorID::Enemy_rocket_right
-          : data::ActorID::Enemy_rocket_left;
-      } else {
-        return isGoingUp
-          ? data::ActorID::Enemy_rocket_2_up
-          : data::ActorID::Enemy_rocket_2_down;
-      }
-
   }
 
   assert(false);
@@ -148,10 +131,6 @@ float speedForProjectileType(const ProjectileType type) {
     case ProjectileType::PlayerShipLaserShot:
       return 3.0f;
       break;
-
-    case ProjectileType::EnemyRocket:
-    case ProjectileType::EnemyBossRocket:
-      return 1.0f;
 
     default:
       return 2.0f;

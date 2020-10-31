@@ -35,8 +35,6 @@ enum class ProjectileType {
   PlayerShipLaserShot,
   ReactorDebris,
   EnemyLaserShot,
-  EnemyRocket,
-  EnemyBossRocket,
 };
 
 
