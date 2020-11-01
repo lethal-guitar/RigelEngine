@@ -125,7 +125,7 @@ TEST_CASE("Rocket elevator") {
     entityFactory.spawnActor(data::ActorID::Rocket_elevator, {2, 103});
 
   base::Vector cameraPosition{0, 0};
-  engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
+  engine::ParticleSystem particleSystem{&randomGenerator, &options, nullptr};
   PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
   BehaviorControllerSystem behaviorControllerSystem{
     GlobalDependencies{

@@ -109,7 +109,7 @@ TEST_CASE("Spike ball") {
     &randomGenerator);
 
   base::Vector cameraPosition{0, 0};
-  engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
+  engine::ParticleSystem particleSystem{&randomGenerator, &options, nullptr};
   BehaviorControllerSystem behaviorControllerSystem{
     GlobalDependencies{
       &collisionChecker,
