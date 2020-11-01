@@ -21,6 +21,7 @@
 
 #include <vector>
 
+namespace rigel::data { struct GameOptions; }
 namespace rigel::renderer { class Renderer; }
 
 
@@ -35,6 +36,7 @@ class ParticleSystem {
 public:
   ParticleSystem(
     RandomNumberGenerator* pRandomGenerator,
+    const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer);
   ~ParticleSystem();
 
@@ -51,6 +53,7 @@ public:
 private:
   std::vector<ParticleGroup> mParticleGroups;
   RandomNumberGenerator* mpRandomGenerator;
+  const data::GameOptions* mpOptions;
   renderer::Renderer* mpRenderer;
 };
 

@@ -16,6 +16,7 @@
 
 #include "particle_system.hpp"
 
+#include "data/game_options.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/random_number_generator.hpp"
 #include "renderer/renderer.hpp"
@@ -32,8 +33,13 @@ using renderer::Renderer;
 
 namespace {
 
-constexpr auto PARTICLE_SYSTEM_LIFE_TIME = 28;
+// In compatibility mode, only 5 groups of particles can be active at the same
+// time. This limitation is important, as each newly spawned group of particles
+// consumes random numbers. Changing the amount of random numbers consumed
+// causes the demo to get out of sync.
+constexpr auto MAX_NUM_PARTICLE_GROUPS = 5;
 
+constexpr auto PARTICLE_SYSTEM_LIFE_TIME = 28;
 constexpr auto INITIAL_INDEX_LIMIT = 15;
 
 constexpr std::array<std::int16_t, 44> VERTICAL_MOVEMENT_TABLE{
@@ -157,9 +163,11 @@ struct ParticleGroup {
 
 ParticleSystem::ParticleSystem(
   RandomNumberGenerator* pRandomGenerator,
+  const data::GameOptions* pOptions,
   Renderer* pRenderer
 )
   : mpRandomGenerator(pRandomGenerator)
+  , mpOptions(pOptions)
   , mpRenderer(pRenderer)
 {
 }
@@ -178,6 +186,17 @@ void ParticleSystem::spawnParticles(
   const base::Color& color,
   int velocityScaleX
 ) {
+  if (mpOptions->compatibilityModeOn()) {
+    const auto numActiveGroups =
+      std::count_if(begin(mParticleGroups), end(mParticleGroups),
+        [](const ParticleGroup& group) {
+          return !group.isExpired();
+        });
+    if (numActiveGroups >= MAX_NUM_PARTICLE_GROUPS) {
+      return;
+    }
+  }
+
   auto pParticles = createParticles(*mpRandomGenerator, velocityScaleX);
   mParticleGroups.emplace_back(
     origin + SPAWN_OFFSET, color, std::move(pParticles));

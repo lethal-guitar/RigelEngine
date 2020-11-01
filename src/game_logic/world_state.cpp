@@ -194,7 +194,7 @@ WorldState::WorldState(
       &mEventManager,
       &mRandomGenerator)
   , mCamera(&mPlayer, mMap, mEventManager)
-  , mParticles(&mRandomGenerator, pRenderer)
+  , mParticles(&mRandomGenerator, pOptions, pRenderer)
   , mRenderingSystem(
       &mCamera.position(),
       pRenderer,
