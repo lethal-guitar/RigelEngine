@@ -81,16 +81,34 @@ data::GameSessionId demoSessionId(const std::size_t levelIndex) {
   return {DEMO_EPISODE, DEMO_LEVELS[levelIndex], DEMO_DIFFICULTY};
 }
 
+
+GameMode::Context setUpOptionsForDemo(
+  GameMode::Context context,
+  UserProfile* pProfile
+) {
+  // In order for the demo to play back correctly, we need to be in
+  // compatibility mode. Therefore, we override whatever options the user has
+  // set by creating our own copy of the user profile and setting the options
+  // as required. The game world is then given a pointer to our version of the
+  // user profile instead of the real one.
+  pProfile->mOptions = context.mpUserProfile->mOptions;
+  pProfile->mOptions.mWidescreenModeOn = false;
+  pProfile->mOptions.mCompatibilityModeOn = true;
+
+  context.mpUserProfile = pProfile;
+  return context;
+}
+
 }
 
 
 DemoPlayer::DemoPlayer(GameMode::Context context)
-  : mContext(context)
+  : mContext(setUpOptionsForDemo(context, &mTempProfile))
   , mFrames(loadDemo(*context.mpResources))
   , mpWorld(std::make_unique<GameWorld>(
       &mPlayerModel,
       demoSessionId(0),
-      context,
+      mContext,
       std::nullopt,
       true,
       mFrames[0].mInput))

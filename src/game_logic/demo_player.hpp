@@ -17,6 +17,7 @@
 #pragma once
 
 #include "common/game_mode.hpp"
+#include "common/user_profile.hpp"
 #include "data/player_model.hpp"
 #include "engine/timing.hpp"
 #include "game_logic/input.hpp"
@@ -45,6 +46,7 @@ public:
   bool isFinished() const;
 
 private:
+  UserProfile mTempProfile;
   GameMode::Context mContext;
   data::PlayerModel mPlayerModel;
 
