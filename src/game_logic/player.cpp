@@ -606,6 +606,8 @@ void Player::enterShip(
   mState = InShip{};
 
   auto& sprite = *mEntity.component<c::Sprite>();
+  const auto playerDrawOrder = sprite.mpDrawData->mDrawOrder;
+  mEntity.assign<c::OverrideDrawOrder>(playerDrawOrder);
   sprite = mpEntityFactory->createSpriteForId(data::ActorID::Dukes_ship_RIGHT);
   sprite.mFramesToRender[0] = 1;
   engine::synchronizeBoundingBoxToSprite(mEntity);
