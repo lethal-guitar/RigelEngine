@@ -21,6 +21,7 @@
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 #include <common/global.hpp>
+#include <data/game_options.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
 #include <data/sound_ids.hpp>
@@ -195,6 +196,7 @@ TEST_CASE("Player movement") {
   MockEntityFactory mockEntityFactory{&entityx.entities};
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
+  data::GameOptions options;
 
   // ---------------------------------------------------------------------------
   // Player entity
@@ -209,6 +211,7 @@ TEST_CASE("Player movement") {
     data::Difficulty::Medium,
     &playerModel,
     &mockServiceProvider,
+    &options,
     &collisionChecker,
     &map,
     &mockEntityFactory,

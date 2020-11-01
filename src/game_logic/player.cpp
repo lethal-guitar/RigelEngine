@@ -20,6 +20,7 @@
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/global.hpp"
+#include "data/game_options.hpp"
 #include "data/map.hpp"
 #include "data/player_model.hpp"
 #include "data/sound_ids.hpp"
@@ -296,6 +297,7 @@ Player::Player(
   const data::Difficulty difficulty,
   data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
+  const data::GameOptions* pOptions,
   const engine::CollisionChecker* pCollisionChecker,
   const data::map::Map* pMap,
   IEntityFactory* pEntityFactory,
@@ -310,6 +312,7 @@ Player::Player(
   , mpEntityFactory(pEntityFactory)
   , mpEvents(pEvents)
   , mpRandomGenerator(pRandomGenerator)
+  , mpOptions(pOptions)
   , mMercyFramesPerHit(mercyFramesForDifficulty(difficulty))
   , mMercyFramesRemaining(INITIAL_MERCY_FRAMES)
 {
@@ -435,7 +438,7 @@ int Player::animationFrame() const {
 
 
 base::Vector Player::orientedPosition() const {
-  if (stateIs<InShip>()) {
+  if (stateIs<InShip>() || !mpOptions->compatibilityModeOn()) {
     return position();
   }
 
@@ -802,7 +805,10 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != walkingDirection) {
           switchOrientation();
-          position.x -= movementVector.x;
+
+          if (mpOptions->compatibilityModeOn()) {
+            position.x -= movementVector.x;
+          }
         }
       } else {
         setVisualState(VisualState::Standing);
@@ -952,7 +958,10 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != orientationAsMovement) {
           switchOrientation();
-          position.x -= movementVector.x;
+
+          if (mpOptions->compatibilityModeOn()) {
+            position.x -= movementVector.x;
+          }
         }
 
         if (mJumpRequested && movement > 0) {
@@ -1080,26 +1089,50 @@ void Player::updateJumpButtonStateTracking(const Button& jumpButton) {
 
 
 void Player::updateShooting(const Button& fireButton) {
-  if (!canFire()) {
-    return;
-  }
-
   const auto hasRapidFire =
     stateIs<InShip>() ||
     mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
     mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
-  if (
-    fireButton.mWasTriggered ||
-    (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
-  ) {
-    fireShot();
-  }
+  if (mpOptions->compatibilityModeOn()) {
+    if (!fireButton.mIsPressed) {
+      mRapidFiredLastFrame = false;
+    }
 
-  if (fireButton.mIsPressed && hasRapidFire) {
     mRapidFiredLastFrame = !mRapidFiredLastFrame;
+
+    if (!canFire()) {
+      return;
+    }
+
+    if (!fireButton.mIsPressed) {
+      mFiredLastFrame = false;
+    }
+
+    if (
+      (fireButton.mWasTriggered && !mFiredLastFrame) ||
+      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
+    ) {
+      fireShot();
+      mFiredLastFrame = true;
+    }
   } else {
-    mRapidFiredLastFrame = false;
+    if (!canFire()) {
+      return;
+    }
+
+    if (
+      fireButton.mWasTriggered ||
+      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
+    ) {
+      fireShot();
+    }
+
+    if (fireButton.mIsPressed && hasRapidFire) {
+      mRapidFiredLastFrame = !mRapidFiredLastFrame;
+    } else {
+      mRapidFiredLastFrame = false;
+    }
   }
 }
 

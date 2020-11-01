@@ -90,6 +90,10 @@ struct GameOptions {
   // Enhancements
   bool mWidescreenModeOn = false;
   bool mQuickSavingEnabled = false;
+
+  bool compatibilityModeOn() const {
+    return mCompatibilityModeOn && !mWidescreenModeOn;
+  }
 };
 
 }

@@ -36,6 +36,7 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { struct IGameServiceProvider; }
+namespace rigel::data { struct GameOptions; }
 namespace rigel::engine { class RandomNumberGenerator; }
 namespace rigel::loader { class ActorImagePackage; }
 
@@ -63,6 +64,7 @@ public:
     entityx::EntityManager* pEntityManager,
     IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
+    const data::GameOptions* pOptions,
     data::Difficulty difficulty);
 
   void createEntitiesForLevel(
@@ -116,6 +118,7 @@ private:
   entityx::EntityManager* mpEntityManager;
   IGameServiceProvider* mpServiceProvider;
   engine::RandomNumberGenerator* mpRandomGenerator;
+  const data::GameOptions* mpOptions;
   int mSpawnIndex = 0;
   data::Difficulty mDifficulty;
 };

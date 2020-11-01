@@ -18,6 +18,7 @@
 
 #include "base/container_utils.hpp"
 #include "common/game_service_provider.hpp"
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
@@ -122,7 +123,8 @@ base::Vector adjustedPosition(
   const ProjectileType type,
   WorldPosition position,
   const ProjectileDirection direction,
-  const BoundingBox& boundingBox
+  const BoundingBox& boundingBox,
+  const bool useBuggyOffsets
 ) {
   using D = ProjectileDirection;
 
@@ -150,6 +152,24 @@ base::Vector adjustedPosition(
   // Same, but for downwards-facing projectiles.
   if (direction == D::Down && type != ProjectileType::Flame) {
     position.y += boundingBox.size.height - 1;
+  }
+
+  if (useBuggyOffsets) {
+    if (type == ProjectileType::Normal && direction == D::Left) {
+      position.x -= 1;
+    }
+
+    if (type == ProjectileType::Normal && direction == D::Down) {
+      position.y += 1;
+    }
+
+    if (type == ProjectileType::Rocket && direction == D::Left) {
+      position.x += 1;
+    }
+
+    if (type == ProjectileType::Rocket && direction == D::Down) {
+      position.y -= 2;
+    }
   }
 
   return position;
@@ -275,11 +295,13 @@ EntityFactory::EntityFactory(
   ex::EntityManager* pEntityManager,
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
+  const data::GameOptions* pOptions,
   const data::Difficulty difficulty)
   : mpSpriteFactory(pSpriteFactory)
   , mpEntityManager(pEntityManager)
   , mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
+  , mpOptions(pOptions)
   , mDifficulty(difficulty)
 {
 }
@@ -340,7 +362,7 @@ entityx::Entity EntityFactory::spawnProjectile(
 
   entity.assign<Active>();
   entity.assign<WorldPosition>(adjustedPosition(
-    type, pos, direction, boundingBox));
+    type, pos, direction, boundingBox, mpOptions->compatibilityModeOn()));
   entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
   entity.assign<PlayerProjectile>(type);
   entity.assign<AutoDestroy>(AutoDestroy{

@@ -457,6 +457,7 @@ void GameWorld::createNewState() {
     mpRenderer,
     mpResources,
     mpPlayerModel,
+    mpOptions,
     &mSpriteFactory,
     mSessionId);
 
@@ -671,6 +672,7 @@ void GameWorld::quickSave() {
     mpRenderer,
     mpResources,
     mpPlayerModel,
+    mpOptions,
     &mSpriteFactory,
     mSessionId);
   pStateCopy->synchronizeTo(

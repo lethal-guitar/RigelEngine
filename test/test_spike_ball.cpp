@@ -17,6 +17,7 @@
 #include "utils.hpp"
 
 #include <base/spatial_types_printing.hpp>
+#include <data/game_options.hpp>
 #include <data/game_traits.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
@@ -74,11 +75,13 @@ TEST_CASE("Spike ball") {
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
   MockSpriteFactory mockSpriteFactory;
+  data::GameOptions options;
   EntityFactory entityFactory{
     &mockSpriteFactory,
     &entityx.entities,
     &mockServiceProvider,
     &randomGenerator,
+    &options,
     data::Difficulty::Medium};
 
   auto spikeBall =
@@ -98,6 +101,7 @@ TEST_CASE("Spike ball") {
     data::Difficulty::Medium,
     &playerModel,
     &mockServiceProvider,
+    &options,
     &collisionChecker,
     &map,
     &entityFactory,

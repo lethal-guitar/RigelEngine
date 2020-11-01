@@ -35,6 +35,7 @@ namespace rigel {
   struct IGameServiceProvider;
 
   namespace data {
+    struct GameOptions;
     class PlayerModel;
 
     namespace map { class Map; }
@@ -202,6 +203,7 @@ public:
     data::Difficulty difficulty,
     data::PlayerModel* pModel,
     IGameServiceProvider* pServiceProvider,
+    const data::GameOptions* pOptions,
     const engine::CollisionChecker* pCollisionChecker,
     const data::map::Map* pMap,
     IEntityFactory* pEntityFactory,
@@ -347,6 +349,7 @@ private:
   IEntityFactory* mpEntityFactory;
   entityx::EventManager* mpEvents;
   engine::RandomNumberGenerator* mpRandomGenerator;
+  const data::GameOptions* mpOptions;
   engine::components::BoundingBox mHitBox;
   WeaponStance mStance = WeaponStance::Regular;
   VisualState mVisualState = VisualState::Standing;
@@ -356,6 +359,7 @@ private:
   int mFramesElapsedHavingCloak = 0;
   std::bitset<3> mAttachedSpiders;
   bool mRapidFiredLastFrame = false;
+  bool mFiredLastFrame = false;
   bool mIsOddFrame = false;
   bool mRecoilAnimationActive = false;
   bool mIsRidingElevator = false;
