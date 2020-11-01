@@ -1588,6 +1588,7 @@ bool Player::canFire() const {
   const auto firingBlocked =
     stateIs<ClimbingLadder>() ||
     stateIs<Interacting>() ||
+    mVisualState == VisualState::CoilingForJumpOrLanding ||
     mIsRidingElevator ||
     (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
     hasSpiderAt(SpiderClingPosition::Weapon);
