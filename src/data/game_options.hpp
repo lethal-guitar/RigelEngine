@@ -84,9 +84,16 @@ struct GameOptions {
   bool mMusicOn = true;
   bool mSoundOn = true;
 
+  // Gameplay
+  bool mCompatibilityModeOn = false;
+
   // Enhancements
   bool mWidescreenModeOn = false;
   bool mQuickSavingEnabled = false;
+
+  bool compatibilityModeOn() const {
+    return mCompatibilityModeOn && !mWidescreenModeOn;
+  }
 };
 
 }

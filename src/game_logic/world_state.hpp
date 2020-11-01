@@ -52,6 +52,7 @@ RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel { struct IGameServiceProvider; }
+namespace rigel::data { struct GameOptions; }
 namespace rigel::engine { class SpriteFactory; }
 namespace rigel::loader { class ResourceLoader; }
 namespace rigel::renderer { class Renderer; }
@@ -93,6 +94,7 @@ struct WorldState {
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader* pResources,
     data::PlayerModel* pPlayerModel,
+    const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId);
   WorldState(
@@ -100,6 +102,7 @@ struct WorldState {
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader* pResources,
     data::PlayerModel* pPlayerModel,
+    const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId,
     data::map::LevelData&& loadedLevel);
@@ -118,6 +121,7 @@ struct WorldState {
   EntityFactory mEntityFactory;
   RadarDishCounter mRadarDishCounter;
   engine::CollisionChecker mCollisionChecker;
+  const data::GameOptions* mpOptions;
 
   Player mPlayer;
   Camera mCamera;

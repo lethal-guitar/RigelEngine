@@ -137,10 +137,10 @@ void BlueGuard::update(
       const auto wantsToShoot = (d.mpRandomGenerator->gen() % 8) == 0;
       if (wantsToShoot && engine::isOnScreen(entity)) {
         d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-        d.mpEntityFactory->spawnProjectile(
-          ProjectileType::EnemyLaserShot,
+        spawnEnemyLaserShot(
+          *d.mpEntityFactory,
           position + offsetForShot(*this),
-          facingLeft ? ProjectileDirection::Left : ProjectileDirection::Right);
+          mOrientation);
       }
 
       // Update sprite

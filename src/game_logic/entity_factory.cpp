@@ -18,6 +18,7 @@
 
 #include "base/container_utils.hpp"
 #include "common/game_service_provider.hpp"
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/life_time_components.hpp"
@@ -118,16 +119,60 @@ void addDefaultMovingBody(
 }
 
 
-auto toPlayerProjectileType(const ProjectileType type) {
-  using PType = components::PlayerProjectile::Type;
-  static_assert(
-    int(PType::Normal) == int(ProjectileType::PlayerRegularShot) &&
-    int(PType::Laser) == int(ProjectileType::PlayerLaserShot) &&
-    int(PType::Rocket) == int(ProjectileType::PlayerRocketShot) &&
-    int(PType::Flame) == int(ProjectileType::PlayerFlameShot) &&
-    int(PType::ShipLaser) == int(ProjectileType::PlayerShipLaserShot) &&
-    int(PType::ReactorDebris) == int(ProjectileType::ReactorDebris));
-  return static_cast<PType>(static_cast<int>(type));
+base::Vector adjustedPosition(
+  const ProjectileType type,
+  WorldPosition position,
+  const ProjectileDirection direction,
+  const BoundingBox& boundingBox,
+  const bool useBuggyOffsets
+) {
+  using D = ProjectileDirection;
+
+  // Position adjustment for the flame thrower shot
+  if (type == ProjectileType::Flame) {
+    if (isHorizontal(direction)) {
+      position.y += 1;
+    } else {
+      position.x -= 1;
+    }
+  }
+
+  // Position adjustment for left-facing projectiles. We want the incoming
+  // position to always represent the projectile's origin, which means we need
+  // to adjust the position by the projectile's length to match the left-bottom
+  // corner positioning system.
+  if (isHorizontal(direction) && direction == D::Left) {
+    position.x -= boundingBox.size.width - 1;
+
+    if (type == ProjectileType::Flame) {
+      position.x += 3;
+    }
+  }
+
+  // Same, but for downwards-facing projectiles.
+  if (direction == D::Down && type != ProjectileType::Flame) {
+    position.y += boundingBox.size.height - 1;
+  }
+
+  if (useBuggyOffsets) {
+    if (type == ProjectileType::Normal && direction == D::Left) {
+      position.x -= 1;
+    }
+
+    if (type == ProjectileType::Normal && direction == D::Down) {
+      position.y += 1;
+    }
+
+    if (type == ProjectileType::Rocket && direction == D::Left) {
+      position.x += 1;
+    }
+
+    if (type == ProjectileType::Rocket && direction == D::Down) {
+      position.y -= 2;
+    }
+  }
+
+  return position;
 }
 
 
@@ -250,11 +295,13 @@ EntityFactory::EntityFactory(
   ex::EntityManager* pEntityManager,
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
+  const data::GameOptions* pOptions,
   const data::Difficulty difficulty)
   : mpSpriteFactory(pSpriteFactory)
   , mpEntityManager(pEntityManager)
   , mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
+  , mpOptions(pOptions)
   , mDifficulty(difficulty)
 {
 }
@@ -305,15 +352,34 @@ entityx::Entity EntityFactory::spawnProjectile(
   const WorldPosition& pos,
   const ProjectileDirection direction
 ) {
-  auto entity = spawnActor(actorIdForProjectile(type, direction), pos);
-  entity.assign<Active>();
+  using namespace engine::components::parameter_aliases;
+  using namespace game_logic::components::parameter_aliases;
 
-  configureProjectile(
-    entity,
-    type,
-    pos,
-    direction,
-    *entity.component<BoundingBox>());
+  auto entity = spawnSprite(actorIdForProjectile(type, direction), true);
+
+  const auto& boundingBox = *entity.component<BoundingBox>();
+  const auto damageAmount = damageForProjectileType(type);
+
+  entity.assign<Active>();
+  entity.assign<WorldPosition>(adjustedPosition(
+    type, pos, direction, boundingBox, mpOptions->compatibilityModeOn()));
+  entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
+  entity.assign<PlayerProjectile>(type);
+  entity.assign<AutoDestroy>(AutoDestroy{
+    AutoDestroy::Condition::OnLeavingActiveRegion});
+
+  const auto speed = speedForProjectileType(type);
+  entity.assign<MovingBody>(
+    Velocity{directionToVector(direction) * speed},
+    GravityAffected{false});
+  // Some player projectiles do have collisions with walls, but that's
+  // handled by player::ProjectileSystem.
+  entity.component<MovingBody>()->mIgnoreCollisions = true;
+  entity.component<MovingBody>()->mIsActive = false;
+
+  if (type == ProjectileType::ShipLaser) {
+    entity.assign<AnimationLoop>(1);
+  }
 
   return entity;
 }
@@ -329,92 +395,6 @@ entityx::Entity EntityFactory::spawnActor(
   configureEntity(entity, id, boundingBox);
 
   return entity;
-}
-
-
-void EntityFactory::configureProjectile(
-  entityx::Entity entity,
-  const ProjectileType type,
-  WorldPosition position,
-  const ProjectileDirection direction,
-  const BoundingBox& boundingBox
-) {
-  using namespace engine::components::parameter_aliases;
-  using namespace game_logic::components::parameter_aliases;
-
-  const auto isGoingLeft = direction == ProjectileDirection::Left;
-
-  // Position adjustment for the flame thrower shot
-  if (type == ProjectileType::PlayerFlameShot) {
-    if (isHorizontal(direction)) {
-      position.y += 1;
-    } else {
-      position.x -= 1;
-    }
-  }
-
-  // Position adjustment for left-facing projectiles. We want the incoming
-  // position to always represent the projectile's origin, which means we need
-  // to adjust the position by the projectile's length to match the left-bottom
-  // corner positioning system.
-  if (isHorizontal(direction) && isGoingLeft) {
-    position.x -= boundingBox.size.width - 1;
-
-    if (type == ProjectileType::PlayerFlameShot) {
-      position.x += 3;
-    }
-  }
-
-  *entity.component<WorldPosition>() = position;
-
-  const auto speed = speedForProjectileType(type);
-  const auto damageAmount = damageForProjectileType(type);
-
-  // TODO: The way projectile creation works needs an overhaul, it's quite
-  // messy and convoluted right now. Having this weird special case here
-  // for rockets is the easiest way to add rockets without doing the full
-  // refactoring, which is planned for later.
-  //
-  // See configureEntity() for the rocket configuration.
-  if (
-    type == ProjectileType::EnemyRocket ||
-    type == ProjectileType::EnemyBossRocket
-  ) {
-    return;
-  }
-
-  entity.assign<MovingBody>(
-    Velocity{directionToVector(direction) * speed},
-    GravityAffected{false});
-  if (isPlayerProjectile(type) || type == ProjectileType::ReactorDebris) {
-    // Some player projectiles do have collisions with walls, but that's
-    // handled by player::ProjectileSystem.
-    entity.component<MovingBody>()->mIgnoreCollisions = true;
-    entity.component<MovingBody>()->mIsActive = false;
-
-    entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
-    entity.assign<PlayerProjectile>(toPlayerProjectileType(type));
-
-    entity.assign<AutoDestroy>(AutoDestroy{
-      AutoDestroy::Condition::OnLeavingActiveRegion});
-  } else {
-    entity.assign<PlayerDamaging>(damageAmount, false, true);
-
-    entity.assign<AutoDestroy>(AutoDestroy{
-      AutoDestroy::Condition::OnWorldCollision,
-      AutoDestroy::Condition::OnLeavingActiveRegion});
-  }
-
-  // For convenience, the enemy laser shot muzzle flash is created along with
-  // the projectile.
-  if (type == ProjectileType::EnemyLaserShot) {
-    const auto muzzleFlashSpriteId = direction == ProjectileDirection::Left
-      ? data::ActorID::Enemy_laser_muzzle_flash_1
-      : data::ActorID::Enemy_laser_muzzle_flash_2;
-    auto muzzleFlash = spawnSprite(muzzleFlashSpriteId);
-    muzzleFlash.assign<WorldPosition>(position);
-    muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
-  }
 }
 
 
@@ -545,6 +525,33 @@ void spawnFireEffect(
   spawnerConfig.mActorId = actorToSpawn;
   spawner.assign<SpriteCascadeSpawner>(spawnerConfig);
   spawner.assign<AutoDestroy>(AutoDestroy::afterTimeout(18));
+}
+
+
+void spawnEnemyLaserShot(
+  IEntityFactory& factory,
+  base::Vector position,
+  const engine::components::Orientation orientation
+) {
+  const auto isFacingLeft = orientation == Orientation::Left;
+  if (isFacingLeft) {
+    position.x -= 1;
+  }
+
+  auto entity = factory.spawnActor(
+    isFacingLeft
+      ? data::ActorID::Enemy_laser_shot_LEFT
+      : data::ActorID::Enemy_laser_shot_RIGHT,
+    position);
+  entity.assign<Active>();
+
+  // For convenience, the enemy laser shot muzzle flash is created along with
+  // the projectile.
+  const auto muzzleFlashSpriteId = isFacingLeft
+    ? data::ActorID::Enemy_laser_muzzle_flash_1
+    : data::ActorID::Enemy_laser_muzzle_flash_2;
+  auto muzzleFlash = factory.spawnSprite(muzzleFlashSpriteId, position);
+  muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
 }
 
 }

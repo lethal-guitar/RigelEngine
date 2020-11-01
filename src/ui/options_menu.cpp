@@ -189,9 +189,25 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
       ImGui::EndTabItem();
     }
 
-    if (ImGui::BeginTabItem("Enhancements"))
+    if (ImGui::BeginTabItem("Gameplay/Enhancements"))
     {
       ImGui::NewLine();
+
+      const auto canUseCompatibilityMode = !mpOptions->mWidescreenModeOn;
+
+      withEnabledState(canUseCompatibilityMode, [&]() {
+        auto gameplayStyleIndex =
+          mpOptions->mCompatibilityModeOn && canUseCompatibilityMode ? 0 : 1;
+        ImGui::Combo(
+          "Gameplay style",
+          &gameplayStyleIndex,
+          "Compatibility mode\0Enhanced mode\0");
+
+        if (canUseCompatibilityMode) {
+          mpOptions->mCompatibilityModeOn = gameplayStyleIndex == 0;
+        }
+      });
+
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::EndTabItem();

@@ -64,7 +64,7 @@ base::Vector rocketSmokeOffset(const base::Point<float>& velocity) {
     if (isHorizontal) {
       return {3, 0};
     } else {
-      return {0, 3};
+      return {0, -3};
     }
   }
 

@@ -18,6 +18,7 @@
 #include "utils.hpp"
 
 #include <base/spatial_types_printing.hpp>
+#include <data/game_options.hpp>
 #include <data/game_traits.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
@@ -92,11 +93,13 @@ TEST_CASE("Rocket elevator") {
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
   MockSpriteFactory mockSpriteFactory;
+  data::GameOptions options;
   EntityFactory entityFactory{
     &mockSpriteFactory,
     &entityx.entities,
     &mockServiceProvider,
     &randomGenerator,
+    &options,
     data::Difficulty::Medium};
 
   auto playerEntity = entityx.entities.create();
@@ -109,6 +112,7 @@ TEST_CASE("Rocket elevator") {
     data::Difficulty::Medium,
     &playerModel,
     &mockServiceProvider,
+    &options,
     &collisionChecker,
     &map,
     &entityFactory,

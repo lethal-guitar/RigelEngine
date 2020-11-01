@@ -266,6 +266,11 @@ auto actorIDListForActor(const ActorID ID) {
       actorParts.push_back(ActorID::Blue_guard_RIGHT);
       break;
 
+    case ActorID::Enemy_laser_shot_LEFT:
+    case ActorID::Enemy_laser_shot_RIGHT:
+      actorParts.push_back(ActorID::Enemy_laser_shot_RIGHT);
+      break;
+
     case ActorID::Red_box_turkey:
       actorParts.push_back(ActorID::Turkey);
       break;

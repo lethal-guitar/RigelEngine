@@ -132,6 +132,7 @@ WorldState::WorldState(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader* pResources,
   data::PlayerModel* pPlayerModel,
+  const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId
 )
@@ -140,6 +141,7 @@ WorldState::WorldState(
       pRenderer,
       pResources,
       pPlayerModel,
+      pOptions,
       pSpriteFactory,
       sessionId,
       loader::loadLevel(
@@ -155,6 +157,7 @@ WorldState::WorldState(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader* pResources,
   data::PlayerModel* pPlayerModel,
+  const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId,
   data::map::LevelData&& loadedLevel
@@ -166,9 +169,11 @@ WorldState::WorldState(
     &mEntities,
     pServiceProvider,
     &mRandomGenerator,
+    pOptions,
     sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, mEventManager)
   , mCollisionChecker(&mMap, mEntities, mEventManager)
+  , mpOptions(pOptions)
   , mPlayer(
       [&]() {
         using engine::components::Orientation;
@@ -182,6 +187,7 @@ WorldState::WorldState(
       sessionId.mDifficulty,
       pPlayerModel,
       pServiceProvider,
+      pOptions,
       &mCollisionChecker,
       &mMap,
       &mEntityFactory,
@@ -323,6 +329,7 @@ void WorldState::synchronizeTo(
       sessionId.mDifficulty,
       pPlayerModel,
       pServiceProvider,
+      mpOptions,
       &mCollisionChecker,
       &mMap,
       &mEntityFactory,

@@ -19,6 +19,7 @@
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/visual_components.hpp"
+#include "game_logic/damage_components.hpp"
 #include "data/map.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -27,17 +28,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::game_logic {
 
-enum class ProjectileType {
-  PlayerRegularShot,
-  PlayerLaserShot,
-  PlayerRocketShot,
-  PlayerFlameShot,
-  PlayerShipLaserShot,
-  ReactorDebris,
-  EnemyLaserShot,
-  EnemyRocket,
-  EnemyBossRocket,
-};
+using ProjectileType = game_logic::components::PlayerProjectile::Type;
 
 
 enum class ProjectileDirection {
@@ -156,5 +147,11 @@ void spawnFireEffect(
   const base::Vector& position,
   const engine::components::BoundingBox& coveredArea,
   data::ActorID actorToSpawn);
+
+
+void spawnEnemyLaserShot(
+  IEntityFactory& factory,
+  base::Vector position,
+  engine::components::Orientation orientation);
 
 }

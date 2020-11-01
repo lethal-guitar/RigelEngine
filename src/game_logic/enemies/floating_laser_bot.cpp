@@ -36,15 +36,15 @@ namespace {
 
 struct GunSpec {
   base::Vector mOffset;
-  ProjectileDirection mDirection;
+  engine::components::Orientation mOrientation;
 };
 
 
 constexpr GunSpec GUN_SPECS[]{
-  {{-1, -1}, ProjectileDirection::Left},
-  {{-1,  0}, ProjectileDirection::Left},
-  {{ 2,  0}, ProjectileDirection::Right},
-  {{ 2, -1}, ProjectileDirection::Right}
+  {{-1, -1}, engine::components::Orientation::Left},
+  {{-1,  0}, engine::components::Orientation::Left},
+  {{ 2,  0}, engine::components::Orientation::Right},
+  {{ 2, -1}, engine::components::Orientation::Right}
 };
 
 }
@@ -75,10 +75,10 @@ void FloatingLaserBot::update(
 
   auto attack = [&, this](int gunIndex) {
     d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
-    d.mpEntityFactory->spawnProjectile(
-      ProjectileType::EnemyLaserShot,
+    spawnEnemyLaserShot(
+      *d.mpEntityFactory,
       position + GUN_SPECS[gunIndex].mOffset,
-      GUN_SPECS[gunIndex].mDirection);
+      GUN_SPECS[gunIndex].mOrientation);
   };
 
 

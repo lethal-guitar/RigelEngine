@@ -197,6 +197,7 @@ nlohmann::json serialize(const data::GameOptions& options) {
   serialized["soundVolume"] = options.mSoundVolume;
   serialized["musicOn"] = options.mMusicOn;
   serialized["soundOn"] = options.mSoundOn;
+  serialized["compatibilityModeOn"] = options.mCompatibilityModeOn;
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
   return serialized;
@@ -342,6 +343,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
   extractValueIfExists("musicOn", result.mMusicOn, json);
   extractValueIfExists("soundOn", result.mSoundOn, json);
+  extractValueIfExists("compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
 

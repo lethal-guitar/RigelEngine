@@ -21,6 +21,7 @@
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
 #include <common/global.hpp>
+#include <data/game_options.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
 #include <data/sound_ids.hpp>
@@ -195,6 +196,7 @@ TEST_CASE("Player movement") {
   MockEntityFactory mockEntityFactory{&entityx.entities};
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
+  data::GameOptions options;
 
   // ---------------------------------------------------------------------------
   // Player entity
@@ -209,6 +211,7 @@ TEST_CASE("Player movement") {
     data::Difficulty::Medium,
     &playerModel,
     &mockServiceProvider,
+    &options,
     &collisionChecker,
     &map,
     &mockEntityFactory,
@@ -1567,28 +1570,28 @@ TEST_CASE("Player movement") {
     SECTION("Shot type depends on player's current weapon") {
       SECTION("Regular shot") {
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerRegularShot);
+        CHECK(lastFiredShot().type == ProjectileType::Normal);
       }
 
       SECTION("Laser shot") {
         playerModel.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerLaserShot);
+        CHECK(lastFiredShot().type == ProjectileType::Laser);
       }
 
       SECTION("Rocket shot") {
         playerModel.switchToWeapon(data::WeaponType::Rocket);
 
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerRocketShot);
+        CHECK(lastFiredShot().type == ProjectileType::Rocket);
       }
 
       SECTION("Flame shot") {
         playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
-        CHECK(lastFiredShot().type == ProjectileType::PlayerFlameShot);
+        CHECK(lastFiredShot().type == ProjectileType::Flame);
       }
     }
 

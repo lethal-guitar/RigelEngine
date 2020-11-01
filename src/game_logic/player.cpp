@@ -20,6 +20,7 @@
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/global.hpp"
+#include "data/game_options.hpp"
 #include "data/map.hpp"
 #include "data/player_model.hpp"
 #include "data/sound_ids.hpp"
@@ -145,20 +146,20 @@ ProjectileType projectileTypeForWeapon(const data::WeaponType weaponType) {
 
   switch (weaponType) {
     case WeaponType::Normal:
-      return ProjectileType::PlayerRegularShot;
+      return ProjectileType::Normal;
 
     case WeaponType::Laser:
-      return ProjectileType::PlayerLaserShot;
+      return ProjectileType::Laser;
 
     case WeaponType::Rocket:
-      return ProjectileType::PlayerRocketShot;
+      return ProjectileType::Rocket;
 
     case WeaponType::FlameThrower:
-      return ProjectileType::PlayerFlameShot;
+      return ProjectileType::Flame;
   }
 
   assert(false);
-  return ProjectileType::PlayerRegularShot;
+  return ProjectileType::Normal;
 }
 
 
@@ -209,7 +210,7 @@ base::Vector shotOffset(
   const auto facingRight = orientation == c::Orientation::Right;
 
   if (stance == WeaponStance::Downwards) {
-    return facingRight ? base::Vector{0, 1} : base::Vector{2, 1};
+    return facingRight ? base::Vector{0, 0} : base::Vector{2, 0};
   }
 
   const auto shotOffsetHorizontal = stance == WeaponStance::Upwards
@@ -296,6 +297,7 @@ Player::Player(
   const data::Difficulty difficulty,
   data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
+  const data::GameOptions* pOptions,
   const engine::CollisionChecker* pCollisionChecker,
   const data::map::Map* pMap,
   IEntityFactory* pEntityFactory,
@@ -310,6 +312,7 @@ Player::Player(
   , mpEntityFactory(pEntityFactory)
   , mpEvents(pEvents)
   , mpRandomGenerator(pRandomGenerator)
+  , mpOptions(pOptions)
   , mMercyFramesPerHit(mercyFramesForDifficulty(difficulty))
   , mMercyFramesRemaining(INITIAL_MERCY_FRAMES)
 {
@@ -435,7 +438,7 @@ int Player::animationFrame() const {
 
 
 base::Vector Player::orientedPosition() const {
-  if (stateIs<InShip>()) {
+  if (stateIs<InShip>() || !mpOptions->compatibilityModeOn()) {
     return position();
   }
 
@@ -802,7 +805,10 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != walkingDirection) {
           switchOrientation();
-          position.x -= movementVector.x;
+
+          if (mpOptions->compatibilityModeOn()) {
+            position.x -= movementVector.x;
+          }
         }
       } else {
         setVisualState(VisualState::Standing);
@@ -952,7 +958,10 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != orientationAsMovement) {
           switchOrientation();
-          position.x -= movementVector.x;
+
+          if (mpOptions->compatibilityModeOn()) {
+            position.x -= movementVector.x;
+          }
         }
 
         if (mJumpRequested && movement > 0) {
@@ -1080,26 +1089,50 @@ void Player::updateJumpButtonStateTracking(const Button& jumpButton) {
 
 
 void Player::updateShooting(const Button& fireButton) {
-  if (!canFire()) {
-    return;
-  }
-
   const auto hasRapidFire =
     stateIs<InShip>() ||
     mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
     mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
-  if (
-    fireButton.mWasTriggered ||
-    (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
-  ) {
-    fireShot();
-  }
+  if (mpOptions->compatibilityModeOn()) {
+    if (!fireButton.mIsPressed) {
+      mRapidFiredLastFrame = false;
+    }
 
-  if (fireButton.mIsPressed && hasRapidFire) {
     mRapidFiredLastFrame = !mRapidFiredLastFrame;
+
+    if (!canFire()) {
+      return;
+    }
+
+    if (!fireButton.mIsPressed) {
+      mFiredLastFrame = false;
+    }
+
+    if (
+      (fireButton.mWasTriggered && !mFiredLastFrame) ||
+      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
+    ) {
+      fireShot();
+      mFiredLastFrame = true;
+    }
   } else {
-    mRapidFiredLastFrame = false;
+    if (!canFire()) {
+      return;
+    }
+
+    if (
+      fireButton.mWasTriggered ||
+      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
+    ) {
+      fireShot();
+    }
+
+    if (fireButton.mIsPressed && hasRapidFire) {
+      mRapidFiredLastFrame = !mRapidFiredLastFrame;
+    } else {
+      mRapidFiredLastFrame = false;
+    }
   }
 }
 
@@ -1551,7 +1584,7 @@ void Player::fireShot() {
     const auto isFacingLeft = orientation() == c::Orientation::Left;
 
     mpEntityFactory->spawnProjectile(
-      ProjectileType::PlayerShipLaserShot,
+      ProjectileType::ShipLaser,
       position + base::Vector{isFacingLeft ? -1 : 8, 0},
       direction);
     spawnOneShotSprite(
@@ -1588,6 +1621,7 @@ bool Player::canFire() const {
   const auto firingBlocked =
     stateIs<ClimbingLadder>() ||
     stateIs<Interacting>() ||
+    mVisualState == VisualState::CoilingForJumpOrLanding ||
     mIsRidingElevator ||
     (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
     hasSpiderAt(SpiderClingPosition::Weapon);
