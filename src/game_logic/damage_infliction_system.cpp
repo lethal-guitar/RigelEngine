@@ -89,9 +89,6 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
           shootableOnScreen
         ) {
           inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
-          if (damage.mDestroyOnContact) {
-            break;
-          }
         }
       }
     });
@@ -105,11 +102,7 @@ void DamageInflictionSystem::inflictDamage(
   Shootable& shootable
 ) {
   const auto inflictorVelocity = extractVelocity(inflictorEntity);
-  if (damage.mDestroyOnContact) {
-    inflictorEntity.destroy();
-  } else {
-    damage.mHasCausedDamage = true;
-  }
+  damage.mHasCausedDamage = true;
 
   shootable.mHealth -= damage.mAmount;
   if (shootable.mHealth <= 0) {

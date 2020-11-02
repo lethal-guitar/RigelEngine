@@ -73,16 +73,12 @@ struct Shootable {
 
 
 struct DamageInflicting {
-  explicit DamageInflicting(
-    const int amount,
-    const bool destroyOnContact = true)
+  explicit DamageInflicting(const int amount)
     : mAmount(amount)
-    , mDestroyOnContact(destroyOnContact)
   {
   }
 
   int mAmount;
-  bool mDestroyOnContact;
   bool mHasCausedDamage = false;
 };
 

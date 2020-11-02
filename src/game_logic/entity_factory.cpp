@@ -363,7 +363,7 @@ entityx::Entity EntityFactory::spawnProjectile(
   entity.assign<Active>();
   entity.assign<WorldPosition>(adjustedPosition(
     type, pos, direction, boundingBox, mpOptions->compatibilityModeOn()));
-  entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
+  entity.assign<DamageInflicting>(damageAmount);
   entity.assign<PlayerProjectile>(type);
   entity.assign<AutoDestroy>(AutoDestroy{
     AutoDestroy::Condition::OnLeavingActiveRegion});

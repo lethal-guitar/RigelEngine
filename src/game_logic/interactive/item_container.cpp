@@ -265,9 +265,7 @@ void NapalmBomb::spawnFires(
     if (canSpawn) {
       auto fire = spawnOneShotSprite(*d.mpEntityFactory, data::ActorID::Fire_bomb_fire, position);
       fire.assign<components::PlayerDamaging>(Damage{1});
-      fire.assign<components::DamageInflicting>(
-        Damage{1},
-        DestroyOnContact{false});
+      fire.assign<components::DamageInflicting>(Damage{1});
     }
     return canSpawn;
   };
