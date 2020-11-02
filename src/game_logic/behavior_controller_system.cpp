@@ -17,12 +17,38 @@
 #include "behavior_controller_system.hpp"
 
 #include "common/global.hpp"
+#include "common/game_service_provider.hpp"
+#include "data/player_model.hpp"
+#include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
+#include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
+#include "game_logic/player.hpp"
 
 
 namespace rigel::game_logic {
+
+using engine::components::Active;
+using engine::components::BoundingBox;
+using engine::components::CollidedWithWorld;
+using engine::components::MovingBody;
+using engine::components::Sprite;
+using engine::components::WorldPosition;
+using game_logic::components::BehaviorController;
+using game_logic::components::DamageInflicting;
+using game_logic::components::Shootable;
+
+namespace {
+
+auto extractVelocity(entityx::Entity entity) {
+  return entity.has_component<MovingBody>()
+    ? entity.component<MovingBody>()->mVelocity
+    : base::Point<float>{};
+}
+
+}
+
 
 BehaviorControllerSystem::BehaviorControllerSystem(
   GlobalDependencies dependencies,
@@ -37,8 +63,6 @@ BehaviorControllerSystem::BehaviorControllerSystem(
       pMap,
       &mPerFrameState)
 {
-  mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
-  mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
   mDependencies.mpEvents->subscribe<engine::events::CollidedWithWorld>(*this);
 }
 
@@ -47,12 +71,20 @@ void BehaviorControllerSystem::update(
   entityx::EntityManager& es,
   const PerFrameState& s
 ) {
-  using engine::components::Active;
-  using game_logic::components::BehaviorController;
+  std::vector<std::tuple<entityx::Entity, BoundingBox>> inflictors;
+  es.each<DamageInflicting, WorldPosition, BoundingBox>(
+    [&](
+      entityx::Entity entity,
+      const DamageInflicting&,
+      const WorldPosition& position,
+      const BoundingBox& bbox
+    ) {
+      inflictors.push_back({entity, engine::toWorldSpace(bbox, position)});
+    });
 
   mPerFrameState = s;
 
-  es.each<BehaviorController, Active>([this](
+  es.each<BehaviorController, Active>([&](
     entityx::Entity entity,
     BehaviorController& controller,
     const Active& active
@@ -62,42 +94,82 @@ void BehaviorControllerSystem::update(
       mGlobalState,
       active.mIsOnScreen,
       entity);
+
+    if (
+      entity &&
+      entity.has_component<Shootable>() &&
+      !entity.component<Shootable>()->mInvincible
+    ) {
+      updateDamageInfliction(entity, controller, inflictors);
+    }
   });
 }
 
 
-void BehaviorControllerSystem::receive(const events::ShootableDamaged& event) {
-  using engine::components::Active;
-  using game_logic::components::BehaviorController;
+void BehaviorControllerSystem::updateDamageInfliction(
+  entityx::Entity shootableEntity,
+  BehaviorController& controller,
+  std::vector<std::tuple<entityx::Entity, BoundingBox>>& inflictors
+) {
+  for (auto& [inflictorEntity, inflictorBbox] : inflictors) {
+    const auto shootableBbox = engine::toWorldSpace(
+      *shootableEntity.component<BoundingBox>(),
+      *shootableEntity.component<WorldPosition>());
 
-  auto entity = event.mEntity;
-  if (
-    entity.has_component<BehaviorController>() &&
-    entity.has_component<Active>()
-  ) {
-    entity.component<BehaviorController>()->onHit(
-      mDependencies,
-      mGlobalState,
-      event.mInflictorVelocity,
-      entity);
+    if (shootableBbox.intersects(inflictorBbox)) {
+      inflictDamage(inflictorEntity, shootableEntity, controller);
+      break;
+    }
   }
 }
 
 
-void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
-  using engine::components::Active;
-  using game_logic::components::BehaviorController;
+void BehaviorControllerSystem::inflictDamage(
+  entityx::Entity inflictorEntity,
+  entityx::Entity shootableEntity,
+  BehaviorController& controller
+) {
+  auto& damage = *inflictorEntity.component<DamageInflicting>();
+  auto& shootable = *shootableEntity.component<Shootable>();
+  const auto inflictorVelocity = extractVelocity(inflictorEntity);
 
-  auto entity = event.mEntity;
-  if (
-    entity.has_component<BehaviorController>() &&
-    entity.has_component<Active>()
-  ) {
-    entity.component<BehaviorController>()->onKilled(
+  damage.mHasCausedDamage = true;
+
+  shootable.mHealth -= damage.mAmount;
+  if (shootable.mHealth <= 0) {
+    controller.onKilled(
       mDependencies,
       mGlobalState,
-      event.mInflictorVelocity,
-      entity);
+      inflictorVelocity,
+      shootableEntity);
+    mDependencies.mpEvents->emit(
+      events::ShootableKilled{shootableEntity, inflictorVelocity});
+    // Event listeners mustn't remove the shootable component
+    assert(shootableEntity.has_component<Shootable>());
+
+    mGlobalState.mpPlayer->model().giveScore(shootable.mGivenScore);
+
+    if (shootable.mDestroyWhenKilled) {
+      shootableEntity.destroy();
+    } else {
+      shootableEntity.remove<Shootable>();
+    }
+  } else {
+    controller.onHit(
+      mDependencies,
+      mGlobalState,
+      inflictorVelocity,
+      shootableEntity);
+    mDependencies.mpEvents->emit(
+      events::ShootableDamaged{shootableEntity, inflictorVelocity});
+
+    if (shootable.mEnableHitFeedback) {
+      mDependencies.mpServiceProvider->playSound(data::SoundId::EnemyHit);
+
+      if (shootableEntity.has_component<Sprite>()) {
+        shootableEntity.component<Sprite>()->flashWhite();
+      }
+    }
   }
 }
 

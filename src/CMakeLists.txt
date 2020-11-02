@@ -95,8 +95,6 @@ set(core_sources
     game_logic/camera.hpp
     game_logic/collectable_components.hpp
     game_logic/damage_components.hpp
-    game_logic/damage_infliction_system.cpp
-    game_logic/damage_infliction_system.hpp
     game_logic/debugging_system.cpp
     game_logic/debugging_system.hpp
     game_logic/demo_player.cpp

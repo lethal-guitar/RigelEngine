@@ -40,7 +40,8 @@ public:
     const engine::CollisionChecker* pCollisionChecker,
     const data::map::Map* pMap);
 
-  void update(entityx::EntityManager& es);
+  void updateMovement(entityx::EntityManager& es);
+  void updateCollision(entityx::EntityManager& es);
 
 private:
   void spawnWallImpactEffect(

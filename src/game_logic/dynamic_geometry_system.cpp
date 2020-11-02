@@ -212,21 +212,14 @@ void DynamicGeometrySystem::updateShootableWalls()
   using game_logic::components::ShootableWall;
 
   std::vector<std::tuple<entityx::Entity, BoundingBox>> projectiles;
-
-  mpEntityManager->each<PlayerProjectile, MovingBody, WorldPosition, BoundingBox>(
+  mpEntityManager->each<PlayerProjectile, WorldPosition, BoundingBox>(
     [&](
       entityx::Entity entity,
       const PlayerProjectile&,
-      const MovingBody& body,
       const WorldPosition& position,
       const BoundingBox& bbox
     ) {
-      const auto futurePosition = base::Vector{
-        position.x + int(body.mVelocity.x),
-        position.y + int(body.mVelocity.y)
-      };
-      projectiles.push_back(
-        {entity, engine::toWorldSpace(bbox, futurePosition)});
+      projectiles.push_back({entity, engine::toWorldSpace(bbox, position)});
     });
 
   mpEntityManager->each<ShootableWall, MapGeometryLink, WorldPosition, BoundingBox>(

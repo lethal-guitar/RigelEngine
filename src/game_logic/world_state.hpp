@@ -30,7 +30,6 @@
 #include "engine/rendering_system.hpp"
 #include "game_logic/behavior_controller_system.hpp"
 #include "game_logic/camera.hpp"
-#include "game_logic/damage_infliction_system.hpp"
 #include "game_logic/debugging_system.hpp"
 #include "game_logic/dynamic_geometry_system.hpp"
 #include "game_logic/earth_quake_effect.hpp"
@@ -133,7 +132,6 @@ struct WorldState {
   game_logic::PlayerInteractionSystem mPlayerInteractionSystem;
   game_logic::player::DamageSystem mPlayerDamageSystem;
   game_logic::player::ProjectileSystem mPlayerProjectileSystem;
-  game_logic::DamageInflictionSystem mDamageInflictionSystem;
   game_logic::DynamicGeometrySystem mDynamicGeometrySystem;
   game_logic::EffectsSystem mEffectsSystem;
   game_logic::ItemContainerSystem mItemContainerSystem;

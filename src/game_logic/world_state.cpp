@@ -221,7 +221,6 @@ WorldState::WorldState(
       pServiceProvider,
       &mCollisionChecker,
       &mMap)
-  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &mEventManager)
   , mDynamicGeometrySystem(
       pServiceProvider,
       &mEntities,

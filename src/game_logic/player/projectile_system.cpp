@@ -32,12 +32,10 @@ namespace {
 
 void deactivateProjectile(entityx::Entity entity) {
   using engine::components::AutoDestroy;
-  using engine::components::MovingBody;
   using game_logic::components::DamageInflicting;
 
   engine::reassign<AutoDestroy>(entity, AutoDestroy::afterTimeout(1));
   entity.remove<DamageInflicting>();
-  entity.remove<MovingBody>();
 }
 
 
@@ -136,7 +134,30 @@ ProjectileSystem::ProjectileSystem(
 }
 
 
-void ProjectileSystem::update(entityx::EntityManager& es) {
+void ProjectileSystem::updateMovement(entityx::EntityManager& es) {
+  using namespace engine::components;
+  using namespace game_logic::components;
+
+  es.each<
+    PlayerProjectile,
+    MovingBody,
+    WorldPosition,
+    Active
+  >(
+    [this](
+      entityx::Entity entity,
+      PlayerProjectile&,
+      MovingBody& body,
+      WorldPosition& position,
+      const Active&
+    ) {
+      position.x += int(body.mVelocity.x);
+      position.y += int(body.mVelocity.y);
+    });
+}
+
+
+void ProjectileSystem::updateCollision(entityx::EntityManager& es) {
   using namespace engine::components;
   using namespace game_logic::components;
 
@@ -157,10 +178,6 @@ void ProjectileSystem::update(entityx::EntityManager& es) {
       DamageInflicting& damage,
       const Active&
     ) {
-      if (!body.mIsActive) {
-        body.mIsActive = true;
-      }
-
       if (
         projectile.mType == PlayerProjectile::Type::Laser ||
         projectile.mType == PlayerProjectile::Type::ShipLaser ||

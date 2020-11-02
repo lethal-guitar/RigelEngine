@@ -70,6 +70,16 @@ const int HINT_GLOBE_ANIMATION[] = {
 };
 
 
+struct Dummy {
+  void update(
+    GlobalDependencies&,
+    GlobalState&,
+    bool,
+    entityx::Entity) {
+  }
+};
+
+
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -2050,6 +2060,13 @@ void EntityFactory::configureEntity(
 
     default:
       break;
+  }
+
+  if (
+    entity.has_component<Shootable>() &&
+    !entity.has_component<BehaviorController>()
+  ) {
+    entity.assign<BehaviorController>(Dummy{});
   }
 
   ++mSpawnIndex;

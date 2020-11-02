@@ -532,6 +532,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mpState->mRenderingSystem.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
 
+  mpState->mPlayerProjectileSystem.updateMovement(mpState->mEntities);
   mpState->mDynamicGeometrySystem.updateShootableWalls();
 
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
@@ -557,9 +558,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mpState->mItemContainerSystem.updateItemBounce(mpState->mEntities);
   mpState->mPlayerInteractionSystem.updateItemCollection(mpState->mEntities);
   mpState->mPlayerDamageSystem.update(mpState->mEntities);
-  mpState->mDamageInflictionSystem.update(mpState->mEntities);
   mpState->mItemContainerSystem.update(mpState->mEntities);
-  mpState->mPlayerProjectileSystem.update(mpState->mEntities);
+  mpState->mPlayerProjectileSystem.updateCollision(mpState->mEntities);
 
   mpState->mEffectsSystem.update(mpState->mEntities);
   mpState->mLifeTimeSystem.update(

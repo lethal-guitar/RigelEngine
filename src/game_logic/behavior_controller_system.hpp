@@ -20,12 +20,19 @@
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/input.hpp"
 
+#include <tuple>
+#include <vector>
+
+
 namespace rigel::engine::events {
   struct CollidedWithWorld;
 }
 
 
 namespace rigel::game_logic {
+
+namespace components { class BehaviorController; }
+
 
 class BehaviorControllerSystem :
   public entityx::Receiver<BehaviorControllerSystem> {
@@ -38,11 +45,18 @@ public:
 
   void update(entityx::EntityManager& es, const PerFrameState& s);
 
-  void receive(const events::ShootableDamaged& event);
-  void receive(const events::ShootableKilled& event);
   void receive(const engine::events::CollidedWithWorld& event);
 
 private:
+  void updateDamageInfliction(
+    entityx::Entity shootableEntity,
+    game_logic::components::BehaviorController& controller,
+    std::vector<std::tuple<entityx::Entity, engine::components::BoundingBox>>& inflictors);
+  void inflictDamage(
+    entityx::Entity inflictorEntity,
+    entityx::Entity shootableEntity,
+    game_logic::components::BehaviorController& controller);
+
   GlobalDependencies mDependencies;
   PerFrameState mPerFrameState;
   GlobalState mGlobalState;
