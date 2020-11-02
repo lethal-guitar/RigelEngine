@@ -91,7 +91,7 @@ void DamageInflictionSystem::update(ex::EntityManager& es)
         if (
           shootableBbox.intersects(inflictorBbox) &&
           !shootable.mInvincible &&
-          (shootableOnScreen || shootable.mCanBeHitWhenOffscreen))
+          shootableOnScreen)
         // clang-format on
         {
           inflictDamage(inflictorEntity, *damage, shootableEntity, shootable);
@@ -109,7 +109,7 @@ void DamageInflictionSystem::inflictDamage(
   Shootable& shootable)
 {
   const auto inflictorVelocity = extractVelocity(inflictorEntity);
-  if (damage.mDestroyOnContact || shootable.mAlwaysConsumeInflictor)
+  if (damage.mDestroyOnContact)
   {
     inflictorEntity.destroy();
   }

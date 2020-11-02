@@ -19,7 +19,6 @@
 #include "base/spatial_types_printing.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
-#include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
@@ -379,10 +378,67 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   , mpMapRenderer(pMapRenderer)
   , mSimpleDynamicSections(std::move(simpleDynamicSections))
 {
-  pEvents->subscribe<events::ShootableKilled>(*this);
   pEvents->subscribe<rigel::events::DoorOpened>(*this);
   pEvents->subscribe<rigel::events::MissileDetonated>(*this);
   pEvents->subscribe<rigel::events::TileBurnedAway>(*this);
+}
+
+
+void DynamicGeometrySystem::updateShootableWalls()
+{
+  using engine::components::BoundingBox;
+  using engine::components::MovingBody;
+  using engine::components::WorldPosition;
+  using game_logic::components::PlayerProjectile;
+  using game_logic::components::ShootableWall;
+
+  mCollectedProjectiles.clear();
+
+  mpEntityManager
+    ->each<PlayerProjectile, MovingBody, WorldPosition, BoundingBox>(
+      [&](
+        entityx::Entity entity,
+        const PlayerProjectile&,
+        const MovingBody& body,
+        const WorldPosition& position,
+        const BoundingBox& bbox) {
+        const auto futurePosition = base::Vec2{
+          position.x + int(body.mVelocity.x),
+          position.y + int(body.mVelocity.y)};
+        mCollectedProjectiles.push_back(
+          {entity, engine::toWorldSpace(bbox, futurePosition)});
+      });
+
+  mpEntityManager
+    ->each<ShootableWall, DynamicGeometrySection, WorldPosition, BoundingBox>(
+      [&](
+        entityx::Entity entity,
+        const ShootableWall&,
+        const DynamicGeometrySection& geometrySection,
+        const WorldPosition& position,
+        const BoundingBox& localBbox) {
+        const auto bbox = engine::toWorldSpace(localBbox, position);
+
+        for (auto& [projectile, projectileBbox] : mCollectedProjectiles)
+        {
+          if (projectile && bbox.intersects(projectileBbox))
+          {
+            const auto& mapSection = geometrySection.mLinkedGeometrySection;
+            explodeMapSection(
+              mapSection,
+              *mpMap,
+              *mpEntityManager,
+              *mpEvents,
+              *mpRandomGenerator);
+            updateExtraSectionsIntersecting(mapSection);
+            mpServiceProvider->playSound(data::SoundId::BigExplosion);
+            mpEvents->emit(rigel::events::ScreenFlash{});
+
+            projectile.destroy();
+            entity.destroy();
+          }
+        }
+      });
 }
 
 
@@ -406,7 +462,7 @@ void DynamicGeometrySystem::initializeDynamicGeometryEntities(
       entityx::Entity entity, DynamicGeometrySection& dynamic) mutable {
       // Shootable walls are dynamic geometry, but they do not fall down,
       // hence they are not relevant here.
-      if (entity.has_component<components::Shootable>())
+      if (entity.has_component<components::ShootableWall>())
       {
         return;
       }
@@ -436,25 +492,6 @@ void DynamicGeometrySystem::initializeDynamicGeometryEntities(
 
       ++index;
     });
-}
-
-
-void DynamicGeometrySystem::receive(const events::ShootableKilled& event)
-{
-  auto entity = event.mEntity;
-  // Take care of shootable walls
-  if (!entity.has_component<DynamicGeometrySection>())
-  {
-    return;
-  }
-
-  const auto& mapSection =
-    entity.component<DynamicGeometrySection>()->mLinkedGeometrySection;
-  explodeMapSection(
-    mapSection, *mpMap, *mpEntityManager, *mpEvents, *mpRandomGenerator);
-  updateExtraSectionsIntersecting(mapSection);
-  mpServiceProvider->playSound(data::SoundId::BigExplosion);
-  mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
 

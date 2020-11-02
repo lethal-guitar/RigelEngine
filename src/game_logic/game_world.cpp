@@ -610,6 +610,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
     mpState->mWaterAnimStep = 0;
   }
 
+  mpState->mDynamicGeometrySystem.updateShootableWalls();
+
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
     input, mpState->mEntities);
   mpState->mPlayer.update(input);

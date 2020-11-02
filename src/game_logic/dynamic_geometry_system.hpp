@@ -19,6 +19,7 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/map.hpp"
+#include "engine/base_components.hpp"
 #include "engine/map_renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -87,10 +88,11 @@ public:
     engine::MapRenderer* pMapRenderer,
     std::vector<base::Rect<int>> simpleDynamicSections);
 
+  void updateShootableWalls();
+
   void initializeDynamicGeometryEntities(
     const std::vector<FallingSectionInfo>& fallingSections);
 
-  void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::DoorOpened& event);
   void receive(const rigel::events::MissileDetonated& event);
   void receive(const rigel::events::TileBurnedAway& event);
@@ -120,6 +122,8 @@ private:
   entityx::EventManager* mpEvents;
   engine::MapRenderer* mpMapRenderer;
   std::vector<base::Rect<int>> mSimpleDynamicSections;
+  std::vector<std::tuple<entityx::Entity, engine::components::BoundingBox>>
+    mCollectedProjectiles;
 };
 
 } // namespace rigel::game_logic
