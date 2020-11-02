@@ -37,6 +37,9 @@ struct TileDebris {
   data::map::TileIndex mTileIndex;
 };
 
+
+struct ShootableWall {};
+
 }
 
 namespace behaviors {

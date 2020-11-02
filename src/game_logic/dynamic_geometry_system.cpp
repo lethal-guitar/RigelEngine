@@ -198,24 +198,62 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   , mpRandomGenerator(pRandomGenerator)
   , mpEvents(pEvents)
 {
-  pEvents->subscribe<events::ShootableKilled>(*this);
   pEvents->subscribe<rigel::events::DoorOpened>(*this);
   pEvents->subscribe<rigel::events::MissileDetonated>(*this);
 }
 
 
-void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
-  auto entity = event.mEntity;
-  // Take care of shootable walls
-  if (!entity.has_component<MapGeometryLink>()) {
-    return;
-  }
+void DynamicGeometrySystem::updateShootableWalls()
+{
+  using engine::components::BoundingBox;
+  using engine::components::MovingBody;
+  using engine::components::WorldPosition;
+  using game_logic::components::PlayerProjectile;
+  using game_logic::components::ShootableWall;
 
-  const auto& mapSection =
-    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
-  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
-  mpServiceProvider->playSound(data::SoundId::BigExplosion);
-  mpEvents->emit(rigel::events::ScreenFlash{});
+  std::vector<std::tuple<entityx::Entity, BoundingBox>> projectiles;
+
+  mpEntityManager->each<PlayerProjectile, MovingBody, WorldPosition, BoundingBox>(
+    [&](
+      entityx::Entity entity,
+      const PlayerProjectile&,
+      const MovingBody& body,
+      const WorldPosition& position,
+      const BoundingBox& bbox
+    ) {
+      const auto futurePosition = base::Vector{
+        position.x + int(body.mVelocity.x),
+        position.y + int(body.mVelocity.y)
+      };
+      projectiles.push_back(
+        {entity, engine::toWorldSpace(bbox, futurePosition)});
+    });
+
+  mpEntityManager->each<ShootableWall, MapGeometryLink, WorldPosition, BoundingBox>(
+    [&](
+      entityx::Entity entity,
+      const ShootableWall&,
+      const MapGeometryLink& mapSection,
+      const WorldPosition& position,
+      const BoundingBox& localBbox
+    ) {
+      const auto bbox = engine::toWorldSpace(localBbox, position);
+
+      for (auto& [projectile, projectileBbox] : projectiles) {
+        if (projectile && bbox.intersects(projectileBbox)) {
+          explodeMapSection(
+            mapSection.mLinkedGeometrySection,
+            *mpMap,
+            *mpEntityManager,
+            *mpRandomGenerator);
+          mpServiceProvider->playSound(data::SoundId::BigExplosion);
+          mpEvents->emit(rigel::events::ScreenFlash{});
+
+          projectile.destroy();
+          entity.destroy();
+        }
+      }
+    });
 }
 
 

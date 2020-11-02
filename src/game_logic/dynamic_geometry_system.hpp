@@ -28,7 +28,6 @@ namespace rigel {
   namespace data::map { class Map; }
   namespace engine { class RandomNumberGenerator; }
   namespace events { struct DoorOpened; struct MissileDetonated; }
-  namespace game_logic::events { struct ShootableKilled; }
 }
 
 
@@ -43,7 +42,8 @@ public:
     engine::RandomNumberGenerator* pRandomGenerator,
     entityx::EventManager* pEvents);
 
-  void receive(const events::ShootableKilled& event);
+  void updateShootableWalls();
+
   void receive(const rigel::events::DoorOpened& event);
   void receive(const rigel::events::MissileDetonated& event);
 

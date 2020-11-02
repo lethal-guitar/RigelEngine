@@ -532,6 +532,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
   mpState->mRenderingSystem.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
 
+  mpState->mDynamicGeometrySystem.updateShootableWalls();
+
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
     input, mpState->mEntities);
   mpState->mPlayer.update(input);
