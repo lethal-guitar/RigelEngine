@@ -29,7 +29,6 @@ class RandomNumberGenerator {
 public:
   int gen();
 
-private:
   std::size_t mNextNumberIndex = 0;
 };
 

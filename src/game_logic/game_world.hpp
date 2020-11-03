@@ -138,7 +138,10 @@ private:
   ui::IngameMessageDisplay mMessageDisplay;
   renderer::RenderTargetTexture mLowResLayer;
 
+public:
   std::unique_ptr<WorldState> mpState;
+
+private:
   std::unique_ptr<QuickSaveData> mpQuickSave;
 };
 
