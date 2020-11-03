@@ -555,7 +555,7 @@ void spawnEnemyLaserShot(
       ? data::ActorID::Enemy_laser_shot_LEFT
       : data::ActorID::Enemy_laser_shot_RIGHT,
     position);
-  entity.assign<Active>();
+  //entity.assign<Active>();
 
   // For convenience, the enemy laser shot muzzle flash is created along with
   // the projectile.
