@@ -24,6 +24,7 @@
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
+#include "game_logic/compatibility_mode.hpp"
 #include "game_logic/player.hpp"
 
 
@@ -38,6 +39,7 @@ using engine::components::WorldPosition;
 using game_logic::components::BehaviorController;
 using game_logic::components::DamageInflicting;
 using game_logic::components::Shootable;
+using game_logic::components::SlotIndex;
 
 namespace {
 
@@ -80,6 +82,19 @@ void BehaviorControllerSystem::update(
       const BoundingBox& bbox
     ) {
       inflictors.push_back({entity, engine::toWorldSpace(bbox, position)});
+    });
+
+  auto sortIndex = [](entityx::Entity entity) {
+    if (entity.has_component<SlotIndex>()) {
+      return entity.component<SlotIndex>()->mIndex;
+    }
+
+    return -1;
+  };
+
+  std::stable_sort(std::begin(inflictors), std::end(inflictors),
+    [&](const auto& lhs, const auto& rhs) {
+      return sortIndex(std::get<0>(lhs)) < sortIndex(std::get<0>(rhs));
     });
 
   mPerFrameState = s;

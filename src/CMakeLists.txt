@@ -94,6 +94,8 @@ set(core_sources
     game_logic/camera.cpp
     game_logic/camera.hpp
     game_logic/collectable_components.hpp
+    game_logic/compatibility_mode.cpp
+    game_logic/compatibility_mode.hpp
     game_logic/damage_components.hpp
     game_logic/debugging_system.cpp
     game_logic/debugging_system.hpp

@@ -29,6 +29,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
+#include "game_logic/compatibility_mode.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/effect_actor_components.hpp"
@@ -293,6 +294,7 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
 EntityFactory::EntityFactory(
   engine::ISpriteFactory* pSpriteFactory,
   ex::EntityManager* pEntityManager,
+  ex::EventManager& eventManager,
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
   const data::GameOptions* pOptions,
@@ -302,9 +304,15 @@ EntityFactory::EntityFactory(
   , mpServiceProvider(pServiceProvider)
   , mpRandomGenerator(pRandomGenerator)
   , mpOptions(pOptions)
+  , mpUpdateOrderManager(pOptions->compatibilityModeOn()
+      ? std::make_unique<UpdateOrderManager>(eventManager)
+      : nullptr)
   , mDifficulty(difficulty)
 {
 }
+
+
+EntityFactory::~EntityFactory() = default;
 
 
 Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
@@ -354,6 +362,10 @@ entityx::Entity EntityFactory::spawnProjectile(
 ) {
   using namespace engine::components::parameter_aliases;
   using namespace game_logic::components::parameter_aliases;
+
+  if (mpUpdateOrderManager && !mpUpdateOrderManager->canSpawnProjectile()) {
+    return {};
+  }
 
   auto entity = spawnSprite(actorIdForProjectile(type, direction), true);
 

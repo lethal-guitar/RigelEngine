@@ -39,7 +39,7 @@ struct AggressivePrisoner {
     bool isOnScreen,
     entityx::Entity entity);
 
-  void onKilled(
+  void onHit(
     GlobalDependencies& dependencies,
     GlobalState& state,
     const base::Point<float>& inflictorVelocity,

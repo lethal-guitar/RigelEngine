@@ -168,6 +168,7 @@ WorldState::WorldState(
   , mEntityFactory(
     pSpriteFactory,
     &mEntities,
+    mEventManager,
     pServiceProvider,
     &mRandomGenerator,
     pOptions,

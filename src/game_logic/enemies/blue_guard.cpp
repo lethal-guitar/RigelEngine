@@ -135,8 +135,11 @@ void BlueGuard::update(
       // Fire gun
       const auto facingLeft = mOrientation == Orientation::Left;
       const auto wantsToShoot = (d.mpRandomGenerator->gen() % 8) == 0;
-      if (wantsToShoot && engine::isOnScreen(entity)) {
-        d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
+      if (wantsToShoot) {
+        if (engine::isOnScreen(entity)) {
+          d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
+        }
+
         spawnEnemyLaserShot(
           *d.mpEntityFactory,
           position + offsetForShot(*this),

@@ -30,6 +30,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <vector>
@@ -41,6 +42,9 @@ namespace rigel::engine { class RandomNumberGenerator; }
 namespace rigel::loader { class ActorImagePackage; }
 
 namespace rigel::game_logic {
+
+class UpdateOrderManager;
+
 
 enum class ContainerColor {
   Red,
@@ -62,10 +66,12 @@ public:
   EntityFactory(
     engine::ISpriteFactory* pSpriteFactory,
     entityx::EntityManager* pEntityManager,
+    entityx::EventManager& eventManager,
     IGameServiceProvider* pServiceProvider,
     engine::RandomNumberGenerator* pRandomGenerator,
     const data::GameOptions* pOptions,
     data::Difficulty difficulty);
+  ~EntityFactory();
 
   void createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) override;
@@ -119,6 +125,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   engine::RandomNumberGenerator* mpRandomGenerator;
   const data::GameOptions* mpOptions;
+  std::unique_ptr<UpdateOrderManager> mpUpdateOrderManager;
   int mSpawnIndex = 0;
   data::Difficulty mDifficulty;
 };

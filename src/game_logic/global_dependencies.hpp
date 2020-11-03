@@ -65,6 +65,7 @@ struct PerFrameState {
   int mNumRadarDishes = 0;
   bool mIsOddFrame = false;
   bool mIsEarthShaking = false;
+  bool mCompatibilityModeOn = false;
 };
 
 

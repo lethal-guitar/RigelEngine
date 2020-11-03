@@ -17,6 +17,7 @@
 #include "prisoner.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "data/player_model.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
@@ -98,7 +99,7 @@ void AggressivePrisoner::update(
 }
 
 
-void AggressivePrisoner::onKilled(
+void AggressivePrisoner::onHit(
   GlobalDependencies& d,
   GlobalState& s,
   const base::Point<float>& inflictorVelocity,
@@ -107,6 +108,11 @@ void AggressivePrisoner::onKilled(
   using engine::components::AutoDestroy;
   using engine::components::Sprite;
   using engine::components::WorldPosition;
+  using game_logic::components::Shootable;
+
+  auto& shootable = *entity.component<Shootable>();
+  shootable.mHealth = 1000;
+  s.mpPlayer->model().giveScore(shootable.mGivenScore);
 
   auto& sprite = *entity.component<Sprite>();
 
@@ -133,7 +139,8 @@ void AggressivePrisoner::onKilled(
     loader::INGAME_PALETTE[5]);
   d.mpServiceProvider->playSound(data::SoundId::BiologicalEnemyDestroyed);
 
-  entity.remove<components::BehaviorController>();
+  *entity.component<components::BehaviorController>() =
+    components::BehaviorController{behaviors::Dummy{}};
 }
 
 

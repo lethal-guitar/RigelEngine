@@ -31,6 +31,20 @@ namespace rigel::engine::events {
 }
 
 
+namespace rigel::game_logic::behaviors {
+
+struct Dummy {
+  void update(
+    GlobalDependencies&,
+    GlobalState&,
+    bool,
+    entityx::Entity) {
+  }
+};
+
+}
+
+
 namespace rigel::game_logic::components {
 
 namespace detail {

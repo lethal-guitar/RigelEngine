@@ -32,10 +32,12 @@ namespace {
 
 void deactivateProjectile(entityx::Entity entity) {
   using engine::components::AutoDestroy;
+  using engine::components::MovingBody;
   using game_logic::components::DamageInflicting;
 
   engine::reassign<AutoDestroy>(entity, AutoDestroy::afterTimeout(1));
   entity.remove<DamageInflicting>();
+  entity.remove<MovingBody>();
 }
 
 

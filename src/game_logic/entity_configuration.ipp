@@ -70,16 +70,6 @@ const int HINT_GLOBE_ANIMATION[] = {
 };
 
 
-struct Dummy {
-  void update(
-    GlobalDependencies&,
-    GlobalState&,
-    bool,
-    entityx::Entity) {
-  }
-};
-
-
 base::Point<float> directionToVector(const ProjectileDirection direction) {
   const auto isNegative =
     direction == ProjectileDirection::Left ||
@@ -1622,9 +1612,15 @@ void EntityFactory::configureEntity(
     case ActorID::Aggressive_prisoner: // Monster in prison cell, aggressive
       entity.assign<BehaviorController>(behaviors::AggressivePrisoner{});
       entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
-      entity.assign<Shootable>(Health{1}, GivenScore{500});
+
+      {
+        const auto health = 1000;
+        entity.assign<Shootable>(health, GivenScore{500});
+      }
+
       entity.component<Shootable>()->mInvincible = true;
       entity.component<Shootable>()->mDestroyWhenKilled = false;
+      entity.component<Shootable>()->mEnableHitFeedback = false;
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -2066,7 +2062,7 @@ void EntityFactory::configureEntity(
     entity.has_component<Shootable>() &&
     !entity.has_component<BehaviorController>()
   ) {
-    entity.assign<BehaviorController>(Dummy{});
+    entity.assign<BehaviorController>(behaviors::Dummy{});
   }
 
   ++mSpawnIndex;

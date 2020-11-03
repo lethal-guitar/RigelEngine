@@ -549,7 +549,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
       viewPortSize,
       mpState->mRadarDishCounter.numRadarDishes(),
       mpState->mIsOddFrame,
-      mpState->mEarthQuakeEffect && mpState->mEarthQuakeEffect->isQuaking()});
+      mpState->mEarthQuakeEffect && mpState->mEarthQuakeEffect->isQuaking(),
+      mpOptions->compatibilityModeOn()});
 
   mpState->mPhysicsSystem.updatePhase1(mpState->mEntities);
 
