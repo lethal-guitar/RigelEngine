@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/clock.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "common/game_mode.hpp"
@@ -35,7 +36,6 @@
 
 #include <SDL_gamecontroller.h>
 
-#include <chrono>
 #include <memory>
 #include <optional>
 #include <string>
@@ -126,7 +126,7 @@ private:
 
   bool mIsRunning;
   bool mIsMinimized;
-  std::chrono::high_resolution_clock::time_point mLastTime;
+  base::Clock::time_point mLastTime;
 
   CommandLineOptions mCommandLineOptions;
   UserProfile* mpUserProfile;

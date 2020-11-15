@@ -231,7 +231,7 @@ Game::Game(
 
   enumerateGameControllers();
 
-  mLastTime = std::chrono::high_resolution_clock::now();
+  mLastTime = base::Clock::now();
 }
 
 
@@ -239,7 +239,7 @@ auto Game::runOneFrame() -> std::optional<StopReason> {
   using namespace std::chrono;
   using base::defer;
 
-  const auto startOfFrame = high_resolution_clock::now();
+  const auto startOfFrame = base::Clock::now();
   const auto elapsed =
     duration<entityx::TimeDelta>(startOfFrame - mLastTime).count();
   mLastTime = startOfFrame;
@@ -401,10 +401,10 @@ void Game::performScreenFadeBlocking(const FadeType type) {
   renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
   auto saved = renderer::setupDefaultState(&mRenderer);
 
-  auto startTime = high_resolution_clock::now();
+  auto startTime = base::Clock::now();
 
   while (mIsRunning) {
-    const auto now = high_resolution_clock::now();
+    const auto now = base::Clock::now();
     const auto elapsedTime = duration<double>(now - startTime).count();
     const auto fastTicksElapsed = engine::timeToFastTicks(elapsedTime);
     const auto fadeFactor =
@@ -427,7 +427,7 @@ void Game::performScreenFadeBlocking(const FadeType type) {
   mRenderer.setColorModulation({255, 255, 255, 255});
 
   // Pretend that the fade didn't take any time
-  mLastTime = high_resolution_clock::now();
+  mLastTime = base::Clock::now();
 }
 
 

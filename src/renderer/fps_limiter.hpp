@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <chrono>
+#include "base/clock.hpp"
 
 
 namespace rigel::renderer {
@@ -28,7 +28,7 @@ public:
   void updateAndWait();
 
 private:
-  std::chrono::high_resolution_clock::time_point mLastTime = {};
+  base::Clock::time_point mLastTime = {};
   double mTargetFrameTime;
   double mError = 0.0;
 };
