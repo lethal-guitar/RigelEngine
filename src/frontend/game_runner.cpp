@@ -26,35 +26,6 @@
 
 namespace rigel {
 
-namespace {
-
-// Controller handling stuff.
-// TODO: This should move into its own file at some point.
-constexpr auto ANALOG_STICK_DEADZONE_X = 10'000;
-constexpr auto ANALOG_STICK_DEADZONE_Y = 24'000;
-constexpr auto TRIGGER_THRESHOLD = 3'000;
-
-
-game_logic::PlayerInput combinedInput(
-  const game_logic::PlayerInput& baseInput,
-  const base::Vector& analogStickVector
-) {
-  auto combined = baseInput;
-
-  // "Overlay" analog stick movement on top of the digital d-pad movement.
-  // This way, button presses and analog stick movements don't cancel each
-  // other out.
-  combined.mLeft |= analogStickVector.x < 0;
-  combined.mRight |= analogStickVector.x > 0;
-  combined.mUp |= analogStickVector.y < 0;
-  combined.mDown |= analogStickVector.y > 0;
-
-  return combined;
-}
-
-}
-
-
 GameRunner::GameRunner(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId& sessionId,
@@ -86,8 +57,21 @@ void GameRunner::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  handlePlayerKeyboardInput(event);
-  handlePlayerGameControllerInput(event);
+  const auto menuCommand = mInputHandler.handleEvent(
+    event, mWorld.mpState->mPlayer.stateIs<game_logic::InShip>());
+
+  switch (menuCommand) {
+    case InputHandler::MenuCommand::QuickSave:
+      mWorld.quickSave();
+      break;
+
+    case InputHandler::MenuCommand::QuickLoad:
+      mWorld.quickLoad();
+      break;
+
+    default:
+      break;
+  }
 
   const auto debugModeEnabled =
     mContext.mpServiceProvider->commandLineOptions().mDebugModeEnabled;
@@ -118,8 +102,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt) {
 
 void GameRunner::updateWorld(const engine::TimeDelta dt) {
   auto update = [this]() {
-    mWorld.updateGameLogic(combinedInput(mPlayerInput, mAnalogStickVector));
-    mPlayerInput.resetTriggeredStates();
+    mWorld.updateGameLogic(mInputHandler.fetchInput());
   };
 
 
@@ -144,7 +127,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt) {
 
 bool GameRunner::updateMenu(const engine::TimeDelta dt) {
   if (mMenu.isActive()) {
-    mPlayerInput = {};
+    mInputHandler.reset();
 
     if (mMenu.isTransparent()) {
       mWorld.render();
@@ -162,173 +145,6 @@ bool GameRunner::updateMenu(const engine::TimeDelta dt) {
   }
 
   return false;
-}
-
-
-void GameRunner::handlePlayerKeyboardInput(const SDL_Event& event) {
-  const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
-  if (!isKeyEvent || event.key.repeat != 0) {
-    return;
-  }
-
-  const auto keyPressed = std::uint8_t{event.type == SDL_KEYDOWN};
-  switch (event.key.keysym.sym) {
-    // TODO: DRY this up a little?
-    case SDLK_UP:
-      mPlayerInput.mUp = keyPressed;
-      mPlayerInput.mInteract.mIsPressed = keyPressed;
-      if (keyPressed) {
-        mPlayerInput.mInteract.mWasTriggered = true;
-      }
-      break;
-
-    case SDLK_DOWN:
-      mPlayerInput.mDown = keyPressed;
-      break;
-
-    case SDLK_LEFT:
-      mPlayerInput.mLeft = keyPressed;
-      break;
-
-    case SDLK_RIGHT:
-      mPlayerInput.mRight = keyPressed;
-      break;
-
-    case SDLK_LCTRL:
-    case SDLK_RCTRL:
-      mPlayerInput.mJump.mIsPressed = keyPressed;
-      if (keyPressed) {
-        mPlayerInput.mJump.mWasTriggered = true;
-      }
-      break;
-
-    case SDLK_LALT:
-    case SDLK_RALT:
-      mPlayerInput.mFire.mIsPressed = keyPressed;
-      if (keyPressed) {
-        mPlayerInput.mFire.mWasTriggered = true;
-      }
-      break;
-
-    case SDLK_F5:
-      if (keyPressed) {
-        mWorld.quickSave();
-      }
-      break;
-
-    case SDLK_F7:
-      if (keyPressed) {
-        mWorld.quickLoad();
-      }
-      break;
-  }
-}
-
-
-void GameRunner::handlePlayerGameControllerInput(const SDL_Event& event) {
-  switch (event.type) {
-    case SDL_CONTROLLERAXISMOTION:
-      switch (event.caxis.axis) {
-        case SDL_CONTROLLER_AXIS_LEFTX:
-        case SDL_CONTROLLER_AXIS_RIGHTX:
-          mAnalogStickVector.x =
-            base::applyThreshold(event.caxis.value, ANALOG_STICK_DEADZONE_X);
-          break;
-
-        case SDL_CONTROLLER_AXIS_LEFTY:
-        case SDL_CONTROLLER_AXIS_RIGHTY:
-          {
-            // We want to avoid accidental crouching/looking up while the
-            // player is walking, but still make it easy to move the ship
-            // up/down while flying. Therefore, we use a different vertical
-            // deadzone when not in the ship.
-            const auto deadZone =
-              mWorld.mpState->mPlayer.stateIs<game_logic::InShip>()
-              ? ANALOG_STICK_DEADZONE_X
-              : ANALOG_STICK_DEADZONE_Y;
-
-            const auto newY = base::applyThreshold(event.caxis.value, deadZone);
-            if (mAnalogStickVector.y >= 0 && newY < 0) {
-              mPlayerInput.mInteract.mWasTriggered = true;
-            }
-            mPlayerInput.mInteract.mIsPressed = newY < 0;
-            mAnalogStickVector.y = newY;
-          }
-          break;
-
-        case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-        case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-          {
-            const auto triggerPressed = event.caxis.value > TRIGGER_THRESHOLD;
-
-            auto& input = event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT
-              ? mPlayerInput.mJump
-              : mPlayerInput.mFire;
-            if (!input.mIsPressed && triggerPressed) {
-              input.mWasTriggered = true;
-            }
-            input.mIsPressed = triggerPressed;
-          }
-          break;
-
-        default:
-          break;
-      }
-      break;
-
-    case SDL_CONTROLLERBUTTONDOWN:
-    case SDL_CONTROLLERBUTTONUP:
-      {
-        const auto buttonPressed = event.type == SDL_CONTROLLERBUTTONDOWN;
-
-        switch (event.cbutton.button) {
-          case SDL_CONTROLLER_BUTTON_DPAD_UP:
-            mPlayerInput.mUp = buttonPressed;
-            mPlayerInput.mInteract.mIsPressed = buttonPressed;
-            if (buttonPressed) {
-                mPlayerInput.mInteract.mWasTriggered = true;
-            }
-            break;
-
-          case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-            mPlayerInput.mDown = buttonPressed;
-            break;
-
-          case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-            mPlayerInput.mLeft = buttonPressed;
-            break;
-
-          case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-            mPlayerInput.mRight = buttonPressed;
-            break;
-
-          case SDL_CONTROLLER_BUTTON_A:
-          case SDL_CONTROLLER_BUTTON_B:
-          case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-            mPlayerInput.mJump.mIsPressed = buttonPressed;
-            if (buttonPressed) {
-                mPlayerInput.mJump.mWasTriggered = true;
-            }
-            break;
-
-          case SDL_CONTROLLER_BUTTON_X:
-          case SDL_CONTROLLER_BUTTON_Y:
-          case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-            mPlayerInput.mFire.mIsPressed = buttonPressed;
-            if (buttonPressed) {
-                mPlayerInput.mFire.mWasTriggered = true;
-            }
-            break;
-
-          case SDL_CONTROLLER_BUTTON_BACK:
-            if (buttonPressed) {
-              mWorld.quickSave();
-            }
-            break;
-        }
-      }
-      break;
-  }
 }
 
 

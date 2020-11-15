@@ -85,6 +85,8 @@ set(core_sources
     frontend/game_runner.hpp
     frontend/game_session_mode.cpp
     frontend/game_session_mode.hpp
+    frontend/input_handler.cpp
+    frontend/input_handler.hpp
     frontend/intro_demo_loop_mode.cpp
     frontend/intro_demo_loop_mode.hpp
     frontend/menu_mode.cpp

@@ -21,6 +21,7 @@
 #include "common/game_mode.hpp"
 #include "data/bonus.hpp"
 #include "data/saved_game.hpp"
+#include "frontend/input_handler.hpp"
 #include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
 #include "ui/ingame_menu.hpp"
@@ -53,16 +54,13 @@ public:
 private:
   void updateWorld(engine::TimeDelta dt);
   bool updateMenu(engine::TimeDelta dt);
-  void handlePlayerKeyboardInput(const SDL_Event& event);
-  void handlePlayerGameControllerInput(const SDL_Event& event);
   void handleDebugKeys(const SDL_Event& event);
   void renderDebugText();
 
   GameMode::Context mContext;
 
   game_logic::GameWorld mWorld;
-  game_logic::PlayerInput mPlayerInput;
-  base::Vector mAnalogStickVector;
+  InputHandler mInputHandler;
   engine::TimeDelta mAccumulatedTime = 0.0;
   ui::IngameMenu mMenu;
   bool mShowDebugText = false;
