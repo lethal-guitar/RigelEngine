@@ -32,7 +32,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
 
-class GameRunner : public entityx::Receiver<GameRunner> {
+class GameRunner {
 public:
   GameRunner(
     data::PlayerModel* pPlayerModel,
