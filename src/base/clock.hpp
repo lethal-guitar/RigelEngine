@@ -14,35 +14,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "fps_limiter.hpp"
+#pragma once
 
-#include <SDL_timer.h>
-
-
-namespace rigel::renderer {
-
-FpsLimiter::FpsLimiter(const int targetFps)
-  : mLastTime(base::Clock::now())
-  , mTargetFrameTime(1.0 / targetFps)
-{
-}
+#include <chrono>
 
 
-void FpsLimiter::updateAndWait() {
-  using namespace std::chrono;
+namespace rigel::base {
 
-  const auto now = base::Clock::now();
-  const auto delta = duration<double>(now - mLastTime).count();
-  mLastTime = now;
-
-  mError += mTargetFrameTime - delta;
-
-  const auto timeToWaitFor = mTargetFrameTime + mError;
-  if (timeToWaitFor > 0.0) {
-    // We use SDL_Delay instead of std::this_thread::sleep_for, because the
-    // former is more accurate on some platforms.
-    SDL_Delay(static_cast<Uint32>(timeToWaitFor * 1000.0));
-  }
-}
+using Clock = std::chrono::steady_clock;
 
 }

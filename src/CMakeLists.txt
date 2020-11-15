@@ -1,5 +1,6 @@
 set(core_sources
     base/array_view.hpp
+    base/clock.hpp
     base/container_utils.hpp
     base/defer.hpp
     base/grid.hpp
