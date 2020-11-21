@@ -303,21 +303,28 @@ make
 
 ### <a name="windows-build-instructions">Windows builds</a>
 
-:exclamation: Currently, only 64-bit builds are possible.
+:exclamation: For best performance, make sure to switch to "Release" mode in Visual Studio before building.
 
 First, you need to install CMake if you don't have it already.
 You can grab it from [the Kitware website](https://cmake.org/download/), I went
 for the `Windows win64-x64 Installer` variant.
 
 For getting the dependencies, I strongly recommend using
-[vcpkg](https://github.com/microsoft/vcpkg):
+[vcpkg](https://github.com/microsoft/vcpkg#quick-start-windows).
+You then need to pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
 
+:exclamation: Make sure to specify the toolchain file as _absolute path_. If the toolchain file path is incorrect, CMake will just silently ignore it, resulting in "package not found" errors.
+So in case of errors, I'd recommend double checking the path first.
+
+#### 64-bit builds
+
+Install dependencies:
 
 ```bash
 vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
 ```
 
-Then pass `CMAKE_TOOLCHAIN_FILE=C:/path/to/your/vcpkgdir/scripts/buildystems/vcpkg.cmake` when invoking CMake.
+Run CMake:
 
 ```bash
 mkdir build
@@ -329,6 +336,31 @@ cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/b
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
 ```
+
+#### 32-bit builds
+
+:exclamation: Currently, only 64-bit builds are regularly tested and built on CI. Building for 32-bit is possible, but there might be small build errors from time to time.
+If you'd like to build for 32-bit and have trouble sorting out build errors, feel free to [open an issue](https://github.com/lethal-guitar/RigelEngine/issues/new/choose) and I'll look into it.
+
+Install dependencies:
+
+```bash
+vcpkg install boost-program-options:x86-windows boost-algorithm:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
+```
+
+Run CMake:
+
+```bash
+mkdir build
+cd build
+
+# Remember to replace <vcpkg_root> with the path to where you installed vcpkg!
+cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_GENERATOR_PLATFORM=Win32
+
+# This will open the generated Visual Studio solution
+start RigelEngine.sln
+```
+
 ### <a name="wasm-build-instructions">Webassembly (Emscripten) build </a>
 
 Rigel Engine can be built to run on a web browser using [Emscripten](https://emscripten.org/).
