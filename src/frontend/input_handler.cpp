@@ -83,45 +83,29 @@ auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
 
 
   const auto keyPressed = std::uint8_t{event.type == SDL_KEYDOWN};
-  switch (event.key.keysym.sym) {
-    case SDLK_UP:
-      mPlayerInput.mUp = keyPressed;
-      updateButton(mPlayerInput.mInteract, keyPressed);
-      break;
+  const auto keyCode = event.key.keysym.sym;
 
-    case SDLK_DOWN:
-      mPlayerInput.mDown = keyPressed;
-      break;
-
-    case SDLK_LEFT:
-      mPlayerInput.mLeft = keyPressed;
-      break;
-
-    case SDLK_RIGHT:
-      mPlayerInput.mRight = keyPressed;
-      break;
-
-    case SDLK_LCTRL:
-    case SDLK_RCTRL:
-      updateButton(mPlayerInput.mJump, keyPressed);
-      break;
-
-    case SDLK_LALT:
-    case SDLK_RALT:
-      updateButton(mPlayerInput.mFire, keyPressed);
-      break;
-
-    case SDLK_F5:
-      if (keyPressed) {
-        return MenuCommand::QuickSave;
-      }
-      break;
-
-    case SDLK_F7:
-      if (keyPressed) {
-        return MenuCommand::QuickLoad;
-      }
-      break;
+  if (keyCode == SDLK_UP) {
+    mPlayerInput.mUp = keyPressed;
+    updateButton(mPlayerInput.mInteract, keyPressed);
+  } else if (keyCode == SDLK_DOWN) {
+    mPlayerInput.mDown = keyPressed;
+  } else if (keyCode == SDLK_LEFT) {
+    mPlayerInput.mLeft = keyPressed;
+  } else if (keyCode == SDLK_RIGHT) {
+    mPlayerInput.mRight = keyPressed;
+  } else if (keyCode == SDLK_LCTRL || keyCode == SDLK_RCTRL) {
+    updateButton(mPlayerInput.mJump, keyPressed);
+  } else if (keyCode == SDLK_LALT || keyCode == SDLK_RALT) {
+    updateButton(mPlayerInput.mFire, keyPressed);
+  } else if (keyCode == SDLK_F5) {
+    if (keyPressed) {
+      return MenuCommand::QuickSave;
+    }
+  } else if (keyCode == SDLK_F7) {
+    if (keyPressed) {
+      return MenuCommand::QuickLoad;
+    }
   }
 
   return MenuCommand::None;
