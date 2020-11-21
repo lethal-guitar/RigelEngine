@@ -22,6 +22,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <imfilebrowser.h>
+#include <SDL_events.h>
 RIGEL_RESTORE_WARNINGS
 
 
@@ -44,15 +45,30 @@ public:
     UserProfile* pUserProfile,
     IGameServiceProvider* pServiceProvider,
     Type type);
+  ~OptionsMenu();
 
+  OptionsMenu(const OptionsMenu&) = delete;
+  OptionsMenu& operator=(const OptionsMenu&) = delete;
+  OptionsMenu(OptionsMenu&&) = default;
+  OptionsMenu& operator=(OptionsMenu&&) = default;
+
+  void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
   bool isFinished() const;
 
 private:
+  void keyBindingRow(const char* label, SDL_Keycode* binding);
+  void beginRebinding(SDL_Keycode* binding);
+  void endRebinding();
+
   ImGui::FileBrowser mGamePathBrowser;
   UserProfile* mpUserProfile;
   data::GameOptions* mpOptions;
   IGameServiceProvider* mpServiceProvider;
+
+  SDL_Keycode* mpCurrentlyEditedBinding = nullptr;
+  engine::TimeDelta mElapsedTimeEditingBinding = 0;
+
   Type mType;
   bool mMenuOpen = true;
   bool mPopupOpened = false;

@@ -24,6 +24,7 @@
 RIGEL_DISABLE_WARNINGS
 #include <nlohmann/json.hpp>
 #include <SDL_filesystem.h>
+#include <SDL_keyboard.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
@@ -197,6 +198,16 @@ nlohmann::json serialize(const data::GameOptions& options) {
   serialized["soundVolume"] = options.mSoundVolume;
   serialized["musicOn"] = options.mMusicOn;
   serialized["soundOn"] = options.mSoundOn;
+
+  serialized["upKeybinding"] = SDL_GetKeyName(options.mUpKeybinding);
+  serialized["downKeybinding"] = SDL_GetKeyName(options.mDownKeybinding);
+  serialized["leftKeybinding"] = SDL_GetKeyName(options.mLeftKeybinding);
+  serialized["rightKeybinding"] = SDL_GetKeyName(options.mRightKeybinding);
+  serialized["jumpKeybinding"] = SDL_GetKeyName(options.mJumpKeybinding);
+  serialized["fireKeybinding"] = SDL_GetKeyName(options.mFireKeybinding);
+  serialized["quickSaveKeybinding"] = SDL_GetKeyName(options.mQuickSaveKeybinding);
+  serialized["quickLoadKeybinding"] = SDL_GetKeyName(options.mQuickLoadKeybinding);
+
   serialized["compatibilityModeOn"] = options.mCompatibilityModeOn;
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
@@ -308,7 +319,7 @@ data::HighScoreListArray deserialize<data::HighScoreListArray>(
 
 
 template <typename TargetType>
-void extractValueIfExists(
+bool extractValueIfExists(
   const char* key,
   TargetType& value,
   const nlohmann::json& json
@@ -316,9 +327,26 @@ void extractValueIfExists(
   if (json.contains(key)) {
     try {
       value = json.at(key).get<TargetType>();
+      return true;
     } catch (const std::exception&) {
     }
   }
+
+  return false;
+}
+
+
+void extractKeyBindingIfExists(
+  const char* key,
+  SDL_Keycode& value,
+  const nlohmann::json& json
+) {
+  auto serialized = std::string{};
+  if (!extractValueIfExists(key, serialized, json)) {
+    return;
+  }
+
+  value = SDL_GetKeyFromName(serialized.c_str());
 }
 
 
@@ -343,10 +371,17 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
   extractValueIfExists("musicOn", result.mMusicOn, json);
   extractValueIfExists("soundOn", result.mSoundOn, json);
+  extractKeyBindingIfExists("upKeybinding", result.mUpKeybinding, json);
+  extractKeyBindingIfExists("downKeybinding", result.mDownKeybinding, json);
+  extractKeyBindingIfExists("leftKeybinding", result.mLeftKeybinding, json);
+  extractKeyBindingIfExists("rightKeybinding", result.mRightKeybinding, json);
+  extractKeyBindingIfExists("jumpKeybinding", result.mJumpKeybinding, json);
+  extractKeyBindingIfExists("fireKeybinding", result.mFireKeybinding, json);
+  extractKeyBindingIfExists("quickSaveKeybinding", result.mQuickSaveKeybinding, json);
+  extractKeyBindingIfExists("quickLoadKeybinding", result.mQuickLoadKeybinding, json);
   extractValueIfExists("compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
-
 
   return result;
 }

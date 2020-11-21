@@ -16,6 +16,12 @@
 
 #pragma once
 
+#include "base/warnings.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <SDL_keycode.h>
+RIGEL_RESTORE_WARNINGS
+
 #include <optional>
 
 
@@ -83,6 +89,16 @@ struct GameOptions {
   float mSoundVolume = SOUND_VOLUME_DEFAULT;
   bool mMusicOn = true;
   bool mSoundOn = true;
+
+  // Keyboard controls
+  SDL_Keycode mUpKeybinding = SDLK_UP;
+  SDL_Keycode mDownKeybinding = SDLK_DOWN;
+  SDL_Keycode mLeftKeybinding = SDLK_LEFT;
+  SDL_Keycode mRightKeybinding = SDLK_RIGHT;
+  SDL_Keycode mJumpKeybinding = SDLK_LCTRL;
+  SDL_Keycode mFireKeybinding = SDLK_LALT;
+  SDL_Keycode mQuickSaveKeybinding = SDLK_F5;
+  SDL_Keycode mQuickLoadKeybinding = SDLK_F7;
 
   // Gameplay
   bool mCompatibilityModeOn = false;

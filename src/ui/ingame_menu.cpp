@@ -598,12 +598,8 @@ void IngameMenu::handleMenuActiveEvents() {
         handleSavedGameNameEntryEvent(state, event);
       },
 
-      [&event](ScriptedMenu& state) {
+      [&event](auto& state) {
         state.handleEvent(event);
-      },
-
-      [&](const ui::OptionsMenu&) {
-        // handled by Dear ImGui
       });
   }
 

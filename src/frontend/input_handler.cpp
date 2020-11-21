@@ -16,6 +16,7 @@
 
 #include "input_handler.hpp"
 
+#include "data/game_options.hpp"
 #include "sdl_utils/key_code.hpp"
 
 
@@ -47,6 +48,11 @@ game_logic::PlayerInput combinedInput(
 
 }
 
+
+InputHandler::InputHandler(const data::GameOptions* pOptions)
+  : mpOptions(pOptions)
+{
+}
 
 
 auto InputHandler::handleEvent(
@@ -88,24 +94,24 @@ auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
   const auto keyCode =
     sdl_utils::normalizeLeftRightVariants(event.key.keysym.sym);
 
-  if (keyCode == SDLK_UP) {
+  if (keyCode == mpOptions->mUpKeybinding) {
     mPlayerInput.mUp = keyPressed;
     updateButton(mPlayerInput.mInteract, keyPressed);
-  } else if (keyCode == SDLK_DOWN) {
+  } else if (keyCode == mpOptions->mDownKeybinding) {
     mPlayerInput.mDown = keyPressed;
-  } else if (keyCode == SDLK_LEFT) {
+  } else if (keyCode == mpOptions->mLeftKeybinding) {
     mPlayerInput.mLeft = keyPressed;
-  } else if (keyCode == SDLK_RIGHT) {
+  } else if (keyCode == mpOptions->mRightKeybinding) {
     mPlayerInput.mRight = keyPressed;
-  } else if (keyCode == SDLK_LCTRL) {
+  } else if (keyCode == mpOptions->mJumpKeybinding) {
     updateButton(mPlayerInput.mJump, keyPressed);
-  } else if (keyCode == SDLK_LALT) {
+  } else if (keyCode == mpOptions->mFireKeybinding) {
     updateButton(mPlayerInput.mFire, keyPressed);
-  } else if (keyCode == SDLK_F5) {
+  } else if (keyCode == mpOptions->mQuickSaveKeybinding) {
     if (keyPressed) {
       return MenuCommand::QuickSave;
     }
-  } else if (keyCode == SDLK_F7) {
+  } else if (keyCode == mpOptions->mQuickLoadKeybinding) {
     if (keyPressed) {
       return MenuCommand::QuickLoad;
     }

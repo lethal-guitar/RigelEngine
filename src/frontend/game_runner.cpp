@@ -18,6 +18,7 @@
 
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
+#include "common/user_profile.hpp"
 #include "game_logic/world_state.hpp"
 #include "ui/utils.hpp"
 
@@ -40,6 +41,7 @@ GameRunner::GameRunner(
       context,
       playerPositionOverride,
       showWelcomeMessage)
+  , mInputHandler(&context.mpUserProfile->mOptions)
   , mMenu(context, pPlayerModel, &mWorld, sessionId)
 {
 }

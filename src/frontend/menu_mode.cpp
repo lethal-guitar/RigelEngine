@@ -63,6 +63,8 @@ MenuMode::MenuMode(Context context)
 
 void MenuMode::handleEvent(const SDL_Event& event) {
   if (mOptionsMenu) {
+    mOptionsMenu->handleEvent(event);
+
     // Options menu blocks all input
     return;
   }

@@ -29,6 +29,8 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel {
 
+namespace data { struct GameOptions; }
+
 
 class InputHandler {
 public:
@@ -37,6 +39,8 @@ public:
     QuickSave,
     QuickLoad
   };
+
+  explicit InputHandler(const data::GameOptions* pOptions);
 
   MenuCommand handleEvent(const SDL_Event& event, bool playerInShip);
   void reset();
@@ -49,6 +53,7 @@ private:
 
   game_logic::PlayerInput mPlayerInput;
   base::Vector mAnalogStickVector;
+  const data::GameOptions* mpOptions;
 };
 
 }
