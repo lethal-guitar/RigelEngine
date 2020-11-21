@@ -74,15 +74,19 @@ game_logic::PlayerInput InputHandler::fetchInput() {
 
 
 auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
+  auto updateButton = [](game_logic::Button& button, const bool isPressed) {
+    button.mIsPressed = isPressed;
+    if (isPressed) {
+      button.mWasTriggered = true;
+    }
+  };
+
+
   const auto keyPressed = std::uint8_t{event.type == SDL_KEYDOWN};
   switch (event.key.keysym.sym) {
-    // TODO: DRY this up a little?
     case SDLK_UP:
       mPlayerInput.mUp = keyPressed;
-      mPlayerInput.mInteract.mIsPressed = keyPressed;
-      if (keyPressed) {
-        mPlayerInput.mInteract.mWasTriggered = true;
-      }
+      updateButton(mPlayerInput.mInteract, keyPressed);
       break;
 
     case SDLK_DOWN:
@@ -99,18 +103,12 @@ auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
 
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-      mPlayerInput.mJump.mIsPressed = keyPressed;
-      if (keyPressed) {
-        mPlayerInput.mJump.mWasTriggered = true;
-      }
+      updateButton(mPlayerInput.mJump, keyPressed);
       break;
 
     case SDLK_LALT:
     case SDLK_RALT:
-      mPlayerInput.mFire.mIsPressed = keyPressed;
-      if (keyPressed) {
-        mPlayerInput.mFire.mWasTriggered = true;
-      }
+      updateButton(mPlayerInput.mFire, keyPressed);
       break;
 
     case SDLK_F5:
