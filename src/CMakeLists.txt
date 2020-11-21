@@ -273,6 +273,7 @@ set(core_sources
     renderer/texture.hpp
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
+    sdl_utils/key_code.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
