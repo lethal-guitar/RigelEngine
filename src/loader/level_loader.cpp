@@ -505,7 +505,7 @@ LevelData loadLevel(
 
   LevelHeader header(levelReader);
   ActorList actors;
-  for (size_t i=0; i<header.numActorWords/3; ++i) {
+  for (size_t i = 0; i < header.numActorWords/3u; ++i) {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
     if (isValidActorId(type)) {

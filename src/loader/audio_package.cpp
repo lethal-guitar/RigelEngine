@@ -59,7 +59,7 @@ std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data) {
     const auto chunkSize = static_cast<int64_t>(nextOffset) - previousOffset;
 
     if (chunkSize > 0) {
-      dict.emplace_back(previousOffset, chunkSize);
+      dict.emplace_back(previousOffset, static_cast<size_t>(chunkSize));
     } else if (chunkSize < 0 && i == numOffsets - 1) {
       dict.back().mSize = nextOffset - dict.back().mOffset;
     }

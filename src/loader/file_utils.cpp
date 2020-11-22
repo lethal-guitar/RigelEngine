@@ -39,7 +39,7 @@ ByteBuffer loadFile(const string& fileName) {
     throw runtime_error(string("File can't be opened: ") + fileName);
   }
 
-  const auto fileSize = file.tellg();
+  const auto fileSize = static_cast<size_t>(file.tellg());
   file.seekg(0);
   ByteBuffer data(fileSize);
   static_assert(sizeof(char) == sizeof(uint8_t));

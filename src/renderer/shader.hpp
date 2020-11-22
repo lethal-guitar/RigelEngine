@@ -24,6 +24,7 @@ RIGEL_DISABLE_WARNINGS
 #include <glm/mat4x4.hpp>
 RIGEL_RESTORE_WARNINGS
 
+#include <functional>
 #include <initializer_list>
 #include <string>
 #include <unordered_map>
@@ -33,12 +34,14 @@ namespace rigel::renderer {
 
 class GlHandleWrapper {
 public:
-  using DeleteFunc = void(*)(GLuint);
+  using DeleteFunc = std::function<void(GLuint)>;
 
   GlHandleWrapper() = default;
-  explicit GlHandleWrapper(GLuint handle, DeleteFunc deleter)
+
+  template <typename DeleteFunc>
+  explicit GlHandleWrapper(GLuint handle, DeleteFunc&& deleter)
     : mHandle(handle)
-    , mDeleteFunc(deleter)
+    , mDeleteFunc(std::forward<DeleteFunc>(deleter))
   {
   }
 
