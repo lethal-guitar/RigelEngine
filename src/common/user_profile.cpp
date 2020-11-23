@@ -359,7 +359,7 @@ UserProfile loadProfile(
   namespace fs = std::filesystem;
 
   try {
-    const auto buffer = loader::loadFile(fileOnDisk);
+    auto buffer = loader::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
 
     UserProfile profile{pathForSaving, std::move(buffer)};
