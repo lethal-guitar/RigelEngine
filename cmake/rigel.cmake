@@ -50,6 +50,8 @@ function(rigel_configure_compiler_warnings)
             -Wno-global-constructors
             -Wno-float-equal
             -Wno-double-promotion
+            -Wno-poison-system-directories
+            -Wno-ctad-maybe-unsupported
         )
 
         if (WARNINGS_AS_ERRORS)

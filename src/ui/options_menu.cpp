@@ -24,13 +24,18 @@
 #include "base/warnings.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
+#include "sdl_utils/key_code.hpp"
+#include "ui/menu_navigation.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <boost/algorithm/string/erase.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <SDL_keyboard.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
+#include <cassert>
 #include <filesystem>
 
 
@@ -42,6 +47,24 @@ constexpr auto SCALE = 0.8f;
 
 constexpr auto STANDARD_FPS_LIMITS = std::array<int, 8>{
   30, 60, 70, 72, 90, 120, 144, 240};
+
+constexpr auto DISALLOWED_KEYS = std::array<SDL_Keycode, 8>{
+  // The following keys are used by the in-game menu system, to enter the menu.
+  // We don't want to allow these keys for use in key bindings.
+  // We could make it possible to rebind those menu keys as well, but for now,
+  // we just disallow their use.
+  SDLK_F1,
+  SDLK_F2,
+  SDLK_F3,
+  SDLK_h,
+  SDLK_p,
+
+  // The following keys could in theory be used for bindings, but are unlikely
+  // to work as expected in practice.
+  SDLK_LGUI,
+  SDLK_RGUI,
+  SDLK_CAPSLOCK
+};
 
 
 template <typename Callback>
@@ -91,6 +114,25 @@ void fpsLimitUi(data::GameOptions* pOptions) {
   });
 }
 
+
+bool isAllowedKey(const SDL_Keycode keyCode) {
+  using std::begin;
+  using std::end;
+  using std::find;
+
+  return find(begin(DISALLOWED_KEYS), end(DISALLOWED_KEYS), keyCode) ==
+    end(DISALLOWED_KEYS);
+}
+
+
+std::string normalizedKeyName(const SDL_Keycode keyCode) {
+  auto keyName = std::string(SDL_GetKeyName(keyCode));
+
+  boost::algorithm::erase_first(keyName, "Left ");
+
+  return keyName;
+}
+
 }
 
 
@@ -111,13 +153,70 @@ OptionsMenu::OptionsMenu(
 }
 
 
+OptionsMenu::~OptionsMenu() {
+  assert(!mpCurrentlyEditedBinding);
+}
+
+
+void OptionsMenu::handleEvent(const SDL_Event& event) {
+  if (
+    !mpCurrentlyEditedBinding ||
+    (event.type != SDL_KEYUP && event.type != SDL_KEYDOWN)
+  ) {
+    return;
+  }
+
+  const auto keyCode =
+    sdl_utils::normalizeLeftRightVariants(event.key.keysym.sym);
+
+  if (keyCode == SDLK_ESCAPE) {
+    // We need to handle the key up, as ImGui would otherwise see the key up
+    // event if we acted on key down. So we act on key up, and swallow the
+    // key down event by always returning.
+    if (event.type == SDL_KEYUP) {
+      endRebinding();
+    }
+
+    return;
+  }
+
+  if (event.type == SDL_KEYDOWN && isAllowedKey(keyCode)) {
+    // Store the new key binding
+    *mpCurrentlyEditedBinding = keyCode;
+
+    // Unbind any duplicates
+    for (auto pBinding : {
+      &mpOptions->mUpKeybinding,
+      &mpOptions->mDownKeybinding,
+      &mpOptions->mLeftKeybinding,
+      &mpOptions->mRightKeybinding,
+      &mpOptions->mJumpKeybinding,
+      &mpOptions->mFireKeybinding,
+      &mpOptions->mQuickSaveKeybinding,
+      &mpOptions->mQuickLoadKeybinding,
+    }) {
+      if (pBinding != mpCurrentlyEditedBinding && *pBinding == keyCode) {
+        *pBinding = SDLK_UNKNOWN;
+      }
+    }
+
+    endRebinding();
+  }
+}
+
+
 void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
   namespace fs = std::filesystem;
+
+  if (mpCurrentlyEditedBinding) {
+    mElapsedTimeEditingBinding += dt;
+  }
 
   ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 
   if (mPopupOpened && !ImGui::IsPopupOpen("Options")) {
     // Popup was closed, quit the options menu
+    endRebinding();
     mMenuOpen = false;
     return;
   }
@@ -144,6 +243,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
   {
     return;
   }
+
+  auto stopRebindingDueToTabSwitch = true;
 
   if (ImGui::BeginTabBar("Tabs"))
   {
@@ -189,6 +290,25 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
       ImGui::EndTabItem();
     }
 
+    if (ImGui::BeginTabItem("Keyboard controls"))
+    {
+      stopRebindingDueToTabSwitch = false;
+
+      ImGui::NewLine();
+      ImGui::Columns(2);
+      keyBindingRow("Up", &mpOptions->mUpKeybinding);
+      keyBindingRow("Down", &mpOptions->mDownKeybinding);
+      keyBindingRow("Left", &mpOptions->mLeftKeybinding);
+      keyBindingRow("Right", &mpOptions->mRightKeybinding);
+      keyBindingRow("Jump", &mpOptions->mJumpKeybinding);
+      keyBindingRow("Fire", &mpOptions->mFireKeybinding);
+      keyBindingRow("Quick save", &mpOptions->mQuickSaveKeybinding);
+      keyBindingRow("Quick load", &mpOptions->mQuickLoadKeybinding);
+      ImGui::Columns(1);
+
+      ImGui::EndTabItem();
+    }
+
     if (ImGui::BeginTabItem("Gameplay/Enhancements"))
     {
       ImGui::NewLine();
@@ -214,6 +334,13 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     }
 
     ImGui::EndTabBar();
+  }
+
+  // If the user selects a key for rebinding, and then switches to a different
+  // tab via the mouse/gamepad, stop rebinding. To implement that, we always
+  // stop rebinding when any other tab aside from keyboard controls is visible.
+  if (stopRebindingDueToTabSwitch) {
+    endRebinding();
   }
 
   if (mType == Type::Main)
@@ -289,6 +416,61 @@ Going back to a registered version will make them work again.)");
 
 bool OptionsMenu::isFinished() const {
   return !mMenuOpen;
+}
+
+
+void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding) {
+  ImGui::Text("%s", label);
+  ImGui::NextColumn();
+
+  const auto buttonSize = ImVec2{ImGui::GetFontSize() * 15, 0};
+
+  ImGui::PushID(binding);
+
+  if (mpCurrentlyEditedBinding != binding)
+  {
+    const auto keyName = *binding == SDLK_UNKNOWN
+      ? "- Unassigned -"
+      : normalizedKeyName(*binding);
+
+    if (ImGui::Button(keyName.c_str(), buttonSize)) {
+      beginRebinding(binding);
+    }
+  }
+  else
+  {
+    // While waiting for a keypress to rebind a selected key, display an
+    // animated button
+    const auto color = static_cast<float>(
+      std::abs(std::sin(mElapsedTimeEditingBinding / 0.25) / 2.0) + 0.3);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(color, 0, 0, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(color, 0, 0, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(color, 0, 0, 1.0f));
+
+    if (ImGui::Button("- Press desired key -", buttonSize)) {
+      endRebinding();
+    }
+
+    ImGui::PopStyleColor(3);
+  }
+
+  ImGui::PopID();
+
+  ImGui::NextColumn();
+}
+
+
+void OptionsMenu::beginRebinding(SDL_Keycode* binding) {
+  mpCurrentlyEditedBinding = binding;
+  mElapsedTimeEditingBinding = 0.0;
+  ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+}
+
+
+void OptionsMenu::endRebinding() {
+  mpCurrentlyEditedBinding = nullptr;
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 }
 
 }

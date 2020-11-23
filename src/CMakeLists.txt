@@ -85,6 +85,8 @@ set(core_sources
     frontend/game_runner.hpp
     frontend/game_session_mode.cpp
     frontend/game_session_mode.hpp
+    frontend/input_handler.cpp
+    frontend/input_handler.hpp
     frontend/intro_demo_loop_mode.cpp
     frontend/intro_demo_loop_mode.hpp
     frontend/menu_mode.cpp
@@ -271,6 +273,7 @@ set(core_sources
     renderer/texture.hpp
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
+    sdl_utils/key_code.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/ptr.hpp
