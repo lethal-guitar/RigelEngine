@@ -59,3 +59,23 @@ jobs:
       run: cd build_dbg && ctest
     - name: Test (release)
       run: cd build_dbg && ctest
+  build_osx:
+    runs-on: macos-10.15
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: brew install sdl2 sdl2_mixer boost
+    - name: Run CMake (debug)
+      run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug
+    - name: Run CMake (release)
+      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+    - name: Build (debug)
+      run: cd build_dbg && make -j2
+    - name: Build (release)
+      run: cd build && make -j2
+    - name: Test (debug)
+      run: cd build_dbg && ctest
+    - name: Test (release)
+      run: cd build_dbg && ctest
