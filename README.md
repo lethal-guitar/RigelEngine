@@ -275,19 +275,57 @@ To do that, switch to a new terminal using Ctrl+Alt+F1 and launch the game there
 
 ### <a name="mac-build-instructions">OS X builds</a>
 
-:exclamation: Currently, the project needs to be built using clang installed via Homebrew - it does _not_ build successfully using Apple's clang.
+:exclamation: On Mojave (10.14) and older, non-Apple clang must be installed via Homebrew, Apple's clang does not have all required C++ library features. Starting with Catalina (10.15), Xcode's clang works fine.
 
-Note that you'll need Xcode 10 and OS X Mojave (10.14) if you want to use clang 8. In the past, I have successfully built the project on OS X Sierra (10.12) when using clang 7 (`brew install llvm@7`), and I'm not aware of any reason why the project shouldn't build on clang 7 anymore. However, I'm building with clang 8 these days, so it's possible that something broke.
+The oldest OS/compiler combination that has worked for me is clang 7 on Sierra (10.12).
 
-Here's how you would install all dependencies as well as clang 8 via Homebrew and build the project using it:
+### Catalina (10.15) or newer
+
+```
+# Install dependencies
+# You might need to run brew update.
+brew install cmake sdl2 sdl2_mixer boost
+
+# Configure & build
+mkdir build
+cd build
+cmake .. -DWARNINGS_AS_ERRORS=OFF
+make
+```
+
+### Mojave (10.14) using clang 8 
+
+:exclamation: Note that you'll need Xcode 10.
 
 ```bash
-# You might need to run brew update
+# You might need to run brew update.
 brew install llvm@8 cmake sdl2 sdl2_mixer boost
 
 # Set up environment variables so that CMake picks up the newly installed clang -
-# this is only necessary the first time
+# this is only necessary the first time.
 export rigel_llvm_path=`brew --prefix llvm@8`;
+export CC="$rigel_llvm_path/bin/clang";
+export CXX="$CC++";
+export CPPFLAGS="-I$rigel_llvm_path/include";
+export LDFLAGS="-L$rigel_llvm_path/lib -Wl,-rpath,$rigel_llvm_path/lib";
+unset rigel_llvm_path;
+
+# Now, the regular build via CMake should work:
+mkdir build
+cd build
+cmake .. -DWARNINGS_AS_ERRORS=OFF
+make
+```
+
+### High Sierra (10.13) or older using clang 7
+
+```bash
+# You might need to run brew update.
+brew install llvm@7 cmake sdl2 sdl2_mixer boost
+
+# Set up environment variables so that CMake picks up the newly installed clang -
+# this is only necessary the first time.
+export rigel_llvm_path=`brew --prefix llvm@7`;
 export CC="$rigel_llvm_path/bin/clang";
 export CXX="$CC++";
 export CPPFLAGS="-I$rigel_llvm_path/include";
@@ -318,15 +356,11 @@ So in case of errors, I'd recommend double checking the path first.
 
 #### 64-bit builds
 
-Install dependencies:
-
 ```bash
+# Install dependencies
 vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
-```
 
-Run CMake:
-
-```bash
+# Run CMake
 mkdir build
 cd build
 
@@ -342,15 +376,11 @@ start RigelEngine.sln
 :exclamation: Currently, only 64-bit builds are regularly tested and built on CI. Building for 32-bit is possible, but there might be small build errors from time to time.
 If you'd like to build for 32-bit and have trouble sorting out build errors, feel free to [open an issue](https://github.com/lethal-guitar/RigelEngine/issues/new/choose) and I'll look into it.
 
-Install dependencies:
-
 ```bash
+# Install dependencies
 vcpkg install boost-program-options:x86-windows boost-algorithm:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
-```
 
-Run CMake:
-
-```bash
+# Run CMake
 mkdir build
 cd build
 
