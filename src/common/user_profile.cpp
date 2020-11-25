@@ -27,6 +27,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
@@ -93,6 +94,7 @@ namespace {
 constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
+constexpr auto OPTIONS_FILENAME = "Options.json";
 
 
 void importOptions(
@@ -201,8 +203,8 @@ nlohmann::json serialize(const data::HighScoreListArray& highScoreLists) {
 }
 
 
-nlohmann::json serialize(const data::GameOptions& options) {
-  using json = nlohmann::json;
+nlohmann::ordered_json serialize(const data::GameOptions& options) {
+  using json = nlohmann::ordered_json;
 
   // NOTE: When adding a new member to the data::GameOptions struct, you most
   // likely want to add a corresponding entry here as well. You also need to
@@ -413,6 +415,32 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
 }
 
 
+void loadOptionsFileIfPresent(
+  const std::filesystem::path& path,
+  data::GameOptions& options
+) {
+  namespace fs = std::filesystem;
+
+  std::error_code ec;
+  if (!fs::exists(path, ec) || ec) {
+    return;
+  }
+
+  try
+  {
+    std::ifstream optionsFile(path.u8string());
+
+    nlohmann::json serializedOptions;
+    optionsFile >> serializedOptions;
+
+    options = deserialize<data::GameOptions>(serializedOptions);
+  } catch (const std::exception& ex) {
+    std::cerr << "WARNING: Failed to load options\n";
+    std::cerr << ex.what() << '\n';
+  }
+}
+
+
 UserProfile loadProfile(
   const std::filesystem::path& fileOnDisk,
   const std::filesystem::path& pathForSaving
@@ -430,6 +458,9 @@ UserProfile loadProfile(
     profile.mHighScoreLists = deserialize<data::HighScoreListArray>(
       serializedProfile.at("highScoreLists"));
 
+    // Older versions of RigelEngine stored options in the user profile
+    // file. When running a newer version for the first time, we want to
+    // import any settings from an earlier version.
     if (serializedProfile.contains("options")) {
       profile.mOptions = deserialize<data::GameOptions>(
         serializedProfile.at("options"));
@@ -439,6 +470,12 @@ UserProfile loadProfile(
       const auto gamePathStr =
         serializedProfile.at("gamePath").get<std::string>();
       profile.mGamePath = fs::u8path(gamePathStr);
+    }
+
+    {
+      auto optionsFile = fileOnDisk;
+      optionsFile.replace_filename(OPTIONS_FILENAME);
+      loadOptionsFileIfPresent(optionsFile, profile.mOptions);
     }
 
     return profile;
@@ -478,7 +515,14 @@ void UserProfile::saveToDisk() {
   json serializedProfile;
   serializedProfile["saveSlots"] = serialize(mSaveSlots);
   serializedProfile["highScoreLists"] = serialize(mHighScoreLists);
-  serializedProfile["options"] = serialize(mOptions);
+
+  // Starting with RigelEngine v.0.7.0, the options are stored in a separate
+  // text file. For compatibility with older versions, the options are also
+  // redundantly stored in the user profile, as before. But this is deprecated,
+  // and will be removed in a later release at some point.
+  const auto options = serialize(mOptions);
+  serializedProfile["options"] = options;
+
   if (mGamePath) {
     serializedProfile["gamePath"] = mGamePath->u8string();
   }
@@ -508,11 +552,21 @@ void UserProfile::saveToDisk() {
     serializedProfile = merge(previousProfile, serializedProfile);
   }
 
+  // Save user profile
   const auto buffer = json::to_msgpack(serializedProfile);
   try {
     loader::saveToFile(buffer, *mProfilePath);
   } catch (const std::exception&) {
     std::cerr << "WARNING: Failed to store user profile\n";
+  }
+
+  // Save options file
+  {
+    auto path = *mProfilePath;
+    path.replace_filename(OPTIONS_FILENAME);
+
+    auto optionsFile = std::ofstream(path.u8string());
+    optionsFile << std::setw(4) << options;
   }
 }
 
