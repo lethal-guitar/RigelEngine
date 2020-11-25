@@ -29,6 +29,7 @@ RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
 #include <fstream>
+#include <unordered_set>
 
 
 namespace rigel {
@@ -103,6 +104,29 @@ void importOptions(
     originalOptions.mAdlibSoundsOn ||
     originalOptions.mPcSpeakersSoundsOn;
   options.mMusicOn = originalOptions.mMusicOn;
+}
+
+
+void eliminateDuplicateKeyBindings(data::GameOptions& options) {
+  std::unordered_set<SDL_Keycode> allBindings;
+
+  for (auto pBinding : {
+    &options.mUpKeybinding,
+    &options.mDownKeybinding,
+    &options.mLeftKeybinding,
+    &options.mRightKeybinding,
+    &options.mJumpKeybinding,
+    &options.mFireKeybinding,
+    &options.mQuickSaveKeybinding,
+    &options.mQuickLoadKeybinding,
+  }) {
+    const auto [it, inserted] = allBindings.insert(*pBinding);
+    if (!inserted) {
+      // If the binding already appeared previously, the current one is a
+      // duplicate - unset it.
+      *pBinding = SDLK_UNKNOWN;
+    }
+  }
 }
 
 
@@ -382,6 +406,8 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
+
+  eliminateDuplicateKeyBindings(result);
 
   return result;
 }
