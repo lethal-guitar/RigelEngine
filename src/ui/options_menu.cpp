@@ -464,6 +464,10 @@ void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding) {
 void OptionsMenu::beginRebinding(SDL_Keycode* binding) {
   mpCurrentlyEditedBinding = binding;
   mElapsedTimeEditingBinding = 0.0;
+
+  // In order to change a key binding, we need to receive key events. But
+  // ImGui is intercepting them normally. To get around that, we temporarily
+  // disable ImGui keyboard navigation while waiting for a key press.
   ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
 }
 
