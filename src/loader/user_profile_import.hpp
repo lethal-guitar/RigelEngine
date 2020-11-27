@@ -28,12 +28,12 @@ namespace rigel::loader {
 struct GameOptions {
   using ScanCode = std::uint8_t;
 
-  ScanCode mKeyBindingUp;
-  ScanCode mKeyBindingDown;
-  ScanCode mKeyBindingLeft;
-  ScanCode mKeyBindingRight;
-  ScanCode mKeyBindingJump;
-  ScanCode mKeyBindingFire;
+  ScanCode mUpKeyBinding;
+  ScanCode mDownKeyBinding;
+  ScanCode mLeftKeyBinding;
+  ScanCode mRightKeyBinding;
+  ScanCode mJumpKeyBinding;
+  ScanCode mFireKeyBinding;
 
   data::Difficulty mDifficulty;
 

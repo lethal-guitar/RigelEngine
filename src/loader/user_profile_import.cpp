@@ -173,12 +173,12 @@ std::optional<GameOptions> loadOptions(const std::string& gamePath) {
     const auto data = loadFile(gamePath + "NUKEM2.-GT");
     auto reader = LeStreamReader{data};
 
-    result.mKeyBindingUp = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingDown = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingLeft = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingRight = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingJump = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingFire = static_cast<std::uint8_t>(reader.readU16());
+    result.mUpKeyBinding = static_cast<std::uint8_t>(reader.readU16());
+    result.mDownKeyBinding = static_cast<std::uint8_t>(reader.readU16());
+    result.mLeftKeyBinding = static_cast<std::uint8_t>(reader.readU16());
+    result.mRightKeyBinding = static_cast<std::uint8_t>(reader.readU16());
+    result.mJumpKeyBinding = static_cast<std::uint8_t>(reader.readU16());
+    result.mFireKeyBinding = static_cast<std::uint8_t>(reader.readU16());
 
     result.mDifficulty = readDifficulty(reader);
 
