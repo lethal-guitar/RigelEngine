@@ -112,16 +112,7 @@ void importOptions(
 void eliminateDuplicateKeyBindings(data::GameOptions& options) {
   std::unordered_set<SDL_Keycode> allBindings;
 
-  for (auto pBinding : {
-    &options.mUpKeybinding,
-    &options.mDownKeybinding,
-    &options.mLeftKeybinding,
-    &options.mRightKeybinding,
-    &options.mJumpKeybinding,
-    &options.mFireKeybinding,
-    &options.mQuickSaveKeybinding,
-    &options.mQuickLoadKeybinding,
-  }) {
+  for (auto pBinding : options.allKeyBindings()) {
     const auto [it, inserted] = allBindings.insert(*pBinding);
     if (!inserted) {
       // If the binding already appeared previously, the current one is a

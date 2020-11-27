@@ -185,16 +185,7 @@ void OptionsMenu::handleEvent(const SDL_Event& event) {
     *mpCurrentlyEditedBinding = keyCode;
 
     // Unbind any duplicates
-    for (auto pBinding : {
-      &mpOptions->mUpKeybinding,
-      &mpOptions->mDownKeybinding,
-      &mpOptions->mLeftKeybinding,
-      &mpOptions->mRightKeybinding,
-      &mpOptions->mJumpKeybinding,
-      &mpOptions->mFireKeybinding,
-      &mpOptions->mQuickSaveKeybinding,
-      &mpOptions->mQuickLoadKeybinding,
-    }) {
+    for (auto pBinding : mpOptions->allKeyBindings()) {
       if (pBinding != mpCurrentlyEditedBinding && *pBinding == keyCode) {
         *pBinding = SDLK_UNKNOWN;
       }
