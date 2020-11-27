@@ -22,6 +22,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL_keycode.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <array>
 #include <optional>
 
 
@@ -110,6 +111,23 @@ struct GameOptions {
   bool compatibilityModeOn() const {
     return mCompatibilityModeOn && !mWidescreenModeOn;
   }
+
+
+  std::array<SDL_Keycode*, 8> allKeyBindings() {
+    return {
+      &mUpKeybinding,
+      &mDownKeybinding,
+      &mLeftKeybinding,
+      &mRightKeybinding,
+      &mJumpKeybinding,
+      &mFireKeybinding,
+      &mQuickSaveKeybinding,
+      &mQuickLoadKeybinding,
+    };
+  }
 };
+
+
+bool canBeUsedForKeyBinding(SDL_Keycode key);
 
 }

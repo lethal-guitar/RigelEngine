@@ -166,19 +166,28 @@ std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
   return result;
 }
 
+
 std::optional<GameOptions> loadOptions(const std::string& gamePath) {
+  static constexpr std::uint16_t MAX_SCAN_CODE = 88;
+
+  auto asScanCode = [](const std::uint16_t rawScanCode) {
+    return static_cast<GameOptions::ScanCode>(
+      std::min(rawScanCode, MAX_SCAN_CODE));
+  };
+
+
   try {
     GameOptions result;
 
     const auto data = loadFile(gamePath + "NUKEM2.-GT");
     auto reader = LeStreamReader{data};
 
-    result.mKeyBindingUp = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingDown = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingLeft = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingRight = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingJump = static_cast<std::uint8_t>(reader.readU16());
-    result.mKeyBindingFire = static_cast<std::uint8_t>(reader.readU16());
+    result.mUpKeybinding = asScanCode(reader.readU16());
+    result.mDownKeybinding = asScanCode(reader.readU16());
+    result.mLeftKeybinding = asScanCode(reader.readU16());
+    result.mRightKeybinding = asScanCode(reader.readU16());
+    result.mJumpKeybinding = asScanCode(reader.readU16());
+    result.mFireKeybinding = asScanCode(reader.readU16());
 
     result.mDifficulty = readDifficulty(reader);
 

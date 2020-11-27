@@ -21,6 +21,15 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 include("${CMAKE_SOURCE_DIR}/cmake/rigel.cmake")
 
+# This catches the most common case, where none of the submodules have been
+# initialized. It's still possible to get in a state where entityx is present
+# but other submodules are not, but that's unlikely to happen to someone who
+# has just cloned the repo and wants to build for the first time.
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/3rd_party/entityx/entityx/Entity.h")
+    message(FATAL_ERROR
+        "It seems git submodules were not initialized. You need to run git submodule update --init --recursive, and then re-run CMake.")
+endif()
+
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
     set(WEBASSEMBLY_GAME_PATH "" CACHE PATH "Path to folder containing Duke Nukem II files")
