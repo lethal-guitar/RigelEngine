@@ -109,14 +109,16 @@ void importOptions(
 }
 
 
-void eliminateDuplicateKeyBindings(data::GameOptions& options) {
+void removeInvalidKeyBindings(data::GameOptions& options) {
   std::unordered_set<SDL_Keycode> allBindings;
 
   for (auto pBinding : options.allKeyBindings()) {
-    const auto [it, inserted] = allBindings.insert(*pBinding);
-    if (!inserted) {
-      // If the binding already appeared previously, the current one is a
-      // duplicate - unset it.
+    // If the binding already appeared previously, the current one is a
+    // duplicate.
+    const auto [_, isUnique] = allBindings.insert(*pBinding);
+
+    const auto isValidBinding = data::canBeUsedForKeyBinding(*pBinding);
+    if (!isUnique || !isValidBinding) {
       *pBinding = SDLK_UNKNOWN;
     }
   }
@@ -400,7 +402,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
 
-  eliminateDuplicateKeyBindings(result);
+  removeInvalidKeyBindings(result);
 
   return result;
 }
