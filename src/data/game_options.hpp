@@ -127,4 +127,7 @@ struct GameOptions {
   }
 };
 
+
+bool canBeUsedForKeyBinding(SDL_Keycode key);
+
 }

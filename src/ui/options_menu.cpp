@@ -48,24 +48,6 @@ constexpr auto SCALE = 0.8f;
 constexpr auto STANDARD_FPS_LIMITS = std::array<int, 8>{
   30, 60, 70, 72, 90, 120, 144, 240};
 
-constexpr auto DISALLOWED_KEYS = std::array<SDL_Keycode, 8>{
-  // The following keys are used by the in-game menu system, to enter the menu.
-  // We don't want to allow these keys for use in key bindings.
-  // We could make it possible to rebind those menu keys as well, but for now,
-  // we just disallow their use.
-  SDLK_F1,
-  SDLK_F2,
-  SDLK_F3,
-  SDLK_h,
-  SDLK_p,
-
-  // The following keys could in theory be used for bindings, but are unlikely
-  // to work as expected in practice.
-  SDLK_LGUI,
-  SDLK_RGUI,
-  SDLK_CAPSLOCK
-};
-
 
 template <typename Callback>
 void withEnabledState(const bool enabled, Callback&& callback) {
@@ -112,16 +94,6 @@ void fpsLimitUi(data::GameOptions* pOptions) {
       ImGui::EndCombo();
     }
   });
-}
-
-
-bool isAllowedKey(const SDL_Keycode keyCode) {
-  using std::begin;
-  using std::end;
-  using std::find;
-
-  return find(begin(DISALLOWED_KEYS), end(DISALLOWED_KEYS), keyCode) ==
-    end(DISALLOWED_KEYS);
 }
 
 
@@ -180,7 +152,7 @@ void OptionsMenu::handleEvent(const SDL_Event& event) {
     return;
   }
 
-  if (event.type == SDL_KEYDOWN && isAllowedKey(keyCode)) {
+  if (event.type == SDL_KEYDOWN && data::canBeUsedForKeyBinding(keyCode)) {
     // Store the new key binding
     *mpCurrentlyEditedBinding = keyCode;
 
