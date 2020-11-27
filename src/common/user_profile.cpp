@@ -97,18 +97,6 @@ constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 constexpr auto OPTIONS_FILENAME = "Options.json";
 
 
-void importOptions(
-  data::GameOptions& options,
-  const loader::GameOptions& originalOptions
-) {
-  options.mSoundOn =
-    originalOptions.mSoundBlasterSoundsOn ||
-    originalOptions.mAdlibSoundsOn ||
-    originalOptions.mPcSpeakersSoundsOn;
-  options.mMusicOn = originalOptions.mMusicOn;
-}
-
-
 void removeInvalidKeyBindings(data::GameOptions& options) {
   std::unordered_set<SDL_Keycode> allBindings;
 
@@ -122,6 +110,18 @@ void removeInvalidKeyBindings(data::GameOptions& options) {
       *pBinding = SDLK_UNKNOWN;
     }
   }
+}
+
+
+void importOptions(
+  data::GameOptions& options,
+  const loader::GameOptions& originalOptions
+) {
+  options.mSoundOn =
+    originalOptions.mSoundBlasterSoundsOn ||
+    originalOptions.mAdlibSoundsOn ||
+    originalOptions.mPcSpeakersSoundsOn;
+  options.mMusicOn = originalOptions.mMusicOn;
 }
 
 
