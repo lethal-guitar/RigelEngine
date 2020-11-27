@@ -27,6 +27,7 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <array>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -96,8 +97,100 @@ constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 constexpr auto OPTIONS_FILENAME = "Options.json";
 
+constexpr auto DOS_SCANCODE_TO_SDL_MAP = std::array<SDL_Scancode, 89>{
+  SDL_SCANCODE_UNKNOWN,
+  SDL_SCANCODE_ESCAPE,
+  SDL_SCANCODE_1,
+  SDL_SCANCODE_2,
+  SDL_SCANCODE_3,
+  SDL_SCANCODE_4,
+  SDL_SCANCODE_5,
+  SDL_SCANCODE_6,
+  SDL_SCANCODE_7,
+  SDL_SCANCODE_8,
+  SDL_SCANCODE_9,
+  SDL_SCANCODE_0,
+  SDL_SCANCODE_MINUS,
+  SDL_SCANCODE_EQUALS,
+  SDL_SCANCODE_BACKSPACE,
+  SDL_SCANCODE_TAB,
+  SDL_SCANCODE_Q,
+  SDL_SCANCODE_W,
+  SDL_SCANCODE_E,
+  SDL_SCANCODE_R,
+  SDL_SCANCODE_T,
+  SDL_SCANCODE_Y,
+  SDL_SCANCODE_U,
+  SDL_SCANCODE_I,
+  SDL_SCANCODE_O,
+  SDL_SCANCODE_P,
+  SDL_SCANCODE_LEFTBRACKET,
+  SDL_SCANCODE_RIGHTBRACKET,
+  SDL_SCANCODE_RETURN,
+  SDL_SCANCODE_LCTRL,
+  SDL_SCANCODE_A,
+  SDL_SCANCODE_S,
+  SDL_SCANCODE_D,
+  SDL_SCANCODE_F,
+  SDL_SCANCODE_G,
+  SDL_SCANCODE_H,
+  SDL_SCANCODE_J,
+  SDL_SCANCODE_K,
+  SDL_SCANCODE_L,
+  SDL_SCANCODE_SEMICOLON,
+  SDL_SCANCODE_APOSTROPHE,
+  SDL_SCANCODE_GRAVE,
+  SDL_SCANCODE_LSHIFT,
+  SDL_SCANCODE_BACKSLASH,
+  SDL_SCANCODE_Z,
+  SDL_SCANCODE_X,
+  SDL_SCANCODE_C,
+  SDL_SCANCODE_V,
+  SDL_SCANCODE_B,
+  SDL_SCANCODE_N,
+  SDL_SCANCODE_M,
+  SDL_SCANCODE_COMMA,
+  SDL_SCANCODE_PERIOD,
+  SDL_SCANCODE_SLASH,
+  SDL_SCANCODE_RSHIFT,
+  SDL_SCANCODE_KP_MULTIPLY,
+  SDL_SCANCODE_LALT,
+  SDL_SCANCODE_SPACE,
+  SDL_SCANCODE_CAPSLOCK,
+  SDL_SCANCODE_F1,
+  SDL_SCANCODE_F2,
+  SDL_SCANCODE_F3,
+  SDL_SCANCODE_F4,
+  SDL_SCANCODE_F5,
+  SDL_SCANCODE_F6,
+  SDL_SCANCODE_F7,
+  SDL_SCANCODE_F8,
+  SDL_SCANCODE_F9,
+  SDL_SCANCODE_F10,
+  SDL_SCANCODE_NUMLOCKCLEAR,
+  SDL_SCANCODE_SCROLLLOCK,
+  SDL_SCANCODE_HOME,
+  SDL_SCANCODE_UP,
+  SDL_SCANCODE_PAGEUP,
+  SDL_SCANCODE_KP_MINUS,
+  SDL_SCANCODE_LEFT,
+  SDL_SCANCODE_KP_5,
+  SDL_SCANCODE_RIGHT,
+  SDL_SCANCODE_KP_PLUS,
+  SDL_SCANCODE_END,
+  SDL_SCANCODE_DOWN,
+  SDL_SCANCODE_PAGEDOWN,
+  SDL_SCANCODE_INSERT,
+  SDL_SCANCODE_DELETE,
+  SDL_SCANCODE_UNKNOWN, // SDL_SCANCODE_SYSREQ ?
+  SDL_SCANCODE_UNKNOWN,
+  SDL_SCANCODE_NONUSBACKSLASH,
+  SDL_SCANCODE_F11,
+  SDL_SCANCODE_F12
+};
 
-void removeInvalidKeyBindings(data::GameOptions& options) {
+
+void removeInvalidKeybindings(data::GameOptions& options) {
   std::unordered_set<SDL_Keycode> allBindings;
 
   for (auto pBinding : options.allKeyBindings()) {
@@ -122,6 +215,27 @@ void importOptions(
     originalOptions.mAdlibSoundsOn ||
     originalOptions.mPcSpeakersSoundsOn;
   options.mMusicOn = originalOptions.mMusicOn;
+
+  options.mUpKeybinding =
+    SDL_GetKeyFromScancode(
+      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mUpKeybinding]);
+  options.mDownKeybinding =
+    SDL_GetKeyFromScancode(
+      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mDownKeybinding]);
+  options.mLeftKeybinding =
+    SDL_GetKeyFromScancode(
+      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mLeftKeybinding]);
+  options.mRightKeybinding =
+    SDL_GetKeyFromScancode(
+      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mRightKeybinding]);
+  options.mJumpKeybinding =
+    SDL_GetKeyFromScancode(
+      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mJumpKeybinding]);
+  options.mFireKeybinding =
+    SDL_GetKeyFromScancode(
+      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mFireKeybinding]);
+
+  removeInvalidKeybindings(options);
 }
 
 
@@ -402,7 +516,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
 
-  removeInvalidKeyBindings(result);
+  removeInvalidKeybindings(result);
 
   return result;
 }
