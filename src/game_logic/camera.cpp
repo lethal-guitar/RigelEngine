@@ -47,7 +47,7 @@ constexpr auto MAX_ADJUST_UP = 2;
 constexpr auto MAX_ADJUST_DOWN = 2;
 constexpr auto MAX_ADJUST_DOWN_ELEVATOR = 3;
 
-constexpr auto DEAD_ZONE_START_X = 11;
+constexpr auto DEAD_ZONE_START_X = 10;
 constexpr auto IN_SHIP_DEAD_ZONE_START_X = 12;
 constexpr auto DEAD_ZONE_END_X = 21;
 
@@ -111,8 +111,7 @@ base::Rect<int> normalizedPlayerBounds(
   const auto offsetToCenter = extraTiles / 2;
 
   auto playerBounds = player.worldSpaceCollisionBox();
-  playerBounds.topLeft.x -= offsetToCenter;
-
+  playerBounds.topLeft.x = player.orientedPosition().x - offsetToCenter;
   return playerBounds;
 }
 
