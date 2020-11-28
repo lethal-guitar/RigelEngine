@@ -438,7 +438,7 @@ int Player::animationFrame() const {
 
 
 base::Vector Player::orientedPosition() const {
-  if (stateIs<InShip>() || !mpOptions->compatibilityModeOn()) {
+  if (stateIs<InShip>()) {
     return position();
   }
 
@@ -805,10 +805,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != walkingDirection) {
           switchOrientation();
-
-          if (mpOptions->compatibilityModeOn()) {
-            position.x -= movementVector.x;
-          }
+          position.x -= movementVector.x;
         }
       } else {
         setVisualState(VisualState::Standing);
@@ -958,10 +955,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != orientationAsMovement) {
           switchOrientation();
-
-          if (mpOptions->compatibilityModeOn()) {
-            position.x -= movementVector.x;
-          }
+          position.x -= movementVector.x;
         }
 
         if (mJumpRequested && movement > 0) {

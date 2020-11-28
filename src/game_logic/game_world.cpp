@@ -663,7 +663,7 @@ void GameWorld::processEndOfFrameActions() {
 
 
 void GameWorld::quickSave() {
-  if (!mpOptions->mQuickSavingEnabled) {
+  if (!mpOptions->mQuickSavingEnabled || mpState->mPlayer.isDead()) {
     return;
   }
 
