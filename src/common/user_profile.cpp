@@ -341,7 +341,12 @@ nlohmann::ordered_json serialize(const data::GameOptions& options) {
   serialized["quickSaveKeybinding"] = SDL_GetKeyName(options.mQuickSaveKeybinding);
   serialized["quickLoadKeybinding"] = SDL_GetKeyName(options.mQuickLoadKeybinding);
 
+#if 0
+  // NOTE: This is disabled for now, it's not quite ready yet to be made
+  // user-facing.
   serialized["compatibilityModeOn"] = options.mCompatibilityModeOn;
+#endif
+
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
   return serialized;

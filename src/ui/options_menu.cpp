@@ -272,10 +272,13 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
       ImGui::EndTabItem();
     }
 
-    if (ImGui::BeginTabItem("Gameplay/Enhancements"))
+    if (ImGui::BeginTabItem("Enhancements"))
     {
       ImGui::NewLine();
 
+#if 0
+      // NOTE: This is disabled for now, it's not quite ready yet to be made
+      // user-facing.
       const auto canUseCompatibilityMode = !mpOptions->mWidescreenModeOn;
 
       withEnabledState(canUseCompatibilityMode, [&]() {
@@ -290,6 +293,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
           mpOptions->mCompatibilityModeOn = gameplayStyleIndex == 0;
         }
       });
+#endif
 
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
