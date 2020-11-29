@@ -16,6 +16,7 @@
 
 #include "game_world.hpp"
 
+#include "base/match.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "data/game_options.hpp"
@@ -28,6 +29,7 @@
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
+#include "game_logic/collectable_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
 #include "loader/resource_loader.hpp"
@@ -659,6 +661,64 @@ void GameWorld::processEndOfFrameActions() {
   handleTeleporter();
 
   mpState->mScreenShakeOffsetX = 0;
+}
+
+
+void GameWorld::activateFullHealthCheat() {
+  mpPlayerModel->resetHealthAndScore();
+}
+
+
+void GameWorld::activateGiveItemsCheat() {
+  namespace ex = entityx;
+  using game_logic::components::CollectableItemForCheat;
+  using game_logic::components::RadarDish;
+
+  // Destroy all radar dishes
+  mpState->mEntities.each<RadarDish>([](ex::Entity entity, const RadarDish&) {
+    entity.destroy();
+  });
+
+  // Give all key items (circuit board, blue key, cloak) found in the level,
+  // and a weapon.
+  // The message shown after activating the cheat says it's a "random weapon",
+  // but that's not true. The 3rd weapon found in spawn order is always given,
+  // or an earlier one if the level contains less than three weapon pickups.
+  // Key items are removed from the level, but weapons and the cloak are not.
+  std::optional<data::WeaponType> weaponToGive;
+
+  mpState->mEntities.each<CollectableItemForCheat>(
+    [&, weaponsFound = 0](
+      ex::Entity entity,
+      const CollectableItemForCheat& item
+    ) mutable {
+      base::match(item.mGivenItem,
+        [&](const data::InventoryItemType inventoryItem) {
+          if (
+            inventoryItem == data::InventoryItemType::BlueKey ||
+            inventoryItem == data::InventoryItemType::CircuitBoard
+          ) {
+            mpPlayerModel->giveItem(inventoryItem);
+            entity.destroy();
+          } else if (
+            inventoryItem == data::InventoryItemType::CloakingDevice &&
+            !mpState->mPlayer.isCloaked()
+          ) {
+            mpPlayerModel->giveItem(inventoryItem);
+          }
+        },
+
+        [&](const data::WeaponType weapon) {
+          if (weaponsFound < 3) {
+            weaponToGive = weapon;
+            ++weaponsFound;
+          }
+        });
+    });
+
+  if (weaponToGive) {
+    mpPlayerModel->switchToWeapon(*weaponToGive);
+  }
 }
 
 

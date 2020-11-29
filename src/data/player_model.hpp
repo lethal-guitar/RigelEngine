@@ -108,6 +108,12 @@ public:
 
   void resetForNewLevel();
 
+  /** Restore full health, reset score to 0
+   *
+   * This implements the "eat" cheat code.
+   */
+  void resetHealthAndScore();
+
   TutorialMessageState& tutorialMessages();
   const TutorialMessageState& tutorialMessages() const;
 

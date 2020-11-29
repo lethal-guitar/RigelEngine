@@ -254,6 +254,7 @@ void IngameMenu::handleEvent(const SDL_Event& event) {
 
   if (!isActive()) {
     handleMenuEnterEvent(event);
+    handleCheatCodes();
   } else {
     // We want to process menu navigation and similar events in updateAndRender,
     // so we only add them to a queue here.
@@ -395,6 +396,39 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
 }
 
 
+void IngameMenu::handleCheatCodes() {
+  if (isActive()) {
+    return;
+  }
+
+  const auto pKeyboard = SDL_GetKeyboardState(nullptr);
+  auto keysPressed = [&](auto... keys) {
+    return (pKeyboard[SDL_GetScancodeFromKey(keys)] && ...);
+  };
+
+  if (mContext.mpServiceProvider->isShareWareVersion()) {
+    if (keysPressed(SDLK_g, SDLK_o, SDLK_d)) {
+      mMenuToEnter = MenuType::CheatMessagePrayingWontHelp;
+    }
+  } else {
+    // In the original, the "praying won't help you" pseudo-cheat (it's not
+    // actually a cheat, just a message telling you to buy the registered
+    // version) still works in the registered version. But in my opinion, it
+    // doesn't make much sense to mention buying the registered version to
+    // someone already owning it. So, contrary to the original, we don't check
+    // for g, o, d being pressed here, only in the shareware version.
+    if (keysPressed(SDLK_e, SDLK_a, SDLK_t)) {
+      mpGameWorld->activateFullHealthCheat();
+      mMenuToEnter = MenuType::CheatMessageHealthRestored;
+    } else if (keysPressed(SDLK_n, SDLK_u, SDLK_k)) {
+      mMenuToEnter = MenuType::CheatMessageItemsGiven;
+      // The cheat is activated after entering the menu, in order to avoid
+      // inventory items appearing before the message is visible.
+    }
+  }
+}
+
+
 void IngameMenu::enterMenu(const MenuType type) {
   auto leaveMenuHook = [this](const ExecutionResult&) {
     leaveMenu();
@@ -493,6 +527,21 @@ void IngameMenu::enterMenu(const MenuType type) {
 
     case MenuType::Pause:
       enterScriptedMenu("Paused", leaveMenuHook, noopEventHook, true);
+      break;
+
+    case MenuType::CheatMessagePrayingWontHelp:
+      enterScriptedMenu("The_Prey", leaveMenuHook, noopEventHook, true);
+      break;
+
+    case MenuType::CheatMessageHealthRestored:
+      enterScriptedMenu("Full_Health", leaveMenuHook, noopEventHook, true);
+      // The original game incorrectly does a fadeout after the message is
+      // closed, but we don't replicate it here.
+      break;
+
+    case MenuType::CheatMessageItemsGiven:
+      enterScriptedMenu("Now_Ch", leaveMenuWithFadeHook);
+      mpGameWorld->activateGiveItemsCheat();
       break;
 
     case MenuType::TopLevel:
