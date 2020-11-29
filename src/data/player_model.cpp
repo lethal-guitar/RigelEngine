@@ -197,6 +197,12 @@ void PlayerModel::resetForNewLevel() {
 }
 
 
+void PlayerModel::resetHealthAndScore() {
+  mHealth = MAX_HEALTH;
+  mScore = 0;
+}
+
+
 TutorialMessageState& PlayerModel::tutorialMessages() {
   return mTutorialMessages;
 }

@@ -530,6 +530,8 @@ void EntityFactory::configureEntity(
           100,
           item,
           AppearsOnRadar{});
+        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
+          data::InventoryItemType::CircuitBoard});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -546,6 +548,8 @@ void EntityFactory::configureEntity(
           100,
           item,
           AppearsOnRadar{});
+        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
+          data::InventoryItemType::BlueKey});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -582,6 +586,8 @@ void EntityFactory::configureEntity(
           item,
           animation,
           AppearsOnRadar{});
+        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
+          data::InventoryItemType::CloakingDevice});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -763,6 +769,8 @@ void EntityFactory::configureEntity(
           ActorTag{ActorTag::Type::CollectableWeapon},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
+          data::WeaponType::Rocket});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -781,6 +789,8 @@ void EntityFactory::configureEntity(
           ActorTag{ActorTag::Type::CollectableWeapon},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
+          data::WeaponType::FlameThrower});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -817,6 +827,8 @@ void EntityFactory::configureEntity(
           ActorTag{ActorTag::Type::CollectableWeapon},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
+        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
+          data::WeaponType::Laser});
         entity.remove<ActivationSettings>();
       }
       break;

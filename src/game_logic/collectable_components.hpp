@@ -20,6 +20,7 @@
 #include "data/tutorial_messages.hpp"
 
 #include <optional>
+#include <variant>
 
 
 namespace rigel::game_logic {
@@ -35,6 +36,11 @@ struct CollectableItem {
   std::optional<data::CollectableLetterType> mGivenCollectableLetter;
   std::optional<data::TutorialMessageId> mShownTutorialMessage;
   bool mSpawnScoreNumbers = true;
+};
+
+
+struct CollectableItemForCheat {
+  std::variant<data::InventoryItemType, data::WeaponType> mGivenItem;
 };
 
 }

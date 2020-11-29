@@ -92,6 +92,9 @@ public:
   void render();
   void processEndOfFrameActions();
 
+  void activateFullHealthCheat();
+  void activateGiveItemsCheat();
+
   void quickSave();
   void quickLoad();
   bool canQuickLoad() const;

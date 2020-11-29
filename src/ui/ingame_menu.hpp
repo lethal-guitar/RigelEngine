@@ -156,7 +156,10 @@ private:
     SaveGame,
     LoadGame,
     Help,
-    Pause
+    Pause,
+    CheatMessagePrayingWontHelp,
+    CheatMessageHealthRestored,
+    CheatMessageItemsGiven
   };
 
   static bool noopEventHook(const SDL_Event&) { return false; }
@@ -175,6 +178,7 @@ private:
   void onRestoreGameMenuFinished(const ExecutionResult& result);
   void saveGame(int slotIndex, std::string_view name);
   void handleMenuEnterEvent(const SDL_Event& event);
+  void handleCheatCodes();
   void handleMenuActiveEvents();
 
   GameMode::Context mContext;
