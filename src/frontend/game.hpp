@@ -103,7 +103,7 @@ private:
 
   void switchGamePath(const std::filesystem::path& newGamePath) override;
 
-  bool isShareWareVersion() const override {
+  bool isSharewareVersion() const override {
     return mIsShareWareVersion;
   }
 

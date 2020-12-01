@@ -329,7 +329,7 @@ void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result) {
     const auto& slot = mContext.mpUserProfile->mSaveSlots[*slotIndex];
     if (slot) {
       if (
-        mContext.mpServiceProvider->isShareWareVersion() &&
+        mContext.mpServiceProvider->isSharewareVersion() &&
         slot->mSessionId.needsRegisteredVersion()
       ) {
         showErrorMessageScript("No_Can_Order");
@@ -406,7 +406,7 @@ void IngameMenu::handleCheatCodes() {
     return (pKeyboard[SDL_GetScancodeFromKey(keys)] && ...);
   };
 
-  if (mContext.mpServiceProvider->isShareWareVersion()) {
+  if (mContext.mpServiceProvider->isSharewareVersion()) {
     if (keysPressed(SDLK_g, SDLK_o, SDLK_d)) {
       mMenuToEnter = MenuType::CheatMessagePrayingWontHelp;
     }

@@ -115,7 +115,7 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 std::unique_ptr<GameMode> createInitialGameMode(
   GameMode::Context context,
   const CommandLineOptions& commandLineOptions,
-  const bool isShareWareVersion,
+  const bool isSharewareVersion,
   const bool isFirstLaunch)
 {
   class DemoTestMode : public GameMode {
@@ -152,7 +152,7 @@ std::unique_ptr<GameMode> createInitialGameMode(
     return std::make_unique<DemoTestMode>(context);
   }
 
-  if (!isShareWareVersion) {
+  if (!isSharewareVersion) {
     return std::make_unique<AntiPiracyScreenMode>(context, isFirstLaunch);
   }
 
