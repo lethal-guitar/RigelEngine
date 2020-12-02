@@ -322,7 +322,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
         mpUserProfile->mGamePath->u8string().c_str());
       ImGui::Text(
         "Type: %s version",
-        mpServiceProvider->isShareWareVersion() ? "Shareware" : "Registered");
+        mpServiceProvider->isSharewareVersion() ? "Shareware" : "Registered");
     }
 
     ImGui::NewLine();
@@ -337,7 +337,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
       mGamePathBrowser.Open();
     }
 
-    if (!mpServiceProvider->isShareWareVersion()) {
+    if (!mpServiceProvider->isSharewareVersion()) {
       ImGui::Spacing();
       ImGui::TextUnformatted(
 R"(NOTE: When switching to a shareware version, some of your saved games
