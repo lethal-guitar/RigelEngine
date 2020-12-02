@@ -43,7 +43,7 @@ struct IGameServiceProvider {
   virtual void stopMusic() = 0;
   virtual void scheduleGameQuit() = 0;
   virtual void switchGamePath(const std::filesystem::path& newGamePath) = 0;
-  virtual bool isShareWareVersion() const = 0;
+  virtual bool isSharewareVersion() const = 0;
   virtual const CommandLineOptions& commandLineOptions() const = 0;
 };
 

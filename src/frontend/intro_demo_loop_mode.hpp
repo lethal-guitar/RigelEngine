@@ -19,7 +19,7 @@ namespace ui { class DukeScriptRunner; }
  * This is the non-interactive "demo" mode of Duke Nukem II. It keeps
  * repeating the following sequence until any key is pressed:
  *
- *   Intro movie -> Credits -> Ordering Info (if ShareWare) -> in-game demos
+ *   Intro movie -> Credits -> Ordering Info (if Shareware) -> in-game demos
  *     -> Apogee Logo
  *
  * This mode is entered when the user sits on the main menu for a certain

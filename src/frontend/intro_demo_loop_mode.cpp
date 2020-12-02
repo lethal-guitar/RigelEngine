@@ -113,7 +113,7 @@ void IntroDemoLoopMode::startCurrentStep() {
       //
       // Consequently, we always insert two 700 tick delays, but only insert
       // the order info script commands if we're running the shareware version.
-      if (mContext.mpServiceProvider->isShareWareVersion()) {
+      if (mContext.mpServiceProvider->isSharewareVersion()) {
         const auto orderInfoScript = mContext.mpScripts->at("Q_ORDER");
         creditsScript.insert(
           end(creditsScript), begin(orderInfoScript), end(orderInfoScript));

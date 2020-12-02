@@ -167,7 +167,7 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
             break;
 
           case 3:
-            if (mContext.mpServiceProvider->isShareWareVersion()) {
+            if (mContext.mpServiceProvider->isSharewareVersion()) {
               runScript(mContext, "Ordering_Info");
             } else {
               runScript(mContext, "V4ORDER");
@@ -214,7 +214,7 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
         assert(result.mSelectedPage);
         const auto chosenEpisode = *result.mSelectedPage;
 
-        if (mContext.mpServiceProvider->isShareWareVersion() && chosenEpisode > 0) {
+        if (mContext.mpServiceProvider->isSharewareVersion() && chosenEpisode > 0) {
           runScript(mContext, "No_Can_Order");
           mMenuState = MenuState::EpisodeNotAvailableMessage;
         } else {
@@ -265,7 +265,7 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
         const auto& slot = mContext.mpUserProfile->mSaveSlots[slotIndex];
         if (slot) {
           if (
-            mContext.mpServiceProvider->isShareWareVersion() &&
+            mContext.mpServiceProvider->isSharewareVersion() &&
             slot->mSessionId.needsRegisteredVersion()
           ) {
             runScript(mContext, "No_Can_Order");
@@ -311,7 +311,7 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
         assert(result.mSelectedPage);
         const auto chosenEpisode = *result.mSelectedPage;
 
-        if (mContext.mpServiceProvider->isShareWareVersion() && chosenEpisode > 0) {
+        if (mContext.mpServiceProvider->isSharewareVersion() && chosenEpisode > 0) {
           runScript(mContext, "No_Can_Order");
           mMenuState = MenuState::EpisodeNotAvailableMessageHighScores;
         } else {
