@@ -1,6 +1,7 @@
 set(sources
     stb_image.h
     stb_image_write.h
+    stb_rect_pack.h
     stb.cpp
 )
 

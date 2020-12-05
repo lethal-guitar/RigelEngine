@@ -15,6 +15,7 @@ target_include_directories(dear_imgui
 target_link_libraries(dear_imgui
     PRIVATE
     SDL2::Core
+    stb
     glad
 )
 
@@ -29,6 +30,8 @@ endif()
 target_compile_definitions(dear_imgui
     PRIVATE
     -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+    -DIMGUI_DISABLE_STB_RECT_PACK_IMPLEMENTATION
+    "-DIMGUI_STB_RECT_PACK_FILENAME=<stb_rect_pack.h>"
 )
 
 if (USE_GL_ES)
