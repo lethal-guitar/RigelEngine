@@ -32,10 +32,7 @@ namespace rigel::engine {
 inline components::BoundingBox inferBoundingBox(
   const SpriteFrame& frame
 ) {
-  const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
-    frame.mImage.extents());
-
-  return {frame.mDrawOffset, dimensionsInTiles};
+  return {frame.mDrawOffset, frame.mDimensions};
 }
 
 

@@ -33,7 +33,10 @@ auto createFrameDrawData(
   renderer::Renderer* pRenderer
 ) {
   auto texture = renderer::OwningTexture{pRenderer, frameData.mFrameImage};
-  return engine::SpriteFrame{std::move(texture), frameData.mDrawOffset};
+  const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
+    texture.extents());
+  return engine::SpriteFrame{
+    std::move(texture), frameData.mDrawOffset, dimensionsInTiles};
 }
 
 
@@ -535,9 +538,7 @@ base::Rect<int> SpriteFactory::actorFrameRect(
   const auto realFrame = virtualToRealFrame(0, data.mDrawData, std::nullopt);
   const auto& frameData = data.mDrawData.mFrames[realFrame];
 
-  const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
-    frameData.mImage.extents());
-  return {frameData.mDrawOffset, dimensionsInTiles};
+  return {frameData.mDrawOffset, frameData.mDimensions};
 }
 
 auto SpriteFactory::createOrFindData(const ActorID mainId) const

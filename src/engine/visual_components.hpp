@@ -40,15 +40,18 @@ struct SpriteFrame {
   SpriteFrame() = default;
   SpriteFrame(
     renderer::OwningTexture image,
-    base::Vector drawOffset
+    base::Vector drawOffset,
+    base::Extents dimensions
   )
     : mImage(std::move(image))
     , mDrawOffset(drawOffset)
+    , mDimensions(dimensions)
   {
   }
 
   renderer::OwningTexture mImage;
   base::Vector mDrawOffset;
+  base::Extents mDimensions;
 };
 
 
