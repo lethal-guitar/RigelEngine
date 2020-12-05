@@ -272,6 +272,8 @@ set(core_sources
     renderer/shader.hpp
     renderer/texture.cpp
     renderer/texture.hpp
+    renderer/texture_atlas.cpp
+    renderer/texture_atlas.hpp
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
     sdl_utils/key_code.hpp
