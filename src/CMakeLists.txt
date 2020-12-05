@@ -340,6 +340,7 @@ target_link_libraries(rigel_core
     glm
 
     PRIVATE
+    stb
     std::filesystem
     dbopl
     speex_resampler

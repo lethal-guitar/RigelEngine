@@ -31,6 +31,7 @@ add_subdirectory(dbopl)
 add_subdirectory(entityx)
 add_subdirectory(glad)
 add_subdirectory(speex_resampler)
+add_subdirectory(stb)
 add_subdirectory(imgui)
 add_subdirectory(imgui-filebrowser)
 
