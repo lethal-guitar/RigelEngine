@@ -427,7 +427,7 @@ void EntityFactory::createEntitiesForLevel(
 
       boundingBox = mapSectionRect;
       boundingBox.topLeft = {0, 0};
-    } else if (hasAssociatedSprite(actor.mID)) {
+    } else if (engine::hasAssociatedSprite(actor.mID)) {
       const auto sprite = createSpriteForId(actor.mID);
       boundingBox = mpSpriteFactory->actorFrameRect(actor.mID, 0);
       entity.assign<Sprite>(sprite);

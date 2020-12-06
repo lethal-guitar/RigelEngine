@@ -38,6 +38,9 @@ constexpr auto MUZZLE_FLASH_DRAW_ORDER = PLAYER_PROJECTILE_DRAW_ORDER + 1;
 constexpr auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
 
 
+bool hasAssociatedSprite(data::ActorID actorID);
+
+
 class SpriteFactory : public ISpriteFactory {
 public:
   SpriteFactory(

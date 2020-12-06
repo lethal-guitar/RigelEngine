@@ -512,6 +512,32 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
 }
 
 
+bool hasAssociatedSprite(const ActorID actorID) {
+  switch (actorID) {
+    default:
+      return true;
+
+    case ActorID::Dynamic_geometry_1:
+    case ActorID::Dynamic_geometry_2:
+    case ActorID::Dynamic_geometry_3:
+    case ActorID::Dynamic_geometry_4:
+    case ActorID::Dynamic_geometry_5:
+    case ActorID::Dynamic_geometry_6:
+    case ActorID::Dynamic_geometry_7:
+    case ActorID::Dynamic_geometry_8:
+    case ActorID::Exit_trigger:
+    case ActorID::Water_body:
+    case ActorID::Water_surface_1:
+    case ActorID::Water_surface_2:
+    case ActorID::Windblown_spider_generator:
+    case ActorID::Airlock_death_trigger_LEFT:
+    case ActorID::Airlock_death_trigger_RIGHT:
+    case ActorID::Explosion_FX_trigger:
+      return false;
+  }
+}
+
+
 SpriteFactory::SpriteFactory(
   renderer::Renderer* pRenderer,
   const loader::ActorImagePackage* pSpritePackage
