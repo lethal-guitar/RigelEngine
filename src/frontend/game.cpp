@@ -222,6 +222,7 @@ Game::Game(
       renderer::OwningTexture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
+  , mSpriteFactory(&mRenderer, &mResources.mActorImagePackage)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
   applyChangedOptions();
@@ -327,6 +328,7 @@ GameMode::Context Game::makeModeContext() {
     &mAllScripts,
     &mTextRenderer,
     &mUiSpriteSheet,
+    &mSpriteFactory,
     mpUserProfile};
 }
 

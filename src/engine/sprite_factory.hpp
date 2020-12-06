@@ -18,6 +18,7 @@
 
 #include "data/game_traits.hpp"
 #include "engine/isprite_factory.hpp"
+#include "renderer/texture_atlas.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -40,7 +41,6 @@ constexpr auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
 
 bool hasAssociatedSprite(data::ActorID actorID);
 
-
 class SpriteFactory : public ISpriteFactory {
 public:
   SpriteFactory(
@@ -50,17 +50,26 @@ public:
   engine::components::Sprite createSprite(data::ActorID id) override;
   base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override;
 
+  const renderer::TextureAtlas& textureAtlas() const {
+    return mSpritesTextureAtlas;
+  }
+
 private:
   struct SpriteData {
     engine::SpriteDrawData mDrawData;
     std::vector<int> mInitialFramesToRender;
   };
 
-  const SpriteData& createOrFindData(data::ActorID id) const;
+  using CtorArgs = std::tuple<
+    std::unordered_map<data::ActorID, SpriteData>, renderer::TextureAtlas>;
 
-  renderer::Renderer* mpRenderer;
-  const loader::ActorImagePackage* mpSpritePackage;
-  mutable std::unordered_map<data::ActorID, SpriteData> mSpriteDataCache;
+  SpriteFactory(CtorArgs args);
+  static CtorArgs construct(
+    renderer::Renderer* pRenderer,
+    const loader::ActorImagePackage* pSpritePackage);
+
+  std::unordered_map<data::ActorID, SpriteData> mSpriteDataMap;
+  renderer::TextureAtlas mSpritesTextureAtlas;
 };
 
 }

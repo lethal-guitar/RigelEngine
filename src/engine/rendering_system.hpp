@@ -35,6 +35,9 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
+namespace rigel::renderer { class TextureAtlas; }
+
+
 namespace rigel::engine {
 
 /** Animates sprites with an AnimationLoop component
@@ -58,6 +61,7 @@ public:
   RenderingSystem(
     const base::Vector* pCameraPosition,
     renderer::Renderer* pRenderer,
+    const renderer::TextureAtlas* pSpritesTextureAtlas,
     const data::map::Map* pMap,
     MapRenderer::MapRenderData&& mapRenderData);
 
@@ -96,6 +100,7 @@ private:
 
 private:
   renderer::Renderer* mpRenderer;
+  const renderer::TextureAtlas* mpTextureAtlas;
   renderer::RenderTargetTexture mRenderTarget;
   MapRenderer mMapRenderer;
   const base::Vector* mpCameraPosition;

@@ -35,6 +35,7 @@ struct IGameServiceProvider;
 class UserProfile;
 
 namespace engine {
+  class SpriteFactory;
   class TiledTexture;
 }
 
@@ -58,6 +59,7 @@ struct GameMode {
     loader::ScriptBundle* mpScripts;
     ui::MenuElementRenderer* mpUiRenderer;
     engine::TiledTexture* mpUiSpriteSheet;
+    engine::SpriteFactory* mpSpriteFactory;
     UserProfile* mpUserProfile;
   };
 

@@ -133,9 +133,9 @@ private:
   data::PlayerModel* mpPlayerModel;
   const data::GameOptions* mpOptions;
   const loader::ResourceLoader* mpResources;
+  engine::SpriteFactory* mpSpriteFactory;
   data::GameSessionId mSessionId;
 
-  engine::SpriteFactory mSpriteFactory;
   data::PlayerModel mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;

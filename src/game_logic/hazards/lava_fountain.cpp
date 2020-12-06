@@ -119,7 +119,7 @@ void LavaFountain::update(
 
 
 void LavaFountain::render(
-  renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace
@@ -136,7 +136,7 @@ void LavaFountain::render(
       engine::drawSpriteFrame(
         sprite.mpDrawData->mFrames[element.mFrame],
         positionInScreenSpace + base::Vector{0, element.mOffsetY},
-        pRenderer);
+        textureAtlas);
     }
   }
 }

@@ -199,6 +199,7 @@ WorldState::WorldState(
   , mRenderingSystem(
       &mCamera.position(),
       pRenderer,
+      &pSpriteFactory->textureAtlas(),
       &mMap,
       engine::MapRenderer::MapRenderData{
         std::move(loadedLevel.mTileSetImage),

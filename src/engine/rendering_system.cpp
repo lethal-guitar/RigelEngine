@@ -22,6 +22,7 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
+#include "renderer/texture_atlas.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -155,17 +156,20 @@ void updateAnimatedSprites(ex::EntityManager& es) {
 void drawSpriteFrame(
   const SpriteFrame& frame,
   const base::Vector& position,
-  renderer::Renderer* pRenderer
+  const renderer::TextureAtlas& spritesTextureAtlas
 ) {
   // World-space tile positions refer to a sprite's bottom left tile,
   // but we need its top left corner for drawing.
-  const auto heightTiles = data::pixelsToTiles(frame.mImage.height());
+  const auto heightTiles = frame.mDimensions.height;
   const auto topLeft = position - base::Vector(0, heightTiles - 1);
   const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
   const auto drawOffsetPx = data::tileVectorToPixelVector(
     frame.mDrawOffset);
 
-  frame.mImage.render(pRenderer, topLeftPx + drawOffsetPx);
+  const auto destRect = base::Rect<int>{
+    topLeftPx + drawOffsetPx,
+    data::tileExtentsToPixelExtents(frame.mDimensions)};
+  spritesTextureAtlas.draw(frame.mImageId, destRect);
 }
 
 
@@ -204,10 +208,12 @@ struct RenderingSystem::SpriteData {
 RenderingSystem::RenderingSystem(
   const base::Vector* pCameraPosition,
   renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas* pSpritesTextureAtlas,
   const data::map::Map* pMap,
   MapRenderer::MapRenderData&& mapRenderData
 )
   : mpRenderer(pRenderer)
+  , mpTextureAtlas(pSpritesTextureAtlas)
   , mRenderTarget(
       pRenderer,
       pRenderer->maxWindowSize().width,
@@ -300,7 +306,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
   if (data.mEntity.has_component<CustomRenderFunc>()) {
     const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
-    renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpCameraPosition);
+    renderFunc(*mpTextureAtlas, data.mEntity, sprite, pos - *mpCameraPosition);
   } else {
     auto slotIndex = 0;
     for (const auto& baseFrameIndex : sprite.mFramesToRender) {
@@ -324,7 +330,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       auto& frame = sprite.mpDrawData->mFrames[frameIndex];
 
-      drawSpriteFrame(frame, pos - *mpCameraPosition, mpRenderer);
+      drawSpriteFrame(frame, pos - *mpCameraPosition, *mpTextureAtlas);
 
       mpRenderer->setOverlayColor(base::Color{});
       mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
