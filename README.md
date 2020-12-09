@@ -37,10 +37,11 @@ RigelEngine is not very demanding, but it does require OpenGL-capable graphics h
 Either OpenGL 3.0 or OpenGL ES 2.0 can be used, depending on what's chosen at compile time.
 To build in GL ES mode, pass `-DUSE_GL_ES=ON` to CMake.
 
-Most Desktop/laptop graphics cards support OpenGL 3.0 nowadays.
-However, some older integrated GPUs might only support OpenGL 2.
-For these systems, using GL ES can be an option as well.
-This has been confirmed to work on Ubuntu 18.04 on an older laptop.
+Any Nvidia or AMD graphics card from 2007 or later should run the game without problems.
+Intel integrated GPUs only added OpenGL 3 support in 2011, however.
+On Linux, using GL ES can still be an option for older Intel GPUs.
+
+See [Supported Graphics cards](https://github.com/lethal-guitar/RigelEngine/wiki/Supported-graphics-cards-(GPUs)) for more info.
 
 ### Differences to the original Duke Nukem II
 
