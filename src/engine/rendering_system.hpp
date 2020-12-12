@@ -96,7 +96,6 @@ public:
 private:
   struct SpriteData;
   void renderSprite(const SpriteData& data) const;
-  void renderWaterEffectAreas(entityx::EntityManager& es);
 
 private:
   renderer::Renderer* mpRenderer;
