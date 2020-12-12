@@ -72,12 +72,15 @@ struct WaterEffectArea {
 
 std::vector<WaterEffectArea> collectWaterEffectAreas(
   entityx::EntityManager& es,
-  const base::Vector& cameraPosition
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
 ) {
   using engine::components::BoundingBox;
   using game_logic::components::ActorTag;
 
   std::vector<WaterEffectArea> result;
+
+  const auto screenBox = BoundingBox{cameraPosition, viewPortSize};
 
   es.each<ActorTag, WorldPosition, BoundingBox>(
     [&](
@@ -91,17 +94,19 @@ std::vector<WaterEffectArea> collectWaterEffectAreas(
       const auto isWaterArea =
         tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
       if (isWaterArea) {
-        const auto screenPosition = position - cameraPosition;
-        const auto worldSpaceBbox = engine::toWorldSpace(bbox, screenPosition);
-        const auto topLeftPx =
-          data::tileVectorToPixelVector(worldSpaceBbox.topLeft);
-        const auto sizePx =
-          data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+        const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
 
-        const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
+        if (screenBox.intersects(worldSpaceBbox)) {
+          const auto topLeftPx =
+            data::tileVectorToPixelVector(
+              worldSpaceBbox.topLeft - cameraPosition);
+          const auto sizePx =
+            data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+          const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
 
-        result.push_back(
-          WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
+          result.push_back(
+            WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
+        }
       }
     });
 
@@ -311,7 +316,8 @@ void RenderingSystem::update(
   };
 
 
-  const auto waterEffectAreas = collectWaterEffectAreas(es, *mpCameraPosition);
+  const auto waterEffectAreas =
+    collectWaterEffectAreas(es, *mpCameraPosition, viewPortSize);
   if (waterEffectAreas.empty()) {
     renderBackgroundLayers();
   } else {
