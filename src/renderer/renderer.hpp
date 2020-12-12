@@ -262,6 +262,7 @@ private:
   GLuint mStreamEbo;
 
   Shader mTexturedQuadShader;
+  Shader mSimpleTexturedQuadShader;
   Shader mSolidColorShader;
   Shader mWaterEffectShader;
 

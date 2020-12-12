@@ -111,6 +111,20 @@ void main() {
 }
 )shd";
 
+
+const auto FRAGMENT_SOURCE_SIMPLE = R"shd(
+OUTPUT_COLOR_DECLARATION
+
+IN HIGHP vec2 texCoordFrag;
+
+uniform sampler2D textureData;
+
+void main() {
+  OUTPUT_COLOR = TEXTURE_LOOKUP(textureData, texCoordFrag);
+}
+)shd";
+
+
 const auto FRAGMENT_SOURCE = R"shd(
 OUTPUT_COLOR_DECLARATION
 
@@ -421,6 +435,11 @@ Renderer::Renderer(SDL_Window* pWindow)
       VERTEX_SOURCE,
       FRAGMENT_SOURCE,
       {"position", "texCoord"})
+  , mSimpleTexturedQuadShader(
+      SHADER_PREAMBLE,
+      VERTEX_SOURCE,
+      FRAGMENT_SOURCE_SIMPLE,
+      {"position", "texCoord"})
   , mSolidColorShader(
       SHADER_PREAMBLE,
       VERTEX_SOURCE_SOLID,
@@ -483,6 +502,9 @@ Renderer::Renderer(SDL_Window* pWindow)
   useShaderIfChanged(mTexturedQuadShader);
   mTexturedQuadShader.setUniform("textureData", 0);
 
+  useShaderIfChanged(mSimpleTexturedQuadShader);
+  mSimpleTexturedQuadShader.setUniform("textureData", 0);
+
   // Remaining setup
   onRenderTargetChanged();
 
@@ -509,9 +531,8 @@ void Renderer::setOverlayColor(const base::Color& color) {
   if (color != mLastOverlayColor) {
     submitBatch();
 
-    setRenderModeIfChanged(RenderMode::SpriteBatch);
-    mTexturedQuadShader.setUniform("overlayColor", toGlColor(color));
     mLastOverlayColor = color;
+    updateShaders();
   }
 }
 
@@ -520,10 +541,8 @@ void Renderer::setColorModulation(const base::Color& colorModulation) {
   if (colorModulation != mLastColorModulation) {
     submitBatch();
 
-    setRenderModeIfChanged(RenderMode::SpriteBatch);
-    mTexturedQuadShader.setUniform(
-      "colorModulation", toGlColor(colorModulation));
     mLastColorModulation = colorModulation;
+    updateShaders();
   }
 }
 
@@ -550,8 +569,8 @@ void Renderer::drawTexture(
   if (repeat != mTextureRepeatOn) {
     submitBatch();
 
-    mTexturedQuadShader.setUniform("enableRepeat", repeat);
     mTextureRepeatOn = repeat;
+    updateShaders();
   }
 
   // x, y, tex_u, tex_v
@@ -898,9 +917,23 @@ void Renderer::setRenderModeIfChanged(const RenderMode mode) {
 void Renderer::updateShaders() {
   switch (mRenderMode) {
     case RenderMode::SpriteBatch:
-      useShaderIfChanged(mTexturedQuadShader);
-      mTexturedQuadShader.setUniform("enableRepeat", mTextureRepeatOn);
-      mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
+      if (
+        mTextureRepeatOn ||
+        mLastOverlayColor != base::Color{} ||
+        mLastColorModulation != base::Color{255, 255, 255, 255}
+      ) {
+        useShaderIfChanged(mTexturedQuadShader);
+        mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
+        mTexturedQuadShader.setUniform("enableRepeat", mTextureRepeatOn);
+        mTexturedQuadShader.setUniform(
+          "colorModulation", toGlColor(mLastColorModulation));
+        mTexturedQuadShader.setUniform(
+          "overlayColor", toGlColor(mLastOverlayColor));
+      } else {
+        useShaderIfChanged(mSimpleTexturedQuadShader);
+        mSimpleTexturedQuadShader.setUniform("transform", mProjectionMatrix);
+      }
+
       glVertexAttribPointer(
         0,
         2,
