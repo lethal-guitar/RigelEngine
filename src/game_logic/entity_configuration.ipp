@@ -1989,7 +1989,7 @@ void EntityFactory::configureEntity(
     case ActorID::Water_drop_spawner: // water drop spawner
       entity.assign<BehaviorController>(WaterDropGenerator{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       break;
 
     case ActorID::Water_surface_1: // water with animated surface
@@ -2005,7 +2005,7 @@ void EntityFactory::configureEntity(
     case ActorID::Windblown_spider_generator: // windblown-spider generator
       entity.assign<BehaviorController>(WindBlownSpiderGenerator{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       break;
 
     case ActorID::Airlock_death_trigger_LEFT:
