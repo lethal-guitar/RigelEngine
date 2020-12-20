@@ -94,7 +94,7 @@ void GrabberClaw::update(
 
 
 void GrabberClaw::render(
-  renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace
@@ -110,14 +110,14 @@ void GrabberClaw::render(
     engine::drawSpriteFrame(
       pDrawData->mFrames[0],
       positionInScreenSpace - base::Vector{0, i + 1},
-      pRenderer);
+      textureAtlas);
   }
 
   // Claw
   engine::drawSpriteFrame(
     pDrawData->mFrames[currentFrame],
     positionInScreenSpace,
-    pRenderer);
+    textureAtlas);
 }
 
 }

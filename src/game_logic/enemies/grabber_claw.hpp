@@ -31,7 +31,7 @@ namespace rigel::game_logic {
   struct GlobalDependencies;
   struct GlobalState;
 }
-namespace rigel::renderer { class Renderer; }
+namespace rigel::renderer { class TextureAtlas; }
 
 
 namespace rigel::game_logic::behaviors {
@@ -58,7 +58,7 @@ struct GrabberClaw {
     entityx::Entity entity);
 
   static void render(
-    renderer::Renderer* pRenderer,
+    const renderer::TextureAtlas& spritesTextureAtlas,
     entityx::Entity entity,
     const engine::components::Sprite& sprite,
     const base::Vector& positionInScreenSpace);

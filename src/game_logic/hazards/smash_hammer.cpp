@@ -82,7 +82,7 @@ void SmashHammer::update(
 
 
 void SmashHammer::render(
-  renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace
@@ -95,14 +95,14 @@ void SmashHammer::render(
 
   // Hammer
   engine::drawSpriteFrame(
-    pDrawData->mFrames[0], positionInScreenSpace, pRenderer);
+    pDrawData->mFrames[0], positionInScreenSpace, textureAtlas);
 
   // Mounting pole
   for (int i = 0; i < state.mExtensionStep; ++i) {
     engine::drawSpriteFrame(
       pDrawData->mFrames[1],
       positionInScreenSpace - base::Vector{0, i},
-      pRenderer);
+      textureAtlas);
   }
 }
 

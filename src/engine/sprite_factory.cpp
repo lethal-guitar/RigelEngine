@@ -20,6 +20,8 @@
 #include "data/unit_conversions.hpp"
 #include "loader/actor_image_package.hpp"
 
+#include <array>
+
 
 namespace rigel::engine {
 
@@ -28,20 +30,251 @@ using namespace engine::components;
 
 namespace {
 
-auto createFrameDrawData(
-  const loader::ActorData::Frame& frameData,
-  renderer::Renderer* pRenderer
-) {
-  auto texture = renderer::OwningTexture{pRenderer, frameData.mFrameImage};
-  return engine::SpriteFrame{std::move(texture), frameData.mDrawOffset};
-}
+constexpr auto INGAME_SPRITE_ACTOR_IDS = std::array{
+  data::ActorID::Hoverbot,
+  data::ActorID::Explosion_FX_1,
+  data::ActorID::Explosion_FX_2,
+  data::ActorID::Shot_impact_FX,
+  data::ActorID::Spiked_green_creature_eye_FX_LEFT,
+  data::ActorID::Duke_LEFT,
+  data::ActorID::Duke_RIGHT,
+  data::ActorID::Duke_rocket_up,
+  data::ActorID::Duke_rocket_down,
+  data::ActorID::Duke_rocket_left,
+  data::ActorID::Duke_rocket_right,
+  data::ActorID::Smoke_puff_FX,
+  data::ActorID::Hoverbot_debris_1,
+  data::ActorID::Hoverbot_debris_2,
+  data::ActorID::Nuclear_waste_can_empty,
+  data::ActorID::Nuclear_waste_can_debris_1,
+  data::ActorID::Nuclear_waste_can_debris_2,
+  data::ActorID::Nuclear_waste_can_debris_3,
+  data::ActorID::Nuclear_waste_can_debris_4,
+  data::ActorID::Green_box_rocket_launcher,
+  data::ActorID::Green_box_flame_thrower,
+  data::ActorID::Duke_flame_shot_up,
+  data::ActorID::Green_box_normal_weapon,
+  data::ActorID::Green_box_laser,
+  data::ActorID::Duke_laser_shot_horizontal,
+  data::ActorID::Duke_laser_shot_vertical,
+  data::ActorID::Duke_regular_shot_horizontal,
+  data::ActorID::Duke_regular_shot_vertical,
+  data::ActorID::Blue_box_health_molecule,
+  data::ActorID::Big_green_cat_LEFT,
+  data::ActorID::Big_green_cat_RIGHT,
+  data::ActorID::Muzzle_flash_up,
+  data::ActorID::Muzzle_flash_down,
+  data::ActorID::Muzzle_flash_left,
+  data::ActorID::Muzzle_flash_right,
+  data::ActorID::White_box_circuit_card,
+  data::ActorID::Wall_mounted_flamethrower_RIGHT,
+  data::ActorID::Wall_mounted_flamethrower_LEFT,
+  data::ActorID::Flame_thrower_fire_RIGHT,
+  data::ActorID::Flame_thrower_fire_LEFT,
+  data::ActorID::Red_box_bomb,
+  data::ActorID::Nuclear_explosion,
+  data::ActorID::Bonus_globe_shell,
+  data::ActorID::Blue_bonus_globe_1,
+  data::ActorID::Blue_bonus_globe_2,
+  data::ActorID::Blue_bonus_globe_3,
+  data::ActorID::Blue_bonus_globe_4,
+  data::ActorID::Watchbot,
+  data::ActorID::Teleporter_1,
+  data::ActorID::Teleporter_2,
+  data::ActorID::White_box_rapid_fire,
+  data::ActorID::Rocket_launcher_turret,
+  data::ActorID::Enemy_rocket_left,
+  data::ActorID::Enemy_rocket_up,
+  data::ActorID::Enemy_rocket_right,
+  data::ActorID::Watchbot_container_carrier,
+  data::ActorID::Watchbot_container,
+  data::ActorID::Watchbot_container_debris_1,
+  data::ActorID::Watchbot_container_debris_2,
+  data::ActorID::Bomb_dropping_spaceship,
+  data::ActorID::Napalm_bomb,
+  data::ActorID::Bouncing_spike_ball,
+  data::ActorID::Fire_bomb_fire,
+  data::ActorID::Electric_reactor,
+  data::ActorID::Green_slime_blob,
+  data::ActorID::Green_slime_container,
+  data::ActorID::Hoverbot_teleport_FX,
+  data::ActorID::Green_slime_blob_flying_on_ceiling,
+  data::ActorID::Duke_death_particles,
+  data::ActorID::Bonus_globe_debris_1,
+  data::ActorID::Bonus_globe_debris_2,
+  data::ActorID::White_circle_flash_FX,
+  data::ActorID::Nuclear_waste_can_green_slime_inside,
+  data::ActorID::Napalm_bomb_small,
+  data::ActorID::Snake,
+  data::ActorID::Camera_on_ceiling,
+  data::ActorID::Camera_on_floor,
+  data::ActorID::Green_hanging_suction_plant,
+  data::ActorID::Smoke_cloud_FX,
+  data::ActorID::Reactor_fire_LEFT,
+  data::ActorID::Reactor_fire_RIGHT,
+  data::ActorID::Dukes_ship_RIGHT,
+  data::ActorID::Dukes_ship_LEFT,
+  data::ActorID::Dukes_ship_after_exiting_RIGHT,
+  data::ActorID::Dukes_ship_after_exiting_LEFT,
+  data::ActorID::Dukes_ship_laser_shot,
+  data::ActorID::Dukes_ship_exhaust_flames,
+  data::ActorID::Super_force_field_LEFT,
+  data::ActorID::Biological_enemy_debris,
+  data::ActorID::Missile_broken,
+  data::ActorID::Missile_debris,
+  data::ActorID::Wall_walker,
+  data::ActorID::Eyeball_thrower_LEFT,
+  data::ActorID::Eyeball_thrower_RIGHT,
+  data::ActorID::Eyeball_projectile,
+  data::ActorID::BOSS_Episode_2,
+  data::ActorID::Messenger_drone_body,
+  data::ActorID::Messenger_drone_part_1,
+  data::ActorID::Messenger_drone_part_2,
+  data::ActorID::Messenger_drone_part_3,
+  data::ActorID::Messenger_drone_exhaust_flame_1,
+  data::ActorID::Messenger_drone_exhaust_flame_2,
+  data::ActorID::Messenger_drone_exhaust_flame_3,
+  data::ActorID::White_box_cloaking_device,
+  data::ActorID::Sentry_robot_generator,
+  data::ActorID::Slime_pipe,
+  data::ActorID::Slime_drop,
+  data::ActorID::Force_field,
+  data::ActorID::Circuit_card_keyhole,
+  data::ActorID::White_box_blue_key,
+  data::ActorID::Blue_key_keyhole,
+  data::ActorID::Score_number_FX_100,
+  data::ActorID::Score_number_FX_500,
+  data::ActorID::Score_number_FX_2000,
+  data::ActorID::Score_number_FX_5000,
+  data::ActorID::Score_number_FX_10000,
+  data::ActorID::Sliding_door_vertical,
+  data::ActorID::Keyhole_mounting_pole,
+  data::ActorID::Blowing_fan,
+  data::ActorID::Laser_turret,
+  data::ActorID::Sliding_door_horizontal,
+  data::ActorID::Respawn_checkpoint,
+  data::ActorID::Skeleton,
+  data::ActorID::Enemy_laser_shot_LEFT,
+  data::ActorID::Enemy_laser_shot_RIGHT,
+  data::ActorID::Laser_turret_mounting_post,
+  data::ActorID::Missile_intact,
+  data::ActorID::Enemy_laser_muzzle_flash_1,
+  data::ActorID::Enemy_laser_muzzle_flash_2,
+  data::ActorID::Missile_exhaust_flame,
+  data::ActorID::Metal_grabber_claw,
+  data::ActorID::Hovering_laser_turret,
+  data::ActorID::Metal_grabber_claw_debris_1,
+  data::ActorID::Metal_grabber_claw_debris_2,
+  data::ActorID::Spider,
+  data::ActorID::Blue_box_N,
+  data::ActorID::Blue_box_U,
+  data::ActorID::Blue_box_K,
+  data::ActorID::Blue_box_E,
+  data::ActorID::Blue_guard_RIGHT,
+  data::ActorID::Blue_box_video_game_cartridge,
+  data::ActorID::White_box_empty,
+  data::ActorID::Green_box_empty,
+  data::ActorID::Red_box_empty,
+  data::ActorID::Blue_box_empty,
+  data::ActorID::Yellow_fireball_FX,
+  data::ActorID::Green_fireball_FX,
+  data::ActorID::Blue_fireball_FX,
+  data::ActorID::Red_box_cola,
+  data::ActorID::Coke_can_debris_1,
+  data::ActorID::Coke_can_debris_2,
+  data::ActorID::Blue_guard_LEFT,
+  data::ActorID::Blue_box_sunglasses,
+  data::ActorID::Blue_box_phone,
+  data::ActorID::Red_box_6_pack_cola,
+  data::ActorID::Ugly_green_bird,
+  data::ActorID::Blue_box_boom_box,
+  data::ActorID::Blue_box_disk,
+  data::ActorID::Blue_box_TV,
+  data::ActorID::Blue_box_camera,
+  data::ActorID::Blue_box_PC,
+  data::ActorID::Blue_box_CD,
+  data::ActorID::Blue_box_M,
+  data::ActorID::Rotating_floor_spikes,
+  data::ActorID::Spiked_green_creature_LEFT,
+  data::ActorID::Spiked_green_creature_RIGHT,
+  data::ActorID::Spiked_green_creature_eye_FX_RIGHT,
+  data::ActorID::Spiked_green_creature_stone_debris_1_LEFT,
+  data::ActorID::Spiked_green_creature_stone_debris_2_LEFT,
+  data::ActorID::Spiked_green_creature_stone_debris_3_LEFT,
+  data::ActorID::Spiked_green_creature_stone_debris_4_LEFT,
+  data::ActorID::Spiked_green_creature_stone_debris_1_RIGHT,
+  data::ActorID::Spiked_green_creature_stone_debris_2_RIGHT,
+  data::ActorID::Spiked_green_creature_stone_debris_3_RIGHT,
+  data::ActorID::Spiked_green_creature_stone_debris_4_RIGHT,
+  data::ActorID::BOSS_Episode_1,
+  data::ActorID::Red_box_turkey,
+  data::ActorID::Turkey,
+  data::ActorID::Red_bird,
+  data::ActorID::Duke_flame_shot_down,
+  data::ActorID::Duke_flame_shot_left,
+  data::ActorID::Duke_flame_shot_right,
+  data::ActorID::Floating_exit_sign_RIGHT,
+  data::ActorID::Rocket_elevator,
+  data::ActorID::Computer_Terminal_Duke_Escaped,
+  data::ActorID::Lava_pit,
+  data::ActorID::Messenger_drone_1,
+  data::ActorID::Messenger_drone_2,
+  data::ActorID::Messenger_drone_3,
+  data::ActorID::Messenger_drone_4,
+  data::ActorID::Blue_guard_using_a_terminal,
+  data::ActorID::Smash_hammer,
+  data::ActorID::Messenger_drone_5,
+  data::ActorID::Lava_fall_1,
+  data::ActorID::Lava_fall_2,
+  data::ActorID::Water_fall_1,
+  data::ActorID::Water_fall_2,
+  data::ActorID::Water_drop,
+  data::ActorID::Water_fall_splash_left,
+  data::ActorID::Water_fall_splash_center,
+  data::ActorID::Water_fall_splash_right,
+  data::ActorID::Lava_fountain,
+  data::ActorID::Spider_shaken_off,
+  data::ActorID::Green_acid_pit,
+  data::ActorID::Radar_dish,
+  data::ActorID::Radar_computer_terminal,
+  data::ActorID::Special_hint_globe,
+  data::ActorID::Special_hint_machine,
+  data::ActorID::Windblown_spider_generator,
+  data::ActorID::Spider_debris_2,
+  data::ActorID::Spider_blowing_in_wind,
+  data::ActorID::Unicycle_bot,
+  data::ActorID::Flame_jet_1,
+  data::ActorID::Flame_jet_2,
+  data::ActorID::Flame_jet_3,
+  data::ActorID::Flame_jet_4,
+  data::ActorID::Floating_exit_sign_LEFT,
+  data::ActorID::Aggressive_prisoner,
+  data::ActorID::Prisoner_hand_debris,
+  data::ActorID::Enemy_rocket_2_up,
+  data::ActorID::Water_on_floor_1,
+  data::ActorID::Water_on_floor_2,
+  data::ActorID::Enemy_rocket_2_down,
+  data::ActorID::Blowing_fan_threads_on_top,
+  data::ActorID::Passive_prisoner,
+  data::ActorID::Fire_on_floor_1,
+  data::ActorID::Fire_on_floor_2,
+  data::ActorID::BOSS_Episode_3,
+  data::ActorID::Small_flying_ship_1,
+  data::ActorID::Small_flying_ship_2,
+  data::ActorID::Small_flying_ship_3,
+  data::ActorID::Blue_box_T_shirt,
+  data::ActorID::Blue_box_videocassette,
+  data::ActorID::BOSS_Episode_4,
+  data::ActorID::BOSS_Episode_4_projectile,
+  data::ActorID::Floating_arrow,
+  data::ActorID::Rigelatin_soldier,
+  data::ActorID::Rigelatin_soldier_projectile
+};
 
 
 void applyTweaks(
   std::vector<engine::SpriteFrame>& frames,
-  const ActorID actorId,
-  const std::vector<loader::ActorData>& actorParts,
-  renderer::Renderer* pRenderer
+  const ActorID actorId
 ) {
   // Some sprites in the game have offsets that would require more complicated
   // code to draw them correctly. To simplify that, we adjust the offsets once
@@ -98,12 +331,8 @@ void applyTweaks(
     //   6,  7: exhaust flames, facing left
     //   8,  9: exhaust flames, facing down, x-offset for facing right
     //  10, 11: exhaust flames, facing right
-    frames.insert(
-      frames.begin() + 8,
-      createFrameDrawData(actorParts[2].mFrames[0], pRenderer));
-    frames.insert(
-      frames.begin() + 9,
-      createFrameDrawData(actorParts[2].mFrames[1], pRenderer));
+    frames.insert(frames.begin() + 8, frames[4]);
+    frames.insert(frames.begin() + 9, frames[5]);
 
     frames[8].mDrawOffset.x += 1;
     frames[9].mDrawOffset.x += 1;
@@ -509,42 +738,62 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
 }
 
 
+bool hasAssociatedSprite(const ActorID actorID) {
+  switch (actorID) {
+    default:
+      return true;
+
+    case ActorID::Dynamic_geometry_1:
+    case ActorID::Dynamic_geometry_2:
+    case ActorID::Dynamic_geometry_3:
+    case ActorID::Dynamic_geometry_4:
+    case ActorID::Dynamic_geometry_5:
+    case ActorID::Dynamic_geometry_6:
+    case ActorID::Dynamic_geometry_7:
+    case ActorID::Dynamic_geometry_8:
+    case ActorID::Exit_trigger:
+    case ActorID::META_Appear_only_in_med_hard_difficulty:
+    case ActorID::META_Appear_only_in_hard_difficulty:
+    case ActorID::META_Dynamic_geometry_marker_1:
+    case ActorID::META_Dynamic_geometry_marker_2:
+    case ActorID::Water_body:
+    case ActorID::Water_drop_spawner:
+    case ActorID::Water_surface_1:
+    case ActorID::Water_surface_2:
+    case ActorID::Windblown_spider_generator:
+    case ActorID::Airlock_death_trigger_LEFT:
+    case ActorID::Airlock_death_trigger_RIGHT:
+    case ActorID::Explosion_FX_trigger:
+      return false;
+  }
+}
+
+
 SpriteFactory::SpriteFactory(
   renderer::Renderer* pRenderer,
+  const loader::ActorImagePackage* pSpritePackage)
+  : SpriteFactory(construct(pRenderer, pSpritePackage))
+{
+}
+
+
+SpriteFactory::SpriteFactory(CtorArgs args)
+  : mSpriteDataMap(std::move(std::get<0>(args)))
+  , mSpritesTextureAtlas(std::move(std::get<1>(args)))
+{
+}
+
+
+auto SpriteFactory::construct(
+  renderer::Renderer* pRenderer,
   const loader::ActorImagePackage* pSpritePackage
-)
-  : mpRenderer(pRenderer)
-  , mpSpritePackage(pSpritePackage)
-{
-}
+) -> CtorArgs {
+  std::unordered_map<data::ActorID, SpriteData> spriteDataMap;
 
+  std::vector<data::Image> spriteImages;
+  spriteImages.reserve(INGAME_SPRITE_ACTOR_IDS.size());
 
-Sprite SpriteFactory::createSprite(const ActorID id) {
-  const auto& data = createOrFindData(id);
-  auto sprite = Sprite{&data.mDrawData, data.mInitialFramesToRender};
-  configureSprite(sprite, id);
-  return sprite;
-}
-
-
-base::Rect<int> SpriteFactory::actorFrameRect(
-  const data::ActorID id,
-  const int frame
-) const {
-  const auto& data = createOrFindData(id);
-  const auto realFrame = virtualToRealFrame(0, data.mDrawData, std::nullopt);
-  const auto& frameData = data.mDrawData.mFrames[realFrame];
-
-  const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
-    frameData.mImage.extents());
-  return {frameData.mDrawOffset, dimensionsInTiles};
-}
-
-auto SpriteFactory::createOrFindData(const ActorID mainId) const
-  -> const SpriteData&
-{
-  auto iData = mSpriteDataCache.find(mainId);
-  if (iData == mSpriteDataCache.end()) {
+  for (const auto mainId : INGAME_SPRITE_ACTOR_IDS) {
     engine::SpriteDrawData drawData;
 
     int lastDrawOrder = 0;
@@ -552,17 +801,30 @@ auto SpriteFactory::createOrFindData(const ActorID mainId) const
     std::vector<int> framesToRender;
 
     const auto actorPartIds = actorIDListForActor(mainId);
-    const auto actorParts = utils::transformed(actorPartIds,
+
+    // non-const so we can move the Image objects into the vector
+    auto actorParts = utils::transformed(actorPartIds,
       [&](const ActorID partId) {
-        return mpSpritePackage->loadActor(partId);
+        return pSpritePackage->loadActor(partId);
       });
 
-    for (const auto& actorData : actorParts) {
+    // Similarly, non-const for move semantics
+    for (auto& actorData : actorParts) {
       lastDrawOrder = actorData.mDrawIndex;
 
-      for (const auto& frameData : actorData.mFrames) {
+      // Similarly, non-const for move semantics
+      for (auto& frameData : actorData.mFrames) {
+        auto& image = frameData.mFrameImage;
+        const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
+          {int(image.width()), int(image.height())});
+
         drawData.mFrames.emplace_back(
-          createFrameDrawData(frameData, mpRenderer));
+          engine::SpriteFrame{
+            int(spriteImages.size()),
+            frameData.mDrawOffset,
+            dimensionsInTiles});
+
+        spriteImages.emplace_back(std::move(image));
       }
 
       framesToRender.push_back(lastFrameCount);
@@ -573,15 +835,36 @@ auto SpriteFactory::createOrFindData(const ActorID mainId) const
     drawData.mVirtualToRealFrameMap = frameMapForActor(mainId);
     drawData.mDrawOrder = adjustedDrawOrder(mainId, lastDrawOrder);
 
-    applyTweaks(drawData.mFrames, mainId, actorParts, mpRenderer);
+    applyTweaks(drawData.mFrames, mainId);
 
-    iData = mSpriteDataCache.emplace(
+    spriteDataMap.emplace(
       mainId,
-      SpriteData{std::move(drawData), std::move(framesToRender)}
-    ).first;
+      SpriteData{std::move(drawData), std::move(framesToRender)});
   }
 
-  return iData->second;
+  return {
+    std::move(spriteDataMap),
+    renderer::TextureAtlas{pRenderer, spriteImages}};
+}
+
+
+Sprite SpriteFactory::createSprite(const ActorID id) {
+  const auto& data = mSpriteDataMap.at(id);
+  auto sprite = Sprite{&data.mDrawData, data.mInitialFramesToRender};
+  configureSprite(sprite, id);
+  return sprite;
+}
+
+
+base::Rect<int> SpriteFactory::actorFrameRect(
+  const data::ActorID id,
+  const int frame
+) const {
+  const auto& data = mSpriteDataMap.at(id);
+  const auto realFrame = virtualToRealFrame(0, data.mDrawData, std::nullopt);
+  const auto& frameData = data.mDrawData.mFrames[realFrame];
+
+  return {frameData.mDrawOffset, frameData.mDimensions};
 }
 
 }

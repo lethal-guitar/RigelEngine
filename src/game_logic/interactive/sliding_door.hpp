@@ -23,7 +23,7 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::renderer { class Renderer; }
+namespace rigel::renderer { class TextureAtlas; }
 namespace rigel::engine::components { struct Sprite; }
 namespace rigel::game_logic {
   struct GlobalDependencies;
@@ -60,7 +60,7 @@ struct VerticalSlidingDoor {
     entityx::Entity entity);
 
   static void render(
-    renderer::Renderer* pRenderer,
+    const renderer::TextureAtlas& textureAtlas,
     entityx::Entity,
     const engine::components::Sprite& sprite,
     const base::Vector& positionInScreenSpace);

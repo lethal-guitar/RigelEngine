@@ -23,6 +23,7 @@
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "engine/sound_system.hpp"
+#include "engine/sprite_factory.hpp"
 #include "engine/tiled_texture.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/resource_loader.hpp"
@@ -136,6 +137,7 @@ private:
   ui::DukeScriptRunner mScriptRunner;
   loader::ScriptBundle mAllScripts;
   engine::TiledTexture mUiSpriteSheet;
+  engine::SpriteFactory mSpriteFactory;
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
   std::vector<SDL_Event> mEventQueue;

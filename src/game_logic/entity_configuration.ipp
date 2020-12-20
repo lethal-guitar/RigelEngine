@@ -327,33 +327,6 @@ ActorID scoreNumberActor(const ScoreNumberType type) {
 }
 
 
-
-bool hasAssociatedSprite(const ActorID actorID) {
-  switch (actorID) {
-    default:
-      return true;
-
-    case ActorID::Dynamic_geometry_1:
-    case ActorID::Dynamic_geometry_2:
-    case ActorID::Dynamic_geometry_3:
-    case ActorID::Dynamic_geometry_4:
-    case ActorID::Dynamic_geometry_5:
-    case ActorID::Dynamic_geometry_6:
-    case ActorID::Dynamic_geometry_7:
-    case ActorID::Dynamic_geometry_8:
-    case ActorID::Exit_trigger:
-    case ActorID::Water_body:
-    case ActorID::Water_surface_1:
-    case ActorID::Water_surface_2:
-    case ActorID::Windblown_spider_generator:
-    case ActorID::Airlock_death_trigger_LEFT:
-    case ActorID::Airlock_death_trigger_RIGHT:
-    case ActorID::Explosion_FX_trigger:
-      return false;
-  }
-}
-
-
 ActorID actorIdForBoxColor(const ContainerColor color) {
   switch (color) {
     case ContainerColor::White: return ActorID::White_box_empty;
@@ -2016,7 +1989,7 @@ void EntityFactory::configureEntity(
     case ActorID::Water_drop_spawner: // water drop spawner
       entity.assign<BehaviorController>(WaterDropGenerator{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       break;
 
     case ActorID::Water_surface_1: // water with animated surface
@@ -2032,7 +2005,7 @@ void EntityFactory::configureEntity(
     case ActorID::Windblown_spider_generator: // windblown-spider generator
       entity.assign<BehaviorController>(WindBlownSpiderGenerator{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-      entity.assign<BoundingBox>(boundingBox);
+      entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       break;
 
     case ActorID::Airlock_death_trigger_LEFT:

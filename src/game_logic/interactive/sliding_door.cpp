@@ -209,7 +209,7 @@ void VerticalSlidingDoor::update(
 
 
 void VerticalSlidingDoor::render(
-  renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
   const engine::components::Sprite& sprite,
   const base::Vector& positionInScreenSpace
@@ -225,7 +225,7 @@ void VerticalSlidingDoor::render(
     engine::drawSpriteFrame(
       sprite.mpDrawData->mFrames[segmentIndex],
       positionInScreenSpace - base::Vector{0, NUM_VERTICAL_DOOR_SEGMENTS - i},
-      pRenderer);
+      textureAtlas);
   }
 }
 

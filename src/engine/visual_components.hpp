@@ -34,21 +34,27 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
+namespace rigel::renderer { class TextureAtlas; }
+
+
 namespace rigel::engine {
 
 struct SpriteFrame {
   SpriteFrame() = default;
   SpriteFrame(
-    renderer::OwningTexture image,
-    base::Vector drawOffset
+    const int imageId,
+    const base::Vector drawOffset,
+    const base::Extents dimensions
   )
-    : mImage(std::move(image))
+    : mImageId(imageId)
     , mDrawOffset(drawOffset)
+    , mDimensions(dimensions)
   {
   }
 
-  renderer::OwningTexture mImage;
+  int mImageId;
   base::Vector mDrawOffset;
+  base::Extents mDimensions;
 };
 
 
@@ -77,7 +83,7 @@ int virtualToRealFrame(
 void drawSpriteFrame(
   const SpriteFrame& frame,
   const base::Vector& position,
-  renderer::Renderer* pRenderer);
+  const renderer::TextureAtlas& spritesTextureAtlas);
 
 
 namespace components {
@@ -177,7 +183,7 @@ struct Sprite {
  * pixel position.
  */
 using CustomRenderFunc = void(*)(
-  renderer::Renderer*,
+  const renderer::TextureAtlas& spritesTextureAtlas,
   entityx::Entity,
   const engine::components::Sprite&,
   const base::Vector&);

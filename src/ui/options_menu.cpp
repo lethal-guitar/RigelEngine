@@ -214,6 +214,11 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     if (ImGui::BeginTabItem("Graphics"))
     {
       ImGui::NewLine();
+
+#ifndef RIGEL_USE_GL_ES
+      // On systems that use GL ES, there's typically no windowing system
+      // involved - applications run full screen all the time.
+      // So it doesn't make much sense to allow changing the window mode.
       {
         auto windowModeIndex = static_cast<int>(mpOptions->mWindowMode);
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 20);
@@ -223,6 +228,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
           "Fullscreen (borderless)\0Exclusive fullscreen\0Windowed\0");
         mpOptions->mWindowMode = static_cast<data::WindowMode>(windowModeIndex);
       }
+#endif
 
       ImGui::Checkbox("V-Sync on", &mpOptions->mEnableVsync);
       ImGui::SameLine();

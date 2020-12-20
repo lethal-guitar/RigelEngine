@@ -237,8 +237,8 @@ GameWorld::GameWorld(
   , mpPlayerModel(pPlayerModel)
   , mpOptions(&context.mpUserProfile->mOptions)
   , mpResources(context.mpResources)
+  , mpSpriteFactory(context.mpSpriteFactory)
   , mSessionId(sessionId)
-  , mSpriteFactory(context.mpRenderer, &context.mpResources->mActorImagePackage)
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mHudRenderer(
       sessionId.mLevel + 1,
@@ -460,7 +460,7 @@ void GameWorld::createNewState() {
     mpResources,
     mpPlayerModel,
     mpOptions,
-    &mSpriteFactory,
+    mpSpriteFactory,
     mSessionId);
 
   subscribe(mpState->mEventManager);
@@ -733,7 +733,7 @@ void GameWorld::quickSave() {
     mpResources,
     mpPlayerModel,
     mpOptions,
-    &mSpriteFactory,
+    mpSpriteFactory,
     mSessionId);
   pStateCopy->synchronizeTo(
     *mpState,

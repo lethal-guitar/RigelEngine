@@ -22,6 +22,7 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
+#include "renderer/texture_atlas.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -43,7 +44,6 @@ using components::WorldPosition;
 
 namespace {
 
-
 void advanceAnimation(Sprite& sprite, AnimationLoop& animated) {
   const auto numFrames = static_cast<int>(sprite.mpDrawData->mFrames.size());
   const auto endFrame = animated.mEndFrame ? *animated.mEndFrame : numFrames-1;
@@ -63,7 +63,58 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated) {
   sprite.mFramesToRender[animated.mRenderSlot] = newFrameNr;
 }
 
+
+struct WaterEffectArea {
+  base::Rect<int> mArea;
+  bool mIsAnimated;
+};
+
+
+std::vector<WaterEffectArea> collectWaterEffectAreas(
+  entityx::EntityManager& es,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  using engine::components::BoundingBox;
+  using game_logic::components::ActorTag;
+
+  std::vector<WaterEffectArea> result;
+
+  const auto screenBox = BoundingBox{cameraPosition, viewPortSize};
+
+  es.each<ActorTag, WorldPosition, BoundingBox>(
+    [&](
+      entityx::Entity,
+      const ActorTag& tag,
+      const WorldPosition& position,
+      const BoundingBox& bbox
+    ) {
+      using T = ActorTag::Type;
+
+      const auto isWaterArea =
+        tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
+      if (isWaterArea) {
+        const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
+
+        if (screenBox.intersects(worldSpaceBbox)) {
+          const auto topLeftPx =
+            data::tileVectorToPixelVector(
+              worldSpaceBbox.topLeft - cameraPosition);
+          const auto sizePx =
+            data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+          const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
+
+          result.push_back(
+            WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
+        }
+      }
+    });
+
+  return result;
 }
+
+}
+
 
 int virtualToRealFrame(
   const int virtualFrame,
@@ -155,17 +206,20 @@ void updateAnimatedSprites(ex::EntityManager& es) {
 void drawSpriteFrame(
   const SpriteFrame& frame,
   const base::Vector& position,
-  renderer::Renderer* pRenderer
+  const renderer::TextureAtlas& spritesTextureAtlas
 ) {
   // World-space tile positions refer to a sprite's bottom left tile,
   // but we need its top left corner for drawing.
-  const auto heightTiles = data::pixelsToTiles(frame.mImage.height());
+  const auto heightTiles = frame.mDimensions.height;
   const auto topLeft = position - base::Vector(0, heightTiles - 1);
   const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
   const auto drawOffsetPx = data::tileVectorToPixelVector(
     frame.mDrawOffset);
 
-  frame.mImage.render(pRenderer, topLeftPx + drawOffsetPx);
+  const auto destRect = base::Rect<int>{
+    topLeftPx + drawOffsetPx,
+    data::tileExtentsToPixelExtents(frame.mDimensions)};
+  spritesTextureAtlas.draw(frame.mImageId, destRect);
 }
 
 
@@ -204,10 +258,12 @@ struct RenderingSystem::SpriteData {
 RenderingSystem::RenderingSystem(
   const base::Vector* pCameraPosition,
   renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas* pSpritesTextureAtlas,
   const data::map::Map* pMap,
   MapRenderer::MapRenderData&& mapRenderData
 )
   : mpRenderer(pRenderer)
+  , mpTextureAtlas(pSpritesTextureAtlas)
   , mRenderTarget(
       pRenderer,
       pRenderer->maxWindowSize().width,
@@ -243,10 +299,7 @@ void RenderingSystem::update(
     end(spritesByDrawOrder),
     mem_fn(&SpriteData::mDrawTopMost));
 
-  {
-    renderer::RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
-
-    // Render
+  auto renderBackgroundLayers = [&]() {
     if (backdropFlashColor) {
       mpRenderer->setOverlayColor(*backdropFlashColor);
       mMapRenderer.renderBackdrop(*mpCameraPosition, viewPortSize);
@@ -257,20 +310,36 @@ void RenderingSystem::update(
 
     mMapRenderer.renderBackground(*mpCameraPosition, viewPortSize);
 
-    // behind foreground
     for (auto it = spritesByDrawOrder.begin(); it != firstTopMostIt; ++it) {
       renderSprite(*it);
     }
-  }
+  };
 
-  {
-    auto saved = renderer::Renderer::StateSaver(mpRenderer);
-    mpRenderer->setGlobalScale({1.0f, 1.0f});
-    mpRenderer->setGlobalTranslation({});
-    mRenderTarget.render(mpRenderer, 0, 0);
-  }
 
-  renderWaterEffectAreas(es);
+  const auto waterEffectAreas =
+    collectWaterEffectAreas(es, *mpCameraPosition, viewPortSize);
+  if (waterEffectAreas.empty()) {
+    renderBackgroundLayers();
+  } else {
+    {
+      renderer::RenderTargetTexture::Binder bindRenderTarget(mRenderTarget, mpRenderer);
+      renderBackgroundLayers();
+    }
+
+    {
+      auto saved = renderer::Renderer::StateSaver(mpRenderer);
+      mpRenderer->setGlobalScale({1.0f, 1.0f});
+      mpRenderer->setGlobalTranslation({});
+      mRenderTarget.render(mpRenderer, 0, 0);
+    }
+
+    for (const auto& area : waterEffectAreas) {
+      mpRenderer->drawWaterEffect(
+        area.mArea,
+        mRenderTarget.data(),
+        area.mIsAnimated ? std::optional<int>(mWaterAnimStep) : std::nullopt);
+    }
+  }
 
   mMapRenderer.renderForeground(*mpCameraPosition, viewPortSize);
 
@@ -280,7 +349,6 @@ void RenderingSystem::update(
   }
 
   mSpritesRendered = spritesByDrawOrder.size();
-
 
   // tile debris
   es.each<TileDebris, WorldPosition>(
@@ -300,7 +368,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
   if (data.mEntity.has_component<CustomRenderFunc>()) {
     const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
-    renderFunc(mpRenderer, data.mEntity, sprite, pos - *mpCameraPosition);
+    renderFunc(*mpTextureAtlas, data.mEntity, sprite, pos - *mpCameraPosition);
   } else {
     auto slotIndex = 0;
     for (const auto& baseFrameIndex : sprite.mFramesToRender) {
@@ -324,7 +392,7 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
 
       auto& frame = sprite.mpDrawData->mFrames[frameIndex];
 
-      drawSpriteFrame(frame, pos - *mpCameraPosition, mpRenderer);
+      drawSpriteFrame(frame, pos - *mpCameraPosition, *mpTextureAtlas);
 
       mpRenderer->setOverlayColor(base::Color{});
       mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
@@ -332,42 +400,6 @@ void RenderingSystem::renderSprite(const SpriteData& data) const {
       ++slotIndex;
     }
   }
-}
-
-
-void RenderingSystem::renderWaterEffectAreas(entityx::EntityManager& es) {
-  using engine::components::BoundingBox;
-  using game_logic::components::ActorTag;
-
-  es.each<ActorTag, WorldPosition, BoundingBox>(
-    [&, this](
-      entityx::Entity,
-      const ActorTag& tag,
-      const WorldPosition& position,
-      const BoundingBox& bbox
-    ) {
-      using T = ActorTag::Type;
-
-      const auto isWaterArea =
-        tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
-      if (isWaterArea) {
-        const auto screenPosition = position - *mpCameraPosition;
-        const auto worldSpaceBbox = engine::toWorldSpace(bbox, screenPosition);
-        const auto topLeftPx =
-          data::tileVectorToPixelVector(worldSpaceBbox.topLeft);
-        const auto sizePx =
-          data::tileExtentsToPixelExtents(worldSpaceBbox.size);
-
-        const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
-
-        mpRenderer->drawWaterEffect(
-          {topLeftPx, sizePx},
-          mRenderTarget.data(),
-          hasAnimatedSurface
-            ? std::optional<int>(mWaterAnimStep)
-            : std::nullopt);
-      }
-    });
 }
 
 }
