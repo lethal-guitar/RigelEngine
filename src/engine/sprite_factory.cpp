@@ -526,7 +526,12 @@ bool hasAssociatedSprite(const ActorID actorID) {
     case ActorID::Dynamic_geometry_7:
     case ActorID::Dynamic_geometry_8:
     case ActorID::Exit_trigger:
+    case ActorID::META_Appear_only_in_med_hard_difficulty:
+    case ActorID::META_Appear_only_in_hard_difficulty:
+    case ActorID::META_Dynamic_geometry_marker_1:
+    case ActorID::META_Dynamic_geometry_marker_2:
     case ActorID::Water_body:
+    case ActorID::Water_drop_spawner:
     case ActorID::Water_surface_1:
     case ActorID::Water_surface_2:
     case ActorID::Windblown_spider_generator:
