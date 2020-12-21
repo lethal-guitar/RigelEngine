@@ -143,10 +143,10 @@ auto viewPortSizeWideScreen(renderer::Renderer* pRenderer) {
 
 void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
-  const renderer::WidescreenViewPortInfo& info
+  const int tilesOnScreen
 ) {
   const auto extraTiles =
-    info.mWidthTiles - data::GameTraits::mapViewPortWidthTiles;
+    tilesOnScreen - data::GameTraits::mapViewPortWidthTiles;
   const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
   pRenderer->setGlobalTranslation(
     localToGlobalTranslation(pRenderer, {hudOffset, 0}));
@@ -225,6 +225,7 @@ GameWorld::GameWorld(
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mHudRenderer(
       sessionId.mLevel + 1,
+      mpOptions,
       mpRenderer,
       *context.mpResources,
       context.mpUiSpriteSheet)
@@ -562,25 +563,39 @@ void GameWorld::render() {
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
+    const auto clipRectGuard = renderer::Renderer::StateSaver{mpRenderer};
+    mpRenderer->setClipRect(base::Rect<int>{
+      mpRenderer->globalTranslation(),
+      renderer::scaleSize(
+        data::tileExtentsToPixelExtents(viewPortSize),
+        mpRenderer->globalScale())});
+
     if (mpState->mScreenFlashColor) {
       mpRenderer->clear(*mpState->mScreenFlashColor);
       return;
     }
 
-    mpState->mRenderingSystem.update(
-      mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
+    if (mpOptions->mPerElementUpscalingEnabled) {
+      mpState->mRenderingSystem.update(
+        mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
 
-    {
-      const auto binder =
-        renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
-      const auto saved = renderer::setupDefaultState(mpRenderer);
+      {
+        const auto binder =
+          renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
+        const auto defaultStateGuard = renderer::setupDefaultState(mpRenderer);
 
-      mpRenderer->clear({0, 0, 0, 0});
+        mpRenderer->clear({0, 0, 0, 0});
+        mpState->mParticles.render(mpState->mCamera.position());
+        mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
+      }
+
+      mLowResLayer.render(mpRenderer, 0, 0);
+    } else {
+      mpState->mRenderingSystem.update(
+        mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
       mpState->mParticles.render(mpState->mCamera.position());
       mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
     }
-
-    mLowResLayer.render(mpRenderer, 0, 0);
   };
 
   auto drawTopRow = [&, this]() {
@@ -612,20 +627,34 @@ void GameWorld::render() {
 
 
   if (widescreenModeOn) {
+    mpServiceProvider->markCurrentFrameAsWidescreen();
+
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
 
-    {
-      const auto saved = setupIngameViewportWidescreen(
-        mpRenderer, info, mpState->mScreenShakeOffsetX);
+    if (mpOptions->mPerElementUpscalingEnabled) {
+      {
+        const auto saved = setupIngameViewportWidescreen(
+          mpRenderer, info, mpState->mScreenShakeOffsetX);
 
-      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles});
+        drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
 
-      setupWidescreenHudOffset(mpRenderer, info);
+        setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
+        drawHud();
+      }
+
+      auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
+      drawTopRow();
+    } else {
+      const auto saved = renderer::setupDefaultState(mpRenderer);
+      drawTopRow();
+
+      mpRenderer->setGlobalTranslation(base::Vector{
+        mpState->mScreenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y});
+      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
+
+      setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
       drawHud();
     }
-
-    auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
-    drawTopRow();
   } else {
     {
       const auto saved = setupIngameViewport(mpRenderer, mpState->mScreenShakeOffsetX);

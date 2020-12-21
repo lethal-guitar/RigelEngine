@@ -28,6 +28,7 @@
 namespace rigel {
 
 namespace data {
+  struct GameOptions;
   class Image;
   class PlayerModel;
 }
@@ -52,6 +53,7 @@ class HudRenderer {
 public:
   HudRenderer(
     int levelNumber,
+    const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer,
     const loader::ResourceLoader& bundle,
     engine::TiledTexture* pStatusSpriteSheetRenderer);
@@ -74,6 +76,7 @@ private:
 
   HudRenderer(
     int levelNumber,
+    const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer,
     const loader::ActorData& actorData,
     InventoryItemTextureMap&& inventoryItemTextures,
@@ -94,6 +97,7 @@ private:
 
   const int mLevelNumber;
   renderer::Renderer* mpRenderer;
+  const data::GameOptions* mpOptions;
 
   std::uint32_t mElapsedFrames = 0;
 

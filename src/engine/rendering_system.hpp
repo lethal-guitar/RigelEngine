@@ -35,6 +35,7 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
+namespace rigel::data { struct GameOptions; }
 namespace rigel::renderer { class TextureAtlas; }
 
 
@@ -61,6 +62,7 @@ public:
   RenderingSystem(
     const base::Vector* pCameraPosition,
     renderer::Renderer* pRenderer,
+    const data::GameOptions* pOptions,
     const renderer::TextureAtlas* pSpritesTextureAtlas,
     const data::map::Map* pMap,
     MapRenderer::MapRenderData&& mapRenderData);

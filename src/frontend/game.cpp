@@ -99,16 +99,48 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 }
 
 
-[[nodiscard]] auto setupSimpleUpscaling(renderer::Renderer* pRenderer) {
+[[nodiscard]] auto setupRenderingViewport(
+  renderer::Renderer* pRenderer,
+  const bool perElementUpscaling
+) {
   auto saved = renderer::Renderer::StateSaver{pRenderer};
 
-  const auto [offset, size, scale] =
-    renderer::determineViewPort(pRenderer);
-  pRenderer->setGlobalScale(scale);
-  pRenderer->setGlobalTranslation(offset);
-  pRenderer->setClipRect(base::Rect<int>{offset, size});
+  if (perElementUpscaling) {
+    const auto [offset, size, scale] = renderer::determineViewPort(pRenderer);
+    pRenderer->setGlobalScale(scale);
+    pRenderer->setGlobalTranslation(offset);
+    pRenderer->setClipRect(base::Rect<int>{offset, size});
+  } else {
+    pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewPortSize});
+  }
 
   return saved;
+}
+
+
+[[nodiscard]] std::optional<renderer::Renderer::StateSaver> setupPresentationViewport(
+  renderer::Renderer* pRenderer,
+  const bool perElementUpscaling,
+  const bool isWidescreenFrame
+) {
+  if (perElementUpscaling) {
+    return std::nullopt;
+  }
+
+  auto saved = renderer::Renderer::StateSaver{pRenderer};
+
+  const auto info = renderer::determineViewPort(pRenderer);
+  pRenderer->setGlobalScale(info.mScale);
+
+  if (isWidescreenFrame) {
+    const auto offset =
+      renderer::determineWidescreenViewPort(pRenderer).mLeftPaddingPx;
+    pRenderer->setGlobalTranslation({offset, 0});
+  } else {
+    pRenderer->setGlobalTranslation(info.mOffset);
+  }
+
+  return std::optional{std::move(saved)};
 }
 
 
@@ -208,10 +240,19 @@ Game::Game(
       return !hasRegisteredVersionFiles;
     }())
   , mFpsLimiter(createLimiter(pUserProfile->mOptions))
-  , mRenderTarget(
-      &mRenderer,
-      mRenderer.maxWindowSize().width,
-      mRenderer.maxWindowSize().height)
+  , mRenderTarget([&]() {
+      if (pUserProfile->mOptions.mPerElementUpscalingEnabled) {
+        return renderer::RenderTargetTexture{
+          &mRenderer,
+          size_t(mRenderer.maxWindowSize().width),
+          size_t(mRenderer.maxWindowSize().height)};
+      } else {
+        return renderer::RenderTargetTexture{
+          &mRenderer,
+          size_t(renderer::determineWidescreenViewPort(&mRenderer).mWidthPx),
+          size_t(data::GameTraits::viewPortHeightPx)};
+      }
+    }())
   , mIsRunning(true)
   , mIsMinimized(false)
   , mCommandLineOptions(commandLineOptions)
@@ -290,11 +331,14 @@ void Game::pumpEvents() {
 
 
 void Game::updateAndRender(const entityx::TimeDelta elapsed) {
+  mCurrentFrameIsWidescreen = false;
+
   {
     RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
     mRenderer.clear();
 
-    auto saved = setupSimpleUpscaling(&mRenderer);
+    auto saved = setupRenderingViewport(
+      &mRenderer, mpUserProfile->mOptions.mPerElementUpscalingEnabled);
 
     auto pMaybeNextMode =
       mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
@@ -309,8 +353,15 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
 
   if (mAlphaMod != 0) {
     mRenderer.clear();
-    mRenderTarget.render(&mRenderer, 0, 0);
-    mRenderer.submitBatch();
+
+    {
+      auto saved = setupPresentationViewport(
+        &mRenderer,
+        mpUserProfile->mOptions.mPerElementUpscalingEnabled,
+        mCurrentFrameIsWidescreen);
+      mRenderTarget.render(&mRenderer, 0, 0);
+      mRenderer.submitBatch();
+    }
 
     if (mpUserProfile->mOptions.mShowFpsCounter) {
       mFpsDisplay.updateAndRender(elapsed);
@@ -401,7 +452,11 @@ void Game::performScreenFadeBlocking(const FadeType type) {
   }
 
   renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
-  auto saved = renderer::setupDefaultState(&mRenderer);
+  auto defaultStateGuard = renderer::setupDefaultState(&mRenderer);
+  auto presentationStateGuard = setupPresentationViewport(
+    &mRenderer,
+    mpUserProfile->mOptions.mPerElementUpscalingEnabled,
+    mCurrentFrameIsWidescreen);
 
   auto startTime = base::Clock::now();
 
@@ -416,7 +471,6 @@ void Game::performScreenFadeBlocking(const FadeType type) {
       base::roundTo<std::uint8_t>(255.0 * alpha);
 
     mRenderer.clear();
-
     mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
     mRenderTarget.render(&mRenderer, 0, 0);
     swapBuffers();
@@ -523,6 +577,8 @@ void Game::fadeOutScreen() {
   auto saved = renderer::setupDefaultState(&mRenderer);
 
   mRenderer.clear();
+
+  mCurrentFrameIsWidescreen = false;
 }
 
 

@@ -16,6 +16,7 @@
 
 #include "rendering_system.hpp"
 
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/physics_system.hpp"
@@ -23,6 +24,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "renderer/texture_atlas.hpp"
+#include "renderer/upscaling_utils.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -258,16 +260,26 @@ struct RenderingSystem::SpriteData {
 RenderingSystem::RenderingSystem(
   const base::Vector* pCameraPosition,
   renderer::Renderer* pRenderer,
+  const data::GameOptions* pOptions,
   const renderer::TextureAtlas* pSpritesTextureAtlas,
   const data::map::Map* pMap,
   MapRenderer::MapRenderData&& mapRenderData
 )
   : mpRenderer(pRenderer)
   , mpTextureAtlas(pSpritesTextureAtlas)
-  , mRenderTarget(
-      pRenderer,
-      pRenderer->maxWindowSize().width,
-      pRenderer->maxWindowSize().height)
+  , mRenderTarget([&]() {
+      if (pOptions->mPerElementUpscalingEnabled) {
+        return renderer::RenderTargetTexture{
+          pRenderer,
+          size_t(pRenderer->maxWindowSize().width),
+          size_t(pRenderer->maxWindowSize().height)};
+      } else {
+        return renderer::RenderTargetTexture{
+          pRenderer,
+          size_t(renderer::determineWidescreenViewPort(pRenderer).mWidthPx),
+          size_t(data::GameTraits::viewPortHeightPx)};
+      }
+    }())
   , mMapRenderer(pRenderer, pMap, std::move(mapRenderData))
   , mpCameraPosition(pCameraPosition)
 {

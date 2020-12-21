@@ -16,6 +16,7 @@
 
 #include "hud_renderer.hpp"
 
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "loader/palette.hpp"
 #include "loader/resource_loader.hpp"
@@ -207,12 +208,14 @@ HudRenderer::makeCollectedLetterTextureMap(
 
 HudRenderer::HudRenderer(
   const int levelNumber,
+  const data::GameOptions* pOptions,
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& bundle,
   engine::TiledTexture* pStatusSpriteSheet
 )
   : HudRenderer(
       levelNumber,
+      pOptions,
       pRenderer,
       bundle.mActorImagePackage.loadActor(ActorID::HUD_frame_background),
       makeInventoryItemTextureMap(pRenderer, bundle.mActorImagePackage),
@@ -224,6 +227,7 @@ HudRenderer::HudRenderer(
 
 HudRenderer::HudRenderer(
   const int levelNumber,
+  const data::GameOptions* pOptions,
   renderer::Renderer* pRenderer,
   const loader::ActorData& actorData,
   InventoryItemTextureMap&& inventoryItemTextures,
@@ -232,6 +236,7 @@ HudRenderer::HudRenderer(
 )
   : mLevelNumber(levelNumber)
   , mpRenderer(pRenderer)
+  , mpOptions(pOptions)
   , mTopRightTexture(mpRenderer, actorData.mFrames[0].mFrameImage)
   , mBottomLeftTexture(mpRenderer, actorData.mFrames[1].mFrameImage)
   , mBottomRightTexture(mpRenderer, actorData.mFrames[2].mFrameImage)
@@ -344,13 +349,7 @@ void HudRenderer::drawCollectedLetters(
 void HudRenderer::drawRadar(
   const base::ArrayView<base::Vector> positions
 ) const {
-  {
-    auto binder =
-      renderer::RenderTargetTexture::Binder{mRadarSurface, mpRenderer};
-    auto stateSaver = renderer::setupDefaultState(mpRenderer);
-
-    mpRenderer->clear({0, 0, 0, 0});
-
+  auto drawDots = [&]() {
     for (const auto& position : positions)
     {
       const auto dotPosition = position + RADAR_CENTER_OFFSET_RELATIVE;
@@ -361,9 +360,27 @@ void HudRenderer::drawRadar(
       mElapsedFrames % NUM_RADAR_BLINK_STEPS + RADAR_BLINK_START_COLOR_INDEX;
     const auto blinkColor = loader::INGAME_PALETTE[blinkColorIndex];
     mpRenderer->drawPoint(RADAR_CENTER_OFFSET_RELATIVE, blinkColor);
-  }
+  };
 
-  mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);
+
+  if (mpOptions->mPerElementUpscalingEnabled) {
+    {
+      auto binder =
+        renderer::RenderTargetTexture::Binder{mRadarSurface, mpRenderer};
+      auto stateSaver = renderer::setupDefaultState(mpRenderer);
+
+      mpRenderer->clear({0, 0, 0, 0});
+      drawDots();
+    }
+
+    mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);
+  } else {
+    const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    mpRenderer->setGlobalTranslation(
+      mpRenderer->globalTranslation() + base::Vector{RADAR_POS_X, RADAR_POS_Y});
+
+    drawDots();
+  }
 }
 
 }

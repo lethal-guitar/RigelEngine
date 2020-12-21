@@ -199,6 +199,7 @@ WorldState::WorldState(
   , mRenderingSystem(
       &mCamera.position(),
       pRenderer,
+      pOptions,
       &pSpriteFactory->textureAtlas(),
       &mMap,
       engine::MapRenderer::MapRenderData{

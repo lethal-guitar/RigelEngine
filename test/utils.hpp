@@ -46,6 +46,7 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
   void stopMusic() override {}
   void scheduleGameQuit() override {}
   void switchGamePath(const std::filesystem::path&) override {}
+  void markCurrentFrameAsWidescreen() override {}
   bool isSharewareVersion() const override { return false; }
 
   const CommandLineOptions& commandLineOptions() const override {
