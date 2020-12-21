@@ -50,6 +50,61 @@ namespace rigel::engine {
 void updateAnimatedSprites(entityx::EntityManager& es);
 
 
+struct SpriteData {
+  SpriteData(
+    const entityx::Entity entity,
+    const components::Sprite* pSprite,
+    const bool drawTopMost,
+    const components::WorldPosition& position
+  )
+    : mEntity(entity)
+    , mPosition(position)
+    , mpSprite(pSprite)
+    , mDrawOrder(
+        entity.has_component<components::OverrideDrawOrder>()
+        ? entity.component<const components::OverrideDrawOrder>()->mDrawOrder
+        : pSprite->mpDrawData->mDrawOrder)
+    , mDrawTopMost(drawTopMost)
+  {
+  }
+
+  bool operator<(const SpriteData& rhs) const {
+    return
+      std::tie(mDrawTopMost, mDrawOrder) <
+      std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
+  }
+
+  entityx::Entity mEntity;
+  components::WorldPosition mPosition;
+  const components::Sprite* mpSprite;
+  int mDrawOrder;
+  bool mDrawTopMost;
+};
+
+
+class SpriteRenderingSystem {
+public:
+  SpriteRenderingSystem(
+    renderer::Renderer* pRenderer,
+    const renderer::TextureAtlas* pTextureAtlas);
+
+  void update(entityx::EntityManager& es, const base::Extents& viewPortSize);
+
+  void renderRegularSprites(const base::Vector& cameraPosition) const;
+  void renderForegroundSprites(const base::Vector& cameraPosition) const;
+
+private:
+  void renderSprite(
+    const SpriteData& sprite,
+    const base::Vector& cameraPosition) const;
+
+  std::vector<SpriteData> mSpritesByDrawOrder;
+  std::vector<SpriteData>::iterator miForegroundSprites;
+  renderer::Renderer* mpRenderer;
+  const renderer::TextureAtlas* mpTextureAtlas;
+};
+
+
 /** Renders the map and in-game sprites
  *
  * Works on all entities that have a Sprite and WorldPosition component.
@@ -94,10 +149,6 @@ public:
   std::size_t spritesRendered() const {
     return mSpritesRendered;
   }
-
-private:
-  struct SpriteData;
-  void renderSprite(const SpriteData& data) const;
 
 private:
   renderer::Renderer* mpRenderer;

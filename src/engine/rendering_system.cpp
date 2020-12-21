@@ -225,36 +225,106 @@ void drawSpriteFrame(
 }
 
 
-struct RenderingSystem::SpriteData {
-  SpriteData(
-    const ex::Entity entity,
-    const Sprite* pSprite,
-    const bool drawTopMost,
-    const WorldPosition& position
-  )
-    : mEntity(entity)
-    , mPosition(position)
-    , mpSprite(pSprite)
-    , mDrawOrder(
-        entity.has_component<components::OverrideDrawOrder>()
-        ? entity.component<const components::OverrideDrawOrder>()->mDrawOrder
-        : pSprite->mpDrawData->mDrawOrder)
-    , mDrawTopMost(drawTopMost)
-  {
+SpriteRenderingSystem::SpriteRenderingSystem(
+  renderer::Renderer* pRenderer,
+  const renderer::TextureAtlas* pTextureAtlas
+)
+  : mpRenderer(pRenderer)
+  , mpTextureAtlas(pTextureAtlas)
+{
+}
+
+
+void SpriteRenderingSystem::update(
+  ex::EntityManager& es,
+  const base::Extents& viewPortSize
+) {
+  using std::begin;
+  using std::end;
+  using std::sort;
+
+  mSpritesByDrawOrder.clear();
+  es.each<Sprite, WorldPosition>([&](
+    ex::Entity entity,
+    Sprite& sprite,
+    const WorldPosition& pos
+  ) {
+    const auto drawTopMost = entity.has_component<DrawTopMost>();
+    mSpritesByDrawOrder.emplace_back(entity, &sprite, drawTopMost, pos);
+  });
+  sort(begin(mSpritesByDrawOrder), end(mSpritesByDrawOrder));
+
+  miForegroundSprites = std::find_if(
+    begin(mSpritesByDrawOrder),
+    end(mSpritesByDrawOrder),
+    std::mem_fn(&SpriteData::mDrawTopMost));
+}
+
+
+void SpriteRenderingSystem::renderRegularSprites(
+  const base::Vector& cameraPosition
+) const {
+  for (auto it = mSpritesByDrawOrder.begin(); it != miForegroundSprites; ++it) {
+    renderSprite(*it, cameraPosition);
+  }
+}
+
+
+void SpriteRenderingSystem::renderForegroundSprites(
+  const base::Vector& cameraPosition
+) const {
+  for (auto it = miForegroundSprites; it != mSpritesByDrawOrder.end(); ++it) {
+    renderSprite(*it, cameraPosition);
+  }
+}
+
+
+void SpriteRenderingSystem::renderSprite(
+  const SpriteData& data,
+  const base::Vector& cameraPosition
+) const {
+  const auto& pos = data.mPosition;
+  const auto& sprite = *data.mpSprite;
+
+  if (!sprite.mShow) {
+    return;
   }
 
-  bool operator<(const SpriteData& rhs) const {
-    return
-      std::tie(mDrawTopMost, mDrawOrder) <
-      std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
-  }
+  if (data.mEntity.has_component<CustomRenderFunc>()) {
+    const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
+    renderFunc(*mpTextureAtlas, data.mEntity, sprite, pos - cameraPosition);
+  } else {
+    auto slotIndex = 0;
+    for (const auto& baseFrameIndex : sprite.mFramesToRender) {
+      assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
-  entityx::Entity mEntity;
-  WorldPosition mPosition;
-  const Sprite* mpSprite;
-  int mDrawOrder;
-  bool mDrawTopMost;
-};
+      if (baseFrameIndex == IGNORE_RENDER_SLOT) {
+        continue;
+      }
+
+      const auto frameIndex = virtualToRealFrame(
+        baseFrameIndex, *sprite.mpDrawData, data.mEntity);
+
+      // White flash effect/translucency
+
+      // White flash takes priority over translucency
+      if (sprite.mFlashingWhiteStates.test(slotIndex)) {
+        mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
+      } else if (sprite.mTranslucent) {
+        mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
+      }
+
+      auto& frame = sprite.mpDrawData->mFrames[frameIndex];
+
+      drawSpriteFrame(frame, pos - cameraPosition, *mpTextureAtlas);
+
+      mpRenderer->setOverlayColor(base::Color{});
+      mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
+
+      ++slotIndex;
+    }
+  }
+}
 
 
 RenderingSystem::RenderingSystem(
@@ -294,22 +364,8 @@ void RenderingSystem::update(
   using namespace std;
   using game_logic::components::TileDebris;
 
-  // Collect sprites, then order by draw index
-  vector<SpriteData> spritesByDrawOrder;
-  es.each<Sprite, WorldPosition>([&spritesByDrawOrder](
-    ex::Entity entity,
-    Sprite& sprite,
-    const WorldPosition& pos
-  ) {
-    const auto drawTopMost = entity.has_component<DrawTopMost>();
-    spritesByDrawOrder.emplace_back(entity, &sprite, drawTopMost, pos);
-  });
-  sort(begin(spritesByDrawOrder), end(spritesByDrawOrder));
-
-  const auto firstTopMostIt = find_if(
-    begin(spritesByDrawOrder),
-    end(spritesByDrawOrder),
-    mem_fn(&SpriteData::mDrawTopMost));
+  SpriteRenderingSystem spriteRenderer{mpRenderer, mpTextureAtlas};
+  spriteRenderer.update(es, viewPortSize);
 
   auto renderBackgroundLayers = [&]() {
     if (backdropFlashColor) {
@@ -322,9 +378,7 @@ void RenderingSystem::update(
 
     mMapRenderer.renderBackground(*mpCameraPosition, viewPortSize);
 
-    for (auto it = spritesByDrawOrder.begin(); it != firstTopMostIt; ++it) {
-      renderSprite(*it);
-    }
+    spriteRenderer.renderRegularSprites(*mpCameraPosition);
   };
 
 
@@ -354,64 +408,13 @@ void RenderingSystem::update(
   }
 
   mMapRenderer.renderForeground(*mpCameraPosition, viewPortSize);
-
-  // top most
-  for (auto it = firstTopMostIt; it != spritesByDrawOrder.end(); ++it) {
-    renderSprite(*it);
-  }
-
-  mSpritesRendered = spritesByDrawOrder.size();
+  spriteRenderer.renderForegroundSprites(*mpCameraPosition);
 
   // tile debris
   es.each<TileDebris, WorldPosition>(
     [this](ex::Entity, const TileDebris& debris, const WorldPosition& pos) {
       mMapRenderer.renderSingleTile(debris.mTileIndex, pos, *mpCameraPosition);
     });
-}
-
-
-void RenderingSystem::renderSprite(const SpriteData& data) const {
-  const auto& pos = data.mPosition;
-  const auto& sprite = *data.mpSprite;
-
-  if (!sprite.mShow) {
-    return;
-  }
-
-  if (data.mEntity.has_component<CustomRenderFunc>()) {
-    const auto renderFunc = *data.mEntity.component<const CustomRenderFunc>();
-    renderFunc(*mpTextureAtlas, data.mEntity, sprite, pos - *mpCameraPosition);
-  } else {
-    auto slotIndex = 0;
-    for (const auto& baseFrameIndex : sprite.mFramesToRender) {
-      assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
-
-      if (baseFrameIndex == IGNORE_RENDER_SLOT) {
-        continue;
-      }
-
-      const auto frameIndex = virtualToRealFrame(
-        baseFrameIndex, *sprite.mpDrawData, data.mEntity);
-
-      // White flash effect/translucency
-
-      // White flash takes priority over translucency
-      if (sprite.mFlashingWhiteStates.test(slotIndex)) {
-        mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
-      } else if (sprite.mTranslucent) {
-        mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
-      }
-
-      auto& frame = sprite.mpDrawData->mFrames[frameIndex];
-
-      drawSpriteFrame(frame, pos - *mpCameraPosition, *mpTextureAtlas);
-
-      mpRenderer->setOverlayColor(base::Color{});
-      mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
-
-      ++slotIndex;
-    }
-  }
 }
 
 }
