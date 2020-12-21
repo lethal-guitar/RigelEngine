@@ -27,6 +27,16 @@ namespace rigel::renderer {
 
 namespace {
 
+auto asVec(const base::Size<int>& size) {
+  return base::Vector{size.width, size.height};
+}
+
+
+auto asSize(const base::Vector& vec) {
+  return base::Size{vec.x, vec.y};
+}
+
+
 base::Size<float> determineUsableSize(
   const float windowWidth,
   const float windowHeight
@@ -87,6 +97,24 @@ WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
     widthInPixels,
     paddingPixels / 2
   };
+}
+
+
+base::Vector scaleVec(
+  const base::Vector& vec,
+  const base::Point<float>& scale
+) {
+  return base::Vector{
+    base::round(vec.x * scale.x),
+    base::round(vec.y * scale.y)};
+}
+
+
+base::Extents scaleSize(
+  const base::Extents& size,
+  const base::Point<float>& scale
+) {
+  return asSize(scaleVec(asVec(size), scale));
 }
 
 }

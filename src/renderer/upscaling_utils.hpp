@@ -48,4 +48,10 @@ bool canUseWidescreenMode(const Renderer* pRenderer);
 
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
 
+base::Vector scaleVec(const base::Vector& vec, const base::Point<float>& scale);
+base::Extents scaleSize(
+  const base::Extents& size,
+  const base::Point<float>& scale);
+
+
 }

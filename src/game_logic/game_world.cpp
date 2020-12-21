@@ -80,29 +80,12 @@ void drawBossHealthBar(
 }
 
 
-auto asVec(const base::Size<int>& size) {
-  return base::Vector{size.width, size.height};
-}
-
-
-auto asSize(const base::Vector& vec) {
-  return base::Size{vec.x, vec.y};
-}
-
-
-auto scaleVec(const base::Vector& vec, const base::Point<float>& scale) {
-  return base::Vector{
-    base::round(vec.x * scale.x),
-    base::round(vec.y * scale.y)};
-}
-
-
 auto localToGlobalTranslation(
   const renderer::Renderer* pRenderer,
   const base::Vector& translation
 ) {
   return pRenderer->globalTranslation() +
-    scaleVec(translation, pRenderer->globalScale());
+    renderer::scaleVec(translation, pRenderer->globalScale());
 }
 
 
@@ -119,7 +102,7 @@ auto localToGlobalTranslation(
   const auto scale = pRenderer->globalScale();
   pRenderer->setClipRect(base::Rect<int>{
     newTranslation,
-    asSize(scaleVec(asVec(data::GameTraits::inGameViewPortSize), scale))});
+    renderer::scaleSize(data::GameTraits::inGameViewPortSize, scale)});
   pRenderer->setGlobalTranslation(newTranslation);
 
   return saved;
@@ -137,7 +120,7 @@ auto localToGlobalTranslation(
   const auto offset = base::Vector{
     screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
   const auto newTranslation =
-    scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
+    renderer::scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
 
   const auto viewPortSize = base::Extents{
