@@ -133,7 +133,7 @@ void MapRenderer::switchBackdrops() {
 void MapRenderer::renderBackground(
   const base::Vector& sectionStart,
   const base::Extents& sectionSize
-) {
+) const {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
 }
 
@@ -141,7 +141,7 @@ void MapRenderer::renderBackground(
 void MapRenderer::renderForeground(
   const base::Vector& sectionStart,
   const base::Extents& sectionSize
-) {
+) const {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
 }
 
@@ -149,7 +149,7 @@ void MapRenderer::renderForeground(
 void MapRenderer::renderBackdrop(
   const base::Vector& cameraPosition,
   const base::Extents& viewPortSize
-) {
+) const {
   const auto offset =
     backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset);
 
@@ -177,7 +177,7 @@ void MapRenderer::renderMapTiles(
   const base::Vector& sectionStart,
   const base::Extents& sectionSize,
   const DrawMode drawMode
-) {
+) const {
   for (int layer=0; layer<2; ++layer) {
     for (int y=0; y<sectionSize.height; ++y) {
       for (int x=0; x<sectionSize.width; ++x) {
@@ -219,7 +219,7 @@ void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
   const base::Vector& position,
   const base::Vector& cameraPosition
-) {
+) const {
   const auto screenPosition = position - cameraPosition;
   renderTile(index, screenPosition.x, screenPosition.y);
 }
@@ -229,7 +229,7 @@ void MapRenderer::renderTile(
   const data::map::TileIndex tileIndex,
   const int x,
   const int y
-) {
+) const {
   // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
   // should be visible. Therefore, don't draw if the index is 0.
   if (tileIndex != 0) {
