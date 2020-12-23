@@ -19,8 +19,6 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/map_renderer.hpp"
-#include "engine/timing.hpp"
 #include "engine/visual_components.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
@@ -35,7 +33,6 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel::data { struct GameOptions; }
 namespace rigel::renderer { class TextureAtlas; }
 
 
@@ -102,62 +99,6 @@ private:
   std::vector<SpriteData>::iterator miForegroundSprites;
   renderer::Renderer* mpRenderer;
   const renderer::TextureAtlas* mpTextureAtlas;
-};
-
-
-/** Renders the map and in-game sprites
- *
- * Works on all entities that have a Sprite and WorldPosition component.
- * Also renders the map using a engine::MapRenderer. Map and sprite rendering
- * are handled by the same system so that draw-order can be done properly
- * (e.g. some sprites are rendered behind certain tiles, others before etc.)
- */
-class RenderingSystem {
-public:
-  RenderingSystem(
-    const base::Vector* pCameraPosition,
-    renderer::Renderer* pRenderer,
-    const data::GameOptions* pOptions,
-    const renderer::TextureAtlas* pSpritesTextureAtlas,
-    const data::map::Map* pMap,
-    MapRenderer::MapRenderData&& mapRenderData);
-
-  /** Update map tile animation state. Should be called at game-logic rate. */
-  void updateAnimatedMapTiles() {
-    mMapRenderer.updateAnimatedMapTiles();
-
-    ++mWaterAnimStep;
-    if (mWaterAnimStep >= 4) {
-      mWaterAnimStep = 0;
-    }
-  }
-
-  /** Render everything. Can be called at full frame rate. */
-  void update(
-    entityx::EntityManager& es,
-    const std::optional<base::Color>& backdropFlashColor,
-    const base::Extents& viewPortSize);
-
-  void switchBackdrops() {
-    mMapRenderer.switchBackdrops();
-  }
-
-  void updateBackdropAutoScrolling(const engine::TimeDelta dt) {
-    mMapRenderer.updateBackdropAutoScrolling(dt);
-  }
-
-  std::size_t spritesRendered() const {
-    return mSpritesRendered;
-  }
-
-private:
-  renderer::Renderer* mpRenderer;
-  const renderer::TextureAtlas* mpTextureAtlas;
-  renderer::RenderTargetTexture mRenderTarget;
-  MapRenderer mMapRenderer;
-  const base::Vector* mpCameraPosition;
-  int mWaterAnimStep = 0;
-  std::size_t mSpritesRendered = 0;
 };
 
 }

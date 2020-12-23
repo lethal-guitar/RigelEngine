@@ -122,7 +122,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt) {
       update();
     }
 
-    mWorld.mpState->mRenderingSystem.updateBackdropAutoScrolling(dt);
+    mWorld.mpState->mMapRenderer.updateBackdropAutoScrolling(dt);
   }
 }
 

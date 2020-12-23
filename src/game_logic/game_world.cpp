@@ -30,6 +30,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
 #include "loader/resource_loader.hpp"
@@ -202,6 +203,56 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
   return stream.str();
 }
 
+
+struct WaterEffectArea {
+  base::Rect<int> mArea;
+  bool mIsAnimated;
+};
+
+
+std::vector<WaterEffectArea> collectWaterEffectAreas(
+  entityx::EntityManager& es,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  using engine::components::BoundingBox;
+  using game_logic::components::ActorTag;
+
+  std::vector<WaterEffectArea> result;
+
+  const auto screenBox = BoundingBox{cameraPosition, viewPortSize};
+
+  es.each<ActorTag, WorldPosition, BoundingBox>(
+    [&](
+      entityx::Entity,
+      const ActorTag& tag,
+      const WorldPosition& position,
+      const BoundingBox& bbox
+    ) {
+      using T = ActorTag::Type;
+
+      const auto isWaterArea =
+        tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
+      if (isWaterArea) {
+        const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
+
+        if (screenBox.intersects(worldSpaceBbox)) {
+          const auto topLeftPx =
+            data::tileVectorToPixelVector(
+              worldSpaceBbox.topLeft - cameraPosition);
+          const auto sizePx =
+            data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+          const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
+
+          result.push_back(
+            WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
+        }
+      }
+    });
+
+  return result;
+}
+
 }
 
 
@@ -230,6 +281,19 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
+  , mWaterEffectBuffer([&]() {
+      if (mpOptions->mPerElementUpscalingEnabled) {
+        return renderer::RenderTargetTexture{
+          mpRenderer,
+          size_t(mpRenderer->maxWindowSize().width),
+          size_t(mpRenderer->maxWindowSize().height)};
+      } else {
+        return renderer::RenderTargetTexture{
+          mpRenderer,
+          size_t(renderer::determineWidescreenViewPort(mpRenderer).mWidthPx),
+          size_t(data::GameTraits::viewPortHeightPx)};
+      }
+    }())
   , mLowResLayer(
       mpRenderer,
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
@@ -515,8 +579,12 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
       ? viewPortSizeWideScreen(mpRenderer)
       : data::GameTraits::mapViewPortSize;
 
-  mpState->mRenderingSystem.updateAnimatedMapTiles();
+  mpState->mMapRenderer.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
+  ++mpState->mWaterAnimStep;
+  if (mpState->mWaterAnimStep >= 4) {
+    mpState->mWaterAnimStep = 0;
+  }
 
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
     input, mpState->mEntities);
@@ -554,6 +622,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
   mpState->mParticles.update();
 
+  mpState->mSpriteRenderingSystem.update(mpState->mEntities, viewPortSize);
+
   mpState->mIsOddFrame = !mpState->mIsOddFrame;
 }
 
@@ -576,8 +646,7 @@ void GameWorld::render() {
     }
 
     if (mpOptions->mPerElementUpscalingEnabled) {
-      mpState->mRenderingSystem.update(
-        mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
+      drawMapAndSprites(viewPortSize);
 
       {
         const auto binder =
@@ -591,8 +660,7 @@ void GameWorld::render() {
 
       mLowResLayer.render(mpRenderer, 0, 0);
     } else {
-      mpState->mRenderingSystem.update(
-        mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
+      drawMapAndSprites(viewPortSize);
       mpState->mParticles.render(mpState->mCamera.position());
       mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
     }
@@ -666,6 +734,67 @@ void GameWorld::render() {
     drawTopRow();
   }
 }
+
+
+void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
+  using game_logic::components::TileDebris;
+
+  auto& state = *mpState;
+  const auto& cameraPosition = mpState->mCamera.position();
+
+  auto renderBackgroundLayers = [&]() {
+    if (state.mBackdropFlashColor) {
+      mpRenderer->setOverlayColor(*state.mBackdropFlashColor);
+      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
+      mpRenderer->setOverlayColor({});
+    } else {
+      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
+    }
+
+    state.mMapRenderer.renderBackground(cameraPosition, viewPortSize);
+
+    state.mSpriteRenderingSystem.renderRegularSprites(cameraPosition);
+  };
+
+
+  const auto waterEffectAreas = collectWaterEffectAreas(
+    state.mEntities, cameraPosition, viewPortSize);
+  if (waterEffectAreas.empty()) {
+    renderBackgroundLayers();
+  } else {
+    {
+      renderer::RenderTargetTexture::Binder bindRenderTarget(
+        mWaterEffectBuffer, mpRenderer);
+      renderBackgroundLayers();
+    }
+
+    {
+      auto saved = renderer::Renderer::StateSaver(mpRenderer);
+      mpRenderer->setGlobalScale({1.0f, 1.0f});
+      mpRenderer->setGlobalTranslation({});
+      mWaterEffectBuffer.render(mpRenderer, 0, 0);
+    }
+
+    for (const auto& area : waterEffectAreas) {
+      mpRenderer->drawWaterEffect(
+        area.mArea,
+        mWaterEffectBuffer.data(),
+        area.mIsAnimated
+          ? std::optional<int>(state.mWaterAnimStep) : std::nullopt);
+    }
+  }
+
+  state.mMapRenderer.renderForeground(cameraPosition, viewPortSize);
+  state.mSpriteRenderingSystem.renderForegroundSprites(cameraPosition);
+
+  // tile debris
+  state.mEntities.each<TileDebris, WorldPosition>(
+    [&](entityx::Entity, const TileDebris& debris, const WorldPosition& pos) {
+      state.mMapRenderer.renderSingleTile(
+        debris.mTileIndex, pos, cameraPosition);
+    });
+}
+
 
 
 void GameWorld::processEndOfFrameActions() {
@@ -795,7 +924,7 @@ void GameWorld::onReactorDestroyed(const base::Vector& position) {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnReactorDestruction;
   if (!mpState->mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
-    mpState->mRenderingSystem.switchBackdrops();
+    mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = true;
     mpState->mReactorDestructionFramesElapsed = 0;
   }
@@ -856,7 +985,7 @@ void GameWorld::restartFromCheckpoint() {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (mpState->mBackdropSwitched && shouldSwitchBackAfterRespawn) {
-    mpState->mRenderingSystem.switchBackdrops();
+    mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = false;
   }
 
@@ -885,7 +1014,7 @@ void GameWorld::handleTeleporter() {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (switchBackdrop) {
-    mpState->mRenderingSystem.switchBackdrops();
+    mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = !mpState->mBackdropSwitched;
   }
 
