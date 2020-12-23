@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
+#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -60,10 +61,9 @@ struct VerticalSlidingDoor {
     entityx::Entity entity);
 
   static void render(
-    const renderer::TextureAtlas& textureAtlas,
-    entityx::Entity,
-    const engine::components::Sprite& sprite,
-    const base::Vector& positionInScreenSpace);
+    entityx::Entity entity,
+    const base::Vector& positionInScreenSpace,
+    std::vector<engine::CustomDrawRequest>& output);
 
   enum class State {
     Closed,

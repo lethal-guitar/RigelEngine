@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "engine/visual_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 #include <variant>
@@ -48,10 +49,9 @@ struct SmashHammer {
     entityx::Entity entity);
 
   static void render(
-    const renderer::TextureAtlas& textureAtlas,
     entityx::Entity entity,
-    const engine::components::Sprite& sprite,
-    const base::Vector& positionInScreenSpace);
+    const base::Vector& positionInScreenSpace,
+    std::vector<engine::CustomDrawRequest>& output);
 
   smash_hammer::State mState = smash_hammer::Waiting{10};
   int mExtensionStep = 0;

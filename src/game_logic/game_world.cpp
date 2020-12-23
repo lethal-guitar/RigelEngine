@@ -622,7 +622,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
   mpState->mParticles.update();
 
-  mpState->mSpriteRenderingSystem.update(mpState->mEntities, viewPortSize);
+  mpState->mSpriteRenderingSystem.update(
+    mpState->mEntities, viewPortSize, mpState->mCamera.position());
 
   mpState->mIsOddFrame = !mpState->mIsOddFrame;
 }
@@ -753,7 +754,7 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
 
     state.mMapRenderer.renderBackground(cameraPosition, viewPortSize);
 
-    state.mSpriteRenderingSystem.renderRegularSprites(cameraPosition);
+    state.mSpriteRenderingSystem.renderRegularSprites();
   };
 
 
@@ -785,7 +786,7 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
   }
 
   state.mMapRenderer.renderForeground(cameraPosition, viewPortSize);
-  state.mSpriteRenderingSystem.renderForegroundSprites(cameraPosition);
+  state.mSpriteRenderingSystem.renderForegroundSprites();
 
   // tile debris
   state.mEntities.each<TileDebris, WorldPosition>(

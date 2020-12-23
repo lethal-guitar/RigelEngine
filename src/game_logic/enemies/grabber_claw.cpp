@@ -94,30 +94,22 @@ void GrabberClaw::update(
 
 
 void GrabberClaw::render(
-  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
-  const engine::components::Sprite& sprite,
-  const base::Vector& positionInScreenSpace
+  const base::Vector& positionInScreenSpace,
+  std::vector<engine::CustomDrawRequest>& output
 ) {
   const auto& state =
     entity.component<components::BehaviorController>()->get<GrabberClaw>();
   const auto currentFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
-  const auto pDrawData = sprite.mpDrawData;
 
   // Mounting pole
   for (int i = 0; i < state.mExtensionStep + 1; ++i) {
-    engine::drawSpriteFrame(
-      pDrawData->mFrames[0],
-      positionInScreenSpace - base::Vector{0, i + 1},
-      textureAtlas);
+    output.push_back({0, positionInScreenSpace - base::Vector{0, i + 1}});
   }
 
   // Claw
-  engine::drawSpriteFrame(
-    pDrawData->mFrames[currentFrame],
-    positionInScreenSpace,
-    textureAtlas);
+  output.push_back({currentFrame, positionInScreenSpace});
 }
 
 }

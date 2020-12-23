@@ -119,10 +119,9 @@ void LavaFountain::update(
 
 
 void LavaFountain::render(
-  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
-  const engine::components::Sprite& sprite,
-  const base::Vector& positionInScreenSpace
+  const base::Vector& positionInScreenSpace,
+  std::vector<engine::CustomDrawRequest>& output
 ) {
   const auto& controller =
     entity.component<components::BehaviorController>()->get<LavaFountain>();
@@ -133,10 +132,9 @@ void LavaFountain::render(
   ) {
     const auto indexForDrawing = pState->mSequenceIndex - 1;
     for (const auto& element : ERUPTION_SEQUENCE[indexForDrawing]) {
-      engine::drawSpriteFrame(
-        sprite.mpDrawData->mFrames[element.mFrame],
-        positionInScreenSpace + base::Vector{0, element.mOffsetY},
-        textureAtlas);
+      output.push_back({
+        element.mFrame,
+        positionInScreenSpace + base::Vector{0, element.mOffsetY}});
     }
   }
 }

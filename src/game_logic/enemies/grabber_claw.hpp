@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
+#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -58,10 +59,9 @@ struct GrabberClaw {
     entityx::Entity entity);
 
   static void render(
-    const renderer::TextureAtlas& spritesTextureAtlas,
     entityx::Entity entity,
-    const engine::components::Sprite& sprite,
-    const base::Vector& positionInScreenSpace);
+    const base::Vector& positionInScreenSpace,
+    std::vector<engine::CustomDrawRequest>& output);
 
   State mState;
   int mExtensionStep = 0;

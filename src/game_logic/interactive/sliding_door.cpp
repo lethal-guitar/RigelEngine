@@ -209,10 +209,9 @@ void VerticalSlidingDoor::update(
 
 
 void VerticalSlidingDoor::render(
-  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
-  const engine::components::Sprite& sprite,
-  const base::Vector& positionInScreenSpace
+  const base::Vector& positionInScreenSpace,
+  std::vector<engine::CustomDrawRequest>& output
 ) {
   const auto& state =
     entity.component<components::BehaviorController>()->get<VerticalSlidingDoor>();
@@ -222,10 +221,9 @@ void VerticalSlidingDoor::render(
 
   for (int i = 0; i < segmentsToDraw; ++i) {
     const auto segmentIndex = NUM_VERTICAL_DOOR_SEGMENTS - i - state.mSlideStep;
-    engine::drawSpriteFrame(
-      sprite.mpDrawData->mFrames[segmentIndex],
-      positionInScreenSpace - base::Vector{0, NUM_VERTICAL_DOOR_SEGMENTS - i},
-      textureAtlas);
+    output.push_back({
+      segmentIndex,
+      positionInScreenSpace - base::Vector{0, NUM_VERTICAL_DOOR_SEGMENTS - i}});
   }
 }
 

@@ -19,7 +19,6 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/visual_components.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
 
@@ -27,8 +26,6 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-#include <cstdint>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -47,35 +44,27 @@ namespace rigel::engine {
 void updateAnimatedSprites(entityx::EntityManager& es);
 
 
-struct SpriteData {
-  SpriteData(
-    const entityx::Entity entity,
-    const components::Sprite* pSprite,
-    const bool drawTopMost,
-    const components::WorldPosition& position
-  )
-    : mEntity(entity)
-    , mPosition(position)
-    , mpSprite(pSprite)
-    , mDrawOrder(
-        entity.has_component<components::OverrideDrawOrder>()
-        ? entity.component<const components::OverrideDrawOrder>()->mDrawOrder
-        : pSprite->mpDrawData->mDrawOrder)
-    , mDrawTopMost(drawTopMost)
-  {
-  }
+struct SpriteDrawSpec {
+  base::Rect<int> mDestRect;
+  int mImageId;
+  bool mIsFlashingWhite;
+  bool mIsTranslucent;
+};
 
-  bool operator<(const SpriteData& rhs) const {
-    return
-      std::tie(mDrawTopMost, mDrawOrder) <
-      std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
-  }
 
-  entityx::Entity mEntity;
-  components::WorldPosition mPosition;
-  const components::Sprite* mpSprite;
+struct SortableDrawSpec {
+  SpriteDrawSpec mSpec;
   int mDrawOrder;
   bool mDrawTopMost;
+
+  friend bool operator<(
+    const SortableDrawSpec& lhs,
+    const SortableDrawSpec& rhs)
+  {
+    return
+      std::tie(lhs.mDrawTopMost, lhs.mDrawOrder) <
+      std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
+  }
 };
 
 
@@ -85,18 +74,29 @@ public:
     renderer::Renderer* pRenderer,
     const renderer::TextureAtlas* pTextureAtlas);
 
-  void update(entityx::EntityManager& es, const base::Extents& viewPortSize);
+  void update(
+    entityx::EntityManager& es,
+    const base::Extents& viewPortSize,
+    const base::Vector& cameraPosition);
 
-  void renderRegularSprites(const base::Vector& cameraPosition) const;
-  void renderForegroundSprites(const base::Vector& cameraPosition) const;
+  void renderRegularSprites() const;
+  void renderForegroundSprites() const;
 
 private:
-  void renderSprite(
-    const SpriteData& sprite,
-    const base::Vector& cameraPosition) const;
+  void renderSprite(const SpriteDrawSpec& spec) const;
 
-  std::vector<SpriteData> mSpritesByDrawOrder;
-  std::vector<SpriteData>::iterator miForegroundSprites;
+  // Temporary storage used for sorting sprites by draw order during sprite
+  // collection. Scope-wise, this is only needed during update(), but in order
+  // to reduce the number of allocations happening each frame, we reuse the
+  // vector.
+  std::vector<SortableDrawSpec> mSortBuffer;
+
+  // Data needed to draw sprites that are currently visible. This is updated
+  // by each call to update().
+  std::vector<SpriteDrawSpec> mSprites;
+  std::vector<SpriteDrawSpec>::iterator miForegroundSprites;
+
+  // Dependencies needed for drawing
   renderer::Renderer* mpRenderer;
   const renderer::TextureAtlas* mpTextureAtlas;
 };

@@ -70,6 +70,18 @@ constexpr auto NUM_RENDER_SLOTS = 8;
 constexpr auto IGNORE_RENDER_SLOT = -1;
 
 
+struct CustomDrawRequest {
+  CustomDrawRequest(const int frame, const base::Vector& screenPosition)
+    : mScreenPosition(screenPosition)
+    , mFrame(frame)
+  {
+  }
+
+  base::Vector mScreenPosition;
+  int mFrame;
+};
+
+
 int virtualToRealFrame(
   const int virtualFrame,
   const SpriteDrawData& drawData,
@@ -179,14 +191,13 @@ struct Sprite {
  * When a sprite entity also has this component, the provided function
  * pointer will be invoked instead of rendering the sprite directly.
  *
- * The last argument is the sprite's world position converted to a screen-space
- * pixel position.
+ * The second argument is the sprite's world position converted to a
+ * screen-space pixel position.
  */
 using CustomRenderFunc = void(*)(
-  const renderer::TextureAtlas& spritesTextureAtlas,
   entityx::Entity,
-  const engine::components::Sprite&,
-  const base::Vector&);
+  const base::Vector&,
+  std::vector<CustomDrawRequest>&);
 
 
 /** Indicates that an entity should always be drawn last
