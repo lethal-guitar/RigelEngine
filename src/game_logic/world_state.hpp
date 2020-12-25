@@ -24,10 +24,11 @@
 #include "engine/collision_checker.hpp"
 #include "engine/entity_activation_system.hpp"
 #include "engine/life_time_system.hpp"
+#include "engine/map_renderer.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/random_number_generator.hpp"
-#include "engine/rendering_system.hpp"
+#include "engine/sprite_rendering_system.hpp"
 #include "game_logic/behavior_controller_system.hpp"
 #include "game_logic/camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"
@@ -126,7 +127,8 @@ struct WorldState {
   Player mPlayer;
   Camera mCamera;
   engine::ParticleSystem mParticles;
-  engine::RenderingSystem mRenderingSystem;
+  engine::SpriteRenderingSystem mSpriteRenderingSystem;
+  engine::MapRenderer mMapRenderer;
   engine::PhysicsSystem mPhysicsSystem;
   engine::LifeTimeSystem mLifeTimeSystem;
   game_logic::DebuggingSystem mDebuggingSystem;
@@ -151,6 +153,7 @@ struct WorldState {
   std::optional<int> mReactorDestructionFramesElapsed;
   int mScreenShakeOffsetX = 0;
   data::map::BackdropSwitchCondition mBackdropSwitchCondition;
+  int mWaterAnimStep = 0;
   bool mBossDeathAnimationStartPending = false;
   bool mBackdropSwitched = false;
   bool mLevelFinished = false;

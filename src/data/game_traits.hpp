@@ -41,6 +41,9 @@ struct GameTraits {
   static constexpr int viewPortHeightTiles =
     viewPortHeightPx / tileSize;
 
+  static constexpr base::Extents viewPortSize{
+    viewPortWidthPx, viewPortHeightPx};
+
   // The actual in-game viewport starts with an offset and is further reduced
   // to make room for the HUD. The right hand side features another 8px of
   // black border.

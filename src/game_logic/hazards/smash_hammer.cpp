@@ -82,27 +82,21 @@ void SmashHammer::update(
 
 
 void SmashHammer::render(
-  const renderer::TextureAtlas& textureAtlas,
   entityx::Entity entity,
-  const engine::components::Sprite& sprite,
-  const base::Vector& positionInScreenSpace
+  const base::Vector& positionInScreenSpace,
+  std::vector<engine::CustomDrawRequest>& output
 ) {
   using namespace smash_hammer;
 
   const auto& state =
     entity.component<components::BehaviorController>()->get<SmashHammer>();
-  const auto pDrawData = sprite.mpDrawData;
 
   // Hammer
-  engine::drawSpriteFrame(
-    pDrawData->mFrames[0], positionInScreenSpace, textureAtlas);
+  output.push_back({0, positionInScreenSpace});
 
   // Mounting pole
   for (int i = 0; i < state.mExtensionStep; ++i) {
-    engine::drawSpriteFrame(
-      pDrawData->mFrames[1],
-      positionInScreenSpace - base::Vector{0, i},
-      textureAtlas);
+    output.push_back({1, positionInScreenSpace - base::Vector{0, i}});
   }
 }
 

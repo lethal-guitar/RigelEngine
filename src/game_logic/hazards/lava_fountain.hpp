@@ -18,6 +18,7 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -53,10 +54,9 @@ struct LavaFountain {
     entityx::Entity entity);
 
   static void render(
-    const renderer::TextureAtlas& textureAtlas,
     entityx::Entity entity,
-    const engine::components::Sprite& sprite,
-    const base::Vector& positionInScreenSpace);
+    const base::Vector& positionInScreenSpace,
+    std::vector<engine::CustomDrawRequest>& output);
 
   State mState = Waiting{};
 };

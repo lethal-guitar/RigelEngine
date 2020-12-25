@@ -44,13 +44,13 @@ public:
 
   void renderBackdrop(
     const base::Vector& cameraPosition,
-    const base::Extents& viewPortSize);
+    const base::Extents& viewPortSize) const;
   void renderBackground(
     const base::Vector& sectionStart,
-    const base::Extents& sectionSize);
+    const base::Extents& sectionSize) const;
   void renderForeground(
     const base::Vector& sectionStart,
-    const base::Extents& sectionSize);
+    const base::Extents& sectionSize) const;
 
   void updateAnimatedMapTiles();
   void updateBackdropAutoScrolling(engine::TimeDelta dt);
@@ -58,7 +58,7 @@ public:
   void renderSingleTile(
     data::map::TileIndex index,
     const base::Vector& position,
-    const base::Vector& cameraPosition);
+    const base::Vector& cameraPosition) const;
 
 private:
   enum class DrawMode {
@@ -69,12 +69,12 @@ private:
   void renderMapTiles(
     const base::Vector& sectionStart,
     const base::Extents& sectionSize,
-    DrawMode drawMode);
-  void renderTile(data::map::TileIndex index, int x, int y);
+    DrawMode drawMode) const;
+  void renderTile(data::map::TileIndex index, int x, int y) const;
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 
 private:
-  renderer::Renderer* mpRenderer;
+  mutable renderer::Renderer* mpRenderer;
   const data::map::Map* mpMap;
 
   TiledTexture mTileSetTexture;

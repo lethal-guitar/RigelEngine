@@ -108,10 +108,17 @@ struct GameOptions {
   bool mWidescreenModeOn = false;
   bool mQuickSavingEnabled = false;
 
+  // Internal options
+  //
+  // The following options are used internally to control various behavior, but
+  // they are not serialized to disk and not editable by the user. The game
+  // sets these options itself.
+  bool mPerElementUpscalingEnabled = false;
+
+  // Helper functions
   bool compatibilityModeOn() const {
     return mCompatibilityModeOn && !mWidescreenModeOn;
   }
-
 
   std::array<SDL_Keycode*, 8> allKeyBindings() {
     return {

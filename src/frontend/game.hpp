@@ -104,6 +104,10 @@ private:
 
   void switchGamePath(const std::filesystem::path& newGamePath) override;
 
+  void markCurrentFrameAsWidescreen() override {
+    mCurrentFrameIsWidescreen = true;
+  }
+
   bool isSharewareVersion() const override {
     return mIsShareWareVersion;
   }
@@ -122,6 +126,7 @@ private:
   std::optional<renderer::FpsLimiter> mFpsLimiter;
   renderer::RenderTargetTexture mRenderTarget;
   std::uint8_t mAlphaMod = 255;
+  bool mCurrentFrameIsWidescreen = false;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;
 

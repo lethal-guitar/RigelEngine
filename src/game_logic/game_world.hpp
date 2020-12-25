@@ -121,6 +121,8 @@ private:
   void printDebugText(std::ostream& stream) const;
 
 private:
+  void drawMapAndSprites(const base::Extents& viewPortSize);
+
   struct QuickSaveData {
     data::PlayerModel mPlayerModel;
     std::unique_ptr<WorldState> mpState;
@@ -139,6 +141,7 @@ private:
   data::PlayerModel mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
+  renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
 
   std::unique_ptr<WorldState> mpState;

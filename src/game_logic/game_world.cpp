@@ -30,6 +30,7 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"
+#include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
 #include "loader/resource_loader.hpp"
@@ -80,29 +81,12 @@ void drawBossHealthBar(
 }
 
 
-auto asVec(const base::Size<int>& size) {
-  return base::Vector{size.width, size.height};
-}
-
-
-auto asSize(const base::Vector& vec) {
-  return base::Size{vec.x, vec.y};
-}
-
-
-auto scaleVec(const base::Vector& vec, const base::Point<float>& scale) {
-  return base::Vector{
-    base::round(vec.x * scale.x),
-    base::round(vec.y * scale.y)};
-}
-
-
 auto localToGlobalTranslation(
   const renderer::Renderer* pRenderer,
   const base::Vector& translation
 ) {
   return pRenderer->globalTranslation() +
-    scaleVec(translation, pRenderer->globalScale());
+    renderer::scaleVec(translation, pRenderer->globalScale());
 }
 
 
@@ -119,7 +103,7 @@ auto localToGlobalTranslation(
   const auto scale = pRenderer->globalScale();
   pRenderer->setClipRect(base::Rect<int>{
     newTranslation,
-    asSize(scaleVec(asVec(data::GameTraits::inGameViewPortSize), scale))});
+    renderer::scaleSize(data::GameTraits::inGameViewPortSize, scale)});
   pRenderer->setGlobalTranslation(newTranslation);
 
   return saved;
@@ -137,7 +121,7 @@ auto localToGlobalTranslation(
   const auto offset = base::Vector{
     screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
   const auto newTranslation =
-    scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
+    renderer::scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
 
   const auto viewPortSize = base::Extents{
@@ -160,10 +144,10 @@ auto viewPortSizeWideScreen(renderer::Renderer* pRenderer) {
 
 void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
-  const renderer::WidescreenViewPortInfo& info
+  const int tilesOnScreen
 ) {
   const auto extraTiles =
-    info.mWidthTiles - data::GameTraits::mapViewPortWidthTiles;
+    tilesOnScreen - data::GameTraits::mapViewPortWidthTiles;
   const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
   pRenderer->setGlobalTranslation(
     localToGlobalTranslation(pRenderer, {hudOffset, 0}));
@@ -219,6 +203,56 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
   return stream.str();
 }
 
+
+struct WaterEffectArea {
+  base::Rect<int> mArea;
+  bool mIsAnimated;
+};
+
+
+std::vector<WaterEffectArea> collectWaterEffectAreas(
+  entityx::EntityManager& es,
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize
+) {
+  using engine::components::BoundingBox;
+  using game_logic::components::ActorTag;
+
+  std::vector<WaterEffectArea> result;
+
+  const auto screenBox = BoundingBox{cameraPosition, viewPortSize};
+
+  es.each<ActorTag, WorldPosition, BoundingBox>(
+    [&](
+      entityx::Entity,
+      const ActorTag& tag,
+      const WorldPosition& position,
+      const BoundingBox& bbox
+    ) {
+      using T = ActorTag::Type;
+
+      const auto isWaterArea =
+        tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
+      if (isWaterArea) {
+        const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
+
+        if (screenBox.intersects(worldSpaceBbox)) {
+          const auto topLeftPx =
+            data::tileVectorToPixelVector(
+              worldSpaceBbox.topLeft - cameraPosition);
+          const auto sizePx =
+            data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+          const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
+
+          result.push_back(
+            WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
+        }
+      }
+    });
+
+  return result;
+}
+
 }
 
 
@@ -242,10 +276,24 @@ GameWorld::GameWorld(
   , mPlayerModelAtLevelStart(*mpPlayerModel)
   , mHudRenderer(
       sessionId.mLevel + 1,
+      mpOptions,
       mpRenderer,
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
+  , mWaterEffectBuffer([&]() {
+      if (mpOptions->mPerElementUpscalingEnabled) {
+        return renderer::RenderTargetTexture{
+          mpRenderer,
+          size_t(mpRenderer->maxWindowSize().width),
+          size_t(mpRenderer->maxWindowSize().height)};
+      } else {
+        return renderer::RenderTargetTexture{
+          mpRenderer,
+          size_t(renderer::determineWidescreenViewPort(mpRenderer).mWidthPx),
+          size_t(data::GameTraits::viewPortHeightPx)};
+      }
+    }())
   , mLowResLayer(
       mpRenderer,
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
@@ -531,8 +579,12 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
       ? viewPortSizeWideScreen(mpRenderer)
       : data::GameTraits::mapViewPortSize;
 
-  mpState->mRenderingSystem.updateAnimatedMapTiles();
+  mpState->mMapRenderer.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
+  ++mpState->mWaterAnimStep;
+  if (mpState->mWaterAnimStep >= 4) {
+    mpState->mWaterAnimStep = 0;
+  }
 
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
     input, mpState->mEntities);
@@ -570,6 +622,9 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 
   mpState->mParticles.update();
 
+  mpState->mSpriteRenderingSystem.update(
+    mpState->mEntities, viewPortSize, mpState->mCamera.position());
+
   mpState->mIsOddFrame = !mpState->mIsOddFrame;
 }
 
@@ -579,25 +634,37 @@ void GameWorld::render() {
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
+    const auto clipRectGuard = renderer::Renderer::StateSaver{mpRenderer};
+    mpRenderer->setClipRect(base::Rect<int>{
+      mpRenderer->globalTranslation(),
+      renderer::scaleSize(
+        data::tileExtentsToPixelExtents(viewPortSize),
+        mpRenderer->globalScale())});
+
     if (mpState->mScreenFlashColor) {
       mpRenderer->clear(*mpState->mScreenFlashColor);
       return;
     }
 
-    mpState->mRenderingSystem.update(
-      mpState->mEntities, mpState->mBackdropFlashColor, viewPortSize);
+    if (mpOptions->mPerElementUpscalingEnabled) {
+      drawMapAndSprites(viewPortSize);
 
-    {
-      const auto binder =
-        renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
-      const auto saved = renderer::setupDefaultState(mpRenderer);
+      {
+        const auto binder =
+          renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
+        const auto defaultStateGuard = renderer::setupDefaultState(mpRenderer);
 
-      mpRenderer->clear({0, 0, 0, 0});
+        mpRenderer->clear({0, 0, 0, 0});
+        mpState->mParticles.render(mpState->mCamera.position());
+        mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
+      }
+
+      mLowResLayer.render(mpRenderer, 0, 0);
+    } else {
+      drawMapAndSprites(viewPortSize);
       mpState->mParticles.render(mpState->mCamera.position());
       mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
     }
-
-    mLowResLayer.render(mpRenderer, 0, 0);
   };
 
   auto drawTopRow = [&, this]() {
@@ -629,20 +696,34 @@ void GameWorld::render() {
 
 
   if (widescreenModeOn) {
+    mpServiceProvider->markCurrentFrameAsWidescreen();
+
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
 
-    {
-      const auto saved = setupIngameViewportWidescreen(
-        mpRenderer, info, mpState->mScreenShakeOffsetX);
+    if (mpOptions->mPerElementUpscalingEnabled) {
+      {
+        const auto saved = setupIngameViewportWidescreen(
+          mpRenderer, info, mpState->mScreenShakeOffsetX);
 
-      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles});
+        drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
 
-      setupWidescreenHudOffset(mpRenderer, info);
+        setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
+        drawHud();
+      }
+
+      auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
+      drawTopRow();
+    } else {
+      const auto saved = renderer::setupDefaultState(mpRenderer);
+      drawTopRow();
+
+      mpRenderer->setGlobalTranslation(base::Vector{
+        mpState->mScreenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y});
+      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
+
+      setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
       drawHud();
     }
-
-    auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
-    drawTopRow();
   } else {
     {
       const auto saved = setupIngameViewport(mpRenderer, mpState->mScreenShakeOffsetX);
@@ -654,6 +735,67 @@ void GameWorld::render() {
     drawTopRow();
   }
 }
+
+
+void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
+  using game_logic::components::TileDebris;
+
+  auto& state = *mpState;
+  const auto& cameraPosition = mpState->mCamera.position();
+
+  auto renderBackgroundLayers = [&]() {
+    if (state.mBackdropFlashColor) {
+      mpRenderer->setOverlayColor(*state.mBackdropFlashColor);
+      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
+      mpRenderer->setOverlayColor({});
+    } else {
+      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
+    }
+
+    state.mMapRenderer.renderBackground(cameraPosition, viewPortSize);
+
+    state.mSpriteRenderingSystem.renderRegularSprites();
+  };
+
+
+  const auto waterEffectAreas = collectWaterEffectAreas(
+    state.mEntities, cameraPosition, viewPortSize);
+  if (waterEffectAreas.empty()) {
+    renderBackgroundLayers();
+  } else {
+    {
+      renderer::RenderTargetTexture::Binder bindRenderTarget(
+        mWaterEffectBuffer, mpRenderer);
+      renderBackgroundLayers();
+    }
+
+    {
+      auto saved = renderer::Renderer::StateSaver(mpRenderer);
+      mpRenderer->setGlobalScale({1.0f, 1.0f});
+      mpRenderer->setGlobalTranslation({});
+      mWaterEffectBuffer.render(mpRenderer, 0, 0);
+    }
+
+    for (const auto& area : waterEffectAreas) {
+      mpRenderer->drawWaterEffect(
+        area.mArea,
+        mWaterEffectBuffer.data(),
+        area.mIsAnimated
+          ? std::optional<int>(state.mWaterAnimStep) : std::nullopt);
+    }
+  }
+
+  state.mMapRenderer.renderForeground(cameraPosition, viewPortSize);
+  state.mSpriteRenderingSystem.renderForegroundSprites();
+
+  // tile debris
+  state.mEntities.each<TileDebris, WorldPosition>(
+    [&](entityx::Entity, const TileDebris& debris, const WorldPosition& pos) {
+      state.mMapRenderer.renderSingleTile(
+        debris.mTileIndex, pos, cameraPosition);
+    });
+}
+
 
 
 void GameWorld::processEndOfFrameActions() {
@@ -783,7 +925,7 @@ void GameWorld::onReactorDestroyed(const base::Vector& position) {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnReactorDestruction;
   if (!mpState->mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
-    mpState->mRenderingSystem.switchBackdrops();
+    mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = true;
     mpState->mReactorDestructionFramesElapsed = 0;
   }
@@ -844,7 +986,7 @@ void GameWorld::restartFromCheckpoint() {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (mpState->mBackdropSwitched && shouldSwitchBackAfterRespawn) {
-    mpState->mRenderingSystem.switchBackdrops();
+    mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = false;
   }
 
@@ -873,7 +1015,7 @@ void GameWorld::handleTeleporter() {
     mpState->mBackdropSwitchCondition ==
       data::map::BackdropSwitchCondition::OnTeleportation;
   if (switchBackdrop) {
-    mpState->mRenderingSystem.switchBackdrops();
+    mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = !mpState->mBackdropSwitched;
   }
 

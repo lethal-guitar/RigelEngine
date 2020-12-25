@@ -522,11 +522,6 @@ Renderer::~Renderer() {
 }
 
 
-base::Rect<int> Renderer::fullScreenRect() const {
-  return {{0, 0}, mCurrentFramebufferSize};
-}
-
-
 void Renderer::setOverlayColor(const base::Color& color) {
   if (color != mLastOverlayColor) {
     submitBatch();
@@ -553,10 +548,6 @@ void Renderer::drawTexture(
   const base::Rect<int>& destRect,
   const bool repeat
 ) {
-  if (!isVisible(destRect)) {
-    return;
-  }
-
   setRenderModeIfChanged(RenderMode::SpriteBatch);
 
   if (textureData.mHandle != mLastUsedTexture) {
@@ -637,10 +628,6 @@ void Renderer::drawRectangle(
 ) {
   // Note: No batching for now, drawRectangle is only used for debugging at
   // the moment
-  if (!isVisible(rect)) {
-    return;
-  }
-
   setRenderModeIfChanged(RenderMode::NonTexturedRender);
 
   const auto left = float(rect.left());
@@ -689,11 +676,6 @@ void Renderer::drawPoint(
   const base::Vector& position,
   const base::Color& color
 ) {
-  const auto& visibleRect = fullScreenRect();
-  if (!visibleRect.containsPoint(position)) {
-    return;
-  }
-
   setRenderModeIfChanged(RenderMode::Points);
 
   float vertices[] = {
@@ -719,10 +701,6 @@ void Renderer::drawWaterEffect(
     (*surfaceAnimationStep >= 0 && *surfaceAnimationStep < 4));
 
   using namespace std;
-
-  if (!isVisible(area)) {
-    return;
-  }
 
   const auto areaWidth = area.size.width;
   auto drawWater = [&, this](
@@ -1079,11 +1057,6 @@ void Renderer::useShaderIfChanged(Shader& shader) {
     shader.use();
     mLastUsedShader = shader.handle();
   }
-}
-
-
-bool Renderer::isVisible(const base::Rect<int>& rect) const {
-  return rect.intersects(fullScreenRect());
 }
 
 
