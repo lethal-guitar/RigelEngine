@@ -138,7 +138,6 @@ public:
   explicit Renderer(SDL_Window* pWindow);
   ~Renderer();
 
-  base::Rect<int> fullScreenRect() const;
   base::Size<int> windowSize() const {
     return mWindowSize;
   }
@@ -240,8 +239,6 @@ private:
     VertexIter&& dataBegin,
     VertexIter&& dataEnd,
     const std::size_t attributesPerVertex);
-
-  bool isVisible(const base::Rect<int>& rect) const;
 
   void useShaderIfChanged(Shader& shader);
   void setRenderModeIfChanged(RenderMode mode);
