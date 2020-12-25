@@ -237,6 +237,7 @@ constexpr auto INGAME_SPRITE_ACTOR_IDS = std::array{
   data::ActorID::Green_acid_pit,
   data::ActorID::Radar_dish,
   data::ActorID::Radar_computer_terminal,
+  data::ActorID::Special_hint_globe_icon,
   data::ActorID::Special_hint_globe,
   data::ActorID::Special_hint_machine,
   data::ActorID::Windblown_spider_generator,
