@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rendering_system.hpp"
+#include "sprite_rendering_system.hpp"
 
 #include "data/unit_conversions.hpp"
 #include "engine/sprite_tools.hpp"

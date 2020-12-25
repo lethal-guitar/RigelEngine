@@ -28,7 +28,7 @@
 #include "engine/particle_system.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/random_number_generator.hpp"
-#include "engine/rendering_system.hpp"
+#include "engine/sprite_rendering_system.hpp"
 #include "game_logic/behavior_controller_system.hpp"
 #include "game_logic/camera.hpp"
 #include "game_logic/damage_infliction_system.hpp"

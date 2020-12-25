@@ -67,12 +67,12 @@ set(core_sources
     engine/physics_system.hpp
     engine/random_number_generator.cpp
     engine/random_number_generator.hpp
-    engine/rendering_system.cpp
-    engine/rendering_system.hpp
     engine/sound_system.cpp
     engine/sound_system.hpp
     engine/sprite_factory.cpp
     engine/sprite_factory.hpp
+    engine/sprite_rendering_system.cpp
+    engine/sprite_rendering_system.hpp
     engine/sprite_tools.hpp
     engine/tiled_texture.cpp
     engine/tiled_texture.hpp
