@@ -745,15 +745,14 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
 
   auto renderBackgroundLayers = [&]() {
     if (state.mBackdropFlashColor) {
-      mpRenderer->setOverlayColor(*state.mBackdropFlashColor);
-      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
-      mpRenderer->setOverlayColor({});
+      mpRenderer->drawFilledRectangle(
+        {{}, data::tileExtentsToPixelExtents(viewPortSize)},
+        *state.mBackdropFlashColor);
     } else {
       state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
     }
 
     state.mMapRenderer.renderBackground(cameraPosition, viewPortSize);
-
     state.mSpriteRenderingSystem.renderRegularSprites();
   };
 
