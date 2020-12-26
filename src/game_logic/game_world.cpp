@@ -674,15 +674,7 @@ void GameWorld::render() {
       const auto health = mpState->mActiveBossEntity.has_component<Shootable>()
         ? mpState->mActiveBossEntity.component<Shootable>()->mHealth : 0;
 
-      if (widescreenModeOn) {
-        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-      } else {
-        auto saved = renderer::Renderer::StateSaver{mpRenderer};
-        mpRenderer->setGlobalTranslation(localToGlobalTranslation(
-          mpRenderer, {data::GameTraits::tileSize, 0}));
-
-        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-      }
+      drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
     } else {
       mMessageDisplay.render();
     }
@@ -726,12 +718,18 @@ void GameWorld::render() {
     }
   } else {
     {
-      const auto saved = setupIngameViewport(mpRenderer, mpState->mScreenShakeOffsetX);
+      const auto saved = setupIngameViewport(
+        mpRenderer, mpState->mScreenShakeOffsetX);
 
       drawWorld(data::GameTraits::mapViewPortSize);
       drawHud();
     }
 
+    auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    mpRenderer->setGlobalTranslation(localToGlobalTranslation(
+      mpRenderer,
+      {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
+      0}));
     drawTopRow();
   }
 }
