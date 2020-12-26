@@ -691,13 +691,20 @@ void GameWorld::render() {
     mpServiceProvider->markCurrentFrameAsWidescreen();
 
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
+    const auto viewPortSize = base::Extents{
+      info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1};
+
+    if (!mWidescreenModeWasOn) {
+      mpState->mSpriteRenderingSystem.update(
+        mpState->mEntities, viewPortSize, mpState->mCamera.position());
+    }
 
     if (mpOptions->mPerElementUpscalingEnabled) {
       {
         const auto saved = setupIngameViewportWidescreen(
           mpRenderer, info, mpState->mScreenShakeOffsetX);
 
-        drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
+        drawWorld(viewPortSize);
 
         setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
         drawHud();
@@ -711,7 +718,7 @@ void GameWorld::render() {
 
       mpRenderer->setGlobalTranslation(base::Vector{
         mpState->mScreenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y});
-      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
+      drawWorld(viewPortSize);
 
       setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
       drawHud();
@@ -732,6 +739,8 @@ void GameWorld::render() {
       0}));
     drawTopRow();
   }
+
+  mWidescreenModeWasOn = widescreenModeOn;
 }
 
 
