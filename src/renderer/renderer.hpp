@@ -154,6 +154,10 @@ public:
     const base::Rect<int>& pDestRect,
     bool repeat = false);
 
+  void drawFilledRectangle(
+    const base::Rect<int>& rect,
+    const base::Color& color);
+
   void drawRectangle(
     const base::Rect<int>& rect,
     const base::Color& color);

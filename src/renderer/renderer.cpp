@@ -622,6 +622,29 @@ void Renderer::submitBatch() {
 }
 
 
+void Renderer::drawFilledRectangle(
+  const base::Rect<int>& rect,
+  const base::Color& color
+) {
+  // Note: No batching for now
+  setRenderModeIfChanged(RenderMode::NonTexturedRender);
+
+  // x, y, r, g, b, a
+  GLfloat vertices[4 * (2 + 4)];
+  fillVertexPositions(rect, std::begin(vertices), 0, 6);
+
+  const auto colorVec = toGlColor(color);
+  for (auto vertex = 0; vertex < 4; ++vertex) {
+    for (auto component = 0; component < 4; ++component) {
+      vertices[2 + vertex*6 + component] = colorVec[component];
+    }
+  }
+
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+
 void Renderer::drawRectangle(
   const base::Rect<int>& rect,
   const base::Color& color
