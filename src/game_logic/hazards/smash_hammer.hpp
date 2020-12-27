@@ -16,13 +16,9 @@
 
 #pragma once
 
-#include "engine/visual_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 #include <variant>
-
-namespace rigel::engine::components { struct Sprite; }
-namespace rigel::renderer { class TextureAtlas; }
 
 
 namespace rigel::game_logic::behaviors {
@@ -47,11 +43,6 @@ struct SmashHammer {
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
-
-  static void render(
-    entityx::Entity entity,
-    const base::Vector& positionInScreenSpace,
-    std::vector<engine::CustomDrawRequest>& output);
 
   smash_hammer::State mState = smash_hammer::Waiting{10};
   int mExtensionStep = 0;

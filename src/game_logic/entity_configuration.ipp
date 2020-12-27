@@ -1384,7 +1384,6 @@ void EntityFactory::configureEntity(
         GRABBER_CLAW_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
         mpSpriteFactory->actorFrameRect(actorID, 0));
-      entity.assign<CustomRenderFunc>(&behaviors::GrabberClaw::render);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1580,7 +1579,6 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::SmashHammer{});
-      entity.assign<CustomRenderFunc>(&behaviors::SmashHammer::render);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1723,7 +1721,6 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::VerticalSlidingDoor{});
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 8}});
       entity.assign<engine::components::SolidBody>();
-      entity.assign<CustomRenderFunc>(&behaviors::VerticalSlidingDoor::render);
       break;
 
     case ActorID::Blowing_fan: // Blowing fan
@@ -1876,7 +1873,6 @@ void EntityFactory::configureEntity(
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::LavaFountain{});
-      entity.assign<CustomRenderFunc>(&behaviors::LavaFountain::render);
       break;
 
     case ActorID::Flame_jet_1: // Rocket exhaust flame left

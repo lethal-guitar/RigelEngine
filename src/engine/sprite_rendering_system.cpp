@@ -33,7 +33,6 @@ namespace rigel::engine {
 
 using components::AnimationLoop;
 using components::AnimationSequence;
-using components::CustomRenderFunc;
 using components::Orientation;
 using components::Sprite;
 using components::WorldPosition;
@@ -69,19 +68,19 @@ void collectVisibleSprites(
 ) {
   using components::BoundingBox;
   using components::DrawTopMost;
+  using components::ExtendedFrameList;
   using components::OverrideDrawOrder;
 
   const auto screenBox = BoundingBox{{}, viewPortSize};
 
   auto submit = [&](
-    ex::Entity entity,
-    const Sprite& sprite,
-    const int frameIndex,
-    const int slotIndex,
-    const base::Vector& position
+    const SpriteFrame& frame,
+    const base::Vector& position,
+    const bool flashingWhite,
+    const bool translucent,
+    const bool drawTopmost,
+    const int drawOrder
   ) {
-    const auto& frame = sprite.mpDrawData->mFrames[frameIndex];
-
     // World-space tile positions refer to a sprite's bottom left tile,
     // but we need its top left corner for drawing.
     const auto heightTiles = frame.mDimensions.height;
@@ -98,15 +97,7 @@ void collectVisibleSprites(
       data::tileVectorToPixelVector(topLeft),
       data::tileExtentsToPixelExtents(frame.mDimensions)};
     const auto drawSpec = SpriteDrawSpec{
-      destRect,
-      frame.mImageId,
-      sprite.mFlashingWhiteStates.test(slotIndex),
-      sprite.mTranslucent};
-
-    const auto drawTopmost = entity.has_component<DrawTopMost>();
-    const auto drawOrder = entity.has_component<OverrideDrawOrder>()
-      ? entity.component<const OverrideDrawOrder>()->mDrawOrder
-      : sprite.mpDrawData->mDrawOrder;
+      destRect, frame.mImageId, flashingWhite, translucent};
 
     output.push_back({drawSpec, drawOrder, drawTopmost});
   };
@@ -122,40 +113,44 @@ void collectVisibleSprites(
     }
 
     const auto screenPosition = position - cameraPosition;
+    const auto drawTopmost = entity.has_component<DrawTopMost>();
+    const auto drawOrder = entity.has_component<OverrideDrawOrder>()
+      ? entity.component<const OverrideDrawOrder>()->mDrawOrder
+      : sprite.mpDrawData->mDrawOrder;
 
-    if (entity.has_component<CustomRenderFunc>()) {
-      std::vector<CustomDrawRequest> frames;
-      const auto renderFunc = *entity.component<const CustomRenderFunc>();
-      renderFunc(entity, screenPosition, frames);
+    auto slotIndex = 0;
+    for (const auto& baseFrameIndex : sprite.mFramesToRender) {
+      assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
-      auto slotIndex = 0;
-      for (const auto& request : frames) {
-        submit(
-          entity,
-          sprite,
-          request.mFrame,
-          slotIndex,
-          request.mScreenPosition);
-        ++slotIndex;
+      if (baseFrameIndex == IGNORE_RENDER_SLOT) {
+        continue;
       }
-    } else {
-      auto slotIndex = 0;
-      for (const auto& baseFrameIndex : sprite.mFramesToRender) {
-        assert(baseFrameIndex < int(sprite.mpDrawData->mFrames.size()));
 
-        if (baseFrameIndex == IGNORE_RENDER_SLOT) {
-          continue;
-        }
+      const auto frameIndex = virtualToRealFrame(
+        baseFrameIndex, *sprite.mpDrawData, entity);
+      submit(
+        sprite.mpDrawData->mFrames[frameIndex],
+        screenPosition,
+        sprite.mFlashingWhiteStates.test(slotIndex),
+        sprite.mTranslucent,
+        drawTopmost,
+        drawOrder);
+      ++slotIndex;
+    }
 
+    if (entity.has_component<ExtendedFrameList>()) {
+      const auto& extendedList =
+        entity.component<ExtendedFrameList>()->mFrames;
+      for (const auto& item : extendedList) {
         const auto frameIndex = virtualToRealFrame(
-          baseFrameIndex, *sprite.mpDrawData, entity);
+          item.mFrame, *sprite.mpDrawData, entity);
         submit(
-          entity,
-          sprite,
-          frameIndex,
-          slotIndex,
-          screenPosition);
-        ++slotIndex;
+          sprite.mpDrawData->mFrames[frameIndex],
+          screenPosition + item.mOffset,
+          false,
+          sprite.mTranslucent,
+          drawTopmost,
+          drawOrder);
       }
     }
   });

@@ -18,7 +18,6 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -30,8 +29,6 @@ namespace rigel::game_logic {
   struct GlobalDependencies;
   struct GlobalState;
 }
-namespace rigel::engine::components { struct Sprite; }
-namespace rigel::renderer { class TextureAtlas; }
 
 
 namespace rigel::game_logic::behaviors {
@@ -52,11 +49,6 @@ struct LavaFountain {
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
-
-  static void render(
-    entityx::Entity entity,
-    const base::Vector& positionInScreenSpace,
-    std::vector<engine::CustomDrawRequest>& output);
 
   State mState = Waiting{};
 };

@@ -76,10 +76,10 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to) {
   copyComponentIfPresent<CollectableItem>(from, to);
   copyComponentIfPresent<CollectableItemForCheat>(from, to);
   copyComponentIfPresent<CollidedWithWorld>(from, to);
-  copyComponentIfPresent<CustomRenderFunc>(from, to);
   copyComponentIfPresent<DamageInflicting>(from, to);
   copyComponentIfPresent<DestructionEffects>(from, to);
   copyComponentIfPresent<DrawTopMost>(from, to);
+  copyComponentIfPresent<ExtendedFrameList>(from, to);
   copyComponentIfPresent<Interactable>(from, to);
   copyComponentIfPresent<ItemBounceEffect>(from, to);
   copyComponentIfPresent<ItemContainer>(from, to);

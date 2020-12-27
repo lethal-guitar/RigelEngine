@@ -181,18 +181,21 @@ struct Sprite {
 };
 
 
-/** Specify a custom rendering function for a sprite
- *
- * When a sprite entity also has this component, the provided function
- * pointer will be invoked instead of rendering the sprite directly.
- *
- * The second argument is the sprite's world position converted to a
- * screen-space pixel position.
+/** Extends Sprite with additional render slots
+
+ * If an entity features this component in addition to a a Sprite component,
+ * the frames specified via this component will be rendered in addition to the
+ * Sprite's render slots. It's also possible to specify a position offset for
+ * each frame.
  */
-using CustomRenderFunc = void(*)(
-  entityx::Entity,
-  const base::Vector&,
-  std::vector<CustomDrawRequest>&);
+struct ExtendedFrameList {
+  struct RenderSpec {
+    int mFrame = 0;
+    base::Vector mOffset;
+  };
+
+  std::vector<RenderSpec> mFrames;
+};
 
 
 /** Indicates that an entity should always be drawn last

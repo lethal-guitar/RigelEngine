@@ -18,6 +18,7 @@
 
 #include "base/match.hpp"
 #include "engine/sprite_tools.hpp"
+#include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
@@ -33,9 +34,15 @@ void GrabberClaw::update(
 ) {
   using game_logic::components::Shootable;
 
+  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+    entity.assign<engine::components::ExtendedFrameList>();
+  }
+
   auto& position = *entity.component<engine::components::WorldPosition>();
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
+
+  const auto previousExtensionStep = mExtensionStep;
 
   base::match(mState,
     [&, this](const Extending&) {
@@ -90,26 +97,16 @@ void GrabberClaw::update(
     });
 
   engine::synchronizeBoundingBoxToSprite(entity);
-}
 
+  if (mExtensionStep != previousExtensionStep) {
+    auto& additionalFrames =
+      entity.component<engine::components::ExtendedFrameList>()->mFrames;
 
-void GrabberClaw::render(
-  entityx::Entity entity,
-  const base::Vector& positionInScreenSpace,
-  std::vector<engine::CustomDrawRequest>& output
-) {
-  const auto& state =
-    entity.component<components::BehaviorController>()->get<GrabberClaw>();
-  const auto currentFrame =
-    entity.component<engine::components::Sprite>()->mFramesToRender[0];
-
-  // Mounting pole
-  for (int i = 0; i < state.mExtensionStep + 1; ++i) {
-    output.push_back({0, positionInScreenSpace - base::Vector{0, i + 1}});
+    additionalFrames.clear();
+    for (int i = 0; i < mExtensionStep + 1; ++i) {
+      additionalFrames.push_back({0, base::Vector{0, -(i + 1)}});
+    }
   }
-
-  // Claw
-  output.push_back({currentFrame, positionInScreenSpace});
 }
 
 }
