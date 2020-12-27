@@ -96,6 +96,8 @@ struct CloakPickedUp {
 
 struct CloakExpired {};
 
+struct RapidFirePickedUp {};
+
 
 struct ExitReached {
   bool mCheckRadarDishes = true;
