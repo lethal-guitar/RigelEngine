@@ -18,14 +18,11 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::renderer { class TextureAtlas; }
-namespace rigel::engine::components { struct Sprite; }
 namespace rigel::game_logic {
   struct GlobalDependencies;
   struct GlobalState;
@@ -59,11 +56,6 @@ struct VerticalSlidingDoor {
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
-
-  static void render(
-    entityx::Entity entity,
-    const base::Vector& positionInScreenSpace,
-    std::vector<engine::CustomDrawRequest>& output);
 
   enum class State {
     Closed,

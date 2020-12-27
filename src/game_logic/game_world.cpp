@@ -674,15 +674,7 @@ void GameWorld::render() {
       const auto health = mpState->mActiveBossEntity.has_component<Shootable>()
         ? mpState->mActiveBossEntity.component<Shootable>()->mHealth : 0;
 
-      if (widescreenModeOn) {
-        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-      } else {
-        auto saved = renderer::Renderer::StateSaver{mpRenderer};
-        mpRenderer->setGlobalTranslation(localToGlobalTranslation(
-          mpRenderer, {data::GameTraits::tileSize, 0}));
-
-        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-      }
+      drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
     } else {
       mMessageDisplay.render();
     }
@@ -699,13 +691,20 @@ void GameWorld::render() {
     mpServiceProvider->markCurrentFrameAsWidescreen();
 
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
+    const auto viewPortSize = base::Extents{
+      info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1};
+
+    if (!mWidescreenModeWasOn) {
+      mpState->mSpriteRenderingSystem.update(
+        mpState->mEntities, viewPortSize, mpState->mCamera.position());
+    }
 
     if (mpOptions->mPerElementUpscalingEnabled) {
       {
         const auto saved = setupIngameViewportWidescreen(
           mpRenderer, info, mpState->mScreenShakeOffsetX);
 
-        drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
+        drawWorld(viewPortSize);
 
         setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
         drawHud();
@@ -719,21 +718,29 @@ void GameWorld::render() {
 
       mpRenderer->setGlobalTranslation(base::Vector{
         mpState->mScreenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y});
-      drawWorld({info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1});
+      drawWorld(viewPortSize);
 
       setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
       drawHud();
     }
   } else {
     {
-      const auto saved = setupIngameViewport(mpRenderer, mpState->mScreenShakeOffsetX);
+      const auto saved = setupIngameViewport(
+        mpRenderer, mpState->mScreenShakeOffsetX);
 
       drawWorld(data::GameTraits::mapViewPortSize);
       drawHud();
     }
 
+    auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    mpRenderer->setGlobalTranslation(localToGlobalTranslation(
+      mpRenderer,
+      {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
+      0}));
     drawTopRow();
   }
+
+  mWidescreenModeWasOn = widescreenModeOn;
 }
 
 
@@ -745,15 +752,14 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
 
   auto renderBackgroundLayers = [&]() {
     if (state.mBackdropFlashColor) {
-      mpRenderer->setOverlayColor(*state.mBackdropFlashColor);
-      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
-      mpRenderer->setOverlayColor({});
+      mpRenderer->drawFilledRectangle(
+        {{}, data::tileExtentsToPixelExtents(viewPortSize)},
+        *state.mBackdropFlashColor);
     } else {
       state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
     }
 
     state.mMapRenderer.renderBackground(cameraPosition, viewPortSize);
-
     state.mSpriteRenderingSystem.renderRegularSprites();
   };
 

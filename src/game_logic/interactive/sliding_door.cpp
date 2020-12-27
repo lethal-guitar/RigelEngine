@@ -138,6 +138,22 @@ void VerticalSlidingDoor::update(
 ) {
   using engine::components::BoundingBox;
 
+  auto updateSprite = [&]() {
+    auto& additionalFrames =
+      entity.component<engine::components::ExtendedFrameList>()->mFrames;
+
+    const auto segmentsToDraw =
+      NUM_VERTICAL_DOOR_SEGMENTS - std::max(0, mSlideStep - 1);
+
+    additionalFrames.clear();
+    for (int i = 0; i < segmentsToDraw; ++i) {
+      const auto segmentIndex = NUM_VERTICAL_DOOR_SEGMENTS - i - mSlideStep;
+      additionalFrames.push_back({
+        segmentIndex,
+        base::Vector{0, -(NUM_VERTICAL_DOOR_SEGMENTS - i)}});
+    }
+  };
+
   auto nextState = [&](const bool playerInRange) {
     auto newState = mState;
 
@@ -184,6 +200,14 @@ void VerticalSlidingDoor::update(
     return 0;
   };
 
+
+  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+    entity.assign<engine::components::ExtendedFrameList>();
+    entity.component<engine::components::Sprite>()->mFramesToRender[0] =
+      engine::IGNORE_RENDER_SLOT;
+    updateSprite();
+  }
+
   const auto& position = *entity.component<WorldPosition>();
   const auto& playerPosition = s.mpPlayer->orientedPosition();
   auto& boundingBox = *entity.component<BoundingBox>();
@@ -191,7 +215,6 @@ void VerticalSlidingDoor::update(
   const auto inRange =
     playerInRange(playerPosition, position, VERTICAL_DOOR_RANGE);
   mState = nextState(inRange);
-  mSlideStep = std::clamp(mSlideStep + stepChange(), 0, 7);
 
   if (mState == State::Closed) {
     boundingBox.topLeft.y = 0;
@@ -205,25 +228,12 @@ void VerticalSlidingDoor::update(
     d.mpServiceProvider->playSound(data::SoundId::SlidingDoor);
     mPlayerWasInRange = inRange;
   }
-}
 
+  const auto previousSlideStep = mSlideStep;
+  mSlideStep = std::clamp(mSlideStep + stepChange(), 0, 7);
 
-void VerticalSlidingDoor::render(
-  entityx::Entity entity,
-  const base::Vector& positionInScreenSpace,
-  std::vector<engine::CustomDrawRequest>& output
-) {
-  const auto& state =
-    entity.component<components::BehaviorController>()->get<VerticalSlidingDoor>();
-
-  const auto segmentsToDraw =
-    NUM_VERTICAL_DOOR_SEGMENTS - std::max(0, state.mSlideStep - 1);
-
-  for (int i = 0; i < segmentsToDraw; ++i) {
-    const auto segmentIndex = NUM_VERTICAL_DOOR_SEGMENTS - i - state.mSlideStep;
-    output.push_back({
-      segmentIndex,
-      positionInScreenSpace - base::Vector{0, NUM_VERTICAL_DOOR_SEGMENTS - i}});
+  if (mSlideStep != previousSlideStep) {
+    updateSprite();
   }
 }
 

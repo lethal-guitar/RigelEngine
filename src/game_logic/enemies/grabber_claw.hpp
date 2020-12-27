@@ -18,7 +18,6 @@
 
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
-#include "engine/visual_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -27,12 +26,10 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::engine::components { struct Sprite; }
 namespace rigel::game_logic {
   struct GlobalDependencies;
   struct GlobalState;
 }
-namespace rigel::renderer { class TextureAtlas; }
 
 
 namespace rigel::game_logic::behaviors {
@@ -57,11 +54,6 @@ struct GrabberClaw {
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
-
-  static void render(
-    entityx::Entity entity,
-    const base::Vector& positionInScreenSpace,
-    std::vector<engine::CustomDrawRequest>& output);
 
   State mState;
   int mExtensionStep = 0;

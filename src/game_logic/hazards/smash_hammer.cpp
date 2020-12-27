@@ -38,7 +38,13 @@ void SmashHammer::update(
 ) {
   using namespace smash_hammer;
 
+  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+    entity.assign<engine::components::ExtendedFrameList>();
+  }
+
   auto& position = *entity.component<engine::components::WorldPosition>();
+
+  const auto previousExtensionStep = mExtensionStep;
 
   base::match(mState,
     [&, this](Waiting& state) {
@@ -78,25 +84,15 @@ void SmashHammer::update(
       }
     }
   );
-}
 
+  if (mExtensionStep != previousExtensionStep) {
+    auto& additionalFrames =
+      entity.component<engine::components::ExtendedFrameList>()->mFrames;
 
-void SmashHammer::render(
-  entityx::Entity entity,
-  const base::Vector& positionInScreenSpace,
-  std::vector<engine::CustomDrawRequest>& output
-) {
-  using namespace smash_hammer;
-
-  const auto& state =
-    entity.component<components::BehaviorController>()->get<SmashHammer>();
-
-  // Hammer
-  output.push_back({0, positionInScreenSpace});
-
-  // Mounting pole
-  for (int i = 0; i < state.mExtensionStep; ++i) {
-    output.push_back({1, positionInScreenSpace - base::Vector{0, i}});
+    additionalFrames.clear();
+    for (int i = 0; i < mExtensionStep; ++i) {
+      additionalFrames.push_back({1, base::Vector{0, -i}});
+    }
   }
 }
 

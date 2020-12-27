@@ -67,6 +67,16 @@ void LavaFountain::update(
 ) {
   using engine::components::ActivationSettings;
 
+  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+    entity.assign<engine::components::ExtendedFrameList>();
+    entity.component<engine::components::Sprite>()->mFramesToRender[0] =
+      engine::IGNORE_RENDER_SLOT;
+  }
+
+  const auto previousSequenceIndex = std::holds_alternative<Erupting>(mState)
+    ? std::optional{std::get<Erupting>(mState).mSequenceIndex}
+    : std::optional<int>{};
+
   const auto& position = *entity.component<engine::components::WorldPosition>();
   auto& bbox = *entity.component<engine::components::BoundingBox>();
 
@@ -115,26 +125,22 @@ void LavaFountain::update(
       updateBbox(ERUPTION_SEQUENCE[state.mSequenceIndex]);
       ++state.mSequenceIndex;
     });
-}
 
+  const auto currentSequenceIndex = std::holds_alternative<Erupting>(mState)
+    ? std::optional{std::get<Erupting>(mState).mSequenceIndex}
+    : std::optional<int>{};
+  if (currentSequenceIndex != previousSequenceIndex) {
+    auto& additionalFrames =
+      entity.component<engine::components::ExtendedFrameList>()->mFrames;
 
-void LavaFountain::render(
-  entityx::Entity entity,
-  const base::Vector& positionInScreenSpace,
-  std::vector<engine::CustomDrawRequest>& output
-) {
-  const auto& controller =
-    entity.component<components::BehaviorController>()->get<LavaFountain>();
-
-  if (
-    auto pState = std::get_if<Erupting>(&controller.mState);
-    pState && pState->mSequenceIndex > 0
-  ) {
-    const auto indexForDrawing = pState->mSequenceIndex - 1;
-    for (const auto& element : ERUPTION_SEQUENCE[indexForDrawing]) {
-      output.push_back({
-        element.mFrame,
-        positionInScreenSpace + base::Vector{0, element.mOffsetY}});
+    additionalFrames.clear();
+    if (currentSequenceIndex && *currentSequenceIndex > 0) {
+      const auto indexForDrawing = *currentSequenceIndex - 1;
+      for (const auto& element : ERUPTION_SEQUENCE[indexForDrawing]) {
+        additionalFrames.push_back({
+          element.mFrame,
+          base::Vector{0, element.mOffsetY}});
+      }
     }
   }
 }
