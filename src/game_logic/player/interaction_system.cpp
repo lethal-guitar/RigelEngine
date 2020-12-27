@@ -295,6 +295,10 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
             showMessage(data::Messages::FoundCloak);
             mpEvents->emit(rigel::events::CloakPickedUp{pos});
           }
+
+          if (itemType == InventoryItemType::RapidFire) {
+            mpEvents->emit(rigel::events::RapidFirePickedUp{});
+          }
         }
 
         if (collectable.mShownTutorialMessage) {

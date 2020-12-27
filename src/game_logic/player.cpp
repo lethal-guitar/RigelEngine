@@ -323,6 +323,8 @@ Player::Player(
 
   mEntity.component<c::Sprite>()->mFramesToRender = {0};
 
+  pEvents->subscribe<rigel::events::CloakPickedUp>(*this);
+  pEvents->subscribe<rigel::events::RapidFirePickedUp>(*this);
   pEvents->subscribe<events::ElevatorAttachmentChanged>(*this);
   pEvents->subscribe<events::AirLockOpened>(*this);
 }
@@ -444,6 +446,16 @@ base::Vector Player::orientedPosition() const {
 
   const auto adjustment = orientation() == c::Orientation::Left ? 1 : 0;
   return position() - base::Vector{adjustment, 0};
+}
+
+
+void Player::receive(const rigel::events::CloakPickedUp&) {
+  mFramesElapsedHavingCloak = 0;
+}
+
+
+void Player::receive(const rigel::events::RapidFirePickedUp&) {
+  mFramesElapsedHavingRapidFire = 0;
 }
 
 

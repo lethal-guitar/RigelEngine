@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "common/global.hpp"
 #include "data/game_session_data.hpp"
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"
@@ -274,6 +275,8 @@ public:
     return mEntity;
   }
 
+  void receive(const rigel::events::CloakPickedUp& event);
+  void receive(const rigel::events::RapidFirePickedUp& event);
   void receive(const events::ElevatorAttachmentChanged& event);
   void receive(const events::AirLockOpened& event);
 

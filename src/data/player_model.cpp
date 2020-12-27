@@ -151,6 +151,19 @@ bool PlayerModel::hasItem(const InventoryItemType type) const {
 
 
 void PlayerModel::giveItem(InventoryItemType type) {
+  using namespace std;
+
+  if (
+    (type == InventoryItemType::RapidFire ||
+    type == InventoryItemType::CloakingDevice) &&
+    find(begin(mInventory), end(mInventory), type) != end(mInventory)
+  ) {
+    // Duke can only carry one rapid fire or cloaking device at a time.
+    // Picking up a 2nd one resets the timer instead, prolonging the item's
+    // effect. This is implemented in the Player class.
+    return;
+  }
+
   mInventory.push_back(type);
 }
 
