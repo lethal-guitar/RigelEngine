@@ -92,11 +92,6 @@ int virtualToRealFrame(
   const SpriteDrawData& drawData,
   const std::optional<components::Orientation>& orientation);
 
-void drawSpriteFrame(
-  const SpriteFrame& frame,
-  const base::Vector& position,
-  const renderer::TextureAtlas& spritesTextureAtlas);
-
 
 namespace components {
 

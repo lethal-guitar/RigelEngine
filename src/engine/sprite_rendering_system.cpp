@@ -251,26 +251,6 @@ void updateAnimatedSprites(ex::EntityManager& es) {
 }
 
 
-void drawSpriteFrame(
-  const SpriteFrame& frame,
-  const base::Vector& position,
-  const renderer::TextureAtlas& spritesTextureAtlas
-) {
-  // World-space tile positions refer to a sprite's bottom left tile,
-  // but we need its top left corner for drawing.
-  const auto heightTiles = frame.mDimensions.height;
-  const auto topLeft = position - base::Vector(0, heightTiles - 1);
-  const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
-  const auto drawOffsetPx = data::tileVectorToPixelVector(
-    frame.mDrawOffset);
-
-  const auto destRect = base::Rect<int>{
-    topLeftPx + drawOffsetPx,
-    data::tileExtentsToPixelExtents(frame.mDimensions)};
-  spritesTextureAtlas.draw(frame.mImageId, destRect);
-}
-
-
 SpriteRenderingSystem::SpriteRenderingSystem(
   renderer::Renderer* pRenderer,
   const renderer::TextureAtlas* pTextureAtlas
