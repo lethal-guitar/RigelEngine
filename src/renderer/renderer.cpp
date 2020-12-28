@@ -223,6 +223,39 @@ vec3 paletteColor(int index) {
 }
 
 
+int remapIndex(int index) {
+  // The color index transformation for achieving the water effect consists of
+  // remapping any incoming color to one out of 4 indices starting at index 8.
+  // The palette contains 3 shades of blue and a dark green in that area, which
+  // leads to the watery look.
+  // The original game does this via bitwise AND and OR operations, but we can
+  // also express it using modulo and addition.
+  // 
+  // The original transformation is:
+  //   (index & 0x3) | 0x8
+  // Which is equivalent to:
+  //   index % 4 + 8
+  //
+  // This could be implemented as:
+  //   mod(float(index), 4.0) + 8.0
+  //
+  // But unfortunately, the implementation of mod() on the Raspberry Pi has
+  // a bug/inaccuracy which leads to visual glitches when done as above.
+  // To work around this, we implement mod() ourselves. In GLSL, mod() is
+  // implemented as:
+  //   mod(a, b) = a - b * floor(a / b)
+  //
+  // The usage of a / b is what causes problems. This is because division is
+  // implemented as multiplication by the reciprocal, and on the Pi, this
+  // runs into precision problems in some cases. Therefore, we multiply by
+  // 0.25 instead of dividing by 4.
+
+  float indexF = float(index);
+  float clampedIndex = indexF - 4.0 * floor(indexF * 0.25);
+  return int(clampedIndex + 8.0);
+}
+
+
 vec4 applyWaterEffect(vec4 color) {
   // The original game runs in a palette-based video mode, where the frame
   // buffer stores indices into a palette of 16 colors instead of directly
@@ -239,14 +272,7 @@ vec4 applyWaterEffect(vec4 color) {
     }
   }
 
-  // The color index transformation for achieving the water effect consists of
-  // remapping any incoming color to one out of 4 indices starting at index 8.
-  // The palette contains 3 shades of blue and a dark green in that area, which
-  // leads to the watery look.
-  // The original game does this via bitwise AND and OR operations, but using
-  // modulo and addition produces the same outcome in this case.
-  int adjustedIndex = int(mod(float(index), 4.0) + 8.0);
-  return vec4(paletteColor(adjustedIndex), color.a);
+  return vec4(paletteColor(remapIndex(index)), color.a);
 }
 
 void main() {
