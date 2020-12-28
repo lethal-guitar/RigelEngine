@@ -75,6 +75,7 @@ These are:
 * [JSON for modern C++](https://github.com/nlohmann/json)
 * Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * [STB image](https://github.com/nothings/stb) image reading/writing library
+* [STB rect_pack](https://github.com/nothings/stb) rectangle packer for building texture atlases
 
 
 ### <a name="linux-build-instructions">Linux builds</a>
@@ -173,7 +174,7 @@ This also assumes that `make`, `gcc` and `gcc-c++` are already installed.
 
 ### <a name="raspi-build-instructions">Raspberry Pi builds</a>
 
-:warning: Note that Raspberry Pi support is still work in progress, and there are [some issues](https://github.com/lethal-guitar/RigelEngine/labels/raspberry-pi-support).
+:exclamation: Make sure to read [Running on Raspberry Pi](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance#raspberry-pi) for information on how to achieve best performance!
 
 To build on the Pi itself, I recommend Raspbian (aka Raspberry Pi OS) _Buster_.
 Older versions like Stretch don't have recent enough versions of CMake, Boost and Gcc.
@@ -185,12 +186,9 @@ When building, you need to enable OpenGL ES Support:
 ```bash
 mkdir build
 cd build
-cmake .. -DUSE_GL_ES=ON -DWARNINGS_AS_ERRORS=OFF
+cmake .. -DUSE_GL_ES=ON -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=OFF
 make
 ```
-
-To get playable performance, I had to run the game outside of the Desktop environment (X server).
-To do that, switch to a new terminal using Ctrl+Alt+F1 and launch the game there.
 
 ### <a name="mac-build-instructions">OS X builds</a>
 

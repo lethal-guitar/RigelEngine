@@ -17,9 +17,14 @@
 #pragma once
 
 #include "base/color.hpp"
+#include "base/warnings.hpp"
 #include "engine/tiled_texture.hpp"
 #include "loader/palette.hpp"
 #include "renderer/texture.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <imgui.h>
+RIGEL_RESTORE_WARNINGS
 
 #include <string_view>
 
@@ -29,6 +34,8 @@ namespace rigel::loader {
 }
 
 namespace rigel::ui {
+
+ImU32 toImgui(const base::Color& color);
 
 renderer::OwningTexture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,

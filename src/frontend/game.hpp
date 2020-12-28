@@ -125,7 +125,7 @@ private:
 
   std::optional<renderer::FpsLimiter> mFpsLimiter;
   renderer::RenderTargetTexture mRenderTarget;
-  std::uint8_t mAlphaMod = 255;
+  std::uint8_t mAlphaMod = 0;
   bool mCurrentFrameIsWidescreen = false;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;

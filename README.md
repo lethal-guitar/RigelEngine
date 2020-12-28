@@ -27,7 +27,8 @@ The project overall is far from finished, though. There are still some pieces mi
 
 RigelEngine runs on Windows, Linux, and Mac OS X.
 
-It also runs on the Raspberry Pi, but that's work in progress as there are still [some issues](https://github.com/lethal-guitar/RigelEngine/labels/raspberry-pi-support) to be sorted out. See [build instructions](BUILDING.md#raspi-build-instructions).
+The Linux version also runs well on small single-board computers (SBCs) like the Raspberry Pi and Odroid Go Advance.
+See [Running on Raspberry Pi and Odroid Go Advance](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance).
 
 Android and iOS versions might happen someday, but there are no concrete plans at the moment.
 

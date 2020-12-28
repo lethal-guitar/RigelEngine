@@ -16,24 +16,15 @@
 
 #include "utils.hpp"
 
-#include "base/warnings.hpp"
 #include "loader/resource_loader.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <imgui.h>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel::ui {
 
-namespace {
-
-auto toImgui(const base::Color& color) {
+ImU32 toImgui(const base::Color& color) {
 RIGEL_DISABLE_WARNINGS
   return IM_COL32(color.r, color.g, color.b, color.a);
 RIGEL_RESTORE_WARNINGS
-}
-
 }
 
 

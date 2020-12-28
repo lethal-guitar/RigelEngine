@@ -240,19 +240,8 @@ Game::Game(
       return !hasRegisteredVersionFiles;
     }())
   , mFpsLimiter(createLimiter(pUserProfile->mOptions))
-  , mRenderTarget([&]() {
-      if (pUserProfile->mOptions.mPerElementUpscalingEnabled) {
-        return renderer::RenderTargetTexture{
-          &mRenderer,
-          size_t(mRenderer.maxWindowSize().width),
-          size_t(mRenderer.maxWindowSize().height)};
-      } else {
-        return renderer::RenderTargetTexture{
-          &mRenderer,
-          size_t(renderer::determineWidescreenViewPort(&mRenderer).mWidthPx),
-          size_t(data::GameTraits::viewPortHeightPx)};
-      }
-    }())
+  , mRenderTarget(renderer::createFullscreenRenderTarget(
+      &mRenderer, pUserProfile->mOptions))
   , mIsRunning(true)
   , mIsMinimized(false)
   , mCommandLineOptions(commandLineOptions)
@@ -443,14 +432,6 @@ bool Game::handleEvent(const SDL_Event& event) {
 void Game::performScreenFadeBlocking(const FadeType type) {
   using namespace std::chrono;
 
-  if (
-    (type == FadeType::In && mAlphaMod == 255) ||
-    (type == FadeType::Out && mAlphaMod == 0)
-  ) {
-    // Already faded in/out, nothing to do
-    return;
-  }
-
   renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
   auto defaultStateGuard = renderer::setupDefaultState(&mRenderer);
   auto presentationStateGuard = setupPresentationViewport(
@@ -549,6 +530,11 @@ void Game::applyChangedOptions() {
     }
   }
 
+  if (currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn) {
+    mRenderTarget = renderer::createFullscreenRenderTarget(
+      &mRenderer, mpUserProfile->mOptions);
+  }
+
   mPreviousOptions = mpUserProfile->mOptions;
 }
 
@@ -570,6 +556,11 @@ void Game::enumerateGameControllers() {
 
 
 void Game::fadeOutScreen() {
+  if (mAlphaMod == 0) {
+    // Already faded out
+    return;
+  }
+
   performScreenFadeBlocking(FadeType::Out);
 
   // Clear render canvas after a fade-out
@@ -583,6 +574,11 @@ void Game::fadeOutScreen() {
 
 
 void Game::fadeInScreen() {
+  if (mAlphaMod == 255) {
+    // Already faded in
+    return;
+  }
+
   performScreenFadeBlocking(FadeType::In);
 }
 

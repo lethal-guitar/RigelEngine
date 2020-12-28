@@ -22,6 +22,7 @@
 #include "sdl_utils/error.hpp"
 #include "ui/game_path_browser.hpp"
 #include "ui/imgui_integration.hpp"
+#include "ui/utils.hpp"
 
 #include "platform.hpp"
 
@@ -42,6 +43,34 @@ namespace rigel {
 using namespace sdl_utils;
 
 namespace {
+
+void showLoadingScreen(SDL_Window* pWindow) {
+  glClear(GL_COLOR_BUFFER_BIT);
+  ui::imgui_integration::beginFrame(pWindow);
+
+  constexpr auto TEXT = "Loading...";
+  const auto fontSize = 256.0f * ImGui::GetIO().FontGlobalScale;
+
+  auto pFont = ImGui::GetFont();
+  const auto textSize = pFont->CalcTextSizeA(fontSize, FLT_MAX, -1.0f, TEXT);
+  const auto windowSize = ImGui::GetIO().DisplaySize;
+
+  const auto position = ImVec2{
+    windowSize.x / 2.0f - textSize.x / 2.0f,
+    windowSize.y / 2.0f - textSize.y / 2.0f};
+
+  auto pDrawList = ImGui::GetForegroundDrawList();
+  pDrawList->AddText(
+    nullptr,
+    fontSize,
+    position,
+    ui::toImgui({255, 255, 255, 255}),
+    TEXT);
+
+  ui::imgui_integration::endFrame();
+  SDL_GL_SwapWindow(pWindow);
+}
+
 
 void setupForFirstLaunch(
   SDL_Window* pWindow,
@@ -110,6 +139,7 @@ void initAndRunGame(
   const CommandLineOptions& commandLineOptions
 ) {
   auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
+    showLoadingScreen(pWindow);
     Game game(options, &userProfile, pWindow, isFirstLaunch);
 
     for (;;) {
@@ -173,6 +203,10 @@ void gameMain(const CommandLineOptions& options) {
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
   renderer::loadGlFunctions();
+
+  // On some platforms, an initial swap is necessary in order for the next
+  // frame (in our case, the loading screen) to show up on screen.
+  SDL_GL_SwapWindow(pWindow.get());
 
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
