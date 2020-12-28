@@ -240,19 +240,8 @@ Game::Game(
       return !hasRegisteredVersionFiles;
     }())
   , mFpsLimiter(createLimiter(pUserProfile->mOptions))
-  , mRenderTarget([&]() {
-      if (pUserProfile->mOptions.mPerElementUpscalingEnabled) {
-        return renderer::RenderTargetTexture{
-          &mRenderer,
-          size_t(mRenderer.maxWindowSize().width),
-          size_t(mRenderer.maxWindowSize().height)};
-      } else {
-        return renderer::RenderTargetTexture{
-          &mRenderer,
-          size_t(renderer::determineWidescreenViewPort(&mRenderer).mWidthPx),
-          size_t(data::GameTraits::viewPortHeightPx)};
-      }
-    }())
+  , mRenderTarget(renderer::createFullscreenRenderTarget(
+      &mRenderer, pUserProfile->mOptions))
   , mIsRunning(true)
   , mIsMinimized(false)
   , mCommandLineOptions(commandLineOptions)
@@ -547,6 +536,11 @@ void Game::applyChangedOptions() {
         : 0.0f;
       mpSoundSystem->setSoundVolume(newVolume);
     }
+  }
+
+  if (currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn) {
+    mRenderTarget = renderer::createFullscreenRenderTarget(
+      &mRenderer, mpUserProfile->mOptions);
   }
 
   mPreviousOptions = mpUserProfile->mOptions;

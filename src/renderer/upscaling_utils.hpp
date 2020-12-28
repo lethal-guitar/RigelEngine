@@ -17,6 +17,10 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
+#include "renderer/texture.hpp"
+
+
+namespace rigel::data { struct GameOptions; }
 
 
 namespace rigel::renderer {
@@ -53,5 +57,8 @@ base::Extents scaleSize(
   const base::Extents& size,
   const base::Point<float>& scale);
 
+RenderTargetTexture createFullscreenRenderTarget(
+  Renderer* pRenderer,
+  const data::GameOptions& options);
 
 }

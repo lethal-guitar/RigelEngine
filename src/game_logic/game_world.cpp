@@ -281,23 +281,15 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
-  , mWaterEffectBuffer([&]() {
-      if (mpOptions->mPerElementUpscalingEnabled) {
-        return renderer::RenderTargetTexture{
-          mpRenderer,
-          size_t(mpRenderer->maxWindowSize().width),
-          size_t(mpRenderer->maxWindowSize().height)};
-      } else {
-        return renderer::RenderTargetTexture{
-          mpRenderer,
-          size_t(renderer::determineWidescreenViewPort(mpRenderer).mWidthPx),
-          size_t(data::GameTraits::viewPortHeightPx)};
-      }
-    }())
+  , mWaterEffectBuffer(renderer::createFullscreenRenderTarget(
+      mpRenderer, *mpOptions))
   , mLowResLayer(
       mpRenderer,
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
       data::GameTraits::viewPortHeightPx)
+  , mWidescreenModeWasOn(
+      mpOptions->mWidescreenModeOn &&
+      renderer::canUseWidescreenMode(mpRenderer))
 {
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -632,6 +624,11 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 void GameWorld::render() {
   const auto widescreenModeOn =
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
+
+  if (widescreenModeOn != mWidescreenModeWasOn) {
+    mWaterEffectBuffer = renderer::createFullscreenRenderTarget(
+      mpRenderer, *mpOptions);
+  }
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
     const auto clipRectGuard = renderer::Renderer::StateSaver{mpRenderer};

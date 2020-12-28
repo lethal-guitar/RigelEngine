@@ -17,6 +17,7 @@
 #include "upscaling_utils.hpp"
 
 #include "base/math_tools.hpp"
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
 
@@ -115,6 +116,28 @@ base::Extents scaleSize(
   const base::Point<float>& scale
 ) {
   return asSize(scaleVec(asVec(size), scale));
+}
+
+
+RenderTargetTexture createFullscreenRenderTarget(
+  Renderer* pRenderer,
+  const data::GameOptions& options
+) {
+  if (options.mPerElementUpscalingEnabled) {
+    return RenderTargetTexture{
+      pRenderer,
+      size_t(pRenderer->maxWindowSize().width),
+      size_t(pRenderer->maxWindowSize().height)};
+  } else {
+    const auto width =
+      options.mWidescreenModeOn && canUseWidescreenMode(pRenderer)
+        ? determineWidescreenViewPort(pRenderer).mWidthPx
+        : data::GameTraits::viewPortWidthPx;
+    return RenderTargetTexture{
+      pRenderer,
+      size_t(width),
+      size_t(data::GameTraits::viewPortHeightPx)};
+  }
 }
 
 }

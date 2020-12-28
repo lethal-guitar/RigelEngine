@@ -143,7 +143,7 @@ private:
   ui::IngameMessageDisplay mMessageDisplay;
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
-  bool mWidescreenModeWasOn = false;
+  bool mWidescreenModeWasOn;
 
   std::unique_ptr<WorldState> mpState;
   std::unique_ptr<QuickSaveData> mpQuickSave;
