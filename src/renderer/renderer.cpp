@@ -215,11 +215,18 @@ IN vec2 texCoordMaskFrag;
 
 uniform sampler2D textureData;
 uniform sampler2D maskData;
-uniform sampler2D paletteData;
+uniform sampler2D colorMapData;
 
 
 vec3 paletteColor(int index) {
-  return TEXTURE_LOOKUP(paletteData, vec2(float(index) / 16.0, 0.0)).rgb;
+  // 1st row of the color map contains the original palette
+  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.0)).rgb;
+}
+
+
+vec3 remappedColor(int index) {
+  // 2nd row contains the remapped "water" palette
+  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.5)).rgb;
 }
 
 
@@ -227,11 +234,16 @@ vec4 applyWaterEffect(vec4 color) {
   // The original game runs in a palette-based video mode, where the frame
   // buffer stores indices into a palette of 16 colors instead of directly
   // storing color values. The water effect is implemented as a modification
-  // of these index values in the frame buffer. To replicate it, we first have
-  // to transform our RGBA color values into indices, by searching the palette
-  // for a matching color. Once we have that, we can apply the same
-  // transformation on the index as done in the original game, and then convert
-  // back to RGBA space by doing a palette lookup with the modified index.
+  // of these index values in the frame buffer:
+  //   water_index = (index & 0x3) | 0x8;
+  //
+  // To replicate it, we first have to transform our RGBA color values into
+  // indices, by searching the palette for a matching color. With the index,
+  // we then look up the corresponding "under water" color.
+  // It would also be possible to perform the index manipulation here in the
+  // shader and then do another palette lookup to get the result. But due to
+  // precision problems on the Raspberry Pi which would cause visual glitches 
+  // with that approach, we do it via lookup table instead. 
   int index = 0;
   for (int i = 0; i < 16; ++i) {
     if (color.rgb == paletteColor(i)) {
@@ -239,14 +251,7 @@ vec4 applyWaterEffect(vec4 color) {
     }
   }
 
-  // The color index transformation for achieving the water effect consists of
-  // remapping any incoming color to one out of 4 indices starting at index 8.
-  // The palette contains 3 shades of blue and a dark green in that area, which
-  // leads to the watery look.
-  // The original game does this via bitwise AND and OR operations, but using
-  // modulo and addition produces the same outcome in this case.
-  int adjustedIndex = int(mod(float(index), 4.0) + 8.0);
-  return vec4(paletteColor(adjustedIndex), color.a);
+  return vec4(remappedColor(index), color.a);
 }
 
 void main() {
@@ -409,12 +414,36 @@ data::Image createWaterSurfaceAnimImage() {
 }
 
 
-data::Image createPaletteImage() {
-  return data::Image{
-    data::PixelBuffer{
-      begin(loader::INGAME_PALETTE), end(loader::INGAME_PALETTE)},
-    loader::INGAME_PALETTE.size(),
-    1};
+data::Image createWaterEffectColorMapImage() {
+  constexpr auto NUM_COLORS = loader::INGAME_PALETTE.size();
+  constexpr auto NUM_ROWS = 2;
+
+  auto pixels = data::PixelBuffer{};
+  pixels.reserve(NUM_COLORS * NUM_ROWS);
+
+  // 1st row: Original palette
+  std::copy(
+    begin(loader::INGAME_PALETTE), end(loader::INGAME_PALETTE),
+    std::back_inserter(pixels));
+
+  // 2nd row: Corresponding "under water" colors 
+  // For the water effect, every palette color is remapped to one
+  // of the colors at indices 8 to 11. These colors are different
+  // shades of blue and a dark green, which leads to the watery look.
+  // The remapping is done by manipulating color indices like this:
+  //   water_index = index % 4 + 8
+  //
+  // In order to create a lookup table for remapping, we therefore
+  // need to repeat the colors found at indices 8 to 11 four times,
+  // giving us a palette of only "under water" colors.
+  constexpr auto WATER_INDEX_START = 8;
+  constexpr auto NUM_WATER_INDICES = 4;
+  for (auto i = 0; i < NUM_COLORS; ++i) {
+    const auto index = WATER_INDEX_START + i % NUM_WATER_INDICES;
+    pixels.push_back(loader::INGAME_PALETTE[index]);
+  }
+
+  return data::Image{std::move(pixels), NUM_COLORS, NUM_ROWS};
 }
 
 
@@ -486,10 +515,11 @@ Renderer::Renderer(SDL_Window* pWindow)
   useShaderIfChanged(mWaterEffectShader);
   mWaterEffectShader.setUniform("textureData", 0);
   mWaterEffectShader.setUniform("maskData", 1);
-  mWaterEffectShader.setUniform("paletteData", 2);
+  mWaterEffectShader.setUniform("colorMapData", 2);
 
   mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
-  mPaletteTexture = createTexture(createPaletteImage());
+  mPaletteTexture = createTexture(
+    createWaterEffectColorMapImage());
 
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture.mHandle);
