@@ -1,11 +1,11 @@
 add_library(dear_imgui STATIC
     imgui_impl_opengl3.cpp
+    imgui_impl_sdl.cpp
 
     imgui/imgui.cpp
     imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_widgets.cpp
-    imgui/examples/imgui_impl_sdl.cpp
 )
 target_include_directories(dear_imgui
     PUBLIC
