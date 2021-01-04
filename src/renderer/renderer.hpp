@@ -20,17 +20,14 @@
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
-#include "renderer/opengl.hpp"
-#include "renderer/shader.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <glm/mat4x4.hpp>
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
+#include <memory>
 #include <optional>
-#include <tuple>
 
 
 namespace rigel::renderer {
@@ -119,15 +116,8 @@ public:
   explicit Renderer(SDL_Window* pWindow);
   ~Renderer();
 
-  base::Size<int> windowSize() const {
-    return mWindowSize;
-  }
-  base::Size<int> maxWindowSize() const {
-    return mMaxWindowSize;
-  }
-
-  void setOverlayColor(const base::Color& color);
-  void setColorModulation(const base::Color& colorModulation);
+  // Drawing API
+  ////////////////////////////////////////////////////////////////////////
 
   void drawTexture(
     TextureId texture,
@@ -139,9 +129,14 @@ public:
     const base::Rect<int>& rect,
     const base::Color& color);
 
-  void drawRectangle(
-    const base::Rect<int>& rect,
-    const base::Color& color);
+  void drawPoint(const base::Vector& position, const base::Color& color);
+
+  void drawWaterEffect(
+    const base::Rect<int>& area,
+    TextureId unprocessedScreen,
+    std::optional<int> surfaceAnimationStep);
+
+  void drawRectangle(const base::Rect<int>& rect, const base::Color& color);
 
   void drawLine(
     const base::Vector& start,
@@ -158,13 +153,23 @@ public:
     int y2,
     const base::Color& color);
 
+  void clear(const base::Color& clearColor = {0, 0, 0, 255});
 
-  void drawPoint(const base::Vector& position, const base::Color& color);
+  void swapBuffers();
+  void submitBatch();
 
-  void drawWaterEffect(
-    const base::Rect<int>& area,
-    TextureId unprocessedScreen,
-    std::optional<int> surfaceAnimationStep);
+  // Resource management API
+  ////////////////////////////////////////////////////////////////////////
+
+  TextureId createTexture(const data::Image& image);
+  TextureId createRenderTargetTexture(int width, int height);
+  void destroyTexture(TextureId texture);
+
+  // State management API
+  ////////////////////////////////////////////////////////////////////////
+
+  void setOverlayColor(const base::Color& color);
+  void setColorModulation(const base::Color& colorModulation);
 
   void setGlobalTranslation(const base::Vector& translation);
   base::Vector globalTranslation() const;
@@ -178,102 +183,12 @@ public:
   TextureId currentRenderTarget() const;
   void setRenderTarget(TextureId target);
 
-  void clear(const base::Color& clearColor = {0, 0, 0, 255});
-  void swapBuffers();
-
-  void submitBatch();
-
-  TextureId createTexture(const data::Image& image);
-  TextureId createRenderTargetTexture(int width, int height);
-  void destroyTexture(TextureId texture);
+  base::Size<int> windowSize() const;
+  base::Size<int> maxWindowSize() const;
 
 private:
-  class DummyVao {
-#ifndef RIGEL_USE_GL_ES
-  public:
-    DummyVao() {
-      glGenVertexArrays(1, &mVao);
-      glBindVertexArray(mVao);
-    }
-
-    ~DummyVao() {
-      glDeleteVertexArrays(1, &mVao);
-    }
-
-    DummyVao(const DummyVao&) = delete;
-    DummyVao& operator=(const DummyVao&) = delete;
-
-  private:
-    GLuint mVao;
-#endif
-  };
-
-  enum class RenderMode {
-    SpriteBatch,
-    NonTexturedRender,
-    Points,
-    WaterEffect
-  };
-
-  template <typename VertexIter>
-  void batchQuadVertices(
-    VertexIter&& dataBegin,
-    VertexIter&& dataEnd,
-    const std::size_t attributesPerVertex);
-
-  void useShaderIfChanged(Shader& shader);
-  void setRenderModeIfChanged(RenderMode mode);
-  void updateShaders();
-  void onRenderTargetChanged();
-  void updateProjectionMatrix();
-
-  GLuint createGlTexture(
-    GLsizei width,
-    GLsizei height,
-    const GLvoid* const pData);
-
-private:
-  struct RenderTarget {
-    base::Extents mSize;
-    GLuint mFbo;
-  };
-
-  SDL_Window* mpWindow;
-
-  DummyVao mDummyVao;
-  GLuint mStreamVbo;
-  GLuint mStreamEbo;
-
-  Shader mTexturedQuadShader;
-  Shader mSimpleTexturedQuadShader;
-  Shader mSolidColorShader;
-  Shader mWaterEffectShader;
-
-  GLuint mLastUsedShader;
-  GLuint mLastUsedTexture;
-  base::Color mLastColorModulation;
-  base::Color mLastOverlayColor;
-  bool mTextureRepeatOn = false;
-
-  RenderMode mRenderMode;
-
-  std::vector<GLfloat> mBatchData;
-  std::vector<GLushort> mBatchIndices;
-  std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
-
-  TextureId mWaterSurfaceAnimTexture;
-  TextureId mWaterEffectColorMapTexture;
-
-  TextureId mCurrentRenderTargetTexture;
-  GLuint mCurrentFbo = 0;
-  base::Size<int> mWindowSize;
-  base::Size<int> mMaxWindowSize;
-  base::Size<int> mCurrentFramebufferSize;
-
-  glm::mat4 mProjectionMatrix;
-  std::optional<base::Rect<int>> mClipRect;
-  glm::vec2 mGlobalTranslation;
-  glm::vec2 mGlobalScale;
+  struct Impl;
+  std::unique_ptr<Impl> mpImpl;
 };
 
 }
