@@ -20,7 +20,6 @@
 #include "base/warnings.hpp"
 #include "data/image.hpp"
 #include "renderer/renderer.hpp"
-#include "renderer/opengl.hpp"
 
 #include <cstddef>
 
@@ -41,21 +40,27 @@ public:
   ~Texture();
 
   Texture(Texture&& other) noexcept
-    : Texture(other.mId, other.mWidth, other.mHeight)
+    : Texture(
+        std::exchange(other.mpRenderer, nullptr),
+        std::exchange(other.mId, 0),
+        other.mWidth,
+        other.mHeight)
   {
-    other.mId = 0;
+  }
+
+  Texture& operator=(Texture&& other) noexcept {
+    using std::swap;
+
+    swap(mpRenderer, other.mpRenderer);
+    swap(mId, other.mId);
+    mWidth = other.mWidth;
+    mHeight = other.mHeight;
+
+    return *this;
   }
 
   Texture(const Texture&) = delete;
   Texture& operator=(const Texture&) = delete;
-
-  Texture& operator=(Texture&& other) noexcept {
-    mId = other.mId;
-    mWidth = other.mWidth;
-    mHeight = other.mHeight;
-    other.mId = 0;
-    return *this;
-  }
 
   /** Render entire texture at given position */
   void render(Renderer* renderer, const base::Vector& position) const;
@@ -98,8 +103,9 @@ public:
   }
 
 protected:
-  Texture(TextureId id, int width, int height)
-    : mId(id)
+  Texture(Renderer* pRenderer, TextureId id, int width, int height)
+    : mpRenderer(pRenderer)
+    , mId(id)
     , mWidth(width)
     , mHeight(height)
   {
@@ -111,6 +117,7 @@ protected:
     int y,
     const base::Rect<int>& sourceRect) const;
 
+  Renderer* mpRenderer = nullptr;
   TextureId mId = 0;
   int mWidth = 0;
   int mHeight = 0;
@@ -174,10 +181,10 @@ public:
     Binder& operator=(Binder&&);
 
   protected:
-    Binder(const Renderer::RenderTarget&, Renderer* pRenderer);
+    Binder(TextureId, Renderer* pRenderer);
 
   private:
-    Renderer::RenderTarget mPreviousRenderTarget;
+    TextureId mPreviousRenderTarget;
     Renderer* mpRenderer;
   };
 
@@ -185,34 +192,6 @@ public:
     Renderer* pRenderer,
     std::size_t width,
     std::size_t height);
-  ~RenderTargetTexture();
-
-  RenderTargetTexture(const RenderTargetTexture&) = delete;
-  RenderTargetTexture& operator=(const RenderTargetTexture&) = delete;
-
-  RenderTargetTexture(RenderTargetTexture&& other) noexcept
-    : Texture(std::move(other))
-    , mFboHandle(other.mFboHandle)
-  {
-    other.mFboHandle = 0;
-  }
-
-
-  RenderTargetTexture& operator=(RenderTargetTexture&& other) noexcept {
-    static_cast<Texture&>(*this) = std::move(other);
-    mFboHandle = other.mFboHandle;
-    other.mFboHandle = 0;
-    return *this;
-  }
-
-private:
-  RenderTargetTexture(
-    const Renderer::RenderTargetHandles& handles,
-    int width,
-    int height);
-
-private:
-  GLuint mFboHandle;
 };
 
 

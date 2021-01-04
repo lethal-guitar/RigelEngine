@@ -80,6 +80,7 @@ void Texture::render(
 
 Texture::Texture(renderer::Renderer* pRenderer, const Image& image)
   : Texture(
+      pRenderer,
       pRenderer->createTexture(image),
       static_cast<int>(image.width()),
       static_cast<int>(image.height()))
@@ -88,7 +89,9 @@ Texture::Texture(renderer::Renderer* pRenderer, const Image& image)
 
 
 Texture::~Texture() {
-  glDeleteTextures(1, &mId);
+  if (mpRenderer) {
+    mpRenderer->destroyTexture(mId);
+  }
 }
 
 
@@ -97,7 +100,8 @@ RenderTargetTexture::RenderTargetTexture(
   const std::size_t width,
   const std::size_t height
 )
-  : RenderTargetTexture(
+  : Texture(
+      pRenderer,
       pRenderer->createRenderTargetTexture(int(width), int(height)),
       static_cast<int>(width),
       static_cast<int>(height))
@@ -105,38 +109,17 @@ RenderTargetTexture::RenderTargetTexture(
 }
 
 
-RenderTargetTexture::RenderTargetTexture(
-  const Renderer::RenderTargetHandles& handles,
-  const int width,
-  const int height
-)
-  : Texture(handles.texture, width, height)
-  , mFboHandle(handles.fbo)
-{
-}
-
-
-RenderTargetTexture::~RenderTargetTexture() {
-  glDeleteFramebuffers(1, &mFboHandle);
-}
-
-
 RenderTargetTexture::Binder::Binder(
   RenderTargetTexture& renderTarget,
   renderer::Renderer* pRenderer
 )
-  : Binder(
-      {
-        base::Size<int>{renderTarget.mWidth, renderTarget.mHeight},
-        renderTarget.mFboHandle
-      },
-      pRenderer)
+  : Binder(renderTarget.data(), pRenderer)
 {
 }
 
 
 RenderTargetTexture::Binder::Binder(
-  const renderer::Renderer::RenderTarget& target,
+  const TextureId target,
   renderer::Renderer* pRenderer
 )
   : mPreviousRenderTarget(pRenderer->currentRenderTarget())
@@ -155,10 +138,8 @@ RenderTargetTexture::Binder::~Binder() {
 
 RenderTargetTexture::Binder::Binder(Binder&& other)
   : mPreviousRenderTarget(other.mPreviousRenderTarget)
-  , mpRenderer(other.mpRenderer)
+  , mpRenderer(std::exchange(other.mpRenderer, nullptr))
 {
-  // Mark other as "moved from"
-  other.mpRenderer = nullptr;
 }
 
 
@@ -166,18 +147,13 @@ auto RenderTargetTexture::Binder::operator=(
   RenderTargetTexture::Binder&& other
 ) -> Binder& {
   mPreviousRenderTarget = other.mPreviousRenderTarget;
-  mpRenderer = other.mpRenderer;
-
-  // Mark other as "moved from"
-  other.mpRenderer = nullptr;
+  mpRenderer = std::exchange(other.mpRenderer, nullptr);
   return *this;
 }
 
 
-DefaultRenderTargetBinder::DefaultRenderTargetBinder(
-  renderer::Renderer* pRenderer
-)
-  : Binder({{0, 0}, 0}, pRenderer)
+DefaultRenderTargetBinder::DefaultRenderTargetBinder(Renderer* pRenderer)
+  : Binder(0, pRenderer)
 {
 }
 

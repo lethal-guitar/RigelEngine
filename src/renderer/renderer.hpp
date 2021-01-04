@@ -63,37 +63,6 @@ inline TexCoords toTexCoords(
 
 class Renderer {
 public:
-  // TODO: Re-evaluate how render targets work
-  struct RenderTarget {
-    RenderTarget() = default;
-    RenderTarget(const base::Size<int> size, const GLuint fbo)
-      : mSize(size)
-      , mFbo(fbo)
-    {
-    }
-
-    bool isDefault() const {
-      return mFbo == 0;
-    }
-
-    bool operator==(const RenderTarget& other) const {
-      return std::tie(mSize, mFbo) == std::tie(other.mSize, other.mFbo);
-    }
-
-    bool operator!=(const RenderTarget& other) const {
-      return !(*this == other);
-    }
-
-    base::Size<int> mSize;
-    GLuint mFbo = 0;
-  };
-
-  struct RenderTargetHandles {
-    GLuint texture;
-    GLuint fbo;
-  };
-
-
   class StateSaver {
   public:
     explicit StateSaver(Renderer* pRenderer)
@@ -143,7 +112,7 @@ public:
     std::optional<base::Rect<int>> mClipRect;
     base::Vector mGlobalTranslation;
     base::Point<float> mGlobalScale;
-    RenderTarget mRenderTarget;
+    TextureId mRenderTarget;
   };
 
 
@@ -206,8 +175,8 @@ public:
   void setClipRect(const std::optional<base::Rect<int>>& clipRect);
   std::optional<base::Rect<int>> clipRect() const;
 
-  RenderTarget currentRenderTarget() const;
-  void setRenderTarget(const RenderTarget& target);
+  TextureId currentRenderTarget() const;
+  void setRenderTarget(TextureId target);
 
   void clear(const base::Color& clearColor = {0, 0, 0, 255});
   void swapBuffers();
@@ -215,12 +184,8 @@ public:
   void submitBatch();
 
   TextureId createTexture(const data::Image& image);
-
-  // TODO: Revisit the render target API and its use in RenderTargetTexture,
-  // there should be a nicer way to do this.
-  RenderTargetHandles createRenderTargetTexture(
-    int width,
-    int height);
+  TextureId createRenderTargetTexture(int width, int height);
+  void destroyTexture(TextureId texture);
 
 private:
   class DummyVao {
@@ -268,6 +233,11 @@ private:
     const GLvoid* const pData);
 
 private:
+  struct RenderTarget {
+    base::Extents mSize;
+    GLuint mFbo;
+  };
+
   SDL_Window* mpWindow;
 
   DummyVao mDummyVao;
@@ -289,11 +259,13 @@ private:
 
   std::vector<GLfloat> mBatchData;
   std::vector<GLushort> mBatchIndices;
+  std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
 
   TextureId mWaterSurfaceAnimTexture;
   TextureId mWaterEffectColorMapTexture;
 
-  GLuint mCurrentFbo;
+  TextureId mCurrentRenderTargetTexture;
+  GLuint mCurrentFbo = 0;
   base::Size<int> mWindowSize;
   base::Size<int> mMaxWindowSize;
   base::Size<int> mCurrentFramebufferSize;

@@ -474,7 +474,7 @@ Renderer::Renderer(SDL_Window* pWindow)
   , mLastUsedShader(0)
   , mLastUsedTexture(0)
   , mRenderMode(RenderMode::SpriteBatch)
-  , mCurrentFbo(0)
+  , mCurrentRenderTargetTexture(0)
   , mWindowSize(getSize(pWindow))
   , mMaxWindowSize(
       [pWindow]() {
@@ -852,33 +852,40 @@ std::optional<base::Rect<int>> Renderer::clipRect() const {
 }
 
 
-Renderer::RenderTarget Renderer::currentRenderTarget() const {
-  return {mCurrentFramebufferSize, mCurrentFbo};
+TextureId Renderer::currentRenderTarget() const {
+  return mCurrentRenderTargetTexture;
 }
 
 
-void Renderer::setRenderTarget(const RenderTarget& target) {
-  if (target.mFbo == mCurrentFbo) {
+void Renderer::setRenderTarget(const TextureId target) {
+  if (target == mCurrentRenderTargetTexture) {
     return;
   }
 
   submitBatch();
 
-  if (!target.isDefault()) {
-    mCurrentFramebufferSize = target.mSize;
-    mCurrentFbo = target.mFbo;
+  if (target != 0) {
+    const auto iData = mRenderTargetDict.find(target);
+    if (iData == mRenderTargetDict.end()) {
+      throw std::invalid_argument("Texture ID is not a render target");
+    }
+
+    mCurrentFbo = iData->second.mFbo;
+    mCurrentFramebufferSize = iData->second.mSize;
   } else {
+    mCurrentFbo = 0;
     mCurrentFramebufferSize.width = mWindowSize.width;
     mCurrentFramebufferSize.height = mWindowSize.height;
-    mCurrentFbo = 0;
   }
+
+  mCurrentRenderTargetTexture = target;
 
   onRenderTargetChanged();
 }
 
 
 void Renderer::swapBuffers() {
-  assert(mCurrentFbo == 0);
+  assert(mCurrentRenderTargetTexture == 0);
 
   submitBatch();
   SDL_GL_SwapWindow(mpWindow);
@@ -1016,7 +1023,7 @@ void Renderer::updateShaders() {
 }
 
 
-Renderer::RenderTargetHandles Renderer::createRenderTargetTexture(
+TextureId Renderer::createRenderTargetTexture(
   const int width,
   const int height
 ) {
@@ -1037,7 +1044,9 @@ Renderer::RenderTargetHandles Renderer::createRenderTargetTexture(
   glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFbo);
   glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
 
-  return {textureHandle, fboHandle};
+  mRenderTargetDict.insert({textureHandle, {{width, height}, fboHandle}});
+
+  return textureHandle;
 }
 
 
@@ -1063,6 +1072,17 @@ auto Renderer::createTexture(const data::Image& image) -> TextureId {
     GLsizei(image.width()),
     GLsizei(image.height()),
     pixelData.data());
+}
+
+
+void Renderer::destroyTexture(TextureId texture) {
+  const auto iRenderTarget = mRenderTargetDict.find(texture);
+  if (iRenderTarget != mRenderTargetDict.end()) {
+    glDeleteFramebuffers(1, &iRenderTarget->second.mFbo);
+    mRenderTargetDict.erase(iRenderTarget);
+  }
+
+  glDeleteTextures(1, &texture);
 }
 
 
