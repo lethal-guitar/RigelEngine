@@ -75,7 +75,6 @@ std::vector<renderer::Texture> loadImagesForEpisode(
 
 EpisodeEndScreen::EpisodeEndScreen(GameMode::Context context, const int episode)
   : mScreenImages(loadImagesForEpisode(context, episode))
-  , mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
 {
 }
@@ -83,7 +82,7 @@ EpisodeEndScreen::EpisodeEndScreen(GameMode::Context context, const int episode)
 
 void EpisodeEndScreen::updateAndRender(engine::TimeDelta dt) {
   const auto index = std::min(mCurrentImage, mScreenImages.size());
-  mScreenImages[index].render(mpRenderer, 0, 0);
+  mScreenImages[index].render(0, 0);
 }
 
 

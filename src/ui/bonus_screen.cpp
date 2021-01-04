@@ -80,7 +80,6 @@ BonusScreen::BonusScreen(
   int scoreBeforeAddingBonuses
 )
   : mState(scoreBeforeAddingBonuses)
-  , mpRenderer(context.mpRenderer)
   , mBackgroundTexture(ui::fullScreenImageAsTexture(
       context.mpRenderer,
       *context.mpResources,
@@ -108,7 +107,7 @@ BonusScreen::BonusScreen(
 void BonusScreen::updateAndRender(engine::TimeDelta dt) {
   updateSequence(dt);
 
-  mBackgroundTexture.render(mpRenderer, 0, 0);
+  mBackgroundTexture.render(0, 0);
   mpTextRenderer->drawBonusScreenText(6, 8, "SCORE");
   mpTextRenderer->drawBonusScreenText(6, 17, mState.mRunningText);
 

@@ -43,7 +43,7 @@ std::unique_ptr<GameMode> AntiPiracyScreenMode::updateAndRender(
   using std::begin;
   using std::end;
 
-  mTexture.render(mContext.mpRenderer, 0, 0);
+  mTexture.render(0, 0);
 
   const auto anyButtonPressed = any_of(begin(events), end(events),
     [](const SDL_Event& event) {

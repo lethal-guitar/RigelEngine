@@ -261,17 +261,14 @@ void HudRenderer::render(
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
   mBottomLeftTexture.render(
-    mpRenderer,
-    0,
-    GameTraits::inGameViewPortSize.height - mBottomLeftTexture.height());
+    0, GameTraits::inGameViewPortSize.height - mBottomLeftTexture.height());
 
   mBottomRightTexture.render(
-    mpRenderer,
     mBottomLeftTexture.width(),
     GameTraits::inGameViewPortSize.height - mBottomRightTexture.height());
 
   const auto topRightTexturePosX = maxX - mTopRightTexture.width();
-  mTopRightTexture.render(mpRenderer, topRightTexturePosX, 0);
+  mTopRightTexture.render(topRightTexturePosX, 0);
 
   // Inventory
   // --------------------------------------------------------------------------
@@ -288,7 +285,7 @@ void HudRenderer::render(
 
         const auto textureIt = mInventoryTexturesByType.find(itemType);
         assert(textureIt != mInventoryTexturesByType.end());
-        textureIt->second.render(mpRenderer, drawPos);
+        textureIt->second.render(drawPos);
       }
     }
   }
@@ -341,7 +338,7 @@ void HudRenderer::drawCollectedLetters(
   for (const auto letter : playerModel.collectedLetters()) {
     const auto it = mCollectedLetterIndicatorsByType.find(letter);
     assert(it != mCollectedLetterIndicatorsByType.end());
-    it->second.mTexture.render(mpRenderer, it->second.mPxPosition);
+    it->second.mTexture.render(it->second.mPxPosition);
   }
 }
 
@@ -373,7 +370,7 @@ void HudRenderer::drawRadar(
       drawDots();
     }
 
-    mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);
+    mRadarSurface.render(RADAR_POS_X, RADAR_POS_Y);
   } else {
     const auto saved = renderer::Renderer::StateSaver{mpRenderer};
     mpRenderer->setGlobalTranslation(

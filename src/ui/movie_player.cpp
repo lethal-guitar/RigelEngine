@@ -52,7 +52,7 @@ void MoviePlayer::playMovie(
     auto saved = renderer::setupDefaultState(mpRenderer);
 
     auto baseImage = renderer::Texture(mpRenderer, movie.mBaseImage);
-    baseImage.render(mpRenderer, 0, 0);
+    baseImage.render(0, 0);
     mpRenderer->submitBatch();
   }
 
@@ -119,10 +119,10 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
     auto saved = renderer::setupDefaultState(mpRenderer);
 
     const auto& frameData = mAnimationFrames[mCurrentFrame];
-    frameData.mImage.render(mpRenderer, 0, frameData.mStartRow);
+    frameData.mImage.render(0, frameData.mStartRow);
   }
 
-  mCanvas.render(mpRenderer, 0, 0);
+  mCanvas.render(0, 0);
 }
 
 

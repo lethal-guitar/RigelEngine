@@ -348,7 +348,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
         &mRenderer,
         mpUserProfile->mOptions.mPerElementUpscalingEnabled,
         mCurrentFrameIsWidescreen);
-      mRenderTarget.render(&mRenderer, 0, 0);
+      mRenderTarget.render(0, 0);
       mRenderer.submitBatch();
     }
 
@@ -453,7 +453,7 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
     mRenderer.clear();
     mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
-    mRenderTarget.render(&mRenderer, 0, 0);
+    mRenderTarget.render(0, 0);
     swapBuffers();
 
     if (fadeFactor >= 1.0) {

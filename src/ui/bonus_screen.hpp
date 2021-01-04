@@ -71,7 +71,6 @@ private:
   std::vector<Event> mEvents;
   std::size_t mNextEvent = 0;
 
-  renderer::Renderer* mpRenderer;
   renderer::Texture mBackgroundTexture;
   ui::MenuElementRenderer* mpTextRenderer;
 };

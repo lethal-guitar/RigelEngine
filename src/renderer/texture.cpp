@@ -24,47 +24,31 @@ namespace rigel::renderer {
 using data::Image;
 
 
-void Texture::render(
-  renderer::Renderer* renderer,
-  const int x,
-  const int y
-) const {
+void Texture::render(const int x, const int y) const {
   base::Rect<int> fullImageRect{{0, 0}, {width(), height()}};
-  render(renderer, x, y, fullImageRect);
+  render(x, y, fullImageRect);
+}
+
+
+void Texture::render(const base::Vector& position) const {
+  render(position.x, position.y);
 }
 
 
 void Texture::render(
-  renderer::Renderer* renderer,
-  const base::Vector& position
-) const {
-  render(renderer, position.x, position.y);
-}
-
-
-void Texture::render(
-  renderer::Renderer* renderer,
   const base::Vector& position,
   const base::Rect<int>& sourceRect
 ) const {
-  render(
-    renderer,
-    position.x,
-    position.y,
-    sourceRect);
+  render(position.x, position.y, sourceRect);
 }
 
 
-void Texture::renderScaled(
-  renderer::Renderer* pRenderer,
-  const base::Rect<int>& destRect
-) const {
-  pRenderer->drawTexture(mId, {0.0f, 0.0f, 1.0f, 1.0f}, destRect);
+void Texture::renderScaled(const base::Rect<int>& destRect) const {
+  mpRenderer->drawTexture(mId, {0.0f, 0.0f, 1.0f, 1.0f}, destRect);
 }
 
 
 void Texture::render(
-  renderer::Renderer* pRenderer,
   const int x,
   const int y,
   const base::Rect<int>& sourceRect
@@ -73,7 +57,7 @@ void Texture::render(
     {x, y},
     {sourceRect.size.width, sourceRect.size.height}
   };
-  pRenderer->drawTexture(
+  mpRenderer->drawTexture(
     mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);
 }
 

@@ -94,7 +94,6 @@ void TiledTexture::renderTileGroup(
   const int tileSpanY
 ) const {
   mTileSetTexture.render(
-    mpRenderer,
     tileVectorToPixelVector({posX, posY}),
     sourceRect(index, tileSpanX, tileSpanY));
 }

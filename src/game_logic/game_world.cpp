@@ -656,7 +656,7 @@ void GameWorld::render() {
         mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
       }
 
-      mLowResLayer.render(mpRenderer, 0, 0);
+      mLowResLayer.render(0, 0);
     } else {
       drawMapAndSprites(viewPortSize);
       mpState->mParticles.render(mpState->mCamera.position());
@@ -776,7 +776,7 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
       auto saved = renderer::Renderer::StateSaver(mpRenderer);
       mpRenderer->setGlobalScale({1.0f, 1.0f});
       mpRenderer->setGlobalTranslation({});
-      mWaterEffectBuffer.render(mpRenderer, 0, 0);
+      mWaterEffectBuffer.render(0, 0);
     }
 
     for (const auto& area : waterEffectAreas) {

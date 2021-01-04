@@ -162,7 +162,7 @@ void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
 
 void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt) {
   mContext.mpRenderer->clear();
-  mMenuBackground.render(mContext.mpRenderer, 0, 0);
+  mMenuBackground.render(0, 0);
 
   auto index = 0;
   for (const auto item : mItems) {
