@@ -538,6 +538,8 @@ struct Renderer::Impl {
   std::vector<GLfloat> mBatchData;
   std::vector<GLushort> mBatchIndices;
   std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
+  int mNumTextures = 0;
+  int mNumInternalTextures = 0;
 
   TextureId mWaterSurfaceAnimTexture = 0;
   TextureId mWaterEffectColorMapTexture = 0;
@@ -629,11 +631,19 @@ struct Renderer::Impl {
     onRenderTargetChanged();
 
     setColorModulation({255, 255, 255, 255});
+
+    mNumInternalTextures = mNumTextures;
   }
 
 
   ~Impl() {
+    // Make sure all externally used textures and render targets have been
+    // destroyed before the renderer is destroyed.
+    assert(mRenderTargetDict.empty());
+    assert(mNumTextures == mNumInternalTextures);
+
     glDeleteBuffers(1, &mStreamVbo);
+    glDeleteBuffers(1, &mStreamEbo);
     glDeleteTextures(1, &mWaterSurfaceAnimTexture);
     glDeleteTextures(1, &mWaterEffectColorMapTexture);
   }
@@ -1148,6 +1158,8 @@ struct Renderer::Impl {
       GLsizei(image.height()),
       pixelData.data());
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+
+    ++mNumTextures;
     return handle;
   }
 
@@ -1157,6 +1169,8 @@ struct Renderer::Impl {
     if (iRenderTarget != mRenderTargetDict.end()) {
       glDeleteFramebuffers(1, &iRenderTarget->second.mFbo);
       mRenderTargetDict.erase(iRenderTarget);
+    } else {
+      --mNumTextures;
     }
 
     glDeleteTextures(1, &texture);
