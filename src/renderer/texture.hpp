@@ -58,38 +58,38 @@ public:
   ) const;
 
   int width() const {
-    return mData.mWidth;
+    return mWidth;
   }
 
   int height() const {
-    return mData.mHeight;
+    return mHeight;
   }
 
   base::Extents extents() const {
-    return {mData.mWidth, mData.mHeight};
+    return {mWidth, mHeight};
   }
 
-  Renderer::TextureData data() const {
-    return mData;
+  TextureId data() const {
+    return mId;
   }
 
 protected:
-  base::Rect<int> completeSourceRect() const {
-    return {{0, 0}, extents()};
-  }
-
   void render(
     Renderer* renderer,
     int x,
     int y,
     const base::Rect<int>& sourceRect) const;
 
-  explicit TextureBase(Renderer::TextureData data)
-    : mData(data)
+  TextureBase(TextureId id, int width, int height)
+    : mId(id)
+    , mWidth(width)
+    , mHeight(height)
   {
   }
 
-  Renderer::TextureData mData;
+  TextureId mId = 0;
+  int mWidth = 0;
+  int mHeight = 0;
 };
 
 }
@@ -108,25 +108,24 @@ public:
   ~OwningTexture();
 
   OwningTexture(OwningTexture&& other) noexcept
-    : TextureBase(other.mData)
+    : TextureBase(other.mId, other.mWidth, other.mHeight)
   {
-    other.mData.mHandle = 0;
+    other.mId = 0;
   }
 
   OwningTexture(const OwningTexture&) = delete;
   OwningTexture& operator=(const OwningTexture&) = delete;
 
   OwningTexture& operator=(OwningTexture&& other) noexcept {
-    mData = other.mData;
-    other.mData.mHandle = 0;
+    mId = other.mId;
+    mWidth = other.mWidth;
+    mHeight = other.mHeight;
+    other.mId = 0;
     return *this;
   }
 
 protected:
-  explicit OwningTexture(Renderer::TextureData data)
-    : TextureBase(data)
-  {
-  }
+  using detail::TextureBase::TextureBase;
 };
 
 

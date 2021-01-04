@@ -60,7 +60,7 @@ void TextureBase::renderScaled(
   renderer::Renderer* pRenderer,
   const base::Rect<int>& destRect
 ) const {
-  pRenderer->drawTexture(mData, completeSourceRect(), destRect);
+  pRenderer->drawTexture(mId, {0.0f, 0.0f, 1.0f, 1.0f}, destRect);
 }
 
 
@@ -74,18 +74,22 @@ void TextureBase::render(
     {x, y},
     {sourceRect.size.width, sourceRect.size.height}
   };
-  pRenderer->drawTexture(mData, sourceRect, destRect);
+  pRenderer->drawTexture(
+    mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);
 }
 
 
 OwningTexture::OwningTexture(renderer::Renderer* pRenderer, const Image& image)
-  : TextureBase(pRenderer->createTexture(image))
+  : TextureBase(
+      pRenderer->createTexture(image),
+      static_cast<int>(image.width()),
+      static_cast<int>(image.height()))
 {
 }
 
 
 OwningTexture::~OwningTexture() {
-  glDeleteTextures(1, &mData.mHandle);
+  glDeleteTextures(1, &mId);
 }
 
 
@@ -107,7 +111,7 @@ RenderTargetTexture::RenderTargetTexture(
   const int width,
   const int height
 )
-  : OwningTexture({width, height, handles.texture})
+  : OwningTexture(handles.texture, width, height)
   , mFboHandle(handles.fbo)
 {
 }
@@ -124,7 +128,7 @@ RenderTargetTexture::Binder::Binder(
 )
   : Binder(
       {
-        base::Size<int>{renderTarget.mData.mWidth, renderTarget.mData.mHeight},
+        base::Size<int>{renderTarget.mWidth, renderTarget.mHeight},
         renderTarget.mFboHandle
       },
       pRenderer)

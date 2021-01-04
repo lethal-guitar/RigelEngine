@@ -39,7 +39,12 @@ void TiledTexture::renderTileStretched(
   const base::Rect<int>& destRect
 ) const {
   mpRenderer->drawTexture(
-    mTileSetTexture.data(), sourceRect(index, 1, 1), destRect);
+    mTileSetTexture.data(),
+    renderer::toTexCoords(
+      sourceRect(index, 1, 1),
+      mTileSetTexture.width(),
+      mTileSetTexture.height()),
+    destRect);
 }
 
 

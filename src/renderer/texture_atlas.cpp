@@ -84,9 +84,10 @@ TextureAtlas::TextureAtlas(
 
   mCoordinatesMap.reserve(images.size());
   for (const auto& packedRect : rects) {
-    mCoordinatesMap.push_back({
-      {packedRect.x, packedRect.y},
-      {packedRect.w, packedRect.h}});
+    mCoordinatesMap.push_back(toTexCoords(
+      {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
+      mAtlasTexture.width(),
+      mAtlasTexture.height()));
   }
 }
 

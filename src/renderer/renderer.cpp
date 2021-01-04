@@ -342,28 +342,19 @@ void fillVertexPositions(
 
 template <typename Iter>
 void fillTexCoords(
-  const base::Rect<int>& rect,
-  Renderer::TextureData textureData,
+  const TexCoords& coords,
   Iter&& destIter,
   const std::size_t offset,
   const std::size_t stride
 ) {
-  using namespace std;
-
-  glm::vec2 texOffset(
-    rect.topLeft.x / float(textureData.mWidth),
-    rect.topLeft.y / float(textureData.mHeight));
-  glm::vec2 texScale(
-    rect.size.width / float(textureData.mWidth),
-    rect.size.height / float(textureData.mHeight));
-
-  const auto left = texOffset.x;
-  const auto right = texScale.x + texOffset.x;
-  const auto top = texOffset.y;
-  const auto bottom = texScale.y + texOffset.y;
-
   fillVertexData(
-    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
+    coords.left,
+    coords.right,
+    coords.top,
+    coords.bottom,
+    std::forward<Iter>(destIter),
+    offset,
+    stride);
 }
 
 
@@ -523,10 +514,10 @@ Renderer::Renderer(SDL_Window* pWindow)
     createWaterEffectColorMapImage());
 
   glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture.mHandle);
+  glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture.mHandle);
+  glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture);
   glActiveTexture(GL_TEXTURE0);
 
   // One-time setup for textured quad shader
@@ -545,8 +536,8 @@ Renderer::Renderer(SDL_Window* pWindow)
 
 Renderer::~Renderer() {
   glDeleteBuffers(1, &mStreamVbo);
-  glDeleteTextures(1, &mWaterSurfaceAnimTexture.mHandle);
-  glDeleteTextures(1, &mWaterEffectColorMapTexture.mHandle);
+  glDeleteTextures(1, &mWaterSurfaceAnimTexture);
+  glDeleteTextures(1, &mWaterEffectColorMapTexture);
 }
 
 
@@ -571,18 +562,18 @@ void Renderer::setColorModulation(const base::Color& colorModulation) {
 
 
 void Renderer::drawTexture(
-  const TextureData& textureData,
-  const base::Rect<int>& sourceRect,
+  const TextureId texture,
+  const TexCoords& sourceRect,
   const base::Rect<int>& destRect,
   const bool repeat
 ) {
   setRenderModeIfChanged(RenderMode::SpriteBatch);
 
-  if (textureData.mHandle != mLastUsedTexture) {
+  if (texture != mLastUsedTexture) {
     submitBatch();
 
-    glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
-    mLastUsedTexture = textureData.mHandle;
+    glBindTexture(GL_TEXTURE_2D, texture);
+    mLastUsedTexture = texture;
   }
 
   if (repeat != mTextureRepeatOn) {
@@ -595,7 +586,7 @@ void Renderer::drawTexture(
   // x, y, tex_u, tex_v
   GLfloat vertices[4 * (2 + 2)];
   fillVertexPositions(destRect, std::begin(vertices), 0, 4);
-  fillTexCoords(sourceRect, textureData, std::begin(vertices), 2, 4);
+  fillTexCoords(sourceRect, std::begin(vertices), 2, 4);
 
   batchQuadVertices(std::begin(vertices), std::end(vertices), 4u);
 }
@@ -744,7 +735,7 @@ void Renderer::drawPoint(
 
 void Renderer::drawWaterEffect(
   const base::Rect<int>& area,
-  TextureData textureData,
+  const TextureId texture,
   std::optional<int> surfaceAnimationStep
 ) {
   assert(
@@ -768,17 +759,21 @@ void Renderer::drawWaterEffect(
     GLfloat vertices[4 * (2 + 2)];
     fillVertexPositions(destRect, std::begin(vertices), 0, 4);
     fillTexCoords(
-      animSourceRect, mWaterSurfaceAnimTexture, std::begin(vertices), 2, 4);
+      toTexCoords(
+        animSourceRect, WATER_MASK_WIDTH, WATER_MASK_HEIGHT * WATER_NUM_MASKS),
+      std::begin(vertices),
+      2,
+      4);
 
     batchQuadVertices(std::begin(vertices), std::end(vertices), 4);
   };
 
   setRenderModeIfChanged(RenderMode::WaterEffect);
 
-  if (mLastUsedTexture != textureData.mHandle) {
+  if (mLastUsedTexture != texture) {
     submitBatch();
-    glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
-    mLastUsedTexture = textureData.mHandle;
+    glBindTexture(GL_TEXTURE_2D, texture);
+    mLastUsedTexture = texture;
   }
 
   if (surfaceAnimationStep) {
@@ -1046,7 +1041,7 @@ Renderer::RenderTargetHandles Renderer::createRenderTargetTexture(
 }
 
 
-auto Renderer::createTexture(const data::Image& image) -> TextureData {
+auto Renderer::createTexture(const data::Image& image) -> TextureId {
   // OpenGL wants pixel data in bottom-up format, so transform it accordingly
   std::vector<std::uint8_t> pixelData;
   pixelData.resize(image.width() * image.height() * 4);
@@ -1064,11 +1059,10 @@ auto Renderer::createTexture(const data::Image& image) -> TextureData {
     }
   }
 
-  auto handle = createGlTexture(
+  return createGlTexture(
     GLsizei(image.width()),
     GLsizei(image.height()),
     pixelData.data());
-  return {int(image.width()), int(image.height()), handle};
 }
 
 

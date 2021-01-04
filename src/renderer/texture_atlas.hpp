@@ -17,13 +17,11 @@
 #pragma once
 
 #include "data/image.hpp"
+#include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
 
 
 namespace rigel::renderer {
-
-class Renderer;
-
 
 class TextureAtlas {
 public:
@@ -32,7 +30,7 @@ public:
   void draw(int index, const base::Rect<int>& destRect) const;
 
 private:
-  std::vector<base::Rect<int>> mCoordinatesMap;
+  std::vector<TexCoords> mCoordinatesMap;
   OwningTexture mAtlasTexture;
   Renderer* mpRenderer;
 };

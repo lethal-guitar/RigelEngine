@@ -35,6 +35,32 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::renderer {
 
+using TextureId = std::uint32_t;
+
+struct TexCoords {
+  float left;
+  float top;
+  float right;
+  float bottom;
+};
+
+
+inline TexCoords toTexCoords(
+  const base::Rect<int>& sourceRect,
+  const int texWidth,
+  const int texHeight
+) {
+  const auto left = sourceRect.topLeft.x / float(texWidth);
+  const auto top = sourceRect.topLeft.y / float(texHeight);
+  const auto width = sourceRect.size.width / float(texWidth);
+  const auto height = sourceRect.size.height / float(texHeight);
+  const auto right = left + width;
+  const auto bottom = top + height;
+
+  return {left, top, right, bottom};
+}
+
+
 class Renderer {
 public:
   // TODO: Re-evaluate how render targets work
@@ -60,20 +86,6 @@ public:
 
     base::Size<int> mSize;
     GLuint mFbo = 0;
-  };
-
-  struct TextureData {
-    TextureData() = default;
-    TextureData(const int width, const int height, const GLuint handle)
-      : mWidth(width)
-      , mHeight(height)
-      , mHandle(handle)
-    {
-    }
-
-    int mWidth = 0;
-    int mHeight = 0;
-    GLuint mHandle = 0;
   };
 
   struct RenderTargetHandles {
@@ -149,9 +161,9 @@ public:
   void setColorModulation(const base::Color& colorModulation);
 
   void drawTexture(
-    const TextureData& textureData,
-    const base::Rect<int>& pSourceRect,
-    const base::Rect<int>& pDestRect,
+    TextureId texture,
+    const TexCoords& sourceRect,
+    const base::Rect<int>& destRect,
     bool repeat = false);
 
   void drawFilledRectangle(
@@ -182,7 +194,7 @@ public:
 
   void drawWaterEffect(
     const base::Rect<int>& area,
-    TextureData unprocessedScreen,
+    TextureId unprocessedScreen,
     std::optional<int> surfaceAnimationStep);
 
   void setGlobalTranslation(const base::Vector& translation);
@@ -202,7 +214,7 @@ public:
 
   void submitBatch();
 
-  TextureData createTexture(const data::Image& image);
+  TextureId createTexture(const data::Image& image);
 
   // TODO: Revisit the render target API and its use in RenderTargetTexture,
   // there should be a nicer way to do this.
@@ -278,8 +290,8 @@ private:
   std::vector<GLfloat> mBatchData;
   std::vector<GLushort> mBatchIndices;
 
-  TextureData mWaterSurfaceAnimTexture;
-  TextureData mWaterEffectColorMapTexture;
+  TextureId mWaterSurfaceAnimTexture;
+  TextureId mWaterEffectColorMapTexture;
 
   GLuint mCurrentFbo;
   base::Size<int> mWindowSize;

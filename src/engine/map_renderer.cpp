@@ -164,7 +164,8 @@ void MapRenderer::renderBackdrop(
 
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
-    {offset, sourceRectSize},
+    renderer::toTexCoords(
+      {offset, sourceRectSize}, backdropWidth, mBackdropTexture.height()),
     {{}, sourceRectSize},
     true);
 }
