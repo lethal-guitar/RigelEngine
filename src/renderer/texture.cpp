@@ -22,10 +22,9 @@
 namespace rigel::renderer {
 
 using data::Image;
-using detail::TextureBase;
 
 
-void TextureBase::render(
+void OwningTexture::render(
   renderer::Renderer* renderer,
   const int x,
   const int y
@@ -35,7 +34,7 @@ void TextureBase::render(
 }
 
 
-void TextureBase::render(
+void OwningTexture::render(
   renderer::Renderer* renderer,
   const base::Vector& position
 ) const {
@@ -43,7 +42,7 @@ void TextureBase::render(
 }
 
 
-void TextureBase::render(
+void OwningTexture::render(
   renderer::Renderer* renderer,
   const base::Vector& position,
   const base::Rect<int>& sourceRect
@@ -56,7 +55,7 @@ void TextureBase::render(
 }
 
 
-void TextureBase::renderScaled(
+void OwningTexture::renderScaled(
   renderer::Renderer* pRenderer,
   const base::Rect<int>& destRect
 ) const {
@@ -64,7 +63,7 @@ void TextureBase::renderScaled(
 }
 
 
-void TextureBase::render(
+void OwningTexture::render(
   renderer::Renderer* pRenderer,
   const int x,
   const int y,
@@ -80,7 +79,7 @@ void TextureBase::render(
 
 
 OwningTexture::OwningTexture(renderer::Renderer* pRenderer, const Image& image)
-  : TextureBase(
+  : OwningTexture(
       pRenderer->createTexture(image),
       static_cast<int>(image.width()),
       static_cast<int>(image.height()))

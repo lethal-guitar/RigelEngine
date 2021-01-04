@@ -27,11 +27,35 @@
 
 namespace rigel::renderer {
 
-namespace detail {
-
-class TextureBase {
+/** Wrapper class for renderable texture
+ *
+ * This wrapper class manages the life-time of a texture, and offers
+ * a more object-oriented interface.
+ *
+ * The ownership semantics are the same as for a std::unique_ptr.
+ */
+class OwningTexture {
 public:
-  TextureBase() = default;
+  OwningTexture() = default;
+  OwningTexture(Renderer* renderer, const data::Image& image);
+  ~OwningTexture();
+
+  OwningTexture(OwningTexture&& other) noexcept
+    : OwningTexture(other.mId, other.mWidth, other.mHeight)
+  {
+    other.mId = 0;
+  }
+
+  OwningTexture(const OwningTexture&) = delete;
+  OwningTexture& operator=(const OwningTexture&) = delete;
+
+  OwningTexture& operator=(OwningTexture&& other) noexcept {
+    mId = other.mId;
+    mWidth = other.mWidth;
+    mHeight = other.mHeight;
+    other.mId = 0;
+    return *this;
+  }
 
   /** Render entire texture at given position */
   void render(Renderer* renderer, const base::Vector& position) const;
@@ -74,58 +98,22 @@ public:
   }
 
 protected:
-  void render(
-    Renderer* renderer,
-    int x,
-    int y,
-    const base::Rect<int>& sourceRect) const;
-
-  TextureBase(TextureId id, int width, int height)
+  OwningTexture(TextureId id, int width, int height)
     : mId(id)
     , mWidth(width)
     , mHeight(height)
   {
   }
 
+  void render(
+    Renderer* renderer,
+    int x,
+    int y,
+    const base::Rect<int>& sourceRect) const;
+
   TextureId mId = 0;
   int mWidth = 0;
   int mHeight = 0;
-};
-
-}
-
-/** Wrapper class for renderable texture
- *
- * This wrapper class manages the life-time of a texture, and offers
- * a more object-oriented interface.
- *
- * The ownership semantics are the same as for a std::unique_ptr.
- */
-class OwningTexture : public detail::TextureBase {
-public:
-  OwningTexture() = default;
-  OwningTexture(Renderer* renderer, const data::Image& image);
-  ~OwningTexture();
-
-  OwningTexture(OwningTexture&& other) noexcept
-    : TextureBase(other.mId, other.mWidth, other.mHeight)
-  {
-    other.mId = 0;
-  }
-
-  OwningTexture(const OwningTexture&) = delete;
-  OwningTexture& operator=(const OwningTexture&) = delete;
-
-  OwningTexture& operator=(OwningTexture&& other) noexcept {
-    mId = other.mId;
-    mWidth = other.mWidth;
-    mHeight = other.mHeight;
-    other.mId = 0;
-    return *this;
-  }
-
-protected:
-  using detail::TextureBase::TextureBase;
 };
 
 
