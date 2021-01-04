@@ -147,7 +147,7 @@ constexpr auto CURSOR_ANIM_DELAY = 5;
 constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
-renderer::OwningTexture createFontTexture(
+renderer::Texture createFontTexture(
   const loader::FontData& font,
   renderer::Renderer* pRenderer
 ) {
@@ -166,7 +166,7 @@ renderer::OwningTexture createFontTexture(
     insertPosX += characterWidth;
   }
 
-  return renderer::OwningTexture{pRenderer, combinedBitmaps};
+  return renderer::Texture{pRenderer, combinedBitmaps};
 }
 
 }

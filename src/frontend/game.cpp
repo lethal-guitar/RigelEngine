@@ -249,7 +249,7 @@ Game::Game(
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
-      renderer::OwningTexture{
+      renderer::Texture{
         &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
   , mSpriteFactory(&mRenderer, &mResources.mActorImagePackage)

@@ -31,7 +31,7 @@ public:
 
 private:
   std::vector<TexCoords> mCoordinatesMap;
-  OwningTexture mAtlasTexture;
+  Texture mAtlasTexture;
   Renderer* mpRenderer;
 };
 

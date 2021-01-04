@@ -28,12 +28,12 @@ RIGEL_RESTORE_WARNINGS
 }
 
 
-renderer::OwningTexture fullScreenImageAsTexture(
+renderer::Texture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName
 ) {
-  return renderer::OwningTexture(
+  return renderer::Texture(
     pRenderer,
     resources.loadStandaloneFullscreenImage(imageName));
 }
@@ -45,7 +45,7 @@ engine::TiledTexture makeUiSpriteSheet(
   const loader::Palette16& palette
 ) {
   return engine::TiledTexture{
-    renderer::OwningTexture{
+    renderer::Texture{
       pRenderer,
       resourceLoader.loadTiledFullscreenImage(
         "STATUS.MNI", palette)},

@@ -48,7 +48,7 @@ public:
 
 private:
   struct FrameData {
-    renderer::OwningTexture mImage;
+    renderer::Texture mImage;
     int mStartRow;
   };
 

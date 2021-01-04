@@ -35,7 +35,7 @@ public:
   bool isFinished() const;
 
 private:
-  renderer::OwningTexture mTextImage;
+  renderer::Texture mTextImage;
   renderer::Renderer* mpRenderer;
   engine::TimeDelta mElapsedTime = 0.0;
 };

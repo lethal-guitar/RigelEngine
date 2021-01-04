@@ -80,7 +80,7 @@ TextureAtlas::TextureAtlas(
     atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
   }
 
-  mAtlasTexture = OwningTexture{mpRenderer, std::move(atlas)};
+  mAtlasTexture = Texture{mpRenderer, std::move(atlas)};
 
   mCoordinatesMap.reserve(images.size());
   for (const auto& packedRect : rects) {

@@ -65,12 +65,12 @@ public:
 
 private:
   struct CollectedLetterIndicator {
-    renderer::OwningTexture mTexture;
+    renderer::Texture mTexture;
     base::Vector mPxPosition;
   };
 
   using InventoryItemTextureMap =
-    std::unordered_map<data::InventoryItemType, renderer::OwningTexture>;
+    std::unordered_map<data::InventoryItemType, renderer::Texture>;
   using CollectedLetterIndicatorMap =
     std::unordered_map<data::CollectableLetterType, CollectedLetterIndicator>;
 
@@ -101,9 +101,9 @@ private:
 
   std::uint32_t mElapsedFrames = 0;
 
-  renderer::OwningTexture mTopRightTexture;
-  renderer::OwningTexture mBottomLeftTexture;
-  renderer::OwningTexture mBottomRightTexture;
+  renderer::Texture mTopRightTexture;
+  renderer::Texture mBottomLeftTexture;
+  renderer::Texture mBottomRightTexture;
   InventoryItemTextureMap mInventoryTexturesByType;
   CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
   engine::TiledTexture* mpStatusSpriteSheetRenderer;

@@ -24,7 +24,7 @@ namespace rigel::renderer {
 using data::Image;
 
 
-void OwningTexture::render(
+void Texture::render(
   renderer::Renderer* renderer,
   const int x,
   const int y
@@ -34,7 +34,7 @@ void OwningTexture::render(
 }
 
 
-void OwningTexture::render(
+void Texture::render(
   renderer::Renderer* renderer,
   const base::Vector& position
 ) const {
@@ -42,7 +42,7 @@ void OwningTexture::render(
 }
 
 
-void OwningTexture::render(
+void Texture::render(
   renderer::Renderer* renderer,
   const base::Vector& position,
   const base::Rect<int>& sourceRect
@@ -55,7 +55,7 @@ void OwningTexture::render(
 }
 
 
-void OwningTexture::renderScaled(
+void Texture::renderScaled(
   renderer::Renderer* pRenderer,
   const base::Rect<int>& destRect
 ) const {
@@ -63,7 +63,7 @@ void OwningTexture::renderScaled(
 }
 
 
-void OwningTexture::render(
+void Texture::render(
   renderer::Renderer* pRenderer,
   const int x,
   const int y,
@@ -78,8 +78,8 @@ void OwningTexture::render(
 }
 
 
-OwningTexture::OwningTexture(renderer::Renderer* pRenderer, const Image& image)
-  : OwningTexture(
+Texture::Texture(renderer::Renderer* pRenderer, const Image& image)
+  : Texture(
       pRenderer->createTexture(image),
       static_cast<int>(image.width()),
       static_cast<int>(image.height()))
@@ -87,7 +87,7 @@ OwningTexture::OwningTexture(renderer::Renderer* pRenderer, const Image& image)
 }
 
 
-OwningTexture::~OwningTexture() {
+Texture::~Texture() {
   glDeleteTextures(1, &mId);
 }
 
@@ -110,7 +110,7 @@ RenderTargetTexture::RenderTargetTexture(
   const int width,
   const int height
 )
-  : OwningTexture(handles.texture, width, height)
+  : Texture(handles.texture, width, height)
   , mFboHandle(handles.fbo)
 {
 }

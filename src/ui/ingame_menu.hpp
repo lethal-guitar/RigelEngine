@@ -97,7 +97,7 @@ private:
     loader::Palette16 mPalette;
     engine::TiledTexture mUiSpriteSheet;
     MenuElementRenderer mMenuElementRenderer;
-    renderer::OwningTexture mMenuBackground;
+    renderer::Texture mMenuBackground;
     MenuNavigationHelper mNavigationHelper;
     std::vector<int> mItems;
     engine::TimeDelta mElapsedTime = 0;

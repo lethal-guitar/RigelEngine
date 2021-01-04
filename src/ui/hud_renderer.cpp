@@ -126,11 +126,11 @@ void drawLevelNumber(const int number, const TiledTexture& spriteSheet) {
 }
 
 
-OwningTexture actorToTexture(
+Texture actorToTexture(
   renderer::Renderer* pRenderer,
   const loader::ActorData& data
 ) {
-  return OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
+  return Texture(pRenderer, data.mFrames[0].mFrameImage);
 }
 
 

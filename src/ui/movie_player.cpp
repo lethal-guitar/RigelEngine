@@ -51,7 +51,7 @@ void MoviePlayer::playMovie(
     auto binder = renderer::RenderTargetTexture::Binder{mCanvas, mpRenderer};
     auto saved = renderer::setupDefaultState(mpRenderer);
 
-    auto baseImage = renderer::OwningTexture(mpRenderer, movie.mBaseImage);
+    auto baseImage = renderer::Texture(mpRenderer, movie.mBaseImage);
     baseImage.render(mpRenderer, 0, 0);
     mpRenderer->submitBatch();
   }
@@ -59,7 +59,7 @@ void MoviePlayer::playMovie(
   mAnimationFrames = utils::transformed(movie.mFrames,
     [this](const auto& frame) {
       auto texture =
-        renderer::OwningTexture(mpRenderer, frame.mReplacementImage);
+        renderer::Texture(mpRenderer, frame.mReplacementImage);
       return FrameData{std::move(texture), frame.mStartRow};
     });
 

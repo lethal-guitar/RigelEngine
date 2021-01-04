@@ -38,7 +38,7 @@ public:
 
 private:
   Context mContext;
-  renderer::OwningTexture mTexture;
+  renderer::Texture mTexture;
   bool mIsFirstLaunch;
 };
 

@@ -72,7 +72,7 @@ private:
   std::size_t mNextEvent = 0;
 
   renderer::Renderer* mpRenderer;
-  renderer::OwningTexture mBackgroundTexture;
+  renderer::Texture mBackgroundTexture;
   ui::MenuElementRenderer* mpTextRenderer;
 };
 

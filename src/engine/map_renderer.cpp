@@ -113,13 +113,13 @@ MapRenderer::MapRenderer(
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileSetTexture(
-      renderer::OwningTexture(pRenderer, renderData.mTileSetImage),
+      renderer::Texture(pRenderer, renderData.mTileSetImage),
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
   , mScrollMode(renderData.mBackdropScrollMode)
 {
   if (renderData.mSecondaryBackdropImage) {
-    mAlternativeBackdropTexture = renderer::OwningTexture(
+    mAlternativeBackdropTexture = renderer::Texture(
       mpRenderer, *renderData.mSecondaryBackdropImage);
   }
 }

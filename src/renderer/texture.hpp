@@ -34,22 +34,22 @@ namespace rigel::renderer {
  *
  * The ownership semantics are the same as for a std::unique_ptr.
  */
-class OwningTexture {
+class Texture {
 public:
-  OwningTexture() = default;
-  OwningTexture(Renderer* renderer, const data::Image& image);
-  ~OwningTexture();
+  Texture() = default;
+  Texture(Renderer* renderer, const data::Image& image);
+  ~Texture();
 
-  OwningTexture(OwningTexture&& other) noexcept
-    : OwningTexture(other.mId, other.mWidth, other.mHeight)
+  Texture(Texture&& other) noexcept
+    : Texture(other.mId, other.mWidth, other.mHeight)
   {
     other.mId = 0;
   }
 
-  OwningTexture(const OwningTexture&) = delete;
-  OwningTexture& operator=(const OwningTexture&) = delete;
+  Texture(const Texture&) = delete;
+  Texture& operator=(const Texture&) = delete;
 
-  OwningTexture& operator=(OwningTexture&& other) noexcept {
+  Texture& operator=(Texture&& other) noexcept {
     mId = other.mId;
     mWidth = other.mWidth;
     mHeight = other.mHeight;
@@ -98,7 +98,7 @@ public:
   }
 
 protected:
-  OwningTexture(TextureId id, int width, int height)
+  Texture(TextureId id, int width, int height)
     : mId(id)
     , mWidth(width)
     , mHeight(height)
@@ -119,7 +119,7 @@ protected:
 
 /** Utility class for render target type textures
  *
- * It manages life-time like OwningTexture, but creates a SDL_Texture with an
+ * It manages life-time like Texture, but creates a SDL_Texture with an
  * access type of SDL_TEXTUREACCESS_TARGET.
  *
  * It also offers a RAII helper class for safe binding/unbinding of the
@@ -158,7 +158,7 @@ protected:
  * Once the outermost scope's Binder is destroyed, the default render target
  * will be active again (i.e. drawing to the screen)
  */
-class RenderTargetTexture : public OwningTexture {
+class RenderTargetTexture : public Texture {
 public:
   friend class Binder;
 
@@ -191,7 +191,7 @@ public:
   RenderTargetTexture& operator=(const RenderTargetTexture&) = delete;
 
   RenderTargetTexture(RenderTargetTexture&& other) noexcept
-    : OwningTexture(std::move(other))
+    : Texture(std::move(other))
     , mFboHandle(other.mFboHandle)
   {
     other.mFboHandle = 0;
@@ -199,7 +199,7 @@ public:
 
 
   RenderTargetTexture& operator=(RenderTargetTexture&& other) noexcept {
-    static_cast<OwningTexture&>(*this) = std::move(other);
+    static_cast<Texture&>(*this) = std::move(other);
     mFboHandle = other.mFboHandle;
     other.mFboHandle = 0;
     return *this;
