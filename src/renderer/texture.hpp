@@ -122,31 +122,9 @@ public:
     return *this;
   }
 
-  friend class NonOwningTexture;
-
 protected:
   explicit OwningTexture(Renderer::TextureData data)
     : TextureBase(data)
-  {
-  }
-};
-
-
-/** Non-owning version of OwningTexture
- *
- * This has exactly the same interface as OwningTexture, but it doesn't
- * manage the underlying texture's life-time.
- *
- * It behaves like a raw pointer, and clients are responsible for ensuring
- * that the corresponding OwningTexture outlives any NonOwningTexture
- * instances.
- */
-class NonOwningTexture : public detail::TextureBase {
-public:
-  NonOwningTexture() = default;
-
-  explicit NonOwningTexture(const OwningTexture& texture) :
-    TextureBase(texture.mData)
   {
   }
 };
