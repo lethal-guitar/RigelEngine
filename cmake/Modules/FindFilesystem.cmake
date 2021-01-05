@@ -105,6 +105,13 @@ if(TARGET std::filesystem)
     return()
 endif()
 
+cmake_policy(PUSH)
+if(POLICY CMP0067)
+    # pass CMAKE_CXX_STANDARD to check_cxx_source_compiles()
+    # has to appear before including CheckCXXSourceCompiles module
+    cmake_policy(SET CMP0067 NEW)
+endif()
+
 include(CMakePushCheckState)
 include(CheckIncludeFileCXX)
 include(CheckCXXSourceCompiles)
@@ -229,3 +236,4 @@ if(Filesystem_FIND_REQUIRED AND NOT Filesystem_FOUND)
     message(FATAL_ERROR "Cannot Compile simple program using std::filesystem")
 endif()
 
+cmake_policy(POP)
