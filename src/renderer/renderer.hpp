@@ -64,22 +64,13 @@ public:
   public:
     explicit StateSaver(Renderer* pRenderer)
       : mpRenderer(pRenderer)
-      , mClipRect(pRenderer->clipRect())
-      , mGlobalTranslation(pRenderer->globalTranslation())
-      , mGlobalScale(pRenderer->globalScale())
-      , mRenderTarget(pRenderer->currentRenderTarget())
     {
+      pRenderer->pushState();
     }
 
     StateSaver(StateSaver&& other) noexcept
-      : mpRenderer(other.mpRenderer)
-      , mClipRect(other.mClipRect)
-      , mGlobalTranslation(other.mGlobalTranslation)
-      , mGlobalScale(other.mGlobalScale)
-      , mRenderTarget(other.mRenderTarget)
+      : mpRenderer(std::exchange(other.mpRenderer, nullptr))
     {
-      // Mark the moved-from object as such (see ~StateSaver)
-      other.mpRenderer = nullptr;
     }
 
     StateSaver& operator=(StateSaver&& other) noexcept {
@@ -91,13 +82,8 @@ public:
     }
 
     ~StateSaver() {
-      // A nullptr renderer indicates a moved-from state, where we shouldn't
-      // reset anything
       if (mpRenderer) {
-        mpRenderer->setRenderTarget(mRenderTarget);
-        mpRenderer->setClipRect(mClipRect);
-        mpRenderer->setGlobalTranslation(mGlobalTranslation);
-        mpRenderer->setGlobalScale(mGlobalScale);
+        mpRenderer->popState();
       }
     }
 
@@ -106,10 +92,6 @@ public:
 
   private:
     Renderer* mpRenderer;
-    std::optional<base::Rect<int>> mClipRect;
-    base::Vector mGlobalTranslation;
-    base::Point<float> mGlobalScale;
-    TextureId mRenderTarget;
   };
 
 
@@ -168,6 +150,10 @@ public:
   // State management API
   ////////////////////////////////////////////////////////////////////////
 
+  void pushState();
+  void popState();
+  void resetState();
+
   void setOverlayColor(const base::Color& color);
   void setColorModulation(const base::Color& colorModulation);
 
@@ -180,7 +166,6 @@ public:
   void setClipRect(const std::optional<base::Rect<int>>& clipRect);
   std::optional<base::Rect<int>> clipRect() const;
 
-  TextureId currentRenderTarget() const;
   void setRenderTarget(TextureId target);
 
   base::Size<int> windowSize() const;

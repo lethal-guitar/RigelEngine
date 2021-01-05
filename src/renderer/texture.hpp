@@ -172,7 +172,6 @@ public:
     Binder(TextureId, Renderer* pRenderer);
 
   private:
-    TextureId mPreviousRenderTarget;
     Renderer* mpRenderer;
   };
 

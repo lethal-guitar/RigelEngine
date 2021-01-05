@@ -296,6 +296,37 @@ GLuint createGlTexture(
 
 
 struct Renderer::Impl {
+  struct State {
+    std::optional<base::Rect<int>> mClipRect;
+    base::Color mColorModulation{255, 255, 255, 255};
+    base::Color mOverlayColor;
+    glm::vec2 mGlobalTranslation{0.0f, 0.0f};
+    glm::vec2 mGlobalScale{1.0f, 1.0f};
+    TextureId mRenderTargetTexture = 0;
+
+    friend bool operator==(const State& lhs, const State& rhs) {
+      return
+        std::tie(
+          lhs.mClipRect,
+          lhs.mColorModulation,
+          lhs.mOverlayColor,
+          lhs.mGlobalTranslation,
+          lhs.mGlobalScale,
+          lhs.mRenderTargetTexture) ==
+        std::tie(
+          rhs.mClipRect,
+          rhs.mColorModulation,
+          rhs.mOverlayColor,
+          rhs.mGlobalTranslation,
+          rhs.mGlobalScale,
+          rhs.mRenderTargetTexture);
+    }
+
+    friend bool operator!=(const State& lhs, const State& rhs) {
+      return !(lhs == rhs);
+    }
+  };
+
   SDL_Window* mpWindow;
 
   DummyVao mDummyVao;
@@ -307,10 +338,7 @@ struct Renderer::Impl {
   Shader mSolidColorShader;
   Shader mWaterEffectShader;
 
-  GLuint mLastUsedShader = 0;
   GLuint mLastUsedTexture = 0;
-  base::Color mLastColorModulation;
-  base::Color mLastOverlayColor;
   bool mTextureRepeatOn = false;
 
   RenderMode mRenderMode = RenderMode::SpriteBatch;
@@ -324,16 +352,11 @@ struct Renderer::Impl {
   TextureId mWaterSurfaceAnimTexture = 0;
   TextureId mWaterEffectColorMapTexture = 0;
 
-  TextureId mCurrentRenderTargetTexture = 0;
-  GLuint mCurrentFbo = 0;
   base::Size<int> mWindowSize;
   base::Size<int> mMaxWindowSize;
-  base::Size<int> mCurrentFramebufferSize;
 
-  glm::mat4 mProjectionMatrix;
-  std::optional<base::Rect<int>> mClipRect;
-  glm::vec2 mGlobalTranslation{0.0f, 0.0f};
-  glm::vec2 mGlobalScale{1.0f, 1.0f};
+  std::vector<State> mStateStack{State{}};
+  bool mStateChanged = true;
 
   explicit Impl(SDL_Window* pWindow)
     : mpWindow(pWindow)
@@ -360,10 +383,7 @@ struct Renderer::Impl {
           sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
           return base::Size<int>{displayMode.w, displayMode.h};
         }())
-    , mCurrentFramebufferSize(mWindowSize)
   {
-    using namespace std;
-
     // General configuration
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -380,11 +400,6 @@ struct Renderer::Impl {
     glEnableVertexAttribArray(1);
 
     // One-time setup for water effect shader
-    useShaderIfChanged(mWaterEffectShader);
-    mWaterEffectShader.setUniform("textureData", 0);
-    mWaterEffectShader.setUniform("maskData", 1);
-    mWaterEffectShader.setUniform("colorMapData", 2);
-
     mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
     mWaterEffectColorMapTexture = createTexture(
       createWaterEffectColorMapImage());
@@ -392,21 +407,22 @@ struct Renderer::Impl {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture);
     glActiveTexture(GL_TEXTURE0);
 
-    // One-time setup for textured quad shader
-    useShaderIfChanged(mTexturedQuadShader);
+    mWaterEffectShader.use();
+    mWaterEffectShader.setUniform("textureData", 0);
+    mWaterEffectShader.setUniform("maskData", 1);
+    mWaterEffectShader.setUniform("colorMapData", 2);
+
+    // One-time setup for textured quad shaders
+    mTexturedQuadShader.use();
     mTexturedQuadShader.setUniform("textureData", 0);
 
-    useShaderIfChanged(mSimpleTexturedQuadShader);
+    mSimpleTexturedQuadShader.use();
     mSimpleTexturedQuadShader.setUniform("textureData", 0);
-
-    // Remaining setup
-    onRenderTargetChanged();
-
-    setColorModulation({255, 255, 255, 255});
 
     mNumInternalTextures = mNumTextures;
   }
@@ -425,33 +441,13 @@ struct Renderer::Impl {
   }
 
 
-  void setOverlayColor(const base::Color& color) {
-    if (color != mLastOverlayColor) {
-      submitBatch();
-
-      mLastOverlayColor = color;
-      updateShaders();
-    }
-  }
-
-
-  void setColorModulation(const base::Color& colorModulation) {
-    if (colorModulation != mLastColorModulation) {
-      submitBatch();
-
-      mLastColorModulation = colorModulation;
-      updateShaders();
-    }
-  }
-
-
   void drawTexture(
     const TextureId texture,
     const TexCoords& sourceRect,
     const base::Rect<int>& destRect,
     const bool repeat
   ) {
-    setRenderModeIfChanged(RenderMode::SpriteBatch);
+    updateState(mRenderMode, RenderMode::SpriteBatch);
 
     if (texture != mLastUsedTexture) {
       submitBatch();
@@ -464,7 +460,7 @@ struct Renderer::Impl {
       submitBatch();
 
       mTextureRepeatOn = repeat;
-      updateShaders();
+      mStateChanged = true;
     }
 
     // x, y, tex_u, tex_v
@@ -480,6 +476,8 @@ struct Renderer::Impl {
     if (mBatchData.empty()) {
       return;
     }
+
+    commitChangedState();
 
     auto submitBatchedQuads = [this]() {
       glBufferData(
@@ -530,7 +528,8 @@ struct Renderer::Impl {
     const base::Color& color
   ) {
     // Note: No batching for now
-    setRenderModeIfChanged(RenderMode::NonTexturedRender);
+    updateState(mRenderMode, RenderMode::NonTexturedRender);
+    commitChangedState();
 
     // x, y, r, g, b, a
     GLfloat vertices[4 * (2 + 4)];
@@ -554,7 +553,8 @@ struct Renderer::Impl {
   ) {
     // Note: No batching for now, drawRectangle is only used for debugging at
     // the moment
-    setRenderModeIfChanged(RenderMode::NonTexturedRender);
+    updateState(mRenderMode, RenderMode::NonTexturedRender);
+    commitChangedState();
 
     const auto left = float(rect.left());
     const auto right = float(rect.right());
@@ -584,7 +584,8 @@ struct Renderer::Impl {
   ) {
     // Note: No batching for now, drawLine is only used for debugging at the
     // moment
-    setRenderModeIfChanged(RenderMode::NonTexturedRender);
+    updateState(mRenderMode, RenderMode::NonTexturedRender);
+    commitChangedState();
 
     const auto colorVec = toGlColor(color);
 
@@ -602,7 +603,7 @@ struct Renderer::Impl {
     const base::Vector& position,
     const base::Color& color
   ) {
-    setRenderModeIfChanged(RenderMode::Points);
+    updateState(mRenderMode, RenderMode::Points);
 
     float vertices[] = {
       float(position.x),
@@ -652,7 +653,7 @@ struct Renderer::Impl {
       batchQuadVertices(std::begin(vertices), std::end(vertices), 4);
     };
 
-    setRenderModeIfChanged(RenderMode::WaterEffect);
+    updateState(mRenderMode, RenderMode::WaterEffect);
 
     if (mLastUsedTexture != texture) {
       submitBatch();
@@ -679,75 +680,74 @@ struct Renderer::Impl {
   }
 
 
+  void pushState() {
+    mStateStack.push_back(mStateStack.back());
+  }
+
+
+  void popState() {
+    assert(mStateStack.size() > 1);
+
+    submitBatch();
+
+    mStateChanged = mStateStack.back() != *std::prev(mStateStack.end(), 2);
+    mStateStack.pop_back();
+  }
+
+
+  void resetState() {
+    submitBatch();
+
+    mStateStack.back() = State{};
+    mStateChanged = true;
+  }
+
+
+  void setOverlayColor(const base::Color& color) {
+    updateState(mStateStack.back().mOverlayColor, color);
+  }
+
+
+  void setColorModulation(const base::Color& color) {
+    updateState(mStateStack.back().mColorModulation, color);
+  }
+
+
   void setGlobalTranslation(const base::Vector& translation) {
     const auto glTranslation = glm::vec2{translation.x, translation.y};
-    if (glTranslation != mGlobalTranslation) {
-      submitBatch();
-
-      mGlobalTranslation = glTranslation;
-      updateProjectionMatrix();
-    }
+    updateState(mStateStack.back().mGlobalTranslation, glTranslation);
   }
 
 
   void setGlobalScale(const base::Point<float>& scale) {
     const auto glScale = glm::vec2{scale.x, scale.y};
-    if (glScale != mGlobalScale) {
-      submitBatch();
-
-      mGlobalScale = glScale;
-      updateProjectionMatrix();
-    }
+    updateState(mStateStack.back().mGlobalScale, glScale);
   }
 
 
   void setClipRect(const std::optional<base::Rect<int>>& clipRect) {
-    if (clipRect == mClipRect) {
-      return;
-    }
-
-    submitBatch();
-
-    mClipRect = clipRect;
-    if (mClipRect) {
-      glEnable(GL_SCISSOR_TEST);
-
-      setScissorBox(*clipRect, mCurrentFramebufferSize);
-    } else {
-      glDisable(GL_SCISSOR_TEST);
-    }
+    updateState(mStateStack.back().mClipRect, clipRect);
   }
 
 
   void setRenderTarget(const TextureId target) {
-    if (target == mCurrentRenderTargetTexture) {
-      return;
+    updateState(mStateStack.back().mRenderTargetTexture, target);
+  }
+
+
+  template <typename StateT>
+  void updateState(StateT& state, const StateT& newValue) {
+    if (state != newValue) {
+      submitBatch();
+
+      state = newValue;
+      mStateChanged = true;
     }
-
-    submitBatch();
-
-    if (target != 0) {
-      const auto iData = mRenderTargetDict.find(target);
-      if (iData == mRenderTargetDict.end()) {
-        throw std::invalid_argument("Texture ID is not a render target");
-      }
-
-      mCurrentFbo = iData->second.mFbo;
-      mCurrentFramebufferSize = iData->second.mSize;
-    } else {
-      mCurrentFbo = 0;
-      mCurrentFramebufferSize.width = mWindowSize.width;
-      mCurrentFramebufferSize.height = mWindowSize.height;
-    }
-
-    mCurrentRenderTargetTexture = target;
-
-    onRenderTargetChanged();
   }
 
 
   void swapBuffers() {
-    assert(mCurrentRenderTargetTexture == 0);
+    assert(mStateStack.back().mRenderTargetTexture == 0);
 
     submitBatch();
     SDL_GL_SwapWindow(mpWindow);
@@ -755,14 +755,14 @@ struct Renderer::Impl {
     const auto actualWindowSize = getSize(mpWindow);
     if (mWindowSize != actualWindowSize) {
       mWindowSize = actualWindowSize;
-      mCurrentFramebufferSize.width = mWindowSize.width;
-      mCurrentFramebufferSize.height = mWindowSize.height;
-      onRenderTargetChanged();
+      mStateChanged = true;
     }
   }
 
 
   void clear(const base::Color& clearColor) {
+    commitChangedState();
+
     const auto glColor = toGlColor(clearColor);
     glClearColor(glColor.r, glColor.g, glColor.b, glColor.a);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -797,34 +797,66 @@ struct Renderer::Impl {
   }
 
 
-  void setRenderModeIfChanged(const RenderMode mode) {
-    if (mRenderMode != mode) {
-      submitBatch();
-
-      mRenderMode = mode;
-      updateShaders();
+  void commitChangedState() {
+    if (!mStateChanged) {
+      return;
     }
-  }
+
+    mStateChanged = false;
+
+    const auto& state = mStateStack.back();
+
+    base::Extents framebufferSize;
+    if (state.mRenderTargetTexture != 0) {
+      const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+      assert(iData != mRenderTargetDict.end());
+
+      glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
+      framebufferSize = iData->second.mSize;
+    } else {
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      framebufferSize = mWindowSize;
+    }
+
+    glViewport(0, 0, framebufferSize.width, framebufferSize.height);
+
+    if (state.mClipRect) {
+      glEnable(GL_SCISSOR_TEST);
+      setScissorBox(*state.mClipRect, framebufferSize);
+    } else {
+      glDisable(GL_SCISSOR_TEST);
+    }
 
 
-  void updateShaders() {
+    auto useShader = [&](Shader& shader) {
+      shader.use();
+
+      const auto projection = glm::ortho(
+        0.0f,
+        float(framebufferSize.width),
+        float(framebufferSize.height),
+        0.0f);
+      const auto projectionMatrix = glm::scale(
+        glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
+        glm::vec3(state.mGlobalScale, 1.0f));
+      shader.setUniform("transform", projectionMatrix);
+    };
+
     switch (mRenderMode) {
       case RenderMode::SpriteBatch:
         if (
           mTextureRepeatOn ||
-          mLastOverlayColor != base::Color{} ||
-          mLastColorModulation != base::Color{255, 255, 255, 255}
+          state.mOverlayColor != base::Color{} ||
+          state.mColorModulation != base::Color{255, 255, 255, 255}
         ) {
-          useShaderIfChanged(mTexturedQuadShader);
-          mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
+          useShader(mTexturedQuadShader);
           mTexturedQuadShader.setUniform("enableRepeat", mTextureRepeatOn);
           mTexturedQuadShader.setUniform(
-            "colorModulation", toGlColor(mLastColorModulation));
+            "colorModulation", toGlColor(state.mColorModulation));
           mTexturedQuadShader.setUniform(
-            "overlayColor", toGlColor(mLastOverlayColor));
+            "overlayColor", toGlColor(state.mOverlayColor));
         } else {
-          useShaderIfChanged(mSimpleTexturedQuadShader);
-          mSimpleTexturedQuadShader.setUniform("transform", mProjectionMatrix);
+          useShader(mSimpleTexturedQuadShader);
         }
 
         glVertexAttribPointer(
@@ -845,8 +877,7 @@ struct Renderer::Impl {
 
       case RenderMode::Points:
       case RenderMode::NonTexturedRender:
-        useShaderIfChanged(mSolidColorShader);
-        mSolidColorShader.setUniform("transform", mProjectionMatrix);
+        useShader(mSolidColorShader);
         glVertexAttribPointer(
           0,
           2,
@@ -864,8 +895,7 @@ struct Renderer::Impl {
         break;
 
       case RenderMode::WaterEffect:
-        useShaderIfChanged(mWaterEffectShader);
-        mWaterEffectShader.setUniform("transform", mProjectionMatrix);
+        useShader(mWaterEffectShader);
         glVertexAttribPointer(
           0,
           2,
@@ -902,7 +932,7 @@ struct Renderer::Impl {
       textureHandle,
       0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFbo);
+    mStateChanged = true;
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
 
     mRenderTargetDict.insert({textureHandle, {{width, height}, fboHandle}});
@@ -950,41 +980,6 @@ struct Renderer::Impl {
     }
 
     glDeleteTextures(1, &texture);
-  }
-
-
-  void useShaderIfChanged(Shader& shader) {
-    if (shader.handle() != mLastUsedShader) {
-      shader.use();
-      mLastUsedShader = shader.handle();
-    }
-  }
-
-
-  void onRenderTargetChanged() {
-    glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFbo);
-    glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
-
-    updateProjectionMatrix();
-
-    if (mClipRect) {
-      setScissorBox(*mClipRect, mCurrentFramebufferSize);
-    }
-  }
-
-
-  void updateProjectionMatrix() {
-    const auto projection = glm::ortho(
-      0.0f,
-      float(mCurrentFramebufferSize.width),
-      float(mCurrentFramebufferSize.height),
-      0.0f);
-
-    mProjectionMatrix = glm::scale(
-      glm::translate(projection, glm::vec3(mGlobalTranslation, 0.0f)),
-      glm::vec3(mGlobalScale, 1.0f));
-
-    updateShaders();
   }
 };
 
@@ -1067,6 +1062,21 @@ void Renderer::drawWaterEffect(
 }
 
 
+void Renderer::pushState() {
+  mpImpl->pushState();
+}
+
+
+void Renderer::popState() {
+  mpImpl->popState();
+}
+
+
+void Renderer::resetState() {
+  mpImpl->resetState();
+}
+
+
 void Renderer::setGlobalTranslation(const base::Vector& translation) {
   mpImpl->setGlobalTranslation(translation);
 }
@@ -1074,8 +1084,8 @@ void Renderer::setGlobalTranslation(const base::Vector& translation) {
 
 base::Vector Renderer::globalTranslation() const {
   return base::Vector{
-    static_cast<int>(mpImpl->mGlobalTranslation.x),
-    static_cast<int>(mpImpl->mGlobalTranslation.y)};
+    static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.x),
+    static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.y)};
 }
 
 
@@ -1085,7 +1095,7 @@ void Renderer::setGlobalScale(const base::Point<float>& scale) {
 
 
 base::Point<float> Renderer::globalScale() const {
-  return {mpImpl->mGlobalScale.x, mpImpl->mGlobalScale.y};
+  return {mpImpl->mStateStack.back().mGlobalScale.x, mpImpl->mStateStack.back().mGlobalScale.y};
 }
 
 
@@ -1095,7 +1105,7 @@ void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
 
 
 std::optional<base::Rect<int>> Renderer::clipRect() const {
-  return mpImpl->mClipRect;
+  return mpImpl->mStateStack.back().mClipRect;
 }
 
 
@@ -1106,11 +1116,6 @@ base::Size<int> Renderer::windowSize() const {
 
 base::Size<int> Renderer::maxWindowSize() const {
   return mpImpl->mMaxWindowSize;
-}
-
-
-TextureId Renderer::currentRenderTarget() const {
-  return mpImpl->mCurrentRenderTargetTexture;
 }
 
 
