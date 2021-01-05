@@ -25,6 +25,62 @@ namespace rigel::renderer {
 
 namespace {
 
+#ifdef RIGEL_USE_GL_ES
+
+const auto SHADER_PREAMBLE = R"shd(
+#version 100
+
+#define ATTRIBUTE attribute
+#define OUT varying
+#define IN varying
+#define TEXTURE_LOOKUP texture2D
+#define OUTPUT_COLOR gl_FragColor
+#define OUTPUT_COLOR_DECLARATION
+#define SET_POINT_SIZE(size) gl_PointSize = size;
+#define HIGHP highp
+
+precision mediump float;
+)shd";
+
+#else
+
+// We generally want to stick to GLSL version 130 (from OpenGL 3.0) in order to
+// maximize compatibility with older graphics cards. Unfortunately, Mac OS only
+// supports GLSL 150 (from OpenGL 3.2), even when requesting a OpenGL 3.0
+// context. Therefore, we use different GLSL versions depending on the
+// platform.
+#if defined(__APPLE__)
+const auto SHADER_PREAMBLE = R"shd(
+#version 150
+
+#define ATTRIBUTE in
+#define OUT out
+#define IN in
+#define TEXTURE_LOOKUP texture
+#define OUTPUT_COLOR outputColor
+#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
+#define SET_POINT_SIZE
+#define HIGHP
+)shd";
+#else
+const auto SHADER_PREAMBLE = R"shd(
+#version 130
+
+#define ATTRIBUTE in
+#define OUT out
+#define IN in
+#define TEXTURE_LOOKUP texture2D
+#define OUTPUT_COLOR outputColor
+#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
+#define SET_POINT_SIZE
+#define HIGHP
+)shd";
+#endif
+
+#endif
+
+
+
 GlHandleWrapper compileShader(const std::string& source, GLenum type) {
   auto shader = GlHandleWrapper{glCreateShader(type), glDeleteShader};
   const auto sourcePtr = source.c_str();
@@ -58,16 +114,15 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type) {
 
 
 Shader::Shader(
-  const char* preamble,
   const char* vertexSource,
   const char* fragmentSource,
   std::initializer_list<std::string> attributesToBind)
   : mProgram(glCreateProgram(), glDeleteProgram)
 {
   auto vertexShader = compileShader(
-    std::string{preamble} + vertexSource, GL_VERTEX_SHADER);
+    std::string{SHADER_PREAMBLE} + vertexSource, GL_VERTEX_SHADER);
   auto fragmentShader = compileShader(
-    std::string{preamble} + fragmentSource, GL_FRAGMENT_SHADER);
+    std::string{SHADER_PREAMBLE} + fragmentSource, GL_FRAGMENT_SHADER);
 
   glAttachShader(mProgram.mHandle, vertexShader.mHandle);
   glAttachShader(mProgram.mHandle, fragmentShader.mHandle);

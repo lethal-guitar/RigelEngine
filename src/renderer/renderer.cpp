@@ -81,61 +81,6 @@ enum class RenderMode {
 };
 
 
-#ifdef RIGEL_USE_GL_ES
-
-const auto SHADER_PREAMBLE = R"shd(
-#version 100
-
-#define ATTRIBUTE attribute
-#define OUT varying
-#define IN varying
-#define TEXTURE_LOOKUP texture2D
-#define OUTPUT_COLOR gl_FragColor
-#define OUTPUT_COLOR_DECLARATION
-#define SET_POINT_SIZE(size) gl_PointSize = size;
-#define HIGHP highp
-
-precision mediump float;
-)shd";
-
-#else
-
-// We generally want to stick to GLSL version 130 (from OpenGL 3.0) in order to
-// maximize compatibility with older graphics cards. Unfortunately, Mac OS only
-// supports GLSL 150 (from OpenGL 3.2), even when requesting a OpenGL 3.0
-// context. Therefore, we use different GLSL versions depending on the
-// platform.
-#if defined(__APPLE__)
-const auto SHADER_PREAMBLE = R"shd(
-#version 150
-
-#define ATTRIBUTE in
-#define OUT out
-#define IN in
-#define TEXTURE_LOOKUP texture
-#define OUTPUT_COLOR outputColor
-#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
-#define SET_POINT_SIZE
-#define HIGHP
-)shd";
-#else
-const auto SHADER_PREAMBLE = R"shd(
-#version 130
-
-#define ATTRIBUTE in
-#define OUT out
-#define IN in
-#define TEXTURE_LOOKUP texture2D
-#define OUTPUT_COLOR outputColor
-#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
-#define SET_POINT_SIZE
-#define HIGHP
-)shd";
-#endif
-
-#endif
-
-
 const auto VERTEX_SOURCE = R"shd(
 ATTRIBUTE HIGHP vec2 position;
 ATTRIBUTE HIGHP vec2 texCoord;
@@ -558,22 +503,18 @@ struct Renderer::Impl {
   explicit Impl(SDL_Window* pWindow)
     : mpWindow(pWindow)
     , mTexturedQuadShader(
-        SHADER_PREAMBLE,
         VERTEX_SOURCE,
         FRAGMENT_SOURCE,
         {"position", "texCoord"})
     , mSimpleTexturedQuadShader(
-        SHADER_PREAMBLE,
         VERTEX_SOURCE,
         FRAGMENT_SOURCE_SIMPLE,
         {"position", "texCoord"})
     , mSolidColorShader(
-        SHADER_PREAMBLE,
         VERTEX_SOURCE_SOLID,
         FRAGMENT_SOURCE_SOLID,
         {"position", "color"})
     , mWaterEffectShader(
-        SHADER_PREAMBLE,
         VERTEX_SOURCE_WATER_EFFECT,
         FRAGMENT_SOURCE_WATER_EFFECT,
         {"position", "texCoordMask"})

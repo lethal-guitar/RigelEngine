@@ -69,7 +69,6 @@ private:
 class Shader {
 public:
   Shader(
-    const char* preamble,
     const char* vertexSource,
     const char* fragmentSource,
     std::initializer_list<std::string> attributesToBind);
