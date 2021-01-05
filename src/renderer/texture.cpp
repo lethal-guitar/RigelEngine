@@ -81,14 +81,14 @@ Texture::~Texture() {
 
 RenderTargetTexture::RenderTargetTexture(
   renderer::Renderer* pRenderer,
-  const std::size_t width,
-  const std::size_t height
+  const int width,
+  const int height
 )
   : Texture(
       pRenderer,
-      pRenderer->createRenderTargetTexture(int(width), int(height)),
-      static_cast<int>(width),
-      static_cast<int>(height))
+      pRenderer->createRenderTargetTexture(width, height),
+      width,
+      height)
 {
 }
 

@@ -21,8 +21,6 @@
 #include "data/image.hpp"
 #include "renderer/renderer.hpp"
 
-#include <cstddef>
-
 
 namespace rigel::renderer {
 
@@ -178,10 +176,7 @@ public:
     Renderer* mpRenderer;
   };
 
-  RenderTargetTexture(
-    Renderer* pRenderer,
-    std::size_t width,
-    std::size_t height);
+  RenderTargetTexture(Renderer* pRenderer, int width, int height);
 };
 
 
