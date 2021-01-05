@@ -86,20 +86,6 @@ private:
     ExecutionTimedOut,
   };
 
-  struct CanvasBinder {
-    CanvasBinder(
-      renderer::RenderTargetTexture& canvas,
-      renderer::Renderer* pRenderer
-    )
-      : mBinder(canvas, pRenderer)
-      , mStateSaver(renderer::setupDefaultState(pRenderer))
-    {
-    }
-
-    renderer::RenderTargetTexture::Binder mBinder;
-    renderer::Renderer::StateSaver mStateSaver;
-  };
-
   struct DelayState {
     explicit DelayState(const int ticksToWait)
       : mTicksToWait(ticksToWait)
@@ -210,7 +196,6 @@ private:
   MenuElementRenderer mMenuElementRenderer;
 
   renderer::RenderTargetTexture mCanvas;
-  std::optional<CanvasBinder> mBoundCanvasState;
 
   data::script::Script mCurrentInstructions;
   std::size_t mProgramCounter;

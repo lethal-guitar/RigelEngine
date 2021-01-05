@@ -103,8 +103,9 @@ void DukeScriptRunner::executeScript(const data::script::Script& script) {
 void DukeScriptRunner::clearCanvas() {
   assert(hasFinishedExecution() || mState == State::ReadyToExecute);
 
-  const auto binder = CanvasBinder{mCanvas, mpRenderer};
+  bindCanvas();
   mpRenderer->clear({0, 0, 0, 0});
+  unbindCanvas();
 }
 
 
@@ -723,12 +724,14 @@ bool DukeScriptRunner::hasCheckBoxes() const {
 
 
 void DukeScriptRunner::bindCanvas() {
-  mBoundCanvasState = CanvasBinder{mCanvas, mpRenderer};
+  mpRenderer->pushState();
+  mpRenderer->resetState();
+  mpRenderer->setRenderTarget(mCanvas.data());
 }
 
 
 void DukeScriptRunner::unbindCanvas() {
-  mBoundCanvasState = std::nullopt;
+  mpRenderer->popState();
 }
 
 }

@@ -39,7 +39,6 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel {
 
 using namespace engine;
-using RenderTargetBinder = renderer::RenderTargetTexture::Binder;
 
 namespace {
 
@@ -99,12 +98,10 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 }
 
 
-[[nodiscard]] auto setupRenderingViewport(
+void setupRenderingViewport(
   renderer::Renderer* pRenderer,
   const bool perElementUpscaling
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
-
   if (perElementUpscaling) {
     const auto [offset, size, scale] = renderer::determineViewPort(pRenderer);
     pRenderer->setGlobalScale(scale);
@@ -113,21 +110,17 @@ auto loadScripts(const loader::ResourceLoader& resources) {
   } else {
     pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewPortSize});
   }
-
-  return saved;
 }
 
 
-[[nodiscard]] std::optional<renderer::Renderer::StateSaver> setupPresentationViewport(
+void setupPresentationViewport(
   renderer::Renderer* pRenderer,
   const bool perElementUpscaling,
   const bool isWidescreenFrame
 ) {
   if (perElementUpscaling) {
-    return std::nullopt;
+    return;
   }
-
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
 
   const auto info = renderer::determineViewPort(pRenderer);
   pRenderer->setGlobalScale(info.mScale);
@@ -139,8 +132,6 @@ auto loadScripts(const loader::ResourceLoader& resources) {
   } else {
     pRenderer->setGlobalTranslation(info.mOffset);
   }
-
-  return std::optional{std::move(saved)};
 }
 
 
@@ -323,10 +314,12 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
   mCurrentFrameIsWidescreen = false;
 
   {
-    RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
+    auto saved = renderer::Renderer::StateSaver{&mRenderer};
+    mRenderer.setRenderTarget(mRenderTarget.data());
+
     mRenderer.clear();
 
-    auto saved = setupRenderingViewport(
+    setupRenderingViewport(
       &mRenderer, mpUserProfile->mOptions.mPerElementUpscalingEnabled);
 
     auto pMaybeNextMode =
@@ -344,7 +337,8 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
     mRenderer.clear();
 
     {
-      auto saved = setupPresentationViewport(
+      auto saved = renderer::Renderer::StateSaver{&mRenderer};
+      setupPresentationViewport(
         &mRenderer,
         mpUserProfile->mOptions.mPerElementUpscalingEnabled,
         mCurrentFrameIsWidescreen);
@@ -432,9 +426,9 @@ bool Game::handleEvent(const SDL_Event& event) {
 void Game::performScreenFadeBlocking(const FadeType type) {
   using namespace std::chrono;
 
-  renderer::DefaultRenderTargetBinder bindDefaultRenderTarget(&mRenderer);
-  auto defaultStateGuard = renderer::setupDefaultState(&mRenderer);
-  auto presentationStateGuard = setupPresentationViewport(
+  auto saved = renderer::Renderer::StateSaver{&mRenderer};
+  mRenderer.resetState();
+  setupPresentationViewport(
     &mRenderer,
     mpUserProfile->mOptions.mPerElementUpscalingEnabled,
     mCurrentFrameIsWidescreen);
@@ -460,8 +454,6 @@ void Game::performScreenFadeBlocking(const FadeType type) {
       break;
     }
   }
-
-  mRenderer.setColorModulation({255, 255, 255, 255});
 
   // Pretend that the fade didn't take any time
   mLastTime = base::Clock::now();
@@ -564,8 +556,9 @@ void Game::fadeOutScreen() {
   performScreenFadeBlocking(FadeType::Out);
 
   // Clear render canvas after a fade-out
-  RenderTargetBinder bindRenderTarget(mRenderTarget, &mRenderer);
-  auto saved = renderer::setupDefaultState(&mRenderer);
+  const auto saved = renderer::Renderer::StateSaver{&mRenderer};
+  mRenderer.resetState();
+  mRenderer.setRenderTarget(mRenderTarget.data());
 
   mRenderer.clear();
 

@@ -647,9 +647,9 @@ void GameWorld::render() {
       drawMapAndSprites(viewPortSize);
 
       {
-        const auto binder =
-          renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
-        const auto defaultStateGuard = renderer::setupDefaultState(mpRenderer);
+        const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+        mpRenderer->resetState();
+        mpRenderer->setRenderTarget(mLowResLayer.data());
 
         mpRenderer->clear({0, 0, 0, 0});
         mpState->mParticles.render(mpState->mCamera.position());
@@ -710,7 +710,9 @@ void GameWorld::render() {
       auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
       drawTopRow();
     } else {
-      const auto saved = renderer::setupDefaultState(mpRenderer);
+      const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+      mpRenderer->setGlobalTranslation({});
+      mpRenderer->setClipRect({});
       drawTopRow();
 
       mpRenderer->setGlobalTranslation(base::Vector{

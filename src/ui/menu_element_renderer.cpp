@@ -265,6 +265,7 @@ void MenuElementRenderer::drawBigText(
   const std::string& text,
   const base::Color& color
 ) const {
+  const auto saved = renderer::Renderer::StateSaver{ mpRenderer };
   mpRenderer->setColorModulation(color);
 
   for (auto i=0u; i<text.size(); ++i) {
@@ -292,8 +293,6 @@ void MenuElementRenderer::drawBigText(
     const auto position = static_cast<int>(i);
     mBigTextTexture.renderTileSlice(index, {x + position, y-1});
   }
-
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 

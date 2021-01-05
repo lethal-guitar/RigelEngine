@@ -168,29 +168,13 @@ public:
     Binder(Binder&&);
     Binder& operator=(Binder&&);
 
-  protected:
+  private:
     Binder(TextureId, Renderer* pRenderer);
 
-  private:
     Renderer* mpRenderer;
   };
 
   RenderTargetTexture(Renderer* pRenderer, int width, int height);
 };
-
-
-class DefaultRenderTargetBinder : public RenderTargetTexture::Binder {
-public:
-  explicit DefaultRenderTargetBinder(renderer::Renderer* pRenderer);
-};
-
-
-[[nodiscard]] inline auto setupDefaultState(Renderer* pRenderer) {
-  auto saved = Renderer::StateSaver{pRenderer};
-  pRenderer->setGlobalTranslation({});
-  pRenderer->setGlobalScale({1.0f, 1.0f});
-  pRenderer->setClipRect({});
-  return saved;
-}
 
 }

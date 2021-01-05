@@ -133,10 +133,4 @@ auto RenderTargetTexture::Binder::operator=(
   return *this;
 }
 
-
-DefaultRenderTargetBinder::DefaultRenderTargetBinder(Renderer* pRenderer)
-  : Binder(0, pRenderer)
-{
-}
-
 }
