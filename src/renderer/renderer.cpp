@@ -38,7 +38,7 @@ namespace rigel::renderer {
 
 namespace {
 
-const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
+const GLushort QUAD_INDICES[] = { 0, 2, 1, 2, 3, 1 };
 
 constexpr auto MAX_QUADS_PER_BATCH = 1280u;
 constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
@@ -402,6 +402,7 @@ struct Renderer::Impl {
   {
     // General configuration
     glDisable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
