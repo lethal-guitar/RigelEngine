@@ -73,13 +73,7 @@ public:
     {
     }
 
-    StateSaver& operator=(StateSaver&& other) noexcept {
-      if (&other != this) {
-        *this = std::move(other);
-      }
-
-      return *this;
-    }
+    StateSaver& operator=(StateSaver&& other) = delete;
 
     ~StateSaver() {
       if (mpRenderer) {
