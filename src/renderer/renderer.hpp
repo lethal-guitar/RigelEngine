@@ -70,8 +70,7 @@ public:
   void drawTexture(
     TextureId texture,
     const TexCoords& sourceRect,
-    const base::Rect<int>& destRect,
-    bool repeat = false);
+    const base::Rect<int>& destRect);
 
   void drawFilledRectangle(
     const base::Rect<int>& rect,
@@ -122,6 +121,7 @@ public:
 
   void setOverlayColor(const base::Color& color);
   void setColorModulation(const base::Color& colorModulation);
+  void setTextureRepeatEnabled(bool enable);
 
   void setGlobalTranslation(const base::Vector& translation);
   base::Vector globalTranslation() const;

@@ -162,12 +162,13 @@ void MapRenderer::renderBackdrop(
     mBackdropTexture.height()
   };
 
+  const auto saved = renderer::saveState(mpRenderer);
+  mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
     renderer::toTexCoords(
       {offset, sourceRectSize}, backdropWidth, mBackdropTexture.height()),
-    {{}, sourceRectSize},
-    true);
+    {{}, sourceRectSize});
 }
 
 

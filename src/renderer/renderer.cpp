@@ -303,6 +303,7 @@ struct Renderer::Impl {
     glm::vec2 mGlobalTranslation{0.0f, 0.0f};
     glm::vec2 mGlobalScale{1.0f, 1.0f};
     TextureId mRenderTargetTexture = 0;
+    bool mTextureRepeatEnabled = false;
 
     friend bool operator==(const State& lhs, const State& rhs) {
       return
@@ -312,14 +313,16 @@ struct Renderer::Impl {
           lhs.mOverlayColor,
           lhs.mGlobalTranslation,
           lhs.mGlobalScale,
-          lhs.mRenderTargetTexture) ==
+          lhs.mRenderTargetTexture,
+          lhs.mTextureRepeatEnabled) ==
         std::tie(
           rhs.mClipRect,
           rhs.mColorModulation,
           rhs.mOverlayColor,
           rhs.mGlobalTranslation,
           rhs.mGlobalScale,
-          rhs.mRenderTargetTexture);
+          rhs.mRenderTargetTexture,
+          rhs.mTextureRepeatEnabled);
     }
 
     friend bool operator!=(const State& lhs, const State& rhs) {
@@ -339,7 +342,6 @@ struct Renderer::Impl {
   Shader mWaterEffectShader;
 
   GLuint mLastUsedTexture = 0;
-  bool mTextureRepeatOn = false;
 
   RenderMode mRenderMode = RenderMode::SpriteBatch;
 
@@ -444,8 +446,7 @@ struct Renderer::Impl {
   void drawTexture(
     const TextureId texture,
     const TexCoords& sourceRect,
-    const base::Rect<int>& destRect,
-    const bool repeat
+    const base::Rect<int>& destRect
   ) {
     updateState(mRenderMode, RenderMode::SpriteBatch);
 
@@ -454,13 +455,6 @@ struct Renderer::Impl {
 
       glBindTexture(GL_TEXTURE_2D, texture);
       mLastUsedTexture = texture;
-    }
-
-    if (repeat != mTextureRepeatOn) {
-      submitBatch();
-
-      mTextureRepeatOn = repeat;
-      mStateChanged = true;
     }
 
     // x, y, tex_u, tex_v
@@ -713,6 +707,11 @@ struct Renderer::Impl {
   }
 
 
+  void setTextureRepeatEnabled(const bool enable) {
+    updateState(mStateStack.back().mTextureRepeatEnabled, enable);
+  }
+
+
   void setGlobalTranslation(const base::Vector& translation) {
     const auto glTranslation = glm::vec2{translation.x, translation.y};
     updateState(mStateStack.back().mGlobalTranslation, glTranslation);
@@ -845,12 +844,13 @@ struct Renderer::Impl {
     switch (mRenderMode) {
       case RenderMode::SpriteBatch:
         if (
-          mTextureRepeatOn ||
+          state.mTextureRepeatEnabled ||
           state.mOverlayColor != base::Color{} ||
           state.mColorModulation != base::Color{255, 255, 255, 255}
         ) {
           useShader(mTexturedQuadShader);
-          mTexturedQuadShader.setUniform("enableRepeat", mTextureRepeatOn);
+          mTexturedQuadShader.setUniform(
+            "enableRepeat", state.mTextureRepeatEnabled);
           mTexturedQuadShader.setUniform(
             "colorModulation", toGlColor(state.mColorModulation));
           mTexturedQuadShader.setUniform(
@@ -1003,13 +1003,17 @@ void Renderer::setColorModulation(const base::Color& colorModulation) {
 }
 
 
+void Renderer::setTextureRepeatEnabled(const bool enable) {
+  mpImpl->setTextureRepeatEnabled(enable);
+}
+
+
 void Renderer::drawTexture(
   const TextureId texture,
   const TexCoords& sourceRect,
-  const base::Rect<int>& destRect,
-  const bool repeat
+  const base::Rect<int>& destRect
 ) {
-  mpImpl->drawTexture(texture, sourceRect, destRect, repeat);
+  mpImpl->drawTexture(texture, sourceRect, destRect);
 }
 
 
