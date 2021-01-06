@@ -77,7 +77,7 @@ struct RenderTarget {
 };
 
 
-enum class RenderMode {
+enum class RenderMode : std::uint8_t {
   SpriteBatch,
   NonTexturedRender,
   Points,
@@ -340,43 +340,40 @@ struct Renderer::Impl {
     }
   };
 
-  SDL_Window* mpWindow;
-
-  DummyVao mDummyVao;
-  GLuint mStreamVbo = 0;
+  // hot - meant to fit into a single cache line.
+  // needed for batching/rendering
+  std::vector<GLfloat> mBatchData;
+  std::vector<State> mStateStack{State{}};
+  GLuint mLastUsedTexture = 0;
   GLuint mQuadIndicesEbo = 0;
+  std::uint16_t mBatchSize = 0;
+  RenderMode mRenderMode = RenderMode::SpriteBatch;
+  bool mStateChanged = true;
 
+  // warm - needed for committing state changes
+  State mLastCommittedState;
+  std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
   Shader mTexturedQuadShader;
   Shader mSimpleTexturedQuadShader;
   Shader mSolidColorShader;
   Shader mWaterEffectShader;
+  base::Size<int> mWindowSize;
+  base::Size<int> mLastKnownWindowSize;
+  SDL_Window* mpWindow;
+  RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
 
-  GLuint mLastUsedTexture = 0;
-
-  RenderMode mRenderMode = RenderMode::SpriteBatch;
-
-  std::vector<GLfloat> mBatchData;
-  std::uint16_t mBatchSize = 0;
-
-  std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
+  // cold
+  base::Size<int> mMaxWindowSize;
   int mNumTextures = 0;
   int mNumInternalTextures = 0;
-
   TextureId mWaterSurfaceAnimTexture = 0;
   TextureId mWaterEffectColorMapTexture = 0;
+  DummyVao mDummyVao;
+  GLuint mStreamVbo = 0;
 
-  base::Size<int> mWindowSize;
-  base::Size<int> mMaxWindowSize;
-
-  std::vector<State> mStateStack{State{}};
-  State mLastCommittedState;
-  base::Size<int> mLastKnownWindowSize;
-  RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
-  bool mStateChanged = true;
 
   explicit Impl(SDL_Window* pWindow)
-    : mpWindow(pWindow)
-    , mTexturedQuadShader(
+    : mTexturedQuadShader(
         VERTEX_SOURCE,
         FRAGMENT_SOURCE,
         {"position", "texCoord"})
@@ -393,6 +390,7 @@ struct Renderer::Impl {
         FRAGMENT_SOURCE_WATER_EFFECT,
         {"position", "texCoordMask"})
     , mWindowSize(getSize(pWindow))
+    , mpWindow(pWindow)
     , mMaxWindowSize(
         [pWindow]() {
           SDL_DisplayMode displayMode;
