@@ -40,6 +40,9 @@ namespace {
 
 const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
 
+constexpr auto MAX_QUADS_PER_BATCH = 1280u;
+constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
+
 
 constexpr auto WATER_MASK_WIDTH = 8;
 constexpr auto WATER_MASK_HEIGHT = 8;
@@ -341,7 +344,7 @@ struct Renderer::Impl {
 
   DummyVao mDummyVao;
   GLuint mStreamVbo = 0;
-  GLuint mStreamEbo = 0;
+  GLuint mQuadIndicesEbo = 0;
 
   Shader mTexturedQuadShader;
   Shader mSimpleTexturedQuadShader;
@@ -353,7 +356,8 @@ struct Renderer::Impl {
   RenderMode mRenderMode = RenderMode::SpriteBatch;
 
   std::vector<GLfloat> mBatchData;
-  std::vector<GLushort> mBatchIndices;
+  std::uint16_t mBatchSize = 0;
+
   std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
   int mNumTextures = 0;
   int mNumInternalTextures = 0;
@@ -402,14 +406,33 @@ struct Renderer::Impl {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     SDL_GL_SetSwapInterval(data::ENABLE_VSYNC_DEFAULT ? 1 : 0);
 
-    // Setup a VBO for streaming data to the GPU, stays bound all the time
+    // Set up a VBO for streaming data to the GPU, stays bound all the time
     glGenBuffers(1, &mStreamVbo);
     glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
-    glGenBuffers(1, &mStreamEbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mStreamEbo);
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    // Set up an index buffer with enough indices to handle the largest
+    // possible batch size. This is only sent to the GPU once, reducing the
+    // amount of data we need to send for each batch.
+    {
+      glGenBuffers(1, &mQuadIndicesEbo);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+
+      std::vector<GLushort> indices;
+      indices.reserve(MAX_BATCH_SIZE);
+
+      for (auto i = 0u; i < MAX_QUADS_PER_BATCH; ++i) {
+        for (auto index : QUAD_INDICES) {
+          indices.push_back(GLushort(index + 4*i));
+        }
+      }
+
+      glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(GLushort) * indices.size(),
+        indices.data(),
+        GL_STATIC_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 
     // One-time setup for water effect shader
     mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
@@ -438,6 +461,8 @@ struct Renderer::Impl {
 
     mNumInternalTextures = mNumTextures;
 
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
     glViewport(0, 0, mWindowSize.width, mWindowSize.height);
     commitShaderSelection(mStateStack.back());
     commitTransformationMatrix(mStateStack.back(), mWindowSize);
@@ -451,7 +476,7 @@ struct Renderer::Impl {
     assert(mNumTextures == mNumInternalTextures);
 
     glDeleteBuffers(1, &mStreamVbo);
-    glDeleteBuffers(1, &mStreamEbo);
+    glDeleteBuffers(1, &mQuadIndicesEbo);
     glDeleteTextures(1, &mWaterSurfaceAnimTexture);
     glDeleteTextures(1, &mWaterEffectColorMapTexture);
   }
@@ -476,7 +501,7 @@ struct Renderer::Impl {
     fillVertexPositions(destRect, std::begin(vertices), 0, 4);
     fillTexCoords(sourceRect, std::begin(vertices), 2, 4);
 
-    batchQuadVertices(std::begin(vertices), std::end(vertices), 4u);
+    batchQuadVertices(std::begin(vertices), std::end(vertices));
   }
 
 
@@ -487,28 +512,22 @@ struct Renderer::Impl {
 
     commitChangedState();
 
-    auto submitBatchedQuads = [this]() {
-      glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * mBatchData.size(),
-        mBatchData.data(),
-        GL_STREAM_DRAW);
-      glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(GLushort) * mBatchIndices.size(),
-        mBatchIndices.data(),
-        GL_STREAM_DRAW);
-      glDrawElements(
-        GL_TRIANGLES,
-        GLsizei(mBatchIndices.size()),
-        GL_UNSIGNED_SHORT,
-        nullptr);
-    };
-
     switch (mRenderMode) {
       case RenderMode::SpriteBatch:
       case RenderMode::WaterEffect:
-        submitBatchedQuads();
+        glBufferData(
+          GL_ARRAY_BUFFER,
+          sizeof(float) * mBatchData.size(),
+          mBatchData.data(),
+          GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+        glDrawElements(
+          GL_TRIANGLES,
+          mBatchSize,
+          GL_UNSIGNED_SHORT,
+          nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         break;
 
       case RenderMode::Points:
@@ -527,7 +546,7 @@ struct Renderer::Impl {
     }
 
     mBatchData.clear();
-    mBatchIndices.clear();
+    mBatchSize = 0;
   }
 
 
@@ -658,7 +677,7 @@ struct Renderer::Impl {
         2,
         4);
 
-      batchQuadVertices(std::begin(vertices), std::end(vertices), 4);
+      batchQuadVertices(std::begin(vertices), std::end(vertices));
     };
 
     updateState(mRenderMode, RenderMode::WaterEffect);
@@ -787,30 +806,16 @@ struct Renderer::Impl {
 
 
   template <typename VertexIter>
-  void batchQuadVertices(
-    VertexIter&& dataBegin,
-    VertexIter&& dataEnd,
-    const std::size_t attributesPerVertex
-  ) {
-    using namespace std;
+  void batchQuadVertices(VertexIter&& dataBegin, VertexIter&& dataEnd) {
+    if (mBatchSize >= MAX_BATCH_SIZE) {
+      submitBatch();
+    }
 
-    const auto currentIndex = GLushort(mBatchData.size() / attributesPerVertex);
-
-    GLushort indices[6];
-    transform(
-      begin(QUAD_INDICES),
-      end(QUAD_INDICES),
-      begin(indices),
-      [&](const GLushort index) -> GLushort {
-        return index + currentIndex;
-      });
-
-    // TODO: Limit maximum batch size
     mBatchData.insert(
       mBatchData.end(),
-      forward<VertexIter>(dataBegin),
-      forward<VertexIter>(dataEnd));
-    mBatchIndices.insert(mBatchIndices.end(), begin(indices), end(indices));
+      std::forward<VertexIter>(dataBegin),
+      std::forward<VertexIter>(dataEnd));
+    mBatchSize += std::uint16_t(std::size(QUAD_INDICES));
   }
 
 
