@@ -362,10 +362,7 @@ void HudRenderer::drawRadar(
 
   if (mpOptions->mPerElementUpscalingEnabled) {
     {
-      const auto saved = renderer::Renderer::StateSaver{mpRenderer};
-      mpRenderer->resetState();
-      mpRenderer->setRenderTarget(mRadarSurface.data());
-
+      const auto saved = mRadarSurface.bindAndReset();
       mpRenderer->clear({0, 0, 0, 0});
       drawDots();
     }

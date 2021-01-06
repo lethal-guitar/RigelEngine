@@ -48,9 +48,7 @@ void MoviePlayer::playMovie(
   assert(frameDelayInFastTicks >= 1);
 
   {
-    const auto saved = renderer::Renderer::StateSaver{mpRenderer};
-    mpRenderer->resetState();
-    mpRenderer->setRenderTarget(mCanvas.data());
+    const auto saved = mCanvas.bindAndReset();
 
     auto baseImage = renderer::Texture(mpRenderer, movie.mBaseImage);
     baseImage.render(0, 0);
@@ -116,10 +114,7 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
   }
 
   {
-    const auto saved = renderer::Renderer::StateSaver{mpRenderer};
-    mpRenderer->resetState();
-    mpRenderer->setRenderTarget(mCanvas.data());
-
+    const auto saved = mCanvas.bindAndReset();
     const auto& frameData = mAnimationFrames[mCurrentFrame];
     frameData.mImage.render(0, frameData.mStartRow);
   }

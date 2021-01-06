@@ -92,45 +92,4 @@ RenderTargetTexture::RenderTargetTexture(
 {
 }
 
-
-RenderTargetTexture::Binder::Binder(
-  RenderTargetTexture& renderTarget,
-  renderer::Renderer* pRenderer
-)
-  : Binder(renderTarget.data(), pRenderer)
-{
-}
-
-
-RenderTargetTexture::Binder::Binder(
-  const TextureId target,
-  renderer::Renderer* pRenderer
-)
-  : mpRenderer(pRenderer)
-{
-  pRenderer->pushState();
-  pRenderer->setRenderTarget(target);
-}
-
-
-RenderTargetTexture::Binder::~Binder() {
-  if (mpRenderer) {
-    mpRenderer->popState();
-  }
-}
-
-
-RenderTargetTexture::Binder::Binder(Binder&& other)
-  : mpRenderer(std::exchange(other.mpRenderer, nullptr))
-{
-}
-
-
-auto RenderTargetTexture::Binder::operator=(
-  RenderTargetTexture::Binder&& other
-) -> Binder& {
-  mpRenderer = std::exchange(other.mpRenderer, nullptr);
-  return *this;
-}
-
 }

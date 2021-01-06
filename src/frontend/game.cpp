@@ -314,9 +314,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
   mCurrentFrameIsWidescreen = false;
 
   {
-    auto saved = renderer::Renderer::StateSaver{&mRenderer};
-    mRenderer.setRenderTarget(mRenderTarget.data());
-
+    auto saved = mRenderTarget.bind();
     mRenderer.clear();
 
     setupRenderingViewport(
@@ -556,10 +554,7 @@ void Game::fadeOutScreen() {
   performScreenFadeBlocking(FadeType::Out);
 
   // Clear render canvas after a fade-out
-  const auto saved = renderer::Renderer::StateSaver{&mRenderer};
-  mRenderer.resetState();
-  mRenderer.setRenderTarget(mRenderTarget.data());
-
+  const auto saved = mRenderTarget.bindAndReset();
   mRenderer.clear();
 
   mCurrentFrameIsWidescreen = false;

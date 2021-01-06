@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include "base/defer.hpp"
 #include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
 #include "data/image.hpp"
 #include "renderer/renderer.hpp"
 
@@ -155,26 +155,20 @@ protected:
  */
 class RenderTargetTexture : public Texture {
 public:
-  friend class Binder;
-
-  class Binder {
-  public:
-    Binder(RenderTargetTexture& renderTarget, Renderer* pRenderer);
-    ~Binder();
-
-    Binder(const Binder&) = delete;
-    Binder& operator=(const Binder&) = delete;
-
-    Binder(Binder&&);
-    Binder& operator=(Binder&&);
-
-  private:
-    Binder(TextureId, Renderer* pRenderer);
-
-    Renderer* mpRenderer;
-  };
-
   RenderTargetTexture(Renderer* pRenderer, int width, int height);
+
+  [[nodiscard]] auto bind() {
+    mpRenderer->pushState();
+    mpRenderer->setRenderTarget(data());
+    return base::defer([this]() { mpRenderer->popState(); });
+  }
+
+  [[nodiscard]] auto bindAndReset() {
+    mpRenderer->pushState();
+    mpRenderer->resetState();
+    mpRenderer->setRenderTarget(data());
+    return base::defer([this]() { mpRenderer->popState(); });
+  }
 };
 
 }

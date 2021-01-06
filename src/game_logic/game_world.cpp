@@ -647,9 +647,7 @@ void GameWorld::render() {
       drawMapAndSprites(viewPortSize);
 
       {
-        const auto saved = renderer::Renderer::StateSaver{mpRenderer};
-        mpRenderer->resetState();
-        mpRenderer->setRenderTarget(mLowResLayer.data());
+        const auto saved = mLowResLayer.bindAndReset();
 
         mpRenderer->clear({0, 0, 0, 0});
         mpState->mParticles.render(mpState->mCamera.position());
@@ -769,8 +767,7 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
     renderBackgroundLayers();
   } else {
     {
-      renderer::RenderTargetTexture::Binder bindRenderTarget(
-        mWaterEffectBuffer, mpRenderer);
+      auto saved = mWaterEffectBuffer.bind();
       renderBackgroundLayers();
     }
 
