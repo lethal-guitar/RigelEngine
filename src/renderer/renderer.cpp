@@ -328,6 +328,13 @@ struct Renderer::Impl {
     friend bool operator!=(const State& lhs, const State& rhs) {
       return !(lhs == rhs);
     }
+
+    bool needsExtendedShader() const {
+      return
+        mTextureRepeatEnabled ||
+        mOverlayColor != base::Color{} ||
+        mColorModulation != base::Color{255, 255, 255, 255};
+    }
   };
 
   SDL_Window* mpWindow;
@@ -358,6 +365,9 @@ struct Renderer::Impl {
   base::Size<int> mMaxWindowSize;
 
   std::vector<State> mStateStack{State{}};
+  State mLastCommittedState;
+  base::Size<int> mLastKnownWindowSize;
+  RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
   bool mStateChanged = true;
 
   explicit Impl(SDL_Window* pWindow)
@@ -427,6 +437,10 @@ struct Renderer::Impl {
     mSimpleTexturedQuadShader.setUniform("textureData", 0);
 
     mNumInternalTextures = mNumTextures;
+
+    glViewport(0, 0, mWindowSize.width, mWindowSize.height);
+    commitShaderSelection(mStateStack.back());
+    commitTransformationMatrix(mStateStack.back(), mWindowSize);
   }
 
 
@@ -692,8 +706,12 @@ struct Renderer::Impl {
   void resetState() {
     submitBatch();
 
-    mStateStack.back() = State{};
-    mStateChanged = true;
+    const auto defaultState = State{};
+
+    if (mStateStack.back() != defaultState) {
+      mStateStack.back() = defaultState;
+      mStateChanged = true;
+    }
   }
 
 
@@ -801,64 +819,143 @@ struct Renderer::Impl {
       return;
     }
 
-    mStateChanged = false;
-
     const auto& state = mStateStack.back();
 
-    base::Extents framebufferSize;
-    if (state.mRenderTargetTexture != 0) {
-      const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
-      assert(iData != mRenderTargetDict.end());
+    auto currentFramebufferSize = [&]() {
+      if (state.mRenderTargetTexture != 0) {
+        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+        assert(iData != mRenderTargetDict.end());
+        return iData->second.mSize;
+      }
 
-      glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
-      framebufferSize = iData->second.mSize;
-    } else {
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      framebufferSize = mWindowSize;
+      return mWindowSize;
+    };
+
+
+    auto transformNeedsUpdate =
+      state.mGlobalTranslation != mLastCommittedState.mGlobalTranslation ||
+      state.mGlobalScale != mLastCommittedState.mGlobalScale;
+
+    if (
+      mRenderMode != mLastKnownRenderMode ||
+      state.needsExtendedShader() != mLastCommittedState.needsExtendedShader()
+    ) {
+      commitShaderSelection(state);
+      transformNeedsUpdate = true;
     }
 
-    glViewport(0, 0, framebufferSize.width, framebufferSize.height);
+    if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture) {
+      base::Extents framebufferSize;
+      if (state.mRenderTargetTexture != 0) {
+        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+        assert(iData != mRenderTargetDict.end());
 
+        glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
+        framebufferSize = iData->second.mSize;
+      } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        framebufferSize = mWindowSize;
+      }
+
+      glViewport(0, 0, framebufferSize.width, framebufferSize.height);
+      commitClipRect(state, framebufferSize);
+      commitVertexAttributeFormat();
+
+      transformNeedsUpdate = true;
+    } else {
+      if (mWindowSize != mLastKnownWindowSize && state.mRenderTargetTexture == 0) {
+        glViewport(0, 0, mWindowSize.width, mWindowSize.height);
+        commitClipRect(state, mWindowSize);
+        transformNeedsUpdate = true;
+      } else if (state.mClipRect != mLastCommittedState.mClipRect) {
+        commitClipRect(state, currentFramebufferSize());
+      }
+    }
+
+    if (mRenderMode == RenderMode::SpriteBatch && state.needsExtendedShader()) {
+      if (state.mColorModulation != mLastCommittedState.mColorModulation) {
+        mTexturedQuadShader.setUniform(
+          "colorModulation", toGlColor(state.mColorModulation));
+      }
+
+      if (state.mOverlayColor != mLastCommittedState.mOverlayColor) {
+        mTexturedQuadShader.setUniform(
+          "overlayColor", toGlColor(state.mOverlayColor));
+      }
+
+      if (state.mTextureRepeatEnabled != mLastCommittedState.mTextureRepeatEnabled) {
+        mTexturedQuadShader.setUniform(
+          "enableRepeat", state.mTextureRepeatEnabled);
+      }
+    }
+
+    if (transformNeedsUpdate) {
+      commitTransformationMatrix(state, currentFramebufferSize());
+    }
+
+    mLastCommittedState = state;
+    mLastKnownRenderMode = mRenderMode;
+    mLastKnownWindowSize = mWindowSize;
+    mStateChanged = false;
+  }
+
+
+  void commitClipRect(
+    const State& state,
+    const base::Extents& framebufferSize
+  ) {
     if (state.mClipRect) {
       glEnable(GL_SCISSOR_TEST);
       setScissorBox(*state.mClipRect, framebufferSize);
     } else {
       glDisable(GL_SCISSOR_TEST);
     }
+  }
 
 
-    auto useShader = [&](Shader& shader) {
-      shader.use();
-
-      const auto projection = glm::ortho(
-        0.0f,
-        float(framebufferSize.width),
-        float(framebufferSize.height),
-        0.0f);
-      const auto projectionMatrix = glm::scale(
-        glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
-        glm::vec3(state.mGlobalScale, 1.0f));
-      shader.setUniform("transform", projectionMatrix);
-    };
-
+  Shader& shaderToUse(const State& state) {
     switch (mRenderMode) {
       case RenderMode::SpriteBatch:
-        if (
-          state.mTextureRepeatEnabled ||
-          state.mOverlayColor != base::Color{} ||
-          state.mColorModulation != base::Color{255, 255, 255, 255}
-        ) {
-          useShader(mTexturedQuadShader);
-          mTexturedQuadShader.setUniform(
-            "enableRepeat", state.mTextureRepeatEnabled);
-          mTexturedQuadShader.setUniform(
-            "colorModulation", toGlColor(state.mColorModulation));
-          mTexturedQuadShader.setUniform(
-            "overlayColor", toGlColor(state.mOverlayColor));
-        } else {
-          useShader(mSimpleTexturedQuadShader);
+        if (state.needsExtendedShader()) {
+          return mTexturedQuadShader;
         }
 
+        return mSimpleTexturedQuadShader;
+
+      case RenderMode::Points:
+      case RenderMode::NonTexturedRender:
+        return mSolidColorShader;
+
+      case RenderMode::WaterEffect:
+        return mWaterEffectShader;
+    }
+
+    assert(false);
+    return mTexturedQuadShader;
+  }
+
+
+  void commitShaderSelection(const State& state) {
+    auto& shader = shaderToUse(state);
+    shader.use();
+
+    if (shader.handle() == mTexturedQuadShader.handle()) {
+      mTexturedQuadShader.setUniform(
+        "enableRepeat", state.mTextureRepeatEnabled);
+      mTexturedQuadShader.setUniform(
+        "colorModulation", toGlColor(state.mColorModulation));
+      mTexturedQuadShader.setUniform(
+        "overlayColor", toGlColor(state.mOverlayColor));
+    }
+
+    commitVertexAttributeFormat();
+  }
+
+
+  void commitVertexAttributeFormat() {
+    switch (mRenderMode) {
+      case RenderMode::SpriteBatch:
+      case RenderMode::WaterEffect:
         glVertexAttribPointer(
           0,
           2,
@@ -877,7 +974,6 @@ struct Renderer::Impl {
 
       case RenderMode::Points:
       case RenderMode::NonTexturedRender:
-        useShader(mSolidColorShader);
         glVertexAttribPointer(
           0,
           2,
@@ -893,25 +989,23 @@ struct Renderer::Impl {
           sizeof(float) * 6,
           toAttribOffset(2 * sizeof(float)));
         break;
-
-      case RenderMode::WaterEffect:
-        useShader(mWaterEffectShader);
-        glVertexAttribPointer(
-          0,
-          2,
-          GL_FLOAT,
-          GL_FALSE,
-          sizeof(float) * 4,
-          toAttribOffset(0));
-        glVertexAttribPointer(
-          2,
-          2,
-          GL_FLOAT,
-          GL_FALSE,
-          sizeof(float) * 4,
-          toAttribOffset(2 * sizeof(float)));
-        break;
     }
+  }
+
+
+  void commitTransformationMatrix(
+    const State& state,
+    const base::Extents& framebufferSize
+  ) {
+    const auto projection = glm::ortho(
+      0.0f,
+      float(framebufferSize.width),
+      float(framebufferSize.height),
+      0.0f);
+    const auto projectionMatrix = glm::scale(
+      glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
+      glm::vec3(state.mGlobalScale, 1.0f));
+    shaderToUse(state).setUniform("transform", projectionMatrix);
   }
 
 
