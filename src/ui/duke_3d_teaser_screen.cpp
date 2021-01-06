@@ -90,7 +90,7 @@ void Duke3DTeaserScreen::updateAndRender(const engine::TimeDelta dt) {
 
   const auto alphaRounded = base::roundTo<uint8_t>(alpha);
 
-  const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+  const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setColorModulation({255, 255, 255, alphaRounded});
   mTextImage.render(TEXT_X_POS, TEXT_Y_POS + base::round(offset));
 }

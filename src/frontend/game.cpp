@@ -335,7 +335,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
     mRenderer.clear();
 
     {
-      auto saved = renderer::Renderer::StateSaver{&mRenderer};
+      auto saved = renderer::saveState(&mRenderer);
       setupPresentationViewport(
         &mRenderer,
         mpUserProfile->mOptions.mPerElementUpscalingEnabled,
@@ -424,7 +424,7 @@ bool Game::handleEvent(const SDL_Event& event) {
 void Game::performScreenFadeBlocking(const FadeType type) {
   using namespace std::chrono;
 
-  auto saved = renderer::Renderer::StateSaver{&mRenderer};
+  auto saved = renderer::saveState(&mRenderer);
   mRenderer.resetState();
   setupPresentationViewport(
     &mRenderer,

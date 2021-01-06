@@ -369,7 +369,7 @@ void HudRenderer::drawRadar(
 
     mRadarSurface.render(RADAR_POS_X, RADAR_POS_Y);
   } else {
-    const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(
       mpRenderer->globalTranslation() + base::Vector{RADAR_POS_X, RADAR_POS_Y});
 

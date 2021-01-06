@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/color.hpp"
+#include "base/defer.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
@@ -60,35 +61,6 @@ inline TexCoords toTexCoords(
 
 class Renderer {
 public:
-  class StateSaver {
-  public:
-    explicit StateSaver(Renderer* pRenderer)
-      : mpRenderer(pRenderer)
-    {
-      pRenderer->pushState();
-    }
-
-    StateSaver(StateSaver&& other) noexcept
-      : mpRenderer(std::exchange(other.mpRenderer, nullptr))
-    {
-    }
-
-    StateSaver& operator=(StateSaver&& other) = delete;
-
-    ~StateSaver() {
-      if (mpRenderer) {
-        mpRenderer->popState();
-      }
-    }
-
-    StateSaver(const StateSaver&) = delete;
-    StateSaver& operator=(const StateSaver&) = delete;
-
-  private:
-    Renderer* mpRenderer;
-  };
-
-
   explicit Renderer(SDL_Window* pWindow);
   ~Renderer();
 
@@ -169,5 +141,11 @@ private:
   struct Impl;
   std::unique_ptr<Impl> mpImpl;
 };
+
+
+[[nodiscard]] inline auto saveState(Renderer* pRenderer) {
+  pRenderer->pushState();
+  return base::defer([=]() { pRenderer->popState(); });
+}
 
 }

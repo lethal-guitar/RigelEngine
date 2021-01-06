@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <utility>
 
 
@@ -23,9 +24,9 @@ namespace rigel::base {
 
 namespace detail {
 
-template <typename Callback>
 class CallOnDestruction {
 public:
+  template <typename Callback>
   explicit CallOnDestruction(Callback&& callback)
     : mCallback(std::forward<Callback>(callback))
   {
@@ -35,11 +36,17 @@ public:
     mCallback();
   }
 
+  CallOnDestruction(CallOnDestruction&& other) noexcept
+    : mCallback(std::exchange(other.mCallback, []() {}))
+  {
+  }
+
+  CallOnDestruction& operator=(CallOnDestruction&&) = delete;
   CallOnDestruction(const CallOnDestruction&) = delete;
   CallOnDestruction& operator=(const CallOnDestruction&) = delete;
 
 private:
-  Callback mCallback;
+  std::function<void()> mCallback;
 };
 
 }

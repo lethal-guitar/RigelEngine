@@ -94,7 +94,7 @@ auto localToGlobalTranslation(
   renderer::Renderer* pRenderer,
   const int screenShakeOffsetX
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  auto saved = renderer::saveState(pRenderer);
 
   const auto offset = data::GameTraits::inGameViewPortOffset +
     base::Vector{screenShakeOffsetX, 0};
@@ -115,7 +115,7 @@ auto localToGlobalTranslation(
   const renderer::WidescreenViewPortInfo& info,
   const int screenShakeOffsetX
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  auto saved = renderer::saveState(pRenderer);
 
   const auto scale = pRenderer->globalScale();
   const auto offset = base::Vector{
@@ -158,7 +158,7 @@ void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
   const renderer::WidescreenViewPortInfo& info
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  auto saved = renderer::saveState(pRenderer);
 
   pRenderer->setGlobalTranslation({
     info.mLeftPaddingPx, pRenderer->globalTranslation().y});
@@ -631,7 +631,7 @@ void GameWorld::render() {
   }
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
-    const auto clipRectGuard = renderer::Renderer::StateSaver{mpRenderer};
+    const auto clipRectGuard = renderer::saveState(mpRenderer);
     mpRenderer->setClipRect(base::Rect<int>{
       mpRenderer->globalTranslation(),
       renderer::scaleSize(
@@ -708,7 +708,7 @@ void GameWorld::render() {
       auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
       drawTopRow();
     } else {
-      const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+      const auto saved = renderer::saveState(mpRenderer);
       mpRenderer->setGlobalTranslation({});
       mpRenderer->setClipRect({});
       drawTopRow();
@@ -729,7 +729,7 @@ void GameWorld::render() {
       drawHud();
     }
 
-    auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(localToGlobalTranslation(
       mpRenderer,
       {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
@@ -772,7 +772,7 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
     }
 
     {
-      auto saved = renderer::Renderer::StateSaver(mpRenderer);
+      auto saved = renderer::saveState(mpRenderer);
       mpRenderer->setGlobalScale({1.0f, 1.0f});
       mpRenderer->setGlobalTranslation({});
       mWaterEffectBuffer.render(0, 0);

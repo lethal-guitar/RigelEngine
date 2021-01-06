@@ -265,7 +265,7 @@ void MenuElementRenderer::drawBigText(
   const std::string& text,
   const base::Color& color
 ) const {
-  const auto saved = renderer::Renderer::StateSaver{ mpRenderer };
+  const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setColorModulation(color);
 
   for (auto i=0u; i<text.size(); ++i) {
