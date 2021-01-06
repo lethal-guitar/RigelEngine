@@ -206,6 +206,7 @@ void gameMain(const CommandLineOptions& options) {
 
   // On some platforms, an initial swap is necessary in order for the next
   // frame (in our case, the loading screen) to show up on screen.
+  SDL_GL_SetSwapInterval(data::ENABLE_VSYNC_DEFAULT ? 1 : 0);
   SDL_GL_SwapWindow(pWindow.get());
 
   SDL_DisableScreenSaver();
