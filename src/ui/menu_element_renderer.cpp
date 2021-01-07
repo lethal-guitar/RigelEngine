@@ -147,7 +147,7 @@ constexpr auto CURSOR_ANIM_DELAY = 5;
 constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
-renderer::OwningTexture createFontTexture(
+renderer::Texture createFontTexture(
   const loader::FontData& font,
   renderer::Renderer* pRenderer
 ) {
@@ -166,7 +166,7 @@ renderer::OwningTexture createFontTexture(
     insertPosX += characterWidth;
   }
 
-  return renderer::OwningTexture{pRenderer, combinedBitmaps};
+  return renderer::Texture{pRenderer, combinedBitmaps};
 }
 
 }
@@ -265,6 +265,7 @@ void MenuElementRenderer::drawBigText(
   const std::string& text,
   const base::Color& color
 ) const {
+  const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setColorModulation(color);
 
   for (auto i=0u; i<text.size(); ++i) {
@@ -292,8 +293,6 @@ void MenuElementRenderer::drawBigText(
     const auto position = static_cast<int>(i);
     mBigTextTexture.renderTileSlice(index, {x + position, y-1});
   }
-
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 

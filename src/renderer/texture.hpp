@@ -16,83 +16,13 @@
 
 #pragma once
 
+#include "base/defer.hpp"
 #include "base/spatial_types.hpp"
-#include "base/warnings.hpp"
 #include "data/image.hpp"
 #include "renderer/renderer.hpp"
-#include "renderer/opengl.hpp"
-
-#include <cstddef>
 
 
 namespace rigel::renderer {
-
-namespace detail {
-
-class TextureBase {
-public:
-  TextureBase() = default;
-
-  /** Render entire texture at given position */
-  void render(Renderer* renderer, const base::Vector& position) const;
-
-  /** Render entire texture at given position */
-  void render(Renderer* renderer, int x, int y) const;
-
-  /** Render a part of the texture at given position
-   *
-   * The sourceRect parameter is interpreted relative to the texture's
-   * coordinate system, e.g. (0, 0, width, height) would render the entire
-   * texture.
-   */
-  void render(
-    Renderer* renderer,
-    const base::Vector& position,
-    const base::Rect<int>& sourceRect
-  ) const;
-
-  /** Render entire texture scaled to fill the given rectangle */
-  void renderScaled(
-    Renderer* renderer,
-    const base::Rect<int>& destRect
-  ) const;
-
-  int width() const {
-    return mData.mWidth;
-  }
-
-  int height() const {
-    return mData.mHeight;
-  }
-
-  base::Extents extents() const {
-    return {mData.mWidth, mData.mHeight};
-  }
-
-  Renderer::TextureData data() const {
-    return mData;
-  }
-
-protected:
-  base::Rect<int> completeSourceRect() const {
-    return {{0, 0}, extents()};
-  }
-
-  void render(
-    Renderer* renderer,
-    int x,
-    int y,
-    const base::Rect<int>& sourceRect) const;
-
-  explicit TextureBase(Renderer::TextureData data)
-    : mData(data)
-  {
-  }
-
-  Renderer::TextureData mData;
-};
-
-}
 
 /** Wrapper class for renderable texture
  *
@@ -101,60 +31,90 @@ protected:
  *
  * The ownership semantics are the same as for a std::unique_ptr.
  */
-class OwningTexture : public detail::TextureBase {
+class Texture {
 public:
-  OwningTexture() = default;
-  OwningTexture(Renderer* renderer, const data::Image& image);
-  ~OwningTexture();
+  Texture() = default;
+  Texture(Renderer* renderer, const data::Image& image);
+  ~Texture();
 
-  OwningTexture(OwningTexture&& other) noexcept
-    : TextureBase(other.mData)
+  Texture(Texture&& other) noexcept
+    : Texture(
+        std::exchange(other.mpRenderer, nullptr),
+        std::exchange(other.mId, 0),
+        other.mWidth,
+        other.mHeight)
   {
-    other.mData.mHandle = 0;
   }
 
-  OwningTexture(const OwningTexture&) = delete;
-  OwningTexture& operator=(const OwningTexture&) = delete;
+  Texture& operator=(Texture&& other) noexcept {
+    using std::swap;
 
-  OwningTexture& operator=(OwningTexture&& other) noexcept {
-    mData = other.mData;
-    other.mData.mHandle = 0;
+    swap(mpRenderer, other.mpRenderer);
+    swap(mId, other.mId);
+    mWidth = other.mWidth;
+    mHeight = other.mHeight;
+
     return *this;
   }
 
-  friend class NonOwningTexture;
+  Texture(const Texture&) = delete;
+  Texture& operator=(const Texture&) = delete;
+
+  /** Render entire texture at given position */
+  void render(const base::Vector& position) const;
+
+  /** Render entire texture at given position */
+  void render(int x, int y) const;
+
+  /** Render a part of the texture at given position
+   *
+   * The sourceRect parameter is interpreted relative to the texture's
+   * coordinate system, e.g. (0, 0, width, height) would render the entire
+   * texture.
+   */
+  void render(
+    const base::Vector& position, const base::Rect<int>& sourceRect) const;
+
+  /** Render entire texture scaled to fill the given rectangle */
+  void renderScaled(const base::Rect<int>& destRect) const;
+
+  int width() const {
+    return mWidth;
+  }
+
+  int height() const {
+    return mHeight;
+  }
+
+  base::Extents extents() const {
+    return {mWidth, mHeight};
+  }
+
+  TextureId data() const {
+    return mId;
+  }
 
 protected:
-  explicit OwningTexture(Renderer::TextureData data)
-    : TextureBase(data)
+  Texture(Renderer* pRenderer, TextureId id, int width, int height)
+    : mpRenderer(pRenderer)
+    , mId(id)
+    , mWidth(width)
+    , mHeight(height)
   {
   }
-};
 
+  void render(int x, int y, const base::Rect<int>& sourceRect) const;
 
-/** Non-owning version of OwningTexture
- *
- * This has exactly the same interface as OwningTexture, but it doesn't
- * manage the underlying texture's life-time.
- *
- * It behaves like a raw pointer, and clients are responsible for ensuring
- * that the corresponding OwningTexture outlives any NonOwningTexture
- * instances.
- */
-class NonOwningTexture : public detail::TextureBase {
-public:
-  NonOwningTexture() = default;
-
-  explicit NonOwningTexture(const OwningTexture& texture) :
-    TextureBase(texture.mData)
-  {
-  }
+  Renderer* mpRenderer = nullptr;
+  TextureId mId = 0;
+  int mWidth = 0;
+  int mHeight = 0;
 };
 
 
 /** Utility class for render target type textures
  *
- * It manages life-time like OwningTexture, but creates a SDL_Texture with an
+ * It manages life-time like Texture, but creates a SDL_Texture with an
  * access type of SDL_TEXTUREACCESS_TARGET.
  *
  * It also offers a RAII helper class for safe binding/unbinding of the
@@ -193,76 +153,22 @@ public:
  * Once the outermost scope's Binder is destroyed, the default render target
  * will be active again (i.e. drawing to the screen)
  */
-class RenderTargetTexture : public OwningTexture {
+class RenderTargetTexture : public Texture {
 public:
-  friend class Binder;
+  RenderTargetTexture(Renderer* pRenderer, int width, int height);
 
-  class Binder {
-  public:
-    Binder(RenderTargetTexture& renderTarget, Renderer* pRenderer);
-    ~Binder();
-
-    Binder(const Binder&) = delete;
-    Binder& operator=(const Binder&) = delete;
-
-    Binder(Binder&&);
-    Binder& operator=(Binder&&);
-
-  protected:
-    Binder(const Renderer::RenderTarget&, Renderer* pRenderer);
-
-  private:
-    Renderer::RenderTarget mPreviousRenderTarget;
-    Renderer* mpRenderer;
-  };
-
-  RenderTargetTexture(
-    Renderer* pRenderer,
-    std::size_t width,
-    std::size_t height);
-  ~RenderTargetTexture();
-
-  RenderTargetTexture(const RenderTargetTexture&) = delete;
-  RenderTargetTexture& operator=(const RenderTargetTexture&) = delete;
-
-  RenderTargetTexture(RenderTargetTexture&& other) noexcept
-    : OwningTexture(std::move(other))
-    , mFboHandle(other.mFboHandle)
-  {
-    other.mFboHandle = 0;
+  [[nodiscard]] auto bind() {
+    mpRenderer->pushState();
+    mpRenderer->setRenderTarget(data());
+    return base::defer([this]() { mpRenderer->popState(); });
   }
 
-
-  RenderTargetTexture& operator=(RenderTargetTexture&& other) noexcept {
-    static_cast<OwningTexture&>(*this) = std::move(other);
-    mFboHandle = other.mFboHandle;
-    other.mFboHandle = 0;
-    return *this;
+  [[nodiscard]] auto bindAndReset() {
+    mpRenderer->pushState();
+    mpRenderer->resetState();
+    mpRenderer->setRenderTarget(data());
+    return base::defer([this]() { mpRenderer->popState(); });
   }
-
-private:
-  RenderTargetTexture(
-    const Renderer::RenderTargetHandles& handles,
-    int width,
-    int height);
-
-private:
-  GLuint mFboHandle;
 };
-
-
-class DefaultRenderTargetBinder : public RenderTargetTexture::Binder {
-public:
-  explicit DefaultRenderTargetBinder(renderer::Renderer* pRenderer);
-};
-
-
-[[nodiscard]] inline auto setupDefaultState(Renderer* pRenderer) {
-  auto saved = Renderer::StateSaver{pRenderer};
-  pRenderer->setGlobalTranslation({});
-  pRenderer->setGlobalScale({1.0f, 1.0f});
-  pRenderer->setClipRect({});
-  return saved;
-}
 
 }

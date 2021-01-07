@@ -22,50 +22,33 @@
 namespace rigel::renderer {
 
 using data::Image;
-using detail::TextureBase;
 
 
-void TextureBase::render(
-  renderer::Renderer* renderer,
-  const int x,
-  const int y
-) const {
+void Texture::render(const int x, const int y) const {
   base::Rect<int> fullImageRect{{0, 0}, {width(), height()}};
-  render(renderer, x, y, fullImageRect);
+  render(x, y, fullImageRect);
 }
 
 
-void TextureBase::render(
-  renderer::Renderer* renderer,
-  const base::Vector& position
-) const {
-  render(renderer, position.x, position.y);
+void Texture::render(const base::Vector& position) const {
+  render(position.x, position.y);
 }
 
 
-void TextureBase::render(
-  renderer::Renderer* renderer,
+void Texture::render(
   const base::Vector& position,
   const base::Rect<int>& sourceRect
 ) const {
-  render(
-    renderer,
-    position.x,
-    position.y,
-    sourceRect);
+  render(position.x, position.y, sourceRect);
 }
 
 
-void TextureBase::renderScaled(
-  renderer::Renderer* pRenderer,
-  const base::Rect<int>& destRect
-) const {
-  pRenderer->drawTexture(mData, completeSourceRect(), destRect);
+void Texture::renderScaled(const base::Rect<int>& destRect) const {
+  mpRenderer->drawTexture(mId, {0.0f, 0.0f, 1.0f, 1.0f}, destRect);
 }
 
 
-void TextureBase::render(
-  renderer::Renderer* pRenderer,
+void Texture::render(
   const int x,
   const int y,
   const base::Rect<int>& sourceRect
@@ -74,107 +57,38 @@ void TextureBase::render(
     {x, y},
     {sourceRect.size.width, sourceRect.size.height}
   };
-  pRenderer->drawTexture(mData, sourceRect, destRect);
+  mpRenderer->drawTexture(
+    mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);
 }
 
 
-OwningTexture::OwningTexture(renderer::Renderer* pRenderer, const Image& image)
-  : TextureBase(pRenderer->createTexture(image))
+Texture::Texture(renderer::Renderer* pRenderer, const Image& image)
+  : Texture(
+      pRenderer,
+      pRenderer->createTexture(image),
+      static_cast<int>(image.width()),
+      static_cast<int>(image.height()))
 {
 }
 
 
-OwningTexture::~OwningTexture() {
-  glDeleteTextures(1, &mData.mHandle);
+Texture::~Texture() {
+  if (mpRenderer) {
+    mpRenderer->destroyTexture(mId);
+  }
 }
 
 
 RenderTargetTexture::RenderTargetTexture(
   renderer::Renderer* pRenderer,
-  const std::size_t width,
-  const std::size_t height
-)
-  : RenderTargetTexture(
-      pRenderer->createRenderTargetTexture(int(width), int(height)),
-      static_cast<int>(width),
-      static_cast<int>(height))
-{
-}
-
-
-RenderTargetTexture::RenderTargetTexture(
-  const Renderer::RenderTargetHandles& handles,
   const int width,
   const int height
 )
-  : OwningTexture({width, height, handles.texture})
-  , mFboHandle(handles.fbo)
-{
-}
-
-
-RenderTargetTexture::~RenderTargetTexture() {
-  glDeleteFramebuffers(1, &mFboHandle);
-}
-
-
-RenderTargetTexture::Binder::Binder(
-  RenderTargetTexture& renderTarget,
-  renderer::Renderer* pRenderer
-)
-  : Binder(
-      {
-        base::Size<int>{renderTarget.mData.mWidth, renderTarget.mData.mHeight},
-        renderTarget.mFboHandle
-      },
-      pRenderer)
-{
-}
-
-
-RenderTargetTexture::Binder::Binder(
-  const renderer::Renderer::RenderTarget& target,
-  renderer::Renderer* pRenderer
-)
-  : mPreviousRenderTarget(pRenderer->currentRenderTarget())
-  , mpRenderer(pRenderer)
-{
-  pRenderer->setRenderTarget(target);
-}
-
-
-RenderTargetTexture::Binder::~Binder() {
-  if (mpRenderer) {
-    mpRenderer->setRenderTarget(mPreviousRenderTarget);
-  }
-}
-
-
-RenderTargetTexture::Binder::Binder(Binder&& other)
-  : mPreviousRenderTarget(other.mPreviousRenderTarget)
-  , mpRenderer(other.mpRenderer)
-{
-  // Mark other as "moved from"
-  other.mpRenderer = nullptr;
-}
-
-
-auto RenderTargetTexture::Binder::operator=(
-  RenderTargetTexture::Binder&& other
-) -> Binder& {
-  mPreviousRenderTarget = other.mPreviousRenderTarget;
-  mpRenderer = other.mpRenderer;
-
-  // Mark other as "moved from"
-  other.mpRenderer = nullptr;
-  return *this;
-}
-
-
-DefaultRenderTargetBinder::DefaultRenderTargetBinder(
-  renderer::Renderer* pRenderer
-)
-  : Binder({{0, 0}, 0}, pRenderer)
+  : Texture(
+      pRenderer,
+      pRenderer->createRenderTargetTexture(width, height),
+      width,
+      height)
 {
 }
 

@@ -17,150 +17,73 @@
 #pragma once
 
 #include "base/color.hpp"
+#include "base/defer.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
-#include "renderer/opengl.hpp"
-#include "renderer/shader.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <glm/mat4x4.hpp>
 #include <SDL_video.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <cstdint>
+#include <memory>
 #include <optional>
-#include <tuple>
 
 
 namespace rigel::renderer {
 
+using TextureId = std::uint32_t;
+
+struct TexCoords {
+  float left;
+  float top;
+  float right;
+  float bottom;
+};
+
+
+inline TexCoords toTexCoords(
+  const base::Rect<int>& sourceRect,
+  const int texWidth,
+  const int texHeight
+) {
+  const auto left = sourceRect.topLeft.x / float(texWidth);
+  const auto top = sourceRect.topLeft.y / float(texHeight);
+  const auto width = sourceRect.size.width / float(texWidth);
+  const auto height = sourceRect.size.height / float(texHeight);
+  const auto right = left + width;
+  const auto bottom = top + height;
+
+  return {left, top, right, bottom};
+}
+
+
 class Renderer {
 public:
-  // TODO: Re-evaluate how render targets work
-  struct RenderTarget {
-    RenderTarget() = default;
-    RenderTarget(const base::Size<int> size, const GLuint fbo)
-      : mSize(size)
-      , mFbo(fbo)
-    {
-    }
-
-    bool isDefault() const {
-      return mFbo == 0;
-    }
-
-    bool operator==(const RenderTarget& other) const {
-      return std::tie(mSize, mFbo) == std::tie(other.mSize, other.mFbo);
-    }
-
-    bool operator!=(const RenderTarget& other) const {
-      return !(*this == other);
-    }
-
-    base::Size<int> mSize;
-    GLuint mFbo = 0;
-  };
-
-  struct TextureData {
-    TextureData() = default;
-    TextureData(const int width, const int height, const GLuint handle)
-      : mWidth(width)
-      , mHeight(height)
-      , mHandle(handle)
-    {
-    }
-
-    int mWidth = 0;
-    int mHeight = 0;
-    GLuint mHandle = 0;
-  };
-
-  struct RenderTargetHandles {
-    GLuint texture;
-    GLuint fbo;
-  };
-
-
-  class StateSaver {
-  public:
-    explicit StateSaver(Renderer* pRenderer)
-      : mpRenderer(pRenderer)
-      , mClipRect(pRenderer->clipRect())
-      , mGlobalTranslation(pRenderer->globalTranslation())
-      , mGlobalScale(pRenderer->globalScale())
-      , mRenderTarget(pRenderer->currentRenderTarget())
-    {
-    }
-
-    StateSaver(StateSaver&& other) noexcept
-      : mpRenderer(other.mpRenderer)
-      , mClipRect(other.mClipRect)
-      , mGlobalTranslation(other.mGlobalTranslation)
-      , mGlobalScale(other.mGlobalScale)
-      , mRenderTarget(other.mRenderTarget)
-    {
-      // Mark the moved-from object as such (see ~StateSaver)
-      other.mpRenderer = nullptr;
-    }
-
-    StateSaver& operator=(StateSaver&& other) noexcept {
-      if (&other != this) {
-        *this = std::move(other);
-      }
-
-      return *this;
-    }
-
-    ~StateSaver() {
-      // A nullptr renderer indicates a moved-from state, where we shouldn't
-      // reset anything
-      if (mpRenderer) {
-        mpRenderer->setRenderTarget(mRenderTarget);
-        mpRenderer->setClipRect(mClipRect);
-        mpRenderer->setGlobalTranslation(mGlobalTranslation);
-        mpRenderer->setGlobalScale(mGlobalScale);
-      }
-    }
-
-    StateSaver(const StateSaver&) = delete;
-    StateSaver& operator=(const StateSaver&) = delete;
-
-  private:
-    Renderer* mpRenderer;
-    std::optional<base::Rect<int>> mClipRect;
-    base::Vector mGlobalTranslation;
-    base::Point<float> mGlobalScale;
-    RenderTarget mRenderTarget;
-  };
-
-
   explicit Renderer(SDL_Window* pWindow);
   ~Renderer();
 
-  base::Size<int> windowSize() const {
-    return mWindowSize;
-  }
-  base::Size<int> maxWindowSize() const {
-    return mMaxWindowSize;
-  }
-
-  void setOverlayColor(const base::Color& color);
-  void setColorModulation(const base::Color& colorModulation);
+  // Drawing API
+  ////////////////////////////////////////////////////////////////////////
 
   void drawTexture(
-    const TextureData& textureData,
-    const base::Rect<int>& pSourceRect,
-    const base::Rect<int>& pDestRect,
-    bool repeat = false);
+    TextureId texture,
+    const TexCoords& sourceRect,
+    const base::Rect<int>& destRect);
 
   void drawFilledRectangle(
     const base::Rect<int>& rect,
     const base::Color& color);
 
-  void drawRectangle(
-    const base::Rect<int>& rect,
-    const base::Color& color);
+  void drawPoint(const base::Vector& position, const base::Color& color);
+
+  void drawWaterEffect(
+    const base::Rect<int>& area,
+    TextureId unprocessedScreen,
+    std::optional<int> surfaceAnimationStep);
+
+  void drawRectangle(const base::Rect<int>& rect, const base::Color& color);
 
   void drawLine(
     const base::Vector& start,
@@ -177,13 +100,28 @@ public:
     int y2,
     const base::Color& color);
 
+  void clear(const base::Color& clearColor = {0, 0, 0, 255});
 
-  void drawPoint(const base::Vector& position, const base::Color& color);
+  void swapBuffers();
+  void submitBatch();
 
-  void drawWaterEffect(
-    const base::Rect<int>& area,
-    TextureData unprocessedScreen,
-    std::optional<int> surfaceAnimationStep);
+  // Resource management API
+  ////////////////////////////////////////////////////////////////////////
+
+  TextureId createTexture(const data::Image& image);
+  TextureId createRenderTargetTexture(int width, int height);
+  void destroyTexture(TextureId texture);
+
+  // State management API
+  ////////////////////////////////////////////////////////////////////////
+
+  void pushState();
+  void popState();
+  void resetState();
+
+  void setOverlayColor(const base::Color& color);
+  void setColorModulation(const base::Color& colorModulation);
+  void setTextureRepeatEnabled(bool enable);
 
   void setGlobalTranslation(const base::Vector& translation);
   base::Vector globalTranslation() const;
@@ -194,102 +132,20 @@ public:
   void setClipRect(const std::optional<base::Rect<int>>& clipRect);
   std::optional<base::Rect<int>> clipRect() const;
 
-  RenderTarget currentRenderTarget() const;
-  void setRenderTarget(const RenderTarget& target);
+  void setRenderTarget(TextureId target);
 
-  void clear(const base::Color& clearColor = {0, 0, 0, 255});
-  void swapBuffers();
-
-  void submitBatch();
-
-  TextureData createTexture(const data::Image& image);
-
-  // TODO: Revisit the render target API and its use in RenderTargetTexture,
-  // there should be a nicer way to do this.
-  RenderTargetHandles createRenderTargetTexture(
-    int width,
-    int height);
+  base::Size<int> windowSize() const;
+  base::Size<int> maxWindowSize() const;
 
 private:
-  class DummyVao {
-#ifndef RIGEL_USE_GL_ES
-  public:
-    DummyVao() {
-      glGenVertexArrays(1, &mVao);
-      glBindVertexArray(mVao);
-    }
-
-    ~DummyVao() {
-      glDeleteVertexArrays(1, &mVao);
-    }
-
-    DummyVao(const DummyVao&) = delete;
-    DummyVao& operator=(const DummyVao&) = delete;
-
-  private:
-    GLuint mVao;
-#endif
-  };
-
-  enum class RenderMode {
-    SpriteBatch,
-    NonTexturedRender,
-    Points,
-    WaterEffect
-  };
-
-  template <typename VertexIter>
-  void batchQuadVertices(
-    VertexIter&& dataBegin,
-    VertexIter&& dataEnd,
-    const std::size_t attributesPerVertex);
-
-  void useShaderIfChanged(Shader& shader);
-  void setRenderModeIfChanged(RenderMode mode);
-  void updateShaders();
-  void onRenderTargetChanged();
-  void updateProjectionMatrix();
-
-  GLuint createGlTexture(
-    GLsizei width,
-    GLsizei height,
-    const GLvoid* const pData);
-
-private:
-  SDL_Window* mpWindow;
-
-  DummyVao mDummyVao;
-  GLuint mStreamVbo;
-  GLuint mStreamEbo;
-
-  Shader mTexturedQuadShader;
-  Shader mSimpleTexturedQuadShader;
-  Shader mSolidColorShader;
-  Shader mWaterEffectShader;
-
-  GLuint mLastUsedShader;
-  GLuint mLastUsedTexture;
-  base::Color mLastColorModulation;
-  base::Color mLastOverlayColor;
-  bool mTextureRepeatOn = false;
-
-  RenderMode mRenderMode;
-
-  std::vector<GLfloat> mBatchData;
-  std::vector<GLushort> mBatchIndices;
-
-  TextureData mWaterSurfaceAnimTexture;
-  TextureData mWaterEffectColorMapTexture;
-
-  GLuint mCurrentFbo;
-  base::Size<int> mWindowSize;
-  base::Size<int> mMaxWindowSize;
-  base::Size<int> mCurrentFramebufferSize;
-
-  glm::mat4 mProjectionMatrix;
-  std::optional<base::Rect<int>> mClipRect;
-  glm::vec2 mGlobalTranslation;
-  glm::vec2 mGlobalScale;
+  struct Impl;
+  std::unique_ptr<Impl> mpImpl;
 };
+
+
+[[nodiscard]] inline auto saveState(Renderer* pRenderer) {
+  pRenderer->pushState();
+  return base::defer([=]() { pRenderer->popState(); });
+}
 
 }

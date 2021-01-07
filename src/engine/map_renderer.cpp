@@ -113,13 +113,13 @@ MapRenderer::MapRenderer(
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileSetTexture(
-      renderer::OwningTexture(pRenderer, renderData.mTileSetImage),
+      renderer::Texture(pRenderer, renderData.mTileSetImage),
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
   , mScrollMode(renderData.mBackdropScrollMode)
 {
   if (renderData.mSecondaryBackdropImage) {
-    mAlternativeBackdropTexture = renderer::OwningTexture(
+    mAlternativeBackdropTexture = renderer::Texture(
       mpRenderer, *renderData.mSecondaryBackdropImage);
   }
 }
@@ -153,23 +153,22 @@ void MapRenderer::renderBackdrop(
   const auto offset =
     backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset);
 
-  const auto backdropWidth = mBackdropTexture.extents().width;
+  const auto backdropWidth = mBackdropTexture.width();
   const auto numRepetitions =
     base::integerDivCeil(tilesToPixels(viewPortSize.width), backdropWidth);
 
   const auto sourceRectSize = base::Extents{
-    mBackdropTexture.extents().width * numRepetitions,
-    mBackdropTexture.extents().height
-  };
-  const auto targetRectSize = base::Extents{
     backdropWidth * numRepetitions,
-    mBackdropTexture.extents().height,
+    mBackdropTexture.height()
   };
+
+  const auto saved = renderer::saveState(mpRenderer);
+  mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
-    {offset, sourceRectSize},
-    {{}, targetRectSize},
-    true);
+    renderer::toTexCoords(
+      {offset, sourceRectSize}, backdropWidth, mBackdropTexture.height()),
+    {{}, sourceRectSize});
 }
 
 

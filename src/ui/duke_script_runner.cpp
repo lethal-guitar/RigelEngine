@@ -103,8 +103,9 @@ void DukeScriptRunner::executeScript(const data::script::Script& script) {
 void DukeScriptRunner::clearCanvas() {
   assert(hasFinishedExecution() || mState == State::ReadyToExecute);
 
-  const auto binder = CanvasBinder{mCanvas, mpRenderer};
+  bindCanvas();
   mpRenderer->clear({0, 0, 0, 0});
+  unbindCanvas();
 }
 
 
@@ -227,7 +228,7 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   clearOldSelectionIndicator();
 
   unbindCanvas();
-  mCanvas.render(mpRenderer, 0, 0);
+  mCanvas.render(0, 0);
 
   if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
     mpServices->fadeInScreen();
@@ -372,14 +373,14 @@ void DukeScriptRunner::interpretNextAction() {
 
     [this](const FadeIn&) {
       unbindCanvas();
-      mCanvas.render(mpRenderer, 0, 0);
+      mCanvas.render(0, 0);
       mpServices->fadeInScreen();
       bindCanvas();
     },
 
     [this](const FadeOut&) {
       unbindCanvas();
-      mCanvas.render(mpRenderer, 0, 0);
+      mCanvas.render(0, 0);
       mpServices->fadeOutScreen();
       bindCanvas();
 
@@ -406,7 +407,7 @@ void DukeScriptRunner::interpretNextAction() {
         mpRenderer,
         *mpResourceBundle,
         showImage.image);
-      imageTexture.render(mpRenderer, 0, 0);
+      imageTexture.render(0, 0);
       mpRenderer->submitBatch();
     },
 
@@ -560,8 +561,8 @@ void DukeScriptRunner::drawSprite(
   const auto drawOffsetPx =
     data::tileVectorToPixelVector(frameData.mDrawOffset);
 
-  renderer::OwningTexture spriteTexture(mpRenderer, image);
-  spriteTexture.render(mpRenderer, topLeftPx + drawOffsetPx);
+  renderer::Texture spriteTexture(mpRenderer, image);
+  spriteTexture.render(topLeftPx + drawOffsetPx);
   mpRenderer->submitBatch();
 }
 
@@ -723,12 +724,14 @@ bool DukeScriptRunner::hasCheckBoxes() const {
 
 
 void DukeScriptRunner::bindCanvas() {
-  mBoundCanvasState = CanvasBinder{mCanvas, mpRenderer};
+  mpRenderer->pushState();
+  mpRenderer->resetState();
+  mpRenderer->setRenderTarget(mCanvas.data());
 }
 
 
 void DukeScriptRunner::unbindCanvas() {
-  mBoundCanvasState = std::nullopt;
+  mpRenderer->popState();
 }
 
 }

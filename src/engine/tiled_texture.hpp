@@ -23,7 +23,7 @@ namespace rigel::engine {
 
 class TiledTexture {
 public:
-  TiledTexture(renderer::OwningTexture&& tileSet, renderer::Renderer* pRenderer);
+  TiledTexture(renderer::Texture&& tileSet, renderer::Renderer* pRenderer);
 
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
 
@@ -59,7 +59,7 @@ private:
     const int tileSpanY) const;
 
 private:
-  renderer::OwningTexture mTileSetTexture;
+  renderer::Texture mTileSetTexture;
   renderer::Renderer* mpRenderer;
 };
 

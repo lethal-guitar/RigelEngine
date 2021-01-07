@@ -27,7 +27,7 @@ namespace rigel::engine {
 using namespace data;
 using namespace renderer;
 
-TiledTexture::TiledTexture(OwningTexture&& tileSet, Renderer* pRenderer)
+TiledTexture::TiledTexture(Texture&& tileSet, Renderer* pRenderer)
   : mTileSetTexture(std::move(tileSet))
   , mpRenderer(pRenderer)
 {
@@ -39,7 +39,12 @@ void TiledTexture::renderTileStretched(
   const base::Rect<int>& destRect
 ) const {
   mpRenderer->drawTexture(
-    mTileSetTexture.data(), sourceRect(index, 1, 1), destRect);
+    mTileSetTexture.data(),
+    renderer::toTexCoords(
+      sourceRect(index, 1, 1),
+      mTileSetTexture.width(),
+      mTileSetTexture.height()),
+    destRect);
 }
 
 
@@ -89,7 +94,6 @@ void TiledTexture::renderTileGroup(
   const int tileSpanY
 ) const {
   mTileSetTexture.render(
-    mpRenderer,
     tileVectorToPixelVector({posX, posY}),
     sourceRect(index, tileSpanX, tileSpanY));
 }

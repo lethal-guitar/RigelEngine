@@ -78,8 +78,8 @@ private:
   const data::map::Map* mpMap;
 
   TiledTexture mTileSetTexture;
-  renderer::OwningTexture mBackdropTexture;
-  renderer::OwningTexture mAlternativeBackdropTexture;
+  renderer::Texture mBackdropTexture;
+  renderer::Texture mAlternativeBackdropTexture;
 
   data::map::BackdropScrollMode mScrollMode;
 

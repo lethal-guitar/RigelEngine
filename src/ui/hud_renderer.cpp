@@ -126,11 +126,11 @@ void drawLevelNumber(const int number, const TiledTexture& spriteSheet) {
 }
 
 
-OwningTexture actorToTexture(
+Texture actorToTexture(
   renderer::Renderer* pRenderer,
   const loader::ActorData& data
 ) {
-  return OwningTexture(pRenderer, data.mFrames[0].mFrameImage);
+  return Texture(pRenderer, data.mFrames[0].mFrameImage);
 }
 
 
@@ -261,17 +261,14 @@ void HudRenderer::render(
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
   mBottomLeftTexture.render(
-    mpRenderer,
-    0,
-    GameTraits::inGameViewPortSize.height - mBottomLeftTexture.height());
+    0, GameTraits::inGameViewPortSize.height - mBottomLeftTexture.height());
 
   mBottomRightTexture.render(
-    mpRenderer,
     mBottomLeftTexture.width(),
     GameTraits::inGameViewPortSize.height - mBottomRightTexture.height());
 
   const auto topRightTexturePosX = maxX - mTopRightTexture.width();
-  mTopRightTexture.render(mpRenderer, topRightTexturePosX, 0);
+  mTopRightTexture.render(topRightTexturePosX, 0);
 
   // Inventory
   // --------------------------------------------------------------------------
@@ -288,7 +285,7 @@ void HudRenderer::render(
 
         const auto textureIt = mInventoryTexturesByType.find(itemType);
         assert(textureIt != mInventoryTexturesByType.end());
-        textureIt->second.render(mpRenderer, drawPos);
+        textureIt->second.render(drawPos);
       }
     }
   }
@@ -341,7 +338,7 @@ void HudRenderer::drawCollectedLetters(
   for (const auto letter : playerModel.collectedLetters()) {
     const auto it = mCollectedLetterIndicatorsByType.find(letter);
     assert(it != mCollectedLetterIndicatorsByType.end());
-    it->second.mTexture.render(mpRenderer, it->second.mPxPosition);
+    it->second.mTexture.render(it->second.mPxPosition);
   }
 }
 
@@ -365,17 +362,14 @@ void HudRenderer::drawRadar(
 
   if (mpOptions->mPerElementUpscalingEnabled) {
     {
-      auto binder =
-        renderer::RenderTargetTexture::Binder{mRadarSurface, mpRenderer};
-      auto stateSaver = renderer::setupDefaultState(mpRenderer);
-
+      const auto saved = mRadarSurface.bindAndReset();
       mpRenderer->clear({0, 0, 0, 0});
       drawDots();
     }
 
-    mRadarSurface.render(mpRenderer, RADAR_POS_X, RADAR_POS_Y);
+    mRadarSurface.render(RADAR_POS_X, RADAR_POS_Y);
   } else {
-    const auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(
       mpRenderer->globalTranslation() + base::Vector{RADAR_POS_X, RADAR_POS_Y});
 

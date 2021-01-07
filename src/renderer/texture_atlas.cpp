@@ -80,13 +80,14 @@ TextureAtlas::TextureAtlas(
     atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
   }
 
-  mAtlasTexture = OwningTexture{mpRenderer, std::move(atlas)};
+  mAtlasTexture = Texture{mpRenderer, std::move(atlas)};
 
   mCoordinatesMap.reserve(images.size());
   for (const auto& packedRect : rects) {
-    mCoordinatesMap.push_back({
-      {packedRect.x, packedRect.y},
-      {packedRect.w, packedRect.h}});
+    mCoordinatesMap.push_back(toTexCoords(
+      {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
+      mAtlasTexture.width(),
+      mAtlasTexture.height()));
   }
 }
 

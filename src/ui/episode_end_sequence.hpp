@@ -37,9 +37,8 @@ public:
   bool finished() const;
 
 private:
-  std::vector<renderer::OwningTexture> mScreenImages;
+  std::vector<renderer::Texture> mScreenImages;
   std::size_t mCurrentImage = 0;
-  renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
 };
 

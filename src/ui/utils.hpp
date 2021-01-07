@@ -37,7 +37,7 @@ namespace rigel::ui {
 
 ImU32 toImgui(const base::Color& color);
 
-renderer::OwningTexture fullScreenImageAsTexture(
+renderer::Texture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
   const std::string& imageName);

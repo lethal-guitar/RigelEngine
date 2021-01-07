@@ -19,10 +19,14 @@
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "loader/palette.hpp"
+#include "renderer/opengl.hpp"
+#include "renderer/shader.hpp"
+#include "renderer/shader_code.hpp"
 #include "sdl_utils/error.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
@@ -34,7 +38,10 @@ namespace rigel::renderer {
 
 namespace {
 
-const GLushort QUAD_INDICES[] = { 0, 1, 2, 2, 3, 1 };
+const GLushort QUAD_INDICES[] = { 0, 2, 1, 2, 3, 1 };
+
+constexpr auto MAX_QUADS_PER_BATCH = 1280u;
+constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
 
 
 constexpr auto WATER_MASK_WIDTH = 8;
@@ -43,225 +50,39 @@ constexpr auto WATER_NUM_MASKS = 5;
 constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 
-#ifdef RIGEL_USE_GL_ES
-
-const auto SHADER_PREAMBLE = R"shd(
-#version 100
-
-#define ATTRIBUTE attribute
-#define OUT varying
-#define IN varying
-#define TEXTURE_LOOKUP texture2D
-#define OUTPUT_COLOR gl_FragColor
-#define OUTPUT_COLOR_DECLARATION
-#define SET_POINT_SIZE(size) gl_PointSize = size;
-#define HIGHP highp
-
-precision mediump float;
-)shd";
-
-#else
-
-// We generally want to stick to GLSL version 130 (from OpenGL 3.0) in order to
-// maximize compatibility with older graphics cards. Unfortunately, Mac OS only
-// supports GLSL 150 (from OpenGL 3.2), even when requesting a OpenGL 3.0
-// context. Therefore, we use different GLSL versions depending on the
-// platform.
-#if defined(__APPLE__)
-const auto SHADER_PREAMBLE = R"shd(
-#version 150
-
-#define ATTRIBUTE in
-#define OUT out
-#define IN in
-#define TEXTURE_LOOKUP texture
-#define OUTPUT_COLOR outputColor
-#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
-#define SET_POINT_SIZE
-#define HIGHP
-)shd";
-#else
-const auto SHADER_PREAMBLE = R"shd(
-#version 130
-
-#define ATTRIBUTE in
-#define OUT out
-#define IN in
-#define TEXTURE_LOOKUP texture2D
-#define OUTPUT_COLOR outputColor
-#define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
-#define SET_POINT_SIZE
-#define HIGHP
-)shd";
-#endif
-
-#endif
-
-
-const auto VERTEX_SOURCE = R"shd(
-ATTRIBUTE HIGHP vec2 position;
-ATTRIBUTE HIGHP vec2 texCoord;
-
-OUT HIGHP vec2 texCoordFrag;
-
-uniform mat4 transform;
-
-void main() {
-  gl_Position = transform * vec4(position, 0.0, 1.0);
-  texCoordFrag = vec2(texCoord.x, 1.0 - texCoord.y);
-}
-)shd";
-
-
-const auto FRAGMENT_SOURCE_SIMPLE = R"shd(
-OUTPUT_COLOR_DECLARATION
-
-IN HIGHP vec2 texCoordFrag;
-
-uniform sampler2D textureData;
-
-void main() {
-  OUTPUT_COLOR = TEXTURE_LOOKUP(textureData, texCoordFrag);
-}
-)shd";
-
-
-const auto FRAGMENT_SOURCE = R"shd(
-OUTPUT_COLOR_DECLARATION
-
-IN HIGHP vec2 texCoordFrag;
-
-uniform sampler2D textureData;
-uniform vec4 overlayColor;
-
-uniform vec4 colorModulation;
-uniform bool enableRepeat;
-
-void main() {
-  vec2 texCoords = texCoordFrag;
-  if (enableRepeat) {
-    texCoords.x = fract(texCoords.x);
-    texCoords.y = fract(texCoords.y);
+class DummyVao {
+#ifndef RIGEL_USE_GL_ES
+public:
+  DummyVao() {
+    glGenVertexArrays(1, &mVao);
+    glBindVertexArray(mVao);
   }
 
-  vec4 baseColor = TEXTURE_LOOKUP(textureData, texCoords);
-  vec4 modulated = baseColor * colorModulation;
-  float targetAlpha = modulated.a;
-
-  OUTPUT_COLOR =
-    vec4(mix(modulated.rgb, overlayColor.rgb, overlayColor.a), targetAlpha);
-}
-)shd";
-
-const auto VERTEX_SOURCE_SOLID = R"shd(
-ATTRIBUTE vec2 position;
-ATTRIBUTE vec4 color;
-
-OUT vec4 colorFrag;
-
-uniform mat4 transform;
-
-void main() {
-  SET_POINT_SIZE(1.0);
-  gl_Position = transform * vec4(position, 0.0, 1.0);
-  colorFrag = color;
-}
-)shd";
-
-const auto FRAGMENT_SOURCE_SOLID = R"shd(
-OUTPUT_COLOR_DECLARATION
-
-IN vec4 colorFrag;
-
-void main() {
-  OUTPUT_COLOR = colorFrag;
-}
-)shd";
-
-
-const auto VERTEX_SOURCE_WATER_EFFECT = R"shd(
-ATTRIBUTE vec2 position;
-ATTRIBUTE vec2 texCoordMask;
-
-OUT vec2 texCoordFrag;
-OUT vec2 texCoordMaskFrag;
-
-uniform mat4 transform;
-
-void main() {
-  SET_POINT_SIZE(1.0);
-  vec4 transformedPos = transform * vec4(position, 0.0, 1.0);
-
-  // Applying the transform gives us a position in normalized device
-  // coordinates (from -1.0 to 1.0). For sampling the render target texture,
-  // we need texture coordinates in the range 0.0 to 1.0, however.
-  // Therefore, we transform the position from normalized device coordinates
-  // into the 0.0 to 1.0 range by adding 1 and dividing by 2.
-  //
-  // We assume that the texture is as large as the screen, therefore sampling
-  // with the resulting tex coords should be equivalent to reading the pixel
-  // located at 'position'.
-  texCoordFrag = (transformedPos.xy + vec2(1.0, 1.0)) / 2.0;
-  texCoordMaskFrag = vec2(texCoordMask.x, 1.0 - texCoordMask.y);
-
-  gl_Position = transformedPos;
-}
-)shd";
-
-const auto FRAGMENT_SOURCE_WATER_EFFECT = R"shd(
-OUTPUT_COLOR_DECLARATION
-
-IN vec2 texCoordFrag;
-IN vec2 texCoordMaskFrag;
-
-uniform sampler2D textureData;
-uniform sampler2D maskData;
-uniform sampler2D colorMapData;
-
-
-vec3 paletteColor(int index) {
-  // 1st row of the color map contains the original palette. Because the
-  // texture is stored up-side down, y-coordinate 0.5 actually corresponds to
-  // the upper row of pixels.
-  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.5)).rgb;
-}
-
-
-vec3 remappedColor(int index) {
-  // 2nd row contains the remapped "water" palette
-  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.0)).rgb;
-}
-
-
-vec4 applyWaterEffect(vec4 color) {
-  // The original game runs in a palette-based video mode, where the frame
-  // buffer stores indices into a palette of 16 colors instead of directly
-  // storing color values. The water effect is implemented as a modification
-  // of these index values in the frame buffer.
-  // To replicate it, we first have to transform our RGBA color values into
-  // indices, by searching the palette for a matching color. With the index,
-  // we then look up the corresponding "under water" color.
-  // It would also be possible to perform the index manipulation here in the
-  // shader and then do another palette lookup to get the result. But due to
-  // precision problems on the Raspberry Pi which would cause visual glitches
-  // with that approach, we do it via lookup table instead.
-  int index = 0;
-  for (int i = 0; i < 16; ++i) {
-    if (color.rgb == paletteColor(i)) {
-      index = i;
-    }
+  ~DummyVao() {
+    glDeleteVertexArrays(1, &mVao);
   }
 
-  return vec4(remappedColor(index), color.a);
-}
+  DummyVao(const DummyVao&) = delete;
+  DummyVao& operator=(const DummyVao&) = delete;
 
-void main() {
-  vec4 color = TEXTURE_LOOKUP(textureData, texCoordFrag);
-  vec4 mask = TEXTURE_LOOKUP(maskData, texCoordMaskFrag);
-  float maskValue = mask.r;
-  OUTPUT_COLOR = mix(color, applyWaterEffect(color), maskValue);
-}
-)shd";
+private:
+  GLuint mVao;
+#endif
+};
+
+
+struct RenderTarget {
+  base::Extents mSize;
+  GLuint mFbo;
+};
+
+
+enum class RenderMode : std::uint8_t {
+  SpriteBatch,
+  NonTexturedRender,
+  Points,
+  WaterEffect
+};
 
 
 void* toAttribOffset(std::uintptr_t offset) {
@@ -342,28 +163,19 @@ void fillVertexPositions(
 
 template <typename Iter>
 void fillTexCoords(
-  const base::Rect<int>& rect,
-  Renderer::TextureData textureData,
+  const TexCoords& coords,
   Iter&& destIter,
   const std::size_t offset,
   const std::size_t stride
 ) {
-  using namespace std;
-
-  glm::vec2 texOffset(
-    rect.topLeft.x / float(textureData.mWidth),
-    rect.topLeft.y / float(textureData.mHeight));
-  glm::vec2 texScale(
-    rect.size.width / float(textureData.mWidth),
-    rect.size.height / float(textureData.mHeight));
-
-  const auto left = texOffset.x;
-  const auto right = texScale.x + texOffset.x;
-  const auto top = texOffset.y;
-  const auto bottom = texScale.y + texOffset.y;
-
   fillVertexData(
-    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
+    coords.left,
+    coords.right,
+    coords.top,
+    coords.bottom,
+    std::forward<Iter>(destIter),
+    offset,
+    stride);
 }
 
 
@@ -455,624 +267,8 @@ auto getSize(SDL_Window* pWindow) {
   return base::Size<int>{windowWidth, windowHeight};
 }
 
-}
 
-
-Renderer::Renderer(SDL_Window* pWindow)
-  : mpWindow(pWindow)
-  , mTexturedQuadShader(
-      SHADER_PREAMBLE,
-      VERTEX_SOURCE,
-      FRAGMENT_SOURCE,
-      {"position", "texCoord"})
-  , mSimpleTexturedQuadShader(
-      SHADER_PREAMBLE,
-      VERTEX_SOURCE,
-      FRAGMENT_SOURCE_SIMPLE,
-      {"position", "texCoord"})
-  , mSolidColorShader(
-      SHADER_PREAMBLE,
-      VERTEX_SOURCE_SOLID,
-      FRAGMENT_SOURCE_SOLID,
-      {"position", "color"})
-  , mWaterEffectShader(
-      SHADER_PREAMBLE,
-      VERTEX_SOURCE_WATER_EFFECT,
-      FRAGMENT_SOURCE_WATER_EFFECT,
-      {"position", "texCoordMask"})
-  , mLastUsedShader(0)
-  , mLastUsedTexture(0)
-  , mRenderMode(RenderMode::SpriteBatch)
-  , mCurrentFbo(0)
-  , mWindowSize(getSize(pWindow))
-  , mMaxWindowSize(
-      [pWindow]() {
-        SDL_DisplayMode displayMode;
-        sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
-        return base::Size<int>{displayMode.w, displayMode.h};
-      }())
-  , mCurrentFramebufferSize(mWindowSize)
-  , mGlobalTranslation(0.0f, 0.0f)
-  , mGlobalScale(1.0f, 1.0f)
-{
-  using namespace std;
-
-  // General configuration
-  glDisable(GL_DEPTH_TEST);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  SDL_GL_SetSwapInterval(data::ENABLE_VSYNC_DEFAULT ? 1 : 0);
-
-  // Setup a VBO for streaming data to the GPU, stays bound all the time
-  glGenBuffers(1, &mStreamVbo);
-  glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
-  glGenBuffers(1, &mStreamEbo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mStreamEbo);
-
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-
-  // One-time setup for water effect shader
-  useShaderIfChanged(mWaterEffectShader);
-  mWaterEffectShader.setUniform("textureData", 0);
-  mWaterEffectShader.setUniform("maskData", 1);
-  mWaterEffectShader.setUniform("colorMapData", 2);
-
-  mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
-  mWaterEffectColorMapTexture = createTexture(
-    createWaterEffectColorMapImage());
-
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture.mHandle);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture.mHandle);
-  glActiveTexture(GL_TEXTURE0);
-
-  // One-time setup for textured quad shader
-  useShaderIfChanged(mTexturedQuadShader);
-  mTexturedQuadShader.setUniform("textureData", 0);
-
-  useShaderIfChanged(mSimpleTexturedQuadShader);
-  mSimpleTexturedQuadShader.setUniform("textureData", 0);
-
-  // Remaining setup
-  onRenderTargetChanged();
-
-  setColorModulation({255, 255, 255, 255});
-}
-
-
-Renderer::~Renderer() {
-  glDeleteBuffers(1, &mStreamVbo);
-  glDeleteTextures(1, &mWaterSurfaceAnimTexture.mHandle);
-  glDeleteTextures(1, &mWaterEffectColorMapTexture.mHandle);
-}
-
-
-void Renderer::setOverlayColor(const base::Color& color) {
-  if (color != mLastOverlayColor) {
-    submitBatch();
-
-    mLastOverlayColor = color;
-    updateShaders();
-  }
-}
-
-
-void Renderer::setColorModulation(const base::Color& colorModulation) {
-  if (colorModulation != mLastColorModulation) {
-    submitBatch();
-
-    mLastColorModulation = colorModulation;
-    updateShaders();
-  }
-}
-
-
-void Renderer::drawTexture(
-  const TextureData& textureData,
-  const base::Rect<int>& sourceRect,
-  const base::Rect<int>& destRect,
-  const bool repeat
-) {
-  setRenderModeIfChanged(RenderMode::SpriteBatch);
-
-  if (textureData.mHandle != mLastUsedTexture) {
-    submitBatch();
-
-    glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
-    mLastUsedTexture = textureData.mHandle;
-  }
-
-  if (repeat != mTextureRepeatOn) {
-    submitBatch();
-
-    mTextureRepeatOn = repeat;
-    updateShaders();
-  }
-
-  // x, y, tex_u, tex_v
-  GLfloat vertices[4 * (2 + 2)];
-  fillVertexPositions(destRect, std::begin(vertices), 0, 4);
-  fillTexCoords(sourceRect, textureData, std::begin(vertices), 2, 4);
-
-  batchQuadVertices(std::begin(vertices), std::end(vertices), 4u);
-}
-
-
-void Renderer::submitBatch() {
-  if (mBatchData.empty()) {
-    return;
-  }
-
-  auto submitBatchedQuads = [this]() {
-    glBufferData(
-      GL_ARRAY_BUFFER,
-      sizeof(float) * mBatchData.size(),
-      mBatchData.data(),
-      GL_STREAM_DRAW);
-    glBufferData(
-      GL_ELEMENT_ARRAY_BUFFER,
-      sizeof(GLushort) * mBatchIndices.size(),
-      mBatchIndices.data(),
-      GL_STREAM_DRAW);
-    glDrawElements(
-      GL_TRIANGLES,
-      GLsizei(mBatchIndices.size()),
-      GL_UNSIGNED_SHORT,
-      nullptr);
-  };
-
-  switch (mRenderMode) {
-    case RenderMode::SpriteBatch:
-    case RenderMode::WaterEffect:
-      submitBatchedQuads();
-      break;
-
-    case RenderMode::Points:
-      glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * mBatchData.size(),
-        mBatchData.data(),
-        GL_STREAM_DRAW);
-      glDrawArrays(GL_POINTS, 0, GLsizei(mBatchData.size() / 6));
-      break;
-
-    case RenderMode::NonTexturedRender:
-      // No batching yet for NonTexturedRender
-      assert(false);
-      break;
-  }
-
-  mBatchData.clear();
-  mBatchIndices.clear();
-}
-
-
-void Renderer::drawFilledRectangle(
-  const base::Rect<int>& rect,
-  const base::Color& color
-) {
-  // Note: No batching for now
-  setRenderModeIfChanged(RenderMode::NonTexturedRender);
-
-  // x, y, r, g, b, a
-  GLfloat vertices[4 * (2 + 4)];
-  fillVertexPositions(rect, std::begin(vertices), 0, 6);
-
-  const auto colorVec = toGlColor(color);
-  for (auto vertex = 0; vertex < 4; ++vertex) {
-    for (auto component = 0; component < 4; ++component) {
-      vertices[2 + vertex*6 + component] = colorVec[component];
-    }
-  }
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-}
-
-
-void Renderer::drawRectangle(
-  const base::Rect<int>& rect,
-  const base::Color& color
-) {
-  // Note: No batching for now, drawRectangle is only used for debugging at
-  // the moment
-  setRenderModeIfChanged(RenderMode::NonTexturedRender);
-
-  const auto left = float(rect.left());
-  const auto right = float(rect.right());
-  const auto top = float(rect.top());
-  const auto bottom = float(rect.bottom());
-
-  const auto colorVec = toGlColor(color);
-  float vertices[] = {
-    left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-    left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-    right, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-    right, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-    left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a
-  };
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
-  glDrawArrays(GL_LINE_STRIP, 0, 5);
-}
-
-
-void Renderer::drawLine(
-  const int x1,
-  const int y1,
-  const int x2,
-  const int y2,
-  const base::Color& color
-) {
-  // Note: No batching for now, drawLine is only used for debugging at the
-  // moment
-  setRenderModeIfChanged(RenderMode::NonTexturedRender);
-
-  const auto colorVec = toGlColor(color);
-
-  float vertices[] = {
-    float(x1), float(y1), colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-    float(x2), float(y2), colorVec.r, colorVec.g, colorVec.b, colorVec.a
-  };
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
-  glDrawArrays(GL_LINE_STRIP, 0, 2);
-}
-
-
-void Renderer::drawPoint(
-  const base::Vector& position,
-  const base::Color& color
-) {
-  setRenderModeIfChanged(RenderMode::Points);
-
-  float vertices[] = {
-    float(position.x),
-    float(position.y),
-    color.r / 255.0f,
-    color.g / 255.0f,
-    color.b / 255.0f,
-    color.a / 255.0f
-  };
-  mBatchData.insert(
-    std::end(mBatchData), std::begin(vertices), std::end(vertices));
-}
-
-
-void Renderer::drawWaterEffect(
-  const base::Rect<int>& area,
-  TextureData textureData,
-  std::optional<int> surfaceAnimationStep
-) {
-  assert(
-    !surfaceAnimationStep ||
-    (*surfaceAnimationStep >= 0 && *surfaceAnimationStep < 4));
-
-  using namespace std;
-
-  const auto areaWidth = area.size.width;
-  auto drawWater = [&, this](
-    const base::Rect<int>& destRect,
-    const int maskIndex
-  ) {
-    const auto maskTexStartY = maskIndex * WATER_MASK_HEIGHT;
-    const auto animSourceRect = base::Rect<int>{
-      {0, maskTexStartY},
-      {areaWidth, WATER_MASK_HEIGHT}
-    };
-
-    // x, y, mask_u, mask_v
-    GLfloat vertices[4 * (2 + 2)];
-    fillVertexPositions(destRect, std::begin(vertices), 0, 4);
-    fillTexCoords(
-      animSourceRect, mWaterSurfaceAnimTexture, std::begin(vertices), 2, 4);
-
-    batchQuadVertices(std::begin(vertices), std::end(vertices), 4);
-  };
-
-  setRenderModeIfChanged(RenderMode::WaterEffect);
-
-  if (mLastUsedTexture != textureData.mHandle) {
-    submitBatch();
-    glBindTexture(GL_TEXTURE_2D, textureData.mHandle);
-    mLastUsedTexture = textureData.mHandle;
-  }
-
-  if (surfaceAnimationStep) {
-    const auto waterSurfaceArea = base::Rect<int>{
-      area.topLeft,
-      {areaWidth, WATER_MASK_HEIGHT}
-    };
-
-    drawWater(waterSurfaceArea, *surfaceAnimationStep);
-
-    auto remainingArea = area;
-    remainingArea.topLeft.y += WATER_MASK_HEIGHT;
-    remainingArea.size.height -= WATER_MASK_HEIGHT;
-
-    drawWater(remainingArea, WATER_MASK_INDEX_FILLED);
-  } else {
-    drawWater(area, WATER_MASK_INDEX_FILLED);
-  }
-}
-
-
-void Renderer::setGlobalTranslation(const base::Vector& translation) {
-  const auto glTranslation = glm::vec2{translation.x, translation.y};
-  if (glTranslation != mGlobalTranslation) {
-    submitBatch();
-
-    mGlobalTranslation = glTranslation;
-    updateProjectionMatrix();
-  }
-}
-
-
-base::Vector Renderer::globalTranslation() const {
-  return base::Vector{
-    static_cast<int>(mGlobalTranslation.x),
-    static_cast<int>(mGlobalTranslation.y)};
-}
-
-
-void Renderer::setGlobalScale(const base::Point<float>& scale) {
-  const auto glScale = glm::vec2{scale.x, scale.y};
-  if (glScale != mGlobalScale) {
-    submitBatch();
-
-    mGlobalScale = glScale;
-    updateProjectionMatrix();
-  }
-}
-
-
-base::Point<float> Renderer::globalScale() const {
-  return {mGlobalScale.x, mGlobalScale.y};
-}
-
-
-void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
-  if (clipRect == mClipRect) {
-    return;
-  }
-
-  submitBatch();
-
-  mClipRect = clipRect;
-  if (mClipRect) {
-    glEnable(GL_SCISSOR_TEST);
-
-    setScissorBox(*clipRect, mCurrentFramebufferSize);
-  } else {
-    glDisable(GL_SCISSOR_TEST);
-  }
-}
-
-
-std::optional<base::Rect<int>> Renderer::clipRect() const {
-  return mClipRect;
-}
-
-
-Renderer::RenderTarget Renderer::currentRenderTarget() const {
-  return {mCurrentFramebufferSize, mCurrentFbo};
-}
-
-
-void Renderer::setRenderTarget(const RenderTarget& target) {
-  if (target.mFbo == mCurrentFbo) {
-    return;
-  }
-
-  submitBatch();
-
-  if (!target.isDefault()) {
-    mCurrentFramebufferSize = target.mSize;
-    mCurrentFbo = target.mFbo;
-  } else {
-    mCurrentFramebufferSize.width = mWindowSize.width;
-    mCurrentFramebufferSize.height = mWindowSize.height;
-    mCurrentFbo = 0;
-  }
-
-  onRenderTargetChanged();
-}
-
-
-void Renderer::swapBuffers() {
-  assert(mCurrentFbo == 0);
-
-  submitBatch();
-  SDL_GL_SwapWindow(mpWindow);
-
-  const auto actualWindowSize = getSize(mpWindow);
-  if (mWindowSize != actualWindowSize) {
-    mWindowSize = actualWindowSize;
-    mCurrentFramebufferSize.width = mWindowSize.width;
-    mCurrentFramebufferSize.height = mWindowSize.height;
-    onRenderTargetChanged();
-  }
-}
-
-
-void Renderer::clear(const base::Color& clearColor) {
-  const auto glColor = toGlColor(clearColor);
-  glClearColor(glColor.r, glColor.g, glColor.b, glColor.a);
-  glClear(GL_COLOR_BUFFER_BIT);
-}
-
-
-template <typename VertexIter>
-void Renderer::batchQuadVertices(
-  VertexIter&& dataBegin,
-  VertexIter&& dataEnd,
-  const std::size_t attributesPerVertex
-) {
-  using namespace std;
-
-  const auto currentIndex = GLushort(mBatchData.size() / attributesPerVertex);
-
-  GLushort indices[6];
-  transform(
-    begin(QUAD_INDICES),
-    end(QUAD_INDICES),
-    begin(indices),
-    [&](const GLushort index) -> GLushort {
-      return index + currentIndex;
-    });
-
-  // TODO: Limit maximum batch size
-  mBatchData.insert(
-    mBatchData.end(),
-    forward<VertexIter>(dataBegin),
-    forward<VertexIter>(dataEnd));
-  mBatchIndices.insert(mBatchIndices.end(), begin(indices), end(indices));
-}
-
-
-void Renderer::setRenderModeIfChanged(const RenderMode mode) {
-  if (mRenderMode != mode) {
-    submitBatch();
-
-    mRenderMode = mode;
-    updateShaders();
-  }
-}
-
-
-void Renderer::updateShaders() {
-  switch (mRenderMode) {
-    case RenderMode::SpriteBatch:
-      if (
-        mTextureRepeatOn ||
-        mLastOverlayColor != base::Color{} ||
-        mLastColorModulation != base::Color{255, 255, 255, 255}
-      ) {
-        useShaderIfChanged(mTexturedQuadShader);
-        mTexturedQuadShader.setUniform("transform", mProjectionMatrix);
-        mTexturedQuadShader.setUniform("enableRepeat", mTextureRepeatOn);
-        mTexturedQuadShader.setUniform(
-          "colorModulation", toGlColor(mLastColorModulation));
-        mTexturedQuadShader.setUniform(
-          "overlayColor", toGlColor(mLastOverlayColor));
-      } else {
-        useShaderIfChanged(mSimpleTexturedQuadShader);
-        mSimpleTexturedQuadShader.setUniform("transform", mProjectionMatrix);
-      }
-
-      glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 4,
-        toAttribOffset(0));
-      glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 4,
-        toAttribOffset(2 * sizeof(float)));
-      break;
-
-    case RenderMode::Points:
-    case RenderMode::NonTexturedRender:
-      useShaderIfChanged(mSolidColorShader);
-      mSolidColorShader.setUniform("transform", mProjectionMatrix);
-      glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 6,
-        toAttribOffset(0));
-      glVertexAttribPointer(
-        1,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 6,
-        toAttribOffset(2 * sizeof(float)));
-      break;
-
-    case RenderMode::WaterEffect:
-      useShaderIfChanged(mWaterEffectShader);
-      mWaterEffectShader.setUniform("transform", mProjectionMatrix);
-      glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 4,
-        toAttribOffset(0));
-      glVertexAttribPointer(
-        2,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 4,
-        toAttribOffset(2 * sizeof(float)));
-      break;
-  }
-}
-
-
-Renderer::RenderTargetHandles Renderer::createRenderTargetTexture(
-  const int width,
-  const int height
-) {
-  const auto textureHandle =
-    createGlTexture(GLsizei(width), GLsizei(height), nullptr);
-  glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-  GLuint fboHandle;
-  glGenFramebuffers(1, &fboHandle);
-  glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
-  glFramebufferTexture2D(
-    GL_FRAMEBUFFER,
-    GL_COLOR_ATTACHMENT0,
-    GL_TEXTURE_2D,
-    textureHandle,
-    0);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFbo);
-  glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
-
-  return {textureHandle, fboHandle};
-}
-
-
-auto Renderer::createTexture(const data::Image& image) -> TextureData {
-  // OpenGL wants pixel data in bottom-up format, so transform it accordingly
-  std::vector<std::uint8_t> pixelData;
-  pixelData.resize(image.width() * image.height() * 4);
-  for (std::size_t y = 0; y < image.height(); ++y) {
-    const auto sourceRow = image.height() - (y + 1);
-    const auto yOffsetSource = image.width() * sourceRow;
-    const auto yOffset = y * image.width() * 4;
-
-    for (std::size_t x = 0; x < image.width(); ++x) {
-      const auto& pixel = image.pixelData()[x + yOffsetSource];
-      pixelData[x*4 +     yOffset] = pixel.r;
-      pixelData[x*4 + 1 + yOffset] = pixel.g;
-      pixelData[x*4 + 2 + yOffset] = pixel.b;
-      pixelData[x*4 + 3 + yOffset] = pixel.a;
-    }
-  }
-
-  auto handle = createGlTexture(
-    GLsizei(image.width()),
-    GLsizei(image.height()),
-    pixelData.data());
-  return {int(image.width()), int(image.height()), handle};
-}
-
-
-GLuint Renderer::createGlTexture(
+GLuint createGlTexture(
   const GLsizei width,
   const GLsizei height,
   const GLvoid* const pData
@@ -1096,45 +292,964 @@ GLuint Renderer::createGlTexture(
     GL_RGBA,
     GL_UNSIGNED_BYTE,
     pData);
-  glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
-
   return handle;
 }
 
+}
 
 
-void Renderer::useShaderIfChanged(Shader& shader) {
-  if (shader.handle() != mLastUsedShader) {
+struct Renderer::Impl {
+  struct State {
+    std::optional<base::Rect<int>> mClipRect;
+    base::Color mColorModulation{255, 255, 255, 255};
+    base::Color mOverlayColor;
+    glm::vec2 mGlobalTranslation{0.0f, 0.0f};
+    glm::vec2 mGlobalScale{1.0f, 1.0f};
+    TextureId mRenderTargetTexture = 0;
+    bool mTextureRepeatEnabled = false;
+
+    friend bool operator==(const State& lhs, const State& rhs) {
+      return
+        std::tie(
+          lhs.mClipRect,
+          lhs.mColorModulation,
+          lhs.mOverlayColor,
+          lhs.mGlobalTranslation,
+          lhs.mGlobalScale,
+          lhs.mRenderTargetTexture,
+          lhs.mTextureRepeatEnabled) ==
+        std::tie(
+          rhs.mClipRect,
+          rhs.mColorModulation,
+          rhs.mOverlayColor,
+          rhs.mGlobalTranslation,
+          rhs.mGlobalScale,
+          rhs.mRenderTargetTexture,
+          rhs.mTextureRepeatEnabled);
+    }
+
+    friend bool operator!=(const State& lhs, const State& rhs) {
+      return !(lhs == rhs);
+    }
+
+    bool needsExtendedShader() const {
+      return
+        mTextureRepeatEnabled ||
+        mOverlayColor != base::Color{} ||
+        mColorModulation != base::Color{255, 255, 255, 255};
+    }
+  };
+
+  // hot - meant to fit into a single cache line.
+  // needed for batching/rendering
+  std::vector<GLfloat> mBatchData;
+  std::vector<State> mStateStack{State{}};
+  GLuint mLastUsedTexture = 0;
+  GLuint mQuadIndicesEbo = 0;
+  std::uint16_t mBatchSize = 0;
+  RenderMode mRenderMode = RenderMode::SpriteBatch;
+  bool mStateChanged = true;
+
+  // warm - needed for committing state changes
+  State mLastCommittedState;
+  std::unordered_map<TextureId, RenderTarget> mRenderTargetDict;
+  Shader mTexturedQuadShader;
+  Shader mSimpleTexturedQuadShader;
+  Shader mSolidColorShader;
+  Shader mWaterEffectShader;
+  base::Size<int> mWindowSize;
+  base::Size<int> mLastKnownWindowSize;
+  SDL_Window* mpWindow;
+  RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
+
+  // cold
+  base::Size<int> mMaxWindowSize;
+  int mNumTextures = 0;
+  int mNumInternalTextures = 0;
+  TextureId mWaterSurfaceAnimTexture = 0;
+  TextureId mWaterEffectColorMapTexture = 0;
+  DummyVao mDummyVao;
+  GLuint mStreamVbo = 0;
+
+
+  explicit Impl(SDL_Window* pWindow)
+    : mTexturedQuadShader(
+        VERTEX_SOURCE,
+        FRAGMENT_SOURCE,
+        {"position", "texCoord"})
+    , mSimpleTexturedQuadShader(
+        VERTEX_SOURCE,
+        FRAGMENT_SOURCE_SIMPLE,
+        {"position", "texCoord"})
+    , mSolidColorShader(
+        VERTEX_SOURCE_SOLID,
+        FRAGMENT_SOURCE_SOLID,
+        {"position", "color"})
+    , mWaterEffectShader(
+        VERTEX_SOURCE_WATER_EFFECT,
+        FRAGMENT_SOURCE_WATER_EFFECT,
+        {"position", "texCoordMask"})
+    , mWindowSize(getSize(pWindow))
+    , mpWindow(pWindow)
+    , mMaxWindowSize(
+        [pWindow]() {
+          SDL_DisplayMode displayMode;
+          sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
+          return base::Size<int>{displayMode.w, displayMode.h};
+        }())
+  {
+    // General configuration
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Set up a VBO for streaming data to the GPU, stays bound all the time
+    glGenBuffers(1, &mStreamVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
+
+    // Set up an index buffer with enough indices to handle the largest
+    // possible batch size. This is only sent to the GPU once, reducing the
+    // amount of data we need to send for each batch.
+    {
+      glGenBuffers(1, &mQuadIndicesEbo);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+
+      std::vector<GLushort> indices;
+      indices.reserve(MAX_BATCH_SIZE);
+
+      for (auto i = 0u; i < MAX_QUADS_PER_BATCH; ++i) {
+        for (auto index : QUAD_INDICES) {
+          indices.push_back(GLushort(index + 4*i));
+        }
+      }
+
+      glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(GLushort) * indices.size(),
+        indices.data(),
+        GL_STATIC_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    // One-time setup for water effect shader
+    mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
+    mWaterEffectColorMapTexture = createTexture(
+      createWaterEffectColorMapImage());
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture);
+    glActiveTexture(GL_TEXTURE0);
+
+    mWaterEffectShader.use();
+    mWaterEffectShader.setUniform("textureData", 0);
+    mWaterEffectShader.setUniform("maskData", 1);
+    mWaterEffectShader.setUniform("colorMapData", 2);
+
+    // One-time setup for textured quad shaders
+    mTexturedQuadShader.use();
+    mTexturedQuadShader.setUniform("textureData", 0);
+
+    mSimpleTexturedQuadShader.use();
+    mSimpleTexturedQuadShader.setUniform("textureData", 0);
+
+    mNumInternalTextures = mNumTextures;
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glViewport(0, 0, mWindowSize.width, mWindowSize.height);
+    commitShaderSelection(mStateStack.back());
+    commitTransformationMatrix(mStateStack.back(), mWindowSize);
+  }
+
+
+  ~Impl() {
+    // Make sure all externally used textures and render targets have been
+    // destroyed before the renderer is destroyed.
+    assert(mRenderTargetDict.empty());
+    assert(mNumTextures == mNumInternalTextures);
+
+    glDeleteBuffers(1, &mStreamVbo);
+    glDeleteBuffers(1, &mQuadIndicesEbo);
+    glDeleteTextures(1, &mWaterSurfaceAnimTexture);
+    glDeleteTextures(1, &mWaterEffectColorMapTexture);
+  }
+
+
+  void drawTexture(
+    const TextureId texture,
+    const TexCoords& sourceRect,
+    const base::Rect<int>& destRect
+  ) {
+    updateState(mRenderMode, RenderMode::SpriteBatch);
+
+    if (texture != mLastUsedTexture) {
+      submitBatch();
+
+      glBindTexture(GL_TEXTURE_2D, texture);
+      mLastUsedTexture = texture;
+    }
+
+    // x, y, tex_u, tex_v
+    GLfloat vertices[4 * (2 + 2)];
+    fillVertexPositions(destRect, std::begin(vertices), 0, 4);
+    fillTexCoords(sourceRect, std::begin(vertices), 2, 4);
+
+    batchQuadVertices(std::begin(vertices), std::end(vertices));
+  }
+
+
+  void submitBatch() {
+    if (mBatchData.empty()) {
+      return;
+    }
+
+    commitChangedState();
+
+    switch (mRenderMode) {
+      case RenderMode::SpriteBatch:
+      case RenderMode::WaterEffect:
+        glBufferData(
+          GL_ARRAY_BUFFER,
+          sizeof(float) * mBatchData.size(),
+          mBatchData.data(),
+          GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+        glDrawElements(
+          GL_TRIANGLES,
+          mBatchSize,
+          GL_UNSIGNED_SHORT,
+          nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        break;
+
+      case RenderMode::Points:
+        glBufferData(
+          GL_ARRAY_BUFFER,
+          sizeof(float) * mBatchData.size(),
+          mBatchData.data(),
+          GL_STREAM_DRAW);
+        glDrawArrays(GL_POINTS, 0, GLsizei(mBatchData.size() / 6));
+        break;
+
+      case RenderMode::NonTexturedRender:
+        // No batching yet for NonTexturedRender
+        assert(false);
+        break;
+    }
+
+    mBatchData.clear();
+    mBatchSize = 0;
+  }
+
+
+  void drawFilledRectangle(
+    const base::Rect<int>& rect,
+    const base::Color& color
+  ) {
+    // Note: No batching for now
+    updateState(mRenderMode, RenderMode::NonTexturedRender);
+    commitChangedState();
+
+    // x, y, r, g, b, a
+    GLfloat vertices[4 * (2 + 4)];
+    fillVertexPositions(rect, std::begin(vertices), 0, 6);
+
+    const auto colorVec = toGlColor(color);
+    for (auto vertex = 0; vertex < 4; ++vertex) {
+      for (auto component = 0; component < 4; ++component) {
+        vertices[2 + vertex*6 + component] = colorVec[component];
+      }
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  }
+
+
+  void drawRectangle(
+    const base::Rect<int>& rect,
+    const base::Color& color
+  ) {
+    // Note: No batching for now, drawRectangle is only used for debugging at
+    // the moment
+    updateState(mRenderMode, RenderMode::NonTexturedRender);
+    commitChangedState();
+
+    const auto left = float(rect.left());
+    const auto right = float(rect.right());
+    const auto top = float(rect.top());
+    const auto bottom = float(rect.bottom());
+
+    const auto colorVec = toGlColor(color);
+    float vertices[] = {
+      left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      right, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      right, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glDrawArrays(GL_LINE_STRIP, 0, 5);
+  }
+
+
+  void drawLine(
+    const int x1,
+    const int y1,
+    const int x2,
+    const int y2,
+    const base::Color& color
+  ) {
+    // Note: No batching for now, drawLine is only used for debugging at the
+    // moment
+    updateState(mRenderMode, RenderMode::NonTexturedRender);
+    commitChangedState();
+
+    const auto colorVec = toGlColor(color);
+
+    float vertices[] = {
+      float(x1), float(y1), colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      float(x2), float(y2), colorVec.r, colorVec.g, colorVec.b, colorVec.a
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glDrawArrays(GL_LINE_STRIP, 0, 2);
+  }
+
+
+  void drawPoint(
+    const base::Vector& position,
+    const base::Color& color
+  ) {
+    updateState(mRenderMode, RenderMode::Points);
+
+    float vertices[] = {
+      float(position.x),
+      float(position.y),
+      color.r / 255.0f,
+      color.g / 255.0f,
+      color.b / 255.0f,
+      color.a / 255.0f
+    };
+    mBatchData.insert(
+      std::end(mBatchData), std::begin(vertices), std::end(vertices));
+  }
+
+
+  void drawWaterEffect(
+    const base::Rect<int>& area,
+    const TextureId texture,
+    std::optional<int> surfaceAnimationStep
+  ) {
+    assert(
+      !surfaceAnimationStep ||
+      (*surfaceAnimationStep >= 0 && *surfaceAnimationStep < 4));
+
+    using namespace std;
+
+    const auto areaWidth = area.size.width;
+    auto drawWater = [&, this](
+      const base::Rect<int>& destRect,
+      const int maskIndex
+    ) {
+      const auto maskTexStartY = maskIndex * WATER_MASK_HEIGHT;
+      const auto animSourceRect = base::Rect<int>{
+        {0, maskTexStartY},
+        {areaWidth, WATER_MASK_HEIGHT}
+      };
+
+      // x, y, mask_u, mask_v
+      GLfloat vertices[4 * (2 + 2)];
+      fillVertexPositions(destRect, std::begin(vertices), 0, 4);
+      fillTexCoords(
+        toTexCoords(
+          animSourceRect, WATER_MASK_WIDTH, WATER_MASK_HEIGHT * WATER_NUM_MASKS),
+        std::begin(vertices),
+        2,
+        4);
+
+      batchQuadVertices(std::begin(vertices), std::end(vertices));
+    };
+
+    updateState(mRenderMode, RenderMode::WaterEffect);
+
+    if (mLastUsedTexture != texture) {
+      submitBatch();
+      glBindTexture(GL_TEXTURE_2D, texture);
+      mLastUsedTexture = texture;
+    }
+
+    if (surfaceAnimationStep) {
+      const auto waterSurfaceArea = base::Rect<int>{
+        area.topLeft,
+        {areaWidth, WATER_MASK_HEIGHT}
+      };
+
+      drawWater(waterSurfaceArea, *surfaceAnimationStep);
+
+      auto remainingArea = area;
+      remainingArea.topLeft.y += WATER_MASK_HEIGHT;
+      remainingArea.size.height -= WATER_MASK_HEIGHT;
+
+      drawWater(remainingArea, WATER_MASK_INDEX_FILLED);
+    } else {
+      drawWater(area, WATER_MASK_INDEX_FILLED);
+    }
+  }
+
+
+  void pushState() {
+    mStateStack.push_back(mStateStack.back());
+  }
+
+
+  void popState() {
+    assert(mStateStack.size() > 1);
+
+    submitBatch();
+
+    mStateChanged = mStateStack.back() != *std::prev(mStateStack.end(), 2);
+    mStateStack.pop_back();
+  }
+
+
+  void resetState() {
+    submitBatch();
+
+    const auto defaultState = State{};
+
+    if (mStateStack.back() != defaultState) {
+      mStateStack.back() = defaultState;
+      mStateChanged = true;
+    }
+  }
+
+
+  void setOverlayColor(const base::Color& color) {
+    updateState(mStateStack.back().mOverlayColor, color);
+  }
+
+
+  void setColorModulation(const base::Color& color) {
+    updateState(mStateStack.back().mColorModulation, color);
+  }
+
+
+  void setTextureRepeatEnabled(const bool enable) {
+    updateState(mStateStack.back().mTextureRepeatEnabled, enable);
+  }
+
+
+  void setGlobalTranslation(const base::Vector& translation) {
+    const auto glTranslation = glm::vec2{translation.x, translation.y};
+    updateState(mStateStack.back().mGlobalTranslation, glTranslation);
+  }
+
+
+  void setGlobalScale(const base::Point<float>& scale) {
+    const auto glScale = glm::vec2{scale.x, scale.y};
+    updateState(mStateStack.back().mGlobalScale, glScale);
+  }
+
+
+  void setClipRect(const std::optional<base::Rect<int>>& clipRect) {
+    updateState(mStateStack.back().mClipRect, clipRect);
+  }
+
+
+  void setRenderTarget(const TextureId target) {
+    updateState(mStateStack.back().mRenderTargetTexture, target);
+  }
+
+
+  template <typename StateT>
+  void updateState(StateT& state, const StateT& newValue) {
+    if (state != newValue) {
+      submitBatch();
+
+      state = newValue;
+      mStateChanged = true;
+    }
+  }
+
+
+  void swapBuffers() {
+    assert(mStateStack.back().mRenderTargetTexture == 0);
+
+    submitBatch();
+    SDL_GL_SwapWindow(mpWindow);
+
+    const auto actualWindowSize = getSize(mpWindow);
+    if (mWindowSize != actualWindowSize) {
+      mWindowSize = actualWindowSize;
+      mStateChanged = true;
+    }
+  }
+
+
+  void clear(const base::Color& clearColor) {
+    commitChangedState();
+
+    const auto glColor = toGlColor(clearColor);
+    glClearColor(glColor.r, glColor.g, glColor.b, glColor.a);
+    glClear(GL_COLOR_BUFFER_BIT);
+  }
+
+
+  template <typename VertexIter>
+  void batchQuadVertices(VertexIter&& dataBegin, VertexIter&& dataEnd) {
+    if (mBatchSize >= MAX_BATCH_SIZE) {
+      submitBatch();
+    }
+
+    mBatchData.insert(
+      mBatchData.end(),
+      std::forward<VertexIter>(dataBegin),
+      std::forward<VertexIter>(dataEnd));
+    mBatchSize += std::uint16_t(std::size(QUAD_INDICES));
+  }
+
+
+  void commitChangedState() {
+    if (!mStateChanged) {
+      return;
+    }
+
+    const auto& state = mStateStack.back();
+
+    auto currentFramebufferSize = [&]() {
+      if (state.mRenderTargetTexture != 0) {
+        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+        assert(iData != mRenderTargetDict.end());
+        return iData->second.mSize;
+      }
+
+      return mWindowSize;
+    };
+
+
+    auto transformNeedsUpdate =
+      state.mGlobalTranslation != mLastCommittedState.mGlobalTranslation ||
+      state.mGlobalScale != mLastCommittedState.mGlobalScale;
+
+    if (
+      mRenderMode != mLastKnownRenderMode ||
+      state.needsExtendedShader() != mLastCommittedState.needsExtendedShader()
+    ) {
+      commitShaderSelection(state);
+      transformNeedsUpdate = true;
+    }
+
+    if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture) {
+      base::Extents framebufferSize;
+      if (state.mRenderTargetTexture != 0) {
+        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+        assert(iData != mRenderTargetDict.end());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
+        framebufferSize = iData->second.mSize;
+      } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        framebufferSize = mWindowSize;
+      }
+
+      glViewport(0, 0, framebufferSize.width, framebufferSize.height);
+      commitClipRect(state, framebufferSize);
+      commitVertexAttributeFormat();
+
+      transformNeedsUpdate = true;
+    } else {
+      if (mWindowSize != mLastKnownWindowSize && state.mRenderTargetTexture == 0) {
+        glViewport(0, 0, mWindowSize.width, mWindowSize.height);
+        commitClipRect(state, mWindowSize);
+        transformNeedsUpdate = true;
+      } else if (state.mClipRect != mLastCommittedState.mClipRect) {
+        commitClipRect(state, currentFramebufferSize());
+      }
+    }
+
+    if (mRenderMode == RenderMode::SpriteBatch && state.needsExtendedShader()) {
+      if (state.mColorModulation != mLastCommittedState.mColorModulation) {
+        mTexturedQuadShader.setUniform(
+          "colorModulation", toGlColor(state.mColorModulation));
+      }
+
+      if (state.mOverlayColor != mLastCommittedState.mOverlayColor) {
+        mTexturedQuadShader.setUniform(
+          "overlayColor", toGlColor(state.mOverlayColor));
+      }
+
+      if (state.mTextureRepeatEnabled != mLastCommittedState.mTextureRepeatEnabled) {
+        mTexturedQuadShader.setUniform(
+          "enableRepeat", state.mTextureRepeatEnabled);
+      }
+    }
+
+    if (transformNeedsUpdate) {
+      commitTransformationMatrix(state, currentFramebufferSize());
+    }
+
+    mLastCommittedState = state;
+    mLastKnownRenderMode = mRenderMode;
+    mLastKnownWindowSize = mWindowSize;
+    mStateChanged = false;
+  }
+
+
+  void commitClipRect(
+    const State& state,
+    const base::Extents& framebufferSize
+  ) {
+    if (state.mClipRect) {
+      glEnable(GL_SCISSOR_TEST);
+      setScissorBox(*state.mClipRect, framebufferSize);
+    } else {
+      glDisable(GL_SCISSOR_TEST);
+    }
+  }
+
+
+  Shader& shaderToUse(const State& state) {
+    switch (mRenderMode) {
+      case RenderMode::SpriteBatch:
+        if (state.needsExtendedShader()) {
+          return mTexturedQuadShader;
+        }
+
+        return mSimpleTexturedQuadShader;
+
+      case RenderMode::Points:
+      case RenderMode::NonTexturedRender:
+        return mSolidColorShader;
+
+      case RenderMode::WaterEffect:
+        return mWaterEffectShader;
+    }
+
+    assert(false);
+    return mTexturedQuadShader;
+  }
+
+
+  void commitShaderSelection(const State& state) {
+    auto& shader = shaderToUse(state);
     shader.use();
-    mLastUsedShader = shader.handle();
+
+    if (shader.handle() == mTexturedQuadShader.handle()) {
+      mTexturedQuadShader.setUniform(
+        "enableRepeat", state.mTextureRepeatEnabled);
+      mTexturedQuadShader.setUniform(
+        "colorModulation", toGlColor(state.mColorModulation));
+      mTexturedQuadShader.setUniform(
+        "overlayColor", toGlColor(state.mOverlayColor));
+    }
+
+    commitVertexAttributeFormat();
   }
+
+
+  void commitVertexAttributeFormat() {
+    switch (mRenderMode) {
+      case RenderMode::SpriteBatch:
+      case RenderMode::WaterEffect:
+        glVertexAttribPointer(
+          0,
+          2,
+          GL_FLOAT,
+          GL_FALSE,
+          sizeof(float) * 4,
+          toAttribOffset(0));
+        glVertexAttribPointer(
+          1,
+          2,
+          GL_FLOAT,
+          GL_FALSE,
+          sizeof(float) * 4,
+          toAttribOffset(2 * sizeof(float)));
+        break;
+
+      case RenderMode::Points:
+      case RenderMode::NonTexturedRender:
+        glVertexAttribPointer(
+          0,
+          2,
+          GL_FLOAT,
+          GL_FALSE,
+          sizeof(float) * 6,
+          toAttribOffset(0));
+        glVertexAttribPointer(
+          1,
+          4,
+          GL_FLOAT,
+          GL_FALSE,
+          sizeof(float) * 6,
+          toAttribOffset(2 * sizeof(float)));
+        break;
+    }
+  }
+
+
+  void commitTransformationMatrix(
+    const State& state,
+    const base::Extents& framebufferSize
+  ) {
+    const auto projection = glm::ortho(
+      0.0f,
+      float(framebufferSize.width),
+      float(framebufferSize.height),
+      0.0f);
+    const auto projectionMatrix = glm::scale(
+      glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
+      glm::vec3(state.mGlobalScale, 1.0f));
+    shaderToUse(state).setUniform("transform", projectionMatrix);
+  }
+
+
+  TextureId createRenderTargetTexture(
+    const int width,
+    const int height
+  ) {
+    const auto textureHandle =
+      createGlTexture(GLsizei(width), GLsizei(height), nullptr);
+
+    GLuint fboHandle;
+    glGenFramebuffers(1, &fboHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+    glFramebufferTexture2D(
+      GL_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0,
+      GL_TEXTURE_2D,
+      textureHandle,
+      0);
+
+    mStateChanged = true;
+    glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+
+    mRenderTargetDict.insert({textureHandle, {{width, height}, fboHandle}});
+
+    return textureHandle;
+  }
+
+
+  TextureId createTexture(const data::Image& image) {
+    // OpenGL wants pixel data in bottom-up format, so transform it accordingly
+    std::vector<std::uint8_t> pixelData;
+    pixelData.resize(image.width() * image.height() * 4);
+    for (std::size_t y = 0; y < image.height(); ++y) {
+      const auto sourceRow = image.height() - (y + 1);
+      const auto yOffsetSource = image.width() * sourceRow;
+      const auto yOffset = y * image.width() * 4;
+
+      for (std::size_t x = 0; x < image.width(); ++x) {
+        const auto& pixel = image.pixelData()[x + yOffsetSource];
+        pixelData[x*4 +     yOffset] = pixel.r;
+        pixelData[x*4 + 1 + yOffset] = pixel.g;
+        pixelData[x*4 + 2 + yOffset] = pixel.b;
+        pixelData[x*4 + 3 + yOffset] = pixel.a;
+      }
+    }
+
+    const auto handle = createGlTexture(
+      GLsizei(image.width()),
+      GLsizei(image.height()),
+      pixelData.data());
+    glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+
+    ++mNumTextures;
+    return handle;
+  }
+
+
+  void destroyTexture(TextureId texture) {
+    const auto iRenderTarget = mRenderTargetDict.find(texture);
+    if (iRenderTarget != mRenderTargetDict.end()) {
+      glDeleteFramebuffers(1, &iRenderTarget->second.mFbo);
+      mRenderTargetDict.erase(iRenderTarget);
+    } else {
+      --mNumTextures;
+    }
+
+    glDeleteTextures(1, &texture);
+  }
+};
+
+
+Renderer::Renderer(SDL_Window* pWindow)
+  : mpImpl(std::make_unique<Impl>(pWindow))
+{
 }
 
 
-void Renderer::onRenderTargetChanged() {
-  glBindFramebuffer(GL_FRAMEBUFFER, mCurrentFbo);
-  glViewport(0, 0, mCurrentFramebufferSize.width, mCurrentFramebufferSize.height);
+Renderer::~Renderer() = default;
 
-  updateProjectionMatrix();
 
-  if (mClipRect) {
-    setScissorBox(*mClipRect, mCurrentFramebufferSize);
-  }
+void Renderer::setOverlayColor(const base::Color& color) {
+  mpImpl->setOverlayColor(color);
 }
 
 
-void Renderer::updateProjectionMatrix() {
-  const auto projection = glm::ortho(
-    0.0f,
-    float(mCurrentFramebufferSize.width),
-    float(mCurrentFramebufferSize.height),
-    0.0f);
+void Renderer::setColorModulation(const base::Color& colorModulation) {
+  mpImpl->setColorModulation(colorModulation);
+}
 
-  mProjectionMatrix = glm::scale(
-    glm::translate(projection, glm::vec3(mGlobalTranslation, 0.0f)),
-    glm::vec3(mGlobalScale, 1.0f));
 
-  updateShaders();
+void Renderer::setTextureRepeatEnabled(const bool enable) {
+  mpImpl->setTextureRepeatEnabled(enable);
+}
+
+
+void Renderer::drawTexture(
+  const TextureId texture,
+  const TexCoords& sourceRect,
+  const base::Rect<int>& destRect
+) {
+  mpImpl->drawTexture(texture, sourceRect, destRect);
+}
+
+
+void Renderer::submitBatch() {
+  mpImpl->submitBatch();
+}
+
+
+void Renderer::drawFilledRectangle(
+  const base::Rect<int>& rect,
+  const base::Color& color
+) {
+  mpImpl->drawFilledRectangle(rect, color);
+}
+
+
+void Renderer::drawRectangle(
+  const base::Rect<int>& rect,
+  const base::Color& color
+) {
+  mpImpl->drawRectangle(rect, color);
+}
+
+
+void Renderer::drawLine(
+  const int x1,
+  const int y1,
+  const int x2,
+  const int y2,
+  const base::Color& color
+) {
+  mpImpl->drawLine(x1, y1, x2, y2, color);
+}
+
+
+void Renderer::drawPoint(
+  const base::Vector& position,
+  const base::Color& color
+) {
+  mpImpl->drawPoint(position, color);
+}
+
+
+void Renderer::drawWaterEffect(
+  const base::Rect<int>& area,
+  const TextureId texture,
+  std::optional<int> surfaceAnimationStep
+) {
+  mpImpl->drawWaterEffect(area, texture, surfaceAnimationStep);
+}
+
+
+void Renderer::pushState() {
+  mpImpl->pushState();
+}
+
+
+void Renderer::popState() {
+  mpImpl->popState();
+}
+
+
+void Renderer::resetState() {
+  mpImpl->resetState();
+}
+
+
+void Renderer::setGlobalTranslation(const base::Vector& translation) {
+  mpImpl->setGlobalTranslation(translation);
+}
+
+
+base::Vector Renderer::globalTranslation() const {
+  return base::Vector{
+    static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.x),
+    static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.y)};
+}
+
+
+void Renderer::setGlobalScale(const base::Point<float>& scale) {
+  mpImpl->setGlobalScale(scale);
+}
+
+
+base::Point<float> Renderer::globalScale() const {
+  return {mpImpl->mStateStack.back().mGlobalScale.x, mpImpl->mStateStack.back().mGlobalScale.y};
+}
+
+
+void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
+  mpImpl->setClipRect(clipRect);
+}
+
+
+std::optional<base::Rect<int>> Renderer::clipRect() const {
+  return mpImpl->mStateStack.back().mClipRect;
+}
+
+
+base::Size<int> Renderer::windowSize() const {
+  return mpImpl->mWindowSize;
+}
+
+
+base::Size<int> Renderer::maxWindowSize() const {
+  return mpImpl->mMaxWindowSize;
+}
+
+
+void Renderer::setRenderTarget(const TextureId target) {
+  mpImpl->setRenderTarget(target);
+}
+
+
+void Renderer::swapBuffers() {
+  mpImpl->swapBuffers();
+}
+
+
+void Renderer::clear(const base::Color& clearColor) {
+  mpImpl->clear(clearColor);
+}
+
+
+TextureId Renderer::createRenderTargetTexture(
+  const int width,
+  const int height
+) {
+  return mpImpl->createRenderTargetTexture(width, height);
+}
+
+
+TextureId Renderer::createTexture(const data::Image& image) {
+  return mpImpl->createTexture(image);
+}
+
+
+void Renderer::destroyTexture(TextureId texture) {
+  mpImpl->destroyTexture(texture);
 }
 
 }

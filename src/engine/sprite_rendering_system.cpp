@@ -304,15 +304,16 @@ void SpriteRenderingSystem::renderForegroundSprites() const {
 void SpriteRenderingSystem::renderSprite(const SpriteDrawSpec& spec) const {
   // White flash takes priority over translucency
   if (spec.mIsFlashingWhite) {
+    const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
+    mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
   } else if (spec.mIsTranslucent) {
+    const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
+    mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
+  } else {
+    mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
   }
-
-  mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
-
-  mpRenderer->setOverlayColor(base::Color{});
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 }

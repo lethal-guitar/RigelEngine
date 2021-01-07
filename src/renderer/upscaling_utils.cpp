@@ -126,8 +126,8 @@ RenderTargetTexture createFullscreenRenderTarget(
   if (options.mPerElementUpscalingEnabled) {
     return RenderTargetTexture{
       pRenderer,
-      size_t(pRenderer->maxWindowSize().width),
-      size_t(pRenderer->maxWindowSize().height)};
+      pRenderer->maxWindowSize().width,
+      pRenderer->maxWindowSize().height};
   } else {
     const auto width =
       options.mWidescreenModeOn && canUseWidescreenMode(pRenderer)
@@ -135,8 +135,8 @@ RenderTargetTexture createFullscreenRenderTarget(
         : data::GameTraits::viewPortWidthPx;
     return RenderTargetTexture{
       pRenderer,
-      size_t(width),
-      size_t(data::GameTraits::viewPortHeightPx)};
+      width,
+      data::GameTraits::viewPortHeightPx};
   }
 }
 

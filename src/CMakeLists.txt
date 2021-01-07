@@ -270,6 +270,8 @@ set(core_sources
     renderer/renderer.hpp
     renderer/shader.cpp
     renderer/shader.hpp
+    renderer/shader_code.cpp
+    renderer/shader_code.hpp
     renderer/texture.cpp
     renderer/texture.hpp
     renderer/texture_atlas.cpp

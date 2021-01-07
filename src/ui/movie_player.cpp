@@ -48,18 +48,17 @@ void MoviePlayer::playMovie(
   assert(frameDelayInFastTicks >= 1);
 
   {
-    auto binder = renderer::RenderTargetTexture::Binder{mCanvas, mpRenderer};
-    auto saved = renderer::setupDefaultState(mpRenderer);
+    const auto saved = mCanvas.bindAndReset();
 
-    auto baseImage = renderer::OwningTexture(mpRenderer, movie.mBaseImage);
-    baseImage.render(mpRenderer, 0, 0);
+    auto baseImage = renderer::Texture(mpRenderer, movie.mBaseImage);
+    baseImage.render(0, 0);
     mpRenderer->submitBatch();
   }
 
   mAnimationFrames = utils::transformed(movie.mFrames,
     [this](const auto& frame) {
       auto texture =
-        renderer::OwningTexture(mpRenderer, frame.mReplacementImage);
+        renderer::Texture(mpRenderer, frame.mReplacementImage);
       return FrameData{std::move(texture), frame.mStartRow};
     });
 
@@ -115,14 +114,12 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
   }
 
   {
-    auto binder = renderer::RenderTargetTexture::Binder{mCanvas, mpRenderer};
-    auto saved = renderer::setupDefaultState(mpRenderer);
-
+    const auto saved = mCanvas.bindAndReset();
     const auto& frameData = mAnimationFrames[mCurrentFrame];
-    frameData.mImage.render(mpRenderer, 0, frameData.mStartRow);
+    frameData.mImage.render(0, frameData.mStartRow);
   }
 
-  mCanvas.render(mpRenderer, 0, 0);
+  mCanvas.render(0, 0);
 }
 
 

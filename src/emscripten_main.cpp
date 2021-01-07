@@ -74,6 +74,7 @@ int main()
 
   renderer::loadGlFunctions();
 
+  SDL_GL_SetSwapInterval(data::ENABLE_VSYNC_DEFAULT ? 1 : 0);
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
 

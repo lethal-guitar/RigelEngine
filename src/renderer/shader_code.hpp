@@ -1,4 +1,4 @@
-/* Copyright (C) 2019, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2021, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,30 +16,17 @@
 
 #pragma once
 
-#include "common/game_mode.hpp"
-#include "renderer/texture.hpp"
 
+namespace rigel::renderer {
 
-namespace rigel {
+extern const char* VERTEX_SOURCE;
+extern const char* FRAGMENT_SOURCE_SIMPLE;
+extern const char* FRAGMENT_SOURCE;
 
-/** Shows anti-piracy screen for registered version
- *
- * Shows the anti-piracy screen (LCR.MNI) until any key is pressed, then
- * switches to Intro/Demo loop.
- */
-class AntiPiracyScreenMode : public GameMode {
-public:
-  AntiPiracyScreenMode(Context context, bool isFirstLaunch);
+extern const char* VERTEX_SOURCE_SOLID;
+extern const char* FRAGMENT_SOURCE_SOLID;
 
-  std::unique_ptr<GameMode> updateAndRender(
-    engine::TimeDelta,
-    const std::vector<SDL_Event>& events
-  ) override;
-
-private:
-  Context mContext;
-  renderer::Texture mTexture;
-  bool mIsFirstLaunch;
-};
+extern const char* VERTEX_SOURCE_WATER_EFFECT;
+extern const char* FRAGMENT_SOURCE_WATER_EFFECT;
 
 }

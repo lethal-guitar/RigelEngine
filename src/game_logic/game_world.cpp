@@ -94,7 +94,7 @@ auto localToGlobalTranslation(
   renderer::Renderer* pRenderer,
   const int screenShakeOffsetX
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  auto saved = renderer::saveState(pRenderer);
 
   const auto offset = data::GameTraits::inGameViewPortOffset +
     base::Vector{screenShakeOffsetX, 0};
@@ -115,7 +115,7 @@ auto localToGlobalTranslation(
   const renderer::WidescreenViewPortInfo& info,
   const int screenShakeOffsetX
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  auto saved = renderer::saveState(pRenderer);
 
   const auto scale = pRenderer->globalScale();
   const auto offset = base::Vector{
@@ -158,7 +158,7 @@ void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
   const renderer::WidescreenViewPortInfo& info
 ) {
-  auto saved = renderer::Renderer::StateSaver{pRenderer};
+  auto saved = renderer::saveState(pRenderer);
 
   pRenderer->setGlobalTranslation({
     info.mLeftPaddingPx, pRenderer->globalTranslation().y});
@@ -631,7 +631,7 @@ void GameWorld::render() {
   }
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
-    const auto clipRectGuard = renderer::Renderer::StateSaver{mpRenderer};
+    const auto clipRectGuard = renderer::saveState(mpRenderer);
     mpRenderer->setClipRect(base::Rect<int>{
       mpRenderer->globalTranslation(),
       renderer::scaleSize(
@@ -647,16 +647,14 @@ void GameWorld::render() {
       drawMapAndSprites(viewPortSize);
 
       {
-        const auto binder =
-          renderer::RenderTargetTexture::Binder(mLowResLayer, mpRenderer);
-        const auto defaultStateGuard = renderer::setupDefaultState(mpRenderer);
+        const auto saved = mLowResLayer.bindAndReset();
 
         mpRenderer->clear({0, 0, 0, 0});
         mpState->mParticles.render(mpState->mCamera.position());
         mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
       }
 
-      mLowResLayer.render(mpRenderer, 0, 0);
+      mLowResLayer.render(0, 0);
     } else {
       drawMapAndSprites(viewPortSize);
       mpState->mParticles.render(mpState->mCamera.position());
@@ -710,7 +708,9 @@ void GameWorld::render() {
       auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
       drawTopRow();
     } else {
-      const auto saved = renderer::setupDefaultState(mpRenderer);
+      const auto saved = renderer::saveState(mpRenderer);
+      mpRenderer->setGlobalTranslation({});
+      mpRenderer->setClipRect({});
       drawTopRow();
 
       mpRenderer->setGlobalTranslation(base::Vector{
@@ -729,7 +729,7 @@ void GameWorld::render() {
       drawHud();
     }
 
-    auto saved = renderer::Renderer::StateSaver{mpRenderer};
+    auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(localToGlobalTranslation(
       mpRenderer,
       {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
@@ -767,16 +767,15 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
     renderBackgroundLayers();
   } else {
     {
-      renderer::RenderTargetTexture::Binder bindRenderTarget(
-        mWaterEffectBuffer, mpRenderer);
+      auto saved = mWaterEffectBuffer.bind();
       renderBackgroundLayers();
     }
 
     {
-      auto saved = renderer::Renderer::StateSaver(mpRenderer);
+      auto saved = renderer::saveState(mpRenderer);
       mpRenderer->setGlobalScale({1.0f, 1.0f});
       mpRenderer->setGlobalTranslation({});
-      mWaterEffectBuffer.render(mpRenderer, 0, 0);
+      mWaterEffectBuffer.render(0, 0);
     }
 
     for (const auto& area : waterEffectAreas) {
