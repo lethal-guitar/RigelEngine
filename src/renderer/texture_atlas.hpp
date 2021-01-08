@@ -23,10 +23,32 @@
 
 namespace rigel::renderer {
 
+/** Combines multiple images into a single texture
+  *
+  * For more efficient rendering, we want to minimize the number of
+  * textures used each frame, as switching textures is expensive.
+  * This class helps with that by combining multiple images into a single
+  * large texture. We can then draw individual images by using the
+  * corresponding part of the large texture.
+  */
 class TextureAtlas {
 public:
+  /** Build a texture atlas
+    *
+    * Create an atlas using the provided list of images. Currently, atlas
+    * size is hardcoded. This will throw an exception if not all images fit
+    * into the size.
+    * Also note that the order of images in the given list determines how
+    * to address these images when drawing: The first image in the list is
+    * referenced by index 0, the 2nd one by index 1, etc.
+    */
   TextureAtlas(Renderer* pRenderer, const std::vector<data::Image>& images);
 
+  /** Draw image from atlas at given location
+    *
+    * The index parameter corresponds to the index in the list given on
+    * construction.
+    */
   void draw(int index, const base::Rect<int>& destRect) const;
 
 private:
