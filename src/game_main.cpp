@@ -44,6 +44,14 @@ using namespace sdl_utils;
 
 namespace {
 
+bool isValidGamePath(const std::filesystem::path& path) {
+  namespace fs = std::filesystem;
+
+  std::error_code ec;
+  return fs::exists(path / "NUKEM2.CMP", ec) && !ec;
+}
+
+
 void showLoadingScreen(SDL_Window* pWindow) {
   glClear(GL_COLOR_BUFFER_BIT);
   ui::imgui_integration::beginFrame(pWindow);
@@ -86,8 +94,6 @@ void setupForFirstLaunch(
     gamePath = fs::u8path(commandLineGamePath);
   }
 
-  const auto dataFilePath = fs::u8path("NUKEM2.CMP");
-
   // Case 2: The current working directory is set to a Duke Nukem II
   // installation, most likely because the RigelEngine executable has been
   // copied there. Use the current working directory as game path.
@@ -95,7 +101,7 @@ void setupForFirstLaunch(
     const auto currentWorkingDir = fs::current_path();
     if (
       commandLineGamePath.empty() &&
-      fs::exists(currentWorkingDir / dataFilePath)
+      isValidGamePath(currentWorkingDir)
     ) {
       gamePath = currentWorkingDir;
     }
@@ -117,7 +123,7 @@ for more info.)");
   }
 
   // Make sure there is a data file at the game path.
-  if (!fs::exists(gamePath / dataFilePath)) {
+  if (!isValidGamePath(gamePath)) {
     throw std::runtime_error("No game data (NUKEM2.CMP file) found in game path");
   }
 
@@ -150,7 +156,9 @@ void initAndRunGame(
     }
   };
 
-  const auto needsProfileSetup = !userProfile.mGamePath.has_value();
+  const auto needsProfileSetup =
+    !userProfile.mGamePath.has_value() ||
+    !isValidGamePath(*userProfile.mGamePath);
   if (needsProfileSetup) {
     setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
