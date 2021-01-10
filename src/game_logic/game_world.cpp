@@ -904,6 +904,13 @@ void GameWorld::quickLoad() {
     mpPlayerModel,
     mSessionId);
   mMessageDisplay.setMessage("Quick save restored.");
+
+  const auto& viewPortSize =
+    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
+      ? viewPortSizeWideScreen(mpRenderer)
+      : data::GameTraits::mapViewPortSize;
+  mpState->mSpriteRenderingSystem.update(
+    mpState->mEntities, viewPortSize, mpState->mCamera.position());
 }
 
 
