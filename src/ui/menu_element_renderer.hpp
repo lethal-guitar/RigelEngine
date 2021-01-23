@@ -76,12 +76,6 @@ public:
    */
   void drawSelectionIndicator(int x, int y, engine::TimeDelta elapsedTime) const;
 
-  /** Draws a black rectangle at given position.
-   *
-   * Meant to erase a previously drawn menu selection indicator.
-   */
-  void clearSelectionIndicator(int x, int y);
-
 private:
   void drawTextEntryCursor(int x, int y, int state) const;
   void drawSelectionIndicator(int x, int y, int state) const;
