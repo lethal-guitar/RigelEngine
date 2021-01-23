@@ -211,6 +211,7 @@ void GameSessionMode::fadeToNewStage(StageT& stage) {
 
 void GameSessionMode::finishGameSession() {
   mContext.mpServiceProvider->stopMusic();
+  mContext.mpServiceProvider->fadeOutScreen();
 
   const auto scoreQualifies = data::scoreQualifiesForHighScoreList(
     mPlayerModel.score(),

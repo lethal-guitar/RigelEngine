@@ -141,7 +141,6 @@ namespace {
 
 constexpr auto MENU_INDICATOR_ANIM_DELAY = 7;
 constexpr auto NUM_MENU_INDICATOR_STATES = 8;
-constexpr auto MENU_INDICATOR_STATE_FOR_CLEARING = NUM_MENU_INDICATOR_STATES + 1;
 
 constexpr auto CURSOR_ANIM_DELAY = 5;
 constexpr auto NUM_CURSOR_ANIM_STATES = 4;
@@ -396,11 +395,6 @@ void MenuElementRenderer::drawSelectionIndicator(
 ) const {
   const auto index = 9*mpSpriteSheet->tilesPerRow() + state*2;
   mpSpriteSheet->renderTileQuad(index, base::Vector{x, y - 1});
-}
-
-
-void MenuElementRenderer::clearSelectionIndicator(const int x, const int y) {
-  drawSelectionIndicator(x, y, MENU_INDICATOR_STATE_FOR_CLEARING);
 }
 
 

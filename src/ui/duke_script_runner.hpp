@@ -103,7 +103,6 @@ private:
     }
 
     int mTalkDuration;
-    int mLastTalkFrame = -1;
     engine::TimeDelta mElapsedTime = 0;
   };
 
@@ -167,7 +166,6 @@ private:
 
   void drawMenuSelectionIndicator(
     MenuSelectionIndicatorState& state, engine::TimeDelta dt);
-  void clearOldSelectionIndicator();
 
   bool hasCheckBoxes() const;
   void displayCheckBoxes(const CheckBoxesState& state);
@@ -208,7 +206,6 @@ private:
   bool mMenuItemWasSelected = false;
   std::unordered_map<int, int> mPersistentMenuSelections;
   std::optional<MenuSelectionIndicatorState> mMenuSelectionIndicatorState;
-  std::optional<MenuSelectionIndicatorState> mPreviousSelectionIndicatorState;
   std::optional<int> mCurrentPersistentSelectionSlot;
 
   std::optional<CheckBoxesState> mCheckBoxStates;

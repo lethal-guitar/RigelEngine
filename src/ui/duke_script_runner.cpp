@@ -219,16 +219,14 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   }
 
   bindCanvas();
-  updateAndRenderDynamicElements(dt);
 
   while (mState == State::ExecutingScript) {
     interpretNextAction();
   }
 
-  clearOldSelectionIndicator();
-
   unbindCanvas();
   mCanvas.render(0, 0);
+  updateAndRenderDynamicElements(dt);
 
   if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
     mpServices->fadeInScreen();
@@ -253,23 +251,6 @@ void DukeScriptRunner::updateAndRenderDynamicElements(
   if (hasCheckBoxes()) {
     displayCheckBoxes(*mCheckBoxStates);
   }
-}
-
-
-void DukeScriptRunner::clearOldSelectionIndicator() {
-  if (mPreviousSelectionIndicatorState) {
-    const auto indicatorNowHidden = !mMenuSelectionIndicatorState.has_value();
-    const auto needsClear =
-      indicatorNowHidden ||
-      mPreviousSelectionIndicatorState->mPosY !=
-        mMenuSelectionIndicatorState->mPosY;
-
-    if (needsClear) {
-      mMenuElementRenderer.clearSelectionIndicator(
-        8, mPreviousSelectionIndicatorState->mPosY);
-    }
-  }
-  mPreviousSelectionIndicatorState = mMenuSelectionIndicatorState;
 }
 
 
@@ -320,16 +301,11 @@ void DukeScriptRunner::animateNewsReporter(
     const auto randomNumber =
       engine::RANDOM_NUMBER_TABLE[
         numFramesAlreadyTalked % engine::RANDOM_NUMBER_TABLE.size()];
-    const auto newTalkFrame = randomNumber % NUM_NEWS_REPORTER_STATES;
-
-    if (newTalkFrame != state.mLastTalkFrame) {
-      drawSprite(
-        data::ActorID::News_reporter_talking_mouth_animation,
-        newTalkFrame,
-        0,
-        0);
-      state.mLastTalkFrame = newTalkFrame;
-    }
+    drawSprite(
+      data::ActorID::News_reporter_talking_mouth_animation,
+      randomNumber % NUM_NEWS_REPORTER_STATES,
+      0,
+      0);
   } else {
     stopNewsReporterAnimation();
   }
@@ -337,9 +313,6 @@ void DukeScriptRunner::animateNewsReporter(
 
 
 void DukeScriptRunner::stopNewsReporterAnimation() {
-  if (mNewsReporterAnimationState) {
-    drawSprite(data::ActorID::News_reporter_talking_mouth_animation, 0, 0, 0);
-  }
   mNewsReporterAnimationState = std::nullopt;
 }
 
@@ -658,6 +631,7 @@ void DukeScriptRunner::showMenuSelectionIndicator(const int y) {
 void DukeScriptRunner::hideMenuSelectionIndicator() {
   mMenuSelectionIndicatorState = std::nullopt;
 }
+
 
 void DukeScriptRunner::drawMenuSelectionIndicator(
   MenuSelectionIndicatorState& state,
