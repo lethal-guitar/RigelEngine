@@ -52,7 +52,6 @@ void MoviePlayer::playMovie(
 
     auto baseImage = renderer::Texture(mpRenderer, movie.mBaseImage);
     baseImage.render(0, 0);
-    mpRenderer->submitBatch();
   }
 
   mAnimationFrames = utils::transformed(movie.mFrames,

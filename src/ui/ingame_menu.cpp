@@ -468,7 +468,7 @@ void IngameMenu::enterMenu(const MenuType type) {
   };
 
   auto saveSlotSelectionEventHook = [this](const SDL_Event& event) {
-    if (isConfirmButton(event)) {
+    if (isMenuConfirmButton(event)) {
       const auto enteredViaGamepad =
         event.type == SDL_CONTROLLERBUTTONDOWN;
 

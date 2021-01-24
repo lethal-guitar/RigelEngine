@@ -848,18 +848,9 @@ struct Renderer::Impl {
     }
 
     if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture) {
-      base::Extents framebufferSize;
-      if (state.mRenderTargetTexture != 0) {
-        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
-        assert(iData != mRenderTargetDict.end());
+      const auto framebufferSize = currentFramebufferSize();
 
-        glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
-        framebufferSize = iData->second.mSize;
-      } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        framebufferSize = mWindowSize;
-      }
-
+      commitRenderTarget(state);
       glViewport(0, 0, framebufferSize.width, framebufferSize.height);
       commitClipRect(state, framebufferSize);
       commitVertexAttributeFormat();
@@ -900,6 +891,17 @@ struct Renderer::Impl {
     mLastKnownRenderMode = mRenderMode;
     mLastKnownWindowSize = mWindowSize;
     mStateChanged = false;
+  }
+
+
+  void commitRenderTarget(const State& state) {
+    if (state.mRenderTargetTexture != 0) {
+      const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+      assert(iData != mRenderTargetDict.end());
+      glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
+    } else {
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
   }
 
 
@@ -1016,6 +1018,8 @@ struct Renderer::Impl {
     const int width,
     const int height
   ) {
+    submitBatch();
+
     const auto textureHandle =
       createGlTexture(GLsizei(width), GLsizei(height), nullptr);
 
@@ -1029,8 +1033,8 @@ struct Renderer::Impl {
       textureHandle,
       0);
 
-    mStateChanged = true;
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+    commitRenderTarget(mLastCommittedState);
 
     mRenderTargetDict.insert({textureHandle, {{width, height}, fboHandle}});
 
@@ -1039,6 +1043,8 @@ struct Renderer::Impl {
 
 
   TextureId createTexture(const data::Image& image) {
+    submitBatch();
+
     // OpenGL wants pixel data in bottom-up format, so transform it accordingly
     std::vector<std::uint8_t> pixelData;
     pixelData.resize(image.width() * image.height() * 4);
@@ -1068,6 +1074,8 @@ struct Renderer::Impl {
 
 
   void destroyTexture(TextureId texture) {
+    submitBatch();
+
     const auto iRenderTarget = mRenderTargetDict.find(texture);
     if (iRenderTarget != mRenderTargetDict.end()) {
       glDeleteFramebuffers(1, &iRenderTarget->second.mFbo);
