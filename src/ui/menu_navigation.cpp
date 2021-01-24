@@ -47,6 +47,14 @@ bool isConfirmButton(const SDL_Event& event) {
 }
 
 
+bool isMenuConfirmButton(const SDL_Event& event) {
+  return
+    isConfirmButton(event) ||
+    (isNonRepeatKeyDown(event) && event.key.keysym.sym == SDLK_SPACE);
+
+}
+
+
 bool isCancelButton(const SDL_Event& event) {
   const auto escapePressed = isNonRepeatKeyDown(event) &&
     event.key.keysym.sym == SDLK_ESCAPE;
