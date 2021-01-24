@@ -1016,6 +1016,8 @@ struct Renderer::Impl {
     const int width,
     const int height
   ) {
+    submitBatch();
+
     const auto textureHandle =
       createGlTexture(GLsizei(width), GLsizei(height), nullptr);
 
@@ -1039,6 +1041,8 @@ struct Renderer::Impl {
 
 
   TextureId createTexture(const data::Image& image) {
+    submitBatch();
+
     // OpenGL wants pixel data in bottom-up format, so transform it accordingly
     std::vector<std::uint8_t> pixelData;
     pixelData.resize(image.width() * image.height() * 4);
@@ -1068,6 +1072,8 @@ struct Renderer::Impl {
 
 
   void destroyTexture(TextureId texture) {
+    submitBatch();
+
     const auto iRenderTarget = mRenderTargetDict.find(texture);
     if (iRenderTarget != mRenderTargetDict.end()) {
       glDeleteFramebuffers(1, &iRenderTarget->second.mFbo);
