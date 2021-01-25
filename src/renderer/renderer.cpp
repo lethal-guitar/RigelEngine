@@ -256,7 +256,7 @@ data::Image createWaterEffectColorMapImage() {
     pixels.push_back(loader::INGAME_PALETTE[index]);
   }
 
-  return data::Image{std::move(pixels), NUM_COLORS, NUM_ROWS};
+  return data::Image{std::move(pixels), static_cast<size_t>(NUM_COLORS), static_cast<size_t>(NUM_ROWS)};
 }
 
 

@@ -74,7 +74,7 @@ TextureAtlas::TextureAtlas(
     throw std::runtime_error("Failed to build texture atlas");
   }
 
-  data::Image atlas{ATLAS_WIDTH, ATLAS_HEIGHT};
+  data::Image atlas{static_cast<size_t>(ATLAS_WIDTH), static_cast<size_t>(ATLAS_HEIGHT)};
 
   for (const auto& packedRect : rects) {
     atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
