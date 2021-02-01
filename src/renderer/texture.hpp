@@ -24,12 +24,11 @@
 
 namespace rigel::renderer {
 
-/** Wrapper class for renderable texture
+/** Image (bitmap) residing in GPU memory
  *
- * This wrapper class manages the life-time of a texture, and offers
- * a more object-oriented interface.
- *
- * The ownership semantics are the same as for a std::unique_ptr.
+ * This is an abstraction over the low-level texture management API
+ * provided by the Renderer class. It automatically manages life-time
+ * and offers convenient drawing functions for various use cases.
  */
 class Texture {
 public:
@@ -70,7 +69,9 @@ public:
    *
    * The sourceRect parameter is interpreted relative to the texture's
    * coordinate system, e.g. (0, 0, width, height) would render the entire
-   * texture.
+   * texture. If texture repeat is enabled in the renderer, the sourceRect
+   * can be larger than the texture itself, which will cause the texture
+   * to be drawn multiple times (repeated).
    */
   void render(
     const base::Vector& position, const base::Rect<int>& sourceRect) const;
@@ -114,43 +115,41 @@ protected:
 
 /** Utility class for render target type textures
  *
- * It manages life-time like Texture, but creates a SDL_Texture with an
- * access type of SDL_TEXTUREACCESS_TARGET.
- *
- * It also offers a RAII helper class for safe binding/unbinding of the
- * render target.
+ * Like the Texture class, this is an abstraction over the Renderer API.
+ * It functions like a regular texture, but additionally offers a bind()
+ * function to safely bind and unbind it for use as a render target.
  *
  * Example use:
  *
  *   RenderTargetTexture renderTarget(pRenderer, 640, 480);
  *
  *   {
- *     RenderTargetTexture::Binder bindTarget(renderTarget);
+ *     auto binding = renderTarget.bind();
  *
  *     // someOtherTexture will be drawn into renderTarget, not on the screen
- *     someOtherTexture.render(pRenderer, 0, 0);
+ *     someOtherTexture.render(0, 0);
  *   }
  *
  *   // Now draw the previously filled render target to the screen
- *   renderTarget.render(pRenderer, 100, 50);
+ *   renderTarget.render(100, 50);
  *
  *
  * Note that it's safe to nest render target bindings, e.g. you can do:
  *
- *   RenderTargetTexture::Binder bindFirstTarget(targetOne);
+ *   auto outerBinding = targetOne.bind();
  *
  *   // do some rendering, it will go into targetOne
  *
  *   {
- *     RenderTargetTexture::Binder bindAnotherTarget(targetTwo);
+ *     auto innerBinding = targetTwo.bind();
  *
  *     // render into targetTwo
  *   }
  *
  *   // This will now end up in targetOne
- *   targetTwo.render(pRenderer, 0, 0);
+ *   targetTwo.render(0, 0);
  *
- * Once the outermost scope's Binder is destroyed, the default render target
+ * Once the outermost scope's binding is destroyed, the default render target
  * will be active again (i.e. drawing to the screen)
  */
 class RenderTargetTexture : public Texture {
