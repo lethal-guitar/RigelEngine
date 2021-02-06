@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  EM_VERSION: 1.39.18
+  EM_VERSION: 2.0.13
   EM_CACHE_DIR: 'emsdk-cache'
 
 jobs:
