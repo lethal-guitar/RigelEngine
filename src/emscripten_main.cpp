@@ -67,6 +67,9 @@ int main()
   platform::setGLAttributes();
 
   auto userProfile = loadOrCreateUserProfile();
+  userProfile.mOptions.mMusicVolume = 0.5f;
+  userProfile.mOptions.mSoundVolume = 0.5f;
+
   auto pWindow = platform::createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
