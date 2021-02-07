@@ -107,6 +107,8 @@ int main()
   EM_ASM(
     var loadingBox = document.getElementById("loadingbox");
     loadingBox.parentNode.removeChild(loadingBox);
+
+    document.getElementById("welcomebox").style.display = "block";
   );
 
   emscripten_set_main_loop_arg(runOneFrameWrapper, &game, 0, true);
