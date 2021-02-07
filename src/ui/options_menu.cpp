@@ -316,6 +316,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     endRebinding();
   }
 
+#ifndef __EMSCRIPTEN__
   if (mType == Type::Main)
   {
     ImGui::Spacing();
@@ -382,6 +383,7 @@ Going back to a registered version will make them work again.)");
       ImGui::EndPopup();
     }
   }
+#endif
 
   ImGui::EndPopup();
 }
