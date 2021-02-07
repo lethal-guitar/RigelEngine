@@ -37,6 +37,10 @@ RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
 
+// This is needed for EM_ASM
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
 
 using namespace rigel;
 
@@ -89,7 +93,15 @@ int main()
   options.mGamePath = WASM_GAME_PATH;
 
   Game game(options, &userProfile, pWindow.get(), false);
+
+  EM_ASM(
+    var loadingBox = document.getElementById("loadingbox");
+    loadingBox.parentNode.removeChild(loadingBox);
+  );
+
   emscripten_set_main_loop_arg(runOneFrameWrapper, &game, 0, true);
 
   return 0;
 }
+
+#pragma clang diagnostic pop

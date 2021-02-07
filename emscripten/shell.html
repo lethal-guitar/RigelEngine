@@ -12,6 +12,20 @@
         padding: 0;
         background-color: black;
       }
+
+      .info_msg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+        text-align: center;
+
+        color: white;
+        font-size: 3em;
+        font-family: sans-serif;
+      }
     </style>
   </head>
   <body>
@@ -22,5 +36,8 @@
       }
     </script>
     {{{ SCRIPT }}}
+    <div id="loadingbox" class="info_msg">
+      <h1>Loading...</h1>
+    </div>
   </body>
 </html>
