@@ -268,6 +268,7 @@ auto Game::runOneFrame() -> std::optional<StopReason> {
 
   pumpEvents();
   if (!mIsRunning) {
+    stopMusic();
     return StopReason::GameEnded;
   }
 

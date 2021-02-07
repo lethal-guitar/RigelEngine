@@ -53,7 +53,17 @@ namespace {
 constexpr auto WASM_GAME_PATH = "/duke/";
 
 void runOneFrameWrapper(void *pData) {
-  static_cast<Game*>(pData)->runOneFrame();
+  auto pGame = static_cast<Game*>(pData);
+  if (const auto result = pGame->runOneFrame();
+      result && *result == Game::StopReason::GameEnded)
+  {
+    EM_ASM(
+      document.getElementById("canvas").style.display = "none";
+      document.getElementById("thankyoubox").style.display = "block";
+    );
+
+    emscripten_cancel_main_loop();
+  }
 }
 
 }
