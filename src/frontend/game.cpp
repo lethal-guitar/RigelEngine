@@ -268,6 +268,7 @@ auto Game::runOneFrame() -> std::optional<StopReason> {
 
   pumpEvents();
   if (!mIsRunning) {
+    stopMusic();
     return StopReason::GameEnded;
   }
 
@@ -422,6 +423,17 @@ bool Game::handleEvent(const SDL_Event& event) {
 
 
 void Game::performScreenFadeBlocking(const FadeType type) {
+#ifdef __EMSCRIPTEN__
+  // TODO: Implement screen fades for the Emscripten version.
+  // This is not so easy because we can't simply do a loop that renders
+  // multiple frames when running in the browser, as it just blocks the
+  // browser's main thread and the intermediate (faded) frames are not
+  // shown until the current requestAnimationFrame() callback returns.
+  // So we'd need to either find a way to suspend and then resume C++ code
+  // execution during the fade, or rewrite all client code to be stateful
+  // instead of relying on a blocking fade() function.
+  mAlphaMod = type == FadeType::In ? 255 : 0;
+#else
   using namespace std::chrono;
 
   auto saved = renderer::saveState(&mRenderer);
@@ -455,6 +467,7 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
   // Pretend that the fade didn't take any time
   mLastTime = base::Clock::now();
+#endif
 }
 
 

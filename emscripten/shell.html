@@ -12,6 +12,31 @@
         padding: 0;
         background-color: black;
       }
+
+      .info_msg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+        text-align: center;
+
+        color: white;
+        font-size: 3em;
+        font-family: sans-serif;
+      }
+
+      #welcomebox {
+        background-color: #000000DD;
+        font-size: 1em;
+        text-align: left;
+        padding: 0.2em;
+      }
+
+      #thankyoubox, #welcomebox {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -20,7 +45,58 @@
       Module = {
         canvas: document.getElementById('canvas')
       }
+
+      window.addEventListener('load', function(load_event) {
+        document.getElementById('close_welcomebox').addEventListener('click',
+          function(e) {
+            var welcomeBox = document.getElementById('welcomebox');
+            welcomebox.parentNode.removeChild(welcomebox);
+          });
+        });
     </script>
     {{{ SCRIPT }}}
+    <div id="loadingbox" class="info_msg">
+      <h1>Loading...</h1>
+    </div>
+    <div id="thankyoubox" class="info_msg">
+      <h1>Thanks for playing!</h1>
+      <p>
+        You can now close this tab, or reload the page to start again.
+      </p>
+    </div>
+    <div id="welcomebox" class="info_msg">
+      <h1>Welcome to &nbsp;<a href="https://github.com/lethal-guitar/RigelEngine" target="_blank">RigelEngine</a>&nbsp;(web version)!</h1>
+
+      <h2>Known issues/limitations</h2>
+      <p>
+      <strong>Please note:</strong>&nbsp;This version is still work in progress and has a few limitations that don't exist in the&nbsp;<a href="https://github.com/lethal-guitar/RigelEngine/releases" target="_blank">native version</a>:
+      </p>
+
+      <ul>
+        <li>On Mac OS, the default controls are in conflict with some system-wide shortcuts (e.g. Ctrl + Up arrow for switching between applications etc.) I'd recommend reconfiguring the controls (see below) if you're on a Mac so that the Ctrl key is not used. This is not a problem in the native Mac version as it can use true fullscreen mode, but that doesn't work in the web version unfortunately.</li>
+        <li>Saved games, high scores, and options can't be saved permanently and are lost when reloading or closing the page.</li>
+        <li>It's not possible to play the registered version.</li>
+        <li>Due to missing touch input support, there is no way to interact with the game on mobile devices (unless you plug in a USB keyboard), so it will just run through the intro loop forever.</li>
+        <li>Screen fade-in and fade-out effects are missig.</li>
+      </ul>
+
+      <p>
+      If you find any problems not mentioned in the list above, please&nbsp;<a href="https://github.com/lethal-guitar/RigelEngine/issues/new/choose" target="_blank">open an issue</a>&nbsp;on GitHub!
+      </p>
+
+      <h2>Controls</h2>
+      <p>
+      Press Esc to enter the main menu, then use arrow keys and Enter/Esc to navigate the menus.
+      Default in-game controls are arrow keys for movement, Ctrl to jump and Alt to shoot.
+      Pressing F1 while in-game brings up an options menu, where you can customize controls.
+      To go back to the main menu press Esc and then Y to confirm.
+      </p>
+
+      <p>
+      Enjoy the game! :)
+      </p>
+
+      <button id="close_welcomebox">Close this message</button>
+    </div>
   </body>
 </html>

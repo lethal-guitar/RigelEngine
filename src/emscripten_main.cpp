@@ -37,6 +37,10 @@ RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
 
+// This is needed for EM_ASM
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
 
 using namespace rigel;
 
@@ -49,7 +53,17 @@ namespace {
 constexpr auto WASM_GAME_PATH = "/duke/";
 
 void runOneFrameWrapper(void *pData) {
-  static_cast<Game*>(pData)->runOneFrame();
+  auto pGame = static_cast<Game*>(pData);
+  if (const auto result = pGame->runOneFrame();
+      result && *result == Game::StopReason::GameEnded)
+  {
+    EM_ASM(
+      document.getElementById("canvas").style.display = "none";
+      document.getElementById("thankyoubox").style.display = "block";
+    );
+
+    emscripten_cancel_main_loop();
+  }
 }
 
 }
@@ -67,6 +81,9 @@ int main()
   platform::setGLAttributes();
 
   auto userProfile = loadOrCreateUserProfile();
+  userProfile.mOptions.mMusicVolume = 0.5f;
+  userProfile.mOptions.mSoundVolume = 0.5f;
+
   auto pWindow = platform::createWindow(userProfile.mOptions);
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
@@ -86,7 +103,17 @@ int main()
   options.mGamePath = WASM_GAME_PATH;
 
   Game game(options, &userProfile, pWindow.get(), false);
+
+  EM_ASM(
+    var loadingBox = document.getElementById("loadingbox");
+    loadingBox.parentNode.removeChild(loadingBox);
+
+    document.getElementById("welcomebox").style.display = "block";
+  );
+
   emscripten_set_main_loop_arg(runOneFrameWrapper, &game, 0, true);
 
   return 0;
 }
+
+#pragma clang diagnostic pop
