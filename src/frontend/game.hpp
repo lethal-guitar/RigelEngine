@@ -146,7 +146,7 @@ private:
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
   std::vector<SDL_Event> mEventQueue;
-  sdl_utils::Ptr<SDL_GameController> mpGameController;
+  std::vector<sdl_utils::Ptr<SDL_GameController>> mGameControllers;
 };
 
 }
