@@ -251,8 +251,6 @@ Game::Game(
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
     makeModeContext(), mCommandLineOptions, mIsShareWareVersion, isFirstLaunch));
 
-  enumerateGameControllers();
-
   mLastTime = base::Clock::now();
 }
 
