@@ -38,6 +38,17 @@ namespace rigel::renderer {
 
 namespace {
 
+constexpr int nextPowerOf2(int number) {
+  // This is a slow and naive implementation, but that's fine.
+  // We only use this at compile time and only on small inputs.
+  // Readability is more important here than best performance.
+  auto result = 1;
+  while (result < number) {
+    result *= 2;
+  }
+  return result;
+}
+
 const GLushort QUAD_INDICES[] = { 0, 2, 1, 2, 3, 1 };
 
 constexpr auto MAX_QUADS_PER_BATCH = 1280u;
@@ -47,6 +58,9 @@ constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
 constexpr auto WATER_MASK_WIDTH = 8;
 constexpr auto WATER_MASK_HEIGHT = 8;
 constexpr auto WATER_NUM_MASKS = 5;
+constexpr auto WATER_ANIM_TEX_WIDTH = WATER_MASK_WIDTH;
+constexpr auto WATER_ANIM_TEX_HEIGHT =
+  nextPowerOf2(WATER_MASK_HEIGHT * WATER_NUM_MASKS);
 constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 
@@ -181,7 +195,7 @@ void fillTexCoords(
 
 data::Image createWaterSurfaceAnimImage() {
   auto pixels = data::PixelBuffer{
-    WATER_MASK_WIDTH * WATER_MASK_HEIGHT * WATER_NUM_MASKS,
+    WATER_ANIM_TEX_WIDTH * WATER_ANIM_TEX_HEIGHT,
     base::Color{255, 255, 255, 255}};
 
   const std::array<int, 16> patternCalmSurface{
@@ -222,8 +236,8 @@ data::Image createWaterSurfaceAnimImage() {
 
   return data::Image{
     move(pixels),
-    static_cast<size_t>(WATER_MASK_WIDTH),
-    static_cast<size_t>(WATER_MASK_HEIGHT * WATER_NUM_MASKS)};
+    static_cast<size_t>(WATER_ANIM_TEX_WIDTH),
+    static_cast<size_t>(WATER_ANIM_TEX_HEIGHT)};
 }
 
 
@@ -670,7 +684,7 @@ struct Renderer::Impl {
       fillVertexPositions(destRect, std::begin(vertices), 0, 4);
       fillTexCoords(
         toTexCoords(
-          animSourceRect, WATER_MASK_WIDTH, WATER_MASK_HEIGHT * WATER_NUM_MASKS),
+          animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
         std::begin(vertices),
         2,
         4);
