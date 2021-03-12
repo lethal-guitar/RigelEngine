@@ -193,7 +193,6 @@ void gameMain(const CommandLineOptions& options) {
   using base::defer;
 
 #ifdef _WIN32
-  SDL_setenv("SDL_AUDIODRIVER", "directsound", true);
   SetProcessDPIAware();
 #endif
 
