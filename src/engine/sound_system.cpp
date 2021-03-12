@@ -188,7 +188,7 @@ struct SoundSystem::MusicConversionWrapper {
       audioFormat, 1, sampleRate);
 
     const auto bufferSize =
-      BUFFER_SIZE * mBytesPerSample * mConversionSpecs.len_mult;
+      BUFFER_SIZE * sizeof(std::int16_t) * mConversionSpecs.len_mult;
     mpBuffer = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[bufferSize]};
     mConversionSpecs.buf = mpBuffer.get();
   }
@@ -198,7 +198,7 @@ struct SoundSystem::MusicConversionWrapper {
     const auto samplesToRender = bytesRequired / mBytesPerSample;
     mpPlayer->render(reinterpret_cast<std::int16_t*>(pBuffer), samplesToRender);
 
-    mConversionSpecs.len = bytesRequired;
+    mConversionSpecs.len = samplesToRender * sizeof(std::int16_t);
     SDL_ConvertAudio(&mConversionSpecs);
     std::memcpy(pOutBuffer, pBuffer, mConversionSpecs.len_cvt);
   }
