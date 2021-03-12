@@ -92,6 +92,7 @@ private:
 
     void handleEvent(const SDL_Event& event);
     void updateAndRender(engine::TimeDelta dt);
+    void selectItem(int index);
 
     GameMode::Context mContext;
     loader::Palette16 mPalette;
