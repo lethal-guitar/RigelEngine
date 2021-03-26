@@ -125,13 +125,14 @@ data::AudioBuffer prepareBuffer(
 // as a raw buffer
 RawBuffer convertBuffer(
   const data::AudioBuffer& buffer,
-  const std::uint16_t audioFormat
+  const std::uint16_t audioFormat,
+  const int numChannels
 ) {
   SDL_AudioCVT conversionSpecs;
   SDL_BuildAudioCVT(
     &conversionSpecs,
     AUDIO_S16LSB, 1, buffer.mSampleRate,
-    audioFormat, 1, buffer.mSampleRate);
+    audioFormat, std::uint8_t(numChannels), buffer.mSampleRate);
 
   const auto sizeInBytes = buffer.mSamples.size() * sizeof(std::int16_t);
   auto converted = RawBuffer(sizeInBytes * conversionSpecs.len_mult);
@@ -140,6 +141,9 @@ RawBuffer convertBuffer(
   conversionSpecs.len = static_cast<int>(sizeInBytes);
   conversionSpecs.buf = converted.data();
   SDL_ConvertAudio(&conversionSpecs);
+
+  converted.resize(conversionSpecs.len_cvt);
+  converted.shrink_to_fit();
 
   return converted;
 }
@@ -178,17 +182,18 @@ struct SoundSystem::MusicConversionWrapper {
   MusicConversionWrapper(
     ImfPlayer* pPlayer,
     const std::uint16_t audioFormat,
-    const int sampleRate)
+    const int sampleRate,
+    const int numChannels)
     : mpPlayer(pPlayer)
-    , mBytesPerSample(SDL_AUDIO_BITSIZE(audioFormat) / 8)
+    , mBytesPerSample((SDL_AUDIO_BITSIZE(audioFormat) / 8) * numChannels)
   {
     SDL_BuildAudioCVT(
       &mConversionSpecs,
       AUDIO_S16LSB, 1, sampleRate,
-      audioFormat, 1, sampleRate);
+      audioFormat, std::uint8_t(numChannels), sampleRate);
 
     const auto bufferSize =
-      BUFFER_SIZE * mBytesPerSample * mConversionSpecs.len_mult;
+      BUFFER_SIZE * sizeof(std::int16_t) * mConversionSpecs.len_mult;
     mpBuffer = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[bufferSize]};
     mConversionSpecs.buf = mpBuffer.get();
   }
@@ -198,7 +203,7 @@ struct SoundSystem::MusicConversionWrapper {
     const auto samplesToRender = bytesRequired / mBytesPerSample;
     mpPlayer->render(reinterpret_cast<std::int16_t*>(pBuffer), samplesToRender);
 
-    mConversionSpecs.len = bytesRequired;
+    mConversionSpecs.len = samplesToRender * sizeof(std::int16_t);
     SDL_ConvertAudio(&mConversionSpecs);
     std::memcpy(pOutBuffer, pBuffer, mConversionSpecs.len_cvt);
   }
@@ -235,10 +240,11 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
 
   int sampleRate = 0;
   std::uint16_t audioFormat = 0;
-  {
-    int numChannels;
-    Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
-  }
+  int numChannels = 0;
+  Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
+
+  const auto audioFormatMatches =
+    audioFormat == AUDIO_S16LSB && numChannels == 1;
 
   mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
 
@@ -258,11 +264,11 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   // simpleMusicCallback). But if the audio device uses a different format, we
   // have to convert from the player's format into the device format. That's
   // handled by the MusicConversionWrapper class.
-  if (audioFormat == AUDIO_S16LSB) {
+  if (audioFormatMatches) {
     Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
   } else {
     mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
-      mpMusicPlayer.get(), audioFormat, sampleRate);
+      mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
     Mix_HookMusic(
       [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
         auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
@@ -292,9 +298,9 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   data::forEachSoundId([&](const auto id) {
     auto buffer = prepareBuffer(resources.loadSound(id), sampleRate);
 
-    mSounds[idToIndex(id)] = audioFormat == AUDIO_S16LSB
+    mSounds[idToIndex(id)] = audioFormatMatches
       ? LoadedSound{std::move(buffer)}
-      : LoadedSound{convertBuffer(buffer, audioFormat)};
+      : LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
   });
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);

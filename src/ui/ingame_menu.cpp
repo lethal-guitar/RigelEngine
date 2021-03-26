@@ -44,6 +44,7 @@ constexpr auto MAX_SAVE_SLOT_NAME_LENGTH = 18;
 
 constexpr auto TOP_LEVEL_MENU_ITEMS = std::array{
   "Save Game",
+  "Quick Save",
   "Restore Game",
   "Restore Quick Save",
   "Options",
@@ -119,8 +120,12 @@ IngameMenu::TopLevelMenu::TopLevelMenu(
   using std::begin;
   using std::next;
 
+  if (context.mpUserProfile->mOptions.mQuickSavingEnabled) {
+    mItems.insert(next(begin(mItems), 2), itemIndex("Quick Save"));
+  }
+
   if (canQuickLoad) {
-    mItems.insert(next(begin(mItems), 2), itemIndex("Restore Quick Save"));
+    mItems.insert(next(begin(mItems), 3), itemIndex("Restore Quick Save"));
   }
 }
 
@@ -182,6 +187,14 @@ void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt) {
     MENU_SELECTION_INDICATOR_POS_X,
     MENU_START_POS_Y + mSelectedIndex * MENU_ITEM_HEIGHT,
     mElapsedTime);
+}
+
+
+void IngameMenu::TopLevelMenu::selectItem(const int index) {
+  const auto iItem = std::find(mItems.begin(), mItems.end(), index);
+  if (iItem != mItems.end()) {
+    mSelectedIndex = static_cast<int>(std::distance(mItems.begin(), iItem));
+  }
 }
 
 
@@ -615,6 +628,11 @@ void IngameMenu::handleMenuActiveEvents() {
               enterMenu(MenuType::SaveGame);
               break;
 
+            case itemIndex("Quick Save"):
+              mpGameWorld->quickSave();
+              leaveTopLevelMenu(state);
+              break;
+
             case itemIndex("Restore Game"):
               enterMenu(MenuType::LoadGame);
               break;
@@ -661,6 +679,28 @@ void IngameMenu::handleMenuActiveEvents() {
     std::get<ui::OptionsMenu>(mStateStack.top()).isFinished()
   ) {
     mStateStack.pop();
+
+    // If the options menu was entered via the top-level menu, we need to
+    // update the list of available menu items. This is because the
+    // "quick save" and "quick load" entries are only shown when quick saving
+    // is enabled. And because the options menu was open, it's possible that
+    // that setting (quick save enabled) has now changed.
+    if (
+      !mStateStack.empty() &&
+      std::holds_alternative<std::unique_ptr<TopLevelMenu>>(mStateStack.top())
+    ) {
+      auto& pTopLevelMenu =
+        std::get<std::unique_ptr<TopLevelMenu>>(mStateStack.top());
+      
+      // Create a new TopLevelMenu, as that's the easiest way to rebuild
+      // the list of visible menu items. That resets the selection to the top
+      // item though. So we select the "Options" entry again afterwards to
+      // keep it selected.
+      pTopLevelMenu = std::make_unique<TopLevelMenu>(
+        mContext, mpGameWorld->canQuickLoad());
+      pTopLevelMenu->selectItem(itemIndex("Options"));
+      mpTopLevelMenu = pTopLevelMenu.get();
+    }
   }
 }
 

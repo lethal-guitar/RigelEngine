@@ -14,8 +14,8 @@ install:
 
       # Download headers and pre-built binaries for SDL2 and SDL2_mixer
     - mkdir C:\RigelLibs
-    - ps: Invoke-WebRequest -Uri https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip -OutFile C:\RigelLibs\SDL2.zip
-    - ps: Invoke-WebRequest -Uri https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.1-VC.zip -OutFile C:\RigelLibs\SDL2_mixer.zip
+    - ps: Invoke-WebRequest -Uri https://www.libsdl.org/release/SDL2-devel-2.0.14-VC.zip -OutFile C:\RigelLibs\SDL2.zip
+    - ps: Invoke-WebRequest -Uri https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.4-VC.zip -OutFile C:\RigelLibs\SDL2_mixer.zip
     - 7z x C:\RigelLibs\SDL2.zip -oC:\RigelLibs
     - 7z x C:\RigelLibs\SDL2_mixer.zip -oC:\RigelLibs
 
@@ -26,8 +26,8 @@ configuration:
     - Release
 
 before_build:
-    - set SDL2DIR=C:\RigelLibs\SDL2-2.0.4
-    - set SDL2MIXERDIR=C:\RigelLibs\SDL2_mixer-2.0.1
+    - set SDL2DIR=C:\RigelLibs\SDL2-2.0.14
+    - set SDL2MIXERDIR=C:\RigelLibs\SDL2_mixer-2.0.4
 
     - mkdir build
     - cd build

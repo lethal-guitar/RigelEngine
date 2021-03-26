@@ -111,7 +111,7 @@ void init(
     gIniFilePath = iniFilePath.u8string();
     ImGui::GetIO().IniFilename = gIniFilePath.c_str();
   } else {
-    ImGui::GetIO().WantSaveIniSettings = false;
+    ImGui::GetIO().IniFilename = nullptr;
   }
 }
 
