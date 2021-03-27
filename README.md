@@ -14,6 +14,8 @@ See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing
 
 Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm via Emscripten)
 
+Read the [F.A.Q.](https://github.com/lethal-guitar/RigelEngine/wiki/FAQ)
+
 Showcase video:
 
 <a href="http://www.youtube.com/watch?v=U7-eotm8Xoo"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
@@ -45,13 +47,11 @@ On Linux, using GL ES can still be an option for older Intel GPUs.
 
 See [Supported Graphics cards](https://github.com/lethal-guitar/RigelEngine/wiki/Supported-graphics-cards-(GPUs)) for more info.
 
+Aside from the graphics card, you don't need much. The game needs less than 64 MB of RAM, and runs fine on a single-core ARMv6 CPU clocked at 700 MHz (Raspberry Pi 1).
+
 ### Differences to the original Duke Nukem II
 
 See [list of differences](https://github.com/lethal-guitar/RigelEngine/wiki#differences-to-the-original-duke-nukem-ii-executable).
-
-### What about Duke Nukem 1 and Cosmo's Cosmic Adventure?
-
-RigelEngine focuses exlusively on Duke Nukem II. For Cosmo and Duke 1, there are already other projects: [Cosmo-Engine](https://github.com/yuv422/cosmo-engine) and [ReDuke](http://k1n9duk3.shikadi.net/reduke.html). Aside from that, Duke Nukem 1 is using a completely different engine, so supporting it with this same project doesn't really make sense. This is a bit different for Cosmo, since its engine actually served as basis for Duke Nukem II's engine. Still, the two are different enough that supporting both games with one engine is not really feasible or useful.
 
 ## Contributing
 
@@ -99,4 +99,4 @@ I'm planning to provide binaries for OS X, Ubuntu/Debian, and Raspberry Pi in th
 
 ## Building from source
 
-See [BUILDING.md](BUILDING.md)
+See [BUILDING.md](BUILDING.md) for detailed instructions for each platform.
