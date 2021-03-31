@@ -17,13 +17,9 @@
 #include "movement.hpp"
 
 #include "base/math_tools.hpp"
-#include "base/warnings.hpp"
+#include "base/static_vector.hpp"
 #include "data/map.hpp"
 #include "engine/collision_checker.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <boost/container/static_vector.hpp>
-RIGEL_RESTORE_WARNINGS
 
 #include <algorithm>
 
@@ -239,8 +235,6 @@ void applyConveyorBeltMotion(
   const data::map::Map& map,
   entityx::Entity entity
 ) {
-  namespace bc = boost::container;
-
   using std::any_of;
   using std::begin;
   using std::end;
@@ -256,7 +250,7 @@ void applyConveyorBeltMotion(
     }
   };
 
-  bc::static_vector<ConveyorBeltFlag, MAX_WIDTH_FOR_CONVEYOR_CHECK> flags;
+  base::static_vector<ConveyorBeltFlag, MAX_WIDTH_FOR_CONVEYOR_CHECK> flags;
 
   {
     const auto& position = *entity.component<WorldPosition>();
