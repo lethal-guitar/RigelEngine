@@ -586,11 +586,11 @@ namespace std
                     /// Number of elements allocated in the embedded storage:
                     size_type size_ = 0;
 
-                    using aligned_storage_t
+                    using storage_t
                         = aligned_storage_t<sizeof(remove_const_t<T>),
                                             alignof(remove_const_t<T>)>;
-                    using data_t = conditional_t<!Const<T>, aligned_storage_t,
-                                                 const aligned_storage_t>;
+                    using data_t = conditional_t<!Const<T>, storage_t,
+                                                 const storage_t>;
                     alignas(alignof(T)) data_t data_[Capacity]{};
                     // FIXME: ^ this won't work for types with "broken" alignof
                     // like SIMD types (one would also need to provide an
