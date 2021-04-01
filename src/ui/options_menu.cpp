@@ -191,7 +191,14 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
 
   const auto& io = ImGui::GetIO();
   const auto windowSize = io.DisplaySize;
-  const auto sizeToUse = ImVec2{windowSize.x * SCALE, windowSize.y * SCALE};
+
+  // On small screen resolutions, we want to make use of all available screen
+  // space. We arbitrarily define anything lower than 800x600 as "small".
+  // This is primarily for the OGA, which has a 480x320 screen.
+  const auto scaleX = windowSize.x >= 800 ? SCALE : 1.0f;
+  const auto scaleY = windowSize.y >= 600 ? SCALE : 1.0f;
+
+  const auto sizeToUse = ImVec2{windowSize.x * scaleX, windowSize.y * scaleY};
   const auto offset = ImVec2{
     (windowSize.x - sizeToUse.x) / 2.0f,
     (windowSize.y - sizeToUse.y) / 2.0f};
