@@ -65,11 +65,15 @@
 #include <cassert>
 
 /// Unreachable code
+#ifdef _MSC_VER
+#define FCV_UNREACHABLE __assume(false)
+#else
 #define FCV_UNREACHABLE __builtin_unreachable()
+#endif
 
 /// Optimizer allowed to assume that EXPR evaluates to true
 #define FCV_ASSUME(EXPR) \
-    static_cast<void>((EXPR) ? void(0) : __builtin_unreachable())
+    static_cast<void>((EXPR) ? void(0) : FCV_UNREACHABLE)
 
 /// Likely/unlikely branches
 #define FCV_LIKELY(boolean_expr) __builtin_expect(!!(boolean_expr), 1)
