@@ -248,7 +248,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
 
     if (ImGui::BeginTabItem("Sound"))
     {
-      const auto sliderWidth = ImGui::GetFontSize() * 24;
+      const auto sliderWidth =
+        std::min(sizeToUse.x / 2.0f, ImGui::GetFontSize() * 24);
 
       ImGui::NewLine();
       ImGui::SetNextItemWidth(sliderWidth);
