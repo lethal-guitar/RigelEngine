@@ -62,7 +62,7 @@
 #include <limits>       // for numeric_limits
 #include <stdexcept>    // for length_error
 #include <type_traits>  // for aligned_storage and all meta-functions
-#include <stdio.h>      // for assertion diagnostics
+#include <cassert>
 
 /// Unreachable code
 #define FCV_UNREACHABLE __builtin_unreachable()
@@ -70,14 +70,6 @@
 /// Optimizer allowed to assume that EXPR evaluates to true
 #define FCV_ASSUME(EXPR) \
     static_cast<void>((EXPR) ? void(0) : __builtin_unreachable())
-
-/// Assert pretty printer
-#define FCV_ASSERT(...)                                                       \
-    static_cast<void>((__VA_ARGS__)                                           \
-                          ? void(0)                                           \
-                          : ::std::experimental::fcv_detail::assert_failure(  \
-                                static_cast<const char*>(__FILE__), __LINE__, \
-                                "assertion failed: " #__VA_ARGS__))
 
 /// Likely/unlikely branches
 #define FCV_LIKELY(boolean_expr) __builtin_expect(!!(boolean_expr), 1)
@@ -88,7 +80,7 @@
 #ifdef NDEBUG
 #define FCV_EXPECT(EXPR) FCV_ASSUME(EXPR)
 #else
-#define FCV_EXPECT(EXPR) FCV_ASSERT(EXPR)
+#define FCV_EXPECT(EXPR) assert(EXPR)
 #endif
 
 #define FCV_CONCEPT_PP_CAT_(X, Y) X##Y
@@ -1458,7 +1450,6 @@ namespace std
 // undefine all the internal macros
 #undef FCV_UNREACHABLE
 #undef FCV_ASSUME
-#undef FCV_ASSERT
 #undef FCV_LIKELY
 #undef FCV_UNLIKELY
 #undef FCV_EXPECT
