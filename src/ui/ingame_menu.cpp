@@ -118,14 +118,24 @@ IngameMenu::TopLevelMenu::TopLevelMenu(
     itemIndex("Quit Game")}
 {
   using std::begin;
+  using std::end;
+  using std::find;
   using std::next;
 
+  auto insertItem = [&](const int newItemIndex, const int precedingItemIndex) {
+    const auto iPrecedingItem =
+      find(begin(mItems), end(mItems), precedingItemIndex);
+    assert(iPrecedingItem != end(mItems));
+
+    mItems.insert(next(iPrecedingItem), newItemIndex);
+  };
+
   if (context.mpUserProfile->mOptions.mQuickSavingEnabled) {
-    mItems.insert(next(begin(mItems), 2), itemIndex("Quick Save"));
+    insertItem(itemIndex("Quick Save"), itemIndex("Save Game"));
   }
 
   if (canQuickLoad) {
-    mItems.insert(next(begin(mItems), 3), itemIndex("Restore Quick Save"));
+    insertItem(itemIndex("Restore Quick Save"), itemIndex("Restore Game"));
   }
 }
 
