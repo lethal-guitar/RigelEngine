@@ -738,7 +738,7 @@ namespace std
                     /// Contract: `il.size() <= capacity()`.
                     template <typename U, FCV_REQUIRES_(Convertible<U, T>)>
                     constexpr non_trivial(initializer_list<U> il) noexcept(
-                        noexcept(emplace_back(index(il, 0))))
+                        noexcept(declval<non_trivial>().emplace_back(index(il, 0))))
                     {
                         FCV_EXPECT(
                             il.size() <= capacity()
@@ -993,7 +993,7 @@ namespace std
                       FCV_REQUIRES_(fcv_detail::Constructible<T, U>&&
                                         fcv_detail::Assignable<reference, U&&>)>
             constexpr void push_back(U&& value) noexcept(
-                noexcept(emplace_back(forward<U>(value))))
+                noexcept(declval<fixed_capacity_vector>().emplace_back(forward<U>(value))))
             {
                 FCV_EXPECT(!full() && "vector is full!");
                 emplace_back(forward<U>(value));
@@ -1002,7 +1002,7 @@ namespace std
             /// Appends a default constructed `T` at the end of the vector.
             FCV_REQUIRES(fcv_detail::Constructible<T, T>&&
                              fcv_detail::Assignable<reference, T&&>)
-            void push_back() noexcept(noexcept(emplace_back(T{})))
+            void push_back() noexcept(noexcept(declval<fixed_capacity_vector>().emplace_back(T{})))
             {
                 FCV_EXPECT(!full() && "vector is full!");
                 emplace_back(T{});
@@ -1012,7 +1012,7 @@ namespace std
                       FCV_REQUIRES_(fcv_detail::Constructible<T, Args...>)>
             constexpr iterator
             emplace(const_iterator position, Args&&... args) noexcept(
-                noexcept(move_insert(position, declval<value_type*>(),
+                noexcept(declval<fixed_capacity_vector>().move_insert(position, declval<value_type*>(),
                                      declval<value_type*>())))
             {
                 FCV_EXPECT(!full()
@@ -1024,7 +1024,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::CopyConstructible<T>)
             constexpr iterator insert(
                 const_iterator position,
-                const_reference x) noexcept(noexcept(insert(position,
+                const_reference x) noexcept(noexcept(declval<fixed_capacity_vector>().insert(position,
                                                             size_type(1), x)))
             {
                 FCV_EXPECT(!full()
@@ -1036,7 +1036,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::MoveConstructible<T>)
             constexpr iterator insert(
                 const_iterator position,
-                value_type&& x) noexcept(noexcept(move_insert(position, &x,
+                value_type&& x) noexcept(noexcept(declval<fixed_capacity_vector>().move_insert(position, &x,
                                                               &x + 1)))
             {
                 FCV_EXPECT(!full()
@@ -1048,7 +1048,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::CopyConstructible<T>)
             constexpr iterator insert(
                 const_iterator position, size_type n,
-                const T& x) noexcept(noexcept(push_back(x)))
+                const T& x) noexcept(noexcept(declval<fixed_capacity_vector>().push_back(x)))
             {
                 assert_iterator_in_range(position);
                 const auto new_size = size() + n;
@@ -1074,7 +1074,7 @@ namespace std
                                   fcv_detail::iterator_reference_t<InputIt>>)>
             constexpr iterator insert(
                 const_iterator position, InputIt first,
-                InputIt last) noexcept(noexcept(emplace_back(*first)))
+                InputIt last) noexcept(noexcept(declval<fixed_capacity_vector>().emplace_back(*first)))
             {
                 assert_iterator_in_range(position);
                 assert_valid_iterator_pair(first, last);
@@ -1107,7 +1107,7 @@ namespace std
                       FCV_REQUIRES_(fcv_detail::InputIterator<InputIt>)>
             constexpr iterator move_insert(
                 const_iterator position, InputIt first,
-                InputIt last) noexcept(noexcept(emplace_back(move(*first))))
+                InputIt last) noexcept(noexcept(declval<fixed_capacity_vector>().emplace_back(move(*first))))
             {
                 assert_iterator_in_range(position);
                 assert_valid_iterator_pair(first, last);
@@ -1132,7 +1132,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::CopyConstructible<T>)
             constexpr iterator insert(
                 const_iterator position,
-                initializer_list<T> il) noexcept(noexcept(insert(position,
+                initializer_list<T> il) noexcept(noexcept(declval<fixed_capacity_vector>().insert(position,
                                                                  il.begin(),
                                                                  il.end())))
             {
@@ -1254,7 +1254,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::CopyConstructible<value_type>)
             constexpr fixed_capacity_vector(
                 fixed_capacity_vector const&
-                    other) noexcept(noexcept(insert(begin(), other.begin(),
+                    other) noexcept(noexcept(declval<fixed_capacity_vector>().insert(begin(), other.begin(),
                                                     other.end())))
             {
                 // nothin to assert: size of other cannot exceed capacity
@@ -1266,7 +1266,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::MoveConstructible<value_type>)
             constexpr fixed_capacity_vector(
                 fixed_capacity_vector&&
-                    other) noexcept(noexcept(move_insert(begin(), other.begin(),
+                    other) noexcept(noexcept(declval<fixed_capacity_vector>().move_insert(begin(), other.begin(),
                                                          other.end())))
             {
                 // nothin to assert: size of other cannot exceed capacity
@@ -1278,8 +1278,8 @@ namespace std
             FCV_REQUIRES(fcv_detail::Assignable<reference, const_reference>)
             constexpr fixed_capacity_vector&
             operator=(fixed_capacity_vector const& other) noexcept(
-                noexcept(clear())
-                && noexcept(insert(begin(), other.begin(), other.end())))
+                noexcept(declval<fixed_capacity_vector>().clear())
+                && noexcept(declval<fixed_capacity_vector>().insert(begin(), other.begin(), other.end())))
             {
                 // nothin to assert: size of other cannot exceed capacity
                 // because both vectors have the same type
@@ -1292,8 +1292,8 @@ namespace std
             FCV_REQUIRES(fcv_detail::Assignable<reference, reference>)
             constexpr fixed_capacity_vector&
             operator=(fixed_capacity_vector&& other) noexcept(
-                noexcept(clear())
-                and noexcept(move_insert(begin(), other.begin(), other.end())))
+                noexcept(declval<fixed_capacity_vector>().clear())
+                and noexcept(declval<fixed_capacity_vector>().move_insert(begin(), other.begin(), other.end())))
             {
                 // nothin to assert: size of other cannot exceed capacity
                 // because both vectors have the same type
@@ -1306,7 +1306,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::CopyConstructible<
                              T> or fcv_detail::MoveConstructible<T>)
             explicit constexpr fixed_capacity_vector(size_type n) noexcept(
-                noexcept(emplace_n(n)))
+                noexcept(declval<fixed_capacity_vector>().emplace_n(n)))
             {
                 FCV_EXPECT(n <= capacity() && "size exceeds capacity");
                 emplace_n(n);
@@ -1316,7 +1316,7 @@ namespace std
             FCV_REQUIRES(fcv_detail::CopyConstructible<T>)
             constexpr fixed_capacity_vector(
                 size_type n,
-                T const& value) noexcept(noexcept(insert(begin(), n, value)))
+                T const& value) noexcept(noexcept(declval<fixed_capacity_vector>().insert(begin(), n, value)))
             {
                 FCV_EXPECT(n <= capacity() && "size exceeds capacity");
                 insert(begin(), n, value);
@@ -1348,7 +1348,7 @@ namespace std
             template <class InputIt,
                       FCV_REQUIRES_(fcv_detail::InputIterator<InputIt>)>
             constexpr void assign(InputIt first, InputIt last) noexcept(
-                noexcept(clear()) and noexcept(insert(begin(), first, last)))
+                noexcept(declval<fixed_capacity_vector>().clear()) and noexcept(declval<fixed_capacity_vector>().insert(begin(), first, last)))
             {
                 if constexpr (fcv_detail::RandomAccessIterator<InputIt>)
                 {
