@@ -47,7 +47,9 @@ On Linux, using GL ES can still be an option for older Intel GPUs.
 
 See [Supported Graphics cards](https://github.com/lethal-guitar/RigelEngine/wiki/Supported-graphics-cards-(GPUs)) for more info.
 
-Aside from the graphics card, you don't need much. The game needs less than 64 MB of RAM, and runs fine on a single-core ARMv6 CPU clocked at 700 MHz (Raspberry Pi 1).
+Aside from the graphics card, you don't need much.
+The game needs less than 32 MB of RAM (64 MB on OS X),
+and runs fine on a single-core ARMv6 CPU clocked at 700 MHz (Raspberry Pi 1).
 
 ### Differences to the original Duke Nukem II
 
