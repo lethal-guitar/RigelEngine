@@ -6,6 +6,7 @@ set(core_sources
     base/grid.hpp
     base/math_tools.hpp
     base/spatial_types.hpp
+    base/static_vector.hpp
     base/warnings.hpp
     common/command_line_options.hpp
     common/game_mode.cpp
@@ -348,6 +349,7 @@ target_link_libraries(rigel_core
     std::filesystem
     dbopl
     speex_resampler
+    static_vector
 )
 
 if(USE_GL_ES)

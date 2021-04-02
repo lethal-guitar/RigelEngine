@@ -17,6 +17,7 @@
 #include "lava_fountain.hpp"
 
 #include "base/match.hpp"
+#include "base/static_vector.hpp"
 #include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/physical_components.hpp"
@@ -25,10 +26,6 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "renderer/renderer.hpp"
-
-RIGEL_DISABLE_WARNINGS
-#include <boost/container/static_vector.hpp>
-RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel::game_logic::behaviors {
@@ -40,20 +37,20 @@ struct SequenceElement {
   int mOffsetY;
 };
 
-using ElementList = boost::container::static_vector<SequenceElement, 4>;
+using ElementList = base::static_vector<SequenceElement, 4>;
 
 const auto ERUPTION_SEQUENCE = std::array<ElementList, 11>{{
-  {{3, 0}},
-  {{4, -3}, {1, 1}},
-  {{5, -6}, {2, -2}, {0, 2}},
-  {{3, -8}, {0, -4}, {1, 0}},
-  {{4, -9}, {1, -5}, {2, -1}, {0, 3}},
-  {{5, -10}, {2, -6}, {0, -2}, {1, 2}},
-  {{3, -9}, {0, -5}, {1, -1}, {2, 3}},
-  {{3, -8}, {0, -4}, {1, 0}},
-  {{4, -6}, {1, -2}, {2, 2}},
-  {{5, -3}, {2, 1}},
-  {{3, 0}}
+  {SequenceElement{3, 0}},
+  {SequenceElement{4, -3}, {1, 1}},
+  {SequenceElement{5, -6}, {2, -2}, {0, 2}},
+  {SequenceElement{3, -8}, {0, -4}, {1, 0}},
+  {SequenceElement{4, -9}, {1, -5}, {2, -1}, {0, 3}},
+  {SequenceElement{5, -10}, {2, -6}, {0, -2}, {1, 2}},
+  {SequenceElement{3, -9}, {0, -5}, {1, -1}, {2, 3}},
+  {SequenceElement{3, -8}, {0, -4}, {1, 0}},
+  {SequenceElement{4, -6}, {1, -2}, {2, 2}},
+  {SequenceElement{5, -3}, {2, 1}},
+  {SequenceElement{3, 0}}
 }};
 
 }

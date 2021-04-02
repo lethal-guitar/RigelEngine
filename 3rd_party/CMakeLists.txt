@@ -16,6 +16,11 @@ target_include_directories(nlohmann-json
     INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/nlohmann"
 )
+add_library(static_vector INTERFACE)
+target_include_directories(static_vector
+    INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/static_vector/include"
+)
 
 
 # Compiled targets
