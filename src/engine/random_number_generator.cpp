@@ -47,12 +47,7 @@ const std::array<int, 256> RANDOM_NUMBER_TABLE{
 
 
 int RandomNumberGenerator::gen() {
-  ++mNextNumberIndex;
-  if (mNextNumberIndex >= RANDOM_NUMBER_TABLE.size()) {
-    mNextNumberIndex = 0;
-  }
-
-  return RANDOM_NUMBER_TABLE[mNextNumberIndex];
+  return RANDOM_NUMBER_TABLE[++mNextNumberIndex];
 }
 
 }
