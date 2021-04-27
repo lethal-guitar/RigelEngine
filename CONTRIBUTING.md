@@ -8,7 +8,7 @@ RigelEngine aims to provide a very authentic experience by default, meaning game
 
 The project requires very few external dependencies at the moment. While third-party libraries can provide a lot of value, having many dependencies also comes at a cost in the long run. Therefore, please carefully consider whether adding a new external dependency is absolutely necessary. If possible, consider making the dependency optional with a build-time switch, so that RigelEngine can still be used without the dependency if desired.
 
-Having said that, I don’t see any reason against small dependencies which can be vendored alongside the source code (in the `3rd_party` directory), as long as they are supported on all current and potential future platforms (current: Windows, Mac OS X, Linux. Future: Raspberry Pi, Web Assembly, Android, iOS).
+Having said that, I donâ€™t see any reason against small dependencies which can be vendored alongside the source code (in the `3rd_party` directory), as long as they are supported on all current and potential future platforms (current: Windows, Mac OS X (x86, ARM), Linux (x86, ARM), Webassembly. Future: Android, iOS).
 
 ## Coding style and code quality guidelines
 
