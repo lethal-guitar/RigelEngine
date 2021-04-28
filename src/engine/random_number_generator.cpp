@@ -16,6 +16,8 @@
 
 #include "random_number_generator.hpp"
 
+#include <limits>
+#include <type_traits>
 
 namespace rigel::engine {
 
@@ -47,6 +49,10 @@ const std::array<int, 256> RANDOM_NUMBER_TABLE{
 
 
 int RandomNumberGenerator::gen() {
+  static_assert(std::is_unsigned_v<decltype(mNextNumberIndex)>, "We rely on unsigned wraparound");
+  static_assert(RANDOM_NUMBER_TABLE.size() == static_cast<size_t>(std::numeric_limits<decltype(mNextNumberIndex)>::max()) + 1u,
+    "mNextNumberIndex must cover all values in the array"
+  );
   return RANDOM_NUMBER_TABLE[++mNextNumberIndex];
 }
 
