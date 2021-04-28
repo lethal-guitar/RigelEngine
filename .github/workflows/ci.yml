@@ -11,6 +11,15 @@ env:
   EM_CACHE_DIR: 'emsdk-cache'
 
 jobs:
+  clang_format_check:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - uses: DoozyX/clang-format-lint-action@v0.12
+      with:
+        source: 'src test modding_tools'
+        extensions: 'hpp,cpp,ipp'
+        clangFormatVersion: 11
   build_wasm:
     runs-on: ubuntu-latest
     steps:
