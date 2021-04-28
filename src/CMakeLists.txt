@@ -15,6 +15,8 @@ set(core_sources
     common/global.hpp
     common/json_utils.cpp
     common/json_utils.hpp
+    base/string_utils.cpp
+    base/string_utils.hpp
     common/user_profile.cpp
     common/user_profile.hpp
     data/actor_ids.hpp

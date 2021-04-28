@@ -9,6 +9,7 @@ add_executable(tests
     test_player.cpp
     test_rng.cpp
     test_spike_ball.cpp
+    test_string_utils.cpp
     test_timing.cpp
 )
 

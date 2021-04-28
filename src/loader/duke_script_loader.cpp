@@ -20,7 +20,6 @@
 #include "data/game_traits.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 RIGEL_RESTORE_WARNINGS
