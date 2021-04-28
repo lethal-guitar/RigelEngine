@@ -22,12 +22,14 @@
 #include <vector>
 
 
-namespace rigel::data::map {
+namespace rigel::data::map
+{
 
 using TileIndex = std::uint32_t;
 
 
-class SolidEdge {
+class SolidEdge
+{
 public:
   static SolidEdge top();
   static SolidEdge bottom();
@@ -47,7 +49,8 @@ private:
 };
 
 
-class CollisionData {
+class CollisionData
+{
 public:
   static CollisionData fullySolid();
 
@@ -55,7 +58,8 @@ public:
   CollisionData(const std::initializer_list<CollisionData>& items);
   explicit CollisionData(std::uint8_t flagsBitPack);
 
-  bool isSolidOn(const SolidEdge& edge) const {
+  bool isSolidOn(const SolidEdge& edge) const
+  {
     return (mCollisionFlagsBitPack & edge.mFlagsBitPack) != 0;
   }
 
@@ -64,7 +68,8 @@ private:
 };
 
 
-class TileAttributes {
+class TileAttributes
+{
 public:
   TileAttributes() = default;
   explicit TileAttributes(std::uint16_t attributesBitPack);
@@ -83,7 +88,8 @@ private:
 };
 
 
-class TileAttributeDict {
+class TileAttributeDict
+{
 public:
   using AttributeArray = std::vector<std::uint16_t>;
 
@@ -101,6 +107,6 @@ private:
   AttributeArray mAttributeBitPacks;
 };
 
-}
+} // namespace rigel::data::map
 
 #include "data/tile_attributes.ipp"

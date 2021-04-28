@@ -24,7 +24,8 @@ RIGEL_RESTORE_WARNINGS
 
 using namespace rigel;
 
-TEST_CASE("JSON merging") {
+TEST_CASE("JSON merging")
+{
   auto makeExampleObject = []() {
     auto result = nlohmann::json{};
     result["valueOne"] = 200;
@@ -51,13 +52,15 @@ TEST_CASE("JSON merging") {
 
   const auto base = makeExampleObject();
 
-  SECTION("Empty extension has no effect") {
+  SECTION("Empty extension has no effect")
+  {
     const auto merged = merge(base, nlohmann::json::object());
 
     CHECK(merged == base);
   }
 
-  SECTION("Unrelated properties in base are unaffected by extension") {
+  SECTION("Unrelated properties in base are unaffected by extension")
+  {
     auto extension = nlohmann::json{};
     extension["anotherProp"] = 42;
 
@@ -67,7 +70,8 @@ TEST_CASE("JSON merging") {
     CHECK(merged == base);
   }
 
-  SECTION("Properties from extension are added to base") {
+  SECTION("Properties from extension are added to base")
+  {
     auto extension = nlohmann::json{};
     extension["anotherProp"] = 42;
 
@@ -76,7 +80,8 @@ TEST_CASE("JSON merging") {
     CHECK(merged["anotherProp"].get<int>() == 42);
   }
 
-  SECTION("Properties from extension overwrite their counterparts in base") {
+  SECTION("Properties from extension overwrite their counterparts in base")
+  {
     auto extension = nlohmann::json{};
     extension["valueOne"] = 42;
 
@@ -84,14 +89,17 @@ TEST_CASE("JSON merging") {
 
     CHECK(merged["valueOne"].get<int>() == 42);
 
-    SECTION("Other properties retain their value") {
+    SECTION("Other properties retain their value")
+    {
       merged["valueOne"] = base["valueOne"];
 
       CHECK(merged == base);
     }
   }
 
-  SECTION("Properties from nested object in extension overwrite counterparts in base") {
+  SECTION(
+    "Properties from nested object in extension overwrite counterparts in base")
+  {
     auto nestedObject = nlohmann::json{};
     nestedObject["setting"] = 3.0f;
     auto extension = nlohmann::json{};
@@ -101,14 +109,17 @@ TEST_CASE("JSON merging") {
 
     CHECK(merged["nestedObject"]["setting"].get<float>() == 3.0f);
 
-    SECTION("Other properties retain their value") {
+    SECTION("Other properties retain their value")
+    {
       merged["nestedObject"]["setting"] = base["nestedObject"]["setting"];
 
       CHECK(merged == base);
     }
   }
 
-  SECTION("Properties from object in array in extension overwrite counterparts in base") {
+  SECTION(
+    "Properties from object in array in extension overwrite counterparts in base")
+  {
     auto nestedObject = nlohmann::json{};
     nestedObject["someValue"] = 24;
     auto extensionArray = base["nestedArray"];
@@ -120,7 +131,8 @@ TEST_CASE("JSON merging") {
 
     CHECK(merged["nestedArray"][2]["someValue"].get<int>() == 24);
 
-    SECTION("Other properties retain their value") {
+    SECTION("Other properties retain their value")
+    {
       merged["nestedArray"][2]["someValue"] =
         base["nestedArray"][2]["someValue"];
 
@@ -128,7 +140,8 @@ TEST_CASE("JSON merging") {
     }
   }
 
-  SECTION("Array of primitives in extension overwrites counterpart in base") {
+  SECTION("Array of primitives in extension overwrites counterpart in base")
+  {
     auto objectWithValues = nlohmann::json{};
     objectWithValues["values"] = nlohmann::json::array();
     objectWithValues["values"].push_back(1);
@@ -146,7 +159,9 @@ TEST_CASE("JSON merging") {
     CHECK(merged["values"] == expectedValues);
   }
 
-  SECTION("Array of primitives in base remains unchanged when not present in extension") {
+  SECTION(
+    "Array of primitives in base remains unchanged when not present in extension")
+  {
     auto objectWithValues = nlohmann::json{};
     objectWithValues["values"] = nlohmann::json::array();
     objectWithValues["values"].push_back(1);

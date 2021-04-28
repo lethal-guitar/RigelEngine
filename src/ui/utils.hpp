@@ -29,11 +29,13 @@ RIGEL_RESTORE_WARNINGS
 #include <string_view>
 
 
-namespace rigel::loader {
-  class ResourceLoader;
+namespace rigel::loader
+{
+class ResourceLoader;
 }
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 ImU32 toImgui(const base::Color& color);
 
@@ -49,4 +51,4 @@ engine::TiledTexture makeUiSpriteSheet(
 
 void drawText(std::string_view text, int x, int y, const base::Color& color);
 
-}
+} // namespace rigel::ui

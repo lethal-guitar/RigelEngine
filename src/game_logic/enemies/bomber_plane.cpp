@@ -31,38 +31,76 @@
 #include "loader/palette.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 using EffectMovement = effects::EffectSprite::Movement;
 
 const effects::EffectSpec BIG_BOMB_DETONATE_IN_AIR_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::EffectSprite{{  0, 0}, data::ActorID::Nuclear_explosion, EffectMovement::None},    0},
-  {effects::EffectSprite{{ -4, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 2},
-  {effects::EffectSprite{{ +4, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 2},
-  {effects::EffectSprite{{ -8, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 4},
-  {effects::EffectSprite{{ +8, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 4},
-  {effects::EffectSprite{{-12, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 6},
-  {effects::EffectSprite{{+12, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 6},
-  {effects::EffectSprite{{-16, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 8},
-  {effects::EffectSprite{{+16, 0}, data::ActorID::Nuclear_explosion, EffectMovement::FlyDown}, 8},
+  {effects::EffectSprite{
+     {0, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::None},
+   0},
+  {effects::EffectSprite{
+     {-4, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   2},
+  {effects::EffectSprite{
+     {+4, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   2},
+  {effects::EffectSprite{
+     {-8, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   4},
+  {effects::EffectSprite{
+     {+8, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   4},
+  {effects::EffectSprite{
+     {-12, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   6},
+  {effects::EffectSprite{
+     {+12, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   6},
+  {effects::EffectSprite{
+     {-16, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   8},
+  {effects::EffectSprite{
+     {+16, 0},
+     data::ActorID::Nuclear_explosion,
+     EffectMovement::FlyDown},
+   8},
 };
 
 
 constexpr auto FLY_AWAY_SPEED_VECTOR = base::Vector{2, 1};
 constexpr auto BOMB_DROP_OFFSET = base::Vector{2, 1};
 
-}
+} // namespace
 
 
 void BomberPlane::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
@@ -104,7 +142,8 @@ void BomberPlane::update(
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const FlyingIn&) {
       const auto result =
         engine::moveHorizontally(*d.mpCollisionChecker, entity, -1);
@@ -113,7 +152,8 @@ void BomberPlane::update(
       const auto reachedPlayer =
         position.x <= s.mpPlayer->orientedPosition().x &&
         position.x + 6 >= s.mpPlayer->orientedPosition().x;
-      if (reachedWall || reachedPlayer) {
+      if (reachedWall || reachedPlayer)
+      {
         mState = DroppingBomb{};
       }
     },
@@ -121,12 +161,17 @@ void BomberPlane::update(
     [&, this](DroppingBomb& state) {
       ++state.mFramesElapsed;
 
-      if (state.mFramesElapsed == 9) {
+      if (state.mFramesElapsed == 9)
+      {
         dropBomb();
-      } else if (state.mFramesElapsed == 10) {
+      }
+      else if (state.mFramesElapsed == 10)
+      {
         entity.component<Sprite>()->mFramesToRender[0] =
           engine::IGNORE_RENDER_SLOT;
-      } else if (state.mFramesElapsed == 29) {
+      }
+      else if (state.mFramesElapsed == 29)
+      {
         entity.remove<ActivationSettings>();
         entity.assign<AutoDestroy>(
           AutoDestroy::Condition::OnLeavingActiveRegion);
@@ -136,10 +181,7 @@ void BomberPlane::update(
       }
     },
 
-    [&](const FlyingOut&) {
-      flyAway();
-    }
-  );
+    [&](const FlyingOut&) { flyAway(); });
 }
 
 
@@ -147,11 +189,12 @@ void BigBomb::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
-  if (!mStartedFalling) {
+  if (!mStartedFalling)
+  {
     // See comment in BomberPlane::update()
     mStartedFalling = true;
     entity.component<Sprite>()->mShow = true;
@@ -163,7 +206,8 @@ void BigBomb::update(
   // exploding if we didn't do this check here.
   const auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
-  if (d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+  if (d.mpCollisionChecker->isOnSolidGround(position, bbox))
+  {
     triggerEffects(entity, *d.mpEntityManager);
     d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
     d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
@@ -176,8 +220,8 @@ void BigBomb::onKilled(
   GlobalDependencies& d,
   GlobalState&,
   const base::Point<float>&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   // When shot while in the air, a slightly different series of explosions is
   // triggered.
   engine::reassign<components::DestructionEffects>(
@@ -190,11 +234,11 @@ void BigBomb::onCollision(
   GlobalDependencies& d,
   GlobalState&,
   const engine::events::CollidedWithWorld&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
   d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
   entity.destroy();
 }
 
-}
+} // namespace rigel::game_logic::behaviors

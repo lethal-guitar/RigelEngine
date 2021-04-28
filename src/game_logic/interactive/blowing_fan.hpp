@@ -21,10 +21,13 @@
 #include <cstdint>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BlowingFan {
-  enum class State : std::uint8_t {
+struct BlowingFan
+{
+  enum class State : std::uint8_t
+  {
     SpeedingUp,
     SlowingDown,
   };
@@ -40,4 +43,4 @@ struct BlowingFan {
   bool mIsPushingPlayer = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

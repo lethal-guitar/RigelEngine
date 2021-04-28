@@ -23,15 +23,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct LevelExitTrigger {
+struct LevelExitTrigger
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -39,4 +42,4 @@ struct LevelExitTrigger {
     entityx::Entity entity);
 };
 
-}
+} // namespace rigel::game_logic::behaviors

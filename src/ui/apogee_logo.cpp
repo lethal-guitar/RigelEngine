@@ -20,9 +20,11 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 /* The original Duke2 executable contains a weird hack for the Apogee Logo.
  * Instead of specifying a duration for the video playback, as is the case with
@@ -55,7 +57,7 @@ const auto TIME_FOR_VIDEO_PLAYBACK = engine::fastTicksToTime(1661);
  */
 const auto TOTAL_TIME = TIME_FOR_VIDEO_PLAYBACK + engine::fastTicksToTime(60);
 
-}
+} // namespace
 
 
 ApogeeLogo::ApogeeLogo(GameMode::Context context)
@@ -66,24 +68,28 @@ ApogeeLogo::ApogeeLogo(GameMode::Context context)
 }
 
 
-void ApogeeLogo::start() {
+void ApogeeLogo::start()
+{
   mpServiceProvider->playMusic("FANFAREA.IMF");
   mMoviePlayer.playMovie(mLogoMovie, 35);
   mElapsedTime = 0.0;
 }
 
 
-void ApogeeLogo::updateAndRender(engine::TimeDelta timeDelta) {
+void ApogeeLogo::updateAndRender(engine::TimeDelta timeDelta)
+{
   mElapsedTime += timeDelta;
 
-  if (mElapsedTime < TIME_FOR_VIDEO_PLAYBACK) {
+  if (mElapsedTime < TIME_FOR_VIDEO_PLAYBACK)
+  {
     mMoviePlayer.updateAndRender(timeDelta);
   }
 }
 
 
-bool ApogeeLogo::isFinished() const {
+bool ApogeeLogo::isFinished() const
+{
   return mElapsedTime >= TOTAL_TIME;
 }
 
-}
+} // namespace rigel::ui

@@ -22,27 +22,31 @@
 #include <iostream>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-namespace {
+namespace
+{
 
-std::uint8_t extend6bitColorValue(const std::uint8_t value) {
+std::uint8_t extend6bitColorValue(const std::uint8_t value)
+{
   // See http://www.shikadi.net/moddingwiki/VGA_Palette for details
   // on the 6-bit to 8-bit conversion
-  return static_cast<uint8_t>(std::min(255, (value*255) / 63));
+  return static_cast<uint8_t>(std::min(255, (value * 255) / 63));
 }
 
 
-template<typename PaletteType, typename PreProcessFunc>
+template <typename PaletteType, typename PreProcessFunc>
 PaletteType load6bitPalette(
   const ByteBufferCIter begin,
   const ByteBufferCIter end,
-  PreProcessFunc preProcess
-) {
+  PreProcessFunc preProcess)
+{
   LeStreamReader reader(begin, end);
 
   PaletteType palette;
-  for (auto& entry : palette) {
+  for (auto& entry : palette)
+  {
     entry.r = extend6bitColorValue(preProcess(reader.readU8()));
     entry.g = extend6bitColorValue(preProcess(reader.readU8()));
     entry.b = extend6bitColorValue(preProcess(reader.readU8()));
@@ -51,7 +55,7 @@ PaletteType load6bitPalette(
   return palette;
 }
 
-}
+} // namespace
 
 // This palette is derived from the hardcoded EGA palette in the uncompressed
 // EXE (using unlzexe) at offset 0x1b038 (registered version, might be
@@ -86,24 +90,23 @@ const Palette16 INGAME_PALETTE{
 // clang-format on
 
 
-Palette16 load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end) {
+Palette16 load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end)
+{
   return load6bitPalette<Palette16>(begin, end, [](const auto entry) {
-    // Duke Nukem 2 uses a non-standard 6-bit palette format, where the maximum
-    // number is 68 instead of 63. This maps Duke 2 palette values to normal
-    // 6-bit VGA/EGA values.
+    // Duke Nukem 2 uses a non-standard 6-bit palette format, where the
+    // maximum number is 68 instead of 63. This maps Duke 2 palette values to
+    // normal 6-bit VGA/EGA values.
     //
     // See http://www.shikadi.net/moddingwiki/Duke_Nukem_II_Palette_Formats
     const auto baseColorValue = entry - 1;
     return static_cast<std::uint8_t>(
-      std::max(0, baseColorValue - baseColorValue/16));
+      std::max(0, baseColorValue - baseColorValue / 16));
   });
 }
 
 
-Palette256 load6bitPalette256(
-  ByteBufferCIter begin,
-  const ByteBufferCIter end
-) {
+Palette256 load6bitPalette256(ByteBufferCIter begin, const ByteBufferCIter end)
+{
   return load6bitPalette<Palette256>(begin, end, [](const auto entry) {
     // 256 color palettes use the standard VGA 6-bit format and need no
     // conversion.
@@ -111,4 +114,4 @@ Palette256 load6bitPalette256(
   });
 }
 
-}
+} // namespace rigel::loader

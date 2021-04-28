@@ -19,16 +19,19 @@
 #include "renderer/texture.hpp"
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-class TiledTexture {
+class TiledTexture
+{
 public:
   TiledTexture(renderer::Texture&& tileSet, renderer::Renderer* pRenderer);
 
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
 
   void renderTile(int index, int posX, int posY) const;
-  void renderTile(const int index, const base::Vector& tlPosition) const {
+  void renderTile(const int index, const base::Vector& tlPosition) const
+  {
     renderTile(index, tlPosition.x, tlPosition.y);
   }
 
@@ -39,9 +42,8 @@ public:
   void renderTileQuad(int baseIndex, const base::Vector& tlPosition) const;
 
   /** Renders two adjacent quads (8x4 group of tiles) */
-  void renderTileDoubleQuad(
-    int baseIndex,
-    const base::Vector& tlPosition) const;
+  void
+    renderTileDoubleQuad(int baseIndex, const base::Vector& tlPosition) const;
 
   int tilesPerRow() const;
 
@@ -53,14 +55,12 @@ private:
     const int tileSpanX,
     const int tileSpanY) const;
 
-  base::Rect<int> sourceRect(
-    int index,
-    const int tileSpanX,
-    const int tileSpanY) const;
+  base::Rect<int>
+    sourceRect(int index, const int tileSpanX, const int tileSpanY) const;
 
 private:
   renderer::Texture mTileSetTexture;
   renderer::Renderer* mpRenderer;
 };
 
-}
+} // namespace rigel::engine

@@ -23,16 +23,20 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SimpleWalker {
-  struct Configuration {
+struct SimpleWalker
+{
+  struct Configuration
+  {
     int mAnimStart = 0;
     int mAnimEnd = 0;
     bool mWalkAtFullSpeed = false;
@@ -53,4 +57,4 @@ struct SimpleWalker {
   const Configuration* mpConfig;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

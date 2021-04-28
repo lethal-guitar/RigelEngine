@@ -21,12 +21,14 @@
 #include <vector>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 struct SavedGame;
 
 
-enum class InventoryItemType {
+enum class InventoryItemType
+{
   CircuitBoard,
   BlueKey,
   RapidFire,
@@ -35,7 +37,8 @@ enum class InventoryItemType {
 };
 
 
-enum class CollectableLetterType {
+enum class CollectableLetterType
+{
   N,
   U,
   K,
@@ -44,7 +47,8 @@ enum class CollectableLetterType {
 };
 
 
-enum class WeaponType {
+enum class WeaponType
+{
   Normal = 0,
   Laser = 1,
   Rocket = 2,
@@ -58,15 +62,18 @@ constexpr auto MAX_AMMO_FLAME_THROWER = 64;
 constexpr auto MAX_HEALTH = 9;
 
 
-class PlayerModel {
+class PlayerModel
+{
 public:
-  struct CheckpointState {
+  struct CheckpointState
+  {
     WeaponType mWeapon;
     int mAmmo;
     int mHealth;
   };
 
-  enum class LetterCollectionState {
+  enum class LetterCollectionState
+  {
     Incomplete,
     WrongOrder,
     InOrder
@@ -127,4 +134,4 @@ private:
   int mHealth;
 };
 
-}
+} // namespace rigel::data

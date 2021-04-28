@@ -24,23 +24,25 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto EYEBALL_THROWER_WIDTH = 5;
 
-const int GET_UP_ANIMATION_SEQUENCE[] = { 0, 0, 0, 0, 0, 1, 2, 3, 4, 5 };
+const int GET_UP_ANIMATION_SEQUENCE[] = {0, 0, 0, 0, 0, 1, 2, 3, 4, 5};
 
-}
+} // namespace
 
 
 void EyeballThrower::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
   using namespace eyeball_thrower;
 
@@ -55,16 +57,15 @@ void EyeballThrower::update(
 
     // [playerpos] Using orientation-independent position here
     const auto playerX = s.mpPlayer->position().x;
-    const auto playerCenterX = playerX + PLAYER_WIDTH/2;
-    const auto myCenterX = position.x + EYEBALL_THROWER_WIDTH/2;
+    const auto playerCenterX = playerX + PLAYER_WIDTH / 2;
+    const auto myCenterX = position.x + EYEBALL_THROWER_WIDTH / 2;
     const auto centerToCenterDistance = std::abs(playerCenterX - myCenterX);
 
     const auto facingPlayer =
       (orientation == Orientation::Left && position.x > playerX) ||
       (orientation == Orientation::Right && position.x < playerX);
     const auto playerInRange =
-      centerToCenterDistance > 9 &&
-      centerToCenterDistance <= 14;
+      centerToCenterDistance > 9 && centerToCenterDistance <= 14;
 
     return facingPlayer && playerInRange;
   };
@@ -87,18 +88,22 @@ void EyeballThrower::update(
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](GettingUp& state) {
-      if (state.mFramesElapsed == 0) {
-        orientation = position.x <= playerPos.x
-          ? Orientation::Right
-          : Orientation::Left;
-      } else if (state.mFramesElapsed == 1) {
+      if (state.mFramesElapsed == 0)
+      {
+        orientation =
+          position.x <= playerPos.x ? Orientation::Right : Orientation::Left;
+      }
+      else if (state.mFramesElapsed == 1)
+      {
         engine::startAnimationSequence(entity, GET_UP_ANIMATION_SEQUENCE);
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 11) {
+      if (state.mFramesElapsed == 11)
+      {
         mState = Walking{};
       }
     },
@@ -106,17 +111,20 @@ void EyeballThrower::update(
     [&, this](Walking& state) {
       ++mFramesElapsedInWalkingState;
 
-      if (canShootAtPlayer()) {
+      if (canShootAtPlayer())
+      {
         mState = Attacking{};
         return;
       }
 
-      if (mFramesElapsedInWalkingState % 4 == 0) {
+      if (mFramesElapsedInWalkingState % 4 == 0)
+      {
         animateWalking();
 
         const auto walkedSuccessfully =
           engine::walk(*d.mpCollisionChecker, entity, orientation);
-        if (!walkedSuccessfully) {
+        if (!walkedSuccessfully)
+        {
           animationFrame = 1;
           mState = GettingUp{};
         }
@@ -128,13 +136,15 @@ void EyeballThrower::update(
       animationFrame = state.mFramesElapsed / 2 + 7;
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 4) {
+      if (state.mFramesElapsed == 4)
+      {
         spawnEyeBall();
-      } else if (state.mFramesElapsed == 6) {
+      }
+      else if (state.mFramesElapsed == 6)
+      {
         mState = Walking{};
       }
-    }
-  );
+    });
 }
 
-}
+} // namespace rigel::game_logic::behaviors

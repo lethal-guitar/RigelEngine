@@ -25,17 +25,21 @@ using namespace rigel;
 using namespace data;
 using namespace std;
 
-namespace {
+namespace
+{
 
-HighScoreList makeList(std::initializer_list<int> scores) {
+HighScoreList makeList(std::initializer_list<int> scores)
+{
   HighScoreList list;
 
   size_t i = 0;
-  for (const auto score : scores) {
+  for (const auto score : scores)
+  {
     list[i].mScore = score;
 
     ++i;
-    if (i >= list.size()) {
+    if (i >= list.size())
+    {
       break;
     }
   }
@@ -43,24 +47,31 @@ HighScoreList makeList(std::initializer_list<int> scores) {
   return list;
 }
 
-}
+} // namespace
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-ostream& operator<<(ostream& stream, const HighScoreEntry& entry) {
+ostream& operator<<(ostream& stream, const HighScoreEntry& entry)
+{
   stream << entry.mScore;
   return stream;
 }
 
 
-ostream& operator<<(ostream& stream, const HighScoreList& list) {
+ostream& operator<<(ostream& stream, const HighScoreList& list)
+{
   stream << '[';
 
   bool first = true;
-  for (const auto& entry : list) {
-    if (first) {
+  for (const auto& entry : list)
+  {
+    if (first)
+    {
       first = false;
-    } else {
+    }
+    else
+    {
       stream << ", ";
     }
 
@@ -71,11 +82,13 @@ ostream& operator<<(ostream& stream, const HighScoreList& list) {
   return stream;
 }
 
-}
+} // namespace rigel::data
 
 
-TEST_CASE("High score list") {
-  SECTION("List is sorted in reverse order") {
+TEST_CASE("High score list")
+{
+  SECTION("List is sorted in reverse order")
+  {
     auto list = makeList({10000, 5000, 3000});
     list[4].mScore = 90000;
     list[0].mScore = 200;
@@ -89,31 +102,39 @@ TEST_CASE("High score list") {
 
   auto list = makeList({10000, 9000, 8000, 7000, 6000, 500, 450, 400, 300, 10});
 
-  SECTION("Checking score qualification") {
-    SECTION("Returns false if score is 0") {
+  SECTION("Checking score qualification")
+  {
+    SECTION("Returns false if score is 0")
+    {
       auto listWithZeroes = makeList({10000, 9000, 8000, 0, 0, 0, 0, 0, 0, 0});
       REQUIRE(!scoreQualifiesForHighScoreList(0, listWithZeroes));
     }
 
-    SECTION("Returns false if score is too small") {
+    SECTION("Returns false if score is too small")
+    {
       REQUIRE(!scoreQualifiesForHighScoreList(5, list));
     }
 
-    SECTION("Returns true if score is larger than highest entry") {
+    SECTION("Returns true if score is larger than highest entry")
+    {
       REQUIRE(scoreQualifiesForHighScoreList(20000, list));
     }
 
-    SECTION("Returns true if score is equal to existing score") {
+    SECTION("Returns true if score is equal to existing score")
+    {
       REQUIRE(scoreQualifiesForHighScoreList(7000, list));
     }
 
-    SECTION("Returns true if score fits in between existing entries") {
+    SECTION("Returns true if score fits in between existing entries")
+    {
       REQUIRE(scoreQualifiesForHighScoreList(8500, list));
     }
   }
 
-  SECTION("Inserting new score") {
-    SECTION("Inserting at end replaces last element") {
+  SECTION("Inserting new score")
+  {
+    SECTION("Inserting at end replaces last element")
+    {
       insertNewScore(200, "", list);
 
       const auto expected =
@@ -122,7 +143,8 @@ TEST_CASE("High score list") {
       REQUIRE(list == expected);
     }
 
-    SECTION("Inserting at start shifts remaining elements to the right") {
+    SECTION("Inserting at start shifts remaining elements to the right")
+    {
       insertNewScore(12000, "", list);
 
       const auto expected =
@@ -131,7 +153,8 @@ TEST_CASE("High score list") {
       REQUIRE(list == expected);
     }
 
-    SECTION("Inserting in the middle shifts consecutive elements to the right") {
+    SECTION("Inserting in the middle shifts consecutive elements to the right")
+    {
       insertNewScore(7500, "", list);
 
       const auto expected =

@@ -22,7 +22,8 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 static_assert(static_cast<int>(WallWalker::Direction::Up) == 0);
 static_assert(static_cast<int>(WallWalker::Direction::Down) == 1);
@@ -39,16 +40,18 @@ void WallWalker::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
 
   auto moveAndAnimate = [&, this]() {
-    switch (mDirection) {
+    switch (mDirection)
+    {
       case Direction::Up:
         animationFrame = mMovementToggle * 2;
-        if (mMovementToggle != 0) {
+        if (mMovementToggle != 0)
+        {
           return engine::moveVertically(*d.mpCollisionChecker, entity, -1) ==
             engine::MovementResult::Completed;
         }
@@ -56,7 +59,8 @@ void WallWalker::update(
 
       case Direction::Down:
         animationFrame = mMovementToggle * 2;
-        if (mMovementToggle == 0) {
+        if (mMovementToggle == 0)
+        {
           return engine::moveVertically(*d.mpCollisionChecker, entity, 1) ==
             engine::MovementResult::Completed;
         }
@@ -64,7 +68,8 @@ void WallWalker::update(
 
       case Direction::Left:
         animationFrame = mMovementToggle;
-        if (mMovementToggle == 0) {
+        if (mMovementToggle == 0)
+        {
           return engine::moveHorizontally(*d.mpCollisionChecker, entity, -1) ==
             engine::MovementResult::Completed;
         }
@@ -72,7 +77,8 @@ void WallWalker::update(
 
       case Direction::Right:
         animationFrame = mMovementToggle;
-        if (mMovementToggle != 0) {
+        if (mMovementToggle != 0)
+        {
           return engine::moveHorizontally(*d.mpCollisionChecker, entity, 1) ==
             engine::MovementResult::Completed;
         }
@@ -84,7 +90,8 @@ void WallWalker::update(
 
 
   mShouldSkipThisFrame = !mShouldSkipThisFrame;
-  if (mShouldSkipThisFrame) {
+  if (mShouldSkipThisFrame)
+  {
     return;
   }
 
@@ -92,12 +99,15 @@ void WallWalker::update(
   --mFramesUntilDirectionSwitch;
 
   const auto moveSucceeded = moveAndAnimate();
-  if (!moveSucceeded || mFramesUntilDirectionSwitch <= 0) {
+  if (!moveSucceeded || mFramesUntilDirectionSwitch <= 0)
+  {
     const auto newDirectionChoice = d.mpRandomGenerator->gen() % 2;
-    if (mDirection == Direction::Up || mDirection == Direction::Down) {
-      mDirection =
-        newDirectionChoice == 1 ? Direction::Right : Direction::Left;
-    } else {
+    if (mDirection == Direction::Up || mDirection == Direction::Down)
+    {
+      mDirection = newDirectionChoice == 1 ? Direction::Right : Direction::Left;
+    }
+    else
+    {
       mDirection = newDirectionChoice == 1 ? Direction::Down : Direction::Up;
     }
 
@@ -105,4 +115,4 @@ void WallWalker::update(
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

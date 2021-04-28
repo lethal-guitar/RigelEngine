@@ -21,13 +21,15 @@
 #include "engine/visual_components.hpp"
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-struct ISpriteFactory {
+struct ISpriteFactory
+{
   virtual ~ISpriteFactory() = default;
 
   virtual engine::components::Sprite createSprite(data::ActorID id) = 0;
   virtual base::Rect<int> actorFrameRect(data::ActorID id, int frame) const = 0;
 };
 
-}
+} // namespace rigel::engine

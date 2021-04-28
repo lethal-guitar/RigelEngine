@@ -23,7 +23,8 @@
 #include "ui/menu_navigation.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
 AntiPiracyScreenMode::AntiPiracyScreenMode(
   Context context,
@@ -45,20 +46,20 @@ std::unique_ptr<GameMode> AntiPiracyScreenMode::updateAndRender(
 
   mTexture.render(0, 0);
 
-  const auto anyButtonPressed = any_of(begin(events), end(events),
-    [](const SDL_Event& event) {
+  const auto anyButtonPressed =
+    any_of(begin(events), end(events), [](const SDL_Event& event) {
       return ui::isButtonPress(event);
     });
 
-  if (anyButtonPressed) {
+  if (anyButtonPressed)
+  {
     return std::make_unique<IntroDemoLoopMode>(
       mContext,
-      mIsFirstLaunch
-        ? IntroDemoLoopMode::Type::AtFirstLaunch
-        : IntroDemoLoopMode::Type::DuringGameStart);
+      mIsFirstLaunch ? IntroDemoLoopMode::Type::AtFirstLaunch
+                     : IntroDemoLoopMode::Type::DuringGameStart);
   }
 
   return {};
 }
 
-}
+} // namespace rigel

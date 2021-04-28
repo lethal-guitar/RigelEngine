@@ -22,7 +22,8 @@
 #include <vector>
 
 
-namespace rigel::data::script {
+namespace rigel::data::script
+{
 
 // clang-format off
 struct DisableMenuFunctionality {};
@@ -37,8 +38,9 @@ struct WaitForUserInput {};
 // clang-format on
 
 
-struct ShowFullScreenImage {
-  template<typename FileNameT>
+struct ShowFullScreenImage
+{
+  template <typename FileNameT>
   explicit ShowFullScreenImage(FileNameT&& image_)
     : image(std::forward<FileNameT>(image_))
   {
@@ -48,7 +50,8 @@ struct ShowFullScreenImage {
 };
 
 
-struct DrawSprite {
+struct DrawSprite
+{
   DrawSprite(int x_, int y_, int spriteId_, int frameNumber_)
     : x(x_)
     , y(y_)
@@ -64,8 +67,9 @@ struct DrawSprite {
 };
 
 
-struct DrawText {
-  template<typename TextT>
+struct DrawText
+{
+  template <typename TextT>
   DrawText(int x_, int y_, TextT&& text_)
     : x(x_)
     , y(y_)
@@ -79,8 +83,9 @@ struct DrawText {
 };
 
 
-struct DrawBigText {
-  template<typename TextT>
+struct DrawBigText
+{
+  template <typename TextT>
   DrawBigText(const int x_, const int y_, const int colorIndex_, TextT&& text_)
     : x(x_)
     , y(y_)
@@ -96,7 +101,8 @@ struct DrawBigText {
 };
 
 
-struct Delay {
+struct Delay
+{
   explicit Delay(const int amount_)
     : amount(amount_)
   {
@@ -106,8 +112,9 @@ struct Delay {
 };
 
 
-struct SetPalette {
-  template<typename FileNameT>
+struct SetPalette
+{
+  template <typename FileNameT>
   explicit SetPalette(FileNameT&& paletteFile_)
     : paletteFile(std::forward<FileNameT>(paletteFile_))
   {
@@ -117,7 +124,8 @@ struct SetPalette {
 };
 
 
-struct AnimateNewsReporter {
+struct AnimateNewsReporter
+{
   explicit AnimateNewsReporter(const int talkDuration_)
     : talkDuration(talkDuration_)
   {
@@ -127,14 +135,14 @@ struct AnimateNewsReporter {
 };
 
 
-struct ShowMessageBox {
-  template<typename MessageLinesT>
+struct ShowMessageBox
+{
+  template <typename MessageLinesT>
   ShowMessageBox(
     const int y_,
     const int width_,
     const int height_,
-    MessageLinesT&& messageLines_
-  )
+    MessageLinesT&& messageLines_)
     : y(y_)
     , width(width_)
     , height(height_)
@@ -149,7 +157,8 @@ struct ShowMessageBox {
 };
 
 
-struct ShowMenuSelectionIndicator {
+struct ShowMenuSelectionIndicator
+{
   explicit ShowMenuSelectionIndicator(const int yPos_)
     : yPos(yPos_)
   {
@@ -159,7 +168,8 @@ struct ShowMenuSelectionIndicator {
 };
 
 
-struct ConfigurePersistentMenuSelection {
+struct ConfigurePersistentMenuSelection
+{
   explicit ConfigurePersistentMenuSelection(const int slot_)
     : slot(slot_)
   {
@@ -169,15 +179,17 @@ struct ConfigurePersistentMenuSelection {
 };
 
 
-struct SetupCheckBoxes {
+struct SetupCheckBoxes
+{
   using CheckBoxID = char;
 
-  struct CheckBoxDefinition {
+  struct CheckBoxDefinition
+  {
     int yPos;
     CheckBoxID id;
   };
 
-  template<typename DefinitionListT>
+  template <typename DefinitionListT>
   SetupCheckBoxes(const int xPos_, DefinitionListT&& boxDefinitions_)
     : xPos(xPos_)
     , boxDefinitions(std::forward<DefinitionListT>(boxDefinitions_))
@@ -189,7 +201,8 @@ struct SetupCheckBoxes {
 };
 
 
-struct ShowSaveSlots {
+struct ShowSaveSlots
+{
   explicit ShowSaveSlots(const int selectedSlot_)
     : mSelectedSlot(selectedSlot_)
   {
@@ -223,14 +236,14 @@ using Action = std::variant<
   ShowMessageBox,
   ShowSaveSlots,
   StopNewsReporterAnimation,
-  WaitForUserInput
->;
+  WaitForUserInput>;
 
 
 using Script = std::vector<Action>;
 
-struct PagesDefinition {
-  template<typename PagesT>
+struct PagesDefinition
+{
+  template <typename PagesT>
   explicit PagesDefinition(PagesT&& pages_)
     : pages(std::forward<PagesT>(pages_))
   {
@@ -239,4 +252,4 @@ struct PagesDefinition {
   std::vector<Script> pages;
 };
 
-}
+} // namespace rigel::data::script

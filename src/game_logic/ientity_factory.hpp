@@ -17,21 +17,23 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "data/map.hpp"
 #include "engine/base_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "data/map.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using ProjectileType = game_logic::components::PlayerProjectile::Type;
 
 
-enum class ProjectileDirection {
+enum class ProjectileDirection
+{
   Left,
   Right,
   Up,
@@ -39,7 +41,8 @@ enum class ProjectileDirection {
 };
 
 
-enum class SpriteMovement {
+enum class SpriteMovement
+{
   FlyRight = 0,
   FlyUpperRight = 1,
   FlyUp = 2,
@@ -50,7 +53,8 @@ enum class SpriteMovement {
 };
 
 
-enum class ScoreNumberType : std::uint8_t {
+enum class ScoreNumberType : std::uint8_t
+{
   S100,
   S500,
   S2000,
@@ -64,33 +68,33 @@ constexpr ScoreNumberType ScoreNumberType_Items[] = {
   ScoreNumberType::S5000,
   ScoreNumberType::S2000,
   ScoreNumberType::S500,
-  ScoreNumberType::S100
-};
+  ScoreNumberType::S100};
 
 constexpr int ScoreNumberType_Values[] = {100, 500, 2000, 5000, 10000};
 
 
-constexpr int scoreNumberValue(const ScoreNumberType type) {
+constexpr int scoreNumberValue(const ScoreNumberType type)
+{
   return ScoreNumberType_Values[static_cast<std::size_t>(type)];
 }
 
 
-struct IEntityFactory {
+struct IEntityFactory
+{
   virtual ~IEntityFactory() = default;
 
-  virtual void createEntitiesForLevel(
-    const data::map::ActorDescriptionList& actors) = 0;
+  virtual void
+    createEntitiesForLevel(const data::map::ActorDescriptionList& actors) = 0;
 
-  virtual engine::components::Sprite createSpriteForId(
-    const data::ActorID actorID) = 0;
+  virtual engine::components::Sprite
+    createSpriteForId(const data::ActorID actorID) = 0;
 
   /** Create a sprite entity using the given actor ID. If assignBoundingBox is
    * true, the dimensions of the sprite's first frame are used to assign a
    * bounding box.
    */
-  virtual entityx::Entity spawnSprite(
-    data::ActorID actorID,
-    bool assignBoundingBox = false) = 0;
+  virtual entityx::Entity
+    spawnSprite(data::ActorID actorID, bool assignBoundingBox = false) = 0;
 
   virtual entityx::Entity spawnSprite(
     data::ActorID actorID,
@@ -102,9 +106,8 @@ struct IEntityFactory {
     const engine::components::WorldPosition& pos,
     ProjectileDirection direction) = 0;
 
-  virtual entityx::Entity spawnActor(
-    data::ActorID actorID,
-    const base::Vector& position) = 0;
+  virtual entityx::Entity
+    spawnActor(data::ActorID actorID, const base::Vector& position) = 0;
 
   virtual entityx::EntityManager& entityManager() = 0;
 };
@@ -132,8 +135,7 @@ entityx::Entity spawnMovingEffectSprite(
   IEntityFactory& factory,
   const data::ActorID id,
   const SpriteMovement movement,
-  const base::Vector& position
-);
+  const base::Vector& position);
 
 
 void spawnFloatingScoreNumber(
@@ -154,4 +156,4 @@ void spawnEnemyLaserShot(
   base::Vector position,
   engine::components::Orientation orientation);
 
-}
+} // namespace rigel::game_logic

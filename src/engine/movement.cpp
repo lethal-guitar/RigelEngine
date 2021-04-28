@@ -24,14 +24,17 @@
 #include <algorithm>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using namespace engine::components;
 
 
-namespace {
+namespace
+{
 
-enum class ConveyorBeltFlag {
+enum class ConveyorBeltFlag
+{
   None,
   Left,
   Right
@@ -43,13 +46,11 @@ constexpr auto WALK_OFF_LEDGE_LEEWAY = 2;
 constexpr auto MAX_WIDTH_FOR_CONVEYOR_CHECK = 16u;
 
 
-template<typename CallableT>
-MovementResult move(
-  int* pPosition,
-  const int amount,
-  CallableT isColliding
-) {
-  if (amount == 0) {
+template <typename CallableT>
+MovementResult move(int* pPosition, const int amount, CallableT isColliding)
+{
+  if (amount == 0)
+  {
     return MovementResult::Completed;
   }
 
@@ -57,8 +58,10 @@ MovementResult move(
   const auto movement = base::sgn(amount);
 
   const auto previousPosition = *pPosition;
-  for (int i = 0; i < desiredDistance; ++i) {
-    if (isColliding()) {
+  for (int i = 0; i < desiredDistance; ++i)
+  {
+    if (isColliding())
+    {
       break;
     }
 
@@ -66,37 +69,36 @@ MovementResult move(
   }
 
   const auto actualDistance = std::abs(*pPosition - previousPosition);
-  if (actualDistance == 0) {
+  if (actualDistance == 0)
+  {
     return MovementResult::Failed;
   }
 
-  return actualDistance == desiredDistance
-    ? MovementResult::Completed
-    : MovementResult::MovedPartially;
+  return actualDistance == desiredDistance ? MovementResult::Completed
+                                           : MovementResult::MovedPartially;
 }
 
 
 bool canWalkUpStairStep(
   const CollisionChecker& collisionChecker,
   entityx::Entity entity,
-  const int movement
-) {
+  const int movement)
+{
   auto stairSteppedBbox = toWorldSpace(
-    *entity.component<BoundingBox>(),
-    *entity.component<WorldPosition>());
+    *entity.component<BoundingBox>(), *entity.component<WorldPosition>());
   stairSteppedBbox.topLeft.y -= 1;
 
   if (
     (movement < 0 && collisionChecker.isTouchingLeftWall(stairSteppedBbox)) ||
-    (movement > 0 && collisionChecker.isTouchingRightWall(stairSteppedBbox))
-  ) {
+    (movement > 0 && collisionChecker.isTouchingRightWall(stairSteppedBbox)))
+  {
     return false;
   }
 
   return true;
 }
 
-}
+} // namespace
 
 
 namespace ex = entityx;
@@ -104,8 +106,8 @@ namespace ex = entityx;
 bool walk(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const components::Orientation orientation
-) {
+  const components::Orientation orientation)
+{
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
 
@@ -113,16 +115,17 @@ bool walk(
   const auto newPosition = position + base::Vector{amount, 0};
   const auto movingLeft = amount < 0;
 
-  const auto xToTest = newPosition.x + WALK_OFF_LEDGE_LEEWAY *
-    (movingLeft ? -1 : 1);
-  const auto stillOnSolidGround = collisionChecker.isOnSolidGround({
-    {xToTest, newPosition.y}, {bbox.size.width, 1}});
+  const auto xToTest =
+    newPosition.x + WALK_OFF_LEDGE_LEEWAY * (movingLeft ? -1 : 1);
+  const auto stillOnSolidGround = collisionChecker.isOnSolidGround(
+    {{xToTest, newPosition.y}, {bbox.size.width, 1}});
 
   const auto collidingWithWorld = movingLeft
     ? collisionChecker.isTouchingLeftWall(position, bbox)
     : collisionChecker.isTouchingRightWall(position, bbox);
 
-  if (stillOnSolidGround && !collidingWithWorld) {
+  if (stillOnSolidGround && !collidingWithWorld)
+  {
     position = newPosition;
     return true;
   }
@@ -134,8 +137,8 @@ bool walk(
 bool walkOnCeiling(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const components::Orientation orientation
-) {
+  const components::Orientation orientation)
+{
   // TODO: Eliminate duplication with the regular walk()
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
@@ -153,7 +156,8 @@ bool walkOnCeiling(
     ? collisionChecker.isTouchingLeftWall(position, bbox)
     : collisionChecker.isTouchingRightWall(position, bbox);
 
-  if (stillOnCeiling && !collidingWithWorld) {
+  if (stillOnCeiling && !collidingWithWorld)
+  {
     position = newPosition;
     return true;
   }
@@ -165,43 +169,40 @@ bool walkOnCeiling(
 MovementResult moveHorizontally(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const int amount
-) {
+  const int amount)
+{
   auto& position = *entity.component<WorldPosition>();
   auto& bbox = *entity.component<BoundingBox>();
 
-  return move(&position.x, amount,
-    [&]() {
-      return amount < 0
-        ? collisionChecker.isTouchingLeftWall(position, bbox)
-        : collisionChecker.isTouchingRightWall(position, bbox);
-    });
+  return move(&position.x, amount, [&]() {
+    return amount < 0 ? collisionChecker.isTouchingLeftWall(position, bbox)
+                      : collisionChecker.isTouchingRightWall(position, bbox);
+  });
 }
 
 
 MovementResult moveVertically(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const int amount
-) {
+  const int amount)
+{
   auto& position = *entity.component<WorldPosition>();
   auto& bbox = *entity.component<BoundingBox>();
 
-  return move(&position.y, amount,
-    [&]() {
-      return amount < 0
-        ? collisionChecker.isTouchingCeiling(position, bbox)
-        : collisionChecker.isOnSolidGround(position, bbox);
-    });
+  return move(&position.y, amount, [&]() {
+    return amount < 0 ? collisionChecker.isTouchingCeiling(position, bbox)
+                      : collisionChecker.isOnSolidGround(position, bbox);
+  });
 }
 
 
 MovementResult moveHorizontallyWithStairStepping(
   const CollisionChecker& collisionChecker,
   ex::Entity entity,
-  const int amount
-) {
-  if (amount == 0) {
+  const int amount)
+{
+  if (amount == 0)
+  {
     return MovementResult::Completed;
   }
 
@@ -211,16 +212,20 @@ MovementResult moveHorizontallyWithStairStepping(
   auto& position = *entity.component<WorldPosition>();
 
   MovementResult finalResult = MovementResult::Completed;
-  for (int i = 0; i < desiredDistance; ++i) {
+  for (int i = 0; i < desiredDistance; ++i)
+  {
     const auto result = moveHorizontally(collisionChecker, entity, step);
-    if (result != MovementResult::Completed) {
-      if (canWalkUpStairStep(collisionChecker, entity, step)) {
+    if (result != MovementResult::Completed)
+    {
+      if (canWalkUpStairStep(collisionChecker, entity, step))
+      {
         position.x += step;
         position.y -= 1;
-      } else {
-        finalResult = i > 0
-          ? MovementResult::MovedPartially
-          : MovementResult::Failed;
+      }
+      else
+      {
+        finalResult =
+          i > 0 ? MovementResult::MovedPartially : MovementResult::Failed;
         break;
       }
     }
@@ -233,19 +238,24 @@ MovementResult moveHorizontallyWithStairStepping(
 void applyConveyorBeltMotion(
   const CollisionChecker& collisionChecker,
   const data::map::Map& map,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using std::any_of;
   using std::begin;
   using std::end;
 
   auto getFlag = [&map](const int x, const int y) {
     const auto attributes = map.attributes(x, y);
-    if (attributes.isConveyorBeltLeft()) {
+    if (attributes.isConveyorBeltLeft())
+    {
       return ConveyorBeltFlag::Left;
-    } else if (attributes.isConveyorBeltRight()) {
+    }
+    else if (attributes.isConveyorBeltRight())
+    {
       return ConveyorBeltFlag::Right;
-    } else {
+    }
+    else
+    {
       return ConveyorBeltFlag::None;
     }
   };
@@ -256,7 +266,8 @@ void applyConveyorBeltMotion(
     const auto& position = *entity.component<WorldPosition>();
     const auto& bbox = *entity.component<BoundingBox>();
     const auto worldBbox = toWorldSpace(bbox, position);
-    for (auto x = 0; x < worldBbox.size.width; ++x) {
+    for (auto x = 0; x < worldBbox.size.width; ++x)
+    {
       flags.push_back(getFlag(worldBbox.left() + x, worldBbox.bottom() + 1));
     }
   }
@@ -297,11 +308,14 @@ void applyConveyorBeltMotion(
   //
   // I'm not sure why this was done this way, instead of using stair stepping
   // for conveyor belt motion.
-  if (anyFlagIs(ConveyorBeltFlag::Left)) {
+  if (anyFlagIs(ConveyorBeltFlag::Left))
+  {
     moveHorizontallyWithStairStepping(collisionChecker, entity, -1);
-  } else if (anyFlagIs(ConveyorBeltFlag::Right)) {
+  }
+  else if (anyFlagIs(ConveyorBeltFlag::Right))
+  {
     moveHorizontallyWithStairStepping(collisionChecker, entity, 1);
   }
 }
 
-}
+} // namespace rigel::engine

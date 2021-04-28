@@ -24,26 +24,27 @@
 #include <stdexcept>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 
 
-namespace {
+namespace
+{
 
-std::string normalizedFileName(const std::string& fileName) {
+std::string normalizedFileName(const std::string& fileName)
+{
   std::string normalized(fileName);
   std::transform(
     normalized.begin(),
     normalized.end(),
     normalized.begin(),
-    [](const auto ch) {
-      return static_cast<char>(std::toupper(ch));
-    });
+    [](const auto ch) { return static_cast<char>(std::toupper(ch)); });
   return normalized;
 }
 
-}
+} // namespace
 
 
 CMPFilePackage::CMPFilePackage(const string& filePath)
@@ -51,28 +52,32 @@ CMPFilePackage::CMPFilePackage(const string& filePath)
 {
   LeStreamReader dictReader(mFileData.begin(), mFileData.end());
 
-  while (dictReader.hasData()) {
+  while (dictReader.hasData())
+  {
     const auto fileName = readFixedSizeString(dictReader, 12);
     const auto fileOffset = dictReader.readU32();
     const auto fileSize = dictReader.readU32();
 
-    if (fileOffset == 0 && fileSize == 0) {
+    if (fileOffset == 0 && fileSize == 0)
+    {
       break;
     }
-    if (fileOffset + fileSize > mFileData.size()) {
+    if (fileOffset + fileSize > mFileData.size())
+    {
       throw invalid_argument("Malformed dictionary in CMP file");
     }
 
     mFileDict.emplace(
-      normalizedFileName(fileName),
-      DictEntry(fileOffset, fileSize));
+      normalizedFileName(fileName), DictEntry(fileOffset, fileSize));
   }
 }
 
 
-ByteBuffer CMPFilePackage::file(const std::string& name) const {
+ByteBuffer CMPFilePackage::file(const std::string& name) const
+{
   const auto it = findFileEntry(name);
-  if (it == mFileDict.end()) {
+  if (it == mFileDict.end())
+  {
     throw invalid_argument(
       string("No such file in CMP: ") + normalizedFileName(name));
   }
@@ -83,26 +88,26 @@ ByteBuffer CMPFilePackage::file(const std::string& name) const {
 }
 
 
-bool CMPFilePackage::hasFile(const std::string& name) const {
+bool CMPFilePackage::hasFile(const std::string& name) const
+{
   return findFileEntry(name) != mFileDict.end();
 }
 
 
-CMPFilePackage::FileDict::const_iterator CMPFilePackage::findFileEntry(
-  const std::string& name
-) const {
+CMPFilePackage::FileDict::const_iterator
+  CMPFilePackage::findFileEntry(const std::string& name) const
+{
   return mFileDict.find(normalizedFileName(name));
 }
 
 
 CMPFilePackage::DictEntry::DictEntry(
   const uint32_t fileOffset_,
-  const uint32_t fileSize_
-)
+  const uint32_t fileSize_)
   : fileOffset(fileOffset_)
   , fileSize(fileSize_)
 {
 }
 
 
-}
+} // namespace rigel::loader

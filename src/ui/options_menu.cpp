@@ -28,10 +28,10 @@
 #include "ui/menu_navigation.hpp"
 
 RIGEL_DISABLE_WARNINGS
+#include <SDL_keyboard.h>
 #include <boost/algorithm/string/erase.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <SDL_keyboard.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
@@ -39,54 +39,67 @@ RIGEL_RESTORE_WARNINGS
 #include <filesystem>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto SCALE = 0.8f;
 
-constexpr auto STANDARD_FPS_LIMITS = std::array<int, 8>{
-  30, 60, 70, 72, 90, 120, 144, 240};
+constexpr auto STANDARD_FPS_LIMITS =
+  std::array<int, 8>{30, 60, 70, 72, 90, 120, 144, 240};
 
 
 template <typename Callback>
-void withEnabledState(const bool enabled, Callback&& callback) {
-  if (!enabled) {
+void withEnabledState(const bool enabled, Callback&& callback)
+{
+  if (!enabled)
+  {
     ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
   }
 
   callback();
 
-  if (!enabled) {
+  if (!enabled)
+  {
     ImGui::PopItemFlag();
     ImGui::PopStyleVar();
   }
 }
 
 
-void fpsLimitUi(data::GameOptions* pOptions) {
+void fpsLimitUi(data::GameOptions* pOptions)
+{
   withEnabledState(!pOptions->mEnableVsync, [=]() {
-    if (pOptions->mEnableVsync) {
+    if (pOptions->mEnableVsync)
+    {
       // When V-Sync is on, we always want to show FPS limiting as off,
       // regardless of the actual setting in the options.
       bool alwaysFalse = false;
       ImGui::Checkbox("Limit max FPS", &alwaysFalse);
-    } else {
+    }
+    else
+    {
       ImGui::Checkbox("Limit max FPS", &pOptions->mEnableFpsLimit);
     }
     ImGui::SameLine();
 
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 3.8f);
-    if (ImGui::BeginCombo("Limit", std::to_string(pOptions->mMaxFps).c_str())) {
-      for (const auto item : STANDARD_FPS_LIMITS) {
+    if (ImGui::BeginCombo("Limit", std::to_string(pOptions->mMaxFps).c_str()))
+    {
+      for (const auto item : STANDARD_FPS_LIMITS)
+      {
         const auto isSelected = item == pOptions->mMaxFps;
 
-        if (ImGui::Selectable(std::to_string(item).c_str(), isSelected)) {
+        if (ImGui::Selectable(std::to_string(item).c_str(), isSelected))
+        {
           pOptions->mMaxFps = item;
         }
 
-        if (isSelected) {
+        if (isSelected)
+        {
           ImGui::SetItemDefaultFocus();
         }
       }
@@ -97,7 +110,8 @@ void fpsLimitUi(data::GameOptions* pOptions) {
 }
 
 
-std::string normalizedKeyName(const SDL_Keycode keyCode) {
+std::string normalizedKeyName(const SDL_Keycode keyCode)
+{
   auto keyName = std::string(SDL_GetKeyName(keyCode));
 
   boost::algorithm::erase_first(keyName, "Left ");
@@ -105,17 +119,15 @@ std::string normalizedKeyName(const SDL_Keycode keyCode) {
   return keyName;
 }
 
-}
+} // namespace
 
 
 OptionsMenu::OptionsMenu(
   UserProfile* pUserProfile,
   IGameServiceProvider* pServiceProvider,
-  const Type type
-)
+  const Type type)
   : mGamePathBrowser(
-      ImGuiFileBrowserFlags_SelectDirectory |
-      ImGuiFileBrowserFlags_CloseOnEsc)
+      ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CloseOnEsc)
   , mpUserProfile(pUserProfile)
   , mpOptions(&pUserProfile->mOptions)
   , mpServiceProvider(pServiceProvider)
@@ -125,40 +137,47 @@ OptionsMenu::OptionsMenu(
 }
 
 
-OptionsMenu::~OptionsMenu() {
+OptionsMenu::~OptionsMenu()
+{
   assert(!mpCurrentlyEditedBinding);
 }
 
 
-void OptionsMenu::handleEvent(const SDL_Event& event) {
+void OptionsMenu::handleEvent(const SDL_Event& event)
+{
   if (
     !mpCurrentlyEditedBinding ||
-    (event.type != SDL_KEYUP && event.type != SDL_KEYDOWN)
-  ) {
+    (event.type != SDL_KEYUP && event.type != SDL_KEYDOWN))
+  {
     return;
   }
 
   const auto keyCode =
     sdl_utils::normalizeLeftRightVariants(event.key.keysym.sym);
 
-  if (keyCode == SDLK_ESCAPE) {
+  if (keyCode == SDLK_ESCAPE)
+  {
     // We need to handle the key up, as ImGui would otherwise see the key up
     // event if we acted on key down. So we act on key up, and swallow the
     // key down event by always returning.
-    if (event.type == SDL_KEYUP) {
+    if (event.type == SDL_KEYUP)
+    {
       endRebinding();
     }
 
     return;
   }
 
-  if (event.type == SDL_KEYDOWN && data::canBeUsedForKeyBinding(keyCode)) {
+  if (event.type == SDL_KEYDOWN && data::canBeUsedForKeyBinding(keyCode))
+  {
     // Store the new key binding
     *mpCurrentlyEditedBinding = keyCode;
 
     // Unbind any duplicates
-    for (auto pBinding : mpOptions->allKeyBindings()) {
-      if (pBinding != mpCurrentlyEditedBinding && *pBinding == keyCode) {
+    for (auto pBinding : mpOptions->allKeyBindings())
+    {
+      if (pBinding != mpCurrentlyEditedBinding && *pBinding == keyCode)
+      {
         *pBinding = SDLK_UNKNOWN;
       }
     }
@@ -168,23 +187,27 @@ void OptionsMenu::handleEvent(const SDL_Event& event) {
 }
 
 
-void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
+void OptionsMenu::updateAndRender(engine::TimeDelta dt)
+{
   namespace fs = std::filesystem;
 
-  if (mpCurrentlyEditedBinding) {
+  if (mpCurrentlyEditedBinding)
+  {
     mElapsedTimeEditingBinding += dt;
   }
 
   ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 
-  if (mPopupOpened && !ImGui::IsPopupOpen("Options")) {
+  if (mPopupOpened && !ImGui::IsPopupOpen("Options"))
+  {
     // Popup was closed, quit the options menu
     endRebinding();
     mMenuOpen = false;
     return;
   }
 
-  if (mMenuOpen && !mPopupOpened) {
+  if (mMenuOpen && !mPopupOpened)
+  {
     ImGui::OpenPopup("Options");
     mPopupOpened = true;
   }
@@ -200,16 +223,13 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
 
   const auto sizeToUse = ImVec2{windowSize.x * scaleX, windowSize.y * scaleY};
   const auto offset = ImVec2{
-    (windowSize.x - sizeToUse.x) / 2.0f,
-    (windowSize.y - sizeToUse.y) / 2.0f};
+    (windowSize.x - sizeToUse.x) / 2.0f, (windowSize.y - sizeToUse.y) / 2.0f};
 
   ImGui::SetNextWindowSize(sizeToUse);
   ImGui::SetNextWindowPos(offset);
 
   if (!ImGui::BeginPopup(
-    "Options",
-    ImGuiWindowFlags_NoCollapse |
-    ImGuiWindowFlags_NoResize))
+        "Options", ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
   {
     return;
   }
@@ -320,7 +340,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
   // If the user selects a key for rebinding, and then switches to a different
   // tab via the mouse/gamepad, stop rebinding. To implement that, we always
   // stop rebinding when any other tab aside from keyboard controls is visible.
-  if (stopRebindingDueToTabSwitch) {
+  if (stopRebindingDueToTabSwitch)
+  {
     endRebinding();
   }
 
@@ -331,7 +352,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (mpUserProfile->mGamePath) {
+    if (mpUserProfile->mGamePath)
+    {
       ImGui::Text(
         "Current game path: '%s'",
         mpUserProfile->mGamePath->u8string().c_str());
@@ -341,36 +363,42 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt) {
     }
 
     ImGui::NewLine();
-    if (ImGui::Button("Choose Duke Nukem II installation")) {
-      if (mpUserProfile->mGamePath) {
+    if (ImGui::Button("Choose Duke Nukem II installation"))
+    {
+      if (mpUserProfile->mGamePath)
+      {
         mGamePathBrowser.SetPwd(*mpUserProfile->mGamePath);
       }
 
       mGamePathBrowser.SetWindowSize(
-        base::round(sizeToUse.x * 0.8f),
-        base::round(sizeToUse.y * 0.8f));
+        base::round(sizeToUse.x * 0.8f), base::round(sizeToUse.y * 0.8f));
       mGamePathBrowser.Open();
     }
 
-    if (!mpServiceProvider->isSharewareVersion()) {
+    if (!mpServiceProvider->isSharewareVersion())
+    {
       ImGui::Spacing();
       ImGui::TextUnformatted(
-R"(NOTE: When switching to a shareware version, some of your saved games
+        R"(NOTE: When switching to a shareware version, some of your saved games
 might become unusable.
 Going back to a registered version will make them work again.)");
     }
 
-    if (!mShowErrorBox) {
+    if (!mShowErrorBox)
+    {
       mGamePathBrowser.Display();
     }
 
     if (mGamePathBrowser.HasSelected())
     {
       const auto newGamePath = mGamePathBrowser.GetSelected();
-      if (fs::exists(newGamePath / "NUKEM2.CMP")) {
+      if (fs::exists(newGamePath / "NUKEM2.CMP"))
+      {
         mGamePathBrowser.Close();
         mpServiceProvider->switchGamePath(newGamePath);
-      } else {
+      }
+      else
+      {
         // Re-open the browser
         mGamePathBrowser.Open();
 
@@ -379,13 +407,13 @@ Going back to a registered version will make them work again.)");
       }
     }
 
-    const auto flags =
-      ImGuiWindowFlags_NoResize |
-      ImGuiWindowFlags_NoMove;
-    if (ImGui::BeginPopupModal("Error", &mShowErrorBox, flags)) {
+    const auto flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    if (ImGui::BeginPopupModal("Error", &mShowErrorBox, flags))
+    {
       ImGui::TextUnformatted(
         "No game data (file NUKEM2.CMP) found at chosen path!");
-      if (ImGui::Button("Ok")) {
+      if (ImGui::Button("Ok"))
+      {
         mShowErrorBox = false;
       }
       ImGui::EndPopup();
@@ -397,12 +425,14 @@ Going back to a registered version will make them work again.)");
 }
 
 
-bool OptionsMenu::isFinished() const {
+bool OptionsMenu::isFinished() const
+{
   return !mMenuOpen;
 }
 
 
-void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding) {
+void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding)
+{
   ImGui::Text("%s", label);
   ImGui::NextColumn();
 
@@ -412,11 +442,11 @@ void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding) {
 
   if (mpCurrentlyEditedBinding != binding)
   {
-    const auto keyName = *binding == SDLK_UNKNOWN
-      ? "- Unassigned -"
-      : normalizedKeyName(*binding);
+    const auto keyName =
+      *binding == SDLK_UNKNOWN ? "- Unassigned -" : normalizedKeyName(*binding);
 
-    if (ImGui::Button(keyName.c_str(), buttonSize)) {
+    if (ImGui::Button(keyName.c_str(), buttonSize))
+    {
       beginRebinding(binding);
     }
   }
@@ -431,7 +461,8 @@ void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding) {
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(color, 0, 0, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(color, 0, 0, 1.0f));
 
-    if (ImGui::Button("- Press desired key -", buttonSize)) {
+    if (ImGui::Button("- Press desired key -", buttonSize))
+    {
       endRebinding();
     }
 
@@ -444,7 +475,8 @@ void OptionsMenu::keyBindingRow(const char* label, SDL_Keycode* binding) {
 }
 
 
-void OptionsMenu::beginRebinding(SDL_Keycode* binding) {
+void OptionsMenu::beginRebinding(SDL_Keycode* binding)
+{
   mpCurrentlyEditedBinding = binding;
   mElapsedTimeEditingBinding = 0.0;
 
@@ -455,9 +487,10 @@ void OptionsMenu::beginRebinding(SDL_Keycode* binding) {
 }
 
 
-void OptionsMenu::endRebinding() {
+void OptionsMenu::endRebinding()
+{
   mpCurrentlyEditedBinding = nullptr;
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 }
 
-}
+} // namespace rigel::ui

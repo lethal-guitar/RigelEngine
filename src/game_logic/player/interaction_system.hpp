@@ -31,28 +31,34 @@ RIGEL_RESTORE_WARNINGS
 
 #include <string>
 
-namespace rigel {
-  struct IGameServiceProvider;
+namespace rigel
+{
+struct IGameServiceProvider;
 
-  namespace data {
-    class PlayerModel;
-  }
-
-  namespace events {
-    struct CloakExpired;
-  }
-
-  namespace game_logic {
-    struct IEntityFactory;
-  }
-
-  namespace loader {
-    class ResourceLoader;
-  }
+namespace data
+{
+class PlayerModel;
 }
 
+namespace events
+{
+struct CloakExpired;
+}
 
-namespace rigel::game_logic {
+namespace game_logic
+{
+struct IEntityFactory;
+}
+
+namespace loader
+{
+class ResourceLoader;
+}
+} // namespace rigel
+
+
+namespace rigel::game_logic
+{
 
 class Player;
 
@@ -89,9 +95,8 @@ private:
   void activateCardReader(
     entityx::EntityManager& es,
     entityx::Entity interactable);
-  void activateKeyHole(
-    entityx::EntityManager& es,
-    entityx::Entity interactable);
+  void
+    activateKeyHole(entityx::EntityManager& es, entityx::Entity interactable);
   void activateHintMachine(entityx::Entity entity);
 
   void collectLetter(
@@ -108,4 +113,4 @@ private:
   data::GameSessionId mSessionId;
 };
 
-}
+} // namespace rigel::game_logic

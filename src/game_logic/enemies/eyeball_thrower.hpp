@@ -21,26 +21,33 @@
 #include <variant>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace eyeball_thrower {
+namespace eyeball_thrower
+{
 
-struct GettingUp {
+struct GettingUp
+{
   int mFramesElapsed = 0;
 };
 
-struct Walking {};
+struct Walking
+{
+};
 
-struct Attacking {
+struct Attacking
+{
   int mFramesElapsed = 0;
 };
 
 using State = std::variant<GettingUp, Walking, Attacking>;
 
-}
+} // namespace eyeball_thrower
 
 
-struct EyeballThrower {
+struct EyeballThrower
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -54,4 +61,4 @@ struct EyeballThrower {
   int mFramesElapsedInWalkingState = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

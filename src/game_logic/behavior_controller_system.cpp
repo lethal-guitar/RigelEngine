@@ -22,20 +22,16 @@
 #include "game_logic/behavior_controller.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 BehaviorControllerSystem::BehaviorControllerSystem(
   GlobalDependencies dependencies,
   Player* pPlayer,
   const base::Vector* pCameraPosition,
-  data::map::Map* pMap
-)
+  data::map::Map* pMap)
   : mDependencies(dependencies)
-  , mGlobalState(
-      pPlayer,
-      pCameraPosition,
-      pMap,
-      &mPerFrameState)
+  , mGlobalState(pPlayer, pCameraPosition, pMap, &mPerFrameState)
 {
   mDependencies.mpEvents->subscribe<events::ShootableDamaged>(*this);
   mDependencies.mpEvents->subscribe<events::ShootableKilled>(*this);
@@ -45,80 +41,68 @@ BehaviorControllerSystem::BehaviorControllerSystem(
 
 void BehaviorControllerSystem::update(
   entityx::EntityManager& es,
-  const PerFrameState& s
-) {
+  const PerFrameState& s)
+{
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   mPerFrameState = s;
 
   es.each<BehaviorController, Active>([this](
-    entityx::Entity entity,
-    BehaviorController& controller,
-    const Active& active
-  ) {
-    controller.update(
-      mDependencies,
-      mGlobalState,
-      active.mIsOnScreen,
-      entity);
+                                        entityx::Entity entity,
+                                        BehaviorController& controller,
+                                        const Active& active) {
+    controller.update(mDependencies, mGlobalState, active.mIsOnScreen, entity);
   });
 }
 
 
-void BehaviorControllerSystem::receive(const events::ShootableDamaged& event) {
+void BehaviorControllerSystem::receive(const events::ShootableDamaged& event)
+{
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   auto entity = event.mEntity;
   if (
     entity.has_component<BehaviorController>() &&
-    entity.has_component<Active>()
-  ) {
+    entity.has_component<Active>())
+  {
     entity.component<BehaviorController>()->onHit(
-      mDependencies,
-      mGlobalState,
-      event.mInflictorVelocity,
-      entity);
+      mDependencies, mGlobalState, event.mInflictorVelocity, entity);
   }
 }
 
 
-void BehaviorControllerSystem::receive(const events::ShootableKilled& event) {
+void BehaviorControllerSystem::receive(const events::ShootableKilled& event)
+{
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   auto entity = event.mEntity;
   if (
     entity.has_component<BehaviorController>() &&
-    entity.has_component<Active>()
-  ) {
+    entity.has_component<Active>())
+  {
     entity.component<BehaviorController>()->onKilled(
-      mDependencies,
-      mGlobalState,
-      event.mInflictorVelocity,
-      entity);
+      mDependencies, mGlobalState, event.mInflictorVelocity, entity);
   }
 }
 
 
 void BehaviorControllerSystem::receive(
-  const engine::events::CollidedWithWorld& event
-) {
+  const engine::events::CollidedWithWorld& event)
+{
   using engine::components::Active;
   using game_logic::components::BehaviorController;
 
   auto entity = event.mEntity;
   if (
     entity.has_component<BehaviorController>() &&
-    entity.has_component<Active>()
-  ) {
+    entity.has_component<Active>())
+  {
     entity.component<BehaviorController>()->onCollision(
-      mDependencies,
-      mGlobalState,
-      event,
-      entity);
+      mDependencies, mGlobalState, event, entity);
   }
 }
 
-}
+} // namespace rigel::game_logic

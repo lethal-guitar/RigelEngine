@@ -28,9 +28,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-class CollisionChecker : public entityx::Receiver<CollisionChecker> {
+class CollisionChecker : public entityx::Receiver<CollisionChecker>
+{
 public:
   CollisionChecker(
     const data::map::Map* pMap,
@@ -58,28 +60,23 @@ public:
   bool isTouchingLeftWall(const engine::components::BoundingBox& bbox) const;
   bool isTouchingRightWall(const engine::components::BoundingBox& bbox) const;
 
-  bool testHorizontalSpan(
-    int startX,
-    int endX,
-    int y,
-    data::map::SolidEdge edge) const;
-  bool testVerticalSpan(
-    int startY,
-    int endY,
-    int x,
-    data::map::SolidEdge edge) const;
+  bool
+    testHorizontalSpan(int startX, int endX, int y, data::map::SolidEdge edge)
+      const;
+  bool testVerticalSpan(int startY, int endY, int x, data::map::SolidEdge edge)
+    const;
 
-  void receive(
-    const entityx::ComponentAddedEvent<components::SolidBody>& event);
-  void receive(
-    const entityx::ComponentRemovedEvent<components::SolidBody>& event);
+  void
+    receive(const entityx::ComponentAddedEvent<components::SolidBody>& event);
+  void
+    receive(const entityx::ComponentRemovedEvent<components::SolidBody>& event);
 
 private:
-  bool testSolidBodyCollision(
-    const engine::components::BoundingBox& bbox) const;
+  bool
+    testSolidBodyCollision(const engine::components::BoundingBox& bbox) const;
 
   std::vector<entityx::Entity> mSolidBodies;
   const data::map::Map* mpMap;
 };
 
-}
+} // namespace rigel::engine

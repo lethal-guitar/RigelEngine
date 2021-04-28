@@ -25,7 +25,7 @@ static_assert(slowTicksToTime(140) == 1.0);
 static_assert(slowTicksToTime(70) == 0.5);
 
 constexpr auto EPSILON = 0.0000001;
-static_assert(timeToFastTicks(4.0) - 280.0*4 < EPSILON);
+static_assert(timeToFastTicks(4.0) - 280.0 * 4 < EPSILON);
 static_assert(timeToFastTicks(1.0) - 280.0 < EPSILON);
-static_assert(timeToSlowTicks(2.0) - 140.0*2 < EPSILON);
+static_assert(timeToSlowTicks(2.0) - 140.0 * 2 < EPSILON);
 static_assert(timeToSlowTicks(1.0) - 140.0 < EPSILON);

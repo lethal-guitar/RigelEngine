@@ -25,7 +25,8 @@ RIGEL_RESTORE_WARNINGS
 #include <stdexcept>
 
 
-void rigel::renderer::loadGlFunctions() {
+void rigel::renderer::loadGlFunctions()
+{
   int result = 0;
 
   // clang-format off
@@ -40,7 +41,8 @@ void rigel::renderer::loadGlFunctions() {
 #endif
   // clang-format on
 
-  if (!result) {
+  if (!result)
+  {
     throw std::runtime_error("Failed to load OpenGL function pointers");
   }
 }

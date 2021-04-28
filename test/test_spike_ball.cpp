@@ -49,26 +49,31 @@ using namespace game_logic;
 namespace ex = entityx;
 
 
-struct MockSpriteFactory : public rigel::engine::ISpriteFactory {
-  engine::components::Sprite createSprite(data::ActorID id) override {
+struct MockSpriteFactory : public rigel::engine::ISpriteFactory
+{
+  engine::components::Sprite createSprite(data::ActorID id) override
+  {
     static rigel::engine::SpriteDrawData dummyDrawData;
     return {&dummyDrawData, {}};
   }
 
-  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override {
+  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override
+  {
     // Bounds for spike ball
     return {{}, {3, 3}};
   }
 };
 
 
-TEST_CASE("Spike ball") {
+TEST_CASE("Spike ball")
+{
   ex::EntityX entityx;
 
   data::map::Map map{300, 300, data::map::TileAttributeDict{{0x0, 0xF}}};
 
   // Floor
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; ++i)
+  {
     map.setTileAt(0, i, 21, 1);
   }
 
@@ -130,8 +135,7 @@ TEST_CASE("Spike ball") {
   perFrameState.mCurrentViewPortSize = viewPortSize;
 
   auto runOneFrame = [&]() {
-    engine::markActiveEntities(
-      entityx.entities, {0, 0}, viewPortSize);
+    engine::markActiveEntities(entityx.entities, {0, 0}, viewPortSize);
     behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
     perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;
@@ -139,7 +143,8 @@ TEST_CASE("Spike ball") {
 
   auto runFramesAndCollect = [&](std::size_t numFrames) {
     std::vector<base::Vector> positions;
-    for (std::size_t i = 0; i < numFrames; ++i) {
+    for (std::size_t i = 0; i < numFrames; ++i)
+    {
       runOneFrame();
       positions.push_back(ballPosition);
     }
@@ -147,7 +152,8 @@ TEST_CASE("Spike ball") {
   };
 
 
-  SECTION("Bouncing without obstacle") {
+  SECTION("Bouncing without obstacle")
+  {
     // clang-format off
     const auto expectedPositions = std::vector<base::Vector>{
       {2, 18},
@@ -180,7 +186,8 @@ TEST_CASE("Spike ball") {
     CHECK(actualPositions == expectedPositions);
   }
 
-  SECTION("Bouncing against ceiling") {
+  SECTION("Bouncing against ceiling")
+  {
     // 15 ----------
     // 16
     // 17
@@ -190,7 +197,8 @@ TEST_CASE("Spike ball") {
     // 21 ----------
 
     // Ceiling
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; ++i)
+    {
       map.setTileAt(0, i, 15, 1);
     }
 

@@ -34,18 +34,22 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel::renderer { class TextureAtlas; }
+namespace rigel::renderer
+{
+class TextureAtlas;
+}
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-struct SpriteFrame {
+struct SpriteFrame
+{
   SpriteFrame() = default;
   SpriteFrame(
     const int imageId,
     const base::Vector drawOffset,
-    const base::Extents dimensions
-  )
+    const base::Extents dimensions)
     : mImageId(imageId)
     , mDrawOffset(drawOffset)
     , mDimensions(dimensions)
@@ -58,7 +62,8 @@ struct SpriteFrame {
 };
 
 
-struct SpriteDrawData {
+struct SpriteDrawData
+{
   std::vector<SpriteFrame> mFrames;
   base::ArrayView<int> mVirtualToRealFrameMap;
   std::optional<int> mOrientationOffset;
@@ -70,7 +75,8 @@ constexpr auto NUM_RENDER_SLOTS = 8;
 constexpr auto IGNORE_RENDER_SLOT = -1;
 
 
-struct CustomDrawRequest {
+struct CustomDrawRequest
+{
   CustomDrawRequest(const int frame, const base::Vector& screenPosition)
     : mScreenPosition(screenPosition)
     , mFrame(frame)
@@ -93,10 +99,13 @@ int virtualToRealFrame(
   const std::optional<components::Orientation>& orientation);
 
 
-namespace components {
+namespace components
+{
 
-struct Sprite {
-  struct RenderSlot {
+struct Sprite
+{
+  struct RenderSlot
+  {
     RenderSlot() = default;
     RenderSlot(const int frame)
       : mFrame(static_cast<std::int8_t>(frame))
@@ -106,7 +115,8 @@ struct Sprite {
         (frame >= 0 && frame < std::numeric_limits<std::int8_t>::max()));
     }
 
-    RenderSlot& operator=(const int frame) {
+    RenderSlot& operator=(const int frame)
+    {
       assert(
         frame == IGNORE_RENDER_SLOT ||
         (frame >= 0 && frame < std::numeric_limits<std::int8_t>::max()));
@@ -115,38 +125,42 @@ struct Sprite {
       return *this;
     }
 
-    operator int() const {
-      return mFrame;
-    }
+    operator int() const { return mFrame; }
 
-    RenderSlot& operator++() {
+    RenderSlot& operator++()
+    {
       ++mFrame;
       return *this;
     }
 
-    RenderSlot operator++(int) {
+    RenderSlot operator++(int)
+    {
       auto copy = *this;
       ++mFrame;
       return copy;
     }
 
-    RenderSlot& operator--() {
+    RenderSlot& operator--()
+    {
       --mFrame;
       return *this;
     }
 
-    RenderSlot operator--(int) {
+    RenderSlot operator--(int)
+    {
       auto copy = *this;
       --mFrame;
       return copy;
     }
 
-    RenderSlot& operator+=(const int offset) {
+    RenderSlot& operator+=(const int offset)
+    {
       mFrame += static_cast<std::int8_t>(offset);
       return *this;
     }
 
-    RenderSlot& operator-=(const int offset) {
+    RenderSlot& operator-=(const int offset)
+    {
       mFrame -= static_cast<std::int8_t>(offset);
       return *this;
     }
@@ -155,21 +169,23 @@ struct Sprite {
   };
 
   Sprite() = default;
-  Sprite(const SpriteDrawData* pDrawData, const std::vector<int>& framesToRender)
+  Sprite(
+    const SpriteDrawData* pDrawData,
+    const std::vector<int>& framesToRender)
     : mpDrawData(pDrawData)
   {
     auto index = 0;
-    for (const auto frame : framesToRender) {
+    for (const auto frame : framesToRender)
+    {
       mFramesToRender[index] = frame;
       ++index;
     }
   }
 
-  void flashWhite() {
-    mFlashingWhiteStates.set();
-  }
+  void flashWhite() { mFlashingWhiteStates.set(); }
 
-  void flashWhite(const int renderSlot) {
+  void flashWhite(const int renderSlot)
+  {
     mFlashingWhiteStates.set(renderSlot);
   }
 
@@ -188,8 +204,10 @@ struct Sprite {
  * Sprite's render slots. It's also possible to specify a position offset for
  * each frame.
  */
-struct ExtendedFrameList {
-  struct RenderSpec {
+struct ExtendedFrameList
+{
+  struct RenderSpec
+  {
     int mFrame = 0;
     base::Vector mOffset;
   };
@@ -203,10 +221,13 @@ struct ExtendedFrameList {
  * An entity marked with this component will always have its Sprite drawn after
  * drawing the world, even if it is placed on top of foreground tiles.
  */
-struct DrawTopMost {};
+struct DrawTopMost
+{
+};
 
 
-struct OverrideDrawOrder {
+struct OverrideDrawOrder
+{
   explicit OverrideDrawOrder(const int drawOrder)
     : mDrawOrder(drawOrder)
   {
@@ -216,12 +237,12 @@ struct OverrideDrawOrder {
 };
 
 
-struct AnimationLoop {
+struct AnimationLoop
+{
   AnimationLoop() = default;
   explicit AnimationLoop(
     const int delayInFrames,
-    std::optional<int> endFrame = std::nullopt
-  )
+    std::optional<int> endFrame = std::nullopt)
     : AnimationLoop(delayInFrames, 0, endFrame)
   {
   }
@@ -230,8 +251,7 @@ struct AnimationLoop {
     const int delayInFrames,
     const int startFrame,
     std::optional<int> endFrame,
-    const int renderSlot = 0
-  )
+    const int renderSlot = 0)
     : mDelayInFrames(delayInFrames)
     , mStartFrame(startFrame)
     , mEndFrame(endFrame)
@@ -247,7 +267,8 @@ struct AnimationLoop {
 };
 
 
-struct AnimationSequence {
+struct AnimationSequence
+{
   explicit AnimationSequence(
     const base::ArrayView<int>& frames,
     const int renderSlot = 0,
@@ -264,4 +285,5 @@ struct AnimationSequence {
   bool mRepeat = false;
 };
 
-}}
+} // namespace components
+} // namespace rigel::engine

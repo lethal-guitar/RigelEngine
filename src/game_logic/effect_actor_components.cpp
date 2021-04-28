@@ -25,9 +25,11 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::components {
+namespace rigel::game_logic::components
+{
 
-namespace {
+namespace
+{
 
 constexpr auto MAX_Y_OFFSET = 16;
 
@@ -38,20 +40,19 @@ void WindBlownSpiderGenerator::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   const auto& position = *entity.component<engine::components::WorldPosition>();
   if (
     position.y > s.mpPlayer->position().y &&
-    d.mpRandomGenerator->gen() % 2 != 0 &&
-    s.mpPerFrameState->mIsOddFrame
-  ) {
+    d.mpRandomGenerator->gen() % 2 != 0 && s.mpPerFrameState->mIsOddFrame)
+  {
     const auto rightScreenEdge =
       s.mpPerFrameState->mCurrentViewPortSize.width - 1;
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
     const auto xPos = s.mpCameraPosition->x + rightScreenEdge;
-    const auto yPos = s.mpCameraPosition->y +
-      d.mpRandomGenerator->gen() % MAX_Y_OFFSET;
+    const auto yPos =
+      s.mpCameraPosition->y + d.mpRandomGenerator->gen() % MAX_Y_OFFSET;
     const auto movementType = d.mpRandomGenerator->gen() % 2 != 0
       ? SpriteMovement::SwirlAround
       : SpriteMovement::FlyLeft;
@@ -69,14 +70,17 @@ void WaterDropGenerator::update(
   GlobalDependencies& d,
   GlobalState& state,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   const auto& position = *entity.component<engine::components::WorldPosition>();
-  if (state.mpPerFrameState->mIsOddFrame && d.mpRandomGenerator->gen() >= 220) {
-    auto drop = d.mpEntityFactory->spawnActor(data::ActorID::Water_drop, position);
+  if (state.mpPerFrameState->mIsOddFrame && d.mpRandomGenerator->gen() >= 220)
+  {
+    auto drop =
+      d.mpEntityFactory->spawnActor(data::ActorID::Water_drop, position);
     drop.assign<engine::components::Active>();
 
-    if (isOnScreen) {
+    if (isOnScreen)
+    {
       d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
     }
   }
@@ -87,8 +91,8 @@ void ExplosionEffect::update(
   GlobalDependencies& d,
   GlobalState&,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   triggerEffects(entity, *d.mpEntityManager);
   entity.destroy();
 }
@@ -98,20 +102,20 @@ void AirLockDeathTrigger::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
 
   const auto& position = *entity.component<engine::components::WorldPosition>();
   const auto orientation = *entity.component<Orientation>();
 
-  const auto xToCheck = orientation == Orientation::Left
-    ? position.x - 3
-    : position.x + 3;
-  if (s.mpMap->tileAt(0, xToCheck, position.y) == 0) {
+  const auto xToCheck =
+    orientation == Orientation::Left ? position.x - 3 : position.x + 3;
+  if (s.mpMap->tileAt(0, xToCheck, position.y) == 0)
+  {
     d.mpEvents->emit(events::AirLockOpened{orientation});
     entity.destroy();
   }
 }
 
-}
+} // namespace rigel::game_logic::components

@@ -24,16 +24,20 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct MessengerDrone {
-  enum class Message {
+struct MessengerDrone
+{
+  enum class Message
+  {
     // Enum values are used to index into the message sequence array
     YourBrainIsOurs = 0,
     BringBackTheBrain = 1,
@@ -53,7 +57,8 @@ struct MessengerDrone {
     bool isOnScreen,
     entityx::Entity entity);
 
-  enum class State {
+  enum class State
+  {
     AwaitActivation,
     FlyIn,
     ShowingMessage,
@@ -69,4 +74,4 @@ struct MessengerDrone {
   int mElapsedFrames = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

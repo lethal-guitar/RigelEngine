@@ -25,9 +25,11 @@
 #include <optional>
 
 
-namespace rigel {
+namespace rigel
+{
 
-class MenuMode : public GameMode {
+class MenuMode : public GameMode
+{
 public:
   explicit MenuMode(Context context);
 
@@ -36,7 +38,8 @@ public:
     const std::vector<SDL_Event>& events) override;
 
 private:
-  enum class MenuState {
+  enum class MenuState
+  {
     AskIfQuit,
     ChooseInstructionsOrStory,
     EpisodeNotAvailableMessage,
@@ -56,8 +59,8 @@ private:
 
   void handleEvent(const SDL_Event& event);
   void enterMainMenu();
-  std::unique_ptr<GameMode> navigateToNextMenu(
-    const ui::DukeScriptRunner::ExecutionResult& result);
+  std::unique_ptr<GameMode>
+    navigateToNextMenu(const ui::DukeScriptRunner::ExecutionResult& result);
 
 private:
   Context mContext;
@@ -66,4 +69,4 @@ private:
   int mChosenEpisode = 0;
 };
 
-}
+} // namespace rigel

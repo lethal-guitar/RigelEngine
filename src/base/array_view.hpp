@@ -23,7 +23,8 @@
 #include <vector>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
 /** Read-only array view type
  *
@@ -34,8 +35,9 @@ namespace rigel::base {
  *
  * Only allows read access.
  */
-template<typename T>
-class ArrayView {
+template <typename T>
+class ArrayView
+{
 public:
   using value_type = T;
   using size_type = std::uint32_t;
@@ -77,58 +79,43 @@ public:
   {
   }
 
-  const_iterator begin() const {
-    return mpData;
-  }
+  const_iterator begin() const { return mpData; }
 
-  const_iterator end() const {
-    return mpData + mSize;
-  }
+  const_iterator end() const { return mpData + mSize; }
 
-  const_iterator cbegin() const {
-    return mpData;
-  }
+  const_iterator cbegin() const { return mpData; }
 
-  const_iterator cend() const {
-    return mpData + mSize;
-  }
+  const_iterator cend() const { return mpData + mSize; }
 
-  size_type size() const {
-    return mSize;
-  }
+  size_type size() const { return mSize; }
 
-  bool empty() const {
-    return mSize == 0;
-  }
+  bool empty() const { return mSize == 0; }
 
-  const_reference operator[](const size_type index) const {
+  const_reference operator[](const size_type index) const
+  {
     return mpData[index];
   }
 
-  const_reference at(const size_type index) const {
+  const_reference at(const size_type index) const
+  {
     using namespace std::string_literals;
-    if (index >= mSize) {
+    if (index >= mSize)
+    {
       throw std::range_error("Index out of range: "s + std::to_string(index));
     }
 
     return mpData[index];
   }
 
-  const_reference front() const {
-    return *begin();
-  }
+  const_reference front() const { return *begin(); }
 
-  const_reference back() const {
-    return *end();
-  }
+  const_reference back() const { return *end(); }
 
-  const T* data() const {
-    return mpData;
-  }
+  const T* data() const { return mpData; }
 
 private:
   const T* mpData = nullptr;
   size_type mSize = 0;
 };
 
-}
+} // namespace rigel::base

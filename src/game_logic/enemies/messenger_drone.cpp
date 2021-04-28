@@ -25,11 +25,14 @@
 #include <array>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-struct MessageFrame {
+struct MessageFrame
+{
   int mIndex;
   int mDuration;
 };
@@ -98,15 +101,15 @@ const base::ArrayView<MessageFrame> MESSAGE_SEQUENCES[] = {
 };
 // clang-format on
 
-}
+} // namespace
 
 
 void MessengerDrone::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
   using namespace engine::orientation;
 
@@ -121,13 +124,13 @@ void MessengerDrone::update(
   };
 
 
-  if (mState == State::AwaitActivation) {
+  if (mState == State::AwaitActivation)
+  {
     // Initialize on first activation to face player
     const auto playerIsLeft = playerPos.x < position.x;
     const auto exhaustStartFrame = playerIsLeft ? 8 : 6;
 
-    mOrientation =
-      playerIsLeft ? Orientation::Left : Orientation::Right;
+    mOrientation = playerIsLeft ? Orientation::Left : Orientation::Right;
 
     sprite.mFramesToRender = {
       0, // blank screen and frame
@@ -142,13 +145,15 @@ void MessengerDrone::update(
     mState = State::FlyIn;
   }
 
-  if (mState == State::FlyIn) {
+  if (mState == State::FlyIn)
+  {
     flyForward();
 
     const auto playerCenterX = playerPos.x + 1;
     const auto droneCenterX = position.x + 3;
 
-    if (std::abs(playerCenterX - droneCenterX) <= 6) {
+    if (std::abs(playerCenterX - droneCenterX) <= 6)
+    {
       // Switch from horizontal engine to vertical engine (suspension in
       // mid-air instead of propulsion)
       sprite.mFramesToRender[3] = 4;
@@ -165,18 +170,21 @@ void MessengerDrone::update(
     }
   }
 
-  if (mState == State::ShowingMessage) {
+  if (mState == State::ShowingMessage)
+  {
     const auto messageIndex = static_cast<int>(mMessage);
     const auto& messageSequence = MESSAGE_SEQUENCES[messageIndex];
     const auto& currentMessageFrame = messageSequence[mMessageStep];
     sprite.mFramesToRender[4] = 10 + currentMessageFrame.mIndex;
 
     ++mElapsedFrames;
-    if (mElapsedFrames >= currentMessageFrame.mDuration) {
+    if (mElapsedFrames >= currentMessageFrame.mDuration)
+    {
       mElapsedFrames = 0;
       ++mMessageStep;
 
-      if (mMessageStep >= messageSequence.size()) {
+      if (mMessageStep >= messageSequence.size())
+      {
         // Go back to blank screen
         sprite.mFramesToRender[4] = engine::IGNORE_RENDER_SLOT;
 
@@ -199,9 +207,10 @@ void MessengerDrone::update(
     }
   }
 
-  if (mState == State::FlyOut) {
+  if (mState == State::FlyOut)
+  {
     flyForward();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

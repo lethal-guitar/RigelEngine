@@ -24,7 +24,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic::interaction {
+namespace rigel::game_logic::interaction
+{
 
 void configureLockedDoor(
   entityx::Entity entity,
@@ -35,5 +36,4 @@ void configureKeyHole(
   const engine::components::BoundingBox& boundingBox);
 void disableKeyHole(entityx::Entity entity);
 
-}
-
+} // namespace rigel::game_logic::interaction

@@ -26,15 +26,18 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BossEpisode4 {
+struct BossEpisode4
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -52,7 +55,8 @@ struct BossEpisode4 {
 };
 
 
-struct BossEpisode4Projectile {
+struct BossEpisode4Projectile
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -62,4 +66,4 @@ struct BossEpisode4Projectile {
   int mFramesElapsed = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

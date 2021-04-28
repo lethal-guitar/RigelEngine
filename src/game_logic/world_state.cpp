@@ -33,16 +33,19 @@
 #include "renderer/renderer.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace {
+namespace
+{
 
 char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 
 
-std::string levelFileName(const int episode, const int level) {
-  assert(episode >=0 && episode < 4);
-  assert(level >=0 && level < 8);
+std::string levelFileName(const int episode, const int level)
+{
+  assert(episode >= 0 && episode < 4);
+  assert(level >= 0 && level < 8);
 
   std::string fileName;
   fileName += EPISODE_PREFIXES[episode];
@@ -53,14 +56,17 @@ std::string levelFileName(const int episode, const int level) {
 
 
 template <typename T>
-void copyComponentIfPresent(entityx::Entity from, entityx::Entity to) {
-  if (from.has_component<T>()) {
+void copyComponentIfPresent(entityx::Entity from, entityx::Entity to)
+{
+  if (from.has_component<T>())
+  {
     to.assign<T>(*from.component<const T>());
   }
 }
 
 
-void copyAllComponents(entityx::Entity from, entityx::Entity to) {
+void copyAllComponents(entityx::Entity from, entityx::Entity to)
+{
   using namespace engine::components;
   using namespace game_logic::components;
 
@@ -101,10 +107,11 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to) {
   assert(from.component_mask() == to.component_mask());
 }
 
-}
+} // namespace
 
 
-BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
+BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es)
+{
   using game_logic::components::ActorTag;
   using AT = ActorTag::Type;
 
@@ -137,8 +144,7 @@ WorldState::WorldState(
   data::PlayerModel* pPlayerModel,
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
-  const data::GameSessionId sessionId
-)
+  const data::GameSessionId sessionId)
   : WorldState(
       pServiceProvider,
       pRenderer,
@@ -163,17 +169,16 @@ WorldState::WorldState(
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId,
-  data::map::LevelData&& loadedLevel
-)
+  data::map::LevelData&& loadedLevel)
   : mMap(std::move(loadedLevel.mMap))
   , mEntities(mEventManager)
   , mEntityFactory(
-    pSpriteFactory,
-    &mEntities,
-    pServiceProvider,
-    &mRandomGenerator,
-    pOptions,
-    sessionId.mDifficulty)
+      pSpriteFactory,
+      &mEntities,
+      pServiceProvider,
+      &mRandomGenerator,
+      pOptions,
+      sessionId.mDifficulty)
   , mRadarDishCounter(mEntities, mEventManager)
   , mCollisionChecker(&mMap, mEntities, mEventManager)
   , mpOptions(pOptions)
@@ -184,7 +189,8 @@ WorldState::WorldState(
           data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
         assignPlayerComponents(
           playerEntity,
-          loadedLevel.mPlayerFacingLeft ? Orientation::Left : Orientation::Right);
+          loadedLevel.mPlayerFacingLeft ? Orientation::Left
+                                        : Orientation::Right);
         return playerEntity;
       }(),
       sessionId.mDifficulty,
@@ -262,9 +268,10 @@ WorldState::WorldState(
   mBonusInfo.mInitialLaserTurretCount = counts.mLaserTurretCount;
   mBonusInfo.mInitialBonusGlobeCount = counts.mBonusGlobeCount;
 
-  if (loadedLevel.mEarthquake) {
-    mEarthQuakeEffect = EarthQuakeEffect{
-      pServiceProvider, &mRandomGenerator, &mEventManager};
+  if (loadedLevel.mEarthquake)
+  {
+    mEarthQuakeEffect =
+      EarthQuakeEffect{pServiceProvider, &mRandomGenerator, &mEventManager};
   }
 }
 
@@ -273,8 +280,8 @@ void WorldState::synchronizeTo(
   const WorldState& other,
   IGameServiceProvider* pServiceProvider,
   data::PlayerModel* pPlayerModel,
-  const data::GameSessionId sessionId
-) {
+  const data::GameSessionId sessionId)
+{
   mBonusInfo = other.mBonusInfo;
   mLevelMusicFile = other.mLevelMusicFile;
   mActivatedCheckpoint = other.mActivatedCheckpoint;
@@ -295,11 +302,14 @@ void WorldState::synchronizeTo(
   mCamera.synchronizeTo(other.mCamera);
   mParticles.synchronizeTo(other.mParticles);
 
-  if (other.mEarthQuakeEffect) {
-    mEarthQuakeEffect = EarthQuakeEffect{
-      pServiceProvider, &mRandomGenerator, &mEventManager};
+  if (other.mEarthQuakeEffect)
+  {
+    mEarthQuakeEffect =
+      EarthQuakeEffect{pServiceProvider, &mRandomGenerator, &mEventManager};
     mEarthQuakeEffect->synchronizeTo(*other.mEarthQuakeEffect);
-  } else {
+  }
+  else
+  {
     mEarthQuakeEffect.reset();
   }
 
@@ -345,4 +355,4 @@ void WorldState::synchronizeTo(
   }
 }
 
-}
+} // namespace rigel::game_logic

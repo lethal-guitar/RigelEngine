@@ -19,15 +19,15 @@
 #include <algorithm>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-namespace {
+namespace
+{
 
 template <typename Range>
-auto findInsertionSpotForNewScore(
-  const int score,
-  Range&& list
-) {
+auto findInsertionSpotForNewScore(const int score, Range&& list)
+{
   using namespace std;
 
   return find_if(begin(list), end(list), [score](const HighScoreEntry& entry) {
@@ -35,15 +35,12 @@ auto findInsertionSpotForNewScore(
   });
 }
 
-}
+} // namespace
 
 
-bool scoreQualifiesForHighScoreList(
-  const int score,
-  const HighScoreList& list
-) {
-  return
-    score > 0 &&
+bool scoreQualifiesForHighScoreList(const int score, const HighScoreList& list)
+{
+  return score > 0 &&
     findInsertionSpotForNewScore(score, list) != std::end(list);
 }
 
@@ -51,15 +48,16 @@ bool scoreQualifiesForHighScoreList(
 void insertNewScore(
   const int score,
   const std::string& name,
-  HighScoreList& list
-) {
+  HighScoreList& list)
+{
   using namespace std;
 
   auto it = findInsertionSpotForNewScore(score, list);
-  if (it != end(list)) {
+  if (it != end(list))
+  {
     rotate(it, prev(end(list)), end(list));
     *it = HighScoreEntry{name, score};
   }
 }
 
-}
+} // namespace rigel::data

@@ -25,12 +25,17 @@
 
 #include <variant>
 
-namespace rigel::data { struct SavedGame; }
+namespace rigel::data
+{
+struct SavedGame;
+}
 
 
-namespace rigel {
+namespace rigel
+{
 
-class GameSessionMode : public GameMode {
+class GameSessionMode : public GameMode
+{
 public:
   GameSessionMode(
     const data::GameSessionId& sessionId,
@@ -45,25 +50,27 @@ public:
 
 private:
   void handleEvent(const SDL_Event& event);
-  template<typename StageT>
+  template <typename StageT>
   void fadeToNewStage(StageT& stage);
   void finishGameSession();
   void enterHighScore(std::string_view name);
 
 private:
-  struct HighScoreNameEntry {
+  struct HighScoreNameEntry
+  {
     ui::TextEntryWidget mNameEntryWidget;
   };
 
-  struct HighScoreListDisplay {};
+  struct HighScoreListDisplay
+  {
+  };
 
   using SessionStage = std::variant<
     std::unique_ptr<GameRunner>,
     ui::BonusScreen,
     ui::EpisodeEndSequence,
     HighScoreNameEntry,
-    HighScoreListDisplay
-  >;
+    HighScoreListDisplay>;
 
   data::PlayerModel mPlayerModel;
   SessionStage mCurrentStage;
@@ -73,4 +80,4 @@ private:
   Context mContext;
 };
 
-}
+} // namespace rigel

@@ -26,9 +26,11 @@
 #include <sstream>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto MENU_START_POS_X = 11;
 constexpr auto MENU_START_POS_Y = 6;
@@ -49,13 +51,15 @@ constexpr auto TOP_LEVEL_MENU_ITEMS = std::array{
   "Restore Quick Save",
   "Options",
   "Help",
-  "Quit Game"
-};
+  "Quit Game"};
 
-constexpr int itemIndex(const std::string_view item) {
+constexpr int itemIndex(const std::string_view item)
+{
   int result = 0;
-  for (const auto candidate : TOP_LEVEL_MENU_ITEMS) {
-    if (item == candidate) {
+  for (const auto candidate : TOP_LEVEL_MENU_ITEMS)
+  {
+    if (item == candidate)
+    {
       return result;
     }
 
@@ -68,35 +72,41 @@ constexpr int itemIndex(const std::string_view item) {
 
 auto createSavedGame(
   const data::GameSessionId& sessionId,
-  const data::PlayerModel& playerModel
-) {
+  const data::PlayerModel& playerModel)
+{
   return data::SavedGame{
     sessionId,
     playerModel.tutorialMessages(),
     "", // will be filled in on saving
     playerModel.weapon(),
     playerModel.ammo(),
-    playerModel.score()
-  };
+    playerModel.score()};
 }
 
 
-std::string makePrefillName(const data::SavedGame& savedGame) {
+std::string makePrefillName(const data::SavedGame& savedGame)
+{
   std::stringstream stream;
-  stream
-    << "Ep " << savedGame.mSessionId.mEpisode + 1 << ", "
-    << "Lv " << savedGame.mSessionId.mLevel + 1 << ", ";
+  stream << "Ep " << savedGame.mSessionId.mEpisode + 1 << ", "
+         << "Lv " << savedGame.mSessionId.mLevel + 1 << ", ";
 
-  switch (savedGame.mSessionId.mDifficulty) {
-    case data::Difficulty::Easy: stream << "Easy"; break;
-    case data::Difficulty::Medium: stream << "Medium"; break;
-    case data::Difficulty::Hard: stream << "Hard"; break;
+  switch (savedGame.mSessionId.mDifficulty)
+  {
+    case data::Difficulty::Easy:
+      stream << "Easy";
+      break;
+    case data::Difficulty::Medium:
+      stream << "Medium";
+      break;
+    case data::Difficulty::Hard:
+      stream << "Hard";
+      break;
   }
 
   return stream.str();
 }
 
-}
+} // namespace
 
 
 IngameMenu::TopLevelMenu::TopLevelMenu(
@@ -104,18 +114,22 @@ IngameMenu::TopLevelMenu::TopLevelMenu(
   const bool canQuickLoad)
   : mContext(context)
   , mPalette(context.mpResources->loadPaletteFromFullScreenImage("MESSAGE.MNI"))
-  , mUiSpriteSheet(makeUiSpriteSheet(
-    context.mpRenderer, *context.mpResources, mPalette))
+  , mUiSpriteSheet(
+      makeUiSpriteSheet(context.mpRenderer, *context.mpResources, mPalette))
   , mMenuElementRenderer(
-      &mUiSpriteSheet, context.mpRenderer, *context.mpResources)
+      &mUiSpriteSheet,
+      context.mpRenderer,
+      *context.mpResources)
   , mMenuBackground(fullScreenImageAsTexture(
-    context.mpRenderer, *context.mpResources, "MESSAGE.MNI"))
+      context.mpRenderer,
+      *context.mpResources,
+      "MESSAGE.MNI"))
   , mItems{
-    itemIndex("Save Game"),
-    itemIndex("Restore Game"),
-    itemIndex("Options"),
-    itemIndex("Help"),
-    itemIndex("Quit Game")}
+      itemIndex("Save Game"),
+      itemIndex("Restore Game"),
+      itemIndex("Options"),
+      itemIndex("Help"),
+      itemIndex("Quit Game")}
 {
   using std::begin;
   using std::end;
@@ -130,20 +144,24 @@ IngameMenu::TopLevelMenu::TopLevelMenu(
     mItems.insert(next(iPrecedingItem), newItemIndex);
   };
 
-  if (context.mpUserProfile->mOptions.mQuickSavingEnabled) {
+  if (context.mpUserProfile->mOptions.mQuickSavingEnabled)
+  {
     insertItem(itemIndex("Quick Save"), itemIndex("Save Game"));
   }
 
-  if (canQuickLoad) {
+  if (canQuickLoad)
+  {
     insertItem(itemIndex("Restore Quick Save"), itemIndex("Restore Game"));
   }
 }
 
 
-void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
+void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event)
+{
   auto selectNext = [this]() {
     ++mSelectedIndex;
-    if (mSelectedIndex >= int(mItems.size())) {
+    if (mSelectedIndex >= int(mItems.size()))
+    {
       mSelectedIndex = 0;
     }
 
@@ -152,7 +170,8 @@ void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
 
   auto selectPrevious = [this]() {
     --mSelectedIndex;
-    if (mSelectedIndex < 0) {
+    if (mSelectedIndex < 0)
+    {
       mSelectedIndex = int(mItems.size()) - 1;
     }
 
@@ -160,7 +179,8 @@ void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
   };
 
 
-  switch (mNavigationHelper.convert(event)) {
+  switch (mNavigationHelper.convert(event))
+  {
     case NavigationEvent::NavigateUp:
       selectPrevious();
       break;
@@ -175,15 +195,16 @@ void IngameMenu::TopLevelMenu::handleEvent(const SDL_Event& event) {
 }
 
 
-void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt) {
+void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt)
+{
   mContext.mpRenderer->clear();
   mMenuBackground.render(0, 0);
 
   auto index = 0;
-  for (const auto item : mItems) {
-    const auto colorIndex = index == mSelectedIndex
-      ? MENU_ITEM_COLOR_SELECTED
-      : MENU_ITEM_COLOR;
+  for (const auto item : mItems)
+  {
+    const auto colorIndex =
+      index == mSelectedIndex ? MENU_ITEM_COLOR_SELECTED : MENU_ITEM_COLOR;
     mMenuElementRenderer.drawBigText(
       MENU_START_POS_X,
       MENU_START_POS_Y + index * MENU_ITEM_HEIGHT,
@@ -200,25 +221,31 @@ void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt) {
 }
 
 
-void IngameMenu::TopLevelMenu::selectItem(const int index) {
+void IngameMenu::TopLevelMenu::selectItem(const int index)
+{
   const auto iItem = std::find(mItems.begin(), mItems.end(), index);
-  if (iItem != mItems.end()) {
+  if (iItem != mItems.end())
+  {
     mSelectedIndex = static_cast<int>(std::distance(mItems.begin(), iItem));
   }
 }
 
 
-void IngameMenu::ScriptedMenu::handleEvent(const SDL_Event& event) {
-  if (!mEventHook(event)) {
+void IngameMenu::ScriptedMenu::handleEvent(const SDL_Event& event)
+{
+  if (!mEventHook(event))
+  {
     mpScriptRunner->handleEvent(event);
   }
 }
 
 
-void IngameMenu::ScriptedMenu::updateAndRender(const engine::TimeDelta dt) {
+void IngameMenu::ScriptedMenu::updateAndRender(const engine::TimeDelta dt)
+{
   mpScriptRunner->updateAndRender(dt);
 
-  if (mpScriptRunner->hasFinishedExecution()) {
+  if (mpScriptRunner->hasFinishedExecution())
+  {
     mScriptFinishedHook(*mpScriptRunner->result());
   }
 }
@@ -227,8 +254,7 @@ void IngameMenu::ScriptedMenu::updateAndRender(const engine::TimeDelta dt) {
 IngameMenu::SavedGameNameEntry::SavedGameNameEntry(
   GameMode::Context context,
   const int slotIndex,
-  const std::string_view initialName
-)
+  const std::string_view initialName)
   : mTextEntryWidget(
       context.mpUiRenderer,
       SAVE_SLOT_NAME_ENTRY_POS_X,
@@ -245,8 +271,7 @@ IngameMenu::IngameMenu(
   GameMode::Context context,
   const data::PlayerModel* pPlayerModel,
   game_logic::GameWorld* pGameWorld,
-  const data::GameSessionId& sessionId
-)
+  const data::GameSessionId& sessionId)
   : mContext(context)
   , mSavedGame(createSavedGame(sessionId, *pPlayerModel))
   , mpGameWorld(pGameWorld)
@@ -254,31 +279,40 @@ IngameMenu::IngameMenu(
 }
 
 
-bool IngameMenu::isTransparent() const {
-  if (mStateStack.empty()) {
+bool IngameMenu::isTransparent() const
+{
+  if (mStateStack.empty())
+  {
     return true;
   }
 
-  if (mpTopLevelMenu) {
+  if (mpTopLevelMenu)
+  {
     return false;
   }
 
-  return base::match(mStateStack.top(),
+  return base::match(
+    mStateStack.top(),
     [](const ScriptedMenu& state) { return state.mIsTransparent; },
     [](const ui::OptionsMenu&) { return true; },
     [](const auto&) { return false; });
 }
 
 
-void IngameMenu::handleEvent(const SDL_Event& event) {
-  if (mQuitRequested || mRequestedGameToLoad) {
+void IngameMenu::handleEvent(const SDL_Event& event)
+{
+  if (mQuitRequested || mRequestedGameToLoad)
+  {
     return;
   }
 
-  if (!isActive()) {
+  if (!isActive())
+  {
     handleMenuEnterEvent(event);
     handleCheatCodes();
-  } else {
+  }
+  else
+  {
     // We want to process menu navigation and similar events in updateAndRender,
     // so we only add them to a queue here.
     mEventQueue.push_back(event);
@@ -286,8 +320,10 @@ void IngameMenu::handleEvent(const SDL_Event& event) {
 }
 
 
-auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult {
-  if (mMenuToEnter) {
+auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult
+{
+  if (mMenuToEnter)
+  {
     enterMenu(*mMenuToEnter);
     mMenuToEnter.reset();
   }
@@ -296,12 +332,15 @@ auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult {
 
   handleMenuActiveEvents();
 
-  if (mpTopLevelMenu && mStateStack.size() > 1) {
+  if (mpTopLevelMenu && mStateStack.size() > 1)
+  {
     mpTopLevelMenu->updateAndRender(0.0);
   }
 
-  if (!mStateStack.empty()) {
-    base::match(mStateStack.top(),
+  if (!mStateStack.empty())
+  {
+    base::match(
+      mStateStack.top(),
       [dt, this](SavedGameNameEntry& state) {
         mContext.mpScriptRunner->updateAndRender(dt);
         state.updateAndRender(dt);
@@ -314,17 +353,20 @@ auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult {
       [dt](auto& state) { state.updateAndRender(dt); });
   }
 
-  if (mStateStack.empty()) {
-    return mFadeoutNeeded
-      ? UpdateResult::FinishedNeedsFadeout
-      : UpdateResult::Finished;
-  } else {
+  if (mStateStack.empty())
+  {
+    return mFadeoutNeeded ? UpdateResult::FinishedNeedsFadeout
+                          : UpdateResult::Finished;
+  }
+  else
+  {
     return UpdateResult::StillActive;
   }
 }
 
 
-void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result) {
+void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result)
+{
   auto showErrorMessageScript = [this](const char* scriptName) {
     // When selecting a slot that can't be loaded, we show a message and
     // then return to the save slot selection menu.  The latter stays on the
@@ -344,29 +386,38 @@ void IngameMenu::onRestoreGameMenuFinished(const ExecutionResult& result) {
 
   using STT = ui::DukeScriptRunner::ScriptTerminationType;
 
-  if (result.mTerminationType == STT::AbortedByUser) {
+  if (result.mTerminationType == STT::AbortedByUser)
+  {
     leaveMenu();
     fadeout();
-  } else {
+  }
+  else
+  {
     const auto slotIndex = result.mSelectedPage;
     const auto& slot = mContext.mpUserProfile->mSaveSlots[*slotIndex];
-    if (slot) {
+    if (slot)
+    {
       if (
         mContext.mpServiceProvider->isSharewareVersion() &&
-        slot->mSessionId.needsRegisteredVersion()
-      ) {
+        slot->mSessionId.needsRegisteredVersion())
+      {
         showErrorMessageScript("No_Can_Order");
-      } else {
+      }
+      else
+      {
         mRequestedGameToLoad = *slot;
       }
-    } else {
+    }
+    else
+    {
       showErrorMessageScript("No_Game_Restore");
     }
   }
 }
 
 
-void IngameMenu::saveGame(const int slotIndex, std::string_view name) {
+void IngameMenu::saveGame(const int slotIndex, std::string_view name)
+{
   auto savedGame = mSavedGame;
   savedGame.mName = name;
 
@@ -375,20 +426,23 @@ void IngameMenu::saveGame(const int slotIndex, std::string_view name) {
 }
 
 
-void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
+void IngameMenu::handleMenuEnterEvent(const SDL_Event& event)
+{
   if (
     event.type == SDL_CONTROLLERBUTTONDOWN &&
-    event.cbutton.button == SDL_CONTROLLER_BUTTON_START
-  ) {
+    event.cbutton.button == SDL_CONTROLLER_BUTTON_START)
+  {
     mMenuToEnter = MenuType::TopLevel;
     return;
   }
 
-  if (!isNonRepeatKeyDown(event)) {
+  if (!isNonRepeatKeyDown(event))
+  {
     return;
   }
 
-  switch (event.key.keysym.sym) {
+  switch (event.key.keysym.sym)
+  {
     case SDLK_ESCAPE:
       mMenuToEnter = MenuType::ConfirmQuitInGame;
       break;
@@ -419,8 +473,10 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event) {
 }
 
 
-void IngameMenu::handleCheatCodes() {
-  if (isActive()) {
+void IngameMenu::handleCheatCodes()
+{
+  if (isActive())
+  {
     return;
   }
 
@@ -429,21 +485,28 @@ void IngameMenu::handleCheatCodes() {
     return (pKeyboard[SDL_GetScancodeFromKey(keys)] && ...);
   };
 
-  if (mContext.mpServiceProvider->isSharewareVersion()) {
-    if (keysPressed(SDLK_g, SDLK_o, SDLK_d)) {
+  if (mContext.mpServiceProvider->isSharewareVersion())
+  {
+    if (keysPressed(SDLK_g, SDLK_o, SDLK_d))
+    {
       mMenuToEnter = MenuType::CheatMessagePrayingWontHelp;
     }
-  } else {
+  }
+  else
+  {
     // In the original, the "praying won't help you" pseudo-cheat (it's not
     // actually a cheat, just a message telling you to buy the registered
     // version) still works in the registered version. But in my opinion, it
     // doesn't make much sense to mention buying the registered version to
     // someone already owning it. So, contrary to the original, we don't check
     // for g, o, d being pressed here, only in the shareware version.
-    if (keysPressed(SDLK_e, SDLK_a, SDLK_t)) {
+    if (keysPressed(SDLK_e, SDLK_a, SDLK_t))
+    {
       mpGameWorld->activateFullHealthCheat();
       mMenuToEnter = MenuType::CheatMessageHealthRestored;
-    } else if (keysPressed(SDLK_n, SDLK_u, SDLK_k)) {
+    }
+    else if (keysPressed(SDLK_n, SDLK_u, SDLK_k))
+    {
       mMenuToEnter = MenuType::CheatMessageItemsGiven;
       // The cheat is activated after entering the menu, in order to avoid
       // inventory items appearing before the message is visible.
@@ -452,7 +515,8 @@ void IngameMenu::handleCheatCodes() {
 }
 
 
-void IngameMenu::enterMenu(const MenuType type) {
+void IngameMenu::enterMenu(const MenuType type)
+{
   auto leaveMenuHook = [this](const ExecutionResult&) {
     leaveMenu();
   };
@@ -475,14 +539,15 @@ void IngameMenu::enterMenu(const MenuType type) {
     // Therefore, we quit on key up. Nevertheless, we still need to prevent the
     // key down event from reaching the script runner, as it would cancel out
     // the quit confirmation dialog otherwise.
-    if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_y) {
+    if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_y)
+    {
       return true;
     }
     if (
       (ev.type == SDL_KEYUP && ev.key.keysym.sym == SDLK_y) ||
       (ev.type == SDL_CONTROLLERBUTTONDOWN &&
-       ev.cbutton.button == SDL_CONTROLLER_BUTTON_A)
-    ) {
+       ev.cbutton.button == SDL_CONTROLLER_BUTTON_A))
+    {
       mQuitRequested = true;
       return true;
     }
@@ -491,9 +556,9 @@ void IngameMenu::enterMenu(const MenuType type) {
   };
 
   auto saveSlotSelectionEventHook = [this](const SDL_Event& event) {
-    if (isMenuConfirmButton(event)) {
-      const auto enteredViaGamepad =
-        event.type == SDL_CONTROLLERBUTTONDOWN;
+    if (isMenuConfirmButton(event))
+    {
+      const auto enteredViaGamepad = event.type == SDL_CONTROLLERBUTTONDOWN;
 
       const auto slotIndex = *mContext.mpScriptRunner->currentPageIndex();
       SDL_StartTextInput();
@@ -509,14 +574,16 @@ void IngameMenu::enterMenu(const MenuType type) {
 
   auto onSaveSlotSelectionFinished = [this](const ExecutionResult& result) {
     using STT = ui::DukeScriptRunner::ScriptTerminationType;
-    if (result.mTerminationType == STT::AbortedByUser) {
+    if (result.mTerminationType == STT::AbortedByUser)
+    {
       leaveMenu();
       fadeout();
     }
   };
 
 
-  switch (type) {
+  switch (type)
+  {
     case MenuType::ConfirmQuitInGame:
       enterScriptedMenu(
         "2Quit_Select", leaveMenuHook, quitConfirmEventHook, true);
@@ -539,9 +606,9 @@ void IngameMenu::enterMenu(const MenuType type) {
       break;
 
     case MenuType::LoadGame:
-      enterScriptedMenu(
-        "Restore_Game",
-        [this](const auto& result) { onRestoreGameMenuFinished(result); });
+      enterScriptedMenu("Restore_Game", [this](const auto& result) {
+        onRestoreGameMenuFinished(result);
+      });
       break;
 
     case MenuType::Help:
@@ -583,38 +650,43 @@ void IngameMenu::enterMenu(const MenuType type) {
 }
 
 
-void IngameMenu::handleMenuActiveEvents() {
-  auto handleSavedGameNameEntryEvent = [this](
-    SavedGameNameEntry& state,
-    const SDL_Event& event
-  ) {
-    auto leaveSaveGameMenu = [&, this]() {
-      SDL_StopTextInput();
+void IngameMenu::handleMenuActiveEvents()
+{
+  auto handleSavedGameNameEntryEvent =
+    [this](SavedGameNameEntry& state, const SDL_Event& event) {
+      auto leaveSaveGameMenu = [&, this]() {
+        SDL_StopTextInput();
 
-      // Render one last time so we have something to fade out from
-      mContext.mpScriptRunner->updateAndRender(0.0);
-      state.updateAndRender(0.0);
+        // Render one last time so we have something to fade out from
+        mContext.mpScriptRunner->updateAndRender(0.0);
+        state.updateAndRender(0.0);
 
-      mStateStack.pop();
-      mStateStack.pop();
-    };
+        mStateStack.pop();
+        mStateStack.pop();
+      };
 
-    if (isConfirmButton(event)) {
-      saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
-      leaveSaveGameMenu();
-      if (mpTopLevelMenu) {
-        mpTopLevelMenu = nullptr;
+      if (isConfirmButton(event))
+      {
+        saveGame(state.mSlotIndex, state.mTextEntryWidget.text());
+        leaveSaveGameMenu();
+        if (mpTopLevelMenu)
+        {
+          mpTopLevelMenu = nullptr;
+          mStateStack.pop();
+        }
+
+        fadeout();
+      }
+      else if (isCancelButton(event))
+      {
+        SDL_StopTextInput();
         mStateStack.pop();
       }
-
-      fadeout();
-    } else if (isCancelButton(event)) {
-      SDL_StopTextInput();
-      mStateStack.pop();
-    } else {
-      state.mTextEntryWidget.handleEvent(event);
-    }
-  };
+      else
+      {
+        state.mTextEntryWidget.handleEvent(event);
+      }
+    };
 
   auto leaveTopLevelMenu = [this](TopLevelMenu& state) {
     state.updateAndRender(0.0);
@@ -624,16 +696,21 @@ void IngameMenu::handleMenuActiveEvents() {
   };
 
 
-  for (const auto& event : mEventQueue) {
-    if (mStateStack.empty()) {
+  for (const auto& event : mEventQueue)
+  {
+    if (mStateStack.empty())
+    {
       break;
     }
 
-    base::match(mStateStack.top(),
+    base::match(
+      mStateStack.top(),
       [&](std::unique_ptr<TopLevelMenu>& pState) {
         auto& state = *pState;
-        if (isConfirmButton(event)) {
-          switch (state.mItems[state.mSelectedIndex]) {
+        if (isConfirmButton(event))
+        {
+          switch (state.mItems[state.mSelectedIndex])
+          {
             case itemIndex("Save Game"):
               enterMenu(MenuType::SaveGame);
               break;
@@ -664,9 +741,13 @@ void IngameMenu::handleMenuActiveEvents() {
               enterMenu(MenuType::ConfirmQuit);
               break;
           }
-        } else if (isCancelButton(event)) {
+        }
+        else if (isCancelButton(event))
+        {
           leaveTopLevelMenu(state);
-        } else {
+        }
+        else
+        {
           state.handleEvent(event);
         }
       },
@@ -675,9 +756,7 @@ void IngameMenu::handleMenuActiveEvents() {
         handleSavedGameNameEntryEvent(state, event);
       },
 
-      [&event](auto& state) {
-        state.handleEvent(event);
-      });
+      [&event](auto& state) { state.handleEvent(event); });
   }
 
   mEventQueue.clear();
@@ -686,8 +765,8 @@ void IngameMenu::handleMenuActiveEvents() {
   if (
     !mStateStack.empty() &&
     std::holds_alternative<ui::OptionsMenu>(mStateStack.top()) &&
-    std::get<ui::OptionsMenu>(mStateStack.top()).isFinished()
-  ) {
+    std::get<ui::OptionsMenu>(mStateStack.top()).isFinished())
+  {
     mStateStack.pop();
 
     // If the options menu was entered via the top-level menu, we need to
@@ -697,17 +776,17 @@ void IngameMenu::handleMenuActiveEvents() {
     // that setting (quick save enabled) has now changed.
     if (
       !mStateStack.empty() &&
-      std::holds_alternative<std::unique_ptr<TopLevelMenu>>(mStateStack.top())
-    ) {
+      std::holds_alternative<std::unique_ptr<TopLevelMenu>>(mStateStack.top()))
+    {
       auto& pTopLevelMenu =
         std::get<std::unique_ptr<TopLevelMenu>>(mStateStack.top());
-      
+
       // Create a new TopLevelMenu, as that's the easiest way to rebuild
       // the list of visible menu items. That resets the selection to the top
       // item though. So we select the "Options" entry again afterwards to
       // keep it selected.
-      pTopLevelMenu = std::make_unique<TopLevelMenu>(
-        mContext, mpGameWorld->canQuickLoad());
+      pTopLevelMenu =
+        std::make_unique<TopLevelMenu>(mContext, mpGameWorld->canQuickLoad());
       pTopLevelMenu->selectItem(itemIndex("Options"));
       mpTopLevelMenu = pTopLevelMenu.get();
     }
@@ -721,9 +800,10 @@ void IngameMenu::enterScriptedMenu(
   ScriptEndHook&& scriptEndedHook,
   EventHook&& eventHook,
   const bool isTransparent,
-  const bool shouldClearScriptCanvas
-) {
-  if (shouldClearScriptCanvas) {
+  const bool shouldClearScriptCanvas)
+{
+  if (shouldClearScriptCanvas)
+  {
     mContext.mpScriptRunner->clearCanvas();
   }
 
@@ -736,19 +816,24 @@ void IngameMenu::enterScriptedMenu(
 }
 
 
-void IngameMenu::leaveMenu() {
+void IngameMenu::leaveMenu()
+{
   mStateStack.pop();
 }
 
 
-void IngameMenu::fadeout() {
-  if (mpTopLevelMenu) {
+void IngameMenu::fadeout()
+{
+  if (mpTopLevelMenu)
+  {
     mContext.mpServiceProvider->fadeOutScreen();
     mpTopLevelMenu->updateAndRender(0.0);
     mContext.mpServiceProvider->fadeInScreen();
-  } else {
+  }
+  else
+  {
     mFadeoutNeeded = true;
   }
 }
 
-}
+} // namespace rigel::ui

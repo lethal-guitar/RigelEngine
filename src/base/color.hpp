@@ -20,11 +20,17 @@
 #include <tuple>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-struct Color {
+struct Color
+{
   constexpr Color() = default;
-  constexpr Color(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_) noexcept
+  constexpr Color(
+    std::uint8_t r_,
+    std::uint8_t g_,
+    std::uint8_t b_,
+    std::uint8_t a_) noexcept
     : r(r_)
     , g(g_)
     , b(b_)
@@ -32,11 +38,13 @@ struct Color {
   {
   }
 
-  bool operator==(const Color& other) const noexcept {
+  bool operator==(const Color& other) const noexcept
+  {
     return std::tie(r, g, b, a) == std::tie(other.r, other.g, other.b, other.a);
   }
 
-  bool operator!=(const Color& other) const noexcept {
+  bool operator!=(const Color& other) const noexcept
+  {
     return !(*this == other);
   }
 
@@ -46,4 +54,4 @@ struct Color {
   std::uint8_t a = 0;
 };
 
-}
+} // namespace rigel::base

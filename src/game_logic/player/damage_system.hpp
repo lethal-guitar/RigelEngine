@@ -23,12 +23,17 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic { class Player; }
+namespace rigel::game_logic
+{
+class Player;
+}
 
 
-namespace rigel::game_logic::player {
+namespace rigel::game_logic::player
+{
 
-class DamageSystem {
+class DamageSystem
+{
 public:
   explicit DamageSystem(Player* pPlayer);
 
@@ -38,4 +43,4 @@ private:
   Player* mpPlayer;
 };
 
-}
+} // namespace rigel::game_logic::player

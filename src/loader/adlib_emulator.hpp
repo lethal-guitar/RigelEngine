@@ -25,9 +25,11 @@
 #include <cstdint>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-class AdlibEmulator {
+class AdlibEmulator
+{
 public:
   explicit AdlibEmulator(int sampleRate)
     : mEmulator(sampleRate)
@@ -37,22 +39,24 @@ public:
     mEmulator.WriteReg(1, 32);
   }
 
-  void writeRegister(const std::uint32_t reg, const std::uint8_t value) {
+  void writeRegister(const std::uint32_t reg, const std::uint8_t value)
+  {
     mEmulator.WriteReg(reg, value);
   }
 
-  template<typename OutputIt>
+  template <typename OutputIt>
   void render(
     std::size_t numSamples,
     OutputIt destination,
-    const float volumeScale = 1.0f
-  ) {
+    const float volumeScale = 1.0f)
+  {
     // DBOPL outputs 32 bit samples, but they never exceed the 16 bit range
     // (compare source code comment in MixerChannel::AddSamples() in mixer.cpp
     // in the DosBox source). Still, this means we cannot render directly into
     // the output buffer.
 
-    while (numSamples > 0) {
+    while (numSamples > 0)
+    {
       const auto samplesForIteration = std::min(mTempBuffer.size(), numSamples);
 
       mEmulator.GenerateBlock2(
@@ -75,4 +79,4 @@ private:
   std::array<std::int32_t, 256> mTempBuffer;
 };
 
-}
+} // namespace rigel::loader

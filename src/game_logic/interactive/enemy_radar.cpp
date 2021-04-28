@@ -24,23 +24,23 @@
 
 namespace ex = entityx;
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace {
+namespace
+{
 
 constexpr auto NUM_ANIMATION_STEPS = 29;
 
 
 constexpr std::array<int, NUM_ANIMATION_STEPS> DISHES_FUNCTIONAL_SEQUENCE = {
-  4, 4, 4, 0, 4, 4, 4, 0, 4, 4, 4, 0,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-};
+  4, 4, 4, 0, 4, 4, 4, 0, 4, 4, 4, 0, 5, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
 
 constexpr std::array<int, NUM_ANIMATION_STEPS> DISHES_DESTROYED_SEQUENCE = {
-  6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 0,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
-};
+  6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 0, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 
 
 // When the animation sequence is currently showing frame 5, the number of
@@ -53,7 +53,7 @@ constexpr auto SHOW_COUNT_FRAME = 5;
 // the number of functional dishes to 7, we get the right frame to show.
 constexpr auto DISH_COUNT_BASE_FRAME = 7;
 
-}
+} // namespace
 
 
 RadarDishCounter::RadarDishCounter(
@@ -65,26 +65,28 @@ RadarDishCounter::RadarDishCounter(
 }
 
 
-int RadarDishCounter::numRadarDishes() const {
+int RadarDishCounter::numRadarDishes() const
+{
   return mNumRadarDishes;
 }
 
 
-bool RadarDishCounter::radarDishesPresent() const {
+bool RadarDishCounter::radarDishesPresent() const
+{
   return mNumRadarDishes != 0;
 }
 
 
 void RadarDishCounter::receive(
-  const ex::ComponentAddedEvent<components::RadarDish>& event
-) {
+  const ex::ComponentAddedEvent<components::RadarDish>& event)
+{
   ++mNumRadarDishes;
 }
 
 
 void RadarDishCounter::receive(
-  const ex::ComponentRemovedEvent<components::RadarDish>& event
-) {
+  const ex::ComponentRemovedEvent<components::RadarDish>& event)
+{
   --mNumRadarDishes;
 }
 
@@ -93,37 +95,41 @@ void behaviors::RadarComputer::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Sprite;
 
-  if (!s.mpPerFrameState->mIsOddFrame) {
+  if (!s.mpPerFrameState->mIsOddFrame)
+  {
     return;
   }
 
   ++mAnimationStep;
-  if (mAnimationStep >= NUM_ANIMATION_STEPS) {
+  if (mAnimationStep >= NUM_ANIMATION_STEPS)
+  {
     mAnimationStep = 0;
   }
 
   auto& sprite = *entity.component<Sprite>();
 
   const auto radarDishesPresent = s.mpPerFrameState->mNumRadarDishes > 0;
-  const auto& sequence = radarDishesPresent
-    ? DISHES_FUNCTIONAL_SEQUENCE
-    : DISHES_DESTROYED_SEQUENCE;
+  const auto& sequence =
+    radarDishesPresent ? DISHES_FUNCTIONAL_SEQUENCE : DISHES_DESTROYED_SEQUENCE;
 
   const auto newFrame = sequence[mAnimationStep];
 
   sprite.mFramesToRender[0] = newFrame;
 
-  if (newFrame == SHOW_COUNT_FRAME) {
+  if (newFrame == SHOW_COUNT_FRAME)
+  {
     const auto dishCountFrame =
       DISH_COUNT_BASE_FRAME + s.mpPerFrameState->mNumRadarDishes;
     sprite.mFramesToRender[4] = dishCountFrame;
-  } else {
+  }
+  else
+  {
     sprite.mFramesToRender[4] = engine::IGNORE_RENDER_SLOT;
   }
 }
 
-}
+} // namespace rigel::game_logic

@@ -27,13 +27,13 @@
 #include "ui/menu_navigation.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
 GameSessionMode::GameSessionMode(
   const data::GameSessionId& sessionId,
   Context context,
-  std::optional<base::Vector> playerPositionOverride
-)
+  std::optional<base::Vector> playerPositionOverride)
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
       sessionId,
@@ -64,8 +64,10 @@ GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
 }
 
 
-void GameSessionMode::handleEvent(const SDL_Event& event) {
-  base::match(mCurrentStage,
+void GameSessionMode::handleEvent(const SDL_Event& event)
+{
+  base::match(
+    mCurrentStage,
     [&event, this](std::unique_ptr<GameRunner>& pIngameMode) {
       pIngameMode->handleEvent(event);
     },
@@ -81,11 +83,14 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
         mContext.mpServiceProvider->fadeOutScreen();
       };
 
-      if (ui::isCancelButton(event)) {
+      if (ui::isCancelButton(event))
+      {
         fadeOut();
         enterHighScore("");
         return;
-      } else if (ui::isConfirmButton(event)) {
+      }
+      else if (ui::isConfirmButton(event))
+      {
         fadeOut();
         enterHighScore(state.mNameEntryWidget.text());
         return;
@@ -98,49 +103,56 @@ void GameSessionMode::handleEvent(const SDL_Event& event) {
       mContext.mpScriptRunner->handleEvent(event);
     },
 
-    [](const auto&) {
-  });
+    [](const auto&) {});
 }
 
 
 std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
   const engine::TimeDelta dt,
-  const std::vector<SDL_Event>& events
-) {
+  const std::vector<SDL_Event>& events)
+{
   using GameModePtr = std::unique_ptr<GameMode>;
 
-  for (const auto& event : events) {
+  for (const auto& event : events)
+  {
     handleEvent(event);
   }
 
-  return base::match(mCurrentStage,
+  return base::match(
+    mCurrentStage,
     [this, &dt](std::unique_ptr<GameRunner>& pIngameMode) -> GameModePtr {
       pIngameMode->updateAndRender(dt);
 
-      if (pIngameMode->gameQuit()) {
+      if (pIngameMode->gameQuit())
+      {
         finishGameSession();
         return nullptr;
       }
 
-      if (auto maybeSavedGame = pIngameMode->requestedGameToLoad()) {
+      if (auto maybeSavedGame = pIngameMode->requestedGameToLoad())
+      {
         mContext.mpServiceProvider->fadeOutScreen();
         return std::make_unique<GameSessionMode>(*maybeSavedGame, mContext);
       }
 
-      if (pIngameMode->levelFinished()) {
+      if (pIngameMode->levelFinished())
+      {
         const auto achievedBonuses = pIngameMode->achievedBonuses();
         const auto scoreWithoutBonuses = mPlayerModel.score();
 
         data::addBonusScore(mPlayerModel, achievedBonuses);
 
-        if (data::isBossLevel(mCurrentLevelNr)) {
+        if (data::isBossLevel(mCurrentLevelNr))
+        {
           mContext.mpServiceProvider->playMusic("NEVRENDA.IMF");
 
           auto endScreens = ui::EpisodeEndSequence{
             mContext, mEpisode, achievedBonuses, scoreWithoutBonuses};
           mContext.mpServiceProvider->fadeOutScreen();
           mCurrentStage = std::move(endScreens);
-        } else {
+        }
+        else
+        {
           mContext.mpServiceProvider->playMusic("OPNGATEA.IMF");
 
           auto bonusScreen =
@@ -157,7 +169,8 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
     [this, &dt](ui::BonusScreen& bonusScreen) -> GameModePtr {
       bonusScreen.updateAndRender(dt);
 
-      if (bonusScreen.finished()) {
+      if (bonusScreen.finished())
+      {
         mPlayerModel.resetForNewLevel();
 
         auto pNextIngameMode = std::make_unique<GameRunner>(
@@ -174,7 +187,8 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
     [this, &dt](ui::EpisodeEndSequence& endScreens) -> GameModePtr {
       endScreens.updateAndRender(dt);
 
-      if (endScreens.finished()) {
+      if (endScreens.finished())
+      {
         finishGameSession();
       }
 
@@ -191,7 +205,8 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
       mContext.mpScriptRunner->updateAndRender(dt);
       ui::drawHighScoreList(mContext, mEpisode);
 
-      if (mContext.mpScriptRunner->hasFinishedExecution()) {
+      if (mContext.mpScriptRunner->hasFinishedExecution())
+      {
         mContext.mpServiceProvider->fadeOutScreen();
         return std::make_unique<MenuMode>(mContext);
       }
@@ -201,31 +216,36 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
 }
 
 
-template<typename StageT>
-void GameSessionMode::fadeToNewStage(StageT& stage) {
+template <typename StageT>
+void GameSessionMode::fadeToNewStage(StageT& stage)
+{
   mContext.mpServiceProvider->fadeOutScreen();
   stage.updateAndRender(0);
   mContext.mpServiceProvider->fadeInScreen();
 }
 
 
-void GameSessionMode::finishGameSession() {
+void GameSessionMode::finishGameSession()
+{
   mContext.mpServiceProvider->stopMusic();
   mContext.mpServiceProvider->fadeOutScreen();
 
   const auto scoreQualifies = data::scoreQualifiesForHighScoreList(
-    mPlayerModel.score(),
-    mContext.mpUserProfile->mHighScoreLists[mEpisode]);
-  if (scoreQualifies) {
+    mPlayerModel.score(), mContext.mpUserProfile->mHighScoreLists[mEpisode]);
+  if (scoreQualifies)
+  {
     SDL_StartTextInput();
     mCurrentStage = HighScoreNameEntry{ui::setupHighScoreNameEntry(mContext)};
-  } else {
+  }
+  else
+  {
     ui::setupHighScoreListDisplay(mContext, mEpisode);
     mCurrentStage = HighScoreListDisplay{};
   }
 }
 
-void GameSessionMode::enterHighScore(std::string_view name) {
+void GameSessionMode::enterHighScore(std::string_view name)
+{
   SDL_StopTextInput();
 
   data::insertNewScore(
@@ -238,4 +258,4 @@ void GameSessionMode::enterHighScore(std::string_view name) {
   mCurrentStage = HighScoreListDisplay{};
 }
 
-}
+} // namespace rigel

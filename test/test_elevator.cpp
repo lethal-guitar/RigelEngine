@@ -14,8 +14,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <catch.hpp>
 #include "utils.hpp"
+#include <catch.hpp>
 
 #include <base/spatial_types_printing.hpp>
 #include <data/game_options.hpp>
@@ -47,44 +47,50 @@ using namespace game_logic::components;
 namespace ex = entityx;
 
 
-struct MockEventListener : public ex::Receiver<MockEventListener> {
+struct MockEventListener : public ex::Receiver<MockEventListener>
+{
   bool mIsPlayerAttached = false;
 
-  void receive(const game_logic::events::ElevatorAttachmentChanged& e) {
+  void receive(const game_logic::events::ElevatorAttachmentChanged& e)
+  {
     mIsPlayerAttached =
       e.mType == game_logic::events::ElevatorAttachmentChanged::Attach;
   }
 };
 
 
-struct MockSpriteFactory : public rigel::engine::ISpriteFactory {
-  engine::components::Sprite createSprite(data::ActorID id) override {
+struct MockSpriteFactory : public rigel::engine::ISpriteFactory
+{
+  engine::components::Sprite createSprite(data::ActorID id) override
+  {
     static rigel::engine::SpriteDrawData dummyDrawData;
     return {&dummyDrawData, {}};
   }
 
-  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override {
+  base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override
+  {
     // Bounds for elevator
     return {{}, {4, 3}};
   }
 };
 
 
-
-
-TEST_CASE("Rocket elevator") {
+TEST_CASE("Rocket elevator")
+{
   ex::EntityX entityx;
 
   data::map::Map map{300, 300, data::map::TileAttributeDict{{0x0, 0xF}}};
 
   // Floor
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 8; ++i)
+  {
     const auto y = i > 1 && i < 6 ? 104 : 101;
     map.setTileAt(0, i, y, 1);
   }
 
   // Ceiling
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 10; ++i)
+  {
     map.setTileAt(0, i, 90, 1);
   }
 
@@ -141,7 +147,8 @@ TEST_CASE("Rocket elevator") {
     &map};
 
 
-  SECTION("Elevator is setup correctly") {
+  SECTION("Elevator is setup correctly")
+  {
     CHECK(elevator.has_component<SolidBody>());
     CHECK(elevator.has_component<BoundingBox>());
 
@@ -158,17 +165,15 @@ TEST_CASE("Rocket elevator") {
     perFrameState.mCurrentViewPortSize = viewPortSize;
 
     player.update(input);
-    engine::markActiveEntities(
-      entityx.entities, {0, 0}, viewPortSize);
+    engine::markActiveEntities(entityx.entities, {0, 0}, viewPortSize);
     behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
     perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;
   };
 
   const auto verifyPositions = [&playerPosition, &elevatorPosition](
-    const WorldPosition& expectedPlayerPosition,
-    const int elevatorHorizontalOffset = -1
-  ) {
+                                 const WorldPosition& expectedPlayerPosition,
+                                 const int elevatorHorizontalOffset = -1) {
     const auto expectedElevatorPosition =
       expectedPlayerPosition + WorldPosition{elevatorHorizontalOffset, 3};
     CHECK(playerPosition == expectedPlayerPosition);
@@ -196,8 +201,10 @@ TEST_CASE("Rocket elevator") {
   };
 
 
-  SECTION("Player attachment") {
-    SECTION("Player is not attached when not completely standing on elevator") {
+  SECTION("Player attachment")
+  {
+    SECTION("Player is not attached when not completely standing on elevator")
+    {
       runOneFrame(noInput);
       CHECK(!isPlayerAttached());
 
@@ -214,7 +221,8 @@ TEST_CASE("Rocket elevator") {
       CHECK(!isPlayerAttached());
     }
 
-    SECTION("Player is attached when completely on top of elevator") {
+    SECTION("Player is attached when completely on top of elevator")
+    {
       playerPosition.x = 3;
       runOneFrame(noInput);
       CHECK(isPlayerAttached());
@@ -229,8 +237,10 @@ TEST_CASE("Rocket elevator") {
   runOneFrame(noInput);
 
 
-  SECTION("Movement on elevator") {
-    SECTION("No movement while player idle") {
+  SECTION("Movement on elevator")
+  {
+    SECTION("No movement while player idle")
+    {
       const auto expectedPos = playerPosition;
 
       runOneFrame(noInput);
@@ -238,7 +248,8 @@ TEST_CASE("Rocket elevator") {
       verifyPositions(expectedPos);
     }
 
-    SECTION("Moving up") {
+    SECTION("Moving up")
+    {
       auto expectedPos = playerPosition;
 
       runOneFrame(pressingUp);
@@ -252,7 +263,8 @@ TEST_CASE("Rocket elevator") {
       verifyPositions(expectedPos);
     }
 
-    SECTION("Moving down") {
+    SECTION("Moving down")
+    {
       playerPosition.y = 96;
       elevatorPosition.y = 99;
 
@@ -269,7 +281,8 @@ TEST_CASE("Rocket elevator") {
       verifyPositions(expectedPos);
     }
 
-    SECTION("Elevator stays in air when player stops moving") {
+    SECTION("Elevator stays in air when player stops moving")
+    {
       auto expectedPos = playerPosition;
 
       runOneFrame(pressingUp);
@@ -280,7 +293,8 @@ TEST_CASE("Rocket elevator") {
       verifyPositions(expectedPos);
     }
 
-    SECTION("Elevator is detached when player jumps") {
+    SECTION("Elevator is detached when player jumps")
+    {
       runOneFrame(pressingUp);
 
       const auto originalPos = playerPosition;
@@ -297,7 +311,8 @@ TEST_CASE("Rocket elevator") {
       CHECK(elevator.has_component<SolidBody>());
     }
 
-    SECTION("Elevator is detached when player walks off") {
+    SECTION("Elevator is detached when player walks off")
+    {
       // Setup: Get player+elevator in the air
       runOneFrame(pressingUp);
       runOneFrame(pressingUp);
@@ -316,7 +331,8 @@ TEST_CASE("Rocket elevator") {
       CHECK(elevator.has_component<SolidBody>());
     }
 
-    SECTION("Moving down to ground doesn't get player stuck in elevator") {
+    SECTION("Moving down to ground doesn't get player stuck in elevator")
+    {
       const auto expectedPos = playerPosition;
 
       // Setup: Get player+elevator in the air
@@ -331,7 +347,8 @@ TEST_CASE("Rocket elevator") {
       verifyPositions(expectedPos);
     }
 
-    SECTION("Player touching ceiling stops the elevator in position") {
+    SECTION("Player touching ceiling stops the elevator in position")
+    {
       playerPosition.y = 96;
       elevatorPosition.y = 99;
       const auto initialPos = playerPosition;
@@ -349,42 +366,42 @@ TEST_CASE("Rocket elevator") {
   }
 
 
-  //SECTION("Player state is updated correctly") {
-    //SECTION("State initially marked as not interacting") {
-      //runOneFrame(noInput);
-      //CHECK(!playerState.mIsInteracting);
-    //}
+  // SECTION("Player state is updated correctly") {
+  // SECTION("State initially marked as not interacting") {
+  // runOneFrame(noInput);
+  // CHECK(!playerState.mIsInteracting);
+  //}
 
-    //SECTION("State set to interacting when moving up") {
-      //runOneFrame(pressingUp);
-      //CHECK(playerState.mIsInteracting);
-    //}
+  // SECTION("State set to interacting when moving up") {
+  // runOneFrame(pressingUp);
+  // CHECK(playerState.mIsInteracting);
+  //}
 
-    //SECTION("State set to interacting when moving down") {
-      //runOneFrame(pressingDown);
-      //CHECK(playerState.mIsInteracting);
-    //}
+  // SECTION("State set to interacting when moving down") {
+  // runOneFrame(pressingDown);
+  // CHECK(playerState.mIsInteracting);
+  //}
 
-    //runOneFrame(pressingUp);
+  // runOneFrame(pressingUp);
 
-    //SECTION("State reset to normal after movement stops") {
-      //runOneFrame(noInput);
-      //CHECK(!playerState.mIsInteracting);
-    //}
+  // SECTION("State reset to normal after movement stops") {
+  // runOneFrame(noInput);
+  // CHECK(!playerState.mIsInteracting);
+  //}
 
-    //SECTION("State reset to normal after detaching") {
-      //playerPosition.x = 0;
-      //runOneFrame(noInput);
-      //CHECK(!playerState.mIsInteracting);
-    //}
+  // SECTION("State reset to normal after detaching") {
+  // playerPosition.x = 0;
+  // runOneFrame(noInput);
+  // CHECK(!playerState.mIsInteracting);
+  //}
 
-    //SECTION("Interacting state is not changed when not attached to elevator") {
-      //playerPosition.x = 6;
-      //runOneFrame(noInput);
+  // SECTION("Interacting state is not changed when not attached to elevator") {
+  // playerPosition.x = 6;
+  // runOneFrame(noInput);
 
-      //playerState.mIsInteracting = true;
-      //runOneFrame(noInput);
-      //CHECK(playerState.mIsInteracting);
-    //}
+  // playerState.mIsInteracting = true;
+  // runOneFrame(noInput);
+  // CHECK(playerState.mIsInteracting);
+  //}
   //}
 }

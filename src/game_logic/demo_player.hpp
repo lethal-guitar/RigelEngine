@@ -25,18 +25,21 @@
 #include <vector>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 class GameWorld;
 
 
-struct DemoInput {
+struct DemoInput
+{
   PlayerInput mInput;
   bool mNextLevel;
 };
 
 
-class DemoPlayer {
+class DemoPlayer
+{
 public:
   explicit DemoPlayer(GameMode::Context context);
 
@@ -56,4 +59,4 @@ private:
   std::unique_ptr<GameWorld> mpWorld;
 };
 
-}
+} // namespace rigel::game_logic

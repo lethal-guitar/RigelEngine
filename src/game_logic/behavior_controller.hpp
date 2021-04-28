@@ -26,41 +26,53 @@ RIGEL_RESTORE_WARNINGS
 #include <memory>
 #include <type_traits>
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
 
 
-namespace rigel::game_logic::components {
+namespace rigel::game_logic::components
+{
 
-namespace detail {
+namespace detail
+{
 
 template <typename...>
 using void_t = void;
 
 template <typename T, typename = void>
-struct hasOnHit : std::false_type {};
+struct hasOnHit : std::false_type
+{
+};
 
 template <typename T>
-struct hasOnHit<T, void_t<decltype(&T::onHit)>> :
-  std::true_type {};
+struct hasOnHit<T, void_t<decltype(&T::onHit)>> : std::true_type
+{
+};
 
 
 template <typename T, typename = void>
-struct hasOnKilled : std::false_type {};
+struct hasOnKilled : std::false_type
+{
+};
 
 template <typename T>
-struct hasOnKilled<T, void_t<decltype(&T::onKilled)>> :
-  std::true_type {};
+struct hasOnKilled<T, void_t<decltype(&T::onKilled)>> : std::true_type
+{
+};
 
 
 template <typename T, typename = void>
-struct hasOnCollision : std::false_type {};
+struct hasOnCollision : std::false_type
+{
+};
 
 template <typename T>
-struct hasOnCollision<T, void_t<decltype(&T::onCollision)>> :
-  std::true_type {};
-}
+struct hasOnCollision<T, void_t<decltype(&T::onCollision)>> : std::true_type
+{
+};
+} // namespace detail
 
 
 template <typename T>
@@ -69,8 +81,8 @@ void updateBehaviorController(
   GlobalDependencies& dependencies,
   GlobalState& state,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   self.update(dependencies, state, isOnScreen, entity);
 }
 
@@ -81,8 +93,8 @@ std::enable_if_t<detail::hasOnHit<T>::value> behaviorControllerOnHit(
   GlobalDependencies& dependencies,
   GlobalState& state,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   self.onHit(dependencies, state, inflictorVelocity, entity);
 }
 
@@ -93,8 +105,8 @@ std::enable_if_t<!detail::hasOnHit<T>::value> behaviorControllerOnHit(
   GlobalDependencies&,
   GlobalState&,
   const base::Point<float>&,
-  entityx::Entity
-) {
+  entityx::Entity)
+{
 }
 
 
@@ -104,8 +116,8 @@ std::enable_if_t<detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   GlobalDependencies& dependencies,
   GlobalState& state,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   self.onKilled(dependencies, state, inflictorVelocity, entity);
 }
 
@@ -116,39 +128,40 @@ std::enable_if_t<!detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   GlobalDependencies&,
   GlobalState& state,
   const base::Point<float>&,
-  entityx::Entity
-) {
+  entityx::Entity)
+{
 }
 
 
 template <typename T>
 std::enable_if_t<detail::hasOnCollision<T>::value>
-behaviorControllerOnCollision(
-  T& self,
-  GlobalDependencies& dependencies,
-  GlobalState& state,
-  const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity
-) {
+  behaviorControllerOnCollision(
+    T& self,
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const engine::events::CollidedWithWorld& event,
+    entityx::Entity entity)
+{
   self.onCollision(dependencies, state, event, entity);
 }
 
 
 template <typename T>
 std::enable_if_t<!detail::hasOnCollision<T>::value>
-behaviorControllerOnCollision(
-  T&,
-  GlobalDependencies&,
-  GlobalState&,
-  const engine::events::CollidedWithWorld&,
-  entityx::Entity
-) {
+  behaviorControllerOnCollision(
+    T&,
+    GlobalDependencies&,
+    GlobalState&,
+    const engine::events::CollidedWithWorld&,
+    entityx::Entity)
+{
 }
 
 
-class BehaviorController {
+class BehaviorController
+{
 public:
-  template<typename T>
+  template <typename T>
   explicit BehaviorController(T controller)
     : mpSelf(std::make_unique<Model<T>>(std::move(controller)))
   {
@@ -159,7 +172,8 @@ public:
   {
   }
 
-  BehaviorController& operator=(const BehaviorController& other) {
+  BehaviorController& operator=(const BehaviorController& other)
+  {
     auto copy = other;
     std::swap(mpSelf, copy.mpSelf);
     return *this;
@@ -172,8 +186,8 @@ public:
     GlobalDependencies& dependencies,
     GlobalState& state,
     const bool isOnScreen,
-    entityx::Entity entity
-  ) {
+    entityx::Entity entity)
+  {
     mpSelf->update(dependencies, state, isOnScreen, entity);
   }
 
@@ -181,8 +195,8 @@ public:
     GlobalDependencies& dependencies,
     GlobalState& state,
     const base::Point<float>& inflictorVelocity,
-    entityx::Entity entity
-  ) {
+    entityx::Entity entity)
+  {
     mpSelf->onHit(dependencies, state, inflictorVelocity, entity);
   }
 
@@ -190,8 +204,8 @@ public:
     GlobalDependencies& dependencies,
     GlobalState& state,
     const base::Point<float>& inflictorVelocity,
-    entityx::Entity entity
-  ) {
+    entityx::Entity entity)
+  {
     mpSelf->onKilled(dependencies, state, inflictorVelocity, entity);
   }
 
@@ -199,19 +213,21 @@ public:
     GlobalDependencies& dependencies,
     GlobalState& state,
     const engine::events::CollidedWithWorld& event,
-    entityx::Entity entity
-  ) {
+    entityx::Entity entity)
+  {
     mpSelf->onCollision(dependencies, state, event, entity);
   }
 
-  template<typename T>
-  T& get() {
+  template <typename T>
+  T& get()
+  {
     auto pSelf = mpSelf.get();
     return dynamic_cast<Model<T>*>(pSelf)->mData;
   }
 
 private:
-  struct Concept {
+  struct Concept
+  {
     virtual ~Concept() = default;
 
     virtual std::unique_ptr<Concept> clone() const = 0;
@@ -241,14 +257,16 @@ private:
       entityx::Entity entity) = 0;
   };
 
-  template<typename T>
-  struct Model : public Concept {
+  template <typename T>
+  struct Model : public Concept
+  {
     explicit Model(T data_)
       : mData(std::move(data_))
     {
     }
 
-    std::unique_ptr<Concept> clone() const override {
+    std::unique_ptr<Concept> clone() const override
+    {
       return std::make_unique<Model>(mData);
     }
 
@@ -256,50 +274,37 @@ private:
       GlobalDependencies& dependencies,
       GlobalState& state,
       bool isOnScreen,
-      entityx::Entity entity
-    ) override {
-      updateBehaviorController(
-        mData,
-        dependencies,
-        state,
-        isOnScreen,
-        entity);
+      entityx::Entity entity) override
+    {
+      updateBehaviorController(mData, dependencies, state, isOnScreen, entity);
     }
 
     void onHit(
       GlobalDependencies& dependencies,
       GlobalState& state,
       const base::Point<float>& inflictorVelocity,
-      entityx::Entity entity
-    ) override {
+      entityx::Entity entity) override
+    {
       behaviorControllerOnHit(
-        mData,
-        dependencies,
-        state,
-        inflictorVelocity,
-        entity);
+        mData, dependencies, state, inflictorVelocity, entity);
     }
 
     void onKilled(
       GlobalDependencies& dependencies,
       GlobalState& state,
       const base::Point<float>& inflictorVelocity,
-      entityx::Entity entity
-    ) override {
+      entityx::Entity entity) override
+    {
       behaviorControllerOnKilled(
-        mData,
-        dependencies,
-        state,
-        inflictorVelocity,
-        entity);
+        mData, dependencies, state, inflictorVelocity, entity);
     }
 
     void onCollision(
       GlobalDependencies& dependencies,
       GlobalState& state,
       const engine::events::CollidedWithWorld& event,
-      entityx::Entity entity
-    ) override {
+      entityx::Entity entity) override
+    {
       behaviorControllerOnCollision(mData, dependencies, state, event, entity);
     }
 
@@ -309,4 +314,4 @@ private:
   std::unique_ptr<Concept> mpSelf;
 };
 
-}
+} // namespace rigel::game_logic::components

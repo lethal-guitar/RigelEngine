@@ -24,7 +24,8 @@
 #include <iostream>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using namespace std;
 using namespace data;
@@ -32,7 +33,8 @@ using namespace data;
 using data::map::BackdropScrollMode;
 
 
-namespace {
+namespace
+{
 
 const auto ANIM_STATES = 4;
 const auto FAST_ANIM_FRAME_DELAY = 1;
@@ -42,19 +44,19 @@ const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60;
 
 
-base::Vector wrapBackgroundOffset(base::Vector offset) {
+base::Vector wrapBackgroundOffset(base::Vector offset)
+{
   return {
     offset.x % GameTraits::viewPortWidthPx,
-    offset.y % GameTraits::viewPortHeightPx
-  };
+    offset.y % GameTraits::viewPortHeightPx};
 }
 
 
 base::Vector backdropOffset(
   const base::Vector& cameraPosition,
   const BackdropScrollMode scrollMode,
-  const double backdropAutoScrollOffset
-) {
+  const double backdropAutoScrollOffset)
+{
   const auto parallaxBoth = scrollMode == BackdropScrollMode::ParallaxBoth;
   const auto parallaxHorizontal =
     scrollMode == BackdropScrollMode::ParallaxHorizontal || parallaxBoth;
@@ -62,18 +64,23 @@ base::Vector backdropOffset(
   const auto autoScrollX = scrollMode == BackdropScrollMode::AutoHorizontal;
   const auto autoScrollY = scrollMode == BackdropScrollMode::AutoVertical;
 
-  if (parallaxHorizontal || parallaxBoth) {
-    return wrapBackgroundOffset({
-      parallaxHorizontal ? cameraPosition.x*PARALLAX_FACTOR : 0,
-      parallaxBoth ? cameraPosition.y*PARALLAX_FACTOR : 0
-    });
-  } else if (autoScrollX || autoScrollY) {
+  if (parallaxHorizontal || parallaxBoth)
+  {
+    return wrapBackgroundOffset(
+      {parallaxHorizontal ? cameraPosition.x * PARALLAX_FACTOR : 0,
+       parallaxBoth ? cameraPosition.y * PARALLAX_FACTOR : 0});
+  }
+  else if (autoScrollX || autoScrollY)
+  {
     std::fesetround(FE_TONEAREST);
     const auto offsetPixels = base::round(backdropAutoScrollOffset);
 
-    if (autoScrollX) {
+    if (autoScrollX)
+    {
       return {offsetPixels, 0};
-    } else {
+    }
+    else
+    {
       return {0, GameTraits::viewPortHeightPx - offsetPixels};
     }
   }
@@ -82,34 +89,45 @@ base::Vector backdropOffset(
 }
 
 
-float speedForScrollMode(const BackdropScrollMode mode) {
-  if (mode == BackdropScrollMode::AutoHorizontal) {
+float speedForScrollMode(const BackdropScrollMode mode)
+{
+  if (mode == BackdropScrollMode::AutoHorizontal)
+  {
     return AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL;
-  } else if (mode == BackdropScrollMode::AutoVertical) {
+  }
+  else if (mode == BackdropScrollMode::AutoVertical)
+  {
     return AUTO_SCROLL_PX_PER_SECOND_VERTICAL;
-  } else {
+  }
+  else
+  {
     return 0.0f;
   }
 }
 
 
-float maxOffsetForScrollMode(const BackdropScrollMode mode) {
-  if (mode == BackdropScrollMode::AutoHorizontal) {
+float maxOffsetForScrollMode(const BackdropScrollMode mode)
+{
+  if (mode == BackdropScrollMode::AutoHorizontal)
+  {
     return data::GameTraits::viewPortWidthPx;
-  } else if (mode == BackdropScrollMode::AutoVertical) {
+  }
+  else if (mode == BackdropScrollMode::AutoVertical)
+  {
     return data::GameTraits::viewPortHeightPx;
-  } else {
+  }
+  else
+  {
     return 1.0f;
   }
 }
 
-}
+} // namespace
 
 MapRenderer::MapRenderer(
   renderer::Renderer* pRenderer,
   const data::map::Map* pMap,
-  MapRenderData&& renderData
-)
+  MapRenderData&& renderData)
   : mpRenderer(pRenderer)
   , mpMap(pMap)
   , mTileSetTexture(
@@ -118,38 +136,40 @@ MapRenderer::MapRenderer(
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
   , mScrollMode(renderData.mBackdropScrollMode)
 {
-  if (renderData.mSecondaryBackdropImage) {
-    mAlternativeBackdropTexture = renderer::Texture(
-      mpRenderer, *renderData.mSecondaryBackdropImage);
+  if (renderData.mSecondaryBackdropImage)
+  {
+    mAlternativeBackdropTexture =
+      renderer::Texture(mpRenderer, *renderData.mSecondaryBackdropImage);
   }
 }
 
 
-void MapRenderer::switchBackdrops() {
+void MapRenderer::switchBackdrops()
+{
   std::swap(mBackdropTexture, mAlternativeBackdropTexture);
 }
 
 
 void MapRenderer::renderBackground(
   const base::Vector& sectionStart,
-  const base::Extents& sectionSize
-) const {
+  const base::Extents& sectionSize) const
+{
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
 }
 
 
 void MapRenderer::renderForeground(
   const base::Vector& sectionStart,
-  const base::Extents& sectionSize
-) const {
+  const base::Extents& sectionSize) const
+{
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
 }
 
 
 void MapRenderer::renderBackdrop(
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize
-) const {
+  const base::Extents& viewPortSize) const
+{
   const auto offset =
     backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset);
 
@@ -157,10 +177,8 @@ void MapRenderer::renderBackdrop(
   const auto numRepetitions =
     base::integerDivCeil(tilesToPixels(viewPortSize.width), backdropWidth);
 
-  const auto sourceRectSize = base::Extents{
-    backdropWidth * numRepetitions,
-    mBackdropTexture.height()
-  };
+  const auto sourceRectSize =
+    base::Extents{backdropWidth * numRepetitions, mBackdropTexture.height()};
 
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
@@ -175,14 +193,18 @@ void MapRenderer::renderBackdrop(
 void MapRenderer::renderMapTiles(
   const base::Vector& sectionStart,
   const base::Extents& sectionSize,
-  const DrawMode drawMode
-) const {
-  for (int layer=0; layer<2; ++layer) {
-    for (int y=0; y<sectionSize.height; ++y) {
-      for (int x=0; x<sectionSize.width; ++x) {
+  const DrawMode drawMode) const
+{
+  for (int layer = 0; layer < 2; ++layer)
+  {
+    for (int y = 0; y < sectionSize.height; ++y)
+    {
+      for (int x = 0; x < sectionSize.width; ++x)
+      {
         const auto col = x + sectionStart.x;
         const auto row = y + sectionStart.y;
-        if (col >= mpMap->width() || row >= mpMap->height()) {
+        if (col >= mpMap->width() || row >= mpMap->height())
+        {
           continue;
         }
 
@@ -191,7 +213,8 @@ void MapRenderer::renderMapTiles(
           mpMap->attributeDict().attributes(tileIndex).isForeGround();
         const auto shouldRenderForeground = drawMode == DrawMode::Foreground;
 
-        if (isForeground != shouldRenderForeground) {
+        if (isForeground != shouldRenderForeground)
+        {
           continue;
         }
 
@@ -202,12 +225,14 @@ void MapRenderer::renderMapTiles(
 }
 
 
-void MapRenderer::updateAnimatedMapTiles() {
+void MapRenderer::updateAnimatedMapTiles()
+{
   ++mElapsedFrames;
 }
 
 
-void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt) {
+void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
+{
   mBackdropAutoScrollOffset += dt * speedForScrollMode(mScrollMode);
   mBackdropAutoScrollOffset =
     std::fmod(mBackdropAutoScrollOffset, maxOffsetForScrollMode(mScrollMode));
@@ -217,8 +242,8 @@ void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt) {
 void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
   const base::Vector& position,
-  const base::Vector& cameraPosition
-) const {
+  const base::Vector& cameraPosition) const
+{
   const auto screenPosition = position - cameraPosition;
   renderTile(index, screenPosition.x, screenPosition.y);
 }
@@ -227,21 +252,23 @@ void MapRenderer::renderSingleTile(
 void MapRenderer::renderTile(
   const data::map::TileIndex tileIndex,
   const int x,
-  const int y
-) const {
+  const int y) const
+{
   // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
   // should be visible. Therefore, don't draw if the index is 0.
-  if (tileIndex != 0) {
+  if (tileIndex != 0)
+  {
     const auto tileIndexToDraw = animatedTileIndex(tileIndex);
     mTileSetTexture.renderTile(tileIndexToDraw, x, y);
   }
 }
 
 
-map::TileIndex MapRenderer::animatedTileIndex(
-  const map::TileIndex tileIndex
-) const {
-  if (mpMap->attributeDict().attributes(tileIndex).isAnimated()) {
+map::TileIndex
+  MapRenderer::animatedTileIndex(const map::TileIndex tileIndex) const
+{
+  if (mpMap->attributeDict().attributes(tileIndex).isAnimated())
+  {
     const auto fastAnimOffset =
       (mElapsedFrames / FAST_ANIM_FRAME_DELAY) % ANIM_STATES;
     const auto slowAnimOffset =
@@ -250,9 +277,11 @@ map::TileIndex MapRenderer::animatedTileIndex(
     const auto isFastAnim =
       mpMap->attributeDict().attributes(tileIndex).isFastAnimation();
     return tileIndex + (isFastAnim ? fastAnimOffset : slowAnimOffset);
-  } else {
+  }
+  else
+  {
     return tileIndex;
   }
 }
 
-}
+} // namespace rigel::engine

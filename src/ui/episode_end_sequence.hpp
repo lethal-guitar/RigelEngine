@@ -25,9 +25,11 @@
 #include <vector>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class EpisodeEndScreen {
+class EpisodeEndScreen
+{
 public:
   EpisodeEndScreen(GameMode::Context context, int episode);
 
@@ -43,7 +45,8 @@ private:
 };
 
 
-class EpisodeEndSequence {
+class EpisodeEndSequence
+{
 public:
   EpisodeEndSequence(
     GameMode::Context context,
@@ -60,7 +63,8 @@ private:
   template <typename T>
   void startNewStage(T&& newStage);
 
-  struct InitialWait {
+  struct InitialWait
+  {
     engine::TimeDelta mElapsedTime = {};
   };
 
@@ -77,4 +81,4 @@ private:
   int mScoreWithoutBonuses;
 };
 
-}
+} // namespace rigel::ui

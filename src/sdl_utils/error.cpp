@@ -23,7 +23,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::sdl_utils {
+namespace rigel::sdl_utils
+{
 
 Error::Error()
   : Error(SDL_GetError())
@@ -37,4 +38,4 @@ Error::Error(const std::string& message)
 }
 
 
-}
+} // namespace rigel::sdl_utils

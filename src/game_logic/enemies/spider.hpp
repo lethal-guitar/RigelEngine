@@ -19,8 +19,8 @@
 #include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
-#include "game_logic/global_dependencies.hpp"
 #include "game_logic/enemies/simple_walker.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -28,15 +28,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct Spider {
+struct Spider
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -51,7 +54,8 @@ struct Spider {
 
   void walkOnFloor(entityx::Entity entity);
 
-  enum class State {
+  enum class State
+  {
     Uninitialized,
     OnCeiling,
     Falling,
@@ -67,4 +71,4 @@ struct Spider {
   SpiderClingPosition mClingPosition;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

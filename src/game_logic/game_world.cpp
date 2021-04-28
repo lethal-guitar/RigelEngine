@@ -45,8 +45,8 @@
 #include <sstream>
 
 
-
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using namespace engine;
 using namespace std;
@@ -55,13 +55,14 @@ using data::PlayerModel;
 using engine::components::WorldPosition;
 
 
-namespace {
+namespace
+{
 
 constexpr auto BOSS_LEVEL_INTRO_MUSIC = "CALM.IMF";
 
 constexpr auto HEALTH_BAR_LABEL_START_X = 0;
 constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
-constexpr auto HEALTH_BAR_TILE_INDEX = 4*40 + 1;
+constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
 constexpr auto HEALTH_BAR_START_PX = base::Vector{data::tilesToPixels(5), 0};
 
 constexpr auto HUD_WIDTH = 6;
@@ -70,8 +71,8 @@ constexpr auto HUD_WIDTH = 6;
 void drawBossHealthBar(
   const int health,
   const ui::MenuElementRenderer& textRenderer,
-  const engine::TiledTexture& uiSpriteSheet
-) {
+  const engine::TiledTexture& uiSpriteSheet)
+{
   textRenderer.drawSmallWhiteText(
     HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
 
@@ -83,8 +84,8 @@ void drawBossHealthBar(
 
 auto localToGlobalTranslation(
   const renderer::Renderer* pRenderer,
-  const base::Vector& translation
-) {
+  const base::Vector& translation)
+{
   return pRenderer->globalTranslation() +
     renderer::scaleVec(translation, pRenderer->globalScale());
 }
@@ -92,8 +93,8 @@ auto localToGlobalTranslation(
 
 [[nodiscard]] auto setupIngameViewport(
   renderer::Renderer* pRenderer,
-  const int screenShakeOffsetX
-) {
+  const int screenShakeOffsetX)
+{
   auto saved = renderer::saveState(pRenderer);
 
   const auto offset = data::GameTraits::inGameViewPortOffset +
@@ -113,39 +114,38 @@ auto localToGlobalTranslation(
 [[nodiscard]] auto setupIngameViewportWidescreen(
   renderer::Renderer* pRenderer,
   const renderer::WidescreenViewPortInfo& info,
-  const int screenShakeOffsetX
-) {
+  const int screenShakeOffsetX)
+{
   auto saved = renderer::saveState(pRenderer);
 
   const auto scale = pRenderer->globalScale();
-  const auto offset = base::Vector{
-    screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
+  const auto offset =
+    base::Vector{screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
   const auto newTranslation =
     renderer::scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
 
   const auto viewPortSize = base::Extents{
     info.mWidthPx,
-    base::round(data::GameTraits::inGameViewPortSize.height * scale.y)
-  };
+    base::round(data::GameTraits::inGameViewPortSize.height * scale.y)};
   pRenderer->setClipRect(base::Rect<int>{newTranslation, viewPortSize});
 
   return saved;
 }
 
 
-auto viewPortSizeWideScreen(renderer::Renderer* pRenderer) {
+auto viewPortSizeWideScreen(renderer::Renderer* pRenderer)
+{
   const auto info = renderer::determineWidescreenViewPort(pRenderer);
   return base::Extents{
-    info.mWidthTiles - HUD_WIDTH,
-    data::GameTraits::mapViewPortSize.height};
+    info.mWidthTiles - HUD_WIDTH, data::GameTraits::mapViewPortSize.height};
 }
 
 
 void setupWidescreenHudOffset(
   renderer::Renderer* pRenderer,
-  const int tilesOnScreen
-) {
+  const int tilesOnScreen)
+{
   const auto extraTiles =
     tilesOnScreen - data::GameTraits::mapViewPortWidthTiles;
   const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
@@ -156,12 +156,12 @@ void setupWidescreenHudOffset(
 
 [[nodiscard]] auto setupWidescreenTopRowViewPort(
   renderer::Renderer* pRenderer,
-  const renderer::WidescreenViewPortInfo& info
-) {
+  const renderer::WidescreenViewPortInfo& info)
+{
   auto saved = renderer::saveState(pRenderer);
 
-  pRenderer->setGlobalTranslation({
-    info.mLeftPaddingPx, pRenderer->globalTranslation().y});
+  pRenderer->setGlobalTranslation(
+    {info.mLeftPaddingPx, pRenderer->globalTranslation().y});
   pRenderer->setClipRect({});
   return saved;
 }
@@ -169,8 +169,8 @@ void setupWidescreenHudOffset(
 
 std::vector<base::Vector> collectRadarDots(
   entityx::EntityManager& entities,
-  const base::Vector& playerPosition
-) {
+  const base::Vector& playerPosition)
+{
   using engine::components::Active;
   using engine::components::WorldPosition;
   using game_logic::components::AppearsOnRadar;
@@ -182,10 +182,10 @@ std::vector<base::Vector> collectRadarDots(
       entityx::Entity,
       const WorldPosition& position,
       const AppearsOnRadar&,
-      const Active&
-    ) {
+      const Active&) {
       const auto positionRelativeToPlayer = position - playerPosition;
-      if (ui::isVisibleOnRadar(positionRelativeToPlayer)) {
+      if (ui::isVisibleOnRadar(positionRelativeToPlayer))
+      {
         radarDots.push_back(positionRelativeToPlayer);
       }
     });
@@ -194,8 +194,9 @@ std::vector<base::Vector> collectRadarDots(
 }
 
 
-template<typename ValueT>
-std::string vec2String(const base::Point<ValueT>& vec, const int width) {
+template <typename ValueT>
+std::string vec2String(const base::Point<ValueT>& vec, const int width)
+{
   std::stringstream stream;
   // clang-format off
   stream
@@ -206,7 +207,8 @@ std::string vec2String(const base::Point<ValueT>& vec, const int width) {
 }
 
 
-struct WaterEffectArea {
+struct WaterEffectArea
+{
   base::Rect<int> mArea;
   bool mIsAnimated;
 };
@@ -215,8 +217,8 @@ struct WaterEffectArea {
 std::vector<WaterEffectArea> collectWaterEffectAreas(
   entityx::EntityManager& es,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize
-) {
+  const base::Extents& viewPortSize)
+{
   using engine::components::BoundingBox;
   using game_logic::components::ActorTag;
 
@@ -224,38 +226,37 @@ std::vector<WaterEffectArea> collectWaterEffectAreas(
 
   const auto screenBox = BoundingBox{cameraPosition, viewPortSize};
 
-  es.each<ActorTag, WorldPosition, BoundingBox>(
-    [&](
-      entityx::Entity,
-      const ActorTag& tag,
-      const WorldPosition& position,
-      const BoundingBox& bbox
-    ) {
-      using T = ActorTag::Type;
+  es.each<ActorTag, WorldPosition, BoundingBox>([&](
+                                                  entityx::Entity,
+                                                  const ActorTag& tag,
+                                                  const WorldPosition& position,
+                                                  const BoundingBox& bbox) {
+    using T = ActorTag::Type;
 
-      const auto isWaterArea =
-        tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
-      if (isWaterArea) {
-        const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
+    const auto isWaterArea =
+      tag.mType == T::AnimatedWaterArea || tag.mType == T::WaterArea;
+    if (isWaterArea)
+    {
+      const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
 
-        if (screenBox.intersects(worldSpaceBbox)) {
-          const auto topLeftPx =
-            data::tileVectorToPixelVector(
-              worldSpaceBbox.topLeft - cameraPosition);
-          const auto sizePx =
-            data::tileExtentsToPixelExtents(worldSpaceBbox.size);
-          const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
+      if (screenBox.intersects(worldSpaceBbox))
+      {
+        const auto topLeftPx = data::tileVectorToPixelVector(
+          worldSpaceBbox.topLeft - cameraPosition);
+        const auto sizePx =
+          data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+        const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
 
-          result.push_back(
-            WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
-        }
+        result.push_back(
+          WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
       }
-    });
+    }
+  });
 
   return result;
 }
 
-}
+} // namespace
 
 
 GameWorld::GameWorld(
@@ -264,8 +265,7 @@ GameWorld::GameWorld(
   GameMode::Context context,
   std::optional<base::Vector> playerPositionOverride,
   bool showWelcomeMessage,
-  const PlayerInput& initialInput
-)
+  const PlayerInput& initialInput)
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
   , mpUiSpriteSheet(context.mpUiSpriteSheet)
@@ -283,8 +283,8 @@ GameWorld::GameWorld(
       *context.mpResources,
       context.mpUiSpriteSheet)
   , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
-  , mWaterEffectBuffer(renderer::createFullscreenRenderTarget(
-      mpRenderer, *mpOptions))
+  , mWaterEffectBuffer(
+      renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
   , mLowResLayer(
       mpRenderer,
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
@@ -298,79 +298,93 @@ GameWorld::GameWorld(
 
   loadLevel(initialInput);
 
-  if (playerPositionOverride) {
+  if (playerPositionOverride)
+  {
     mpState->mPlayer.position() = *playerPositionOverride;
     mpState->mCamera.centerViewOnPlayer();
     updateGameLogic(initialInput);
   }
 
-  if (showWelcomeMessage) {
+  if (showWelcomeMessage)
+  {
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
   }
 
   // earth quake message overrides welcome message
-  if (mpState->mEarthQuakeEffect) {
+  if (mpState->mEarthQuakeEffect)
+  {
     showTutorialMessage(data::TutorialMessageId::EarthQuake);
   }
 
   // radar dish message overrides earth quake message
-  if (mpState->mRadarDishCounter.radarDishesPresent()) {
+  if (mpState->mRadarDishCounter.radarDishesPresent())
+  {
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);
   }
 
   auto after = high_resolution_clock::now();
-  std::cout << "Level load time: " <<
-    duration<double>(after - before).count() * 1000.0 << " ms\n";
+  std::cout << "Level load time: "
+            << duration<double>(after - before).count() * 1000.0 << " ms\n";
 }
 
 
 GameWorld::~GameWorld() = default;
 
 
-bool GameWorld::levelFinished() const {
+bool GameWorld::levelFinished() const
+{
   return mpState->mLevelFinished;
 }
 
 
-std::set<data::Bonus> GameWorld::achievedBonuses() const {
+std::set<data::Bonus> GameWorld::achievedBonuses() const
+{
   std::set<data::Bonus> bonuses;
 
-  if (!mpState->mBonusInfo.mPlayerTookDamage) {
+  if (!mpState->mBonusInfo.mPlayerTookDamage)
+  {
     bonuses.insert(data::Bonus::NoDamageTaken);
   }
 
-  const auto counts =
-    countBonusRelatedItems(
-      const_cast<entityx::EntityManager&>(mpState->mEntities));
+  const auto counts = countBonusRelatedItems(
+    const_cast<entityx::EntityManager&>(mpState->mEntities));
 
-  if (mpState->mBonusInfo.mInitialCameraCount > 0 && counts.mCameraCount == 0) {
+  if (mpState->mBonusInfo.mInitialCameraCount > 0 && counts.mCameraCount == 0)
+  {
     bonuses.insert(data::Bonus::DestroyedAllCameras);
   }
 
   // NOTE: This is a bug (?) in the original game - if a level doesn't contain
   // any fire bombs, bonus 6 will be awarded, as if the player had destroyed
   // all fire bombs.
-  if (counts.mFireBombCount == 0) {
+  if (counts.mFireBombCount == 0)
+  {
     bonuses.insert(data::Bonus::DestroyedAllFireBombs);
   }
 
   if (
-    mpState->mBonusInfo.mInitialMerchandiseCount > 0 && counts.mMerchandiseCount == 0
-  ) {
+    mpState->mBonusInfo.mInitialMerchandiseCount > 0 &&
+    counts.mMerchandiseCount == 0)
+  {
     bonuses.insert(data::Bonus::CollectedAllMerchandise);
   }
 
-  if (mpState->mBonusInfo.mInitialWeaponCount > 0 && counts.mWeaponCount == 0) {
+  if (mpState->mBonusInfo.mInitialWeaponCount > 0 && counts.mWeaponCount == 0)
+  {
     bonuses.insert(data::Bonus::CollectedEveryWeapon);
   }
 
   if (
-    mpState->mBonusInfo.mInitialLaserTurretCount > 0 && counts.mLaserTurretCount == 0
-  ) {
+    mpState->mBonusInfo.mInitialLaserTurretCount > 0 &&
+    counts.mLaserTurretCount == 0)
+  {
     bonuses.insert(data::Bonus::DestroyedAllSpinningLaserTurrets);
   }
 
-  if (mpState->mBonusInfo.mInitialBonusGlobeCount == mpState->mBonusInfo.mNumShotBonusGlobes) {
+  if (
+    mpState->mBonusInfo.mInitialBonusGlobeCount ==
+    mpState->mBonusInfo.mNumShotBonusGlobes)
+  {
     bonuses.insert(data::Bonus::ShotAllBonusGlobes);
   }
 
@@ -378,61 +392,76 @@ std::set<data::Bonus> GameWorld::achievedBonuses() const {
 }
 
 
-void GameWorld::receive(const rigel::events::CheckPointActivated& event) {
-  mpState->mActivatedCheckpoint = CheckpointData{
-    mpPlayerModel->makeCheckpoint(), event.mPosition};
+void GameWorld::receive(const rigel::events::CheckPointActivated& event)
+{
+  mpState->mActivatedCheckpoint =
+    CheckpointData{mpPlayerModel->makeCheckpoint(), event.mPosition};
   mMessageDisplay.setMessage(data::Messages::FoundRespawnBeacon);
 }
 
 
-void GameWorld::receive(const rigel::events::ExitReached& event) {
-  if (mpState->mRadarDishCounter.radarDishesPresent() && event.mCheckRadarDishes) {
+void GameWorld::receive(const rigel::events::ExitReached& event)
+{
+  if (
+    mpState->mRadarDishCounter.radarDishesPresent() && event.mCheckRadarDishes)
+  {
     showTutorialMessage(data::TutorialMessageId::RadarsStillFunctional);
-  } else {
+  }
+  else
+  {
     mpState->mLevelFinished = true;
   }
 }
 
 
-void GameWorld::receive(const rigel::events::PlayerDied& event) {
+void GameWorld::receive(const rigel::events::PlayerDied& event)
+{
   mpState->mPlayerDied = true;
 }
 
 
-void GameWorld::receive(const rigel::events::PlayerTookDamage& event) {
+void GameWorld::receive(const rigel::events::PlayerTookDamage& event)
+{
   mpState->mBonusInfo.mPlayerTookDamage = true;
 }
 
 
-void GameWorld::receive(const rigel::events::PlayerMessage& event) {
+void GameWorld::receive(const rigel::events::PlayerMessage& event)
+{
   mMessageDisplay.setMessage(event.mText);
 }
 
 
-void GameWorld::receive(const rigel::events::PlayerTeleported& event) {
+void GameWorld::receive(const rigel::events::PlayerTeleported& event)
+{
   mpState->mTeleportTargetPosition = event.mNewPosition;
 }
 
 
-void GameWorld::receive(const rigel::events::ScreenFlash& event) {
+void GameWorld::receive(const rigel::events::ScreenFlash& event)
+{
   mpState->mScreenFlashColor = event.mColor;
 }
 
 
-void GameWorld::receive(const rigel::events::ScreenShake& event) {
+void GameWorld::receive(const rigel::events::ScreenShake& event)
+{
   mpState->mScreenShakeOffsetX = event.mAmount;
 }
 
 
-void GameWorld::receive(const rigel::events::TutorialMessage& event) {
+void GameWorld::receive(const rigel::events::TutorialMessage& event)
+{
   showTutorialMessage(event.mId);
 }
 
 
-void GameWorld::receive(const game_logic::events::ShootableKilled& event) {
+void GameWorld::receive(const game_logic::events::ShootableKilled& event)
+{
   using game_logic::components::ActorTag;
   auto entity = event.mEntity;
-  if (!entity.has_component<ActorTag>()) {
+  if (!entity.has_component<ActorTag>())
+  {
     return;
   }
 
@@ -440,7 +469,8 @@ void GameWorld::receive(const game_logic::events::ShootableKilled& event) {
 
   using AT = ActorTag::Type;
   const auto type = entity.component<ActorTag>()->mType;
-  switch (type) {
+  switch (type)
+  {
     case AT::Reactor:
       onReactorDestroyed(position);
       break;
@@ -455,46 +485,57 @@ void GameWorld::receive(const game_logic::events::ShootableKilled& event) {
 }
 
 
-void GameWorld::receive(const rigel::events::BossActivated& event) {
+void GameWorld::receive(const rigel::events::BossActivated& event)
+{
   mpState->mActiveBossEntity = event.mBossEntity;
   mpServiceProvider->playMusic(mpState->mLevelMusicFile);
 }
 
 
-void GameWorld::receive(const rigel::events::BossDestroyed& event) {
+void GameWorld::receive(const rigel::events::BossDestroyed& event)
+{
   mpState->mBossDeathAnimationStartPending = true;
 }
 
 
-void GameWorld::receive(const rigel::events::CloakPickedUp& event) {
+void GameWorld::receive(const rigel::events::CloakPickedUp& event)
+{
   mpState->mCloakPickupPosition = event.mPosition;
 }
 
 
-void GameWorld::receive(const rigel::events::CloakExpired&) {
-  if (mpState->mCloakPickupPosition) {
+void GameWorld::receive(const rigel::events::CloakExpired&)
+{
+  if (mpState->mCloakPickupPosition)
+  {
     mpState->mEntityFactory.spawnActor(
       data::ActorID::White_box_cloaking_device, *mpState->mCloakPickupPosition);
   }
 }
 
 
-void GameWorld::loadLevel(const PlayerInput& initialInput) {
+void GameWorld::loadLevel(const PlayerInput& initialInput)
+{
   createNewState();
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic(initialInput);
 
-  if (data::isBossLevel(mSessionId.mLevel)) {
+  if (data::isBossLevel(mSessionId.mLevel))
+  {
     mpServiceProvider->playMusic(BOSS_LEVEL_INTRO_MUSIC);
-  } else {
+  }
+  else
+  {
     mpServiceProvider->playMusic(mpState->mLevelMusicFile);
   }
 }
 
 
-void GameWorld::createNewState() {
-  if (mpState) {
+void GameWorld::createNewState()
+{
+  if (mpState)
+  {
     unsubscribe(mpState->mEventManager);
   }
 
@@ -511,7 +552,8 @@ void GameWorld::createNewState() {
 }
 
 
-void GameWorld::subscribe(entityx::EventManager& eventManager) {
+void GameWorld::subscribe(entityx::EventManager& eventManager)
+{
   eventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   eventManager.subscribe<rigel::events::ExitReached>(*this);
   eventManager.subscribe<rigel::events::PlayerDied>(*this);
@@ -529,7 +571,8 @@ void GameWorld::subscribe(entityx::EventManager& eventManager) {
 }
 
 
-void GameWorld::unsubscribe(entityx::EventManager& eventManager) {
+void GameWorld::unsubscribe(entityx::EventManager& eventManager)
+{
   eventManager.unsubscribe<rigel::events::CheckPointActivated>(*this);
   eventManager.unsubscribe<rigel::events::ExitReached>(*this);
   eventManager.unsubscribe<rigel::events::PlayerDied>(*this);
@@ -547,38 +590,44 @@ void GameWorld::unsubscribe(entityx::EventManager& eventManager) {
 }
 
 
-void GameWorld::updateGameLogic(const PlayerInput& input) {
+void GameWorld::updateGameLogic(const PlayerInput& input)
+{
   mpState->mBackdropFlashColor = std::nullopt;
   mpState->mScreenFlashColor = std::nullopt;
 
-  if (mpState->mReactorDestructionFramesElapsed) {
+  if (mpState->mReactorDestructionFramesElapsed)
+  {
     updateReactorDestructionEvent();
   }
 
-  if (mpState->mEarthQuakeEffect) {
+  if (mpState->mEarthQuakeEffect)
+  {
     mpState->mEarthQuakeEffect->update();
   }
 
   mHudRenderer.updateAnimation();
   mMessageDisplay.update();
 
-  if (mpState->mActiveBossEntity && mpState->mBossDeathAnimationStartPending) {
+  if (mpState->mActiveBossEntity && mpState->mBossDeathAnimationStartPending)
+  {
     engine::removeSafely<game_logic::components::PlayerDamaging>(
       mpState->mActiveBossEntity);
-    mpState->mActiveBossEntity.replace<game_logic::components::BehaviorController>(
-      behaviors::DyingBoss{});
+    mpState->mActiveBossEntity
+      .replace<game_logic::components::BehaviorController>(
+        behaviors::DyingBoss{});
     mpState->mBossDeathAnimationStartPending = false;
   }
 
   const auto& viewPortSize =
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
-      ? viewPortSizeWideScreen(mpRenderer)
-      : data::GameTraits::mapViewPortSize;
+    ? viewPortSizeWideScreen(mpRenderer)
+    : data::GameTraits::mapViewPortSize;
 
   mpState->mMapRenderer.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
   ++mpState->mWaterAnimStep;
-  if (mpState->mWaterAnimStep >= 4) {
+  if (mpState->mWaterAnimStep >= 4)
+  {
     mpState->mWaterAnimStep = 0;
   }
 
@@ -625,13 +674,15 @@ void GameWorld::updateGameLogic(const PlayerInput& input) {
 }
 
 
-void GameWorld::render() {
+void GameWorld::render()
+{
   const auto widescreenModeOn =
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
 
-  if (widescreenModeOn != mWidescreenModeWasOn) {
-    mWaterEffectBuffer = renderer::createFullscreenRenderTarget(
-      mpRenderer, *mpOptions);
+  if (widescreenModeOn != mWidescreenModeWasOn)
+  {
+    mWaterEffectBuffer =
+      renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
   }
 
   auto drawWorld = [this](const base::Extents& viewPortSize) {
@@ -642,12 +693,14 @@ void GameWorld::render() {
         data::tileExtentsToPixelExtents(viewPortSize),
         mpRenderer->globalScale())});
 
-    if (mpState->mScreenFlashColor) {
+    if (mpState->mScreenFlashColor)
+    {
       mpRenderer->clear(*mpState->mScreenFlashColor);
       return;
     }
 
-    if (mpOptions->mPerElementUpscalingEnabled) {
+    if (mpOptions->mPerElementUpscalingEnabled)
+    {
       drawMapAndSprites(viewPortSize);
 
       {
@@ -659,7 +712,9 @@ void GameWorld::render() {
       }
 
       mLowResLayer.render(0, 0);
-    } else {
+    }
+    else
+    {
       drawMapAndSprites(viewPortSize);
       mpState->mParticles.render(mpState->mCamera.position());
       mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
@@ -667,14 +722,18 @@ void GameWorld::render() {
   };
 
   auto drawTopRow = [&, this]() {
-    if (mpState->mActiveBossEntity) {
+    if (mpState->mActiveBossEntity)
+    {
       using game_logic::components::Shootable;
 
       const auto health = mpState->mActiveBossEntity.has_component<Shootable>()
-        ? mpState->mActiveBossEntity.component<Shootable>()->mHealth : 0;
+        ? mpState->mActiveBossEntity.component<Shootable>()->mHealth
+        : 0;
 
       drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
-    } else {
+    }
+    else
+    {
       mMessageDisplay.render();
     }
   };
@@ -686,19 +745,22 @@ void GameWorld::render() {
   };
 
 
-  if (widescreenModeOn) {
+  if (widescreenModeOn)
+  {
     mpServiceProvider->markCurrentFrameAsWidescreen();
 
     const auto info = renderer::determineWidescreenViewPort(mpRenderer);
     const auto viewPortSize = base::Extents{
       info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1};
 
-    if (!mWidescreenModeWasOn) {
+    if (!mWidescreenModeWasOn)
+    {
       mpState->mSpriteRenderingSystem.update(
         mpState->mEntities, viewPortSize, mpState->mCamera.position());
     }
 
-    if (mpOptions->mPerElementUpscalingEnabled) {
+    if (mpOptions->mPerElementUpscalingEnabled)
+    {
       {
         const auto saved = setupIngameViewportWidescreen(
           mpRenderer, info, mpState->mScreenShakeOffsetX);
@@ -711,23 +773,28 @@ void GameWorld::render() {
 
       auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
       drawTopRow();
-    } else {
+    }
+    else
+    {
       const auto saved = renderer::saveState(mpRenderer);
       mpRenderer->setGlobalTranslation({});
       mpRenderer->setClipRect({});
       drawTopRow();
 
       mpRenderer->setGlobalTranslation(base::Vector{
-        mpState->mScreenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y});
+        mpState->mScreenShakeOffsetX,
+        data::GameTraits::inGameViewPortOffset.y});
       drawWorld(viewPortSize);
 
       setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
       drawHud();
     }
-  } else {
+  }
+  else
+  {
     {
-      const auto saved = setupIngameViewport(
-        mpRenderer, mpState->mScreenShakeOffsetX);
+      const auto saved =
+        setupIngameViewport(mpRenderer, mpState->mScreenShakeOffsetX);
 
       drawWorld(data::GameTraits::mapViewPortSize);
       drawHud();
@@ -737,7 +804,7 @@ void GameWorld::render() {
     mpRenderer->setGlobalTranslation(localToGlobalTranslation(
       mpRenderer,
       {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
-      0}));
+       0}));
     drawTopRow();
   }
 
@@ -745,18 +812,22 @@ void GameWorld::render() {
 }
 
 
-void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
+void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize)
+{
   using game_logic::components::TileDebris;
 
   auto& state = *mpState;
   const auto& cameraPosition = mpState->mCamera.position();
 
   auto renderBackgroundLayers = [&]() {
-    if (state.mBackdropFlashColor) {
+    if (state.mBackdropFlashColor)
+    {
       mpRenderer->drawFilledRectangle(
         {{}, data::tileExtentsToPixelExtents(viewPortSize)},
         *state.mBackdropFlashColor);
-    } else {
+    }
+    else
+    {
       state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
     }
 
@@ -765,11 +836,14 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
   };
 
 
-  const auto waterEffectAreas = collectWaterEffectAreas(
-    state.mEntities, cameraPosition, viewPortSize);
-  if (waterEffectAreas.empty()) {
+  const auto waterEffectAreas =
+    collectWaterEffectAreas(state.mEntities, cameraPosition, viewPortSize);
+  if (waterEffectAreas.empty())
+  {
     renderBackgroundLayers();
-  } else {
+  }
+  else
+  {
     {
       auto saved = mWaterEffectBuffer.bind();
       renderBackgroundLayers();
@@ -782,12 +856,13 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
       mWaterEffectBuffer.render(0, 0);
     }
 
-    for (const auto& area : waterEffectAreas) {
+    for (const auto& area : waterEffectAreas)
+    {
       mpRenderer->drawWaterEffect(
         area.mArea,
         mWaterEffectBuffer.data(),
-        area.mIsAnimated
-          ? std::optional<int>(state.mWaterAnimStep) : std::nullopt);
+        area.mIsAnimated ? std::optional<int>(state.mWaterAnimStep)
+                         : std::nullopt);
     }
   }
 
@@ -803,8 +878,8 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize) {
 }
 
 
-
-void GameWorld::processEndOfFrameActions() {
+void GameWorld::processEndOfFrameActions()
+{
   handlePlayerDeath();
   handleTeleporter();
 
@@ -812,20 +887,21 @@ void GameWorld::processEndOfFrameActions() {
 }
 
 
-void GameWorld::activateFullHealthCheat() {
+void GameWorld::activateFullHealthCheat()
+{
   mpPlayerModel->resetHealthAndScore();
 }
 
 
-void GameWorld::activateGiveItemsCheat() {
+void GameWorld::activateGiveItemsCheat()
+{
   namespace ex = entityx;
   using game_logic::components::CollectableItemForCheat;
   using game_logic::components::RadarDish;
 
   // Destroy all radar dishes
-  mpState->mEntities.each<RadarDish>([](ex::Entity entity, const RadarDish&) {
-    entity.destroy();
-  });
+  mpState->mEntities.each<RadarDish>(
+    [](ex::Entity entity, const RadarDish&) { entity.destroy(); });
 
   // Give all key items (circuit board, blue key, cloak) found in the level,
   // and a weapon.
@@ -837,41 +913,45 @@ void GameWorld::activateGiveItemsCheat() {
 
   mpState->mEntities.each<CollectableItemForCheat>(
     [&, weaponsFound = 0](
-      ex::Entity entity,
-      const CollectableItemForCheat& item
-    ) mutable {
-      base::match(item.mGivenItem,
+      ex::Entity entity, const CollectableItemForCheat& item) mutable {
+      base::match(
+        item.mGivenItem,
         [&](const data::InventoryItemType inventoryItem) {
           if (
             inventoryItem == data::InventoryItemType::BlueKey ||
-            inventoryItem == data::InventoryItemType::CircuitBoard
-          ) {
+            inventoryItem == data::InventoryItemType::CircuitBoard)
+          {
             mpPlayerModel->giveItem(inventoryItem);
             entity.destroy();
-          } else if (
+          }
+          else if (
             inventoryItem == data::InventoryItemType::CloakingDevice &&
-            !mpState->mPlayer.isCloaked()
-          ) {
+            !mpState->mPlayer.isCloaked())
+          {
             mpPlayerModel->giveItem(inventoryItem);
           }
         },
 
         [&](const data::WeaponType weapon) {
-          if (weaponsFound < 3) {
+          if (weaponsFound < 3)
+          {
             weaponToGive = weapon;
             ++weaponsFound;
           }
         });
     });
 
-  if (weaponToGive) {
+  if (weaponToGive)
+  {
     mpPlayerModel->switchToWeapon(*weaponToGive);
   }
 }
 
 
-void GameWorld::quickSave() {
-  if (!mpOptions->mQuickSavingEnabled || mpState->mPlayer.isDead()) {
+void GameWorld::quickSave()
+{
+  if (!mpOptions->mQuickSavingEnabled || mpState->mPlayer.isDead())
+  {
     return;
   }
 
@@ -884,10 +964,7 @@ void GameWorld::quickSave() {
     mpSpriteFactory,
     mSessionId);
   pStateCopy->synchronizeTo(
-    *mpState,
-    mpServiceProvider,
-    mpPlayerModel,
-    mSessionId);
+    *mpState, mpServiceProvider, mpPlayerModel, mSessionId);
 
   mpQuickSave = std::make_unique<QuickSaveData>(
     QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
@@ -896,34 +973,35 @@ void GameWorld::quickSave() {
 }
 
 
-void GameWorld::quickLoad() {
-  if (!canQuickLoad()) {
+void GameWorld::quickLoad()
+{
+  if (!canQuickLoad())
+  {
     return;
   }
 
   *mpPlayerModel = mpQuickSave->mPlayerModel;
   mpState->synchronizeTo(
-    *mpQuickSave->mpState,
-    mpServiceProvider,
-    mpPlayerModel,
-    mSessionId);
+    *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
   mMessageDisplay.setMessage("Quick save restored.");
 
   const auto& viewPortSize =
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
-      ? viewPortSizeWideScreen(mpRenderer)
-      : data::GameTraits::mapViewPortSize;
+    ? viewPortSizeWideScreen(mpRenderer)
+    : data::GameTraits::mapViewPortSize;
   mpState->mSpriteRenderingSystem.update(
     mpState->mEntities, viewPortSize, mpState->mCamera.position());
 }
 
 
-bool GameWorld::canQuickLoad() const {
+bool GameWorld::canQuickLoad() const
+{
   return mpOptions->mQuickSavingEnabled && mpQuickSave;
 }
 
 
-void GameWorld::onReactorDestroyed(const base::Vector& position) {
+void GameWorld::onReactorDestroyed(const base::Vector& position)
+{
   mpState->mScreenFlashColor = loader::INGAME_PALETTE[7];
   mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
@@ -934,10 +1012,10 @@ void GameWorld::onReactorDestroyed(const base::Vector& position) {
     position + base::Vector{3, 0},
     ProjectileDirection::Right);
 
-  const auto shouldDoSpecialEvent =
-    mpState->mBackdropSwitchCondition ==
-      data::map::BackdropSwitchCondition::OnReactorDestruction;
-  if (!mpState->mReactorDestructionFramesElapsed && shouldDoSpecialEvent) {
+  const auto shouldDoSpecialEvent = mpState->mBackdropSwitchCondition ==
+    data::map::BackdropSwitchCondition::OnReactorDestruction;
+  if (!mpState->mReactorDestructionFramesElapsed && shouldDoSpecialEvent)
+  {
     mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = true;
     mpState->mReactorDestructionFramesElapsed = 0;
@@ -945,15 +1023,20 @@ void GameWorld::onReactorDestroyed(const base::Vector& position) {
 }
 
 
-void GameWorld::updateReactorDestructionEvent() {
+void GameWorld::updateReactorDestructionEvent()
+{
   auto& framesElapsed = *mpState->mReactorDestructionFramesElapsed;
-  if (framesElapsed >= 14) {
+  if (framesElapsed >= 14)
+  {
     return;
   }
 
-  if (framesElapsed == 13) {
+  if (framesElapsed == 13)
+  {
     mMessageDisplay.setMessage(data::Messages::DestroyedEverything);
-  } else if (framesElapsed % 2 == 1) {
+  }
+  else if (framesElapsed % 2 == 1)
+  {
     mpState->mBackdropFlashColor = base::Color{255, 255, 255, 255};
     mpServiceProvider->playSound(data::SoundId::BigExplosion);
   }
@@ -962,27 +1045,34 @@ void GameWorld::updateReactorDestructionEvent() {
 }
 
 
-void GameWorld::handlePlayerDeath() {
-  if (mpState->mPlayerDied) {
+void GameWorld::handlePlayerDeath()
+{
+  if (mpState->mPlayerDied)
+  {
     mpState->mPlayerDied = false;
     mpState->mActiveBossEntity = {};
 
-    if (mpState->mActivatedCheckpoint) {
+    if (mpState->mActivatedCheckpoint)
+    {
       restartFromCheckpoint();
-    } else {
+    }
+    else
+    {
       restartLevel();
     }
   }
 }
 
 
-void GameWorld::restartLevel() {
+void GameWorld::restartLevel()
+{
   mpServiceProvider->fadeOutScreen();
 
   *mpPlayerModel = mPlayerModelAtLevelStart;
   loadLevel({});
 
-  if (mpState->mRadarDishCounter.radarDishesPresent()) {
+  if (mpState->mRadarDishCounter.radarDishesPresent())
+  {
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);
   }
 
@@ -992,13 +1082,14 @@ void GameWorld::restartLevel() {
 }
 
 
-void GameWorld::restartFromCheckpoint() {
+void GameWorld::restartFromCheckpoint()
+{
   mpServiceProvider->fadeOutScreen();
 
-  const auto shouldSwitchBackAfterRespawn =
-    mpState->mBackdropSwitchCondition ==
-      data::map::BackdropSwitchCondition::OnTeleportation;
-  if (mpState->mBackdropSwitched && shouldSwitchBackAfterRespawn) {
+  const auto shouldSwitchBackAfterRespawn = mpState->mBackdropSwitchCondition ==
+    data::map::BackdropSwitchCondition::OnTeleportation;
+  if (mpState->mBackdropSwitched && shouldSwitchBackAfterRespawn)
+  {
     mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = false;
   }
@@ -1014,8 +1105,10 @@ void GameWorld::restartFromCheckpoint() {
 }
 
 
-void GameWorld::handleTeleporter() {
-  if (!mpState->mTeleportTargetPosition) {
+void GameWorld::handleTeleporter()
+{
+  if (!mpState->mTeleportTargetPosition)
+  {
     return;
   }
 
@@ -1024,10 +1117,10 @@ void GameWorld::handleTeleporter() {
   mpState->mPlayer.position() = *mpState->mTeleportTargetPosition;
   mpState->mTeleportTargetPosition = std::nullopt;
 
-  const auto switchBackdrop =
-    mpState->mBackdropSwitchCondition ==
-      data::map::BackdropSwitchCondition::OnTeleportation;
-  if (switchBackdrop) {
+  const auto switchBackdrop = mpState->mBackdropSwitchCondition ==
+    data::map::BackdropSwitchCondition::OnTeleportation;
+  if (switchBackdrop)
+  {
     mpState->mMapRenderer.switchBackdrops();
     mpState->mBackdropSwitched = !mpState->mBackdropSwitched;
   }
@@ -1038,19 +1131,21 @@ void GameWorld::handleTeleporter() {
 }
 
 
-void GameWorld::showTutorialMessage(const data::TutorialMessageId id) {
-  if (!mpPlayerModel->tutorialMessages().hasBeenShown(id)) {
+void GameWorld::showTutorialMessage(const data::TutorialMessageId id)
+{
+  if (!mpPlayerModel->tutorialMessages().hasBeenShown(id))
+  {
     mMessageDisplay.setMessage(data::messageText(id));
     mpPlayerModel->tutorialMessages().markAsShown(id);
   }
 }
 
 
-void GameWorld::printDebugText(std::ostream& stream) const {
-  stream
-    << "Scroll: " << vec2String(mpState->mCamera.position(), 4) << '\n'
-    << "Player: " << vec2String(mpState->mPlayer.position(), 4) << '\n'
-    << "Entities: " << mpState->mEntities.size() << '\n';
+void GameWorld::printDebugText(std::ostream& stream) const
+{
+  stream << "Scroll: " << vec2String(mpState->mCamera.position(), 4) << '\n'
+         << "Player: " << vec2String(mpState->mPlayer.position(), 4) << '\n'
+         << "Entities: " << mpState->mEntities.size() << '\n';
 }
 
-}
+} // namespace rigel::game_logic

@@ -25,15 +25,18 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct PlayerShip {
+struct PlayerShip
+{
   explicit PlayerShip(bool hasJustBeenExited);
 
   void update(
@@ -45,4 +48,4 @@ struct PlayerShip {
   int mPickUpCoolDownFrames = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

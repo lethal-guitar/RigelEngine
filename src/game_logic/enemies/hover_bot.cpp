@@ -23,14 +23,16 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto SPAWN_DELAY = 36;
 const auto BOT_SPAWN_OFFSET = base::Vector{1, 0};
@@ -39,20 +41,22 @@ constexpr auto TELEPORT_ANIMATION_START_FRAME = 12;
 constexpr auto TELEPORT_ANIMATION_END_FRAME =
   TELEPORT_ANIMATION_START_FRAME + 6;
 
-}
+} // namespace
 
 
 void HoverBotSpawnMachine::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::WorldPosition;
 
-  if (mSpawnsRemaining > 0) {
+  if (mSpawnsRemaining > 0)
+  {
     ++mNextSpawnCountdown;
-    if (mNextSpawnCountdown == SPAWN_DELAY) {
+    if (mNextSpawnCountdown == SPAWN_DELAY)
+    {
       mNextSpawnCountdown = 0;
       --mSpawnsRemaining;
 
@@ -69,29 +73,33 @@ void HoverBot::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<engine::components::Sprite>();
 
   auto updateReorientation = [&](Reorientation& state) {
-    if (s.mpPerFrameState->mIsOddFrame) {
+    if (s.mpPerFrameState->mIsOddFrame)
+    {
       ++state.mStep;
     }
 
     const auto eyePosition = state.mTargetOrientation == Orientation::Left
-      ? 5 - state.mStep : state.mStep;
+      ? 5 - state.mStep
+      : state.mStep;
     sprite.mFramesToRender[1] = 6 + eyePosition;
 
-    if (state.mStep == 5) {
+    if (state.mStep == 5)
+    {
       mState = Moving{state.mTargetOrientation};
     }
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&](TeleportingIn& state) {
       // The teleportation sequence begins with a single frame of nothing,
       // followed by 7 frames of teleport animation. The enemy is not
@@ -99,7 +107,8 @@ void HoverBot::update(
       // Afterwards, the robot waits for 9 more frames before starting to
       // move.
 
-      if (state.mFramesElapsed == 1) {
+      if (state.mFramesElapsed == 1)
+      {
         // start teleport animation
         sprite.mShow = true;
         engine::startAnimationLoop(
@@ -108,7 +117,9 @@ void HoverBot::update(
           TELEPORT_ANIMATION_START_FRAME,
           TELEPORT_ANIMATION_END_FRAME);
         entity.assign<game_logic::components::PlayerDamaging>(1);
-      } else if (state.mFramesElapsed == 8) {
+      }
+      else if (state.mFramesElapsed == 8)
+      {
         // stop teleport animation, draw the robot's body with a looping
         // animation
         engine::startAnimationLoop(entity, 1, 0, 5);
@@ -116,7 +127,9 @@ void HoverBot::update(
         // draw the robot's eye
         sprite.mFramesToRender[1] = 6;
         entity.assign<game_logic::components::AppearsOnRadar>();
-      } else if (state.mFramesElapsed == 16) {
+      }
+      else if (state.mFramesElapsed == 16)
+      {
         mState = Moving{Orientation::Left};
         return; // We must'n access 'state' after this point
       }
@@ -134,19 +147,17 @@ void HoverBot::update(
       const auto playerIsRight = position.x < playerPosition.x;
       if (
         (state.mOrientation == Orientation::Left && playerIsRight) ||
-        (state.mOrientation == Orientation::Right && playerIsLeft)
-      ) {
-        auto newState = Reorientation{
-          engine::orientation::opposite(state.mOrientation)};
+        (state.mOrientation == Orientation::Right && playerIsLeft))
+      {
+        auto newState =
+          Reorientation{engine::orientation::opposite(state.mOrientation)};
         updateReorientation(newState);
         mState = newState;
       }
     },
 
 
-    [&](Reorientation& state) {
-      updateReorientation(state);
-    });
+    [&](Reorientation& state) { updateReorientation(state); });
 }
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -21,22 +21,26 @@
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <imfilebrowser.h>
 #include <SDL_events.h>
+#include <imfilebrowser.h>
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel {
-  struct IGameServiceProvider;
-  class UserProfile;
-}
+namespace rigel
+{
+struct IGameServiceProvider;
+class UserProfile;
+} // namespace rigel
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class OptionsMenu {
+class OptionsMenu
+{
 public:
-  enum class Type {
+  enum class Type
+  {
     Main,
     InGame
   };
@@ -75,4 +79,4 @@ private:
   bool mShowErrorBox = false;
 };
 
-}
+} // namespace rigel::ui

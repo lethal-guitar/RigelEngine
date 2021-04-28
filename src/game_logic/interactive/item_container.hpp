@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -26,23 +26,35 @@ RIGEL_RESTORE_WARNINGS
 #include <memory>
 #include <vector>
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::engine { class CollisionChecker; }
-namespace rigel::game_logic { struct GlobalState; }
-namespace rigel::game_logic::events {
-  struct ShootableKilled;
+namespace rigel
+{
+struct IGameServiceProvider;
+}
+namespace rigel::engine
+{
+class CollisionChecker;
+}
+namespace rigel::game_logic
+{
+struct GlobalState;
+}
+namespace rigel::game_logic::events
+{
+struct ShootableKilled;
 }
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 struct GlobalDependencies;
 
 
 /** Provides type erasure for component classes */
-class ComponentHolder {
+class ComponentHolder
+{
 public:
-  template<typename T>
+  template <typename T>
   explicit ComponentHolder(T component_)
     : mpSelf(std::make_unique<Model<T>>(std::move(component_)))
   {
@@ -53,7 +65,8 @@ public:
   {
   }
 
-  ComponentHolder& operator=(const ComponentHolder& other) {
+  ComponentHolder& operator=(const ComponentHolder& other)
+  {
     auto copy = other;
     std::swap(mpSelf, copy.mpSelf);
     return *this;
@@ -62,29 +75,34 @@ public:
   ComponentHolder(ComponentHolder&&) = default;
   ComponentHolder& operator=(ComponentHolder&&) = default;
 
-  void assignToEntity(entityx::Entity entity) const {
+  void assignToEntity(entityx::Entity entity) const
+  {
     mpSelf->assignToEntity(entity);
   }
 
 private:
-  struct Concept {
+  struct Concept
+  {
     virtual ~Concept() = default;
     virtual std::unique_ptr<Concept> clone() const = 0;
     virtual void assignToEntity(entityx::Entity entity) const = 0;
   };
 
-  template<typename T>
-  struct Model : public Concept {
+  template <typename T>
+  struct Model : public Concept
+  {
     explicit Model(T data_)
       : mData(std::move(data_))
     {
     }
 
-    std::unique_ptr<Concept> clone() const override {
+    std::unique_ptr<Concept> clone() const override
+    {
       return std::make_unique<Model>(mData);
     }
 
-    void assignToEntity(entityx::Entity entity) const override {
+    void assignToEntity(entityx::Entity entity) const override
+    {
       entity.assign<T>(mData);
     }
 
@@ -95,9 +113,11 @@ private:
 };
 
 
-namespace components {
+namespace components
+{
 
-struct ItemBounceEffect {
+struct ItemBounceEffect
+{
   explicit ItemBounceEffect(const float fallVelocity)
     : mFallVelocity(fallVelocity)
   {
@@ -108,8 +128,10 @@ struct ItemBounceEffect {
 };
 
 
-struct ItemContainer {
-  enum class ReleaseStyle : std::uint8_t {
+struct ItemContainer
+{
+  enum class ReleaseStyle : std::uint8_t
+  {
     Default,
     ItemBox,
     ItemBoxNoBounce,
@@ -121,16 +143,18 @@ struct ItemContainer {
   std::int8_t mFramesElapsed = 0;
   bool mHasBeenShot = false;
 
-  template<typename TComponent, typename... TArgs>
-  void assign(TArgs&&... components) {
+  template <typename TComponent, typename... TArgs>
+  void assign(TArgs&&... components)
+  {
     mContainedComponents.emplace_back(
       TComponent{std::forward<TArgs>(components)...});
   }
 };
 
-}
+} // namespace components
 
-class ItemContainerSystem : public entityx::Receiver<ItemContainerSystem> {
+class ItemContainerSystem : public entityx::Receiver<ItemContainerSystem>
+{
 public:
   ItemContainerSystem(
     entityx::EntityManager* pEntityManager,
@@ -147,9 +171,11 @@ private:
 };
 
 
-namespace behaviors {
+namespace behaviors
+{
 
-class NapalmBomb {
+class NapalmBomb
+{
 public:
   void update(
     GlobalDependencies& dependencies,
@@ -163,7 +189,8 @@ public:
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 
-  enum class State {
+  enum class State
+  {
     Ticking,
     SpawningFires
   };
@@ -176,9 +203,11 @@ public:
 private:
   void explode(GlobalDependencies& dependencies, entityx::Entity entity);
   void spawnFires(
-    GlobalDependencies& d, const base::Vector& bombPosition, int step);
+    GlobalDependencies& d,
+    const base::Vector& bombPosition,
+    int step);
 };
 
-}
+} // namespace behaviors
 
-}
+} // namespace rigel::game_logic

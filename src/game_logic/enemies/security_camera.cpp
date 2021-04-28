@@ -20,51 +20,59 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 using engine::components::Sprite;
 using engine::components::WorldPosition;
 
 
-namespace {
+namespace
+{
 
 int determineFrameForCameraPosition(
   const WorldPosition& cameraPosition,
-  const WorldPosition& playerPosition
-) {
+  const WorldPosition& playerPosition)
+{
   const auto playerAbove = playerPosition.y < cameraPosition.y;
   const auto playerBelow = playerPosition.y > cameraPosition.y;
   const auto playerLeft = playerPosition.x < cameraPosition.x;
   const auto playerRight = playerPosition.x > cameraPosition.x;
 
-  if (playerBelow) {
+  if (playerBelow)
+  {
     return playerLeft ? 7 : (playerRight ? 1 : 0);
-  } else if (playerAbove) {
+  }
+  else if (playerAbove)
+  {
     return playerLeft ? 5 : (playerRight ? 3 : 4);
-  } else {
+  }
+  else
+  {
     return playerLeft ? 6 : (playerRight ? 2 : 0);
   }
 }
 
-}
+} // namespace
 
 
 void SecurityCamera::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
-  if (s.mpPlayer->isCloaked()) {
+  entityx::Entity entity)
+{
+  if (s.mpPlayer->isCloaked())
+  {
     return;
   }
 
   const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<Sprite>();
 
-  const auto newFrame = determineFrameForCameraPosition(
-    position, s.mpPlayer->position());
+  const auto newFrame =
+    determineFrameForCameraPosition(position, s.mpPlayer->position());
   sprite.mFramesToRender[0] = newFrame;
 }
 
-}
+} // namespace rigel::game_logic::behaviors

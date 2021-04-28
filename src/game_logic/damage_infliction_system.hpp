@@ -24,14 +24,22 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
+namespace rigel
+{
+struct IGameServiceProvider;
+}
 
-namespace rigel::data { class PlayerModel; }
+namespace rigel::data
+{
+class PlayerModel;
+}
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-class DamageInflictionSystem {
+class DamageInflictionSystem
+{
 public:
   DamageInflictionSystem(
     data::PlayerModel* pPlayerModel,
@@ -52,4 +60,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}
+} // namespace rigel::game_logic

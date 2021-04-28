@@ -28,17 +28,19 @@
 using namespace rigel::engine::components;
 
 
-namespace {
+namespace
+{
 
 constexpr int FLY_ANIMATION[] = {0, 1, 2, 1};
 constexpr int HOVER_ANIMATION[] = {6, 7};
 
 constexpr int FLY_ANIMATION_ORIENTATION_OFFSET = 3;
 
-}
+} // namespace
 
 
-void rigel::game_logic::configureRedBird(entityx::Entity entity) {
+void rigel::game_logic::configureRedBird(entityx::Entity entity)
+{
   using namespace engine::components::parameter_aliases;
   entity.assign<MovingBody>(Velocity{}, GravityAffected{false});
   entity.assign<ActivationSettings>(
@@ -47,20 +49,22 @@ void rigel::game_logic::configureRedBird(entityx::Entity entity) {
 }
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void RedBird::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& position = *entity.component<WorldPosition>();
   auto& body = *entity.component<MovingBody>();
   auto& sprite = *entity.component<Sprite>();
 
   const auto& playerPosition = s.mpPlayer->orientedPosition();
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Flying& state) {
       // clang-format off
       const auto wantsToAttack =
@@ -69,25 +73,31 @@ void RedBird::update(
         position.x < playerPosition.x + 2;
       // clang-format on
 
-      if (wantsToAttack) {
+      if (wantsToAttack)
+      {
         sprite.mFramesToRender[0] =
           HOVER_ANIMATION[int(s.mpPerFrameState->mIsOddFrame)];
         mState = Hovering{};
-      } else {
+      }
+      else
+      {
         const auto result = engine::moveHorizontally(
           *d.mpCollisionChecker,
           entity,
           engine::orientation::toMovement(state.mOrientation));
-        if (result != engine::MovementResult::Completed) {
+        if (result != engine::MovementResult::Completed)
+        {
           state.mOrientation =
             engine::orientation::opposite(state.mOrientation);
-        } else {
+        }
+        else
+        {
           // Animate flying
           ++state.mAnimStep;
-          sprite.mFramesToRender[0] =
-            FLY_ANIMATION[state.mAnimStep % 4] +
-              (state.mOrientation == Orientation::Right
-                ? FLY_ANIMATION_ORIENTATION_OFFSET : 0);
+          sprite.mFramesToRender[0] = FLY_ANIMATION[state.mAnimStep % 4] +
+            (state.mOrientation == Orientation::Right
+               ? FLY_ANIMATION_ORIENTATION_OFFSET
+               : 0);
         }
       }
     },
@@ -97,7 +107,8 @@ void RedBird::update(
         HOVER_ANIMATION[int(s.mpPerFrameState->mIsOddFrame)];
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed >= 7) {
+      if (state.mFramesElapsed >= 7)
+      {
         mState = PlungingDown{position.y};
         body.mGravityAffected = true;
         sprite.mFramesToRender[0] = 6;
@@ -106,13 +117,15 @@ void RedBird::update(
 
     [&](const PlungingDown& state) {
       const auto bbox = *entity.component<BoundingBox>();
-      if (d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+      if (d.mpCollisionChecker->isOnSolidGround(position, bbox))
+      {
         startRisingUp(state.mInitialHeight, entity);
       }
     },
 
     [&, this](RisingUp& state) {
-      if (state.mBackAtOriginalHeight) {
+      if (state.mBackAtOriginalHeight)
+      {
         const auto flyingLeft = !s.mpPerFrameState->mIsOddFrame;
         const auto newOrientation =
           flyingLeft ? Orientation::Left : Orientation::Right;
@@ -123,9 +136,12 @@ void RedBird::update(
       sprite.mFramesToRender[0] =
         HOVER_ANIMATION[int(s.mpPerFrameState->mIsOddFrame)];
 
-      if (position.y > state.mInitialHeight) {
+      if (position.y > state.mInitialHeight)
+      {
         --position.y;
-      } else {
+      }
+      else
+      {
         // We wait 1 frame in the air before returning to regular flying
         // mode. This is accomplished using this bool, which is checked
         // before the position check, and so will only be checked again on
@@ -142,11 +158,13 @@ void RedBird::onCollision(
   GlobalDependencies& d,
   GlobalState& s,
   const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity
-) {
-  base::match(mState,
+  entityx::Entity entity)
+{
+  base::match(
+    mState,
     [&, this](const PlungingDown& state) {
-      if (event.mCollidedBottom) {
+      if (event.mCollidedBottom)
+      {
         startRisingUp(state.mInitialHeight, entity);
       }
     },
@@ -155,11 +173,12 @@ void RedBird::onCollision(
 }
 
 
-void RedBird::startRisingUp(const int initialHeight, entityx::Entity entity) {
+void RedBird::startRisingUp(const int initialHeight, entityx::Entity entity)
+{
   auto& body = *entity.component<MovingBody>();
 
   mState = RisingUp{initialHeight};
   body.mGravityAffected = false;
 }
 
-}
+} // namespace rigel::game_logic::behaviors

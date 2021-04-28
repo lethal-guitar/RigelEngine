@@ -20,38 +20,45 @@
 #include <stdexcept>
 
 
-namespace rigel {
+namespace rigel
+{
 
-namespace {
+namespace
+{
 
 constexpr auto CANNOT_MERGE_MESSAGE =
   "JSON trees are not structurally equivalent";
 
 
-bool isArrayOfPrimitives(const nlohmann::json& item) {
+bool isArrayOfPrimitives(const nlohmann::json& item)
+{
   using std::all_of;
   using std::begin;
   using std::end;
 
-// clang-format off
+  // clang-format off
   return
     item.is_array() &&
     all_of(begin(item), end(item), [](const nlohmann::json& element) {
       return !element.is_structured();
     });
-// clang-format on
+  // clang-format on
 }
 
-}
+} // namespace
 
 
-nlohmann::json merge(nlohmann::json base, nlohmann::json extension) {
-  if (!base.is_structured() || isArrayOfPrimitives(base)) {
+nlohmann::json merge(nlohmann::json base, nlohmann::json extension)
+{
+  if (!base.is_structured() || isArrayOfPrimitives(base))
+  {
     return extension;
   }
 
-  if (base.is_object()) {
-    if (!extension.is_object()) {
+  if (base.is_object())
+  {
+    if (!extension.is_object())
+    {
       throw std::invalid_argument(CANNOT_MERGE_MESSAGE);
     }
 
@@ -63,16 +70,21 @@ nlohmann::json merge(nlohmann::json base, nlohmann::json extension) {
 
     // Now recursively merge all properties. This will overwrite any primitive
     // values in base with their extension counterparts.
-    for (auto& [key, value] : base.items()) {
+    for (auto& [key, value] : base.items())
+    {
       value = merge(value, extension[key]);
     }
-  } else { // array
-    if (!extension.is_array() || base.size() != extension.size()) {
+  }
+  else
+  { // array
+    if (!extension.is_array() || base.size() != extension.size())
+    {
       throw std::invalid_argument(CANNOT_MERGE_MESSAGE);
     }
 
     auto index = 0u;
-    for (auto& value : base) {
+    for (auto& value : base)
+    {
       value = merge(value, extension[index]);
       ++index;
     }
@@ -81,4 +93,4 @@ nlohmann::json merge(nlohmann::json base, nlohmann::json extension) {
   return base;
 }
 
-}
+} // namespace rigel

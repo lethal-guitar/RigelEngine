@@ -21,11 +21,14 @@
 #include <initializer_list>
 
 
-namespace rigel::engine::components {
+namespace rigel::engine::components
+{
 
 /** Marks entity to be destroyed when some condition is fulfilled */
-struct AutoDestroy {
-  enum class Condition {
+struct AutoDestroy
+{
+  enum class Condition
+  {
     OnWorldCollision = 1,
     OnLeavingActiveRegion = 2,
     OnTimeoutElapsed = 4
@@ -38,13 +41,15 @@ struct AutoDestroy {
 
   AutoDestroy(std::initializer_list<Condition> conditions)
   {
-    for (const auto condition : conditions) {
+    for (const auto condition : conditions)
+    {
       const auto conditionValue = static_cast<int>(condition);
       mConditionFlags |= conditionValue;
     }
   }
 
-  static AutoDestroy afterTimeout(const int framesToLive) {
+  static AutoDestroy afterTimeout(const int framesToLive)
+  {
     auto instance = AutoDestroy{Condition::OnTimeoutElapsed};
     instance.mFramesToLive = framesToLive;
     return instance;
@@ -54,4 +59,4 @@ struct AutoDestroy {
   int mFramesToLive = 0;
 };
 
-}
+} // namespace rigel::engine::components

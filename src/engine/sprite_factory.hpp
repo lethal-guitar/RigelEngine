@@ -24,24 +24,33 @@
 #include <vector>
 
 
-namespace rigel::loader { class ActorImagePackage; }
-namespace rigel::renderer { class Renderer; }
+namespace rigel::loader
+{
+class ActorImagePackage;
+}
+namespace rigel::renderer
+{
+class Renderer;
+}
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 // The game draws player projectiles after drawing all regular actors, which
 // makes them appear on top of everything. But in our case, they are rendered
 // using the same mechanism as the other sprites, so we have to explicitly
 // assign an order (which is higher than all regular actors' draw order).
-constexpr auto PLAYER_PROJECTILE_DRAW_ORDER = data::GameTraits::maxDrawOrder + 1;
+constexpr auto PLAYER_PROJECTILE_DRAW_ORDER =
+  data::GameTraits::maxDrawOrder + 1;
 constexpr auto MUZZLE_FLASH_DRAW_ORDER = PLAYER_PROJECTILE_DRAW_ORDER + 1;
 constexpr auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
 
 
 bool hasAssociatedSprite(data::ActorID actorID);
 
-class SpriteFactory : public ISpriteFactory {
+class SpriteFactory : public ISpriteFactory
+{
 public:
   SpriteFactory(
     renderer::Renderer* pRenderer,
@@ -50,18 +59,21 @@ public:
   engine::components::Sprite createSprite(data::ActorID id) override;
   base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override;
 
-  const renderer::TextureAtlas& textureAtlas() const {
+  const renderer::TextureAtlas& textureAtlas() const
+  {
     return mSpritesTextureAtlas;
   }
 
 private:
-  struct SpriteData {
+  struct SpriteData
+  {
     engine::SpriteDrawData mDrawData;
     std::vector<int> mInitialFramesToRender;
   };
 
   using CtorArgs = std::tuple<
-    std::unordered_map<data::ActorID, SpriteData>, renderer::TextureAtlas>;
+    std::unordered_map<data::ActorID, SpriteData>,
+    renderer::TextureAtlas>;
 
   SpriteFactory(CtorArgs args);
   static CtorArgs construct(
@@ -72,4 +84,4 @@ private:
   renderer::TextureAtlas mSpritesTextureAtlas;
 };
 
-}
+} // namespace rigel::engine

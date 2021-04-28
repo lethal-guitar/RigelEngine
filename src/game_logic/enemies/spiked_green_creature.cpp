@@ -26,47 +26,81 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 using EffectMovement = effects::EffectSprite::Movement;
 
 const effects::EffectSpec SHELL_BURST_FX_LEFT[] = {
-  {effects::EffectSprite{{0, -2}, data::ActorID::Spiked_green_creature_stone_debris_1_LEFT, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{-2, 0}, data::ActorID::Spiked_green_creature_stone_debris_2_LEFT, EffectMovement::FlyLeft}, 0},
-  {effects::EffectSprite{{2, -2}, data::ActorID::Spiked_green_creature_stone_debris_3_LEFT, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_4_LEFT, EffectMovement::FlyUpperRight}, 0},
+  {effects::EffectSprite{
+     {0, -2},
+     data::ActorID::Spiked_green_creature_stone_debris_1_LEFT,
+     EffectMovement::FlyUpperLeft},
+   0},
+  {effects::EffectSprite{
+     {-2, 0},
+     data::ActorID::Spiked_green_creature_stone_debris_2_LEFT,
+     EffectMovement::FlyLeft},
+   0},
+  {effects::EffectSprite{
+     {2, -2},
+     data::ActorID::Spiked_green_creature_stone_debris_3_LEFT,
+     EffectMovement::FlyUp},
+   0},
+  {effects::EffectSprite{
+     {},
+     data::ActorID::Spiked_green_creature_stone_debris_4_LEFT,
+     EffectMovement::FlyUpperRight},
+   0},
 };
 
 
 const effects::EffectSpec SHELL_BURST_FX_RIGHT[] = {
-  {effects::EffectSprite{{0, -2}, data::ActorID::Spiked_green_creature_stone_debris_1_RIGHT, EffectMovement::FlyUp}, 0},
-  {effects::EffectSprite{{-2, 0}, data::ActorID::Spiked_green_creature_stone_debris_2_RIGHT, EffectMovement::FlyUpperLeft}, 0},
-  {effects::EffectSprite{{2, -2}, data::ActorID::Spiked_green_creature_stone_debris_3_RIGHT, EffectMovement::FlyUpperRight}, 0},
-  {effects::EffectSprite{{}, data::ActorID::Spiked_green_creature_stone_debris_4_RIGHT, EffectMovement::FlyRight}, 0},
+  {effects::EffectSprite{
+     {0, -2},
+     data::ActorID::Spiked_green_creature_stone_debris_1_RIGHT,
+     EffectMovement::FlyUp},
+   0},
+  {effects::EffectSprite{
+     {-2, 0},
+     data::ActorID::Spiked_green_creature_stone_debris_2_RIGHT,
+     EffectMovement::FlyUpperLeft},
+   0},
+  {effects::EffectSprite{
+     {2, -2},
+     data::ActorID::Spiked_green_creature_stone_debris_3_RIGHT,
+     EffectMovement::FlyUpperRight},
+   0},
+  {effects::EffectSprite{
+     {},
+     data::ActorID::Spiked_green_creature_stone_debris_4_RIGHT,
+     EffectMovement::FlyRight},
+   0},
 };
 
 
-const int POUNCE_ANIM_SEQ[] = { 3, 3, 4, 4, 4, 5 };
-const int POUNCE_MOVEMENT_Y_OFFSETS[] = { 0, 0, -2, -1, 0, 0 };
+const int POUNCE_ANIM_SEQ[] = {3, 3, 4, 4, 4, 5};
+const int POUNCE_MOVEMENT_Y_OFFSETS[] = {0, 0, -2, -1, 0, 0};
 
 constexpr auto MOVEMENT_SPEED = 2;
 
-}
+} // namespace
 
 
 void SpikedGreenCreature::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
 
   const auto& bbox = *entity.component<engine::components::BoundingBox>();
@@ -76,25 +110,27 @@ void SpikedGreenCreature::update(
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Awakening& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 5 || state.mFramesElapsed == 9) {
+      if (state.mFramesElapsed == 5 || state.mFramesElapsed == 9)
+      {
         const auto type = orientation == Orientation::Left
           ? data::ActorID::Spiked_green_creature_eye_FX_LEFT
           : data::ActorID::Spiked_green_creature_eye_FX_RIGHT;
         spawnOneShotSprite(*d.mpEntityFactory, type, position);
       }
 
-      if (state.mFramesElapsed == 15) {
+      if (state.mFramesElapsed == 15)
+      {
         d.mpServiceProvider->playSound(data::SoundId::GlassBreaking);
         animationFrame = 1;
 
         spawnEffects(
           components::DestructionEffects{
-            orientation == Orientation::Left
-              ? SHELL_BURST_FX_LEFT
-              : SHELL_BURST_FX_RIGHT},
+            orientation == Orientation::Left ? SHELL_BURST_FX_LEFT
+                                             : SHELL_BURST_FX_RIGHT},
           position,
           *d.mpEntityManager);
         mState = Waiting{};
@@ -107,7 +143,8 @@ void SpikedGreenCreature::update(
         : Orientation::Left;
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 11) {
+      if (state.mFramesElapsed == 11)
+      {
         // There is a slight bug here, in that we stay on frame 2 the first
         // time around, but all subsequent Waiting states switch to frame 3
         // here. Since this affects the enemies hitbox, I decided against
@@ -115,29 +152,34 @@ void SpikedGreenCreature::update(
         ++animationFrame;
       }
 
-      if (state.mFramesElapsed == 15) {
+      if (state.mFramesElapsed == 15)
+      {
         mState = Pouncing{};
       }
     },
 
     [&, this](Pouncing& state) {
-      if (state.mFramesElapsed == 0) {
+      if (state.mFramesElapsed == 0)
+      {
         engine::startAnimationSequence(entity, POUNCE_ANIM_SEQ);
         engine::synchronizeBoundingBoxToSprite(entity);
       }
 
-      if (state.mFramesElapsed < 6) {
+      if (state.mFramesElapsed < 6)
+      {
         position.y += POUNCE_MOVEMENT_Y_OFFSETS[state.mFramesElapsed];
       }
 
-      if (state.mFramesElapsed > 1) {
+      if (state.mFramesElapsed > 1)
+      {
         const auto offset = engine::orientation::toMovement(orientation);
         position.x += offset * MOVEMENT_SPEED;
       }
       ensureNotStuckInWall(d, entity);
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 8) {
+      if (state.mFramesElapsed == 8)
+      {
         body.mGravityAffected = true;
         body.mVelocity.y = 1.0f;
         mState = Landing{};
@@ -147,7 +189,8 @@ void SpikedGreenCreature::update(
     [&, this](const Landing&) {
       const auto hasLanded =
         d.mpCollisionChecker->isOnSolidGround(position, bbox);
-      if (hasLanded) {
+      if (hasLanded)
+      {
         landOnGround(d, entity);
         return;
       }
@@ -155,7 +198,7 @@ void SpikedGreenCreature::update(
       moveWhileFalling(d, entity);
     });
 
-    engine::synchronizeBoundingBoxToSprite(entity);
+  engine::synchronizeBoundingBoxToSprite(entity);
 }
 
 
@@ -163,9 +206,10 @@ void SpikedGreenCreature::onCollision(
   GlobalDependencies& d,
   GlobalState&,
   const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity
-) {
-  if (std::holds_alternative<Landing>(mState) && event.mCollidedBottom) {
+  entityx::Entity entity)
+{
+  if (std::holds_alternative<Landing>(mState) && event.mCollidedBottom)
+  {
     landOnGround(d, entity);
   }
 }
@@ -173,8 +217,8 @@ void SpikedGreenCreature::onCollision(
 
 void SpikedGreenCreature::landOnGround(
   const GlobalDependencies& d,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& body = *entity.component<engine::components::MovingBody>();
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
@@ -191,8 +235,8 @@ void SpikedGreenCreature::landOnGround(
 
 void SpikedGreenCreature::ensureNotStuckInWall(
   const GlobalDependencies& d,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
 
   const auto& bbox = *entity.component<engine::components::BoundingBox>();
@@ -205,7 +249,8 @@ void SpikedGreenCreature::ensureNotStuckInWall(
   const auto isCurrentlyColliding = orientation == Orientation::Left
     ? d.mpCollisionChecker->isTouchingLeftWall(positionForChecking, bbox)
     : d.mpCollisionChecker->isTouchingRightWall(positionForChecking, bbox);
-  if (isCurrentlyColliding) {
+  if (isCurrentlyColliding)
+  {
     orientation = engine::orientation::opposite(orientation);
     position.x -= movementOffset;
   }
@@ -214,8 +259,8 @@ void SpikedGreenCreature::ensureNotStuckInWall(
 
 void SpikedGreenCreature::moveWhileFalling(
   const GlobalDependencies& d,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
 
   auto& position = *entity.component<engine::components::WorldPosition>();
@@ -225,9 +270,7 @@ void SpikedGreenCreature::moveWhileFalling(
 
   position.x += offset;
   engine::moveHorizontallyWithStairStepping(
-    *d.mpCollisionChecker,
-    entity,
-    offset);
+    *d.mpCollisionChecker, entity, offset);
 }
 
-}
+} // namespace rigel::game_logic::behaviors

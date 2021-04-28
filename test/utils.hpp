@@ -31,25 +31,29 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel {
+namespace rigel
+{
 
-struct MockServiceProvider : public rigel::IGameServiceProvider {
-  void fadeOutScreen() override {}
-  void fadeInScreen() override {}
+struct MockServiceProvider : public rigel::IGameServiceProvider
+{
+  void fadeOutScreen() override { }
+  void fadeInScreen() override { }
 
-  void playSound(rigel::data::SoundId id) override {
+  void playSound(rigel::data::SoundId id) override
+  {
     mLastTriggeredSoundId = id;
   }
-  void stopSound(rigel::data::SoundId id) override {}
+  void stopSound(rigel::data::SoundId id) override { }
 
-  void playMusic(const std::string&) override {}
-  void stopMusic() override {}
-  void scheduleGameQuit() override {}
-  void switchGamePath(const std::filesystem::path&) override {}
-  void markCurrentFrameAsWidescreen() override {}
+  void playMusic(const std::string&) override { }
+  void stopMusic() override { }
+  void scheduleGameQuit() override { }
+  void switchGamePath(const std::filesystem::path&) override { }
+  void markCurrentFrameAsWidescreen() override { }
   bool isSharewareVersion() const override { return false; }
 
-  const CommandLineOptions& commandLineOptions() const override {
+  const CommandLineOptions& commandLineOptions() const override
+  {
     static auto dummyOptions = CommandLineOptions{};
     return dummyOptions;
   }
@@ -58,14 +62,16 @@ struct MockServiceProvider : public rigel::IGameServiceProvider {
 };
 
 
-struct FireShotParameters {
+struct FireShotParameters
+{
   rigel::game_logic::ProjectileType type;
   rigel::engine::components::WorldPosition position;
   rigel::game_logic::ProjectileDirection direction;
 };
 
 
-struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
+struct MockEntityFactory : public rigel::game_logic::IEntityFactory
+{
   std::vector<FireShotParameters> mCreateProjectileCalls;
 
   explicit MockEntityFactory(entityx::EntityManager* pEntityManager)
@@ -76,51 +82,48 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory {
   entityx::Entity spawnProjectile(
     game_logic::ProjectileType type,
     const engine::components::WorldPosition& pos,
-    game_logic::ProjectileDirection direction
-  ) override {
+    game_logic::ProjectileDirection direction) override
+  {
     mCreateProjectileCalls.push_back(FireShotParameters{type, pos, direction});
     return createMockSpriteEntity();
   }
 
   void createEntitiesForLevel(
-    const data::map::ActorDescriptionList& actors
-  ) override {
+    const data::map::ActorDescriptionList& actors) override
+  {
   }
 
-  engine::components::Sprite createSpriteForId(
-    const data::ActorID actorID
-  ) override {
+  engine::components::Sprite
+    createSpriteForId(const data::ActorID actorID) override
+  {
     return {};
   }
 
-  entityx::Entity spawnSprite(
-    data::ActorID actorID,
-    bool assignBoundingBox = false
-  ) override {
+  entityx::Entity
+    spawnSprite(data::ActorID actorID, bool assignBoundingBox = false) override
+  {
     return createMockSpriteEntity();
   }
 
   entityx::Entity spawnSprite(
     data::ActorID actorID,
     const base::Vector& position,
-    bool assignBoundingBox = false
-  ) override {
+    bool assignBoundingBox = false) override
+  {
     return createMockSpriteEntity();
   }
 
-  entityx::Entity spawnActor(
-    data::ActorID actorID,
-    const base::Vector& position
-  ) override {
+  entityx::Entity
+    spawnActor(data::ActorID actorID, const base::Vector& position) override
+  {
     return createMockSpriteEntity();
   }
 
-  entityx::EntityManager& entityManager() override {
-    return *mpEntityManager;
-  }
+  entityx::EntityManager& entityManager() override { return *mpEntityManager; }
 
 private:
-  entityx::Entity createMockSpriteEntity() {
+  entityx::Entity createMockSpriteEntity()
+  {
     static rigel::engine::SpriteDrawData dummyDrawData;
 
     auto entity = mpEntityManager->create();
@@ -132,4 +135,4 @@ private:
   entityx::EntityManager* mpEntityManager;
 };
 
-}
+} // namespace rigel

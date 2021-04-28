@@ -25,14 +25,16 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 const auto NUM_BREAK_ANIMATION_STEPS = 15;
 const auto BREAK_ANIM_SPEED = 3; // frames between visible animation steps
@@ -50,15 +52,15 @@ const auto CONTRACT_UP_ANIM_START = 14;
 const auto CONTRACT_UP_ANIM_END = 16;
 const auto STRETCH_DOWN_ANIM_END = 14;
 
-}
+} // namespace
 
 
 void SlimeContainer::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
   using game_logic::components::BehaviorController;
   using game_logic::components::Shootable;
@@ -66,15 +68,19 @@ void SlimeContainer::update(
   auto& sprite = *entity.component<Sprite>();
 
   const auto stillIntact = entity.has_component<Shootable>();
-  if (stillIntact) {
+  if (stillIntact)
+  {
     // Animate slime blob inside
     sprite.mFramesToRender[2] = d.mpRandomGenerator->gen() % 2;
-  } else {
+  }
+  else
+  {
     ++mBreakAnimationStep;
     const auto visibleFrame = mBreakAnimationStep / BREAK_ANIM_SPEED;
     sprite.mFramesToRender[0] = 2 + visibleFrame;
 
-    if (mBreakAnimationStep >= NUM_BREAK_ANIMATION_STEPS) {
+    if (mBreakAnimationStep >= NUM_BREAK_ANIMATION_STEPS)
+    {
       const auto& position = *entity.component<WorldPosition>();
       d.mpEntityFactory->spawnActor(
         data::ActorID::Green_slime_blob, position + SLIME_BLOB_SPAWN_OFFSET);
@@ -90,8 +96,8 @@ void SlimeContainer::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
   const base::Point<float>&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   auto& sprite = *entity.component<Sprite>();
@@ -105,8 +111,8 @@ void SlimeBlob::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
   using namespace engine::orientation;
 
@@ -120,7 +126,8 @@ void SlimeBlob::update(
   auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<engine::components::Sprite>();
 
-  base::match(mState,
+  base::match(
+    mState,
     [&](OnGround& state) {
       // Animate walking
       state.mIsOddUpdate = !state.mIsOddUpdate;
@@ -134,24 +141,26 @@ void SlimeBlob::update(
       sprite.mFramesToRender[0] = newAnimFrame;
 
       // Decide if we should continue walking or change state
-      const auto isFacingLeft =
-        mOrientation == Orientation::Left;
+      const auto isFacingLeft = mOrientation == Orientation::Left;
       const auto movingTowardsPlayer =
         (isFacingLeft && position.x >= playerPosition.x) ||
         (!isFacingLeft && position.x <= playerPosition.x);
 
-      if (movingTowardsPlayer) {
-        if (newAnimFrame % 2 == 1) {
-          const auto walkedSuccessfully = engine::walk(
-            *d.mpCollisionChecker,
-            entity,
-            mOrientation);
+      if (movingTowardsPlayer)
+      {
+        if (newAnimFrame % 2 == 1)
+        {
+          const auto walkedSuccessfully =
+            engine::walk(*d.mpCollisionChecker, entity, mOrientation);
 
-          if (!walkedSuccessfully) {
+          if (!walkedSuccessfully)
+          {
             mState = Idle{};
           }
         }
-      } else {
+      }
+      else
+      {
         mState = Idle{};
       }
     },
@@ -159,7 +168,8 @@ void SlimeBlob::update(
 
     [&](OnCeiling& state) {
       // Check if we are above the player, and fall back down if so
-      if (position.x == playerPosition.x) {
+      if (position.x == playerPosition.x)
+      {
         mState = Descending{};
         return;
       }
@@ -171,16 +181,15 @@ void SlimeBlob::update(
       sprite.mFramesToRender[0] = baseFrame + (state.mIsOddUpdate ? 1 : 0);
 
       // Move
-      if (state.mIsOddUpdate) {
-        const auto orientationForMovement = playerIsRight
-          ? Orientation::Right
-          : Orientation::Left;
+      if (state.mIsOddUpdate)
+      {
+        const auto orientationForMovement =
+          playerIsRight ? Orientation::Right : Orientation::Left;
         const auto walkedSuccessfully = engine::walkOnCeiling(
-          *d.mpCollisionChecker,
-          entity,
-          orientationForMovement);
+          *d.mpCollisionChecker, entity, orientationForMovement);
 
-        if (!walkedSuccessfully) {
+        if (!walkedSuccessfully)
+        {
           sprite.mFramesToRender[0] -= 2;
           mState = Descending{};
         }
@@ -190,7 +199,8 @@ void SlimeBlob::update(
 
     [&](Idle& state) {
       // Randomly decide to fly up
-      if ((d.mpRandomGenerator->gen() % 32) == 0) {
+      if ((d.mpRandomGenerator->gen() % 32) == 0)
+      {
         mState = Ascending{};
         sprite.mFramesToRender[0] = STRETCH_UP_ANIM_START;
         return;
@@ -203,7 +213,8 @@ void SlimeBlob::update(
 
       // Wait until time-out elapsed
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed >= 10) {
+      if (state.mFramesElapsed >= 10)
+      {
         // Orient towards player and back to movement
         const auto newOrientation = position.x <= playerPosition.x
           ? Orientation::Right
@@ -218,25 +229,32 @@ void SlimeBlob::update(
     [&](Ascending& state) {
       auto& animationFrame = sprite.mFramesToRender[0];
 
-      if (animationFrame < IN_FLIGHT_ANIM_FRAME) {
+      if (animationFrame < IN_FLIGHT_ANIM_FRAME)
+      {
         // Animate getting ready to fly up (stretch upwards). Assumes we
         // previously set the animation frame to STRETCH_UP_ANIM_START
         ++animationFrame;
-      } else if (animationFrame == IN_FLIGHT_ANIM_FRAME) {
+      }
+      else if (animationFrame == IN_FLIGHT_ANIM_FRAME)
+      {
         // Fly upwards
         const auto willCollide =
           d.mpCollisionChecker->isTouchingCeiling(position, bbox);
-        if (willCollide) {
+        if (willCollide)
+        {
           animationFrame = CONTRACT_UP_ANIM_START;
         }
 
         // always move, even when colliding. This is ok because the next
         // anim frame has an offset which makes us not collide anymore.
         position.y -= 1;
-      } else {
+      }
+      else
+      {
         // Animate arrival on ceiling (contract)
         ++animationFrame;
-        if (animationFrame >= CONTRACT_UP_ANIM_END) {
+        if (animationFrame >= CONTRACT_UP_ANIM_END)
+        {
           mState = OnCeiling{};
         }
       }
@@ -246,25 +264,31 @@ void SlimeBlob::update(
     [&](Descending& state) {
       auto& animationFrame = sprite.mFramesToRender[0];
 
-      if (animationFrame == IN_FLIGHT_ANIM_FRAME) {
+      if (animationFrame == IN_FLIGHT_ANIM_FRAME)
+      {
         const auto offset = base::Vector{0, 3};
 
         const auto willCollide =
           d.mpCollisionChecker->isOnSolidGround(position + offset, bbox);
-        if (willCollide) {
+        if (willCollide)
+        {
           animationFrame = CONTRACT_DOWN_ANIM_START;
         }
 
         // always move, even when colliding. This is ok because the next
         // anim frame has an offset which makes us not collide anymore.
         position.y += 1;
-      } else {
-        if (animationFrame == STRETCH_DOWN_ANIM_END) {
+      }
+      else
+      {
+        if (animationFrame == STRETCH_DOWN_ANIM_END)
+        {
           position.y += 1;
         }
 
         --animationFrame;
-        if (animationFrame <= CONTRACT_DOWN_ANIM_END) {
+        if (animationFrame <= CONTRACT_DOWN_ANIM_END)
+        {
           animationFrame = 0;
           mState = Idle{};
           mOrientation = Orientation::Left;
@@ -275,4 +299,4 @@ void SlimeBlob::update(
   engine::synchronizeBoundingBoxToSprite(entity);
 }
 
-}
+} // namespace rigel::game_logic::behaviors

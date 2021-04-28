@@ -43,44 +43,53 @@
 //            we just hardcode those keys for Quit_Select.
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 using namespace data::script;
 using data::GameTraits;
 
 
-namespace {
+namespace
+{
 
-void skipWhiteSpace(istream& sourceStream) {
-  while (!sourceStream.eof() && std::isspace(sourceStream.peek())) {
+void skipWhiteSpace(istream& sourceStream)
+{
+  while (!sourceStream.eof() && std::isspace(sourceStream.peek()))
+  {
     sourceStream.get();
   }
 }
 
 
-bool isCommand(const string& line) {
+bool isCommand(const string& line)
+{
   return strings::startsWith(line, "//");
 }
 
 
-void stripCommandPrefix(string& line) {
+void stripCommandPrefix(string& line)
+{
   strings::trimLeft(line, "/");
 }
 
 
-template<typename Callable>
+template <typename Callable>
 void parseScriptLines(
   istream& sourceTextStream,
   const string& endMarker,
-  Callable consumeLine
-) {
+  Callable consumeLine)
+{
   skipWhiteSpace(sourceTextStream);
-  for (string line; getline(sourceTextStream, line, '\n');) {
+  for (string line; getline(sourceTextStream, line, '\n');)
+  {
     strings::trim(line);
-    if (isCommand(line)) {
+    if (isCommand(line))
+    {
       strings::trimLeft(line, "/");
-      if (line == endMarker) {
+      if (line == endMarker)
+      {
         return;
       }
 
@@ -97,7 +106,8 @@ void parseScriptLines(
 }
 
 
-vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
+vector<string> parseMessageBoxTextDefinition(istream& sourceStream)
+{
   vector<string> messageLines;
 
   // There is unfortunately no end marker for the CENTERWINDOW section,
@@ -105,27 +115,35 @@ vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
   // we find one that's not part of the message box definition commands, then
   // we assume the message box is complete and return to regular parsing.
   auto startOfLine = sourceStream.tellg();
-  for (string line; getline(sourceStream, line, '\n');) {
+  for (string line; getline(sourceStream, line, '\n');)
+  {
     strings::trim(line);
-    if (isCommand(line)) {
+    if (isCommand(line))
+    {
       stripCommandPrefix(line);
       istringstream lineTextStream(line);
       string command;
       lineTextStream >> command;
       strings::trim(command);
 
-      if (command == "CWTEXT") {
+      if (command == "CWTEXT")
+      {
         lineTextStream.get();
         string messageLine;
         getline(lineTextStream, messageLine, '\r');
-        if (messageLine.empty()) {
+        if (messageLine.empty())
+        {
           throw invalid_argument("Corrupt Duke Script file");
         }
         strings::trimRight(messageLine);
         messageLines.emplace_back(messageLine);
-      } else if (command == "SKLINE") {
+      }
+      else if (command == "SKLINE")
+      {
         messageLines.emplace_back("");
-      } else {
+      }
+      else
+      {
         // Since we already read a command, we have to rewind the stream to
         // allow the subsequent regular parsing to work.
         sourceStream.seekg(startOfLine);
@@ -140,10 +158,9 @@ vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
 }
 
 
-std::optional<Action> parseSingleActionCommand(
-  const string& command,
-  istream& lineTextStream
-) {
+std::optional<Action>
+  parseSingleActionCommand(const string& command, istream& lineTextStream)
+{
   if (command == "FADEIN")
   {
     return Action{FadeIn{}};
@@ -156,7 +173,8 @@ std::optional<Action> parseSingleActionCommand(
   {
     int amount = 0;
     lineTextStream >> amount;
-    if (amount <= 0) {
+    if (amount <= 0)
+    {
       throw invalid_argument("Invalid DELAY command in Duke Script file");
     }
     return Action{Delay{amount}};
@@ -165,7 +183,8 @@ std::optional<Action> parseSingleActionCommand(
   {
     int duration = 0;
     lineTextStream >> duration;
-    if (duration <= 0) {
+    if (duration <= 0)
+    {
       throw invalid_argument("Invalid BABBLEON command in Duke Script file");
     }
     return Action{AnimateNewsReporter{duration}};
@@ -186,7 +205,8 @@ std::optional<Action> parseSingleActionCommand(
   {
     int slot = 0;
     lineTextStream >> slot;
-    if (slot < 0 || slot >= 8) {
+    if (slot < 0 || slot >= 8)
+    {
       throw invalid_argument("Invalid GETNAMES command in Duke Script file");
     }
     return Action{ShowSaveSlots{slot}};
@@ -202,7 +222,8 @@ std::optional<Action> parseSingleActionCommand(
     string imageName;
     lineTextStream >> imageName;
     strings::trim(imageName);
-    if (imageName.empty()) {
+    if (imageName.empty())
+    {
       throw invalid_argument("Invalid LOADRAW command in Duke Script file");
     }
     return Action{ShowFullScreenImage{imageName}};
@@ -218,7 +239,8 @@ std::optional<Action> parseSingleActionCommand(
     string paletteFile;
     lineTextStream >> paletteFile;
     strings::trim(paletteFile);
-    if (paletteFile.empty()) {
+    if (paletteFile.empty())
+    {
       throw invalid_argument("Invalid LOADRAW command in Duke Script file");
     }
     return Action{SetPalette{paletteFile}};
@@ -243,7 +265,8 @@ std::optional<Action> parseSingleActionCommand(
     lineTextStream >> count;
 
     vector<SetupCheckBoxes::CheckBoxDefinition> definitions;
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i)
+    {
       SetupCheckBoxes::CheckBoxDefinition definition{0, 0};
       lineTextStream >> definition.yPos;
       lineTextStream >> definition.id;
@@ -263,10 +286,10 @@ std::optional<Action> parseSingleActionCommand(
       "MENU",
       "PAGESEND",
       "PAGESSTART",
-      "SKLINE"
-    };
+      "SKLINE"};
 
-    if (notAllowedHere.count(command) == 1) {
+    if (notAllowedHere.count(command) == 1)
+    {
       throw invalid_argument(
         string("The command ") + command + " is not allowed in this context");
     }
@@ -280,13 +303,14 @@ vector<Action> parseTextCommandWithBigText(
   const int x,
   const int y,
   const string& sourceText,
-  const string::const_iterator bigTextMarkerIter
-) {
+  const string::const_iterator bigTextMarkerIter)
+{
   vector<Action> textActions;
 
-  const auto numPrecedingCharacters = static_cast<int>(
-    distance(sourceText.begin(), bigTextMarkerIter));
-  if (numPrecedingCharacters > 0) {
+  const auto numPrecedingCharacters =
+    static_cast<int>(distance(sourceText.begin(), bigTextMarkerIter));
+  if (numPrecedingCharacters > 0)
+  {
     string regularTextPart(sourceText.begin(), bigTextMarkerIter);
     textActions.emplace_back(DrawText{x, y, regularTextPart});
   }
@@ -296,34 +320,30 @@ vector<Action> parseTextCommandWithBigText(
 
   const auto colorIndex = static_cast<uint8_t>(*bigTextMarkerIter) - 0xF0;
   string bigTextPart(next(bigTextMarkerIter), sourceText.end());
-  textActions.emplace_back(DrawBigText{
-    x + positionOffset,
-    y,
-    colorIndex,
-    move(bigTextPart)
-  });
+  textActions.emplace_back(
+    DrawBigText{x + positionOffset, y, colorIndex, move(bigTextPart)});
 
   return textActions;
 }
 
 
-Action parseDrawSpriteCommand(const int x, const int y, const string& source) {
-  if (source.size() < 5) {
+Action parseDrawSpriteCommand(const int x, const int y, const string& source)
+{
+  if (source.size() < 5)
+  {
     throw invalid_argument("Corrupt Duke Script file");
   }
 
   string actorNumberString(source.begin() + 1, source.begin() + 4);
   string frameNumberString(source.begin() + 4, source.begin() + 6);
 
-  return {DrawSprite{
-    x + 2,
-    y + 1,
-    stoi(actorNumberString),
-    stoi(frameNumberString)}};
+  return {
+    DrawSprite{x + 2, y + 1, stoi(actorNumberString), stoi(frameNumberString)}};
 }
 
 
-vector<Action> parseTextCommand(istream& lineTextStream) {
+vector<Action> parseTextCommand(istream& lineTextStream)
+{
   // They decided to pack a lot of different functionality into the XYTEXT
   // command, which makes parsing it a bit more involved. There are three
   // variants:
@@ -359,22 +379,29 @@ vector<Action> parseTextCommand(istream& lineTextStream) {
   string sourceText;
   getline(lineTextStream, sourceText, '\r');
 
-  if (sourceText.empty()) {
+  if (sourceText.empty())
+  {
     throw invalid_argument("Corrupt Duke Script file");
   }
 
   vector<Action> textActions;
-  if (static_cast<uint8_t>(sourceText[0]) == 0xEF) {
+  if (static_cast<uint8_t>(sourceText[0]) == 0xEF)
+  {
     textActions.emplace_back(parseDrawSpriteCommand(x, y, sourceText));
-  } else {
+  }
+  else
+  {
     const auto bigTextMarkerIter =
       std::find_if(sourceText.begin(), sourceText.end(), [](const auto ch) {
         return static_cast<uint8_t>(ch) >= 0xF0;
       });
 
-    if (bigTextMarkerIter != sourceText.end()) {
+    if (bigTextMarkerIter != sourceText.end())
+    {
       return parseTextCommandWithBigText(x, y, sourceText, bigTextMarkerIter);
-    } else {
+    }
+    else
+    {
       textActions.emplace_back(DrawText{x, y, sourceText});
     }
   }
@@ -386,11 +413,12 @@ vector<Action> parseTextCommand(istream& lineTextStream) {
 vector<Action> parseCommand(
   const std::string& command,
   istream& sourceTextStream,
-  istream& currentLineStream
-) {
+  istream& currentLineStream)
+{
   vector<Action> actions;
 
-  if (command == "CENTERWINDOW") {
+  if (command == "CENTERWINDOW")
+  {
     int y = 0;
     int width = 0;
     int height = 0;
@@ -400,24 +428,27 @@ vector<Action> parseCommand(
 
     skipWhiteSpace(sourceTextStream);
     return {Action{ShowMessageBox{
-      y,
-      width,
-      height,
-      parseMessageBoxTextDefinition(sourceTextStream)}}};
-  } else if (command == "MENU") {
+      y, width, height, parseMessageBoxTextDefinition(sourceTextStream)}}};
+  }
+  else if (command == "MENU")
+  {
     int slot = 0;
     currentLineStream >> slot;
 
     return {
       ConfigurePersistentMenuSelection{slot},
-      ScheduleFadeInBeforeNextWaitState{}
-    };
-  } else if (command == "XYTEXT") {
+      ScheduleFadeInBeforeNextWaitState{}};
+  }
+  else if (command == "XYTEXT")
+  {
     actions = parseTextCommand(currentLineStream);
-  } else {
-    const auto maybeAction = parseSingleActionCommand(
-      command, currentLineStream);
-    if (maybeAction) {
+  }
+  else
+  {
+    const auto maybeAction =
+      parseSingleActionCommand(command, currentLineStream);
+    if (maybeAction)
+    {
       actions.emplace_back(*maybeAction);
     }
   }
@@ -426,17 +457,21 @@ vector<Action> parseCommand(
 }
 
 
-PagesDefinition parsePagesDefinition(
-  istream& sourceTextStream
-) {
+PagesDefinition parsePagesDefinition(istream& sourceTextStream)
+{
   vector<data::script::Script> pages(1);
-  parseScriptLines(sourceTextStream, "PAGESEND",
+  parseScriptLines(
+    sourceTextStream,
+    "PAGESEND",
     [&pages, &sourceTextStream](const auto& command, auto& lineTextStream) {
-      if (command == "APAGE") {
+      if (command == "APAGE")
+      {
         pages.emplace_back(Script{});
-      } else {
-        const auto actions = parseCommand(
-          command, sourceTextStream, lineTextStream);
+      }
+      else
+      {
+        const auto actions =
+          parseCommand(command, sourceTextStream, lineTextStream);
         auto& currentPage = pages.back();
         currentPage.insert(currentPage.end(), actions.begin(), actions.end());
       }
@@ -446,18 +481,24 @@ PagesDefinition parsePagesDefinition(
 }
 
 
-data::script::Script parseScript(istream& sourceTextStream) {
+data::script::Script parseScript(istream& sourceTextStream)
+{
   data::script::Script script;
 
-  parseScriptLines(sourceTextStream, "END",
+  parseScriptLines(
+    sourceTextStream,
+    "END",
     [&script, &sourceTextStream](const auto& command, auto& lineTextStream) {
       vector<Action> actions;
 
-      if (command == "PAGESSTART") {
+      if (command == "PAGESSTART")
+      {
         skipWhiteSpace(sourceTextStream);
         actions.emplace_back(std::make_shared<PagesDefinition>(
           parsePagesDefinition(sourceTextStream)));
-      } else {
+      }
+      else
+      {
         actions = parseCommand(command, sourceTextStream, lineTextStream);
       }
 
@@ -468,15 +509,18 @@ data::script::Script parseScript(istream& sourceTextStream) {
 }
 
 
-bool skipToHintsSection(istream& sourceTextStream) {
-  while (!sourceTextStream.eof()) {
+bool skipToHintsSection(istream& sourceTextStream)
+{
+  while (!sourceTextStream.eof())
+  {
     skipWhiteSpace(sourceTextStream);
 
     string sectionName;
     sourceTextStream >> sectionName;
     strings::trim(sectionName);
 
-    if (sectionName == "Hints") {
+    if (sectionName == "Hints")
+    {
       skipWhiteSpace(sourceTextStream);
       return true;
     }
@@ -485,21 +529,24 @@ bool skipToHintsSection(istream& sourceTextStream) {
   return false;
 }
 
-}
+} // namespace
 
 
-ScriptBundle loadScripts(const string& scriptSource) {
+ScriptBundle loadScripts(const string& scriptSource)
+{
   istringstream sourceStream(scriptSource);
 
   ScriptBundle bundle;
-  while (!sourceStream.eof()) {
+  while (!sourceStream.eof())
+  {
     skipWhiteSpace(sourceStream);
 
     string scriptName;
     sourceStream >> scriptName;
     strings::trim(scriptName);
 
-    if (!scriptName.empty()) {
+    if (!scriptName.empty())
+    {
       bundle.emplace(scriptName, parseScript(sourceStream));
     }
   }
@@ -508,20 +555,24 @@ ScriptBundle loadScripts(const string& scriptSource) {
 }
 
 
-data::LevelHints loadHintMessages(const std::string& scriptSource) {
+data::LevelHints loadHintMessages(const std::string& scriptSource)
+{
   istringstream sourceStream(scriptSource);
 
   const auto hintsFound = skipToHintsSection(sourceStream);
-  if (!hintsFound) {
+  if (!hintsFound)
+  {
     return {};
   }
 
   std::vector<data::Hint> hints;
 
-  for (string line; getline(sourceStream, line, '\r'); ) {
+  for (string line; getline(sourceStream, line, '\r');)
+  {
     skipWhiteSpace(sourceStream);
 
-    if (!isCommand(line)) {
+    if (!isCommand(line))
+    {
       continue;
     }
 
@@ -533,11 +584,13 @@ data::LevelHints loadHintMessages(const std::string& scriptSource) {
     lineTextStream >> command;
     stripCommandPrefix(command);
 
-    if (command == "END") {
+    if (command == "END")
+    {
       break;
     }
 
-    if (command == "HELPTEXT") {
+    if (command == "HELPTEXT")
+    {
       int episode;
       int level;
       string message;
@@ -555,4 +608,4 @@ data::LevelHints loadHintMessages(const std::string& scriptSource) {
   return data::LevelHints{hints};
 }
 
-}
+} // namespace rigel::loader

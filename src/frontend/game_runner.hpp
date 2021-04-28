@@ -31,9 +31,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel {
+namespace rigel
+{
 
-class GameRunner {
+class GameRunner
+{
 public:
   GameRunner(
     data::PlayerModel* pPlayerModel,
@@ -70,23 +72,27 @@ private:
 };
 
 
-inline bool GameRunner::levelFinished() const {
+inline bool GameRunner::levelFinished() const
+{
   return mWorld.levelFinished() || mLevelFinishedByDebugKey;
 }
 
 
-inline bool GameRunner::gameQuit() const {
+inline bool GameRunner::gameQuit() const
+{
   return mMenu.quitRequested();
 }
 
 
-inline std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const {
+inline std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const
+{
   return mMenu.requestedGameToLoad();
 }
 
 
-inline std::set<data::Bonus> GameRunner::achievedBonuses() const {
+inline std::set<data::Bonus> GameRunner::achievedBonuses() const
+{
   return mWorld.achievedBonuses();
 }
 
-}
+} // namespace rigel

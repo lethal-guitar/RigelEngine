@@ -22,25 +22,31 @@
 #include "engine/physical_components.hpp"
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using namespace components;
 
 
-namespace {
+namespace
+{
 
-bool determineActiveState(entityx::Entity entity, const bool inActiveRegion) {
+bool determineActiveState(entityx::Entity entity, const bool inActiveRegion)
+{
   using Policy = ActivationSettings::Policy;
 
-  if (entity.has_component<ActivationSettings>()) {
+  if (entity.has_component<ActivationSettings>())
+  {
     auto& settings = *entity.component<ActivationSettings>();
 
-    switch (settings.mPolicy) {
+    switch (settings.mPolicy)
+    {
       case Policy::Always:
         return true;
 
       case Policy::AlwaysAfterFirstActivation:
-        if (!settings.mHasBeenActivated && inActiveRegion) {
+        if (!settings.mHasBeenActivated && inActiveRegion)
+        {
           settings.mHasBeenActivated = true;
         }
 
@@ -55,7 +61,7 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion) {
   return inActiveRegion;
 }
 
-}
+} // namespace
 
 
 // TODO: Declaration for this is currently in base_components.hpp, maybe
@@ -63,8 +69,8 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion) {
 bool isOnScreen(
   const BoundingBox& bounds,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize
-) {
+  const base::Extents& viewPortSize)
+{
   const BoundingBox activeRegionBox{cameraPosition, viewPortSize};
   return bounds.intersects(activeRegionBox);
 }
@@ -73,23 +79,23 @@ bool isOnScreen(
 void markActiveEntities(
   entityx::EntityManager& es,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize
-) {
+  const base::Extents& viewPortSize)
+{
   const BoundingBox activeRegionBox{cameraPosition, viewPortSize};
 
   es.each<WorldPosition, BoundingBox>([&activeRegionBox](
-    entityx::Entity entity,
-    const WorldPosition& position,
-    const BoundingBox& bbox
-  ) {
+                                        entityx::Entity entity,
+                                        const WorldPosition& position,
+                                        const BoundingBox& bbox) {
     const auto worldSpaceBbox = toWorldSpace(bbox, position);
     const auto inActiveRegion = worldSpaceBbox.intersects(activeRegionBox);
     const auto active = determineActiveState(entity, inActiveRegion);
     setTag<Active>(entity, active);
-    if (active) {
+    if (active)
+    {
       entity.component<Active>()->mIsOnScreen = inActiveRegion;
     }
   });
 }
 
-}
+} // namespace rigel::engine

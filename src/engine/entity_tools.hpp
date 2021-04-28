@@ -24,39 +24,46 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-template<typename TagComponent>
-void setTag(entityx::Entity entity, const bool assignTag) {
-  if (!entity.has_component<TagComponent>() && assignTag) {
+template <typename TagComponent>
+void setTag(entityx::Entity entity, const bool assignTag)
+{
+  if (!entity.has_component<TagComponent>() && assignTag)
+  {
     entity.assign<TagComponent>();
   }
-  if (entity.has_component<TagComponent>() && !assignTag) {
+  if (entity.has_component<TagComponent>() && !assignTag)
+  {
     entity.remove<TagComponent>();
   }
 }
 
 
-template<typename ComponentT>
-void removeSafely(entityx::Entity entity) {
-  if (entity.has_component<ComponentT>()) {
+template <typename ComponentT>
+void removeSafely(entityx::Entity entity)
+{
+  if (entity.has_component<ComponentT>())
+  {
     entity.remove<ComponentT>();
   }
 }
 
 
 /** Like Entity::assign, but first removes the component if already present. */
-template<typename ComponentT, typename... Args>
-void reassign(entityx::Entity entity, Args&&... args) {
+template <typename ComponentT, typename... Args>
+void reassign(entityx::Entity entity, Args&&... args)
+{
   removeSafely<ComponentT>(entity);
   entity.assign<ComponentT>(std::forward<Args>(args)...);
 }
 
 
-inline bool isOnScreen(const entityx::Entity entity) {
-  return
-      entity.has_component<components::Active>() &&
-      entity.component<const components::Active>()->mIsOnScreen;
+inline bool isOnScreen(const entityx::Entity entity)
+{
+  return entity.has_component<components::Active>() &&
+    entity.component<const components::Active>()->mIsOnScreen;
 }
 
 
@@ -67,9 +74,10 @@ inline bool isOnScreen(const entityx::Entity entity) {
  * off screen. This function resets their activation. This means that they will
  * be back to inactive until they come on-screen again.
  */
-inline void resetActivation(entityx::Entity entity) {
+inline void resetActivation(entityx::Entity entity)
+{
   removeSafely<components::Active>(entity);
   entity.component<components::ActivationSettings>()->mHasBeenActivated = false;
 }
 
-}
+} // namespace rigel::engine

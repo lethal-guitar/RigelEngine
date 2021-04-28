@@ -23,11 +23,12 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #ifdef APIENTRY
-#undef APIENTRY
+  #undef APIENTRY
 #endif
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 void loadGlFunctions();
 

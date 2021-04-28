@@ -27,15 +27,18 @@
 namespace ex = entityx;
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace {
+namespace
+{
 
 using namespace engine::components;
 using namespace game_logic::components;
 
 
-struct VerticalDeadZone {
+struct VerticalDeadZone
+{
   int mStart;
   int mEnd;
 };
@@ -59,7 +62,8 @@ constexpr auto INITIAL_CAMERA_OFFSET = base::Vector{15, 19};
 constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
 
 
-bool shouldUseTightDeadZone(const Player& player) {
+bool shouldUseTightDeadZone(const Player& player)
+{
   // clang-format off
   return
     player.stateIs<ClimbingLadder>() ||
@@ -71,17 +75,18 @@ bool shouldUseTightDeadZone(const Player& player) {
 }
 
 
-const VerticalDeadZone& deadZoneForStateOf(const Player& player) {
-  return shouldUseTightDeadZone(player)
-    ? TIGHT_VERTICAL_DEAD_ZONE
-    : DEFAULT_VERTICAL_DEAD_ZONE;
+const VerticalDeadZone& deadZoneForStateOf(const Player& player)
+{
+  return shouldUseTightDeadZone(player) ? TIGHT_VERTICAL_DEAD_ZONE
+                                        : DEFAULT_VERTICAL_DEAD_ZONE;
 }
 
 
-base::Rect<int> deadZoneRect(const Player& player) {
+base::Rect<int> deadZoneRect(const Player& player)
+{
   const auto& verticalDeadZone = deadZoneForStateOf(player);
-  const auto deadZoneStartX = player.stateIs<InShip>()
-    ? IN_SHIP_DEAD_ZONE_START_X : DEAD_ZONE_START_X;
+  const auto deadZoneStartX =
+    player.stateIs<InShip>() ? IN_SHIP_DEAD_ZONE_START_X : DEAD_ZONE_START_X;
 
   return base::makeRect<int>(
     {deadZoneStartX, verticalDeadZone.mStart},
@@ -106,8 +111,8 @@ base::Rect<int> deadZoneRect(const Player& player) {
  */
 base::Rect<int> normalizedPlayerBounds(
   const Player& player,
-  const base::Extents& viewPortSize
-) {
+  const base::Extents& viewPortSize)
+{
   const auto extraTiles =
     viewPortSize.width - data::GameTraits::mapViewPortSize.width;
   const auto offsetToCenter = extraTiles / 2;
@@ -121,39 +126,36 @@ base::Rect<int> normalizedPlayerBounds(
 base::Vector offsetToDeadZone(
   const Player& player,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize
-) {
+  const base::Extents& viewPortSize)
+{
   const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
   // horizontal
   const auto offsetLeft =
-    std::max(0, worldSpaceDeadZone.topLeft.x -  playerBounds.topLeft.x);
-  const auto offsetRight =
-    std::min(0,
-      worldSpaceDeadZone.bottomRight().x - playerBounds.bottomRight().x);
+    std::max(0, worldSpaceDeadZone.topLeft.x - playerBounds.topLeft.x);
+  const auto offsetRight = std::min(
+    0, worldSpaceDeadZone.bottomRight().x - playerBounds.bottomRight().x);
   const auto offsetX = -offsetLeft - offsetRight;
 
   // vertical
   const auto offsetTop =
     std::max(0, worldSpaceDeadZone.top() - playerBounds.top());
   const auto offsetBottom =
-    std::min(0,
-      worldSpaceDeadZone.bottom() - playerBounds.bottom());
+    std::min(0, worldSpaceDeadZone.bottom() - playerBounds.bottom());
   const auto offsetY = -offsetTop - offsetBottom;
 
   return {offsetX, offsetY};
 }
 
-}
+} // namespace
 
 
 Camera::Camera(
   const Player* pPlayer,
   const data::map::Map& map,
-  entityx::EventManager& eventManager
-)
+  entityx::EventManager& eventManager)
   : mpPlayer(pPlayer)
   , mpMap(&map)
   , mViewPortSize(data::GameTraits::mapViewPortSize)
@@ -162,67 +164,78 @@ Camera::Camera(
 }
 
 
-void Camera::synchronizeTo(const Camera& other) {
+void Camera::synchronizeTo(const Camera& other)
+{
   mPosition = other.mPosition;
   mManualScrollCooldown = other.mManualScrollCooldown;
 }
 
 
-void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize) {
+void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize)
+{
   mViewPortSize = viewPortSize;
   updateManualScrolling(input);
 
-  if (!mpPlayer->stateIs<GettingSuckedIntoSpace>()) {
+  if (!mpPlayer->stateIs<GettingSuckedIntoSpace>())
+  {
     updateAutomaticScrolling();
-  } else {
-    const auto offset = 2 *
-      engine::orientation::toMovement(mpPlayer->orientation());
+  }
+  else
+  {
+    const auto offset =
+      2 * engine::orientation::toMovement(mpPlayer->orientation());
     setPosition(mPosition + base::Vector{offset, 0});
   }
 }
 
 
-void Camera::updateManualScrolling(const PlayerInput& input) {
-  if (mManualScrollCooldown > 0) {
+void Camera::updateManualScrolling(const PlayerInput& input)
+{
+  if (mManualScrollCooldown > 0)
+  {
     // clang-format off
     const auto isApplicable =
       (mpPlayer->stateIs<OnGround>() && input.mDown) ||
       (mpPlayer->stateIs<OnPipe>() && input.mUp);
     // clang-format on
-    if (isApplicable) {
+    if (isApplicable)
+    {
       --mManualScrollCooldown;
       return;
     }
   }
 
-  if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>()) {
-    if (input.mDown) {
+  if (mpPlayer->stateIs<OnGround>() || mpPlayer->stateIs<OnPipe>())
+  {
+    if (input.mDown)
+    {
       mPosition.y += MANUAL_SCROLL_ADJUST;
     }
-    if (input.mUp) {
+    if (input.mUp)
+    {
       mPosition.y -= MANUAL_SCROLL_ADJUST;
     }
   }
 }
 
 
-void Camera::updateAutomaticScrolling() {
+void Camera::updateAutomaticScrolling()
+{
   const auto [offsetX, offsetY] =
     offsetToDeadZone(*mpPlayer, mPosition, mViewPortSize);
 
-  const auto maxAdjustDown = mpPlayer->isRidingElevator()
-    ? MAX_ADJUST_DOWN_ELEVATOR
-    : MAX_ADJUST_DOWN;
+  const auto maxAdjustDown =
+    mpPlayer->isRidingElevator() ? MAX_ADJUST_DOWN_ELEVATOR : MAX_ADJUST_DOWN;
   const auto adjustment = base::Vector{
     std::clamp(offsetX, -MAX_ADJUST_X, MAX_ADJUST_X),
-    std::clamp(offsetY, -MAX_ADJUST_UP, maxAdjustDown)
-  };
+    std::clamp(offsetY, -MAX_ADJUST_UP, maxAdjustDown)};
 
   setPosition(mPosition + adjustment);
 }
 
 
-void Camera::setPosition(const base::Vector position) {
+void Camera::setPosition(const base::Vector position)
+{
   const auto maxPosition = base::Extents{
     static_cast<int>(mpMap->width() - mViewPortSize.width),
     static_cast<int>(mpMap->height() - mViewPortSize.height)};
@@ -231,9 +244,12 @@ void Camera::setPosition(const base::Vector position) {
 }
 
 
-void Camera::centerViewOnPlayer() {
-  auto playerPos = normalizedPlayerBounds(*mpPlayer, mViewPortSize).bottomLeft();
-  if (mpPlayer->orientation() == Orientation::Left) {
+void Camera::centerViewOnPlayer()
+{
+  auto playerPos =
+    normalizedPlayerBounds(*mpPlayer, mViewPortSize).bottomLeft();
+  if (mpPlayer->orientation() == Orientation::Left)
+  {
     playerPos.x -= 1;
   }
 
@@ -241,8 +257,9 @@ void Camera::centerViewOnPlayer() {
 }
 
 
-void Camera::receive(const rigel::events::PlayerFiredShot& event) {
+void Camera::receive(const rigel::events::PlayerFiredShot& event)
+{
   mManualScrollCooldown = MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING;
 }
 
-}
+} // namespace rigel::game_logic

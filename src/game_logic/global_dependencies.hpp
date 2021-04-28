@@ -26,29 +26,35 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel {
-  struct IGameServiceProvider;
+namespace rigel
+{
+struct IGameServiceProvider;
 
-  namespace data::map {
-    class Map;
-  }
-
-  namespace engine {
-    class CollisionChecker;
-    class ParticleSystem;
-    class RandomNumberGenerator;
-  }
-
-  namespace game_logic {
-    struct IEntityFactory;
-    class Player;
-  }
+namespace data::map
+{
+class Map;
 }
 
+namespace engine
+{
+class CollisionChecker;
+class ParticleSystem;
+class RandomNumberGenerator;
+} // namespace engine
 
-namespace rigel::game_logic {
+namespace game_logic
+{
+struct IEntityFactory;
+class Player;
+} // namespace game_logic
+} // namespace rigel
 
-struct GlobalDependencies {
+
+namespace rigel::game_logic
+{
+
+struct GlobalDependencies
+{
   const engine::CollisionChecker* mpCollisionChecker;
   engine::ParticleSystem* mpParticles;
   engine::RandomNumberGenerator* mpRandomGenerator;
@@ -59,7 +65,8 @@ struct GlobalDependencies {
 };
 
 
-struct PerFrameState {
+struct PerFrameState
+{
   PlayerInput mInput;
   base::Extents mCurrentViewPortSize;
   int mNumRadarDishes = 0;
@@ -68,13 +75,13 @@ struct PerFrameState {
 };
 
 
-struct GlobalState {
+struct GlobalState
+{
   GlobalState(
     Player* pPlayer,
     const base::Vector* pCameraPosition,
     data::map::Map* pMap,
-    const PerFrameState* pPerFrameState
-  )
+    const PerFrameState* pPerFrameState)
     : mpPlayer(pPlayer)
     , mpCameraPosition(pCameraPosition)
     , mpMap(pMap)
@@ -91,12 +98,10 @@ struct GlobalState {
 
 inline bool isBboxOnScreen(
   const GlobalState& s,
-  const engine::components::BoundingBox& bounds
-) {
+  const engine::components::BoundingBox& bounds)
+{
   return engine::isOnScreen(
-    bounds,
-    *s.mpCameraPosition,
-    s.mpPerFrameState->mCurrentViewPortSize);
+    bounds, *s.mpCameraPosition, s.mpPerFrameState->mCurrentViewPortSize);
 }
 
-}
+} // namespace rigel::game_logic

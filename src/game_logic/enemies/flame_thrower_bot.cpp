@@ -19,52 +19,58 @@
 #include "data/actor_ids.hpp"
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void FlameThrowerBot::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
   using engine::components::WorldPosition;
 
-  if (const auto num = d.mpRandomGenerator->gen(); num == 0 || num == 128) {
+  if (const auto num = d.mpRandomGenerator->gen(); num == 0 || num == 128)
+  {
     mFramesRemainingForFiring = 16;
   }
 
-  if (mFramesRemainingForFiring > 0) {
+  if (mFramesRemainingForFiring > 0)
+  {
     --mFramesRemainingForFiring;
-    if (mFramesRemainingForFiring == 8) {
+    if (mFramesRemainingForFiring == 8)
+    {
       const auto isFacingLeft =
         *entity.component<Orientation>() == Orientation::Left;
-      const auto id = isFacingLeft
-        ? data::ActorID::Flame_thrower_fire_LEFT
-        : data::ActorID::Flame_thrower_fire_RIGHT;
+      const auto id = isFacingLeft ? data::ActorID::Flame_thrower_fire_LEFT
+                                   : data::ActorID::Flame_thrower_fire_RIGHT;
       const auto xOffset = isFacingLeft ? -7 : 7;
       spawnOneShotSprite(
         *d.mpEntityFactory,
         id,
         *entity.component<WorldPosition>() + base::Vector{xOffset, -3});
     }
-  } else {
+  }
+  else
+  {
     // When moving up, we move at half speed (only on odd frames)
     if (
       mMovementDirection == MovementDirection::Up &&
-      !s.mpPerFrameState->mIsOddFrame
-    ) {
+      !s.mpPerFrameState->mIsOddFrame)
+    {
       return;
     }
 
     const auto amount = mMovementDirection == MovementDirection::Up ? -1 : 1;
     const auto result =
       engine::moveVertically(*d.mpCollisionChecker, entity, amount);
-    if (result != engine::MovementResult::Completed) {
+    if (result != engine::MovementResult::Completed)
+    {
       // Switch direction if we hit the floor/ceiling
       mMovementDirection = mMovementDirection == MovementDirection::Up
         ? MovementDirection::Down
@@ -73,4 +79,4 @@ void FlameThrowerBot::update(
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

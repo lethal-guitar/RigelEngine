@@ -31,29 +31,35 @@
  */
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 
-namespace {
+namespace
+{
 
 const char* INVALID_MOVIE_FILE = "Invalid/corrupted movie file";
 
-enum class SubChunkType {
+enum class SubChunkType
+{
   Palette,
   MainImage,
   AnimationFrame
 };
 
 
-struct SubChunkHeader {
+struct SubChunkHeader
+{
   explicit SubChunkHeader(LeStreamReader& reader)
     : mSize(reader.readU32())
   {
     const auto typeId = reader.readU16();
-    switch (typeId) {
+    switch (typeId)
+    {
       case 0xB:
-        if (mSize != 778) {
+        if (mSize != 778)
+        {
           throw invalid_argument(INVALID_MOVIE_FILE);
         }
         mType = SubChunkType::Palette;
@@ -77,13 +83,15 @@ struct SubChunkHeader {
 };
 
 
-struct ChunkHeader {
+struct ChunkHeader
+{
   explicit ChunkHeader(LeStreamReader& reader)
     : mSize(reader.readU32())
     , mType(reader.readU16())
     , mNumSubChunks(reader.readU16())
   {
-    if (mType != 0xF1FA) {
+    if (mType != 0xF1FA)
+    {
       throw invalid_argument(INVALID_MOVIE_FILE);
     }
 
@@ -96,15 +104,16 @@ struct ChunkHeader {
 };
 
 
-Palette256 readPalette(LeStreamReader& reader) {
+Palette256 readPalette(LeStreamReader& reader)
+{
   SubChunkHeader mPaletteChunkHeader(reader);
-  if (mPaletteChunkHeader.mType != SubChunkType::Palette) {
+  if (mPaletteChunkHeader.mType != SubChunkType::Palette)
+  {
     throw invalid_argument(INVALID_MOVIE_FILE);
   }
   reader.skipBytes(4); // always 1
-  const auto palette = load6bitPalette256(
-    reader.currentIter(),
-    reader.currentIter() + 768);
+  const auto palette =
+    load6bitPalette256(reader.currentIter(), reader.currentIter() + 768);
   reader.skipBytes(768);
   return palette;
 }
@@ -114,19 +123,23 @@ data::PixelBuffer readMainImagePixels(
   LeStreamReader& reader,
   const uint16_t width,
   const uint16_t height,
-  const Palette256& palette
-) {
+  const Palette256& palette)
+{
   SubChunkHeader mainImageSubChunkHeader(reader);
-  if (mainImageSubChunkHeader.mType != SubChunkType::MainImage) {
+  if (mainImageSubChunkHeader.mType != SubChunkType::MainImage)
+  {
     throw invalid_argument(INVALID_MOVIE_FILE);
   }
 
   data::PixelBuffer mainImagePixels;
   mainImagePixels.reserve(width * height);
 
-  for (auto row=0u; row<height; ++row) {
+  for (auto row = 0u; row < height; ++row)
+  {
     const auto numRLEFlagsInRow = reader.readU8();
-    decompressRle(reader, numRLEFlagsInRow,
+    decompressRle(
+      reader,
+      numRLEFlagsInRow,
       [&mainImagePixels, &palette](const auto colorIndex) {
         mainImagePixels.push_back(palette[colorIndex]);
       });
@@ -140,26 +153,29 @@ data::PixelBuffer readAnimationFramePixels(
   LeStreamReader& reader,
   const uint16_t width,
   const uint16_t height,
-  const Palette256& palette
-) {
+  const Palette256& palette)
+{
   data::PixelBuffer framePixels(width * height, data::Pixel{});
 
-  for (auto row=0u; row<height; ++row) {
+  for (auto row = 0u; row < height; ++row)
+  {
     const auto startOffset = row * width;
     auto targetCol = 0;
 
     const auto numRleWords = reader.readU8();
-    for (auto rleEntry=0u; rleEntry<numRleWords; ++rleEntry) {
+    for (auto rleEntry = 0u; rleEntry < numRleWords; ++rleEntry)
+    {
       const auto pixelsToSkip = reader.readU8();
       targetCol += pixelsToSkip;
 
       // For some reason, the RLE markers are inverted in the animation frame
       // chunks...
       const auto invertedMarkerByte = reader.readS8();
-      expandSingleRleWord(-invertedMarkerByte, reader,
+      expandSingleRleWord(
+        -invertedMarkerByte,
+        reader,
         [&framePixels, &palette, &targetCol, startOffset](
-          const auto colorIndex
-        ) {
+          const auto colorIndex) {
           framePixels[targetCol++ + startOffset] = palette[colorIndex];
         });
     }
@@ -173,16 +189,17 @@ vector<data::MovieFrame> readAnimationFrames(
   LeStreamReader& reader,
   const uint16_t width,
   const uint16_t numAnimFrames,
-  const Palette256& palette
-) {
+  const Palette256& palette)
+{
   vector<data::MovieFrame> frames;
-  for (auto frame=0u; frame<numAnimFrames; ++frame) {
+  for (auto frame = 0u; frame < numAnimFrames; ++frame)
+  {
     ChunkHeader frameChunkHeader(reader);
     SubChunkHeader frameChunkSubHeader(reader);
     if (
       frameChunkHeader.mNumSubChunks != 1 ||
-      frameChunkSubHeader.mType != SubChunkType::AnimationFrame
-    ) {
+      frameChunkSubHeader.mType != SubChunkType::AnimationFrame)
+    {
       throw invalid_argument(INVALID_MOVIE_FILE);
     }
 
@@ -199,10 +216,11 @@ vector<data::MovieFrame> readAnimationFrames(
   return frames;
 }
 
-}
+} // namespace
 
 
-data::Movie loadMovie(const ByteBuffer& file) {
+data::Movie loadMovie(const ByteBuffer& file)
+{
   LeStreamReader reader(file);
 
   const auto fileSize = reader.readU32();
@@ -213,24 +231,22 @@ data::Movie loadMovie(const ByteBuffer& file) {
   reader.skipBytes(4 + 4); // unknown1, unknown2
   reader.skipBytes(108); // padding
 
-  if (fileSize != file.size() || type != 0xAF11) {
+  if (fileSize != file.size() || type != 0xAF11)
+  {
     throw invalid_argument(INVALID_MOVIE_FILE);
   }
   ChunkHeader mainImageChunkHeader(reader);
-  if (mainImageChunkHeader.mNumSubChunks != 2) {
+  if (mainImageChunkHeader.mNumSubChunks != 2)
+  {
     throw invalid_argument(INVALID_MOVIE_FILE);
   }
   const auto palette = readPalette(reader);
-  auto mainImagePixels =
-    readMainImagePixels(reader, width, height, palette);
+  auto mainImagePixels = readMainImagePixels(reader, width, height, palette);
 
-  auto frames =
-    readAnimationFrames(reader, width, numAnimFrames, palette);
+  auto frames = readAnimationFrames(reader, width, numAnimFrames, palette);
   return {
-    data::Image(std::move(mainImagePixels), width, height),
-    std::move(frames)
-  };
+    data::Image(std::move(mainImagePixels), width, height), std::move(frames)};
 }
 
 
-}
+} // namespace rigel::loader

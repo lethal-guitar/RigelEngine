@@ -26,7 +26,8 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 constexpr auto PLAYER_WIDTH = 3;
 constexpr auto PLAYER_HEIGHT = 5;
@@ -40,15 +41,13 @@ constexpr auto PLAYER_HEIGHT_ON_PIPE = 6;
 // is crouching.
 constexpr auto PLAYER_HITBOX_HEIGHT_CROUCHED = 3;
 
-constexpr auto DEFAULT_PLAYER_BOUNDS = engine::components::BoundingBox{
-  {0, 0},
-  {PLAYER_WIDTH, PLAYER_HEIGHT}
-};
+constexpr auto DEFAULT_PLAYER_BOUNDS =
+  engine::components::BoundingBox{{0, 0}, {PLAYER_WIDTH, PLAYER_HEIGHT}};
 
 inline void assignPlayerComponents(
   entityx::Entity entity,
-  const engine::components::Orientation orientation
-) {
+  const engine::components::Orientation orientation)
+{
   using namespace engine::components;
 
   entity.assign<Orientation>(orientation);
@@ -56,10 +55,13 @@ inline void assignPlayerComponents(
 }
 
 
-namespace events {
+namespace events
+{
 
-struct ElevatorAttachmentChanged {
-  enum ChangeType {
+struct ElevatorAttachmentChanged
+{
+  enum ChangeType
+  {
     Attach,
     Detach
   };
@@ -74,16 +76,19 @@ struct ElevatorAttachmentChanged {
   ChangeType mType;
 };
 
-struct AirLockOpened {
+struct AirLockOpened
+{
   engine::components::Orientation mOrientation;
 };
 
-}
+} // namespace events
 
 
-namespace components {
+namespace components
+{
 
-enum class InteractableType {
+enum class InteractableType
+{
   Teleporter,
   ForceFieldCardReader,
   KeyHole,
@@ -91,7 +96,8 @@ enum class InteractableType {
 };
 
 
-struct Interactable {
+struct Interactable
+{
   explicit Interactable(const InteractableType type)
     : mType(type)
   {
@@ -100,6 +106,6 @@ struct Interactable {
   InteractableType mType;
 };
 
-}
+} // namespace components
 
-}
+} // namespace rigel::game_logic

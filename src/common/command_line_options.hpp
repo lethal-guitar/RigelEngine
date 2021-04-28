@@ -24,7 +24,8 @@
 #include <utility>
 
 
-namespace rigel {
+namespace rigel
+{
 
 /** Settings that can be changed via command-line arguments/switches
  *
@@ -36,7 +37,8 @@ namespace rigel {
  * If you add something here, you'll want to extend the code in main.cpp
  * as well!
  */
-struct CommandLineOptions {
+struct CommandLineOptions
+{
   std::string mGamePath;
   std::optional<data::GameSessionId> mLevelToJumpTo;
   bool mSkipIntro = false;
@@ -45,4 +47,4 @@ struct CommandLineOptions {
   std::optional<base::Vector> mPlayerPosition;
 };
 
-}
+} // namespace rigel

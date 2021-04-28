@@ -19,7 +19,8 @@
 #include <stdexcept>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 using namespace std;
 
@@ -27,8 +28,7 @@ using namespace std;
 Image::Image(
   const PixelBuffer& pixels,
   const std::size_t width,
-  const std::size_t height
-)
+  const std::size_t height)
   : mPixels(pixels)
   , mWidth(width)
   , mHeight(height)
@@ -39,8 +39,7 @@ Image::Image(
 Image::Image(
   PixelBuffer&& pixels,
   const std::size_t width,
-  const std::size_t height
-)
+  const std::size_t height)
   : mPixels(std::move(pixels))
   , mWidth(width)
   , mHeight(height)
@@ -48,16 +47,14 @@ Image::Image(
 }
 
 
-Image::Image(
-  const std::size_t width,
-  const std::size_t height
-)
-  : Image(vector<Pixel>(width*height, Pixel{}), width, height)
+Image::Image(const std::size_t width, const std::size_t height)
+  : Image(vector<Pixel>(width * height, Pixel{}), width, height)
 {
 }
 
 
-void Image::insertImage(const size_t x, const size_t y, const Image& image) {
+void Image::insertImage(const size_t x, const size_t y, const Image& image)
+{
   insertImage(x, y, image.pixelData(), image.width());
 }
 
@@ -66,21 +63,24 @@ void Image::insertImage(
   const size_t x,
   const size_t y,
   const PixelBuffer& pixels,
-  const size_t sourceWidth
-) {
+  const size_t sourceWidth)
+{
   const auto inferredHeight = pixels.size() / sourceWidth;
-  if (x + sourceWidth > mWidth || y + inferredHeight > mHeight) {
+  if (x + sourceWidth > mWidth || y + inferredHeight > mHeight)
+  {
     throw invalid_argument("Source image doesn't fit");
   }
 
   auto sourceIter = pixels.begin();
-  for (size_t row=0; row<inferredHeight; ++row) {
-    for (size_t col=0; col<sourceWidth; ++col) {
-      const auto targetOffset = (x+col) + (y+row)*mWidth;
+  for (size_t row = 0; row < inferredHeight; ++row)
+  {
+    for (size_t col = 0; col < sourceWidth; ++col)
+    {
+      const auto targetOffset = (x + col) + (y + row) * mWidth;
       mPixels[targetOffset] = *sourceIter++;
     }
   }
 }
 
 
-}
+} // namespace rigel::data

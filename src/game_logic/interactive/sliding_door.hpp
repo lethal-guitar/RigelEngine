@@ -23,22 +23,26 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct HorizontalSlidingDoor {
+struct HorizontalSlidingDoor
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  enum class State {
+  enum class State
+  {
     Closed = 0,
     HalfOpen = 1,
     Open = 2,
@@ -50,14 +54,16 @@ struct HorizontalSlidingDoor {
 };
 
 
-struct VerticalSlidingDoor {
+struct VerticalSlidingDoor
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  enum class State {
+  enum class State
+  {
     Closed,
     Opening,
     Open,
@@ -69,4 +75,4 @@ struct VerticalSlidingDoor {
   int mSlideStep = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

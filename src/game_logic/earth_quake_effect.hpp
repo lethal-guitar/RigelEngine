@@ -23,13 +23,21 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::engine { class RandomNumberGenerator; }
+namespace rigel
+{
+struct IGameServiceProvider;
+}
+namespace rigel::engine
+{
+class RandomNumberGenerator;
+}
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-class EarthQuakeEffect {
+class EarthQuakeEffect
+{
 public:
   EarthQuakeEffect(
     IGameServiceProvider* pServiceProvider,
@@ -50,4 +58,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}
+} // namespace rigel::game_logic

@@ -23,40 +23,41 @@
 namespace ex = entityx;
 
 
-namespace rigel::game_logic::interaction {
+namespace rigel::game_logic::interaction
+{
 
 using namespace engine::components;
 using namespace game_logic::components;
 
-namespace {
+namespace
+{
 
 constexpr int KEYHOLE_ANIMATION[] = {0, 1, 2, 3, 4, 3, 2, 1};
 constexpr int KEYHOLE_UNLOCKED_FRAME = 5;
 
-}
+} // namespace
 
 
 void configureLockedDoor(
   entityx::Entity entity,
   const int spawnIndex,
-  const BoundingBox& boundingBox
-) {
+  const BoundingBox& boundingBox)
+{
   entity.assign<ActorTag>(ActorTag::Type::Door, spawnIndex);
   entity.assign<BoundingBox>(boundingBox);
 }
 
 
-void configureKeyHole(
-  entityx::Entity entity,
-  const BoundingBox& boundingBox
-) {
+void configureKeyHole(entityx::Entity entity, const BoundingBox& boundingBox)
+{
   entity.assign<Interactable>(InteractableType::KeyHole);
   entity.assign<BoundingBox>(boundingBox);
   entity.assign<AnimationSequence>(KEYHOLE_ANIMATION, 0, true);
 }
 
 
-void disableKeyHole(entityx::Entity entity) {
+void disableKeyHole(entityx::Entity entity)
+{
   entity.remove<Interactable>();
   entity.remove<BoundingBox>();
   entity.remove<AnimationSequence>();
@@ -64,4 +65,4 @@ void disableKeyHole(entityx::Entity entity) {
   entity.component<Sprite>()->mFramesToRender[0] = KEYHOLE_UNLOCKED_FRAME;
 }
 
-}
+} // namespace rigel::game_logic::interaction

@@ -20,21 +20,27 @@
 #include "renderer/texture.hpp"
 
 
-namespace rigel::data { struct GameOptions; }
+namespace rigel::data
+{
+struct GameOptions;
+}
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 class Renderer;
 
-struct ViewPortInfo {
+struct ViewPortInfo
+{
   base::Vector mOffset;
   base::Size<int> mSize;
   base::Point<float> mScale;
 };
 
 
-struct WidescreenViewPortInfo {
+struct WidescreenViewPortInfo
+{
   int mWidthTiles;
   int mWidthPx;
   int mLeftPaddingPx;
@@ -53,12 +59,11 @@ bool canUseWidescreenMode(const Renderer* pRenderer);
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
 
 base::Vector scaleVec(const base::Vector& vec, const base::Point<float>& scale);
-base::Extents scaleSize(
-  const base::Extents& size,
-  const base::Point<float>& scale);
+base::Extents
+  scaleSize(const base::Extents& size, const base::Point<float>& scale);
 
 RenderTargetTexture createFullscreenRenderTarget(
   Renderer* pRenderer,
   const data::GameOptions& options);
 
-}
+} // namespace rigel::renderer

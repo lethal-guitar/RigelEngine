@@ -23,16 +23,20 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct FlameThrowerBot {
-  enum class MovementDirection {
+struct FlameThrowerBot
+{
+  enum class MovementDirection
+  {
     Up,
     Down
   };
@@ -47,4 +51,4 @@ struct FlameThrowerBot {
   MovementDirection mMovementDirection = MovementDirection::Down;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

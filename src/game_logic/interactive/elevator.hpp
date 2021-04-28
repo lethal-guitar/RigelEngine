@@ -26,22 +26,26 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct Elevator {
+struct Elevator
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  struct State {
+  struct State
+  {
     int mPreviousPosY = 0;
   };
 
@@ -49,4 +53,4 @@ struct Elevator {
   std::optional<State> mState;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

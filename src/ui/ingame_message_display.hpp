@@ -19,13 +19,21 @@
 #include <string>
 #include <variant>
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::ui { class MenuElementRenderer; }
+namespace rigel
+{
+struct IGameServiceProvider;
+}
+namespace rigel::ui
+{
+class MenuElementRenderer;
+}
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class IngameMessageDisplay {
+class IngameMessageDisplay
+{
 public:
   IngameMessageDisplay(
     IGameServiceProvider* pServiceProvider,
@@ -44,24 +52,26 @@ private:
   // finished.
   static constexpr auto NEXT_LINE_DELAY = 21;
 
-  struct Idle {};
+  struct Idle
+  {
+  };
 
-  struct Printing {
+  struct Printing
+  {
     Printing() = default;
     explicit Printing(const unsigned int offset)
       : mOffset(offset)
     {
     }
 
-    unsigned int effectiveOffset() const {
-      return mCharsPrinted + mOffset;
-    }
+    unsigned int effectiveOffset() const { return mCharsPrinted + mOffset; }
 
     unsigned int mCharsPrinted = 0;
     unsigned int mOffset = 0;
   };
 
-  struct Waiting {
+  struct Waiting
+  {
     explicit Waiting(const unsigned int nextOffset)
       : mNextOffset(nextOffset)
     {
@@ -82,4 +92,4 @@ private:
   IGameServiceProvider* mpServiceProvider;
 };
 
-}
+} // namespace rigel::ui

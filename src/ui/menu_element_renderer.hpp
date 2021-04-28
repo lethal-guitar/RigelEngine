@@ -31,15 +31,18 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel::loader {
-  class ResourceLoader;
+namespace rigel::loader
+{
+class ResourceLoader;
 }
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 
-class MenuElementRenderer {
+class MenuElementRenderer
+{
 public:
   MenuElementRenderer(
     engine::TiledTexture* pSpriteSheet,
@@ -51,11 +54,9 @@ public:
   void drawText(int x, int y, const std::string& text) const;
   void drawSmallWhiteText(int x, int y, const std::string& text) const;
   void drawMultiLineText(int x, int y, const std::string& text) const;
-  void drawBigText(
-    int x,
-    int y,
-    const std::string& text,
-    const base::Color& color) const;
+  void
+    drawBigText(int x, int y, const std::string& text, const base::Color& color)
+      const;
   void drawMessageBox(int x, int y, int width, int height) const;
 
   void drawCheckBox(int x, int y, bool isChecked) const;
@@ -74,7 +75,8 @@ public:
    * elapsedTime should be the total elapsed time since the selection indicator
    * is being drawn.
    */
-  void drawSelectionIndicator(int x, int y, engine::TimeDelta elapsedTime) const;
+  void
+    drawSelectionIndicator(int x, int y, engine::TimeDelta elapsedTime) const;
 
 private:
   void drawTextEntryCursor(int x, int y, int state) const;
@@ -93,4 +95,4 @@ private:
   engine::TiledTexture mBigTextTexture;
 };
 
-}
+} // namespace rigel::ui

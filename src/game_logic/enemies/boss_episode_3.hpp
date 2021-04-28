@@ -24,15 +24,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BossEpisode3 {
+struct BossEpisode3
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -48,4 +51,4 @@ struct BossEpisode3 {
   bool mHasBeenSighted = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

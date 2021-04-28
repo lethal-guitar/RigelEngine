@@ -19,61 +19,59 @@
 #include "engine/physical_components.hpp"
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 void LifeTimeSystem::update(
   entityx::EntityManager& es,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize
-) {
+  const base::Extents& viewPortSize)
+{
   namespace c = components;
   using Condition = components::AutoDestroy::Condition;
 
-  es.each<c::AutoDestroy>([&](
-    entityx::Entity entity,
-    c::AutoDestroy& autoDestroyProperties
-  ) {
-    auto entityIsOnScreen = [&]() {
-      if (
-        entity.has_component<c::WorldPosition>() &&
-        entity.has_component<c::BoundingBox>()
-      ) {
-        const auto& position = *entity.component<c::WorldPosition>();
-        const auto& bbox = *entity.component<c::BoundingBox>();
-        return engine::isOnScreen(
-          engine::toWorldSpace(bbox, position),
-          cameraPosition,
-          viewPortSize);
+  es.each<c::AutoDestroy>(
+    [&](entityx::Entity entity, c::AutoDestroy& autoDestroyProperties) {
+      auto entityIsOnScreen = [&]() {
+        if (
+          entity.has_component<c::WorldPosition>() &&
+          entity.has_component<c::BoundingBox>())
+        {
+          const auto& position = *entity.component<c::WorldPosition>();
+          const auto& bbox = *entity.component<c::BoundingBox>();
+          return engine::isOnScreen(
+            engine::toWorldSpace(bbox, position), cameraPosition, viewPortSize);
+        }
+
+        return entity.has_component<c::Active>() &&
+          entity.component<c::Active>()->mIsOnScreen;
+      };
+
+      const auto flags = autoDestroyProperties.mConditionFlags;
+
+      const auto conditionIsSet = [&flags](const Condition condition) {
+        const auto conditionValue = static_cast<int>(condition);
+        return (flags & conditionValue) != 0;
+      };
+
+      const auto hasTimeout = conditionIsSet(Condition::OnTimeoutElapsed);
+      if (hasTimeout)
+      {
+        --autoDestroyProperties.mFramesToLive;
       }
 
-      return entity.has_component<c::Active>() &&
-        entity.component<c::Active>()->mIsOnScreen;
-    };
+      const auto mustDestroy =
+        (conditionIsSet(Condition::OnWorldCollision) &&
+         entity.has_component<components::CollidedWithWorld>()) ||
+        (conditionIsSet(Condition::OnLeavingActiveRegion) &&
+         !entityIsOnScreen()) ||
+        (hasTimeout && autoDestroyProperties.mFramesToLive < 0);
 
-    const auto flags = autoDestroyProperties.mConditionFlags;
-
-    const auto conditionIsSet = [&flags](const Condition condition) {
-      const auto conditionValue = static_cast<int>(condition);
-      return (flags & conditionValue) != 0;
-    };
-
-    const auto hasTimeout = conditionIsSet(Condition::OnTimeoutElapsed);
-    if (hasTimeout) {
-      --autoDestroyProperties.mFramesToLive;
-    }
-
-    const auto mustDestroy =
-      (conditionIsSet(Condition::OnWorldCollision) &&
-        entity.has_component<components::CollidedWithWorld>()) ||
-      (conditionIsSet(Condition::OnLeavingActiveRegion) &&
-        !entityIsOnScreen()) ||
-      (hasTimeout && autoDestroyProperties.mFramesToLive < 0);
-
-    if (mustDestroy) {
-      entity.destroy();
-    }
-  });
+      if (mustDestroy)
+      {
+        entity.destroy();
+      }
+    });
 }
 
-}
-
+} // namespace rigel::engine

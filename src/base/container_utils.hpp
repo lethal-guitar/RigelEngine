@@ -22,17 +22,20 @@
 #include <vector>
 
 
-namespace rigel::utils {
+namespace rigel::utils
+{
 
-template<typename RangeT, typename Callable>
-auto transformed(const RangeT& range, Callable elementTransform) {
+template <typename RangeT, typename Callable>
+auto transformed(const RangeT& range, Callable elementTransform)
+{
   std::vector<std::invoke_result_t<Callable, decltype(*std::begin(range))>>
     result;
 
   const auto start = std::begin(range);
   const auto end = std::end(range);
   const auto distance = std::distance(start, end);
-  if (distance > 0) {
+  if (distance > 0)
+  {
     result.reserve(distance);
     std::transform(start, end, std::back_inserter(result), elementTransform);
   }
@@ -41,19 +44,21 @@ auto transformed(const RangeT& range, Callable elementTransform) {
 }
 
 
-template<typename ContainerT>
-void appendTo(ContainerT& first, const ContainerT& second) {
+template <typename ContainerT>
+void appendTo(ContainerT& first, const ContainerT& second)
+{
   first.reserve(first.size() + second.size());
   first.insert(first.end(), std::begin(second), std::end(second));
 }
 
 
-template<typename ContainerT>
-auto concatenated(ContainerT&& first, const ContainerT& second) {
+template <typename ContainerT>
+auto concatenated(ContainerT&& first, const ContainerT& second)
+{
   ContainerT combined(std::forward<ContainerT>(first));
   appendTo(combined, second);
   return combined;
 }
 
 
-}
+} // namespace rigel::utils

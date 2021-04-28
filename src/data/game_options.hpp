@@ -26,7 +26,8 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 // In the majority of cases, the value of an option can be re-evaluated every
 // frame, and whatever code implements the option can adjust accordingly.
@@ -43,18 +44,19 @@ constexpr auto ENABLE_VSYNC_DEFAULT = true;
 constexpr auto MUSIC_VOLUME_DEFAULT = 1.0f;
 constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
 
-enum class WindowMode {
+enum class WindowMode
+{
   Fullscreen,
   ExclusiveFullscreen,
   Windowed
 };
 
 #if defined(__EMSCRIPTEN__)
-  constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Windowed;
+constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Windowed;
 #elif defined(__APPLE__) || defined(RIGEL_USE_GL_ES)
-  constexpr auto DEFAULT_WINDOW_MODE = WindowMode::ExclusiveFullscreen;
+constexpr auto DEFAULT_WINDOW_MODE = WindowMode::ExclusiveFullscreen;
 #else
-  constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Fullscreen;
+constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Fullscreen;
 #endif
 
 
@@ -67,7 +69,8 @@ enum class WindowMode {
  * If you add something to this struct, you most likely want to add
  * serialization and UI as well!
  */
-struct GameOptions {
+struct GameOptions
+{
   // Graphics
   WindowMode mWindowMode = DEFAULT_WINDOW_MODE;
 
@@ -116,11 +119,13 @@ struct GameOptions {
   bool mPerElementUpscalingEnabled = false;
 
   // Helper functions
-  bool compatibilityModeOn() const {
+  bool compatibilityModeOn() const
+  {
     return mCompatibilityModeOn && !mWidescreenModeOn;
   }
 
-  std::array<SDL_Keycode*, 8> allKeyBindings() {
+  std::array<SDL_Keycode*, 8> allKeyBindings()
+  {
     return {
       &mUpKeybinding,
       &mDownKeybinding,
@@ -137,4 +142,4 @@ struct GameOptions {
 
 bool canBeUsedForKeyBinding(SDL_Keycode key);
 
-}
+} // namespace rigel::data

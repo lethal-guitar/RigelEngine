@@ -23,9 +23,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-namespace detail {
+namespace detail
+{
 
 // The original game re-programs the PIT (programmable interrupt timer)
 // using 0x10A1 as counter. This gives a tick rate of roughly 280 Hz
@@ -38,31 +40,35 @@ namespace detail {
 constexpr auto FAST_TICK_RATE = 280.0;
 constexpr auto SLOW_TICK_RATE = FAST_TICK_RATE / 2.0;
 
-}
+} // namespace detail
 
 
 using TimeDelta = double;
 using TimePoint = double;
 
 
-constexpr TimeDelta slowTicksToTime(const int ticks) {
+constexpr TimeDelta slowTicksToTime(const int ticks)
+{
   return ticks / detail::SLOW_TICK_RATE;
 }
 
 
-constexpr double timeToSlowTicks(const TimeDelta time) {
+constexpr double timeToSlowTicks(const TimeDelta time)
+{
   return time * detail::SLOW_TICK_RATE;
 }
 
 
-constexpr TimeDelta fastTicksToTime(const int ticks) {
+constexpr TimeDelta fastTicksToTime(const int ticks)
+{
   return ticks / detail::FAST_TICK_RATE;
 }
 
 
-constexpr double timeToFastTicks(const TimeDelta time) {
+constexpr double timeToFastTicks(const TimeDelta time)
+{
   return time * detail::FAST_TICK_RATE;
 }
 
 
-}
+} // namespace rigel::engine

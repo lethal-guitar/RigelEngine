@@ -19,9 +19,11 @@
 #include <array>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-namespace {
+namespace
+{
 
 constexpr std::array<const char*, NUM_TUTORIAL_MESSAGES> MESSAGE_TEXTS = {
   "HOLD DOWN YOUR FIRE BUTTON FOR*RAPID FIRE.",
@@ -51,29 +53,32 @@ constexpr std::array<const char*, NUM_TUTORIAL_MESSAGES> MESSAGE_TEXTS = {
   "EXCELLENT!  ONE HUNDRED THOUSAND*POINTS!!!!!!!!!!!",
   "THE CAFFEINE IN SODAS PROVIDES*ONE UNIT OF HEALTH.",
   "USE THE ACCESS CARD TO DISABLE*THIS FORCE FIELD.",
-  "USE A KEY TO OPEN THIS DOOR."
-};
+  "USE A KEY TO OPEN THIS DOOR."};
 
 
-int toIndex(const TutorialMessageId message) {
+int toIndex(const TutorialMessageId message)
+{
   return static_cast<int>(message);
 }
 
-}
+} // namespace
 
 
-const char* messageText(TutorialMessageId id) {
+const char* messageText(TutorialMessageId id)
+{
   return MESSAGE_TEXTS[toIndex(id)];
 }
 
 
-void TutorialMessageState::markAsShown(TutorialMessageId id) {
+void TutorialMessageState::markAsShown(TutorialMessageId id)
+{
   mMessagesShownMask.set(toIndex(id));
 }
 
 
-bool TutorialMessageState::hasBeenShown(TutorialMessageId id) const {
+bool TutorialMessageState::hasBeenShown(TutorialMessageId id) const
+{
   return mMessagesShownMask.test(toIndex(id));
 }
 
-}
+} // namespace rigel::data

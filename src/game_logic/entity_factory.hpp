@@ -26,8 +26,8 @@
 #include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <entityx/entityx.h>
 #include <SDL.h>
+#include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
 #include <optional>
@@ -35,14 +35,28 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::data { struct GameOptions; }
-namespace rigel::engine { class RandomNumberGenerator; }
-namespace rigel::loader { class ActorImagePackage; }
+namespace rigel
+{
+struct IGameServiceProvider;
+}
+namespace rigel::data
+{
+struct GameOptions;
+}
+namespace rigel::engine
+{
+class RandomNumberGenerator;
+}
+namespace rigel::loader
+{
+class ActorImagePackage;
+}
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-enum class ContainerColor {
+enum class ContainerColor
+{
   Red,
   Green,
   White,
@@ -50,14 +64,15 @@ enum class ContainerColor {
 };
 
 
-inline bool isHorizontal(const ProjectileDirection direction) {
-  return
-    direction == ProjectileDirection::Left ||
+inline bool isHorizontal(const ProjectileDirection direction)
+{
+  return direction == ProjectileDirection::Left ||
     direction == ProjectileDirection::Right;
 }
 
 
-class EntityFactory : public IEntityFactory {
+class EntityFactory : public IEntityFactory
+{
 public:
   EntityFactory(
     engine::ISpriteFactory* pSpriteFactory,
@@ -70,16 +85,15 @@ public:
   void createEntitiesForLevel(
     const data::map::ActorDescriptionList& actors) override;
 
-  engine::components::Sprite createSpriteForId(
-    const data::ActorID actorID) override;
+  engine::components::Sprite
+    createSpriteForId(const data::ActorID actorID) override;
 
   /** Create a sprite entity using the given actor ID. If assignBoundingBox is
    * true, the dimensions of the sprite's first frame are used to assign a
    * bounding box.
    */
-  entityx::Entity spawnSprite(
-    data::ActorID actorID,
-    bool assignBoundingBox = false) override;
+  entityx::Entity
+    spawnSprite(data::ActorID actorID, bool assignBoundingBox = false) override;
 
   entityx::Entity spawnSprite(
     data::ActorID actorID,
@@ -91,13 +105,10 @@ public:
     const engine::components::WorldPosition& pos,
     ProjectileDirection direction) override;
 
-  entityx::Entity spawnActor(
-    data::ActorID actorID,
-    const base::Vector& position) override;
+  entityx::Entity
+    spawnActor(data::ActorID actorID, const base::Vector& position) override;
 
-  entityx::EntityManager& entityManager() override {
-    return *mpEntityManager;
-  }
+  entityx::EntityManager& entityManager() override { return *mpEntityManager; }
 
 private:
   void configureEntity(
@@ -105,7 +116,7 @@ private:
     const data::ActorID actorID,
     const engine::components::BoundingBox& boundingBox);
 
-  template<typename... Args>
+  template <typename... Args>
   void configureItemBox(
     entityx::Entity entity,
     ContainerColor color,
@@ -123,4 +134,4 @@ private:
   data::Difficulty mDifficulty;
 };
 
-}
+} // namespace rigel::game_logic

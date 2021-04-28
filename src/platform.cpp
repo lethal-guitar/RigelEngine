@@ -19,9 +19,11 @@
 #include "sdl_utils/error.hpp"
 
 
-namespace rigel::platform {
+namespace rigel::platform
+{
 
-void setGLAttributes() {
+void setGLAttributes()
+{
 #ifdef RIGEL_USE_GL_ES
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -35,7 +37,8 @@ void setGLAttributes() {
 }
 
 
-sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options) {
+sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options)
+{
   SDL_DisplayMode displayMode;
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
 
@@ -66,7 +69,8 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options) {
 }
 
 
-int flagsForWindowMode(const data::WindowMode mode) {
+int flagsForWindowMode(const data::WindowMode mode)
+{
   using WM = data::WindowMode;
 
   // clang-format off
@@ -80,4 +84,4 @@ int flagsForWindowMode(const data::WindowMode mode) {
   return 0;
 }
 
-}
+} // namespace rigel::platform

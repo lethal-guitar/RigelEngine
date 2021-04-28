@@ -25,15 +25,18 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SmallFlyingShip {
+struct SmallFlyingShip
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -43,4 +46,4 @@ struct SmallFlyingShip {
   std::optional<int> mInitialHeight;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

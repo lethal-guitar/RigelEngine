@@ -20,12 +20,14 @@
 #include <cstdint>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 extern const std::array<int, 256> RANDOM_NUMBER_TABLE;
 
 
-class RandomNumberGenerator {
+class RandomNumberGenerator
+{
 public:
   int gen();
 
@@ -33,4 +35,4 @@ private:
   std::uint8_t mNextNumberIndex = 0;
 };
 
-}
+} // namespace rigel::engine

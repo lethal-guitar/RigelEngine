@@ -21,14 +21,15 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void LevelExitTrigger::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::WorldPosition;
 
   const auto& position = *entity.component<WorldPosition>();
@@ -42,9 +43,10 @@ void LevelExitTrigger::update(
     position.x <= (playerBBox.right() + 1);
   // clang-format on
 
-  if (playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis) {
+  if (playerAboveOrAtTriggerHeight && touchingTriggerOnXAxis)
+  {
     d.mpEvents->emit(rigel::events::ExitReached{});
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

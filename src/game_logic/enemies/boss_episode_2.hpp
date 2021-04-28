@@ -26,43 +26,56 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BossEpisode2 {
-  struct WarmingUp {
+struct BossEpisode2
+{
+  struct WarmingUp
+  {
     int mFramesElapsed = 0;
   };
 
-  struct FlyingRight {
+  struct FlyingRight
+  {
     int mFramesElapsed = 0;
   };
 
-  struct FlyingLeft {
+  struct FlyingLeft
+  {
     int mFramesElapsed = 0;
   };
 
-  struct FallingDown {};
+  struct FallingDown
+  {
+  };
 
-  struct JumpingRight {
+  struct JumpingRight
+  {
     int mFramesElapsed = 0;
     int mJumpsCompleted = 0;
   };
 
-  struct JumpingLeft {
+  struct JumpingLeft
+  {
     int mFramesElapsed = 0;
     int mJumpsCompleted = 0;
   };
 
-  struct RisingUp {};
+  struct RisingUp
+  {
+  };
 
   using State = std::variant<
     WarmingUp,
@@ -97,4 +110,4 @@ struct BossEpisode2 {
   bool mDestructionPending = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

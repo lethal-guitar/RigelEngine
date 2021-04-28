@@ -27,24 +27,27 @@
 #include "platform.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <imgui.h>
 #include <SDL.h>
+#include <imgui.h>
 RIGEL_RESTORE_WARNINGS
 
 #ifdef _WIN32
-#include <Windows.h>
+  #include <Windows.h>
 #endif
 
 #include <filesystem>
 
 
-namespace rigel {
+namespace rigel
+{
 
 using namespace sdl_utils;
 
-namespace {
+namespace
+{
 
-bool isValidGamePath(const std::filesystem::path& path) {
+bool isValidGamePath(const std::filesystem::path& path)
+{
   namespace fs = std::filesystem;
 
   std::error_code ec;
@@ -52,7 +55,8 @@ bool isValidGamePath(const std::filesystem::path& path) {
 }
 
 
-void showLoadingScreen(SDL_Window* pWindow) {
+void showLoadingScreen(SDL_Window* pWindow)
+{
   glClear(GL_COLOR_BUFFER_BIT);
   ui::imgui_integration::beginFrame(pWindow);
 
@@ -69,11 +73,7 @@ void showLoadingScreen(SDL_Window* pWindow) {
 
   auto pDrawList = ImGui::GetForegroundDrawList();
   pDrawList->AddText(
-    nullptr,
-    fontSize,
-    position,
-    ui::toImgui({255, 255, 255, 255}),
-    TEXT);
+    nullptr, fontSize, position, ui::toImgui({255, 255, 255, 255}), TEXT);
 
   ui::imgui_integration::endFrame();
   SDL_GL_SwapWindow(pWindow);
@@ -83,52 +83,57 @@ void showLoadingScreen(SDL_Window* pWindow) {
 void setupForFirstLaunch(
   SDL_Window* pWindow,
   UserProfile& userProfile,
-  const std::string& commandLineGamePath
-) {
+  const std::string& commandLineGamePath)
+{
   namespace fs = std::filesystem;
 
   auto gamePath = fs::path{};
 
   // Case 1: A path is given on the command line on first launch. Use that.
-  if (!commandLineGamePath.empty()) {
+  if (!commandLineGamePath.empty())
+  {
     gamePath = fs::u8path(commandLineGamePath);
   }
 
   // Case 2: The current working directory is set to a Duke Nukem II
   // installation, most likely because the RigelEngine executable has been
   // copied there. Use the current working directory as game path.
-  if (gamePath.empty()) {
+  if (gamePath.empty())
+  {
     const auto currentWorkingDir = fs::current_path();
-    if (
-      commandLineGamePath.empty() &&
-      isValidGamePath(currentWorkingDir)
-    ) {
+    if (commandLineGamePath.empty() && isValidGamePath(currentWorkingDir))
+    {
       gamePath = currentWorkingDir;
     }
   }
 
   // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
   // the user select their Duke Nukem II installation.
-  if (gamePath.empty()) {
+  if (gamePath.empty())
+  {
     gamePath = ui::runFolderBrowser(pWindow);
   }
 
   // If we still don't have a game path, stop here.
-  if (gamePath.empty()) {
+  if (gamePath.empty())
+  {
     throw std::runtime_error(
-R"(No game path given. RigelEngine needs the original Duke Nukem II data files in order to function.
+      R"(No game path given. RigelEngine needs the original Duke Nukem II data files in order to function.
 You can download the Shareware version for free, see
 https://github.com/lethal-guitar/RigelEngine/blob/master/README.md#acquiring-the-game-data
 for more info.)");
   }
 
   // Make sure there is a data file at the game path.
-  if (!isValidGamePath(gamePath)) {
-    throw std::runtime_error("No game data (NUKEM2.CMP file) found in game path");
+  if (!isValidGamePath(gamePath))
+  {
+    throw std::runtime_error(
+      "No game data (NUKEM2.CMP file) found in game path");
   }
 
   // Import original game's profile data, if our profile is still 'empty'
-  if (!userProfile.hasProgressData()) {
+  if (!userProfile.hasProgressData())
+  {
     importOriginalGameProfileData(userProfile, gamePath.u8string() + "/");
   }
 
@@ -142,42 +147,45 @@ for more info.)");
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
-  const CommandLineOptions& commandLineOptions
-) {
+  const CommandLineOptions& commandLineOptions)
+{
   auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
     showLoadingScreen(pWindow);
     Game game(options, &userProfile, pWindow, isFirstLaunch);
 
-    for (;;) {
+    for (;;)
+    {
       auto maybeStopReason = game.runOneFrame();
-      if (maybeStopReason) {
+      if (maybeStopReason)
+      {
         return *maybeStopReason;
       }
     }
   };
 
-  const auto needsProfileSetup =
-    !userProfile.mGamePath.has_value() ||
+  const auto needsProfileSetup = !userProfile.mGamePath.has_value() ||
     !isValidGamePath(*userProfile.mGamePath);
-  if (needsProfileSetup) {
+  if (needsProfileSetup)
+  {
     setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
 
   auto result = run(
-    commandLineOptions,
-    needsProfileSetup && !userProfile.hasProgressData());
+    commandLineOptions, needsProfileSetup && !userProfile.hasProgressData());
 
   // Some game option changes (like choosing a new game path) require
   // restarting the game to make the change effective. If the first game run
   // ended with a result of RestartNeeded, launch a new game, but start from
   // the main menu and discard most command line options.
-  if (result == Game::StopReason::RestartNeeded) {
+  if (result == Game::StopReason::RestartNeeded)
+  {
     auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
     optionsForRestartedGame.mDebugModeEnabled =
       commandLineOptions.mDebugModeEnabled;
 
-    while (result == Game::StopReason::RestartNeeded) {
+    while (result == Game::StopReason::RestartNeeded)
+    {
       result = run(optionsForRestartedGame, false);
     }
   }
@@ -186,18 +194,19 @@ void initAndRunGame(
   userProfile.saveToDisk();
 }
 
-}
+} // namespace
 
 
-void gameMain(const CommandLineOptions& options) {
+void gameMain(const CommandLineOptions& options)
+{
   using base::defer;
 
 #ifdef _WIN32
   SetProcessDPIAware();
 #endif
 
-  sdl_utils::check(SDL_Init(
-    SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
+  sdl_utils::check(
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
@@ -223,11 +232,14 @@ void gameMain(const CommandLineOptions& options) {
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
 
-  try {
+  try
+  {
     initAndRunGame(pWindow.get(), userProfile, options);
-  } catch (const std::exception& error) {
+  }
+  catch (const std::exception& error)
+  {
     ui::showErrorMessage(pWindow.get(), error.what());
   }
 }
 
-}
+} // namespace rigel

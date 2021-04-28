@@ -20,15 +20,17 @@
 #include "data/player_model.hpp"
 
 #include <array>
-#include <string>
 #include <optional>
+#include <string>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 constexpr auto NUM_SAVE_SLOTS = 8u;
 
-struct SavedGame {
+struct SavedGame
+{
   GameSessionId mSessionId;
   TutorialMessageState mTutorialMessagesAlreadySeen;
   std::string mName;
@@ -40,4 +42,4 @@ struct SavedGame {
 
 using SaveSlotArray = std::array<std::optional<SavedGame>, NUM_SAVE_SLOTS>;
 
-}
+} // namespace rigel::data

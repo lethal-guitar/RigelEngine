@@ -24,7 +24,8 @@
 #include <utility>
 
 
-namespace rigel::data::map {
+namespace rigel::data::map
+{
 
 using namespace std;
 
@@ -32,11 +33,10 @@ using namespace std;
 Map::Map(
   const int widthInTiles,
   const int heightInTiles,
-  TileAttributeDict attributes
-)
-  : mLayers({
-      TileArray(widthInTiles*heightInTiles, 0),
-      TileArray(widthInTiles*heightInTiles, 0)})
+  TileAttributeDict attributes)
+  : mLayers(
+      {TileArray(widthInTiles * heightInTiles, 0),
+       TileArray(widthInTiles * heightInTiles, 0)})
   , mWidthInTiles(static_cast<size_t>(widthInTiles))
   , mHeightInTiles(static_cast<size_t>(heightInTiles))
   , mAttributes(std::move(attributes))
@@ -46,22 +46,16 @@ Map::Map(
 }
 
 
-map::TileIndex Map::tileAt(
-  const int layer,
-  const int x,
-  const int y
-) const {
+map::TileIndex Map::tileAt(const int layer, const int x, const int y) const
+{
   return tileRefAt(layer, x, y);
 }
 
 
-void Map::setTileAt(
-  const int layer,
-  const int x,
-  const int y,
-  TileIndex index
-) {
-  if (index >= GameTraits::CZone::numTilesTotal) {
+void Map::setTileAt(const int layer, const int x, const int y, TileIndex index)
+{
+  if (index >= GameTraits::CZone::numTilesTotal)
+  {
     throw invalid_argument("Tile index too large for tile set");
   }
   tileRefAt(layer, x, y) = index;
@@ -72,10 +66,12 @@ void Map::clearSection(
   const int x,
   const int y,
   const int width,
-  const int height
-) {
-  for (auto row = y; row < y+height; ++row) {
-    for (auto col = x; col < x + width; ++col) {
+  const int height)
+{
+  for (auto row = y; row < y + height; ++row)
+  {
+    for (auto col = x; col < x + width; ++col)
+    {
       setTileAt(0, col, row, 0);
       setTileAt(1, col, row, 0);
     }
@@ -83,27 +79,31 @@ void Map::clearSection(
 }
 
 
-const TileAttributeDict& Map::attributeDict() const {
+const TileAttributeDict& Map::attributeDict() const
+{
   return mAttributes;
 }
 
 
-TileAttributes Map::attributes(const int x, const int y) const {
+TileAttributes Map::attributes(const int x, const int y) const
+{
   if (
     static_cast<std::size_t>(x) >= mWidthInTiles ||
-    static_cast<std::size_t>(y) >= mHeightInTiles
-  ) {
+    static_cast<std::size_t>(y) >= mHeightInTiles)
+  {
     // Outside of the map doesn't have any attributes set
     return TileAttributes{};
   }
 
-  if (tileAt(0, x, y) != 0 && tileAt(1, x, y) != 0) {
+  if (tileAt(0, x, y) != 0 && tileAt(1, x, y) != 0)
+  {
     // "Composite" tiles (content on both layers) are ignored for attribute
     // checking
     return TileAttributes{};
   }
 
-  if (tileAt(1, x, y) != 0) {
+  if (tileAt(1, x, y) != 0)
+  {
     return TileAttributes{mAttributes.attributes(tileAt(1, x, y))};
   }
 
@@ -111,18 +111,22 @@ TileAttributes Map::attributes(const int x, const int y) const {
 }
 
 
-CollisionData Map::collisionData(const int x, const int y) const {
-  if (static_cast<std::size_t>(x) >= mWidthInTiles) {
+CollisionData Map::collisionData(const int x, const int y) const
+{
+  if (static_cast<std::size_t>(x) >= mWidthInTiles)
+  {
     // Left/right edge of the map are always solid
     return CollisionData::fullySolid();
   }
 
-  if (static_cast<std::size_t>(y) >= mHeightInTiles) {
+  if (static_cast<std::size_t>(y) >= mHeightInTiles)
+  {
     // Bottom/top edge of the map are never solid
     return CollisionData{};
   }
 
-  if (tileAt(0, x, y) != 0 && tileAt(1, x, y) != 0) {
+  if (tileAt(0, x, y) != 0 && tileAt(1, x, y) != 0)
+  {
     // "Composite" tiles (content on both layers) are ignored for collision
     // checking
     return CollisionData{};
@@ -134,36 +138,34 @@ CollisionData Map::collisionData(const int x, const int y) const {
 }
 
 
-const map::TileIndex& Map::tileRefAt(
-  const int layerS,
-  const int xS,
-  const int yS
-) const {
+const map::TileIndex&
+  Map::tileRefAt(const int layerS, const int xS, const int yS) const
+{
   const auto layer = static_cast<size_t>(layerS);
   const auto x = static_cast<size_t>(xS);
   const auto y = static_cast<size_t>(yS);
 
-  if (layer >= mLayers.size()) {
+  if (layer >= mLayers.size())
+  {
     throw invalid_argument("Layer index out of bounds");
   }
-  if (x >= mWidthInTiles) {
+  if (x >= mWidthInTiles)
+  {
     throw invalid_argument("X coord out of bounds");
   }
-  if (y >= mHeightInTiles) {
+  if (y >= mHeightInTiles)
+  {
     throw invalid_argument("Y coord out of bounds");
   }
-  return mLayers[layer][x + y*mWidthInTiles];
+  return mLayers[layer][x + y * mWidthInTiles];
 }
 
 
-map::TileIndex& Map::tileRefAt(
-  const int layer,
-  const int x,
-  const int y
-) {
+map::TileIndex& Map::tileRefAt(const int layer, const int x, const int y)
+{
   return const_cast<map::TileIndex&>(
     static_cast<const Map&>(*this).tileRefAt(layer, x, y));
 }
 
 
-}
+} // namespace rigel::data::map

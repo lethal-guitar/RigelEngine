@@ -33,14 +33,17 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 enum class ScoreNumberType : std::uint8_t;
 
 
-namespace effects {
+namespace effects
+{
 
-struct Sound {
+struct Sound
+{
   constexpr explicit Sound(const data::SoundId id) noexcept
     : mId(id)
   {
@@ -50,25 +53,24 @@ struct Sound {
 };
 
 
-struct RandomExplosionSound {};
+struct RandomExplosionSound
+{
+};
 
 
-struct Particles {
+struct Particles
+{
   Particles(
     const base::Vector& offset,
     const base::Color& color,
-    const int velocityScaleX = 0
-  )
+    const int velocityScaleX = 0)
     : mColor(color)
     , mOffset(offset)
     , mVelocityScaleX(velocityScaleX)
   {
   }
 
-  explicit Particles(
-    const base::Vector& offset,
-    const int velocityScaleX = 0
-  )
+  explicit Particles(const base::Vector& offset, const int velocityScaleX = 0)
     : mOffset(offset)
     , mVelocityScaleX(velocityScaleX)
   {
@@ -80,8 +82,10 @@ struct Particles {
 };
 
 
-struct EffectSprite {
-  enum class Movement {
+struct EffectSprite
+{
+  enum class Movement
+  {
     None = -2,
     FloatUp = -1,
     FlyRight = 0,
@@ -99,12 +103,14 @@ struct EffectSprite {
 };
 
 
-struct SpriteCascade {
+struct SpriteCascade
+{
   data::ActorID mActorId;
 };
 
 
-struct ScoreNumber {
+struct ScoreNumber
+{
   base::Vector mOffset;
   ScoreNumberType mType;
 };
@@ -116,21 +122,24 @@ using EffectType = std::variant<
   Particles,
   EffectSprite,
   SpriteCascade,
-  ScoreNumber
->;
+  ScoreNumber>;
 
 
-struct EffectSpec {
+struct EffectSpec
+{
   EffectType mEffect;
   int mDelay;
 };
 
-}
+} // namespace effects
 
-namespace components {
+namespace components
+{
 
-struct DestructionEffects {
-  enum class TriggerCondition {
+struct DestructionEffects
+{
+  enum class TriggerCondition
+  {
     OnKilled,
     OnCollision,
     Manual
@@ -142,8 +151,7 @@ struct DestructionEffects {
     EffectSpecList effectSpecs,
     TriggerCondition condition = TriggerCondition::OnKilled,
     std::optional<engine::components::BoundingBox> cascadePlacementBox =
-      std::nullopt
-  )
+      std::nullopt)
     : mEffectSpecs(effectSpecs)
     , mTriggerCondition(condition)
     , mCascadePlacementBox(cascadePlacementBox)
@@ -158,21 +166,23 @@ struct DestructionEffects {
 };
 
 
-struct SpriteCascadeSpawner {
+struct SpriteCascadeSpawner
+{
   base::Vector mBasePosition;
   base::Extents mCoveredArea;
   data::ActorID mActorId;
   bool mSpawnedLastFrame = true;
 };
 
-}
+} // namespace components
 
 
 void triggerEffects(
-  entityx::Entity entity, entityx::EntityManager& entityManager);
+  entityx::Entity entity,
+  entityx::EntityManager& entityManager);
 
 void spawnEffects(
   const components::DestructionEffects& effects,
   const base::Vector& position,
   entityx::EntityManager& entityManager);
-}
+} // namespace rigel::game_logic

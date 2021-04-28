@@ -22,13 +22,15 @@
 #include <set>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 constexpr int SCORE_ADDED_PER_BONUS = 100000;
 
 
 // Enum values match the bonus numbers shown on the bonus screen
-enum class Bonus : std::uint8_t {
+enum class Bonus : std::uint8_t
+{
   DestroyedAllCameras = 1,
   NoDamageTaken = 2,
   CollectedEveryWeapon = 3,
@@ -39,17 +41,17 @@ enum class Bonus : std::uint8_t {
 };
 
 
-constexpr int asNumber(const Bonus bonus) {
+constexpr int asNumber(const Bonus bonus)
+{
   return static_cast<int>(bonus);
 }
 
 
-inline void addBonusScore(
-  PlayerModel& playerModel,
-  const std::set<Bonus>& bonuses
-) {
+inline void
+  addBonusScore(PlayerModel& playerModel, const std::set<Bonus>& bonuses)
+{
   const auto numBonuses = static_cast<int>(bonuses.size());
   playerModel.giveScore(numBonuses * SCORE_ADDED_PER_BONUS);
 }
 
-}
+} // namespace rigel::data

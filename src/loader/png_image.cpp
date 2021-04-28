@@ -25,12 +25,16 @@ RIGEL_RESTORE_WARNINGS
 
 #include <memory>
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-std::optional<data::Image> loadPng(const std::string& path) {
+std::optional<data::Image> loadPng(const std::string& path)
+{
   int width = 0;
   int height = 0;
-  const auto imageDeleter = [] (unsigned char* p) { stbi_image_free(p); };
+  const auto imageDeleter = [](unsigned char* p) {
+    stbi_image_free(p);
+  };
   std::unique_ptr<unsigned char, decltype(imageDeleter)> pImageData{
     stbi_load(path.c_str(), &width, &height, nullptr, 4), imageDeleter};
 
@@ -40,17 +44,20 @@ std::optional<data::Image> loadPng(const std::string& path) {
     const auto numPixels = static_cast<size_t>(width * height);
     data::PixelBuffer buffer{pPixels, pPixels + numPixels};
     return data::Image{
-      std::move(buffer), static_cast<size_t>(width), static_cast<size_t>(height)};
+      std::move(buffer),
+      static_cast<size_t>(width),
+      static_cast<size_t>(height)};
   }
 
   return {};
 }
 
-void savePng(const std::string& path, const data::Image& image) {
+void savePng(const std::string& path, const data::Image& image)
+{
   const auto width = static_cast<int>(image.width());
   const auto height = static_cast<int>(image.height());
   stbi_write_png(
     path.c_str(), width, height, 4, image.pixelData().data(), width * 4);
 }
 
-}
+} // namespace rigel::loader

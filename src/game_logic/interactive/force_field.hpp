@@ -23,13 +23,15 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::interaction {
+namespace rigel::game_logic::interaction
+{
 
 void configureForceField(entityx::Entity entity, int spawnIndex);
 void configureKeyCardSlot(
@@ -39,12 +41,14 @@ void disableKeyCardSlot(entityx::Entity entity);
 
 void disableNextForceField(entityx::EntityManager& es);
 
-}
+} // namespace rigel::game_logic::interaction
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct ForceField {
+struct ForceField
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -52,4 +56,4 @@ struct ForceField {
     entityx::Entity entity);
 };
 
-}
+} // namespace rigel::game_logic::behaviors

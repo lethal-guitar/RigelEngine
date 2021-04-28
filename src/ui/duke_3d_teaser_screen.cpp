@@ -22,19 +22,21 @@
 #include "renderer/renderer.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto TEXT_X_POS = data::tilesToPixels(5);
 constexpr auto TEXT_Y_POS = 59;
 constexpr auto TEXT_SLIDE_IN_START_OFFSET = 35;
 
 constexpr auto TEXT_FADE_IN_TIME = engine::slowTicksToTime(64);
-constexpr auto TEXT_SLIDE_IN_TIME = TEXT_FADE_IN_TIME +
-  engine::slowTicksToTime(4);
-constexpr auto TOTAL_DISPLAY_TIME = TEXT_SLIDE_IN_TIME +
-  engine::slowTicksToTime(1500);
+constexpr auto TEXT_SLIDE_IN_TIME =
+  TEXT_FADE_IN_TIME + engine::slowTicksToTime(4);
+constexpr auto TOTAL_DISPLAY_TIME =
+  TEXT_SLIDE_IN_TIME + engine::slowTicksToTime(1500);
 
 // clang-format off
 constexpr loader::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
@@ -58,35 +60,37 @@ constexpr loader::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
 // clang-format on
 
 
-auto loadImage(const loader::ResourceLoader& resources) {
+auto loadImage(const loader::ResourceLoader& resources)
+{
   const auto actorData = resources.mActorImagePackage.loadActor(
     data::ActorID::Duke_3d_teaser_text, DUKE_3D_TEASER_TEXT_PALETTE);
   return actorData.mFrames.at(0).mFrameImage;
 }
 
-}
+} // namespace
 
 
 Duke3DTeaserScreen::Duke3DTeaserScreen(
   const loader::ResourceLoader& resources,
-  renderer::Renderer* pRenderer
-)
+  renderer::Renderer* pRenderer)
   : mTextImage(pRenderer, loadImage(resources))
   , mpRenderer(pRenderer)
 {
 }
 
 
-bool Duke3DTeaserScreen::isFinished() const {
+bool Duke3DTeaserScreen::isFinished() const
+{
   return mElapsedTime >= TOTAL_DISPLAY_TIME;
 }
 
 
-void Duke3DTeaserScreen::updateAndRender(const engine::TimeDelta dt) {
+void Duke3DTeaserScreen::updateAndRender(const engine::TimeDelta dt)
+{
   mElapsedTime += dt;
 
-  const auto alpha = 255 *
-    std::min(1.0f, float(mElapsedTime / TEXT_FADE_IN_TIME));
+  const auto alpha =
+    255 * std::min(1.0f, float(mElapsedTime / TEXT_FADE_IN_TIME));
   const auto offset = TEXT_SLIDE_IN_START_OFFSET *
     (1.0f - std::min(1.0f, float(mElapsedTime / TEXT_SLIDE_IN_TIME)));
 
@@ -97,4 +101,4 @@ void Duke3DTeaserScreen::updateAndRender(const engine::TimeDelta dt) {
   mTextImage.render(TEXT_X_POS, TEXT_Y_POS + base::round(offset));
 }
 
-}
+} // namespace rigel::ui

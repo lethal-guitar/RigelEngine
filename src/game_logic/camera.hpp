@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "base/warnings.hpp"
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
 #include "engine/base_components.hpp"
 #include "game_logic/input.hpp"
 #include "game_logic/player/components.hpp"
@@ -26,16 +26,24 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::data::map { class Map; }
-namespace rigel::events { struct PlayerFiredShot; }
+namespace rigel::data::map
+{
+class Map;
+}
+namespace rigel::events
+{
+struct PlayerFiredShot;
+}
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 
 class Player;
 
-class Camera : public entityx::Receiver<Camera> {
+class Camera : public entityx::Receiver<Camera>
+{
 public:
   Camera(
     const Player* pPlayer,
@@ -64,8 +72,9 @@ private:
 };
 
 
-inline const base::Vector& Camera::position() const {
+inline const base::Vector& Camera::position() const
+{
   return mPosition;
 }
 
-}
+} // namespace rigel::game_logic

@@ -19,9 +19,11 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SecurityCamera {
+struct SecurityCamera
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -29,4 +31,4 @@ struct SecurityCamera {
     entityx::Entity entity);
 };
 
-}
+} // namespace rigel::game_logic::behaviors

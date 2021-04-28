@@ -21,19 +21,20 @@
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void UnicycleBot::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
 
   const auto& position = *entity.component<engine::components::WorldPosition>();
@@ -44,9 +45,8 @@ void UnicycleBot::update(
   auto spawnSmokePuff = [&]() {
     const auto isFacingLeft = orientation == Orientation::Left;
     const auto xOffset = isFacingLeft ? 1 : 0;
-    const auto movementType = isFacingLeft
-      ? SpriteMovement::FlyUpperRight
-      : SpriteMovement::FlyUpperLeft;
+    const auto movementType = isFacingLeft ? SpriteMovement::FlyUpperRight
+                                           : SpriteMovement::FlyUpperLeft;
     spawnMovingEffectSprite(
       *d.mpEntityFactory,
       data::ActorID::Smoke_puff_FX,
@@ -55,10 +55,12 @@ void UnicycleBot::update(
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Waiting& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 15) {
+      if (state.mFramesElapsed == 15)
+      {
         orientation = position.x < s.mpPlayer->orientedPosition().x
           ? Orientation::Right
           : Orientation::Left;
@@ -72,13 +74,15 @@ void UnicycleBot::update(
     [&, this](Accelerating& state) {
       animationFrame = s.mpPerFrameState->mIsOddFrame ? 2 : 1;
 
-      if (s.mpPerFrameState->mIsOddFrame) {
+      if (s.mpPerFrameState->mIsOddFrame)
+      {
         spawnSmokePuff();
       }
 
       --mFramesUntilNextTurn;
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 10) {
+      if (state.mFramesElapsed == 10)
+      {
         mState = Moving{};
       }
     },
@@ -94,11 +98,11 @@ void UnicycleBot::update(
         engine::orientation::toMovement(orientation));
       if (
         result != engine::MovementResult::Completed ||
-        mFramesUntilNextTurn <= 0
-      ) {
+        mFramesUntilNextTurn <= 0)
+      {
         mState = Waiting{};
       }
     });
 }
 
-}
+} // namespace rigel::game_logic::behaviors

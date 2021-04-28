@@ -26,21 +26,25 @@
 
 namespace ec = rigel::engine::components;
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void EnemyRocket::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& position = *entity.component<ec::WorldPosition>();
 
   auto move = [&]() {
-    if (mDirection.x != 0) {
+    if (mDirection.x != 0)
+    {
       return engine::moveHorizontally(
         *d.mpCollisionChecker, entity, mDirection.x);
-    } else {
+    }
+    else
+    {
       return engine::moveVertically(
         *d.mpCollisionChecker, entity, mDirection.y);
     }
@@ -48,15 +52,14 @@ void EnemyRocket::update(
 
   auto explode = [&]() {
     spawnOneShotSprite(
-      *d.mpEntityFactory,
-      data::ActorID::Explosion_FX_1,
-      position);
+      *d.mpEntityFactory, data::ActorID::Explosion_FX_1, position);
     entity.destroy();
   };
 
 
   ++mFramesElapsed;
-  if (mFramesElapsed >= 4) {
+  if (mFramesElapsed >= 4)
+  {
     // Once at full speed (after 4 frames), the rocket moves twice per update,
     // and the first update is not checked for collision. This can cause the
     // rocket to move through walls under the right circumstances. Most likely
@@ -65,17 +68,19 @@ void EnemyRocket::update(
   }
 
   const auto result = move();
-  if (result != engine::MovementResult::Completed) {
+  if (result != engine::MovementResult::Completed)
+  {
     explode();
     return;
   }
 
   const auto bbox =
     engine::toWorldSpace(*entity.component<ec::BoundingBox>(), position);
-  if (bbox.intersects(s.mpPlayer->worldSpaceHitBox())) {
+  if (bbox.intersects(s.mpPlayer->worldSpaceHitBox()))
+  {
     s.mpPlayer->takeDamage(1);
     explode();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

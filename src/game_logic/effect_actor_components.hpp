@@ -19,9 +19,11 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::components {
+namespace rigel::game_logic::components
+{
 
-struct WindBlownSpiderGenerator {
+struct WindBlownSpiderGenerator
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -30,7 +32,8 @@ struct WindBlownSpiderGenerator {
 };
 
 
-struct WaterDropGenerator {
+struct WaterDropGenerator
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -39,7 +42,8 @@ struct WaterDropGenerator {
 };
 
 
-struct ExplosionEffect {
+struct ExplosionEffect
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -48,7 +52,8 @@ struct ExplosionEffect {
 };
 
 
-struct AirLockDeathTrigger {
+struct AirLockDeathTrigger
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -56,4 +61,4 @@ struct AirLockDeathTrigger {
     entityx::Entity entity);
 };
 
-}
+} // namespace rigel::game_logic::components

@@ -20,17 +20,20 @@
 #include "data/game_traits.hpp"
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-namespace {
+namespace
+{
 
-int imfDelayToSamples(const int delay, const int sampleRate) {
+int imfDelayToSamples(const int delay, const int sampleRate)
+{
   const auto samplesPerImfTick =
     static_cast<double>(sampleRate) / data::GameTraits::musicPlaybackRate;
   return base::round(delay * samplesPerImfTick);
 }
 
-}
+} // namespace
 
 
 ImfPlayer::ImfPlayer(const int sampleRate)
@@ -42,7 +45,8 @@ ImfPlayer::ImfPlayer(const int sampleRate)
 }
 
 
-void ImfPlayer::playSong(data::Song&& song) {
+void ImfPlayer::playSong(data::Song&& song)
+{
   {
     std::lock_guard<std::mutex> takeLock{mAudioLock};
     mNextSongData = std::move(song);
@@ -51,13 +55,16 @@ void ImfPlayer::playSong(data::Song&& song) {
 }
 
 
-void ImfPlayer::setVolume(const float volume) {
+void ImfPlayer::setVolume(const float volume)
+{
   mVolume.store(std::clamp(volume, 0.0f, 1.0f));
 }
 
 
-void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
-  if (mSongSwitchPending && mAudioLock.try_lock()) {
+void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired)
+{
+  if (mSongSwitchPending && mAudioLock.try_lock())
+  {
     mSongData = std::move(mNextSongData);
     mSongSwitchPending = false;
     mAudioLock.unlock();
@@ -66,25 +73,29 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
     mSamplesAvailable = 0;
   }
 
-  if (mSongData.empty()) {
+  if (mSongData.empty())
+  {
     std::fill(pBuffer, pBuffer + samplesRequired, int16_t{0});
     return;
   }
 
   const auto volume = mVolume.load();
 
-  while (samplesRequired > mSamplesAvailable) {
+  while (samplesRequired > mSamplesAvailable)
+  {
     mEmulator.render(mSamplesAvailable, pBuffer, volume);
     pBuffer += mSamplesAvailable;
     samplesRequired -= mSamplesAvailable;
 
     auto commandDelay = 0;
-    do {
+    do
+    {
       const auto& command = *miNextCommand;
       commandDelay = command.delay;
       mEmulator.writeRegister(command.reg, command.value);
       ++miNextCommand;
-      if (miNextCommand == mSongData.end()) {
+      if (miNextCommand == mSongData.end())
+      {
         miNextCommand = mSongData.begin();
       }
     } while (commandDelay == 0);
@@ -97,4 +108,4 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired) {
 }
 
 
-}
+} // namespace rigel::engine

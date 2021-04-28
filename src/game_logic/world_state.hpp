@@ -52,16 +52,33 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::data { struct GameOptions; }
-namespace rigel::engine { class SpriteFactory; }
-namespace rigel::loader { class ResourceLoader; }
-namespace rigel::renderer { class Renderer; }
+namespace rigel
+{
+struct IGameServiceProvider;
+}
+namespace rigel::data
+{
+struct GameOptions;
+}
+namespace rigel::engine
+{
+class SpriteFactory;
+}
+namespace rigel::loader
+{
+class ResourceLoader;
+}
+namespace rigel::renderer
+{
+class Renderer;
+}
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-struct BonusRelatedItemCounts {
+struct BonusRelatedItemCounts
+{
   int mCameraCount = 0;
   int mFireBombCount = 0;
   int mWeaponCount = 0;
@@ -73,7 +90,8 @@ struct BonusRelatedItemCounts {
 BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es);
 
 
-struct LevelBonusInfo {
+struct LevelBonusInfo
+{
   int mInitialCameraCount = 0;
   int mInitialMerchandiseCount = 0;
   int mInitialWeaponCount = 0;
@@ -84,12 +102,14 @@ struct LevelBonusInfo {
   bool mPlayerTookDamage = false;
 };
 
-struct CheckpointData {
+struct CheckpointData
+{
   data::PlayerModel::CheckpointState mState;
   base::Vector mPosition;
 };
 
-struct WorldState {
+struct WorldState
+{
   WorldState(
     IGameServiceProvider* pServiceProvider,
     renderer::Renderer* pRenderer,
@@ -161,4 +181,4 @@ struct WorldState {
   bool mIsOddFrame = true;
 };
 
-}
+} // namespace rigel::game_logic

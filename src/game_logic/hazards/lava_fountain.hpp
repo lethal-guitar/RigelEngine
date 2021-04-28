@@ -25,20 +25,25 @@ RIGEL_RESTORE_WARNINGS
 
 #include <variant>
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct LavaFountain {
-  struct Waiting {
+struct LavaFountain
+{
+  struct Waiting
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Erupting {
+  struct Erupting
+  {
     int mSequenceIndex = 0;
   };
 
@@ -53,4 +58,4 @@ struct LavaFountain {
   State mState = Waiting{};
 };
 
-}
+} // namespace rigel::game_logic::behaviors

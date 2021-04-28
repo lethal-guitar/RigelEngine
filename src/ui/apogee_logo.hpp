@@ -21,9 +21,11 @@
 #include "ui/movie_player.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class ApogeeLogo {
+class ApogeeLogo
+{
 public:
   explicit ApogeeLogo(GameMode::Context context);
 
@@ -41,4 +43,4 @@ private:
   engine::TimeDelta mElapsedTime;
 };
 
-}
+} // namespace rigel::ui

@@ -21,16 +21,20 @@
 
 #include <variant>
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace watch_bot {
+namespace watch_bot
+{
 
-struct Jumping {
+struct Jumping
+{
   Jumping() = default;
   explicit Jumping(const engine::components::Orientation orientation)
     : mOrientation(orientation)
@@ -42,15 +46,18 @@ struct Jumping {
     engine::components::Orientation::Left;
 };
 
-struct Falling {
+struct Falling
+{
   engine::components::Orientation mOrientation;
 };
 
-struct OnGround {
+struct OnGround
+{
   int mFramesElapsed = 0;
 };
 
-struct LookingAround {
+struct LookingAround
+{
   explicit LookingAround(const engine::components::Orientation orientation)
     : mOrientation(orientation)
   {
@@ -63,10 +70,11 @@ struct LookingAround {
 
 using State = std::variant<Jumping, Falling, OnGround, LookingAround>;
 
-}
+} // namespace watch_bot
 
 
-struct WatchBot {
+struct WatchBot
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -85,8 +93,10 @@ struct WatchBot {
 };
 
 
-struct WatchBotCarrier {
-  enum class State {
+struct WatchBotCarrier
+{
+  enum class State
+  {
     ApproachingPlayer,
     ReleasingPayload
   };
@@ -102,7 +112,8 @@ struct WatchBotCarrier {
 };
 
 
-struct WatchBotContainer {
+struct WatchBotContainer
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -112,4 +123,4 @@ struct WatchBotContainer {
   int mFramesElapsed = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

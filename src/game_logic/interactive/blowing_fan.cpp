@@ -21,35 +21,35 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 const int FAN_ANIM_SEQUENCE[61] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 0, 1, 2, 3, 0,
-  1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2,
-  0, 2, 0, 2, 0, 2, 0, 2, 0
-};
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3,
+  0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 0, 2, 0, 2, 0, 2,
+  0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0};
 
 
 const int FAN_THREADS_ANIM_SEQUENCE[61] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 2, 3, 2, 3, 2,
-  3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2,
-  3, 2, 3, 2, 3, 2, 3, 2, 3
-};
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3,
+  2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2,
+  3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3};
 
 
 constexpr int THREAD_ANIM_BASE_FRAME = 4;
 
-}
+} // namespace
 
 
 void BlowingFan::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   const auto& playerPos = s.mpPlayer->position();
@@ -71,14 +71,19 @@ void BlowingFan::update(
 
 
   // Update fan spinning
-  if (mState == State::SpeedingUp) {
+  if (mState == State::SpeedingUp)
+  {
     ++mStep;
-    if (mStep == 60) {
+    if (mStep == 60)
+    {
       mState = State::SlowingDown;
     }
-  } else {
+  }
+  else
+  {
     --mStep;
-    if (mStep == 0) {
+    if (mStep == 0)
+    {
       mState = State::SpeedingUp;
     }
   }
@@ -86,12 +91,14 @@ void BlowingFan::update(
   // Update animation & sound
   spriteFrames[0] = FAN_ANIM_SEQUENCE[mStep];
   spriteFrames[1] = FAN_THREADS_ANIM_SEQUENCE[mStep] + THREAD_ANIM_BASE_FRAME;
-  if (spriteFrames[0] == 2 && isOnScreen) {
+  if (spriteFrames[0] == 2 && isOnScreen)
+  {
     d.mpServiceProvider->playSound(data::SoundId::Swoosh);
   }
 
   // Update attaching player
-  if (mStep > 24 && playerInRange() && !s.mpPlayer->isDead()) {
+  if (mStep > 24 && playerInRange() && !s.mpPlayer->isDead())
+  {
     s.mpPlayer->beginBeingPushedByFan();
     mIsPushingPlayer = true;
 
@@ -108,10 +115,11 @@ void BlowingFan::update(
 
   const auto playerHasLeftRange =
     !playerInHorizontalRange() || position.y > playerPos.y + 25;
-  if (mIsPushingPlayer && (mStep < 25 || playerHasLeftRange)) {
+  if (mIsPushingPlayer && (mStep < 25 || playerHasLeftRange))
+  {
     s.mpPlayer->endBeingPushedByFan();
     mIsPushingPlayer = false;
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

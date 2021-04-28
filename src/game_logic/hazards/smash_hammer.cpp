@@ -28,17 +28,19 @@
 #include "renderer/renderer.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void SmashHammer::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace smash_hammer;
 
-  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+  if (!entity.has_component<engine::components::ExtendedFrameList>())
+  {
     entity.assign<engine::components::ExtendedFrameList>();
   }
 
@@ -46,31 +48,40 @@ void SmashHammer::update(
 
   const auto previousExtensionStep = mExtensionStep;
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Waiting& state) {
-      if (state.mFramesElapsed == 0 && !isOnScreen) {
+      if (state.mFramesElapsed == 0 && !isOnScreen)
+      {
         return;
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 19) {
+      if (state.mFramesElapsed == 19)
+      {
         mState = PushingDown{};
       }
     },
 
     [&, this](const PushingDown&) {
-      if (mExtensionStep == 0) {
+      if (mExtensionStep == 0)
+      {
         entity.assign<components::PlayerDamaging>(1);
       }
 
       const auto result =
         engine::moveVertically(*d.mpCollisionChecker, entity, 1);
-      if (result != engine::MovementResult::Completed) {
+      if (result != engine::MovementResult::Completed)
+      {
         d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
         spawnOneShotSprite(
-          *d.mpEntityFactory, data::ActorID::Smoke_cloud_FX, position + base::Vector{0, 4});
+          *d.mpEntityFactory,
+          data::ActorID::Smoke_cloud_FX,
+          position + base::Vector{0, 4});
         mState = PullingUp{};
-      } else {
+      }
+      else
+      {
         ++mExtensionStep;
       }
     },
@@ -78,22 +89,24 @@ void SmashHammer::update(
     [&, this](const PullingUp&) {
       --position.y;
       --mExtensionStep;
-      if (mExtensionStep == 0) {
+      if (mExtensionStep == 0)
+      {
         entity.remove<components::PlayerDamaging>();
         mState = Waiting{};
       }
-    }
-  );
+    });
 
-  if (mExtensionStep != previousExtensionStep) {
+  if (mExtensionStep != previousExtensionStep)
+  {
     auto& additionalFrames =
       entity.component<engine::components::ExtendedFrameList>()->mFrames;
 
     additionalFrames.clear();
-    for (int i = 0; i < mExtensionStep; ++i) {
+    for (int i = 0; i < mExtensionStep; ++i)
+    {
       additionalFrames.push_back({1, base::Vector{0, -i}});
     }
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

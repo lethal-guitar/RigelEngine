@@ -21,24 +21,26 @@
 
 #include <variant>
 
-namespace rigel::engine::events { struct CollidedWithWorld; }
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
+}
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 void configureRedBird(entityx::Entity entity);
 
 }
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct RedBird {
-  void update(
-    GlobalDependencies&,
-    GlobalState&,
-    bool,
-    entityx::Entity);
+struct RedBird
+{
+  void update(GlobalDependencies&, GlobalState&, bool, entityx::Entity);
 
   void onCollision(
     GlobalDependencies& dependencies,
@@ -49,7 +51,8 @@ struct RedBird {
   void startRisingUp(int initialHeight, entityx::Entity entity);
 
 
-  struct Flying {
+  struct Flying
+  {
     Flying() noexcept = default;
     explicit Flying(const engine::components::Orientation orientation)
       : mOrientation(orientation)
@@ -61,15 +64,18 @@ struct RedBird {
     unsigned int mAnimStep = 0;
   };
 
-  struct Hovering {
+  struct Hovering
+  {
     int mFramesElapsed = 0;
   };
 
-  struct PlungingDown {
+  struct PlungingDown
+  {
     int mInitialHeight;
   };
 
-  struct RisingUp {
+  struct RisingUp
+  {
     explicit RisingUp(const int initialHeight)
       : mInitialHeight(initialHeight)
     {
@@ -83,4 +89,4 @@ struct RedBird {
   State mState;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -26,7 +26,8 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 PlayerShip::PlayerShip(const bool hasJustBeenExited)
   : mPickUpCoolDownFrames(hasJustBeenExited ? 20 : 0)
@@ -38,15 +39,16 @@ void PlayerShip::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::BoundingBox;
   using engine::components::WorldPosition;
 
   const auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
 
-  if (mPickUpCoolDownFrames > 0) {
+  if (mPickUpCoolDownFrames > 0)
+  {
     --mPickUpCoolDownFrames;
   }
 
@@ -62,15 +64,14 @@ void PlayerShip::update(
     s.mpPlayer->stateIs<Falling>())
   // clang-format on
   {
-    d.mpEvents->emit(rigel::events::TutorialMessage{
-      data::TutorialMessageId::FoundSpaceShip});
+    d.mpEvents->emit(
+      rigel::events::TutorialMessage{data::TutorialMessageId::FoundSpaceShip});
     d.mpServiceProvider->playSound(data::SoundId::WeaponPickup);
 
     s.mpPlayer->enterShip(
-      position,
-      *entity.component<engine::components::Orientation>());
+      position, *entity.component<engine::components::Orientation>());
     entity.destroy();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

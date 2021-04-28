@@ -19,9 +19,11 @@
 #include "base/clock.hpp"
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
-class FpsLimiter {
+class FpsLimiter
+{
 public:
   explicit FpsLimiter(int targetFps);
 
@@ -33,4 +35,4 @@ private:
   double mError = 0.0;
 };
 
-}
+} // namespace rigel::renderer

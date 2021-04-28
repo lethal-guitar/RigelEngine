@@ -20,21 +20,22 @@
 #include "renderer/texture.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
 /** Shows anti-piracy screen for registered version
  *
  * Shows the anti-piracy screen (LCR.MNI) until any key is pressed, then
  * switches to Intro/Demo loop.
  */
-class AntiPiracyScreenMode : public GameMode {
+class AntiPiracyScreenMode : public GameMode
+{
 public:
   AntiPiracyScreenMode(Context context, bool isFirstLaunch);
 
   std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta,
-    const std::vector<SDL_Event>& events
-  ) override;
+    const std::vector<SDL_Event>& events) override;
 
 private:
   Context mContext;
@@ -42,4 +43,4 @@ private:
   bool mIsFirstLaunch;
 };
 
-}
+} // namespace rigel

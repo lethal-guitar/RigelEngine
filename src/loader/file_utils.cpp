@@ -21,21 +21,25 @@
 #include <stdexcept>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 
 
-namespace {
+namespace
+{
 
 const char* OUT_OF_DATA_ERROR_MSG = "No more data in stream";
 
 }
 
 
-ByteBuffer loadFile(const string& fileName) {
+ByteBuffer loadFile(const string& fileName)
+{
   ifstream file(fileName, ios::binary | ios::ate);
-  if (!file.is_open()) {
+  if (!file.is_open())
+  {
     throw runtime_error(string("File can't be opened: ") + fileName);
   }
 
@@ -50,10 +54,11 @@ ByteBuffer loadFile(const string& fileName) {
 
 void saveToFile(
   const loader::ByteBuffer& buffer,
-  const std::filesystem::path& filePath
-) {
+  const std::filesystem::path& filePath)
+{
   std::ofstream file(filePath.u8string(), std::ios::binary);
-  if (!file.is_open()) {
+  if (!file.is_open())
+  {
     throw runtime_error(string("File can't be opened: ") + filePath.u8string());
   }
   file.exceptions(ios::failbit | ios::badbit);
@@ -62,7 +67,8 @@ void saveToFile(
 }
 
 
-std::string asText(const ByteBuffer& buffer) {
+std::string asText(const ByteBuffer& buffer)
+{
   const auto pBytesAsChars = reinterpret_cast<const char*>(buffer.data());
   return std::string(pBytesAsChars, pBytesAsChars + buffer.size());
 }
@@ -81,22 +87,26 @@ LeStreamReader::LeStreamReader(ByteBufferCIter begin, ByteBufferCIter end)
 }
 
 
-uint8_t LeStreamReader::readU8() {
-  if (mCurrentByteIter == mDataEnd) {
+uint8_t LeStreamReader::readU8()
+{
+  if (mCurrentByteIter == mDataEnd)
+  {
     throw runtime_error(OUT_OF_DATA_ERROR_MSG);
   }
   return *mCurrentByteIter++;
 }
 
 
-uint16_t LeStreamReader::readU16() {
+uint16_t LeStreamReader::readU16()
+{
   const auto lsb = readU8();
   const auto msb = readU8();
   return lsb | uint16_t(msb << 8);
 }
 
 
-uint32_t LeStreamReader::readU24() {
+uint32_t LeStreamReader::readU24()
+{
   const auto lsb = readU8();
   const auto middle = readU8();
   const auto msb = readU8();
@@ -105,24 +115,28 @@ uint32_t LeStreamReader::readU24() {
 }
 
 
-uint32_t LeStreamReader::readU32() {
+uint32_t LeStreamReader::readU32()
+{
   const auto lowWord = readU16();
   const auto highWord = readU16();
   return lowWord | (highWord << 16);
 }
 
 
-int8_t LeStreamReader::readS8() {
+int8_t LeStreamReader::readS8()
+{
   return static_cast<int8_t>(readU8());
 }
 
 
-int16_t LeStreamReader::readS16() {
+int16_t LeStreamReader::readS16()
+{
   return static_cast<int16_t>(readU16());
 }
 
 
-int32_t LeStreamReader::readS24() {
+int32_t LeStreamReader::readS24()
+{
   static_assert(static_cast<int8_t>(0xFFU) == -1, "Need two's complement");
   const auto rawValue = readU24();
   const auto extension = (rawValue & 0x800000) ? 0xFF : 0x00;
@@ -130,13 +144,15 @@ int32_t LeStreamReader::readS24() {
 }
 
 
-int32_t LeStreamReader::readS32() {
+int32_t LeStreamReader::readS32()
+{
   return static_cast<int32_t>(readU32());
 }
 
 
-template<typename Callable>
-auto LeStreamReader::withPreservingCurrentIter(Callable func) {
+template <typename Callable>
+auto LeStreamReader::withPreservingCurrentIter(Callable func)
+{
   const auto currentIter = mCurrentByteIter;
   const auto result = func();
   mCurrentByteIter = currentIter;
@@ -144,51 +160,61 @@ auto LeStreamReader::withPreservingCurrentIter(Callable func) {
 }
 
 
-uint8_t LeStreamReader::peekU8() {
+uint8_t LeStreamReader::peekU8()
+{
   return withPreservingCurrentIter([this]() { return readU8(); });
 }
 
 
-uint16_t LeStreamReader::peekU16() {
+uint16_t LeStreamReader::peekU16()
+{
   return withPreservingCurrentIter([this]() { return readU16(); });
 }
 
 
-uint32_t LeStreamReader::peekU24() {
+uint32_t LeStreamReader::peekU24()
+{
   return withPreservingCurrentIter([this]() { return readU24(); });
 }
 
 
-uint32_t LeStreamReader::peekU32() {
+uint32_t LeStreamReader::peekU32()
+{
   return withPreservingCurrentIter([this]() { return readU32(); });
 }
 
 
-int8_t LeStreamReader::peekS8() {
+int8_t LeStreamReader::peekS8()
+{
   return withPreservingCurrentIter([this]() { return readS8(); });
 }
 
 
-int16_t LeStreamReader::peekS16() {
+int16_t LeStreamReader::peekS16()
+{
   return withPreservingCurrentIter([this]() { return readS16(); });
 }
 
 
-int32_t LeStreamReader::peekS24() {
+int32_t LeStreamReader::peekS24()
+{
   return withPreservingCurrentIter([this]() { return readS24(); });
 }
 
 
-int32_t LeStreamReader::peekS32() {
+int32_t LeStreamReader::peekS32()
+{
   return withPreservingCurrentIter([this]() { return readS32(); });
 }
 
 
-void LeStreamReader::skipBytes(const size_t count) {
+void LeStreamReader::skipBytes(const size_t count)
+{
   assert(distance(mCurrentByteIter, mDataEnd) >= 0);
-  const auto availableBytes = static_cast<size_t>(
-    distance(mCurrentByteIter, mDataEnd));
-  if (availableBytes < count) {
+  const auto availableBytes =
+    static_cast<size_t>(distance(mCurrentByteIter, mDataEnd));
+  if (availableBytes < count)
+  {
     throw runtime_error(OUT_OF_DATA_ERROR_MSG);
   }
 
@@ -196,19 +222,23 @@ void LeStreamReader::skipBytes(const size_t count) {
 }
 
 
-bool LeStreamReader::hasData() const {
+bool LeStreamReader::hasData() const
+{
   return mCurrentByteIter != mDataEnd;
 }
 
 
-ByteBufferCIter LeStreamReader::currentIter() const {
+ByteBufferCIter LeStreamReader::currentIter() const
+{
   return mCurrentByteIter;
 }
 
 
-string readFixedSizeString(LeStreamReader& reader, const size_t len) {
+string readFixedSizeString(LeStreamReader& reader, const size_t len)
+{
   vector<char> characters;
-  for (size_t i=0; i<len; ++i) {
+  for (size_t i = 0; i < len; ++i)
+  {
     characters.push_back(static_cast<char>(reader.readU8()));
   }
 
@@ -219,4 +249,4 @@ string readFixedSizeString(LeStreamReader& reader, const size_t len) {
   return string(characters.data());
 }
 
-}
+} // namespace rigel::loader

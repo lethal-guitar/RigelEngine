@@ -89,7 +89,8 @@
 namespace ex = entityx;
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using namespace data;
 using namespace loader;
@@ -101,14 +102,13 @@ using namespace engine::components;
 using namespace game_logic::components;
 
 
-namespace {
+namespace
+{
 
 // Assign gravity affected moving body component
-template<typename EntityLike>
-void addDefaultMovingBody(
-  EntityLike& entity,
-  const BoundingBox& boundingBox
-) {
+template <typename EntityLike>
+void addDefaultMovingBody(EntityLike& entity, const BoundingBox& boundingBox)
+{
   using namespace engine::components::parameter_aliases;
 
   entity.template assign<MovingBody>(
@@ -124,15 +124,19 @@ base::Vector adjustedPosition(
   WorldPosition position,
   const ProjectileDirection direction,
   const BoundingBox& boundingBox,
-  const bool useBuggyOffsets
-) {
+  const bool useBuggyOffsets)
+{
   using D = ProjectileDirection;
 
   // Position adjustment for the flame thrower shot
-  if (type == ProjectileType::Flame) {
-    if (isHorizontal(direction)) {
+  if (type == ProjectileType::Flame)
+  {
+    if (isHorizontal(direction))
+    {
       position.y += 1;
-    } else {
+    }
+    else
+    {
       position.x -= 1;
     }
   }
@@ -141,33 +145,41 @@ base::Vector adjustedPosition(
   // position to always represent the projectile's origin, which means we need
   // to adjust the position by the projectile's length to match the left-bottom
   // corner positioning system.
-  if (isHorizontal(direction) && direction == D::Left) {
+  if (isHorizontal(direction) && direction == D::Left)
+  {
     position.x -= boundingBox.size.width - 1;
 
-    if (type == ProjectileType::Flame) {
+    if (type == ProjectileType::Flame)
+    {
       position.x += 3;
     }
   }
 
   // Same, but for downwards-facing projectiles.
-  if (direction == D::Down && type != ProjectileType::Flame) {
+  if (direction == D::Down && type != ProjectileType::Flame)
+  {
     position.y += boundingBox.size.height - 1;
   }
 
-  if (useBuggyOffsets) {
-    if (type == ProjectileType::Normal && direction == D::Left) {
+  if (useBuggyOffsets)
+  {
+    if (type == ProjectileType::Normal && direction == D::Left)
+    {
       position.x -= 1;
     }
 
-    if (type == ProjectileType::Normal && direction == D::Down) {
+    if (type == ProjectileType::Normal && direction == D::Down)
+    {
       position.y += 1;
     }
 
-    if (type == ProjectileType::Rocket && direction == D::Left) {
+    if (type == ProjectileType::Rocket && direction == D::Left)
+    {
       position.x += 1;
     }
 
-    if (type == ProjectileType::Rocket && direction == D::Down) {
+    if (type == ProjectileType::Rocket && direction == D::Down)
+    {
       position.y -= 2;
     }
   }
@@ -186,22 +198,20 @@ const base::Point<float> FLY_RIGHT[] = {
   {2.0f, 2.0f},
   {1.0f, 2.0f},
   {1.0f, 3.0f},
-  {1.0f, 3.0f}
-};
+  {1.0f, 3.0f}};
 
 
 const base::Point<float> FLY_UPPER_RIGHT[] = {
   {3.0f, -3.0f},
   {2.0f, -2.0f},
   {2.0f, -1.0f},
-  {1.0f,  0.0f},
-  {1.0f,  0.0f},
-  {1.0f,  1.0f},
-  {1.0f,  2.0f},
-  {1.0f,  2.0f},
-  {1.0f,  3.0f},
-  {1.0f,  3.0f}
-};
+  {1.0f, 0.0f},
+  {1.0f, 0.0f},
+  {1.0f, 1.0f},
+  {1.0f, 2.0f},
+  {1.0f, 2.0f},
+  {1.0f, 3.0f},
+  {1.0f, 3.0f}};
 
 
 const base::Point<float> FLY_UP[] = {
@@ -214,8 +224,7 @@ const base::Point<float> FLY_UP[] = {
   {0.0f, 1.0f},
   {0.0f, 2.0f},
   {0.0f, 3.0f},
-  {0.0f, 3.0f}
-};
+  {0.0f, 3.0f}};
 
 
 const base::Point<float> FLY_UPPER_LEFT[] = {
@@ -228,8 +237,7 @@ const base::Point<float> FLY_UPPER_LEFT[] = {
   {-1.0f, 2.0f},
   {-1.0f, 3.0f},
   {-1.0f, 4.0f},
-  {-1.0f, 4.0f}
-};
+  {-1.0f, 4.0f}};
 
 
 const base::Point<float> FLY_LEFT[] = {
@@ -242,8 +250,7 @@ const base::Point<float> FLY_LEFT[] = {
   {-2.0f, 2.0f},
   {-1.0f, 3.0f},
   {-1.0f, 3.0f},
-  {-1.0f, 3.0f}
-};
+  {-1.0f, 3.0f}};
 
 
 const base::Point<float> FLY_DOWN[] = {
@@ -256,8 +263,7 @@ const base::Point<float> FLY_DOWN[] = {
   {0.0f, 3.0f},
   {0.0f, 3.0f},
   {0.0f, 3.0f},
-  {0.0f, 3.0f}
-};
+  {0.0f, 3.0f}};
 
 
 const base::Point<float> SWIRL_AROUND[] = {
@@ -270,8 +276,7 @@ const base::Point<float> SWIRL_AROUND[] = {
   {2.0f, 0.0f},
   {1.0f, -1.0f},
   {-2.0f, -1.0f},
-  {-2.0f, 1.0f}
-};
+  {-2.0f, 1.0f}};
 
 
 const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
@@ -281,10 +286,9 @@ const base::ArrayView<base::Point<float>> MOVEMENT_SEQUENCES[] = {
   FLY_UPPER_LEFT,
   FLY_LEFT,
   FLY_DOWN,
-  SWIRL_AROUND
-};
+  SWIRL_AROUND};
 
-}
+} // namespace
 
 
 #include "entity_configuration.ipp"
@@ -307,24 +311,27 @@ EntityFactory::EntityFactory(
 }
 
 
-Sprite EntityFactory::createSpriteForId(const ActorID actorID) {
+Sprite EntityFactory::createSpriteForId(const ActorID actorID)
+{
   return mpSpriteFactory->createSprite(actorID);
 }
 
 
 entityx::Entity EntityFactory::spawnSprite(
   const data::ActorID actorID,
-  const bool assignBoundingBox
-) {
+  const bool assignBoundingBox)
+{
   auto entity = mpEntityManager->create();
   auto sprite = createSpriteForId(actorID);
   entity.assign<Sprite>(sprite);
 
-  if (assignBoundingBox) {
+  if (assignBoundingBox)
+  {
     entity.assign<BoundingBox>(mpSpriteFactory->actorFrameRect(actorID, 0));
   }
 
-  if (actorID == data::ActorID::Explosion_FX_1) {
+  if (actorID == data::ActorID::Explosion_FX_1)
+  {
     // TODO: Eliminate duplication with code in effects_system.cpp
     const auto randomChoice = mpRandomGenerator->gen();
     const auto soundId = randomChoice % 2 == 0
@@ -339,8 +346,8 @@ entityx::Entity EntityFactory::spawnSprite(
 entityx::Entity EntityFactory::spawnSprite(
   const data::ActorID actorID,
   const base::Vector& position,
-  const bool assignBoundingBox
-) {
+  const bool assignBoundingBox)
+{
   auto entity = spawnSprite(actorID, assignBoundingBox);
   entity.assign<WorldPosition>(position);
   return entity;
@@ -350,8 +357,8 @@ entityx::Entity EntityFactory::spawnSprite(
 entityx::Entity EntityFactory::spawnProjectile(
   const ProjectileType type,
   const WorldPosition& pos,
-  const ProjectileDirection direction
-) {
+  const ProjectileDirection direction)
+{
   using namespace engine::components::parameter_aliases;
   using namespace game_logic::components::parameter_aliases;
 
@@ -365,19 +372,19 @@ entityx::Entity EntityFactory::spawnProjectile(
     type, pos, direction, boundingBox, mpOptions->compatibilityModeOn()));
   entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
   entity.assign<PlayerProjectile>(type);
-  entity.assign<AutoDestroy>(AutoDestroy{
-    AutoDestroy::Condition::OnLeavingActiveRegion});
+  entity.assign<AutoDestroy>(
+    AutoDestroy{AutoDestroy::Condition::OnLeavingActiveRegion});
 
   const auto speed = speedForProjectileType(type);
   entity.assign<MovingBody>(
-    Velocity{directionToVector(direction) * speed},
-    GravityAffected{false});
+    Velocity{directionToVector(direction) * speed}, GravityAffected{false});
   // Some player projectiles do have collisions with walls, but that's
   // handled by player::ProjectileSystem.
   entity.component<MovingBody>()->mIgnoreCollisions = true;
   entity.component<MovingBody>()->mIsActive = false;
 
-  if (type == ProjectileType::ShipLaser) {
+  if (type == ProjectileType::ShipLaser)
+  {
     entity.assign<AnimationLoop>(1);
   }
 
@@ -387,8 +394,8 @@ entityx::Entity EntityFactory::spawnProjectile(
 
 entityx::Entity EntityFactory::spawnActor(
   const data::ActorID id,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   auto entity = spawnSprite(id, position);
   const auto boundingBox = mpSpriteFactory->actorFrameRect(id, 0);
 
@@ -399,19 +406,23 @@ entityx::Entity EntityFactory::spawnActor(
 
 
 void EntityFactory::createEntitiesForLevel(
-  const data::map::ActorDescriptionList& actors
-) {
-  for (const auto& actor : actors) {
+  const data::map::ActorDescriptionList& actors)
+{
+  for (const auto& actor : actors)
+  {
     // Difficulty/section markers should never appear in the actor descriptions
     // coming from the loader, as they are handled during pre-processing.
     assert(
-      actor.mID != ActorID::META_Appear_only_in_med_hard_difficulty && actor.mID != ActorID::META_Appear_only_in_hard_difficulty &&
-      actor.mID != ActorID::META_Dynamic_geometry_marker_1 && actor.mID != ActorID::META_Dynamic_geometry_marker_2);
+      actor.mID != ActorID::META_Appear_only_in_med_hard_difficulty &&
+      actor.mID != ActorID::META_Appear_only_in_hard_difficulty &&
+      actor.mID != ActorID::META_Dynamic_geometry_marker_1 &&
+      actor.mID != ActorID::META_Dynamic_geometry_marker_2);
 
     auto entity = mpEntityManager->create();
 
     auto position = actor.mPosition;
-    if (actor.mAssignedArea) {
+    if (actor.mAssignedArea)
+    {
       // For dynamic geometry, the original position refers to the top-left
       // corner of the assigned area, but it refers to the bottom-left corner
       // for all other entities. Adjust the position here so that it's also
@@ -421,13 +432,16 @@ void EntityFactory::createEntitiesForLevel(
     entity.assign<WorldPosition>(position);
 
     BoundingBox boundingBox;
-    if (actor.mAssignedArea) {
+    if (actor.mAssignedArea)
+    {
       const auto mapSectionRect = *actor.mAssignedArea;
       entity.assign<MapGeometryLink>(mapSectionRect);
 
       boundingBox = mapSectionRect;
       boundingBox.topLeft = {0, 0};
-    } else if (engine::hasAssociatedSprite(actor.mID)) {
+    }
+    else if (engine::hasAssociatedSprite(actor.mID))
+    {
       const auto sprite = createSpriteForId(actor.mID);
       boundingBox = mpSpriteFactory->actorFrameRect(actor.mID, 0);
       entity.assign<Sprite>(sprite);
@@ -441,12 +455,13 @@ void EntityFactory::createEntitiesForLevel(
 entityx::Entity spawnOneShotSprite(
   IEntityFactory& factory,
   const ActorID id,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   auto entity = factory.spawnSprite(id, position, true);
-  const auto numAnimationFrames = static_cast<int>(
-    entity.component<Sprite>()->mpDrawData->mFrames.size());
-  if (numAnimationFrames > 1) {
+  const auto numAnimationFrames =
+    static_cast<int>(entity.component<Sprite>()->mpDrawData->mFrames.size());
+  if (numAnimationFrames > 1)
+  {
     engine::startAnimationLoop(entity, 1, 0, std::nullopt);
   }
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(numAnimationFrames));
@@ -459,15 +474,13 @@ entityx::Entity spawnOneShotSprite(
 entityx::Entity spawnFloatingOneShotSprite(
   IEntityFactory& factory,
   const data::ActorID id,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   using namespace engine::components::parameter_aliases;
 
   auto entity = spawnOneShotSprite(factory, id, position);
   entity.assign<MovingBody>(MovingBody{
-    Velocity{0, -1.0f},
-    GravityAffected{false},
-    IgnoreCollisions{true}});
+    Velocity{0, -1.0f}, GravityAffected{false}, IgnoreCollisions{true}});
   return entity;
 }
 
@@ -476,11 +489,12 @@ entityx::Entity spawnMovingEffectSprite(
   IEntityFactory& factory,
   const ActorID id,
   const SpriteMovement movement,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   auto entity = factory.spawnSprite(id, position, true);
   configureMovingEffectSprite(entity, movement);
-  if (entity.component<Sprite>()->mpDrawData->mFrames.size() > 1) {
+  if (entity.component<Sprite>()->mpDrawData->mFrames.size() > 1)
+  {
     entity.assign<AnimationLoop>(1);
   }
   assignSpecialEffectSpriteProperties(entity, id);
@@ -491,17 +505,15 @@ entityx::Entity spawnMovingEffectSprite(
 void spawnFloatingScoreNumber(
   IEntityFactory& factory,
   const ScoreNumberType type,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   using namespace engine::components::parameter_aliases;
 
   auto entity = factory.spawnSprite(scoreNumberActor(type), position, true);
   engine::startAnimationSequence(entity, SCORE_NUMBER_ANIMATION_SEQUENCE);
   entity.assign<MovementSequence>(SCORE_NUMBER_MOVE_SEQUENCE);
   entity.assign<MovingBody>(
-    Velocity{},
-    GravityAffected{false},
-    IgnoreCollisions{true});
+    Velocity{}, GravityAffected{false}, IgnoreCollisions{true});
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(SCORE_NUMBER_LIFE_TIME));
   entity.assign<Active>();
 }
@@ -511,8 +523,8 @@ void spawnFireEffect(
   entityx::EntityManager& entityManager,
   const base::Vector& position,
   const BoundingBox& coveredArea,
-  const data::ActorID actorToSpawn
-) {
+  const data::ActorID actorToSpawn)
+{
   // TODO: The initial offset should be based on the size of the actor
   // that's to be spawned. Currently, it's hard-coded for actor ID 3
   // (small explosion).
@@ -531,17 +543,17 @@ void spawnFireEffect(
 void spawnEnemyLaserShot(
   IEntityFactory& factory,
   base::Vector position,
-  const engine::components::Orientation orientation
-) {
+  const engine::components::Orientation orientation)
+{
   const auto isFacingLeft = orientation == Orientation::Left;
-  if (isFacingLeft) {
+  if (isFacingLeft)
+  {
     position.x -= 1;
   }
 
   auto entity = factory.spawnActor(
-    isFacingLeft
-      ? data::ActorID::Enemy_laser_shot_LEFT
-      : data::ActorID::Enemy_laser_shot_RIGHT,
+    isFacingLeft ? data::ActorID::Enemy_laser_shot_LEFT
+                 : data::ActorID::Enemy_laser_shot_RIGHT,
     position);
   entity.assign<Active>();
 
@@ -554,4 +566,4 @@ void spawnEnemyLaserShot(
   muzzleFlash.assign<AutoDestroy>(AutoDestroy::afterTimeout(1));
 }
 
-}
+} // namespace rigel::game_logic

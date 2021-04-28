@@ -24,9 +24,11 @@
 #include <vector>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class IntroMovie {
+class IntroMovie
+{
 public:
   explicit IntroMovie(GameMode::Context context);
 
@@ -39,7 +41,8 @@ public:
 private:
   void startNextMovie();
 
-  struct PlaybackConfig {
+  struct PlaybackConfig
+  {
     data::Movie mMovie;
 
     const int mFrameDelay;
@@ -49,8 +52,8 @@ private:
 
   using PlaybackConfigList = std::vector<PlaybackConfig>;
 
-  PlaybackConfigList createConfigurations(
-    const loader::ResourceLoader& resources);
+  PlaybackConfigList
+    createConfigurations(const loader::ResourceLoader& resources);
 
 private:
   IGameServiceProvider* mpServiceProvider;
@@ -61,4 +64,4 @@ private:
 };
 
 
-}
+} // namespace rigel::ui

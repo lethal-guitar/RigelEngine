@@ -20,11 +20,14 @@
 #include <utility>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-namespace detail {
+namespace detail
+{
 
-class CallOnDestruction {
+class CallOnDestruction
+{
 public:
   template <typename Callback>
   explicit CallOnDestruction(Callback&& callback)
@@ -32,9 +35,7 @@ public:
   {
   }
 
-  ~CallOnDestruction() {
-    mCallback();
-  }
+  ~CallOnDestruction() { mCallback(); }
 
   CallOnDestruction(CallOnDestruction&& other) noexcept
     : mCallback(std::exchange(other.mCallback, []() {}))
@@ -49,12 +50,13 @@ private:
   std::function<void()> mCallback;
 };
 
-}
+} // namespace detail
 
 
 template <typename Callback>
-[[nodiscard]] auto defer(Callback&& callback) {
+[[nodiscard]] auto defer(Callback&& callback)
+{
   return detail::CallOnDestruction{std::forward<Callback>(callback)};
 }
 
-}
+} // namespace rigel::base

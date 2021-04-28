@@ -28,23 +28,27 @@ RIGEL_RESTORE_WARNINGS
 #include <iostream>
 
 
-namespace {
+namespace
+{
 
 constexpr auto INDENTATION_WIDTH = 2;
 
 
-void printBanner(const std::filesystem::path& prefsDirPath) {
-  std::cout <<
-    "== Rigel Engine user profile tool ==\n"
-    "\n"
-    "User profile path: \"" << prefsDirPath.u8string() << "\"\n"
-    "\n";
+void printBanner(const std::filesystem::path& prefsDirPath)
+{
+  std::cout << "== Rigel Engine user profile tool ==\n"
+               "\n"
+               "User profile path: \""
+            << prefsDirPath.u8string()
+            << "\"\n"
+               "\n";
 }
 
 
-void printUsage() {
+void printUsage()
+{
   std::cout <<
-R"(Usage:
+    R"(Usage:
   UserProfileTool <command>
 
 With command being 'encode' or 'decode'. Both commands operate in-place in
@@ -56,31 +60,30 @@ decode - reads binary profile file, and writes a JSON version
 }
 
 
-std::string readJsonFile(const std::filesystem::path& path) {
+std::string readJsonFile(const std::filesystem::path& path)
+{
   auto inFile = std::ifstream{path.u8string()};
-  if (inFile.is_open()) {
+  if (inFile.is_open())
+  {
     return std::string{
-      std::istreambuf_iterator<char>{inFile},
-      std::istreambuf_iterator<char>{}};
+      std::istreambuf_iterator<char>{inFile}, std::istreambuf_iterator<char>{}};
   }
 
   return "";
 }
 
 
-void writeJsonFile(
-  const std::string& json,
-  const std::filesystem::path& path
-) {
+void writeJsonFile(const std::string& json, const std::filesystem::path& path)
+{
   auto outFile = std::ofstream{path.u8string()};
   outFile << json;
 }
 
 
-bool userConfirmed() {
-  std::cout
-    << "WARNING: This will overwrite your current profile.\n"
-    << "Proceed? [Y/n] ";
+bool userConfirmed()
+{
+  std::cout << "WARNING: This will overwrite your current profile.\n"
+            << "Proceed? [Y/n] ";
 
   char confirmation = 'n';
   std::cin >> confirmation;
@@ -88,12 +91,14 @@ bool userConfirmed() {
   return confirmation == 'y' || confirmation == 'Y';
 }
 
-}
+} // namespace
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   const auto USER_PROFILE_FILENAME =
-    std::string{rigel::USER_PROFILE_BASE_NAME} + rigel::USER_PROFILE_FILE_EXTENSION;
+    std::string{rigel::USER_PROFILE_BASE_NAME} +
+    rigel::USER_PROFILE_FILE_EXTENSION;
   const auto JSON_USER_PROFILE_FILENAME =
     std::string{rigel::USER_PROFILE_BASE_NAME} + ".json";
 
@@ -101,16 +106,19 @@ int main(int argc, char** argv) {
 
   namespace fs = std::filesystem;
 
-  try {
+  try
+  {
     const auto prefsDirPath = rigel::createOrGetPreferencesPath();
-    if (!prefsDirPath) {
+    if (!prefsDirPath)
+    {
       std::cerr << "ERROR: Failed to get preferences path\n";
       return 1;
     }
 
     printBanner(*prefsDirPath);
 
-    if (argc < 2) {
+    if (argc < 2)
+    {
       printUsage();
       return 1;
     }
@@ -118,9 +126,11 @@ int main(int argc, char** argv) {
 
     const auto command = argv[1];
 
-    if (command == "decode"s) {
+    if (command == "decode"s)
+    {
       const auto profileFilePath = *prefsDirPath / USER_PROFILE_FILENAME;
-      if (!fs::exists(profileFilePath)) {
+      if (!fs::exists(profileFilePath))
+      {
         std::cerr << "ERROR: No profile file found\n";
         return 1;
       }
@@ -130,12 +140,15 @@ int main(int argc, char** argv) {
       const auto outFilePath = *prefsDirPath / JSON_USER_PROFILE_FILENAME;
       writeJsonFile(profile.dump(INDENTATION_WIDTH), outFilePath);
 
-      std::cout <<
-        "Profile successfully decoded. Find the JSON file at:\n"
-        "\t\"" << outFilePath.u8string() << "\"\n";
-    } else if (command == "encode"s) {
+      std::cout << "Profile successfully decoded. Find the JSON file at:\n"
+                   "\t\""
+                << outFilePath.u8string() << "\"\n";
+    }
+    else if (command == "encode"s)
+    {
       const auto jsonFilePath = *prefsDirPath / JSON_USER_PROFILE_FILENAME;
-      if (!fs::exists(jsonFilePath)) {
+      if (!fs::exists(jsonFilePath))
+      {
         std::cerr << "ERROR: No decoded profile (JSON file) found\n";
         return 1;
       }
@@ -144,16 +157,21 @@ int main(int argc, char** argv) {
       const auto jsonProfile = nlohmann::json::parse(jsonProfileText);
       const auto serializedBuffer = nlohmann::json::to_msgpack(jsonProfile);
 
-      if (userConfirmed()) {
+      if (userConfirmed())
+      {
         const auto profileFilePath = *prefsDirPath / USER_PROFILE_FILENAME;
         rigel::loader::saveToFile(serializedBuffer, profileFilePath);
 
         std::cout << "Profile successfully encoded.\n";
       }
-    } else {
+    }
+    else
+    {
       printUsage();
     }
-  } catch (const std::exception& ex) {
+  }
+  catch (const std::exception& ex)
+  {
     std::cerr << "ERROR: " << ex.what() << '\n';
     return 1;
   }

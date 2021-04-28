@@ -19,12 +19,14 @@
 #include <bitset>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 // The values are explicitly given in order to easily see which message has
 // which id. The ids are chosen to match how the original game references these
 // messages.
-enum class TutorialMessageId {
+enum class TutorialMessageId
+{
   FoundRapidFire = 0,
   FoundHealthMolecule = 1,
   FoundRegularWeapon = 2,
@@ -62,7 +64,8 @@ constexpr auto NUM_TUTORIAL_MESSAGES =
 const char* messageText(TutorialMessageId id);
 
 
-class TutorialMessageState {
+class TutorialMessageState
+{
 public:
   void markAsShown(TutorialMessageId id);
   bool hasBeenShown(TutorialMessageId id) const;
@@ -71,4 +74,4 @@ private:
   std::bitset<NUM_TUTORIAL_MESSAGES> mMessagesShownMask;
 };
 
-}
+} // namespace rigel::data

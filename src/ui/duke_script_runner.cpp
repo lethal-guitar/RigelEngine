@@ -31,15 +31,17 @@
 #include <cassert>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 using engine::TiledTexture;
 
 using ExecutionResultOptional =
-    std::optional<DukeScriptRunner::ExecutionResult>;
+  std::optional<DukeScriptRunner::ExecutionResult>;
 
 
-namespace {
+namespace
+{
 
 const auto NUM_NEWS_REPORTER_STATES = 4;
 
@@ -59,15 +61,14 @@ const auto INITIAL_GAME_SPEED = 3;
 
 constexpr auto START_DEMO_TIMEOUT = 30.0; // seconds
 
-}
+} // namespace
 
 
 DukeScriptRunner::DukeScriptRunner(
   loader::ResourceLoader* pResourceLoader,
   renderer::Renderer* pRenderer,
   const data::SaveSlotArray* pSaveSlots,
-  IGameServiceProvider* pServiceProvider
-)
+  IGameServiceProvider* pServiceProvider)
   : mpResourceBundle(pResourceLoader)
   , mCurrentPalette(loader::INGAME_PALETTE)
   , mpRenderer(pRenderer)
@@ -88,7 +89,8 @@ DukeScriptRunner::DukeScriptRunner(
 }
 
 
-void DukeScriptRunner::executeScript(const data::script::Script& script) {
+void DukeScriptRunner::executeScript(const data::script::Script& script)
+{
   mCurrentPersistentSelectionSlot = std::nullopt;
   mPagerState = std::nullopt;
   mCheckBoxStates = std::nullopt;
@@ -100,7 +102,8 @@ void DukeScriptRunner::executeScript(const data::script::Script& script) {
 }
 
 
-void DukeScriptRunner::clearCanvas() {
+void DukeScriptRunner::clearCanvas()
+{
   assert(hasFinishedExecution() || mState == State::ReadyToExecute);
 
   bindCanvas();
@@ -109,7 +112,8 @@ void DukeScriptRunner::clearCanvas() {
 }
 
 
-void DukeScriptRunner::startExecution(const data::script::Script& script) {
+void DukeScriptRunner::startExecution(const data::script::Script& script)
+{
   mCurrentInstructions = script;
   mProgramCounter = 0u;
   mState = State::ExecutingScript;
@@ -120,7 +124,8 @@ void DukeScriptRunner::startExecution(const data::script::Script& script) {
 }
 
 
-bool DukeScriptRunner::hasFinishedExecution() const {
+bool DukeScriptRunner::hasFinishedExecution() const
+{
   // clang-format off
   return
     mState == State::FinishedExecution ||
@@ -130,69 +135,84 @@ bool DukeScriptRunner::hasFinishedExecution() const {
 }
 
 
-ExecutionResultOptional DukeScriptRunner::result() const {
-  if (hasFinishedExecution()) {
-    const auto selectedPage =
-      hasMenuPages() ?
-      std::optional<int>(mPagerState->mCurrentPageIndex)
+ExecutionResultOptional DukeScriptRunner::result() const
+{
+  if (hasFinishedExecution())
+  {
+    const auto selectedPage = hasMenuPages()
+      ? std::optional<int>(mPagerState->mCurrentPageIndex)
       : std::nullopt;
 
     auto terminationType = ScriptTerminationType::RanToCompletion;
-    if (mState == State::ExecutionInterrupted) {
+    if (mState == State::ExecutionInterrupted)
+    {
       terminationType = ScriptTerminationType::AbortedByUser;
     }
-    if (mState == State::ExecutionTimedOut) {
+    if (mState == State::ExecutionTimedOut)
+    {
       terminationType = ScriptTerminationType::TimedOut;
     }
-    if (hasMenuPages() && mMenuItemWasSelected) {
+    if (hasMenuPages() && mMenuItemWasSelected)
+    {
       terminationType = ScriptTerminationType::MenuItemSelected;
     }
 
     return ExecutionResult{terminationType, selectedPage};
-  } else {
+  }
+  else
+  {
     return std::nullopt;
   }
 }
 
 
-bool DukeScriptRunner::isInWaitState() const {
+bool DukeScriptRunner::isInWaitState() const
+{
   return mState == State::AwaitingUserInput;
 }
 
 
-void DukeScriptRunner::clearWaitState() {
+void DukeScriptRunner::clearWaitState()
+{
   mState = State::ExecutingScript;
   mDelayState = std::nullopt;
 }
 
 
-void DukeScriptRunner::handleEvent(const SDL_Event& event) {
-  if (hasFinishedExecution()) {
+void DukeScriptRunner::handleEvent(const SDL_Event& event)
+{
+  if (hasFinishedExecution())
+  {
     return;
   }
 
   const auto navigationEvent = mNavigationHelper.convert(event);
 
-  if (navigationEvent == NavigationEvent::Cancel) {
+  if (navigationEvent == NavigationEvent::Cancel)
+  {
     mState = State::ExecutionInterrupted;
     mTimeSinceLastUserInput = std::nullopt;
     hideMenuSelectionIndicator();
     return;
   }
 
-  if (isInWaitState() && navigationEvent != NavigationEvent::None) {
+  if (isInWaitState() && navigationEvent != NavigationEvent::None)
+  {
     clearWaitState();
   }
 
-  if (mTimeSinceLastUserInput && navigationEvent != NavigationEvent::None) {
+  if (mTimeSinceLastUserInput && navigationEvent != NavigationEvent::None)
+  {
     // Any user input resets the "timeout to demo" timer
     *mTimeSinceLastUserInput = 0.0;
   }
 
-  if (hasMenuPages()) {
+  if (hasMenuPages())
+  {
     auto& state = *mPagerState;
 
-    switch (navigationEvent) {
+    switch (navigationEvent)
+    {
       case NavigationEvent::NavigateUp:
         selectPreviousPage(state);
         break;
@@ -216,14 +236,17 @@ void DukeScriptRunner::handleEvent(const SDL_Event& event) {
 }
 
 
-void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
-  if (mDelayState) {
+void DukeScriptRunner::updateAndRender(engine::TimeDelta dt)
+{
+  if (mDelayState)
+  {
     updateDelayState(*mDelayState, dt);
   }
 
   bindCanvas();
 
-  while (mState == State::ExecutingScript) {
+  while (mState == State::ExecutingScript)
+  {
     interpretNextAction();
   }
 
@@ -231,7 +254,8 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
   mCanvas.render(0, 0);
   updateAndRenderDynamicElements(dt);
 
-  if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution()) {
+  if (mFadeInBeforeNextWaitStateScheduled && !hasFinishedExecution())
+  {
     mpServices->fadeInScreen();
     mFadeInBeforeNextWaitStateScheduled = false;
   }
@@ -241,26 +265,31 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt) {
 
 
 void DukeScriptRunner::updateAndRenderDynamicElements(
-  const engine::TimeDelta dt
-) {
-  if (mMenuSelectionIndicatorState) {
+  const engine::TimeDelta dt)
+{
+  if (mMenuSelectionIndicatorState)
+  {
     drawMenuSelectionIndicator(*mMenuSelectionIndicatorState, dt);
   }
 
-  if (mNewsReporterAnimationState) {
+  if (mNewsReporterAnimationState)
+  {
     animateNewsReporter(*mNewsReporterAnimationState, dt);
   }
 
-  if (hasCheckBoxes()) {
+  if (hasCheckBoxes())
+  {
     displayCheckBoxes(*mCheckBoxStates);
   }
 }
 
 
-void DukeScriptRunner::displayCheckBoxes(const CheckBoxesState& state) {
+void DukeScriptRunner::displayCheckBoxes(const CheckBoxesState& state)
+{
   const auto xPos = state.mPosX;
 
-  for (const auto& box : state.mStates) {
+  for (const auto& box : state.mStates)
+  {
     const auto yPos = box.mPosY;
     mMenuElementRenderer.drawCheckBox(xPos, yPos, box.mChecked);
   }
@@ -269,20 +298,24 @@ void DukeScriptRunner::displayCheckBoxes(const CheckBoxesState& state) {
 
 void DukeScriptRunner::updateDelayState(
   DelayState& state,
-  const engine::TimeDelta timeDelta
-) {
+  const engine::TimeDelta timeDelta)
+{
   state.mElapsedTime += timeDelta;
 
-  if (state.mElapsedTime >= engine::slowTicksToTime(state.mTicksToWait)) {
+  if (state.mElapsedTime >= engine::slowTicksToTime(state.mTicksToWait))
+  {
     clearWaitState();
   }
 }
 
 
-void DukeScriptRunner::updateTimeoutToDemo(const engine::TimeDelta dt) {
-  if (mTimeSinceLastUserInput) {
+void DukeScriptRunner::updateTimeoutToDemo(const engine::TimeDelta dt)
+{
+  if (mTimeSinceLastUserInput)
+  {
     *mTimeSinceLastUserInput += dt;
-    if (*mTimeSinceLastUserInput >= START_DEMO_TIMEOUT) {
+    if (*mTimeSinceLastUserInput >= START_DEMO_TIMEOUT)
+    {
       mState = State::ExecutionTimedOut;
       mTimeSinceLastUserInput = std::nullopt;
     }
@@ -292,15 +325,16 @@ void DukeScriptRunner::updateTimeoutToDemo(const engine::TimeDelta dt) {
 
 void DukeScriptRunner::animateNewsReporter(
   NewsReporterState& state,
-  const engine::TimeDelta timeDelta
-) {
+  const engine::TimeDelta timeDelta)
+{
   state.mElapsedTime += timeDelta;
   const auto elapsedTicks = engine::timeToFastTicks(state.mElapsedTime);
 
   const auto elapsedFrames = elapsedTicks / 25.0;
   const auto numFramesAlreadyTalked = static_cast<int>(elapsedFrames);
 
-  if (numFramesAlreadyTalked < state.mTalkDuration) {
+  if (numFramesAlreadyTalked < state.mTalkDuration)
+  {
     // clang-format off
     const auto randomNumber =
       engine::RANDOM_NUMBER_TABLE[
@@ -311,13 +345,16 @@ void DukeScriptRunner::animateNewsReporter(
       randomNumber % NUM_NEWS_REPORTER_STATES,
       0,
       0);
-  } else {
+  }
+  else
+  {
     stopNewsReporterAnimation();
   }
 }
 
 
-void DukeScriptRunner::stopNewsReporterAnimation() {
+void DukeScriptRunner::stopNewsReporterAnimation()
+{
   mNewsReporterAnimationState = std::nullopt;
 }
 
@@ -326,16 +363,18 @@ void DukeScriptRunner::drawBigText(
   const int x,
   const int y,
   const int colorIndex,
-  const std::string& text
-) const {
+  const std::string& text) const
+{
   mMenuElementRenderer.drawBigText(x, y, text, mCurrentPalette.at(colorIndex));
 }
 
 
-void DukeScriptRunner::interpretNextAction() {
+void DukeScriptRunner::interpretNextAction()
+{
   using namespace data::script;
 
-  if (mProgramCounter >= mCurrentInstructions.size()) {
+  if (mProgramCounter >= mCurrentInstructions.size())
+  {
     mState = State::FinishedExecution;
     mTimeSinceLastUserInput = std::nullopt;
     hideMenuSelectionIndicator();
@@ -368,23 +407,20 @@ void DukeScriptRunner::interpretNextAction() {
 
     [this](const ShowMenuSelectionIndicator& action) {
       showMenuSelectionIndicator(action.yPos);
-      if (hasCheckBoxes()) {
+      if (hasCheckBoxes())
+      {
         mCheckBoxStates->mCurrentMenuPosY = action.yPos;
       }
     },
 
-    [this](const StopNewsReporterAnimation&) {
-      stopNewsReporterAnimation();
-    },
+    [this](const StopNewsReporterAnimation&) { stopNewsReporterAnimation(); },
 
     [this](const ShowFullScreenImage& showImage) {
       updatePalette(
         mpResourceBundle->loadPaletteFromFullScreenImage(showImage.image));
 
       const auto imageTexture = fullScreenImageAsTexture(
-        mpRenderer,
-        *mpResourceBundle,
-        showImage.image);
+        mpRenderer, *mpResourceBundle, showImage.image);
       imageTexture.render(0, 0);
     },
 
@@ -393,16 +429,10 @@ void DukeScriptRunner::interpretNextAction() {
       mState = State::AwaitingUserInput;
     },
 
-    [this](const WaitForUserInput&) {
-      mState = State::AwaitingUserInput;
-    },
+    [this](const WaitForUserInput&) { mState = State::AwaitingUserInput; },
 
     [this](const DrawBigText& action) {
-      drawBigText(
-        action.x + 2,
-        action.y,
-        action.colorIndex,
-        action.text);
+      drawBigText(action.x + 2, action.y, action.colorIndex, action.text);
     },
 
     [this](const DrawText& action) {
@@ -418,21 +448,17 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const SetPalette& action) {
-      updatePalette(loader::load6bitPalette16(
-        mpResourceBundle->file(action.paletteFile)));
+      updatePalette(
+        loader::load6bitPalette16(mpResourceBundle->file(action.paletteFile)));
     },
 
     [this](const SetupCheckBoxes& action) {
       CheckBoxesState state;
       state.mPosX = action.xPos;
       state.mCurrentMenuPosY = 0;
-      state.mStates = utils::transformed(action.boxDefinitions,
-        [](const auto& definition) {
-          return CheckBoxState{
-            definition.yPos,
-            false,
-            definition.id
-          };
+      state.mStates =
+        utils::transformed(action.boxDefinitions, [](const auto& definition) {
+          return CheckBoxState{definition.yPos, false, definition.id};
         });
 
       mCheckBoxStates = state;
@@ -450,7 +476,8 @@ void DukeScriptRunner::interpretNextAction() {
 
       auto yPos = messageBoxDefinition.y + 1;
       const auto availableWidth = messageBoxDefinition.width - 1;
-      for (const auto& line : messageBoxDefinition.messageLines) {
+      for (const auto& line : messageBoxDefinition.messageLines)
+      {
         const auto lineLength = static_cast<int>(line.size());
         const auto offsetToCenter = (availableWidth - lineLength) / 2;
 
@@ -468,9 +495,12 @@ void DukeScriptRunner::interpretNextAction() {
     },
 
     [this](const DisableMenuFunctionality&) {
-      if (mPagerState) {
+      if (mPagerState)
+      {
         mPagerState->mMode = PagingMode::PagingOnly;
-      } else {
+      }
+      else
+      {
         mDisableMenuFunctionalityForNextPagesDefinition = true;
       }
     },
@@ -482,15 +512,16 @@ void DukeScriptRunner::interpretNextAction() {
         definition.pages,
         PagingMode::Menu,
         0,
-        static_cast<int>(definition.pages.size() - 1)
-      };
+        static_cast<int>(definition.pages.size() - 1)};
 
-      if (mCurrentPersistentSelectionSlot) {
+      if (mCurrentPersistentSelectionSlot)
+      {
         mPagerState->mCurrentPageIndex =
           mPersistentMenuSelections[*mCurrentPersistentSelectionSlot];
       }
 
-      if (mDisableMenuFunctionalityForNextPagesDefinition) {
+      if (mDisableMenuFunctionalityForNextPagesDefinition)
+      {
         mPagerState->mMode = PagingMode::PagingOnly;
         mDisableMenuFunctionalityForNextPagesDefinition = false;
       }
@@ -498,22 +529,15 @@ void DukeScriptRunner::interpretNextAction() {
       executeCurrentPageScript(*mPagerState);
     },
 
-    [this](const EnableTextOffset&) {
-      mTextBoxOffsetEnabled = true;
-    },
+    [this](const EnableTextOffset&) { mTextBoxOffsetEnabled = true; },
 
-    [this](const EnableTimeOutToDemo&) {
-      mTimeSinceLastUserInput = 0.0;
-    },
+    [this](const EnableTimeOutToDemo&) { mTimeSinceLastUserInput = 0.0; },
 
-    [this](const ShowKeyBindings&) {
-      drawCurrentKeyBindings();
-    },
+    [this](const ShowKeyBindings&) { drawCurrentKeyBindings(); },
 
     [this](const ShowSaveSlots& action) {
       drawSaveSlotNames(action.mSelectedSlot);
-    }
-  );
+    });
 }
 
 
@@ -521,16 +545,15 @@ void DukeScriptRunner::drawSprite(
   const data::ActorID id,
   const int frame,
   const int x,
-  const int y
-) {
+  const int y)
+{
   const auto actorData =
     mpResourceBundle->mActorImagePackage.loadActor(id, mCurrentPalette);
   const auto& frameData = actorData.mFrames.at(frame);
   const auto& image = frameData.mFrameImage;
 
   const auto spriteHeightTiles =
-    data::pixelsToTiles(
-      static_cast<int>(image.height()));
+    data::pixelsToTiles(static_cast<int>(image.height()));
   const auto pos = base::Vector{x - 1, y};
   const auto topLeft = pos - base::Vector(0, spriteHeightTiles - 1);
 
@@ -543,9 +566,11 @@ void DukeScriptRunner::drawSprite(
 }
 
 
-void DukeScriptRunner::selectNextPage(PagerState& state) {
+void DukeScriptRunner::selectNextPage(PagerState& state)
+{
   ++state.mCurrentPageIndex;
-  if (state.mCurrentPageIndex > state.mMaxPageIndex) {
+  if (state.mCurrentPageIndex > state.mMaxPageIndex)
+  {
     state.mCurrentPageIndex = 0;
   }
 
@@ -553,9 +578,11 @@ void DukeScriptRunner::selectNextPage(PagerState& state) {
 }
 
 
-void DukeScriptRunner::selectPreviousPage(PagerState& state) {
+void DukeScriptRunner::selectPreviousPage(PagerState& state)
+{
   --state.mCurrentPageIndex;
-  if (state.mCurrentPageIndex < 0) {
+  if (state.mCurrentPageIndex < 0)
+  {
     state.mCurrentPageIndex = state.mMaxPageIndex;
   }
 
@@ -563,47 +590,61 @@ void DukeScriptRunner::selectPreviousPage(PagerState& state) {
 }
 
 
-void DukeScriptRunner::confirmOrSelectNextPage(PagerState& state) {
-  if (mPagerState->mMode == PagingMode::Menu) {
+void DukeScriptRunner::confirmOrSelectNextPage(PagerState& state)
+{
+  if (mPagerState->mMode == PagingMode::Menu)
+  {
     selectCurrentMenuItem(state);
-  } else {
+  }
+  else
+  {
     selectNextPage(state);
   }
 }
 
 
-void DukeScriptRunner::handleUnassignedButton(PagerState& state) {
-  if (mPagerState->mMode == PagingMode::Menu) {
+void DukeScriptRunner::handleUnassignedButton(PagerState& state)
+{
+  if (mPagerState->mMode == PagingMode::Menu)
+  {
     // Since we cleared the wait state previously, we have to go back
     // to the current page
     executeCurrentPageScript(state);
-  } else {
+  }
+  else
+  {
     selectNextPage(state);
   }
 }
 
 
-void DukeScriptRunner::onPageChanged(PagerState& state) {
+void DukeScriptRunner::onPageChanged(PagerState& state)
+{
   executeCurrentPageScript(state);
 
-  if (mPagerState->mMode == PagingMode::Menu) {
+  if (mPagerState->mMode == PagingMode::Menu)
+  {
     mpServices->playSound(data::SoundId::MenuSelect);
   }
 
-  if (mCurrentPersistentSelectionSlot) {
+  if (mCurrentPersistentSelectionSlot)
+  {
     mPersistentMenuSelections[*mCurrentPersistentSelectionSlot] =
       state.mCurrentPageIndex;
   }
 }
 
 
-void DukeScriptRunner::executeCurrentPageScript(PagerState& state) {
+void DukeScriptRunner::executeCurrentPageScript(PagerState& state)
+{
   startExecution(state.mPageScripts[state.mCurrentPageIndex]);
 }
 
 
-void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
-  if (hasCheckBoxes()) {
+void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState)
+{
+  if (hasCheckBoxes())
+  {
     auto& checkBoxStates = *mCheckBoxStates;
     const auto currentMenuPosY = checkBoxStates.mCurrentMenuPosY;
     const auto currentCheckBoxIter = find_if(
@@ -613,7 +654,8 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
         return state.mPosY == currentMenuPosY;
       });
 
-    if (currentCheckBoxIter != checkBoxStates.mStates.end()) {
+    if (currentCheckBoxIter != checkBoxStates.mStates.end())
+    {
       currentCheckBoxIter->mChecked = !currentCheckBoxIter->mChecked;
       executeCurrentPageScript(pagerState);
 
@@ -626,20 +668,22 @@ void DukeScriptRunner::selectCurrentMenuItem(PagerState& pagerState) {
 }
 
 
-void DukeScriptRunner::showMenuSelectionIndicator(const int y) {
+void DukeScriptRunner::showMenuSelectionIndicator(const int y)
+{
   mMenuSelectionIndicatorState = MenuSelectionIndicatorState{y};
 }
 
 
-void DukeScriptRunner::hideMenuSelectionIndicator() {
+void DukeScriptRunner::hideMenuSelectionIndicator()
+{
   mMenuSelectionIndicatorState = std::nullopt;
 }
 
 
 void DukeScriptRunner::drawMenuSelectionIndicator(
   MenuSelectionIndicatorState& state,
-  const engine::TimeDelta dt
-) {
+  const engine::TimeDelta dt)
+{
   state.mElapsedTime += dt;
 
   mMenuElementRenderer.drawSelectionIndicator(
@@ -647,38 +691,37 @@ void DukeScriptRunner::drawMenuSelectionIndicator(
 }
 
 
-void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex) {
-  for (auto i = 0; i < 8; ++i) {
+void DukeScriptRunner::drawSaveSlotNames(const int selectedIndex)
+{
+  for (auto i = 0; i < 8; ++i)
+  {
     const auto& saveSlot = (*mpSaveSlots)[i];
     drawBigText(
       SAVE_SLOT_START_X,
-      SAVE_SLOT_START_Y + i*MENU_FONT_HEIGHT,
+      SAVE_SLOT_START_Y + i * MENU_FONT_HEIGHT,
       i == selectedIndex ? SELECTED_COLOR_INDEX : UNSELECTED_COLOR_INDEX,
       saveSlot ? saveSlot->mName : "Empty");
   }
 }
 
 
-void DukeScriptRunner::drawCurrentKeyBindings() {
+void DukeScriptRunner::drawCurrentKeyBindings()
+{
   static std::array<std::string, 6> keyNames{
-    "ALT",
-    "CTRL",
-    "Up",
-    "Down",
-    "Left",
-    "Right"
-  };
+    "ALT", "CTRL", "Up", "Down", "Left", "Right"};
 
-  for (auto i = 0u; i < keyNames.size(); ++i) {
+  for (auto i = 0u; i < keyNames.size(); ++i)
+  {
     mMenuElementRenderer.drawText(
       KEY_BINDINGS_START_X,
-      KEY_BINDINGS_START_Y + i*MENU_FONT_HEIGHT,
+      KEY_BINDINGS_START_Y + i * MENU_FONT_HEIGHT,
       keyNames[i]);
   }
 }
 
 
-void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
+void DukeScriptRunner::updatePalette(const loader::Palette16& palette)
+{
   // TODO think about optimizing this maybe, to only update if actually
   // changed, e.g. if (palette != mCurrentPalette) or maybe have a
   // 'paletteSource' string (name of palette file or fullscreen image file),
@@ -690,25 +733,29 @@ void DukeScriptRunner::updatePalette(const loader::Palette16& palette) {
 }
 
 
-bool DukeScriptRunner::hasMenuPages() const {
+bool DukeScriptRunner::hasMenuPages() const
+{
   return static_cast<bool>(mPagerState);
 }
 
 
-bool DukeScriptRunner::hasCheckBoxes() const {
+bool DukeScriptRunner::hasCheckBoxes() const
+{
   return static_cast<bool>(mCheckBoxStates);
 }
 
 
-void DukeScriptRunner::bindCanvas() {
+void DukeScriptRunner::bindCanvas()
+{
   mpRenderer->pushState();
   mpRenderer->resetState();
   mpRenderer->setRenderTarget(mCanvas.data());
 }
 
 
-void DukeScriptRunner::unbindCanvas() {
+void DukeScriptRunner::unbindCanvas()
+{
   mpRenderer->popState();
 }
 
-}
+} // namespace rigel::ui

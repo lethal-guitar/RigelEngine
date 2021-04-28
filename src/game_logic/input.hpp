@@ -17,9 +17,11 @@
 #pragma once
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-struct Button {
+struct Button
+{
   /** True if the button is currently pressed (down) */
   bool mIsPressed = false;
 
@@ -28,7 +30,8 @@ struct Button {
 };
 
 
-struct PlayerInput {
+struct PlayerInput
+{
   bool mLeft = false;
   bool mRight = false;
   bool mUp = false;
@@ -38,11 +41,12 @@ struct PlayerInput {
   Button mJump;
   Button mFire;
 
-  void resetTriggeredStates() {
+  void resetTriggeredStates()
+  {
     mInteract.mWasTriggered = false;
     mJump.mWasTriggered = false;
     mFire.mWasTriggered = false;
   }
 };
 
-}
+} // namespace rigel::game_logic

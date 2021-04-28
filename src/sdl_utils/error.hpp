@@ -20,9 +20,11 @@
 #include <string>
 
 
-namespace rigel::sdl_utils {
+namespace rigel::sdl_utils
+{
 
-class Error : public std::runtime_error {
+class Error : public std::runtime_error
+{
 public:
   /** Will call SDL_GetError() to determine message */
   Error();
@@ -31,18 +33,22 @@ public:
 };
 
 
-inline void check(int result) {
-  if (result < 0) {
+inline void check(int result)
+{
+  if (result < 0)
+  {
     throw Error();
   }
 }
 
 template <typename ObjectPtr>
-auto check(ObjectPtr pObject) {
-  if (pObject == nullptr) {
+auto check(ObjectPtr pObject)
+{
+  if (pObject == nullptr)
+  {
     throw Error();
   }
   return pObject;
 }
 
-}
+} // namespace rigel::sdl_utils

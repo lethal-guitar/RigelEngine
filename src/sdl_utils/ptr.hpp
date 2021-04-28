@@ -26,48 +26,57 @@ RIGEL_RESTORE_WARNINGS
 #include <memory>
 
 
-namespace rigel::sdl_utils {
+namespace rigel::sdl_utils
+{
 
-namespace detail {
+namespace detail
+{
 
-template<typename SDLType>
-using PtrBase = std::unique_ptr<SDLType, void(*)(SDLType*)>;
+template <typename SDLType>
+using PtrBase = std::unique_ptr<SDLType, void (*)(SDLType*)>;
 
 
-template<typename SDLType>
-struct DeleterFor {};
+template <typename SDLType>
+struct DeleterFor
+{
+};
 
-template<>
-struct DeleterFor<SDL_Window> {
+template <>
+struct DeleterFor<SDL_Window>
+{
   static auto deleter() { return &SDL_DestroyWindow; }
 };
 
-template<>
-struct DeleterFor<SDL_GameController> {
+template <>
+struct DeleterFor<SDL_GameController>
+{
   static auto deleter() { return &SDL_GameControllerClose; }
 };
 
-template<>
-struct DeleterFor<Mix_Chunk> {
+template <>
+struct DeleterFor<Mix_Chunk>
+{
   static auto deleter() { return &Mix_FreeChunk; }
 };
 
-template<typename SDLType>
-auto deleterFor() {
+template <typename SDLType>
+auto deleterFor()
+{
   return DeleterFor<SDLType>::deleter();
 }
 
-}
+} // namespace detail
 
-template<typename SDLType>
-class Ptr : public detail::PtrBase<SDLType> {
+template <typename SDLType>
+class Ptr : public detail::PtrBase<SDLType>
+{
 public:
   Ptr()
     : Ptr(nullptr)
   {
   }
 
-  template<typename P>
+  template <typename P>
   explicit Ptr(P&& p)
     : detail::PtrBase<SDLType>(
         std::forward<P>(p),
@@ -76,4 +85,4 @@ public:
   }
 };
 
-}
+} // namespace rigel::sdl_utils

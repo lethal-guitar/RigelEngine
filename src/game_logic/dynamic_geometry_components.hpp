@@ -21,9 +21,13 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic { namespace components {
+namespace rigel::game_logic
+{
+namespace components
+{
 
-struct MapGeometryLink {
+struct MapGeometryLink
+{
   explicit MapGeometryLink(engine::components::BoundingBox geometrySection)
     : mLinkedGeometrySection(geometrySection)
   {
@@ -33,16 +37,20 @@ struct MapGeometryLink {
 };
 
 
-struct TileDebris {
+struct TileDebris
+{
   data::map::TileIndex mTileIndex;
 };
 
-}
+} // namespace components
 
-namespace behaviors {
+namespace behaviors
+{
 
-struct DynamicGeometryController {
-  enum class Type : std::uint8_t {
+struct DynamicGeometryController
+{
+  enum class Type : std::uint8_t
+  {
     FallDownAfterDelayThenSinkIntoGround,
     BlueKeyDoor,
     FallDownWhileEarthQuakeActiveThenExplode,
@@ -52,7 +60,8 @@ struct DynamicGeometryController {
     FallDownAfterDelayThenStayOnGround
   };
 
-  enum class State : std::uint8_t {
+  enum class State : std::uint8_t
+  {
     Waiting,
     Falling,
     Sinking
@@ -74,4 +83,5 @@ struct DynamicGeometryController {
   State mState = State::Waiting;
 };
 
-}}
+} // namespace behaviors
+} // namespace rigel::game_logic

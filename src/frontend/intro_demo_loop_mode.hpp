@@ -9,9 +9,13 @@
 #include <variant>
 
 
-namespace rigel {
+namespace rigel
+{
 
-namespace ui { class DukeScriptRunner; }
+namespace ui
+{
+class DukeScriptRunner;
+}
 
 
 /** Implements the intro/credits/demo loop
@@ -27,9 +31,11 @@ namespace ui { class DukeScriptRunner; }
  * start, although it then starts on the Apogee Logo and includes the story
  * cutscene/animation.
  */
-class IntroDemoLoopMode : public GameMode {
+class IntroDemoLoopMode : public GameMode
+{
 public:
-  enum class Type {
+  enum class Type
+  {
     Regular,
     DuringGameStart,
     AtFirstLaunch
@@ -49,17 +55,21 @@ public:
     const std::vector<SDL_Event>& events) override;
 
 private:
-  struct ScriptedStep {};
-  struct Credits : ScriptedStep {};
-  struct HypeScreen : ScriptedStep {};
-  struct Story : ScriptedStep {};
+  struct ScriptedStep
+  {
+  };
+  struct Credits : ScriptedStep
+  {
+  };
+  struct HypeScreen : ScriptedStep
+  {
+  };
+  struct Story : ScriptedStep
+  {
+  };
 
-  using Step = std::variant<
-    ui::ApogeeLogo,
-    ui::IntroMovie,
-    Story,
-    HypeScreen,
-    Credits>;
+  using Step =
+    std::variant<ui::ApogeeLogo, ui::IntroMovie, Story, HypeScreen, Credits>;
 
   bool handleEvent(const SDL_Event& event);
   void startCurrentStep();
@@ -72,4 +82,4 @@ private:
   std::size_t mCurrentStep = 0;
 };
 
-}
+} // namespace rigel

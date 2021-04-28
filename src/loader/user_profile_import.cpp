@@ -23,19 +23,22 @@
 #include <algorithm>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-namespace {
+namespace
+{
 
-std::array<std::string, data::NUM_SAVE_SLOTS> loadNameList(
-  const std::string& filename
-) {
+std::array<std::string, data::NUM_SAVE_SLOTS>
+  loadNameList(const std::string& filename)
+{
   std::array<std::string, data::NUM_SAVE_SLOTS> result;
 
   const auto data = loadFile(filename);
   auto reader = LeStreamReader{data};
 
-  for (auto& name : result) {
+  for (auto& name : result)
+  {
     name = readFixedSizeString(reader, 18);
   }
 
@@ -43,13 +46,16 @@ std::array<std::string, data::NUM_SAVE_SLOTS> loadNameList(
 }
 
 
-data::TutorialMessageState readTutorialMessageFlags(LeStreamReader& reader) {
+data::TutorialMessageState readTutorialMessageFlags(LeStreamReader& reader)
+{
   data::TutorialMessageState state;
 
   reader.skipBytes(4u);
-  for (int i = 0; i < data::NUM_TUTORIAL_MESSAGES; ++i) {
+  for (int i = 0; i < data::NUM_TUTORIAL_MESSAGES; ++i)
+  {
     const auto hasBeenShown = reader.readU8() != 0;
-    if (hasBeenShown) {
+    if (hasBeenShown)
+    {
       state.markAsShown(static_cast<data::TutorialMessageId>(i));
     }
   }
@@ -60,16 +66,17 @@ data::TutorialMessageState readTutorialMessageFlags(LeStreamReader& reader) {
 }
 
 
-data::Difficulty readDifficulty(LeStreamReader& reader) {
-  const auto difficultyIndex = std::clamp<std::uint16_t>(reader.readU16(), 1, 3);
+data::Difficulty readDifficulty(LeStreamReader& reader)
+{
+  const auto difficultyIndex =
+    std::clamp<std::uint16_t>(reader.readU16(), 1, 3);
   return static_cast<data::Difficulty>(difficultyIndex - 1);
 }
 
 
-data::SavedGame loadSavedGame(
-  const std::string& filename,
-  std::string saveSlotName
-) {
+data::SavedGame
+  loadSavedGame(const std::string& filename, std::string saveSlotName)
+{
   static_assert(
     static_cast<int>(data::WeaponType::Normal) == 0 &&
     static_cast<int>(data::WeaponType::Laser) == 1 &&
@@ -84,9 +91,8 @@ data::SavedGame loadSavedGame(
   reader.skipBytes(sizeof(std::uint16_t));
   const auto ammo = std::min<std::uint16_t>(
     reader.readU16(),
-    weapon == data::WeaponType::FlameThrower
-      ? data::MAX_AMMO_FLAME_THROWER
-      : data::MAX_AMMO);
+    weapon == data::WeaponType::FlameThrower ? data::MAX_AMMO_FLAME_THROWER
+                                             : data::MAX_AMMO);
   const auto difficulty = readDifficulty(reader);
   const auto episode =
     std::min<std::uint16_t>(reader.readU16(), data::NUM_EPISODES - 1);
@@ -101,12 +107,12 @@ data::SavedGame loadSavedGame(
     std::move(saveSlotName),
     weapon,
     static_cast<int>(ammo),
-    static_cast<int>(score)
-  };
+    static_cast<int>(score)};
 }
 
 
-data::HighScoreList loadHighScoreList(const std::string& filename) {
+data::HighScoreList loadHighScoreList(const std::string& filename)
+{
   using std::begin;
   using std::end;
   using std::sort;
@@ -116,7 +122,8 @@ data::HighScoreList loadHighScoreList(const std::string& filename) {
   const auto data = loadFile(filename);
   auto reader = LeStreamReader{data};
 
-  for (auto i = 0u; i < data::NUM_HIGH_SCORE_ENTRIES; ++i) {
+  for (auto i = 0u; i < data::NUM_HIGH_SCORE_ENTRIES; ++i)
+  {
     list[i].mName = readFixedSizeString(reader, 15);
     list[i].mScore = std::min<std::uint32_t>(reader.readU32(), data::MAX_SCORE);
   }
@@ -125,41 +132,53 @@ data::HighScoreList loadHighScoreList(const std::string& filename) {
   return list;
 }
 
-}
+} // namespace
 
 
-data::SaveSlotArray loadSavedGames(const std::string& gamePath) {
+data::SaveSlotArray loadSavedGames(const std::string& gamePath)
+{
   std::array<std::optional<data::SavedGame>, data::NUM_SAVE_SLOTS> result;
 
-  try {
+  try
+  {
     const auto nameList = loadNameList(gamePath + "NUKEM2.-NM");
 
-    for (auto i = 0u; i < data::NUM_SAVE_SLOTS; ++i) {
+    for (auto i = 0u; i < data::NUM_SAVE_SLOTS; ++i)
+    {
       const auto saveSlotFile = gamePath + "NUKEM2.-S" + std::to_string(i + 1);
-      try {
+      try
+      {
         result[i] = loadSavedGame(saveSlotFile, nameList[i]);
-      } catch (const std::exception&) {
+      }
+      catch (const std::exception&)
+      {
       }
     }
-  } catch (const std::exception&) {
+  }
+  catch (const std::exception&)
+  {
   }
 
   return result;
 }
 
 
-std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
-  const std::string& gamePath
-) {
+std::array<data::HighScoreList, data::NUM_EPISODES>
+  loadHighScoreLists(const std::string& gamePath)
+{
   using namespace std::literals;
 
   std::array<data::HighScoreList, data::NUM_EPISODES> result;
 
-  for (auto i = 0; i < data::NUM_EPISODES; ++i) {
-    try {
-      result[i] = loadHighScoreList(
-        gamePath + "NUKEM2.-V"s + std::to_string(i + 1));
-    } catch (const std::exception&) {
+  for (auto i = 0; i < data::NUM_EPISODES; ++i)
+  {
+    try
+    {
+      result[i] =
+        loadHighScoreList(gamePath + "NUKEM2.-V"s + std::to_string(i + 1));
+    }
+    catch (const std::exception&)
+    {
     }
   }
 
@@ -167,7 +186,8 @@ std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
 }
 
 
-std::optional<GameOptions> loadOptions(const std::string& gamePath) {
+std::optional<GameOptions> loadOptions(const std::string& gamePath)
+{
   static constexpr std::uint16_t MAX_SCAN_CODE = 88;
 
   auto asScanCode = [](const std::uint16_t rawScanCode) {
@@ -176,7 +196,8 @@ std::optional<GameOptions> loadOptions(const std::string& gamePath) {
   };
 
 
-  try {
+  try
+  {
     GameOptions result;
 
     const auto data = loadFile(gamePath + "NUKEM2.-GT");
@@ -199,14 +220,16 @@ std::optional<GameOptions> loadOptions(const std::string& gamePath) {
     // Skip over joystick calibration data
     reader.skipBytes(12);
 
-    result.mGameSpeedIndex = static_cast<std::uint8_t>(
-      std::min<std::uint16_t>(reader.readU16(), 7));
+    result.mGameSpeedIndex =
+      static_cast<std::uint8_t>(std::min<std::uint16_t>(reader.readU16(), 7));
 
     return result;
-  } catch (const std::exception&) {
+  }
+  catch (const std::exception&)
+  {
   }
 
   return {};
 }
 
-}
+} // namespace rigel::loader

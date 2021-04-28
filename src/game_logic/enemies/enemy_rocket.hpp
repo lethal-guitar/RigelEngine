@@ -24,15 +24,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct EnemyRocket {
+struct EnemyRocket
+{
   explicit EnemyRocket(const base::Vector& direction)
     : mDirection(direction)
   {
@@ -48,4 +51,4 @@ struct EnemyRocket {
   int mFramesElapsed = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -29,27 +29,31 @@ RIGEL_DISABLE_WARNINGS
 #include <glm/mat4x4.hpp>
 RIGEL_RESTORE_WARNINGS
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <iterator>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
-namespace {
+namespace
+{
 
-constexpr int nextPowerOf2(int number) {
+constexpr int nextPowerOf2(int number)
+{
   // This is a slow and naive implementation, but that's fine.
   // We only use this at compile time and only on small inputs.
   // Readability is more important here than best performance.
   auto result = 1;
-  while (result < number) {
+  while (result < number)
+  {
     result *= 2;
   }
   return result;
 }
 
-const GLushort QUAD_INDICES[] = { 0, 2, 1, 2, 3, 1 };
+const GLushort QUAD_INDICES[] = {0, 2, 1, 2, 3, 1};
 
 constexpr auto MAX_QUADS_PER_BATCH = 1280u;
 constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
@@ -64,17 +68,17 @@ constexpr auto WATER_ANIM_TEX_HEIGHT =
 constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 
-class DummyVao {
+class DummyVao
+{
 #ifndef RIGEL_USE_GL_ES
 public:
-  DummyVao() {
+  DummyVao()
+  {
     glGenVertexArrays(1, &mVao);
     glBindVertexArray(mVao);
   }
 
-  ~DummyVao() {
-    glDeleteVertexArrays(1, &mVao);
-  }
+  ~DummyVao() { glDeleteVertexArrays(1, &mVao); }
 
   DummyVao(const DummyVao&) = delete;
   DummyVao& operator=(const DummyVao&) = delete;
@@ -85,13 +89,15 @@ private:
 };
 
 
-struct RenderTarget {
+struct RenderTarget
+{
   base::Extents mSize;
   GLuint mFbo;
 };
 
 
-enum class RenderMode : std::uint8_t {
+enum class RenderMode : std::uint8_t
+{
   SpriteBatch,
   NonTexturedRender,
   Points,
@@ -99,20 +105,22 @@ enum class RenderMode : std::uint8_t {
 };
 
 
-void* toAttribOffset(std::uintptr_t offset) {
+void* toAttribOffset(std::uintptr_t offset)
+{
   return reinterpret_cast<void*>(offset);
 }
 
 
-glm::vec4 toGlColor(const base::Color& color) {
+glm::vec4 toGlColor(const base::Color& color)
+{
   return glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
 }
 
 
 void setScissorBox(
   const base::Rect<int>& clipRect,
-  const base::Size<int>& frameBufferSize
-) {
+  const base::Size<int>& frameBufferSize)
+{
   const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
   glScissor(
     clipRect.topLeft.x,
@@ -130,8 +138,8 @@ void fillVertexData(
   float bottom,
   Iter&& destIter,
   const std::size_t offset,
-  const std::size_t stride
-) {
+  const std::size_t stride)
+{
   using namespace std;
   advance(destIter, offset);
 
@@ -160,8 +168,8 @@ void fillVertexPositions(
   const base::Rect<int>& rect,
   Iter&& destIter,
   const std::size_t offset,
-  const std::size_t stride
-) {
+  const std::size_t stride)
+{
   glm::vec2 posOffset(float(rect.topLeft.x), float(rect.topLeft.y));
   glm::vec2 posScale(float(rect.size.width), float(rect.size.height));
 
@@ -180,8 +188,8 @@ void fillTexCoords(
   const TexCoords& coords,
   Iter&& destIter,
   const std::size_t offset,
-  const std::size_t stride
-) {
+  const std::size_t stride)
+{
   fillVertexData(
     coords.left,
     coords.right,
@@ -193,7 +201,8 @@ void fillTexCoords(
 }
 
 
-data::Image createWaterSurfaceAnimImage() {
+data::Image createWaterSurfaceAnimImage()
+{
   auto pixels = data::PixelBuffer{
     WATER_ANIM_TEX_WIDTH * WATER_ANIM_TEX_HEIGHT,
     base::Color{255, 255, 255, 255}};
@@ -215,10 +224,7 @@ data::Image createWaterSurfaceAnimImage() {
   };
   // clang-format on
 
-  auto applyPattern = [&pixels](
-    const auto& pattern,
-    const auto destOffset
-  ) {
+  auto applyPattern = [&pixels](const auto& pattern, const auto destOffset) {
     std::transform(
       std::begin(pattern),
       std::end(pattern),
@@ -243,7 +249,8 @@ data::Image createWaterSurfaceAnimImage() {
 }
 
 
-data::Image createWaterEffectColorMapImage() {
+data::Image createWaterEffectColorMapImage()
+{
   constexpr auto NUM_COLORS = int(loader::INGAME_PALETTE.size());
   constexpr auto NUM_ROWS = 2;
 
@@ -252,7 +259,8 @@ data::Image createWaterEffectColorMapImage() {
 
   // 1st row: Original palette
   std::copy(
-    begin(loader::INGAME_PALETTE), end(loader::INGAME_PALETTE),
+    begin(loader::INGAME_PALETTE),
+    end(loader::INGAME_PALETTE),
     std::back_inserter(pixels));
 
   // 2nd row: Corresponding "under water" colors
@@ -267,16 +275,21 @@ data::Image createWaterEffectColorMapImage() {
   // giving us a palette of only "under water" colors.
   constexpr auto WATER_INDEX_START = 8;
   constexpr auto NUM_WATER_INDICES = 4;
-  for (auto i = 0; i < NUM_COLORS; ++i) {
+  for (auto i = 0; i < NUM_COLORS; ++i)
+  {
     const auto index = WATER_INDEX_START + i % NUM_WATER_INDICES;
     pixels.push_back(loader::INGAME_PALETTE[index]);
   }
 
-  return data::Image{std::move(pixels), static_cast<size_t>(NUM_COLORS), static_cast<size_t>(NUM_ROWS)};
+  return data::Image{
+    std::move(pixels),
+    static_cast<size_t>(NUM_COLORS),
+    static_cast<size_t>(NUM_ROWS)};
 }
 
 
-auto getSize(SDL_Window* pWindow) {
+auto getSize(SDL_Window* pWindow)
+{
   int windowWidth = 0;
   int windowHeight = 0;
   SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
@@ -287,8 +300,8 @@ auto getSize(SDL_Window* pWindow) {
 GLuint createGlTexture(
   const GLsizei width,
   const GLsizei height,
-  const GLvoid* const pData
-) {
+  const GLvoid* const pData)
+{
   GLuint handle = 0;
   glGenTextures(1, &handle);
 
@@ -311,11 +324,13 @@ GLuint createGlTexture(
   return handle;
 }
 
-}
+} // namespace
 
 
-struct Renderer::Impl {
-  struct State {
+struct Renderer::Impl
+{
+  struct State
+  {
     std::optional<base::Rect<int>> mClipRect;
     base::Color mColorModulation{255, 255, 255, 255};
     base::Color mOverlayColor;
@@ -324,7 +339,8 @@ struct Renderer::Impl {
     TextureId mRenderTargetTexture = 0;
     bool mTextureRepeatEnabled = false;
 
-    friend bool operator==(const State& lhs, const State& rhs) {
+    friend bool operator==(const State& lhs, const State& rhs)
+    {
       // clang-format off
       return
         std::tie(
@@ -346,11 +362,13 @@ struct Renderer::Impl {
       // clang-format on
     }
 
-    friend bool operator!=(const State& lhs, const State& rhs) {
+    friend bool operator!=(const State& lhs, const State& rhs)
+    {
       return !(lhs == rhs);
     }
 
-    bool needsExtendedShader() const {
+    bool needsExtendedShader() const
+    {
       // clang-format off
       return
         mTextureRepeatEnabled ||
@@ -411,12 +429,11 @@ struct Renderer::Impl {
         {"position", "texCoordMask"})
     , mWindowSize(getSize(pWindow))
     , mpWindow(pWindow)
-    , mMaxWindowSize(
-        [pWindow]() {
-          SDL_DisplayMode displayMode;
-          sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
-          return base::Size<int>{displayMode.w, displayMode.h};
-        }())
+    , mMaxWindowSize([pWindow]() {
+      SDL_DisplayMode displayMode;
+      sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
+      return base::Size<int>{displayMode.w, displayMode.h};
+    }())
   {
     // General configuration
     glDisable(GL_DEPTH_TEST);
@@ -438,9 +455,11 @@ struct Renderer::Impl {
       std::vector<GLushort> indices;
       indices.reserve(MAX_BATCH_SIZE);
 
-      for (auto i = 0u; i < MAX_QUADS_PER_BATCH; ++i) {
-        for (auto index : QUAD_INDICES) {
-          indices.push_back(GLushort(index + 4*i));
+      for (auto i = 0u; i < MAX_QUADS_PER_BATCH; ++i)
+      {
+        for (auto index : QUAD_INDICES)
+        {
+          indices.push_back(GLushort(index + 4 * i));
         }
       }
 
@@ -454,8 +473,8 @@ struct Renderer::Impl {
 
     // One-time setup for water effect shader
     mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
-    mWaterEffectColorMapTexture = createTexture(
-      createWaterEffectColorMapImage());
+    mWaterEffectColorMapTexture =
+      createTexture(createWaterEffectColorMapImage());
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture);
@@ -487,7 +506,8 @@ struct Renderer::Impl {
   }
 
 
-  ~Impl() {
+  ~Impl()
+  {
     // Make sure all externally used textures and render targets have been
     // destroyed before the renderer is destroyed.
     assert(mRenderTargetDict.empty());
@@ -503,11 +523,12 @@ struct Renderer::Impl {
   void drawTexture(
     const TextureId texture,
     const TexCoords& sourceRect,
-    const base::Rect<int>& destRect
-  ) {
+    const base::Rect<int>& destRect)
+  {
     updateState(mRenderMode, RenderMode::SpriteBatch);
 
-    if (texture != mLastUsedTexture) {
+    if (texture != mLastUsedTexture)
+    {
       submitBatch();
 
       glBindTexture(GL_TEXTURE_2D, texture);
@@ -523,14 +544,17 @@ struct Renderer::Impl {
   }
 
 
-  void submitBatch() {
-    if (mBatchData.empty()) {
+  void submitBatch()
+  {
+    if (mBatchData.empty())
+    {
       return;
     }
 
     commitChangedState();
 
-    switch (mRenderMode) {
+    switch (mRenderMode)
+    {
       case RenderMode::SpriteBatch:
       case RenderMode::WaterEffect:
         glBufferData(
@@ -540,11 +564,7 @@ struct Renderer::Impl {
           GL_STREAM_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
-        glDrawElements(
-          GL_TRIANGLES,
-          mBatchSize,
-          GL_UNSIGNED_SHORT,
-          nullptr);
+        glDrawElements(GL_TRIANGLES, mBatchSize, GL_UNSIGNED_SHORT, nullptr);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         break;
 
@@ -568,10 +588,9 @@ struct Renderer::Impl {
   }
 
 
-  void drawFilledRectangle(
-    const base::Rect<int>& rect,
-    const base::Color& color
-  ) {
+  void
+    drawFilledRectangle(const base::Rect<int>& rect, const base::Color& color)
+  {
     // Note: No batching for now
     updateState(mRenderMode, RenderMode::NonTexturedRender);
     commitChangedState();
@@ -583,10 +602,10 @@ struct Renderer::Impl {
 
     const auto colorVec = toGlColor(color);
     float vertices[] = {
-      left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left,  bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
       right, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-      left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-      right, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left,  top,    colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      right, top,    colorVec.r, colorVec.g, colorVec.b, colorVec.a,
     };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
@@ -594,10 +613,8 @@ struct Renderer::Impl {
   }
 
 
-  void drawRectangle(
-    const base::Rect<int>& rect,
-    const base::Color& color
-  ) {
+  void drawRectangle(const base::Rect<int>& rect, const base::Color& color)
+  {
     // Note: No batching for now, drawRectangle is only used for debugging at
     // the moment
     updateState(mRenderMode, RenderMode::NonTexturedRender);
@@ -610,12 +627,11 @@ struct Renderer::Impl {
 
     const auto colorVec = toGlColor(color);
     float vertices[] = {
-      left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-      left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left,  top,    colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left,  bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
       right, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-      right, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
-      left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a
-    };
+      right, top,    colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left,  top,    colorVec.r, colorVec.g, colorVec.b, colorVec.a};
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glDrawArrays(GL_LINE_STRIP, 0, 5);
@@ -627,8 +643,8 @@ struct Renderer::Impl {
     const int y1,
     const int x2,
     const int y2,
-    const base::Color& color
-  ) {
+    const base::Color& color)
+  {
     // Note: No batching for now, drawLine is only used for debugging at the
     // moment
     updateState(mRenderMode, RenderMode::NonTexturedRender);
@@ -648,10 +664,8 @@ struct Renderer::Impl {
   }
 
 
-  void drawPoint(
-    const base::Vector& position,
-    const base::Color& color
-  ) {
+  void drawPoint(const base::Vector& position, const base::Color& color)
+  {
     updateState(mRenderMode, RenderMode::Points);
 
     float vertices[] = {
@@ -660,8 +674,7 @@ struct Renderer::Impl {
       color.r / 255.0f,
       color.g / 255.0f,
       color.b / 255.0f,
-      color.a / 255.0f
-    };
+      color.a / 255.0f};
     mBatchData.insert(
       std::end(mBatchData), std::begin(vertices), std::end(vertices));
   }
@@ -670,8 +683,8 @@ struct Renderer::Impl {
   void drawWaterEffect(
     const base::Rect<int>& area,
     const TextureId texture,
-    std::optional<int> surfaceAnimationStep
-  ) {
+    std::optional<int> surfaceAnimationStep)
+  {
     assert(
       !surfaceAnimationStep ||
       (*surfaceAnimationStep >= 0 && *surfaceAnimationStep < 4));
@@ -679,42 +692,38 @@ struct Renderer::Impl {
     using namespace std;
 
     const auto areaWidth = area.size.width;
-    auto drawWater = [&, this](
-      const base::Rect<int>& destRect,
-      const int maskIndex
-    ) {
-      const auto maskTexStartY = maskIndex * WATER_MASK_HEIGHT;
-      const auto animSourceRect = base::Rect<int>{
-        {0, maskTexStartY},
-        {areaWidth, WATER_MASK_HEIGHT}
+    auto drawWater =
+      [&, this](const base::Rect<int>& destRect, const int maskIndex) {
+        const auto maskTexStartY = maskIndex * WATER_MASK_HEIGHT;
+        const auto animSourceRect =
+          base::Rect<int>{{0, maskTexStartY}, {areaWidth, WATER_MASK_HEIGHT}};
+
+        // x, y, mask_u, mask_v
+        GLfloat vertices[4 * (2 + 2)];
+        fillVertexPositions(destRect, std::begin(vertices), 0, 4);
+        fillTexCoords(
+          toTexCoords(
+            animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
+          std::begin(vertices),
+          2,
+          4);
+
+        batchQuadVertices(std::begin(vertices), std::end(vertices));
       };
-
-      // x, y, mask_u, mask_v
-      GLfloat vertices[4 * (2 + 2)];
-      fillVertexPositions(destRect, std::begin(vertices), 0, 4);
-      fillTexCoords(
-        toTexCoords(
-          animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
-        std::begin(vertices),
-        2,
-        4);
-
-      batchQuadVertices(std::begin(vertices), std::end(vertices));
-    };
 
     updateState(mRenderMode, RenderMode::WaterEffect);
 
-    if (mLastUsedTexture != texture) {
+    if (mLastUsedTexture != texture)
+    {
       submitBatch();
       glBindTexture(GL_TEXTURE_2D, texture);
       mLastUsedTexture = texture;
     }
 
-    if (surfaceAnimationStep) {
-      const auto waterSurfaceArea = base::Rect<int>{
-        area.topLeft,
-        {areaWidth, WATER_MASK_HEIGHT}
-      };
+    if (surfaceAnimationStep)
+    {
+      const auto waterSurfaceArea =
+        base::Rect<int>{area.topLeft, {areaWidth, WATER_MASK_HEIGHT}};
 
       drawWater(waterSurfaceArea, *surfaceAnimationStep);
 
@@ -723,18 +732,19 @@ struct Renderer::Impl {
       remainingArea.size.height -= WATER_MASK_HEIGHT;
 
       drawWater(remainingArea, WATER_MASK_INDEX_FILLED);
-    } else {
+    }
+    else
+    {
       drawWater(area, WATER_MASK_INDEX_FILLED);
     }
   }
 
 
-  void pushState() {
-    mStateStack.push_back(mStateStack.back());
-  }
+  void pushState() { mStateStack.push_back(mStateStack.back()); }
 
 
-  void popState() {
+  void popState()
+  {
     assert(mStateStack.size() > 1);
 
     submitBatch();
@@ -744,58 +754,69 @@ struct Renderer::Impl {
   }
 
 
-  void resetState() {
+  void resetState()
+  {
     submitBatch();
 
     const auto defaultState = State{};
 
-    if (mStateStack.back() != defaultState) {
+    if (mStateStack.back() != defaultState)
+    {
       mStateStack.back() = defaultState;
       mStateChanged = true;
     }
   }
 
 
-  void setOverlayColor(const base::Color& color) {
+  void setOverlayColor(const base::Color& color)
+  {
     updateState(mStateStack.back().mOverlayColor, color);
   }
 
 
-  void setColorModulation(const base::Color& color) {
+  void setColorModulation(const base::Color& color)
+  {
     updateState(mStateStack.back().mColorModulation, color);
   }
 
 
-  void setTextureRepeatEnabled(const bool enable) {
+  void setTextureRepeatEnabled(const bool enable)
+  {
     updateState(mStateStack.back().mTextureRepeatEnabled, enable);
   }
 
 
-  void setGlobalTranslation(const base::Vector& translation) {
+  void setGlobalTranslation(const base::Vector& translation)
+  {
     const auto glTranslation = glm::vec2{translation.x, translation.y};
     updateState(mStateStack.back().mGlobalTranslation, glTranslation);
   }
 
 
-  void setGlobalScale(const base::Point<float>& scale) {
+  void setGlobalScale(const base::Point<float>& scale)
+  {
     const auto glScale = glm::vec2{scale.x, scale.y};
     updateState(mStateStack.back().mGlobalScale, glScale);
   }
 
 
-  void setClipRect(const std::optional<base::Rect<int>>& clipRect) {
+  void setClipRect(const std::optional<base::Rect<int>>& clipRect)
+  {
     updateState(mStateStack.back().mClipRect, clipRect);
   }
 
 
-  void setRenderTarget(const TextureId target) {
+  void setRenderTarget(const TextureId target)
+  {
     updateState(mStateStack.back().mRenderTargetTexture, target);
   }
 
 
   template <typename StateT>
-  void updateState(StateT& state, const StateT& newValue) {
-    if (state != newValue) {
+  void updateState(StateT& state, const StateT& newValue)
+  {
+    if (state != newValue)
+    {
       submitBatch();
 
       state = newValue;
@@ -804,21 +825,24 @@ struct Renderer::Impl {
   }
 
 
-  void swapBuffers() {
+  void swapBuffers()
+  {
     assert(mStateStack.back().mRenderTargetTexture == 0);
 
     submitBatch();
     SDL_GL_SwapWindow(mpWindow);
 
     const auto actualWindowSize = getSize(mpWindow);
-    if (mWindowSize != actualWindowSize) {
+    if (mWindowSize != actualWindowSize)
+    {
       mWindowSize = actualWindowSize;
       mStateChanged = true;
     }
   }
 
 
-  void clear(const base::Color& clearColor) {
+  void clear(const base::Color& clearColor)
+  {
     commitChangedState();
 
     const auto glColor = toGlColor(clearColor);
@@ -828,8 +852,10 @@ struct Renderer::Impl {
 
 
   template <typename VertexIter>
-  void batchQuadVertices(VertexIter&& dataBegin, VertexIter&& dataEnd) {
-    if (mBatchSize >= MAX_BATCH_SIZE) {
+  void batchQuadVertices(VertexIter&& dataBegin, VertexIter&& dataEnd)
+  {
+    if (mBatchSize >= MAX_BATCH_SIZE)
+    {
       submitBatch();
     }
 
@@ -841,15 +867,18 @@ struct Renderer::Impl {
   }
 
 
-  void commitChangedState() {
-    if (!mStateChanged) {
+  void commitChangedState()
+  {
+    if (!mStateChanged)
+    {
       return;
     }
 
     const auto& state = mStateStack.back();
 
     auto currentFramebufferSize = [&]() {
-      if (state.mRenderTargetTexture != 0) {
+      if (state.mRenderTargetTexture != 0)
+      {
         const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
         assert(iData != mRenderTargetDict.end());
         return iData->second.mSize;
@@ -865,13 +894,14 @@ struct Renderer::Impl {
 
     if (
       mRenderMode != mLastKnownRenderMode ||
-      state.needsExtendedShader() != mLastCommittedState.needsExtendedShader()
-    ) {
+      state.needsExtendedShader() != mLastCommittedState.needsExtendedShader())
+    {
       commitShaderSelection(state);
       transformNeedsUpdate = true;
     }
 
-    if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture) {
+    if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture)
+    {
       const auto framebufferSize = currentFramebufferSize();
 
       commitRenderTarget(state);
@@ -880,34 +910,47 @@ struct Renderer::Impl {
       commitVertexAttributeFormat();
 
       transformNeedsUpdate = true;
-    } else {
-      if (mWindowSize != mLastKnownWindowSize && state.mRenderTargetTexture == 0) {
+    }
+    else
+    {
+      if (
+        mWindowSize != mLastKnownWindowSize && state.mRenderTargetTexture == 0)
+      {
         glViewport(0, 0, mWindowSize.width, mWindowSize.height);
         commitClipRect(state, mWindowSize);
         transformNeedsUpdate = true;
-      } else if (state.mClipRect != mLastCommittedState.mClipRect) {
+      }
+      else if (state.mClipRect != mLastCommittedState.mClipRect)
+      {
         commitClipRect(state, currentFramebufferSize());
       }
     }
 
-    if (mRenderMode == RenderMode::SpriteBatch && state.needsExtendedShader()) {
-      if (state.mColorModulation != mLastCommittedState.mColorModulation) {
+    if (mRenderMode == RenderMode::SpriteBatch && state.needsExtendedShader())
+    {
+      if (state.mColorModulation != mLastCommittedState.mColorModulation)
+      {
         mTexturedQuadShader.setUniform(
           "colorModulation", toGlColor(state.mColorModulation));
       }
 
-      if (state.mOverlayColor != mLastCommittedState.mOverlayColor) {
+      if (state.mOverlayColor != mLastCommittedState.mOverlayColor)
+      {
         mTexturedQuadShader.setUniform(
           "overlayColor", toGlColor(state.mOverlayColor));
       }
 
-      if (state.mTextureRepeatEnabled != mLastCommittedState.mTextureRepeatEnabled) {
+      if (
+        state.mTextureRepeatEnabled !=
+        mLastCommittedState.mTextureRepeatEnabled)
+      {
         mTexturedQuadShader.setUniform(
           "enableRepeat", state.mTextureRepeatEnabled);
       }
     }
 
-    if (transformNeedsUpdate) {
+    if (transformNeedsUpdate)
+    {
       commitTransformationMatrix(state, currentFramebufferSize());
     }
 
@@ -918,34 +961,42 @@ struct Renderer::Impl {
   }
 
 
-  void commitRenderTarget(const State& state) {
-    if (state.mRenderTargetTexture != 0) {
+  void commitRenderTarget(const State& state)
+  {
+    if (state.mRenderTargetTexture != 0)
+    {
       const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
       assert(iData != mRenderTargetDict.end());
       glBindFramebuffer(GL_FRAMEBUFFER, iData->second.mFbo);
-    } else {
+    }
+    else
+    {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
   }
 
 
-  void commitClipRect(
-    const State& state,
-    const base::Extents& framebufferSize
-  ) {
-    if (state.mClipRect) {
+  void commitClipRect(const State& state, const base::Extents& framebufferSize)
+  {
+    if (state.mClipRect)
+    {
       glEnable(GL_SCISSOR_TEST);
       setScissorBox(*state.mClipRect, framebufferSize);
-    } else {
+    }
+    else
+    {
       glDisable(GL_SCISSOR_TEST);
     }
   }
 
 
-  Shader& shaderToUse(const State& state) {
-    switch (mRenderMode) {
+  Shader& shaderToUse(const State& state)
+  {
+    switch (mRenderMode)
+    {
       case RenderMode::SpriteBatch:
-        if (state.needsExtendedShader()) {
+        if (state.needsExtendedShader())
+        {
           return mTexturedQuadShader;
         }
 
@@ -964,11 +1015,13 @@ struct Renderer::Impl {
   }
 
 
-  void commitShaderSelection(const State& state) {
+  void commitShaderSelection(const State& state)
+  {
     auto& shader = shaderToUse(state);
     shader.use();
 
-    if (shader.handle() == mTexturedQuadShader.handle()) {
+    if (shader.handle() == mTexturedQuadShader.handle())
+    {
       mTexturedQuadShader.setUniform(
         "enableRepeat", state.mTextureRepeatEnabled);
       mTexturedQuadShader.setUniform(
@@ -981,17 +1034,14 @@ struct Renderer::Impl {
   }
 
 
-  void commitVertexAttributeFormat() {
-    switch (mRenderMode) {
+  void commitVertexAttributeFormat()
+  {
+    switch (mRenderMode)
+    {
       case RenderMode::SpriteBatch:
       case RenderMode::WaterEffect:
         glVertexAttribPointer(
-          0,
-          2,
-          GL_FLOAT,
-          GL_FALSE,
-          sizeof(float) * 4,
-          toAttribOffset(0));
+          0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, toAttribOffset(0));
         glVertexAttribPointer(
           1,
           2,
@@ -1004,12 +1054,7 @@ struct Renderer::Impl {
       case RenderMode::Points:
       case RenderMode::NonTexturedRender:
         glVertexAttribPointer(
-          0,
-          2,
-          GL_FLOAT,
-          GL_FALSE,
-          sizeof(float) * 6,
-          toAttribOffset(0));
+          0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, toAttribOffset(0));
         glVertexAttribPointer(
           1,
           4,
@@ -1024,13 +1069,10 @@ struct Renderer::Impl {
 
   void commitTransformationMatrix(
     const State& state,
-    const base::Extents& framebufferSize
-  ) {
+    const base::Extents& framebufferSize)
+  {
     const auto projection = glm::ortho(
-      0.0f,
-      float(framebufferSize.width),
-      float(framebufferSize.height),
-      0.0f);
+      0.0f, float(framebufferSize.width), float(framebufferSize.height), 0.0f);
     const auto projectionMatrix = glm::scale(
       glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
       glm::vec3(state.mGlobalScale, 1.0f));
@@ -1038,10 +1080,8 @@ struct Renderer::Impl {
   }
 
 
-  TextureId createRenderTargetTexture(
-    const int width,
-    const int height
-  ) {
+  TextureId createRenderTargetTexture(const int width, const int height)
+  {
     submitBatch();
 
     const auto textureHandle =
@@ -1051,11 +1091,7 @@ struct Renderer::Impl {
     glGenFramebuffers(1, &fboHandle);
     glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
     glFramebufferTexture2D(
-      GL_FRAMEBUFFER,
-      GL_COLOR_ATTACHMENT0,
-      GL_TEXTURE_2D,
-      textureHandle,
-      0);
+      GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureHandle, 0);
 
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
     commitRenderTarget(mLastCommittedState);
@@ -1066,30 +1102,31 @@ struct Renderer::Impl {
   }
 
 
-  TextureId createTexture(const data::Image& image) {
+  TextureId createTexture(const data::Image& image)
+  {
     submitBatch();
 
     // OpenGL wants pixel data in bottom-up format, so transform it accordingly
     std::vector<std::uint8_t> pixelData;
     pixelData.resize(image.width() * image.height() * 4);
-    for (std::size_t y = 0; y < image.height(); ++y) {
+    for (std::size_t y = 0; y < image.height(); ++y)
+    {
       const auto sourceRow = image.height() - (y + 1);
       const auto yOffsetSource = image.width() * sourceRow;
       const auto yOffset = y * image.width() * 4;
 
-      for (std::size_t x = 0; x < image.width(); ++x) {
+      for (std::size_t x = 0; x < image.width(); ++x)
+      {
         const auto& pixel = image.pixelData()[x + yOffsetSource];
-        pixelData[x*4 +     yOffset] = pixel.r;
-        pixelData[x*4 + 1 + yOffset] = pixel.g;
-        pixelData[x*4 + 2 + yOffset] = pixel.b;
-        pixelData[x*4 + 3 + yOffset] = pixel.a;
+        pixelData[x * 4 + yOffset] = pixel.r;
+        pixelData[x * 4 + 1 + yOffset] = pixel.g;
+        pixelData[x * 4 + 2 + yOffset] = pixel.b;
+        pixelData[x * 4 + 3 + yOffset] = pixel.a;
       }
     }
 
     const auto handle = createGlTexture(
-      GLsizei(image.width()),
-      GLsizei(image.height()),
-      pixelData.data());
+      GLsizei(image.width()), GLsizei(image.height()), pixelData.data());
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
 
     ++mNumTextures;
@@ -1097,14 +1134,18 @@ struct Renderer::Impl {
   }
 
 
-  void destroyTexture(TextureId texture) {
+  void destroyTexture(TextureId texture)
+  {
     submitBatch();
 
     const auto iRenderTarget = mRenderTargetDict.find(texture);
-    if (iRenderTarget != mRenderTargetDict.end()) {
+    if (iRenderTarget != mRenderTargetDict.end())
+    {
       glDeleteFramebuffers(1, &iRenderTarget->second.mFbo);
       mRenderTargetDict.erase(iRenderTarget);
-    } else {
+    }
+    else
+    {
       --mNumTextures;
     }
 
@@ -1122,17 +1163,20 @@ Renderer::Renderer(SDL_Window* pWindow)
 Renderer::~Renderer() = default;
 
 
-void Renderer::setOverlayColor(const base::Color& color) {
+void Renderer::setOverlayColor(const base::Color& color)
+{
   mpImpl->setOverlayColor(color);
 }
 
 
-void Renderer::setColorModulation(const base::Color& colorModulation) {
+void Renderer::setColorModulation(const base::Color& colorModulation)
+{
   mpImpl->setColorModulation(colorModulation);
 }
 
 
-void Renderer::setTextureRepeatEnabled(const bool enable) {
+void Renderer::setTextureRepeatEnabled(const bool enable)
+{
   mpImpl->setTextureRepeatEnabled(enable);
 }
 
@@ -1140,29 +1184,30 @@ void Renderer::setTextureRepeatEnabled(const bool enable) {
 void Renderer::drawTexture(
   const TextureId texture,
   const TexCoords& sourceRect,
-  const base::Rect<int>& destRect
-) {
+  const base::Rect<int>& destRect)
+{
   mpImpl->drawTexture(texture, sourceRect, destRect);
 }
 
 
-void Renderer::submitBatch() {
+void Renderer::submitBatch()
+{
   mpImpl->submitBatch();
 }
 
 
 void Renderer::drawFilledRectangle(
   const base::Rect<int>& rect,
-  const base::Color& color
-) {
+  const base::Color& color)
+{
   mpImpl->drawFilledRectangle(rect, color);
 }
 
 
 void Renderer::drawRectangle(
   const base::Rect<int>& rect,
-  const base::Color& color
-) {
+  const base::Color& color)
+{
   mpImpl->drawRectangle(rect, color);
 }
 
@@ -1172,16 +1217,14 @@ void Renderer::drawLine(
   const int y1,
   const int x2,
   const int y2,
-  const base::Color& color
-) {
+  const base::Color& color)
+{
   mpImpl->drawLine(x1, y1, x2, y2, color);
 }
 
 
-void Renderer::drawPoint(
-  const base::Vector& position,
-  const base::Color& color
-) {
+void Renderer::drawPoint(const base::Vector& position, const base::Color& color)
+{
   mpImpl->drawPoint(position, color);
 }
 
@@ -1189,99 +1232,115 @@ void Renderer::drawPoint(
 void Renderer::drawWaterEffect(
   const base::Rect<int>& area,
   const TextureId texture,
-  std::optional<int> surfaceAnimationStep
-) {
+  std::optional<int> surfaceAnimationStep)
+{
   mpImpl->drawWaterEffect(area, texture, surfaceAnimationStep);
 }
 
 
-void Renderer::pushState() {
+void Renderer::pushState()
+{
   mpImpl->pushState();
 }
 
 
-void Renderer::popState() {
+void Renderer::popState()
+{
   mpImpl->popState();
 }
 
 
-void Renderer::resetState() {
+void Renderer::resetState()
+{
   mpImpl->resetState();
 }
 
 
-void Renderer::setGlobalTranslation(const base::Vector& translation) {
+void Renderer::setGlobalTranslation(const base::Vector& translation)
+{
   mpImpl->setGlobalTranslation(translation);
 }
 
 
-base::Vector Renderer::globalTranslation() const {
+base::Vector Renderer::globalTranslation() const
+{
   return base::Vector{
     static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.x),
     static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.y)};
 }
 
 
-void Renderer::setGlobalScale(const base::Point<float>& scale) {
+void Renderer::setGlobalScale(const base::Point<float>& scale)
+{
   mpImpl->setGlobalScale(scale);
 }
 
 
-base::Point<float> Renderer::globalScale() const {
-  return {mpImpl->mStateStack.back().mGlobalScale.x, mpImpl->mStateStack.back().mGlobalScale.y};
+base::Point<float> Renderer::globalScale() const
+{
+  return {
+    mpImpl->mStateStack.back().mGlobalScale.x,
+    mpImpl->mStateStack.back().mGlobalScale.y};
 }
 
 
-void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect) {
+void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect)
+{
   mpImpl->setClipRect(clipRect);
 }
 
 
-std::optional<base::Rect<int>> Renderer::clipRect() const {
+std::optional<base::Rect<int>> Renderer::clipRect() const
+{
   return mpImpl->mStateStack.back().mClipRect;
 }
 
 
-base::Size<int> Renderer::windowSize() const {
+base::Size<int> Renderer::windowSize() const
+{
   return mpImpl->mWindowSize;
 }
 
 
-base::Size<int> Renderer::maxWindowSize() const {
+base::Size<int> Renderer::maxWindowSize() const
+{
   return mpImpl->mMaxWindowSize;
 }
 
 
-void Renderer::setRenderTarget(const TextureId target) {
+void Renderer::setRenderTarget(const TextureId target)
+{
   mpImpl->setRenderTarget(target);
 }
 
 
-void Renderer::swapBuffers() {
+void Renderer::swapBuffers()
+{
   mpImpl->swapBuffers();
 }
 
 
-void Renderer::clear(const base::Color& clearColor) {
+void Renderer::clear(const base::Color& clearColor)
+{
   mpImpl->clear(clearColor);
 }
 
 
-TextureId Renderer::createRenderTargetTexture(
-  const int width,
-  const int height
-) {
+TextureId Renderer::createRenderTargetTexture(const int width, const int height)
+{
   return mpImpl->createRenderTargetTexture(width, height);
 }
 
 
-TextureId Renderer::createTexture(const data::Image& image) {
+TextureId Renderer::createTexture(const data::Image& image)
+{
   return mpImpl->createTexture(image);
 }
 
 
-void Renderer::destroyTexture(TextureId texture) {
+void Renderer::destroyTexture(TextureId texture)
+{
   mpImpl->destroyTexture(texture);
 }
 
-}
+} // namespace rigel::renderer

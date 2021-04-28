@@ -28,26 +28,30 @@ RIGEL_RESTORE_WARNINGS
 #include <tuple>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-template<typename ValueT>
+template <typename ValueT>
 struct Rect;
 
-namespace detail {
+namespace detail
+{
 
-template<typename ValueT>
+template <typename ValueT>
 SDL_Rect toSdlRect(const Rect<ValueT>& rect)
 {
   return {
-    int(rect.topLeft.x), int(rect.topLeft.y),
-    int(rect.size.width), int(rect.size.height)
-  };
+    int(rect.topLeft.x),
+    int(rect.topLeft.y),
+    int(rect.size.width),
+    int(rect.size.height)};
 }
 
-}
+} // namespace detail
 
-template<typename ValueT>
-struct Point {
+template <typename ValueT>
+struct Point
+{
   Point() = default;
   Point(const Point&) = default;
   Point(Point&&) = default;
@@ -58,13 +62,12 @@ struct Point {
   }
   Point& operator=(const Point&) = default;
 
-  bool operator==(const Point<ValueT>& rhs) const {
+  bool operator==(const Point<ValueT>& rhs) const
+  {
     return std::tie(x, y) == std::tie(rhs.x, rhs.y);
   }
 
-  bool operator!=(const Point<ValueT>& rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const Point<ValueT>& rhs) const { return !(*this == rhs); }
 
 
   ValueT x = 0;
@@ -72,8 +75,9 @@ struct Point {
 };
 
 
-template<typename ValueT>
-struct Size {
+template <typename ValueT>
+struct Size
+{
   Size() = default;
   constexpr Size(const ValueT width_, const ValueT height_) noexcept
     : width(width_)
@@ -81,188 +85,164 @@ struct Size {
   {
   }
 
-  bool operator==(const Size<ValueT>& rhs) const {
+  bool operator==(const Size<ValueT>& rhs) const
+  {
     return std::tie(width, height) == std::tie(rhs.width, rhs.height);
   }
 
-  bool operator!=(const Size<ValueT>& rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const Size<ValueT>& rhs) const { return !(*this == rhs); }
 
   ValueT width = 0;
   ValueT height = 0;
 };
 
 
-template<typename ValueT>
-struct Rect {
+template <typename ValueT>
+struct Rect
+{
   Point<ValueT> topLeft;
   Size<ValueT> size;
 
-  Point<ValueT> bottomLeft() const {
+  Point<ValueT> bottomLeft() const
+  {
     return Point<ValueT>{
-      topLeft.x,
-      static_cast<ValueT>(topLeft.y + (size.height - 1))
-    };
+      topLeft.x, static_cast<ValueT>(topLeft.y + (size.height - 1))};
   }
 
-  Point<ValueT> bottomRight() const {
-    return bottomLeft() + Point<ValueT>{
-      static_cast<ValueT>(size.width - 1),
-      0
-    };
+  Point<ValueT> bottomRight() const
+  {
+    return bottomLeft() + Point<ValueT>{static_cast<ValueT>(size.width - 1), 0};
   }
 
-  ValueT top() const {
-    return topLeft.y;
-  }
+  ValueT top() const { return topLeft.y; }
 
-  ValueT bottom() const {
-    return bottomLeft().y;
-  }
+  ValueT bottom() const { return bottomLeft().y; }
 
-  ValueT left() const {
-    return topLeft.x;
-  }
+  ValueT left() const { return topLeft.x; }
 
-  ValueT right() const {
-    return bottomRight().x;
-  }
+  ValueT right() const { return bottomRight().x; }
 
-  bool intersects(const Rect& other) const {
+  bool intersects(const Rect& other) const
+  {
     const auto r1 = detail::toSdlRect(*this);
     const auto r2 = detail::toSdlRect(other);
     return SDL_HasIntersection(&r1, &r2);
   }
 
-  bool containsPoint(const Point<ValueT>& point) const {
-    return
-      inRange(point.x, left(), right()) && inRange(point.y, top(), bottom());
+  bool containsPoint(const Point<ValueT>& point) const
+  {
+    return inRange(point.x, left(), right()) &&
+      inRange(point.y, top(), bottom());
   }
 };
 
 
-template<typename ValueT>
-Rect<ValueT> makeRect(Point<ValueT> topLeft, Point<ValueT> bottomRight) {
+template <typename ValueT>
+Rect<ValueT> makeRect(Point<ValueT> topLeft, Point<ValueT> bottomRight)
+{
   const auto sizeAsPoint = bottomRight - topLeft;
   return Rect<ValueT>{topLeft, Size<ValueT>{sizeAsPoint.x, sizeAsPoint.y}};
 }
 
 
-template<typename ValueT>
-Point<ValueT> operator+(
-  const Point<ValueT>& lhs,
-  const Point<ValueT>& rhs
-) {
+template <typename ValueT>
+Point<ValueT> operator+(const Point<ValueT>& lhs, const Point<ValueT>& rhs)
+{
   return Point<ValueT>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
 
-template<typename ValueT>
-Point<ValueT> operator-(
-  const Point<ValueT>& lhs,
-  const Point<ValueT>& rhs
-) {
+template <typename ValueT>
+Point<ValueT> operator-(const Point<ValueT>& lhs, const Point<ValueT>& rhs)
+{
   return Point<ValueT>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 
 
-template<typename ValueT, typename ScalarT>
-auto operator*(
-  const Point<ValueT>& point,
-  const ScalarT scalar
-) {
-  return Point<decltype(point.x * scalar)>{
-    point.x * scalar,
-    point.y * scalar
-  };
+template <typename ValueT, typename ScalarT>
+auto operator*(const Point<ValueT>& point, const ScalarT scalar)
+{
+  return Point<decltype(point.x * scalar)>{point.x * scalar, point.y * scalar};
 }
 
 
-template<typename ValueT>
-Point<ValueT>& operator+=(Point<ValueT>& lhs, const Point<ValueT>& rhs) {
+template <typename ValueT>
+Point<ValueT>& operator+=(Point<ValueT>& lhs, const Point<ValueT>& rhs)
+{
   auto newPoint = lhs + rhs;
   std::swap(lhs, newPoint);
   return lhs;
 }
 
 
-template<typename ValueT>
-Point<ValueT>& operator-=(Point<ValueT>& lhs, const Point<ValueT>& rhs) {
+template <typename ValueT>
+Point<ValueT>& operator-=(Point<ValueT>& lhs, const Point<ValueT>& rhs)
+{
   auto newPoint = lhs - rhs;
   std::swap(lhs, newPoint);
   return lhs;
 }
 
 
-template<typename ValueT>
-Size<ValueT> operator+(
-  const Size<ValueT>& lhs,
-  const Size<ValueT>& rhs
-) {
+template <typename ValueT>
+Size<ValueT> operator+(const Size<ValueT>& lhs, const Size<ValueT>& rhs)
+{
   return Size<ValueT>(lhs.width + rhs.width, lhs.height + rhs.height);
 }
 
 
-template<typename ValueT>
-Size<ValueT> operator-(
-  const Size<ValueT>& lhs,
-  const Size<ValueT>& rhs
-) {
+template <typename ValueT>
+Size<ValueT> operator-(const Size<ValueT>& lhs, const Size<ValueT>& rhs)
+{
   return Size<ValueT>(lhs.width - rhs.width, lhs.height - rhs.height);
 }
 
 
-template<typename ValueT, typename ScalarT>
-auto operator*(
-  const Size<ValueT>& size,
-  const ScalarT scalar
-) {
+template <typename ValueT, typename ScalarT>
+auto operator*(const Size<ValueT>& size, const ScalarT scalar)
+{
   return Size<decltype(size.width * scalar)>{
-    size.width * scalar,
-    size.height * scalar
-  };
+    size.width * scalar, size.height * scalar};
 }
 
 
-template<typename ValueT>
-Size<ValueT>& operator+=(Size<ValueT>& lhs, const Size<ValueT>& rhs) {
+template <typename ValueT>
+Size<ValueT>& operator+=(Size<ValueT>& lhs, const Size<ValueT>& rhs)
+{
   auto newSize = lhs + rhs;
   std::swap(lhs, newSize);
   return lhs;
 }
 
 
-template<typename ValueT>
-Size<ValueT>& operator-=(Size<ValueT>& lhs, const Size<ValueT>& rhs) {
+template <typename ValueT>
+Size<ValueT>& operator-=(Size<ValueT>& lhs, const Size<ValueT>& rhs)
+{
   auto newSize = lhs - rhs;
   std::swap(lhs, newSize);
   return lhs;
 }
 
 
-template<typename ValueT>
-Rect<ValueT> operator+(
-  const Rect<ValueT>& rect,
-  const Point<ValueT>& translation
-) {
+template <typename ValueT>
+Rect<ValueT>
+  operator+(const Rect<ValueT>& rect, const Point<ValueT>& translation)
+{
   return Rect<ValueT>{
-    rect.topLeft + Point<ValueT>{
-        translation.x,
-        translation.y},
-    rect.size
-  };
+    rect.topLeft + Point<ValueT>{translation.x, translation.y}, rect.size};
 }
 
 
-template<typename ValueT>
-bool operator==(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs) {
+template <typename ValueT>
+bool operator==(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs)
+{
   return std::tie(lhs.topLeft, lhs.size) == std::tie(rhs.topLeft, rhs.size);
 }
 
 
-template<typename ValueT>
-bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs) {
+template <typename ValueT>
+bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs)
+{
   return !(lhs == rhs);
 }
 
@@ -270,4 +250,4 @@ bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs) {
 using Vector = Point<int>;
 using Extents = Size<int>;
 
-}
+} // namespace rigel::base

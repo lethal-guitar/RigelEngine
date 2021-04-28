@@ -37,27 +37,34 @@
 #include <cassert>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using engine::moveHorizontally;
 using engine::moveHorizontallyWithStairStepping;
-using engine::moveVertically;
 using engine::MovementResult;
+using engine::moveVertically;
 
 namespace c = engine::components;
 namespace ex = entityx;
 
-struct AnimationConfig {
+struct AnimationConfig
+{
   int startOfCycle;
   int endOfCycle;
 };
 
-namespace {
+namespace
+{
 
 using EffectMovement = effects::EffectSprite::Movement;
 
 const effects::EffectSpec PLAYER_DEATH_EFFECT_SPEC[] = {
-  {effects::EffectSprite{{}, data::ActorID::Duke_death_particles, EffectMovement::None}, 0},
+  {effects::EffectSprite{
+     {},
+     data::ActorID::Duke_death_particles,
+     EffectMovement::None},
+   0},
   {effects::Particles{{2, 0}, loader::INGAME_PALETTE[6]}, 0},
   {effects::RandomExplosionSound{}, 1},
   {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3], 1}, 2},
@@ -89,21 +96,21 @@ constexpr auto FAN_PUSH_SPEED = 2;
 
 constexpr auto JETPACK_SPEED = 1;
 
-constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_ANIMATION_SEQUENCE{
-  29, 29, 29, 29, 30, 31};
+constexpr std::array<int, DEATH_ANIMATION_STEPS>
+  DEATH_ANIMATION_SEQUENCE{29, 29, 29, 29, 30, 31};
 
-constexpr std::array<int, DEATH_ANIMATION_STEPS> DEATH_FLY_UP_SEQUENCE{
-  -2, -1, 0, 0, 1, 1};
+constexpr std::array<int, DEATH_ANIMATION_STEPS>
+  DEATH_FLY_UP_SEQUENCE{-2, -1, 0, 0, 1, 1};
 
-constexpr std::array<int, 4> GETTING_SUCKED_INTO_SPACE_Y_SEQ{
-  -2, -2, -1, -1};
-
+constexpr std::array<int, 4> GETTING_SUCKED_INTO_SPACE_Y_SEQ{-2, -2, -1, -1};
 
 
-int mercyFramesForDifficulty(const data::Difficulty difficulty) {
+int mercyFramesForDifficulty(const data::Difficulty difficulty)
+{
   using data::Difficulty;
 
-  switch (difficulty) {
+  switch (difficulty)
+  {
     case Difficulty::Easy:
       return 40;
 
@@ -119,14 +126,17 @@ int mercyFramesForDifficulty(const data::Difficulty difficulty) {
 }
 
 
-PlayerInput filterInput(PlayerInput input) {
+PlayerInput filterInput(PlayerInput input)
+{
   // Conflicting directional inputs are treated as if no input happened on the
   // conflicting axis. E.g. left + right both pressed -> no horizontal movement
-  if (input.mLeft && input.mRight) {
+  if (input.mLeft && input.mRight)
+  {
     input.mLeft = input.mRight = false;
   }
 
-  if (input.mUp && input.mDown) {
+  if (input.mUp && input.mDown)
+  {
     input.mUp = input.mDown = false;
   }
 
@@ -134,17 +144,20 @@ PlayerInput filterInput(PlayerInput input) {
 }
 
 
-base::Vector inputToVec(const PlayerInput& input) {
+base::Vector inputToVec(const PlayerInput& input)
+{
   const auto x = input.mLeft ? -1 : (input.mRight ? 1 : 0);
   const auto y = input.mUp ? -1 : (input.mDown ? 1 : 0);
   return {x, y};
 }
 
 
-ProjectileType projectileTypeForWeapon(const data::WeaponType weaponType) {
+ProjectileType projectileTypeForWeapon(const data::WeaponType weaponType)
+{
   using data::WeaponType;
 
-  switch (weaponType) {
+  switch (weaponType)
+  {
     case WeaponType::Normal:
       return ProjectileType::Normal;
 
@@ -163,11 +176,13 @@ ProjectileType projectileTypeForWeapon(const data::WeaponType weaponType) {
 }
 
 
-data::SoundId soundIdForWeapon(const data::WeaponType weaponType) {
+data::SoundId soundIdForWeapon(const data::WeaponType weaponType)
+{
   using data::SoundId;
   using data::WeaponType;
 
-  switch (weaponType) {
+  switch (weaponType)
+  {
     case WeaponType::Laser:
       return SoundId::DukeLaserShot;
 
@@ -180,36 +195,38 @@ data::SoundId soundIdForWeapon(const data::WeaponType weaponType) {
 }
 
 
-ProjectileDirection shotDirection(
-  const c::Orientation orientation,
-  const WeaponStance stance
-) {
-  if (stance == WeaponStance::Upwards) {
+ProjectileDirection
+  shotDirection(const c::Orientation orientation, const WeaponStance stance)
+{
+  if (stance == WeaponStance::Upwards)
+  {
     return ProjectileDirection::Up;
-  } else if (
-    stance == WeaponStance::Downwards ||
-    stance == WeaponStance::UsingJetpack
-  ) {
+  }
+  else if (
+    stance == WeaponStance::Downwards || stance == WeaponStance::UsingJetpack)
+  {
     return ProjectileDirection::Down;
-  } else {
-    return orientation == c::Orientation::Right
-      ? ProjectileDirection::Right
-      : ProjectileDirection::Left;
+  }
+  else
+  {
+    return orientation == c::Orientation::Right ? ProjectileDirection::Right
+                                                : ProjectileDirection::Left;
   }
 }
 
 
-base::Vector shotOffset(
-  const c::Orientation orientation,
-  const WeaponStance stance
-) {
-  if (stance == WeaponStance::UsingJetpack) {
+base::Vector
+  shotOffset(const c::Orientation orientation, const WeaponStance stance)
+{
+  if (stance == WeaponStance::UsingJetpack)
+  {
     return {1, 1};
   }
 
   const auto facingRight = orientation == c::Orientation::Right;
 
-  if (stance == WeaponStance::Downwards) {
+  if (stance == WeaponStance::Downwards)
+  {
     return facingRight ? base::Vector{0, 0} : base::Vector{2, 0};
   }
 
@@ -224,28 +241,29 @@ base::Vector shotOffset(
 }
 
 
-data::ActorID muzzleFlashActorId(const ProjectileDirection direction) {
+data::ActorID muzzleFlashActorId(const ProjectileDirection direction)
+{
   static const data::ActorID DIRECTION_MAP[] = {
     data::ActorID::Muzzle_flash_left,
     data::ActorID::Muzzle_flash_right,
     data::ActorID::Muzzle_flash_up,
-    data::ActorID::Muzzle_flash_down
-  };
+    data::ActorID::Muzzle_flash_down};
   return DIRECTION_MAP[static_cast<std::size_t>(direction)];
 }
 
 
-base::Vector muzzleFlashOffset(
-  const c::Orientation orientation,
-  const WeaponStance stance
-) {
-  if (stance == WeaponStance::UsingJetpack) {
+base::Vector
+  muzzleFlashOffset(const c::Orientation orientation, const WeaponStance stance)
+{
+  if (stance == WeaponStance::UsingJetpack)
+  {
     return {1, 1};
   }
 
   const auto facingRight = orientation == c::Orientation::Right;
 
-  if (stance == WeaponStance::Downwards) {
+  if (stance == WeaponStance::Downwards)
+  {
     return facingRight ? base::Vector{0, 1} : base::Vector{2, 1};
   }
 
@@ -260,9 +278,11 @@ base::Vector muzzleFlashOffset(
 }
 
 
-std::optional<int> recoilAnimationFrame(const VisualState state) {
+std::optional<int> recoilAnimationFrame(const VisualState state)
+{
   using VS = VisualState;
-  switch (state) {
+  switch (state)
+  {
     case VS::Standing:
       return 18;
 
@@ -289,7 +309,7 @@ std::optional<int> recoilAnimationFrame(const VisualState state) {
   return std::nullopt;
 }
 
-}
+} // namespace
 
 
 Player::Player(
@@ -302,8 +322,7 @@ Player::Player(
   const data::map::Map* pMap,
   IEntityFactory* pEntityFactory,
   ex::EventManager* pEvents,
-  engine::RandomNumberGenerator* pRandomGenerator
-)
+  engine::RandomNumberGenerator* pRandomGenerator)
   : mEntity(entity)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
@@ -330,10 +349,8 @@ Player::Player(
 }
 
 
-void Player::synchronizeTo(
-  const Player& other,
-  entityx::EntityManager& es
-) {
+void Player::synchronizeTo(const Player& other, entityx::EntityManager& es)
+{
   using game_logic::components::ActorTag;
 
   mGodModeOn = other.mGodModeOn;
@@ -356,10 +373,13 @@ void Player::synchronizeTo(
   *mEntity.component<c::BoundingBox>() =
     *other.mEntity.component<const c::BoundingBox>();
 
-  if (other.mAttachedElevator) {
+  if (other.mAttachedElevator)
+  {
     entityx::ComponentHandle<ActorTag> tag;
-    for (auto entity : es.entities_with_components(tag)) {
-      if (tag->mType == ActorTag::Type::ActiveElevator) {
+    for (auto entity : es.entities_with_components(tag))
+    {
+      if (tag->mType == ActorTag::Type::ActiveElevator)
+      {
         mAttachedElevator = entity;
         break;
       }
@@ -368,79 +388,95 @@ void Player::synchronizeTo(
 }
 
 
-bool Player::isInRegularState() const {
+bool Player::isInRegularState() const
+{
   return stateIs<OnGround>() && !mIsRidingElevator;
 }
 
 
-bool Player::isInMercyFrames() const {
+bool Player::isInMercyFrames() const
+{
   return mMercyFramesRemaining > 0;
 }
 
 
-bool Player::isCloaked() const {
+bool Player::isCloaked() const
+{
   return mpPlayerModel->hasItem(data::InventoryItemType::CloakingDevice);
 }
 
 
-bool Player::isDead() const {
+bool Player::isDead() const
+{
   return stateIs<Dieing>() || stateIs<GettingSuckedIntoSpace>();
 }
 
 
-bool Player::isIncapacitated() const {
+bool Player::isIncapacitated() const
+{
   return stateIs<Incapacitated>();
 }
 
 
-bool Player::isLookingUp() const {
+bool Player::isLookingUp() const
+{
   return mStance == WeaponStance::Upwards;
 }
 
 
-bool Player::isCrouching() const {
+bool Player::isCrouching() const
+{
   return mStance == WeaponStance::RegularCrouched;
 }
 
 
-bool Player::isRidingElevator() const {
+bool Player::isRidingElevator() const
+{
   return mIsRidingElevator;
 }
 
 
-engine::components::Orientation Player::orientation() const {
+engine::components::Orientation Player::orientation() const
+{
   return *mEntity.component<const c::Orientation>();
 }
 
 
-engine::components::BoundingBox Player::worldSpaceHitBox() const {
+engine::components::BoundingBox Player::worldSpaceHitBox() const
+{
   return engine::toWorldSpace(mHitBox, position());
 }
 
 
-engine::components::BoundingBox Player::worldSpaceCollisionBox() const {
+engine::components::BoundingBox Player::worldSpaceCollisionBox() const
+{
   return engine::toWorldSpace(
     *mEntity.component<const c::BoundingBox>(), position());
 }
 
 
-const base::Vector& Player::position() const {
+const base::Vector& Player::position() const
+{
   return *mEntity.component<const c::WorldPosition>();
 }
 
 
-base::Vector& Player::position() {
+base::Vector& Player::position()
+{
   return *mEntity.component<c::WorldPosition>();
 }
 
 
-int Player::animationFrame() const {
+int Player::animationFrame() const
+{
   return mEntity.component<const c::Sprite>()->mFramesToRender[0];
 }
 
 
-base::Vector Player::orientedPosition() const {
-  if (stateIs<InShip>()) {
+base::Vector Player::orientedPosition() const
+{
+  if (stateIs<InShip>())
+  {
     return position();
   }
 
@@ -449,33 +485,42 @@ base::Vector Player::orientedPosition() const {
 }
 
 
-void Player::receive(const rigel::events::CloakPickedUp&) {
+void Player::receive(const rigel::events::CloakPickedUp&)
+{
   mFramesElapsedHavingCloak = 0;
 }
 
 
-void Player::receive(const rigel::events::RapidFirePickedUp&) {
+void Player::receive(const rigel::events::RapidFirePickedUp&)
+{
   mFramesElapsedHavingRapidFire = 0;
 }
 
 
-void Player::receive(const events::ElevatorAttachmentChanged& event) {
-  if (isDead()) {
+void Player::receive(const events::ElevatorAttachmentChanged& event)
+{
+  if (isDead())
+  {
     return;
   }
 
   using CT = events::ElevatorAttachmentChanged;
 
-  if (event.mType == CT::Attach) {
+  if (event.mType == CT::Attach)
+  {
     mAttachedElevator = event.mElevator;
-  } else if (event.mType == CT::Detach && mAttachedElevator == event.mElevator) {
+  }
+  else if (event.mType == CT::Detach && mAttachedElevator == event.mElevator)
+  {
     mAttachedElevator = {};
   }
 }
 
 
-void Player::receive(const events::AirLockOpened& event) {
-  if (isDead()) {
+void Player::receive(const events::AirLockOpened& event)
+{
+  if (isDead())
+  {
     return;
   }
 
@@ -487,8 +532,10 @@ void Player::receive(const events::AirLockOpened& event) {
   engine::startAnimationLoop(mEntity, 1, 8, 15);
 }
 
-void Player::beginBeingPushedByFan() {
-  if (isDead()) {
+void Player::beginBeingPushedByFan()
+{
+  if (isDead())
+  {
     return;
   }
 
@@ -496,8 +543,10 @@ void Player::beginBeingPushedByFan() {
 }
 
 
-void Player::endBeingPushedByFan() {
-  if (isDead()) {
+void Player::endBeingPushedByFan()
+{
+  if (isDead())
+  {
     return;
   }
 
@@ -508,26 +557,31 @@ void Player::endBeingPushedByFan() {
 }
 
 
-void Player::update(const PlayerInput& unfilteredInput) {
+void Player::update(const PlayerInput& unfilteredInput)
+{
   using namespace engine;
 
   updateTemporaryItemExpiration();
 
-  if (auto pState = std::get_if<GettingSuckedIntoSpace>(&mState)) {
+  if (auto pState = std::get_if<GettingSuckedIntoSpace>(&mState))
+  {
     updateGettingSuckedIntoSpaceAnimation(*pState);
     return;
   }
 
-  if (!isIncapacitated() && !mIsRidingElevator) {
+  if (!isIncapacitated() && !mIsRidingElevator)
+  {
     applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, mEntity);
   }
 
-  if (isDead()) {
+  if (isDead())
+  {
     updateDeathAnimation();
     return;
   }
 
-  if (isIncapacitated()) {
+  if (isIncapacitated())
+  {
     updateIncapacitatedState(std::get<Incapacitated>(mState));
     return;
   }
@@ -545,14 +599,17 @@ void Player::update(const PlayerInput& unfilteredInput) {
   updateShooting(input.mFire);
   updateCollisionBox();
 
-  if (mVisualState != previousVisualState) {
+  if (mVisualState != previousVisualState)
+  {
     resetAnimation();
   }
 
   // The ladder climb animation gets a special case, since it depends on
   // knowing whether the Y position has changed
-  if (mVisualState == VisualState::ClimbingLadder) {
-    if (position().y % 2 != 0 && previousPosY != position().y) {
+  if (mVisualState == VisualState::ClimbingLadder)
+  {
+    if (position().y % 2 != 0 && previousPosY != position().y)
+    {
       updateAnimationLoop(LADDER_CLIMB_ANIMATION);
     }
   }
@@ -561,36 +618,46 @@ void Player::update(const PlayerInput& unfilteredInput) {
 }
 
 
-void Player::takeDamage(const int amount) {
-  if (isDead() || isInMercyFrames() || isCloaked() || mGodModeOn) {
+void Player::takeDamage(const int amount)
+{
+  if (isDead() || isInMercyFrames() || isCloaked() || mGodModeOn)
+  {
     return;
   }
 
   mpEvents->emit(rigel::events::PlayerTookDamage{});
   mpPlayerModel->takeDamage(amount);
-  if (!mpPlayerModel->isDead()) {
+  if (!mpPlayerModel->isDead())
+  {
     mMercyFramesRemaining = mMercyFramesPerHit;
     mpServiceProvider->playSound(data::SoundId::DukePain);
-  } else {
+  }
+  else
+  {
     die();
   }
 }
 
 
-void Player::takeFatalDamage() {
-  if (!mGodModeOn) {
+void Player::takeFatalDamage()
+{
+  if (!mGodModeOn)
+  {
     mpEvents->emit(rigel::events::PlayerTookDamage{});
     die();
   }
 }
 
 
-void Player::die() {
-  if (isDead()) {
+void Player::die()
+{
+  if (isDead())
+  {
     return;
   }
 
-  if (stateIs<InShip>()) {
+  if (stateIs<InShip>())
+  {
     exitShip();
   }
 
@@ -610,9 +677,10 @@ void Player::die() {
 
 void Player::enterShip(
   const base::Vector& shipPosition,
-  const c::Orientation shipOrientation
-) {
-  if (isDead()) {
+  const c::Orientation shipOrientation)
+{
+  if (isDead())
+  {
     return;
   }
 
@@ -631,17 +699,19 @@ void Player::enterShip(
 }
 
 
-void Player::exitShip() {
-  if (isDead()) {
+void Player::exitShip()
+{
+  if (isDead())
+  {
     return;
   }
 
   mState = OnGround{};
 
   const auto facingLeft = orientation() == c::Orientation::Left;
-  mpEntityFactory->spawnActor(facingLeft
-    ? data::ActorID::Dukes_ship_after_exiting_LEFT
-    : data::ActorID::Dukes_ship_after_exiting_RIGHT,
+  mpEntityFactory->spawnActor(
+    facingLeft ? data::ActorID::Dukes_ship_after_exiting_LEFT
+               : data::ActorID::Dukes_ship_after_exiting_RIGHT,
     position());
 
   position().x += facingLeft ? 3 : 1;
@@ -655,20 +725,25 @@ void Player::exitShip() {
 }
 
 
-void Player::incapacitate(const int framesToKeepVisible) {
-  if (isDead()) {
+void Player::incapacitate(const int framesToKeepVisible)
+{
+  if (isDead())
+  {
     return;
   }
 
-  if (framesToKeepVisible == 0) {
+  if (framesToKeepVisible == 0)
+  {
     mEntity.component<c::Sprite>()->mShow = false;
   }
   mState = Incapacitated{framesToKeepVisible};
 }
 
 
-void Player::setFree() {
-  if (isDead()) {
+void Player::setFree()
+{
+  if (isDead())
+  {
     return;
   }
 
@@ -679,8 +754,10 @@ void Player::setFree() {
 }
 
 
-void Player::doInteractionAnimation() {
-  if (isDead()) {
+void Player::doInteractionAnimation()
+{
+  if (isDead())
+  {
     return;
   }
 
@@ -688,7 +765,8 @@ void Player::doInteractionAnimation() {
 }
 
 
-void Player::reSpawnAt(const base::Vector& spawnPosition) {
+void Player::reSpawnAt(const base::Vector& spawnPosition)
+{
   position() = spawnPosition;
 
   // TODO: Refactor this - it would be much nicer if we could just consruct
@@ -707,25 +785,29 @@ void Player::reSpawnAt(const base::Vector& spawnPosition) {
 }
 
 
-void Player::updateTemporaryItemExpiration() {
+void Player::updateTemporaryItemExpiration()
+{
   using data::InventoryItemType;
 
   auto updateExpiration = [this](
-    const InventoryItemType itemType,
-    const char* message,
-    int& framesElapsedHavingItem
-  ) {
-    if (mpPlayerModel->hasItem(itemType)) {
+                            const InventoryItemType itemType,
+                            const char* message,
+                            int& framesElapsedHavingItem) {
+    if (mpPlayerModel->hasItem(itemType))
+    {
       ++framesElapsedHavingItem;
-      if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME) {
+      if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME)
+      {
         mpEvents->emit(rigel::events::PlayerMessage{message});
       }
 
-      if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME) {
+      if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME)
+      {
         mpPlayerModel->removeItem(itemType);
         framesElapsedHavingItem = 0;
 
-        if (itemType == InventoryItemType::CloakingDevice) {
+        if (itemType == InventoryItemType::CloakingDevice)
+        {
           mpEvents->emit(rigel::events::CloakExpired{});
         }
       }
@@ -745,18 +827,20 @@ void Player::updateTemporaryItemExpiration() {
 }
 
 
-
-
-void Player::updateAnimation() {
-  if (mVisualState == VisualState::Walking && mIsOddFrame) {
+void Player::updateAnimation()
+{
+  if (mVisualState == VisualState::Walking && mIsOddFrame)
+  {
     updateAnimationLoop(WALK_ANIMATION);
   }
 
-  if (mVisualState == VisualState::MovingOnPipe && mIsOddFrame) {
+  if (mVisualState == VisualState::MovingOnPipe && mIsOddFrame)
+  {
     updateAnimationLoop(CLIMB_ON_PIPE_ANIMATION);
   }
 
-  if (mRecoilAnimationActive) {
+  if (mRecoilAnimationActive)
+  {
     resetAnimation();
     mRecoilAnimationActive = false;
   }
@@ -771,8 +855,8 @@ void Player::updateAnimation() {
 void Player::updateMovement(
   const base::Vector& movementVector,
   const Button& jumpButton,
-  const Button& fireButton
-) {
+  const Button& fireButton)
+{
   mStance = WeaponStance::Regular;
   mIsRidingElevator = false;
 
@@ -789,15 +873,19 @@ void Player::updateMovement(
     fireButton.mIsPressed;
   // clang-format on
 
-  if (shouldActivateJetpack && !stateIs<UsingJetpack>()) {
+  if (shouldActivateJetpack && !stateIs<UsingJetpack>())
+  {
     mState = UsingJetpack{};
   }
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const OnGround&) {
-      if (mAttachedElevator && movementVector.y != 0) {
+      if (mAttachedElevator && movementVector.y != 0)
+      {
         const auto didMove = updateElevatorMovement(movementVector.y);
-        if (didMove) {
+        if (didMove)
+        {
           mIsRidingElevator = true;
           setVisualState(VisualState::Interacting);
           return;
@@ -807,7 +895,8 @@ void Player::updateMovement(
       const auto walkingDirection =
         engine::orientation::toMovement(orientation());
 
-      if (movementVector.y != 0) {
+      if (movementVector.y != 0)
+      {
         const auto movement = movementVector.y;
 
         // clang-format off
@@ -819,22 +908,30 @@ void Player::updateMovement(
         setVisualState(
           movement < 0 ? VisualState::LookingUp : VisualState::Crouching);
 
-        if (movementVector.x != 0 && movementVector.x != walkingDirection) {
+        if (movementVector.x != 0 && movementVector.x != walkingDirection)
+        {
           switchOrientation();
           position.x -= movementVector.x;
         }
-      } else {
+      }
+      else
+      {
         setVisualState(VisualState::Standing);
 
-        if (movementVector.x != 0) {
+        if (movementVector.x != 0)
+        {
           const auto movement = movementVector.x;
 
-          if (walkingDirection != movement) {
+          if (walkingDirection != movement)
+          {
             switchOrientation();
-          } else {
+          }
+          else
+          {
             const auto result = moveHorizontallyWithStairStepping(
               *mpCollisionChecker, mEntity, movement);
-            if (result == MovementResult::Completed) {
+            if (result == MovementResult::Completed)
+            {
               setVisualState(VisualState::Walking);
             }
           }
@@ -843,11 +940,14 @@ void Player::updateMovement(
 
       if (
         mJumpRequested &&
-        !mpCollisionChecker->isTouchingCeiling(position, bbox)
-      ) {
+        !mpCollisionChecker->isTouchingCeiling(position, bbox))
+      {
         jump();
-      } else {
-        if (!mpCollisionChecker->isOnSolidGround(position, bbox)) {
+      }
+      else
+      {
+        if (!mpCollisionChecker->isOnSolidGround(position, bbox))
+        {
           startFalling();
         }
       }
@@ -860,9 +960,12 @@ void Player::updateMovement(
     [&, this](Falling& state) {
       // Gravity acceleration
       const auto reachedTerminalVelocity = state.mFramesElapsed >= 2;
-      if (reachedTerminalVelocity) {
+      if (reachedTerminalVelocity)
+      {
         setVisualState(VisualState::FallingFullSpeed);
-      } else {
+      }
+      else
+      {
         setVisualState(VisualState::Falling);
         ++state.mFramesElapsed;
       }
@@ -875,8 +978,8 @@ void Player::updateMovement(
       const auto result = moveVerticallyInAir(fallVelocity);
       if (
         !result.mAttachedToClimbable &&
-        result.mMoveResult != MovementResult::Completed
-      ) {
+        result.mMoveResult != MovementResult::Completed)
+      {
         const auto needRecoveryFrame = reachedTerminalVelocity;
         landOnGround(needRecoveryFrame);
       }
@@ -889,7 +992,8 @@ void Player::updateMovement(
     },
 
     [&, this](const UsingJetpack&) {
-      if (!shouldActivateJetpack) {
+      if (!shouldActivateJetpack)
+      {
         startFallingDelayed();
         return;
       }
@@ -910,20 +1014,21 @@ void Player::updateMovement(
     [&, this](ClimbingLadder& state) {
       if (
         mJumpRequested &&
-        !mpCollisionChecker->isTouchingCeiling(position, bbox)
-      ) {
+        !mpCollisionChecker->isTouchingCeiling(position, bbox))
+      {
         jumpFromLadder(movementVector);
         return;
       }
 
       if (
         movementVector.x != 0 &&
-        movementVector.x != engine::orientation::toMovement(orientation())
-      ) {
+        movementVector.x != engine::orientation::toMovement(orientation()))
+      {
         switchOrientation();
       }
 
-      if (movementVector.y != 0) {
+      if (movementVector.y != 0)
+      {
         const auto movement = movementVector.y;
         const auto worldBBox = engine::toWorldSpace(bbox, position);
 
@@ -937,9 +1042,12 @@ void Player::updateMovement(
 
         const auto canContinue = mpMap->attributes(attachX, nextY).isLadder();
 
-        if (canContinue) {
+        if (canContinue)
+        {
           moveVertically(*mpCollisionChecker, mEntity, movement);
-        } else if (movement > 0) {
+        }
+        else if (movement > 0)
+        {
           startFalling();
         }
       }
@@ -963,7 +1071,8 @@ void Player::updateMovement(
       const auto orientationAsMovement =
         engine::orientation::toMovement(orientation());
 
-      if (movementVector.y != 0) {
+      if (movementVector.y != 0)
+      {
         const auto movement = movementVector.y;
 
         // clang-format off
@@ -972,22 +1081,29 @@ void Player::updateMovement(
           : WeaponStance::Downwards;
         // clang-format on
 
-        setVisualState(movement < 0
-          ? VisualState::PullingLegsUpOnPipe
-          : VisualState::AimingDownOnPipe);
+        setVisualState(
+          movement < 0 ? VisualState::PullingLegsUpOnPipe
+                       : VisualState::AimingDownOnPipe);
 
-        if (movementVector.x != 0 && movementVector.x != orientationAsMovement) {
+        if (movementVector.x != 0 && movementVector.x != orientationAsMovement)
+        {
           switchOrientation();
           position.x -= movementVector.x;
         }
 
-        if (mJumpRequested && movement > 0) {
+        if (mJumpRequested && movement > 0)
+        {
           startFallingDelayed();
         }
-      } else if (movementVector.x != 0) {
-        if (movementVector.x != orientationAsMovement) {
+      }
+      else if (movementVector.x != 0)
+      {
+        if (movementVector.x != orientationAsMovement)
+        {
           switchOrientation();
-        } else {
+        }
+        else
+        {
           const auto worldBBox = engine::toWorldSpace(bbox, position);
 
           // clang-format off
@@ -998,10 +1114,14 @@ void Player::updateMovement(
 
           const auto result = moveHorizontally(
             *mpCollisionChecker, mEntity, orientationAsMovement);
-          if (result != MovementResult::Failed) {
-            if (mpMap->attributes(testX, worldBBox.top()).isClimbable()) {
+          if (result != MovementResult::Failed)
+          {
+            if (mpMap->attributes(testX, worldBBox.top()).isClimbable())
+            {
               setVisualState(VisualState::MovingOnPipe);
-            } else {
+            }
+            else
+            {
               startFallingDelayed();
             }
           }
@@ -1014,58 +1134,75 @@ void Player::updateMovement(
         return engine::orientation::toMovement(orientation());
       };
 
-      if (movementVector.x != 0 && movementVector.x != movementDirection()) {
+      if (movementVector.x != 0 && movementVector.x != movementDirection())
+      {
         state.mSpeed = 0;
         switchOrientation();
       }
 
-      if (movementVector.x != 0) {
-        if (state.mSpeed < 4) {
+      if (movementVector.x != 0)
+      {
+        if (state.mSpeed < 4)
+        {
           ++state.mSpeed;
         }
 
         const auto numSteps = state.mSpeed == 4 ? 2 : 1;
-        for (int i = 0; i < numSteps; ++i) {
-          const auto result = moveHorizontally(
-            *mpCollisionChecker, mEntity, movementDirection());
+        for (int i = 0; i < numSteps; ++i)
+        {
+          const auto result =
+            moveHorizontally(*mpCollisionChecker, mEntity, movementDirection());
 
           const auto worldBBox = engine::toWorldSpace(bbox, position);
-          if (result != MovementResult::Completed) {
-            if (mpCollisionChecker->isOnSolidGround(worldBBox)) {
-              moveVertically(
-                *mpCollisionChecker, mEntity, -1);
-            } else if (mpCollisionChecker->isTouchingCeiling(worldBBox)) {
-              moveVertically(
-                *mpCollisionChecker, mEntity, 1);
+          if (result != MovementResult::Completed)
+          {
+            if (mpCollisionChecker->isOnSolidGround(worldBBox))
+            {
+              moveVertically(*mpCollisionChecker, mEntity, -1);
+            }
+            else if (mpCollisionChecker->isTouchingCeiling(worldBBox))
+            {
+              moveVertically(*mpCollisionChecker, mEntity, 1);
             }
           }
         }
-      } else {
+      }
+      else
+      {
         state.mSpeed = 0;
       }
 
-      moveVertically(
-        *mpCollisionChecker, mEntity, movementVector.y);
+      moveVertically(*mpCollisionChecker, mEntity, movementVector.y);
 
       auto& sprite = *mEntity.component<c::Sprite>();
-      if (movementVector.x != 0) {
+      if (movementVector.x != 0)
+      {
         sprite.mFramesToRender[1] = mIsOddFrame ? 3 : 2;
-      } else {
+      }
+      else
+      {
         sprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
       }
 
-      if (movementVector.y < 0) {
+      if (movementVector.y < 0)
+      {
         sprite.mFramesToRender[2] = mIsOddFrame ? 5 : 4;
-      } else {
+      }
+      else
+      {
         sprite.mFramesToRender[2] = engine::IGNORE_RENDER_SLOT;
       }
 
-      if (mJumpRequested) {
+      if (mJumpRequested)
+      {
         exitShip();
 
-        if (!mpCollisionChecker->isTouchingCeiling(position, bbox)) {
+        if (!mpCollisionChecker->isTouchingCeiling(position, bbox))
+        {
           jump();
-        } else {
+        }
+        else
+        {
           startFalling();
         }
       }
@@ -1074,9 +1211,12 @@ void Player::updateMovement(
     [this](Interacting& state) {
       setVisualState(VisualState::Interacting);
 
-      if (state.mFramesElapsed == state.mDuration - 1) {
+      if (state.mFramesElapsed == state.mDuration - 1)
+      {
         mState = OnGround{};
-      } else {
+      }
+      else
+      {
         ++state.mFramesElapsed;
       }
     },
@@ -1098,76 +1238,89 @@ void Player::updateMovement(
 }
 
 
-void Player::updateJumpButtonStateTracking(const Button& jumpButton) {
-  if (jumpButton.mWasTriggered) {
+void Player::updateJumpButtonStateTracking(const Button& jumpButton)
+{
+  if (jumpButton.mWasTriggered)
+  {
     mJumpRequested = true;
   }
-  if (!jumpButton.mIsPressed) {
+  if (!jumpButton.mIsPressed)
+  {
     mJumpRequested = false;
   }
 }
 
 
-void Player::updateShooting(const Button& fireButton) {
-  const auto hasRapidFire =
-    stateIs<InShip>() ||
+void Player::updateShooting(const Button& fireButton)
+{
+  const auto hasRapidFire = stateIs<InShip>() ||
     mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
     mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
-  if (mpOptions->compatibilityModeOn()) {
-    if (!fireButton.mIsPressed) {
+  if (mpOptions->compatibilityModeOn())
+  {
+    if (!fireButton.mIsPressed)
+    {
       mRapidFiredLastFrame = false;
     }
 
     mRapidFiredLastFrame = !mRapidFiredLastFrame;
 
-    if (!canFire()) {
+    if (!canFire())
+    {
       return;
     }
 
-    if (!fireButton.mIsPressed) {
+    if (!fireButton.mIsPressed)
+    {
       mFiredLastFrame = false;
     }
 
     if (
       (fireButton.mWasTriggered && !mFiredLastFrame) ||
-      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
-    ) {
+      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame))
+    {
       fireShot();
       mFiredLastFrame = true;
     }
-  } else {
-    if (!canFire()) {
+  }
+  else
+  {
+    if (!canFire())
+    {
       return;
     }
 
     if (
       fireButton.mWasTriggered ||
-      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame)
-    ) {
+      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame))
+    {
       fireShot();
     }
 
-    if (fireButton.mIsPressed && hasRapidFire) {
+    if (fireButton.mIsPressed && hasRapidFire)
+    {
       mRapidFiredLastFrame = !mRapidFiredLastFrame;
-    } else {
+    }
+    else
+    {
       mRapidFiredLastFrame = false;
     }
   }
 }
 
 
-bool Player::updateElevatorMovement(const int movementDirection) {
+bool Player::updateElevatorMovement(const int movementDirection)
+{
   auto& playerPosition = *mEntity.component<c::WorldPosition>();
   auto& elevatorPosition = *mAttachedElevator.component<c::WorldPosition>();
   const auto& elevatorBbox = *mAttachedElevator.component<c::BoundingBox>();
 
   auto colliding = [&]() {
-    const auto elevatorOnGround = mpCollisionChecker->isOnSolidGround(
-      elevatorPosition, elevatorBbox);
+    const auto elevatorOnGround =
+      mpCollisionChecker->isOnSolidGround(elevatorPosition, elevatorBbox);
     const auto playerTouchingCeiling = mpCollisionChecker->isTouchingCeiling(
-      playerPosition,
-      DEFAULT_PLAYER_BOUNDS);
+      playerPosition, DEFAULT_PLAYER_BOUNDS);
 
     // clang-format off
     return
@@ -1178,8 +1331,10 @@ bool Player::updateElevatorMovement(const int movementDirection) {
 
   const auto previousY = playerPosition.y;
 
-  for (int i = 0; i < ELEVATOR_SPEED; ++i) {
-    if (colliding()) {
+  for (int i = 0; i < ELEVATOR_SPEED; ++i)
+  {
+    if (colliding())
+    {
       break;
     }
 
@@ -1191,7 +1346,8 @@ bool Player::updateElevatorMovement(const int movementDirection) {
 }
 
 
-void Player::updateLadderAttachment(const base::Vector& movementVector) {
+void Player::updateLadderAttachment(const base::Vector& movementVector)
+{
   const auto& bbox = *mEntity.component<c::BoundingBox>();
   auto& position = *mEntity.component<c::WorldPosition>();
 
@@ -1203,21 +1359,25 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
   // clang-format on
 
   const auto wantsToAttach = movementVector.y < 0;
-  if (canAttachToLadder && wantsToAttach) {
+  if (canAttachToLadder && wantsToAttach)
+  {
     const auto worldBBox = engine::toWorldSpace(bbox, position);
 
     std::optional<base::Vector> maybeLadderTouchPoint;
-    for (int i = 0; i < worldBBox.size.width; ++i) {
+    for (int i = 0; i < worldBBox.size.width; ++i)
+    {
       const auto attributes =
         mpMap->attributes(worldBBox.left() + i, worldBBox.top());
-      if (attributes.isLadder()) {
+      if (attributes.isLadder())
+      {
         maybeLadderTouchPoint =
           base::Vector{worldBBox.left() + i, worldBBox.top()};
         break;
       }
     }
 
-    if (maybeLadderTouchPoint) {
+    if (maybeLadderTouchPoint)
+    {
       mState = ClimbingLadder{};
       setVisualState(VisualState::ClimbingLadder);
 
@@ -1230,15 +1390,19 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
 }
 
 
-void Player::updateHorizontalMovementInAir(const base::Vector& movementVector) {
-  if (movementVector.x != 0) {
+void Player::updateHorizontalMovementInAir(const base::Vector& movementVector)
+{
+  if (movementVector.x != 0)
+  {
     const auto movement = movementVector.x;
-    const auto moveDirection =
-      engine::orientation::toMovement(orientation());
+    const auto moveDirection = engine::orientation::toMovement(orientation());
 
-    if (moveDirection != movement) {
+    if (moveDirection != movement)
+    {
       switchOrientation();
-    } else {
+    }
+    else
+    {
       moveHorizontally(*mpCollisionChecker, mEntity, movement);
     }
   }
@@ -1248,14 +1412,16 @@ void Player::updateHorizontalMovementInAir(const base::Vector& movementVector) {
 void Player::updateJumpMovement(
   Jumping& state,
   const base::Vector& movementVector,
-  const bool jumpPressed
-) {
+  const bool jumpPressed)
+{
   auto updateSomersaultAnimation = [&, this]() {
-    if (state.mDoingSomersault) {
+    if (state.mDoingSomersault)
+    {
       auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
       ++animationFrame;
 
-      if (animationFrame == 16 || movementVector.x == 0) {
+      if (animationFrame == 16 || movementVector.x == 0)
+      {
         state.mDoingSomersault = false;
         setVisualState(VisualState::Jumping);
       }
@@ -1270,7 +1436,8 @@ void Player::updateJumpMovement(
     // clang-format on
     {
       const auto shouldDoSomersault = mpRandomGenerator->gen() % 6 == 0;
-      if (shouldDoSomersault) {
+      if (shouldDoSomersault)
+      {
         state.mDoingSomersault = true;
         setVisualState(VisualState::DoingSomersault);
       }
@@ -1278,36 +1445,49 @@ void Player::updateJumpMovement(
   };
 
 
-  if (state.mFramesElapsed == 0) {
+  if (state.mFramesElapsed == 0)
+  {
     setVisualState(VisualState::Jumping);
   }
 
-  if (state.mFramesElapsed != 0 || state.mJumpedFromLadder) {
+  if (state.mFramesElapsed != 0 || state.mJumpedFromLadder)
+  {
     updateHorizontalMovementInAir(movementVector);
   }
 
-  if (state.mFramesElapsed >= JUMP_ARC.size()) {
+  if (state.mFramesElapsed >= JUMP_ARC.size())
+  {
     startFalling();
-  } else {
+  }
+  else
+  {
     const auto offset = JUMP_ARC[state.mFramesElapsed];
 
     engine::MovementResult movementOutcome = engine::MovementResult::Failed;
-    if (state.mFramesElapsed > 0) {
+    if (state.mFramesElapsed > 0)
+    {
       const auto result = moveVerticallyInAir(-offset);
-      if (result.mAttachedToClimbable) {
+      if (result.mAttachedToClimbable)
+      {
         return;
       }
 
       movementOutcome = result.mMoveResult;
-    } else {
+    }
+    else
+    {
       movementOutcome = moveVertically(*mpCollisionChecker, mEntity, -offset);
     }
 
-    if (movementOutcome != MovementResult::Completed) {
-      if (offset == 2 && movementOutcome == MovementResult::MovedPartially) {
+    if (movementOutcome != MovementResult::Completed)
+    {
+      if (offset == 2 && movementOutcome == MovementResult::MovedPartially)
+      {
         // TODO: Add explanatory comment here
         state.mFramesElapsed = 3;
-      } else {
+      }
+      else
+      {
         startFalling();
         return;
       }
@@ -1318,46 +1498,51 @@ void Player::updateJumpMovement(
     // On the 3rd frame, check if we should do a high jump (jump key still
     // pressed). If not, we skip part of the jump arc, which then results
     // in the lower jump.
-    const auto isShortJump =
-      state.mFramesElapsed == 2 &&
+    const auto isShortJump = state.mFramesElapsed == 2 &&
       (!jumpPressed || hasSpiderAt(SpiderClingPosition::Head));
-    if (isShortJump) {
+    if (isShortJump)
+    {
       state.mFramesElapsed = 6;
-    } else {
+    }
+    else
+    {
       ++state.mFramesElapsed;
     }
   }
 }
 
 
-void Player::updateDeathAnimation() {
+void Player::updateDeathAnimation()
+{
   using namespace death_animation;
 
   auto& position = *mEntity.component<c::WorldPosition>();
   auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
   auto& deathAnimationState = std::get<Dieing>(mState);
 
-  if (position.y > mpMap->height() + 3) {
+  if (position.y > mpMap->height() + 3)
+  {
     mpEvents->emit<rigel::events::PlayerDied>();
     return;
   }
 
-  base::match(deathAnimationState,
+  base::match(
+    deathAnimationState,
     [&, this](FlyingUp& state) {
-      animationFrame =
-        DEATH_ANIMATION_SEQUENCE[state.mFramesElapsed];
+      animationFrame = DEATH_ANIMATION_SEQUENCE[state.mFramesElapsed];
       position.y += DEATH_FLY_UP_SEQUENCE[state.mFramesElapsed];
       ++state.mFramesElapsed;
 
-      if (state.mFramesElapsed >= DEATH_ANIMATION_STEPS) {
+      if (state.mFramesElapsed >= DEATH_ANIMATION_STEPS)
+      {
         deathAnimationState = FallingDown{};
       }
     },
 
     [&, this](FallingDown& state) {
-      const auto result =
-        moveVertically(*mpCollisionChecker, mEntity, 2);
-      if (result != MovementResult::Completed) {
+      const auto result = moveVertically(*mpCollisionChecker, mEntity, 2);
+      if (result != MovementResult::Completed)
+      {
         deathAnimationState = Exploding{};
         animationFrame = 32;
       }
@@ -1366,17 +1551,20 @@ void Player::updateDeathAnimation() {
     [&, this](Exploding& state) {
       ++state.mFramesElapsed;
 
-      if (state.mFramesElapsed >= 10) {
-        if (state.mFramesElapsed == 10) {
+      if (state.mFramesElapsed >= 10)
+      {
+        if (state.mFramesElapsed == 10)
+        {
           mEntity.component<c::Sprite>()->mShow = false;
           // TODO: Use triggerEffects() here
-          auto explosionEffect = components::DestructionEffects{
-            PLAYER_DEATH_EFFECT_SPEC};
+          auto explosionEffect =
+            components::DestructionEffects{PLAYER_DEATH_EFFECT_SPEC};
           explosionEffect.mActivated = true;
           mEntity.assign<components::DestructionEffects>(explosionEffect);
         }
 
-        if (state.mFramesElapsed == 35) {
+        if (state.mFramesElapsed == 35)
+        {
           mpEvents->emit<rigel::events::PlayerDied>();
           deathAnimationState = Finished{};
         }
@@ -1390,58 +1578,65 @@ void Player::updateDeathAnimation() {
 
 
 void Player::updateGettingSuckedIntoSpaceAnimation(
-  GettingSuckedIntoSpace& state
-) {
-  if (state.mFramesElapsed == 0) {
+  GettingSuckedIntoSpace& state)
+{
+  if (state.mFramesElapsed == 0)
+  {
     mpServiceProvider->playSound(data::SoundId::DukePain);
   }
 
-  if (
-    state.mFramesElapsed < int(GETTING_SUCKED_INTO_SPACE_Y_SEQ.size())
-  ) {
-    position().y += GETTING_SUCKED_INTO_SPACE_Y_SEQ[
-      state.mFramesElapsed];
+  if (state.mFramesElapsed < int(GETTING_SUCKED_INTO_SPACE_Y_SEQ.size()))
+  {
+    position().y += GETTING_SUCKED_INTO_SPACE_Y_SEQ[state.mFramesElapsed];
   }
 
   ++state.mFramesElapsed;
 
-  position().x += 2 *
-    engine::orientation::toMovement(orientation());
-  if (position().x < 0 || position().x >= mpMap->width()) {
+  position().x += 2 * engine::orientation::toMovement(orientation());
+  if (position().x < 0 || position().x >= mpMap->width())
+  {
     mpServiceProvider->playSound(data::SoundId::DukeDeath);
     mpEvents->emit<rigel::events::PlayerDied>();
   }
 }
 
 
-void Player::updateIncapacitatedState(Incapacitated& state) {
+void Player::updateIncapacitatedState(Incapacitated& state)
+{
   auto& visibleFramesRemaining = state.mVisibleFramesRemaining;
-  if (visibleFramesRemaining > 0) {
+  if (visibleFramesRemaining > 0)
+  {
     --visibleFramesRemaining;
-    if (visibleFramesRemaining == 0) {
+    if (visibleFramesRemaining == 0)
+    {
       mEntity.component<c::Sprite>()->mShow = false;
     }
   }
 
-  if (mMercyFramesRemaining > 0) {
+  if (mMercyFramesRemaining > 0)
+  {
     --mMercyFramesRemaining;
   }
 }
 
 
-Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
+Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount)
+{
   const auto distance = std::abs(amount);
   const auto movement = base::sgn(amount);
 
   VerticalMovementResult result;
   result.mMoveResult = engine::MovementResult::Completed;
-  if (distance == 0) {
+  if (distance == 0)
+  {
     result.mAttachedToClimbable = tryAttachToClimbable();
     return result;
   }
 
-  for (int step = 0; step < distance; ++step) {
-    if (tryAttachToClimbable()) {
+  for (int step = 0; step < distance; ++step)
+  {
+    if (tryAttachToClimbable())
+    {
       result.mAttachedToClimbable = true;
       break;
     }
@@ -1449,10 +1644,10 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
     const auto moveResult =
       moveVertically(*mpCollisionChecker, mEntity, movement);
 
-    if (moveResult != engine::MovementResult::Completed) {
-      result.mMoveResult = step == 0
-        ? engine::MovementResult::Failed
-        : engine::MovementResult::MovedPartially;
+    if (moveResult != engine::MovementResult::Completed)
+    {
+      result.mMoveResult = step == 0 ? engine::MovementResult::Failed
+                                     : engine::MovementResult::MovedPartially;
       break;
     }
   }
@@ -1461,16 +1656,19 @@ Player::VerticalMovementResult Player::moveVerticallyInAir(const int amount) {
 }
 
 
-bool Player::tryAttachToClimbable() {
+bool Player::tryAttachToClimbable()
+{
   auto worldBBox = worldSpaceCollisionBox();
 
-  if (stateIs<Jumping>()) {
+  if (stateIs<Jumping>())
+  {
     --worldBBox.topLeft.y;
   }
 
   const auto attributes =
     mpMap->attributes(worldBBox.left() + 1, worldBBox.top());
-  if (attributes.isClimbable()) {
+  if (attributes.isClimbable())
+  {
     setVisualState(VisualState::HangingFromPipe);
     mState = OnPipe{};
     mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
@@ -1482,34 +1680,43 @@ bool Player::tryAttachToClimbable() {
 }
 
 
-void Player::updateAnimationLoop(const AnimationConfig& config) {
+void Player::updateAnimationLoop(const AnimationConfig& config)
+{
   auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
 
   ++animationFrame;
 
-  if (animationFrame > config.endOfCycle) {
+  if (animationFrame > config.endOfCycle)
+  {
     animationFrame = config.startOfCycle;
   }
 }
 
 
-void Player::resetAnimation() {
+void Player::resetAnimation()
+{
   mEntity.component<c::Sprite>()->mFramesToRender[0] =
     static_cast<int>(mVisualState);
 }
 
 
-void Player::updateMercyFramesAnimation() {
+void Player::updateMercyFramesAnimation()
+{
   auto& sprite = *mEntity.component<c::Sprite>();
 
-  if (mMercyFramesRemaining > 0) {
+  if (mMercyFramesRemaining > 0)
+  {
     sprite.mShow = true;
 
     const auto effectActive = mMercyFramesRemaining % 2 != 0;
-    if (effectActive) {
-      if (mMercyFramesRemaining > 10) {
+    if (effectActive)
+    {
+      if (mMercyFramesRemaining > 10)
+      {
         sprite.mShow = false;
-      } else {
+      }
+      else
+      {
         sprite.flashWhite();
       }
     }
@@ -1519,7 +1726,8 @@ void Player::updateMercyFramesAnimation() {
 }
 
 
-void Player::updateCloakedAppearance() {
+void Player::updateCloakedAppearance()
+{
   const auto hasCloak = isCloaked();
 
   auto& sprite = *mEntity.component<c::Sprite>();
@@ -1537,28 +1745,34 @@ void Player::updateCloakedAppearance() {
 }
 
 
-void Player::updateCollisionBox() {
-  if (!stateIs<InShip>()) {
+void Player::updateCollisionBox()
+{
+  if (!stateIs<InShip>())
+  {
     auto& bbox = *mEntity.component<c::BoundingBox>();
     bbox.size.height = PLAYER_HEIGHT;
 
-    if (isCrouching()) {
+    if (isCrouching())
+    {
       bbox.size.height = PLAYER_HEIGHT_CROUCHED;
     }
 
-    if (stateIs<OnPipe>()) {
+    if (stateIs<OnPipe>())
+    {
       bbox.size.height = PLAYER_HEIGHT_ON_PIPE;
     }
   }
 }
 
 
-void Player::updateHitBox() {
+void Player::updateHitBox()
+{
   using VS = VisualState;
 
   mHitBox = DEFAULT_PLAYER_BOUNDS;
 
-  switch (mVisualState) {
+  switch (mVisualState)
+  {
     case VS::CoilingForJumpOrLanding:
       mHitBox.size.height = 4;
       break;
@@ -1597,19 +1811,23 @@ void Player::updateHitBox() {
 }
 
 
-void Player::dieIfFallenOutOfMap() {
-  if (position().y > mpMap->height() + 3) {
+void Player::dieIfFallenOutOfMap()
+{
+  if (position().y > mpMap->height() + 3)
+  {
     mpServiceProvider->playSound(data::SoundId::DukeDeath);
     mpEvents->emit<rigel::events::PlayerDied>();
   }
 }
 
 
-void Player::fireShot() {
+void Player::fireShot()
+{
   const auto& position = *mEntity.component<c::WorldPosition>();
   const auto direction = shotDirection(orientation(), mStance);
 
-  if (stateIs<InShip>()) {
+  if (stateIs<InShip>())
+  {
     const auto isFacingLeft = orientation() == c::Orientation::Left;
 
     mpEntityFactory->spawnProjectile(
@@ -1621,7 +1839,9 @@ void Player::fireShot() {
       muzzleFlashActorId(direction),
       position + base::Vector{isFacingLeft ? -3 : 8, -1});
     mpServiceProvider->playSound(data::SoundId::DukeLaserShot);
-  } else {
+  }
+  else
+  {
     const auto weaponType = mpPlayerModel->weapon();
 
     mpEntityFactory->spawnProjectile(
@@ -1636,7 +1856,8 @@ void Player::fireShot() {
       muzzleFlashActorId(direction),
       position + muzzleFlashOffset(orientation(), mStance));
 
-    if (auto maybeRecoilFrame = recoilAnimationFrame(mVisualState)) {
+    if (auto maybeRecoilFrame = recoilAnimationFrame(mVisualState))
+    {
       mEntity.component<c::Sprite>()->mFramesToRender[0] = *maybeRecoilFrame;
       mRecoilAnimationActive = true;
     }
@@ -1646,7 +1867,8 @@ void Player::fireShot() {
 }
 
 
-bool Player::canFire() const {
+bool Player::canFire() const
+{
   // clang-format off
   const auto firingBlocked =
     stateIs<ClimbingLadder>() ||
@@ -1661,13 +1883,15 @@ bool Player::canFire() const {
 }
 
 
-void Player::setVisualState(const VisualState visualState) {
+void Player::setVisualState(const VisualState visualState)
+{
   mVisualState = visualState;
   updateHitBox();
 }
 
 
-void Player::jump() {
+void Player::jump()
+{
   mState = Jumping{};
   setVisualState(VisualState::CoilingForJumpOrLanding);
   mpServiceProvider->playSound(data::SoundId::DukeJumping);
@@ -1675,7 +1899,8 @@ void Player::jump() {
 }
 
 
-void Player::jumpFromLadder(const base::Vector& movementVector) {
+void Player::jumpFromLadder(const base::Vector& movementVector)
+{
   auto newState = Jumping{Jumping::FromLadder{}};
   updateJumpMovement(newState, movementVector, true);
 
@@ -1686,11 +1911,15 @@ void Player::jumpFromLadder(const base::Vector& movementVector) {
 }
 
 
-void Player::startFalling() {
-  if (mpCollisionChecker->isOnSolidGround(worldSpaceCollisionBox())) {
+void Player::startFalling()
+{
+  if (mpCollisionChecker->isOnSolidGround(worldSpaceCollisionBox()))
+  {
     mState = OnGround{};
     setVisualState(VisualState::Standing);
-  } else {
+  }
+  else
+  {
     mState = Falling{};
     setVisualState(VisualState::Falling);
     moveVerticallyInAir(1);
@@ -1698,25 +1927,31 @@ void Player::startFalling() {
 }
 
 
-void Player::startFallingDelayed() {
+void Player::startFallingDelayed()
+{
   mState = Falling{};
   setVisualState(VisualState::Jumping);
 }
 
 
-void Player::landOnGround(bool needRecoveryFrame) {
-  if (needRecoveryFrame) {
+void Player::landOnGround(bool needRecoveryFrame)
+{
+  if (needRecoveryFrame)
+  {
     mState = RecoveringFromLanding{};
     setVisualState(VisualState::CoilingForJumpOrLanding);
-  } else {
+  }
+  else
+  {
     mState = OnGround{};
     setVisualState(VisualState::Standing);
   }
 }
 
-void Player::switchOrientation() {
+void Player::switchOrientation()
+{
   auto& orientation = *mEntity.component<c::Orientation>();
   orientation = engine::orientation::opposite(orientation);
 }
 
-}
+} // namespace rigel::game_logic

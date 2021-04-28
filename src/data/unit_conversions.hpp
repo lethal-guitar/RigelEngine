@@ -20,15 +20,18 @@
 #include "data/game_traits.hpp"
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-template<typename T>
-constexpr T pixelsToTiles(const T pixels) {
+template <typename T>
+constexpr T pixelsToTiles(const T pixels)
+{
   return pixels / static_cast<T>(GameTraits::tileSize);
 }
 
-template<typename T>
-constexpr T tilesToPixels(const T tiles) {
+template <typename T>
+constexpr T tilesToPixels(const T tiles)
+{
   return tiles * static_cast<T>(GameTraits::tileSize);
 }
 
@@ -36,9 +39,7 @@ constexpr T tilesToPixels(const T tiles) {
 base::Vector tileVectorToPixelVector(const base::Vector& tileVector);
 base::Vector pixelVectorToTileVector(const base::Vector& pixelVector);
 
-base::Extents tileExtentsToPixelExtents(
-  const base::Extents& tileExtents);
-base::Extents pixelExtentsToTileExtents(
-  const base::Extents& pixelExtents);
+base::Extents tileExtentsToPixelExtents(const base::Extents& tileExtents);
+base::Extents pixelExtentsToTileExtents(const base::Extents& pixelExtents);
 
-}
+} // namespace rigel::data

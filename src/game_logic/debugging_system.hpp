@@ -26,9 +26,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-class DebuggingSystem {
+class DebuggingSystem
+{
 public:
   DebuggingSystem(
     renderer::Renderer* pRenderer,
@@ -51,4 +53,4 @@ private:
   bool mShowGrid = false;
 };
 
-}
+} // namespace rigel::game_logic

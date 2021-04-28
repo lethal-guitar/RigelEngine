@@ -21,18 +21,20 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/actor_tag.hpp"
-#include "game_logic/player/components.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/player/components.hpp"
 
 namespace ex = entityx;
 
 
-namespace rigel::game_logic::interaction {
+namespace rigel::game_logic::interaction
+{
 
 using namespace engine::components;
 using namespace game_logic::components;
 
-void configureForceField(entityx::Entity entity, const int spawnIndex) {
+void configureForceField(entityx::Entity entity, const int spawnIndex)
+{
   engine::startAnimationLoop(entity, 1, 2, 4);
   entity.assign<BoundingBox>(BoundingBox{{0, -4}, {2, 10}});
   entity.assign<ActorTag>(ActorTag::Type::ForceField, spawnIndex);
@@ -41,47 +43,52 @@ void configureForceField(entityx::Entity entity, const int spawnIndex) {
 
 void configureKeyCardSlot(
   entityx::Entity entity,
-  const BoundingBox& boundingBox
-) {
+  const BoundingBox& boundingBox)
+{
   entity.assign<Interactable>(InteractableType::ForceFieldCardReader);
   entity.assign<AnimationLoop>(1);
   entity.assign<BoundingBox>(boundingBox);
 }
 
 
-void disableKeyCardSlot(entityx::Entity entity) {
+void disableKeyCardSlot(entityx::Entity entity)
+{
   entity.remove<Interactable>();
   entity.remove<AnimationLoop>();
   entity.remove<BoundingBox>();
 }
 
 
-void disableNextForceField(entityx::EntityManager& es) {
+void disableNextForceField(entityx::EntityManager& es)
+{
   auto nextForceField =
     findFirstMatchInSpawnOrder(es, ActorTag::Type::ForceField);
-  if (nextForceField) {
+  if (nextForceField)
+  {
     nextForceField.destroy();
   }
 }
 
-}
+} // namespace rigel::game_logic::interaction
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void ForceField::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& sprite = *entity.component<engine::components::Sprite>();
 
   const auto fizzle = (d.mpRandomGenerator->gen() / 32) % 2 != 0;
-  if (fizzle) {
+  if (fizzle)
+  {
     d.mpServiceProvider->playSound(data::SoundId::ForceFieldFizzle);
     sprite.flashWhite();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

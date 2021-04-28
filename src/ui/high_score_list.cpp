@@ -21,23 +21,28 @@
 #include "ui/duke_script_runner.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto HIGH_SCORE_NAME_ENTRY_POS_X = 12;
 constexpr auto HIGH_SCORE_NAME_ENTRY_POS_Y = 14;
 constexpr auto MAX_HIGH_SCORE_NAME_ENTRY_LENGTH = 15;
 
-void awaitScriptCompletion(GameMode::Context& context) {
-  while (!context.mpScriptRunner->hasFinishedExecution()) {
+void awaitScriptCompletion(GameMode::Context& context)
+{
+  while (!context.mpScriptRunner->hasFinishedExecution())
+  {
     context.mpScriptRunner->updateAndRender(0.0);
   }
 }
 
-}
+} // namespace
 
-void drawHighScoreList(GameMode::Context& context, int episode) {
+void drawHighScoreList(GameMode::Context& context, int episode)
+{
   auto drawScoreEntry = [&](int yPos, const data::HighScoreEntry& entry) {
     context.mpUiRenderer->drawText(10, yPos, std::to_string(entry.mScore));
     context.mpUiRenderer->drawText(20, yPos, entry.mName);
@@ -46,13 +51,15 @@ void drawHighScoreList(GameMode::Context& context, int episode) {
   const auto& list = context.mpUserProfile->mHighScoreLists[episode];
   drawScoreEntry(6, list[0]);
 
-  for (auto i = 1u; i < list.size(); ++i) {
+  for (auto i = 1u; i < list.size(); ++i)
+  {
     drawScoreEntry(7 + i, list[i]);
   }
 }
 
 
-void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
+void setupHighScoreListDisplay(GameMode::Context& context, const int episode)
+{
   using namespace std::literals;
 
   runScript(context, "Volume"s + std::to_string(episode + 1));
@@ -62,16 +69,15 @@ void setupHighScoreListDisplay(GameMode::Context& context, const int episode) {
   context.mpServiceProvider->fadeInScreen();
 
   {
-    auto awaitInput = data::script::Script{
-      data::script::WaitForUserInput{}
-    };
+    auto awaitInput = data::script::Script{data::script::WaitForUserInput{}};
 
     context.mpScriptRunner->executeScript(awaitInput);
   }
 }
 
 
-ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context) {
+ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context)
+{
   runScript(context, "New_Highscore");
   awaitScriptCompletion(context);
 
@@ -80,8 +86,7 @@ ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context) {
     HIGH_SCORE_NAME_ENTRY_POS_X,
     HIGH_SCORE_NAME_ENTRY_POS_Y,
     MAX_HIGH_SCORE_NAME_ENTRY_LENGTH,
-    ui::TextEntryWidget::Style::Regular
-  };
+    ui::TextEntryWidget::Style::Regular};
 }
 
-}
+} // namespace rigel::ui

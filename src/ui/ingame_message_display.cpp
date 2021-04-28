@@ -24,27 +24,30 @@
 #include <cctype>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto NEXT_LINE_MARKER = '*';
 constexpr auto CHARS_PER_LINE = 37;
 
-}
+} // namespace
 
 IngameMessageDisplay::IngameMessageDisplay(
   IGameServiceProvider* pServiceProvider,
-  MenuElementRenderer* pTextRenderer
-)
+  MenuElementRenderer* pTextRenderer)
   : mpTextRenderer(pTextRenderer)
   , mpServiceProvider(pServiceProvider)
 {
 }
 
 
-void IngameMessageDisplay::setMessage(std::string message) {
-  if (!message.empty()) {
+void IngameMessageDisplay::setMessage(std::string message)
+{
+  if (!message.empty())
+  {
     mMessage = std::move(message);
     mPrintedMessage.clear();
     mState = Printing{};
@@ -52,17 +55,21 @@ void IngameMessageDisplay::setMessage(std::string message) {
 }
 
 
-void IngameMessageDisplay::update() {
-  base::match(mState,
+void IngameMessageDisplay::update()
+{
+  base::match(
+    mState,
     [](const Idle&) {},
 
     [this](Printing& state) {
       const auto nextChar = mMessage[state.effectiveOffset()];
 
       const auto foundNextLineMarker = nextChar == NEXT_LINE_MARKER;
-      if (!foundNextLineMarker) {
+      if (!foundNextLineMarker)
+      {
         mPrintedMessage.push_back(static_cast<char>(std::toupper(nextChar)));
-        if (nextChar != ' ') {
+        if (nextChar != ' ')
+        {
           mpServiceProvider->playSound(data::SoundId::IngameMessageTyping);
         }
       }
@@ -77,19 +84,24 @@ void IngameMessageDisplay::update() {
         messageConsumed;
       // clang-format on
 
-      if (endOfLine) {
+      if (endOfLine)
+      {
         mState = Waiting{state.effectiveOffset()};
       }
     },
 
     [this](Waiting& state) {
       --state.mFramesRemaining;
-      if (state.mFramesRemaining == 0) {
+      if (state.mFramesRemaining == 0)
+      {
         mPrintedMessage.clear();
 
-        if (state.mNextOffset < mMessage.size()) {
+        if (state.mNextOffset < mMessage.size())
+        {
           mState = Printing{state.mNextOffset};
-        } else {
+        }
+        else
+        {
           mState = Idle{};
         }
       }
@@ -97,10 +109,12 @@ void IngameMessageDisplay::update() {
 }
 
 
-void IngameMessageDisplay::render() {
-  if (!mPrintedMessage.empty()) {
+void IngameMessageDisplay::render()
+{
+  if (!mPrintedMessage.empty())
+  {
     mpTextRenderer->drawSmallWhiteText(0, 0, mPrintedMessage);
   }
 }
 
-}
+} // namespace rigel::ui

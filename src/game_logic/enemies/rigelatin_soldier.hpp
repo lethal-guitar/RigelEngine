@@ -21,37 +21,46 @@
 
 #include <variant>
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace rigelatin_soldier {
+namespace rigelatin_soldier
+{
 
-struct Ready {};
+struct Ready
+{
+};
 
-struct Jumping {
+struct Jumping
+{
   int mFramesElapsed = 0;
   engine::MovementResult mLastHorizontalMovementResult =
     engine::MovementResult::Failed;
   int mPreviousPosX = 0;
 };
 
-struct Waiting {
+struct Waiting
+{
   int mFramesElapsed = 0;
 };
 
 
 using State = std::variant<Ready, Jumping, Waiting>;
 
-}
+} // namespace rigelatin_soldier
 
 
-namespace behaviors {
+namespace behaviors
+{
 
-struct RigelatinSoldier {
+struct RigelatinSoldier
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -73,4 +82,5 @@ struct RigelatinSoldier {
   int mDecisionCounter = 3;
 };
 
-}}
+} // namespace behaviors
+} // namespace rigel::game_logic

@@ -28,9 +28,11 @@ RIGEL_RESTORE_WARNINGS
 #include <utility>
 
 
-namespace rigel::events {
+namespace rigel::events
+{
 
-struct ScreenFlash {
+struct ScreenFlash
+{
   ScreenFlash() = default;
   explicit ScreenFlash(base::Color color)
     : mColor(color)
@@ -41,12 +43,14 @@ struct ScreenFlash {
 };
 
 
-struct ScreenShake {
+struct ScreenShake
+{
   int mAmount;
 };
 
 
-struct PlayerMessage {
+struct PlayerMessage
+{
   PlayerMessage() = default;
   explicit PlayerMessage(std::string text)
     : mText(std::move(text))
@@ -57,7 +61,8 @@ struct PlayerMessage {
 };
 
 
-struct TutorialMessage {
+struct TutorialMessage
+{
   TutorialMessage() = default;
   explicit TutorialMessage(const data::TutorialMessageId id)
     : mId(id)
@@ -68,53 +73,71 @@ struct TutorialMessage {
 };
 
 
-struct CheckPointActivated {
+struct CheckPointActivated
+{
   base::Vector mPosition;
 };
 
 
-struct MissileDetonated {
+struct MissileDetonated
+{
   // Specifies the tile above the missile's top-left
   base::Vector mImpactPosition;
 };
 
 
-struct PlayerDied {};
+struct PlayerDied
+{
+};
 
-struct PlayerTookDamage {};
+struct PlayerTookDamage
+{
+};
 
-struct PlayerFiredShot {};
+struct PlayerFiredShot
+{
+};
 
-struct PlayerTeleported {
+struct PlayerTeleported
+{
   base::Vector mNewPosition;
 };
 
 
-struct CloakPickedUp {
+struct CloakPickedUp
+{
   base::Vector mPosition;
 };
 
-struct CloakExpired {};
+struct CloakExpired
+{
+};
 
-struct RapidFirePickedUp {};
+struct RapidFirePickedUp
+{
+};
 
 
-struct ExitReached {
+struct ExitReached
+{
   bool mCheckRadarDishes = true;
 };
 
 
-struct DoorOpened {
+struct DoorOpened
+{
   entityx::Entity mEntity;
 };
 
 
-struct BossActivated {
+struct BossActivated
+{
   entityx::Entity mBossEntity;
 };
 
-struct BossDestroyed {
+struct BossDestroyed
+{
   entityx::Entity mBossEntity;
 };
 
-}
+} // namespace rigel::events

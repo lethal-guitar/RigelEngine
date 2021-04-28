@@ -22,75 +22,87 @@
 #include "loader/user_profile_import.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <nlohmann/json.hpp>
 #include <SDL_filesystem.h>
 #include <SDL_keyboard.h>
+#include <nlohmann/json.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <fstream>
 #include <unordered_set>
 
 
-namespace rigel {
+namespace rigel
+{
 
-namespace data {
+namespace data
+{
 
-NLOHMANN_JSON_SERIALIZE_ENUM(Difficulty, {
-  {Difficulty::Easy, "Easy"},
-  {Difficulty::Medium, "Medium"},
-  {Difficulty::Hard, "Hard"},
-})
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  Difficulty,
+  {
+    {Difficulty::Easy, "Easy"},
+    {Difficulty::Medium, "Medium"},
+    {Difficulty::Hard, "Hard"},
+  })
 
-NLOHMANN_JSON_SERIALIZE_ENUM(WeaponType, {
-  {WeaponType::Normal, "Normal"},
-  {WeaponType::Laser, "Laser"},
-  {WeaponType::Rocket, "Rocket"},
-  {WeaponType::FlameThrower, "FlameThrower"},
-})
-
-
-NLOHMANN_JSON_SERIALIZE_ENUM(TutorialMessageId, {
-  {TutorialMessageId::FoundRapidFire, "FoundRapidFire"},
-  {TutorialMessageId::FoundHealthMolecule, "FoundHealthMolecule"},
-  {TutorialMessageId::FoundRegularWeapon, "FoundRegularWeapon"},
-  {TutorialMessageId::FoundLaser, "FoundLaser"},
-  {TutorialMessageId::FoundFlameThrower, "FoundFlameThrower"},
-  {TutorialMessageId::FoundRocketLauncher, "FoundRocketLauncher"},
-  {TutorialMessageId::EarthQuake, "EarthQuake"},
-  {TutorialMessageId::FoundBlueKey, "FoundBlueKey"},
-  {TutorialMessageId::FoundAccessCard, "FoundAccessCard"},
-  {TutorialMessageId::FoundSpaceShip, "FoundSpaceShip"},
-  {TutorialMessageId::FoundLetterN, "FoundLetterN"},
-  {TutorialMessageId::FoundLetterU, "FoundLetterU"},
-  {TutorialMessageId::FoundLetterK, "FoundLetterK"},
-  {TutorialMessageId::FoundLetterE, "FoundLetterE"},
-  {TutorialMessageId::KeyNeeded, "KeyNeeded"},
-  {TutorialMessageId::AccessCardNeeded, "AccessCardNeeded"},
-  {TutorialMessageId::CloakNeeded, "CloakNeeded"},
-  {TutorialMessageId::RadarsStillFunctional, "RadarsStillFunctional"},
-  {TutorialMessageId::HintGlobeNeeded, "HintGlobeNeeded"},
-  {TutorialMessageId::FoundTurboLift, "FoundTurboLift"},
-  {TutorialMessageId::FoundTeleporter, "FoundTeleporter"},
-  {TutorialMessageId::LettersCollectedRightOrder, "LettersCollectedRightOrder"},
-  {TutorialMessageId::FoundSoda, "FoundSoda"},
-  {TutorialMessageId::FoundForceField, "FoundForceField"},
-  {TutorialMessageId::FoundDoor, "FoundDoor"},
-})
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  WeaponType,
+  {
+    {WeaponType::Normal, "Normal"},
+    {WeaponType::Laser, "Laser"},
+    {WeaponType::Rocket, "Rocket"},
+    {WeaponType::FlameThrower, "FlameThrower"},
+  })
 
 
-NLOHMANN_JSON_SERIALIZE_ENUM(WindowMode, {
-  {WindowMode::Fullscreen, "Fullscreen"},
-  {WindowMode::ExclusiveFullscreen, "ExclusiveFullscreen"},
-  {WindowMode::Windowed, "Windowed"},
-})
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  TutorialMessageId,
+  {
+    {TutorialMessageId::FoundRapidFire, "FoundRapidFire"},
+    {TutorialMessageId::FoundHealthMolecule, "FoundHealthMolecule"},
+    {TutorialMessageId::FoundRegularWeapon, "FoundRegularWeapon"},
+    {TutorialMessageId::FoundLaser, "FoundLaser"},
+    {TutorialMessageId::FoundFlameThrower, "FoundFlameThrower"},
+    {TutorialMessageId::FoundRocketLauncher, "FoundRocketLauncher"},
+    {TutorialMessageId::EarthQuake, "EarthQuake"},
+    {TutorialMessageId::FoundBlueKey, "FoundBlueKey"},
+    {TutorialMessageId::FoundAccessCard, "FoundAccessCard"},
+    {TutorialMessageId::FoundSpaceShip, "FoundSpaceShip"},
+    {TutorialMessageId::FoundLetterN, "FoundLetterN"},
+    {TutorialMessageId::FoundLetterU, "FoundLetterU"},
+    {TutorialMessageId::FoundLetterK, "FoundLetterK"},
+    {TutorialMessageId::FoundLetterE, "FoundLetterE"},
+    {TutorialMessageId::KeyNeeded, "KeyNeeded"},
+    {TutorialMessageId::AccessCardNeeded, "AccessCardNeeded"},
+    {TutorialMessageId::CloakNeeded, "CloakNeeded"},
+    {TutorialMessageId::RadarsStillFunctional, "RadarsStillFunctional"},
+    {TutorialMessageId::HintGlobeNeeded, "HintGlobeNeeded"},
+    {TutorialMessageId::FoundTurboLift, "FoundTurboLift"},
+    {TutorialMessageId::FoundTeleporter, "FoundTeleporter"},
+    {TutorialMessageId::LettersCollectedRightOrder,
+     "LettersCollectedRightOrder"},
+    {TutorialMessageId::FoundSoda, "FoundSoda"},
+    {TutorialMessageId::FoundForceField, "FoundForceField"},
+    {TutorialMessageId::FoundDoor, "FoundDoor"},
+  })
 
-}
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  WindowMode,
+  {
+    {WindowMode::Fullscreen, "Fullscreen"},
+    {WindowMode::ExclusiveFullscreen, "ExclusiveFullscreen"},
+    {WindowMode::Windowed, "Windowed"},
+  })
+
+} // namespace data
 
 
-namespace {
+namespace
+{
 
 constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
@@ -192,16 +204,19 @@ constexpr auto DOS_SCANCODE_TO_SDL_MAP = std::array<SDL_Scancode, 89>{
 // clang-format on
 
 
-void removeInvalidKeybindings(data::GameOptions& options) {
+void removeInvalidKeybindings(data::GameOptions& options)
+{
   std::unordered_set<SDL_Keycode> allBindings;
 
-  for (auto pBinding : options.allKeyBindings()) {
+  for (auto pBinding : options.allKeyBindings())
+  {
     // If the binding already appeared previously, the current one is a
     // duplicate.
     const auto [_, isUnique] = allBindings.insert(*pBinding);
 
     const auto isValidBinding = data::canBeUsedForKeyBinding(*pBinding);
-    if (!isUnique || !isValidBinding) {
+    if (!isUnique || !isValidBinding)
+    {
       *pBinding = SDLK_UNKNOWN;
     }
   }
@@ -210,43 +225,38 @@ void removeInvalidKeybindings(data::GameOptions& options) {
 
 void importOptions(
   data::GameOptions& options,
-  const loader::GameOptions& originalOptions
-) {
-  options.mSoundOn =
-    originalOptions.mSoundBlasterSoundsOn ||
-    originalOptions.mAdlibSoundsOn ||
-    originalOptions.mPcSpeakersSoundsOn;
+  const loader::GameOptions& originalOptions)
+{
+  options.mSoundOn = originalOptions.mSoundBlasterSoundsOn ||
+    originalOptions.mAdlibSoundsOn || originalOptions.mPcSpeakersSoundsOn;
   options.mMusicOn = originalOptions.mMusicOn;
 
-  options.mUpKeybinding =
-    SDL_GetKeyFromScancode(
-      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mUpKeybinding]);
-  options.mDownKeybinding =
-    SDL_GetKeyFromScancode(
-      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mDownKeybinding]);
-  options.mLeftKeybinding =
-    SDL_GetKeyFromScancode(
-      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mLeftKeybinding]);
-  options.mRightKeybinding =
-    SDL_GetKeyFromScancode(
-      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mRightKeybinding]);
-  options.mJumpKeybinding =
-    SDL_GetKeyFromScancode(
-      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mJumpKeybinding]);
-  options.mFireKeybinding =
-    SDL_GetKeyFromScancode(
-      DOS_SCANCODE_TO_SDL_MAP[originalOptions.mFireKeybinding]);
+  options.mUpKeybinding = SDL_GetKeyFromScancode(
+    DOS_SCANCODE_TO_SDL_MAP[originalOptions.mUpKeybinding]);
+  options.mDownKeybinding = SDL_GetKeyFromScancode(
+    DOS_SCANCODE_TO_SDL_MAP[originalOptions.mDownKeybinding]);
+  options.mLeftKeybinding = SDL_GetKeyFromScancode(
+    DOS_SCANCODE_TO_SDL_MAP[originalOptions.mLeftKeybinding]);
+  options.mRightKeybinding = SDL_GetKeyFromScancode(
+    DOS_SCANCODE_TO_SDL_MAP[originalOptions.mRightKeybinding]);
+  options.mJumpKeybinding = SDL_GetKeyFromScancode(
+    DOS_SCANCODE_TO_SDL_MAP[originalOptions.mJumpKeybinding]);
+  options.mFireKeybinding = SDL_GetKeyFromScancode(
+    DOS_SCANCODE_TO_SDL_MAP[originalOptions.mFireKeybinding]);
 
   removeInvalidKeybindings(options);
 }
 
 
-nlohmann::json serialize(const data::TutorialMessageState& messageState) {
+nlohmann::json serialize(const data::TutorialMessageState& messageState)
+{
   auto serialized = nlohmann::json::array();
 
-  for (int i = 0; i < data::NUM_TUTORIAL_MESSAGES; ++i) {
+  for (int i = 0; i < data::NUM_TUTORIAL_MESSAGES; ++i)
+  {
     const auto value = static_cast<data::TutorialMessageId>(i);
-    if (messageState.hasBeenShown(value)) {
+    if (messageState.hasBeenShown(value))
+    {
       serialized.push_back(value);
     }
   }
@@ -255,7 +265,8 @@ nlohmann::json serialize(const data::TutorialMessageState& messageState) {
 }
 
 
-nlohmann::json serialize(const data::SavedGame& savedGame) {
+nlohmann::json serialize(const data::SavedGame& savedGame)
+{
   using json = nlohmann::json;
 
   json serialized;
@@ -272,12 +283,17 @@ nlohmann::json serialize(const data::SavedGame& savedGame) {
 }
 
 
-nlohmann::json serialize(const data::SaveSlotArray& saveSlots) {
+nlohmann::json serialize(const data::SaveSlotArray& saveSlots)
+{
   auto serialized = nlohmann::json::array();
-  for (const auto& slot : saveSlots) {
-    if (slot) {
+  for (const auto& slot : saveSlots)
+  {
+    if (slot)
+    {
       serialized.push_back(serialize(*slot));
-    } else {
+    }
+    else
+    {
       serialized.push_back(nullptr);
     }
   }
@@ -285,7 +301,8 @@ nlohmann::json serialize(const data::SaveSlotArray& saveSlots) {
 }
 
 
-nlohmann::json serialize(const data::HighScoreEntry& entry) {
+nlohmann::json serialize(const data::HighScoreEntry& entry)
+{
   using json = nlohmann::json;
 
   json serialized;
@@ -295,13 +312,16 @@ nlohmann::json serialize(const data::HighScoreEntry& entry) {
 }
 
 
-nlohmann::json serialize(const data::HighScoreListArray& highScoreLists) {
+nlohmann::json serialize(const data::HighScoreListArray& highScoreLists)
+{
   using json = nlohmann::json;
 
   auto serialized = json::array();
-  for (const auto& list : highScoreLists) {
+  for (const auto& list : highScoreLists)
+  {
     auto serializedList = json::array();
-    for (const auto& entry : list) {
+    for (const auto& entry : list)
+    {
       serializedList.push_back(serialize(entry));
     }
 
@@ -312,7 +332,8 @@ nlohmann::json serialize(const data::HighScoreListArray& highScoreLists) {
 }
 
 
-nlohmann::ordered_json serialize(const data::GameOptions& options) {
+nlohmann::ordered_json serialize(const data::GameOptions& options)
+{
   using json = nlohmann::ordered_json;
 
   // NOTE: When adding a new member to the data::GameOptions struct, you most
@@ -340,8 +361,10 @@ nlohmann::ordered_json serialize(const data::GameOptions& options) {
   serialized["rightKeybinding"] = SDL_GetKeyName(options.mRightKeybinding);
   serialized["jumpKeybinding"] = SDL_GetKeyName(options.mJumpKeybinding);
   serialized["fireKeybinding"] = SDL_GetKeyName(options.mFireKeybinding);
-  serialized["quickSaveKeybinding"] = SDL_GetKeyName(options.mQuickSaveKeybinding);
-  serialized["quickLoadKeybinding"] = SDL_GetKeyName(options.mQuickLoadKeybinding);
+  serialized["quickSaveKeybinding"] =
+    SDL_GetKeyName(options.mQuickSaveKeybinding);
+  serialized["quickLoadKeybinding"] =
+    SDL_GetKeyName(options.mQuickLoadKeybinding);
 
 #if 0
   // NOTE: This is disabled for now, it's not quite ready yet to be made
@@ -355,25 +378,27 @@ nlohmann::ordered_json serialize(const data::GameOptions& options) {
 }
 
 
-template<typename T>
+template <typename T>
 T deserialize(const nlohmann::json& json);
 
 
-template<>
-data::SavedGame deserialize<data::SavedGame>(const nlohmann::json& json) {
+template <>
+data::SavedGame deserialize<data::SavedGame>(const nlohmann::json& json)
+{
   using namespace data;
 
   // TODO: Does it make sense to share the clamping/validation code with the
   // user profile importer?
   data::SavedGame result;
-  result.mSessionId.mEpisode = std::clamp(
-    json.at("episode").get<int>(), 0, NUM_EPISODES - 1);
-  result.mSessionId.mLevel = std::clamp(
-    json.at("level").get<int>(), 0, NUM_LEVELS_PER_EPISODE - 1);
+  result.mSessionId.mEpisode =
+    std::clamp(json.at("episode").get<int>(), 0, NUM_EPISODES - 1);
+  result.mSessionId.mLevel =
+    std::clamp(json.at("level").get<int>(), 0, NUM_LEVELS_PER_EPISODE - 1);
   result.mSessionId.mDifficulty = json.at("difficulty").get<data::Difficulty>();
 
   const auto& messageIds = json.at("tutorialMessagesAlreadySeen");
-  for (const auto& messageId : messageIds) {
+  for (const auto& messageId : messageIds)
+  {
     result.mTutorialMessagesAlreadySeen.markAsShown(
       messageId.get<data::TutorialMessageId>());
   }
@@ -390,19 +415,21 @@ data::SavedGame deserialize<data::SavedGame>(const nlohmann::json& json) {
 }
 
 
-template<>
-data::SaveSlotArray deserialize<data::SaveSlotArray>(
-  const nlohmann::json& json
-) {
+template <>
+data::SaveSlotArray deserialize<data::SaveSlotArray>(const nlohmann::json& json)
+{
   data::SaveSlotArray result;
 
   std::size_t i = 0;
-  for (const auto& serializedSlot : json) {
-    if (!serializedSlot.is_null()) {
+  for (const auto& serializedSlot : json)
+  {
+    if (!serializedSlot.is_null())
+    {
       result[i] = deserialize<data::SavedGame>(serializedSlot);
     }
     ++i;
-    if (i >= result.size()) {
+    if (i >= result.size())
+    {
       break;
     }
   }
@@ -411,10 +438,10 @@ data::SaveSlotArray deserialize<data::SaveSlotArray>(
 }
 
 
-template<>
-data::HighScoreEntry deserialize<data::HighScoreEntry>(
-  const nlohmann::json& json
-) {
+template <>
+data::HighScoreEntry
+  deserialize<data::HighScoreEntry>(const nlohmann::json& json)
+{
   data::HighScoreEntry result;
 
   result.mName = json.at("name").get<std::string>();
@@ -424,10 +451,10 @@ data::HighScoreEntry deserialize<data::HighScoreEntry>(
 }
 
 
-template<>
-data::HighScoreListArray deserialize<data::HighScoreListArray>(
-  const nlohmann::json& json
-) {
+template <>
+data::HighScoreListArray
+  deserialize<data::HighScoreListArray>(const nlohmann::json& json)
+{
   using std::begin;
   using std::end;
   using std::sort;
@@ -435,13 +462,16 @@ data::HighScoreListArray deserialize<data::HighScoreListArray>(
   data::HighScoreListArray result;
 
   std::size_t i = 0;
-  for (const auto& serializedList : json) {
+  for (const auto& serializedList : json)
+  {
     std::size_t j = 0;
-    for (const auto& serializedEntry : serializedList) {
+    for (const auto& serializedEntry : serializedList)
+    {
       result[i][j] = deserialize<data::HighScoreEntry>(serializedEntry);
 
       ++j;
-      if (j >= data::NUM_HIGH_SCORE_ENTRIES) {
+      if (j >= data::NUM_HIGH_SCORE_ENTRIES)
+      {
         break;
       }
     }
@@ -449,7 +479,8 @@ data::HighScoreListArray deserialize<data::HighScoreListArray>(
     sort(begin(result[i]), end(result[i]));
 
     ++i;
-    if (i >= result.size()) {
+    if (i >= result.size())
+    {
       break;
     }
   }
@@ -462,13 +493,17 @@ template <typename TargetType>
 bool extractValueIfExists(
   const char* key,
   TargetType& value,
-  const nlohmann::json& json
-) {
-  if (json.contains(key)) {
-    try {
+  const nlohmann::json& json)
+{
+  if (json.contains(key))
+  {
+    try
+    {
       value = json.at(key).get<TargetType>();
       return true;
-    } catch (const std::exception&) {
+    }
+    catch (const std::exception&)
+    {
     }
   }
 
@@ -479,10 +514,11 @@ bool extractValueIfExists(
 void extractKeyBindingIfExists(
   const char* key,
   SDL_Keycode& value,
-  const nlohmann::json& json
-) {
+  const nlohmann::json& json)
+{
   auto serialized = std::string{};
-  if (!extractValueIfExists(key, serialized, json)) {
+  if (!extractValueIfExists(key, serialized, json))
+  {
     return;
   }
 
@@ -490,8 +526,9 @@ void extractKeyBindingIfExists(
 }
 
 
-template<>
-data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
+template <>
+data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
+{
   data::GameOptions result;
 
   // NOTE: When adding a new member to the data::GameOptions struct, you most
@@ -517,9 +554,12 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
   extractKeyBindingIfExists("rightKeybinding", result.mRightKeybinding, json);
   extractKeyBindingIfExists("jumpKeybinding", result.mJumpKeybinding, json);
   extractKeyBindingIfExists("fireKeybinding", result.mFireKeybinding, json);
-  extractKeyBindingIfExists("quickSaveKeybinding", result.mQuickSaveKeybinding, json);
-  extractKeyBindingIfExists("quickLoadKeybinding", result.mQuickLoadKeybinding, json);
-  extractValueIfExists("compatibilityModeOn", result.mCompatibilityModeOn, json);
+  extractKeyBindingIfExists(
+    "quickSaveKeybinding", result.mQuickSaveKeybinding, json);
+  extractKeyBindingIfExists(
+    "quickLoadKeybinding", result.mQuickLoadKeybinding, json);
+  extractValueIfExists(
+    "compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
 
@@ -531,12 +571,13 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json) {
 
 void loadOptionsFileIfPresent(
   const std::filesystem::path& path,
-  data::GameOptions& options
-) {
+  data::GameOptions& options)
+{
   namespace fs = std::filesystem;
 
   std::error_code ec;
-  if (!fs::exists(path, ec) || ec) {
+  if (!fs::exists(path, ec) || ec)
+  {
     return;
   }
 
@@ -548,7 +589,9 @@ void loadOptionsFileIfPresent(
     optionsFile >> serializedOptions;
 
     options = deserialize<data::GameOptions>(serializedOptions);
-  } catch (const std::exception& ex) {
+  }
+  catch (const std::exception& ex)
+  {
     std::cerr << "WARNING: Failed to load options\n";
     std::cerr << ex.what() << '\n';
   }
@@ -557,30 +600,33 @@ void loadOptionsFileIfPresent(
 
 UserProfile loadProfile(
   const std::filesystem::path& fileOnDisk,
-  const std::filesystem::path& pathForSaving
-) {
+  const std::filesystem::path& pathForSaving)
+{
   namespace fs = std::filesystem;
 
-  try {
+  try
+  {
     auto buffer = loader::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
 
     UserProfile profile{pathForSaving, std::move(buffer)};
 
-    profile.mSaveSlots = deserialize<data::SaveSlotArray>(
-      serializedProfile.at("saveSlots"));
+    profile.mSaveSlots =
+      deserialize<data::SaveSlotArray>(serializedProfile.at("saveSlots"));
     profile.mHighScoreLists = deserialize<data::HighScoreListArray>(
       serializedProfile.at("highScoreLists"));
 
     // Older versions of RigelEngine stored options in the user profile
     // file. When running a newer version for the first time, we want to
     // import any settings from an earlier version.
-    if (serializedProfile.contains("options")) {
-      profile.mOptions = deserialize<data::GameOptions>(
-        serializedProfile.at("options"));
+    if (serializedProfile.contains("options"))
+    {
+      profile.mOptions =
+        deserialize<data::GameOptions>(serializedProfile.at("options"));
     }
 
-    if (serializedProfile.contains("gamePath")) {
+    if (serializedProfile.contains("gamePath"))
+    {
       const auto gamePathStr =
         serializedProfile.at("gamePath").get<std::string>();
       profile.mGamePath = fs::u8path(gamePathStr);
@@ -593,7 +639,9 @@ UserProfile loadProfile(
     }
 
     return profile;
-  } catch (const std::exception& ex) {
+  }
+  catch (const std::exception& ex)
+  {
     std::cerr << "WARNING: Failed to load user profile\n";
     std::cerr << ex.what() << '\n';
   }
@@ -602,25 +650,27 @@ UserProfile loadProfile(
 }
 
 
-UserProfile loadProfile(const std::filesystem::path& profileFile) {
+UserProfile loadProfile(const std::filesystem::path& profileFile)
+{
   return loadProfile(profileFile, profileFile);
 }
 
-}
+} // namespace
 
 
 UserProfile::UserProfile(
   const std::filesystem::path& profilePath,
-  loader::ByteBuffer originalJson
-)
+  loader::ByteBuffer originalJson)
   : mProfilePath(profilePath)
   , mOriginalJson(std::move(originalJson))
 {
 }
 
 
-void UserProfile::saveToDisk() {
-  if (!mProfilePath) {
+void UserProfile::saveToDisk()
+{
+  if (!mProfilePath)
+  {
     return;
   }
 
@@ -637,7 +687,8 @@ void UserProfile::saveToDisk() {
   const auto options = serialize(mOptions);
   serializedProfile["options"] = options;
 
-  if (mGamePath) {
+  if (mGamePath)
+  {
     serializedProfile["gamePath"] = mGamePath->u8string();
   }
 
@@ -660,17 +711,22 @@ void UserProfile::saveToDisk() {
   // data in addition to the deserialized C++ objects. When writing back to
   // disk, we merge our serializedProfile into the previously read JSON data.
   // This ensures that any settings present in the profile file are kept,
-  // even if they are not part of the serializedProfile we are currently writing.
-  if (mOriginalJson.size() > 0) {
+  // even if they are not part of the serializedProfile we are currently
+  // writing.
+  if (mOriginalJson.size() > 0)
+  {
     const auto previousProfile = json::from_msgpack(mOriginalJson);
     serializedProfile = merge(previousProfile, serializedProfile);
   }
 
   // Save user profile
   const auto buffer = json::to_msgpack(serializedProfile);
-  try {
+  try
+  {
     loader::saveToFile(buffer, *mProfilePath);
-  } catch (const std::exception&) {
+  }
+  catch (const std::exception&)
+  {
     std::cerr << "WARNING: Failed to store user profile\n";
   }
 
@@ -707,14 +763,18 @@ bool UserProfile::hasProgressData() const
 }
 
 
-std::optional<std::filesystem::path> createOrGetPreferencesPath() {
+std::optional<std::filesystem::path> createOrGetPreferencesPath()
+{
   namespace fs = std::filesystem;
 
-  auto deleter = [](char* path) { SDL_free(path); };
+  auto deleter = [](char* path) {
+    SDL_free(path);
+  };
   const auto pPreferencesDirName = std::unique_ptr<char, decltype(deleter)>{
     SDL_GetPrefPath(PREF_PATH_ORG_NAME, PREF_PATH_APP_NAME), deleter};
 
-  if (!pPreferencesDirName) {
+  if (!pPreferencesDirName)
+  {
     return {};
   }
 
@@ -725,7 +785,8 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath() {
 UserProfile createEmptyUserProfile()
 {
   const auto preferencesPath = createOrGetPreferencesPath();
-  if (!preferencesPath) {
+  if (!preferencesPath)
+  {
     std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
@@ -741,19 +802,22 @@ std::optional<UserProfile> loadUserProfile()
   namespace fs = std::filesystem;
 
   const auto preferencesPath = createOrGetPreferencesPath();
-  if (!preferencesPath) {
+  if (!preferencesPath)
+  {
     std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
   const auto profileFilePath = *preferencesPath /
     (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
-  if (fs::exists(profileFilePath)) {
+  if (fs::exists(profileFilePath))
+  {
     return loadProfile(profileFilePath);
   }
 
   const auto profileFilePath_v1 = *preferencesPath / USER_PROFILE_FILENAME_V1;
-  if (fs::exists(profileFilePath_v1)) {
+  if (fs::exists(profileFilePath_v1))
+  {
     return loadProfile(profileFilePath_v1, profileFilePath);
   }
 
@@ -768,13 +832,15 @@ void importOriginalGameProfileData(
   profile.mSaveSlots = loader::loadSavedGames(gamePath);
   profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
 
-  if (const auto options = loader::loadOptions(gamePath)) {
+  if (const auto options = loader::loadOptions(gamePath))
+  {
     importOptions(profile.mOptions, *options);
   }
 }
 
 
-UserProfile loadOrCreateUserProfile() {
+UserProfile loadOrCreateUserProfile()
+{
   if (auto profile = loadUserProfile())
   {
     return *profile;
@@ -785,4 +851,4 @@ UserProfile loadOrCreateUserProfile() {
   return profile;
 }
 
-}
+} // namespace rigel

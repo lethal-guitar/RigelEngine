@@ -25,30 +25,44 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::engine { class CollisionChecker; }
-namespace rigel::engine::events { struct CollidedWithWorld; }
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
+namespace rigel::engine
+{
+class CollisionChecker;
 }
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
+}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SpikedGreenCreature {
-  struct Awakening {
+struct SpikedGreenCreature
+{
+  struct Awakening
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Waiting {
+  struct Waiting
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Pouncing {
+  struct Pouncing
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Landing {};
+  struct Landing
+  {
+  };
 
   using State = std::variant<Awakening, Waiting, Pouncing, Landing>;
 
@@ -64,17 +78,12 @@ struct SpikedGreenCreature {
     const engine::events::CollidedWithWorld& event,
     entityx::Entity entity);
 
-  void landOnGround(
-    const GlobalDependencies& d,
-    entityx::Entity entity);
-  void ensureNotStuckInWall(
-    const GlobalDependencies& d,
-    entityx::Entity entity);
-  void moveWhileFalling(
-    const GlobalDependencies& d,
-    entityx::Entity entity);
+  void landOnGround(const GlobalDependencies& d, entityx::Entity entity);
+  void
+    ensureNotStuckInWall(const GlobalDependencies& d, entityx::Entity entity);
+  void moveWhileFalling(const GlobalDependencies& d, entityx::Entity entity);
 
   State mState = Awakening{};
 };
 
-}
+} // namespace rigel::game_logic::behaviors

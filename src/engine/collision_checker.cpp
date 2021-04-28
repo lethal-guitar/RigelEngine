@@ -19,7 +19,8 @@
 #include <algorithm>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 namespace ex = entityx;
 
@@ -31,8 +32,7 @@ using namespace engine::components;
 CollisionChecker::CollisionChecker(
   const data::map::Map* pMap,
   ex::EntityManager& entities,
-  ex::EventManager& eventManager
-)
+  ex::EventManager& eventManager)
   : mpMap(pMap)
 {
   entities.each<SolidBody>([this](ex::Entity entity, const SolidBody&) {
@@ -46,8 +46,8 @@ CollisionChecker::CollisionChecker(
 
 bool CollisionChecker::isOnSolidGround(
   const WorldPosition& position,
-  const BoundingBox& bbox
-) const {
+  const BoundingBox& bbox) const
+{
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
   return isOnSolidGround(worldSpaceBbox);
 }
@@ -55,8 +55,8 @@ bool CollisionChecker::isOnSolidGround(
 
 bool CollisionChecker::isTouchingCeiling(
   const WorldPosition& position,
-  const BoundingBox& bbox
-) const {
+  const BoundingBox& bbox) const
+{
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
   return isTouchingCeiling(worldSpaceBbox);
 }
@@ -64,8 +64,8 @@ bool CollisionChecker::isTouchingCeiling(
 
 bool CollisionChecker::isTouchingLeftWall(
   const WorldPosition& position,
-  const BoundingBox& bbox
-) const {
+  const BoundingBox& bbox) const
+{
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
   return isTouchingLeftWall(worldSpaceBbox);
 }
@@ -73,8 +73,8 @@ bool CollisionChecker::isTouchingLeftWall(
 
 bool CollisionChecker::isTouchingRightWall(
   const WorldPosition& position,
-  const BoundingBox& bbox
-) const {
+  const BoundingBox& bbox) const
+{
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
   return isTouchingRightWall(worldSpaceBbox);
 }
@@ -84,18 +84,21 @@ bool CollisionChecker::testHorizontalSpan(
   const int startX,
   const int endX,
   const int y,
-  const SolidEdge edge
-) const {
+  const SolidEdge edge) const
+{
   {
     const auto width = endX - startX + 1;
     const auto bboxForSolidBodyTest = BoundingBox{{startX, y}, {width, 1}};
-    if (testSolidBodyCollision(bboxForSolidBodyTest)) {
+    if (testSolidBodyCollision(bboxForSolidBodyTest))
+    {
       return true;
     }
   }
 
-  for (int x = startX; x <= endX; ++x) {
-    if (mpMap->collisionData(x, y).isSolidOn(edge)) {
+  for (int x = startX; x <= endX; ++x)
+  {
+    if (mpMap->collisionData(x, y).isSolidOn(edge))
+    {
       return true;
     }
   }
@@ -108,18 +111,21 @@ bool CollisionChecker::testVerticalSpan(
   const int startY,
   const int endY,
   const int x,
-  const SolidEdge edge
-) const {
+  const SolidEdge edge) const
+{
   {
     const auto height = endY - startY + 1;
     const auto bboxForSolidBodyTest = BoundingBox{{x, startY}, {1, height}};
-    if (testSolidBodyCollision(bboxForSolidBodyTest)) {
+    if (testSolidBodyCollision(bboxForSolidBodyTest))
+    {
       return true;
     }
   }
 
-  for (int y = startY; y <= endY; ++y) {
-    if (mpMap->collisionData(x, y).isSolidOn(edge)) {
+  for (int y = startY; y <= endY; ++y)
+  {
+    if (mpMap->collisionData(x, y).isSolidOn(edge))
+    {
       return true;
     }
   }
@@ -129,14 +135,16 @@ bool CollisionChecker::testVerticalSpan(
 
 
 bool CollisionChecker::testSolidBodyCollision(
-  const BoundingBox& bboxToTest
-) const {
-  return any_of(begin(mSolidBodies), end(mSolidBodies),
+  const BoundingBox& bboxToTest) const
+{
+  return any_of(
+    begin(mSolidBodies),
+    end(mSolidBodies),
     [&bboxToTest](const ex::Entity& entity) {
       if (
         entity.has_component<BoundingBox>() &&
-        entity.has_component<WorldPosition>()
-      ) {
+        entity.has_component<WorldPosition>())
+      {
         const auto solidBodyBbox = engine::toWorldSpace(
           *entity.component<const BoundingBox>(),
           *entity.component<const WorldPosition>());
@@ -149,8 +157,8 @@ bool CollisionChecker::testSolidBodyCollision(
 
 
 bool CollisionChecker::isTouchingCeiling(
-  const BoundingBox& worldSpaceBbox
-) const {
+  const BoundingBox& worldSpaceBbox) const
+{
   return testHorizontalSpan(
     worldSpaceBbox.left(),
     worldSpaceBbox.right(),
@@ -159,9 +167,8 @@ bool CollisionChecker::isTouchingCeiling(
 }
 
 
-bool CollisionChecker::isOnSolidGround(
-  const BoundingBox& worldSpaceBbox
-) const {
+bool CollisionChecker::isOnSolidGround(const BoundingBox& worldSpaceBbox) const
+{
   return testHorizontalSpan(
     worldSpaceBbox.left(),
     worldSpaceBbox.right(),
@@ -171,8 +178,8 @@ bool CollisionChecker::isOnSolidGround(
 
 
 bool CollisionChecker::isTouchingLeftWall(
-  const BoundingBox& worldSpaceBbox
-) const {
+  const BoundingBox& worldSpaceBbox) const
+{
   return testVerticalSpan(
     worldSpaceBbox.top(),
     worldSpaceBbox.bottom(),
@@ -182,8 +189,8 @@ bool CollisionChecker::isTouchingLeftWall(
 
 
 bool CollisionChecker::isTouchingRightWall(
-  const BoundingBox& worldSpaceBbox
-) const {
+  const BoundingBox& worldSpaceBbox) const
+{
   return testVerticalSpan(
     worldSpaceBbox.top(),
     worldSpaceBbox.bottom(),
@@ -192,24 +199,24 @@ bool CollisionChecker::isTouchingRightWall(
 }
 
 
-void CollisionChecker::receive(
-  const ex::ComponentAddedEvent<SolidBody>& event
-) {
+void CollisionChecker::receive(const ex::ComponentAddedEvent<SolidBody>& event)
+{
   mSolidBodies.push_back(event.entity);
 }
 
 
 void CollisionChecker::receive(
-  const ex::ComponentRemovedEvent<SolidBody>& event
-) {
-  const auto it = find_if(begin(mSolidBodies), end(mSolidBodies),
-    [&event](const auto& entity) {
+  const ex::ComponentRemovedEvent<SolidBody>& event)
+{
+  const auto it = find_if(
+    begin(mSolidBodies), end(mSolidBodies), [&event](const auto& entity) {
       return entity == event.entity;
     });
 
-  if (it != end(mSolidBodies)) {
+  if (it != end(mSolidBodies))
+  {
     mSolidBodies.erase(it);
   }
 }
 
-}
+} // namespace rigel::engine

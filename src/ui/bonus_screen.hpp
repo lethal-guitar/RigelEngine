@@ -25,9 +25,11 @@
 #include <set>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class BonusScreen {
+class BonusScreen
+{
 public:
   BonusScreen(
     GameMode::Context context,
@@ -36,12 +38,11 @@ public:
 
   void updateAndRender(engine::TimeDelta dt);
 
-  bool finished() const {
-    return mState.mIsDone;
-  }
+  bool finished() const { return mState.mIsDone; }
 
 private:
-  struct State {
+  struct State
+  {
     explicit State(const int score)
       : mScore(score)
     {
@@ -52,7 +53,8 @@ private:
     bool mIsDone = false;
   };
 
-  struct Event {
+  struct Event
+  {
     engine::TimeDelta mTime;
     std::function<void(State&)> mAction;
   };
@@ -60,8 +62,8 @@ private:
   engine::TimeDelta setupBonusSummationSequence(
     const std::set<data::Bonus>& achievedBonuses,
     IGameServiceProvider* pServiceProvider);
-  engine::TimeDelta setupNoBonusSequence(
-    IGameServiceProvider* pServiceProvider);
+  engine::TimeDelta
+    setupNoBonusSequence(IGameServiceProvider* pServiceProvider);
   void updateSequence(engine::TimeDelta timeDelta);
 
 private:
@@ -75,4 +77,4 @@ private:
   ui::MenuElementRenderer* mpTextRenderer;
 };
 
-}
+} // namespace rigel::ui

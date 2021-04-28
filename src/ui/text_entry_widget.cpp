@@ -20,19 +20,22 @@
 #include "ui/menu_element_renderer.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto TEXT_COLOR = base::Color{109, 109, 109, 255};
 
 
-bool isAsciiChar(const char chValue) {
+bool isAsciiChar(const char chValue)
+{
   const auto value = static_cast<unsigned char>(chValue);
   return value <= 127;
 }
 
-}
+} // namespace
 
 
 TextEntryWidget::TextEntryWidget(
@@ -41,8 +44,7 @@ TextEntryWidget::TextEntryWidget(
   const int posY,
   const int maxTextLength,
   const Style textStyle,
-  const std::string_view initialText
-)
+  const std::string_view initialText)
   : mText(initialText)
   , mpUiRenderer(pUiRenderer)
   , mPosX(posX)
@@ -53,33 +55,40 @@ TextEntryWidget::TextEntryWidget(
 }
 
 
-void TextEntryWidget::handleEvent(const SDL_Event& event) {
+void TextEntryWidget::handleEvent(const SDL_Event& event)
+{
   if (
-    event.type == SDL_KEYDOWN &&
-    event.key.keysym.sym == SDLK_BACKSPACE &&
-    !mText.empty()
-  ) {
+    event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_BACKSPACE &&
+    !mText.empty())
+  {
     mText.pop_back();
   }
 
-  if (event.type == SDL_TEXTINPUT) {
+  if (event.type == SDL_TEXTINPUT)
+  {
     const auto newChar = event.text.text[0];
-    if (!isAsciiChar(newChar)) {
+    if (!isAsciiChar(newChar))
+    {
       return;
     }
 
-    if (mText.size() < static_cast<size_t>(mMaxTextLength)) {
+    if (mText.size() < static_cast<size_t>(mMaxTextLength))
+    {
       mText += newChar;
     }
   }
 }
 
 
-void TextEntryWidget::updateAndRender(const engine::TimeDelta dt) {
+void TextEntryWidget::updateAndRender(const engine::TimeDelta dt)
+{
   auto drawText = [this](const std::string& text) {
-    if (mTextStyle == Style::BigText) {
+    if (mTextStyle == Style::BigText)
+    {
       mpUiRenderer->drawBigText(mPosX, mPosY, text, TEXT_COLOR);
-    } else {
+    }
+    else
+    {
       mpUiRenderer->drawText(mPosX, mPosY, text);
     }
   };
@@ -106,8 +115,9 @@ void TextEntryWidget::updateAndRender(const engine::TimeDelta dt) {
 }
 
 
-std::string_view TextEntryWidget::text() const {
+std::string_view TextEntryWidget::text() const
+{
   return mText;
 }
 
-}
+} // namespace rigel::ui

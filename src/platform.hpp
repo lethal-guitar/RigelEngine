@@ -25,10 +25,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::platform {
+namespace rigel::platform
+{
 
 void setGLAttributes();
 sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options);
 int flagsForWindowMode(const data::WindowMode mode);
 
-}
+} // namespace rigel::platform

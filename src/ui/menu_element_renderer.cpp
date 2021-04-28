@@ -130,10 +130,11 @@
  */
 
 
+namespace rigel::ui
+{
 
-namespace rigel::ui {
-
-namespace {
+namespace
+{
 
 constexpr auto MENU_INDICATOR_ANIM_DELAY = 7;
 constexpr auto NUM_MENU_INDICATOR_STATES = 8;
@@ -142,21 +143,21 @@ constexpr auto CURSOR_ANIM_DELAY = 5;
 constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
-renderer::Texture createFontTexture(
-  const loader::FontData& font,
-  renderer::Renderer* pRenderer
-) {
-  if (font.size() != 67u) {
+renderer::Texture
+  createFontTexture(const loader::FontData& font, renderer::Renderer* pRenderer)
+{
+  if (font.size() != 67u)
+  {
     throw std::runtime_error("Wrong number of bitmaps in menu font");
   }
 
   const auto characterWidth = int(font.front().width());
   data::Image combinedBitmaps(
-    characterWidth * font.size(),
-    font.front().height());
+    characterWidth * font.size(), font.front().height());
 
   int insertPosX = 0;
-  for (const auto& characterBitmap : font) {
+  for (const auto& characterBitmap : font)
+  {
     combinedBitmaps.insertImage(insertPosX, 0, characterBitmap);
     insertPosX += characterWidth;
   }
@@ -164,14 +165,13 @@ renderer::Texture createFontTexture(
   return renderer::Texture{pRenderer, combinedBitmaps};
 }
 
-}
+} // namespace
 
 
 MenuElementRenderer::MenuElementRenderer(
   engine::TiledTexture* pSpriteSheet,
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resources
-)
+  const loader::ResourceLoader& resources)
   : mpRenderer(pRenderer)
   , mpSpriteSheet(pSpriteSheet)
   , mBigTextTexture(
@@ -181,12 +181,10 @@ MenuElementRenderer::MenuElementRenderer(
 }
 
 
-void MenuElementRenderer::drawText(
-  int x,
-  int y,
-  const std::string& text
-) const {
-  for (auto i=0u; i<text.size(); ++i) {
+void MenuElementRenderer::drawText(int x, int y, const std::string& text) const
+{
+  for (auto i = 0u; i < text.size(); ++i)
+  {
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int spriteSheetIndex = 0;
@@ -214,9 +212,10 @@ void MenuElementRenderer::drawText(
 void MenuElementRenderer::drawSmallWhiteText(
   int x,
   int y,
-  const std::string& text
-) const {
-  for (auto i=0u; i<text.size(); ++i) {
+  const std::string& text) const
+{
+  for (auto i = 0u; i < text.size(); ++i)
+  {
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int spriteSheetIndex = 0;
@@ -248,10 +247,11 @@ void MenuElementRenderer::drawSmallWhiteText(
 void MenuElementRenderer::drawMultiLineText(
   const int x,
   const int y,
-  const std::string& text
-) const {
+  const std::string& text) const
+{
   const std::vector<std::string> lines = strings::split(text, '\n');
-  for (int i = 0; i < int(lines.size()); ++i) {
+  for (int i = 0; i < int(lines.size()); ++i)
+  {
     drawText(x, y + i, lines[i]);
   }
 }
@@ -261,12 +261,13 @@ void MenuElementRenderer::drawBigText(
   int x,
   int y,
   const std::string& text,
-  const base::Color& color
-) const {
+  const base::Color& color) const
+{
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setColorModulation(color);
 
-  for (auto i=0u; i<text.size(); ++i) {
+  for (auto i = 0u; i < text.size(); ++i)
+  {
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int index = 0;
@@ -292,22 +293,20 @@ void MenuElementRenderer::drawBigText(
     // clang-format on
 
     const auto position = static_cast<int>(i);
-    mBigTextTexture.renderTileSlice(index, {x + position, y-1});
+    mBigTextTexture.renderTileSlice(index, {x + position, y - 1});
   }
 }
 
 
-void MenuElementRenderer::drawMessageBox(
-  int x,
-  int y,
-  int width,
-  int height
-) const {
+void MenuElementRenderer::drawMessageBox(int x, int y, int width, int height)
+  const
+{
   // Top border
   drawMessageBoxRow(x, y, width, 0, 1, 2);
 
   // Body with left and right borders
-  for (int row = 1; row < height - 1; ++row) {
+  for (int row = 1; row < height - 1; ++row)
+  {
     drawMessageBoxRow(x, y + row, width, 7, 8, 3);
   }
 
@@ -319,10 +318,10 @@ void MenuElementRenderer::drawMessageBox(
 void MenuElementRenderer::drawCheckBox(
   const int x,
   const int y,
-  const bool isChecked
-) const {
+  const bool isChecked) const
+{
   const auto offset = isChecked ? 2 : 0;
-  const auto index = 7*mpSpriteSheet->tilesPerRow() + 20 + offset;
+  const auto index = 7 * mpSpriteSheet->tilesPerRow() + 20 + offset;
 
   mpSpriteSheet->renderTileQuad(index, base::Vector{x - 1, y - 1});
 }
@@ -331,12 +330,13 @@ void MenuElementRenderer::drawCheckBox(
 void MenuElementRenderer::drawBonusScreenText(
   const int x,
   const int y,
-  const std::string& text
-) const {
- //        col 0, row 0: ASCII chars 48-57, 65-74
- //        col 0, row 2: ASCII chars 75-90,37,61,46,33
+  const std::string& text) const
+{
+  //        col 0, row 0: ASCII chars 48-57, 65-74
+  //        col 0, row 2: ASCII chars 75-90,37,61,46,33
 
-  for (auto i=0u; i<text.size(); ++i) {
+  for (auto i = 0u; i < text.size(); ++i)
+  {
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int spriteSheetIndex = 0;
@@ -365,15 +365,15 @@ void MenuElementRenderer::drawBonusScreenText(
 
     const auto index = static_cast<int>(i);
     mpSpriteSheet->renderTileQuad(
-      spriteSheetIndex, base::Vector{x + index*2, y});
+      spriteSheetIndex, base::Vector{x + index * 2, y});
   }
 }
 
 void MenuElementRenderer::drawTextEntryCursor(
   const int x,
   const int y,
-  const engine::TimeDelta elapsedTime
-) const {
+  const engine::TimeDelta elapsedTime) const
+{
   const auto animTicks =
     engine::timeToSlowTicks(elapsedTime) / CURSOR_ANIM_DELAY;
   const auto animState = base::round(animTicks);
@@ -384,8 +384,8 @@ void MenuElementRenderer::drawTextEntryCursor(
 void MenuElementRenderer::drawSelectionIndicator(
   const int x,
   const int y,
-  const engine::TimeDelta elapsedTime
-) const {
+  const engine::TimeDelta elapsedTime) const
+{
   const auto animTicks =
     engine::timeToSlowTicks(elapsedTime) / MENU_INDICATOR_ANIM_DELAY;
   const auto animState = base::round(animTicks);
@@ -396,9 +396,9 @@ void MenuElementRenderer::drawSelectionIndicator(
 void MenuElementRenderer::drawSelectionIndicator(
   const int x,
   const int y,
-  const int state
-) const {
-  const auto index = 9*mpSpriteSheet->tilesPerRow() + state*2;
+  const int state) const
+{
+  const auto index = 9 * mpSpriteSheet->tilesPerRow() + state * 2;
   mpSpriteSheet->renderTileQuad(index, base::Vector{x, y - 1});
 }
 
@@ -406,9 +406,9 @@ void MenuElementRenderer::drawSelectionIndicator(
 void MenuElementRenderer::drawTextEntryCursor(
   const int x,
   const int y,
-  const int state
-) const {
-  const auto baseIndex = 4*mpSpriteSheet->tilesPerRow() + 9;
+  const int state) const
+{
+  const auto baseIndex = 4 * mpSpriteSheet->tilesPerRow() + 9;
   const auto index = baseIndex + std::clamp(state, 0, 3);
   mpSpriteSheet->renderTile(index, x, y);
 }
@@ -420,18 +420,19 @@ void MenuElementRenderer::drawMessageBoxRow(
   const int width,
   const int leftIndex,
   const int middleIndex,
-  const int rightIndex
-) const {
-  const auto baseIndex = 4*40;
+  const int rightIndex) const
+{
+  const auto baseIndex = 4 * 40;
 
   mpSpriteSheet->renderTile(baseIndex + leftIndex, x, y);
 
   const auto untilX = x + width - 1;
-  for (int col = x + 1; col < untilX; ++col) {
+  for (int col = x + 1; col < untilX; ++col)
+  {
     mpSpriteSheet->renderTile(baseIndex + middleIndex, col, y);
   }
 
   mpSpriteSheet->renderTile(baseIndex + rightIndex, x + width - 1, y);
 }
 
-}
+} // namespace rigel::ui

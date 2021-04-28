@@ -22,10 +22,13 @@
 #include <vector>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct TileBurner {
-  struct NewBurnerInfo {
+struct TileBurner
+{
+  struct NewBurnerInfo
+  {
     base::Vector mPosition;
     int mFramesToWait;
   };
@@ -40,4 +43,4 @@ struct TileBurner {
   int mFramesElapsed = -1;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

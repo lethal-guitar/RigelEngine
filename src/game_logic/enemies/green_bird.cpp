@@ -22,24 +22,25 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void GreenBird::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::Orientation;
   using engine::components::WorldPosition;
 
   const auto& position = *entity.component<WorldPosition>();
 
-  if (!entity.has_component<Orientation>()) {
+  if (!entity.has_component<Orientation>())
+  {
     const auto playerPosX = s.mpPlayer->orientedPosition().x;
-    const auto initialOrientation = position.x <= playerPosX
-      ? Orientation::Right
-      : Orientation::Left;
+    const auto initialOrientation =
+      position.x <= playerPosX ? Orientation::Right : Orientation::Left;
     entity.assign<Orientation>(initialOrientation);
   }
 
@@ -49,9 +50,10 @@ void GreenBird::update(
     *d.mpCollisionChecker,
     entity,
     engine::orientation::toMovement(orientation));
-  if (result != engine::MovementResult::Completed) {
+  if (result != engine::MovementResult::Completed)
+  {
     orientation = engine::orientation::opposite(orientation);
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -30,9 +30,11 @@ RIGEL_RESTORE_WARNINGS
 #include <unordered_map>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
-class GlHandleWrapper {
+class GlHandleWrapper
+{
 public:
   using DeleteFunc = std::function<void(GLuint)>;
 
@@ -53,9 +55,7 @@ public:
     other.mHandle = 0;
   }
 
-  ~GlHandleWrapper() {
-    mDeleteFunc(mHandle);
-  }
+  ~GlHandleWrapper() { mDeleteFunc(mHandle); }
 
   GlHandleWrapper& operator=(const GlHandleWrapper&) = delete;
 
@@ -66,7 +66,8 @@ private:
 };
 
 
-class Shader {
+class Shader
+{
 public:
   Shader(
     const char* vertexSource,
@@ -75,57 +76,58 @@ public:
 
   void use();
 
-  void setUniform(const std::string& name, const glm::mat4& matrix) {
+  void setUniform(const std::string& name, const glm::mat4& matrix)
+  {
     glUniformMatrix4fv(location(name), 1, GL_FALSE, glm::value_ptr(matrix));
   }
 
-  void setUniform(const std::string& name, const glm::vec2& vec2) {
+  void setUniform(const std::string& name, const glm::vec2& vec2)
+  {
     glUniform2fv(location(name), 1, glm::value_ptr(vec2));
   }
 
-  void setUniform(const std::string& name, const glm::vec3& vec3) {
+  void setUniform(const std::string& name, const glm::vec3& vec3)
+  {
     glUniform3fv(location(name), 1, glm::value_ptr(vec3));
   }
 
-  void setUniform(const std::string& name, const glm::vec4& vec4) {
+  void setUniform(const std::string& name, const glm::vec4& vec4)
+  {
     glUniform4fv(location(name), 1, glm::value_ptr(vec4));
   }
 
   template <std::size_t N>
-  void setUniform(
-    const std::string& name,
-    const std::array<glm::vec2, N>& values
-  ) {
+  void
+    setUniform(const std::string& name, const std::array<glm::vec2, N>& values)
+  {
     glUniform3fv(location(name), N, glm::value_ptr(values.front()));
   }
 
   template <std::size_t N>
-  void setUniform(
-    const std::string& name,
-    const std::array<glm::vec3, N>& values
-  ) {
+  void
+    setUniform(const std::string& name, const std::array<glm::vec3, N>& values)
+  {
     glUniform3fv(location(name), N, glm::value_ptr(values.front()));
   }
 
   template <std::size_t N>
-  void setUniform(
-    const std::string& name,
-    const std::array<glm::vec4, N>& values
-  ) {
+  void
+    setUniform(const std::string& name, const std::array<glm::vec4, N>& values)
+  {
     glUniform3fv(location(name), N, glm::value_ptr(values.front()));
   }
 
-  void setUniform(const std::string& name, const int value) {
+  void setUniform(const std::string& name, const int value)
+  {
     glUniform1i(location(name), value);
   }
 
-  void setUniform(const std::string& name, const float value) {
+  void setUniform(const std::string& name, const float value)
+  {
     glUniform1f(location(name), value);
   }
 
-  GLuint handle() {
-    return mProgram.mHandle;
-  }
+  GLuint handle() { return mProgram.mHandle; }
 
 private:
   GLint location(const std::string& name) const;
@@ -135,4 +137,4 @@ private:
   mutable std::unordered_map<std::string, GLint> mLocationCache;
 };
 
-}
+} // namespace rigel::renderer

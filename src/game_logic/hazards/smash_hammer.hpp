@@ -21,23 +21,31 @@
 #include <variant>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace smash_hammer {
+namespace smash_hammer
+{
 
-struct Waiting {
+struct Waiting
+{
   int mFramesElapsed = 0;
 };
 
-struct PushingDown {};
-struct PullingUp {};
+struct PushingDown
+{
+};
+struct PullingUp
+{
+};
 
 using State = std::variant<Waiting, PushingDown, PullingUp>;
 
-}
+} // namespace smash_hammer
 
 
-struct SmashHammer {
+struct SmashHammer
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -48,4 +56,4 @@ struct SmashHammer {
   int mExtensionStep = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

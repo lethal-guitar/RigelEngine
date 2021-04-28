@@ -26,15 +26,18 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SlimeContainer {
+struct SlimeContainer
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -51,26 +54,34 @@ struct SlimeContainer {
 };
 
 
-struct SlimeBlob {
+struct SlimeBlob
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  struct OnGround {
+  struct OnGround
+  {
     bool mIsOddUpdate = false;
   };
 
-  struct Idle {
+  struct Idle
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Ascending {};
+  struct Ascending
+  {
+  };
 
-  struct Descending {};
+  struct Descending
+  {
+  };
 
-  struct OnCeiling {
+  struct OnCeiling
+  {
     bool mIsOddUpdate = false;
   };
 
@@ -81,4 +92,4 @@ struct SlimeBlob {
     engine::components::Orientation::Left;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

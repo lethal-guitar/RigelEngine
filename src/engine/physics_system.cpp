@@ -23,7 +23,8 @@
 namespace ex = entityx;
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using namespace std;
 
@@ -34,18 +35,21 @@ using components::SolidBody;
 using components::WorldPosition;
 
 
-namespace {
+namespace
+{
 
 base::Point<float> updateMovementSequence(
   entityx::Entity entity,
-  const base::Point<float>& velocity
-) {
+  const base::Point<float>& velocity)
+{
   auto& sequence = *entity.component<MovementSequence>();
-  if (sequence.mCurrentStep >= sequence.mVelocites.size()) {
-    if (sequence.mResetVelocityAfterSequence) {
-      const auto resetVelocity = sequence.mEnableX ?
-        base::Point<float>{} :
-        base::Point<float>{velocity.x, 0.0f};
+  if (sequence.mCurrentStep >= sequence.mVelocites.size())
+  {
+    if (sequence.mResetVelocityAfterSequence)
+    {
+      const auto resetVelocity = sequence.mEnableX
+        ? base::Point<float>{}
+        : base::Point<float>{velocity.x, 0.0f};
       entity.remove<MovementSequence>();
       return resetVelocity;
     }
@@ -60,26 +64,23 @@ base::Point<float> updateMovementSequence(
   return {sequence.mEnableX ? newVelocity.x : velocity.x, newVelocity.y};
 }
 
-}
+} // namespace
 
 
 // TODO: This is implemented here, but declared in physical_components.hpp.
 // It would be cleaner to have a matching .cpp file for that file.
-BoundingBox toWorldSpace(
-  const BoundingBox& bbox,
-  const base::Vector& entityPosition
-) {
-  return bbox + base::Vector(
-    entityPosition.x,
-    entityPosition.y - (bbox.size.height - 1));
+BoundingBox
+  toWorldSpace(const BoundingBox& bbox, const base::Vector& entityPosition)
+{
+  return bbox +
+    base::Vector(entityPosition.x, entityPosition.y - (bbox.size.height - 1));
 }
 
 
 PhysicsSystem::PhysicsSystem(
   const engine::CollisionChecker* pCollisionChecker,
   const data::map::Map* pMap,
-  entityx::EventManager* pEvents
-)
+  entityx::EventManager* pEvents)
   : mpCollisionChecker(pCollisionChecker)
   , mpMap(pMap)
   , mpEvents(pEvents)
@@ -89,35 +90,38 @@ PhysicsSystem::PhysicsSystem(
 }
 
 
-void PhysicsSystem::update(ex::EntityManager& es) {
+void PhysicsSystem::update(ex::EntityManager& es)
+{
   es.each<MovingBody, WorldPosition, BoundingBox, components::Active>(
     [this](
       ex::Entity entity,
       MovingBody& body,
       WorldPosition& position,
       const BoundingBox& collisionRect,
-      const components::Active&
-    ) {
+      const components::Active&) {
       applyPhysics(entity, body, position, collisionRect);
     });
 }
 
 
-void PhysicsSystem::updatePhase1(ex::EntityManager& es) {
+void PhysicsSystem::updatePhase1(ex::EntityManager& es)
+{
   update(es);
   mShouldCollectForPhase2 = true;
 }
 
 
-void PhysicsSystem::updatePhase2(ex::EntityManager& es) {
-  for (auto entity : mPhysicsObjectsForPhase2) {
+void PhysicsSystem::updatePhase2(ex::EntityManager& es)
+{
+  for (auto entity : mPhysicsObjectsForPhase2)
+  {
     assert(entity.has_component<MovingBody>());
-    const auto hasRequiredComponents =
-      entity.has_component<WorldPosition>() &&
+    const auto hasRequiredComponents = entity.has_component<WorldPosition>() &&
       entity.has_component<BoundingBox>() &&
       entity.has_component<components::Active>();
 
-    if (hasRequiredComponents) {
+    if (hasRequiredComponents)
+    {
       applyPhysics(
         entity,
         *entity.component<MovingBody>(),
@@ -135,9 +139,10 @@ void PhysicsSystem::applyPhysics(
   ex::Entity entity,
   MovingBody& body,
   WorldPosition& position,
-  const BoundingBox& collisionRect
-) {
-  if (!body.mIsActive) {
+  const BoundingBox& collisionRect)
+{
+  if (!body.mIsActive)
+  {
     return;
   }
 
@@ -145,7 +150,8 @@ void PhysicsSystem::applyPhysics(
     return entity.has_component<MovementSequence>();
   };
 
-  if (hasActiveSequence()) {
+  if (hasActiveSequence())
+  {
     body.mVelocity = updateMovementSequence(entity, body.mVelocity);
   }
 
@@ -159,16 +165,17 @@ void PhysicsSystem::applyPhysics(
   // for the next steps
   const auto bbox = toWorldSpace(collisionRect, position);
 
-  if (body.mGravityAffected && !hasActiveSequence()) {
+  if (body.mGravityAffected && !hasActiveSequence())
+  {
     body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
 
     applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, entity);
   }
 
   const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
-  const auto result =
-    moveVertically(*mpCollisionChecker, entity, movementY);
-  if (result != MovementResult::Completed) {
+  const auto result = moveVertically(*mpCollisionChecker, entity, movementY);
+  if (result != MovementResult::Completed)
+  {
     body.mVelocity.y = 0.0f;
   }
 
@@ -177,17 +184,18 @@ void PhysicsSystem::applyPhysics(
   const auto collisionOccured = position != targetPosition;
   setTag<components::CollidedWithWorld>(entity, collisionOccured);
 
-  if (collisionOccured) {
+  if (collisionOccured)
+  {
     const auto left = targetPosition.x != position.x && movementX < 0;
     const auto right = targetPosition.x != position.x && movementX > 0;
     const auto top = targetPosition.y != position.y && movementY < 0;
     const auto bottom = targetPosition.y != position.y && movementY > 0;
 
-    mpEvents->emit(events::CollidedWithWorld{
-      entity, left, right, top, bottom});
+    mpEvents->emit(events::CollidedWithWorld{entity, left, right, top, bottom});
   }
 
-  if (body.mIgnoreCollisions) {
+  if (body.mIgnoreCollisions)
+  {
     position = targetPosition;
     body.mVelocity = originalVelocity;
   }
@@ -195,9 +203,10 @@ void PhysicsSystem::applyPhysics(
 
 
 void PhysicsSystem::receive(
-  const entityx::ComponentAddedEvent<components::MovingBody>& event
-) {
-  if (!mShouldCollectForPhase2) {
+  const entityx::ComponentAddedEvent<components::MovingBody>& event)
+{
+  if (!mShouldCollectForPhase2)
+  {
     return;
   }
 
@@ -206,22 +215,22 @@ void PhysicsSystem::receive(
 
 
 void PhysicsSystem::receive(
-  const entityx::ComponentRemovedEvent<components::MovingBody>& event
-) {
+  const entityx::ComponentRemovedEvent<components::MovingBody>& event)
+{
   using namespace std;
 
-  if (!mShouldCollectForPhase2) {
+  if (!mShouldCollectForPhase2)
+  {
     return;
   }
 
   const auto it = find_if(
     begin(mPhysicsObjectsForPhase2),
     end(mPhysicsObjectsForPhase2),
-    [&event](const auto& entity) {
-      return entity == event.entity;
-    });
+    [&event](const auto& entity) { return entity == event.entity; });
 
-  if (it != end(mPhysicsObjectsForPhase2)) {
+  if (it != end(mPhysicsObjectsForPhase2))
+  {
     mPhysicsObjectsForPhase2.erase(it);
   }
 }
@@ -229,23 +238,30 @@ void PhysicsSystem::receive(
 
 float PhysicsSystem::applyGravity(
   const BoundingBox& bbox,
-  const float currentVelocity
-) {
-  if (currentVelocity == 0.0f) {
-    if (mpCollisionChecker->isOnSolidGround(bbox)) {
+  const float currentVelocity)
+{
+  if (currentVelocity == 0.0f)
+  {
+    if (mpCollisionChecker->isOnSolidGround(bbox))
+    {
       return currentVelocity;
     }
 
     // We are floating - begin falling
     return 0.5f;
-  } else {
+  }
+  else
+  {
     // Apply gravity to falling object until terminal velocity reached
-    if (currentVelocity < 2.0f) {
+    if (currentVelocity < 2.0f)
+    {
       return currentVelocity + 0.5f;
-    } else {
+    }
+    else
+    {
       return 2.0f;
     }
   }
 }
 
-}
+} // namespace rigel::engine

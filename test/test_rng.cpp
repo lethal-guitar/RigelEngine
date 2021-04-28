@@ -23,31 +23,46 @@ RIGEL_RESTORE_WARNINGS
 
 #include <algorithm>
 
-TEST_CASE("Random number generator works the same as the original") {
+TEST_CASE("Random number generator works the same as the original")
+{
   rigel::engine::RandomNumberGenerator rng;
-  SECTION("Values are generated in this particular order") {
-    SECTION("First generated value is 8 (the 1st one in the array)") {
+  SECTION("Values are generated in this particular order")
+  {
+    SECTION("First generated value is 8 (the 1st one in the array)")
+    {
       CHECK(rng.gen() == 8u);
     }
-    SECTION("The period of the RNG is the original array's size") {
+    SECTION("The period of the RNG is the original array's size")
+    {
       const auto firstRandomValue = rng.gen();
-      for(unsigned i = 0u; i < rigel::engine::RANDOM_NUMBER_TABLE.size() - 1; ++i) {
+      for (unsigned i = 0u; i < rigel::engine::RANDOM_NUMBER_TABLE.size() - 1;
+           ++i)
+      {
         (void)rng.gen(); // ignore these
       }
       const auto randomValueAfterPeriod = rng.gen();
       CHECK(firstRandomValue == randomValueAfterPeriod);
     }
-    SECTION("Test RNG generates in the same order") {
-      std::vector<int> randomNumbers(rigel::engine::RANDOM_NUMBER_TABLE.size() * 2, std::numeric_limits<int>::min());
+    SECTION("Test RNG generates in the same order")
+    {
+      std::vector<int> randomNumbers(
+        rigel::engine::RANDOM_NUMBER_TABLE.size() * 2,
+        std::numeric_limits<int>::min());
       auto beg = std::begin(randomNumbers);
       auto end = std::end(randomNumbers);
       std::generate(beg, end, [&rng]() { return rng.gen(); });
       // since we start from the 1st index in the original array, rotate once
-      std::rotate(randomNumbers.rbegin(), randomNumbers.rbegin() + 1, randomNumbers.rend());
-      auto half = std::next(std::begin(randomNumbers), randomNumbers.size() / 2);
+      std::rotate(
+        randomNumbers.rbegin(),
+        randomNumbers.rbegin() + 1,
+        randomNumbers.rend());
+      auto half =
+        std::next(std::begin(randomNumbers), randomNumbers.size() / 2);
       const auto halfDistance = std::distance(beg, half);
       CHECK(halfDistance == std::distance(half, end));
-      CHECK(static_cast<size_t>(halfDistance) == rigel::engine::RANDOM_NUMBER_TABLE.size());
+      CHECK(
+        static_cast<size_t>(halfDistance) ==
+        rigel::engine::RANDOM_NUMBER_TABLE.size());
       CHECK(std::equal(beg, half, half));
     }
   }
