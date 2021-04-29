@@ -30,7 +30,7 @@ public:
   int gen();
 
 private:
-  std::size_t mNextNumberIndex = 0;
+  std::uint8_t mNextNumberIndex = 0;
 };
 
 }

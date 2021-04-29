@@ -7,6 +7,7 @@ set(test_sources
     test_letter_collection.cpp
     test_physics_system.cpp
     test_player.cpp
+    test_rng.cpp
     test_spike_ball.cpp
     test_timing.cpp
 )
