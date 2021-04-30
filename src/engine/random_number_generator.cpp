@@ -16,8 +16,10 @@
 
 #include "random_number_generator.hpp"
 
+#include <cstddef>
 #include <limits>
 #include <type_traits>
+
 
 namespace rigel::engine {
 
