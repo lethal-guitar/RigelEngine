@@ -8,6 +8,7 @@
     * [Ubuntu 18.04](#linux-build-instructions-184)
     * [Fedora 31 or newer](#linux-build-instructions-fedora)
 * [Raspberry Pi builds](#raspi-build-instructions)
+* [Docker builds](#docker-build-instructions)
 * [OS X builds](#mac-build-instructions)
     * [Catalina (10.15) or newer](#mac-build-instructions-1015)
     * [Mojave (10.14) using clang 8](#mac-build-instructions-1014)
@@ -189,6 +190,37 @@ cd build
 cmake .. -DUSE_GL_ES=ON -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=OFF
 make
 ```
+
+### <a name="docker-build-instructions">Docker builds</a>
+
+The provided docker image allows you to mimic one of the CI environments (ubuntu:latest).
+
+Build the image using
+
+```bash
+docker build . -f docker/ubuntu.Dockerfile -t rigel-build
+```
+
+Then run your container with:
+
+```bash
+# build it, debug it, etc..
+docker run -ti --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -v $(pwd):/workdir -w /workdir rigel-build
+```
+
+And now follow the build steps from [Ubuntu](#linux-build-instructions-194).
+
+#### Running it inside the container
+
+You can also run the game from the container by following these instructions:
+
+1) on your host: `xhost +` (will allow connections from anything - you can be more granular if you wish)
+2) run the same build container with:
+```bash
+# ability to run the game with the GPU mapped + X forwarding
+docker run -ti --device=/dev/dri:/dev/dri --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --net=host -v $(pwd):/workdir -w /workdir rigel-build
+```
+3) build & run, same as you would on your local machine
 
 ### <a name="mac-build-instructions">OS X builds</a>
 

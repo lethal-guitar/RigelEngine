@@ -217,9 +217,14 @@ if(CXX_FILESYSTEM_HAVE_FS)
         add_library(std::filesystem INTERFACE IMPORTED)
         target_compile_features(std::filesystem INTERFACE cxx_std_17)
         set(_found TRUE)
-
         if(CXX_FILESYSTEM_NO_LINK_NEEDED)
-            # Nothing to add...
+            # on certain linux distros we have a version of libstdc++ which has the final code for c++17 fs in the
+            # libstdc++.so.*. BUT when compiling with g++ < 9, we MUST still link with libstdc++fs.a 
+            # libc++ should not suffer from this issue, so, in theory we should be fine with only checking for
+            # GCC's libstdc++ 
+            if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0.0"))
+                target_link_libraries(std::filesystem INTERFACE -lstdc++fs)
+            endif()
         elseif(CXX_FILESYSTEM_STDCPPFS_NEEDED)
             target_link_libraries(std::filesystem INTERFACE -lstdc++fs)
         elseif(CXX_FILESYSTEM_CPPFS_NEEDED)

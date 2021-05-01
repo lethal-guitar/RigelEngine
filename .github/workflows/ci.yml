@@ -50,7 +50,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install libsdl2-dev libsdl2-mixer-dev libboost-dev libboost-program-options-dev g++-8
+      run: sudo ./docker/ubuntu-deps.sh
     - name: Run CMake (debug)
       run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug
     - name: Run CMake (release)
