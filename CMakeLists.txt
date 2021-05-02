@@ -55,7 +55,7 @@ else()
     find_package(SDL2_mixer REQUIRED)
 endif()
 
-find_package(Filesystem REQUIRED)
+find_package(Filesystem REQUIRED COMPONENTS Final)
 
 
 # Compiler settings
