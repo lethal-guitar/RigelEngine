@@ -359,10 +359,10 @@ if(USE_GL_ES)
 endif()
 
 
-
 # Main executable
+add_executable(RigelEngine)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-    add_executable(RigelEngine emscripten_main.cpp)
+    target_sources(RigelEngine PRIVATE emscripten_main.cpp)
     target_link_libraries(RigelEngine PRIVATE
       rigel_core
     )
@@ -381,7 +381,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         ".html"
     )
 else()
-    add_executable(RigelEngine
+    target_sources(RigelEngine PRIVATE
         game_main.cpp
         game_main.hpp
         main.cpp
