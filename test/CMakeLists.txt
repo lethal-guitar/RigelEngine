@@ -1,4 +1,4 @@
-set(test_sources
+add_executable(tests
     test_main.cpp
     test_duke_script_loader.cpp
     test_elevator.cpp
@@ -12,8 +12,6 @@ set(test_sources
     test_timing.cpp
 )
 
-
-add_executable(tests ${test_sources})
 target_link_libraries(tests
     PRIVATE
     rigel_core

@@ -325,7 +325,6 @@ set(core_sources
     platform.hpp
 )
 
-
 # Core library
 add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
