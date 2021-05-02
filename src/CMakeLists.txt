@@ -343,10 +343,10 @@ target_link_libraries(rigel_core
     nlohmann-json
     glad
     glm
+    std::filesystem
 
     PRIVATE
     stb
-    std::filesystem
     dbopl
     speex_resampler
     static_vector
@@ -389,7 +389,6 @@ else()
     target_link_libraries(RigelEngine PRIVATE
         SDL2::Main
         rigel_core
-        Boost::boost
         Boost::program_options
         Boost::disable_autolinking
     )
