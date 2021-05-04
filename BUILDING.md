@@ -94,7 +94,7 @@ as long as all necessary dependencies are available at recent enough versions.
 
 ```bash
 # Install all external dependencies, as well as the CMake build system:
-sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
+sudo apt-get install cmake libboost-dev libsdl2-dev libsdl2-mixer-dev
 
 # Configure and build (run inside your clone of the repo):
 mkdir build
@@ -166,10 +166,8 @@ On Fedora, the following command installs all
 required dependencies:
 
 ```bash
-sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel SDL2_mixer-devel
+sudo dnf install cmake boost-devel SDL2-devel SDL2_mixer-devel
 ```
-
-Note the additional `boost-static` package - without it, there will be linker errors.
 
 This also assumes that `make`, `gcc` and `gcc-c++` are already installed.
 
@@ -307,7 +305,7 @@ So in case of errors, I'd recommend double checking the path first.
 
 ```bash
 # Install dependencies
-vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
+vcpkg install boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
 
 # Run CMake
 mkdir build
@@ -327,7 +325,7 @@ If you'd like to build for 32-bit and have trouble sorting out build errors, fee
 
 ```bash
 # Install dependencies
-vcpkg install boost-program-options:x86-windows boost-algorithm:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
+vcpkg install boost-algorithm:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
 
 # Run CMake
 mkdir build

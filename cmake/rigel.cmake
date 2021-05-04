@@ -55,6 +55,7 @@ function(rigel_configure_compiler_warnings)
             -Wno-ctad-maybe-unsupported
             -Wno-implicit-int-float-conversion
             -Wno-suggest-destructor-override
+            -Wno-non-virtual-dtor
         )
 
         if (WARNINGS_AS_ERRORS)

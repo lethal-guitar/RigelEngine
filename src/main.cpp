@@ -30,10 +30,11 @@
 RIGEL_DISABLE_WARNINGS
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/program_options.hpp>
+#include <lyra/lyra.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 
@@ -41,7 +42,6 @@ RIGEL_RESTORE_WARNINGS
 using namespace rigel;
 
 namespace ba = boost::algorithm;
-namespace po = boost::program_options;
 
 
 namespace {
@@ -65,144 +65,88 @@ void showBanner() {
     "\n";
 }
 
-
-auto parseLevelToJumpTo(const std::string& levelToPlay) {
-  if (levelToPlay.size() != 2) {
-    throw std::invalid_argument("Invalid level name");
-  }
-
-  const auto episode = static_cast<int>(levelToPlay[0] - 'L');
-  const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
-
-  if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
-    throw std::invalid_argument(std::string("Invalid level name: ") + levelToPlay);
-  }
-  return std::make_pair(episode, level);
-}
-
-
-auto parseDifficulty(const std::string& difficultySpec) {
-  if (difficultySpec == "easy") {
-    return data::Difficulty::Easy;
-  } else if (difficultySpec == "medium") {
-    return data::Difficulty::Medium;
-  } else if (difficultySpec == "hard") {
-    return data::Difficulty::Hard;
-  }
-
-  throw std::invalid_argument(
-    std::string("Invalid difficulty: ") + difficultySpec);
-}
-
-
-base::Vector parsePlayerPosition(const std::string& playerPosString) {
-  std::vector<std::string> positionParts;
-  ba::split(positionParts, playerPosString, ba::is_any_of(","));
-
-  if (
-    positionParts.size() != 2 ||
-    positionParts[0].empty() ||
-    positionParts[1].empty()
-  ) {
-    throw std::invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
-  }
-
-  return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
-}
-
 }
 
 
 int main(int argc, char** argv) {
   showBanner();
 
+  auto showHelp = false;
   CommandLineOptions config;
 
-  po::options_description optionsDescription("Options");
-  optionsDescription.add_options()
-    ("help,h", "Show command line help message")
-    ("skip-intro,s",
-     po::bool_switch(&config.mSkipIntro),
-     "Skip intro movies/Apogee logo, go straight to main menu")
-    ("play-level,l",
-     po::value<std::string>(),
-     "Directly jump to given map, skipping intro/menu etc.")
-    ("difficulty",
-     po::value<std::string>(),
-     "Difficulty to use when jumping to a level via 'play-level'")
-    ("player-pos",
-     po::value<std::string>(),
-     "Specify position to place the player at (to be used in conjunction with\n"
-     "'play-level')")
-    ("debug-mode,d",
-     po::bool_switch(&config.mDebugModeEnabled),
-     "Enable debugging features")
-    ("play-demo",
-     po::bool_switch(&config.mPlayDemo),
-     "Play pre-recorded demo")
-    ("game-path",
-     po::value<std::string>(&config.mGamePath)->default_value(""),
-     "Path to original game's installation. Can also be given as positional "
-     "argument. If not provided here, a folder browser ui will ask for it");
+  auto optionsParser = lyra::help(showHelp)
+    | lyra::opt(config.mSkipIntro)["-s"]["--skip-intro"]
+      .help("Skip intro movies/Apogee logo, go straight to main menu")
+    | lyra::opt(config.mDebugModeEnabled)["-d"]["--debug-mode"]
+      .help("Enable debugging features")
+    | lyra::opt(config.mPlayDemo)["--play-demo"]
+      .help("Play pre-recorded demo")
+    | lyra::group([&](const lyra::group&){})
+      .add_argument(lyra::opt([&](const std::string& levelSpec){
+          config.mLevelToJumpTo = data::GameSessionId{
+            static_cast<int>(levelSpec[0] - 'L'),
+            static_cast<int>(levelSpec[1] - '0') - 1};
+        }, "level name")
+        ["-l"]["--play-level"]
+        .help("Directly jump to given map, skipping intro/menu etc.")
+        .required()
+        .choices([](const std::string& levelSpec) {
+          std::regex levelRegex{"(L|M|N|O)[1-8]"};
+          return std::regex_match(levelSpec, levelRegex);
+        }))
+      .add_argument(lyra::opt([&](const std::string& difficultySpec) {
+          if (!config.mLevelToJumpTo) { return; }
 
-  po::positional_options_description positionalArgsDescription;
-  positionalArgsDescription.add("game-path", -1);
+          if (difficultySpec == "easy") {
+            config.mLevelToJumpTo->mDifficulty = data::Difficulty::Easy;
+          } else if (difficultySpec == "medium") {
+            config.mLevelToJumpTo->mDifficulty = data::Difficulty::Medium;
+          } else if (difficultySpec == "hard") {
+            config.mLevelToJumpTo->mDifficulty = data::Difficulty::Hard;
+          }
+        }, "easy|medium|hard")
+        ["--difficulty"]
+        .help("Difficulty to use when jumping to a level")
+        .choices("easy", "medium", "hard"))
+      .add_argument(lyra::opt([&](const std::string& positionSpec) {
+          if (!config.mLevelToJumpTo) { return; }
 
-  try
-  {
-    po::variables_map options;
-    po::store(
-      po::command_line_parser(argc, argv)
-        .options(optionsDescription)
-        .positional(positionalArgsDescription)
-        .run(),
-      options);
-    po::notify(options);
+          std::vector<std::string> positionParts;
+          ba::split(positionParts, positionSpec, ba::is_any_of(","));
+          config.mPlayerPosition = base::Vector{
+            std::stoi(positionParts[0]), std::stoi(positionParts[1])};
+        }, "x,y")
+        ["--player-pos"]
+        .help("Position to place the player at when jumping to a level")
+        .choices([](const std::string& positionSpec) {
+          std::regex positionRegex{"([0-9]+),([0-9]+)"};
+          return std::regex_match(positionSpec, positionRegex);
+        }))
+    | lyra::arg(config.mGamePath, "game path")
+      .help(
+        "Path to original game's installation. If not provided here, "
+        "the game will show a folder browser UI.")
+  ;
 
-    if (options.count("help")) {
-      std::cout << optionsDescription << '\n';
-      return 0;
-    }
+  const auto parseResult = optionsParser.parse({argc, argv});
 
-    if (options.count("play-level")) {
-      auto sessionId = data::GameSessionId{};
-      std::tie(sessionId.mEpisode, sessionId.mLevel) =
-        parseLevelToJumpTo(options["play-level"].as<std::string>());
-
-      config.mLevelToJumpTo = sessionId;
-    }
-
-    if (options.count("difficulty")) {
-      if (!options.count("play-level")) {
-        throw std::invalid_argument(
-          "This option requires also using the play-level option");
-      }
-
-      config.mLevelToJumpTo->mDifficulty =
-        parseDifficulty(options["difficulty"].as<std::string>());
-    }
-
-    if (options.count("player-pos")) {
-      if (!options.count("play-level")) {
-        throw std::invalid_argument(
-          "This option requires also using the play-level option");
-      }
-
-      config.mPlayerPosition = parsePlayerPosition(
-        options["player-pos"].as<std::string>());
-    }
-
-    if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
-      config.mGamePath += "/";
-    }
-
-    gameMain(config);
+  if (showHelp) {
+    std::cout << optionsParser << '\n';
+    return 0;
   }
-  catch (const po::error& err)
-  {
-    std::cerr << "ERROR: " << err.what() << "\n\n";
-    std::cerr << optionsDescription << '\n';
+
+  if (!parseResult) {
+    std::cerr << "ERROR: " << parseResult.errorMessage() << "\n\n";
+    std::cerr << optionsParser << '\n';
     return -1;
+  }
+
+  if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
+    config.mGamePath += "/";
+  }
+
+  try {
+    gameMain(config);
   }
   catch (const std::exception& ex)
   {

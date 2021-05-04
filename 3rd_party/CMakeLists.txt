@@ -21,6 +21,11 @@ target_include_directories(static_vector
     INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/static_vector/include"
 )
+add_library(lyra INTERFACE)
+target_include_directories(lyra
+    INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/lyra/include"
+)
 
 
 # Compiled targets

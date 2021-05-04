@@ -390,7 +390,6 @@ else()
         SDL2::Main
         rigel_core
         Boost::boost
-        Boost::program_options
-        Boost::disable_autolinking
+        lyra
     )
 endif()
