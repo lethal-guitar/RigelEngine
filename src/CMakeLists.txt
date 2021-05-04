@@ -325,7 +325,6 @@ set(core_sources
     platform.hpp
 )
 
-
 # Core library
 add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
@@ -343,10 +342,10 @@ target_link_libraries(rigel_core
     nlohmann-json
     glad
     glm
+    std::filesystem
 
     PRIVATE
     stb
-    std::filesystem
     dbopl
     speex_resampler
     static_vector
@@ -359,10 +358,10 @@ if(USE_GL_ES)
 endif()
 
 
-
 # Main executable
+add_executable(RigelEngine)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-    add_executable(RigelEngine emscripten_main.cpp)
+    target_sources(RigelEngine PRIVATE emscripten_main.cpp)
     target_link_libraries(RigelEngine PRIVATE
       rigel_core
     )
@@ -381,7 +380,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         ".html"
     )
 else()
-    add_executable(RigelEngine
+    target_sources(RigelEngine PRIVATE
         game_main.cpp
         game_main.hpp
         main.cpp
@@ -389,7 +388,6 @@ else()
     target_link_libraries(RigelEngine PRIVATE
         SDL2::Main
         rigel_core
-        Boost::boost
         Boost::program_options
         Boost::disable_autolinking
     )

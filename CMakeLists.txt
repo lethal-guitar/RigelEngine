@@ -2,14 +2,19 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 project(RigelEngine)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 # Project settings
 ###############################################################################
+
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+  message(STATUS "No build type was specified, will default to ${CMAKE_BUILD_TYPE}")
+endif()
 
 option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
@@ -55,7 +60,7 @@ else()
     find_package(SDL2_mixer REQUIRED)
 endif()
 
-find_package(Filesystem REQUIRED)
+find_package(Filesystem REQUIRED COMPONENTS Final)
 
 
 # Compiler settings
