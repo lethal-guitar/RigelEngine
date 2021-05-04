@@ -48,3 +48,30 @@ TEST_CASE("String split") {
     CHECK(v == expected);
   }
 }
+
+TEST_CASE("String prefix check (startsWith)") {
+  SECTION("Empty string is prefix of itself") {
+    const bool hasPrefix = rigel::strings::startsWith("", "");
+    CHECK(hasPrefix);
+  }
+  SECTION("Empty string is a prefix for any string") {
+    const bool hasPrefix = rigel::strings::startsWith("1234", "");
+    CHECK(hasPrefix);
+  }
+  SECTION("String with no prefix") {
+    const bool hasPrefix = rigel::strings::startsWith("hello", "bye");
+    CHECK(!hasPrefix);
+  }
+  SECTION("String with prefix") {
+    const bool hasPrefix = rigel::strings::startsWith("1234", "12");
+    CHECK(hasPrefix);
+  }
+  SECTION("String with prefix longer than string") {
+    const bool hasPrefix = rigel::strings::startsWith("1234", "12345");
+    CHECK(!hasPrefix);
+  }
+  SECTION("String contains the desired substring, but not as a prefix") {
+    const bool hasPrefix = rigel::strings::startsWith("1234", "234");
+    CHECK(!hasPrefix);
+  }
+}

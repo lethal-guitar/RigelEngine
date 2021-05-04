@@ -26,4 +26,8 @@ namespace rigel::strings {
  */
 [[nodiscard]] std::vector<std::string> split(std::string_view input, char delimiter);
 
+/** Checks if an input string has the given prefix
+ */
+[[nodiscard]] bool startsWith(std::string_view input, std::string_view prefix) noexcept;
+
 } // namespace rigel::strings

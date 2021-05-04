@@ -20,4 +20,9 @@ std::vector<std::string> split(std::string_view input, char delimiter) {
   return output;
 }
 
+bool startsWith(std::string_view input, std::string_view prefix) noexcept {
+  return input.size() >= prefix.size() &&
+    std::equal(std::begin(prefix), std::end(prefix), std::begin(input));
+}
+
 } // namespace rigel::strings

@@ -16,11 +16,11 @@
 
 #include "duke_script_loader.hpp"
 
+#include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 #include "data/game_traits.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 RIGEL_RESTORE_WARNINGS
 
@@ -63,7 +63,7 @@ void skipWhiteSpace(istream& sourceStream) {
 
 
 bool isCommand(const string& line) {
-  return b::starts_with(line, "//");
+  return strings::startsWith(line, "//");
 }
 
 
