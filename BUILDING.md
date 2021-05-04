@@ -60,8 +60,8 @@ to find for the build to work:
 * SDL\_mixer >= 2.0.1
 * Boost >= 1.65
 
-All other dependencies are already provided as submodules or source
-code (in the `3rd_party` directory), and will be built along with RigelEngine.
+All other dependencies are already provided as submodules, source
+code (in the `3rd_party` directory) or fetched on configuration, and will be built along with RigelEngine.
 In other words, you don't need to worry about providing these dependencies.
 
 These are:
@@ -78,6 +78,7 @@ These are:
 * [STB image](https://github.com/nothings/stb) image reading/writing library
 * [STB rect_pack](https://github.com/nothings/stb) rectangle packer for building texture atlases
 
+If you want to build benchmarks, you need to enable `BUILD_BENCHMARKS` (via CMake's `-DBUILD_BENCHMARKS=ON`). Doing so will automatically fetch googlebenchmark. You can then build the `benchmarks` target (this will also build googlebenchmark). Make sure you build in `Release` and disable CPU scaling (see: [link](https://github.com/google/benchmark#disabling-cpu-frequency-scaling) for more details).
 
 ### <a name="linux-build-instructions">Linux builds</a>
 
