@@ -30,4 +30,19 @@ namespace rigel::strings {
  */
 [[nodiscard]] bool startsWith(std::string_view input, std::string_view prefix) noexcept;
 
+/** Removes all occurences of 'what' from the left of the input, until any non-'what' is found
+ * Does everything inplace
+ */
+std::string& trimLeft(std::string& input, const char* what = "\n\r\t ") noexcept;
+
+/** Removes all occurences of 'what' from the right of the input, until any non-'what' is found
+ * Does everything inplace
+ */
+std::string& trimRight(std::string& input, const char* what = "\n\r\t ") noexcept;
+
+/** Removes all occurences of 'what' from the right and left of the input, until any non-'what' is found
+ * Does everything inplace
+ */
+std::string& trim(std::string& input, const char* what = "\n\r\t ") noexcept;
+
 } // namespace rigel::strings

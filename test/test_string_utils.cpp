@@ -75,3 +75,98 @@ TEST_CASE("String prefix check (startsWith)") {
     CHECK(!hasPrefix);
   }
 }
+
+
+TEST_CASE("String trim inplace") {
+  SECTION("Trim left") {
+    SECTION("Empty string still empty after trim left") {
+      std::string trimmed = "";
+      rigel::strings::trimLeft(trimmed);
+      CHECK(trimmed == "");
+    }
+    SECTION("Trim whitespace from the left of the string") {
+      std::string trimmed = " hello ";
+      rigel::strings::trimLeft(trimmed);
+      CHECK(trimmed == "hello ");
+    }
+    SECTION("Trim whitespace from the left of the string but don't change inside it") {
+      std::string trimmed = " hello world";
+      rigel::strings::trimLeft(trimmed);
+      CHECK(trimmed == "hello world");
+    }
+    SECTION("Trim whitespace from the left of the string and don't change the right side") {
+      std::string trimmed = "hello ";
+      rigel::strings::trimLeft(trimmed);
+      CHECK(trimmed == "hello ");
+    }
+    SECTION("Trim all whitespaces from the left of the string") {
+      std::string trimmed = "  \n\thello ";
+      rigel::strings::trimLeft(trimmed);
+      CHECK(trimmed == "hello ");
+    }
+    SECTION("Trims other characters from the left of the string") {
+      std::string trimmed = "//hello ";
+      rigel::strings::trimLeft(trimmed, "/");
+      CHECK(trimmed == "hello ");
+    }
+    SECTION("Empties an all whitespace string") {
+      std::string trimmed = " \t\n\r";
+      rigel::strings::trimLeft(trimmed);
+      CHECK(trimmed == "");
+    }
+  }
+  SECTION("Trim right") {
+    SECTION("Empty string still empty after trim right") {
+      std::string trimmed = "";
+      rigel::strings::trimRight(trimmed);
+      CHECK(trimmed == "");
+    }
+    SECTION("Trim whitespace from the right of the string") {
+      std::string trimmed = " hello ";
+      rigel::strings::trimRight(trimmed);
+      CHECK(trimmed == " hello");
+    }
+    SECTION("Trim whitespace from the right of the string but don't change inside it") {
+      std::string trimmed = "hello world ";
+      rigel::strings::trimRight(trimmed);
+      CHECK(trimmed == "hello world");
+    }
+    SECTION("Trim whitespace from the right of the string and don't change the left side") {
+      std::string trimmed = " hello";
+      rigel::strings::trimRight(trimmed);
+      CHECK(trimmed == " hello");
+    }
+    SECTION("Trim all whitespaces from the right of the string") {
+      std::string trimmed = "  \n\thello\n\t ";
+      rigel::strings::trimRight(trimmed);
+      CHECK(trimmed == "  \n\thello");
+    }
+    SECTION("Trims other characters from the right of the string") {
+      std::string trimmed = "//hello//";
+      rigel::strings::trimRight(trimmed, "/");
+      CHECK(trimmed == "//hello");
+    }
+  }
+  SECTION("Trim all") {
+    SECTION("Empty string still empty after trim") {
+      std::string trimmed = "";
+      rigel::strings::trim(trimmed);
+      CHECK(trimmed == "");
+    }
+    SECTION("Trim whitespace from the right/left of the string") {
+      std::string trimmed = " hello ";
+      rigel::strings::trim(trimmed);
+      CHECK(trimmed == "hello");
+    }
+    SECTION("Trim whitespace from the right/left of the string and don't change the inside") {
+      std::string trimmed = " hello world ";
+      rigel::strings::trim(trimmed);
+      CHECK(trimmed == "hello world");
+    }
+    SECTION("Trims other characters from the string") {
+      std::string trimmed = "//hello//";
+      rigel::strings::trim(trimmed, "/");
+      CHECK(trimmed == "hello");
+    }
+  }
+}

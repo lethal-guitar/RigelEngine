@@ -20,10 +20,8 @@
 #include "base/warnings.hpp"
 #include "data/game_traits.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/algorithm/string/trim.hpp>
-RIGEL_RESTORE_WARNINGS
-
+#include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <optional>
 #include <sstream>
@@ -47,7 +45,6 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::loader {
 
-namespace b = boost;
 using namespace std;
 using namespace data::script;
 using data::GameTraits;
@@ -68,7 +65,7 @@ bool isCommand(const string& line) {
 
 
 void stripCommandPrefix(string& line) {
-  b::trim_left_if(line, [](const auto c) { return c == '/'; });
+  strings::trimLeft(line, "/");
 }
 
 
@@ -80,9 +77,9 @@ void parseScriptLines(
 ) {
   skipWhiteSpace(sourceTextStream);
   for (string line; getline(sourceTextStream, line, '\n');) {
-    b::trim(line);
+    strings::trim(line);
     if (isCommand(line)) {
-      b::trim_left_if(line, [](const auto c) { return c == '/'; });
+      strings::trimLeft(line, "/");
       if (line == endMarker) {
         return;
       }
@@ -90,7 +87,7 @@ void parseScriptLines(
       istringstream lineTextStream(line);
       string command;
       lineTextStream >> command;
-      b::trim(command);
+      strings::trim(command);
       consumeLine(command, lineTextStream);
     }
   }
@@ -109,13 +106,13 @@ vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
   // we assume the message box is complete and return to regular parsing.
   auto startOfLine = sourceStream.tellg();
   for (string line; getline(sourceStream, line, '\n');) {
-    b::trim(line);
+    strings::trim(line);
     if (isCommand(line)) {
       stripCommandPrefix(line);
       istringstream lineTextStream(line);
       string command;
       lineTextStream >> command;
-      b::trim(command);
+      strings::trim(command);
 
       if (command == "CWTEXT") {
         lineTextStream.get();
@@ -124,7 +121,7 @@ vector<string> parseMessageBoxTextDefinition(istream& sourceStream) {
         if (messageLine.empty()) {
           throw invalid_argument("Corrupt Duke Script file");
         }
-        b::trim_right(messageLine);
+        strings::trimRight(messageLine);
         messageLines.emplace_back(messageLine);
       } else if (command == "SKLINE") {
         messageLines.emplace_back("");
@@ -204,7 +201,7 @@ std::optional<Action> parseSingleActionCommand(
   {
     string imageName;
     lineTextStream >> imageName;
-    b::trim(imageName);
+    strings::trim(imageName);
     if (imageName.empty()) {
       throw invalid_argument("Invalid LOADRAW command in Duke Script file");
     }
@@ -220,7 +217,7 @@ std::optional<Action> parseSingleActionCommand(
   {
     string paletteFile;
     lineTextStream >> paletteFile;
-    b::trim(paletteFile);
+    strings::trim(paletteFile);
     if (paletteFile.empty()) {
       throw invalid_argument("Invalid LOADRAW command in Duke Script file");
     }
@@ -477,7 +474,7 @@ bool skipToHintsSection(istream& sourceTextStream) {
 
     string sectionName;
     sourceTextStream >> sectionName;
-    b::trim(sectionName);
+    strings::trim(sectionName);
 
     if (sectionName == "Hints") {
       skipWhiteSpace(sourceTextStream);
@@ -500,7 +497,7 @@ ScriptBundle loadScripts(const string& scriptSource) {
 
     string scriptName;
     sourceStream >> scriptName;
-    b::trim(scriptName);
+    strings::trim(scriptName);
 
     if (!scriptName.empty()) {
       bundle.emplace(scriptName, parseScript(sourceStream));
@@ -528,7 +525,7 @@ data::LevelHints loadHintMessages(const std::string& scriptSource) {
       continue;
     }
 
-    b::trim(line);
+    strings::trim(line);
 
     istringstream lineTextStream(line);
 

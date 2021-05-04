@@ -25,4 +25,19 @@ bool startsWith(std::string_view input, std::string_view prefix) noexcept {
     std::equal(std::begin(prefix), std::end(prefix), std::begin(input));
 }
 
+std::string& trimLeft(std::string& input, const char* what) noexcept {
+  input.erase(0, input.find_first_not_of(what));
+  return input;
+}
+
+std::string& trimRight(std::string& input, const char* what) noexcept {
+  input.erase(input.find_last_not_of(what) + 1);
+  return input;
+}
+
+std::string& trim(std::string& input, const char* what) noexcept {
+  trimLeft(trimRight(input, what), what);
+  return input;
+}
+
 } // namespace rigel::strings
