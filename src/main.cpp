@@ -23,13 +23,12 @@
 // you might want to hop over to game_main.cpp instead of looking at this file
 // here.
 
+#include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 
 #include "game_main.hpp"
 
 RIGEL_DISABLE_WARNINGS
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/program_options.hpp>
 RIGEL_RESTORE_WARNINGS
 
@@ -40,7 +39,6 @@ RIGEL_RESTORE_WARNINGS
 
 using namespace rigel;
 
-namespace ba = boost::algorithm;
 namespace po = boost::program_options;
 
 
@@ -96,8 +94,7 @@ auto parseDifficulty(const std::string& difficultySpec) {
 
 
 base::Vector parsePlayerPosition(const std::string& playerPosString) {
-  std::vector<std::string> positionParts;
-  ba::split(positionParts, playerPosString, ba::is_any_of(","));
+  const std::vector<std::string> positionParts = strings::split(playerPosString, ',');
 
   if (
     positionParts.size() != 2 ||

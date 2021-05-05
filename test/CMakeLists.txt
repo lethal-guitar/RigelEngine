@@ -9,6 +9,7 @@ add_executable(tests
     test_player.cpp
     test_rng.cpp
     test_spike_ball.cpp
+    test_string_utils.cpp
     test_timing.cpp
 )
 
@@ -17,5 +18,7 @@ target_link_libraries(tests
     rigel_core
     catch2
 )
+
+rigel_enable_warnings(tests)
 
 add_test(all-tests tests)

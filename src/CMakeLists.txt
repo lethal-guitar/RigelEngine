@@ -15,6 +15,8 @@ set(core_sources
     common/global.hpp
     common/json_utils.cpp
     common/json_utils.hpp
+    base/string_utils.cpp
+    base/string_utils.hpp
     common/user_profile.cpp
     common/user_profile.hpp
     data/actor_ids.hpp
@@ -351,6 +353,8 @@ target_link_libraries(rigel_core
     static_vector
 )
 
+rigel_enable_warnings(rigel_core)
+
 if(USE_GL_ES)
     target_compile_definitions(rigel_core PUBLIC
         RIGEL_USE_GL_ES=1
@@ -392,3 +396,5 @@ else()
         Boost::disable_autolinking
     )
 endif()
+
+rigel_enable_warnings(RigelEngine)

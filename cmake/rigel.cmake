@@ -19,9 +19,9 @@ function(rigel_define_wasm_targets_for_dependencies)
 endfunction()
 
 
-function(rigel_configure_compiler_warnings)
+function(rigel_enable_warnings target)
     if(MSVC)
-        add_compile_options(
+        target_compile_options(${target} PRIVATE
             /W4
             /wd4100 # Unused parameter
             /wd4503 # Decorated name length exceeded
@@ -30,10 +30,10 @@ function(rigel_configure_compiler_warnings)
         add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
         if (WARNINGS_AS_ERRORS)
-            add_compile_options(/WX)
+            target_compile_options(${target} PRIVATE /WX)
         endif()
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        add_compile_options(
+        target_compile_options(${target} PRIVATE
             -Weverything
             -Wno-unknown-warning-option
             -Wno-c++98-compat
@@ -58,10 +58,10 @@ function(rigel_configure_compiler_warnings)
         )
 
         if (WARNINGS_AS_ERRORS)
-            add_compile_options(-Werror)
+            target_compile_options(${target} PRIVATE -Werror)
         endif()
     elseif(CMAKE_COMPILER_IS_GNUCXX)
-        add_compile_options(
+        target_compile_options(${target} PRIVATE
             -Wall
             -Wextra
             -pedantic
@@ -70,7 +70,7 @@ function(rigel_configure_compiler_warnings)
         )
 
         if (WARNINGS_AS_ERRORS)
-            add_compile_options(-Werror)
+            target_compile_options(${target} PRIVATE -Werror)
         endif()
     else()
         message(FATAL_ERROR "Unrecognized compiler")
