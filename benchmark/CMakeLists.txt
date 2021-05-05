@@ -22,3 +22,5 @@ target_link_libraries(benchmarks PRIVATE
     rigel_core
     benchmark::benchmark_main
 )
+
+rigel_enable_warnings(benchmarks)

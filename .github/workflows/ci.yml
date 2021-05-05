@@ -54,7 +54,7 @@ jobs:
     - name: Run CMake (debug)
       run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug
     - name: Run CMake (release)
-      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_BENCHMARKS=ON
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)
@@ -74,7 +74,7 @@ jobs:
     - name: Run CMake (debug)
       run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug
     - name: Run CMake (release)
-      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_BENCHMARKS=ON
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)

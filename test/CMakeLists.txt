@@ -19,4 +19,6 @@ target_link_libraries(tests
     catch2
 )
 
+rigel_enable_warnings(tests)
+
 add_test(all-tests tests)

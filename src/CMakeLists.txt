@@ -353,6 +353,8 @@ target_link_libraries(rigel_core
     static_vector
 )
 
+rigel_enable_warnings(rigel_core)
+
 if(USE_GL_ES)
     target_compile_definitions(rigel_core PUBLIC
         RIGEL_USE_GL_ES=1
@@ -394,3 +396,5 @@ else()
         Boost::disable_autolinking
     )
 endif()
+
+rigel_enable_warnings(RigelEngine)

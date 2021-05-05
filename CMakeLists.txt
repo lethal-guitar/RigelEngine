@@ -84,8 +84,6 @@ endif()
 ###############################################################################
 
 add_subdirectory(3rd_party)
-
-rigel_configure_compiler_warnings()
 add_subdirectory(src)
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
