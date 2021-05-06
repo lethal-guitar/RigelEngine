@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-project(RigelEngine)
+project(RigelEngine VERSION 0.8.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -96,3 +96,5 @@ endif()
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmark)
 endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/rigel_pack.cmake)
