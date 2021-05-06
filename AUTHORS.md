@@ -7,6 +7,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 ## Contributors (code/documentation)
 
 * Alain Martin ([@McMartin](https://github.com/McMartin)): Help with OS X port, clang-tidy, compiler upgrades and lots of other things
+* Andrei-Florin Bencsik ([@bencsikandrei](https://github.com/bencsikandrei)): Replacements for Boost string utilities, introducing clang-format, various code & CMake cleanups
 * Evo Stamatov ([@avioli](https://github.com/avioli)): README improvements
 * Pratik Anand ([@pratikone](https://github.com/pratikone)): Webassembly port, widescreen support, game path browser, initial gamepad support, README improvements
 * Ryan Brown ([@rbrown46](https://github.com/rbrown46)): Actor image modding (replace sprites using `png` files)
