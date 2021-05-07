@@ -570,16 +570,18 @@ struct Renderer::Impl {
     updateState(mRenderMode, RenderMode::NonTexturedRender);
     commitChangedState();
 
-    // x, y, r, g, b, a
-    GLfloat vertices[4 * (2 + 4)];
-    fillVertexPositions(rect, std::begin(vertices), 0, 6);
+    const auto left = float(rect.left());
+    const auto right = float(rect.right());
+    const auto top = float(rect.top());
+    const auto bottom = float(rect.bottom());
 
     const auto colorVec = toGlColor(color);
-    for (auto vertex = 0; vertex < 4; ++vertex) {
-      for (auto component = 0; component < 4; ++component) {
-        vertices[2 + vertex*6 + component] = colorVec[component];
-      }
-    }
+    float vertices[] = {
+      left, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      right, bottom, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      left, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+      right, top, colorVec.r, colorVec.g, colorVec.b, colorVec.a,
+    };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
