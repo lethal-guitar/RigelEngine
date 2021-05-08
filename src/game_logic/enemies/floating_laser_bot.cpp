@@ -40,12 +40,13 @@ struct GunSpec {
 };
 
 
+// clang-format off
 constexpr GunSpec GUN_SPECS[]{
   {{-1, -1}, engine::components::Orientation::Left},
   {{-1,  0}, engine::components::Orientation::Left},
   {{ 2,  0}, engine::components::Orientation::Right},
-  {{ 2, -1}, engine::components::Orientation::Right}
-};
+  {{ 2, -1}, engine::components::Orientation::Right}};
+// clang-format on
 
 }
 

@@ -148,6 +148,7 @@ TEST_CASE("Spike ball") {
 
 
   SECTION("Bouncing without obstacle") {
+    // clang-format off
     const auto expectedPositions = std::vector<base::Vector>{
       {2, 18},
       {2, 16},
@@ -172,6 +173,8 @@ TEST_CASE("Spike ball") {
       {2, 17},
       {2, 19}
     };
+    // clang-format on
+
     const auto actualPositions = runFramesAndCollect(expectedPositions.size());
 
     CHECK(actualPositions == expectedPositions);
@@ -191,6 +194,7 @@ TEST_CASE("Spike ball") {
       map.setTileAt(0, i, 15, 1);
     }
 
+    // clang-format off
     const auto expectedPositions = std::vector<base::Vector>{
       {2, 18},
       {2, 18},
@@ -199,6 +203,8 @@ TEST_CASE("Spike ball") {
       {2, 20},
       {2, 18}
     };
+    // clang-format on
+
     const auto actualPositions = runFramesAndCollect(expectedPositions.size());
 
     CHECK(actualPositions == expectedPositions);

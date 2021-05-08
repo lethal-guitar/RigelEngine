@@ -36,6 +36,7 @@ constexpr auto TEXT_SLIDE_IN_TIME = TEXT_FADE_IN_TIME +
 constexpr auto TOTAL_DISPLAY_TIME = TEXT_SLIDE_IN_TIME +
   engine::slowTicksToTime(1500);
 
+// clang-format off
 constexpr loader::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
   data::Pixel{  0, 0, 0, 255},
   data::Pixel{ 97, 0, 0, 255},
@@ -54,6 +55,7 @@ constexpr loader::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
   data::Pixel{242, 0, 0, 255},
   data::Pixel{214, 0, 0, 255},
 };
+// clang-format on
 
 
 auto loadImage(const loader::ResourceLoader& resources) {

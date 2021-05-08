@@ -34,6 +34,7 @@ const auto INITIAL_DELAY_TICKS = 60;
 const auto FINAL_DELAY_TICKS = 425;
 
 
+// clang-format off
 const std::array<const char*, 6> BONUS_SLIDE_IN{
   "S",
   "ONUS",
@@ -70,6 +71,7 @@ const std::array<const char*, 27> NO_BONUS_SLIDE_IN{
   "CK!  NEXT TIME",
   "!  NEXT TIME! ",
   "  NEXT TIME!  "};
+// clang-format on
 
 }
 

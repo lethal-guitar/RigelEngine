@@ -190,6 +190,8 @@ void MenuElementRenderer::drawText(
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int spriteSheetIndex = 0;
+
+    // clang-format off
     if (ch < 62) {
       spriteSheetIndex = 21*40 + (ch - 22);
     } else if (ch <= 90) {
@@ -202,6 +204,7 @@ void MenuElementRenderer::drawText(
       // Skip non-renderable chars
       continue;
     }
+    // clang-format on
 
     mpSpriteSheet->renderTile(spriteSheetIndex, x + i, y);
   }
@@ -217,6 +220,8 @@ void MenuElementRenderer::drawSmallWhiteText(
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int spriteSheetIndex = 0;
+
+    // clang-format off
     if (ch == 44) {
       spriteSheetIndex = 24*40 + 17 + 6;
     } else if (ch == 46) {
@@ -233,6 +238,7 @@ void MenuElementRenderer::drawSmallWhiteText(
       // Skip non-renderable chars
       continue;
     }
+    // clang-format on
 
     mpSpriteSheet->renderTile(spriteSheetIndex, x + i, y);
   }
@@ -264,6 +270,8 @@ void MenuElementRenderer::drawBigText(
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int index = 0;
+
+    // clang-format off
     if (ch >= 65 && ch <= 90) {
       index = ch - 65;
     } else if (ch >= 48 && ch <= 57) {
@@ -281,6 +289,7 @@ void MenuElementRenderer::drawBigText(
     } else {
       index = 40;
     }
+    // clang-format on
 
     const auto position = static_cast<int>(i);
     mBigTextTexture.renderTileSlice(index, {x + position, y-1});
@@ -331,6 +340,8 @@ void MenuElementRenderer::drawBonusScreenText(
     const auto ch = static_cast<uint8_t>(text[i]);
 
     int spriteSheetIndex = 0;
+
+    // clang-format off
     if (ch >= 48 && ch <= 57) {
       spriteSheetIndex = (ch - 48) * 2;
     } else if (ch >= 65 && ch <= 74) {
@@ -350,6 +361,7 @@ void MenuElementRenderer::drawBonusScreenText(
       // Skip non-renderable chars
       continue;
     }
+    // clang-format on
 
     const auto index = static_cast<int>(i);
     mpSpriteSheet->renderTileQuad(

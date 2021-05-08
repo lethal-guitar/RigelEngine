@@ -66,6 +66,7 @@ bool playerVisible(
   const auto playerY = player.position().y;
   const auto facingLeft = state.mOrientation == Orientation::Left;
 
+  // clang-format off
   const auto hasLineOfSightHorizontal =
     (facingLeft && myPosition.x >= playerX) ||
     (!facingLeft && myPosition.x <= playerX);
@@ -78,6 +79,7 @@ bool playerVisible(
     !player.isCloaked() &&
     hasLineOfSightHorizontal &&
     hasLineOfSightVertical;
+  // clang-format on
 }
 
 

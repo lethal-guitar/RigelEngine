@@ -62,10 +62,13 @@ void RedBird::update(
   const auto& playerPosition = s.mpPlayer->orientedPosition();
   base::match(mState,
     [&, this](Flying& state) {
+      // clang-format off
       const auto wantsToAttack =
         position.y + 2 < playerPosition.y &&
         position.x > playerPosition.x &&
         position.x < playerPosition.x + 2;
+      // clang-format on
+
       if (wantsToAttack) {
         sprite.mFramesToRender[0] =
           HOVER_ANIMATION[int(s.mpPerFrameState->mIsOddFrame)];

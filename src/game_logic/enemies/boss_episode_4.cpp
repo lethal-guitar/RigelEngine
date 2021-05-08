@@ -49,7 +49,6 @@ void BossEpisode4::update(
   using engine::components::WorldPosition;
 
   auto& position = *entity.component<WorldPosition>();
-  //auto& sprite = *entity.component<Sprite>();
   const auto& playerPos = s.mpPlayer->orientedPosition();
 
   auto moveTowardsPlayer = [&]() {

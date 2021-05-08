@@ -44,6 +44,7 @@ const effects::EffectSpec CARRIER_SELF_DESTRUCT_EFFECT_SPEC[] = {
 };
 
 
+// clang-format off
 const int LAND_ON_GROUND_ANIM[] = { 1, 2, 1 };
 
 const int LOOK_LEFT_RIGHT_ANIM[] = {
@@ -55,6 +56,7 @@ const int LOOK_RIGHT_LEFT_ANIM[] = {
   1, 1, 6, 6, 7, 8, 7, 6, 6, 1, 1, 3, 3, 1, 6, 6, 1, 1, 1, 3,
   4, 5, 4, 3, 3, 3, 4, 5, 4, 3, 1, 1
 };
+// clang-format on
 
 
 void advanceRandomNumberGenerator(GlobalDependencies& d) {

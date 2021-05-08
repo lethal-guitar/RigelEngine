@@ -110,6 +110,7 @@ BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
 
   BonusRelatedItemCounts counts;
 
+  // clang-format off
   es.each<ActorTag>([&counts](entityx::Entity, const ActorTag& tag) {
       switch (tag.mType) {
         case AT::ShootableCamera: ++counts.mCameraCount; break;
@@ -123,6 +124,7 @@ BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es) {
           break;
       }
     });
+  // clang-format on
 
   return counts;
 }
@@ -304,11 +306,14 @@ void WorldState::synchronizeTo(
   mEntities.reset();
 
   entityx::Entity playerEntity;
+
+  // clang-format off
   for (
     const auto entity :
       const_cast<entityx::EntityManager&>(other.mEntities)
-        .entities_for_debugging()
-  ) {
+        .entities_for_debugging())
+  // clang-format on
+  {
     auto clone = mEntities.create();
 
     copyAllComponents(entity, clone);

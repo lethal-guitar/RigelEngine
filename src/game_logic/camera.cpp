@@ -60,12 +60,14 @@ constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
 
 
 bool shouldUseTightDeadZone(const Player& player) {
+  // clang-format off
   return
     player.stateIs<ClimbingLadder>() ||
     player.stateIs<PushedByFan>() ||
     player.stateIs<UsingJetpack>() ||
     player.stateIs<InShip>() ||
     player.isRidingElevator();
+  // clang-format on
 }
 
 
@@ -182,9 +184,11 @@ void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize)
 
 void Camera::updateManualScrolling(const PlayerInput& input) {
   if (mManualScrollCooldown > 0) {
+    // clang-format off
     const auto isApplicable =
       (mpPlayer->stateIs<OnGround>() && input.mDown) ||
       (mpPlayer->stateIs<OnPipe>() && input.mUp);
+    // clang-format on
     if (isApplicable) {
       --mManualScrollCooldown;
       return;

@@ -33,7 +33,7 @@ constexpr auto EPISODE_END_SCREEN_INITIAL_DELAY = engine::slowTicksToTime(140);
 constexpr const char* EPISODE_1_END_IMAGES[] = {
   "END1-3.MNI",
   "END1-1.MNI",
-  "END1-2.MNI"
+  "END1-2.MNI",
 };
 
 constexpr const char* EPISODE_2_END_IMAGES[] = {
@@ -61,6 +61,7 @@ std::vector<renderer::Texture> loadImagesForEpisode(
     });
   };
 
+  // clang-format off
   switch (episode) {
     case 0: return createTextures(EPISODE_1_END_IMAGES);
     case 1: return createTextures(EPISODE_2_END_IMAGES);
@@ -68,6 +69,7 @@ std::vector<renderer::Texture> loadImagesForEpisode(
     case 3: return createTextures(EPISODE_4_END_IMAGES);
     default: return {};
   }
+  // clang-format on
 }
 
 }

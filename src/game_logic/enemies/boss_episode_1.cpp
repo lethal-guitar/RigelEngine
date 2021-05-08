@@ -141,11 +141,13 @@ void BossEpisode1::update(
         state.mFramesElapsed % ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE.size()];
 
       ++state.mFramesElapsed;
+      // clang-format off
       if (
         state.mFramesElapsed > 50 &&
         position.x - 1 <= playerPos.x &&
-        position.x + 9 >= playerPos.x
-      ) {
+        position.x + 9 >= playerPos.x)
+      // clang-format on
+      {
         startSlammingDown();
       }
     },

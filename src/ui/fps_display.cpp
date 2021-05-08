@@ -44,10 +44,12 @@ void FpsDisplay::updateAndRender(const engine::TimeDelta totalElapsed) {
   const auto smoothedFps = base::round(1.0f / mFilteredFrameTime);
 
   std::stringstream statsReport;
+  // clang-format off
   statsReport
     << smoothedFps << " FPS, "
     << std::setw(4) << std::fixed << std::setprecision(2)
     << totalElapsed * 1000.0 << " ms";
+  // clang-format on
 
   const auto reportString = statsReport.str();
   drawText(reportString, 0, 0, {255, 255, 255, 255});

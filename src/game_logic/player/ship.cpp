@@ -54,12 +54,14 @@ void PlayerShip::update(
   const auto isTouchingPlayer =
     s.mpPlayer->worldSpaceHitBox().intersects(worldSpaceBbox);
 
+  // clang-format off
   if (
     mPickUpCoolDownFrames == 0 &&
     isTouchingPlayer &&
     d.mpCollisionChecker->isOnSolidGround(worldSpaceBbox) &&
-    s.mpPlayer->stateIs<Falling>()
-  ) {
+    s.mpPlayer->stateIs<Falling>())
+  // clang-format on
+  {
     d.mpEvents->emit(rigel::events::TutorialMessage{
       data::TutorialMessageId::FoundSpaceShip});
     d.mpServiceProvider->playSound(data::SoundId::WeaponPickup);

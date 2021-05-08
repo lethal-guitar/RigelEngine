@@ -32,6 +32,7 @@ using namespace engine::components;
 
 namespace {
 
+// clang-format off
 constexpr base::Point<float> JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
@@ -39,6 +40,7 @@ constexpr base::Point<float> JUMP_ARC[] = {
   {0.0f, -1.0f},
   {0.0f, -1.0f}
 };
+// clang-format on
 
 }
 

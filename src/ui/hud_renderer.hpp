@@ -43,9 +43,11 @@ namespace loader {
 namespace ui {
 
 inline bool isVisibleOnRadar(const base::Vector& position) {
+  // clang-format off
   return
     position.x >= -16 && position.x < 16 &&
     position.y >= -16 && position.y < 16;
+  // clang-format on
 }
 
 

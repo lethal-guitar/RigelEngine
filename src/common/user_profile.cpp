@@ -97,6 +97,7 @@ constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 constexpr auto OPTIONS_FILENAME = "Options.json";
 
+// clang-format off
 constexpr auto DOS_SCANCODE_TO_SDL_MAP = std::array<SDL_Scancode, 89>{
   SDL_SCANCODE_UNKNOWN,
   SDL_SCANCODE_ESCAPE,
@@ -188,6 +189,7 @@ constexpr auto DOS_SCANCODE_TO_SDL_MAP = std::array<SDL_Scancode, 89>{
   SDL_SCANCODE_F11,
   SDL_SCANCODE_F12
 };
+// clang-format on
 
 
 void removeInvalidKeybindings(data::GameOptions& options) {

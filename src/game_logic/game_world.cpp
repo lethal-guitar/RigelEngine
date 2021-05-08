@@ -197,9 +197,11 @@ std::vector<base::Vector> collectRadarDots(
 template<typename ValueT>
 std::string vec2String(const base::Point<ValueT>& vec, const int width) {
   std::stringstream stream;
+  // clang-format off
   stream
     << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
     << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
+  // clang-format on
   return stream.str();
 }
 
@@ -306,11 +308,13 @@ GameWorld::GameWorld(
     mMessageDisplay.setMessage(data::Messages::WelcomeToDukeNukem2);
   }
 
-  if (mpState->mEarthQuakeEffect) { // overrides welcome message
+  // earth quake message overrides welcome message
+  if (mpState->mEarthQuakeEffect) {
     showTutorialMessage(data::TutorialMessageId::EarthQuake);
   }
 
-  if (mpState->mRadarDishCounter.radarDishesPresent()) { // overrides earth quake
+  // radar dish message overrides earth quake message
+  if (mpState->mRadarDishCounter.radarDishesPresent()) {
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);
   }
 

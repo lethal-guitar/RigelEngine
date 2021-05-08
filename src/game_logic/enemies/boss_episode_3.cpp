@@ -42,12 +42,14 @@ struct AttackArea {
 };
 
 
+// clang-format off
 constexpr AttackArea ATTACK_AREAS[] = {
   {{-9,  0}, {-4, -4}, data::ActorID::Enemy_rocket_left},
   {{ 9,  0}, { 8, -4}, data::ActorID::Enemy_rocket_right},
   {{ 0, -9}, { 4, -8}, data::ActorID::Enemy_rocket_2_up},
   {{ 0,  9}, { 4,  3}, data::ActorID::Enemy_rocket_2_down},
 };
+// clang-format on
 
 
 constexpr auto PLAYER_TARGET_OFFSET = base::Vector{3, -1};
@@ -81,11 +83,14 @@ void BossEpisode3::update(
   }
 
   // Fire rockets
+
+  // clang-format off
   if (
     isOnScreen &&
     s.mpPerFrameState->mIsOddFrame &&
-    d.mpRandomGenerator->gen() % 2 != 0
-  ) {
+    d.mpRandomGenerator->gen() % 2 != 0)
+  // clang-format on
+  {
     const auto playerBbox = s.mpPlayer->worldSpaceHitBox();
     for (const auto& area : ATTACK_AREAS) {
       auto attackRangeBbox =

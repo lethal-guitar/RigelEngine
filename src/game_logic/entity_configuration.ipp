@@ -24,6 +24,7 @@ using namespace game_logic::components::parameter_aliases;
 
 const auto SCORE_NUMBER_LIFE_TIME = 60;
 
+// clang-format off
 const base::Point<float> SCORE_NUMBER_MOVE_SEQUENCE[] = {
   {0.0f, -1.0f},
   {0.0f, -1.0f},
@@ -47,7 +48,7 @@ const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
   0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
   0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2
 };
-
+// clang-format on
 
 const int FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
 
@@ -65,9 +66,11 @@ const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 
 const int BOMB_DROPPING_ANIMATION[] = {0, 1, 1, 2};
 
+// clang-format off
 const int HINT_GLOBE_ANIMATION[] = {
   0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+// clang-format on
 
 
 base::Point<float> directionToVector(const ProjectileDirection direction) {

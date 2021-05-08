@@ -115,6 +115,7 @@ int main(int argc, char** argv) {
 
   CommandLineOptions config;
 
+  // clang-format off
   po::options_description optionsDescription("Options");
   optionsDescription.add_options()
     ("help,h", "Show command line help message")
@@ -141,6 +142,7 @@ int main(int argc, char** argv) {
      po::value<std::string>(&config.mGamePath)->default_value(""),
      "Path to original game's installation. Can also be given as positional "
      "argument. If not provided here, a folder browser ui will ask for it");
+  // clang-format on
 
   po::positional_options_description positionalArgsDescription;
   positionalArgsDescription.add("game-path", -1);

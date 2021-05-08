@@ -40,10 +40,13 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options) {
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
 
   const auto isFullscreen = options.mWindowMode != data::WindowMode::Windowed;
+
+  // clang-format off
   const auto windowFlags =
     flagsForWindowMode(options.mWindowMode) |
     SDL_WINDOW_RESIZABLE |
     SDL_WINDOW_OPENGL;
+  // clang-format on
 
   auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
     "Rigel Engine",
@@ -66,11 +69,13 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options) {
 int flagsForWindowMode(const data::WindowMode mode) {
   using WM = data::WindowMode;
 
+  // clang-format off
   switch (mode) {
     case WM::Fullscreen: return SDL_WINDOW_FULLSCREEN_DESKTOP;
     case WM::ExclusiveFullscreen: return SDL_WINDOW_FULLSCREEN;
     case WM::Windowed: return 0;
   }
+  // clang-format on
 
   return 0;
 }

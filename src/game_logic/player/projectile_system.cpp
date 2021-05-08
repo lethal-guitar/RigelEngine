@@ -220,9 +220,13 @@ void ProjectileSystem::spawnWallImpactEffect(
   const bool isRocket
 ) {
   const auto& bbox = *entity.component<engine::components::BoundingBox>();
+
+  // clang-format off
   const auto insideMap =
     position.x >= 0 &&
     (position.x + bbox.size.width) < mpMap->width();
+  // clang-format on
+
   if (!insideMap) {
     return;
   }

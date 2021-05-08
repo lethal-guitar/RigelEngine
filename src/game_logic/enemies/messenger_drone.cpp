@@ -35,6 +35,7 @@ struct MessageFrame {
 };
 
 
+// clang-format off
 const MessageFrame YOUR_BRAIN_IS_OURS[] = {
   {0, 11},
   {1, 11},
@@ -95,6 +96,7 @@ const base::ArrayView<MessageFrame> MESSAGE_SEQUENCES[] = {
   DIE,
   CANT_ESCAPE
 };
+// clang-format on
 
 }
 

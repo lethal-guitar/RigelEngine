@@ -507,7 +507,9 @@ TEST_CASE("Player movement") {
           {pressingRight, {1, 2}, 8},
           {pressingRight, {1, 2}, 8}, // landing here
           {pressingRight, {1, 0}, 5},
-          {pressingRight, {0, 0}, 0}, // recovery frame - movement ignored here
+          {pressingRight, {0, 0}, 0}, // recovery frame - movement ignored
+                                      // here
+
           {pressingRight, {1, 0}, 1}, // now moving again
         });
       }
@@ -659,7 +661,9 @@ TEST_CASE("Player movement") {
       SECTION("Can move horizontally while jumping") {
         testMovementSequence(player, {
           {jumpButtonTriggered & pressingLeft, {-1, 0}, 5},
-          {pressingLeft, {0, -2}, 6}, // no movement on the first frame of jumping
+          {pressingLeft, {0, -2}, 6}, // no movement on the first frame of
+                                      // jumping
+
           {pressingLeft, {-1, -2}, 6},
           {pressingLeft, {-1, -1}, 6},
           {pressingRight, {0, 0}, 6}, // change orientation
@@ -1035,11 +1039,13 @@ TEST_CASE("Player movement") {
                 base::Vector{pipeStartX - 1, position.y};
               CHECK(position == positionAtEndOfPipe);
 
+              // clang-format off
               testMovementSequence(player, {
                 {pressingLeft, {-1, 0}, 6},
                 {{}, {0, 1}, 7},
                 {{}, {0, 0}, 0}
               });
+              // clang-format on
             }
           }
 
@@ -1060,11 +1066,13 @@ TEST_CASE("Player movement") {
                 base::Vector{playerRightEdge - (PLAYER_WIDTH - 1), position.y};
               CHECK(position == positionAtEndOfPipe);
 
+              // clang-format off
               testMovementSequence(player, {
                 {pressingRight, {1, 0}, 6},
                 {{}, {0, 1}, 7},
                 {{}, {0, 0}, 0}
               });
+              // clang-format on
             }
           }
 

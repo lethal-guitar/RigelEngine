@@ -125,10 +125,12 @@ void SlimeBlob::update(
       // Animate walking
       state.mIsOddUpdate = !state.mIsOddUpdate;
 
+      // clang-format off
       const auto newAnimFrame =
         WALKING_ON_GROUND_BASE_FRAME +
         (state.mIsOddUpdate ? 1 : 0) +
         toOffset(mOrientation);
+      // clang-format on
       sprite.mFramesToRender[0] = newAnimFrame;
 
       // Decide if we should continue walking or change state

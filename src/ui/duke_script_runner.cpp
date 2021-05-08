@@ -121,9 +121,12 @@ void DukeScriptRunner::startExecution(const data::script::Script& script) {
 
 
 bool DukeScriptRunner::hasFinishedExecution() const {
-  return mState == State::FinishedExecution ||
+  // clang-format off
+  return
+    mState == State::FinishedExecution ||
     mState == State::ExecutionInterrupted ||
     mState == State::ExecutionTimedOut;
+  // clang-format on
 }
 
 
@@ -298,9 +301,11 @@ void DukeScriptRunner::animateNewsReporter(
   const auto numFramesAlreadyTalked = static_cast<int>(elapsedFrames);
 
   if (numFramesAlreadyTalked < state.mTalkDuration) {
+    // clang-format off
     const auto randomNumber =
       engine::RANDOM_NUMBER_TABLE[
         numFramesAlreadyTalked % engine::RANDOM_NUMBER_TABLE.size()];
+    // clang-format on
     drawSprite(
       data::ActorID::News_reporter_talking_mouth_animation,
       randomNumber % NUM_NEWS_REPORTER_STATES,

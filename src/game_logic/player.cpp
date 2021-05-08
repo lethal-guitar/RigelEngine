@@ -781,11 +781,13 @@ void Player::updateMovement(
 
   updateJumpButtonStateTracking(jumpButton);
 
+  // clang-format off
   const auto shouldActivateJetpack =
     canFire() &&
     mpPlayerModel->weapon() == data::WeaponType::FlameThrower &&
     movementVector.y > 0 &&
     fireButton.mIsPressed;
+  // clang-format on
 
   if (shouldActivateJetpack && !stateIs<UsingJetpack>()) {
     mState = UsingJetpack{};
@@ -808,9 +810,11 @@ void Player::updateMovement(
       if (movementVector.y != 0) {
         const auto movement = movementVector.y;
 
+        // clang-format off
         mStance = movement < 0
           ? WeaponStance::Upwards
           : WeaponStance::RegularCrouched;
+        // clang-format on
 
         setVisualState(
           movement < 0 ? VisualState::LookingUp : VisualState::Crouching);
@@ -924,9 +928,12 @@ void Player::updateMovement(
         const auto worldBBox = engine::toWorldSpace(bbox, position);
 
         const auto attachX = worldBBox.topLeft.x + 1;
+
+        // clang-format off
         const auto nextY = movement < 0
           ? worldBBox.top() - 1
           : worldBBox.bottom() + 1;
+        // clang-format on
 
         const auto canContinue = mpMap->attributes(attachX, nextY).isLadder();
 
@@ -939,11 +946,13 @@ void Player::updateMovement(
     },
 
     [&, this](OnPipe& state) {
+      // clang-format off
       if (
         movementVector.y <= 0 &&
         mJumpRequested &&
-        !mpCollisionChecker->isTouchingCeiling(position, bbox)
-      ) {
+        !mpCollisionChecker->isTouchingCeiling(position, bbox))
+      // clang-format on
+      {
         position.y -= 1;
         jumpFromLadder(movementVector);
         return;
@@ -957,9 +966,11 @@ void Player::updateMovement(
       if (movementVector.y != 0) {
         const auto movement = movementVector.y;
 
+        // clang-format off
         mStance = movement < 0
           ? WeaponStance::Upwards
           : WeaponStance::Downwards;
+        // clang-format on
 
         setVisualState(movement < 0
           ? VisualState::PullingLegsUpOnPipe
@@ -978,9 +989,12 @@ void Player::updateMovement(
           switchOrientation();
         } else {
           const auto worldBBox = engine::toWorldSpace(bbox, position);
+
+          // clang-format off
           const auto testX = movementVector.x < 0
             ? worldBBox.topLeft.x
             : worldBBox.right();
+          // clang-format on
 
           const auto result = moveHorizontally(
             *mpCollisionChecker, mEntity, orientationAsMovement);
@@ -1155,9 +1169,11 @@ bool Player::updateElevatorMovement(const int movementDirection) {
       playerPosition,
       DEFAULT_PLAYER_BOUNDS);
 
+    // clang-format off
     return
       (movementDirection > 0 && elevatorOnGround) ||
       (movementDirection < 0 && playerTouchingCeiling);
+    // clang-format on
   };
 
   const auto previousY = playerPosition.y;
@@ -1179,10 +1195,13 @@ void Player::updateLadderAttachment(const base::Vector& movementVector) {
   const auto& bbox = *mEntity.component<c::BoundingBox>();
   auto& position = *mEntity.component<c::WorldPosition>();
 
+  // clang-format off
   const auto canAttachToLadder =
     !stateIs<ClimbingLadder>() &&
     !stateIs<InShip>() &&
     (!stateIs<Jumping>() || std::get<Jumping>(mState).mFramesElapsed >= 3);
+  // clang-format on
+
   const auto wantsToAttach = movementVector.y < 0;
   if (canAttachToLadder && wantsToAttach) {
     const auto worldBBox = engine::toWorldSpace(bbox, position);
@@ -1242,12 +1261,14 @@ void Player::updateJumpMovement(
       }
     }
 
+    // clang-format off
     if (
       state.mFramesElapsed == 1 &&
       !state.mDoingSomersault &&
       movementVector.x != 0 &&
-      mAttachedSpiders.none()
-    ) {
+      mAttachedSpiders.none())
+    // clang-format on
+    {
       const auto shouldDoSomersault = mpRandomGenerator->gen() % 6 == 0;
       if (shouldDoSomersault) {
         state.mDoingSomersault = true;
@@ -1504,11 +1525,13 @@ void Player::updateCloakedAppearance() {
   auto& sprite = *mEntity.component<c::Sprite>();
   sprite.mTranslucent = hasCloak;
 
+  // clang-format off
   if (
     hasCloak &&
     mFramesElapsedHavingCloak > ITEM_ABOUT_TO_EXPIRE_TIME &&
-    mIsOddFrame
-  ) {
+    mIsOddFrame)
+  // clang-format on
+  {
     sprite.flashWhite();
   }
 }
@@ -1624,6 +1647,7 @@ void Player::fireShot() {
 
 
 bool Player::canFire() const {
+  // clang-format off
   const auto firingBlocked =
     stateIs<ClimbingLadder>() ||
     stateIs<Interacting>() ||
@@ -1631,6 +1655,7 @@ bool Player::canFire() const {
     mIsRidingElevator ||
     (stateIs<OnPipe>() && mStance == WeaponStance::Upwards) ||
     hasSpiderAt(SpiderClingPosition::Weapon);
+  // clang-format on
 
   return !firingBlocked;
 }

@@ -70,10 +70,12 @@ void IngameMessageDisplay::update() {
       ++state.mCharsPrinted;
 
       const auto messageConsumed = state.effectiveOffset() >= mMessage.size();
+      // clang-format off
       const auto endOfLine =
         state.mCharsPrinted == CHARS_PER_LINE ||
         foundNextLineMarker ||
         messageConsumed;
+      // clang-format on
 
       if (endOfLine) {
         mState = Waiting{state.effectiveOffset()};

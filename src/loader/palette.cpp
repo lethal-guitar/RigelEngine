@@ -63,6 +63,8 @@ PaletteType load6bitPalette(
 // 0x20, 0x00, 0x00,  0x30, 0x00, 0x00,  0x40, 0x1C, 0x10,  0x40, 0x40, 0x00,
 // 0x00, 0x10, 0x00,  0x00, 0x00, 0x20,  0x00, 0x00, 0x30,  0x00, 0x00, 0x40,
 // 0x00, 0x20, 0x00,  0x00, 0x30, 0x00,  0x20, 0x10, 0x00,  0x40, 0x40, 0x40
+
+// clang-format off
 const Palette16 INGAME_PALETTE{
   data::Pixel{0,     0,   0, 255},
   data::Pixel{60,   60,  60, 255},
@@ -79,8 +81,9 @@ const Palette16 INGAME_PALETTE{
   data::Pixel{0,   121,   0, 255},
   data::Pixel{0,   182,   0, 255},
   data::Pixel{121,  60,   0, 255},
-  data::Pixel{242, 242, 242, 255}
+  data::Pixel{242, 242, 242, 255},
 };
+// clang-format on
 
 
 Palette16 load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end) {

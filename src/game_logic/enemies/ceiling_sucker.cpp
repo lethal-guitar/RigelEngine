@@ -61,10 +61,12 @@ void CeilingSucker::update(
 
   base::match(mState,
     [&, this](const Ready&) {
+      // clang-format off
       if (
         playerPos.x + 4 >= position.x &&
-        position.x + 4 >= playerPos.x
-      ) {
+        position.x + 4 >= playerPos.x)
+      // clang-format on
+      {
         mState = Grabbing{};
         engine::startAnimationSequence(entity, ANIM_SEQUENCE_GRAB_AIR);
       }
@@ -78,13 +80,16 @@ void CeilingSucker::update(
       }
 
       // TODO: Don't grab when player in player ship
+
+      // clang-format off
       if (
         state.mFramesElapsed == 5 &&
         touchingPlayer() &&
         !s.mpPlayer->isDead() &&
         playerPos.x + 1 >= position.x &&
-        position.x + 1 >= playerPos.x
-      ) {
+        position.x + 1 >= playerPos.x)
+      // clang-format on
+      {
         s.mpPlayer->incapacitate(1);
         mState = HoldingPlayer{};
         engine::startAnimationSequence(entity, ANIM_SEQUENCE_GRAB_PLAYER);

@@ -74,7 +74,9 @@ void drawNumbersBig(
     if (digit >= positionsToSkip) {
       const auto numeralIndex =
         printed[digit - positionsToSkip + inputToSkip] - 0x30;
+      // clang-format off
       spriteSheet.renderTileQuad(numeralIndex*2 + 7*40, tlPositionForDigit);
+      // clang-format on
     }
   }
 }
@@ -91,9 +93,11 @@ void drawScore(const int score, const TiledTexture& spriteSheet) {
 
 void drawWeaponIcon(const WeaponType type, const TiledTexture& spriteSheet) {
   const auto weaponIndex = static_cast<int>(type);
+  // clang-format off
   spriteSheet.renderTileDoubleQuad(
     weaponIndex*4 + 4 + 5*40,
     base::Vector{17, GameTraits::mapViewPortSize.height + 1});
+  // clang-format on
 }
 
 
@@ -315,18 +319,24 @@ void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const {
   if (numFullSlices > 0) {
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = i < numFullSlices ? 9 : 10;
+
+      // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
+      // clang-format on
     }
   } else {
     const auto animationOffset = mElapsedFrames;
 
     for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
       const auto sliceIndex = (i + animationOffset) % 9;
+
+      // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
+      // clang-format on
     }
   }
 }

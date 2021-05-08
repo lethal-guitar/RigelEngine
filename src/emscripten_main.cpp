@@ -57,10 +57,12 @@ void runOneFrameWrapper(void *pData) {
   if (const auto result = pGame->runOneFrame();
       result && *result == Game::StopReason::GameEnded)
   {
+// clang-format off
     EM_ASM(
       document.getElementById("canvas").style.display = "none";
       document.getElementById("thankyoubox").style.display = "block";
     );
+// clang-format on
 
     emscripten_cancel_main_loop();
   }
@@ -104,12 +106,14 @@ int main()
 
   Game game(options, &userProfile, pWindow.get(), false);
 
+// clang-format off
   EM_ASM(
     var loadingBox = document.getElementById("loadingbox");
     loadingBox.parentNode.removeChild(loadingBox);
 
     document.getElementById("welcomebox").style.display = "block";
   );
+// clang-format on
 
   emscripten_set_main_loop_arg(runOneFrameWrapper, &game, 0, true);
 

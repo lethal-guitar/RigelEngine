@@ -84,9 +84,11 @@ void LaserTurret::update(
 
     // See if we need to re-adjust our orientation
     const auto playerIsRight = position.x <= playerPosition.x;
+    // clang-format off
     const auto isInPosition =
       (playerIsRight && mAngle == 4) ||
       (!playerIsRight && mAngle == 0);
+    // clang-format on
 
     if (isInPosition) {
       // Count down and maybe fire
@@ -174,11 +176,15 @@ void LaserTurret::onKilled(
 
   const auto shotFromRight = inflictorVelocity.x < 0.0f;
   const auto shotFromLeft = inflictorVelocity.x > 0.0f;
+
+  // clang-format off
   const auto debrisMovement = shotFromRight
     ? SpriteMovement::FlyUpperLeft
     : (shotFromLeft)
       ? SpriteMovement::FlyUpperRight
       : SpriteMovement::FlyUp;
+  // clang-format on
+
   spawnMovingEffectSprite(
     *d.mpEntityFactory,
     data::ActorID::Laser_turret,

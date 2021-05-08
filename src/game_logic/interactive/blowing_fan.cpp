@@ -61,10 +61,12 @@ void BlowingFan::update(
   };
 
   auto playerInRange = [&]() {
+    // clang-format off
     return
       playerInHorizontalRange() &&
       position.y > playerPos.y &&
       playerPos.y + 25 > position.y;
+    // clang-format on
   };
 
 
@@ -93,11 +95,13 @@ void BlowingFan::update(
     s.mpPlayer->beginBeingPushedByFan();
     mIsPushingPlayer = true;
 
+    // clang-format off
     if (
       spriteFrames[0] == 3 ||
       playerPos.y + 24 == position.y ||
-      playerPos.y + 25 == position.y
-    ) {
+      playerPos.y + 25 == position.y)
+    // clang-format on
+    {
       d.mpServiceProvider->playSound(data::SoundId::Swoosh);
     }
   }

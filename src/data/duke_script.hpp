@@ -24,6 +24,7 @@
 
 namespace rigel::data::script {
 
+// clang-format off
 struct DisableMenuFunctionality {};
 struct EnableTextOffset {};
 struct EnableTimeOutToDemo {};
@@ -33,6 +34,7 @@ struct ScheduleFadeInBeforeNextWaitState {};
 struct ShowKeyBindings {};
 struct StopNewsReporterAnimation {};
 struct WaitForUserInput {};
+// clang-format on
 
 
 struct ShowFullScreenImage {

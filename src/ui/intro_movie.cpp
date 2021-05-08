@@ -64,6 +64,7 @@ using data::SoundId;
 IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
   const loader::ResourceLoader& resources
 ){
+  // clang-format off
   return {
     // Neo LA - the future
     {
@@ -180,6 +181,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
       }
     }
   };
+  // clang-format on
 }
 
 

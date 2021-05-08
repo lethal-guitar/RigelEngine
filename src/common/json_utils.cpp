@@ -33,11 +33,13 @@ bool isArrayOfPrimitives(const nlohmann::json& item) {
   using std::begin;
   using std::end;
 
+// clang-format off
   return
     item.is_array() &&
     all_of(begin(item), end(item), [](const nlohmann::json& element) {
       return !element.is_structured();
     });
+// clang-format on
 }
 
 }

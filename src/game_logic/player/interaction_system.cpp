@@ -157,11 +157,14 @@ ex::Entity currentlyTouchedInteractable(
 
     if (type == InteractableType::Teleporter) {
       const auto& playerPos = pPlayer->orientedPosition();
+
+      // clang-format off
       return
         objectBounds.left() <= playerPos.x &&
         objectBounds.left() + 3 >= playerPos.x &&
         objectBounds.bottom() == playerPos.y &&
         pPlayer->isInRegularState();
+      // clang-format on
     }
 
     return true;

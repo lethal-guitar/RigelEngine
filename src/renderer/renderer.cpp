@@ -198,6 +198,7 @@ data::Image createWaterSurfaceAnimImage() {
     WATER_ANIM_TEX_WIDTH * WATER_ANIM_TEX_HEIGHT,
     base::Color{255, 255, 255, 255}};
 
+  // clang-format off
   const std::array<int, 16> patternCalmSurface{
     0, 0, 0, 0, 0, 0, 0, 0,
     1, 1, 1, 1, 1, 1, 1, 1
@@ -212,6 +213,7 @@ data::Image createWaterSurfaceAnimImage() {
     0, 1, 1, 0, 0, 0, 0, 0,
     1, 1, 1, 1, 1, 0, 0, 1
   };
+  // clang-format on
 
   auto applyPattern = [&pixels](
     const auto& pattern,
@@ -323,6 +325,7 @@ struct Renderer::Impl {
     bool mTextureRepeatEnabled = false;
 
     friend bool operator==(const State& lhs, const State& rhs) {
+      // clang-format off
       return
         std::tie(
           lhs.mClipRect,
@@ -340,6 +343,7 @@ struct Renderer::Impl {
           rhs.mGlobalScale,
           rhs.mRenderTargetTexture,
           rhs.mTextureRepeatEnabled);
+      // clang-format on
     }
 
     friend bool operator!=(const State& lhs, const State& rhs) {
@@ -347,10 +351,12 @@ struct Renderer::Impl {
     }
 
     bool needsExtendedShader() const {
+      // clang-format off
       return
         mTextureRepeatEnabled ||
         mOverlayColor != base::Color{} ||
         mColorModulation != base::Color{255, 255, 255, 255};
+      // clang-format on
     }
   };
 
@@ -630,10 +636,12 @@ struct Renderer::Impl {
 
     const auto colorVec = toGlColor(color);
 
+    // clang-format off
     float vertices[] = {
       float(x1), float(y1), colorVec.r, colorVec.g, colorVec.b, colorVec.a,
       float(x2), float(y2), colorVec.r, colorVec.g, colorVec.b, colorVec.a
     };
+    // clang-format on
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glDrawArrays(GL_LINE_STRIP, 0, 2);

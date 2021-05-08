@@ -119,11 +119,13 @@ void Spider::update(
   };
 
   auto tryClingToPlayer = [&, this](const SpiderClingPosition clingPos) {
+    // clang-format off
     if (
       s.mpPlayer->hasSpiderAt(clingPos) ||
       s.mpPlayer->isDead() ||
-      s.mpPlayer->isCloaked()
-    ) {
+      s.mpPlayer->isCloaked())
+    // clang-format on
+    {
       return false;
     }
 

@@ -83,11 +83,13 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
           shootableEntity.has_component<Active>() &&
           shootableEntity.component<Active>()->mIsOnScreen;
 
+        // clang-format off
         if (
           shootableBbox.intersects(inflictorBbox) &&
           !shootable->mInvincible &&
-          (shootableOnScreen || shootable->mCanBeHitWhenOffscreen)
-        ) {
+          (shootableOnScreen || shootable->mCanBeHitWhenOffscreen))
+        // clang-format on
+        {
           const auto destroyOnContact = damage.mDestroyOnContact ||
             shootable->mAlwaysConsumeInflictor;
           inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
