@@ -24,10 +24,12 @@
 #include <vector>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 
-class CMPFilePackage {
+class CMPFilePackage
+{
 public:
   explicit CMPFilePackage(const std::string& filePath);
 
@@ -36,7 +38,8 @@ public:
   bool hasFile(const std::string& name) const;
 
 private:
-  struct DictEntry {
+  struct DictEntry
+  {
     DictEntry(std::uint32_t fileOffset, std::uint32_t fileSize);
     DictEntry(const DictEntry&) = default;
     DictEntry(DictEntry&&) = default;
@@ -55,4 +58,4 @@ private:
 };
 
 
-}
+} // namespace rigel::loader

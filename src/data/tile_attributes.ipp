@@ -18,54 +18,64 @@
 #include <stdexcept>
 
 
-namespace rigel::data::map {
+namespace rigel::data::map
+{
 
 using namespace std;
 
 
-namespace detail {
+namespace detail
+{
 
-inline bool isBitSet(uint16_t bitPack, uint16_t bitMask) {
+inline bool isBitSet(uint16_t bitPack, uint16_t bitMask)
+{
   return (bitPack & bitMask) != 0;
 }
 
-}
+} // namespace detail
 
 
-inline SolidEdge SolidEdge::top() {
+inline SolidEdge SolidEdge::top()
+{
   return SolidEdge{0x01};
 }
 
 
-inline SolidEdge SolidEdge::bottom() {
+inline SolidEdge SolidEdge::bottom()
+{
   return SolidEdge{0x02};
 }
 
 
-inline SolidEdge SolidEdge::left() {
+inline SolidEdge SolidEdge::left()
+{
   return SolidEdge{0x08};
 }
 
 
-inline SolidEdge SolidEdge::right() {
+inline SolidEdge SolidEdge::right()
+{
   return SolidEdge{0x04};
 }
 
 
-inline SolidEdge SolidEdge::any() {
+inline SolidEdge SolidEdge::any()
+{
   return SolidEdge{0x0F};
 }
 
 
-inline CollisionData CollisionData::fullySolid() {
+inline CollisionData CollisionData::fullySolid()
+{
   return CollisionData{0xFF};
 }
 
 
 inline CollisionData::CollisionData(
-  const std::initializer_list<CollisionData>& items
-) {
-  for (const auto& item : items) {
+  const std::initializer_list<CollisionData>& items)
+{
+  for (const auto& item : items)
+  {
     mCollisionFlagsBitPack |= item.mCollisionFlagsBitPack;
   }
 }
@@ -83,42 +93,50 @@ inline TileAttributes::TileAttributes(const std::uint16_t attributesBitPack)
 }
 
 
-inline bool TileAttributes::isAnimated() const {
+inline bool TileAttributes::isAnimated() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x10);
 }
 
 
-inline bool TileAttributes::isFastAnimation() const {
+inline bool TileAttributes::isFastAnimation() const
+{
   return !detail::isBitSet(mAttributesBitPack, 0x400);
 }
 
 
-inline bool TileAttributes::isForeGround() const {
+inline bool TileAttributes::isForeGround() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x20);
 }
 
 
-inline bool TileAttributes::isLadder() const {
+inline bool TileAttributes::isLadder() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x4000);
 }
 
 
-inline bool TileAttributes::isClimbable() const {
+inline bool TileAttributes::isClimbable() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x80);
 }
 
 
-inline bool TileAttributes::isConveyorBeltLeft() const {
+inline bool TileAttributes::isConveyorBeltLeft() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x100);
 }
 
 
-inline bool TileAttributes::isConveyorBeltRight() const {
+inline bool TileAttributes::isConveyorBeltRight() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x200);
 }
 
 
-inline bool TileAttributes::isFlammable() const {
+inline bool TileAttributes::isFlammable() const
+{
   return detail::isBitSet(mAttributesBitPack, 0x40);
 }
 
@@ -135,19 +153,23 @@ inline TileAttributeDict::TileAttributeDict(AttributeArray&& bitpacks)
 }
 
 
-inline uint16_t TileAttributeDict::bitPackFor(const TileIndex tile) const {
+inline uint16_t TileAttributeDict::bitPackFor(const TileIndex tile) const
+{
   assert(tile < mAttributeBitPacks.size());
   return mAttributeBitPacks[tile];
 }
 
 
-inline TileAttributes TileAttributeDict::attributes(const TileIndex tile) const {
+inline TileAttributes TileAttributeDict::attributes(const TileIndex tile) const
+{
   return TileAttributes(bitPackFor(tile));
 }
 
 
-inline CollisionData TileAttributeDict::collisionData(const TileIndex tile) const {
+inline CollisionData
+  TileAttributeDict::collisionData(const TileIndex tile) const
+{
   return CollisionData(static_cast<uint8_t>(bitPackFor(tile) & 0xF));
 }
 
-}
+} // namespace rigel::data::map

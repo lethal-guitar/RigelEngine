@@ -20,7 +20,8 @@
 #include "loader/byte_buffer.hpp"
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 data::Song loadSong(const ByteBuffer& imfData);
 

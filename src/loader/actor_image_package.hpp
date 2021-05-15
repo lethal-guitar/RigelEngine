@@ -28,10 +28,13 @@
 #include <vector>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-struct ActorData {
-  struct Frame {
+struct ActorData
+{
+  struct Frame
+  {
     base::Vector mDrawOffset;
     data::Image mFrameImage;
   };
@@ -44,7 +47,8 @@ struct ActorData {
 using FontData = std::vector<data::Image>;
 
 
-class ActorImagePackage {
+class ActorImagePackage
+{
 public:
   static constexpr auto IMAGE_DATA_FILE = "ACTORS.MNI";
   static constexpr auto ACTOR_INFO_FILE = "ACTRINFO.MNI";
@@ -60,18 +64,21 @@ public:
 
   FontData loadFont() const;
 
-  int drawIndexFor(data::ActorID id) const {
+  int drawIndexFor(data::ActorID id) const
+  {
     return mDrawIndexById.at(static_cast<size_t>(id));
   }
 
 private:
-  struct ActorFrameHeader {
+  struct ActorFrameHeader
+  {
     base::Vector mDrawOffset;
     base::Extents mSizeInTiles;
     std::uint32_t mFileOffset;
   };
 
-  struct ActorHeader {
+  struct ActorHeader
+  {
     int mDrawIndex;
     std::vector<ActorFrameHeader> mFrames;
   };
@@ -83,8 +90,7 @@ private:
 
   data::Image loadImage(
     const ActorFrameHeader& frameHeader,
-    const Palette16& palette
-  ) const;
+    const Palette16& palette) const;
 
 private:
   const ByteBuffer mImageData;
@@ -94,4 +100,4 @@ private:
 };
 
 
-}
+} // namespace rigel::loader

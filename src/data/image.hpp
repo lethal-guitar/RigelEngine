@@ -22,7 +22,8 @@
 #include <vector>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 using Pixel = rigel::base::Color;
 using PixelBuffer = std::vector<Pixel>;
@@ -32,23 +33,18 @@ using PixelBuffer = std::vector<Pixel>;
  *
  * Always RGBA, 8-bit to keep things simple.
  */
-class Image {
+class Image
+{
 public:
   Image(PixelBuffer&& pixels, std::size_t width, std::size_t height);
   Image(const PixelBuffer& pixels, std::size_t width, std::size_t height);
   Image(std::size_t width, std::size_t height);
 
-  const PixelBuffer& pixelData() const {
-    return mPixels;
-  }
+  const PixelBuffer& pixelData() const { return mPixels; }
 
-  std::size_t width() const {
-    return mWidth;
-  }
+  std::size_t width() const { return mWidth; }
 
-  std::size_t height() const {
-    return mHeight;
-  }
+  std::size_t height() const { return mHeight; }
 
   void insertImage(std::size_t x, std::size_t y, const Image& image);
   void insertImage(
@@ -64,4 +60,4 @@ private:
 };
 
 
-}
+} // namespace rigel::data

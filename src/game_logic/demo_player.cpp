@@ -21,9 +21,11 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace {
+namespace
+{
 
 constexpr int DEMO_EPISODE = 0;
 constexpr int DEMO_LEVELS[] = {0, 2, 4, 6};
@@ -31,10 +33,9 @@ constexpr auto DEMO_DIFFICULTY = data::Difficulty::Hard;
 constexpr std::uint8_t END_OF_DEMO_MARKER = 0xFF;
 
 
-PlayerInput parseInput(
-  const std::uint8_t byte,
-  const PlayerInput& previousInput
-) {
+PlayerInput
+  parseInput(const std::uint8_t byte, const PlayerInput& previousInput)
+{
   PlayerInput result;
 
   result.mUp = (byte & 0b1) != 0;
@@ -45,24 +46,27 @@ PlayerInput parseInput(
   result.mFire.mIsPressed = (byte & 0b100000) != 0;
   result.mInteract.mIsPressed = (byte & 0b1) != 0;
 
-  result.mJump.mWasTriggered = result.mJump.mIsPressed &&
-    !previousInput.mJump.mIsPressed;
-  result.mFire.mWasTriggered = result.mFire.mIsPressed &&
-    !previousInput.mFire.mIsPressed;
-  result.mInteract.mWasTriggered = result.mInteract.mIsPressed &&
-    !previousInput.mInteract.mIsPressed;
+  result.mJump.mWasTriggered =
+    result.mJump.mIsPressed && !previousInput.mJump.mIsPressed;
+  result.mFire.mWasTriggered =
+    result.mFire.mIsPressed && !previousInput.mFire.mIsPressed;
+  result.mInteract.mWasTriggered =
+    result.mInteract.mIsPressed && !previousInput.mInteract.mIsPressed;
 
   return result;
 }
 
 
-std::vector<DemoInput> loadDemo(const loader::ResourceLoader& resources) {
+std::vector<DemoInput> loadDemo(const loader::ResourceLoader& resources)
+{
   PlayerInput previousInput;
   std::vector<DemoInput> result;
 
   const auto demoData = resources.file("NUKEM2.MNI");
-  for (const auto byte : demoData) {
-    if (byte == END_OF_DEMO_MARKER) {
+  for (const auto byte : demoData)
+  {
+    if (byte == END_OF_DEMO_MARKER)
+    {
       break;
     }
 
@@ -77,11 +81,12 @@ std::vector<DemoInput> loadDemo(const loader::ResourceLoader& resources) {
 }
 
 
-data::GameSessionId demoSessionId(const std::size_t levelIndex) {
+data::GameSessionId demoSessionId(const std::size_t levelIndex)
+{
   return {DEMO_EPISODE, DEMO_LEVELS[levelIndex], DEMO_DIFFICULTY};
 }
 
-}
+} // namespace
 
 
 DemoPlayer::DemoPlayer(GameMode::Context context)
@@ -98,14 +103,17 @@ DemoPlayer::DemoPlayer(GameMode::Context context)
 }
 
 
-void DemoPlayer::updateAndRender(const engine::TimeDelta dt) {
-  if (isFinished()) {
+void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
+{
+  if (isFinished())
+  {
     return;
   }
 
   mElapsedTime += dt;
 
-  if (mElapsedTime >= GAME_LOGIC_UPDATE_DELAY) {
+  if (mElapsedTime >= GAME_LOGIC_UPDATE_DELAY)
+  {
     mpWorld->updateGameLogic(mFrames[mCurrentFrameIndex].mInput);
     ++mCurrentFrameIndex;
 
@@ -117,25 +125,24 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt) {
 
   if (
     mCurrentFrameIndex < mFrames.size() &&
-    mFrames[mCurrentFrameIndex].mNextLevel
-  ) {
+    mFrames[mCurrentFrameIndex].mNextLevel)
+  {
     mContext.mpServiceProvider->fadeOutScreen();
 
     ++mCurrentFrameIndex;
     ++mLevelIndex;
     mPlayerModel.resetForNewLevel();
     mpWorld = std::make_unique<GameWorld>(
-      &mPlayerModel,
-      demoSessionId(mLevelIndex),
-      mContext);
+      &mPlayerModel, demoSessionId(mLevelIndex), mContext);
 
     mContext.mpServiceProvider->fadeInScreen();
   }
 }
 
 
-bool DemoPlayer::isFinished() const {
+bool DemoPlayer::isFinished() const
+{
   return mCurrentFrameIndex >= mFrames.size();
 }
 
-}
+} // namespace rigel::game_logic

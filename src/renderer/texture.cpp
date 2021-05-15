@@ -19,31 +19,35 @@
 #include <cassert>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 using data::Image;
 
 
-void Texture::render(const int x, const int y) const {
+void Texture::render(const int x, const int y) const
+{
   base::Rect<int> fullImageRect{{0, 0}, {width(), height()}};
   render(x, y, fullImageRect);
 }
 
 
-void Texture::render(const base::Vector& position) const {
+void Texture::render(const base::Vector& position) const
+{
   render(position.x, position.y);
 }
 
 
 void Texture::render(
   const base::Vector& position,
-  const base::Rect<int>& sourceRect
-) const {
+  const base::Rect<int>& sourceRect) const
+{
   render(position.x, position.y, sourceRect);
 }
 
 
-void Texture::renderScaled(const base::Rect<int>& destRect) const {
+void Texture::renderScaled(const base::Rect<int>& destRect) const
+{
   mpRenderer->drawTexture(mId, {0.0f, 0.0f, 1.0f, 1.0f}, destRect);
 }
 
@@ -51,12 +55,10 @@ void Texture::renderScaled(const base::Rect<int>& destRect) const {
 void Texture::render(
   const int x,
   const int y,
-  const base::Rect<int>& sourceRect
-) const {
+  const base::Rect<int>& sourceRect) const
+{
   base::Rect<int> destRect{
-    {x, y},
-    {sourceRect.size.width, sourceRect.size.height}
-  };
+    {x, y}, {sourceRect.size.width, sourceRect.size.height}};
   mpRenderer->drawTexture(
     mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);
 }
@@ -72,8 +74,10 @@ Texture::Texture(renderer::Renderer* pRenderer, const Image& image)
 }
 
 
-Texture::~Texture() {
-  if (mpRenderer) {
+Texture::~Texture()
+{
+  if (mpRenderer)
+  {
     mpRenderer->destroyTexture(mId);
   }
 }
@@ -82,8 +86,7 @@ Texture::~Texture() {
 RenderTargetTexture::RenderTargetTexture(
   renderer::Renderer* pRenderer,
   const int width,
-  const int height
-)
+  const int height)
   : Texture(
       pRenderer,
       pRenderer->createRenderTargetTexture(width, height),
@@ -92,4 +95,4 @@ RenderTargetTexture::RenderTargetTexture(
 {
 }
 
-}
+} // namespace rigel::renderer

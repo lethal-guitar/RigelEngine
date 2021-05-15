@@ -31,14 +31,15 @@
 #include "loader/palette.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void SuperForceField::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
@@ -46,19 +47,22 @@ void SuperForceField::update(
   auto& sprite = *entity.component<Sprite>();
   auto& playerPos = s.mpPlayer->position();
 
-  if (mFizzleFramesElapsed) {
+  if (mFizzleFramesElapsed)
+  {
     auto& animationFrame = sprite.mFramesToRender[0];
 
     auto& framesElapsed = *mFizzleFramesElapsed;
     ++framesElapsed;
 
     animationFrame = (s.mpPerFrameState->mIsOddFrame ? 0 : 1) + 1;
-    if ((d.mpRandomGenerator->gen() / 8) % 2 != 0) {
+    if ((d.mpRandomGenerator->gen() / 8) % 2 != 0)
+    {
       d.mpServiceProvider->playSound(data::SoundId::ForceFieldFizzle);
       sprite.flashWhite(0);
     }
 
-    if (framesElapsed == 19) {
+    if (framesElapsed == 19)
+    {
       animationFrame = 0;
       mFizzleFramesElapsed = std::nullopt;
     }
@@ -66,11 +70,13 @@ void SuperForceField::update(
     engine::synchronizeBoundingBoxToSprite(entity);
   }
 
-  if (mDestructionFramesElapsed) {
+  if (mDestructionFramesElapsed)
+  {
     auto& framesElapsed = *mDestructionFramesElapsed;
     ++framesElapsed;
 
-    if (framesElapsed % 2 != 0) {
+    if (framesElapsed % 2 != 0)
+    {
       d.mpServiceProvider->playSound(data::SoundId::GlassBreaking);
       d.mpParticles->spawnParticles(
         position + base::Vector{1, -framesElapsed + 14},
@@ -82,9 +88,10 @@ void SuperForceField::update(
       s.mpPlayer->model().giveScore(500);
     }
 
-    if (framesElapsed == 10) {
-      d.mpEvents->emit(rigel::events::PlayerMessage{
-        data::Messages::ForceFieldDestroyed});
+    if (framesElapsed == 10)
+    {
+      d.mpEvents->emit(
+        rigel::events::PlayerMessage{data::Messages::ForceFieldDestroyed});
       d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
@@ -109,20 +116,26 @@ void SuperForceField::update(
   const auto worldBbox = engine::toWorldSpace(bbox, position);
   const auto touchingPlayer =
     worldBbox.intersects(s.mpPlayer->worldSpaceHitBox());
-  if (touchingPlayer) {
-    if (s.mpPlayer->isCloaked()) {
+  if (touchingPlayer)
+  {
+    if (s.mpPlayer->isCloaked())
+    {
       mDestructionFramesElapsed = 0;
-    } else {
+    }
+    else
+    {
       startFizzle();
       s.mpPlayer->takeDamage(1);
-      d.mpEvents->emit(rigel::events::TutorialMessage{
-        data::TutorialMessageId::CloakNeeded});
+      d.mpEvents->emit(
+        rigel::events::TutorialMessage{data::TutorialMessageId::CloakNeeded});
 
-      if (playerPos.x + 2 <= position.x) {
+      if (playerPos.x + 2 <= position.x)
+      {
         --playerPos.x;
       }
 
-      if (playerPos.x + 2 > position.x) {
+      if (playerPos.x + 2 > position.x)
+      {
         ++playerPos.x;
       }
     }
@@ -134,8 +147,8 @@ void SuperForceField::onHit(
   GlobalDependencies& d,
   GlobalState& s,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using game_logic::components::Shootable;
 
   startFizzle();
@@ -143,10 +156,12 @@ void SuperForceField::onHit(
 }
 
 
-void SuperForceField::startFizzle() {
-  if (!mFizzleFramesElapsed) {
+void SuperForceField::startFizzle()
+{
+  if (!mFizzleFramesElapsed)
+  {
     mFizzleFramesElapsed = 0;
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

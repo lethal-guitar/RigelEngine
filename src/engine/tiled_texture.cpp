@@ -22,7 +22,8 @@
 #include <cassert>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using namespace data;
 using namespace renderer;
@@ -36,8 +37,8 @@ TiledTexture::TiledTexture(Texture&& tileSet, Renderer* pRenderer)
 
 void TiledTexture::renderTileStretched(
   const int index,
-  const base::Rect<int>& destRect
-) const {
+  const base::Rect<int>& destRect) const
+{
   mpRenderer->drawTexture(
     mTileSetTexture.data(),
     renderer::toTexCoords(
@@ -48,40 +49,38 @@ void TiledTexture::renderTileStretched(
 }
 
 
-void TiledTexture::renderTile(
-  const int index,
-  const int x,
-  const int y
-) const {
+void TiledTexture::renderTile(const int index, const int x, const int y) const
+{
   renderTileGroup(index, x, y, 1, 1);
 }
 
 
 void TiledTexture::renderTileSlice(
   const int baseIndex,
-  const base::Vector& tlPosition
-) const {
+  const base::Vector& tlPosition) const
+{
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 1, 2);
 }
 
 
 void TiledTexture::renderTileQuad(
   const int baseIndex,
-  const base::Vector& tlPosition
-) const {
+  const base::Vector& tlPosition) const
+{
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 2, 2);
 }
 
 
 void TiledTexture::renderTileDoubleQuad(
   const int baseIndex,
-  const base::Vector& tlPosition
-) const {
+  const base::Vector& tlPosition) const
+{
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 4, 2);
 }
 
 
-int TiledTexture::tilesPerRow() const {
+int TiledTexture::tilesPerRow() const
+{
   return data::pixelsToTiles(mTileSetTexture.width());
 }
 
@@ -91,8 +90,8 @@ void TiledTexture::renderTileGroup(
   const int posX,
   const int posY,
   const int tileSpanX,
-  const int tileSpanY
-) const {
+  const int tileSpanY) const
+{
   mTileSetTexture.render(
     tileVectorToPixelVector({posX, posY}),
     sourceRect(index, tileSpanX, tileSpanY));
@@ -102,15 +101,13 @@ void TiledTexture::renderTileGroup(
 base::Rect<int> TiledTexture::sourceRect(
   const int index,
   const int tileSpanX,
-  const int tileSpanY
-) const {
+  const int tileSpanY) const
+{
   const base::Vector tileSetStartPosition{
-    index % tilesPerRow(),
-    index / tilesPerRow()};
+    index % tilesPerRow(), index / tilesPerRow()};
   return {
     tileVectorToPixelVector(tileSetStartPosition),
-    tileExtentsToPixelExtents({tileSpanX, tileSpanY})
-  };
+    tileExtentsToPixelExtents({tileSpanX, tileSpanY})};
 }
 
-}
+} // namespace rigel::engine

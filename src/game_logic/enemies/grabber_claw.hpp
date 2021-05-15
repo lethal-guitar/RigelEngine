@@ -26,24 +26,33 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct GrabberClaw {
-  struct Extending {};
+struct GrabberClaw
+{
+  struct Extending
+  {
+  };
 
-  struct Grabbing {
+  struct Grabbing
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Retracting {};
+  struct Retracting
+  {
+  };
 
-  struct Waiting {
+  struct Waiting
+  {
     int mFramesElapsed = 0;
   };
 
@@ -59,4 +68,4 @@ struct GrabberClaw {
   int mExtensionStep = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

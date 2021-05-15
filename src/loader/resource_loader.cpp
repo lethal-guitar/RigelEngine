@@ -33,13 +33,15 @@
 namespace fs = std::filesystem;
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace data;
 using namespace std;
 
 
-namespace {
+namespace
+{
 
 const auto ANTI_PIRACY_SCREEN_FILENAME = "LCR.MNI";
 
@@ -47,7 +49,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
   (GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx) /
   (GameTraits::pixelsPerEgaByte / GameTraits::egaPlanes);
 
-}
+} // namespace
 
 // When loading assets, the game will first check if a file with an expected
 // name exists at the replacements path, and if it does, it will load this file
@@ -81,17 +83,17 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
 }
 
 
-data::Image ResourceLoader::loadTiledFullscreenImage(
-  const std::string& name
-) const {
+data::Image
+  ResourceLoader::loadTiledFullscreenImage(const std::string& name) const
+{
   return loadTiledFullscreenImage(name, INGAME_PALETTE);
 }
 
 
 data::Image ResourceLoader::loadTiledFullscreenImage(
   const std::string& name,
-  const Palette16& overridePalette
-) const {
+  const Palette16& overridePalette) const
+{
   return loadTiledImage(
     file(name),
     data::GameTraits::viewPortWidthTiles,
@@ -100,19 +102,15 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
 }
 
 
-data::Image ResourceLoader::loadStandaloneFullscreenImage(
-  const std::string& name
-) const {
+data::Image
+  ResourceLoader::loadStandaloneFullscreenImage(const std::string& name) const
+{
   const auto& data = file(name);
   const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
-  const auto palette = load6bitPalette16(
-    paletteStart,
-    data.end());
+  const auto palette = load6bitPalette16(paletteStart, data.end());
 
   auto pixels = decodeSimplePlanarEgaBuffer(
-    data.begin(),
-    data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE,
-    palette);
+    data.begin(), data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE, palette);
   return data::Image(
     std::move(pixels),
     GameTraits::viewPortWidthPx,
@@ -120,7 +118,8 @@ data::Image ResourceLoader::loadStandaloneFullscreenImage(
 }
 
 
-data::Image ResourceLoader::loadAntiPiracyImage() const {
+data::Image ResourceLoader::loadAntiPiracyImage() const
+{
   using namespace std;
 
   // For some reason, the anti-piracy screen is in a different format than all
@@ -129,30 +128,32 @@ data::Image ResourceLoader::loadAntiPiracyImage() const {
   //
   // See http://www.shikadi.net/moddingwiki/Duke_Nukem_II_Full-screen_Images
   const auto& data = file(ANTI_PIRACY_SCREEN_FILENAME);
-  const auto iImageStart = begin(data) + 256*3;
+  const auto iImageStart = begin(data) + 256 * 3;
   const auto palette = load6bitPalette256(begin(data), iImageStart);
 
   data::PixelBuffer pixels;
   pixels.reserve(GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx);
-  transform(iImageStart, end(data), back_inserter(pixels),
+  transform(
+    iImageStart,
+    end(data),
+    back_inserter(pixels),
     [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
   return data::Image(
-    move(pixels),
-    GameTraits::viewPortWidthPx,
-    GameTraits::viewPortHeightPx);
+    move(pixels), GameTraits::viewPortWidthPx, GameTraits::viewPortHeightPx);
 }
 
 
 loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
-  const std::string& imageName
-) const {
+  const std::string& imageName) const
+{
   const auto& data = file(imageName);
   const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
   return load6bitPalette16(paletteStart, data.end());
 }
 
 
-TileSet ResourceLoader::loadCZone(const std::string& name) const {
+TileSet ResourceLoader::loadCZone(const std::string& name) const
+{
   using namespace data;
   using namespace map;
   using T = data::TileImageType;
@@ -163,10 +164,12 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
 
   vector<uint16_t> attributes;
   attributes.reserve(GameTraits::CZone::numTilesTotal);
-  for (TileIndex index=0; index<GameTraits::CZone::numTilesTotal; ++index) {
+  for (TileIndex index = 0; index < GameTraits::CZone::numTilesTotal; ++index)
+  {
     attributes.push_back(attributeReader.readU16());
 
-    if (index >= GameTraits::CZone::numSolidTiles) {
+    if (index >= GameTraits::CZone::numSolidTiles)
+    {
       attributeReader.skipBytes(sizeof(uint16_t) * 4);
     }
   }
@@ -175,10 +178,9 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
     tilesToPixels(GameTraits::CZone::tileSetImageWidth),
     tilesToPixels(GameTraits::CZone::tileSetImageHeight));
 
-  const auto tilesBegin =
-    data.begin() + GameTraits::CZone::attributeBytesTotal;
-  const auto maskedTilesBegin =
-    tilesBegin + GameTraits::CZone::numSolidTiles*GameTraits::CZone::tileBytes;
+  const auto tilesBegin = data.begin() + GameTraits::CZone::attributeBytesTotal;
+  const auto maskedTilesBegin = tilesBegin +
+    GameTraits::CZone::numSolidTiles * GameTraits::CZone::tileBytes;
 
   const auto solidTilesImage = loadTiledImage(
     tilesBegin,
@@ -202,17 +204,20 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const {
 }
 
 
-data::Movie ResourceLoader::loadMovie(const std::string& name) const {
+data::Movie ResourceLoader::loadMovie(const std::string& name) const
+{
   return loader::loadMovie(loadFile(mGamePath / fs::u8path(name)));
 }
 
 
-data::Song ResourceLoader::loadMusic(const std::string& name) const {
+data::Song ResourceLoader::loadMusic(const std::string& name) const
+{
   return loader::loadSong(file(name));
 }
 
 
-data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const {
+data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
+{
   static const std::map<data::SoundId, const char*> INTRO_SOUND_MAP{
     {data::SoundId::IntroGunShot, "INTRO3.MNI"},
     {data::SoundId::IntroGunShotLow, "INTRO4.MNI"},
@@ -220,40 +225,45 @@ data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const {
     {data::SoundId::IntroTargetMovingCloser, "INTRO6.MNI"},
     {data::SoundId::IntroTargetStopsMoving, "INTRO7.MNI"},
     {data::SoundId::IntroDukeSpeaks1, "INTRO8.MNI"},
-    {data::SoundId::IntroDukeSpeaks2, "INTRO9.MNI"}
-  };
+    {data::SoundId::IntroDukeSpeaks2, "INTRO9.MNI"}};
 
   const auto introSoundIter = INTRO_SOUND_MAP.find(id);
 
-  if (introSoundIter != INTRO_SOUND_MAP.end()) {
+  if (introSoundIter != INTRO_SOUND_MAP.end())
+  {
     return loadSound(introSoundIter->second);
   }
 
   const auto digitizedSoundFileName =
     string("SB_") + to_string(static_cast<int>(id) + 1) + ".MNI";
-  if (hasFile(digitizedSoundFileName)) {
+  if (hasFile(digitizedSoundFileName))
+  {
     return loadSound(digitizedSoundFileName);
-  } else {
+  }
+  else
+  {
     return mAdlibSoundsPackage.loadAdlibSound(id);
   }
 }
 
 
-data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const {
+data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const
+{
   return loader::decodeVoc(file(name));
 }
 
 
-ScriptBundle ResourceLoader::loadScriptBundle(
-  const std::string& fileName
-) const {
+ScriptBundle ResourceLoader::loadScriptBundle(const std::string& fileName) const
+{
   return loader::loadScripts(fileAsText(fileName));
 }
 
 
-ByteBuffer ResourceLoader::file(const std::string& name) const {
+ByteBuffer ResourceLoader::file(const std::string& name) const
+{
   const auto unpackedFilePath = mGamePath / fs::u8path(name);
-  if (fs::exists(unpackedFilePath)) {
+  if (fs::exists(unpackedFilePath))
+  {
     return loadFile(unpackedFilePath);
   }
 
@@ -261,13 +271,15 @@ ByteBuffer ResourceLoader::file(const std::string& name) const {
 }
 
 
-std::string ResourceLoader::fileAsText(const std::string& name) const {
+std::string ResourceLoader::fileAsText(const std::string& name) const
+{
   return asText(file(name));
 }
 
-bool ResourceLoader::hasFile(const std::string& name) const {
+bool ResourceLoader::hasFile(const std::string& name) const
+{
   const auto unpackedFilePath = mGamePath / fs::u8path(name);
   return fs::exists(unpackedFilePath) || mFilePackage.hasFile(name);
 }
 
-}
+} // namespace rigel::loader

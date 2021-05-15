@@ -23,3 +23,28 @@ Having said that, I don’t see any reason against small dependencies which can 
 * For polymorphism, prefer using `std::variant` & `base::match` instead of class hierarchies. If that's not an option, consider using [concept based polymorphism](https://www.youtube.com/watch?v=2bLkxj6EVoM). If that's not an option either, aim to make the class hierarchy as flat as possible. In the ideal case, there is one interface class (pure virtual only) and a couple of implementations, but no inheritance beyond that one level.
 * Prefer free functions over member functions
 * Prefer structs with named members over `std::tuple`/`std::pair`.
+
+## Code formatting
+
+RigelEngine uses [clang-format](https://releases.llvm.org/11.0.0/tools/clang/docs/ClangFormat.html) for automated code formatting. This is enforced by a check on CI, meaning your code needs to be clang-formatted before it can be merged. It's important to use exactly version 11.0.0 of clang-format, as unfortunately the formatting behavior varies between versions even with an identical configuration file.
+
+To format the code in your working copy, you can either use the script `tools/format-all.sh` directly (if clang-format 11 is already installed in your system), or run it via Docker (that way, you don't need to install it locally).
+
+### Installing clang-format locally
+
+On Ubuntu 20.04 or later, you can install clang-format 11 via `sudo apt-get install clang-format-11`.
+
+For Windows, Mac, and other systems, you can [grab a binary clang/LLVM release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-11.0.0).
+Make sure `clang-format` is on your `PATH` after installing it.
+
+Once installed, you can run `./tools/format-all.sh` from the root of your working copy (using git bash on Windows).
+
+### Running clang-format via Docker
+
+First, build the Docker container as described [here](https://github.com/lethal-guitar/RigelEngine/blob/master/BUILDING.md#docker-build-instructions).
+
+Once the container is built, you can run the following in the root of your working copy:
+
+```bash
+docker run --rm -it -v $(pwd):/workdir -w /workdir rigel-build ./tools/format-all.sh
+```

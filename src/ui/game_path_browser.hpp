@@ -26,10 +26,11 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 std::filesystem::path runFolderBrowser(SDL_Window* pWindow);
 
 void showErrorMessage(SDL_Window* pWindow, const std::string& error);
 
-}
+} // namespace rigel::ui

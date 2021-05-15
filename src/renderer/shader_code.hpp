@@ -17,7 +17,8 @@
 #pragma once
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 extern const char* VERTEX_SOURCE;
 extern const char* FRAGMENT_SOURCE_SIMPLE;
@@ -29,4 +30,4 @@ extern const char* FRAGMENT_SOURCE_SOLID;
 extern const char* VERTEX_SOURCE_WATER_EFFECT;
 extern const char* FRAGMENT_SOURCE_WATER_EFFECT;
 
-}
+} // namespace rigel::renderer

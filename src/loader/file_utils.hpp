@@ -23,7 +23,8 @@
 #include <string>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 /** Load entire contents of file with given name into ByteBuffer
  *
@@ -31,7 +32,8 @@ namespace rigel::loader {
  */
 ByteBuffer loadFile(const std::string& fileName);
 
-inline ByteBuffer loadFile(const std::filesystem::path& path) {
+inline ByteBuffer loadFile(const std::filesystem::path& path)
+{
   return loadFile(path.u8string());
 }
 
@@ -46,7 +48,8 @@ std::string asText(const ByteBuffer& buffer);
  *
  * All readX() methods will throw if there is not enough data left.
  */
-class LeStreamReader {
+class LeStreamReader
+{
 public:
   explicit LeStreamReader(const ByteBuffer& data);
   LeStreamReader(ByteBufferCIter begin, ByteBufferCIter end);
@@ -78,7 +81,7 @@ public:
   ByteBufferCIter currentIter() const;
 
 private:
-  template<typename Callable>
+  template <typename Callable>
   auto withPreservingCurrentIter(Callable func);
 
   ByteBufferCIter mCurrentByteIter;
@@ -89,4 +92,4 @@ private:
 std::string readFixedSizeString(LeStreamReader& reader, std::size_t len);
 
 
-}
+} // namespace rigel::loader

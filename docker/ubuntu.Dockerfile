@@ -12,4 +12,5 @@ RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10 && \
   update-alternatives --set cc /usr/bin/gcc
 
 RUN apt install -y gdb
+RUN apt install -y clang-format-11
 

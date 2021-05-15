@@ -24,22 +24,27 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BlueGuard {
-  static BlueGuard typingOnTerminal() {
+struct BlueGuard
+{
+  static BlueGuard typingOnTerminal()
+  {
     BlueGuard instance;
     instance.mTypingOnTerminal = true;
     return instance;
   }
 
-  static BlueGuard patrolling(const engine::components::Orientation orientation) {
+  static BlueGuard patrolling(const engine::components::Orientation orientation)
+  {
     BlueGuard instance;
     instance.mOrientation = orientation;
     return instance;
@@ -68,4 +73,4 @@ struct BlueGuard {
   bool mTypingInterruptedByAttack = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

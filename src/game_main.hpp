@@ -19,7 +19,8 @@
 #include "common/command_line_options.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
 /** Initialize platform, create game, run main loop
  *
@@ -33,4 +34,4 @@ namespace rigel {
  */
 void gameMain(const CommandLineOptions& options);
 
-}
+} // namespace rigel

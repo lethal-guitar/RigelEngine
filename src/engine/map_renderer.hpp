@@ -24,11 +24,14 @@
 #include "renderer/texture.hpp"
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-class MapRenderer {
+class MapRenderer
+{
 public:
-  struct MapRenderData {
+  struct MapRenderData
+  {
     data::Image mTileSetImage;
     data::Image mBackdropImage;
     std::optional<data::Image> mSecondaryBackdropImage;
@@ -61,7 +64,8 @@ public:
     const base::Vector& cameraPosition) const;
 
 private:
-  enum class DrawMode {
+  enum class DrawMode
+  {
     Background,
     Foreground
   };
@@ -87,4 +91,4 @@ private:
   std::uint32_t mElapsedFrames = 0;
 };
 
-}
+} // namespace rigel::engine

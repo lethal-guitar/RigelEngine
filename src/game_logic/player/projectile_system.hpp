@@ -24,15 +24,29 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::data::map { class Map; }
-namespace rigel::engine { class CollisionChecker; }
-namespace rigel::game_logic { struct IEntityFactory; }
+namespace rigel
+{
+struct IGameServiceProvider;
+}
+namespace rigel::data::map
+{
+class Map;
+}
+namespace rigel::engine
+{
+class CollisionChecker;
+}
+namespace rigel::game_logic
+{
+struct IEntityFactory;
+}
 
 
-namespace rigel::game_logic::player {
+namespace rigel::game_logic::player
+{
 
-class ProjectileSystem {
+class ProjectileSystem
+{
 public:
   ProjectileSystem(
     IEntityFactory* pEntityFactory,
@@ -56,4 +70,4 @@ private:
   const data::map::Map* mpMap;
 };
 
-}
+} // namespace rigel::game_logic::player

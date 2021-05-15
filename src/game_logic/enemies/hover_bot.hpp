@@ -26,15 +26,18 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct HoverBotSpawnMachine {
+struct HoverBotSpawnMachine
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -46,18 +49,21 @@ struct HoverBotSpawnMachine {
 };
 
 
-struct HoverBot {
+struct HoverBot
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  struct TeleportingIn {
+  struct TeleportingIn
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Moving {
+  struct Moving
+  {
     explicit Moving(const engine::components::Orientation orientation)
       : mOrientation(orientation)
     {
@@ -66,8 +72,10 @@ struct HoverBot {
     engine::components::Orientation mOrientation;
   };
 
-  struct Reorientation {
-    explicit Reorientation(const engine::components::Orientation targetOrientation)
+  struct Reorientation
+  {
+    explicit Reorientation(
+      const engine::components::Orientation targetOrientation)
       : mTargetOrientation(targetOrientation)
     {
     }
@@ -81,4 +89,4 @@ struct HoverBot {
   State mState = TeleportingIn{};
 };
 
-}
+} // namespace rigel::game_logic::behaviors

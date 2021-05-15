@@ -16,20 +16,22 @@
 
 #include "dying_boss.hpp"
 
-#include "data/player_model.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/global.hpp"
+#include "data/player_model.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 #include "loader/palette.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto BOSS_KILL_SCORE = 50'000;
 
@@ -40,8 +42,8 @@ void DyingBoss::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& position = *entity.component<engine::components::WorldPosition>();
   auto& sprite = *entity.component<engine::components::Sprite>();
 
@@ -64,14 +66,18 @@ void DyingBoss::update(
   };
 
 
-  if (mFramesElapsed == 0) {
+  if (mFramesElapsed == 0)
+  {
     d.mpServiceProvider->stopMusic();
     s.mpPlayer->model().giveScore(BOSS_KILL_SCORE);
   }
 
-  switch (mFramesElapsed) {
+  switch (mFramesElapsed)
+  {
+    // clang-format off
     case 1: case 5: case 12: case 14: case 19: case 23: case 25: case 28:
     case 30: case 34: case 38: case 41: case 46: case 48:
+      // clang-format on
       d.mpParticles->spawnParticles(
         position + base::Vector{rand() % 4, -(rand() % 8)},
         loader::INGAME_PALETTE[rand() % 16],
@@ -91,28 +97,38 @@ void DyingBoss::update(
       break;
   }
 
-  if (mFramesElapsed < 48) {
+  if (mFramesElapsed < 48)
+  {
     sprite.mShow = !s.mpPerFrameState->mIsOddFrame;
 
-    if ((rand() / 4) % 2 != 0 && s.mpPerFrameState->mIsOddFrame) {
+    if ((rand() / 4) % 2 != 0 && s.mpPerFrameState->mIsOddFrame)
+    {
       bigExplosionEffect();
-    } else {
+    }
+    else
+    {
       randomExplosionSound();
     }
-  } else if (mFramesElapsed == 48) {
+  }
+  else if (mFramesElapsed == 48)
+  {
     sprite.mShow = true;
     bigExplosionEffect();
-  } else { // > 50
-    if (position.y > 3) {
+  }
+  else
+  { // > 50
+    if (position.y > 3)
+    {
       position.y -= 2;
     }
   }
 
-  if (mFramesElapsed == 58) {
+  if (mFramesElapsed == 58)
+  {
     d.mpEvents->emit(rigel::events::ExitReached{false});
   }
 
   ++mFramesElapsed;
 }
 
-}
+} // namespace rigel::game_logic::behaviors

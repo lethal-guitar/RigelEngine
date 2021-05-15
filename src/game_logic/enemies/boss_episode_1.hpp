@@ -22,34 +22,53 @@
 #include <variant>
 
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace boss_episode_1 {
+namespace boss_episode_1
+{
 
-struct AwaitingActivation {};
+struct AwaitingActivation
+{
+};
 
-struct SlammingDown {};
+struct SlammingDown
+{
+};
 
-struct RisingBackUp {};
+struct RisingBackUp
+{
+};
 
-struct FlyingLeftOnUpperLevel {};
+struct FlyingLeftOnUpperLevel
+{
+};
 
-struct FlyingRightDroppingBombs {};
+struct FlyingRightDroppingBombs
+{
+};
 
-struct MovingDownOnRightSide {
+struct MovingDownOnRightSide
+{
   int mFramesElapsed = 0;
 };
 
-struct FlyingLeftOnLowerLevel {};
+struct FlyingLeftOnLowerLevel
+{
+};
 
-struct MovingUpOnLeftSide {};
+struct MovingUpOnLeftSide
+{
+};
 
-struct ZigZagging {
+struct ZigZagging
+{
   int mFramesElapsed = 0;
   engine::components::Orientation mOrientation =
     engine::components::Orientation::Left;
@@ -67,12 +86,14 @@ using State = std::variant<
   MovingUpOnLeftSide,
   ZigZagging>;
 
-}
+} // namespace boss_episode_1
 
 
-namespace behaviors {
+namespace behaviors
+{
 
-struct BossEpisode1 {
+struct BossEpisode1
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -95,5 +116,5 @@ struct BossEpisode1 {
   int mStartingAltitude = 0;
 };
 
-}}
-
+} // namespace behaviors
+} // namespace rigel::game_logic

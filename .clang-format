@@ -1,0 +1,50 @@
+AccessModifierOffset: -2
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+AlignEscapedNewlines: Right
+AlignOperands: false
+AlignTrailingComments: false
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BasedOnStyle: WebKit
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Allman
+BreakStringLiterals: false
+ColumnLimit: 80
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth : 2
+ContinuationIndentWidth: 2
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: true
+IndentCaseBlocks: true
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+IndentWidth: 2
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: true
+Language: Cpp
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: None
+SpaceAfterTemplateKeyword: true
+SpaceBeforeCpp11BracedList: false
+Standard: Cpp11
+StatementMacros: 
+    - _Pragma
+    - __pragma
+UseTab: Never

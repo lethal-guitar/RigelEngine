@@ -24,44 +24,53 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic { struct GlobalDependencies; }
-namespace rigel::game_logic { struct GlobalState; }
-
-namespace rigel::game_logic::behaviors {
-
-struct Missile {
-  void update(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    bool isOnScreen,
-    entityx::Entity entity);
-
-  void onKilled(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
-    entityx::Entity entity);
-
-  int mFramesElapsed = 0;
-  bool mIsActive = false;
-};
-
-
-struct BrokenMissile {
-  void update(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    bool isOnScreen,
-    entityx::Entity entity);
-
-  void onKilled(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
-    entityx::Entity entity);
-
-  int mFramesElapsed = 0;
-  bool mIsActive = false;
-};
-
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
 }
+namespace rigel::game_logic
+{
+struct GlobalState;
+}
+
+namespace rigel::game_logic::behaviors
+{
+
+struct Missile
+{
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onKilled(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
+  int mFramesElapsed = 0;
+  bool mIsActive = false;
+};
+
+
+struct BrokenMissile
+{
+  void update(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    bool isOnScreen,
+    entityx::Entity entity);
+
+  void onKilled(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Point<float>& inflictorVelocity,
+    entityx::Entity entity);
+
+  int mFramesElapsed = 0;
+  bool mIsActive = false;
+};
+
+} // namespace rigel::game_logic::behaviors

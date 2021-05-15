@@ -25,8 +25,11 @@ RIGEL_RESTORE_WARNINGS
 #include <stdexcept>
 
 
-void rigel::renderer::loadGlFunctions() {
+void rigel::renderer::loadGlFunctions()
+{
   int result = 0;
+
+  // clang-format off
 #ifdef RIGEL_USE_GL_ES
   result = gladLoadGLES2Loader([](const char* proc) {
     return sdl_utils::check(SDL_GL_GetProcAddress(proc));
@@ -36,8 +39,10 @@ void rigel::renderer::loadGlFunctions() {
     return sdl_utils::check(SDL_GL_GetProcAddress(proc));
   });
 #endif
+  // clang-format on
 
-  if (!result) {
+  if (!result)
+  {
     throw std::runtime_error("Failed to load OpenGL function pointers");
   }
 }

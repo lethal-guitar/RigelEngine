@@ -19,9 +19,11 @@
 #include <cstdint>
 #include <vector>
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-struct ImfCommand {
+struct ImfCommand
+{
   std::uint8_t reg;
   std::uint8_t value;
   std::uint16_t delay;
@@ -30,4 +32,4 @@ struct ImfCommand {
 
 using Song = std::vector<ImfCommand>;
 
-}
+} // namespace rigel::data

@@ -30,10 +30,14 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel::renderer { class TextureAtlas; }
+namespace rigel::renderer
+{
+class TextureAtlas;
+}
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 /** Animates sprites with an AnimationLoop component
  *
@@ -44,7 +48,8 @@ namespace rigel::engine {
 void updateAnimatedSprites(entityx::EntityManager& es);
 
 
-struct SpriteDrawSpec {
+struct SpriteDrawSpec
+{
   base::Rect<int> mDestRect;
   int mImageId;
   bool mIsFlashingWhite;
@@ -52,23 +57,23 @@ struct SpriteDrawSpec {
 };
 
 
-struct SortableDrawSpec {
+struct SortableDrawSpec
+{
   SpriteDrawSpec mSpec;
   int mDrawOrder;
   bool mDrawTopMost;
 
-  friend bool operator<(
-    const SortableDrawSpec& lhs,
-    const SortableDrawSpec& rhs)
+  friend bool
+    operator<(const SortableDrawSpec& lhs, const SortableDrawSpec& rhs)
   {
-    return
-      std::tie(lhs.mDrawTopMost, lhs.mDrawOrder) <
+    return std::tie(lhs.mDrawTopMost, lhs.mDrawOrder) <
       std::tie(rhs.mDrawTopMost, rhs.mDrawOrder);
   }
 };
 
 
-class SpriteRenderingSystem {
+class SpriteRenderingSystem
+{
 public:
   SpriteRenderingSystem(
     renderer::Renderer* pRenderer,
@@ -101,4 +106,4 @@ private:
   const renderer::TextureAtlas* mpTextureAtlas;
 };
 
-}
+} // namespace rigel::engine

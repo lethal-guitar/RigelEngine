@@ -25,24 +25,31 @@ RIGEL_RESTORE_WARNINGS
 #include <variant>
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct UnicycleBot {
-  struct Waiting {
+struct UnicycleBot
+{
+  struct Waiting
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Accelerating {
+  struct Accelerating
+  {
     int mFramesElapsed = 0;
   };
 
-  struct Moving {};
+  struct Moving
+  {
+  };
 
   using State = std::variant<Waiting, Accelerating, Moving>;
 
@@ -56,4 +63,4 @@ struct UnicycleBot {
   int mFramesUntilNextTurn = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

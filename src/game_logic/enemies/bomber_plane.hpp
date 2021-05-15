@@ -21,21 +21,29 @@
 #include <variant>
 
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BomberPlane {
-  struct FlyingIn {};
+struct BomberPlane
+{
+  struct FlyingIn
+  {
+  };
 
-  struct DroppingBomb {
+  struct DroppingBomb
+  {
     int mFramesElapsed = 0;
   };
 
-  struct FlyingOut {};
+  struct FlyingOut
+  {
+  };
 
   using State = std::variant<FlyingIn, DroppingBomb, FlyingOut>;
 
@@ -50,7 +58,8 @@ struct BomberPlane {
 };
 
 
-struct BigBomb {
+struct BigBomb
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -72,4 +81,4 @@ struct BigBomb {
   bool mStartedFalling = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

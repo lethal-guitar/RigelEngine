@@ -23,7 +23,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel {
+namespace rigel
+{
 
 /** Merges values from extension into base
  *
@@ -40,4 +41,4 @@ namespace rigel {
  */
 nlohmann::json merge(nlohmann::json base, nlohmann::json extension);
 
-}
+} // namespace rigel

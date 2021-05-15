@@ -42,49 +42,61 @@ using namespace rigel;
 namespace po = boost::program_options;
 
 
-namespace {
+namespace
+{
 
-void showBanner() {
-  std::cout <<
-    "================================================================================\n"
-    "                            Welcome to RIGEL ENGINE!\n"
-    "\n"
-    "  A modern reimplementation of the game Duke Nukem II, originally released in\n"
-    "  1993 for MS-DOS by Apogee Software.\n"
-    "\n"
-    "You need the original game's data files in order to play, e.g. the freely\n"
-    "available shareware version.\n"
-    "\n"
-    "Rigel Engine Copyright (C) 2016, Nikolai Wuttke.\n"
-    "Rigel Engine comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
-    "are welcome to redistribute it under certain conditions.\n"
-    "For details, see https://www.gnu.org/licenses/gpl-2.0.html\n"
-    "================================================================================\n"
-    "\n";
+void showBanner()
+{
+  std::cout
+    << "================================================================================\n"
+       "                            Welcome to RIGEL ENGINE!\n"
+       "\n"
+       "  A modern reimplementation of the game Duke Nukem II, originally released in\n"
+       "  1993 for MS-DOS by Apogee Software.\n"
+       "\n"
+       "You need the original game's data files in order to play, e.g. the freely\n"
+       "available shareware version.\n"
+       "\n"
+       "Rigel Engine Copyright (C) 2016, Nikolai Wuttke.\n"
+       "Rigel Engine comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
+       "are welcome to redistribute it under certain conditions.\n"
+       "For details, see https://www.gnu.org/licenses/gpl-2.0.html\n"
+       "================================================================================\n"
+       "\n";
 }
 
 
-auto parseLevelToJumpTo(const std::string& levelToPlay) {
-  if (levelToPlay.size() != 2) {
+auto parseLevelToJumpTo(const std::string& levelToPlay)
+{
+  if (levelToPlay.size() != 2)
+  {
     throw std::invalid_argument("Invalid level name");
   }
 
   const auto episode = static_cast<int>(levelToPlay[0] - 'L');
   const auto level = static_cast<int>(levelToPlay[1] - '0') - 1;
 
-  if (episode < 0 || episode >= 4 || level < 0 || level >= 8) {
-    throw std::invalid_argument(std::string("Invalid level name: ") + levelToPlay);
+  if (episode < 0 || episode >= 4 || level < 0 || level >= 8)
+  {
+    throw std::invalid_argument(
+      std::string("Invalid level name: ") + levelToPlay);
   }
   return std::make_pair(episode, level);
 }
 
 
-auto parseDifficulty(const std::string& difficultySpec) {
-  if (difficultySpec == "easy") {
+auto parseDifficulty(const std::string& difficultySpec)
+{
+  if (difficultySpec == "easy")
+  {
     return data::Difficulty::Easy;
-  } else if (difficultySpec == "medium") {
+  }
+  else if (difficultySpec == "medium")
+  {
     return data::Difficulty::Medium;
-  } else if (difficultySpec == "hard") {
+  }
+  else if (difficultySpec == "hard")
+  {
     return data::Difficulty::Hard;
   }
 
@@ -93,28 +105,32 @@ auto parseDifficulty(const std::string& difficultySpec) {
 }
 
 
-base::Vector parsePlayerPosition(const std::string& playerPosString) {
-  const std::vector<std::string> positionParts = strings::split(playerPosString, ',');
+base::Vector parsePlayerPosition(const std::string& playerPosString)
+{
+  const std::vector<std::string> positionParts =
+    strings::split(playerPosString, ',');
 
   if (
-    positionParts.size() != 2 ||
-    positionParts[0].empty() ||
-    positionParts[1].empty()
-  ) {
-    throw std::invalid_argument("Invalid x/y-position (specify using '<X>,<Y>')");
+    positionParts.size() != 2 || positionParts[0].empty() ||
+    positionParts[1].empty())
+  {
+    throw std::invalid_argument(
+      "Invalid x/y-position (specify using '<X>,<Y>')");
   }
 
   return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
 }
 
-}
+} // namespace
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   showBanner();
 
   CommandLineOptions config;
 
+  // clang-format off
   po::options_description optionsDescription("Options");
   optionsDescription.add_options()
     ("help,h", "Show command line help message")
@@ -141,6 +157,7 @@ int main(int argc, char** argv) {
      po::value<std::string>(&config.mGamePath)->default_value(""),
      "Path to original game's installation. Can also be given as positional "
      "argument. If not provided here, a folder browser ui will ask for it");
+  // clang-format on
 
   po::positional_options_description positionalArgsDescription;
   positionalArgsDescription.add("game-path", -1);
@@ -156,12 +173,14 @@ int main(int argc, char** argv) {
       options);
     po::notify(options);
 
-    if (options.count("help")) {
+    if (options.count("help"))
+    {
       std::cout << optionsDescription << '\n';
       return 0;
     }
 
-    if (options.count("play-level")) {
+    if (options.count("play-level"))
+    {
       auto sessionId = data::GameSessionId{};
       std::tie(sessionId.mEpisode, sessionId.mLevel) =
         parseLevelToJumpTo(options["play-level"].as<std::string>());
@@ -169,8 +188,10 @@ int main(int argc, char** argv) {
       config.mLevelToJumpTo = sessionId;
     }
 
-    if (options.count("difficulty")) {
-      if (!options.count("play-level")) {
+    if (options.count("difficulty"))
+    {
+      if (!options.count("play-level"))
+      {
         throw std::invalid_argument(
           "This option requires also using the play-level option");
       }
@@ -179,17 +200,20 @@ int main(int argc, char** argv) {
         parseDifficulty(options["difficulty"].as<std::string>());
     }
 
-    if (options.count("player-pos")) {
-      if (!options.count("play-level")) {
+    if (options.count("player-pos"))
+    {
+      if (!options.count("play-level"))
+      {
         throw std::invalid_argument(
           "This option requires also using the play-level option");
       }
 
-      config.mPlayerPosition = parsePlayerPosition(
-        options["player-pos"].as<std::string>());
+      config.mPlayerPosition =
+        parsePlayerPosition(options["player-pos"].as<std::string>());
     }
 
-    if (!config.mGamePath.empty() && config.mGamePath.back() != '/') {
+    if (!config.mGamePath.empty() && config.mGamePath.back() != '/')
+    {
       config.mGamePath += "/";
     }
 

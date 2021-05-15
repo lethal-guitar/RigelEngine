@@ -39,14 +39,20 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel::game_logic { class GameWorld; }
+namespace rigel::game_logic
+{
+class GameWorld;
+}
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class IngameMenu {
+class IngameMenu
+{
 public:
-  enum class UpdateResult {
+  enum class UpdateResult
+  {
     StillActive,
     Finished,
     FinishedNeedsFadeout
@@ -69,22 +75,20 @@ public:
   void handleEvent(const SDL_Event& event);
   UpdateResult updateAndRender(engine::TimeDelta dt);
 
-  bool quitRequested() const {
-    return mQuitRequested;
-  }
+  bool quitRequested() const { return mQuitRequested; }
 
-  std::optional<data::SavedGame> requestedGameToLoad() const {
+  std::optional<data::SavedGame> requestedGameToLoad() const
+  {
     return mRequestedGameToLoad;
   }
 
-  bool isActive() const {
-    return !mStateStack.empty() || mMenuToEnter;
-  }
+  bool isActive() const { return !mStateStack.empty() || mMenuToEnter; }
 
 private:
   using ExecutionResult = ui::DukeScriptRunner::ExecutionResult;
 
-  struct TopLevelMenu {
+  struct TopLevelMenu
+  {
     TopLevelMenu(GameMode::Context context, bool canQuickLoad);
 
     TopLevelMenu(const TopLevelMenu&) = delete;
@@ -105,14 +109,14 @@ private:
     int mSelectedIndex = 0;
   };
 
-  struct ScriptedMenu {
+  struct ScriptedMenu
+  {
     template <typename ScriptEndHook, typename EventHook>
     ScriptedMenu(
       ui::DukeScriptRunner* pScriptRunner,
       ScriptEndHook&& scriptEndHook,
       EventHook&& eventHook,
-      const bool isTransparent
-    )
+      const bool isTransparent)
       : mScriptFinishedHook(std::forward<ScriptEndHook>(scriptEndHook))
       , mEventHook(std::forward<EventHook>(eventHook))
       , mpScriptRunner(pScriptRunner)
@@ -129,13 +133,15 @@ private:
     bool mIsTransparent;
   };
 
-  struct SavedGameNameEntry {
+  struct SavedGameNameEntry
+  {
     SavedGameNameEntry(
       GameMode::Context context,
       int slotIndex,
       std::string_view initialName);
 
-    void updateAndRender(engine::TimeDelta dt) {
+    void updateAndRender(engine::TimeDelta dt)
+    {
       mTextEntryWidget.updateAndRender(dt);
     }
 
@@ -149,7 +155,8 @@ private:
     SavedGameNameEntry,
     ui::OptionsMenu>;
 
-  enum class MenuType {
+  enum class MenuType
+  {
     TopLevel,
     ConfirmQuitInGame,
     ConfirmQuit,
@@ -165,7 +172,9 @@ private:
 
   static bool noopEventHook(const SDL_Event&) { return false; }
 
-  template <typename ScriptEndHook, typename EventHook = decltype(noopEventHook)>
+  template <
+    typename ScriptEndHook,
+    typename EventHook = decltype(noopEventHook)>
   void enterScriptedMenu(
     const char* scriptName,
     ScriptEndHook&& scriptEndedHook,
@@ -194,4 +203,4 @@ private:
   bool mFadeoutNeeded = false;
 };
 
-}
+} // namespace rigel::ui

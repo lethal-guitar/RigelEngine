@@ -19,22 +19,20 @@
 #include <algorithm>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-std::optional<std::string> LevelHints::getHint(
-  const int episode,
-  const int level
-) const {
+std::optional<std::string>
+  LevelHints::getHint(const int episode, const int level) const
+{
   using namespace std;
 
-  auto iHint = find_if(begin(mHints), end(mHints),
-    [&](const Hint& hint) {
-      return hint.mEpisode == episode && hint.mLevel == level;
-    });
+  auto iHint = find_if(begin(mHints), end(mHints), [&](const Hint& hint) {
+    return hint.mEpisode == episode && hint.mLevel == level;
+  });
 
-  return iHint != end(mHints)
-    ? std::optional<std::string>{iHint->mMessage}
-    : std::nullopt;
+  return iHint != end(mHints) ? std::optional<std::string>{iHint->mMessage}
+                              : std::nullopt;
 }
 
-}
+} // namespace rigel::data

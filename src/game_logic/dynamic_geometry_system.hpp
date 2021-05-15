@@ -23,18 +23,34 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel {
-  struct IGameServiceProvider;
-  namespace data::map { class Map; }
-  namespace engine { class RandomNumberGenerator; }
-  namespace events { struct DoorOpened; struct MissileDetonated; }
-  namespace game_logic::events { struct ShootableKilled; }
+namespace rigel
+{
+struct IGameServiceProvider;
+namespace data::map
+{
+class Map;
 }
+namespace engine
+{
+class RandomNumberGenerator;
+}
+namespace events
+{
+struct DoorOpened;
+struct MissileDetonated;
+} // namespace events
+namespace game_logic::events
+{
+struct ShootableKilled;
+}
+} // namespace rigel
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-class DynamicGeometrySystem : public entityx::Receiver<DynamicGeometrySystem> {
+class DynamicGeometrySystem : public entityx::Receiver<DynamicGeometrySystem>
+{
 public:
   DynamicGeometrySystem(
     IGameServiceProvider* pServiceProvider,
@@ -55,4 +71,4 @@ private:
   entityx::EventManager* mpEvents;
 };
 
-}
+} // namespace rigel::game_logic

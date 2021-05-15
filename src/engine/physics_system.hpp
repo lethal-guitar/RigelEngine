@@ -29,10 +29,14 @@ RIGEL_RESTORE_WARNINGS
 #include <tuple>
 
 
-namespace rigel::data::map { class Map; }
+namespace rigel::data::map
+{
+class Map;
+}
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 class CollisionChecker;
 
@@ -55,7 +59,8 @@ class CollisionChecker;
  *
  * For directly moving entities, the functions in movement.hpp should be used.
  */
-class PhysicsSystem  : public entityx::Receiver<PhysicsSystem> {
+class PhysicsSystem : public entityx::Receiver<PhysicsSystem>
+{
 public:
   PhysicsSystem(
     const engine::CollisionChecker* pCollisionChecker,
@@ -85,8 +90,8 @@ public:
    */
   void updatePhase2(entityx::EntityManager& es);
 
-  void receive(
-    const entityx::ComponentAddedEvent<components::MovingBody>& event);
+  void
+    receive(const entityx::ComponentAddedEvent<components::MovingBody>& event);
   void receive(
     const entityx::ComponentRemovedEvent<components::MovingBody>& event);
 
@@ -96,9 +101,8 @@ private:
     components::MovingBody& body,
     components::WorldPosition& position,
     const components::BoundingBox& collisionRect);
-  float applyGravity(
-    const components::BoundingBox& bbox,
-    float currentVelocity);
+  float
+    applyGravity(const components::BoundingBox& bbox, float currentVelocity);
 
 private:
   std::vector<entityx::Entity> mPhysicsObjectsForPhase2;
@@ -108,4 +112,4 @@ private:
   bool mShouldCollectForPhase2 = false;
 };
 
-}
+} // namespace rigel::engine

@@ -22,9 +22,11 @@
 #include <vector>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-struct Hint {
+struct Hint
+{
   Hint(const int episode, const int level, std::string message)
     : mEpisode(episode)
     , mLevel(level)
@@ -38,7 +40,8 @@ struct Hint {
 };
 
 
-struct LevelHints {
+struct LevelHints
+{
   LevelHints() = default;
   explicit LevelHints(std::vector<Hint> hints)
     : mHints(std::move(hints))
@@ -50,4 +53,4 @@ struct LevelHints {
   std::vector<Hint> mHints;
 };
 
-}
+} // namespace rigel::data

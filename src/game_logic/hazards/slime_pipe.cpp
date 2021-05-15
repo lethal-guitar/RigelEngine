@@ -27,13 +27,15 @@
 #include "game_logic/ientity_factory.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 using engine::components::Active;
 using engine::components::WorldPosition;
 
 
-namespace {
+namespace
+{
 
 const data::ActorID DROP_ACTOR_ID = data::ActorID::Slime_drop;
 const auto DROP_FREQUENCY = 25;
@@ -42,41 +44,40 @@ const auto DROP_OFFSET = WorldPosition{1, 1};
 
 void createSlimeDrop(
   const base::Vector& position,
-  IEntityFactory& entityFactory
-) {
+  IEntityFactory& entityFactory)
+{
   using namespace engine::components;
   using namespace engine::components::parameter_aliases;
   using namespace game_logic::components;
   using namespace game_logic::components::parameter_aliases;
 
-  auto entity = entityFactory.spawnSprite(
-    DROP_ACTOR_ID,
-    position + DROP_OFFSET,
-    true);
+  auto entity =
+    entityFactory.spawnSprite(DROP_ACTOR_ID, position + DROP_OFFSET, true);
   // Gravity handles the drop's movement, so velocity is initially 0.
   entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
   entity.assign<AppearsOnRadar>();
 
   entity.assign<PlayerDamaging>(Damage{1});
-  entity.assign<AutoDestroy>(AutoDestroy{
-    AutoDestroy::Condition::OnLeavingActiveRegion});
+  entity.assign<AutoDestroy>(
+    AutoDestroy{AutoDestroy::Condition::OnLeavingActiveRegion});
   entity.assign<Active>();
   entity.assign<BehaviorController>(SlimeDrop{});
 }
 
-}
+} // namespace
 
 
 void SlimePipe::update(
   GlobalDependencies& d,
   GlobalState& state,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   const auto& position = *entity.component<WorldPosition>();
 
   ++mGameFramesSinceLastDrop;
-  if (mGameFramesSinceLastDrop >= DROP_FREQUENCY) {
+  if (mGameFramesSinceLastDrop >= DROP_FREQUENCY)
+  {
     mGameFramesSinceLastDrop = 0;
     createSlimeDrop(position, *d.mpEntityFactory);
     d.mpServiceProvider->playSound(data::SoundId::WaterDrop);
@@ -88,8 +89,8 @@ void SlimeDrop::onCollision(
   GlobalDependencies& dependencies,
   GlobalState& state,
   const engine::events::CollidedWithWorld&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   auto& sprite = *entity.component<Sprite>();
@@ -98,4 +99,4 @@ void SlimeDrop::onCollision(
   engine::reassign<AutoDestroy>(entity, AutoDestroy::afterTimeout(1));
 }
 
-}
+} // namespace rigel::game_logic::behaviors

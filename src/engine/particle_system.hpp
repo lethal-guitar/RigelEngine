@@ -21,17 +21,22 @@
 
 #include <vector>
 
-namespace rigel::renderer { class Renderer; }
+namespace rigel::renderer
+{
+class Renderer;
+}
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 class RandomNumberGenerator;
 
 struct ParticleGroup;
 
 
-class ParticleSystem {
+class ParticleSystem
+{
 public:
   ParticleSystem(
     RandomNumberGenerator* pRandomGenerator,
@@ -54,4 +59,4 @@ private:
   renderer::Renderer* mpRenderer;
 };
 
-}
+} // namespace rigel::engine

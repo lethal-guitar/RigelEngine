@@ -23,28 +23,33 @@
 #include <tuple>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 constexpr auto NUM_HIGH_SCORE_ENTRIES = 10u;
 
-struct HighScoreEntry {
+struct HighScoreEntry
+{
   std::string mName;
   int mScore = 0;
 };
 
 
-inline bool operator<(const HighScoreEntry& lhs, const HighScoreEntry& rhs) {
+inline bool operator<(const HighScoreEntry& lhs, const HighScoreEntry& rhs)
+{
   // Sort by highest score first
   return rhs.mScore < lhs.mScore;
 }
 
 
-inline bool operator==(const HighScoreEntry& lhs, const HighScoreEntry& rhs) {
+inline bool operator==(const HighScoreEntry& lhs, const HighScoreEntry& rhs)
+{
   return std::tie(lhs.mName, lhs.mScore) == std::tie(rhs.mName, rhs.mScore);
 }
 
 
-inline bool operator!=(const HighScoreEntry& lhs, const HighScoreEntry& rhs) {
+inline bool operator!=(const HighScoreEntry& lhs, const HighScoreEntry& rhs)
+{
   return !(lhs == rhs);
 }
 
@@ -54,9 +59,6 @@ using HighScoreListArray = std::array<HighScoreList, NUM_EPISODES>;
 
 bool scoreQualifiesForHighScoreList(int score, const HighScoreList& list);
 
-void insertNewScore(
-  int score,
-  const std::string& name,
-  HighScoreList& list);
+void insertNewScore(int score, const std::string& name, HighScoreList& list);
 
-}
+} // namespace rigel::data

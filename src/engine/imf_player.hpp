@@ -23,9 +23,11 @@
 #include <mutex>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-class ImfPlayer {
+class ImfPlayer
+{
 public:
   explicit ImfPlayer(int sampleRate);
   ImfPlayer(const ImfPlayer&) = delete;
@@ -50,4 +52,4 @@ private:
   std::atomic<bool> mSongSwitchPending;
 };
 
-}
+} // namespace rigel::engine

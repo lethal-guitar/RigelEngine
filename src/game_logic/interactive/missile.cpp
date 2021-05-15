@@ -26,24 +26,26 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "loader/palette.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 namespace
 {
 
-constexpr int FALL_OVER_ANIM_LEFT[] = { 0, 1, 2, 3, 2, 3, 4, 3 };
+constexpr int FALL_OVER_ANIM_LEFT[] = {0, 1, 2, 3, 2, 3, 4, 3};
 
-constexpr int FALL_OVER_ANIM_RIGHT[] = { 0, 5, 6, 7, 6, 7, 8, 7 };
+constexpr int FALL_OVER_ANIM_RIGHT[] = {0, 5, 6, 7, 6, 7, 8, 7};
 
 constexpr auto MISSILE_HEIGHT = 12;
 
 
-void startFlameAnimation(entityx::Entity entity) {
+void startFlameAnimation(entityx::Entity entity)
+{
   using namespace engine::components;
 
   // Start the missile fire animation in render slot 2, moving the missile
@@ -65,45 +67,43 @@ void startFlameAnimation(entityx::Entity entity) {
 }
 
 
-void triggerHitEffect(
-  entityx::Entity entity,
-  engine::ParticleSystem& particles
-) {
+void triggerHitEffect(entityx::Entity entity, engine::ParticleSystem& particles)
+{
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
   entity.component<Sprite>()->flashWhite();
   particles.spawnParticles(
-    position + base::Vector{5, 0},
-    loader::INGAME_PALETTE[15]);
+    position + base::Vector{5, 0}, loader::INGAME_PALETTE[15]);
 }
 
-}
+} // namespace
 
 
 void Missile::update(
   GlobalDependencies& d,
   GlobalState& state,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
-  if (!mIsActive) {
+  if (!mIsActive)
+  {
     return;
   }
 
   const auto& position = *entity.component<WorldPosition>();
 
   auto detonate = [&]() {
-    const auto impactPosition =
-      position - base::Vector{0, MISSILE_HEIGHT};
+    const auto impactPosition = position - base::Vector{0, MISSILE_HEIGHT};
     d.mpEvents->emit(rigel::events::MissileDetonated{impactPosition});
     triggerEffects(entity, *d.mpEntityManager);
   };
 
 
-  if (mFramesElapsed == 0) {
+  if (mFramesElapsed == 0)
+  {
     // Ignition animation
     spawnOneShotSprite(
       *d.mpEntityFactory,
@@ -113,18 +113,21 @@ void Missile::update(
       *d.mpEntityFactory,
       data::ActorID::White_circle_flash_FX,
       position + base::Vector{1, 1});
-  } else if (mFramesElapsed == 5) {
+  }
+  else if (mFramesElapsed == 5)
+  {
     startFlameAnimation(entity);
-  } else if (mFramesElapsed >= 5) {
+  }
+  else if (mFramesElapsed >= 5)
+  {
     d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
 
     const auto speed = mFramesElapsed >= 8 ? 2 : 1;
-    const auto movementResult = engine::moveVertically(
-      *d.mpCollisionChecker,
-      entity,
-      -speed);
+    const auto movementResult =
+      engine::moveVertically(*d.mpCollisionChecker, entity, -speed);
 
-    if (movementResult != engine::MovementResult::Completed) {
+    if (movementResult != engine::MovementResult::Completed)
+    {
       detonate();
       entity.destroy();
       return;
@@ -139,9 +142,10 @@ void Missile::onKilled(
   GlobalDependencies& d,
   GlobalState& state,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
-  if (!mIsActive) {
+  entityx::Entity entity)
+{
+  if (!mIsActive)
+  {
     mIsActive = true;
     triggerHitEffect(entity, *d.mpParticles);
   }
@@ -152,11 +156,12 @@ void BrokenMissile::update(
   GlobalDependencies& d,
   GlobalState& state,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
-  if (!mIsActive) {
+  if (!mIsActive)
+  {
     return;
   }
 
@@ -169,15 +174,14 @@ void BrokenMissile::update(
   };
 
 
-  if (
-    mFramesElapsed == 2 ||
-    mFramesElapsed == 4 ||
-    mFramesElapsed == 6
-  ) {
+  if (mFramesElapsed == 2 || mFramesElapsed == 4 || mFramesElapsed == 6)
+  {
     // This is meant to play sound effects along with the animation, i.e.
     // every time the missile hits the ground
     d.mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
-  } else if (mFramesElapsed == 11) {
+  }
+  else if (mFramesElapsed == 11)
+  {
     detonate();
     entity.destroy();
     return;
@@ -191,9 +195,10 @@ void BrokenMissile::onKilled(
   GlobalDependencies& d,
   GlobalState& state,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
-  if (!mIsActive) {
+  entityx::Entity entity)
+{
+  if (!mIsActive)
+  {
     mIsActive = true;
 
     const auto shotFromLeft = inflictorVelocity.x > 0;
@@ -202,9 +207,8 @@ void BrokenMissile::onKilled(
     triggerHitEffect(entity, *d.mpParticles);
 
     engine::startAnimationSequence(
-      entity,
-      fallingLeft ? FALL_OVER_ANIM_LEFT : FALL_OVER_ANIM_RIGHT);
+      entity, fallingLeft ? FALL_OVER_ANIM_LEFT : FALL_OVER_ANIM_RIGHT);
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

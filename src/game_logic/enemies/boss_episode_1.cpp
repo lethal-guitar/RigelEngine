@@ -31,24 +31,26 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto BOMB_DROP_OFFSET = base::Vector{3, 1};
 
-constexpr auto ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE = std::array<int, 10>{
-  -1, -1, 0, 0, 1, 1, 1, 0, 0, -1 };
+constexpr auto ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE =
+  std::array<int, 10>{-1, -1, 0, 0, 1, 1, 1, 0, 0, -1};
 
-}
+} // namespace
 
 
 void BossEpisode1::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace boss_episode_1;
   using namespace engine::components;
 
@@ -58,19 +60,22 @@ void BossEpisode1::update(
 
   auto startSlammingDown = [&, this]() {
     const auto isTouchingGround = d.mpCollisionChecker->isOnSolidGround(
-      position,
-      *entity.component<BoundingBox>());
-    if (isTouchingGround) {
+      position, *entity.component<BoundingBox>());
+    if (isTouchingGround)
+    {
       d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
       mState = RisingBackUp{};
-    } else {
+    }
+    else
+    {
       mState = SlammingDown{};
       body.mGravityAffected = true;
     }
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const AwaitingActivation&) {
       d.mpEvents->emit(rigel::events::BossActivated{entity});
       mStartingAltitude = position.y;
@@ -78,51 +83,56 @@ void BossEpisode1::update(
     },
 
     [&, this](const RisingBackUp&) {
-      if (position.y <= mStartingAltitude) {
+      if (position.y <= mStartingAltitude)
+      {
         mState = FlyingLeftOnUpperLevel{};
-      } else {
+      }
+      else
+      {
         --position.y;
       }
     },
 
     [&, this](const FlyingLeftOnUpperLevel&) {
-      const auto result = engine::moveHorizontally(
-        *d.mpCollisionChecker,
-        entity,
-        -2);
-      if (result != engine::MovementResult::Completed) {
+      const auto result =
+        engine::moveHorizontally(*d.mpCollisionChecker, entity, -2);
+      if (result != engine::MovementResult::Completed)
+      {
         mState = FlyingRightDroppingBombs{};
       }
     },
 
     [&, this](const FlyingRightDroppingBombs&) {
-      if (s.mpPerFrameState->mIsOddFrame) {
-        d.mpEntityFactory->spawnActor(data::ActorID::Napalm_bomb_small, position + BOMB_DROP_OFFSET);
+      if (s.mpPerFrameState->mIsOddFrame)
+      {
+        d.mpEntityFactory->spawnActor(
+          data::ActorID::Napalm_bomb_small, position + BOMB_DROP_OFFSET);
       }
-      const auto result = engine::moveHorizontally(
-        *d.mpCollisionChecker,
-        entity,
-        2);
-      if (result != engine::MovementResult::Completed) {
+      const auto result =
+        engine::moveHorizontally(*d.mpCollisionChecker, entity, 2);
+      if (result != engine::MovementResult::Completed)
+      {
         mState = MovingDownOnRightSide{};
         body.mGravityAffected = true;
       }
     },
 
     [&, this](const FlyingLeftOnLowerLevel&) {
-       const auto result = engine::moveHorizontally(
-        *d.mpCollisionChecker,
-        entity,
-        -2);
-      if (result != engine::MovementResult::Completed) {
+      const auto result =
+        engine::moveHorizontally(*d.mpCollisionChecker, entity, -2);
+      if (result != engine::MovementResult::Completed)
+      {
         mState = MovingUpOnLeftSide{};
       }
     },
 
     [&, this](const MovingUpOnLeftSide&) {
-      if (position.y <= mStartingAltitude) {
+      if (position.y <= mStartingAltitude)
+      {
         mState = ZigZagging{};
-      } else {
+      }
+      else
+      {
         --position.y;
       }
     },
@@ -132,20 +142,22 @@ void BossEpisode1::update(
         *d.mpCollisionChecker,
         entity,
         engine::orientation::toMovement(state.mOrientation));
-      if (result != engine::MovementResult::Completed) {
-        state.mOrientation =
-          engine::orientation::opposite(state.mOrientation);
+      if (result != engine::MovementResult::Completed)
+      {
+        state.mOrientation = engine::orientation::opposite(state.mOrientation);
       }
 
-      position.y += ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE[
-        state.mFramesElapsed % ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE.size()];
+      position.y += ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE
+        [state.mFramesElapsed % ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE.size()];
 
       ++state.mFramesElapsed;
+      // clang-format off
       if (
         state.mFramesElapsed > 50 &&
         position.x - 1 <= playerPos.x &&
-        position.x + 9 >= playerPos.x
-      ) {
+        position.x + 9 >= playerPos.x)
+      // clang-format on
+      {
         startSlammingDown();
       }
     },
@@ -158,14 +170,15 @@ void BossEpisode1::onCollision(
   GlobalDependencies& d,
   GlobalState&,
   const engine::events::CollidedWithWorld&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace boss_episode_1;
   using namespace engine::components;
 
   auto& body = *entity.component<MovingBody>();
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const SlammingDown&) {
       body.mGravityAffected = false;
       d.mpServiceProvider->playSound(data::SoundId::HammerSmash);
@@ -185,8 +198,8 @@ void BossEpisode1::onKilled(
   GlobalDependencies& d,
   GlobalState&,
   const base::Point<float>&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::MovingBody;
   using engine::components::Sprite;
 
@@ -197,4 +210,4 @@ void BossEpisode1::onKilled(
   d.mpEvents->emit(rigel::events::BossDestroyed{entity});
 }
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -24,31 +24,43 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel { struct IGameServiceProvider; }
-namespace rigel::engine {
-  namespace events {
-    struct CollidedWithWorld;
-  }
-
-  class RandomNumberGenerator;
-  class ParticleSystem;
+namespace rigel
+{
+struct IGameServiceProvider;
 }
-namespace rigel::game_logic::events {
-  struct ShootableKilled;
+namespace rigel::engine
+{
+namespace events
+{
+struct CollidedWithWorld;
 }
 
+class RandomNumberGenerator;
+class ParticleSystem;
+} // namespace rigel::engine
+namespace rigel::game_logic::events
+{
+struct ShootableKilled;
+}
 
-namespace rigel::game_logic {
 
-namespace components { struct DestructionEffects; }
+namespace rigel::game_logic
+{
+
+namespace components
+{
+struct DestructionEffects;
+}
 struct IEntityFactory;
 
 
 void triggerEffects(
-  entityx::Entity entity, entityx::EntityManager& entityManager);
+  entityx::Entity entity,
+  entityx::EntityManager& entityManager);
 
 
-class EffectsSystem : public entityx::Receiver<EffectsSystem> {
+class EffectsSystem : public entityx::Receiver<EffectsSystem>
+{
 public:
   EffectsSystem(
     IGameServiceProvider* pServiceProvider,
@@ -79,4 +91,4 @@ private:
   engine::ParticleSystem* mpParticles;
 };
 
-}
+} // namespace rigel::game_logic

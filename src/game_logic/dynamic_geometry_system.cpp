@@ -32,11 +32,13 @@
 #include "game_logic/ientity_factory.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using game_logic::components::MapGeometryLink;
 
-namespace {
+namespace
+{
 
 constexpr auto GEOMETRY_FALL_SPEED = 2;
 
@@ -51,8 +53,7 @@ const base::Point<float> TILE_DEBRIS_MOVEMENT_SEQUENCE[] = {
   {0.0f, 1.0f},
   {0.0f, 2.0f},
   {0.0f, 2.0f},
-  {0.0f, 3.0f}
-};
+  {0.0f, 3.0f}};
 
 
 void spawnTileDebris(
@@ -61,16 +62,14 @@ void spawnTileDebris(
   const int y,
   const data::map::TileIndex tileIndex,
   const int velocityX,
-  const int ySequenceOffset
-) {
+  const int ySequenceOffset)
+{
   using namespace engine::components;
   using namespace engine::components::parameter_aliases;
   using components::TileDebris;
 
   auto movement = MovementSequence{
-    TILE_DEBRIS_MOVEMENT_SEQUENCE,
-    ResetAfterSequence{false},
-    EnableX{false}};
+    TILE_DEBRIS_MOVEMENT_SEQUENCE, ResetAfterSequence{false}, EnableX{false}};
   movement.mCurrentStep = ySequenceOffset;
 
   auto debris = entities.create();
@@ -92,14 +91,17 @@ void spawnTileDebrisForSection(
   const engine::components::BoundingBox& mapSection,
   data::map::Map& map,
   entityx::EntityManager& entities,
-  engine::RandomNumberGenerator& randomGen
-) {
+  engine::RandomNumberGenerator& randomGen)
+{
   const auto& start = mapSection.topLeft;
   const auto& size = mapSection.size;
-  for (auto y = start.y; y < start.y + size.height; ++y) {
-    for (auto x = start.x; x < start.x + size.width; ++x) {
+  for (auto y = start.y; y < start.y + size.height; ++y)
+  {
+    for (auto x = start.x; x < start.x + size.width; ++x)
+    {
       const auto tileIndex = map.tileAt(0, x, y);
-      if (tileIndex == 0) {
+      if (tileIndex == 0)
+      {
         continue;
       }
 
@@ -115,38 +117,41 @@ void explodeMapSection(
   const base::Rect<int>& mapSection,
   data::map::Map& map,
   entityx::EntityManager& entityManager,
-  engine::RandomNumberGenerator& randomGenerator
-) {
+  engine::RandomNumberGenerator& randomGenerator)
+{
   spawnTileDebrisForSection(mapSection, map, entityManager, randomGenerator);
 
   map.clearSection(
-    mapSection.topLeft.x, mapSection.topLeft.y,
-    mapSection.size.width, mapSection.size.height);
+    mapSection.topLeft.x,
+    mapSection.topLeft.y,
+    mapSection.size.width,
+    mapSection.size.height);
 }
 
 
 void explodeMapSection(
   const base::Rect<int>& mapSection,
   GlobalDependencies& d,
-  GlobalState& s
-) {
+  GlobalState& s)
+{
   explodeMapSection(
     mapSection, *s.mpMap, *d.mpEntityManager, *d.mpRandomGenerator);
 }
 
 
-void moveTileRows(
-  const base::Rect<int>& mapSection,
-  data::map::Map& map
-) {
+void moveTileRows(const base::Rect<int>& mapSection, data::map::Map& map)
+{
   const auto startX = mapSection.left();
   const auto startY = mapSection.top();
   const auto width = mapSection.size.width;
   const auto height = mapSection.size.height;
 
-  for (int layer = 0; layer < 2; ++layer) {
-    for (int row = 0; row < height; ++row) {
-      for (int col = 0; col < width; ++col) {
+  for (int layer = 0; layer < 2; ++layer)
+  {
+    for (int row = 0; row < height; ++row)
+    {
+      for (int col = 0; col < width; ++col)
+      {
         const auto x = startX + col;
         const auto sourceY = startY + (height - row - 1);
         const auto targetY = sourceY + 1;
@@ -160,19 +165,15 @@ void moveTileRows(
 }
 
 
-void moveTileSection(
-  base::Rect<int>& mapSection,
-  data::map::Map& map
-) {
+void moveTileSection(base::Rect<int>& mapSection, data::map::Map& map)
+{
   moveTileRows(mapSection, map);
   ++mapSection.topLeft.y;
 }
 
 
-void squashTileSection(
-  base::Rect<int>& mapSection,
-  data::map::Map& map
-) {
+void squashTileSection(base::Rect<int>& mapSection, data::map::Map& map)
+{
   // By not moving the lower-most row, it gets effectively overwritten by the
   // row above
   moveTileRows(
@@ -182,7 +183,7 @@ void squashTileSection(
   --mapSection.size.height;
 }
 
-}
+} // namespace
 
 
 DynamicGeometrySystem::DynamicGeometrySystem(
@@ -190,8 +191,7 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   entityx::EntityManager* pEntityManager,
   data::map::Map* pMap,
   engine::RandomNumberGenerator* pRandomGenerator,
-  entityx::EventManager* pEvents
-)
+  entityx::EventManager* pEvents)
   : mpServiceProvider(pServiceProvider)
   , mpEntityManager(pEntityManager)
   , mpMap(pMap)
@@ -204,10 +204,12 @@ DynamicGeometrySystem::DynamicGeometrySystem(
 }
 
 
-void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
+void DynamicGeometrySystem::receive(const events::ShootableKilled& event)
+{
   auto entity = event.mEntity;
   // Take care of shootable walls
-  if (!entity.has_component<MapGeometryLink>()) {
+  if (!entity.has_component<MapGeometryLink>())
+  {
     return;
   }
 
@@ -219,7 +221,8 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event) {
 }
 
 
-void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event) {
+void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event)
+{
   using namespace engine::components;
   using namespace game_logic::components;
 
@@ -232,13 +235,12 @@ void DynamicGeometrySystem::receive(const rigel::events::DoorOpened& event) {
 
 
 void DynamicGeometrySystem::receive(
-  const rigel::events::MissileDetonated& event
-) {
+  const rigel::events::MissileDetonated& event)
+{
   // TODO: Add a helper function for creating rectangles based on different
   // given values, e.g. bottom left and size
   engine::components::BoundingBox mapSection{
-    event.mImpactPosition - base::Vector{0, 2},
-    {3, 3}};
+    event.mImpactPosition - base::Vector{0, 2}, {3, 3}};
   explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
@@ -248,8 +250,8 @@ void behaviors::DynamicGeometryController::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   auto& position = *entity.component<WorldPosition>();
@@ -257,7 +259,8 @@ void behaviors::DynamicGeometryController::update(
     entity.component<MapGeometryLink>()->mLinkedGeometrySection;
 
   auto isOnSolidGround = [&]() {
-    if (mapSection.bottom() >= s.mpMap->height() - 1) {
+    if (mapSection.bottom() >= s.mpMap->height() - 1)
+    {
       return true;
     }
 
@@ -265,8 +268,7 @@ void behaviors::DynamicGeometryController::update(
       s.mpMap->collisionData(mapSection.left(), mapSection.bottom() + 1);
     const auto bottomRight =
       s.mpMap->collisionData(mapSection.right(), mapSection.bottom() + 1);
-    return
-      bottomLeft.isSolidOn(data::map::SolidEdge::top()) ||
+    return bottomLeft.isSolidOn(data::map::SolidEdge::top()) ||
       bottomRight.isSolidOn(data::map::SolidEdge::top());
   };
 
@@ -277,17 +279,22 @@ void behaviors::DynamicGeometryController::update(
 
   auto updateWaiting = [&](const int numFrames) {
     ++mFramesElapsed;
-    if (mFramesElapsed == numFrames) {
+    if (mFramesElapsed == numFrames)
+    {
       d.mpServiceProvider->playSound(data::SoundId::FallingRock);
-    } else if (mFramesElapsed == numFrames + 1) {
+    }
+    else if (mFramesElapsed == numFrames + 1)
+    {
       makeAlwaysActive();
       mState = State::Falling;
     }
   };
 
   auto fall = [&]() {
-    for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i) {
-      if (isOnSolidGround()) {
+    for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i)
+    {
+      if (isOnSolidGround())
+      {
         return true;
       }
 
@@ -306,19 +313,19 @@ void behaviors::DynamicGeometryController::update(
     const auto spawnPosition =
       base::Vector{mapSection.left() + offset, mapSection.bottom() + 1};
     spawnFloatingOneShotSprite(
-      *d.mpEntityFactory,
-      data::ActorID::Shot_impact_FX,
-      spawnPosition);
+      *d.mpEntityFactory, data::ActorID::Shot_impact_FX, spawnPosition);
   };
 
   auto sink = [&]() {
-    if (mapSection.size.height == 1) {
+    if (mapSection.size.height == 1)
+    {
       s.mpMap->clearSection(
-        mapSection.topLeft.x, mapSection.topLeft.y,
-        mapSection.size.width, 1);
+        mapSection.topLeft.x, mapSection.topLeft.y, mapSection.size.width, 1);
       d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
       entity.destroy();
-    } else {
+    }
+    else
+    {
       squashTileSection(mapSection, *s.mpMap);
       ++position.y;
     }
@@ -337,13 +344,15 @@ void behaviors::DynamicGeometryController::update(
 
 
   auto updateType1 = [&, this]() {
-    switch (mState) {
+    switch (mState)
+    {
       case State::Waiting:
         updateWaiting(20);
         break;
 
       case State::Falling:
-        if (fall()) {
+        if (fall())
+        {
           mState = State::Sinking;
           doBurnEffect();
           sink();
@@ -362,15 +371,18 @@ void behaviors::DynamicGeometryController::update(
 
 
   auto updateType2 = [&, this]() {
-    switch (mState) {
+    switch (mState)
+    {
       case State::Waiting:
-        if (s.mpPerFrameState->mIsEarthShaking) {
+        if (s.mpPerFrameState->mIsEarthShaking)
+        {
           updateWaiting(2);
         }
         break;
 
       case State::Falling:
-        if (fall()) {
+        if (fall())
+        {
           explode();
         }
         break;
@@ -382,12 +394,15 @@ void behaviors::DynamicGeometryController::update(
 
 
   auto updateType3 = [&, this]() {
-    switch (mState) {
+    switch (mState)
+    {
       case State::Waiting:
-        if (!isOnSolidGround()) {
+        if (!isOnSolidGround())
+        {
           makeAlwaysActive();
           mState = State::Falling;
-          if (fall()) {
+          if (fall())
+          {
             land();
             mState = State::Waiting;
           }
@@ -395,7 +410,8 @@ void behaviors::DynamicGeometryController::update(
         break;
 
       case State::Falling:
-        if (fall()) {
+        if (fall())
+        {
           land();
           mState = State::Waiting;
         }
@@ -408,19 +424,23 @@ void behaviors::DynamicGeometryController::update(
 
 
   auto updateType5 = [&, this]() {
-    switch (mState) {
+    switch (mState)
+    {
       case State::Waiting:
-        if (!isOnSolidGround()) {
+        if (!isOnSolidGround())
+        {
           makeAlwaysActive();
           mState = State::Falling;
-          if (fall()) {
+          if (fall())
+          {
             explode();
           }
         }
         break;
 
       case State::Falling:
-        if (fall()) {
+        if (fall())
+        {
           explode();
         }
         break;
@@ -432,18 +452,23 @@ void behaviors::DynamicGeometryController::update(
 
 
   auto updateType6 = [&, this]() {
-    switch (mState) {
+    switch (mState)
+    {
       case State::Waiting:
         updateWaiting(20);
         break;
 
       case State::Falling:
-        for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i) {
-          if (isOnSolidGround()) {
+        for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i)
+        {
+          if (isOnSolidGround())
+          {
             land();
             mType = Type::FallDownImmediatelyThenStayOnGround;
             mState = State::Waiting;
-          } else {
+          }
+          else
+          {
             moveTileSection(mapSection, *s.mpMap);
             ++position.y;
           }
@@ -457,17 +482,20 @@ void behaviors::DynamicGeometryController::update(
 
 
   auto updateDoor = [&]() {
-    switch (mState) {
+    switch (mState)
+    {
       case State::Waiting:
         ++mFramesElapsed;
-        if (mFramesElapsed == 2) {
+        if (mFramesElapsed == 2)
+        {
           makeAlwaysActive();
           mState = State::Falling;
         }
         break;
 
       case State::Falling:
-        if (fall()) {
+        if (fall())
+        {
           mState = State::Sinking;
           sink();
         }
@@ -483,7 +511,8 @@ void behaviors::DynamicGeometryController::update(
   };
 
 
-  switch (mType) {
+  switch (mType)
+  {
     case Type::FallDownAfterDelayThenSinkIntoGround:
       updateType1();
       break;
@@ -513,4 +542,4 @@ void behaviors::DynamicGeometryController::update(
   }
 }
 
-}
+} // namespace rigel::game_logic

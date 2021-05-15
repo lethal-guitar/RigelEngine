@@ -27,9 +27,11 @@
 #include <vector>
 
 
-namespace rigel::data::map {
+namespace rigel::data::map
+{
 
-enum class BackdropScrollMode {
+enum class BackdropScrollMode
+{
   None,
   ParallaxBoth,
   ParallaxHorizontal,
@@ -38,14 +40,16 @@ enum class BackdropScrollMode {
 };
 
 
-enum class BackdropSwitchCondition {
+enum class BackdropSwitchCondition
+{
   None,
   OnTeleportation,
   OnReactorDestruction
 };
 
 
-class Map {
+class Map
+{
 public:
   Map() = default;
   Map(int widthInTiles, int heightInTiles, TileAttributeDict attributes);
@@ -54,13 +58,9 @@ public:
 
   void setTileAt(int layer, int x, int y, TileIndex index);
 
-  int width() const {
-    return static_cast<int>(mWidthInTiles);
-  }
+  int width() const { return static_cast<int>(mWidthInTiles); }
 
-  int height() const {
-    return static_cast<int>(mHeightInTiles);
-  }
+  int height() const { return static_cast<int>(mHeightInTiles); }
 
   void clearSection(int x, int y, int width, int height);
 
@@ -84,8 +84,10 @@ private:
 };
 
 
-struct LevelData {
-  struct Actor {
+struct LevelData
+{
+  struct Actor
+  {
     base::Vector mPosition;
     ActorID mID;
     std::optional<base::Rect<int>> mAssignedArea;
@@ -109,4 +111,4 @@ struct LevelData {
 
 using ActorDescriptionList = std::vector<LevelData::Actor>;
 
-}
+} // namespace rigel::data::map

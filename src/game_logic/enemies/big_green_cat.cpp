@@ -23,28 +23,31 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-const int ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
+const int ANIMATION_SEQUENCE[] = {0, 1, 2, 1};
 
 constexpr auto MOVEMENT_SPEED = 2;
 
-}
+} // namespace
 
 
 void BigGreenCat::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
   auto& orientation = *entity.component<engine::components::Orientation>();
 
-  if (mWaitFramesRemaining != 0) {
+  if (mWaitFramesRemaining != 0)
+  {
     animationFrame = 0;
     --mWaitFramesRemaining;
     return;
@@ -56,9 +59,12 @@ void BigGreenCat::update(
   const auto isTouchingGround = d.mpCollisionChecker->isOnSolidGround(
     *entity.component<engine::components::WorldPosition>(),
     *entity.component<engine::components::BoundingBox>());
-  if (isTouchingGround) {
+  if (isTouchingGround)
+  {
     animationFrame = ANIMATION_SEQUENCE[mAnimationStep];
-  } else {
+  }
+  else
+  {
     animationFrame = 2;
   }
 
@@ -66,11 +72,12 @@ void BigGreenCat::update(
     *d.mpCollisionChecker,
     entity,
     MOVEMENT_SPEED * engine::orientation::toMovement(orientation));
-  if (result != engine::MovementResult::Completed) {
+  if (result != engine::MovementResult::Completed)
+  {
     orientation = engine::orientation::opposite(orientation);
     mWaitFramesRemaining = FRAMES_TO_WAIT;
     mAnimationStep = 0;
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

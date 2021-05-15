@@ -18,8 +18,8 @@
 
 #include "base/match.hpp"
 #include "engine/base_components.hpp"
-#include "engine/random_number_generator.hpp"
 #include "engine/physical_components.hpp"
+#include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/ientity_factory.hpp"
@@ -28,9 +28,11 @@
 #include <algorithm>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto FLY_SPEED = 2;
 
@@ -38,20 +40,20 @@ constexpr base::Point<float> JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
   {0.0f, -1.0f},
-  {0.0f,  0.0f},
+  {0.0f, 0.0f},
 };
 
-}
+} // namespace
 
 
 void RigelatinSoldier::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
-  using rigelatin_soldier::Ready;
+  entityx::Entity entity)
+{
   using rigelatin_soldier::Jumping;
+  using rigelatin_soldier::Ready;
   using rigelatin_soldier::Waiting;
   using namespace engine::components;
 
@@ -61,16 +63,18 @@ void RigelatinSoldier::update(
   auto& movingBody = *entity.component<MovingBody>();
   auto& animationFrame = entity.component<Sprite>()->mFramesToRender[0];
 
-  base::match(mState,
-    [&, this](const Ready&) {
-      updateReadyState(d, s, entity);
-    },
+  base::match(
+    mState,
+    [&, this](const Ready&) { updateReadyState(d, s, entity); },
 
     [&, this](Jumping& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 1) {
+      if (state.mFramesElapsed == 1)
+      {
         engine::reassign<MovementSequence>(entity, JUMP_ARC, true, false);
-      } else if (state.mFramesElapsed == 4) {
+      }
+      else if (state.mFramesElapsed == 4)
+      {
         movingBody.mGravityAffected = true;
         animationFrame = 2;
       }
@@ -85,14 +89,16 @@ void RigelatinSoldier::update(
     [&, this](Waiting& state) {
       ++state.mFramesElapsed;
 
-      if (state.mFramesElapsed == 4) {
+      if (state.mFramesElapsed == 4)
+      {
         // Reset previously set "attack" animation state
         animationFrame = 0;
-      } else if (state.mFramesElapsed == 20) {
+      }
+      else if (state.mFramesElapsed == 20)
+      {
         mState = Ready{};
       }
-    }
-  );
+    });
 
   engine::synchronizeBoundingBoxToSprite(entity);
 }
@@ -102,26 +108,29 @@ void RigelatinSoldier::onCollision(
   GlobalDependencies& d,
   GlobalState& s,
   const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity
-) {
-  using rigelatin_soldier::Jumping;
+  entityx::Entity entity)
+{
   using engine::MovementResult;
+  using rigelatin_soldier::Jumping;
   using namespace engine::components;
 
-  if (!event.mCollidedBottom) {
+  if (!event.mCollidedBottom)
+  {
     return;
   }
 
   auto& position = *entity.component<WorldPosition>();
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const Jumping& state) {
       // In RigelatinSoldier::update(), we don't know if we are going to hit
       // the ground on the current frame or not, as the Physics update happens
       // after all behavior controllers have been updated. Therefore, we need
       // to check here if we did horizontal movement during update(), and
       // revert it if that's the case.
-      if (state.mLastHorizontalMovementResult != MovementResult::Failed) {
+      if (state.mLastHorizontalMovementResult != MovementResult::Failed)
+      {
         position.x = state.mPreviousPosX;
       }
 
@@ -131,18 +140,17 @@ void RigelatinSoldier::onCollision(
       engine::synchronizeBoundingBoxToSprite(entity);
     },
 
-    [](const auto&) {}
-  );
+    [](const auto&) {});
 }
 
 
 void RigelatinSoldier::updateReadyState(
   GlobalDependencies& d,
   GlobalState& s,
-  entityx::Entity entity
-) {
-  using rigelatin_soldier::Ready;
+  entityx::Entity entity)
+{
   using rigelatin_soldier::Jumping;
+  using rigelatin_soldier::Ready;
   using rigelatin_soldier::Waiting;
   using namespace engine::components;
 
@@ -160,7 +168,10 @@ void RigelatinSoldier::updateReadyState(
     const auto xOffset = facingLeft ? 0 : 4;
 
     auto projectile = spawnMovingEffectSprite(
-      *d.mpEntityFactory, data::ActorID::Rigelatin_soldier_projectile, movement, position + base::Vector{xOffset, -4});
+      *d.mpEntityFactory,
+      data::ActorID::Rigelatin_soldier_projectile,
+      movement,
+      position + base::Vector{xOffset, -4});
     projectile.assign<components::PlayerDamaging>(1);
 
     animationFrame = 3;
@@ -176,26 +187,32 @@ void RigelatinSoldier::updateReadyState(
 
 
   // Orient towards player
-  orientation = position.x >= playerPos.x
-    ? Orientation::Left
-    : Orientation::Right;
+  orientation =
+    position.x >= playerPos.x ? Orientation::Left : Orientation::Right;
 
   // Attack immediately, or decide between jumping and possibly attacking
-  if (d.mpRandomGenerator->gen() % 2 == 0) {
+  if (d.mpRandomGenerator->gen() % 2 == 0)
+  {
     attack();
-  } else {
+  }
+  else
+  {
     const auto adjustment = orientation == Orientation::Left ? -1 : 1;
     mDecisionCounter += adjustment;
 
-    if (mDecisionCounter > 0 && mDecisionCounter < 6) {
+    if (mDecisionCounter > 0 && mDecisionCounter < 6)
+    {
       jump();
-    } else {
+    }
+    else
+    {
       mDecisionCounter = std::clamp(mDecisionCounter, 1, 5);
 
-      if (d.mpRandomGenerator->gen() % 2 != 0) {
+      if (d.mpRandomGenerator->gen() % 2 != 0)
+      {
         attack();
       }
     }
   }
 }
-}
+} // namespace rigel::game_logic::behaviors

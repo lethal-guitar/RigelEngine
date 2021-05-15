@@ -31,18 +31,22 @@
 #include <optional>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class DukeScriptRunner {
+class DukeScriptRunner
+{
 public:
-  enum class ScriptTerminationType {
+  enum class ScriptTerminationType
+  {
     RanToCompletion,
     AbortedByUser,
     MenuItemSelected,
     TimedOut
   };
 
-  struct ExecutionResult {
+  struct ExecutionResult
+  {
     ScriptTerminationType mTerminationType;
     std::optional<int> mSelectedPage;
   };
@@ -70,14 +74,15 @@ public:
   void updateAndRender(engine::TimeDelta dt);
   void handleEvent(const SDL_Event& event);
 
-  std::optional<int> currentPageIndex() const {
-    return mPagerState
-      ? std::make_optional(mPagerState->mCurrentPageIndex)
-      : std::nullopt;
+  std::optional<int> currentPageIndex() const
+  {
+    return mPagerState ? std::make_optional(mPagerState->mCurrentPageIndex)
+                       : std::nullopt;
   }
 
 private:
-  enum class State {
+  enum class State
+  {
     ReadyToExecute,
     ExecutingScript,
     AwaitingUserInput,
@@ -86,7 +91,8 @@ private:
     ExecutionTimedOut,
   };
 
-  struct DelayState {
+  struct DelayState
+  {
     explicit DelayState(const int ticksToWait)
       : mTicksToWait(ticksToWait)
     {
@@ -96,7 +102,8 @@ private:
     engine::TimeDelta mElapsedTime = 0;
   };
 
-  struct NewsReporterState {
+  struct NewsReporterState
+  {
     explicit NewsReporterState(const int talkDuration)
       : mTalkDuration(talkDuration)
     {
@@ -106,7 +113,8 @@ private:
     engine::TimeDelta mElapsedTime = 0;
   };
 
-  struct MenuSelectionIndicatorState {
+  struct MenuSelectionIndicatorState
+  {
     explicit MenuSelectionIndicatorState(const int posY)
       : mPosY(posY)
     {
@@ -116,25 +124,29 @@ private:
     engine::TimeDelta mElapsedTime = 0;
   };
 
-  enum PagingMode {
+  enum PagingMode
+  {
     Menu,
     PagingOnly
   };
 
-  struct PagerState {
+  struct PagerState
+  {
     std::vector<data::script::Script> mPageScripts;
     PagingMode mMode;
     int mCurrentPageIndex;
     int mMaxPageIndex;
   };
 
-  struct CheckBoxState {
+  struct CheckBoxState
+  {
     int mPosY;
     bool mChecked;
     data::script::SetupCheckBoxes::CheckBoxID mID;
   };
 
-  struct CheckBoxesState {
+  struct CheckBoxesState
+  {
     int mPosX;
     std::vector<CheckBoxState> mStates;
     int mCurrentMenuPosY;
@@ -165,16 +177,16 @@ private:
   void hideMenuSelectionIndicator();
 
   void drawMenuSelectionIndicator(
-    MenuSelectionIndicatorState& state, engine::TimeDelta dt);
+    MenuSelectionIndicatorState& state,
+    engine::TimeDelta dt);
 
   bool hasCheckBoxes() const;
   void displayCheckBoxes(const CheckBoxesState& state);
 
   void updateDelayState(DelayState& state, engine::TimeDelta timeDelta);
   void updateTimeoutToDemo(engine::TimeDelta timeDelta);
-  void animateNewsReporter(
-    NewsReporterState& state,
-    engine::TimeDelta timeDelta);
+  void
+    animateNewsReporter(NewsReporterState& state, engine::TimeDelta timeDelta);
   void stopNewsReporterAnimation();
 
   void updateAndRenderDynamicElements(engine::TimeDelta dt);
@@ -219,4 +231,4 @@ private:
   bool mTextBoxOffsetEnabled = false;
 };
 
-}
+} // namespace rigel::ui

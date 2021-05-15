@@ -20,21 +20,21 @@
 #include "loader/file_utils.hpp"
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 using data::SoundId;
 
-namespace {
+namespace
+{
 
 const auto ADLIB_SOUND_RATE = 140;
 
 
-struct AudioDictEntry {
-  AudioDictEntry(
-    const std::size_t offset,
-    const std::size_t size
-  )
+struct AudioDictEntry
+{
+  AudioDictEntry(const std::size_t offset, const std::size_t size)
     : mOffset(offset)
     , mSize(size)
   {
@@ -45,7 +45,8 @@ struct AudioDictEntry {
 };
 
 
-std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data) {
+std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data)
+{
   const auto numOffsets = data.size() / sizeof(uint32_t);
 
   vector<AudioDictEntry> dict;
@@ -53,14 +54,18 @@ std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data) {
 
   LeStreamReader reader(data);
   auto previousOffset = reader.readU32();
-  for (auto i=1u; i<numOffsets; ++i) {
+  for (auto i = 1u; i < numOffsets; ++i)
+  {
     const auto nextOffset = reader.readU32();
 
     const auto chunkSize = static_cast<int64_t>(nextOffset) - previousOffset;
 
-    if (chunkSize > 0) {
+    if (chunkSize > 0)
+    {
       dict.emplace_back(previousOffset, static_cast<size_t>(chunkSize));
-    } else if (chunkSize < 0 && i == numOffsets - 1) {
+    }
+    else if (chunkSize < 0 && i == numOffsets - 1)
+    {
       dict.back().mSize = nextOffset - dict.back().mOffset;
     }
 
@@ -70,19 +75,22 @@ std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data) {
   return dict;
 }
 
-}
+} // namespace
 
 
-AudioPackage::AdlibSound::AdlibSound(LeStreamReader& reader) {
+AudioPackage::AdlibSound::AdlibSound(LeStreamReader& reader)
+{
   const auto length = reader.readU32();
   mSoundData.reserve(length);
   reader.skipBytes(sizeof(uint16_t)); // priority - not interesting for us
-  for (auto& setting : mInstrumentSettings) {
+  for (auto& setting : mInstrumentSettings)
+  {
     setting = reader.readU8();
   }
   mOctave = reader.readU8();
 
-  for (auto i=0u; i<length; ++i) {
+  for (auto i = 0u; i < length; ++i)
+  {
     mSoundData.push_back(reader.readU8());
   }
 }
@@ -90,14 +98,16 @@ AudioPackage::AdlibSound::AdlibSound(LeStreamReader& reader) {
 
 AudioPackage::AudioPackage(
   const ByteBuffer& audioDictData,
-  const ByteBuffer& bundledAudioData
-) {
+  const ByteBuffer& bundledAudioData)
+{
   const auto audioDict = readAudioDict(audioDictData);
-  if (audioDict.size() < 68u) {
+  if (audioDict.size() < 68u)
+  {
     throw std::invalid_argument("Corrupt Duke Nukem II AUDIOT/AUDIOHED");
   }
 
-  for (auto i=34u; i<68u; ++i) {
+  for (auto i = 34u; i < 68u; ++i)
+  {
     const auto& dictEntry = audioDict[i];
 
     const auto soundStartIter = bundledAudioData.begin() + dictEntry.mOffset;
@@ -107,9 +117,11 @@ AudioPackage::AudioPackage(
 }
 
 
-data::AudioBuffer AudioPackage::loadAdlibSound(SoundId id) const {
+data::AudioBuffer AudioPackage::loadAdlibSound(SoundId id) const
+{
   const auto idAsIndex = static_cast<int>(id);
-  if (idAsIndex < 0 || idAsIndex >= 34) {
+  if (idAsIndex < 0 || idAsIndex >= 34)
+  {
     throw std::invalid_argument("Invalid sound ID");
   }
 
@@ -118,9 +130,8 @@ data::AudioBuffer AudioPackage::loadAdlibSound(SoundId id) const {
 }
 
 
-data::AudioBuffer AudioPackage::renderAdlibSound(
-  const AdlibSound& sound
-) const {
+data::AudioBuffer AudioPackage::renderAdlibSound(const AdlibSound& sound) const
+{
   const auto sampleRate = 44100;
 
   AdlibEmulator emulator{sampleRate};
@@ -146,10 +157,14 @@ data::AudioBuffer AudioPackage::renderAdlibSound(
   vector<data::Sample> renderedSamples;
   renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
 
-  for (const auto byte : sound.mSoundData) {
-    if (byte == 0) {
+  for (const auto byte : sound.mSoundData)
+  {
+    if (byte == 0)
+    {
       emulator.writeRegister(0xB0, 0);
-    } else {
+    }
+    else
+    {
       emulator.writeRegister(0xA0, byte);
       emulator.writeRegister(0xB0, 0x20 | octaveBits);
     }
@@ -160,4 +175,4 @@ data::AudioBuffer AudioPackage::renderAdlibSound(
   return {sampleRate, renderedSamples};
 }
 
-}
+} // namespace rigel::loader

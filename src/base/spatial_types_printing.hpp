@@ -21,12 +21,14 @@
 #include <iostream>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-template<typename ValueT>
-std::ostream& operator<<(std::ostream& stream, const Point<ValueT>& point) {
+template <typename ValueT>
+std::ostream& operator<<(std::ostream& stream, const Point<ValueT>& point)
+{
   stream << "Point{" << point.x << ", " << point.y << '}';
   return stream;
 }
 
-}
+} // namespace rigel::base

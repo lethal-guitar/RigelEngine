@@ -20,28 +20,39 @@
 #include <string_view>
 #include <vector>
 
-namespace rigel::strings {
+namespace rigel::strings
+{
 
 /** Split a string based on a single char delimiter and return the output
  */
-[[nodiscard]] std::vector<std::string> split(std::string_view input, char delimiter);
+[[nodiscard]] std::vector<std::string>
+  split(std::string_view input, char delimiter);
 
 /** Checks if an input string has the given prefix
  */
-[[nodiscard]] bool startsWith(std::string_view input, std::string_view prefix) noexcept;
+[[nodiscard]] bool
+  startsWith(std::string_view input, std::string_view prefix) noexcept;
 
-/** Removes all occurences of 'what' from the left of the input, until any non-'what' is found
- * Does everything inplace
+/** Removes all occurences of 'what' from the left of the input, until any
+ * non-'what' is found
+ *
+ * Does everything inplace.
  */
-std::string& trimLeft(std::string& input, const char* what = "\n\r\t ") noexcept;
+std::string&
+  trimLeft(std::string& input, const char* what = "\n\r\t ") noexcept;
 
-/** Removes all occurences of 'what' from the right of the input, until any non-'what' is found
- * Does everything inplace
+/** Removes all occurences of 'what' from the right of the input, until any
+ * non-'what' is found
+ *
+ * Does everything inplace.
  */
-std::string& trimRight(std::string& input, const char* what = "\n\r\t ") noexcept;
+std::string&
+  trimRight(std::string& input, const char* what = "\n\r\t ") noexcept;
 
-/** Removes all occurences of 'what' from the right and left of the input, until any non-'what' is found
- * Does everything inplace
+/** Removes all occurences of 'what' from the right and left of the input, until
+ * any non-'what' is found
+ *
+ * Does everything inplace.
  */
 std::string& trim(std::string& input, const char* what = "\n\r\t ") noexcept;
 

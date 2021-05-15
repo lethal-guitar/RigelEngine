@@ -19,45 +19,46 @@
 #include <vector>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-template<typename ValueT>
-class Grid {
+template <typename ValueT>
+class Grid
+{
 public:
   Grid() = default;
   Grid(const std::size_t width, const std::size_t height)
-    : mStorage(width*height)
+    : mStorage(width * height)
     , mWidth(width)
     , mHeight(height)
   {
   }
 
-  const ValueT& valueAt(const std::size_t x, const std::size_t y) const {
-    return mStorage[x + y*mWidth];
+  const ValueT& valueAt(const std::size_t x, const std::size_t y) const
+  {
+    return mStorage[x + y * mWidth];
   }
 
-  void setValueAt(const std::size_t x, const std::size_t y, ValueT value) {
-    mStorage[x + y*mWidth] = value;
+  void setValueAt(const std::size_t x, const std::size_t y, ValueT value)
+  {
+    mStorage[x + y * mWidth] = value;
   }
 
   const ValueT& valueAtWithDefault(
     const std::size_t x,
     const std::size_t y,
-    const ValueT& defaultValue
-  ) const {
-    if (x >= mWidth || y >= mHeight) {
+    const ValueT& defaultValue) const
+  {
+    if (x >= mWidth || y >= mHeight)
+    {
       return defaultValue;
     }
     return valueAt(x, y);
   }
 
-  std::size_t width() const {
-    return mWidth;
-  }
+  std::size_t width() const { return mWidth; }
 
-  std::size_t height() const {
-    return mHeight;
-  }
+  std::size_t height() const { return mHeight; }
 
 private:
   std::vector<ValueT> mStorage;
@@ -65,4 +66,4 @@ private:
   const std::size_t mHeight = 0;
 };
 
-}
+} // namespace rigel::base

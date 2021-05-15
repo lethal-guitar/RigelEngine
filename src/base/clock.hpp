@@ -19,7 +19,8 @@
 #include <chrono>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
 using Clock = std::chrono::steady_clock;
 

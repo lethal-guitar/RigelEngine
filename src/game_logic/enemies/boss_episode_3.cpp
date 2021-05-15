@@ -23,46 +23,52 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
 namespace ec = rigel::engine::components;
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-struct AttackArea {
+struct AttackArea
+{
   base::Vector mBboxOffset;
   base::Vector mShotOffset;
   data::ActorID mActorId;
 };
 
 
+// clang-format off
 constexpr AttackArea ATTACK_AREAS[] = {
   {{-9,  0}, {-4, -4}, data::ActorID::Enemy_rocket_left},
   {{ 9,  0}, { 8, -4}, data::ActorID::Enemy_rocket_right},
   {{ 0, -9}, { 4, -8}, data::ActorID::Enemy_rocket_2_up},
   {{ 0,  9}, { 4,  3}, data::ActorID::Enemy_rocket_2_down},
 };
+// clang-format on
 
 
 constexpr auto PLAYER_TARGET_OFFSET = base::Vector{3, -1};
 constexpr auto BOSS_OFFSET_TO_CENTER = base::Vector{4, -4};
 
-}
+} // namespace
 
 
 void BossEpisode3::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
-  if (!mHasBeenSighted) {
+  entityx::Entity entity)
+{
+  if (!mHasBeenSighted)
+  {
     d.mpEvents->emit(rigel::events::BossActivated{entity});
     mHasBeenSighted = true;
   }
@@ -73,26 +79,33 @@ void BossEpisode3::update(
   // Move towards player
   const auto vecToPlayer =
     (playerPos + PLAYER_TARGET_OFFSET) - (position + BOSS_OFFSET_TO_CENTER);
-  if (d.mpRandomGenerator->gen() % 2 != 0) {
+  if (d.mpRandomGenerator->gen() % 2 != 0)
+  {
     position.x += base::sgn(vecToPlayer.x);
   }
-  if (s.mpPerFrameState->mIsOddFrame) {
+  if (s.mpPerFrameState->mIsOddFrame)
+  {
     position.y += base::sgn(vecToPlayer.y);
   }
 
   // Fire rockets
+
+  // clang-format off
   if (
     isOnScreen &&
     s.mpPerFrameState->mIsOddFrame &&
-    d.mpRandomGenerator->gen() % 2 != 0
-  ) {
+    d.mpRandomGenerator->gen() % 2 != 0)
+  // clang-format on
+  {
     const auto playerBbox = s.mpPlayer->worldSpaceHitBox();
-    for (const auto& area : ATTACK_AREAS) {
+    for (const auto& area : ATTACK_AREAS)
+    {
       auto attackRangeBbox =
         engine::toWorldSpace(*entity.component<ec::BoundingBox>(), position);
       attackRangeBbox.topLeft += area.mBboxOffset;
 
-      if (attackRangeBbox.intersects(playerBbox)) {
+      if (attackRangeBbox.intersects(playerBbox))
+      {
         d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
         d.mpEntityFactory->spawnActor(
           area.mActorId, position + area.mShotOffset);
@@ -106,9 +119,9 @@ void BossEpisode3::onKilled(
   GlobalDependencies& d,
   GlobalState&,
   const base::Point<float>&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   d.mpEvents->emit(rigel::events::BossDestroyed{entity});
 }
 
-}
+} // namespace rigel::game_logic::behaviors

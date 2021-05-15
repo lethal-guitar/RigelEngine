@@ -24,23 +24,26 @@
 #include "data/tile_attributes.hpp"
 #include "loader/actor_image_package.hpp"
 #include "loader/audio_package.hpp"
-#include "loader/duke_script_loader.hpp"
 #include "loader/cmp_file_package.hpp"
+#include "loader/duke_script_loader.hpp"
 #include "loader/palette.hpp"
 
-#include <string>
 #include <filesystem>
+#include <string>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-struct TileSet {
+struct TileSet
+{
   data::Image mTiles;
   data::map::TileAttributeDict mAttributes;
 };
 
 
-class ResourceLoader {
+class ResourceLoader
+{
 public:
   explicit ResourceLoader(const std::string& gamePath);
 
@@ -50,8 +53,8 @@ public:
     const Palette16& overridePalette) const;
 
   data::Image loadStandaloneFullscreenImage(const std::string& name) const;
-  loader::Palette16 loadPaletteFromFullScreenImage(
-    const std::string& imageName) const;
+  loader::Palette16
+    loadPaletteFromFullScreenImage(const std::string& imageName) const;
 
   data::Image loadAntiPiracyImage() const;
 
@@ -80,4 +83,4 @@ private:
   loader::AudioPackage mAdlibSoundsPackage;
 };
 
-}
+} // namespace rigel::loader

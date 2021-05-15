@@ -23,29 +23,27 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-constexpr int ANIM_SEQUENCE_GRAB_AIR[] = {
-  0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0
-};
+constexpr int ANIM_SEQUENCE_GRAB_AIR[] = {0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0};
 
 
 constexpr int ANIM_SEQUENCE_GRAB_PLAYER[] = {
-  5, 9, 8, 7, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6,
-  7, 8, 9, 10, 5, 4, 3, 2, 1, 0
-};
+  5, 9, 8, 7, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 7, 8, 9, 10, 5, 4, 3, 2, 1, 0};
 
-}
+} // namespace
 
 
 void CeilingSucker::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace ceiling_sucker;
   using engine::toWorldSpace;
 
@@ -59,12 +57,15 @@ void CeilingSucker::update(
     return worldBbox.intersects(s.mpPlayer->worldSpaceHitBox());
   };
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const Ready&) {
+      // clang-format off
       if (
         playerPos.x + 4 >= position.x &&
-        position.x + 4 >= playerPos.x
-      ) {
+        position.x + 4 >= playerPos.x)
+      // clang-format on
+      {
         mState = Grabbing{};
         engine::startAnimationSequence(entity, ANIM_SEQUENCE_GRAB_AIR);
       }
@@ -72,19 +73,23 @@ void CeilingSucker::update(
 
     [&, this](Grabbing& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed >= 9) {
+      if (state.mFramesElapsed >= 9)
+      {
         mState = Waiting{};
         return;
       }
 
       // TODO: Don't grab when player in player ship
+
+      // clang-format off
       if (
         state.mFramesElapsed == 5 &&
         touchingPlayer() &&
         !s.mpPlayer->isDead() &&
         playerPos.x + 1 >= position.x &&
-        position.x + 1 >= playerPos.x
-      ) {
+        position.x + 1 >= playerPos.x)
+      // clang-format on
+      {
         s.mpPlayer->incapacitate(1);
         mState = HoldingPlayer{};
         engine::startAnimationSequence(entity, ANIM_SEQUENCE_GRAB_PLAYER);
@@ -93,23 +98,26 @@ void CeilingSucker::update(
 
     [&, this](HoldingPlayer& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 19) {
+      if (state.mFramesElapsed == 19)
+      {
         s.mpPlayer->position().x = position.x;
         s.mpPlayer->setFree();
         s.mpPlayer->takeDamage(1);
       }
 
-      if (state.mFramesElapsed >= 24) {
+      if (state.mFramesElapsed >= 24)
+      {
         mState = Waiting{};
       }
     },
 
     [this](Waiting& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed >= 39) {
+      if (state.mFramesElapsed >= 39)
+      {
         mState = Ready{};
       }
     });
 }
 
-}
+} // namespace rigel::game_logic::behaviors

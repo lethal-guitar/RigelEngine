@@ -21,36 +21,41 @@
 #include "utils.hpp"
 
 #include <iomanip>
-#include <string>
 #include <sstream>
+#include <string>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 const auto PRE_FILTER_WEIGHT = 0.7f;
 const auto FILTER_WEIGHT = 0.9f;
 
-}
+} // namespace
 
 
-void FpsDisplay::updateAndRender(const engine::TimeDelta totalElapsed) {
+void FpsDisplay::updateAndRender(const engine::TimeDelta totalElapsed)
+{
   mPreFilteredFrameTime = base::lerp(
     static_cast<float>(totalElapsed), mPreFilteredFrameTime, PRE_FILTER_WEIGHT);
-  mFilteredFrameTime = base::lerp(
-    mPreFilteredFrameTime, mFilteredFrameTime, FILTER_WEIGHT);
+  mFilteredFrameTime =
+    base::lerp(mPreFilteredFrameTime, mFilteredFrameTime, FILTER_WEIGHT);
 
   const auto smoothedFps = base::round(1.0f / mFilteredFrameTime);
 
   std::stringstream statsReport;
+  // clang-format off
   statsReport
     << smoothedFps << " FPS, "
     << std::setw(4) << std::fixed << std::setprecision(2)
     << totalElapsed * 1000.0 << " ms";
+  // clang-format on
 
   const auto reportString = statsReport.str();
   drawText(reportString, 0, 0, {255, 255, 255, 255});
 }
 
-}
+} // namespace rigel::ui

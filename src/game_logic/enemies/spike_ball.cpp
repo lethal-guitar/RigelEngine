@@ -26,12 +26,15 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 using namespace engine::components;
 
-namespace {
+namespace
+{
 
+// clang-format off
 constexpr base::Point<float> JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
@@ -39,40 +42,45 @@ constexpr base::Point<float> JUMP_ARC[] = {
   {0.0f, -1.0f},
   {0.0f, -1.0f}
 };
+// clang-format on
 
-}
+} // namespace
 
 
 void SpikeBall::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto jump = [&]() {
     mJumpBackCooldown = 9;
     engine::reassign<MovementSequence>(entity, JUMP_ARC, true, false);
 
-    if (isOnScreen) {
+    if (isOnScreen)
+    {
       d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
     }
   };
 
 
-  if (!mInitialized) {
+  if (!mInitialized)
+  {
     entity.assign<MovementSequence>(JUMP_ARC, true, false);
     mInitialized = true;
   }
 
-  if (mJumpBackCooldown > 0) {
+  if (mJumpBackCooldown > 0)
+  {
     --mJumpBackCooldown;
   }
 
   const auto& position = *entity.component<WorldPosition>();
   const auto& bounds = *entity.component<BoundingBox>();
-  const auto onSolidGround = d.mpCollisionChecker->isOnSolidGround(
-    position, bounds);
-  if (mJumpBackCooldown == 0 && onSolidGround) {
+  const auto onSolidGround =
+    d.mpCollisionChecker->isOnSolidGround(position, bounds);
+  if (mJumpBackCooldown == 0 && onSolidGround)
+  {
     jump();
   }
 }
@@ -82,8 +90,8 @@ void SpikeBall::onHit(
   GlobalDependencies& d,
   GlobalState& s,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& body = *entity.component<MovingBody>();
   body.mVelocity.x = inflictorVelocity.x > 0 ? 1.0f : -1.0f;
 }
@@ -93,17 +101,22 @@ void SpikeBall::onCollision(
   GlobalDependencies& d,
   GlobalState& s,
   const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& body = *entity.component<MovingBody>();
-  if (event.mCollidedLeft) {
+  if (event.mCollidedLeft)
+  {
     body.mVelocity.x = 1.0f;
-  } else if (event.mCollidedRight) {
+  }
+  else if (event.mCollidedRight)
+  {
     body.mVelocity.x = -1.0f;
   }
 
-  if (event.mCollidedTop) {
-    if (entity.component<Active>()->mIsOnScreen) {
+  if (event.mCollidedTop)
+  {
+    if (entity.component<Active>()->mIsOnScreen)
+    {
       d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
     }
 
@@ -114,4 +127,4 @@ void SpikeBall::onCollision(
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

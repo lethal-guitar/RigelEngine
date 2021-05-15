@@ -25,10 +25,14 @@
 #include <memory>
 
 
-namespace rigel::loader { class ResourceLoader; }
+namespace rigel::loader
+{
+class ResourceLoader;
+}
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 class ImfPlayer;
 
@@ -43,7 +47,8 @@ using RawBuffer = std::vector<std::uint8_t>;
  * that point on, sound effects and music playback can be triggered at any time
  * using the class' interface. Sound and music volume can also be adjusted.
  */
-class SoundSystem {
+class SoundSystem
+{
 public:
   explicit SoundSystem(const loader::ResourceLoader& resources);
   ~SoundSystem();
@@ -77,7 +82,8 @@ public:
 private:
   struct MusicConversionWrapper;
 
-  struct LoadedSound {
+  struct LoadedSound
+  {
     LoadedSound() = default;
     explicit LoadedSound(const data::AudioBuffer& buffer);
     explicit LoadedSound(RawBuffer buffer);
@@ -91,4 +97,4 @@ private:
   std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
 };
 
-}
+} // namespace rigel::engine

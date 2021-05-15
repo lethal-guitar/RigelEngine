@@ -25,14 +25,16 @@
 #include <string>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 using namespace rigel::data;
 using namespace rigel::engine;
 using namespace rigel::renderer;
 
 
-namespace {
+namespace
+{
 
 constexpr auto NUM_HEALTH_SLICES = 8;
 
@@ -40,16 +42,12 @@ constexpr auto RADAR_SIZE_PX = 32;
 constexpr auto RADAR_CENTER_POS_X = 288;
 constexpr auto RADAR_CENTER_POS_Y = 136;
 
-constexpr auto RADAR_POS_X =
-  RADAR_CENTER_POS_X -
-  RADAR_SIZE_PX/2 -
+constexpr auto RADAR_POS_X = RADAR_CENTER_POS_X - RADAR_SIZE_PX / 2 -
   data::GameTraits::inGameViewPortOffset.x;
-constexpr auto RADAR_POS_Y =
-  RADAR_CENTER_POS_Y -
-  RADAR_SIZE_PX/2 -
+constexpr auto RADAR_POS_Y = RADAR_CENTER_POS_Y - RADAR_SIZE_PX / 2 -
   data::GameTraits::inGameViewPortOffset.y;
 constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
-  base::Vector{RADAR_SIZE_PX/2, RADAR_SIZE_PX/2 + 1};
+  base::Vector{RADAR_SIZE_PX / 2, RADAR_SIZE_PX / 2 + 1};
 
 constexpr auto NUM_RADAR_BLINK_STEPS = 4;
 constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
@@ -60,27 +58,32 @@ void drawNumbersBig(
   const int number,
   const int maxDigits,
   const base::Vector& tlPosition,
-  const TiledTexture& spriteSheet
-) {
+  const TiledTexture& spriteSheet)
+{
   const auto printed = std::to_string(number);
 
   const auto overflow = maxDigits - static_cast<int>(printed.size());
   const auto inputToSkip = std::max(0, -overflow);
   const auto positionsToSkip = std::max(0, overflow);
 
-  for (auto digit=0; digit<maxDigits; ++digit) {
-    const auto tlPositionForDigit = tlPosition + base::Vector{digit*2, 0};
+  for (auto digit = 0; digit < maxDigits; ++digit)
+  {
+    const auto tlPositionForDigit = tlPosition + base::Vector{digit * 2, 0};
 
-    if (digit >= positionsToSkip) {
+    if (digit >= positionsToSkip)
+    {
       const auto numeralIndex =
         printed[digit - positionsToSkip + inputToSkip] - 0x30;
+      // clang-format off
       spriteSheet.renderTileQuad(numeralIndex*2 + 7*40, tlPositionForDigit);
+      // clang-format on
     }
   }
 }
 
 
-void drawScore(const int score, const TiledTexture& spriteSheet) {
+void drawScore(const int score, const TiledTexture& spriteSheet)
+{
   drawNumbersBig(
     score,
     7,
@@ -89,33 +92,37 @@ void drawScore(const int score, const TiledTexture& spriteSheet) {
 }
 
 
-void drawWeaponIcon(const WeaponType type, const TiledTexture& spriteSheet) {
+void drawWeaponIcon(const WeaponType type, const TiledTexture& spriteSheet)
+{
   const auto weaponIndex = static_cast<int>(type);
+  // clang-format off
   spriteSheet.renderTileDoubleQuad(
     weaponIndex*4 + 4 + 5*40,
     base::Vector{17, GameTraits::mapViewPortSize.height + 1});
+  // clang-format on
 }
 
 
 void drawAmmoBar(
   const int currentAmmo,
   const int maxAmmo,
-  const TiledTexture& spriteSheet
-) {
+  const TiledTexture& spriteSheet)
+{
   // The sprite sheet has 17 bar sizes; index 0 is full, 16 is empty.
   // Starting at col 0, row 23. Each bar is 2 tiles high
 
-  const auto quantizedAmmoCount = static_cast<int>(std::ceil(
-    static_cast<float>(currentAmmo) / maxAmmo * 16.0f));
+  const auto quantizedAmmoCount = static_cast<int>(
+    std::ceil(static_cast<float>(currentAmmo) / maxAmmo * 16.0f));
 
   const auto ammoBarIndex = 16 - quantizedAmmoCount;
   spriteSheet.renderTileSlice(
-    ammoBarIndex + 23*40,
+    ammoBarIndex + 23 * 40,
     base::Vector{22, GameTraits::mapViewPortSize.height + 1});
 }
 
 
-void drawLevelNumber(const int number, const TiledTexture& spriteSheet) {
+void drawLevelNumber(const int number, const TiledTexture& spriteSheet)
+{
   drawNumbersBig(
     number,
     1,
@@ -126,81 +133,90 @@ void drawLevelNumber(const int number, const TiledTexture& spriteSheet) {
 }
 
 
-Texture actorToTexture(
-  renderer::Renderer* pRenderer,
-  const loader::ActorData& data
-) {
+Texture
+  actorToTexture(renderer::Renderer* pRenderer, const loader::ActorData& data)
+{
   return Texture(pRenderer, data.mFrames[0].mFrameImage);
 }
 
 
-}
+} // namespace
 
 
 HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage& imagePack
-) {
+  const loader::ActorImagePackage& imagePack)
+{
   InventoryItemTextureMap map;
 
   map.emplace(
     InventoryItemType::CircuitBoard,
-    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::White_box_circuit_card)));
+    actorToTexture(
+      pRenderer, imagePack.loadActor(data::ActorID::White_box_circuit_card)));
   map.emplace(
     InventoryItemType::BlueKey,
-    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::White_box_blue_key)));
+    actorToTexture(
+      pRenderer, imagePack.loadActor(data::ActorID::White_box_blue_key)));
   map.emplace(
     InventoryItemType::RapidFire,
-    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::Rapid_fire_icon)));
+    actorToTexture(
+      pRenderer, imagePack.loadActor(data::ActorID::Rapid_fire_icon)));
   map.emplace(
     InventoryItemType::SpecialHintGlobe,
-    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::Special_hint_globe_icon)));
+    actorToTexture(
+      pRenderer, imagePack.loadActor(data::ActorID::Special_hint_globe_icon)));
   map.emplace(
     InventoryItemType::CloakingDevice,
-    actorToTexture(pRenderer, imagePack.loadActor(data::ActorID::Cloaking_device_icon)));
+    actorToTexture(
+      pRenderer, imagePack.loadActor(data::ActorID::Cloaking_device_icon)));
   return map;
 }
 
 
 HudRenderer::CollectedLetterIndicatorMap
-HudRenderer::makeCollectedLetterTextureMap(
-  renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage& imagePack
-) {
+  HudRenderer::makeCollectedLetterTextureMap(
+    renderer::Renderer* pRenderer,
+    const loader::ActorImagePackage& imagePack)
+{
   CollectedLetterIndicatorMap map;
 
   const auto rightScreenEdge = GameTraits::inGameViewPortSize.width;
   const auto bottomScreenEdge = GameTraits::inGameViewPortSize.height;
   const base::Vector letterDrawStart{
-    rightScreenEdge - 5*GameTraits::tileSize,
-    bottomScreenEdge - 2*GameTraits::tileSize};
+    rightScreenEdge - 5 * GameTraits::tileSize,
+    bottomScreenEdge - 2 * GameTraits::tileSize};
   // TODO: Consider using the positions from the loaded actor frames instead
   // of calculating manually?
   const base::Vector letterSize{GameTraits::tileSize, 0};
   map.emplace(
     CollectableLetterType::N,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_N)),
+      actorToTexture(
+        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_N)),
       letterDrawStart});
   map.emplace(
     CollectableLetterType::U,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_U)),
+      actorToTexture(
+        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_U)),
       letterDrawStart});
   map.emplace(
     CollectableLetterType::K,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_K)),
+      actorToTexture(
+        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_K)),
       letterDrawStart + letterSize * 1});
   map.emplace(
     CollectableLetterType::E,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_E)),
+      actorToTexture(
+        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_E)),
       letterDrawStart + letterSize * 2});
   map.emplace(
     CollectableLetterType::M,
     CollectedLetterIndicator{
-      actorToTexture(pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_M)),
+      actorToTexture(
+        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_M)),
       letterDrawStart + letterSize * 3});
   return map;
 }
@@ -211,8 +227,7 @@ HudRenderer::HudRenderer(
   const data::GameOptions* pOptions,
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& bundle,
-  engine::TiledTexture* pStatusSpriteSheet
-)
+  engine::TiledTexture* pStatusSpriteSheet)
   : HudRenderer(
       levelNumber,
       pOptions,
@@ -232,8 +247,7 @@ HudRenderer::HudRenderer(
   const loader::ActorData& actorData,
   InventoryItemTextureMap&& inventoryItemTextures,
   CollectedLetterIndicatorMap&& collectedLetterTextures,
-  engine::TiledTexture* pStatusSpriteSheet
-)
+  engine::TiledTexture* pStatusSpriteSheet)
   : mLevelNumber(levelNumber)
   , mpRenderer(pRenderer)
   , mpOptions(pOptions)
@@ -248,15 +262,16 @@ HudRenderer::HudRenderer(
 }
 
 
-void HudRenderer::updateAnimation() {
+void HudRenderer::updateAnimation()
+{
   ++mElapsedFrames;
 }
 
 
 void HudRenderer::render(
   const data::PlayerModel& playerModel,
-  const base::ArrayView<base::Vector> radarPositions
-) {
+  const base::ArrayView<base::Vector> radarPositions)
+{
   // Hud background
   // --------------------------------------------------------------------------
   const auto maxX = GameTraits::inGameViewPortSize.width;
@@ -273,15 +288,17 @@ void HudRenderer::render(
   // Inventory
   // --------------------------------------------------------------------------
   const auto inventoryStartPos = base::Vector{
-    topRightTexturePosX + GameTraits::tileSize,
-    2*GameTraits::tileSize};
+    topRightTexturePosX + GameTraits::tileSize, 2 * GameTraits::tileSize};
   auto inventoryIter = playerModel.inventory().begin();
-  for (int row = 0; row < 3; ++row) {
-    for (int col = 0; col < 2; ++col) {
-      if (inventoryIter != playerModel.inventory().end()) {
+  for (int row = 0; row < 3; ++row)
+  {
+    for (int col = 0; col < 2; ++col)
+    {
+      if (inventoryIter != playerModel.inventory().end())
+      {
         const auto itemType = *inventoryIter++;
         const auto drawPos =
-          inventoryStartPos + base::Vector{col, row} * GameTraits::tileSize*2;
+          inventoryStartPos + base::Vector{col, row} * GameTraits::tileSize * 2;
 
         const auto textureIt = mInventoryTexturesByType.find(itemType);
         assert(textureIt != mInventoryTexturesByType.end());
@@ -305,37 +322,50 @@ void HudRenderer::render(
 }
 
 
-void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const {
+void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const
+{
   // Health slices start at col 20, row 4. The first 9 are for the "0 health"
   // animation
 
   // The model has a range of 1-9 for health, but the HUD shows only 8
   // slices, with a special animation for having 1 point of health.
   const auto numFullSlices = playerModel.health() - 1;
-  if (numFullSlices > 0) {
-    for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
+  if (numFullSlices > 0)
+  {
+    for (int i = 0; i < NUM_HEALTH_SLICES; ++i)
+    {
       const auto sliceIndex = i < numFullSlices ? 9 : 10;
+
+      // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
+      // clang-format on
     }
-  } else {
+  }
+  else
+  {
     const auto animationOffset = mElapsedFrames;
 
-    for (int i=0; i<NUM_HEALTH_SLICES; ++i) {
+    for (int i = 0; i < NUM_HEALTH_SLICES; ++i)
+    {
       const auto sliceIndex = (i + animationOffset) % 9;
+
+      // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
         base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
+      // clang-format on
     }
   }
 }
 
 
 void HudRenderer::drawCollectedLetters(
-  const data::PlayerModel& playerModel
-) const {
-  for (const auto letter : playerModel.collectedLetters()) {
+  const data::PlayerModel& playerModel) const
+{
+  for (const auto letter : playerModel.collectedLetters())
+  {
     const auto it = mCollectedLetterIndicatorsByType.find(letter);
     assert(it != mCollectedLetterIndicatorsByType.end());
     it->second.mTexture.render(it->second.mPxPosition);
@@ -343,9 +373,8 @@ void HudRenderer::drawCollectedLetters(
 }
 
 
-void HudRenderer::drawRadar(
-  const base::ArrayView<base::Vector> positions
-) const {
+void HudRenderer::drawRadar(const base::ArrayView<base::Vector> positions) const
+{
   auto drawDots = [&]() {
     for (const auto& position : positions)
     {
@@ -360,7 +389,8 @@ void HudRenderer::drawRadar(
   };
 
 
-  if (mpOptions->mPerElementUpscalingEnabled) {
+  if (mpOptions->mPerElementUpscalingEnabled)
+  {
     {
       const auto saved = mRadarSurface.bindAndReset();
       mpRenderer->clear({0, 0, 0, 0});
@@ -368,7 +398,9 @@ void HudRenderer::drawRadar(
     }
 
     mRadarSurface.render(RADAR_POS_X, RADAR_POS_Y);
-  } else {
+  }
+  else
+  {
     const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(
       mpRenderer->globalTranslation() + base::Vector{RADAR_POS_X, RADAR_POS_Y});
@@ -377,4 +409,4 @@ void HudRenderer::drawRadar(
   }
 }
 
-}
+} // namespace rigel::ui

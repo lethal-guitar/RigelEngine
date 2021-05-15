@@ -18,14 +18,17 @@
 
 #include "game_logic/global_dependencies.hpp"
 
-namespace rigel::engine::events {
-  struct CollidedWithWorld;
+namespace rigel::engine::events
+{
+struct CollidedWithWorld;
 }
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SlimePipe {
+struct SlimePipe
+{
   int mGameFramesSinceLastDrop = 0;
 
   void update(
@@ -36,14 +39,9 @@ struct SlimePipe {
 };
 
 
-struct SlimeDrop {
-  void update(
-    GlobalDependencies&,
-    GlobalState&,
-    bool,
-    entityx::Entity
-  ) {
-  }
+struct SlimeDrop
+{
+  void update(GlobalDependencies&, GlobalState&, bool, entityx::Entity) { }
 
   void onCollision(
     GlobalDependencies& dependencies,
@@ -52,4 +50,4 @@ struct SlimeDrop {
     entityx::Entity entity);
 };
 
-}
+} // namespace rigel::game_logic::behaviors

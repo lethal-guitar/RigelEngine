@@ -19,7 +19,10 @@
 #include "base/spatial_types.hpp"
 
 
-namespace rigel::engine { namespace components {
+namespace rigel::engine
+{
+namespace components
+{
 
 using WorldPosition = base::Vector;
 using BoundingBox = base::Rect<int>;
@@ -31,13 +34,16 @@ using BoundingBox = base::Rect<int>;
  * active if their bounding box intersects the active region, i.e. they are
  * visible on screen.
  * */
-struct Active {
+struct Active
+{
   bool mIsOnScreen = true;
 };
 
 /** Specifies when to activate entity */
-struct ActivationSettings {
-  enum class Policy {
+struct ActivationSettings
+{
+  enum class Policy
+  {
     // Entity is always active
     Always,
 
@@ -61,12 +67,13 @@ struct ActivationSettings {
 };
 
 
-enum class Orientation {
+enum class Orientation
+{
   Left,
   Right
 };
 
-}
+} // namespace components
 
 
 bool isOnScreen(
@@ -75,21 +82,23 @@ bool isOnScreen(
   const base::Extents& viewPortSize);
 
 
-namespace orientation {
+namespace orientation
+{
 
-inline components::Orientation opposite(
-  const components::Orientation orientation
-) {
+inline components::Orientation
+  opposite(const components::Orientation orientation)
+{
   return orientation == components::Orientation::Left
     ? components::Orientation::Right
     : components::Orientation::Left;
 }
 
 
-inline int toMovement(const components::Orientation orientation) {
+inline int toMovement(const components::Orientation orientation)
+{
   return orientation == components::Orientation::Left ? -1 : 1;
 }
 
-}
+} // namespace orientation
 
-}
+} // namespace rigel::engine

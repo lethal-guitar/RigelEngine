@@ -40,13 +40,16 @@
  *   https://www.ffmpeg.org/doxygen/2.4/adpcm_8c_source.html#l00295
  */
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 
-namespace {
+namespace
+{
 
-enum class ChunkType {
+enum class ChunkType
+{
   Terminator = 0,
   TypedSoundData = 1,
   UntypedSoundData = 2,
@@ -60,7 +63,8 @@ enum class ChunkType {
 };
 
 
-enum class CodecType {
+enum class CodecType
+{
   Unsigned8BitPcm = 0,
   Adpcm4Bits = 1,
   Adpcm2_6Bits = 2,
@@ -69,20 +73,24 @@ enum class CodecType {
 };
 
 
-enum class AdpcmType {
+enum class AdpcmType
+{
   FourBits,
   TwoPointSixBits,
   TwoBits
 };
 
 
-constexpr int adpcmShiftValue(const AdpcmType codec) {
+constexpr int adpcmShiftValue(const AdpcmType codec)
+{
   return codec == AdpcmType::TwoBits ? 2 : 0;
 }
 
 
-ChunkType determineChunkType(const std::uint8_t typeMarker) {
-  if (typeMarker > 9) {
+ChunkType determineChunkType(const std::uint8_t typeMarker)
+{
+  if (typeMarker > 9)
+  {
     throw std::invalid_argument("Unrecognized chunk type in VOC file");
   }
 
@@ -90,8 +98,10 @@ ChunkType determineChunkType(const std::uint8_t typeMarker) {
 }
 
 
-CodecType determineCodecType(const std::uint8_t typeMarker) {
-  if (typeMarker > 4) {
+CodecType determineCodecType(const std::uint8_t typeMarker)
+{
+  if (typeMarker > 4)
+  {
     throw std::runtime_error("Unsupported codec in VOC file");
   }
 
@@ -99,16 +109,18 @@ CodecType determineCodecType(const std::uint8_t typeMarker) {
 }
 
 
-int determineSampleRate(const std::uint8_t frequencyDivisor) {
+int determineSampleRate(const std::uint8_t frequencyDivisor)
+{
   return 1000000 / (256 - frequencyDivisor);
 }
 
 
 std::size_t calculateUncompressedSampleCount(
   const CodecType codec,
-  const std::size_t encodedSize
-) {
-  switch (codec) {
+  const std::size_t encodedSize)
+{
+  switch (codec)
+  {
     case CodecType::Unsigned8BitPcm:
     case CodecType::Signed16BitPcm:
       return encodedSize;
@@ -116,13 +128,13 @@ std::size_t calculateUncompressedSampleCount(
     // For the three ADPCM variants, each source byte decodes to N samples.
     // In addition, the first byte is a single Unsigned 8-bit sample.
     case CodecType::Adpcm4Bits:
-      return 2 * (encodedSize-1) + 1;
+      return 2 * (encodedSize - 1) + 1;
 
     case CodecType::Adpcm2_6Bits:
-      return 3 * (encodedSize-1) + 1;
+      return 3 * (encodedSize - 1) + 1;
 
     case CodecType::Adpcm2Bits:
-      return 4  * (encodedSize-1) + 1;
+      return 4 * (encodedSize - 1) + 1;
 
     default:
       break;
@@ -135,26 +147,31 @@ std::size_t calculateUncompressedSampleCount(
 }
 
 
-bool readAndValidateVocHeader(LeStreamReader& reader) {
+bool readAndValidateVocHeader(LeStreamReader& reader)
+{
   const auto signatureText = readFixedSizeString(reader, 19);
-  if (signatureText != "Creative Voice File") {
+  if (signatureText != "Creative Voice File")
+  {
     return false;
   }
 
   const auto signatureByte = reader.readU8();
-  if (signatureByte != 0x1A) {
+  if (signatureByte != 0x1A)
+  {
     return false;
   }
 
   const auto headerSize = reader.readU16();
-  if (headerSize != 0x1A) {
+  if (headerSize != 0x1A)
+  {
     return false;
   }
 
   const auto versionNumber = reader.readU16();
   const auto checkSum = reader.readU16();
 
-  if (checkSum != (~versionNumber + 0x1234)) {
+  if (checkSum != (~versionNumber + 0x1234))
+  {
     return false;
   }
 
@@ -162,13 +179,15 @@ bool readAndValidateVocHeader(LeStreamReader& reader) {
 }
 
 
-std::int16_t unsigned8BitSampleToSigned16Bit(const std::uint8_t sample) {
+std::int16_t unsigned8BitSampleToSigned16Bit(const std::uint8_t sample)
+{
   return 128 * (sample - 0x80);
 }
 
 
-template<AdpcmType codec>
-class AdpcmDecoderHelper {
+template <AdpcmType codec>
+class AdpcmDecoderHelper
+{
 public:
   static const int shift = adpcmShiftValue(codec);
 
@@ -178,24 +197,28 @@ public:
   {
   }
 
-  template<int numBits>
-  int16_t decodeBits(const int bitPack) {
-    const bool isNegative = (bitPack >> (numBits-1)) != 0;
-    const int delta = bitPack & ((1 << (numBits-1)) - 1);
+  template <int numBits>
+  int16_t decodeBits(const int bitPack)
+  {
+    const bool isNegative = (bitPack >> (numBits - 1)) != 0;
+    const int delta = bitPack & ((1 << (numBits - 1)) - 1);
 
     int difference = delta << (mStep + 7 + shift);
-    if (isNegative) {
+    if (isNegative)
+    {
       difference = -difference;
     }
 
-    const auto newSample = std::clamp(
-      mPrediction + difference, -16384, 16384);
+    const auto newSample = std::clamp(mPrediction + difference, -16384, 16384);
     mPrediction = newSample;
 
-    const auto limit = numBits*2 - 3;
-    if (delta >= limit && mStep < 3) {
+    const auto limit = numBits * 2 - 3;
+    if (delta >= limit && mStep < 3)
+    {
       ++mStep;
-    } else if (delta == 0 && mStep > 0) {
+    }
+    else if (delta == 0 && mStep > 0)
+    {
       --mStep;
     }
 
@@ -208,20 +231,22 @@ private:
 };
 
 
-template<AdpcmType codec, typename TargetIter>
+template <AdpcmType codec, typename TargetIter>
 void decodeAdpcmAudio(
   LeStreamReader& reader,
   const std::size_t encodedSize,
-  TargetIter outputIter
-) {
+  TargetIter outputIter)
+{
   const auto firstSample = unsigned8BitSampleToSigned16Bit(reader.readU8());
   *outputIter++ = firstSample;
 
   AdpcmDecoderHelper<codec> decoder(firstSample);
-  for (auto i=0u; i<encodedSize - 1; ++i) {
+  for (auto i = 0u; i < encodedSize - 1; ++i)
+  {
     const auto bitPack = reader.readU8();
 
-    switch (codec) {
+    switch (codec)
+    {
       case AdpcmType::FourBits:
         // Each byte contains two 4-bit encoded samples
         *outputIter++ = decoder.template decodeBits<4>(bitPack >> 4);
@@ -247,16 +272,18 @@ void decodeAdpcmAudio(
 }
 
 
-template<typename TargetIter>
+template <typename TargetIter>
 void decodeAudio(
   LeStreamReader& reader,
   const std::size_t encodedSize,
   const CodecType codec,
-  TargetIter outputIter
-) {
-  switch (codec) {
+  TargetIter outputIter)
+{
+  switch (codec)
+  {
     case CodecType::Unsigned8BitPcm:
-      for (auto i=0u; i<encodedSize; ++i) {
+      for (auto i = 0u; i < encodedSize; ++i)
+      {
         *outputIter++ = unsigned8BitSampleToSigned16Bit(reader.readU8());
       }
       break;
@@ -275,28 +302,33 @@ void decodeAudio(
       break;
 
     case CodecType::Signed16BitPcm:
-      for (auto i=0u; i<encodedSize; ++i) {
+      for (auto i = 0u; i < encodedSize; ++i)
+      {
         *outputIter++ = reader.readS16();
       }
       break;
   }
 }
 
-}
+} // namespace
 
 
-data::AudioBuffer decodeVoc(const ByteBuffer& data) {
+data::AudioBuffer decodeVoc(const ByteBuffer& data)
+{
   LeStreamReader reader(data);
-  if (!readAndValidateVocHeader(reader)) {
+  if (!readAndValidateVocHeader(reader))
+  {
     throw std::invalid_argument("Invalid VOC file header");
   }
 
   std::vector<data::Sample> decodedSamples;
   std::optional<int> sampleRate;
 
-  while (reader.hasData()) {
+  while (reader.hasData())
+  {
     const auto chunkType = determineChunkType(reader.readU8());
-    if (chunkType == ChunkType::Terminator) {
+    if (chunkType == ChunkType::Terminator)
+    {
       // Terminator chunks don't have a size value, so we need to stop before
       // attempting to read a size.
       break;
@@ -304,17 +336,20 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data) {
     const auto chunkSize = reader.readU24();
 
     LeStreamReader chunkReader(
-      reader.currentIter(),
-      reader.currentIter() + chunkSize);
+      reader.currentIter(), reader.currentIter() + chunkSize);
 
-    switch (chunkType) {
+    switch (chunkType)
+    {
       case ChunkType::TypedSoundData:
         {
           const auto newSampleRate = determineSampleRate(chunkReader.readU8());
-          if (sampleRate && *sampleRate != newSampleRate) {
+          if (sampleRate && *sampleRate != newSampleRate)
+          {
             throw std::invalid_argument(
               "Multiple sample rates in single VOC file aren't supported");
-          } else if (!sampleRate) {
+          }
+          else if (!sampleRate)
+          {
             sampleRate = newSampleRate;
           }
 
@@ -337,12 +372,15 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data) {
           const auto silenceSampleRate =
             determineSampleRate(chunkReader.readU8());
 
-          if (sampleRate && *sampleRate != silenceSampleRate) {
+          if (sampleRate && *sampleRate != silenceSampleRate)
+          {
             const auto factor =
               static_cast<double>(*sampleRate) / silenceSampleRate;
             numSilentSamples = static_cast<decltype(numSilentSamples)>(
               numSilentSamples * factor);
-          } else if (!sampleRate) {
+          }
+          else if (!sampleRate)
+          {
             sampleRate = silenceSampleRate;
           }
 
@@ -363,7 +401,8 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data) {
     reader.skipBytes(chunkSize);
   }
 
-  if (!sampleRate || decodedSamples.empty()) {
+  if (!sampleRate || decodedSamples.empty())
+  {
     throw std::invalid_argument("VOC file didn't contain data");
   }
 
@@ -371,4 +410,4 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data) {
 }
 
 
-}
+} // namespace rigel::loader

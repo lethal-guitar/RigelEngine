@@ -29,29 +29,35 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel {
+namespace rigel
+{
 
 struct IGameServiceProvider;
 class UserProfile;
 
-namespace engine {
-  class SpriteFactory;
-  class TiledTexture;
+namespace engine
+{
+class SpriteFactory;
+class TiledTexture;
+} // namespace engine
+
+namespace loader
+{
+class ResourceLoader;
 }
 
-namespace loader {
-  class ResourceLoader;
-}
-
-namespace ui {
-  class MenuElementRenderer;
-  class DukeScriptRunner;
-}
+namespace ui
+{
+class MenuElementRenderer;
+class DukeScriptRunner;
+} // namespace ui
 
 
-struct GameMode {
+struct GameMode
+{
   /** Contains everything a mode needs */
-  struct Context {
+  struct Context
+  {
     const loader::ResourceLoader* mpResources;
     renderer::Renderer* mpRenderer;
     IGameServiceProvider* mpServiceProvider;
@@ -73,4 +79,4 @@ struct GameMode {
 
 void runScript(GameMode::Context& context, const std::string& scriptName);
 
-}
+} // namespace rigel

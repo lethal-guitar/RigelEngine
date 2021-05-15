@@ -21,13 +21,13 @@
 #include "engine/random_number_generator.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 EarthQuakeEffect::EarthQuakeEffect(
   IGameServiceProvider* pServiceProvider,
   engine::RandomNumberGenerator* pRandomGenerator,
-  entityx::EventManager* pEvents
-)
+  entityx::EventManager* pEvents)
   : mCountdown(0)
   , mThreshold(0)
   , mpServiceProvider(pServiceProvider)
@@ -37,24 +37,33 @@ EarthQuakeEffect::EarthQuakeEffect(
 }
 
 
-void EarthQuakeEffect::synchronizeTo(const EarthQuakeEffect& other) {
+void EarthQuakeEffect::synchronizeTo(const EarthQuakeEffect& other)
+{
   mCountdown = other.mCountdown;
   mThreshold = other.mThreshold;
 }
 
 
-void EarthQuakeEffect::update() {
-  if (mCountdown <= 0) {
+void EarthQuakeEffect::update()
+{
+  if (mCountdown <= 0)
+  {
     // Once the countdown reaches 0, determine a new countdown and threshold
     mCountdown = mpRandomGenerator->gen() - 1;
     mThreshold = mpRandomGenerator->gen() % 50;
-  } else {
-    if (mCountdown < mThreshold) {
+  }
+  else
+  {
+    if (mCountdown < mThreshold)
+    {
       // Shake the screen or play the sound
       const auto randomNumber = mpRandomGenerator->gen() % 4;
-      if (randomNumber == 0) {
+      if (randomNumber == 0)
+      {
         mpServiceProvider->playSound(data::SoundId::EarthQuake);
-      } else {
+      }
+      else
+      {
         mpEvents->emit(events::ScreenShake{randomNumber});
       }
     }
@@ -64,8 +73,9 @@ void EarthQuakeEffect::update() {
 }
 
 
-bool EarthQuakeEffect::isQuaking() const {
+bool EarthQuakeEffect::isQuaking() const
+{
   return mCountdown < mThreshold && mCountdown != 0;
 }
 
-}
+} // namespace rigel::game_logic

@@ -19,15 +19,18 @@
 #include <algorithm>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-bool canBeUsedForKeyBinding(const SDL_Keycode keyCode) {
+bool canBeUsedForKeyBinding(const SDL_Keycode keyCode)
+{
   using std::begin;
   using std::end;
   using std::find;
 
   static constexpr auto DISALLOWED_KEYS = std::array<SDL_Keycode, 8>{
-    // The following keys are used by the in-game menu system, to enter the menu.
+    // The following keys are used by the in-game menu system, to enter the
+    // menu.
     // We don't want to allow these keys for use in key bindings.
     // We could make it possible to rebind those menu keys as well, but for now,
     // we just disallow their use.
@@ -41,11 +44,10 @@ bool canBeUsedForKeyBinding(const SDL_Keycode keyCode) {
     // to work as expected in practice.
     SDLK_LGUI,
     SDLK_RGUI,
-    SDLK_CAPSLOCK
-  };
+    SDLK_CAPSLOCK};
 
   return find(begin(DISALLOWED_KEYS), end(DISALLOWED_KEYS), keyCode) ==
     end(DISALLOWED_KEYS);
 }
 
-}
+} // namespace rigel::data

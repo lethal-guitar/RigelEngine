@@ -20,15 +20,17 @@
 #include <vector>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 using Sample = std::int16_t;
 
 /** Mono, 16-bit signed little-endian PCM */
-struct AudioBuffer {
+struct AudioBuffer
+{
   int mSampleRate;
   std::vector<Sample> mSamples;
 };
 
 
-}
+} // namespace rigel::data

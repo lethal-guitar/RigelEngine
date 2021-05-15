@@ -25,7 +25,8 @@
 namespace ex = entityx;
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using namespace data;
 using namespace engine::components;
@@ -33,37 +34,44 @@ using namespace std;
 using data::map::SolidEdge;
 
 
-namespace {
+namespace
+{
 
-struct SolidEdgeVisualizationInfo {
+struct SolidEdgeVisualizationInfo
+{
   data::map::SolidEdge mEdge;
   tuple<int, int, int, int> mCoordinates;
 };
 
 
-base::Color colorForEntity(entityx::Entity entity) {
+base::Color colorForEntity(entityx::Entity entity)
+{
   const auto isPlayerDamaging =
     entity.has_component<game_logic::components::PlayerDamaging>();
   const auto isSolidBody =
     entity.has_component<engine::components::SolidBody>();
 
-  if (isPlayerDamaging) {
+  if (isPlayerDamaging)
+  {
     return {255, 0, 0, 255};
-  } else if (isSolidBody) {
+  }
+  else if (isSolidBody)
+  {
     return {255, 255, 0, 255};
-  } else {
+  }
+  else
+  {
     return {0, 255, 0, 255};
   }
 }
 
-}
+} // namespace
 
 
 DebuggingSystem::DebuggingSystem(
   renderer::Renderer* pRenderer,
   const base::Vector* pCameraPos,
-  data::map::Map* pMap
-)
+  data::map::Map* pMap)
   : mpRenderer(pRenderer)
   , mpCameraPos(pCameraPos)
   , mpMap(pMap)
@@ -71,33 +79,40 @@ DebuggingSystem::DebuggingSystem(
 }
 
 
-void DebuggingSystem::toggleBoundingBoxDisplay() {
+void DebuggingSystem::toggleBoundingBoxDisplay()
+{
   mShowBoundingBoxes = !mShowBoundingBoxes;
 }
 
 
-void DebuggingSystem::toggleWorldCollisionDataDisplay() {
+void DebuggingSystem::toggleWorldCollisionDataDisplay()
+{
   mShowWorldCollisionData = !mShowWorldCollisionData;
 }
 
 
-void DebuggingSystem::toggleGridDisplay() {
+void DebuggingSystem::toggleGridDisplay()
+{
   mShowGrid = !mShowGrid;
 }
 
 
 void DebuggingSystem::update(
   ex::EntityManager& es,
-  const base::Extents& viewPortSize
-) {
-  if (mShowWorldCollisionData) {
+  const base::Extents& viewPortSize)
+{
+  if (mShowWorldCollisionData)
+  {
     const auto drawColor = base::Color{255, 255, 0, 255};
 
-    for (int y=0; y<viewPortSize.height; ++y) {
-      for (int x=0; x<viewPortSize.width; ++x) {
+    for (int y = 0; y < viewPortSize.height; ++y)
+    {
+      for (int x = 0; x < viewPortSize.width; ++x)
+      {
         const auto col = x + mpCameraPos->x;
         const auto row = y + mpCameraPos->y;
-        if (col >= mpMap->width() || row >= mpMap->height()) {
+        if (col >= mpMap->width() || row >= mpMap->height())
+        {
           continue;
         }
 
@@ -110,14 +125,15 @@ void DebuggingSystem::update(
         const auto bottom = bottomRight.y;
 
         const SolidEdgeVisualizationInfo visualizationInfos[] = {
-          {SolidEdge::top(),    make_tuple(left, top, right, top)},
-          {SolidEdge::right(),  make_tuple(right, top, right, bottom)},
+          {SolidEdge::top(), make_tuple(left, top, right, top)},
+          {SolidEdge::right(), make_tuple(right, top, right, bottom)},
           {SolidEdge::bottom(), make_tuple(left, bottom, right, bottom)},
-          {SolidEdge::left(),   make_tuple(left, top, left, bottom)}
-        };
+          {SolidEdge::left(), make_tuple(left, top, left, bottom)}};
 
-        for (const auto& info : visualizationInfos) {
-          if (collisionData.isSolidOn(info.mEdge)) {
+        for (const auto& info : visualizationInfos)
+        {
+          if (collisionData.isSolidOn(info.mEdge))
+          {
             int x1, y1, x2, y2;
             tie(x1, y1, x2, y2) = info.mCoordinates;
             mpRenderer->drawLine(x1, y1, x2, y2, drawColor);
@@ -128,17 +144,20 @@ void DebuggingSystem::update(
         const auto isLadder = mpMap->attributes(col, row).isLadder();
         const auto isFlammable = mpMap->attributes(col, row).isFlammable();
 
-        if (isClimbable) {
+        if (isClimbable)
+        {
           auto tileBox = base::makeRect<int>(topLeft, bottomRight);
           mpRenderer->drawRectangle(tileBox, base::Color(255, 100, 255, 220));
         }
 
-        if (isLadder) {
+        if (isLadder)
+        {
           auto tileBox = base::makeRect<int>(topLeft, bottomRight);
           mpRenderer->drawRectangle(tileBox, base::Color(0, 100, 255, 220));
         }
 
-        if (isFlammable) {
+        if (isFlammable)
+        {
           auto tileBox = base::makeRect<int>(topLeft, bottomRight);
           mpRenderer->drawRectangle(tileBox, base::Color(255, 127, 0, 220));
         }
@@ -146,19 +165,16 @@ void DebuggingSystem::update(
     }
   }
 
-  if (mShowBoundingBoxes) {
+  if (mShowBoundingBoxes)
+  {
     es.each<WorldPosition, BoundingBox>(
       [this](
-        ex::Entity entity,
-        const WorldPosition& pos,
-        const BoundingBox& bbox
-      ) {
+        ex::Entity entity, const WorldPosition& pos, const BoundingBox& bbox) {
         const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
-          tileExtentsToPixelExtents(worldSpaceBox.size)
-        };
+          tileExtentsToPixelExtents(worldSpaceBox.size)};
 
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
@@ -167,34 +183,37 @@ void DebuggingSystem::update(
       [this](
         ex::Entity entity,
         const WorldPosition& pos,
-        const game_logic::components::MapGeometryLink& link
-      ) {
+        const game_logic::components::MapGeometryLink& link) {
         const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
         const auto boxInPixels = BoundingBox{
-          tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) - worldToScreenPx,
+          tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) -
+            worldToScreenPx,
           tileExtentsToPixelExtents(link.mLinkedGeometrySection.size)};
 
         mpRenderer->drawRectangle(boxInPixels, base::Color{0, 255, 255, 190});
       });
   }
 
-  if (mShowGrid) {
+  if (mShowGrid)
+  {
     const auto drawColor = base::Color{255, 255, 255, 190};
     const auto maxX = tilesToPixels(viewPortSize.width);
     const auto maxY = tilesToPixels(viewPortSize.height);
 
     // Horizontal lines
-    for (int y=0; y<viewPortSize.height; ++y) {
+    for (int y = 0; y < viewPortSize.height; ++y)
+    {
       const auto pxY = tilesToPixels(y);
       mpRenderer->drawLine(0, pxY, maxX, pxY, drawColor);
     }
 
     // Vertical lines
-    for (int x=0; x<viewPortSize.width; ++x) {
+    for (int x = 0; x < viewPortSize.width; ++x)
+    {
       const auto pxX = tilesToPixels(x);
       mpRenderer->drawLine(pxX, 0, pxX, maxY, drawColor);
     }
   }
 }
 
-}
+} // namespace rigel::game_logic

@@ -26,27 +26,29 @@ RIGEL_RESTORE_WARNINGS
 #include <stdexcept>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
-namespace {
+namespace
+{
 
 constexpr auto ATLAS_WIDTH = 2048;
 constexpr auto ATLAS_HEIGHT = 1024;
 
-}
+} // namespace
 
 
 TextureAtlas::TextureAtlas(
   Renderer* pRenderer,
-  const std::vector<data::Image>& images
-)
+  const std::vector<data::Image>& images)
   : mpRenderer(pRenderer)
 {
   std::vector<stbrp_rect> rects;
   rects.reserve(images.size());
 
   auto index = 0;
-  for (const auto& image : images) {
+  for (const auto& image : images)
+  {
     rects.push_back(stbrp_rect{
       index,
       static_cast<stbrp_coord>(image.width()),
@@ -70,20 +72,24 @@ TextureAtlas::TextureAtlas(
 
   const auto result =
     stbrp_pack_rects(&context, rects.data(), static_cast<int>(images.size()));
-  if (!result) {
+  if (!result)
+  {
     throw std::runtime_error("Failed to build texture atlas");
   }
 
-  data::Image atlas{static_cast<size_t>(ATLAS_WIDTH), static_cast<size_t>(ATLAS_HEIGHT)};
+  data::Image atlas{
+    static_cast<size_t>(ATLAS_WIDTH), static_cast<size_t>(ATLAS_HEIGHT)};
 
-  for (const auto& packedRect : rects) {
+  for (const auto& packedRect : rects)
+  {
     atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
   }
 
   mAtlasTexture = Texture{mpRenderer, std::move(atlas)};
 
   mCoordinatesMap.reserve(images.size());
-  for (const auto& packedRect : rects) {
+  for (const auto& packedRect : rects)
+  {
     mCoordinatesMap.push_back(toTexCoords(
       {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
       mAtlasTexture.width(),
@@ -92,11 +98,10 @@ TextureAtlas::TextureAtlas(
 }
 
 
-void TextureAtlas::draw(int index, const base::Rect<int>& destRect) const {
+void TextureAtlas::draw(int index, const base::Rect<int>& destRect) const
+{
   mpRenderer->drawTexture(
-    mAtlasTexture.data(),
-    mCoordinatesMap[index],
-    destRect);
+    mAtlasTexture.data(), mCoordinatesMap[index], destRect);
 }
 
-}
+} // namespace rigel::renderer

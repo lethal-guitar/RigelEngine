@@ -25,31 +25,39 @@
 #include <unordered_map>
 
 
-namespace rigel {
+namespace rigel
+{
 
-namespace data {
-  struct GameOptions;
-  class Image;
-  class PlayerModel;
-}
+namespace data
+{
+struct GameOptions;
+class Image;
+class PlayerModel;
+} // namespace data
 
-namespace loader {
-  struct ActorData;
-  class ActorImagePackage;
-  class ResourceLoader;
-}
+namespace loader
+{
+struct ActorData;
+class ActorImagePackage;
+class ResourceLoader;
+} // namespace loader
 
 
-namespace ui {
+namespace ui
+{
 
-inline bool isVisibleOnRadar(const base::Vector& position) {
+inline bool isVisibleOnRadar(const base::Vector& position)
+{
+  // clang-format off
   return
     position.x >= -16 && position.x < 16 &&
     position.y >= -16 && position.y < 16;
+  // clang-format on
 }
 
 
-class HudRenderer {
+class HudRenderer
+{
 public:
   HudRenderer(
     int levelNumber,
@@ -64,7 +72,8 @@ public:
     base::ArrayView<base::Vector> radarPositions);
 
 private:
-  struct CollectedLetterIndicator {
+  struct CollectedLetterIndicator
+  {
     renderer::Texture mTexture;
     base::Vector mPxPosition;
   };
@@ -110,4 +119,5 @@ private:
   mutable renderer::RenderTargetTexture mRadarSurface;
 };
 
-}}
+} // namespace ui
+} // namespace rigel

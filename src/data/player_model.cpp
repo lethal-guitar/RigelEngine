@@ -22,7 +22,8 @@
 #include <cassert>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 PlayerModel::PlayerModel()
   : mWeapon(WeaponType::Normal)
@@ -43,121 +44,143 @@ PlayerModel::PlayerModel(const SavedGame& save)
 }
 
 
-PlayerModel::CheckpointState PlayerModel::makeCheckpoint() const {
+PlayerModel::CheckpointState PlayerModel::makeCheckpoint() const
+{
   return CheckpointState{mWeapon, mAmmo, mHealth};
 }
 
 
-void PlayerModel::restoreFromCheckpoint(const CheckpointState& state) {
+void PlayerModel::restoreFromCheckpoint(const CheckpointState& state)
+{
   mHealth = std::max(2, state.mHealth);
   mWeapon = state.mWeapon;
   mAmmo = state.mAmmo;
 }
 
 
-int PlayerModel::score() const {
+int PlayerModel::score() const
+{
   return mScore;
 }
 
 
-void PlayerModel::giveScore(const int amount) {
+void PlayerModel::giveScore(const int amount)
+{
   mScore = std::clamp(mScore + amount, 0, MAX_SCORE);
 }
 
 
-int PlayerModel::ammo() const {
+int PlayerModel::ammo() const
+{
   return mAmmo;
 }
 
 
-int PlayerModel::currentMaxAmmo() const {
-  return
-    mWeapon == WeaponType::FlameThrower ? MAX_AMMO_FLAME_THROWER : MAX_AMMO;
+int PlayerModel::currentMaxAmmo() const
+{
+  return mWeapon == WeaponType::FlameThrower ? MAX_AMMO_FLAME_THROWER
+                                             : MAX_AMMO;
 }
 
 
-WeaponType PlayerModel::weapon() const {
+WeaponType PlayerModel::weapon() const
+{
   return mWeapon;
 }
 
 
-bool PlayerModel::currentWeaponConsumesAmmo() const {
+bool PlayerModel::currentWeaponConsumesAmmo() const
+{
   return mWeapon != WeaponType::Normal;
 }
 
 
-void PlayerModel::switchToWeapon(const WeaponType type) {
+void PlayerModel::switchToWeapon(const WeaponType type)
+{
   mWeapon = type;
   mAmmo = currentMaxAmmo();
 }
 
 
-void PlayerModel::useAmmo() {
-  if (currentWeaponConsumesAmmo()) {
+void PlayerModel::useAmmo()
+{
+  if (currentWeaponConsumesAmmo())
+  {
     --mAmmo;
-    if (mAmmo <= 0) {
+    if (mAmmo <= 0)
+    {
       switchToWeapon(WeaponType::Normal);
     }
   }
 }
 
 
-void PlayerModel::setAmmo(int amount) {
+void PlayerModel::setAmmo(int amount)
+{
   assert(amount >= 0 && amount <= currentMaxAmmo());
   mAmmo = amount;
 }
 
 
-int PlayerModel::health() const {
+int PlayerModel::health() const
+{
   return mHealth;
 }
 
 
-bool PlayerModel::isAtFullHealth() const {
+bool PlayerModel::isAtFullHealth() const
+{
   return mHealth == MAX_HEALTH;
 }
 
 
-bool PlayerModel::isDead() const {
+bool PlayerModel::isDead() const
+{
   return mHealth <= 0;
 }
 
 
-void PlayerModel::takeDamage(const int amount) {
+void PlayerModel::takeDamage(const int amount)
+{
   mHealth = std::clamp(mHealth - amount, 0, MAX_HEALTH);
 }
 
 
-void PlayerModel::takeFatalDamage() {
+void PlayerModel::takeFatalDamage()
+{
   mHealth = 0;
 }
 
 
-void PlayerModel::giveHealth(const int amount) {
+void PlayerModel::giveHealth(const int amount)
+{
   mHealth = std::clamp(mHealth + amount, 0, MAX_HEALTH);
 }
 
 
-const std::vector<InventoryItemType>& PlayerModel::inventory() const {
+const std::vector<InventoryItemType>& PlayerModel::inventory() const
+{
   return mInventory;
 }
 
 
-bool PlayerModel::hasItem(const InventoryItemType type) const {
+bool PlayerModel::hasItem(const InventoryItemType type) const
+{
   using namespace std;
 
   return find(begin(mInventory), end(mInventory), type) != end(mInventory);
 }
 
 
-void PlayerModel::giveItem(InventoryItemType type) {
+void PlayerModel::giveItem(InventoryItemType type)
+{
   using namespace std;
 
   if (
     (type == InventoryItemType::RapidFire ||
-    type == InventoryItemType::CloakingDevice) &&
-    find(begin(mInventory), end(mInventory), type) != end(mInventory)
-  ) {
+     type == InventoryItemType::CloakingDevice) &&
+    find(begin(mInventory), end(mInventory), type) != end(mInventory))
+  {
     // Duke can only carry one rapid fire or cloaking device at a time.
     // Picking up a 2nd one resets the timer instead, prolonging the item's
     // effect. This is implemented in the Player class.
@@ -168,34 +191,39 @@ void PlayerModel::giveItem(InventoryItemType type) {
 }
 
 
-void PlayerModel::removeItem(const InventoryItemType type) {
+void PlayerModel::removeItem(const InventoryItemType type)
+{
   using namespace std;
 
   auto iItem = find(begin(mInventory), end(mInventory), type);
-  if (iItem != end(mInventory)) {
+  if (iItem != end(mInventory))
+  {
     mInventory.erase(iItem);
   }
 }
 
 
-const std::vector<CollectableLetterType>& PlayerModel::collectedLetters() const {
+const std::vector<CollectableLetterType>& PlayerModel::collectedLetters() const
+{
   return mCollectedLetters;
 }
 
 
-PlayerModel::LetterCollectionState PlayerModel::addLetter(
-  const CollectableLetterType type
-) {
+PlayerModel::LetterCollectionState
+  PlayerModel::addLetter(const CollectableLetterType type)
+{
   using L = CollectableLetterType;
-  static std::vector<L> sExpectedOrder = {
-    L::N, L::U, L::K, L::E, L::M};
+  static std::vector<L> sExpectedOrder = {L::N, L::U, L::K, L::E, L::M};
 
 
   mCollectedLetters.push_back(type);
 
-  if (mCollectedLetters.size() < 5) {
+  if (mCollectedLetters.size() < 5)
+  {
     return LetterCollectionState::Incomplete;
-  } else {
+  }
+  else
+  {
     return mCollectedLetters == sExpectedOrder
       ? LetterCollectionState::InOrder
       : LetterCollectionState::WrongOrder;
@@ -203,26 +231,30 @@ PlayerModel::LetterCollectionState PlayerModel::addLetter(
 }
 
 
-void PlayerModel::resetForNewLevel() {
+void PlayerModel::resetForNewLevel()
+{
   mHealth = MAX_HEALTH;
   mCollectedLetters.clear();
   mInventory.clear();
 }
 
 
-void PlayerModel::resetHealthAndScore() {
+void PlayerModel::resetHealthAndScore()
+{
   mHealth = MAX_HEALTH;
   mScore = 0;
 }
 
 
-TutorialMessageState& PlayerModel::tutorialMessages() {
+TutorialMessageState& PlayerModel::tutorialMessages()
+{
   return mTutorialMessages;
 }
 
 
-const TutorialMessageState& PlayerModel::tutorialMessages() const {
+const TutorialMessageState& PlayerModel::tutorialMessages() const
+{
   return mTutorialMessages;
 }
 
-}
+} // namespace rigel::data

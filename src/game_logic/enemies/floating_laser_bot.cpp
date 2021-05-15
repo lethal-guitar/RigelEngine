@@ -30,32 +30,36 @@
 #include <algorithm>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-struct GunSpec {
+struct GunSpec
+{
   base::Vector mOffset;
   engine::components::Orientation mOrientation;
 };
 
 
+// clang-format off
 constexpr GunSpec GUN_SPECS[]{
   {{-1, -1}, engine::components::Orientation::Left},
   {{-1,  0}, engine::components::Orientation::Left},
   {{ 2,  0}, engine::components::Orientation::Right},
-  {{ 2, -1}, engine::components::Orientation::Right}
-};
+  {{ 2, -1}, engine::components::Orientation::Right}};
+// clang-format on
 
-}
+} // namespace
 
 
 void FloatingLaserBot::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace floating_laser_bot;
   using engine::components::Sprite;
   using engine::components::WorldPosition;
@@ -82,42 +86,58 @@ void FloatingLaserBot::update(
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Waiting& state) {
-      if (!isOnScreen) {
+      if (!isOnScreen)
+      {
         // De-activate until sighted again
         engine::resetActivation(entity);
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 10) {
+      if (state.mFramesElapsed == 10)
+      {
         mState = Active{};
       }
     },
 
 
     [&, this](Active& state) {
-      if (state.mFramesElapsed < 40) {
-        if (d.mpRandomGenerator->gen() % 4 == 0) {
+      if (state.mFramesElapsed < 40)
+      {
+        if (d.mpRandomGenerator->gen() % 4 == 0)
+        {
           moveTowardsPlayer();
         }
-      } else if (state.mFramesElapsed < 50) {
+      }
+      else if (state.mFramesElapsed < 50)
+      {
         // unfold
-        if (animationFrame < 5) {
+        if (animationFrame < 5)
+        {
           ++animationFrame;
         }
-      } else if (state.mFramesElapsed < 80) {
+      }
+      else if (state.mFramesElapsed < 80)
+      {
         // while in this stage, only update on even frames
-        if (s.mpPerFrameState->mIsOddFrame) {
+        if (s.mpPerFrameState->mIsOddFrame)
+        {
           return;
         }
 
         attack(state.mFramesElapsed % 4);
-      } else {
+      }
+      else
+      {
         // fold back in
-        if (animationFrame > 0) {
+        if (animationFrame > 0)
+        {
           --animationFrame;
-        } else {
+        }
+        else
+        {
           mState = Waiting{};
           return;
         }
@@ -129,4 +149,4 @@ void FloatingLaserBot::update(
   engine::synchronizeBoundingBoxToSprite(entity);
 }
 
-}
+} // namespace rigel::game_logic::behaviors

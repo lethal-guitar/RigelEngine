@@ -24,22 +24,26 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct RocketTurret {
+struct RocketTurret
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  enum class Orientation {
+  enum class Orientation
+  {
     Left = 0,
     Top = 1,
     Right = 2
@@ -50,4 +54,4 @@ struct RocketTurret {
   int mNextShotCountdown = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

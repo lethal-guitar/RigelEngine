@@ -17,9 +17,11 @@
 #pragma once
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-enum class SoundId {
+enum class SoundId
+{
   DukeNormalShot = 0,
   BigExplosion = 1,
   DukePain = 2,
@@ -68,11 +70,13 @@ enum class SoundId {
 constexpr auto NUM_SOUND_IDS = 41;
 
 
-template<typename Callable>
-void forEachSoundId(Callable callback) {
-  for (auto i = 0; i < NUM_SOUND_IDS; ++i) {
+template <typename Callable>
+void forEachSoundId(Callable callback)
+{
+  for (auto i = 0; i < NUM_SOUND_IDS; ++i)
+  {
     callback(static_cast<SoundId>(i));
   }
 }
 
-}
+} // namespace rigel::data

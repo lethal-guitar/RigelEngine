@@ -32,28 +32,39 @@ RIGEL_RESTORE_WARNINGS
 #include <cstdint>
 #include <variant>
 
-namespace rigel {
-  struct IGameServiceProvider;
+namespace rigel
+{
+struct IGameServiceProvider;
 
-  namespace data {
-    struct GameOptions;
-    class PlayerModel;
+namespace data
+{
+struct GameOptions;
+class PlayerModel;
 
-    namespace map { class Map; }
-  }
-
-  namespace engine {
-    class CollisionChecker;
-    class RandomNumberGenerator;
-  }
-
-  namespace game_logic { struct IEntityFactory; }
+namespace map
+{
+class Map;
 }
+} // namespace data
+
+namespace engine
+{
+class CollisionChecker;
+class RandomNumberGenerator;
+} // namespace engine
+
+namespace game_logic
+{
+struct IEntityFactory;
+}
+} // namespace rigel
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-enum class WeaponStance {
+enum class WeaponStance
+{
   Regular,
   RegularCrouched,
   Upwards,
@@ -62,10 +73,15 @@ enum class WeaponStance {
 };
 
 
-struct OnGround {};
+struct OnGround
+{
+};
 
-struct Jumping {
-  struct FromLadder {}; // tag
+struct Jumping
+{
+  struct FromLadder
+  {
+  }; // tag
 
   Jumping() = default;
   explicit Jumping(const FromLadder&)
@@ -78,25 +94,38 @@ struct Jumping {
   bool mDoingSomersault = false;
 };
 
-struct Falling {
+struct Falling
+{
   int mFramesElapsed = 0;
 };
 
-struct PushedByFan {};
+struct PushedByFan
+{
+};
 
-struct UsingJetpack {};
+struct UsingJetpack
+{
+};
 
-struct RecoveringFromLanding {};
+struct RecoveringFromLanding
+{
+};
 
-struct ClimbingLadder {};
+struct ClimbingLadder
+{
+};
 
-struct OnPipe {};
+struct OnPipe
+{
+};
 
-struct InShip {
+struct InShip
+{
   int mSpeed = 0;
 };
 
-struct Interacting {
+struct Interacting
+{
   explicit Interacting(const int duration)
     : mDuration(duration)
   {
@@ -107,32 +136,41 @@ struct Interacting {
 };
 
 
-struct Incapacitated {
+struct Incapacitated
+{
   int mVisibleFramesRemaining;
 };
 
 
-struct GettingSuckedIntoSpace {
+struct GettingSuckedIntoSpace
+{
   int mFramesElapsed;
 };
 
-namespace death_animation {
+namespace death_animation
+{
 
-struct FlyingUp {
+struct FlyingUp
+{
   FlyingUp() = default;
 
   int mFramesElapsed = 0;
 };
 
-struct FallingDown {};
+struct FallingDown
+{
+};
 
-struct Exploding {
+struct Exploding
+{
   int mFramesElapsed = 0;
 };
 
-struct Finished {};
+struct Finished
+{
+};
 
-}
+} // namespace death_animation
 
 
 using Dieing = std::variant<
@@ -161,7 +199,8 @@ using PlayerState = std::variant<
 // The enum's values are chosen to match the corresponding animation frames.
 // For animated states (like walking), the first frame of the cycle/sequence is
 // used.
-enum class VisualState {
+enum class VisualState
+{
   Standing = 0,
   Walking = 1,
   LookingUp = 16,
@@ -187,7 +226,8 @@ enum class VisualState {
 struct AnimationConfig;
 
 
-enum class SpiderClingPosition {
+enum class SpiderClingPosition
+{
   Head = 0,
   Weapon = 1,
   Back = 2
@@ -197,7 +237,8 @@ enum class SpiderClingPosition {
 constexpr auto INTERACTION_LOCK_DURATION = 8;
 
 
-class Player : public entityx::Receiver<Player> {
+class Player : public entityx::Receiver<Player>
+{
 public:
   Player(
     entityx::Entity entity,
@@ -260,35 +301,35 @@ public:
   // TODO: Explain what this is
   base::Vector orientedPosition() const;
 
-  template<typename StateT>
-  bool stateIs() const {
+  template <typename StateT>
+  bool stateIs() const
+  {
     return std::holds_alternative<StateT>(mState);
   }
 
   base::Vector& position();
 
-  data::PlayerModel& model() {
-    return *mpPlayerModel;
-  }
+  data::PlayerModel& model() { return *mpPlayerModel; }
 
-  const entityx::Entity& entity() const {
-    return mEntity;
-  }
+  const entityx::Entity& entity() const { return mEntity; }
 
   void receive(const rigel::events::CloakPickedUp& event);
   void receive(const rigel::events::RapidFirePickedUp& event);
   void receive(const events::ElevatorAttachmentChanged& event);
   void receive(const events::AirLockOpened& event);
 
-  bool hasSpiderAt(const SpiderClingPosition position) const {
+  bool hasSpiderAt(const SpiderClingPosition position) const
+  {
     return mAttachedSpiders.test(static_cast<size_t>(position));
   }
 
-  void attachSpider(const SpiderClingPosition position) {
+  void attachSpider(const SpiderClingPosition position)
+  {
     mAttachedSpiders.set(static_cast<size_t>(position));
   }
 
-  void detachSpider(const SpiderClingPosition position) {
+  void detachSpider(const SpiderClingPosition position)
+  {
     mAttachedSpiders.reset(static_cast<size_t>(position));
   }
 
@@ -296,7 +337,8 @@ public:
   void endBeingPushedByFan();
 
 private:
-  struct VerticalMovementResult {
+  struct VerticalMovementResult
+  {
     engine::MovementResult mMoveResult = engine::MovementResult::Failed;
     bool mAttachedToClimbable = false;
   };
@@ -369,4 +411,4 @@ private:
   bool mJumpRequested = false;
 };
 
-}
+} // namespace rigel::game_logic

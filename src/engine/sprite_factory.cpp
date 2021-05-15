@@ -23,12 +23,14 @@
 #include <array>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using data::ActorID;
 using namespace engine::components;
 
-namespace {
+namespace
+{
 
 constexpr auto INGAME_SPRITE_ACTOR_IDS = std::array{
   data::ActorID::Hoverbot,
@@ -269,35 +271,42 @@ constexpr auto INGAME_SPRITE_ACTOR_IDS = std::array{
   data::ActorID::BOSS_Episode_4_projectile,
   data::ActorID::Floating_arrow,
   data::ActorID::Rigelatin_soldier,
-  data::ActorID::Rigelatin_soldier_projectile
-};
+  data::ActorID::Rigelatin_soldier_projectile};
 
 
 void applyTweaks(
   std::vector<engine::SpriteFrame>& frames,
-  const ActorID actorId
-) {
+  const ActorID actorId)
+{
   // Some sprites in the game have offsets that would require more complicated
   // code to draw them correctly. To simplify that, we adjust the offsets once
   // at loading time so that no additional adjustment is necessary at run time.
 
   // Player sprite
-  if (actorId == ActorID::Duke_LEFT || actorId == ActorID::Duke_RIGHT) {
-    for (int i=0; i<39; ++i) {
-      if (i != 35 && i != 36) {
+  if (actorId == ActorID::Duke_LEFT || actorId == ActorID::Duke_RIGHT)
+  {
+    for (int i = 0; i < 39; ++i)
+    {
+      if (i != 35 && i != 36)
+      {
         frames[i].mDrawOffset.x -= 1;
       }
     }
   }
 
   // Destroyed reactor fire
-  if (actorId == ActorID::Reactor_fire_LEFT || actorId == ActorID::Reactor_fire_RIGHT) {
+  if (
+    actorId == ActorID::Reactor_fire_LEFT ||
+    actorId == ActorID::Reactor_fire_RIGHT)
+  {
     frames[0].mDrawOffset.x = 0;
   }
 
   // Radar computer
-  if (actorId == ActorID::Radar_computer_terminal) {
-    for (auto i = 8u; i < frames.size(); ++i) {
+  if (actorId == ActorID::Radar_computer_terminal)
+  {
+    for (auto i = 8u; i < frames.size(); ++i)
+    {
       frames[i].mDrawOffset.x -= 1;
     }
   }
@@ -307,8 +316,8 @@ void applyTweaks(
     actorId == ActorID::Dukes_ship_LEFT ||
     actorId == ActorID::Dukes_ship_RIGHT ||
     actorId == ActorID::Dukes_ship_after_exiting_LEFT ||
-    actorId == ActorID::Dukes_ship_after_exiting_RIGHT
-  ) {
+    actorId == ActorID::Dukes_ship_after_exiting_RIGHT)
+  {
     // The incoming frame list is based on IDs 87, 88, and 92. The frames
     // are laid out as follows:
     //
@@ -339,20 +348,24 @@ void applyTweaks(
     frames[9].mDrawOffset.x += 1;
   }
 
-  if (actorId == ActorID::Bomb_dropping_spaceship) {
+  if (actorId == ActorID::Bomb_dropping_spaceship)
+  {
     frames[3].mDrawOffset += base::Vector{2, 0};
     frames.erase(std::next(frames.begin(), 4), frames.end());
   }
 
-  if (actorId == ActorID::Watchbot_container_carrier) {
+  if (actorId == ActorID::Watchbot_container_carrier)
+  {
     frames[2].mDrawOffset += base::Vector{0, -2};
     frames.erase(std::next(frames.begin(), 3), frames.end());
   }
 }
 
 
-std::optional<int> orientationOffsetForActor(const ActorID actorId) {
-  switch (actorId) {
+std::optional<int> orientationOffsetForActor(const ActorID actorId)
+{
+  switch (actorId)
+  {
     case ActorID::Duke_LEFT:
     case ActorID::Duke_RIGHT:
       return 39;
@@ -403,24 +416,42 @@ std::optional<int> orientationOffsetForActor(const ActorID actorId) {
 
 int SPIDER_FRAME_MAP[] = {
   3, 4, 5, 9, 10, 11, 6, 8, 9, 14, 15, 12, 13, // left
-  0, 1, 2, 6, 7, 8, 6, 8, 9, 12, 13, 14, 15, // right
+  0, 1, 2, 6, 7,  8,  6, 8, 9, 12, 13, 14, 15, // right
 };
 
 
 int UNICYCLE_FRAME_MAP[] = {
-  0, 5, 1, 2, // left
-  0, 5, 3, 4, // right
+  0,
+  5,
+  1,
+  2, // left
+  0,
+  5,
+  3,
+  4, // right
 };
 
 
 int DUKES_SHIP_FRAME_MAP[] = {
-  0, 1, 10, 11, 8, 9, // left
-  2, 3, 6, 7, 4, 5, // right
+  0,
+  1,
+  10,
+  11,
+  8,
+  9, // left
+  2,
+  3,
+  6,
+  7,
+  4,
+  5, // right
 };
 
 
-base::ArrayView<int> frameMapForActor(const ActorID actorId) {
-  switch (actorId) {
+base::ArrayView<int> frameMapForActor(const ActorID actorId)
+{
+  switch (actorId)
+  {
     case ActorID::Spider:
       return base::ArrayView<int>(SPIDER_FRAME_MAP);
 
@@ -439,10 +470,12 @@ base::ArrayView<int> frameMapForActor(const ActorID actorId) {
 }
 
 
-auto actorIDListForActor(const ActorID ID) {
+auto actorIDListForActor(const ActorID ID)
+{
   std::vector<ActorID> actorParts;
 
-  switch (ID) {
+  switch (ID)
+  {
     case ActorID::Hoverbot:
       actorParts.push_back(ActorID::Hoverbot);
       actorParts.push_back(ActorID::Hoverbot_teleport_FX);
@@ -554,8 +587,10 @@ auto actorIDListForActor(const ActorID ID) {
 }
 
 
-void configureSprite(Sprite& sprite, const ActorID actorID) {
-  switch (actorID) {
+void configureSprite(Sprite& sprite, const ActorID actorID)
+{
+  switch (actorID)
+  {
     case ActorID::Hoverbot:
       sprite.mFramesToRender = {0};
       break;
@@ -652,20 +687,35 @@ void configureSprite(Sprite& sprite, const ActorID actorID) {
 }
 
 
-int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
+int adjustedDrawOrder(const ActorID id, const int baseDrawOrder)
+{
   auto scale = [](const int drawOrderValue) {
     constexpr auto SCALE_FACTOR = 10;
     return drawOrderValue * SCALE_FACTOR;
   };
 
-  switch (id) {
-    case ActorID::Duke_rocket_up: case ActorID::Duke_rocket_down: case ActorID::Duke_rocket_left: case ActorID::Duke_rocket_right:
-    case ActorID::Duke_laser_shot_horizontal: case ActorID::Duke_laser_shot_vertical: case ActorID::Duke_regular_shot_horizontal: case ActorID::Duke_regular_shot_vertical:
-    case ActorID::Duke_flame_shot_up: case ActorID::Duke_flame_shot_down: case ActorID::Duke_flame_shot_left: case ActorID::Duke_flame_shot_right:
-    case ActorID::Reactor_fire_LEFT: case ActorID::Reactor_fire_RIGHT:
+  switch (id)
+  {
+    case ActorID::Duke_rocket_up:
+    case ActorID::Duke_rocket_down:
+    case ActorID::Duke_rocket_left:
+    case ActorID::Duke_rocket_right:
+    case ActorID::Duke_laser_shot_horizontal:
+    case ActorID::Duke_laser_shot_vertical:
+    case ActorID::Duke_regular_shot_horizontal:
+    case ActorID::Duke_regular_shot_vertical:
+    case ActorID::Duke_flame_shot_up:
+    case ActorID::Duke_flame_shot_down:
+    case ActorID::Duke_flame_shot_left:
+    case ActorID::Duke_flame_shot_right:
+    case ActorID::Reactor_fire_LEFT:
+    case ActorID::Reactor_fire_RIGHT:
       return scale(PLAYER_PROJECTILE_DRAW_ORDER);
 
-    case ActorID::Muzzle_flash_up: case ActorID::Muzzle_flash_down: case ActorID::Muzzle_flash_left: case ActorID::Muzzle_flash_right: // player muzzle flash
+    case ActorID::Muzzle_flash_up:
+    case ActorID::Muzzle_flash_down:
+    case ActorID::Muzzle_flash_left:
+    case ActorID::Muzzle_flash_right: // player muzzle flash
       return scale(MUZZLE_FLASH_DRAW_ORDER);
 
     case ActorID::Explosion_FX_1:
@@ -736,11 +786,13 @@ int adjustedDrawOrder(const ActorID id, const int baseDrawOrder) {
   }
 }
 
-}
+} // namespace
 
 
-bool hasAssociatedSprite(const ActorID actorID) {
-  switch (actorID) {
+bool hasAssociatedSprite(const ActorID actorID)
+{
+  switch (actorID)
+  {
     default:
       return true;
 
@@ -787,14 +839,15 @@ SpriteFactory::SpriteFactory(CtorArgs args)
 
 auto SpriteFactory::construct(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage* pSpritePackage
-) -> CtorArgs {
+  const loader::ActorImagePackage* pSpritePackage) -> CtorArgs
+{
   std::unordered_map<data::ActorID, SpriteData> spriteDataMap;
 
   std::vector<data::Image> spriteImages;
   spriteImages.reserve(INGAME_SPRITE_ACTOR_IDS.size());
 
-  for (const auto mainId : INGAME_SPRITE_ACTOR_IDS) {
+  for (const auto mainId : INGAME_SPRITE_ACTOR_IDS)
+  {
     engine::SpriteDrawData drawData;
 
     int lastDrawOrder = 0;
@@ -804,26 +857,25 @@ auto SpriteFactory::construct(
     const auto actorPartIds = actorIDListForActor(mainId);
 
     // non-const so we can move the Image objects into the vector
-    auto actorParts = utils::transformed(actorPartIds,
-      [&](const ActorID partId) {
+    auto actorParts =
+      utils::transformed(actorPartIds, [&](const ActorID partId) {
         return pSpritePackage->loadActor(partId);
       });
 
     // Similarly, non-const for move semantics
-    for (auto& actorData : actorParts) {
+    for (auto& actorData : actorParts)
+    {
       lastDrawOrder = actorData.mDrawIndex;
 
       // Similarly, non-const for move semantics
-      for (auto& frameData : actorData.mFrames) {
+      for (auto& frameData : actorData.mFrames)
+      {
         auto& image = frameData.mFrameImage;
         const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
           {int(image.width()), int(image.height())});
 
-        drawData.mFrames.emplace_back(
-          engine::SpriteFrame{
-            int(spriteImages.size()),
-            frameData.mDrawOffset,
-            dimensionsInTiles});
+        drawData.mFrames.emplace_back(engine::SpriteFrame{
+          int(spriteImages.size()), frameData.mDrawOffset, dimensionsInTiles});
 
         spriteImages.emplace_back(std::move(image));
       }
@@ -839,17 +891,16 @@ auto SpriteFactory::construct(
     applyTweaks(drawData.mFrames, mainId);
 
     spriteDataMap.emplace(
-      mainId,
-      SpriteData{std::move(drawData), std::move(framesToRender)});
+      mainId, SpriteData{std::move(drawData), std::move(framesToRender)});
   }
 
   return {
-    std::move(spriteDataMap),
-    renderer::TextureAtlas{pRenderer, spriteImages}};
+    std::move(spriteDataMap), renderer::TextureAtlas{pRenderer, spriteImages}};
 }
 
 
-Sprite SpriteFactory::createSprite(const ActorID id) {
+Sprite SpriteFactory::createSprite(const ActorID id)
+{
   const auto& data = mSpriteDataMap.at(id);
   auto sprite = Sprite{&data.mDrawData, data.mInitialFramesToRender};
   configureSprite(sprite, id);
@@ -857,10 +908,9 @@ Sprite SpriteFactory::createSprite(const ActorID id) {
 }
 
 
-base::Rect<int> SpriteFactory::actorFrameRect(
-  const data::ActorID id,
-  const int frame
-) const {
+base::Rect<int>
+  SpriteFactory::actorFrameRect(const data::ActorID id, const int frame) const
+{
   const auto& data = mSpriteDataMap.at(id);
   const auto realFrame = virtualToRealFrame(0, data.mDrawData, std::nullopt);
   const auto& frameData = data.mDrawData.mFrames[realFrame];
@@ -868,4 +918,4 @@ base::Rect<int> SpriteFactory::actorFrameRect(
   return {frameData.mDrawOffset, frameData.mDimensions};
 }
 
-}
+} // namespace rigel::engine

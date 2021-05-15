@@ -25,15 +25,20 @@ RIGEL_RESTORE_WARNINGS
 #include <limits>
 
 
-namespace rigel::game_logic::components {
+namespace rigel::game_logic::components
+{
 
 // TODO: Consider finding a better place for this?
-struct AppearsOnRadar {};
+struct AppearsOnRadar
+{
+};
 
-struct ActorTag {
+struct ActorTag
+{
   static constexpr auto INVALID_SPAWN_INDEX = std::numeric_limits<int>::max();
 
-  enum class Type {
+  enum class Type
+  {
     ForceField,
     Door,
     Reactor,
@@ -62,18 +67,21 @@ struct ActorTag {
 
 inline entityx::Entity findFirstMatchInSpawnOrder(
   entityx::EntityManager& es,
-  const ActorTag::Type desiredType
-) {
+  const ActorTag::Type desiredType)
+{
   entityx::Entity candidate;
   int candidateIndex = std::numeric_limits<int>::max();
 
   entityx::ComponentHandle<ActorTag> tag;
-  for (auto entity : es.entities_with_components(tag)) {
-    if (tag->mType != desiredType) {
+  for (auto entity : es.entities_with_components(tag))
+  {
+    if (tag->mType != desiredType)
+    {
       continue;
     }
 
-    if (tag->mSpawnIndex < candidateIndex) {
+    if (tag->mSpawnIndex < candidateIndex)
+    {
       candidate = entity;
       candidateIndex = tag->mSpawnIndex;
     }
@@ -82,4 +90,4 @@ inline entityx::Entity findFirstMatchInSpawnOrder(
   return candidate;
 }
 
-}
+} // namespace rigel::game_logic::components

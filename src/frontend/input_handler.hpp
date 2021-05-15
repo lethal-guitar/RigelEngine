@@ -27,14 +27,20 @@ RIGEL_RESTORE_WARNINGS
 #include <vector>
 
 
-namespace rigel {
+namespace rigel
+{
 
-namespace data { struct GameOptions; }
+namespace data
+{
+struct GameOptions;
+}
 
 
-class InputHandler {
+class InputHandler
+{
 public:
-  enum class MenuCommand {
+  enum class MenuCommand
+  {
     None,
     QuickSave,
     QuickLoad
@@ -56,4 +62,4 @@ private:
   const data::GameOptions* mpOptions;
 };
 
-}
+} // namespace rigel

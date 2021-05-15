@@ -22,11 +22,12 @@
 #include "loader/byte_buffer.hpp"
 
 #include <filesystem>
-#include <string>
 #include <optional>
+#include <string>
 
 
-namespace rigel {
+namespace rigel
+{
 
 constexpr auto USER_PROFILE_BASE_NAME = "UserProfile_v2";
 constexpr auto USER_PROFILE_FILE_EXTENSION = ".rigel";
@@ -48,7 +49,8 @@ constexpr auto USER_PROFILE_FILE_EXTENSION = ".rigel";
  * types used within one of those types, you need to adapt the serialization
  * and deserialization code in the implementation of this class!
  */
-class UserProfile {
+class UserProfile
+{
 public:
   UserProfile() = default;
   UserProfile(
@@ -92,7 +94,8 @@ std::optional<UserProfile> loadUserProfile();
  * of the passed in profile, so best used on an empty one.
  */
 void importOriginalGameProfileData(
-  UserProfile& profile, const std::string& gamePath);
+  UserProfile& profile,
+  const std::string& gamePath);
 
 /** Loads existing profile if found, creates a new one otherwise. */
 UserProfile loadOrCreateUserProfile();
@@ -111,4 +114,4 @@ UserProfile loadOrCreateUserProfile();
  */
 std::optional<std::filesystem::path> createOrGetPreferencesPath();
 
-}
+} // namespace rigel

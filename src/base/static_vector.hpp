@@ -18,7 +18,8 @@
 
 #include <experimental/fixed_capacity_vector>
 
-namespace rigel::base {
+namespace rigel::base
+{
 
 template <typename T, std::size_t S>
 using static_vector = std::experimental::fixed_capacity_vector<T, S>;

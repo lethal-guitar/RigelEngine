@@ -24,9 +24,11 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-class LifeTimeSystem {
+class LifeTimeSystem
+{
 public:
   void update(
     entityx::EntityManager& es,
@@ -34,4 +36,4 @@ public:
     const base::Extents& viewPortSize);
 };
 
-}
+} // namespace rigel::engine

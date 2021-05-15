@@ -19,13 +19,21 @@
 #include "engine/timing.hpp"
 #include "renderer/texture.hpp"
 
-namespace rigel::loader { class ResourceLoader; }
-namespace rigel::renderer { class Renderer; }
+namespace rigel::loader
+{
+class ResourceLoader;
+}
+namespace rigel::renderer
+{
+class Renderer;
+}
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class Duke3DTeaserScreen {
+class Duke3DTeaserScreen
+{
 public:
   Duke3DTeaserScreen(
     const loader::ResourceLoader& resources,
@@ -40,4 +48,4 @@ private:
   engine::TimeDelta mElapsedTime = 0.0;
 };
 
-}
+} // namespace rigel::ui

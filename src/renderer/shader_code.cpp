@@ -17,7 +17,8 @@
 #include "shader_code.hpp"
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 const char* VERTEX_SOURCE = R"shd(
 ATTRIBUTE HIGHP vec2 position;
@@ -184,4 +185,4 @@ void main() {
 }
 )shd";
 
-}
+} // namespace rigel::renderer

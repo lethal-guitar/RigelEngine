@@ -21,28 +21,30 @@
 #include <cstddef>
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-enum class TileImageType {
+enum class TileImageType
+{
   Unmasked,
   Masked
 };
 
 
-struct GameTraits {
+struct GameTraits
+{
 
   static constexpr int tileSize = 8;
-  static constexpr int tileSizeSquared = tileSize*tileSize;
+  static constexpr int tileSizeSquared = tileSize * tileSize;
 
   static constexpr int viewPortWidthPx = 320;
   static constexpr int viewPortHeightPx = 200;
-  static constexpr int viewPortWidthTiles =
-    viewPortWidthPx / tileSize;
-  static constexpr int viewPortHeightTiles =
-    viewPortHeightPx / tileSize;
+  static constexpr int viewPortWidthTiles = viewPortWidthPx / tileSize;
+  static constexpr int viewPortHeightTiles = viewPortHeightPx / tileSize;
 
   static constexpr base::Extents viewPortSize{
-    viewPortWidthPx, viewPortHeightPx};
+    viewPortWidthPx,
+    viewPortHeightPx};
 
   // The actual in-game viewport starts with an offset and is further reduced
   // to make room for the HUD. The right hand side features another 8px of
@@ -52,10 +54,8 @@ struct GameTraits {
     GameTraits::viewPortWidthPx - 16,
     GameTraits::viewPortHeightPx - 8};
 
-  static constexpr int mapViewPortWidthTiles =
-    viewPortWidthTiles - 8;
-  static constexpr int mapViewPortHeightTiles =
-    viewPortHeightTiles - 5;
+  static constexpr int mapViewPortWidthTiles = viewPortWidthTiles - 8;
+  static constexpr int mapViewPortHeightTiles = viewPortHeightTiles - 5;
 
   static constexpr base::Extents mapViewPortSize{
     GameTraits::mapViewPortWidthTiles,
@@ -66,15 +66,18 @@ struct GameTraits {
   static constexpr std::size_t fontEgaPlanes = 2u;
   static constexpr std::size_t pixelsPerEgaByte = 8u;
 
-  static constexpr std::size_t numPlanes(const TileImageType type) {
+  static constexpr std::size_t numPlanes(const TileImageType type)
+  {
     return type == TileImageType::Masked ? maskedEgaPlanes : egaPlanes;
   }
 
-  static constexpr std::size_t bytesPerTile(const TileImageType type) {
+  static constexpr std::size_t bytesPerTile(const TileImageType type)
+  {
     return (tileSizeSquared / pixelsPerEgaByte) * numPlanes(type);
   }
 
-  static constexpr std::size_t bytesPerFontTile() {
+  static constexpr std::size_t bytesPerFontTile()
+  {
     return (tileSizeSquared / pixelsPerEgaByte) * fontEgaPlanes;
   }
 
@@ -82,7 +85,8 @@ struct GameTraits {
 
   static constexpr std::size_t mapDataWords = 32750u;
 
-  static constexpr std::size_t mapHeightForWidth(const std::size_t width) {
+  static constexpr std::size_t mapHeightForWidth(const std::size_t width)
+  {
     return mapDataWords / width;
   }
 
@@ -97,7 +101,8 @@ struct GameTraits {
   // picture.
   static constexpr auto aspectRatio = 4.0f / 3.0f;
 
-  struct CZone {
+  struct CZone
+  {
     static constexpr std::size_t numSolidTiles = 1000u;
     static constexpr std::size_t numMaskedTiles = 160u;
     static constexpr std::size_t numTilesTotal = numSolidTiles + numMaskedTiles;
@@ -105,7 +110,7 @@ struct GameTraits {
     static constexpr int tileSetImageWidth = viewPortWidthTiles;
     static constexpr int solidTilesImageHeight = viewPortHeightTiles;
     static constexpr int tileSetImageHeight =
-      solidTilesImageHeight + numMaskedTiles/tileSetImageWidth;
+      solidTilesImageHeight + numMaskedTiles / tileSetImageWidth;
 
     static constexpr std::size_t tileBytes =
       egaPlanes * tileSize * sizeof(std::uint8_t);
@@ -115,11 +120,11 @@ struct GameTraits {
     static constexpr std::size_t attributeBytes = sizeof(std::uint16_t);
 
     static constexpr std::size_t attributeBytesTotal =
-      attributeBytes*numSolidTiles + attributeBytes*5*numMaskedTiles;
+      attributeBytes * numSolidTiles + attributeBytes * 5 * numMaskedTiles;
   };
 
   static constexpr auto musicPlaybackRate = 280;
 };
 
 
-}
+} // namespace rigel::data

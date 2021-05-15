@@ -26,12 +26,15 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 
-namespace components {
+namespace components
+{
 
-namespace parameter_aliases {
+namespace parameter_aliases
+{
 
 using Velocity = base::Point<float>;
 using GravityAffected = bool;
@@ -39,16 +42,15 @@ using IgnoreCollisions = bool;
 using ResetAfterSequence = bool;
 using EnableX = bool;
 
-}
+} // namespace parameter_aliases
 
 
-
-struct MovingBody {
+struct MovingBody
+{
   MovingBody(
     const base::Point<float> velocity,
     const bool gravityAffected,
-    const bool ignoreCollisions = false
-  )
+    const bool ignoreCollisions = false)
     : mVelocity(velocity)
     , mGravityAffected(gravityAffected)
     , mIgnoreCollisions(ignoreCollisions)
@@ -69,7 +71,9 @@ struct MovingBody {
 /** Marker component which is added to all entities that had a collision with
  * the level geometry on the last physics update.
  */
-struct CollidedWithWorld {};
+struct CollidedWithWorld
+{
+};
 
 
 /** Marks an entity to participate in world collision
@@ -77,10 +81,13 @@ struct CollidedWithWorld {};
  * Other MovingBody entities will collide against the bounding box of any
  * SolidBody entity as if it were part of the world.
  * */
-struct SolidBody {};
+struct SolidBody
+{
+};
 
 
-struct MovementSequence {
+struct MovementSequence
+{
   using VelocityList = base::ArrayView<base::Point<float>>;
 
   explicit MovementSequence(
@@ -99,12 +106,14 @@ struct MovementSequence {
   bool mEnableX = true;
 };
 
-}
+} // namespace components
 
 
-namespace events {
+namespace events
+{
 
-struct CollidedWithWorld {
+struct CollidedWithWorld
+{
   entityx::Entity mEntity;
   bool mCollidedLeft;
   bool mCollidedRight;
@@ -112,10 +121,11 @@ struct CollidedWithWorld {
   bool mCollidedBottom;
 };
 
-}
+} // namespace events
 
 
 components::BoundingBox toWorldSpace(
-  const components::BoundingBox& bbox, const base::Vector& entityPosition);
+  const components::BoundingBox& bbox,
+  const base::Vector& entityPosition);
 
-}
+} // namespace rigel::engine

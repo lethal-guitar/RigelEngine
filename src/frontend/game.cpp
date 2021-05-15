@@ -36,11 +36,13 @@ RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel {
+namespace rigel
+{
 
 using namespace engine;
 
-namespace {
+namespace
+{
 
 /** Returns game path to be used for loading resources
  *
@@ -51,11 +53,12 @@ namespace {
  */
 std::string effectiveGamePath(
   const CommandLineOptions& options,
-  const UserProfile& profile
-) {
+  const UserProfile& profile)
+{
   using namespace std::string_literals;
 
-  if (!options.mGamePath.empty()) {
+  if (!options.mGamePath.empty())
+  {
     return options.mGamePath;
   }
 
@@ -63,18 +66,19 @@ std::string effectiveGamePath(
 }
 
 
-auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
-  class InitialFadeInWrapper : public GameMode {
+auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode)
+{
+  class InitialFadeInWrapper : public GameMode
+  {
   public:
     explicit InitialFadeInWrapper(std::unique_ptr<GameMode> pModeToSwitchTo)
       : mpModeToSwitchTo(std::move(pModeToSwitchTo))
     {
     }
 
-    std::unique_ptr<GameMode> updateAndRender(
-      engine::TimeDelta,
-      const std::vector<SDL_Event>&
-    ) override {
+    std::unique_ptr<GameMode>
+      updateAndRender(engine::TimeDelta, const std::vector<SDL_Event>&) override
+    {
       return std::move(mpModeToSwitchTo);
     }
 
@@ -86,7 +90,8 @@ auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode) {
 }
 
 
-auto loadScripts(const loader::ResourceLoader& resources) {
+auto loadScripts(const loader::ResourceLoader& resources)
+{
   auto allScripts = resources.loadScriptBundle("TEXT.MNI");
   const auto optionsScripts = resources.loadScriptBundle("OPTIONS.MNI");
   const auto orderInfoScripts = resources.loadScriptBundle("ORDERTXT.MNI");
@@ -100,14 +105,17 @@ auto loadScripts(const loader::ResourceLoader& resources) {
 
 void setupRenderingViewport(
   renderer::Renderer* pRenderer,
-  const bool perElementUpscaling
-) {
-  if (perElementUpscaling) {
+  const bool perElementUpscaling)
+{
+  if (perElementUpscaling)
+  {
     const auto [offset, size, scale] = renderer::determineViewPort(pRenderer);
     pRenderer->setGlobalScale(scale);
     pRenderer->setGlobalTranslation(offset);
     pRenderer->setClipRect(base::Rect<int>{offset, size});
-  } else {
+  }
+  else
+  {
     pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewPortSize});
   }
 }
@@ -116,20 +124,24 @@ void setupRenderingViewport(
 void setupPresentationViewport(
   renderer::Renderer* pRenderer,
   const bool perElementUpscaling,
-  const bool isWidescreenFrame
-) {
-  if (perElementUpscaling) {
+  const bool isWidescreenFrame)
+{
+  if (perElementUpscaling)
+  {
     return;
   }
 
   const auto info = renderer::determineViewPort(pRenderer);
   pRenderer->setGlobalScale(info.mScale);
 
-  if (isWidescreenFrame) {
+  if (isWidescreenFrame)
+  {
     const auto offset =
       renderer::determineWidescreenViewPort(pRenderer).mLeftPaddingPx;
     pRenderer->setGlobalTranslation({offset, 0});
-  } else {
+  }
+  else
+  {
     pRenderer->setGlobalTranslation(info.mOffset);
   }
 }
@@ -141,7 +153,8 @@ std::unique_ptr<GameMode> createInitialGameMode(
   const bool isSharewareVersion,
   const bool isFirstLaunch)
 {
-  class DemoTestMode : public GameMode {
+  class DemoTestMode : public GameMode
+  {
   public:
     explicit DemoTestMode(Context context)
       : mDemoPlayer(context)
@@ -150,8 +163,8 @@ std::unique_ptr<GameMode> createInitialGameMode(
 
     std::unique_ptr<GameMode> updateAndRender(
       engine::TimeDelta dt,
-      const std::vector<SDL_Event>&
-    ) override {
+      const std::vector<SDL_Event>&) override
+    {
       mDemoPlayer.updateAndRender(dt);
       return nullptr;
     }
@@ -171,68 +184,75 @@ std::unique_ptr<GameMode> createInitialGameMode(
   {
     return std::make_unique<MenuMode>(context);
   }
-  else if (commandLineOptions.mPlayDemo) {
+  else if (commandLineOptions.mPlayDemo)
+  {
     return std::make_unique<DemoTestMode>(context);
   }
 
-  if (!isSharewareVersion) {
+  if (!isSharewareVersion)
+  {
     return std::make_unique<AntiPiracyScreenMode>(context, isFirstLaunch);
   }
 
   return std::make_unique<IntroDemoLoopMode>(
     context,
-    isFirstLaunch
-      ? IntroDemoLoopMode::Type::AtFirstLaunch
-      : IntroDemoLoopMode::Type::DuringGameStart);
+    isFirstLaunch ? IntroDemoLoopMode::Type::AtFirstLaunch
+                  : IntroDemoLoopMode::Type::DuringGameStart);
 }
 
 
-std::optional<renderer::FpsLimiter> createLimiter(
-  const data::GameOptions& options
-) {
-  if (options.mEnableFpsLimit && !options.mEnableVsync) {
+std::optional<renderer::FpsLimiter>
+  createLimiter(const data::GameOptions& options)
+{
+  if (options.mEnableFpsLimit && !options.mEnableVsync)
+  {
     return renderer::FpsLimiter{options.mMaxFps};
-  } else {
+  }
+  else
+  {
     return std::nullopt;
   }
 }
 
-}
+} // namespace
 
 
 Game::Game(
   const CommandLineOptions& commandLineOptions,
   UserProfile* pUserProfile,
   SDL_Window* pWindow,
-  const bool isFirstLaunch
-)
+  const bool isFirstLaunch)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
   , mpSoundSystem([this]() {
-      std::unique_ptr<engine::SoundSystem> pResult;
-      try {
-        pResult = std::make_unique<engine::SoundSystem>(mResources);
-      } catch (const std::exception& ex) {
-        std::cerr << "WARNING: Failed to initialize audio: " << ex.what() << '\n';
-      }
+    std::unique_ptr<engine::SoundSystem> pResult;
+    try
+    {
+      pResult = std::make_unique<engine::SoundSystem>(mResources);
+    }
+    catch (const std::exception& ex)
+    {
+      std::cerr << "WARNING: Failed to initialize audio: " << ex.what() << '\n';
+    }
 
-      return pResult;
-    }())
+    return pResult;
+  }())
   , mIsShareWareVersion([this]() {
-      // The registered version has 24 additional level files, and a
-      // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
-      // all of these files, as that would be fairly tedious. Instead, we just
-      // check for the presence of one of the registered version's levels, and
-      // the anti-piracy screen, and assume that we're dealing with a
-      // registered version data set if these two are present.
-      const auto hasRegisteredVersionFiles =
-        mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
-      return !hasRegisteredVersionFiles;
-    }())
+    // The registered version has 24 additional level files, and a
+    // "anti-piracy" image (LCR.MNI). But we don't check for the presence of
+    // all of these files, as that would be fairly tedious. Instead, we just
+    // check for the presence of one of the registered version's levels, and
+    // the anti-piracy screen, and assume that we're dealing with a
+    // registered version data set if these two are present.
+    const auto hasRegisteredVersionFiles =
+      mResources.hasFile("LCR.MNI") && mResources.hasFile("O1.MNI");
+    return !hasRegisteredVersionFiles;
+  }())
   , mFpsLimiter(createLimiter(pUserProfile->mOptions))
   , mRenderTarget(renderer::createFullscreenRenderTarget(
-      &mRenderer, pUserProfile->mOptions))
+      &mRenderer,
+      pUserProfile->mOptions))
   , mIsRunning(true)
   , mIsMinimized(false)
   , mCommandLineOptions(commandLineOptions)
@@ -241,7 +261,8 @@ Game::Game(
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
       renderer::Texture{
-        &mRenderer, mResources.loadTiledFullscreenImage("STATUS.MNI")},
+        &mRenderer,
+        mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
   , mSpriteFactory(&mRenderer, &mResources.mActorImagePackage)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
@@ -249,13 +270,17 @@ Game::Game(
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
-    makeModeContext(), mCommandLineOptions, mIsShareWareVersion, isFirstLaunch));
+    makeModeContext(),
+    mCommandLineOptions,
+    mIsShareWareVersion,
+    isFirstLaunch));
 
   mLastTime = base::Clock::now();
 }
 
 
-auto Game::runOneFrame() -> std::optional<StopReason> {
+auto Game::runOneFrame() -> std::optional<StopReason>
+{
   using namespace std::chrono;
   using base::defer;
 
@@ -265,7 +290,8 @@ auto Game::runOneFrame() -> std::optional<StopReason> {
   mLastTime = startOfFrame;
 
   pumpEvents();
-  if (!mIsRunning) {
+  if (!mIsRunning)
+  {
     stopMusic();
     return StopReason::GameEnded;
   }
@@ -283,7 +309,8 @@ auto Game::runOneFrame() -> std::optional<StopReason> {
 
   applyChangedOptions();
 
-  if (!mGamePathToSwitchTo.empty()) {
+  if (!mGamePathToSwitchTo.empty())
+  {
     mpUserProfile->mGamePath = mGamePathToSwitchTo;
     mpUserProfile->saveToDisk();
     return StopReason::RestartNeeded;
@@ -293,23 +320,29 @@ auto Game::runOneFrame() -> std::optional<StopReason> {
 }
 
 
-void Game::pumpEvents() {
+void Game::pumpEvents()
+{
   SDL_Event event;
-  while (mIsMinimized && SDL_WaitEvent(&event)) {
-    if (!handleEvent(event)) {
+  while (mIsMinimized && SDL_WaitEvent(&event))
+  {
+    if (!handleEvent(event))
+    {
       mEventQueue.push_back(event);
     }
   }
 
-  while (SDL_PollEvent(&event)) {
-    if (!handleEvent(event)) {
+  while (SDL_PollEvent(&event))
+  {
+    if (!handleEvent(event))
+    {
       mEventQueue.push_back(event);
     }
   }
 }
 
 
-void Game::updateAndRender(const entityx::TimeDelta elapsed) {
+void Game::updateAndRender(const entityx::TimeDelta elapsed)
+{
   mCurrentFrameIsWidescreen = false;
 
   {
@@ -322,7 +355,8 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
     auto pMaybeNextMode =
       mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
 
-    if (pMaybeNextMode) {
+    if (pMaybeNextMode)
+    {
       fadeOutScreen();
       mpCurrentGameMode = std::move(pMaybeNextMode);
       mpCurrentGameMode->updateAndRender(0, {});
@@ -330,7 +364,8 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
     }
   }
 
-  if (mAlphaMod != 0) {
+  if (mAlphaMod != 0)
+  {
     mRenderer.clear();
 
     {
@@ -343,14 +378,16 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed) {
       mRenderer.submitBatch();
     }
 
-    if (mpUserProfile->mOptions.mShowFpsCounter) {
+    if (mpUserProfile->mOptions.mShowFpsCounter)
+    {
       mFpsDisplay.updateAndRender(elapsed);
     }
   }
 }
 
 
-GameMode::Context Game::makeModeContext() {
+GameMode::Context Game::makeModeContext()
+{
   return {
     &mResources,
     &mRenderer,
@@ -364,15 +401,19 @@ GameMode::Context Game::makeModeContext() {
 }
 
 
-bool Game::handleEvent(const SDL_Event& event) {
-  if (ui::imgui_integration::handleEvent(event)) {
+bool Game::handleEvent(const SDL_Event& event)
+{
+  if (ui::imgui_integration::handleEvent(event))
+  {
     return true;
   }
 
   auto& options = mpUserProfile->mOptions;
-  switch (event.type) {
+  switch (event.type)
+  {
     case SDL_KEYUP:
-      if (event.key.keysym.sym == SDLK_F6) {
+      if (event.key.keysym.sym == SDLK_F6)
+      {
         options.mShowFpsCounter = !options.mShowFpsCounter;
       }
       return false;
@@ -382,7 +423,8 @@ bool Game::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_WINDOWEVENT:
-      switch (event.window.event) {
+      switch (event.window.event)
+      {
         case SDL_WINDOWEVENT_MINIMIZED:
           mIsMinimized = true;
           break;
@@ -392,14 +434,16 @@ bool Game::handleEvent(const SDL_Event& event) {
           break;
 
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-          if (options.mWindowMode == data::WindowMode::Windowed) {
+          if (options.mWindowMode == data::WindowMode::Windowed)
+          {
             options.mWindowWidth = event.window.data1;
             options.mWindowHeight = event.window.data2;
           }
           break;
 
         case SDL_WINDOWEVENT_MOVED:
-          if (options.mWindowMode == data::WindowMode::Windowed) {
+          if (options.mWindowMode == data::WindowMode::Windowed)
+          {
             options.mWindowPosX = event.window.data1;
             options.mWindowPosY = event.window.data2;
           }
@@ -420,7 +464,8 @@ bool Game::handleEvent(const SDL_Event& event) {
 }
 
 
-void Game::performScreenFadeBlocking(const FadeType type) {
+void Game::performScreenFadeBlocking(const FadeType type)
+{
 #ifdef __EMSCRIPTEN__
   // TODO: Implement screen fades for the Emscripten version.
   // This is not so easy because we can't simply do a loop that renders
@@ -443,22 +488,23 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 
   auto startTime = base::Clock::now();
 
-  while (mIsRunning) {
+  while (mIsRunning)
+  {
     const auto now = base::Clock::now();
     const auto elapsedTime = duration<double>(now - startTime).count();
     const auto fastTicksElapsed = engine::timeToFastTicks(elapsedTime);
     const auto fadeFactor =
       std::clamp((fastTicksElapsed / 4.0) / 16.0, 0.0, 1.0);
     const auto alpha = type == FadeType::In ? fadeFactor : 1.0 - fadeFactor;
-    mAlphaMod =
-      base::roundTo<std::uint8_t>(255.0 * alpha);
+    mAlphaMod = base::roundTo<std::uint8_t>(255.0 * alpha);
 
     mRenderer.clear();
     mRenderer.setColorModulation({255, 255, 255, mAlphaMod});
     mRenderTarget.render(0, 0);
     swapBuffers();
 
-    if (fadeFactor >= 1.0) {
+    if (fadeFactor >= 1.0)
+    {
       break;
     }
   }
@@ -469,69 +515,78 @@ void Game::performScreenFadeBlocking(const FadeType type) {
 }
 
 
-void Game::swapBuffers() {
+void Game::swapBuffers()
+{
   mRenderer.swapBuffers();
 
-  if (mFpsLimiter) {
+  if (mFpsLimiter)
+  {
     mFpsLimiter->updateAndWait();
   }
 }
 
 
-void Game::applyChangedOptions() {
+void Game::applyChangedOptions()
+{
   const auto& currentOptions = mpUserProfile->mOptions;
 
-  if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode) {
+  if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode)
+  {
     const auto result = SDL_SetWindowFullscreen(
       mpWindow, platform::flagsForWindowMode(currentOptions.mWindowMode));
 
-    if (result != 0) {
-      std::cerr <<
-        "WARNING: Failed to set window mode: " << SDL_GetError() << '\n';
+    if (result != 0)
+    {
+      std::cerr << "WARNING: Failed to set window mode: " << SDL_GetError()
+                << '\n';
       mpUserProfile->mOptions.mWindowMode = mPreviousOptions.mWindowMode;
-    } else {
-      if (currentOptions.mWindowMode == data::WindowMode::Windowed) {
+    }
+    else
+    {
+      if (currentOptions.mWindowMode == data::WindowMode::Windowed)
+      {
         SDL_SetWindowSize(
           mpWindow, currentOptions.mWindowWidth, currentOptions.mWindowHeight);
       }
     }
   }
 
-  if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync) {
+  if (currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync)
+  {
     SDL_GL_SetSwapInterval(mpUserProfile->mOptions.mEnableVsync ? 1 : 0);
   }
 
   if (
     currentOptions.mEnableVsync != mPreviousOptions.mEnableVsync ||
     currentOptions.mEnableFpsLimit != mPreviousOptions.mEnableFpsLimit ||
-    currentOptions.mMaxFps != mPreviousOptions.mMaxFps
-  ) {
+    currentOptions.mMaxFps != mPreviousOptions.mMaxFps)
+  {
     mFpsLimiter = createLimiter(currentOptions);
   }
 
-  if (mpSoundSystem) {
+  if (mpSoundSystem)
+  {
     if (
       currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
-      currentOptions.mMusicOn != mPreviousOptions.mMusicOn
-    ) {
-      const auto newVolume = currentOptions.mMusicOn
-        ? currentOptions.mMusicVolume
-        : 0.0f;
+      currentOptions.mMusicOn != mPreviousOptions.mMusicOn)
+    {
+      const auto newVolume =
+        currentOptions.mMusicOn ? currentOptions.mMusicVolume : 0.0f;
       mpSoundSystem->setMusicVolume(newVolume);
     }
 
     if (
       currentOptions.mSoundVolume != mPreviousOptions.mSoundVolume ||
-      currentOptions.mSoundOn != mPreviousOptions.mSoundOn
-    ) {
-      const auto newVolume = currentOptions.mSoundOn
-        ? currentOptions.mSoundVolume
-        : 0.0f;
+      currentOptions.mSoundOn != mPreviousOptions.mSoundOn)
+    {
+      const auto newVolume =
+        currentOptions.mSoundOn ? currentOptions.mSoundVolume : 0.0f;
       mpSoundSystem->setSoundVolume(newVolume);
     }
   }
 
-  if (currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn) {
+  if (currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn)
+  {
     mRenderTarget = renderer::createFullscreenRenderTarget(
       &mRenderer, mpUserProfile->mOptions);
   }
@@ -540,11 +595,14 @@ void Game::applyChangedOptions() {
 }
 
 
-void Game::enumerateGameControllers() {
+void Game::enumerateGameControllers()
+{
   mGameControllers.clear();
 
-  for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i) {
-    if (SDL_IsGameController(i)) {
+  for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i)
+  {
+    if (SDL_IsGameController(i))
+    {
       mGameControllers.push_back(
         sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)});
     }
@@ -552,8 +610,10 @@ void Game::enumerateGameControllers() {
 }
 
 
-void Game::fadeOutScreen() {
-  if (mAlphaMod == 0) {
+void Game::fadeOutScreen()
+{
+  if (mAlphaMod == 0)
+  {
     // Already faded out
     return;
   }
@@ -568,8 +628,10 @@ void Game::fadeOutScreen() {
 }
 
 
-void Game::fadeInScreen() {
-  if (mAlphaMod == 255) {
+void Game::fadeInScreen()
+{
+  if (mAlphaMod == 255)
+  {
     // Already faded in
     return;
   }
@@ -578,43 +640,54 @@ void Game::fadeInScreen() {
 }
 
 
-void Game::playSound(const data::SoundId id) {
-  if (mpSoundSystem) {
+void Game::playSound(const data::SoundId id)
+{
+  if (mpSoundSystem)
+  {
     mpSoundSystem->playSound(id);
   }
 }
 
 
-void Game::stopSound(const data::SoundId id) {
-  if (mpSoundSystem) {
+void Game::stopSound(const data::SoundId id)
+{
+  if (mpSoundSystem)
+  {
     mpSoundSystem->stopSound(id);
   }
 }
 
 
-void Game::playMusic(const std::string& name) {
-  if (mpSoundSystem) {
+void Game::playMusic(const std::string& name)
+{
+  if (mpSoundSystem)
+  {
     mpSoundSystem->playSong(mResources.loadMusic(name));
   }
 }
 
 
-void Game::stopMusic() {
-  if (mpSoundSystem) {
+void Game::stopMusic()
+{
+  if (mpSoundSystem)
+  {
     mpSoundSystem->stopMusic();
   }
 }
 
 
-void Game::scheduleGameQuit() {
+void Game::scheduleGameQuit()
+{
   mIsRunning = false;
 }
 
 
-void Game::switchGamePath(const std::filesystem::path& newGamePath) {
-  if (newGamePath != mpUserProfile->mGamePath) {
+void Game::switchGamePath(const std::filesystem::path& newGamePath)
+{
+  if (newGamePath != mpUserProfile->mGamePath)
+  {
     mGamePathToSwitchTo = newGamePath;
   }
 }
 
-}
+} // namespace rigel

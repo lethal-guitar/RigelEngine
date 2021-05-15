@@ -21,9 +21,11 @@
 #include <string>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
-namespace {
+namespace
+{
 
 #ifdef RIGEL_USE_GL_ES
 
@@ -44,12 +46,12 @@ precision mediump float;
 
 #else
 
-// We generally want to stick to GLSL version 130 (from OpenGL 3.0) in order to
-// maximize compatibility with older graphics cards. Unfortunately, Mac OS only
-// supports GLSL 150 (from OpenGL 3.2), even when requesting a OpenGL 3.0
-// context. Therefore, we use different GLSL versions depending on the
-// platform.
-#if defined(__APPLE__)
+  // We generally want to stick to GLSL version 130 (from OpenGL 3.0) in order
+  // to maximize compatibility with older graphics cards. Unfortunately, Mac OS
+  // only supports GLSL 150 (from OpenGL 3.2), even when requesting a OpenGL 3.0
+  // context. Therefore, we use different GLSL versions depending on the
+  // platform.
+  #if defined(__APPLE__)
 const auto SHADER_PREAMBLE = R"shd(
 #version 150
 
@@ -62,7 +64,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define SET_POINT_SIZE
 #define HIGHP
 )shd";
-#else
+  #else
 const auto SHADER_PREAMBLE = R"shd(
 #version 130
 
@@ -75,13 +77,13 @@ const auto SHADER_PREAMBLE = R"shd(
 #define SET_POINT_SIZE
 #define HIGHP
 )shd";
-#endif
+  #endif
 
 #endif
 
 
-
-GlHandleWrapper compileShader(const std::string& source, GLenum type) {
+GlHandleWrapper compileShader(const std::string& source, GLenum type)
+{
   auto shader = GlHandleWrapper{glCreateShader(type), glDeleteShader};
   const auto sourcePtr = source.c_str();
   glShaderSource(shader.mHandle, 1, &sourcePtr, nullptr);
@@ -90,18 +92,22 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type) {
   GLint compileStatus = 0;
   glGetShaderiv(shader.mHandle, GL_COMPILE_STATUS, &compileStatus);
 
-  if (!compileStatus) {
+  if (!compileStatus)
+  {
     GLint infoLogSize = 0;
     glGetShaderiv(shader.mHandle, GL_INFO_LOG_LENGTH, &infoLogSize);
 
-    if (infoLogSize > 0) {
+    if (infoLogSize > 0)
+    {
       std::unique_ptr<char[]> infoLogBuffer(new char[infoLogSize]);
       glGetShaderInfoLog(
         shader.mHandle, infoLogSize, nullptr, infoLogBuffer.get());
 
       throw std::runtime_error(
         std::string{"Shader compilation failed:\n\n"} + infoLogBuffer.get());
-    } else {
+    }
+    else
+    {
       throw std::runtime_error(
         "Shader compilation failed, but could not get info log");
     }
@@ -110,7 +116,7 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type) {
   return shader;
 }
 
-}
+} // namespace
 
 
 Shader::Shader(
@@ -128,7 +134,8 @@ Shader::Shader(
   glAttachShader(mProgram.mHandle, fragmentShader.mHandle);
 
   int index = 0;
-  for (const auto& attributeName : attributesToBind) {
+  for (const auto& attributeName : attributesToBind)
+  {
     glBindAttribLocation(mProgram.mHandle, index, attributeName.c_str());
     ++index;
   }
@@ -137,20 +144,23 @@ Shader::Shader(
 
   GLint linkStatus = 0;
   glGetProgramiv(mProgram.mHandle, GL_LINK_STATUS, &linkStatus);
-  if (!linkStatus) {
+  if (!linkStatus)
+  {
     GLint infoLogSize = 0;
     glGetProgramiv(mProgram.mHandle, GL_INFO_LOG_LENGTH, &infoLogSize);
 
-    if (infoLogSize > 0) {
+    if (infoLogSize > 0)
+    {
       std::unique_ptr<char[]> infoLogBuffer(new char[infoLogSize]);
       glGetProgramInfoLog(
         mProgram.mHandle, infoLogSize, nullptr, infoLogBuffer.get());
 
       throw std::runtime_error(
         std::string{"Shader program linking failed:\n\n"} +
-        infoLogBuffer.get()
-      );
-    } else {
+        infoLogBuffer.get());
+    }
+    else
+    {
       throw std::runtime_error(
         "Shader program linking failed, but could not get info log");
     }
@@ -158,14 +168,17 @@ Shader::Shader(
 }
 
 
-void Shader::use() {
+void Shader::use()
+{
   glUseProgram(mProgram.mHandle);
 }
 
 
-GLint Shader::location(const std::string& name) const {
+GLint Shader::location(const std::string& name) const
+{
   auto it = mLocationCache.find(name);
-  if (it == mLocationCache.end()) {
+  if (it == mLocationCache.end())
+  {
     const auto location = glGetUniformLocation(mProgram.mHandle, name.c_str());
     std::tie(it, std::ignore) = mLocationCache.emplace(name, location);
   }
@@ -173,4 +186,4 @@ GLint Shader::location(const std::string& name) const {
   return it->second;
 }
 
-}
+} // namespace rigel::renderer

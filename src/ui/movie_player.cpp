@@ -24,7 +24,8 @@
 #include <cassert>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 using engine::fastTicksToTime;
 
@@ -43,8 +44,8 @@ void MoviePlayer::playMovie(
   const data::Movie& movie,
   const int frameDelayInFastTicks,
   const std::optional<int>& repetitions,
-  FrameCallbackFunc frameCallback
-) {
+  FrameCallbackFunc frameCallback)
+{
   assert(frameDelayInFastTicks >= 1);
 
   {
@@ -54,10 +55,9 @@ void MoviePlayer::playMovie(
     baseImage.render(0, 0);
   }
 
-  mAnimationFrames = utils::transformed(movie.mFrames,
-    [this](const auto& frame) {
-      auto texture =
-        renderer::Texture(mpRenderer, frame.mReplacementImage);
+  mAnimationFrames =
+    utils::transformed(movie.mFrames, [this](const auto& frame) {
+      auto texture = renderer::Texture(mpRenderer, frame.mReplacementImage);
       return FrameData{std::move(texture), frame.mStartRow};
     });
 
@@ -70,12 +70,15 @@ void MoviePlayer::playMovie(
 }
 
 
-void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
-  if (hasCompletedPlayback()) {
+void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta)
+{
+  if (hasCompletedPlayback())
+  {
     return;
   }
 
-  if (!mHasShownFirstFrame) {
+  if (!mHasShownFirstFrame)
+  {
     // TODO: Get rid of this special case, it should be possible to handle it
     // as part of the regular update logic
     invokeFrameCallbackIfPresent(0);
@@ -85,24 +88,29 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
   mElapsedTime += timeDelta;
   const auto elapsedFrames = static_cast<int>(mElapsedTime / mFrameDelay);
 
-  if (elapsedFrames > 0) {
+  if (elapsedFrames > 0)
+  {
     mElapsedTime -= elapsedFrames * mFrameDelay;
     ++mCurrentFrame;
 
-    if (mRemainingRepetitions) {
+    if (mRemainingRepetitions)
+    {
       auto& repetitionsRemaining = *mRemainingRepetitions;
 
       // We render one frame less during the last repetition, since the first
       // (full) image is to be counted as if it was the first frame.
       const auto framesToRenderThisRepetition =
         static_cast<int>(mAnimationFrames.size()) -
-          (repetitionsRemaining == 1 ? 1 : 0);
+        (repetitionsRemaining == 1 ? 1 : 0);
 
-      if (mCurrentFrame >= framesToRenderThisRepetition) {
+      if (mCurrentFrame >= framesToRenderThisRepetition)
+      {
         mCurrentFrame = 0;
         --repetitionsRemaining;
       }
-    } else {
+    }
+    else
+    {
       // Repeat forever
       mCurrentFrame %= mAnimationFrames.size();
     }
@@ -122,19 +130,23 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta) {
 }
 
 
-bool MoviePlayer::hasCompletedPlayback() const {
+bool MoviePlayer::hasCompletedPlayback() const
+{
   return mRemainingRepetitions && *mRemainingRepetitions == 0;
 }
 
 
-void MoviePlayer::invokeFrameCallbackIfPresent(const int frameNumber) {
-  if (mFrameCallback) {
+void MoviePlayer::invokeFrameCallbackIfPresent(const int frameNumber)
+{
+  if (mFrameCallback)
+  {
     const auto maybeNewFrameDelay = mFrameCallback(frameNumber);
 
-    if (maybeNewFrameDelay) {
+    if (maybeNewFrameDelay)
+    {
       mFrameDelay = fastTicksToTime(*maybeNewFrameDelay);
     }
   }
 }
 
-}
+} // namespace rigel::ui

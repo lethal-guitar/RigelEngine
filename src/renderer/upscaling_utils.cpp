@@ -24,37 +24,44 @@
 #include <algorithm>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
-namespace {
+namespace
+{
 
-auto asVec(const base::Size<int>& size) {
+auto asVec(const base::Size<int>& size)
+{
   return base::Vector{size.width, size.height};
 }
 
 
-auto asSize(const base::Vector& vec) {
+auto asSize(const base::Vector& vec)
+{
   return base::Size{vec.x, vec.y};
 }
 
 
-base::Size<float> determineUsableSize(
-  const float windowWidth,
-  const float windowHeight
-) {
+base::Size<float>
+  determineUsableSize(const float windowWidth, const float windowHeight)
+{
   const auto actualAspectRatioIsWiderThanTarget =
     windowWidth / windowHeight > data::GameTraits::aspectRatio;
-  if (actualAspectRatioIsWiderThanTarget) {
+  if (actualAspectRatioIsWiderThanTarget)
+  {
     return {data::GameTraits::aspectRatio * windowHeight, windowHeight};
-  } else {
+  }
+  else
+  {
     return {windowWidth, 1.0f / data::GameTraits::aspectRatio * windowWidth};
   }
 }
 
-}
+} // namespace
 
 
-ViewPortInfo determineViewPort(const Renderer* pRenderer) {
+ViewPortInfo determineViewPort(const Renderer* pRenderer)
+{
   const auto windowWidth = float(pRenderer->windowSize().width);
   const auto windowHeight = float(pRenderer->windowSize().height);
 
@@ -69,19 +76,20 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer) {
   return {
     base::Vector{int(offsetX), int(offsetY)},
     base::Size<int>{int(usableWidth), int(usableHeight)},
-    base::Point<float>{widthScale, heightScale}
-  };
+    base::Point<float>{widthScale, heightScale}};
 }
 
 
-bool canUseWidescreenMode(const Renderer* pRenderer) {
+bool canUseWidescreenMode(const Renderer* pRenderer)
+{
   const auto windowWidth = float(pRenderer->windowSize().width);
   const auto windowHeight = float(pRenderer->windowSize().height);
   return windowWidth / windowHeight > data::GameTraits::aspectRatio;
 }
 
 
-WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
+WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer)
+{
   const auto info = determineViewPort(pRenderer);
 
   const auto windowWidth = pRenderer->windowSize().width;
@@ -90,54 +98,46 @@ WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer) {
 
   const auto widthInPixels =
     std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidth);
-  const auto paddingPixels =
-    pRenderer->windowSize().width - widthInPixels;
+  const auto paddingPixels = pRenderer->windowSize().width - widthInPixels;
 
-  return {
-    maxTilesOnScreen,
-    widthInPixels,
-    paddingPixels / 2
-  };
+  return {maxTilesOnScreen, widthInPixels, paddingPixels / 2};
 }
 
 
-base::Vector scaleVec(
-  const base::Vector& vec,
-  const base::Point<float>& scale
-) {
+base::Vector scaleVec(const base::Vector& vec, const base::Point<float>& scale)
+{
   return base::Vector{
-    base::round(vec.x * scale.x),
-    base::round(vec.y * scale.y)};
+    base::round(vec.x * scale.x), base::round(vec.y * scale.y)};
 }
 
 
-base::Extents scaleSize(
-  const base::Extents& size,
-  const base::Point<float>& scale
-) {
+base::Extents
+  scaleSize(const base::Extents& size, const base::Point<float>& scale)
+{
   return asSize(scaleVec(asVec(size), scale));
 }
 
 
 RenderTargetTexture createFullscreenRenderTarget(
   Renderer* pRenderer,
-  const data::GameOptions& options
-) {
-  if (options.mPerElementUpscalingEnabled) {
+  const data::GameOptions& options)
+{
+  if (options.mPerElementUpscalingEnabled)
+  {
     return RenderTargetTexture{
       pRenderer,
       pRenderer->maxWindowSize().width,
       pRenderer->maxWindowSize().height};
-  } else {
+  }
+  else
+  {
     const auto width =
       options.mWidescreenModeOn && canUseWidescreenMode(pRenderer)
-        ? determineWidescreenViewPort(pRenderer).mWidthPx
-        : data::GameTraits::viewPortWidthPx;
+      ? determineWidescreenViewPort(pRenderer).mWidthPx
+      : data::GameTraits::viewPortWidthPx;
     return RenderTargetTexture{
-      pRenderer,
-      width,
-      data::GameTraits::viewPortHeightPx};
+      pRenderer, width, data::GameTraits::viewPortHeightPx};
   }
 }
 
-}
+} // namespace rigel::renderer

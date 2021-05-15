@@ -38,48 +38,57 @@
  * masked tile bit section format (which was done many years ago, before that
  * information became available on wikis).
  *
- * See http://archive.shikadi.net/sites/www.geocities.com/dooknookimklassik/dn2specs.txt
+ * See
+ * http://archive.shikadi.net/sites/www.geocities.com/dooknookimklassik/dn2specs.txt
  */
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 using data::ActorID;
 using data::Difficulty;
+using data::GameTraits;
 using data::map::BackdropScrollMode;
 using data::map::BackdropSwitchCondition;
 using data::map::LevelData;
-using data::GameTraits;
 
 
-namespace {
+namespace
+{
 
 using ActorList = std::vector<LevelData::Actor>;
 
 
-string stripSpaces(string str) {
+string stripSpaces(string str)
+{
   const auto it = str.find(' ');
-  if (it != str.npos) {
+  if (it != str.npos)
+  {
     str.erase(it);
   }
   return str;
 }
 
 
-data::map::TileIndex convertTileIndex(const uint16_t rawIndex) {
+data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
+{
   const auto index = rawIndex / 8u;
-  if (index >= GameTraits::CZone::numSolidTiles) {
-    return
-      (index - GameTraits::CZone::numSolidTiles) / 5u +
+  if (index >= GameTraits::CZone::numSolidTiles)
+  {
+    return (index - GameTraits::CZone::numSolidTiles) / 5u +
       GameTraits::CZone::numSolidTiles;
-  } else {
+  }
+  else
+  {
     return index;
   }
 }
 
 
-struct LevelHeader {
+struct LevelHeader
+{
   explicit LevelHeader(LeStreamReader& reader)
     : dataOffset(reader.readU16())
     , CZone(stripSpaces(readFixedSizeString(reader, 13)))
@@ -92,9 +101,7 @@ struct LevelHeader {
   {
   }
 
-  bool flagBitSet(const uint8_t bitMask) {
-    return (flags & bitMask) != 0;
-  }
+  bool flagBitSet(const uint8_t bitMask) { return (flags & bitMask) != 0; }
 
   const uint16_t dataOffset;
   const string CZone;
@@ -107,7 +114,8 @@ struct LevelHeader {
 };
 
 
-ByteBuffer readExtraMaskedTileBits(const LeStreamReader& levelReader) {
+ByteBuffer readExtraMaskedTileBits(const LeStreamReader& levelReader)
+{
   LeStreamReader extraInfoReader(levelReader);
   extraInfoReader.skipBytes(GameTraits::mapDataWords * sizeof(uint16_t));
   const auto extraInfoSize = extraInfoReader.readU16();
@@ -130,7 +138,8 @@ ByteBuffer readExtraMaskedTileBits(const LeStreamReader& levelReader) {
 }
 
 
-string backdropNameFromNumber(const uint8_t backdropNumber) {
+string backdropNameFromNumber(const uint8_t backdropNumber)
+{
   auto name = string("DROP");
   name += to_string(backdropNumber);
   name += ".MNI";
@@ -143,60 +152,71 @@ string backdropNameFromNumber(const uint8_t backdropNumber) {
  * Takes a linear list of actor descriptions, and puts them into a 2d grid.
  * This is useful since some meta actors have spatial relations to others.
  */
-auto makeActorGrid(const data::map::Map& map, const ActorList& actors) {
+auto makeActorGrid(const data::map::Map& map, const ActorList& actors)
+{
   base::Grid<const LevelData::Actor*> actorGrid(map.width(), map.height());
 
-  for (const auto& actor : actors) {
+  for (const auto& actor : actors)
+  {
     actorGrid.setValueAt(actor.mPosition.x, actor.mPosition.y, &actor);
   }
   return actorGrid;
 }
 
 
-class ActorGrid {
+class ActorGrid
+{
 public:
   ActorGrid(const data::map::Map& map, const ActorList& actors)
     : mActorGrid(makeActorGrid(map, actors))
   {
   }
 
-  const LevelData::Actor& actorAt(const size_t col, const size_t row) const {
+  const LevelData::Actor& actorAt(const size_t col, const size_t row) const
+  {
     return *mActorGrid.valueAt(col, row);
   }
 
-  bool hasActorAt(const size_t col, const size_t row) const {
+  bool hasActorAt(const size_t col, const size_t row) const
+  {
     return mActorGrid.valueAt(col, row) != nullptr;
   }
 
-  void removeActorAt(const size_t col, const size_t row) {
+  void removeActorAt(const size_t col, const size_t row)
+  {
     mActorGrid.setValueAt(col, row, nullptr);
   }
 
-  std::optional<base::Rect<int>> findTileSectionRect(
-    const int startCol,
-    const int startRow
-  ) {
-    for (auto x=startCol; x<int(mActorGrid.width()); ++x) {
+  std::optional<base::Rect<int>>
+    findTileSectionRect(const int startCol, const int startRow)
+  {
+    for (auto x = startCol; x < int(mActorGrid.width()); ++x)
+    {
       auto pTopRightMarkerCandidate = mActorGrid.valueAt(x, startRow);
 
-      if (pTopRightMarkerCandidate && pTopRightMarkerCandidate->mID == ActorID::META_Dynamic_geometry_marker_1) {
+      if (
+        pTopRightMarkerCandidate &&
+        pTopRightMarkerCandidate->mID ==
+          ActorID::META_Dynamic_geometry_marker_1)
+      {
         const auto rightCol = pTopRightMarkerCandidate->mPosition.x;
 
-        for (auto y=startRow+1; y<int(mActorGrid.height()); ++y) {
+        for (auto y = startRow + 1; y < int(mActorGrid.height()); ++y)
+        {
           auto pBottomRightMarkerCandidate = mActorGrid.valueAt(rightCol, y);
 
           if (
             pBottomRightMarkerCandidate &&
-            pBottomRightMarkerCandidate->mID == ActorID::META_Dynamic_geometry_marker_2
-          ) {
+            pBottomRightMarkerCandidate->mID ==
+              ActorID::META_Dynamic_geometry_marker_2)
+          {
             const auto bottomRow = y;
             removeActorAt(rightCol, startRow);
             removeActorAt(rightCol, bottomRow);
 
             return base::Rect<int>{
               {startCol, startRow},
-              {rightCol - startCol + 1, bottomRow - startRow + 1}
-            };
+              {rightCol - startCol + 1, bottomRow - startRow + 1}};
           }
         }
       }
@@ -210,10 +230,12 @@ private:
 };
 
 
-bool isValidActorId(const uint16_t id) {
+bool isValidActorId(const uint16_t id)
+{
   using ID = data::ActorID;
 
-  switch (static_cast<data::ActorID>(id)) {
+  switch (static_cast<data::ActorID>(id))
+  {
     case ID::Keyhole_mounting_pole:
     case ID::Duke_LEFT:
     case ID::Duke_RIGHT:
@@ -407,30 +429,34 @@ bool isValidActorId(const uint16_t id) {
 std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
   const data::map::Map& map,
   const ActorList& originalActors,
-  const Difficulty chosenDifficulty
-) {
+  const Difficulty chosenDifficulty)
+{
   ActorList actors;
   base::Vector playerSpawnPosition;
   bool playerFacingLeft = false;
 
   ActorGrid grid(map, originalActors);
-  for (int row=0; row<map.height(); ++row) {
-    for (int col=0; col<map.width(); ++col) {
-      if (!grid.hasActorAt(col, row)) {
+  for (int row = 0; row < map.height(); ++row)
+  {
+    for (int col = 0; col < map.width(); ++col)
+    {
+      if (!grid.hasActorAt(col, row))
+      {
         continue;
       }
 
       auto applyDifficultyMarker = [&grid, col, row, chosenDifficulty](
-        const Difficulty requiredDifficulty
-      ) {
+                                     const Difficulty requiredDifficulty) {
         const auto targetCol = col + 1;
-        if (chosenDifficulty < requiredDifficulty) {
+        if (chosenDifficulty < requiredDifficulty)
+        {
           grid.removeActorAt(targetCol, row);
         }
       };
 
       const auto& actor = grid.actorAt(col, row);
-      switch (actor.mID) {
+      switch (actor.mID)
+      {
         case ActorID::META_Appear_only_in_med_hard_difficulty:
           applyDifficultyMarker(Difficulty::Medium);
           break;
@@ -454,12 +480,10 @@ std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
         case ActorID::Dynamic_geometry_8:
           {
             auto tileSection = grid.findTileSectionRect(col, row);
-            if (tileSection) {
-              actors.emplace_back(LevelData::Actor{
-                actor.mPosition,
-                actor.mID,
-                tileSection
-              });
+            if (tileSection)
+            {
+              actors.emplace_back(
+                LevelData::Actor{actor.mPosition, actor.mID, tileSection});
             }
           }
           break;
@@ -484,33 +508,38 @@ std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
 }
 
 
-void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources) {
-  std::stable_sort(begin(actors), end(actors),
+void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
+{
+  std::stable_sort(
+    begin(actors),
+    end(actors),
     [&](const LevelData::Actor& lhs, const LevelData::Actor& rhs) {
       return resources.mActorImagePackage.drawIndexFor(lhs.mID) <
         resources.mActorImagePackage.drawIndexFor(rhs.mID);
     });
 }
 
-}
+} // namespace
 
 
 LevelData loadLevel(
   const string& mapName,
   const ResourceLoader& resources,
-  const Difficulty chosenDifficulty
-) {
+  const Difficulty chosenDifficulty)
+{
   const auto levelData = resources.file(mapName);
   LeStreamReader levelReader(levelData);
 
   LevelHeader header(levelReader);
   ActorList actors;
-  for (size_t i = 0; i < header.numActorWords/3u; ++i) {
+  for (size_t i = 0; i < header.numActorWords / 3u; ++i)
+  {
     const auto type = levelReader.readU16();
     const base::Vector position{levelReader.readU16(), levelReader.readU16()};
-    if (isValidActorId(type)) {
-      actors.emplace_back(LevelData::Actor{
-          position, static_cast<ActorID>(type), std::nullopt});
+    if (isValidActorId(type))
+    {
+      actors.emplace_back(
+        LevelData::Actor{position, static_cast<ActorID>(type), std::nullopt});
     }
   }
 
@@ -521,28 +550,29 @@ LevelData loadLevel(
   data::map::Map map(width, height, std::move(tileSet.mAttributes));
 
   const auto maskedTileOffsets = readExtraMaskedTileBits(levelReader);
-  auto lookupExtraMaskedTileBits = [&maskedTileOffsets, width, height](
-    const int x,
-    const int y
-  ) {
-    const auto index = x/4 + y*(width/4);
-    const auto extraBitPack = maskedTileOffsets.at(index);
+  auto lookupExtraMaskedTileBits =
+    [&maskedTileOffsets, width, height](const int x, const int y) {
+      const auto index = x / 4 + y * (width / 4);
+      const auto extraBitPack = maskedTileOffsets.at(index);
 
-    const auto indexInPack = x % 4;
-    const auto bitMask = 0x03 << indexInPack*2;
-    const auto extraBits = (extraBitPack & bitMask) >> indexInPack*2;
+      const auto indexInPack = x % 4;
+      const auto bitMask = 0x03 << indexInPack * 2;
+      const auto extraBits = (extraBitPack & bitMask) >> indexInPack * 2;
 
-    return static_cast<uint8_t>(extraBits << 5);
-  };
+      return static_cast<uint8_t>(extraBits << 5);
+    };
 
   LeStreamReader tileDataReader(
     levelReader.currentIter(),
-    levelReader.currentIter() + width*height*sizeof(uint16_t));
-  for (int y=0; y<height; ++y) {
-    for (int x=0; x<width; ++x) {
+    levelReader.currentIter() + width * height * sizeof(uint16_t));
+  for (int y = 0; y < height; ++y)
+  {
+    for (int x = 0; x < width; ++x)
+    {
       const auto tileSpec = tileDataReader.readU16();
 
-      if (tileSpec & 0x8000) {
+      if (tileSpec & 0x8000)
+      {
         // extended tile spec: separate indices for layers 0 and 1.
         // 10 bits for solid, 5 for masked (the most significant bit serves
         // as a marker to distinguish the complex and simple masked tile
@@ -554,7 +584,9 @@ LevelData loadLevel(
 
         map.setTileAt(0, x, y, solidIndex);
         map.setTileAt(1, x, y, maskedIndex);
-      } else {
+      }
+      else
+      {
         const auto index = convertTileIndex(tileSpec);
         map.setTileAt(0, x, y, index);
       }
@@ -562,31 +594,41 @@ LevelData loadLevel(
   }
 
   auto scrollMode = BackdropScrollMode::None;
-  if (header.flagBitSet(0x1)) {
+  if (header.flagBitSet(0x1))
+  {
     scrollMode = BackdropScrollMode::ParallaxBoth;
-  } else if (header.flagBitSet(0x2)) {
+  }
+  else if (header.flagBitSet(0x2))
+  {
     scrollMode = BackdropScrollMode::ParallaxHorizontal;
-  } else if (header.flagBitSet(0x8)) {
+  }
+  else if (header.flagBitSet(0x8))
+  {
     scrollMode = BackdropScrollMode::AutoHorizontal;
-  } else if (header.flagBitSet(0x10)) {
+  }
+  else if (header.flagBitSet(0x10))
+  {
     scrollMode = BackdropScrollMode::AutoVertical;
   }
   auto backdropSwitchCondition = BackdropSwitchCondition::None;
   if (
     scrollMode != BackdropScrollMode::AutoHorizontal &&
-    scrollMode != BackdropScrollMode::AutoVertical
-  ) {
-    if (header.flagBitSet(0x40)) {
+    scrollMode != BackdropScrollMode::AutoVertical)
+  {
+    if (header.flagBitSet(0x40))
+    {
       backdropSwitchCondition = BackdropSwitchCondition::OnReactorDestruction;
     }
-    else if (header.flagBitSet(0x80)) {
+    else if (header.flagBitSet(0x80))
+    {
       backdropSwitchCondition = BackdropSwitchCondition::OnTeleportation;
     }
   }
 
   auto backdropImage = resources.loadTiledFullscreenImage(header.backdrop);
   std::optional<data::Image> alternativeBackdropImage;
-  if (header.flagBitSet(0x40) || header.flagBitSet(0x80)) {
+  if (header.flagBitSet(0x40) || header.flagBitSet(0x80))
+  {
     alternativeBackdropImage = resources.loadTiledFullscreenImage(
       backdropNameFromNumber(header.alternativeBackdropNumber));
   }
@@ -606,9 +648,8 @@ LevelData loadLevel(
     scrollMode,
     backdropSwitchCondition,
     header.flagBitSet(0x20),
-    header.music
-  };
+    header.music};
 }
 
 
-}
+} // namespace rigel::loader

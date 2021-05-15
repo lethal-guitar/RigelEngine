@@ -26,13 +26,15 @@
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace {
+namespace
+{
 
 using engine::components::Active;
 using engine::components::BoundingBox;
@@ -44,14 +46,13 @@ using game_logic::components::ItemContainer;
 
 constexpr int ITEM_BOUNCE_SEQUENCE[] = {-3, -2, -1, 0, 1, 2, 3, -1, 1};
 
-}
+} // namespace
 
 
 ItemContainerSystem::ItemContainerSystem(
   entityx::EntityManager* pEntityManager,
   const engine::CollisionChecker* pCollisionChecker,
-  entityx::EventManager& events
-)
+  entityx::EventManager& events)
   : mpEntityManager(pEntityManager)
   , mpCollisionChecker(pCollisionChecker)
 {
@@ -59,28 +60,32 @@ ItemContainerSystem::ItemContainerSystem(
 }
 
 
-void ItemContainerSystem::update(entityx::EntityManager& es) {
+void ItemContainerSystem::update(entityx::EntityManager& es)
+{
   using RS = ItemContainer::ReleaseStyle;
 
-  auto releaseItem = [this](
-    entityx::Entity entity,
-    const std::vector<ComponentHolder>& containedComponents
-  ) {
-    auto contents = mpEntityManager->create();
-    for (auto& component : containedComponents) {
-      component.assignToEntity(contents);
-    }
+  auto releaseItem =
+    [this](
+      entityx::Entity entity,
+      const std::vector<ComponentHolder>& containedComponents) {
+      auto contents = mpEntityManager->create();
+      for (auto& component : containedComponents)
+      {
+        component.assignToEntity(contents);
+      }
 
-    contents.assign<WorldPosition>(*entity.component<WorldPosition>());
-    return contents;
-  };
+      contents.assign<WorldPosition>(*entity.component<WorldPosition>());
+      return contents;
+    };
 
   es.each<ItemContainer>([&](entityx::Entity entity, ItemContainer& container) {
-    if (!container.mHasBeenShot) {
+    if (!container.mHasBeenShot)
+    {
       return;
     }
 
-    switch (container.mStyle) {
+    switch (container.mStyle)
+    {
       case RS::Default:
         releaseItem(entity, container.mContainedComponents);
         entity.destroy();
@@ -90,12 +95,16 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
       case RS::ItemBoxNoBounce:
         ++container.mFramesElapsed;
 
-        if (container.mFramesElapsed == 1) {
+        if (container.mFramesElapsed == 1)
+        {
           entity.component<Sprite>()->flashWhite();
-        } else if (container.mFramesElapsed == 2) {
+        }
+        else if (container.mFramesElapsed == 2)
+        {
           auto item = releaseItem(entity, container.mContainedComponents);
 
-          if (container.mStyle != RS::ItemBoxNoBounce) {
+          if (container.mStyle != RS::ItemBoxNoBounce)
+          {
             const auto fallVelocity =
               entity.component<MovingBody>()->mVelocity.y;
             item.assign<ItemBounceEffect>(fallVelocity);
@@ -109,15 +118,22 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
       case RS::NuclearWasteBarrel:
         ++container.mFramesElapsed;
 
-        if (container.mFramesElapsed == 1) {
+        if (container.mFramesElapsed == 1)
+        {
           entity.component<Sprite>()->flashWhite();
-        } else if (container.mFramesElapsed == 2) {
+        }
+        else if (container.mFramesElapsed == 2)
+        {
           // Switch to "bulging" state
           ++entity.component<Sprite>()->mFramesToRender[0];
-        } else if (container.mFramesElapsed == 3) {
+        }
+        else if (container.mFramesElapsed == 3)
+        {
           // At this point, the destruction effects take over
           entity.component<Sprite>()->mShow = false;
-        } else if (container.mFramesElapsed == 4) {
+        }
+        else if (container.mFramesElapsed == 4)
+        {
           releaseItem(entity, container.mContainedComponents);
           entity.destroy();
         }
@@ -127,38 +143,40 @@ void ItemContainerSystem::update(entityx::EntityManager& es) {
 }
 
 
-void ItemContainerSystem::updateItemBounce(entityx::EntityManager& es) {
+void ItemContainerSystem::updateItemBounce(entityx::EntityManager& es)
+{
   es.each<WorldPosition, BoundingBox, MovingBody, ItemBounceEffect>(
     [this](
       entityx::Entity entity,
       WorldPosition& position,
       const BoundingBox& bbox,
       MovingBody& body,
-      ItemBounceEffect& state
-    ) {
+      ItemBounceEffect& state) {
       position.y += ITEM_BOUNCE_SEQUENCE[state.mFramesElapsed];
 
       const auto hasLanded =
         mpCollisionChecker->isOnSolidGround(position, bbox);
       if (
-        (state.mFramesElapsed == 7 && !hasLanded) ||
-        state.mFramesElapsed == 9
-      ) {
+        (state.mFramesElapsed == 7 && !hasLanded) || state.mFramesElapsed == 9)
+      {
         body.mGravityAffected = true;
         body.mVelocity.y = state.mFallVelocity;
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 9) {
+      if (state.mFramesElapsed == 9)
+      {
         entity.remove<ItemBounceEffect>();
       }
     });
 }
 
 
-void ItemContainerSystem::receive(const events::ShootableKilled& event) {
+void ItemContainerSystem::receive(const events::ShootableKilled& event)
+{
   auto entity = event.mEntity;
-  if (entity.has_component<ItemContainer>()) {
+  if (entity.has_component<ItemContainer>())
+  {
     // We can't open up the item container immediately, but have to do it
     // in our update() function. This is because the container's contents
     // might be shootable, and this could cause them to be hit by the
@@ -171,14 +189,15 @@ void ItemContainerSystem::receive(const events::ShootableKilled& event) {
 }
 
 
-namespace behaviors {
+namespace behaviors
+{
 
 void NapalmBomb::update(
   GlobalDependencies& d,
   GlobalState&,
   const bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using components::DestructionEffects;
   using State = NapalmBomb::State;
 
@@ -187,13 +206,16 @@ void NapalmBomb::update(
   const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<Sprite>();
 
-  switch (mState) {
+  switch (mState)
+  {
     case State::Ticking:
-      if (mFramesElapsed >= 25 && mFramesElapsed % 2 == 1) {
+      if (mFramesElapsed >= 25 && mFramesElapsed % 2 == 1)
+      {
         sprite.flashWhite();
       }
 
-      if (mFramesElapsed >= 31) {
+      if (mFramesElapsed >= 31)
+      {
         explode(d, entity);
 
         // Remove the shootable to prevent explode() being called twice
@@ -204,12 +226,14 @@ void NapalmBomb::update(
       break;
 
     case State::SpawningFires:
-      if (mFramesElapsed > 10) {
+      if (mFramesElapsed > 10)
+      {
         entity.destroy();
         return;
       }
 
-      if (mFramesElapsed % 2 == 0) {
+      if (mFramesElapsed % 2 == 0)
+      {
         const auto step = mFramesElapsed / 2;
         spawnFires(d, position, step);
       }
@@ -222,13 +246,14 @@ void NapalmBomb::onKilled(
   GlobalDependencies& d,
   GlobalState&,
   const base::Point<float>&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   explode(d, entity);
 }
 
 
-void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
+void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity)
+{
   const auto& position = *entity.component<WorldPosition>();
 
   triggerEffects(entity, *d.mpEntityManager);
@@ -252,34 +277,36 @@ void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity) {
 void NapalmBomb::spawnFires(
   GlobalDependencies& d,
   const base::Vector& bombPosition,
-  const int step
-) {
+  const int step)
+{
   using namespace game_logic::components::parameter_aliases;
 
   auto spawnOneFire = [&, this](const base::Vector& position) {
     const auto canSpawn =
-      d.mpCollisionChecker->isOnSolidGround(
-        position,
-        BoundingBox{{}, {2, 1}});
+      d.mpCollisionChecker->isOnSolidGround(position, BoundingBox{{}, {2, 1}});
 
-    if (canSpawn) {
-      auto fire = spawnOneShotSprite(*d.mpEntityFactory, data::ActorID::Fire_bomb_fire, position);
+    if (canSpawn)
+    {
+      auto fire = spawnOneShotSprite(
+        *d.mpEntityFactory, data::ActorID::Fire_bomb_fire, position);
       fire.assign<components::PlayerDamaging>(Damage{1});
       fire.assign<components::DamageInflicting>(
-        Damage{1},
-        DestroyOnContact{false});
+        Damage{1}, DestroyOnContact{false});
     }
     return canSpawn;
   };
 
   const auto basePosition = WorldPosition{step + 1, 0};
-  if (mCanSpawnLeft) {
+  if (mCanSpawnLeft)
+  {
     mCanSpawnLeft = spawnOneFire(bombPosition + basePosition * -2);
   }
 
-  if (mCanSpawnRight) {
+  if (mCanSpawnRight)
+  {
     mCanSpawnRight = spawnOneFire(bombPosition + basePosition * 2);
   }
 }
 
-}}
+} // namespace behaviors
+} // namespace rigel::game_logic

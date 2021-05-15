@@ -23,7 +23,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::sdl_utils {
+namespace rigel::sdl_utils
+{
 
 /** Normalize keys with left/right variant to always use the left one
  *
@@ -33,18 +34,26 @@ namespace rigel::sdl_utils {
  * always returns the left variant for any of these keys. Other key codes
  * are returned unchanged.
  */
-inline SDL_Keycode normalizeLeftRightVariants(const SDL_Keycode keyCode) {
-  if (keyCode == SDLK_RCTRL) {
+inline SDL_Keycode normalizeLeftRightVariants(const SDL_Keycode keyCode)
+{
+  if (keyCode == SDLK_RCTRL)
+  {
     return SDLK_LCTRL;
-  } else if (keyCode == SDLK_RALT) {
+  }
+  else if (keyCode == SDLK_RALT)
+  {
     return SDLK_LALT;
-  } else if (keyCode == SDLK_RSHIFT) {
+  }
+  else if (keyCode == SDLK_RSHIFT)
+  {
     return SDLK_LSHIFT;
-  } else if (keyCode == SDLK_RGUI) {
+  }
+  else if (keyCode == SDLK_RGUI)
+  {
     return SDLK_LGUI;
   }
 
   return keyCode;
 }
 
-}
+} // namespace rigel::sdl_utils

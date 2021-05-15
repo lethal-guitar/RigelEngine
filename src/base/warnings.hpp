@@ -22,52 +22,54 @@
 
 #if defined(_MSC_VER)
 
-  #define RIGEL_DISABLE_WARNINGS __pragma(warning(push, 0)) \
-    __pragma(warning(disable: 4244)) \
+  #define RIGEL_DISABLE_WARNINGS                                               \
+    __pragma(warning(push, 0))                                                 \
+    __pragma(warning(disable : 4244))                                          \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS __pragma(warning(pop))
 
 #elif defined(__clang__)
 
-  #define RIGEL_DISABLE_WARNINGS \
-    _Pragma("clang diagnostic push") \
-    _Pragma("clang diagnostic ignored \"-Wunknown-pragmas\"") \
-    _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"") \
-    _Pragma("clang diagnostic ignored \"-Wold-style-cast\"") \
-    _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"") \
-    _Pragma("clang diagnostic ignored \"-Wextra-semi\"") \
-    _Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-    _Pragma("clang diagnostic ignored \"-Wreserved-id-macro\"") \
-    _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"") \
-    _Pragma("clang diagnostic ignored \"-Wdocumentation-unknown-command\"") \
-    _Pragma("clang diagnostic ignored \"-Wdocumentation\"") \
-    _Pragma("clang diagnostic ignored \"-Wshadow\"") \
-    _Pragma("clang diagnostic ignored \"-Wmissing-noreturn\"") \
-    _Pragma("clang diagnostic ignored \"-Wdeprecated\"") \
-    _Pragma("clang diagnostic ignored \"-Wundef\"") \
-    _Pragma("clang diagnostic ignored \"-Wundefined-reinterpret-cast\"") \
-    _Pragma("clang diagnostic ignored \"-Wcast-align\"") \
-    _Pragma("clang diagnostic ignored \"-Wmissing-prototypes\"") \
-    _Pragma("clang diagnostic ignored \"-Wconversion\"") \
-    _Pragma("clang diagnostic ignored \"-Wcomma\"") \
-    _Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
-    _Pragma("clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"") \
-    _Pragma("clang diagnostic ignored \"-Wcast-qual\"") \
-    _Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
-    _Pragma("clang diagnostic ignored \"-Wgnu-anonymous-struct\"") \
-    _Pragma("clang diagnostic ignored \"-Wnested-anon-types\"") \
-    _Pragma("clang diagnostic ignored \"-Wextra-semi-stmt\"") \
+  #define RIGEL_DISABLE_WARNINGS                                                 \
+    _Pragma("clang diagnostic push")                                             \
+    _Pragma("clang diagnostic ignored \"-Wunknown-pragmas\"")                    \
+    _Pragma("clang diagnostic ignored \"-Wglobal-constructors\"")                \
+    _Pragma("clang diagnostic ignored \"-Wold-style-cast\"")                     \
+    _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"")           \
+    _Pragma("clang diagnostic ignored \"-Wextra-semi\"")                         \
+    _Pragma("clang diagnostic ignored \"-Wdouble-promotion\"")                   \
+    _Pragma("clang diagnostic ignored \"-Wreserved-id-macro\"")                  \
+    _Pragma("clang diagnostic ignored \"-Wimplicit-fallthrough\"")               \
+    _Pragma("clang diagnostic ignored \"-Wdocumentation-unknown-command\"")      \
+    _Pragma("clang diagnostic ignored \"-Wdocumentation\"")                      \
+    _Pragma("clang diagnostic ignored \"-Wshadow\"")                             \
+    _Pragma("clang diagnostic ignored \"-Wmissing-noreturn\"")                   \
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"")                         \
+    _Pragma("clang diagnostic ignored \"-Wundef\"")                              \
+    _Pragma("clang diagnostic ignored \"-Wundefined-reinterpret-cast\"")         \
+    _Pragma("clang diagnostic ignored \"-Wcast-align\"")                         \
+    _Pragma("clang diagnostic ignored \"-Wmissing-prototypes\"")                 \
+    _Pragma("clang diagnostic ignored \"-Wconversion\"")                         \
+    _Pragma("clang diagnostic ignored \"-Wcomma\"")                              \
+    _Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"")      \
+    _Pragma(                                                                     \
+      "clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"") \
+    _Pragma("clang diagnostic ignored \"-Wcast-qual\"")                          \
+    _Pragma("clang diagnostic ignored \"-Wfloat-equal\"")                        \
+    _Pragma("clang diagnostic ignored \"-Wgnu-anonymous-struct\"")               \
+    _Pragma("clang diagnostic ignored \"-Wnested-anon-types\"")                  \
+    _Pragma("clang diagnostic ignored \"-Wextra-semi-stmt\"")                    \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")
 
 #elif defined(__GNUC__)
 
-  #define RIGEL_DISABLE_WARNINGS \
-    _Pragma("GCC diagnostic push") \
-    _Pragma("GCC diagnostic ignored \"-Wpedantic\"") \
-    _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"") \
+  #define RIGEL_DISABLE_WARNINGS                                               \
+    _Pragma("GCC diagnostic push")                                             \
+    _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                           \
+    _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"")               \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("GCC diagnostic pop")

@@ -32,7 +32,8 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 using data::PlayerModel;
 using engine::components::AnimationLoop;
@@ -44,7 +45,8 @@ using namespace game_logic::components;
 
 namespace ex = entityx;
 
-namespace {
+namespace
+{
 
 constexpr auto BASIC_LETTER_COLLECTION_SCORE = 10100;
 constexpr auto CORRECT_LETTER_COLLECTION_SCORE = 100000;
@@ -57,22 +59,26 @@ constexpr auto HINT_MACHINE_GLOBE_OFFSET = base::Vector{1, -4};
 void spawnScoreNumbers(
   const base::Vector& position,
   int score,
-  IEntityFactory& entityFactory
-) {
+  IEntityFactory& entityFactory)
+{
   std::vector<ScoreNumberType> numbers;
-  for (const auto numberType : ScoreNumberType_Items) {
+  for (const auto numberType : ScoreNumberType_Items)
+  {
     const auto value = scoreNumberValue(numberType);
-    for (; score >= value; score -= value) {
+    for (; score >= value; score -= value)
+    {
       numbers.push_back(numberType);
     }
   }
 
-  if (numbers.empty()) {
+  if (numbers.empty())
+  {
     return;
   }
 
   auto yOffset = static_cast<int>(numbers.size() - 1);
-  for (const auto numberType : numbers) {
+  for (const auto numberType : numbers)
+  {
     const auto offset = base::Vector{0, yOffset};
     --yOffset;
     spawnFloatingScoreNumber(entityFactory, numberType, position - offset);
@@ -82,20 +88,23 @@ void spawnScoreNumbers(
 
 void spawnScoreNumbersForLetterCollectionBonus(
   IEntityFactory& factory,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   constexpr int X_OFFSETS[] = {-3, 0, 3, 0};
 
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 10; ++i)
+  {
     const auto offset = base::Vector{X_OFFSETS[i % 4], -i};
     spawnFloatingScoreNumber(
       factory, ScoreNumberType::S10000, position + offset);
   }
 }
 
-data::TutorialMessageId tutorialFor(const components::InteractableType type) {
+data::TutorialMessageId tutorialFor(const components::InteractableType type)
+{
   using TM = data::TutorialMessageId;
-  switch (type) {
+  switch (type)
+  {
     case InteractableType::Teleporter:
       return TM::FoundTeleporter;
 
@@ -116,22 +125,24 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type) {
 
 std::optional<base::Vector> findTeleporterTargetPosition(
   ex::EntityManager& es,
-  ex::Entity sourceTeleporter
-) {
+  ex::Entity sourceTeleporter)
+{
   ex::ComponentHandle<components::Interactable> interactable;
   ex::ComponentHandle<WorldPosition> position;
 
   ex::Entity targetTeleporter;
-  for (auto entity : es.entities_with_components(interactable, position)) {
+  for (auto entity : es.entities_with_components(interactable, position))
+  {
     if (
       interactable->mType == components::InteractableType::Teleporter &&
-      entity != sourceTeleporter
-    ) {
+      entity != sourceTeleporter)
+    {
       targetTeleporter = entity;
     }
   }
 
-  if (!targetTeleporter) {
+  if (!targetTeleporter)
+  {
     return std::nullopt;
   }
 
@@ -143,25 +154,29 @@ std::optional<base::Vector> findTeleporterTargetPosition(
 
 ex::Entity currentlyTouchedInteractable(
   entityx::EntityManager& es,
-  const Player* pPlayer
-) {
+  const Player* pPlayer)
+{
   const auto worldSpacePlayerBounds = pPlayer->worldSpaceHitBox();
 
   auto isInRange = [&](
-    const BoundingBox& objectBounds,
-    const components::InteractableType type
-  ) {
-    if (!worldSpacePlayerBounds.intersects(objectBounds)) {
+                     const BoundingBox& objectBounds,
+                     const components::InteractableType type) {
+    if (!worldSpacePlayerBounds.intersects(objectBounds))
+    {
       return false;
     }
 
-    if (type == InteractableType::Teleporter) {
+    if (type == InteractableType::Teleporter)
+    {
       const auto& playerPos = pPlayer->orientedPosition();
+
+      // clang-format off
       return
         objectBounds.left() <= playerPos.x &&
         objectBounds.left() + 3 >= playerPos.x &&
         objectBounds.bottom() == playerPos.y &&
         pPlayer->isInRegularState();
+      // clang-format on
     }
 
     return true;
@@ -171,9 +186,11 @@ ex::Entity currentlyTouchedInteractable(
   ex::ComponentHandle<Interactable> interactable;
   ex::ComponentHandle<WorldPosition> pos;
   ex::ComponentHandle<BoundingBox> bbox;
-  for (auto entity : es.entities_with_components(interactable, pos, bbox)) {
+  for (auto entity : es.entities_with_components(interactable, pos, bbox))
+  {
     const auto objectBounds = engine::toWorldSpace(*bbox, *pos);
-    if (isInRange(objectBounds, interactable->mType)) {
+    if (isInRange(objectBounds, interactable->mType))
+    {
       return entity;
     }
   }
@@ -182,12 +199,13 @@ ex::Entity currentlyTouchedInteractable(
 }
 
 
-data::LevelHints loadHints(const loader::ResourceLoader& resources) {
+data::LevelHints loadHints(const loader::ResourceLoader& resources)
+{
   const auto text = resources.fileAsText("HELP.MNI");
   return loader::loadHintMessages(text);
 }
 
-}
+} // namespace
 
 
 PlayerInteractionSystem::PlayerInteractionSystem(
@@ -197,8 +215,7 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   IGameServiceProvider* pServices,
   IEntityFactory* pEntityFactory,
   entityx::EventManager* pEvents,
-  const loader::ResourceLoader& resources
-)
+  const loader::ResourceLoader& resources)
   : mpPlayer(pPlayer)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)
@@ -212,13 +229,15 @@ PlayerInteractionSystem::PlayerInteractionSystem(
 
 void PlayerInteractionSystem::updatePlayerInteraction(
   const PlayerInput& input,
-  entityx::EntityManager& es
-) {
-  if (mpPlayer->isDead()) {
+  entityx::EntityManager& es)
+{
+  if (mpPlayer->isDead())
+  {
     return;
   }
 
-  if (auto entity = currentlyTouchedInteractable(es, mpPlayer)) {
+  if (auto entity = currentlyTouchedInteractable(es, mpPlayer))
+  {
     const auto type = entity.component<Interactable>()->mType;
     const auto isHintMachine = type == InteractableType::HintMachine;
 
@@ -226,15 +245,18 @@ void PlayerInteractionSystem::updatePlayerInteraction(
 
     // The hint machine activates on touch, all other interactables require
     // pressing the interact button/key.
-    if (input.mInteract.mWasTriggered || isHintMachine) {
+    if (input.mInteract.mWasTriggered || isHintMachine)
+    {
       performInteraction(es, entity, type);
     }
   }
 }
 
 
-void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
-  if (mpPlayer->isDead()) {
+void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es)
+{
+  if (mpPlayer->isDead())
+  {
     return;
   }
 
@@ -243,8 +265,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
       ex::Entity entity,
       const CollectableItem& collectable,
       const WorldPosition& pos,
-      const BoundingBox& collisionRect
-    ) {
+      const BoundingBox& collisionRect) {
       using namespace data;
 
       auto worldSpaceBbox = collisionRect;
@@ -252,64 +273,76 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
         base::Vector{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
 
       auto playerBBox = mpPlayer->worldSpaceHitBox();
-      if (worldSpaceBbox.intersects(playerBBox)) {
+      if (worldSpaceBbox.intersects(playerBBox))
+      {
         std::optional<data::SoundId> soundToPlay;
 
         const auto playerAtFullHealth = mpPlayerModel->isAtFullHealth();
-        if (auto maybeScore = givenScore(collectable, playerAtFullHealth)) {
+        if (auto maybeScore = givenScore(collectable, playerAtFullHealth))
+        {
           const auto score = *maybeScore;
           assert(score > 0);
           mpPlayerModel->giveScore(score);
 
           soundToPlay = SoundId::ItemPickup;
 
-          if (collectable.mSpawnScoreNumbers) {
+          if (collectable.mSpawnScoreNumbers)
+          {
             spawnScoreNumbers(pos, score, *mpEntityFactory);
           }
         }
 
-        if (collectable.mGivenHealth) {
+        if (collectable.mGivenHealth)
+        {
           assert(*collectable.mGivenHealth > 0);
           mpPlayerModel->giveHealth(*collectable.mGivenHealth);
           soundToPlay = SoundId::HealthPickup;
         }
 
-        if (collectable.mGivenWeapon) {
+        if (collectable.mGivenWeapon)
+        {
           mpPlayerModel->switchToWeapon(*collectable.mGivenWeapon);
           soundToPlay = SoundId::WeaponPickup;
         }
 
-        if (collectable.mGivenItem) {
+        if (collectable.mGivenItem)
+        {
           const auto itemType = *collectable.mGivenItem;
           mpPlayerModel->giveItem(itemType);
 
-          soundToPlay = itemType == InventoryItemType::RapidFire ?
-            SoundId::WeaponPickup :
-            SoundId::ItemPickup;
+          soundToPlay = itemType == InventoryItemType::RapidFire
+            ? SoundId::WeaponPickup
+            : SoundId::ItemPickup;
 
-          if (itemType == InventoryItemType::SpecialHintGlobe) {
+          if (itemType == InventoryItemType::SpecialHintGlobe)
+          {
             showMessage(data::Messages::FoundSpecialHintGlobe);
           }
 
-          if (itemType == InventoryItemType::CloakingDevice) {
+          if (itemType == InventoryItemType::CloakingDevice)
+          {
             showMessage(data::Messages::FoundCloak);
             mpEvents->emit(rigel::events::CloakPickedUp{pos});
           }
 
-          if (itemType == InventoryItemType::RapidFire) {
+          if (itemType == InventoryItemType::RapidFire)
+          {
             mpEvents->emit(rigel::events::RapidFirePickedUp{});
           }
         }
 
-        if (collectable.mShownTutorialMessage) {
+        if (collectable.mShownTutorialMessage)
+        {
           showTutorialMessage(*collectable.mShownTutorialMessage);
         }
 
-        if (collectable.mGivenCollectableLetter) {
+        if (collectable.mGivenCollectableLetter)
+        {
           collectLetter(*collectable.mGivenCollectableLetter, pos);
         }
 
-        if (soundToPlay) {
+        if (soundToPlay)
+        {
           mpServiceProvider->playSound(*soundToPlay);
         }
 
@@ -319,14 +352,15 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es) {
 }
 
 
-void PlayerInteractionSystem::showMessage(const std::string& text) {
+void PlayerInteractionSystem::showMessage(const std::string& text)
+{
   mpEvents->emit(rigel::events::PlayerMessage{text});
 }
 
 
 void PlayerInteractionSystem::showTutorialMessage(
-  const data::TutorialMessageId id
-) {
+  const data::TutorialMessageId id)
+{
   mpEvents->emit(rigel::events::TutorialMessage{id});
 }
 
@@ -334,9 +368,10 @@ void PlayerInteractionSystem::showTutorialMessage(
 void PlayerInteractionSystem::performInteraction(
   entityx::EntityManager& es,
   entityx::Entity interactable,
-  const components::InteractableType type
-) {
-  switch (type) {
+  const components::InteractableType type)
+{
+  switch (type)
+  {
     case InteractableType::Teleporter:
       activateTeleporter(es, interactable);
       break;
@@ -358,15 +393,18 @@ void PlayerInteractionSystem::performInteraction(
 
 void PlayerInteractionSystem::activateTeleporter(
   entityx::EntityManager& es,
-  entityx::Entity interactable
-) {
+  entityx::Entity interactable)
+{
   mpServiceProvider->playSound(data::SoundId::Teleport);
 
   const auto maybeTargetPosition =
     findTeleporterTargetPosition(es, interactable);
-  if (maybeTargetPosition) {
+  if (maybeTargetPosition)
+  {
     mpEvents->emit(rigel::events::PlayerTeleported{*maybeTargetPosition});
-  } else {
+  }
+  else
+  {
     // If there is only one teleporter in the level, using it exits the level.
     // This is used in N7, for example.
     // Probably an oversight, but this does NOT check for radar dishes in the
@@ -378,19 +416,22 @@ void PlayerInteractionSystem::activateTeleporter(
 
 void PlayerInteractionSystem::activateCardReader(
   entityx::EntityManager& es,
-  entityx::Entity interactable
-) {
+  entityx::Entity interactable)
+{
   const auto hasKey =
     mpPlayerModel->hasItem(data::InventoryItemType::CircuitBoard);
 
-  if (hasKey) {
+  if (hasKey)
+  {
     mpPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
     interaction::disableKeyCardSlot(interactable);
     interaction::disableNextForceField(es);
 
     mpPlayer->doInteractionAnimation();
     showMessage(data::Messages::AccessGranted);
-  } else {
+  }
+  else
+  {
     showTutorialMessage(data::TutorialMessageId::AccessCardNeeded);
   }
 }
@@ -398,27 +439,33 @@ void PlayerInteractionSystem::activateCardReader(
 
 void PlayerInteractionSystem::activateKeyHole(
   entityx::EntityManager& es,
-  entityx::Entity interactable
-) {
-  if (mpPlayerModel->hasItem(data::InventoryItemType::BlueKey)) {
+  entityx::Entity interactable)
+{
+  if (mpPlayerModel->hasItem(data::InventoryItemType::BlueKey))
+  {
     mpPlayerModel->removeItem(data::InventoryItemType::BlueKey);
     interaction::disableKeyHole(interactable);
 
     auto door = findFirstMatchInSpawnOrder(es, ActorTag::Type::Door);
-    if (door) {
+    if (door)
+    {
       mpEvents->emit(rigel::events::DoorOpened{door});
     }
 
     mpPlayer->doInteractionAnimation();
     showMessage(data::Messages::OpeningDoor);
-  } else {
+  }
+  else
+  {
     showTutorialMessage(data::TutorialMessageId::KeyNeeded);
   }
 }
 
 
-void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
-  if (!mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe)) {
+void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity)
+{
+  if (!mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe))
+  {
     return;
   }
 
@@ -428,36 +475,39 @@ void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity) {
 
   mpServiceProvider->playSound(data::SoundId::ItemPickup);
   spawnScoreNumbers(
-    machinePosition,
-    HINT_MACHINE_ACTIVATION_SCORE,
-    *mpEntityFactory);
+    machinePosition, HINT_MACHINE_ACTIVATION_SCORE, *mpEntityFactory);
 
   const auto maybeHint =
     mLevelHints.getHint(mSessionId.mEpisode, mSessionId.mLevel);
-  if (maybeHint) {
+  if (maybeHint)
+  {
     showMessage(*maybeHint);
   }
 
   entity.remove<Interactable>();
   entity.remove<BoundingBox>();
   mpEntityFactory->spawnSprite(
-    data::ActorID::Special_hint_globe_icon, machinePosition + HINT_MACHINE_GLOBE_OFFSET);
+    data::ActorID::Special_hint_globe_icon,
+    machinePosition + HINT_MACHINE_GLOBE_OFFSET);
 }
 
 
 void PlayerInteractionSystem::collectLetter(
   const data::CollectableLetterType type,
-  const base::Vector& position
-) {
+  const base::Vector& position)
+{
   using S = data::PlayerModel::LetterCollectionState;
 
   const auto collectionState = mpPlayerModel->addLetter(type);
-  if (collectionState == S::InOrder) {
+  if (collectionState == S::InOrder)
+  {
     mpServiceProvider->playSound(data::SoundId::LettersCollectedCorrectly);
     mpPlayerModel->giveScore(CORRECT_LETTER_COLLECTION_SCORE);
     spawnScoreNumbersForLetterCollectionBonus(*mpEntityFactory, position);
     showTutorialMessage(data::TutorialMessageId::LettersCollectedRightOrder);
-  } else {
+  }
+  else
+  {
     mpServiceProvider->playSound(data::SoundId::ItemPickup);
     mpPlayerModel->giveScore(BASIC_LETTER_COLLECTION_SCORE);
 
@@ -471,10 +521,11 @@ void PlayerInteractionSystem::collectLetter(
     // picked up, instead of only when all letters have been collected.
     spawnFloatingScoreNumber(*mpEntityFactory, ScoreNumberType::S100, position);
 
-    if (collectionState == S::WrongOrder) {
+    if (collectionState == S::WrongOrder)
+    {
       showMessage(data::Messages::LettersCollectedWrongOrder);
     }
   }
 }
 
-}
+} // namespace rigel::game_logic

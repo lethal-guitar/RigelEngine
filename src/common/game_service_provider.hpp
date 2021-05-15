@@ -23,13 +23,18 @@
 #include <filesystem>
 #include <string>
 
-namespace rigel::data { struct SavedGame; }
+namespace rigel::data
+{
+struct SavedGame;
+}
 
 
-namespace rigel {
+namespace rigel
+{
 
 /** Interface for functionality available to game modes */
-struct IGameServiceProvider {
+struct IGameServiceProvider
+{
   virtual ~IGameServiceProvider() = default;
 
   // Blocking calls
@@ -48,4 +53,4 @@ struct IGameServiceProvider {
   virtual const CommandLineOptions& commandLineOptions() const = 0;
 };
 
-}
+} // namespace rigel

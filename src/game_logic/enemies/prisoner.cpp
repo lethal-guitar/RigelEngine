@@ -24,49 +24,52 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 #include "loader/palette.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 const int DEATH_SEQUENCE[] = {5, 5, 6, 7};
 
 const auto DEATH_FRAMES_TO_LIVE = 6;
 
-}
+} // namespace
 
 
 void AggressivePrisoner::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::WorldPosition;
-  using game_logic::components::Shootable;
   using game_logic::components::PlayerDamaging;
+  using game_logic::components::Shootable;
 
   auto& sprite = *entity.component<engine::components::Sprite>();
   auto& shootable = *entity.component<Shootable>();
 
   // See if we want to grab
-  if (!mIsGrabbing) {
+  if (!mIsGrabbing)
+  {
     const auto& position = *entity.component<WorldPosition>();
     const auto& playerPos = s.mpPlayer->orientedPosition();
     const auto playerInRange =
-      position.x - 4 < playerPos.x &&
-      position.x + 7 > playerPos.x;
+      position.x - 4 < playerPos.x && position.x + 7 > playerPos.x;
 
-    if (playerInRange) {
-      const auto wantsToGrab =
-        (d.mpRandomGenerator->gen() / 16) % 2 != 0 &&
+    if (playerInRange)
+    {
+      const auto wantsToGrab = (d.mpRandomGenerator->gen() / 16) % 2 != 0 &&
         s.mpPerFrameState->mIsOddFrame;
-      if (wantsToGrab) {
+      if (wantsToGrab)
+      {
         mIsGrabbing = true;
         mGrabStep = 0;
         sprite.mFramesToRender[1] = 1;
@@ -78,10 +81,12 @@ void AggressivePrisoner::update(
 
   // If we decided to grab, we immediately update accordingly on the
   // same frame (this is how it works in the original game)
-  if (mIsGrabbing) {
+  if (mIsGrabbing)
+  {
     sprite.mFramesToRender[1] = (mGrabStep + 1) % 5;
 
-    if (mGrabStep >= 4) {
+    if (mGrabStep >= 4)
+    {
       mIsGrabbing = false;
       sprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
       shootable.mInvincible = true;
@@ -91,7 +96,8 @@ void AggressivePrisoner::update(
     // Do this *after* checking whether the grab sequence is finished.
     // This is required in order to get exactly the same sequence as in the
     // original game.
-    if (s.mpPerFrameState->mIsOddFrame) {
+    if (s.mpPerFrameState->mIsOddFrame)
+    {
       ++mGrabStep;
     }
   }
@@ -102,15 +108,16 @@ void AggressivePrisoner::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::AutoDestroy;
   using engine::components::Sprite;
   using engine::components::WorldPosition;
 
   auto& sprite = *entity.component<Sprite>();
 
-  if (mIsGrabbing) {
+  if (mIsGrabbing)
+  {
     sprite.mFramesToRender[1] = engine::IGNORE_RENDER_SLOT;
     entity.remove<game_logic::components::PlayerDamaging>();
   }
@@ -119,9 +126,8 @@ void AggressivePrisoner::onKilled(
   entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(DEATH_FRAMES_TO_LIVE));
 
   const auto shotFromLeft = inflictorVelocity.x > 0.0f;
-  const auto debrisMovement = shotFromLeft
-    ? SpriteMovement::FlyUpperRight
-    : SpriteMovement::FlyUpperLeft;
+  const auto debrisMovement =
+    shotFromLeft ? SpriteMovement::FlyUpperRight : SpriteMovement::FlyUpperLeft;
   const auto& position = *entity.component<WorldPosition>();
   spawnMovingEffectSprite(
     *d.mpEntityFactory,
@@ -129,8 +135,7 @@ void AggressivePrisoner::onKilled(
     debrisMovement,
     position);
   d.mpParticles->spawnParticles(
-    position + base::Vector{3, 0},
-    loader::INGAME_PALETTE[5]);
+    position + base::Vector{3, 0}, loader::INGAME_PALETTE[5]);
   d.mpServiceProvider->playSound(data::SoundId::BiologicalEnemyDestroyed);
 
   entity.remove<components::BehaviorController>();
@@ -141,8 +146,8 @@ void PassivePrisoner::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   const auto shakeIronBars = (d.mpRandomGenerator->gen() / 4) % 2 != 0;
 
   // The animation has two frames, 0 is "idle" and 1 is "shaking".
@@ -150,4 +155,4 @@ void PassivePrisoner::update(
   sprite.mFramesToRender[0] = int{shakeIronBars};
 }
 
-}
+} // namespace rigel::game_logic::behaviors

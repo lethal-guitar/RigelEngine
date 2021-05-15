@@ -35,75 +35,77 @@ using S = PlayerModel::LetterCollectionState;
 using ExpectedState = pair<LT, S>;
 
 
-namespace {
+namespace
+{
 
-vector<LT> getLetters(const vector<ExpectedState>& expectations) {
-  return utils::transformed(expectations, [](const auto& pair) {
-    return pair.first;
-  });
+vector<LT> getLetters(const vector<ExpectedState>& expectations)
+{
+  return utils::transformed(
+    expectations, [](const auto& pair) { return pair.first; });
 }
 
 
-vector<S> getStates(const vector<ExpectedState>& expectations) {
-  return utils::transformed(expectations, [](const auto& pair) {
-    return pair.second;
-  });
+vector<S> getStates(const vector<ExpectedState>& expectations)
+{
+  return utils::transformed(
+    expectations, [](const auto& pair) { return pair.second; });
 }
 
 
-vector<S> collectLetters(const vector<LT>& letters) {
+vector<S> collectLetters(const vector<LT>& letters)
+{
   PlayerModel model;
 
-  return utils::transformed(letters, [&model](const auto letter) {
-    return model.addLetter(letter);
-  });
+  return utils::transformed(
+    letters, [&model](const auto letter) { return model.addLetter(letter); });
 }
 
-}
+} // namespace
 
 
-TEST_CASE("Collectable letters") {
+TEST_CASE("Collectable letters")
+{
   auto testIt = [](const vector<ExpectedState>& dataSet) {
     CHECK(getStates(dataSet) == collectLetters(getLetters(dataSet)));
   };
 
-  SECTION("In order") {
-    testIt({
-      {LT::N, S::Incomplete},
-      {LT::U, S::Incomplete},
-      {LT::K, S::Incomplete},
-      {LT::E, S::Incomplete},
-      {LT::M, S::InOrder}
-    });
+  SECTION("In order")
+  {
+    testIt(
+      {{LT::N, S::Incomplete},
+       {LT::U, S::Incomplete},
+       {LT::K, S::Incomplete},
+       {LT::E, S::Incomplete},
+       {LT::M, S::InOrder}});
   }
 
-  SECTION("In order, except last two") {
-    testIt({
-      {LT::N, S::Incomplete},
-      {LT::U, S::Incomplete},
-      {LT::K, S::Incomplete},
-      {LT::M, S::Incomplete},
-      {LT::E, S::WrongOrder}
-    });
+  SECTION("In order, except last two")
+  {
+    testIt(
+      {{LT::N, S::Incomplete},
+       {LT::U, S::Incomplete},
+       {LT::K, S::Incomplete},
+       {LT::M, S::Incomplete},
+       {LT::E, S::WrongOrder}});
   }
 
-  SECTION("Reverse order") {
-    testIt({
-      {LT::M, S::Incomplete},
-      {LT::E, S::Incomplete},
-      {LT::K, S::Incomplete},
-      {LT::U, S::Incomplete},
-      {LT::N, S::WrongOrder}
-    });
+  SECTION("Reverse order")
+  {
+    testIt(
+      {{LT::M, S::Incomplete},
+       {LT::E, S::Incomplete},
+       {LT::K, S::Incomplete},
+       {LT::U, S::Incomplete},
+       {LT::N, S::WrongOrder}});
   }
 
-  SECTION("Random order") {
-    testIt({
-      {LT::K, S::Incomplete},
-      {LT::N, S::Incomplete},
-      {LT::U, S::Incomplete},
-      {LT::M, S::Incomplete},
-      {LT::E, S::WrongOrder}
-    });
+  SECTION("Random order")
+  {
+    testIt(
+      {{LT::K, S::Incomplete},
+       {LT::N, S::Incomplete},
+       {LT::U, S::Incomplete},
+       {LT::M, S::Incomplete},
+       {LT::E, S::WrongOrder}});
   }
 }

@@ -31,9 +31,11 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto CONTAINER_OFFSET = base::Vector{0, -2};
 
@@ -44,6 +46,7 @@ const effects::EffectSpec CARRIER_SELF_DESTRUCT_EFFECT_SPEC[] = {
 };
 
 
+// clang-format off
 const int LAND_ON_GROUND_ANIM[] = { 1, 2, 1 };
 
 const int LOOK_LEFT_RIGHT_ANIM[] = {
@@ -55,24 +58,26 @@ const int LOOK_RIGHT_LEFT_ANIM[] = {
   1, 1, 6, 6, 7, 8, 7, 6, 6, 1, 1, 3, 3, 1, 6, 6, 1, 1, 1, 3,
   4, 5, 4, 3, 3, 3, 4, 5, 4, 3, 1, 1
 };
+// clang-format on
 
 
-void advanceRandomNumberGenerator(GlobalDependencies& d) {
+void advanceRandomNumberGenerator(GlobalDependencies& d)
+{
   // The result isn't used, this is just done in order to exactly mimic
   // how the original game uses the random number generator (since each
   // invocation influences subsequent calls).
   d.mpRandomGenerator->gen();
 }
 
-}
+} // namespace
 
 
 void WatchBot::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine;
   using namespace engine::components;
   using namespace watch_bot;
@@ -87,29 +92,28 @@ void WatchBot::update(
   auto jump = [&]() {
     animationFrame = 0;
 
-    const auto newOrientation = position.x > playerPos.x
-      ? Orientation::Left
-      : Orientation::Right;
+    const auto newOrientation =
+      position.x > playerPos.x ? Orientation::Left : Orientation::Right;
     mState = Jumping{newOrientation};
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Jumping& state) {
       moveHorizontally(
         *d.mpCollisionChecker,
         entity,
         orientation::toMovement(state.mOrientation));
       const auto speed = state.mFramesElapsed < 2 ? 2 : 1;
-      const auto moveResult = moveVertically(
-        *d.mpCollisionChecker,
-        entity,
-        -speed);
+      const auto moveResult =
+        moveVertically(*d.mpCollisionChecker, entity, -speed);
 
       ++state.mFramesElapsed;
 
       const auto collidedWithCeiling = moveResult != MovementResult::Completed;
-      if (collidedWithCeiling || state.mFramesElapsed >= 5) {
+      if (collidedWithCeiling || state.mFramesElapsed >= 5)
+      {
         movingBody.mGravityAffected = true;
         movingBody.mVelocity.y = -0.5f;
         mState = Falling{state.mOrientation};
@@ -123,7 +127,8 @@ void WatchBot::update(
         entity,
         orientation::toMovement(state.mOrientation));
 
-      if (d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+      if (d.mpCollisionChecker->isOnSolidGround(position, bbox))
+      {
         land(entity, d);
       }
     },
@@ -131,11 +136,11 @@ void WatchBot::update(
     [&, this](OnGround& state) {
       const auto randomChoice = d.mpRandomGenerator->gen();
       const auto shouldLookAround =
-        randomChoice % 2 != 0 &&
-        (randomChoice / 32) % 2 != 0;
+        randomChoice % 2 != 0 && (randomChoice / 32) % 2 != 0;
 
       ++state.mFramesElapsed;
-      if (shouldLookAround && state.mFramesElapsed == 1) {
+      if (shouldLookAround && state.mFramesElapsed == 1)
+      {
         // Stop landing animation
         removeSafely<AnimationSequence>(entity);
 
@@ -146,7 +151,8 @@ void WatchBot::update(
         return;
       }
 
-      if (state.mFramesElapsed == 3) {
+      if (state.mFramesElapsed == 3)
+      {
         jump();
       }
     },
@@ -154,25 +160,29 @@ void WatchBot::update(
     [&, this](LookingAround& state) {
       // TODO: Is there a way to use AnimationSequence here, but still only
       // update on odd frames?
-      if (state.mFramesElapsed < 32) {
+      if (state.mFramesElapsed < 32)
+      {
         const auto sequence = state.mOrientation == Orientation::Left
           ? LOOK_LEFT_RIGHT_ANIM
           : LOOK_RIGHT_LEFT_ANIM;
         animationFrame = sequence[state.mFramesElapsed];
       }
 
-      if (s.mpPerFrameState->mIsOddFrame) {
+      if (s.mpPerFrameState->mIsOddFrame)
+      {
         ++state.mFramesElapsed;
       }
 
-      if (state.mFramesElapsed == 33) {
+      if (state.mFramesElapsed == 33)
+      {
         animationFrame = 1;
         advanceRandomNumberGenerator(d);
-      } else if (state.mFramesElapsed == 34) {
+      }
+      else if (state.mFramesElapsed == 34)
+      {
         jump();
       }
-    }
-  );
+    });
 
   engine::synchronizeBoundingBoxToSprite(entity);
 }
@@ -182,29 +192,26 @@ void WatchBot::onCollision(
   GlobalDependencies& d,
   GlobalState& s,
   const engine::events::CollidedWithWorld&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace watch_bot;
 
-  base::match(mState,
-    [&, this](const Falling& state) {
-      land(entity, d);
-    },
+  base::match(
+    mState,
+    [&, this](const Falling& state) { land(entity, d); },
 
-    [](const auto&) {}
-  );
+    [](const auto&) {});
 }
 
 
-void WatchBot::land(
-  entityx::Entity entity,
-  GlobalDependencies& d
-) {
+void WatchBot::land(entityx::Entity entity, GlobalDependencies& d)
+{
   using namespace engine::components;
   using namespace watch_bot;
 
   const auto isOnScreen = entity.component<Active>()->mIsOnScreen;
-  if (isOnScreen) {
+  if (isOnScreen)
+  {
     d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
   }
 
@@ -221,8 +228,8 @@ void WatchBotCarrier::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
@@ -235,9 +242,10 @@ void WatchBotCarrier::update(
   };
 
   auto move = [&, this](const int movement) {
-    const auto result = engine::moveHorizontally(
-      *d.mpCollisionChecker, entity, movement);
-    if (result != engine::MovementResult::Completed) {
+    const auto result =
+      engine::moveHorizontally(*d.mpCollisionChecker, entity, movement);
+    if (result != engine::MovementResult::Completed)
+    {
       mState = State::ReleasingPayload;
     }
   };
@@ -260,19 +268,27 @@ void WatchBotCarrier::update(
   };
 
 
-  switch (mState) {
+  switch (mState)
+  {
     case State::ApproachingPlayer:
-      if (playerInRange()) {
+      if (playerInRange())
+      {
         mState = State::ReleasingPayload;
-      } else {
+      }
+      else
+      {
         const auto shouldMoveRight = position.x < playerPos.x;
-        if (shouldMoveRight) {
+        if (shouldMoveRight)
+        {
           // This is asymmetrical with the else branch, but it's like this
           // in the original code.
-          if (position.x + 3 < playerPos.x) {
+          if (position.x + 3 < playerPos.x)
+          {
             move(1);
           }
-        } else {
+        }
+        else
+        {
           move(-1);
         }
       }
@@ -280,19 +296,25 @@ void WatchBotCarrier::update(
 
     case State::ReleasingPayload:
       ++mFramesElapsed;
-      if (mFramesElapsed == 6) {
+      if (mFramesElapsed == 6)
+      {
         animationFrame = 1;
         releasePayload();
-      } else if (mFramesElapsed == 20) {
+      }
+      else if (mFramesElapsed == 20)
+      {
         animationFrame = 0;
-      } else if (mFramesElapsed == 34) {
+      }
+      else if (mFramesElapsed == 34)
+      {
         explode();
         entity.destroy();
       }
       break;
   }
 
-  if (entity) {
+  if (entity)
+  {
     engine::synchronizeBoundingBoxToSprite(entity);
   }
 }
@@ -302,20 +324,22 @@ void WatchBotContainer::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<Sprite>();
 
 
-  if (mFramesElapsed < 10) {
+  if (mFramesElapsed < 10)
+  {
     engine::moveVertically(*d.mpCollisionChecker, entity, -1);
   }
 
   ++mFramesElapsed;
-  if (mFramesElapsed == 25) {
+  if (mFramesElapsed == 25)
+  {
     sprite.flashWhite();
     sprite.mFramesToRender[0] = engine::IGNORE_RENDER_SLOT;
 
@@ -331,10 +355,11 @@ void WatchBotContainer::update(
       position);
     d.mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
 
-    d.mpEntityFactory->spawnActor(data::ActorID::Watchbot, position + base::Vector{1, 3});
+    d.mpEntityFactory->spawnActor(
+      data::ActorID::Watchbot, position + base::Vector{1, 3});
 
     entity.destroy();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

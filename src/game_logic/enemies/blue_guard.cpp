@@ -22,21 +22,23 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 #include <optional>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 using namespace engine::components;
 using namespace engine::orientation;
 using engine::CollisionChecker;
 
 
-namespace {
+namespace
+{
 
 const auto SPRITE_ORIENTATION_OFFSET = 6;
 const auto TYPING_BASE_FRAME = 12;
@@ -45,27 +47,26 @@ const auto GUARD_WIDTH = 3;
 
 bool playerInNoticeableRange(
   const WorldPosition& myPosition,
-  const WorldPosition& playerPosition
-) {
+  const WorldPosition& playerPosition)
+{
   const auto playerCenterX = playerPosition.x + 1;
-  const auto myCenterX = myPosition.x + GUARD_WIDTH/2;
+  const auto myCenterX = myPosition.x + GUARD_WIDTH / 2;
   const auto centerToCenterDistance = std::abs(playerCenterX - myCenterX);
 
-  return
-    myPosition.y == playerPosition.y &&
-    centerToCenterDistance <= 6;
+  return myPosition.y == playerPosition.y && centerToCenterDistance <= 6;
 }
 
 
 bool playerVisible(
   BlueGuard& state,
   const WorldPosition& myPosition,
-  const Player& player
-) {
+  const Player& player)
+{
   const auto playerX = player.position().x;
   const auto playerY = player.position().y;
   const auto facingLeft = state.mOrientation == Orientation::Left;
 
+  // clang-format off
   const auto hasLineOfSightHorizontal =
     (facingLeft && myPosition.x >= playerX) ||
     (!facingLeft && myPosition.x <= playerX);
@@ -78,10 +79,12 @@ bool playerVisible(
     !player.isCloaked() &&
     hasLineOfSightHorizontal &&
     hasLineOfSightVertical;
+  // clang-format on
 }
 
 
-base::Vector offsetForShot(const BlueGuard& state) {
+base::Vector offsetForShot(const BlueGuard& state)
+{
   const auto offsetY = state.mIsCrouched ? -1 : -2;
   const auto facingLeft = state.mOrientation == Orientation::Left;
   const auto offsetX = facingLeft ? -1 : 3;
@@ -89,15 +92,15 @@ base::Vector offsetForShot(const BlueGuard& state) {
   return {offsetX, offsetY};
 }
 
-}
+} // namespace
 
 
 void BlueGuard::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   const auto& position = *entity.component<WorldPosition>();
   auto& sprite = *entity.component<Sprite>();
 
@@ -113,54 +116,64 @@ void BlueGuard::update(
     //
     // This bug makes it quite easy to kill the guard protecting the key
     // card in level L1 without taking damage.
-    const auto canAttack =
-      playerVisible(*this, position, *s.mpPlayer) &&
+    const auto canAttack = playerVisible(*this, position, *s.mpPlayer) &&
       (!mTypingInterruptedByAttack || s.mpPlayer->position().x < position.x);
     mTypingInterruptedByAttack = false;
 
-    if (canAttack) {
+    if (canAttack)
+    {
       // Change stance if necessary
-      if (mStanceChangeCountdown <= 0) {
+      if (mStanceChangeCountdown <= 0)
+      {
         const auto playerCrouched = s.mpPlayer->isCrouching();
         const auto playerBelow = s.mpPlayer->position().y > position.y;
         mIsCrouched = playerCrouched || playerBelow;
 
-        if (mIsCrouched) {
+        if (mIsCrouched)
+        {
           mStanceChangeCountdown = d.mpRandomGenerator->gen() % 16;
         }
-      } else {
+      }
+      else
+      {
         --mStanceChangeCountdown;
       }
 
       // Fire gun
       const auto facingLeft = mOrientation == Orientation::Left;
       const auto wantsToShoot = (d.mpRandomGenerator->gen() % 8) == 0;
-      if (wantsToShoot && engine::isOnScreen(entity)) {
+      if (wantsToShoot && engine::isOnScreen(entity))
+      {
         d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
         spawnEnemyLaserShot(
-          *d.mpEntityFactory,
-          position + offsetForShot(*this),
-          mOrientation);
+          *d.mpEntityFactory, position + offsetForShot(*this), mOrientation);
       }
 
       // Update sprite
-      if (wantsToShoot && !mIsCrouched) {
+      if (wantsToShoot && !mIsCrouched)
+      {
         // Show gun recoil animation in non-crouched state
         sprite.mFramesToRender[0] = facingLeft ? 15 : 14;
-      } else {
+      }
+      else
+      {
         const auto animationFrame = mIsCrouched ? 5 : 4;
         const auto orientationOffset =
           facingLeft ? SPRITE_ORIENTATION_OFFSET : 0;
         sprite.mFramesToRender[0] = animationFrame + orientationOffset;
       }
-    } else {
+    }
+    else
+    {
       mStanceChangeCountdown = 0;
 
-      if (s.mpPerFrameState->mIsOddFrame) {
+      if (s.mpPerFrameState->mIsOddFrame)
+      {
         const auto walkedSuccessfully = walkOneStep();
 
         ++mStepsWalked;
-        if (mStepsWalked >= 20 || !walkedSuccessfully) {
+        if (mStepsWalked >= 20 || !walkedSuccessfully)
+        {
           mOrientation = opposite(mOrientation);
 
           // After changing orientation, walk one step in the new direction on
@@ -181,14 +194,18 @@ void BlueGuard::update(
   };
 
 
-  if (mTypingOnTerminal) {
+  if (mTypingOnTerminal)
+  {
     const auto noticesPlayer =
       playerInNoticeableRange(position, s.mpPlayer->position());
 
-    if (noticesPlayer) {
+    if (noticesPlayer)
+    {
       stopTyping(s, entity);
       updatePatrolling();
-    } else {
+    }
+    else
+    {
       // Animate typing on terminal
       const auto skipOneMove = (d.mpRandomGenerator->gen() / 4) % 2 != 0;
       const auto moveHand = s.mpPerFrameState->mIsOddFrame && !skipOneMove;
@@ -196,7 +213,9 @@ void BlueGuard::update(
 
       sprite.mFramesToRender[0] = TYPING_BASE_FRAME + typingFrameOffset;
     }
-  } else {
+  }
+  else
+  {
     updatePatrolling();
   }
 
@@ -208,23 +227,23 @@ void BlueGuard::onHit(
   GlobalDependencies& d,
   GlobalState& s,
   const base::Point<float>& inflictorVelocity,
-  entityx::Entity entity
-) {
-  if (mTypingOnTerminal) {
+  entityx::Entity entity)
+{
+  if (mTypingOnTerminal)
+  {
     stopTyping(s, entity);
     mTypingInterruptedByAttack = true;
   }
 }
 
 
-void BlueGuard::stopTyping(GlobalState& s, entityx::Entity entity) {
+void BlueGuard::stopTyping(GlobalState& s, entityx::Entity entity)
+{
   mTypingOnTerminal = false;
 
   const auto& position = *entity.component<WorldPosition>();
   const auto playerX = s.mpPlayer->orientedPosition().x;
-  mOrientation = position.x <= playerX
-    ? Orientation::Right
-    : Orientation::Left;
+  mOrientation = position.x <= playerX ? Orientation::Right : Orientation::Left;
 }
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -27,61 +27,66 @@
 #include "ui/menu_navigation.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
 using namespace std;
 
 using ui::DukeScriptRunner;
 
 
-namespace {
+namespace
+{
 
 
 const std::array<data::Difficulty, 3> DIFFICULTY_MAPPING{
   data::Difficulty::Easy,
   data::Difficulty::Medium,
-  data::Difficulty::Hard
-};
+  data::Difficulty::Hard};
 
 
-bool abortedByUser(const DukeScriptRunner::ExecutionResult& result) {
-  return
-    result.mTerminationType ==
+bool abortedByUser(const DukeScriptRunner::ExecutionResult& result)
+{
+  return result.mTerminationType ==
     DukeScriptRunner::ScriptTerminationType::AbortedByUser;
 }
 
-}
+} // namespace
 
 
 MenuMode::MenuMode(Context context)
   : mContext(context)
 {
   mContext.mpServiceProvider->playMusic("DUKEIIA.IMF");
-  runScript(mContext,"Main_Menu");
+  runScript(mContext, "Main_Menu");
 }
 
 
-void MenuMode::handleEvent(const SDL_Event& event) {
-  if (mOptionsMenu) {
+void MenuMode::handleEvent(const SDL_Event& event)
+{
+  if (mOptionsMenu)
+  {
     mOptionsMenu->handleEvent(event);
 
     // Options menu blocks all input
     return;
   }
 
-  if (mMenuState == MenuState::AskIfQuit && ui::isQuitConfirmButton(event)) {
+  if (mMenuState == MenuState::AskIfQuit && ui::isQuitConfirmButton(event))
+  {
     mContext.mpServiceProvider->scheduleGameQuit();
     return;
   }
 
-  if (mMenuState == MenuState::MainMenu) {
+  if (mMenuState == MenuState::MainMenu)
+  {
     const auto maybeIndex = mContext.mpScriptRunner->currentPageIndex();
     const auto optionsMenuSelected = maybeIndex && *maybeIndex == 2;
     if (
       optionsMenuSelected &&
       (ui::isConfirmButton(event) ||
-       (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE))
-    ) {
+       (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)))
+    {
       mOptionsMenu = ui::OptionsMenu{
         mContext.mpUserProfile,
         mContext.mpServiceProvider,
@@ -96,35 +101,43 @@ void MenuMode::handleEvent(const SDL_Event& event) {
 
 std::unique_ptr<GameMode> MenuMode::updateAndRender(
   const engine::TimeDelta dt,
-  const std::vector<SDL_Event>& events
-) {
-  for (const auto& event : events) {
+  const std::vector<SDL_Event>& events)
+{
+  for (const auto& event : events)
+  {
     handleEvent(event);
   }
 
-  if (mOptionsMenu) {
+  if (mOptionsMenu)
+  {
     mContext.mpScriptRunner->updateAndRender(0.0);
     mOptionsMenu->updateAndRender(dt);
 
-    if (mOptionsMenu->isFinished()) {
+    if (mOptionsMenu->isFinished())
+    {
       mOptionsMenu = std::nullopt;
-    } else {
+    }
+    else
+    {
       return {};
     }
   }
 
   mContext.mpScriptRunner->updateAndRender(dt);
 
-  if (mMenuState == MenuState::ShowHiscores) {
+  if (mMenuState == MenuState::ShowHiscores)
+  {
     ui::drawHighScoreList(mContext, mChosenEpisode);
   }
 
-  if (mContext.mpScriptRunner->hasFinishedExecution()) {
+  if (mContext.mpScriptRunner->hasFinishedExecution())
+  {
     const auto result = mContext.mpScriptRunner->result();
     assert(result);
 
     using STT = ui::DukeScriptRunner::ScriptTerminationType;
-    if (result->mTerminationType == STT::TimedOut) {
+    if (result->mTerminationType == STT::TimedOut)
+    {
       return std::make_unique<IntroDemoLoopMode>(
         mContext, IntroDemoLoopMode::Type::Regular);
     }
@@ -136,7 +149,8 @@ std::unique_ptr<GameMode> MenuMode::updateAndRender(
 }
 
 
-void MenuMode::enterMainMenu() {
+void MenuMode::enterMainMenu()
+{
   mChosenEpisode = 0;
 
   mMenuState = MenuState::MainMenu;
@@ -145,17 +159,22 @@ void MenuMode::enterMainMenu() {
 
 
 std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
-  const ui::DukeScriptRunner::ExecutionResult& result
-) {
-  switch (mMenuState) {
+  const ui::DukeScriptRunner::ExecutionResult& result)
+{
+  switch (mMenuState)
+  {
     case MenuState::MainMenu:
-      if (abortedByUser(result)) {
+      if (abortedByUser(result))
+      {
         runScript(mContext, "Quit_Select");
         mMenuState = MenuState::AskIfQuit;
-      } else {
+      }
+      else
+      {
         assert(result.mSelectedPage);
 
-        switch (*result.mSelectedPage) {
+        switch (*result.mSelectedPage)
+        {
           case 0:
             runScript(mContext, "Episode_Select");
             mMenuState = MenuState::SelectNewGameEpisode;
@@ -167,9 +186,12 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
             break;
 
           case 3:
-            if (mContext.mpServiceProvider->isSharewareVersion()) {
+            if (mContext.mpServiceProvider->isSharewareVersion())
+            {
               runScript(mContext, "Ordering_Info");
-            } else {
+            }
+            else
+            {
               runScript(mContext, "V4ORDER");
             }
             mMenuState = MenuState::OrderingInformation;
@@ -208,16 +230,23 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
       break;
 
     case MenuState::SelectNewGameEpisode:
-      if (abortedByUser(result)) {
+      if (abortedByUser(result))
+      {
         enterMainMenu();
-      } else {
+      }
+      else
+      {
         assert(result.mSelectedPage);
         const auto chosenEpisode = *result.mSelectedPage;
 
-        if (mContext.mpServiceProvider->isSharewareVersion() && chosenEpisode > 0) {
+        if (
+          mContext.mpServiceProvider->isSharewareVersion() && chosenEpisode > 0)
+        {
           runScript(mContext, "No_Can_Order");
           mMenuState = MenuState::EpisodeNotAvailableMessage;
-        } else {
+        }
+        else
+        {
           mChosenEpisode = chosenEpisode;
 
           runScript(mContext, "Skill_Select");
@@ -227,21 +256,23 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
       break;
 
     case MenuState::SelectNewGameSkill:
-      if (abortedByUser(result)) {
+      if (abortedByUser(result))
+      {
         runScript(mContext, "Episode_Select");
         mMenuState = MenuState::SelectNewGameEpisode;
-      } else {
+      }
+      else
+      {
         assert(result.mSelectedPage);
         const auto chosenSkill = *result.mSelectedPage;
-        if (chosenSkill < 0 || chosenSkill >= 3) {
+        if (chosenSkill < 0 || chosenSkill >= 3)
+        {
           throw std::invalid_argument("Invalid skill index");
         }
 
         return std::make_unique<GameSessionMode>(
           data::GameSessionId{
-            mChosenEpisode,
-            0,
-            DIFFICULTY_MAPPING[chosenSkill]},
+            mChosenEpisode, 0, DIFFICULTY_MAPPING[chosenSkill]},
           mContext);
       }
       break;
@@ -257,23 +288,31 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
       break;
 
     case MenuState::RestoreGame:
-      if (abortedByUser(result)) {
+      if (abortedByUser(result))
+      {
         enterMainMenu();
-      } else {
+      }
+      else
+      {
         assert(result.mSelectedPage);
         const auto slotIndex = *result.mSelectedPage;
         const auto& slot = mContext.mpUserProfile->mSaveSlots[slotIndex];
-        if (slot) {
+        if (slot)
+        {
           if (
             mContext.mpServiceProvider->isSharewareVersion() &&
-            slot->mSessionId.needsRegisteredVersion()
-          ) {
+            slot->mSessionId.needsRegisteredVersion())
+          {
             runScript(mContext, "No_Can_Order");
             mMenuState = MenuState::NoSavedGameInSlotMessage;
-          } else {
+          }
+          else
+          {
             return std::make_unique<GameSessionMode>(*slot, mContext);
           }
-        } else {
+        }
+        else
+        {
           runScript(mContext, "No_Game_Restore");
           mMenuState = MenuState::NoSavedGameInSlotMessage;
         }
@@ -286,11 +325,15 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
       break;
 
     case MenuState::ChooseInstructionsOrStory:
-      if (abortedByUser(result)) {
+      if (abortedByUser(result))
+      {
         enterMainMenu();
-      } else {
+      }
+      else
+      {
         assert(result.mSelectedPage);
-        switch (*result.mSelectedPage) {
+        switch (*result.mSelectedPage)
+        {
           case 0:
             runScript(mContext, "&Instructions");
             mMenuState = MenuState::Instructions;
@@ -305,16 +348,23 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
       break;
 
     case MenuState::SelectHighscoresEpisode:
-      if (abortedByUser(result)) {
+      if (abortedByUser(result))
+      {
         enterMainMenu();
-      } else {
+      }
+      else
+      {
         assert(result.mSelectedPage);
         const auto chosenEpisode = *result.mSelectedPage;
 
-        if (mContext.mpServiceProvider->isSharewareVersion() && chosenEpisode > 0) {
+        if (
+          mContext.mpServiceProvider->isSharewareVersion() && chosenEpisode > 0)
+        {
           runScript(mContext, "No_Can_Order");
           mMenuState = MenuState::EpisodeNotAvailableMessageHighScores;
-        } else {
+        }
+        else
+        {
           ui::setupHighScoreListDisplay(mContext, chosenEpisode);
           mChosenEpisode = chosenEpisode;
           mMenuState = MenuState::ShowHiscores;
@@ -335,4 +385,4 @@ std::unique_ptr<GameMode> MenuMode::navigateToNextMenu(
   return {};
 }
 
-}
+} // namespace rigel

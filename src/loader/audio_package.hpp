@@ -24,11 +24,13 @@
 #include <cstdint>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 class LeStreamReader;
 
-class AudioPackage {
+class AudioPackage
+{
 public:
   static constexpr auto AUDIO_DICT_FILE = "AUDIOHED.MNI";
   static constexpr auto AUDIO_DATA_FILE = "AUDIOT.MNI";
@@ -40,7 +42,8 @@ public:
   data::AudioBuffer loadAdlibSound(data::SoundId id) const;
 
 private:
-  struct AdlibSound {
+  struct AdlibSound
+  {
     explicit AdlibSound(LeStreamReader& reader);
 
     std::uint8_t mOctave = 0;
@@ -55,4 +58,4 @@ private:
 };
 
 
-}
+} // namespace rigel::loader

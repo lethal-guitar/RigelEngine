@@ -24,36 +24,38 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
-#include "game_logic/ientity_factory.hpp"
 #include "game_logic/global_dependencies.hpp"
+#include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
 constexpr auto OFFSET_TO_TARGET = base::Vector{-4, -4};
 constexpr auto PROJECTILE_OFFSET_TO_TARGET = base::Vector{1, -1};
 constexpr auto SHOT_OFFSET = base::Vector{4, 2};
 
-}
+} // namespace
 
 
 void BossEpisode4::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::WorldPosition;
 
   auto& position = *entity.component<WorldPosition>();
-  //auto& sprite = *entity.component<Sprite>();
   const auto& playerPos = s.mpPlayer->orientedPosition();
 
   auto moveTowardsPlayer = [&]() {
-    if (!s.mpPerFrameState->mIsOddFrame) {
+    if (!s.mpPerFrameState->mIsOddFrame)
+    {
       return false;
     }
 
@@ -67,25 +69,28 @@ void BossEpisode4::update(
 
   auto fireShot = [&]() {
     d.mpEntityFactory->spawnActor(
-      data::ActorID::BOSS_Episode_4_projectile,
-      position + SHOT_OFFSET);
+      data::ActorID::BOSS_Episode_4_projectile, position + SHOT_OFFSET);
   };
 
 
-  if (!mHasBeenSighted) {
+  if (!mHasBeenSighted)
+  {
     d.mpEvents->emit(rigel::events::BossActivated{entity});
     mHasBeenSighted = true;
   }
 
-  if (mCoolDownFrames > 0) {
+  if (mCoolDownFrames > 0)
+  {
     --mCoolDownFrames;
     return;
   }
 
-  if (moveTowardsPlayer()) {
+  if (moveTowardsPlayer())
+  {
     ++mFramesSinceLastShot;
 
-    if (mFramesSinceLastShot == 12) {
+    if (mFramesSinceLastShot == 12)
+    {
       mFramesSinceLastShot = 0;
       mCoolDownFrames = 12;
       fireShot();
@@ -98,8 +103,8 @@ void BossEpisode4::onKilled(
   GlobalDependencies& d,
   GlobalState&,
   const base::Point<float>&,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   d.mpEvents->emit(rigel::events::BossDestroyed{entity});
 }
 
@@ -108,8 +113,8 @@ void BossEpisode4Projectile::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::AutoDestroy;
   using engine::components::BoundingBox;
   using engine::components::WorldPosition;
@@ -118,9 +123,12 @@ void BossEpisode4Projectile::update(
   const auto& bbox = *entity.component<BoundingBox>();
   const auto& playerPos = s.mpPlayer->orientedPosition();
 
-  if (mFramesElapsed < 8) {
+  if (mFramesElapsed < 8)
+  {
     ++mFramesElapsed;
-  } else if (d.mpRandomGenerator->gen() % 4 != 0) {
+  }
+  else if (d.mpRandomGenerator->gen() % 4 != 0)
+  {
     const auto targetPosition = playerPos + PROJECTILE_OFFSET_TO_TARGET;
     const auto movementVec = targetPosition - position;
     position +=
@@ -128,13 +136,12 @@ void BossEpisode4Projectile::update(
   }
 
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);
-  if (s.mpPlayer->worldSpaceHitBox().intersects(worldSpaceBbox)) {
+  if (s.mpPlayer->worldSpaceHitBox().intersects(worldSpaceBbox))
+  {
     spawnOneShotSprite(
-      *d.mpEntityFactory,
-      data::ActorID::Explosion_FX_1,
-      position);
+      *d.mpEntityFactory, data::ActorID::Explosion_FX_1, position);
     entity.assign<AutoDestroy>(AutoDestroy::afterTimeout(0));
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

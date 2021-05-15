@@ -25,11 +25,12 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::player {
+namespace rigel::game_logic::player
+{
 
+using engine::toWorldSpace;
 using engine::components::BoundingBox;
 using engine::components::WorldPosition;
-using engine::toWorldSpace;
 using game_logic::components::PlayerDamaging;
 
 
@@ -39,8 +40,10 @@ DamageSystem::DamageSystem(Player* pPlayer)
 }
 
 
-void DamageSystem::update(entityx::EntityManager& es) {
-  if (mpPlayer->isDead()) {
+void DamageSystem::update(entityx::EntityManager& es)
+{
+  if (mpPlayer->isDead())
+  {
     return;
   }
 
@@ -50,23 +53,27 @@ void DamageSystem::update(entityx::EntityManager& es) {
       entityx::Entity entity,
       const PlayerDamaging& damage,
       const BoundingBox& boundingBox,
-      const WorldPosition& position
-    ) {
+      const WorldPosition& position) {
       const auto bbox = toWorldSpace(boundingBox, position);
       const auto hasCollision = bbox.intersects(playerBBox);
 
-      if (hasCollision) {
-        if (damage.mIsFatal) {
+      if (hasCollision)
+      {
+        if (damage.mIsFatal)
+        {
           mpPlayer->takeFatalDamage();
-        } else {
+        }
+        else
+        {
           mpPlayer->takeDamage(damage.mAmount);
         }
 
-        if (damage.mDestroyOnContact) {
+        if (damage.mDestroyOnContact)
+        {
           entity.destroy();
         }
       }
     });
 }
 
-}
+} // namespace rigel::game_logic::player

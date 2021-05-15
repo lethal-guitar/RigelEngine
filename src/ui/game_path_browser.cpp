@@ -26,7 +26,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
 {
@@ -47,8 +48,7 @@ std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
     int windowHeight = 0;
     SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
     folderBrowser.SetWindowSize(
-      base::round(windowWidth * 0.64f),
-      base::round(windowHeight * 0.64f));
+      base::round(windowWidth * 0.64f), base::round(windowHeight * 0.64f));
   }
 
   folderBrowser.Open();
@@ -79,28 +79,34 @@ std::filesystem::path runFolderBrowser(SDL_Window* pWindow)
 }
 
 
-void showErrorMessage(SDL_Window* pWindow, const std::string& error) {
+void showErrorMessage(SDL_Window* pWindow, const std::string& error)
+{
   SDL_Event event;
   auto boxIsVisible = true;
   auto firstTime = true;
 
-  while (boxIsVisible) {
-    while (SDL_PollEvent(&event)) {
+  while (boxIsVisible)
+  {
+    while (SDL_PollEvent(&event))
+    {
       ui::imgui_integration::handleEvent(event);
     }
 
     glClear(GL_COLOR_BUFFER_BIT);
     ui::imgui_integration::beginFrame(pWindow);
 
-    if (firstTime) {
+    if (firstTime)
+    {
       firstTime = false;
       ImGui::OpenPopup("Error!");
     }
 
-    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, 0)) {
+    if (ImGui::BeginPopupModal("Error!", &boxIsVisible, 0))
+    {
       ImGui::Text("%s", error.c_str());
 
-      if (ImGui::Button("Ok")) {
+      if (ImGui::Button("Ok"))
+      {
         boxIsVisible = false;
       }
 
@@ -112,4 +118,4 @@ void showErrorMessage(SDL_Window* pWindow, const std::string& error) {
   }
 }
 
-}
+} // namespace rigel::ui

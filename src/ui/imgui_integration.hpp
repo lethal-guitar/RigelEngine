@@ -26,7 +26,8 @@ RIGEL_RESTORE_WARNINGS
 #include <optional>
 
 
-namespace rigel::ui::imgui_integration {
+namespace rigel::ui::imgui_integration
+{
 
 void init(
   SDL_Window* pWindow,
@@ -38,4 +39,4 @@ bool handleEvent(const SDL_Event& event);
 void beginFrame(SDL_Window* pWindow);
 void endFrame();
 
-}
+} // namespace rigel::ui::imgui_integration

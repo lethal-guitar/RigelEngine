@@ -23,15 +23,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct DyingBoss {
+struct DyingBoss
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -41,4 +44,4 @@ struct DyingBoss {
   int mFramesElapsed;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

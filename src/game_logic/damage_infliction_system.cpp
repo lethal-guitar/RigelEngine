@@ -23,7 +23,8 @@
 #include "engine/visual_components.hpp"
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
 namespace ex = entityx;
 
@@ -37,22 +38,23 @@ using game_logic::components::DamageInflicting;
 using game_logic::components::Shootable;
 
 
-namespace {
+namespace
+{
 
-auto extractVelocity(entityx::Entity entity) {
+auto extractVelocity(entityx::Entity entity)
+{
   return entity.has_component<MovingBody>()
     ? entity.component<MovingBody>()->mVelocity
     : base::Point<float>{};
 }
 
-}
+} // namespace
 
 
 DamageInflictionSystem::DamageInflictionSystem(
   data::PlayerModel* pPlayerModel,
   IGameServiceProvider* pServiceProvider,
-  entityx::EventManager* pEvents
-)
+  entityx::EventManager* pEvents)
   : mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServiceProvider)
   , mpEvents(pEvents)
@@ -60,22 +62,22 @@ DamageInflictionSystem::DamageInflictionSystem(
 }
 
 
-void DamageInflictionSystem::update(ex::EntityManager& es) {
+void DamageInflictionSystem::update(ex::EntityManager& es)
+{
   es.each<DamageInflicting, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity inflictorEntity,
       DamageInflicting& damage,
       const WorldPosition& inflictorPosition,
-      const BoundingBox& bbox
-    ) {
+      const BoundingBox& bbox) {
       const auto inflictorBbox = engine::toWorldSpace(bbox, inflictorPosition);
 
       ex::ComponentHandle<Shootable> shootable;
       ex::ComponentHandle<WorldPosition> shootablePos;
       ex::ComponentHandle<BoundingBox> shootableBboxLocal;
       for (auto shootableEntity : es.entities_with_components(
-        shootable, shootablePos, shootableBboxLocal)
-      ) {
+             shootable, shootablePos, shootableBboxLocal))
+      {
         const auto shootableBbox =
           engine::toWorldSpace(*shootableBboxLocal, *shootablePos);
 
@@ -83,15 +85,18 @@ void DamageInflictionSystem::update(ex::EntityManager& es) {
           shootableEntity.has_component<Active>() &&
           shootableEntity.component<Active>()->mIsOnScreen;
 
+        // clang-format off
         if (
           shootableBbox.intersects(inflictorBbox) &&
           !shootable->mInvincible &&
-          (shootableOnScreen || shootable->mCanBeHitWhenOffscreen)
-        ) {
-          const auto destroyOnContact = damage.mDestroyOnContact ||
-            shootable->mAlwaysConsumeInflictor;
+          (shootableOnScreen || shootable->mCanBeHitWhenOffscreen))
+        // clang-format on
+        {
+          const auto destroyOnContact =
+            damage.mDestroyOnContact || shootable->mAlwaysConsumeInflictor;
           inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
-          if (destroyOnContact) {
+          if (destroyOnContact)
+          {
             break;
           }
         }
@@ -104,41 +109,51 @@ void DamageInflictionSystem::inflictDamage(
   entityx::Entity inflictorEntity,
   DamageInflicting& damage,
   entityx::Entity shootableEntity,
-  Shootable& shootable
-) {
+  Shootable& shootable)
+{
   const auto inflictorVelocity = extractVelocity(inflictorEntity);
-  if (damage.mDestroyOnContact || shootable.mAlwaysConsumeInflictor) {
+  if (damage.mDestroyOnContact || shootable.mAlwaysConsumeInflictor)
+  {
     inflictorEntity.destroy();
-  } else {
+  }
+  else
+  {
     damage.mHasCausedDamage = true;
   }
 
   shootable.mHealth -= damage.mAmount;
-  if (shootable.mHealth <= 0) {
-    mpEvents->emit(
-      events::ShootableKilled{shootableEntity, inflictorVelocity});
+  if (shootable.mHealth <= 0)
+  {
+    mpEvents->emit(events::ShootableKilled{shootableEntity, inflictorVelocity});
     // Event listeners mustn't remove the shootable component
     assert(shootableEntity.has_component<Shootable>());
 
     mpPlayerModel->giveScore(shootable.mGivenScore);
 
-    if (shootable.mDestroyWhenKilled) {
+    if (shootable.mDestroyWhenKilled)
+    {
       shootableEntity.destroy();
-    } else {
+    }
+    else
+    {
       shootableEntity.remove<Shootable>();
     }
-  } else {
+  }
+  else
+  {
     mpEvents->emit(
       events::ShootableDamaged{shootableEntity, inflictorVelocity});
 
-    if (shootable.mEnableHitFeedback) {
+    if (shootable.mEnableHitFeedback)
+    {
       mpServiceProvider->playSound(data::SoundId::EnemyHit);
 
-      if (shootableEntity.has_component<Sprite>()) {
+      if (shootableEntity.has_component<Sprite>())
+      {
         shootableEntity.component<Sprite>()->flashWhite();
       }
     }
   }
 }
 
-}
+} // namespace rigel::game_logic

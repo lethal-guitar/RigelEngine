@@ -17,19 +17,22 @@
 #pragma once
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 constexpr auto NUM_EPISODES = 4;
 constexpr auto NUM_LEVELS_PER_EPISODE = 8;
 
-enum class Difficulty {
+enum class Difficulty
+{
   Easy = 0,
   Medium = 1,
   Hard = 2
 };
 
 
-struct GameSessionId {
+struct GameSessionId
+{
   GameSessionId() = default;
   GameSessionId(const int episode, const int level, const Difficulty difficulty)
     : mEpisode(episode)
@@ -38,9 +41,7 @@ struct GameSessionId {
   {
   }
 
-  bool needsRegisteredVersion() const {
-    return mEpisode > 0;
-  }
+  bool needsRegisteredVersion() const { return mEpisode > 0; }
 
   int mEpisode = 0;
   int mLevel = 0;
@@ -48,10 +49,10 @@ struct GameSessionId {
 };
 
 
-constexpr bool isBossLevel(const int level) {
+constexpr bool isBossLevel(const int level)
+{
   return level == NUM_LEVELS_PER_EPISODE - 1;
 }
 
 
-
-}
+} // namespace rigel::data

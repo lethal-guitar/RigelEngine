@@ -28,43 +28,46 @@
 #include "renderer/renderer.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-struct SequenceElement {
+struct SequenceElement
+{
   int mFrame;
   int mOffsetY;
 };
 
 using ElementList = base::static_vector<SequenceElement, 4>;
 
-const auto ERUPTION_SEQUENCE = std::array<ElementList, 11>{{
-  {SequenceElement{3, 0}},
-  {SequenceElement{4, -3}, {1, 1}},
-  {SequenceElement{5, -6}, {2, -2}, {0, 2}},
-  {SequenceElement{3, -8}, {0, -4}, {1, 0}},
-  {SequenceElement{4, -9}, {1, -5}, {2, -1}, {0, 3}},
-  {SequenceElement{5, -10}, {2, -6}, {0, -2}, {1, 2}},
-  {SequenceElement{3, -9}, {0, -5}, {1, -1}, {2, 3}},
-  {SequenceElement{3, -8}, {0, -4}, {1, 0}},
-  {SequenceElement{4, -6}, {1, -2}, {2, 2}},
-  {SequenceElement{5, -3}, {2, 1}},
-  {SequenceElement{3, 0}}
-}};
+const auto ERUPTION_SEQUENCE = std::array<ElementList, 11>{
+  {{SequenceElement{3, 0}},
+   {SequenceElement{4, -3}, {1, 1}},
+   {SequenceElement{5, -6}, {2, -2}, {0, 2}},
+   {SequenceElement{3, -8}, {0, -4}, {1, 0}},
+   {SequenceElement{4, -9}, {1, -5}, {2, -1}, {0, 3}},
+   {SequenceElement{5, -10}, {2, -6}, {0, -2}, {1, 2}},
+   {SequenceElement{3, -9}, {0, -5}, {1, -1}, {2, 3}},
+   {SequenceElement{3, -8}, {0, -4}, {1, 0}},
+   {SequenceElement{4, -6}, {1, -2}, {2, 2}},
+   {SequenceElement{5, -3}, {2, 1}},
+   {SequenceElement{3, 0}}}};
 
-}
+} // namespace
 
 
 void LavaFountain::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::ActivationSettings;
 
-  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+  if (!entity.has_component<engine::components::ExtendedFrameList>())
+  {
     entity.assign<engine::components::ExtendedFrameList>();
     entity.component<engine::components::Sprite>()->mFramesToRender[0] =
       engine::IGNORE_RENDER_SLOT;
@@ -88,25 +91,30 @@ void LavaFountain::update(
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](Waiting& state) {
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 15) {
+      if (state.mFramesElapsed == 15)
+      {
         mState = Erupting{};
       }
     },
 
     [&, this](Erupting& state) {
-      if (state.mSequenceIndex == 0) {
+      if (state.mSequenceIndex == 0)
+      {
         entity.assign<game_logic::components::PlayerDamaging>(1);
       }
-      if (state.mSequenceIndex == static_cast<int>(ERUPTION_SEQUENCE.size())) {
+      if (state.mSequenceIndex == static_cast<int>(ERUPTION_SEQUENCE.size()))
+      {
         resetBbox();
         entity.remove<game_logic::components::PlayerDamaging>();
 
         const auto stillOnScreen =
           isBboxOnScreen(s, engine::toWorldSpace(bbox, position));
-        if (!stillOnScreen) {
+        if (!stillOnScreen)
+        {
           entity.component<ActivationSettings>()->mHasBeenActivated = false;
         }
 
@@ -115,7 +123,8 @@ void LavaFountain::update(
         return;
       }
 
-      if (state.mSequenceIndex < 5) {
+      if (state.mSequenceIndex < 5)
+      {
         d.mpServiceProvider->playSound(data::SoundId::LavaFountain);
       }
 
@@ -126,20 +135,22 @@ void LavaFountain::update(
   const auto currentSequenceIndex = std::holds_alternative<Erupting>(mState)
     ? std::optional{std::get<Erupting>(mState).mSequenceIndex}
     : std::optional<int>{};
-  if (currentSequenceIndex != previousSequenceIndex) {
+  if (currentSequenceIndex != previousSequenceIndex)
+  {
     auto& additionalFrames =
       entity.component<engine::components::ExtendedFrameList>()->mFrames;
 
     additionalFrames.clear();
-    if (currentSequenceIndex && *currentSequenceIndex > 0) {
+    if (currentSequenceIndex && *currentSequenceIndex > 0)
+    {
       const auto indexForDrawing = *currentSequenceIndex - 1;
-      for (const auto& element : ERUPTION_SEQUENCE[indexForDrawing]) {
-        additionalFrames.push_back({
-          element.mFrame,
-          base::Vector{0, element.mOffsetY}});
+      for (const auto& element : ERUPTION_SEQUENCE[indexForDrawing])
+      {
+        additionalFrames.push_back(
+          {element.mFrame, base::Vector{0, element.mOffsetY}});
       }
     }
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -42,11 +42,14 @@
 #include <string>
 
 
-namespace rigel {
+namespace rigel
+{
 
-class Game : public IGameServiceProvider {
+class Game : public IGameServiceProvider
+{
 public:
-  enum class StopReason {
+  enum class StopReason
+  {
     GameEnded,
     RestartNeeded
   };
@@ -74,7 +77,8 @@ public:
   std::optional<StopReason> runOneFrame();
 
 private:
-  enum class FadeType {
+  enum class FadeType
+  {
     In,
     Out
   };
@@ -104,15 +108,15 @@ private:
 
   void switchGamePath(const std::filesystem::path& newGamePath) override;
 
-  void markCurrentFrameAsWidescreen() override {
+  void markCurrentFrameAsWidescreen() override
+  {
     mCurrentFrameIsWidescreen = true;
   }
 
-  bool isSharewareVersion() const override {
-    return mIsShareWareVersion;
-  }
+  bool isSharewareVersion() const override { return mIsShareWareVersion; }
 
-  const CommandLineOptions& commandLineOptions() const override {
+  const CommandLineOptions& commandLineOptions() const override
+  {
     return mCommandLineOptions;
   }
 
@@ -149,4 +153,4 @@ private:
   std::vector<sdl_utils::Ptr<SDL_GameController>> mGameControllers;
 };
 
-}
+} // namespace rigel

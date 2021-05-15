@@ -24,14 +24,15 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void SmallFlyingShip::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using engine::components::BoundingBox;
   using engine::components::WorldPosition;
   using game_logic::components::Shootable;
@@ -41,13 +42,14 @@ void SmallFlyingShip::update(
 
   auto isGroundAtOffset = [&](const int offset) {
     return d.mpCollisionChecker->isOnSolidGround(
-      position + base::Vector{0, offset - 1},
-      {{}, {1, 1}});
+      position + base::Vector{0, offset - 1}, {{}, {1, 1}});
   };
 
   auto findDistanceToGround = [&](const int maxDistance) -> std::optional<int> {
-    for (int offset = 0; offset < maxDistance; ++offset) {
-      if (isGroundAtOffset(offset)) {
+    for (int offset = 0; offset < maxDistance; ++offset)
+    {
+      if (isGroundAtOffset(offset))
+      {
         return offset;
       }
     }
@@ -56,28 +58,38 @@ void SmallFlyingShip::update(
   };
 
 
-  if (d.mpCollisionChecker->isTouchingLeftWall(position, bbox)) {
+  if (d.mpCollisionChecker->isTouchingLeftWall(position, bbox))
+  {
     triggerEffects(entity, *d.mpEntityManager);
     s.mpPlayer->model().giveScore(entity.component<Shootable>()->mGivenScore);
     entity.destroy();
     return;
   }
 
-  if (!mInitialHeight || *mInitialHeight == 0) {
+  if (!mInitialHeight || *mInitialHeight == 0)
+  {
     mInitialHeight = findDistanceToGround(15);
   }
 
-  if (mInitialHeight) {
+  if (mInitialHeight)
+  {
     const auto newHeight = findDistanceToGround(*mInitialHeight);
-    if (newHeight) {
+    if (newHeight)
+    {
       --position.y;
-    } else {
-      if (!isGroundAtOffset(*mInitialHeight)) {
+    }
+    else
+    {
+      if (!isGroundAtOffset(*mInitialHeight))
+      {
         ++position.y;
       }
     }
-  } else {
-    if (!isGroundAtOffset(0)) {
+  }
+  else
+  {
+    if (!isGroundAtOffset(0))
+    {
       ++position.y;
     }
   }
@@ -86,9 +98,10 @@ void SmallFlyingShip::update(
 
   const auto stillOnScreen =
     isBboxOnScreen(s, engine::toWorldSpace(bbox, position));
-  if (!stillOnScreen && position.x - 20 == s.mpPlayer->orientedPosition().x) {
+  if (!stillOnScreen && position.x - 20 == s.mpPlayer->orientedPosition().x)
+  {
     entity.destroy();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

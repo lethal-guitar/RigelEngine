@@ -21,11 +21,12 @@
 #include "ui/text_entry_widget.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 void setupHighScoreListDisplay(GameMode::Context& context, int episode);
 
 void drawHighScoreList(GameMode::Context& context, int episode);
 
 ui::TextEntryWidget setupHighScoreNameEntry(GameMode::Context& context);
-}
+} // namespace rigel::ui

@@ -27,34 +27,37 @@
 #include <memory>
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 using renderer::Renderer;
 
-namespace {
+namespace
+{
 
 constexpr auto PARTICLE_SYSTEM_LIFE_TIME = 28;
 
 constexpr auto INITIAL_INDEX_LIMIT = 15;
 
 constexpr std::array<std::int16_t, 44> VERTICAL_MOVEMENT_TABLE{
-  0, -8, -16, -24, -32, -36, -40, -44, -46, -47, -47, -47, -46, -44, -40, -36,
-  -32, -24, -16, -8, 0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104,
-  112, 120, 128, 136, 144, 152, 160, 168, 192, 193
-};
+  0,   -8,  -16, -24, -32, -36, -40, -44, -46, -47, -47, -47, -46, -44, -40,
+  -36, -32, -24, -16, -8,  0,   8,   16,  24,  32,  40,  48,  56,  64,  72,
+  80,  88,  96,  104, 112, 120, 128, 136, 144, 152, 160, 168, 192, 193};
 
 constexpr auto SPAWN_OFFSET = base::Vector{0, -1};
 
 
-static_assert(INITIAL_INDEX_LIMIT + PARTICLE_SYSTEM_LIFE_TIME <
+static_assert(
+  INITIAL_INDEX_LIMIT + PARTICLE_SYSTEM_LIFE_TIME <
   VERTICAL_MOVEMENT_TABLE.size());
 
 
 auto yOffsetAtTime(
   const std::int16_t initialOffsetIndex,
-  const int framesElapsed
-) {
-  assert(initialOffsetIndex + framesElapsed <
+  const int framesElapsed)
+{
+  assert(
+    initialOffsetIndex + framesElapsed <
     static_cast<int>(VERTICAL_MOVEMENT_TABLE.size()));
 
   const auto baseOffset =
@@ -64,12 +67,13 @@ auto yOffsetAtTime(
 }
 
 
-struct Particle {
-  base::Vector offsetAtTime(const int framesElapsed) const {
+struct Particle
+{
+  base::Vector offsetAtTime(const int framesElapsed) const
+  {
     return {
       mVelocityX * framesElapsed,
-      yOffsetAtTime(mInitialOffsetIndexY, framesElapsed)
-    };
+      yOffsetAtTime(mInitialOffsetIndexY, framesElapsed)};
   }
 
   std::int16_t mVelocityX;
@@ -82,29 +86,30 @@ using ParticlesList = std::array<Particle, 64>;
 
 std::unique_ptr<ParticlesList> createParticles(
   RandomNumberGenerator& randomGenerator,
-  const int velocityScaleX
-) {
+  const int velocityScaleX)
+{
   auto pParticles = std::make_unique<ParticlesList>();
-  for (auto& particle : *pParticles) {
+  for (auto& particle : *pParticles)
+  {
     const auto randomVariation = randomGenerator.gen() % 20;
-    particle.mVelocityX = static_cast<std::int16_t>(velocityScaleX == 0
-      ? 10 - randomVariation
-      : velocityScaleX * (randomVariation + 1));
+    particle.mVelocityX = static_cast<std::int16_t>(
+      velocityScaleX == 0 ? 10 - randomVariation
+                          : velocityScaleX * (randomVariation + 1));
     particle.mInitialOffsetIndexY =
       randomGenerator.gen() % (INITIAL_INDEX_LIMIT + 1);
   }
   return pParticles;
 }
 
-}
+} // namespace
 
 
-struct ParticleGroup {
+struct ParticleGroup
+{
   ParticleGroup(
     const base::Vector& origin,
     const base::Color& color,
-    std::unique_ptr<ParticlesList> pParticles
-  )
+    std::unique_ptr<ParticlesList> pParticles)
     : mpParticles(std::move(pParticles))
     , mOrigin(origin)
     , mColor(color)
@@ -118,7 +123,8 @@ struct ParticleGroup {
   {
   }
 
-  ParticleGroup& operator=(const ParticleGroup& other) {
+  ParticleGroup& operator=(const ParticleGroup& other)
+  {
     auto copy = other;
     std::swap(mpParticles, copy.mpParticles);
     mOrigin = copy.mOrigin;
@@ -130,14 +136,14 @@ struct ParticleGroup {
   ParticleGroup(ParticleGroup&&) = default;
   ParticleGroup& operator=(ParticleGroup&&) = default;
 
-  void update() {
-    ++mFramesElapsed;
-  }
+  void update() { ++mFramesElapsed; }
 
-  void render(Renderer& renderer, const base::Vector& cameraPosition) {
+  void render(Renderer& renderer, const base::Vector& cameraPosition)
+  {
     const auto screenSpaceOrigin =
       data::tileVectorToPixelVector(mOrigin - cameraPosition);
-    for (auto& particle : *mpParticles) {
+    for (auto& particle : *mpParticles)
+    {
       const auto particlePosition =
         screenSpaceOrigin + particle.offsetAtTime(mFramesElapsed);
       renderer.drawPoint(particlePosition, mColor);
@@ -145,9 +151,7 @@ struct ParticleGroup {
   }
 
 
-  bool isExpired() const {
-    return mFramesElapsed >= PARTICLE_SYSTEM_LIFE_TIME;
-  }
+  bool isExpired() const { return mFramesElapsed >= PARTICLE_SYSTEM_LIFE_TIME; }
 
   std::unique_ptr<ParticlesList> mpParticles;
   base::Vector mOrigin;
@@ -158,8 +162,7 @@ struct ParticleGroup {
 
 ParticleSystem::ParticleSystem(
   RandomNumberGenerator* pRandomGenerator,
-  Renderer* pRenderer
-)
+  Renderer* pRenderer)
   : mpRandomGenerator(pRandomGenerator)
   , mpRenderer(pRenderer)
 {
@@ -169,7 +172,8 @@ ParticleSystem::ParticleSystem(
 ParticleSystem::~ParticleSystem() = default;
 
 
-void ParticleSystem::synchronizeTo(const ParticleSystem& other) {
+void ParticleSystem::synchronizeTo(const ParticleSystem& other)
+{
   mParticleGroups = other.mParticleGroups;
 }
 
@@ -177,15 +181,16 @@ void ParticleSystem::synchronizeTo(const ParticleSystem& other) {
 void ParticleSystem::spawnParticles(
   const base::Vector& origin,
   const base::Color& color,
-  int velocityScaleX
-) {
+  int velocityScaleX)
+{
   auto pParticles = createParticles(*mpRandomGenerator, velocityScaleX);
   mParticleGroups.emplace_back(
     origin + SPAWN_OFFSET, color, std::move(pParticles));
 }
 
 
-void ParticleSystem::update() {
+void ParticleSystem::update()
+{
   using namespace std;
 
   const auto it = remove_if(
@@ -194,16 +199,19 @@ void ParticleSystem::update() {
     mem_fn(&ParticleGroup::isExpired));
   mParticleGroups.erase(it, end(mParticleGroups));
 
-  for (auto& group : mParticleGroups) {
+  for (auto& group : mParticleGroups)
+  {
     group.update();
   }
 }
 
 
-void ParticleSystem::render(const base::Vector& cameraPosition) {
-  for (auto& group : mParticleGroups) {
+void ParticleSystem::render(const base::Vector& cameraPosition)
+{
+  for (auto& group : mParticleGroups)
+  {
     group.render(*mpRenderer, cameraPosition);
   }
 }
 
-}
+} // namespace rigel::engine

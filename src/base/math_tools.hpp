@@ -20,51 +20,59 @@
 #include <cstdlib>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-template<typename T>
-T integerDivCeil(const T value, const T divisor) {
+template <typename T>
+T integerDivCeil(const T value, const T divisor)
+{
   return (value + divisor - 1) / divisor;
 }
 
 
-template<typename T>
-auto lerp(const T a, const T b, const float factor) {
+template <typename T>
+auto lerp(const T a, const T b, const float factor)
+{
   return a * (1.0f - factor) + b * factor;
 }
 
 
-template<typename T>
-bool inRange(const T value, const T min, const T max) {
+template <typename T>
+bool inRange(const T value, const T min, const T max)
+{
   return value >= min && value <= max;
 }
 
 
-template<typename U, typename T>
-U roundTo(const T value) {
+template <typename U, typename T>
+U roundTo(const T value)
+{
   return static_cast<U>(std::round(value));
 }
 
 
-template<typename T>
-int round(const T value) {
+template <typename T>
+int round(const T value)
+{
   return roundTo<int>(value);
 }
 
 
-inline int sgn(const int value) {
+inline int sgn(const int value)
+{
   return value > 0 ? 1 : (value < 0 ? -1 : 0);
 }
 
 
-template<typename T, typename U>
+template <typename T, typename U>
 T applyThreshold(const T value, const U threshold)
 {
-  if (std::abs(value) < threshold) {
+  if (std::abs(value) < threshold)
+  {
     return T{0};
   }
 
   return value;
 }
 
-}
+} // namespace rigel::base

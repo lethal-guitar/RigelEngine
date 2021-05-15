@@ -24,16 +24,18 @@
 #include "ui/utils.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto EPISODE_END_SCREEN_INITIAL_DELAY = engine::slowTicksToTime(140);
 
 constexpr const char* EPISODE_1_END_IMAGES[] = {
   "END1-3.MNI",
   "END1-1.MNI",
-  "END1-2.MNI"
+  "END1-2.MNI",
 };
 
 constexpr const char* EPISODE_2_END_IMAGES[] = {
@@ -50,10 +52,9 @@ constexpr const char* EPISODE_4_END_IMAGES[] = {
 };
 
 
-std::vector<renderer::Texture> loadImagesForEpisode(
-  GameMode::Context context,
-  const int episode
-) {
+std::vector<renderer::Texture>
+  loadImagesForEpisode(GameMode::Context context, const int episode)
+{
   auto createTextures = [&context](const auto& imageFilenames) {
     return utils::transformed(imageFilenames, [&](const char* imageFilename) {
       return ui::fullScreenImageAsTexture(
@@ -61,6 +62,7 @@ std::vector<renderer::Texture> loadImagesForEpisode(
     });
   };
 
+  // clang-format off
   switch (episode) {
     case 0: return createTextures(EPISODE_1_END_IMAGES);
     case 1: return createTextures(EPISODE_2_END_IMAGES);
@@ -68,9 +70,10 @@ std::vector<renderer::Texture> loadImagesForEpisode(
     case 3: return createTextures(EPISODE_4_END_IMAGES);
     default: return {};
   }
+  // clang-format on
 }
 
-}
+} // namespace
 
 
 EpisodeEndScreen::EpisodeEndScreen(GameMode::Context context, const int episode)
@@ -80,24 +83,29 @@ EpisodeEndScreen::EpisodeEndScreen(GameMode::Context context, const int episode)
 }
 
 
-void EpisodeEndScreen::updateAndRender(engine::TimeDelta dt) {
+void EpisodeEndScreen::updateAndRender(engine::TimeDelta dt)
+{
   const auto index = std::min(mCurrentImage, mScreenImages.size());
   mScreenImages[index].render(0, 0);
 }
 
 
-void EpisodeEndScreen::handleEvent(const SDL_Event& event) {
-  if (!ui::isButtonPress(event)) {
+void EpisodeEndScreen::handleEvent(const SDL_Event& event)
+{
+  if (!ui::isButtonPress(event))
+  {
     return;
   }
 
   updateAndRender(0);
   mpServiceProvider->fadeOutScreen();
 
-  if (mCurrentImage < mScreenImages.size()) {
+  if (mCurrentImage < mScreenImages.size())
+  {
     ++mCurrentImage;
 
-    if (mCurrentImage < mScreenImages.size()) {
+    if (mCurrentImage < mScreenImages.size())
+    {
       updateAndRender(0);
       mpServiceProvider->fadeInScreen();
     }
@@ -105,7 +113,8 @@ void EpisodeEndScreen::handleEvent(const SDL_Event& event) {
 }
 
 
-bool EpisodeEndScreen::finished() const {
+bool EpisodeEndScreen::finished() const
+{
   return mCurrentImage >= mScreenImages.size();
 }
 
@@ -114,8 +123,7 @@ EpisodeEndSequence::EpisodeEndSequence(
   GameMode::Context context,
   const int episode,
   std::set<data::Bonus> achievedBonuses,
-  int scoreWithoutBonuses
-)
+  int scoreWithoutBonuses)
   : mContext(context)
   , mAchievedBonuses(std::move(achievedBonuses))
   , mEpisode(episode)
@@ -124,12 +132,15 @@ EpisodeEndSequence::EpisodeEndSequence(
 }
 
 
-void EpisodeEndSequence::updateAndRender(engine::TimeDelta dt) {
-  base::match(mStage,
+void EpisodeEndSequence::updateAndRender(engine::TimeDelta dt)
+{
+  base::match(
+    mStage,
     [this, dt](InitialWait& state) {
       state.mElapsedTime += dt;
 
-      if (state.mElapsedTime >= EPISODE_END_SCREEN_INITIAL_DELAY) {
+      if (state.mElapsedTime >= EPISODE_END_SCREEN_INITIAL_DELAY)
+      {
         startNewStage(ui::EpisodeEndScreen{mContext, mEpisode});
       }
     },
@@ -137,28 +148,33 @@ void EpisodeEndSequence::updateAndRender(engine::TimeDelta dt) {
     [this, dt](ui::Duke3DTeaserScreen& duke3DTeaser) {
       duke3DTeaser.updateAndRender(dt);
 
-      if (duke3DTeaser.isFinished()) {
+      if (duke3DTeaser.isFinished())
+      {
         startNewStage(
           ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
       }
     },
 
-    [dt](auto& state) {
-      state.updateAndRender(dt);
-    });
+    [dt](auto& state) { state.updateAndRender(dt); });
 }
 
 
-void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
-  base::match(mStage,
+void EpisodeEndSequence::handleEvent(const SDL_Event& event)
+{
+  base::match(
+    mStage,
     [&](ui::EpisodeEndScreen& endScreen) {
       endScreen.handleEvent(event);
 
-      if (endScreen.finished()) {
-        if (mEpisode == 3) {
+      if (endScreen.finished())
+      {
+        if (mEpisode == 3)
+        {
           startNewStage(
             ui::Duke3DTeaserScreen{*mContext.mpResources, mContext.mpRenderer});
-        } else {
+        }
+        else
+        {
           startNewStage(
             ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
         }
@@ -166,7 +182,8 @@ void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
     },
 
     [&](ui::Duke3DTeaserScreen&) {
-      if (ui::isButtonPress(event)) {
+      if (ui::isButtonPress(event))
+      {
         startNewStage(
           ui::BonusScreen{mContext, mAchievedBonuses, mScoreWithoutBonuses});
       }
@@ -176,20 +193,19 @@ void EpisodeEndSequence::handleEvent(const SDL_Event& event) {
 }
 
 
-bool EpisodeEndSequence::finished() const {
-  return base::match(mStage,
-    [](const ui::BonusScreen& bonusScreen) {
-      return bonusScreen.finished();
-    },
+bool EpisodeEndSequence::finished() const
+{
+  return base::match(
+    mStage,
+    [](const ui::BonusScreen& bonusScreen) { return bonusScreen.finished(); },
 
-    [](auto&&) {
-      return false;
-    });
+    [](auto&&) { return false; });
 }
 
 
 template <typename T>
-void EpisodeEndSequence::startNewStage(T&& newStage) {
+void EpisodeEndSequence::startNewStage(T&& newStage)
+{
   mContext.mpServiceProvider->fadeOutScreen();
   newStage.updateAndRender(0.0);
   mContext.mpServiceProvider->fadeInScreen();
@@ -197,4 +213,4 @@ void EpisodeEndSequence::startNewStage(T&& newStage) {
   mStage = std::forward<T>(newStage);
 }
 
-}
+} // namespace rigel::ui

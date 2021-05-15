@@ -19,10 +19,12 @@
 #include "ui/duke_script_runner.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
-void runScript(GameMode::Context& context, const std::string& scriptName) {
+void runScript(GameMode::Context& context, const std::string& scriptName)
+{
   context.mpScriptRunner->executeScript(context.mpScripts->at(scriptName));
 }
 
-}
+} // namespace rigel

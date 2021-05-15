@@ -17,13 +17,15 @@
 // This file is meant to be included into entity_factory.cpp. It's only
 // a separate file to make the amount of code in one file more manageable.
 
-namespace {
+namespace
+{
 
 using namespace engine::components::parameter_aliases;
 using namespace game_logic::components::parameter_aliases;
 
 const auto SCORE_NUMBER_LIFE_TIME = 60;
 
+// clang-format off
 const base::Point<float> SCORE_NUMBER_MOVE_SEQUENCE[] = {
   {0.0f, -1.0f},
   {0.0f, -1.0f},
@@ -47,12 +49,12 @@ const int SCORE_NUMBER_ANIMATION_SEQUENCE[] = {
   0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1,
   0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2
 };
+// clang-format on
+
+const int FLY_ANIMATION_SEQUENCE[] = {0, 1, 2, 1};
 
 
-const int FLY_ANIMATION_SEQUENCE[] = { 0, 1, 2, 1 };
-
-
-const int BOSS4_PROJECTILE_SPAWN_ANIM_SEQ[] = { 0, 1, 1, 2, 2, 3, 3, 4 };
+const int BOSS4_PROJECTILE_SPAWN_ANIM_SEQ[] = {0, 1, 1, 2, 2, 3, 3, 4};
 
 
 #include "destruction_effect_specs.ipp"
@@ -65,14 +67,16 @@ const int SODA_CAN_ROCKET_FIRE_ANIMATION[] = {6, 7};
 
 const int BOMB_DROPPING_ANIMATION[] = {0, 1, 1, 2};
 
+// clang-format off
 const int HINT_GLOBE_ANIMATION[] = {
   0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+// clang-format on
 
 
-base::Point<float> directionToVector(const ProjectileDirection direction) {
-  const auto isNegative =
-    direction == ProjectileDirection::Left ||
+base::Point<float> directionToVector(const ProjectileDirection direction)
+{
+  const auto isNegative = direction == ProjectileDirection::Left ||
     direction == ProjectileDirection::Up;
   const auto value = isNegative ? -1.0f : 1.0f;
 
@@ -83,33 +87,42 @@ base::Point<float> directionToVector(const ProjectileDirection direction) {
 
 ActorID actorIdForProjectile(
   const ProjectileType type,
-  const ProjectileDirection direction
-) {
+  const ProjectileDirection direction)
+{
   const auto isGoingRight = direction == ProjectileDirection::Right;
   const auto isGoingUp = direction == ProjectileDirection::Up;
 
-  switch (type) {
+  switch (type)
+  {
     case ProjectileType::Normal:
-      return isHorizontal(direction) ? data::ActorID::Duke_regular_shot_horizontal : data::ActorID::Duke_regular_shot_vertical;
+      return isHorizontal(direction)
+        ? data::ActorID::Duke_regular_shot_horizontal
+        : data::ActorID::Duke_regular_shot_vertical;
 
     case ProjectileType::Laser:
-      return isHorizontal(direction) ? data::ActorID::Duke_laser_shot_horizontal : data::ActorID::Duke_laser_shot_vertical;
+      return isHorizontal(direction) ? data::ActorID::Duke_laser_shot_horizontal
+                                     : data::ActorID::Duke_laser_shot_vertical;
 
     case ProjectileType::Rocket:
       return isHorizontal(direction)
-        ? (isGoingRight ? data::ActorID::Duke_rocket_right : data::ActorID::Duke_rocket_left)
-        : (isGoingUp ? data::ActorID::Duke_rocket_up : data::ActorID::Duke_rocket_down);
+        ? (isGoingRight ? data::ActorID::Duke_rocket_right
+                        : data::ActorID::Duke_rocket_left)
+        : (isGoingUp ? data::ActorID::Duke_rocket_up
+                     : data::ActorID::Duke_rocket_down);
 
     case ProjectileType::Flame:
       return isHorizontal(direction)
-        ? (isGoingRight ? data::ActorID::Duke_flame_shot_right : data::ActorID::Duke_flame_shot_left)
-        : (isGoingUp ? data::ActorID::Duke_flame_shot_up : data::ActorID::Duke_flame_shot_down);
+        ? (isGoingRight ? data::ActorID::Duke_flame_shot_right
+                        : data::ActorID::Duke_flame_shot_left)
+        : (isGoingUp ? data::ActorID::Duke_flame_shot_up
+                     : data::ActorID::Duke_flame_shot_down);
 
     case ProjectileType::ShipLaser:
       return data::ActorID::Dukes_ship_laser_shot;
 
     case ProjectileType::ReactorDebris:
-      return isGoingRight ? data::ActorID::Reactor_fire_RIGHT : data::ActorID::Reactor_fire_LEFT;
+      return isGoingRight ? data::ActorID::Reactor_fire_RIGHT
+                          : data::ActorID::Reactor_fire_LEFT;
   }
 
   assert(false);
@@ -117,8 +130,10 @@ ActorID actorIdForProjectile(
 }
 
 
-float speedForProjectileType(const ProjectileType type) {
-  switch (type) {
+float speedForProjectileType(const ProjectileType type)
+{
+  switch (type)
+  {
     case ProjectileType::Laser:
     case ProjectileType::Flame:
       return 5.0f;
@@ -134,8 +149,10 @@ float speedForProjectileType(const ProjectileType type) {
 }
 
 
-int damageForProjectileType(const ProjectileType type) {
-  switch (type) {
+int damageForProjectileType(const ProjectileType type)
+{
+  switch (type)
+  {
     case ProjectileType::Flame:
     case ProjectileType::Laser:
       return 2;
@@ -161,12 +178,13 @@ Message MESSAGE_TYPE_BY_INDEX[] = {
   Message::BringBackTheBrain,
   Message::LiveFromRigel,
   Message::Die,
-  Message::CantEscape
-};
+  Message::CantEscape};
 
 
-int messengerDroneTypeIndex(const ActorID id) {
-  switch (id) {
+int messengerDroneTypeIndex(const ActorID id)
+{
+  switch (id)
+  {
     case ActorID::Messenger_drone_1:
       return 0;
     case ActorID::Messenger_drone_2:
@@ -185,13 +203,20 @@ int messengerDroneTypeIndex(const ActorID id) {
 }
 
 
-base::Vector directionVectorForRocketType(const ActorID id) {
-  switch (id) {
-    case ActorID::Enemy_rocket_left: return {-1, 0};
-    case ActorID::Enemy_rocket_right: return {+1, 0};
-    case ActorID::Enemy_rocket_up: return {0, -1};
-    case ActorID::Enemy_rocket_2_up: return {0, -1};
-    case ActorID::Enemy_rocket_2_down: return {0, +1};
+base::Vector directionVectorForRocketType(const ActorID id)
+{
+  switch (id)
+  {
+    case ActorID::Enemy_rocket_left:
+      return {-1, 0};
+    case ActorID::Enemy_rocket_right:
+      return {+1, 0};
+    case ActorID::Enemy_rocket_up:
+      return {0, -1};
+    case ActorID::Enemy_rocket_2_up:
+      return {0, -1};
+    case ActorID::Enemy_rocket_2_down:
+      return {0, +1};
 
     default:
       assert(false);
@@ -200,14 +225,15 @@ base::Vector directionVectorForRocketType(const ActorID id) {
 }
 
 
-template<typename EntityLike>
+template <typename EntityLike>
 void configureMovingEffectSprite(
   EntityLike& entity,
-  const SpriteMovement movement
-) {
+  const SpriteMovement movement)
+{
   using namespace engine::components::parameter_aliases;
 
-  entity.template assign<ActivationSettings>(ActivationSettings::Policy::Always);
+  entity.template assign<ActivationSettings>(
+    ActivationSettings::Policy::Always);
   // TODO: To match the original, the condition should actually be
   // OnLeavingActiveRegion, but only after the movement sequence is
   // finished.
@@ -216,14 +242,14 @@ void configureMovingEffectSprite(
   const auto movementIndex = static_cast<int>(movement);
   entity.template assign<MovementSequence>(MOVEMENT_SEQUENCES[movementIndex]);
   entity.template assign<MovingBody>(
-    Velocity{},
-    GravityAffected{false},
-    IgnoreCollisions{true});
+    Velocity{}, GravityAffected{false}, IgnoreCollisions{true});
 }
 
 
-void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
-  switch (id) {
+void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id)
+{
+  switch (id)
+  {
     case ActorID::Shot_impact_FX:
       entity.assign<BehaviorController>(behaviors::TileBurner{});
       break;
@@ -241,21 +267,25 @@ void assignSpecialEffectSpriteProperties(ex::Entity entity, const ActorID id) {
 }
 
 
-auto createBlueGuardBehavior(const ActorID id) {
+auto createBlueGuardBehavior(const ActorID id)
+{
   using behaviors::BlueGuard;
 
-  if (id == ActorID::Blue_guard_using_a_terminal) {
+  if (id == ActorID::Blue_guard_using_a_terminal)
+  {
     return BlueGuard::typingOnTerminal();
-  } else {
-    const auto orientation = id == ActorID::Blue_guard_RIGHT
-      ? Orientation::Right
-      : Orientation::Left;
+  }
+  else
+  {
+    const auto orientation =
+      id == ActorID::Blue_guard_RIGHT ? Orientation::Right : Orientation::Left;
     return BlueGuard::patrolling(orientation);
   }
 }
 
 
-auto skeletonWalkerConfig() {
+auto skeletonWalkerConfig()
+{
   static auto config = []() {
     behaviors::SimpleWalker::Configuration c;
     c.mAnimEnd = 3;
@@ -267,7 +297,8 @@ auto skeletonWalkerConfig() {
 }
 
 
-auto turkeyWalkerConfig() {
+auto turkeyWalkerConfig()
+{
   static auto config = []() {
     behaviors::SimpleWalker::Configuration c;
     c.mAnimEnd = 1;
@@ -282,8 +313,8 @@ auto turkeyWalkerConfig() {
 void configureBonusGlobe(
   ex::Entity entity,
   const BoundingBox& boundingBox,
-  const int scoreValue
-) {
+  const int scoreValue)
+{
   entity.assign<AnimationLoop>(1, 0, 3, 0);
   entity.assign<Shootable>(Health{1}, GivenScore{100});
   entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
@@ -312,14 +343,20 @@ void configureBonusGlobe(
 }
 
 
-ActorID scoreNumberActor(const ScoreNumberType type) {
+ActorID scoreNumberActor(const ScoreNumberType type)
+{
   switch (type)
   {
-    case ScoreNumberType::S100: return ActorID::Score_number_FX_100;
-    case ScoreNumberType::S500: return ActorID::Score_number_FX_500;
-    case ScoreNumberType::S2000: return ActorID::Score_number_FX_2000;
-    case ScoreNumberType::S5000: return ActorID::Score_number_FX_5000;
-    case ScoreNumberType::S10000: return ActorID::Score_number_FX_10000;
+    case ScoreNumberType::S100:
+      return ActorID::Score_number_FX_100;
+    case ScoreNumberType::S500:
+      return ActorID::Score_number_FX_500;
+    case ScoreNumberType::S2000:
+      return ActorID::Score_number_FX_2000;
+    case ScoreNumberType::S5000:
+      return ActorID::Score_number_FX_5000;
+    case ScoreNumberType::S10000:
+      return ActorID::Score_number_FX_10000;
   }
 
   assert(false);
@@ -327,12 +364,18 @@ ActorID scoreNumberActor(const ScoreNumberType type) {
 }
 
 
-ActorID actorIdForBoxColor(const ContainerColor color) {
-  switch (color) {
-    case ContainerColor::White: return ActorID::White_box_empty;
-    case ContainerColor::Green: return ActorID::Green_box_empty;
-    case ContainerColor::Red: return ActorID::Red_box_empty;
-    case ContainerColor::Blue: return ActorID::Blue_box_empty;
+ActorID actorIdForBoxColor(const ContainerColor color)
+{
+  switch (color)
+  {
+    case ContainerColor::White:
+      return ActorID::White_box_empty;
+    case ContainerColor::Green:
+      return ActorID::Green_box_empty;
+    case ContainerColor::Red:
+      return ActorID::Red_box_empty;
+    case ContainerColor::Blue:
+      return ActorID::Blue_box_empty;
   }
 
   assert(false);
@@ -340,14 +383,16 @@ ActorID actorIdForBoxColor(const ContainerColor color) {
 }
 
 
-template<typename... Args>
-void addToContainer(components::ItemContainer& container, Args&&... components) {
+template <typename... Args>
+void addToContainer(components::ItemContainer& container, Args&&... components)
+{
   (container.mContainedComponents.emplace_back(std::move(components)), ...);
 }
 
 
-template<typename... Args>
-components::ItemContainer makeContainer(Args&&... components) {
+template <typename... Args>
+components::ItemContainer makeContainer(Args&&... components)
+{
   typename components::ItemContainer container;
   addToContainer(container, components...);
   return container;
@@ -358,8 +403,8 @@ void turnIntoContainer(
   ex::Entity entity,
   Sprite containerSprite,
   const int givenScore,
-  components::ItemContainer&& container
-) {
+  components::ItemContainer&& container)
+{
   // We don't assign a position here, as the container might move before being
   // opened. The item container's onHit callback will set the spawned entity's
   // position when the container is opened.
@@ -369,21 +414,22 @@ void turnIntoContainer(
   entity.assign<components::ItemContainer>(std::move(container));
   entity.assign<Shootable>(Health{1}, givenScore);
   addDefaultMovingBody(
-    entity,
-    engine::inferBoundingBox(containerSprite, entity));
+    entity, engine::inferBoundingBox(containerSprite, entity));
   entity.remove<Sprite>();
   entity.assign<Sprite>(std::move(containerSprite));
 }
 
 
-void addBarrelDestroyEffect(ex::Entity entity) {
+void addBarrelDestroyEffect(ex::Entity entity)
+{
   auto container = makeContainer();
   container.mStyle = ItemContainer::ReleaseStyle::NuclearWasteBarrel;
   entity.assign<ItemContainer>(std::move(container));
 }
 
 
-void addItemBoxDestroyEffect(ex::Entity entity) {
+void addItemBoxDestroyEffect(ex::Entity entity)
+{
   auto container = makeContainer();
   container.mStyle = ItemContainer::ReleaseStyle::ItemBox;
   entity.assign<ItemContainer>(std::move(container));
@@ -392,13 +438,13 @@ void addItemBoxDestroyEffect(ex::Entity entity) {
 } // namespace
 
 
-template<typename... Args>
+template <typename... Args>
 void EntityFactory::configureItemBox(
   ex::Entity entity,
   const ContainerColor color,
   const int givenScore,
-  Args&&... components
-) {
+  Args&&... components)
+{
   auto container = makeContainer(components...);
   container.mStyle = components::ItemContainer::ReleaseStyle::ItemBox;
   addToContainer(
@@ -418,8 +464,8 @@ void EntityFactory::configureItemBox(
 void EntityFactory::configureEntity(
   ex::Entity entity,
   const ActorID actorID,
-  const BoundingBox& boundingBox
-) {
+  const BoundingBox& boundingBox)
+{
   using namespace effects;
 
   using DGType = behaviors::DynamicGeometryController::Type;
@@ -428,7 +474,8 @@ void EntityFactory::configureEntity(
     ? (mDifficulty == Difficulty::Hard ? 2 : 1)
     : 0;
 
-  switch (actorID) {
+  switch (actorID)
+  {
     case ActorID::Blue_bonus_globe_1: // Blue bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{500});
       entity.assign<AppearsOnRadar>();
@@ -498,13 +545,9 @@ void EntityFactory::configureEntity(
         item.mGivenItem = InventoryItemType::CircuitBoard;
         item.mShownTutorialMessage = TutorialMessageId::FoundAccessCard;
         configureItemBox(
-          entity,
-          ContainerColor::White,
-          100,
-          item,
-          AppearsOnRadar{});
-        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
-          data::InventoryItemType::CircuitBoard});
+          entity, ContainerColor::White, 100, item, AppearsOnRadar{});
+        entity.assign<CollectableItemForCheat>(
+          CollectableItemForCheat{data::InventoryItemType::CircuitBoard});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -516,13 +559,9 @@ void EntityFactory::configureEntity(
         item.mGivenItem = InventoryItemType::BlueKey;
         item.mShownTutorialMessage = TutorialMessageId::FoundBlueKey;
         configureItemBox(
-          entity,
-          ContainerColor::White,
-          100,
-          item,
-          AppearsOnRadar{});
-        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
-          data::InventoryItemType::BlueKey});
+          entity, ContainerColor::White, 100, item, AppearsOnRadar{});
+        entity.assign<CollectableItemForCheat>(
+          CollectableItemForCheat{data::InventoryItemType::BlueKey});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -559,8 +598,8 @@ void EntityFactory::configureEntity(
           item,
           animation,
           AppearsOnRadar{});
-        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
-          data::InventoryItemType::CloakingDevice});
+        entity.assign<CollectableItemForCheat>(
+          CollectableItemForCheat{data::InventoryItemType::CloakingDevice});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -742,8 +781,8 @@ void EntityFactory::configureEntity(
           ActorTag{ActorTag::Type::CollectableWeapon},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
-        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
-          data::WeaponType::Rocket});
+        entity.assign<CollectableItemForCheat>(
+          CollectableItemForCheat{data::WeaponType::Rocket});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -762,8 +801,8 @@ void EntityFactory::configureEntity(
           ActorTag{ActorTag::Type::CollectableWeapon},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
-        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
-          data::WeaponType::FlameThrower});
+        entity.assign<CollectableItemForCheat>(
+          CollectableItemForCheat{data::WeaponType::FlameThrower});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -800,8 +839,8 @@ void EntityFactory::configureEntity(
           ActorTag{ActorTag::Type::CollectableWeapon},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::CollectableWeapon);
-        entity.assign<CollectableItemForCheat>(CollectableItemForCheat{
-          data::WeaponType::Laser});
+        entity.assign<CollectableItemForCheat>(
+          CollectableItemForCheat{data::WeaponType::Laser});
         entity.remove<ActivationSettings>();
       }
       break;
@@ -907,7 +946,8 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Blue_box_video_game_cartridge: // Video game cartridge in blue box
+    case ActorID::Blue_box_video_game_cartridge: // Video game cartridge in blue
+                                                 // box
       {
         CollectableItem item;
         item.mGivenScore = 500;
@@ -1102,9 +1142,9 @@ void EntityFactory::configureEntity(
       break;
 
 
-    // ----------------------------------------------------------------------
-    // Enemies
-    // ----------------------------------------------------------------------
+      // ----------------------------------------------------------------------
+      // Enemies
+      // ----------------------------------------------------------------------
 
     case ActorID::Hoverbot:
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{150});
@@ -1122,9 +1162,8 @@ void EntityFactory::configureEntity(
       entity.assign<Shootable>(Health{5}, GivenScore{1000});
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Orientation>(
-        actorID == ActorID::Big_green_cat_LEFT
-          ? Orientation::Left
-          : Orientation::Right);
+        actorID == ActorID::Big_green_cat_LEFT ? Orientation::Left
+                                               : Orientation::Right);
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<BehaviorController>(behaviors::BigGreenCat{});
       entity.assign<DestructionEffects>(
@@ -1179,13 +1218,13 @@ void EntityFactory::configureEntity(
     case ActorID::Enemy_rocket_right:
     case ActorID::Enemy_rocket_2_up:
     case ActorID::Enemy_rocket_2_down:
-      entity.assign<BehaviorController>(behaviors::EnemyRocket{
-        directionVectorForRocketType(actorID)});
+      entity.assign<BehaviorController>(
+        behaviors::EnemyRocket{directionVectorForRocketType(actorID)});
       entity.assign<PlayerDamaging>(1);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
-      entity.assign<AutoDestroy>(AutoDestroy{
-        AutoDestroy::Condition::OnLeavingActiveRegion});
+      entity.assign<AutoDestroy>(
+        AutoDestroy{AutoDestroy::Condition::OnLeavingActiveRegion});
       entity.component<Sprite>()->mFramesToRender[1] = 1;
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       entity.assign<AppearsOnRadar>();
@@ -1193,8 +1232,8 @@ void EntityFactory::configureEntity(
       // The "up/down 2" variants are not destructible
       if (
         actorID != ActorID::Enemy_rocket_2_up &&
-        actorID != ActorID::Enemy_rocket_2_down
-      ) {
+        actorID != ActorID::Enemy_rocket_2_down)
+      {
         entity.assign<Shootable>(Health{1}, GivenScore{10});
         entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       }
@@ -1213,7 +1252,8 @@ void EntityFactory::configureEntity(
 
     case ActorID::Watchbot_container:
       entity.assign<BoundingBox>(boundingBox);
-      entity.assign<components::BehaviorController>(behaviors::WatchBotContainer{});
+      entity.assign<components::BehaviorController>(
+        behaviors::WatchBotContainer{});
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<AnimationLoop>(1, 1, 5, 1);
       break;
@@ -1317,7 +1357,8 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Green_hanging_suction_plant: // Green creature attached to ceiling, sucking in player
+    case ActorID::Green_hanging_suction_plant: // Green creature attached to
+                                               // ceiling, sucking in player
       entity.assign<Shootable>(
         Health{15 + 3 * difficultyOffset}, GivenScore{300});
       entity.assign<DestructionEffects>(
@@ -1387,7 +1428,8 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Hovering_laser_turret: // Floating ball, opens up and shoots lasers
+    case ActorID::Hovering_laser_turret: // Floating ball, opens up and shoots
+                                         // lasers
       entity.assign<Shootable>(Health{3 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1438,9 +1480,9 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<MovingBody>(Velocity{}, GravityAffected{false});
-      entity.assign<Orientation>(actorID == ActorID::Spiked_green_creature_LEFT
-        ? Orientation::Left
-        : Orientation::Right);
+      entity.assign<Orientation>(
+        actorID == ActorID::Spiked_green_creature_LEFT ? Orientation::Left
+                                                       : Orientation::Right);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::SpikedGreenCreature{});
@@ -1474,8 +1516,7 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
-      entity.assign<BehaviorController>(
-        createBlueGuardBehavior(actorID));
+      entity.assign<BehaviorController>(createBlueGuardBehavior(actorID));
       entity.assign<DestructionEffects>(
         BLUE_GUARD_KILL_EFFECT_SPEC,
         DestructionEffects::TriggerCondition::OnKilled,
@@ -1594,7 +1635,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Aggressive_prisoner: // Monster in prison cell, aggressive
       entity.assign<BehaviorController>(behaviors::AggressivePrisoner{});
-      entity.assign<BoundingBox>(BoundingBox{{2,0}, {3, 3}});
+      entity.assign<BoundingBox>(BoundingBox{{2, 0}, {3, 3}});
       entity.assign<Shootable>(Health{1}, GivenScore{500});
       entity.component<Shootable>()->mInvincible = true;
       entity.component<Shootable>()->mDestroyWhenKilled = false;
@@ -1622,17 +1663,17 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    // ----------------------------------------------------------------------
-    // Various
-    // ----------------------------------------------------------------------
+      // ----------------------------------------------------------------------
+      // Various
+      // ----------------------------------------------------------------------
 
     case ActorID::Dukes_ship_LEFT:
     case ActorID::Dukes_ship_RIGHT:
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<BehaviorController>(behaviors::PlayerShip{false});
-      entity.assign<Orientation>(actorID == ActorID::Dukes_ship_LEFT
-        ? Orientation::Left
-        : Orientation::Right);
+      entity.assign<Orientation>(
+        actorID == ActorID::Dukes_ship_LEFT ? Orientation::Left
+                                            : Orientation::Right);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1641,9 +1682,8 @@ void EntityFactory::configureEntity(
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<BehaviorController>(behaviors::PlayerShip{true});
       entity.assign<Orientation>(
-        actorID == ActorID::Dukes_ship_after_exiting_LEFT
-          ? Orientation::Left
-          : Orientation::Right);
+        actorID == ActorID::Dukes_ship_after_exiting_LEFT ? Orientation::Left
+                                                          : Orientation::Right);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1655,11 +1695,12 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Nuclear_waste_can_green_slime_inside: // Nuclear waste barrel, slime inside
+    case ActorID::Nuclear_waste_can_green_slime_inside: // Nuclear waste barrel,
+                                                        // slime inside
       {
         const auto& sprite = *entity.component<Sprite>();
-        const auto numAnimationFrames = static_cast<int>(
-          sprite.mpDrawData->mFrames.size());
+        const auto numAnimationFrames =
+          static_cast<int>(sprite.mpDrawData->mFrames.size());
         auto container = makeContainer(
           boundingBox,
           PlayerDamaging{Damage{1}},
@@ -1690,7 +1731,8 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Super_force_field_LEFT: // Blue force field (disabled by cloak)
+    case ActorID::Super_force_field_LEFT: // Blue force field (disabled by
+                                          // cloak)
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{100});
       entity.component<Shootable>()->mDestroyWhenKilled = false;
@@ -1828,7 +1870,8 @@ void EntityFactory::configureEntity(
       entity.assign<AppearsOnRadar>();
       break;
 
-    case ActorID::Computer_Terminal_Duke_Escaped: // Computer showing "Duke escaped"
+    case ActorID::Computer_Terminal_Duke_Escaped: // Computer showing "Duke
+                                                  // escaped"
     case ActorID::Lava_fall_1: // Lava fall left
     case ActorID::Lava_fall_2: // Lava fall right
     case ActorID::Water_fall_1: // Water fall left
@@ -1842,10 +1885,12 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Messenger_drone_1: // "Your brain is ours!"
-    case ActorID::Messenger_drone_2: // "Bring back the brain! ... Please stand by"
+    case ActorID::Messenger_drone_2: // "Bring back the brain! ... Please stand
+                                     // by"
     case ActorID::Messenger_drone_3: // "Live from Rigel it's Saturday night!"
     case ActorID::Messenger_drone_4: // "Die!"
-    case ActorID::Messenger_drone_5: // "You cannot escape us! You will get your brain sucked!"
+    case ActorID::Messenger_drone_5: // "You cannot escape us! You will get your
+                                     // brain sucked!"
       {
         const auto typeIndex = messengerDroneTypeIndex(actorID);
 
@@ -1887,7 +1932,8 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {1, 1}});
       break;
 
-    case ActorID::Dynamic_geometry_2: // shootable wall, explodes into small pieces
+    case ActorID::Dynamic_geometry_2: // shootable wall, explodes into small
+                                      // pieces
       entity.assign<Shootable>(Health{1});
       entity.component<Shootable>()->mAlwaysConsumeInflictor = true;
       entity.component<Shootable>()->mCanBeHitWhenOffscreen = true;
@@ -1903,7 +1949,8 @@ void EntityFactory::configureEntity(
       }
       break;
 
-    case ActorID::Dynamic_geometry_3: // door, opened by blue key (slides into ground)
+    case ActorID::Dynamic_geometry_3: // door, opened by blue key (slides into
+                                      // ground)
       interaction::configureLockedDoor(entity, mSpawnIndex, boundingBox);
       break;
 
@@ -1976,8 +2023,8 @@ void EntityFactory::configureEntity(
 
     case ActorID::Water_drop: // water drop
       addDefaultMovingBody(entity, boundingBox);
-      entity.assign<AutoDestroy>(AutoDestroy{
-        AutoDestroy::Condition::OnWorldCollision});
+      entity.assign<AutoDestroy>(
+        AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
       engine::reassign<ActivationSettings>(
         entity, ActivationSettings::Policy::Always);
       break;
@@ -1993,7 +2040,8 @@ void EntityFactory::configureEntity(
       entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
       break;
 
-    case ActorID::Water_surface_2: // water with animated surface (double sized block)
+    case ActorID::Water_surface_2: // water with animated surface (double sized
+                                   // block)
       entity.assign<BoundingBox>(BoundingBox{{0, 3}, {4, 4}});
       entity.assign<ActorTag>(ActorTag::Type::AnimatedWaterArea);
       break;
@@ -2007,8 +2055,9 @@ void EntityFactory::configureEntity(
     case ActorID::Airlock_death_trigger_LEFT:
     case ActorID::Airlock_death_trigger_RIGHT:
       entity.assign<BehaviorController>(AirLockDeathTrigger{});
-      entity.assign<Orientation>(actorID == ActorID::Airlock_death_trigger_LEFT
-        ? Orientation::Left : Orientation::Right);
+      entity.assign<Orientation>(
+        actorID == ActorID::Airlock_death_trigger_LEFT ? Orientation::Left
+                                                       : Orientation::Right);
       entity.assign<BoundingBox>(BoundingBox{{}, {1, 1}});
       break;
 
@@ -2022,7 +2071,8 @@ void EntityFactory::configureEntity(
     case ActorID::Enemy_laser_shot_RIGHT:
       entity.assign<PlayerDamaging>(1, false, true);
       entity.assign<MovingBody>(
-        Velocity{actorID == ActorID::Enemy_laser_shot_LEFT ? -2.0f : 2.0f, 0.0f},
+        Velocity{
+          actorID == ActorID::Enemy_laser_shot_LEFT ? -2.0f : 2.0f, 0.0f},
         GravityAffected{false});
       entity.assign<AutoDestroy>(AutoDestroy{
         AutoDestroy::Condition::OnWorldCollision,

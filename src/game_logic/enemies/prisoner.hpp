@@ -24,15 +24,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct AggressivePrisoner {
+struct AggressivePrisoner
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -50,7 +53,8 @@ struct AggressivePrisoner {
 };
 
 
-struct PassivePrisoner {
+struct PassivePrisoner
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -58,4 +62,4 @@ struct PassivePrisoner {
     entityx::Entity entity);
 };
 
-}
+} // namespace rigel::game_logic::behaviors

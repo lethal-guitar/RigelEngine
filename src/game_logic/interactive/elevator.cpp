@@ -29,14 +29,15 @@
 namespace ex = entityx;
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void Elevator::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool,
-  ex::Entity entity
-) {
+  ex::Entity entity)
+{
   using engine::components::BoundingBox;
   using engine::components::MovingBody;
   using engine::components::Sprite;
@@ -51,8 +52,7 @@ void Elevator::update(
     const auto& playerBbox = s.mpPlayer->worldSpaceCollisionBox();
     const auto elevatorBbox = engine::toWorldSpace(bbox, position);
 
-    return
-      playerBbox.bottom() + 1 == elevatorBbox.top() &&
+    return playerBbox.bottom() + 1 == elevatorBbox.top() &&
       playerBbox.left() >= elevatorBbox.left() &&
       playerBbox.right() <= elevatorBbox.right();
   };
@@ -62,11 +62,10 @@ void Elevator::update(
     entity.assign<ActorTag>(ActorTag::Type::ActiveElevator);
     mState = State{position.y};
 
-    d.mpEvents->emit(rigel::events::TutorialMessage{
-      data::TutorialMessageId::FoundTurboLift});
+    d.mpEvents->emit(
+      rigel::events::TutorialMessage{data::TutorialMessageId::FoundTurboLift});
     d.mpEvents->emit(events::ElevatorAttachmentChanged{
-      entity,
-      events::ElevatorAttachmentChanged::ChangeType::Attach});
+      entity, events::ElevatorAttachmentChanged::ChangeType::Attach});
   };
 
   auto detach = [&]() {
@@ -77,21 +76,23 @@ void Elevator::update(
     mState.reset();
 
     d.mpEvents->emit(events::ElevatorAttachmentChanged{
-      entity,
-      events::ElevatorAttachmentChanged::ChangeType::Detach});
+      entity, events::ElevatorAttachmentChanged::ChangeType::Detach});
   };
 
 
   const auto playerInRange = isPlayerInRange();
-  if (playerInRange && !mState) {
+  if (playerInRange && !mState)
+  {
     attach();
   }
 
-  if (!playerInRange && mState) {
+  if (!playerInRange && mState)
+  {
     detach();
   }
 
-  if (!mState) {
+  if (!mState)
+  {
     // We are not attached to the player, nothing to do.
     return;
   }
@@ -100,19 +101,26 @@ void Elevator::update(
   mState->mPreviousPosY = position.y;
 
   const auto offset = s.mpPerFrameState->mIsOddFrame ? 1 : 0;
-  if (movement < 0) {
-    if (s.mpPerFrameState->mIsOddFrame) {
+  if (movement < 0)
+  {
+    if (s.mpPerFrameState->mIsOddFrame)
+    {
       d.mpServiceProvider->playSound(data::SoundId::FlameThrowerShot);
     }
 
     sprite.mFramesToRender.back() = 1 + offset;
-  } else if (movement > 0) {
+  }
+  else if (movement > 0)
+  {
     sprite.mFramesToRender.back() = engine::IGNORE_RENDER_SLOT;
-  } else {
-    if (!d.mpCollisionChecker->isOnSolidGround(position, bbox)) {
+  }
+  else
+  {
+    if (!d.mpCollisionChecker->isOnSolidGround(position, bbox))
+    {
       sprite.mFramesToRender.back() = 3 + offset;
     }
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

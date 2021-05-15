@@ -21,9 +21,11 @@
 #include <optional>
 
 
-namespace rigel::game_logic::interaction {
+namespace rigel::game_logic::interaction
+{
 
-struct RespawnCheckpoint {
+struct RespawnCheckpoint
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -34,4 +36,4 @@ struct RespawnCheckpoint {
   std::optional<int> mActivationCountdown;
 };
 
-}
+} // namespace rigel::game_logic::interaction

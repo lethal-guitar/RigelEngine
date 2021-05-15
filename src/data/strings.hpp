@@ -16,12 +16,13 @@
 
 #pragma once
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-struct Messages {
+struct Messages
+{
 
-  static constexpr auto PressKeyToUse =
-    "Press a key to use..";
+  static constexpr auto PressKeyToUse = "Press a key to use..";
 
   static constexpr auto KeyAlreadyUsed =
     "THAT KEY IS ALREADY IN USE!\n   Select another key.";
@@ -68,4 +69,4 @@ struct Messages {
   static constexpr auto WelcomeToDukeNukem2 = "WELCOME TO DUKE NUKEM II!";
 };
 
-}
+} // namespace rigel::data

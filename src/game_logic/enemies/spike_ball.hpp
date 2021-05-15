@@ -24,15 +24,18 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SpikeBall {
+struct SpikeBall
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -55,4 +58,4 @@ struct SpikeBall {
   bool mInitialized = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

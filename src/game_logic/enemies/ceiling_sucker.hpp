@@ -21,40 +21,45 @@
 #include <variant>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace ceiling_sucker {
+namespace ceiling_sucker
+{
 
-struct Ready {};
+struct Ready
+{
+};
 
 
-struct Grabbing {
+struct Grabbing
+{
   int mFramesElapsed = 0;
 };
 
 
-struct HoldingPlayer {
+struct HoldingPlayer
+{
   int mFramesElapsed = 0;
 };
 
 
-struct Waiting {
+struct Waiting
+{
   int mFramesElapsed = 0;
 };
 
 
-using State = std::variant<
-  Ready,
-  Grabbing,
-  HoldingPlayer,
-  Waiting>;
+using State = std::variant<Ready, Grabbing, HoldingPlayer, Waiting>;
 
-}
+} // namespace ceiling_sucker
 
 
-namespace behaviors {
+namespace behaviors
+{
 
-struct CeilingSucker {
+struct CeilingSucker
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -64,4 +69,5 @@ struct CeilingSucker {
   ceiling_sucker::State mState;
 };
 
-}}
+} // namespace behaviors
+} // namespace rigel::game_logic

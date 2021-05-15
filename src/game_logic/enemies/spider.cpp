@@ -25,18 +25,21 @@
 #include "game_logic/ientity_factory.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 using namespace engine::components;
 using namespace engine::orientation;
 
 
-namespace {
+namespace
+{
 
 constexpr auto SHAKE_OFF_THRESHOLD = 2;
 
 
-auto floorWalkerConfig() {
+auto floorWalkerConfig()
+{
   static auto config = []() {
     behaviors::SimpleWalker::Configuration c;
     c.mAnimStart = 3;
@@ -48,7 +51,8 @@ auto floorWalkerConfig() {
 }
 
 
-auto ceilingWalkerConfig() {
+auto ceilingWalkerConfig()
+{
   static auto config = []() {
     behaviors::SimpleWalker::Configuration c;
     c.mAnimStart = 0;
@@ -61,8 +65,10 @@ auto ceilingWalkerConfig() {
 }
 
 
-int baseFrameForClinging(const SpiderClingPosition where) {
-  switch (where) {
+int baseFrameForClinging(const SpiderClingPosition where)
+{
+  switch (where)
+  {
     case SpiderClingPosition::Head:
       return 7;
 
@@ -80,10 +86,11 @@ int baseFrameForClinging(const SpiderClingPosition where) {
 
 base::Vector offsetForClinging(
   const SpiderClingPosition where,
-  const Orientation playerOrientation
-) {
+  const Orientation playerOrientation)
+{
   const auto playerFacingRight = playerOrientation == Orientation::Right;
-  switch (where) {
+  switch (where)
+  {
     case SpiderClingPosition::Head:
       return playerFacingRight ? base::Vector{0, -3} : base::Vector{1, -3};
 
@@ -98,15 +105,15 @@ base::Vector offsetForClinging(
   return base::Vector{0, 0};
 }
 
-}
+} // namespace
 
 
 void Spider::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
   auto& sprite = *entity.component<Sprite>();
@@ -119,11 +126,13 @@ void Spider::update(
   };
 
   auto tryClingToPlayer = [&, this](const SpiderClingPosition clingPos) {
+    // clang-format off
     if (
       s.mpPlayer->hasSpiderAt(clingPos) ||
       s.mpPlayer->isDead() ||
-      s.mpPlayer->isCloaked()
-    ) {
+      s.mpPlayer->isCloaked())
+    // clang-format on
+    {
       return false;
     }
 
@@ -155,9 +164,8 @@ void Spider::update(
 
   auto fallOff = [&, this]() {
     using M = SpriteMovement;
-    const auto movementType = d.mpRandomGenerator->gen() % 2 != 0
-      ? M::FlyUpperLeft
-      : M::FlyUpperRight;
+    const auto movementType =
+      d.mpRandomGenerator->gen() % 2 != 0 ? M::FlyUpperLeft : M::FlyUpperRight;
     spawnMovingEffectSprite(
       *d.mpEntityFactory,
       data::ActorID::Spider_shaken_off,
@@ -175,11 +183,10 @@ void Spider::update(
 
   auto clingToPlayer = [&, this]() {
     *entity.component<Orientation>() = playerOrientation;
-    position = playerPosition +
-      offsetForClinging(mClingPosition, playerOrientation);
+    position =
+      playerPosition + offsetForClinging(mClingPosition, playerOrientation);
     sprite.mFramesToRender[0] =
-      baseFrameForClinging(mClingPosition) +
-      d.mpRandomGenerator->gen() % 2;
+      baseFrameForClinging(mClingPosition) + d.mpRandomGenerator->gen() % 2;
   };
 
   auto updateShakeOff = [&, this]() {
@@ -187,59 +194,72 @@ void Spider::update(
       playerOrientation != mPreviousPlayerOrientation;
     mPreviousPlayerOrientation = playerOrientation;
 
-    if (playerTurnedThisFrame) {
+    if (playerTurnedThisFrame)
+    {
       ++mShakeOffProgress;
-    } else if (s.mpPerFrameState->mIsOddFrame && mShakeOffProgress > 0) {
+    }
+    else if (s.mpPerFrameState->mIsOddFrame && mShakeOffProgress > 0)
+    {
       --mShakeOffProgress;
     }
 
-    if (mShakeOffProgress >= SHAKE_OFF_THRESHOLD) {
+    if (mShakeOffProgress >= SHAKE_OFF_THRESHOLD)
+    {
       fallOff();
     }
   };
 
-  switch (mState) {
+  switch (mState)
+  {
     case State::Uninitialized:
-      if (d.mpCollisionChecker->isOnSolidGround(worldSpaceBox)) {
+      if (d.mpCollisionChecker->isOnSolidGround(worldSpaceBox))
+      {
         walkOnFloor(entity);
-      } else {
+      }
+      else
+      {
         walkOnCeiling();
       }
       break;
 
     case State::OnCeiling:
-      if (
-        position.x == playerPosition.x &&
-        position.y < playerPosition.y - 3
-      ) {
+      if (position.x == playerPosition.x && position.y < playerPosition.y - 3)
+      {
         startFalling();
       }
       break;
 
     case State::Falling:
-      if (isTouchingPlayer()) {
+      if (isTouchingPlayer())
+      {
         tryClingToPlayer(SpiderClingPosition::Head);
       }
       break;
 
     case State::OnFloor:
-      if (isTouchingPlayer()) {
+      if (isTouchingPlayer())
+      {
         const auto success = tryClingToPlayer(SpiderClingPosition::Weapon);
-        if (!success) {
+        if (!success)
+        {
           tryClingToPlayer(SpiderClingPosition::Back);
         }
       }
       break;
 
     case State::ClingingToPlayer:
-      if (s.mpPlayer->isIncapacitated()) {
+      if (s.mpPlayer->isIncapacitated())
+      {
         detachAndDestroy();
         return;
       }
 
-      if (s.mpPlayer->isDead()) {
+      if (s.mpPlayer->isDead())
+      {
         fallOff();
-      } else {
+      }
+      else
+      {
         clingToPlayer();
         updateShakeOff();
       }
@@ -249,7 +269,8 @@ void Spider::update(
       break;
   }
 
-  if (entity && mWalkerBehavior.mpConfig) {
+  if (entity && mWalkerBehavior.mpConfig)
+  {
     mWalkerBehavior.update(d, s, isOnScreen, entity);
   }
 }
@@ -259,15 +280,17 @@ void Spider::onCollision(
   GlobalDependencies& d,
   GlobalState& s,
   const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity
-) {
-  if (mState == State::Falling) {
+  entityx::Entity entity)
+{
+  if (mState == State::Falling)
+  {
     walkOnFloor(entity);
   }
 }
 
 
-void Spider::walkOnFloor(entityx::Entity entity) {
+void Spider::walkOnFloor(entityx::Entity entity)
+{
   mState = State::OnFloor;
 
   auto& sprite = *entity.component<Sprite>();
@@ -276,4 +299,4 @@ void Spider::walkOnFloor(entityx::Entity entity) {
   mWalkerBehavior.mpConfig = floorWalkerConfig();
 }
 
-}
+} // namespace rigel::game_logic::behaviors

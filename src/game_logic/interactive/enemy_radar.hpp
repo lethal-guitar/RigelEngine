@@ -24,22 +24,28 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace components {
+namespace components
+{
 
-struct RadarDish {};
+struct RadarDish
+{
+};
 
-}
+} // namespace components
 
 
-class RadarDishCounter : public entityx::Receiver<RadarDishCounter> {
+class RadarDishCounter : public entityx::Receiver<RadarDishCounter>
+{
 public:
   RadarDishCounter(
     entityx::EntityManager& entities,
@@ -48,19 +54,21 @@ public:
   int numRadarDishes() const;
   bool radarDishesPresent() const;
 
-  void receive(
-    const entityx::ComponentAddedEvent<components::RadarDish>& event);
-  void receive(
-    const entityx::ComponentRemovedEvent<components::RadarDish>& event);
+  void
+    receive(const entityx::ComponentAddedEvent<components::RadarDish>& event);
+  void
+    receive(const entityx::ComponentRemovedEvent<components::RadarDish>& event);
 
 private:
   int mNumRadarDishes = 0;
 };
 
 
-namespace behaviors {
+namespace behaviors
+{
 
-struct RadarComputer {
+struct RadarComputer
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -70,6 +78,6 @@ struct RadarComputer {
   int mAnimationStep = 0;
 };
 
-}
+} // namespace behaviors
 
-}
+} // namespace rigel::game_logic

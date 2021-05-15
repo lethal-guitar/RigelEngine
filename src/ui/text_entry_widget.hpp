@@ -26,13 +26,16 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 class MenuElementRenderer;
 
-class TextEntryWidget {
+class TextEntryWidget
+{
 public:
-  enum class Style {
+  enum class Style
+  {
     Regular,
     BigText
   };
@@ -61,4 +64,4 @@ private:
   Style mTextStyle;
 };
 
-}
+} // namespace rigel::ui

@@ -27,14 +27,16 @@
 #include <stdexcept>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 using namespace std;
 using data::GameTraits;
 using data::PixelBuffer;
 using data::tilesToPixels;
 
-namespace {
+namespace
+{
 
 using PalettizedPixelBuffer = std::vector<std::uint8_t>;
 
@@ -43,8 +45,8 @@ size_t inferHeight(
   const ByteBufferCIter begin,
   const ByteBufferCIter end,
   const size_t widthInTiles,
-  const size_t bytesPerTile
-) {
+  const size_t bytesPerTile)
+{
   const auto availableBytes = distance(begin, end);
   const auto numTiles = static_cast<size_t>(availableBytes / bytesPerTile);
   return base::integerDivCeil(numTiles, widthInTiles);
@@ -56,13 +58,14 @@ size_t inferHeight(
  * Pre-conditions:
  *   source and target can be advanced pixelCount times.
  */
-template<typename SourceIter, typename TargetIter>
+template <typename SourceIter, typename TargetIter>
 SourceIter readEgaMaskPlane(
   SourceIter source,
   TargetIter target,
-  const size_t pixelCount
-) {
-  for (size_t i = 0; i < pixelCount; ++i) {
+  const size_t pixelCount)
+{
+  for (size_t i = 0; i < pixelCount; ++i)
+  {
     *target++ = *source++;
   }
 
@@ -76,16 +79,18 @@ SourceIter readEgaMaskPlane(
  *   target can be advanced pixelCount times.
  *   source can be advanced pixelCount*4 times.
  */
-template<typename SourceIter, typename TargetIter>
+template <typename SourceIter, typename TargetIter>
 SourceIter readEgaColorData(
   SourceIter source,
   TargetIter target,
-  const size_t pixelCount
-) {
-  for (auto plane = 0u; plane < GameTraits::egaPlanes; ++plane) {
+  const size_t pixelCount)
+{
+  for (auto plane = 0u; plane < GameTraits::egaPlanes; ++plane)
+  {
     auto targetIterForPlane = target;
 
-    for (auto pixel = 0u; pixel < pixelCount; ++pixel) {
+    for (auto pixel = 0u; pixel < pixelCount; ++pixel)
+    {
       const auto planeBit = *source++;
       *targetIterForPlane++ |= planeBit << plane;
     }
@@ -102,17 +107,17 @@ SourceIter readEgaColorData(
  *   target can be advanced pixelCount times.
  *   source can be advanced pixelCount times.
  */
-template<typename SourceIter, typename TargetIter>
+template <typename SourceIter, typename TargetIter>
 SourceIter readEgaMonochromeData(
   SourceIter source,
   TargetIter target,
-  const size_t pixelCount
-) {
-  for (size_t i = 0; i < pixelCount; ++i) {
+  const size_t pixelCount)
+{
+  for (size_t i = 0; i < pixelCount; ++i)
+  {
     const auto pixelPresent = *source++ != 0;
-    *target++ = pixelPresent ?
-      data::Pixel{255, 255, 255, 255} :
-      data::Pixel{0, 0, 0, 255};
+    *target++ = pixelPresent ? data::Pixel{255, 255, 255, 255}
+                             : data::Pixel{0, 0, 0, 255};
   }
 
   return source;
@@ -127,38 +132,43 @@ SourceIter readEgaMonochromeData(
  *   pixels can be advanced pixelCount times.
  *   maskValues can be advanced pixelCount times.
  */
-template<typename MaskIter, typename PixelBufferIter>
+template <typename MaskIter, typename PixelBufferIter>
 void applyEgaMask(
   MaskIter maskValues,
   PixelBufferIter pixels,
-  const size_t pixelCount
-) {
-  for (size_t i = 0; i < pixelCount; ++i, ++pixels) {
+  const size_t pixelCount)
+{
+  for (size_t i = 0; i < pixelCount; ++i, ++pixels)
+  {
     const auto maskActive = *maskValues++;
-    if (maskActive) {
+    if (maskActive)
+    {
       pixels->a = 0;
     }
   }
 }
 
 
-template<typename Callable>
+template <typename Callable>
 data::PixelBuffer decodeTiledEgaData(
   const ByteBufferCIter dataIter,
   const std::size_t widthInTiles,
   const std::size_t heightInTiles,
-  Callable decodeRow
-) {
+  Callable decodeRow)
+{
   const auto targetBufferStride = tilesToPixels(widthInTiles);
   PixelBuffer pixels(
     widthInTiles * heightInTiles * GameTraits::tileSizeSquared);
 
   BitWiseIterator<ByteBufferCIter> bitsIter(dataIter);
-  for (auto row=0u; row<heightInTiles; ++row) {
-    for (auto col=0u; col<widthInTiles; ++col) {
-      for (size_t rowInTile=0u; rowInTile<GameTraits::tileSize; ++rowInTile) {
+  for (auto row = 0u; row < heightInTiles; ++row)
+  {
+    for (auto col = 0u; col < widthInTiles; ++col)
+    {
+      for (size_t rowInTile = 0u; rowInTile < GameTraits::tileSize; ++rowInTile)
+      {
         const auto insertStart = tilesToPixels(col) +
-          (tilesToPixels(row) + rowInTile)*targetBufferStride;
+          (tilesToPixels(row) + rowInTile) * targetBufferStride;
         const auto targetPixelIter = pixels.begin() + insertStart;
 
         bitsIter = decodeRow(bitsIter, targetPixelIter);
@@ -169,28 +179,26 @@ data::PixelBuffer decodeTiledEgaData(
   return pixels;
 }
 
-}
+} // namespace
 
 
 data::PixelBuffer decodeSimplePlanarEgaBuffer(
   const ByteBufferCIter begin,
   const ByteBufferCIter end,
-  const Palette16& palette
-) {
+  const Palette16& palette)
+{
   const auto numBytes = distance(begin, end);
   assert(numBytes > 0);
-  const auto numPixels =
-    static_cast<size_t>(numBytes / GameTraits::egaPlanes) *
+  const auto numPixels = static_cast<size_t>(numBytes / GameTraits::egaPlanes) *
     GameTraits::pixelsPerEgaByte;
 
   BitWiseIterator<ByteBufferCIter> bitsIter(begin);
   PalettizedPixelBuffer indexedPixels(numPixels, 0);
   readEgaColorData(bitsIter, indexedPixels.begin(), numPixels);
 
-  return utils::transformed(indexedPixels,
-    [&palette](const auto colorIndex) {
-      return palette[colorIndex];
-    });
+  return utils::transformed(indexedPixels, [&palette](const auto colorIndex) {
+    return palette[colorIndex];
+  });
 }
 
 
@@ -199,16 +207,20 @@ data::Image loadTiledImage(
   const ByteBufferCIter end,
   std::size_t widthInTiles,
   const Palette16& palette,
-  const data::TileImageType type
-) {
+  const data::TileImageType type)
+{
   const auto heightInTiles =
     inferHeight(begin, end, widthInTiles, GameTraits::bytesPerTile(type));
 
-  auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
+  auto pixels = decodeTiledEgaData(
+    begin,
+    widthInTiles,
+    heightInTiles,
     [&palette, type](auto sourceBitsIter, const auto targetPixelIter) {
       const auto isMasked = type == data::TileImageType::Masked;
       array<bool, GameTraits::tileSize> pixelMask;
-      if (isMasked) {
+      if (isMasked)
+      {
         sourceBitsIter = readEgaMaskPlane(
           sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
       }
@@ -218,11 +230,13 @@ data::Image loadTiledImage(
       sourceBitsIter = readEgaColorData(
         sourceBitsIter, indexedPixels.begin(), GameTraits::tileSize);
 
-      for (auto i=0; i<GameTraits::tileSize; ++i) {
+      for (auto i = 0; i < GameTraits::tileSize; ++i)
+      {
         *(targetPixelIter + i) = palette[indexedPixels[i]];
       }
 
-      if (isMasked) {
+      if (isMasked)
+      {
         applyEgaMask(pixelMask.begin(), targetPixelIter, GameTraits::tileSize);
       }
 
@@ -239,15 +253,19 @@ data::Image loadTiledImage(
 data::Image loadTiledFontBitmap(
   const ByteBufferCIter begin,
   const ByteBufferCIter end,
-  const std::size_t widthInTiles
-) {
+  const std::size_t widthInTiles)
+{
   const auto heightInTiles =
     inferHeight(begin, end, widthInTiles, GameTraits::bytesPerFontTile());
 
-  auto pixels = decodeTiledEgaData(begin, widthInTiles, heightInTiles,
+  auto pixels = decodeTiledEgaData(
+    begin,
+    widthInTiles,
+    heightInTiles,
     [](auto sourceBitsIter, const auto targetPixelIter) {
       array<bool, GameTraits::tileSize> pixelMask;
-      sourceBitsIter = readEgaMaskPlane(sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
+      sourceBitsIter = readEgaMaskPlane(
+        sourceBitsIter, pixelMask.begin(), GameTraits::tileSize);
 
       sourceBitsIter = readEgaMonochromeData(
         sourceBitsIter, targetPixelIter, GameTraits::tileSize);
@@ -261,4 +279,4 @@ data::Image loadTiledFontBitmap(
     tilesToPixels(heightInTiles));
 }
 
-}
+} // namespace rigel::loader

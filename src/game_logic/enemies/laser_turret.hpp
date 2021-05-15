@@ -24,15 +24,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct LaserTurret {
+struct LaserTurret
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -56,4 +59,4 @@ struct LaserTurret {
   int mNextShotCountdown = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

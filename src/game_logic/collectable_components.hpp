@@ -23,11 +23,14 @@
 #include <variant>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace components {
+namespace components
+{
 
-struct CollectableItem {
+struct CollectableItem
+{
   std::optional<int> mGivenScore;
   std::optional<int> mGivenScoreAtFullHealth;
   std::optional<int> mGivenHealth;
@@ -39,25 +42,26 @@ struct CollectableItem {
 };
 
 
-struct CollectableItemForCheat {
+struct CollectableItemForCheat
+{
   std::variant<data::InventoryItemType, data::WeaponType> mGivenItem;
 };
 
-}
+} // namespace components
 
 
 inline std::optional<int> givenScore(
   const components::CollectableItem& collectable,
-  const bool playerAtFullHealth
-) {
-  if (collectable.mGivenScore && collectable.mGivenScoreAtFullHealth) {
-    const auto score = playerAtFullHealth
-      ? *collectable.mGivenScoreAtFullHealth
-      : *collectable.mGivenScore;
+  const bool playerAtFullHealth)
+{
+  if (collectable.mGivenScore && collectable.mGivenScoreAtFullHealth)
+  {
+    const auto score = playerAtFullHealth ? *collectable.mGivenScoreAtFullHealth
+                                          : *collectable.mGivenScore;
     return score;
   }
 
   return collectable.mGivenScore;
 }
 
-}
+} // namespace rigel::game_logic

@@ -22,7 +22,8 @@
 #include "renderer/renderer.hpp"
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 /** Image (bitmap) residing in GPU memory
  *
@@ -30,7 +31,8 @@ namespace rigel::renderer {
  * provided by the Renderer class. It automatically manages life-time
  * and offers convenient drawing functions for various use cases.
  */
-class Texture {
+class Texture
+{
 public:
   Texture() = default;
   Texture(Renderer* renderer, const data::Image& image);
@@ -45,7 +47,8 @@ public:
   {
   }
 
-  Texture& operator=(Texture&& other) noexcept {
+  Texture& operator=(Texture&& other) noexcept
+  {
     using std::swap;
 
     swap(mpRenderer, other.mpRenderer);
@@ -73,27 +76,19 @@ public:
    * can be larger than the texture itself, which will cause the texture
    * to be drawn multiple times (repeated).
    */
-  void render(
-    const base::Vector& position, const base::Rect<int>& sourceRect) const;
+  void render(const base::Vector& position, const base::Rect<int>& sourceRect)
+    const;
 
   /** Render entire texture scaled to fill the given rectangle */
   void renderScaled(const base::Rect<int>& destRect) const;
 
-  int width() const {
-    return mWidth;
-  }
+  int width() const { return mWidth; }
 
-  int height() const {
-    return mHeight;
-  }
+  int height() const { return mHeight; }
 
-  base::Extents extents() const {
-    return {mWidth, mHeight};
-  }
+  base::Extents extents() const { return {mWidth, mHeight}; }
 
-  TextureId data() const {
-    return mId;
-  }
+  TextureId data() const { return mId; }
 
 protected:
   Texture(Renderer* pRenderer, TextureId id, int width, int height)
@@ -152,17 +147,20 @@ protected:
  * Once the outermost scope's binding is destroyed, the default render target
  * will be active again (i.e. drawing to the screen)
  */
-class RenderTargetTexture : public Texture {
+class RenderTargetTexture : public Texture
+{
 public:
   RenderTargetTexture(Renderer* pRenderer, int width, int height);
 
-  [[nodiscard]] auto bind() {
+  [[nodiscard]] auto bind()
+  {
     mpRenderer->pushState();
     mpRenderer->setRenderTarget(data());
     return base::defer([this]() { mpRenderer->popState(); });
   }
 
-  [[nodiscard]] auto bindAndReset() {
+  [[nodiscard]] auto bindAndReset()
+  {
     mpRenderer->pushState();
     mpRenderer->resetState();
     mpRenderer->setRenderTarget(data());
@@ -170,4 +168,4 @@ public:
   }
 };
 
-}
+} // namespace rigel::renderer

@@ -21,27 +21,36 @@
 #include <variant>
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace snake {
+namespace snake
+{
 
-struct Walking {};
+struct Walking
+{
+};
 
-struct GrabbingPlayer {
+struct GrabbingPlayer
+{
   int mFramesElapsed = 0;
 };
 
-struct SwallowedPlayer {};
+struct SwallowedPlayer
+{
+};
 
 
 using State = std::variant<Walking, GrabbingPlayer, SwallowedPlayer>;
 
-}
+} // namespace snake
 
 
-namespace behaviors {
+namespace behaviors
+{
 
-struct Snake {
+struct Snake
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -51,4 +60,5 @@ struct Snake {
   snake::State mState;
 };
 
-}}
+} // namespace behaviors
+} // namespace rigel::game_logic

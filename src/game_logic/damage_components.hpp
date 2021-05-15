@@ -24,11 +24,14 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
+namespace rigel::game_logic
+{
 
-namespace components {
+namespace components
+{
 
-namespace parameter_aliases {
+namespace parameter_aliases
+{
 
 using Damage = int;
 using Health = int;
@@ -36,15 +39,15 @@ using GivenScore = int;
 using IsFatal = bool;
 using DestroyOnContact = bool;
 
-}
+} // namespace parameter_aliases
 
 
-struct PlayerDamaging {
+struct PlayerDamaging
+{
   explicit PlayerDamaging(
     const int amount,
     const bool isFatal = false,
-    const bool destroyOnContact = false
-  )
+    const bool destroyOnContact = false)
     : mAmount(amount)
     , mIsFatal(isFatal)
     , mDestroyOnContact(destroyOnContact)
@@ -57,7 +60,8 @@ struct PlayerDamaging {
 };
 
 
-struct Shootable {
+struct Shootable
+{
   explicit Shootable(const int health, const int givenScore = 0)
     : mHealth(health)
     , mGivenScore(givenScore)
@@ -80,7 +84,8 @@ struct Shootable {
 };
 
 
-struct DamageInflicting {
+struct DamageInflicting
+{
   explicit DamageInflicting(
     const int amount,
     const bool destroyOnContact = true)
@@ -95,8 +100,10 @@ struct DamageInflicting {
 };
 
 
-struct PlayerProjectile {
-  enum class Type {
+struct PlayerProjectile
+{
+  enum class Type
+  {
     Normal,
     Laser,
     Rocket,
@@ -113,22 +120,25 @@ struct PlayerProjectile {
   Type mType;
 };
 
-}
+} // namespace components
 
 
-namespace events {
+namespace events
+{
 
-struct ShootableDamaged {
+struct ShootableDamaged
+{
   entityx::Entity mEntity;
   base::Point<float> mInflictorVelocity;
 };
 
 
-struct ShootableKilled {
+struct ShootableKilled
+{
   entityx::Entity mEntity;
   base::Point<float> mInflictorVelocity;
 };
 
-}
+} // namespace events
 
-}
+} // namespace rigel::game_logic

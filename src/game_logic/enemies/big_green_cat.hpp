@@ -23,15 +23,18 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
-}
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct BigGreenCat {
+struct BigGreenCat
+{
   static constexpr auto FRAMES_TO_WAIT = 10;
 
   void update(
@@ -44,4 +47,4 @@ struct BigGreenCat {
   int mAnimationStep = 0;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

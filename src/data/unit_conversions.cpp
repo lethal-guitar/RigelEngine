@@ -19,12 +19,14 @@
 #include "game_traits.hpp"
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
 using namespace base;
 
 
-Vector tileVectorToPixelVector(const Vector& tileVec) {
+Vector tileVectorToPixelVector(const Vector& tileVec)
+{
   return {
     tilesToPixels(tileVec.x),
     tilesToPixels(tileVec.y),
@@ -32,7 +34,8 @@ Vector tileVectorToPixelVector(const Vector& tileVec) {
 }
 
 
-Vector pixelVectorToTileVector(const Vector& pixelVector) {
+Vector pixelVectorToTileVector(const Vector& pixelVector)
+{
   return {
     pixelsToTiles(pixelVector.x),
     pixelsToTiles(pixelVector.y),
@@ -40,9 +43,8 @@ Vector pixelVectorToTileVector(const Vector& pixelVector) {
 }
 
 
-Extents tileExtentsToPixelExtents(
-  const Extents& tileExtents
-) {
+Extents tileExtentsToPixelExtents(const Extents& tileExtents)
+{
   return {
     tilesToPixels(tileExtents.width),
     tilesToPixels(tileExtents.height),
@@ -50,9 +52,8 @@ Extents tileExtentsToPixelExtents(
 }
 
 
-Extents pixelExtentsToTileExtents(
-  const Extents& pixelExtents
-) {
+Extents pixelExtentsToTileExtents(const Extents& pixelExtents)
+{
   return {
     pixelsToTiles(pixelExtents.width),
     pixelsToTiles(pixelExtents.height),
@@ -60,4 +61,4 @@ Extents pixelExtentsToTileExtents(
 }
 
 
-}
+} // namespace rigel::data

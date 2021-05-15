@@ -24,7 +24,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
 void markActiveEntities(
   entityx::EntityManager& es,

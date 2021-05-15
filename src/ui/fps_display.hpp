@@ -19,9 +19,11 @@
 #include "engine/timing.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class FpsDisplay {
+class FpsDisplay
+{
 public:
   void updateAndRender(engine::TimeDelta elapsed);
 
@@ -31,4 +33,4 @@ private:
   float mFilteredFrameTime = 0.0f;
 };
 
-}
+} // namespace rigel::ui

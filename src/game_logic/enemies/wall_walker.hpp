@@ -22,17 +22,24 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
-namespace rigel::engine { class RandomNumberGenerator; }
-namespace rigel::game_logic {
-  struct GlobalDependencies;
-  struct GlobalState;
+namespace rigel::engine
+{
+class RandomNumberGenerator;
 }
+namespace rigel::game_logic
+{
+struct GlobalDependencies;
+struct GlobalState;
+} // namespace rigel::game_logic
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct WallWalker {
-  enum class Direction {
+struct WallWalker
+{
+  enum class Direction
+  {
     Up,
     Down,
     Left,
@@ -53,4 +60,4 @@ struct WallWalker {
   bool mShouldSkipThisFrame = false;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

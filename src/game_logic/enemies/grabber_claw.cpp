@@ -24,17 +24,19 @@
 #include "game_logic/global_dependencies.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
 void GrabberClaw::update(
   GlobalDependencies& d,
   GlobalState& s,
   bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using game_logic::components::Shootable;
 
-  if (!entity.has_component<engine::components::ExtendedFrameList>()) {
+  if (!entity.has_component<engine::components::ExtendedFrameList>())
+  {
     entity.assign<engine::components::ExtendedFrameList>();
   }
 
@@ -44,21 +46,25 @@ void GrabberClaw::update(
 
   const auto previousExtensionStep = mExtensionStep;
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const Extending&) {
-      if (mExtensionStep == 0) {
+      if (mExtensionStep == 0)
+      {
         entity.component<Shootable>()->mInvincible = false;
       }
 
       ++position.y;
       ++mExtensionStep;
-      if (mExtensionStep == 5) {
+      if (mExtensionStep == 5)
+      {
         mState = Grabbing{};
       }
     },
 
     [&, this](Grabbing& state) {
-      if (mExtensionStep == 5) {
+      if (mExtensionStep == 5)
+      {
         ++position.y;
         mExtensionStep = 6;
         entity.assign<game_logic::components::PlayerDamaging>(1);
@@ -66,13 +72,15 @@ void GrabberClaw::update(
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 19) {
+      if (state.mFramesElapsed == 19)
+      {
         mState = Retracting{};
       }
     },
 
     [&, this](const Retracting&) {
-      if (mExtensionStep == 6) {
+      if (mExtensionStep == 6)
+      {
         entity.remove<game_logic::components::PlayerDamaging>();
         entity.remove<engine::components::AnimationLoop>();
         animationFrame = 1;
@@ -80,33 +88,38 @@ void GrabberClaw::update(
 
       --position.y;
       --mExtensionStep;
-      if (mExtensionStep == 0) {
+      if (mExtensionStep == 0)
+      {
         mState = Waiting{};
       }
     },
 
     [&, this](Waiting& state) {
-      if (state.mFramesElapsed == 0) {
+      if (state.mFramesElapsed == 0)
+      {
         entity.component<Shootable>()->mInvincible = true;
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 10) {
+      if (state.mFramesElapsed == 10)
+      {
         mState = Extending{};
       }
     });
 
   engine::synchronizeBoundingBoxToSprite(entity);
 
-  if (mExtensionStep != previousExtensionStep) {
+  if (mExtensionStep != previousExtensionStep)
+  {
     auto& additionalFrames =
       entity.component<engine::components::ExtendedFrameList>()->mFrames;
 
     additionalFrames.clear();
-    for (int i = 0; i < mExtensionStep + 1; ++i) {
+    for (int i = 0; i < mExtensionStep + 1; ++i)
+    {
       additionalFrames.push_back({0, base::Vector{0, -(i + 1)}});
     }
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

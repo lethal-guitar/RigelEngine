@@ -25,9 +25,11 @@
 #include <vector>
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-class MoviePlayer {
+class MoviePlayer
+{
 public:
   /** The frame callback will be invoked each time a new animation frame is
    * shown. If it returns a number, it will be used to set the new frame delay
@@ -47,7 +49,8 @@ public:
   bool hasCompletedPlayback() const;
 
 private:
-  struct FrameData {
+  struct FrameData
+  {
     renderer::Texture mImage;
     int mStartRow;
   };
@@ -67,4 +70,4 @@ private:
   engine::TimeDelta mElapsedTime = 0.0;
 };
 
-}
+} // namespace rigel::ui

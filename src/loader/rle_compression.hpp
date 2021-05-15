@@ -21,24 +21,30 @@
 #include <optional>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 /** Expand single RLE word by calling callback for each output byte */
-template<typename Callable>
+template <typename Callable>
 void expandSingleRleWord(
   const std::int8_t marker,
   LeStreamReader& reader,
-  Callable callback
-) {
-  if (marker > 0) {
+  Callable callback)
+{
+  if (marker > 0)
+  {
     const auto byteToRepeat = reader.readU8();
     const auto numRepetitions = marker;
-    for (int i=0; i<numRepetitions; ++i) {
+    for (int i = 0; i < numRepetitions; ++i)
+    {
       callback(byteToRepeat);
     }
-  } else {
+  }
+  else
+  {
     const auto numBytesToCopy = -marker;
-    for (int i=0; i<numBytesToCopy; ++i) {
+    for (int i = 0; i < numBytesToCopy; ++i)
+    {
       callback(reader.readU8());
     }
   }
@@ -46,14 +52,14 @@ void expandSingleRleWord(
 
 
 /** Decompress RLE data with unknown size - assumes terminating 0 marker */
-template<typename Callable>
-void decompressRle(
-  LeStreamReader& reader,
-  Callable callback
-) {
-  for (;;) {
+template <typename Callable>
+void decompressRle(LeStreamReader& reader, Callable callback)
+{
+  for (;;)
+  {
     const auto marker = reader.readS8();
-    if (marker == 0) {
+    if (marker == 0)
+    {
       break;
     }
 
@@ -63,16 +69,17 @@ void decompressRle(
 
 
 /** Decompress RLE data with known size (number of RLE marker words) */
-template<typename Callable>
+template <typename Callable>
 void decompressRle(
   LeStreamReader& reader,
   const std::size_t numRleWords,
-  Callable callback
-) {
-  for (auto wordsRead = 0u; wordsRead < numRleWords; ++wordsRead) {
+  Callable callback)
+{
+  for (auto wordsRead = 0u; wordsRead < numRleWords; ++wordsRead)
+  {
     expandSingleRleWord(reader.readS8(), reader, callback);
   }
 }
 
 
-}
+} // namespace rigel::loader

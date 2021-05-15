@@ -25,20 +25,14 @@
 #include <array>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-constexpr base::Vector TILE_BURN_AREA_OFFSETS[] = {
-  {0, 0},
-  {0, -1},
-  {0, -2},
-  {1, -2},
-  {2, -2},
-  {2, -1},
-  {2, 0},
-  {1, 0}
-};
+constexpr base::Vector TILE_BURN_AREA_OFFSETS[] =
+  {{0, 0}, {0, -1}, {0, -2}, {1, -2}, {2, -2}, {2, -1}, {2, 0}, {1, 0}};
 
 }
 
@@ -47,18 +41,21 @@ void TileBurner::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using components::BehaviorController;
   using engine::components::WorldPosition;
 
   const auto& myPosition = *entity.component<WorldPosition>();
 
-  if (mFramesElapsed == 0) {
-    for (const auto& offset : TILE_BURN_AREA_OFFSETS) {
+  if (mFramesElapsed == 0)
+  {
+    for (const auto& offset : TILE_BURN_AREA_OFFSETS)
+    {
       const auto [x, y] = myPosition + offset;
 
-      if (s.mpMap->attributes(x, y).isFlammable()) {
+      if (s.mpMap->attributes(x, y).isFlammable())
+      {
         s.mpMap->setTileAt(0, x, y, 0);
         s.mpMap->setTileAt(1, x, y, 0);
 
@@ -69,13 +66,16 @@ void TileBurner::update(
     }
   }
 
-  for (const auto& info : mBurnersToSpawn) {
-    if (mFramesElapsed == info.mFramesToWait) {
-      spawnOneShotSprite(*d.mpEntityFactory, data::ActorID::Shot_impact_FX, info.mPosition);
+  for (const auto& info : mBurnersToSpawn)
+  {
+    if (mFramesElapsed == info.mFramesToWait)
+    {
+      spawnOneShotSprite(
+        *d.mpEntityFactory, data::ActorID::Shot_impact_FX, info.mPosition);
     }
   }
 
   ++mFramesElapsed;
 }
 
-}
+} // namespace rigel::game_logic::behaviors

@@ -20,7 +20,8 @@
 #include <iterator>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 /** Adapter iterator which returns individual bits from a sequence of values
  *
@@ -28,8 +29,9 @@ namespace rigel::loader {
  * iterator, it can be used in multi-pass algorithms, even though it doesn't
  * satisfy the requirements for ForwardIterator.
  */
-template<typename OriginalIterType>
-class BitWiseIterator {
+template <typename OriginalIterType>
+class BitWiseIterator
+{
 public:
   using value_type = bool;
   using reference = value_type&;
@@ -44,25 +46,25 @@ public:
   {
   }
 
-  bool operator==(const BitWiseIterator& other) {
-    return
-      other.mOriginalIter == mOriginalIter &&
-      other.mBitIndex == mBitIndex;
+  bool operator==(const BitWiseIterator& other)
+  {
+    return other.mOriginalIter == mOriginalIter && other.mBitIndex == mBitIndex;
   }
 
-  bool operator!=(const BitWiseIterator& other) {
-    return !(*this == other);
-  }
+  bool operator!=(const BitWiseIterator& other) { return !(*this == other); }
 
-  BitWiseIterator operator++(int) {
+  BitWiseIterator operator++(int)
+  {
     BitWiseIterator copy(*this);
     ++(*this);
     return copy;
   }
 
-  BitWiseIterator& operator++() {
+  BitWiseIterator& operator++()
+  {
     ++mBitIndex;
-    if (mBitIndex == NUM_BITS) {
+    if (mBitIndex == NUM_BITS)
+    {
       ++mOriginalIter;
       mBitIndex = 0;
     }
@@ -70,7 +72,8 @@ public:
     return *this;
   }
 
-  bool operator*() {
+  bool operator*()
+  {
     const auto actualBitIndex = (NUM_BITS - 1) - mBitIndex;
     const auto bitMask = 1 << actualBitIndex;
 
@@ -85,4 +88,4 @@ private:
   std::uint8_t mBitIndex;
 };
 
-}
+} // namespace rigel::loader

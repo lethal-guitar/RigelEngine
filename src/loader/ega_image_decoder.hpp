@@ -16,13 +16,14 @@
 
 #pragma once
 
-#include "loader/byte_buffer.hpp"
-#include "loader/palette.hpp"
 #include "data/game_traits.hpp"
 #include "data/image.hpp"
+#include "loader/byte_buffer.hpp"
+#include "loader/palette.hpp"
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
 data::PixelBuffer decodeSimplePlanarEgaBuffer(
   ByteBufferCIter begin,
@@ -42,20 +43,14 @@ inline data::Image loadTiledImage(
   const ByteBuffer& data,
   std::size_t widthInTiles,
   const Palette16& palette,
-  const data::TileImageType type = data::TileImageType::Unmasked
-) {
-  return loadTiledImage(
-    data.begin(),
-    data.end(),
-    widthInTiles,
-    palette,
-    type);
+  const data::TileImageType type = data::TileImageType::Unmasked)
+{
+  return loadTiledImage(data.begin(), data.end(), widthInTiles, palette, type);
 }
 
 data::Image loadTiledFontBitmap(
   ByteBufferCIter begin,
   ByteBufferCIter end,
-  std::size_t widthInTiles
-);
+  std::size_t widthInTiles);
 
-}
+} // namespace rigel::loader

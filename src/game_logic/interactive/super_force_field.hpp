@@ -21,9 +21,11 @@
 #include <optional>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-struct SuperForceField {
+struct SuperForceField
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -42,4 +44,4 @@ struct SuperForceField {
   std::optional<int> mDestructionFramesElapsed;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

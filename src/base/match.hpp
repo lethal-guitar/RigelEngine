@@ -20,26 +20,30 @@
 #include <variant>
 
 
-namespace rigel::base {
+namespace rigel::base
+{
 
-namespace detail {
+namespace detail
+{
 
-template<class... Ts>
-struct overloaded : Ts...  {
+template <class... Ts>
+struct overloaded : Ts...
+{
   using Ts::operator()...;
 };
 
-template<class... Ts>
+template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-}
+} // namespace detail
 
 
 template <typename Variant, typename... Matchers>
-auto match(Variant&& variant, Matchers&&... matchers) {
+auto match(Variant&& variant, Matchers&&... matchers)
+{
   return std::visit(
     detail::overloaded{std::forward<Matchers>(matchers)...},
     std::forward<Variant>(variant));
 }
 
-}
+} // namespace rigel::base

@@ -19,7 +19,8 @@
 #include <SDL_timer.h>
 
 
-namespace rigel::renderer {
+namespace rigel::renderer
+{
 
 FpsLimiter::FpsLimiter(const int targetFps)
   : mLastTime(base::Clock::now())
@@ -28,7 +29,8 @@ FpsLimiter::FpsLimiter(const int targetFps)
 }
 
 
-void FpsLimiter::updateAndWait() {
+void FpsLimiter::updateAndWait()
+{
   using namespace std::chrono;
 
   const auto now = base::Clock::now();
@@ -38,11 +40,12 @@ void FpsLimiter::updateAndWait() {
   mError += mTargetFrameTime - delta;
 
   const auto timeToWaitFor = mTargetFrameTime + mError;
-  if (timeToWaitFor > 0.0) {
+  if (timeToWaitFor > 0.0)
+  {
     // We use SDL_Delay instead of std::this_thread::sleep_for, because the
     // former is more accurate on some platforms.
     SDL_Delay(static_cast<Uint32>(timeToWaitFor * 1000.0));
   }
 }
 
-}
+} // namespace rigel::renderer

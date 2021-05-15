@@ -21,25 +21,30 @@
 #include <variant>
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace floating_laser_bot {
+namespace floating_laser_bot
+{
 
-struct Waiting {
+struct Waiting
+{
   int mFramesElapsed = 0;
 };
 
 
-struct Active {
+struct Active
+{
   int mFramesElapsed = 0;
 };
 
 using State = std::variant<Waiting, Active>;
 
-}
+} // namespace floating_laser_bot
 
 
-struct FloatingLaserBot {
+struct FloatingLaserBot
+{
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -49,4 +54,4 @@ struct FloatingLaserBot {
   floating_laser_bot::State mState;
 };
 
-}
+} // namespace rigel::game_logic::behaviors

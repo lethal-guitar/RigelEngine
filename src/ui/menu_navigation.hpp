@@ -24,7 +24,8 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 bool isNonRepeatKeyDown(const SDL_Event& event);
 bool isButtonPress(const SDL_Event& event);
@@ -34,7 +35,8 @@ bool isCancelButton(const SDL_Event& event);
 bool isQuitConfirmButton(const SDL_Event& event);
 
 
-enum class NavigationEvent {
+enum class NavigationEvent
+{
   None,
   NavigateUp,
   NavigateDown,
@@ -44,7 +46,8 @@ enum class NavigationEvent {
 };
 
 
-class MenuNavigationHelper {
+class MenuNavigationHelper
+{
 public:
   NavigationEvent convert(const SDL_Event& event);
 
@@ -52,4 +55,4 @@ private:
   base::Vector mAnalogStickVector;
 };
 
-}
+} // namespace rigel::ui

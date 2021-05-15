@@ -28,11 +28,13 @@
 #include "game_logic/player.hpp"
 
 
-namespace rigel::game_logic::behaviors {
+namespace rigel::game_logic::behaviors
+{
 
-namespace {
+namespace
+{
 
-int GRAB_PLAYER_ANIMATION[] = { 2, 3, 4, 5, 6 };
+int GRAB_PLAYER_ANIMATION[] = {2, 3, 4, 5, 6};
 
 }
 
@@ -41,8 +43,8 @@ void Snake::update(
   GlobalDependencies& d,
   GlobalState& s,
   const bool isOnScreen,
-  entityx::Entity entity
-) {
+  entityx::Entity entity)
+{
   using namespace snake;
   using namespace engine::components;
 
@@ -60,7 +62,8 @@ void Snake::update(
   auto walk = [&]() {
     const auto successful =
       engine::walk(*d.mpCollisionChecker, entity, orientation);
-    if (!successful) {
+    if (!successful)
+    {
       position.x += movementValue() * 2;
       orientation = engine::orientation::opposite(orientation);
     }
@@ -73,7 +76,8 @@ void Snake::update(
     const auto touchingPlayer =
       worldBbox.intersects(s.mpPlayer->worldSpaceHitBox());
 
-    if (!touchingPlayer) {
+    if (!touchingPlayer)
+    {
       return false;
     }
 
@@ -88,13 +92,13 @@ void Snake::update(
       myX + offset1 == playerX || myX + offset2 == playerX;
     const auto inReachVertically = position.y == playerPos.y;
 
-    return
-      inReachHorizontally && inReachVertically &&
+    return inReachHorizontally && inReachVertically &&
       s.mpPlayer->isInRegularState();
   };
 
   auto walkWhilePlayerSwallowed = [&]() {
-    if (s.mpPlayer->isDead()) {
+    if (s.mpPlayer->isDead())
+    {
       triggerEffects(entity, *d.mpEntityManager);
       destroySelf = true;
       return;
@@ -104,14 +108,14 @@ void Snake::update(
 
     const auto fireButtonPressed =
       s.mpPerFrameState->mInput.mFire.mWasTriggered;
-    if (!s.mpPlayer->isDead() && fireButtonPressed) {
+    if (!s.mpPlayer->isDead() && fireButtonPressed)
+    {
       s.mpPlayer->setFree();
 
       // TODO: Is there a way we don't have to duplicate the score assignment/
       // event triggering here?
       const auto& shootable = *entity.component<components::Shootable>();
-      d.mpEvents->emit(game_logic::events::ShootableKilled{
-        entity, {}});
+      d.mpEvents->emit(game_logic::events::ShootableKilled{entity, {}});
       s.mpPlayer->model().giveScore(shootable.mGivenScore);
       destroySelf = true;
       return;
@@ -120,49 +124,53 @@ void Snake::update(
     animationFrame = 7 + (s.mpPerFrameState->mIsOddFrame ? 1 : 0);
     engine::synchronizeBoundingBoxToSprite(entity);
 
-    if (s.mpPerFrameState->mIsOddFrame) {
+    if (s.mpPerFrameState->mIsOddFrame)
+    {
       playerPos.x += movementValue();
       walk();
     }
   };
 
 
-  base::match(mState,
+  base::match(
+    mState,
     [&, this](const Walking&) {
-      if (!s.mpPerFrameState->mIsOddFrame) {
+      if (!s.mpPerFrameState->mIsOddFrame)
+      {
         walk();
         animationFrame = position.x % 2;
       }
 
-      if (playerInReach()) {
+      if (playerInReach())
+      {
         mState = GrabbingPlayer{};
       }
     },
 
     [&, this](GrabbingPlayer& state) {
-      if (state.mFramesElapsed == 0) {
+      if (state.mFramesElapsed == 0)
+      {
         s.mpPlayer->incapacitate(2);
         engine::startAnimationSequence(entity, GRAB_PLAYER_ANIMATION);
       }
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 6) {
+      if (state.mFramesElapsed == 6)
+      {
         playerPos.x += 2;
         mState = SwallowedPlayer{};
         walkWhilePlayerSwallowed();
       }
     },
 
-    [&, this](const SwallowedPlayer&) {
-      walkWhilePlayerSwallowed();
-    }
-  );
+    [&, this](const SwallowedPlayer&) { walkWhilePlayerSwallowed(); });
 
   engine::synchronizeBoundingBoxToSprite(entity);
 
-  if (destroySelf) {
+  if (destroySelf)
+  {
     entity.destroy();
   }
 }
 
-}
+} // namespace rigel::game_logic::behaviors

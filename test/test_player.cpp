@@ -52,31 +52,31 @@ using engine::components::WorldPosition;
 namespace ex = entityx;
 
 
-namespace rigel::data {
+namespace rigel::data
+{
 
-static std::ostream& operator<<(std::ostream& os, const SoundId id) {
+static std::ostream& operator<<(std::ostream& os, const SoundId id)
+{
   os << static_cast<int>(id);
   return os;
 }
 
-}
+} // namespace rigel::data
 
 
-namespace {
+namespace
+{
 
-struct MockEventListener : public ex::Receiver<MockEventListener> {
+struct MockEventListener : public ex::Receiver<MockEventListener>
+{
   int mCallCount = 0;
 
-  void receive(const rigel::events::PlayerDied&) {
-    ++mCallCount;
-  }
+  void receive(const rigel::events::PlayerDied&) { ++mCallCount; }
 };
 
 
-PlayerInput operator&(
-  const PlayerInput& lhs,
-  const PlayerInput& rhs
-) {
+PlayerInput operator&(const PlayerInput& lhs, const PlayerInput& rhs)
+{
   PlayerInput merged;
   merged.mLeft = lhs.mLeft || rhs.mLeft;
   merged.mRight = lhs.mRight || rhs.mRight;
@@ -87,57 +87,72 @@ PlayerInput operator&(
     lhs.mJump.mWasTriggered || rhs.mJump.mWasTriggered;
   merged.mFire.mWasTriggered =
     lhs.mFire.mWasTriggered || rhs.mFire.mWasTriggered;
-  merged.mJump.mIsPressed =
-    lhs.mJump.mIsPressed || rhs.mJump.mIsPressed;
-  merged.mFire.mIsPressed =
-    lhs.mFire.mIsPressed || rhs.mFire.mIsPressed;
+  merged.mJump.mIsPressed = lhs.mJump.mIsPressed || rhs.mJump.mIsPressed;
+  merged.mFire.mIsPressed = lhs.mFire.mIsPressed || rhs.mFire.mIsPressed;
   return merged;
 }
 
 
-void makeWall(data::map::Map& map, const int x, const int yStart, const int yEnd) {
-  for (int y = yStart; y <= yEnd; ++y) {
+void makeWall(
+  data::map::Map& map,
+  const int x,
+  const int yStart,
+  const int yEnd)
+{
+  for (int y = yStart; y <= yEnd; ++y)
+  {
     map.setTileAt(0, x, y, 1);
   }
 }
 
 
-void makeFloor(data::map::Map& map, const int y, const int xStart, const int xEnd) {
-  for (int x = xStart; x <= xEnd; ++x) {
+void makeFloor(
+  data::map::Map& map,
+  const int y,
+  const int xStart,
+  const int xEnd)
+{
+  for (int x = xStart; x <= xEnd; ++x)
+  {
     map.setTileAt(0, x, y, 1);
   }
 }
 
 
-void makePipe(data::map::Map& map, const int x, const int y, const int length) {
-  for (int i = 0; i < length; ++i) {
+void makePipe(data::map::Map& map, const int x, const int y, const int length)
+{
+  for (int i = 0; i < length; ++i)
+  {
     map.setTileAt(0, x + i, y, 3);
   }
 }
 
 
-struct StateChange {
+struct StateChange
+{
   base::Vector move;
   int frame;
 
-  bool operator==(const StateChange& other) const {
+  bool operator==(const StateChange& other) const
+  {
     return std::tie(move, frame) == std::tie(other.move, other.frame);
   }
 };
 
 
-std::ostream& operator<<(std::ostream& stream, const StateChange& change) {
+std::ostream& operator<<(std::ostream& stream, const StateChange& change)
+{
   stream << "[Move: " << change.move << ", anim: " << change.frame << ']';
   return stream;
 }
 
 
-struct MoveSpec {
+struct MoveSpec
+{
   MoveSpec(
     const PlayerInput input,
     const base::Vector expectedMove,
-    const int expectedAnimationFrame
-  )
+    const int expectedAnimationFrame)
     : givenInput(input)
     , expectedStateChange({expectedMove, expectedAnimationFrame})
   {
@@ -148,41 +163,46 @@ struct MoveSpec {
 };
 
 
-void testMovementSequence(Player& player, const std::vector<MoveSpec>& spec) {
+void testMovementSequence(Player& player, const std::vector<MoveSpec>& spec)
+{
   std::vector<StateChange> actualStateChanges;
 
   auto previousPosition = player.position();
-  for (const auto& frame : spec) {
+  for (const auto& frame : spec)
+  {
     player.update(frame.givenInput);
 
     actualStateChanges.push_back(StateChange{
-      player.position() - previousPosition,
-      player.animationFrame()});
+      player.position() - previousPosition, player.animationFrame()});
 
     previousPosition = player.position();
   }
 
-  const auto expectedStateChanges = utils::transformed(spec,
-    [](const MoveSpec& frameSpec) {
+  const auto expectedStateChanges =
+    utils::transformed(spec, [](const MoveSpec& frameSpec) {
       return frameSpec.expectedStateChange;
     });
   CHECK(actualStateChanges == expectedStateChanges);
 }
 
-}
+} // namespace
 
 
-TEST_CASE("Player movement") {
+TEST_CASE("Player movement")
+{
   ex::EntityX entityx;
 
   // ---------------------------------------------------------------------------
   // Map
-  data::map::Map map{100, 100, data::map::TileAttributeDict{{
-    0x0,    // index 0: empty
-    0xF,    // index 1: solid
-    0x4000, // index 2: ladder
-    0x80    // index 3: climbable
-  }}};
+  data::map::Map map{
+    100,
+    100,
+    data::map::TileAttributeDict{{
+      0x0, // index 0: empty
+      0xF, // index 1: solid
+      0x4000, // index 2: ladder
+      0x80 // index 3: climbable
+    }}};
 
   makeFloor(map, 17, 0, 32);
   const auto initialMap = map;
@@ -224,7 +244,8 @@ TEST_CASE("Player movement") {
 
 
   auto drainMercyFrames = [&]() {
-    while (player.isInMercyFrames()) {
+    while (player.isInMercyFrames())
+    {
       player.update({});
     }
   };
@@ -260,8 +281,10 @@ TEST_CASE("Player movement") {
 
   // ---------------------------------------------------------------------------
 
-  SECTION("Facing left") {
-    SECTION("Doesn't move when no key pressed") {
+  SECTION("Facing left")
+  {
+    SECTION("Doesn't move when no key pressed")
+    {
       const auto previousPosition = position;
 
       player.update(PlayerInput{});
@@ -269,7 +292,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Doesn't move when both keys pressed") {
+    SECTION("Doesn't move when both keys pressed")
+    {
       const auto previousPosition = position;
 
       PlayerInput input;
@@ -280,7 +304,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Moves left when left key pressed") {
+    SECTION("Moves left when left key pressed")
+    {
       const auto expectedPosition = position + base::Vector{-1, 0};
 
       PlayerInput input;
@@ -289,7 +314,8 @@ TEST_CASE("Player movement") {
 
       CHECK(position == expectedPosition);
 
-      SECTION("Stops moving when key released") {
+      SECTION("Stops moving when key released")
+      {
         input.mLeft = false;
         player.update(input);
 
@@ -297,7 +323,8 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Changes orientation when right key pressed") {
+    SECTION("Changes orientation when right key pressed")
+    {
       const auto expectedPosition = position;
 
       PlayerInput input;
@@ -309,7 +336,8 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 0);
     }
 
-    SECTION("Doesn't move when up against wall") {
+    SECTION("Doesn't move when up against wall")
+    {
       const auto previousPosition = position;
       makeWall(map, position.x - 1, 0, position.y + 1);
 
@@ -320,7 +348,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Doesn't move when up key pressed at the same time") {
+    SECTION("Doesn't move when up key pressed at the same time")
+    {
       const auto previousPosition = position;
 
       PlayerInput input;
@@ -331,7 +360,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Doesn't move when down key pressed at the same time") {
+    SECTION("Doesn't move when down key pressed at the same time")
+    {
       const auto previousPosition = position;
 
       PlayerInput input;
@@ -342,7 +372,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Ignores up/down keys when both pressed at the same time") {
+    SECTION("Ignores up/down keys when both pressed at the same time")
+    {
       const auto expectedPosition = position + base::Vector{-1, 0};
 
       PlayerInput input;
@@ -354,7 +385,8 @@ TEST_CASE("Player movement") {
       CHECK(position == expectedPosition);
     }
 
-    SECTION("Aims up when up key pressed") {
+    SECTION("Aims up when up key pressed")
+    {
       PlayerInput input;
       input.mUp = true;
 
@@ -363,12 +395,14 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 16);
       CHECK(player.isLookingUp());
 
-      SECTION("isLookingUp() works correctly when recoil animation shown") {
+      SECTION("isLookingUp() works correctly when recoil animation shown")
+      {
         animationFrame = 19;
         CHECK(player.isLookingUp());
       }
 
-      SECTION("Can change orientation while looking up") {
+      SECTION("Can change orientation while looking up")
+      {
         const auto previousOrientation = player.orientation();
 
         player.update(pressingUp & pressingRight);
@@ -377,7 +411,8 @@ TEST_CASE("Player movement") {
         CHECK(player.orientation() != previousOrientation);
       }
 
-      SECTION("Stops aiming up when key released") {
+      SECTION("Stops aiming up when key released")
+      {
         input.mUp = false;
         player.update(input);
 
@@ -386,7 +421,8 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Crouches when down key pressed") {
+    SECTION("Crouches when down key pressed")
+    {
       PlayerInput input;
       input.mDown = true;
       player.update(input);
@@ -397,12 +433,14 @@ TEST_CASE("Player movement") {
         player.worldSpaceHitBox().size.height == PLAYER_HITBOX_HEIGHT_CROUCHED);
       CHECK(bbox.size.height == PLAYER_HEIGHT_CROUCHED);
 
-      SECTION("isCrouching() works correctly when recoil animation shown") {
+      SECTION("isCrouching() works correctly when recoil animation shown")
+      {
         animationFrame = 34;
         CHECK(player.isCrouching());
       }
 
-      SECTION("Can change orientation while crouching") {
+      SECTION("Can change orientation while crouching")
+      {
         const auto previousOrientation = player.orientation();
 
         player.update(pressingDown & pressingRight);
@@ -411,7 +449,8 @@ TEST_CASE("Player movement") {
         CHECK(player.orientation() != previousOrientation);
       }
 
-      SECTION("Stops crouching when key released") {
+      SECTION("Stops crouching when key released")
+      {
         input.mDown = false;
         player.update(input);
 
@@ -421,7 +460,8 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Walks up a stair step") {
+    SECTION("Walks up a stair step")
+    {
       map.setTileAt(0, position.x - 1, position.y, 1);
       const auto expectedPosition = position + base::Vector{-1, -1};
 
@@ -432,7 +472,8 @@ TEST_CASE("Player movement") {
       CHECK(position == expectedPosition);
     }
 
-    SECTION("Falling") {
+    SECTION("Falling")
+    {
       // Make a hole in the floor
       map.setTileAt(0, position.x + 1, position.y + 1, 0);
       map.setTileAt(0, position.x + 0, position.y + 1, 0);
@@ -443,260 +484,319 @@ TEST_CASE("Player movement") {
       // New floor, further down
       makeFloor(map, 24, 0, 32);
 
-      SECTION("Falls down when walking off ledge") {
-        testMovementSequence(player, {
-          {pressingLeft, {-1, +1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 2}, 8}, // landing here
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+      SECTION("Falls down when walking off ledge")
+      {
+        testMovementSequence(
+          player,
+          {
+            {pressingLeft, {-1, +1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 2}, 8}, // landing here
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Falls down when ground disappears") {
+      SECTION("Falls down when ground disappears")
+      {
         map.setTileAt(0, position.x + 2, position.y + 1, 0);
 
-        testMovementSequence(player, {
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 2}, 8}, // landing here
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 2}, 8}, // landing here
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Has one recovery frame when falling at full speed") {
+      SECTION("Has one recovery frame when falling at full speed")
+      {
         map.setTileAt(0, position.x + 2, position.y + 1, 0);
 
-        testMovementSequence(player, {
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 2}, 8}, // landing here
-          {{}, {0, 0}, 5},
-          {pressingLeft, {0, 0}, 0}, // recovery frame - movement ignored here
-          {pressingLeft, {-1, 0}, 1}, // now moving again
-        });
+        testMovementSequence(
+          player,
+          {
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 2}, 8}, // landing here
+            {{}, {0, 0}, 5},
+            {pressingLeft, {0, 0}, 0}, // recovery frame - movement ignored here
+            {pressingLeft, {-1, 0}, 1}, // now moving again
+          });
       }
 
-      SECTION("No recovery frame when landing before reaching full speed") {
+      SECTION("No recovery frame when landing before reaching full speed")
+      {
         makeFloor(map, 19, 0, 32);
         map.setTileAt(0, position.x + 2, position.y + 1, 0);
 
-        testMovementSequence(player, {
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7}, // landing here
-          {{}, {0, 0}, 0},
-          {pressingLeft, {-1, 0}, 1},
-          {pressingLeft, {-1, 0}, 1},
-        });
+        testMovementSequence(
+          player,
+          {
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7}, // landing here
+            {{}, {0, 0}, 0},
+            {pressingLeft, {-1, 0}, 1},
+            {pressingLeft, {-1, 0}, 1},
+          });
       }
 
-      SECTION("Horizontal movement is possible while falling (air control)") {
+      SECTION("Horizontal movement is possible while falling (air control)")
+      {
         map.setTileAt(0, position.x + 2, position.y + 1, 0);
 
-        testMovementSequence(player, {
-          {pressingLeft, {-1, 1}, 7},
-          {pressingLeft, {-1, 1}, 7},
-          {pressingRight, {0, 1}, 7}, // changing orientation here
-          {pressingRight, {1, 2}, 8},
-          {pressingRight, {1, 2}, 8}, // landing here
-          {pressingRight, {1, 0}, 5},
-          {pressingRight, {0, 0}, 0}, // recovery frame - movement ignored here
-          {pressingRight, {1, 0}, 1}, // now moving again
-        });
+        testMovementSequence(
+          player,
+          {
+            {pressingLeft, {-1, 1}, 7},
+            {pressingLeft, {-1, 1}, 7},
+            {pressingRight, {0, 1}, 7}, // changing orientation here
+            {pressingRight, {1, 2}, 8},
+            {pressingRight, {1, 2}, 8}, // landing here
+            {pressingRight, {1, 0}, 5},
+            {pressingRight, {0, 0}, 0}, // recovery frame - movement ignored
+                                        // here
+
+            {pressingRight, {1, 0}, 1}, // now moving again
+          });
       }
     }
 
-    SECTION("Jumping") {
-      SECTION("Doesn't jump when already touching ceiling") {
+    SECTION("Jumping")
+    {
+      SECTION("Doesn't jump when already touching ceiling")
+      {
         makeFloor(map, position.y - PLAYER_HEIGHT, 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 0},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 0},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Low jump") {
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -2}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 1}, 7}, // falling again
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+      SECTION("Low jump")
+      {
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, -2}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 1}, 7}, // falling again
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("High jump") {
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -2}, 6},
-          {pressingJump, {0, -1}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 1}, 7}, // falling again
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 2}, 8},
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+      SECTION("High jump")
+      {
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, -2}, 6},
+            {pressingJump, {0, -1}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 1}, 7}, // falling again
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 2}, 8},
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Collision after 1 step") {
+      SECTION("Collision after 1 step")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 1), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -1}, 6},
-          {{}, {0, 1}, 7},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -1}, 6},
+            {{}, {0, 1}, 7},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Collision after 2 steps") {
+      SECTION("Collision after 2 steps")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 2), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Collision after 3 steps") {
+      SECTION("Collision after 3 steps")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 3), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Collision after 4 steps") {
+      SECTION("Collision after 4 steps")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 4), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -2}, 6},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 5},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, -2}, 6},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Doesn't fall down immediately when collision at apex of low jump") {
+      SECTION(
+        "Doesn't fall down immediately when collision at apex of low jump")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 5), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -2}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 1}, 7}, // falling again
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, -2}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 1}, 7}, // falling again
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Doesn't fall down immediately when collision at apex of high jump") {
+      SECTION(
+        "Doesn't fall down immediately when collision at apex of high jump")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 7), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -2}, 6},
-          {pressingJump, {0, -1}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, -1}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 1}, 7}, // falling again
-          {{}, {0, 1}, 7},
-          {{}, {0, 1}, 7},
-          {{}, {0, 2}, 8},
-          {{}, {0, 2}, 8},
-          {{}, {0, 0}, 5},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -2}, 6},
+            {{}, {0, -2}, 6},
+            {pressingJump, {0, -1}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, -1}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 1}, 7}, // falling again
+            {{}, {0, 1}, 7},
+            {{}, {0, 1}, 7},
+            {{}, {0, 2}, 8},
+            {{}, {0, 2}, 8},
+            {{}, {0, 0}, 5},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Can move horizontally while jumping") {
-        testMovementSequence(player, {
-          {jumpButtonTriggered & pressingLeft, {-1, 0}, 5},
-          {pressingLeft, {0, -2}, 6}, // no movement on the first frame of jumping
-          {pressingLeft, {-1, -2}, 6},
-          {pressingLeft, {-1, -1}, 6},
-          {pressingRight, {0, 0}, 6}, // change orientation
-          {pressingRight, {1, 0}, 6},
-          {pressingRight, {1, 1}, 7}, // falling again
-          {pressingRight, {1, 1}, 7},
-          {pressingRight, {1, 1}, 7},
-          {pressingRight, {1, 2}, 8},
-          {pressingRight, {1, 0}, 5},
-          {pressingRight, {0, 0}, 0}, // recovery frame
-        });
+      SECTION("Can move horizontally while jumping")
+      {
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered & pressingLeft, {-1, 0}, 5},
+            {pressingLeft, {0, -2}, 6}, // no movement on the first frame of
+                                        // jumping
+
+            {pressingLeft, {-1, -2}, 6},
+            {pressingLeft, {-1, -1}, 6},
+            {pressingRight, {0, 0}, 6}, // change orientation
+            {pressingRight, {1, 0}, 6},
+            {pressingRight, {1, 1}, 7}, // falling again
+            {pressingRight, {1, 1}, 7},
+            {pressingRight, {1, 1}, 7},
+            {pressingRight, {1, 2}, 8},
+            {pressingRight, {1, 0}, 5},
+            {pressingRight, {0, 0}, 0}, // recovery frame
+          });
       }
 
-      SECTION("Obstacle disappears after shortening jump") {
+      SECTION("Obstacle disappears after shortening jump")
+      {
         makeFloor(map, position.y - (PLAYER_HEIGHT + 1), 0, 32);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -1}, 6},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {{}, {0, -1}, 6},
+          });
 
         map = initialMap;
 
-        testMovementSequence(player, {
-          {{}, {0, -1}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 1}, 7}, // falling again
-          {{}, {0, 1}, 7},
-          {{}, {0, 0}, 0},
-        });
+        testMovementSequence(
+          player,
+          {
+            {{}, {0, -1}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 0}, 6},
+            {{}, {0, 1}, 7}, // falling again
+            {{}, {0, 1}, 7},
+            {{}, {0, 0}, 0},
+          });
       }
 
-      SECTION("Can still jump on the frame where player walked off a ledge") {
+      SECTION("Can still jump on the frame where player walked off a ledge")
+      {
         // Make a hole in the floor to the player's left
-        for (int x = 0; x <= position.x + 1; ++x) {
+        for (int x = 0; x <= position.x + 1; ++x)
+        {
           map.setTileAt(0, x, position.y + 1, 0);
         }
 
@@ -716,30 +816,34 @@ TEST_CASE("Player movement") {
         CHECK(animationFrame == 6);
       }
 
-      SECTION("Lands on floor when already touching floor at apex of jump") {
-        makeFloor(map, position.y - 4, 0, position.x-1);
+      SECTION("Lands on floor when already touching floor at apex of jump")
+      {
+        makeFloor(map, position.y - 4, 0, position.x - 1);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {{}, {0, -2}, 6},
-          {{}, {0, -2}, 6},
-          {{}, {0, -1}, 6},
-          {{pressingLeft}, {-1, 0}, 6},
-          {{}, {0, 0}, 6},
-          {{}, {0, 0}, 0}
-        });
+        testMovementSequence(
+          player,
+          {{jumpButtonTriggered, {0, 0}, 5},
+           {{}, {0, -2}, 6},
+           {{}, {0, -2}, 6},
+           {{}, {0, -1}, 6},
+           {{pressingLeft}, {-1, 0}, 6},
+           {{}, {0, 0}, 6},
+           {{}, {0, 0}, 0}});
       }
 
       // TODO: Edge case: jump was shortened but ceiling is only one tile high
     }
 
-    SECTION("Climbing ladders") {
+    SECTION("Climbing ladders")
+    {
       auto animationFrameValid = [&]() {
         return animationFrame == 35 || animationFrame == 36;
       };
 
-      SECTION("Doesn't attach when ladder at non-attacheable height") {
-        for (int yOffset = 0; yOffset < 4; ++yOffset) {
+      SECTION("Doesn't attach when ladder at non-attacheable height")
+      {
+        for (int yOffset = 0; yOffset < 4; ++yOffset)
+        {
           map.setTileAt(0, position.x + 1, position.y - yOffset, 2);
 
           const auto previousPosition = position;
@@ -753,7 +857,8 @@ TEST_CASE("Player movement") {
         }
       }
 
-      SECTION("Doesn't attach when one unit above player") {
+      SECTION("Doesn't attach when one unit above player")
+      {
         map.setTileAt(0, position.x + 1, position.y - 5, 2);
 
         const auto previousPosition = position;
@@ -764,7 +869,8 @@ TEST_CASE("Player movement") {
         CHECK(position == previousPosition);
       }
 
-      SECTION("Attaches when touching ladder at right height") {
+      SECTION("Attaches when touching ladder at right height")
+      {
         map.setTileAt(0, position.x + 1, position.y - 4, 2);
 
         const auto previousPosition = position;
@@ -774,15 +880,18 @@ TEST_CASE("Player movement") {
         CHECK(animationFrame == 35);
         CHECK(position == previousPosition);
 
-        SECTION("Can't move horizontally while on ladder") {
-          SECTION("Left") {
+        SECTION("Can't move horizontally while on ladder")
+        {
+          SECTION("Left")
+          {
             player.update(pressingLeft);
 
             CHECK(animationFrame == 35);
             CHECK(position == previousPosition);
           }
 
-          SECTION("Right") {
+          SECTION("Right")
+          {
             player.update(pressingRight);
 
             CHECK(animationFrame == 35);
@@ -790,7 +899,8 @@ TEST_CASE("Player movement") {
           }
         }
 
-        SECTION("Can move up on ladder") {
+        SECTION("Can move up on ladder")
+        {
           map.setTileAt(0, position.x + 1, position.y - 5, 2);
 
           const auto expectedPosition = position + base::Vector{0, -1};
@@ -799,14 +909,16 @@ TEST_CASE("Player movement") {
           CHECK(animationFrameValid());
           CHECK(position == expectedPosition);
 
-          SECTION("Can't move up when end of ladder reached") {
+          SECTION("Can't move up when end of ladder reached")
+          {
             player.update(pressingUp);
 
             CHECK(animationFrameValid());
             CHECK(position == expectedPosition);
           }
 
-          SECTION("Changing orientation changes to the proper animation frame") {
+          SECTION("Changing orientation changes to the proper animation frame")
+          {
             CHECK(player.orientation() == Orientation::Left);
             CHECK(animationFrame == 36);
 
@@ -816,8 +928,10 @@ TEST_CASE("Player movement") {
           }
         }
 
-        SECTION("Can move down on ladder") {
-          for (int offset = 0; offset < 5; ++offset) {
+        SECTION("Can move down on ladder")
+        {
+          for (int offset = 0; offset < 5; ++offset)
+          {
             map.setTileAt(0, position.x + 1, position.y - (5 + offset), 2);
           }
 
@@ -830,62 +944,77 @@ TEST_CASE("Player movement") {
           CHECK(animationFrameValid());
           CHECK(position == expectedPosition);
 
-          SECTION("Falls off ladder when climbing past bottom rung") {
-            testMovementSequence(player, {
-              {pressingDown, {0, 1}, 7},
-              {{}, {0, 1}, 7},
-              {{}, {0, 1}, 7},
-              {{}, {0, 1}, 5},
-              {{}, {0, 0}, 0},
-            });
+          SECTION("Falls off ladder when climbing past bottom rung")
+          {
+            testMovementSequence(
+              player,
+              {
+                {pressingDown, {0, 1}, 7},
+                {{}, {0, 1}, 7},
+                {{}, {0, 1}, 7},
+                {{}, {0, 1}, 5},
+                {{}, {0, 0}, 0},
+              });
           }
 
-          SECTION("Can jump off ladder") {
-            testMovementSequence(player, {
-              {jumpButtonTriggered, {0, -2}, 6},
-              {{}, {0, -2}, 6},
-              {{}, {0, -1}, 6},
-              {{}, {0, 0}, 6},
-              {{}, {0, 0}, 6},
-              {{}, {0, 1}, 7}, // falling again
-              {{}, {0, 1}, 7},
-              {{}, {0, 1}, 7},
-              {{}, {0, 2}, 8},
-              {{}, {0, 2}, 8},
-              {{}, {0, 2}, 8},
-              {{}, {0, 0}, 5},
-              {{}, {0, 0}, 0},
-            });
+          SECTION("Can jump off ladder")
+          {
+            testMovementSequence(
+              player,
+              {
+                {jumpButtonTriggered, {0, -2}, 6},
+                {{}, {0, -2}, 6},
+                {{}, {0, -1}, 6},
+                {{}, {0, 0}, 6},
+                {{}, {0, 0}, 6},
+                {{}, {0, 1}, 7}, // falling again
+                {{}, {0, 1}, 7},
+                {{}, {0, 1}, 7},
+                {{}, {0, 2}, 8},
+                {{}, {0, 2}, 8},
+                {{}, {0, 2}, 8},
+                {{}, {0, 0}, 5},
+                {{}, {0, 0}, 0},
+              });
           }
 
-          SECTION("Can immediately move horizontally when jumping off ladder") {
-            testMovementSequence(player, {
-              {jumpButtonTriggered & pressingLeft, {-1, -2}, 6},
-              {pressingLeft, {-1, -2}, 6},
-              {pressingLeft, {-1, -1}, 6},
-              {{}, {0, 0}, 6},
-              {{}, {0, 0}, 6},
-              {{}, {0, 1}, 7}, // falling again
-              {{}, {0, 1}, 7},
-              {{}, {0, 1}, 7},
-              {{}, {0, 2}, 8},
-              {{}, {0, 2}, 8},
-              {{}, {0, 2}, 8},
-              {{}, {0, 0}, 5},
-              {{}, {0, 0}, 0},
-            });
+          SECTION("Can immediately move horizontally when jumping off ladder")
+          {
+            testMovementSequence(
+              player,
+              {
+                {jumpButtonTriggered & pressingLeft, {-1, -2}, 6},
+                {pressingLeft, {-1, -2}, 6},
+                {pressingLeft, {-1, -1}, 6},
+                {{}, {0, 0}, 6},
+                {{}, {0, 0}, 6},
+                {{}, {0, 1}, 7}, // falling again
+                {{}, {0, 1}, 7},
+                {{}, {0, 1}, 7},
+                {{}, {0, 2}, 8},
+                {{}, {0, 2}, 8},
+                {{}, {0, 2}, 8},
+                {{}, {0, 0}, 5},
+                {{}, {0, 0}, 0},
+              });
           }
 
-          SECTION("Doesn't re-attach immediately when pressing up while jumping") {
-            testMovementSequence(player, {
-              {jumpButtonTriggered & pressingUp, {0, -2}, 6},
-              {{}, {0, -2}, 6},
-            });
+          SECTION(
+            "Doesn't re-attach immediately when pressing up while jumping")
+          {
+            testMovementSequence(
+              player,
+              {
+                {jumpButtonTriggered & pressingUp, {0, -2}, 6},
+                {{}, {0, -2}, 6},
+              });
           }
         }
       }
 
-      SECTION("Attaches and snaps player to ladder when player off to the left by one") {
+      SECTION(
+        "Attaches and snaps player to ladder when player off to the left by one")
+      {
         map.setTileAt(0, position.x, position.y - 4, 2);
 
         const auto expectedPosition = position + base::Vector{-1, 0};
@@ -896,7 +1025,9 @@ TEST_CASE("Player movement") {
         CHECK(position == expectedPosition);
       }
 
-      SECTION("Attaches and snaps player to ladder when player off to the right by one") {
+      SECTION(
+        "Attaches and snaps player to ladder when player off to the right by one")
+      {
         map.setTileAt(0, position.x + 2, position.y - 4, 2);
 
         const auto expectedPosition = position + base::Vector{1, 0};
@@ -907,7 +1038,8 @@ TEST_CASE("Player movement") {
         CHECK(position == expectedPosition);
       }
 
-      SECTION("Moves up by one when attaching and ladder tile above") {
+      SECTION("Moves up by one when attaching and ladder tile above")
+      {
         map.setTileAt(0, position.x + 1, position.y - 5, 2);
         map.setTileAt(0, position.x + 1, position.y - 4, 2);
 
@@ -919,78 +1051,97 @@ TEST_CASE("Player movement") {
         CHECK(position == expectedPositionAfterAttach);
       }
 
-      SECTION("Can attach while falling") {
+      SECTION("Can attach while falling")
+      {
         map.setTileAt(0, position.x + 1, position.y - 7, 2);
         position.y -= 6;
 
-        testMovementSequence(player, {
-          {pressingUp, {0, 1}, 7},
-          {pressingUp, {0, 1}, 7},
-          {pressingUp, {0, 1}, 7},
-          {pressingUp, {0, 0}, 35},
-        });
+        testMovementSequence(
+          player,
+          {
+            {pressingUp, {0, 1}, 7},
+            {pressingUp, {0, 1}, 7},
+            {pressingUp, {0, 1}, 7},
+            {pressingUp, {0, 0}, 35},
+          });
       }
 
       position.y = 16;
-      for (int yOffset = 4; yOffset < 10; ++yOffset) {
+      for (int yOffset = 4; yOffset < 10; ++yOffset)
+      {
         map.setTileAt(0, position.x + 1, position.y - yOffset, 2);
       }
 
-      SECTION("Can attach while jumping when on frame 4 (low jump)") {
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp, {0, -1}, 6},
-          {pressingUp, {0, 0}, 35},
-        });
+      SECTION("Can attach while jumping when on frame 4 (low jump)")
+      {
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp, {0, -1}, 6},
+            {pressingUp, {0, 0}, 35},
+          });
       }
 
-      SECTION("Can attach while jumping when beyond frame 4 (low jump)") {
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp, {0, -1}, 6},
-          {{}, {0, 0}, 6},
-          {pressingUp, {0, 0}, 35},
-        });
+      SECTION("Can attach while jumping when beyond frame 4 (low jump)")
+      {
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp, {0, -1}, 6},
+            {{}, {0, 0}, 6},
+            {pressingUp, {0, 0}, 35},
+          });
       }
 
-      SECTION("Can attach while jumping when on frame 4 (high jump)") {
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp & pressingJump, {0, -1}, 6},
-          {pressingUp, {0, 0}, 35},
-        });
+      SECTION("Can attach while jumping when on frame 4 (high jump)")
+      {
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp & pressingJump, {0, -1}, 6},
+            {pressingUp, {0, 0}, 35},
+          });
       }
 
-      SECTION("Can attach while jumping when beyond frame 4 (high jump)") {
+      SECTION("Can attach while jumping when beyond frame 4 (high jump)")
+      {
         map.setTileAt(0, position.x + 1, position.y - 10, 2);
 
-        testMovementSequence(player, {
-          {jumpButtonTriggered, {0, 0}, 5},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp, {0, -2}, 6},
-          {pressingUp & pressingJump, {0, -1}, 6},
-          {{}, {0, -1}, 6},
-          {pressingUp, {0, 0}, 35},
-        });
+        testMovementSequence(
+          player,
+          {
+            {jumpButtonTriggered, {0, 0}, 5},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp, {0, -2}, 6},
+            {pressingUp & pressingJump, {0, -1}, 6},
+            {{}, {0, -1}, 6},
+            {pressingUp, {0, 0}, 35},
+          });
       }
     }
 
-    SECTION("Climbing on pipes/climbables") {
+    SECTION("Climbing on pipes/climbables")
+    {
       const auto pipeLength = 8;
       const auto pipeStartX = position.x - 4;
       const auto pipeEndX = pipeStartX + pipeLength - 1;
       const auto pipeY = position.y - 6;
-      for (int i = 0; i < pipeLength; ++i) {
+      for (int i = 0; i < pipeLength; ++i)
+      {
         map.setTileAt(0, pipeStartX + i, pipeY, 3);
       }
 
-      SECTION("Attaches while falling when player top row touches climbable") {
+      SECTION("Attaches while falling when player top row touches climbable")
+      {
         const auto originalY = position.y;
         position.y -= 3;
 
@@ -1001,15 +1152,18 @@ TEST_CASE("Player movement") {
         CHECK(animationFrame == 20);
         CHECK(position.y == originalY - 1);
 
-        SECTION("Doesn't fall down when attached to pipe") {
+        SECTION("Doesn't fall down when attached to pipe")
+        {
           player.update({});
 
           CHECK(animationFrame == 20);
           CHECK(position.y == originalY - 1);
         }
 
-        SECTION("Movement on pipe") {
-          SECTION("Changes orientation when opposite direction key pressed") {
+        SECTION("Movement on pipe")
+        {
+          SECTION("Changes orientation when opposite direction key pressed")
+          {
             const auto previousPosition = position;
             CHECK(player.orientation() == Orientation::Left);
 
@@ -1019,15 +1173,18 @@ TEST_CASE("Player movement") {
             CHECK(position == previousPosition);
           }
 
-          SECTION("Moves along pipe when direction key pressed (left)") {
+          SECTION("Moves along pipe when direction key pressed (left)")
+          {
             const auto previousPosition = position;
             player.update(pressingLeft);
 
             const auto expectedPosition = previousPosition - base::Vector{1, 0};
             CHECK(position == expectedPosition);
 
-            SECTION("Falls down when end of pipe reached (left)") {
-              for (int i = 0; i < 4; ++i) {
+            SECTION("Falls down when end of pipe reached (left)")
+            {
+              for (int i = 0; i < 4; ++i)
+              {
                 player.update(pressingLeft);
               }
 
@@ -1035,15 +1192,18 @@ TEST_CASE("Player movement") {
                 base::Vector{pipeStartX - 1, position.y};
               CHECK(position == positionAtEndOfPipe);
 
+              // clang-format off
               testMovementSequence(player, {
                 {pressingLeft, {-1, 0}, 6},
                 {{}, {0, 1}, 7},
                 {{}, {0, 0}, 0}
               });
+              // clang-format on
             }
           }
 
-          SECTION("Moves along pipe when direction key pressed (right)") {
+          SECTION("Moves along pipe when direction key pressed (right)")
+          {
             resetOrientation(Orientation::Right);
 
             const auto previousPosition = position;
@@ -1052,7 +1212,8 @@ TEST_CASE("Player movement") {
             const auto expectedPosition = previousPosition + base::Vector{1, 0};
             CHECK(position == expectedPosition);
 
-            SECTION("Falls down when end of pipe reached (right)") {
+            SECTION("Falls down when end of pipe reached (right)")
+            {
               player.update(pressingRight);
 
               const auto playerRightEdge = pipeEndX + 1;
@@ -1060,28 +1221,33 @@ TEST_CASE("Player movement") {
                 base::Vector{playerRightEdge - (PLAYER_WIDTH - 1), position.y};
               CHECK(position == positionAtEndOfPipe);
 
+              // clang-format off
               testMovementSequence(player, {
                 {pressingRight, {1, 0}, 6},
                 {{}, {0, 1}, 7},
                 {{}, {0, 0}, 0}
               });
+              // clang-format on
             }
           }
 
-          SECTION("Pulls legs up when up key pressed") {
+          SECTION("Pulls legs up when up key pressed")
+          {
             // TODO: Can't shoot when legs up
           }
 
-          SECTION("Aims down when down key pressed") {
+          SECTION("Aims down when down key pressed")
+          {
             // TODO: Correct shot position etc.
           }
 
-          SECTION("Can jump off pipe") {
-            testMovementSequence(player, {
-              {jumpButtonTriggered, {0, -3}, 6},
-              {{}, {0, -2}, 6},
-              {{}, {0, -1}, 6}
-            });
+          SECTION("Can jump off pipe")
+          {
+            testMovementSequence(
+              player,
+              {{jumpButtonTriggered, {0, -3}, 6},
+               {{}, {0, -2}, 6},
+               {{}, {0, -1}, 6}});
           }
 
           // TODO: Jumping respects world collision even when checking for
@@ -1089,92 +1255,111 @@ TEST_CASE("Player movement") {
         }
       }
 
-      SECTION("Attaches while jumping") {
-        SECTION("Doesn't attach on first frame of jumping") {
-          testMovementSequence(player, {
-            {jumpButtonTriggered, {0, 0}, 5},
-            {{}, {0, -2}, 6},
-            {{}, {0, -2}, 6}
-          });
+      SECTION("Attaches while jumping")
+      {
+        SECTION("Doesn't attach on first frame of jumping")
+        {
+          testMovementSequence(
+            player,
+            {{jumpButtonTriggered, {0, 0}, 5},
+             {{}, {0, -2}, 6},
+             {{}, {0, -2}, 6}});
         }
 
-        SECTION("Attaches on 2nd frame of jumping") {
+        SECTION("Attaches on 2nd frame of jumping")
+        {
           const auto newPipeY = position.y - 8;
-          for (int i = 0; i < pipeLength; ++i) {
+          for (int i = 0; i < pipeLength; ++i)
+          {
             map.setTileAt(0, pipeStartX + i, newPipeY, 3);
           }
 
-          testMovementSequence(player, {
-            {jumpButtonTriggered, {0, 0}, 5},
-            {{}, {0, -2}, 6},
-            {{}, {0, -1}, 20}
-          });
+          testMovementSequence(
+            player,
+            {{jumpButtonTriggered, {0, 0}, 5},
+             {{}, {0, -2}, 6},
+             {{}, {0, -1}, 20}});
         }
 
-        SECTION("Attaches on 3nd frame of jumping") {
+        SECTION("Attaches on 3nd frame of jumping")
+        {
           const auto newPipeY = position.y - 9;
-          for (int i = 0; i < pipeLength; ++i) {
+          for (int i = 0; i < pipeLength; ++i)
+          {
             map.setTileAt(0, pipeStartX + i, newPipeY, 3);
           }
 
-          testMovementSequence(player, {
-            {jumpButtonTriggered, {0, 0}, 5},
-            {{}, {0, -2}, 6},
-            {{}, {0, -2}, 6},
-            {{}, {0, 0}, 20}
-          });
+          testMovementSequence(
+            player,
+            {{jumpButtonTriggered, {0, 0}, 5},
+             {{}, {0, -2}, 6},
+             {{}, {0, -2}, 6},
+             {{}, {0, 0}, 20}});
         }
 
-        SECTION("Doesn't attach when pipe out of reach") {
+        SECTION("Doesn't attach when pipe out of reach")
+        {
           const auto newPipeY = position.y - 11;
-          for (int i = 0; i < pipeLength; ++i) {
+          for (int i = 0; i < pipeLength; ++i)
+          {
             map.setTileAt(0, pipeStartX + i, newPipeY, 3);
           }
 
-          testMovementSequence(player, {
-            {jumpButtonTriggered, {0, 0}, 5},
-            {{}, {0, -2}, 6},
-            {{}, {0, -2}, 6},
-            {{}, {0, -1}, 6},
-            {{}, {0, 0}, 6},
-            {{}, {0, 0}, 6},
-          });
+          testMovementSequence(
+            player,
+            {
+              {jumpButtonTriggered, {0, 0}, 5},
+              {{}, {0, -2}, 6},
+              {{}, {0, -2}, 6},
+              {{}, {0, -1}, 6},
+              {{}, {0, 0}, 6},
+              {{}, {0, 0}, 6},
+            });
         }
 
-        SECTION("Doesn't attach when colliding before reaching pipe") {
+        SECTION("Doesn't attach when colliding before reaching pipe")
+        {
           const auto newPipeY = position.y - 10;
-          for (int i = 0; i < pipeLength; ++i) {
+          for (int i = 0; i < pipeLength; ++i)
+          {
             map.setTileAt(0, pipeStartX + i, newPipeY, 3);
             map.setTileAt(0, pipeStartX + i, newPipeY + 1, 1);
           }
 
-          testMovementSequence(player, {
-            {jumpButtonTriggered, {0, 0}, 5},
-            {{}, {0, -2}, 6},
-            {{}, {0, -2}, 6},
-            {{}, {0, 1}, 7},
-            {{}, {0, 1}, 7},
-          });
+          testMovementSequence(
+            player,
+            {
+              {jumpButtonTriggered, {0, 0}, 5},
+              {{}, {0, -2}, 6},
+              {{}, {0, -2}, 6},
+              {{}, {0, 1}, 7},
+              {{}, {0, 1}, 7},
+            });
         }
 
-        SECTION("Attaches with high jump") {
+        SECTION("Attaches with high jump")
+        {
           const auto newPipeY = position.y - 10;
-          for (int i = 0; i < pipeLength; ++i) {
+          for (int i = 0; i < pipeLength; ++i)
+          {
             map.setTileAt(0, pipeStartX + i, newPipeY, 3);
           }
 
-          testMovementSequence(player, {
-            {jumpButtonTriggered, {0, 0}, 5},
-            {{}, {0, -2}, 6},
-            {{}, {0, -2}, 6},
-            {{pressingJump}, {0, -1}, 6},
-            {{}, {0, 0}, 20},
-          });
+          testMovementSequence(
+            player,
+            {
+              {jumpButtonTriggered, {0, 0}, 5},
+              {{}, {0, -2}, 6},
+              {{}, {0, -2}, 6},
+              {{pressingJump}, {0, -1}, 6},
+              {{}, {0, 0}, 20},
+            });
         }
       }
     }
 
-    SECTION("Regression test: Large jump to wooden beam in M5") {
+    SECTION("Regression test: Large jump to wooden beam in M5")
+    {
       position = {50, 50};
       makePipe(map, position.x - 6, position.y - 12, 8);
 
@@ -1185,14 +1370,16 @@ TEST_CASE("Player movement") {
       player.update(input);
 
       input.mJump.mWasTriggered = false;
-      for (int i = 0; i < 6; ++i) {
+      for (int i = 0; i < 6; ++i)
+      {
         player.update(input);
       }
 
       CHECK(animationFrame == 20);
     }
 
-    SECTION("Regression test: Pipe to pipe jump in O1") {
+    SECTION("Regression test: Pipe to pipe jump in O1")
+    {
       makePipe(map, 10, 50, 7);
       makePipe(map, 21, 43, 5);
       resetOrientation(Orientation::Right);
@@ -1208,7 +1395,8 @@ TEST_CASE("Player movement") {
       player.update(input);
 
       input.mJump.mWasTriggered = false;
-      for (int i = 0; i < 10; ++i) {
+      for (int i = 0; i < 10; ++i)
+      {
         player.update(input);
       }
 
@@ -1217,7 +1405,8 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 20);
     }
 
-    SECTION("Regression test: Walk off elevator into pipe hang in O8") {
+    SECTION("Regression test: Walk off elevator into pipe hang in O8")
+    {
       makePipe(map, 10, 20, 15);
       makeFloor(map, 25, 10, 12);
       resetOrientation(Orientation::Right);
@@ -1233,24 +1422,30 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 20);
     }
 
-    SECTION("Death sequence") {
+    SECTION("Death sequence")
+    {
       drainMercyFrames();
 
-      SECTION("Flies up and falls back down") {
+      SECTION("Flies up and falls back down")
+      {
         player.die();
 
-        testMovementSequence(player, {
-          {{}, {0, -2}, 29},
-          {{}, {0, -1}, 29},
-          {{}, {0, 0}, 29},
-          {{}, {0, 0}, 29},
-          {{}, {0, 1}, 30},
-          {{}, {0, 1}, 31},
-          {{}, {0, 1}, 32},
-        });
+        testMovementSequence(
+          player,
+          {
+            {{}, {0, -2}, 29},
+            {{}, {0, -1}, 29},
+            {{}, {0, 0}, 29},
+            {{}, {0, 0}, 29},
+            {{}, {0, 1}, 30},
+            {{}, {0, 1}, 31},
+            {{}, {0, 1}, 32},
+          });
 
-        SECTION("Body disappears after some time") {
-          for (int i = 0; i < 9; ++i) {
+        SECTION("Body disappears after some time")
+        {
+          for (int i = 0; i < 9; ++i)
+          {
             player.update({});
           }
 
@@ -1260,11 +1455,13 @@ TEST_CASE("Player movement") {
 
           CHECK(!playerEntity.component<Sprite>()->mShow);
 
-          SECTION("Emits event when sequence finished") {
+          SECTION("Emits event when sequence finished")
+          {
             MockEventListener listener;
             entityx.events.subscribe<rigel::events::PlayerDied>(listener);
 
-            for (int i = 0; i < 24; ++i) {
+            for (int i = 0; i < 24; ++i)
+            {
               player.update({});
             }
 
@@ -1275,7 +1472,8 @@ TEST_CASE("Player movement") {
             CHECK(listener.mCallCount == 1);
 
             // Update some more frames, event shouldn't fire again
-            for (int i = 0; i < 10; ++i) {
+            for (int i = 0; i < 10; ++i)
+            {
               player.update({});
             }
 
@@ -1284,27 +1482,33 @@ TEST_CASE("Player movement") {
         }
       }
 
-      SECTION("Doesn't continue walk animation after death animation when killed while walking") {
+      SECTION(
+        "Doesn't continue walk animation after death animation when killed while walking")
+      {
         player.update(pressingLeft);
         CHECK(animationFrame == 1);
 
         player.die();
-        for (int i = 0; i < 9; ++i) {
+        for (int i = 0; i < 9; ++i)
+        {
           player.update({});
         }
 
         CHECK(animationFrame == 32);
       }
 
-      SECTION("Cannot attach to ladder while dieing") {
-        for (int yOffset = 4; yOffset < 8; ++yOffset) {
+      SECTION("Cannot attach to ladder while dieing")
+      {
+        for (int yOffset = 4; yOffset < 8; ++yOffset)
+        {
           map.setTileAt(0, position.x + 1, position.y - yOffset, 2);
         }
 
         const auto expectedPosition = position;
 
         player.die();
-        for (int i = 0; i < 7; ++i) {
+        for (int i = 0; i < 7; ++i)
+        {
           player.update(pressingUp);
         }
 
@@ -1323,7 +1527,8 @@ TEST_CASE("Player movement") {
   //
 
   auto finishInteractionAnimation = [&]() {
-    for (int i = 0; i < INTERACTION_LOCK_DURATION; ++i) {
+    for (int i = 0; i < INTERACTION_LOCK_DURATION; ++i)
+    {
       player.update({});
     }
 
@@ -1331,7 +1536,8 @@ TEST_CASE("Player movement") {
   };
 
 
-  SECTION("Interaction animation") {
+  SECTION("Interaction animation")
+  {
     player.doInteractionAnimation();
     player.update({});
 
@@ -1341,19 +1547,22 @@ TEST_CASE("Player movement") {
     // TODO: Cannot attach to ladder while interacting
     // TODO: Doesn't fall while interacting (but moved by conveyor belts)
 
-    SECTION("Cannot look up while interacting") {
+    SECTION("Cannot look up while interacting")
+    {
       player.update(pressingUp);
 
       CHECK(animationFrame == 33);
     }
 
-    SECTION("Cannot crouch while interacting") {
+    SECTION("Cannot crouch while interacting")
+    {
       player.update(pressingDown);
 
       CHECK(animationFrame == 33);
     }
 
-    SECTION("Cannot change orientation while interacting") {
+    SECTION("Cannot change orientation while interacting")
+    {
       const auto previousPosition = position;
       player.update(pressingRight);
 
@@ -1362,7 +1571,8 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 33);
     }
 
-    SECTION("Cannot walk while interacting") {
+    SECTION("Cannot walk while interacting")
+    {
       const auto previousPosition = position;
 
       player.update(pressingLeft);
@@ -1371,7 +1581,8 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 33);
     }
 
-    SECTION("Cannot jump while interacting") {
+    SECTION("Cannot jump while interacting")
+    {
       const auto previousPosition = position;
 
       player.update(jumpButtonTriggered);
@@ -1381,7 +1592,8 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 33);
     }
 
-    SECTION("In normal state after interaction finished") {
+    SECTION("In normal state after interaction finished")
+    {
       finishInteractionAnimation();
 
       const auto previousPosition = position;
@@ -1390,10 +1602,12 @@ TEST_CASE("Player movement") {
       CHECK(position != previousPosition);
     }
 
-    SECTION("Can move immediately after interaction animation finished") {
+    SECTION("Can move immediately after interaction animation finished")
+    {
       const auto previousPosition = position;
 
-      for (int i = 0; i < INTERACTION_LOCK_DURATION - 1; ++i) {
+      for (int i = 0; i < INTERACTION_LOCK_DURATION - 1; ++i)
+      {
         player.update(pressingLeft);
       }
 
@@ -1408,7 +1622,8 @@ TEST_CASE("Player movement") {
   }
 
 
-  SECTION("Shooting") {
+  SECTION("Shooting")
+  {
     auto& fireShotSpy = mockEntityFactory.mCreateProjectileCalls;
 
     auto lastFiredShot = [&]() {
@@ -1416,7 +1631,8 @@ TEST_CASE("Player movement") {
       return fireShotSpy.back();
     };
 
-    SECTION("Fires one shot when fire button triggered") {
+    SECTION("Fires one shot when fire button triggered")
+    {
       player.update({});
       CHECK(fireShotSpy.size() == 0);
 
@@ -1427,7 +1643,8 @@ TEST_CASE("Player movement") {
       player.update(pressingFire);
       CHECK(fireShotSpy.size() == 1);
 
-      SECTION("Re-triggering fire button fires another shot") {
+      SECTION("Re-triggering fire button fires another shot")
+      {
         player.update({});
 
         player.update(fireButtonTriggered);
@@ -1436,9 +1653,13 @@ TEST_CASE("Player movement") {
     }
 
 
-    SECTION("Shot position and direction depend on player orientation and state") {
-      SECTION("Standing") {
-        SECTION("Facing right") {
+    SECTION(
+      "Shot position and direction depend on player orientation and state")
+    {
+      SECTION("Standing")
+      {
+        SECTION("Facing right")
+        {
           resetOrientation(Orientation::Right);
           player.update(fireButtonTriggered);
 
@@ -1447,7 +1668,8 @@ TEST_CASE("Player movement") {
           CHECK(lastFiredShot().direction == ProjectileDirection::Right);
         }
 
-        SECTION("Facing left") {
+        SECTION("Facing left")
+        {
           resetOrientation(Orientation::Left);
           player.update(fireButtonTriggered);
 
@@ -1456,15 +1678,18 @@ TEST_CASE("Player movement") {
           CHECK(lastFiredShot().direction == ProjectileDirection::Left);
         }
 
-        SECTION("Player position offset") {
-          SECTION("Facing right") {
+        SECTION("Player position offset")
+        {
+          SECTION("Facing right")
+          {
             resetOrientation(Orientation::Right);
 
             player.update(fireButtonTriggered);
             CHECK(lastFiredShot().position.x == position.x + 3);
           }
 
-          SECTION("Facing left") {
+          SECTION("Facing left")
+          {
             resetOrientation(Orientation::Left);
 
             player.update(fireButtonTriggered);
@@ -1473,10 +1698,12 @@ TEST_CASE("Player movement") {
         }
       }
 
-      SECTION("Crouching") {
+      SECTION("Crouching")
+      {
         player.update(pressingDown);
 
-        SECTION("Facing left") {
+        SECTION("Facing left")
+        {
           player.update(fireButtonTriggered & pressingDown);
 
           const auto expectedPosition = position + base::Vector{-1, -1};
@@ -1484,7 +1711,8 @@ TEST_CASE("Player movement") {
           CHECK(lastFiredShot().direction == ProjectileDirection::Left);
         }
 
-        SECTION("Facing right") {
+        SECTION("Facing right")
+        {
           resetOrientation(Orientation::Right);
 
           player.update(fireButtonTriggered & pressingDown);
@@ -1495,10 +1723,12 @@ TEST_CASE("Player movement") {
         }
       }
 
-      SECTION("Looking up") {
+      SECTION("Looking up")
+      {
         player.update(pressingUp);
 
-        SECTION("Facing left") {
+        SECTION("Facing left")
+        {
           player.update(fireButtonTriggered & pressingUp);
 
           const auto expectedPosition = position + base::Vector{0, -5};
@@ -1506,7 +1736,8 @@ TEST_CASE("Player movement") {
           CHECK(lastFiredShot().direction == ProjectileDirection::Up);
         }
 
-        SECTION("Facing right") {
+        SECTION("Facing right")
+        {
           resetOrientation(Orientation::Right);
 
           player.update(fireButtonTriggered & pressingUp);
@@ -1519,8 +1750,10 @@ TEST_CASE("Player movement") {
     }
 
 
-    SECTION("Player cannot shoot in certain states") {
-      SECTION("Cannot shoot while climbing a ladder") {
+    SECTION("Player cannot shoot in certain states")
+    {
+      SECTION("Cannot shoot while climbing a ladder")
+      {
         map.setTileAt(0, position.x + 1, position.y - 4, 2);
         player.update(pressingUp);
         CHECK(animationFrame == 35);
@@ -1530,7 +1763,8 @@ TEST_CASE("Player movement") {
         CHECK(fireShotSpy.size() == 0);
       }
 
-      SECTION("Cannot shoot while dieing") {
+      SECTION("Cannot shoot while dieing")
+      {
         drainMercyFrames();
         player.die();
 
@@ -1538,9 +1772,11 @@ TEST_CASE("Player movement") {
 
         CHECK(fireShotSpy.size() == 0);
 
-        SECTION("Cannot shoot when dead") {
+        SECTION("Cannot shoot when dead")
+        {
           // Finish death animation
-          for (int i = 0; i < 200; ++i) {
+          for (int i = 0; i < 200; ++i)
+          {
             player.update({});
           }
 
@@ -1550,14 +1786,16 @@ TEST_CASE("Player movement") {
         }
       }
 
-      SECTION("Player cannot fire while in 'interacting' state") {
+      SECTION("Player cannot fire while in 'interacting' state")
+      {
         player.doInteractionAnimation();
 
         player.update(fireButtonTriggered);
 
         CHECK(fireShotSpy.size() == 0);
 
-        SECTION("Can fire again after interaction animation done") {
+        SECTION("Can fire again after interaction animation done")
+        {
           finishInteractionAnimation();
 
           player.update(fireButtonTriggered);
@@ -1567,27 +1805,32 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Shot type depends on player's current weapon") {
-      SECTION("Regular shot") {
+    SECTION("Shot type depends on player's current weapon")
+    {
+      SECTION("Regular shot")
+      {
         player.update(fireButtonTriggered);
         CHECK(lastFiredShot().type == ProjectileType::Normal);
       }
 
-      SECTION("Laser shot") {
+      SECTION("Laser shot")
+      {
         playerModel.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
         CHECK(lastFiredShot().type == ProjectileType::Laser);
       }
 
-      SECTION("Rocket shot") {
+      SECTION("Rocket shot")
+      {
         playerModel.switchToWeapon(data::WeaponType::Rocket);
 
         player.update(fireButtonTriggered);
         CHECK(lastFiredShot().type == ProjectileType::Rocket);
       }
 
-      SECTION("Flame shot") {
+      SECTION("Flame shot")
+      {
         playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
@@ -1596,49 +1839,55 @@ TEST_CASE("Player movement") {
     }
 
 
-    SECTION("Shooting triggers appropriate sound") {
+    SECTION("Shooting triggers appropriate sound")
+    {
       CHECK(mockServiceProvider.mLastTriggeredSoundId == std::nullopt);
 
-      SECTION("Normal shot") {
+      SECTION("Normal shot")
+      {
         player.update(fireButtonTriggered);
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
-            *mockServiceProvider.mLastTriggeredSoundId ==
-            data::SoundId::DukeNormalShot);
+          *mockServiceProvider.mLastTriggeredSoundId ==
+          data::SoundId::DukeNormalShot);
       }
 
-      SECTION("Laser") {
+      SECTION("Laser")
+      {
         playerModel.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
-            *mockServiceProvider.mLastTriggeredSoundId ==
-            data::SoundId::DukeLaserShot);
+          *mockServiceProvider.mLastTriggeredSoundId ==
+          data::SoundId::DukeLaserShot);
       }
 
-      SECTION("Rocket launcher") {
+      SECTION("Rocket launcher")
+      {
         playerModel.switchToWeapon(data::WeaponType::Rocket);
 
         // The rocket launcher also uses the normal shot sound
         player.update(fireButtonTriggered);
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
-            *mockServiceProvider.mLastTriggeredSoundId ==
-            data::SoundId::DukeNormalShot);
+          *mockServiceProvider.mLastTriggeredSoundId ==
+          data::SoundId::DukeNormalShot);
       }
 
-      SECTION("Flame thrower") {
+      SECTION("Flame thrower")
+      {
         playerModel.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
-            *mockServiceProvider.mLastTriggeredSoundId ==
-            data::SoundId::FlameThrowerShot);
+          *mockServiceProvider.mLastTriggeredSoundId ==
+          data::SoundId::FlameThrowerShot);
       }
 
-      SECTION("Last shot before ammo depletion still uses appropriate sound") {
+      SECTION("Last shot before ammo depletion still uses appropriate sound")
+      {
         playerModel.switchToWeapon(data::WeaponType::Laser);
         playerModel.setAmmo(1);
 
@@ -1646,8 +1895,8 @@ TEST_CASE("Player movement") {
 
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
         CHECK(
-            *mockServiceProvider.mLastTriggeredSoundId ==
-            data::SoundId::DukeLaserShot);
+          *mockServiceProvider.mLastTriggeredSoundId ==
+          data::SoundId::DukeLaserShot);
       }
     }
 
@@ -1655,14 +1904,17 @@ TEST_CASE("Player movement") {
       player.update(fireButtonTriggered);
     };
 
-    SECTION("Ammo consumption for non-regular weapons works") {
-      SECTION("Normal shot doesn't consume ammo") {
+    SECTION("Ammo consumption for non-regular weapons works")
+    {
+      SECTION("Normal shot doesn't consume ammo")
+      {
         playerModel.setAmmo(24);
         fireOneShot();
         CHECK(playerModel.ammo() == 24);
       }
 
-      SECTION("Laser consumes 1 unit of ammo per shot") {
+      SECTION("Laser consumes 1 unit of ammo per shot")
+      {
         playerModel.switchToWeapon(data::WeaponType::Laser);
         playerModel.setAmmo(10);
 
@@ -1670,7 +1922,8 @@ TEST_CASE("Player movement") {
         CHECK(playerModel.ammo() == 9);
       }
 
-      SECTION("Rocket launcher consumes 1 unit of ammo per shot") {
+      SECTION("Rocket launcher consumes 1 unit of ammo per shot")
+      {
         playerModel.switchToWeapon(data::WeaponType::Rocket);
         playerModel.setAmmo(10);
 
@@ -1678,7 +1931,8 @@ TEST_CASE("Player movement") {
         CHECK(playerModel.ammo() == 9);
       }
 
-      SECTION("Flame thrower consumes 1 unit of ammo per shot") {
+      SECTION("Flame thrower consumes 1 unit of ammo per shot")
+      {
         playerModel.switchToWeapon(data::WeaponType::FlameThrower);
         playerModel.setAmmo(10);
 
@@ -1686,19 +1940,22 @@ TEST_CASE("Player movement") {
         CHECK(playerModel.ammo() == 9);
       }
 
-      SECTION("Multiple shots consume several units of ammo") {
+      SECTION("Multiple shots consume several units of ammo")
+      {
         playerModel.switchToWeapon(data::WeaponType::Laser);
         playerModel.setAmmo(20);
 
         const auto shotsToFire = 15;
-        for (int i = 0; i < shotsToFire; ++i) {
+        for (int i = 0; i < shotsToFire; ++i)
+        {
           fireOneShot();
         }
 
         CHECK(playerModel.ammo() == 20 - shotsToFire);
       }
 
-      SECTION("Depleting ammo switches back to normal weapon") {
+      SECTION("Depleting ammo switches back to normal weapon")
+      {
         playerModel.switchToWeapon(data::WeaponType::Rocket);
         playerModel.setAmmo(1);
 
@@ -1709,7 +1966,9 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Player fires continuously every other frame when owning rapid fire buff") {
+    SECTION(
+      "Player fires continuously every other frame when owning rapid fire buff")
+    {
       playerModel.giveItem(data::InventoryItemType::RapidFire);
 
       player.update(pressingFire & fireButtonTriggered);
@@ -1726,17 +1985,20 @@ TEST_CASE("Player movement") {
       CHECK(fireShotSpy.size() == 3);
     }
 
-    SECTION("Firing stops when rapid fire is taken away") {
+    SECTION("Firing stops when rapid fire is taken away")
+    {
       playerModel.giveItem(data::InventoryItemType::RapidFire);
 
-      for (int i = 0; i < 700; ++i) {
+      for (int i = 0; i < 700; ++i)
+      {
         player.update(pressingFire);
       }
       CHECK(fireShotSpy.size() == 350);
 
       playerModel.removeItem(data::InventoryItemType::RapidFire);
 
-      for (int i = 0; i < 2; ++i) {
+      for (int i = 0; i < 2; ++i)
+      {
         player.update(pressingFire);
       }
       CHECK(fireShotSpy.size() == 350);
@@ -1744,10 +2006,12 @@ TEST_CASE("Player movement") {
   }
 
 
-  SECTION("Facing right") {
+  SECTION("Facing right")
+  {
     resetOrientation(Orientation::Right);
 
-    SECTION("Doesn't move when no key pressed") {
+    SECTION("Doesn't move when no key pressed")
+    {
       const auto previousPosition = position;
 
       player.update(PlayerInput{});
@@ -1755,7 +2019,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Doesn't move when both keys pressed") {
+    SECTION("Doesn't move when both keys pressed")
+    {
       const auto previousPosition = position;
 
       PlayerInput input;
@@ -1766,7 +2031,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Moves right when right key pressed") {
+    SECTION("Moves right when right key pressed")
+    {
       const auto expectedPosition = position + base::Vector{+1, 0};
 
       PlayerInput input;
@@ -1775,7 +2041,8 @@ TEST_CASE("Player movement") {
 
       CHECK(position == expectedPosition);
 
-      SECTION("Stops moving when key released") {
+      SECTION("Stops moving when key released")
+      {
         input.mRight = false;
         player.update(input);
 
@@ -1783,7 +2050,8 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Changes orientation when left key pressed") {
+    SECTION("Changes orientation when left key pressed")
+    {
       const auto expectedPosition = position;
 
       PlayerInput input;
@@ -1795,7 +2063,8 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 0);
     }
 
-    SECTION("Doesn't move when up against wall") {
+    SECTION("Doesn't move when up against wall")
+    {
       const auto previousPosition = position;
       makeWall(map, position.x + 2 + 1, 0, position.y + 1);
 
@@ -1806,7 +2075,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Doesn't move when up key pressed at the same time") {
+    SECTION("Doesn't move when up key pressed at the same time")
+    {
       const auto previousPosition = position;
 
       PlayerInput input;
@@ -1817,7 +2087,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Doesn't move when down key pressed at the same time") {
+    SECTION("Doesn't move when down key pressed at the same time")
+    {
       const auto previousPosition = position;
 
       PlayerInput input;
@@ -1828,7 +2099,8 @@ TEST_CASE("Player movement") {
       CHECK(position == previousPosition);
     }
 
-    SECTION("Ignores up/down keys when both pressed at the same time") {
+    SECTION("Ignores up/down keys when both pressed at the same time")
+    {
       const auto expectedPosition = position + base::Vector{+1, 0};
 
       PlayerInput input;
@@ -1840,7 +2112,8 @@ TEST_CASE("Player movement") {
       CHECK(position == expectedPosition);
     }
 
-    SECTION("Aims up when up key pressed") {
+    SECTION("Aims up when up key pressed")
+    {
       PlayerInput input;
       input.mUp = true;
       player.update(input);
@@ -1848,12 +2121,14 @@ TEST_CASE("Player movement") {
       CHECK(animationFrame == 16);
       CHECK(player.isLookingUp());
 
-      SECTION("isLookingUp() works correctly when recoil animation shown") {
+      SECTION("isLookingUp() works correctly when recoil animation shown")
+      {
         animationFrame = 19;
         CHECK(player.isLookingUp());
       }
 
-      SECTION("Can change orientation while looking up") {
+      SECTION("Can change orientation while looking up")
+      {
         const auto previousOrientation = player.orientation();
 
         player.update(pressingUp & pressingLeft);
@@ -1862,7 +2137,8 @@ TEST_CASE("Player movement") {
         CHECK(player.orientation() != previousOrientation);
       }
 
-      SECTION("Stops aiming up when key released") {
+      SECTION("Stops aiming up when key released")
+      {
         input.mUp = false;
         player.update(input);
 
@@ -1871,7 +2147,8 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Crouches when down key pressed") {
+    SECTION("Crouches when down key pressed")
+    {
       PlayerInput input;
       input.mDown = true;
       player.update(input);
@@ -1882,12 +2159,14 @@ TEST_CASE("Player movement") {
         player.worldSpaceHitBox().size.height == PLAYER_HITBOX_HEIGHT_CROUCHED);
       CHECK(bbox.size.height == PLAYER_HEIGHT_CROUCHED);
 
-      SECTION("isCrouching() works correctly when recoil animation shown") {
+      SECTION("isCrouching() works correctly when recoil animation shown")
+      {
         animationFrame = 34;
         CHECK(player.isCrouching());
       }
 
-      SECTION("Can change orientation while crouching") {
+      SECTION("Can change orientation while crouching")
+      {
         const auto previousOrientation = player.orientation();
 
         player.update(pressingDown & pressingLeft);
@@ -1896,7 +2175,8 @@ TEST_CASE("Player movement") {
         CHECK(player.orientation() != previousOrientation);
       }
 
-      SECTION("Stops crouching when key released") {
+      SECTION("Stops crouching when key released")
+      {
         input.mDown = false;
         player.update(input);
 
@@ -1906,7 +2186,8 @@ TEST_CASE("Player movement") {
       }
     }
 
-    SECTION("Walks up a stair step") {
+    SECTION("Walks up a stair step")
+    {
       map.setTileAt(0, position.x + 1 + 2, position.y, 1);
       const auto expectedPosition = position + base::Vector{+1, -1};
 

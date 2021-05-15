@@ -19,28 +19,30 @@
 #include "loader/file_utils.hpp"
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-namespace {
+namespace
+{
 
-data::ImfCommand readCommand(LeStreamReader& reader) {
-  return {
-    reader.readU8(),
-    reader.readU8(),
-    reader.readU16()};
+data::ImfCommand readCommand(LeStreamReader& reader)
+{
+  return {reader.readU8(), reader.readU8(), reader.readU16()};
 }
 
-}
+} // namespace
 
-data::Song loadSong(const ByteBuffer& imfData) {
+data::Song loadSong(const ByteBuffer& imfData)
+{
   data::Song song;
 
   LeStreamReader reader(imfData);
-  while (reader.hasData()) {
+  while (reader.hasData())
+  {
     song.push_back(readCommand(reader));
   }
 
   return song;
 }
 
-}
+} // namespace rigel::loader

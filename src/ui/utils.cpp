@@ -19,36 +19,36 @@
 #include "loader/resource_loader.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-ImU32 toImgui(const base::Color& color) {
-RIGEL_DISABLE_WARNINGS
+ImU32 toImgui(const base::Color& color)
+{
+  RIGEL_DISABLE_WARNINGS
   return IM_COL32(color.r, color.g, color.b, color.a);
-RIGEL_RESTORE_WARNINGS
+  RIGEL_RESTORE_WARNINGS
 }
 
 
 renderer::Texture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
-  const std::string& imageName
-) {
+  const std::string& imageName)
+{
   return renderer::Texture(
-    pRenderer,
-    resources.loadStandaloneFullscreenImage(imageName));
+    pRenderer, resources.loadStandaloneFullscreenImage(imageName));
 }
 
 
 engine::TiledTexture makeUiSpriteSheet(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resourceLoader,
-  const loader::Palette16& palette
-) {
+  const loader::Palette16& palette)
+{
   return engine::TiledTexture{
     renderer::Texture{
       pRenderer,
-      resourceLoader.loadTiledFullscreenImage(
-        "STATUS.MNI", palette)},
+      resourceLoader.loadTiledFullscreenImage("STATUS.MNI", palette)},
     pRenderer};
 }
 
@@ -57,8 +57,8 @@ void drawText(
   const std::string_view text,
   const int x,
   const int y,
-  const base::Color& color
-) {
+  const base::Color& color)
+{
   auto pDrawList = ImGui::GetForegroundDrawList();
   pDrawList->AddText(
     {static_cast<float>(x), static_cast<float>(y)},
@@ -67,4 +67,4 @@ void drawText(
     text.data() + text.size());
 }
 
-}
+} // namespace rigel::ui

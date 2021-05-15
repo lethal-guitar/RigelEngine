@@ -17,26 +17,31 @@
 #include "menu_navigation.hpp"
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
-namespace {
+namespace
+{
 
 constexpr auto ANALOG_STICK_DEADZONE = 20'000;
 
 }
 
 
-bool isNonRepeatKeyDown(const SDL_Event& event) {
+bool isNonRepeatKeyDown(const SDL_Event& event)
+{
   return event.type == SDL_KEYDOWN && event.key.repeat == 0;
 }
 
 
-bool isButtonPress(const SDL_Event& event) {
+bool isButtonPress(const SDL_Event& event)
+{
   return event.type == SDL_KEYDOWN || event.type == SDL_CONTROLLERBUTTONDOWN;
 }
 
 
-bool isConfirmButton(const SDL_Event& event) {
+bool isConfirmButton(const SDL_Event& event)
+{
   const auto enterPressed = isNonRepeatKeyDown(event) &&
     (event.key.keysym.sym == SDLK_RETURN ||
      event.key.keysym.sym == SDLK_KP_ENTER);
@@ -47,17 +52,17 @@ bool isConfirmButton(const SDL_Event& event) {
 }
 
 
-bool isMenuConfirmButton(const SDL_Event& event) {
-  return
-    isConfirmButton(event) ||
+bool isMenuConfirmButton(const SDL_Event& event)
+{
+  return isConfirmButton(event) ||
     (isNonRepeatKeyDown(event) && event.key.keysym.sym == SDLK_SPACE);
-
 }
 
 
-bool isCancelButton(const SDL_Event& event) {
-  const auto escapePressed = isNonRepeatKeyDown(event) &&
-    event.key.keysym.sym == SDLK_ESCAPE;
+bool isCancelButton(const SDL_Event& event)
+{
+  const auto escapePressed =
+    isNonRepeatKeyDown(event) && event.key.keysym.sym == SDLK_ESCAPE;
   const auto buttonBPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
     event.cbutton.button == SDL_CONTROLLER_BUTTON_B;
 
@@ -65,7 +70,8 @@ bool isCancelButton(const SDL_Event& event) {
 }
 
 
-bool isQuitConfirmButton(const SDL_Event& event) {
+bool isQuitConfirmButton(const SDL_Event& event)
+{
   const auto yPressed =
     event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_y;
   const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
@@ -75,16 +81,19 @@ bool isQuitConfirmButton(const SDL_Event& event) {
 }
 
 
-NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event) {
+NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event)
+{
   auto handleAxisMotion = [&](int& value, const std::int16_t newValueRaw) {
     auto result = NavigationEvent::None;
 
     const auto newValue =
       base::applyThreshold(newValueRaw, ANALOG_STICK_DEADZONE);
-    if (value >= 0 && newValue < 0) {
+    if (value >= 0 && newValue < 0)
+    {
       result = NavigationEvent::NavigateUp;
     }
-    if (value <= 0 && newValue > 0) {
+    if (value <= 0 && newValue > 0)
+    {
       result = NavigationEvent::NavigateDown;
     }
 
@@ -94,9 +103,11 @@ NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event) {
   };
 
 
-  switch (event.type) {
+  switch (event.type)
+  {
     case SDL_KEYDOWN:
-      switch (event.key.keysym.sym) {
+      switch (event.key.keysym.sym)
+      {
         case SDLK_LEFT:
         case SDLK_UP:
           return NavigationEvent::NavigateUp;
@@ -118,7 +129,8 @@ NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event) {
       }
 
     case SDL_CONTROLLERAXISMOTION:
-      switch (event.caxis.axis) {
+      switch (event.caxis.axis)
+      {
         case SDL_CONTROLLER_AXIS_LEFTX:
         case SDL_CONTROLLER_AXIS_RIGHTX:
           return handleAxisMotion(mAnalogStickVector.x, event.caxis.value);
@@ -133,7 +145,8 @@ NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event) {
       break;
 
     case SDL_CONTROLLERBUTTONDOWN:
-      switch (event.cbutton.button) {
+      switch (event.cbutton.button)
+      {
         case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
         case SDL_CONTROLLER_BUTTON_DPAD_UP:
           return NavigationEvent::NavigateUp;
@@ -159,4 +172,4 @@ NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event) {
   return NavigationEvent::None;
 }
 
-}
+} // namespace rigel::ui

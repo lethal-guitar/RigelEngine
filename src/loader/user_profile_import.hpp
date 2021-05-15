@@ -23,9 +23,11 @@
 #include <optional>
 
 
-namespace rigel::loader {
+namespace rigel::loader
+{
 
-struct GameOptions {
+struct GameOptions
+{
   using ScanCode = std::uint8_t;
 
   ScanCode mUpKeybinding;
@@ -48,8 +50,8 @@ struct GameOptions {
 
 data::SaveSlotArray loadSavedGames(const std::string& gamePath);
 
-std::array<data::HighScoreList, data::NUM_EPISODES> loadHighScoreLists(
-  const std::string& gamePath);
+std::array<data::HighScoreList, data::NUM_EPISODES>
+  loadHighScoreLists(const std::string& gamePath);
 
 std::optional<GameOptions> loadOptions(const std::string& gamePath);
-}
+} // namespace rigel::loader

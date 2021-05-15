@@ -27,36 +27,32 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 
-namespace rigel::engine {
+namespace rigel::engine
+{
 
-inline components::BoundingBox inferBoundingBox(
-  const SpriteFrame& frame
-) {
+inline components::BoundingBox inferBoundingBox(const SpriteFrame& frame)
+{
   return {frame.mDrawOffset, frame.mDimensions};
 }
 
 
-inline components::BoundingBox inferBoundingBox(
-  const components::Sprite& sprite,
-  entityx::Entity entity
-) {
-  const auto realFrame = virtualToRealFrame(
-    0, *sprite.mpDrawData, entity);
+inline components::BoundingBox
+  inferBoundingBox(const components::Sprite& sprite, entityx::Entity entity)
+{
+  const auto realFrame = virtualToRealFrame(0, *sprite.mpDrawData, entity);
   return inferBoundingBox(sprite.mpDrawData->mFrames[realFrame]);
 }
 
 
 inline void synchronizeBoundingBoxToSprite(
   entityx::Entity& entity,
-  const int renderSlot = 0
-) {
+  const int renderSlot = 0)
+{
   auto& sprite = *entity.component<components::Sprite>();
   auto& bbox = *entity.component<components::BoundingBox>();
 
   const auto currentRealFrame = virtualToRealFrame(
-    sprite.mFramesToRender[renderSlot],
-    *sprite.mpDrawData,
-    entity);
+    sprite.mFramesToRender[renderSlot], *sprite.mpDrawData, entity);
   bbox = inferBoundingBox(sprite.mpDrawData->mFrames[currentRealFrame]);
 }
 
@@ -66,8 +62,8 @@ inline void startAnimationLoop(
   const int delayInFrames,
   const int startFrame,
   std::optional<int> endFrame,
-  const int renderSlot = 0
-) {
+  const int renderSlot = 0)
+{
   removeSafely<components::AnimationLoop>(entity);
 
   auto& sprite = *entity.component<components::Sprite>();
@@ -81,8 +77,8 @@ inline void startAnimationSequence(
   entityx::Entity& entity,
   const base::ArrayView<int>& frames,
   const int renderSlot = 0,
-  const bool repeat = false
-) {
+  const bool repeat = false)
+{
   removeSafely<components::AnimationSequence>(entity);
 
   auto& sprite = *entity.component<components::Sprite>();
@@ -91,4 +87,4 @@ inline void startAnimationSequence(
 }
 
 
-}
+} // namespace rigel::engine

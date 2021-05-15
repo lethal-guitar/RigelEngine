@@ -20,9 +20,11 @@
 #include "sdl_utils/key_code.hpp"
 
 
-namespace rigel {
+namespace rigel
+{
 
-namespace {
+namespace
+{
 
 constexpr auto ANALOG_STICK_DEADZONE_X = 10'000;
 constexpr auto ANALOG_STICK_DEADZONE_Y = 24'000;
@@ -31,8 +33,8 @@ constexpr auto TRIGGER_THRESHOLD = 3'000;
 
 game_logic::PlayerInput combinedInput(
   const game_logic::PlayerInput& baseInput,
-  const base::Vector& analogStickVector
-) {
+  const base::Vector& analogStickVector)
+{
   auto combined = baseInput;
 
   // "Overlay" analog stick movement on top of the digital d-pad movement.
@@ -46,7 +48,7 @@ game_logic::PlayerInput combinedInput(
   return combined;
 }
 
-}
+} // namespace
 
 
 InputHandler::InputHandler(const data::GameOptions* pOptions)
@@ -55,36 +57,42 @@ InputHandler::InputHandler(const data::GameOptions* pOptions)
 }
 
 
-auto InputHandler::handleEvent(
-  const SDL_Event& event,
-  const bool playerInShip
-) -> MenuCommand {
+auto InputHandler::handleEvent(const SDL_Event& event, const bool playerInShip)
+  -> MenuCommand
+{
   const auto isKeyEvent = event.type == SDL_KEYDOWN || event.type == SDL_KEYUP;
 
-  if (isKeyEvent && event.key.repeat == 0) {
+  if (isKeyEvent && event.key.repeat == 0)
+  {
     return handleKeyboardInput(event);
-  } else {
+  }
+  else
+  {
     return handleControllerInput(event, playerInShip);
   }
 }
 
 
-void InputHandler::reset() {
+void InputHandler::reset()
+{
   mPlayerInput = {};
 }
 
 
-game_logic::PlayerInput InputHandler::fetchInput() {
+game_logic::PlayerInput InputHandler::fetchInput()
+{
   const auto input = combinedInput(mPlayerInput, mAnalogStickVector);
   mPlayerInput.resetTriggeredStates();
   return input;
 }
 
 
-auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
+auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand
+{
   auto updateButton = [](game_logic::Button& button, const bool isPressed) {
     button.mIsPressed = isPressed;
-    if (isPressed) {
+    if (isPressed)
+    {
       button.mWasTriggered = true;
     }
   };
@@ -94,25 +102,42 @@ auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
   const auto keyCode =
     sdl_utils::normalizeLeftRightVariants(event.key.keysym.sym);
 
-  if (keyCode == mpOptions->mUpKeybinding) {
+  if (keyCode == mpOptions->mUpKeybinding)
+  {
     mPlayerInput.mUp = keyPressed;
     updateButton(mPlayerInput.mInteract, keyPressed);
-  } else if (keyCode == mpOptions->mDownKeybinding) {
+  }
+  else if (keyCode == mpOptions->mDownKeybinding)
+  {
     mPlayerInput.mDown = keyPressed;
-  } else if (keyCode == mpOptions->mLeftKeybinding) {
+  }
+  else if (keyCode == mpOptions->mLeftKeybinding)
+  {
     mPlayerInput.mLeft = keyPressed;
-  } else if (keyCode == mpOptions->mRightKeybinding) {
+  }
+  else if (keyCode == mpOptions->mRightKeybinding)
+  {
     mPlayerInput.mRight = keyPressed;
-  } else if (keyCode == mpOptions->mJumpKeybinding) {
+  }
+  else if (keyCode == mpOptions->mJumpKeybinding)
+  {
     updateButton(mPlayerInput.mJump, keyPressed);
-  } else if (keyCode == mpOptions->mFireKeybinding) {
+  }
+  else if (keyCode == mpOptions->mFireKeybinding)
+  {
     updateButton(mPlayerInput.mFire, keyPressed);
-  } else if (keyCode == mpOptions->mQuickSaveKeybinding) {
-    if (keyPressed) {
+  }
+  else if (keyCode == mpOptions->mQuickSaveKeybinding)
+  {
+    if (keyPressed)
+    {
       return MenuCommand::QuickSave;
     }
-  } else if (keyCode == mpOptions->mQuickLoadKeybinding) {
-    if (keyPressed) {
+  }
+  else if (keyCode == mpOptions->mQuickLoadKeybinding)
+  {
+    if (keyPressed)
+    {
       return MenuCommand::QuickLoad;
     }
   }
@@ -123,11 +148,13 @@ auto InputHandler::handleKeyboardInput(const SDL_Event& event) -> MenuCommand {
 
 auto InputHandler::handleControllerInput(
   const SDL_Event& event,
-  const bool playerInShip
-) -> MenuCommand {
-  switch (event.type) {
+  const bool playerInShip) -> MenuCommand
+{
+  switch (event.type)
+  {
     case SDL_CONTROLLERAXISMOTION:
-      switch (event.caxis.axis) {
+      switch (event.caxis.axis)
+      {
         case SDL_CONTROLLER_AXIS_LEFTX:
         case SDL_CONTROLLER_AXIS_RIGHTX:
           mAnalogStickVector.x =
@@ -141,11 +168,12 @@ auto InputHandler::handleControllerInput(
             // player is walking, but still make it easy to move the ship
             // up/down while flying. Therefore, we use a different vertical
             // deadzone when not in the ship.
-            const auto deadZone = playerInShip
-              ? ANALOG_STICK_DEADZONE_X : ANALOG_STICK_DEADZONE_Y;
+            const auto deadZone =
+              playerInShip ? ANALOG_STICK_DEADZONE_X : ANALOG_STICK_DEADZONE_Y;
 
             const auto newY = base::applyThreshold(event.caxis.value, deadZone);
-            if (mAnalogStickVector.y >= 0 && newY < 0) {
+            if (mAnalogStickVector.y >= 0 && newY < 0)
+            {
               mPlayerInput.mInteract.mWasTriggered = true;
             }
             mPlayerInput.mInteract.mIsPressed = newY < 0;
@@ -161,7 +189,8 @@ auto InputHandler::handleControllerInput(
             auto& input = event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT
               ? mPlayerInput.mJump
               : mPlayerInput.mFire;
-            if (!input.mIsPressed && triggerPressed) {
+            if (!input.mIsPressed && triggerPressed)
+            {
               input.mWasTriggered = true;
             }
             input.mIsPressed = triggerPressed;
@@ -178,12 +207,14 @@ auto InputHandler::handleControllerInput(
       {
         const auto buttonPressed = event.type == SDL_CONTROLLERBUTTONDOWN;
 
-        switch (event.cbutton.button) {
+        switch (event.cbutton.button)
+        {
           case SDL_CONTROLLER_BUTTON_DPAD_UP:
             mPlayerInput.mUp = buttonPressed;
             mPlayerInput.mInteract.mIsPressed = buttonPressed;
-            if (buttonPressed) {
-                mPlayerInput.mInteract.mWasTriggered = true;
+            if (buttonPressed)
+            {
+              mPlayerInput.mInteract.mWasTriggered = true;
             }
             break;
 
@@ -203,8 +234,9 @@ auto InputHandler::handleControllerInput(
           case SDL_CONTROLLER_BUTTON_B:
           case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
             mPlayerInput.mJump.mIsPressed = buttonPressed;
-            if (buttonPressed) {
-                mPlayerInput.mJump.mWasTriggered = true;
+            if (buttonPressed)
+            {
+              mPlayerInput.mJump.mWasTriggered = true;
             }
             break;
 
@@ -212,13 +244,15 @@ auto InputHandler::handleControllerInput(
           case SDL_CONTROLLER_BUTTON_Y:
           case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
             mPlayerInput.mFire.mIsPressed = buttonPressed;
-            if (buttonPressed) {
-                mPlayerInput.mFire.mWasTriggered = true;
+            if (buttonPressed)
+            {
+              mPlayerInput.mFire.mWasTriggered = true;
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_BACK:
-            if (buttonPressed) {
+            if (buttonPressed)
+            {
               return MenuCommand::QuickSave;
             }
             break;
@@ -230,4 +264,4 @@ auto InputHandler::handleControllerInput(
   return MenuCommand::None;
 }
 
-}
+} // namespace rigel

@@ -56,14 +56,16 @@
 // | 55 |   SB_1 |  1120 | // 4 seconds
 
 
-namespace rigel::ui {
+namespace rigel::ui
+{
 
 using data::SoundId;
 
 
-IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
-  const loader::ResourceLoader& resources
-){
+IntroMovie::PlaybackConfigList
+  IntroMovie::createConfigurations(const loader::ResourceLoader& resources)
+{
+  // clang-format off
   return {
     // Neo LA - the future
     {
@@ -180,6 +182,7 @@ IntroMovie::PlaybackConfigList IntroMovie::createConfigurations(
       }
     }
   };
+  // clang-format on
 }
 
 
@@ -192,23 +195,28 @@ IntroMovie::IntroMovie(GameMode::Context context)
 }
 
 
-void IntroMovie::start() {
+void IntroMovie::start()
+{
   mpServiceProvider->playMusic("RANGEA.IMF");
   mCurrentConfiguration = 0u;
   startNextMovie();
 }
 
 
-void IntroMovie::updateAndRender(engine::TimeDelta dt) {
-  if (isFinished()) {
+void IntroMovie::updateAndRender(engine::TimeDelta dt)
+{
+  if (isFinished())
+  {
     return;
   }
 
   mMoviePlayer.updateAndRender(dt);
 
-  if (mMoviePlayer.hasCompletedPlayback()) {
+  if (mMoviePlayer.hasCompletedPlayback())
+  {
     ++mCurrentConfiguration;
-    if (mCurrentConfiguration >= mMovieConfigurations.size()) {
+    if (mCurrentConfiguration >= mMovieConfigurations.size())
+    {
       mpServiceProvider->fadeOutScreen();
       return;
     }
@@ -218,12 +226,14 @@ void IntroMovie::updateAndRender(engine::TimeDelta dt) {
 }
 
 
-bool IntroMovie::isFinished() const {
+bool IntroMovie::isFinished() const
+{
   return mCurrentConfiguration >= mMovieConfigurations.size();
 }
 
 
-void IntroMovie::startNextMovie() {
+void IntroMovie::startNextMovie()
+{
   const auto& config = mMovieConfigurations[mCurrentConfiguration];
   mMoviePlayer.playMovie(
     config.mMovie,
@@ -232,4 +242,4 @@ void IntroMovie::startNextMovie() {
     config.mFrameCallback);
 }
 
-}
+} // namespace rigel::ui
