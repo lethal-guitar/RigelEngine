@@ -50,7 +50,6 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
   (GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx) /
   (GameTraits::pixelsPerEgaByte / GameTraits::egaPlanes);
 
-} // namespace
 
 // When loading assets, the game will first check if a file with an expected
 // name exists at the replacements path, and if it does, it will load this file
@@ -68,6 +67,31 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
+
+
+std::optional<data::Image> loadReplacementTilesetIfPresent(
+  const fs::path& gamePath,
+  const std::string& name)
+{
+  using namespace std::literals;
+
+  std::regex tilesetNameRegex{"^CZONE([0-9A-Z])\\.MNI$", std::regex::icase};
+  std::smatch matches;
+
+  if (!std::regex_match(name, matches, tilesetNameRegex) || matches.size() != 2)
+  {
+    return {};
+  }
+
+  const auto number = matches[1].str();
+  const auto replacementName = "tileset"s + number + ".png";
+  const auto replacementPath =
+    gamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+
+  return loadPng(replacementPath.u8string());
+}
+
+} // namespace
 
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
@@ -196,6 +220,12 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const
     {
       attributeReader.skipBytes(sizeof(uint16_t) * 4);
     }
+  }
+
+  if (auto replacementImage = loadReplacementTilesetIfPresent(mGamePath, name))
+  {
+    return {
+      std::move(*replacementImage), TileAttributeDict{std::move(attributes)}};
   }
 
   Image fullImage(
