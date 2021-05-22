@@ -70,7 +70,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 //
 // For tilesets and backdrops, <num> should be the same number as in the
 // original asset filename. E.g. to replace CZONE1.MNI, provide a file named
-// tileset_1.png, etc.
+// tileset1.png, etc.
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
