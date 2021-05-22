@@ -23,12 +23,14 @@
 #include "loader/file_utils.hpp"
 #include "loader/movie_loader.hpp"
 #include "loader/music_loader.hpp"
+#include "loader/png_image.hpp"
 #include "loader/voc_decoder.hpp"
 
 #include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <map>
+#include <regex>
 
 namespace fs = std::filesystem;
 
@@ -148,6 +150,29 @@ loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
   const auto& data = file(imageName);
   const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
   return load6bitPalette16(paletteStart, data.end());
+}
+
+
+data::Image ResourceLoader::loadBackdrop(const std::string& name) const
+{
+  using namespace std::literals;
+
+  std::regex backdropNameRegex{"^DROP([0-9]+)\\.MNI$", std::regex::icase};
+  std::smatch matches;
+
+  if (std::regex_match(name, matches, backdropNameRegex) && matches.size() == 2)
+  {
+    const auto number = matches[1].str();
+    const auto replacementName = "backdrop"s + number + ".png";
+    const auto replacementPath =
+      mGamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+    if (const auto replacementImage = loadPng(replacementPath.u8string()))
+    {
+      return *replacementImage;
+    }
+  }
+
+  return loadTiledFullscreenImage(name);
 }
 
 

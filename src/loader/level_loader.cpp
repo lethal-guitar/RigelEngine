@@ -621,11 +621,11 @@ LevelData loadLevel(
     }
   }
 
-  auto backdropImage = resources.loadTiledFullscreenImage(header.backdrop);
+  auto backdropImage = resources.loadBackdrop(header.backdrop);
   std::optional<data::Image> alternativeBackdropImage;
   if (header.flagBitSet(0x40) || header.flagBitSet(0x80))
   {
-    alternativeBackdropImage = resources.loadTiledFullscreenImage(
+    alternativeBackdropImage = resources.loadBackdrop(
       backdropNameFromNumber(header.alternativeBackdropNumber));
   }
 
