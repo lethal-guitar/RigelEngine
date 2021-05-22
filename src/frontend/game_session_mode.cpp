@@ -216,6 +216,18 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
 }
 
 
+bool GameSessionMode::needsPerElementUpscaling() const
+{
+  return base::match(
+    mCurrentStage,
+    [this](const std::unique_ptr<GameRunner>& pIngameMode) {
+      return pIngameMode->needsPerElementUpscaling();
+    },
+
+    [](auto&&) { return false; });
+}
+
+
 template <typename StageT>
 void GameSessionMode::fadeToNewStage(StageT& stage)
 {

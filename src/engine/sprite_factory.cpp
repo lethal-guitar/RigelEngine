@@ -833,6 +833,7 @@ SpriteFactory::SpriteFactory(
 SpriteFactory::SpriteFactory(CtorArgs args)
   : mSpriteDataMap(std::move(std::get<0>(args)))
   , mSpritesTextureAtlas(std::move(std::get<1>(args)))
+  , mHasHighResReplacements(std::get<2>(args))
 {
 }
 
@@ -841,6 +842,8 @@ auto SpriteFactory::construct(
   renderer::Renderer* pRenderer,
   const loader::ActorImagePackage* pSpritePackage) -> CtorArgs
 {
+  bool highResReplacementsFound = false;
+
   std::unordered_map<data::ActorID, SpriteData> spriteDataMap;
 
   std::vector<data::Image> spriteImages;
@@ -876,6 +879,15 @@ auto SpriteFactory::construct(
           frameData.mDrawOffset,
           frameData.mLogicalSize});
 
+        if (
+          data::tilesToPixels(frameData.mLogicalSize.width) <
+            int(image.width()) ||
+          data::tilesToPixels(frameData.mLogicalSize.height) <
+            int(image.height()))
+        {
+          highResReplacementsFound = true;
+        }
+
         spriteImages.emplace_back(std::move(image));
       }
 
@@ -894,7 +906,9 @@ auto SpriteFactory::construct(
   }
 
   return {
-    std::move(spriteDataMap), renderer::TextureAtlas{pRenderer, spriteImages}};
+    std::move(spriteDataMap),
+    renderer::TextureAtlas{pRenderer, spriteImages},
+    highResReplacementsFound};
 }
 
 

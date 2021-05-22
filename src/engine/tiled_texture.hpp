@@ -51,6 +51,8 @@ public:
 
   int tilesPerRow() const;
 
+  bool isHighRes() const;
+
 private:
   void renderTileGroup(
     const int index,

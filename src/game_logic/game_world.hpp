@@ -99,6 +99,7 @@ public:
   void receive(const rigel::events::CloakPickedUp& event);
   void receive(const rigel::events::CloakExpired& event);
 
+  bool needsPerElementUpscaling() const;
   void updateGameLogic(const PlayerInput& input);
   void render();
   void processEndOfFrameActions();

@@ -383,6 +383,9 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
       mFpsDisplay.updateAndRender(elapsed);
     }
   }
+
+  mpUserProfile->mOptions.mPerElementUpscalingEnabled =
+    mpCurrentGameMode->needsPerElementUpscaling();
 }
 
 

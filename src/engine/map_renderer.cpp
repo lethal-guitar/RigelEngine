@@ -150,6 +150,14 @@ MapRenderer::MapRenderer(
 }
 
 
+bool MapRenderer::hasHighResReplacements() const
+{
+  return mBackdropTexture.width() > data::GameTraits::viewPortWidthPx ||
+    mBackdropTexture.height() > data::GameTraits::viewPortHeightPx ||
+    mTileSetTexture.isHighRes();
+}
+
+
 void MapRenderer::switchBackdrops()
 {
   std::swap(mBackdropTexture, mAlternativeBackdropTexture);

@@ -591,6 +591,13 @@ void GameWorld::unsubscribe(entityx::EventManager& eventManager)
 }
 
 
+bool GameWorld::needsPerElementUpscaling() const
+{
+  return mpSpriteFactory->hasHighResReplacements() ||
+    mpState->mMapRenderer.hasHighResReplacements();
+}
+
+
 void GameWorld::updateGameLogic(const PlayerInput& input)
 {
   mpState->mBackdropFlashColor = std::nullopt;

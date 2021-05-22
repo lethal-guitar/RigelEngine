@@ -59,6 +59,8 @@ public:
   engine::components::Sprite createSprite(data::ActorID id) override;
   base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override;
 
+  bool hasHighResReplacements() const { return mHasHighResReplacements; }
+
   const renderer::TextureAtlas& textureAtlas() const
   {
     return mSpritesTextureAtlas;
@@ -73,7 +75,8 @@ private:
 
   using CtorArgs = std::tuple<
     std::unordered_map<data::ActorID, SpriteData>,
-    renderer::TextureAtlas>;
+    renderer::TextureAtlas,
+    bool>;
 
   SpriteFactory(CtorArgs args);
   static CtorArgs construct(
@@ -82,6 +85,7 @@ private:
 
   std::unordered_map<data::ActorID, SpriteData> mSpriteDataMap;
   renderer::TextureAtlas mSpritesTextureAtlas;
+  bool mHasHighResReplacements;
 };
 
 } // namespace rigel::engine

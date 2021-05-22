@@ -97,6 +97,12 @@ int TiledTexture::tilesPerRow() const
 }
 
 
+bool TiledTexture::isHighRes() const
+{
+  return mScaleX > 1 || mScaleY > 1;
+}
+
+
 void TiledTexture::renderTileGroup(
   const int index,
   const int posX,
