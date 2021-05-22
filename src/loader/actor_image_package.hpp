@@ -36,6 +36,7 @@ struct ActorData
   struct Frame
   {
     base::Vector mDrawOffset;
+    base::Extents mLogicalSize;
     data::Image mFrameImage;
   };
 
