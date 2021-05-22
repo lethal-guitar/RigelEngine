@@ -27,7 +27,6 @@
 namespace rigel::engine
 {
 
-using namespace std;
 using namespace data;
 
 using data::map::BackdropScrollMode;

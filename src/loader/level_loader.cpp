@@ -46,7 +46,6 @@
 namespace rigel::loader
 {
 
-using namespace std;
 using data::ActorID;
 using data::Difficulty;
 using data::GameTraits;
@@ -61,7 +60,7 @@ namespace
 using ActorList = std::vector<LevelData::Actor>;
 
 
-string stripSpaces(string str)
+std::string stripSpaces(std::string str)
 {
   const auto it = str.find(' ');
   if (it != str.npos)
@@ -104,9 +103,9 @@ struct LevelHeader
   bool flagBitSet(const uint8_t bitMask) { return (flags & bitMask) != 0; }
 
   const uint16_t dataOffset;
-  const string CZone;
-  const string backdrop;
-  const string music;
+  const std::string CZone;
+  const std::string backdrop;
+  const std::string music;
   const uint8_t flags;
   const uint8_t alternativeBackdropNumber;
   const uint16_t unknown;
@@ -138,10 +137,10 @@ ByteBuffer readExtraMaskedTileBits(const LeStreamReader& levelReader)
 }
 
 
-string backdropNameFromNumber(const uint8_t backdropNumber)
+std::string backdropNameFromNumber(const uint8_t backdropNumber)
 {
-  auto name = string("DROP");
-  name += to_string(backdropNumber);
+  auto name = std::string("DROP");
+  name += std::to_string(backdropNumber);
   name += ".MNI";
   return name;
 }
@@ -511,8 +510,8 @@ std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
 void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
 {
   std::stable_sort(
-    begin(actors),
-    end(actors),
+    std::begin(actors),
+    std::end(actors),
     [&](const LevelData::Actor& lhs, const LevelData::Actor& rhs) {
       return resources.mActorImagePackage.drawIndexFor(lhs.mID) <
         resources.mActorImagePackage.drawIndexFor(rhs.mID);
@@ -523,7 +522,7 @@ void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
 
 
 LevelData loadLevel(
-  const string& mapName,
+  const std::string& mapName,
   const ResourceLoader& resources,
   const Difficulty chosenDifficulty)
 {

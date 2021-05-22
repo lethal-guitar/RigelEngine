@@ -37,7 +37,6 @@ namespace rigel::loader
 {
 
 using namespace data;
-using namespace std;
 
 
 namespace
@@ -200,7 +199,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const
     tilesToPixels(GameTraits::CZone::solidTilesImageHeight),
     maskedTilesImage);
 
-  return {move(fullImage), TileAttributeDict{move(attributes)}};
+  return {std::move(fullImage), TileAttributeDict{std::move(attributes)}};
 }
 
 
@@ -235,7 +234,7 @@ data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
   }
 
   const auto digitizedSoundFileName =
-    string("SB_") + to_string(static_cast<int>(id) + 1) + ".MNI";
+    std::string("SB_") + std::to_string(static_cast<int>(id) + 1) + ".MNI";
   if (hasFile(digitizedSoundFileName))
   {
     return loadSound(digitizedSoundFileName);
