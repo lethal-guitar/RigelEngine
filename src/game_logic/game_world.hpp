@@ -156,6 +156,7 @@ private:
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
   bool mWidescreenModeWasOn;
+  bool mPerElementUpscalingWasEnabled;
 
   std::unique_ptr<WorldState> mpState;
   std::unique_ptr<QuickSaveData> mpQuickSave;

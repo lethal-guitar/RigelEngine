@@ -585,7 +585,10 @@ void Game::applyChangedOptions()
     }
   }
 
-  if (currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn)
+  if (
+    currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn ||
+    currentOptions.mPerElementUpscalingEnabled !=
+      mPreviousOptions.mPerElementUpscalingEnabled)
   {
     mRenderTarget = renderer::createFullscreenRenderTarget(
       &mRenderer, mpUserProfile->mOptions);

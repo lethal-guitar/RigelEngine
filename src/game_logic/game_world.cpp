@@ -292,6 +292,7 @@ GameWorld::GameWorld(
   , mWidescreenModeWasOn(
       mpOptions->mWidescreenModeOn &&
       renderer::canUseWidescreenMode(mpRenderer))
+  , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
 {
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -679,7 +680,9 @@ void GameWorld::render()
   const auto widescreenModeOn =
     mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
 
-  if (widescreenModeOn != mWidescreenModeWasOn)
+  if (
+    widescreenModeOn != mWidescreenModeWasOn ||
+    mpOptions->mPerElementUpscalingEnabled != mPerElementUpscalingWasEnabled)
   {
     mWaterEffectBuffer =
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
@@ -809,6 +812,7 @@ void GameWorld::render()
   }
 
   mWidescreenModeWasOn = widescreenModeOn;
+  mPerElementUpscalingWasEnabled = mpOptions->mPerElementUpscalingEnabled;
 }
 
 
