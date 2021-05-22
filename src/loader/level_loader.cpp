@@ -19,6 +19,7 @@
 #include "base/container_utils.hpp"
 #include "base/grid.hpp"
 #include "base/math_tools.hpp"
+#include "base/string_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "loader/bitwise_iter.hpp"
@@ -62,11 +63,7 @@ using ActorList = std::vector<LevelData::Actor>;
 
 std::string stripSpaces(std::string str)
 {
-  const auto it = str.find(' ');
-  if (it != str.npos)
-  {
-    str.erase(it);
-  }
+  strings::trimRight(str);
   return str;
 }
 
