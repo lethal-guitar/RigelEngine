@@ -871,11 +871,10 @@ auto SpriteFactory::construct(
       for (auto& frameData : actorData.mFrames)
       {
         auto& image = frameData.mFrameImage;
-        const auto dimensionsInTiles = data::pixelExtentsToTileExtents(
-          {int(image.width()), int(image.height())});
-
         drawData.mFrames.emplace_back(engine::SpriteFrame{
-          int(spriteImages.size()), frameData.mDrawOffset, dimensionsInTiles});
+          int(spriteImages.size()),
+          frameData.mDrawOffset,
+          frameData.mLogicalSize});
 
         spriteImages.emplace_back(std::move(image));
       }

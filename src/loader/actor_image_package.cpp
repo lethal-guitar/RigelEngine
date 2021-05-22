@@ -133,6 +133,7 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
 
       return ActorData::Frame{
         frameHeader.mDrawOffset,
+        frameHeader.mSizeInTiles,
         maybeReplacement ? *maybeReplacement : loadImage(frameHeader, palette)};
     });
 }
