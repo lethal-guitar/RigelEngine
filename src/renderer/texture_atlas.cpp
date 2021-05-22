@@ -23,6 +23,7 @@ RIGEL_DISABLE_WARNINGS
 #include <stb_rect_pack.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <algorithm>
 #include <stdexcept>
 
 
@@ -43,6 +44,8 @@ TextureAtlas::TextureAtlas(
   const std::vector<data::Image>& images)
   : mpRenderer(pRenderer)
 {
+  mAtlasMap.resize(images.size());
+
   std::vector<stbrp_rect> rects;
   rects.reserve(images.size());
 
@@ -63,45 +66,62 @@ TextureAtlas::TextureAtlas(
   std::vector<stbrp_node> nodes;
   nodes.resize(ATLAS_WIDTH);
 
-  stbrp_init_target(
-    &context,
-    ATLAS_WIDTH,
-    ATLAS_HEIGHT,
-    nodes.data(),
-    static_cast<int>(nodes.size()));
-
-  const auto result =
-    stbrp_pack_rects(&context, rects.data(), static_cast<int>(images.size()));
-  if (!result)
+  do
   {
-    throw std::runtime_error("Failed to build texture atlas");
-  }
+    stbrp_init_target(
+      &context,
+      ATLAS_WIDTH,
+      ATLAS_HEIGHT,
+      nodes.data(),
+      static_cast<int>(nodes.size()));
 
-  data::Image atlas{
-    static_cast<size_t>(ATLAS_WIDTH), static_cast<size_t>(ATLAS_HEIGHT)};
+    const auto result =
+      stbrp_pack_rects(&context, rects.data(), static_cast<int>(rects.size()));
 
-  for (const auto& packedRect : rects)
-  {
-    atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
-  }
+    // Not all images might fit into the first texture. If that happens, we
+    // separate off those that didn't fit, and then do another round, then
+    // repeat again if needed, until we've managed to place all images.
+    // We do this by shifting all successfully packed images to the end of
+    // the vector, so that we can easily delete them after processing them,
+    // with the unpacked images remaining.
+    const auto iFirstPacked = result
+      ? rects.begin()
+      : std::partition(rects.begin(), rects.end(), [](const stbrp_rect& rect) {
+          return !rect.was_packed;
+        });
 
-  mAtlasTexture = Texture{mpRenderer, std::move(atlas)};
+    if (!result && iFirstPacked == rects.end())
+    {
+      // If not even a single rect could be packed, we give up
+      throw std::runtime_error{"Failed to build texture atlas"};
+    }
 
-  mCoordinatesMap.reserve(images.size());
-  for (const auto& packedRect : rects)
-  {
-    mCoordinatesMap.push_back(toTexCoords(
-      {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
-      mAtlasTexture.width(),
-      mAtlasTexture.height()));
-  }
+    data::Image atlas{
+      static_cast<size_t>(ATLAS_WIDTH), static_cast<size_t>(ATLAS_HEIGHT)};
+
+    const auto textureIndex = static_cast<int>(mAtlasTextures.size());
+    std::for_each(iFirstPacked, rects.end(), [&](const stbrp_rect& packedRect) {
+      atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
+      mAtlasMap[packedRect.id] = TextureInfo{
+        toTexCoords(
+          {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
+          ATLAS_WIDTH,
+          ATLAS_HEIGHT),
+        textureIndex};
+    });
+
+    mAtlasTextures.emplace_back(mpRenderer, std::move(atlas));
+
+    rects.erase(iFirstPacked, rects.end());
+  } while (!rects.empty());
 }
 
 
 void TextureAtlas::draw(int index, const base::Rect<int>& destRect) const
 {
+  const auto& info = mAtlasMap[index];
   mpRenderer->drawTexture(
-    mAtlasTexture.data(), mCoordinatesMap[index], destRect);
+    mAtlasTextures[info.mTextureIndex].data(), info.mCoordinates, destRect);
 }
 
 } // namespace rigel::renderer
