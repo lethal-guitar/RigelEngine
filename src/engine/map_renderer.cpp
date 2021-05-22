@@ -121,7 +121,13 @@ float maxOffsetForScrollMode(const BackdropScrollMode mode)
   }
 }
 
+
+constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Extents{
+  tilesToPixels(data::GameTraits::CZone::tileSetImageWidth),
+  tilesToPixels(data::GameTraits::CZone::tileSetImageHeight)};
+
 } // namespace
+
 
 MapRenderer::MapRenderer(
   renderer::Renderer* pRenderer,
@@ -131,6 +137,7 @@ MapRenderer::MapRenderer(
   , mpMap(pMap)
   , mTileSetTexture(
       renderer::Texture(pRenderer, renderData.mTileSetImage),
+      TILE_SET_IMAGE_LOGICAL_SIZE,
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
   , mScrollMode(renderData.mBackdropScrollMode)

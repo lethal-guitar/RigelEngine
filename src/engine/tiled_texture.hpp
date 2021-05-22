@@ -26,6 +26,10 @@ class TiledTexture
 {
 public:
   TiledTexture(renderer::Texture&& tileSet, renderer::Renderer* pRenderer);
+  TiledTexture(
+    renderer::Texture&& tileSet,
+    const base::Extents logicalSize,
+    renderer::Renderer* pRenderer);
 
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
 
@@ -61,6 +65,8 @@ private:
 private:
   renderer::Texture mTileSetTexture;
   renderer::Renderer* mpRenderer;
+  int mScaleX = 1;
+  int mScaleY = 1;
 };
 
 } // namespace rigel::engine
