@@ -23,12 +23,14 @@
 #include "loader/file_utils.hpp"
 #include "loader/movie_loader.hpp"
 #include "loader/music_loader.hpp"
+#include "loader/png_image.hpp"
 #include "loader/voc_decoder.hpp"
 
 #include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <map>
+#include <regex>
 
 namespace fs = std::filesystem;
 
@@ -37,7 +39,6 @@ namespace rigel::loader
 {
 
 using namespace data;
-using namespace std;
 
 
 namespace
@@ -49,24 +50,56 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
   (GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx) /
   (GameTraits::pixelsPerEgaByte / GameTraits::egaPlanes);
 
-} // namespace
 
 // When loading assets, the game will first check if a file with an expected
 // name exists at the replacements path, and if it does, it will load this file
 // and use it instead of the asset from the original data file (NUKEM2.CMP).
 //
-// At the moment, this is only implemented for sprites/actors. The expected
-// format for replacement files is:
+// At the moment, this is implemented for sprites/actors, backdrops, and
+// tilesets. The expected format for replacement files is:
+//
+//   backdrop<num>.png
+//
+//   tileset<num>.png
 //
 //   actor<actor_id>_frame<animation_frame>.png
 //
-// Where <actor_id> and <animation_frame> should be replaced with the
+// Where <num>, <actor_id> and <animation_frame> should be replaced with the
 // corresponding numbers. For example, to replace the images used for the
 // "blue guard" enemy, files named "actor159_frame0.png" up to
 // "actor159_frame12.png" should be provided.
 //
+// For tilesets and backdrops, <num> should be the same number as in the
+// original asset filename. E.g. to replace CZONE1.MNI, provide a file named
+// tileset_1.png, etc.
+//
 // The files can contain full 32-bit RGBA values, there are no limitations.
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
+
+
+std::optional<data::Image> loadReplacementTilesetIfPresent(
+  const fs::path& gamePath,
+  const std::string& name)
+{
+  using namespace std::literals;
+
+  std::regex tilesetNameRegex{"^CZONE([0-9A-Z])\\.MNI$", std::regex::icase};
+  std::smatch matches;
+
+  if (!std::regex_match(name, matches, tilesetNameRegex) || matches.size() != 2)
+  {
+    return {};
+  }
+
+  const auto number = matches[1].str();
+  const auto replacementName = "tileset"s + number + ".png";
+  const auto replacementPath =
+    gamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+
+  return loadPng(replacementPath.u8string());
+}
+
+} // namespace
 
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
@@ -152,6 +185,29 @@ loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
 }
 
 
+data::Image ResourceLoader::loadBackdrop(const std::string& name) const
+{
+  using namespace std::literals;
+
+  std::regex backdropNameRegex{"^DROP([0-9]+)\\.MNI$", std::regex::icase};
+  std::smatch matches;
+
+  if (std::regex_match(name, matches, backdropNameRegex) && matches.size() == 2)
+  {
+    const auto number = matches[1].str();
+    const auto replacementName = "backdrop"s + number + ".png";
+    const auto replacementPath =
+      mGamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+    if (const auto replacementImage = loadPng(replacementPath.u8string()))
+    {
+      return *replacementImage;
+    }
+  }
+
+  return loadTiledFullscreenImage(name);
+}
+
+
 TileSet ResourceLoader::loadCZone(const std::string& name) const
 {
   using namespace data;
@@ -172,6 +228,12 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const
     {
       attributeReader.skipBytes(sizeof(uint16_t) * 4);
     }
+  }
+
+  if (auto replacementImage = loadReplacementTilesetIfPresent(mGamePath, name))
+  {
+    return {
+      std::move(*replacementImage), TileAttributeDict{std::move(attributes)}};
   }
 
   Image fullImage(
@@ -200,7 +262,7 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const
     tilesToPixels(GameTraits::CZone::solidTilesImageHeight),
     maskedTilesImage);
 
-  return {move(fullImage), TileAttributeDict{move(attributes)}};
+  return {std::move(fullImage), TileAttributeDict{std::move(attributes)}};
 }
 
 
@@ -235,7 +297,7 @@ data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
   }
 
   const auto digitizedSoundFileName =
-    string("SB_") + to_string(static_cast<int>(id) + 1) + ".MNI";
+    std::string("SB_") + std::to_string(static_cast<int>(id) + 1) + ".MNI";
   if (hasFile(digitizedSoundFileName))
   {
     return loadSound(digitizedSoundFileName);

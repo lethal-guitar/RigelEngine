@@ -27,7 +27,6 @@
 namespace rigel::engine
 {
 
-using namespace std;
 using namespace data;
 
 using data::map::BackdropScrollMode;
@@ -170,23 +169,29 @@ void MapRenderer::renderBackdrop(
   const base::Vector& cameraPosition,
   const base::Extents& viewPortSize) const
 {
+  const auto numRepetitions = base::integerDivCeil(
+    tilesToPixels(viewPortSize.width), GameTraits::viewPortWidthPx);
+
+  const auto sourceRectSize = base::Extents{
+    mBackdropTexture.width() * numRepetitions, mBackdropTexture.height()};
+  const auto destRectSize = base::Extents{
+    GameTraits::viewPortWidthPx * numRepetitions, GameTraits::viewPortHeightPx};
+
+  const auto widthFactor =
+    mBackdropTexture.width() / GameTraits::viewPortWidthPx;
   const auto offset =
-    backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset);
-
-  const auto backdropWidth = mBackdropTexture.width();
-  const auto numRepetitions =
-    base::integerDivCeil(tilesToPixels(viewPortSize.width), backdropWidth);
-
-  const auto sourceRectSize =
-    base::Extents{backdropWidth * numRepetitions, mBackdropTexture.height()};
+    backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset) *
+    widthFactor;
 
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
     renderer::toTexCoords(
-      {offset, sourceRectSize}, backdropWidth, mBackdropTexture.height()),
-    {{}, sourceRectSize});
+      {offset, sourceRectSize},
+      mBackdropTexture.width(),
+      mBackdropTexture.height()),
+    {{}, destRectSize});
 }
 
 

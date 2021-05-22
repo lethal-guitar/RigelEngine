@@ -58,6 +58,7 @@ public:
 
   data::Image loadAntiPiracyImage() const;
 
+  data::Image loadBackdrop(const std::string& name) const;
   TileSet loadCZone(const std::string& name) const;
   data::Movie loadMovie(const std::string& name) const;
   data::Song loadMusic(const std::string& name) const;
