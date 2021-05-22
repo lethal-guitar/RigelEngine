@@ -55,15 +55,23 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 // name exists at the replacements path, and if it does, it will load this file
 // and use it instead of the asset from the original data file (NUKEM2.CMP).
 //
-// At the moment, this is only implemented for sprites/actors. The expected
-// format for replacement files is:
+// At the moment, this is implemented for sprites/actors, backdrops, and
+// tilesets. The expected format for replacement files is:
+//
+//   backdrop<num>.png
+//
+//   tileset<num>.png
 //
 //   actor<actor_id>_frame<animation_frame>.png
 //
-// Where <actor_id> and <animation_frame> should be replaced with the
+// Where <num>, <actor_id> and <animation_frame> should be replaced with the
 // corresponding numbers. For example, to replace the images used for the
 // "blue guard" enemy, files named "actor159_frame0.png" up to
 // "actor159_frame12.png" should be provided.
+//
+// For tilesets and backdrops, <num> should be the same number as in the
+// original asset filename. E.g. to replace CZONE1.MNI, provide a file named
+// tileset_1.png, etc.
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
