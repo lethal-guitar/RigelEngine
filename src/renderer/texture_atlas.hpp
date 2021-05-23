@@ -37,10 +37,10 @@ class TextureAtlas
 public:
   /** Build a texture atlas
    *
-   * Create an atlas using the provided list of images. Currently, atlas
-   * size is hardcoded. This will throw an exception if not all images fit
-   * into the size.
-   * Also note that the order of images in the given list determines how
+   * Create an atlas using the provided list of images. Might use more than
+   * one texture internally if not all images fit into a single texture.
+   *
+   * Note that the order of images in the given list determines how
    * to address these images when drawing: The first image in the list is
    * referenced by index 0, the 2nd one by index 1, etc.
    */
@@ -54,8 +54,14 @@ public:
   void draw(int index, const base::Rect<int>& destRect) const;
 
 private:
-  std::vector<TexCoords> mCoordinatesMap;
-  Texture mAtlasTexture;
+  struct TextureInfo
+  {
+    TexCoords mCoordinates;
+    int mTextureIndex;
+  };
+
+  std::vector<TextureInfo> mAtlasMap;
+  std::vector<Texture> mAtlasTextures;
   Renderer* mpRenderer;
 };
 

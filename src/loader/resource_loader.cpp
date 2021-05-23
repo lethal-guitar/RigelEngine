@@ -29,7 +29,6 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
-#include <map>
 #include <regex>
 
 namespace fs = std::filesystem;
@@ -71,7 +70,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 //
 // For tilesets and backdrops, <num> should be the same number as in the
 // original asset filename. E.g. to replace CZONE1.MNI, provide a file named
-// tileset_1.png, etc.
+// tileset1.png, etc.
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
@@ -280,20 +279,24 @@ data::Song ResourceLoader::loadMusic(const std::string& name) const
 
 data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
 {
-  static const std::map<data::SoundId, const char*> INTRO_SOUND_MAP{
-    {data::SoundId::IntroGunShot, "INTRO3.MNI"},
-    {data::SoundId::IntroGunShotLow, "INTRO4.MNI"},
-    {data::SoundId::IntroEmptyShellsFalling, "INTRO5.MNI"},
-    {data::SoundId::IntroTargetMovingCloser, "INTRO6.MNI"},
-    {data::SoundId::IntroTargetStopsMoving, "INTRO7.MNI"},
-    {data::SoundId::IntroDukeSpeaks1, "INTRO8.MNI"},
-    {data::SoundId::IntroDukeSpeaks2, "INTRO9.MNI"}};
+  auto introSoundFilenameFor = [](const data::SoundId soundId) -> const char* {
+    // clang-format off
+    switch (soundId) {
+      case data::SoundId::IntroGunShot: return "INTRO3.MNI";
+      case data::SoundId::IntroGunShotLow: return "INTRO4.MNI";
+      case data::SoundId::IntroEmptyShellsFalling: return "INTRO5.MNI";
+      case data::SoundId::IntroTargetMovingCloser: return "INTRO6.MNI";
+      case data::SoundId::IntroTargetStopsMoving: return "INTRO7.MNI";
+      case data::SoundId::IntroDukeSpeaks1: return "INTRO8.MNI";
+      case data::SoundId::IntroDukeSpeaks2: return "INTRO9.MNI";
+      default: return nullptr;
+    }
+    // clang-format on
+  };
 
-  const auto introSoundIter = INTRO_SOUND_MAP.find(id);
-
-  if (introSoundIter != INTRO_SOUND_MAP.end())
+  if (const auto introSoundFilename = introSoundFilenameFor(id))
   {
-    return loadSound(introSoundIter->second);
+    return loadSound(introSoundFilename);
   }
 
   const auto digitizedSoundFileName =

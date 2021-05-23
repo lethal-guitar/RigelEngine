@@ -383,6 +383,9 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
       mFpsDisplay.updateAndRender(elapsed);
     }
   }
+
+  mpUserProfile->mOptions.mPerElementUpscalingEnabled =
+    mpCurrentGameMode->needsPerElementUpscaling();
 }
 
 
@@ -585,7 +588,10 @@ void Game::applyChangedOptions()
     }
   }
 
-  if (currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn)
+  if (
+    currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn ||
+    currentOptions.mPerElementUpscalingEnabled !=
+      mPreviousOptions.mPerElementUpscalingEnabled)
   {
     mRenderTarget = renderer::createFullscreenRenderTarget(
       &mRenderer, mpUserProfile->mOptions);

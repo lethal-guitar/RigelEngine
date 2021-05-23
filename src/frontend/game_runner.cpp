@@ -110,6 +110,12 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
 }
 
 
+bool GameRunner::needsPerElementUpscaling() const
+{
+  return mWorld.needsPerElementUpscaling();
+}
+
+
 void GameRunner::updateWorld(const engine::TimeDelta dt)
 {
   auto update = [this]() {

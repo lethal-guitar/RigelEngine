@@ -48,6 +48,8 @@ public:
     engine::TimeDelta dt,
     const std::vector<SDL_Event>& events) override;
 
+  bool needsPerElementUpscaling() const override;
+
 private:
   void handleEvent(const SDL_Event& event);
   template <typename StageT>

@@ -74,6 +74,8 @@ struct GameMode
   virtual std::unique_ptr<GameMode> updateAndRender(
     engine::TimeDelta dt,
     const std::vector<SDL_Event>& events) = 0;
+
+  virtual bool needsPerElementUpscaling() const { return false; }
 };
 
 

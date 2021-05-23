@@ -46,6 +46,7 @@ public:
 
   void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
+  bool needsPerElementUpscaling() const;
 
   bool levelFinished() const;
   bool gameQuit() const;

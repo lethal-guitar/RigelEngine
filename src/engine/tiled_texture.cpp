@@ -35,6 +35,18 @@ TiledTexture::TiledTexture(Texture&& tileSet, Renderer* pRenderer)
 }
 
 
+TiledTexture::TiledTexture(
+  Texture&& tileSet,
+  const base::Extents logicalSize,
+  Renderer* pRenderer)
+  : mTileSetTexture(std::move(tileSet))
+  , mpRenderer(pRenderer)
+  , mScaleX(mTileSetTexture.width() / logicalSize.width)
+  , mScaleY(mTileSetTexture.height() / logicalSize.height)
+{
+}
+
+
 void TiledTexture::renderTileStretched(
   const int index,
   const base::Rect<int>& destRect) const
@@ -81,7 +93,13 @@ void TiledTexture::renderTileDoubleQuad(
 
 int TiledTexture::tilesPerRow() const
 {
-  return data::pixelsToTiles(mTileSetTexture.width());
+  return data::pixelsToTiles(mTileSetTexture.width() / mScaleX);
+}
+
+
+bool TiledTexture::isHighRes() const
+{
+  return mScaleX > 1 || mScaleY > 1;
 }
 
 
@@ -92,9 +110,14 @@ void TiledTexture::renderTileGroup(
   const int tileSpanX,
   const int tileSpanY) const
 {
-  mTileSetTexture.render(
-    tileVectorToPixelVector({posX, posY}),
-    sourceRect(index, tileSpanX, tileSpanY));
+  mpRenderer->drawTexture(
+    mTileSetTexture.data(),
+    renderer::toTexCoords(
+      sourceRect(index, tileSpanX, tileSpanY),
+      mTileSetTexture.width(),
+      mTileSetTexture.height()),
+    {tileVectorToPixelVector({posX, posY}),
+     tileExtentsToPixelExtents({tileSpanX, tileSpanY})});
 }
 
 
@@ -105,9 +128,12 @@ base::Rect<int> TiledTexture::sourceRect(
 {
   const base::Vector tileSetStartPosition{
     index % tilesPerRow(), index / tilesPerRow()};
+  const auto topLeft = tileVectorToPixelVector(tileSetStartPosition);
+  const auto size = tileExtentsToPixelExtents({tileSpanX, tileSpanY});
+
   return {
-    tileVectorToPixelVector(tileSetStartPosition),
-    tileExtentsToPixelExtents({tileSpanX, tileSpanY})};
+    {topLeft.x * mScaleX, topLeft.y * mScaleY},
+    {size.width * mScaleX, size.height * mScaleY}};
 }
 
 } // namespace rigel::engine
