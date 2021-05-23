@@ -283,21 +283,13 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   // simpleMusicCallback). But if the audio device uses a different format, we
   // have to convert from the player's format into the device format. That's
   // handled by the MusicConversionWrapper class.
-  if (audioFormatMatches)
-  {
-    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
-  }
-  else
+  if (!audioFormatMatches)
   {
     mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
       mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
-    Mix_HookMusic(
-      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
-        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
-        pWrapper->render(pOutBuffer, bytesRequired);
-      },
-      mpMusicConversionWrapper.get());
   }
+
+  hookMusic();
 
   // For sound playback, we want to be able to play as many sound effects in
   // parallel as possible. In the original game, the number of available sound
@@ -344,7 +336,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
 
 SoundSystem::~SoundSystem()
 {
-  Mix_HookMusic(nullptr, nullptr);
+  unhookMusic();
 
   // We have to destroy all the MixChunks before we can call Mix_Quit().
   for (auto& sound : mSounds)
@@ -400,6 +392,30 @@ void SoundSystem::setSoundVolume(const float volume)
       Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
     }
   }
+}
+
+
+void SoundSystem::hookMusic() const
+{
+  if (mpMusicConversionWrapper)
+  {
+    Mix_HookMusic(
+      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
+        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
+        pWrapper->render(pOutBuffer, bytesRequired);
+      },
+      mpMusicConversionWrapper.get());
+  }
+  else
+  {
+    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
+  }
+}
+
+
+void SoundSystem::unhookMusic() const
+{
+  Mix_HookMusic(nullptr, nullptr);
 }
 
 } // namespace rigel::engine

@@ -80,6 +80,9 @@ public:
   void setSoundVolume(float volume);
 
 private:
+  void hookMusic() const;
+  void unhookMusic() const;
+
   struct MusicConversionWrapper;
 
   struct LoadedSound
