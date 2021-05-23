@@ -61,11 +61,10 @@ public:
   data::Image loadBackdrop(const std::string& name) const;
   TileSet loadCZone(const std::string& name) const;
   data::Movie loadMovie(const std::string& name) const;
+
   data::Song loadMusic(const std::string& name) const;
-
-  data::AudioBuffer loadSound(const std::string& name) const;
-
   data::AudioBuffer loadSound(data::SoundId id) const;
+  std::filesystem::path replacementSoundPath(data::SoundId id) const;
 
   ScriptBundle loadScriptBundle(const std::string& fileName) const;
 
@@ -74,6 +73,8 @@ public:
   bool hasFile(const std::string& name) const;
 
 private:
+  data::AudioBuffer loadSound(const std::string& name) const;
+
   std::filesystem::path mGamePath;
   loader::CMPFilePackage mFilePackage;
 

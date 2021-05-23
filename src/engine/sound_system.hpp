@@ -87,6 +87,7 @@ private:
     LoadedSound() = default;
     explicit LoadedSound(const data::AudioBuffer& buffer);
     explicit LoadedSound(RawBuffer buffer);
+    explicit LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk);
 
     RawBuffer mData;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;

@@ -243,6 +243,12 @@ SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
 }
 
 
+SoundSystem::LoadedSound::LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk)
+  : mpMixChunk(std::move(pMixChunk))
+{
+}
+
+
 SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
 {
   sdl_mixer::check(Mix_OpenAudio(
@@ -312,6 +318,18 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
+    std::error_code ec;
+    if (const auto replacementPath = resources.replacementSoundPath(id);
+        std::filesystem::exists(replacementPath, ec))
+    {
+      if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
+      {
+        mSounds[idToIndex(id)] =
+          LoadedSound{sdl_utils::Ptr<Mix_Chunk>{pMixChunk}};
+        return;
+      }
+    }
+
     auto buffer = prepareBuffer(resources.loadSound(id), sampleRate);
 
     mSounds[idToIndex(id)] = audioFormatMatches
