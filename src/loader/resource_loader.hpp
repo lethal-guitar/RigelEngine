@@ -65,6 +65,7 @@ public:
   data::Song loadMusic(const std::string& name) const;
   data::AudioBuffer loadSound(data::SoundId id) const;
   std::filesystem::path replacementSoundPath(data::SoundId id) const;
+  std::filesystem::path replacementMusicBasePath() const;
 
   ScriptBundle loadScriptBundle(const std::string& fileName) const;
 

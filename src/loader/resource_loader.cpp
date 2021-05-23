@@ -323,6 +323,12 @@ std::filesystem::path
 }
 
 
+std::filesystem::path ResourceLoader::replacementMusicBasePath() const
+{
+  return mGamePath / ASSET_REPLACEMENTS_PATH;
+}
+
+
 data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const
 {
   return loader::decodeVoc(file(name));

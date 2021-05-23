@@ -24,6 +24,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 
 namespace rigel::loader
@@ -83,6 +84,7 @@ public:
 private:
   void hookMusic() const;
   void unhookMusic() const;
+  sdl_utils::Ptr<Mix_Music> loadReplacementSong(const std::string& name);
 
   struct MusicConversionWrapper;
 
@@ -100,6 +102,9 @@ private:
   std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
   std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
+  mutable sdl_utils::Ptr<Mix_Music> mpCurrentReplacementSong;
+  mutable std::unordered_map<std::string, std::string>
+    mReplacementSongFileCache;
   const loader::ResourceLoader* mpResources;
 };
 
