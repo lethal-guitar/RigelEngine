@@ -249,7 +249,8 @@ SoundSystem::LoadedSound::LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk)
 }
 
 
-SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
+SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
+  : mpResources(pResources)
 {
   sdl_mixer::check(Mix_OpenAudio(
     DESIRED_SAMPLE_RATE,
@@ -311,7 +312,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
 
   data::forEachSoundId([&](const auto id) {
     std::error_code ec;
-    if (const auto replacementPath = resources.replacementSoundPath(id);
+    if (const auto replacementPath = mpResources->replacementSoundPath(id);
         std::filesystem::exists(replacementPath, ec))
     {
       if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
@@ -322,7 +323,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
       }
     }
 
-    auto buffer = prepareBuffer(resources.loadSound(id), sampleRate);
+    auto buffer = prepareBuffer(mpResources->loadSound(id), sampleRate);
 
     mSounds[idToIndex(id)] = audioFormatMatches
       ? LoadedSound{std::move(buffer)}
@@ -348,9 +349,9 @@ SoundSystem::~SoundSystem()
 }
 
 
-void SoundSystem::playSong(data::Song&& song)
+void SoundSystem::playSong(const std::string& name)
 {
-  mpMusicPlayer->playSong(std::move(song));
+  mpMusicPlayer->playSong(mpResources->loadMusic(name));
 }
 
 

@@ -229,7 +229,7 @@ Game::Game(
     std::unique_ptr<engine::SoundSystem> pResult;
     try
     {
-      pResult = std::make_unique<engine::SoundSystem>(mResources);
+      pResult = std::make_unique<engine::SoundSystem>(&mResources);
     }
     catch (const std::exception& ex)
     {
@@ -668,7 +668,7 @@ void Game::playMusic(const std::string& name)
 {
   if (mpSoundSystem)
   {
-    mpSoundSystem->playSong(mResources.loadMusic(name));
+    mpSoundSystem->playSong(name);
   }
 }
 
