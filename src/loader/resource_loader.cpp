@@ -312,6 +312,23 @@ data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
 }
 
 
+std::filesystem::path
+  ResourceLoader::replacementSoundPath(data::SoundId id) const
+{
+  using namespace std::literals;
+
+  const auto expectedName =
+    "sound"s + std::to_string(static_cast<int>(id) + 1) + ".wav";
+  return mGamePath / ASSET_REPLACEMENTS_PATH / expectedName;
+}
+
+
+std::filesystem::path ResourceLoader::replacementMusicBasePath() const
+{
+  return mGamePath / ASSET_REPLACEMENTS_PATH;
+}
+
+
 data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const
 {
   return loader::decodeVoc(file(name));

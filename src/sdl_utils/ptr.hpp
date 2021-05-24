@@ -59,6 +59,12 @@ struct DeleterFor<Mix_Chunk>
   static auto deleter() { return &Mix_FreeChunk; }
 };
 
+template <>
+struct DeleterFor<Mix_Music>
+{
+  static auto deleter() { return &Mix_FreeMusic; }
+};
+
 template <typename SDLType>
 auto deleterFor()
 {

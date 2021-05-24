@@ -24,7 +24,9 @@
 
 #include <speex/speex_resampler.h>
 
+#include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cstring>
 #include <iostream>
 #include <utility>
@@ -243,13 +245,22 @@ SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
 }
 
 
-SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
+SoundSystem::LoadedSound::LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk)
+  : mpMixChunk(std::move(pMixChunk))
+{
+}
+
+
+SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
+  : mpResources(pResources)
 {
   sdl_mixer::check(Mix_OpenAudio(
     DESIRED_SAMPLE_RATE,
     AUDIO_S16LSB,
     1, // mono
     BUFFER_SIZE));
+
+  Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
 
   int sampleRate = 0;
   std::uint16_t audioFormat = 0;
@@ -267,31 +278,19 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   // our own callback handler and then use an AdLib emulator to generate audio
   // from the music data (ImfPlayer class).
   //
-  // Once we add the ability to override the original music with custom high
-  // fidelity music files in modern formats, this will have to be extended to
-  // alternate between IMF playback and playing back other formats.
-  //
   // The ImfPlayer class only knows how to produce audio data in 16-bit integer
   // format (AUDIO_S16LSB). If the audio device uses that same audio format, we
   // can directly write the player's output into the output buffer (using
   // simpleMusicCallback). But if the audio device uses a different format, we
   // have to convert from the player's format into the device format. That's
   // handled by the MusicConversionWrapper class.
-  if (audioFormatMatches)
-  {
-    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
-  }
-  else
+  if (!audioFormatMatches)
   {
     mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
       mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
-    Mix_HookMusic(
-      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
-        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
-        pWrapper->render(pOutBuffer, bytesRequired);
-      },
-      mpMusicConversionWrapper.get());
   }
+
+  hookMusic();
 
   // For sound playback, we want to be able to play as many sound effects in
   // parallel as possible. In the original game, the number of available sound
@@ -312,7 +311,19 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
-    auto buffer = prepareBuffer(resources.loadSound(id), sampleRate);
+    std::error_code ec;
+    if (const auto replacementPath = mpResources->replacementSoundPath(id);
+        std::filesystem::exists(replacementPath, ec))
+    {
+      if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
+      {
+        mSounds[idToIndex(id)] =
+          LoadedSound{sdl_utils::Ptr<Mix_Chunk>{pMixChunk}};
+        return;
+      }
+    }
+
+    auto buffer = prepareBuffer(mpResources->loadSound(id), sampleRate);
 
     mSounds[idToIndex(id)] = audioFormatMatches
       ? LoadedSound{std::move(buffer)}
@@ -326,7 +337,14 @@ SoundSystem::SoundSystem(const loader::ResourceLoader& resources)
 
 SoundSystem::~SoundSystem()
 {
-  Mix_HookMusic(nullptr, nullptr);
+  if (mpCurrentReplacementSong)
+  {
+    mpCurrentReplacementSong.reset();
+  }
+  else
+  {
+    unhookMusic();
+  }
 
   // We have to destroy all the MixChunks before we can call Mix_Quit().
   for (auto& sound : mSounds)
@@ -338,14 +356,35 @@ SoundSystem::~SoundSystem()
 }
 
 
-void SoundSystem::playSong(data::Song&& song)
+void SoundSystem::playSong(const std::string& name)
 {
-  mpMusicPlayer->playSong(std::move(song));
+  if (auto pReplacementSong = loadReplacementSong(name))
+  {
+    mpCurrentReplacementSong = std::move(pReplacementSong);
+    unhookMusic();
+    Mix_PlayMusic(mpCurrentReplacementSong.get(), -1);
+    return;
+  }
+
+  if (mpCurrentReplacementSong)
+  {
+    mpCurrentReplacementSong.reset();
+    hookMusic();
+  }
+
+  mpMusicPlayer->playSong(mpResources->loadMusic(name));
 }
 
 
 void SoundSystem::stopMusic() const
 {
+  if (mpCurrentReplacementSong)
+  {
+    Mix_HaltMusic();
+    mpCurrentReplacementSong.reset();
+    hookMusic();
+  }
+
   mpMusicPlayer->playSong({});
 }
 
@@ -366,7 +405,11 @@ void SoundSystem::stopSound(const data::SoundId id) const
 
 void SoundSystem::setMusicVolume(const float volume)
 {
+  const auto sdlVolume =
+    static_cast<int>(std::clamp(volume, 0.0f, 1.0f) * MIX_MAX_VOLUME);
+
   mpMusicPlayer->setVolume(volume);
+  Mix_VolumeMusic(sdlVolume);
 }
 
 
@@ -382,6 +425,88 @@ void SoundSystem::setSoundVolume(const float volume)
       Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
     }
   }
+}
+
+
+void SoundSystem::hookMusic() const
+{
+  if (mpMusicConversionWrapper)
+  {
+    Mix_HookMusic(
+      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
+        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
+        pWrapper->render(pOutBuffer, bytesRequired);
+      },
+      mpMusicConversionWrapper.get());
+  }
+  else
+  {
+    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
+  }
+}
+
+
+void SoundSystem::unhookMusic() const
+{
+  Mix_HookMusic(nullptr, nullptr);
+}
+
+
+sdl_utils::Ptr<Mix_Music>
+  SoundSystem::loadReplacementSong(const std::string& name)
+{
+  namespace fs = std::filesystem;
+
+  if (const auto iCacheEntry = mReplacementSongFileCache.find(name);
+      iCacheEntry != mReplacementSongFileCache.end())
+  {
+    if (iCacheEntry->second.empty())
+    {
+      // An empty entry indicates that no replacement exists
+      return {};
+    }
+
+    if (auto pSong = Mix_LoadMUS(iCacheEntry->second.c_str()))
+    {
+      return sdl_utils::Ptr<Mix_Music>{pSong};
+    }
+  }
+
+  // Because of the large variety of file formats supported by SDL_mixer, we
+  // don't try to explicitly look for specific file extensions. Instead, we
+  // look for any file with a base name (i.e. without extension) matching the
+  // requested music file's name. If we find a match and SDL_mixer can
+  // successfully load it, we add the file path to our cache.
+  auto lowercaseName = name;
+  std::transform(
+    lowercaseName.begin(),
+    lowercaseName.end(),
+    lowercaseName.begin(),
+    [](const auto ch) { return static_cast<char>(std::tolower(ch)); });
+  const auto songName = fs::u8path(lowercaseName).replace_extension();
+
+  for (const fs::directory_entry& candidate :
+       fs::directory_iterator(mpResources->replacementMusicBasePath()))
+  {
+    if (!candidate.is_regular_file() || candidate.path().stem() != songName)
+    {
+      continue;
+    }
+
+    const auto candidateFilePath = candidate.path().u8string();
+    if (auto pSong = Mix_LoadMUS(candidateFilePath.c_str()))
+    {
+      auto pReplacement = sdl_utils::Ptr<Mix_Music>{pSong};
+      mReplacementSongFileCache.insert({name, candidateFilePath});
+      return pReplacement;
+    }
+  }
+
+  // We didn't find a suitable replacement. Insert an empty string into the
+  // cache to avoid scanning the file system again next time.
+  mReplacementSongFileCache.insert({name, std::string{}});
+
+  return {};
 }
 
 } // namespace rigel::engine

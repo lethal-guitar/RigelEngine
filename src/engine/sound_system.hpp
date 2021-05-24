@@ -23,6 +23,8 @@
 
 #include <array>
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 
 namespace rigel::loader
@@ -50,15 +52,15 @@ using RawBuffer = std::vector<std::uint8_t>;
 class SoundSystem
 {
 public:
-  explicit SoundSystem(const loader::ResourceLoader& resources);
+  explicit SoundSystem(const loader::ResourceLoader* pResources);
   ~SoundSystem();
 
   /** Start playing given music data
    *
-   * Starts playback of the song stored in the given Song object, and returns
+   * Starts playback of the song identified by the given name, and returns
    * immediately. Music plays in parallel to any sound effects.
    */
-  void playSong(data::Song&& song);
+  void playSong(const std::string& name);
 
   /** Stop playing current song (if playing) */
   void stopMusic() const;
@@ -80,6 +82,10 @@ public:
   void setSoundVolume(float volume);
 
 private:
+  void hookMusic() const;
+  void unhookMusic() const;
+  sdl_utils::Ptr<Mix_Music> loadReplacementSong(const std::string& name);
+
   struct MusicConversionWrapper;
 
   struct LoadedSound
@@ -87,6 +93,7 @@ private:
     LoadedSound() = default;
     explicit LoadedSound(const data::AudioBuffer& buffer);
     explicit LoadedSound(RawBuffer buffer);
+    explicit LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk);
 
     RawBuffer mData;
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
@@ -95,6 +102,10 @@ private:
   std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
   std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
+  mutable sdl_utils::Ptr<Mix_Music> mpCurrentReplacementSong;
+  mutable std::unordered_map<std::string, std::string>
+    mReplacementSongFileCache;
+  const loader::ResourceLoader* mpResources;
 };
 
 } // namespace rigel::engine
