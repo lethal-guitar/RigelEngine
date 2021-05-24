@@ -254,3 +254,18 @@ TEST_CASE("String trim inplace")
     }
   }
 }
+
+TEST_CASE("Changing case")
+{
+  SECTION("Converts to uppercase")
+  {
+    const auto converted = rigel::strings::toUppercase("test ExAmPlE, $#32");
+    CHECK(converted == "TEST EXAMPLE, $#32");
+  }
+
+  SECTION("Converts to lowercase")
+  {
+    const auto converted = rigel::strings::toLowercase("TEST ExAmPlE, $#32");
+    CHECK(converted == "test example, $#32");
+  }
+}

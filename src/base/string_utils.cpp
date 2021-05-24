@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 
 namespace rigel::strings
 {
@@ -66,6 +67,26 @@ std::string trim(std::string_view input, const char* what)
 {
   std::string result{input};
   trim(result, what);
+  return result;
+}
+
+std::string toUppercase(std::string_view input)
+{
+  std::string result{input};
+  std::transform(
+    result.begin(), result.end(), result.begin(), [](const auto ch) {
+      return static_cast<char>(std::toupper(ch));
+    });
+  return result;
+}
+
+std::string toLowercase(std::string_view input)
+{
+  std::string result{input};
+  std::transform(
+    result.begin(), result.end(), result.begin(), [](const auto ch) {
+      return static_cast<char>(std::tolower(ch));
+    });
   return result;
 }
 

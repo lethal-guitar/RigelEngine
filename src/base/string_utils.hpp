@@ -68,4 +68,8 @@ std::string& trim(std::string& input, const char* what = "\n\r\t ") noexcept;
 [[nodiscard]] std::string
   trim(std::string_view input, const char* what = "\n\r\t ");
 
+[[nodiscard]] std::string toUppercase(std::string_view input);
+
+[[nodiscard]] std::string toLowercase(std::string_view input);
+
 } // namespace rigel::strings
