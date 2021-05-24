@@ -17,6 +17,7 @@
 #include "sound_system.hpp"
 
 #include "base/math_tools.hpp"
+#include "base/string_utils.hpp"
 #include "data/game_options.hpp"
 #include "engine/imf_player.hpp"
 #include "loader/resource_loader.hpp"
@@ -26,7 +27,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <cstring>
 #include <iostream>
 #include <utility>
@@ -239,8 +239,8 @@ SoundSystem::LoadedSound::LoadedSound(const data::AudioBuffer& buffer)
 
 SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
   : mData(std::move(buffer))
-  , mpMixChunk(sdl_utils::Ptr<Mix_Chunk>{
-      Mix_QuickLoad_RAW(mData.data(), static_cast<Uint32>(mData.size()))})
+  , mpMixChunk(sdl_utils::wrap(
+      Mix_QuickLoad_RAW(mData.data(), static_cast<Uint32>(mData.size()))))
 {
 }
 
@@ -317,8 +317,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
     {
       if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
       {
-        mSounds[idToIndex(id)] =
-          LoadedSound{sdl_utils::Ptr<Mix_Chunk>{pMixChunk}};
+        mSounds[idToIndex(id)] = LoadedSound{sdl_utils::wrap(pMixChunk)};
         return;
       }
     }
@@ -468,7 +467,7 @@ sdl_utils::Ptr<Mix_Music>
 
     if (auto pSong = Mix_LoadMUS(iCacheEntry->second.c_str()))
     {
-      return sdl_utils::Ptr<Mix_Music>{pSong};
+      return sdl_utils::wrap(pSong);
     }
   }
 
@@ -477,13 +476,8 @@ sdl_utils::Ptr<Mix_Music>
   // look for any file with a base name (i.e. without extension) matching the
   // requested music file's name. If we find a match and SDL_mixer can
   // successfully load it, we add the file path to our cache.
-  auto lowercaseName = name;
-  std::transform(
-    lowercaseName.begin(),
-    lowercaseName.end(),
-    lowercaseName.begin(),
-    [](const auto ch) { return static_cast<char>(std::tolower(ch)); });
-  const auto songName = fs::u8path(lowercaseName).replace_extension();
+  const auto songName =
+    fs::u8path(strings::toLowercase(name)).replace_extension();
 
   for (const fs::directory_entry& candidate :
        fs::directory_iterator(mpResources->replacementMusicBasePath()))
@@ -496,7 +490,7 @@ sdl_utils::Ptr<Mix_Music>
     const auto candidateFilePath = candidate.path().u8string();
     if (auto pSong = Mix_LoadMUS(candidateFilePath.c_str()))
     {
-      auto pReplacement = sdl_utils::Ptr<Mix_Music>{pSong};
+      auto pReplacement = sdl_utils::wrap(pSong);
       mReplacementSongFileCache.insert({name, candidateFilePath});
       return pReplacement;
     }

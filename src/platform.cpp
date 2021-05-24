@@ -51,13 +51,13 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options)
     SDL_WINDOW_OPENGL;
   // clang-format on
 
-  auto pWindow = sdl_utils::Ptr<SDL_Window>{sdl_utils::check(SDL_CreateWindow(
+  auto pWindow = sdl_utils::wrap(sdl_utils::check(SDL_CreateWindow(
     "Rigel Engine",
     options.mWindowPosX,
     options.mWindowPosY,
     isFullscreen ? displayMode.w : options.mWindowWidth,
     isFullscreen ? displayMode.h : options.mWindowHeight,
-    windowFlags))};
+    windowFlags)));
 
   // Setting a display mode is necessary to make sure that exclusive
   // full-screen mode keeps using the desktop resolution. Without this,

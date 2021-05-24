@@ -16,11 +16,10 @@
 
 #include "cmp_file_package.hpp"
 
+#include "base/string_utils.hpp"
 #include "loader/file_utils.hpp"
 
-#include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <stdexcept>
 
 
@@ -35,13 +34,7 @@ namespace
 
 std::string normalizedFileName(const std::string& fileName)
 {
-  std::string normalized(fileName);
-  std::transform(
-    normalized.begin(),
-    normalized.end(),
-    normalized.begin(),
-    [](const auto ch) { return static_cast<char>(std::toupper(ch)); });
-  return normalized;
+  return strings::toUppercase(fileName);
 }
 
 } // namespace
