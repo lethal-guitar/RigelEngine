@@ -32,63 +32,28 @@ namespace rigel::sdl_utils
 namespace detail
 {
 
-template <typename SDLType>
-using PtrBase = std::unique_ptr<SDLType, void (*)(SDLType*)>;
-
-
-template <typename SDLType>
-struct DeleterFor
+struct Deleter
 {
+  void operator()(SDL_Window* ptr) { SDL_DestroyWindow(ptr); }
+
+  void operator()(SDL_GameController* ptr) { SDL_GameControllerClose(ptr); }
+
+  void operator()(Mix_Chunk* ptr) { Mix_FreeChunk(ptr); }
+
+  void operator()(Mix_Music* ptr) { Mix_FreeMusic(ptr); }
 };
-
-template <>
-struct DeleterFor<SDL_Window>
-{
-  static auto deleter() { return &SDL_DestroyWindow; }
-};
-
-template <>
-struct DeleterFor<SDL_GameController>
-{
-  static auto deleter() { return &SDL_GameControllerClose; }
-};
-
-template <>
-struct DeleterFor<Mix_Chunk>
-{
-  static auto deleter() { return &Mix_FreeChunk; }
-};
-
-template <>
-struct DeleterFor<Mix_Music>
-{
-  static auto deleter() { return &Mix_FreeMusic; }
-};
-
-template <typename SDLType>
-auto deleterFor()
-{
-  return DeleterFor<SDLType>::deleter();
-}
 
 } // namespace detail
 
-template <typename SDLType>
-class Ptr : public detail::PtrBase<SDLType>
-{
-public:
-  Ptr()
-    : Ptr(nullptr)
-  {
-  }
 
-  template <typename P>
-  explicit Ptr(P&& p)
-    : detail::PtrBase<SDLType>(
-        std::forward<P>(p),
-        detail::deleterFor<SDLType>())
-  {
-  }
-};
+template <typename SDLType>
+using Ptr = std::unique_ptr<SDLType, detail::Deleter>;
+
+
+template <typename SDLType>
+[[nodiscard]] auto wrap(SDLType* ptr)
+{
+  return Ptr<SDLType>{ptr};
+}
 
 } // namespace rigel::sdl_utils
