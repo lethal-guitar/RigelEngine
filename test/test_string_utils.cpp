@@ -155,6 +155,12 @@ TEST_CASE("String trim inplace")
       rigel::strings::trimLeft(trimmed);
       CHECK(trimmed == "");
     }
+
+    SECTION("Works on r-values")
+    {
+      const auto trimmed = rigel::strings::trimLeft("\t test");
+      CHECK(trimmed == "test");
+    }
   }
 
   SECTION("Trim right")
@@ -202,6 +208,12 @@ TEST_CASE("String trim inplace")
       rigel::strings::trimRight(trimmed, "/");
       CHECK(trimmed == "//hello");
     }
+
+    SECTION("Works on r-values")
+    {
+      const auto trimmed = rigel::strings::trimRight("test \t");
+      CHECK(trimmed == "test");
+    }
   }
 
   SECTION("Trim all")
@@ -233,6 +245,12 @@ TEST_CASE("String trim inplace")
       std::string trimmed = "//hello//";
       rigel::strings::trim(trimmed, "/");
       CHECK(trimmed == "hello");
+    }
+
+    SECTION("Works on r-values")
+    {
+      const auto trimmed = rigel::strings::trim(" \ttest \t");
+      CHECK(trimmed == "test");
     }
   }
 }

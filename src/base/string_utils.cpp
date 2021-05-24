@@ -36,16 +36,37 @@ std::string& trimLeft(std::string& input, const char* what) noexcept
   return input;
 }
 
+std::string trimLeft(std::string_view input, const char* what)
+{
+  std::string result{input};
+  trimLeft(result, what);
+  return result;
+}
+
 std::string& trimRight(std::string& input, const char* what) noexcept
 {
   input.erase(input.find_last_not_of(what) + 1);
   return input;
 }
 
+std::string trimRight(std::string_view input, const char* what)
+{
+  std::string result{input};
+  trimRight(result, what);
+  return result;
+}
+
 std::string& trim(std::string& input, const char* what) noexcept
 {
   trimLeft(trimRight(input, what), what);
   return input;
+}
+
+std::string trim(std::string_view input, const char* what)
+{
+  std::string result{input};
+  trim(result, what);
+  return result;
 }
 
 } // namespace rigel::strings

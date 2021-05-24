@@ -41,6 +41,10 @@ namespace rigel::strings
 std::string&
   trimLeft(std::string& input, const char* what = "\n\r\t ") noexcept;
 
+/** Like trimLeft, but works for temporaries/r-values (returns a new value) */
+[[nodiscard]] std::string
+  trimLeft(std::string_view input, const char* what = "\n\r\t ");
+
 /** Removes all occurences of 'what' from the right of the input, until any
  * non-'what' is found
  *
@@ -49,11 +53,19 @@ std::string&
 std::string&
   trimRight(std::string& input, const char* what = "\n\r\t ") noexcept;
 
+/** Like trimRight, but works for temporaries/r-values (returns a new value) */
+[[nodiscard]] std::string
+  trimRight(std::string_view input, const char* what = "\n\r\t ");
+
 /** Removes all occurences of 'what' from the right and left of the input, until
  * any non-'what' is found
  *
  * Does everything inplace.
  */
 std::string& trim(std::string& input, const char* what = "\n\r\t ") noexcept;
+
+/** Like trim, but works for temporaries/r-values (returns a new value) */
+[[nodiscard]] std::string
+  trim(std::string_view input, const char* what = "\n\r\t ");
 
 } // namespace rigel::strings
