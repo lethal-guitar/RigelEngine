@@ -17,6 +17,7 @@
 #include "sound_system.hpp"
 
 #include "base/math_tools.hpp"
+#include "base/string_utils.hpp"
 #include "data/game_options.hpp"
 #include "engine/imf_player.hpp"
 #include "loader/resource_loader.hpp"
@@ -26,7 +27,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <cstring>
 #include <iostream>
 #include <utility>
@@ -477,13 +477,8 @@ sdl_utils::Ptr<Mix_Music>
   // look for any file with a base name (i.e. without extension) matching the
   // requested music file's name. If we find a match and SDL_mixer can
   // successfully load it, we add the file path to our cache.
-  auto lowercaseName = name;
-  std::transform(
-    lowercaseName.begin(),
-    lowercaseName.end(),
-    lowercaseName.begin(),
-    [](const auto ch) { return static_cast<char>(std::tolower(ch)); });
-  const auto songName = fs::u8path(lowercaseName).replace_extension();
+  const auto songName =
+    fs::u8path(strings::toLowercase(name)).replace_extension();
 
   for (const fs::directory_entry& candidate :
        fs::directory_iterator(mpResources->replacementMusicBasePath()))
