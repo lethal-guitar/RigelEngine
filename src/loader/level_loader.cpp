@@ -61,13 +61,6 @@ namespace
 using ActorList = std::vector<LevelData::Actor>;
 
 
-std::string stripSpaces(std::string str)
-{
-  strings::trimRight(str);
-  return str;
-}
-
-
 data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
 {
   const auto index = rawIndex / 8u;
@@ -87,9 +80,9 @@ struct LevelHeader
 {
   explicit LevelHeader(LeStreamReader& reader)
     : dataOffset(reader.readU16())
-    , CZone(stripSpaces(readFixedSizeString(reader, 13)))
-    , backdrop(stripSpaces(readFixedSizeString(reader, 13)))
-    , music(stripSpaces(readFixedSizeString(reader, 13)))
+    , CZone(strings::trimRight(readFixedSizeString(reader, 13)))
+    , backdrop(strings::trimRight(readFixedSizeString(reader, 13)))
+    , music(strings::trimRight(readFixedSizeString(reader, 13)))
     , flags(reader.readU8())
     , alternativeBackdropNumber(reader.readU8())
     , unknown(reader.readU16())
