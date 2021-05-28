@@ -479,8 +479,9 @@ sdl_utils::Ptr<Mix_Music>
   const auto songName =
     fs::u8path(strings::toLowercase(name)).replace_extension();
 
+  std::error_code ec;
   for (const fs::directory_entry& candidate :
-       fs::directory_iterator(mpResources->replacementMusicBasePath()))
+       fs::directory_iterator(mpResources->replacementMusicBasePath(), ec))
   {
     if (!candidate.is_regular_file() || candidate.path().stem() != songName)
     {
