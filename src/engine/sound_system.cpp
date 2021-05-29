@@ -265,11 +265,6 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   // but when the same sound effect is triggered multiple times in a row, it
   // results in the sound being cut off and played again from the beginning as
   // in the original game.
-  //
-  // Similarly to the music, the resource loader can only produce audio samples
-  // in AUDIO_S16LSB format. Consequently, we also need to convert if the audio
-  // device is using a different format, but we can directly load our data into
-  // Mix_Chunks if the format matches.
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
   data::forEachSoundId([&](const auto id) {
