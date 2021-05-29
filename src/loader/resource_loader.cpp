@@ -98,6 +98,25 @@ std::optional<data::Image> loadReplacementTilesetIfPresent(
   return loadPng(replacementPath.u8string());
 }
 
+
+int asSoundIndex(const data::SoundId id)
+{
+  return static_cast<int>(id) + 1;
+}
+
+
+int asIntroSoundIndex(const data::SoundId id)
+{
+  return static_cast<int>(id) - static_cast<int>(data::SoundId::IntroGunShot) +
+    3;
+}
+
+
+bool isIntroSound(const data::SoundId id)
+{
+  return id >= data::SoundId::IntroGunShot;
+}
+
 } // namespace
 
 
@@ -279,28 +298,18 @@ data::Song ResourceLoader::loadMusic(const std::string& name) const
 
 data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
 {
-  auto introSoundFilenameFor = [](const data::SoundId soundId) -> const char* {
-    // clang-format off
-    switch (soundId) {
-      case data::SoundId::IntroGunShot: return "INTRO3.MNI";
-      case data::SoundId::IntroGunShotLow: return "INTRO4.MNI";
-      case data::SoundId::IntroEmptyShellsFalling: return "INTRO5.MNI";
-      case data::SoundId::IntroTargetMovingCloser: return "INTRO6.MNI";
-      case data::SoundId::IntroTargetStopsMoving: return "INTRO7.MNI";
-      case data::SoundId::IntroDukeSpeaks1: return "INTRO8.MNI";
-      case data::SoundId::IntroDukeSpeaks2: return "INTRO9.MNI";
-      default: return nullptr;
+  using namespace std::string_literals;
+
+  auto digitizedSoundFilenameForId = [](const data::SoundId soundId) {
+    if (isIntroSound(soundId))
+    {
+      return "INTRO"s + std::to_string(asIntroSoundIndex(soundId)) + ".MNI";
     }
-    // clang-format on
+
+    return "SB_"s + std::to_string(asSoundIndex(soundId)) + ".MNI";
   };
 
-  if (const auto introSoundFilename = introSoundFilenameFor(id))
-  {
-    return loadSound(introSoundFilename);
-  }
-
-  const auto digitizedSoundFileName =
-    std::string("SB_") + std::to_string(static_cast<int>(id) + 1) + ".MNI";
+  const auto digitizedSoundFileName = digitizedSoundFilenameForId(id);
   if (hasFile(digitizedSoundFileName))
   {
     return loadSound(digitizedSoundFileName);
