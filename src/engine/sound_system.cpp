@@ -162,29 +162,6 @@ auto idToIndex(const data::SoundId id)
   return static_cast<int>(id);
 }
 
-
-void simpleMusicCallback(
-  void* pUserData,
-  Uint8* pOutBuffer,
-  const int bytesRequired)
-{
-  auto pPlayer = static_cast<ImfPlayer*>(pUserData);
-  auto pDestination = reinterpret_cast<std::int16_t*>(pOutBuffer);
-  const auto samplesRequired = bytesRequired / sizeof(std::int16_t);
-
-  pPlayer->render(pDestination, samplesRequired);
-}
-
-
-// Turns the given audio buffer into a raw buffer without any conversion
-RawBuffer asRawBuffer(const data::AudioBuffer& buffer)
-{
-  const auto sizeInBytes = buffer.mSamples.size() * sizeof(data::Sample);
-  auto rawBuffer = RawBuffer(sizeInBytes);
-  std::memcpy(rawBuffer.data(), buffer.mSamples.data(), sizeInBytes);
-  return rawBuffer;
-}
-
 } // namespace
 
 
@@ -231,12 +208,6 @@ struct SoundSystem::MusicConversionWrapper
 };
 
 
-SoundSystem::LoadedSound::LoadedSound(const data::AudioBuffer& buffer)
-  : LoadedSound(asRawBuffer(buffer))
-{
-}
-
-
 SoundSystem::LoadedSound::LoadedSound(RawBuffer buffer)
   : mData(std::move(buffer))
   , mpMixChunk(sdl_utils::wrap(
@@ -257,7 +228,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   sdl_mixer::check(Mix_OpenAudio(
     DESIRED_SAMPLE_RATE,
     AUDIO_S16LSB,
-    1, // mono
+    2, // stereo
     BUFFER_SIZE));
 
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
@@ -267,11 +238,6 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   int numChannels = 0;
   Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
 
-  const auto audioFormatMatches =
-    audioFormat == AUDIO_S16LSB && numChannels == 1;
-
-  mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
-
   // Our music is in a format which SDL_mixer does not understand (IMF format
   // aka raw AdLib commands). Therefore, we cannot use any of the high-level
   // music playback functionality offered by the library. Instead, we register
@@ -279,16 +245,12 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   // from the music data (ImfPlayer class).
   //
   // The ImfPlayer class only knows how to produce audio data in 16-bit integer
-  // format (AUDIO_S16LSB). If the audio device uses that same audio format, we
-  // can directly write the player's output into the output buffer (using
-  // simpleMusicCallback). But if the audio device uses a different format, we
-  // have to convert from the player's format into the device format. That's
-  // handled by the MusicConversionWrapper class.
-  if (!audioFormatMatches)
-  {
-    mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
-      mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
-  }
+  // format (AUDIO_S16LSB), and in mono.  Converting from the player's format
+  // into the output device format is handled by the MusicConversionWrapper
+  // class.
+  mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
+  mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
+    mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
 
   hookMusic();
 
@@ -324,9 +286,8 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
 
     auto buffer = prepareBuffer(mpResources->loadSound(id), sampleRate);
 
-    mSounds[idToIndex(id)] = audioFormatMatches
-      ? LoadedSound{std::move(buffer)}
-      : LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
+    mSounds[idToIndex(id)] =
+      LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
   });
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
@@ -429,19 +390,12 @@ void SoundSystem::setSoundVolume(const float volume)
 
 void SoundSystem::hookMusic() const
 {
-  if (mpMusicConversionWrapper)
-  {
-    Mix_HookMusic(
-      [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
-        auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
-        pWrapper->render(pOutBuffer, bytesRequired);
-      },
-      mpMusicConversionWrapper.get());
-  }
-  else
-  {
-    Mix_HookMusic(simpleMusicCallback, mpMusicPlayer.get());
-  }
+  Mix_HookMusic(
+    [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
+      auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
+      pWrapper->render(pOutBuffer, bytesRequired);
+    },
+    mpMusicConversionWrapper.get());
 }
 
 
