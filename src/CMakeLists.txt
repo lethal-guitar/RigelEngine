@@ -371,6 +371,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
     )
     target_link_options(RigelEngine PRIVATE
         "SHELL:-s WASM=1"
+        "SHELL:-s INITIAL_MEMORY=64mb"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
         "SHELL:-s MIN_WEBGL_VERSION=1"
         "SHELL:-s MAX_WEBGL_VERSION=2"
