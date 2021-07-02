@@ -209,6 +209,17 @@ void gameMain(const CommandLineOptions& options)
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
 
+  SDL_version version;
+  SDL_GetVersion(&version);
+
+  if (version.patch < 10)
+  {
+    if (const auto pMappingsFile = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE"))
+    {
+      SDL_GameControllerAddMappingsFromFile(pMappingsFile);
+    }
+  }
+
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   platform::setGLAttributes();
 
