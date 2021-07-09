@@ -71,7 +71,7 @@ jobs:
     - name: Test (debug)
       run: cd build_dbg && ctest
     - name: Test (release)
-      run: cd build_dbg && ctest
+      run: cd build && ctest
   build_osx:
     runs-on: macos-10.15
     steps:
