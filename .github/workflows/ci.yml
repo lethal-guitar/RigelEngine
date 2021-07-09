@@ -21,7 +21,7 @@ jobs:
         extensions: 'hpp,cpp,ipp'
         clangFormatVersion: 11
   build_wasm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
@@ -53,7 +53,7 @@ jobs:
         name: wasm_build
         path: build_wasm/src/RigelEngine.*
   build_linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
