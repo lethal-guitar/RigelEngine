@@ -672,8 +672,17 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
 
   mpState->mParticles.update();
 
+  // As far as game logic is concerned, the viewport is always the same height
+  // regardless of widescreen mode being on or off. But since the HUD doesn't
+  // cover the entire width of the screen in widescreen mode, we need a larger
+  // viewport height for rendering to ensure that sprites in the lower left of
+  // the screen are rendered.
+  const auto renderingViewPortSize = widescreenModeOn()
+    ? base::
+        Extents{viewPortSize.width, data::GameTraits::viewPortHeightTiles - 1}
+    : viewPortSize;
   mpState->mSpriteRenderingSystem.update(
-    mpState->mEntities, viewPortSize, mpState->mCamera.position());
+    mpState->mEntities, renderingViewPortSize, mpState->mCamera.position());
 
   mpState->mIsOddFrame = !mpState->mIsOddFrame;
 }
