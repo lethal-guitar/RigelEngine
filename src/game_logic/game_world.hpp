@@ -134,6 +134,7 @@ private:
 
 private:
   void drawMapAndSprites(const base::Extents& viewPortSize);
+  bool widescreenModeOn() const;
 
   struct QuickSaveData
   {

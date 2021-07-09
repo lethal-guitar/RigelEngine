@@ -289,9 +289,7 @@ GameWorld::GameWorld(
       mpRenderer,
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
       data::GameTraits::viewPortHeightPx)
-  , mWidescreenModeWasOn(
-      mpOptions->mWidescreenModeOn &&
-      renderer::canUseWidescreenMode(mpRenderer))
+  , mWidescreenModeWasOn(widescreenModeOn())
   , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
 {
   using namespace std::chrono;
@@ -626,8 +624,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
     mpState->mBossDeathAnimationStartPending = false;
   }
 
-  const auto& viewPortSize =
-    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
+  const auto& viewPortSize = widescreenModeOn()
     ? viewPortSizeWideScreen(mpRenderer)
     : data::GameTraits::mapViewPortSize;
 
@@ -684,11 +681,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
 
 void GameWorld::render()
 {
-  const auto widescreenModeOn =
-    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer);
-
   if (
-    widescreenModeOn != mWidescreenModeWasOn ||
+    widescreenModeOn() != mWidescreenModeWasOn ||
     mpOptions->mPerElementUpscalingEnabled != mPerElementUpscalingWasEnabled)
   {
     mWaterEffectBuffer =
@@ -755,7 +749,7 @@ void GameWorld::render()
   };
 
 
-  if (widescreenModeOn)
+  if (widescreenModeOn())
   {
     mpServiceProvider->markCurrentFrameAsWidescreen();
 
@@ -818,7 +812,7 @@ void GameWorld::render()
     drawTopRow();
   }
 
-  mWidescreenModeWasOn = widescreenModeOn;
+  mWidescreenModeWasOn = widescreenModeOn();
   mPerElementUpscalingWasEnabled = mpOptions->mPerElementUpscalingEnabled;
 }
 
@@ -886,6 +880,13 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize)
       state.mMapRenderer.renderSingleTile(
         debris.mTileIndex, pos, cameraPosition);
     });
+}
+
+
+bool GameWorld::widescreenModeOn() const
+{
+  return mpOptions->mWidescreenModeOn &&
+    renderer::canUseWidescreenMode(mpRenderer);
 }
 
 
@@ -996,8 +997,7 @@ void GameWorld::quickLoad()
     *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
   mMessageDisplay.setMessage("Quick save restored.");
 
-  const auto& viewPortSize =
-    mpOptions->mWidescreenModeOn && renderer::canUseWidescreenMode(mpRenderer)
+  const auto& viewPortSize = widescreenModeOn()
     ? viewPortSizeWideScreen(mpRenderer)
     : data::GameTraits::mapViewPortSize;
   mpState->mSpriteRenderingSystem.update(
