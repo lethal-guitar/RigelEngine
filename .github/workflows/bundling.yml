@@ -6,8 +6,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  dummy:
-    runs-on: ubuntu-latest
+  build_package_linux:
+    runs-on: ubuntu-20.04
     steps:
-      - name: Run a one-line script
-        run: echo Hello, world!
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: sudo ./docker/ubuntu-deps.sh
+    - name: Run CMake
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+    - name: Build
+      run: cd build && make -j2
+    - name: Package (deb)
+      run: cd build && cpack -G "DEB" && mv packages/rigelengine.deb packages/rigelengine_linux_x64.deb
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ubuntu_deb_build
+        path: build/packages/*.deb*
