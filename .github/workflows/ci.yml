@@ -90,6 +90,7 @@ jobs:
       run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug
     - name: Run CMake (release)
       run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_BENCHMARKS=ON
+    # TODO: -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)
@@ -98,3 +99,9 @@ jobs:
       run: cd build_dbg && ctest
     - name: Test (release)
       run: cd build_dbg && ctest
+    - name: Package (dmg)
+      run: cd build && cpack -G "DragNDrop" .. && mv packages/rigelengine.dmg packages/rigelengine-mac.dmg
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos_dmg_build
+        path: build/packages/*.dmg*
