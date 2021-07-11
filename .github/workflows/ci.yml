@@ -73,10 +73,10 @@ jobs:
     - name: Test (release)
       run: cd build && ctest
     - name: Package (deb)
-      run: cd build && cpack -G "DEB" && mv packages/rigelengine.deb packages/rigelengine-linux-x64.deb
+      run: cd build && cpack -G "DEB" && mv packages/rigelengine.deb packages/rigelengine_linux_x64.deb
     - uses: actions/upload-artifact@v2
       with:
-        name: ubuntu_18.04_deb_build
+        name: ubuntu_deb_build
         path: build/packages/*.deb*
   build_osx:
     runs-on: macos-10.15
