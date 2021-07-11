@@ -399,3 +399,9 @@ else()
 endif()
 
 rigel_enable_warnings(RigelEngine)
+
+include(GNUInstallDirs)
+install(TARGETS RigelEngine
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
+  COMPONENT bin
+)
