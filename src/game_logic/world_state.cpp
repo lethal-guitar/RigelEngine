@@ -282,6 +282,11 @@ void WorldState::synchronizeTo(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId sessionId)
 {
+  if (mBackdropSwitched != other.mBackdropSwitched)
+  {
+    mMapRenderer.switchBackdrops();
+  }
+
   mBonusInfo = other.mBonusInfo;
   mLevelMusicFile = other.mLevelMusicFile;
   mActivatedCheckpoint = other.mActivatedCheckpoint;
