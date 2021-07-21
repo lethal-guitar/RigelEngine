@@ -18,8 +18,6 @@
 
 #include <base/string_utils.hpp>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/algorithm.hpp>
 
 static void BMStringSplit(benchmark::State &state) {
   std::string const kInputString = "Hello, world";
@@ -31,20 +29,6 @@ static void BMStringSplit(benchmark::State &state) {
 }
 
 BENCHMARK(BMStringSplit);
-
-static void BMBoostStringSplit(benchmark::State &state) {
-  const std::string kInputString = "Hello, world";
-  for (auto _ : state) {
-    state.PauseTiming();
-    std::vector<std::string> v;
-    state.ResumeTiming();
-    boost::split(v, kInputString, boost::is_any_of(","));
-    benchmark::DoNotOptimize(v);
-    benchmark::ClobberMemory();
-  }
-}
-
-BENCHMARK(BMBoostStringSplit);
 
 static void BMStartsWithTrueCase(benchmark::State &state) {
   const std::string kInputString = "12341234";
@@ -77,26 +61,6 @@ static void BMStartsWithFalseCase(benchmark::State &state) {
 
 BENCHMARK(BMStartsWithFalseCase);
 
-
-static void BMBoostStartsWithTrueCase(benchmark::State &state) {
-  const std::string kInputString = "12341234";
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(
-      boost::starts_with(kInputString, "1234"));
-  }
-}
-
-BENCHMARK(BMBoostStartsWithTrueCase);
-
-static void BMBoostStartsWithFalseCase(benchmark::State &state) {
-  const std::string kInputString = "12341234";
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(
-      boost::starts_with(kInputString, "234"));
-  }
-}
-
-BENCHMARK(BMBoostStartsWithFalseCase);
 
 static void BMTrimLeft(benchmark::State &state) {
   for (auto _ : state) {
@@ -133,14 +97,3 @@ static void BMTrim(benchmark::State &state) {
 }
 
 BENCHMARK(BMTrim);
-
-static void BMBoostTrim(benchmark::State &state) {
-  for (auto _ : state) {
-    state.PauseTiming();
-    std::string kInputString = "  1234  ";
-    state.ResumeTiming();
-    boost::trim(kInputString);
-  }
-}
-
-BENCHMARK(BMBoostTrim);
