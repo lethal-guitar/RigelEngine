@@ -338,7 +338,6 @@ target_link_libraries(rigel_core
     SDL2::Core
     SDL2::Mixer
     entityx
-    Boost::boost
     dear_imgui
     imgui-filebrowser
     nlohmann-json
