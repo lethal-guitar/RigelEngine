@@ -7,6 +7,7 @@
     * [Ubuntu 19.04 or newer](#linux-build-instructions-194)
     * [Ubuntu 18.04](#linux-build-instructions-184)
     * [Fedora 31 or newer](#linux-build-instructions-fedora)
+    * [OpenGL ES version](#linux-build-instructions-gles)
 * [Raspberry Pi builds](#raspi-build-instructions)
 * [Docker builds](#docker-build-instructions)
 * [OS X builds](#mac-build-instructions)
@@ -173,6 +174,30 @@ sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel
 Note the additional `boost-static` package - without it, there will be linker errors.
 
 This also assumes that `make`, `gcc` and `gcc-c++` are already installed.
+
+#### <a name="linux-build-instructions-gles">OpenGL ES version</a>
+
+On Linux, RigelEngine can be built in two versions: Regular and OpenGL ES.
+The latter is useful for system with an older graphics card (e.g. Intel integrated GPU)
+which doesn't support OpenGL 3.0.
+
+This might require installing the GL ES driver. On Ubuntu/Debian, you can do that as follows:
+
+```
+sudo apt-get install libgles2-mesa-dev
+```
+
+To build the GL ES version, pass `-DUSE_GL_ES=ON` when running CMake, then build as usual:
+
+```bash
+mkdir build
+cd build
+cmake .. -DUSE_GL_ES=ON -DWARNINGS_AS_ERRORS=OFF
+make -j8 # adjust depending on number of CPU cores in your machine
+```
+
+If you've already built the regular version before, you can reuse the existing build dir
+(skip the `mkdir` step) but otherwise run the same commands.
 
 ### <a name="raspi-build-instructions">Raspberry Pi builds</a>
 
