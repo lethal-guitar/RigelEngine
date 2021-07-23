@@ -63,7 +63,9 @@ public:
   data::Movie loadMovie(const std::string& name) const;
 
   data::Song loadMusic(const std::string& name) const;
-  data::AudioBuffer loadSound(data::SoundId id) const;
+  bool hasSoundBlasterSound(data::SoundId id) const;
+  data::AudioBuffer loadAdlibSound(data::SoundId id) const;
+  data::AudioBuffer loadPreferredSound(data::SoundId id) const;
   std::filesystem::path replacementSoundPath(data::SoundId id) const;
   std::filesystem::path replacementMusicBasePath() const;
 

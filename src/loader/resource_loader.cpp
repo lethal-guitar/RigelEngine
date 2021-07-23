@@ -117,6 +117,19 @@ bool isIntroSound(const data::SoundId id)
   return id >= data::SoundId::IntroGunShot;
 }
 
+
+std::string digitizedSoundFilenameForId(const data::SoundId soundId)
+{
+  using namespace std::string_literals;
+
+  if (isIntroSound(soundId))
+  {
+    return "INTRO"s + std::to_string(asIntroSoundIndex(soundId)) + ".MNI";
+  }
+
+  return "SB_"s + std::to_string(asSoundIndex(soundId)) + ".MNI";
+}
+
 } // namespace
 
 
@@ -296,19 +309,21 @@ data::Song ResourceLoader::loadMusic(const std::string& name) const
 }
 
 
-data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
+bool ResourceLoader::hasSoundBlasterSound(const data::SoundId id) const
 {
-  using namespace std::string_literals;
+  return hasFile(digitizedSoundFilenameForId(id));
+}
 
-  auto digitizedSoundFilenameForId = [](const data::SoundId soundId) {
-    if (isIntroSound(soundId))
-    {
-      return "INTRO"s + std::to_string(asIntroSoundIndex(soundId)) + ".MNI";
-    }
 
-    return "SB_"s + std::to_string(asSoundIndex(soundId)) + ".MNI";
-  };
+data::AudioBuffer ResourceLoader::loadAdlibSound(const data::SoundId id) const
+{
+  return mAdlibSoundsPackage.loadAdlibSound(id);
+}
 
+
+data::AudioBuffer
+  ResourceLoader::loadPreferredSound(const data::SoundId id) const
+{
   const auto digitizedSoundFileName = digitizedSoundFilenameForId(id);
   if (hasFile(digitizedSoundFileName))
   {
@@ -316,7 +331,7 @@ data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
   }
   else
   {
-    return mAdlibSoundsPackage.loadAdlibSound(id);
+    return loadAdlibSound(id);
   }
 }
 

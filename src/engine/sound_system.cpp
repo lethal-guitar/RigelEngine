@@ -280,7 +280,8 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
       }
     }
 
-    auto buffer = prepareBuffer(mpResources->loadSound(id), sampleRate);
+    auto buffer =
+      prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
 
     mSounds[idToIndex(id)] =
       LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
