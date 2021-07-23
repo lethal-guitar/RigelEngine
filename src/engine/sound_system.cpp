@@ -356,6 +356,12 @@ void SoundSystem::stopSound(const data::SoundId id) const
 }
 
 
+void SoundSystem::stopAllSounds() const
+{
+  data::forEachSoundId([&](const auto id) { stopSound(id); });
+}
+
+
 void SoundSystem::setMusicVolume(const float volume)
 {
   const auto sdlVolume =

@@ -78,6 +78,7 @@ public:
 
   /** Stop playing specified sound effect (if currently playing) */
   void stopSound(data::SoundId id) const;
+  void stopAllSounds() const;
 
   void setMusicVolume(float volume);
   void setSoundVolume(float volume);

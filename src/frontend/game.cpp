@@ -664,6 +664,15 @@ void Game::stopSound(const data::SoundId id)
 }
 
 
+void Game::stopAllSounds()
+{
+  if (mpSoundSystem)
+  {
+    mpSoundSystem->stopAllSounds();
+  }
+}
+
+
 void Game::playMusic(const std::string& name)
 {
   if (mpSoundSystem)

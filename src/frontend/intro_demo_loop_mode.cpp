@@ -57,7 +57,10 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event)
       return false;
     },
 
-    [&](ui::IntroMovie& state) { return true; },
+    [&](ui::IntroMovie& state) {
+      mContext.mpServiceProvider->stopAllSounds();
+      return true;
+    },
 
     [&](auto&& state) {
       mContext.mpScriptRunner->handleEvent(event);
