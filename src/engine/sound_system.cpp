@@ -223,14 +223,17 @@ SoundSystem::LoadedSound::LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk)
 
 
 SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
-  : mpResources(pResources)
-{
-  sdl_mixer::check(Mix_OpenAudio(
-    DESIRED_SAMPLE_RATE,
-    AUDIO_S16LSB,
-    2, // stereo
-    BUFFER_SIZE));
+  : mCloseMixerGuard(std::invoke([]() {
+    sdl_mixer::check(Mix_OpenAudio(
+      DESIRED_SAMPLE_RATE,
+      AUDIO_S16LSB,
+      2, // stereo
+      BUFFER_SIZE));
 
+    return &Mix_Quit;
+  }))
+  , mpResources(pResources)
+{
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
 
   int sampleRate = 0;
@@ -251,8 +254,6 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
   mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
     mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
-
-  hookMusic();
 
   // For sound playback, we want to be able to play as many sound effects in
   // parallel as possible. In the original game, the number of available sound
@@ -287,6 +288,11 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
   setSoundVolume(data::SOUND_VOLUME_DEFAULT);
+
+  // Do this as the last step, in case any of the above throws an exception.
+  // We would otherwise end up with a hook that points to a destroyed
+  // SoundSystem instance, and crash.
+  hookMusic();
 }
 
 
@@ -300,14 +306,6 @@ SoundSystem::~SoundSystem()
   {
     unhookMusic();
   }
-
-  // We have to destroy all the MixChunks before we can call Mix_Quit().
-  for (auto& sound : mSounds)
-  {
-    sound.mpMixChunk.reset(nullptr);
-  }
-
-  Mix_Quit();
 }
 
 

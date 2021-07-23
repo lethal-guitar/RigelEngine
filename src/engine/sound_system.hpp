@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/defer.hpp"
 #include "data/audio_buffer.hpp"
 #include "data/song.hpp"
 #include "data/sound_ids.hpp"
@@ -98,6 +99,7 @@ private:
     sdl_utils::Ptr<Mix_Chunk> mpMixChunk;
   };
 
+  base::ScopeGuard mCloseMixerGuard;
   std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
   std::unique_ptr<ImfPlayer> mpMusicPlayer;
   std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
