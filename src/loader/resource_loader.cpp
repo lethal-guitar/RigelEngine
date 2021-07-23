@@ -112,17 +112,11 @@ int asIntroSoundIndex(const data::SoundId id)
 }
 
 
-bool isIntroSound(const data::SoundId id)
-{
-  return id >= data::SoundId::IntroGunShot;
-}
-
-
 std::string digitizedSoundFilenameForId(const data::SoundId soundId)
 {
   using namespace std::string_literals;
 
-  if (isIntroSound(soundId))
+  if (data::isIntroSound(soundId))
   {
     return "INTRO"s + std::to_string(asIntroSoundIndex(soundId)) + ".MNI";
   }

@@ -69,6 +69,11 @@ enum class SoundId
 
 constexpr auto NUM_SOUND_IDS = 41;
 
+inline bool isIntroSound(const SoundId id)
+{
+  return id >= SoundId::IntroGunShot;
+}
+
 
 template <typename Callable>
 void forEachSoundId(Callable callback)
