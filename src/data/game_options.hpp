@@ -23,6 +23,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
+#include <cstdint>
 #include <optional>
 
 
@@ -59,6 +60,13 @@ constexpr auto DEFAULT_WINDOW_MODE = WindowMode::ExclusiveFullscreen;
 constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Fullscreen;
 #endif
 
+enum class SoundStyle : std::uint8_t
+{
+  AdLib,
+  SoundBlaster,
+  Combined
+};
+
 
 /** Data-model for user-configurable options/settings
  *
@@ -93,6 +101,7 @@ struct GameOptions
   float mSoundVolume = SOUND_VOLUME_DEFAULT;
   bool mMusicOn = true;
   bool mSoundOn = true;
+  SoundStyle mSoundStyle = SoundStyle::SoundBlaster;
 
   // Keyboard controls
   SDL_Keycode mUpKeybinding = SDLK_UP;
