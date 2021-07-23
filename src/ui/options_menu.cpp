@@ -21,6 +21,7 @@
 #include "options_menu.hpp"
 
 #include "base/math_tools.hpp"
+#include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
@@ -29,7 +30,6 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
-#include <boost/algorithm/string/erase.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
 RIGEL_RESTORE_WARNINGS
@@ -112,9 +112,16 @@ void fpsLimitUi(data::GameOptions* pOptions)
 
 std::string normalizedKeyName(const SDL_Keycode keyCode)
 {
+  using namespace std::literals;
+
+  constexpr auto variantPrefix = "Left "sv;
+
   auto keyName = std::string(SDL_GetKeyName(keyCode));
 
-  boost::algorithm::erase_first(keyName, "Left ");
+  if (strings::startsWith(keyName, variantPrefix))
+  {
+    keyName.erase(0, variantPrefix.size());
+  }
 
   return keyName;
 }

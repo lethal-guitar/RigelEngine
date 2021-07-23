@@ -1,4 +1,4 @@
-# Emscripten provides its own versions of the SDL and Boost libraries.
+# Emscripten provides its own versions of the SDL libraries.
 # Calling this function defines the same targets that would normally be
 # defined by the corresponding find_package calls, but these targets
 # set the appropriate compiler and linker flags for Emscripten instead of
@@ -11,11 +11,6 @@ function(rigel_define_wasm_targets_for_dependencies)
     add_library(SDL2::Mixer INTERFACE IMPORTED)
     target_compile_options(SDL2::Mixer INTERFACE "SHELL:-s USE_SDL_MIXER=2")
     target_link_options(SDL2::Mixer INTERFACE "SHELL:-s USE_SDL_MIXER=2")
-
-    add_library(Boost::boost INTERFACE IMPORTED)
-    target_compile_options(Boost::boost INTERFACE
-        "SHELL:-s USE_BOOST_HEADERS=1"
-    )
 endfunction()
 
 

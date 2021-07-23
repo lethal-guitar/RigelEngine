@@ -28,19 +28,22 @@
 
 #include "game_main.hpp"
 
-RIGEL_DISABLE_WARNINGS
-#include <boost/program_options.hpp>
-RIGEL_RESTORE_WARNINGS
-
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
+#if RIGEL_HAS_BOOST
 
-using namespace rigel;
+RIGEL_DISABLE_WARNINGS
+  #include <boost/program_options.hpp>
+RIGEL_RESTORE_WARNINGS
 
 namespace po = boost::program_options;
 
+#endif
+
+
+using namespace rigel;
 
 namespace
 {
@@ -65,6 +68,7 @@ void showBanner()
        "\n";
 }
 
+#if RIGEL_HAS_BOOST
 
 auto parseLevelToJumpTo(const std::string& levelToPlay)
 {
@@ -121,6 +125,8 @@ base::Vector parsePlayerPosition(const std::string& playerPosString)
   return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
 }
 
+#endif
+
 } // namespace
 
 
@@ -128,6 +134,7 @@ int main(int argc, char** argv)
 {
   showBanner();
 
+#if RIGEL_HAS_BOOST
   CommandLineOptions config;
 
   // clang-format off
@@ -235,6 +242,22 @@ int main(int argc, char** argv)
     std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
+#else
+  try
+  {
+    gameMain({});
+  }
+  catch (const std::exception& ex)
+  {
+    std::cerr << "ERROR: " << ex.what() << '\n';
+    return -2;
+  }
+  catch (...)
+  {
+    std::cerr << "UNKNOWN ERROR\n";
+    return -3;
+  }
+#endif
 
   return 0;
 }

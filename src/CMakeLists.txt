@@ -338,7 +338,6 @@ target_link_libraries(rigel_core
     SDL2::Core
     SDL2::Mixer
     entityx
-    Boost::boost
     dear_imgui
     imgui-filebrowser
     nlohmann-json
@@ -385,6 +384,10 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         ".html"
     )
 else()
+    target_compile_definitions(RigelEngine PRIVATE
+        RIGEL_HAS_BOOST=$<BOOL:${Boost_FOUND}>
+    )
+
     target_sources(RigelEngine PRIVATE
         game_main.cpp
         game_main.hpp
@@ -393,9 +396,14 @@ else()
     target_link_libraries(RigelEngine PRIVATE
         SDL2::Main
         rigel_core
-        Boost::program_options
-        Boost::disable_autolinking
     )
+
+    if(${Boost_FOUND})
+        target_link_libraries(RigelEngine PRIVATE
+            Boost::program_options
+            Boost::disable_autolinking
+        )
+    endif()
 endif()
 
 rigel_enable_warnings(RigelEngine)
