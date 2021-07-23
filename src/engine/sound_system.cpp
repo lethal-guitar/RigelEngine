@@ -268,24 +268,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   // in the original game.
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
-  data::forEachSoundId([&](const auto id) {
-    std::error_code ec;
-    if (const auto replacementPath = mpResources->replacementSoundPath(id);
-        std::filesystem::exists(replacementPath, ec))
-    {
-      if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
-      {
-        mSounds[idToIndex(id)] = LoadedSound{sdl_utils::wrap(pMixChunk)};
-        return;
-      }
-    }
-
-    auto buffer =
-      prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
-
-    mSounds[idToIndex(id)] =
-      LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
-  });
+  loadAllSounds(sampleRate, audioFormat, numChannels);
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
   setSoundVolume(data::SOUND_VOLUME_DEFAULT);
@@ -385,6 +368,32 @@ void SoundSystem::setSoundVolume(const float volume)
       Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
     }
   }
+}
+
+
+void SoundSystem::loadAllSounds(
+  const int sampleRate,
+  const std::uint16_t audioFormat,
+  const int numChannels)
+{
+  data::forEachSoundId([&](const auto id) {
+    std::error_code ec;
+    if (const auto replacementPath = mpResources->replacementSoundPath(id);
+        std::filesystem::exists(replacementPath, ec))
+    {
+      if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
+      {
+        mSounds[idToIndex(id)] = LoadedSound{sdl_utils::wrap(pMixChunk)};
+        return;
+      }
+    }
+
+    auto buffer =
+      prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
+
+    mSounds[idToIndex(id)] =
+      LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
+  });
 }
 
 

@@ -84,6 +84,8 @@ public:
   void setSoundVolume(float volume);
 
 private:
+  void
+    loadAllSounds(int sampleRate, std::uint16_t audioFormat, int numChannels);
   void hookMusic() const;
   void unhookMusic() const;
   sdl_utils::Ptr<Mix_Music> loadReplacementSong(const std::string& name);
