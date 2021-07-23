@@ -245,7 +245,19 @@ int main(int argc, char** argv)
 #else
   try
   {
-    gameMain({});
+    CommandLineOptions config;
+
+    if (argc > 1)
+    {
+      config.mGamePath = argv[1];
+
+      if (!config.mGamePath.empty() && config.mGamePath.back() != '/')
+      {
+        config.mGamePath += "/";
+      }
+    }
+
+    gameMain(config);
   }
   catch (const std::exception& ex)
   {
