@@ -18,6 +18,7 @@
 
 #include "base/defer.hpp"
 #include "data/audio_buffer.hpp"
+#include "data/game_options.hpp"
 #include "data/song.hpp"
 #include "data/sound_ids.hpp"
 #include "sdl_utils/ptr.hpp"
@@ -53,8 +54,12 @@ using RawBuffer = std::vector<std::uint8_t>;
 class SoundSystem
 {
 public:
-  explicit SoundSystem(const loader::ResourceLoader* pResources);
+  explicit SoundSystem(
+    const loader::ResourceLoader* pResources,
+    data::SoundStyle soundStyle);
   ~SoundSystem();
+
+  void reloadAllSounds(data::SoundStyle soundStyle);
 
   /** Start playing given music data
    *
@@ -84,8 +89,16 @@ public:
   void setSoundVolume(float volume);
 
 private:
-  void
-    loadAllSounds(int sampleRate, std::uint16_t audioFormat, int numChannels);
+  void loadAllSounds(
+    int sampleRate,
+    std::uint16_t audioFormat,
+    int numChannels,
+    data::SoundStyle soundStyle);
+  data::AudioBuffer loadSoundForStyle(
+    data::SoundId id,
+    data::SoundStyle soundStyle,
+    int sampleRate) const;
+  void applySoundVolume(float volume);
   void hookMusic() const;
   void unhookMusic() const;
   sdl_utils::Ptr<Mix_Music> loadReplacementSong(const std::string& name);
@@ -110,6 +123,8 @@ private:
   mutable std::unordered_map<std::string, std::string>
     mReplacementSongFileCache;
   const loader::ResourceLoader* mpResources;
+  float mCurrentSoundVolume;
+  data::SoundStyle mCurrentSoundStyle;
 };
 
 } // namespace rigel::engine

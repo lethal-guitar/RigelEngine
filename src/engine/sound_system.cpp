@@ -18,7 +18,6 @@
 
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
-#include "data/game_options.hpp"
 #include "engine/imf_player.hpp"
 #include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
@@ -59,6 +58,7 @@ namespace rigel::engine
 namespace
 {
 
+const auto COMBINED_SOUNDS_ADLIB_PERCENTAGE = 0.30f;
 const auto DESIRED_SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
 
@@ -157,6 +157,30 @@ RawBuffer convertBuffer(
 }
 
 
+void overlaySound(
+  data::AudioBuffer& base,
+  const data::AudioBuffer& overlay,
+  const float overlayVolume)
+{
+  assert(base.mSampleRate == overlay.mSampleRate);
+
+  if (base.mSamples.size() < overlay.mSamples.size())
+  {
+    base.mSamples.resize(overlay.mSamples.size());
+  }
+
+  const auto overlayVolumeSdl =
+    base::round(std::clamp(overlayVolume, 0.0f, 1.0f) * SDL_MIX_MAXVOLUME);
+
+  SDL_MixAudioFormat(
+    reinterpret_cast<std::uint8_t*>(base.mSamples.data()),
+    reinterpret_cast<const std::uint8_t*>(overlay.mSamples.data()),
+    AUDIO_S16LSB,
+    static_cast<std::uint32_t>(overlay.mSamples.size() * sizeof(data::Sample)),
+    overlayVolumeSdl);
+}
+
+
 auto idToIndex(const data::SoundId id)
 {
   return static_cast<int>(id);
@@ -222,7 +246,9 @@ SoundSystem::LoadedSound::LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk)
 }
 
 
-SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
+SoundSystem::SoundSystem(
+  const loader::ResourceLoader* pResources,
+  data::SoundStyle soundStyle)
   : mCloseMixerGuard(std::invoke([]() {
     sdl_mixer::check(Mix_OpenAudio(
       DESIRED_SAMPLE_RATE,
@@ -233,6 +259,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
     return &Mix_Quit;
   }))
   , mpResources(pResources)
+  , mCurrentSoundStyle(soundStyle)
 {
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
 
@@ -268,7 +295,7 @@ SoundSystem::SoundSystem(const loader::ResourceLoader* pResources)
   // in the original game.
   Mix_AllocateChannels(data::NUM_SOUND_IDS);
 
-  loadAllSounds(sampleRate, audioFormat, numChannels);
+  loadAllSounds(sampleRate, audioFormat, numChannels, soundStyle);
 
   setMusicVolume(data::MUSIC_VOLUME_DEFAULT);
   setSoundVolume(data::SOUND_VOLUME_DEFAULT);
@@ -290,6 +317,40 @@ SoundSystem::~SoundSystem()
   {
     unhookMusic();
   }
+}
+
+
+void SoundSystem::reloadAllSounds(const data::SoundStyle soundStyle)
+{
+  if (mCurrentSoundStyle == soundStyle)
+  {
+    return;
+  }
+
+  stopAllSounds();
+
+  int sampleRate = 0;
+  std::uint16_t audioFormat = 0;
+  int numChannels = 0;
+  Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
+
+  data::forEachSoundId([&](const auto id) {
+    const auto index = idToIndex(id);
+    if (
+      mSounds[index].mData.empty() || data::isIntroSound(id) ||
+      !mpResources->hasSoundBlasterSound(id))
+    {
+      return;
+    }
+
+    const auto soundData = loadSoundForStyle(id, soundStyle, sampleRate);
+    mSounds[index] =
+      LoadedSound{convertBuffer(soundData, audioFormat, numChannels)};
+  });
+
+  applySoundVolume(mCurrentSoundVolume);
+
+  mCurrentSoundStyle = soundStyle;
 }
 
 
@@ -358,23 +419,16 @@ void SoundSystem::setMusicVolume(const float volume)
 
 void SoundSystem::setSoundVolume(const float volume)
 {
-  const auto sdlVolume =
-    static_cast<int>(std::clamp(volume, 0.0f, 1.0f) * MIX_MAX_VOLUME);
-
-  for (auto& sound : mSounds)
-  {
-    if (sound.mpMixChunk)
-    {
-      Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
-    }
-  }
+  applySoundVolume(volume);
+  mCurrentSoundVolume = volume;
 }
 
 
 void SoundSystem::loadAllSounds(
   const int sampleRate,
   const std::uint16_t audioFormat,
-  const int numChannels)
+  const int numChannels,
+  const data::SoundStyle soundStyle)
 {
   data::forEachSoundId([&](const auto id) {
     std::error_code ec;
@@ -388,12 +442,65 @@ void SoundSystem::loadAllSounds(
       }
     }
 
-    auto buffer =
-      prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
+    const auto soundData = loadSoundForStyle(id, soundStyle, sampleRate);
 
     mSounds[idToIndex(id)] =
-      LoadedSound{convertBuffer(buffer, audioFormat, numChannels)};
+      LoadedSound{convertBuffer(soundData, audioFormat, numChannels)};
   });
+}
+
+
+data::AudioBuffer SoundSystem::loadSoundForStyle(
+  const data::SoundId id,
+  const data::SoundStyle soundStyle,
+  const int sampleRate) const
+{
+  if (data::isIntroSound(id))
+  {
+    // The intro sounds don't have AdLib versions, so always load
+    // the 'preferred' version (SoundBlaster) regardless of chosen
+    // sound style.
+    return prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
+  }
+
+  switch (soundStyle)
+  {
+    case data::SoundStyle::AdLib:
+      return prepareBuffer(mpResources->loadAdlibSound(id), sampleRate);
+
+    case data::SoundStyle::Combined:
+      {
+        auto buffer =
+          prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
+        if (mpResources->hasSoundBlasterSound(id))
+        {
+          overlaySound(
+            buffer,
+            prepareBuffer(mpResources->loadAdlibSound(id), sampleRate),
+            COMBINED_SOUNDS_ADLIB_PERCENTAGE);
+        }
+
+        return buffer;
+      }
+
+    default:
+      return prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
+  }
+}
+
+
+void SoundSystem::applySoundVolume(const float volume)
+{
+  const auto sdlVolume =
+    static_cast<int>(std::clamp(volume, 0.0f, 1.0f) * MIX_MAX_VOLUME);
+
+  for (auto& sound : mSounds)
+  {
+    if (sound.mpMixChunk)
+    {
+      Mix_VolumeChunk(sound.mpMixChunk.get(), sdlVolume);
+    }
+  }
 }
 
 

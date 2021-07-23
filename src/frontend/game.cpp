@@ -225,11 +225,12 @@ Game::Game(
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
-  , mpSoundSystem([this]() {
+  , mpSoundSystem([&]() {
     std::unique_ptr<engine::SoundSystem> pResult;
     try
     {
-      pResult = std::make_unique<engine::SoundSystem>(&mResources);
+      pResult = std::make_unique<engine::SoundSystem>(
+        &mResources, pUserProfile->mOptions.mSoundStyle);
     }
     catch (const std::exception& ex)
     {
@@ -569,6 +570,11 @@ void Game::applyChangedOptions()
 
   if (mpSoundSystem)
   {
+    if (currentOptions.mSoundStyle != mPreviousOptions.mSoundStyle)
+    {
+      mpSoundSystem->reloadAllSounds(currentOptions.mSoundStyle);
+    }
+
     if (
       currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
       currentOptions.mMusicOn != mPreviousOptions.mMusicOn)
