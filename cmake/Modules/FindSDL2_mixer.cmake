@@ -208,13 +208,10 @@ mark_as_advanced(SDL2_MIXER_PATH
 
 
 if(SDL2_MIXER_FOUND)
-
   # SDL2::Mixer target
   if(SDL2_MIXER_LIBRARY AND NOT TARGET SDL2::Mixer)
-    add_library(SDL2::Mixer UNKNOWN IMPORTED)
-    set_target_properties(SDL2::Mixer PROPERTIES
-                          IMPORTED_LOCATION "${SDL2_MIXER_LIBRARY}"
-                          INTERFACE_INCLUDE_DIRECTORIES "${SDL2_MIXER_INCLUDE_DIR}"
-                          INTERFACE_LINK_LIBRARIES SDL2::Core)
+    add_library(SDL2::Mixer INTERFACE IMPORTED)
+    target_include_directories(SDL2::Mixer INTERFACE "${SDL2_MIXER_INCLUDE_DIR}")
+    target_link_libraries(SDL2::Mixer INTERFACE SDL2::Core "${SDL2_MIXER_LIBRARY}")
   endif()
 endif()
