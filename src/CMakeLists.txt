@@ -362,7 +362,13 @@ endif()
 
 
 # Main executable
-add_executable(RigelEngine)
+set(icon_file_osx "${CMAKE_SOURCE_DIR}/dist/osx/RigelEngine.icns")
+set_source_files_properties(${icon_file_osx} PROPERTIES
+    MACOSX_PACKAGE_LOCATION "Resources"
+)
+
+add_executable(RigelEngine MACOSX_BUNDLE ${icon_file_osx})
+
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
     target_sources(RigelEngine PRIVATE emscripten_main.cpp)
     target_link_libraries(RigelEngine PRIVATE
@@ -404,12 +410,27 @@ else()
             Boost::disable_autolinking
         )
     endif()
+
+    set_target_properties(RigelEngine PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/dist/osx/Info.plist
+    )
 endif()
 
 rigel_enable_warnings(RigelEngine)
 
-include(GNUInstallDirs)
-install(TARGETS RigelEngine
-  DESTINATION ${CMAKE_INSTALL_BINDIR}
-  COMPONENT bin
-)
+if(APPLE)
+    install(TARGETS RigelEngine
+        DESTINATION .
+        COMPONENT bin)
+    install(CODE [[
+        include(BundleUtilities)
+        set(BU_CHMOD_BUNDLE_ITEMS TRUE)
+        fixup_bundle("${CMAKE_INSTALL_PREFIX}/RigelEngine.app" "" "")
+    ]] COMPONENT bin)
+elseif(UNIX)
+    include(GNUInstallDirs)
+    install(TARGETS RigelEngine
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT bin
+    )
+endif()

@@ -30,3 +30,29 @@ jobs:
       with:
         name: ubuntu_deb_build
         path: build/packages/*.deb*
+  build_package_osx:
+    runs-on: macos-10.15
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: brew install sdl2 sdl2_mixer boost llvm@8
+    - name: Run CMake
+      run: |
+        export rigel_llvm_path=`brew --prefix llvm@8`;
+        export CC="$rigel_llvm_path/bin/clang";
+        export CXX="$CC++";
+        export CPPFLAGS="-I$rigel_llvm_path/include";
+        export LDFLAGS="-L$rigel_llvm_path/lib -Wl,-rpath,$rigel_llvm_path/lib";
+        unset rigel_llvm_path;
+        cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release
+        # TODO: -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+    - name: Build
+      run: cd build && make -j2
+    - name: Package (dmg)
+      run: cd build && cpack -G "DragNDrop" .. && mv packages/rigelengine.dmg packages/rigelengine_mac_x64.dmg && mv packages/rigelengine.dmg.sha256 packages/rigelengine_mac_x64.dmg.sha256
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos_dmg_build
+        path: build/packages/*.dmg*
