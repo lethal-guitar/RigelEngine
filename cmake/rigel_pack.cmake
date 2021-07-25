@@ -18,7 +18,9 @@ set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_COMPONENTS_ALL bin)
 set(CPACK_PACKAGE_FILE_NAME "rigelengine")
 
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
+# We don't include this in order to avoid popping up a "Agree to EULA" dialog
+# for some CPack generators, like Mac OS
+#set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
 
 # a headsup
