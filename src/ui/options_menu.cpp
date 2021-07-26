@@ -27,6 +27,7 @@
 #include "common/user_profile.hpp"
 #include "sdl_utils/key_code.hpp"
 #include "ui/menu_navigation.hpp"
+#include "ui/utils.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
@@ -219,6 +220,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     mPopupOpened = true;
   }
 
+  auto soundStyleChanged = false;
+
   const auto& io = ImGui::GetIO();
   const auto windowSize = io.DisplaySize;
 
@@ -275,6 +278,19 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
     if (ImGui::BeginTabItem("Sound"))
     {
+      ImGui::NewLine();
+
+      auto soundEffectStyleIndex = static_cast<int>(mpOptions->mSoundStyle);
+      ImGui::Combo(
+        "Sound effects style",
+        &soundEffectStyleIndex,
+        "AdLib\0Sound Blaster\0Combined AdLib + SB\0");
+
+      const auto newSoundStyle =
+        static_cast<data::SoundStyle>(std::clamp(soundEffectStyleIndex, 0, 2));
+      soundStyleChanged = newSoundStyle != mpOptions->mSoundStyle;
+      mpOptions->mSoundStyle = newSoundStyle;
+
       const auto sliderWidth =
         std::min(sizeToUse.x / 2.0f, ImGui::GetFontSize() * 24);
 
@@ -429,6 +445,13 @@ Going back to a registered version will make them work again.)");
 #endif
 
   ImGui::EndPopup();
+
+  if (soundStyleChanged)
+  {
+    ImGui::GetForegroundDrawList()->AddRectFilled(
+      {0, 0}, windowSize, ui::toImgui({0, 0, 0, 128}));
+    ui::drawLoadingScreenText();
+  }
 }
 
 

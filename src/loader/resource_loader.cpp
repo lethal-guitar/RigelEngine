@@ -98,6 +98,32 @@ std::optional<data::Image> loadReplacementTilesetIfPresent(
   return loadPng(replacementPath.u8string());
 }
 
+
+int asSoundIndex(const data::SoundId id)
+{
+  return static_cast<int>(id) + 1;
+}
+
+
+int asIntroSoundIndex(const data::SoundId id)
+{
+  return static_cast<int>(id) - static_cast<int>(data::SoundId::IntroGunShot) +
+    3;
+}
+
+
+std::string digitizedSoundFilenameForId(const data::SoundId soundId)
+{
+  using namespace std::string_literals;
+
+  if (data::isIntroSound(soundId))
+  {
+    return "INTRO"s + std::to_string(asIntroSoundIndex(soundId)) + ".MNI";
+  }
+
+  return "SB_"s + std::to_string(asSoundIndex(soundId)) + ".MNI";
+}
+
 } // namespace
 
 
@@ -277,37 +303,29 @@ data::Song ResourceLoader::loadMusic(const std::string& name) const
 }
 
 
-data::AudioBuffer ResourceLoader::loadSound(const data::SoundId id) const
+bool ResourceLoader::hasSoundBlasterSound(const data::SoundId id) const
 {
-  auto introSoundFilenameFor = [](const data::SoundId soundId) -> const char* {
-    // clang-format off
-    switch (soundId) {
-      case data::SoundId::IntroGunShot: return "INTRO3.MNI";
-      case data::SoundId::IntroGunShotLow: return "INTRO4.MNI";
-      case data::SoundId::IntroEmptyShellsFalling: return "INTRO5.MNI";
-      case data::SoundId::IntroTargetMovingCloser: return "INTRO6.MNI";
-      case data::SoundId::IntroTargetStopsMoving: return "INTRO7.MNI";
-      case data::SoundId::IntroDukeSpeaks1: return "INTRO8.MNI";
-      case data::SoundId::IntroDukeSpeaks2: return "INTRO9.MNI";
-      default: return nullptr;
-    }
-    // clang-format on
-  };
+  return hasFile(digitizedSoundFilenameForId(id));
+}
 
-  if (const auto introSoundFilename = introSoundFilenameFor(id))
-  {
-    return loadSound(introSoundFilename);
-  }
 
-  const auto digitizedSoundFileName =
-    std::string("SB_") + std::to_string(static_cast<int>(id) + 1) + ".MNI";
+data::AudioBuffer ResourceLoader::loadAdlibSound(const data::SoundId id) const
+{
+  return mAdlibSoundsPackage.loadAdlibSound(id);
+}
+
+
+data::AudioBuffer
+  ResourceLoader::loadPreferredSound(const data::SoundId id) const
+{
+  const auto digitizedSoundFileName = digitizedSoundFilenameForId(id);
   if (hasFile(digitizedSoundFileName))
   {
     return loadSound(digitizedSoundFileName);
   }
   else
   {
-    return mAdlibSoundsPackage.loadAdlibSound(id);
+    return loadAdlibSound(id);
   }
 }
 

@@ -23,40 +23,35 @@
 namespace rigel::base
 {
 
-namespace detail
-{
-
-class CallOnDestruction
+class ScopeGuard
 {
 public:
   template <typename Callback>
-  explicit CallOnDestruction(Callback&& callback)
+  explicit ScopeGuard(Callback&& callback)
     : mCallback(std::forward<Callback>(callback))
   {
   }
 
-  ~CallOnDestruction() { mCallback(); }
+  ~ScopeGuard() { mCallback(); }
 
-  CallOnDestruction(CallOnDestruction&& other) noexcept
+  ScopeGuard(ScopeGuard&& other) noexcept
     : mCallback(std::exchange(other.mCallback, []() {}))
   {
   }
 
-  CallOnDestruction& operator=(CallOnDestruction&&) = delete;
-  CallOnDestruction(const CallOnDestruction&) = delete;
-  CallOnDestruction& operator=(const CallOnDestruction&) = delete;
+  ScopeGuard& operator=(ScopeGuard&&) = delete;
+  ScopeGuard(const ScopeGuard&) = delete;
+  ScopeGuard& operator=(const ScopeGuard&) = delete;
 
 private:
   std::function<void()> mCallback;
 };
 
-} // namespace detail
-
 
 template <typename Callback>
 [[nodiscard]] auto defer(Callback&& callback)
 {
-  return detail::CallOnDestruction{std::forward<Callback>(callback)};
+  return ScopeGuard{std::forward<Callback>(callback)};
 }
 
 } // namespace rigel::base

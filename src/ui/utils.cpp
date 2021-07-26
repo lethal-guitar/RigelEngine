@@ -67,4 +67,23 @@ void drawText(
     text.data() + text.size());
 }
 
+
+void drawLoadingScreenText()
+{
+  constexpr auto TEXT = "Loading...";
+  const auto fontSize = 256.0f * ImGui::GetIO().FontGlobalScale;
+
+  auto pFont = ImGui::GetFont();
+  const auto textSize = pFont->CalcTextSizeA(fontSize, FLT_MAX, -1.0f, TEXT);
+  const auto windowSize = ImGui::GetIO().DisplaySize;
+
+  const auto position = ImVec2{
+    windowSize.x / 2.0f - textSize.x / 2.0f,
+    windowSize.y / 2.0f - textSize.y / 2.0f};
+
+  auto pDrawList = ImGui::GetForegroundDrawList();
+  pDrawList->AddText(
+    nullptr, fontSize, position, ui::toImgui({255, 255, 255, 255}), TEXT);
+}
+
 } // namespace rigel::ui

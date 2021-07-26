@@ -51,4 +51,7 @@ engine::TiledTexture makeUiSpriteSheet(
 
 void drawText(std::string_view text, int x, int y, const base::Color& color);
 
+// TODO: There's probably a more appropriate place for this
+void drawLoadingScreenText();
+
 } // namespace rigel::ui
