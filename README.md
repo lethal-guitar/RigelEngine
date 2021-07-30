@@ -95,9 +95,10 @@ You can find more info that didn't quite fit in this README over on [the Wiki](h
 
 Pre-built binaries for Windows 64-bit are provided with each [Release](https://github.com/lethal-guitar/RigelEngine/releases). You can also grab a build of the latest `master` branch by going to [AppVeyor](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master), clicking on "Configuration: Release", and then clicking on "Artifacts".
 
-Thanks to [@mnhauke](https://github.com/mnhauke), there is now also a [Linux package for OpenSUSE Tumbleweed](https://software.opensuse.org/package/RigelEngine).
+See [third-party Linux builds](https://github.com/lethal-guitar/RigelEngine/wiki/Third-party-Linux-builds)
+for a list of Linux packages/builds provided by distros and other projects.
 
-I'm planning to provide binaries for OS X, Ubuntu/Debian, and Raspberry Pi in the future, but right now, you need to build the project yourself on these platforms.
+Binaries for Mac OS and Ubuntu/Debian/Mint are coming soon. Until then, you still need to build the project yourself on these platforms.
 
 ## Building from source
 
