@@ -95,6 +95,7 @@ struct GameOptions
   bool mEnableFpsLimit = true; // Only relevant when mEnableVsync == false
   int mMaxFps = 60; // Only relevant when mEnableFpsLimit == true
   bool mShowFpsCounter = false;
+  bool mEnableScreenFlashes = true;
 
   // Sound
   float mMusicVolume = MUSIC_VOLUME_DEFAULT;

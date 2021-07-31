@@ -273,6 +273,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::NewLine();
 
       ImGui::Checkbox("Show FPS", &mpOptions->mShowFpsCounter);
+      ImGui::Checkbox(
+        "Enable screen flashing", &mpOptions->mEnableScreenFlashes);
       ImGui::EndTabItem();
     }
 

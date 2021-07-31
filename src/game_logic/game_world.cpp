@@ -1058,7 +1058,11 @@ void GameWorld::updateReactorDestructionEvent()
   }
   else if (framesElapsed % 2 == 1)
   {
-    mpState->mBackdropFlashColor = base::Color{255, 255, 255, 255};
+    if (mpOptions->mEnableScreenFlashes)
+    {
+      mpState->mBackdropFlashColor = base::Color{255, 255, 255, 255};
+    }
+
     mpServiceProvider->playSound(data::SoundId::BigExplosion);
   }
 
@@ -1164,7 +1168,10 @@ void GameWorld::showTutorialMessage(const data::TutorialMessageId id)
 
 void GameWorld::flashScreen(const base::Color& color)
 {
-  mpState->mScreenFlashColor = color;
+  if (mpOptions->mEnableScreenFlashes)
+  {
+    mpState->mScreenFlashColor = color;
+  }
 }
 
 

@@ -359,6 +359,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["enableFpsLimit"] = options.mEnableFpsLimit;
   serialized["maxFps"] = options.mMaxFps;
   serialized["showFpsCounter"] = options.mShowFpsCounter;
+  serialized["enableScreenFlashes"] = options.mEnableScreenFlashes;
   serialized["soundStyle"] = options.mSoundStyle;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
@@ -554,6 +555,8 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists("enableFpsLimit", result.mEnableFpsLimit, json);
   extractValueIfExists("maxFps", result.mMaxFps, json);
   extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
+  extractValueIfExists(
+    "enableScreenFlashes", result.mEnableScreenFlashes, json);
   extractValueIfExists("soundStyle", result.mSoundStyle, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
