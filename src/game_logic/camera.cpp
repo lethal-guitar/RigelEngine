@@ -236,9 +236,11 @@ void Camera::updateAutomaticScrolling()
 
 void Camera::setPosition(const base::Vector position)
 {
+  // The std::max(_, 0) is for the case that the viewport is bigger than the
+  // map, which would result in negative values
   const auto maxPosition = base::Extents{
-    static_cast<int>(mpMap->width() - mViewPortSize.width),
-    static_cast<int>(mpMap->height() - mViewPortSize.height)};
+    std::max(static_cast<int>(mpMap->width() - mViewPortSize.width), 0),
+    std::max(static_cast<int>(mpMap->height() - mViewPortSize.height), 0)};
   mPosition.x = std::clamp(position.x, 0, maxPosition.width);
   mPosition.y = std::clamp(position.y, 0, maxPosition.height);
 }

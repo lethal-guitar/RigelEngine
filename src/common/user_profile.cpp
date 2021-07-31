@@ -351,6 +351,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   // further down in this file, i.e. `deserialize<data::GameOptions>()`.
   json serialized;
   serialized["windowMode"] = options.mWindowMode;
+  serialized["windowCoordsValid"] = options.mWindowCoordsValid;
   serialized["windowPosX"] = options.mWindowPosX;
   serialized["windowPosY"] = options.mWindowPosY;
   serialized["windowWidth"] = options.mWindowWidth;
@@ -359,6 +360,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["enableFpsLimit"] = options.mEnableFpsLimit;
   serialized["maxFps"] = options.mMaxFps;
   serialized["showFpsCounter"] = options.mShowFpsCounter;
+  serialized["enableScreenFlashes"] = options.mEnableScreenFlashes;
   serialized["soundStyle"] = options.mSoundStyle;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
@@ -546,6 +548,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   // add the serialization counterpart to the serialization function further
   // up in this file, i.e. `serialize(const data::GameOptions& options)`.
   extractValueIfExists("windowMode", result.mWindowMode, json);
+  extractValueIfExists("windowCoordsValid", result.mWindowCoordsValid, json);
   extractValueIfExists("windowPosX", result.mWindowPosX, json);
   extractValueIfExists("windowPosY", result.mWindowPosY, json);
   extractValueIfExists("windowWidth", result.mWindowWidth, json);
@@ -554,6 +557,8 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists("enableFpsLimit", result.mEnableFpsLimit, json);
   extractValueIfExists("maxFps", result.mMaxFps, json);
   extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
+  extractValueIfExists(
+    "enableScreenFlashes", result.mEnableScreenFlashes, json);
   extractValueIfExists("soundStyle", result.mSoundStyle, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
