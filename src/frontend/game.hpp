@@ -142,6 +142,7 @@ private:
   CommandLineOptions mCommandLineOptions;
   UserProfile* mpUserProfile;
   data::GameOptions mPreviousOptions;
+  bool mWidescreenModeWasActive;
   std::filesystem::path mGamePathToSwitchTo;
 
   ui::DukeScriptRunner mScriptRunner;

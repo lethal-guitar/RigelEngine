@@ -258,6 +258,9 @@ Game::Game(
   , mIsMinimized(false)
   , mCommandLineOptions(commandLineOptions)
   , mpUserProfile(pUserProfile)
+  , mWidescreenModeWasActive(
+      pUserProfile->mOptions.mWidescreenModeOn &&
+      renderer::canUseWidescreenMode(&mRenderer))
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
@@ -611,8 +614,10 @@ void Game::applyChangedOptions()
     }
   }
 
+  const auto widescreenModeActive = currentOptions.mWidescreenModeOn &&
+    renderer::canUseWidescreenMode(&mRenderer);
   if (
-    currentOptions.mWidescreenModeOn != mPreviousOptions.mWidescreenModeOn ||
+    widescreenModeActive != mWidescreenModeWasActive ||
     currentOptions.mPerElementUpscalingEnabled !=
       mPreviousOptions.mPerElementUpscalingEnabled)
   {
@@ -621,6 +626,7 @@ void Game::applyChangedOptions()
   }
 
   mPreviousOptions = mpUserProfile->mOptions;
+  mWidescreenModeWasActive = widescreenModeActive;
 }
 
 
