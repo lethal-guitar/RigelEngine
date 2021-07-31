@@ -129,6 +129,7 @@ private:
   void handleTeleporter();
   void updateTemporaryItemExpiration();
   void showTutorialMessage(const data::TutorialMessageId id);
+  void flashScreen(const base::Color& color);
 
   void printDebugText(std::ostream& stream) const;
 

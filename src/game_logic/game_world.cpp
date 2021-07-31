@@ -439,7 +439,7 @@ void GameWorld::receive(const rigel::events::PlayerTeleported& event)
 
 void GameWorld::receive(const rigel::events::ScreenFlash& event)
 {
-  mpState->mScreenFlashColor = event.mColor;
+  flashScreen(event.mColor);
 }
 
 
@@ -1022,7 +1022,8 @@ bool GameWorld::canQuickLoad() const
 
 void GameWorld::onReactorDestroyed(const base::Vector& position)
 {
-  mpState->mScreenFlashColor = loader::INGAME_PALETTE[7];
+  flashScreen(loader::INGAME_PALETTE[7]);
+
   mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
     position + base::Vector{-1, 0},
@@ -1158,6 +1159,12 @@ void GameWorld::showTutorialMessage(const data::TutorialMessageId id)
     mMessageDisplay.setMessage(data::messageText(id));
     mpPlayerModel->tutorialMessages().markAsShown(id);
   }
+}
+
+
+void GameWorld::flashScreen(const base::Color& color)
+{
+  mpState->mScreenFlashColor = color;
 }
 
 
