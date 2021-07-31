@@ -132,7 +132,6 @@ private:
 
   void printDebugText(std::ostream& stream) const;
 
-private:
   void drawMapAndSprites(const base::Extents& viewPortSize);
   bool widescreenModeOn() const;
 
