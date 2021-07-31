@@ -86,6 +86,7 @@ struct GameOptions
   // they are automatically updated every time the window is moved or resized
   // when in windowed mode. This way, the window's position and size will be
   // remembered until next time.
+  bool mWindowCoordsValid = false;
   int mWindowPosX = 0;
   int mWindowPosY = 0;
   int mWindowWidth = 1920;

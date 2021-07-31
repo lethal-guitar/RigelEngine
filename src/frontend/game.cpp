@@ -549,8 +549,25 @@ void Game::applyChangedOptions()
     {
       if (currentOptions.mWindowMode == data::WindowMode::Windowed)
       {
-        SDL_SetWindowSize(
-          mpWindow, currentOptions.mWindowWidth, currentOptions.mWindowHeight);
+        if (currentOptions.mWindowCoordsValid)
+        {
+          SDL_SetWindowSize(
+            mpWindow,
+            currentOptions.mWindowWidth,
+            currentOptions.mWindowHeight);
+        }
+        else
+        {
+          int width = 0;
+          int height = 0;
+          SDL_GetWindowSize(mpWindow, &width, &height);
+
+          SDL_SetWindowSize(
+            mpWindow, base::round(width * 0.8f), base::round(height * 0.8f));
+          SDL_SetWindowPosition(
+            mpWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+          mpUserProfile->mOptions.mWindowCoordsValid = true;
+        }
       }
     }
   }

@@ -351,6 +351,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   // further down in this file, i.e. `deserialize<data::GameOptions>()`.
   json serialized;
   serialized["windowMode"] = options.mWindowMode;
+  serialized["windowCoordsValid"] = options.mWindowCoordsValid;
   serialized["windowPosX"] = options.mWindowPosX;
   serialized["windowPosY"] = options.mWindowPosY;
   serialized["windowWidth"] = options.mWindowWidth;
@@ -547,6 +548,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   // add the serialization counterpart to the serialization function further
   // up in this file, i.e. `serialize(const data::GameOptions& options)`.
   extractValueIfExists("windowMode", result.mWindowMode, json);
+  extractValueIfExists("windowCoordsValid", result.mWindowCoordsValid, json);
   extractValueIfExists("windowPosX", result.mWindowPosX, json);
   extractValueIfExists("windowPosY", result.mWindowPosY, json);
   extractValueIfExists("windowWidth", result.mWindowWidth, json);
