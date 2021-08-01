@@ -32,6 +32,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <SDL_main.h>
+
 #if RIGEL_HAS_BOOST
 
 RIGEL_DISABLE_WARNINGS
