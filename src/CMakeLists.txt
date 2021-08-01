@@ -367,7 +367,12 @@ set_source_files_properties(${icon_file_osx} PROPERTIES
     MACOSX_PACKAGE_LOCATION "Resources"
 )
 
-add_executable(RigelEngine WIN32 MACOSX_BUNDLE ${icon_file_osx})
+set(rc_file_windows "${CMAKE_SOURCE_DIR}/dist/win/RigelEngine.rc")
+
+add_executable(RigelEngine WIN32 MACOSX_BUNDLE
+    ${icon_file_osx}
+    ${rc_file_windows}
+)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
     target_sources(RigelEngine PRIVATE emscripten_main.cpp)
