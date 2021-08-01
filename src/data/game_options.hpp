@@ -68,6 +68,13 @@ enum class SoundStyle : std::uint8_t
 };
 
 
+enum class UpscalingFilter : std::uint8_t
+{
+  None,
+  Linear
+};
+
+
 /** Data-model for user-configurable options/settings
  *
  * This struct contains everything that can be configured by the user in
@@ -97,6 +104,7 @@ struct GameOptions
   int mMaxFps = 60; // Only relevant when mEnableFpsLimit == true
   bool mShowFpsCounter = false;
   bool mEnableScreenFlashes = true;
+  UpscalingFilter mUpscalingFilter = UpscalingFilter::None;
 
   // Sound
   float mMusicVolume = MUSIC_VOLUME_DEFAULT;

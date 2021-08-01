@@ -107,6 +107,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
     {SoundStyle::Combined, "Combined"},
   })
 
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  UpscalingFilter,
+  {
+    {UpscalingFilter::None, "None"},
+    {UpscalingFilter::Linear, "Linear"},
+  })
 } // namespace data
 
 
@@ -361,6 +368,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["maxFps"] = options.mMaxFps;
   serialized["showFpsCounter"] = options.mShowFpsCounter;
   serialized["enableScreenFlashes"] = options.mEnableScreenFlashes;
+  serialized["upscalingFilter"] = options.mUpscalingFilter;
   serialized["soundStyle"] = options.mSoundStyle;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
@@ -559,6 +567,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists("showFpsCounter", result.mShowFpsCounter, json);
   extractValueIfExists(
     "enableScreenFlashes", result.mEnableScreenFlashes, json);
+  extractValueIfExists("upscalingFilter", result.mUpscalingFilter, json);
   extractValueIfExists("soundStyle", result.mSoundStyle, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);

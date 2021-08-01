@@ -275,6 +275,19 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Checkbox("Show FPS", &mpOptions->mShowFpsCounter);
       ImGui::Checkbox(
         "Enable screen flashing", &mpOptions->mEnableScreenFlashes);
+
+      {
+        auto upscalingFilterIndex =
+          static_cast<int>(mpOptions->mUpscalingFilter);
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 20);
+        ImGui::Combo(
+          "Upscaling filter",
+          &upscalingFilterIndex,
+          "None (nearest neighbor)\0Linear\0");
+        mpOptions->mUpscalingFilter =
+          static_cast<data::UpscalingFilter>(upscalingFilterIndex);
+      }
+
       ImGui::EndTabItem();
     }
 
