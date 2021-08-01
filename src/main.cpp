@@ -33,6 +33,7 @@
 #include <string>
 
 #include <SDL_main.h>
+#include <SDL_messagebox.h>
 
 #if RIGEL_HAS_BOOST
 
@@ -69,6 +70,13 @@ void showBanner()
        "================================================================================\n"
        "\n";
 }
+
+
+void showErrorBox(const char* message)
+{
+  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, nullptr);
+}
+
 
 #if RIGEL_HAS_BOOST
 
@@ -236,11 +244,13 @@ int main(int argc, char** argv)
   }
   catch (const std::exception& ex)
   {
+    showErrorBox(ex.what());
     std::cerr << "ERROR: " << ex.what() << '\n';
     return -2;
   }
   catch (...)
   {
+    showErrorBox("Unknown error");
     std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
@@ -263,11 +273,13 @@ int main(int argc, char** argv)
   }
   catch (const std::exception& ex)
   {
+    showErrorBox(ex.what());
     std::cerr << "ERROR: " << ex.what() << '\n';
     return -2;
   }
   catch (...)
   {
+    showErrorBox("Unknown error");
     std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
