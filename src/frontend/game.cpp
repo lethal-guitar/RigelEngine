@@ -537,6 +537,13 @@ void Game::applyChangedOptions()
 {
   const auto& currentOptions = mpUserProfile->mOptions;
 
+  auto updateUpscalingFilter = [&]() {
+    mRenderer.setFilteringEnabled(
+      mRenderTarget.data(),
+      currentOptions.mUpscalingFilter == data::UpscalingFilter::Linear);
+  };
+
+
   if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode)
   {
     const auto result = SDL_SetWindowFullscreen(
@@ -588,6 +595,11 @@ void Game::applyChangedOptions()
     mFpsLimiter = createLimiter(currentOptions);
   }
 
+  if (currentOptions.mUpscalingFilter != mPreviousOptions.mUpscalingFilter)
+  {
+    updateUpscalingFilter();
+  }
+
   if (mpSoundSystem)
   {
     if (currentOptions.mSoundStyle != mPreviousOptions.mSoundStyle)
@@ -623,6 +635,7 @@ void Game::applyChangedOptions()
   {
     mRenderTarget = renderer::createFullscreenRenderTarget(
       &mRenderer, mpUserProfile->mOptions);
+    updateUpscalingFilter();
   }
 
   mPreviousOptions = mpUserProfile->mOptions;

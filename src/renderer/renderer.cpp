@@ -1151,6 +1151,27 @@ struct Renderer::Impl
 
     glDeleteTextures(1, &texture);
   }
+
+
+  void setFilteringEnabled(const TextureId texture, const bool enabled)
+  {
+    submitBatch();
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    if (enabled)
+    {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    else
+    {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+  }
 };
 
 
@@ -1341,6 +1362,12 @@ TextureId Renderer::createTexture(const data::Image& image)
 void Renderer::destroyTexture(TextureId texture)
 {
   mpImpl->destroyTexture(texture);
+}
+
+
+void Renderer::setFilteringEnabled(const TextureId texture, const bool enabled)
+{
+  mpImpl->setFilteringEnabled(texture, enabled);
 }
 
 } // namespace rigel::renderer
