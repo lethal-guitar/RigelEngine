@@ -292,7 +292,7 @@ auto getSize(SDL_Window* pWindow)
 {
   int windowWidth = 0;
   int windowHeight = 0;
-  SDL_GetWindowSize(pWindow, &windowWidth, &windowHeight);
+  SDL_GL_GetDrawableSize(pWindow, &windowWidth, &windowHeight);
   return base::Size<int>{windowWidth, windowHeight};
 }
 
