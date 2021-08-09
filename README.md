@@ -73,7 +73,9 @@ It's also possible to pass the path to the game files as argument on the command
 
 ### Acquiring the game data
 
-The full version of the game (aka registered version) is not available currently, but you can still download the freely available shareware version, e.g. from [archive.org](https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip).
+You can download the shareware version for free from [archive.org](https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip).
+The full version (aka registered version) can be bought on [Zoom Platform](https://www.zoom-platform.com/product/duke-nukem-2),
+a store which still has a license to sell the game (unlike other digital stores like Steam and Gog).
 
 If you already have a copy of the game, you can also point RigelEngine to that existing installation.
 
