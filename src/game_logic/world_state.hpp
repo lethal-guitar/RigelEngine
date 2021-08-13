@@ -170,6 +170,7 @@ struct WorldState
   std::optional<base::Vector> mTeleportTargetPosition;
   std::optional<base::Vector> mCloakPickupPosition;
   entityx::Entity mActiveBossEntity;
+  int mBossStartingHealth = 0;
   std::optional<int> mReactorDestructionFramesElapsed;
   int mScreenShakeOffsetX = 0;
   data::map::BackdropSwitchCondition mBackdropSwitchCondition;
