@@ -761,7 +761,14 @@ void Player::doInteractionAnimation()
     return;
   }
 
-  mState = Interacting{INTERACTION_LOCK_DURATION};
+  if (stateIs<OnGround>())
+  {
+    mState = Interacting{INTERACTION_LOCK_DURATION};
+    // TODO: Handle the case where the player enters the OnGround state
+    // while the interaction lock timer is still going. In the original game,
+    // the player will enter the interacting state for the remaining frames
+    // in that case.
+  }
 }
 
 
