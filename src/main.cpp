@@ -23,6 +23,7 @@
 // you might want to hop over to game_main.cpp instead of looking at this file
 // here.
 
+#include "base/defer.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 
@@ -42,6 +43,59 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace po = boost::program_options;
+
+#endif
+
+#ifdef _WIN32
+
+  #include <Windows.h>
+  #include <stdio.h>
+
+static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
+{
+  if (AttachConsole(ATTACH_PARENT_PROCESS))
+  {
+    std::cin.clear();
+    std::cout.flush();
+    std::cerr.flush();
+
+    FILE* fp = nullptr;
+    freopen_s(&fp, "CONIN$", "r", stdin);
+    freopen_s(&fp, "CONOUT$", "w", stdout);
+    freopen_s(&fp, "CONOUT$", "w", stderr);
+
+    std::cout << std::endl;
+
+    return rigel::base::defer([]() {
+      std::cout.flush();
+      std::cerr.flush();
+
+      // This is a hack to make the console output behave like it does when
+      // running a genuine console app (i.e. subsystem set to console).
+      // The thing is that even though we attach to the console that has
+      // launched us, the console itself is not actually waiting for our
+      // process to terminate, since it treats us as a GUI application.
+      // This means that we can write our stdout/stderr to the console, but
+      // the console won't show a new prompt after our process has terminated
+      // like it would do with a console application. This makes command line
+      // usage awkward because users need to press enter once after each
+      // invocation of RigelEngine in order to get a new prompt.
+      // By sending a enter key press message to the parent console, we do this
+      // automatically.
+      SendMessageA(GetConsoleWindow(), WM_CHAR, VK_RETURN, 0);
+      FreeConsole();
+    });
+  }
+
+  return std::nullopt;
+}
+
+#else
+
+static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
+{
+  return std::nullopt;
+}
 
 #endif
 
@@ -142,6 +196,8 @@ base::Vector parsePlayerPosition(const std::string& playerPosString)
 
 int main(int argc, char** argv)
 {
+  auto win32IoGuard = win32ReenableStdIo();
+
   showBanner();
 
 #if RIGEL_HAS_BOOST
@@ -234,6 +290,7 @@ int main(int argc, char** argv)
       config.mGamePath += "/";
     }
 
+    win32IoGuard.reset();
     gameMain(config);
   }
   catch (const po::error& err)
@@ -269,6 +326,7 @@ int main(int argc, char** argv)
       }
     }
 
+    win32IoGuard.reset();
     gameMain(config);
   }
   catch (const std::exception& ex)
