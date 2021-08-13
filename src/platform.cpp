@@ -48,6 +48,7 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options)
   const auto windowFlags =
     flagsForWindowMode(options.mWindowMode) |
     SDL_WINDOW_RESIZABLE |
+    SDL_WINDOW_ALLOW_HIGHDPI |
     SDL_WINDOW_OPENGL;
   // clang-format on
 

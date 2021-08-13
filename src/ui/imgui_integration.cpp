@@ -99,7 +99,7 @@ void init(
 
     int width = 0;
     int height = 0;
-    SDL_GetWindowSize(pWindow, &width, &height);
+    SDL_GL_GetDrawableSize(pWindow, &width, &height);
     updateUiScale(width, height);
   }
 
