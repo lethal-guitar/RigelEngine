@@ -620,7 +620,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
       mpState->mActiveBossEntity);
     mpState->mActiveBossEntity
       .replace<game_logic::components::BehaviorController>(
-        behaviors::DyingBoss{});
+        behaviors::DyingBoss{mSessionId.mEpisode});
     mpState->mBossDeathAnimationStartPending = false;
   }
 
