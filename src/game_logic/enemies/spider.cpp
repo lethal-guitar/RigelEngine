@@ -287,9 +287,12 @@ void Spider::onCollision(
   const engine::events::CollidedWithWorld& event,
   entityx::Entity entity)
 {
+  using engine::components::Orientation;
+
   if (mState == State::Falling)
   {
     walkOnFloor(entity);
+    *entity.component<Orientation>() = Orientation::Right;
   }
 }
 
