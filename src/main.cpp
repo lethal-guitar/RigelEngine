@@ -29,6 +29,7 @@
 
 #include "game_main.hpp"
 
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -132,6 +133,15 @@ void showErrorBox(const char* message)
 }
 
 
+bool isExpectedExeName(const char* exeName)
+{
+  namespace fs = std::filesystem;
+
+  const auto executablePath = fs::u8path(exeName);
+  return strings::startsWith(executablePath.stem().u8string(), "RigelEngine");
+}
+
+
 #if RIGEL_HAS_BOOST
 
 auto parseLevelToJumpTo(const std::string& levelToPlay)
@@ -199,6 +209,36 @@ int main(int argc, char** argv)
   auto win32IoGuard = win32ReenableStdIo();
 
   showBanner();
+
+  if (!isExpectedExeName(argv[0]))
+  {
+    // If the executable has been renamed, ignore any command line arguments.
+    // This is to facilitate using RigelEngine as an executable replacement
+    // for the Steam version of Duke2, which uses DosBox normally and passes
+    // various arguments that RigelEngine doesn't know about.
+    std::cerr
+      << "Executable has been renamed, ignoring all command line arguments!\n";
+
+    try
+    {
+      win32IoGuard.reset();
+      gameMain(CommandLineOptions{});
+    }
+    catch (const std::exception& ex)
+    {
+      showErrorBox(ex.what());
+      std::cerr << "ERROR: " << ex.what() << '\n';
+      return -2;
+    }
+    catch (...)
+    {
+      showErrorBox("Unknown error");
+      std::cerr << "UNKNOWN ERROR\n";
+      return -3;
+    }
+
+    return 0;
+  }
 
 #if RIGEL_HAS_BOOST
   CommandLineOptions config;
