@@ -38,6 +38,14 @@ constexpr auto BOSS_KILL_SCORE = 50'000;
 }
 
 
+DyingBoss::DyingBoss(const int episodeNr)
+  // In the final episode, the boss explodes completely instead of flying
+  // away.
+  : mShowSpriteDuringFlyAway(episodeNr != 3)
+{
+}
+
+
 void DyingBoss::update(
   GlobalDependencies& d,
   GlobalState& s,
@@ -112,7 +120,7 @@ void DyingBoss::update(
   }
   else if (mFramesElapsed == 48)
   {
-    sprite.mShow = true;
+    sprite.mShow = mShowSpriteDuringFlyAway;
     bigExplosionEffect();
   }
   else

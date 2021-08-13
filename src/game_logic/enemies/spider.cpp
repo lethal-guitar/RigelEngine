@@ -149,8 +149,13 @@ void Spider::update(
 
   auto walkOnCeiling = [&, this]() {
     mState = State::OnCeiling;
-    mWalkerBehavior.mpConfig = ceilingWalkerConfig();
     sprite.mFramesToRender[0] = 0;
+
+    // If the spider is floating in the air upon spawning, do not animate.
+    if (d.mpCollisionChecker->isTouchingCeiling(worldSpaceBox))
+    {
+      mWalkerBehavior.mpConfig = ceilingWalkerConfig();
+    }
   };
 
   auto isTouchingPlayer = [&, this]() {
@@ -282,9 +287,12 @@ void Spider::onCollision(
   const engine::events::CollidedWithWorld& event,
   entityx::Entity entity)
 {
+  using engine::components::Orientation;
+
   if (mState == State::Falling)
   {
     walkOnFloor(entity);
+    *entity.component<Orientation>() = Orientation::Right;
   }
 }
 

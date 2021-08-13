@@ -294,6 +294,7 @@ void WorldState::synchronizeTo(
   mBackdropFlashColor = other.mBackdropFlashColor;
   mTeleportTargetPosition = other.mTeleportTargetPosition;
   mCloakPickupPosition = other.mCloakPickupPosition;
+  mBossStartingHealth = other.mBossStartingHealth;
   mReactorDestructionFramesElapsed = other.mReactorDestructionFramesElapsed;
   mScreenShakeOffsetX = other.mScreenShakeOffsetX;
   mBossDeathAnimationStartPending = other.mBossDeathAnimationStartPending;

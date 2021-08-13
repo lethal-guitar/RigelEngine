@@ -35,13 +35,16 @@ namespace rigel::game_logic::behaviors
 
 struct DyingBoss
 {
+  explicit DyingBoss(int episodeNr);
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  int mFramesElapsed;
+  int mFramesElapsed = 0;
+  bool mShowSpriteDuringFlyAway;
 };
 
 } // namespace rigel::game_logic::behaviors

@@ -160,26 +160,33 @@ ex::Entity currentlyTouchedInteractable(
 
   auto isInRange = [&](
                      const BoundingBox& objectBounds,
+                     const WorldPosition& position,
                      const components::InteractableType type) {
     if (!worldSpacePlayerBounds.intersects(objectBounds))
     {
       return false;
     }
 
-    if (type == InteractableType::Teleporter)
+    const auto& playerPos = pPlayer->orientedPosition();
+
+    switch (type)
     {
-      const auto& playerPos = pPlayer->orientedPosition();
+      case InteractableType::Teleporter:
+        // clang-format off
+        return
+          objectBounds.left() <= playerPos.x &&
+          objectBounds.left() + 3 >= playerPos.x &&
+          objectBounds.bottom() == playerPos.y &&
+          pPlayer->isInRegularState();
+        // clang-format on
 
-      // clang-format off
-      return
-        objectBounds.left() <= playerPos.x &&
-        objectBounds.left() + 3 >= playerPos.x &&
-        objectBounds.bottom() == playerPos.y &&
-        pPlayer->isInRegularState();
-      // clang-format on
+      case InteractableType::KeyHole:
+      case InteractableType::ForceFieldCardReader:
+        return playerPos.y - 2 == position.y;
+
+      default:
+        return true;
     }
-
-    return true;
   };
 
 
@@ -189,7 +196,7 @@ ex::Entity currentlyTouchedInteractable(
   for (auto entity : es.entities_with_components(interactable, pos, bbox))
   {
     const auto objectBounds = engine::toWorldSpace(*bbox, *pos);
-    if (isInRange(objectBounds, interactable->mType))
+    if (isInRange(objectBounds, *pos, interactable->mType))
     {
       return entity;
     }

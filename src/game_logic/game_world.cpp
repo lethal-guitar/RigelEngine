@@ -82,6 +82,16 @@ void drawBossHealthBar(
 }
 
 
+int healthOrZero(entityx::Entity entity)
+{
+  using game_logic::components::Shootable;
+
+  return entity.has_component<Shootable>()
+    ? entity.component<Shootable>()->mHealth
+    : 0;
+}
+
+
 auto localToGlobalTranslation(
   const renderer::Renderer* pRenderer,
   const base::Vector& translation)
@@ -487,6 +497,7 @@ void GameWorld::receive(const game_logic::events::ShootableKilled& event)
 void GameWorld::receive(const rigel::events::BossActivated& event)
 {
   mpState->mActiveBossEntity = event.mBossEntity;
+  mpState->mBossStartingHealth = healthOrZero(event.mBossEntity);
   mpServiceProvider->playMusic(mpState->mLevelMusicFile);
 }
 
@@ -620,7 +631,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
       mpState->mActiveBossEntity);
     mpState->mActiveBossEntity
       .replace<game_logic::components::BehaviorController>(
-        behaviors::DyingBoss{});
+        behaviors::DyingBoss{mSessionId.mEpisode});
     mpState->mBossDeathAnimationStartPending = false;
   }
 
@@ -734,16 +745,25 @@ void GameWorld::render()
     }
   };
 
-  auto drawTopRow = [&, this]() {
+  auto drawTopRow = [&, this](int maxWidthPx) {
     if (mpState->mActiveBossEntity)
     {
-      using game_logic::components::Shootable;
+      const auto health = healthOrZero(mpState->mActiveBossEntity);
 
-      const auto health = mpState->mActiveBossEntity.has_component<Shootable>()
-        ? mpState->mActiveBossEntity.component<Shootable>()->mHealth
-        : 0;
-
-      drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+      const auto maxHealthBarSize = maxWidthPx - HEALTH_BAR_START_PX.x;
+      if (mpState->mBossStartingHealth <= maxHealthBarSize)
+      {
+        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+      }
+      else
+      {
+        const auto healthPercentage =
+          float(health) / mpState->mBossStartingHealth;
+        const auto healthPercentagePx =
+          base::round(healthPercentage * maxHealthBarSize);
+        drawBossHealthBar(
+          healthPercentagePx, *mpTextRenderer, *mpUiSpriteSheet);
+      }
     }
     else
     {
@@ -785,14 +805,14 @@ void GameWorld::render()
       }
 
       auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
-      drawTopRow();
+      drawTopRow(data::tilesToPixels(viewPortSize.width));
     }
     else
     {
       const auto saved = renderer::saveState(mpRenderer);
       mpRenderer->setGlobalTranslation({});
       mpRenderer->setClipRect({});
-      drawTopRow();
+      drawTopRow(data::tilesToPixels(viewPortSize.width));
 
       mpRenderer->setGlobalTranslation(base::Vector{
         mpState->mScreenShakeOffsetX,
@@ -818,7 +838,7 @@ void GameWorld::render()
       mpRenderer,
       {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
        0}));
-    drawTopRow();
+    drawTopRow(data::GameTraits::inGameViewPortSize.width);
   }
 
   mWidescreenModeWasOn = widescreenModeOn();

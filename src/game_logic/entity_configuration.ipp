@@ -1322,7 +1322,6 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Napalm_bomb_small: // Small bomb
-      entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
       entity.assign<DestructionEffects>(
         SMALL_BOMB_DETONATE_EFFECT_SPEC,
