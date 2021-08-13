@@ -82,6 +82,16 @@ void drawBossHealthBar(
 }
 
 
+int healthOrZero(entityx::Entity entity)
+{
+  using game_logic::components::Shootable;
+
+  return entity.has_component<Shootable>()
+    ? entity.component<Shootable>()->mHealth
+    : 0;
+}
+
+
 auto localToGlobalTranslation(
   const renderer::Renderer* pRenderer,
   const base::Vector& translation)
@@ -737,12 +747,7 @@ void GameWorld::render()
   auto drawTopRow = [&, this]() {
     if (mpState->mActiveBossEntity)
     {
-      using game_logic::components::Shootable;
-
-      const auto health = mpState->mActiveBossEntity.has_component<Shootable>()
-        ? mpState->mActiveBossEntity.component<Shootable>()->mHealth
-        : 0;
-
+      const auto health = healthOrZero(mpState->mActiveBossEntity);
       drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
     }
     else
