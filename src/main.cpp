@@ -24,6 +24,7 @@
 // here.
 
 #include "base/defer.hpp"
+#include "base/match.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 
@@ -33,6 +34,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <variant>
 
 #include <SDL_main.h>
 #include <SDL_messagebox.h>
@@ -201,15 +203,9 @@ base::Vector parsePlayerPosition(const std::string& playerPosString)
 
 #endif
 
-} // namespace
 
-
-int main(int argc, char** argv)
+std::variant<CommandLineOptions, int> parseArgs(int argc, char** argv)
 {
-  auto win32IoGuard = win32ReenableStdIo();
-
-  showBanner();
-
   if (!isExpectedExeName(argv[0]))
   {
     // If the executable has been renamed, ignore any command line arguments.
@@ -219,25 +215,7 @@ int main(int argc, char** argv)
     std::cerr
       << "Executable has been renamed, ignoring all command line arguments!\n";
 
-    try
-    {
-      win32IoGuard.reset();
-      gameMain(CommandLineOptions{});
-    }
-    catch (const std::exception& ex)
-    {
-      showErrorBox(ex.what());
-      std::cerr << "ERROR: " << ex.what() << '\n';
-      return -2;
-    }
-    catch (...)
-    {
-      showErrorBox("Unknown error");
-      std::cerr << "UNKNOWN ERROR\n";
-      return -3;
-    }
-
-    return 0;
+    return CommandLineOptions{};
   }
 
 #if RIGEL_HAS_BOOST
@@ -330,8 +308,7 @@ int main(int argc, char** argv)
       config.mGamePath += "/";
     }
 
-    win32IoGuard.reset();
-    gameMain(config);
+    return config;
   }
   catch (const po::error& err)
   {
@@ -339,35 +316,61 @@ int main(int argc, char** argv)
     std::cerr << optionsDescription << '\n';
     return -1;
   }
-  catch (const std::exception& ex)
-  {
-    showErrorBox(ex.what());
-    std::cerr << "ERROR: " << ex.what() << '\n';
-    return -2;
-  }
-  catch (...)
-  {
-    showErrorBox("Unknown error");
-    std::cerr << "UNKNOWN ERROR\n";
-    return -3;
-  }
 #else
+  CommandLineOptions config;
+
+  if (argc > 1)
+  {
+    config.mGamePath = argv[1];
+
+    if (!config.mGamePath.empty() && config.mGamePath.back() != '/')
+    {
+      config.mGamePath += "/";
+    }
+  }
+
+  return config;
+#endif
+}
+
+} // namespace
+
+
+int main(int argc, char** argv)
+{
+  // On Windows, RigelEngine is a GUI application (subsystem win32), which
+  // means that it can't be used as a command-line application - stdout and
+  // stdin are not connected to the terminal that launches the executable in
+  // case of a GUI application.
+  // However, it's possible to detect that we've been launched from a terminal,
+  // and then manually attach our stdin/stdout to that terminal. This makes
+  // our command line interface usable on Windows.
+  // It's not perfect, because the terminal itself doesn't actually know
+  // that a process it has launched has now attached to it, so it keeps happily
+  // accepting user input, it doesn't wait for our process to terminate like
+  // it normally does when running a console application. But since we don't
+  // need interactive command line use, it's good enough for our case - we
+  // can output some text to the terminal and then detach again.
+  auto win32IoGuard = win32ReenableStdIo();
+
+  showBanner();
+
   try
   {
-    CommandLineOptions config;
+    const auto configOrExitCode = parseArgs(argc, argv);
 
-    if (argc > 1)
-    {
-      config.mGamePath = argv[1];
+    return base::match(
+      configOrExitCode,
+      [&](const CommandLineOptions& config) {
+        // Once we're ready to run, detach from the console. See comment above
+        // for why we're doing this.
+        win32IoGuard.reset();
 
-      if (!config.mGamePath.empty() && config.mGamePath.back() != '/')
-      {
-        config.mGamePath += "/";
-      }
-    }
+        gameMain(config);
+        return 0;
+      },
 
-    win32IoGuard.reset();
-    gameMain(config);
+      [](const int exitCode) { return exitCode; });
   }
   catch (const std::exception& ex)
   {
@@ -381,7 +384,4 @@ int main(int argc, char** argv)
     std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
-#endif
-
-  return 0;
 }
