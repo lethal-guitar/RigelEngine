@@ -77,6 +77,7 @@ private:
   bool mMenuOpen = true;
   bool mPopupOpened = false;
   bool mShowErrorBox = false;
+  bool mIsRunningInDesktopEnvironment;
 };
 
 } // namespace rigel::ui
