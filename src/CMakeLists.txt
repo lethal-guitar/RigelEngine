@@ -438,4 +438,10 @@ elseif(UNIX)
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT bin
     )
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine.desktop
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
+    )
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine.png
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps
+    )
 endif()

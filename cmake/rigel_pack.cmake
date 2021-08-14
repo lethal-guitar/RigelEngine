@@ -26,10 +26,6 @@ set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
 # a headsup
 set(CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION TRUE)
 
-if(UNIX AND NOT APPLE)
-    set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/${PROJECT_NAME}/")
-endif()
-
 # Debian
 # (abencsik) intentionally left this here for future reference
 # set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON) # automatically resolve deps
