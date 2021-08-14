@@ -2,7 +2,21 @@
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VENDOR "Nikolai Wuttke <lethal_guitar128@web.de>")
 set(CPACK_PACKAGE_CONTACT "Nikolai Wuttke <lethal_guitar128@web.de>")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/dist/description.txt")
+set(CPACK_PACKAGE_DESCRIPTION [[
+RigelEngine is a re-implementation of the game Duke Nukem II, originally
+released by Apogee Software in 1993 for MS-DOS.  It works as a drop-in
+replacement for the original executable: It reads the game's data files and
+plays just like the original, but runs natively on modern operating systems.
+On top of that, it offers various modern enhancements like better game
+controller support, a wide-screen mode, quick saving etc.
+
+In order to run RigelEngine, the game data from the original game is required.
+Both the shareware version and the registered version work.
+
+You can grab the shareware version from archive.org:
+https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip
+]]
+)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A modern re-implementation of the game Duke Nukem II")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/lethal-guitar/RigelEngine")
 set(CPACK_PACKAGE_CHECKSUM "SHA256")
