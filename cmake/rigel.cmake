@@ -50,6 +50,7 @@ function(rigel_enable_warnings target)
             -Wno-ctad-maybe-unsupported
             -Wno-implicit-int-float-conversion
             -Wno-suggest-destructor-override
+            -Wno-return-std-move-in-c++11
         )
 
         if (WARNINGS_AS_ERRORS)

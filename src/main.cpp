@@ -23,14 +23,18 @@
 // you might want to hop over to game_main.cpp instead of looking at this file
 // here.
 
+#include "base/defer.hpp"
+#include "base/match.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 
 #include "game_main.hpp"
 
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <variant>
 
 #include <SDL_main.h>
 #include <SDL_messagebox.h>
@@ -42,6 +46,59 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 namespace po = boost::program_options;
+
+#endif
+
+#ifdef _WIN32
+
+  #include <Windows.h>
+  #include <stdio.h>
+
+static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
+{
+  if (AttachConsole(ATTACH_PARENT_PROCESS))
+  {
+    std::cin.clear();
+    std::cout.flush();
+    std::cerr.flush();
+
+    FILE* fp = nullptr;
+    freopen_s(&fp, "CONIN$", "r", stdin);
+    freopen_s(&fp, "CONOUT$", "w", stdout);
+    freopen_s(&fp, "CONOUT$", "w", stderr);
+
+    std::cout << std::endl;
+
+    return rigel::base::defer([]() {
+      std::cout.flush();
+      std::cerr.flush();
+
+      // This is a hack to make the console output behave like it does when
+      // running a genuine console app (i.e. subsystem set to console).
+      // The thing is that even though we attach to the console that has
+      // launched us, the console itself is not actually waiting for our
+      // process to terminate, since it treats us as a GUI application.
+      // This means that we can write our stdout/stderr to the console, but
+      // the console won't show a new prompt after our process has terminated
+      // like it would do with a console application. This makes command line
+      // usage awkward because users need to press enter once after each
+      // invocation of RigelEngine in order to get a new prompt.
+      // By sending a enter key press message to the parent console, we do this
+      // automatically.
+      SendMessageA(GetConsoleWindow(), WM_CHAR, VK_RETURN, 0);
+      FreeConsole();
+    });
+  }
+
+  return std::nullopt;
+}
+
+#else
+
+static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
+{
+  return std::nullopt;
+}
 
 #endif
 
@@ -75,6 +132,15 @@ void showBanner()
 void showErrorBox(const char* message)
 {
   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, nullptr);
+}
+
+
+bool isExpectedExeName(const char* exeName)
+{
+  namespace fs = std::filesystem;
+
+  const auto executablePath = fs::u8path(exeName);
+  return strings::startsWith(executablePath.stem().u8string(), "RigelEngine");
 }
 
 
@@ -137,12 +203,20 @@ base::Vector parsePlayerPosition(const std::string& playerPosString)
 
 #endif
 
-} // namespace
 
-
-int main(int argc, char** argv)
+std::variant<CommandLineOptions, int> parseArgs(int argc, char** argv)
 {
-  showBanner();
+  if (!isExpectedExeName(argv[0]))
+  {
+    // If the executable has been renamed, ignore any command line arguments.
+    // This is to facilitate using RigelEngine as an executable replacement
+    // for the Steam version of Duke2, which uses DosBox normally and passes
+    // various arguments that RigelEngine doesn't know about.
+    std::cerr
+      << "Executable has been renamed, ignoring all command line arguments!\n";
+
+    return CommandLineOptions{};
+  }
 
 #if RIGEL_HAS_BOOST
   CommandLineOptions config;
@@ -234,42 +308,69 @@ int main(int argc, char** argv)
       config.mGamePath += "/";
     }
 
-    gameMain(config);
+    return config;
   }
-  catch (const po::error& err)
+  catch (const std::exception& ex)
   {
-    std::cerr << "ERROR: " << err.what() << "\n\n";
+    std::cerr << "ERROR: " << ex.what() << "\n\n";
     std::cerr << optionsDescription << '\n';
     return -1;
   }
-  catch (const std::exception& ex)
-  {
-    showErrorBox(ex.what());
-    std::cerr << "ERROR: " << ex.what() << '\n';
-    return -2;
-  }
-  catch (...)
-  {
-    showErrorBox("Unknown error");
-    std::cerr << "UNKNOWN ERROR\n";
-    return -3;
-  }
 #else
+  CommandLineOptions config;
+
+  if (argc > 1)
+  {
+    config.mGamePath = argv[1];
+
+    if (!config.mGamePath.empty() && config.mGamePath.back() != '/')
+    {
+      config.mGamePath += "/";
+    }
+  }
+
+  return config;
+#endif
+}
+
+} // namespace
+
+
+int main(int argc, char** argv)
+{
+  // On Windows, RigelEngine is a GUI application (subsystem win32), which
+  // means that it can't be used as a command-line application - stdout and
+  // stdin are not connected to the terminal that launches the executable in
+  // case of a GUI application.
+  // However, it's possible to detect that we've been launched from a terminal,
+  // and then manually attach our stdin/stdout to that terminal. This makes
+  // our command line interface usable on Windows.
+  // It's not perfect, because the terminal itself doesn't actually know
+  // that a process it has launched has now attached to it, so it keeps happily
+  // accepting user input, it doesn't wait for our process to terminate like
+  // it normally does when running a console application. But since we don't
+  // need interactive command line use, it's good enough for our case - we
+  // can output some text to the terminal and then detach again.
+  auto win32IoGuard = win32ReenableStdIo();
+
+  showBanner();
+
   try
   {
-    CommandLineOptions config;
+    const auto configOrExitCode = parseArgs(argc, argv);
 
-    if (argc > 1)
-    {
-      config.mGamePath = argv[1];
+    return base::match(
+      configOrExitCode,
+      [&](const CommandLineOptions& config) {
+        // Once we're ready to run, detach from the console. See comment above
+        // for why we're doing this.
+        win32IoGuard.reset();
 
-      if (!config.mGamePath.empty() && config.mGamePath.back() != '/')
-      {
-        config.mGamePath += "/";
-      }
-    }
+        gameMain(config);
+        return 0;
+      },
 
-    gameMain(config);
+      [](const int exitCode) { return exitCode; });
   }
   catch (const std::exception& ex)
   {
@@ -283,7 +384,4 @@ int main(int argc, char** argv)
     std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
-#endif
-
-  return 0;
 }
