@@ -387,7 +387,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         "SHELL:-s MAX_WEBGL_VERSION=2"
         "SHELL:-s FULL_ES2=1"
         "SHELL:--preload-file \"${WEBASSEMBLY_GAME_PATH}/@/duke\""
-        "SHELL:--shell-file \"${CMAKE_SOURCE_DIR}/emscripten/shell.html\""
+        "SHELL:--shell-file \"${CMAKE_SOURCE_DIR}/dist/emscripten/shell.html\""
         --no-heap-copy
     )
     set_target_properties(RigelEngine PROPERTIES
