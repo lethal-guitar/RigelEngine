@@ -310,9 +310,9 @@ std::variant<CommandLineOptions, int> parseArgs(int argc, char** argv)
 
     return config;
   }
-  catch (const po::error& err)
+  catch (const std::exception& ex)
   {
-    std::cerr << "ERROR: " << err.what() << "\n\n";
+    std::cerr << "ERROR: " << ex.what() << "\n\n";
     std::cerr << optionsDescription << '\n';
     return -1;
   }
