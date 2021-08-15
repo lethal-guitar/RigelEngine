@@ -59,7 +59,7 @@ to find for the build to work:
 
 * SDL >= 2.0.4
 * SDL\_mixer >= 2.0.1
-* Boost >= 1.65
+* Boost >= 1.65 (optional, needed for command line options)
 
 All other dependencies are already provided as submodules, source
 code (in the `3rd_party` directory) or fetched on configuration, and will be built along with RigelEngine.
@@ -333,7 +333,7 @@ So in case of errors, I'd recommend double checking the path first.
 
 ```bash
 # Install dependencies
-vcpkg install boost-program-options:x64-windows boost-algorithm:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
+vcpkg install boost-program-options:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
 
 # Run CMake
 mkdir build
@@ -353,7 +353,7 @@ If you'd like to build for 32-bit and have trouble sorting out build errors, fee
 
 ```bash
 # Install dependencies
-vcpkg install boost-program-options:x86-windows boost-algorithm:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
+vcpkg install boost-program-options:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
 
 # Run CMake
 mkdir build
