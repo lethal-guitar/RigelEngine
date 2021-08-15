@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=RigelEngine
+Comment=A modern re-implementation of the classic DOS game Duke Nukem II
+Icon=rigelengine
+TryExec=/usr/bin/RigelEngine
+Exec=/usr/bin/RigelEngine
+Terminal=false
+Categories=Game

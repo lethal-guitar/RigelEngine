@@ -127,6 +127,20 @@ std::string normalizedKeyName(const SDL_Keycode keyCode)
   return keyName;
 }
 
+
+bool determineIfRunningInDesktopEnvironment()
+{
+  const auto sdlVideoDriver = std::string(SDL_GetCurrentVideoDriver());
+
+  // clang-format off
+  return
+    sdlVideoDriver == "cocoa" ||
+    sdlVideoDriver == "wayland" ||
+    sdlVideoDriver == "windows" ||
+    sdlVideoDriver == "x11";
+  // clang-format on
+}
+
 } // namespace
 
 
@@ -140,6 +154,7 @@ OptionsMenu::OptionsMenu(
   , mpOptions(&pUserProfile->mOptions)
   , mpServiceProvider(pServiceProvider)
   , mType(type)
+  , mIsRunningInDesktopEnvironment(determineIfRunningInDesktopEnvironment())
 {
   mGamePathBrowser.SetTitle("Choose Duke Nukem II installation");
 }
@@ -252,10 +267,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     {
       ImGui::NewLine();
 
-#ifndef RIGEL_USE_GL_ES
-      // On systems that use GL ES, there's typically no windowing system
-      // involved - applications run full screen all the time.
-      // So it doesn't make much sense to allow changing the window mode.
+      if (mIsRunningInDesktopEnvironment)
       {
         auto windowModeIndex = static_cast<int>(mpOptions->mWindowMode);
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 20);
@@ -265,7 +277,6 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
           "Fullscreen (borderless)\0Exclusive fullscreen\0Windowed\0");
         mpOptions->mWindowMode = static_cast<data::WindowMode>(windowModeIndex);
       }
-#endif
 
       ImGui::Checkbox("V-Sync on", &mpOptions->mEnableVsync);
       ImGui::SameLine();

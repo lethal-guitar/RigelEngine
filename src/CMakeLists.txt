@@ -387,7 +387,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         "SHELL:-s MAX_WEBGL_VERSION=2"
         "SHELL:-s FULL_ES2=1"
         "SHELL:--preload-file \"${WEBASSEMBLY_GAME_PATH}/@/duke\""
-        "SHELL:--shell-file \"${CMAKE_SOURCE_DIR}/emscripten/shell.html\""
+        "SHELL:--shell-file \"${CMAKE_SOURCE_DIR}/dist/emscripten/shell.html\""
         --no-heap-copy
     )
     set_target_properties(RigelEngine PROPERTIES
@@ -437,5 +437,11 @@ elseif(UNIX)
     install(TARGETS RigelEngine
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT bin
+    )
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine.desktop
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications
+    )
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine.png
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps
     )
 endif()
