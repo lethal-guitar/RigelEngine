@@ -106,14 +106,21 @@ NavigationEvent MenuNavigationHelper::convert(const SDL_Event& event)
   switch (event.type)
   {
     case SDL_KEYDOWN:
+      // NOTE: SDL always sends SDLK_KP_n events for the numpad keys,
+      // regardless of the numlock state. Therefore, we need to explicitly
+      // handle the numpad arrow keys if we want them to work for navigation.
       switch (event.key.keysym.sym)
       {
         case SDLK_LEFT:
         case SDLK_UP:
+        case SDLK_KP_4: // numpad left
+        case SDLK_KP_8: // numpad up
           return NavigationEvent::NavigateUp;
 
         case SDLK_RIGHT:
         case SDLK_DOWN:
+        case SDLK_KP_6: // numpad right
+        case SDLK_KP_2: // numpad down
           return NavigationEvent::NavigateDown;
 
         case SDLK_RETURN:
