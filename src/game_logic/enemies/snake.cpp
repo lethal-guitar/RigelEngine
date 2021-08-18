@@ -110,7 +110,10 @@ void Snake::update(
       s.mpPerFrameState->mInput.mFire.mWasTriggered;
     if (!s.mpPlayer->isDead() && fireButtonPressed)
     {
-      s.mpPlayer->setFree();
+      // Setting the player free again happens in the onKilled() handler.
+      // This is to handle the edge case where the player kills the snake right
+      // before being incapacitated, which would lead to a soft lock due to the
+      // player never being set free if we didn't handle it in onKilled().
 
       // TODO: Is there a way we don't have to duplicate the score assignment/
       // event triggering here?
@@ -170,6 +173,19 @@ void Snake::update(
   if (destroySelf)
   {
     entity.destroy();
+  }
+}
+
+
+void Snake::onKilled(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const base::Point<float>&,
+  entityx::Entity entity)
+{
+  if (s.mpPlayer->isIncapacitated())
+  {
+    s.mpPlayer->setFree();
   }
 }
 
