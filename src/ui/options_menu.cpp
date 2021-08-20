@@ -57,6 +57,8 @@ constexpr auto OPENGL_VARIANT = "OpenGL";
 
 constexpr auto SCALE = 0.8f;
 
+constexpr auto MAX_OPTIONS_MENU_ASPECT_RATIO = 16.0f / 9.0f;
+
 constexpr auto STANDARD_FPS_LIMITS =
   std::array<int, 8>{30, 60, 70, 72, 90, 120, 144, 240};
 
@@ -148,6 +150,14 @@ bool determineIfRunningInDesktopEnvironment()
     sdlVideoDriver == "windows" ||
     sdlVideoDriver == "x11";
   // clang-format on
+}
+
+
+ImVec2 clampAspectRatio(ImVec2 windowSize)
+{
+  return ImVec2{
+    std::min(windowSize.x, windowSize.y * MAX_OPTIONS_MENU_ASPECT_RATIO),
+    windowSize.y};
 }
 
 } // namespace
@@ -255,7 +265,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
   const auto scaleX = windowSize.x >= 800 ? SCALE : 1.0f;
   const auto scaleY = windowSize.y >= 600 ? SCALE : 1.0f;
 
-  const auto sizeToUse = ImVec2{windowSize.x * scaleX, windowSize.y * scaleY};
+  const auto sizeToUse =
+    clampAspectRatio(ImVec2{windowSize.x * scaleX, windowSize.y * scaleY});
   const auto offset = ImVec2{
     (windowSize.x - sizeToUse.x) / 2.0f, (windowSize.y - sizeToUse.y) / 2.0f};
 
