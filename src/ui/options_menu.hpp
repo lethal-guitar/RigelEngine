@@ -67,6 +67,7 @@ private:
   void endRebinding();
   bool shouldDrawGamePathChooser() const;
   void drawGamePathChooser(const ImVec2& sizeToUse);
+  void drawCreditsBox(engine::TimeDelta dt);
 
   ImGui::FileBrowser mGamePathBrowser;
   UserProfile* mpUserProfile;
@@ -75,7 +76,9 @@ private:
 
   SDL_Keycode* mpCurrentlyEditedBinding = nullptr;
   engine::TimeDelta mElapsedTimeEditingBinding = 0;
+  engine::TimeDelta mElapsedTimeForCreditsBox = 0;
   float mGamePathChooserHeightNormalized = 0.0f;
+  float mCreditsBoxContentHeightNormalized = 0.0f;
 
   Type mType;
   bool mMenuOpen = true;
