@@ -443,8 +443,9 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     endRebinding();
   }
 
-#ifndef __EMSCRIPTEN__
-  if (mType == Type::Main)
+  // If a game path was specified on the command line, don't show the game path
+  // chooser.
+  if (mType == Type::Main && mpServiceProvider->commandLineOptions().mGamePath.empty())
   {
     ImGui::Spacing();
     ImGui::Separator();
@@ -517,7 +518,6 @@ Going back to a registered version will make them work again.)");
       ImGui::EndPopup();
     }
   }
-#endif
 
   ImGui::EndPopup();
 
