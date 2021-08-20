@@ -100,6 +100,11 @@ struct DamageInflicting
 };
 
 
+struct CustomDamageApplication
+{
+};
+
+
 struct PlayerProjectile
 {
   enum class Type
