@@ -436,6 +436,9 @@ bool Game::handleEvent(const SDL_Event& event)
           mIsMinimized = true;
           break;
 
+        case SDL_WINDOWEVENT_ENTER:
+        case SDL_WINDOWEVENT_FOCUS_GAINED:
+        case SDL_WINDOWEVENT_MAXIMIZED:
         case SDL_WINDOWEVENT_RESTORED:
           mIsMinimized = false;
           break;
