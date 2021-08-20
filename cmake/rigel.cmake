@@ -79,3 +79,19 @@ function(rigel_disable_warnings target)
     # compilers.
     target_compile_options(${target} PRIVATE -w)
 endfunction()
+
+
+function(rigel_determine_git_commit_hash output_var)
+    if (GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --short=10 HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            RESULT_VARIABLE git_exit_code
+            OUTPUT_VARIABLE git_commit_hash
+        )
+        if(${git_exit_code} EQUAL 0)
+            string(STRIP "${git_commit_hash}" git_commit_hash)
+            set(${output_var} "${git_commit_hash}" PARENT_SCOPE)
+        endif()
+    endif()
+endfunction()
