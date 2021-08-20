@@ -34,7 +34,6 @@
 RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
 #include <SDL_mixer.h>
-#include <imgui.h>
 #include <imgui_internal.h>
 RIGEL_RESTORE_WARNINGS
 
@@ -451,43 +450,21 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
   // If a game path was specified on the command line, don't show the game path
   // chooser.
-  if (mType == Type::Main && mpServiceProvider->commandLineOptions().mGamePath.empty())
+  if (shouldDrawGamePathChooser())
   {
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    if (mpUserProfile->mGamePath)
+    if (mGamePathChooserHeightNormalized == 0.0f)
     {
-      ImGui::Text(
-        "Current game path: '%s'",
-        mpUserProfile->mGamePath->u8string().c_str());
-      ImGui::Text(
-        "Type: %s version",
-        mpServiceProvider->isSharewareVersion() ? "Shareware" : "Registered");
+      // Draw the chooser into an invisible window to figure out its size
+      ImGui::BeginChild("#dummy", {0.0f, 0.0f});
+      drawGamePathChooser(sizeToUse);
+      mGamePathChooserHeightNormalized = ImGui::GetCursorPosY() / sizeToUse.y;
+      ImGui::EndChild();
     }
 
-    ImGui::NewLine();
-    if (ImGui::Button("Choose Duke Nukem II installation"))
-    {
-      if (mpUserProfile->mGamePath)
-      {
-        mGamePathBrowser.SetPwd(*mpUserProfile->mGamePath);
-      }
-
-      mGamePathBrowser.SetWindowSize(
-        base::round(sizeToUse.x * 0.8f), base::round(sizeToUse.y * 0.8f));
-      mGamePathBrowser.Open();
-    }
-
-    if (!mpServiceProvider->isSharewareVersion())
-    {
-      ImGui::Spacing();
-      ImGui::TextUnformatted(
-        R"(NOTE: When switching to a shareware version, some of your saved games
-might become unusable.
-Going back to a registered version will make them work again.)");
-    }
+    ImGui::SetCursorPosY(
+      ImGui::GetContentRegionMax().y -
+      mGamePathChooserHeightNormalized * sizeToUse.y);
+    drawGamePathChooser(sizeToUse);
 
     if (!mShowErrorBox)
     {
@@ -602,6 +579,52 @@ void OptionsMenu::endRebinding()
 {
   mpCurrentlyEditedBinding = nullptr;
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+}
+
+
+bool OptionsMenu::shouldDrawGamePathChooser() const
+{
+  return mType == Type::Main &&
+    mpServiceProvider->commandLineOptions().mGamePath.empty();
+}
+
+
+void OptionsMenu::drawGamePathChooser(const ImVec2& sizeToUse)
+{
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+
+  if (mpUserProfile->mGamePath)
+  {
+    ImGui::Text(
+      "Current game path: '%s'", mpUserProfile->mGamePath->u8string().c_str());
+    ImGui::Text(
+      "Type: %s version",
+      mpServiceProvider->isSharewareVersion() ? "Shareware" : "Registered");
+  }
+
+  ImGui::NewLine();
+  if (ImGui::Button("Choose Duke Nukem II installation"))
+  {
+    if (mpUserProfile->mGamePath)
+    {
+      mGamePathBrowser.SetPwd(*mpUserProfile->mGamePath);
+    }
+
+    mGamePathBrowser.SetWindowSize(
+      base::round(sizeToUse.x * 0.8f), base::round(sizeToUse.y * 0.8f));
+    mGamePathBrowser.Open();
+  }
+
+  if (!mpServiceProvider->isSharewareVersion())
+  {
+    ImGui::Spacing();
+    ImGui::TextUnformatted(
+      R"(NOTE: When switching to a shareware version, some of your saved games
+might become unusable.
+Going back to a registered version will make them work again.)");
+  }
 }
 
 } // namespace rigel::ui
