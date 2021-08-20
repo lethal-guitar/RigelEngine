@@ -20,6 +20,8 @@
 
 #include "options_menu.hpp"
 
+#include "version_info.hpp"
+
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
@@ -31,6 +33,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
+#include <SDL_mixer.h>
 #include <imgui.h>
 #include <imgui_internal.h>
 RIGEL_RESTORE_WARNINGS
@@ -45,6 +48,12 @@ namespace rigel::ui
 
 namespace
 {
+
+#ifdef RIGEL_USE_GL_ES
+constexpr auto OPENGL_VARIANT = "OpenGL ES";
+#else
+constexpr auto OPENGL_VARIANT = "OpenGL";
+#endif
 
 constexpr auto SCALE = 0.8f;
 
@@ -381,6 +390,35 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::EndTabItem();
+    }
+
+    if (ImGui::BeginTabItem("About"))
+    {
+      ImGui::NewLine();
+
+      ImGui::Text(
+        "RigelEngine v%d.%d.%d (commit %s) - %s renderer",
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_PATCH,
+        COMMIT_HASH,
+        OPENGL_VARIANT);
+
+      SDL_version sdlVersion;
+      SDL_GetVersion(&sdlVersion);
+
+      const auto pSdlMixerVersion = Mix_Linked_Version();
+
+      ImGui::Text(
+        "Using SDL v%d.%d.%d - SDL Mixer v%d.%d.%d - %s & %s backends",
+        sdlVersion.major,
+        sdlVersion.minor,
+        sdlVersion.patch,
+        pSdlMixerVersion->major,
+        pSdlMixerVersion->minor,
+        pSdlMixerVersion->patch,
+        SDL_GetCurrentVideoDriver(),
+        SDL_GetCurrentAudioDriver());
     }
 
     ImGui::EndTabBar();
