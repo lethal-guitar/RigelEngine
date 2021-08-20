@@ -141,8 +141,7 @@ void DamageInflictionSystem::inflictDamage(
   }
   else
   {
-    mpEvents->emit(
-      events::ShootableDamaged{shootableEntity, inflictorVelocity});
+    mpEvents->emit(events::ShootableDamaged{shootableEntity, inflictorEntity});
 
     if (shootable.mEnableHitFeedback)
     {

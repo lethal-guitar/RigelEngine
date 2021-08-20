@@ -68,7 +68,7 @@ void BehaviorControllerSystem::receive(const events::ShootableDamaged& event)
     entity.has_component<Active>())
   {
     entity.component<BehaviorController>()->onHit(
-      mDependencies, mGlobalState, event.mInflictorVelocity, entity);
+      mDependencies, mGlobalState, event.mInflictorEntity, entity);
   }
 }
 

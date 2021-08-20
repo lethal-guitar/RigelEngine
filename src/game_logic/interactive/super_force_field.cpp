@@ -146,7 +146,7 @@ void SuperForceField::update(
 void SuperForceField::onHit(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Point<float>& inflictorVelocity,
+  entityx::Entity,
   entityx::Entity entity)
 {
   using game_logic::components::Shootable;

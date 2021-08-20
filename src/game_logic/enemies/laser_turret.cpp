@@ -169,7 +169,7 @@ void LaserTurret::update(
 void LaserTurret::onHit(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Point<float>& inflictorVelocity,
+  entityx::Entity,
   entityx::Entity entity)
 {
   // When hit, go into spinning mode

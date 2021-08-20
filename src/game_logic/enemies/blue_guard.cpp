@@ -226,7 +226,7 @@ void BlueGuard::update(
 void BlueGuard::onHit(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Point<float>& inflictorVelocity,
+  entityx::Entity,
   entityx::Entity entity)
 {
   if (mTypingOnTerminal)

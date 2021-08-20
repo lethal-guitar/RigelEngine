@@ -129,7 +129,7 @@ namespace events
 struct ShootableDamaged
 {
   entityx::Entity mEntity;
-  base::Point<float> mInflictorVelocity;
+  entityx::Entity mInflictorEntity;
 };
 
 

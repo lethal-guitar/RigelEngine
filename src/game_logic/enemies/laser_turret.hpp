@@ -45,7 +45,7 @@ struct LaserTurret
   void onHit(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    entityx::Entity inflictorEntity,
     entityx::Entity entity);
 
   void onKilled(

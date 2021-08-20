@@ -89,9 +89,13 @@ void SpikeBall::update(
 void SpikeBall::onHit(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Point<float>& inflictorVelocity,
+  entityx::Entity inflictorEntity,
   entityx::Entity entity)
 {
+  const auto inflictorVelocity = inflictorEntity.has_component<MovingBody>()
+    ? inflictorEntity.component<MovingBody>()->mVelocity
+    : base::Point<float>{};
+
   auto& body = *entity.component<MovingBody>();
   body.mVelocity.x = inflictorVelocity.x > 0 ? 1.0f : -1.0f;
 }
