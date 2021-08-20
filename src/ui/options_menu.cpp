@@ -55,7 +55,7 @@ constexpr auto OPENGL_VARIANT = "OpenGL ES";
 constexpr auto OPENGL_VARIANT = "OpenGL";
 #endif
 
-constexpr auto SCALE = 0.8f;
+constexpr auto WINDOW_SCALE = 0.8f;
 
 constexpr auto MAX_OPTIONS_MENU_ASPECT_RATIO = 16.0f / 9.0f;
 
@@ -160,6 +160,15 @@ ImVec2 clampAspectRatio(ImVec2 windowSize)
     windowSize.y};
 }
 
+
+bool isSmallScreen(const ImVec2& windowSize)
+{
+  // On small screen resolutions, we want to make use of all available screen
+  // space. We arbitrarily define anything lower than 800x600 as "small".
+  // This is primarily for the OGA, which has a 480x320 screen.
+  return windowSize.x < 800 || windowSize.y < 600;
+}
+
 } // namespace
 
 
@@ -259,11 +268,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
   const auto& io = ImGui::GetIO();
   const auto windowSize = io.DisplaySize;
 
-  // On small screen resolutions, we want to make use of all available screen
-  // space. We arbitrarily define anything lower than 800x600 as "small".
-  // This is primarily for the OGA, which has a 480x320 screen.
-  const auto scaleX = windowSize.x >= 800 ? SCALE : 1.0f;
-  const auto scaleY = windowSize.y >= 600 ? SCALE : 1.0f;
+  const auto scaleX = isSmallScreen(windowSize) ? 1.0f : WINDOW_SCALE;
+  const auto scaleY = isSmallScreen(windowSize) ? 1.0f : WINDOW_SCALE;
 
   const auto sizeToUse =
     clampAspectRatio(ImVec2{windowSize.x * scaleX, windowSize.y * scaleY});
