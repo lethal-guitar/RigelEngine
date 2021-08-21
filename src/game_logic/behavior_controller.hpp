@@ -92,10 +92,10 @@ std::enable_if_t<detail::hasOnHit<T>::value> behaviorControllerOnHit(
   T& self,
   GlobalDependencies& dependencies,
   GlobalState& state,
-  const base::Point<float>& inflictorVelocity,
+  entityx::Entity inflictorEntity,
   entityx::Entity entity)
 {
-  self.onHit(dependencies, state, inflictorVelocity, entity);
+  self.onHit(dependencies, state, inflictorEntity, entity);
 }
 
 
@@ -104,7 +104,7 @@ std::enable_if_t<!detail::hasOnHit<T>::value> behaviorControllerOnHit(
   T&,
   GlobalDependencies&,
   GlobalState&,
-  const base::Point<float>&,
+  entityx::Entity,
   entityx::Entity)
 {
 }
@@ -194,10 +194,10 @@ public:
   void onHit(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    entityx::Entity inflictorEntity,
     entityx::Entity entity)
   {
-    mpSelf->onHit(dependencies, state, inflictorVelocity, entity);
+    mpSelf->onHit(dependencies, state, inflictorEntity, entity);
   }
 
   void onKilled(
@@ -241,7 +241,7 @@ private:
     virtual void onHit(
       GlobalDependencies& dependencies,
       GlobalState& state,
-      const base::Point<float>& inflictorVelocity,
+      entityx::Entity inflictorEntity,
       entityx::Entity entity) = 0;
 
     virtual void onKilled(
@@ -282,11 +282,11 @@ private:
     void onHit(
       GlobalDependencies& dependencies,
       GlobalState& state,
-      const base::Point<float>& inflictorVelocity,
+      entityx::Entity inflictorEntity,
       entityx::Entity entity) override
     {
       behaviorControllerOnHit(
-        mData, dependencies, state, inflictorVelocity, entity);
+        mData, dependencies, state, inflictorEntity, entity);
     }
 
     void onKilled(

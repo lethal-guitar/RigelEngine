@@ -100,6 +100,11 @@ struct DamageInflicting
 };
 
 
+struct CustomDamageApplication
+{
+};
+
+
 struct PlayerProjectile
 {
   enum class Type
@@ -129,7 +134,7 @@ namespace events
 struct ShootableDamaged
 {
   entityx::Entity mEntity;
-  base::Point<float> mInflictorVelocity;
+  entityx::Entity mInflictorEntity;
 };
 
 

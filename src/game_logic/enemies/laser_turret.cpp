@@ -169,14 +169,28 @@ void LaserTurret::update(
 void LaserTurret::onHit(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Point<float>& inflictorVelocity,
+  entityx::Entity inflictorEntity,
   entityx::Entity entity)
 {
-  // When hit, go into spinning mode
-  mSpinningTurnsLeft = 40;
+  using game_logic::components::PlayerProjectile;
 
   auto& shootable = *entity.component<game_logic::components::Shootable>();
-  shootable.mHealth = 2;
+
+  // If the inflictor is not Duke's regular shot, apply damage as normal.
+  if (
+    !inflictorEntity.has_component<PlayerProjectile>() ||
+    inflictorEntity.component<PlayerProjectile>()->mType !=
+      PlayerProjectile::Type::Normal)
+  {
+    shootable.mHealth -=
+      inflictorEntity.component<game_logic::components::DamageInflicting>()
+        ->mAmount;
+    return;
+  }
+
+  // Otherwise, go into spinning mode, but don't lose any health.
+  mSpinningTurnsLeft = 40;
+
   shootable.mInvincible = true;
   entity.remove<game_logic::components::PlayerDamaging>();
 

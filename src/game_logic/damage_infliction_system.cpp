@@ -34,6 +34,7 @@ using engine::components::CollidedWithWorld;
 using engine::components::MovingBody;
 using engine::components::Sprite;
 using engine::components::WorldPosition;
+using game_logic::components::CustomDamageApplication;
 using game_logic::components::DamageInflicting;
 using game_logic::components::Shootable;
 
@@ -121,7 +122,21 @@ void DamageInflictionSystem::inflictDamage(
     damage.mHasCausedDamage = true;
   }
 
-  shootable.mHealth -= damage.mAmount;
+  if (shootableEntity.has_component<CustomDamageApplication>())
+  {
+    mpEvents->emit(events::ShootableDamaged{shootableEntity, inflictorEntity});
+  }
+  else
+  {
+    shootable.mHealth -= damage.mAmount;
+
+    if (shootable.mHealth > 0)
+    {
+      mpEvents->emit(
+        events::ShootableDamaged{shootableEntity, inflictorEntity});
+    }
+  }
+
   if (shootable.mHealth <= 0)
   {
     mpEvents->emit(events::ShootableKilled{shootableEntity, inflictorVelocity});
@@ -141,9 +156,6 @@ void DamageInflictionSystem::inflictDamage(
   }
   else
   {
-    mpEvents->emit(
-      events::ShootableDamaged{shootableEntity, inflictorVelocity});
-
     if (shootable.mEnableHitFeedback)
     {
       mpServiceProvider->playSound(data::SoundId::EnemyHit);
