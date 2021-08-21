@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/warnings.hpp"
+#include "sdl_utils/platform.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_keycode.h>
@@ -54,7 +55,7 @@ enum class WindowMode
 
 #if defined(__EMSCRIPTEN__)
 constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Windowed;
-#elif defined(__APPLE__) || defined(RIGEL_USE_GL_ES)
+#elif defined(__APPLE__)
 constexpr auto DEFAULT_WINDOW_MODE = WindowMode::ExclusiveFullscreen;
 #else
 constexpr auto DEFAULT_WINDOW_MODE = WindowMode::Fullscreen;
@@ -71,7 +72,7 @@ enum class SoundStyle : std::uint8_t
 enum class UpscalingFilter : std::uint8_t
 {
   None,
-  Linear
+  Bilinear
 };
 
 
@@ -155,6 +156,20 @@ struct GameOptions
       &mQuickSaveKeybinding,
       &mQuickLoadKeybinding,
     };
+  }
+
+  WindowMode effectiveWindowMode() const
+  {
+    // When running in GL ES mode, we want to ignore the window mode setting
+    // and always return exclusive fullscreen unless we are running in a
+    // Desktop environment.
+#if defined(RIGEL_USE_GL_ES) && !defined(__EMSCRIPTEN__)
+    return sdl_utils::isRunningInDesktopEnvironment()
+      ? mWindowMode
+      : WindowMode::ExclusiveFullscreen;
+#else
+    return mWindowMode;
+#endif
   }
 };
 

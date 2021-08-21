@@ -444,7 +444,7 @@ bool Game::handleEvent(const SDL_Event& event)
           break;
 
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-          if (options.mWindowMode == data::WindowMode::Windowed)
+          if (options.effectiveWindowMode() == data::WindowMode::Windowed)
           {
             options.mWindowWidth = event.window.data1;
             options.mWindowHeight = event.window.data2;
@@ -452,7 +452,7 @@ bool Game::handleEvent(const SDL_Event& event)
           break;
 
         case SDL_WINDOWEVENT_MOVED:
-          if (options.mWindowMode == data::WindowMode::Windowed)
+          if (options.effectiveWindowMode() == data::WindowMode::Windowed)
           {
             options.mWindowPosX = event.window.data1;
             options.mWindowPosY = event.window.data2;
@@ -543,14 +543,17 @@ void Game::applyChangedOptions()
   auto updateUpscalingFilter = [&]() {
     mRenderer.setFilteringEnabled(
       mRenderTarget.data(),
-      currentOptions.mUpscalingFilter == data::UpscalingFilter::Linear);
+      currentOptions.mUpscalingFilter == data::UpscalingFilter::Bilinear);
   };
 
 
-  if (currentOptions.mWindowMode != mPreviousOptions.mWindowMode)
+  if (
+    currentOptions.effectiveWindowMode() !=
+    mPreviousOptions.effectiveWindowMode())
   {
     const auto result = SDL_SetWindowFullscreen(
-      mpWindow, platform::flagsForWindowMode(currentOptions.mWindowMode));
+      mpWindow,
+      platform::flagsForWindowMode(currentOptions.effectiveWindowMode()));
 
     if (result != 0)
     {
@@ -560,7 +563,7 @@ void Game::applyChangedOptions()
     }
     else
     {
-      if (currentOptions.mWindowMode == data::WindowMode::Windowed)
+      if (currentOptions.effectiveWindowMode() == data::WindowMode::Windowed)
       {
         if (currentOptions.mWindowCoordsValid)
         {
