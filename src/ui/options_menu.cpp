@@ -28,6 +28,7 @@
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "sdl_utils/key_code.hpp"
+#include "sdl_utils/platform.hpp"
 #include "ui/menu_navigation.hpp"
 #include "ui/utils.hpp"
 
@@ -140,20 +141,6 @@ std::string normalizedKeyName(const SDL_Keycode keyCode)
 }
 
 
-bool determineIfRunningInDesktopEnvironment()
-{
-  const auto sdlVideoDriver = std::string(SDL_GetCurrentVideoDriver());
-
-  // clang-format off
-  return
-    sdlVideoDriver == "cocoa" ||
-    sdlVideoDriver == "wayland" ||
-    sdlVideoDriver == "windows" ||
-    sdlVideoDriver == "x11";
-  // clang-format on
-}
-
-
 ImVec2 clampAspectRatio(ImVec2 windowSize)
 {
   return ImVec2{
@@ -183,7 +170,7 @@ OptionsMenu::OptionsMenu(
   , mpOptions(&pUserProfile->mOptions)
   , mpServiceProvider(pServiceProvider)
   , mType(type)
-  , mIsRunningInDesktopEnvironment(determineIfRunningInDesktopEnvironment())
+  , mIsRunningInDesktopEnvironment(sdl_utils::isRunningInDesktopEnvironment())
 {
   mGamePathBrowser.SetTitle("Choose Duke Nukem II installation");
 }

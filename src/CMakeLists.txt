@@ -284,6 +284,8 @@ set(core_sources
     sdl_utils/key_code.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
+    sdl_utils/platform.cpp
+    sdl_utils/platform.hpp
     sdl_utils/ptr.hpp
     ui/apogee_logo.cpp
     ui/apogee_logo.hpp
