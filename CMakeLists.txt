@@ -61,6 +61,7 @@ else()
 endif()
 
 find_package(Filesystem REQUIRED COMPONENTS Final)
+find_package(Git)
 
 
 # Compiler settings

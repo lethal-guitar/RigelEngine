@@ -328,10 +328,19 @@ set(core_sources
 )
 
 # Core library
+set(RIGEL_COMMIT_HASH "N/A")
+rigel_determine_git_commit_hash(RIGEL_COMMIT_HASH)
+
+configure_file(
+    version_info.hpp.in
+    "${CMAKE_CURRENT_BINARY_DIR}/generated/version_info.hpp"
+)
+
 add_library(rigel_core STATIC ${core_sources})
 target_include_directories(rigel_core
     PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR}/generated"
 )
 target_link_libraries(rigel_core
     PUBLIC

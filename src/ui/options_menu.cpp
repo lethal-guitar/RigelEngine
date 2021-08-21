@@ -20,6 +20,8 @@
 
 #include "options_menu.hpp"
 
+#include "version_info.hpp"
+
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
@@ -31,7 +33,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_keyboard.h>
-#include <imgui.h>
+#include <SDL_mixer.h>
 #include <imgui_internal.h>
 RIGEL_RESTORE_WARNINGS
 
@@ -46,7 +48,17 @@ namespace rigel::ui
 namespace
 {
 
-constexpr auto SCALE = 0.8f;
+#ifdef RIGEL_USE_GL_ES
+constexpr auto OPENGL_VARIANT = "OpenGL ES";
+#else
+constexpr auto OPENGL_VARIANT = "OpenGL";
+#endif
+
+constexpr auto WINDOW_SCALE = 0.8f;
+
+constexpr auto CREDITS_SCROLL_SPEED = 1.6f;
+
+constexpr auto MAX_OPTIONS_MENU_ASPECT_RATIO = 16.0f / 9.0f;
 
 constexpr auto STANDARD_FPS_LIMITS =
   std::array<int, 8>{30, 60, 70, 72, 90, 120, 144, 240};
@@ -139,6 +151,23 @@ bool determineIfRunningInDesktopEnvironment()
     sdlVideoDriver == "windows" ||
     sdlVideoDriver == "x11";
   // clang-format on
+}
+
+
+ImVec2 clampAspectRatio(ImVec2 windowSize)
+{
+  return ImVec2{
+    std::min(windowSize.x, windowSize.y * MAX_OPTIONS_MENU_ASPECT_RATIO),
+    windowSize.y};
+}
+
+
+bool isSmallScreen(const ImVec2& windowSize)
+{
+  // On small screen resolutions, we want to make use of all available screen
+  // space. We arbitrarily define anything lower than 800x600 as "small".
+  // This is primarily for the OGA, which has a 480x320 screen.
+  return windowSize.x < 800 || windowSize.y < 600;
 }
 
 } // namespace
@@ -240,13 +269,11 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
   const auto& io = ImGui::GetIO();
   const auto windowSize = io.DisplaySize;
 
-  // On small screen resolutions, we want to make use of all available screen
-  // space. We arbitrarily define anything lower than 800x600 as "small".
-  // This is primarily for the OGA, which has a 480x320 screen.
-  const auto scaleX = windowSize.x >= 800 ? SCALE : 1.0f;
-  const auto scaleY = windowSize.y >= 600 ? SCALE : 1.0f;
+  const auto scaleX = isSmallScreen(windowSize) ? 1.0f : WINDOW_SCALE;
+  const auto scaleY = isSmallScreen(windowSize) ? 1.0f : WINDOW_SCALE;
 
-  const auto sizeToUse = ImVec2{windowSize.x * scaleX, windowSize.y * scaleY};
+  const auto sizeToUse =
+    clampAspectRatio(ImVec2{windowSize.x * scaleX, windowSize.y * scaleY});
   const auto offset = ImVec2{
     (windowSize.x - sizeToUse.x) / 2.0f, (windowSize.y - sizeToUse.y) / 2.0f};
 
@@ -383,6 +410,41 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::EndTabItem();
     }
 
+    if (ImGui::BeginTabItem("About"))
+    {
+      ImGui::NewLine();
+
+      ImGui::Text(
+        "RigelEngine v%d.%d.%d (commit %s) - %s renderer",
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_PATCH,
+        COMMIT_HASH,
+        OPENGL_VARIANT);
+
+      SDL_version sdlVersion;
+      SDL_GetVersion(&sdlVersion);
+
+      const auto pSdlMixerVersion = Mix_Linked_Version();
+
+      ImGui::Text(
+        "Using SDL v%d.%d.%d - SDL Mixer v%d.%d.%d - %s & %s backends",
+        sdlVersion.major,
+        sdlVersion.minor,
+        sdlVersion.patch,
+        pSdlMixerVersion->major,
+        pSdlMixerVersion->minor,
+        pSdlMixerVersion->patch,
+        SDL_GetCurrentVideoDriver(),
+        SDL_GetCurrentAudioDriver());
+
+      ImGui::Spacing();
+
+      drawCreditsBox(dt);
+
+      ImGui::EndTabItem();
+    }
+
     ImGui::EndTabBar();
   }
 
@@ -394,44 +456,23 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     endRebinding();
   }
 
-#ifndef __EMSCRIPTEN__
-  if (mType == Type::Main)
+  // If a game path was specified on the command line, don't show the game path
+  // chooser.
+  if (shouldDrawGamePathChooser())
   {
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    if (mpUserProfile->mGamePath)
+    if (mGamePathChooserHeightNormalized == 0.0f)
     {
-      ImGui::Text(
-        "Current game path: '%s'",
-        mpUserProfile->mGamePath->u8string().c_str());
-      ImGui::Text(
-        "Type: %s version",
-        mpServiceProvider->isSharewareVersion() ? "Shareware" : "Registered");
+      // Draw the chooser into an invisible window to figure out its size
+      ImGui::BeginChild("#dummy", {0.0f, 0.0f});
+      drawGamePathChooser(sizeToUse);
+      mGamePathChooserHeightNormalized = ImGui::GetCursorPosY() / sizeToUse.y;
+      ImGui::EndChild();
     }
 
-    ImGui::NewLine();
-    if (ImGui::Button("Choose Duke Nukem II installation"))
-    {
-      if (mpUserProfile->mGamePath)
-      {
-        mGamePathBrowser.SetPwd(*mpUserProfile->mGamePath);
-      }
-
-      mGamePathBrowser.SetWindowSize(
-        base::round(sizeToUse.x * 0.8f), base::round(sizeToUse.y * 0.8f));
-      mGamePathBrowser.Open();
-    }
-
-    if (!mpServiceProvider->isSharewareVersion())
-    {
-      ImGui::Spacing();
-      ImGui::TextUnformatted(
-        R"(NOTE: When switching to a shareware version, some of your saved games
-might become unusable.
-Going back to a registered version will make them work again.)");
-    }
+    ImGui::SetCursorPosY(
+      ImGui::GetContentRegionMax().y -
+      mGamePathChooserHeightNormalized * sizeToUse.y);
+    drawGamePathChooser(sizeToUse);
 
     if (!mShowErrorBox)
     {
@@ -468,7 +509,6 @@ Going back to a registered version will make them work again.)");
       ImGui::EndPopup();
     }
   }
-#endif
 
   ImGui::EndPopup();
 
@@ -547,6 +587,607 @@ void OptionsMenu::endRebinding()
 {
   mpCurrentlyEditedBinding = nullptr;
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+}
+
+
+bool OptionsMenu::shouldDrawGamePathChooser() const
+{
+  return mType == Type::Main &&
+    mpServiceProvider->commandLineOptions().mGamePath.empty();
+}
+
+
+void OptionsMenu::drawGamePathChooser(const ImVec2& sizeToUse)
+{
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+
+  if (mpUserProfile->mGamePath)
+  {
+    ImGui::Text(
+      "Current game path: '%s'", mpUserProfile->mGamePath->u8string().c_str());
+    ImGui::Text(
+      "Type: %s version",
+      mpServiceProvider->isSharewareVersion() ? "Shareware" : "Registered");
+  }
+
+  ImGui::NewLine();
+  if (ImGui::Button("Choose Duke Nukem II installation"))
+  {
+    if (mpUserProfile->mGamePath)
+    {
+      mGamePathBrowser.SetPwd(*mpUserProfile->mGamePath);
+    }
+
+    mGamePathBrowser.SetWindowSize(
+      base::round(sizeToUse.x * 0.8f), base::round(sizeToUse.y * 0.8f));
+    mGamePathBrowser.Open();
+  }
+
+  if (!mpServiceProvider->isSharewareVersion())
+  {
+    ImGui::Spacing();
+    ImGui::TextUnformatted(
+      R"(NOTE: When switching to a shareware version, some of your saved games
+might become unusable.
+Going back to a registered version will make them work again.)");
+  }
+}
+
+
+void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
+{
+  const auto windowSize = ImGui::GetWindowSize();
+  const auto creditsBoxWidth =
+    windowSize.x * (isSmallScreen(windowSize) ? 1.0f : 0.75f);
+  const auto creditsBoxHeight = ImGui::GetContentRegionAvail().y -
+    (shouldDrawGamePathChooser()
+       ? mGamePathChooserHeightNormalized * windowSize.y
+       : 0.0f);
+
+  mElapsedTimeForCreditsBox += dt;
+
+  const auto totalScrollOffset = static_cast<float>(
+    mElapsedTimeForCreditsBox * CREDITS_SCROLL_SPEED * ImGui::GetFontSize());
+
+  const auto totalContentHeight =
+    mCreditsBoxContentHeightNormalized * windowSize.y;
+
+  // We only know the content height after drawing the first frame, hence
+  // we cannot determine the scroll position before knowing the height.
+  const auto scrollPos = totalContentHeight != 0.0f
+    ? std::fmod(totalScrollOffset, totalContentHeight)
+    : 0.0f;
+
+  auto centeredText = [&](const char* text) {
+    const auto textSize = ImGui::CalcTextSize(text).x;
+    ImGui::SetCursorPosX((creditsBoxWidth - textSize) / 2.0f);
+    ImGui::TextUnformatted(text);
+  };
+
+  auto centeredTextBig = [&](const char* text, const float factor = 1.8f) {
+    auto pFont = ImGui::GetFont();
+    const auto currentScale = pFont->Scale;
+
+    pFont->Scale *= factor;
+    ImGui::PushFont(pFont);
+    centeredText(text);
+
+    pFont->Scale = currentScale;
+    ImGui::PopFont();
+  };
+
+
+  const auto offset =
+    isSmallScreen(windowSize) ? 0.0f : (windowSize.x - creditsBoxWidth) / 2.0f;
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+  ImGui::SetNextWindowPos(
+    {ImGui::GetCursorScreenPos().x + offset, ImGui::GetCursorScreenPos().y});
+
+  ImGui::SetNextWindowScroll({-1.0f, scrollPos});
+  ImGui::BeginChild(
+    "#credits",
+    {creditsBoxWidth, creditsBoxHeight},
+    true,
+    ImGuiWindowFlags_NoScrollbar);
+
+  // Blank space at the beginning
+  ImGui::SetCursorPosY(creditsBoxHeight);
+
+  centeredTextBig("RigelEngine", 2.2f);
+  ImGui::Spacing();
+  centeredText("A modern re-implementation of the game Duke Nukem II");
+  centeredText("(originally released in 1993 by Apogee Software)");
+
+  ImGui::NewLine();
+
+  centeredText("Created by Nikolai Wuttke (https://github.com/lethal_guitar)");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("With major contributions from");
+  ImGui::Spacing();
+  centeredText("Alain Martin (https://github.com/McMartin)");
+  centeredText("Andrei-Florin Bencsik (https://github.com/bencsikandrei)");
+  centeredText("Pratik Anand (https://github.com/pratikone)");
+  centeredText("Ryan Brown (https://github.com/rbrown46)");
+  centeredText("s-martin (https://github.com/s-martin)");
+
+  ImGui::NewLine();
+
+  centeredText("RigelEngine icon by LunarLoony (https://lunarloony.co.uk)");
+
+  ImGui::NewLine();
+
+  centeredText("OpenSUSE package by mnhauke (https://github.com/mnhauke)");
+
+  ImGui::NewLine();
+
+  centeredText("Many thanks to everyone else who contributed to the project!");
+  centeredText("See AUTHORS.md on GitHub for a full list of contributors.");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Special thanks");
+  ImGui::Spacing();
+  centeredText("Apogee Software");
+  centeredText(
+    "Shikadi Modding Wiki (https://moddingwiki.shikadi.net/wiki/Main_Page)");
+  centeredText("The DOSBox project");
+  centeredText("IDA Pro disassembler by Hex Rays");
+  centeredText(
+    "Clint Basinger aka LGR (https://www.youtube.com/c/Lazygamereviews)");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredText("Rigel Engine Copyright (C) 2016, Nikolai Wuttke.");
+  centeredText("Rigel Engine comes with ABSOLUTELY NO WARRANTY.");
+  centeredText(
+    "This is free software, and you are welcome to redistribute it under certain conditions.");
+  centeredText("For details, see https://www.gnu.org/licenses/gpl-2.0.html.");
+
+  ImGui::NewLine();
+
+  centeredText("Find the full source code on GitHub:");
+  centeredText("https://github.com/lethal-guitar/RigelEngine");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Open-source components & licenses");
+
+  ImGui::NewLine();
+
+  centeredText("RigelEngine incorporates some 3rd party open source code.");
+  centeredText("The following libraries and components are used:");
+
+  ImGui::NewLine();
+
+  centeredTextBig("Simple DirectMedia Layer (SDL)", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>");
+  centeredText("https://www.libsdl.org");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("SDL Mixer", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>");
+  centeredText("https://www.libsdl.org/projects/SDL_mixer");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+#ifdef RIGEL_HAS_BOOST
+  centeredTextBig("Boost program_options", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 2002-2004 Vladimir Prus");
+  centeredText("https://github.com/boostorg/program_options");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+#endif
+
+  centeredTextBig("DBOPL AdLib emulator (from DosBox)", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 2002-2015  The DOSBox Team");
+  ImGui::NewLine();
+  centeredText(
+    "This program is free software; you can redistribute it and/or modify");
+  centeredText(
+    "it under the terms of the GNU General Public License as published by");
+  centeredText(
+    "the Free Software Foundation; either version 2 of the License, or");
+  centeredText("(at your option) any later version.");
+  ImGui::NewLine();
+  centeredText(
+    "This program is distributed in the hope that it will be useful,");
+  centeredText(
+    "but WITHOUT ANY WARRANTY; without even the implied warranty of");
+  centeredText("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+  centeredText("GNU General Public License for more details.");
+  ImGui::NewLine();
+  centeredText("https://www.gnu.org/licenses/gpl-2.0.html.");
+  ImGui::NewLine();
+  centeredText("https://sourceforge.net/projects/dosbox");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("EntityX", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 2012 Alec Thomas");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of");
+  centeredText(
+    "this software and associated documentation files (the \"Software\"), to deal in");
+  centeredText(
+    "the Software without restriction, including without limitation the rights to");
+  centeredText(
+    "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies");
+  centeredText(
+    "of the Software, and to permit persons to whom the Software is furnished to do");
+  centeredText("so, subject to the following conditions:");
+  ImGui::NewLine();
+  centeredText(
+    "The above copyright notice and this permission notice shall be included in all");
+  centeredText("copies or substantial portions of the Software.");
+  ImGui::NewLine();
+  centeredText(
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
+  centeredText(
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
+  centeredText(
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
+  centeredText(
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
+  centeredText(
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
+  centeredText(
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
+  centeredText("SOFTWARE.");
+  ImGui::NewLine();
+  centeredText("https://github.com/alecthomas/entityx");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("OpenGL/OpenGL ES loader code generated via glad", 1.4f);
+  ImGui::Spacing();
+  centeredText(
+    "The glad code generator is Copyright (c) 2013-2021 David Herberth.");
+  ImGui::Spacing();
+  centeredText(
+    "The generated code is in the public domain, except for khrplatform.h.");
+  centeredText("The latter is under the following license:");
+  ImGui::NewLine();
+  centeredText("Copyright (c) 2008-2018 The Khronos Group Inc.");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a");
+  centeredText(
+    "copy of this software and/or associated documentation files (the");
+  centeredText(
+    "\"Materials\"), to deal in the Materials without restriction, including");
+  centeredText(
+    "without limitation the rights to use, copy, modify, merge, publish,");
+  centeredText(
+    "distribute, sublicense, and/or sell copies of the Materials, and to");
+  centeredText(
+    "permit persons to whom the Materials are furnished to do so, subject to");
+  centeredText("the following conditions:");
+  ImGui::NewLine();
+  centeredText(
+    "The above copyright notice and this permission notice shall be included");
+  centeredText("in all copies or substantial portions of the Materials.");
+  ImGui::NewLine();
+  centeredText(
+    "THE MATERIALS ARE PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,");
+  centeredText(
+    "EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF");
+  centeredText(
+    "MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.");
+  centeredText(
+    "IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY");
+  centeredText(
+    "CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,");
+  centeredText(
+    "TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE");
+  centeredText("MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.");
+  ImGui::NewLine();
+  centeredText("https://github.com/Dav1dde/glad");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("OpenGL Mathematics (GLM)", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (c) 2005 - G-Truc Creation");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of");
+  centeredText(
+    "this software and associated documentation files (the \"Software\"), to deal in");
+  centeredText(
+    "the Software without restriction, including without limitation the rights to");
+  centeredText(
+    "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies");
+  centeredText(
+    "of the Software, and to permit persons to whom the Software is furnished to do");
+  centeredText("so, subject to the following conditions:");
+  ImGui::NewLine();
+  centeredText(
+    "The above copyright notice and this permission notice shall be included in all");
+  centeredText("copies or substantial portions of the Software.");
+  ImGui::NewLine();
+  centeredText("Restrictions:");
+  centeredText(
+    " By making use of the Software for military purposes, you choose to make a");
+  centeredText(" Bunny unhappy.");
+  ImGui::NewLine();
+  centeredText(
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
+  centeredText(
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
+  centeredText(
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
+  centeredText(
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
+  centeredText(
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
+  centeredText(
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
+  centeredText("SOFTWARE.");
+  ImGui::NewLine();
+  centeredText("https://github.com/g-truc/glm");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Dear ImGui", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (c) 2014-2021 Omar Cornut");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of");
+  centeredText(
+    "this software and associated documentation files (the \"Software\"), to deal in");
+  centeredText(
+    "the Software without restriction, including without limitation the rights to");
+  centeredText(
+    "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies");
+  centeredText(
+    "of the Software, and to permit persons to whom the Software is furnished to do");
+  centeredText("so, subject to the following conditions:");
+  ImGui::NewLine();
+  centeredText(
+    "The above copyright notice and this permission notice shall be included in all");
+  centeredText("copies or substantial portions of the Software.");
+  ImGui::NewLine();
+  centeredText(
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
+  centeredText(
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
+  centeredText(
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
+  centeredText(
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
+  centeredText(
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
+  centeredText(
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
+  centeredText("SOFTWARE.");
+  ImGui::NewLine();
+  centeredText("https://github.com/ocornut/imgui");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Dear ImGui file browser extension", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (c) 2019-2020 Zhuang Guan");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of");
+  centeredText(
+    "this software and associated documentation files (the \"Software\"), to deal in");
+  centeredText(
+    "the Software without restriction, including without limitation the rights to");
+  centeredText(
+    "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies");
+  centeredText(
+    "of the Software, and to permit persons to whom the Software is furnished to do");
+  centeredText("so, subject to the following conditions:");
+  ImGui::NewLine();
+  centeredText(
+    "The above copyright notice and this permission notice shall be included in all");
+  centeredText("copies or substantial portions of the Software.");
+  ImGui::NewLine();
+  centeredText(
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
+  centeredText(
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
+  centeredText(
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
+  centeredText(
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
+  centeredText(
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
+  centeredText(
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
+  centeredText("SOFTWARE.");
+  ImGui::NewLine();
+  centeredText("https://github.com/AirGuanZ/imgui-filebrowser");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("JSON for Modern C++", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (c) 2013-2019 Niels Lohmann <http://nlohmann.me>.");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of");
+  centeredText(
+    "this software and associated documentation files (the \"Software\"), to deal in");
+  centeredText(
+    "the Software without restriction, including without limitation the rights to");
+  centeredText(
+    "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies");
+  centeredText(
+    "of the Software, and to permit persons to whom the Software is furnished to do");
+  centeredText("so, subject to the following conditions:");
+  ImGui::NewLine();
+  centeredText(
+    "The above copyright notice and this permission notice shall be included in all");
+  centeredText("copies or substantial portions of the Software.");
+  ImGui::NewLine();
+  centeredText(
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
+  centeredText(
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
+  centeredText(
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
+  centeredText(
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
+  centeredText(
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
+  centeredText(
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
+  centeredText("SOFTWARE.");
+  ImGui::NewLine();
+  centeredText("https://json.nlohmann.me");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Resampler code from libspeex", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 2007 Jean-Marc Valin");
+  ImGui::NewLine();
+  centeredText(
+    "Redistribution and use in source and binary forms, with or without");
+  centeredText(
+    "modification, are permitted provided that the following conditions are");
+  centeredText("met:");
+  ImGui::NewLine();
+  centeredText(
+    "1. Redistributions of source code must retain the above copyright notice,");
+  centeredText("this list of conditions and the following disclaimer.");
+  ImGui::NewLine();
+  centeredText(
+    "2. Redistributions in binary form must reproduce the above copyright");
+  centeredText(
+    "notice, this list of conditions and the following disclaimer in the");
+  centeredText(
+    "documentation and/or other materials provided with the distribution.");
+  ImGui::NewLine();
+  centeredText(
+    "3. The name of the author may not be used to endorse or promote products");
+  centeredText(
+    "derived from this software without specific prior written permission.");
+  ImGui::NewLine();
+  centeredText(
+    "THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR");
+  centeredText(
+    "IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES");
+  centeredText("OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE");
+  centeredText(
+    "DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,");
+  centeredText(
+    "INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES");
+  centeredText(
+    "(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR");
+  centeredText(
+    "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)");
+  centeredText(
+    "HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,");
+  centeredText(
+    "STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN");
+  centeredText(
+    "ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE");
+  centeredText("POSSIBILITY OF SUCH DAMAGE.");
+  ImGui::NewLine();
+  centeredText("http://www.speex.org");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("static_vector", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright Gonzalo Brito Gadeschi 2015-2017");
+  centeredText("Copyright Eric Niebler 2013-2014");
+  centeredText("Copyright Casey Carter 2016");
+  ImGui::NewLine();
+  centeredText("https://github.com/gnzlbg/static_vector");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("stb_image & stb_rect_pack", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (c) 2017 Sean Barrett");
+  ImGui::NewLine();
+  centeredText(
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of");
+  centeredText(
+    "this software and associated documentation files (the \"Software\"), to deal in");
+  centeredText(
+    "the Software without restriction, including without limitation the rights to");
+  centeredText(
+    "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies");
+  centeredText(
+    "of the Software, and to permit persons to whom the Software is furnished to do");
+  centeredText("so, subject to the following conditions:");
+  centeredText(
+    "The above copyright notice and this permission notice shall be included in all");
+  centeredText("copies or substantial portions of the Software.");
+  ImGui::NewLine();
+  centeredText(
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR");
+  centeredText(
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,");
+  centeredText(
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE");
+  centeredText(
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER");
+  centeredText(
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,");
+  centeredText(
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE");
+  centeredText("SOFTWARE.");
+  ImGui::NewLine();
+  centeredText("https://github.com/nothings/stb");
+
+  ImGui::NewLine();
+
+  // Blank space at the end
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + creditsBoxHeight);
+
+  // Measure the total size of the content on the first frame,
+  // minus the blank space at the beginning. This is so that the credits
+  // repeat quicker after the first full scroll through. If we would take
+  // the full blank space into account, it would take a while for the start
+  // to reappear after the end has scrolled off screen.
+  if (mCreditsBoxContentHeightNormalized == 0.0f)
+  {
+    // We store the height divided by the window height, since the window might
+    // be resized later. That would throw off our calculations if we were to
+    // store the actual height. But this way, we simply multiply with the
+    // actual window height at the time of drawing (see above).
+    mCreditsBoxContentHeightNormalized =
+      (ImGui::GetCursorPosY() - creditsBoxHeight) / windowSize.y;
+  }
+
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
 }
 
 } // namespace rigel::ui

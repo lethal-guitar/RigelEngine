@@ -23,6 +23,7 @@
 RIGEL_DISABLE_WARNINGS
 #include <SDL_events.h>
 #include <imfilebrowser.h>
+#include <imgui.h>
 RIGEL_RESTORE_WARNINGS
 
 
@@ -64,6 +65,9 @@ private:
   void keyBindingRow(const char* label, SDL_Keycode* binding);
   void beginRebinding(SDL_Keycode* binding);
   void endRebinding();
+  bool shouldDrawGamePathChooser() const;
+  void drawGamePathChooser(const ImVec2& sizeToUse);
+  void drawCreditsBox(engine::TimeDelta dt);
 
   ImGui::FileBrowser mGamePathBrowser;
   UserProfile* mpUserProfile;
@@ -72,6 +76,9 @@ private:
 
   SDL_Keycode* mpCurrentlyEditedBinding = nullptr;
   engine::TimeDelta mElapsedTimeEditingBinding = 0;
+  engine::TimeDelta mElapsedTimeForCreditsBox = 0;
+  float mGamePathChooserHeightNormalized = 0.0f;
+  float mCreditsBoxContentHeightNormalized = 0.0f;
 
   Type mType;
   bool mMenuOpen = true;
