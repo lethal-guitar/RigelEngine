@@ -42,11 +42,12 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options)
   SDL_DisplayMode displayMode;
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
 
-  const auto isFullscreen = options.mWindowMode != data::WindowMode::Windowed;
+  const auto isFullscreen =
+    options.effectiveWindowMode() != data::WindowMode::Windowed;
 
   // clang-format off
   const auto windowFlags =
-    flagsForWindowMode(options.mWindowMode) |
+    flagsForWindowMode(options.effectiveWindowMode()) |
     SDL_WINDOW_RESIZABLE |
     SDL_WINDOW_ALLOW_HIGHDPI |
     SDL_WINDOW_OPENGL;
