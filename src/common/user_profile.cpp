@@ -112,7 +112,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
   UpscalingFilter,
   {
     {UpscalingFilter::None, "None"},
-    {UpscalingFilter::Linear, "Linear"},
+    {UpscalingFilter::Bilinear, "Bilinear"},
   })
 } // namespace data
 

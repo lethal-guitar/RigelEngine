@@ -321,7 +321,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
         ImGui::Combo(
           "Upscaling filter",
           &upscalingFilterIndex,
-          "None (nearest neighbor)\0Linear\0");
+          "None (nearest neighbor)\0Bilinear\0");
         mpOptions->mUpscalingFilter =
           static_cast<data::UpscalingFilter>(upscalingFilterIndex);
       }

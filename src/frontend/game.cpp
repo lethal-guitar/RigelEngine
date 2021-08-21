@@ -543,7 +543,7 @@ void Game::applyChangedOptions()
   auto updateUpscalingFilter = [&]() {
     mRenderer.setFilteringEnabled(
       mRenderTarget.data(),
-      currentOptions.mUpscalingFilter == data::UpscalingFilter::Linear);
+      currentOptions.mUpscalingFilter == data::UpscalingFilter::Bilinear);
   };
 
 

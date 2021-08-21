@@ -71,7 +71,7 @@ enum class SoundStyle : std::uint8_t
 enum class UpscalingFilter : std::uint8_t
 {
   None,
-  Linear
+  Bilinear
 };
 
 
