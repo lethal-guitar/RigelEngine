@@ -47,7 +47,7 @@ test_script:
     - ctest
 
 after_build:
-  - 7z a rigelengine_win_x64.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\SDL2_mixer.dll
+  - 7z a rigelengine_win_x64.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\*.dll
 
 artifacts:
     - path: rigelengine_win_x64.zip
