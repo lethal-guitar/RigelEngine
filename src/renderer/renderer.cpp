@@ -401,7 +401,6 @@ struct Renderer::Impl
   RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
 
   // cold
-  base::Size<int> mMaxWindowSize;
   int mNumTextures = 0;
   int mNumInternalTextures = 0;
   TextureId mWaterSurfaceAnimTexture = 0;
@@ -429,11 +428,6 @@ struct Renderer::Impl
         {"position", "texCoordMask"})
     , mWindowSize(getSize(pWindow))
     , mpWindow(pWindow)
-    , mMaxWindowSize([pWindow]() {
-      SDL_DisplayMode displayMode;
-      sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
-      return base::Size<int>{displayMode.w, displayMode.h};
-    }())
   {
     // General configuration
     glDisable(GL_DEPTH_TEST);
@@ -1320,12 +1314,6 @@ std::optional<base::Rect<int>> Renderer::clipRect() const
 base::Size<int> Renderer::windowSize() const
 {
   return mpImpl->mWindowSize;
-}
-
-
-base::Size<int> Renderer::maxWindowSize() const
-{
-  return mpImpl->mMaxWindowSize;
 }
 
 
