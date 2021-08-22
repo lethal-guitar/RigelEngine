@@ -6,7 +6,7 @@ This project is a re-implementation of the game [Duke Nukem II](
 https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee
 Software in 1993 for MS-DOS. RigelEngine works as a drop-in replacement for the original executable: It reads the game's data files and plays just like the original,
 but runs natively on modern operating systems and is written in modern C++ code with a completely new architecture under the hood.
-On top of that, it offers various modern enhancements like better game controller support, a wide-screen mode, quick saving etc.
+On top of that, it offers various modern enhancements like better game controller support, a wide-screen mode, quick saving, extended modding features etc.
 
 There was never any source code released for the original game, so this project
 is based on reverse engineering. Disassembly from the original executable served as basis for writing new code from scratch, while video captures from DosBox were used for frame-by-frame verification.
@@ -93,14 +93,17 @@ RigelEngine imports them into its own user profile when running for the first ti
 
 You can find more info that didn't quite fit in this README over on [the Wiki](https://github.com/lethal-guitar/RigelEngine/wiki). For example, you'll find info on how to activate the built-in debugging tools, a list of bugs in the original version that have been fixed in Rigel Engine, etc.
 
-## Getting binaries
+## Pre-built binaries
 
-Pre-built binaries for Windows 64-bit are provided with each [Release](https://github.com/lethal-guitar/RigelEngine/releases). You can also grab a build of the latest `master` branch by going to [AppVeyor](https://ci.appveyor.com/project/lethal-guitar/rigelengine/branch/master), clicking on "Configuration: Release", and then clicking on "Artifacts".
+Pre-built binaries are provided with each [Release](https://github.com/lethal-guitar/RigelEngine/releases).
+As of version 0.8.0, this includes Windows (x64),
+Mac OS (x64),
+and `deb` packages for Debian/Ubuntu/Mint Linux distros (also x64).
 
-See [third-party Linux builds](https://github.com/lethal-guitar/RigelEngine/wiki/Third-party-Linux-builds)
-for a list of Linux packages/builds provided by distros and other projects.
+A Flatpak for other distros is currently work in progress.
 
-Binaries for Mac OS and Ubuntu/Debian/Mint are coming soon. Until then, you still need to build the project yourself on these platforms.
+Also see [third-party Linux builds](https://github.com/lethal-guitar/RigelEngine/wiki/Third-party-Linux-builds)
+for a list of other Linux packages/builds provided by distros and other projects.
 
 ## Building from source
 
