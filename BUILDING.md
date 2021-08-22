@@ -250,9 +250,7 @@ docker run -ti --device=/dev/dri:/dev/dri --cap-add=SYS_PTRACE --security-opt se
 
 ### <a name="mac-build-instructions">OS X builds</a>
 
-:exclamation: On Mojave (10.14) and older, non-Apple clang must be installed via Homebrew, Apple's clang does not have all required C++ library features. Starting with Catalina (10.15), Xcode's clang works fine.
-
-The oldest OS/compiler combination that has worked for me is clang 7 on Sierra (10.12).
+:exclamation: On Mojave (10.14), non-Apple clang must be installed via Homebrew, Apple's clang does not have all required C++ library features. Starting with Catalina (10.15), Xcode's clang works fine.
 
 ### <a name="mac-build-instructions-1015">Catalina (10.15) or newer</a>
 
@@ -266,6 +264,9 @@ mkdir build
 cd build
 cmake .. -DWARNINGS_AS_ERRORS=OFF
 make
+
+# Now run it!
+./src/RigelEngine.app/Contents/MacOS/RigelEngine
 ```
 
 ### <a name="mac-build-instructions-1014">Mojave (10.14) using clang 8</a>
@@ -290,28 +291,9 @@ mkdir build
 cd build
 cmake .. -DWARNINGS_AS_ERRORS=OFF
 make
-```
 
-### <a name="mac-build-instructions-1013">High Sierra (10.13) or older using clang 7</a>
-
-```bash
-# You might need to run brew update.
-brew install llvm@7 cmake sdl2 sdl2_mixer boost
-
-# Set up environment variables so that CMake picks up the newly installed clang -
-# this is only necessary the first time.
-export rigel_llvm_path=`brew --prefix llvm@7`;
-export CC="$rigel_llvm_path/bin/clang";
-export CXX="$CC++";
-export CPPFLAGS="-I$rigel_llvm_path/include";
-export LDFLAGS="-L$rigel_llvm_path/lib -Wl,-rpath,$rigel_llvm_path/lib";
-unset rigel_llvm_path;
-
-# Now, the regular build via CMake should work:
-mkdir build
-cd build
-cmake .. -DWARNINGS_AS_ERRORS=OFF
-make
+# Now run it!
+./src/RigelEngine.app/Contents/MacOS/RigelEngine
 ```
 
 ### <a name="windows-build-instructions">Windows builds</a>
