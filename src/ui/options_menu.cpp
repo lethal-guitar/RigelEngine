@@ -709,7 +709,7 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
 
   ImGui::NewLine();
 
-  centeredText("OpenSUSE package by mnhauke (https://github.com/mnhauke)");
+  centeredText("openSUSE package by mnhauke (https://github.com/mnhauke)");
 
   ImGui::NewLine();
 
