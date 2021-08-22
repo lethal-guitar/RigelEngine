@@ -258,6 +258,7 @@ Game::Game(
   , mIsMinimized(false)
   , mCommandLineOptions(commandLineOptions)
   , mpUserProfile(pUserProfile)
+  , mPreviousWindowSize(mRenderer.windowSize())
   , mWidescreenModeWasActive(
       pUserProfile->mOptions.mWidescreenModeOn &&
       renderer::canUseWidescreenMode(&mRenderer))
@@ -637,7 +638,8 @@ void Game::applyChangedOptions()
   if (
     widescreenModeActive != mWidescreenModeWasActive ||
     currentOptions.mPerElementUpscalingEnabled !=
-      mPreviousOptions.mPerElementUpscalingEnabled)
+      mPreviousOptions.mPerElementUpscalingEnabled ||
+    mPreviousWindowSize != mRenderer.windowSize())
   {
     mRenderTarget = renderer::createFullscreenRenderTarget(
       &mRenderer, mpUserProfile->mOptions);
@@ -646,6 +648,7 @@ void Game::applyChangedOptions()
 
   mPreviousOptions = mpUserProfile->mOptions;
   mWidescreenModeWasActive = widescreenModeActive;
+  mPreviousWindowSize = mRenderer.windowSize();
 }
 
 

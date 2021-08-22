@@ -142,6 +142,7 @@ private:
   CommandLineOptions mCommandLineOptions;
   UserProfile* mpUserProfile;
   data::GameOptions mPreviousOptions;
+  base::Size<int> mPreviousWindowSize;
   bool mWidescreenModeWasActive;
   std::filesystem::path mGamePathToSwitchTo;
 

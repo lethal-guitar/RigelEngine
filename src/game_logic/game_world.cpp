@@ -299,6 +299,7 @@ GameWorld::GameWorld(
       mpRenderer,
       renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
       data::GameTraits::viewPortHeightPx)
+  , mPreviousWindowSize(mpRenderer->windowSize())
   , mWidescreenModeWasOn(widescreenModeOn())
   , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
 {
@@ -703,7 +704,8 @@ void GameWorld::render()
 {
   if (
     widescreenModeOn() != mWidescreenModeWasOn ||
-    mpOptions->mPerElementUpscalingEnabled != mPerElementUpscalingWasEnabled)
+    mpOptions->mPerElementUpscalingEnabled != mPerElementUpscalingWasEnabled ||
+    mPreviousWindowSize != mpRenderer->windowSize())
   {
     mWaterEffectBuffer =
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
@@ -843,6 +845,7 @@ void GameWorld::render()
 
   mWidescreenModeWasOn = widescreenModeOn();
   mPerElementUpscalingWasEnabled = mpOptions->mPerElementUpscalingEnabled;
+  mPreviousWindowSize = mpRenderer->windowSize();
 }
 
 

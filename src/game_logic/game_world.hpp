@@ -157,6 +157,7 @@ private:
   ui::IngameMessageDisplay mMessageDisplay;
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
+  base::Size<int> mPreviousWindowSize;
   bool mWidescreenModeWasOn;
   bool mPerElementUpscalingWasEnabled;
 

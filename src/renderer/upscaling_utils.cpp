@@ -125,9 +125,7 @@ RenderTargetTexture createFullscreenRenderTarget(
   if (options.mPerElementUpscalingEnabled)
   {
     return RenderTargetTexture{
-      pRenderer,
-      pRenderer->maxWindowSize().width,
-      pRenderer->maxWindowSize().height};
+      pRenderer, pRenderer->windowSize().width, pRenderer->windowSize().height};
   }
   else
   {
