@@ -82,6 +82,7 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   copyComponentIfPresent<CollectableItem>(from, to);
   copyComponentIfPresent<CollectableItemForCheat>(from, to);
   copyComponentIfPresent<CollidedWithWorld>(from, to);
+  copyComponentIfPresent<CustomDamageApplication>(from, to);
   copyComponentIfPresent<DamageInflicting>(from, to);
   copyComponentIfPresent<DestructionEffects>(from, to);
   copyComponentIfPresent<DrawTopMost>(from, to);
