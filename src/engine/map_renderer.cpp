@@ -43,14 +43,6 @@ const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60;
 
 
-base::Vector wrapBackgroundOffset(base::Vector offset)
-{
-  return {
-    offset.x % GameTraits::viewPortWidthPx,
-    offset.y % GameTraits::viewPortHeightPx};
-}
-
-
 base::Vector backdropOffset(
   const base::Vector& cameraPosition,
   const BackdropScrollMode scrollMode,
@@ -65,9 +57,9 @@ base::Vector backdropOffset(
 
   if (parallaxHorizontal || parallaxBoth)
   {
-    return wrapBackgroundOffset(
-      {parallaxHorizontal ? cameraPosition.x * PARALLAX_FACTOR : 0,
-       parallaxBoth ? cameraPosition.y * PARALLAX_FACTOR : 0});
+    return {
+      parallaxHorizontal ? cameraPosition.x * PARALLAX_FACTOR : 0,
+      parallaxBoth ? cameraPosition.y * PARALLAX_FACTOR : 0};
   }
   else if (autoScrollX || autoScrollY)
   {
@@ -180,33 +172,98 @@ void MapRenderer::renderForeground(
 }
 
 
+renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize) const
+{
+  // This function determines the texture coordinates we need to use for
+  // drawing the backdrop into the current view port (which could be
+  // wide-screen or classic), while taking the current backdrop offset (either
+  // from parallax, or automatic scrolling) into account. Essentially, we want
+  // to determine the rectangle defining the section of the backdrop graphic
+  // that we need to display. The rectangle might be wider than the backdrop
+  // itself, which then causes the backdrop texture to wrap around and repeat
+  // thanks to texture repeat being enabled when drawing the backdrop.
+  //
+  // The logic is somewhat complicated, because it needs to work for any
+  // background image resolution, and any background image aspect ratio - we
+  // want to support things like wide backgrounds. For original artwork and
+  // replacements in the same resolution, we need to take aspect ratio
+  // correction into account, but only when doing per-element upscaling.
+  // For higher resolution replacements, we want to maintain the artwork's
+  // aspect ratio, and we want to display it correctly even if the aspect
+  // ratio of the current screen resolution is different (e.g., showing a
+  // 16:9 background image on a 16:10 screen).
+  //
+  // We need to determine how to map the viewport rectangle (which is
+  // not the entire screen) into the background image's texture space.
+  // The idea is that we always scale the background vertically to match
+  // the current render target size, and then work out the width from there.
+
+  // Let's start with determining the scale factor.
+  const auto windowWidth = float(mpRenderer->currentRenderTargetSize().width);
+  const auto windowHeight = float(mpRenderer->currentRenderTargetSize().height);
+  const auto scaleY = windowHeight / mBackdropTexture.height();
+
+  // Now that we know the scaling factor, we can determine the ratio between
+  // the screen's width and the scaled background's width. Here we need to
+  // take aspect ratio correction into account, in case we are working with
+  // original art resolution and per-element upscaling.
+  const auto isOriginalSize =
+    mBackdropTexture.width() == GameTraits::viewPortWidthPx &&
+    mBackdropTexture.height() == GameTraits::viewPortHeightPx;
+  const auto needsAspectRatioCorrection =
+    isOriginalSize && windowHeight != GameTraits::viewPortHeightPx;
+  const auto correctionFactor = needsAspectRatioCorrection ? 1.0f / 1.2f : 1.0f;
+  const auto scaleX = scaleY * correctionFactor;
+
+  // We can now determine the width of the background when applying scaling,
+  // and based on that, we can determine the "remapping factor" that we
+  // need to apply in order to avoid horizontal stretching.
+  // Basically, this is a measure of how much wider/narrower the background
+  // image is in relation to the screen.
+  const auto scaledWidth = scaleY * mBackdropTexture.width() * correctionFactor;
+  const auto remappingFactor = windowWidth / scaledWidth;
+
+  // Then, we need to know what portion of the full screen is occupied by
+  // the view port. Basically, what percentage of the background size can we
+  // use to match the dimensions of the destination rectangle used for
+  // drawing, which is equal in size to the current view port.
+  const auto targetWidth = float(data::tilesToPixels(viewPortSize.width)) *
+    mpRenderer->globalScale().x;
+  const auto targetHeight = float(data::tilesToPixels(viewPortSize.height)) *
+    mpRenderer->globalScale().y;
+  const auto visibleTargetPortionX = targetWidth / windowWidth;
+  const auto visibleTargetPortionY = targetHeight / windowHeight;
+
+  // Finally, compute the offset, and map it into the coordinate system of
+  // the backdrop texture.
+  const auto offset =
+    backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset);
+
+  // With all that, we can now define our rectangle in texture coordinate
+  // space (i.e. from 0..1 on both axes).
+  const auto offsetX = offset.x * mpRenderer->globalScale().x / scaleX;
+  const auto offsetY = offset.y * mpRenderer->globalScale().y / scaleY;
+  const auto left = offsetX / mBackdropTexture.width();
+  const auto top = offsetY / mBackdropTexture.height();
+  const auto right = left + visibleTargetPortionX * remappingFactor;
+  const auto bottom = top + visibleTargetPortionY;
+
+  return renderer::TexCoords{left, top, right, bottom};
+}
+
+
 void MapRenderer::renderBackdrop(
   const base::Vector& cameraPosition,
   const base::Extents& viewPortSize) const
 {
-  const auto numRepetitions = base::integerDivCeil(
-    tilesToPixels(viewPortSize.width), GameTraits::viewPortWidthPx);
-
-  const auto sourceRectSize = base::Extents{
-    mBackdropTexture.width() * numRepetitions, mBackdropTexture.height()};
-  const auto destRectSize = base::Extents{
-    GameTraits::viewPortWidthPx * numRepetitions, GameTraits::viewPortHeightPx};
-
-  const auto widthFactor =
-    mBackdropTexture.width() / GameTraits::viewPortWidthPx;
-  const auto offset =
-    backdropOffset(cameraPosition, mScrollMode, mBackdropAutoScrollOffset) *
-    widthFactor;
-
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
-    renderer::toTexCoords(
-      {offset, sourceRectSize},
-      mBackdropTexture.width(),
-      mBackdropTexture.height()),
-    {{}, destRectSize});
+    calculateBackdropTexCoords(cameraPosition, viewPortSize),
+    {{}, data::tileExtentsToPixelExtents(viewPortSize)});
 }
 
 

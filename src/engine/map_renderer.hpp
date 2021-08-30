@@ -72,6 +72,10 @@ private:
     Foreground
   };
 
+  renderer::TexCoords calculateBackdropTexCoords(
+    const base::Vector& cameraPosition,
+    const base::Extents& viewPortSize) const;
+
   void renderMapTiles(
     const base::Vector& sectionStart,
     const base::Extents& sectionSize,
