@@ -404,6 +404,7 @@ public:
    */
   void setRenderTarget(TextureId target);
 
+  base::Size<int> currentRenderTargetSize() const;
   base::Size<int> windowSize() const;
 
   base::Vector globalTranslation() const;

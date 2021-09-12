@@ -870,18 +870,6 @@ struct Renderer::Impl
 
     const auto& state = mStateStack.back();
 
-    auto currentFramebufferSize = [&]() {
-      if (state.mRenderTargetTexture != 0)
-      {
-        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
-        assert(iData != mRenderTargetDict.end());
-        return iData->second.mSize;
-      }
-
-      return mWindowSize;
-    };
-
-
     auto transformNeedsUpdate =
       state.mGlobalTranslation != mLastCommittedState.mGlobalTranslation ||
       state.mGlobalScale != mLastCommittedState.mGlobalScale;
@@ -896,7 +884,7 @@ struct Renderer::Impl
 
     if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture)
     {
-      const auto framebufferSize = currentFramebufferSize();
+      const auto framebufferSize = currentRenderTargetSize();
 
       commitRenderTarget(state);
       glViewport(0, 0, framebufferSize.width, framebufferSize.height);
@@ -916,7 +904,7 @@ struct Renderer::Impl
       }
       else if (state.mClipRect != mLastCommittedState.mClipRect)
       {
-        commitClipRect(state, currentFramebufferSize());
+        commitClipRect(state, currentRenderTargetSize());
       }
     }
 
@@ -945,7 +933,7 @@ struct Renderer::Impl
 
     if (transformNeedsUpdate)
     {
-      commitTransformationMatrix(state, currentFramebufferSize());
+      commitTransformationMatrix(state, currentRenderTargetSize());
     }
 
     mLastCommittedState = state;
@@ -1166,6 +1154,19 @@ struct Renderer::Impl
 
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
   }
+
+  base::Size<int> currentRenderTargetSize() const
+  {
+    const auto& state = mStateStack.back();
+    if (state.mRenderTargetTexture != 0)
+    {
+      const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+      assert(iData != mRenderTargetDict.end());
+      return iData->second.mSize;
+    }
+
+    return mWindowSize;
+  }
 };
 
 
@@ -1308,6 +1309,12 @@ void Renderer::setClipRect(const std::optional<base::Rect<int>>& clipRect)
 std::optional<base::Rect<int>> Renderer::clipRect() const
 {
   return mpImpl->mStateStack.back().mClipRect;
+}
+
+
+base::Size<int> Renderer::currentRenderTargetSize() const
+{
+  return mpImpl->currentRenderTargetSize();
 }
 
 
