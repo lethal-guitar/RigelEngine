@@ -762,7 +762,9 @@ void GameWorld::showDebugText() {
   std::stringstream infoText;
   mpSystems->printDebugText(infoText);
   infoText
-    << "Entities: " << mEntities.size();
+    << "Entities: " << mEntities.size() << '\n';
+  infoText
+    << "Motion smoothing: " << (mpOptions->mMotionSmoothing ? "ON" : "OFF");
 
   ui::drawText(infoText.str(), 0, 32, {255, 255, 255, 255});
 }
