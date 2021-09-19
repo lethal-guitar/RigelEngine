@@ -203,7 +203,7 @@ WorldState::WorldState(
       &mEntityFactory,
       &mEventManager,
       &mRandomGenerator)
-  , mCamera(&mPlayer, mMap, mEventManager)
+  , mCamera(&mPlayer, mMap, mEventManager, pOptions)
   , mParticles(&mRandomGenerator, pRenderer)
   , mSpriteRenderingSystem(pRenderer, &pSpriteFactory->textureAtlas())
   , mMapRenderer(

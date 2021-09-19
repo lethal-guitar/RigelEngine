@@ -26,6 +26,11 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+namespace rigel::data
+{
+struct GameOptions;
+}
+
 namespace rigel::data::map
 {
 class Map;
@@ -39,7 +44,6 @@ struct PlayerFiredShot;
 namespace rigel::game_logic
 {
 
-
 class Player;
 
 class Camera : public entityx::Receiver<Camera>
@@ -48,7 +52,8 @@ public:
   Camera(
     const Player* pPlayer,
     const data::map::Map& map,
-    entityx::EventManager& eventManager);
+    entityx::EventManager& eventManager,
+    const data::GameOptions* pOptions);
 
   void synchronizeTo(const Camera& other);
 
@@ -66,6 +71,7 @@ private:
 
   const Player* mpPlayer;
   const data::map::Map* mpMap;
+  const data::GameOptions* mpOptions;
   base::Vector mPosition;
   base::Extents mViewPortSize;
   int mManualScrollCooldown = 0;

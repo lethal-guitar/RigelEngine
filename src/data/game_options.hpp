@@ -130,6 +130,7 @@ struct GameOptions
   // Enhancements
   bool mWidescreenModeOn = false;
   bool mQuickSavingEnabled = false;
+  int mCameraOffsetX = 0;
 
   // Internal options
   //

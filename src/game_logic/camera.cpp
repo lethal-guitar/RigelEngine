@@ -17,6 +17,7 @@
 #include "camera.hpp"
 
 #include "common/global.hpp"
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "engine/physical_components.hpp"
@@ -111,14 +112,15 @@ base::Rect<int> deadZoneRect(const Player& player)
  */
 base::Rect<int> normalizedPlayerBounds(
   const Player& player,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewPortSize,
+  const int cameraOffsetX)
 {
   const auto extraTiles =
     viewPortSize.width - data::GameTraits::mapViewPortSize.width;
   const auto offsetToCenter = extraTiles / 2;
 
   auto playerBounds = player.worldSpaceCollisionBox();
-  playerBounds.topLeft.x = player.orientedPosition().x - offsetToCenter;
+  playerBounds.topLeft.x = player.orientedPosition().x - offsetToCenter - cameraOffsetX;
   return playerBounds;
 }
 
@@ -126,9 +128,10 @@ base::Rect<int> normalizedPlayerBounds(
 base::Vector offsetToDeadZone(
   const Player& player,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewPortSize,
+  const int cameraOffsetX)
 {
-  const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
+  const auto playerBounds = normalizedPlayerBounds(player, viewPortSize, cameraOffsetX);
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
@@ -155,9 +158,11 @@ base::Vector offsetToDeadZone(
 Camera::Camera(
   const Player* pPlayer,
   const data::map::Map& map,
-  entityx::EventManager& eventManager)
+  entityx::EventManager& eventManager,
+  const data::GameOptions* pOptions)
   : mpPlayer(pPlayer)
   , mpMap(&map)
+  , mpOptions(pOptions)
   , mViewPortSize(data::GameTraits::mapViewPortSize)
 {
   eventManager.subscribe<rigel::events::PlayerFiredShot>(*this);
@@ -222,7 +227,7 @@ void Camera::updateManualScrolling(const PlayerInput& input)
 void Camera::updateAutomaticScrolling()
 {
   const auto [offsetX, offsetY] =
-    offsetToDeadZone(*mpPlayer, mPosition, mViewPortSize);
+    offsetToDeadZone(*mpPlayer, mPosition, mViewPortSize, mpOptions->mCameraOffsetX);
 
   const auto maxAdjustDown =
     mpPlayer->isRidingElevator() ? MAX_ADJUST_DOWN_ELEVATOR : MAX_ADJUST_DOWN;
@@ -249,7 +254,7 @@ void Camera::setPosition(const base::Vector position)
 void Camera::centerViewOnPlayer()
 {
   auto playerPos =
-    normalizedPlayerBounds(*mpPlayer, mViewPortSize).bottomLeft();
+    normalizedPlayerBounds(*mpPlayer, mViewPortSize, mpOptions->mCameraOffsetX).bottomLeft();
   if (mpPlayer->orientation() == Orientation::Left)
   {
     playerPos.x -= 1;

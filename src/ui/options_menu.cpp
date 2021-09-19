@@ -394,6 +394,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
+      ImGui::SliderInt("Camera offset (tiles)", &mpOptions->mCameraOffsetX, -40, 40);
       ImGui::EndTabItem();
     }
 
