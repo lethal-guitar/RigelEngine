@@ -383,6 +383,7 @@ private:
   void startFallingDelayed();
   void landOnGround(bool needRecoveryFrame);
   void switchOrientation();
+  void switchOrientationWithPositionChange();
 
   PlayerState mState;
   entityx::Entity mEntity;

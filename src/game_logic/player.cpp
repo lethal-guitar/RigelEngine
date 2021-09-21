@@ -917,8 +917,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != walkingDirection)
         {
-          switchOrientation();
-          position.x -= movementVector.x;
+          switchOrientationWithPositionChange();
         }
       }
       else
@@ -1094,8 +1093,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != orientationAsMovement)
         {
-          switchOrientation();
-          position.x -= movementVector.x;
+          switchOrientationWithPositionChange();
         }
 
         if (mJumpRequested && movement > 0)
@@ -1959,6 +1957,16 @@ void Player::switchOrientation()
 {
   auto& orientation = *mEntity.component<c::Orientation>();
   orientation = engine::orientation::opposite(orientation);
+}
+
+
+void Player::switchOrientationWithPositionChange()
+{
+  auto& position = *mEntity.component<c::WorldPosition>();
+  auto& orientation = *mEntity.component<c::Orientation>();
+
+  orientation = engine::orientation::opposite(orientation);
+  position.x -= engine::orientation::toMovement(orientation);
 }
 
 } // namespace rigel::game_logic
