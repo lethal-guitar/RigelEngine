@@ -590,9 +590,9 @@ struct Renderer::Impl
     commitChangedState();
 
     const auto left = float(rect.left());
-    const auto right = float(rect.right());
+    const auto right = float(rect.right()) + 1.0f;
     const auto top = float(rect.top());
-    const auto bottom = float(rect.bottom());
+    const auto bottom = float(rect.bottom()) + 1.0f;
 
     const auto colorVec = toGlColor(color);
     float vertices[] = {
