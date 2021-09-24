@@ -917,8 +917,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != walkingDirection)
         {
-          switchOrientation();
-          position.x -= movementVector.x;
+          switchOrientationWithPositionChange();
         }
       }
       else
@@ -1094,8 +1093,7 @@ void Player::updateMovement(
 
         if (movementVector.x != 0 && movementVector.x != orientationAsMovement)
         {
-          switchOrientation();
-          position.x -= movementVector.x;
+          switchOrientationWithPositionChange();
         }
 
         if (mJumpRequested && movement > 0)
@@ -1959,6 +1957,29 @@ void Player::switchOrientation()
 {
   auto& orientation = *mEntity.component<c::Orientation>();
   orientation = engine::orientation::opposite(orientation);
+
+  auto& position = *mEntity.component<c::WorldPosition>();
+  const auto& bbox = *mEntity.component<c::BoundingBox>();
+
+  const auto offset = base::Vector{1, 0};
+  const auto stuckInWall = orientation == c::Orientation::Left
+    ? mpCollisionChecker->isTouchingLeftWall(position + offset, bbox)
+    : mpCollisionChecker->isTouchingRightWall(position - offset, bbox);
+  if (stuckInWall)
+  {
+    const auto direction = engine::orientation::toMovement(orientation);
+    position.x -= direction;
+  }
+}
+
+
+void Player::switchOrientationWithPositionChange()
+{
+  auto& position = *mEntity.component<c::WorldPosition>();
+  auto& orientation = *mEntity.component<c::Orientation>();
+
+  orientation = engine::orientation::opposite(orientation);
+  position.x -= engine::orientation::toMovement(orientation);
 }
 
 } // namespace rigel::game_logic
