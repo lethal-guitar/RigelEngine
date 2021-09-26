@@ -1120,6 +1120,7 @@ struct Renderer::Impl
   void destroyTexture(TextureId texture)
   {
     submitBatch();
+    commitChangedState();
 
     const auto iRenderTarget = mRenderTargetDict.find(texture);
     if (iRenderTarget != mRenderTargetDict.end())
