@@ -64,6 +64,25 @@ GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
 }
 
 
+GameSessionMode::GameSessionMode(
+  const data::GameSessionId& sessionId,
+  data::PlayerModel playerModel,
+  Context context)
+  : mPlayerModel(std::move(playerModel))
+  , mCurrentStage(std::make_unique<GameRunner>(
+      &mPlayerModel,
+      sessionId,
+      context,
+      std::nullopt,
+      false /* don't show welcome message */))
+  , mEpisode(sessionId.mEpisode)
+  , mCurrentLevelNr(sessionId.mLevel)
+  , mDifficulty(sessionId.mDifficulty)
+  , mContext(context)
+{
+}
+
+
 void GameSessionMode::handleEvent(const SDL_Event& event)
 {
   base::match(
@@ -173,12 +192,17 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
       {
         mPlayerModel.resetForNewLevel();
 
-        auto pNextIngameMode = std::make_unique<GameRunner>(
-          &mPlayerModel,
+        // Although we technically stay inside GameSessionMode, we still
+        // want to trigger a mode switch at the top level, since that's the
+        // only way we can switch between low- and hi-res modes (i.e.
+        // per-element upscaling)
+        //
+        // We can't use make_unique here, because the constructor is
+        // private.
+        return std::unique_ptr<GameSessionMode>{new GameSessionMode{
           data::GameSessionId{mEpisode, ++mCurrentLevelNr, mDifficulty},
-          mContext);
-        fadeToNewStage(*pNextIngameMode);
-        mCurrentStage = std::move(pNextIngameMode);
+          mPlayerModel,
+          mContext}};
       }
 
       return nullptr;
