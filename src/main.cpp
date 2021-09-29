@@ -51,8 +51,8 @@ namespace po = boost::program_options;
 
 #ifdef _WIN32
 
-  #include <Windows.h>
   #include <stdio.h>
+  #include <windows.h>
 
 static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
 {
