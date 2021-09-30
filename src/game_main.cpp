@@ -32,7 +32,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #ifdef _WIN32
-  #include <Windows.h>
+  #include <windows.h>
 #endif
 
 #include <filesystem>
