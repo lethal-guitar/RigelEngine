@@ -97,21 +97,21 @@ float speedForScrollMode(const BackdropScrollMode mode)
 }
 
 
-float maxOffsetForScrollMode(const BackdropScrollMode mode)
-{
-  if (mode == BackdropScrollMode::AutoHorizontal)
-  {
-    return data::GameTraits::viewPortWidthPx;
-  }
-  else if (mode == BackdropScrollMode::AutoVertical)
-  {
-    return data::GameTraits::viewPortHeightPx;
-  }
-  else
-  {
-    return 1.0f;
-  }
-}
+//float maxOffsetForScrollMode(const BackdropScrollMode mode)
+//{
+  //if (mode == BackdropScrollMode::AutoHorizontal)
+  //{
+    //return data::GameTraits::viewPortWidthPx;
+  //}
+  //else if (mode == BackdropScrollMode::AutoVertical)
+  //{
+    //return data::GameTraits::viewPortHeightPx;
+  //}
+  //else
+  //{
+    //return 1.0f;
+  //}
+//}
 
 
 constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Extents{
@@ -342,8 +342,8 @@ void MapRenderer::updateAnimatedMapTiles()
 void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
 {
   mBackdropAutoScrollOffset += dt * speedForScrollMode(mScrollMode);
-  mBackdropAutoScrollOffset =
-    std::fmod(mBackdropAutoScrollOffset, maxOffsetForScrollMode(mScrollMode));
+  //mBackdropAutoScrollOffset =
+    //std::fmod(mBackdropAutoScrollOffset, maxOffsetForScrollMode(mScrollMode));
 }
 
 
