@@ -95,6 +95,7 @@ private:
   void swapBuffers();
   void applyChangedOptions();
   void enumerateGameControllers();
+  void takeScreenshot();
 
   // IGameServiceProvider implementation
   void fadeOutScreen() override;
@@ -137,6 +138,7 @@ private:
 
   bool mIsRunning;
   bool mIsMinimized;
+  bool mScreenshotRequested = false;
   base::Clock::time_point mLastTime;
 
   CommandLineOptions mCommandLineOptions;

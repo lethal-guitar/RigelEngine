@@ -53,6 +53,26 @@ Image::Image(const std::size_t width, const std::size_t height)
 }
 
 
+Image Image::flipped() const
+{
+  PixelBuffer flippedPixelData;
+  flippedPixelData.resize(width() * height());
+
+  for (std::size_t y = 0; y < height(); ++y)
+  {
+    const auto sourceRow = height() - (y + 1);
+    const auto yOffsetSource = sourceRow * width();
+    const auto yOffset = y * width();
+    for (std::size_t x = 0; x < width(); ++x)
+    {
+      flippedPixelData[x + yOffset] = pixelData()[x + yOffsetSource];
+    }
+  }
+
+  return Image{std::move(flippedPixelData), width(), height()};
+}
+
+
 void Image::insertImage(const size_t x, const size_t y, const Image& image)
 {
   insertImage(x, y, image.pixelData(), image.width());

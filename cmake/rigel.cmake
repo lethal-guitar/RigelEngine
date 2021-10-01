@@ -22,7 +22,7 @@ function(rigel_enable_warnings target)
             /wd4503 # Decorated name length exceeded
             /wd4800 # Forcing value to bool
         )
-        add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+        add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
 
         if (WARNINGS_AS_ERRORS)
             target_compile_options(${target} PRIVATE /WX)

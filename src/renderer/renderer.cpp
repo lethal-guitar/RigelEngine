@@ -590,9 +590,9 @@ struct Renderer::Impl
     commitChangedState();
 
     const auto left = float(rect.left());
-    const auto right = float(rect.right());
+    const auto right = float(rect.right()) + 1.0f;
     const auto top = float(rect.top());
-    const auto bottom = float(rect.bottom());
+    const auto bottom = float(rect.bottom()) + 1.0f;
 
     const auto colorVec = toGlColor(color);
     float vertices[] = {
@@ -805,6 +805,20 @@ struct Renderer::Impl
     updateState(mStateStack.back().mRenderTargetTexture, target);
   }
 
+  data::Image grabCurrentFramebuffer()
+  {
+    submitBatch();
+
+    const auto size = currentRenderTargetSize();
+    auto pixels = data::PixelBuffer{size_t(size.width * size.height * 4)};
+    glReadPixels(
+      0, 0, size.width, size.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+    return data::Image{
+      std::move(pixels), size_t(size.width), size_t(size.height)}
+      .flipped();
+  }
+
 
   template <typename StateT>
   void updateState(StateT& state, const StateT& newValue)
@@ -870,18 +884,6 @@ struct Renderer::Impl
 
     const auto& state = mStateStack.back();
 
-    auto currentFramebufferSize = [&]() {
-      if (state.mRenderTargetTexture != 0)
-      {
-        const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
-        assert(iData != mRenderTargetDict.end());
-        return iData->second.mSize;
-      }
-
-      return mWindowSize;
-    };
-
-
     auto transformNeedsUpdate =
       state.mGlobalTranslation != mLastCommittedState.mGlobalTranslation ||
       state.mGlobalScale != mLastCommittedState.mGlobalScale;
@@ -896,7 +898,7 @@ struct Renderer::Impl
 
     if (state.mRenderTargetTexture != mLastCommittedState.mRenderTargetTexture)
     {
-      const auto framebufferSize = currentFramebufferSize();
+      const auto framebufferSize = currentRenderTargetSize();
 
       commitRenderTarget(state);
       glViewport(0, 0, framebufferSize.width, framebufferSize.height);
@@ -916,7 +918,7 @@ struct Renderer::Impl
       }
       else if (state.mClipRect != mLastCommittedState.mClipRect)
       {
-        commitClipRect(state, currentFramebufferSize());
+        commitClipRect(state, currentRenderTargetSize());
       }
     }
 
@@ -945,7 +947,7 @@ struct Renderer::Impl
 
     if (transformNeedsUpdate)
     {
-      commitTransformationMatrix(state, currentFramebufferSize());
+      commitTransformationMatrix(state, currentRenderTargetSize());
     }
 
     mLastCommittedState = state;
@@ -1100,27 +1102,14 @@ struct Renderer::Impl
   {
     submitBatch();
 
-    // OpenGL wants pixel data in bottom-up format, so transform it accordingly
-    std::vector<std::uint8_t> pixelData;
-    pixelData.resize(image.width() * image.height() * 4);
-    for (std::size_t y = 0; y < image.height(); ++y)
-    {
-      const auto sourceRow = image.height() - (y + 1);
-      const auto yOffsetSource = image.width() * sourceRow;
-      const auto yOffset = y * image.width() * 4;
-
-      for (std::size_t x = 0; x < image.width(); ++x)
-      {
-        const auto& pixel = image.pixelData()[x + yOffsetSource];
-        pixelData[x * 4 + yOffset] = pixel.r;
-        pixelData[x * 4 + 1 + yOffset] = pixel.g;
-        pixelData[x * 4 + 2 + yOffset] = pixel.b;
-        pixelData[x * 4 + 3 + yOffset] = pixel.a;
-      }
-    }
+    // OpenGL wants pixel data in bottom-up format, so we need to flip the
+    // image
+    const auto flippedImage = image.flipped();
 
     const auto handle = createGlTexture(
-      GLsizei(image.width()), GLsizei(image.height()), pixelData.data());
+      GLsizei(flippedImage.width()),
+      GLsizei(flippedImage.height()),
+      flippedImage.pixelData().data());
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
 
     ++mNumTextures;
@@ -1165,6 +1154,19 @@ struct Renderer::Impl
     }
 
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+  }
+
+  base::Size<int> currentRenderTargetSize() const
+  {
+    const auto& state = mStateStack.back();
+    if (state.mRenderTargetTexture != 0)
+    {
+      const auto iData = mRenderTargetDict.find(state.mRenderTargetTexture);
+      assert(iData != mRenderTargetDict.end());
+      return iData->second.mSize;
+    }
+
+    return mWindowSize;
   }
 };
 
@@ -1311,6 +1313,12 @@ std::optional<base::Rect<int>> Renderer::clipRect() const
 }
 
 
+base::Size<int> Renderer::currentRenderTargetSize() const
+{
+  return mpImpl->currentRenderTargetSize();
+}
+
+
 base::Size<int> Renderer::windowSize() const
 {
   return mpImpl->mWindowSize;
@@ -1320,6 +1328,12 @@ base::Size<int> Renderer::windowSize() const
 void Renderer::setRenderTarget(const TextureId target)
 {
   mpImpl->setRenderTarget(target);
+}
+
+
+data::Image Renderer::grabCurrentFramebuffer()
+{
+  return mpImpl->grabCurrentFramebuffer();
 }
 
 

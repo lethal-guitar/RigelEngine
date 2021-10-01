@@ -23,6 +23,7 @@
 #include "engine/timing.hpp"
 #include "game_logic/demo_player.hpp"
 #include "loader/duke_script_loader.hpp"
+#include "loader/png_image.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "ui/imgui_integration.hpp"
 
@@ -35,6 +36,9 @@
 RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <ctime>
+
 
 namespace rigel
 {
@@ -214,6 +218,27 @@ std::optional<renderer::FpsLimiter>
   }
 }
 
+
+std::string makeScreenshotFilename()
+{
+  using namespace std::literals;
+
+  const auto time =
+    std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  const auto pLocalTime = std::localtime(&time);
+
+  std::array<char, 32> dateTimeBuffer;
+  dateTimeBuffer.fill(0);
+
+  std::strftime(
+    dateTimeBuffer.data(),
+    dateTimeBuffer.size(),
+    "%Y-%m-%d_%H%M%S",
+    pLocalTime);
+
+  return "RigelEngine_"s + dateTimeBuffer.data() + ".png";
+}
+
 } // namespace
 
 
@@ -308,6 +333,12 @@ auto Game::runOneFrame() -> std::optional<StopReason>
 
     updateAndRender(elapsed);
     mEventQueue.clear();
+  }
+
+  if (mScreenshotRequested)
+  {
+    takeScreenshot();
+    mScreenshotRequested = false;
   }
 
   swapBuffers();
@@ -423,6 +454,10 @@ bool Game::handleEvent(const SDL_Event& event)
       if (event.key.keysym.sym == SDLK_F6)
       {
         options.mShowFpsCounter = !options.mShowFpsCounter;
+      }
+      else if (event.key.keysym.sym == SDLK_F12)
+      {
+        mScreenshotRequested = true;
       }
       return false;
 
@@ -664,6 +699,27 @@ void Game::enumerateGameControllers()
         sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)});
     }
   }
+}
+
+
+void Game::takeScreenshot()
+{
+  namespace fs = std::filesystem;
+
+  const auto shot = mRenderer.grabCurrentFramebuffer();
+  const auto filename = makeScreenshotFilename();
+  const auto screenshotsDir =
+    fs::u8path(effectiveGamePath(mCommandLineOptions, *mpUserProfile)) /
+    "screenshots";
+
+  std::error_code ec;
+
+  if (!fs::exists(screenshotsDir, ec) && !ec)
+  {
+    fs::create_directory(screenshotsDir, ec);
+  }
+
+  loader::savePng((screenshotsDir / filename).u8string(), shot);
 }
 
 

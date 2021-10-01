@@ -404,8 +404,10 @@ public:
    */
   void setRenderTarget(TextureId target);
 
+  data::Image grabCurrentFramebuffer();
+
+  base::Size<int> currentRenderTargetSize() const;
   base::Size<int> windowSize() const;
-  base::Size<int> maxWindowSize() const;
 
   base::Vector globalTranslation() const;
   base::Point<float> globalScale() const;

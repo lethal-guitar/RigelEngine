@@ -46,6 +46,8 @@ public:
 
   std::size_t height() const { return mHeight; }
 
+  Image flipped() const;
+
   void insertImage(std::size_t x, std::size_t y, const Image& image);
   void insertImage(
     std::size_t x,
