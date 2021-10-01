@@ -1088,27 +1088,14 @@ struct Renderer::Impl
   {
     submitBatch();
 
-    // OpenGL wants pixel data in bottom-up format, so transform it accordingly
-    std::vector<std::uint8_t> pixelData;
-    pixelData.resize(image.width() * image.height() * 4);
-    for (std::size_t y = 0; y < image.height(); ++y)
-    {
-      const auto sourceRow = image.height() - (y + 1);
-      const auto yOffsetSource = image.width() * sourceRow;
-      const auto yOffset = y * image.width() * 4;
-
-      for (std::size_t x = 0; x < image.width(); ++x)
-      {
-        const auto& pixel = image.pixelData()[x + yOffsetSource];
-        pixelData[x * 4 + yOffset] = pixel.r;
-        pixelData[x * 4 + 1 + yOffset] = pixel.g;
-        pixelData[x * 4 + 2 + yOffset] = pixel.b;
-        pixelData[x * 4 + 3 + yOffset] = pixel.a;
-      }
-    }
+    // OpenGL wants pixel data in bottom-up format, so we need to flip the
+    // image
+    const auto flippedImage = image.flipped();
 
     const auto handle = createGlTexture(
-      GLsizei(image.width()), GLsizei(image.height()), pixelData.data());
+      GLsizei(flippedImage.width()),
+      GLsizei(flippedImage.height()),
+      flippedImage.pixelData().data());
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
 
     ++mNumTextures;
