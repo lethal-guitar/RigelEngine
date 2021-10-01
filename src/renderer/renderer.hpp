@@ -404,6 +404,8 @@ public:
    */
   void setRenderTarget(TextureId target);
 
+  data::Image grabCurrentFramebuffer();
+
   base::Size<int> currentRenderTargetSize() const;
   base::Size<int> windowSize() const;
 

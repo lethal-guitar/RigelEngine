@@ -805,6 +805,20 @@ struct Renderer::Impl
     updateState(mStateStack.back().mRenderTargetTexture, target);
   }
 
+  data::Image grabCurrentFramebuffer()
+  {
+    submitBatch();
+
+    const auto size = currentRenderTargetSize();
+    auto pixels = data::PixelBuffer{size_t(size.width * size.height * 4)};
+    glReadPixels(
+      0, 0, size.width, size.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+    return data::Image{
+      std::move(pixels), size_t(size.width), size_t(size.height)}
+      .flipped();
+  }
+
 
   template <typename StateT>
   void updateState(StateT& state, const StateT& newValue)
@@ -1314,6 +1328,12 @@ base::Size<int> Renderer::windowSize() const
 void Renderer::setRenderTarget(const TextureId target)
 {
   mpImpl->setRenderTarget(target);
+}
+
+
+data::Image Renderer::grabCurrentFramebuffer()
+{
+  return mpImpl->grabCurrentFramebuffer();
 }
 
 
