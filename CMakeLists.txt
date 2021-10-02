@@ -17,7 +17,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
-option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 
