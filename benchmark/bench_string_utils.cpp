@@ -19,9 +19,11 @@
 #include <base/string_utils.hpp>
 
 
-static void BMStringSplit(benchmark::State &state) {
+static void BMStringSplit(benchmark::State& state)
+{
   std::string const kInputString = "Hello, world";
-  for (auto _ : state) {
+  for (auto _ : state)
+  {
     const auto v = rigel::strings::split(kInputString, ',');
     benchmark::DoNotOptimize(v);
     benchmark::ClobberMemory();
@@ -30,20 +32,24 @@ static void BMStringSplit(benchmark::State &state) {
 
 BENCHMARK(BMStringSplit);
 
-static void BMStartsWithTrueCase(benchmark::State &state) {
+static void BMStartsWithTrueCase(benchmark::State& state)
+{
   const std::string kInputString = "12341234";
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(
-      rigel::strings::startsWith(kInputString, "1234"));
+  for (auto _ : state)
+  {
+    benchmark::DoNotOptimize(rigel::strings::startsWith(kInputString, "1234"));
   }
 }
 
 BENCHMARK(BMStartsWithTrueCase);
 
 
-static void BMStartsWithTrueCaseLongString(benchmark::State &state) {
-  const std::string kInputString = "Iid7tUoNzQaGQjb9QqmuvqVQU9XbPmOvVbOI5ozuKdQN9bdHeP";
-  for (auto _ : state) {
+static void BMStartsWithTrueCaseLongString(benchmark::State& state)
+{
+  const std::string kInputString =
+    "Iid7tUoNzQaGQjb9QqmuvqVQU9XbPmOvVbOI5ozuKdQN9bdHeP";
+  for (auto _ : state)
+  {
     benchmark::DoNotOptimize(
       rigel::strings::startsWith(kInputString, "Iid7tUoNzQaGQjb9QqmuvqVQU9Xb"));
   }
@@ -51,48 +57,52 @@ static void BMStartsWithTrueCaseLongString(benchmark::State &state) {
 
 BENCHMARK(BMStartsWithTrueCaseLongString);
 
-static void BMStartsWithFalseCase(benchmark::State &state) {
+static void BMStartsWithFalseCase(benchmark::State& state)
+{
   const std::string kInputString = "12341234";
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(
-      rigel::strings::startsWith(kInputString, "234"));
+  for (auto _ : state)
+  {
+    benchmark::DoNotOptimize(rigel::strings::startsWith(kInputString, "234"));
   }
 }
 
 BENCHMARK(BMStartsWithFalseCase);
 
 
-static void BMTrimLeft(benchmark::State &state) {
-  for (auto _ : state) {
+static void BMTrimLeft(benchmark::State& state)
+{
+  for (auto _ : state)
+  {
     state.PauseTiming();
     std::string kInputString = "  1234  ";
     state.ResumeTiming();
-    benchmark::DoNotOptimize(
-      rigel::strings::trimLeft(kInputString));
+    benchmark::DoNotOptimize(rigel::strings::trimLeft(kInputString));
   }
 }
 
 BENCHMARK(BMTrimLeft);
 
-static void BMTrimRight(benchmark::State &state) {
-  for (auto _ : state) {
+static void BMTrimRight(benchmark::State& state)
+{
+  for (auto _ : state)
+  {
     state.PauseTiming();
     std::string kInputString = "  1234  ";
     state.ResumeTiming();
-    benchmark::DoNotOptimize(
-      rigel::strings::trimRight(kInputString));
+    benchmark::DoNotOptimize(rigel::strings::trimRight(kInputString));
   }
 }
 
 BENCHMARK(BMTrimRight);
 
-static void BMTrim(benchmark::State &state) {
-  for (auto _ : state) {
+static void BMTrim(benchmark::State& state)
+{
+  for (auto _ : state)
+  {
     state.PauseTiming();
     std::string kInputString = "  1234  ";
     state.ResumeTiming();
-    benchmark::DoNotOptimize(
-      rigel::strings::trim(kInputString));
+    benchmark::DoNotOptimize(rigel::strings::trim(kInputString));
   }
 }
 
