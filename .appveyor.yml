@@ -31,7 +31,7 @@ before_build:
 
     - mkdir build
     - cd build
-    - cmake .. -G "Visual Studio 16 2019" -DBUILD_BENCHMARKS=ON -DBUILD_TESTS=ON
+    - cmake .. -G "Visual Studio 16 2019" -DWARNINGS_AS_ERRORS=ON -DBUILD_BENCHMARKS=ON -DBUILD_TESTS=ON
     - cd ..
 
 build:
