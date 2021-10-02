@@ -21,21 +21,6 @@ namespace rigel::data
 
 struct Messages
 {
-
-  static constexpr auto PressKeyToUse = "Press a key to use..";
-
-  static constexpr auto KeyAlreadyUsed =
-    "THAT KEY IS ALREADY IN USE!\n   Select another key.";
-
-  static constexpr auto CalibrationTopLeft =
-    "Move the joystick towards the\nUPPER LEFT and press a button.";
-
-  static constexpr auto CalibrationBottomRight =
-    "Move the joystick towards the\nLOWER RIGHT and press a button.";
-
-  static constexpr auto CalibrationButtons =
-    "Select fire button.  The other\nbutton is used for jumping.";
-
   static constexpr auto DestroyedEverything =
     "DUKE... YOU HAVE DESTROYED*EVERYTHING.  EXCELLENT...";
 
