@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: DoozyX/clang-format-lint-action@v0.12
       with:
-        source: 'src test modding_tools'
+        source: 'src test'
         extensions: 'hpp,cpp,ipp'
         clangFormatVersion: 11
   build_wasm:
@@ -61,9 +61,9 @@ jobs:
     - name: Install dependencies
       run: sudo ./docker/ubuntu-deps.sh
     - name: Run CMake (debug)
-      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
     - name: Run CMake (release)
-      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON -DBUILD_BENCHMARKS=ON
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=ON
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)
@@ -81,9 +81,9 @@ jobs:
     - name: Install dependencies
       run: brew install sdl2 sdl2_mixer boost
     - name: Run CMake (debug)
-      run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON
+      run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
     - name: Run CMake (release)
-      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON -DBUILD_BENCHMARKS=ON
+      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=ON
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)
