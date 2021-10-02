@@ -19,6 +19,8 @@ endif()
 option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(BUILD_MODDING_TOOLS "Build modding tools" OFF)
+option(BUILD_TESTS "Build tests" OFF)
 
 # Dependencies
 ###############################################################################
@@ -88,10 +90,14 @@ add_subdirectory(3rd_party)
 add_subdirectory(src)
 
 if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
-    enable_testing()
+    if(BUILD_MODDING_TOOLS)
+        add_subdirectory(modding_tools)
+    endif()
 
-    add_subdirectory(modding_tools)
-    add_subdirectory(test)
+    if(BUILD_TESTS)
+        enable_testing()
+        add_subdirectory(test)
+    endif()
 endif()
 
 if(BUILD_BENCHMARKS)
