@@ -22,7 +22,7 @@
 namespace rigel
 {
 
-/** Initialize platform, create game, run main loop
+/** Initialize platform, create game, run main loop. Returns exit code
  *
  * This function is meant for environments where Rigel can own the main loop.
  * It keeps running until the user quits the game.
@@ -32,6 +32,6 @@ namespace rigel
  * restarting the game in case the user switches to a different game path from
  * the options menu.
  */
-void gameMain(const CommandLineOptions& options);
+int gameMain(const CommandLineOptions& options);
 
 } // namespace rigel
