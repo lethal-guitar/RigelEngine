@@ -366,8 +366,7 @@ int main(int argc, char** argv)
         // for why we're doing this.
         win32IoGuard.reset();
 
-        gameMain(config);
-        return 0;
+        return gameMain(config);
       },
 
       [](const int exitCode) { return exitCode; });
