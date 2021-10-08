@@ -16,12 +16,12 @@
 
 #include "damage_system.hpp"
 
-#include "common/global.hpp"
 #include "data/player_model.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
 

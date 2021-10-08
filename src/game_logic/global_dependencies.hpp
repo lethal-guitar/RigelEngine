@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include "base/color.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "data/tutorial_messages.hpp"
 #include "engine/base_components.hpp"
 #include "game_logic/input.hpp"
 
@@ -25,6 +27,8 @@ RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <string>
+#include <utility>
 
 namespace rigel
 {
@@ -105,3 +109,118 @@ inline bool isBboxOnScreen(
 }
 
 } // namespace rigel::game_logic
+
+
+namespace rigel::events
+{
+
+struct ScreenFlash
+{
+  ScreenFlash() = default;
+  explicit ScreenFlash(base::Color color)
+    : mColor(color)
+  {
+  }
+
+  base::Color mColor = base::Color{255, 255, 255, 255};
+};
+
+
+struct ScreenShake
+{
+  int mAmount;
+};
+
+
+struct PlayerMessage
+{
+  PlayerMessage() = default;
+  explicit PlayerMessage(std::string text)
+    : mText(std::move(text))
+  {
+  }
+
+  std::string mText;
+};
+
+
+struct TutorialMessage
+{
+  TutorialMessage() = default;
+  explicit TutorialMessage(const data::TutorialMessageId id)
+    : mId(id)
+  {
+  }
+
+  data::TutorialMessageId mId;
+};
+
+
+struct CheckPointActivated
+{
+  base::Vector mPosition;
+};
+
+
+struct MissileDetonated
+{
+  // Specifies the tile above the missile's top-left
+  base::Vector mImpactPosition;
+};
+
+
+struct PlayerDied
+{
+};
+
+struct PlayerTookDamage
+{
+};
+
+struct PlayerFiredShot
+{
+};
+
+struct PlayerTeleported
+{
+  base::Vector mNewPosition;
+};
+
+
+struct CloakPickedUp
+{
+  base::Vector mPosition;
+};
+
+struct CloakExpired
+{
+};
+
+struct RapidFirePickedUp
+{
+};
+
+
+struct ExitReached
+{
+  bool mCheckRadarDishes = true;
+};
+
+
+struct DoorOpened
+{
+  entityx::Entity mEntity;
+};
+
+
+struct BossActivated
+{
+  entityx::Entity mBossEntity;
+};
+
+struct BossDestroyed
+{
+  entityx::Entity mBossEntity;
+};
+
+} // namespace rigel::events

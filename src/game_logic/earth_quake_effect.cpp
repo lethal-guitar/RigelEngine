@@ -17,8 +17,8 @@
 #include "earth_quake_effect.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "engine/random_number_generator.hpp"
+#include "game_logic/global_dependencies.hpp"
 
 
 namespace rigel::game_logic

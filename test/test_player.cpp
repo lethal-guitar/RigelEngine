@@ -20,7 +20,6 @@
 #include <base/container_utils.hpp>
 #include <base/spatial_types_printing.hpp>
 #include <base/warnings.hpp>
-#include <common/global.hpp>
 #include <data/game_options.hpp>
 #include <data/map.hpp>
 #include <data/player_model.hpp>
@@ -30,6 +29,7 @@
 #include <engine/random_number_generator.hpp>
 #include <engine/sprite_tools.hpp>
 #include <engine/visual_components.hpp>
+#include <game_logic/global_dependencies.hpp>
 #include <game_logic/player.hpp>
 #include <game_logic/player/components.hpp>
 

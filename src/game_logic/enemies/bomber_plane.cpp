@@ -18,7 +18,6 @@
 
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
@@ -26,6 +25,7 @@
 #include "engine/movement.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/effect_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 #include "loader/palette.hpp"

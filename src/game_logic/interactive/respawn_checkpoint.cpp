@@ -16,13 +16,13 @@
 
 #include "respawn_checkpoint.hpp"
 
-#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/behavior_controller.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
 
