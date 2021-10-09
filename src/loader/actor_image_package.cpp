@@ -17,6 +17,7 @@
 #include "actor_image_package.hpp"
 
 #include "base/container_utils.hpp"
+#include "base/string_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "loader/ega_image_decoder.hpp"
@@ -24,6 +25,7 @@
 #include "loader/png_image.hpp"
 
 #include <cassert>
+#include <fstream>
 #include <utility>
 
 
@@ -96,6 +98,43 @@ ActorImagePackage::ActorImagePackage(
         ActorID(index), ActorHeader{drawIndex, move(frameHeaders)});
     }
   }
+
+  if (mMaybeReplacementsPath)
+  {
+    std::ifstream sizeOverrideFile{
+      *mMaybeReplacementsPath + "/actor_size_overrides.txt"};
+
+    if (sizeOverrideFile.is_open())
+    {
+      for (std::string line; std::getline(sizeOverrideFile, line);)
+      {
+        const auto keyAndValue = strings::split(line, ':');
+        if (keyAndValue.size() != 2)
+        {
+          continue;
+        }
+
+        const auto keyParts = strings::split(keyAndValue[0], ' ');
+        const auto valueParts =
+          strings::split(strings::trim(keyAndValue[1]), ' ');
+        if (keyParts.size() != 2 || valueParts.size() != 4)
+        {
+          continue;
+        }
+
+        const auto id = std::stoi(keyParts[0]);
+        const auto frame = std::stoi(keyParts[1]);
+        const auto x = std::stoi(valueParts[0]);
+        const auto y = std::stoi(valueParts[1]);
+        const auto w = std::stoi(valueParts[2]);
+        const auto h = std::stoi(valueParts[3]);
+
+        mSizeOverrides.insert(
+          {IdAndFrame{static_cast<data::ActorID>(id), frame},
+           base::Rect<int>{{x, y}, {w, h}}});
+      }
+    }
+  }
 }
 
 
@@ -125,6 +164,14 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
 {
   return utils::transformed(
     header.mFrames, [&, this, frame = 0](const auto& frameHeader) mutable {
+      const auto iSizeOverride = mSizeOverrides.find({id, frame});
+      const auto offset = iSizeOverride != mSizeOverrides.end()
+        ? iSizeOverride->second.topLeft
+        : frameHeader.mDrawOffset;
+      const auto size = iSizeOverride != mSizeOverrides.end()
+        ? iSizeOverride->second.size
+        : frameHeader.mSizeInTiles;
+
       auto maybeReplacement = mMaybeReplacementsPath
         ? loadPng(replacementImagePath(
             *mMaybeReplacementsPath, static_cast<int>(id), frame))
@@ -132,8 +179,8 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
       ++frame;
 
       return ActorData::Frame{
-        frameHeader.mDrawOffset,
-        frameHeader.mSizeInTiles,
+        offset,
+        size,
         maybeReplacement ? *maybeReplacement : loadImage(frameHeader, palette)};
     });
 }

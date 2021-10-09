@@ -25,6 +25,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -84,6 +85,8 @@ private:
     std::vector<ActorFrameHeader> mFrames;
   };
 
+  using IdAndFrame = std::tuple<data::ActorID, int>;
+
   std::vector<ActorData::Frame> loadFrameImages(
     data::ActorID id,
     const ActorHeader& header,
@@ -96,6 +99,7 @@ private:
 private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
+  std::map<IdAndFrame, base::Rect<int>> mSizeOverrides;
   std::vector<int> mDrawIndexById;
   std::optional<std::string> mMaybeReplacementsPath;
 };
