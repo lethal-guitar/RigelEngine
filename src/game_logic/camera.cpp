@@ -16,10 +16,10 @@
 
 #include "camera.hpp"
 
-#include "common/global.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "engine/physical_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 
 #include <algorithm>

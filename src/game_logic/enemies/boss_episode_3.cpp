@@ -18,7 +18,6 @@
 
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"

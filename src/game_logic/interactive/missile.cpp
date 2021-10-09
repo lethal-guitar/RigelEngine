@@ -17,7 +17,6 @@
 #include "missile.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"

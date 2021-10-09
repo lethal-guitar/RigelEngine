@@ -17,7 +17,6 @@
 #include "boss_episode_4.hpp"
 
 #include "base/math_tools.hpp"
-#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"

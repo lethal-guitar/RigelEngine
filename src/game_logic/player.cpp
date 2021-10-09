@@ -19,7 +19,6 @@
 #include "base/match.hpp"
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "data/game_options.hpp"
 #include "data/map.hpp"
 #include "data/player_model.hpp"
@@ -31,6 +30,7 @@
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/effect_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "loader/palette.hpp"
 

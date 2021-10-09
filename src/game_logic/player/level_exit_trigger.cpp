@@ -16,7 +16,6 @@
 
 #include "level_exit_trigger.hpp"
 
-#include "common/global.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 

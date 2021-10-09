@@ -12,7 +12,6 @@ set(core_sources
     common/game_mode.cpp
     common/game_mode.hpp
     common/game_service_provider.hpp
-    common/global.hpp
     common/json_utils.cpp
     common/json_utils.hpp
     base/string_utils.cpp
@@ -188,6 +187,7 @@ set(core_sources
     game_logic/entity_factory.hpp
     game_logic/game_world.cpp
     game_logic/game_world.hpp
+    game_logic/global_dependencies.hpp
     game_logic/hazards/lava_fountain.cpp
     game_logic/hazards/lava_fountain.hpp
     game_logic/hazards/slime_pipe.cpp

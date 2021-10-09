@@ -17,7 +17,6 @@
 #include "dying_boss.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "data/player_model.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"

@@ -17,7 +17,6 @@
 #include "boss_episode_2.hpp"
 
 #include "base/match.hpp"
-#include "common/global.hpp"
 #include "engine/base_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/sprite_tools.hpp"

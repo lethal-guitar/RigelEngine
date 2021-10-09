@@ -17,7 +17,6 @@
 #include "dynamic_geometry_system.hpp"
 
 #include "common/game_service_provider.hpp"
-#include "common/global.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
@@ -29,6 +28,7 @@
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
+#include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 
 
