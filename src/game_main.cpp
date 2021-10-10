@@ -239,6 +239,8 @@ int gameMain(const CommandLineOptions& options)
     ui::showErrorMessage(pWindow.get(), error.what());
     return -2;
   }
+
+  return 0;
 }
 
 } // namespace rigel
