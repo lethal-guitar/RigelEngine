@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: DoozyX/clang-format-lint-action@v0.12
       with:
-        source: 'src test modding_tools'
+        source: 'benchmark src test'
         extensions: 'hpp,cpp,ipp'
         clangFormatVersion: 11
   build_wasm:
@@ -45,7 +45,7 @@ jobs:
     - name: Fetch game data
       run: bash -c '[ -d DUKE2 ] || (wget https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip && unzip DUKE2.zip)'
     - name: Run CMake
-      run: emcmake cmake -H. -Bbuild_wasm -DCMAKE_BUILD_TYPE=Release -DWEBASSEMBLY_GAME_PATH=$(pwd)/DUKE2
+      run: emcmake cmake -H. -Bbuild_wasm -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=ON -DWEBASSEMBLY_GAME_PATH=$(pwd)/DUKE2
     - name: Build
       run: make -j2 -Cbuild_wasm
     - uses: actions/upload-artifact@v2
@@ -61,9 +61,9 @@ jobs:
     - name: Install dependencies
       run: sudo ./docker/ubuntu-deps.sh
     - name: Run CMake (debug)
-      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON
     - name: Run CMake (release)
-      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON -DBUILD_BENCHMARKS=ON
+      run: CC=gcc-8 CXX=g++-8 cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=ON
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)
@@ -81,9 +81,9 @@ jobs:
     - name: Install dependencies
       run: brew install sdl2 sdl2_mixer boost
     - name: Run CMake (debug)
-      run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON
+      run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON
     - name: Run CMake (release)
-      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON -DBUILD_BENCHMARKS=ON
+      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=ON
     - name: Build (debug)
       run: cd build_dbg && make -j2
     - name: Build (release)

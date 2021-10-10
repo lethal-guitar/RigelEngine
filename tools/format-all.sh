@@ -16,4 +16,4 @@ if ! $CLANG_FORMAT --version | grep "11\.0\.0" > /dev/null 2>&1; then
     exit 1
 fi
 
-find "$(pwd)/modding_tools" "$(pwd)/src" "$(pwd)/test" -iname *.\[chi\]pp -exec $CLANG_FORMAT -i {} +
+find "$(pwd)/benchmark" "$(pwd)/src" "$(pwd)/test" -iname *.\[chi\]pp -exec $CLANG_FORMAT -i {} +

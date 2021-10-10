@@ -7,7 +7,7 @@ branches:
         - master
 
 environment:
-    BOOST_ROOT: C:\Libraries\boost_1_71_0
+    BOOST_ROOT: C:\Libraries\boost_1_73_0
 
 install:
     - git submodule update --init --recursive
@@ -31,7 +31,7 @@ before_build:
 
     - mkdir build
     - cd build
-    - cmake .. -G "Visual Studio 16 2019" -DBUILD_BENCHMARKS=ON -DBUILD_TESTS=ON -DBUILD_MODDING_TOOLS=ON
+    - cmake .. -G "Visual Studio 16 2019" -DWARNINGS_AS_ERRORS=ON -DBUILD_BENCHMARKS=ON -DBUILD_TESTS=ON
     - cd ..
 
 build:
@@ -45,6 +45,7 @@ before_test:
 test_script:
     - cd build
     - ctest
+    - C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe --help
 
 after_build:
   - 7z a rigelengine_win_x64.zip C:\projects\rigelengine\build\src\%CONFIGURATION%\RigelEngine.exe %SDL2DIR%\lib\x64\SDL2.dll %SDL2MIXERDIR%\lib\x64\*.dll

@@ -184,7 +184,7 @@ void initAndRunGame(
 } // namespace
 
 
-void gameMain(const CommandLineOptions& options)
+int gameMain(const CommandLineOptions& options)
 {
   using base::defer;
 
@@ -237,7 +237,10 @@ void gameMain(const CommandLineOptions& options)
   catch (const std::exception& error)
   {
     ui::showErrorMessage(pWindow.get(), error.what());
+    return -2;
   }
+
+  return 0;
 }
 
 } // namespace rigel
