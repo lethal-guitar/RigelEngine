@@ -1,7 +1,7 @@
 # How to build RigelEngine from source
 
 * [Cloning & initializing submodules](#get-the-sources)
-* [A note about warnings as errors](#a-note-about-warnings-as-errors)
+* [Build configuration](#build-configuration)
 * [Pre-requisites and dependencies](#dependencies)
 * [Linux builds](#linux-build-instructions)
     * [Ubuntu 19.04 or newer](#linux-build-instructions-194)
@@ -30,16 +30,26 @@ cd RigelEngine
 git submodule update --init --recursive
 ```
 
-### A note about warnings as errors
+### Build configuration
 
-By default, warnings during compilation are treated as errors. This behavior
-can be changed by passing `-DWARNINGS_AS_ERRORS=OFF` to CMake when configuring.
-If you plan to work on RigelEngine, I'd recommend leaving this on, as you might
-otherwise have your build fail on CI despite it building successfully locally.
+There are a few build options that can be configured when invoking CMake.
+You don't need to worry about most of these if you just want to build RigelEngine in order to use it.
+If you plan to work on RigelEngine, read on.
 
-On the other hand, if you only want to use RigelEngine, but there are no
-pre-built binaries for your platform, disabling warnings as errors is
-recommended.
+Each option can be either `ON` or `OFF`. The default is `OFF` for all options.
+
+* `USE_GL_ES`: Build against the OpenGL ES 2.0 API instead of OpenGL 3.0
+* `WARNINGS_AS_ERRORS`: Make compiler warnings fail the build
+* `BUILD_TESTS`: Build the unit tests (`tests` target) 
+* `BUILD_BENCHMARKS`: Build the benchmarks (`benchmarks` target)
+
+For developing RigelEngine, I recommend enabling warnings as errors and tests:
+
+```
+cmake . -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON
+```
+
+This is how the project is built on CI.
 
 ### <a name="dependencies">Pre-requisites and dependencies</a>
 
@@ -79,7 +89,7 @@ These are:
 * [STB image](https://github.com/nothings/stb) image reading/writing library
 * [STB rect_pack](https://github.com/nothings/stb) rectangle packer for building texture atlases
 
-If you want to build benchmarks, you need to enable `BUILD_BENCHMARKS` (via CMake's `-DBUILD_BENCHMARKS=ON`). Doing so will automatically fetch googlebenchmark. You can then build the `benchmarks` target (this will also build googlebenchmark). Make sure you build in `Release` and disable CPU scaling (see: [link](https://github.com/google/benchmark#disabling-cpu-frequency-scaling) for more details).
+Enabling `BUILD_BENCHMARKS` will automatically fetch googlebenchmark. You can then build the `benchmarks` target (this will also build googlebenchmark). Make sure you build in `Release` and disable CPU scaling (see: [link](https://github.com/google/benchmark#disabling-cpu-frequency-scaling) for more details).
 
 ### <a name="linux-build-instructions">Linux builds</a>
 
