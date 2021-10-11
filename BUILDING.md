@@ -38,7 +38,7 @@ If you plan to work on RigelEngine, read on.
 
 Each option can be either `ON` or `OFF`. The default is `OFF` for all options.
 
-* `USE_GL_ES`: Build against the OpenGL ES 2.0 API instead of OpenGL 3.0
+* `USE_GL_ES`: Build against the OpenGL ES 2.0 API instead of OpenGL 3.0. See [OpenGL ES version](#linux-build-instructions-gles) for more info.
 * `WARNINGS_AS_ERRORS`: Make compiler warnings fail the build
 * `BUILD_TESTS`: Build the unit tests (`tests` target) 
 * `BUILD_BENCHMARKS`: Build the benchmarks (`benchmarks` target)
@@ -105,21 +105,22 @@ as long as all necessary dependencies are available at recent enough versions.
 #### <a name="linux-build-instructions-194">Ubuntu 19.04 or newer</a>
 
 ```bash
-# Install all external dependencies, as well as the CMake build system:
+# Install all external dependencies, as well as the CMake build system
+# (libboost-all-dev is optional):
 sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
 
 # Configure and build (run inside your clone of the repo):
 mkdir build
 cd build
-cmake .. -DWARNINGS_AS_ERRORS=OFF
+cmake ..
 make -j8
 
 # NOTE: The -j<NUM_PROCESSES> argument to 'make' enables multi-core
 # compilation, '8' is a good number for a 4-core machine with hyperthreading.
 # You may want to tweak this number depending on your actual CPU configuration.
 #
-# If you plan to develop RigelEngine, I recommend dropping the
-# -DWARNINGS_AS_ERRORS part - see the note about warnings as errors above.
+# If you plan to develop RigelEngine, I recommend adding
+# -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON to the cmake command.
 
 # Now run it!
 ./src/RigelEngine
@@ -134,6 +135,7 @@ has to be built from source or installed via a PPA.
 
 ```bash
 # Install all external dependencies, and gcc 8. CMake will be built from source.
+# Again, libboost-all-dev is optional.
 sudo apt-get install g++-8 libboost-all-dev libsdl2-dev libsdl2-mixer-dev
 
 # Now we need to install a newer version of CMake. If you already have CMake
@@ -165,7 +167,7 @@ export CC=`which gcc-8`
 export CXX=`which g++-8`
 
 # Finally, we can configure and build as usual (see above).
-cmake .. -DWARNINGS_AS_ERRORS=OFF
+cmake ..
 make -j8 # adjust depending on number of CPU cores in your machine
 
 # Now run it!
@@ -175,7 +177,7 @@ make -j8 # adjust depending on number of CPU cores in your machine
 #### <a name="linux-build-instructions-fedora">Fedora 31 or newer</a>
 
 On Fedora, the following command installs all
-required dependencies:
+required and optional dependencies:
 
 ```bash
 sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel SDL2_mixer-devel
@@ -191,18 +193,12 @@ On Linux, RigelEngine can be built in two versions: Regular and OpenGL ES.
 The latter is useful for system with an older graphics card (e.g. Intel integrated GPU)
 which doesn't support OpenGL 3.0.
 
-This might require installing the GL ES driver. On Ubuntu/Debian, you can do that as follows:
-
-```
-sudo apt-get install libgles2-mesa-dev
-```
-
 To build the GL ES version, pass `-DUSE_GL_ES=ON` when running CMake, then build as usual:
 
 ```bash
 mkdir build
 cd build
-cmake .. -DUSE_GL_ES=ON -DWARNINGS_AS_ERRORS=OFF
+cmake .. -DUSE_GL_ES=ON
 make -j8 # adjust depending on number of CPU cores in your machine
 ```
 
@@ -223,7 +219,7 @@ When building, you need to enable OpenGL ES Support:
 ```bash
 mkdir build
 cd build
-cmake .. -DUSE_GL_ES=ON -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=OFF
+cmake .. -DUSE_GL_ES=ON
 make
 ```
 
@@ -267,12 +263,13 @@ docker run -ti --device=/dev/dri:/dev/dri --cap-add=SYS_PTRACE --security-opt se
 ```
 # Install dependencies
 # You might need to run brew update.
+# boost is optional.
 brew install cmake sdl2 sdl2_mixer boost
 
 # Configure & build
 mkdir build
 cd build
-cmake .. -DWARNINGS_AS_ERRORS=OFF
+cmake ..
 make
 
 # Now run it!
@@ -285,6 +282,7 @@ make
 
 ```bash
 # You might need to run brew update.
+# boost is optional.
 brew install llvm@8 cmake sdl2 sdl2_mixer boost
 
 # Set up environment variables so that CMake picks up the newly installed clang -
@@ -299,7 +297,7 @@ unset rigel_llvm_path;
 # Now, the regular build via CMake should work:
 mkdir build
 cd build
-cmake .. -DWARNINGS_AS_ERRORS=OFF
+cmake
 make
 
 # Now run it!
@@ -324,7 +322,7 @@ So in case of errors, I'd recommend double checking the path first.
 #### <a name="windows-build-instructions-64">64-bit builds</a>
 
 ```bash
-# Install dependencies
+# Install dependencies, boost is optional
 vcpkg install boost-program-options:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
 
 # Run CMake
@@ -332,7 +330,7 @@ mkdir build
 cd build
 
 # Remember to replace <vcpkg_root> with the path to where you installed vcpkg!
-cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_GENERATOR_PLATFORM=x64
+cmake .. -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_GENERATOR_PLATFORM=x64
 
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
@@ -344,7 +342,7 @@ start RigelEngine.sln
 If you'd like to build for 32-bit and have trouble sorting out build errors, feel free to [open an issue](https://github.com/lethal-guitar/RigelEngine/issues/new/choose) and I'll look into it.
 
 ```bash
-# Install dependencies
+# Install dependencies, boost is optional
 vcpkg install boost-program-options:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
 
 # Run CMake
@@ -352,7 +350,7 @@ mkdir build
 cd build
 
 # Remember to replace <vcpkg_root> with the path to where you installed vcpkg!
-cmake .. -DWARNINGS_AS_ERRORS=OFF -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_GENERATOR_PLATFORM=Win32
+cmake .. -DCMAKE_TOOLCHAIN_FILE=<vckpkg_root>/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_GENERATOR_PLATFORM=Win32
 
 # This will open the generated Visual Studio solution
 start RigelEngine.sln
@@ -369,7 +367,7 @@ You can verify the installation by running the `emcc` command. If it executes wi
 The instructions to build are the same as above, except for the CMake part:
 
 ```bash
-emcmake cmake .. -DWARNINGS_AS_ERRORS=OFF -DWEBASSEMBLY_GAME_PATH=<path-to-duke2-folder>
+emcmake cmake .. -DWEBASSEMBLY_GAME_PATH=<path-to-duke2-folder>
 make
 ```
 
