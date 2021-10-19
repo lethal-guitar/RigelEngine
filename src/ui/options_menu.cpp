@@ -394,6 +394,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
+      ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
       ImGui::EndTabItem();
     }
 
