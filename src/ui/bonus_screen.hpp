@@ -36,6 +36,7 @@ public:
     const std::set<data::Bonus>& achievedBonuses,
     int scoreBeforeAddingBonuses);
 
+  void handleEvent(const SDL_Event& event);
   void updateAndRender(engine::TimeDelta dt);
 
   bool finished() const { return mState.mIsDone; }
