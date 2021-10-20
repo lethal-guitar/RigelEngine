@@ -297,6 +297,8 @@ Game::Game(
   , mSpriteFactory(&mRenderer, &mResources.mActorImagePackage)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
+  mCommandLineOptions.mSkipIntro |= mpUserProfile->mOptions.mSkipIntro;
+
   applyChangedOptions();
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(

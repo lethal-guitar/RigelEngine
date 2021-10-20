@@ -72,10 +72,6 @@ void GameSessionMode::handleEvent(const SDL_Event& event)
       pIngameMode->handleEvent(event);
     },
 
-    [&event](ui::EpisodeEndSequence& endScreens) {
-      endScreens.handleEvent(event);
-    },
-
     [&event, this](HighScoreNameEntry& state) {
       auto fadeOut = [&state, this]() {
         mContext.mpScriptRunner->updateAndRender(0);
@@ -99,11 +95,11 @@ void GameSessionMode::handleEvent(const SDL_Event& event)
       state.mNameEntryWidget.handleEvent(event);
     },
 
-    [&event, this](const HighScoreListDisplay&) {
+    [&event, this](HighScoreListDisplay&) {
       mContext.mpScriptRunner->handleEvent(event);
     },
 
-    [](const auto&) {});
+    [&event](auto&& stage) { stage.handleEvent(event); });
 }
 
 

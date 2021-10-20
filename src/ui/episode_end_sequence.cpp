@@ -189,6 +189,8 @@ void EpisodeEndSequence::handleEvent(const SDL_Event& event)
       }
     },
 
+    [&](ui::BonusScreen& screen) { screen.handleEvent(event); },
+
     [](auto&&) {});
 }
 

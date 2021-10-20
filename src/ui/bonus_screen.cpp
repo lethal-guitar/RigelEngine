@@ -19,6 +19,7 @@
 #include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
 #include "loader/resource_loader.hpp"
+#include "ui/menu_navigation.hpp"
 #include "ui/utils.hpp"
 
 
@@ -104,6 +105,15 @@ BonusScreen::BonusScreen(
   mEvents.emplace_back(Event{time, [](State& state) {
                                state.mIsDone = true;
                              }});
+}
+
+
+void BonusScreen::handleEvent(const SDL_Event& event)
+{
+  if (isConfirmButton(event) || isCancelButton(event))
+  {
+    mState.mIsDone = true;
+  }
 }
 
 
