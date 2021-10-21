@@ -512,7 +512,7 @@ void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
 
 
 LevelData loadLevel(
-  const std::string& mapName,
+  std::string_view mapName,
   const ResourceLoader& resources,
   const Difficulty chosenDifficulty)
 {

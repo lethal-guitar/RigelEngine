@@ -42,7 +42,7 @@ ImU32 toImgui(const base::Color& color);
 renderer::Texture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resources,
-  const std::string& imageName);
+  std::string_view imageName);
 
 engine::TiledTexture makeUiSpriteSheet(
   renderer::Renderer* pRenderer,

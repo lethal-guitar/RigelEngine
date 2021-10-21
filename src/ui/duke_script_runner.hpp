@@ -191,7 +191,7 @@ private:
 
   void updateAndRenderDynamicElements(engine::TimeDelta dt);
 
-  void drawBigText(int x, int y, int colorIndex, const std::string& text) const;
+  void drawBigText(int x, int y, int colorIndex, std::string_view text) const;
 
   void bindCanvas();
   void unbindCanvas();

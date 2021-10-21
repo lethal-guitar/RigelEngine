@@ -51,17 +51,17 @@ public:
 
   // Stateless API
   // --------------------------------------------------------------------------
-  void drawText(int x, int y, const std::string& text) const;
-  void drawSmallWhiteText(int x, int y, const std::string& text) const;
-  void drawMultiLineText(int x, int y, const std::string& text) const;
+  void drawText(int x, int y, std::string_view text) const;
+  void drawSmallWhiteText(int x, int y, std::string_view text) const;
+  void drawMultiLineText(int x, int y, std::string_view text) const;
   void
-    drawBigText(int x, int y, const std::string& text, const base::Color& color)
+    drawBigText(int x, int y, std::string_view text, const base::Color& color)
       const;
   void drawMessageBox(int x, int y, int width, int height) const;
 
   void drawCheckBox(int x, int y, bool isChecked) const;
 
-  void drawBonusScreenText(int x, int y, const std::string& text) const;
+  void drawBonusScreenText(int x, int y, std::string_view text) const;
 
   /** Draw text entry cursor icon at given position/state.
    *

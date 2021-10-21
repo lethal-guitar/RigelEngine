@@ -33,7 +33,7 @@ using namespace std;
 namespace
 {
 
-Script loadSingleScript(const string& source)
+Script loadSingleScript(string_view source)
 {
   auto sourceWithName = string("TestTestTest\r\n\r\n");
   sourceWithName += source;
