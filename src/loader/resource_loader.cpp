@@ -78,14 +78,16 @@ const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
 
 std::optional<data::Image> loadReplacementTilesetIfPresent(
   const fs::path& gamePath,
-  const std::string& name)
+  std::string_view name)
 {
   using namespace std::literals;
 
   std::regex tilesetNameRegex{"^CZONE([0-9A-Z])\\.MNI$", std::regex::icase};
-  std::smatch matches;
+  std::match_results<std::string_view::const_iterator> matches;
 
-  if (!std::regex_match(name, matches, tilesetNameRegex) || matches.size() != 2)
+  if (
+    !std::regex_match(name.begin(), name.end(), matches, tilesetNameRegex) ||
+    matches.size() != 2)
   {
     return {};
   }
@@ -142,14 +144,14 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
 
 
 data::Image
-  ResourceLoader::loadTiledFullscreenImage(const std::string& name) const
+  ResourceLoader::loadTiledFullscreenImage(std::string_view name) const
 {
   return loadTiledFullscreenImage(name, INGAME_PALETTE);
 }
 
 
 data::Image ResourceLoader::loadTiledFullscreenImage(
-  const std::string& name,
+  std::string_view name,
   const Palette16& overridePalette) const
 {
   return loadTiledImage(
@@ -161,7 +163,7 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
 
 
 data::Image
-  ResourceLoader::loadStandaloneFullscreenImage(const std::string& name) const
+  ResourceLoader::loadStandaloneFullscreenImage(std::string_view name) const
 {
   const auto& data = file(name);
   const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
@@ -202,7 +204,7 @@ data::Image ResourceLoader::loadAntiPiracyImage() const
 
 
 loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
-  const std::string& imageName) const
+  std::string_view imageName) const
 {
   const auto& data = file(imageName);
   const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
@@ -210,14 +212,16 @@ loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
 }
 
 
-data::Image ResourceLoader::loadBackdrop(const std::string& name) const
+data::Image ResourceLoader::loadBackdrop(std::string_view name) const
 {
   using namespace std::literals;
 
   std::regex backdropNameRegex{"^DROP([0-9]+)\\.MNI$", std::regex::icase};
-  std::smatch matches;
+  std::match_results<std::string_view::const_iterator> matches;
 
-  if (std::regex_match(name, matches, backdropNameRegex) && matches.size() == 2)
+  if (
+    std::regex_match(name.begin(), name.end(), matches, backdropNameRegex) &&
+    matches.size() == 2)
   {
     const auto number = matches[1].str();
     const auto replacementName = "backdrop"s + number + ".png";
@@ -233,7 +237,7 @@ data::Image ResourceLoader::loadBackdrop(const std::string& name) const
 }
 
 
-TileSet ResourceLoader::loadCZone(const std::string& name) const
+TileSet ResourceLoader::loadCZone(std::string_view name) const
 {
   using namespace data;
   using namespace map;
@@ -291,13 +295,13 @@ TileSet ResourceLoader::loadCZone(const std::string& name) const
 }
 
 
-data::Movie ResourceLoader::loadMovie(const std::string& name) const
+data::Movie ResourceLoader::loadMovie(std::string_view name) const
 {
   return loader::loadMovie(loadFile(mGamePath / fs::u8path(name)));
 }
 
 
-data::Song ResourceLoader::loadMusic(const std::string& name) const
+data::Song ResourceLoader::loadMusic(std::string_view name) const
 {
   return loader::loadSong(file(name));
 }
@@ -347,19 +351,19 @@ std::filesystem::path ResourceLoader::replacementMusicBasePath() const
 }
 
 
-data::AudioBuffer ResourceLoader::loadSound(const std::string& name) const
+data::AudioBuffer ResourceLoader::loadSound(std::string_view name) const
 {
   return loader::decodeVoc(file(name));
 }
 
 
-ScriptBundle ResourceLoader::loadScriptBundle(const std::string& fileName) const
+ScriptBundle ResourceLoader::loadScriptBundle(std::string_view fileName) const
 {
   return loader::loadScripts(fileAsText(fileName));
 }
 
 
-ByteBuffer ResourceLoader::file(const std::string& name) const
+ByteBuffer ResourceLoader::file(std::string_view name) const
 {
   const auto unpackedFilePath = mGamePath / fs::u8path(name);
   if (fs::exists(unpackedFilePath))
@@ -371,12 +375,12 @@ ByteBuffer ResourceLoader::file(const std::string& name) const
 }
 
 
-std::string ResourceLoader::fileAsText(const std::string& name) const
+std::string ResourceLoader::fileAsText(std::string_view name) const
 {
   return asText(file(name));
 }
 
-bool ResourceLoader::hasFile(const std::string& name) const
+bool ResourceLoader::hasFile(std::string_view name) const
 {
   const auto unpackedFilePath = mGamePath / fs::u8path(name);
   return fs::exists(unpackedFilePath) || mFilePackage.hasFile(name);

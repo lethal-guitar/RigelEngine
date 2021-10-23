@@ -32,7 +32,7 @@ class ResourceLoader;
 
 
 data::map::LevelData loadLevel(
-  const std::string& mapName,
+  std::string_view mapName,
   const ResourceLoader& resources,
   data::Difficulty chosenDifficulty);
 

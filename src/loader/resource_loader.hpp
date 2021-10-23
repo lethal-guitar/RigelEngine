@@ -47,36 +47,36 @@ class ResourceLoader
 public:
   explicit ResourceLoader(const std::string& gamePath);
 
-  data::Image loadTiledFullscreenImage(const std::string& name) const;
+  data::Image loadTiledFullscreenImage(std::string_view name) const;
   data::Image loadTiledFullscreenImage(
-    const std::string& name,
+    std::string_view name,
     const Palette16& overridePalette) const;
 
-  data::Image loadStandaloneFullscreenImage(const std::string& name) const;
+  data::Image loadStandaloneFullscreenImage(std::string_view name) const;
   loader::Palette16
-    loadPaletteFromFullScreenImage(const std::string& imageName) const;
+    loadPaletteFromFullScreenImage(std::string_view imageName) const;
 
   data::Image loadAntiPiracyImage() const;
 
-  data::Image loadBackdrop(const std::string& name) const;
-  TileSet loadCZone(const std::string& name) const;
-  data::Movie loadMovie(const std::string& name) const;
+  data::Image loadBackdrop(std::string_view name) const;
+  TileSet loadCZone(std::string_view name) const;
+  data::Movie loadMovie(std::string_view name) const;
 
-  data::Song loadMusic(const std::string& name) const;
+  data::Song loadMusic(std::string_view name) const;
   bool hasSoundBlasterSound(data::SoundId id) const;
   data::AudioBuffer loadAdlibSound(data::SoundId id) const;
   data::AudioBuffer loadPreferredSound(data::SoundId id) const;
   std::filesystem::path replacementSoundPath(data::SoundId id) const;
   std::filesystem::path replacementMusicBasePath() const;
 
-  ScriptBundle loadScriptBundle(const std::string& fileName) const;
+  ScriptBundle loadScriptBundle(std::string_view fileName) const;
 
-  ByteBuffer file(const std::string& name) const;
-  std::string fileAsText(const std::string& name) const;
-  bool hasFile(const std::string& name) const;
+  ByteBuffer file(std::string_view name) const;
+  std::string fileAsText(std::string_view name) const;
+  bool hasFile(std::string_view name) const;
 
 private:
-  data::AudioBuffer loadSound(const std::string& name) const;
+  data::AudioBuffer loadSound(std::string_view name) const;
 
   std::filesystem::path mGamePath;
   loader::CMPFilePackage mFilePackage;

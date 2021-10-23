@@ -82,7 +82,7 @@ void TextEntryWidget::handleEvent(const SDL_Event& event)
 
 void TextEntryWidget::updateAndRender(const engine::TimeDelta dt)
 {
-  auto drawText = [this](const std::string& text) {
+  auto drawText = [this](std::string_view text) {
     if (mTextStyle == Style::BigText)
     {
       mpUiRenderer->drawBigText(mPosX, mPosY, text, TEXT_COLOR);

@@ -30,7 +30,7 @@ namespace
 {
 
 std::array<std::string, data::NUM_SAVE_SLOTS>
-  loadNameList(const std::string& filename)
+  loadNameList(std::string_view filename)
 {
   std::array<std::string, data::NUM_SAVE_SLOTS> result;
 
@@ -75,7 +75,7 @@ data::Difficulty readDifficulty(LeStreamReader& reader)
 
 
 data::SavedGame
-  loadSavedGame(const std::string& filename, std::string saveSlotName)
+  loadSavedGame(std::string_view filename, std::string saveSlotName)
 {
   static_assert(
     static_cast<int>(data::WeaponType::Normal) == 0 &&
@@ -111,7 +111,7 @@ data::SavedGame
 }
 
 
-data::HighScoreList loadHighScoreList(const std::string& filename)
+data::HighScoreList loadHighScoreList(std::string_view filename)
 {
   using std::begin;
   using std::end;

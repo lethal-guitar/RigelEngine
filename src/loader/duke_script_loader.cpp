@@ -63,7 +63,7 @@ void skipWhiteSpace(istream& sourceStream)
 }
 
 
-bool isCommand(const string& line)
+bool isCommand(string_view line)
 {
   return strings::startsWith(line, "//");
 }
@@ -327,7 +327,7 @@ vector<Action> parseTextCommandWithBigText(
 }
 
 
-Action parseDrawSpriteCommand(const int x, const int y, const string& source)
+Action parseDrawSpriteCommand(const int x, const int y, string_view source)
 {
   if (source.size() < 5)
   {

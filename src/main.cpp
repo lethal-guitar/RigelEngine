@@ -185,7 +185,7 @@ auto parseDifficulty(const std::string& difficultySpec)
 }
 
 
-base::Vector parsePlayerPosition(const std::string& playerPosString)
+base::Vector parsePlayerPosition(std::string_view playerPosString)
 {
   const std::vector<std::string> positionParts =
     strings::split(playerPosString, ',');
