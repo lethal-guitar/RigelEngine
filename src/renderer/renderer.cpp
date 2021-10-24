@@ -540,12 +540,12 @@ struct Renderer::Impl
 
   void submitBatch()
   {
+    commitChangedState();
+
     if (mBatchData.empty())
     {
       return;
     }
-
-    commitChangedState();
 
     switch (mRenderMode)
     {

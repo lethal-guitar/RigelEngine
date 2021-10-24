@@ -72,6 +72,10 @@ private:
     Foreground
   };
 
+  renderer::TexCoords calculateBackdropTexCoords(
+    const base::Vector& cameraPosition,
+    const base::Extents& viewPortSize) const;
+
   void renderMapTiles(
     const base::Vector& sectionStart,
     const base::Extents& sectionSize,
@@ -89,7 +93,7 @@ private:
 
   data::map::BackdropScrollMode mScrollMode;
 
-  double mBackdropAutoScrollOffset = 0.0;
+  float mBackdropAutoScrollOffset = 0.0f;
   std::uint32_t mElapsedFrames = 0;
 };
 

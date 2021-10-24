@@ -96,6 +96,7 @@ private:
   void applyChangedOptions();
   void enumerateGameControllers();
   void takeScreenshot();
+  void setPerElementUpscalingEnabled(bool enabled);
 
   // IGameServiceProvider implementation
   void fadeOutScreen() override;

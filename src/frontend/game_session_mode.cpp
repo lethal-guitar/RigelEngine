@@ -64,6 +64,25 @@ GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
 }
 
 
+GameSessionMode::GameSessionMode(
+  const data::GameSessionId& sessionId,
+  data::PlayerModel playerModel,
+  Context context)
+  : mPlayerModel(std::move(playerModel))
+  , mCurrentStage(std::make_unique<GameRunner>(
+      &mPlayerModel,
+      sessionId,
+      context,
+      std::nullopt,
+      false /* don't show welcome message */))
+  , mEpisode(sessionId.mEpisode)
+  , mCurrentLevelNr(sessionId.mLevel)
+  , mDifficulty(sessionId.mDifficulty)
+  , mContext(context)
+{
+}
+
+
 void GameSessionMode::handleEvent(const SDL_Event& event)
 {
   base::match(
@@ -169,12 +188,23 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
       {
         mPlayerModel.resetForNewLevel();
 
-        auto pNextIngameMode = std::make_unique<GameRunner>(
-          &mPlayerModel,
+        // The new level we are about to enter might have different
+        // requirements w.r.t. low-res vs. hi-res mode (per-element upscaling).
+        // The only way we can switch between these modes is with a game mode
+        // switch at the top-level (Game class/main loop), so we need to
+        // enter a new instance of GameSessionMode here even though we
+        // technically remain in the same game mode. Otherwise, we would
+        // potentially see brief glitches during the fade-in into the new
+        // level.
+        //
+        // This feels like a bit of a hack, but I couldn't think of anything
+        // else that wouldn't be massively more complicated.
+        //
+        // We can't use make_unique here, because the constructor is private.
+        return std::unique_ptr<GameSessionMode>{new GameSessionMode{
           data::GameSessionId{mEpisode, ++mCurrentLevelNr, mDifficulty},
-          mContext);
-        fadeToNewStage(*pNextIngameMode);
-        mCurrentStage = std::move(pNextIngameMode);
+          mPlayerModel,
+          mContext}};
       }
 
       return nullptr;

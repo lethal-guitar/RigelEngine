@@ -51,6 +51,11 @@ public:
   bool needsPerElementUpscaling() const override;
 
 private:
+  GameSessionMode(
+    const data::GameSessionId& sessionId,
+    data::PlayerModel playerModel,
+    Context context);
+
   void handleEvent(const SDL_Event& event);
   template <typename StageT>
   void fadeToNewStage(StageT& stage);

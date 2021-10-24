@@ -383,23 +383,31 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
 {
   mCurrentFrameIsWidescreen = false;
 
-  {
+  auto pMaybeNextMode = std::invoke([&]() {
     auto saved = mRenderTarget.bind();
     mRenderer.clear();
 
     setupRenderingViewport(
       &mRenderer, mpUserProfile->mOptions.mPerElementUpscalingEnabled);
 
-    auto pMaybeNextMode =
-      mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
+    return mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
+  });
 
-    if (pMaybeNextMode)
+  if (pMaybeNextMode)
+  {
+    fadeOutScreen();
+
+    setPerElementUpscalingEnabled(pMaybeNextMode->needsPerElementUpscaling());
+    mpCurrentGameMode = std::move(pMaybeNextMode);
+
     {
-      fadeOutScreen();
-      mpCurrentGameMode = std::move(pMaybeNextMode);
+      auto saved = mRenderTarget.bind();
+      setupRenderingViewport(
+        &mRenderer, mpUserProfile->mOptions.mPerElementUpscalingEnabled);
       mpCurrentGameMode->updateAndRender(0, {});
-      fadeInScreen();
     }
+
+    fadeInScreen();
   }
 
   if (mAlphaMod != 0)
@@ -421,9 +429,6 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
       mFpsDisplay.updateAndRender(elapsed);
     }
   }
-
-  mpUserProfile->mOptions.mPerElementUpscalingEnabled =
-    mpCurrentGameMode->needsPerElementUpscaling();
 }
 
 
@@ -674,12 +679,20 @@ void Game::applyChangedOptions()
     renderer::canUseWidescreenMode(&mRenderer);
   if (
     widescreenModeActive != mWidescreenModeWasActive ||
-    currentOptions.mPerElementUpscalingEnabled !=
-      mPreviousOptions.mPerElementUpscalingEnabled ||
     mPreviousWindowSize != mRenderer.windowSize())
   {
     mRenderTarget = renderer::createFullscreenRenderTarget(
       &mRenderer, mpUserProfile->mOptions);
+    updateUpscalingFilter();
+  }
+
+
+  if (
+    currentOptions.mPerElementUpscalingEnabled !=
+    mPreviousOptions.mPerElementUpscalingEnabled)
+  {
+    // The render target has already been recreated in
+    // setPerElementUpscalingEnabled(), just need to update upscaling.
     updateUpscalingFilter();
   }
 
@@ -724,6 +737,16 @@ void Game::takeScreenshot()
   loader::savePng((screenshotsDir / filename).u8string(), shot);
 }
 
+
+void Game::setPerElementUpscalingEnabled(bool enabled)
+{
+  if (enabled != mpUserProfile->mOptions.mPerElementUpscalingEnabled)
+  {
+    mpUserProfile->mOptions.mPerElementUpscalingEnabled = enabled;
+    mRenderTarget = renderer::createFullscreenRenderTarget(
+      &mRenderer, mpUserProfile->mOptions);
+  }
+}
 
 void Game::fadeOutScreen()
 {
