@@ -131,6 +131,7 @@ struct GameOptions
   bool mWidescreenModeOn = false;
   bool mQuickSavingEnabled = false;
   bool mSkipIntro = false;
+  bool mMotionSmoothing = false;
 
   // Internal options
   //

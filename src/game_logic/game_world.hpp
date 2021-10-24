@@ -101,7 +101,7 @@ public:
 
   bool needsPerElementUpscaling() const;
   void updateGameLogic(const PlayerInput& input);
-  void render();
+  void render(float interpolationFactor = 0.0f);
   void processEndOfFrameActions();
 
   void activateFullHealthCheat();
