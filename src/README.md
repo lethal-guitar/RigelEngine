@@ -71,8 +71,8 @@ This module depends only on `base`, `data`, the standard library, and some 3rd p
 ### `renderer`
 
 Provides 2d-rendering functionality, using OpenGL as backend. This is meant
-to be kept fairly small in terms of the public intetface, and ideally general enough
-that other types of games could be built on top of it. The inner workings have
+to be kept fairly small in terms of the public interface, and ideally general enough
+that other types of games could be built on top of it.
 
 ### `sdl_utils`
 
