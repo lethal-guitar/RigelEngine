@@ -75,6 +75,16 @@ struct Point
 };
 
 
+template <typename NewValueT, typename ValueT>
+Point<NewValueT> cast(const Point<ValueT>& point)
+{
+  return {
+    static_cast<NewValueT>(point.x),
+    static_cast<NewValueT>(point.y),
+  };
+}
+
+
 template <typename ValueT>
 struct Size
 {
