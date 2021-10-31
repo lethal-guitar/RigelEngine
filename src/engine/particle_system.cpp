@@ -17,6 +17,7 @@
 #include "particle_system.hpp"
 
 #include "data/unit_conversions.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/random_number_generator.hpp"
 #include "renderer/renderer.hpp"
 
@@ -138,15 +139,23 @@ struct ParticleGroup
 
   void update() { ++mFramesElapsed; }
 
-  void render(Renderer& renderer, const base::Vector& cameraPosition)
+  void render(
+    Renderer& renderer,
+    const base::Vector& cameraPosition,
+    const float interpolation)
   {
     const auto screenSpaceOrigin =
       data::tileVectorToPixelVector(mOrigin - cameraPosition);
     for (auto& particle : *mpParticles)
     {
-      const auto particlePosition =
-        screenSpaceOrigin + particle.offsetAtTime(mFramesElapsed);
-      renderer.drawPoint(particlePosition, mColor);
+      const auto currentParticlePosition =
+        particle.offsetAtTime(mFramesElapsed);
+      const auto previousParticlePosition =
+        particle.offsetAtTime(std::max(0, mFramesElapsed - 1));
+
+      const auto particlePosition = lerpRounded(
+        previousParticlePosition, currentParticlePosition, interpolation);
+      renderer.drawPoint(screenSpaceOrigin + particlePosition, mColor);
     }
   }
 
@@ -206,11 +215,13 @@ void ParticleSystem::update()
 }
 
 
-void ParticleSystem::render(const base::Vector& cameraPosition)
+void ParticleSystem::render(
+  const base::Vector& cameraPosition,
+  const float interpolation)
 {
   for (auto& group : mParticleGroups)
   {
-    group.render(*mpRenderer, cameraPosition);
+    group.render(*mpRenderer, cameraPosition, interpolation);
   }
 }
 

@@ -746,7 +746,7 @@ void GameWorld::render(const float interpolationFactor)
         mpRenderer->setGlobalTranslation(
           localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
         mpState->mParticles.render(
-          viewportParams.mRenderStartPosition);
+          viewportParams.mRenderStartPosition, interpolationFactor);
         mpState->mDebuggingSystem.update(
           mpState->mEntities,
           viewportParams.mRenderStartPosition,
@@ -763,7 +763,7 @@ void GameWorld::render(const float interpolationFactor)
         localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
 
       mpState->mParticles.render(
-        viewportParams.mRenderStartPosition);
+        viewportParams.mRenderStartPosition, interpolationFactor);
       mpState->mDebuggingSystem.update(
         mpState->mEntities,
         viewportParams.mRenderStartPosition,
