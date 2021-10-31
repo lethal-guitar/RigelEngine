@@ -70,12 +70,12 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   using namespace engine::components;
   using namespace game_logic::components;
 
-  copyComponentIfPresent<AppearsOnRadar>(from, to);
   copyComponentIfPresent<ActivationSettings>(from, to);
   copyComponentIfPresent<Active>(from, to);
   copyComponentIfPresent<ActorTag>(from, to);
   copyComponentIfPresent<AnimationLoop>(from, to);
   copyComponentIfPresent<AnimationSequence>(from, to);
+  copyComponentIfPresent<AppearsOnRadar>(from, to);
   copyComponentIfPresent<AutoDestroy>(from, to);
   copyComponentIfPresent<BehaviorController>(from, to);
   copyComponentIfPresent<BoundingBox>(from, to);
