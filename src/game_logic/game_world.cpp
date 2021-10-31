@@ -316,6 +316,7 @@ GameWorld::GameWorld(
     mpState->mPlayer.position() = *playerPositionOverride;
     mpState->mCamera.centerViewOnPlayer();
     updateGameLogic(initialInput);
+    mpState->mPreviousCameraPosition = mpState->mCamera.position();
   }
 
   if (showWelcomeMessage)
@@ -534,6 +535,7 @@ void GameWorld::loadLevel(const PlayerInput& initialInput)
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic(initialInput);
+  mpState->mPreviousCameraPosition = mpState->mCamera.position();
 
   if (data::isBossLevel(mSessionId.mLevel))
   {
@@ -654,6 +656,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
     input, mpState->mEntities);
   mpState->mPlayer.update(input);
+  mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mpState->mCamera.update(input, viewPortSize);
 
   engine::markActiveEntities(
@@ -714,7 +717,7 @@ void GameWorld::render(const float interpolationFactor)
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
   }
 
-  auto drawWorld = [this](const base::Extents& viewPortSize) {
+  auto drawWorld = [&](const base::Extents& viewPortSize) {
     const auto clipRectGuard = renderer::saveState(mpRenderer);
     mpRenderer->setClipRect(base::Rect<int>{
       mpRenderer->globalTranslation(),
@@ -728,25 +731,43 @@ void GameWorld::render(const float interpolationFactor)
       return;
     }
 
+    const auto viewportParams =
+      determineSmoothScrollViewport(viewPortSize, interpolationFactor);
+
     if (mpOptions->mPerElementUpscalingEnabled)
     {
-      drawMapAndSprites(viewPortSize);
+      drawMapAndSprites(viewportParams, interpolationFactor);
 
       {
         const auto saved = mLowResLayer.bindAndReset();
 
         mpRenderer->clear({0, 0, 0, 0});
-        mpState->mParticles.render(mpState->mCamera.position());
-        mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
+
+        mpRenderer->setGlobalTranslation(
+          localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
+        mpState->mParticles.render(
+          viewportParams.mRenderStartPosition);
+        mpState->mDebuggingSystem.update(
+          mpState->mEntities,
+          viewportParams.mRenderStartPosition,
+          viewportParams.mViewportSize);
       }
 
       mLowResLayer.render(0, 0);
     }
     else
     {
-      drawMapAndSprites(viewPortSize);
-      mpState->mParticles.render(mpState->mCamera.position());
-      mpState->mDebuggingSystem.update(mpState->mEntities, viewPortSize);
+      drawMapAndSprites(viewportParams, interpolationFactor);
+
+      mpRenderer->setGlobalTranslation(
+        localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
+
+      mpState->mParticles.render(
+        viewportParams.mRenderStartPosition);
+      mpState->mDebuggingSystem.update(
+        mpState->mEntities,
+        viewportParams.mRenderStartPosition,
+        viewportParams.mViewportSize);
     }
   };
 
@@ -855,40 +876,136 @@ void GameWorld::render(const float interpolationFactor)
 }
 
 
-void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize)
+auto GameWorld::determineSmoothScrollViewport(
+  const base::Extents& viewPortSizeOriginal,
+  float interpolationFactor) const -> ViewportParams
+{
+  const auto& state = *mpState;
+
+  if (!mpOptions->mMotionSmoothing)
+  {
+    return {
+      base::cast<float>(state.mCamera.position()),
+      {},
+      state.mCamera.position(),
+      viewPortSizeOriginal};
+  }
+
+  auto currentCameraPosition = state.mCamera.position();
+  auto previousCameraPosition = state.mPreviousCameraPosition;
+
+  const auto direction = currentCameraPosition - previousCameraPosition;
+
+  if (direction.x < 0)
+  {
+    std::swap(currentCameraPosition.x, previousCameraPosition.x);
+  }
+  if (direction.y < 0)
+  {
+    std::swap(currentCameraPosition.y, previousCameraPosition.y);
+  }
+
+  const auto interpolationX =
+    direction.x < 0 ? 1.0f - interpolationFactor : interpolationFactor;
+  const auto interpolationY =
+    direction.y < 0 ? 1.0f - interpolationFactor : interpolationFactor;
+
+  const auto interpolatedCameraPosition = base::Point<float>{
+    base::lerp(
+      previousCameraPosition.x, currentCameraPosition.x, interpolationX),
+    base::lerp(
+      previousCameraPosition.y, currentCameraPosition.y, interpolationY),
+  };
+
+  const auto viewPortSize = base::Extents{
+    viewPortSizeOriginal.width + (direction.x != 0 ? 1 : 0),
+    viewPortSizeOriginal.height + (direction.y != 0 ? 2 : 0)};
+
+  const auto cameraOffset =
+    base::Vector{
+      base::round(data::tilesToPixels(interpolatedCameraPosition.x)),
+      base::round(data::tilesToPixels(interpolatedCameraPosition.y))} -
+    data::tileVectorToPixelVector(previousCameraPosition);
+
+  return {
+    interpolatedCameraPosition,
+    cameraOffset * -1,
+    previousCameraPosition,
+    viewPortSize};
+}
+
+
+void GameWorld::drawMapAndSprites(
+  const ViewportParams& params,
+  const float interpolationFactor)
 {
   using game_logic::components::TileDebris;
 
   auto& state = *mpState;
-  const auto& cameraPosition = mpState->mCamera.position();
 
-  auto renderBackgroundLayers = [&]() {
+  auto renderBackdrop = [&]() {
     if (state.mBackdropFlashColor)
     {
       mpRenderer->drawFilledRectangle(
-        {{}, data::tileExtentsToPixelExtents(viewPortSize)},
+        {{}, data::tileExtentsToPixelExtents(params.mViewportSize)},
         *state.mBackdropFlashColor);
     }
     else
     {
-      state.mMapRenderer.renderBackdrop(cameraPosition, viewPortSize);
+      state.mMapRenderer.renderBackdrop(
+        params.mInterpolatedCameraPosition, params.mViewportSize);
     }
+  };
 
-    state.mMapRenderer.renderBackground(cameraPosition, viewPortSize);
+  auto renderBackgroundLayers = [&]() {
+    state.mMapRenderer.renderBackground(
+      params.mRenderStartPosition, params.mViewportSize);
     state.mSpriteRenderingSystem.renderRegularSprites();
   };
 
+  auto renderForegroundLayers = [&]() {
+    state.mMapRenderer.renderForeground(
+      params.mRenderStartPosition, params.mViewportSize);
+    state.mSpriteRenderingSystem.renderForegroundSprites();
 
-  const auto waterEffectAreas =
-    collectWaterEffectAreas(state.mEntities, cameraPosition, viewPortSize);
+    // tile debris
+    state.mEntities.each<TileDebris, WorldPosition>(
+      [&](
+        entityx::Entity e, const TileDebris& debris, const WorldPosition& pos) {
+        state.mMapRenderer.renderSingleTile(
+          debris.mTileIndex, pos, params.mRenderStartPosition);
+      });
+  };
+
+
+  auto outerStateSave = renderer::saveState(mpRenderer);
+
+  if (mpOptions->mMotionSmoothing)
+  {
+    mpState->mSpriteRenderingSystem.update(
+      mpState->mEntities, params.mViewportSize, params.mRenderStartPosition);
+  }
+
+  const auto waterEffectAreas = collectWaterEffectAreas(
+    state.mEntities, params.mRenderStartPosition, params.mViewportSize);
   if (waterEffectAreas.empty())
   {
+    renderBackdrop();
+
+    mpRenderer->setGlobalTranslation(
+      localToGlobalTranslation(mpRenderer, params.mCameraOffset));
+
     renderBackgroundLayers();
+    renderForegroundLayers();
   }
   else
   {
     {
       auto saved = mWaterEffectBuffer.bind();
+      renderBackdrop();
+
+      mpRenderer->setGlobalTranslation(
+        localToGlobalTranslation(mpRenderer, params.mCameraOffset));
       renderBackgroundLayers();
     }
 
@@ -899,6 +1016,9 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize)
       mWaterEffectBuffer.render(0, 0);
     }
 
+    mpRenderer->setGlobalTranslation(
+      localToGlobalTranslation(mpRenderer, params.mCameraOffset));
+
     for (const auto& area : waterEffectAreas)
     {
       mpRenderer->drawWaterEffect(
@@ -907,17 +1027,9 @@ void GameWorld::drawMapAndSprites(const base::Extents& viewPortSize)
         area.mIsAnimated ? std::optional<int>(state.mWaterAnimStep)
                          : std::nullopt);
     }
+
+    renderForegroundLayers();
   }
-
-  state.mMapRenderer.renderForeground(cameraPosition, viewPortSize);
-  state.mSpriteRenderingSystem.renderForegroundSprites();
-
-  // tile debris
-  state.mEntities.each<TileDebris, WorldPosition>(
-    [&](entityx::Entity, const TileDebris& debris, const WorldPosition& pos) {
-      state.mMapRenderer.renderSingleTile(
-        debris.mTileIndex, pos, cameraPosition);
-    });
 }
 
 
@@ -1033,6 +1145,7 @@ void GameWorld::quickLoad()
   *mpPlayerModel = mpQuickSave->mPlayerModel;
   mpState->synchronizeTo(
     *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
+  mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mMessageDisplay.setMessage("Quick save restored.");
 
   const auto& viewPortSize = widescreenModeOn()
@@ -1153,6 +1266,7 @@ void GameWorld::restartFromCheckpoint()
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
+  mpState->mPreviousCameraPosition = mpState->mCamera.position();
   render();
 
   mpServiceProvider->fadeInScreen();
@@ -1181,6 +1295,7 @@ void GameWorld::handleTeleporter()
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
+  mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mpServiceProvider->fadeInScreen();
 }
 

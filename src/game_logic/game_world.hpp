@@ -114,6 +114,15 @@ public:
   friend class rigel::GameRunner;
 
 private:
+  struct ViewportParams
+  {
+    base::Point<float> mInterpolatedCameraPosition;
+    base::Vector mCameraOffset;
+
+    base::Vector mRenderStartPosition;
+    base::Extents mViewportSize;
+  };
+
   void loadLevel(const PlayerInput& initialInput);
   void createNewState();
   void subscribe(entityx::EventManager& eventManager);
@@ -133,7 +142,12 @@ private:
 
   void printDebugText(std::ostream& stream) const;
 
-  void drawMapAndSprites(const base::Extents& viewPortSize);
+  ViewportParams determineSmoothScrollViewport(
+    const base::Extents& viewPortSizeOriginal,
+    const float interpolationFactor) const;
+
+  void
+    drawMapAndSprites(const ViewportParams& params, float interpolationFactor);
   bool widescreenModeOn() const;
 
   struct QuickSaveData

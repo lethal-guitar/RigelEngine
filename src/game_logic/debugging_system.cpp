@@ -70,10 +70,8 @@ base::Color colorForEntity(entityx::Entity entity)
 
 DebuggingSystem::DebuggingSystem(
   renderer::Renderer* pRenderer,
-  const base::Vector* pCameraPos,
   data::map::Map* pMap)
   : mpRenderer(pRenderer)
-  , mpCameraPos(pCameraPos)
   , mpMap(pMap)
 {
 }
@@ -99,6 +97,7 @@ void DebuggingSystem::toggleGridDisplay()
 
 void DebuggingSystem::update(
   ex::EntityManager& es,
+  const base::Vector& cameraPosition,
   const base::Extents& viewPortSize)
 {
   if (mShowWorldCollisionData)
@@ -109,8 +108,8 @@ void DebuggingSystem::update(
     {
       for (int x = 0; x < viewPortSize.width; ++x)
       {
-        const auto col = x + mpCameraPos->x;
-        const auto row = y + mpCameraPos->y;
+        const auto col = x + cameraPosition.x;
+        const auto row = y + cameraPosition.y;
         if (col >= mpMap->width() || row >= mpMap->height())
         {
           continue;
@@ -168,9 +167,9 @@ void DebuggingSystem::update(
   if (mShowBoundingBoxes)
   {
     es.each<WorldPosition, BoundingBox>(
-      [this](
+      [&](
         ex::Entity entity, const WorldPosition& pos, const BoundingBox& bbox) {
-        const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
+        const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
@@ -180,11 +179,11 @@ void DebuggingSystem::update(
       });
 
     es.each<WorldPosition, game_logic::components::MapGeometryLink>(
-      [this](
+      [&](
         ex::Entity entity,
         const WorldPosition& pos,
         const game_logic::components::MapGeometryLink& link) {
-        const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
+        const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) -
             worldToScreenPx,

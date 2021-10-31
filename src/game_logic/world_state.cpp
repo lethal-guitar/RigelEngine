@@ -215,7 +215,7 @@ WorldState::WorldState(
         std::move(loadedLevel.mSecondaryBackdropImage),
         loadedLevel.mBackdropScrollMode})
   , mPhysicsSystem(&mCollisionChecker, &mMap, &mEventManager)
-  , mDebuggingSystem(pRenderer, &mCamera.position(), &mMap)
+  , mDebuggingSystem(pRenderer, &mMap)
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,

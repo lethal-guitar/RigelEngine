@@ -32,20 +32,19 @@ namespace rigel::game_logic
 class DebuggingSystem
 {
 public:
-  DebuggingSystem(
-    renderer::Renderer* pRenderer,
-    const base::Vector* pCameraPos,
-    data::map::Map* pMap);
+  DebuggingSystem(renderer::Renderer* pRenderer, data::map::Map* pMap);
 
   void toggleBoundingBoxDisplay();
   void toggleWorldCollisionDataDisplay();
   void toggleGridDisplay();
 
-  void update(entityx::EntityManager& es, const base::Extents& viewPortSize);
+  void update(
+    entityx::EntityManager& es,
+    const base::Vector& cameraPosition,
+    const base::Extents& viewPortSize);
 
 private:
   renderer::Renderer* mpRenderer;
-  const base::Vector* mpCameraPos;
   data::map::Map* mpMap;
 
   bool mShowBoundingBoxes = false;
