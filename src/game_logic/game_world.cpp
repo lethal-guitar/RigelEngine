@@ -1209,6 +1209,11 @@ void GameWorld::printDebugText(std::ostream& stream) const
   stream << "Scroll: " << vec2String(mpState->mCamera.position(), 4) << '\n'
          << "Player: " << vec2String(mpState->mPlayer.position(), 4) << '\n'
          << "Entities: " << mpState->mEntities.size() << '\n';
+
+  if (mpOptions->mPerElementUpscalingEnabled)
+  {
+    stream << "Hi-res mode ON\n";
+  }
 }
 
 } // namespace rigel::game_logic
