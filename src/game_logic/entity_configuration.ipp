@@ -1061,6 +1061,7 @@ void EntityFactory::configureEntity(
           ContainerColor::Blue,
           0,
           item,
+          AnimationLoop{1},
           ActorTag{ActorTag::Type::Merchandise},
           AppearsOnRadar{});
         entity.assign<ActorTag>(ActorTag::Type::Merchandise);
