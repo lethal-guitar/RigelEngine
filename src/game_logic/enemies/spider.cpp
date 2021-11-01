@@ -19,6 +19,7 @@
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
+#include "engine/physics.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
@@ -117,9 +118,22 @@ void Spider::update(
   auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
   auto& sprite = *entity.component<Sprite>();
-  const auto worldSpaceBox = engine::toWorldSpace(bbox, position);
   const auto& playerPosition = s.mpPlayer->orientedPosition();
   const auto playerOrientation = s.mpPlayer->orientation();
+
+  auto worldSpaceBox = [&]() {
+    return engine::toWorldSpace(bbox, position);
+  };
+
+  auto processPhysics = [&]() {
+    return engine::applyPhysics(
+      *d.mpCollisionChecker,
+      *s.mpMap,
+      entity,
+      *entity.component<MovingBody>(),
+      position,
+      bbox);
+  };
 
   auto stopWalking = [&]() {
     mWalkerBehavior.mpConfig = nullptr;
@@ -143,7 +157,6 @@ void Spider::update(
 
     stopWalking();
     entity.remove<game_logic::components::Shootable>();
-    entity.remove<MovingBody>();
     return true;
   };
 
@@ -152,14 +165,20 @@ void Spider::update(
     sprite.mFramesToRender[0] = 0;
 
     // If the spider is floating in the air upon spawning, do not animate.
-    if (d.mpCollisionChecker->isTouchingCeiling(worldSpaceBox))
+    if (d.mpCollisionChecker->isTouchingCeiling(worldSpaceBox()))
     {
       mWalkerBehavior.mpConfig = ceilingWalkerConfig();
     }
   };
 
+  auto walkOnFloor = [&]() {
+    mState = State::OnFloor;
+    sprite.mFramesToRender[0] = 3;
+    mWalkerBehavior.mpConfig = floorWalkerConfig();
+  };
+
   auto isTouchingPlayer = [&, this]() {
-    return worldSpaceBox.intersects(s.mpPlayer->worldSpaceHitBox());
+    return worldSpaceBox().intersects(s.mpPlayer->worldSpaceHitBox());
   };
 
   auto detachAndDestroy = [&, this]() {
@@ -180,10 +199,17 @@ void Spider::update(
   };
 
   auto startFalling = [&, this]() {
+    using namespace engine::components::parameter_aliases;
+
     sprite.mFramesToRender[0] = 6;
     stopWalking();
     mState = State::Falling;
-    entity.component<MovingBody>()->mGravityAffected = true;
+    entity.assign<MovingBody>(Velocity{0.f, 0.f}, GravityAffected{true});
+
+    // We process physics ourselves, so prevent the physics system from doing
+    // so
+    entity.component<MovingBody>()->mIsActive = false;
+    processPhysics();
   };
 
   auto clingToPlayer = [&, this]() {
@@ -214,17 +240,25 @@ void Spider::update(
     }
   };
 
+  auto doWalking = [&]() {
+    if (mWalkerBehavior.mpConfig)
+    {
+      mWalkerBehavior.update(d, s, isOnScreen, entity);
+    }
+  };
+
   switch (mState)
   {
     case State::Uninitialized:
-      if (d.mpCollisionChecker->isOnSolidGround(worldSpaceBox))
+      if (d.mpCollisionChecker->isOnSolidGround(worldSpaceBox()))
       {
-        walkOnFloor(entity);
+        walkOnFloor();
       }
       else
       {
         walkOnCeiling();
       }
+      doWalking();
       break;
 
     case State::OnCeiling:
@@ -232,16 +266,28 @@ void Spider::update(
       {
         startFalling();
       }
+      doWalking();
       break;
 
     case State::Falling:
-      if (isTouchingPlayer())
       {
-        tryClingToPlayer(SpiderClingPosition::Head);
+        if (processPhysics())
+        {
+          walkOnFloor();
+          entity.remove<engine::components::MovingBody>();
+          *entity.component<Orientation>() = Orientation::Right;
+        }
+
+        if (isTouchingPlayer())
+        {
+          tryClingToPlayer(SpiderClingPosition::Head);
+        }
       }
       break;
 
     case State::OnFloor:
+      doWalking();
+
       if (isTouchingPlayer())
       {
         const auto success = tryClingToPlayer(SpiderClingPosition::Weapon);
@@ -273,38 +319,6 @@ void Spider::update(
     default:
       break;
   }
-
-  if (entity && mWalkerBehavior.mpConfig)
-  {
-    mWalkerBehavior.update(d, s, isOnScreen, entity);
-  }
-}
-
-
-void Spider::onCollision(
-  GlobalDependencies& d,
-  GlobalState& s,
-  const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity)
-{
-  using engine::components::Orientation;
-
-  if (mState == State::Falling)
-  {
-    walkOnFloor(entity);
-    *entity.component<Orientation>() = Orientation::Right;
-  }
-}
-
-
-void Spider::walkOnFloor(entityx::Entity entity)
-{
-  mState = State::OnFloor;
-
-  auto& sprite = *entity.component<Sprite>();
-  sprite.mFramesToRender[0] = 3;
-
-  mWalkerBehavior.mpConfig = floorWalkerConfig();
 }
 
 } // namespace rigel::game_logic::behaviors

@@ -1446,7 +1446,6 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<Orientation>(Orientation::Left);
-      entity.assign<MovingBody>(Velocity{0.f, 0.f}, GravityAffected{false});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
       entity.assign<BehaviorController>(behaviors::Spider{});
