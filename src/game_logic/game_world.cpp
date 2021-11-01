@@ -166,12 +166,15 @@ void setupWidescreenHudOffset(
 
 [[nodiscard]] auto setupWidescreenTopRowViewPort(
   renderer::Renderer* pRenderer,
-  const renderer::WidescreenViewPortInfo& info)
+  const renderer::WidescreenViewPortInfo& info,
+  const int screenShakeOffsetX)
 {
   auto saved = renderer::saveState(pRenderer);
 
+  const auto scale = pRenderer->globalScale();
   pRenderer->setGlobalTranslation(
-    {info.mLeftPaddingPx, pRenderer->globalTranslation().y});
+    {base::round(info.mLeftPaddingPx + screenShakeOffsetX * scale.x),
+     pRenderer->globalTranslation().y});
   pRenderer->setClipRect({});
   return saved;
 }
@@ -806,14 +809,17 @@ void GameWorld::render()
         drawHud();
       }
 
-      auto saved = setupWidescreenTopRowViewPort(mpRenderer, info);
+      auto saved = setupWidescreenTopRowViewPort(
+        mpRenderer, info, mpState->mScreenShakeOffsetX);
       drawTopRow(data::tilesToPixels(viewPortSize.width));
     }
     else
     {
       const auto saved = renderer::saveState(mpRenderer);
-      mpRenderer->setGlobalTranslation({});
       mpRenderer->setClipRect({});
+
+      mpRenderer->setGlobalTranslation(
+        base::Vector{mpState->mScreenShakeOffsetX, 0});
       drawTopRow(data::tilesToPixels(viewPortSize.width));
 
       mpRenderer->setGlobalTranslation(base::Vector{
