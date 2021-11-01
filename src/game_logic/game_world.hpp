@@ -145,6 +145,7 @@ private:
   ViewportParams determineSmoothScrollViewport(
     const base::Extents& viewPortSizeOriginal,
     const float interpolationFactor) const;
+  void updateMotionSmoothingStates();
 
   void
     drawMapAndSprites(const ViewportParams& params, float interpolationFactor);
@@ -174,6 +175,7 @@ private:
   base::Size<int> mPreviousWindowSize;
   bool mWidescreenModeWasOn;
   bool mPerElementUpscalingWasEnabled;
+  bool mMotionSmoothingWasEnabled;
 
   std::unique_ptr<WorldState> mpState;
   std::unique_ptr<QuickSaveData> mpQuickSave;

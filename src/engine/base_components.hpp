@@ -27,6 +27,17 @@ namespace components
 using WorldPosition = base::Vector;
 using BoundingBox = base::Rect<int>;
 
+struct InterpolateMotion
+{
+  InterpolateMotion() = default;
+  explicit InterpolateMotion(const WorldPosition& pos)
+    : mPreviousPosition(pos)
+  {
+  }
+
+  WorldPosition mPreviousPosition;
+};
+
 /** Marks entity as active
  *
  * Most systems should only operate on active entities. Entity activation

@@ -25,7 +25,9 @@
 #include "data/sound_ids.hpp"
 #include "data/strings.hpp"
 #include "data/unit_conversions.hpp"
+#include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
@@ -52,6 +54,7 @@ using namespace engine;
 using namespace std;
 
 using data::PlayerModel;
+using engine::components::InterpolateMotion;
 using engine::components::WorldPosition;
 
 
@@ -305,6 +308,7 @@ GameWorld::GameWorld(
   , mPreviousWindowSize(mpRenderer->windowSize())
   , mWidescreenModeWasOn(widescreenModeOn())
   , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
+  , mMotionSmoothingWasEnabled(mpOptions->mMotionSmoothing)
 {
   using namespace std::chrono;
   auto before = high_resolution_clock::now();
@@ -631,6 +635,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   mHudRenderer.updateAnimation();
   mMessageDisplay.update();
 
+  updateMotionSmoothingStates();
+
   if (mpState->mActiveBossEntity && mpState->mBossDeathAnimationStartPending)
   {
     engine::removeSafely<game_logic::components::PlayerDamaging>(
@@ -715,6 +721,12 @@ void GameWorld::render(const float interpolationFactor)
   {
     mWaterEffectBuffer =
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
+  }
+
+  if (mpOptions->mMotionSmoothing != mMotionSmoothingWasEnabled)
+  {
+    updateMotionSmoothingStates();
+    mMotionSmoothingWasEnabled = mpOptions->mMotionSmoothing;
   }
 
   auto drawWorld = [&](const base::Extents& viewPortSize) {
@@ -932,6 +944,20 @@ auto GameWorld::determineSmoothScrollViewport(
     cameraOffset * -1,
     previousCameraPosition,
     viewPortSize};
+}
+
+
+void GameWorld::updateMotionSmoothingStates()
+{
+  if (mpOptions->mMotionSmoothing)
+  {
+    // Store current positions of all interpolated entities for use as
+    // previous positions after the current update is done.
+    mpState->mEntities.each<InterpolateMotion, WorldPosition>(
+      [&](entityx::Entity, InterpolateMotion& data, const WorldPosition& pos) {
+        data.mPreviousPosition = pos;
+      });
+  }
 }
 
 

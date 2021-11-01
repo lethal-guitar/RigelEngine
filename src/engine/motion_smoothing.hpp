@@ -18,10 +18,33 @@
 
 #include "base/math_tools.hpp"
 #include "base/spatial_types.hpp"
+#include "base/warnings.hpp"
+#include "engine/base_components.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <entityx/entityx.h>
+RIGEL_RESTORE_WARNINGS
 
 
 namespace rigel::engine
 {
+
+inline void discardInterpolation(entityx::Entity entity)
+{
+  if (entity.has_component<components::InterpolateMotion>())
+  {
+    entity.component<components::InterpolateMotion>()->mPreviousPosition =
+      *entity.component<components::WorldPosition>();
+  }
+}
+
+
+inline void enableInterpolation(entityx::Entity entity)
+{
+  const auto& currentPosition = *entity.component<components::WorldPosition>();
+  entity.assign<components::InterpolateMotion>(currentPosition);
+}
+
 
 inline base::Point<float> lerp(
   const base::Point<float>& a,
