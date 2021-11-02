@@ -364,11 +364,17 @@ void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
 
 void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
-  const base::Vector& position,
-  const base::Vector& cameraPosition) const
+  const base::Vector& pixelPosition) const
 {
-  const auto screenPosition = position - cameraPosition;
-  renderTile(index, screenPosition.x, screenPosition.y);
+  // TODO: Can we reduce duplication with renderTile()?
+
+  // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
+  // should be visible. Therefore, don't draw if the index is 0.
+  if (index != 0)
+  {
+    const auto tileIndexToDraw = animatedTileIndex(index);
+    mTileSetTexture.renderTileAtPixelPos(tileIndexToDraw, pixelPosition);
+  }
 }
 
 

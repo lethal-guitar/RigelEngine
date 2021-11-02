@@ -91,6 +91,20 @@ void TiledTexture::renderTileDoubleQuad(
 }
 
 
+void TiledTexture::renderTileAtPixelPos(
+  int index,
+  const base::Vector& pxPosition) const
+{
+  mpRenderer->drawTexture(
+    mTileSetTexture.data(),
+    renderer::toTexCoords(
+      sourceRect(index, 1, 1),
+      mTileSetTexture.width(),
+      mTileSetTexture.height()),
+    {pxPosition, tileExtentsToPixelExtents({1, 1})});
+}
+
+
 int TiledTexture::tilesPerRow() const
 {
   return data::pixelsToTiles(mTileSetTexture.width() / mScaleX);

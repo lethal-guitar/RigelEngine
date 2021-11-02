@@ -22,6 +22,7 @@
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/actor_tag.hpp"
@@ -84,6 +85,7 @@ void spawnTileDebris(
     GravityAffected{false},
     IgnoreCollisions{true});
   debris.assign<MovementSequence>(movement);
+  engine::enableInterpolation(debris);
 }
 
 

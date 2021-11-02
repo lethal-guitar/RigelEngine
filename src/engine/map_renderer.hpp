@@ -64,8 +64,7 @@ public:
 
   void renderSingleTile(
     data::map::TileIndex index,
-    const base::Vector& position,
-    const base::Vector& cameraPosition) const;
+    const base::Vector& pixelPosition) const;
 
 private:
   enum class DrawMode

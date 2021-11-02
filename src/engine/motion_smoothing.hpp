@@ -86,4 +86,24 @@ inline base::Vector interpolatedPixelPosition(
     interpolationFactor);
 }
 
+
+inline base::Vector interpolatedPixelPosition(
+  const entityx::Entity entity,
+  const float interpolationFactor)
+{
+  const auto currentPosition =
+    *entity.component<const components::WorldPosition>();
+
+  if (entity.has_component<components::InterpolateMotion>())
+  {
+    const auto& previousPosition =
+      entity.component<const components::InterpolateMotion>()
+        ->mPreviousPosition;
+    return interpolatedPixelPosition(
+      previousPosition, currentPosition, interpolationFactor);
+  }
+
+  return data::tileVectorToPixelVector(currentPosition);
+}
+
 } // namespace rigel::engine
