@@ -319,6 +319,7 @@ void configureBonusGlobe(
   entity.assign<Shootable>(Health{1}, GivenScore{100});
   entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
   entity.assign<ActorTag>(ActorTag::Type::ShootableBonusGlobe);
+  entity.assign<AppearsOnRadar>();
   addDefaultMovingBody(entity, boundingBox);
 
   CollectableItem item;
@@ -478,22 +479,18 @@ void EntityFactory::configureEntity(
   {
     case ActorID::Blue_bonus_globe_1: // Blue bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{500});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_2: // Red bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{2000});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_3: // Green bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{5000});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_4: // White bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{10000});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Force_field:
