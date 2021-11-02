@@ -735,6 +735,19 @@ void GameWorld::render(const float interpolationFactor)
     mMotionSmoothingWasEnabled = mpOptions->mMotionSmoothing;
   }
 
+  auto drawParticlesAndDebugOverlay =
+    [&](const ViewportParams& viewportParams) {
+      mpRenderer->setGlobalTranslation(
+        localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
+      mpState->mParticles.render(
+        viewportParams.mRenderStartPosition, interpolationFactor);
+      mpState->mDebuggingSystem.update(
+        mpState->mEntities,
+        viewportParams.mRenderStartPosition,
+        viewportParams.mViewportSize,
+        interpolationFactor);
+    };
+
   auto drawWorld = [&](const base::Extents& viewPortSize) {
     const auto clipRectGuard = renderer::saveState(mpRenderer);
     mpRenderer->setClipRect(base::Rect<int>{
@@ -758,18 +771,8 @@ void GameWorld::render(const float interpolationFactor)
 
       {
         const auto saved = mLowResLayer.bindAndReset();
-
         mpRenderer->clear({0, 0, 0, 0});
-
-        mpRenderer->setGlobalTranslation(
-          localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
-        mpState->mParticles.render(
-          viewportParams.mRenderStartPosition, interpolationFactor);
-        mpState->mDebuggingSystem.update(
-          mpState->mEntities,
-          viewportParams.mRenderStartPosition,
-          viewportParams.mViewportSize,
-          interpolationFactor);
+        drawParticlesAndDebugOverlay(viewportParams);
       }
 
       mLowResLayer.render(0, 0);
@@ -777,17 +780,7 @@ void GameWorld::render(const float interpolationFactor)
     else
     {
       drawMapAndSprites(viewportParams, interpolationFactor);
-
-      mpRenderer->setGlobalTranslation(
-        localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
-
-      mpState->mParticles.render(
-        viewportParams.mRenderStartPosition, interpolationFactor);
-      mpState->mDebuggingSystem.update(
-        mpState->mEntities,
-        viewportParams.mRenderStartPosition,
-        viewportParams.mViewportSize,
-        interpolationFactor);
+      drawParticlesAndDebugOverlay(viewportParams);
     }
   };
 
