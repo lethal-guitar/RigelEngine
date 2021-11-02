@@ -18,6 +18,7 @@
 
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
@@ -98,7 +99,8 @@ void DebuggingSystem::toggleGridDisplay()
 void DebuggingSystem::update(
   ex::EntityManager& es,
   const base::Vector& cameraPosition,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewPortSize,
+  const float interpolationFactor)
 {
   if (mShowWorldCollisionData)
   {
@@ -171,9 +173,25 @@ void DebuggingSystem::update(
         ex::Entity entity, const WorldPosition& pos, const BoundingBox& bbox) {
         const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
+
+        const auto topLeftCurrent = worldSpaceBox.topLeft;
+        const auto topLeftPrevious = entity.has_component<InterpolateMotion>()
+          ? engine::toWorldSpace(
+              bbox, entity.component<InterpolateMotion>()->mPreviousPosition)
+              .topLeft
+          : topLeftCurrent;
+
+        auto transform = [&](const base::Vector& p) {
+          return tileVectorToPixelVector(p) - worldToScreenPx;
+        };
+
+        const auto visualTopLeft = engine::lerpRounded(
+          transform(topLeftPrevious),
+          transform(topLeftCurrent),
+          interpolationFactor);
+
         const auto boxInPixels = BoundingBox{
-          tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
-          tileExtentsToPixelExtents(worldSpaceBox.size)};
+          visualTopLeft, tileExtentsToPixelExtents(worldSpaceBox.size)};
 
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });

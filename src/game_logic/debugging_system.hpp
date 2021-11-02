@@ -41,7 +41,8 @@ public:
   void update(
     entityx::EntityManager& es,
     const base::Vector& cameraPosition,
-    const base::Extents& viewPortSize);
+    const base::Extents& viewPortSize,
+    float interpolationFactor);
 
 private:
   renderer::Renderer* mpRenderer;

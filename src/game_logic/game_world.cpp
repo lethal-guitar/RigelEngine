@@ -701,12 +701,18 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   // cover the entire width of the screen in widescreen mode, we need a larger
   // viewport height for rendering to ensure that sprites in the lower left of
   // the screen are rendered.
-  const auto renderingViewPortSize = widescreenModeOn()
-    ? base::
-        Extents{viewPortSize.width, data::GameTraits::viewPortHeightTiles - 1}
-    : viewPortSize;
-  mpState->mSpriteRenderingSystem.update(
-    mpState->mEntities, renderingViewPortSize, mpState->mCamera.position());
+  if (!mpOptions->mMotionSmoothing)
+  {
+    const auto renderingViewPortSize = widescreenModeOn()
+      ? base::
+          Extents{viewPortSize.width, data::GameTraits::viewPortHeightTiles - 1}
+      : viewPortSize;
+    mpState->mSpriteRenderingSystem.update(
+      mpState->mEntities,
+      renderingViewPortSize,
+      mpState->mCamera.position(),
+      1.0f);
+  }
 
   mpState->mIsOddFrame = !mpState->mIsOddFrame;
 }
@@ -762,7 +768,8 @@ void GameWorld::render(const float interpolationFactor)
         mpState->mDebuggingSystem.update(
           mpState->mEntities,
           viewportParams.mRenderStartPosition,
-          viewportParams.mViewportSize);
+          viewportParams.mViewportSize,
+          interpolationFactor);
       }
 
       mLowResLayer.render(0, 0);
@@ -779,7 +786,8 @@ void GameWorld::render(const float interpolationFactor)
       mpState->mDebuggingSystem.update(
         mpState->mEntities,
         viewportParams.mRenderStartPosition,
-        viewportParams.mViewportSize);
+        viewportParams.mViewportSize,
+        interpolationFactor);
     }
   };
 
@@ -824,10 +832,10 @@ void GameWorld::render(const float interpolationFactor)
     const auto viewPortSize = base::Extents{
       info.mWidthTiles, data::GameTraits::viewPortHeightTiles - 1};
 
-    if (!mWidescreenModeWasOn)
+    if (!mWidescreenModeWasOn && !mpOptions->mMotionSmoothing)
     {
       mpState->mSpriteRenderingSystem.update(
-        mpState->mEntities, viewPortSize, mpState->mCamera.position());
+        mpState->mEntities, viewPortSize, mpState->mCamera.position(), 1.0f);
     }
 
     if (mpOptions->mPerElementUpscalingEnabled)
@@ -1009,7 +1017,10 @@ void GameWorld::drawMapAndSprites(
   if (mpOptions->mMotionSmoothing)
   {
     mpState->mSpriteRenderingSystem.update(
-      mpState->mEntities, params.mViewportSize, params.mRenderStartPosition);
+      mpState->mEntities,
+      params.mViewportSize,
+      params.mRenderStartPosition,
+      interpolationFactor);
   }
 
   const auto waterEffectAreas = collectWaterEffectAreas(
@@ -1174,11 +1185,14 @@ void GameWorld::quickLoad()
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mMessageDisplay.setMessage("Quick save restored.");
 
-  const auto& viewPortSize = widescreenModeOn()
-    ? viewPortSizeWideScreen(mpRenderer)
-    : data::GameTraits::mapViewPortSize;
-  mpState->mSpriteRenderingSystem.update(
-    mpState->mEntities, viewPortSize, mpState->mCamera.position());
+  if (!mpOptions->mMotionSmoothing)
+  {
+    const auto& viewPortSize = widescreenModeOn()
+      ? viewPortSizeWideScreen(mpRenderer)
+      : data::GameTraits::mapViewPortSize;
+    mpState->mSpriteRenderingSystem.update(
+      mpState->mEntities, viewPortSize, mpState->mCamera.position(), 1.0f);
+  }
 }
 
 

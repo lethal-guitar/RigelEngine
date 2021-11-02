@@ -19,6 +19,7 @@
 #include "base/math_tools.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -71,6 +72,18 @@ base::Vector lerpRounded(
   const auto lerped = lerp(base::cast<float>(a), base::cast<float>(b), factor);
 
   return {base::round(lerped.x), base::round(lerped.y)};
+}
+
+
+inline base::Vector interpolatedPixelPosition(
+  const base::Vector& a,
+  const base::Vector& b,
+  const float interpolationFactor)
+{
+  return lerpRounded(
+    data::tileVectorToPixelVector(a),
+    data::tileVectorToPixelVector(b),
+    interpolationFactor);
 }
 
 } // namespace rigel::engine
