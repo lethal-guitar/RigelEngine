@@ -20,6 +20,7 @@
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
@@ -57,6 +58,7 @@ void createSlimeDrop(
   entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
   entity.assign<AppearsOnRadar>();
 
+  engine::enableInterpolation(entity);
   entity.assign<PlayerDamaging>(Damage{1});
   entity.assign<AutoDestroy>(
     AutoDestroy{AutoDestroy::Condition::OnLeavingActiveRegion});
