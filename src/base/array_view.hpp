@@ -16,11 +16,9 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 
 namespace rigel::base
@@ -36,7 +34,7 @@ namespace rigel::base
  * Only allows read access.
  */
 template <typename T>
-class ArrayView
+class [[nodiscard]] ArrayView
 {
 public:
   using value_type = T;
@@ -49,8 +47,9 @@ public:
   using iterator = pointer;
   using const_iterator = const_pointer;
 
-  ArrayView() = default;
-  constexpr ArrayView(const T* pData, const size_type size) noexcept
+  constexpr ArrayView() = default;
+
+  constexpr ArrayView(const_pointer pData, const size_type size) noexcept
     : mpData(pData)
     , mSize(size)
   {
@@ -58,45 +57,53 @@ public:
 
   // implicit on purpose
   template <std::size_t N>
-  constexpr ArrayView(const std::array<T, N>& array) noexcept // NOLINT
-    : mpData(array.data())
-    , mSize(static_cast<size_type>(N))
-  {
-  }
-
-  // implicit on purpose
-  template <std::size_t N>
-  constexpr ArrayView(const T (&array)[N]) noexcept // NOLINT
+  constexpr ArrayView(const value_type (&array)[N]) noexcept // NOLINT
     : mpData(array)
     , mSize(static_cast<size_type>(N))
   {
   }
 
   // implicit on purpose
-  ArrayView(const std::vector<T>& vec) noexcept // NOLINT
-    : mpData(vec.data())
-    , mSize(static_cast<size_type>(vec.size()))
+  template <typename Container>
+  constexpr ArrayView(const Container& c) noexcept // NOLINT
+    : mpData(c.data())
+    , mSize(static_cast<size_type>(c.size()))
   {
   }
 
-  const_iterator begin() const { return mpData; }
+  [[nodiscard]] constexpr const_iterator begin() const noexcept
+  {
+    return mpData;
+  }
 
-  const_iterator end() const { return mpData + mSize; }
+  [[nodiscard]] constexpr const_iterator end() const noexcept
+  {
+    return mpData + mSize;
+  }
 
-  const_iterator cbegin() const { return mpData; }
+  [[nodiscard]] constexpr const_iterator cbegin() const noexcept
+  {
+    return mpData;
+  }
 
-  const_iterator cend() const { return mpData + mSize; }
+  [[nodiscard]] constexpr const_iterator cend() const noexcept
+  {
+    return mpData + mSize;
+  }
 
-  size_type size() const { return mSize; }
+  [[nodiscard]] constexpr size_type size() const noexcept { return mSize; }
 
-  bool empty() const { return mSize == 0; }
+  [[nodiscard]] constexpr size_type max_size() const noexcept { return mSize; }
 
-  const_reference operator[](const size_type index) const
+  [[nodiscard]] constexpr bool empty() const noexcept { return mSize == 0; }
+
+  [[nodiscard]] constexpr const_reference
+    operator[](const size_type index) const noexcept
   {
     return mpData[index];
   }
 
-  const_reference at(const size_type index) const
+  [[nodiscard]] const_reference at(const size_type index) const
   {
     using namespace std::string_literals;
     if (index >= mSize)
@@ -107,15 +114,24 @@ public:
     return mpData[index];
   }
 
-  const_reference front() const { return *begin(); }
+  [[nodiscard]] constexpr const_reference front() const noexcept
+  {
+    return *begin();
+  }
 
-  const_reference back() const { return *end(); }
+  [[nodiscard]] constexpr const_reference back() const noexcept
+  {
+    return *end();
+  }
 
-  const T* data() const { return mpData; }
+  [[nodiscard]] constexpr const_pointer data() const noexcept { return mpData; }
 
 private:
-  const T* mpData = nullptr;
-  size_type mSize = 0;
+  const_pointer mpData = nullptr;
+  size_type mSize = 0u;
 };
+
+template <typename Container>
+ArrayView(Container) -> ArrayView<typename Container::value_type>;
 
 } // namespace rigel::base
