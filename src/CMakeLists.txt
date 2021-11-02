@@ -65,6 +65,8 @@ set(core_sources
     engine/particle_system.cpp
     engine/particle_system.hpp
     engine/physical_components.hpp
+    engine/physics.cpp
+    engine/physics.hpp
     engine/physics_system.cpp
     engine/physics_system.hpp
     engine/random_number_generator.cpp

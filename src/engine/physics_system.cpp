@@ -16,9 +16,9 @@
 
 #include "physics_system.hpp"
 
-#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
-#include "engine/movement.hpp"
+#include "engine/physics.hpp"
+
 
 namespace ex = entityx;
 
@@ -26,55 +26,9 @@ namespace ex = entityx;
 namespace rigel::engine
 {
 
-using namespace std;
-
 using components::BoundingBox;
-using components::MovementSequence;
 using components::MovingBody;
-using components::SolidBody;
 using components::WorldPosition;
-
-
-namespace
-{
-
-base::Point<float> updateMovementSequence(
-  entityx::Entity entity,
-  const base::Point<float>& velocity)
-{
-  auto& sequence = *entity.component<MovementSequence>();
-  if (sequence.mCurrentStep >= sequence.mVelocites.size())
-  {
-    if (sequence.mResetVelocityAfterSequence)
-    {
-      const auto resetVelocity = sequence.mEnableX
-        ? base::Point<float>{}
-        : base::Point<float>{velocity.x, 0.0f};
-      entity.remove<MovementSequence>();
-      return resetVelocity;
-    }
-
-    entity.remove<MovementSequence>();
-    return velocity;
-  }
-
-  auto newVelocity = sequence.mVelocites[sequence.mCurrentStep];
-  ++sequence.mCurrentStep;
-
-  return {sequence.mEnableX ? newVelocity.x : velocity.x, newVelocity.y};
-}
-
-} // namespace
-
-
-// TODO: This is implemented here, but declared in physical_components.hpp.
-// It would be cleaner to have a matching .cpp file for that file.
-BoundingBox
-  toWorldSpace(const BoundingBox& bbox, const base::Vector& entityPosition)
-{
-  return bbox +
-    base::Vector(entityPosition.x, entityPosition.y - (bbox.size.height - 1));
-}
 
 
 PhysicsSystem::PhysicsSystem(
@@ -146,58 +100,15 @@ void PhysicsSystem::applyPhysics(
     return;
   }
 
-  auto hasActiveSequence = [&]() {
-    return entity.has_component<MovementSequence>();
-  };
+  const auto result = engine::applyPhysics(
+    *mpCollisionChecker, *mpMap, entity, body, position, collisionRect);
 
-  if (hasActiveSequence())
+  setTag<components::CollidedWithWorld>(entity, result.has_value());
+
+  if (result)
   {
-    body.mVelocity = updateMovementSequence(entity, body.mVelocity);
-  }
-
-  const auto originalVelocity = body.mVelocity;
-  const auto originalPosition = position;
-
-  const auto movementX = static_cast<std::int16_t>(body.mVelocity.x);
-  moveHorizontally(*mpCollisionChecker, entity, movementX);
-
-  // Cache new world space BBox after applying horizontal movement
-  // for the next steps
-  const auto bbox = toWorldSpace(collisionRect, position);
-
-  if (body.mGravityAffected && !hasActiveSequence())
-  {
-    body.mVelocity.y = applyGravity(bbox, body.mVelocity.y);
-
-    applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, entity);
-  }
-
-  const auto movementY = static_cast<std::int16_t>(body.mVelocity.y);
-  const auto result = moveVertically(*mpCollisionChecker, entity, movementY);
-  if (result != MovementResult::Completed)
-  {
-    body.mVelocity.y = 0.0f;
-  }
-
-  const auto targetPosition =
-    originalPosition + WorldPosition{movementX, movementY};
-  const auto collisionOccured = position != targetPosition;
-  setTag<components::CollidedWithWorld>(entity, collisionOccured);
-
-  if (collisionOccured)
-  {
-    const auto left = targetPosition.x != position.x && movementX < 0;
-    const auto right = targetPosition.x != position.x && movementX > 0;
-    const auto top = targetPosition.y != position.y && movementY < 0;
-    const auto bottom = targetPosition.y != position.y && movementY > 0;
-
-    mpEvents->emit(events::CollidedWithWorld{entity, left, right, top, bottom});
-  }
-
-  if (body.mIgnoreCollisions)
-  {
-    position = targetPosition;
-    body.mVelocity = originalVelocity;
+    mpEvents->emit(events::CollidedWithWorld{
+      entity, result->mLeft, result->mRight, result->mTop, result->mBottom});
   }
 }
 
@@ -232,35 +143,6 @@ void PhysicsSystem::receive(
   if (it != end(mPhysicsObjectsForPhase2))
   {
     mPhysicsObjectsForPhase2.erase(it);
-  }
-}
-
-
-float PhysicsSystem::applyGravity(
-  const BoundingBox& bbox,
-  const float currentVelocity)
-{
-  if (currentVelocity == 0.0f)
-  {
-    if (mpCollisionChecker->isOnSolidGround(bbox))
-    {
-      return currentVelocity;
-    }
-
-    // We are floating - begin falling
-    return 0.5f;
-  }
-  else
-  {
-    // Apply gravity to falling object until terminal velocity reached
-    if (currentVelocity < 2.0f)
-    {
-      return currentVelocity + 0.5f;
-    }
-    else
-    {
-      return 2.0f;
-    }
   }
 }
 
