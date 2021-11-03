@@ -43,6 +43,8 @@ public:
     const data::map::Map* pMap,
     MapRenderData&& renderData);
 
+  void synchronizeTo(const MapRenderer& other);
+
   bool hasHighResReplacements() const;
 
   void switchBackdrops();
