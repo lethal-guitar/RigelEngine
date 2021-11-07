@@ -154,16 +154,17 @@ void ItemContainerSystem::updateItemBounce(entityx::EntityManager& es)
       ItemBounceEffect& state) {
       position.y += ITEM_BOUNCE_SEQUENCE[state.mFramesElapsed];
 
-      const auto hasLanded =
-        mpCollisionChecker->isOnSolidGround(position, bbox);
-      if (
-        (state.mFramesElapsed == 7 && !hasLanded) || state.mFramesElapsed == 9)
+      ++state.mFramesElapsed;
+
+      if (const auto hasLanded =
+            mpCollisionChecker->isOnSolidGround(position, bbox);
+          (state.mFramesElapsed == 6 && !hasLanded) ||
+          state.mFramesElapsed == 9)
       {
         body.mGravityAffected = true;
         body.mVelocity.y = state.mFallVelocity;
       }
 
-      ++state.mFramesElapsed;
       if (state.mFramesElapsed == 9)
       {
         entity.remove<ItemBounceEffect>();
