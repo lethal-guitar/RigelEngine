@@ -1,5 +1,6 @@
 add_executable(tests
     test_main.cpp
+    test_array_view.cpp
     test_duke_script_loader.cpp
     test_elevator.cpp
     test_high_score_list.cpp
