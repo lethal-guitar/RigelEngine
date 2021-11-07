@@ -46,12 +46,6 @@ struct Spider
     bool isOnScreen,
     entityx::Entity entity);
 
-  void onCollision(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    const engine::events::CollidedWithWorld& event,
-    entityx::Entity entity);
-
   void walkOnFloor(entityx::Entity entity);
 
   enum class State

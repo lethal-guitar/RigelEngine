@@ -106,6 +106,13 @@ MapRenderer::MapRenderer(
 }
 
 
+void MapRenderer::synchronizeTo(const MapRenderer& other)
+{
+  mBackdropAutoScrollOffset = other.mBackdropAutoScrollOffset;
+  mElapsedFrames = other.mElapsedFrames;
+}
+
+
 bool MapRenderer::hasHighResReplacements() const
 {
   return mBackdropTexture.width() > data::GameTraits::viewPortWidthPx ||

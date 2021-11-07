@@ -308,6 +308,7 @@ void WorldState::synchronizeTo(
   mRandomGenerator = other.mRandomGenerator;
   mCamera.synchronizeTo(other.mCamera);
   mParticles.synchronizeTo(other.mParticles);
+  mMapRenderer.synchronizeTo(other.mMapRenderer);
 
   if (other.mEarthQuakeEffect)
   {

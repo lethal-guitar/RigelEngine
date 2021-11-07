@@ -101,10 +101,7 @@ private:
     components::MovingBody& body,
     components::WorldPosition& position,
     const components::BoundingBox& collisionRect);
-  float
-    applyGravity(const components::BoundingBox& bbox, float currentVelocity);
 
-private:
   std::vector<entityx::Entity> mPhysicsObjectsForPhase2;
   const CollisionChecker* mpCollisionChecker;
   const data::map::Map* mpMap;
