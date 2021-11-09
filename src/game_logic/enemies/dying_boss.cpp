@@ -17,13 +17,13 @@
 #include "dying_boss.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "data/game_traits.hpp"
 #include "data/player_model.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
-#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors
@@ -87,7 +87,7 @@ void DyingBoss::update(
       // clang-format on
       d.mpParticles->spawnParticles(
         position + base::Vector{rand() % 4, -(rand() % 8)},
-        loader::INGAME_PALETTE[rand() % 16],
+        data::GameTraits::INGAME_PALETTE[rand() % 16],
         rand() % 2 - 1);
       spawnOneShotSprite(
         *d.mpEntityFactory,

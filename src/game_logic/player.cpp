@@ -20,6 +20,7 @@
 #include "base/math_tools.hpp"
 #include "common/game_service_provider.hpp"
 #include "data/game_options.hpp"
+#include "data/game_traits.hpp"
 #include "data/map.hpp"
 #include "data/player_model.hpp"
 #include "data/sound_ids.hpp"
@@ -32,7 +33,6 @@
 #include "game_logic/effect_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
-#include "loader/palette.hpp"
 
 #include <cassert>
 
@@ -65,11 +65,11 @@ const effects::EffectSpec PLAYER_DEATH_EFFECT_SPEC[] = {
      data::ActorID::Duke_death_particles,
      EffectMovement::None},
    0},
-  {effects::Particles{{2, 0}, loader::INGAME_PALETTE[6]}, 0},
+  {effects::Particles{{2, 0}, data::GameTraits::INGAME_PALETTE[6]}, 0},
   {effects::RandomExplosionSound{}, 1},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3], 1}, 2},
+  {effects::Particles{{1, 0}, data::GameTraits::INGAME_PALETTE[3], 1}, 2},
   {effects::RandomExplosionSound{}, 3},
-  {effects::Particles{{2, 0}, loader::INGAME_PALETTE[10], -1}, 4},
+  {effects::Particles{{2, 0}, data::GameTraits::INGAME_PALETTE[10], -1}, 4},
   {effects::RandomExplosionSound{}, 5},
 };
 

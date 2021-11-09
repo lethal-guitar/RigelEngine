@@ -146,7 +146,7 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
 data::Image
   ResourceLoader::loadTiledFullscreenImage(std::string_view name) const
 {
-  return loadTiledFullscreenImage(name, INGAME_PALETTE);
+  return loadTiledFullscreenImage(name, data::GameTraits::INGAME_PALETTE);
 }
 
 
@@ -277,13 +277,13 @@ TileSet ResourceLoader::loadCZone(std::string_view name) const
     tilesBegin,
     maskedTilesBegin,
     GameTraits::CZone::tileSetImageWidth,
-    INGAME_PALETTE,
+    data::GameTraits::INGAME_PALETTE,
     T::Unmasked);
   const auto maskedTilesImage = loadTiledImage(
     maskedTilesBegin,
     data.end(),
     GameTraits::CZone::tileSetImageWidth,
-    INGAME_PALETTE,
+    data::GameTraits::INGAME_PALETTE,
     T::Masked);
   fullImage.insertImage(0, 0, solidTilesImage);
   fullImage.insertImage(

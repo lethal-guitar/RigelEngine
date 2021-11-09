@@ -18,6 +18,7 @@
 
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
+#include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
@@ -26,7 +27,6 @@
 #include "engine/visual_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/ientity_factory.hpp"
-#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic
@@ -192,7 +192,7 @@ void EffectsSystem::processEffectsAndAdvance(
       [&, this](const Particles& particles) {
         const auto color = particles.mColor
           ? *particles.mColor
-          : loader::INGAME_PALETTE[mpRandomGenerator->gen() % 16];
+          : data::GameTraits::INGAME_PALETTE[mpRandomGenerator->gen() % 16];
 
         mpParticles->spawnParticles(
           position + particles.mOffset, color, particles.mVelocityScaleX);

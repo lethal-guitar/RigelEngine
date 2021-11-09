@@ -70,7 +70,7 @@ DukeScriptRunner::DukeScriptRunner(
   const data::SaveSlotArray* pSaveSlots,
   IGameServiceProvider* pServiceProvider)
   : mpResourceBundle(pResourceLoader)
-  , mCurrentPalette(loader::INGAME_PALETTE)
+  , mCurrentPalette(data::GameTraits::INGAME_PALETTE)
   , mpRenderer(pRenderer)
   , mpSaveSlots(pSaveSlots)
   , mpServices(pServiceProvider)

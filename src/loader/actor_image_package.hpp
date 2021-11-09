@@ -18,9 +18,9 @@
 
 #include "base/spatial_types.hpp"
 #include "data/actor_ids.hpp"
+#include "data/game_traits.hpp"
 #include "data/image.hpp"
 #include "loader/byte_buffer.hpp"
-#include "loader/palette.hpp"
 
 #include <map>
 #include <optional>
@@ -61,7 +61,7 @@ public:
 
   ActorData loadActor(
     data::ActorID id,
-    const Palette16& palette = INGAME_PALETTE) const;
+    const Palette16& palette = data::GameTraits::INGAME_PALETTE) const;
 
   FontData loadFont() const;
 

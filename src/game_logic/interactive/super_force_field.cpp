@@ -17,6 +17,7 @@
 #include "super_force_field.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "data/game_traits.hpp"
 #include "data/player_model.hpp"
 #include "data/strings.hpp"
 #include "engine/particle_system.hpp"
@@ -28,7 +29,6 @@
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
-#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors
@@ -80,7 +80,7 @@ void SuperForceField::update(
       d.mpServiceProvider->playSound(data::SoundId::GlassBreaking);
       d.mpParticles->spawnParticles(
         position + base::Vector{1, -framesElapsed + 14},
-        loader::INGAME_PALETTE[11]);
+        data::GameTraits::INGAME_PALETTE[11]);
       spawnFloatingScoreNumber(
         *d.mpEntityFactory,
         ScoreNumberType::S500,
