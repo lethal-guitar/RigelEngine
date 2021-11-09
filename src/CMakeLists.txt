@@ -1,4 +1,8 @@
 set(core_sources
+    audio/imf_player.cpp
+    audio/imf_player.hpp
+    audio/sound_system.cpp
+    audio/sound_system.hpp
     base/array_view.hpp
     base/clock.hpp
     base/container_utils.hpp
@@ -52,8 +56,6 @@ set(core_sources
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
-    engine/imf_player.cpp
-    engine/imf_player.hpp
     engine/isprite_factory.hpp
     engine/life_time_components.hpp
     engine/life_time_system.cpp
@@ -72,8 +74,6 @@ set(core_sources
     engine/physics_system.hpp
     engine/random_number_generator.cpp
     engine/random_number_generator.hpp
-    engine/sound_system.cpp
-    engine/sound_system.hpp
     engine/sprite_factory.cpp
     engine/sprite_factory.hpp
     engine/sprite_rendering_system.cpp

@@ -23,7 +23,7 @@
 #include <mutex>
 
 
-namespace rigel::engine
+namespace rigel::audio
 {
 
 class ImfPlayer
@@ -52,4 +52,4 @@ private:
   std::atomic<bool> mSongSwitchPending;
 };
 
-} // namespace rigel::engine
+} // namespace rigel::audio

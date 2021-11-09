@@ -16,13 +16,13 @@
 
 #pragma once
 
+#include "audio/sound_system.hpp"
 #include "base/clock.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "common/game_mode.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
-#include "engine/sound_system.hpp"
 #include "engine/sprite_factory.hpp"
 #include "engine/tiled_texture.hpp"
 #include "loader/duke_script_loader.hpp"
@@ -132,7 +132,7 @@ private:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
   loader::ResourceLoader mResources;
-  std::unique_ptr<engine::SoundSystem> mpSoundSystem;
+  std::unique_ptr<audio::SoundSystem> mpSoundSystem;
   bool mIsShareWareVersion;
 
   std::optional<renderer::FpsLimiter> mFpsLimiter;

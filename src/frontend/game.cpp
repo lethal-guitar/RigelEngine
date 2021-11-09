@@ -251,10 +251,10 @@ Game::Game(
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
   , mpSoundSystem([&]() {
-    std::unique_ptr<engine::SoundSystem> pResult;
+    std::unique_ptr<audio::SoundSystem> pResult;
     try
     {
-      pResult = std::make_unique<engine::SoundSystem>(
+      pResult = std::make_unique<audio::SoundSystem>(
         &mResources, pUserProfile->mOptions.mSoundStyle);
     }
     catch (const std::exception& ex)

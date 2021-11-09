@@ -16,9 +16,9 @@
 
 #include "sound_system.hpp"
 
+#include "audio/imf_player.hpp"
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
-#include "engine/imf_player.hpp"
 #include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
 
@@ -52,7 +52,7 @@ void check(int result)
 } // namespace rigel::sdl_mixer
 
 
-namespace rigel::engine
+namespace rigel::audio
 {
 
 namespace
@@ -574,4 +574,4 @@ sdl_utils::Ptr<Mix_Music>
   return {};
 }
 
-} // namespace rigel::engine
+} // namespace rigel::audio
