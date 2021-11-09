@@ -30,9 +30,6 @@ using Palette16 = std::array<data::Pixel, 16>;
 using Palette256 = std::array<data::Pixel, 256>;
 
 
-extern const Palette16 INGAME_PALETTE;
-
-
 Palette16 load6bitPalette16(ByteBufferCIter begin, ByteBufferCIter end);
 
 

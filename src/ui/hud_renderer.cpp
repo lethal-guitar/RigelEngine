@@ -51,7 +51,7 @@ constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
 
 constexpr auto NUM_RADAR_BLINK_STEPS = 4;
 constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
-const auto RADAR_DOT_COLOR = loader::INGAME_PALETTE[15];
+const auto RADAR_DOT_COLOR = data::GameTraits::INGAME_PALETTE[15];
 
 
 void drawNumbersBig(
@@ -384,7 +384,7 @@ void HudRenderer::drawRadar(const base::ArrayView<base::Vector> positions) const
 
     const auto blinkColorIndex =
       mElapsedFrames % NUM_RADAR_BLINK_STEPS + RADAR_BLINK_START_COLOR_INDEX;
-    const auto blinkColor = loader::INGAME_PALETTE[blinkColorIndex];
+    const auto blinkColor = data::GameTraits::INGAME_PALETTE[blinkColorIndex];
     mpRenderer->drawPoint(RADAR_CENTER_OFFSET_RELATIVE, blinkColor);
   };
 

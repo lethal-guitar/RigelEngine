@@ -17,6 +17,7 @@
 #include "missile.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "data/game_traits.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"
@@ -27,7 +28,6 @@
 #include "game_logic/effect_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
-#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors
@@ -73,7 +73,7 @@ void triggerHitEffect(entityx::Entity entity, engine::ParticleSystem& particles)
   const auto& position = *entity.component<WorldPosition>();
   entity.component<Sprite>()->flashWhite();
   particles.spawnParticles(
-    position + base::Vector{5, 0}, loader::INGAME_PALETTE[15]);
+    position + base::Vector{5, 0}, data::GameTraits::INGAME_PALETTE[15]);
 }
 
 } // namespace
@@ -166,7 +166,8 @@ void BrokenMissile::update(
 
   auto detonate = [&]() {
     const auto& position = *entity.component<WorldPosition>();
-    d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
+    d.mpEvents->emit(
+      rigel::events::ScreenFlash{data::GameTraits::INGAME_PALETTE[15]});
     triggerEffects(entity, *d.mpEntityManager);
     spawnOneShotSprite(
       *d.mpEntityFactory, data::ActorID::Nuclear_explosion, position);

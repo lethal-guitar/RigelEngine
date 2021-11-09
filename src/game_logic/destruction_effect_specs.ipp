@@ -32,7 +32,7 @@ const effects::EffectSpec HOVER_BOT_KILL_EFFECT_SPEC[] = {
      rigel::data::ActorID::Hoverbot_debris_2,
      EffectMovement::FlyDown},
    0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[3]}, 0},
   {effects::RandomExplosionSound{}, 0}};
 
 
@@ -44,7 +44,7 @@ const effects::EffectSpec SIMPLE_TECH_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec NAPALM_BOMB_KILL_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0}};
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[15]}, 0}};
 
 
 const effects::EffectSpec SPIDER_KILL_EFFECT_SPEC[] = {
@@ -56,7 +56,7 @@ const effects::EffectSpec SPIDER_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec RED_BIRD_KILL_EFFECT_SPEC[] = {
-  {effects::Particles{{}, loader::INGAME_PALETTE[5]}, 0},
+  {effects::Particles{{}, rigel::data::GameTraits::INGAME_PALETTE[5]}, 0},
   {effects::EffectSprite{
      {},
      rigel::data::ActorID::Explosion_FX_1,
@@ -183,7 +183,7 @@ const effects::EffectSpec EYE_BALL_THROWER_KILL_EFFECT_SPEC[] = {
      rigel::data::ActorID::Eyeball_projectile,
      EffectMovement::FlyUp},
    0},
-  {effects::Particles{{}, loader::INGAME_PALETTE[13]}, 0}};
+  {effects::Particles{{}, rigel::data::GameTraits::INGAME_PALETTE[13]}, 0}};
 
 
 const effects::EffectSpec LIVING_TURKEY_KILL_EFFECT_SPEC[] = {
@@ -197,7 +197,7 @@ const effects::EffectSpec LIVING_TURKEY_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec BOSS4_PROJECTILE_KILL_EFFECT_SPEC[] = {
   {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[3]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[3]}, 0},
   {effects::RandomExplosionSound{}, 0}};
 
 
@@ -240,7 +240,7 @@ const effects::EffectSpec FLOATING_ARROW_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec SPIKE_BALL_KILL_EFFECT_SPEC[] = {
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[15]}, 0},
   {effects::EffectSprite{
      {-1, 1},
      rigel::data::ActorID::Explosion_FX_1,
@@ -263,7 +263,7 @@ const effects::EffectSpec BONUS_GLOBE_KILL_EFFECT_SPEC[] = {
    0},
   {effects::ScoreNumber{{}, ScoreNumberType::S100}, 0},
   {effects::Sound{data::SoundId::GlassBreaking}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0}};
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[15]}, 0}};
 
 
 const effects::EffectSpec BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC[] = {
@@ -426,16 +426,16 @@ const effects::EffectSpec GRABBER_CLAW_KILL_EFFECT_SPEC[] = {
 
 
 const effects::EffectSpec BLUE_GUARD_KILL_EFFECT_SPEC[] = {
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[11]}, 0},
   {effects::RandomExplosionSound{}, 0},
   {effects::SpriteCascade{rigel::data::ActorID::Shot_impact_FX}, 0}};
 
 
 const effects::EffectSpec NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[4]}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[4]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[15]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[11]}, 0},
   {effects::EffectSprite{
      {},
      rigel::data::ActorID::Nuclear_waste_can_debris_4,
@@ -465,9 +465,9 @@ const effects::EffectSpec NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec CONTAINER_BOX_KILL_EFFECT_SPEC[] = {
   {effects::RandomExplosionSound{}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[4]}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[11]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[4]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[15]}, 0},
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[11]}, 0},
 
   {effects::EffectSprite{
      {},
@@ -494,7 +494,7 @@ const effects::EffectSpec CONTAINER_BOX_KILL_EFFECT_SPEC[] = {
 
 const effects::EffectSpec SLIME_CONTAINER_KILL_EFFECT_SPEC[] = {
   {effects::Sound{data::SoundId::GlassBreaking}, 0},
-  {effects::Particles{{1, 0}, loader::INGAME_PALETTE[15]}, 0}};
+  {effects::Particles{{1, 0}, rigel::data::GameTraits::INGAME_PALETTE[15]}, 0}};
 
 
 const effects::EffectSpec REACTOR_KILL_EFFECT_SPEC[] = {

@@ -18,6 +18,7 @@
 
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
+#include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
@@ -28,7 +29,6 @@
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
-#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors
@@ -209,7 +209,8 @@ void BigBomb::update(
   if (d.mpCollisionChecker->isOnSolidGround(position, bbox))
   {
     triggerEffects(entity, *d.mpEntityManager);
-    d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
+    d.mpEvents->emit(
+      rigel::events::ScreenFlash{data::GameTraits::INGAME_PALETTE[15]});
     d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
     entity.destroy();
   }
@@ -236,7 +237,8 @@ void BigBomb::onCollision(
   const engine::events::CollidedWithWorld&,
   entityx::Entity entity)
 {
-  d.mpEvents->emit(rigel::events::ScreenFlash{loader::INGAME_PALETTE[15]});
+  d.mpEvents->emit(
+    rigel::events::ScreenFlash{data::GameTraits::INGAME_PALETTE[15]});
   d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
   entity.destroy();
 }

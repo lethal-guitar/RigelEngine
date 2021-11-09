@@ -251,7 +251,7 @@ data::Image createWaterSurfaceAnimImage()
 
 data::Image createWaterEffectColorMapImage()
 {
-  constexpr auto NUM_COLORS = int(loader::INGAME_PALETTE.size());
+  constexpr auto NUM_COLORS = int(data::GameTraits::INGAME_PALETTE.size());
   constexpr auto NUM_ROWS = 2;
 
   auto pixels = data::PixelBuffer{};
@@ -259,8 +259,8 @@ data::Image createWaterEffectColorMapImage()
 
   // 1st row: Original palette
   std::copy(
-    begin(loader::INGAME_PALETTE),
-    end(loader::INGAME_PALETTE),
+    begin(data::GameTraits::INGAME_PALETTE),
+    end(data::GameTraits::INGAME_PALETTE),
     std::back_inserter(pixels));
 
   // 2nd row: Corresponding "under water" colors
@@ -278,7 +278,7 @@ data::Image createWaterEffectColorMapImage()
   for (auto i = 0; i < NUM_COLORS; ++i)
   {
     const auto index = WATER_INDEX_START + i % NUM_WATER_INDICES;
-    pixels.push_back(loader::INGAME_PALETTE[index]);
+    pixels.push_back(data::GameTraits::INGAME_PALETTE[index]);
   }
 
   return data::Image{

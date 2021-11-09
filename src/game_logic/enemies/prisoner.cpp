@@ -17,6 +17,7 @@
 #include "prisoner.hpp"
 
 #include "common/game_service_provider.hpp"
+#include "data/game_traits.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
@@ -27,7 +28,6 @@
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
-#include "loader/palette.hpp"
 
 
 namespace rigel::game_logic::behaviors
@@ -135,7 +135,7 @@ void AggressivePrisoner::onKilled(
     debrisMovement,
     position);
   d.mpParticles->spawnParticles(
-    position + base::Vector{3, 0}, loader::INGAME_PALETTE[5]);
+    position + base::Vector{3, 0}, data::GameTraits::INGAME_PALETTE[5]);
   d.mpServiceProvider->playSound(data::SoundId::BiologicalEnemyDestroyed);
 
   entity.remove<components::BehaviorController>();

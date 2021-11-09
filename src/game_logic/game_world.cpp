@@ -1051,7 +1051,7 @@ bool GameWorld::canQuickLoad() const
 
 void GameWorld::onReactorDestroyed(const base::Vector& position)
 {
-  flashScreen(loader::INGAME_PALETTE[7]);
+  flashScreen(data::GameTraits::INGAME_PALETTE[7]);
 
   mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
