@@ -721,20 +721,37 @@ void Game::takeScreenshot()
 {
   namespace fs = std::filesystem;
 
+  constexpr auto SCREENSHOTS_SUBDIR = "screenshots";
+
   const auto shot = mRenderer.grabCurrentFramebuffer();
   const auto filename = makeScreenshotFilename();
-  const auto screenshotsDir =
+
+  auto saveShot = [&](const fs::path& path) {
+    std::error_code ec;
+
+    if (!fs::exists(path, ec) && !ec)
+    {
+      fs::create_directory(path, ec);
+    }
+
+    return loader::savePng((path / filename).u8string(), shot);
+  };
+
+  const auto gameDirScreenshotPath =
     fs::u8path(effectiveGamePath(mCommandLineOptions, *mpUserProfile)) /
-    "screenshots";
+    SCREENSHOTS_SUBDIR;
 
-  std::error_code ec;
-
-  if (!fs::exists(screenshotsDir, ec) && !ec)
+  // First, try the game dir.
+  if (saveShot(gameDirScreenshotPath))
   {
-    fs::create_directory(screenshotsDir, ec);
+    return;
   }
 
-  loader::savePng((screenshotsDir / filename).u8string(), shot);
+  // If the game dir is not writable, try the user profile dir.
+  if (const auto maybePrefsDir = createOrGetPreferencesPath(); maybePrefsDir)
+  {
+    saveShot(*maybePrefsDir / SCREENSHOTS_SUBDIR);
+  }
 }
 
 
