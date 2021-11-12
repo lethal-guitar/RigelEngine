@@ -51,7 +51,7 @@ public:
     int velocityScaleX = 0);
 
   void update();
-  void render(const base::Vector& cameraPosition);
+  void render(const base::Vector& cameraPosition, float interpolation);
 
 private:
   std::vector<ParticleGroup> mParticleGroups;

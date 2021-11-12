@@ -38,13 +38,13 @@ namespace
 const auto ANIM_STATES = 4;
 const auto FAST_ANIM_FRAME_DELAY = 1;
 const auto SLOW_ANIM_FRAME_DELAY = 2;
-const auto PARALLAX_FACTOR = 4;
+const auto PARALLAX_FACTOR = 4.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60.0f;
 
 
 base::Point<float> backdropOffset(
-  const base::Vector& cameraPosition,
+  const base::Point<float>& cameraPosition,
   const BackdropScrollMode scrollMode,
   const float backdropAutoScrollOffset)
 {
@@ -58,8 +58,8 @@ base::Point<float> backdropOffset(
   if (parallaxHorizontal || parallaxBoth)
   {
     return {
-      parallaxHorizontal ? float(cameraPosition.x * PARALLAX_FACTOR) : 0.0f,
-      parallaxBoth ? float(cameraPosition.y * PARALLAX_FACTOR) : 0.0f};
+      parallaxHorizontal ? cameraPosition.x * PARALLAX_FACTOR : 0.0f,
+      parallaxBoth ? cameraPosition.y * PARALLAX_FACTOR : 0.0f};
   }
   else if (autoScrollX || autoScrollY)
   {
@@ -144,7 +144,7 @@ void MapRenderer::renderForeground(
 
 
 renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
-  const base::Vector& cameraPosition,
+  const base::Point<float>& cameraPosition,
   const base::Extents& viewPortSize) const
 {
   // This function determines the texture coordinates we need to use for
@@ -238,7 +238,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 
 void MapRenderer::renderBackdrop(
-  const base::Vector& cameraPosition,
+  const base::Point<float>& cameraPosition,
   const base::Extents& viewPortSize) const
 {
   const auto saved = renderer::saveState(mpRenderer);
@@ -364,11 +364,17 @@ void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
 
 void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
-  const base::Vector& position,
-  const base::Vector& cameraPosition) const
+  const base::Vector& pixelPosition) const
 {
-  const auto screenPosition = position - cameraPosition;
-  renderTile(index, screenPosition.x, screenPosition.y);
+  // TODO: Can we reduce duplication with renderTile()?
+
+  // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
+  // should be visible. Therefore, don't draw if the index is 0.
+  if (index != 0)
+  {
+    const auto tileIndexToDraw = animatedTileIndex(index);
+    mTileSetTexture.renderTileAtPixelPos(tileIndexToDraw, pixelPosition);
+  }
 }
 
 

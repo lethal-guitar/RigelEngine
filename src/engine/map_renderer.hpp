@@ -50,7 +50,7 @@ public:
   void switchBackdrops();
 
   void renderBackdrop(
-    const base::Vector& cameraPosition,
+    const base::Point<float>& cameraPosition,
     const base::Extents& viewPortSize) const;
   void renderBackground(
     const base::Vector& sectionStart,
@@ -64,8 +64,7 @@ public:
 
   void renderSingleTile(
     data::map::TileIndex index,
-    const base::Vector& position,
-    const base::Vector& cameraPosition) const;
+    const base::Vector& pixelPosition) const;
 
 private:
   enum class DrawMode
@@ -75,7 +74,7 @@ private:
   };
 
   renderer::TexCoords calculateBackdropTexCoords(
-    const base::Vector& cameraPosition,
+    const base::Point<float>& cameraPosition,
     const base::Extents& viewPortSize) const;
 
   void renderMapTiles(

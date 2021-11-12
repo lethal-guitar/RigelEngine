@@ -315,10 +315,12 @@ void configureBonusGlobe(
   const BoundingBox& boundingBox,
   const int scoreValue)
 {
+  engine::enableInterpolation(entity);
   entity.assign<AnimationLoop>(1, 0, 3, 0);
   entity.assign<Shootable>(Health{1}, GivenScore{100});
   entity.assign<DestructionEffects>(BONUS_GLOBE_KILL_EFFECT_SPEC);
   entity.assign<ActorTag>(ActorTag::Type::ShootableBonusGlobe);
+  entity.assign<AppearsOnRadar>();
   addDefaultMovingBody(entity, boundingBox);
 
   CollectableItem item;
@@ -337,6 +339,7 @@ void configureBonusGlobe(
   coloredDestructionEffect.assign<BoundingBox>(boundingBox);
   coloredDestructionEffect.assign<OverrideDrawOrder>(engine::EFFECT_DRAW_ORDER);
   coloredDestructionEffect.assign<AnimationLoop>(1, 0, 3);
+  coloredDestructionEffect.assign<InterpolateMotion>();
   configureMovingEffectSprite(coloredDestructionEffect, SpriteMovement::FlyUp);
 
   entity.assign<ItemContainer>(std::move(coloredDestructionEffect));
@@ -411,6 +414,7 @@ void turnIntoContainer(
   auto originalSprite = *entity.component<Sprite>();
   addToContainer(container, originalSprite);
 
+  engine::enableInterpolation(entity);
   entity.assign<components::ItemContainer>(std::move(container));
   entity.assign<Shootable>(Health{1}, givenScore);
   addDefaultMovingBody(
@@ -450,6 +454,7 @@ void EntityFactory::configureItemBox(
   addToContainer(
     container,
     Active{},
+    InterpolateMotion{},
     MovingBody{Velocity{0.0f, 0.0f}, GravityAffected{false}},
     engine::inferBoundingBox(*entity.component<Sprite>(), entity),
     ActivationSettings{ActivationSettings::Policy::Always});
@@ -478,22 +483,18 @@ void EntityFactory::configureEntity(
   {
     case ActorID::Blue_bonus_globe_1: // Blue bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{500});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_2: // Red bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{2000});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_3: // Green bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{5000});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Blue_bonus_globe_4: // White bonus globe
       configureBonusGlobe(entity, boundingBox, GivenScore{10000});
-      entity.assign<AppearsOnRadar>();
       break;
 
     case ActorID::Force_field:
@@ -528,6 +529,7 @@ void EntityFactory::configureEntity(
     case ActorID::Red_box_empty: // Empty red box
     case ActorID::Blue_box_empty: // Empty blue box
     case ActorID::White_box_empty: // Empty white box
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<DestructionEffects>(CONTAINER_BOX_KILL_EFFECT_SPEC);
       addDefaultMovingBody(entity, boundingBox);
@@ -671,6 +673,7 @@ void EntityFactory::configureEntity(
         auto flyingSodaCanContainer = makeContainer(
           flyingSodaCanCollectable,
           flyingSodaCanSprite,
+          InterpolateMotion{},
           boundingBox,
           DestructionEffects{
             SODA_CAN_ROCKET_KILL_EFFECT_SPEC,
@@ -1129,6 +1132,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Special_hint_globe: // Special hint globe
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{3}, GivenScore{100});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<AnimationSequence>(HINT_GLOBE_ANIMATION, 0, true);
@@ -1148,6 +1152,7 @@ void EntityFactory::configureEntity(
       // ----------------------------------------------------------------------
 
     case ActorID::Hoverbot:
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{150});
       addDefaultMovingBody(entity, boundingBox);
       entity.component<Sprite>()->mShow = false;
@@ -1160,6 +1165,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Big_green_cat_LEFT:
     case ActorID::Big_green_cat_RIGHT:
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{5}, GivenScore{1000});
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Orientation>(
@@ -1177,6 +1183,7 @@ void EntityFactory::configureEntity(
     // Wall-mounted flame thrower
     case ActorID::Wall_mounted_flamethrower_RIGHT: // ->
     case ActorID::Wall_mounted_flamethrower_LEFT: // <-
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{12}, GivenScore{5000});
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Orientation>(
@@ -1190,6 +1197,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Watchbot: // Bouncing robot with big eye
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<DestructionEffects>(
@@ -1219,6 +1227,7 @@ void EntityFactory::configureEntity(
     case ActorID::Enemy_rocket_right:
     case ActorID::Enemy_rocket_2_up:
     case ActorID::Enemy_rocket_2_down:
+      engine::enableInterpolation(entity);
       entity.assign<BehaviorController>(
         behaviors::EnemyRocket{directionVectorForRocketType(actorID)});
       entity.assign<PlayerDamaging>(1);
@@ -1241,6 +1250,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Watchbot_container_carrier: // Watch-bot container carrier
+      engine::enableInterpolation(entity);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<Shootable>(Health{5}, GivenScore{500});
       entity.assign<PlayerDamaging>(1);
@@ -1252,6 +1262,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Watchbot_container:
+      engine::enableInterpolation(entity);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<components::BehaviorController>(
         behaviors::WatchBotContainer{});
@@ -1261,6 +1272,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Bomb_dropping_spaceship: // Bomb dropping space ship
       // Not player damaging, only the bombs are
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{5000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<BoundingBox>(boundingBox);
@@ -1272,6 +1284,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Napalm_bomb: // Big bomb
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{1}, GivenScore{200});
       entity.assign<PlayerDamaging>(1);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
@@ -1286,6 +1299,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Bouncing_spike_ball:
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(SPIKE_BALL_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(1);
@@ -1298,6 +1312,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Green_slime_blob:
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{6 + difficultyOffset}, GivenScore{1500});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,
@@ -1323,6 +1338,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Napalm_bomb_small: // Small bomb
+      engine::enableInterpolation(entity);
       entity.assign<AnimationSequence>(BOMB_DROPPING_ANIMATION);
       entity.assign<DestructionEffects>(
         SMALL_BOMB_DETONATE_EFFECT_SPEC,
@@ -1415,6 +1431,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Metal_grabber_claw:
+      engine::enableInterpolation(entity);
       entity.component<WorldPosition>()->y += 1;
       entity.assign<BoundingBox>(BoundingBox{{0, -1}, {1, 1}});
       entity.assign<Shootable>(Health{1}, GivenScore{250});
@@ -1430,6 +1447,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Hovering_laser_turret: // Floating ball, opens up and shoots
                                          // lasers
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{3 + difficultyOffset}, GivenScore{1000});
       entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1460,6 +1478,7 @@ void EntityFactory::configureEntity(
         entity.assign<Shootable>(Health{2}, GivenScore{position.y});
       }
 
+      engine::enableInterpolation(entity);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -1475,6 +1494,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Spiked_green_creature_LEFT:
     case ActorID::Spiked_green_creature_RIGHT:
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{5}, GivenScore{1000});
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
@@ -1495,6 +1515,7 @@ void EntityFactory::configureEntity(
     case ActorID::Small_flying_ship_1: // Small flying ship 1
     case ActorID::Small_flying_ship_2: // Small flying ship 2
     case ActorID::Small_flying_ship_3: // Small flying ship 3
+      engine::enableInterpolation(entity);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<ActivationSettings>(
@@ -1538,6 +1559,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::BOSS_Episode_1: // Boss (episode 1)
+      engine::enableInterpolation(entity);
       entity.assign<AnimationLoop>(1, 0, 1);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(
@@ -1552,6 +1574,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::BOSS_Episode_2:
+      engine::enableInterpolation(entity);
       entity.assign<AnimationLoop>(1, 0, 1);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(
@@ -1567,6 +1590,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::BOSS_Episode_3:
+      engine::enableInterpolation(entity);
       entity.assign<AnimationLoop>(1, 1, 2, 1);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(
@@ -1580,6 +1604,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::BOSS_Episode_4:
+      engine::enableInterpolation(entity);
       entity.assign<AnimationLoop>(1, 1, 4, 1);
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<Shootable>(
@@ -1593,6 +1618,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::BOSS_Episode_4_projectile:
+      engine::enableInterpolation(entity);
       entity.assign<AnimationSequence>(BOSS4_PROJECTILE_SPAWN_ANIM_SEQ);
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<PlayerDamaging>(1);
@@ -1607,6 +1633,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Red_bird: // Red bird
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{1 + difficultyOffset}, GivenScore{100});
       entity.assign<DestructionEffects>(RED_BIRD_KILL_EFFECT_SPEC);
       entity.assign<PlayerDamaging>(Damage{1});
@@ -1616,6 +1643,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Smash_hammer: // Smash hammer
+      engine::enableInterpolation(entity);
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(
         ActivationSettings::Policy::AlwaysAfterFirstActivation);
@@ -1624,6 +1652,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Unicycle_bot:
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{2}, GivenScore{300});
       entity.assign<PlayerDamaging>(1);
       addDefaultMovingBody(entity, boundingBox);
@@ -1650,6 +1679,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Rigelatin_soldier: // Rigelatin soldier
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(
         Health{27 + 2 * difficultyOffset}, GivenScore{2100});
       entity.assign<BehaviorController>(behaviors::RigelatinSoldier{});
@@ -1679,6 +1709,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Dukes_ship_after_exiting_LEFT:
     case ActorID::Dukes_ship_after_exiting_RIGHT:
+      engine::enableInterpolation(entity);
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<BehaviorController>(behaviors::PlayerShip{true});
       entity.assign<Orientation>(
@@ -1688,6 +1719,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Nuclear_waste_can_empty: // Nuclear waste barrel, empty
+      engine::enableInterpolation(entity);
       entity.assign<Shootable>(Health{1}, GivenScore{100});
       entity.assign<DestructionEffects>(NUCLEAR_WASTE_BARREL_KILL_EFFECT_SPEC);
       addBarrelDestroyEffect(entity);
@@ -1749,6 +1781,7 @@ void EntityFactory::configureEntity(
         auto shootable = Shootable{Health{1}};
         shootable.mDestroyWhenKilled = false;
 
+        engine::enableInterpolation(entity);
         addDefaultMovingBody(entity, boundingBox);
         entity.assign<Shootable>(shootable);
         entity.assign<DestructionEffects>(
@@ -1783,6 +1816,7 @@ void EntityFactory::configureEntity(
         auto shootable = Shootable{Health{1}};
         shootable.mDestroyWhenKilled = false;
 
+        engine::enableInterpolation(entity);
         entity.assign<Shootable>(shootable);
         entity.assign<BoundingBox>(boundingBox);
         entity.assign<DestructionEffects>(
@@ -1796,6 +1830,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Rocket_elevator:
+      engine::enableInterpolation(entity);
       entity.assign<BehaviorController>(behaviors::Elevator{});
       entity.assign<BoundingBox>(BoundingBox{{0, 0}, {4, 3}});
       entity.assign<MovingBody>(Velocity{0.0f, 0.0f}, GravityAffected{true});
@@ -1892,6 +1927,8 @@ void EntityFactory::configureEntity(
     case ActorID::Messenger_drone_5: // "You cannot escape us! You will get your
                                      // brain sucked!"
       {
+        engine::enableInterpolation(entity);
+
         const auto typeIndex = messengerDroneTypeIndex(actorID);
 
         // The original game uses the actor's "score" field to store which
@@ -1904,7 +1941,6 @@ void EntityFactory::configureEntity(
         entity.assign<DestructionEffects>(TECH_KILL_EFFECT_SPEC);
         entity.assign<BoundingBox>(boundingBox);
         entity.component<Sprite>()->mFramesToRender = {};
-
         entity.assign<BehaviorController>(
           behaviors::MessengerDrone{MESSAGE_TYPE_BY_INDEX[typeIndex]});
         entity.assign<ActivationSettings>(
@@ -2022,6 +2058,7 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Water_drop: // water drop
+      engine::enableInterpolation(entity);
       addDefaultMovingBody(entity, boundingBox);
       entity.assign<AutoDestroy>(
         AutoDestroy{AutoDestroy::Condition::OnWorldCollision});
@@ -2069,6 +2106,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Enemy_laser_shot_LEFT:
     case ActorID::Enemy_laser_shot_RIGHT:
+      engine::enableInterpolation(entity);
       entity.assign<PlayerDamaging>(1, false, true);
       entity.assign<MovingBody>(
         Velocity{

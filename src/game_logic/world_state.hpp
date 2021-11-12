@@ -146,6 +146,7 @@ struct WorldState
 
   Player mPlayer;
   Camera mCamera;
+  base::Vector mPreviousCameraPosition;
   engine::ParticleSystem mParticles;
   engine::SpriteRenderingSystem mSpriteRenderingSystem;
   engine::MapRenderer mMapRenderer;

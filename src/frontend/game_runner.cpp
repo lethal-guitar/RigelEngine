@@ -104,7 +104,13 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
   }
 
   updateWorld(dt);
-  mWorld.render();
+
+  const auto interpolationFactor =
+    mContext.mpUserProfile->mOptions.mMotionSmoothing
+    ? static_cast<float>(mAccumulatedTime / game_logic::GAME_LOGIC_UPDATE_DELAY)
+    : 1.0f;
+  mWorld.render(interpolationFactor);
+
   renderDebugText();
   mWorld.processEndOfFrameActions();
 }

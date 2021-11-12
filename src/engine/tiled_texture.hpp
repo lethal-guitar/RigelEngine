@@ -49,6 +49,8 @@ public:
   void
     renderTileDoubleQuad(int baseIndex, const base::Vector& tlPosition) const;
 
+  void renderTileAtPixelPos(int index, const base::Vector& pxPosition) const;
+
   int tilesPerRow() const;
 
   bool isHighRes() const;

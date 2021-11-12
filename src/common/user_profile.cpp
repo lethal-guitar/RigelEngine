@@ -395,6 +395,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
   serialized["skipIntro"] = options.mSkipIntro;
+  serialized["motionSmoothing"] = options.mMotionSmoothing;
   return serialized;
 }
 
@@ -589,6 +590,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
   extractValueIfExists("skipIntro", result.mSkipIntro, json);
+  extractValueIfExists("motionSmoothing", result.mMotionSmoothing, json);
 
   removeInvalidKeybindings(result);
 

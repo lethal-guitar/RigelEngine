@@ -101,7 +101,7 @@ public:
 
   bool needsPerElementUpscaling() const;
   void updateGameLogic(const PlayerInput& input);
-  void render();
+  void render(float interpolationFactor = 0.0f);
   void processEndOfFrameActions();
 
   void activateFullHealthCheat();
@@ -114,6 +114,15 @@ public:
   friend class rigel::GameRunner;
 
 private:
+  struct ViewportParams
+  {
+    base::Point<float> mInterpolatedCameraPosition;
+    base::Vector mCameraOffset;
+
+    base::Vector mRenderStartPosition;
+    base::Extents mViewportSize;
+  };
+
   void loadLevel(const PlayerInput& initialInput);
   void createNewState();
   void subscribe(entityx::EventManager& eventManager);
@@ -133,7 +142,13 @@ private:
 
   void printDebugText(std::ostream& stream) const;
 
-  void drawMapAndSprites(const base::Extents& viewPortSize);
+  ViewportParams determineSmoothScrollViewport(
+    const base::Extents& viewPortSizeOriginal,
+    const float interpolationFactor) const;
+  void updateMotionSmoothingStates();
+
+  void
+    drawMapAndSprites(const ViewportParams& params, float interpolationFactor);
   bool widescreenModeOn() const;
 
   struct QuickSaveData
@@ -160,6 +175,7 @@ private:
   base::Size<int> mPreviousWindowSize;
   bool mWidescreenModeWasOn;
   bool mPerElementUpscalingWasEnabled;
+  bool mMotionSmoothingWasEnabled;
 
   std::unique_ptr<WorldState> mpState;
   std::unique_ptr<QuickSaveData> mpQuickSave;

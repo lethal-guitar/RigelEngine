@@ -21,6 +21,7 @@
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/life_time_components.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/actor_tag.hpp"
@@ -75,6 +76,8 @@ void ItemContainerSystem::update(entityx::EntityManager& es)
       }
 
       contents.assign<WorldPosition>(*entity.component<WorldPosition>());
+      engine::discardInterpolation(contents);
+
       return contents;
     };
 

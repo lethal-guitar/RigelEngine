@@ -60,6 +60,7 @@ set(core_sources
     engine/life_time_system.hpp
     engine/map_renderer.cpp
     engine/map_renderer.hpp
+    engine/motion_smoothing.hpp
     engine/movement.cpp
     engine/movement.hpp
     engine/particle_system.cpp

@@ -52,6 +52,7 @@ inline void assignPlayerComponents(
 
   entity.assign<Orientation>(orientation);
   entity.assign<BoundingBox>(DEFAULT_PLAYER_BOUNDS);
+  entity.assign<InterpolateMotion>();
 }
 
 

@@ -18,6 +18,7 @@
 
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/dynamic_geometry_components.hpp"
@@ -70,10 +71,8 @@ base::Color colorForEntity(entityx::Entity entity)
 
 DebuggingSystem::DebuggingSystem(
   renderer::Renderer* pRenderer,
-  const base::Vector* pCameraPos,
   data::map::Map* pMap)
   : mpRenderer(pRenderer)
-  , mpCameraPos(pCameraPos)
   , mpMap(pMap)
 {
 }
@@ -99,7 +98,9 @@ void DebuggingSystem::toggleGridDisplay()
 
 void DebuggingSystem::update(
   ex::EntityManager& es,
-  const base::Extents& viewPortSize)
+  const base::Vector& cameraPosition,
+  const base::Extents& viewPortSize,
+  const float interpolationFactor)
 {
   if (mShowWorldCollisionData)
   {
@@ -109,8 +110,8 @@ void DebuggingSystem::update(
     {
       for (int x = 0; x < viewPortSize.width; ++x)
       {
-        const auto col = x + mpCameraPos->x;
-        const auto row = y + mpCameraPos->y;
+        const auto col = x + cameraPosition.x;
+        const auto row = y + cameraPosition.y;
         if (col >= mpMap->width() || row >= mpMap->height())
         {
           continue;
@@ -168,23 +169,39 @@ void DebuggingSystem::update(
   if (mShowBoundingBoxes)
   {
     es.each<WorldPosition, BoundingBox>(
-      [this](
+      [&](
         ex::Entity entity, const WorldPosition& pos, const BoundingBox& bbox) {
-        const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
+        const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
+
+        const auto topLeftCurrent = worldSpaceBox.topLeft;
+        const auto topLeftPrevious = entity.has_component<InterpolateMotion>()
+          ? engine::toWorldSpace(
+              bbox, entity.component<InterpolateMotion>()->mPreviousPosition)
+              .topLeft
+          : topLeftCurrent;
+
+        auto transform = [&](const base::Vector& p) {
+          return tileVectorToPixelVector(p) - worldToScreenPx;
+        };
+
+        const auto visualTopLeft = engine::lerpRounded(
+          transform(topLeftPrevious),
+          transform(topLeftCurrent),
+          interpolationFactor);
+
         const auto boxInPixels = BoundingBox{
-          tileVectorToPixelVector(worldSpaceBox.topLeft) - worldToScreenPx,
-          tileExtentsToPixelExtents(worldSpaceBox.size)};
+          visualTopLeft, tileExtentsToPixelExtents(worldSpaceBox.size)};
 
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
 
     es.each<WorldPosition, game_logic::components::MapGeometryLink>(
-      [this](
+      [&](
         ex::Entity entity,
         const WorldPosition& pos,
         const game_logic::components::MapGeometryLink& link) {
-        const auto worldToScreenPx = tileVectorToPixelVector(*mpCameraPos);
+        const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto boxInPixels = BoundingBox{
           tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) -
             worldToScreenPx,

@@ -18,6 +18,7 @@
 
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/movement.hpp"
 #include "engine/physics.hpp"
 #include "engine/random_number_generator.hpp"
@@ -210,6 +211,7 @@ void Spider::update(
     // so
     entity.component<MovingBody>()->mIsActive = false;
     processPhysics();
+    engine::enableInterpolation(entity);
   };
 
   auto clingToPlayer = [&, this]() {
@@ -274,6 +276,7 @@ void Spider::update(
         if (processPhysics())
         {
           walkOnFloor();
+          entity.remove<engine::components::InterpolateMotion>();
           entity.remove<engine::components::MovingBody>();
           *entity.component<Orientation>() = Orientation::Right;
         }

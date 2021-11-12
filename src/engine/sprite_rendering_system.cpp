@@ -17,6 +17,7 @@
 #include "sprite_rendering_system.hpp"
 
 #include "data/unit_conversions.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "renderer/texture_atlas.hpp"
@@ -34,6 +35,7 @@ namespace rigel::engine
 
 using components::AnimationLoop;
 using components::AnimationSequence;
+using components::InterpolateMotion;
 using components::Orientation;
 using components::Sprite;
 using components::WorldPosition;
@@ -69,7 +71,8 @@ void collectVisibleSprites(
   ex::EntityManager& es,
   const base::Vector& cameraPosition,
   const base::Extents& viewPortSize,
-  std::vector<SortableDrawSpec>& output)
+  std::vector<SortableDrawSpec>& output,
+  const float interpolationFactor)
 {
   using components::BoundingBox;
   using components::DrawTopMost;
@@ -80,6 +83,7 @@ void collectVisibleSprites(
 
   auto submit = [&](
                   const SpriteFrame& frame,
+                  const base::Vector& previousPosition,
                   const base::Vector& position,
                   const bool flashingWhite,
                   const bool translucent,
@@ -87,9 +91,13 @@ void collectVisibleSprites(
                   const int drawOrder) {
     // World-space tile positions refer to a sprite's bottom left tile,
     // but we need its top left corner for drawing.
-    const auto heightTiles = frame.mDimensions.height;
-    const auto topLeft =
-      position - base::Vector(0, heightTiles - 1) + frame.mDrawOffset;
+    auto drawPosition = [&frame, &cameraPosition](const base::Vector& pos) {
+      const auto heightTiles = frame.mDimensions.height;
+      return pos - cameraPosition - base::Vector(0, heightTiles - 1) +
+        frame.mDrawOffset;
+    };
+
+    const auto topLeft = drawPosition(position);
 
     // Discard sprites outside visible area
     const auto frameBox = BoundingBox{topLeft, frame.mDimensions};
@@ -98,8 +106,11 @@ void collectVisibleSprites(
       return;
     }
 
+    const auto previousTopLeft = drawPosition(previousPosition);
+
     const auto destRect = base::Rect<int>{
-      data::tileVectorToPixelVector(topLeft),
+      engine::interpolatedPixelPosition(
+        previousTopLeft, topLeft, interpolationFactor),
       data::tileExtentsToPixelExtents(frame.mDimensions)};
     const auto drawSpec =
       SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, translucent};
@@ -116,7 +127,10 @@ void collectVisibleSprites(
         return;
       }
 
-      const auto screenPosition = position - cameraPosition;
+      const auto& previousPosition = entity.has_component<InterpolateMotion>()
+        ? entity.component<InterpolateMotion>()->mPreviousPosition
+        : position;
+
       const auto drawTopmost = entity.has_component<DrawTopMost>();
       const auto drawOrder = entity.has_component<OverrideDrawOrder>()
         ? entity.component<const OverrideDrawOrder>()->mDrawOrder
@@ -136,7 +150,8 @@ void collectVisibleSprites(
           virtualToRealFrame(baseFrameIndex, *sprite.mpDrawData, entity);
         submit(
           sprite.mpDrawData->mFrames[frameIndex],
-          screenPosition,
+          previousPosition,
+          position,
           sprite.mFlashingWhiteStates.test(slotIndex),
           sprite.mTranslucent,
           drawTopmost,
@@ -154,7 +169,8 @@ void collectVisibleSprites(
             virtualToRealFrame(item.mFrame, *sprite.mpDrawData, entity);
           submit(
             sprite.mpDrawData->mFrames[frameIndex],
-            screenPosition + item.mOffset,
+            previousPosition + item.mOffset,
+            position + item.mOffset,
             false,
             sprite.mTranslucent,
             drawTopmost,
@@ -266,14 +282,16 @@ SpriteRenderingSystem::SpriteRenderingSystem(
 void SpriteRenderingSystem::update(
   ex::EntityManager& es,
   const base::Extents& viewPortSize,
-  const base::Vector& cameraPosition)
+  const base::Vector& cameraPosition,
+  const float interpolationFactor)
 {
   using std::back_inserter;
   using std::begin;
   using std::end;
 
   mSortBuffer.clear();
-  collectVisibleSprites(es, cameraPosition, viewPortSize, mSortBuffer);
+  collectVisibleSprites(
+    es, cameraPosition, viewPortSize, mSortBuffer, interpolationFactor);
   std::sort(begin(mSortBuffer), end(mSortBuffer));
 
   mSprites.clear();

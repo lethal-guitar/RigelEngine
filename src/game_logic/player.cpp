@@ -27,6 +27,7 @@
 #include "data/strings.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
+#include "engine/motion_smoothing.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "game_logic/actor_tag.hpp"
@@ -684,9 +685,10 @@ void Player::enterShip(
     return;
   }
 
-  position() = shipPosition;
   *mEntity.component<c::Orientation>() = shipOrientation;
   mState = InShip{};
+  position() = shipPosition;
+  engine::discardInterpolation(mEntity);
 
   auto& sprite = *mEntity.component<c::Sprite>();
   const auto playerDrawOrder = sprite.mpDrawData->mDrawOrder;
@@ -715,6 +717,7 @@ void Player::exitShip()
     position());
 
   position().x += facingLeft ? 3 : 1;
+  engine::discardInterpolation(mEntity);
 
   auto& sprite = *mEntity.component<c::Sprite>();
   sprite = mpEntityFactory->createSpriteForId(data::ActorID::Duke_LEFT);
@@ -1980,6 +1983,8 @@ void Player::switchOrientationWithPositionChange()
 
   orientation = engine::orientation::opposite(orientation);
   position.x -= engine::orientation::toMovement(orientation);
+
+  engine::discardInterpolation(mEntity);
 }
 
 } // namespace rigel::game_logic

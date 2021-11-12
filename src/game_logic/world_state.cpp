@@ -70,12 +70,12 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   using namespace engine::components;
   using namespace game_logic::components;
 
-  copyComponentIfPresent<AppearsOnRadar>(from, to);
   copyComponentIfPresent<ActivationSettings>(from, to);
   copyComponentIfPresent<Active>(from, to);
   copyComponentIfPresent<ActorTag>(from, to);
   copyComponentIfPresent<AnimationLoop>(from, to);
   copyComponentIfPresent<AnimationSequence>(from, to);
+  copyComponentIfPresent<AppearsOnRadar>(from, to);
   copyComponentIfPresent<AutoDestroy>(from, to);
   copyComponentIfPresent<BehaviorController>(from, to);
   copyComponentIfPresent<BoundingBox>(from, to);
@@ -88,6 +88,7 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   copyComponentIfPresent<DrawTopMost>(from, to);
   copyComponentIfPresent<ExtendedFrameList>(from, to);
   copyComponentIfPresent<Interactable>(from, to);
+  copyComponentIfPresent<InterpolateMotion>(from, to);
   copyComponentIfPresent<ItemBounceEffect>(from, to);
   copyComponentIfPresent<ItemContainer>(from, to);
   copyComponentIfPresent<MapGeometryLink>(from, to);
@@ -215,7 +216,7 @@ WorldState::WorldState(
         std::move(loadedLevel.mSecondaryBackdropImage),
         loadedLevel.mBackdropScrollMode})
   , mPhysicsSystem(&mCollisionChecker, &mMap, &mEventManager)
-  , mDebuggingSystem(pRenderer, &mCamera.position(), &mMap)
+  , mDebuggingSystem(pRenderer, &mMap)
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,
