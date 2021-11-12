@@ -52,12 +52,13 @@ std::optional<data::Image> loadPng(const std::string& path)
   return {};
 }
 
-void savePng(const std::string& path, const data::Image& image)
+bool savePng(const std::string& path, const data::Image& image)
 {
   const auto width = static_cast<int>(image.width());
   const auto height = static_cast<int>(image.height());
-  stbi_write_png(
+  const auto result = stbi_write_png(
     path.c_str(), width, height, 4, image.pixelData().data(), width * 4);
+  return result != 0;
 }
 
 } // namespace rigel::loader
