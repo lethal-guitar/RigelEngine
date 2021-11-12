@@ -93,7 +93,6 @@ namespace rigel::game_logic
 {
 
 using namespace data;
-using namespace loader;
 using namespace std;
 
 using data::ActorID;
