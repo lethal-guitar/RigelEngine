@@ -732,6 +732,8 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredText("IDA Pro disassembler by Hex Rays");
   centeredText(
     "Clint Basinger aka LGR (https://www.youtube.com/c/Lazygamereviews)");
+  centeredText("Bart aka Dosgamert (https://www.youtube.com/c/dosgamert)");
+  centeredText("Everyone on the RigelEngine Discord");
 
   ImGui::NewLine();
   ImGui::NewLine();
