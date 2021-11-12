@@ -123,6 +123,11 @@ private:
     return mCommandLineOptions;
   }
 
+  const GameControllerInfo& gameControllerInfo() const override
+  {
+    return mGameControllerInfo;
+  }
+
 private:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
@@ -156,7 +161,8 @@ private:
   ui::MenuElementRenderer mTextRenderer;
   ui::FpsDisplay mFpsDisplay;
   std::vector<SDL_Event> mEventQueue;
-  std::vector<sdl_utils::Ptr<SDL_GameController>> mGameControllers;
+
+  GameControllerInfo mGameControllerInfo;
 };
 
 } // namespace rigel

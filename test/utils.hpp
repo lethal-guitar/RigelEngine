@@ -59,6 +59,12 @@ struct MockServiceProvider : public rigel::IGameServiceProvider
     return dummyOptions;
   }
 
+  const GameControllerInfo& gameControllerInfo() const override
+  {
+    static auto dummyInfo = GameControllerInfo{};
+    return dummyInfo;
+  }
+
   std::optional<rigel::data::SoundId> mLastTriggeredSoundId;
 };
 

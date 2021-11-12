@@ -504,8 +504,8 @@ bool Game::handleEvent(const SDL_Event& event)
       }
       break;
 
-    case SDL_CONTROLLERDEVICEADDED:
-    case SDL_CONTROLLERDEVICEREMOVED:
+    case SDL_JOYDEVICEADDED:
+    case SDL_JOYDEVICEREMOVED:
       enumerateGameControllers();
       break;
 
@@ -704,14 +704,31 @@ void Game::applyChangedOptions()
 
 void Game::enumerateGameControllers()
 {
-  mGameControllers.clear();
+  mGameControllerInfo.mGameControllers.clear();
+  mGameControllerInfo.mUnrecognizedControllers.clear();
+
+  auto addUnrecognized = [this](const int index) {
+    const auto sdlGuid = SDL_JoystickGetDeviceGUID(index);
+
+    std::string guid;
+    guid.resize(33);
+    SDL_JoystickGetGUIDString(sdlGuid, &guid[0], int(guid.size()));
+
+    mGameControllerInfo.mUnrecognizedControllers.emplace_back(
+      SDL_JoystickNameForIndex(index), guid);
+  };
 
   for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i)
   {
     if (SDL_IsGameController(i))
     {
-      mGameControllers.push_back(
-        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)});
+      auto pController =
+        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)};
+      mGameControllerInfo.mGameControllers.push_back(std::move(pController));
+    }
+    else
+    {
+      addUnrecognized(i);
     }
   }
 }
