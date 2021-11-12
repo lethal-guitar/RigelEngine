@@ -50,10 +50,10 @@ public:
   data::Image loadTiledFullscreenImage(std::string_view name) const;
   data::Image loadTiledFullscreenImage(
     std::string_view name,
-    const Palette16& overridePalette) const;
+    const data::Palette16& overridePalette) const;
 
   data::Image loadStandaloneFullscreenImage(std::string_view name) const;
-  loader::Palette16
+  data::Palette16
     loadPaletteFromFullScreenImage(std::string_view imageName) const;
 
   data::Image loadAntiPiracyImage() const;

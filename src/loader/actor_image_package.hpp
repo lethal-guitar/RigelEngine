@@ -61,7 +61,7 @@ public:
 
   ActorData loadActor(
     data::ActorID id,
-    const Palette16& palette = data::GameTraits::INGAME_PALETTE) const;
+    const data::Palette16& palette = data::GameTraits::INGAME_PALETTE) const;
 
   FontData loadFont() const;
 
@@ -87,11 +87,11 @@ private:
   std::vector<ActorData::Frame> loadFrameImages(
     data::ActorID id,
     const ActorHeader& header,
-    const Palette16& palette) const;
+    const data::Palette16& palette) const;
 
   data::Image loadImage(
     const ActorFrameHeader& frameHeader,
-    const Palette16& palette) const;
+    const data::Palette16& palette) const;
 
 private:
   const ByteBuffer mImageData;

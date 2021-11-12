@@ -152,7 +152,7 @@ data::Image
 
 data::Image ResourceLoader::loadTiledFullscreenImage(
   std::string_view name,
-  const Palette16& overridePalette) const
+  const data::Palette16& overridePalette) const
 {
   return loadTiledImage(
     file(name),
@@ -203,7 +203,7 @@ data::Image ResourceLoader::loadAntiPiracyImage() const
 }
 
 
-loader::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
+data::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
   std::string_view imageName) const
 {
   const auto& data = file(imageName);

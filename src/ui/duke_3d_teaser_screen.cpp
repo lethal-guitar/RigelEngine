@@ -39,7 +39,7 @@ constexpr auto TOTAL_DISPLAY_TIME =
   TEXT_SLIDE_IN_TIME + engine::slowTicksToTime(1500);
 
 // clang-format off
-constexpr loader::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
+constexpr data::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
   data::Pixel{  0, 0, 0, 255},
   data::Pixel{ 97, 0, 0, 255},
   data::Pixel{109, 0, 0, 255},

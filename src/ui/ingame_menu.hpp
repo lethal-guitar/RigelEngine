@@ -99,7 +99,7 @@ private:
     void selectItem(int index);
 
     GameMode::Context mContext;
-    loader::Palette16 mPalette;
+    data::Palette16 mPalette;
     engine::TiledTexture mUiSpriteSheet;
     MenuElementRenderer mMenuElementRenderer;
     renderer::Texture mMenuBackground;

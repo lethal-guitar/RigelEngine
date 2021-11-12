@@ -99,8 +99,9 @@ ActorImagePackage::ActorImagePackage(
 }
 
 
-ActorData
-  ActorImagePackage::loadActor(const ActorID id, const Palette16& palette) const
+ActorData ActorImagePackage::loadActor(
+  const ActorID id,
+  const data::Palette16& palette) const
 {
   // Font has to be loaded using loadFont()
   assert(id != data::ActorID::Menu_font_grayscale);
@@ -121,7 +122,7 @@ ActorData
 std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
   const data::ActorID id,
   const ActorHeader& header,
-  const Palette16& palette) const
+  const data::Palette16& palette) const
 {
   return utils::transformed(
     header.mFrames, [&, this, frame = 0](const auto& frameHeader) mutable {
@@ -141,7 +142,7 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
 
 data::Image ActorImagePackage::loadImage(
   const ActorFrameHeader& frameHeader,
-  const Palette16& palette) const
+  const data::Palette16& palette) const
 {
   using T = data::TileImageType;
 
