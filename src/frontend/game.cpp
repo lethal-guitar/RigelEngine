@@ -449,7 +449,7 @@ GameMode::Context Game::makeModeContext()
 
 bool Game::handleEvent(const SDL_Event& event)
 {
-  if (ui::imgui_integration::handleEvent(event))
+  if (ui::imgui_integration::handleEvent(event) && event.type != SDL_KEYUP)
   {
     return true;
   }
