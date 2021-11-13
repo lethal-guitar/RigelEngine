@@ -1393,6 +1393,7 @@ void Player::updateLadderAttachment(const base::Vector& movementVector)
       const auto playerCenterX = worldBBox.topLeft.x + worldBBox.size.width / 2;
       const auto offsetToCenter = playerCenterX - maybeLadderTouchPoint->x;
       position.x -= offsetToCenter;
+      engine::discardInterpolation(mEntity);
     }
   }
 }

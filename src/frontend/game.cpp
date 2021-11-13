@@ -449,7 +449,7 @@ GameMode::Context Game::makeModeContext()
 
 bool Game::handleEvent(const SDL_Event& event)
 {
-  if (ui::imgui_integration::handleEvent(event))
+  if (ui::imgui_integration::handleEvent(event) && event.type != SDL_KEYUP)
   {
     return true;
   }
@@ -504,8 +504,8 @@ bool Game::handleEvent(const SDL_Event& event)
       }
       break;
 
-    case SDL_CONTROLLERDEVICEADDED:
-    case SDL_CONTROLLERDEVICEREMOVED:
+    case SDL_JOYDEVICEADDED:
+    case SDL_JOYDEVICEREMOVED:
       enumerateGameControllers();
       break;
 
@@ -704,14 +704,31 @@ void Game::applyChangedOptions()
 
 void Game::enumerateGameControllers()
 {
-  mGameControllers.clear();
+  mGameControllerInfo.mGameControllers.clear();
+  mGameControllerInfo.mUnrecognizedControllers.clear();
+
+  auto addUnrecognized = [this](const int index) {
+    const auto sdlGuid = SDL_JoystickGetDeviceGUID(index);
+
+    std::string guid;
+    guid.resize(33);
+    SDL_JoystickGetGUIDString(sdlGuid, &guid[0], int(guid.size()));
+
+    mGameControllerInfo.mUnrecognizedControllers.emplace_back(
+      SDL_JoystickNameForIndex(index), guid);
+  };
 
   for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i)
   {
     if (SDL_IsGameController(i))
     {
-      mGameControllers.push_back(
-        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)});
+      auto pController =
+        sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)};
+      mGameControllerInfo.mGameControllers.push_back(std::move(pController));
+    }
+    else
+    {
+      addUnrecognized(i);
     }
   }
 }
@@ -721,20 +738,37 @@ void Game::takeScreenshot()
 {
   namespace fs = std::filesystem;
 
+  constexpr auto SCREENSHOTS_SUBDIR = "screenshots";
+
   const auto shot = mRenderer.grabCurrentFramebuffer();
   const auto filename = makeScreenshotFilename();
-  const auto screenshotsDir =
+
+  auto saveShot = [&](const fs::path& path) {
+    std::error_code ec;
+
+    if (!fs::exists(path, ec) && !ec)
+    {
+      fs::create_directory(path, ec);
+    }
+
+    return loader::savePng((path / filename).u8string(), shot);
+  };
+
+  const auto gameDirScreenshotPath =
     fs::u8path(effectiveGamePath(mCommandLineOptions, *mpUserProfile)) /
-    "screenshots";
+    SCREENSHOTS_SUBDIR;
 
-  std::error_code ec;
-
-  if (!fs::exists(screenshotsDir, ec) && !ec)
+  // First, try the game dir.
+  if (saveShot(gameDirScreenshotPath))
   {
-    fs::create_directory(screenshotsDir, ec);
+    return;
   }
 
-  loader::savePng((screenshotsDir / filename).u8string(), shot);
+  // If the game dir is not writable, try the user profile dir.
+  if (const auto maybePrefsDir = createOrGetPreferencesPath(); maybePrefsDir)
+  {
+    saveShot(*maybePrefsDir / SCREENSHOTS_SUBDIR);
+  }
 }
 
 

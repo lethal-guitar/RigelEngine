@@ -369,6 +369,49 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::EndTabItem();
     }
 
+    if (ImGui::BeginTabItem("Gamepad controls"))
+    {
+      const auto& info = mpServiceProvider->gameControllerInfo();
+
+      ImGui::NewLine();
+      ImGui::TextUnformatted("Gamepad configuration options coming soon.");
+      ImGui::TextUnformatted("For now, this just shows all detected gamepads.");
+      ImGui::NewLine();
+
+      if (info.mGameControllers.empty())
+      {
+        ImGui::TextUnformatted("No gamepads detected.");
+      }
+      else
+      {
+        ImGui::TextUnformatted("Detected gamepads:");
+        ImGui::Spacing();
+
+        for (const auto& controller : info.mGameControllers)
+        {
+          ImGui::Bullet();
+          ImGui::TextUnformatted(SDL_GameControllerName(controller.get()));
+        }
+      }
+
+      if (!info.mUnrecognizedControllers.empty())
+      {
+        ImGui::NewLine();
+
+        ImGui::TextUnformatted("Unrecognized gamepads (no SDL mappings):");
+        ImGui::Spacing();
+
+        for (const auto& controller : info.mUnrecognizedControllers)
+        {
+          ImGui::Bullet();
+          ImGui::Text(
+            "%s (%s)", controller.mName.c_str(), controller.mGuid.c_str());
+        }
+      }
+
+      ImGui::EndTabItem();
+    }
+
     if (ImGui::BeginTabItem("Enhancements"))
     {
       ImGui::NewLine();
@@ -732,6 +775,8 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredText("IDA Pro disassembler by Hex Rays");
   centeredText(
     "Clint Basinger aka LGR (https://www.youtube.com/c/Lazygamereviews)");
+  centeredText("Bart aka Dosgamert (https://www.youtube.com/c/dosgamert)");
+  centeredText("Everyone on the RigelEngine Discord");
 
   ImGui::NewLine();
   ImGui::NewLine();

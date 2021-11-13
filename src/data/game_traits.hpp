@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/spatial_types.hpp"
-#include "loader/palette.hpp"
+#include "data/palette.hpp"
 
 #include <cstddef>
 
@@ -79,7 +79,7 @@ struct GameTraits
   // 0x00, 0x20, 0x00,  0x00, 0x30, 0x00,  0x20, 0x10, 0x00,  0x40, 0x40, 0x40
 
   // clang-format off
-  static constexpr loader::Palette16 INGAME_PALETTE{
+  static constexpr Palette16 INGAME_PALETTE{
     data::Pixel{0,     0,   0, 255},
     data::Pixel{60,   60,  60, 255},
     data::Pixel{121, 121, 121, 255},

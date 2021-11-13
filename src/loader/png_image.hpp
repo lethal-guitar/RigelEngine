@@ -26,6 +26,6 @@ namespace rigel::loader
 
 std::optional<data::Image> loadPng(const std::string& path);
 
-void savePng(const std::string& path, const data::Image& image);
+bool savePng(const std::string& path, const data::Image& image);
 
 } // namespace rigel::loader

@@ -58,9 +58,10 @@ PaletteType load6bitPalette(
 } // namespace
 
 
-Palette16 load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end)
+data::Palette16
+  load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end)
 {
-  return load6bitPalette<Palette16>(begin, end, [](const auto entry) {
+  return load6bitPalette<data::Palette16>(begin, end, [](const auto entry) {
     // Duke Nukem 2 uses a non-standard 6-bit palette format, where the
     // maximum number is 68 instead of 63. This maps Duke 2 palette values to
     // normal 6-bit VGA/EGA values.
@@ -73,9 +74,10 @@ Palette16 load6bitPalette16(ByteBufferCIter begin, const ByteBufferCIter end)
 }
 
 
-Palette256 load6bitPalette256(ByteBufferCIter begin, const ByteBufferCIter end)
+data::Palette256
+  load6bitPalette256(ByteBufferCIter begin, const ByteBufferCIter end)
 {
-  return load6bitPalette<Palette256>(begin, end, [](const auto entry) {
+  return load6bitPalette<data::Palette256>(begin, end, [](const auto entry) {
     // 256 color palettes use the standard VGA 6-bit format and need no
     // conversion.
     return entry;

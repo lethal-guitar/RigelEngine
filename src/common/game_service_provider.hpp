@@ -19,9 +19,14 @@
 #include "common/command_line_options.hpp"
 #include "data/game_session_data.hpp"
 #include "data/sound_ids.hpp"
+#include "sdl_utils/ptr.hpp"
+
+#include <SDL_gamecontroller.h>
 
 #include <filesystem>
 #include <string>
+#include <vector>
+
 
 namespace rigel::data
 {
@@ -31,6 +36,26 @@ struct SavedGame;
 
 namespace rigel
 {
+
+struct UnrecognizedController
+{
+  UnrecognizedController(std::string name, std::string guid)
+    : mName(std::move(name))
+    , mGuid(std::move(guid))
+  {
+  }
+
+  std::string mName;
+  std::string mGuid;
+};
+
+
+struct GameControllerInfo
+{
+  std::vector<sdl_utils::Ptr<SDL_GameController>> mGameControllers;
+  std::vector<UnrecognizedController> mUnrecognizedControllers;
+};
+
 
 /** Interface for functionality available to game modes */
 struct IGameServiceProvider
@@ -52,6 +77,7 @@ struct IGameServiceProvider
   virtual void markCurrentFrameAsWidescreen() = 0;
   virtual bool isSharewareVersion() const = 0;
   virtual const CommandLineOptions& commandLineOptions() const = 0;
+  virtual const GameControllerInfo& gameControllerInfo() const = 0;
 };
 
 } // namespace rigel

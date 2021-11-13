@@ -104,7 +104,7 @@ struct ChunkHeader
 };
 
 
-Palette256 readPalette(LeStreamReader& reader)
+data::Palette256 readPalette(LeStreamReader& reader)
 {
   SubChunkHeader mPaletteChunkHeader(reader);
   if (mPaletteChunkHeader.mType != SubChunkType::Palette)
@@ -123,7 +123,7 @@ data::PixelBuffer readMainImagePixels(
   LeStreamReader& reader,
   const uint16_t width,
   const uint16_t height,
-  const Palette256& palette)
+  const data::Palette256& palette)
 {
   SubChunkHeader mainImageSubChunkHeader(reader);
   if (mainImageSubChunkHeader.mType != SubChunkType::MainImage)
@@ -153,7 +153,7 @@ data::PixelBuffer readAnimationFramePixels(
   LeStreamReader& reader,
   const uint16_t width,
   const uint16_t height,
-  const Palette256& palette)
+  const data::Palette256& palette)
 {
   data::PixelBuffer framePixels(width * height, data::Pixel{});
 
@@ -189,7 +189,7 @@ vector<data::MovieFrame> readAnimationFrames(
   LeStreamReader& reader,
   const uint16_t width,
   const uint16_t numAnimFrames,
-  const Palette256& palette)
+  const data::Palette256& palette)
 {
   vector<data::MovieFrame> frames;
   for (auto frame = 0u; frame < numAnimFrames; ++frame)

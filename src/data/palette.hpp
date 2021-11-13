@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2021, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,26 +16,16 @@
 
 #pragma once
 
-#include "data/palette.hpp"
-#include "loader/byte_buffer.hpp"
+#include "data/image.hpp"
+
+#include <array>
 
 
-namespace rigel::loader
+namespace rigel::data
 {
 
-data::Palette16 load6bitPalette16(ByteBufferCIter begin, ByteBufferCIter end);
-data::Palette256 load6bitPalette256(ByteBufferCIter begin, ByteBufferCIter end);
+using Palette16 = std::array<data::Pixel, 16>;
 
+using Palette256 = std::array<data::Pixel, 256>;
 
-inline data::Palette16 load6bitPalette16(const ByteBuffer& buffer)
-{
-  return load6bitPalette16(buffer.begin(), buffer.end());
-}
-
-
-inline data::Palette256 load6bitPalette256(const ByteBuffer& buffer)
-{
-  return load6bitPalette256(buffer.begin(), buffer.end());
-}
-
-} // namespace rigel::loader
+} // namespace rigel::data

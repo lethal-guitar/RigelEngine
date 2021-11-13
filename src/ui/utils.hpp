@@ -47,7 +47,7 @@ renderer::Texture fullScreenImageAsTexture(
 engine::TiledTexture makeUiSpriteSheet(
   renderer::Renderer* pRenderer,
   const loader::ResourceLoader& resourceLoader,
-  const loader::Palette16& palette);
+  const data::Palette16& palette);
 
 void drawText(std::string_view text, int x, int y, const base::Color& color);
 

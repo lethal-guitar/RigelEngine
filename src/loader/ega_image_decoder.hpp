@@ -28,21 +28,21 @@ namespace rigel::loader
 data::PixelBuffer decodeSimplePlanarEgaBuffer(
   ByteBufferCIter begin,
   ByteBufferCIter end,
-  const Palette16& palette);
+  const data::Palette16& palette);
 
 
 data::Image loadTiledImage(
   ByteBufferCIter begin,
   ByteBufferCIter end,
   std::size_t widthInTiles,
-  const Palette16& palette,
+  const data::Palette16& palette,
   data::TileImageType type);
 
 
 inline data::Image loadTiledImage(
   const ByteBuffer& data,
   std::size_t widthInTiles,
-  const Palette16& palette,
+  const data::Palette16& palette,
   const data::TileImageType type = data::TileImageType::Unmasked)
 {
   return loadTiledImage(data.begin(), data.end(), widthInTiles, palette, type);

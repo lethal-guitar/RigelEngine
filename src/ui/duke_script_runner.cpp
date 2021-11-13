@@ -720,7 +720,7 @@ void DukeScriptRunner::drawCurrentKeyBindings()
 }
 
 
-void DukeScriptRunner::updatePalette(const loader::Palette16& palette)
+void DukeScriptRunner::updatePalette(const data::Palette16& palette)
 {
   // TODO think about optimizing this maybe, to only update if actually
   // changed, e.g. if (palette != mCurrentPalette) or maybe have a

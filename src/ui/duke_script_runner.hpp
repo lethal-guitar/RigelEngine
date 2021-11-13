@@ -159,7 +159,7 @@ private:
   void clearWaitState();
 
   void drawSprite(data::ActorID id, int frame, int x, int y);
-  void updatePalette(const loader::Palette16& palette);
+  void updatePalette(const data::Palette16& palette);
 
   void drawSaveSlotNames(int selectedIndex);
 
@@ -198,7 +198,7 @@ private:
 
 private:
   const loader::ResourceLoader* mpResourceBundle;
-  loader::Palette16 mCurrentPalette;
+  data::Palette16 mCurrentPalette;
   renderer::Renderer* mpRenderer;
   const data::SaveSlotArray* mpSaveSlots;
   IGameServiceProvider* mpServices;

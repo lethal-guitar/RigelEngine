@@ -185,7 +185,7 @@ data::PixelBuffer decodeTiledEgaData(
 data::PixelBuffer decodeSimplePlanarEgaBuffer(
   const ByteBufferCIter begin,
   const ByteBufferCIter end,
-  const Palette16& palette)
+  const data::Palette16& palette)
 {
   const auto numBytes = distance(begin, end);
   assert(numBytes > 0);
@@ -206,7 +206,7 @@ data::Image loadTiledImage(
   const ByteBufferCIter begin,
   const ByteBufferCIter end,
   std::size_t widthInTiles,
-  const Palette16& palette,
+  const data::Palette16& palette,
   const data::TileImageType type)
 {
   const auto heightInTiles =
