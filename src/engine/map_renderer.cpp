@@ -188,7 +188,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   const auto correctionFactor = needsAspectRatioCorrection
     ? data::GameTraits::aspectCorrectionStretchFactor
     : 1.0f;
-  const auto scaleX = scaleY * correctionFactor;
+  const auto scaleX = scaleY / correctionFactor;
 
   // We can now determine the width of the background when applying scaling,
   // and based on that, we can determine the "remapping factor" that we
