@@ -572,7 +572,9 @@ void Player::update(const PlayerInput& unfilteredInput)
 
   if (!isIncapacitated() && !mIsRidingElevator)
   {
-    applyConveyorBeltMotion(*mpCollisionChecker, *mpMap, mEntity);
+    const auto amount =
+      determineConveyorBeltMotionAmount(*mpCollisionChecker, *mpMap, mEntity);
+    moveHorizontallyWithStairStepping(*mpCollisionChecker, mEntity, amount);
   }
 
   if (isDead())
