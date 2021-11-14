@@ -8,6 +8,8 @@
 #include "ui/duke_script_runner.hpp"
 #include "ui/menu_navigation.hpp"
 
+#include <stdexcept>
+
 
 namespace rigel
 {
@@ -17,9 +19,23 @@ IntroDemoLoopMode::IntroDemoLoopMode(Context context, const Type type)
 {
   if (type == Type::Regular)
   {
-    mSteps.push_back(ui::IntroMovie(context));
+    try
+    {
+      mSteps.push_back(ui::IntroMovie(context));
+    }
+    catch (const std::runtime_error&) // Skip movies if they can't be opened
+    {
+    }
+
     mSteps.push_back(Credits{});
-    mSteps.push_back(ui::ApogeeLogo(context));
+
+    try
+    {
+      mSteps.push_back(ui::ApogeeLogo(context));
+    }
+    catch (const std::runtime_error&)
+    {
+    }
   }
   else
   {
@@ -28,8 +44,22 @@ IntroDemoLoopMode::IntroDemoLoopMode(Context context, const Type type)
       mSteps.push_back(HypeScreen{});
     }
 
-    mSteps.push_back(ui::ApogeeLogo(context));
-    mSteps.push_back(ui::IntroMovie(context));
+    try
+    {
+      mSteps.push_back(ui::ApogeeLogo(context));
+    }
+    catch (const std::runtime_error&)
+    {
+    }
+
+    try
+    {
+      mSteps.push_back(ui::IntroMovie(context));
+    }
+    catch (const std::runtime_error&)
+    {
+    }
+
     mSteps.push_back(Story{});
     mSteps.push_back(Credits{});
   }
