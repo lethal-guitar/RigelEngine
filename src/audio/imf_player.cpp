@@ -20,7 +20,7 @@
 #include "data/game_traits.hpp"
 
 
-namespace rigel::engine
+namespace rigel::audio
 {
 
 namespace
@@ -108,4 +108,4 @@ void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired)
 }
 
 
-} // namespace rigel::engine
+} // namespace rigel::audio

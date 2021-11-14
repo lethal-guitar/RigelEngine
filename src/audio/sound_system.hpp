@@ -35,7 +35,7 @@ class ResourceLoader;
 }
 
 
-namespace rigel::engine
+namespace rigel::audio
 {
 
 class ImfPlayer;
@@ -127,4 +127,4 @@ private:
   data::SoundStyle mCurrentSoundStyle;
 };
 
-} // namespace rigel::engine
+} // namespace rigel::audio
