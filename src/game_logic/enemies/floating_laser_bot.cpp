@@ -60,7 +60,6 @@ void FloatingLaserBot::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  using namespace floating_laser_bot;
   using engine::components::Sprite;
   using engine::components::WorldPosition;
 
