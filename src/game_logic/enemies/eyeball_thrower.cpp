@@ -44,7 +44,6 @@ void EyeballThrower::update(
   entityx::Entity entity)
 {
   using namespace engine::components;
-  using namespace eyeball_thrower;
 
   const auto& position = *entity.component<WorldPosition>();
   const auto& playerPos = s.mpPlayer->orientedPosition();
