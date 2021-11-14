@@ -24,33 +24,27 @@
 namespace rigel::game_logic
 {
 
-namespace snake
-{
-
-struct Walking
-{
-};
-
-struct GrabbingPlayer
-{
-  int mFramesElapsed = 0;
-};
-
-struct SwallowedPlayer
-{
-};
-
-
-using State = std::variant<Walking, GrabbingPlayer, SwallowedPlayer>;
-
-} // namespace snake
-
-
 namespace behaviors
 {
 
 struct Snake
 {
+  struct Walking
+  {
+  };
+
+  struct GrabbingPlayer
+  {
+    int mFramesElapsed = 0;
+  };
+
+  struct SwallowedPlayer
+  {
+  };
+
+
+  using State = std::variant<Walking, GrabbingPlayer, SwallowedPlayer>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -62,7 +56,7 @@ struct Snake
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 
-  snake::State mState;
+  State mState;
 };
 
 } // namespace behaviors
