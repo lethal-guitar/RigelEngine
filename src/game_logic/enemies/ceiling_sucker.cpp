@@ -44,7 +44,6 @@ void CeilingSucker::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  using namespace ceiling_sucker;
   using engine::toWorldSpace;
 
   const auto& position = *entity.component<engine::components::WorldPosition>();

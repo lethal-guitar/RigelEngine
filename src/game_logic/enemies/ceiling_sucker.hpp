@@ -24,49 +24,43 @@
 namespace rigel::game_logic
 {
 
-namespace ceiling_sucker
-{
-
-struct Ready
-{
-};
-
-
-struct Grabbing
-{
-  int mFramesElapsed = 0;
-};
-
-
-struct HoldingPlayer
-{
-  int mFramesElapsed = 0;
-};
-
-
-struct Waiting
-{
-  int mFramesElapsed = 0;
-};
-
-
-using State = std::variant<Ready, Grabbing, HoldingPlayer, Waiting>;
-
-} // namespace ceiling_sucker
-
-
 namespace behaviors
 {
 
 struct CeilingSucker
 {
+  struct Ready
+  {
+  };
+
+
+  struct Grabbing
+  {
+    int mFramesElapsed = 0;
+  };
+
+
+  struct HoldingPlayer
+  {
+    int mFramesElapsed = 0;
+  };
+
+
+  struct Waiting
+  {
+    int mFramesElapsed = 0;
+  };
+
+
+  using State = std::variant<Ready, Grabbing, HoldingPlayer, Waiting>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  ceiling_sucker::State mState;
+  State mState;
 };
 
 } // namespace behaviors
