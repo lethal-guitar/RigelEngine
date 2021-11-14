@@ -931,7 +931,7 @@ auto GameWorld::determineSmoothScrollViewport(
   };
 
   const auto viewPortSize = base::Extents{
-    viewPortSizeOriginal.width + (direction.x != 0 ? 1 : 0),
+    viewPortSizeOriginal.width + (direction.x != 0 ? 2 : 0),
     viewPortSizeOriginal.height + (direction.y != 0 ? 2 : 0)};
 
   const auto cameraOffset =
