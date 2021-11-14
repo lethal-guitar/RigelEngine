@@ -116,7 +116,7 @@ public:
 private:
   struct ViewportParams
   {
-    base::Point<float> mInterpolatedCameraPosition;
+    base::Vec2T<float> mInterpolatedCameraPosition;
     base::Vector mCameraOffset;
 
     base::Vector mRenderStartPosition;

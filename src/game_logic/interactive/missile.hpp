@@ -47,7 +47,7 @@ struct Missile
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    const base::Vec2T<float>& inflictorVelocity,
     entityx::Entity entity);
 
   int mFramesElapsed = 0;
@@ -66,7 +66,7 @@ struct BrokenMissile
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    const base::Vec2T<float>& inflictorVelocity,
     entityx::Entity entity);
 
   int mFramesElapsed = 0;

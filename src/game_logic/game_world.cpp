@@ -211,7 +211,7 @@ std::vector<base::Vector> collectRadarDots(
 
 
 template <typename ValueT>
-std::string vec2String(const base::Point<ValueT>& vec, const int width)
+std::string vec2String(const base::Vec2T<ValueT>& vec, const int width)
 {
   std::stringstream stream;
   // clang-format off
@@ -923,7 +923,7 @@ auto GameWorld::determineSmoothScrollViewport(
   const auto interpolationY =
     direction.y < 0 ? 1.0f - interpolationFactor : interpolationFactor;
 
-  const auto interpolatedCameraPosition = base::Point<float>{
+  const auto interpolatedCameraPosition = base::Vec2T<float>{
     base::lerp(
       previousCameraPosition.x, currentCameraPosition.x, interpolationX),
     base::lerp(

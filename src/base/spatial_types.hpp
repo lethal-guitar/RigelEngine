@@ -50,24 +50,24 @@ SDL_Rect toSdlRect(const Rect<ValueT>& rect)
 } // namespace detail
 
 template <typename ValueT>
-struct Point
+struct Vec2T
 {
-  Point() = default;
-  Point(const Point&) = default;
-  Point(Point&&) = default;
-  constexpr Point(const ValueT x_, const ValueT y_) noexcept
+  Vec2T() = default;
+  Vec2T(const Vec2T&) = default;
+  Vec2T(Vec2T&&) = default;
+  constexpr Vec2T(const ValueT x_, const ValueT y_) noexcept
     : x(x_)
     , y(y_)
   {
   }
-  Point& operator=(const Point&) = default;
+  Vec2T& operator=(const Vec2T&) = default;
 
-  bool operator==(const Point<ValueT>& rhs) const
+  bool operator==(const Vec2T<ValueT>& rhs) const
   {
     return std::tie(x, y) == std::tie(rhs.x, rhs.y);
   }
 
-  bool operator!=(const Point<ValueT>& rhs) const { return !(*this == rhs); }
+  bool operator!=(const Vec2T<ValueT>& rhs) const { return !(*this == rhs); }
 
 
   ValueT x = 0;
@@ -76,7 +76,7 @@ struct Point
 
 
 template <typename NewValueT, typename ValueT>
-Point<NewValueT> cast(const Point<ValueT>& point)
+Vec2T<NewValueT> cast(const Vec2T<ValueT>& point)
 {
   return {
     static_cast<NewValueT>(point.x),
@@ -110,18 +110,18 @@ struct Size
 template <typename ValueT>
 struct Rect
 {
-  Point<ValueT> topLeft;
+  Vec2T<ValueT> topLeft;
   Size<ValueT> size;
 
-  Point<ValueT> bottomLeft() const
+  Vec2T<ValueT> bottomLeft() const
   {
-    return Point<ValueT>{
+    return Vec2T<ValueT>{
       topLeft.x, static_cast<ValueT>(topLeft.y + (size.height - 1))};
   }
 
-  Point<ValueT> bottomRight() const
+  Vec2T<ValueT> bottomRight() const
   {
-    return bottomLeft() + Point<ValueT>{static_cast<ValueT>(size.width - 1), 0};
+    return bottomLeft() + Vec2T<ValueT>{static_cast<ValueT>(size.width - 1), 0};
   }
 
   ValueT top() const { return topLeft.y; }
@@ -139,7 +139,7 @@ struct Rect
     return SDL_HasIntersection(&r1, &r2);
   }
 
-  bool containsPoint(const Point<ValueT>& point) const
+  bool containsPoint(const Vec2T<ValueT>& point) const
   {
     return inRange(point.x, left(), right()) &&
       inRange(point.y, top(), bottom());
@@ -148,7 +148,7 @@ struct Rect
 
 
 template <typename ValueT>
-Rect<ValueT> makeRect(Point<ValueT> topLeft, Point<ValueT> bottomRight)
+Rect<ValueT> makeRect(Vec2T<ValueT> topLeft, Vec2T<ValueT> bottomRight)
 {
   const auto sizeAsPoint = bottomRight - topLeft;
   return Rect<ValueT>{topLeft, Size<ValueT>{sizeAsPoint.x, sizeAsPoint.y}};
@@ -156,28 +156,28 @@ Rect<ValueT> makeRect(Point<ValueT> topLeft, Point<ValueT> bottomRight)
 
 
 template <typename ValueT>
-Point<ValueT> operator+(const Point<ValueT>& lhs, const Point<ValueT>& rhs)
+Vec2T<ValueT> operator+(const Vec2T<ValueT>& lhs, const Vec2T<ValueT>& rhs)
 {
-  return Point<ValueT>(lhs.x + rhs.x, lhs.y + rhs.y);
+  return Vec2T<ValueT>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
 
 template <typename ValueT>
-Point<ValueT> operator-(const Point<ValueT>& lhs, const Point<ValueT>& rhs)
+Vec2T<ValueT> operator-(const Vec2T<ValueT>& lhs, const Vec2T<ValueT>& rhs)
 {
-  return Point<ValueT>(lhs.x - rhs.x, lhs.y - rhs.y);
+  return Vec2T<ValueT>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 
 
 template <typename ValueT, typename ScalarT>
-auto operator*(const Point<ValueT>& point, const ScalarT scalar)
+auto operator*(const Vec2T<ValueT>& point, const ScalarT scalar)
 {
-  return Point<decltype(point.x * scalar)>{point.x * scalar, point.y * scalar};
+  return Vec2T<decltype(point.x * scalar)>{point.x * scalar, point.y * scalar};
 }
 
 
 template <typename ValueT>
-Point<ValueT>& operator+=(Point<ValueT>& lhs, const Point<ValueT>& rhs)
+Vec2T<ValueT>& operator+=(Vec2T<ValueT>& lhs, const Vec2T<ValueT>& rhs)
 {
   auto newPoint = lhs + rhs;
   std::swap(lhs, newPoint);
@@ -186,7 +186,7 @@ Point<ValueT>& operator+=(Point<ValueT>& lhs, const Point<ValueT>& rhs)
 
 
 template <typename ValueT>
-Point<ValueT>& operator-=(Point<ValueT>& lhs, const Point<ValueT>& rhs)
+Vec2T<ValueT>& operator-=(Vec2T<ValueT>& lhs, const Vec2T<ValueT>& rhs)
 {
   auto newPoint = lhs - rhs;
   std::swap(lhs, newPoint);
@@ -236,10 +236,10 @@ Size<ValueT>& operator-=(Size<ValueT>& lhs, const Size<ValueT>& rhs)
 
 template <typename ValueT>
 Rect<ValueT>
-  operator+(const Rect<ValueT>& rect, const Point<ValueT>& translation)
+  operator+(const Rect<ValueT>& rect, const Vec2T<ValueT>& translation)
 {
   return Rect<ValueT>{
-    rect.topLeft + Point<ValueT>{translation.x, translation.y}, rect.size};
+    rect.topLeft + Vec2T<ValueT>{translation.x, translation.y}, rect.size};
 }
 
 
@@ -257,7 +257,7 @@ bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs)
 }
 
 
-using Vector = Point<int>;
+using Vector = Vec2T<int>;
 using Extents = Size<int>;
 
 } // namespace rigel::base

@@ -46,7 +46,7 @@ auto extractVelocity(entityx::Entity entity)
 {
   return entity.has_component<MovingBody>()
     ? entity.component<MovingBody>()->mVelocity
-    : base::Point<float>{};
+    : base::Vec2T<float>{};
 }
 
 } // namespace

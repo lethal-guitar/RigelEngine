@@ -43,8 +43,8 @@ const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60.0f;
 
 
-base::Point<float> backdropOffset(
-  const base::Point<float>& cameraPosition,
+base::Vec2T<float> backdropOffset(
+  const base::Vec2T<float>& cameraPosition,
   const BackdropScrollMode scrollMode,
   const float backdropAutoScrollOffset)
 {
@@ -144,7 +144,7 @@ void MapRenderer::renderForeground(
 
 
 renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
-  const base::Point<float>& cameraPosition,
+  const base::Vec2T<float>& cameraPosition,
   const base::Extents& viewPortSize) const
 {
   // This function determines the texture coordinates we need to use for
@@ -238,7 +238,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 
 void MapRenderer::renderBackdrop(
-  const base::Point<float>& cameraPosition,
+  const base::Vec2T<float>& cameraPosition,
   const base::Extents& viewPortSize) const
 {
   const auto saved = renderer::saveState(mpRenderer);

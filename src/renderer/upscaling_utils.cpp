@@ -76,7 +76,7 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer)
   return {
     base::Vector{int(offsetX), int(offsetY)},
     base::Size<int>{int(usableWidth), int(usableHeight)},
-    base::Point<float>{widthScale, heightScale}};
+    base::Vec2T<float>{widthScale, heightScale}};
 }
 
 
@@ -104,7 +104,7 @@ WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer)
 }
 
 
-base::Vector scaleVec(const base::Vector& vec, const base::Point<float>& scale)
+base::Vector scaleVec(const base::Vector& vec, const base::Vec2T<float>& scale)
 {
   return base::Vector{
     base::round(vec.x * scale.x), base::round(vec.y * scale.y)};
@@ -112,7 +112,7 @@ base::Vector scaleVec(const base::Vector& vec, const base::Point<float>& scale)
 
 
 base::Extents
-  scaleSize(const base::Extents& size, const base::Point<float>& scale)
+  scaleSize(const base::Extents& size, const base::Vec2T<float>& scale)
 {
   return asSize(scaleVec(asVec(size), scale));
 }

@@ -47,16 +47,16 @@ inline void enableInterpolation(entityx::Entity entity)
 }
 
 
-inline base::Point<float> lerp(
-  const base::Point<float>& a,
-  const base::Point<float>& b,
+inline base::Vec2T<float> lerp(
+  const base::Vec2T<float>& a,
+  const base::Vec2T<float>& b,
   const float factor)
 {
   return {base::lerp(a.x, b.x, factor), base::lerp(a.y, b.y, factor)};
 }
 
 
-inline base::Point<float>
+inline base::Vec2T<float>
   lerp(const base::Vector& a, const base::Vector& b, const float factor)
 {
   return lerp(base::cast<float>(a), base::cast<float>(b), factor);
@@ -65,8 +65,8 @@ inline base::Point<float>
 
 template <typename T>
 base::Vector lerpRounded(
-  const base::Point<T>& a,
-  const base::Point<T>& b,
+  const base::Vec2T<T>& a,
+  const base::Vec2T<T>& b,
   const float factor)
 {
   const auto lerped = lerp(base::cast<float>(a), base::cast<float>(b), factor);

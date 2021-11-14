@@ -50,7 +50,7 @@ public:
   void switchBackdrops();
 
   void renderBackdrop(
-    const base::Point<float>& cameraPosition,
+    const base::Vec2T<float>& cameraPosition,
     const base::Extents& viewPortSize) const;
   void renderBackground(
     const base::Vector& sectionStart,
@@ -74,7 +74,7 @@ private:
   };
 
   renderer::TexCoords calculateBackdropTexCoords(
-    const base::Point<float>& cameraPosition,
+    const base::Vec2T<float>& cameraPosition,
     const base::Extents& viewPortSize) const;
 
   void renderMapTiles(

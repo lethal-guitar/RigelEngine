@@ -43,7 +43,7 @@ namespace
 
 constexpr auto GEOMETRY_FALL_SPEED = 2;
 
-const base::Point<float> TILE_DEBRIS_MOVEMENT_SEQUENCE[] = {
+const base::Vec2T<float> TILE_DEBRIS_MOVEMENT_SEQUENCE[] = {
   {0.0f, -3.0f},
   {0.0f, -3.0f},
   {0.0f, -2.0f},

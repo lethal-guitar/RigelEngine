@@ -36,7 +36,7 @@ namespace components
 namespace parameter_aliases
 {
 
-using Velocity = base::Point<float>;
+using Velocity = base::Vec2T<float>;
 using GravityAffected = bool;
 using IgnoreCollisions = bool;
 using ResetAfterSequence = bool;
@@ -48,7 +48,7 @@ using EnableX = bool;
 struct MovingBody
 {
   MovingBody(
-    const base::Point<float> velocity,
+    const base::Vec2T<float> velocity,
     const bool gravityAffected,
     const bool ignoreCollisions = false)
     : mVelocity(velocity)
@@ -57,7 +57,7 @@ struct MovingBody
   {
   }
 
-  base::Point<float> mVelocity;
+  base::Vec2T<float> mVelocity;
   bool mGravityAffected;
 
   /** When set, the body will move through walls, but collision events will
@@ -88,7 +88,7 @@ struct SolidBody
 
 struct MovementSequence
 {
-  using VelocityList = base::ArrayView<base::Point<float>>;
+  using VelocityList = base::ArrayView<base::Vec2T<float>>;
 
   explicit MovementSequence(
     const VelocityList& velocities,

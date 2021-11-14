@@ -249,7 +249,7 @@ void NapalmBomb::update(
 void NapalmBomb::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Point<float>&,
+  const base::Vec2T<float>&,
   entityx::Entity entity)
 {
   explode(d, entity);

@@ -787,7 +787,7 @@ struct Renderer::Impl
   }
 
 
-  void setGlobalScale(const base::Point<float>& scale)
+  void setGlobalScale(const base::Vec2T<float>& scale)
   {
     const auto glScale = glm::vec2{scale.x, scale.y};
     updateState(mStateStack.back().mGlobalScale, glScale);
@@ -1287,13 +1287,13 @@ base::Vector Renderer::globalTranslation() const
 }
 
 
-void Renderer::setGlobalScale(const base::Point<float>& scale)
+void Renderer::setGlobalScale(const base::Vec2T<float>& scale)
 {
   mpImpl->setGlobalScale(scale);
 }
 
 
-base::Point<float> Renderer::globalScale() const
+base::Vec2T<float> Renderer::globalScale() const
 {
   return {
     mpImpl->mStateStack.back().mGlobalScale.x,

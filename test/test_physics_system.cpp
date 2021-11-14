@@ -136,7 +136,7 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("Non-moving object")
     {
-      body.mVelocity = base::Point<float>{0.0f, 0.0f};
+      body.mVelocity = base::Vec2T<float>{0.0f, 0.0f};
       runOneFrame();
       CHECK(position.y == 5);
       CHECK(body.mVelocity.y > 0.0f);
@@ -288,7 +288,7 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("SolidBody doesn't collide with itself")
     {
-      solidBody.assign<MovingBody>(base::Point<float>{0, 2.0f}, false);
+      solidBody.assign<MovingBody>(base::Vec2T<float>{0, 2.0f}, false);
       solidBody.assign<Active>();
       runOneFrame();
       CHECK(solidBody.component<WorldPosition>()->y == 10);
@@ -316,11 +316,11 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("Velocity reset after sequence")
     {
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(true));
 
@@ -351,11 +351,11 @@ TEST_CASE("Physics system works as expected")
     {
       body.mGravityAffected = false;
 
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(false));
       for (int i = 0; i < 4; ++i)
@@ -382,11 +382,11 @@ TEST_CASE("Physics system works as expected")
       body.mGravityAffected = false;
       body.mIgnoreCollisions = true;
 
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(false));
       for (int i = 0; i < 4; ++i)
@@ -410,11 +410,11 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("X part of sequence can be ignored")
     {
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(true), EnableX(false));
       body.mVelocity.x = 1.0f;
