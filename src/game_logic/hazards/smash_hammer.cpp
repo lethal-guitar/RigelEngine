@@ -37,8 +37,6 @@ void SmashHammer::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  using namespace smash_hammer;
-
   if (!entity.has_component<engine::components::ExtendedFrameList>())
   {
     entity.assign<engine::components::ExtendedFrameList>();
