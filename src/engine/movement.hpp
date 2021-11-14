@@ -80,6 +80,12 @@ MovementResult moveHorizontallyWithStairStepping(
   int amount);
 
 
+int determineConveyorBeltMotionAmount(
+  const CollisionChecker& collisionChecker,
+  const data::map::Map& map,
+  entityx::Entity entity);
+
+
 void applyConveyorBeltMotion(
   const CollisionChecker& collisionChecker,
   const data::map::Map& map,

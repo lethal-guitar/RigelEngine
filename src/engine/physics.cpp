@@ -103,6 +103,21 @@ std::optional<PhysicsCollisionInfo> applyPhysics(
 
   if (body.mGravityAffected && !hasActiveSequence())
   {
+    // Unstick objects from ground that ended up stuck inside on the previous
+    // frame. This is needed for item's released from boxes in mid-air, which
+    // can sometimes end up stuck in the ground.
+    // It also makes sloped conveyor belts in N7 work.
+    //
+    // We need to temporarily move the object's position, instead of simply
+    // doing a check at `position - {0, 1}`, because the entity might be a
+    // solid body and we would detect collision with the entity itself if
+    // we didn't adjust the position.
+    --position.y;
+    if (!collisionChecker.isOnSolidGround(position, collisionRect))
+    {
+      ++position.y;
+    }
+
     body.mVelocity.y = applyGravity(collisionChecker, bbox, body.mVelocity.y);
 
     applyConveyorBeltMotion(collisionChecker, map, entity);
