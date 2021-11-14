@@ -31,69 +31,62 @@ struct CollidedWithWorld;
 namespace rigel::game_logic
 {
 
-namespace boss_episode_1
-{
-
-struct AwaitingActivation
-{
-};
-
-struct SlammingDown
-{
-};
-
-struct RisingBackUp
-{
-};
-
-struct FlyingLeftOnUpperLevel
-{
-};
-
-struct FlyingRightDroppingBombs
-{
-};
-
-struct MovingDownOnRightSide
-{
-  int mFramesElapsed = 0;
-};
-
-struct FlyingLeftOnLowerLevel
-{
-};
-
-struct MovingUpOnLeftSide
-{
-};
-
-struct ZigZagging
-{
-  int mFramesElapsed = 0;
-  engine::components::Orientation mOrientation =
-    engine::components::Orientation::Left;
-};
-
-
-using State = std::variant<
-  AwaitingActivation,
-  SlammingDown,
-  RisingBackUp,
-  FlyingLeftOnUpperLevel,
-  FlyingRightDroppingBombs,
-  MovingDownOnRightSide,
-  FlyingLeftOnLowerLevel,
-  MovingUpOnLeftSide,
-  ZigZagging>;
-
-} // namespace boss_episode_1
-
-
 namespace behaviors
 {
 
 struct BossEpisode1
 {
+  struct AwaitingActivation
+  {
+  };
+
+  struct SlammingDown
+  {
+  };
+  struct RisingBackUp
+  {
+  };
+
+  struct FlyingLeftOnUpperLevel
+  {
+  };
+
+  struct FlyingRightDroppingBombs
+  {
+  };
+
+  struct MovingDownOnRightSide
+  {
+    int mFramesElapsed = 0;
+  };
+
+  struct FlyingLeftOnLowerLevel
+  {
+  };
+
+  struct MovingUpOnLeftSide
+  {
+  };
+
+  struct ZigZagging
+  {
+    int mFramesElapsed = 0;
+    engine::components::Orientation mOrientation =
+      engine::components::Orientation::Left;
+  };
+
+
+  using State = std::variant<
+    AwaitingActivation,
+    SlammingDown,
+    RisingBackUp,
+    FlyingLeftOnUpperLevel,
+    FlyingRightDroppingBombs,
+    MovingDownOnRightSide,
+    FlyingLeftOnLowerLevel,
+    MovingUpOnLeftSide,
+    ZigZagging>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -112,7 +105,7 @@ struct BossEpisode1
     const base::Point<float>& inflictorVelocity,
     entityx::Entity entity);
 
-  boss_episode_1::State mState;
+  State mState;
   int mStartingAltitude = 0;
 };
 
