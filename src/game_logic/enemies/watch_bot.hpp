@@ -30,51 +30,45 @@ struct CollidedWithWorld;
 namespace rigel::game_logic::behaviors
 {
 
-namespace watch_bot
-{
-
-struct Jumping
-{
-  Jumping() = default;
-  explicit Jumping(const engine::components::Orientation orientation)
-    : mOrientation(orientation)
-  {
-  }
-
-  int mFramesElapsed = 0;
-  engine::components::Orientation mOrientation =
-    engine::components::Orientation::Left;
-};
-
-struct Falling
-{
-  engine::components::Orientation mOrientation;
-};
-
-struct OnGround
-{
-  int mFramesElapsed = 0;
-};
-
-struct LookingAround
-{
-  explicit LookingAround(const engine::components::Orientation orientation)
-    : mOrientation(orientation)
-  {
-  }
-
-  int mFramesElapsed = 0;
-  engine::components::Orientation mOrientation;
-};
-
-
-using State = std::variant<Jumping, Falling, OnGround, LookingAround>;
-
-} // namespace watch_bot
-
-
 struct WatchBot
 {
+  struct Jumping
+  {
+    Jumping() = default;
+    explicit Jumping(const engine::components::Orientation orientation)
+      : mOrientation(orientation)
+    {
+    }
+
+    int mFramesElapsed = 0;
+    engine::components::Orientation mOrientation =
+      engine::components::Orientation::Left;
+  };
+
+  struct Falling
+  {
+    engine::components::Orientation mOrientation;
+  };
+
+  struct OnGround
+  {
+    int mFramesElapsed = 0;
+  };
+
+  struct LookingAround
+  {
+    explicit LookingAround(const engine::components::Orientation orientation)
+      : mOrientation(orientation)
+    {
+    }
+
+    int mFramesElapsed = 0;
+    engine::components::Orientation mOrientation;
+  };
+
+
+  using State = std::variant<Jumping, Falling, OnGround, LookingAround>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -89,7 +83,7 @@ struct WatchBot
 
   void land(entityx::Entity entity, GlobalDependencies& dependencies);
 
-  watch_bot::State mState;
+  State mState = Jumping{};
 };
 
 

@@ -24,37 +24,31 @@
 namespace rigel::game_logic::behaviors
 {
 
-namespace eyeball_thrower
-{
-
-struct GettingUp
-{
-  int mFramesElapsed = 0;
-};
-
-struct Walking
-{
-};
-
-struct Attacking
-{
-  int mFramesElapsed = 0;
-};
-
-using State = std::variant<GettingUp, Walking, Attacking>;
-
-} // namespace eyeball_thrower
-
-
 struct EyeballThrower
 {
+  struct GettingUp
+  {
+    int mFramesElapsed = 0;
+  };
+
+  struct Walking
+  {
+  };
+
+  struct Attacking
+  {
+    int mFramesElapsed = 0;
+  };
+
+  using State = std::variant<GettingUp, Walking, Attacking>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  eyeball_thrower::State mState;
+  State mState = GettingUp();
 
   // This stays persistent across state changes, therefore it's stored outside
   // of the state machine.

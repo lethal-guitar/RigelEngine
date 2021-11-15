@@ -52,9 +52,6 @@ void RigelatinSoldier::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  using rigelatin_soldier::Jumping;
-  using rigelatin_soldier::Ready;
-  using rigelatin_soldier::Waiting;
   using namespace engine::components;
 
   const auto& position = *entity.component<WorldPosition>();
@@ -111,7 +108,6 @@ void RigelatinSoldier::onCollision(
   entityx::Entity entity)
 {
   using engine::MovementResult;
-  using rigelatin_soldier::Jumping;
   using namespace engine::components;
 
   if (!event.mCollidedBottom)
@@ -134,7 +130,7 @@ void RigelatinSoldier::onCollision(
         position.x = state.mPreviousPosX;
       }
 
-      mState = rigelatin_soldier::Ready{};
+      mState = Ready{};
       updateReadyState(d, s, entity);
 
       engine::synchronizeBoundingBoxToSprite(entity);
@@ -149,9 +145,6 @@ void RigelatinSoldier::updateReadyState(
   GlobalState& s,
   entityx::Entity entity)
 {
-  using rigelatin_soldier::Jumping;
-  using rigelatin_soldier::Ready;
-  using rigelatin_soldier::Waiting;
   using namespace engine::components;
 
   const auto& playerPos = s.mpPlayer->orientedPosition();

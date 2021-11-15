@@ -30,37 +30,31 @@ struct CollidedWithWorld;
 namespace rigel::game_logic
 {
 
-namespace rigelatin_soldier
-{
-
-struct Ready
-{
-};
-
-struct Jumping
-{
-  int mFramesElapsed = 0;
-  engine::MovementResult mLastHorizontalMovementResult =
-    engine::MovementResult::Failed;
-  int mPreviousPosX = 0;
-};
-
-struct Waiting
-{
-  int mFramesElapsed = 0;
-};
-
-
-using State = std::variant<Ready, Jumping, Waiting>;
-
-} // namespace rigelatin_soldier
-
-
 namespace behaviors
 {
 
 struct RigelatinSoldier
 {
+  struct Ready
+  {
+  };
+
+  struct Jumping
+  {
+    int mFramesElapsed = 0;
+    engine::MovementResult mLastHorizontalMovementResult =
+      engine::MovementResult::Failed;
+    int mPreviousPosX = 0;
+  };
+
+  struct Waiting
+  {
+    int mFramesElapsed = 0;
+  };
+
+
+  using State = std::variant<Ready, Jumping, Waiting>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
@@ -78,7 +72,7 @@ struct RigelatinSoldier
     GlobalState& state,
     entityx::Entity entity);
 
-  rigelatin_soldier::State mState;
+  State mState;
   int mDecisionCounter = 3;
 };
 

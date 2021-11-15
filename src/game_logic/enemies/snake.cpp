@@ -45,7 +45,6 @@ void Snake::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  using namespace snake;
   using namespace engine::components;
 
   auto& animationFrame = entity.component<Sprite>()->mFramesToRender[0];

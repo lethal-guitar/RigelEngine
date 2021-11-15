@@ -51,7 +51,6 @@ void BossEpisode1::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  using namespace boss_episode_1;
   using namespace engine::components;
 
   auto& position = *entity.component<WorldPosition>();
@@ -172,7 +171,6 @@ void BossEpisode1::onCollision(
   const engine::events::CollidedWithWorld&,
   entityx::Entity entity)
 {
-  using namespace boss_episode_1;
   using namespace engine::components;
 
   auto& body = *entity.component<MovingBody>();

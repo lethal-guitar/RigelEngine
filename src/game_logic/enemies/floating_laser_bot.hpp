@@ -24,34 +24,28 @@
 namespace rigel::game_logic::behaviors
 {
 
-namespace floating_laser_bot
-{
-
-struct Waiting
-{
-  int mFramesElapsed = 0;
-};
-
-
-struct Active
-{
-  int mFramesElapsed = 0;
-};
-
-using State = std::variant<Waiting, Active>;
-
-} // namespace floating_laser_bot
-
-
 struct FloatingLaserBot
 {
+  struct Waiting
+  {
+    int mFramesElapsed = 0;
+  };
+
+
+  struct Active
+  {
+    int mFramesElapsed = 0;
+  };
+
+  using State = std::variant<Waiting, Active>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  floating_laser_bot::State mState;
+  State mState = Waiting();
 };
 
 } // namespace rigel::game_logic::behaviors

@@ -24,35 +24,29 @@
 namespace rigel::game_logic::behaviors
 {
 
-namespace smash_hammer
-{
-
-struct Waiting
-{
-  int mFramesElapsed = 0;
-};
-
-struct PushingDown
-{
-};
-struct PullingUp
-{
-};
-
-using State = std::variant<Waiting, PushingDown, PullingUp>;
-
-} // namespace smash_hammer
-
-
 struct SmashHammer
 {
+  struct Waiting
+  {
+    int mFramesElapsed = 0;
+  };
+
+  struct PushingDown
+  {
+  };
+  struct PullingUp
+  {
+  };
+
+  using State = std::variant<Waiting, PushingDown, PullingUp>;
+
   void update(
     GlobalDependencies& dependencies,
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
 
-  smash_hammer::State mState = smash_hammer::Waiting{10};
+  State mState = Waiting{10};
   int mExtensionStep = 0;
 };
 

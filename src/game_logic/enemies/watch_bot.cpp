@@ -80,7 +80,6 @@ void WatchBot::update(
 {
   using namespace engine;
   using namespace engine::components;
-  using namespace watch_bot;
 
   const auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
@@ -194,8 +193,6 @@ void WatchBot::onCollision(
   const engine::events::CollidedWithWorld&,
   entityx::Entity entity)
 {
-  using namespace watch_bot;
-
   base::match(
     mState,
     [&, this](const Falling& state) { land(entity, d); },
@@ -207,7 +204,6 @@ void WatchBot::onCollision(
 void WatchBot::land(entityx::Entity entity, GlobalDependencies& d)
 {
   using namespace engine::components;
-  using namespace watch_bot;
 
   const auto isOnScreen = entity.component<Active>()->mIsOnScreen;
   if (isOnScreen)
