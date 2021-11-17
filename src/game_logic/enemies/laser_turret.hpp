@@ -51,7 +51,7 @@ struct LaserTurret
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Vec2T<float>& inflictorVelocity,
+    const base::Vec2f& inflictorVelocity,
     entityx::Entity entity);
 
   int mAngle = 0;

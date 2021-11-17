@@ -44,7 +44,7 @@ void deactivateProjectile(entityx::Entity entity)
 }
 
 
-base::Vec2 regularShotDebrisOffset(const base::Vec2T<float>& velocity)
+base::Vec2 regularShotDebrisOffset(const base::Vec2f& velocity)
 {
   const auto isHorizontal = velocity.x != 0.0f;
   return {isHorizontal ? 0 : -1, 1};
@@ -54,7 +54,7 @@ base::Vec2 regularShotDebrisOffset(const base::Vec2T<float>& velocity)
 void spawnRegularShotImpactEffect(
   IEntityFactory& entityFactory,
   const base::Vec2& position,
-  const base::Vec2T<float> velocity)
+  const base::Vec2f velocity)
 {
   const auto debrisPosition = position + regularShotDebrisOffset(velocity);
   spawnFloatingOneShotSprite(
@@ -62,7 +62,7 @@ void spawnRegularShotImpactEffect(
 }
 
 
-base::Vec2 rocketSmokeOffset(const base::Vec2T<float>& velocity)
+base::Vec2 rocketSmokeOffset(const base::Vec2f& velocity)
 {
   const auto isFacingOpposite = velocity.x < 0.0f || velocity.y > 0.0f;
   if (isFacingOpposite)
@@ -85,7 +85,7 @@ base::Vec2 rocketSmokeOffset(const base::Vec2T<float>& velocity)
 void generateRocketSmoke(
   IEntityFactory& entityFactory,
   const base::Vec2& position,
-  const base::Vec2T<float> velocity)
+  const base::Vec2f velocity)
 {
   const auto offset = rocketSmokeOffset(velocity);
   spawnOneShotSprite(
@@ -93,7 +93,7 @@ void generateRocketSmoke(
 }
 
 
-base::Vec2 rocketWallImpactOffset(const base::Vec2T<float>& velocity)
+base::Vec2 rocketWallImpactOffset(const base::Vec2f& velocity)
 {
   const auto isHorizontal = velocity.x != 0.0f;
   if (isHorizontal)
@@ -111,7 +111,7 @@ void spawnRocketWallImpactEffect(
   IEntityFactory& entityFactory,
   const base::Vec2& position,
   const engine::components::BoundingBox& bbox,
-  const base::Vec2T<float> velocity)
+  const base::Vec2f velocity)
 {
   const auto offset = rocketWallImpactOffset(velocity);
   spawnOneShotSprite(
@@ -232,7 +232,7 @@ void ProjectileSystem::update(entityx::EntityManager& es)
 void ProjectileSystem::spawnWallImpactEffect(
   entityx::Entity entity,
   const base::Vec2& position,
-  const base::Vec2T<float>& velocity,
+  const base::Vec2f& velocity,
   const bool isRocket)
 {
   const auto& bbox = *entity.component<engine::components::BoundingBox>();

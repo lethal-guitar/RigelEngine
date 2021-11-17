@@ -141,7 +141,7 @@ struct ShootableDamaged
 struct ShootableKilled
 {
   entityx::Entity mEntity;
-  base::Vec2T<float> mInflictorVelocity;
+  base::Vec2f mInflictorVelocity;
 };
 
 } // namespace events

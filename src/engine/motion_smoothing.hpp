@@ -47,16 +47,14 @@ inline void enableInterpolation(entityx::Entity entity)
 }
 
 
-inline base::Vec2T<float> lerp(
-  const base::Vec2T<float>& a,
-  const base::Vec2T<float>& b,
-  const float factor)
+inline base::Vec2f
+  lerp(const base::Vec2f& a, const base::Vec2f& b, const float factor)
 {
   return {base::lerp(a.x, b.x, factor), base::lerp(a.y, b.y, factor)};
 }
 
 
-inline base::Vec2T<float>
+inline base::Vec2f
   lerp(const base::Vec2& a, const base::Vec2& b, const float factor)
 {
   return lerp(base::cast<float>(a), base::cast<float>(b), factor);

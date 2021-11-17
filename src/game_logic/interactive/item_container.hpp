@@ -186,7 +186,7 @@ public:
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Vec2T<float>& inflictorVelocity,
+    const base::Vec2f& inflictorVelocity,
     entityx::Entity entity);
 
   enum class State

@@ -923,7 +923,7 @@ auto GameWorld::determineSmoothScrollViewport(
   const auto interpolationY =
     direction.y < 0 ? 1.0f - interpolationFactor : interpolationFactor;
 
-  const auto interpolatedCameraPosition = base::Vec2T<float>{
+  const auto interpolatedCameraPosition = base::Vec2f{
     base::lerp(
       previousCameraPosition.x, currentCameraPosition.x, interpolationX),
     base::lerp(

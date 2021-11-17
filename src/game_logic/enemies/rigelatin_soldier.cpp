@@ -36,7 +36,7 @@ namespace
 
 constexpr auto FLY_SPEED = 2;
 
-constexpr base::Vec2T<float> JUMP_ARC[] = {
+constexpr base::Vec2f JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
   {0.0f, -1.0f},

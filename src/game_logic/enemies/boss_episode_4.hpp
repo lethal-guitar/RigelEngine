@@ -46,7 +46,7 @@ struct BossEpisode4
   void onKilled(
     GlobalDependencies& d,
     GlobalState&,
-    const base::Vec2T<float>&,
+    const base::Vec2f&,
     entityx::Entity entity);
 
   int mCoolDownFrames = 0;

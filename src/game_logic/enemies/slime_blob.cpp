@@ -95,7 +95,7 @@ void SlimeContainer::update(
 void SlimeContainer::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Vec2T<float>&,
+  const base::Vec2f&,
   entityx::Entity entity)
 {
   using namespace engine::components;
