@@ -203,7 +203,7 @@ int messengerDroneTypeIndex(const ActorID id)
 }
 
 
-base::Vector directionVectorForRocketType(const ActorID id)
+base::Vec2 directionVectorForRocketType(const ActorID id)
 {
   switch (id)
   {

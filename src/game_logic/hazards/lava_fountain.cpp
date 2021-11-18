@@ -147,7 +147,7 @@ void LavaFountain::update(
       for (const auto& element : ERUPTION_SEQUENCE[indexForDrawing])
       {
         additionalFrames.push_back(
-          {element.mFrame, base::Vector{0, element.mOffsetY}});
+          {element.mFrame, base::Vec2{0, element.mOffsetY}});
       }
     }
   }

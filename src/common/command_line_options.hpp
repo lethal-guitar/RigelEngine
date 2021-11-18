@@ -44,7 +44,7 @@ struct CommandLineOptions
   bool mSkipIntro = false;
   bool mDebugModeEnabled = false;
   bool mPlayDemo = false;
-  std::optional<base::Vector> mPlayerPosition;
+  std::optional<base::Vec2> mPlayerPosition;
 };
 
 } // namespace rigel

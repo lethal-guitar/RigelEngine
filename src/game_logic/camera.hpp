@@ -55,24 +55,24 @@ public:
   void update(const PlayerInput& input, const base::Extents& viewPortSize);
   void centerViewOnPlayer();
 
-  const base::Vector& position() const;
+  const base::Vec2& position() const;
 
   void receive(const rigel::events::PlayerFiredShot& event);
 
 private:
   void updateManualScrolling(const PlayerInput& input);
   void updateAutomaticScrolling();
-  void setPosition(base::Vector position);
+  void setPosition(base::Vec2 position);
 
   const Player* mpPlayer;
   const data::map::Map* mpMap;
-  base::Vector mPosition;
+  base::Vec2 mPosition;
   base::Extents mViewPortSize;
   int mManualScrollCooldown = 0;
 };
 
 
-inline const base::Vector& Camera::position() const
+inline const base::Vec2& Camera::position() const
 {
   return mPosition;
 }

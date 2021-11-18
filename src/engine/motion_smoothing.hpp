@@ -57,14 +57,14 @@ inline base::Vec2T<float> lerp(
 
 
 inline base::Vec2T<float>
-  lerp(const base::Vector& a, const base::Vector& b, const float factor)
+  lerp(const base::Vec2& a, const base::Vec2& b, const float factor)
 {
   return lerp(base::cast<float>(a), base::cast<float>(b), factor);
 }
 
 
 template <typename T>
-base::Vector lerpRounded(
+base::Vec2 lerpRounded(
   const base::Vec2T<T>& a,
   const base::Vec2T<T>& b,
   const float factor)
@@ -75,9 +75,9 @@ base::Vector lerpRounded(
 }
 
 
-inline base::Vector interpolatedPixelPosition(
-  const base::Vector& a,
-  const base::Vector& b,
+inline base::Vec2 interpolatedPixelPosition(
+  const base::Vec2& a,
+  const base::Vec2& b,
   const float interpolationFactor)
 {
   return lerpRounded(
@@ -87,7 +87,7 @@ inline base::Vector interpolatedPixelPosition(
 }
 
 
-inline base::Vector interpolatedPixelPosition(
+inline base::Vec2 interpolatedPixelPosition(
   const entityx::Entity entity,
   const float interpolationFactor)
 {

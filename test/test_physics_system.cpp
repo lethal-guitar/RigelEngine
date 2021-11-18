@@ -298,7 +298,7 @@ TEST_CASE("Physics system works as expected")
 
   auto runFramesAndCollect = [&position,
                               &runOneFrame](const std::size_t numFrames) {
-    std::vector<base::Vector> positions;
+    std::vector<base::Vec2> positions;
     for (std::size_t i = 0; i < numFrames; ++i)
     {
       runOneFrame();
@@ -326,14 +326,14 @@ TEST_CASE("Physics system works as expected")
 
       const auto collectedPositions = runFramesAndCollect(sequence.size());
       const auto expectedPositions =
-        std::vector<base::Vector>{{10, 4}, {13, 2}, {15, 2}, {14, 3}};
+        std::vector<base::Vec2>{{10, 4}, {13, 2}, {15, 2}, {14, 3}};
 
       CHECK(collectedPositions == expectedPositions);
 
       SECTION("Gravity takes over again after sequence ended")
       {
         const auto expectedPositions2 =
-          std::vector<base::Vector>{{14, 3}, {14, 4}};
+          std::vector<base::Vec2>{{14, 3}, {14, 4}};
         const auto collectedPositions2 =
           runFramesAndCollect(expectedPositions2.size());
 
@@ -364,7 +364,7 @@ TEST_CASE("Physics system works as expected")
       }
 
       const auto expectedPositions =
-        std::vector<base::Vector>{{13, 4}, {12, 5}, {11, 6}};
+        std::vector<base::Vec2>{{13, 4}, {12, 5}, {11, 6}};
       const auto collectedPositions =
         runFramesAndCollect(expectedPositions.size());
 
@@ -395,7 +395,7 @@ TEST_CASE("Physics system works as expected")
       }
 
       const auto expectedPositions =
-        std::vector<base::Vector>{{13, 4}, {12, 5}, {11, 6}};
+        std::vector<base::Vec2>{{13, 4}, {12, 5}, {11, 6}};
       const auto collectedPositions =
         runFramesAndCollect(expectedPositions.size());
 
@@ -421,7 +421,7 @@ TEST_CASE("Physics system works as expected")
 
       const auto collectedPositions = runFramesAndCollect(sequence.size());
       const auto expectedPositions =
-        std::vector<base::Vector>{{11, 4}, {12, 2}, {13, 2}, {14, 3}};
+        std::vector<base::Vec2>{{11, 4}, {12, 2}, {13, 2}, {14, 3}};
 
       CHECK(collectedPositions == expectedPositions);
     }

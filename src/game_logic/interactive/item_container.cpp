@@ -280,12 +280,12 @@ void NapalmBomb::explode(GlobalDependencies& d, entityx::Entity entity)
 
 void NapalmBomb::spawnFires(
   GlobalDependencies& d,
-  const base::Vector& bombPosition,
+  const base::Vec2& bombPosition,
   const int step)
 {
   using namespace game_logic::components::parameter_aliases;
 
-  auto spawnOneFire = [&, this](const base::Vector& position) {
+  auto spawnOneFire = [&, this](const base::Vec2& position) {
     const auto canSpawn =
       d.mpCollisionChecker->isOnSolidGround(position, BoundingBox{{}, {2, 1}});
 

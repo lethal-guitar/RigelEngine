@@ -36,7 +36,7 @@ namespace rigel::game_logic::behaviors
 
 struct EnemyRocket
 {
-  explicit EnemyRocket(const base::Vector& direction)
+  explicit EnemyRocket(const base::Vec2& direction)
     : mDirection(direction)
   {
   }
@@ -47,7 +47,7 @@ struct EnemyRocket
     bool isOnScreen,
     entityx::Entity entity);
 
-  base::Vector mDirection;
+  base::Vec2 mDirection;
   int mFramesElapsed = 0;
 };
 

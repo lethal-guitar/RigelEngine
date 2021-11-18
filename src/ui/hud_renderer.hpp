@@ -46,7 +46,7 @@ class ResourceLoader;
 namespace ui
 {
 
-inline bool isVisibleOnRadar(const base::Vector& position)
+inline bool isVisibleOnRadar(const base::Vec2& position)
 {
   // clang-format off
   return
@@ -69,13 +69,13 @@ public:
   void updateAnimation();
   void render(
     const data::PlayerModel& playerModel,
-    base::ArrayView<base::Vector> radarPositions);
+    base::ArrayView<base::Vec2> radarPositions);
 
 private:
   struct CollectedLetterIndicator
   {
     renderer::Texture mTexture;
-    base::Vector mPxPosition;
+    base::Vec2 mPxPosition;
   };
 
   using InventoryItemTextureMap =
@@ -102,7 +102,7 @@ private:
 
   void drawHealthBar(const data::PlayerModel& playerModel) const;
   void drawCollectedLetters(const data::PlayerModel& playerModel) const;
-  void drawRadar(base::ArrayView<base::Vector> positions) const;
+  void drawRadar(base::ArrayView<base::Vec2> positions) const;
 
   const int mLevelNumber;
   renderer::Renderer* mpRenderer;

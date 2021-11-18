@@ -99,9 +99,8 @@ private:
     activateKeyHole(entityx::EntityManager& es, entityx::Entity interactable);
   void activateHintMachine(entityx::Entity entity);
 
-  void collectLetter(
-    data::CollectableLetterType type,
-    const base::Vector& position);
+  void
+    collectLetter(data::CollectableLetterType type, const base::Vec2& position);
 
 private:
   Player* mpPlayer;

@@ -56,12 +56,12 @@ int angleAdjustment(const int currentAngle, const bool playerIsRight)
 }
 
 
-void performBaseHitEffect(GlobalDependencies& d, const base::Vector& position)
+void performBaseHitEffect(GlobalDependencies& d, const base::Vec2& position)
 {
   spawnFloatingOneShotSprite(
     *d.mpEntityFactory,
     data::ActorID::Shot_impact_FX,
-    position + base::Vector{-1, 2});
+    position + base::Vec2{-1, 2});
   const auto randomChoice = d.mpRandomGenerator->gen();
   const auto soundId = randomChoice % 2 == 0 ? data::SoundId::AlternateExplosion
                                              : data::SoundId::Explosion;
@@ -114,7 +114,7 @@ void LaserTurret::update(
         d.mpServiceProvider->playSound(data::SoundId::EnemyLaserShot);
         spawnEnemyLaserShot(
           *d.mpEntityFactory,
-          position + base::Vector{offset, 0},
+          position + base::Vec2{offset, 0},
           facingLeft ? engine::components::Orientation::Left
                      : engine::components::Orientation::Right);
       }

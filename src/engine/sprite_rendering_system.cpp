@@ -69,7 +69,7 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated)
 
 void collectVisibleSprites(
   ex::EntityManager& es,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize,
   std::vector<SortableDrawSpec>& output,
   const float interpolationFactor)
@@ -83,17 +83,17 @@ void collectVisibleSprites(
 
   auto submit = [&](
                   const SpriteFrame& frame,
-                  const base::Vector& previousPosition,
-                  const base::Vector& position,
+                  const base::Vec2& previousPosition,
+                  const base::Vec2& position,
                   const bool flashingWhite,
                   const bool translucent,
                   const bool drawTopmost,
                   const int drawOrder) {
     // World-space tile positions refer to a sprite's bottom left tile,
     // but we need its top left corner for drawing.
-    auto drawPosition = [&frame, &cameraPosition](const base::Vector& pos) {
+    auto drawPosition = [&frame, &cameraPosition](const base::Vec2& pos) {
       const auto heightTiles = frame.mDimensions.height;
-      return pos - cameraPosition - base::Vector(0, heightTiles - 1) +
+      return pos - cameraPosition - base::Vec2(0, heightTiles - 1) +
         frame.mDrawOffset;
     };
 
@@ -282,7 +282,7 @@ SpriteRenderingSystem::SpriteRenderingSystem(
 void SpriteRenderingSystem::update(
   ex::EntityManager& es,
   const base::Extents& viewPortSize,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const float interpolationFactor)
 {
   using std::back_inserter;

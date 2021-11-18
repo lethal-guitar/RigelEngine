@@ -126,6 +126,6 @@ struct CollidedWithWorld
 
 components::BoundingBox toWorldSpace(
   const components::BoundingBox& bbox,
-  const base::Vector& entityPosition);
+  const base::Vec2& entityPosition);
 
 } // namespace rigel::engine

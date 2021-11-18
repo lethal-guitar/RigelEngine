@@ -37,7 +37,7 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr auto BOMB_DROP_OFFSET = base::Vector{3, 1};
+constexpr auto BOMB_DROP_OFFSET = base::Vec2{3, 1};
 
 constexpr auto ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE =
   std::array<int, 10>{-1, -1, 0, 0, 1, 1, 1, 0, 0, -1};

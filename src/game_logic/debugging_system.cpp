@@ -98,7 +98,7 @@ void DebuggingSystem::toggleGridDisplay()
 
 void DebuggingSystem::update(
   ex::EntityManager& es,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize,
   const float interpolationFactor)
 {
@@ -181,7 +181,7 @@ void DebuggingSystem::update(
               .topLeft
           : topLeftCurrent;
 
-        auto transform = [&](const base::Vector& p) {
+        auto transform = [&](const base::Vec2& p) {
           return tileVectorToPixelVector(p) - worldToScreenPx;
         };
 

@@ -145,7 +145,7 @@ PlayerInput filterInput(PlayerInput input)
 }
 
 
-base::Vector inputToVec(const PlayerInput& input)
+base::Vec2 inputToVec(const PlayerInput& input)
 {
   const auto x = input.mLeft ? -1 : (input.mRight ? 1 : 0);
   const auto y = input.mUp ? -1 : (input.mDown ? 1 : 0);
@@ -216,7 +216,7 @@ ProjectileDirection
 }
 
 
-base::Vector
+base::Vec2
   shotOffset(const c::Orientation orientation, const WeaponStance stance)
 {
   if (stance == WeaponStance::UsingJetpack)
@@ -228,7 +228,7 @@ base::Vector
 
   if (stance == WeaponStance::Downwards)
   {
-    return facingRight ? base::Vector{0, 0} : base::Vector{2, 0};
+    return facingRight ? base::Vec2{0, 0} : base::Vec2{2, 0};
   }
 
   const auto shotOffsetHorizontal = stance == WeaponStance::Upwards
@@ -238,7 +238,7 @@ base::Vector
     ? (stance == WeaponStance::Upwards ? -5 : -2)
     : -1;
 
-  return base::Vector{shotOffsetHorizontal, shotOffsetVertical};
+  return base::Vec2{shotOffsetHorizontal, shotOffsetVertical};
 }
 
 
@@ -253,7 +253,7 @@ data::ActorID muzzleFlashActorId(const ProjectileDirection direction)
 }
 
 
-base::Vector
+base::Vec2
   muzzleFlashOffset(const c::Orientation orientation, const WeaponStance stance)
 {
   if (stance == WeaponStance::UsingJetpack)
@@ -265,7 +265,7 @@ base::Vector
 
   if (stance == WeaponStance::Downwards)
   {
-    return facingRight ? base::Vector{0, 1} : base::Vector{2, 1};
+    return facingRight ? base::Vec2{0, 1} : base::Vec2{2, 1};
   }
 
   const auto horizontalOffset = stance == WeaponStance::Upwards
@@ -456,13 +456,13 @@ engine::components::BoundingBox Player::worldSpaceCollisionBox() const
 }
 
 
-const base::Vector& Player::position() const
+const base::Vec2& Player::position() const
 {
   return *mEntity.component<const c::WorldPosition>();
 }
 
 
-base::Vector& Player::position()
+base::Vec2& Player::position()
 {
   return *mEntity.component<c::WorldPosition>();
 }
@@ -474,7 +474,7 @@ int Player::animationFrame() const
 }
 
 
-base::Vector Player::orientedPosition() const
+base::Vec2 Player::orientedPosition() const
 {
   if (stateIs<InShip>())
   {
@@ -482,7 +482,7 @@ base::Vector Player::orientedPosition() const
   }
 
   const auto adjustment = orientation() == c::Orientation::Left ? 1 : 0;
-  return position() - base::Vector{adjustment, 0};
+  return position() - base::Vec2{adjustment, 0};
 }
 
 
@@ -679,7 +679,7 @@ void Player::die()
 
 
 void Player::enterShip(
-  const base::Vector& shipPosition,
+  const base::Vec2& shipPosition,
   const c::Orientation shipOrientation)
 {
   if (isDead())
@@ -777,7 +777,7 @@ void Player::doInteractionAnimation()
 }
 
 
-void Player::reSpawnAt(const base::Vector& spawnPosition)
+void Player::reSpawnAt(const base::Vec2& spawnPosition)
 {
   position() = spawnPosition;
 
@@ -865,7 +865,7 @@ void Player::updateAnimation()
 
 
 void Player::updateMovement(
-  const base::Vector& movementVector,
+  const base::Vec2& movementVector,
   const Button& jumpButton,
   const Button& fireButton)
 {
@@ -1356,7 +1356,7 @@ bool Player::updateElevatorMovement(const int movementDirection)
 }
 
 
-void Player::updateLadderAttachment(const base::Vector& movementVector)
+void Player::updateLadderAttachment(const base::Vec2& movementVector)
 {
   const auto& bbox = *mEntity.component<c::BoundingBox>();
   auto& position = *mEntity.component<c::WorldPosition>();
@@ -1373,7 +1373,7 @@ void Player::updateLadderAttachment(const base::Vector& movementVector)
   {
     const auto worldBBox = engine::toWorldSpace(bbox, position);
 
-    std::optional<base::Vector> maybeLadderTouchPoint;
+    std::optional<base::Vec2> maybeLadderTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i)
     {
       const auto attributes =
@@ -1381,7 +1381,7 @@ void Player::updateLadderAttachment(const base::Vector& movementVector)
       if (attributes.isLadder())
       {
         maybeLadderTouchPoint =
-          base::Vector{worldBBox.left() + i, worldBBox.top()};
+          base::Vec2{worldBBox.left() + i, worldBBox.top()};
         break;
       }
     }
@@ -1401,7 +1401,7 @@ void Player::updateLadderAttachment(const base::Vector& movementVector)
 }
 
 
-void Player::updateHorizontalMovementInAir(const base::Vector& movementVector)
+void Player::updateHorizontalMovementInAir(const base::Vec2& movementVector)
 {
   if (movementVector.x != 0)
   {
@@ -1422,7 +1422,7 @@ void Player::updateHorizontalMovementInAir(const base::Vector& movementVector)
 
 void Player::updateJumpMovement(
   Jumping& state,
-  const base::Vector& movementVector,
+  const base::Vec2& movementVector,
   const bool jumpPressed)
 {
   auto updateSomersaultAnimation = [&, this]() {
@@ -1843,12 +1843,12 @@ void Player::fireShot()
 
     mpEntityFactory->spawnProjectile(
       ProjectileType::ShipLaser,
-      position + base::Vector{isFacingLeft ? -1 : 8, 0},
+      position + base::Vec2{isFacingLeft ? -1 : 8, 0},
       direction);
     spawnOneShotSprite(
       *mpEntityFactory,
       muzzleFlashActorId(direction),
-      position + base::Vector{isFacingLeft ? -3 : 8, -1});
+      position + base::Vec2{isFacingLeft ? -3 : 8, -1});
     mpServiceProvider->playSound(data::SoundId::DukeLaserShot);
   }
   else
@@ -1910,7 +1910,7 @@ void Player::jump()
 }
 
 
-void Player::jumpFromLadder(const base::Vector& movementVector)
+void Player::jumpFromLadder(const base::Vec2& movementVector)
 {
   auto newState = Jumping{Jumping::FromLadder{}};
   updateJumpMovement(newState, movementVector, true);
@@ -1967,7 +1967,7 @@ void Player::switchOrientation()
   auto& position = *mEntity.component<c::WorldPosition>();
   const auto& bbox = *mEntity.component<c::BoundingBox>();
 
-  const auto offset = base::Vector{1, 0};
+  const auto offset = base::Vec2{1, 0};
   const auto stuckInWall = orientation == c::Orientation::Left
     ? mpCollisionChecker->isTouchingLeftWall(position + offset, bbox)
     : mpCollisionChecker->isTouchingRightWall(position - offset, bbox);

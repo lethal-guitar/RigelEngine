@@ -114,14 +114,14 @@ struct MockEntityFactory : public rigel::game_logic::IEntityFactory
 
   entityx::Entity spawnSprite(
     data::ActorID actorID,
-    const base::Vector& position,
+    const base::Vec2& position,
     bool assignBoundingBox = false) override
   {
     return createMockSpriteEntity();
   }
 
   entityx::Entity
-    spawnActor(data::ActorID actorID, const base::Vector& position) override
+    spawnActor(data::ActorID actorID, const base::Vec2& position) override
   {
     return createMockSpriteEntity();
   }

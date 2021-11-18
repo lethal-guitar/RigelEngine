@@ -73,7 +73,7 @@ void triggerHitEffect(entityx::Entity entity, engine::ParticleSystem& particles)
   const auto& position = *entity.component<WorldPosition>();
   entity.component<Sprite>()->flashWhite();
   particles.spawnParticles(
-    position + base::Vector{5, 0}, data::GameTraits::INGAME_PALETTE[15]);
+    position + base::Vec2{5, 0}, data::GameTraits::INGAME_PALETTE[15]);
 }
 
 } // namespace
@@ -95,7 +95,7 @@ void Missile::update(
   const auto& position = *entity.component<WorldPosition>();
 
   auto detonate = [&]() {
-    const auto impactPosition = position - base::Vector{0, MISSILE_HEIGHT};
+    const auto impactPosition = position - base::Vec2{0, MISSILE_HEIGHT};
     d.mpEvents->emit(rigel::events::MissileDetonated{impactPosition});
     triggerEffects(entity, *d.mpEntityManager);
   };
@@ -107,11 +107,11 @@ void Missile::update(
     spawnOneShotSprite(
       *d.mpEntityFactory,
       data::ActorID::White_circle_flash_FX,
-      position + base::Vector{-2, 1});
+      position + base::Vec2{-2, 1});
     spawnOneShotSprite(
       *d.mpEntityFactory,
       data::ActorID::White_circle_flash_FX,
-      position + base::Vector{1, 1});
+      position + base::Vec2{1, 1});
   }
   else if (mFramesElapsed == 5)
   {

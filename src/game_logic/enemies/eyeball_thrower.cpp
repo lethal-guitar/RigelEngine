@@ -79,7 +79,7 @@ void EyeballThrower::update(
       *d.mpEntityFactory,
       data::ActorID::Eyeball_projectile,
       movement,
-      position + base::Vector{offsetX, -6});
+      position + base::Vec2{offsetX, -6});
   };
 
   auto animateWalking = [&]() {

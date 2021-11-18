@@ -86,7 +86,7 @@ int baseFrameForClinging(const SpiderClingPosition where)
 }
 
 
-base::Vector offsetForClinging(
+base::Vec2 offsetForClinging(
   const SpiderClingPosition where,
   const Orientation playerOrientation)
 {
@@ -94,17 +94,17 @@ base::Vector offsetForClinging(
   switch (where)
   {
     case SpiderClingPosition::Head:
-      return playerFacingRight ? base::Vector{0, -3} : base::Vector{1, -3};
+      return playerFacingRight ? base::Vec2{0, -3} : base::Vec2{1, -3};
 
     case SpiderClingPosition::Weapon:
-      return playerFacingRight ? base::Vector{2, -1} : base::Vector{-1, -1};
+      return playerFacingRight ? base::Vec2{2, -1} : base::Vec2{-1, -1};
 
     case SpiderClingPosition::Back:
-      return playerFacingRight ? base::Vector{-2, -2} : base::Vector{3, -2};
+      return playerFacingRight ? base::Vec2{-2, -2} : base::Vec2{3, -2};
   }
 
   assert(false);
-  return base::Vector{0, 0};
+  return base::Vec2{0, 0};
 }
 
 } // namespace

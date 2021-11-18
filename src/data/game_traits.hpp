@@ -50,7 +50,7 @@ struct GameTraits
   // The actual in-game viewport starts with an offset and is further reduced
   // to make room for the HUD. The right hand side features another 8px of
   // black border.
-  static constexpr base::Vector inGameViewPortOffset{8, 8};
+  static constexpr base::Vec2 inGameViewPortOffset{8, 8};
   static constexpr base::Extents inGameViewPortSize{
     GameTraits::viewPortWidthPx - 16,
     GameTraits::viewPortHeightPx - 8};

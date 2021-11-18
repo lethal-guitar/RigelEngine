@@ -28,7 +28,7 @@ namespace rigel::game_logic
 BehaviorControllerSystem::BehaviorControllerSystem(
   GlobalDependencies dependencies,
   Player* pPlayer,
-  const base::Vector* pCameraPosition,
+  const base::Vec2* pCameraPosition,
   data::map::Map* pMap)
   : mDependencies(dependencies)
   , mGlobalState(pPlayer, pCameraPosition, pMap, &mPerFrameState)

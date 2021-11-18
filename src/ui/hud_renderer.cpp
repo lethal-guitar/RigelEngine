@@ -47,7 +47,7 @@ constexpr auto RADAR_POS_X = RADAR_CENTER_POS_X - RADAR_SIZE_PX / 2 -
 constexpr auto RADAR_POS_Y = RADAR_CENTER_POS_Y - RADAR_SIZE_PX / 2 -
   data::GameTraits::inGameViewPortOffset.y;
 constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
-  base::Vector{RADAR_SIZE_PX / 2, RADAR_SIZE_PX / 2 + 1};
+  base::Vec2{RADAR_SIZE_PX / 2, RADAR_SIZE_PX / 2 + 1};
 
 constexpr auto NUM_RADAR_BLINK_STEPS = 4;
 constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
@@ -57,7 +57,7 @@ const auto RADAR_DOT_COLOR = data::GameTraits::INGAME_PALETTE[15];
 void drawNumbersBig(
   const int number,
   const int maxDigits,
-  const base::Vector& tlPosition,
+  const base::Vec2& tlPosition,
   const TiledTexture& spriteSheet)
 {
   const auto printed = std::to_string(number);
@@ -68,7 +68,7 @@ void drawNumbersBig(
 
   for (auto digit = 0; digit < maxDigits; ++digit)
   {
-    const auto tlPositionForDigit = tlPosition + base::Vector{digit * 2, 0};
+    const auto tlPositionForDigit = tlPosition + base::Vec2{digit * 2, 0};
 
     if (digit >= positionsToSkip)
     {
@@ -87,7 +87,7 @@ void drawScore(const int score, const TiledTexture& spriteSheet)
   drawNumbersBig(
     score,
     7,
-    base::Vector{2, GameTraits::mapViewPortSize.height + 1},
+    base::Vec2{2, GameTraits::mapViewPortSize.height + 1},
     spriteSheet);
 }
 
@@ -98,7 +98,7 @@ void drawWeaponIcon(const WeaponType type, const TiledTexture& spriteSheet)
   // clang-format off
   spriteSheet.renderTileDoubleQuad(
     weaponIndex*4 + 4 + 5*40,
-    base::Vector{17, GameTraits::mapViewPortSize.height + 1});
+    base::Vec2{17, GameTraits::mapViewPortSize.height + 1});
   // clang-format on
 }
 
@@ -117,7 +117,7 @@ void drawAmmoBar(
   const auto ammoBarIndex = 16 - quantizedAmmoCount;
   spriteSheet.renderTileSlice(
     ammoBarIndex + 23 * 40,
-    base::Vector{22, GameTraits::mapViewPortSize.height + 1});
+    base::Vec2{22, GameTraits::mapViewPortSize.height + 1});
 }
 
 
@@ -126,7 +126,7 @@ void drawLevelNumber(const int number, const TiledTexture& spriteSheet)
   drawNumbersBig(
     number,
     1,
-    base::Vector{
+    base::Vec2{
       GameTraits::mapViewPortSize.width + 2,
       GameTraits::mapViewPortSize.height},
     spriteSheet);
@@ -182,12 +182,12 @@ HudRenderer::CollectedLetterIndicatorMap
 
   const auto rightScreenEdge = GameTraits::inGameViewPortSize.width;
   const auto bottomScreenEdge = GameTraits::inGameViewPortSize.height;
-  const base::Vector letterDrawStart{
+  const base::Vec2 letterDrawStart{
     rightScreenEdge - 5 * GameTraits::tileSize,
     bottomScreenEdge - 2 * GameTraits::tileSize};
   // TODO: Consider using the positions from the loaded actor frames instead
   // of calculating manually?
-  const base::Vector letterSize{GameTraits::tileSize, 0};
+  const base::Vec2 letterSize{GameTraits::tileSize, 0};
   map.emplace(
     CollectableLetterType::N,
     CollectedLetterIndicator{
@@ -270,7 +270,7 @@ void HudRenderer::updateAnimation()
 
 void HudRenderer::render(
   const data::PlayerModel& playerModel,
-  const base::ArrayView<base::Vector> radarPositions)
+  const base::ArrayView<base::Vec2> radarPositions)
 {
   // Hud background
   // --------------------------------------------------------------------------
@@ -287,7 +287,7 @@ void HudRenderer::render(
 
   // Inventory
   // --------------------------------------------------------------------------
-  const auto inventoryStartPos = base::Vector{
+  const auto inventoryStartPos = base::Vec2{
     topRightTexturePosX + GameTraits::tileSize, 2 * GameTraits::tileSize};
   auto inventoryIter = playerModel.inventory().begin();
   for (int row = 0; row < 3; ++row)
@@ -298,7 +298,7 @@ void HudRenderer::render(
       {
         const auto itemType = *inventoryIter++;
         const auto drawPos =
-          inventoryStartPos + base::Vector{col, row} * GameTraits::tileSize * 2;
+          inventoryStartPos + base::Vec2{col, row} * GameTraits::tileSize * 2;
 
         const auto textureIt = mInventoryTexturesByType.find(itemType);
         assert(textureIt != mInventoryTexturesByType.end());
@@ -339,7 +339,7 @@ void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const
       // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
-        base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
+        base::Vec2{24 + i, GameTraits::mapViewPortSize.height + 1});
       // clang-format on
     }
   }
@@ -354,7 +354,7 @@ void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const
       // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
-        base::Vector{24 + i, GameTraits::mapViewPortSize.height + 1});
+        base::Vec2{24 + i, GameTraits::mapViewPortSize.height + 1});
       // clang-format on
     }
   }
@@ -373,7 +373,7 @@ void HudRenderer::drawCollectedLetters(
 }
 
 
-void HudRenderer::drawRadar(const base::ArrayView<base::Vector> positions) const
+void HudRenderer::drawRadar(const base::ArrayView<base::Vec2> positions) const
 {
   auto drawDots = [&]() {
     for (const auto& position : positions)
@@ -403,7 +403,7 @@ void HudRenderer::drawRadar(const base::ArrayView<base::Vector> positions) const
   {
     const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(
-      mpRenderer->globalTranslation() + base::Vector{RADAR_POS_X, RADAR_POS_Y});
+      mpRenderer->globalTranslation() + base::Vec2{RADAR_POS_X, RADAR_POS_Y});
 
     drawDots();
   }

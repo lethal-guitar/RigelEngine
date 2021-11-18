@@ -112,7 +112,7 @@ bool walk(
   const auto& bbox = *entity.component<BoundingBox>();
 
   const auto amount = orientation::toMovement(orientation);
-  const auto newPosition = position + base::Vector{amount, 0};
+  const auto newPosition = position + base::Vec2{amount, 0};
   const auto movingLeft = amount < 0;
 
   const auto xToTest =
@@ -144,11 +144,11 @@ bool walkOnCeiling(
   const auto& bbox = *entity.component<BoundingBox>();
 
   const auto amount = orientation::toMovement(orientation);
-  const auto newPosition = position + base::Vector{amount, 0};
+  const auto newPosition = position + base::Vec2{amount, 0};
   const auto movingLeft = amount < 0;
 
   const auto xOffset = bbox.size.width * amount;
-  const auto offset = base::Vector{xOffset, 0};
+  const auto offset = base::Vec2{xOffset, 0};
   const auto stillOnCeiling =
     collisionChecker.isTouchingCeiling(position + offset, bbox);
 

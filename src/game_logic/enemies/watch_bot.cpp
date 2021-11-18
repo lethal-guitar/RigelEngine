@@ -37,7 +37,7 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr auto CONTAINER_OFFSET = base::Vector{0, -2};
+constexpr auto CONTAINER_OFFSET = base::Vec2{0, -2};
 
 
 const effects::EffectSpec CARRIER_SELF_DESTRUCT_EFFECT_SPEC[] = {
@@ -352,7 +352,7 @@ void WatchBotContainer::update(
     d.mpServiceProvider->playSound(data::SoundId::DukeAttachClimbable);
 
     d.mpEntityFactory->spawnActor(
-      data::ActorID::Watchbot, position + base::Vector{1, 3});
+      data::ActorID::Watchbot, position + base::Vec2{1, 3});
 
     entity.destroy();
   }

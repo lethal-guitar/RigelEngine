@@ -34,22 +34,21 @@ public:
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
 
   void renderTile(int index, int posX, int posY) const;
-  void renderTile(const int index, const base::Vector& tlPosition) const
+  void renderTile(const int index, const base::Vec2& tlPosition) const
   {
     renderTile(index, tlPosition.x, tlPosition.y);
   }
 
   /** Renders the given tile plus the one below it (vertical slice) */
-  void renderTileSlice(int baseIndex, const base::Vector& tlPosition) const;
+  void renderTileSlice(int baseIndex, const base::Vec2& tlPosition) const;
 
   /** Renders two adjacent slices (4x4 group of tiles) */
-  void renderTileQuad(int baseIndex, const base::Vector& tlPosition) const;
+  void renderTileQuad(int baseIndex, const base::Vec2& tlPosition) const;
 
   /** Renders two adjacent quads (8x4 group of tiles) */
-  void
-    renderTileDoubleQuad(int baseIndex, const base::Vector& tlPosition) const;
+  void renderTileDoubleQuad(int baseIndex, const base::Vec2& tlPosition) const;
 
-  void renderTileAtPixelPos(int index, const base::Vector& pxPosition) const;
+  void renderTileAtPixelPos(int index, const base::Vec2& pxPosition) const;
 
   int tilesPerRow() const;
 

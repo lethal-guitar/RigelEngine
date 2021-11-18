@@ -43,9 +43,7 @@ const auto DROP_FREQUENCY = 25;
 const auto DROP_OFFSET = WorldPosition{1, 1};
 
 
-void createSlimeDrop(
-  const base::Vector& position,
-  IEntityFactory& entityFactory)
+void createSlimeDrop(const base::Vec2& position, IEntityFactory& entityFactory)
 {
   using namespace engine::components;
   using namespace engine::components::parameter_aliases;

@@ -46,12 +46,12 @@ public:
   void synchronizeTo(const ParticleSystem& other);
 
   void spawnParticles(
-    const base::Vector& origin,
+    const base::Vec2& origin,
     const base::Color& color,
     int velocityScaleX = 0);
 
   void update();
-  void render(const base::Vector& cameraPosition, float interpolation);
+  void render(const base::Vec2& cameraPosition, float interpolation);
 
 private:
   std::vector<ParticleGroup> mParticleGroups;

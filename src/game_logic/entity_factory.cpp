@@ -119,7 +119,7 @@ void addDefaultMovingBody(EntityLike& entity, const BoundingBox& boundingBox)
 }
 
 
-base::Vector adjustedPosition(
+base::Vec2 adjustedPosition(
   const ProjectileType type,
   WorldPosition position,
   const ProjectileDirection direction,
@@ -345,7 +345,7 @@ entityx::Entity EntityFactory::spawnSprite(
 
 entityx::Entity EntityFactory::spawnSprite(
   const data::ActorID actorID,
-  const base::Vector& position,
+  const base::Vec2& position,
   const bool assignBoundingBox)
 {
   auto entity = spawnSprite(actorID, assignBoundingBox);
@@ -393,9 +393,8 @@ entityx::Entity EntityFactory::spawnProjectile(
 }
 
 
-entityx::Entity EntityFactory::spawnActor(
-  const data::ActorID id,
-  const base::Vector& position)
+entityx::Entity
+  EntityFactory::spawnActor(const data::ActorID id, const base::Vec2& position)
 {
   auto entity = spawnSprite(id, position);
   const auto boundingBox = mpSpriteFactory->actorFrameRect(id, 0);
@@ -456,7 +455,7 @@ void EntityFactory::createEntitiesForLevel(
 entityx::Entity spawnOneShotSprite(
   IEntityFactory& factory,
   const ActorID id,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   auto entity = factory.spawnSprite(id, position, true);
   const auto numAnimationFrames =
@@ -475,7 +474,7 @@ entityx::Entity spawnOneShotSprite(
 entityx::Entity spawnFloatingOneShotSprite(
   IEntityFactory& factory,
   const data::ActorID id,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   using namespace engine::components::parameter_aliases;
 
@@ -491,7 +490,7 @@ entityx::Entity spawnMovingEffectSprite(
   IEntityFactory& factory,
   const ActorID id,
   const SpriteMovement movement,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   auto entity = factory.spawnSprite(id, position, true);
   configureMovingEffectSprite(entity, movement);
@@ -508,7 +507,7 @@ entityx::Entity spawnMovingEffectSprite(
 void spawnFloatingScoreNumber(
   IEntityFactory& factory,
   const ScoreNumberType type,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   using namespace engine::components::parameter_aliases;
 
@@ -525,14 +524,14 @@ void spawnFloatingScoreNumber(
 
 void spawnFireEffect(
   entityx::EntityManager& entityManager,
-  const base::Vector& position,
+  const base::Vec2& position,
   const BoundingBox& coveredArea,
   const data::ActorID actorToSpawn)
 {
   // TODO: The initial offset should be based on the size of the actor
   // that's to be spawned. Currently, it's hard-coded for actor ID 3
   // (small explosion).
-  auto offset = base::Vector{-1, 1};
+  auto offset = base::Vec2{-1, 1};
 
   auto spawner = entityManager.create();
   SpriteCascadeSpawner spawnerConfig;
@@ -546,7 +545,7 @@ void spawnFireEffect(
 
 void spawnEnemyLaserShot(
   IEntityFactory& factory,
-  base::Vector position,
+  base::Vec2 position,
   const engine::components::Orientation orientation)
 {
   const auto isFacingLeft = orientation == Orientation::Left;

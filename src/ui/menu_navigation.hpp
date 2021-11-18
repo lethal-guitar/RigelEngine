@@ -52,7 +52,7 @@ public:
   NavigationEvent convert(const SDL_Event& event);
 
 private:
-  base::Vector mAnalogStickVector;
+  base::Vec2 mAnalogStickVector;
 };
 
 } // namespace rigel::ui

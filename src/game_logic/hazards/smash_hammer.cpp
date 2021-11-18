@@ -75,7 +75,7 @@ void SmashHammer::update(
         spawnOneShotSprite(
           *d.mpEntityFactory,
           data::ActorID::Smoke_cloud_FX,
-          position + base::Vector{0, 4});
+          position + base::Vec2{0, 4});
         mState = PullingUp{};
       }
       else
@@ -102,7 +102,7 @@ void SmashHammer::update(
     additionalFrames.clear();
     for (int i = 0; i < mExtensionStep; ++i)
     {
-      additionalFrames.push_back({1, base::Vector{0, -i}});
+      additionalFrames.push_back({1, base::Vec2{0, -i}});
     }
   }
 }

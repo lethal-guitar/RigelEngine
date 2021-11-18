@@ -323,7 +323,7 @@ void MenuElementRenderer::drawCheckBox(
   const auto offset = isChecked ? 2 : 0;
   const auto index = 7 * mpSpriteSheet->tilesPerRow() + 20 + offset;
 
-  mpSpriteSheet->renderTileQuad(index, base::Vector{x - 1, y - 1});
+  mpSpriteSheet->renderTileQuad(index, base::Vec2{x - 1, y - 1});
 }
 
 
@@ -365,7 +365,7 @@ void MenuElementRenderer::drawBonusScreenText(
 
     const auto index = static_cast<int>(i);
     mpSpriteSheet->renderTileQuad(
-      spriteSheetIndex, base::Vector{x + index * 2, y});
+      spriteSheetIndex, base::Vec2{x + index * 2, y});
   }
 }
 
@@ -399,7 +399,7 @@ void MenuElementRenderer::drawSelectionIndicator(
   const int state) const
 {
   const auto index = 9 * mpSpriteSheet->tilesPerRow() + state * 2;
-  mpSpriteSheet->renderTileQuad(index, base::Vector{x, y - 1});
+  mpSpriteSheet->renderTileQuad(index, base::Vec2{x, y - 1});
 }
 
 

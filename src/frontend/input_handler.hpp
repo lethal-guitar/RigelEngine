@@ -58,7 +58,7 @@ private:
   MenuCommand handleControllerInput(const SDL_Event& event, bool playerInShip);
 
   game_logic::PlayerInput mPlayerInput;
-  base::Vector mAnalogStickVector;
+  base::Vec2 mAnalogStickVector;
   const data::GameOptions* mpOptions;
 };
 

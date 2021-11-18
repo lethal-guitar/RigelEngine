@@ -32,7 +32,7 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr base::Vector OFFSET_BY_ORIENTATION[] = {{-2, -1}, {1, -2}, {2, -1}};
+constexpr base::Vec2 OFFSET_BY_ORIENTATION[] = {{-2, -1}, {1, -2}, {2, -1}};
 
 
 constexpr data::ActorID ACTOR_ID_BY_ORIENTATION[] = {
@@ -42,8 +42,8 @@ constexpr data::ActorID ACTOR_ID_BY_ORIENTATION[] = {
 
 
 auto determineOrientation(
-  const base::Vector& position,
-  const base::Vector& playerPosition)
+  const base::Vec2& position,
+  const base::Vec2& playerPosition)
 {
   using Orientation = behaviors::RocketTurret::Orientation;
 

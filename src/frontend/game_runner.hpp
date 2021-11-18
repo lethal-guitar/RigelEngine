@@ -41,7 +41,7 @@ public:
     data::PlayerModel* pPlayerModel,
     const data::GameSessionId& sessionId,
     GameMode::Context context,
-    std::optional<base::Vector> playerPositionOverride = std::nullopt,
+    std::optional<base::Vec2> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false);
 
   void handleEvent(const SDL_Event& event);

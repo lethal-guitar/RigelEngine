@@ -33,7 +33,7 @@ namespace rigel
 GameSessionMode::GameSessionMode(
   const data::GameSessionId& sessionId,
   Context context,
-  std::optional<base::Vector> playerPositionOverride)
+  std::optional<base::Vec2> playerPositionOverride)
   : mCurrentStage(std::make_unique<GameRunner>(
       &mPlayerModel,
       sessionId,

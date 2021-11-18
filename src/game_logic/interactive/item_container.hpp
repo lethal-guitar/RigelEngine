@@ -202,10 +202,8 @@ public:
 
 private:
   void explode(GlobalDependencies& dependencies, entityx::Entity entity);
-  void spawnFires(
-    GlobalDependencies& d,
-    const base::Vector& bombPosition,
-    int step);
+  void
+    spawnFires(GlobalDependencies& d, const base::Vec2& bombPosition, int step);
 };
 
 } // namespace behaviors

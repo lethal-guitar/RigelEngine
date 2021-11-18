@@ -86,18 +86,18 @@ void DyingBoss::update(
     case 30: case 34: case 38: case 41: case 46: case 48:
       // clang-format on
       d.mpParticles->spawnParticles(
-        position + base::Vector{rand() % 4, -(rand() % 8)},
+        position + base::Vec2{rand() % 4, -(rand() % 8)},
         data::GameTraits::INGAME_PALETTE[rand() % 16],
         rand() % 2 - 1);
       spawnOneShotSprite(
         *d.mpEntityFactory,
         data::ActorID::Explosion_FX_1,
-        position + base::Vector{rand() % 4, -(rand() % 8)});
+        position + base::Vec2{rand() % 4, -(rand() % 8)});
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
         data::ActorID::Shot_impact_FX,
         SpriteMovement::FlyDown,
-        position + base::Vector{rand() % 4, -(rand() % 8)});
+        position + base::Vec2{rand() % 4, -(rand() % 8)});
       break;
 
     default:

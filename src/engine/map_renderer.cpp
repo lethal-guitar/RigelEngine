@@ -128,7 +128,7 @@ void MapRenderer::switchBackdrops()
 
 
 void MapRenderer::renderBackground(
-  const base::Vector& sectionStart,
+  const base::Vec2& sectionStart,
   const base::Extents& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
@@ -136,7 +136,7 @@ void MapRenderer::renderBackground(
 
 
 void MapRenderer::renderForeground(
-  const base::Vector& sectionStart,
+  const base::Vec2& sectionStart,
   const base::Extents& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
@@ -251,7 +251,7 @@ void MapRenderer::renderBackdrop(
 
 
 void MapRenderer::renderMapTiles(
-  const base::Vector& sectionStart,
+  const base::Vec2& sectionStart,
   const base::Extents& sectionSize,
   const DrawMode drawMode) const
 {
@@ -364,7 +364,7 @@ void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
 
 void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
-  const base::Vector& pixelPosition) const
+  const base::Vec2& pixelPosition) const
 {
   // TODO: Can we reduce duplication with renderTile()?
 

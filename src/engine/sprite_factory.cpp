@@ -350,13 +350,13 @@ void applyTweaks(
 
   if (actorId == ActorID::Bomb_dropping_spaceship)
   {
-    frames[3].mDrawOffset += base::Vector{2, 0};
+    frames[3].mDrawOffset += base::Vec2{2, 0};
     frames.erase(std::next(frames.begin(), 4), frames.end());
   }
 
   if (actorId == ActorID::Watchbot_container_carrier)
   {
-    frames[2].mDrawOffset += base::Vector{0, -2};
+    frames[2].mDrawOffset += base::Vec2{0, -2};
     frames.erase(std::next(frames.begin(), 3), frames.end());
   }
 }

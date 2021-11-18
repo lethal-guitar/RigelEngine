@@ -97,7 +97,7 @@ public:
 
   entityx::Entity spawnSprite(
     data::ActorID actorID,
-    const base::Vector& position,
+    const base::Vec2& position,
     bool assignBoundingBox = false) override;
 
   entityx::Entity spawnProjectile(
@@ -106,7 +106,7 @@ public:
     ProjectileDirection direction) override;
 
   entityx::Entity
-    spawnActor(data::ActorID actorID, const base::Vector& position) override;
+    spawnActor(data::ActorID actorID, const base::Vec2& position) override;
 
   entityx::EntityManager& entityManager() override { return *mpEntityManager; }
 

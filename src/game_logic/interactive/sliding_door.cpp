@@ -158,7 +158,7 @@ void VerticalSlidingDoor::update(
     {
       const auto segmentIndex = NUM_VERTICAL_DOOR_SEGMENTS - i - mSlideStep;
       additionalFrames.push_back(
-        {segmentIndex, base::Vector{0, -(NUM_VERTICAL_DOOR_SEGMENTS - i)}});
+        {segmentIndex, base::Vec2{0, -(NUM_VERTICAL_DOOR_SEGMENTS - i)}});
     }
   };
 

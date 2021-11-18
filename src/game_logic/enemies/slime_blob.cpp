@@ -39,7 +39,7 @@ namespace
 const auto NUM_BREAK_ANIMATION_STEPS = 15;
 const auto BREAK_ANIM_SPEED = 3; // frames between visible animation steps
 
-const auto SLIME_BLOB_SPAWN_OFFSET = base::Vector{2, 0};
+const auto SLIME_BLOB_SPAWN_OFFSET = base::Vec2{2, 0};
 
 const auto SPRITE_ORIENTATION_OFFSET = 5;
 const auto WALKING_ON_GROUND_BASE_FRAME = 3;
@@ -266,7 +266,7 @@ void SlimeBlob::update(
 
       if (animationFrame == IN_FLIGHT_ANIM_FRAME)
       {
-        const auto offset = base::Vector{0, 3};
+        const auto offset = base::Vec2{0, 3};
 
         const auto willCollide =
           d.mpCollisionChecker->isOnSolidGround(position + offset, bbox);

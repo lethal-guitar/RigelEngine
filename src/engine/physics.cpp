@@ -67,10 +67,10 @@ base::Vec2T<float> updateMovementSequence(
 // TODO: This is implemented here, but declared in physical_components.hpp.
 // It would be cleaner to have a matching .cpp file for that file.
 BoundingBox
-  toWorldSpace(const BoundingBox& bbox, const base::Vector& entityPosition)
+  toWorldSpace(const BoundingBox& bbox, const base::Vec2& entityPosition)
 {
   return bbox +
-    base::Vector(entityPosition.x, entityPosition.y - (bbox.size.height - 1));
+    base::Vec2(entityPosition.x, entityPosition.y - (bbox.size.height - 1));
 }
 
 

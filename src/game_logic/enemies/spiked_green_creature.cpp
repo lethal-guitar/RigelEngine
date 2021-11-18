@@ -244,7 +244,7 @@ void SpikedGreenCreature::ensureNotStuckInWall(
   auto& position = *entity.component<engine::components::WorldPosition>();
 
   const auto movementOffset = engine::orientation::toMovement(orientation);
-  const auto positionForChecking = position - base::Vector{movementOffset, 0};
+  const auto positionForChecking = position - base::Vec2{movementOffset, 0};
 
   const auto isCurrentlyColliding = orientation == Orientation::Left
     ? d.mpCollisionChecker->isTouchingLeftWall(positionForChecking, bbox)

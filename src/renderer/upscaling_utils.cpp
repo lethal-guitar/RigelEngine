@@ -32,11 +32,11 @@ namespace
 
 auto asVec(const base::Size<int>& size)
 {
-  return base::Vector{size.width, size.height};
+  return base::Vec2{size.width, size.height};
 }
 
 
-auto asSize(const base::Vector& vec)
+auto asSize(const base::Vec2& vec)
 {
   return base::Size{vec.x, vec.y};
 }
@@ -74,7 +74,7 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer)
   const auto offsetY = (windowHeight - usableHeight) / 2.0f;
 
   return {
-    base::Vector{int(offsetX), int(offsetY)},
+    base::Vec2{int(offsetX), int(offsetY)},
     base::Size<int>{int(usableWidth), int(usableHeight)},
     base::Vec2T<float>{widthScale, heightScale}};
 }
@@ -104,10 +104,9 @@ WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer)
 }
 
 
-base::Vector scaleVec(const base::Vector& vec, const base::Vec2T<float>& scale)
+base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2T<float>& scale)
 {
-  return base::Vector{
-    base::round(vec.x * scale.x), base::round(vec.y * scale.y)};
+  return base::Vec2{base::round(vec.x * scale.x), base::round(vec.y * scale.y)};
 }
 
 

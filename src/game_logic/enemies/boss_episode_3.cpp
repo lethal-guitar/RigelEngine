@@ -38,8 +38,8 @@ namespace
 
 struct AttackArea
 {
-  base::Vector mBboxOffset;
-  base::Vector mShotOffset;
+  base::Vec2 mBboxOffset;
+  base::Vec2 mShotOffset;
   data::ActorID mActorId;
 };
 
@@ -54,8 +54,8 @@ constexpr AttackArea ATTACK_AREAS[] = {
 // clang-format on
 
 
-constexpr auto PLAYER_TARGET_OFFSET = base::Vector{3, -1};
-constexpr auto BOSS_OFFSET_TO_CENTER = base::Vector{4, -4};
+constexpr auto PLAYER_TARGET_OFFSET = base::Vec2{3, -1};
+constexpr auto BOSS_OFFSET_TO_CENTER = base::Vec2{4, -4};
 
 } // namespace
 

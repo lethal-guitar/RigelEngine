@@ -242,7 +242,7 @@ void DynamicGeometrySystem::receive(
   // TODO: Add a helper function for creating rectangles based on different
   // given values, e.g. bottom left and size
   engine::components::BoundingBox mapSection{
-    event.mImpactPosition - base::Vector{0, 2}, {3, 3}};
+    event.mImpactPosition - base::Vec2{0, 2}, {3, 3}};
   explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
@@ -313,7 +313,7 @@ void behaviors::DynamicGeometryController::update(
 
     const auto offset = d.mpRandomGenerator->gen() % mapSection.size.width;
     const auto spawnPosition =
-      base::Vector{mapSection.left() + offset, mapSection.bottom() + 1};
+      base::Vec2{mapSection.left() + offset, mapSection.bottom() + 1};
     spawnFloatingOneShotSprite(
       *d.mpEntityFactory, data::ActorID::Shot_impact_FX, spawnPosition);
   };

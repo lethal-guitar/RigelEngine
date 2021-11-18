@@ -68,7 +68,7 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion)
 // straighten that out (i.e. move the implementation into base.components.cpp)?
 bool isOnScreen(
   const BoundingBox& bounds,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize)
 {
   const BoundingBox activeRegionBox{cameraPosition, viewPortSize};
@@ -78,7 +78,7 @@ bool isOnScreen(
 
 void markActiveEntities(
   entityx::EntityManager& es,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize)
 {
   const BoundingBox activeRegionBox{cameraPosition, viewPortSize};

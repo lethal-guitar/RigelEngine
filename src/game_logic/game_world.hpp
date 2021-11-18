@@ -76,7 +76,7 @@ public:
     data::PlayerModel* pPlayerModel,
     const data::GameSessionId& sessionId,
     GameMode::Context context,
-    std::optional<base::Vector> playerPositionOverride = std::nullopt,
+    std::optional<base::Vec2> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false,
     const PlayerInput& initialInput = PlayerInput{});
   ~GameWorld(); // NOLINT
@@ -117,9 +117,9 @@ private:
   struct ViewportParams
   {
     base::Vec2T<float> mInterpolatedCameraPosition;
-    base::Vector mCameraOffset;
+    base::Vec2 mCameraOffset;
 
-    base::Vector mRenderStartPosition;
+    base::Vec2 mRenderStartPosition;
     base::Extents mViewportSize;
   };
 
@@ -128,7 +128,7 @@ private:
   void subscribe(entityx::EventManager& eventManager);
   void unsubscribe(entityx::EventManager& eventManager);
 
-  void onReactorDestroyed(const base::Vector& position);
+  void onReactorDestroyed(const base::Vec2& position);
   void updateReactorDestructionEvent();
 
   void handleLevelExit();

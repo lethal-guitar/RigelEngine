@@ -83,7 +83,7 @@ struct GlobalState
 {
   GlobalState(
     Player* pPlayer,
-    const base::Vector* pCameraPosition,
+    const base::Vec2* pCameraPosition,
     data::map::Map* pMap,
     const PerFrameState* pPerFrameState)
     : mpPlayer(pPlayer)
@@ -94,7 +94,7 @@ struct GlobalState
   }
 
   Player* mpPlayer;
-  const base::Vector* mpCameraPosition;
+  const base::Vec2* mpCameraPosition;
   data::map::Map* mpMap;
   const PerFrameState* mpPerFrameState;
 };
@@ -158,14 +158,14 @@ struct TutorialMessage
 
 struct CheckPointActivated
 {
-  base::Vector mPosition;
+  base::Vec2 mPosition;
 };
 
 
 struct MissileDetonated
 {
   // Specifies the tile above the missile's top-left
-  base::Vector mImpactPosition;
+  base::Vec2 mImpactPosition;
 };
 
 
@@ -183,13 +183,13 @@ struct PlayerFiredShot
 
 struct PlayerTeleported
 {
-  base::Vector mNewPosition;
+  base::Vec2 mNewPosition;
 };
 
 
 struct CloakPickedUp
 {
-  base::Vector mPosition;
+  base::Vec2 mPosition;
 };
 
 struct CloakExpired

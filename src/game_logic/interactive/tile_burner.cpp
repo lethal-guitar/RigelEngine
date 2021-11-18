@@ -31,7 +31,7 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr base::Vector TILE_BURN_AREA_OFFSETS[] =
+constexpr base::Vec2 TILE_BURN_AREA_OFFSETS[] =
   {{0, 0}, {0, -1}, {0, -2}, {1, -2}, {2, -2}, {2, -1}, {2, 0}, {1, 0}};
 
 }
@@ -59,7 +59,7 @@ void TileBurner::update(
         s.mpMap->setTileAt(0, x, y, 0);
         s.mpMap->setTileAt(1, x, y, 0);
 
-        const auto spawnPosition = base::Vector{x - 1, y + 1};
+        const auto spawnPosition = base::Vec2{x - 1, y + 1};
         const auto spawnDelay = d.mpRandomGenerator->gen() % 4;
         mBurnersToSpawn.push_back(NewBurnerInfo{spawnPosition, spawnDelay});
       }

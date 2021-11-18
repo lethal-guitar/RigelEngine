@@ -53,10 +53,10 @@ public:
     const base::Vec2T<float>& cameraPosition,
     const base::Extents& viewPortSize) const;
   void renderBackground(
-    const base::Vector& sectionStart,
+    const base::Vec2& sectionStart,
     const base::Extents& sectionSize) const;
   void renderForeground(
-    const base::Vector& sectionStart,
+    const base::Vec2& sectionStart,
     const base::Extents& sectionSize) const;
 
   void updateAnimatedMapTiles();
@@ -64,7 +64,7 @@ public:
 
   void renderSingleTile(
     data::map::TileIndex index,
-    const base::Vector& pixelPosition) const;
+    const base::Vec2& pixelPosition) const;
 
 private:
   enum class DrawMode
@@ -78,7 +78,7 @@ private:
     const base::Extents& viewPortSize) const;
 
   void renderMapTiles(
-    const base::Vector& sectionStart,
+    const base::Vec2& sectionStart,
     const base::Extents& sectionSize,
     DrawMode drawMode) const;
   void renderTile(data::map::TileIndex index, int x, int y) const;
