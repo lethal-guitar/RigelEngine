@@ -61,7 +61,7 @@ struct RandomExplosionSound
 struct Particles
 {
   Particles(
-    const base::Vector& offset,
+    const base::Vec2& offset,
     const base::Color& color,
     const int velocityScaleX = 0)
     : mColor(color)
@@ -70,14 +70,14 @@ struct Particles
   {
   }
 
-  explicit Particles(const base::Vector& offset, const int velocityScaleX = 0)
+  explicit Particles(const base::Vec2& offset, const int velocityScaleX = 0)
     : mOffset(offset)
     , mVelocityScaleX(velocityScaleX)
   {
   }
 
   std::optional<base::Color> mColor;
-  base::Vector mOffset;
+  base::Vec2 mOffset;
   int mVelocityScaleX;
 };
 
@@ -97,7 +97,7 @@ struct EffectSprite
     SwirlAround = 6
   };
 
-  base::Vector mOffset;
+  base::Vec2 mOffset;
   data::ActorID mActorId;
   Movement mMovement;
 };
@@ -111,7 +111,7 @@ struct SpriteCascade
 
 struct ScoreNumber
 {
-  base::Vector mOffset;
+  base::Vec2 mOffset;
   ScoreNumberType mType;
 };
 
@@ -168,7 +168,7 @@ struct DestructionEffects
 
 struct SpriteCascadeSpawner
 {
-  base::Vector mBasePosition;
+  base::Vec2 mBasePosition;
   base::Extents mCoveredArea;
   data::ActorID mActorId;
   bool mSpawnedLastFrame = true;
@@ -183,6 +183,6 @@ void triggerEffects(
 
 void spawnEffects(
   const components::DestructionEffects& effects,
-  const base::Vector& position,
+  const base::Vec2& position,
   entityx::EntityManager& entityManager);
 } // namespace rigel::game_logic

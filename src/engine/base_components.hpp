@@ -24,7 +24,7 @@ namespace rigel::engine
 namespace components
 {
 
-using WorldPosition = base::Vector;
+using WorldPosition = base::Vec2;
 using BoundingBox = base::Rect<int>;
 
 struct InterpolateMotion
@@ -89,7 +89,7 @@ enum class Orientation
 
 bool isOnScreen(
   const components::BoundingBox& bounds,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize);
 
 

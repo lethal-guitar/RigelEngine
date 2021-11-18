@@ -415,13 +415,13 @@ bool isValidActorId(const uint16_t id)
  * Actors which are only relevant for these purposes will be removed from
  * the list (difficulty markers and section markers, player).
  */
-std::tuple<ActorList, base::Vector, bool> preProcessActorDescriptions(
+std::tuple<ActorList, base::Vec2, bool> preProcessActorDescriptions(
   const data::map::Map& map,
   const ActorList& originalActors,
   const Difficulty chosenDifficulty)
 {
   ActorList actors;
-  base::Vector playerSpawnPosition;
+  base::Vec2 playerSpawnPosition;
   bool playerFacingLeft = false;
 
   ActorGrid grid(map, originalActors);
@@ -524,7 +524,7 @@ LevelData loadLevel(
   for (size_t i = 0; i < header.numActorWords / 3u; ++i)
   {
     const auto type = levelReader.readU16();
-    const base::Vector position{levelReader.readU16(), levelReader.readU16()};
+    const base::Vec2 position{levelReader.readU16(), levelReader.readU16()};
     if (isValidActorId(type))
     {
       actors.emplace_back(

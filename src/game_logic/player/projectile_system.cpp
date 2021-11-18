@@ -44,7 +44,7 @@ void deactivateProjectile(entityx::Entity entity)
 }
 
 
-base::Vector regularShotDebrisOffset(const base::Point<float>& velocity)
+base::Vec2 regularShotDebrisOffset(const base::Vec2T<float>& velocity)
 {
   const auto isHorizontal = velocity.x != 0.0f;
   return {isHorizontal ? 0 : -1, 1};
@@ -53,8 +53,8 @@ base::Vector regularShotDebrisOffset(const base::Point<float>& velocity)
 
 void spawnRegularShotImpactEffect(
   IEntityFactory& entityFactory,
-  const base::Vector& position,
-  const base::Point<float> velocity)
+  const base::Vec2& position,
+  const base::Vec2T<float> velocity)
 {
   const auto debrisPosition = position + regularShotDebrisOffset(velocity);
   spawnFloatingOneShotSprite(
@@ -62,7 +62,7 @@ void spawnRegularShotImpactEffect(
 }
 
 
-base::Vector rocketSmokeOffset(const base::Point<float>& velocity)
+base::Vec2 rocketSmokeOffset(const base::Vec2T<float>& velocity)
 {
   const auto isFacingOpposite = velocity.x < 0.0f || velocity.y > 0.0f;
   if (isFacingOpposite)
@@ -84,8 +84,8 @@ base::Vector rocketSmokeOffset(const base::Point<float>& velocity)
 
 void generateRocketSmoke(
   IEntityFactory& entityFactory,
-  const base::Vector& position,
-  const base::Point<float> velocity)
+  const base::Vec2& position,
+  const base::Vec2T<float> velocity)
 {
   const auto offset = rocketSmokeOffset(velocity);
   spawnOneShotSprite(
@@ -93,7 +93,7 @@ void generateRocketSmoke(
 }
 
 
-base::Vector rocketWallImpactOffset(const base::Point<float>& velocity)
+base::Vec2 rocketWallImpactOffset(const base::Vec2T<float>& velocity)
 {
   const auto isHorizontal = velocity.x != 0.0f;
   if (isHorizontal)
@@ -109,9 +109,9 @@ base::Vector rocketWallImpactOffset(const base::Point<float>& velocity)
 
 void spawnRocketWallImpactEffect(
   IEntityFactory& entityFactory,
-  const base::Vector& position,
+  const base::Vec2& position,
   const engine::components::BoundingBox& bbox,
-  const base::Point<float> velocity)
+  const base::Vec2T<float> velocity)
 {
   const auto offset = rocketWallImpactOffset(velocity);
   spawnOneShotSprite(
@@ -126,12 +126,10 @@ void spawnRocketWallImpactEffect(
 
 void spawnEnemyImpactEffect(
   IEntityFactory& entityFactory,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   spawnOneShotSprite(
-    entityFactory,
-    data::ActorID::Explosion_FX_2,
-    position + base::Vector{-3, 3});
+    entityFactory, data::ActorID::Explosion_FX_2, position + base::Vec2{-3, 3});
 }
 
 } // namespace
@@ -233,8 +231,8 @@ void ProjectileSystem::update(entityx::EntityManager& es)
 
 void ProjectileSystem::spawnWallImpactEffect(
   entityx::Entity entity,
-  const base::Vector& position,
-  const base::Point<float>& velocity,
+  const base::Vec2& position,
+  const base::Vec2T<float>& velocity,
   const bool isRocket)
 {
   const auto& bbox = *entity.component<engine::components::BoundingBox>();

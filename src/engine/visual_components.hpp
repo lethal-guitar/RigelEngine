@@ -48,7 +48,7 @@ struct SpriteFrame
   SpriteFrame() = default;
   SpriteFrame(
     const int imageId,
-    const base::Vector drawOffset,
+    const base::Vec2 drawOffset,
     const base::Extents dimensions)
     : mImageId(imageId)
     , mDrawOffset(drawOffset)
@@ -57,7 +57,7 @@ struct SpriteFrame
   }
 
   int mImageId;
-  base::Vector mDrawOffset;
+  base::Vec2 mDrawOffset;
   base::Extents mDimensions;
 };
 
@@ -77,13 +77,13 @@ constexpr auto IGNORE_RENDER_SLOT = -1;
 
 struct CustomDrawRequest
 {
-  CustomDrawRequest(const int frame, const base::Vector& screenPosition)
+  CustomDrawRequest(const int frame, const base::Vec2& screenPosition)
     : mScreenPosition(screenPosition)
     , mFrame(frame)
   {
   }
 
-  base::Vector mScreenPosition;
+  base::Vec2 mScreenPosition;
   int mFrame;
 };
 
@@ -209,7 +209,7 @@ struct ExtendedFrameList
   struct RenderSpec
   {
     int mFrame = 0;
-    base::Vector mOffset;
+    base::Vec2 mOffset;
   };
 
   std::vector<RenderSpec> mFrames;

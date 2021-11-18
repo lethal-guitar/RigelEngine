@@ -185,7 +185,7 @@ auto parseDifficulty(const std::string& difficultySpec)
 }
 
 
-base::Vector parsePlayerPosition(std::string_view playerPosString)
+base::Vec2 parsePlayerPosition(std::string_view playerPosString)
 {
   const std::vector<std::string> positionParts =
     strings::split(playerPosString, ',');
@@ -198,7 +198,7 @@ base::Vector parsePlayerPosition(std::string_view playerPosString)
       "Invalid x/y-position (specify using '<X>,<Y>')");
   }
 
-  return base::Vector{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
+  return base::Vec2{std::stoi(positionParts[0]), std::stoi(positionParts[1])};
 }
 
 #endif

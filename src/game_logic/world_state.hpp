@@ -105,7 +105,7 @@ struct LevelBonusInfo
 struct CheckpointData
 {
   data::PlayerModel::CheckpointState mState;
-  base::Vector mPosition;
+  base::Vec2 mPosition;
 };
 
 struct WorldState
@@ -146,7 +146,7 @@ struct WorldState
 
   Player mPlayer;
   Camera mCamera;
-  base::Vector mPreviousCameraPosition;
+  base::Vec2 mPreviousCameraPosition;
   engine::ParticleSystem mParticles;
   engine::SpriteRenderingSystem mSpriteRenderingSystem;
   engine::MapRenderer mMapRenderer;
@@ -168,8 +168,8 @@ struct WorldState
   std::optional<EarthQuakeEffect> mEarthQuakeEffect;
   std::optional<base::Color> mScreenFlashColor;
   std::optional<base::Color> mBackdropFlashColor;
-  std::optional<base::Vector> mTeleportTargetPosition;
-  std::optional<base::Vector> mCloakPickupPosition;
+  std::optional<base::Vec2> mTeleportTargetPosition;
+  std::optional<base::Vec2> mCloakPickupPosition;
   entityx::Entity mActiveBossEntity;
   int mBossStartingHealth = 0;
   std::optional<int> mReactorDestructionFramesElapsed;

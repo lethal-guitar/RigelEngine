@@ -658,7 +658,7 @@ struct Renderer::Impl
   }
 
 
-  void drawPoint(const base::Vector& position, const base::Color& color)
+  void drawPoint(const base::Vec2& position, const base::Color& color)
   {
     updateState(mRenderMode, RenderMode::Points);
 
@@ -780,14 +780,14 @@ struct Renderer::Impl
   }
 
 
-  void setGlobalTranslation(const base::Vector& translation)
+  void setGlobalTranslation(const base::Vec2& translation)
   {
     const auto glTranslation = glm::vec2{translation.x, translation.y};
     updateState(mStateStack.back().mGlobalTranslation, glTranslation);
   }
 
 
-  void setGlobalScale(const base::Point<float>& scale)
+  void setGlobalScale(const base::Vec2T<float>& scale)
   {
     const auto glScale = glm::vec2{scale.x, scale.y};
     updateState(mStateStack.back().mGlobalScale, glScale);
@@ -1240,7 +1240,7 @@ void Renderer::drawLine(
 }
 
 
-void Renderer::drawPoint(const base::Vector& position, const base::Color& color)
+void Renderer::drawPoint(const base::Vec2& position, const base::Color& color)
 {
   mpImpl->drawPoint(position, color);
 }
@@ -1273,27 +1273,27 @@ void Renderer::resetState()
 }
 
 
-void Renderer::setGlobalTranslation(const base::Vector& translation)
+void Renderer::setGlobalTranslation(const base::Vec2& translation)
 {
   mpImpl->setGlobalTranslation(translation);
 }
 
 
-base::Vector Renderer::globalTranslation() const
+base::Vec2 Renderer::globalTranslation() const
 {
-  return base::Vector{
+  return base::Vec2{
     static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.x),
     static_cast<int>(mpImpl->mStateStack.back().mGlobalTranslation.y)};
 }
 
 
-void Renderer::setGlobalScale(const base::Point<float>& scale)
+void Renderer::setGlobalScale(const base::Vec2T<float>& scale)
 {
   mpImpl->setGlobalScale(scale);
 }
 
 
-base::Point<float> Renderer::globalScale() const
+base::Vec2T<float> Renderer::globalScale() const
 {
   return {
     mpImpl->mStateStack.back().mGlobalScale.x,

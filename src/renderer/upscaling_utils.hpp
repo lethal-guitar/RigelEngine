@@ -33,9 +33,9 @@ class Renderer;
 
 struct ViewPortInfo
 {
-  base::Vector mOffset;
+  base::Vec2 mOffset;
   base::Size<int> mSize;
-  base::Point<float> mScale;
+  base::Vec2T<float> mScale;
 };
 
 
@@ -58,9 +58,9 @@ bool canUseWidescreenMode(const Renderer* pRenderer);
 
 WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
 
-base::Vector scaleVec(const base::Vector& vec, const base::Point<float>& scale);
+base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2T<float>& scale);
 base::Extents
-  scaleSize(const base::Extents& size, const base::Point<float>& scale);
+  scaleSize(const base::Extents& size, const base::Vec2T<float>& scale);
 
 RenderTargetTexture createFullscreenRenderTarget(
   Renderer* pRenderer,

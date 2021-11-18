@@ -554,8 +554,8 @@ void DukeScriptRunner::drawSprite(
 
   const auto spriteHeightTiles =
     data::pixelsToTiles(static_cast<int>(image.height()));
-  const auto pos = base::Vector{x - 1, y};
-  const auto topLeft = pos - base::Vector(0, spriteHeightTiles - 1);
+  const auto pos = base::Vec2{x - 1, y};
+  const auto topLeft = pos - base::Vec2(0, spriteHeightTiles - 1);
 
   const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
   const auto drawOffsetPx =

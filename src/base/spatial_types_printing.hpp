@@ -25,9 +25,9 @@ namespace rigel::base
 {
 
 template <typename ValueT>
-std::ostream& operator<<(std::ostream& stream, const Point<ValueT>& point)
+std::ostream& operator<<(std::ostream& stream, const Vec2T<ValueT>& point)
 {
-  stream << "Point{" << point.x << ", " << point.y << '}';
+  stream << "Vec2{" << point.x << ", " << point.y << '}';
   return stream;
 }
 

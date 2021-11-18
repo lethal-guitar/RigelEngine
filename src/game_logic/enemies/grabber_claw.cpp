@@ -117,7 +117,7 @@ void GrabberClaw::update(
     additionalFrames.clear();
     for (int i = 0; i < mExtensionStep + 1; ++i)
     {
-      additionalFrames.push_back({0, base::Vector{0, -(i + 1)}});
+      additionalFrames.push_back({0, base::Vec2{0, -(i + 1)}});
     }
   }
 }

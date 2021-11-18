@@ -33,7 +33,7 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr auto FLY_RIGHT_MOVEMENT_SEQ = std::array<base::Point<float>, 39>{{
+constexpr auto FLY_RIGHT_MOVEMENT_SEQ = std::array<base::Vec2T<float>, 39>{{
   {0.0f, 1.0f},  {0.0f, 1.0f},  {1.0f, 2.0f},  {1.0f, 2.0f},  {2.0f, 1.0f},
   {2.0f, 1.0f},  {2.0f, 0.0f},  {2.0f, 0.0f},  {2.0f, 0.0f},  {2.0f, 0.0f},
   {2.0f, 0.0f},  {2.0f, 0.0f},  {2.0f, 0.0f},  {2.0f, 0.0f},  {2.0f, 0.0f},
@@ -63,7 +63,7 @@ constexpr auto FLY_LEFT_MOVEMENT_SEQ =
 int FLY_RIGHT_ANIM_SEQ[] = {2, 2, 3};
 int FLY_LEFT_ANIM_SEQ[] = {4, 4, 5};
 
-constexpr auto JUMP_RIGHT_MOVEMENT_SEQ = std::array<base::Point<float>, 9>{{
+constexpr auto JUMP_RIGHT_MOVEMENT_SEQ = std::array<base::Vec2T<float>, 9>{{
   {0.0f, -2.0f},
   {0.0f, -2.0f},
   {1.0f, -2.0f},
@@ -242,7 +242,7 @@ void BossEpisode2::onCollision(
 void BossEpisode2::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Point<float>&,
+  const base::Vec2T<float>&,
   entityx::Entity entity)
 {
   mDestructionPending = true;

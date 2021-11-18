@@ -51,7 +51,7 @@ void UnicycleBot::update(
       *d.mpEntityFactory,
       data::ActorID::Smoke_puff_FX,
       movementType,
-      position + base::Vector{xOffset, 0});
+      position + base::Vec2{xOffset, 0});
   };
 
 

@@ -35,7 +35,7 @@ namespace
 {
 
 constexpr auto SPAWN_DELAY = 36;
-const auto BOT_SPAWN_OFFSET = base::Vector{1, 0};
+const auto BOT_SPAWN_OFFSET = base::Vec2{1, 0};
 
 constexpr auto TELEPORT_ANIMATION_START_FRAME = 12;
 constexpr auto TELEPORT_ANIMATION_END_FRAME =

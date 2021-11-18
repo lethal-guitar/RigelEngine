@@ -36,7 +36,7 @@ namespace
 
 constexpr auto FLY_SPEED = 2;
 
-constexpr base::Point<float> JUMP_ARC[] = {
+constexpr base::Vec2T<float> JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
   {0.0f, -1.0f},
@@ -164,7 +164,7 @@ void RigelatinSoldier::updateReadyState(
       *d.mpEntityFactory,
       data::ActorID::Rigelatin_soldier_projectile,
       movement,
-      position + base::Vector{xOffset, -4});
+      position + base::Vec2{xOffset, -4});
     projectile.assign<components::PlayerDamaging>(1);
 
     animationFrame = 3;

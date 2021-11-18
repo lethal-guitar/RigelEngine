@@ -37,7 +37,7 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr auto BOMB_DROP_OFFSET = base::Vector{3, 1};
+constexpr auto BOMB_DROP_OFFSET = base::Vec2{3, 1};
 
 constexpr auto ZIG_ZAG_VERTICAL_MOVEMENT_SEQUENCE =
   std::array<int, 10>{-1, -1, 0, 0, 1, 1, 1, 0, 0, -1};
@@ -195,7 +195,7 @@ void BossEpisode1::onCollision(
 void BossEpisode1::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Point<float>&,
+  const base::Vec2T<float>&,
   entityx::Entity entity)
 {
   using engine::components::MovingBody;

@@ -186,7 +186,7 @@ public:
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    const base::Vec2T<float>& inflictorVelocity,
     entityx::Entity entity);
 
   enum class State
@@ -202,10 +202,8 @@ public:
 
 private:
   void explode(GlobalDependencies& dependencies, entityx::Entity entity);
-  void spawnFires(
-    GlobalDependencies& d,
-    const base::Vector& bombPosition,
-    int step);
+  void
+    spawnFires(GlobalDependencies& d, const base::Vec2& bombPosition, int step);
 };
 
 } // namespace behaviors

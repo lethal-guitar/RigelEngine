@@ -88,7 +88,7 @@ struct LevelData
 {
   struct Actor
   {
-    base::Vector mPosition;
+    base::Vec2 mPosition;
     ActorID mID;
     std::optional<base::Rect<int>> mAssignedArea;
   };
@@ -99,7 +99,7 @@ struct LevelData
 
   data::map::Map mMap;
   std::vector<Actor> mActors;
-  base::Vector mPlayerSpawnPosition;
+  base::Vec2 mPlayerSpawnPosition;
   bool mPlayerFacingLeft;
 
   BackdropScrollMode mBackdropScrollMode;

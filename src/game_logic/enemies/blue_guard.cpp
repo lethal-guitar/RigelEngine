@@ -83,7 +83,7 @@ bool playerVisible(
 }
 
 
-base::Vector offsetForShot(const BlueGuard& state)
+base::Vec2 offsetForShot(const BlueGuard& state)
 {
   const auto offsetY = state.mIsCrouched ? -1 : -2;
   const auto facingLeft = state.mOrientation == Orientation::Left;

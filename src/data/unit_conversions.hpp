@@ -36,8 +36,8 @@ constexpr T tilesToPixels(const T tiles)
 }
 
 
-base::Vector tileVectorToPixelVector(const base::Vector& tileVector);
-base::Vector pixelVectorToTileVector(const base::Vector& pixelVector);
+base::Vec2 tileVectorToPixelVector(const base::Vec2& tileVector);
+base::Vec2 pixelVectorToTileVector(const base::Vec2& pixelVector);
 
 base::Extents tileExtentsToPixelExtents(const base::Extents& tileExtents);
 base::Extents pixelExtentsToTileExtents(const base::Extents& pixelExtents);

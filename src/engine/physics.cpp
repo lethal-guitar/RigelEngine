@@ -35,9 +35,9 @@ using components::WorldPosition;
 namespace
 {
 
-base::Point<float> updateMovementSequence(
+base::Vec2T<float> updateMovementSequence(
   entityx::Entity entity,
-  const base::Point<float>& velocity)
+  const base::Vec2T<float>& velocity)
 {
   auto& sequence = *entity.component<MovementSequence>();
   if (sequence.mCurrentStep >= sequence.mVelocites.size())
@@ -45,8 +45,8 @@ base::Point<float> updateMovementSequence(
     if (sequence.mResetVelocityAfterSequence)
     {
       const auto resetVelocity = sequence.mEnableX
-        ? base::Point<float>{}
-        : base::Point<float>{velocity.x, 0.0f};
+        ? base::Vec2T<float>{}
+        : base::Vec2T<float>{velocity.x, 0.0f};
       entity.remove<MovementSequence>();
       return resetVelocity;
     }
@@ -67,10 +67,10 @@ base::Point<float> updateMovementSequence(
 // TODO: This is implemented here, but declared in physical_components.hpp.
 // It would be cleaner to have a matching .cpp file for that file.
 BoundingBox
-  toWorldSpace(const BoundingBox& bbox, const base::Vector& entityPosition)
+  toWorldSpace(const BoundingBox& bbox, const base::Vec2& entityPosition)
 {
   return bbox +
-    base::Vector(entityPosition.x, entityPosition.y - (bbox.size.height - 1));
+    base::Vec2(entityPosition.x, entityPosition.y - (bbox.size.height - 1));
 }
 
 

@@ -130,7 +130,7 @@ void makePipe(data::map::Map& map, const int x, const int y, const int length)
 
 struct StateChange
 {
-  base::Vector move;
+  base::Vec2 move;
   int frame;
 
   bool operator==(const StateChange& other) const
@@ -151,7 +151,7 @@ struct MoveSpec
 {
   MoveSpec(
     const PlayerInput input,
-    const base::Vector expectedMove,
+    const base::Vec2 expectedMove,
     const int expectedAnimationFrame)
     : givenInput(input)
     , expectedStateChange({expectedMove, expectedAnimationFrame})
@@ -306,7 +306,7 @@ TEST_CASE("Player movement")
 
     SECTION("Moves left when left key pressed")
     {
-      const auto expectedPosition = position + base::Vector{-1, 0};
+      const auto expectedPosition = position + base::Vec2{-1, 0};
 
       PlayerInput input;
       input.mLeft = true;
@@ -374,7 +374,7 @@ TEST_CASE("Player movement")
 
     SECTION("Ignores up/down keys when both pressed at the same time")
     {
-      const auto expectedPosition = position + base::Vector{-1, 0};
+      const auto expectedPosition = position + base::Vec2{-1, 0};
 
       PlayerInput input;
       input.mLeft = true;
@@ -463,7 +463,7 @@ TEST_CASE("Player movement")
     SECTION("Walks up a stair step")
     {
       map.setTileAt(0, position.x - 1, position.y, 1);
-      const auto expectedPosition = position + base::Vector{-1, -1};
+      const auto expectedPosition = position + base::Vec2{-1, -1};
 
       PlayerInput input;
       input.mLeft = true;
@@ -803,7 +803,7 @@ TEST_CASE("Player movement")
         CHECK(
           collisionChecker.isOnSolidGround(player.worldSpaceCollisionBox()));
 
-        const auto expectedPosition = position - base::Vector{1, 0};
+        const auto expectedPosition = position - base::Vec2{1, 0};
         player.update(pressingLeft & jumpButtonTriggered);
 
         CHECK(
@@ -903,7 +903,7 @@ TEST_CASE("Player movement")
         {
           map.setTileAt(0, position.x + 1, position.y - 5, 2);
 
-          const auto expectedPosition = position + base::Vector{0, -1};
+          const auto expectedPosition = position + base::Vec2{0, -1};
           player.update(pressingUp);
 
           CHECK(animationFrameValid());
@@ -937,7 +937,7 @@ TEST_CASE("Player movement")
 
           position.y -= 5;
 
-          const auto expectedPosition = position + base::Vector{0, 1};
+          const auto expectedPosition = position + base::Vec2{0, 1};
 
           player.update(pressingDown);
 
@@ -1017,7 +1017,7 @@ TEST_CASE("Player movement")
       {
         map.setTileAt(0, position.x, position.y - 4, 2);
 
-        const auto expectedPosition = position + base::Vector{-1, 0};
+        const auto expectedPosition = position + base::Vec2{-1, 0};
 
         player.update(pressingUp);
 
@@ -1030,7 +1030,7 @@ TEST_CASE("Player movement")
       {
         map.setTileAt(0, position.x + 2, position.y - 4, 2);
 
-        const auto expectedPosition = position + base::Vector{1, 0};
+        const auto expectedPosition = position + base::Vec2{1, 0};
 
         player.update(pressingUp);
 
@@ -1043,7 +1043,7 @@ TEST_CASE("Player movement")
         map.setTileAt(0, position.x + 1, position.y - 5, 2);
         map.setTileAt(0, position.x + 1, position.y - 4, 2);
 
-        const auto expectedPositionAfterAttach = position + base::Vector{0, -1};
+        const auto expectedPositionAfterAttach = position + base::Vec2{0, -1};
 
         player.update(pressingUp);
 
@@ -1178,7 +1178,7 @@ TEST_CASE("Player movement")
             const auto previousPosition = position;
             player.update(pressingLeft);
 
-            const auto expectedPosition = previousPosition - base::Vector{1, 0};
+            const auto expectedPosition = previousPosition - base::Vec2{1, 0};
             CHECK(position == expectedPosition);
 
             SECTION("Falls down when end of pipe reached (left)")
@@ -1189,7 +1189,7 @@ TEST_CASE("Player movement")
               }
 
               const auto positionAtEndOfPipe =
-                base::Vector{pipeStartX - 1, position.y};
+                base::Vec2{pipeStartX - 1, position.y};
               CHECK(position == positionAtEndOfPipe);
 
               // clang-format off
@@ -1209,7 +1209,7 @@ TEST_CASE("Player movement")
             const auto previousPosition = position;
             player.update(pressingRight);
 
-            const auto expectedPosition = previousPosition + base::Vector{1, 0};
+            const auto expectedPosition = previousPosition + base::Vec2{1, 0};
             CHECK(position == expectedPosition);
 
             SECTION("Falls down when end of pipe reached (right)")
@@ -1218,7 +1218,7 @@ TEST_CASE("Player movement")
 
               const auto playerRightEdge = pipeEndX + 1;
               const auto positionAtEndOfPipe =
-                base::Vector{playerRightEdge - (PLAYER_WIDTH - 1), position.y};
+                base::Vec2{playerRightEdge - (PLAYER_WIDTH - 1), position.y};
               CHECK(position == positionAtEndOfPipe);
 
               // clang-format off
@@ -1663,7 +1663,7 @@ TEST_CASE("Player movement")
           resetOrientation(Orientation::Right);
           player.update(fireButtonTriggered);
 
-          const auto expectedPosition = position + base::Vector{3, -2};
+          const auto expectedPosition = position + base::Vec2{3, -2};
           CHECK(lastFiredShot().position == expectedPosition);
           CHECK(lastFiredShot().direction == ProjectileDirection::Right);
         }
@@ -1673,7 +1673,7 @@ TEST_CASE("Player movement")
           resetOrientation(Orientation::Left);
           player.update(fireButtonTriggered);
 
-          const auto expectedPosition = position + base::Vector{-1, -2};
+          const auto expectedPosition = position + base::Vec2{-1, -2};
           CHECK(lastFiredShot().position == expectedPosition);
           CHECK(lastFiredShot().direction == ProjectileDirection::Left);
         }
@@ -1706,7 +1706,7 @@ TEST_CASE("Player movement")
         {
           player.update(fireButtonTriggered & pressingDown);
 
-          const auto expectedPosition = position + base::Vector{-1, -1};
+          const auto expectedPosition = position + base::Vec2{-1, -1};
           CHECK(lastFiredShot().position == expectedPosition);
           CHECK(lastFiredShot().direction == ProjectileDirection::Left);
         }
@@ -1717,7 +1717,7 @@ TEST_CASE("Player movement")
 
           player.update(fireButtonTriggered & pressingDown);
 
-          const auto expectedPosition = position + base::Vector{3, -1};
+          const auto expectedPosition = position + base::Vec2{3, -1};
           CHECK(lastFiredShot().position == expectedPosition);
           CHECK(lastFiredShot().direction == ProjectileDirection::Right);
         }
@@ -1731,7 +1731,7 @@ TEST_CASE("Player movement")
         {
           player.update(fireButtonTriggered & pressingUp);
 
-          const auto expectedPosition = position + base::Vector{0, -5};
+          const auto expectedPosition = position + base::Vec2{0, -5};
           CHECK(lastFiredShot().position == expectedPosition);
           CHECK(lastFiredShot().direction == ProjectileDirection::Up);
         }
@@ -1742,7 +1742,7 @@ TEST_CASE("Player movement")
 
           player.update(fireButtonTriggered & pressingUp);
 
-          const auto expectedPosition = position + base::Vector{2, -5};
+          const auto expectedPosition = position + base::Vec2{2, -5};
           CHECK(lastFiredShot().position == expectedPosition);
           CHECK(lastFiredShot().direction == ProjectileDirection::Up);
         }
@@ -2033,7 +2033,7 @@ TEST_CASE("Player movement")
 
     SECTION("Moves right when right key pressed")
     {
-      const auto expectedPosition = position + base::Vector{+1, 0};
+      const auto expectedPosition = position + base::Vec2{+1, 0};
 
       PlayerInput input;
       input.mRight = true;
@@ -2101,7 +2101,7 @@ TEST_CASE("Player movement")
 
     SECTION("Ignores up/down keys when both pressed at the same time")
     {
-      const auto expectedPosition = position + base::Vector{+1, 0};
+      const auto expectedPosition = position + base::Vec2{+1, 0};
 
       PlayerInput input;
       input.mRight = true;
@@ -2189,7 +2189,7 @@ TEST_CASE("Player movement")
     SECTION("Walks up a stair step")
     {
       map.setTileAt(0, position.x + 1 + 2, position.y, 1);
-      const auto expectedPosition = position + base::Vector{+1, -1};
+      const auto expectedPosition = position + base::Vec2{+1, -1};
 
       PlayerInput input;
       input.mRight = true;

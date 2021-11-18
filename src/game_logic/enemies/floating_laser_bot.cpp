@@ -38,7 +38,7 @@ namespace
 
 struct GunSpec
 {
-  base::Vector mOffset;
+  base::Vec2 mOffset;
   engine::components::Orientation mOrientation;
 };
 
@@ -68,7 +68,7 @@ void FloatingLaserBot::update(
 
   auto moveTowardsPlayer = [&, this]() {
     const auto offsetToPlayer =
-      s.mpPlayer->orientedPosition() - position + base::Vector{1, -2};
+      s.mpPlayer->orientedPosition() - position + base::Vec2{1, -2};
     const auto movementX = std::clamp(offsetToPlayer.x, -1, 1);
     const auto movementY = std::clamp(offsetToPlayer.y, -1, 1);
 

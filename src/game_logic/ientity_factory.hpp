@@ -98,7 +98,7 @@ struct IEntityFactory
 
   virtual entityx::Entity spawnSprite(
     data::ActorID actorID,
-    const base::Vector& position,
+    const base::Vec2& position,
     bool assignBoundingBox = false) = 0;
 
   virtual entityx::Entity spawnProjectile(
@@ -107,7 +107,7 @@ struct IEntityFactory
     ProjectileDirection direction) = 0;
 
   virtual entityx::Entity
-    spawnActor(data::ActorID actorID, const base::Vector& position) = 0;
+    spawnActor(data::ActorID actorID, const base::Vec2& position) = 0;
 
   virtual entityx::EntityManager& entityManager() = 0;
 };
@@ -122,38 +122,38 @@ struct IEntityFactory
 entityx::Entity spawnOneShotSprite(
   IEntityFactory& factory,
   data::ActorID id,
-  const base::Vector& position);
+  const base::Vec2& position);
 
 
 entityx::Entity spawnFloatingOneShotSprite(
   IEntityFactory& factory,
   data::ActorID id,
-  const base::Vector& position);
+  const base::Vec2& position);
 
 
 entityx::Entity spawnMovingEffectSprite(
   IEntityFactory& factory,
   const data::ActorID id,
   const SpriteMovement movement,
-  const base::Vector& position);
+  const base::Vec2& position);
 
 
 void spawnFloatingScoreNumber(
   IEntityFactory& factory,
   ScoreNumberType type,
-  const base::Vector& position);
+  const base::Vec2& position);
 
 
 void spawnFireEffect(
   entityx::EntityManager& entityManager,
-  const base::Vector& position,
+  const base::Vec2& position,
   const engine::components::BoundingBox& coveredArea,
   data::ActorID actorToSpawn);
 
 
 void spawnEnemyLaserShot(
   IEntityFactory& factory,
-  base::Vector position,
+  base::Vec2 position,
   engine::components::Orientation orientation);
 
 } // namespace rigel::game_logic

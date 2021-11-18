@@ -32,7 +32,7 @@ GameRunner::GameRunner(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
-  const std::optional<base::Vector> playerPositionOverride,
+  const std::optional<base::Vec2> playerPositionOverride,
   const bool showWelcomeMessage)
   : mContext(context)
   , mWorld(

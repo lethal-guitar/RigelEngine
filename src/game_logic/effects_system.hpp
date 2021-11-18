@@ -81,7 +81,7 @@ private:
     components::DestructionEffects::TriggerCondition expectedCondition);
 
   void processEffectsAndAdvance(
-    const base::Vector& position,
+    const base::Vec2& position,
     components::DestructionEffects& effects);
 
   IGameServiceProvider* mpServiceProvider;

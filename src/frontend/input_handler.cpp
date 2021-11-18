@@ -33,7 +33,7 @@ constexpr auto TRIGGER_THRESHOLD = 3'000;
 
 game_logic::PlayerInput combinedInput(
   const game_logic::PlayerInput& baseInput,
-  const base::Vector& analogStickVector)
+  const base::Vec2& analogStickVector)
 {
   auto combined = baseInput;
 

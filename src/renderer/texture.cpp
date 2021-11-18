@@ -32,14 +32,14 @@ void Texture::render(const int x, const int y) const
 }
 
 
-void Texture::render(const base::Vector& position) const
+void Texture::render(const base::Vec2& position) const
 {
   render(position.x, position.y);
 }
 
 
 void Texture::render(
-  const base::Vector& position,
+  const base::Vec2& position,
   const base::Rect<int>& sourceRect) const
 {
   render(position.x, position.y, sourceRect);

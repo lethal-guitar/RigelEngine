@@ -136,7 +136,7 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("Non-moving object")
     {
-      body.mVelocity = base::Point<float>{0.0f, 0.0f};
+      body.mVelocity = base::Vec2T<float>{0.0f, 0.0f};
       runOneFrame();
       CHECK(position.y == 5);
       CHECK(body.mVelocity.y > 0.0f);
@@ -288,7 +288,7 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("SolidBody doesn't collide with itself")
     {
-      solidBody.assign<MovingBody>(base::Point<float>{0, 2.0f}, false);
+      solidBody.assign<MovingBody>(base::Vec2T<float>{0, 2.0f}, false);
       solidBody.assign<Active>();
       runOneFrame();
       CHECK(solidBody.component<WorldPosition>()->y == 10);
@@ -298,7 +298,7 @@ TEST_CASE("Physics system works as expected")
 
   auto runFramesAndCollect = [&position,
                               &runOneFrame](const std::size_t numFrames) {
-    std::vector<base::Vector> positions;
+    std::vector<base::Vec2> positions;
     for (std::size_t i = 0; i < numFrames; ++i)
     {
       runOneFrame();
@@ -316,24 +316,24 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("Velocity reset after sequence")
     {
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(true));
 
       const auto collectedPositions = runFramesAndCollect(sequence.size());
       const auto expectedPositions =
-        std::vector<base::Vector>{{10, 4}, {13, 2}, {15, 2}, {14, 3}};
+        std::vector<base::Vec2>{{10, 4}, {13, 2}, {15, 2}, {14, 3}};
 
       CHECK(collectedPositions == expectedPositions);
 
       SECTION("Gravity takes over again after sequence ended")
       {
         const auto expectedPositions2 =
-          std::vector<base::Vector>{{14, 3}, {14, 4}};
+          std::vector<base::Vec2>{{14, 3}, {14, 4}};
         const auto collectedPositions2 =
           runFramesAndCollect(expectedPositions2.size());
 
@@ -351,11 +351,11 @@ TEST_CASE("Physics system works as expected")
     {
       body.mGravityAffected = false;
 
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(false));
       for (int i = 0; i < 4; ++i)
@@ -364,7 +364,7 @@ TEST_CASE("Physics system works as expected")
       }
 
       const auto expectedPositions =
-        std::vector<base::Vector>{{13, 4}, {12, 5}, {11, 6}};
+        std::vector<base::Vec2>{{13, 4}, {12, 5}, {11, 6}};
       const auto collectedPositions =
         runFramesAndCollect(expectedPositions.size());
 
@@ -382,11 +382,11 @@ TEST_CASE("Physics system works as expected")
       body.mGravityAffected = false;
       body.mIgnoreCollisions = true;
 
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(false));
       for (int i = 0; i < 4; ++i)
@@ -395,7 +395,7 @@ TEST_CASE("Physics system works as expected")
       }
 
       const auto expectedPositions =
-        std::vector<base::Vector>{{13, 4}, {12, 5}, {11, 6}};
+        std::vector<base::Vec2>{{13, 4}, {12, 5}, {11, 6}};
       const auto collectedPositions =
         runFramesAndCollect(expectedPositions.size());
 
@@ -410,18 +410,18 @@ TEST_CASE("Physics system works as expected")
 
     SECTION("X part of sequence can be ignored")
     {
-      std::array<base::Point<float>, 4> sequence{
-        base::Point<float>{0.0f, -1.0f},
-        base::Point<float>{3.0f, -2.0f},
-        base::Point<float>{2.0f, 0.0f},
-        base::Point<float>{-1.0f, 1.0f}};
+      std::array<base::Vec2T<float>, 4> sequence{
+        base::Vec2T<float>{0.0f, -1.0f},
+        base::Vec2T<float>{3.0f, -2.0f},
+        base::Vec2T<float>{2.0f, 0.0f},
+        base::Vec2T<float>{-1.0f, 1.0f}};
       physicalObject.assign<MovementSequence>(
         sequence, ResetAfterSequence(true), EnableX(false));
       body.mVelocity.x = 1.0f;
 
       const auto collectedPositions = runFramesAndCollect(sequence.size());
       const auto expectedPositions =
-        std::vector<base::Vector>{{11, 4}, {12, 2}, {13, 2}, {14, 3}};
+        std::vector<base::Vec2>{{11, 4}, {12, 2}, {13, 2}, {14, 3}};
 
       CHECK(collectedPositions == expectedPositions);
     }

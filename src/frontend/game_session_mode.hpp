@@ -40,7 +40,7 @@ public:
   GameSessionMode(
     const data::GameSessionId& sessionId,
     Context context,
-    std::optional<base::Vector> playerPositionOverride = std::nullopt);
+    std::optional<base::Vec2> playerPositionOverride = std::nullopt);
 
   GameSessionMode(const data::SavedGame& save, Context context);
 

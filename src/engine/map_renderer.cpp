@@ -43,8 +43,8 @@ const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60.0f;
 
 
-base::Point<float> backdropOffset(
-  const base::Point<float>& cameraPosition,
+base::Vec2T<float> backdropOffset(
+  const base::Vec2T<float>& cameraPosition,
   const BackdropScrollMode scrollMode,
   const float backdropAutoScrollOffset)
 {
@@ -128,7 +128,7 @@ void MapRenderer::switchBackdrops()
 
 
 void MapRenderer::renderBackground(
-  const base::Vector& sectionStart,
+  const base::Vec2& sectionStart,
   const base::Extents& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
@@ -136,7 +136,7 @@ void MapRenderer::renderBackground(
 
 
 void MapRenderer::renderForeground(
-  const base::Vector& sectionStart,
+  const base::Vec2& sectionStart,
   const base::Extents& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
@@ -144,7 +144,7 @@ void MapRenderer::renderForeground(
 
 
 renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
-  const base::Point<float>& cameraPosition,
+  const base::Vec2T<float>& cameraPosition,
   const base::Extents& viewPortSize) const
 {
   // This function determines the texture coordinates we need to use for
@@ -238,7 +238,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 
 void MapRenderer::renderBackdrop(
-  const base::Point<float>& cameraPosition,
+  const base::Vec2T<float>& cameraPosition,
   const base::Extents& viewPortSize) const
 {
   const auto saved = renderer::saveState(mpRenderer);
@@ -251,7 +251,7 @@ void MapRenderer::renderBackdrop(
 
 
 void MapRenderer::renderMapTiles(
-  const base::Vector& sectionStart,
+  const base::Vec2& sectionStart,
   const base::Extents& sectionSize,
   const DrawMode drawMode) const
 {
@@ -364,7 +364,7 @@ void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
 
 void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
-  const base::Vector& pixelPosition) const
+  const base::Vec2& pixelPosition) const
 {
   // TODO: Can we reduce duplication with renderTile()?
 

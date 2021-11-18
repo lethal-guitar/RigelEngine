@@ -63,7 +63,7 @@ public:
   Texture& operator=(const Texture&) = delete;
 
   /** Render entire texture at given position */
-  void render(const base::Vector& position) const;
+  void render(const base::Vec2& position) const;
 
   /** Render entire texture at given position */
   void render(int x, int y) const;
@@ -76,8 +76,8 @@ public:
    * can be larger than the texture itself, which will cause the texture
    * to be drawn multiple times (repeated).
    */
-  void render(const base::Vector& position, const base::Rect<int>& sourceRect)
-    const;
+  void
+    render(const base::Vec2& position, const base::Rect<int>& sourceRect) const;
 
   /** Render entire texture scaled to fill the given rectangle */
   void renderScaled(const base::Rect<int>& destRect) const;

@@ -77,7 +77,7 @@ ActorImagePackage::ActorImagePackage(
     vector<ActorFrameHeader> frameHeaders;
     for (size_t frame = 0; frame < numFrames; ++frame)
     {
-      base::Vector drawOffset{entryReader.readS16(), entryReader.readS16()};
+      base::Vec2 drawOffset{entryReader.readS16(), entryReader.readS16()};
 
       const auto height = entryReader.readU16();
       const auto width = entryReader.readU16();

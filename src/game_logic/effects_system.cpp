@@ -59,7 +59,7 @@ void triggerEffects(
 
 void spawnEffects(
   const DestructionEffects& effects,
-  const base::Vector& position,
+  const base::Vec2& position,
   entityx::EntityManager& entityManager)
 {
   using namespace engine::components;
@@ -119,7 +119,7 @@ void EffectsSystem::update(entityx::EntityManager& es)
         const auto yOffset =
           mpRandomGenerator->gen() % spawner.mCoveredArea.height;
         const auto spawnPosition =
-          spawner.mBasePosition + base::Vector{xOffset, -yOffset};
+          spawner.mBasePosition + base::Vec2{xOffset, -yOffset};
 
         spawnFloatingOneShotSprite(
           *mpEntityFactory, spawner.mActorId, spawnPosition);
@@ -163,7 +163,7 @@ void EffectsSystem::triggerEffectsIfConditionMatches(
 
 
 void EffectsSystem::processEffectsAndAdvance(
-  const base::Vector& position,
+  const base::Vec2& position,
   DestructionEffects& effects)
 {
   using namespace effects;

@@ -132,7 +132,7 @@ public:
    * Position is modified by the current global scale and translation.
    * Color modulation and overlay color are ignored.
    */
-  void drawPoint(const base::Vector& position, const base::Color& color);
+  void drawPoint(const base::Vec2& position, const base::Color& color);
 
   /** Draw "under water" effect
    *
@@ -189,8 +189,8 @@ public:
    * Color modulation and overlay color are ignored.
    */
   void drawLine(
-    const base::Vector& start,
-    const base::Vector& end,
+    const base::Vec2& start,
+    const base::Vec2& end,
     const base::Color& color)
   {
     drawLine(start.x, start.y, end.x, end.y, color);
@@ -357,7 +357,7 @@ public:
    * without modifying the code. E.g. drawing the same UI multiple
    * times at different locations.
    */
-  void setGlobalTranslation(const base::Vector& translation);
+  void setGlobalTranslation(const base::Vec2& translation);
 
   /** Set scale factor to be applied to all coordinates before rendering
    *
@@ -377,7 +377,7 @@ public:
    * screen resolution, without needing the client code to be aware of
    * this. Also see upscaling_utils.hpp.
    */
-  void setGlobalScale(const base::Point<float>& scale);
+  void setGlobalScale(const base::Vec2T<float>& scale);
 
   /** Set clipping rectangle to constrain rendering
    *
@@ -409,8 +409,8 @@ public:
   base::Size<int> currentRenderTargetSize() const;
   base::Size<int> windowSize() const;
 
-  base::Vector globalTranslation() const;
-  base::Point<float> globalScale() const;
+  base::Vec2 globalTranslation() const;
+  base::Vec2T<float> globalScale() const;
   std::optional<base::Rect<int>> clipRect() const;
 
 private:

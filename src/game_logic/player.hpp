@@ -272,7 +272,7 @@ public:
   bool mGodModeOn = false;
 
   void enterShip(
-    const base::Vector& shipPosition,
+    const base::Vec2& shipPosition,
     engine::components::Orientation shipOrientation);
   void exitShip();
 
@@ -281,7 +281,7 @@ public:
 
   void doInteractionAnimation();
 
-  void reSpawnAt(const base::Vector& spawnPosition);
+  void reSpawnAt(const base::Vec2& spawnPosition);
 
   bool isInRegularState() const;
 
@@ -295,11 +295,11 @@ public:
   engine::components::Orientation orientation() const;
   engine::components::BoundingBox worldSpaceHitBox() const;
   engine::components::BoundingBox worldSpaceCollisionBox() const;
-  const base::Vector& position() const;
+  const base::Vec2& position() const;
   int animationFrame() const;
 
   // TODO: Explain what this is
-  base::Vector orientedPosition() const;
+  base::Vec2 orientedPosition() const;
 
   template <typename StateT>
   bool stateIs() const
@@ -307,7 +307,7 @@ public:
     return std::holds_alternative<StateT>(mState);
   }
 
-  base::Vector& position();
+  base::Vec2& position();
 
   data::PlayerModel& model() { return *mpPlayerModel; }
 
@@ -346,17 +346,17 @@ private:
   void updateTemporaryItemExpiration();
   void updateAnimation();
   void updateMovement(
-    const base::Vector& movementVector,
+    const base::Vec2& movementVector,
     const Button& jumpButton,
     const Button& fireButton);
   void updateJumpButtonStateTracking(const Button& jumpButton);
   void updateShooting(const Button& fireButton);
-  void updateLadderAttachment(const base::Vector& movementVector);
+  void updateLadderAttachment(const base::Vec2& movementVector);
   bool updateElevatorMovement(int movement);
-  void updateHorizontalMovementInAir(const base::Vector& movementVector);
+  void updateHorizontalMovementInAir(const base::Vec2& movementVector);
   void updateJumpMovement(
     Jumping& state,
-    const base::Vector& movementVector,
+    const base::Vec2& movementVector,
     bool jumpPressed);
   void updateDeathAnimation();
   void updateGettingSuckedIntoSpaceAnimation(GettingSuckedIntoSpace& state);
@@ -378,7 +378,7 @@ private:
 
   void setVisualState(VisualState visualState);
   void jump();
-  void jumpFromLadder(const base::Vector& movementVector);
+  void jumpFromLadder(const base::Vec2& movementVector);
   void startFalling();
   void startFallingDelayed();
   void landOnGround(bool needRecoveryFrame);

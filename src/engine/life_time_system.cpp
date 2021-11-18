@@ -24,7 +24,7 @@ namespace rigel::engine
 
 void LifeTimeSystem::update(
   entityx::EntityManager& es,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize)
 {
   namespace c = components;

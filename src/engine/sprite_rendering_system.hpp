@@ -82,7 +82,7 @@ public:
   void update(
     entityx::EntityManager& es,
     const base::Extents& viewPortSize,
-    const base::Vector& cameraPosition,
+    const base::Vec2& cameraPosition,
     float interpolationFactor);
 
   void renderRegularSprites() const;

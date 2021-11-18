@@ -25,7 +25,7 @@ namespace rigel::data
 using namespace base;
 
 
-Vector tileVectorToPixelVector(const Vector& tileVec)
+Vec2 tileVectorToPixelVector(const Vec2& tileVec)
 {
   return {
     tilesToPixels(tileVec.x),
@@ -34,7 +34,7 @@ Vector tileVectorToPixelVector(const Vector& tileVec)
 }
 
 
-Vector pixelVectorToTileVector(const Vector& pixelVector)
+Vec2 pixelVectorToTileVector(const Vec2& pixelVector)
 {
   return {
     pixelsToTiles(pixelVector.x),

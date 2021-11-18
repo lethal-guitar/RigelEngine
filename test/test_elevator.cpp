@@ -130,7 +130,7 @@ TEST_CASE("Rocket elevator")
   auto elevator =
     entityFactory.spawnActor(data::ActorID::Rocket_elevator, {2, 103});
 
-  base::Vector cameraPosition{0, 0};
+  base::Vec2 cameraPosition{0, 0};
   engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
   PhysicsSystem physicsSystem{&collisionChecker, &map, &entityx.events};
   BehaviorControllerSystem behaviorControllerSystem{

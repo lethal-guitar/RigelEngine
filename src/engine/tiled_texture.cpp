@@ -69,7 +69,7 @@ void TiledTexture::renderTile(const int index, const int x, const int y) const
 
 void TiledTexture::renderTileSlice(
   const int baseIndex,
-  const base::Vector& tlPosition) const
+  const base::Vec2& tlPosition) const
 {
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 1, 2);
 }
@@ -77,7 +77,7 @@ void TiledTexture::renderTileSlice(
 
 void TiledTexture::renderTileQuad(
   const int baseIndex,
-  const base::Vector& tlPosition) const
+  const base::Vec2& tlPosition) const
 {
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 2, 2);
 }
@@ -85,15 +85,14 @@ void TiledTexture::renderTileQuad(
 
 void TiledTexture::renderTileDoubleQuad(
   const int baseIndex,
-  const base::Vector& tlPosition) const
+  const base::Vec2& tlPosition) const
 {
   renderTileGroup(baseIndex, tlPosition.x, tlPosition.y, 4, 2);
 }
 
 
-void TiledTexture::renderTileAtPixelPos(
-  int index,
-  const base::Vector& pxPosition) const
+void TiledTexture::renderTileAtPixelPos(int index, const base::Vec2& pxPosition)
+  const
 {
   mpRenderer->drawTexture(
     mTileSetTexture.data(),
@@ -140,7 +139,7 @@ base::Rect<int> TiledTexture::sourceRect(
   const int tileSpanX,
   const int tileSpanY) const
 {
-  const base::Vector tileSetStartPosition{
+  const base::Vec2 tileSetStartPosition{
     index % tilesPerRow(), index / tilesPerRow()};
   const auto topLeft = tileVectorToPixelVector(tileSetStartPosition);
   const auto size = tileExtentsToPixelExtents({tileSpanX, tileSpanY});

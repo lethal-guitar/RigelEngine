@@ -35,7 +35,7 @@ struct ActorData
 {
   struct Frame
   {
-    base::Vector mDrawOffset;
+    base::Vec2 mDrawOffset;
     base::Extents mLogicalSize;
     data::Image mFrameImage;
   };
@@ -73,7 +73,7 @@ public:
 private:
   struct ActorFrameHeader
   {
-    base::Vector mDrawOffset;
+    base::Vec2 mDrawOffset;
     base::Extents mSizeInTiles;
     std::uint32_t mFileOffset;
   };

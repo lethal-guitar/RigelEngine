@@ -113,7 +113,7 @@ TEST_CASE("Spike ball")
     &entityx.events,
     &randomGenerator);
 
-  base::Vector cameraPosition{0, 0};
+  base::Vec2 cameraPosition{0, 0};
   engine::ParticleSystem particleSystem{&randomGenerator, nullptr};
   BehaviorControllerSystem behaviorControllerSystem{
     GlobalDependencies{
@@ -142,7 +142,7 @@ TEST_CASE("Spike ball")
   };
 
   auto runFramesAndCollect = [&](std::size_t numFrames) {
-    std::vector<base::Vector> positions;
+    std::vector<base::Vec2> positions;
     for (std::size_t i = 0; i < numFrames; ++i)
     {
       runOneFrame();
@@ -155,7 +155,7 @@ TEST_CASE("Spike ball")
   SECTION("Bouncing without obstacle")
   {
     // clang-format off
-    const auto expectedPositions = std::vector<base::Vector>{
+    const auto expectedPositions = std::vector<base::Vec2>{
       {2, 18},
       {2, 16},
       {2, 15},
@@ -203,7 +203,7 @@ TEST_CASE("Spike ball")
     }
 
     // clang-format off
-    const auto expectedPositions = std::vector<base::Vector>{
+    const auto expectedPositions = std::vector<base::Vec2>{
       {2, 18},
       {2, 18},
       {2, 18},

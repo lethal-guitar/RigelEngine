@@ -45,7 +45,7 @@ constexpr std::array<std::int16_t, 44> VERTICAL_MOVEMENT_TABLE{
   -36, -32, -24, -16, -8,  0,   8,   16,  24,  32,  40,  48,  56,  64,  72,
   80,  88,  96,  104, 112, 120, 128, 136, 144, 152, 160, 168, 192, 193};
 
-constexpr auto SPAWN_OFFSET = base::Vector{0, -1};
+constexpr auto SPAWN_OFFSET = base::Vec2{0, -1};
 
 
 static_assert(
@@ -70,7 +70,7 @@ auto yOffsetAtTime(
 
 struct Particle
 {
-  base::Vector offsetAtTime(const int framesElapsed) const
+  base::Vec2 offsetAtTime(const int framesElapsed) const
   {
     return {
       mVelocityX * framesElapsed,
@@ -108,7 +108,7 @@ std::unique_ptr<ParticlesList> createParticles(
 struct ParticleGroup
 {
   ParticleGroup(
-    const base::Vector& origin,
+    const base::Vec2& origin,
     const base::Color& color,
     std::unique_ptr<ParticlesList> pParticles)
     : mpParticles(std::move(pParticles))
@@ -141,7 +141,7 @@ struct ParticleGroup
 
   void render(
     Renderer& renderer,
-    const base::Vector& cameraPosition,
+    const base::Vec2& cameraPosition,
     const float interpolation)
   {
     const auto screenSpaceOrigin =
@@ -163,7 +163,7 @@ struct ParticleGroup
   bool isExpired() const { return mFramesElapsed >= PARTICLE_SYSTEM_LIFE_TIME; }
 
   std::unique_ptr<ParticlesList> mpParticles;
-  base::Vector mOrigin;
+  base::Vec2 mOrigin;
   base::Color mColor;
   int mFramesElapsed = 0;
 };
@@ -188,7 +188,7 @@ void ParticleSystem::synchronizeTo(const ParticleSystem& other)
 
 
 void ParticleSystem::spawnParticles(
-  const base::Vector& origin,
+  const base::Vec2& origin,
   const base::Color& color,
   int velocityScaleX)
 {
@@ -216,7 +216,7 @@ void ParticleSystem::update()
 
 
 void ParticleSystem::render(
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const float interpolation)
 {
   for (auto& group : mParticleGroups)

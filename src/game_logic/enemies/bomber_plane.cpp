@@ -89,8 +89,8 @@ const effects::EffectSpec BIG_BOMB_DETONATE_IN_AIR_EFFECT_SPEC[] = {
 };
 
 
-constexpr auto FLY_AWAY_SPEED_VECTOR = base::Vector{2, 1};
-constexpr auto BOMB_DROP_OFFSET = base::Vector{2, 1};
+constexpr auto FLY_AWAY_SPEED_VECTOR = base::Vec2{2, 1};
+constexpr auto BOMB_DROP_OFFSET = base::Vec2{2, 1};
 
 } // namespace
 
@@ -220,7 +220,7 @@ void BigBomb::update(
 void BigBomb::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Point<float>&,
+  const base::Vec2T<float>&,
   entityx::Entity entity)
 {
   // When shot while in the air, a slightly different series of explosions is

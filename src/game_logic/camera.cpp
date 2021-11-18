@@ -57,7 +57,7 @@ constexpr auto DEAD_ZONE_END_X = 21;
 constexpr auto DEFAULT_VERTICAL_DEAD_ZONE = VerticalDeadZone{2, 19};
 constexpr auto TIGHT_VERTICAL_DEAD_ZONE = VerticalDeadZone{7, 13};
 
-constexpr auto INITIAL_CAMERA_OFFSET = base::Vector{15, 19};
+constexpr auto INITIAL_CAMERA_OFFSET = base::Vec2{15, 19};
 
 constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
 
@@ -123,9 +123,9 @@ base::Rect<int> normalizedPlayerBounds(
 }
 
 
-base::Vector offsetToDeadZone(
+base::Vec2 offsetToDeadZone(
   const Player& player,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize)
 {
   const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
@@ -184,7 +184,7 @@ void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize)
   {
     const auto offset =
       2 * engine::orientation::toMovement(mpPlayer->orientation());
-    setPosition(mPosition + base::Vector{offset, 0});
+    setPosition(mPosition + base::Vec2{offset, 0});
   }
 }
 
@@ -226,7 +226,7 @@ void Camera::updateAutomaticScrolling()
 
   const auto maxAdjustDown =
     mpPlayer->isRidingElevator() ? MAX_ADJUST_DOWN_ELEVATOR : MAX_ADJUST_DOWN;
-  const auto adjustment = base::Vector{
+  const auto adjustment = base::Vec2{
     std::clamp(offsetX, -MAX_ADJUST_X, MAX_ADJUST_X),
     std::clamp(offsetY, -MAX_ADJUST_UP, maxAdjustDown)};
 
@@ -234,7 +234,7 @@ void Camera::updateAutomaticScrolling()
 }
 
 
-void Camera::setPosition(const base::Vector position)
+void Camera::setPosition(const base::Vec2 position)
 {
   // The std::max(_, 0) is for the case that the viewport is bigger than the
   // map, which would result in negative values

@@ -53,7 +53,7 @@ void FlameThrowerBot::update(
       spawnOneShotSprite(
         *d.mpEntityFactory,
         id,
-        *entity.component<WorldPosition>() + base::Vector{xOffset, -3});
+        *entity.component<WorldPosition>() + base::Vec2{xOffset, -3});
     }
   }
   else

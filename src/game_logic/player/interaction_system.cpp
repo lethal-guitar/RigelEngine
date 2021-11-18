@@ -52,12 +52,12 @@ constexpr auto BASIC_LETTER_COLLECTION_SCORE = 10100;
 constexpr auto CORRECT_LETTER_COLLECTION_SCORE = 100000;
 constexpr auto HINT_MACHINE_ACTIVATION_SCORE = 50000;
 
-constexpr auto PLAYER_TO_TELEPORTER_OFFSET = base::Vector{1, 0};
-constexpr auto HINT_MACHINE_GLOBE_OFFSET = base::Vector{1, -4};
+constexpr auto PLAYER_TO_TELEPORTER_OFFSET = base::Vec2{1, 0};
+constexpr auto HINT_MACHINE_GLOBE_OFFSET = base::Vec2{1, -4};
 
 
 void spawnScoreNumbers(
-  const base::Vector& position,
+  const base::Vec2& position,
   int score,
   IEntityFactory& entityFactory)
 {
@@ -79,7 +79,7 @@ void spawnScoreNumbers(
   auto yOffset = static_cast<int>(numbers.size() - 1);
   for (const auto numberType : numbers)
   {
-    const auto offset = base::Vector{0, yOffset};
+    const auto offset = base::Vec2{0, yOffset};
     --yOffset;
     spawnFloatingScoreNumber(entityFactory, numberType, position - offset);
   }
@@ -88,13 +88,13 @@ void spawnScoreNumbers(
 
 void spawnScoreNumbersForLetterCollectionBonus(
   IEntityFactory& factory,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   constexpr int X_OFFSETS[] = {-3, 0, 3, 0};
 
   for (int i = 0; i < 10; ++i)
   {
-    const auto offset = base::Vector{X_OFFSETS[i % 4], -i};
+    const auto offset = base::Vec2{X_OFFSETS[i % 4], -i};
     spawnFloatingScoreNumber(
       factory, ScoreNumberType::S10000, position + offset);
   }
@@ -123,7 +123,7 @@ data::TutorialMessageId tutorialFor(const components::InteractableType type)
 }
 
 
-std::optional<base::Vector> findTeleporterTargetPosition(
+std::optional<base::Vec2> findTeleporterTargetPosition(
   ex::EntityManager& es,
   ex::Entity sourceTeleporter)
 {
@@ -277,7 +277,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es)
 
       auto worldSpaceBbox = collisionRect;
       worldSpaceBbox.topLeft +=
-        base::Vector{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
+        base::Vec2{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
 
       auto playerBBox = mpPlayer->worldSpaceHitBox();
       if (worldSpaceBbox.intersects(playerBBox))
@@ -501,7 +501,7 @@ void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity)
 
 void PlayerInteractionSystem::collectLetter(
   const data::CollectableLetterType type,
-  const base::Vector& position)
+  const base::Vec2& position)
 {
   using S = data::PlayerModel::LetterCollectionState;
 

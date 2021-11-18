@@ -102,7 +102,7 @@ struct BossEpisode1
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Point<float>& inflictorVelocity,
+    const base::Vec2T<float>& inflictorVelocity,
     entityx::Entity entity);
 
   State mState;

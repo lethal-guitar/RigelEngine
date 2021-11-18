@@ -34,9 +34,9 @@ namespace rigel::game_logic::behaviors
 namespace
 {
 
-constexpr auto OFFSET_TO_TARGET = base::Vector{-4, -4};
-constexpr auto PROJECTILE_OFFSET_TO_TARGET = base::Vector{1, -1};
-constexpr auto SHOT_OFFSET = base::Vector{4, 2};
+constexpr auto OFFSET_TO_TARGET = base::Vec2{-4, -4};
+constexpr auto PROJECTILE_OFFSET_TO_TARGET = base::Vec2{1, -1};
+constexpr auto SHOT_OFFSET = base::Vec2{4, 2};
 
 } // namespace
 
@@ -60,10 +60,9 @@ void BossEpisode4::update(
 
     const auto targetPosition = playerPos + OFFSET_TO_TARGET;
     const auto movementVec = targetPosition - position;
-    position +=
-      base::Vector{base::sgn(movementVec.x), base::sgn(movementVec.y)};
+    position += base::Vec2{base::sgn(movementVec.x), base::sgn(movementVec.y)};
 
-    return movementVec != base::Vector{0, 0};
+    return movementVec != base::Vec2{0, 0};
   };
 
   auto fireShot = [&]() {
@@ -101,7 +100,7 @@ void BossEpisode4::update(
 void BossEpisode4::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Point<float>&,
+  const base::Vec2T<float>&,
   entityx::Entity entity)
 {
   d.mpEvents->emit(rigel::events::BossDestroyed{entity});
@@ -130,8 +129,7 @@ void BossEpisode4Projectile::update(
   {
     const auto targetPosition = playerPos + PROJECTILE_OFFSET_TO_TARGET;
     const auto movementVec = targetPosition - position;
-    position +=
-      base::Vector{base::sgn(movementVec.x), base::sgn(movementVec.y)};
+    position += base::Vec2{base::sgn(movementVec.x), base::sgn(movementVec.y)};
   }
 
   const auto worldSpaceBbox = engine::toWorldSpace(bbox, position);

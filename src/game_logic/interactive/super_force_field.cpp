@@ -79,12 +79,12 @@ void SuperForceField::update(
     {
       d.mpServiceProvider->playSound(data::SoundId::GlassBreaking);
       d.mpParticles->spawnParticles(
-        position + base::Vector{1, -framesElapsed + 14},
+        position + base::Vec2{1, -framesElapsed + 14},
         data::GameTraits::INGAME_PALETTE[11]);
       spawnFloatingScoreNumber(
         *d.mpEntityFactory,
         ScoreNumberType::S500,
-        position + base::Vector{0, -framesElapsed + 18});
+        position + base::Vec2{0, -framesElapsed + 18});
       s.mpPlayer->model().giveScore(500);
     }
 
@@ -97,17 +97,17 @@ void SuperForceField::update(
         *d.mpEntityFactory,
         data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyUpperLeft,
-        position + base::Vector{-1, 5});
+        position + base::Vec2{-1, 5});
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
         data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyUpperRight,
-        position + base::Vector{-1, 5});
+        position + base::Vec2{-1, 5});
       spawnMovingEffectSprite(
         *d.mpEntityFactory,
         data::ActorID::Explosion_FX_2,
         SpriteMovement::FlyDown,
-        position + base::Vector{-1, 5});
+        position + base::Vec2{-1, 5});
       entity.destroy();
       return;
     }

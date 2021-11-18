@@ -42,7 +42,7 @@ void SmallFlyingShip::update(
 
   auto isGroundAtOffset = [&](const int offset) {
     return d.mpCollisionChecker->isOnSolidGround(
-      position + base::Vector{0, offset - 1}, {{}, {1, 1}});
+      position + base::Vec2{0, offset - 1}, {{}, {1, 1}});
   };
 
   auto findDistanceToGround = [&](const int maxDistance) -> std::optional<int> {

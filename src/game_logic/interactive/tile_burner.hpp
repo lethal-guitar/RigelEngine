@@ -29,7 +29,7 @@ struct TileBurner
 {
   struct NewBurnerInfo
   {
-    base::Vector mPosition;
+    base::Vec2 mPosition;
     int mFramesToWait;
   };
 

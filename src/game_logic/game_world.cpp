@@ -66,7 +66,7 @@ constexpr auto BOSS_LEVEL_INTRO_MUSIC = "CALM.IMF";
 constexpr auto HEALTH_BAR_LABEL_START_X = 0;
 constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
 constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
-constexpr auto HEALTH_BAR_START_PX = base::Vector{data::tilesToPixels(5), 0};
+constexpr auto HEALTH_BAR_START_PX = base::Vec2{data::tilesToPixels(5), 0};
 
 constexpr auto HUD_WIDTH = 6;
 
@@ -97,7 +97,7 @@ int healthOrZero(entityx::Entity entity)
 
 auto localToGlobalTranslation(
   const renderer::Renderer* pRenderer,
-  const base::Vector& translation)
+  const base::Vec2& translation)
 {
   return pRenderer->globalTranslation() +
     renderer::scaleVec(translation, pRenderer->globalScale());
@@ -110,8 +110,8 @@ auto localToGlobalTranslation(
 {
   auto saved = renderer::saveState(pRenderer);
 
-  const auto offset = data::GameTraits::inGameViewPortOffset +
-    base::Vector{screenShakeOffsetX, 0};
+  const auto offset =
+    data::GameTraits::inGameViewPortOffset + base::Vec2{screenShakeOffsetX, 0};
   const auto newTranslation = localToGlobalTranslation(pRenderer, offset);
 
   const auto scale = pRenderer->globalScale();
@@ -133,9 +133,9 @@ auto localToGlobalTranslation(
 
   const auto scale = pRenderer->globalScale();
   const auto offset =
-    base::Vector{screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
+    base::Vec2{screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
   const auto newTranslation =
-    renderer::scaleVec(offset, scale) + base::Vector{info.mLeftPaddingPx, 0};
+    renderer::scaleVec(offset, scale) + base::Vec2{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
 
   const auto viewPortSize = base::Extents{
@@ -183,15 +183,15 @@ void setupWidescreenHudOffset(
 }
 
 
-std::vector<base::Vector> collectRadarDots(
+std::vector<base::Vec2> collectRadarDots(
   entityx::EntityManager& entities,
-  const base::Vector& playerPosition)
+  const base::Vec2& playerPosition)
 {
   using engine::components::Active;
   using engine::components::WorldPosition;
   using game_logic::components::AppearsOnRadar;
 
-  std::vector<base::Vector> radarDots;
+  std::vector<base::Vec2> radarDots;
 
   entities.each<WorldPosition, AppearsOnRadar, Active>(
     [&](
@@ -211,7 +211,7 @@ std::vector<base::Vector> collectRadarDots(
 
 
 template <typename ValueT>
-std::string vec2String(const base::Point<ValueT>& vec, const int width)
+std::string vec2String(const base::Vec2T<ValueT>& vec, const int width)
 {
   std::stringstream stream;
   // clang-format off
@@ -232,7 +232,7 @@ struct WaterEffectArea
 
 std::vector<WaterEffectArea> collectWaterEffectAreas(
   entityx::EntityManager& es,
-  const base::Vector& cameraPosition,
+  const base::Vec2& cameraPosition,
   const base::Extents& viewPortSize)
 {
   using engine::components::BoundingBox;
@@ -279,7 +279,7 @@ GameWorld::GameWorld(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
-  std::optional<base::Vector> playerPositionOverride,
+  std::optional<base::Vec2> playerPositionOverride,
   bool showWelcomeMessage,
   const PlayerInput& initialInput)
   : mpRenderer(context.mpRenderer)
@@ -853,10 +853,10 @@ void GameWorld::render(const float interpolationFactor)
       mpRenderer->setClipRect({});
 
       mpRenderer->setGlobalTranslation(
-        base::Vector{mpState->mScreenShakeOffsetX, 0});
+        base::Vec2{mpState->mScreenShakeOffsetX, 0});
       drawTopRow(data::tilesToPixels(viewPortSize.width));
 
-      mpRenderer->setGlobalTranslation(base::Vector{
+      mpRenderer->setGlobalTranslation(base::Vec2{
         mpState->mScreenShakeOffsetX,
         data::GameTraits::inGameViewPortOffset.y});
       drawWorld(viewPortSize);
@@ -923,7 +923,7 @@ auto GameWorld::determineSmoothScrollViewport(
   const auto interpolationY =
     direction.y < 0 ? 1.0f - interpolationFactor : interpolationFactor;
 
-  const auto interpolatedCameraPosition = base::Point<float>{
+  const auto interpolatedCameraPosition = base::Vec2T<float>{
     base::lerp(
       previousCameraPosition.x, currentCameraPosition.x, interpolationX),
     base::lerp(
@@ -935,7 +935,7 @@ auto GameWorld::determineSmoothScrollViewport(
     viewPortSizeOriginal.height + (direction.y != 0 ? 2 : 0)};
 
   const auto cameraOffset =
-    base::Vector{
+    base::Vec2{
       base::round(data::tilesToPixels(interpolatedCameraPosition.x)),
       base::round(data::tilesToPixels(interpolatedCameraPosition.y))} -
     data::tileVectorToPixelVector(previousCameraPosition);
@@ -1199,17 +1199,17 @@ bool GameWorld::canQuickLoad() const
 }
 
 
-void GameWorld::onReactorDestroyed(const base::Vector& position)
+void GameWorld::onReactorDestroyed(const base::Vec2& position)
 {
   flashScreen(data::GameTraits::INGAME_PALETTE[7]);
 
   mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
-    position + base::Vector{-1, 0},
+    position + base::Vec2{-1, 0},
     ProjectileDirection::Left);
   mpState->mEntityFactory.spawnProjectile(
     ProjectileType::ReactorDebris,
-    position + base::Vector{3, 0},
+    position + base::Vec2{3, 0},
     ProjectileDirection::Right);
 
   const auto shouldDoSpecialEvent = mpState->mBackdropSwitchCondition ==

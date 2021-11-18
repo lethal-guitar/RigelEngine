@@ -107,7 +107,7 @@ void AggressivePrisoner::update(
 void AggressivePrisoner::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Point<float>& inflictorVelocity,
+  const base::Vec2T<float>& inflictorVelocity,
   entityx::Entity entity)
 {
   using engine::components::AutoDestroy;
@@ -135,7 +135,7 @@ void AggressivePrisoner::onKilled(
     debrisMovement,
     position);
   d.mpParticles->spawnParticles(
-    position + base::Vector{3, 0}, data::GameTraits::INGAME_PALETTE[5]);
+    position + base::Vec2{3, 0}, data::GameTraits::INGAME_PALETTE[5]);
   d.mpServiceProvider->playSound(data::SoundId::BiologicalEnemyDestroyed);
 
   entity.remove<components::BehaviorController>();
