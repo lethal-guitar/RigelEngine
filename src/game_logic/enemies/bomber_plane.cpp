@@ -220,7 +220,7 @@ void BigBomb::update(
 void BigBomb::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Vec2T<float>&,
+  const base::Vec2f&,
   entityx::Entity entity)
 {
   // When shot while in the air, a slightly different series of explosions is

@@ -107,7 +107,7 @@ void AggressivePrisoner::update(
 void AggressivePrisoner::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Vec2T<float>& inflictorVelocity,
+  const base::Vec2f& inflictorVelocity,
   entityx::Entity entity)
 {
   using engine::components::AutoDestroy;

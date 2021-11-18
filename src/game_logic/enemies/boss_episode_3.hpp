@@ -45,7 +45,7 @@ struct BossEpisode3
   void onKilled(
     GlobalDependencies&,
     GlobalState&,
-    const base::Vec2T<float>&,
+    const base::Vec2f&,
     entityx::Entity entity);
 
   bool mHasBeenSighted = false;

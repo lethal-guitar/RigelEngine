@@ -35,18 +35,16 @@ using components::WorldPosition;
 namespace
 {
 
-base::Vec2T<float> updateMovementSequence(
-  entityx::Entity entity,
-  const base::Vec2T<float>& velocity)
+base::Vec2f
+  updateMovementSequence(entityx::Entity entity, const base::Vec2f& velocity)
 {
   auto& sequence = *entity.component<MovementSequence>();
   if (sequence.mCurrentStep >= sequence.mVelocites.size())
   {
     if (sequence.mResetVelocityAfterSequence)
     {
-      const auto resetVelocity = sequence.mEnableX
-        ? base::Vec2T<float>{}
-        : base::Vec2T<float>{velocity.x, 0.0f};
+      const auto resetVelocity =
+        sequence.mEnableX ? base::Vec2f{} : base::Vec2f{velocity.x, 0.0f};
       entity.remove<MovementSequence>();
       return resetVelocity;
     }

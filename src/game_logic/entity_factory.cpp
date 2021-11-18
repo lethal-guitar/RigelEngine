@@ -188,7 +188,7 @@ base::Vec2 adjustedPosition(
 }
 
 
-const base::Vec2T<float> FLY_RIGHT[] = {
+const base::Vec2f FLY_RIGHT[] = {
   {3.0f, 0.0f},
   {3.0f, 0.0f},
   {3.0f, 0.0f},
@@ -201,7 +201,7 @@ const base::Vec2T<float> FLY_RIGHT[] = {
   {1.0f, 3.0f}};
 
 
-const base::Vec2T<float> FLY_UPPER_RIGHT[] = {
+const base::Vec2f FLY_UPPER_RIGHT[] = {
   {3.0f, -3.0f},
   {2.0f, -2.0f},
   {2.0f, -1.0f},
@@ -214,7 +214,7 @@ const base::Vec2T<float> FLY_UPPER_RIGHT[] = {
   {1.0f, 3.0f}};
 
 
-const base::Vec2T<float> FLY_UP[] = {
+const base::Vec2f FLY_UP[] = {
   {0.0f, -3.0f},
   {0.0f, -2.0f},
   {0.0f, -2.0f},
@@ -227,7 +227,7 @@ const base::Vec2T<float> FLY_UP[] = {
   {0.0f, 3.0f}};
 
 
-const base::Vec2T<float> FLY_UPPER_LEFT[] = {
+const base::Vec2f FLY_UPPER_LEFT[] = {
   {-3.0f, -3.0f},
   {-2.0f, -2.0f},
   {-2.0f, -1.0f},
@@ -240,7 +240,7 @@ const base::Vec2T<float> FLY_UPPER_LEFT[] = {
   {-1.0f, 4.0f}};
 
 
-const base::Vec2T<float> FLY_LEFT[] = {
+const base::Vec2f FLY_LEFT[] = {
   {-3.0f, 0.0f},
   {-3.0f, 0.0f},
   {-3.0f, 0.0f},
@@ -253,7 +253,7 @@ const base::Vec2T<float> FLY_LEFT[] = {
   {-1.0f, 3.0f}};
 
 
-const base::Vec2T<float> FLY_DOWN[] = {
+const base::Vec2f FLY_DOWN[] = {
   {0.0f, 1.0f},
   {0.0f, 2.0f},
   {0.0f, 2.0f},
@@ -266,7 +266,7 @@ const base::Vec2T<float> FLY_DOWN[] = {
   {0.0f, 3.0f}};
 
 
-const base::Vec2T<float> SWIRL_AROUND[] = {
+const base::Vec2f SWIRL_AROUND[] = {
   {-2.0f, 1.0f},
   {-2.0f, 1.0f},
   {-2.0f, 1.0f},
@@ -279,7 +279,7 @@ const base::Vec2T<float> SWIRL_AROUND[] = {
   {-2.0f, 1.0f}};
 
 
-const base::ArrayView<base::Vec2T<float>> MOVEMENT_SEQUENCES[] = {
+const base::ArrayView<base::Vec2f> MOVEMENT_SEQUENCES[] = {
   FLY_RIGHT,
   FLY_UPPER_RIGHT,
   FLY_UP,

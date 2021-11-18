@@ -35,7 +35,7 @@ namespace
 {
 
 // clang-format off
-constexpr base::Vec2T<float> JUMP_ARC[] = {
+constexpr base::Vec2f JUMP_ARC[] = {
   {0.0f, -2.0f},
   {0.0f, -2.0f},
   {0.0f, -1.0f},
@@ -94,7 +94,7 @@ void SpikeBall::onHit(
 {
   const auto inflictorVelocity = inflictorEntity.has_component<MovingBody>()
     ? inflictorEntity.component<MovingBody>()->mVelocity
-    : base::Vec2T<float>{};
+    : base::Vec2f{};
 
   auto& body = *entity.component<MovingBody>();
   body.mVelocity.x = inflictorVelocity.x > 0 ? 1.0f : -1.0f;

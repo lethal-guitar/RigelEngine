@@ -204,7 +204,7 @@ void LaserTurret::onHit(
 void LaserTurret::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Vec2T<float>& inflictorVelocity,
+  const base::Vec2f& inflictorVelocity,
   entityx::Entity entity)
 {
   const auto& position = *entity.component<engine::components::WorldPosition>();

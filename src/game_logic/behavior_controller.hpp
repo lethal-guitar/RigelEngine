@@ -115,7 +115,7 @@ std::enable_if_t<detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   T& self,
   GlobalDependencies& dependencies,
   GlobalState& state,
-  const base::Vec2T<float>& inflictorVelocity,
+  const base::Vec2f& inflictorVelocity,
   entityx::Entity entity)
 {
   self.onKilled(dependencies, state, inflictorVelocity, entity);
@@ -127,7 +127,7 @@ std::enable_if_t<!detail::hasOnKilled<T>::value> behaviorControllerOnKilled(
   T&,
   GlobalDependencies&,
   GlobalState& state,
-  const base::Vec2T<float>&,
+  const base::Vec2f&,
   entityx::Entity)
 {
 }
@@ -203,7 +203,7 @@ public:
   void onKilled(
     GlobalDependencies& dependencies,
     GlobalState& state,
-    const base::Vec2T<float>& inflictorVelocity,
+    const base::Vec2f& inflictorVelocity,
     entityx::Entity entity)
   {
     mpSelf->onKilled(dependencies, state, inflictorVelocity, entity);
@@ -247,7 +247,7 @@ private:
     virtual void onKilled(
       GlobalDependencies& dependencies,
       GlobalState& state,
-      const base::Vec2T<float>& inflictorVelocity,
+      const base::Vec2f& inflictorVelocity,
       entityx::Entity entity) = 0;
 
     virtual void onCollision(
@@ -292,7 +292,7 @@ private:
     void onKilled(
       GlobalDependencies& dependencies,
       GlobalState& state,
-      const base::Vec2T<float>& inflictorVelocity,
+      const base::Vec2f& inflictorVelocity,
       entityx::Entity entity) override
     {
       behaviorControllerOnKilled(

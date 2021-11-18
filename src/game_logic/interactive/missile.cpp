@@ -140,7 +140,7 @@ void Missile::update(
 void Missile::onKilled(
   GlobalDependencies& d,
   GlobalState& state,
-  const base::Vec2T<float>& inflictorVelocity,
+  const base::Vec2f& inflictorVelocity,
   entityx::Entity entity)
 {
   if (!mIsActive)
@@ -194,7 +194,7 @@ void BrokenMissile::update(
 void BrokenMissile::onKilled(
   GlobalDependencies& d,
   GlobalState& state,
-  const base::Vec2T<float>& inflictorVelocity,
+  const base::Vec2f& inflictorVelocity,
   entityx::Entity entity)
 {
   if (!mIsActive)

@@ -26,7 +26,7 @@ using namespace game_logic::components::parameter_aliases;
 const auto SCORE_NUMBER_LIFE_TIME = 60;
 
 // clang-format off
-const base::Vec2T<float> SCORE_NUMBER_MOVE_SEQUENCE[] = {
+const base::Vec2f SCORE_NUMBER_MOVE_SEQUENCE[] = {
   {0.0f, -1.0f},
   {0.0f, -1.0f},
   {0.0f, -1.0f},
@@ -74,13 +74,13 @@ const int HINT_GLOBE_ANIMATION[] = {
 // clang-format on
 
 
-base::Vec2T<float> directionToVector(const ProjectileDirection direction)
+base::Vec2f directionToVector(const ProjectileDirection direction)
 {
   const auto isNegative = direction == ProjectileDirection::Left ||
     direction == ProjectileDirection::Up;
   const auto value = isNegative ? -1.0f : 1.0f;
 
-  using Vec = base::Vec2T<float>;
+  using Vec = base::Vec2f;
   return isHorizontal(direction) ? Vec{value, 0.0f} : Vec{0.0f, value};
 }
 

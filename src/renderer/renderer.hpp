@@ -377,7 +377,7 @@ public:
    * screen resolution, without needing the client code to be aware of
    * this. Also see upscaling_utils.hpp.
    */
-  void setGlobalScale(const base::Vec2T<float>& scale);
+  void setGlobalScale(const base::Vec2f& scale);
 
   /** Set clipping rectangle to constrain rendering
    *
@@ -410,7 +410,7 @@ public:
   base::Size<int> windowSize() const;
 
   base::Vec2 globalTranslation() const;
-  base::Vec2T<float> globalScale() const;
+  base::Vec2f globalScale() const;
   std::optional<base::Rect<int>> clipRect() const;
 
 private:

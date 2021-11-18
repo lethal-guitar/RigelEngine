@@ -60,7 +60,7 @@ private:
   void spawnWallImpactEffect(
     entityx::Entity entity,
     const base::Vec2& position,
-    const base::Vec2T<float>& velocity,
+    const base::Vec2f& velocity,
     bool isRocket);
   bool isCollidingWithWorld(const base::Rect<int>& bbox);
 

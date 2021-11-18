@@ -195,7 +195,7 @@ void BossEpisode1::onCollision(
 void BossEpisode1::onKilled(
   GlobalDependencies& d,
   GlobalState&,
-  const base::Vec2T<float>&,
+  const base::Vec2f&,
   entityx::Entity entity)
 {
   using engine::components::MovingBody;

@@ -179,7 +179,7 @@ void Snake::update(
 void Snake::onKilled(
   GlobalDependencies& d,
   GlobalState& s,
-  const base::Vec2T<float>&,
+  const base::Vec2f&,
   entityx::Entity entity)
 {
   if (s.mpPlayer->isIncapacitated())
