@@ -10,6 +10,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 * Andrei-Florin Bencsik ([@bencsikandrei](https://github.com/bencsikandrei)): Replacements for Boost string utilities, introducing clang-format, .deb package creation, various code & CMake cleanups, and more
 * Pratik Anand ([@pratikone](https://github.com/pratikone)): Webassembly port, widescreen support, game path browser, initial gamepad support, README improvements
 * Ryan Brown ([@rbrown46](https://github.com/rbrown46)): Actor image modding (replace sprites using `png` files)
+* Soham Roy ([@sohamroy19](https://github.com/sohamroy19)): Refactoring & code cleanups
 * [@LunarLoony](https://github.com/LunarLoony): RigelEngine icon
 * [@mnhauke](https://github.com/mnhauke): OpenSUSE package
 * [@PatriotRossii](https://github.com/PatriotRossii): Refactoring, code cleanups, and more
