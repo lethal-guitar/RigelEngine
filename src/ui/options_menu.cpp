@@ -748,6 +748,8 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredText("Andrei-Florin Bencsik (https://github.com/bencsikandrei)");
   centeredText("Pratik Anand (https://github.com/pratikone)");
   centeredText("Ryan Brown (https://github.com/rbrown46)");
+  centeredText("Soham Roy (https://github.com/sohamroy19)");
+  centeredText("PatriotRossii (https://github.com/PatriotRossii)");
   centeredText("s-martin (https://github.com/s-martin)");
 
   ImGui::NewLine();
