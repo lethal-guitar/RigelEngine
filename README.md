@@ -6,7 +6,13 @@ This project is a re-implementation of the game [Duke Nukem II](
 https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee
 Software in 1993 for MS-DOS. RigelEngine works as a drop-in replacement for the original executable: It reads the game's data files and plays just like the original,
 but runs natively on modern operating systems and is written in modern C++ code with a completely new architecture under the hood.
-On top of that, it offers various modern enhancements like better game controller support, a wide-screen mode, quick saving, extended modding features etc.
+On top of that, it offers many modern enhancements, including:
+
+* wide-screen mode
+* smooth scrolling & movement mode with increased frame rate
+* quick saving
+* improved game controller support
+* extended modding features
 
 There was never any source code released for the original game, so this project
 is based on reverse engineering. Disassembly from the original executable served as basis for writing new code from scratch, while video captures from DosBox were used for frame-by-frame verification.
@@ -38,22 +44,17 @@ Android and iOS versions might happen someday, but there are no concrete plans a
 ### System requirements
 
 RigelEngine is not very demanding, but it does require OpenGL-capable graphics hardware.
-Either OpenGL 3.0 or OpenGL ES 2.0 can be used, depending on what's chosen at compile time.
-To build in GL ES mode, pass `-DUSE_GL_ES=ON` to CMake.
+Either OpenGL 3.0 or OpenGL ES 2.0 can be chosen at compile time.
 
 Any Nvidia or AMD graphics card from 2007 or later should run the game without problems.
 Intel integrated GPUs only added OpenGL 3 support in 2011, however.
-On Linux, using GL ES can still be an option for older Intel GPUs.
+On Linux, using GL ES can be an option for those older Intel GPUs.
 
 See [Supported Graphics cards](https://github.com/lethal-guitar/RigelEngine/wiki/Supported-graphics-cards-(GPUs)) for more info.
 
 Aside from the graphics card, you don't need much.
 The game needs less than 32 MB of RAM (64 MB on OS X),
 and runs fine on a single-core ARMv6 CPU clocked at 700 MHz (Raspberry Pi 1).
-
-### Differences to the original Duke Nukem II
-
-See [list of differences](https://github.com/lethal-guitar/RigelEngine/wiki#differences-to-the-original-duke-nukem-ii-executable).
 
 ## Contributing
 
