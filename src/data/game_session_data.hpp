@@ -34,7 +34,10 @@ enum class Difficulty
 struct GameSessionId
 {
   GameSessionId() = default;
-  GameSessionId(const int episode, const int level, const Difficulty difficulty)
+  GameSessionId(
+    const int episode,
+    const int level,
+    const Difficulty difficulty = Difficulty::Medium)
     : mEpisode(episode)
     , mLevel(level)
     , mDifficulty(difficulty)
