@@ -69,7 +69,6 @@ to find for the build to work:
 
 * SDL >= 2.0.4
 * SDL\_mixer >= 2.0.1
-* Boost >= 1.65 (optional, needed for command line options)
 
 All other dependencies are already provided as submodules, source
 code (in the `3rd_party` directory) or fetched on configuration, and will be built along with RigelEngine.
@@ -85,6 +84,7 @@ These are:
 * [Glad](https://github.com/Dav1dde/glad) OpenGL function loader generator
 * [GLM](https://github.com/g-truc/glm.git) math library
 * [JSON for modern C++](https://github.com/nlohmann/json)
+* [Lyra](https://github.com/bfgroup/Lyra) command line parser
 * Speex Resampler (taken from [libspeex](http://www.speex.org/))
 * [STB image](https://github.com/nothings/stb) image reading/writing library
 * [STB rect_pack](https://github.com/nothings/stb) rectangle packer for building texture atlases
@@ -105,9 +105,8 @@ as long as all necessary dependencies are available at recent enough versions.
 #### <a name="linux-build-instructions-194">Ubuntu 19.04 or newer</a>
 
 ```bash
-# Install all external dependencies, as well as the CMake build system
-# (libboost-all-dev is optional):
-sudo apt-get install cmake libboost-all-dev libsdl2-dev libsdl2-mixer-dev
+# Install all external dependencies, as well as the CMake build system:
+sudo apt-get install cmake libsdl2-dev libsdl2-mixer-dev
 
 # Configure and build (run inside your clone of the repo):
 mkdir build
@@ -135,8 +134,7 @@ has to be built from source or installed via a PPA.
 
 ```bash
 # Install all external dependencies, and gcc 8. CMake will be built from source.
-# Again, libboost-all-dev is optional.
-sudo apt-get install g++-8 libboost-all-dev libsdl2-dev libsdl2-mixer-dev
+sudo apt-get install g++-8 libsdl2-dev libsdl2-mixer-dev
 
 # Now we need to install a newer version of CMake. If you already have CMake
 # installed, you can uninstall it by running:
@@ -180,12 +178,10 @@ On Fedora, the following command installs all
 required and optional dependencies:
 
 ```bash
-sudo dnf install cmake boost-devel boost-program-options boost-static SDL2-devel SDL2_mixer-devel
+sudo dnf install cmake SDL2-devel SDL2_mixer-devel
 ```
 
-Note the additional `boost-static` package - without it, there will be linker errors.
-
-This also assumes that `make`, `gcc` and `gcc-c++` are already installed.
+This assumes that `make`, `gcc` and `gcc-c++` are already installed.
 
 #### <a name="linux-build-instructions-gles">OpenGL ES version</a>
 
@@ -210,7 +206,7 @@ If you've already built the regular version before, you can reuse the existing b
 :exclamation: Make sure to read [Running on Raspberry Pi](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance#raspberry-pi) for information on how to achieve best performance!
 
 To build on the Pi itself, I recommend Raspbian (aka Raspberry Pi OS) _Buster_.
-Older versions like Stretch don't have recent enough versions of CMake, Boost and Gcc.
+Older versions like Stretch don't have recent enough versions of CMake and Gcc.
 
 Installing the dependencies on Buster works exactly like [on Ubuntu](#linux-build-instructions-194).
 
@@ -263,8 +259,7 @@ docker run -ti --device=/dev/dri:/dev/dri --cap-add=SYS_PTRACE --security-opt se
 ```
 # Install dependencies
 # You might need to run brew update.
-# boost is optional.
-brew install cmake sdl2 sdl2_mixer boost
+brew install cmake sdl2 sdl2_mixer
 
 # Configure & build
 mkdir build
@@ -282,8 +277,7 @@ make
 
 ```bash
 # You might need to run brew update.
-# boost is optional.
-brew install llvm@8 cmake sdl2 sdl2_mixer boost
+brew install llvm@8 cmake sdl2 sdl2_mixer
 
 # Set up environment variables so that CMake picks up the newly installed clang -
 # this is only necessary the first time.
@@ -322,8 +316,8 @@ So in case of errors, I'd recommend double checking the path first.
 #### <a name="windows-build-instructions-64">64-bit builds</a>
 
 ```bash
-# Install dependencies, boost is optional
-vcpkg install boost-program-options:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
+# Install dependencies
+vcpkg install sdl2:x64-windows sdl2-mixer:x64-windows --triplet x64-windows
 
 # Run CMake
 mkdir build
@@ -342,8 +336,8 @@ start RigelEngine.sln
 If you'd like to build for 32-bit and have trouble sorting out build errors, feel free to [open an issue](https://github.com/lethal-guitar/RigelEngine/issues/new/choose) and I'll look into it.
 
 ```bash
-# Install dependencies, boost is optional
-vcpkg install boost-program-options:x86-windows sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
+# Install dependencies
+vcpkg install sdl2:x86-windows sdl2-mixer:x86-windows --triplet x86-windows
 
 # Run CMake
 mkdir build
