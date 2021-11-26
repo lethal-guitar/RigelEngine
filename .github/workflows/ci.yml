@@ -79,7 +79,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install dependencies
-      run: brew install sdl2 sdl2_mixer boost
+      run: brew install sdl2 sdl2_mixer
     - name: Run CMake (debug)
       run: cmake -H. -Bbuild_dbg -DCMAKE_BUILD_TYPE=Debug -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON
     - name: Run CMake (release)
