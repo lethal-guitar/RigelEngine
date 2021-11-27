@@ -409,10 +409,6 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
         ".html"
     )
 else()
-    target_compile_definitions(RigelEngine PRIVATE
-        RIGEL_HAS_BOOST=$<BOOL:${Boost_FOUND}>
-    )
-
     target_sources(RigelEngine PRIVATE
         game_main.cpp
         game_main.hpp
@@ -421,14 +417,8 @@ else()
     target_link_libraries(RigelEngine PRIVATE
         SDL2::Main
         rigel_core
+        lyra
     )
-
-    if(${Boost_FOUND})
-        target_link_libraries(RigelEngine PRIVATE
-            Boost::program_options
-            Boost::disable_autolinking
-        )
-    endif()
 
     set_target_properties(RigelEngine PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/dist/osx/Info.plist

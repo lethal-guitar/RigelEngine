@@ -37,7 +37,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install dependencies
-      run: brew install sdl2 sdl2_mixer boost llvm@8
+      run: brew install sdl2 sdl2_mixer llvm@8
     - name: Run CMake
       run: |
         export rigel_llvm_path=`brew --prefix llvm@8`;

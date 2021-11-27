@@ -822,15 +822,14 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   ImGui::NewLine();
   ImGui::NewLine();
 
-#ifdef RIGEL_HAS_BOOST
-  centeredTextBig("Boost program_options", 1.4f);
+  centeredTextBig("Lyra", 1.4f);
   ImGui::Spacing();
-  centeredText("Copyright (C) 2002-2004 Vladimir Prus");
-  centeredText("https://github.com/boostorg/program_options");
+  centeredText("Copyright 2018-2019 René Ferdinand Rivera Morell");
+  centeredText("Copyright 2017 Two Blue Cubes Ltd. All rights reserved.");
+  centeredText("https://github.com/bfgroup/Lyra");
 
   ImGui::NewLine();
   ImGui::NewLine();
-#endif
 
   centeredTextBig("DBOPL AdLib emulator (from DosBox)", 1.4f);
   ImGui::Spacing();

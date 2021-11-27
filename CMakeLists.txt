@@ -55,8 +55,6 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Emscripten")
 
     rigel_define_wasm_targets_for_dependencies()
 else()
-    set(Boost_USE_STATIC_LIBS ON)
-    find_package(Boost 1.64 COMPONENTS program_options)
     find_package(SDL2 REQUIRED)
     find_package(SDL2_mixer REQUIRED)
 endif()
@@ -98,7 +96,3 @@ if(BUILD_BENCHMARKS)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/rigel_pack.cmake)
-
-if(NOT ${Boost_FOUND})
-    message(WARNING "Boost not found, building without command line argument support")
-endif()
