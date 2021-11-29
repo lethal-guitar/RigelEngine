@@ -103,3 +103,14 @@ TEST_CASE("Array view CTAD")
     const rigel::base::ArrayView view{array};
   }
 }
+
+TEST_CASE("Array view core functionality")
+{
+  const auto array = std::array{10, 20, 30, 40, 50};
+
+  const auto view = rigel::base::ArrayView<int>{array};
+
+  SECTION("front") { CHECK(view.front() == 10); }
+
+  SECTION("back") { CHECK(view.back() == 50); }
+}

@@ -116,12 +116,12 @@ public:
 
   [[nodiscard]] constexpr const_reference front() const noexcept
   {
-    return *begin();
+    return mpData[0];
   }
 
   [[nodiscard]] constexpr const_reference back() const noexcept
   {
-    return *end();
+    return mpData[mSize - 1];
   }
 
   [[nodiscard]] constexpr const_pointer data() const noexcept { return mpData; }
