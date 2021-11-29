@@ -17,12 +17,19 @@
 #pragma once
 
 #include <cstdint>
-#include <stdexcept>
-#include <string>
+#include <cstdlib>
 
 
 namespace rigel::base
 {
+
+namespace detail
+{
+
+[[noreturn]] void throwOutOfRange(std::uint32_t index);
+
+}
+
 
 /** Read-only array view type
  *
@@ -105,10 +112,9 @@ public:
 
   [[nodiscard]] const_reference at(const size_type index) const
   {
-    using namespace std::string_literals;
     if (index >= mSize)
     {
-      throw std::range_error("Index out of range: "s + std::to_string(index));
+      detail::throwOutOfRange(index);
     }
 
     return mpData[index];
