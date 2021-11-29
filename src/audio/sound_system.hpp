@@ -38,8 +38,6 @@ class ResourceLoader;
 namespace rigel::audio
 {
 
-class ImfPlayer;
-
 
 using RawBuffer = std::vector<std::uint8_t>;
 
@@ -103,7 +101,7 @@ private:
   void unhookMusic() const;
   sdl_utils::Ptr<Mix_Music> loadReplacementSong(const std::string& name);
 
-  struct MusicConversionWrapper;
+  struct ImfPlayerWrapper;
 
   struct LoadedSound
   {
@@ -117,8 +115,7 @@ private:
 
   base::ScopeGuard mCloseMixerGuard;
   std::array<LoadedSound, data::NUM_SOUND_IDS> mSounds;
-  std::unique_ptr<ImfPlayer> mpMusicPlayer;
-  std::unique_ptr<MusicConversionWrapper> mpMusicConversionWrapper;
+  std::unique_ptr<ImfPlayerWrapper> mpMusicPlayer;
   mutable sdl_utils::Ptr<Mix_Music> mpCurrentReplacementSong;
   mutable std::unordered_map<std::string, std::string>
     mReplacementSongFileCache;
