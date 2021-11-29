@@ -16,7 +16,7 @@
 
 #include "sound_system.hpp"
 
-#include "audio/imf_player.hpp"
+#include "audio/software_imf_player.hpp"
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
 #include "loader/resource_loader.hpp"
@@ -230,7 +230,7 @@ struct SoundSystem::ImfPlayerWrapper
 
   SDL_AudioCVT mConversionSpecs;
   std::unique_ptr<std::uint8_t[]> mpBuffer;
-  ImfPlayer mPlayer;
+  SoftwareImfPlayer mPlayer;
   int mBytesPerSample;
 };
 
@@ -275,11 +275,11 @@ SoundSystem::SoundSystem(
   // aka raw AdLib commands). Therefore, we cannot use any of the high-level
   // music playback functionality offered by the library. Instead, we register
   // our own callback handler and then use an AdLib emulator to generate audio
-  // from the music data (ImfPlayer class).
+  // from the music data (SoftwareImfPlayer class).
   //
-  // The ImfPlayer class only knows how to produce audio data in 16-bit integer
-  // format (AUDIO_S16LSB), and in mono.  Converting from the player's format
-  // into the output device format is handled by the ImfPlayerWrapper
+  // The SoftwareImfPlayer class only knows how to produce audio data in 16-bit
+  // integer format (AUDIO_S16LSB), and in mono.  Converting from the player's
+  // format into the output device format is handled by the ImfPlayerWrapper
   // class.
   mpMusicPlayer =
     std::make_unique<ImfPlayerWrapper>(audioFormat, sampleRate, numChannels);

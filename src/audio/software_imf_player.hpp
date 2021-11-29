@@ -26,12 +26,12 @@
 namespace rigel::audio
 {
 
-class ImfPlayer
+class SoftwareImfPlayer
 {
 public:
-  explicit ImfPlayer(int sampleRate);
-  ImfPlayer(const ImfPlayer&) = delete;
-  ImfPlayer& operator=(const ImfPlayer&) = delete;
+  explicit SoftwareImfPlayer(int sampleRate);
+  SoftwareImfPlayer(const SoftwareImfPlayer&) = delete;
+  SoftwareImfPlayer& operator=(const SoftwareImfPlayer&) = delete;
 
   void playSong(data::Song&& song);
   void setVolume(const float volume);
