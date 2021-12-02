@@ -62,7 +62,7 @@ constexpr auto CREDITS_SCROLL_SPEED = 1.6f;
 constexpr auto MAX_OPTIONS_MENU_ASPECT_RATIO = 16.0f / 9.0f;
 
 constexpr auto STANDARD_FPS_LIMITS =
-  std::array<int, 8>{30, 60, 70, 72, 90, 120, 144, 240};
+  std::array{30, 60, 70, 72, 75, 90, 120, 144, 240};
 
 
 template <typename Callback>
