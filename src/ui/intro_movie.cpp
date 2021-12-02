@@ -215,7 +215,7 @@ void IntroMovie::updateAndRender(engine::TimeDelta dt)
   if (mMoviePlayer.hasCompletedPlayback())
   {
     ++mCurrentConfiguration;
-    if (mCurrentConfiguration >= mMovieConfigurations.size())
+    if (isFinished())
     {
       mpServiceProvider->fadeOutScreen();
       return;
