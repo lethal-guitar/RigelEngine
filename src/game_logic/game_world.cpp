@@ -650,6 +650,10 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   const auto& viewPortSize = widescreenModeOn()
     ? viewPortSizeWideScreen(mpRenderer)
     : data::GameTraits::mapViewPortSize;
+  const auto& renderingViewPortSize = widescreenModeOn()
+    ? base::
+        Extents{viewPortSize.width, data::GameTraits::viewPortHeightTiles - 1}
+    : viewPortSize;
 
   mpState->mMapRenderer.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
@@ -663,7 +667,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
     input, mpState->mEntities);
   mpState->mPlayer.update(input);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
-  mpState->mCamera.update(input, viewPortSize);
+  mpState->mCamera.update(input, viewPortSize, renderingViewPortSize);
 
   engine::markActiveEntities(
     mpState->mEntities, mpState->mCamera.position(), viewPortSize);
@@ -703,10 +707,6 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   // the screen are rendered.
   if (!mpOptions->mMotionSmoothing)
   {
-    const auto renderingViewPortSize = widescreenModeOn()
-      ? base::
-          Extents{viewPortSize.width, data::GameTraits::viewPortHeightTiles - 1}
-      : viewPortSize;
     mpState->mSpriteRenderingSystem.update(
       mpState->mEntities,
       renderingViewPortSize,
