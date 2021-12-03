@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "imf_player.hpp"
+#include "software_imf_player.hpp"
 
 #include "base/math_tools.hpp"
 #include "data/game_traits.hpp"
@@ -36,7 +36,7 @@ int imfDelayToSamples(const int delay, const int sampleRate)
 } // namespace
 
 
-ImfPlayer::ImfPlayer(const int sampleRate)
+SoftwareImfPlayer::SoftwareImfPlayer(const int sampleRate)
   : mEmulator(sampleRate)
   , mSampleRate(sampleRate)
   , mSongSwitchPending(false)
@@ -45,7 +45,7 @@ ImfPlayer::ImfPlayer(const int sampleRate)
 }
 
 
-void ImfPlayer::playSong(data::Song&& song)
+void SoftwareImfPlayer::playSong(data::Song&& song)
 {
   {
     std::lock_guard<std::mutex> takeLock{mAudioLock};
@@ -55,13 +55,15 @@ void ImfPlayer::playSong(data::Song&& song)
 }
 
 
-void ImfPlayer::setVolume(const float volume)
+void SoftwareImfPlayer::setVolume(const float volume)
 {
   mVolume.store(std::clamp(volume, 0.0f, 1.0f));
 }
 
 
-void ImfPlayer::render(std::int16_t* pBuffer, std::size_t samplesRequired)
+void SoftwareImfPlayer::render(
+  std::int16_t* pBuffer,
+  std::size_t samplesRequired)
 {
   if (mSongSwitchPending && mAudioLock.try_lock())
   {

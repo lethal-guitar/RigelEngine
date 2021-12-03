@@ -1,8 +1,9 @@
 set(core_sources
-    audio/imf_player.cpp
-    audio/imf_player.hpp
+    audio/software_imf_player.cpp
+    audio/software_imf_player.hpp
     audio/sound_system.cpp
     audio/sound_system.hpp
+    base/array_view.cpp
     base/array_view.hpp
     base/clock.hpp
     base/container_utils.hpp

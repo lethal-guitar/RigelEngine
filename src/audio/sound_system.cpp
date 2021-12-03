@@ -16,7 +16,7 @@
 
 #include "sound_system.hpp"
 
-#include "audio/imf_player.hpp"
+#include "audio/software_imf_player.hpp"
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
 #include "loader/resource_loader.hpp"
@@ -189,14 +189,13 @@ auto idToIndex(const data::SoundId id)
 } // namespace
 
 
-struct SoundSystem::MusicConversionWrapper
+struct SoundSystem::ImfPlayerWrapper
 {
-  MusicConversionWrapper(
-    ImfPlayer* pPlayer,
+  ImfPlayerWrapper(
     const std::uint16_t audioFormat,
     const int sampleRate,
     const int numChannels)
-    : mpPlayer(pPlayer)
+    : mPlayer(sampleRate)
     , mBytesPerSample((SDL_AUDIO_BITSIZE(audioFormat) / 8) * numChannels)
   {
     SDL_BuildAudioCVT(
@@ -218,16 +217,20 @@ struct SoundSystem::MusicConversionWrapper
   {
     auto pBuffer = mpBuffer.get();
     const auto samplesToRender = bytesRequired / mBytesPerSample;
-    mpPlayer->render(reinterpret_cast<std::int16_t*>(pBuffer), samplesToRender);
+    mPlayer.render(reinterpret_cast<std::int16_t*>(pBuffer), samplesToRender);
 
     mConversionSpecs.len = samplesToRender * sizeof(std::int16_t);
     SDL_ConvertAudio(&mConversionSpecs);
     std::memcpy(pOutBuffer, pBuffer, mConversionSpecs.len_cvt);
   }
 
+  void playSong(data::Song&& song) { mPlayer.playSong(std::move(song)); }
+
+  void setVolume(const float volume) { mPlayer.setVolume(volume); }
+
   SDL_AudioCVT mConversionSpecs;
   std::unique_ptr<std::uint8_t[]> mpBuffer;
-  ImfPlayer* mpPlayer;
+  SoftwareImfPlayer mPlayer;
   int mBytesPerSample;
 };
 
@@ -272,15 +275,14 @@ SoundSystem::SoundSystem(
   // aka raw AdLib commands). Therefore, we cannot use any of the high-level
   // music playback functionality offered by the library. Instead, we register
   // our own callback handler and then use an AdLib emulator to generate audio
-  // from the music data (ImfPlayer class).
+  // from the music data (SoftwareImfPlayer class).
   //
-  // The ImfPlayer class only knows how to produce audio data in 16-bit integer
-  // format (AUDIO_S16LSB), and in mono.  Converting from the player's format
-  // into the output device format is handled by the MusicConversionWrapper
+  // The SoftwareImfPlayer class only knows how to produce audio data in 16-bit
+  // integer format (AUDIO_S16LSB), and in mono.  Converting from the player's
+  // format into the output device format is handled by the ImfPlayerWrapper
   // class.
-  mpMusicPlayer = std::make_unique<ImfPlayer>(sampleRate);
-  mpMusicConversionWrapper = std::make_unique<MusicConversionWrapper>(
-    mpMusicPlayer.get(), audioFormat, sampleRate, numChannels);
+  mpMusicPlayer =
+    std::make_unique<ImfPlayerWrapper>(audioFormat, sampleRate, numChannels);
 
   // For sound playback, we want to be able to play as many sound effects in
   // parallel as possible. In the original game, the number of available sound
@@ -508,10 +510,10 @@ void SoundSystem::hookMusic() const
 {
   Mix_HookMusic(
     [](void* pUserData, Uint8* pOutBuffer, int bytesRequired) {
-      auto pWrapper = static_cast<MusicConversionWrapper*>(pUserData);
+      auto pWrapper = static_cast<ImfPlayerWrapper*>(pUserData);
       pWrapper->render(pOutBuffer, bytesRequired);
     },
-    mpMusicConversionWrapper.get());
+    mpMusicPlayer.get());
 }
 
 

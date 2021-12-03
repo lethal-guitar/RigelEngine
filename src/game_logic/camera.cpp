@@ -23,6 +23,7 @@
 #include "game_logic/player.hpp"
 
 #include <algorithm>
+#include <functional>
 
 namespace ex = entityx;
 
@@ -171,9 +172,13 @@ void Camera::synchronizeTo(const Camera& other)
 }
 
 
-void Camera::update(const PlayerInput& input, const base::Extents& viewPortSize)
+void Camera::update(
+  const PlayerInput& input,
+  const base::Extents& viewPortSize,
+  const base::Extents& renderViewportSize)
 {
   mViewPortSize = viewPortSize;
+  mRenderViewPortSize = renderViewportSize;
   updateManualScrolling(input);
 
   if (!mpPlayer->stateIs<GettingSuckedIntoSpace>())
@@ -236,13 +241,29 @@ void Camera::updateAutomaticScrolling()
 
 void Camera::setPosition(const base::Vec2 position)
 {
+  const auto usableViewPortHeight = std::invoke([&]() {
+    const auto extraViewportHeight =
+      mRenderViewPortSize.height - mViewPortSize.height;
+    if (extraViewportHeight == 0)
+    {
+      return mViewPortSize.height;
+    }
+
+    const auto maxPlayerPosY = mpMap->height() - 1;
+    const auto playerOffsetFromBottomOfMap =
+      maxPlayerPosY - 1 - mpPlayer->position().y;
+    const auto playerHeightUnitsCoveredByHud =
+      std::max(0, extraViewportHeight - playerOffsetFromBottomOfMap);
+    return mRenderViewPortSize.height - (playerHeightUnitsCoveredByHud);
+  });
+
   // The std::max(_, 0) is for the case that the viewport is bigger than the
   // map, which would result in negative values
-  const auto maxPosition = base::Extents{
+  const auto maxPosition = base::Vec2{
     std::max(static_cast<int>(mpMap->width() - mViewPortSize.width), 0),
-    std::max(static_cast<int>(mpMap->height() - mViewPortSize.height), 0)};
-  mPosition.x = std::clamp(position.x, 0, maxPosition.width);
-  mPosition.y = std::clamp(position.y, 0, maxPosition.height);
+    std::max(static_cast<int>(mpMap->height() - usableViewPortHeight), 0)};
+  mPosition.x = std::clamp(position.x, 0, maxPosition.x);
+  mPosition.y = std::clamp(position.y, 0, maxPosition.y);
 }
 
 

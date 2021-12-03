@@ -94,6 +94,7 @@ void DukeScriptRunner::executeScript(const data::script::Script& script)
   mCurrentPersistentSelectionSlot = std::nullopt;
   mPagerState = std::nullopt;
   mCheckBoxStates = std::nullopt;
+  mDelayState = std::nullopt;
   mFadeInBeforeNextWaitStateScheduled = false;
   mDisableMenuFunctionalityForNextPagesDefinition = false;
   mTextBoxOffsetEnabled = false;

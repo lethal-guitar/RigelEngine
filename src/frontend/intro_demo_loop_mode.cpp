@@ -92,6 +92,8 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event)
       return true;
     },
 
+    [&](Credits& state) { return true; },
+
     [&](auto&& state) {
       mContext.mpScriptRunner->handleEvent(event);
       return mContext.mpScriptRunner->hasFinishedExecution() &&
@@ -140,23 +142,23 @@ void IntroDemoLoopMode::startCurrentStep()
 
     [this](Credits& state) {
       auto creditsScript = mContext.mpScripts->at("&Credits");
-      creditsScript.emplace_back(data::script::Delay{700});
 
       // The credits screen is shown twice as long in the registered version.
       // This makes the timing equivalent between the versions, only that the
       // shareware version will switch to the order info screen after half the
       // time has elapsed.
-      //
-      // Consequently, we always insert two 700 tick delays, but only insert
-      // the order info script commands if we're running the shareware version.
       if (mContext.mpServiceProvider->isSharewareVersion())
       {
+        creditsScript.emplace_back(data::script::Delay{700});
         const auto orderInfoScript = mContext.mpScripts->at("Q_ORDER");
         creditsScript.insert(
           end(creditsScript), begin(orderInfoScript), end(orderInfoScript));
+        creditsScript.emplace_back(data::script::Delay{700});
       }
-
-      creditsScript.emplace_back(data::script::Delay{700});
+      else
+      {
+        creditsScript.emplace_back(data::script::Delay{700 * 2});
+      }
 
       mContext.mpScriptRunner->executeScript(creditsScript);
     },
