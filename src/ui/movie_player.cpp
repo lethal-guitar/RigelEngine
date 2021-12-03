@@ -85,39 +85,60 @@ void MoviePlayer::updateAndRender(const engine::TimeDelta timeDelta)
     mHasShownFirstFrame = true;
   }
 
+
+  auto invokeCallback = [&]() {
+    const int frameNrIncludingFirstImage =
+      (mCurrentFrame + 1) % mAnimationFrames.size();
+    invokeFrameCallbackIfPresent(frameNrIncludingFirstImage);
+  };
+
   mElapsedTime += timeDelta;
   const auto elapsedFrames = static_cast<int>(mElapsedTime / mFrameDelay);
 
   if (elapsedFrames > 0)
   {
     mElapsedTime -= elapsedFrames * mFrameDelay;
-    ++mCurrentFrame;
 
     if (mRemainingRepetitions)
     {
       auto& repetitionsRemaining = *mRemainingRepetitions;
+      const auto isLastRepetition = repetitionsRemaining == 1;
 
       // We render one frame less during the last repetition, since the first
       // (full) image is to be counted as if it was the first frame.
       const auto framesToRenderThisRepetition =
-        static_cast<int>(mAnimationFrames.size()) -
-        (repetitionsRemaining == 1 ? 1 : 0);
+        static_cast<int>(mAnimationFrames.size()) - (isLastRepetition ? 1 : 0);
+      const auto isLastFrame =
+        mCurrentFrame + 1 >= framesToRenderThisRepetition;
 
-      if (mCurrentFrame >= framesToRenderThisRepetition)
+      if (isLastFrame)
       {
-        mCurrentFrame = 0;
         --repetitionsRemaining;
+
+        // If we are on the last repetition, we keep showing the last frame,
+        // otherwise, restart from the beginning.
+        if (repetitionsRemaining > 0)
+        {
+          mCurrentFrame = 0;
+        }
+      }
+      else
+      {
+        ++mCurrentFrame;
+      }
+
+      if (!isLastRepetition || !isLastFrame)
+      {
+        invokeCallback();
       }
     }
     else
     {
       // Repeat forever
+      ++mCurrentFrame;
       mCurrentFrame %= mAnimationFrames.size();
+      invokeCallback();
     }
-
-    const int frameNrIncludingFirstImage =
-      (mCurrentFrame + 1) % mAnimationFrames.size();
-    invokeFrameCallbackIfPresent(frameNrIncludingFirstImage);
   }
 
   {
