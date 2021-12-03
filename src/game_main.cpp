@@ -67,78 +67,14 @@ void showLoadingScreen(SDL_Window* pWindow)
 }
 
 
-void setupForFirstLaunch(
-  SDL_Window* pWindow,
-  UserProfile& userProfile,
-  std::string_view commandLineGamePath)
-{
-  namespace fs = std::filesystem;
-
-  auto gamePath = fs::path{};
-
-  // Case 1: A path is given on the command line on first launch. Use that.
-  if (!commandLineGamePath.empty())
-  {
-    gamePath = fs::u8path(commandLineGamePath);
-  }
-
-  // Case 2: The current working directory is set to a Duke Nukem II
-  // installation, most likely because the RigelEngine executable has been
-  // copied there. Use the current working directory as game path.
-  if (gamePath.empty())
-  {
-    const auto currentWorkingDir = fs::current_path();
-    if (commandLineGamePath.empty() && isValidGamePath(currentWorkingDir))
-    {
-      gamePath = currentWorkingDir;
-    }
-  }
-
-  // Case 3: Neither case 1 nor case 2 apply. Show a folder browser to let
-  // the user select their Duke Nukem II installation.
-  if (gamePath.empty())
-  {
-    gamePath = ui::runFolderBrowser(pWindow);
-  }
-
-  // If we still don't have a game path, stop here.
-  if (gamePath.empty())
-  {
-    throw std::runtime_error(
-      R"(No game path given. RigelEngine needs the original Duke Nukem II data files in order to function.
-You can download the Shareware version for free, see
-https://github.com/lethal-guitar/RigelEngine/blob/master/README.md#acquiring-the-game-data
-for more info.)");
-  }
-
-  // Make sure there is a data file at the game path.
-  if (!isValidGamePath(gamePath))
-  {
-    throw std::runtime_error(
-      "No game data (NUKEM2.CMP file) found in game path");
-  }
-
-  // Import original game's profile data, if our profile is still 'empty'
-  if (!userProfile.hasProgressData())
-  {
-    importOriginalGameProfileData(userProfile, gamePath.u8string() + "/");
-  }
-
-  // Finally, persist the chosen game path in the user profile for the next
-  // launch.
-  userProfile.mGamePath = fs::canonical(gamePath);
-  userProfile.saveToDisk();
-}
-
-
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
   const CommandLineOptions& commandLineOptions)
 {
-  auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
+  auto run = [&](const CommandLineOptions& options) {
     showLoadingScreen(pWindow);
-    Game game(options, &userProfile, pWindow, isFirstLaunch);
+    Game game(options, &userProfile, pWindow);
 
     for (;;)
     {
@@ -150,15 +86,7 @@ void initAndRunGame(
     }
   };
 
-  const auto needsProfileSetup = !userProfile.mGamePath.has_value() ||
-    !isValidGamePath(*userProfile.mGamePath);
-  if (needsProfileSetup)
-  {
-    setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
-  }
-
-  auto result = run(
-    commandLineOptions, needsProfileSetup && !userProfile.hasProgressData());
+  auto result = run(commandLineOptions);
 
   // Some game option changes (like choosing a new game path) require
   // restarting the game to make the change effective. If the first game run
@@ -173,7 +101,7 @@ void initAndRunGame(
 
     while (result == Game::StopReason::RestartNeeded)
     {
-      result = run(optionsForRestartedGame, false);
+      result = run(optionsForRestartedGame);
     }
   }
 

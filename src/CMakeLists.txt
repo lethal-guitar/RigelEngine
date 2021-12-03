@@ -85,8 +85,6 @@ set(core_sources
     engine/tiled_texture.hpp
     engine/timing.hpp
     engine/visual_components.hpp
-    frontend/anti_piracy_screen_mode.cpp
-    frontend/anti_piracy_screen_mode.hpp
     frontend/game.cpp
     frontend/game.hpp
     frontend/game_runner.cpp

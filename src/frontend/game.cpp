@@ -66,7 +66,7 @@ std::string effectiveGamePath(
     return options.mGamePath;
   }
 
-  return profile.mGamePath ? profile.mGamePath->u8string() + "/"s : ""s;
+  return "";
 }
 
 
@@ -153,55 +153,11 @@ void setupPresentationViewport(
 
 std::unique_ptr<GameMode> createInitialGameMode(
   GameMode::Context context,
-  const CommandLineOptions& commandLineOptions,
-  const bool isSharewareVersion,
-  const bool isFirstLaunch)
+  const CommandLineOptions& commandLineOptions)
 {
-  class DemoTestMode : public GameMode
-  {
-  public:
-    explicit DemoTestMode(Context context)
-      : mDemoPlayer(context)
-    {
-    }
-
-    std::unique_ptr<GameMode> updateAndRender(
-      engine::TimeDelta dt,
-      const std::vector<SDL_Event>&) override
-    {
-      mDemoPlayer.updateAndRender(dt);
-      return nullptr;
-    }
-
-  private:
-    game_logic::DemoPlayer mDemoPlayer;
-  };
-
-  if (commandLineOptions.mLevelToJumpTo)
-  {
-    return std::make_unique<GameSessionMode>(
-      *commandLineOptions.mLevelToJumpTo,
-      context,
-      commandLineOptions.mPlayerPosition);
-  }
-  else if (commandLineOptions.mSkipIntro)
-  {
-    return std::make_unique<MenuMode>(context);
-  }
-  else if (commandLineOptions.mPlayDemo)
-  {
-    return std::make_unique<DemoTestMode>(context);
-  }
-
-  if (!isSharewareVersion)
-  {
-    return std::make_unique<AntiPiracyScreenMode>(context, isFirstLaunch);
-  }
-
-  return std::make_unique<IntroDemoLoopMode>(
-    context,
-    isFirstLaunch ? IntroDemoLoopMode::Type::AtFirstLaunch
-                  : IntroDemoLoopMode::Type::DuringGameStart);
+  return std::make_unique<GameSessionMode>(
+    data::GameSessionId{0, 0},
+    context);
 }
 
 
@@ -245,8 +201,7 @@ std::string makeScreenshotFilename()
 Game::Game(
   const CommandLineOptions& commandLineOptions,
   UserProfile* pUserProfile,
-  SDL_Window* pWindow,
-  const bool isFirstLaunch)
+  SDL_Window* pWindow)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
   , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
@@ -305,9 +260,7 @@ Game::Game(
 
   mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
     makeModeContext(),
-    mCommandLineOptions,
-    mIsShareWareVersion,
-    isFirstLaunch));
+    mCommandLineOptions));
 
   mLastTime = base::Clock::now();
 }
