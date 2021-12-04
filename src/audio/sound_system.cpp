@@ -19,6 +19,8 @@
 #include "audio/software_imf_player.hpp"
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
+#include "loader/adlib_emulator.hpp"
+#include "loader/audio_package.hpp"
 #include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
 
@@ -57,6 +59,8 @@ namespace rigel::audio
 
 namespace
 {
+
+const auto ADLIB_SOUND_RATE = 140;
 
 const auto COMBINED_SOUNDS_ADLIB_PERCENTAGE = 0.30f;
 const auto DESIRED_SAMPLE_RATE = 44100;
@@ -184,6 +188,112 @@ void overlaySound(
 auto idToIndex(const data::SoundId id)
 {
   return static_cast<int>(id);
+}
+
+data::AudioBuffer renderAdlibSound(const loader::AdlibSound& sound)
+{
+  const auto sampleRate = 44100;
+
+  loader::AdlibEmulator emulator{sampleRate};
+
+  emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
+  emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
+  emulator.writeRegister(0x60, sound.mInstrumentSettings[4]);
+  emulator.writeRegister(0x80, sound.mInstrumentSettings[6]);
+  emulator.writeRegister(0xE0, sound.mInstrumentSettings[8]);
+
+  emulator.writeRegister(0x23, sound.mInstrumentSettings[1]);
+  emulator.writeRegister(0x43, sound.mInstrumentSettings[3]);
+  emulator.writeRegister(0x63, sound.mInstrumentSettings[5]);
+  emulator.writeRegister(0x83, sound.mInstrumentSettings[7]);
+  emulator.writeRegister(0xE3, sound.mInstrumentSettings[9]);
+
+  emulator.writeRegister(0xC0, 0);
+  emulator.writeRegister(0xB0, 0);
+
+  const auto octaveBits = static_cast<uint8_t>((sound.mOctave & 7) << 2);
+
+  const auto samplesPerTick = sampleRate / ADLIB_SOUND_RATE;
+  std::vector<data::Sample> renderedSamples;
+  renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
+
+  for (const auto byte : sound.mSoundData)
+  {
+    if (byte == 0)
+    {
+      emulator.writeRegister(0xB0, 0);
+    }
+    else
+    {
+      emulator.writeRegister(0xA0, byte);
+      emulator.writeRegister(0xB0, 0x20 | octaveBits);
+    }
+
+    emulator.render(samplesPerTick, back_inserter(renderedSamples), 2);
+  }
+
+  return {sampleRate, renderedSamples};
+}
+
+
+data::AudioBuffer loadSoundForStyle(
+  const data::SoundId id,
+  const data::SoundStyle soundStyle,
+  const int sampleRate,
+  const loader::ResourceLoader& resources,
+  const loader::AudioPackage& soundPackage)
+{
+  auto loadAdlibSound = [&](const data::SoundId soundId) {
+    const auto idAsIndex = static_cast<int>(soundId);
+    if (idAsIndex < 0 || idAsIndex >= 34)
+    {
+      throw std::invalid_argument("Invalid sound ID");
+    }
+
+    return renderAdlibSound(soundPackage[idAsIndex]);
+  };
+
+  auto loadPreferredSound = [&](const data::SoundId soundId) {
+    const auto buffer = resources.loadSoundBlasterSound(soundId);
+    if (buffer.mSamples.empty())
+    {
+      return loadAdlibSound(soundId);
+    }
+
+    return buffer;
+  };
+
+
+  if (data::isIntroSound(id))
+  {
+    // The intro sounds don't have AdLib versions, so always load
+    // the 'preferred' version (SoundBlaster) regardless of chosen
+    // sound style.
+    return prepareBuffer(loadPreferredSound(id), sampleRate);
+  }
+
+  switch (soundStyle)
+  {
+    case data::SoundStyle::AdLib:
+      return prepareBuffer(loadAdlibSound(id), sampleRate);
+
+    case data::SoundStyle::Combined:
+      {
+        auto buffer = prepareBuffer(loadPreferredSound(id), sampleRate);
+        if (resources.hasSoundBlasterSound(id))
+        {
+          overlaySound(
+            buffer,
+            prepareBuffer(loadAdlibSound(id), sampleRate),
+            COMBINED_SOUNDS_ADLIB_PERCENTAGE);
+        }
+
+        return buffer;
+      }
+
+    default:
+      return prepareBuffer(loadPreferredSound(id), sampleRate);
+  }
 }
 
 } // namespace
@@ -344,6 +454,10 @@ void SoundSystem::reloadAllSounds(const data::SoundStyle soundStyle)
   int numChannels = 0;
   Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
 
+  const auto soundPackage = loader::loadAdlibSoundData(
+    mpResources->file(loader::AUDIO_DICT_FILE),
+    mpResources->file(loader::AUDIO_DATA_FILE));
+
   data::forEachSoundId([&](const auto id) {
     const auto index = idToIndex(id);
     if (
@@ -353,7 +467,8 @@ void SoundSystem::reloadAllSounds(const data::SoundStyle soundStyle)
       return;
     }
 
-    const auto soundData = loadSoundForStyle(id, soundStyle, sampleRate);
+    const auto soundData =
+      loadSoundForStyle(id, soundStyle, sampleRate, *mpResources, soundPackage);
     mSounds[index] =
       LoadedSound{convertBuffer(soundData, audioFormat, numChannels)};
   });
@@ -447,6 +562,10 @@ void SoundSystem::loadAllSounds(
   const int numChannels,
   const data::SoundStyle soundStyle)
 {
+  const auto soundPackage = loader::loadAdlibSoundData(
+    mpResources->file(loader::AUDIO_DICT_FILE),
+    mpResources->file(loader::AUDIO_DATA_FILE));
+
   data::forEachSoundId([&](const auto id) {
     std::error_code ec;
     if (const auto replacementPath = mpResources->replacementSoundPath(id);
@@ -459,50 +578,12 @@ void SoundSystem::loadAllSounds(
       }
     }
 
-    const auto soundData = loadSoundForStyle(id, soundStyle, sampleRate);
+    const auto soundData =
+      loadSoundForStyle(id, soundStyle, sampleRate, *mpResources, soundPackage);
 
     mSounds[idToIndex(id)] =
       LoadedSound{convertBuffer(soundData, audioFormat, numChannels)};
   });
-}
-
-
-data::AudioBuffer SoundSystem::loadSoundForStyle(
-  const data::SoundId id,
-  const data::SoundStyle soundStyle,
-  const int sampleRate) const
-{
-  if (data::isIntroSound(id))
-  {
-    // The intro sounds don't have AdLib versions, so always load
-    // the 'preferred' version (SoundBlaster) regardless of chosen
-    // sound style.
-    return prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
-  }
-
-  switch (soundStyle)
-  {
-    case data::SoundStyle::AdLib:
-      return prepareBuffer(mpResources->loadAdlibSound(id), sampleRate);
-
-    case data::SoundStyle::Combined:
-      {
-        auto buffer =
-          prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
-        if (mpResources->hasSoundBlasterSound(id))
-        {
-          overlaySound(
-            buffer,
-            prepareBuffer(mpResources->loadAdlibSound(id), sampleRate),
-            COMBINED_SOUNDS_ADLIB_PERCENTAGE);
-        }
-
-        return buffer;
-      }
-
-    default:
-      return prepareBuffer(mpResources->loadPreferredSound(id), sampleRate);
-  }
 }
 
 

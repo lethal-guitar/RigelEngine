@@ -93,10 +93,6 @@ private:
     std::uint16_t audioFormat,
     int numChannels,
     data::SoundStyle soundStyle);
-  data::AudioBuffer loadSoundForStyle(
-    data::SoundId id,
-    data::SoundStyle soundStyle,
-    int sampleRate) const;
   void applySoundVolume(float volume);
   void hookMusic() const;
   void unhookMusic() const;
