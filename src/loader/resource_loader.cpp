@@ -19,6 +19,7 @@
 #include "base/container_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
+#include "loader/adlib_emulator.hpp"
 #include "loader/ega_image_decoder.hpp"
 #include "loader/file_utils.hpp"
 #include "loader/movie_loader.hpp"
@@ -42,6 +43,8 @@ using namespace data;
 
 namespace
 {
+
+const auto ADLIB_SOUND_RATE = 140;
 
 const auto ANTI_PIRACY_SCREEN_FILENAME = "LCR.MNI";
 
@@ -136,9 +139,9 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
       file(ActorImagePackage::IMAGE_DATA_FILE),
       file(ActorImagePackage::ACTOR_INFO_FILE),
       gamePath + "/" + ASSET_REPLACEMENTS_PATH)
-  , mAdlibSoundsPackage(
-      file(AudioPackage::AUDIO_DICT_FILE),
-      file(AudioPackage::AUDIO_DATA_FILE))
+  , mAdlibSounds(loadAdlibSoundData(
+      file(AUDIO_DICT_FILE),
+      file(AUDIO_DATA_FILE)))
 {
 }
 
@@ -315,7 +318,55 @@ bool ResourceLoader::hasSoundBlasterSound(const data::SoundId id) const
 
 data::AudioBuffer ResourceLoader::loadAdlibSound(const data::SoundId id) const
 {
-  return mAdlibSoundsPackage.loadAdlibSound(id);
+  const auto idAsIndex = static_cast<int>(id);
+  if (idAsIndex < 0 || idAsIndex >= 34)
+  {
+    throw std::invalid_argument("Invalid sound ID");
+  }
+
+  const auto& sound = mAdlibSounds[idAsIndex];
+
+  const auto sampleRate = 44100;
+
+  AdlibEmulator emulator{sampleRate};
+
+  emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
+  emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
+  emulator.writeRegister(0x60, sound.mInstrumentSettings[4]);
+  emulator.writeRegister(0x80, sound.mInstrumentSettings[6]);
+  emulator.writeRegister(0xE0, sound.mInstrumentSettings[8]);
+
+  emulator.writeRegister(0x23, sound.mInstrumentSettings[1]);
+  emulator.writeRegister(0x43, sound.mInstrumentSettings[3]);
+  emulator.writeRegister(0x63, sound.mInstrumentSettings[5]);
+  emulator.writeRegister(0x83, sound.mInstrumentSettings[7]);
+  emulator.writeRegister(0xE3, sound.mInstrumentSettings[9]);
+
+  emulator.writeRegister(0xC0, 0);
+  emulator.writeRegister(0xB0, 0);
+
+  const auto octaveBits = static_cast<uint8_t>((sound.mOctave & 7) << 2);
+
+  const auto samplesPerTick = sampleRate / ADLIB_SOUND_RATE;
+  std::vector<data::Sample> renderedSamples;
+  renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
+
+  for (const auto byte : sound.mSoundData)
+  {
+    if (byte == 0)
+    {
+      emulator.writeRegister(0xB0, 0);
+    }
+    else
+    {
+      emulator.writeRegister(0xA0, byte);
+      emulator.writeRegister(0xB0, 0x20 | octaveBits);
+    }
+
+    emulator.render(samplesPerTick, back_inserter(renderedSamples), 2);
+  }
+
+  return {sampleRate, renderedSamples};
 }
 
 

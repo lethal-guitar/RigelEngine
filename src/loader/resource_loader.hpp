@@ -85,7 +85,7 @@ public:
   loader::ActorImagePackage mActorImagePackage;
 
 private:
-  loader::AudioPackage mAdlibSoundsPackage;
+  loader::AudioPackage mAdlibSounds;
 };
 
 } // namespace rigel::loader

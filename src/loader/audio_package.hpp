@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include "data/audio_buffer.hpp"
-#include "data/sound_ids.hpp"
 #include "loader/byte_buffer.hpp"
 
 #include <array>
@@ -27,7 +25,8 @@
 namespace rigel::loader
 {
 
-class LeStreamReader;
+constexpr auto AUDIO_DICT_FILE = "AUDIOHED.MNI";
+constexpr auto AUDIO_DATA_FILE = "AUDIOT.MNI";
 
 
 struct AdlibSound
@@ -37,25 +36,10 @@ struct AdlibSound
   std::vector<std::uint8_t> mSoundData;
 };
 
+using AudioPackage = std::vector<AdlibSound>;
 
-class AudioPackage
-{
-public:
-  static constexpr auto AUDIO_DICT_FILE = "AUDIOHED.MNI";
-  static constexpr auto AUDIO_DATA_FILE = "AUDIOT.MNI";
-
-  AudioPackage(
-    const ByteBuffer& audioDictData,
-    const ByteBuffer& bundledAudioData);
-
-  data::AudioBuffer loadAdlibSound(data::SoundId id) const;
-
-private:
-  data::AudioBuffer renderAdlibSound(const AdlibSound& sound) const;
-
-private:
-  std::vector<AdlibSound> mSounds;
-};
-
+AudioPackage loadAdlibSoundData(
+  const ByteBuffer& audioDictData,
+  const ByteBuffer& bundledAudioData);
 
 } // namespace rigel::loader
