@@ -865,6 +865,30 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   ImGui::NewLine();
   ImGui::NewLine();
 
+  centeredTextBig("Nuked OPL3 AdLib emulator", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 2013-2020 Nuke.YKT");
+  ImGui::NewLine();
+  centeredText(
+    "Nuked OPL3 is free software: you can redistribute it and/or modify");
+  centeredText(
+    "it under the terms of the GNU Lesser General Public License as");
+  centeredText("published by the Free Software Foundation, either version 2.1");
+  centeredText("of the License, or (at your option) any later version.");
+  ImGui::NewLine();
+  centeredText("Nuked OPL3 is distributed in the hope that it will be useful,");
+  centeredText(
+    "but WITHOUT ANY WARRANTY; without even the implied warranty of");
+  centeredText("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+  centeredText("GNU Lesser General Public License for more details.");
+  ImGui::NewLine();
+  centeredText("https://www.gnu.org/licenses/lgpl-2.1.html");
+  ImGui::NewLine();
+  centeredText("https://github.com/nukeykt/Nuked-OPL3");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
   centeredTextBig("EntityX", 1.4f);
   ImGui::Spacing();
   centeredText("Copyright (C) 2012 Alec Thomas");
