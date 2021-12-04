@@ -352,19 +352,19 @@ target_link_libraries(rigel_core
     PUBLIC
     SDL2::Core
     SDL2::Mixer
-    entityx
     dear_imgui
-    imgui-filebrowser
-    nlohmann-json
+    entityx
     glad
     glm
+    imgui-filebrowser
+    nlohmann-json
     std::filesystem
 
     PRIVATE
-    stb
     dbopl
     speex_resampler
     static_vector
+    stb
 )
 
 rigel_enable_warnings(rigel_core)
