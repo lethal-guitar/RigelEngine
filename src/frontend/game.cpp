@@ -657,6 +657,12 @@ void Game::applyChangedOptions()
     }
 
     if (
+      currentOptions.mAdlibPlaybackType != mPreviousOptions.mAdlibPlaybackType)
+    {
+      mpSoundSystem->setAdlibPlaybackType(currentOptions.mAdlibPlaybackType);
+    }
+
+    if (
       currentOptions.mMusicVolume != mPreviousOptions.mMusicVolume ||
       currentOptions.mMusicOn != mPreviousOptions.mMusicOn)
     {

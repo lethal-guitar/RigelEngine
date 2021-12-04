@@ -58,6 +58,7 @@ public:
   ~SoundSystem();
 
   void reloadAllSounds(data::SoundStyle soundStyle);
+  void setAdlibPlaybackType(data::AdlibPlaybackType adlibPlaybackType);
 
   /** Start playing given music data
    *

@@ -109,6 +109,14 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 
 
 NLOHMANN_JSON_SERIALIZE_ENUM(
+  AdlibPlaybackType,
+  {
+    {AdlibPlaybackType::DBOPL, "DBOPL"},
+    {AdlibPlaybackType::NukedOpl3, "NukedOpl3"},
+  })
+
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
   UpscalingFilter,
   {
     {UpscalingFilter::None, "None"},
@@ -370,6 +378,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["enableScreenFlashes"] = options.mEnableScreenFlashes;
   serialized["upscalingFilter"] = options.mUpscalingFilter;
   serialized["soundStyle"] = options.mSoundStyle;
+  serialized["adlibPlaybackType"] = options.mAdlibPlaybackType;
   serialized["musicVolume"] = options.mMusicVolume;
   serialized["soundVolume"] = options.mSoundVolume;
   serialized["musicOn"] = options.mMusicOn;
@@ -571,6 +580,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
     "enableScreenFlashes", result.mEnableScreenFlashes, json);
   extractValueIfExists("upscalingFilter", result.mUpscalingFilter, json);
   extractValueIfExists("soundStyle", result.mSoundStyle, json);
+  extractValueIfExists("adlibPlaybackType", result.mAdlibPlaybackType, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);
   extractValueIfExists("soundVolume", result.mSoundVolume, json);
   extractValueIfExists("musicOn", result.mMusicOn, json);

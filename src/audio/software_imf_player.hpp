@@ -33,6 +33,8 @@ public:
   SoftwareImfPlayer(const SoftwareImfPlayer&) = delete;
   SoftwareImfPlayer& operator=(const SoftwareImfPlayer&) = delete;
 
+  void setType(loader::AdlibEmulator::Type type);
+
   void playSong(data::Song&& song);
   void setVolume(const float volume);
 
@@ -50,6 +52,7 @@ private:
 
   std::atomic<float> mVolume;
   std::atomic<bool> mSongSwitchPending;
+  std::atomic<loader::AdlibEmulator::Type> mTypeToUse;
 };
 
 } // namespace rigel::audio

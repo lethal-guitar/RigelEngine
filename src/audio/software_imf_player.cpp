@@ -38,10 +38,18 @@ int imfDelayToSamples(const int delay, const int sampleRate)
 
 SoftwareImfPlayer::SoftwareImfPlayer(const int sampleRate)
   : mEmulator(sampleRate)
+  , miNextCommand(mSongData.end())
   , mSampleRate(sampleRate)
   , mSongSwitchPending(false)
+  , mTypeToUse(mEmulator.type())
 {
   mVolume.store(1.0f);
+}
+
+
+void SoftwareImfPlayer::setType(const loader::AdlibEmulator::Type type)
+{
+  mTypeToUse = type;
 }
 
 
@@ -65,6 +73,19 @@ void SoftwareImfPlayer::render(
   std::int16_t* pBuffer,
   std::size_t samplesRequired)
 {
+  const auto emulatorType = mTypeToUse.load();
+  if (emulatorType != mEmulator.type())
+  {
+    mEmulator = loader::AdlibEmulator{mSampleRate, emulatorType};
+
+    // Replay all previously played commands
+    for (auto iCommand = mSongData.begin(); iCommand != miNextCommand;
+         ++iCommand)
+    {
+      mEmulator.writeRegister(iCommand->reg, iCommand->value);
+    }
+  }
+
   if (mSongSwitchPending && mAudioLock.try_lock())
   {
     mSongData = std::move(mNextSongData);

@@ -213,6 +213,14 @@ struct SoundSystem::ImfPlayerWrapper
     mConversionSpecs.buf = mpBuffer.get();
   }
 
+  void setType(const data::AdlibPlaybackType type)
+  {
+    const auto emulatorType = type == data::AdlibPlaybackType::DBOPL
+      ? loader::AdlibEmulator::Type::DBOPL
+      : loader::AdlibEmulator::Type::NukedOpl3;
+    mPlayer.setType(emulatorType);
+  }
+
   void render(Uint8* pOutBuffer, int bytesRequired)
   {
     auto pBuffer = mpBuffer.get();
@@ -353,6 +361,13 @@ void SoundSystem::reloadAllSounds(const data::SoundStyle soundStyle)
   applySoundVolume(mCurrentSoundVolume);
 
   mCurrentSoundStyle = soundStyle;
+}
+
+
+void SoundSystem::setAdlibPlaybackType(
+  const data::AdlibPlaybackType adlibPlaybackType)
+{
+  mpMusicPlayer->setType(adlibPlaybackType);
 }
 
 
