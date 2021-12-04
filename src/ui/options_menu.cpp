@@ -336,8 +336,11 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Combo(
         "AdLib emulation", &adlibPlaybackTypeIndex, "DBOPL\0Nuked OPL3\0");
 
-      mpOptions->mAdlibPlaybackType = static_cast<data::AdlibPlaybackType>(
+      const auto newAdlibPlaybackType = static_cast<data::AdlibPlaybackType>(
         std::clamp(adlibPlaybackTypeIndex, 0, 1));
+      soundStyleChanged = soundStyleChanged ||
+        newAdlibPlaybackType != mpOptions->mAdlibPlaybackType;
+      mpOptions->mAdlibPlaybackType = newAdlibPlaybackType;
 
       const auto sliderWidth =
         std::min(sizeToUse.x / 2.0f, ImGui::GetFontSize() * 24);
