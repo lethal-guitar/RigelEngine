@@ -858,7 +858,7 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredText("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
   centeredText("GNU General Public License for more details.");
   ImGui::NewLine();
-  centeredText("https://www.gnu.org/licenses/gpl-2.0.html.");
+  centeredText("https://www.gnu.org/licenses/gpl-2.0.html");
   ImGui::NewLine();
   centeredText("https://sourceforge.net/projects/dosbox");
 
