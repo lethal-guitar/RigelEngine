@@ -362,6 +362,7 @@ target_link_libraries(rigel_core
 
     PRIVATE
     dbopl
+    nuked-opl3
     speex_resampler
     static_vector
     stb
