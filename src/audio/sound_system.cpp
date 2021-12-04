@@ -60,6 +60,7 @@ namespace rigel::audio
 namespace
 {
 
+const auto OPL2_SAMPLE_RATE = 49716;
 const auto ADLIB_SOUND_RATE = 140;
 
 const auto COMBINED_SOUNDS_ADLIB_PERCENTAGE = 0.30f;
@@ -192,9 +193,7 @@ auto idToIndex(const data::SoundId id)
 
 data::AudioBuffer renderAdlibSound(const loader::AdlibSound& sound)
 {
-  const auto sampleRate = 44100;
-
-  AdlibEmulator emulator{sampleRate};
+  AdlibEmulator emulator{OPL2_SAMPLE_RATE};
 
   emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
   emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
@@ -213,7 +212,7 @@ data::AudioBuffer renderAdlibSound(const loader::AdlibSound& sound)
 
   const auto octaveBits = static_cast<uint8_t>((sound.mOctave & 7) << 2);
 
-  const auto samplesPerTick = sampleRate / ADLIB_SOUND_RATE;
+  const auto samplesPerTick = OPL2_SAMPLE_RATE / ADLIB_SOUND_RATE;
   std::vector<data::Sample> renderedSamples;
   renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
 
@@ -232,7 +231,7 @@ data::AudioBuffer renderAdlibSound(const loader::AdlibSound& sound)
     emulator.render(samplesPerTick, back_inserter(renderedSamples), 2);
   }
 
-  return {sampleRate, renderedSamples};
+  return {OPL2_SAMPLE_RATE, renderedSamples};
 }
 
 
