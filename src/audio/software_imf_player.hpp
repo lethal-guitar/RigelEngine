@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include "audio/adlib_emulator.hpp"
 #include "data/song.hpp"
-#include "loader/adlib_emulator.hpp"
 
 #include <atomic>
 #include <mutex>
@@ -33,7 +33,7 @@ public:
   SoftwareImfPlayer(const SoftwareImfPlayer&) = delete;
   SoftwareImfPlayer& operator=(const SoftwareImfPlayer&) = delete;
 
-  void setType(loader::AdlibEmulator::Type type);
+  void setType(AdlibEmulator::Type type);
 
   void playSong(data::Song&& song);
   void setVolume(const float volume);
@@ -41,7 +41,7 @@ public:
   void render(std::int16_t* pBuffer, std::size_t samplesRequired);
 
 private:
-  loader::AdlibEmulator mEmulator;
+  AdlibEmulator mEmulator;
   std::mutex mAudioLock;
   data::Song mNextSongData;
 
@@ -52,7 +52,7 @@ private:
 
   std::atomic<float> mVolume;
   std::atomic<bool> mSongSwitchPending;
-  std::atomic<loader::AdlibEmulator::Type> mTypeToUse;
+  std::atomic<AdlibEmulator::Type> mTypeToUse;
 };
 
 } // namespace rigel::audio

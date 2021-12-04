@@ -28,7 +28,7 @@
 #include <variant>
 
 
-namespace rigel::loader
+namespace rigel::audio
 {
 
 namespace detail
@@ -185,4 +185,4 @@ private:
   std::unique_ptr<Emulator> mpEmulator;
 };
 
-} // namespace rigel::loader
+} // namespace rigel::audio

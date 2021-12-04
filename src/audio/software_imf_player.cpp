@@ -47,7 +47,7 @@ SoftwareImfPlayer::SoftwareImfPlayer(const int sampleRate)
 }
 
 
-void SoftwareImfPlayer::setType(const loader::AdlibEmulator::Type type)
+void SoftwareImfPlayer::setType(const AdlibEmulator::Type type)
 {
   mTypeToUse = type;
 }
@@ -76,7 +76,7 @@ void SoftwareImfPlayer::render(
   const auto emulatorType = mTypeToUse.load();
   if (emulatorType != mEmulator.type())
   {
-    mEmulator = loader::AdlibEmulator{mSampleRate, emulatorType};
+    mEmulator = AdlibEmulator{mSampleRate, emulatorType};
 
     // Replay all previously played commands
     for (auto iCommand = mSongData.begin(); iCommand != miNextCommand;

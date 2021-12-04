@@ -16,10 +16,10 @@
 
 #include "sound_system.hpp"
 
+#include "audio/adlib_emulator.hpp"
 #include "audio/software_imf_player.hpp"
 #include "base/math_tools.hpp"
 #include "base/string_utils.hpp"
-#include "loader/adlib_emulator.hpp"
 #include "loader/audio_package.hpp"
 #include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
@@ -194,7 +194,7 @@ data::AudioBuffer renderAdlibSound(const loader::AdlibSound& sound)
 {
   const auto sampleRate = 44100;
 
-  loader::AdlibEmulator emulator{sampleRate};
+  AdlibEmulator emulator{sampleRate};
 
   emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
   emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
@@ -326,8 +326,8 @@ struct SoundSystem::ImfPlayerWrapper
   void setType(const data::AdlibPlaybackType type)
   {
     const auto emulatorType = type == data::AdlibPlaybackType::DBOPL
-      ? loader::AdlibEmulator::Type::DBOPL
-      : loader::AdlibEmulator::Type::NukedOpl3;
+      ? AdlibEmulator::Type::DBOPL
+      : AdlibEmulator::Type::NukedOpl3;
     mPlayer.setType(emulatorType);
   }
 
