@@ -75,25 +75,29 @@ std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data)
   return dict;
 }
 
-} // namespace
 
-
-AudioPackage::AdlibSound::AdlibSound(LeStreamReader& reader)
+AdlibSound parseAdlibSound(LeStreamReader& reader)
 {
+  AdlibSound sound;
+
   const auto length = reader.readU32();
-  mSoundData.reserve(length);
+  sound.mSoundData.reserve(length);
   reader.skipBytes(sizeof(uint16_t)); // priority - not interesting for us
-  for (auto& setting : mInstrumentSettings)
+  for (auto& setting : sound.mInstrumentSettings)
   {
     setting = reader.readU8();
   }
-  mOctave = reader.readU8();
+  sound.mOctave = reader.readU8();
 
   for (auto i = 0u; i < length; ++i)
   {
-    mSoundData.push_back(reader.readU8());
+    sound.mSoundData.push_back(reader.readU8());
   }
+
+  return sound;
 }
+
+} // namespace
 
 
 AudioPackage::AudioPackage(
@@ -112,7 +116,7 @@ AudioPackage::AudioPackage(
 
     const auto soundStartIter = bundledAudioData.begin() + dictEntry.mOffset;
     LeStreamReader reader(soundStartIter, soundStartIter + dictEntry.mSize);
-    mSounds.emplace_back(reader);
+    mSounds.emplace_back(parseAdlibSound(reader));
   }
 }
 

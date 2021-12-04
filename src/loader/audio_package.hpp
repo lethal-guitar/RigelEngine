@@ -29,6 +29,15 @@ namespace rigel::loader
 
 class LeStreamReader;
 
+
+struct AdlibSound
+{
+  std::uint8_t mOctave = 0;
+  std::array<std::uint8_t, 16> mInstrumentSettings;
+  std::vector<std::uint8_t> mSoundData;
+};
+
+
 class AudioPackage
 {
 public:
@@ -42,15 +51,6 @@ public:
   data::AudioBuffer loadAdlibSound(data::SoundId id) const;
 
 private:
-  struct AdlibSound
-  {
-    explicit AdlibSound(LeStreamReader& reader);
-
-    std::uint8_t mOctave = 0;
-    std::array<std::uint8_t, 16> mInstrumentSettings;
-    std::vector<std::uint8_t> mSoundData;
-  };
-
   data::AudioBuffer renderAdlibSound(const AdlibSound& sound) const;
 
 private:
