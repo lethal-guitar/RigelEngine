@@ -16,21 +16,14 @@
 
 #include "audio_package.hpp"
 
-#include "loader/adlib_emulator.hpp"
 #include "loader/file_utils.hpp"
 
 
 namespace rigel::loader
 {
 
-using namespace std;
-using data::SoundId;
-
 namespace
 {
-
-const auto ADLIB_SOUND_RATE = 140;
-
 
 struct AudioDictEntry
 {
@@ -49,7 +42,7 @@ std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data)
 {
   const auto numOffsets = data.size() / sizeof(uint32_t);
 
-  vector<AudioDictEntry> dict;
+  std::vector<AudioDictEntry> dict;
   dict.reserve(numOffsets);
 
   LeStreamReader reader(data);
@@ -75,31 +68,37 @@ std::vector<AudioDictEntry> readAudioDict(const ByteBuffer& data)
   return dict;
 }
 
-} // namespace
 
-
-AudioPackage::AdlibSound::AdlibSound(LeStreamReader& reader)
+AdlibSound parseAdlibSound(LeStreamReader& reader)
 {
+  AdlibSound sound;
+
   const auto length = reader.readU32();
-  mSoundData.reserve(length);
+  sound.mSoundData.reserve(length);
   reader.skipBytes(sizeof(uint16_t)); // priority - not interesting for us
-  for (auto& setting : mInstrumentSettings)
+  for (auto& setting : sound.mInstrumentSettings)
   {
     setting = reader.readU8();
   }
-  mOctave = reader.readU8();
+  sound.mOctave = reader.readU8();
 
   for (auto i = 0u; i < length; ++i)
   {
-    mSoundData.push_back(reader.readU8());
+    sound.mSoundData.push_back(reader.readU8());
   }
+
+  return sound;
 }
 
+} // namespace
 
-AudioPackage::AudioPackage(
+
+AudioPackage loadAdlibSoundData(
   const ByteBuffer& audioDictData,
   const ByteBuffer& bundledAudioData)
 {
+  AudioPackage sounds;
+
   const auto audioDict = readAudioDict(audioDictData);
   if (audioDict.size() < 68u)
   {
@@ -112,67 +111,10 @@ AudioPackage::AudioPackage(
 
     const auto soundStartIter = bundledAudioData.begin() + dictEntry.mOffset;
     LeStreamReader reader(soundStartIter, soundStartIter + dictEntry.mSize);
-    mSounds.emplace_back(reader);
-  }
-}
-
-
-data::AudioBuffer AudioPackage::loadAdlibSound(SoundId id) const
-{
-  const auto idAsIndex = static_cast<int>(id);
-  if (idAsIndex < 0 || idAsIndex >= 34)
-  {
-    throw std::invalid_argument("Invalid sound ID");
+    sounds.emplace_back(parseAdlibSound(reader));
   }
 
-  const auto& sound = mSounds[idAsIndex];
-  return renderAdlibSound(sound);
-}
-
-
-data::AudioBuffer AudioPackage::renderAdlibSound(const AdlibSound& sound) const
-{
-  const auto sampleRate = 44100;
-
-  AdlibEmulator emulator{sampleRate};
-
-  emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
-  emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
-  emulator.writeRegister(0x60, sound.mInstrumentSettings[4]);
-  emulator.writeRegister(0x80, sound.mInstrumentSettings[6]);
-  emulator.writeRegister(0xE0, sound.mInstrumentSettings[8]);
-
-  emulator.writeRegister(0x23, sound.mInstrumentSettings[1]);
-  emulator.writeRegister(0x43, sound.mInstrumentSettings[3]);
-  emulator.writeRegister(0x63, sound.mInstrumentSettings[5]);
-  emulator.writeRegister(0x83, sound.mInstrumentSettings[7]);
-  emulator.writeRegister(0xE3, sound.mInstrumentSettings[9]);
-
-  emulator.writeRegister(0xC0, 0);
-  emulator.writeRegister(0xB0, 0);
-
-  const auto octaveBits = static_cast<uint8_t>((sound.mOctave & 7) << 2);
-
-  const auto samplesPerTick = sampleRate / ADLIB_SOUND_RATE;
-  vector<data::Sample> renderedSamples;
-  renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
-
-  for (const auto byte : sound.mSoundData)
-  {
-    if (byte == 0)
-    {
-      emulator.writeRegister(0xB0, 0);
-    }
-    else
-    {
-      emulator.writeRegister(0xA0, byte);
-      emulator.writeRegister(0xB0, 0x20 | octaveBits);
-    }
-
-    emulator.render(samplesPerTick, back_inserter(renderedSamples), 2);
-  }
-
-  return {sampleRate, renderedSamples};
+  return sounds;
 }
 
 } // namespace rigel::loader

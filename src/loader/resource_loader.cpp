@@ -136,9 +136,6 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
       file(ActorImagePackage::IMAGE_DATA_FILE),
       file(ActorImagePackage::ACTOR_INFO_FILE),
       gamePath + "/" + ASSET_REPLACEMENTS_PATH)
-  , mAdlibSoundsPackage(
-      file(AudioPackage::AUDIO_DICT_FILE),
-      file(AudioPackage::AUDIO_DATA_FILE))
 {
 }
 
@@ -313,24 +310,16 @@ bool ResourceLoader::hasSoundBlasterSound(const data::SoundId id) const
 }
 
 
-data::AudioBuffer ResourceLoader::loadAdlibSound(const data::SoundId id) const
-{
-  return mAdlibSoundsPackage.loadAdlibSound(id);
-}
-
-
 data::AudioBuffer
-  ResourceLoader::loadPreferredSound(const data::SoundId id) const
+  ResourceLoader::loadSoundBlasterSound(const data::SoundId id) const
 {
   const auto digitizedSoundFileName = digitizedSoundFilenameForId(id);
   if (hasFile(digitizedSoundFileName))
   {
     return loadSound(digitizedSoundFileName);
   }
-  else
-  {
-    return loadAdlibSound(id);
-  }
+
+  return {};
 }
 
 

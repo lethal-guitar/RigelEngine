@@ -69,6 +69,13 @@ enum class SoundStyle : std::uint8_t
 };
 
 
+enum class AdlibPlaybackType : std::uint8_t
+{
+  DBOPL,
+  NukedOpl3
+};
+
+
 enum class UpscalingFilter : std::uint8_t
 {
   None,
@@ -113,6 +120,7 @@ struct GameOptions
   bool mMusicOn = true;
   bool mSoundOn = true;
   SoundStyle mSoundStyle = SoundStyle::SoundBlaster;
+  AdlibPlaybackType mAdlibPlaybackType = AdlibPlaybackType::DBOPL;
 
   // Keyboard controls
   SDL_Keycode mUpKeybinding = SDLK_UP;

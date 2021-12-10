@@ -255,7 +255,9 @@ Game::Game(
     try
     {
       pResult = std::make_unique<audio::SoundSystem>(
-        &mResources, pUserProfile->mOptions.mSoundStyle);
+        &mResources,
+        pUserProfile->mOptions.mSoundStyle,
+        pUserProfile->mOptions.mAdlibPlaybackType);
     }
     catch (const std::exception& ex)
     {
@@ -653,7 +655,13 @@ void Game::applyChangedOptions()
   {
     if (currentOptions.mSoundStyle != mPreviousOptions.mSoundStyle)
     {
-      mpSoundSystem->reloadAllSounds(currentOptions.mSoundStyle);
+      mpSoundSystem->setSoundStyle(currentOptions.mSoundStyle);
+    }
+
+    if (
+      currentOptions.mAdlibPlaybackType != mPreviousOptions.mAdlibPlaybackType)
+    {
+      mpSoundSystem->setAdlibPlaybackType(currentOptions.mAdlibPlaybackType);
     }
 
     if (

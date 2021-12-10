@@ -54,10 +54,12 @@ class SoundSystem
 public:
   explicit SoundSystem(
     const loader::ResourceLoader* pResources,
-    data::SoundStyle soundStyle);
+    data::SoundStyle soundStyle,
+    data::AdlibPlaybackType adlibPlaybackType);
   ~SoundSystem();
 
-  void reloadAllSounds(data::SoundStyle soundStyle);
+  void setSoundStyle(data::SoundStyle soundStyle);
+  void setAdlibPlaybackType(data::AdlibPlaybackType adlibPlaybackType);
 
   /** Start playing given music data
    *
@@ -92,10 +94,7 @@ private:
     std::uint16_t audioFormat,
     int numChannels,
     data::SoundStyle soundStyle);
-  data::AudioBuffer loadSoundForStyle(
-    data::SoundId id,
-    data::SoundStyle soundStyle,
-    int sampleRate) const;
+  void reloadAllSounds();
   void applySoundVolume(float volume);
   void hookMusic() const;
   void unhookMusic() const;
@@ -122,6 +121,7 @@ private:
   const loader::ResourceLoader* mpResources;
   float mCurrentSoundVolume;
   data::SoundStyle mCurrentSoundStyle;
+  data::AdlibPlaybackType mCurrentAdlibPlaybackType;
 };
 
 } // namespace rigel::audio

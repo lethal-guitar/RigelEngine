@@ -23,7 +23,6 @@
 #include "data/sound_ids.hpp"
 #include "data/tile_attributes.hpp"
 #include "loader/actor_image_package.hpp"
-#include "loader/audio_package.hpp"
 #include "loader/cmp_file_package.hpp"
 #include "loader/duke_script_loader.hpp"
 #include "loader/palette.hpp"
@@ -64,8 +63,7 @@ public:
 
   data::Song loadMusic(std::string_view name) const;
   bool hasSoundBlasterSound(data::SoundId id) const;
-  data::AudioBuffer loadAdlibSound(data::SoundId id) const;
-  data::AudioBuffer loadPreferredSound(data::SoundId id) const;
+  data::AudioBuffer loadSoundBlasterSound(data::SoundId id) const;
   std::filesystem::path replacementSoundPath(data::SoundId id) const;
   std::filesystem::path replacementMusicBasePath() const;
 
@@ -83,9 +81,6 @@ private:
 
 public:
   loader::ActorImagePackage mActorImagePackage;
-
-private:
-  loader::AudioPackage mAdlibSoundsPackage;
 };
 
 } // namespace rigel::loader

@@ -1,4 +1,5 @@
 set(core_sources
+    audio/adlib_emulator.hpp
     audio/software_imf_player.cpp
     audio/software_imf_player.hpp
     audio/sound_system.cpp
@@ -239,7 +240,6 @@ set(core_sources
     game_logic/world_state.hpp
     loader/actor_image_package.cpp
     loader/actor_image_package.hpp
-    loader/adlib_emulator.hpp
     loader/audio_package.cpp
     loader/audio_package.hpp
     loader/bitwise_iter.hpp
@@ -352,19 +352,20 @@ target_link_libraries(rigel_core
     PUBLIC
     SDL2::Core
     SDL2::Mixer
-    entityx
     dear_imgui
-    imgui-filebrowser
-    nlohmann-json
+    entityx
     glad
     glm
+    imgui-filebrowser
+    nlohmann-json
     std::filesystem
 
     PRIVATE
-    stb
     dbopl
+    nuked-opl3
     speex_resampler
     static_vector
+    stb
 )
 
 rigel_enable_warnings(rigel_core)

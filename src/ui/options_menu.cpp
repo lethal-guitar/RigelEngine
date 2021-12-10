@@ -331,6 +331,17 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       soundStyleChanged = newSoundStyle != mpOptions->mSoundStyle;
       mpOptions->mSoundStyle = newSoundStyle;
 
+      auto adlibPlaybackTypeIndex =
+        static_cast<int>(mpOptions->mAdlibPlaybackType);
+      ImGui::Combo(
+        "AdLib emulation", &adlibPlaybackTypeIndex, "DBOPL\0Nuked OPL3\0");
+
+      const auto newAdlibPlaybackType = static_cast<data::AdlibPlaybackType>(
+        std::clamp(adlibPlaybackTypeIndex, 0, 1));
+      soundStyleChanged = soundStyleChanged ||
+        newAdlibPlaybackType != mpOptions->mAdlibPlaybackType;
+      mpOptions->mAdlibPlaybackType = newAdlibPlaybackType;
+
       const auto sliderWidth =
         std::min(sizeToUse.x / 2.0f, ImGui::GetFontSize() * 24);
 
@@ -850,9 +861,33 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredText("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
   centeredText("GNU General Public License for more details.");
   ImGui::NewLine();
-  centeredText("https://www.gnu.org/licenses/gpl-2.0.html.");
+  centeredText("https://www.gnu.org/licenses/gpl-2.0.html");
   ImGui::NewLine();
   centeredText("https://sourceforge.net/projects/dosbox");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Nuked OPL3 AdLib emulator", 1.4f);
+  ImGui::Spacing();
+  centeredText("Copyright (C) 2013-2020 Nuke.YKT");
+  ImGui::NewLine();
+  centeredText(
+    "Nuked OPL3 is free software: you can redistribute it and/or modify");
+  centeredText(
+    "it under the terms of the GNU Lesser General Public License as");
+  centeredText("published by the Free Software Foundation, either version 2.1");
+  centeredText("of the License, or (at your option) any later version.");
+  ImGui::NewLine();
+  centeredText("Nuked OPL3 is distributed in the hope that it will be useful,");
+  centeredText(
+    "but WITHOUT ANY WARRANTY; without even the implied warranty of");
+  centeredText("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+  centeredText("GNU Lesser General Public License for more details.");
+  ImGui::NewLine();
+  centeredText("https://www.gnu.org/licenses/lgpl-2.1.html");
+  ImGui::NewLine();
+  centeredText("https://github.com/nukeykt/Nuked-OPL3");
 
   ImGui::NewLine();
   ImGui::NewLine();
