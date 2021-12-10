@@ -205,10 +205,13 @@ If you've already built the regular version before, you can reuse the existing b
 
 :exclamation: Make sure to read [Running on Raspberry Pi](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance#raspberry-pi) for information on how to achieve best performance!
 
-To build on the Pi itself, I recommend Raspbian (aka Raspberry Pi OS) _Buster_.
-Older versions like Stretch don't have recent enough versions of CMake and Gcc.
+If you're using RetroPie, you can use [this build script](https://github.com/Exarkuniv/Rigelengine-RPi)
+made by [@Exarkuniv](https://github.com/Exarkuniv). Otherwise, read on!
 
-Installing the dependencies on Buster works exactly like [on Ubuntu](#linux-build-instructions-194).
+To build on the Pi itself, I recommend at least Raspbian (aka Raspberry Pi OS) _Buster_.
+Older versions like Stretch don't have recent enough versions of CMake and gcc.
+
+Installing the dependencies works exactly like [on Ubuntu](#linux-build-instructions-194).
 
 When building, you need to enable OpenGL ES Support:
 
