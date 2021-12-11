@@ -17,6 +17,7 @@
 #include "resource_loader.hpp"
 
 #include "base/container_utils.hpp"
+#include "base/string_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "loader/ega_image_decoder.hpp"
@@ -148,11 +149,14 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
   std::string_view name,
   const data::Palette16& overridePalette) const
 {
-  return loadTiledImage(
-    file(name),
-    data::GameTraits::viewPortWidthTiles,
-    overridePalette,
-    data::TileImageType::Unmasked);
+  const auto path = (mGamePath / strings::toLowercase(name)).replace_extension("png");
+  const auto maybeImage = loadPng(path.u8string());
+  if (!maybeImage)
+  {
+    throw std::runtime_error("Image not found: " + path.filename().u8string());
+  }
+
+  return *maybeImage;
 }
 
 
