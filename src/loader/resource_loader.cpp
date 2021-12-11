@@ -312,7 +312,7 @@ std::filesystem::path
 
   const auto expectedName =
     "sound"s + std::to_string(static_cast<int>(id) + 1) + ".wav";
-  return mGamePath / expectedName;
+  return mGamePath / "sounds" / expectedName;
 }
 
 
