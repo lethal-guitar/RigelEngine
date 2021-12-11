@@ -150,7 +150,7 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
   const data::Palette16& overridePalette) const
 {
   const auto path =
-    (mGamePath / strings::toLowercase(name)).replace_extension("png");
+    (mGamePath / "misc" / strings::toLowercase(name)).replace_extension("png");
   const auto maybeImage = loadPng(path.u8string());
   if (!maybeImage)
   {

@@ -52,7 +52,7 @@ class ActorImagePackage
 {
 public:
   static constexpr auto IMAGE_DATA_FILE = "ACTORS.MNI";
-  static constexpr auto ACTOR_INFO_FILE = "ACTRINFO.MNI";
+  static constexpr auto ACTOR_INFO_FILE = "misc/ACTRINFO.MNI";
 
   ActorImagePackage(
     const ByteBuffer& actorInfoData,

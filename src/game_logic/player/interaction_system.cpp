@@ -208,7 +208,7 @@ ex::Entity currentlyTouchedInteractable(
 
 data::LevelHints loadHints(const loader::ResourceLoader& resources)
 {
-  const auto text = resources.fileAsText("hint_messages.txt");
+  const auto text = resources.fileAsText("misc/hint_messages.txt");
   return loader::loadHintMessages(text);
 }
 
