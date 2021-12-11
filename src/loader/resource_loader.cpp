@@ -74,9 +74,10 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 
-std::tuple<std::optional<data::Image>, std::string> loadReplacementTilesetIfPresent(
-  const fs::path& gamePath,
-  std::string_view name)
+std::tuple<std::optional<data::Image>, std::string>
+  loadReplacementTilesetIfPresent(
+    const fs::path& gamePath,
+    std::string_view name)
 {
   using namespace std::literals;
 
@@ -92,8 +93,7 @@ std::tuple<std::optional<data::Image>, std::string> loadReplacementTilesetIfPres
 
   const auto number = matches[1].str();
   const auto replacementName = "tileset"s + number + ".png";
-  const auto replacementPath =
-    gamePath / "tilesets" / replacementName;
+  const auto replacementPath = gamePath / "tilesets" / replacementName;
 
   const auto fname = replacementPath.u8string();
   return {loadPng(fname), replacementName};
@@ -219,8 +219,7 @@ data::Image ResourceLoader::loadBackdrop(std::string_view name) const
   {
     const auto number = matches[1].str();
     const auto replacementName = "backdrop"s + number + ".png";
-    const auto replacementPath =
-      mGamePath / "backdrops" / replacementName;
+    const auto replacementPath = mGamePath / "backdrops" / replacementName;
     if (const auto replacementImage = loadPng(replacementPath.u8string()))
     {
       return *replacementImage;
@@ -231,7 +230,8 @@ data::Image ResourceLoader::loadBackdrop(std::string_view name) const
     }
   }
 
-  throw std::runtime_error("Can't determine image name for backdrop: " + std::string(name));
+  throw std::runtime_error(
+    "Can't determine image name for backdrop: " + std::string(name));
 }
 
 

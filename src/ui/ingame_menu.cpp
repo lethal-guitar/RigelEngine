@@ -451,21 +451,21 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event)
       mMenuToEnter = MenuType::Options;
       break;
 
-    //case SDLK_F2:
-      //mMenuToEnter = MenuType::SaveGame;
-      //break;
+      // case SDLK_F2:
+      // mMenuToEnter = MenuType::SaveGame;
+      // break;
 
-    //case SDLK_F3:
-      //mMenuToEnter = MenuType::LoadGame;
-      //break;
+      // case SDLK_F3:
+      // mMenuToEnter = MenuType::LoadGame;
+      // break;
 
-    //case SDLK_h:
-      //mMenuToEnter = MenuType::Help;
-      //break;
+      // case SDLK_h:
+      // mMenuToEnter = MenuType::Help;
+      // break;
 
-    //case SDLK_p:
-      //mMenuToEnter = MenuType::Pause;
-      //break;
+      // case SDLK_p:
+      // mMenuToEnter = MenuType::Pause;
+      // break;
 
     default:
       break;

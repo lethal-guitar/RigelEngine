@@ -155,9 +155,7 @@ std::unique_ptr<GameMode> createInitialGameMode(
   GameMode::Context context,
   const CommandLineOptions& commandLineOptions)
 {
-  return std::make_unique<GameSessionMode>(
-    data::GameSessionId{0, 0},
-    context);
+  return std::make_unique<GameSessionMode>(data::GameSessionId{0, 0}, context);
 }
 
 
@@ -256,9 +254,8 @@ Game::Game(
 
   applyChangedOptions();
 
-  mpCurrentGameMode = wrapWithInitialFadeIn(createInitialGameMode(
-    makeModeContext(),
-    mCommandLineOptions));
+  mpCurrentGameMode = wrapWithInitialFadeIn(
+    createInitialGameMode(makeModeContext(), mCommandLineOptions));
 
   mLastTime = base::Clock::now();
 }

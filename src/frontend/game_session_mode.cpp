@@ -141,7 +141,7 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
       if (pIngameMode->gameQuit())
       {
         mContext.mpServiceProvider->scheduleGameQuit();
-        //finishGameSession();
+        // finishGameSession();
         return nullptr;
       }
 

@@ -149,7 +149,7 @@ renderer::Texture
   if (font.size() != 67u)
   {
     return {};
-      //throw std::runtime_error("Wrong number of bitmaps in menu font");
+    // throw std::runtime_error("Wrong number of bitmaps in menu font");
   }
 
   const auto characterWidth = int(font.front().width());
