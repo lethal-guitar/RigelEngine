@@ -64,6 +64,7 @@ function(rigel_enable_warnings target)
             -pedantic
             -Wno-maybe-uninitialized
             -Wno-unused-parameter
+            -Wno-psabi
         )
 
         if (WARNINGS_AS_ERRORS)
