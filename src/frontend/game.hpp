@@ -153,8 +153,6 @@ private:
   bool mWidescreenModeWasActive;
   std::filesystem::path mGamePathToSwitchTo;
 
-  ui::DukeScriptRunner mScriptRunner;
-  loader::ScriptBundle mAllScripts;
   engine::TiledTexture mUiSpriteSheet;
   engine::SpriteFactory mSpriteFactory;
   ui::MenuElementRenderer mTextRenderer;

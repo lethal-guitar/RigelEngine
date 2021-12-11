@@ -244,8 +244,6 @@ Game::Game(
   , mWidescreenModeWasActive(
       pUserProfile->mOptions.mWidescreenModeOn &&
       renderer::canUseWidescreenMode(&mRenderer))
-  , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
-  , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
       renderer::Texture{
         &mRenderer,
@@ -393,8 +391,8 @@ GameMode::Context Game::makeModeContext()
     &mResources,
     &mRenderer,
     this,
-    &mScriptRunner,
-    &mAllScripts,
+    nullptr,
+    nullptr,
     &mTextRenderer,
     &mUiSpriteSheet,
     &mSpriteFactory,
