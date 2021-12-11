@@ -730,12 +730,12 @@ void Game::takeScreenshot()
 
 void Game::setPerElementUpscalingEnabled(bool enabled)
 {
-  if (enabled != mpUserProfile->mOptions.mPerElementUpscalingEnabled)
-  {
-    mpUserProfile->mOptions.mPerElementUpscalingEnabled = enabled;
-    mRenderTarget = renderer::createFullscreenRenderTarget(
-      &mRenderer, mpUserProfile->mOptions);
-  }
+  //if (enabled != mpUserProfile->mOptions.mPerElementUpscalingEnabled)
+  //{
+    //mpUserProfile->mOptions.mPerElementUpscalingEnabled = enabled;
+    //mRenderTarget = renderer::createFullscreenRenderTarget(
+      //&mRenderer, mpUserProfile->mOptions);
+  //}
 }
 
 void Game::fadeOutScreen()

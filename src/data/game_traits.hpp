@@ -35,11 +35,11 @@ enum class TileImageType
 struct GameTraits
 {
 
-  static constexpr int tileSize = 8;
+  static constexpr int tileSize = 16;
   static constexpr int tileSizeSquared = tileSize * tileSize;
 
-  static constexpr int viewPortWidthPx = 320;
-  static constexpr int viewPortHeightPx = 200;
+  static constexpr int viewPortWidthPx = 640;
+  static constexpr int viewPortHeightPx = 400;
   static constexpr int viewPortWidthTiles = viewPortWidthPx / tileSize;
   static constexpr int viewPortHeightTiles = viewPortHeightPx / tileSize;
 
@@ -50,10 +50,10 @@ struct GameTraits
   // The actual in-game viewport starts with an offset and is further reduced
   // to make room for the HUD. The right hand side features another 8px of
   // black border.
-  static constexpr base::Vec2 inGameViewPortOffset{8, 8};
+  static constexpr base::Vec2 inGameViewPortOffset{tileSize, tileSize};
   static constexpr base::Extents inGameViewPortSize{
-    GameTraits::viewPortWidthPx - 16,
-    GameTraits::viewPortHeightPx - 8};
+    GameTraits::viewPortWidthPx - tileSize * 2,
+    GameTraits::viewPortHeightPx - tileSize};
 
   static constexpr int mapViewPortWidthTiles = viewPortWidthTiles - 8;
   static constexpr int mapViewPortHeightTiles = viewPortHeightTiles - 5;
