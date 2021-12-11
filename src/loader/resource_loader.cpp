@@ -74,7 +74,7 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
 
-std::optional<data::Image> loadReplacementTilesetIfPresent(
+std::tuple<std::optional<data::Image>, std::string> loadReplacementTilesetIfPresent(
   const fs::path& gamePath,
   std::string_view name)
 {
@@ -93,9 +93,10 @@ std::optional<data::Image> loadReplacementTilesetIfPresent(
   const auto number = matches[1].str();
   const auto replacementName = "tileset"s + number + ".png";
   const auto replacementPath =
-    gamePath / replacementName;
+    gamePath / "tilesets" / replacementName;
 
-  return loadPng(replacementPath.u8string());
+  const auto fname = replacementPath.u8string();
+  return {loadPng(fname), replacementName};
 }
 
 
@@ -219,14 +220,18 @@ data::Image ResourceLoader::loadBackdrop(std::string_view name) const
     const auto number = matches[1].str();
     const auto replacementName = "backdrop"s + number + ".png";
     const auto replacementPath =
-      mGamePath / replacementName;
+      mGamePath / "backdrops" / replacementName;
     if (const auto replacementImage = loadPng(replacementPath.u8string()))
     {
       return *replacementImage;
     }
+    else
+    {
+      throw std::runtime_error("Missing backdrop: " + replacementName);
+    }
   }
 
-  return loadTiledFullscreenImage(name);
+  throw std::runtime_error("Can't determine image name for backdrop: " + std::string(name));
 }
 
 
@@ -236,7 +241,7 @@ TileSet ResourceLoader::loadCZone(std::string_view name) const
   using namespace map;
   using T = data::TileImageType;
 
-  const auto& data = file(name);
+  const auto& data = file("tilesets/" + std::string(name));
   LeStreamReader attributeReader(
     data.begin(), data.begin() + GameTraits::CZone::attributeBytesTotal);
 
@@ -252,39 +257,15 @@ TileSet ResourceLoader::loadCZone(std::string_view name) const
     }
   }
 
-  if (auto replacementImage = loadReplacementTilesetIfPresent(mGamePath, name))
+  const auto [replacementImage, replacementName] =
+    loadReplacementTilesetIfPresent(mGamePath, name);
+  if (replacementImage)
   {
     return {
       std::move(*replacementImage), TileAttributeDict{std::move(attributes)}};
   }
 
-  Image fullImage(
-    tilesToPixels(GameTraits::CZone::tileSetImageWidth),
-    tilesToPixels(GameTraits::CZone::tileSetImageHeight));
-
-  const auto tilesBegin = data.begin() + GameTraits::CZone::attributeBytesTotal;
-  const auto maskedTilesBegin = tilesBegin +
-    GameTraits::CZone::numSolidTiles * GameTraits::CZone::tileBytes;
-
-  const auto solidTilesImage = loadTiledImage(
-    tilesBegin,
-    maskedTilesBegin,
-    GameTraits::CZone::tileSetImageWidth,
-    data::GameTraits::INGAME_PALETTE,
-    T::Unmasked);
-  const auto maskedTilesImage = loadTiledImage(
-    maskedTilesBegin,
-    data.end(),
-    GameTraits::CZone::tileSetImageWidth,
-    data::GameTraits::INGAME_PALETTE,
-    T::Masked);
-  fullImage.insertImage(0, 0, solidTilesImage);
-  fullImage.insertImage(
-    0,
-    tilesToPixels(GameTraits::CZone::solidTilesImageHeight),
-    maskedTilesImage);
-
-  return {std::move(fullImage), TileAttributeDict{std::move(attributes)}};
+  throw std::runtime_error("Missing tileset image: " + replacementName);
 }
 
 
