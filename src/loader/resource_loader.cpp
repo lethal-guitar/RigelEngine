@@ -149,7 +149,8 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
   std::string_view name,
   const data::Palette16& overridePalette) const
 {
-  const auto path = (mGamePath / strings::toLowercase(name)).replace_extension("png");
+  const auto path =
+    (mGamePath / strings::toLowercase(name)).replace_extension("png");
   const auto maybeImage = loadPng(path.u8string());
   if (!maybeImage)
   {
@@ -317,7 +318,7 @@ std::filesystem::path
 
 std::filesystem::path ResourceLoader::replacementMusicBasePath() const
 {
-  return mGamePath;
+  return mGamePath / "music";
 }
 
 

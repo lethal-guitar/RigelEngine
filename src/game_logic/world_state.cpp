@@ -47,7 +47,7 @@ std::string levelFileName(const int episode, const int level)
   assert(episode >= 0 && episode < 4);
   assert(level >= 0 && level < 8);
 
-  std::string fileName;
+  std::string fileName{"levels/"};
   fileName += EPISODE_PREFIXES[episode];
   fileName += std::to_string(level + 1);
   fileName += ".MNI";
