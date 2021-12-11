@@ -52,11 +52,9 @@ std::string replacementImagePath(
 
 
 ActorImagePackage::ActorImagePackage(
-  ByteBuffer imageData,
   const ByteBuffer& actorInfoData,
-  std::optional<std::string> maybeImageReplacementsPath)
-  : mImageData(std::move(imageData))
-  , mMaybeReplacementsPath(std::move(maybeImageReplacementsPath))
+  std::string maybeImageReplacementsPath)
+  : mMaybeReplacementsPath(std::move(maybeImageReplacementsPath))
 {
   LeStreamReader actorInfoReader(actorInfoData);
   const auto numEntries = actorInfoReader.peekU16();
@@ -126,74 +124,28 @@ std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
 {
   return utils::transformed(
     header.mFrames, [&, this, frame = 0](const auto& frameHeader) mutable {
-      auto maybeReplacement = mMaybeReplacementsPath
-        ? loadPng(replacementImagePath(
-            *mMaybeReplacementsPath, static_cast<int>(id), frame))
-        : std::nullopt;
+      const auto maybeImage = loadPng(replacementImagePath(
+        mMaybeReplacementsPath, static_cast<int>(id), frame));
       ++frame;
+
+      if (!maybeImage)
+      {
+        throw std::runtime_error(
+          "No image for actor " + std::to_string(static_cast<int>(id)) +
+          ", frame " + std::to_string(frame - 1));
+      }
 
       return ActorData::Frame{
         frameHeader.mDrawOffset,
         frameHeader.mSizeInTiles,
-        maybeReplacement ? *maybeReplacement : loadImage(frameHeader, palette)};
+        std::move(*maybeImage)};
     });
-}
-
-
-data::Image ActorImagePackage::loadImage(
-  const ActorFrameHeader& frameHeader,
-  const data::Palette16& palette) const
-{
-  using T = data::TileImageType;
-
-  const auto width = frameHeader.mSizeInTiles.width;
-  const auto height = frameHeader.mSizeInTiles.height;
-
-  const auto dataSize = height * width * GameTraits::bytesPerTile(T::Masked);
-  if (frameHeader.mFileOffset + dataSize > mImageData.size())
-  {
-    throw invalid_argument("Not enough data");
-  }
-
-  const auto dataStart = mImageData.begin() + frameHeader.mFileOffset;
-  return loadTiledImage(
-    dataStart, dataStart + dataSize, width, palette, T::Masked);
 }
 
 
 FontData ActorImagePackage::loadFont() const
 {
-  const auto it = mHeadersById.find(data::ActorID::Menu_font_grayscale);
-  if (it == mHeadersById.end() || it->second.mFrames.empty())
-  {
-    throw runtime_error("Font data missing");
-  }
-
-  const auto& header = it->second;
-  const auto sizeInTiles = header.mFrames.front().mSizeInTiles;
-
-  FontData fontBitmaps;
-  for (const auto& frameHeader : header.mFrames)
-  {
-    if (frameHeader.mSizeInTiles != sizeInTiles)
-    {
-      throw runtime_error("Font bitmaps must all be equally sized");
-    }
-
-    const auto dataSize =
-      sizeInTiles.width * sizeInTiles.height * GameTraits::bytesPerFontTile();
-    if (frameHeader.mFileOffset + dataSize > mImageData.size())
-    {
-      throw runtime_error("Not enough data");
-    }
-
-    const auto dataStart = mImageData.begin() + frameHeader.mFileOffset;
-    auto characterBitmap =
-      loadTiledFontBitmap(dataStart, dataStart + dataSize, sizeInTiles.width);
-    fontBitmaps.emplace_back(std::move(characterBitmap));
-  }
-
-  return fontBitmaps;
+  return {};
 }
 
 } // namespace rigel::loader

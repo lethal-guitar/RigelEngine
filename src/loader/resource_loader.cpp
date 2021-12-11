@@ -73,8 +73,6 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 // tileset1.png, etc.
 //
 // The files can contain full 32-bit RGBA values, there are no limitations.
-const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
-
 
 std::optional<data::Image> loadReplacementTilesetIfPresent(
   const fs::path& gamePath,
@@ -95,7 +93,7 @@ std::optional<data::Image> loadReplacementTilesetIfPresent(
   const auto number = matches[1].str();
   const auto replacementName = "tileset"s + number + ".png";
   const auto replacementPath =
-    gamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+    gamePath / replacementName;
 
   return loadPng(replacementPath.u8string());
 }
@@ -131,11 +129,9 @@ std::string digitizedSoundFilenameForId(const data::SoundId soundId)
 
 ResourceLoader::ResourceLoader(const std::string& gamePath)
   : mGamePath(fs::u8path(gamePath))
-  , mFilePackage(gamePath + "NUKEM2.CMP")
   , mActorImagePackage(
-      file(ActorImagePackage::IMAGE_DATA_FILE),
       file(ActorImagePackage::ACTOR_INFO_FILE),
-      gamePath + "/" + ASSET_REPLACEMENTS_PATH)
+      gamePath + "/sprites/")
 {
 }
 
@@ -223,7 +219,7 @@ data::Image ResourceLoader::loadBackdrop(std::string_view name) const
     const auto number = matches[1].str();
     const auto replacementName = "backdrop"s + number + ".png";
     const auto replacementPath =
-      mGamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+      mGamePath / replacementName;
     if (const auto replacementImage = loadPng(replacementPath.u8string()))
     {
       return *replacementImage;
@@ -330,13 +326,13 @@ std::filesystem::path
 
   const auto expectedName =
     "sound"s + std::to_string(static_cast<int>(id) + 1) + ".wav";
-  return mGamePath / ASSET_REPLACEMENTS_PATH / expectedName;
+  return mGamePath / expectedName;
 }
 
 
 std::filesystem::path ResourceLoader::replacementMusicBasePath() const
 {
-  return mGamePath / ASSET_REPLACEMENTS_PATH;
+  return mGamePath;
 }
 
 
@@ -360,7 +356,7 @@ ByteBuffer ResourceLoader::file(std::string_view name) const
     return loadFile(unpackedFilePath);
   }
 
-  return mFilePackage.file(name);
+  throw std::runtime_error("File not found: " + std::string(name));
 }
 
 
@@ -372,7 +368,7 @@ std::string ResourceLoader::fileAsText(std::string_view name) const
 bool ResourceLoader::hasFile(std::string_view name) const
 {
   const auto unpackedFilePath = mGamePath / fs::u8path(name);
-  return fs::exists(unpackedFilePath) || mFilePackage.hasFile(name);
+  return fs::exists(unpackedFilePath);
 }
 
 } // namespace rigel::loader

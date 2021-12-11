@@ -77,7 +77,6 @@ private:
   data::AudioBuffer loadSound(std::string_view name) const;
 
   std::filesystem::path mGamePath;
-  loader::CMPFilePackage mFilePackage;
 
 public:
   loader::ActorImagePackage mActorImagePackage;

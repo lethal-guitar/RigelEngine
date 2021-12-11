@@ -55,9 +55,8 @@ public:
   static constexpr auto ACTOR_INFO_FILE = "ACTRINFO.MNI";
 
   ActorImagePackage(
-    ByteBuffer imageData,
     const ByteBuffer& actorInfoData,
-    std::optional<std::string> maybeImageReplacementsPath = std::nullopt);
+    std::string maybeImageReplacementsPath);
 
   ActorData loadActor(
     data::ActorID id,
@@ -94,10 +93,9 @@ private:
     const data::Palette16& palette) const;
 
 private:
-  const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
   std::vector<int> mDrawIndexById;
-  std::optional<std::string> mMaybeReplacementsPath;
+  std::string mMaybeReplacementsPath;
 };
 
 
