@@ -66,7 +66,7 @@ std::string effectiveGamePath(
     return options.mGamePath;
   }
 
-  return "";
+  return std::filesystem::current_path().u8string();
 }
 
 
