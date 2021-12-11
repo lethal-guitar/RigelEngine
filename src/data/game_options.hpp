@@ -136,10 +136,10 @@ struct GameOptions
   bool mCompatibilityModeOn = false;
 
   // Enhancements
-  bool mWidescreenModeOn = false;
-  bool mQuickSavingEnabled = false;
+  bool mWidescreenModeOn = true;
+  bool mQuickSavingEnabled = true;
   bool mSkipIntro = false;
-  bool mMotionSmoothing = false;
+  bool mMotionSmoothing = true;
 
   // Internal options
   //

@@ -771,10 +771,11 @@ void GameWorld::render(const float interpolationFactor)
 
       {
         const auto saved = mLowResLayer.bindAndReset();
-        mpRenderer->clear({0, 0, 0, 0});
+        mpRenderer->clear({200, 0, 0, 100});
         drawParticlesAndDebugOverlay(viewportParams);
       }
 
+      //mpRenderer->setGlobalScale({2.0f, 2.0f});
       mLowResLayer.render(0, 0);
     }
     else

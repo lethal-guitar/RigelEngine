@@ -38,9 +38,9 @@ namespace
 
 constexpr auto NUM_HEALTH_SLICES = 8;
 
-constexpr auto RADAR_SIZE_PX = 32;
-constexpr auto RADAR_CENTER_POS_X = 288;
-constexpr auto RADAR_CENTER_POS_Y = 136;
+constexpr auto RADAR_SIZE_PX = 32 * 2;
+constexpr auto RADAR_CENTER_POS_X = 288 * 2;
+constexpr auto RADAR_CENTER_POS_Y = 136 * 2;
 
 constexpr auto RADAR_POS_X = RADAR_CENTER_POS_X - RADAR_SIZE_PX / 2 -
   data::GameTraits::inGameViewPortOffset.x;
@@ -389,7 +389,7 @@ void HudRenderer::drawRadar(const base::ArrayView<base::Vec2> positions) const
   };
 
 
-  if (mpOptions->mPerElementUpscalingEnabled)
+  //if (mpOptions->mPerElementUpscalingEnabled)
   {
     {
       const auto saved = mRadarSurface.bindAndReset();
@@ -399,14 +399,14 @@ void HudRenderer::drawRadar(const base::ArrayView<base::Vec2> positions) const
 
     mRadarSurface.render(RADAR_POS_X, RADAR_POS_Y);
   }
-  else
-  {
-    const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setGlobalTranslation(
-      mpRenderer->globalTranslation() + base::Vec2{RADAR_POS_X, RADAR_POS_Y});
+  //else
+  //{
+    //const auto saved = renderer::saveState(mpRenderer);
+    //mpRenderer->setGlobalTranslation(
+      //mpRenderer->globalTranslation() + base::Vec2{RADAR_POS_X, RADAR_POS_Y});
 
-    drawDots();
-  }
+    //drawDots();
+  //}
 }
 
 } // namespace rigel::ui
