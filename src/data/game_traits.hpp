@@ -132,7 +132,7 @@ struct GameTraits
   // with the earth in the Apogee logo). CRTs are not limited to square pixels,
   // and the monitor would stretch the 320x200 into the right shape for a 4:3
   // picture.
-  static constexpr auto aspectRatio = 4.0f / 3.0f;
+  static constexpr auto aspectRatio = 16.0f / 10.0f;
   static constexpr auto aspectCorrectionStretchFactor =
     viewPortWidthPx / aspectRatio / viewPortHeightPx;
 
