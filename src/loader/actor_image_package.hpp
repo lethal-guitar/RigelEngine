@@ -23,9 +23,11 @@
 #include "loader/byte_buffer.hpp"
 
 #include <map>
+#include <unordered_map>
 #include <optional>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 
 namespace rigel::loader
@@ -52,7 +54,7 @@ class ActorImagePackage
 {
 public:
   static constexpr auto IMAGE_DATA_FILE = "ACTORS.MNI";
-  static constexpr auto ACTOR_INFO_FILE = "misc/ACTRINFO.MNI";
+  static constexpr auto ACTOR_INFO_FILE = "misc/actor_info.json";
 
   ActorImagePackage(
     const ByteBuffer& actorInfoData,
@@ -66,7 +68,13 @@ public:
 
   int drawIndexFor(data::ActorID id) const
   {
-    return mDrawIndexById.at(static_cast<size_t>(id));
+    const auto iResult = mDrawIndexById.find(static_cast<int>(id));
+    if (iResult == mDrawIndexById.end())
+    {
+      throw std::runtime_error("No draw index for this ID");
+    }
+
+    return iResult->second;
   }
 
 private:
@@ -94,7 +102,7 @@ private:
 
 private:
   std::map<data::ActorID, ActorHeader> mHeadersById;
-  std::vector<int> mDrawIndexById;
+  std::unordered_map<int, int> mDrawIndexById;
   std::string mMaybeReplacementsPath;
 };
 

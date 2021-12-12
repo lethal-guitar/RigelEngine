@@ -23,6 +23,10 @@
 #include "loader/file_utils.hpp"
 #include "loader/png_image.hpp"
 
+RIGEL_DISABLE_WARNINGS
+#include <nlohmann/json.hpp>
+RIGEL_RESTORE_WARNINGS
+
 #include <cassert>
 #include <utility>
 
@@ -56,44 +60,75 @@ ActorImagePackage::ActorImagePackage(
   std::string maybeImageReplacementsPath)
   : mMaybeReplacementsPath(std::move(maybeImageReplacementsPath))
 {
-  LeStreamReader actorInfoReader(actorInfoData);
-  const auto numEntries = actorInfoReader.peekU16();
+  using json = nlohmann::json;
 
-  mDrawIndexById.reserve(numEntries);
-  for (uint16_t index = 0; index < numEntries; ++index)
+  const auto data = json::parse(actorInfoData.begin(), actorInfoData.end());
+
+  for (const auto& entry : data)
   {
-    const auto offset = actorInfoReader.readU16();
+    const auto drawIndex = entry.at("draw_index").get<int>();
+    const auto id = entry.at("id").get<int>();
 
-    LeStreamReader entryReader(actorInfoData);
-    entryReader.skipBytes(offset * sizeof(uint16_t));
+    mDrawIndexById.insert({id, drawIndex});
 
-    const auto numFrames = entryReader.readU16();
-    const auto drawIndex = entryReader.readS16();
-
-    mDrawIndexById.push_back(drawIndex);
+    const auto& frameList = entry.at("frames");
 
     vector<ActorFrameHeader> frameHeaders;
-    for (size_t frame = 0; frame < numFrames; ++frame)
+    for (const auto& frame : frameList)
     {
-      base::Vec2 drawOffset{entryReader.readS16(), entryReader.readS16()};
-
-      const auto height = entryReader.readU16();
-      const auto width = entryReader.readU16();
-      base::Extents size{width, height};
-
-      const auto imageDataOffset = entryReader.readU32();
-      entryReader.skipBytes(4); // padding
-
+      const auto drawOffset = base::Vec2{
+        frame.at("offset_x").get<int>(), frame.at("offset_y").get<int>()};
+      const auto size = base::Extents{
+        frame.at("width").get<int>(), frame.at("height").get<int>()};
       frameHeaders.emplace_back(
-        ActorFrameHeader{drawOffset, size, imageDataOffset});
+        ActorFrameHeader{drawOffset, size, 0});
     }
 
     if (!frameHeaders.empty())
     {
       mHeadersById.emplace(
-        ActorID(index), ActorHeader{drawIndex, move(frameHeaders)});
+        ActorID(id), ActorHeader{drawIndex, move(frameHeaders)});
     }
   }
+
+  //LeStreamReader actorInfoReader(actorInfoData);
+  //const auto numEntries = actorInfoReader.peekU16();
+
+  //mDrawIndexById.reserve(numEntries);
+  //for (uint16_t index = 0; index < numEntries; ++index)
+  //{
+    //const auto offset = actorInfoReader.readU16();
+
+    //LeStreamReader entryReader(actorInfoData);
+    //entryReader.skipBytes(offset * sizeof(uint16_t));
+
+    //const auto numFrames = entryReader.readU16();
+    //const auto drawIndex = entryReader.readS16();
+
+    //mDrawIndexById.push_back(drawIndex);
+
+    //vector<ActorFrameHeader> frameHeaders;
+    //for (size_t frame = 0; frame < numFrames; ++frame)
+    //{
+      //base::Vec2 drawOffset{entryReader.readS16(), entryReader.readS16()};
+
+      //const auto height = entryReader.readU16();
+      //const auto width = entryReader.readU16();
+      //base::Extents size{width, height};
+
+      //const auto imageDataOffset = entryReader.readU32();
+      //entryReader.skipBytes(4); // padding
+
+      //frameHeaders.emplace_back(
+        //ActorFrameHeader{drawOffset, size, imageDataOffset});
+    //}
+
+    //if (!frameHeaders.empty())
+    //{
+      //mHeadersById.emplace(
+        //ActorID(index), ActorHeader{drawIndex, move(frameHeaders)});
+    //}
+  //}
 }
 
 
