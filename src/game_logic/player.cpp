@@ -105,6 +105,38 @@ constexpr std::array<int, DEATH_ANIMATION_STEPS>
 
 constexpr std::array<int, 4> GETTING_SUCKED_INTO_SPACE_Y_SEQ{-2, -2, -1, -1};
 
+constexpr std::array<base::Vec2, 5> SHOT_OFFSET_TABLE_LEFT{{
+  {-1, -2},
+  {-1, -1},
+  {0, -5},
+  {2, 0},
+  {1, 1},
+}};
+
+constexpr std::array<base::Vec2, 5> SHOT_OFFSET_TABLE_RIGHT{{
+  {3, -2},
+  {3, -1},
+  {2, -5},
+  {0, 0},
+  {1, 1},
+}};
+
+constexpr std::array<base::Vec2, 5> MUZZLE_FLASH_OFFSET_TABLE_LEFT{{
+  {-3, -2},
+  {-3, -1},
+  {0, -5},
+  {2, 1},
+  {1, 1},
+}};
+
+constexpr std::array<base::Vec2, 5> MUZZLE_FLASH_OFFSET_TABLE_RIGHT{{
+  {3, -2},
+  {3, -1},
+  {2, -5},
+  {0, 1},
+  {1, 1},
+}};
+
 
 int mercyFramesForDifficulty(const data::Difficulty difficulty)
 {
@@ -219,26 +251,10 @@ ProjectileDirection
 base::Vec2
   shotOffset(const c::Orientation orientation, const WeaponStance stance)
 {
-  if (stance == WeaponStance::UsingJetpack)
-  {
-    return {1, 1};
-  }
-
-  const auto facingRight = orientation == c::Orientation::Right;
-
-  if (stance == WeaponStance::Downwards)
-  {
-    return facingRight ? base::Vec2{0, 0} : base::Vec2{2, 0};
-  }
-
-  const auto shotOffsetHorizontal = stance == WeaponStance::Upwards
-    ? (facingRight ? 2 : 0)
-    : (facingRight ? 3 : -1);
-  const auto shotOffsetVertical = stance != WeaponStance::RegularCrouched
-    ? (stance == WeaponStance::Upwards ? -5 : -2)
-    : -1;
-
-  return base::Vec2{shotOffsetHorizontal, shotOffsetVertical};
+  const auto& table = orientation == c::Orientation::Left
+    ? SHOT_OFFSET_TABLE_LEFT
+    : SHOT_OFFSET_TABLE_RIGHT;
+  return table[static_cast<size_t>(stance)];
 }
 
 
@@ -256,26 +272,10 @@ data::ActorID muzzleFlashActorId(const ProjectileDirection direction)
 base::Vec2
   muzzleFlashOffset(const c::Orientation orientation, const WeaponStance stance)
 {
-  if (stance == WeaponStance::UsingJetpack)
-  {
-    return {1, 1};
-  }
-
-  const auto facingRight = orientation == c::Orientation::Right;
-
-  if (stance == WeaponStance::Downwards)
-  {
-    return facingRight ? base::Vec2{0, 1} : base::Vec2{2, 1};
-  }
-
-  const auto horizontalOffset = stance == WeaponStance::Upwards
-    ? (facingRight ? 2 : 0)
-    : (facingRight ? 3 : -3);
-  const auto verticalOffset = stance == WeaponStance::Upwards
-    ? -5
-    : (stance == WeaponStance::RegularCrouched ? -1 : -2);
-
-  return {horizontalOffset, verticalOffset};
+  const auto& table = orientation == c::Orientation::Left
+    ? MUZZLE_FLASH_OFFSET_TABLE_LEFT
+    : MUZZLE_FLASH_OFFSET_TABLE_RIGHT;
+  return table[static_cast<size_t>(stance)];
 }
 
 
