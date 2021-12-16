@@ -794,6 +794,7 @@ void Player::reSpawnAt(const base::Vec2& spawnPosition)
 
   mEntity.component<c::Sprite>()->mFramesToRender = {0};
   engine::removeSafely<components::DestructionEffects>(mEntity);
+  engine::removeSafely<c::AnimationLoop>(mEntity);
 }
 
 
