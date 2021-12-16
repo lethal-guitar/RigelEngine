@@ -60,7 +60,6 @@ namespace rigel::audio
 namespace
 {
 
-const auto OPL2_SAMPLE_RATE = 49716;
 const auto ADLIB_SOUND_RATE = 140;
 
 const auto COMBINED_SOUNDS_ADLIB_PERCENTAGE = 0.30f;
