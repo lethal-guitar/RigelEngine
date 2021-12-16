@@ -63,13 +63,14 @@ struct IEntityFactory;
 namespace rigel::game_logic
 {
 
-enum class WeaponStance
+// !!! These enum values are used as array indices !!!
+enum class WeaponStance : std::uint8_t
 {
-  Regular,
-  RegularCrouched,
-  Upwards,
-  Downwards,
-  UsingJetpack
+  Regular = 0,
+  RegularCrouched = 1,
+  Upwards = 2,
+  Downwards = 3,
+  UsingJetpack = 4
 };
 
 

@@ -59,6 +59,11 @@ struct CeilingSucker
     GlobalState& state,
     bool isOnScreen,
     entityx::Entity entity);
+  void onKilled(
+    GlobalDependencies& dependencies,
+    GlobalState& state,
+    const base::Vec2f& inflictorVelocity,
+    entityx::Entity entity);
 
   State mState;
 };

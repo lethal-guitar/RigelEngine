@@ -119,4 +119,17 @@ void CeilingSucker::update(
     });
 }
 
+
+void CeilingSucker::onKilled(
+  GlobalDependencies& d,
+  GlobalState& s,
+  const base::Vec2f&,
+  entityx::Entity entity)
+{
+  if (s.mpPlayer->isIncapacitated())
+  {
+    s.mpPlayer->setFree();
+  }
+}
+
 } // namespace rigel::game_logic::behaviors
