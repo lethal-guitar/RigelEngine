@@ -23,25 +23,24 @@
 #include "loader/byte_buffer.hpp"
 
 #include <map>
-#include <optional>
-#include <string>
 #include <vector>
 
 
 namespace rigel::loader
 {
 
-struct ActorData
+struct ActorFrameHeader
 {
-  struct Frame
-  {
-    base::Vec2 mDrawOffset;
-    base::Extents mLogicalSize;
-    data::Image mFrameImage;
-  };
+  base::Vec2 mDrawOffset;
+  base::Extents mSizeInTiles;
+  std::uint32_t mFileOffset;
+};
 
+
+struct ActorHeader
+{
   int mDrawIndex;
-  std::vector<Frame> mFrames;
+  std::vector<ActorFrameHeader> mFrames;
 };
 
 
@@ -54,14 +53,12 @@ public:
   static constexpr auto IMAGE_DATA_FILE = "ACTORS.MNI";
   static constexpr auto ACTOR_INFO_FILE = "ACTRINFO.MNI";
 
-  ActorImagePackage(
-    ByteBuffer imageData,
-    const ByteBuffer& actorInfoData,
-    std::optional<std::string> maybeImageReplacementsPath = std::nullopt);
+  ActorImagePackage(ByteBuffer imageData, const ByteBuffer& actorInfoData);
 
-  ActorData loadActor(
-    data::ActorID id,
-    const data::Palette16& palette = data::GameTraits::INGAME_PALETTE) const;
+  const ActorHeader& loadActorInfo(data::ActorID id) const;
+  data::Image loadImage(
+    const ActorFrameHeader& frameHeader,
+    const data::Palette16& palette) const;
 
   FontData loadFont() const;
 
@@ -71,33 +68,9 @@ public:
   }
 
 private:
-  struct ActorFrameHeader
-  {
-    base::Vec2 mDrawOffset;
-    base::Extents mSizeInTiles;
-    std::uint32_t mFileOffset;
-  };
-
-  struct ActorHeader
-  {
-    int mDrawIndex;
-    std::vector<ActorFrameHeader> mFrames;
-  };
-
-  std::vector<ActorData::Frame> loadFrameImages(
-    data::ActorID id,
-    const ActorHeader& header,
-    const data::Palette16& palette) const;
-
-  data::Image loadImage(
-    const ActorFrameHeader& frameHeader,
-    const data::Palette16& palette) const;
-
-private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;
   std::vector<int> mDrawIndexById;
-  std::optional<std::string> mMaybeReplacementsPath;
 };
 
 

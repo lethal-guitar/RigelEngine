@@ -41,6 +41,20 @@ struct TileSet
 };
 
 
+struct ActorData
+{
+  struct Frame
+  {
+    base::Vec2 mDrawOffset;
+    base::Extents mLogicalSize;
+    data::Image mFrameImage;
+  };
+
+  int mDrawIndex;
+  std::vector<Frame> mFrames;
+};
+
+
 class ResourceLoader
 {
 public:
