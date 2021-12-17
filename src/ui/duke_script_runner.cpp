@@ -548,8 +548,7 @@ void DukeScriptRunner::drawSprite(
   const int x,
   const int y)
 {
-  const auto actorData =
-    mpResourceBundle->mActorImagePackage.loadActor(id, mCurrentPalette);
+  const auto actorData = mpResourceBundle->loadActor(id, mCurrentPalette);
   const auto& frameData = actorData.mFrames.at(frame);
   const auto& image = frameData.mFrameImage;
 

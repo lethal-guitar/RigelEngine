@@ -296,7 +296,7 @@ Game::Game(
         &mRenderer,
         mResources.loadTiledFullscreenImage("STATUS.MNI")},
       &mRenderer)
-  , mSpriteFactory(&mRenderer, &mResources.mActorImagePackage)
+  , mSpriteFactory(&mRenderer, &mResources)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
   mCommandLineOptions.mSkipIntro |= mpUserProfile->mOptions.mSkipIntro;

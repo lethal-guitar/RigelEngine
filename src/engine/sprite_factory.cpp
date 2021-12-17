@@ -18,7 +18,7 @@
 
 #include "base/container_utils.hpp"
 #include "data/unit_conversions.hpp"
-#include "loader/actor_image_package.hpp"
+#include "loader/resource_loader.hpp"
 
 #include <array>
 
@@ -824,8 +824,8 @@ bool hasAssociatedSprite(const ActorID actorID)
 
 SpriteFactory::SpriteFactory(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage* pSpritePackage)
-  : SpriteFactory(construct(pRenderer, pSpritePackage))
+  const loader::ResourceLoader* pResourceLoader)
+  : SpriteFactory(construct(pRenderer, pResourceLoader))
 {
 }
 
@@ -840,7 +840,7 @@ SpriteFactory::SpriteFactory(CtorArgs args)
 
 auto SpriteFactory::construct(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage* pSpritePackage) -> CtorArgs
+  const loader::ResourceLoader* pResourceLoader) -> CtorArgs
 {
   bool highResReplacementsFound = false;
 
@@ -862,7 +862,7 @@ auto SpriteFactory::construct(
     // non-const so we can move the Image objects into the vector
     auto actorParts =
       utils::transformed(actorPartIds, [&](const ActorID partId) {
-        return pSpritePackage->loadActor(partId);
+        return pResourceLoader->loadActor(partId);
       });
 
     // Similarly, non-const for move semantics

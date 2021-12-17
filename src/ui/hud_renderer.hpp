@@ -38,7 +38,6 @@ class PlayerModel;
 namespace loader
 {
 struct ActorData;
-class ActorImagePackage;
 class ResourceLoader;
 } // namespace loader
 
@@ -94,11 +93,11 @@ private:
 
   static InventoryItemTextureMap makeInventoryItemTextureMap(
     renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage& imagePack);
+    const loader::ResourceLoader& resources);
 
   static CollectedLetterIndicatorMap makeCollectedLetterTextureMap(
     renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage& imagePack);
+    const loader::ResourceLoader& resources);
 
   void drawHealthBar(const data::PlayerModel& playerModel) const;
   void drawCollectedLetters(const data::PlayerModel& playerModel) const;

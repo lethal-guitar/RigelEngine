@@ -503,8 +503,7 @@ void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
     std::begin(actors),
     std::end(actors),
     [&](const LevelData::Actor& lhs, const LevelData::Actor& rhs) {
-      return resources.mActorImagePackage.drawIndexFor(lhs.mID) <
-        resources.mActorImagePackage.drawIndexFor(rhs.mID);
+      return resources.drawIndexFor(lhs.mID) < resources.drawIndexFor(rhs.mID);
     });
 }
 

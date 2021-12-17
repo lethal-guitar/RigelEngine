@@ -145,30 +145,30 @@ Texture
 
 HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage& imagePack)
+  const loader::ResourceLoader& resources)
 {
   InventoryItemTextureMap map;
 
   map.emplace(
     InventoryItemType::CircuitBoard,
     actorToTexture(
-      pRenderer, imagePack.loadActor(data::ActorID::White_box_circuit_card)));
+      pRenderer, resources.loadActor(data::ActorID::White_box_circuit_card)));
   map.emplace(
     InventoryItemType::BlueKey,
     actorToTexture(
-      pRenderer, imagePack.loadActor(data::ActorID::White_box_blue_key)));
+      pRenderer, resources.loadActor(data::ActorID::White_box_blue_key)));
   map.emplace(
     InventoryItemType::RapidFire,
     actorToTexture(
-      pRenderer, imagePack.loadActor(data::ActorID::Rapid_fire_icon)));
+      pRenderer, resources.loadActor(data::ActorID::Rapid_fire_icon)));
   map.emplace(
     InventoryItemType::SpecialHintGlobe,
     actorToTexture(
-      pRenderer, imagePack.loadActor(data::ActorID::Special_hint_globe_icon)));
+      pRenderer, resources.loadActor(data::ActorID::Special_hint_globe_icon)));
   map.emplace(
     InventoryItemType::CloakingDevice,
     actorToTexture(
-      pRenderer, imagePack.loadActor(data::ActorID::Cloaking_device_icon)));
+      pRenderer, resources.loadActor(data::ActorID::Cloaking_device_icon)));
   return map;
 }
 
@@ -176,7 +176,7 @@ HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
 HudRenderer::CollectedLetterIndicatorMap
   HudRenderer::makeCollectedLetterTextureMap(
     renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage& imagePack)
+    const loader::ResourceLoader& resources)
 {
   CollectedLetterIndicatorMap map;
 
@@ -192,31 +192,31 @@ HudRenderer::CollectedLetterIndicatorMap
     CollectableLetterType::N,
     CollectedLetterIndicator{
       actorToTexture(
-        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_N)),
+        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_N)),
       letterDrawStart});
   map.emplace(
     CollectableLetterType::U,
     CollectedLetterIndicator{
       actorToTexture(
-        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_U)),
+        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_U)),
       letterDrawStart});
   map.emplace(
     CollectableLetterType::K,
     CollectedLetterIndicator{
       actorToTexture(
-        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_K)),
+        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_K)),
       letterDrawStart + letterSize * 1});
   map.emplace(
     CollectableLetterType::E,
     CollectedLetterIndicator{
       actorToTexture(
-        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_E)),
+        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_E)),
       letterDrawStart + letterSize * 2});
   map.emplace(
     CollectableLetterType::M,
     CollectedLetterIndicator{
       actorToTexture(
-        pRenderer, imagePack.loadActor(ActorID::Letter_collection_indicator_M)),
+        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_M)),
       letterDrawStart + letterSize * 3});
   return map;
 }
@@ -232,9 +232,9 @@ HudRenderer::HudRenderer(
       levelNumber,
       pOptions,
       pRenderer,
-      bundle.mActorImagePackage.loadActor(ActorID::HUD_frame_background),
-      makeInventoryItemTextureMap(pRenderer, bundle.mActorImagePackage),
-      makeCollectedLetterTextureMap(pRenderer, bundle.mActorImagePackage),
+      bundle.loadActor(ActorID::HUD_frame_background),
+      makeInventoryItemTextureMap(pRenderer, bundle),
+      makeCollectedLetterTextureMap(pRenderer, bundle),
       pStatusSpriteSheet)
 {
 }

@@ -62,7 +62,7 @@ constexpr data::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
 
 auto loadImage(const loader::ResourceLoader& resources)
 {
-  const auto actorData = resources.mActorImagePackage.loadActor(
+  const auto actorData = resources.loadActor(
     data::ActorID::Duke_3d_teaser_text, DUKE_3D_TEASER_TEXT_PALETTE);
   return actorData.mFrames.at(0).mFrameImage;
 }

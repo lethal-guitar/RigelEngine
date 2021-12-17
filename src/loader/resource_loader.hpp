@@ -55,6 +55,17 @@ public:
   data::Palette16
     loadPaletteFromFullScreenImage(std::string_view imageName) const;
 
+  ActorData loadActor(
+    data::ActorID id,
+    const data::Palette16& palette = data::GameTraits::INGAME_PALETTE) const;
+
+  FontData loadFont() const { return mActorImagePackage.loadFont(); }
+
+  int drawIndexFor(data::ActorID id) const
+  {
+    return mActorImagePackage.drawIndexFor(id);
+  }
+
   data::Image loadAntiPiracyImage() const;
 
   data::Image loadBackdrop(std::string_view name) const;
@@ -79,7 +90,6 @@ private:
   std::filesystem::path mGamePath;
   loader::CMPFilePackage mFilePackage;
 
-public:
   loader::ActorImagePackage mActorImagePackage;
 };
 

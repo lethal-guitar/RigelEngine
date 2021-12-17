@@ -209,6 +209,14 @@ data::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
 }
 
 
+ActorData ResourceLoader::loadActor(
+  data::ActorID id,
+  const data::Palette16& palette) const
+{
+  return mActorImagePackage.loadActor(id, palette);
+}
+
+
 data::Image ResourceLoader::loadBackdrop(std::string_view name) const
 {
   using namespace std::literals;
