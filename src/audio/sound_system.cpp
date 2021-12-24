@@ -190,9 +190,12 @@ auto idToIndex(const data::SoundId id)
   return static_cast<int>(id);
 }
 
-data::AudioBuffer
-  renderAdlibSound(const loader::AdlibSound& sound, AdlibEmulator& emulator)
+data::AudioBuffer renderAdlibSound(
+  const loader::AdlibSound& sound,
+  const AdlibEmulator::Type emulatorType)
 {
+  AdlibEmulator emulator{OPL2_SAMPLE_RATE, emulatorType};
+
   emulator.writeRegister(0x20, sound.mInstrumentSettings[0]);
   emulator.writeRegister(0x40, sound.mInstrumentSettings[2]);
   emulator.writeRegister(0x60, sound.mInstrumentSettings[4]);
@@ -239,7 +242,7 @@ data::AudioBuffer loadSoundForStyle(
   const int sampleRate,
   const loader::ResourceLoader& resources,
   const loader::AudioPackage& soundPackage,
-  AdlibEmulator& adlibEmulator)
+  const AdlibEmulator::Type emulatorType)
 {
   auto loadAdlibSound = [&](const data::SoundId soundId) {
     const auto idAsIndex = static_cast<int>(soundId);
@@ -248,7 +251,7 @@ data::AudioBuffer loadSoundForStyle(
       throw std::invalid_argument("Invalid sound ID");
     }
 
-    return renderAdlibSound(soundPackage[idAsIndex], adlibEmulator);
+    return renderAdlibSound(soundPackage[idAsIndex], emulatorType);
   };
 
   auto loadPreferredSound = [&](const data::SoundId soundId) {
@@ -545,8 +548,6 @@ void SoundSystem::loadAllSounds(
   const auto soundPackage = loader::loadAdlibSoundData(
     mpResources->file(loader::AUDIO_DICT_FILE),
     mpResources->file(loader::AUDIO_DATA_FILE));
-  AdlibEmulator emulator{
-    OPL2_SAMPLE_RATE, toEmulationType(mCurrentAdlibPlaybackType)};
 
   data::forEachSoundId([&](const auto id) {
     std::error_code ec;
@@ -561,7 +562,12 @@ void SoundSystem::loadAllSounds(
     }
 
     const auto soundData = loadSoundForStyle(
-      id, soundStyle, sampleRate, *mpResources, soundPackage, emulator);
+      id,
+      soundStyle,
+      sampleRate,
+      *mpResources,
+      soundPackage,
+      toEmulationType(mCurrentAdlibPlaybackType));
 
     mSounds[idToIndex(id)] =
       LoadedSound{convertBuffer(soundData, audioFormat, numChannels)};
@@ -581,8 +587,6 @@ void SoundSystem::reloadAllSounds()
   const auto soundPackage = loader::loadAdlibSoundData(
     mpResources->file(loader::AUDIO_DICT_FILE),
     mpResources->file(loader::AUDIO_DATA_FILE));
-  AdlibEmulator emulator{
-    OPL2_SAMPLE_RATE, toEmulationType(mCurrentAdlibPlaybackType)};
 
   data::forEachSoundId([&](const auto id) {
     const auto index = idToIndex(id);
@@ -594,7 +598,12 @@ void SoundSystem::reloadAllSounds()
     }
 
     const auto soundData = loadSoundForStyle(
-      id, mCurrentSoundStyle, sampleRate, *mpResources, soundPackage, emulator);
+      id,
+      mCurrentSoundStyle,
+      sampleRate,
+      *mpResources,
+      soundPackage,
+      toEmulationType(mCurrentAdlibPlaybackType));
     mSounds[index] =
       LoadedSound{convertBuffer(soundData, audioFormat, numChannels)};
   });
