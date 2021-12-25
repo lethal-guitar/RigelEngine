@@ -958,7 +958,10 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   ImGui::NewLine();
   ImGui::NewLine();
 
-  centeredTextBig("DBOPL AdLib emulator (from DosBox)", 1.4f);
+  centeredTextBig("Code from DosBox", 1.4f);
+  ImGui::Spacing();
+  centeredTextBig("DBOPL AdLib emulator", 1.2f);
+  centeredTextBig("Creative ADPCM decoding code", 1.2f);
   ImGui::Spacing();
   centeredText("Copyright (C) 2002-2015  The DOSBox Team");
   ImGui::NewLine();
