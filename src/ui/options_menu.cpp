@@ -65,6 +65,76 @@ constexpr auto STANDARD_FPS_LIMITS =
   std::array{30, 60, 70, 72, 75, 90, 120, 144, 240};
 
 
+struct SoundIdWithDescription
+{
+  data::SoundId mId;
+  const char* mDescription;
+};
+
+
+constexpr auto SOUND_IDS_FOR_SOUND_TEST =
+  std::array<SoundIdWithDescription, 29>{
+    {{data::SoundId::DukeNormalShot, "Duke's regular gun"},
+     {data::SoundId::BigExplosion, "Big explosion"},
+     {data::SoundId::DukePain, "Duke taking damage"},
+     {data::SoundId::DukeDeath, "Duke's death"},
+     {data::SoundId::Explosion, "Explosion 1"},
+     {data::SoundId::GlassBreaking, "Glass breaking"},
+     {data::SoundId::DukeLaserShot, "Duke's laser gun"},
+     {data::SoundId::ItemPickup, "Item picked up"},
+     {data::SoundId::WeaponPickup, "Weapon picked up"},
+     {data::SoundId::EnemyHit, "Enemy hit"},
+     {data::SoundId::Swoosh, "Swoosh"},
+     {data::SoundId::FlameThrowerShot, "Duke's flame thrower"},
+     {data::SoundId::DukeJumping, "Duke jumping"},
+     {data::SoundId::LavaFountain, "Lava fountain"},
+     {data::SoundId::DukeLanding, "Duke landing"},
+     {data::SoundId::DukeAttachClimbable, "Duke grabbing pipe"},
+     {data::SoundId::HammerSmash, "Hammer smash"},
+     {data::SoundId::BlueKeyDoorOpened, "Door opened"},
+     {data::SoundId::AlternateExplosion, "Explosion 2"},
+     {data::SoundId::WaterDrop, "Water drop"},
+     {data::SoundId::ForceFieldFizzle, "Force field fizzle"},
+     {data::SoundId::SlidingDoor, "Sliding door"},
+     {data::SoundId::FallingRock, "Falling rock"},
+     {data::SoundId::EnemyLaserShot, "Enemy's laser gun"},
+     {data::SoundId::EarthQuake, "Earthquake"},
+     {data::SoundId::BiologicalEnemyDestroyed, "Enemy death"},
+     {data::SoundId::Teleport, "Teleporter"},
+     {data::SoundId::HealthPickup, "Health picked up"},
+     {data::SoundId::LettersCollectedCorrectly, "'NUKEM' bonus"}}};
+
+
+constexpr int stringLength(const char* string)
+{
+  int result = 0;
+  while (*string++ != '\0')
+  {
+    ++result;
+  }
+
+  return result;
+}
+
+
+constexpr auto LONGEST_SOUND_DESCRIPTION_INDEX = []() {
+  auto longestIndex = 0;
+  auto longestLength = 0;
+
+  for (auto i = 0u; i < SOUND_IDS_FOR_SOUND_TEST.size(); ++i)
+  {
+    const auto length = stringLength(SOUND_IDS_FOR_SOUND_TEST[i].mDescription);
+    if (length > longestLength)
+    {
+      longestIndex = int(i);
+      longestLength = length;
+    }
+  }
+
+  return longestIndex;
+}();
+
+
 template <typename Callback>
 void withEnabledState(const bool enabled, Callback&& callback)
 {
@@ -230,6 +300,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 {
   namespace fs = std::filesystem;
 
+  using namespace std::string_literals;
+
   if (mpCurrentlyEditedBinding)
   {
     mElapsedTimeEditingBinding += dt;
@@ -357,6 +429,50 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::SameLine();
       ImGui::Checkbox("Sound on", &mpOptions->mSoundOn);
       ImGui::NewLine();
+
+      const auto& selectedSound = SOUND_IDS_FOR_SOUND_TEST[mSelectedSoundIndex];
+
+      if (ImGui::Button("Test sound"))
+      {
+        mpServiceProvider->playSound(selectedSound.mId);
+      }
+
+      ImGui::SameLine();
+
+      if (ImGui::Button("<"))
+      {
+        --mSelectedSoundIndex;
+        if (mSelectedSoundIndex < 0)
+        {
+          mSelectedSoundIndex = int(SOUND_IDS_FOR_SOUND_TEST.size()) - 1;
+        }
+      }
+
+      ImGui::SameLine();
+
+      const auto longestDescription =
+        SOUND_IDS_FOR_SOUND_TEST[LONGEST_SOUND_DESCRIPTION_INDEX].mDescription +
+        " (#99)"s;
+      const auto longestDescriptionSize =
+        ImGui::CalcTextSize(longestDescription.c_str()).x;
+
+      const auto description = selectedSound.mDescription + " (#"s +
+        std::to_string(static_cast<int>(selectedSound.mId) + 1) + ")";
+
+      const auto descriptionSize = ImGui::CalcTextSize(description.c_str()).x;
+      const auto spacing = (longestDescriptionSize - descriptionSize) / 2.0f;
+
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + spacing);
+      ImGui::TextUnformatted(description.c_str());
+      ImGui::SameLine();
+
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + spacing);
+
+      if (ImGui::Button(">"))
+      {
+        ++mSelectedSoundIndex;
+        mSelectedSoundIndex %= int(SOUND_IDS_FOR_SOUND_TEST.size());
+      }
 
       ImGui::EndTabItem();
     }
@@ -842,7 +958,10 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   ImGui::NewLine();
   ImGui::NewLine();
 
-  centeredTextBig("DBOPL AdLib emulator (from DosBox)", 1.4f);
+  centeredTextBig("Code from DosBox", 1.4f);
+  ImGui::Spacing();
+  centeredTextBig("DBOPL AdLib emulator", 1.2f);
+  centeredTextBig("Creative ADPCM decoding code", 1.2f);
   ImGui::Spacing();
   centeredText("Copyright (C) 2002-2015  The DOSBox Team");
   ImGui::NewLine();

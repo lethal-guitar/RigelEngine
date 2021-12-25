@@ -74,6 +74,8 @@ private:
   data::GameOptions* mpOptions;
   IGameServiceProvider* mpServiceProvider;
 
+  int mSelectedSoundIndex = 0;
+
   SDL_Keycode* mpCurrentlyEditedBinding = nullptr;
   engine::TimeDelta mElapsedTimeEditingBinding = 0;
   engine::TimeDelta mElapsedTimeForCreditsBox = 0;

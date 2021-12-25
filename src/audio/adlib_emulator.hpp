@@ -31,6 +31,8 @@
 namespace rigel::audio
 {
 
+constexpr auto OPL2_SAMPLE_RATE = 49716;
+
 namespace detail
 {
 

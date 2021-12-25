@@ -1,5 +1,8 @@
 /* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
  *
+ * Parts of this file are Copyright (C) 2002-2021  The DOSBox Team.
+ * These parts are explicitly marked as such.
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 2 of the License, or
@@ -20,6 +23,7 @@
 #include "loader/file_utils.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <iterator>
@@ -34,10 +38,8 @@
  *  - https://wiki.multimedia.cx/index.php?title=Creative_Voice
  *  - https://wiki.multimedia.cx/index.php?title=Creative_8_bits_ADPCM
  *
- * The ADPCM decoding is also heavily inspired by FFMPEG's implementation of
- * the same, which can be found in libavcodec/adpcm.c:
- *
- *   https://www.ffmpeg.org/doxygen/2.4/adpcm_8c_source.html#l00295
+ * The ADPCM decoding has been adapted from DosBox code:
+ * https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp
  */
 
 namespace rigel::loader
@@ -79,12 +81,6 @@ enum class AdpcmType
   TwoPointSixBits,
   TwoBits
 };
-
-
-constexpr int adpcmShiftValue(const AdpcmType codec)
-{
-  return codec == AdpcmType::TwoBits ? 2 : 0;
-}
 
 
 ChunkType determineChunkType(const std::uint8_t typeMarker)
@@ -185,62 +181,121 @@ std::int16_t unsigned8BitSampleToSigned16Bit(const std::uint8_t sample)
 }
 
 
-template <AdpcmType codec>
+// These lookup tables have been copied from DosBox code. Link to
+// original code is next to each set of tables.
+// The original code is Copyright (C) 2002-2021  The DOSBox Team
+template <int numBits>
+struct AdpcmLookupTables
+{
+};
+
+
+// See
+// https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L403
+// The original code is Copyright (C) 2002-2021  The DOSBox Team
+template <>
+struct AdpcmLookupTables<2>
+{
+  static constexpr size_t TABLE_SIZE = 24;
+
+  static constexpr std::array<int8_t, TABLE_SIZE> SAMPLE_SCALE_TABLE{
+    0, 1,  0,  -1,  1, 3,  -1, -3,  2, 6,  -2,  -6,
+    4, 12, -4, -12, 8, 24, -8, -24, 6, 48, -16, -48};
+  static constexpr std::array<uint8_t, TABLE_SIZE> STEP_ADJUST_TABLE{
+    0,   4, 0,   4, 252, 4, 252, 4, 252, 4, 252, 4,
+    252, 4, 252, 4, 252, 4, 252, 4, 252, 0, 252, 0};
+};
+
+
+// See
+// https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L426
+// The original code is Copyright (C) 2002-2021  The DOSBox Team
+template <>
+struct AdpcmLookupTables<3>
+{
+  static constexpr size_t TABLE_SIZE = 40;
+
+  static constexpr std::array<int8_t, TABLE_SIZE> SAMPLE_SCALE_TABLE{
+    0,  1,   2,   3,   0,  -1, -2, -3, 1,   3,   5,   7,  -1, -3,
+    -5, -7,  2,   6,   10, 14, -2, -6, -10, -14, 4,   12, 20, 28,
+    -4, -12, -20, -28, 5,  15, 25, 35, -5,  -15, -25, -35};
+
+  static constexpr std::array<uint8_t, TABLE_SIZE> STEP_ADJUST_TABLE{
+    0,   0, 0, 8, 0,   0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 8,
+    248, 0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 0, 248, 0, 0, 0};
+};
+
+
+// See
+// https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L375
+// The original code is Copyright (C) 2002-2021  The DOSBox Team
+template <>
+struct AdpcmLookupTables<4>
+{
+  static constexpr size_t TABLE_SIZE = 64;
+
+  static constexpr std::array<int8_t, TABLE_SIZE> SAMPLE_SCALE_TABLE{
+    0, 1,  2,  3,  4,  5,  6,  7,  0,  -1,  -2,  -3,  -4,  -5,  -6,  -7,
+    1, 3,  5,  7,  9,  11, 13, 15, -1, -3,  -5,  -7,  -9,  -11, -13, -15,
+    2, 6,  10, 14, 18, 22, 26, 30, -2, -6,  -10, -14, -18, -22, -26, -30,
+    4, 12, 20, 28, 36, 44, 52, 60, -4, -12, -20, -28, -36, -44, -52, -60};
+
+  static constexpr std::array<uint8_t, TABLE_SIZE> STEP_ADJUST_TABLE{
+    0,   0, 0, 0, 0, 16, 16, 16, 0,   0, 0, 0, 0, 16, 16, 16,
+    240, 0, 0, 0, 0, 16, 16, 16, 240, 0, 0, 0, 0, 16, 16, 16,
+    240, 0, 0, 0, 0, 16, 16, 16, 240, 0, 0, 0, 0, 16, 16, 16,
+    240, 0, 0, 0, 0, 0,  0,  0,  240, 0, 0, 0, 0, 0,  0,  0};
+};
+
+
 class AdpcmDecoderHelper
 {
 public:
-  static const int shift = adpcmShiftValue(codec);
-
-  explicit AdpcmDecoderHelper(const int32_t initialPrediction)
-    : mPrediction(initialPrediction)
-    , mStep(0)
+  explicit AdpcmDecoderHelper(const uint8_t initialSample)
+    : mReference(initialSample)
+    , mStepSize(0)
   {
   }
 
   template <int numBits>
-  int16_t decodeBits(const int bitPack)
+  int16_t decodeBits(const int encodedSample)
   {
-    const bool isNegative = (bitPack >> (numBits - 1)) != 0;
-    const int delta = bitPack & ((1 << (numBits - 1)) - 1);
+    // This algorithm has been adapted from DosBox code.
+    // See
+    // https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L391
+    // The original code is Copyright (C) 2002-2021  The DOSBox Team
+    const auto tableIndex = std::min(
+      encodedSample + mStepSize,
+      int(AdpcmLookupTables<numBits>::TABLE_SIZE - 1));
 
-    int difference = delta << (mStep + 7 + shift);
-    if (isNegative)
-    {
-      difference = -difference;
-    }
+    const auto newStepSize =
+      mStepSize + AdpcmLookupTables<numBits>::STEP_ADJUST_TABLE[tableIndex];
+    mStepSize = newStepSize & 0xff;
 
-    const auto newSample = std::clamp(mPrediction + difference, -16384, 16384);
-    mPrediction = newSample;
+    const auto newSample =
+      mReference + AdpcmLookupTables<numBits>::SAMPLE_SCALE_TABLE[tableIndex];
+    mReference = static_cast<uint8_t>(std::clamp(newSample, 0, 255));
 
-    const auto limit = numBits * 2 - 3;
-    if (delta >= limit && mStep < 3)
-    {
-      ++mStep;
-    }
-    else if (delta == 0 && mStep > 0)
-    {
-      --mStep;
-    }
-
-    return static_cast<int16_t>(newSample);
+    return unsigned8BitSampleToSigned16Bit(mReference);
   }
 
 private:
-  int32_t mPrediction;
-  int mStep;
+  uint8_t mReference;
+  int mStepSize;
 };
 
 
-template <AdpcmType codec, typename TargetIter>
+template <typename TargetIter>
 void decodeAdpcmAudio(
   LeStreamReader& reader,
+  const AdpcmType codec,
   const std::size_t encodedSize,
   TargetIter outputIter)
 {
-  const auto firstSample = unsigned8BitSampleToSigned16Bit(reader.readU8());
-  *outputIter++ = firstSample;
+  const auto firstSample = reader.readU8();
+  *outputIter++ = unsigned8BitSampleToSigned16Bit(firstSample);
 
-  AdpcmDecoderHelper<codec> decoder(firstSample);
+  AdpcmDecoderHelper decoder(firstSample);
   for (auto i = 0u; i < encodedSize - 1; ++i)
   {
     const auto bitPack = reader.readU8();
@@ -255,17 +310,17 @@ void decodeAdpcmAudio(
 
       case AdpcmType::TwoPointSixBits:
         // Each byte contains two 3-bit samples and one 2-bit sample
-        *outputIter++ = decoder.template decodeBits<3>(bitPack >> 5);
+        *outputIter++ = decoder.template decodeBits<3>((bitPack >> 5) & 0x07);
         *outputIter++ = decoder.template decodeBits<3>((bitPack >> 2) & 0x07);
-        *outputIter++ = decoder.template decodeBits<2>(bitPack & 0x03);
+        *outputIter++ = decoder.template decodeBits<3>((bitPack & 0x03) << 1);
         break;
 
       case AdpcmType::TwoBits:
         // Each byte contains four 2-bit encoded samples
-        *outputIter++ = decoder.template decodeBits<2>(bitPack >> 6);
+        *outputIter++ = decoder.template decodeBits<2>((bitPack >> 6) & 0x03);
         *outputIter++ = decoder.template decodeBits<2>((bitPack >> 4) & 0x03);
         *outputIter++ = decoder.template decodeBits<2>((bitPack >> 2) & 0x03);
-        *outputIter++ = decoder.template decodeBits<2>(bitPack & 0x03);
+        *outputIter++ = decoder.template decodeBits<2>((bitPack >> 0) & 0x03);
         break;
     }
   }
@@ -289,16 +344,16 @@ void decodeAudio(
       break;
 
     case CodecType::Adpcm4Bits:
-      decodeAdpcmAudio<AdpcmType::FourBits>(reader, encodedSize, outputIter);
+      decodeAdpcmAudio(reader, AdpcmType::FourBits, encodedSize, outputIter);
       break;
 
     case CodecType::Adpcm2_6Bits:
-      decodeAdpcmAudio<AdpcmType::TwoPointSixBits>(
-        reader, encodedSize, outputIter);
+      decodeAdpcmAudio(
+        reader, AdpcmType::TwoPointSixBits, encodedSize, outputIter);
       break;
 
     case CodecType::Adpcm2Bits:
-      decodeAdpcmAudio<AdpcmType::TwoBits>(reader, encodedSize, outputIter);
+      decodeAdpcmAudio(reader, AdpcmType::TwoBits, encodedSize, outputIter);
       break;
 
     case CodecType::Signed16BitPcm:
