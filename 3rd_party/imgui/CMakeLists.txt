@@ -3,14 +3,14 @@ add_library(dear_imgui STATIC
     imgui_impl_sdl.cpp
 
     imgui/imgui.cpp
-    imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
+    imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
 )
 target_include_directories(dear_imgui
     PUBLIC
+    ${CMAKE_SOURCE_DIR}/3rd_party/imgui/
     ${CMAKE_SOURCE_DIR}/3rd_party/imgui/imgui
-    ${CMAKE_SOURCE_DIR}/3rd_party/imgui/imgui/examples
 )
 target_link_libraries(dear_imgui
     PRIVATE
