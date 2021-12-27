@@ -117,6 +117,8 @@ bool MapRenderer::hasHighResReplacements() const
 {
   return mBackdropTexture.width() > data::GameTraits::viewPortWidthPx ||
     mBackdropTexture.height() > data::GameTraits::viewPortHeightPx ||
+    mAlternativeBackdropTexture.width() > data::GameTraits::viewPortWidthPx ||
+    mAlternativeBackdropTexture.height() > data::GameTraits::viewPortHeightPx ||
     mTileSetTexture.isHighRes();
 }
 
