@@ -62,14 +62,25 @@ base::Size<float>
 
 ViewPortInfo determineViewPort(const Renderer* pRenderer)
 {
+  auto quantize = [](const float f) {
+    // We need to restrict the scaling factors in order to prevent visual
+    // artifacts during texture sampling when rendering in hi-res mode (aka
+    // per-element upscaling).
+    constexpr auto QUANTIZE_FACTOR = 16.0f;
+    return std::round(f * QUANTIZE_FACTOR) / QUANTIZE_FACTOR;
+  };
+
   const auto windowWidth = float(pRenderer->windowSize().width);
   const auto windowHeight = float(pRenderer->windowSize().height);
 
   const auto [usableWidth, usableHeight] =
     determineUsableSize(windowWidth, windowHeight);
 
-  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
-  const auto heightScale = usableHeight / data::GameTraits::viewPortHeightPx;
+  const auto widthScale =
+    quantize(usableWidth / data::GameTraits::viewPortWidthPx);
+  const auto heightScale =
+    quantize(usableHeight / data::GameTraits::viewPortHeightPx);
+
   const auto offsetX = (windowWidth - usableWidth) / 2.0f;
   const auto offsetY = (windowHeight - usableHeight) / 2.0f;
 
