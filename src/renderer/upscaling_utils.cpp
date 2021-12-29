@@ -94,7 +94,7 @@ WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer)
 
   const auto windowWidth = pRenderer->windowSize().width;
   const auto tileWidthScaled = data::GameTraits::tileSize * info.mScale.x;
-  const auto maxTilesOnScreen = base::round(windowWidth / tileWidthScaled);
+  const auto maxTilesOnScreen = int(windowWidth / tileWidthScaled);
 
   const auto widthInPixels =
     std::min(base::round(maxTilesOnScreen * tileWidthScaled), windowWidth);
