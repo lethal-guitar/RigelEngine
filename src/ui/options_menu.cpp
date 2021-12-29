@@ -902,9 +902,11 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
     "Shikadi Modding Wiki (https://moddingwiki.shikadi.net/wiki/Main_Page)");
   centeredText("The DOSBox project");
   centeredText("IDA Pro disassembler by Hex Rays");
+  centeredText("Anton Gulenko");
   centeredText(
     "Clint Basinger aka LGR (https://www.youtube.com/c/Lazygamereviews)");
   centeredText("Bart aka Dosgamert (https://www.youtube.com/c/dosgamert)");
+  centeredText("MaxiTaxi Creative (https://www.instagram.com/maxitaxi.f500)");
   centeredText("Everyone on the RigelEngine Discord");
 
   ImGui::NewLine();
@@ -963,7 +965,7 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredTextBig("DBOPL AdLib emulator", 1.2f);
   centeredTextBig("Creative ADPCM decoding code", 1.2f);
   ImGui::Spacing();
-  centeredText("Copyright (C) 2002-2015  The DOSBox Team");
+  centeredText("Copyright (C) 2002-2021  The DOSBox Team");
   ImGui::NewLine();
   centeredText(
     "This program is free software; you can redistribute it and/or modify");
@@ -983,6 +985,7 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   centeredText("https://www.gnu.org/licenses/gpl-2.0.html");
   ImGui::NewLine();
   centeredText("https://sourceforge.net/projects/dosbox");
+  centeredText("https://github.com/dosbox-staging/dosbox-staging");
 
   ImGui::NewLine();
   ImGui::NewLine();
