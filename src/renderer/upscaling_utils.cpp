@@ -45,15 +45,22 @@ auto asSize(const base::Vec2& vec)
 base::Size<float>
   determineUsableSize(const float windowWidth, const float windowHeight)
 {
+  auto quantize = [](const float value) {
+    return float(int(value) - int(value) % 8);
+  };
+
   const auto actualAspectRatioIsWiderThanTarget =
     windowWidth / windowHeight > data::GameTraits::aspectRatio;
   if (actualAspectRatioIsWiderThanTarget)
   {
-    return {data::GameTraits::aspectRatio * windowHeight, windowHeight};
+    const auto evenHeight = quantize(windowHeight);
+    return {data::GameTraits::aspectRatio * evenHeight, evenHeight};
   }
   else
   {
-    return {windowWidth, 1.0f / data::GameTraits::aspectRatio * windowWidth};
+    return {
+      quantize(windowWidth),
+      quantize(1.0f / data::GameTraits::aspectRatio * windowWidth)};
   }
 }
 
