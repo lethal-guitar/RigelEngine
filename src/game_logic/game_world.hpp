@@ -30,6 +30,7 @@
 #include "game_logic/input.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
+#include "ui/menu_element_renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
@@ -159,8 +160,8 @@ private:
 
   renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
-  engine::TiledTexture* mpUiSpriteSheet;
-  ui::MenuElementRenderer* mpTextRenderer;
+  engine::TiledTexture mUiSpriteSheet;
+  ui::MenuElementRenderer mTextRenderer;
   data::PlayerModel* mpPlayerModel;
   const data::GameOptions* mpOptions;
   const loader::ResourceLoader* mpResources;

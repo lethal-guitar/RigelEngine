@@ -284,8 +284,11 @@ GameWorld::GameWorld(
   const PlayerInput& initialInput)
   : mpRenderer(context.mpRenderer)
   , mpServiceProvider(context.mpServiceProvider)
-  , mpUiSpriteSheet(context.mpUiSpriteSheet)
-  , mpTextRenderer(context.mpUiRenderer)
+  , mUiSpriteSheet(
+      renderer::Texture{mpRenderer, context.mpResources->loadUiSpriteSheet()},
+      data::GameTraits::viewPortSize,
+      mpRenderer)
+  , mTextRenderer(&mUiSpriteSheet, mpRenderer, *context.mpResources)
   , mpPlayerModel(pPlayerModel)
   , mpOptions(&context.mpUserProfile->mOptions)
   , mpResources(context.mpResources)
@@ -297,8 +300,8 @@ GameWorld::GameWorld(
       mpOptions,
       mpRenderer,
       *context.mpResources,
-      context.mpUiSpriteSheet)
-  , mMessageDisplay(mpServiceProvider, context.mpUiRenderer)
+      &mUiSpriteSheet)
+  , mMessageDisplay(mpServiceProvider, &mTextRenderer)
   , mWaterEffectBuffer(
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
   , mLowResLayer(
@@ -613,7 +616,8 @@ void GameWorld::unsubscribe(entityx::EventManager& eventManager)
 bool GameWorld::needsPerElementUpscaling() const
 {
   return mpSpriteFactory->hasHighResReplacements() ||
-    mpState->mMapRenderer.hasHighResReplacements();
+    mpState->mMapRenderer.hasHighResReplacements() ||
+    mUiSpriteSheet.isHighRes();
 }
 
 
@@ -792,7 +796,7 @@ void GameWorld::render(const float interpolationFactor)
       const auto maxHealthBarSize = maxWidthPx - HEALTH_BAR_START_PX.x;
       if (mpState->mBossStartingHealth <= maxHealthBarSize)
       {
-        drawBossHealthBar(health, *mpTextRenderer, *mpUiSpriteSheet);
+        drawBossHealthBar(health, mTextRenderer, mUiSpriteSheet);
       }
       else
       {
@@ -800,8 +804,7 @@ void GameWorld::render(const float interpolationFactor)
           float(health) / mpState->mBossStartingHealth;
         const auto healthPercentagePx =
           base::round(healthPercentage * maxHealthBarSize);
-        drawBossHealthBar(
-          healthPercentagePx, *mpTextRenderer, *mpUiSpriteSheet);
+        drawBossHealthBar(healthPercentagePx, mTextRenderer, mUiSpriteSheet);
       }
     }
     else

@@ -149,6 +149,13 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
 
 data::Image ResourceLoader::loadUiSpriteSheet() const
 {
+  const auto replacementPath =
+    mGamePath / ASSET_REPLACEMENTS_PATH / "status.png";
+  if (auto oReplacement = loadPng(replacementPath.u8string()))
+  {
+    return *oReplacement;
+  }
+
   return loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE);
 }
 

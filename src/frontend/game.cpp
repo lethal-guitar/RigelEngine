@@ -292,7 +292,11 @@ Game::Game(
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
-      renderer::Texture{&mRenderer, mResources.loadUiSpriteSheet()},
+      // Explicitly specify the palette here to avoid loading any replacement
+      // status.png file (since that is meant only for in-game, for now)
+      renderer::Texture{
+        &mRenderer,
+        mResources.loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE)},
       &mRenderer)
   , mSpriteFactory(&mRenderer, &mResources)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
