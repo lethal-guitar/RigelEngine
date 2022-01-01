@@ -60,10 +60,8 @@ class ResourceLoader
 public:
   explicit ResourceLoader(const std::string& gamePath);
 
-  data::Image loadTiledFullscreenImage(std::string_view name) const;
-  data::Image loadTiledFullscreenImage(
-    std::string_view name,
-    const data::Palette16& overridePalette) const;
+  data::Image loadUiSpriteSheet() const;
+  data::Image loadUiSpriteSheet(const data::Palette16& overridePalette) const;
 
   data::Image loadStandaloneFullscreenImage(std::string_view name) const;
   data::Palette16
@@ -99,6 +97,10 @@ public:
   bool hasFile(std::string_view name) const;
 
 private:
+  data::Image loadTiledFullscreenImage(std::string_view name) const;
+  data::Image loadTiledFullscreenImage(
+    std::string_view name,
+    const data::Palette16& overridePalette) const;
   data::AudioBuffer loadSound(std::string_view name) const;
 
   std::filesystem::path mGamePath;

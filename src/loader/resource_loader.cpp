@@ -147,6 +147,19 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
 }
 
 
+data::Image ResourceLoader::loadUiSpriteSheet() const
+{
+  return loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE);
+}
+
+
+data::Image ResourceLoader::loadUiSpriteSheet(
+  const data::Palette16& overridePalette) const
+{
+  return loadTiledFullscreenImage("STATUS.MNI", overridePalette);
+}
+
+
 data::Image
   ResourceLoader::loadTiledFullscreenImage(std::string_view name) const
 {
