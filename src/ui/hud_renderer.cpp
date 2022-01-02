@@ -60,23 +60,25 @@ void drawNumbersBig(
   const base::Vec2& tlPosition,
   const TiledTexture& spriteSheet)
 {
-  const auto printed = std::to_string(number);
+  auto remainingNumber = number;
 
-  const auto overflow = maxDigits - static_cast<int>(printed.size());
-  const auto inputToSkip = std::max(0, -overflow);
-  const auto positionsToSkip = std::max(0, overflow);
-
-  for (auto digit = 0; digit < maxDigits; ++digit)
+  for (auto digitIndex = 0; digitIndex < maxDigits; ++digitIndex)
   {
-    const auto tlPositionForDigit = tlPosition + base::Vec2{digit * 2, 0};
+    // Draw digits from right to left, until the number is fully drawn or
+    // we run out of digits to draw.
+    const auto tlPositionForDigit =
+      tlPosition + base::Vec2{(maxDigits - 1 - digitIndex) * 2, 0};
 
-    if (digit >= positionsToSkip)
+    const auto digitValue = remainingNumber % 10;
+    remainingNumber /= 10;
+
+    // clang-format off
+    spriteSheet.renderTileQuad(digitValue*2 + 7*40, tlPositionForDigit);
+    // clang-format on
+
+    if (remainingNumber == 0)
     {
-      const auto numeralIndex =
-        printed[digit - positionsToSkip + inputToSkip] - 0x30;
-      // clang-format off
-      spriteSheet.renderTileQuad(numeralIndex*2 + 7*40, tlPositionForDigit);
-      // clang-format on
+      break;
     }
   }
 }
