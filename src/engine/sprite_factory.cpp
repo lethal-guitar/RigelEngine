@@ -924,12 +924,18 @@ Sprite SpriteFactory::createSprite(const ActorID id)
 base::Rect<int>
   SpriteFactory::actorFrameRect(const data::ActorID id, const int frame) const
 {
+  const auto& frameData = actorFrameData(id, frame);
+  return {frameData.mDrawOffset, frameData.mDimensions};
+}
+
+
+engine::SpriteFrame
+  SpriteFactory::actorFrameData(data::ActorID id, int frame) const
+{
   const auto& data = mSpriteDataMap.at(id);
   const auto realFrame =
     virtualToRealFrame(frame, data.mDrawData, std::nullopt);
-  const auto& frameData = data.mDrawData.mFrames[realFrame];
-
-  return {frameData.mDrawOffset, frameData.mDimensions};
+  return data.mDrawData.mFrames[realFrame];
 }
 
 } // namespace rigel::engine

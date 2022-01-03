@@ -58,6 +58,7 @@ public:
 
   engine::components::Sprite createSprite(data::ActorID id) override;
   base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override;
+  SpriteFrame actorFrameData(data::ActorID id, int frame) const override;
 
   bool hasHighResReplacements() const { return mHasHighResReplacements; }
 

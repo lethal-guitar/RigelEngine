@@ -72,6 +72,11 @@ struct MockSpriteFactory : public rigel::engine::ISpriteFactory
     // Bounds for elevator
     return {{}, {4, 3}};
   }
+
+  SpriteFrame actorFrameData(data::ActorID id, int frame) const override
+  {
+    return {};
+  }
 };
 
 
