@@ -271,7 +271,20 @@ constexpr auto INGAME_SPRITE_ACTOR_IDS = std::array{
   data::ActorID::BOSS_Episode_4_projectile,
   data::ActorID::Floating_arrow,
   data::ActorID::Rigelatin_soldier,
-  data::ActorID::Rigelatin_soldier_projectile};
+  data::ActorID::Rigelatin_soldier_projectile,
+
+  // HUD
+  // Some sprites needed by the HUD are already included in the in-game
+  // sprites above: Hint globe, blue key and circuit board/access card.
+  data::ActorID::HUD_frame_background,
+  data::ActorID::Rapid_fire_icon,
+  data::ActorID::Cloaking_device_icon,
+  data::ActorID::Letter_collection_indicator_N,
+  data::ActorID::Letter_collection_indicator_U,
+  data::ActorID::Letter_collection_indicator_K,
+  data::ActorID::Letter_collection_indicator_E,
+  data::ActorID::Letter_collection_indicator_M,
+};
 
 
 void applyTweaks(

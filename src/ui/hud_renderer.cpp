@@ -18,6 +18,8 @@
 
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
+#include "data/unit_conversions.hpp"
+#include "engine/sprite_factory.hpp"
 #include "loader/palette.hpp"
 #include "loader/resource_loader.hpp"
 
@@ -48,6 +50,34 @@ constexpr auto RADAR_POS_Y = RADAR_CENTER_POS_Y - RADAR_SIZE_PX / 2 -
   data::GameTraits::inGameViewPortOffset.y;
 constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
   base::Vec2{RADAR_SIZE_PX / 2, RADAR_SIZE_PX / 2 + 1};
+
+constexpr auto HUD_START_TOP_RIGHT =
+  base::Vec2{data::GameTraits::mapViewPortWidthTiles, 0};
+constexpr auto HUD_START_BOTTOM_LEFT =
+  base::Vec2{0, data::GameTraits::mapViewPortHeightTiles};
+constexpr auto HUD_START_BOTTOM_RIGHT = base::Vec2{
+  HUD_START_BOTTOM_LEFT.x + 28,
+  data::GameTraits::mapViewPortHeightTiles};
+
+constexpr auto INVENTORY_START_POS = base::Vec2{HUD_START_TOP_RIGHT.x + 1, 2};
+
+// The letter collection indicator actors already contain an offset in the
+// actor info that positions them correctly. Unfortunately, that offset is
+// relative to the entire screen, but in our HUD renderer, everything is
+// relative to the start of the map viewport, i.e. offset by {1, 1} tiles.  We
+// have to account for that and render the indicators further up/left to negate
+// this offset. On top of that, we need to offset one more to the left and one
+// more up, because that's how the original game's coordinate system works - a
+// coordinate for actor rendering actually refers to the actor's bottom-left,
+// so we have to subtract one on the Y axis (each letter indicator is 2 tiles
+// tall), and then we also have to subtract one on the X axis since the X
+// coordinate refers to the tile after the actor's left-most tile for whatever
+// reason. It's not clear why, the original executable's code literally has `x
+// - 1` in the function that's used for drawing actors in the UI/HUD.  The
+// in-game sprite drawing code doesn't have that behavior (but it does have the
+// 'Y refers to bottom-most tile' part).  TODO: Maybe don't hardcode the height
+// of the indicators?
+constexpr auto LETTER_INDICATOR_POSITION = base::Vec2{-2, -2};
 
 constexpr auto NUM_RADAR_BLINK_STEPS = 4;
 constexpr auto RADAR_BLINK_START_COLOR_INDEX = 3;
@@ -134,131 +164,20 @@ void drawLevelNumber(const int number, const TiledTexture& spriteSheet)
     spriteSheet);
 }
 
-
-Texture
-  actorToTexture(renderer::Renderer* pRenderer, const loader::ActorData& data)
-{
-  return Texture(pRenderer, data.mFrames[0].mFrameImage);
-}
-
-
 } // namespace
 
 
-HudRenderer::InventoryItemTextureMap HudRenderer::makeInventoryItemTextureMap(
-  renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resources)
-{
-  InventoryItemTextureMap map;
-
-  map.emplace(
-    InventoryItemType::CircuitBoard,
-    actorToTexture(
-      pRenderer, resources.loadActor(data::ActorID::White_box_circuit_card)));
-  map.emplace(
-    InventoryItemType::BlueKey,
-    actorToTexture(
-      pRenderer, resources.loadActor(data::ActorID::White_box_blue_key)));
-  map.emplace(
-    InventoryItemType::RapidFire,
-    actorToTexture(
-      pRenderer, resources.loadActor(data::ActorID::Rapid_fire_icon)));
-  map.emplace(
-    InventoryItemType::SpecialHintGlobe,
-    actorToTexture(
-      pRenderer, resources.loadActor(data::ActorID::Special_hint_globe_icon)));
-  map.emplace(
-    InventoryItemType::CloakingDevice,
-    actorToTexture(
-      pRenderer, resources.loadActor(data::ActorID::Cloaking_device_icon)));
-  return map;
-}
-
-
-HudRenderer::CollectedLetterIndicatorMap
-  HudRenderer::makeCollectedLetterTextureMap(
-    renderer::Renderer* pRenderer,
-    const loader::ResourceLoader& resources)
-{
-  CollectedLetterIndicatorMap map;
-
-  const auto rightScreenEdge = GameTraits::inGameViewPortSize.width;
-  const auto bottomScreenEdge = GameTraits::inGameViewPortSize.height;
-  const base::Vec2 letterDrawStart{
-    rightScreenEdge - 5 * GameTraits::tileSize,
-    bottomScreenEdge - 2 * GameTraits::tileSize};
-  // TODO: Consider using the positions from the loaded actor frames instead
-  // of calculating manually?
-  const base::Vec2 letterSize{GameTraits::tileSize, 0};
-  map.emplace(
-    CollectableLetterType::N,
-    CollectedLetterIndicator{
-      actorToTexture(
-        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_N)),
-      letterDrawStart});
-  map.emplace(
-    CollectableLetterType::U,
-    CollectedLetterIndicator{
-      actorToTexture(
-        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_U)),
-      letterDrawStart});
-  map.emplace(
-    CollectableLetterType::K,
-    CollectedLetterIndicator{
-      actorToTexture(
-        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_K)),
-      letterDrawStart + letterSize * 1});
-  map.emplace(
-    CollectableLetterType::E,
-    CollectedLetterIndicator{
-      actorToTexture(
-        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_E)),
-      letterDrawStart + letterSize * 2});
-  map.emplace(
-    CollectableLetterType::M,
-    CollectedLetterIndicator{
-      actorToTexture(
-        pRenderer, resources.loadActor(ActorID::Letter_collection_indicator_M)),
-      letterDrawStart + letterSize * 3});
-  return map;
-}
-
-
 HudRenderer::HudRenderer(
   const int levelNumber,
   const data::GameOptions* pOptions,
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& bundle,
-  engine::TiledTexture* pStatusSpriteSheet)
-  : HudRenderer(
-      levelNumber,
-      pOptions,
-      pRenderer,
-      bundle.loadActor(ActorID::HUD_frame_background),
-      makeInventoryItemTextureMap(pRenderer, bundle),
-      makeCollectedLetterTextureMap(pRenderer, bundle),
-      pStatusSpriteSheet)
-{
-}
-
-
-HudRenderer::HudRenderer(
-  const int levelNumber,
-  const data::GameOptions* pOptions,
-  renderer::Renderer* pRenderer,
-  const loader::ActorData& actorData,
-  InventoryItemTextureMap&& inventoryItemTextures,
-  CollectedLetterIndicatorMap&& collectedLetterTextures,
-  engine::TiledTexture* pStatusSpriteSheet)
+  engine::TiledTexture* pStatusSpriteSheet,
+  const engine::SpriteFactory* pSpriteFactory)
   : mLevelNumber(levelNumber)
   , mpRenderer(pRenderer)
   , mpOptions(pOptions)
-  , mTopRightTexture(mpRenderer, actorData.mFrames[0].mFrameImage)
-  , mBottomLeftTexture(mpRenderer, actorData.mFrames[1].mFrameImage)
-  , mBottomRightTexture(mpRenderer, actorData.mFrames[2].mFrameImage)
-  , mInventoryTexturesByType(std::move(inventoryItemTextures))
-  , mCollectedLetterIndicatorsByType(std::move(collectedLetterTextures))
   , mpStatusSpriteSheetRenderer(pStatusSpriteSheet)
+  , mpSpriteFactory(pSpriteFactory)
   , mRadarSurface(pRenderer, RADAR_SIZE_PX, RADAR_SIZE_PX)
 {
 }
@@ -274,43 +193,17 @@ void HudRenderer::render(
   const data::PlayerModel& playerModel,
   const base::ArrayView<base::Vec2> radarPositions)
 {
-  // Hud background
-  // --------------------------------------------------------------------------
-  const auto maxX = GameTraits::inGameViewPortSize.width;
-  mBottomLeftTexture.render(
-    0, GameTraits::inGameViewPortSize.height - mBottomLeftTexture.height());
+  // We group drawing into what texture is used to minimize the amount of
+  // OpenGL state switches needed.
 
-  mBottomRightTexture.render(
-    mBottomLeftTexture.width(),
-    GameTraits::inGameViewPortSize.height - mBottomRightTexture.height());
+  // These use the actor sprite sheet texture.
+  drawActorFrame(ActorID::HUD_frame_background, 0, HUD_START_TOP_RIGHT);
+  drawActorFrame(ActorID::HUD_frame_background, 1, HUD_START_BOTTOM_LEFT);
+  drawActorFrame(ActorID::HUD_frame_background, 2, HUD_START_BOTTOM_RIGHT);
+  drawInventory(playerModel.inventory());
+  drawCollectedLetters(playerModel);
 
-  const auto topRightTexturePosX = maxX - mTopRightTexture.width();
-  mTopRightTexture.render(topRightTexturePosX, 0);
-
-  // Inventory
-  // --------------------------------------------------------------------------
-  const auto inventoryStartPos = base::Vec2{
-    topRightTexturePosX + GameTraits::tileSize, 2 * GameTraits::tileSize};
-  auto inventoryIter = playerModel.inventory().begin();
-  for (int row = 0; row < 3; ++row)
-  {
-    for (int col = 0; col < 2; ++col)
-    {
-      if (inventoryIter != playerModel.inventory().end())
-      {
-        const auto itemType = *inventoryIter++;
-        const auto drawPos =
-          inventoryStartPos + base::Vec2{col, row} * GameTraits::tileSize * 2;
-
-        const auto textureIt = mInventoryTexturesByType.find(itemType);
-        assert(textureIt != mInventoryTexturesByType.end());
-        textureIt->second.render(drawPos);
-      }
-    }
-  }
-
-  // Player state and remaining HUD elements
-  // --------------------------------------------------------------------------
+  // These use the UI sprite sheet texture.
   drawScore(playerModel.score(), *mpStatusSpriteSheetRenderer);
   drawWeaponIcon(playerModel.weapon(), *mpStatusSpriteSheetRenderer);
   drawAmmoBar(
@@ -319,8 +212,48 @@ void HudRenderer::render(
     *mpStatusSpriteSheetRenderer);
   drawHealthBar(playerModel);
   drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer);
-  drawCollectedLetters(playerModel);
   drawRadar(radarPositions);
+}
+
+
+void HudRenderer::drawInventory(
+  const std::vector<data::InventoryItemType>& inventory) const
+{
+  auto iItem = inventory.begin();
+  for (int row = 0; row < 3; ++row)
+  {
+    for (int col = 0; col < 2; ++col)
+    {
+      if (iItem != inventory.end())
+      {
+        const auto itemType = *iItem++;
+        const auto drawPos = INVENTORY_START_POS + base::Vec2{col * 2, row * 2};
+
+        switch (itemType)
+        {
+          case InventoryItemType::CircuitBoard:
+            drawActorFrame(ActorID::White_box_circuit_card, 0, drawPos);
+            break;
+
+          case InventoryItemType::BlueKey:
+            drawActorFrame(ActorID::White_box_blue_key, 0, drawPos);
+            break;
+
+          case InventoryItemType::RapidFire:
+            drawActorFrame(ActorID::Rapid_fire_icon, 0, drawPos);
+            break;
+
+          case InventoryItemType::SpecialHintGlobe:
+            drawActorFrame(ActorID::Special_hint_globe_icon, 0, drawPos);
+            break;
+
+          case InventoryItemType::CloakingDevice:
+            drawActorFrame(ActorID::Cloaking_device_icon, 0, drawPos);
+            break;
+        }
+      }
+    }
+  }
 }
 
 
@@ -368,9 +301,35 @@ void HudRenderer::drawCollectedLetters(
 {
   for (const auto letter : playerModel.collectedLetters())
   {
-    const auto it = mCollectedLetterIndicatorsByType.find(letter);
-    assert(it != mCollectedLetterIndicatorsByType.end());
-    it->second.mTexture.render(it->second.mPxPosition);
+    // The draw position is the same for all cases, because each actor
+    // includes a draw offset in its actor info that positions it correctly.
+    switch (letter)
+    {
+      case CollectableLetterType::N:
+        drawActorFrame(
+          ActorID::Letter_collection_indicator_N, 0, LETTER_INDICATOR_POSITION);
+        break;
+
+      case CollectableLetterType::U:
+        drawActorFrame(
+          ActorID::Letter_collection_indicator_U, 0, LETTER_INDICATOR_POSITION);
+        break;
+
+      case CollectableLetterType::K:
+        drawActorFrame(
+          ActorID::Letter_collection_indicator_K, 0, LETTER_INDICATOR_POSITION);
+        break;
+
+      case CollectableLetterType::E:
+        drawActorFrame(
+          ActorID::Letter_collection_indicator_E, 0, LETTER_INDICATOR_POSITION);
+        break;
+
+      case CollectableLetterType::M:
+        drawActorFrame(
+          ActorID::Letter_collection_indicator_M, 0, LETTER_INDICATOR_POSITION);
+        break;
+    }
   }
 }
 
@@ -409,6 +368,19 @@ void HudRenderer::drawRadar(const base::ArrayView<base::Vec2> positions) const
 
     drawDots();
   }
+}
+
+
+void HudRenderer::drawActorFrame(
+  const ActorID id,
+  const int frame,
+  const base::Vec2& pos) const
+{
+  const auto& frameData = mpSpriteFactory->actorFrameData(id, frame);
+  const auto destRect = base::Rect<int>{
+    data::tileVectorToPixelVector(pos + frameData.mDrawOffset),
+    data::tileExtentsToPixelExtents(frameData.mDimensions)};
+  mpSpriteFactory->textureAtlas().draw(frameData.mImageId, destRect);
 }
 
 } // namespace rigel::ui

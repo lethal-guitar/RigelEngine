@@ -299,8 +299,8 @@ GameWorld::GameWorld(
       sessionId.mLevel + 1,
       mpOptions,
       mpRenderer,
-      *context.mpResources,
-      &mUiSpriteSheet)
+      &mUiSpriteSheet,
+      mpSpriteFactory)
   , mMessageDisplay(mpServiceProvider, &mTextRenderer)
   , mWaterEffectBuffer(
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))

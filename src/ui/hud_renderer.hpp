@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/array_view.hpp"
+#include "data/actor_ids.hpp"
 #include "data/player_model.hpp"
 #include "engine/tiled_texture.hpp"
 #include "renderer/texture.hpp"
@@ -32,14 +33,12 @@ namespace data
 {
 struct GameOptions;
 class Image;
-class PlayerModel;
 } // namespace data
 
-namespace loader
+namespace engine
 {
-struct ActorData;
-class ResourceLoader;
-} // namespace loader
+class SpriteFactory;
+}
 
 
 namespace ui
@@ -62,8 +61,8 @@ public:
     int levelNumber,
     const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer,
-    const loader::ResourceLoader& bundle,
-    engine::TiledTexture* pStatusSpriteSheetRenderer);
+    engine::TiledTexture* pStatusSpriteSheetRenderer,
+    const engine::SpriteFactory* pSpriteFactory);
 
   void updateAnimation();
   void render(
@@ -71,37 +70,12 @@ public:
     base::ArrayView<base::Vec2> radarPositions);
 
 private:
-  struct CollectedLetterIndicator
-  {
-    renderer::Texture mTexture;
-    base::Vec2 mPxPosition;
-  };
-
-  using InventoryItemTextureMap =
-    std::unordered_map<data::InventoryItemType, renderer::Texture>;
-  using CollectedLetterIndicatorMap =
-    std::unordered_map<data::CollectableLetterType, CollectedLetterIndicator>;
-
-  HudRenderer(
-    int levelNumber,
-    const data::GameOptions* pOptions,
-    renderer::Renderer* pRenderer,
-    const loader::ActorData& actorData,
-    InventoryItemTextureMap&& inventoryItemTextures,
-    CollectedLetterIndicatorMap&& collectedLetterTextures,
-    engine::TiledTexture* pStatusSpriteSheetRenderer);
-
-  static InventoryItemTextureMap makeInventoryItemTextureMap(
-    renderer::Renderer* pRenderer,
-    const loader::ResourceLoader& resources);
-
-  static CollectedLetterIndicatorMap makeCollectedLetterTextureMap(
-    renderer::Renderer* pRenderer,
-    const loader::ResourceLoader& resources);
-
+  void
+    drawInventory(const std::vector<data::InventoryItemType>& inventory) const;
   void drawHealthBar(const data::PlayerModel& playerModel) const;
   void drawCollectedLetters(const data::PlayerModel& playerModel) const;
   void drawRadar(base::ArrayView<base::Vec2> positions) const;
+  void drawActorFrame(data::ActorID id, int frame, const base::Vec2& pos) const;
 
   const int mLevelNumber;
   renderer::Renderer* mpRenderer;
@@ -112,9 +86,8 @@ private:
   renderer::Texture mTopRightTexture;
   renderer::Texture mBottomLeftTexture;
   renderer::Texture mBottomRightTexture;
-  InventoryItemTextureMap mInventoryTexturesByType;
-  CollectedLetterIndicatorMap mCollectedLetterIndicatorsByType;
   engine::TiledTexture* mpStatusSpriteSheetRenderer;
+  const engine::SpriteFactory* mpSpriteFactory;
   mutable renderer::RenderTargetTexture mRadarSurface;
 };
 
