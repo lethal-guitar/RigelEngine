@@ -64,6 +64,21 @@ base::Size<float>
   }
 }
 
+
+int determineLowResBufferWidth(
+  const Renderer* pRenderer,
+  const bool widescreenModeWanted)
+{
+  if (widescreenModeWanted && canUseWidescreenMode(pRenderer))
+  {
+    const auto scale = determineViewport(pRenderer).mScale.x;
+    const auto fullWidth = determineWidescreenViewport(pRenderer).mWidthPx;
+    return base::round(fullWidth / scale);
+  }
+
+  return data::GameTraits::viewportWidthPx;
+}
+
 } // namespace
 
 
@@ -134,12 +149,10 @@ RenderTargetTexture createFullscreenRenderTarget(
   }
   else
   {
-    const auto width =
-      options.mWidescreenModeOn && canUseWidescreenMode(pRenderer)
-      ? determineWidescreenViewport(pRenderer).mWidthPx
-      : data::GameTraits::viewportWidthPx;
     return RenderTargetTexture{
-      pRenderer, width, data::GameTraits::viewportHeightPx};
+      pRenderer,
+      determineLowResBufferWidth(pRenderer, options.mWidescreenModeOn),
+      data::GameTraits::viewportHeightPx};
   }
 }
 
