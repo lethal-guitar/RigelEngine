@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/defer.hpp"
 #include "base/spatial_types.hpp"
 #include "renderer/texture.hpp"
 
@@ -65,5 +66,26 @@ RenderTargetTexture createFullscreenRenderTarget(
 base::Vec2 offsetTo4by3WithinWidescreen(
   Renderer* pRenderer,
   const data::GameOptions& options);
+
+
+class UpscalingBuffer
+{
+public:
+  UpscalingBuffer(Renderer* pRenderer, const data::GameOptions& options);
+
+  [[nodiscard]] base::ScopeGuard bind(bool perElementUpscaling);
+  void clear();
+  void present(bool currentFrameIsWidescreen, bool perElementUpscaling);
+
+  std::uint8_t alphaMod() const { return mAlphaMod; }
+
+  void setAlphaMod(std::uint8_t alphaMod);
+  void updateConfiguration(const data::GameOptions& options);
+
+private:
+  RenderTargetTexture mRenderTarget;
+  Renderer* mpRenderer;
+  std::uint8_t mAlphaMod = 0;
+};
 
 } // namespace rigel::renderer
