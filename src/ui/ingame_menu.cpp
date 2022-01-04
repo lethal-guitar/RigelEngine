@@ -617,6 +617,7 @@ void IngameMenu::enterMenu(const MenuType type)
       mStateStack.push(ui::OptionsMenu{
         mContext.mpUserProfile,
         mContext.mpServiceProvider,
+        mContext.mpRenderer,
         ui::OptionsMenu::Type::InGame});
       break;
 

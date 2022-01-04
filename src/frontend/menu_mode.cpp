@@ -90,6 +90,7 @@ void MenuMode::handleEvent(const SDL_Event& event)
       mOptionsMenu = ui::OptionsMenu{
         mContext.mpUserProfile,
         mContext.mpServiceProvider,
+        mContext.mpRenderer,
         ui::OptionsMenu::Type::Main};
       return;
     }

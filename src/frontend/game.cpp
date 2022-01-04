@@ -342,7 +342,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
   mCurrentFrameIsWidescreen = false;
 
   auto pMaybeNextMode = std::invoke([&]() {
-    auto saved = mUpscalingBuffer.bind(
+    auto saved = mUpscalingBuffer.bindAndClear(
       mpUserProfile->mOptions.mPerElementUpscalingEnabled);
     return mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
   });
@@ -355,7 +355,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
     mpCurrentGameMode = std::move(pMaybeNextMode);
 
     {
-      auto saved = mUpscalingBuffer.bind(
+      auto saved = mUpscalingBuffer.bindAndClear(
         mpUserProfile->mOptions.mPerElementUpscalingEnabled);
       mpCurrentGameMode->updateAndRender(0, {});
     }

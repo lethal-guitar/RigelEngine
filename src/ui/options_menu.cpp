@@ -27,6 +27,7 @@
 #include "base/warnings.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
+#include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/key_code.hpp"
 #include "sdl_utils/platform.hpp"
 #include "ui/menu_navigation.hpp"
@@ -233,12 +234,14 @@ bool isSmallScreen(const ImVec2& windowSize)
 OptionsMenu::OptionsMenu(
   UserProfile* pUserProfile,
   IGameServiceProvider* pServiceProvider,
+  renderer::Renderer* pRenderer,
   const Type type)
   : mGamePathBrowser(
       ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CloseOnEsc)
   , mpUserProfile(pUserProfile)
   , mpOptions(&pUserProfile->mOptions)
   , mpServiceProvider(pServiceProvider)
+  , mpRenderer(pRenderer)
   , mType(type)
   , mIsRunningInDesktopEnvironment(sdl_utils::isRunningInDesktopEnvironment())
 {
@@ -373,16 +376,35 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Checkbox(
         "Enable screen flashing", &mpOptions->mEnableScreenFlashes);
 
-      {
+      withEnabledState(!mpOptions->mPerElementUpscalingEnabled, [&]() {
         auto upscalingFilterIndex =
           static_cast<int>(mpOptions->mUpscalingFilter);
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 20);
         ImGui::Combo(
           "Upscaling filter",
           &upscalingFilterIndex,
-          "None (nearest neighbor)\0Bilinear\0");
+          "None (nearest neighbor)\0Sharp Bilinear\0Pixel-perfect (integer scaling)\0Bilinear\0");
         mpOptions->mUpscalingFilter =
           static_cast<data::UpscalingFilter>(upscalingFilterIndex);
+      });
+
+      if (mpOptions->mPerElementUpscalingEnabled)
+      {
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped(
+          "NOTE: Upscaling options unavailable due to presence of high-res mods");
+        ImGui::PopStyleColor();
+      }
+      else if (
+        mpOptions->mUpscalingFilter == data::UpscalingFilter::PixelPerfect &&
+        !renderer::canUsePixelPerfectScaling(mpRenderer, *mpOptions))
+      {
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped(
+          "NOTE: Current screen resolution/window size is too small for pixel-perfect scaling (needs at least 1600x1200)!\nFalling back to sharp bilinear.");
+        ImGui::PopStyleColor();
       }
 
       ImGui::EndTabItem();
