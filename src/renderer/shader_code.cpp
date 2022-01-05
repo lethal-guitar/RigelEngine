@@ -60,7 +60,7 @@ uniform vec4 colorModulation;
 uniform bool enableRepeat;
 
 void main() {
-  vec2 texCoords = texCoordFrag;
+  HIGHP vec2 texCoords = texCoordFrag;
   if (enableRepeat) {
     texCoords.x = fract(texCoords.x);
     texCoords.y = fract(texCoords.y);
