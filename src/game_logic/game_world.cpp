@@ -1335,6 +1335,7 @@ void GameWorld::handleTeleporter()
 
   mpState->mCamera.centerViewOnPlayer();
   updateGameLogic({});
+  render(1.0f);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mpServiceProvider->fadeInScreen();
 }
