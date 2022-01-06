@@ -292,11 +292,13 @@ Game::Game(
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
   , mUiSpriteSheet(
+      // Explicitly specify the palette here to avoid loading any replacement
+      // status.png file (since that is meant only for in-game, for now)
       renderer::Texture{
         &mRenderer,
-        mResources.loadTiledFullscreenImage("STATUS.MNI")},
+        mResources.loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE)},
       &mRenderer)
-  , mSpriteFactory(&mRenderer, &mResources.mActorImagePackage)
+  , mSpriteFactory(&mRenderer, &mResources)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
   mCommandLineOptions.mSkipIntro |= mpUserProfile->mOptions.mSkipIntro;

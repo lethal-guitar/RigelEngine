@@ -21,7 +21,6 @@
 #include "data/unit_conversions.hpp"
 #include "loader/ega_image_decoder.hpp"
 #include "loader/file_utils.hpp"
-#include "loader/png_image.hpp"
 
 #include <cassert>
 #include <utility>
@@ -35,28 +34,10 @@ using data::ActorID;
 using data::GameTraits;
 
 
-namespace
-{
-
-
-std::string replacementImagePath(
-  const std::string& basePath,
-  const int id,
-  const int frame)
-{
-  return basePath + "/actor" + std::to_string(id) + "_frame" +
-    std::to_string(frame) + ".png";
-}
-
-} // namespace
-
-
 ActorImagePackage::ActorImagePackage(
   ByteBuffer imageData,
-  const ByteBuffer& actorInfoData,
-  std::optional<std::string> maybeImageReplacementsPath)
+  const ByteBuffer& actorInfoData)
   : mImageData(std::move(imageData))
-  , mMaybeReplacementsPath(std::move(maybeImageReplacementsPath))
 {
   LeStreamReader actorInfoReader(actorInfoData);
   const auto numEntries = actorInfoReader.peekU16();
@@ -99,9 +80,7 @@ ActorImagePackage::ActorImagePackage(
 }
 
 
-ActorData ActorImagePackage::loadActor(
-  const ActorID id,
-  const data::Palette16& palette) const
+const ActorHeader& ActorImagePackage::loadActorInfo(const ActorID id) const
 {
   // Font has to be loaded using loadFont()
   assert(id != data::ActorID::Menu_font_grayscale);
@@ -114,29 +93,7 @@ ActorData ActorImagePackage::loadActor(
       std::to_string(static_cast<int>(id)));
   }
 
-  const auto& header = it->second;
-  return ActorData{header.mDrawIndex, loadFrameImages(id, header, palette)};
-}
-
-
-std::vector<ActorData::Frame> ActorImagePackage::loadFrameImages(
-  const data::ActorID id,
-  const ActorHeader& header,
-  const data::Palette16& palette) const
-{
-  return utils::transformed(
-    header.mFrames, [&, this, frame = 0](const auto& frameHeader) mutable {
-      auto maybeReplacement = mMaybeReplacementsPath
-        ? loadPng(replacementImagePath(
-            *mMaybeReplacementsPath, static_cast<int>(id), frame))
-        : std::nullopt;
-      ++frame;
-
-      return ActorData::Frame{
-        frameHeader.mDrawOffset,
-        frameHeader.mSizeInTiles,
-        maybeReplacement ? *maybeReplacement : loadImage(frameHeader, palette)};
-    });
+  return it->second;
 }
 
 

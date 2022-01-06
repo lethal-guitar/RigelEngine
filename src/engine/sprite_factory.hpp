@@ -26,7 +26,7 @@
 
 namespace rigel::loader
 {
-class ActorImagePackage;
+class ResourceLoader;
 }
 namespace rigel::renderer
 {
@@ -54,10 +54,11 @@ class SpriteFactory : public ISpriteFactory
 public:
   SpriteFactory(
     renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage* pSpritePackage);
+    const loader::ResourceLoader* pResourceLoader);
 
   engine::components::Sprite createSprite(data::ActorID id) override;
   base::Rect<int> actorFrameRect(data::ActorID id, int frame) const override;
+  SpriteFrame actorFrameData(data::ActorID id, int frame) const override;
 
   bool hasHighResReplacements() const { return mHasHighResReplacements; }
 
@@ -81,7 +82,7 @@ private:
   SpriteFactory(CtorArgs args);
   static CtorArgs construct(
     renderer::Renderer* pRenderer,
-    const loader::ActorImagePackage* pSpritePackage);
+    const loader::ResourceLoader* pResourceLoader);
 
   std::unordered_map<data::ActorID, SpriteData> mSpriteDataMap;
   renderer::TextureAtlas mSpritesTextureAtlas;

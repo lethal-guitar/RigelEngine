@@ -46,9 +46,7 @@ engine::TiledTexture makeUiSpriteSheet(
   const data::Palette16& palette)
 {
   return engine::TiledTexture{
-    renderer::Texture{
-      pRenderer,
-      resourceLoader.loadTiledFullscreenImage("STATUS.MNI", palette)},
+    renderer::Texture{pRenderer, resourceLoader.loadUiSpriteSheet(palette)},
     pRenderer};
 }
 

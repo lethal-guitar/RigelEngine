@@ -76,6 +76,14 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
 
 
+fs::path
+  replacementImagePath(const fs::path& basePath, const int id, const int frame)
+{
+  return basePath /
+    ("actor" + std::to_string(id) + "_frame" + std::to_string(frame) + ".png");
+}
+
+
 std::optional<data::Image> loadReplacementTilesetIfPresent(
   const fs::path& gamePath,
   std::string_view name)
@@ -134,9 +142,28 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
   , mFilePackage(gamePath + "NUKEM2.CMP")
   , mActorImagePackage(
       file(ActorImagePackage::IMAGE_DATA_FILE),
-      file(ActorImagePackage::ACTOR_INFO_FILE),
-      gamePath + "/" + ASSET_REPLACEMENTS_PATH)
+      file(ActorImagePackage::ACTOR_INFO_FILE))
 {
+}
+
+
+data::Image ResourceLoader::loadUiSpriteSheet() const
+{
+  const auto replacementPath =
+    mGamePath / ASSET_REPLACEMENTS_PATH / "status.png";
+  if (auto oReplacement = loadPng(replacementPath.u8string()))
+  {
+    return *oReplacement;
+  }
+
+  return loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE);
+}
+
+
+data::Image ResourceLoader::loadUiSpriteSheet(
+  const data::Palette16& overridePalette) const
+{
+  return loadTiledFullscreenImage("STATUS.MNI", overridePalette);
 }
 
 
@@ -206,6 +233,31 @@ data::Palette16 ResourceLoader::loadPaletteFromFullScreenImage(
   const auto& data = file(imageName);
   const auto paletteStart = data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE;
   return load6bitPalette16(paletteStart, data.end());
+}
+
+
+ActorData ResourceLoader::loadActor(
+  data::ActorID id,
+  const data::Palette16& palette) const
+{
+  const auto& actorInfo = mActorImagePackage.loadActorInfo(id);
+
+  auto images = utils::transformed(
+    actorInfo.mFrames, [&, frame = 0](const auto& frameHeader) mutable {
+      auto maybeReplacement = loadPng(
+        replacementImagePath(
+          mGamePath / ASSET_REPLACEMENTS_PATH, static_cast<int>(id), frame)
+          .u8string());
+      ++frame;
+
+      return ActorData::Frame{
+        frameHeader.mDrawOffset,
+        frameHeader.mSizeInTiles,
+        maybeReplacement ? *maybeReplacement
+                         : mActorImagePackage.loadImage(frameHeader, palette)};
+    });
+
+  return ActorData{actorInfo.mDrawIndex, std::move(images)};
 }
 
 

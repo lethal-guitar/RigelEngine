@@ -41,19 +41,42 @@ struct TileSet
 };
 
 
+struct ActorData
+{
+  struct Frame
+  {
+    base::Vec2 mDrawOffset;
+    base::Extents mLogicalSize;
+    data::Image mFrameImage;
+  };
+
+  int mDrawIndex;
+  std::vector<Frame> mFrames;
+};
+
+
 class ResourceLoader
 {
 public:
   explicit ResourceLoader(const std::string& gamePath);
 
-  data::Image loadTiledFullscreenImage(std::string_view name) const;
-  data::Image loadTiledFullscreenImage(
-    std::string_view name,
-    const data::Palette16& overridePalette) const;
+  data::Image loadUiSpriteSheet() const;
+  data::Image loadUiSpriteSheet(const data::Palette16& overridePalette) const;
 
   data::Image loadStandaloneFullscreenImage(std::string_view name) const;
   data::Palette16
     loadPaletteFromFullScreenImage(std::string_view imageName) const;
+
+  ActorData loadActor(
+    data::ActorID id,
+    const data::Palette16& palette = data::GameTraits::INGAME_PALETTE) const;
+
+  FontData loadFont() const { return mActorImagePackage.loadFont(); }
+
+  int drawIndexFor(data::ActorID id) const
+  {
+    return mActorImagePackage.drawIndexFor(id);
+  }
 
   data::Image loadAntiPiracyImage() const;
 
@@ -74,12 +97,15 @@ public:
   bool hasFile(std::string_view name) const;
 
 private:
+  data::Image loadTiledFullscreenImage(std::string_view name) const;
+  data::Image loadTiledFullscreenImage(
+    std::string_view name,
+    const data::Palette16& overridePalette) const;
   data::AudioBuffer loadSound(std::string_view name) const;
 
   std::filesystem::path mGamePath;
   loader::CMPFilePackage mFilePackage;
 
-public:
   loader::ActorImagePackage mActorImagePackage;
 };
 

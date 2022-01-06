@@ -62,6 +62,11 @@ struct MockSpriteFactory : public rigel::engine::ISpriteFactory
     // Bounds for spike ball
     return {{}, {3, 3}};
   }
+
+  SpriteFrame actorFrameData(data::ActorID id, int frame) const override
+  {
+    return {};
+  }
 };
 
 

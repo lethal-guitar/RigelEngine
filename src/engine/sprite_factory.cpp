@@ -18,7 +18,7 @@
 
 #include "base/container_utils.hpp"
 #include "data/unit_conversions.hpp"
-#include "loader/actor_image_package.hpp"
+#include "loader/resource_loader.hpp"
 
 #include <array>
 
@@ -271,7 +271,20 @@ constexpr auto INGAME_SPRITE_ACTOR_IDS = std::array{
   data::ActorID::BOSS_Episode_4_projectile,
   data::ActorID::Floating_arrow,
   data::ActorID::Rigelatin_soldier,
-  data::ActorID::Rigelatin_soldier_projectile};
+  data::ActorID::Rigelatin_soldier_projectile,
+
+  // HUD
+  // Some sprites needed by the HUD are already included in the in-game
+  // sprites above: Hint globe, blue key and circuit board/access card.
+  data::ActorID::HUD_frame_background,
+  data::ActorID::Rapid_fire_icon,
+  data::ActorID::Cloaking_device_icon,
+  data::ActorID::Letter_collection_indicator_N,
+  data::ActorID::Letter_collection_indicator_U,
+  data::ActorID::Letter_collection_indicator_K,
+  data::ActorID::Letter_collection_indicator_E,
+  data::ActorID::Letter_collection_indicator_M,
+};
 
 
 void applyTweaks(
@@ -824,8 +837,8 @@ bool hasAssociatedSprite(const ActorID actorID)
 
 SpriteFactory::SpriteFactory(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage* pSpritePackage)
-  : SpriteFactory(construct(pRenderer, pSpritePackage))
+  const loader::ResourceLoader* pResourceLoader)
+  : SpriteFactory(construct(pRenderer, pResourceLoader))
 {
 }
 
@@ -840,7 +853,7 @@ SpriteFactory::SpriteFactory(CtorArgs args)
 
 auto SpriteFactory::construct(
   renderer::Renderer* pRenderer,
-  const loader::ActorImagePackage* pSpritePackage) -> CtorArgs
+  const loader::ResourceLoader* pResourceLoader) -> CtorArgs
 {
   bool highResReplacementsFound = false;
 
@@ -862,7 +875,7 @@ auto SpriteFactory::construct(
     // non-const so we can move the Image objects into the vector
     auto actorParts =
       utils::transformed(actorPartIds, [&](const ActorID partId) {
-        return pSpritePackage->loadActor(partId);
+        return pResourceLoader->loadActor(partId);
       });
 
     // Similarly, non-const for move semantics
@@ -924,11 +937,18 @@ Sprite SpriteFactory::createSprite(const ActorID id)
 base::Rect<int>
   SpriteFactory::actorFrameRect(const data::ActorID id, const int frame) const
 {
-  const auto& data = mSpriteDataMap.at(id);
-  const auto realFrame = virtualToRealFrame(0, data.mDrawData, std::nullopt);
-  const auto& frameData = data.mDrawData.mFrames[realFrame];
-
+  const auto& frameData = actorFrameData(id, frame);
   return {frameData.mDrawOffset, frameData.mDimensions};
+}
+
+
+engine::SpriteFrame
+  SpriteFactory::actorFrameData(data::ActorID id, int frame) const
+{
+  const auto& data = mSpriteDataMap.at(id);
+  const auto realFrame =
+    virtualToRealFrame(frame, data.mDrawData, std::nullopt);
+  return data.mDrawData.mFrames[realFrame];
 }
 
 } // namespace rigel::engine

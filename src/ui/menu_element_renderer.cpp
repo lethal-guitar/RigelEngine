@@ -175,7 +175,7 @@ MenuElementRenderer::MenuElementRenderer(
   : mpRenderer(pRenderer)
   , mpSpriteSheet(pSpriteSheet)
   , mBigTextTexture(
-      createFontTexture(resources.mActorImagePackage.loadFont(), pRenderer),
+      createFontTexture(resources.loadFont(), pRenderer),
       pRenderer)
 {
 }
