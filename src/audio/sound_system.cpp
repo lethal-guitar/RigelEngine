@@ -18,7 +18,7 @@
 
 #include "audio/adlib_emulator.hpp"
 #include "audio/software_imf_player.hpp"
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/string_utils.hpp"
 #include "loader/audio_package.hpp"
 #include "loader/resource_loader.hpp"

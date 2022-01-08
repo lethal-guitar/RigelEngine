@@ -17,7 +17,7 @@
 #include "game.hpp"
 
 #include "base/defer.hpp"
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"

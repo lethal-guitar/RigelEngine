@@ -16,7 +16,7 @@
 
 #include "boss_episode_3.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "common/game_service_provider.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"

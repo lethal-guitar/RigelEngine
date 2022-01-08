@@ -16,7 +16,7 @@
 
 #include "game_path_browser.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "renderer/opengl.hpp"
 #include "ui/imgui_integration.hpp"
 

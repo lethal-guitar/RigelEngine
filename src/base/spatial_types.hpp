@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS

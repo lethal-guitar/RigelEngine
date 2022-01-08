@@ -16,7 +16,7 @@
 
 #include "movement.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/static_vector.hpp"
 #include "data/map.hpp"
 #include "engine/collision_checker.hpp"

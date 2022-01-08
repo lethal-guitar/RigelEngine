@@ -16,7 +16,7 @@
 
 #include "software_imf_player.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "data/game_traits.hpp"
 
 
