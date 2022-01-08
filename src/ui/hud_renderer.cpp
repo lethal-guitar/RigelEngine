@@ -64,7 +64,7 @@ constexpr auto INVENTORY_START_POS = base::Vec2{HUD_START_TOP_RIGHT.x + 1, 2};
 // The letter collection indicator actors already contain an offset in the
 // actor info that positions them correctly. Unfortunately, that offset is
 // relative to the entire screen, but in our HUD renderer, everything is
-// relative to the start of the map viewport, i.e. offset by {1, 1} tiles.  We
+// relative to the start of the map Viewport, i.e. offset by {1, 1} tiles.  We
 // have to account for that and render the indicators further up/left to negate
 // this offset. On top of that, we need to offset one more to the left and one
 // more up, because that's how the original game's coordinate system works - a

@@ -168,7 +168,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   // ratio of the current screen resolution is different (e.g., showing a
   // 16:9 background image on a 16:10 screen).
   //
-  // We need to determine how to map the viewport rectangle (which is
+  // We need to determine how to map the Viewport rectangle (which is
   // not the entire screen) into the background image's texture space.
   // The idea is that we always scale the background vertically to match
   // the current render target size, and then work out the width from there.

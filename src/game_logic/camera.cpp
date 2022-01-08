@@ -257,7 +257,7 @@ void Camera::setPosition(const base::Vec2 position)
     return mRenderViewPortSize.height - (playerHeightUnitsCoveredByHud);
   });
 
-  // The std::max(_, 0) is for the case that the viewport is bigger than the
+  // The std::max(_, 0) is for the case that the Viewport is bigger than the
   // map, which would result in negative values
   const auto maxPosition = base::Vec2{
     std::max(static_cast<int>(mpMap->width() - mViewPortSize.width), 0),
