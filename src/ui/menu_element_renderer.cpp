@@ -16,7 +16,7 @@
 
 #include "menu_element_renderer.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 #include "data/game_traits.hpp"

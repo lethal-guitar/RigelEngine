@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/unit_conversions.hpp"

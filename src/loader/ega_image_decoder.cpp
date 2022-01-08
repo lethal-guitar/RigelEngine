@@ -17,7 +17,7 @@
 #include "ega_image_decoder.hpp"
 
 #include "base/container_utils.hpp"
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "data/unit_conversions.hpp"
 #include "loader/bitwise_iter.hpp"
 #include "loader/file_utils.hpp"
