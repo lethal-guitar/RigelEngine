@@ -10,7 +10,7 @@ set(core_sources
     base/container_utils.hpp
     base/defer.hpp
     base/grid.hpp
-    base/math_tools.hpp
+    base/math_utils.hpp
     base/spatial_types.hpp
     base/static_vector.hpp
     base/warnings.hpp

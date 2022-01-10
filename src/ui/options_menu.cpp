@@ -22,7 +22,7 @@
 
 #include "version_info.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 #include "common/game_service_provider.hpp"

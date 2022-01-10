@@ -16,7 +16,7 @@
 
 #include "fps_display.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 
 #include "utils.hpp"
 

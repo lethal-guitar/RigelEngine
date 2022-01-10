@@ -16,7 +16,7 @@
 
 #include "game_runner.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "game_logic/world_state.hpp"

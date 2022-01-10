@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 
 #include <dbopl.h>
 #include <opl3.h>

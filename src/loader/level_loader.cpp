@@ -18,7 +18,7 @@
 
 #include "base/container_utils.hpp"
 #include "base/grid.hpp"
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "base/string_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"

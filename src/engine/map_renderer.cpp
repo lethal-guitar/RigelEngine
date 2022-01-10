@@ -16,7 +16,7 @@
 
 #include "map_renderer.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 

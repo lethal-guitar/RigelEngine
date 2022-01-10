@@ -16,7 +16,7 @@
 
 #include "upscaling_utils.hpp"
 
-#include "base/math_tools.hpp"
+#include "base/math_utils.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
