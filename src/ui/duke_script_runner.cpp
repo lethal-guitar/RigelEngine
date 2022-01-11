@@ -79,8 +79,8 @@ DukeScriptRunner::DukeScriptRunner(
   , mMenuElementRenderer(&mUiSpriteSheetRenderer, pRenderer, *pResourceLoader)
   , mCanvas(
       pRenderer,
-      data::GameTraits::viewPortWidthPx,
-      data::GameTraits::viewPortHeightPx)
+      data::GameTraits::viewportWidthPx,
+      data::GameTraits::viewportHeightPx)
   , mProgramCounter(0u)
 {
   // Default menu pre-selections at game start

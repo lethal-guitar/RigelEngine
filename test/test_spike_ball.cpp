@@ -135,12 +135,12 @@ TEST_CASE("Spike ball")
 
   auto& ballPosition = *spikeBall.component<WorldPosition>();
 
-  const auto& viewPortSize = data::GameTraits::mapViewPortSize;
+  const auto& viewportSize = data::GameTraits::mapviewportSize;
   PerFrameState perFrameState;
-  perFrameState.mCurrentViewPortSize = viewPortSize;
+  perFrameState.mCurrentviewportSize = viewportSize;
 
   auto runOneFrame = [&]() {
-    engine::markActiveEntities(entityx.entities, {0, 0}, viewPortSize);
+    engine::markActiveEntities(entityx.entities, {0, 0}, viewportSize);
     behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
     perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;

@@ -31,7 +31,7 @@ namespace rigel::renderer
 
 class Renderer;
 
-struct ViewPortInfo
+struct viewportInfo
 {
   base::Vec2 mOffset;
   base::Size<int> mSize;
@@ -39,7 +39,7 @@ struct ViewPortInfo
 };
 
 
-struct WidescreenViewPortInfo
+struct WidescreenviewportInfo
 {
   int mWidthTiles;
   int mWidthPx;

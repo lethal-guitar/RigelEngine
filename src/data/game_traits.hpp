@@ -38,29 +38,29 @@ struct GameTraits
   static constexpr int tileSize = 8;
   static constexpr int tileSizeSquared = tileSize * tileSize;
 
-  static constexpr int viewPortWidthPx = 320;
-  static constexpr int viewPortHeightPx = 200;
-  static constexpr int viewPortWidthTiles = viewPortWidthPx / tileSize;
-  static constexpr int viewPortHeightTiles = viewPortHeightPx / tileSize;
+  static constexpr int viewportWidthPx = 320;
+  static constexpr int viewportHeightPx = 200;
+  static constexpr int viewportWidthTiles = viewportWidthPx / tileSize;
+  static constexpr int viewportHeightTiles = viewportHeightPx / tileSize;
 
-  static constexpr base::Extents viewPortSize{
-    viewPortWidthPx,
-    viewPortHeightPx};
+  static constexpr base::Extents viewportSize{
+    viewportWidthPx,
+    viewportHeightPx};
 
-  // The actual in-game Viewport starts with an offset and is further reduced
+  // The actual in-game viewport starts with an offset and is further reduced
   // to make room for the HUD. The right hand side features another 8px of
   // black border.
-  static constexpr base::Vec2 inGameViewPortOffset{8, 8};
-  static constexpr base::Extents inGameViewPortSize{
-    GameTraits::viewPortWidthPx - 16,
-    GameTraits::viewPortHeightPx - 8};
+  static constexpr base::Vec2 inGameviewportOffset{8, 8};
+  static constexpr base::Extents inGameviewportSize{
+    GameTraits::viewportWidthPx - 16,
+    GameTraits::viewportHeightPx - 8};
 
-  static constexpr int mapViewPortWidthTiles = viewPortWidthTiles - 8;
-  static constexpr int mapViewPortHeightTiles = viewPortHeightTiles - 5;
+  static constexpr int mapviewportWidthTiles = viewportWidthTiles - 8;
+  static constexpr int mapviewportHeightTiles = viewportHeightTiles - 5;
 
-  static constexpr base::Extents mapViewPortSize{
-    GameTraits::mapViewPortWidthTiles,
-    GameTraits::mapViewPortHeightTiles};
+  static constexpr base::Extents mapviewportSize{
+    GameTraits::mapviewportWidthTiles,
+    GameTraits::mapviewportHeightTiles};
 
   static constexpr std::size_t egaPlanes = 4u;
   static constexpr std::size_t maskedEgaPlanes = egaPlanes + 1u;
@@ -134,7 +134,7 @@ struct GameTraits
   // picture.
   static constexpr auto aspectRatio = 4.0f / 3.0f;
   static constexpr auto aspectCorrectionStretchFactor =
-    viewPortWidthPx / aspectRatio / viewPortHeightPx;
+    viewportWidthPx / aspectRatio / viewportHeightPx;
 
   struct CZone
   {
@@ -142,8 +142,8 @@ struct GameTraits
     static constexpr std::size_t numMaskedTiles = 160u;
     static constexpr std::size_t numTilesTotal = numSolidTiles + numMaskedTiles;
 
-    static constexpr int tileSetImageWidth = viewPortWidthTiles;
-    static constexpr int solidTilesImageHeight = viewPortHeightTiles;
+    static constexpr int tileSetImageWidth = viewportWidthTiles;
+    static constexpr int solidTilesImageHeight = viewportHeightTiles;
     static constexpr int tileSetImageHeight =
       solidTilesImageHeight + numMaskedTiles / tileSetImageWidth;
 

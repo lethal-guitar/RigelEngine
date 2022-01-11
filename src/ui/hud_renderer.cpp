@@ -45,26 +45,26 @@ constexpr auto RADAR_CENTER_POS_X = 288;
 constexpr auto RADAR_CENTER_POS_Y = 136;
 
 constexpr auto RADAR_POS_X = RADAR_CENTER_POS_X - RADAR_SIZE_PX / 2 -
-  data::GameTraits::inGameViewPortOffset.x;
+  data::GameTraits::inGameviewportOffset.x;
 constexpr auto RADAR_POS_Y = RADAR_CENTER_POS_Y - RADAR_SIZE_PX / 2 -
-  data::GameTraits::inGameViewPortOffset.y;
+  data::GameTraits::inGameviewportOffset.y;
 constexpr auto RADAR_CENTER_OFFSET_RELATIVE =
   base::Vec2{RADAR_SIZE_PX / 2, RADAR_SIZE_PX / 2 + 1};
 
 constexpr auto HUD_START_TOP_RIGHT =
-  base::Vec2{data::GameTraits::mapViewPortWidthTiles, 0};
+  base::Vec2{data::GameTraits::mapviewportWidthTiles, 0};
 constexpr auto HUD_START_BOTTOM_LEFT =
-  base::Vec2{0, data::GameTraits::mapViewPortHeightTiles};
+  base::Vec2{0, data::GameTraits::mapviewportHeightTiles};
 constexpr auto HUD_START_BOTTOM_RIGHT = base::Vec2{
   HUD_START_BOTTOM_LEFT.x + 28,
-  data::GameTraits::mapViewPortHeightTiles};
+  data::GameTraits::mapviewportHeightTiles};
 
 constexpr auto INVENTORY_START_POS = base::Vec2{HUD_START_TOP_RIGHT.x + 1, 2};
 
 // The letter collection indicator actors already contain an offset in the
 // actor info that positions them correctly. Unfortunately, that offset is
 // relative to the entire screen, but in our HUD renderer, everything is
-// relative to the start of the map Viewport, i.e. offset by {1, 1} tiles.  We
+// relative to the start of the map viewport, i.e. offset by {1, 1} tiles.  We
 // have to account for that and render the indicators further up/left to negate
 // this offset. On top of that, we need to offset one more to the left and one
 // more up, because that's how the original game's coordinate system works - a
@@ -119,7 +119,7 @@ void drawScore(const int score, const TiledTexture& spriteSheet)
   drawNumbersBig(
     score,
     7,
-    base::Vec2{2, GameTraits::mapViewPortSize.height + 1},
+    base::Vec2{2, GameTraits::mapviewportSize.height + 1},
     spriteSheet);
 }
 
@@ -130,7 +130,7 @@ void drawWeaponIcon(const WeaponType type, const TiledTexture& spriteSheet)
   // clang-format off
   spriteSheet.renderTileDoubleQuad(
     weaponIndex*4 + 4 + 5*40,
-    base::Vec2{17, GameTraits::mapViewPortSize.height + 1});
+    base::Vec2{17, GameTraits::mapviewportSize.height + 1});
   // clang-format on
 }
 
@@ -149,7 +149,7 @@ void drawAmmoBar(
   const auto ammoBarIndex = 16 - quantizedAmmoCount;
   spriteSheet.renderTileSlice(
     ammoBarIndex + 23 * 40,
-    base::Vec2{22, GameTraits::mapViewPortSize.height + 1});
+    base::Vec2{22, GameTraits::mapviewportSize.height + 1});
 }
 
 
@@ -159,8 +159,8 @@ void drawLevelNumber(const int number, const TiledTexture& spriteSheet)
     number,
     1,
     base::Vec2{
-      GameTraits::mapViewPortSize.width + 2,
-      GameTraits::mapViewPortSize.height},
+      GameTraits::mapviewportSize.width + 2,
+      GameTraits::mapviewportSize.height},
     spriteSheet);
 }
 
@@ -274,7 +274,7 @@ void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const
       // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
-        base::Vec2{24 + i, GameTraits::mapViewPortSize.height + 1});
+        base::Vec2{24 + i, GameTraits::mapviewportSize.height + 1});
       // clang-format on
     }
   }
@@ -289,7 +289,7 @@ void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const
       // clang-format off
       mpStatusSpriteSheetRenderer->renderTileSlice(
         sliceIndex + 20 + 4*40,
-        base::Vec2{24 + i, GameTraits::mapViewPortSize.height + 1});
+        base::Vec2{24 + i, GameTraits::mapviewportSize.height + 1});
       // clang-format on
     }
   }

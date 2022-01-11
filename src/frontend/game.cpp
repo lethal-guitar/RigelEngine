@@ -107,25 +107,25 @@ auto loadScripts(const loader::ResourceLoader& resources)
 }
 
 
-void setupRenderingViewport(
+void setupRenderingviewport(
   renderer::Renderer* pRenderer,
   const bool perElementUpscaling)
 {
   if (perElementUpscaling)
   {
-    const auto [offset, size, scale] = renderer::determineViewPort(pRenderer);
+    const auto [offset, size, scale] = renderer::determineviewport(pRenderer);
     pRenderer->setGlobalScale(scale);
     pRenderer->setGlobalTranslation(offset);
     pRenderer->setClipRect(base::Rect<int>{offset, size});
   }
   else
   {
-    pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewPortSize});
+    pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewportSize});
   }
 }
 
 
-void setupPresentationViewport(
+void setupPresentationviewport(
   renderer::Renderer* pRenderer,
   const bool perElementUpscaling,
   const bool isWidescreenFrame)
@@ -135,13 +135,13 @@ void setupPresentationViewport(
     return;
   }
 
-  const auto info = renderer::determineViewPort(pRenderer);
+  const auto info = renderer::determineviewport(pRenderer);
   pRenderer->setGlobalScale(info.mScale);
 
   if (isWidescreenFrame)
   {
     const auto offset =
-      renderer::determineWidescreenViewPort(pRenderer).mLeftPaddingPx;
+      renderer::determineWidescreenviewport(pRenderer).mLeftPaddingPx;
     pRenderer->setGlobalTranslation({offset, 0});
   }
   else
@@ -391,7 +391,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
     auto saved = mRenderTarget.bind();
     mRenderer.clear();
 
-    setupRenderingViewport(
+    setupRenderingviewport(
       &mRenderer, mpUserProfile->mOptions.mPerElementUpscalingEnabled);
 
     return mpCurrentGameMode->updateAndRender(elapsed, mEventQueue);
@@ -406,7 +406,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
 
     {
       auto saved = mRenderTarget.bind();
-      setupRenderingViewport(
+      setupRenderingviewport(
         &mRenderer, mpUserProfile->mOptions.mPerElementUpscalingEnabled);
       mpCurrentGameMode->updateAndRender(0, {});
     }
@@ -420,7 +420,7 @@ void Game::updateAndRender(const entityx::TimeDelta elapsed)
 
     {
       auto saved = renderer::saveState(&mRenderer);
-      setupPresentationViewport(
+      setupPresentationviewport(
         &mRenderer,
         mpUserProfile->mOptions.mPerElementUpscalingEnabled,
         mCurrentFrameIsWidescreen);
@@ -538,7 +538,7 @@ void Game::performScreenFadeBlocking(const FadeType type)
 
   auto saved = renderer::saveState(&mRenderer);
   mRenderer.resetState();
-  setupPresentationViewport(
+  setupPresentationviewport(
     &mRenderer,
     mpUserProfile->mOptions.mPerElementUpscalingEnabled,
     mCurrentFrameIsWidescreen);

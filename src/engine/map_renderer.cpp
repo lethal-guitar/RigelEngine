@@ -70,7 +70,7 @@ base::Vec2f backdropOffset(
     else
     {
       return {
-        0.0f, float(GameTraits::viewPortHeightPx) - backdropAutoScrollOffset};
+        0.0f, float(GameTraits::viewportHeightPx) - backdropAutoScrollOffset};
     }
   }
 
@@ -115,10 +115,10 @@ void MapRenderer::synchronizeTo(const MapRenderer& other)
 
 bool MapRenderer::hasHighResReplacements() const
 {
-  return mBackdropTexture.width() > data::GameTraits::viewPortWidthPx ||
-    mBackdropTexture.height() > data::GameTraits::viewPortHeightPx ||
-    mAlternativeBackdropTexture.width() > data::GameTraits::viewPortWidthPx ||
-    mAlternativeBackdropTexture.height() > data::GameTraits::viewPortHeightPx ||
+  return mBackdropTexture.width() > data::GameTraits::viewportWidthPx ||
+    mBackdropTexture.height() > data::GameTraits::viewportHeightPx ||
+    mAlternativeBackdropTexture.width() > data::GameTraits::viewportWidthPx ||
+    mAlternativeBackdropTexture.height() > data::GameTraits::viewportHeightPx ||
     mTileSetTexture.isHighRes();
 }
 
@@ -147,7 +147,7 @@ void MapRenderer::renderForeground(
 
 renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   const base::Vec2f& cameraPosition,
-  const base::Extents& viewPortSize) const
+  const base::Extents& viewportSize) const
 {
   // This function determines the texture coordinates we need to use for
   // drawing the backdrop into the current view port (which could be
@@ -168,7 +168,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   // ratio of the current screen resolution is different (e.g., showing a
   // 16:9 background image on a 16:10 screen).
   //
-  // We need to determine how to map the Viewport rectangle (which is
+  // We need to determine how to map the viewport rectangle (which is
   // not the entire screen) into the background image's texture space.
   // The idea is that we always scale the background vertically to match
   // the current render target size, and then work out the width from there.
@@ -183,10 +183,10 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   // take aspect ratio correction into account, in case we are working with
   // original art resolution and per-element upscaling.
   const auto isOriginalSize =
-    mBackdropTexture.width() == GameTraits::viewPortWidthPx &&
-    mBackdropTexture.height() == GameTraits::viewPortHeightPx;
+    mBackdropTexture.width() == GameTraits::viewportWidthPx &&
+    mBackdropTexture.height() == GameTraits::viewportHeightPx;
   const auto needsAspectRatioCorrection =
-    isOriginalSize && windowHeight != GameTraits::viewPortHeightPx;
+    isOriginalSize && windowHeight != GameTraits::viewportHeightPx;
   const auto correctionFactor = needsAspectRatioCorrection
     ? data::GameTraits::aspectCorrectionStretchFactor
     : 1.0f;
@@ -204,9 +204,9 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   // the view port. Basically, what percentage of the background size can we
   // use to match the dimensions of the destination rectangle used for
   // drawing, which is equal in size to the current view port.
-  const auto targetWidth = float(data::tilesToPixels(viewPortSize.width)) *
+  const auto targetWidth = float(data::tilesToPixels(viewportSize.width)) *
     mpRenderer->globalScale().x;
-  const auto targetHeight = float(data::tilesToPixels(viewPortSize.height)) *
+  const auto targetHeight = float(data::tilesToPixels(viewportSize.height)) *
     mpRenderer->globalScale().y;
   const auto visibleTargetPortionX = targetWidth / windowWidth;
   const auto visibleTargetPortionY = targetHeight / windowHeight;
@@ -241,14 +241,14 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 void MapRenderer::renderBackdrop(
   const base::Vec2f& cameraPosition,
-  const base::Extents& viewPortSize) const
+  const base::Extents& viewportSize) const
 {
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
-    calculateBackdropTexCoords(cameraPosition, viewPortSize),
-    {{}, data::tileExtentsToPixelExtents(viewPortSize)});
+    calculateBackdropTexCoords(cameraPosition, viewportSize),
+    {{}, data::tileExtentsToPixelExtents(viewportSize)});
 }
 
 
