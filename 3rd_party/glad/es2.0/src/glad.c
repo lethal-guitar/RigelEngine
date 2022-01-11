@@ -265,7 +265,7 @@ PFNGLVERTEXATTRIB3FVPROC glad_glVertexAttrib3fv = NULL;
 PFNGLVERTEXATTRIB4FPROC glad_glVertexAttrib4f = NULL;
 PFNGLVERTEXATTRIB4FVPROC glad_glVertexAttrib4fv = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC glad_glVertexAttribPointer = NULL;
-PFNGLVIEWPORTPROC glad_glViewport = NULL;
+PFNGLVIEWPORTPROC glad_glviewport = NULL;
 static void load_GL_ES_VERSION_2_0(GLADloadproc load) {
 	if(!GLAD_GL_ES_VERSION_2_0) return;
 	glad_glActiveTexture = (PFNGLACTIVETEXTUREPROC)load("glActiveTexture");
@@ -409,7 +409,7 @@ static void load_GL_ES_VERSION_2_0(GLADloadproc load) {
 	glad_glVertexAttrib4f = (PFNGLVERTEXATTRIB4FPROC)load("glVertexAttrib4f");
 	glad_glVertexAttrib4fv = (PFNGLVERTEXATTRIB4FVPROC)load("glVertexAttrib4fv");
 	glad_glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)load("glVertexAttribPointer");
-	glad_glViewport = (PFNGLVIEWPORTPROC)load("glViewport");
+	glad_glviewport = (PFNGLVIEWPORTPROC)load("glviewport");
 }
 static int find_extensionsGLES2(void) {
 	if (!get_exts()) return 0;

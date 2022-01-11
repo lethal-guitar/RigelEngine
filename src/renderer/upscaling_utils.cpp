@@ -67,7 +67,7 @@ base::Size<float>
 } // namespace
 
 
-ViewPortInfo determineViewPort(const Renderer* pRenderer)
+viewportInfo determineviewport(const Renderer* pRenderer)
 {
   const auto windowWidth = float(pRenderer->windowSize().width);
   const auto windowHeight = float(pRenderer->windowSize().height);
@@ -95,9 +95,9 @@ bool canUseWidescreenMode(const Renderer* pRenderer)
 }
 
 
-WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer)
+WidescreenviewportInfo determineWidescreenviewport(const Renderer* pRenderer)
 {
-  const auto info = determineViewPort(pRenderer);
+  const auto info = determineviewport(pRenderer);
 
   const auto windowWidth = pRenderer->windowSize().width;
   const auto tileWidthScaled = data::GameTraits::tileSize * info.mScale.x;
@@ -136,7 +136,7 @@ RenderTargetTexture createFullscreenRenderTarget(
   {
     const auto width =
       options.mWidescreenModeOn && canUseWidescreenMode(pRenderer)
-      ? determineWidescreenViewPort(pRenderer).mWidthPx
+      ? determineWidescreenviewport(pRenderer).mWidthPx
       : data::GameTraits::viewportWidthPx;
     return RenderTargetTexture{
       pRenderer, width, data::GameTraits::viewportHeightPx};

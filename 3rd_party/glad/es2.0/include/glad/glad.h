@@ -863,8 +863,8 @@ typedef void (APIENTRYP PFNGLVERTEXATTRIBPOINTERPROC)(GLuint index, GLint size, 
 GLAPI PFNGLVERTEXATTRIBPOINTERPROC glad_glVertexAttribPointer;
 #define glVertexAttribPointer glad_glVertexAttribPointer
 typedef void (APIENTRYP PFNGLVIEWPORTPROC)(GLint x, GLint y, GLsizei width, GLsizei height);
-GLAPI PFNGLVIEWPORTPROC glad_glViewport;
-#define glViewport glad_glViewport
+GLAPI PFNGLVIEWPORTPROC glad_glviewport;
+#define glviewport glad_glviewport
 #endif
 
 #ifdef __cplusplus

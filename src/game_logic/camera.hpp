@@ -55,7 +55,7 @@ public:
   void update(
     const PlayerInput& input,
     const base::Extents& viewportSize,
-    const base::Extents& renderViewportSize);
+    const base::Extents& renderviewportSize);
   void centerViewOnPlayer();
 
   const base::Vec2& position() const;
@@ -70,8 +70,8 @@ private:
   const Player* mpPlayer;
   const data::map::Map* mpMap;
   base::Vec2 mPosition;
-  base::Extents mViewPortSize;
-  base::Extents mRenderViewPortSize;
+  base::Extents mviewportSize;
+  base::Extents mRenderviewportSize;
   int mManualScrollCooldown = 0;
 };
 

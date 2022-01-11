@@ -416,7 +416,7 @@ PFNGLVERTEXATTRIBI4UIVPROC glad_glVertexAttribI4uiv = NULL;
 PFNGLVERTEXATTRIBI4USVPROC glad_glVertexAttribI4usv = NULL;
 PFNGLVERTEXATTRIBIPOINTERPROC glad_glVertexAttribIPointer = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC glad_glVertexAttribPointer = NULL;
-PFNGLVIEWPORTPROC glad_glViewport = NULL;
+PFNGLVIEWPORTPROC glad_glviewport = NULL;
 static void load_GL_VERSION_1_0(GLADloadproc load) {
 	if(!GLAD_GL_VERSION_1_0) return;
 	glad_glCullFace = (PFNGLCULLFACEPROC)load("glCullFace");
@@ -466,7 +466,7 @@ static void load_GL_VERSION_1_0(GLADloadproc load) {
 	glad_glGetTexLevelParameteriv = (PFNGLGETTEXLEVELPARAMETERIVPROC)load("glGetTexLevelParameteriv");
 	glad_glIsEnabled = (PFNGLISENABLEDPROC)load("glIsEnabled");
 	glad_glDepthRange = (PFNGLDEPTHRANGEPROC)load("glDepthRange");
-	glad_glViewport = (PFNGLVIEWPORTPROC)load("glViewport");
+	glad_glviewport = (PFNGLVIEWPORTPROC)load("glviewport");
 }
 static void load_GL_VERSION_1_1(GLADloadproc load) {
 	if(!GLAD_GL_VERSION_1_1) return;

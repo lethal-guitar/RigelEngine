@@ -952,8 +952,8 @@ typedef void (APIENTRYP PFNGLDEPTHRANGEPROC)(GLdouble n, GLdouble f);
 GLAPI PFNGLDEPTHRANGEPROC glad_glDepthRange;
 #define glDepthRange glad_glDepthRange
 typedef void (APIENTRYP PFNGLVIEWPORTPROC)(GLint x, GLint y, GLsizei width, GLsizei height);
-GLAPI PFNGLVIEWPORTPROC glad_glViewport;
-#define glViewport glad_glViewport
+GLAPI PFNGLVIEWPORTPROC glad_glviewport;
+#define glviewport glad_glviewport
 #endif
 #ifndef GL_VERSION_1_1
 #define GL_VERSION_1_1 1

@@ -494,7 +494,7 @@ struct Renderer::Impl
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glViewport(0, 0, mWindowSize.width, mWindowSize.height);
+    glviewport(0, 0, mWindowSize.width, mWindowSize.height);
     commitShaderSelection(mStateStack.back());
     commitTransformationMatrix(mStateStack.back(), mWindowSize);
   }
@@ -901,7 +901,7 @@ struct Renderer::Impl
       const auto framebufferSize = currentRenderTargetSize();
 
       commitRenderTarget(state);
-      glViewport(0, 0, framebufferSize.width, framebufferSize.height);
+      glviewport(0, 0, framebufferSize.width, framebufferSize.height);
       commitClipRect(state, framebufferSize);
       commitVertexAttributeFormat();
 
@@ -912,7 +912,7 @@ struct Renderer::Impl
       if (
         mWindowSize != mLastKnownWindowSize && state.mRenderTargetTexture == 0)
       {
-        glViewport(0, 0, mWindowSize.width, mWindowSize.height);
+        glviewport(0, 0, mWindowSize.width, mWindowSize.height);
         commitClipRect(state, mWindowSize);
         transformNeedsUpdate = true;
       }

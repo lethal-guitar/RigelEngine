@@ -47,7 +47,7 @@ struct WidescreenviewportInfo
 };
 
 
-ViewPortInfo determineViewPort(const Renderer* pRenderer);
+viewportInfo determineviewport(const Renderer* pRenderer);
 
 /** Returns true if wide-screen mode is feasible for the current window size.
  *
@@ -56,7 +56,7 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer);
  */
 bool canUseWidescreenMode(const Renderer* pRenderer);
 
-WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
+WidescreenviewportInfo determineWidescreenviewport(const Renderer* pRenderer);
 
 base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale);
 base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale);

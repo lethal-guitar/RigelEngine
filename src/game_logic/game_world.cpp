@@ -104,43 +104,43 @@ auto localToGlobalTranslation(
 }
 
 
-[[nodiscard]] auto setupIngameViewport(
+[[nodiscard]] auto setupIngameviewport(
   renderer::Renderer* pRenderer,
   const int screenShakeOffsetX)
 {
   auto saved = renderer::saveState(pRenderer);
 
   const auto offset =
-    data::GameTraits::inGameViewPortOffset + base::Vec2{screenShakeOffsetX, 0};
+    data::GameTraits::inGameviewportOffset + base::Vec2{screenShakeOffsetX, 0};
   const auto newTranslation = localToGlobalTranslation(pRenderer, offset);
 
   const auto scale = pRenderer->globalScale();
   pRenderer->setClipRect(base::Rect<int>{
     newTranslation,
-    renderer::scaleSize(data::GameTraits::inGameViewPortSize, scale)});
+    renderer::scaleSize(data::GameTraits::inGameviewportSize, scale)});
   pRenderer->setGlobalTranslation(newTranslation);
 
   return saved;
 }
 
 
-[[nodiscard]] auto setupIngameViewportWidescreen(
+[[nodiscard]] auto setupIngameviewportWidescreen(
   renderer::Renderer* pRenderer,
-  const renderer::WidescreenViewPortInfo& info,
+  const renderer::WidescreenviewportInfo& info,
   const int screenShakeOffsetX)
 {
   auto saved = renderer::saveState(pRenderer);
 
   const auto scale = pRenderer->globalScale();
   const auto offset =
-    base::Vec2{screenShakeOffsetX, data::GameTraits::inGameViewPortOffset.y};
+    base::Vec2{screenShakeOffsetX, data::GameTraits::inGameviewportOffset.y};
   const auto newTranslation =
     renderer::scaleVec(offset, scale) + base::Vec2{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
 
   const auto viewportSize = base::Extents{
     info.mWidthPx,
-    base::round(data::GameTraits::inGameViewPortSize.height * scale.y)};
+    base::round(data::GameTraits::inGameviewportSize.height * scale.y)};
   pRenderer->setClipRect(base::Rect<int>{newTranslation, viewportSize});
 
   return saved;
@@ -149,9 +149,9 @@ auto localToGlobalTranslation(
 
 auto viewportSizeWideScreen(renderer::Renderer* pRenderer)
 {
-  const auto info = renderer::determineWidescreenViewPort(pRenderer);
+  const auto info = renderer::determineWidescreenviewport(pRenderer);
   return base::Extents{
-    info.mWidthTiles - HUD_WIDTH, data::GameTraits::mapViewPortSize.height};
+    info.mWidthTiles - HUD_WIDTH, data::GameTraits::mapviewportSize.height};
 }
 
 
@@ -160,16 +160,16 @@ void setupWidescreenHudOffset(
   const int tilesOnScreen)
 {
   const auto extraTiles =
-    tilesOnScreen - data::GameTraits::mapViewPortWidthTiles;
+    tilesOnScreen - data::GameTraits::mapviewportWidthTiles;
   const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
   pRenderer->setGlobalTranslation(
     localToGlobalTranslation(pRenderer, {hudOffset, 0}));
 }
 
 
-[[nodiscard]] auto setupWidescreenTopRowViewPort(
+[[nodiscard]] auto setupWidescreenTopRowviewport(
   renderer::Renderer* pRenderer,
-  const renderer::WidescreenViewPortInfo& info,
+  const renderer::WidescreenviewportInfo& info,
   const int screenShakeOffsetX)
 {
   auto saved = renderer::saveState(pRenderer);
@@ -306,7 +306,7 @@ GameWorld::GameWorld(
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
   , mLowResLayer(
       mpRenderer,
-      renderer::determineWidescreenViewPort(mpRenderer).mWidthPx,
+      renderer::determineWidescreenviewport(mpRenderer).mWidthPx,
       data::GameTraits::viewportHeightPx)
   , mPreviousWindowSize(mpRenderer->windowSize())
   , mWidescreenModeWasOn(widescreenModeOn())
@@ -653,8 +653,8 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
 
   const auto& viewportSize = widescreenModeOn()
     ? viewportSizeWideScreen(mpRenderer)
-    : data::GameTraits::mapViewPortSize;
-  const auto& renderingViewPortSize = widescreenModeOn()
+    : data::GameTraits::mapviewportSize;
+  const auto& renderingviewportSize = widescreenModeOn()
     ? base::
         Extents{viewportSize.width, data::GameTraits::viewportHeightTiles - 1}
     : viewportSize;
@@ -671,7 +671,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
     input, mpState->mEntities);
   mpState->mPlayer.update(input);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
-  mpState->mCamera.update(input, viewportSize, renderingViewPortSize);
+  mpState->mCamera.update(input, viewportSize, renderingviewportSize);
 
   engine::markActiveEntities(
     mpState->mEntities, mpState->mCamera.position(), viewportSize);
@@ -704,16 +704,16 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
 
   mpState->mParticles.update();
 
-  // As far as game logic is concerned, the Viewport is always the same height
+  // As far as game logic is concerned, the viewport is always the same height
   // regardless of widescreen mode being on or off. But since the HUD doesn't
   // cover the entire width of the screen in widescreen mode, we need a larger
-  // Viewport height for rendering to ensure that sprites in the lower left of
+  // viewport height for rendering to ensure that sprites in the lower left of
   // the screen are rendered.
   if (!mpOptions->mMotionSmoothing)
   {
     mpState->mSpriteRenderingSystem.update(
       mpState->mEntities,
-      renderingViewPortSize,
+      renderingviewportSize,
       mpState->mCamera.position(),
       1.0f);
   }
@@ -740,7 +740,7 @@ void GameWorld::render(const float interpolationFactor)
   }
 
   auto drawParticlesAndDebugOverlay =
-    [&](const ViewportParams& viewportParams) {
+    [&](const viewportParams& viewportParams) {
       mpRenderer->setGlobalTranslation(
         localToGlobalTranslation(mpRenderer, viewportParams.mCameraOffset));
       mpState->mParticles.render(
@@ -748,7 +748,7 @@ void GameWorld::render(const float interpolationFactor)
       mpState->mDebuggingSystem.update(
         mpState->mEntities,
         viewportParams.mRenderStartPosition,
-        viewportParams.mViewportSize,
+        viewportParams.mviewportSize,
         interpolationFactor);
     };
 
@@ -767,7 +767,7 @@ void GameWorld::render(const float interpolationFactor)
     }
 
     const auto viewportParams =
-      determineSmoothScrollViewport(viewportSize, interpolationFactor);
+      determineSmoothScrollviewport(viewportSize, interpolationFactor);
 
     if (mpOptions->mPerElementUpscalingEnabled)
     {
@@ -824,7 +824,7 @@ void GameWorld::render(const float interpolationFactor)
   {
     mpServiceProvider->markCurrentFrameAsWidescreen();
 
-    const auto info = renderer::determineWidescreenViewPort(mpRenderer);
+    const auto info = renderer::determineWidescreenviewport(mpRenderer);
     const auto viewportSize = base::Extents{
       info.mWidthTiles, data::GameTraits::viewportHeightTiles - 1};
 
@@ -837,7 +837,7 @@ void GameWorld::render(const float interpolationFactor)
     if (mpOptions->mPerElementUpscalingEnabled)
     {
       {
-        const auto saved = setupIngameViewportWidescreen(
+        const auto saved = setupIngameviewportWidescreen(
           mpRenderer, info, mpState->mScreenShakeOffsetX);
 
         drawWorld(viewportSize);
@@ -846,7 +846,7 @@ void GameWorld::render(const float interpolationFactor)
         drawHud();
       }
 
-      auto saved = setupWidescreenTopRowViewPort(
+      auto saved = setupWidescreenTopRowviewport(
         mpRenderer, info, mpState->mScreenShakeOffsetX);
       drawTopRow(data::tilesToPixels(viewportSize.width));
     }
@@ -861,7 +861,7 @@ void GameWorld::render(const float interpolationFactor)
 
       mpRenderer->setGlobalTranslation(base::Vec2{
         mpState->mScreenShakeOffsetX,
-        data::GameTraits::inGameViewPortOffset.y});
+        data::GameTraits::inGameviewportOffset.y});
       drawWorld(viewportSize);
 
       setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
@@ -872,18 +872,18 @@ void GameWorld::render(const float interpolationFactor)
   {
     {
       const auto saved =
-        setupIngameViewport(mpRenderer, mpState->mScreenShakeOffsetX);
+        setupIngameviewport(mpRenderer, mpState->mScreenShakeOffsetX);
 
-      drawWorld(data::GameTraits::mapViewPortSize);
+      drawWorld(data::GameTraits::mapviewportSize);
       drawHud();
     }
 
     auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setGlobalTranslation(localToGlobalTranslation(
       mpRenderer,
-      {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewPortOffset.x,
+      {mpState->mScreenShakeOffsetX + data::GameTraits::inGameviewportOffset.x,
        0}));
-    drawTopRow(data::GameTraits::inGameViewPortSize.width);
+    drawTopRow(data::GameTraits::inGameviewportSize.width);
   }
 
   mWidescreenModeWasOn = widescreenModeOn();
@@ -892,9 +892,9 @@ void GameWorld::render(const float interpolationFactor)
 }
 
 
-auto GameWorld::determineSmoothScrollViewport(
+auto GameWorld::determineSmoothScrollviewport(
   const base::Extents& viewportSizeOriginal,
-  float interpolationFactor) const -> ViewportParams
+  float interpolationFactor) const -> viewportParams
 {
   const auto& state = *mpState;
 
@@ -966,7 +966,7 @@ void GameWorld::updateMotionSmoothingStates()
 
 
 void GameWorld::drawMapAndSprites(
-  const ViewportParams& params,
+  const viewportParams& params,
   const float interpolationFactor)
 {
   using game_logic::components::TileDebris;
@@ -977,25 +977,25 @@ void GameWorld::drawMapAndSprites(
     if (state.mBackdropFlashColor)
     {
       mpRenderer->drawFilledRectangle(
-        {{}, data::tileExtentsToPixelExtents(params.mViewportSize)},
+        {{}, data::tileExtentsToPixelExtents(params.mviewportSize)},
         *state.mBackdropFlashColor);
     }
     else
     {
       state.mMapRenderer.renderBackdrop(
-        params.mInterpolatedCameraPosition, params.mViewportSize);
+        params.mInterpolatedCameraPosition, params.mviewportSize);
     }
   };
 
   auto renderBackgroundLayers = [&]() {
     state.mMapRenderer.renderBackground(
-      params.mRenderStartPosition, params.mViewportSize);
+      params.mRenderStartPosition, params.mviewportSize);
     state.mSpriteRenderingSystem.renderRegularSprites();
   };
 
   auto renderForegroundLayers = [&]() {
     state.mMapRenderer.renderForeground(
-      params.mRenderStartPosition, params.mViewportSize);
+      params.mRenderStartPosition, params.mviewportSize);
     state.mSpriteRenderingSystem.renderForegroundSprites();
 
     // tile debris
@@ -1018,13 +1018,13 @@ void GameWorld::drawMapAndSprites(
   {
     mpState->mSpriteRenderingSystem.update(
       mpState->mEntities,
-      params.mViewportSize,
+      params.mviewportSize,
       params.mRenderStartPosition,
       interpolationFactor);
   }
 
   const auto waterEffectAreas = collectWaterEffectAreas(
-    state.mEntities, params.mRenderStartPosition, params.mViewportSize);
+    state.mEntities, params.mRenderStartPosition, params.mviewportSize);
   if (waterEffectAreas.empty())
   {
     renderBackdrop();
@@ -1189,7 +1189,7 @@ void GameWorld::quickLoad()
   {
     const auto& viewportSize = widescreenModeOn()
       ? viewportSizeWideScreen(mpRenderer)
-      : data::GameTraits::mapViewPortSize;
+      : data::GameTraits::mapviewportSize;
     mpState->mSpriteRenderingSystem.update(
       mpState->mEntities, viewportSize, mpState->mCamera.position(), 1.0f);
   }
