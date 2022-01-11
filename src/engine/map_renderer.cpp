@@ -328,7 +328,7 @@ void MapRenderer::updateBackdropAutoScrolling(const engine::TimeDelta dt)
 {
   const auto scrollSpeed = std::invoke([&]() {
     const auto scale =
-      float(mBackdropTexture.height()) / GameTraits::viewPortHeightPx;
+      float(mBackdropTexture.height()) / GameTraits::viewportHeightPx;
 
     if (mScrollMode == BackdropScrollMode::AutoHorizontal)
     {

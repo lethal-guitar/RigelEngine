@@ -75,8 +75,8 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer)
   const auto [usableWidth, usableHeight] =
     determineUsableSize(windowWidth, windowHeight);
 
-  const auto widthScale = usableWidth / data::GameTraits::viewPortWidthPx;
-  const auto heightScale = usableHeight / data::GameTraits::viewPortHeightPx;
+  const auto widthScale = usableWidth / data::GameTraits::viewportWidthPx;
+  const auto heightScale = usableHeight / data::GameTraits::viewportHeightPx;
   const auto offsetX = (windowWidth - usableWidth) / 2.0f;
   const auto offsetY = (windowHeight - usableHeight) / 2.0f;
 
@@ -137,9 +137,9 @@ RenderTargetTexture createFullscreenRenderTarget(
     const auto width =
       options.mWidescreenModeOn && canUseWidescreenMode(pRenderer)
       ? determineWidescreenViewPort(pRenderer).mWidthPx
-      : data::GameTraits::viewPortWidthPx;
+      : data::GameTraits::viewportWidthPx;
     return RenderTargetTexture{
-      pRenderer, width, data::GameTraits::viewPortHeightPx};
+      pRenderer, width, data::GameTraits::viewportHeightPx};
   }
 }
 

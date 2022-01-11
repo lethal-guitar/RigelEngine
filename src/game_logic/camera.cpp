@@ -112,10 +112,10 @@ base::Rect<int> deadZoneRect(const Player& player)
  */
 base::Rect<int> normalizedPlayerBounds(
   const Player& player,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewportSize)
 {
   const auto extraTiles =
-    viewPortSize.width - data::GameTraits::mapViewPortSize.width;
+    viewportSize.width - data::GameTraits::mapViewPortSize.width;
   const auto offsetToCenter = extraTiles / 2;
 
   auto playerBounds = player.worldSpaceCollisionBox();
@@ -127,9 +127,9 @@ base::Rect<int> normalizedPlayerBounds(
 base::Vec2 offsetToDeadZone(
   const Player& player,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewportSize)
 {
-  const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
+  const auto playerBounds = normalizedPlayerBounds(player, viewportSize);
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
@@ -174,10 +174,10 @@ void Camera::synchronizeTo(const Camera& other)
 
 void Camera::update(
   const PlayerInput& input,
-  const base::Extents& viewPortSize,
+  const base::Extents& viewportSize,
   const base::Extents& renderViewportSize)
 {
-  mViewPortSize = viewPortSize;
+  mViewPortSize = viewportSize;
   mRenderViewPortSize = renderViewportSize;
   updateManualScrolling(input);
 

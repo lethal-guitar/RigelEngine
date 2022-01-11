@@ -54,7 +54,7 @@ public:
 
   void update(
     const PlayerInput& input,
-    const base::Extents& viewPortSize,
+    const base::Extents& viewportSize,
     const base::Extents& renderViewportSize);
   void centerViewOnPlayer();
 

@@ -281,7 +281,7 @@ SpriteRenderingSystem::SpriteRenderingSystem(
 
 void SpriteRenderingSystem::update(
   ex::EntityManager& es,
-  const base::Extents& viewPortSize,
+  const base::Extents& viewportSize,
   const base::Vec2& cameraPosition,
   const float interpolationFactor)
 {
@@ -291,7 +291,7 @@ void SpriteRenderingSystem::update(
 
   mSortBuffer.clear();
   collectVisibleSprites(
-    es, cameraPosition, viewPortSize, mSortBuffer, interpolationFactor);
+    es, cameraPosition, viewportSize, mSortBuffer, interpolationFactor);
   std::sort(begin(mSortBuffer), end(mSortBuffer));
 
   mSprites.clear();

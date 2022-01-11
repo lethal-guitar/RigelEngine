@@ -223,7 +223,7 @@ data::Image ResourceLoader::loadAntiPiracyImage() const
     back_inserter(pixels),
     [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
   return data::Image(
-    move(pixels), GameTraits::viewPortWidthPx, GameTraits::viewPortHeightPx);
+    move(pixels), GameTraits::viewportWidthPx, GameTraits::viewportHeightPx);
 }
 
 
