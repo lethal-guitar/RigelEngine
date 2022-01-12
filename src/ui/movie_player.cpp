@@ -34,8 +34,8 @@ MoviePlayer::MoviePlayer(renderer::Renderer* pRenderer)
   : mpRenderer(pRenderer)
   , mCanvas(
       pRenderer,
-      data::GameTraits::viewPortWidthPx,
-      data::GameTraits::viewPortHeightPx)
+      data::GameTraits::viewportWidthPx,
+      data::GameTraits::viewportHeightPx)
 {
 }
 

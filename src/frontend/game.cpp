@@ -113,14 +113,14 @@ void setupRenderingViewport(
 {
   if (perElementUpscaling)
   {
-    const auto [offset, size, scale] = renderer::determineViewPort(pRenderer);
+    const auto [offset, size, scale] = renderer::determineViewport(pRenderer);
     pRenderer->setGlobalScale(scale);
     pRenderer->setGlobalTranslation(offset);
     pRenderer->setClipRect(base::Rect<int>{offset, size});
   }
   else
   {
-    pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewPortSize});
+    pRenderer->setClipRect(base::Rect<int>{{}, data::GameTraits::viewportSize});
   }
 }
 
@@ -135,13 +135,13 @@ void setupPresentationViewport(
     return;
   }
 
-  const auto info = renderer::determineViewPort(pRenderer);
+  const auto info = renderer::determineViewport(pRenderer);
   pRenderer->setGlobalScale(info.mScale);
 
   if (isWidescreenFrame)
   {
     const auto offset =
-      renderer::determineWidescreenViewPort(pRenderer).mLeftPaddingPx;
+      renderer::determineWidescreenViewport(pRenderer).mLeftPaddingPx;
     pRenderer->setGlobalTranslation({offset, 0});
   }
   else

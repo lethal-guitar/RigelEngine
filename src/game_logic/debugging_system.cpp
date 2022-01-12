@@ -99,16 +99,16 @@ void DebuggingSystem::toggleGridDisplay()
 void DebuggingSystem::update(
   ex::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewPortSize,
+  const base::Extents& viewportSize,
   const float interpolationFactor)
 {
   if (mShowWorldCollisionData)
   {
     const auto drawColor = base::Color{255, 255, 0, 255};
 
-    for (int y = 0; y < viewPortSize.height; ++y)
+    for (int y = 0; y < viewportSize.height; ++y)
     {
-      for (int x = 0; x < viewPortSize.width; ++x)
+      for (int x = 0; x < viewportSize.width; ++x)
       {
         const auto col = x + cameraPosition.x;
         const auto row = y + cameraPosition.y;
@@ -214,18 +214,18 @@ void DebuggingSystem::update(
   if (mShowGrid)
   {
     const auto drawColor = base::Color{255, 255, 255, 190};
-    const auto maxX = tilesToPixels(viewPortSize.width);
-    const auto maxY = tilesToPixels(viewPortSize.height);
+    const auto maxX = tilesToPixels(viewportSize.width);
+    const auto maxY = tilesToPixels(viewportSize.height);
 
     // Horizontal lines
-    for (int y = 0; y < viewPortSize.height; ++y)
+    for (int y = 0; y < viewportSize.height; ++y)
     {
       const auto pxY = tilesToPixels(y);
       mpRenderer->drawLine(0, pxY, maxX, pxY, drawColor);
     }
 
     // Vertical lines
-    for (int x = 0; x < viewPortSize.width; ++x)
+    for (int x = 0; x < viewportSize.width; ++x)
     {
       const auto pxX = tilesToPixels(x);
       mpRenderer->drawLine(pxX, 0, pxX, maxY, drawColor);

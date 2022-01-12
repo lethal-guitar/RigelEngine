@@ -112,10 +112,10 @@ base::Rect<int> deadZoneRect(const Player& player)
  */
 base::Rect<int> normalizedPlayerBounds(
   const Player& player,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewportSize)
 {
   const auto extraTiles =
-    viewPortSize.width - data::GameTraits::mapViewPortSize.width;
+    viewportSize.width - data::GameTraits::mapViewportSize.width;
   const auto offsetToCenter = extraTiles / 2;
 
   auto playerBounds = player.worldSpaceCollisionBox();
@@ -127,9 +127,9 @@ base::Rect<int> normalizedPlayerBounds(
 base::Vec2 offsetToDeadZone(
   const Player& player,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewportSize)
 {
-  const auto playerBounds = normalizedPlayerBounds(player, viewPortSize);
+  const auto playerBounds = normalizedPlayerBounds(player, viewportSize);
   auto worldSpaceDeadZone = deadZoneRect(player);
   worldSpaceDeadZone.topLeft += cameraPosition;
 
@@ -159,7 +159,7 @@ Camera::Camera(
   entityx::EventManager& eventManager)
   : mpPlayer(pPlayer)
   , mpMap(&map)
-  , mViewPortSize(data::GameTraits::mapViewPortSize)
+  , mViewportSize(data::GameTraits::mapViewportSize)
 {
   eventManager.subscribe<rigel::events::PlayerFiredShot>(*this);
 }
@@ -174,11 +174,11 @@ void Camera::synchronizeTo(const Camera& other)
 
 void Camera::update(
   const PlayerInput& input,
-  const base::Extents& viewPortSize,
+  const base::Extents& viewportSize,
   const base::Extents& renderViewportSize)
 {
-  mViewPortSize = viewPortSize;
-  mRenderViewPortSize = renderViewportSize;
+  mViewportSize = viewportSize;
+  mRenderViewportSize = renderViewportSize;
   updateManualScrolling(input);
 
   if (!mpPlayer->stateIs<GettingSuckedIntoSpace>())
@@ -227,7 +227,7 @@ void Camera::updateManualScrolling(const PlayerInput& input)
 void Camera::updateAutomaticScrolling()
 {
   const auto [offsetX, offsetY] =
-    offsetToDeadZone(*mpPlayer, mPosition, mViewPortSize);
+    offsetToDeadZone(*mpPlayer, mPosition, mViewportSize);
 
   const auto maxAdjustDown =
     mpPlayer->isRidingElevator() ? MAX_ADJUST_DOWN_ELEVATOR : MAX_ADJUST_DOWN;
@@ -241,12 +241,12 @@ void Camera::updateAutomaticScrolling()
 
 void Camera::setPosition(const base::Vec2 position)
 {
-  const auto usableViewPortHeight = std::invoke([&]() {
+  const auto usableViewportHeight = std::invoke([&]() {
     const auto extraViewportHeight =
-      mRenderViewPortSize.height - mViewPortSize.height;
+      mRenderViewportSize.height - mViewportSize.height;
     if (extraViewportHeight == 0)
     {
-      return mViewPortSize.height;
+      return mViewportSize.height;
     }
 
     const auto maxPlayerPosY = mpMap->height() - 1;
@@ -254,14 +254,14 @@ void Camera::setPosition(const base::Vec2 position)
       maxPlayerPosY - 1 - mpPlayer->position().y;
     const auto playerHeightUnitsCoveredByHud =
       std::max(0, extraViewportHeight - playerOffsetFromBottomOfMap);
-    return mRenderViewPortSize.height - (playerHeightUnitsCoveredByHud);
+    return mRenderViewportSize.height - (playerHeightUnitsCoveredByHud);
   });
 
   // The std::max(_, 0) is for the case that the viewport is bigger than the
   // map, which would result in negative values
   const auto maxPosition = base::Vec2{
-    std::max(static_cast<int>(mpMap->width() - mViewPortSize.width), 0),
-    std::max(static_cast<int>(mpMap->height() - usableViewPortHeight), 0)};
+    std::max(static_cast<int>(mpMap->width() - mViewportSize.width), 0),
+    std::max(static_cast<int>(mpMap->height() - usableViewportHeight), 0)};
   mPosition.x = std::clamp(position.x, 0, maxPosition.x);
   mPosition.y = std::clamp(position.y, 0, maxPosition.y);
 }
@@ -270,7 +270,7 @@ void Camera::setPosition(const base::Vec2 position)
 void Camera::centerViewOnPlayer()
 {
   auto playerPos =
-    normalizedPlayerBounds(*mpPlayer, mViewPortSize).bottomLeft();
+    normalizedPlayerBounds(*mpPlayer, mViewportSize).bottomLeft();
   if (mpPlayer->orientation() == Orientation::Left)
   {
     playerPos.x -= 1;

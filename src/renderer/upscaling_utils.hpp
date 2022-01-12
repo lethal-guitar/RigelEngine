@@ -31,7 +31,7 @@ namespace rigel::renderer
 
 class Renderer;
 
-struct ViewPortInfo
+struct ViewportInfo
 {
   base::Vec2 mOffset;
   base::Size<int> mSize;
@@ -39,7 +39,7 @@ struct ViewPortInfo
 };
 
 
-struct WidescreenViewPortInfo
+struct WidescreenViewportInfo
 {
   int mWidthTiles;
   int mWidthPx;
@@ -47,7 +47,7 @@ struct WidescreenViewPortInfo
 };
 
 
-ViewPortInfo determineViewPort(const Renderer* pRenderer);
+ViewportInfo determineViewport(const Renderer* pRenderer);
 
 /** Returns true if wide-screen mode is feasible for the current window size.
  *
@@ -56,7 +56,7 @@ ViewPortInfo determineViewPort(const Renderer* pRenderer);
  */
 bool canUseWidescreenMode(const Renderer* pRenderer);
 
-WidescreenViewPortInfo determineWidescreenViewPort(const Renderer* pRenderer);
+WidescreenViewportInfo determineWidescreenViewport(const Renderer* pRenderer);
 
 base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale);
 base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale);

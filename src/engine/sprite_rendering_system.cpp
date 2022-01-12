@@ -70,7 +70,7 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated)
 void collectVisibleSprites(
   ex::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewPortSize,
+  const base::Extents& viewportSize,
   std::vector<SortableDrawSpec>& output,
   const float interpolationFactor)
 {
@@ -79,7 +79,7 @@ void collectVisibleSprites(
   using components::ExtendedFrameList;
   using components::OverrideDrawOrder;
 
-  const auto screenBox = BoundingBox{{}, viewPortSize};
+  const auto screenBox = BoundingBox{{}, viewportSize};
 
   auto submit = [&](
                   const SpriteFrame& frame,
@@ -281,7 +281,7 @@ SpriteRenderingSystem::SpriteRenderingSystem(
 
 void SpriteRenderingSystem::update(
   ex::EntityManager& es,
-  const base::Extents& viewPortSize,
+  const base::Extents& viewportSize,
   const base::Vec2& cameraPosition,
   const float interpolationFactor)
 {
@@ -291,7 +291,7 @@ void SpriteRenderingSystem::update(
 
   mSortBuffer.clear();
   collectVisibleSprites(
-    es, cameraPosition, viewPortSize, mSortBuffer, interpolationFactor);
+    es, cameraPosition, viewportSize, mSortBuffer, interpolationFactor);
   std::sort(begin(mSortBuffer), end(mSortBuffer));
 
   mSprites.clear();

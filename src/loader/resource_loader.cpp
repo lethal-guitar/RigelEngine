@@ -46,7 +46,7 @@ namespace
 const auto ANTI_PIRACY_SCREEN_FILENAME = "LCR.MNI";
 
 const auto FULL_SCREEN_IMAGE_DATA_SIZE =
-  (GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx) /
+  (GameTraits::viewportWidthPx * GameTraits::viewportHeightPx) /
   (GameTraits::pixelsPerEgaByte / GameTraits::egaPlanes);
 
 
@@ -180,7 +180,7 @@ data::Image ResourceLoader::loadTiledFullscreenImage(
 {
   return loadTiledImage(
     file(name),
-    data::GameTraits::viewPortWidthTiles,
+    data::GameTraits::viewportWidthTiles,
     overridePalette,
     data::TileImageType::Unmasked);
 }
@@ -197,8 +197,8 @@ data::Image
     data.begin(), data.begin() + FULL_SCREEN_IMAGE_DATA_SIZE, palette);
   return data::Image(
     std::move(pixels),
-    GameTraits::viewPortWidthPx,
-    GameTraits::viewPortHeightPx);
+    GameTraits::viewportWidthPx,
+    GameTraits::viewportHeightPx);
 }
 
 
@@ -216,14 +216,14 @@ data::Image ResourceLoader::loadAntiPiracyImage() const
   const auto palette = load6bitPalette256(begin(data), iImageStart);
 
   data::PixelBuffer pixels;
-  pixels.reserve(GameTraits::viewPortWidthPx * GameTraits::viewPortHeightPx);
+  pixels.reserve(GameTraits::viewportWidthPx * GameTraits::viewportHeightPx);
   transform(
     iImageStart,
     end(data),
     back_inserter(pixels),
     [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
   return data::Image(
-    move(pixels), GameTraits::viewPortWidthPx, GameTraits::viewPortHeightPx);
+    move(pixels), GameTraits::viewportWidthPx, GameTraits::viewportHeightPx);
 }
 
 

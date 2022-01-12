@@ -51,7 +51,7 @@ public:
 
   void renderBackdrop(
     const base::Vec2f& cameraPosition,
-    const base::Extents& viewPortSize) const;
+    const base::Extents& viewportSize) const;
   void renderBackground(
     const base::Vec2& sectionStart,
     const base::Extents& sectionSize) const;
@@ -75,7 +75,7 @@ private:
 
   renderer::TexCoords calculateBackdropTexCoords(
     const base::Vec2f& cameraPosition,
-    const base::Extents& viewPortSize) const;
+    const base::Extents& viewportSize) const;
 
   void renderMapTiles(
     const base::Vec2& sectionStart,
