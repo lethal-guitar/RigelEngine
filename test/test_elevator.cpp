@@ -165,12 +165,12 @@ TEST_CASE("Rocket elevator")
 
   PerFrameState perFrameState;
   const auto runOneFrame = [&](const PlayerInput& input) {
-    const auto& viewPortSize = data::GameTraits::mapViewPortSize;
+    const auto& viewportSize = data::GameTraits::mapViewportSize;
     perFrameState.mInput = input;
-    perFrameState.mCurrentViewPortSize = viewPortSize;
+    perFrameState.mCurrentViewportSize = viewportSize;
 
     player.update(input);
-    engine::markActiveEntities(entityx.entities, {0, 0}, viewPortSize);
+    engine::markActiveEntities(entityx.entities, {0, 0}, viewportSize);
     behaviorControllerSystem.update(entityx.entities, perFrameState);
     physicsSystem.update(entityx.entities);
     perFrameState.mIsOddFrame = !perFrameState.mIsOddFrame;

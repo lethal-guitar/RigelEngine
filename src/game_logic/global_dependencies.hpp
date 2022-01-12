@@ -72,7 +72,7 @@ struct GlobalDependencies
 struct PerFrameState
 {
   PlayerInput mInput;
-  base::Extents mCurrentViewPortSize;
+  base::Extents mCurrentViewportSize;
   int mNumRadarDishes = 0;
   bool mIsOddFrame = false;
   bool mIsEarthShaking = false;
@@ -105,7 +105,7 @@ inline bool isBboxOnScreen(
   const engine::components::BoundingBox& bounds)
 {
   return engine::isOnScreen(
-    bounds, *s.mpCameraPosition, s.mpPerFrameState->mCurrentViewPortSize);
+    bounds, *s.mpCameraPosition, s.mpPerFrameState->mCurrentViewportSize);
 }
 
 } // namespace rigel::game_logic

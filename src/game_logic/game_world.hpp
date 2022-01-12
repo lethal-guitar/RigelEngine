@@ -144,7 +144,7 @@ private:
   void printDebugText(std::ostream& stream) const;
 
   ViewportParams determineSmoothScrollViewport(
-    const base::Extents& viewPortSizeOriginal,
+    const base::Extents& viewportSizeOriginal,
     const float interpolationFactor) const;
   void updateMotionSmoothingStates();
 

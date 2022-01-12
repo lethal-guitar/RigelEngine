@@ -25,7 +25,7 @@ namespace rigel::engine
 void LifeTimeSystem::update(
   entityx::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewPortSize)
+  const base::Extents& viewportSize)
 {
   namespace c = components;
   using Condition = components::AutoDestroy::Condition;
@@ -40,7 +40,7 @@ void LifeTimeSystem::update(
           const auto& position = *entity.component<c::WorldPosition>();
           const auto& bbox = *entity.component<c::BoundingBox>();
           return engine::isOnScreen(
-            engine::toWorldSpace(bbox, position), cameraPosition, viewPortSize);
+            engine::toWorldSpace(bbox, position), cameraPosition, viewportSize);
         }
 
         return entity.has_component<c::Active>() &&

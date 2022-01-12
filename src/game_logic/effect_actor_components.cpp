@@ -48,7 +48,7 @@ void WindBlownSpiderGenerator::update(
     d.mpRandomGenerator->gen() % 2 != 0 && s.mpPerFrameState->mIsOddFrame)
   {
     const auto rightScreenEdge =
-      s.mpPerFrameState->mCurrentViewPortSize.width - 1;
+      s.mpPerFrameState->mCurrentViewportSize.width - 1;
     const auto effectActorId = 241 + d.mpRandomGenerator->gen() % 3;
     const auto xPos = s.mpCameraPosition->x + rightScreenEdge;
     const auto yPos =
