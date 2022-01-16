@@ -85,7 +85,8 @@ The only files actually required for RigelEngine are:
 * `NUKEM2.CMP` (the main data file)
 * `NUKEM2.F1`, `.F2`, `.F3` etc. up to `.F5` (intro movie files)
 
-Currently, the game will abort if the intro movies are missing, but they aren't mandatory for gameplay, and I'm planning to make them optional in the future.
+The intro movies aren't mandatory, RigelEngine simply skips movie playback if the files aren't found.
+They are still part of the experience though, so I do recommend including them when copying the game files somewhere.
 
 If there are existing saved games, high score lists, or settings found in the game files,
 RigelEngine imports them into its own user profile when running for the first time.
