@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/warnings.hpp"
 #include "renderer/opengl.hpp"
 
@@ -66,13 +67,26 @@ private:
 };
 
 
+enum class VertexLayout
+{
+  PositionAndTexCoords,
+  PositionAndColor
+};
+
+
+struct ShaderSpec
+{
+  VertexLayout mVertexLayout;
+  base::ArrayView<const char*> mTextureUnitNames;
+  const char* mVertexSource;
+  const char* mFragmentSource;
+};
+
+
 class Shader
 {
 public:
-  Shader(
-    const char* vertexSource,
-    const char* fragmentSource,
-    std::initializer_list<std::string> attributesToBind);
+  Shader(const ShaderSpec& spec);
 
   void use();
 
@@ -134,6 +148,7 @@ private:
 
 private:
   GlHandleWrapper mProgram;
+  VertexLayout mVertexLayout;
   mutable std::unordered_map<std::string, GLint> mLocationCache;
 };
 

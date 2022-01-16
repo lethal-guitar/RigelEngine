@@ -105,12 +105,6 @@ enum class RenderMode : std::uint8_t
 };
 
 
-void* toAttribOffset(std::uintptr_t offset)
-{
-  return reinterpret_cast<void*>(offset);
-}
-
-
 glm::vec4 toGlColor(const base::Color& color)
 {
   return glm::vec4{color.r, color.g, color.b, color.a} / 255.0f;
@@ -410,22 +404,10 @@ struct Renderer::Impl
 
 
   explicit Impl(SDL_Window* pWindow)
-    : mTexturedQuadShader(
-        VERTEX_SOURCE,
-        FRAGMENT_SOURCE,
-        {"position", "texCoord"})
-    , mSimpleTexturedQuadShader(
-        VERTEX_SOURCE,
-        FRAGMENT_SOURCE_SIMPLE,
-        {"position", "texCoord"})
-    , mSolidColorShader(
-        VERTEX_SOURCE_SOLID,
-        FRAGMENT_SOURCE_SOLID,
-        {"position", "color"})
-    , mWaterEffectShader(
-        VERTEX_SOURCE_WATER_EFFECT,
-        FRAGMENT_SOURCE_WATER_EFFECT,
-        {"position", "texCoordMask"})
+    : mTexturedQuadShader(TEXTURED_QUAD_SHADER)
+    , mSimpleTexturedQuadShader(SIMPLE_TEXTURED_QUAD_SHADER)
+    , mSolidColorShader(SOLID_COLOR_SHADER)
+    , mWaterEffectShader(WATER_EFFECT_SHADER)
     , mWindowSize(getSize(pWindow))
     , mpWindow(pWindow)
   {
@@ -477,18 +459,6 @@ struct Renderer::Impl
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture);
     glActiveTexture(GL_TEXTURE0);
-
-    mWaterEffectShader.use();
-    mWaterEffectShader.setUniform("textureData", 0);
-    mWaterEffectShader.setUniform("maskData", 1);
-    mWaterEffectShader.setUniform("colorMapData", 2);
-
-    // One-time setup for textured quad shaders
-    mTexturedQuadShader.use();
-    mTexturedQuadShader.setUniform("textureData", 0);
-
-    mSimpleTexturedQuadShader.use();
-    mSimpleTexturedQuadShader.setUniform("textureData", 0);
 
     mNumInternalTextures = mNumTextures;
 
@@ -905,7 +875,7 @@ struct Renderer::Impl
       commitRenderTarget(state);
       glViewport(0, 0, framebufferSize.width, framebufferSize.height);
       commitClipRect(state, framebufferSize);
-      commitVertexAttributeFormat();
+      commitShaderSelection(state);
 
       transformNeedsUpdate = true;
     }
@@ -1026,41 +996,6 @@ struct Renderer::Impl
         "colorModulation", toGlColor(state.mColorModulation));
       mTexturedQuadShader.setUniform(
         "overlayColor", toGlColor(state.mOverlayColor));
-    }
-
-    commitVertexAttributeFormat();
-  }
-
-
-  void commitVertexAttributeFormat()
-  {
-    switch (mRenderMode)
-    {
-      case RenderMode::SpriteBatch:
-      case RenderMode::WaterEffect:
-        glVertexAttribPointer(
-          0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, toAttribOffset(0));
-        glVertexAttribPointer(
-          1,
-          2,
-          GL_FLOAT,
-          GL_FALSE,
-          sizeof(float) * 4,
-          toAttribOffset(2 * sizeof(float)));
-        break;
-
-      case RenderMode::Points:
-      case RenderMode::NonTexturedRender:
-        glVertexAttribPointer(
-          0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, toAttribOffset(0));
-        glVertexAttribPointer(
-          1,
-          4,
-          GL_FLOAT,
-          GL_FALSE,
-          sizeof(float) * 6,
-          toAttribOffset(2 * sizeof(float)));
-        break;
     }
   }
 

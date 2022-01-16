@@ -16,18 +16,15 @@
 
 #pragma once
 
+#include "renderer/shader.hpp"
+
 
 namespace rigel::renderer
 {
 
-extern const char* VERTEX_SOURCE;
-extern const char* FRAGMENT_SOURCE_SIMPLE;
-extern const char* FRAGMENT_SOURCE;
-
-extern const char* VERTEX_SOURCE_SOLID;
-extern const char* FRAGMENT_SOURCE_SOLID;
-
-extern const char* VERTEX_SOURCE_WATER_EFFECT;
-extern const char* FRAGMENT_SOURCE_WATER_EFFECT;
+extern const ShaderSpec TEXTURED_QUAD_SHADER;
+extern const ShaderSpec SIMPLE_TEXTURED_QUAD_SHADER;
+extern const ShaderSpec SOLID_COLOR_SHADER;
+extern const ShaderSpec WATER_EFFECT_SHADER;
 
 } // namespace rigel::renderer

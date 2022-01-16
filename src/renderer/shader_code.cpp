@@ -16,8 +16,13 @@
 
 #include "shader_code.hpp"
 
+#include <array>
+
 
 namespace rigel::renderer
+{
+
+namespace
 {
 
 const char* VERTEX_SOURCE = R"shd(
@@ -103,7 +108,7 @@ void main() {
 
 const char* VERTEX_SOURCE_WATER_EFFECT = R"shd(
 ATTRIBUTE vec2 position;
-ATTRIBUTE vec2 texCoordMask;
+ATTRIBUTE vec2 texCoord;
 
 OUT vec2 texCoordFrag;
 OUT vec2 texCoordMaskFrag;
@@ -124,7 +129,7 @@ void main() {
   // with the resulting tex coords should be equivalent to reading the pixel
   // located at 'position'.
   texCoordFrag = (transformedPos.xy + vec2(1.0, 1.0)) / 2.0;
-  texCoordMaskFrag = vec2(texCoordMask.x, 1.0 - texCoordMask.y);
+  texCoordMaskFrag = vec2(texCoord.x, 1.0 - texCoord.y);
 
   gl_Position = transformedPos;
 }
@@ -184,5 +189,41 @@ void main() {
   OUTPUT_COLOR = mix(color, applyWaterEffect(color), maskValue);
 }
 )shd";
+
+
+constexpr auto TEXTURED_QUAD_TEXTURE_UNIT_NAMES = std::array{"textureData"};
+
+constexpr auto WATER_EFFECT_TEXTURE_UNIT_NAMES =
+  std::array{"textureData", "maskData", "colorMapData"};
+
+} // namespace
+
+
+const ShaderSpec TEXTURED_QUAD_SHADER{
+  VertexLayout::PositionAndTexCoords,
+  TEXTURED_QUAD_TEXTURE_UNIT_NAMES,
+  VERTEX_SOURCE,
+  FRAGMENT_SOURCE};
+
+
+const ShaderSpec SIMPLE_TEXTURED_QUAD_SHADER{
+  VertexLayout::PositionAndTexCoords,
+  TEXTURED_QUAD_TEXTURE_UNIT_NAMES,
+  VERTEX_SOURCE,
+  FRAGMENT_SOURCE_SIMPLE};
+
+
+const ShaderSpec SOLID_COLOR_SHADER{
+  VertexLayout::PositionAndColor,
+  {},
+  VERTEX_SOURCE_SOLID,
+  FRAGMENT_SOURCE_SOLID};
+
+
+const ShaderSpec WATER_EFFECT_SHADER{
+  VertexLayout::PositionAndTexCoords,
+  WATER_EFFECT_TEXTURE_UNIT_NAMES,
+  VERTEX_SOURCE_WATER_EFFECT,
+  FRAGMENT_SOURCE_WATER_EFFECT};
 
 } // namespace rigel::renderer

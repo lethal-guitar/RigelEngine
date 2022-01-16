@@ -116,28 +116,38 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type)
   return shader;
 }
 
+
+void* toAttribOffset(std::uintptr_t offset)
+{
+  return reinterpret_cast<void*>(offset);
+}
+
 } // namespace
 
 
-Shader::Shader(
-  const char* vertexSource,
-  const char* fragmentSource,
-  std::initializer_list<std::string> attributesToBind)
+Shader::Shader(const ShaderSpec& spec)
   : mProgram(glCreateProgram(), glDeleteProgram)
+  , mVertexLayout(spec.mVertexLayout)
 {
   auto vertexShader = compileShader(
-    std::string{SHADER_PREAMBLE} + vertexSource, GL_VERTEX_SHADER);
+    std::string{SHADER_PREAMBLE} + spec.mVertexSource, GL_VERTEX_SHADER);
   auto fragmentShader = compileShader(
-    std::string{SHADER_PREAMBLE} + fragmentSource, GL_FRAGMENT_SHADER);
+    std::string{SHADER_PREAMBLE} + spec.mFragmentSource, GL_FRAGMENT_SHADER);
 
   glAttachShader(mProgram.mHandle, vertexShader.mHandle);
   glAttachShader(mProgram.mHandle, fragmentShader.mHandle);
 
-  int index = 0;
-  for (const auto& attributeName : attributesToBind)
+  switch (spec.mVertexLayout)
   {
-    glBindAttribLocation(mProgram.mHandle, index, attributeName.c_str());
-    ++index;
+    case VertexLayout::PositionAndTexCoords:
+      glBindAttribLocation(mProgram.mHandle, 0, "position");
+      glBindAttribLocation(mProgram.mHandle, 1, "texCoord");
+      break;
+
+    case VertexLayout::PositionAndColor:
+      glBindAttribLocation(mProgram.mHandle, 0, "position");
+      glBindAttribLocation(mProgram.mHandle, 1, "color");
+      break;
   }
 
   glLinkProgram(mProgram.mHandle);
@@ -165,12 +175,50 @@ Shader::Shader(
         "Shader program linking failed, but could not get info log");
     }
   }
+
+  // Bind texture sampler names to texture units
+  GLint currentProgram;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+  glUseProgram(mProgram.mHandle);
+
+  for (auto i = 0u; i < spec.mTextureUnitNames.size(); ++i)
+  {
+    setUniform(spec.mTextureUnitNames[i], int(i));
+  }
+
+  glUseProgram(currentProgram);
 }
 
 
 void Shader::use()
 {
   glUseProgram(mProgram.mHandle);
+
+  switch (mVertexLayout)
+  {
+    case VertexLayout::PositionAndTexCoords:
+      glVertexAttribPointer(
+        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 4,
+        toAttribOffset(sizeof(float) * 2));
+      break;
+
+    case VertexLayout::PositionAndColor:
+      glVertexAttribPointer(
+        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(sizeof(float) * 2));
+  }
 }
 
 
