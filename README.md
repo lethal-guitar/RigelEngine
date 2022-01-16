@@ -22,7 +22,7 @@ Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm 
 
 Read the [F.A.Q.](https://github.com/lethal-guitar/RigelEngine/wiki/FAQ)
 
-Showcase video:
+Showcase video (outdated):
 
 <a href="http://www.youtube.com/watch?v=U7-eotm8Xoo"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
 
