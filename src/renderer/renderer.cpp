@@ -492,8 +492,10 @@ struct Renderer::Impl
 
     mNumInternalTextures = mNumTextures;
 
+    // All shaders have exactly two vertex attributes
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+
     glViewport(0, 0, mWindowSize.width, mWindowSize.height);
     commitShaderSelection(mStateStack.back());
     commitTransformationMatrix(mStateStack.back(), mWindowSize);
