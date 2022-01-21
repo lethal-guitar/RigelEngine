@@ -105,6 +105,10 @@ void fillTexCoords(
 } // namespace detail
 
 
+// 4 * (x, y, u, v)
+using QuadVertices = float[4 * (2 + 2)];
+
+
 template <typename Iter>
 void addTexturedQuadVertices(
   const TexCoords& sourceRect,

@@ -431,8 +431,7 @@ struct Renderer::Impl
       mLastUsedTexture = texture;
     }
 
-    // x, y, tex_u, tex_v
-    GLfloat vertices[4 * (2 + 2)];
+    QuadVertices vertices;
     addTexturedQuadVertices(sourceRect, destRect, std::begin(vertices));
 
     batchQuadVertices(std::begin(vertices), std::end(vertices));
@@ -593,8 +592,7 @@ struct Renderer::Impl
         const auto animSourceRect =
           base::Rect<int>{{0, maskTexStartY}, {areaWidth, WATER_MASK_HEIGHT}};
 
-        // x, y, mask_u, mask_v
-        GLfloat vertices[4 * (2 + 2)];
+        QuadVertices vertices;
         addTexturedQuadVertices(
           toTexCoords(
             animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
