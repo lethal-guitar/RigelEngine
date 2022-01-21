@@ -431,9 +431,7 @@ struct Renderer::Impl
       mLastUsedTexture = texture;
     }
 
-    QuadVertices vertices;
-    addTexturedQuadVertices(sourceRect, destRect, std::begin(vertices));
-
+    const auto vertices = createTexturedQuadVertices(sourceRect, destRect);
     batchQuadVertices(std::begin(vertices), std::end(vertices));
   }
 
@@ -592,12 +590,10 @@ struct Renderer::Impl
         const auto animSourceRect =
           base::Rect<int>{{0, maskTexStartY}, {areaWidth, WATER_MASK_HEIGHT}};
 
-        QuadVertices vertices;
-        addTexturedQuadVertices(
+        const auto vertices = createTexturedQuadVertices(
           toTexCoords(
             animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
-          destRect,
-          std::begin(vertices));
+          destRect);
         batchQuadVertices(std::begin(vertices), std::end(vertices));
       };
 

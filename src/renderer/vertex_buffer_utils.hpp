@@ -23,102 +23,35 @@ RIGEL_DISABLE_WARNINGS
 #include <glm/vec2.hpp>
 RIGEL_RESTORE_WARNINGS
 
-#include <iterator>
-
 
 namespace rigel::renderer
 {
 
-namespace detail
+
+// 4 * (x, y, u, v)
+using QuadVertices = std::array<float, 4 * (2 + 2)>;
+
+
+inline QuadVertices createTexturedQuadVertices(
+  const TexCoords& sourceRect,
+  const base::Rect<int>& destRect)
 {
-
-template <typename Iter>
-void fillVertexData(
-  float left,
-  float right,
-  float top,
-  float bottom,
-  Iter&& destIter,
-  const std::size_t offset,
-  const std::size_t stride)
-{
-  using namespace std;
-  advance(destIter, offset);
-
-  const auto innerStride = stride - 2;
-
-  *destIter++ = left;
-  *destIter++ = bottom;
-  advance(destIter, innerStride);
-
-  *destIter++ = left;
-  *destIter++ = top;
-  advance(destIter, innerStride);
-
-  *destIter++ = right;
-  *destIter++ = bottom;
-  advance(destIter, innerStride);
-
-  *destIter++ = right;
-  *destIter++ = top;
-  advance(destIter, innerStride);
-}
-
-
-template <typename Iter>
-void fillVertexPositions(
-  const base::Rect<int>& rect,
-  Iter&& destIter,
-  const std::size_t offset,
-  const std::size_t stride)
-{
-  glm::vec2 posOffset(float(rect.topLeft.x), float(rect.topLeft.y));
-  glm::vec2 posScale(float(rect.size.width), float(rect.size.height));
+  glm::vec2 posOffset(float(destRect.topLeft.x), float(destRect.topLeft.y));
+  glm::vec2 posScale(float(destRect.size.width), float(destRect.size.height));
 
   const auto left = posOffset.x;
   const auto right = posScale.x + posOffset.x;
   const auto top = posOffset.y;
   const auto bottom = posScale.y + posOffset.y;
 
-  fillVertexData(
-    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
-}
-
-
-template <typename Iter>
-void fillTexCoords(
-  const TexCoords& coords,
-  Iter&& destIter,
-  const std::size_t offset,
-  const std::size_t stride)
-{
-  fillVertexData(
-    coords.left,
-    coords.right,
-    coords.top,
-    coords.bottom,
-    std::forward<Iter>(destIter),
-    offset,
-    stride);
-}
-
-} // namespace detail
-
-
-// 4 * (x, y, u, v)
-using QuadVertices = float[4 * (2 + 2)];
-
-
-template <typename Iter>
-void addTexturedQuadVertices(
-  const TexCoords& sourceRect,
-  const base::Rect<int>& destRect,
-  const Iter& destIter)
-{
-  auto iVertices = destIter;
-  auto iTexCoords = destIter;
-  detail::fillVertexPositions(destRect, iVertices, 0, 4);
-  detail::fillTexCoords(sourceRect, iTexCoords, 2, 4);
+  // clang-format off
+  return QuadVertices{{
+    left,  bottom, sourceRect.left,  sourceRect.bottom,
+    left,  top,    sourceRect.left,  sourceRect.top,
+    right, bottom, sourceRect.right, sourceRect.bottom,
+    right, top,    sourceRect.right, sourceRect.top
+  }};
+  // clang-format on
 }
 
 } // namespace rigel::renderer
