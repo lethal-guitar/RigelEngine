@@ -22,6 +22,7 @@
 #include "renderer/opengl.hpp"
 #include "renderer/shader.hpp"
 #include "renderer/shader_code.hpp"
+#include "renderer/vertex_buffer_utils.hpp"
 #include "sdl_utils/error.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -121,77 +122,6 @@ void setScissorBox(
     offsetAtBottom - 1,
     clipRect.size.width,
     clipRect.size.height);
-}
-
-
-template <typename Iter>
-void fillVertexData(
-  float left,
-  float right,
-  float top,
-  float bottom,
-  Iter&& destIter,
-  const std::size_t offset,
-  const std::size_t stride)
-{
-  using namespace std;
-  advance(destIter, offset);
-
-  const auto innerStride = stride - 2;
-
-  *destIter++ = left;
-  *destIter++ = bottom;
-  advance(destIter, innerStride);
-
-  *destIter++ = left;
-  *destIter++ = top;
-  advance(destIter, innerStride);
-
-  *destIter++ = right;
-  *destIter++ = bottom;
-  advance(destIter, innerStride);
-
-  *destIter++ = right;
-  *destIter++ = top;
-  advance(destIter, innerStride);
-}
-
-
-template <typename Iter>
-void fillVertexPositions(
-  const base::Rect<int>& rect,
-  Iter&& destIter,
-  const std::size_t offset,
-  const std::size_t stride)
-{
-  glm::vec2 posOffset(float(rect.topLeft.x), float(rect.topLeft.y));
-  glm::vec2 posScale(float(rect.size.width), float(rect.size.height));
-
-  const auto left = posOffset.x;
-  const auto right = posScale.x + posOffset.x;
-  const auto top = posOffset.y;
-  const auto bottom = posScale.y + posOffset.y;
-
-  fillVertexData(
-    left, right, top, bottom, std::forward<Iter>(destIter), offset, stride);
-}
-
-
-template <typename Iter>
-void fillTexCoords(
-  const TexCoords& coords,
-  Iter&& destIter,
-  const std::size_t offset,
-  const std::size_t stride)
-{
-  fillVertexData(
-    coords.left,
-    coords.right,
-    coords.top,
-    coords.bottom,
-    std::forward<Iter>(destIter),
-    offset,
-    stride);
 }
 
 
