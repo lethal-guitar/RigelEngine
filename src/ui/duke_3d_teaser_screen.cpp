@@ -16,9 +16,9 @@
 
 #include "duke_3d_teaser_screen.hpp"
 
+#include "assets/palette.hpp"
+#include "assets/resource_loader.hpp"
 #include "data/unit_conversions.hpp"
-#include "loader/palette.hpp"
-#include "loader/resource_loader.hpp"
 #include "renderer/renderer.hpp"
 
 
@@ -60,7 +60,7 @@ constexpr data::Palette16 DUKE_3D_TEASER_TEXT_PALETTE{
 // clang-format on
 
 
-auto loadImage(const loader::ResourceLoader& resources)
+auto loadImage(const assets::ResourceLoader& resources)
 {
   const auto actorData = resources.loadActor(
     data::ActorID::Duke_3d_teaser_text, DUKE_3D_TEASER_TEXT_PALETTE);
@@ -71,7 +71,7 @@ auto loadImage(const loader::ResourceLoader& resources)
 
 
 Duke3DTeaserScreen::Duke3DTeaserScreen(
-  const loader::ResourceLoader& resources,
+  const assets::ResourceLoader& resources,
   renderer::Renderer* pRenderer)
   : mTextImage(pRenderer, loadImage(resources))
   , mpRenderer(pRenderer)

@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include "assets/duke_script_loader.hpp"
 #include "base/warnings.hpp"
 #include "engine/timing.hpp"
-#include "loader/duke_script_loader.hpp"
 #include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -41,7 +41,7 @@ class SpriteFactory;
 class TiledTexture;
 } // namespace engine
 
-namespace loader
+namespace assets
 {
 class ResourceLoader;
 }
@@ -58,11 +58,11 @@ struct GameMode
   /** Contains everything a mode needs */
   struct Context
   {
-    const loader::ResourceLoader* mpResources;
+    const assets::ResourceLoader* mpResources;
     renderer::Renderer* mpRenderer;
     IGameServiceProvider* mpServiceProvider;
     ui::DukeScriptRunner* mpScriptRunner;
-    loader::ScriptBundle* mpScripts;
+    assets::ScriptBundle* mpScripts;
     ui::MenuElementRenderer* mpUiRenderer;
     engine::TiledTexture* mpUiSpriteSheet;
     engine::SpriteFactory* mpSpriteFactory;

@@ -16,8 +16,8 @@
 
 #include "intro_movie.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "common/game_service_provider.hpp"
-#include "loader/resource_loader.hpp"
 
 
 // Repetition counts and delays from original exe, determined from disassembly:
@@ -63,7 +63,7 @@ using data::SoundId;
 
 
 IntroMovie::PlaybackConfigList
-  IntroMovie::createConfigurations(const loader::ResourceLoader& resources)
+  IntroMovie::createConfigurations(const assets::ResourceLoader& resources)
 {
   // clang-format off
   return {

@@ -29,7 +29,7 @@
 #include <unordered_map>
 
 
-namespace rigel::loader
+namespace rigel::assets
 {
 class ResourceLoader;
 }
@@ -53,7 +53,7 @@ class SoundSystem
 {
 public:
   explicit SoundSystem(
-    const loader::ResourceLoader* pResources,
+    const assets::ResourceLoader* pResources,
     data::SoundStyle soundStyle,
     data::AdlibPlaybackType adlibPlaybackType);
   ~SoundSystem();
@@ -118,7 +118,7 @@ private:
   mutable sdl_utils::Ptr<Mix_Music> mpCurrentReplacementSong;
   mutable std::unordered_map<std::string, std::string>
     mReplacementSongFileCache;
-  const loader::ResourceLoader* mpResources;
+  const assets::ResourceLoader* mpResources;
   float mCurrentSoundVolume;
   data::SoundStyle mCurrentSoundStyle;
   data::AdlibPlaybackType mCurrentAdlibPlaybackType;

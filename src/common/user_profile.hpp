@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include "assets/byte_buffer.hpp"
 #include "data/game_options.hpp"
 #include "data/high_score_list.hpp"
 #include "data/saved_game.hpp"
-#include "loader/byte_buffer.hpp"
 
 #include <filesystem>
 #include <optional>
@@ -55,7 +55,7 @@ public:
   UserProfile() = default;
   UserProfile(
     const std::filesystem::path& profilePath,
-    loader::ByteBuffer originalJson = {});
+    assets::ByteBuffer originalJson = {});
 
   void saveToDisk();
 
@@ -70,7 +70,7 @@ public:
 
 private:
   std::optional<std::filesystem::path> mProfilePath;
-  loader::ByteBuffer mOriginalJson;
+  assets::ByteBuffer mOriginalJson;
 };
 
 

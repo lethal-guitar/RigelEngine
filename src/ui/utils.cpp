@@ -16,7 +16,7 @@
 
 #include "utils.hpp"
 
-#include "loader/resource_loader.hpp"
+#include "assets/resource_loader.hpp"
 
 
 namespace rigel::ui
@@ -32,7 +32,7 @@ ImU32 toImgui(const base::Color& color)
 
 renderer::Texture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resources,
+  const assets::ResourceLoader& resources,
   std::string_view imageName)
 {
   return renderer::Texture(
@@ -42,7 +42,7 @@ renderer::Texture fullScreenImageAsTexture(
 
 engine::TiledTexture makeUiSpriteSheet(
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resourceLoader,
+  const assets::ResourceLoader& resourceLoader,
   const data::Palette16& palette)
 {
   return engine::TiledTexture{

@@ -64,7 +64,7 @@ namespace rigel::engine
 {
 class SpriteFactory;
 }
-namespace rigel::loader
+namespace rigel::assets
 {
 class ResourceLoader;
 }
@@ -113,7 +113,7 @@ struct WorldState
   WorldState(
     IGameServiceProvider* pServiceProvider,
     renderer::Renderer* pRenderer,
-    const loader::ResourceLoader* pResources,
+    const assets::ResourceLoader* pResources,
     data::PlayerModel* pPlayerModel,
     const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
@@ -121,7 +121,7 @@ struct WorldState
   WorldState(
     IGameServiceProvider* pServiceProvider,
     renderer::Renderer* pRenderer,
-    const loader::ResourceLoader* pResources,
+    const assets::ResourceLoader* pResources,
     data::PlayerModel* pPlayerModel,
     const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,

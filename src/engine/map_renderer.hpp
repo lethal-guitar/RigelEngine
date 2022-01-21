@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include "assets/level_loader.hpp"
 #include "base/spatial_types.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
-#include "loader/level_loader.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
 

@@ -16,14 +16,14 @@
 
 #include "game.hpp"
 
+#include "assets/duke_script_loader.hpp"
+#include "assets/png_image.hpp"
 #include "base/defer.hpp"
 #include "base/math_utils.hpp"
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
 #include "game_logic/demo_player.hpp"
-#include "loader/duke_script_loader.hpp"
-#include "loader/png_image.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "ui/imgui_integration.hpp"
 
@@ -94,7 +94,7 @@ auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode)
 }
 
 
-auto loadScripts(const loader::ResourceLoader& resources)
+auto loadScripts(const assets::ResourceLoader& resources)
 {
   auto allScripts = resources.loadScriptBundle("TEXT.MNI");
   const auto optionsScripts = resources.loadScriptBundle("OPTIONS.MNI");
@@ -761,7 +761,7 @@ void Game::takeScreenshot()
       fs::create_directory(path, ec);
     }
 
-    return loader::savePng((path / filename).u8string(), shot);
+    return assets::savePng((path / filename).u8string(), shot);
   };
 
   const auto gameDirScreenshotPath =

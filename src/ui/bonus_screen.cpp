@@ -16,9 +16,9 @@
 
 #include "bonus_screen.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
-#include "loader/resource_loader.hpp"
 #include "ui/menu_navigation.hpp"
 #include "ui/utils.hpp"
 

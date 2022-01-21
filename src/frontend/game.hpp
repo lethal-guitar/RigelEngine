@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "assets/duke_script_loader.hpp"
+#include "assets/resource_loader.hpp"
 #include "audio/sound_system.hpp"
 #include "base/clock.hpp"
 #include "base/spatial_types.hpp"
@@ -25,8 +27,6 @@
 #include "common/user_profile.hpp"
 #include "engine/sprite_factory.hpp"
 #include "engine/tiled_texture.hpp"
-#include "loader/duke_script_loader.hpp"
-#include "loader/resource_loader.hpp"
 #include "renderer/fps_limiter.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
@@ -131,7 +131,7 @@ private:
 private:
   SDL_Window* mpWindow;
   renderer::Renderer mRenderer;
-  loader::ResourceLoader mResources;
+  assets::ResourceLoader mResources;
   std::unique_ptr<audio::SoundSystem> mpSoundSystem;
   bool mIsShareWareVersion;
 
@@ -155,7 +155,7 @@ private:
   std::filesystem::path mGamePathToSwitchTo;
 
   ui::DukeScriptRunner mScriptRunner;
-  loader::ScriptBundle mAllScripts;
+  assets::ScriptBundle mAllScripts;
   engine::TiledTexture mUiSpriteSheet;
   engine::SpriteFactory mSpriteFactory;
   ui::MenuElementRenderer mTextRenderer;

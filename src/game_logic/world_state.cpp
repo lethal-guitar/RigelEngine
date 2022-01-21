@@ -16,6 +16,7 @@
 
 #include "world_state.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "common/game_service_provider.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
@@ -29,7 +30,6 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/interactive/item_container.hpp"
-#include "loader/resource_loader.hpp"
 #include "renderer/renderer.hpp"
 
 
@@ -142,7 +142,7 @@ BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es)
 WorldState::WorldState(
   IGameServiceProvider* pServiceProvider,
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader* pResources,
+  const assets::ResourceLoader* pResources,
   data::PlayerModel* pPlayerModel,
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
@@ -155,7 +155,7 @@ WorldState::WorldState(
       pOptions,
       pSpriteFactory,
       sessionId,
-      loader::loadLevel(
+      assets::loadLevel(
         levelFileName(sessionId.mEpisode, sessionId.mLevel),
         *pResources,
         sessionId.mDifficulty))
@@ -166,7 +166,7 @@ WorldState::WorldState(
 WorldState::WorldState(
   IGameServiceProvider* pServiceProvider,
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader* pResources,
+  const assets::ResourceLoader* pResources,
   data::PlayerModel* pPlayerModel,
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,

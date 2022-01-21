@@ -16,9 +16,9 @@
 
 #include "renderer.hpp"
 
+#include "assets/palette.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
-#include "loader/palette.hpp"
 #include "renderer/opengl.hpp"
 #include "renderer/shader.hpp"
 #include "renderer/shader_code.hpp"
