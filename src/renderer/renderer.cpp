@@ -41,19 +41,6 @@ namespace rigel::renderer
 namespace
 {
 
-constexpr int nextPowerOf2(int number)
-{
-  // This is a slow and naive implementation, but that's fine.
-  // We only use this at compile time and only on small inputs.
-  // Readability is more important here than best performance.
-  auto result = 1;
-  while (result < number)
-  {
-    result *= 2;
-  }
-  return result;
-}
-
 const GLushort QUAD_INDICES[] = {0, 2, 1, 2, 3, 1};
 
 constexpr std::array<GLenum, MAX_MULTI_TEXTURES> TEXTURE_UNIT_IDS{
@@ -68,15 +55,6 @@ constexpr std::array<GLenum, MAX_MULTI_TEXTURES> TEXTURE_UNIT_IDS{
 
 constexpr auto MAX_QUADS_PER_BATCH = 1280u;
 constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
-
-
-constexpr auto WATER_MASK_WIDTH = 8;
-constexpr auto WATER_MASK_HEIGHT = 8;
-constexpr auto WATER_NUM_MASKS = 5;
-constexpr auto WATER_ANIM_TEX_WIDTH = WATER_MASK_WIDTH;
-constexpr auto WATER_ANIM_TEX_HEIGHT =
-  nextPowerOf2(WATER_MASK_HEIGHT * WATER_NUM_MASKS);
-constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 
 class DummyVao
@@ -112,7 +90,6 @@ enum class RenderMode : std::uint8_t
   SpriteBatch,
   NonTexturedRender,
   Points,
-  WaterEffect,
   CustomDrawing
 };
 
@@ -133,93 +110,6 @@ void setScissorBox(
     offsetAtBottom - 1,
     clipRect.size.width,
     clipRect.size.height);
-}
-
-
-data::Image createWaterSurfaceAnimImage()
-{
-  auto pixels = data::PixelBuffer{
-    WATER_ANIM_TEX_WIDTH * WATER_ANIM_TEX_HEIGHT,
-    base::Color{255, 255, 255, 255}};
-
-  // clang-format off
-  const std::array<int, 16> patternCalmSurface{
-    0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 1, 1, 1
-  };
-
-  const std::array<int, 16> patternWaveRight{
-    0, 0, 0, 0, 0, 1, 1, 0,
-    1, 0, 0, 1, 1, 1, 1, 1
-  };
-
-  const std::array<int, 16> patternWaveLeft{
-    0, 1, 1, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 1
-  };
-  // clang-format on
-
-  auto applyPattern = [&pixels](const auto& pattern, const auto destOffset) {
-    std::transform(
-      std::begin(pattern),
-      std::end(pattern),
-      std::begin(pixels) + destOffset,
-      [](const int patternValue) {
-        const auto value = static_cast<uint8_t>(255 * patternValue);
-        return base::Color{value, value, value, value};
-      });
-  };
-
-  const auto pixelsPerAnimStep = WATER_MASK_WIDTH * WATER_MASK_HEIGHT;
-
-  applyPattern(patternCalmSurface, 0);
-  applyPattern(patternWaveRight, pixelsPerAnimStep);
-  applyPattern(patternCalmSurface, pixelsPerAnimStep * 2);
-  applyPattern(patternWaveLeft, pixelsPerAnimStep * 3);
-
-  return data::Image{
-    move(pixels),
-    static_cast<size_t>(WATER_ANIM_TEX_WIDTH),
-    static_cast<size_t>(WATER_ANIM_TEX_HEIGHT)};
-}
-
-
-data::Image createWaterEffectColorMapImage()
-{
-  constexpr auto NUM_COLORS = int(data::GameTraits::INGAME_PALETTE.size());
-  constexpr auto NUM_ROWS = 2;
-
-  auto pixels = data::PixelBuffer{};
-  pixels.reserve(NUM_COLORS * NUM_ROWS);
-
-  // 1st row: Original palette
-  std::copy(
-    begin(data::GameTraits::INGAME_PALETTE),
-    end(data::GameTraits::INGAME_PALETTE),
-    std::back_inserter(pixels));
-
-  // 2nd row: Corresponding "under water" colors
-  // For the water effect, every palette color is remapped to one
-  // of the colors at indices 8 to 11. These colors are different
-  // shades of blue and a dark green, which leads to the watery look.
-  // The remapping is done by manipulating color indices like this:
-  //   water_index = index % 4 + 8
-  //
-  // In order to create a lookup table for remapping, we therefore
-  // need to repeat the colors found at indices 8 to 11 four times,
-  // giving us a palette of only "under water" colors.
-  constexpr auto WATER_INDEX_START = 8;
-  constexpr auto NUM_WATER_INDICES = 4;
-  for (auto i = 0; i < NUM_COLORS; ++i)
-  {
-    const auto index = WATER_INDEX_START + i % NUM_WATER_INDICES;
-    pixels.push_back(data::GameTraits::INGAME_PALETTE[index]);
-  }
-
-  return data::Image{
-    std::move(pixels),
-    static_cast<size_t>(NUM_COLORS),
-    static_cast<size_t>(NUM_ROWS)};
 }
 
 
@@ -329,7 +219,6 @@ struct Renderer::Impl
   Shader mTexturedQuadShader;
   Shader mSimpleTexturedQuadShader;
   Shader mSolidColorShader;
-  Shader mWaterEffectShader;
   base::Size<int> mWindowSize;
   base::Size<int> mLastKnownWindowSize;
   SDL_Window* mpWindow;
@@ -337,9 +226,6 @@ struct Renderer::Impl
 
   // cold
   int mNumTextures = 0;
-  int mNumInternalTextures = 0;
-  TextureId mWaterSurfaceAnimTexture = 0;
-  TextureId mWaterEffectColorMapTexture = 0;
   DummyVao mDummyVao;
   GLuint mStreamVbo = 0;
 
@@ -348,7 +234,6 @@ struct Renderer::Impl
     : mTexturedQuadShader(TEXTURED_QUAD_SHADER)
     , mSimpleTexturedQuadShader(SIMPLE_TEXTURED_QUAD_SHADER)
     , mSolidColorShader(SOLID_COLOR_SHADER)
-    , mWaterEffectShader(WATER_EFFECT_SHADER)
     , mWindowSize(getSize(pWindow))
     , mpWindow(pWindow)
   {
@@ -388,21 +273,6 @@ struct Renderer::Impl
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    // One-time setup for water effect shader
-    mWaterSurfaceAnimTexture = createTexture(createWaterSurfaceAnimImage());
-    mWaterEffectColorMapTexture =
-      createTexture(createWaterEffectColorMapImage());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, mWaterSurfaceAnimTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, mWaterEffectColorMapTexture);
-    glActiveTexture(GL_TEXTURE0);
-
-    mNumInternalTextures = mNumTextures;
-
     // All shaders have exactly two vertex attributes
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -415,15 +285,13 @@ struct Renderer::Impl
 
   ~Impl()
   {
-    // Make sure all externally used textures and render targets have been
-    // destroyed before the renderer is destroyed.
+    // Make sure all textures and render targets have been destroyed
+    // before the renderer is destroyed.
     assert(mRenderTargetDict.empty());
-    assert(mNumTextures == mNumInternalTextures);
+    assert(mNumTextures == 0);
 
     glDeleteBuffers(1, &mStreamVbo);
     glDeleteBuffers(1, &mQuadIndicesEbo);
-    glDeleteTextures(1, &mWaterSurfaceAnimTexture);
-    glDeleteTextures(1, &mWaterEffectColorMapTexture);
   }
 
 
@@ -459,7 +327,6 @@ struct Renderer::Impl
     switch (mRenderMode)
     {
       case RenderMode::SpriteBatch:
-      case RenderMode::WaterEffect:
         glBufferData(
           GL_ARRAY_BUFFER,
           sizeof(float) * mBatchData.size(),
@@ -629,60 +496,6 @@ struct Renderer::Impl
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
-
-
-  void drawWaterEffect(
-    const base::Rect<int>& area,
-    const TextureId texture,
-    std::optional<int> surfaceAnimationStep)
-  {
-    assert(
-      !surfaceAnimationStep ||
-      (*surfaceAnimationStep >= 0 && *surfaceAnimationStep < 4));
-
-    using namespace std;
-
-    const auto areaWidth = area.size.width;
-    auto drawWater =
-      [&, this](const base::Rect<int>& destRect, const int maskIndex) {
-        const auto maskTexStartY = maskIndex * WATER_MASK_HEIGHT;
-        const auto animSourceRect =
-          base::Rect<int>{{0, maskTexStartY}, {areaWidth, WATER_MASK_HEIGHT}};
-
-        const auto vertices = createTexturedQuadVertices(
-          toTexCoords(
-            animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
-          destRect);
-        batchQuadVertices(std::begin(vertices), std::end(vertices));
-      };
-
-    updateState(mRenderMode, RenderMode::WaterEffect);
-
-    if (mLastUsedTexture != texture)
-    {
-      submitBatch();
-      glBindTexture(GL_TEXTURE_2D, texture);
-      mLastUsedTexture = texture;
-    }
-
-    if (surfaceAnimationStep)
-    {
-      const auto waterSurfaceArea =
-        base::Rect<int>{area.topLeft, {areaWidth, WATER_MASK_HEIGHT}};
-
-      drawWater(waterSurfaceArea, *surfaceAnimationStep);
-
-      auto remainingArea = area;
-      remainingArea.topLeft.y += WATER_MASK_HEIGHT;
-      remainingArea.size.height -= WATER_MASK_HEIGHT;
-
-      drawWater(remainingArea, WATER_MASK_INDEX_FILLED);
-    }
-    else
-    {
-      drawWater(area, WATER_MASK_INDEX_FILLED);
-    }
   }
 
 
@@ -954,9 +767,6 @@ struct Renderer::Impl
       case RenderMode::NonTexturedRender:
         return mSolidColorShader;
 
-      case RenderMode::WaterEffect:
-        return mWaterEffectShader;
-
       default:
         break;
     }
@@ -1198,15 +1008,6 @@ void Renderer::drawPoint(const base::Vec2& position, const base::Color& color)
 void Renderer::drawCustomQuadBatch(const CustomQuadBatchData& batch)
 {
   mpImpl->drawCustomQuadBatch(batch);
-}
-
-
-void Renderer::drawWaterEffect(
-  const base::Rect<int>& area,
-  const TextureId texture,
-  std::optional<int> surfaceAnimationStep)
-{
-  mpImpl->drawWaterEffect(area, texture, surfaceAnimationStep);
 }
 
 

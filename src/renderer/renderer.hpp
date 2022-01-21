@@ -96,28 +96,6 @@ public:
 
   void drawCustomQuadBatch(const CustomQuadBatchData& batch);
 
-  /** Draw "under water" effect
-   *
-   * Contrary to the other functions offered by the renderer, this one
-   * is very specific to Duke Nukem II. It draws the given texture with
-   * a special shader modifying all colors to be shades of blue.
-   * The area rectangle is used as both source and target rectangle, as
-   * the texture typically represents a rendered game scene.
-   * If an animation step is given, the top-most pixels of the given
-   * area will appear in one of 4 possible wave patterns. Otherwise,
-   * the entire area is drawn uniformly. The animation step must be a
-   * number between 0 and 3.
-   *
-   * Supports batching: Multiple calls to this function will be combined
-   * into a single vertex buffer and OpenGL draw call, as long as the
-   * same texture is used. Changing any state will also interrupt the
-   * current batch.
-   */
-  void drawWaterEffect(
-    const base::Rect<int>& area,
-    TextureId unprocessedScreen,
-    std::optional<int> surfaceAnimationStep);
-
   /** Draw rectangle outline, 1 pixel wide
    *
    * _Warning_: Does not support batching, use sparingly or only for

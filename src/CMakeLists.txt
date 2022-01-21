@@ -89,6 +89,8 @@ set(core_sources
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
+    engine/graphical_effects.cpp
+    engine/graphical_effects.hpp
     engine/isprite_factory.hpp
     engine/life_time_components.hpp
     engine/life_time_system.cpp

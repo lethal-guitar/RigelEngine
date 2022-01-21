@@ -24,6 +24,7 @@
 #include "data/game_session_data.hpp"
 #include "data/player_model.hpp"
 #include "data/tutorial_messages.hpp"
+#include "engine/graphical_effects.hpp"
 #include "engine/sprite_factory.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
@@ -171,6 +172,7 @@ private:
   data::PlayerModel mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
+  engine::WaterEffectRenderer mWaterEffect;
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
   base::Size<int> mPreviousWindowSize;
