@@ -190,7 +190,7 @@ Shader::Shader(const ShaderSpec& spec)
 }
 
 
-void Shader::use()
+void Shader::use() const
 {
   glUseProgram(mProgram.mHandle);
 
