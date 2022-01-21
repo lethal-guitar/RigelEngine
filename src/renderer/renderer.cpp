@@ -310,8 +310,15 @@ struct Renderer::Impl
       mLastUsedTexture = texture;
     }
 
+    if (mBatchSize >= MAX_BATCH_SIZE)
+    {
+      submitBatch();
+    }
+
     const auto vertices = createTexturedQuadVertices(sourceRect, destRect);
-    batchQuadVertices(std::begin(vertices), std::end(vertices));
+    mBatchData.insert(
+      mBatchData.end(), std::begin(vertices), std::end(vertices));
+    mBatchSize += std::uint16_t(std::size(QUAD_INDICES));
   }
 
 
@@ -621,22 +628,6 @@ struct Renderer::Impl
     const auto glColor = toGlColor(clearColor);
     glClearColor(glColor.r, glColor.g, glColor.b, glColor.a);
     glClear(GL_COLOR_BUFFER_BIT);
-  }
-
-
-  template <typename VertexIter>
-  void batchQuadVertices(VertexIter&& dataBegin, VertexIter&& dataEnd)
-  {
-    if (mBatchSize >= MAX_BATCH_SIZE)
-    {
-      submitBatch();
-    }
-
-    mBatchData.insert(
-      mBatchData.end(),
-      std::forward<VertexIter>(dataBegin),
-      std::forward<VertexIter>(dataEnd));
-    mBatchSize += std::uint16_t(std::size(QUAD_INDICES));
   }
 
 
