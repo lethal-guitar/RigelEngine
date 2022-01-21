@@ -275,6 +275,7 @@ set(core_sources
     renderer/opengl.hpp
     renderer/renderer.cpp
     renderer/renderer.hpp
+    renderer/renderer_support.hpp
     renderer/shader.cpp
     renderer/shader.hpp
     renderer/shader_code.cpp

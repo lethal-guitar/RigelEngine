@@ -18,9 +18,9 @@
 
 #include "base/color.hpp"
 #include "base/defer.hpp"
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
+#include "renderer/renderer_support.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_video.h>
@@ -33,45 +33,6 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::renderer
 {
-
-using TextureId = std::uint32_t;
-
-/** Texture coordinates for Renderer::drawTexture()
- *
- * Values should be in range [0.0, 1.0] - unless texture repeat is
- * enabled. Use the toTexCoords() helper function to create these from
- * a source rectangle.
- */
-struct TexCoords
-{
-  float left;
-  float top;
-  float right;
-  float bottom;
-};
-
-
-/** Convert a source rect to texture coordinates
- *
- * Renderer::drawTexture() expects normalized texture coordinates,
- * but most of the time, it's easier to work with image-specific
- * coordinates, like e.g. "from 8,8 to 32,64". This helper function
- * converts from the latter to the former.
- */
-inline TexCoords toTexCoords(
-  const base::Rect<int>& sourceRect,
-  const int texWidth,
-  const int texHeight)
-{
-  const auto left = sourceRect.topLeft.x / float(texWidth);
-  const auto top = sourceRect.topLeft.y / float(texHeight);
-  const auto width = sourceRect.size.width / float(texWidth);
-  const auto height = sourceRect.size.height / float(texHeight);
-  const auto right = left + width;
-  const auto bottom = top + height;
-
-  return {left, top, right, bottom};
-}
 
 
 /** OpenGL-based 2D rendering API
