@@ -34,7 +34,6 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel::renderer
 {
 
-
 /** OpenGL-based 2D rendering API
  *
  * This class provides hardware-accelerated 2D rendering capabilities
@@ -94,6 +93,8 @@ public:
    * Color modulation and overlay color are ignored.
    */
   void drawPoint(const base::Vec2& position, const base::Color& color);
+
+  void drawCustomQuadBatch(const CustomQuadBatchData& batch);
 
   /** Draw "under water" effect
    *

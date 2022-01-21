@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/spatial_types.hpp"
 
 #include <cstdint>
@@ -23,6 +24,13 @@
 
 namespace rigel::renderer
 {
+
+class Shader;
+
+
+// This is the minimum number supported by GL ES 2.0/WebGL.
+constexpr auto MAX_MULTI_TEXTURES = 8;
+
 
 using TextureId = std::uint32_t;
 
@@ -62,5 +70,13 @@ inline TexCoords toTexCoords(
 
   return {left, top, right, bottom};
 }
+
+
+struct CustomQuadBatchData
+{
+  base::ArrayView<TextureId> mTextures;
+  base::ArrayView<float> mVertexBuffer;
+  const Shader* mpShader;
+};
 
 } // namespace rigel::renderer

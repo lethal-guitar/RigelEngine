@@ -56,6 +56,16 @@ constexpr int nextPowerOf2(int number)
 
 const GLushort QUAD_INDICES[] = {0, 2, 1, 2, 3, 1};
 
+constexpr std::array<GLenum, MAX_MULTI_TEXTURES> TEXTURE_UNIT_IDS{
+  GL_TEXTURE0,
+  GL_TEXTURE1,
+  GL_TEXTURE2,
+  GL_TEXTURE3,
+  GL_TEXTURE4,
+  GL_TEXTURE5,
+  GL_TEXTURE6,
+  GL_TEXTURE7};
+
 constexpr auto MAX_QUADS_PER_BATCH = 1280u;
 constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
 
@@ -102,7 +112,8 @@ enum class RenderMode : std::uint8_t
   SpriteBatch,
   NonTexturedRender,
   Points,
-  WaterEffect
+  WaterEffect,
+  CustomDrawing
 };
 
 
@@ -469,8 +480,10 @@ struct Renderer::Impl
         glDrawArrays(GL_POINTS, 0, GLsizei(mBatchData.size() / 6));
         break;
 
+      case RenderMode::CustomDrawing:
       case RenderMode::NonTexturedRender:
-        // No batching yet for NonTexturedRender
+        // No batching yet for NonTexturedRender, and we aren't meant to ever
+        // see mRenderMode set to CustomDrawing.
         assert(false);
         break;
     }
@@ -569,6 +582,53 @@ struct Renderer::Impl
       color.a / 255.0f};
     mBatchData.insert(
       std::end(mBatchData), std::begin(vertices), std::end(vertices));
+  }
+
+
+  void drawCustomQuadBatch(const CustomQuadBatchData& batch)
+  {
+    submitBatch();
+
+    // Trigger committing render state again with the next regular
+    // drawing command
+    mLastKnownRenderMode = RenderMode::CustomDrawing;
+    mLastUsedTexture = 0;
+    mStateChanged = true;
+
+    // Bind textures
+
+    // We do it in reverse, because that way we end up with unit 0 as
+    // the active texture again after the loop, which is the state we want
+    // after returning from this function.
+    // We could just do another glActiveTexture(GL_TEXTURE0) after the loop
+    // but by doing it this way, we save one GL call.
+    for (auto i = batch.mTextures.size(); i > 0; --i)
+    {
+      glActiveTexture(TEXTURE_UNIT_IDS[i - 1]);
+      glBindTexture(GL_TEXTURE_2D, batch.mTextures[i - 1]);
+    }
+
+    // Use shader
+    const auto transform = computeTransformationMatrix(
+      mStateStack.back(), currentRenderTargetSize());
+    batch.mpShader->use();
+    batch.mpShader->setUniform("transform", transform);
+
+    // Submit vertex buffer
+    const auto numQuads =
+      batch.mVertexBuffer.size() / std::tuple_size<QuadVertices>::value;
+    const auto numIndices = GLsizei(numQuads * std::size(QUAD_INDICES));
+    assert(numIndices < GLsizei(MAX_BATCH_SIZE));
+
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(float) * batch.mVertexBuffer.size(),
+      batch.mVertexBuffer.data(),
+      GL_STREAM_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
 
@@ -896,6 +956,9 @@ struct Renderer::Impl
 
       case RenderMode::WaterEffect:
         return mWaterEffectShader;
+
+      default:
+        break;
     }
 
     assert(false);
@@ -920,15 +983,24 @@ struct Renderer::Impl
   }
 
 
-  void commitTransformationMatrix(
+  glm::mat4 computeTransformationMatrix(
     const State& state,
     const base::Extents& framebufferSize)
   {
     const auto projection = glm::ortho(
       0.0f, float(framebufferSize.width), float(framebufferSize.height), 0.0f);
-    const auto projectionMatrix = glm::scale(
+    return glm::scale(
       glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
       glm::vec3(state.mGlobalScale, 1.0f));
+  }
+
+
+  void commitTransformationMatrix(
+    const State& state,
+    const base::Extents& framebufferSize)
+  {
+    const auto projectionMatrix =
+      computeTransformationMatrix(state, framebufferSize);
     shaderToUse(state).setUniform("transform", projectionMatrix);
   }
 
@@ -1100,6 +1172,12 @@ void Renderer::drawLine(
 void Renderer::drawPoint(const base::Vec2& position, const base::Color& color)
 {
   mpImpl->drawPoint(position, color);
+}
+
+
+void Renderer::drawCustomQuadBatch(const CustomQuadBatchData& batch)
+{
+  mpImpl->drawCustomQuadBatch(batch);
 }
 
 
