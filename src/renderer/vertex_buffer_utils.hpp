@@ -29,6 +29,9 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel::renderer
 {
 
+namespace detail
+{
+
 template <typename Iter>
 void fillVertexData(
   float left,
@@ -97,6 +100,21 @@ void fillTexCoords(
     std::forward<Iter>(destIter),
     offset,
     stride);
+}
+
+} // namespace detail
+
+
+template <typename Iter>
+void addTexturedQuadVertices(
+  const TexCoords& sourceRect,
+  const base::Rect<int>& destRect,
+  const Iter& destIter)
+{
+  auto iVertices = destIter;
+  auto iTexCoords = destIter;
+  detail::fillVertexPositions(destRect, iVertices, 0, 4);
+  detail::fillTexCoords(sourceRect, iTexCoords, 2, 4);
 }
 
 } // namespace rigel::renderer

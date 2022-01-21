@@ -433,8 +433,7 @@ struct Renderer::Impl
 
     // x, y, tex_u, tex_v
     GLfloat vertices[4 * (2 + 2)];
-    fillVertexPositions(destRect, std::begin(vertices), 0, 4);
-    fillTexCoords(sourceRect, std::begin(vertices), 2, 4);
+    addTexturedQuadVertices(sourceRect, destRect, std::begin(vertices));
 
     batchQuadVertices(std::begin(vertices), std::end(vertices));
   }
@@ -596,14 +595,11 @@ struct Renderer::Impl
 
         // x, y, mask_u, mask_v
         GLfloat vertices[4 * (2 + 2)];
-        fillVertexPositions(destRect, std::begin(vertices), 0, 4);
-        fillTexCoords(
+        addTexturedQuadVertices(
           toTexCoords(
             animSourceRect, WATER_ANIM_TEX_WIDTH, WATER_ANIM_TEX_HEIGHT),
-          std::begin(vertices),
-          2,
-          4);
-
+          destRect,
+          std::begin(vertices));
         batchQuadVertices(std::begin(vertices), std::end(vertices));
       };
 
