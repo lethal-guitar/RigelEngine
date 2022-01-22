@@ -10,6 +10,22 @@ the same library as well.
 
 ## Modules
 
+### `audio`
+
+Contains code related to sound & music playback.
+
+### `assets`
+
+Code for working with the file formats used by the original Duke Nukem II game. Main purpose is to
+extract various assets like images, sounds, music, level data etc. and convert them into data structures
+that can be used by the rest of the code, using data types from the `data` module. The idea is that all
+the messy details of the original file formats are abstracted away by this module, so that the rest of the
+code doesn't need to be aware of them. For example, the original game uses 16-color graphics with a palette.
+The loader module converts these into modern 32-bit RGBA graphics, which makes it easy to
+create OpenGL textures.
+
+This module depends only on `base`, `data`, the standard library, and some 3rd party code.
+
 ### `base`
 
 This module contains fundamental utilities and data structures. It can
@@ -55,18 +71,6 @@ For the platform startup code, it acts as the main facade for the game.
 
 This is where all the game logic is implemented. See corresponding README for more
 details.
-
-### `loader`
-
-Code for working with the file formats used by the original Duke Nukem II game. Main purpose is to
-extract various assets like images, sounds, music, level data etc. and convert them into data structures
-that can be used by the rest of the code, using data types from the `data` module. The idea is that all
-the messy details of the original file formats are abstracted away by this module, so that the rest of the
-code doesn't need to be aware of them. For example, the original game uses 16-color graphics with a palette.
-The loader module converts these into modern 32-bit RGBA graphics, which makes it easy to
-create OpenGL textures.
-
-This module depends only on `base`, `data`, the standard library, and some 3rd party code.
 
 ### `renderer`
 
