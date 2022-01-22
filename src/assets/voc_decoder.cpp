@@ -1,8 +1,5 @@
 /* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
  *
- * Parts of this file are Copyright (C) 2002-2021  The DOSBox Team.
- * These parts are explicitly marked as such.
- *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 2 of the License, or
@@ -38,8 +35,9 @@
  *  - https://wiki.multimedia.cx/index.php?title=Creative_Voice
  *  - https://wiki.multimedia.cx/index.php?title=Creative_8_bits_ADPCM
  *
- * The ADPCM decoding has been adapted from DosBox code:
- * https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp
+ * The ADPCM decoding is based on the original SoundBlaster firmware,
+ * as per the disassembly found at:
+ *  https://github.com/schlae/sb-firmware/blob/a45580807f0aaec4469977e6b8a9d32f060319c9/sbv202.asm#L1951
  */
 
 namespace rigel::assets
@@ -181,107 +179,115 @@ std::int16_t unsigned8BitSampleToSigned16Bit(const std::uint8_t sample)
 }
 
 
-// These lookup tables have been copied from DosBox code. Link to
-// original code is next to each set of tables.
-// The original code is Copyright (C) 2002-2021  The DOSBox Team
-template <int numBits>
-struct AdpcmLookupTables
-{
-};
-
-
-// See
-// https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L403
-// The original code is Copyright (C) 2002-2021  The DOSBox Team
-template <>
-struct AdpcmLookupTables<2>
-{
-  static constexpr size_t TABLE_SIZE = 24;
-
-  static constexpr std::array<int8_t, TABLE_SIZE> SAMPLE_SCALE_TABLE{
-    0, 1,  0,  -1,  1, 3,  -1, -3,  2, 6,  -2,  -6,
-    4, 12, -4, -12, 8, 24, -8, -24, 6, 48, -16, -48};
-  static constexpr std::array<uint8_t, TABLE_SIZE> STEP_ADJUST_TABLE{
-    0,   4, 0,   4, 252, 4, 252, 4, 252, 4, 252, 4,
-    252, 4, 252, 4, 252, 4, 252, 4, 252, 0, 252, 0};
-};
-
-
-// See
-// https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L426
-// The original code is Copyright (C) 2002-2021  The DOSBox Team
-template <>
-struct AdpcmLookupTables<3>
-{
-  static constexpr size_t TABLE_SIZE = 40;
-
-  static constexpr std::array<int8_t, TABLE_SIZE> SAMPLE_SCALE_TABLE{
-    0,  1,   2,   3,   0,  -1, -2, -3, 1,   3,   5,   7,  -1, -3,
-    -5, -7,  2,   6,   10, 14, -2, -6, -10, -14, 4,   12, 20, 28,
-    -4, -12, -20, -28, 5,  15, 25, 35, -5,  -15, -25, -35};
-
-  static constexpr std::array<uint8_t, TABLE_SIZE> STEP_ADJUST_TABLE{
-    0,   0, 0, 8, 0,   0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 8,
-    248, 0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 8, 248, 0, 0, 0, 248, 0, 0, 0};
-};
-
-
-// See
-// https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L375
-// The original code is Copyright (C) 2002-2021  The DOSBox Team
-template <>
-struct AdpcmLookupTables<4>
-{
-  static constexpr size_t TABLE_SIZE = 64;
-
-  static constexpr std::array<int8_t, TABLE_SIZE> SAMPLE_SCALE_TABLE{
-    0, 1,  2,  3,  4,  5,  6,  7,  0,  -1,  -2,  -3,  -4,  -5,  -6,  -7,
-    1, 3,  5,  7,  9,  11, 13, 15, -1, -3,  -5,  -7,  -9,  -11, -13, -15,
-    2, 6,  10, 14, 18, 22, 26, 30, -2, -6,  -10, -14, -18, -22, -26, -30,
-    4, 12, 20, 28, 36, 44, 52, 60, -4, -12, -20, -28, -36, -44, -52, -60};
-
-  static constexpr std::array<uint8_t, TABLE_SIZE> STEP_ADJUST_TABLE{
-    0,   0, 0, 0, 0, 16, 16, 16, 0,   0, 0, 0, 0, 16, 16, 16,
-    240, 0, 0, 0, 0, 16, 16, 16, 240, 0, 0, 0, 0, 16, 16, 16,
-    240, 0, 0, 0, 0, 16, 16, 16, 240, 0, 0, 0, 0, 16, 16, 16,
-    240, 0, 0, 0, 0, 0,  0,  0,  240, 0, 0, 0, 0, 0,  0,  0};
-};
-
-
 class AdpcmDecoderHelper
 {
 public:
   explicit AdpcmDecoderHelper(const uint8_t initialSample)
     : mReference(initialSample)
-    , mStepSize(0)
+    , mStep(1)
   {
   }
 
-  template <int numBits>
-  int16_t decodeBits(const int encodedSample)
+  int16_t decodeBits4(const int encoded)
   {
-    // This algorithm has been adapted from DosBox code.
-    // See
-    // https://github.com/dosbox-staging/dosbox-staging/blob/65b5878b65267363bcb21d3a828854fe0a6ccbd8/src/hardware/sblaster.cpp#L391
-    // The original code is Copyright (C) 2002-2021  The DOSBox Team
-    const auto tableIndex = std::min(
-      encodedSample + mStepSize,
-      int(AdpcmLookupTables<numBits>::TABLE_SIZE - 1));
+    // compare to
+    // https://github.com/schlae/sb-firmware/blob/a45580807f0aaec4469977e6b8a9d32f060319c9/sbv202.asm#L2075
+    const auto dataBits = encoded & 0b0111;
+    const auto signBit = (encoded & 0b1000) != 0;
 
-    const auto newStepSize =
-      mStepSize + AdpcmLookupTables<numBits>::STEP_ADJUST_TABLE[tableIndex];
-    mStepSize = newStepSize & 0xff;
+    const auto delta = ((dataBits * mStep) & 0xFF) + mStep / 2;
 
-    const auto newSample =
-      mReference + AdpcmLookupTables<numBits>::SAMPLE_SCALE_TABLE[tableIndex];
-    mReference = static_cast<uint8_t>(std::clamp(newSample, 0, 255));
+    updateReference(delta, signBit);
+
+    if (dataBits == 0)
+    {
+      mStep = std::max(mStep / 2, 1);
+    }
+    else if (dataBits >= 5)
+    {
+      mStep *= 2;
+
+      if (mStep == 0x10)
+      {
+        mStep = 8;
+      }
+    }
+
+    return unsigned8BitSampleToSigned16Bit(mReference);
+  }
+
+  int16_t decodeBits2_6(const int encoded)
+  {
+    // compare to
+    // https://github.com/schlae/sb-firmware/blob/a45580807f0aaec4469977e6b8a9d32f060319c9/sbv202.asm#L2156
+    const auto dataBits = encoded & 0b011;
+    const auto signBit = (encoded & 0b100) != 0;
+
+    const auto delta = ((dataBits * mStep) & 0xFF) + mStep / 2;
+
+    updateReference(delta, signBit);
+
+    if (dataBits == 0)
+    {
+      mStep = std::max(mStep / 2, 1);
+    }
+    else if (dataBits == 0b11)
+    {
+      if (mStep != 0x10)
+      {
+        mStep *= 2;
+      }
+    }
+
+    return unsigned8BitSampleToSigned16Bit(mReference);
+  }
+
+  int16_t decodeBits2(const int encoded)
+  {
+    // compare to
+    // https://github.com/schlae/sb-firmware/blob/a45580807f0aaec4469977e6b8a9d32f060319c9/sbv202.asm#L1964
+    const auto dataBit = encoded & 0b1;
+    const auto signBit = (encoded & 0b10) != 0;
+
+    if (dataBit)
+    {
+      const auto delta = mStep + mStep / 2;
+
+      updateReference(delta, signBit);
+
+      if (mStep != 0x20)
+      {
+        mStep *= 2;
+      }
+    }
+    else
+    {
+      mStep /= 2;
+
+      if (mStep == 0)
+      {
+        mStep = 1;
+
+        // No reference update, reuse last reference value
+      }
+      else
+      {
+        updateReference(mStep, signBit);
+      }
+    }
 
     return unsigned8BitSampleToSigned16Bit(mReference);
   }
 
 private:
+  void updateReference(const int delta, const bool signBit)
+  {
+    mReference =
+      uint8_t(std::clamp(mReference + delta * (signBit ? -1 : 1), 0, 0xFF));
+  }
+
   uint8_t mReference;
-  int mStepSize;
+  int mStep;
 };
 
 
@@ -304,23 +310,24 @@ void decodeAdpcmAudio(
     {
       case AdpcmType::FourBits:
         // Each byte contains two 4-bit encoded samples
-        *outputIter++ = decoder.template decodeBits<4>(bitPack >> 4);
-        *outputIter++ = decoder.template decodeBits<4>(bitPack & 0x0F);
+        *outputIter++ = decoder.decodeBits4(bitPack >> 4);
+        *outputIter++ = decoder.decodeBits4(bitPack & 0b1111);
         break;
 
       case AdpcmType::TwoPointSixBits:
         // Each byte contains two 3-bit samples and one 2-bit sample
-        *outputIter++ = decoder.template decodeBits<3>((bitPack >> 5) & 0x07);
-        *outputIter++ = decoder.template decodeBits<3>((bitPack >> 2) & 0x07);
-        *outputIter++ = decoder.template decodeBits<3>((bitPack & 0x03) << 1);
+        *outputIter++ = decoder.decodeBits2_6((bitPack >> 5) & 0b111);
+        *outputIter++ = decoder.decodeBits2_6((bitPack >> 2) & 0b111);
+        *outputIter++ =
+          decoder.decodeBits2_6((bitPack & 0b10) << 1 | (bitPack & 0b1));
         break;
 
       case AdpcmType::TwoBits:
         // Each byte contains four 2-bit encoded samples
-        *outputIter++ = decoder.template decodeBits<2>((bitPack >> 6) & 0x03);
-        *outputIter++ = decoder.template decodeBits<2>((bitPack >> 4) & 0x03);
-        *outputIter++ = decoder.template decodeBits<2>((bitPack >> 2) & 0x03);
-        *outputIter++ = decoder.template decodeBits<2>((bitPack >> 0) & 0x03);
+        *outputIter++ = decoder.decodeBits2((bitPack >> 6) & 0b11);
+        *outputIter++ = decoder.decodeBits2((bitPack >> 4) & 0b11);
+        *outputIter++ = decoder.decodeBits2((bitPack >> 2) & 0b11);
+        *outputIter++ = decoder.decodeBits2((bitPack >> 0) & 0b11);
         break;
     }
   }
