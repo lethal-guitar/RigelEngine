@@ -16,6 +16,8 @@
 
 #include "interaction_system.hpp"
 
+#include "assets/duke_script_loader.hpp"
+#include "assets/resource_loader.hpp"
 #include "common/game_service_provider.hpp"
 #include "data/strings.hpp"
 #include "engine/physics_system.hpp"
@@ -28,8 +30,6 @@
 #include "game_logic/interactive/force_field.hpp"
 #include "game_logic/interactive/locked_door.hpp"
 #include "game_logic/player.hpp"
-#include "loader/duke_script_loader.hpp"
-#include "loader/resource_loader.hpp"
 
 
 namespace rigel::game_logic
@@ -206,10 +206,10 @@ ex::Entity currentlyTouchedInteractable(
 }
 
 
-data::LevelHints loadHints(const loader::ResourceLoader& resources)
+data::LevelHints loadHints(const assets::ResourceLoader& resources)
 {
   const auto text = resources.fileAsText("HELP.MNI");
-  return loader::loadHintMessages(text);
+  return assets::loadHintMessages(text);
 }
 
 } // namespace
@@ -222,7 +222,7 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   IGameServiceProvider* pServices,
   IEntityFactory* pEntityFactory,
   entityx::EventManager* pEvents,
-  const loader::ResourceLoader& resources)
+  const assets::ResourceLoader& resources)
   : mpPlayer(pPlayer)
   , mpPlayerModel(pPlayerModel)
   , mpServiceProvider(pServices)

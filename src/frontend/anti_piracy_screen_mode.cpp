@@ -16,7 +16,7 @@
 
 #include "anti_piracy_screen_mode.hpp"
 
-#include "loader/resource_loader.hpp"
+#include "assets/resource_loader.hpp"
 
 #include "intro_demo_loop_mode.hpp"
 

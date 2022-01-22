@@ -16,12 +16,12 @@
 
 #include "sound_system.hpp"
 
+#include "assets/audio_package.hpp"
+#include "assets/resource_loader.hpp"
 #include "audio/adlib_emulator.hpp"
 #include "audio/software_imf_player.hpp"
 #include "base/math_utils.hpp"
 #include "base/string_utils.hpp"
-#include "loader/audio_package.hpp"
-#include "loader/resource_loader.hpp"
 #include "sdl_utils/error.hpp"
 
 #include <speex/speex_resampler.h>
@@ -191,7 +191,7 @@ auto idToIndex(const data::SoundId id)
 }
 
 data::AudioBuffer renderAdlibSound(
-  const loader::AdlibSound& sound,
+  const assets::AdlibSound& sound,
   const AdlibEmulator::Type emulatorType)
 {
   AdlibEmulator emulator{OPL2_SAMPLE_RATE, emulatorType};
@@ -240,8 +240,8 @@ data::AudioBuffer loadSoundForStyle(
   const data::SoundId id,
   const data::SoundStyle soundStyle,
   const int sampleRate,
-  const loader::ResourceLoader& resources,
-  const loader::AudioPackage& soundPackage,
+  const assets::ResourceLoader& resources,
+  const assets::AudioPackage& soundPackage,
   const AdlibEmulator::Type emulatorType)
 {
   auto loadAdlibSound = [&](const data::SoundId soundId) {
@@ -371,7 +371,7 @@ SoundSystem::LoadedSound::LoadedSound(sdl_utils::Ptr<Mix_Chunk> pMixChunk)
 
 
 SoundSystem::SoundSystem(
-  const loader::ResourceLoader* pResources,
+  const assets::ResourceLoader* pResources,
   const data::SoundStyle soundStyle,
   const data::AdlibPlaybackType adlibPlaybackType)
   : mCloseMixerGuard(std::invoke([]() {
@@ -545,9 +545,9 @@ void SoundSystem::loadAllSounds(
   const int numChannels,
   const data::SoundStyle soundStyle)
 {
-  const auto soundPackage = loader::loadAdlibSoundData(
-    mpResources->file(loader::AUDIO_DICT_FILE),
-    mpResources->file(loader::AUDIO_DATA_FILE));
+  const auto soundPackage = assets::loadAdlibSoundData(
+    mpResources->file(assets::AUDIO_DICT_FILE),
+    mpResources->file(assets::AUDIO_DATA_FILE));
 
   data::forEachSoundId([&](const auto id) {
     std::error_code ec;
@@ -584,9 +584,9 @@ void SoundSystem::reloadAllSounds()
   int numChannels = 0;
   Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
 
-  const auto soundPackage = loader::loadAdlibSoundData(
-    mpResources->file(loader::AUDIO_DICT_FILE),
-    mpResources->file(loader::AUDIO_DATA_FILE));
+  const auto soundPackage = assets::loadAdlibSoundData(
+    mpResources->file(assets::AUDIO_DICT_FILE),
+    mpResources->file(assets::AUDIO_DATA_FILE));
 
   data::forEachSoundId([&](const auto id) {
     const auto index = idToIndex(id);

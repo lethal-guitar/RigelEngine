@@ -16,11 +16,11 @@
 
 #pragma once
 
+#include "assets/palette.hpp"
 #include "base/color.hpp"
 #include "base/warnings.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
-#include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -31,7 +31,7 @@ RIGEL_RESTORE_WARNINGS
 #include <string>
 
 
-namespace rigel::loader
+namespace rigel::assets
 {
 class ResourceLoader;
 }
@@ -47,7 +47,7 @@ public:
   MenuElementRenderer(
     engine::TiledTexture* pSpriteSheet,
     renderer::Renderer* pRenderer,
-    const loader::ResourceLoader& resources);
+    const assets::ResourceLoader& resources);
 
   // Stateless API
   // --------------------------------------------------------------------------

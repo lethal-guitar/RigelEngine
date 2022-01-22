@@ -16,9 +16,9 @@
 
 #include "sprite_factory.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "base/container_utils.hpp"
 #include "data/unit_conversions.hpp"
-#include "loader/resource_loader.hpp"
 
 #include <array>
 
@@ -837,7 +837,7 @@ bool hasAssociatedSprite(const ActorID actorID)
 
 SpriteFactory::SpriteFactory(
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader* pResourceLoader)
+  const assets::ResourceLoader* pResourceLoader)
   : SpriteFactory(construct(pRenderer, pResourceLoader))
 {
 }
@@ -853,7 +853,7 @@ SpriteFactory::SpriteFactory(CtorArgs args)
 
 auto SpriteFactory::construct(
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader* pResourceLoader) -> CtorArgs
+  const assets::ResourceLoader* pResourceLoader) -> CtorArgs
 {
   bool highResReplacementsFound = false;
 

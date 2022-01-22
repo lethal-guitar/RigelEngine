@@ -16,6 +16,7 @@
 
 #include "game_world.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
@@ -35,7 +36,6 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
-#include "loader/resource_loader.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"

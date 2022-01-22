@@ -1,4 +1,35 @@
 set(core_sources
+    assets/actor_image_package.cpp
+    assets/actor_image_package.hpp
+    assets/audio_package.cpp
+    assets/audio_package.hpp
+    assets/bitwise_iter.hpp
+    assets/byte_buffer.hpp
+    assets/cmp_file_package.cpp
+    assets/cmp_file_package.hpp
+    assets/duke_script_loader.cpp
+    assets/duke_script_loader.hpp
+    assets/ega_image_decoder.cpp
+    assets/ega_image_decoder.hpp
+    assets/file_utils.cpp
+    assets/file_utils.hpp
+    assets/level_loader.cpp
+    assets/level_loader.hpp
+    assets/movie_loader.cpp
+    assets/movie_loader.hpp
+    assets/music_loader.cpp
+    assets/music_loader.hpp
+    assets/palette.cpp
+    assets/palette.hpp
+    assets/png_image.cpp
+    assets/png_image.hpp
+    assets/resource_loader.cpp
+    assets/resource_loader.hpp
+    assets/rle_compression.hpp
+    assets/user_profile_import.cpp
+    assets/user_profile_import.hpp
+    assets/voc_decoder.cpp
+    assets/voc_decoder.hpp
     audio/adlib_emulator.hpp
     audio/software_imf_player.cpp
     audio/software_imf_player.hpp
@@ -13,6 +44,8 @@ set(core_sources
     base/math_utils.hpp
     base/spatial_types.hpp
     base/static_vector.hpp
+    base/string_utils.cpp
+    base/string_utils.hpp
     base/warnings.hpp
     common/command_line_options.hpp
     common/game_mode.cpp
@@ -20,8 +53,6 @@ set(core_sources
     common/game_service_provider.hpp
     common/json_utils.cpp
     common/json_utils.hpp
-    base/string_utils.cpp
-    base/string_utils.hpp
     common/user_profile.cpp
     common/user_profile.hpp
     data/actor_ids.hpp
@@ -238,37 +269,6 @@ set(core_sources
     game_logic/player/ship.hpp
     game_logic/world_state.cpp
     game_logic/world_state.hpp
-    loader/actor_image_package.cpp
-    loader/actor_image_package.hpp
-    loader/audio_package.cpp
-    loader/audio_package.hpp
-    loader/bitwise_iter.hpp
-    loader/byte_buffer.hpp
-    loader/cmp_file_package.cpp
-    loader/cmp_file_package.hpp
-    loader/duke_script_loader.cpp
-    loader/duke_script_loader.hpp
-    loader/ega_image_decoder.cpp
-    loader/ega_image_decoder.hpp
-    loader/file_utils.cpp
-    loader/file_utils.hpp
-    loader/level_loader.cpp
-    loader/level_loader.hpp
-    loader/movie_loader.cpp
-    loader/movie_loader.hpp
-    loader/music_loader.cpp
-    loader/music_loader.hpp
-    loader/palette.cpp
-    loader/palette.hpp
-    loader/png_image.cpp
-    loader/png_image.hpp
-    loader/resource_loader.cpp
-    loader/resource_loader.hpp
-    loader/rle_compression.hpp
-    loader/user_profile_import.cpp
-    loader/user_profile_import.hpp
-    loader/voc_decoder.cpp
-    loader/voc_decoder.hpp
     renderer/fps_limiter.cpp
     renderer/fps_limiter.hpp
     renderer/opengl.cpp
@@ -285,9 +285,9 @@ set(core_sources
     renderer/texture_atlas.hpp
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
-    sdl_utils/key_code.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
+    sdl_utils/key_code.hpp
     sdl_utils/platform.cpp
     sdl_utils/platform.hpp
     sdl_utils/ptr.hpp

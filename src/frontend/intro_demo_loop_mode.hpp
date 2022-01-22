@@ -1,7 +1,7 @@
 #pragma once
 
+#include "assets/duke_script_loader.hpp"
 #include "common/game_mode.hpp"
-#include "loader/duke_script_loader.hpp"
 #include "ui/apogee_logo.hpp"
 #include "ui/intro_movie.hpp"
 

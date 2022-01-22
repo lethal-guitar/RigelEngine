@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include "assets/palette.hpp"
 #include "base/color.hpp"
 #include "base/warnings.hpp"
 #include "engine/tiled_texture.hpp"
-#include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -29,7 +29,7 @@ RIGEL_RESTORE_WARNINGS
 #include <string_view>
 
 
-namespace rigel::loader
+namespace rigel::assets
 {
 class ResourceLoader;
 }
@@ -41,12 +41,12 @@ ImU32 toImgui(const base::Color& color);
 
 renderer::Texture fullScreenImageAsTexture(
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resources,
+  const assets::ResourceLoader& resources,
   std::string_view imageName);
 
 engine::TiledTexture makeUiSpriteSheet(
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resourceLoader,
+  const assets::ResourceLoader& resourceLoader,
   const data::Palette16& palette);
 
 void drawText(std::string_view text, int x, int y, const base::Color& color);

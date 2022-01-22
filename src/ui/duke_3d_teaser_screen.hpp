@@ -19,7 +19,7 @@
 #include "engine/timing.hpp"
 #include "renderer/texture.hpp"
 
-namespace rigel::loader
+namespace rigel::assets
 {
 class ResourceLoader;
 }
@@ -36,7 +36,7 @@ class Duke3DTeaserScreen
 {
 public:
   Duke3DTeaserScreen(
-    const loader::ResourceLoader& resources,
+    const assets::ResourceLoader& resources,
     renderer::Renderer* pRenderer);
 
   void updateAndRender(const engine::TimeDelta dt);

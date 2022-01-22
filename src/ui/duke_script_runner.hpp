@@ -16,13 +16,13 @@
 
 #pragma once
 
+#include "assets/palette.hpp"
 #include "common/game_mode.hpp"
 #include "data/actor_ids.hpp"
 #include "data/duke_script.hpp"
 #include "data/saved_game.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
-#include "loader/palette.hpp"
 #include "renderer/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/menu_navigation.hpp"
@@ -52,7 +52,7 @@ public:
   };
 
   DukeScriptRunner(
-    loader::ResourceLoader* pResourceLoader,
+    assets::ResourceLoader* pResourceLoader,
     renderer::Renderer* pRenderer,
     const data::SaveSlotArray* pSaveSlots,
     IGameServiceProvider* pServiceProvider);
@@ -197,7 +197,7 @@ private:
   void unbindCanvas();
 
 private:
-  const loader::ResourceLoader* mpResourceBundle;
+  const assets::ResourceLoader* mpResourceBundle;
   data::Palette16 mCurrentPalette;
   renderer::Renderer* mpRenderer;
   const data::SaveSlotArray* mpSaveSlots;

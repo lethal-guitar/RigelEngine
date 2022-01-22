@@ -16,12 +16,12 @@
 
 #include "hud_renderer.hpp"
 
+#include "assets/palette.hpp"
+#include "assets/resource_loader.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/sprite_factory.hpp"
-#include "loader/palette.hpp"
-#include "loader/resource_loader.hpp"
 
 #include <cmath>
 #include <string>

@@ -16,11 +16,11 @@
 
 #include "ingame_menu.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
 #include "common/user_profile.hpp"
 #include "game_logic/game_world.hpp"
-#include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>

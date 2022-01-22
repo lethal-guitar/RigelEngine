@@ -16,6 +16,7 @@
 
 #include "duke_script_runner.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "base/container_utils.hpp"
 #include "base/match.hpp"
 #include "base/math_utils.hpp"
@@ -25,7 +26,6 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
-#include "loader/resource_loader.hpp"
 #include "ui/utils.hpp"
 
 #include <cassert>
@@ -65,7 +65,7 @@ constexpr auto START_DEMO_TIMEOUT = 30.0; // seconds
 
 
 DukeScriptRunner::DukeScriptRunner(
-  loader::ResourceLoader* pResourceLoader,
+  assets::ResourceLoader* pResourceLoader,
   renderer::Renderer* pRenderer,
   const data::SaveSlotArray* pSaveSlots,
   IGameServiceProvider* pServiceProvider)
@@ -450,7 +450,7 @@ void DukeScriptRunner::interpretNextAction()
 
     [this](const SetPalette& action) {
       updatePalette(
-        loader::load6bitPalette16(mpResourceBundle->file(action.paletteFile)));
+        assets::load6bitPalette16(mpResourceBundle->file(action.paletteFile)));
     },
 
     [this](const SetupCheckBoxes& action) {

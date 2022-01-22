@@ -164,7 +164,7 @@ private:
   ui::MenuElementRenderer mTextRenderer;
   data::PlayerModel* mpPlayerModel;
   const data::GameOptions* mpOptions;
-  const loader::ResourceLoader* mpResources;
+  const assets::ResourceLoader* mpResources;
   engine::SpriteFactory* mpSpriteFactory;
   data::GameSessionId mSessionId;
 

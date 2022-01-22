@@ -16,13 +16,13 @@
 
 #include "menu_element_renderer.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "base/math_utils.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/timing.hpp"
-#include "loader/resource_loader.hpp"
 
 #include <cassert>
 #include <stdexcept>
@@ -144,7 +144,7 @@ constexpr auto NUM_CURSOR_ANIM_STATES = 4;
 
 
 renderer::Texture
-  createFontTexture(const loader::FontData& font, renderer::Renderer* pRenderer)
+  createFontTexture(const assets::FontData& font, renderer::Renderer* pRenderer)
 {
   if (font.size() != 67u)
   {
@@ -171,7 +171,7 @@ renderer::Texture
 MenuElementRenderer::MenuElementRenderer(
   engine::TiledTexture* pSpriteSheet,
   renderer::Renderer* pRenderer,
-  const loader::ResourceLoader& resources)
+  const assets::ResourceLoader& resources)
   : mpRenderer(pRenderer)
   , mpSpriteSheet(pSpriteSheet)
   , mBigTextTexture(

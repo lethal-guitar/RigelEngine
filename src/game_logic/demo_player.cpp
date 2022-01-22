@@ -16,9 +16,9 @@
 
 #include "demo_player.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "common/game_service_provider.hpp"
 #include "game_logic/game_world.hpp"
-#include "loader/resource_loader.hpp"
 
 
 namespace rigel::game_logic
@@ -57,7 +57,7 @@ PlayerInput
 }
 
 
-std::vector<DemoInput> loadDemo(const loader::ResourceLoader& resources)
+std::vector<DemoInput> loadDemo(const assets::ResourceLoader& resources)
 {
   PlayerInput previousInput;
   std::vector<DemoInput> result;

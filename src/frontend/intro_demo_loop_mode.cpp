@@ -2,9 +2,9 @@
 
 #include "menu_mode.hpp"
 
+#include "assets/resource_loader.hpp"
 #include "base/match.hpp"
 #include "common/game_service_provider.hpp"
-#include "loader/resource_loader.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/menu_navigation.hpp"
 

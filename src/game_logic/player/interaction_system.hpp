@@ -50,7 +50,7 @@ namespace game_logic
 struct IEntityFactory;
 }
 
-namespace loader
+namespace assets
 {
 class ResourceLoader;
 }
@@ -72,7 +72,7 @@ public:
     IGameServiceProvider* pServices,
     IEntityFactory* pEntityFactory,
     entityx::EventManager* pEvents,
-    const loader::ResourceLoader& resources);
+    const assets::ResourceLoader& resources);
 
   void updatePlayerInteraction(
     const PlayerInput& input,

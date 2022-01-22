@@ -16,13 +16,13 @@
 
 #pragma once
 
+#include "assets/level_loader.hpp"
 #include "base/warnings.hpp"
 #include "data/game_session_data.hpp"
 #include "engine/base_components.hpp"
 #include "engine/isprite_factory.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/ientity_factory.hpp"
-#include "loader/level_loader.hpp"
 #include "renderer/renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS

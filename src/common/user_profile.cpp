@@ -16,10 +16,10 @@
 
 #include "user_profile.hpp"
 
+#include "assets/file_utils.hpp"
+#include "assets/user_profile_import.hpp"
 #include "base/warnings.hpp"
 #include "common/json_utils.hpp"
-#include "loader/file_utils.hpp"
-#include "loader/user_profile_import.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_filesystem.h>
@@ -249,7 +249,7 @@ void removeInvalidKeybindings(data::GameOptions& options)
 
 void importOptions(
   data::GameOptions& options,
-  const loader::GameOptions& originalOptions)
+  const assets::GameOptions& originalOptions)
 {
   options.mSoundOn = originalOptions.mSoundBlasterSoundsOn ||
     originalOptions.mAdlibSoundsOn || originalOptions.mPcSpeakersSoundsOn;
@@ -645,7 +645,7 @@ UserProfile loadProfile(
 
   try
   {
-    auto buffer = loader::loadFile(fileOnDisk);
+    auto buffer = assets::loadFile(fileOnDisk);
     const auto serializedProfile = nlohmann::json::from_msgpack(buffer);
 
     UserProfile profile{pathForSaving, std::move(buffer)};
@@ -699,7 +699,7 @@ UserProfile loadProfile(const std::filesystem::path& profileFile)
 
 UserProfile::UserProfile(
   const std::filesystem::path& profilePath,
-  loader::ByteBuffer originalJson)
+  assets::ByteBuffer originalJson)
   : mProfilePath(profilePath)
   , mOriginalJson(std::move(originalJson))
 {
@@ -762,7 +762,7 @@ void UserProfile::saveToDisk()
   const auto buffer = json::to_msgpack(serializedProfile);
   try
   {
-    loader::saveToFile(buffer, *mProfilePath);
+    assets::saveToFile(buffer, *mProfilePath);
   }
   catch (const std::exception&)
   {
@@ -868,10 +868,10 @@ void importOriginalGameProfileData(
   UserProfile& profile,
   const std::string& gamePath)
 {
-  profile.mSaveSlots = loader::loadSavedGames(gamePath);
-  profile.mHighScoreLists = loader::loadHighScoreLists(gamePath);
+  profile.mSaveSlots = assets::loadSavedGames(gamePath);
+  profile.mHighScoreLists = assets::loadHighScoreLists(gamePath);
 
-  if (const auto options = loader::loadOptions(gamePath))
+  if (const auto options = assets::loadOptions(gamePath))
   {
     importOptions(profile.mOptions, *options);
   }
