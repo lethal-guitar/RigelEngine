@@ -13,6 +13,8 @@ set(core_sources
     base/math_utils.hpp
     base/spatial_types.hpp
     base/static_vector.hpp
+    base/string_utils.cpp
+    base/string_utils.hpp
     base/warnings.hpp
     common/command_line_options.hpp
     common/game_mode.cpp
@@ -20,8 +22,6 @@ set(core_sources
     common/game_service_provider.hpp
     common/json_utils.cpp
     common/json_utils.hpp
-    base/string_utils.cpp
-    base/string_utils.hpp
     common/user_profile.cpp
     common/user_profile.hpp
     data/actor_ids.hpp
@@ -285,9 +285,9 @@ set(core_sources
     renderer/texture_atlas.hpp
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
-    sdl_utils/key_code.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
+    sdl_utils/key_code.hpp
     sdl_utils/platform.cpp
     sdl_utils/platform.hpp
     sdl_utils/ptr.hpp
