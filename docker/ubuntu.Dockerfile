@@ -10,5 +10,6 @@ RUN ./tmp/ubuntu-deps.sh && \
   update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 20 && \
   update-alternatives --set cc /usr/bin/gcc && \
   apt install -y gdb && \
-  apt install -y clang-format-11
+  apt install -y clang-format-11 && \
+  apt install -y git
 
