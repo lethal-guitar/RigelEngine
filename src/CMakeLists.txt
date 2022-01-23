@@ -89,6 +89,8 @@ set(core_sources
     engine/entity_activation_system.cpp
     engine/entity_activation_system.hpp
     engine/entity_tools.hpp
+    engine/graphical_effects.cpp
+    engine/graphical_effects.hpp
     engine/isprite_factory.hpp
     engine/life_time_components.hpp
     engine/life_time_system.cpp
@@ -269,12 +271,14 @@ set(core_sources
     game_logic/player/ship.hpp
     game_logic/world_state.cpp
     game_logic/world_state.hpp
+    renderer/custom_quad_batch.hpp
     renderer/fps_limiter.cpp
     renderer/fps_limiter.hpp
     renderer/opengl.cpp
     renderer/opengl.hpp
     renderer/renderer.cpp
     renderer/renderer.hpp
+    renderer/renderer_support.hpp
     renderer/shader.cpp
     renderer/shader.hpp
     renderer/shader_code.cpp
@@ -285,6 +289,7 @@ set(core_sources
     renderer/texture_atlas.hpp
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
+    renderer/vertex_buffer_utils.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/key_code.hpp

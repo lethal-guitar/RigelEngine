@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/warnings.hpp"
 #include "renderer/opengl.hpp"
 
@@ -66,74 +67,91 @@ private:
 };
 
 
+enum class VertexLayout
+{
+  PositionAndTexCoords,
+  PositionAndColor
+};
+
+
+struct ShaderSpec
+{
+  VertexLayout mVertexLayout;
+  base::ArrayView<const char*> mTextureUnitNames;
+  const char* mVertexSource;
+  const char* mFragmentSource;
+};
+
+
 class Shader
 {
 public:
-  Shader(
-    const char* vertexSource,
-    const char* fragmentSource,
-    std::initializer_list<std::string> attributesToBind);
+  Shader(const ShaderSpec& spec);
 
-  void use();
+  void use() const;
 
-  void setUniform(const std::string& name, const glm::mat4& matrix)
+  void setUniform(const std::string& name, const glm::mat4& matrix) const
   {
     glUniformMatrix4fv(location(name), 1, GL_FALSE, glm::value_ptr(matrix));
   }
 
-  void setUniform(const std::string& name, const glm::vec2& vec2)
+  void setUniform(const std::string& name, const glm::vec2& vec2) const
   {
     glUniform2fv(location(name), 1, glm::value_ptr(vec2));
   }
 
-  void setUniform(const std::string& name, const glm::vec3& vec3)
+  void setUniform(const std::string& name, const glm::vec3& vec3) const
   {
     glUniform3fv(location(name), 1, glm::value_ptr(vec3));
   }
 
-  void setUniform(const std::string& name, const glm::vec4& vec4)
+  void setUniform(const std::string& name, const glm::vec4& vec4) const
   {
     glUniform4fv(location(name), 1, glm::value_ptr(vec4));
   }
 
   template <std::size_t N>
-  void
-    setUniform(const std::string& name, const std::array<glm::vec2, N>& values)
+  void setUniform(
+    const std::string& name,
+    const std::array<glm::vec2, N>& values) const
   {
     glUniform3fv(location(name), N, glm::value_ptr(values.front()));
   }
 
   template <std::size_t N>
-  void
-    setUniform(const std::string& name, const std::array<glm::vec3, N>& values)
+  void setUniform(
+    const std::string& name,
+    const std::array<glm::vec3, N>& values) const
   {
     glUniform3fv(location(name), N, glm::value_ptr(values.front()));
   }
 
   template <std::size_t N>
-  void
-    setUniform(const std::string& name, const std::array<glm::vec4, N>& values)
+  void setUniform(
+    const std::string& name,
+    const std::array<glm::vec4, N>& values) const
   {
     glUniform3fv(location(name), N, glm::value_ptr(values.front()));
   }
 
-  void setUniform(const std::string& name, const int value)
+  void setUniform(const std::string& name, const int value) const
   {
     glUniform1i(location(name), value);
   }
 
-  void setUniform(const std::string& name, const float value)
+  void setUniform(const std::string& name, const float value) const
   {
     glUniform1f(location(name), value);
   }
 
-  GLuint handle() { return mProgram.mHandle; }
+  GLuint handle() const { return mProgram.mHandle; }
 
 private:
   GLint location(const std::string& name) const;
 
 private:
   GlHandleWrapper mProgram;
+  VertexLayout mVertexLayout;
   mutable std::unordered_map<std::string, GLint> mLocationCache;
 };
 

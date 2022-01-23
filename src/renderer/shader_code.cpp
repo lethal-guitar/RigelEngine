@@ -16,8 +16,13 @@
 
 #include "shader_code.hpp"
 
+#include <array>
+
 
 namespace rigel::renderer
+{
+
+namespace
 {
 
 const char* VERTEX_SOURCE = R"shd(
@@ -101,88 +106,29 @@ void main() {
 )shd";
 
 
-const char* VERTEX_SOURCE_WATER_EFFECT = R"shd(
-ATTRIBUTE vec2 position;
-ATTRIBUTE vec2 texCoordMask;
+constexpr auto TEXTURED_QUAD_TEXTURE_UNIT_NAMES = std::array{"textureData"};
 
-OUT vec2 texCoordFrag;
-OUT vec2 texCoordMaskFrag;
-
-uniform mat4 transform;
-
-void main() {
-  SET_POINT_SIZE(1.0);
-  vec4 transformedPos = transform * vec4(position, 0.0, 1.0);
-
-  // Applying the transform gives us a position in normalized device
-  // coordinates (from -1.0 to 1.0). For sampling the render target texture,
-  // we need texture coordinates in the range 0.0 to 1.0, however.
-  // Therefore, we transform the position from normalized device coordinates
-  // into the 0.0 to 1.0 range by adding 1 and dividing by 2.
-  //
-  // We assume that the texture is as large as the screen, therefore sampling
-  // with the resulting tex coords should be equivalent to reading the pixel
-  // located at 'position'.
-  texCoordFrag = (transformedPos.xy + vec2(1.0, 1.0)) / 2.0;
-  texCoordMaskFrag = vec2(texCoordMask.x, 1.0 - texCoordMask.y);
-
-  gl_Position = transformedPos;
-}
-)shd";
-
-const char* FRAGMENT_SOURCE_WATER_EFFECT = R"shd(
-OUTPUT_COLOR_DECLARATION
-
-IN vec2 texCoordFrag;
-IN vec2 texCoordMaskFrag;
-
-uniform sampler2D textureData;
-uniform sampler2D maskData;
-uniform sampler2D colorMapData;
+} // namespace
 
 
-vec3 paletteColor(int index) {
-  // 1st row of the color map contains the original palette. Because the
-  // texture is stored up-side down, y-coordinate 0.5 actually corresponds to
-  // the upper row of pixels.
-  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.5)).rgb;
-}
+const ShaderSpec TEXTURED_QUAD_SHADER{
+  VertexLayout::PositionAndTexCoords,
+  TEXTURED_QUAD_TEXTURE_UNIT_NAMES,
+  VERTEX_SOURCE,
+  FRAGMENT_SOURCE};
 
 
-vec3 remappedColor(int index) {
-  // 2nd row contains the remapped "water" palette
-  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.0)).rgb;
-}
+const ShaderSpec SIMPLE_TEXTURED_QUAD_SHADER{
+  VertexLayout::PositionAndTexCoords,
+  TEXTURED_QUAD_TEXTURE_UNIT_NAMES,
+  VERTEX_SOURCE,
+  FRAGMENT_SOURCE_SIMPLE};
 
 
-vec4 applyWaterEffect(vec4 color) {
-  // The original game runs in a palette-based video mode, where the frame
-  // buffer stores indices into a palette of 16 colors instead of directly
-  // storing color values. The water effect is implemented as a modification
-  // of these index values in the frame buffer.
-  // To replicate it, we first have to transform our RGBA color values into
-  // indices, by searching the palette for a matching color. With the index,
-  // we then look up the corresponding "under water" color.
-  // It would also be possible to perform the index manipulation here in the
-  // shader and then do another palette lookup to get the result. But due to
-  // precision problems on the Raspberry Pi which would cause visual glitches
-  // with that approach, we do it via lookup table instead.
-  int index = 0;
-  for (int i = 0; i < 16; ++i) {
-    if (color.rgb == paletteColor(i)) {
-      index = i;
-    }
-  }
-
-  return vec4(remappedColor(index), color.a);
-}
-
-void main() {
-  vec4 color = TEXTURE_LOOKUP(textureData, texCoordFrag);
-  vec4 mask = TEXTURE_LOOKUP(maskData, texCoordMaskFrag);
-  float maskValue = mask.r;
-  OUTPUT_COLOR = mix(color, applyWaterEffect(color), maskValue);
-}
-)shd";
+const ShaderSpec SOLID_COLOR_SHADER{
+  VertexLayout::PositionAndColor,
+  {},
+  VERTEX_SOURCE_SOLID,
+  FRAGMENT_SOURCE_SOLID};
 
 } // namespace rigel::renderer

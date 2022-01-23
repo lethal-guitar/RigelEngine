@@ -18,9 +18,9 @@
 
 #include "base/color.hpp"
 #include "base/defer.hpp"
-#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "data/image.hpp"
+#include "renderer/renderer_support.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_video.h>
@@ -33,46 +33,6 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::renderer
 {
-
-using TextureId = std::uint32_t;
-
-/** Texture coordinates for Renderer::drawTexture()
- *
- * Values should be in range [0.0, 1.0] - unless texture repeat is
- * enabled. Use the toTexCoords() helper function to create these from
- * a source rectangle.
- */
-struct TexCoords
-{
-  float left;
-  float top;
-  float right;
-  float bottom;
-};
-
-
-/** Convert a source rect to texture coordinates
- *
- * Renderer::drawTexture() expects normalized texture coordinates,
- * but most of the time, it's easier to work with image-specific
- * coordinates, like e.g. "from 8,8 to 32,64". This helper function
- * converts from the latter to the former.
- */
-inline TexCoords toTexCoords(
-  const base::Rect<int>& sourceRect,
-  const int texWidth,
-  const int texHeight)
-{
-  const auto left = sourceRect.topLeft.x / float(texWidth);
-  const auto top = sourceRect.topLeft.y / float(texHeight);
-  const auto width = sourceRect.size.width / float(texWidth);
-  const auto height = sourceRect.size.height / float(texHeight);
-  const auto right = left + width;
-  const auto bottom = top + height;
-
-  return {left, top, right, bottom};
-}
-
 
 /** OpenGL-based 2D rendering API
  *
@@ -134,27 +94,7 @@ public:
    */
   void drawPoint(const base::Vec2& position, const base::Color& color);
 
-  /** Draw "under water" effect
-   *
-   * Contrary to the other functions offered by the renderer, this one
-   * is very specific to Duke Nukem II. It draws the given texture with
-   * a special shader modifying all colors to be shades of blue.
-   * The area rectangle is used as both source and target rectangle, as
-   * the texture typically represents a rendered game scene.
-   * If an animation step is given, the top-most pixels of the given
-   * area will appear in one of 4 possible wave patterns. Otherwise,
-   * the entire area is drawn uniformly. The animation step must be a
-   * number between 0 and 3.
-   *
-   * Supports batching: Multiple calls to this function will be combined
-   * into a single vertex buffer and OpenGL draw call, as long as the
-   * same texture is used. Changing any state will also interrupt the
-   * current batch.
-   */
-  void drawWaterEffect(
-    const base::Rect<int>& area,
-    TextureId unprocessedScreen,
-    std::optional<int> surfaceAnimationStep);
+  void drawCustomQuadBatch(const CustomQuadBatchData& batch);
 
   /** Draw rectangle outline, 1 pixel wide
    *
@@ -258,6 +198,7 @@ public:
   void destroyTexture(TextureId texture);
 
   void setFilteringEnabled(TextureId texture, bool enabled);
+  void setNativeRepeatEnabled(TextureId texture, bool enabled);
 
   // State management API
   ////////////////////////////////////////////////////////////////////////

@@ -28,6 +28,7 @@
 #include "data/unit_conversions.hpp"
 #include "engine/base_components.hpp"
 #include "engine/entity_tools.hpp"
+#include "engine/graphical_effects.hpp"
 #include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "game_logic/actor_tag.hpp"
@@ -223,14 +224,7 @@ std::string vec2String(const base::Vec2T<ValueT>& vec, const int width)
 }
 
 
-struct WaterEffectArea
-{
-  base::Rect<int> mArea;
-  bool mIsAnimated;
-};
-
-
-std::vector<WaterEffectArea> collectWaterEffectAreas(
+std::vector<engine::WaterEffectArea> collectWaterEffectAreas(
   entityx::EntityManager& es,
   const base::Vec2& cameraPosition,
   const base::Extents& viewportSize)
@@ -238,7 +232,7 @@ std::vector<WaterEffectArea> collectWaterEffectAreas(
   using engine::components::BoundingBox;
   using game_logic::components::ActorTag;
 
-  std::vector<WaterEffectArea> result;
+  std::vector<engine::WaterEffectArea> result;
 
   const auto screenBox = BoundingBox{cameraPosition, viewportSize};
 
@@ -264,7 +258,7 @@ std::vector<WaterEffectArea> collectWaterEffectAreas(
         const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
 
         result.push_back(
-          WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
+          engine::WaterEffectArea{{topLeftPx, sizePx}, hasAnimatedSurface});
       }
     }
   });
@@ -302,6 +296,7 @@ GameWorld::GameWorld(
       &mUiSpriteSheet,
       mpSpriteFactory)
   , mMessageDisplay(mpServiceProvider, &mTextRenderer)
+  , mWaterEffect(mpRenderer)
   , mWaterEffectBuffer(
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
   , mLowResLayer(
@@ -1056,15 +1051,8 @@ void GameWorld::drawMapAndSprites(
     mpRenderer->setGlobalTranslation(
       localToGlobalTranslation(mpRenderer, params.mCameraOffset));
 
-    for (const auto& area : waterEffectAreas)
-    {
-      mpRenderer->drawWaterEffect(
-        area.mArea,
-        mWaterEffectBuffer.data(),
-        area.mIsAnimated ? std::optional<int>(state.mWaterAnimStep)
-                         : std::nullopt);
-    }
-
+    mWaterEffect.draw(
+      mWaterEffectBuffer, waterEffectAreas, state.mWaterAnimStep);
     renderForegroundLayers();
   }
 }
