@@ -1085,6 +1085,26 @@ struct Renderer::Impl
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
   }
 
+  void setNativeRepeatEnabled(TextureId texture, bool enabled)
+  {
+    submitBatch();
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    if (enabled)
+    {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+    else
+    {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+  }
+
   base::Size<int> currentRenderTargetSize() const
   {
     const auto& state = mStateStack.back();
@@ -1305,6 +1325,13 @@ void Renderer::destroyTexture(TextureId texture)
 void Renderer::setFilteringEnabled(const TextureId texture, const bool enabled)
 {
   mpImpl->setFilteringEnabled(texture, enabled);
+}
+
+void Renderer::setNativeRepeatEnabled(
+  const TextureId texture,
+  const bool enabled)
+{
+  mpImpl->setNativeRepeatEnabled(texture, enabled);
 }
 
 } // namespace rigel::renderer

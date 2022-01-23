@@ -220,6 +220,7 @@ public:
   void destroyTexture(TextureId texture);
 
   void setFilteringEnabled(TextureId texture, bool enabled);
+  void setNativeRepeatEnabled(TextureId texture, bool enabled);
 
   // State management API
   ////////////////////////////////////////////////////////////////////////
