@@ -432,10 +432,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
       const auto& selectedSound = SOUND_IDS_FOR_SOUND_TEST[mSelectedSoundIndex];
 
-      if (ImGui::Button("Test sound"))
-      {
-        mpServiceProvider->playSound(selectedSound.mId);
-      }
+      ImGui::AlignTextToFramePadding();
+      ImGui::TextUnformatted("Test sound: ");
 
       ImGui::SameLine();
 
@@ -459,14 +457,14 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       const auto description = selectedSound.mDescription + " (#"s +
         std::to_string(static_cast<int>(selectedSound.mId) + 1) + ")";
 
-      const auto descriptionSize = ImGui::CalcTextSize(description.c_str()).x;
-      const auto spacing = (longestDescriptionSize - descriptionSize) / 2.0f;
+      const auto buttonSize =
+        longestDescriptionSize + ImGui::GetStyle().FramePadding.x * 2;
+      if (ImGui::Button(description.c_str(), {buttonSize, 0}))
+      {
+        mpServiceProvider->playSound(selectedSound.mId);
+      }
 
-      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + spacing);
-      ImGui::TextUnformatted(description.c_str());
       ImGui::SameLine();
-
-      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + spacing);
 
       if (ImGui::Button(">"))
       {
