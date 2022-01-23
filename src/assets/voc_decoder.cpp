@@ -173,7 +173,7 @@ bool readAndValidateVocHeader(LeStreamReader& reader)
 }
 
 
-std::int16_t unsigned8BitSampleToSigned16Bit(const std::uint8_t sample)
+std::int16_t expand8BitSample(const std::uint8_t sample)
 {
   return 128 * (sample - 0x80);
 }
@@ -213,7 +213,7 @@ public:
       }
     }
 
-    return unsigned8BitSampleToSigned16Bit(mReference);
+    return expand8BitSample(mReference);
   }
 
   int16_t decodeBits2_6(const int encoded)
@@ -239,7 +239,7 @@ public:
       }
     }
 
-    return unsigned8BitSampleToSigned16Bit(mReference);
+    return expand8BitSample(mReference);
   }
 
   int16_t decodeBits2(const int encoded)
@@ -276,7 +276,7 @@ public:
       }
     }
 
-    return unsigned8BitSampleToSigned16Bit(mReference);
+    return expand8BitSample(mReference);
   }
 
 private:
@@ -299,7 +299,7 @@ void decodeAdpcmAudio(
   TargetIter outputIter)
 {
   const auto firstSample = reader.readU8();
-  *outputIter++ = unsigned8BitSampleToSigned16Bit(firstSample);
+  *outputIter++ = expand8BitSample(firstSample);
 
   AdpcmDecoderHelper decoder(firstSample);
   for (auto i = 0u; i < encodedSize - 1; ++i)
@@ -346,7 +346,7 @@ void decodeAudio(
     case CodecType::Unsigned8BitPcm:
       for (auto i = 0u; i < encodedSize; ++i)
       {
-        *outputIter++ = unsigned8BitSampleToSigned16Bit(reader.readU8());
+        *outputIter++ = expand8BitSample(reader.readU8());
       }
       break;
 
