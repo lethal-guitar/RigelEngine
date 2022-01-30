@@ -37,8 +37,10 @@ First, build the Docker container as described [here](https://github.com/lethal-
 Once the container is built, you can run the following in the root of your working copy:
 
 ```bash
+# Format files currently staged in git
 docker run --rm -it -v $(pwd):/workdir -w /workdir rigel-build ./tools/format-staged.sh
 
+# Format all files
 docker run --rm -it -v $(pwd):/workdir -w /workdir rigel-build ./tools/format-all.sh
 ```
 
