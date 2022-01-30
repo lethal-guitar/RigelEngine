@@ -1,15 +1,5 @@
 # Contribution guide
 
-## Authenticity
-
-RigelEngine aims to provide a very authentic experience by default, meaning gameplay should be largely identical to the original Duke Nukem II. Modern enhancements that alter the gameplay are welcome, but should be disabled by default, requiring the user to opt in via the options menu. If you are planning to contribute a feature that might alter gameplay, please add a corresponding option to toggle it on/off.
-
-## Dependencies
-
-The project requires very few external dependencies at the moment. While third-party libraries can provide a lot of value, having many dependencies also comes at a cost in the long run. Therefore, please carefully consider whether adding a new external dependency is absolutely necessary. If possible, consider making the dependency optional with a build-time switch, so that RigelEngine can still be used without the dependency if desired.
-
-Having said that, I don’t see any reason against small dependencies which can be vendored alongside the source code (in the `3rd_party` directory), as long as they are supported on all current and potential future platforms (current: Windows, Mac OS X (x86, ARM), Linux (x86, ARM), Webassembly. Future: Android, iOS).
-
 ## Coding style and code quality guidelines
 
 * Choose human readable names
@@ -26,9 +16,10 @@ Having said that, I don’t see any reason against small dependencies which can 
 
 ## Code formatting
 
-RigelEngine uses [clang-format](https://releases.llvm.org/11.0.0/tools/clang/docs/ClangFormat.html) for automated code formatting. This is enforced by a check on CI, meaning your code needs to be clang-formatted before it can be merged. It's important to use exactly version 11.0.0 of clang-format, as unfortunately the formatting behavior varies between versions even with an identical configuration file.
+RigelEngine uses [clang-format](https://releases.llvm.org/11.0.0/tools/clang/docs/ClangFormat.html) for automated code formatting. This is enforced by a check on CI, meaning your code needs to be clang-formatted before it can be merged. It's important to use exactly version 11 of clang-format, as unfortunately the formatting behavior varies between versions even with an identical configuration file.
+Differences in minor or patch version seem to be ok, though, so 11.0.0 and 11.10.0 should both work fine.
 
-To format the code in your working copy, you can either use the script `tools/format-all.sh` directly (if clang-format 11 is already installed in your system), or run it via Docker (that way, you don't need to install it locally).
+To format the code in your working copy, you can either use the scripts `tools/format-all.sh` and `tools/format-staged.sh` directly (if clang-format 11 is already installed in your system), or run them via Docker (that way, you don't need to install it locally).
 
 ### Installing clang-format locally
 
@@ -37,7 +28,7 @@ On Ubuntu 20.04 or later, you can install clang-format 11 via `sudo apt-get inst
 For Windows, Mac, and other systems, you can [grab a binary clang/LLVM release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-11.0.0).
 Make sure `clang-format` is on your `PATH` after installing it.
 
-Once installed, you can run `./tools/format-all.sh` from the root of your working copy (using git bash on Windows).
+Once installed, you can run `tools/format-staged.sh` or `./tools/format-all.sh` from the root of your working copy (using git bash on Windows).
 
 ### Running clang-format via Docker
 
@@ -46,5 +37,17 @@ First, build the Docker container as described [here](https://github.com/lethal-
 Once the container is built, you can run the following in the root of your working copy:
 
 ```bash
+docker run --rm -it -v $(pwd):/workdir -w /workdir rigel-build ./tools/format-staged.sh
+
 docker run --rm -it -v $(pwd):/workdir -w /workdir rigel-build ./tools/format-all.sh
 ```
+
+## Authenticity
+
+RigelEngine aims to provide a very authentic experience by default, meaning gameplay should be largely identical to the original Duke Nukem II. Modern enhancements that alter the gameplay are welcome, but should be disabled by default, requiring the user to opt in via the options menu. If you are planning to contribute a feature that might alter gameplay, please add a corresponding option to toggle it on/off.
+
+## Dependencies
+
+The project requires very few external dependencies at the moment. While third-party libraries can provide a lot of value, having many dependencies also comes at a cost in the long run. Therefore, please carefully consider whether adding a new external dependency is absolutely necessary. If possible, consider making the dependency optional with a build-time switch, so that RigelEngine can still be used without the dependency if desired.
+
+Having said that, I don’t see any reason against small dependencies which can be vendored alongside the source code (in the `3rd_party` directory), as long as they are supported on all current and potential future platforms (current: Windows, Mac OS X (x86, ARM), Linux (x86, ARM), Webassembly. Future: Android, iOS).
