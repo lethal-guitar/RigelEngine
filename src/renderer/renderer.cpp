@@ -78,6 +78,20 @@ private:
 };
 
 
+VertexBufferId packVertexBuffer(const GLuint vbo, const uint16_t size)
+{
+  static_assert(sizeof(GLuint) == sizeof(uint32_t));
+
+  return uint32_t(vbo) | (uint64_t(size) << 32);
+}
+
+
+std::tuple<GLuint, uint16_t> unpackVertexBuffer(const VertexBufferId buffer)
+{
+  return {GLuint(buffer & 0xFFFFFFFF), uint16_t(buffer >> 32)};
+}
+
+
 struct RenderTarget
 {
   base::Extents mSize;
@@ -262,6 +276,7 @@ struct Renderer::Impl
 
   // cold
   int mNumTextures = 0;
+  int mNumVbos = 0;
   DummyVao mDummyVao;
   GLuint mStreamVbo = 0;
 
@@ -325,6 +340,7 @@ struct Renderer::Impl
     // before the renderer is destroyed.
     assert(mRenderTargetDict.empty());
     assert(mNumTextures == 0);
+    assert(mNumVbos == 0);
 
     glDeleteBuffers(1, &mStreamVbo);
     glDeleteBuffers(1, &mQuadIndicesEbo);
@@ -539,6 +555,42 @@ struct Renderer::Impl
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+
+
+  void submitVertexBuffers(
+    const base::ArrayView<VertexBufferId> buffers,
+    const TextureId texture)
+  {
+    updateState(mRenderMode, RenderMode::SpriteBatch);
+
+    if (texture != mLastUsedTexture)
+    {
+      submitBatch();
+
+      glBindTexture(GL_TEXTURE_2D, texture);
+      mLastUsedTexture = texture;
+    }
+
+    commitChangedState();
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+
+    const auto layout = shaderToUse(mStateStack.back()).vertexLayout();
+
+    for (const auto buffer : buffers)
+    {
+      const auto [vbo, size] = unpackVertexBuffer(buffer);
+
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      setVertexLayout(layout);
+      glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_SHORT, nullptr);
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
+    setVertexLayout(layout);
   }
 
 
@@ -849,6 +901,40 @@ struct Renderer::Impl
   }
 
 
+  VertexBufferId createVertexBuffer(const base::ArrayView<float> vertices)
+  {
+    GLuint vbo = 0;
+    glGenBuffers(1, &vbo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(float) * vertices.size(),
+      vertices.data(),
+      GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
+
+    const auto size = uint16_t(
+      vertices.size() / std::tuple_size<renderer::QuadVertices>::value *
+      std::size(QUAD_INDICES));
+
+    ++mNumVbos;
+
+    return packVertexBuffer(vbo, size);
+  }
+
+
+  void destroyVertexBuffer(const VertexBufferId buffer)
+  {
+    assert(buffer != INVALID_VERTEX_BUFFER_ID);
+
+    const auto [vbo, _] = unpackVertexBuffer(buffer);
+    glDeleteBuffers(1, &vbo);
+
+    --mNumVbos;
+  }
+
+
   TextureId createRenderTargetTexture(const int width, const int height)
   {
     submitBatch();
@@ -1045,6 +1131,14 @@ void Renderer::drawCustomQuadBatch(const CustomQuadBatchData& batch)
 }
 
 
+void Renderer::submitVertexBuffers(
+  const base::ArrayView<VertexBufferId> buffers,
+  const TextureId texture)
+{
+  mpImpl->submitVertexBuffers(buffers, texture);
+}
+
+
 void Renderer::pushState()
 {
   mpImpl->pushState();
@@ -1136,6 +1230,19 @@ void Renderer::swapBuffers()
 void Renderer::clear(const base::Color& clearColor)
 {
   mpImpl->clear(clearColor);
+}
+
+
+VertexBufferId
+  Renderer::createVertexBuffer(const base::ArrayView<float> vertices)
+{
+  return mpImpl->createVertexBuffer(vertices);
+}
+
+
+void Renderer::destroyVertexBuffer(const VertexBufferId buffer)
+{
+  mpImpl->destroyVertexBuffer(buffer);
 }
 
 
