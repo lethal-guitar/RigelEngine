@@ -28,6 +28,7 @@
 #include "data/unit_conversions.hpp"
 
 #include <algorithm>
+#include <array>
 #include <string>
 #include <type_traits>
 
@@ -59,6 +60,20 @@ namespace
 {
 
 using ActorList = std::vector<LevelData::Actor>;
+
+
+constexpr auto VALID_LEVEL_WIDTHS = std::array{32, 64, 128, 256, 512, 1024};
+
+
+bool isValidWidth(int width)
+{
+  using std::begin;
+  using std::end;
+  using std::find;
+
+  return find(begin(VALID_LEVEL_WIDTHS), end(VALID_LEVEL_WIDTHS), width) !=
+    end(VALID_LEVEL_WIDTHS);
+}
 
 
 data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
@@ -534,6 +549,13 @@ LevelData loadLevel(
   auto tileSet = resources.loadCZone(header.CZone);
 
   const auto width = static_cast<int>(levelReader.readU16());
+
+  if (!isValidWidth(width))
+  {
+    throw std::runtime_error(
+      "Level file has invalid width: " + std::to_string(width));
+  }
+
   const auto height = static_cast<int>(GameTraits::mapHeightForWidth(width));
   data::map::Map map(width, height, std::move(tileSet.mAttributes));
 
