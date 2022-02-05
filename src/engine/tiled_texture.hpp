@@ -39,6 +39,10 @@ public:
     renderTile(index, tlPosition.x, tlPosition.y);
   }
 
+  renderer::TextureId textureId() const { return mTileSetTexture.data(); }
+
+  renderer::QuadVertices generateVertices(int index, int posX, int posY) const;
+
   /** Renders the given tile plus the one below it (vertical slice) */
   void renderTileSlice(int baseIndex, const base::Vec2& tlPosition) const;
 
