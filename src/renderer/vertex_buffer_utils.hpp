@@ -27,11 +27,6 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel::renderer
 {
 
-
-// 4 * (x, y, u, v)
-using QuadVertices = std::array<float, 4 * (2 + 2)>;
-
-
 inline QuadVertices createTexturedQuadVertices(
   const TexCoords& sourceRect,
   const base::Rect<int>& destRect)

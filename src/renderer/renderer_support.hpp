@@ -72,6 +72,10 @@ inline TexCoords toTexCoords(
 }
 
 
+// 4 * (x, y, u, v)
+using QuadVertices = std::array<float, 4 * (2 + 2)>;
+
+
 struct CustomQuadBatchData
 {
   base::ArrayView<TextureId> mTextures;
