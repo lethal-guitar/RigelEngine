@@ -100,6 +100,12 @@ glm::vec4 toGlColor(const base::Color& color)
 }
 
 
+void* toAttribOffset(std::uintptr_t offset)
+{
+  return reinterpret_cast<void*>(offset);
+}
+
+
 void setScissorBox(
   const base::Rect<int>& clipRect,
   const base::Size<int>& frameBufferSize)
@@ -110,6 +116,36 @@ void setScissorBox(
     offsetAtBottom - 1,
     clipRect.size.width,
     clipRect.size.height);
+}
+
+
+void setVertexLayout(const VertexLayout layout)
+{
+  switch (layout)
+  {
+    case VertexLayout::PositionAndTexCoords:
+      glVertexAttribPointer(
+        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 4,
+        toAttribOffset(sizeof(float) * 2));
+      break;
+
+    case VertexLayout::PositionAndColor:
+      glVertexAttribPointer(
+        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(sizeof(float) * 2));
+  }
 }
 
 
@@ -659,7 +695,7 @@ struct Renderer::Impl
       commitRenderTarget(state);
       glViewport(0, 0, framebufferSize.width, framebufferSize.height);
       commitClipRect(state, framebufferSize);
-      commitShaderSelection(state);
+      commitVertexAttributeFormat(state);
 
       transformNeedsUpdate = true;
     }
@@ -767,10 +803,17 @@ struct Renderer::Impl
   }
 
 
+  void commitVertexAttributeFormat(const State& state)
+  {
+    setVertexLayout(shaderToUse(state).vertexLayout());
+  }
+
+
   void commitShaderSelection(const State& state)
   {
     auto& shader = shaderToUse(state);
     shader.use();
+    setVertexLayout(shader.vertexLayout());
 
     if (shader.handle() == mTexturedQuadShader.handle())
     {
