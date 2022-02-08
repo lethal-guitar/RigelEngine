@@ -222,7 +222,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   // the backdrop texture, so we don't need to remap.
   const auto isAutoScrolling =
     mScrollMode == BackdropScrollMode::AutoHorizontal ||
-    mScrollMode == BackdropScrollMode::AutoHorizontal;
+    mScrollMode == BackdropScrollMode::AutoVertical;
   const auto offsetX = isAutoScrolling
     ? offset.x
     : offset.x * mpRenderer->globalScale().x / scaleX;
