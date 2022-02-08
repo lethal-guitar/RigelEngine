@@ -284,37 +284,6 @@ void MapRenderer::renderMapTiles(
       }
     }
   }
-
-  if (drawMode == DrawMode::Foreground)
-  {
-    const auto outOfBoundsTilesX =
-      std::max(0, sectionStart.x + sectionSize.width - mpMap->width());
-    const auto outOfBoundsTilesY =
-      std::max(0, sectionStart.y + sectionSize.height - mpMap->height());
-
-    if (outOfBoundsTilesX)
-    {
-      const auto outOfBoundsStart = sectionSize.width - outOfBoundsTilesX;
-      const auto outOfBoundsRect = base::Rect<int>{
-        data::tileVectorToPixelVector({outOfBoundsStart, 0}),
-        data::tileExtentsToPixelExtents(
-          {outOfBoundsTilesX, sectionSize.height}),
-      };
-
-      mpRenderer->drawFilledRectangle(outOfBoundsRect, {0, 0, 0, 255});
-    }
-
-    if (outOfBoundsTilesY)
-    {
-      const auto outOfBoundsStart = sectionSize.height - outOfBoundsTilesY;
-      const auto outOfBoundsRect = base::Rect<int>{
-        data::tileVectorToPixelVector({0, outOfBoundsStart}),
-        data::tileExtentsToPixelExtents({sectionSize.width, outOfBoundsTilesY}),
-      };
-
-      mpRenderer->drawFilledRectangle(outOfBoundsRect, {0, 0, 0, 255});
-    }
-  }
 }
 
 

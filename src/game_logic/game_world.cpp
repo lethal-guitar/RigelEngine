@@ -139,11 +139,6 @@ auto localToGlobalTranslation(
     renderer::scaleVec(offset, scale) + base::Vec2{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
 
-  const auto viewportSize = base::Extents{
-    info.mWidthPx,
-    base::round(data::GameTraits::inGameViewportSize.height * scale.y)};
-  pRenderer->setClipRect(base::Rect<int>{newTranslation, viewportSize});
-
   return saved;
 }
 
@@ -264,6 +259,17 @@ std::vector<engine::WaterEffectArea> collectWaterEffectAreas(
   });
 
   return result;
+}
+
+
+base::Extents clampedSectionSize(
+  const base::Vec2& sectionStart,
+  const base::Extents& sectionSize,
+  const data::map::Map& map)
+{
+  return {
+    std::min(sectionSize.width, map.width() - sectionStart.x),
+    std::min(sectionSize.height, map.height() - sectionStart.y)};
 }
 
 } // namespace
@@ -734,6 +740,23 @@ void GameWorld::render(const float interpolationFactor)
     mMotionSmoothingWasEnabled = mpOptions->mMotionSmoothing;
   }
 
+  auto setupWorldClipRect = [&](const auto& viewportParams) {
+    const auto clampedSize = clampedSectionSize(
+      viewportParams.mRenderStartPosition,
+      viewportParams.mViewportSize,
+      mpState->mMap);
+    const auto clampedSizePx = data::tileExtentsToPixelExtents(clampedSize);
+    const auto smoothedSize = base::Extents{
+      clampedSizePx.width + viewportParams.mCameraOffset.x,
+      clampedSizePx.height + viewportParams.mCameraOffset.y};
+
+    auto saved = renderer::saveState(mpRenderer);
+    mpRenderer->setClipRect(base::Rect<int>{
+      mpRenderer->globalTranslation(),
+      renderer::scaleSize(smoothedSize, mpRenderer->globalScale())});
+    return saved;
+  };
+
   auto drawParticlesAndDebugOverlay =
     [&](const ViewportParams& viewportParams) {
       mpRenderer->setGlobalTranslation(
@@ -748,13 +771,6 @@ void GameWorld::render(const float interpolationFactor)
     };
 
   auto drawWorld = [&](const base::Extents& viewportSize) {
-    const auto clipRectGuard = renderer::saveState(mpRenderer);
-    mpRenderer->setClipRect(base::Rect<int>{
-      mpRenderer->globalTranslation(),
-      renderer::scaleSize(
-        data::tileExtentsToPixelExtents(viewportSize),
-        mpRenderer->globalScale())});
-
     if (mpState->mScreenFlashColor)
     {
       mpRenderer->clear(*mpState->mScreenFlashColor);
@@ -763,6 +779,9 @@ void GameWorld::render(const float interpolationFactor)
 
     const auto viewportParams =
       determineSmoothScrollViewport(viewportSize, interpolationFactor);
+
+    // prevent out of bounds areas from showing the backdrop/sprites
+    auto clipRectGuard = setupWorldClipRect(viewportParams);
 
     if (mpOptions->mPerElementUpscalingEnabled)
     {
