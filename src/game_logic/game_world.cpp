@@ -1020,12 +1020,16 @@ void GameWorld::drawMapAndSprites(
   auto renderBackgroundLayers = [&]() {
     state.mMapRenderer.renderBackground(
       params.mRenderStartPosition, params.mViewportSize);
+    state.mDynamicGeometrySystem.renderDynamicBackgroundSections(
+      params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
     state.mSpriteRenderingSystem.renderRegularSprites();
   };
 
   auto renderForegroundLayers = [&]() {
     state.mMapRenderer.renderForeground(
       params.mRenderStartPosition, params.mViewportSize);
+    state.mDynamicGeometrySystem.renderDynamicForegroundSections(
+      params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
     state.mSpriteRenderingSystem.renderForegroundSprites();
     renderTileDebris();
   };

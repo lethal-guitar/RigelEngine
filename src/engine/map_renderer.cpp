@@ -17,8 +17,11 @@
 #include "map_renderer.hpp"
 
 #include "base/math_utils.hpp"
+#include "base/static_vector.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
+#include "renderer/upscaling_utils.hpp"
+#include "renderer/vertex_buffer_utils.hpp"
 
 #include <cfenv>
 #include <iostream>
@@ -35,12 +38,116 @@ using data::map::BackdropScrollMode;
 namespace
 {
 
+auto unpack(const PackedTileData data)
+{
+  return std::tuple{data & 0xFFFF, (data & 0xFFFF0000) >> 16};
+}
+
+
 const auto ANIM_STATES = 4;
 const auto FAST_ANIM_FRAME_DELAY = 1;
 const auto SLOW_ANIM_FRAME_DELAY = 2;
 const auto PARALLAX_FACTOR = 4.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60.0f;
+const auto MAX_BLOCKS = 32;
+
+
+struct TileBlockData
+{
+  std::vector<float> mVertices;
+  std::vector<AnimatedTile> mAnimatedTiles;
+};
+
+
+void buildBlock(
+  const int blockX,
+  const int blockY,
+  TileRenderData& renderData,
+  const data::map::Map& map,
+  const TiledTexture& tileSetTexture,
+  renderer::Renderer* pRenderer)
+{
+  const auto blockStartX = blockX * BLOCK_SIZE;
+  const auto blockEndX = (blockX + 1) * BLOCK_SIZE;
+  const auto blockStartY = blockY * BLOCK_SIZE;
+  const auto blockEndY = (blockY + 1) * BLOCK_SIZE;
+
+  auto blockData = std::array<TileBlockData, 2>{};
+
+
+  auto addToBlock =
+    [&](const map::TileIndex tileIndex, const int x, const int y) {
+      if (tileIndex == 0)
+      {
+        return;
+      }
+
+      const auto isForeground =
+        map.attributeDict().attributes(tileIndex).isForeGround();
+      const auto targetIndex = isForeground ? 1 : 0;
+      auto& targetBlockData = blockData[targetIndex];
+
+      const auto isAnimated =
+        map.attributeDict().attributes(tileIndex).isAnimated();
+      if (isAnimated)
+      {
+        targetBlockData.mAnimatedTiles.push_back({{x, y}, tileIndex});
+      }
+      else
+      {
+        const auto vertices = tileSetTexture.generateVertices(tileIndex, x, y);
+        targetBlockData.mVertices.insert(
+          targetBlockData.mVertices.end(), vertices.begin(), vertices.end());
+      }
+    };
+
+
+  // Fill block data with tiles
+  for (auto y = blockStartY; y < blockEndY && y < map.height(); ++y)
+  {
+    for (auto x = blockStartX; x < blockEndX && x < map.width(); ++x)
+    {
+      addToBlock(map.tileAt(0, x, y), x, y);
+      addToBlock(map.tileAt(1, x, y), x, y);
+    }
+  }
+
+  // Commit block data
+  for (auto layer = 0; layer < 2; ++layer)
+  {
+    auto& data = blockData[layer];
+
+    auto buffer = data.mVertices.empty()
+      ? renderer::INVALID_VERTEX_BUFFER_ID
+      : pRenderer->createVertexBuffer(data.mVertices);
+
+    renderData.mLayers[layer].push_back(
+      {buffer, std::move(data.mAnimatedTiles)});
+  }
+}
+
+
+TileRenderData buildRenderData(
+  const data::map::Map& map,
+  const TiledTexture& tileSetTexture,
+  renderer::Renderer* pRenderer)
+{
+  const auto numBlocksX = base::integerDivCeil(map.width(), BLOCK_SIZE);
+  const auto numBlocksY = base::integerDivCeil(map.height(), BLOCK_SIZE);
+
+  TileRenderData result{{numBlocksX, numBlocksY}, pRenderer};
+
+  for (auto blockY = 0; blockY < numBlocksY; ++blockY)
+  {
+    for (auto blockX = 0; blockX < numBlocksX; ++blockX)
+    {
+      buildBlock(blockX, blockY, result, map, tileSetTexture, pRenderer);
+    }
+  }
+
+  return result;
+}
 
 
 base::Vec2f backdropOffset(
@@ -85,17 +192,67 @@ constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Extents{
 } // namespace
 
 
+std::vector<PackedTileData>
+  copyMapData(const base::Rect<int>& section, const data::map::Map& map)
+{
+  auto result = std::vector<PackedTileData>{};
+  result.resize(section.size.width * section.size.height);
+
+  for (auto layer = 0; layer < 2; ++layer)
+  {
+    auto iMapData = result.begin();
+    for (auto y = section.top(); y <= section.bottom(); ++y)
+    {
+      for (auto x = section.left(); x <= section.right(); ++x)
+      {
+        const auto tileValue = map.tileAt(layer, x, y);
+        *iMapData |= tileValue << (layer * 16);
+        ++iMapData;
+      }
+    }
+  }
+
+  return result;
+}
+
+
+TileRenderData::TileRenderData(
+  base::Extents size,
+  renderer::Renderer* pRenderer)
+  : mSize(size)
+  , mpRenderer(pRenderer)
+{
+}
+
+
+TileRenderData::~TileRenderData()
+{
+  for (const auto& layer : mLayers)
+  {
+    for (const auto& block : layer)
+    {
+      if (block.mTilesBuffer != renderer::INVALID_VERTEX_BUFFER_ID)
+      {
+        mpRenderer->destroyVertexBuffer(block.mTilesBuffer);
+      }
+    }
+  }
+}
+
+
 MapRenderer::MapRenderer(
   renderer::Renderer* pRenderer,
-  const data::map::Map* pMap,
+  const data::map::Map& map,
+  const data::map::TileAttributeDict* pTileAttributes,
   MapRenderData&& renderData)
   : mpRenderer(pRenderer)
-  , mpMap(pMap)
+  , mpTileAttributes(pTileAttributes)
   , mTileSetTexture(
       renderer::Texture(pRenderer, renderData.mTileSetImage),
       TILE_SET_IMAGE_LOGICAL_SIZE,
       pRenderer)
   , mBackdropTexture(mpRenderer, renderData.mBackdropImage)
+  , mRenderData(buildRenderData(map, mTileSetTexture, pRenderer))
   , mScrollMode(renderData.mBackdropScrollMode)
 {
   if (renderData.mSecondaryBackdropImage)
@@ -257,33 +414,59 @@ void MapRenderer::renderMapTiles(
   const base::Extents& sectionSize,
   const DrawMode drawMode) const
 {
-  for (int layer = 0; layer < 2; ++layer)
-  {
-    for (int y = 0; y < sectionSize.height; ++y)
+  const auto blockX = sectionStart.x / BLOCK_SIZE;
+  const auto blockY = sectionStart.y / BLOCK_SIZE;
+  const auto offsetInBlockX = sectionStart.x % BLOCK_SIZE;
+  const auto offsetInBlockY = sectionStart.y % BLOCK_SIZE;
+  const auto numBlocksX = base::integerDivCeil(sectionSize.width, BLOCK_SIZE) +
+    std::min(offsetInBlockX, 1);
+  const auto numBlocksY = base::integerDivCeil(sectionSize.height, BLOCK_SIZE) +
+    std::min(offsetInBlockY, 1);
+
+  auto forEachVisibleBlock = [&](auto&& func) {
+    const auto layerIndex = static_cast<size_t>(drawMode);
+
+    for (auto y = blockY;
+         y < std::min(blockY + numBlocksY, mRenderData.mSize.height);
+         ++y)
     {
-      for (int x = 0; x < sectionSize.width; ++x)
+      for (auto x = blockX;
+           x < std::min(blockX + numBlocksX, mRenderData.mSize.width);
+           ++x)
       {
-        const auto col = x + sectionStart.x;
-        const auto row = y + sectionStart.y;
-        if (col >= mpMap->width() || row >= mpMap->height())
-        {
-          continue;
-        }
-
-        const auto tileIndex = mpMap->tileAt(layer, col, row);
-        const auto isForeground =
-          mpMap->attributeDict().attributes(tileIndex).isForeGround();
-        const auto shouldRenderForeground = drawMode == DrawMode::Foreground;
-
-        if (isForeground != shouldRenderForeground)
-        {
-          continue;
-        }
-
-        renderTile(tileIndex, x, y);
+        const auto blockIndex = x + y * mRenderData.mSize.width;
+        func(mRenderData.mLayers[layerIndex][blockIndex]);
       }
     }
-  }
+  };
+
+
+  base::static_vector<renderer::VertexBufferId, MAX_BLOCKS> blocksToRender;
+
+  forEachVisibleBlock([&](const TileBlock& block) {
+    if (block.mTilesBuffer != renderer::INVALID_VERTEX_BUFFER_ID)
+    {
+      blocksToRender.push_back(block.mTilesBuffer);
+    }
+  });
+
+  const auto translation = data::tileVectorToPixelVector(sectionStart) * -1;
+
+  const auto saved = renderer::saveState(mpRenderer);
+  mpRenderer->setGlobalTranslation(
+    mpRenderer->globalTranslation() +
+    renderer::scaleVec(translation, mpRenderer->globalScale()));
+
+  mpRenderer->submitVertexBuffers(blocksToRender, mTileSetTexture.textureId());
+
+  forEachVisibleBlock([&](const TileBlock& block) {
+    for (const auto& animated : block.mAnimatedTiles)
+    {
+      const auto tileIndexToDraw = animatedTileIndex(animated.mIndex);
+      mTileSetTexture.renderTile(
+        tileIndexToDraw, animated.mPosition.x, animated.mPosition.y);
+    }
+  });
 }
 
 
@@ -337,8 +520,6 @@ void MapRenderer::renderSingleTile(
   const data::map::TileIndex index,
   const base::Vec2& pixelPosition) const
 {
-  // TODO: Can we reduce duplication with renderTile()?
-
   // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
   // should be visible. Therefore, don't draw if the index is 0.
   if (index != 0)
@@ -349,17 +530,78 @@ void MapRenderer::renderSingleTile(
 }
 
 
-void MapRenderer::renderTile(
-  const data::map::TileIndex tileIndex,
-  const int x,
-  const int y) const
+void MapRenderer::renderDynamicSection(
+  const data::map::Map& map,
+  const base::Rect<int>& coordinates,
+  const base::Vec2& pixelPosition,
+  const DrawMode drawMode) const
 {
-  // Tile index 0 is used to represent a transparent tile, i.e. the backdrop
-  // should be visible. Therefore, don't draw if the index is 0.
-  if (tileIndex != 0)
+  for (auto layer = 0; layer < 2; ++layer)
   {
-    const auto tileIndexToDraw = animatedTileIndex(tileIndex);
-    mTileSetTexture.renderTile(tileIndexToDraw, x, y);
+    for (auto y = coordinates.top();
+         y < coordinates.top() + coordinates.size.height;
+         ++y)
+    {
+      for (auto x = coordinates.left();
+           x < coordinates.left() + coordinates.size.width;
+           ++x)
+      {
+        if (x >= map.width() || y >= map.height())
+        {
+          continue;
+        }
+
+        const auto tileIndex = map.tileAt(layer, x, y);
+        const auto isForeground =
+          mpTileAttributes->attributes(tileIndex).isForeGround();
+        const auto shouldRenderForeground = drawMode == DrawMode::Foreground;
+        if (isForeground != shouldRenderForeground)
+        {
+          continue;
+        }
+
+        const auto offsetInSection =
+          data::tileVectorToPixelVector(base::Vec2{x, y} - coordinates.topLeft);
+        renderSingleTile(tileIndex, pixelPosition + offsetInSection);
+      }
+    }
+  }
+}
+
+
+void MapRenderer::renderCachedSection(
+  const base::Vec2& pixelPosition,
+  base::ArrayView<PackedTileData> data,
+  const int width,
+  const DrawMode drawMode) const
+{
+  auto drawTile = [&](const auto tileIndex, const base::Vec2& screenPos) {
+    const auto isForeground =
+      mpTileAttributes->attributes(tileIndex).isForeGround();
+    const auto shouldRenderForeground = drawMode == DrawMode::Foreground;
+    if (isForeground == shouldRenderForeground)
+    {
+      renderSingleTile(tileIndex, screenPos);
+    }
+  };
+
+
+  const auto height = int(data.size()) / width;
+
+  auto iMapData = data.begin();
+  for (auto y = 0; y < height; ++y)
+  {
+    for (auto x = 0; x < width; ++x)
+    {
+      const auto screenPos =
+        data::tileVectorToPixelVector(base::Vec2{x, y}) + pixelPosition;
+
+      const auto [layer0, layer1] = unpack(*iMapData);
+      drawTile(layer0, screenPos);
+      drawTile(layer1, screenPos);
+
+      ++iMapData;
+    }
   }
 }
 
@@ -367,7 +609,7 @@ void MapRenderer::renderTile(
 map::TileIndex
   MapRenderer::animatedTileIndex(const map::TileIndex tileIndex) const
 {
-  if (mpMap->attributeDict().attributes(tileIndex).isAnimated())
+  if (mpTileAttributes->attributes(tileIndex).isAnimated())
   {
     const auto fastAnimOffset =
       (mElapsedFrames / FAST_ANIM_FRAME_DELAY) % ANIM_STATES;
@@ -375,7 +617,7 @@ map::TileIndex
       (mElapsedFrames / SLOW_ANIM_FRAME_DELAY) % ANIM_STATES;
 
     const auto isFastAnim =
-      mpMap->attributeDict().attributes(tileIndex).isFastAnimation();
+      mpTileAttributes->attributes(tileIndex).isFastAnimation();
     return tileIndex + (isFastAnim ? fastAnimOffset : slowAnimOffset);
   }
   else

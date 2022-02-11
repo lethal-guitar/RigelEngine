@@ -207,6 +207,16 @@ void DebuggingSystem::update(
           tileExtentsToPixelExtents(link.mLinkedGeometrySection.size)};
 
         mpRenderer->drawRectangle(boxInPixels, base::Color{0, 255, 255, 190});
+
+        if (const auto extraSectionRect = link.extraSectionRect())
+        {
+          const auto extraBoxInPixels = BoundingBox{
+            tileVectorToPixelVector(extraSectionRect->topLeft) -
+              worldToScreenPx,
+            tileExtentsToPixelExtents(extraSectionRect->size)};
+          mpRenderer->drawRectangle(
+            extraBoxInPixels, base::Color{255, 255, 100, 190});
+        }
       });
   }
 

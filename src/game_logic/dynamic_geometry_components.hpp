@@ -20,6 +20,8 @@
 #include "engine/base_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
+#include <optional>
+
 
 namespace rigel::game_logic
 {
@@ -28,12 +30,41 @@ namespace components
 
 struct MapGeometryLink
 {
+  // This represents the area below a piece of dynamic geometry, which
+  // will be erased as the piece is falling down.
+  struct ExtraSection
+  {
+    std::vector<std::uint32_t> mMapData;
+    int mTop;
+    int mHeight;
+  };
+
   explicit MapGeometryLink(engine::components::BoundingBox geometrySection)
     : mLinkedGeometrySection(geometrySection)
   {
   }
 
+  std::optional<base::Rect<int>> extraSectionRect() const
+  {
+    if (!mExtraSection)
+    {
+      return std::nullopt;
+    }
+
+    const auto actualTop =
+      std::max(mExtraSection->mTop, mLinkedGeometrySection.bottom() + 1);
+    const auto removedHeight =
+      std::min(mExtraSection->mHeight, actualTop - mExtraSection->mTop);
+    const auto actualHeight =
+      std::max(0, mExtraSection->mHeight - removedHeight);
+
+    return base::Rect<int>{
+      {mLinkedGeometrySection.left(), actualTop},
+      {mLinkedGeometrySection.size.width, actualHeight}};
+  }
+
   engine::components::BoundingBox mLinkedGeometrySection;
+  std::optional<ExtraSection> mExtraSection;
 };
 
 
