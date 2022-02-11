@@ -821,7 +821,7 @@ void GameWorld::render(const float interpolationFactor)
 
     const auto info = renderer::determineWidescreenViewport(mpRenderer);
     const auto viewportSize = base::Extents{
-      info.mWidthTiles, data::GameTraits::viewportHeightTiles - 1};
+      info.mWidthTiles - 6, data::GameTraits::viewportHeightTiles - 1};
 
     if (!mWidescreenModeWasOn && !mpOptions->mMotionSmoothing)
     {
