@@ -18,7 +18,6 @@
 
 #include "base/match.hpp"
 #include "base/math_utils.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
@@ -30,6 +29,7 @@
 #include "engine/motion_smoothing.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/global_dependencies.hpp"

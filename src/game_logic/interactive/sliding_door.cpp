@@ -16,12 +16,12 @@
 
 #include "sliding_door.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"

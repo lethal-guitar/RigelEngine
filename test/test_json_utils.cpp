@@ -15,7 +15,7 @@
  */
 
 #include <base/warnings.hpp>
-#include <common/json_utils.hpp>
+#include <frontend/json_utils.hpp>
 
 RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>

@@ -16,7 +16,6 @@
 
 #include "item_container.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
@@ -24,6 +23,7 @@
 #include "engine/motion_smoothing.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"

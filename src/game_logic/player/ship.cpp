@@ -16,11 +16,11 @@
 
 #include "ship.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/physical_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player.hpp"
 

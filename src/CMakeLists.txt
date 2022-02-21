@@ -47,14 +47,6 @@ set(core_sources
     base/string_utils.cpp
     base/string_utils.hpp
     base/warnings.hpp
-    common/command_line_options.hpp
-    common/game_mode.cpp
-    common/game_mode.hpp
-    common/game_service_provider.hpp
-    common/json_utils.cpp
-    common/json_utils.hpp
-    common/user_profile.cpp
-    common/user_profile.hpp
     data/actor_ids.hpp
     data/audio_buffer.hpp
     data/bonus.hpp
@@ -120,18 +112,26 @@ set(core_sources
     engine/visual_components.hpp
     frontend/anti_piracy_screen_mode.cpp
     frontend/anti_piracy_screen_mode.hpp
+    frontend/command_line_options.hpp
     frontend/game.cpp
     frontend/game.hpp
+    frontend/game_mode.cpp
+    frontend/game_mode.hpp
     frontend/game_runner.cpp
     frontend/game_runner.hpp
+    frontend/game_service_provider.hpp
     frontend/game_session_mode.cpp
     frontend/game_session_mode.hpp
     frontend/input_handler.cpp
     frontend/input_handler.hpp
     frontend/intro_demo_loop_mode.cpp
     frontend/intro_demo_loop_mode.hpp
+    frontend/json_utils.cpp
+    frontend/json_utils.hpp
     frontend/menu_mode.cpp
     frontend/menu_mode.hpp
+    frontend/user_profile.cpp
+    frontend/user_profile.hpp
     game_logic/behavior_controller.hpp
     game_logic/behavior_controller_system.cpp
     game_logic/behavior_controller_system.hpp

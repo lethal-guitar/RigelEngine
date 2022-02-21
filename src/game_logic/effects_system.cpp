@@ -17,7 +17,6 @@
 #include "effects_system.hpp"
 
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
@@ -25,6 +24,7 @@
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/ientity_factory.hpp"
 

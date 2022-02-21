@@ -18,10 +18,10 @@
 
 #include "assets/duke_script_loader.hpp"
 #include "assets/resource_loader.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/strings.hpp"
 #include "engine/physics_system.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/collectable_components.hpp"
 #include "game_logic/damage_components.hpp"

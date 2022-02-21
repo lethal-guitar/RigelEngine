@@ -20,12 +20,12 @@
 #include "base/container_utils.hpp"
 #include "base/match.hpp"
 #include "base/math_utils.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "ui/utils.hpp"
 
 #include <cassert>

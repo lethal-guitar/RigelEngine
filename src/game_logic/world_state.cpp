@@ -17,12 +17,12 @@
 #include "world_state.hpp"
 
 #include "assets/resource_loader.hpp"
-#include "common/game_service_provider.hpp"
 #include "engine/base_components.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/sprite_factory.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"

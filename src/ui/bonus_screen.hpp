@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "common/game_mode.hpp"
 #include "data/bonus.hpp"
 #include "engine/timing.hpp"
+#include "frontend/game_mode.hpp"
 #include "ui/menu_element_renderer.hpp"
 
 #include <functional>

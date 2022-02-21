@@ -16,7 +16,6 @@
 
 #include "dynamic_geometry_system.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
@@ -25,6 +24,7 @@
 #include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"

@@ -17,7 +17,7 @@
 #include "intro_movie.hpp"
 
 #include "assets/resource_loader.hpp"
-#include "common/game_service_provider.hpp"
+#include "frontend/game_service_provider.hpp"
 
 
 // Repetition counts and delays from original exe, determined from disassembly:

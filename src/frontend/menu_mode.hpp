@@ -17,8 +17,8 @@
 #pragma once
 
 #include "assets/duke_script_loader.hpp"
-#include "common/game_mode.hpp"
 #include "data/duke_script.hpp"
+#include "frontend/game_mode.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/options_menu.hpp"
 

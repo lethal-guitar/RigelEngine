@@ -16,8 +16,8 @@
 
 #include "blowing_fan.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/player.hpp"
 
 

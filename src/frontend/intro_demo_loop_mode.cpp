@@ -4,7 +4,7 @@
 
 #include "assets/resource_loader.hpp"
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/menu_navigation.hpp"
 

@@ -20,9 +20,9 @@
 #include "intro_demo_loop_mode.hpp"
 
 #include "assets/resource_loader.hpp"
-#include "common/game_service_provider.hpp"
-#include "common/user_profile.hpp"
 #include "data/game_session_data.hpp"
+#include "frontend/game_service_provider.hpp"
+#include "frontend/user_profile.hpp"
 #include "ui/high_score_list.hpp"
 #include "ui/menu_navigation.hpp"
 

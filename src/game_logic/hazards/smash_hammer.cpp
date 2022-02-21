@@ -17,11 +17,11 @@
 #include "smash_hammer.hpp"
 
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/movement.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/ientity_factory.hpp"

@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "common/game_mode.hpp"
 #include "data/high_score_list.hpp"
+#include "frontend/game_mode.hpp"
 #include "ui/text_entry_widget.hpp"
 
 

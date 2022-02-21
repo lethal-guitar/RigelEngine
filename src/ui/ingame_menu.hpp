@@ -18,9 +18,9 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
-#include "common/game_mode.hpp"
 #include "data/bonus.hpp"
 #include "data/saved_game.hpp"
+#include "frontend/game_mode.hpp"
 #include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
 #include "ui/duke_script_runner.hpp"

@@ -16,12 +16,12 @@
 
 #include "spike_ball.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/physical_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 

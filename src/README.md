@@ -35,10 +35,6 @@ required by the rest of the code base.
 Should only depend on the standard library ideally (there is currently a dependency on SDL
 in an implementation detail, but this should be removed longer term).
 
-### `common`
-
-Contains code that's relevant for both the core (i.e. `rigel_core`) and the executable (`RigelEngine`).
-
 ### `data`
 
 Contains data structures for all kinds of game data/state, and various constants. Code in the

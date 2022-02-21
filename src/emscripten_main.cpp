@@ -23,8 +23,8 @@
 #include "base/warnings.hpp"
 
 #include "base/defer.hpp"
-#include "common/user_profile.hpp"
 #include "frontend/game.hpp"
+#include "frontend/user_profile.hpp"
 #include "renderer/opengl.hpp"
 #include "sdl_utils/error.hpp"
 #include "ui/imgui_integration.hpp"
