@@ -18,10 +18,10 @@
 
 #include "base/match.hpp"
 #include "base/static_vector.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/physical_components.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"

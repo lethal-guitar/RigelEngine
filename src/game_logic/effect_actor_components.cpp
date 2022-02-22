@@ -16,10 +16,10 @@
 
 #include "effect_actor_components.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/random_number_generator.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"

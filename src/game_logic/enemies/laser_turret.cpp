@@ -17,11 +17,11 @@
 #include "laser_turret.hpp"
 
 #include "base/math_utils.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/player_model.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"

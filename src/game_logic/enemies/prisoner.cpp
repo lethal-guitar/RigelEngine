@@ -16,13 +16,13 @@
 
 #include "prisoner.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"

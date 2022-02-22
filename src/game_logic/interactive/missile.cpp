@@ -16,7 +16,6 @@
 
 #include "missile.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
@@ -24,6 +23,7 @@
 #include "engine/particle_system.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/damage_components.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/global_dependencies.hpp"

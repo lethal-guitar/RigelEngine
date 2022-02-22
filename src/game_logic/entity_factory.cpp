@@ -17,7 +17,6 @@
 #include "entity_factory.hpp"
 
 #include "base/container_utils.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
@@ -27,6 +26,7 @@
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_factory.hpp"
 #include "engine/sprite_tools.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"

@@ -20,9 +20,9 @@
 #include "menu_mode.hpp"
 
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
-#include "common/user_profile.hpp"
 #include "data/saved_game.hpp"
+#include "frontend/game_service_provider.hpp"
+#include "frontend/user_profile.hpp"
 #include "ui/high_score_list.hpp"
 #include "ui/menu_navigation.hpp"
 

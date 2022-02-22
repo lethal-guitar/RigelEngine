@@ -17,7 +17,7 @@
 #include "apogee_logo.hpp"
 
 #include "assets/resource_loader.hpp"
-#include "common/game_service_provider.hpp"
+#include "frontend/game_service_provider.hpp"
 
 
 namespace rigel::ui

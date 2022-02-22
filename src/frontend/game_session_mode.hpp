@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "common/game_mode.hpp"
 #include "data/player_model.hpp"
+#include "frontend/game_mode.hpp"
 #include "ui/bonus_screen.hpp"
 #include "ui/episode_end_sequence.hpp"
 

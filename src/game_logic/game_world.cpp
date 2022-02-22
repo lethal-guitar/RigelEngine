@@ -18,8 +18,6 @@
 
 #include "assets/resource_loader.hpp"
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
-#include "common/user_profile.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
@@ -31,6 +29,8 @@
 #include "engine/graphical_effects.hpp"
 #include "engine/motion_smoothing.hpp"
 #include "engine/physical_components.hpp"
+#include "frontend/game_service_provider.hpp"
+#include "frontend/user_profile.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/behavior_controller.hpp"
 #include "game_logic/collectable_components.hpp"

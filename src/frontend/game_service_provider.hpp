@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "common/command_line_options.hpp"
 #include "data/game_session_data.hpp"
 #include "data/sound_ids.hpp"
+#include "frontend/command_line_options.hpp"
 #include "sdl_utils/ptr.hpp"
 
 #include <SDL_gamecontroller.h>

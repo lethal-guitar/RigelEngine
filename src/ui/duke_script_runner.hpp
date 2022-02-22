@@ -17,12 +17,12 @@
 #pragma once
 
 #include "assets/palette.hpp"
-#include "common/game_mode.hpp"
 #include "data/actor_ids.hpp"
 #include "data/duke_script.hpp"
 #include "data/saved_game.hpp"
 #include "engine/tiled_texture.hpp"
 #include "engine/timing.hpp"
+#include "frontend/game_mode.hpp"
 #include "renderer/texture.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/menu_navigation.hpp"

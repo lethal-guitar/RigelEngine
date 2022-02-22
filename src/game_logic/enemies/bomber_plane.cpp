@@ -17,7 +17,6 @@
 #include "bomber_plane.hpp"
 
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
@@ -25,6 +24,7 @@
 #include "engine/life_time_components.hpp"
 #include "engine/movement.hpp"
 #include "engine/physical_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/effect_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"

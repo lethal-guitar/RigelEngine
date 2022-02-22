@@ -16,11 +16,11 @@
 
 #include "dying_boss.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "data/game_traits.hpp"
 #include "data/player_model.hpp"
 #include "engine/particle_system.hpp"
 #include "engine/random_number_generator.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"

@@ -87,7 +87,7 @@ enum class UpscalingFilter : std::uint8_t
  *
  * This struct contains everything that can be configured by the user in
  * RigelEngine. The corresponding UI is located in ui/options_menu.cpp
- * Serialization code is found in common/user_profile.cpp
+ * Serialization code is found in frontend/user_profile.cpp
  *
  * If you add something to this struct, you most likely want to add
  * serialization and UI as well!

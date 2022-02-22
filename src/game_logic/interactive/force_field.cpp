@@ -16,10 +16,10 @@
 
 #include "force_field.hpp"
 
-#include "common/game_service_provider.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/actor_tag.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/player/components.hpp"

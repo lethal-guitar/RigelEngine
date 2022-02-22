@@ -16,8 +16,8 @@
 
 #include "high_score_list.hpp"
 
-#include "common/game_service_provider.hpp"
-#include "common/user_profile.hpp"
+#include "frontend/game_service_provider.hpp"
+#include "frontend/user_profile.hpp"
 #include "ui/duke_script_runner.hpp"
 
 

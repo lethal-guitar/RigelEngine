@@ -18,8 +18,8 @@
 
 #include "base/container_utils.hpp"
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
 #include "engine/timing.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "ui/menu_navigation.hpp"
 #include "ui/utils.hpp"
 

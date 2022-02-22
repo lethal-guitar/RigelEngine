@@ -17,13 +17,13 @@
 #include "floating_laser_bot.hpp"
 
 #include "base/match.hpp"
-#include "common/game_service_provider.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/ientity_factory.hpp"
 #include "game_logic/player.hpp"
 

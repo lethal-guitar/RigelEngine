@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "common/command_line_options.hpp"
+#include "frontend/command_line_options.hpp"
 
 
 namespace rigel

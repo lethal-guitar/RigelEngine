@@ -19,7 +19,7 @@
 #include "assets/file_utils.hpp"
 #include "assets/user_profile_import.hpp"
 #include "base/warnings.hpp"
-#include "common/json_utils.hpp"
+#include "frontend/json_utils.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL_filesystem.h>

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "common/game_mode.hpp"
+#include "frontend/game_mode.hpp"
 #include "renderer/texture.hpp"
 #include "ui/bonus_screen.hpp"
 #include "ui/duke_3d_teaser_screen.hpp"

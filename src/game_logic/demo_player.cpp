@@ -17,7 +17,7 @@
 #include "demo_player.hpp"
 
 #include "assets/resource_loader.hpp"
-#include "common/game_service_provider.hpp"
+#include "frontend/game_service_provider.hpp"
 #include "game_logic/game_world.hpp"
 
 
