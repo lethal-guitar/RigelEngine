@@ -40,8 +40,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR_DECLARATION
 #define SET_POINT_SIZE(size) gl_PointSize = size;
 #define HIGHP highp
-
-precision mediump float;
+#define DEFAULT_PRECISION_DECLARATION precision mediump float;
 )shd";
 
 #else
@@ -63,6 +62,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
 #define SET_POINT_SIZE
 #define HIGHP
+#define DEFAULT_PRECISION_DECLARATION
 )shd";
   #else
 const auto SHADER_PREAMBLE = R"shd(
@@ -76,6 +76,7 @@ const auto SHADER_PREAMBLE = R"shd(
 #define OUTPUT_COLOR_DECLARATION out vec4 outputColor;
 #define SET_POINT_SIZE
 #define HIGHP
+#define DEFAULT_PRECISION_DECLARATION
 )shd";
   #endif
 

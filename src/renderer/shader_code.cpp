@@ -41,6 +41,7 @@ void main() {
 
 
 const char* FRAGMENT_SOURCE_SIMPLE = R"shd(
+DEFAULT_PRECISION_DECLARATION
 OUTPUT_COLOR_DECLARATION
 
 IN HIGHP vec2 texCoordFrag;
@@ -54,6 +55,7 @@ void main() {
 
 
 const char* FRAGMENT_SOURCE = R"shd(
+DEFAULT_PRECISION_DECLARATION
 OUTPUT_COLOR_DECLARATION
 
 IN HIGHP vec2 texCoordFrag;
@@ -96,6 +98,7 @@ void main() {
 )shd";
 
 const char* FRAGMENT_SOURCE_SOLID = R"shd(
+DEFAULT_PRECISION_DECLARATION
 OUTPUT_COLOR_DECLARATION
 
 IN vec4 colorFrag;
