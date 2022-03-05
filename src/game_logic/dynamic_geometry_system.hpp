@@ -38,6 +38,7 @@ namespace events
 {
 struct DoorOpened;
 struct MissileDetonated;
+struct TileBurnedAway;
 } // namespace events
 namespace game_logic::events
 {
@@ -62,6 +63,7 @@ public:
   void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::DoorOpened& event);
   void receive(const rigel::events::MissileDetonated& event);
+  void receive(const rigel::events::TileBurnedAway& event);
 
 private:
   IGameServiceProvider* mpServiceProvider;

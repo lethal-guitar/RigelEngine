@@ -38,14 +38,11 @@ public:
   {
   }
 
-  void preAllocateSpace(const int numQuads)
-  {
-    mVertexBuffer.reserve(numQuads * 4);
-  }
+  void preAllocateSpace(const int numQuads) { mVertices.reserve(numQuads * 4); }
 
   void reset()
   {
-    mVertexBuffer.clear();
+    mVertices.clear();
     mTextures.clear();
   }
 
@@ -54,18 +51,14 @@ public:
   void addQuad(const TexCoords& sourceRect, const base::Rect<int>& destRect)
   {
     const auto vertices = createTexturedQuadVertices(sourceRect, destRect);
-    mVertexBuffer.insert(
-      mVertexBuffer.end(), std::begin(vertices), std::end(vertices));
+    mVertices.insert(mVertices.end(), std::begin(vertices), std::end(vertices));
   }
 
-  CustomQuadBatchData data() const
-  {
-    return {mTextures, mVertexBuffer, mpShader};
-  }
+  CustomQuadBatchData data() const { return {mTextures, mVertices, mpShader}; }
 
 private:
   base::static_vector<TextureId, MAX_MULTI_TEXTURES> mTextures;
-  std::vector<float> mVertexBuffer;
+  std::vector<float> mVertices;
   const Shader* mpShader;
 };
 

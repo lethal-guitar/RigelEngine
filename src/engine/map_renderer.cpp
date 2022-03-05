@@ -222,7 +222,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   // the backdrop texture, so we don't need to remap.
   const auto isAutoScrolling =
     mScrollMode == BackdropScrollMode::AutoHorizontal ||
-    mScrollMode == BackdropScrollMode::AutoHorizontal;
+    mScrollMode == BackdropScrollMode::AutoVertical;
   const auto offsetX = isAutoScrolling
     ? offset.x
     : offset.x * mpRenderer->globalScale().x / scaleX;
@@ -282,37 +282,6 @@ void MapRenderer::renderMapTiles(
 
         renderTile(tileIndex, x, y);
       }
-    }
-  }
-
-  if (drawMode == DrawMode::Foreground)
-  {
-    const auto outOfBoundsTilesX =
-      std::max(0, sectionStart.x + sectionSize.width - mpMap->width());
-    const auto outOfBoundsTilesY =
-      std::max(0, sectionStart.y + sectionSize.height - mpMap->height());
-
-    if (outOfBoundsTilesX)
-    {
-      const auto outOfBoundsStart = sectionSize.width - outOfBoundsTilesX;
-      const auto outOfBoundsRect = base::Rect<int>{
-        data::tileVectorToPixelVector({outOfBoundsStart, 0}),
-        data::tileExtentsToPixelExtents(
-          {outOfBoundsTilesX, sectionSize.height}),
-      };
-
-      mpRenderer->drawFilledRectangle(outOfBoundsRect, {0, 0, 0, 255});
-    }
-
-    if (outOfBoundsTilesY)
-    {
-      const auto outOfBoundsStart = sectionSize.height - outOfBoundsTilesY;
-      const auto outOfBoundsRect = base::Rect<int>{
-        data::tileVectorToPixelVector({0, outOfBoundsStart}),
-        data::tileExtentsToPixelExtents({sectionSize.width, outOfBoundsTilesY}),
-      };
-
-      mpRenderer->drawFilledRectangle(outOfBoundsRect, {0, 0, 0, 255});
     }
   }
 }

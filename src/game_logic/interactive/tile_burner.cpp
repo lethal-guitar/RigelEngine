@@ -56,8 +56,7 @@ void TileBurner::update(
 
       if (s.mpMap->attributes(x, y).isFlammable())
       {
-        s.mpMap->setTileAt(0, x, y, 0);
-        s.mpMap->setTileAt(1, x, y, 0);
+        d.mpEvents->emit(rigel::events::TileBurnedAway{{x, y}});
 
         const auto spawnPosition = base::Vec2{x - 1, y + 1};
         const auto spawnDelay = d.mpRandomGenerator->gen() % 4;

@@ -145,6 +145,7 @@ public:
   }
 
   GLuint handle() const { return mProgram.mHandle; }
+  VertexLayout vertexLayout() const { return mVertexLayout; }
 
 private:
   GLint location(const std::string& name) const;

@@ -31,4 +31,13 @@ std::ostream& operator<<(std::ostream& stream, const Vec2T<ValueT>& point)
   return stream;
 }
 
+
+template <typename ValueT>
+std::ostream& operator<<(std::ostream& stream, const Rect<ValueT>& rect)
+{
+  stream << "Rect{" << rect.topLeft.x << ", " << rect.topLeft.y << ", "
+         << rect.size.width << ", " << rect.size.height << '}';
+  return stream;
+}
+
 } // namespace rigel::base

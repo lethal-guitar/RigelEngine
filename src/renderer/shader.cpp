@@ -116,12 +116,6 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type)
   return shader;
 }
 
-
-void* toAttribOffset(std::uintptr_t offset)
-{
-  return reinterpret_cast<void*>(offset);
-}
-
 } // namespace
 
 
@@ -193,32 +187,6 @@ Shader::Shader(const ShaderSpec& spec)
 void Shader::use() const
 {
   glUseProgram(mProgram.mHandle);
-
-  switch (mVertexLayout)
-  {
-    case VertexLayout::PositionAndTexCoords:
-      glVertexAttribPointer(
-        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, toAttribOffset(0));
-      glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 4,
-        toAttribOffset(sizeof(float) * 2));
-      break;
-
-    case VertexLayout::PositionAndColor:
-      glVertexAttribPointer(
-        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, toAttribOffset(0));
-      glVertexAttribPointer(
-        1,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(float) * 6,
-        toAttribOffset(sizeof(float) * 2));
-  }
 }
 
 

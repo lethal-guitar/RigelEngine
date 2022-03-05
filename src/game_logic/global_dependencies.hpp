@@ -169,6 +169,12 @@ struct MissileDetonated
 };
 
 
+struct TileBurnedAway
+{
+  base::Vec2 mPosition;
+};
+
+
 struct PlayerDied
 {
 };

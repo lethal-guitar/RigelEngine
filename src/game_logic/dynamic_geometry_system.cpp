@@ -203,6 +203,7 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   pEvents->subscribe<events::ShootableKilled>(*this);
   pEvents->subscribe<rigel::events::DoorOpened>(*this);
   pEvents->subscribe<rigel::events::MissileDetonated>(*this);
+  pEvents->subscribe<rigel::events::TileBurnedAway>(*this);
 }
 
 
@@ -245,6 +246,14 @@ void DynamicGeometrySystem::receive(
     event.mImpactPosition - base::Vec2{0, 2}, {3, 3}};
   explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
   mpEvents->emit(rigel::events::ScreenFlash{});
+}
+
+
+void DynamicGeometrySystem::receive(const rigel::events::TileBurnedAway& event)
+{
+  const auto [x, y] = event.mPosition;
+  mpMap->setTileAt(0, x, y, 0);
+  mpMap->setTileAt(1, x, y, 0);
 }
 
 

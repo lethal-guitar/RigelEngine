@@ -18,6 +18,7 @@
 
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
+#include "renderer/vertex_buffer_utils.hpp"
 
 #include <cassert>
 
@@ -64,6 +65,20 @@ void TiledTexture::renderTileStretched(
 void TiledTexture::renderTile(const int index, const int x, const int y) const
 {
   renderTileGroup(index, x, y, 1, 1);
+}
+
+
+renderer::QuadVertices TiledTexture::generateVertices(
+  const int index,
+  const int posX,
+  const int posY) const
+{
+  return renderer::createTexturedQuadVertices(
+    renderer::toTexCoords(
+      sourceRect(index, 1, 1),
+      mTileSetTexture.width(),
+      mTileSetTexture.height()),
+    {tileVectorToPixelVector({posX, posY}), tileExtentsToPixelExtents({1, 1})});
 }
 
 

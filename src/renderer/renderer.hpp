@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/color.hpp"
 #include "base/defer.hpp"
 #include "base/warnings.hpp"
@@ -33,6 +34,11 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::renderer
 {
+
+using VertexBufferId = std::uint64_t;
+
+constexpr auto INVALID_VERTEX_BUFFER_ID = VertexBufferId(0);
+
 
 /** OpenGL-based 2D rendering API
  *
@@ -95,6 +101,10 @@ public:
   void drawPoint(const base::Vec2& position, const base::Color& color);
 
   void drawCustomQuadBatch(const CustomQuadBatchData& batch);
+
+  void submitVertexBuffers(
+    base::ArrayView<VertexBufferId> buffers,
+    TextureId texture);
 
   /** Draw rectangle outline, 1 pixel wide
    *
@@ -165,6 +175,9 @@ public:
 
   // Resource management API
   ////////////////////////////////////////////////////////////////////////
+
+  VertexBufferId createVertexBuffer(base::ArrayView<float> vertices);
+  void destroyVertexBuffer(const VertexBufferId buffer);
 
   /** Create a texture
    *

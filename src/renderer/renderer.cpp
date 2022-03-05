@@ -78,6 +78,20 @@ private:
 };
 
 
+VertexBufferId packVertexBuffer(const GLuint vbo, const uint16_t size)
+{
+  static_assert(sizeof(GLuint) == sizeof(uint32_t));
+
+  return uint32_t(vbo) | (uint64_t(size) << 32);
+}
+
+
+std::tuple<GLuint, uint16_t> unpackVertexBuffer(const VertexBufferId buffer)
+{
+  return {GLuint(buffer & 0xFFFFFFFF), uint16_t(buffer >> 32)};
+}
+
+
 struct RenderTarget
 {
   base::Extents mSize;
@@ -100,6 +114,12 @@ glm::vec4 toGlColor(const base::Color& color)
 }
 
 
+void* toAttribOffset(std::uintptr_t offset)
+{
+  return reinterpret_cast<void*>(offset);
+}
+
+
 void setScissorBox(
   const base::Rect<int>& clipRect,
   const base::Size<int>& frameBufferSize)
@@ -110,6 +130,36 @@ void setScissorBox(
     offsetAtBottom - 1,
     clipRect.size.width,
     clipRect.size.height);
+}
+
+
+void setVertexLayout(const VertexLayout layout)
+{
+  switch (layout)
+  {
+    case VertexLayout::PositionAndTexCoords:
+      glVertexAttribPointer(
+        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 4,
+        toAttribOffset(sizeof(float) * 2));
+      break;
+
+    case VertexLayout::PositionAndColor:
+      glVertexAttribPointer(
+        0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, toAttribOffset(0));
+      glVertexAttribPointer(
+        1,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(float) * 6,
+        toAttribOffset(sizeof(float) * 2));
+  }
 }
 
 
@@ -226,6 +276,7 @@ struct Renderer::Impl
 
   // cold
   int mNumTextures = 0;
+  int mNumVbos = 0;
   DummyVao mDummyVao;
   GLuint mStreamVbo = 0;
 
@@ -289,6 +340,7 @@ struct Renderer::Impl
     // before the renderer is destroyed.
     assert(mRenderTargetDict.empty());
     assert(mNumTextures == 0);
+    assert(mNumVbos == 0);
 
     glDeleteBuffers(1, &mStreamVbo);
     glDeleteBuffers(1, &mQuadIndicesEbo);
@@ -506,6 +558,42 @@ struct Renderer::Impl
   }
 
 
+  void submitVertexBuffers(
+    const base::ArrayView<VertexBufferId> buffers,
+    const TextureId texture)
+  {
+    updateState(mRenderMode, RenderMode::SpriteBatch);
+
+    if (texture != mLastUsedTexture)
+    {
+      submitBatch();
+
+      glBindTexture(GL_TEXTURE_2D, texture);
+      mLastUsedTexture = texture;
+    }
+
+    commitChangedState();
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadIndicesEbo);
+
+    const auto layout = shaderToUse(mStateStack.back()).vertexLayout();
+
+    for (const auto buffer : buffers)
+    {
+      const auto [vbo, size] = unpackVertexBuffer(buffer);
+
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      setVertexLayout(layout);
+      glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_SHORT, nullptr);
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
+    setVertexLayout(layout);
+  }
+
+
   void pushState() { mStateStack.push_back(mStateStack.back()); }
 
 
@@ -659,7 +747,7 @@ struct Renderer::Impl
       commitRenderTarget(state);
       glViewport(0, 0, framebufferSize.width, framebufferSize.height);
       commitClipRect(state, framebufferSize);
-      commitShaderSelection(state);
+      commitVertexAttributeFormat(state);
 
       transformNeedsUpdate = true;
     }
@@ -767,10 +855,17 @@ struct Renderer::Impl
   }
 
 
+  void commitVertexAttributeFormat(const State& state)
+  {
+    setVertexLayout(shaderToUse(state).vertexLayout());
+  }
+
+
   void commitShaderSelection(const State& state)
   {
     auto& shader = shaderToUse(state);
     shader.use();
+    setVertexLayout(shader.vertexLayout());
 
     if (shader.handle() == mTexturedQuadShader.handle())
     {
@@ -803,6 +898,40 @@ struct Renderer::Impl
     const auto projectionMatrix =
       computeTransformationMatrix(state, framebufferSize);
     shaderToUse(state).setUniform("transform", projectionMatrix);
+  }
+
+
+  VertexBufferId createVertexBuffer(const base::ArrayView<float> vertices)
+  {
+    GLuint vbo = 0;
+    glGenBuffers(1, &vbo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(float) * vertices.size(),
+      vertices.data(),
+      GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mStreamVbo);
+
+    const auto size = uint16_t(
+      vertices.size() / std::tuple_size<renderer::QuadVertices>::value *
+      std::size(QUAD_INDICES));
+
+    ++mNumVbos;
+
+    return packVertexBuffer(vbo, size);
+  }
+
+
+  void destroyVertexBuffer(const VertexBufferId buffer)
+  {
+    assert(buffer != INVALID_VERTEX_BUFFER_ID);
+
+    const auto [vbo, _] = unpackVertexBuffer(buffer);
+    glDeleteBuffers(1, &vbo);
+
+    --mNumVbos;
   }
 
 
@@ -1002,6 +1131,14 @@ void Renderer::drawCustomQuadBatch(const CustomQuadBatchData& batch)
 }
 
 
+void Renderer::submitVertexBuffers(
+  const base::ArrayView<VertexBufferId> buffers,
+  const TextureId texture)
+{
+  mpImpl->submitVertexBuffers(buffers, texture);
+}
+
+
 void Renderer::pushState()
 {
   mpImpl->pushState();
@@ -1093,6 +1230,19 @@ void Renderer::swapBuffers()
 void Renderer::clear(const base::Color& clearColor)
 {
   mpImpl->clear(clearColor);
+}
+
+
+VertexBufferId
+  Renderer::createVertexBuffer(const base::ArrayView<float> vertices)
+{
+  return mpImpl->createVertexBuffer(vertices);
+}
+
+
+void Renderer::destroyVertexBuffer(const VertexBufferId buffer)
+{
+  mpImpl->destroyVertexBuffer(buffer);
 }
 
 

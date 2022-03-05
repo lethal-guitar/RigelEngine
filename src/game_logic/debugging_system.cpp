@@ -196,10 +196,9 @@ void DebuggingSystem::update(
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
 
-    es.each<WorldPosition, game_logic::components::MapGeometryLink>(
+    es.each<game_logic::components::MapGeometryLink>(
       [&](
         ex::Entity entity,
-        const WorldPosition& pos,
         const game_logic::components::MapGeometryLink& link) {
         const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto boxInPixels = BoundingBox{
