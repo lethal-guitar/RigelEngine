@@ -1001,18 +1001,7 @@ void GameWorld::drawMapAndSprites(
     }
   };
 
-  auto renderBackgroundLayers = [&]() {
-    state.mMapRenderer.renderBackground(
-      params.mRenderStartPosition, params.mViewportSize);
-    state.mSpriteRenderingSystem.renderRegularSprites();
-  };
-
-  auto renderForegroundLayers = [&]() {
-    state.mMapRenderer.renderForeground(
-      params.mRenderStartPosition, params.mViewportSize);
-    state.mSpriteRenderingSystem.renderForegroundSprites();
-
-    // tile debris
+  auto renderTileDebris = [&]() {
     state.mEntities.each<TileDebris, WorldPosition>(
       [&](
         entityx::Entity e, const TileDebris& debris, const WorldPosition& pos) {
@@ -1023,6 +1012,19 @@ void GameWorld::drawMapAndSprites(
           pixelPosition -
             data::tileVectorToPixelVector(params.mRenderStartPosition));
       });
+  };
+
+  auto renderBackgroundLayers = [&]() {
+    state.mMapRenderer.renderBackground(
+      params.mRenderStartPosition, params.mViewportSize);
+    state.mSpriteRenderingSystem.renderRegularSprites();
+  };
+
+  auto renderForegroundLayers = [&]() {
+    state.mMapRenderer.renderForeground(
+      params.mRenderStartPosition, params.mViewportSize);
+    state.mSpriteRenderingSystem.renderForegroundSprites();
+    renderTileDebris();
   };
 
 
