@@ -94,7 +94,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
   {
     // TODO: This is a workaround to make the fadeout on quitting work.
     // Would be good to find a better way to do this.
-    mWorld.render();
+    mWorld.render(interpolationFactor(dt));
     return;
   }
 
@@ -104,12 +104,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
   }
 
   updateWorld(dt);
-
-  const auto interpolationFactor =
-    mContext.mpUserProfile->mOptions.mMotionSmoothing
-    ? static_cast<float>(mAccumulatedTime / game_logic::GAME_LOGIC_UPDATE_DELAY)
-    : 1.0f;
-  mWorld.render(interpolationFactor);
+  mWorld.render(interpolationFactor(dt));
 
   renderDebugText();
   mWorld.processEndOfFrameActions();
@@ -119,6 +114,14 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
 bool GameRunner::needsPerElementUpscaling() const
 {
   return mWorld.needsPerElementUpscaling();
+}
+
+
+float GameRunner::interpolationFactor(const engine::TimeDelta dt) const
+{
+  return mContext.mpUserProfile->mOptions.mMotionSmoothing
+    ? static_cast<float>(mAccumulatedTime / game_logic::GAME_LOGIC_UPDATE_DELAY)
+    : 1.0f;
 }
 
 
@@ -159,7 +162,7 @@ bool GameRunner::updateMenu(const engine::TimeDelta dt)
 
     if (mMenu.isTransparent())
     {
-      mWorld.render();
+      mWorld.render(interpolationFactor(dt));
     }
 
     const auto result = mMenu.updateAndRender(dt);
@@ -167,7 +170,7 @@ bool GameRunner::updateMenu(const engine::TimeDelta dt)
     if (result == ui::IngameMenu::UpdateResult::FinishedNeedsFadeout)
     {
       mContext.mpServiceProvider->fadeOutScreen();
-      mWorld.render();
+      mWorld.render(interpolationFactor(dt));
       mContext.mpServiceProvider->fadeInScreen();
     }
 
