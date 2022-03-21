@@ -52,10 +52,7 @@ public:
 
   void synchronizeTo(const Camera& other);
 
-  void update(
-    const PlayerInput& input,
-    const base::Extents& viewportSize,
-    const base::Extents& renderViewportSize);
+  void update(const PlayerInput& input, const base::Extents& viewportSize);
   void centerViewOnPlayer();
 
   const base::Vec2& position() const;
@@ -71,7 +68,6 @@ private:
   const data::map::Map* mpMap;
   base::Vec2 mPosition;
   base::Extents mViewportSize;
-  base::Extents mRenderViewportSize;
   int mManualScrollCooldown = 0;
 };
 

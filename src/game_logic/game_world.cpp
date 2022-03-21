@@ -655,10 +655,6 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   const auto& viewportSize = widescreenModeOn()
     ? viewportSizeWideScreen(mpRenderer)
     : data::GameTraits::mapViewportSize;
-  const auto& renderingViewportSize = widescreenModeOn()
-    ? base::
-        Extents{viewportSize.width, data::GameTraits::viewportHeightTiles - 1}
-    : viewportSize;
 
   mpState->mMapRenderer.updateAnimatedMapTiles();
   engine::updateAnimatedSprites(mpState->mEntities);
@@ -672,7 +668,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
     input, mpState->mEntities);
   mpState->mPlayer.update(input);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
-  mpState->mCamera.update(input, viewportSize, renderingViewportSize);
+  mpState->mCamera.update(input, viewportSize);
 
   engine::markActiveEntities(
     mpState->mEntities, mpState->mCamera.position(), viewportSize);
@@ -705,18 +701,10 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
 
   mpState->mParticles.update();
 
-  // As far as game logic is concerned, the viewport is always the same height
-  // regardless of widescreen mode being on or off. But since the HUD doesn't
-  // cover the entire width of the screen in widescreen mode, we need a larger
-  // viewport height for rendering to ensure that sprites in the lower left of
-  // the screen are rendered.
   if (!mpOptions->mMotionSmoothing)
   {
     mpState->mSpriteRenderingSystem.update(
-      mpState->mEntities,
-      renderingViewportSize,
-      mpState->mCamera.position(),
-      1.0f);
+      mpState->mEntities, viewportSize, mpState->mCamera.position(), 1.0f);
   }
 
   mpState->mIsOddFrame = !mpState->mIsOddFrame;
@@ -740,22 +728,18 @@ void GameWorld::render(const float interpolationFactor)
     mMotionSmoothingWasEnabled = mpOptions->mMotionSmoothing;
   }
 
-  auto setupWorldClipRect = [&](const auto& viewportParams) {
-    const auto clampedSize = clampedSectionSize(
-      viewportParams.mRenderStartPosition,
-      viewportParams.mViewportSize,
-      mpState->mMap);
-    const auto clampedSizePx = data::tileExtentsToPixelExtents(clampedSize);
-    const auto smoothedSize = base::Extents{
-      clampedSizePx.width + viewportParams.mCameraOffset.x,
-      clampedSizePx.height + viewportParams.mCameraOffset.y};
+  auto setupWorldClipRect =
+    [&](const auto& renderStart, const auto& viewportSize) {
+      const auto clampedSize =
+        clampedSectionSize(renderStart, viewportSize, mpState->mMap);
+      const auto clampedSizePx = data::tileExtentsToPixelExtents(clampedSize);
 
-    auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setClipRect(base::Rect<int>{
-      mpRenderer->globalTranslation(),
-      renderer::scaleSize(smoothedSize, mpRenderer->globalScale())});
-    return saved;
-  };
+      auto saved = renderer::saveState(mpRenderer);
+      mpRenderer->setClipRect(base::Rect<int>{
+        mpRenderer->globalTranslation(),
+        renderer::scaleSize(clampedSizePx, mpRenderer->globalScale())});
+      return saved;
+    };
 
   auto drawParticlesAndDebugOverlay =
     [&](const ViewportParams& viewportParams) {
@@ -781,7 +765,8 @@ void GameWorld::render(const float interpolationFactor)
       determineSmoothScrollViewport(viewportSize, interpolationFactor);
 
     // prevent out of bounds areas from showing the backdrop/sprites
-    auto clipRectGuard = setupWorldClipRect(viewportParams);
+    auto clipRectGuard =
+      setupWorldClipRect(viewportParams.mRenderStartPosition, viewportSize);
 
     if (mpOptions->mPerElementUpscalingEnabled)
     {
@@ -833,6 +818,19 @@ void GameWorld::render(const float interpolationFactor)
     mHudRenderer.render(*mpPlayerModel, radarDots);
   };
 
+  auto drawHudExtension = [&](const int viewportWidth) {
+    // Space to the left of the HUD
+    const auto extraWidth =
+      data::tilesToPixels(viewportWidth - ui::HUD_WIDTH_TOTAL);
+    const auto hudStartY =
+      data::tilesToPixels(data::GameTraits::mapViewportHeightTiles);
+    constexpr auto hudHeightPx = data::tilesToPixels(ui::HUD_HEIGHT_BOTTOM);
+
+    mpRenderer->drawFilledRectangle(
+      {{0, hudStartY + 1}, {extraWidth - 1, hudHeightPx - 2}},
+      data::GameTraits::INGAME_PALETTE[1]);
+  };
+
 
   if (widescreenModeOn())
   {
@@ -840,7 +838,8 @@ void GameWorld::render(const float interpolationFactor)
 
     const auto info = renderer::determineWidescreenViewport(mpRenderer);
     const auto viewportSize = base::Extents{
-      info.mWidthTiles - 6, data::GameTraits::viewportHeightTiles - 1};
+      info.mWidthTiles - ui::HUD_WIDTH_RIGHT,
+      data::GameTraits::mapViewportHeightTiles};
 
     if (!mWidescreenModeWasOn && !mpOptions->mMotionSmoothing)
     {
@@ -855,6 +854,8 @@ void GameWorld::render(const float interpolationFactor)
           mpRenderer, info, mpState->mScreenShakeOffsetX);
 
         drawWorld(viewportSize);
+
+        drawHudExtension(info.mWidthTiles);
 
         setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
         drawHud();
@@ -877,6 +878,8 @@ void GameWorld::render(const float interpolationFactor)
         mpState->mScreenShakeOffsetX,
         data::GameTraits::inGameViewportOffset.y});
       drawWorld(viewportSize);
+
+      drawHudExtension(info.mWidthTiles);
 
       setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
       drawHud();
@@ -1001,18 +1004,7 @@ void GameWorld::drawMapAndSprites(
     }
   };
 
-  auto renderBackgroundLayers = [&]() {
-    state.mMapRenderer.renderBackground(
-      params.mRenderStartPosition, params.mViewportSize);
-    state.mSpriteRenderingSystem.renderRegularSprites();
-  };
-
-  auto renderForegroundLayers = [&]() {
-    state.mMapRenderer.renderForeground(
-      params.mRenderStartPosition, params.mViewportSize);
-    state.mSpriteRenderingSystem.renderForegroundSprites();
-
-    // tile debris
+  auto renderTileDebris = [&]() {
     state.mEntities.each<TileDebris, WorldPosition>(
       [&](
         entityx::Entity e, const TileDebris& debris, const WorldPosition& pos) {
@@ -1023,6 +1015,19 @@ void GameWorld::drawMapAndSprites(
           pixelPosition -
             data::tileVectorToPixelVector(params.mRenderStartPosition));
       });
+  };
+
+  auto renderBackgroundLayers = [&]() {
+    state.mMapRenderer.renderBackground(
+      params.mRenderStartPosition, params.mViewportSize);
+    state.mSpriteRenderingSystem.renderRegularSprites();
+  };
+
+  auto renderForegroundLayers = [&]() {
+    state.mMapRenderer.renderForeground(
+      params.mRenderStartPosition, params.mViewportSize);
+    state.mSpriteRenderingSystem.renderForegroundSprites();
+    renderTileDebris();
   };
 
 
