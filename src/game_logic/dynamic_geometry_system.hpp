@@ -78,6 +78,7 @@ class DynamicGeometrySystem : public entityx::Receiver<DynamicGeometrySystem>
 {
 public:
   DynamicGeometrySystem(
+    renderer::Renderer* pRenderer,
     IGameServiceProvider* pServiceProvider,
     entityx::EntityManager* pEntityManager,
     data::map::Map* pMap,
@@ -110,6 +111,7 @@ private:
     float interpolationFactor,
     engine::MapRenderer::DrawMode drawMode);
 
+  renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   entityx::EntityManager* mpEntityManager;
   data::map::Map* mpMap;

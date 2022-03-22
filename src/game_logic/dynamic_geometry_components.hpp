@@ -18,9 +18,11 @@
 
 #include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
+#include "engine/map_renderer.hpp"
 #include "game_logic/global_dependencies.hpp"
 
 #include <optional>
+#include <vector>
 
 
 namespace rigel::game_logic
@@ -42,6 +44,7 @@ struct DynamicGeometrySection
   explicit DynamicGeometrySection(
     engine::components::BoundingBox geometrySection)
     : mLinkedGeometrySection(geometrySection)
+    , mPreviousHeight(geometrySection.size.height)
   {
   }
 
@@ -66,6 +69,10 @@ struct DynamicGeometrySection
 
   engine::components::BoundingBox mLinkedGeometrySection;
   std::optional<ExtraSection> mExtraSection;
+
+  // These two are for interpolation while sinking
+  std::vector<engine::PackedTileData> mBottomRowCopy;
+  int mPreviousHeight;
 };
 
 

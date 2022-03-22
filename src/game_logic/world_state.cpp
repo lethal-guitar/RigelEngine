@@ -258,6 +258,7 @@ WorldState::WorldState(
       &mMap)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &mEventManager)
   , mDynamicGeometrySystem(
+      pRenderer,
       pServiceProvider,
       &mEntities,
       &mMap,

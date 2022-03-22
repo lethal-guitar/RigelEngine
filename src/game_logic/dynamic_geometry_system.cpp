@@ -33,6 +33,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
+#include "renderer/upscaling_utils.hpp"
 
 
 namespace rigel::game_logic
@@ -192,6 +193,28 @@ void squashTileSection(base::Rect<int>& mapSection, data::map::Map& map)
   --mapSection.size.height;
 }
 
+
+base::Rect<int> localToGlobalClipRect(
+  const renderer::Renderer* pRenderer,
+  const base::Rect<int> localRect)
+{
+  const auto scale = pRenderer->globalScale();
+  const auto offset = pRenderer->globalTranslation() +
+    renderer::scaleVec(localRect.topLeft, scale);
+  const auto size = renderer::scaleSize(localRect.size, scale);
+
+  if (const auto existingClipRect = pRenderer->clipRect())
+  {
+    return {
+      {std::max(existingClipRect->left(), offset.x),
+       std::max(existingClipRect->top(), offset.y)},
+      {std::min(existingClipRect->size.width, size.width),
+       std::min(existingClipRect->size.height, size.height)}};
+  }
+
+  return {offset, size};
+}
+
 } // namespace
 
 
@@ -343,6 +366,7 @@ DynamicMapSectionData determineDynamicMapSections(
 
 
 DynamicGeometrySystem::DynamicGeometrySystem(
+  renderer::Renderer* pRenderer,
   IGameServiceProvider* pServiceProvider,
   entityx::EntityManager* pEntityManager,
   data::map::Map* pMap,
@@ -350,7 +374,8 @@ DynamicGeometrySystem::DynamicGeometrySystem(
   entityx::EventManager* pEvents,
   engine::MapRenderer* pMapRenderer,
   std::vector<base::Rect<int>> simpleDynamicSections)
-  : mpServiceProvider(pServiceProvider)
+  : mpRenderer(pRenderer)
+  , mpServiceProvider(pServiceProvider)
   , mpEntityManager(pEntityManager)
   , mpMap(pMap)
   , mpRandomGenerator(pRandomGenerator)
@@ -528,15 +553,57 @@ void DynamicGeometrySystem::renderDynamicSections(
       const WorldPosition&) {
       // Render the geometry with smoothing, to make falling pieces of the map
       // appear smooth.
-      if (screenRect.intersects(dynamic.mLinkedGeometrySection))
+      if (
+        screenRect.intersects(dynamic.mLinkedGeometrySection) ||
+        (dynamic.mPreviousHeight > 0 &&
+         dynamic.mLinkedGeometrySection.size.height == 0))
       {
+        const auto heightDecrease =
+          dynamic.mPreviousHeight - dynamic.mLinkedGeometrySection.size.height;
+        const auto interpolatedHeightDecrease =
+          heightDecrease * interpolationFactor;
+        const auto offsetForSinking = base::round(
+          data::tilesToPixels(heightDecrease - interpolatedHeightDecrease));
+
         const auto pixelPos =
           engine::interpolatedPixelPosition(e, interpolationFactor) -
           data::tileVectorToPixelVector(
             base::Vec2{0, dynamic.mLinkedGeometrySection.size.height - 1} +
-            sectionStart);
+            sectionStart) -
+          base::Vec2{0, offsetForSinking};
         mpMapRenderer->renderDynamicSection(
           *mpMap, dynamic.mLinkedGeometrySection, pixelPos, drawMode);
+
+        // For geometry that's sinking into the ground, we have to render
+        // the bottom row separately - it has already been removed from the
+        // map at this point, but we still have a copy that we can use to
+        // render the intermediate steps.
+        if (offsetForSinking > 0)
+        {
+          const auto position =
+            base::Vec2{
+              dynamic.mLinkedGeometrySection.left(),
+              dynamic.mLinkedGeometrySection.bottom()} -
+            sectionStart;
+
+          const auto lastRowOffset =
+            base::round(data::tilesToPixels(interpolatedHeightDecrease));
+          const auto lastRowPixelPos = data::tileVectorToPixelVector(position) +
+            base::Vec2{0, lastRowOffset};
+          const auto allowedHeight = offsetForSinking;
+
+          const auto saved = renderer::saveState(mpRenderer);
+          mpRenderer->setClipRect(localToGlobalClipRect(
+            mpRenderer,
+            {lastRowPixelPos,
+             {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
+              allowedHeight}}));
+          mpMapRenderer->renderCachedSection(
+            lastRowPixelPos,
+            dynamic.mBottomRowCopy,
+            dynamic.mLinkedGeometrySection.size.width,
+            drawMode);
+        }
       }
 
       // If there are non-zero tiles below the falling piece of geometry, we
@@ -577,6 +644,8 @@ void behaviors::DynamicGeometryController::update(
   auto& position = *entity.component<WorldPosition>();
   auto& dynamic = *entity.component<DynamicGeometrySection>();
   auto& mapSection = dynamic.mLinkedGeometrySection;
+
+  dynamic.mPreviousHeight = mapSection.size.height;
 
   auto isOnSolidGround = [&]() {
     if (mapSection.bottom() >= s.mpMap->height() - 1)
@@ -637,12 +706,23 @@ void behaviors::DynamicGeometryController::update(
   };
 
   auto sink = [&]() {
-    if (mapSection.size.height == 1)
+    // Grab a copy of the bottom row for interpolation during sinking
+    dynamic.mBottomRowCopy = engine::copyMapData(
+      {{mapSection.left(), mapSection.bottom()}, {mapSection.size.width, 1}},
+      *s.mpMap);
+
+    if (mapSection.size.height == 0)
+    {
+      entity.destroy();
+    }
+    else if (mapSection.size.height == 1)
     {
       s.mpMap->clearSection(
         mapSection.topLeft.x, mapSection.topLeft.y, mapSection.size.width, 1);
       d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
-      entity.destroy();
+
+      ++mapSection.topLeft.y;
+      mapSection.size.height = 0;
     }
     else
     {
