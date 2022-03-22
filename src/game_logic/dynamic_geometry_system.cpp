@@ -551,6 +551,11 @@ void DynamicGeometrySystem::renderDynamicSections(
       entityx::Entity e,
       const DynamicGeometrySection& dynamic,
       const WorldPosition&) {
+      const auto interpolatedPixelPos =
+        engine::interpolatedPixelPosition(e, interpolationFactor) -
+        data::tileVectorToPixelVector(
+          base::Vec2{0, dynamic.mLinkedGeometrySection.size.height - 1});
+
       // Render the geometry with smoothing, to make falling pieces of the map
       // appear smooth.
       if (
@@ -565,11 +570,8 @@ void DynamicGeometrySystem::renderDynamicSections(
         const auto offsetForSinking = base::round(
           data::tilesToPixels(heightDecrease - interpolatedHeightDecrease));
 
-        const auto pixelPos =
-          engine::interpolatedPixelPosition(e, interpolationFactor) -
-          data::tileVectorToPixelVector(
-            base::Vec2{0, dynamic.mLinkedGeometrySection.size.height - 1} +
-            sectionStart) -
+        const auto pixelPos = interpolatedPixelPos -
+          data::tileVectorToPixelVector(sectionStart) -
           base::Vec2{0, offsetForSinking};
         mpMapRenderer->renderDynamicSection(
           *mpMap, dynamic.mLinkedGeometrySection, pixelPos, drawMode);
@@ -611,23 +613,44 @@ void DynamicGeometrySystem::renderDynamicSections(
       // piece of geometry is falling down. Also see comment in
       // initializeDynamicGeometryEntities().
       if (const auto extraSectionRect = dynamic.extraSectionRect();
-          extraSectionRect && extraSectionRect->size.height > 0 &&
-          screenRect.intersects(*extraSectionRect))
+          extraSectionRect && screenRect.intersects(*extraSectionRect))
       {
-        const auto numSkippedRows =
-          dynamic.mExtraSection->mHeight - extraSectionRect->size.height;
-        const auto numSkippedTiles =
-          numSkippedRows * extraSectionRect->size.width;
-        const auto mapDataView = base::ArrayView<uint32_t>{
-          dynamic.mExtraSection->mMapData.data() + numSkippedTiles,
-          base::ArrayView<uint32_t>::size_type(
-            dynamic.mExtraSection->mMapData.size() - numSkippedTiles)};
-        mpMapRenderer->renderCachedSection(
-          data::tileVectorToPixelVector(
-            extraSectionRect->topLeft - sectionStart),
-          mapDataView,
-          extraSectionRect->size.width,
-          drawMode);
+        const auto interpolatedBottomPos = interpolatedPixelPos +
+          base::Vec2{
+            0, data::tilesToPixels(dynamic.mLinkedGeometrySection.size.height)};
+
+        if (
+          interpolatedBottomPos.y <
+          data::tilesToPixels(extraSectionRect->top()))
+        {
+          mpMapRenderer->renderCachedSection(
+            data::tileVectorToPixelVector(
+              extraSectionRect->topLeft - sectionStart),
+            dynamic.mExtraSection->mMapData,
+            extraSectionRect->size.width,
+            drawMode);
+        }
+        else
+        {
+          const auto startPos =
+            interpolatedBottomPos - data::tileVectorToPixelVector(sectionStart);
+          const auto visibleHeight =
+            data::tilesToPixels(extraSectionRect->bottom() + 1) -
+            interpolatedBottomPos.y;
+
+          const auto saved = renderer::saveState(mpRenderer);
+          mpRenderer->setClipRect(localToGlobalClipRect(
+            mpRenderer,
+            {startPos,
+             {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
+              visibleHeight}}));
+          mpMapRenderer->renderCachedSection(
+            data::tileVectorToPixelVector(
+              extraSectionRect->topLeft - sectionStart),
+            dynamic.mExtraSection->mMapData,
+            extraSectionRect->size.width,
+            drawMode);
+        }
       }
     });
 }
@@ -731,6 +754,7 @@ void behaviors::DynamicGeometryController::update(
   };
 
   auto land = [&]() {
+    dynamic.mExtraSection = std::nullopt;
     d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
     d.mpEvents->emit(rigel::events::ScreenShake{7});
   };

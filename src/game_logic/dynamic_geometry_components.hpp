@@ -50,21 +50,14 @@ struct DynamicGeometrySection
 
   std::optional<base::Rect<int>> extraSectionRect() const
   {
-    if (!mExtraSection)
+    if (mExtraSection)
     {
-      return std::nullopt;
+      return base::Rect<int>{
+        {mLinkedGeometrySection.left(), mExtraSection->mTop},
+        {mLinkedGeometrySection.size.width, mExtraSection->mHeight}};
     }
 
-    const auto actualTop =
-      std::max(mExtraSection->mTop, mLinkedGeometrySection.bottom() + 1);
-    const auto removedHeight =
-      std::min(mExtraSection->mHeight, actualTop - mExtraSection->mTop);
-    const auto actualHeight =
-      std::max(0, mExtraSection->mHeight - removedHeight);
-
-    return base::Rect<int>{
-      {mLinkedGeometrySection.left(), actualTop},
-      {mLinkedGeometrySection.size.width, actualHeight}};
+    return std::nullopt;
   }
 
   engine::components::BoundingBox mLinkedGeometrySection;
