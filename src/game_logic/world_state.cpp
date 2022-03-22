@@ -86,12 +86,12 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   copyComponentIfPresent<DamageInflicting>(from, to);
   copyComponentIfPresent<DestructionEffects>(from, to);
   copyComponentIfPresent<DrawTopMost>(from, to);
+  copyComponentIfPresent<DynamicGeometrySection>(from, to);
   copyComponentIfPresent<ExtendedFrameList>(from, to);
   copyComponentIfPresent<Interactable>(from, to);
   copyComponentIfPresent<InterpolateMotion>(from, to);
   copyComponentIfPresent<ItemBounceEffect>(from, to);
   copyComponentIfPresent<ItemContainer>(from, to);
-  copyComponentIfPresent<MapGeometryLink>(from, to);
   copyComponentIfPresent<MovementSequence>(from, to);
   copyComponentIfPresent<MovingBody>(from, to);
   copyComponentIfPresent<Orientation>(from, to);

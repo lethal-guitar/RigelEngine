@@ -196,19 +196,19 @@ void DebuggingSystem::update(
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
 
-    es.each<game_logic::components::MapGeometryLink>(
+    es.each<game_logic::components::DynamicGeometrySection>(
       [&](
         ex::Entity entity,
-        const game_logic::components::MapGeometryLink& link) {
+        const game_logic::components::DynamicGeometrySection& dynamic) {
         const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
         const auto boxInPixels = BoundingBox{
-          tileVectorToPixelVector(link.mLinkedGeometrySection.topLeft) -
+          tileVectorToPixelVector(dynamic.mLinkedGeometrySection.topLeft) -
             worldToScreenPx,
-          tileExtentsToPixelExtents(link.mLinkedGeometrySection.size)};
+          tileExtentsToPixelExtents(dynamic.mLinkedGeometrySection.size)};
 
         mpRenderer->drawRectangle(boxInPixels, base::Color{0, 255, 255, 190});
 
-        if (const auto extraSectionRect = link.extraSectionRect())
+        if (const auto extraSectionRect = dynamic.extraSectionRect())
         {
           const auto extraBoxInPixels = BoundingBox{
             tileVectorToPixelVector(extraSectionRect->topLeft) -

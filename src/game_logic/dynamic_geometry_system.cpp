@@ -38,7 +38,7 @@
 namespace rigel::game_logic
 {
 
-using game_logic::components::MapGeometryLink;
+using game_logic::components::DynamicGeometrySection;
 
 namespace
 {
@@ -380,8 +380,9 @@ void DynamicGeometrySystem::initializeDynamicGeometryEntities(
   // appear in the level, and that EntityX preserves the order of creation. So
   // we keep a running index, and use it to match the entities up with the
   // corresponding entries in the fallingSections vector.
-  mpEntityManager->each<MapGeometryLink>(
-    [&, index = 0](entityx::Entity entity, MapGeometryLink& link) mutable {
+  mpEntityManager->each<DynamicGeometrySection>(
+    [&, index = 0](
+      entityx::Entity entity, DynamicGeometrySection& dynamic) mutable {
       // Shootable walls are dynamic geometry, but they do not fall down,
       // hence they are not relevant here.
       if (entity.has_component<components::Shootable>())
@@ -404,7 +405,7 @@ void DynamicGeometrySystem::initializeDynamicGeometryEntities(
       {
         const auto& extraSection = iFallingSectionInfo->mSectionBelow;
 
-        link.mExtraSection = MapGeometryLink::ExtraSection{
+        dynamic.mExtraSection = DynamicGeometrySection::ExtraSection{
           engine::copyMapData(extraSection, *mpMap),
           extraSection.top(),
           extraSection.size.height};
@@ -421,13 +422,13 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event)
 {
   auto entity = event.mEntity;
   // Take care of shootable walls
-  if (!entity.has_component<MapGeometryLink>())
+  if (!entity.has_component<DynamicGeometrySection>())
   {
     return;
   }
 
   const auto& mapSection =
-    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
+    entity.component<DynamicGeometrySection>()->mLinkedGeometrySection;
   explodeMapSection(
     mapSection, *mpMap, *mpEntityManager, *mpEvents, *mpRandomGenerator);
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
@@ -520,37 +521,40 @@ void DynamicGeometrySystem::renderDynamicSections(
   }
 
   // Falling dynamic geometry
-  mpEntityManager->each<MapGeometryLink, WorldPosition>(
-    [&](entityx::Entity e, const MapGeometryLink& link, const WorldPosition&) {
+  mpEntityManager->each<DynamicGeometrySection, WorldPosition>(
+    [&](
+      entityx::Entity e,
+      const DynamicGeometrySection& dynamic,
+      const WorldPosition&) {
       // Render the geometry with smoothing, to make falling pieces of the map
       // appear smooth.
-      if (screenRect.intersects(link.mLinkedGeometrySection))
+      if (screenRect.intersects(dynamic.mLinkedGeometrySection))
       {
         const auto pixelPos =
           engine::interpolatedPixelPosition(e, interpolationFactor) -
           data::tileVectorToPixelVector(
-            base::Vec2{0, link.mLinkedGeometrySection.size.height - 1} +
+            base::Vec2{0, dynamic.mLinkedGeometrySection.size.height - 1} +
             sectionStart);
         mpMapRenderer->renderDynamicSection(
-          *mpMap, link.mLinkedGeometrySection, pixelPos, drawMode);
+          *mpMap, dynamic.mLinkedGeometrySection, pixelPos, drawMode);
       }
 
       // If there are non-zero tiles below the falling piece of geometry, we
       // also need to render them separately since these tiles disappear as the
       // piece of geometry is falling down. Also see comment in
       // initializeDynamicGeometryEntities().
-      if (const auto extraSectionRect = link.extraSectionRect();
+      if (const auto extraSectionRect = dynamic.extraSectionRect();
           extraSectionRect && extraSectionRect->size.height > 0 &&
           screenRect.intersects(*extraSectionRect))
       {
         const auto numSkippedRows =
-          link.mExtraSection->mHeight - extraSectionRect->size.height;
+          dynamic.mExtraSection->mHeight - extraSectionRect->size.height;
         const auto numSkippedTiles =
           numSkippedRows * extraSectionRect->size.width;
         const auto mapDataView = base::ArrayView<uint32_t>{
-          link.mExtraSection->mMapData.data() + numSkippedTiles,
+          dynamic.mExtraSection->mMapData.data() + numSkippedTiles,
           base::ArrayView<uint32_t>::size_type(
-            link.mExtraSection->mMapData.size() - numSkippedTiles)};
+            dynamic.mExtraSection->mMapData.size() - numSkippedTiles)};
         mpMapRenderer->renderCachedSection(
           data::tileVectorToPixelVector(
             extraSectionRect->topLeft - sectionStart),
@@ -571,8 +575,8 @@ void behaviors::DynamicGeometryController::update(
   using namespace engine::components;
 
   auto& position = *entity.component<WorldPosition>();
-  auto& link = *entity.component<MapGeometryLink>();
-  auto& mapSection = link.mLinkedGeometrySection;
+  auto& dynamic = *entity.component<DynamicGeometrySection>();
+  auto& mapSection = dynamic.mLinkedGeometrySection;
 
   auto isOnSolidGround = [&]() {
     if (mapSection.bottom() >= s.mpMap->height() - 1)

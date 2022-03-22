@@ -28,7 +28,7 @@ namespace rigel::game_logic
 namespace components
 {
 
-struct MapGeometryLink
+struct DynamicGeometrySection
 {
   // This represents the area below a piece of dynamic geometry, which
   // will be erased as the piece is falling down.
@@ -39,7 +39,8 @@ struct MapGeometryLink
     int mHeight;
   };
 
-  explicit MapGeometryLink(engine::components::BoundingBox geometrySection)
+  explicit DynamicGeometrySection(
+    engine::components::BoundingBox geometrySection)
     : mLinkedGeometrySection(geometrySection)
   {
   }

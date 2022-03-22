@@ -435,7 +435,7 @@ void EntityFactory::createEntitiesForLevel(
     if (actor.mAssignedArea)
     {
       const auto mapSectionRect = *actor.mAssignedArea;
-      entity.assign<MapGeometryLink>(mapSectionRect);
+      entity.assign<DynamicGeometrySection>(mapSectionRect);
       engine::enableInterpolation(entity);
 
       boundingBox = mapSectionRect;
