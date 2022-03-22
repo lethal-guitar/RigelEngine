@@ -755,18 +755,18 @@ void GameWorld::render(const float interpolationFactor)
     };
 
   auto drawWorld = [&](const base::Extents& viewportSize) {
-    if (mpState->mScreenFlashColor)
-    {
-      mpRenderer->clear(*mpState->mScreenFlashColor);
-      return;
-    }
-
     const auto viewportParams =
       determineSmoothScrollViewport(viewportSize, interpolationFactor);
 
     // prevent out of bounds areas from showing the backdrop/sprites
     auto clipRectGuard =
       setupWorldClipRect(viewportParams.mRenderStartPosition, viewportSize);
+
+    if (mpState->mScreenFlashColor)
+    {
+      mpRenderer->clear(*mpState->mScreenFlashColor);
+      return;
+    }
 
     if (mpOptions->mPerElementUpscalingEnabled)
     {
