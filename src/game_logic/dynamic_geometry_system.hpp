@@ -18,22 +18,25 @@
 
 #include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
+#include "data/map.hpp"
+#include "engine/map_renderer.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <vector>
+
+
 namespace rigel
 {
 struct IGameServiceProvider;
-namespace data::map
-{
-class Map;
-}
+
 namespace engine
 {
+class CollisionChecker;
 class RandomNumberGenerator;
-}
+} // namespace engine
 namespace events
 {
 struct DoorOpened;
@@ -50,27 +53,72 @@ struct ShootableKilled;
 namespace rigel::game_logic
 {
 
+struct FallingSectionInfo
+{
+  base::Rect<int> mSectionBelow;
+  int mIndex;
+};
+
+
+struct DynamicMapSectionData
+{
+  data::map::Map mMapStaticParts;
+
+  std::vector<base::Rect<int>> mSimpleSections;
+  std::vector<FallingSectionInfo> mFallingSections;
+};
+
+
+DynamicMapSectionData determineDynamicMapSections(
+  const data::map::Map& originalMap,
+  const std::vector<data::map::LevelData::Actor>& actorDescriptions);
+
+
 class DynamicGeometrySystem : public entityx::Receiver<DynamicGeometrySystem>
 {
 public:
   DynamicGeometrySystem(
+    renderer::Renderer* pRenderer,
     IGameServiceProvider* pServiceProvider,
     entityx::EntityManager* pEntityManager,
     data::map::Map* pMap,
     engine::RandomNumberGenerator* pRandomGenerator,
-    entityx::EventManager* pEvents);
+    entityx::EventManager* pEvents,
+    engine::MapRenderer* pMapRenderer,
+    std::vector<base::Rect<int>> simpleDynamicSections);
+
+  void initializeDynamicGeometryEntities(
+    const std::vector<FallingSectionInfo>& fallingSections);
 
   void receive(const events::ShootableKilled& event);
   void receive(const rigel::events::DoorOpened& event);
   void receive(const rigel::events::MissileDetonated& event);
   void receive(const rigel::events::TileBurnedAway& event);
 
+  void renderDynamicBackgroundSections(
+    const base::Vec2& sectionStart,
+    const base::Extents& sectionSize,
+    float interpolationFactor);
+  void renderDynamicForegroundSections(
+    const base::Vec2& sectionStart,
+    const base::Extents& sectionSize,
+    float interpolationFactor);
+
 private:
+  void renderDynamicSections(
+    const base::Vec2& sectionStart,
+    const base::Extents& sectionSize,
+    float interpolationFactor,
+    engine::MapRenderer::DrawMode drawMode);
+
+  renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
   entityx::EntityManager* mpEntityManager;
   data::map::Map* mpMap;
   engine::RandomNumberGenerator* mpRandomGenerator;
   entityx::EventManager* mpEvents;
+  engine::MapRenderer* mpMapRenderer;
+  std::vector<base::Rect<int>> mSimpleDynamicSections;
 };
 
 } // namespace rigel::game_logic

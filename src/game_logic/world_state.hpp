@@ -108,6 +108,7 @@ struct CheckpointData
   base::Vec2 mPosition;
 };
 
+
 struct WorldState
 {
   WorldState(
@@ -126,6 +127,16 @@ struct WorldState
     const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId,
+    data::map::LevelData&& loadedLevel);
+  WorldState(
+    IGameServiceProvider* pServiceProvider,
+    renderer::Renderer* pRenderer,
+    const assets::ResourceLoader* pResources,
+    data::PlayerModel* pPlayerModel,
+    const data::GameOptions* pOptions,
+    engine::SpriteFactory* pSpriteFactory,
+    data::GameSessionId sessionId,
+    DynamicMapSectionData&& dynamicMapSections,
     data::map::LevelData&& loadedLevel);
 
   void synchronizeTo(

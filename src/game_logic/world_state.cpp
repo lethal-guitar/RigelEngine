@@ -86,12 +86,12 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   copyComponentIfPresent<DamageInflicting>(from, to);
   copyComponentIfPresent<DestructionEffects>(from, to);
   copyComponentIfPresent<DrawTopMost>(from, to);
+  copyComponentIfPresent<DynamicGeometrySection>(from, to);
   copyComponentIfPresent<ExtendedFrameList>(from, to);
   copyComponentIfPresent<Interactable>(from, to);
   copyComponentIfPresent<InterpolateMotion>(from, to);
   copyComponentIfPresent<ItemBounceEffect>(from, to);
   copyComponentIfPresent<ItemContainer>(from, to);
-  copyComponentIfPresent<MapGeometryLink>(from, to);
   copyComponentIfPresent<MovementSequence>(from, to);
   copyComponentIfPresent<MovingBody>(from, to);
   copyComponentIfPresent<Orientation>(from, to);
@@ -172,6 +172,30 @@ WorldState::WorldState(
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId,
   data::map::LevelData&& loadedLevel)
+  : WorldState(
+      pServiceProvider,
+      pRenderer,
+      pResources,
+      pPlayerModel,
+      pOptions,
+      pSpriteFactory,
+      sessionId,
+      determineDynamicMapSections(loadedLevel.mMap, loadedLevel.mActors),
+      std::move(loadedLevel))
+{
+}
+
+
+WorldState::WorldState(
+  IGameServiceProvider* pServiceProvider,
+  renderer::Renderer* pRenderer,
+  const assets::ResourceLoader* pResources,
+  data::PlayerModel* pPlayerModel,
+  const data::GameOptions* pOptions,
+  engine::SpriteFactory* pSpriteFactory,
+  const data::GameSessionId sessionId,
+  DynamicMapSectionData&& dynamicMapSections,
+  data::map::LevelData&& loadedLevel)
   : mMap(std::move(loadedLevel.mMap))
   , mEntities(mEventManager)
   , mEntityFactory(
@@ -209,7 +233,8 @@ WorldState::WorldState(
   , mSpriteRenderingSystem(pRenderer, &pSpriteFactory->textureAtlas())
   , mMapRenderer(
       pRenderer,
-      &mMap,
+      std::move(dynamicMapSections.mMapStaticParts),
+      &mMap.attributeDict(),
       engine::MapRenderer::MapRenderData{
         std::move(loadedLevel.mTileSetImage),
         std::move(loadedLevel.mBackdropImage),
@@ -233,11 +258,14 @@ WorldState::WorldState(
       &mMap)
   , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &mEventManager)
   , mDynamicGeometrySystem(
+      pRenderer,
       pServiceProvider,
       &mEntities,
       &mMap,
       &mRandomGenerator,
-      &mEventManager)
+      &mEventManager,
+      &mMapRenderer,
+      std::move(dynamicMapSections.mSimpleSections))
   , mEffectsSystem(
       pServiceProvider,
       &mRandomGenerator,
@@ -262,6 +290,8 @@ WorldState::WorldState(
   , mBackdropSwitchCondition(loadedLevel.mBackdropSwitchCondition)
 {
   mEntityFactory.createEntitiesForLevel(loadedLevel.mActors);
+  mDynamicGeometrySystem.initializeDynamicGeometryEntities(
+    dynamicMapSections.mFallingSections);
 
   const auto counts = countBonusRelatedItems(mEntities);
   mBonusInfo.mInitialCameraCount = counts.mCameraCount;

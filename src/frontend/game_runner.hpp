@@ -55,6 +55,7 @@ public:
   std::set<data::Bonus> achievedBonuses() const;
 
 private:
+  float interpolationFactor(engine::TimeDelta dt) const;
   void updateWorld(engine::TimeDelta dt);
   bool updateMenu(engine::TimeDelta dt);
   void handleDebugKeys(const SDL_Event& event);

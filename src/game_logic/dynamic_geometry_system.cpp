@@ -16,9 +16,11 @@
 
 #include "dynamic_geometry_system.hpp"
 
+#include "base/spatial_types_printing.hpp"
 #include "data/map.hpp"
 #include "data/sound_ids.hpp"
 #include "engine/base_components.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/entity_tools.hpp"
 #include "engine/life_time_components.hpp"
 #include "engine/motion_smoothing.hpp"
@@ -31,12 +33,13 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
+#include "renderer/upscaling_utils.hpp"
 
 
 namespace rigel::game_logic
 {
 
-using game_logic::components::MapGeometryLink;
+using game_logic::components::DynamicGeometrySection;
 
 namespace
 {
@@ -91,7 +94,7 @@ void spawnTileDebris(
 
 void spawnTileDebrisForSection(
   const engine::components::BoundingBox& mapSection,
-  data::map::Map& map,
+  const data::map::Map& map,
   entityx::EntityManager& entities,
   engine::RandomNumberGenerator& randomGen)
 {
@@ -119,6 +122,7 @@ void explodeMapSection(
   const base::Rect<int>& mapSection,
   data::map::Map& map,
   entityx::EntityManager& entityManager,
+  entityx::EventManager& eventManager,
   engine::RandomNumberGenerator& randomGenerator)
 {
   spawnTileDebrisForSection(mapSection, map, entityManager, randomGenerator);
@@ -137,7 +141,11 @@ void explodeMapSection(
   GlobalState& s)
 {
   explodeMapSection(
-    mapSection, *s.mpMap, *d.mpEntityManager, *d.mpRandomGenerator);
+    mapSection,
+    *s.mpMap,
+    *d.mpEntityManager,
+    *d.mpEvents,
+    *d.mpRandomGenerator);
 }
 
 
@@ -185,20 +193,195 @@ void squashTileSection(base::Rect<int>& mapSection, data::map::Map& map)
   --mapSection.size.height;
 }
 
+
+base::Rect<int> localToGlobalClipRect(
+  const renderer::Renderer* pRenderer,
+  const base::Rect<int> localRect)
+{
+  const auto scale = pRenderer->globalScale();
+  const auto offset = pRenderer->globalTranslation() +
+    renderer::scaleVec(localRect.topLeft, scale);
+  const auto size = renderer::scaleSize(localRect.size, scale);
+
+  if (const auto existingClipRect = pRenderer->clipRect())
+  {
+    return {
+      {std::max(existingClipRect->left(), offset.x),
+       std::max(existingClipRect->top(), offset.y)},
+      {std::min(existingClipRect->size.width, size.width),
+       std::min(existingClipRect->size.height, size.height)}};
+  }
+
+  return {offset, size};
+}
+
 } // namespace
 
 
+// This function splits the map up into a static part, which we hand over
+// to the MapRenderer, and dynamic parts. The dynamic parts can change during
+// gameplay and thus cannot be rendered as static VBOs, but rather have to
+// be rendered dynamically (see DynamicGeometrySystem::renderDynamicSections).
+DynamicMapSectionData determineDynamicMapSections(
+  const data::map::Map& originalMap,
+  const std::vector<data::map::LevelData::Actor>& actorDescriptions)
+{
+  DynamicMapSectionData result{originalMap, {}, {}};
+  auto& map = result.mMapStaticParts;
+
+  // We don't have entities yet, but the CollisionChecker needs them.
+  // To avoid making the CollisionChecker more complex, we simply create
+  // a dummy EntityManager here.
+  entityx::EventManager dummyEvents;
+  entityx::EntityManager dummyEntities{dummyEvents};
+  engine::CollisionChecker checker{&map, dummyEntities, dummyEvents};
+
+  auto findSectionBelowFallingSection =
+    [&](const base::Rect<int>& section) -> std::optional<std::tuple<int, int>> {
+    for (auto y = section.bottom() + 1; y < map.height() &&
+         !checker.isOnSolidGround(
+           {{section.left(), y - 1}, {section.size.width, 1}});
+         ++y)
+    {
+      for (auto x = section.left(); x < section.left() + section.size.width;
+           ++x)
+      {
+        if (map.tileAt(0, x, y) != 0 || map.tileAt(1, x, y) != 0)
+        {
+          auto y2 = y + 1;
+          while (y2 < map.height() &&
+                 !checker.isOnSolidGround(
+                   {{section.left(), y2 - 1}, {section.size.width, 1}}))
+          {
+            ++y2;
+          }
+
+          return std::tuple{y, y2};
+        }
+      }
+    }
+
+    return std::nullopt;
+  };
+
+
+  std::vector<base::Rect<int>> dynamicSections;
+
+  for (const auto& actor : actorDescriptions)
+  {
+    if (actor.mAssignedArea)
+    {
+      const auto& section = *actor.mAssignedArea;
+
+      // Type 2 (shootable wall) is the only type that can't fall down
+      if (actor.mID == data::ActorID::Dynamic_geometry_2)
+      {
+        map.clearSection(
+          section.left(),
+          section.top(),
+          section.size.width,
+          section.size.height);
+      }
+      else
+      {
+        // The other types of dynamic geometry are handled separately
+        dynamicSections.push_back(section);
+      }
+    }
+    else
+    {
+      // Missiles can explode parts of the map
+      if (actor.mID == data::ActorID::Missile_intact)
+      {
+        const auto x = actor.mPosition.x;
+        auto y = actor.mPosition.y - 12;
+        while (y >= 0 && !checker.isTouchingCeiling({{x, y + 1}, {3, 1}}))
+        {
+          --y;
+        }
+
+        if (y >= 2)
+        {
+          map.clearSection(x, y - 2, 3, 3);
+          result.mSimpleSections.push_back({{x, y - 2}, {3, 3}});
+        }
+      }
+    }
+  }
+
+  // Burnable tiles
+  for (auto y = 0; y < map.height(); ++y)
+  {
+    for (auto x = 0; x < map.width(); ++x)
+    {
+      if (map.attributes(x, y).isFlammable())
+      {
+        auto endX = x + 1;
+        while (endX < map.width() && map.attributes(endX, y).isFlammable())
+        {
+          ++endX;
+        }
+
+        auto endY = y + 1;
+        while (endY < map.height() && map.attributes(x, endY).isFlammable())
+        {
+          ++endY;
+        }
+
+        const auto section = base::Rect<int>{{x, y}, {endX - x, endY - y}};
+        map.clearSection(x, y, section.size.width, section.size.height);
+        result.mSimpleSections.push_back(section);
+      }
+    }
+  }
+
+  // Sections below dynamic (falling) geometry
+  auto index = 0;
+  for (const auto& section : dynamicSections)
+  {
+    if (const auto areaBelow = findSectionBelowFallingSection(section))
+    {
+      const auto [top, bottom] = *areaBelow;
+      result.mFallingSections.push_back(
+        {{{section.left(), top}, {section.size.width, bottom - top}}, index});
+    }
+
+    ++index;
+  }
+
+  for (const auto& section : dynamicSections)
+  {
+    map.clearSection(
+      section.left(), section.top(), section.size.width, section.size.height);
+  }
+
+  for (const auto& [section, _] : result.mFallingSections)
+  {
+    map.clearSection(
+      section.left(), section.top(), section.size.width, section.size.height);
+  }
+
+  return result;
+}
+
+
 DynamicGeometrySystem::DynamicGeometrySystem(
+  renderer::Renderer* pRenderer,
   IGameServiceProvider* pServiceProvider,
   entityx::EntityManager* pEntityManager,
   data::map::Map* pMap,
   engine::RandomNumberGenerator* pRandomGenerator,
-  entityx::EventManager* pEvents)
-  : mpServiceProvider(pServiceProvider)
+  entityx::EventManager* pEvents,
+  engine::MapRenderer* pMapRenderer,
+  std::vector<base::Rect<int>> simpleDynamicSections)
+  : mpRenderer(pRenderer)
+  , mpServiceProvider(pServiceProvider)
   , mpEntityManager(pEntityManager)
   , mpMap(pMap)
   , mpRandomGenerator(pRandomGenerator)
   , mpEvents(pEvents)
+  , mpMapRenderer(pMapRenderer)
+  , mSimpleDynamicSections(std::move(simpleDynamicSections))
 {
   pEvents->subscribe<events::ShootableKilled>(*this);
   pEvents->subscribe<rigel::events::DoorOpened>(*this);
@@ -207,18 +390,72 @@ DynamicGeometrySystem::DynamicGeometrySystem(
 }
 
 
+void DynamicGeometrySystem::initializeDynamicGeometryEntities(
+  const std::vector<FallingSectionInfo>& fallingSections)
+{
+  auto iFallingSectionInfo = fallingSections.begin();
+
+  // Entities for the level have already been created, so we now have one
+  // entity for each piece of dynamic geometry. We now need to go through these
+  // and assign the data for the area below the dynamic geometry that might be
+  // affected when the former is falling down. The affected area has already
+  // been determined in determineDynamicMapSections, but at the time when we
+  // did that we didn't yet have entities in the map.  We rely on the fact here
+  // that the order in which we create entities matches the order in which they
+  // appear in the level, and that EntityX preserves the order of creation. So
+  // we keep a running index, and use it to match the entities up with the
+  // corresponding entries in the fallingSections vector.
+  mpEntityManager->each<DynamicGeometrySection>(
+    [&, index = 0](
+      entityx::Entity entity, DynamicGeometrySection& dynamic) mutable {
+      // Shootable walls are dynamic geometry, but they do not fall down,
+      // hence they are not relevant here.
+      if (entity.has_component<components::Shootable>())
+      {
+        return;
+      }
+
+      // We have found a corresponding entry matching the entity we are
+      // currently looking at, so we need to grab a copy of the map data
+      // and attach it to the extraSection data of the entity. This allows
+      // us to render the area below a falling piece of geometry correctly,
+      // while also rendering the moving geometry itself smoothly.
+      // Simply rendering the area below the falling geometry dynamically
+      // (i.e. rendering the actual true state of the map instead of the cached
+      // VBOs) would not work, since we would then render the moving geometry
+      // itself as well and that would destroy the smoothing.
+      if (
+        iFallingSectionInfo != fallingSections.end() &&
+        index == iFallingSectionInfo->mIndex)
+      {
+        const auto& extraSection = iFallingSectionInfo->mSectionBelow;
+
+        dynamic.mExtraSection = DynamicGeometrySection::ExtraSection{
+          engine::copyMapData(extraSection, *mpMap),
+          extraSection.top(),
+          extraSection.size.height};
+
+        ++iFallingSectionInfo;
+      }
+
+      ++index;
+    });
+}
+
+
 void DynamicGeometrySystem::receive(const events::ShootableKilled& event)
 {
   auto entity = event.mEntity;
   // Take care of shootable walls
-  if (!entity.has_component<MapGeometryLink>())
+  if (!entity.has_component<DynamicGeometrySection>())
   {
     return;
   }
 
   const auto& mapSection =
-    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
-  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
+    entity.component<DynamicGeometrySection>()->mLinkedGeometrySection;
+  explodeMapSection(
+    mapSection, *mpMap, *mpEntityManager, *mpEvents, *mpRandomGenerator);
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
@@ -244,7 +481,8 @@ void DynamicGeometrySystem::receive(
   // given values, e.g. bottom left and size
   engine::components::BoundingBox mapSection{
     event.mImpactPosition - base::Vec2{0, 2}, {3, 3}};
-  explodeMapSection(mapSection, *mpMap, *mpEntityManager, *mpRandomGenerator);
+  explodeMapSection(
+    mapSection, *mpMap, *mpEntityManager, *mpEvents, *mpRandomGenerator);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
@@ -257,6 +495,167 @@ void DynamicGeometrySystem::receive(const rigel::events::TileBurnedAway& event)
 }
 
 
+void DynamicGeometrySystem::renderDynamicBackgroundSections(
+  const base::Vec2& sectionStart,
+  const base::Extents& sectionSize,
+  const float interpolationFactor)
+{
+  renderDynamicSections(
+    sectionStart,
+    sectionSize,
+    interpolationFactor,
+    engine::MapRenderer::DrawMode::Background);
+}
+
+
+void DynamicGeometrySystem::renderDynamicForegroundSections(
+  const base::Vec2& sectionStart,
+  const base::Extents& sectionSize,
+  const float interpolationFactor)
+{
+  renderDynamicSections(
+    sectionStart,
+    sectionSize,
+    interpolationFactor,
+    engine::MapRenderer::DrawMode::Foreground);
+}
+
+
+void DynamicGeometrySystem::renderDynamicSections(
+  const base::Vec2& sectionStart,
+  const base::Extents& sectionSize,
+  const float interpolationFactor,
+  const engine::MapRenderer::DrawMode drawMode)
+{
+  using engine::components::WorldPosition;
+
+  const auto screenRect = base::Rect<int>{sectionStart, sectionSize};
+
+  // Simple dynamic sections (burning tiles or destroyed by missile)
+  for (const auto& section : mSimpleDynamicSections)
+  {
+    if (!screenRect.intersects(section))
+    {
+      continue;
+    }
+
+    const auto pixelPos =
+      data::tileVectorToPixelVector(section.topLeft - sectionStart);
+
+    mpMapRenderer->renderDynamicSection(*mpMap, section, pixelPos, drawMode);
+  }
+
+  // Falling dynamic geometry
+  mpEntityManager->each<DynamicGeometrySection, WorldPosition>(
+    [&](
+      entityx::Entity e,
+      const DynamicGeometrySection& dynamic,
+      const WorldPosition&) {
+      const auto interpolatedPixelPos =
+        engine::interpolatedPixelPosition(e, interpolationFactor) -
+        data::tileVectorToPixelVector(
+          base::Vec2{0, dynamic.mLinkedGeometrySection.size.height - 1});
+
+      // Render the geometry with smoothing, to make falling pieces of the map
+      // appear smooth.
+      if (
+        screenRect.intersects(dynamic.mLinkedGeometrySection) ||
+        (dynamic.mPreviousHeight > 0 &&
+         dynamic.mLinkedGeometrySection.size.height == 0))
+      {
+        const auto heightDecrease =
+          dynamic.mPreviousHeight - dynamic.mLinkedGeometrySection.size.height;
+        const auto interpolatedHeightDecrease =
+          heightDecrease * interpolationFactor;
+        const auto offsetForSinking = base::round(
+          data::tilesToPixels(heightDecrease - interpolatedHeightDecrease));
+
+        const auto pixelPos = interpolatedPixelPos -
+          data::tileVectorToPixelVector(sectionStart) -
+          base::Vec2{0, offsetForSinking};
+        mpMapRenderer->renderDynamicSection(
+          *mpMap, dynamic.mLinkedGeometrySection, pixelPos, drawMode);
+
+        // For geometry that's sinking into the ground, we have to render
+        // the bottom row separately - it has already been removed from the
+        // map at this point, but we still have a copy that we can use to
+        // render the intermediate steps.
+        if (offsetForSinking > 0)
+        {
+          const auto position =
+            base::Vec2{
+              dynamic.mLinkedGeometrySection.left(),
+              dynamic.mLinkedGeometrySection.bottom()} -
+            sectionStart;
+
+          const auto lastRowOffset =
+            base::round(data::tilesToPixels(interpolatedHeightDecrease));
+          const auto lastRowPixelPos = data::tileVectorToPixelVector(position) +
+            base::Vec2{0, lastRowOffset};
+          const auto allowedHeight = offsetForSinking;
+
+          const auto saved = renderer::saveState(mpRenderer);
+          mpRenderer->setClipRect(localToGlobalClipRect(
+            mpRenderer,
+            {lastRowPixelPos,
+             {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
+              allowedHeight}}));
+          mpMapRenderer->renderCachedSection(
+            lastRowPixelPos,
+            dynamic.mBottomRowCopy,
+            dynamic.mLinkedGeometrySection.size.width,
+            drawMode);
+        }
+      }
+
+      // If there are non-zero tiles below the falling piece of geometry, we
+      // also need to render them separately since these tiles disappear as the
+      // piece of geometry is falling down. Also see comment in
+      // initializeDynamicGeometryEntities().
+      if (const auto extraSectionRect = dynamic.extraSectionRect();
+          extraSectionRect && screenRect.intersects(*extraSectionRect))
+      {
+        const auto interpolatedBottomPos = interpolatedPixelPos +
+          base::Vec2{
+            0, data::tilesToPixels(dynamic.mLinkedGeometrySection.size.height)};
+
+        if (
+          interpolatedBottomPos.y <
+          data::tilesToPixels(extraSectionRect->top()))
+        {
+          mpMapRenderer->renderCachedSection(
+            data::tileVectorToPixelVector(
+              extraSectionRect->topLeft - sectionStart),
+            dynamic.mExtraSection->mMapData,
+            extraSectionRect->size.width,
+            drawMode);
+        }
+        else
+        {
+          const auto startPos =
+            interpolatedBottomPos - data::tileVectorToPixelVector(sectionStart);
+          const auto visibleHeight =
+            data::tilesToPixels(extraSectionRect->bottom() + 1) -
+            interpolatedBottomPos.y;
+
+          const auto saved = renderer::saveState(mpRenderer);
+          mpRenderer->setClipRect(localToGlobalClipRect(
+            mpRenderer,
+            {startPos,
+             {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
+              visibleHeight}}));
+          mpMapRenderer->renderCachedSection(
+            data::tileVectorToPixelVector(
+              extraSectionRect->topLeft - sectionStart),
+            dynamic.mExtraSection->mMapData,
+            extraSectionRect->size.width,
+            drawMode);
+        }
+      }
+    });
+}
+
+
 void behaviors::DynamicGeometryController::update(
   GlobalDependencies& d,
   GlobalState& s,
@@ -266,8 +665,10 @@ void behaviors::DynamicGeometryController::update(
   using namespace engine::components;
 
   auto& position = *entity.component<WorldPosition>();
-  auto& mapSection =
-    entity.component<MapGeometryLink>()->mLinkedGeometrySection;
+  auto& dynamic = *entity.component<DynamicGeometrySection>();
+  auto& mapSection = dynamic.mLinkedGeometrySection;
+
+  dynamic.mPreviousHeight = mapSection.size.height;
 
   auto isOnSolidGround = [&]() {
     if (mapSection.bottom() >= s.mpMap->height() - 1)
@@ -328,21 +729,32 @@ void behaviors::DynamicGeometryController::update(
   };
 
   auto sink = [&]() {
-    if (mapSection.size.height == 1)
+    // Grab a copy of the bottom row for interpolation during sinking
+    dynamic.mBottomRowCopy = engine::copyMapData(
+      {{mapSection.left(), mapSection.bottom()}, {mapSection.size.width, 1}},
+      *s.mpMap);
+
+    if (mapSection.size.height == 0)
+    {
+      entity.destroy();
+    }
+    else if (mapSection.size.height == 1)
     {
       s.mpMap->clearSection(
         mapSection.topLeft.x, mapSection.topLeft.y, mapSection.size.width, 1);
       d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
-      entity.destroy();
+
+      ++mapSection.topLeft.y;
+      mapSection.size.height = 0;
     }
     else
     {
       squashTileSection(mapSection, *s.mpMap);
-      ++position.y;
     }
   };
 
   auto land = [&]() {
+    dynamic.mExtraSection = std::nullopt;
     d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
     d.mpEvents->emit(rigel::events::ScreenShake{7});
   };

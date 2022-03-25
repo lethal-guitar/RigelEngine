@@ -18,7 +18,11 @@
 
 #include "data/tile_attributes.hpp"
 #include "engine/base_components.hpp"
+#include "engine/map_renderer.hpp"
 #include "game_logic/global_dependencies.hpp"
+
+#include <optional>
+#include <vector>
 
 
 namespace rigel::game_logic
@@ -26,14 +30,42 @@ namespace rigel::game_logic
 namespace components
 {
 
-struct MapGeometryLink
+struct DynamicGeometrySection
 {
-  explicit MapGeometryLink(engine::components::BoundingBox geometrySection)
+  // This represents the area below a piece of dynamic geometry, which
+  // will be erased as the piece is falling down.
+  struct ExtraSection
+  {
+    std::vector<std::uint32_t> mMapData;
+    int mTop;
+    int mHeight;
+  };
+
+  explicit DynamicGeometrySection(
+    engine::components::BoundingBox geometrySection)
     : mLinkedGeometrySection(geometrySection)
+    , mPreviousHeight(geometrySection.size.height)
   {
   }
 
+  std::optional<base::Rect<int>> extraSectionRect() const
+  {
+    if (mExtraSection)
+    {
+      return base::Rect<int>{
+        {mLinkedGeometrySection.left(), mExtraSection->mTop},
+        {mLinkedGeometrySection.size.width, mExtraSection->mHeight}};
+    }
+
+    return std::nullopt;
+  }
+
   engine::components::BoundingBox mLinkedGeometrySection;
+  std::optional<ExtraSection> mExtraSection;
+
+  // These two are for interpolation while sinking
+  std::vector<engine::PackedTileData> mBottomRowCopy;
+  int mPreviousHeight;
 };
 
 
