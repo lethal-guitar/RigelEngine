@@ -16,6 +16,10 @@
 
 #include "renderer/viewport_utils.hpp"
 
+#include "renderer/renderer.hpp"
+
+#include <algorithm>
+
 
 namespace rigel::renderer
 {
@@ -46,6 +50,37 @@ base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale)
 base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale)
 {
   return asSize(scaleVec(asVec(size), scale));
+}
+
+
+base::Vec2 localToGlobalTranslation(
+  const renderer::Renderer* pRenderer,
+  const base::Vec2& translation)
+{
+  return pRenderer->globalTranslation() +
+    renderer::scaleVec(translation, pRenderer->globalScale());
+}
+
+
+base::Rect<int> localToGlobalClipRect(
+  const renderer::Renderer* pRenderer,
+  const base::Rect<int>& localRect)
+{
+  const auto scale = pRenderer->globalScale();
+  const auto offset = pRenderer->globalTranslation() +
+    renderer::scaleVec(localRect.topLeft, scale);
+  const auto size = renderer::scaleSize(localRect.size, scale);
+
+  if (const auto existingClipRect = pRenderer->clipRect())
+  {
+    return {
+      {std::max(existingClipRect->left(), offset.x),
+       std::max(existingClipRect->top(), offset.y)},
+      {std::min(existingClipRect->size.width, size.width),
+       std::min(existingClipRect->size.height, size.height)}};
+  }
+
+  return {offset, size};
 }
 
 } // namespace rigel::renderer
