@@ -33,7 +33,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/viewport_utils.hpp"
 
 
 namespace rigel::game_logic
@@ -191,28 +191,6 @@ void squashTileSection(base::Rect<int>& mapSection, data::map::Map& map)
     map);
   ++mapSection.topLeft.y;
   --mapSection.size.height;
-}
-
-
-base::Rect<int> localToGlobalClipRect(
-  const renderer::Renderer* pRenderer,
-  const base::Rect<int> localRect)
-{
-  const auto scale = pRenderer->globalScale();
-  const auto offset = pRenderer->globalTranslation() +
-    renderer::scaleVec(localRect.topLeft, scale);
-  const auto size = renderer::scaleSize(localRect.size, scale);
-
-  if (const auto existingClipRect = pRenderer->clipRect())
-  {
-    return {
-      {std::max(existingClipRect->left(), offset.x),
-       std::max(existingClipRect->top(), offset.y)},
-      {std::min(existingClipRect->size.width, size.width),
-       std::min(existingClipRect->size.height, size.height)}};
-  }
-
-  return {offset, size};
 }
 
 } // namespace
@@ -595,11 +573,11 @@ void DynamicGeometrySystem::renderDynamicSections(
           const auto allowedHeight = offsetForSinking;
 
           const auto saved = renderer::saveState(mpRenderer);
-          mpRenderer->setClipRect(localToGlobalClipRect(
+          renderer::setLocalClipRect(
             mpRenderer,
             {lastRowPixelPos,
              {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
-              allowedHeight}}));
+              allowedHeight}});
           mpMapRenderer->renderCachedSection(
             lastRowPixelPos,
             dynamic.mBottomRowCopy,
@@ -639,11 +617,11 @@ void DynamicGeometrySystem::renderDynamicSections(
             interpolatedBottomPos.y;
 
           const auto saved = renderer::saveState(mpRenderer);
-          mpRenderer->setClipRect(localToGlobalClipRect(
+          renderer::setLocalClipRect(
             mpRenderer,
             {startPos,
              {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
-              visibleHeight}}));
+              visibleHeight}});
           mpMapRenderer->renderCachedSection(
             data::tileVectorToPixelVector(
               extraSectionRect->topLeft - sectionStart),

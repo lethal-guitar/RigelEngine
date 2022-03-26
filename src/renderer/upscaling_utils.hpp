@@ -58,10 +58,11 @@ bool canUseWidescreenMode(const Renderer* pRenderer);
 
 WidescreenViewportInfo determineWidescreenViewport(const Renderer* pRenderer);
 
-base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale);
-base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale);
-
 RenderTargetTexture createFullscreenRenderTarget(
+  Renderer* pRenderer,
+  const data::GameOptions& options);
+
+base::Vec2 offsetTo4by3WithinWidescreen(
   Renderer* pRenderer,
   const data::GameOptions& options);
 

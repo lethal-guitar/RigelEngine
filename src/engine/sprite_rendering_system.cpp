@@ -78,8 +78,18 @@ void collectVisibleSprites(
   using components::DrawTopMost;
   using components::ExtendedFrameList;
   using components::OverrideDrawOrder;
+  using components::SpriteStrip;
 
   const auto screenBox = BoundingBox{{}, viewportSize};
+
+  // World-space tile positions refer to a sprite's bottom left tile,
+  // but we need its top left corner for drawing.
+  auto drawPosition =
+    [&cameraPosition](const SpriteFrame& frame, const base::Vec2& pos) {
+      const auto heightTiles = frame.mDimensions.height;
+      return pos - cameraPosition - base::Vec2(0, heightTiles - 1) +
+        frame.mDrawOffset;
+    };
 
   auto submit = [&](
                   const SpriteFrame& frame,
@@ -89,15 +99,7 @@ void collectVisibleSprites(
                   const bool translucent,
                   const bool drawTopmost,
                   const int drawOrder) {
-    // World-space tile positions refer to a sprite's bottom left tile,
-    // but we need its top left corner for drawing.
-    auto drawPosition = [&frame, &cameraPosition](const base::Vec2& pos) {
-      const auto heightTiles = frame.mDimensions.height;
-      return pos - cameraPosition - base::Vec2(0, heightTiles - 1) +
-        frame.mDrawOffset;
-    };
-
-    const auto topLeft = drawPosition(position);
+    const auto topLeft = drawPosition(frame, position);
 
     // Discard sprites outside visible area
     const auto frameBox = BoundingBox{topLeft, frame.mDimensions};
@@ -106,7 +108,7 @@ void collectVisibleSprites(
       return;
     }
 
-    const auto previousTopLeft = drawPosition(previousPosition);
+    const auto previousTopLeft = drawPosition(frame, previousPosition);
 
     const auto destRect = base::Rect<int>{
       engine::interpolatedPixelPosition(
@@ -176,6 +178,39 @@ void collectVisibleSprites(
             drawTopmost,
             drawOrder);
         }
+      }
+
+      if (entity.has_component<SpriteStrip>())
+      {
+        const auto& strip = *entity.component<SpriteStrip>();
+        const auto frameIndex =
+          virtualToRealFrame(strip.mFrame, *sprite.mpDrawData, entity);
+        const auto& frame = sprite.mpDrawData->mFrames[frameIndex];
+
+        const auto topLeft = drawPosition(frame, strip.mStartPosition);
+
+        // Discard sprites outside visible area
+        const auto frameBox = BoundingBox{
+          topLeft,
+          {frame.mDimensions.width,
+           std::max(strip.mHeight, strip.mPreviousHeight)}};
+        if (!frameBox.intersects(screenBox))
+        {
+          return;
+        }
+
+        const auto width = data::tilesToPixels(frame.mDimensions.width);
+        const auto height = base::round(data::tilesToPixels(base::lerp(
+          float(strip.mPreviousHeight),
+          float(strip.mHeight),
+          interpolationFactor)));
+
+        const auto destRect = base::Rect<int>{
+          data::tileVectorToPixelVector(topLeft), {width, height}};
+
+        const auto drawSpec =
+          SpriteDrawSpec{destRect, frame.mImageId, false, sprite.mTranslucent};
+        output.push_back({drawSpec, drawOrder, drawTopmost});
       }
     });
 }

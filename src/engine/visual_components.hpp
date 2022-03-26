@@ -75,19 +75,6 @@ constexpr auto NUM_RENDER_SLOTS = 8;
 constexpr auto IGNORE_RENDER_SLOT = -1;
 
 
-struct CustomDrawRequest
-{
-  CustomDrawRequest(const int frame, const base::Vec2& screenPosition)
-    : mScreenPosition(screenPosition)
-    , mFrame(frame)
-  {
-  }
-
-  base::Vec2 mScreenPosition;
-  int mFrame;
-};
-
-
 int virtualToRealFrame(
   const int virtualFrame,
   const SpriteDrawData& drawData,
@@ -213,6 +200,21 @@ struct ExtendedFrameList
   };
 
   std::vector<RenderSpec> mFrames;
+};
+
+
+struct SpriteStrip
+{
+  explicit SpriteStrip(const base::Vec2& start, int frame)
+    : mStartPosition(start)
+    , mFrame(frame)
+  {
+  }
+
+  base::Vec2 mStartPosition;
+  int mFrame = 0;
+  int mHeight = 0;
+  int mPreviousHeight = 0;
 };
 
 

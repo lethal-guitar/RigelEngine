@@ -20,8 +20,8 @@
 #include "base/static_vector.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
-#include "renderer/upscaling_utils.hpp"
 #include "renderer/vertex_buffer_utils.hpp"
+#include "renderer/viewport_utils.hpp"
 
 #include <cfenv>
 #include <iostream>
@@ -453,9 +453,7 @@ void MapRenderer::renderMapTiles(
   const auto translation = data::tileVectorToPixelVector(sectionStart) * -1;
 
   const auto saved = renderer::saveState(mpRenderer);
-  mpRenderer->setGlobalTranslation(
-    mpRenderer->globalTranslation() +
-    renderer::scaleVec(translation, mpRenderer->globalScale()));
+  renderer::setLocalTranslation(mpRenderer, translation);
 
   mpRenderer->submitVertexBuffers(blocksToRender, mTileSetTexture.textureId());
 

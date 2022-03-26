@@ -37,14 +37,14 @@ void SmashHammer::update(
   const bool isOnScreen,
   entityx::Entity entity)
 {
-  if (!entity.has_component<engine::components::ExtendedFrameList>())
+  namespace c = engine::components;
+
+  auto& position = *entity.component<c::WorldPosition>();
+
+  if (!entity.has_component<c::SpriteStrip>())
   {
-    entity.assign<engine::components::ExtendedFrameList>();
+    entity.assign<c::SpriteStrip>(position + base::Vec2{0, 1}, 1);
   }
-
-  auto& position = *entity.component<engine::components::WorldPosition>();
-
-  const auto previousExtensionStep = mExtensionStep;
 
   base::match(
     mState,
@@ -94,17 +94,9 @@ void SmashHammer::update(
       }
     });
 
-  if (mExtensionStep != previousExtensionStep)
-  {
-    auto& additionalFrames =
-      entity.component<engine::components::ExtendedFrameList>()->mFrames;
-
-    additionalFrames.clear();
-    for (int i = 0; i < mExtensionStep; ++i)
-    {
-      additionalFrames.push_back({1, base::Vec2{0, -i}});
-    }
-  }
+  auto& extensionSpriteStrip = *entity.component<c::SpriteStrip>();
+  extensionSpriteStrip.mPreviousHeight = extensionSpriteStrip.mHeight;
+  extensionSpriteStrip.mHeight = mExtensionStep;
 }
 
 } // namespace rigel::game_logic::behaviors
