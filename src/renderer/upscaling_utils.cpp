@@ -20,6 +20,7 @@
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
+#include "renderer/viewport_utils.hpp"
 
 #include <algorithm>
 
@@ -29,18 +30,6 @@ namespace rigel::renderer
 
 namespace
 {
-
-auto asVec(const base::Size<int>& size)
-{
-  return base::Vec2{size.width, size.height};
-}
-
-
-auto asSize(const base::Vec2& vec)
-{
-  return base::Size{vec.x, vec.y};
-}
-
 
 base::Size<float>
   determineUsableSize(const float windowWidth, const float windowHeight)
@@ -123,18 +112,6 @@ WidescreenViewportInfo determineWidescreenViewport(const Renderer* pRenderer)
   const auto paddingPixels = pRenderer->windowSize().width - widthInPixels;
 
   return {maxTilesOnScreen, widthInPixels, paddingPixels / 2};
-}
-
-
-base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale)
-{
-  return base::Vec2{base::round(vec.x * scale.x), base::round(vec.y * scale.y)};
-}
-
-
-base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale)
-{
-  return asSize(scaleVec(asVec(size), scale));
 }
 
 

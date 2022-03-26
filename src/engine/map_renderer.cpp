@@ -20,8 +20,8 @@
 #include "base/static_vector.hpp"
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
-#include "renderer/upscaling_utils.hpp"
 #include "renderer/vertex_buffer_utils.hpp"
+#include "renderer/viewport_utils.hpp"
 
 #include <cfenv>
 #include <iostream>

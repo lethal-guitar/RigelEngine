@@ -33,7 +33,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/ientity_factory.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/viewport_utils.hpp"
 
 
 namespace rigel::game_logic

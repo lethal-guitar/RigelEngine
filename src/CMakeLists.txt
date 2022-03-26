@@ -290,6 +290,8 @@ set(core_sources
     renderer/upscaling_utils.cpp
     renderer/upscaling_utils.hpp
     renderer/vertex_buffer_utils.hpp
+    renderer/viewport_utils.cpp
+    renderer/viewport_utils.hpp
     sdl_utils/error.cpp
     sdl_utils/error.hpp
     sdl_utils/key_code.hpp
