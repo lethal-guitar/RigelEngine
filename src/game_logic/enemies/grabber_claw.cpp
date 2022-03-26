@@ -33,18 +33,18 @@ void GrabberClaw::update(
   bool isOnScreen,
   entityx::Entity entity)
 {
-  using game_logic::components::Shootable;
+  namespace c = engine::components;
 
-  if (!entity.has_component<engine::components::ExtendedFrameList>())
-  {
-    entity.assign<engine::components::ExtendedFrameList>();
-  }
+  using game_logic::components::Shootable;
 
   auto& position = *entity.component<engine::components::WorldPosition>();
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
 
-  const auto previousExtensionStep = mExtensionStep;
+  if (!entity.has_component<c::SpriteStrip>())
+  {
+    entity.assign<c::SpriteStrip>(position - base::Vec2{0, 1}, 0);
+  }
 
   base::match(
     mState,
@@ -109,17 +109,9 @@ void GrabberClaw::update(
 
   engine::synchronizeBoundingBoxToSprite(entity);
 
-  if (mExtensionStep != previousExtensionStep)
-  {
-    auto& additionalFrames =
-      entity.component<engine::components::ExtendedFrameList>()->mFrames;
-
-    additionalFrames.clear();
-    for (int i = 0; i < mExtensionStep + 1; ++i)
-    {
-      additionalFrames.push_back({0, base::Vec2{0, -(i + 1)}});
-    }
-  }
+  auto& extensionSpriteStrip = *entity.component<c::SpriteStrip>();
+  extensionSpriteStrip.mPreviousHeight = extensionSpriteStrip.mHeight;
+  extensionSpriteStrip.mHeight = mExtensionStep + 1;
 }
 
 } // namespace rigel::game_logic::behaviors

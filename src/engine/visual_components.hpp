@@ -203,6 +203,21 @@ struct ExtendedFrameList
 };
 
 
+struct SpriteStrip
+{
+  explicit SpriteStrip(const base::Vec2& start, int frame)
+    : mStartPosition(start)
+    , mFrame(frame)
+  {
+  }
+
+  base::Vec2 mStartPosition;
+  int mFrame = 0;
+  int mHeight = 0;
+  int mPreviousHeight = 0;
+};
+
+
 /** Indicates that an entity should always be drawn last
  *
  * An entity marked with this component will always have its Sprite drawn after
