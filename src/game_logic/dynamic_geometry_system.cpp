@@ -573,11 +573,11 @@ void DynamicGeometrySystem::renderDynamicSections(
           const auto allowedHeight = offsetForSinking;
 
           const auto saved = renderer::saveState(mpRenderer);
-          mpRenderer->setClipRect(renderer::localToGlobalClipRect(
+          renderer::setLocalClipRect(
             mpRenderer,
             {lastRowPixelPos,
              {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
-              allowedHeight}}));
+              allowedHeight}});
           mpMapRenderer->renderCachedSection(
             lastRowPixelPos,
             dynamic.mBottomRowCopy,
@@ -617,11 +617,11 @@ void DynamicGeometrySystem::renderDynamicSections(
             interpolatedBottomPos.y;
 
           const auto saved = renderer::saveState(mpRenderer);
-          mpRenderer->setClipRect(renderer::localToGlobalClipRect(
+          renderer::setLocalClipRect(
             mpRenderer,
             {startPos,
              {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
-              visibleHeight}}));
+              visibleHeight}});
           mpMapRenderer->renderCachedSection(
             data::tileVectorToPixelVector(
               extraSectionRect->topLeft - sectionStart),

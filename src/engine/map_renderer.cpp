@@ -453,9 +453,7 @@ void MapRenderer::renderMapTiles(
   const auto translation = data::tileVectorToPixelVector(sectionStart) * -1;
 
   const auto saved = renderer::saveState(mpRenderer);
-  mpRenderer->setGlobalTranslation(
-    mpRenderer->globalTranslation() +
-    renderer::scaleVec(translation, mpRenderer->globalScale()));
+  renderer::setLocalTranslation(mpRenderer, translation);
 
   mpRenderer->submitVertexBuffers(blocksToRender, mTileSetTexture.textureId());
 

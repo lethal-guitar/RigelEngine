@@ -31,11 +31,11 @@ namespace rigel::renderer
 base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale);
 base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale);
 
-base::Vec2 localToGlobalTranslation(
-  const renderer::Renderer* pRenderer,
+void setLocalTranslation(
+  renderer::Renderer* pRenderer,
   const base::Vec2& translation);
-base::Rect<int> localToGlobalClipRect(
-  const renderer::Renderer* pRenderer,
+void setLocalClipRect(
+  renderer::Renderer* pRenderer,
   const base::Rect<int>& localRect);
 
 } // namespace rigel::renderer

@@ -105,14 +105,9 @@ int healthOrZero(entityx::Entity entity)
 
   const auto offset =
     data::GameTraits::inGameViewportOffset + base::Vec2{screenShakeOffsetX, 0};
-  const auto newTranslation =
-    renderer::localToGlobalTranslation(pRenderer, offset);
-
-  const auto scale = pRenderer->globalScale();
-  pRenderer->setClipRect(base::Rect<int>{
-    newTranslation,
-    renderer::scaleSize(data::GameTraits::inGameViewportSize, scale)});
-  pRenderer->setGlobalTranslation(newTranslation);
+  renderer::setLocalTranslation(pRenderer, offset);
+  renderer::setLocalClipRect(
+    pRenderer, base::Rect<int>{{}, data::GameTraits::inGameViewportSize});
 
   return saved;
 }
@@ -131,6 +126,7 @@ int healthOrZero(entityx::Entity entity)
   const auto newTranslation =
     renderer::scaleVec(offset, scale) + base::Vec2{info.mLeftPaddingPx, 0};
   pRenderer->setGlobalTranslation(newTranslation);
+  pRenderer->setClipRect({});
 
   return saved;
 }
@@ -151,8 +147,7 @@ void setupWidescreenHudOffset(
   const auto extraTiles =
     tilesOnScreen - data::GameTraits::mapViewportWidthTiles;
   const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
-  pRenderer->setGlobalTranslation(
-    renderer::localToGlobalTranslation(pRenderer, {hudOffset, 0}));
+  renderer::setLocalTranslation(pRenderer, {hudOffset, 0});
 }
 
 
@@ -728,16 +723,13 @@ void GameWorld::render(const float interpolationFactor)
       const auto clampedSizePx = data::tileExtentsToPixelExtents(clampedSize);
 
       auto saved = renderer::saveState(mpRenderer);
-      mpRenderer->setClipRect(base::Rect<int>{
-        mpRenderer->globalTranslation(),
-        renderer::scaleSize(clampedSizePx, mpRenderer->globalScale())});
+      renderer::setLocalClipRect(mpRenderer, {{}, clampedSizePx});
       return saved;
     };
 
   auto drawParticlesAndDebugOverlay =
     [&](const ViewportParams& viewportParams) {
-      mpRenderer->setGlobalTranslation(renderer::localToGlobalTranslation(
-        mpRenderer, viewportParams.mCameraOffset));
+      renderer::setLocalTranslation(mpRenderer, viewportParams.mCameraOffset);
       mpState->mParticles.render(
         viewportParams.mRenderStartPosition, interpolationFactor);
       mpState->mDebuggingSystem.update(
@@ -889,10 +881,10 @@ void GameWorld::render(const float interpolationFactor)
     }
 
     auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setGlobalTranslation(renderer::localToGlobalTranslation(
+    renderer::setLocalTranslation(
       mpRenderer,
       {mpState->mScreenShakeOffsetX + data::GameTraits::inGameViewportOffset.x,
-       0}));
+       0});
     drawTopRow(data::GameTraits::inGameViewportSize.width);
   }
 
@@ -1045,9 +1037,7 @@ void GameWorld::drawMapAndSprites(
   {
     renderBackdrop();
 
-    mpRenderer->setGlobalTranslation(
-      renderer::localToGlobalTranslation(mpRenderer, params.mCameraOffset));
-
+    renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
     renderBackgroundLayers();
     renderForegroundLayers();
   }
@@ -1057,8 +1047,7 @@ void GameWorld::drawMapAndSprites(
       auto saved = mWaterEffectBuffer.bind();
       renderBackdrop();
 
-      mpRenderer->setGlobalTranslation(
-        renderer::localToGlobalTranslation(mpRenderer, params.mCameraOffset));
+      renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
       renderBackgroundLayers();
     }
 
@@ -1069,8 +1058,7 @@ void GameWorld::drawMapAndSprites(
       mWaterEffectBuffer.render(0, 0);
     }
 
-    mpRenderer->setGlobalTranslation(
-      renderer::localToGlobalTranslation(mpRenderer, params.mCameraOffset));
+    renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
 
     mWaterEffect.draw(
       mWaterEffectBuffer, waterEffectAreas, state.mWaterAnimStep);
