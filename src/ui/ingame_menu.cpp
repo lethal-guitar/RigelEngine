@@ -21,6 +21,7 @@
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
 #include "game_logic/game_world.hpp"
+#include "renderer/upscaling_utils.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -348,6 +349,25 @@ auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult
 
       [dt](std::unique_ptr<TopLevelMenu>& pState) {
         pState->updateAndRender(dt);
+      },
+
+      [this, dt](ScriptedMenu& state) {
+        const auto& options = mContext.mpUserProfile->mOptions;
+        if (
+          state.mIsTransparent && options.mWidescreenModeOn &&
+          renderer::canUseWidescreenMode(mContext.mpRenderer))
+        {
+          auto saved = renderer::saveState(mContext.mpRenderer);
+          mContext.mpRenderer->setClipRect({});
+          mContext.mpRenderer->setGlobalTranslation(
+            renderer::offsetTo4by3WithinWidescreen(
+              mContext.mpRenderer, options));
+          state.updateAndRender(dt);
+        }
+        else
+        {
+          state.updateAndRender(dt);
+        }
       },
 
       [dt](auto& state) { state.updateAndRender(dt); });

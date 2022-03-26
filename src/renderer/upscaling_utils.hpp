@@ -62,4 +62,8 @@ RenderTargetTexture createFullscreenRenderTarget(
   Renderer* pRenderer,
   const data::GameOptions& options);
 
+base::Vec2 offsetTo4by3WithinWidescreen(
+  Renderer* pRenderer,
+  const data::GameOptions& options);
+
 } // namespace rigel::renderer

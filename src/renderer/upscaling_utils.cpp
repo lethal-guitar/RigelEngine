@@ -133,4 +133,20 @@ RenderTargetTexture createFullscreenRenderTarget(
   }
 }
 
+
+base::Vec2 offsetTo4by3WithinWidescreen(
+  Renderer* pRenderer,
+  const data::GameOptions& options)
+{
+  const auto viewportInfo = determineViewport(pRenderer);
+  if (options.mPerElementUpscalingEnabled)
+  {
+    return viewportInfo.mOffset;
+  }
+
+  return scaleVec(
+    viewportInfo.mOffset,
+    {1.0f / viewportInfo.mScale.x, 1.0f / viewportInfo.mScale.y});
+}
+
 } // namespace rigel::renderer
