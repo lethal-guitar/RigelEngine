@@ -564,8 +564,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
       ImGui::Checkbox(
-        "Smooth scrolling & movement (experimental)",
-        &mpOptions->mMotionSmoothing);
+        "Smooth scrolling & movement", &mpOptions->mMotionSmoothing);
       ImGui::EndTabItem();
     }
 
