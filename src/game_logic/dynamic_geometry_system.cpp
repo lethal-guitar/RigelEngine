@@ -193,6 +193,24 @@ void squashTileSection(base::Rect<int>& mapSection, data::map::Map& map)
   --mapSection.size.height;
 }
 
+
+bool isOnSolidGround(
+  const base::Rect<int>& mapSection,
+  const data::map::Map& map)
+{
+  if (mapSection.bottom() >= map.height() - 1)
+  {
+    return true;
+  }
+
+  const auto bottomLeft =
+    map.collisionData(mapSection.left(), mapSection.bottom() + 1);
+  const auto bottomRight =
+    map.collisionData(mapSection.right(), mapSection.bottom() + 1);
+  return bottomLeft.isSolidOn(data::map::SolidEdge::top()) ||
+    bottomRight.isSolidOn(data::map::SolidEdge::top());
+}
+
 } // namespace
 
 
@@ -217,8 +235,8 @@ DynamicMapSectionData determineDynamicMapSections(
   auto findSectionBelowFallingSection =
     [&](const base::Rect<int>& section) -> std::optional<std::tuple<int, int>> {
     for (auto y = section.bottom() + 1; y < map.height() &&
-         !checker.isOnSolidGround(
-           {{section.left(), y - 1}, {section.size.width, 1}});
+         !isOnSolidGround({{section.left(), y - 1}, {section.size.width, 1}},
+                          map);
          ++y)
     {
       for (auto x = section.left(); x < section.left() + section.size.width;
@@ -228,8 +246,8 @@ DynamicMapSectionData determineDynamicMapSections(
         {
           auto y2 = y + 1;
           while (y2 < map.height() &&
-                 !checker.isOnSolidGround(
-                   {{section.left(), y2 - 1}, {section.size.width, 1}}))
+                 !isOnSolidGround(
+                   {{section.left(), y2 - 1}, {section.size.width, 1}}, map))
           {
             ++y2;
           }
@@ -648,20 +666,6 @@ void behaviors::DynamicGeometryController::update(
 
   dynamic.mPreviousHeight = mapSection.size.height;
 
-  auto isOnSolidGround = [&]() {
-    if (mapSection.bottom() >= s.mpMap->height() - 1)
-    {
-      return true;
-    }
-
-    const auto bottomLeft =
-      s.mpMap->collisionData(mapSection.left(), mapSection.bottom() + 1);
-    const auto bottomRight =
-      s.mpMap->collisionData(mapSection.right(), mapSection.bottom() + 1);
-    return bottomLeft.isSolidOn(data::map::SolidEdge::top()) ||
-      bottomRight.isSolidOn(data::map::SolidEdge::top());
-  };
-
   auto makeAlwaysActive = [&]() {
     engine::reassign<ActivationSettings>(
       entity, ActivationSettings::Policy::Always);
@@ -683,7 +687,7 @@ void behaviors::DynamicGeometryController::update(
   auto fall = [&]() {
     for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i)
     {
-      if (isOnSolidGround())
+      if (isOnSolidGround(mapSection, *s.mpMap))
       {
         return true;
       }
@@ -798,7 +802,7 @@ void behaviors::DynamicGeometryController::update(
     switch (mState)
     {
       case State::Waiting:
-        if (!isOnSolidGround())
+        if (!isOnSolidGround(mapSection, *s.mpMap))
         {
           makeAlwaysActive();
           mState = State::Falling;
@@ -828,7 +832,7 @@ void behaviors::DynamicGeometryController::update(
     switch (mState)
     {
       case State::Waiting:
-        if (!isOnSolidGround())
+        if (!isOnSolidGround(mapSection, *s.mpMap))
         {
           makeAlwaysActive();
           mState = State::Falling;
@@ -862,7 +866,7 @@ void behaviors::DynamicGeometryController::update(
       case State::Falling:
         for (int i = 0; i < GEOMETRY_FALL_SPEED; ++i)
         {
-          if (isOnSolidGround())
+          if (isOnSolidGround(mapSection, *s.mpMap))
           {
             land();
             mType = Type::FallDownImmediatelyThenStayOnGround;
