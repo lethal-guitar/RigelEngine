@@ -122,18 +122,18 @@ BonusRelatedItemCounts countBonusRelatedItems(entityx::EntityManager& es)
 
   // clang-format off
   es.each<ActorTag>([&counts](entityx::Entity, const ActorTag& tag) {
-      switch (tag.mType) {
-        case AT::ShootableCamera: ++counts.mCameraCount; break;
-        case AT::FireBomb: ++counts.mFireBombCount; break;
-        case AT::CollectableWeapon: ++counts.mWeaponCount; break;
-        case AT::Merchandise: ++counts.mMerchandiseCount; break;
-        case AT::ShootableBonusGlobe: ++counts.mBonusGlobeCount; break;
-        case AT::MountedLaserTurret: ++counts.mLaserTurretCount; break;
+    switch (tag.mType) {
+      case AT::ShootableCamera: ++counts.mCameraCount; break;
+      case AT::FireBomb: ++counts.mFireBombCount; break;
+      case AT::CollectableWeapon: ++counts.mWeaponCount; break;
+      case AT::Merchandise: ++counts.mMerchandiseCount; break;
+      case AT::ShootableBonusGlobe: ++counts.mBonusGlobeCount; break;
+      case AT::MountedLaserTurret: ++counts.mLaserTurretCount; break;
 
-        default:
-          break;
-      }
-    });
+      default:
+        break;
+    }
+  });
   // clang-format on
 
   return counts;
