@@ -78,19 +78,20 @@
     <div id="welcomebox" class="info_msg">
       <h1>Welcome to RigelEngine (web version)!</h1>
       <p>
-        RigelEngine is an open-source recreation of the game&nbsp;<a href="https://en.wikipedia.org/wiki/Duke_Nukem_II" target="_blank">Duke Nukem II</a>&nbsp;for modern systems, offering various enhancements like better game controller support, a wide-screen mode, quick saving etc. This is the web version, made using Emscripten and Webassembly (wasm).
+        RigelEngine is an open-source recreation of the game&nbsp;<a href="https://en.wikipedia.org/wiki/Duke_Nukem_II" target="_blank">Duke Nukem II</a>&nbsp;for modern systems, offering various enhancements like increased frame rate, better game controller support, a wide-screen mode, quick saving etc. This is the web version, made using Emscripten and Webassembly (wasm).
         It's still work in progress and has a few limitations that don't exist in the native version (see below).
       </p>
       <p>
-        More info:&nbsp;<a href="https://github.com/lethal-guitar/RigelEngine" target="_blank">GitHub project</a>,&nbsp;<a href="https://lethalguitar.wordpress.com/category/rigel-engine" target="_blank">Blog</a><br/>
-        Download&nbsp;<a href="https://github.com/lethal-guitar/RigelEngine/releases" target="_blank">a native build (Windows, 64 bit)</a>
+        More info:&nbsp;<a href="https://github.com/lethal-guitar/RigelEngine" target="_blank">GitHub project</a><br/>
+        Updates:&nbsp;<a href="https://lethalguitar.wordpress.com/category/rigel-engine" target="_blank">Blog</a>,&nbsp;<a href="https://twitter.com/lethal_guitar" target="_blank">Twitter</a>,&nbsp;<a href="https://www.youtube.com/user/lethalguitar128/videos" target="_blank">YouTube</a><br/>
+        <a href="https://github.com/lethal-guitar/RigelEngine/releases" target="_blank">Download a native build (Windows/Mac OS/Linux)</a>
       </p>
 
       <h2>Controls</h2>
       <p>
       Press Esc to enter the main menu, then use arrow keys and Enter/Esc to navigate the menus.
       Default in-game controls are arrow keys for movement, Ctrl to jump and Alt to shoot.
-      Pressing F1 while in-game brings up an options menu, where you can customize controls (recommended on Mac) and enable widescreen mode/quick saving.
+      Pressing F1 while in-game brings up an options menu, where you can customize controls (recommended on Mac) and enable enhancements like widescreen mode/quick saving.
       To go back to the main menu press Esc and then Y to confirm.
       </p>
 
@@ -99,8 +100,9 @@
         <li>On Mac OS, the default controls are in conflict with some system-wide shortcuts (e.g. Ctrl + Up arrow for switching between applications etc.) I'd recommend reconfiguring the controls (see above) if you're on a Mac so that the Ctrl key is not used. This is not a problem in the native Mac version as it can use true fullscreen mode, but that doesn't work in the web version unfortunately.</li>
         <li>Saved games, high scores, and options can't be saved permanently and are lost when reloading or closing the page.</li>
         <li>It's not possible to play the registered version.</li>
-        <li>Due to missing touch input support, there is no way to interact with the game on mobile devices (unless you plug in a USB keyboard), so it will just run through the intro loop forever.</li>
+        <li>Due to missing touch input support, there is no way to interact with the game on mobile devices (unless you plug in a USB keyboard or game controller), so it will just run through the intro loop forever.</li>
         <li>Screen fade-in and fade-out effects are missig.</li>
+        <li>Switching between sound styles causes the UI to temporarily become unresponsive (a loading indicator isn't displayed correctly).</li>
       </ul>
 
       <p>
