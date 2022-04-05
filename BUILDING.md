@@ -112,12 +112,8 @@ sudo apt-get install cmake libsdl2-dev libsdl2-mixer-dev
 mkdir build
 cd build
 cmake ..
-make -j8
+make -j$(nproc)
 
-# NOTE: The -j<NUM_PROCESSES> argument to 'make' enables multi-core
-# compilation, '8' is a good number for a 4-core machine with hyperthreading.
-# You may want to tweak this number depending on your actual CPU configuration.
-#
 # If you plan to develop RigelEngine, I recommend adding
 # -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON to the cmake command.
 
@@ -149,7 +145,7 @@ tar -xzvf cmake-3.15.4.tar.gz
 cd cmake-3.15.4
 
 ./bootstrap
-make -j8 # adjust depending on number of CPU cores in your machine
+make -j$(nproc)
 sudo make install
 
 # Now, when you run cmake --version, it should say 3.15. You can delete the
@@ -166,7 +162,7 @@ export CXX=`which g++-8`
 
 # Finally, we can configure and build as usual (see above).
 cmake ..
-make -j8 # adjust depending on number of CPU cores in your machine
+make -j$(nproc)
 
 # Now run it!
 ./src/RigelEngine
@@ -195,7 +191,7 @@ To build the GL ES version, pass `-DUSE_GL_ES=ON` when running CMake, then build
 mkdir build
 cd build
 cmake .. -DUSE_GL_ES=ON
-make -j8 # adjust depending on number of CPU cores in your machine
+make -j$(nproc)
 ```
 
 If you've already built the regular version before, you can reuse the existing build dir
@@ -219,7 +215,7 @@ When building, you need to enable OpenGL ES Support:
 mkdir build
 cd build
 cmake .. -DUSE_GL_ES=ON
-make
+make # single-job is better for RPI
 ```
 
 ### <a name="docker-build-instructions">Docker builds</a>
@@ -268,7 +264,7 @@ brew install cmake sdl2 sdl2_mixer
 mkdir build
 cd build
 cmake ..
-make
+make -j$(nproc)
 
 # Now run it!
 ./src/RigelEngine.app/Contents/MacOS/RigelEngine
@@ -295,7 +291,7 @@ unset rigel_llvm_path;
 mkdir build
 cd build
 cmake
-make
+make -j$(nproc)
 
 # Now run it!
 ./src/RigelEngine.app/Contents/MacOS/RigelEngine
@@ -365,7 +361,7 @@ The instructions to build are the same as above, except for the CMake part:
 
 ```bash
 emcmake cmake .. -DWEBASSEMBLY_GAME_PATH=<path-to-duke2-folder>
-make
+make -j$(nproc)
 ```
 
 This will produce a couple of files in the `<path-to-cmake-build-dir>/src` folder.
