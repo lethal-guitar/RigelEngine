@@ -53,10 +53,20 @@ public:
    */
   void draw(int index, const base::Rect<int>& destRect) const;
 
+  /** Draw (part of) image from atlas at given location
+   *
+   * Like the other overload of draw(), but allows specifying a source
+   * rectangle to draw just a part of the specified image.
+   */
+  void draw(
+    int index,
+    const base::Rect<int>& srcRect,
+    const base::Rect<int>& destRect) const;
+
 private:
   struct TextureInfo
   {
-    TexCoords mCoordinates;
+    base::Rect<int> mRect;
     int mTextureIndex;
   };
 
