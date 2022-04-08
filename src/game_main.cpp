@@ -28,6 +28,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <imgui.h>
 RIGEL_RESTORE_WARNINGS
 
@@ -195,6 +196,8 @@ int gameMain(const CommandLineOptions& options)
   sdl_utils::check(
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
+  Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
+  auto sdlMixerGuard = defer([]() { Mix_Quit(); });
 
   SDL_version version;
   SDL_GetVersion(&version);

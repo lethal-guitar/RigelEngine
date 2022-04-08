@@ -381,14 +381,12 @@ SoundSystem::SoundSystem(
       2, // stereo
       BUFFER_SIZE));
 
-    return &Mix_Quit;
+    return &Mix_CloseAudio;
   }))
   , mpResources(pResources)
   , mCurrentSoundStyle(soundStyle)
   , mCurrentAdlibPlaybackType(adlibPlaybackType)
 {
-  Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
-
   int sampleRate = 0;
   std::uint16_t audioFormat = 0;
   int numChannels = 0;
