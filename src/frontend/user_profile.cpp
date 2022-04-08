@@ -754,8 +754,15 @@ void UserProfile::saveToDisk()
   // writing.
   if (mOriginalJson.size() > 0)
   {
-    const auto previousProfile = json::from_msgpack(mOriginalJson);
-    serializedProfile = merge(previousProfile, serializedProfile);
+    try
+    {
+      const auto previousProfile = json::from_msgpack(mOriginalJson);
+      serializedProfile = merge(previousProfile, serializedProfile);
+    }
+    catch (const std::exception&)
+    {
+      std::cerr << "WARNING: Failed to merge in previous profile\n";
+    }
   }
 
   // Save user profile
