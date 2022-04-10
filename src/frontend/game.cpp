@@ -55,7 +55,7 @@ namespace
  * returning the right path based on the given command line options and user
  * profile.
  */
-std::string effectiveGamePath(
+std::filesystem::path effectiveGamePath(
   const CommandLineOptions& options,
   const UserProfile& profile)
 {
@@ -66,7 +66,7 @@ std::string effectiveGamePath(
     return options.mGamePath;
   }
 
-  return profile.mGamePath ? profile.mGamePath->u8string() + "/"s : ""s;
+  return profile.mGamePath ? *profile.mGamePath : std::filesystem::path{};
 }
 
 
@@ -249,7 +249,7 @@ Game::Game(
   const bool isFirstLaunch)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
+  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile), true, {})
   , mpSoundSystem([&]() {
     std::unique_ptr<audio::SoundSystem> pResult;
     try
@@ -765,8 +765,7 @@ void Game::takeScreenshot()
   };
 
   const auto gameDirScreenshotPath =
-    fs::u8path(effectiveGamePath(mCommandLineOptions, *mpUserProfile)) /
-    SCREENSHOTS_SUBDIR;
+    effectiveGamePath(mCommandLineOptions, *mpUserProfile) / SCREENSHOTS_SUBDIR;
 
   // First, try the game dir.
   if (saveShot(gameDirScreenshotPath))

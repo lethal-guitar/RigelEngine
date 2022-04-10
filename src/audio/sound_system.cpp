@@ -381,14 +381,12 @@ SoundSystem::SoundSystem(
       2, // stereo
       BUFFER_SIZE));
 
-    return &Mix_Quit;
+    return &Mix_CloseAudio;
   }))
   , mpResources(pResources)
   , mCurrentSoundStyle(soundStyle)
   , mCurrentAdlibPlaybackType(adlibPlaybackType)
 {
-  Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
-
   int sampleRate = 0;
   std::uint16_t audioFormat = 0;
   int numChannels = 0;
@@ -550,14 +548,16 @@ void SoundSystem::loadAllSounds(
     mpResources->file(assets::AUDIO_DATA_FILE));
 
   data::forEachSoundId([&](const auto id) {
-    std::error_code ec;
-    if (const auto replacementPath = mpResources->replacementSoundPath(id);
-        std::filesystem::exists(replacementPath, ec))
+    for (const auto& replacementPath : mpResources->replacementSoundPaths(id))
     {
-      if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
+      std::error_code ec;
+      if (std::filesystem::exists(replacementPath, ec))
       {
-        mSounds[idToIndex(id)] = LoadedSound{sdl_utils::wrap(pMixChunk)};
-        return;
+        if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
+        {
+          mSounds[idToIndex(id)] = LoadedSound{sdl_utils::wrap(pMixChunk)};
+          return;
+        }
       }
     }
 
@@ -673,20 +673,25 @@ sdl_utils::Ptr<Mix_Music>
     fs::u8path(strings::toLowercase(name)).replace_extension();
 
   std::error_code ec;
-  for (const fs::directory_entry& candidate :
-       fs::directory_iterator(mpResources->replacementMusicBasePath(), ec))
-  {
-    if (!candidate.is_regular_file() || candidate.path().stem() != songName)
-    {
-      continue;
-    }
 
-    const auto candidateFilePath = candidate.path().u8string();
-    if (auto pSong = Mix_LoadMUS(candidateFilePath.c_str()))
+  for (const auto& replacementBasePath :
+       mpResources->replacementMusicBasePaths())
+  {
+    for (const fs::directory_entry& candidate :
+         fs::directory_iterator(replacementBasePath, ec))
     {
-      auto pReplacement = sdl_utils::wrap(pSong);
-      mReplacementSongFileCache.insert({name, candidateFilePath});
-      return pReplacement;
+      if (!candidate.is_regular_file() || candidate.path().stem() != songName)
+      {
+        continue;
+      }
+
+      const auto candidateFilePath = candidate.path().u8string();
+      if (auto pSong = Mix_LoadMUS(candidateFilePath.c_str()))
+      {
+        auto pReplacement = sdl_utils::wrap(pSong);
+        mReplacementSongFileCache.insert({name, candidateFilePath});
+        return pReplacement;
+      }
     }
   }
 

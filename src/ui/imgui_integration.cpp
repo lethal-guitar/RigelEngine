@@ -73,6 +73,10 @@ void updateUiScale(const int, const int newHeight)
   ImGui::GetIO().FontGlobalScale = scaleFactor;
   ImGui::GetStyle() = ImGuiStyle{};
   ImGui::GetStyle().ScaleAllSizes(scaleFactor * INITIAL_UI_SCALE);
+
+  // AntiAliasedLinesUseTex requires using bilinear filtering, but we don't use
+  // it (see our version of imgui_impl_opengl3.cpp).
+  ImGui::GetStyle().AntiAliasedLinesUseTex = false;
 }
 
 } // namespace
