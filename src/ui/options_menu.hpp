@@ -18,6 +18,7 @@
 
 #include "base/warnings.hpp"
 #include "data/game_options.hpp"
+#include "data/mod_library.hpp"
 #include "engine/timing.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -82,6 +83,10 @@ private:
   renderer::Renderer* mpRenderer;
 
   int mSelectedSoundIndex = 0;
+
+  std::optional<data::ModLibrary> moLocalModLibrary;
+  std::vector<data::ModStatus> mModSelection;
+  bool mEnableTopLevelMods;
 
   SDL_Keycode* mpCurrentlyEditedBinding = nullptr;
   engine::TimeDelta mElapsedTimeEditingBinding = 0;

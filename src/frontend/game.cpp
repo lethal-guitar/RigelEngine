@@ -48,28 +48,6 @@ using namespace engine;
 namespace
 {
 
-/** Returns game path to be used for loading resources
- *
- * A game path specified on the command line takes priority over the path
- * stored in the user profile. This function implements that priority by
- * returning the right path based on the given command line options and user
- * profile.
- */
-std::filesystem::path effectiveGamePath(
-  const CommandLineOptions& options,
-  const UserProfile& profile)
-{
-  using namespace std::string_literals;
-
-  if (!options.mGamePath.empty())
-  {
-    return options.mGamePath;
-  }
-
-  return profile.mGamePath ? *profile.mGamePath : std::filesystem::path{};
-}
-
-
 auto wrapWithInitialFadeIn(std::unique_ptr<GameMode> mode)
 {
   class InitialFadeInWrapper : public GameMode
@@ -198,6 +176,21 @@ std::string makeScreenshotFilename()
 } // namespace
 
 
+std::filesystem::path effectiveGamePath(
+  const CommandLineOptions& options,
+  const UserProfile& profile)
+{
+  using namespace std::string_literals;
+
+  if (!options.mGamePath.empty())
+  {
+    return options.mGamePath;
+  }
+
+  return profile.mGamePath ? *profile.mGamePath : std::filesystem::path{};
+}
+
+
 Game::Game(
   const CommandLineOptions& commandLineOptions,
   UserProfile* pUserProfile,
@@ -205,7 +198,10 @@ Game::Game(
   const bool isFirstLaunch)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile), true, {})
+  , mResources(
+      effectiveGamePath(commandLineOptions, *pUserProfile),
+      pUserProfile->mOptions.mEnableTopLevelMods,
+      pUserProfile->mModLibrary.enabledModPaths())
   , mpSoundSystem([&]() {
     std::unique_ptr<audio::SoundSystem> pResult;
     try
@@ -303,12 +299,19 @@ auto Game::runOneFrame() -> std::optional<StopReason>
 
   swapBuffers();
 
-  applyChangedOptions();
+  const auto changedOptionsRequireRestart = applyChangedOptions();
 
   if (!mGamePathToSwitchTo.empty())
   {
     mpUserProfile->mGamePath = mGamePathToSwitchTo;
     mpUserProfile->saveToDisk();
+    return StopReason::RestartNeeded;
+  }
+
+  if (
+    changedOptionsRequireRestart ||
+    mpUserProfile->mModLibrary.fetchAndClearSelectionChangedFlag())
+  {
     return StopReason::RestartNeeded;
   }
 
@@ -518,7 +521,7 @@ void Game::swapBuffers()
 }
 
 
-void Game::applyChangedOptions()
+bool Game::applyChangedOptions()
 {
   const auto& currentOptions = mpUserProfile->mOptions;
 
@@ -618,9 +621,14 @@ void Game::applyChangedOptions()
     mUpscalingBuffer.updateConfiguration(currentOptions);
   }
 
+  const auto restartNeeded =
+    currentOptions.mEnableTopLevelMods != mPreviousOptions.mEnableTopLevelMods;
+
   mPreviousOptions = mpUserProfile->mOptions;
   mWidescreenModeWasActive = widescreenModeActive;
   mPreviousWindowSize = mRenderer.windowSize();
+
+  return restartNeeded;
 }
 
 
