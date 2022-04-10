@@ -60,7 +60,7 @@ class ResourceLoader
 {
 public:
   ResourceLoader(
-    const std::string& gamePath,
+    std::filesystem::path gamePath,
     bool enableTopLevelMods,
     std::vector<std::filesystem::path> modPaths);
 

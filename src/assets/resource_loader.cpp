@@ -136,13 +136,13 @@ std::string digitizedSoundFilenameForId(const data::SoundId soundId)
 
 
 ResourceLoader::ResourceLoader(
-  const std::string& gamePath,
+  std::filesystem::path gamePath,
   bool enableTopLevelMods,
   std::vector<fs::path> modPaths)
-  : mGamePath(fs::u8path(gamePath))
+  : mGamePath(std::move(gamePath))
   , mModPaths(std::move(modPaths))
   , mEnableTopLevelMods(enableTopLevelMods)
-  , mFilePackage(gamePath + "NUKEM2.CMP")
+  , mFilePackage((mGamePath / "NUKEM2.CMP").u8string())
   , mActorImagePackage(
       file(ActorImagePackage::IMAGE_DATA_FILE),
       file(ActorImagePackage::ACTOR_INFO_FILE))
