@@ -29,6 +29,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 
 namespace rigel::assets
@@ -58,7 +59,10 @@ struct ActorData
 class ResourceLoader
 {
 public:
-  explicit ResourceLoader(const std::string& gamePath);
+  ResourceLoader(
+    const std::string& gamePath,
+    bool enableTopLevelMods,
+    std::vector<std::filesystem::path> modPaths);
 
   data::Image loadUiSpriteSheet() const;
   data::Image loadUiSpriteSheet(const data::Palette16& overridePalette) const;
@@ -87,8 +91,10 @@ public:
   data::Song loadMusic(std::string_view name) const;
   bool hasSoundBlasterSound(data::SoundId id) const;
   data::AudioBuffer loadSoundBlasterSound(data::SoundId id) const;
-  std::filesystem::path replacementSoundPath(data::SoundId id) const;
-  std::filesystem::path replacementMusicBasePath() const;
+
+  std::vector<std::filesystem::path>
+    replacementSoundPaths(data::SoundId id) const;
+  std::vector<std::filesystem::path> replacementMusicBasePaths() const;
 
   ScriptBundle loadScriptBundle(std::string_view fileName) const;
 
@@ -97,6 +103,16 @@ public:
   bool hasFile(std::string_view name) const;
 
 private:
+  // The invoke_result of the TryLoadFunc is going to be a std::optional<T>,
+  // hence we need to unpack the underlying T via the optional's value_type
+  template <
+    typename TryLoadFunc,
+    typename T = typename std::
+      invoke_result_t<TryLoadFunc, const std::filesystem::path&>::value_type>
+  std::optional<T> tryLoadReplacement(TryLoadFunc&& tryLoad) const;
+  std::optional<data::Image>
+    tryLoadPngReplacement(std::string_view filename) const;
+
   data::Image loadTiledFullscreenImage(std::string_view name) const;
   data::Image loadTiledFullscreenImage(
     std::string_view name,
@@ -104,8 +120,10 @@ private:
   data::AudioBuffer loadSound(std::string_view name) const;
 
   std::filesystem::path mGamePath;
-  assets::CMPFilePackage mFilePackage;
+  std::vector<std::filesystem::path> mModPaths;
+  bool mEnableTopLevelMods;
 
+  assets::CMPFilePackage mFilePackage;
   assets::ActorImagePackage mActorImagePackage;
 };
 

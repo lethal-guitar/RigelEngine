@@ -249,7 +249,7 @@ Game::Game(
   const bool isFirstLaunch)
   : mpWindow(pWindow)
   , mRenderer(pWindow)
-  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile))
+  , mResources(effectiveGamePath(commandLineOptions, *pUserProfile), true, {})
   , mpSoundSystem([&]() {
     std::unique_ptr<audio::SoundSystem> pResult;
     try

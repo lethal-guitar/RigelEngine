@@ -76,16 +76,15 @@ const auto FULL_SCREEN_IMAGE_DATA_SIZE =
 const auto ASSET_REPLACEMENTS_PATH = "asset_replacements";
 
 
-fs::path
-  replacementImagePath(const fs::path& basePath, const int id, const int frame)
+std::string replacementSpriteImageName(const int id, const int frame)
 {
-  return basePath /
-    ("actor" + std::to_string(id) + "_frame" + std::to_string(frame) + ".png");
+  return "actor" + std::to_string(id) + "_frame" + std::to_string(frame) +
+    ".png";
 }
 
 
 std::optional<data::Image> loadReplacementTilesetIfPresent(
-  const fs::path& gamePath,
+  const fs::path& resourcePath,
   std::string_view name)
 {
   using namespace std::literals;
@@ -102,8 +101,7 @@ std::optional<data::Image> loadReplacementTilesetIfPresent(
 
   const auto number = matches[1].str();
   const auto replacementName = "tileset"s + number + ".png";
-  const auto replacementPath =
-    gamePath / ASSET_REPLACEMENTS_PATH / replacementName;
+  const auto replacementPath = resourcePath / replacementName;
 
   return loadPng(replacementPath.u8string());
 }
@@ -137,8 +135,13 @@ std::string digitizedSoundFilenameForId(const data::SoundId soundId)
 } // namespace
 
 
-ResourceLoader::ResourceLoader(const std::string& gamePath)
+ResourceLoader::ResourceLoader(
+  const std::string& gamePath,
+  bool enableTopLevelMods,
+  std::vector<fs::path> modPaths)
   : mGamePath(fs::u8path(gamePath))
+  , mModPaths(std::move(modPaths))
+  , mEnableTopLevelMods(enableTopLevelMods)
   , mFilePackage(gamePath + "NUKEM2.CMP")
   , mActorImagePackage(
       file(ActorImagePackage::IMAGE_DATA_FILE),
@@ -147,16 +150,43 @@ ResourceLoader::ResourceLoader(const std::string& gamePath)
 }
 
 
-data::Image ResourceLoader::loadUiSpriteSheet() const
+template <typename TryLoadFunc, typename T>
+std::optional<T> ResourceLoader::tryLoadReplacement(TryLoadFunc&& tryLoad) const
 {
-  const auto replacementPath =
-    mGamePath / ASSET_REPLACEMENTS_PATH / "status.png";
-  if (auto oReplacement = loadPng(replacementPath.u8string()))
+  for (auto iPath = mModPaths.rbegin(); iPath != mModPaths.rend(); ++iPath)
   {
-    return *oReplacement;
+    if (auto oReplacement = tryLoad(*iPath))
+    {
+      return *oReplacement;
+    }
   }
 
-  return loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE);
+  if (mEnableTopLevelMods)
+  {
+    if (auto oReplacement = tryLoad(mGamePath / ASSET_REPLACEMENTS_PATH))
+    {
+      return *oReplacement;
+    }
+  }
+
+  return {};
+}
+
+
+std::optional<data::Image>
+  ResourceLoader::tryLoadPngReplacement(std::string_view filename) const
+{
+  return tryLoadReplacement([filename](const fs::path& path) {
+    return loadPng((path / filename).u8string());
+  });
+}
+
+
+data::Image ResourceLoader::loadUiSpriteSheet() const
+{
+  const auto oReplacement = tryLoadPngReplacement("status.png");
+  return oReplacement ? *oReplacement
+                      : loadUiSpriteSheet(data::GameTraits::INGAME_PALETTE);
 }
 
 
@@ -244,17 +274,16 @@ ActorData ResourceLoader::loadActor(
 
   auto images = utils::transformed(
     actorInfo.mFrames, [&, frame = 0](const auto& frameHeader) mutable {
-      auto maybeReplacement = loadPng(
-        replacementImagePath(
-          mGamePath / ASSET_REPLACEMENTS_PATH, static_cast<int>(id), frame)
-          .u8string());
+      const auto imageName =
+        replacementSpriteImageName(static_cast<int>(id), frame);
       ++frame;
 
+      const auto oReplacement = tryLoadPngReplacement(imageName);
       return ActorData::Frame{
         frameHeader.mDrawOffset,
         frameHeader.mSizeInTiles,
-        maybeReplacement ? *maybeReplacement
-                         : mActorImagePackage.loadImage(frameHeader, palette)};
+        oReplacement ? *oReplacement
+                     : mActorImagePackage.loadImage(frameHeader, palette)};
     });
 
   return ActorData{actorInfo.mDrawIndex, std::move(images)};
@@ -274,11 +303,10 @@ data::Image ResourceLoader::loadBackdrop(std::string_view name) const
   {
     const auto number = matches[1].str();
     const auto replacementName = "backdrop"s + number + ".png";
-    const auto replacementPath =
-      mGamePath / ASSET_REPLACEMENTS_PATH / replacementName;
-    if (const auto replacementImage = loadPng(replacementPath.u8string()))
+
+    if (const auto oReplacement = tryLoadPngReplacement(replacementName))
     {
-      return *replacementImage;
+      return *oReplacement;
     }
   }
 
@@ -308,10 +336,15 @@ TileSet ResourceLoader::loadCZone(std::string_view name) const
     }
   }
 
-  if (auto replacementImage = loadReplacementTilesetIfPresent(mGamePath, name))
+  const auto oReplacementImage =
+    tryLoadReplacement([name](const fs::path& path) {
+      return loadReplacementTilesetIfPresent(path, name);
+    });
+
+  if (oReplacementImage)
   {
     return {
-      std::move(*replacementImage), TileAttributeDict{std::move(attributes)}};
+      std::move(*oReplacementImage), TileAttributeDict{std::move(attributes)}};
   }
 
   Image fullImage(
@@ -346,6 +379,17 @@ TileSet ResourceLoader::loadCZone(std::string_view name) const
 
 data::Movie ResourceLoader::loadMovie(std::string_view name) const
 {
+  // We don't use tryLoadReplacement here, because we don't look for movies
+  // in the top-level path.
+  for (auto iPath = mModPaths.rbegin(); iPath != mModPaths.rend(); ++iPath)
+  {
+    const auto moddedFile = *iPath / fs::u8path(name);
+    if (fs::exists(moddedFile))
+    {
+      return assets::loadMovie(loadFile(moddedFile));
+    }
+  }
+
   return assets::loadMovie(loadFile(mGamePath / fs::u8path(name)));
 }
 
@@ -375,20 +419,43 @@ data::AudioBuffer
 }
 
 
-std::filesystem::path
-  ResourceLoader::replacementSoundPath(data::SoundId id) const
+std::vector<std::filesystem::path>
+  ResourceLoader::replacementSoundPaths(data::SoundId id) const
 {
   using namespace std::literals;
 
   const auto expectedName =
     "sound"s + std::to_string(static_cast<int>(id) + 1) + ".wav";
-  return mGamePath / ASSET_REPLACEMENTS_PATH / expectedName;
+
+  auto result = std::vector<std::filesystem::path>{};
+  result.reserve(mModPaths.size());
+
+  std::transform(
+    mModPaths.rbegin(),
+    mModPaths.rend(),
+    std::back_inserter(result),
+    [&](const auto& path) { return path / expectedName; });
+
+  if (mEnableTopLevelMods)
+  {
+    result.push_back(mGamePath / ASSET_REPLACEMENTS_PATH / expectedName);
+  }
+
+  return result;
 }
 
 
-std::filesystem::path ResourceLoader::replacementMusicBasePath() const
+std::vector<std::filesystem::path>
+  ResourceLoader::replacementMusicBasePaths() const
 {
-  return mGamePath / ASSET_REPLACEMENTS_PATH;
+  auto result =
+    std::vector<std::filesystem::path>{mModPaths.rbegin(), mModPaths.rend()};
+
+  if (mEnableTopLevelMods)
+  {
+    result.push_back(mGamePath / ASSET_REPLACEMENTS_PATH);
+  }
+  return result;
 }
 
 
@@ -406,10 +473,23 @@ ScriptBundle ResourceLoader::loadScriptBundle(std::string_view fileName) const
 
 ByteBuffer ResourceLoader::file(std::string_view name) const
 {
-  const auto unpackedFilePath = mGamePath / fs::u8path(name);
-  if (fs::exists(unpackedFilePath))
+  // TODO: Eliminate duplication with tryLoadReplacement?
+  for (auto iPath = mModPaths.rbegin(); iPath != mModPaths.rend(); ++iPath)
   {
-    return loadFile(unpackedFilePath);
+    const auto unpackedFilePath = *iPath / fs::u8path(name);
+    if (fs::exists(unpackedFilePath))
+    {
+      return loadFile(unpackedFilePath);
+    }
+  }
+
+  if (mEnableTopLevelMods)
+  {
+    const auto unpackedFilePath = mGamePath / fs::u8path(name);
+    if (fs::exists(unpackedFilePath))
+    {
+      return loadFile(unpackedFilePath);
+    }
   }
 
   return mFilePackage.file(name);
@@ -421,10 +501,29 @@ std::string ResourceLoader::fileAsText(std::string_view name) const
   return asText(file(name));
 }
 
+
 bool ResourceLoader::hasFile(std::string_view name) const
 {
-  const auto unpackedFilePath = mGamePath / fs::u8path(name);
-  return fs::exists(unpackedFilePath) || mFilePackage.hasFile(name);
+  // TODO: Eliminate duplication with tryLoadReplacement?
+  for (auto iPath = mModPaths.rbegin(); iPath != mModPaths.rend(); ++iPath)
+  {
+    const auto unpackedFilePath = *iPath / fs::u8path(name);
+    if (fs::exists(unpackedFilePath))
+    {
+      return true;
+    }
+  }
+
+  if (mEnableTopLevelMods)
+  {
+    const auto unpackedFilePath = mGamePath / fs::u8path(name);
+    if (fs::exists(unpackedFilePath))
+    {
+      return true;
+    }
+  }
+
+  return mFilePackage.hasFile(name);
 }
 
 } // namespace rigel::assets
