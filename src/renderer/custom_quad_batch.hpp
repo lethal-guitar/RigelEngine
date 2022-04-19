@@ -38,7 +38,10 @@ public:
   {
   }
 
-  void preAllocateSpace(const int numQuads) { mVertices.reserve(numQuads * 4); }
+  void preAllocateSpace(const int numQuads)
+  {
+    mVertices.reserve(numQuads * std::tuple_size<QuadVertices>::value);
+  }
 
   void reset()
   {
