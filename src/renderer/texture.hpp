@@ -25,6 +25,9 @@
 namespace rigel::renderer
 {
 
+class Shader;
+
+
 /** Image (bitmap) residing in GPU memory
  *
  * This is an abstraction over the low-level texture management API
@@ -106,6 +109,25 @@ protected:
   int mWidth = 0;
   int mHeight = 0;
 };
+
+
+void drawWithCustomShader(
+  Renderer* pRenderer,
+  const Texture& texture,
+  const base::Vec2& position,
+  const Shader& shader);
+void drawWithCustomShader(
+  Renderer* pRenderer,
+  const Texture& texture,
+  const base::Rect<int>& destRect,
+  const Shader& shader);
+
+void drawWithCustomShader(
+  Renderer* pRenderer,
+  const Texture& texture,
+  const base::Rect<int>& sourceRect,
+  const base::Rect<int>& destRect,
+  const Shader& shader);
 
 
 /** Utility class for render target type textures
