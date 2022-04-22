@@ -79,7 +79,9 @@ enum class AdlibPlaybackType : std::uint8_t
 enum class UpscalingFilter : std::uint8_t
 {
   None,
-  Bilinear
+  SharpBilinear,
+  PixelPerfect,
+  Bilinear,
 };
 
 

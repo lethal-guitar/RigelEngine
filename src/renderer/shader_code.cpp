@@ -25,21 +25,6 @@ namespace rigel::renderer
 namespace
 {
 
-const char* VERTEX_SOURCE = R"shd(
-ATTRIBUTE HIGHP vec2 position;
-ATTRIBUTE HIGHP vec2 texCoord;
-
-OUT HIGHP vec2 texCoordFrag;
-
-uniform mat4 transform;
-
-void main() {
-  gl_Position = transform * vec4(position, 0.0, 1.0);
-  texCoordFrag = vec2(texCoord.x, 1.0 - texCoord.y);
-}
-)shd";
-
-
 const char* FRAGMENT_SOURCE_SIMPLE = R"shd(
 DEFAULT_PRECISION_DECLARATION
 OUTPUT_COLOR_DECLARATION
@@ -114,17 +99,32 @@ constexpr auto TEXTURED_QUAD_TEXTURE_UNIT_NAMES = std::array{"textureData"};
 } // namespace
 
 
+const char* STANDARD_VERTEX_SOURCE = R"shd(
+ATTRIBUTE HIGHP vec2 position;
+ATTRIBUTE HIGHP vec2 texCoord;
+
+OUT HIGHP vec2 texCoordFrag;
+
+uniform mat4 transform;
+
+void main() {
+  gl_Position = transform * vec4(position, 0.0, 1.0);
+  texCoordFrag = vec2(texCoord.x, 1.0 - texCoord.y);
+}
+)shd";
+
+
 const ShaderSpec TEXTURED_QUAD_SHADER{
   VertexLayout::PositionAndTexCoords,
   TEXTURED_QUAD_TEXTURE_UNIT_NAMES,
-  VERTEX_SOURCE,
+  STANDARD_VERTEX_SOURCE,
   FRAGMENT_SOURCE};
 
 
 const ShaderSpec SIMPLE_TEXTURED_QUAD_SHADER{
   VertexLayout::PositionAndTexCoords,
   TEXTURED_QUAD_TEXTURE_UNIT_NAMES,
-  VERTEX_SOURCE,
+  STANDARD_VERTEX_SOURCE,
   FRAGMENT_SOURCE_SIMPLE};
 
 

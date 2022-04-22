@@ -30,6 +30,7 @@
 #include "renderer/fps_limiter.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
+#include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/ptr.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/fps_display.hpp"
@@ -136,8 +137,7 @@ private:
   bool mIsShareWareVersion;
 
   std::optional<renderer::FpsLimiter> mFpsLimiter;
-  renderer::RenderTargetTexture mRenderTarget;
-  std::uint8_t mAlphaMod = 0;
+  renderer::UpscalingBuffer mUpscalingBuffer;
   bool mCurrentFrameIsWidescreen = false;
 
   std::unique_ptr<GameMode> mpCurrentGameMode;

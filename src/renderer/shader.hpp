@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base/array_view.hpp"
+#include "base/defer.hpp"
 #include "base/warnings.hpp"
 #include "renderer/opengl.hpp"
 
@@ -155,5 +156,8 @@ private:
   VertexLayout mVertexLayout;
   mutable std::unordered_map<std::string, GLint> mLocationCache;
 };
+
+
+base::ScopeGuard useTemporarily(const Shader& shader);
 
 } // namespace rigel::renderer

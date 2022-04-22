@@ -16,6 +16,8 @@
 
 #include "texture.hpp"
 
+#include "renderer/custom_quad_batch.hpp"
+
 #include <cassert>
 
 
@@ -80,6 +82,49 @@ Texture::~Texture()
   {
     mpRenderer->destroyTexture(mId);
   }
+}
+
+
+void drawWithCustomShader(
+  Renderer* pRenderer,
+  const Texture& texture,
+  const base::Vec2& position,
+  const Shader& shader)
+{
+  drawWithCustomShader(
+    pRenderer,
+    texture,
+    {position, {texture.width(), texture.height()}},
+    shader);
+}
+
+
+void drawWithCustomShader(
+  Renderer* pRenderer,
+  const Texture& texture,
+  const base::Rect<int>& destRect,
+  const Shader& shader)
+{
+  drawWithCustomShader(
+    pRenderer,
+    texture,
+    {{}, {texture.width(), texture.height()}},
+    destRect,
+    shader);
+}
+
+
+void drawWithCustomShader(
+  Renderer* pRenderer,
+  const Texture& texture,
+  const base::Rect<int>& sourceRect,
+  const base::Rect<int>& destRect,
+  const Shader& shader)
+{
+  const auto textureIds = std::array{texture.data()};
+  const auto vertices = createTexturedQuadVertices(
+    toTexCoords(sourceRect, texture.width(), texture.height()), destRect);
+  pRenderer->drawCustomQuadBatch({textureIds, vertices, &shader});
 }
 
 

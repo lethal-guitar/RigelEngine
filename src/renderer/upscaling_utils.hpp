@@ -16,9 +16,13 @@
 
 #pragma once
 
+#include "base/defer.hpp"
 #include "base/spatial_types.hpp"
+#include "data/game_options.hpp"
+#include "renderer/shader.hpp"
 #include "renderer/texture.hpp"
 
+#include <optional>
 
 namespace rigel::data
 {
@@ -56,6 +60,10 @@ ViewportInfo determineViewport(const Renderer* pRenderer);
  */
 bool canUseWidescreenMode(const Renderer* pRenderer);
 
+bool canUsePixelPerfectScaling(
+  const Renderer* pRenderer,
+  const data::GameOptions& options);
+
 WidescreenViewportInfo determineWidescreenViewport(const Renderer* pRenderer);
 
 RenderTargetTexture createFullscreenRenderTarget(
@@ -65,5 +73,28 @@ RenderTargetTexture createFullscreenRenderTarget(
 base::Vec2 offsetTo4by3WithinWidescreen(
   Renderer* pRenderer,
   const data::GameOptions& options);
+
+
+class UpscalingBuffer
+{
+public:
+  UpscalingBuffer(Renderer* pRenderer, const data::GameOptions& options);
+
+  [[nodiscard]] base::ScopeGuard bindAndClear(bool perElementUpscaling);
+  void clear();
+  void present(bool currentFrameIsWidescreen, bool perElementUpscaling);
+
+  std::uint8_t alphaMod() const { return mAlphaMod; }
+
+  void setAlphaMod(std::uint8_t alphaMod);
+  void updateConfiguration(const data::GameOptions& options);
+
+private:
+  RenderTargetTexture mRenderTarget;
+  Shader mSharpBilinearShader;
+  Renderer* mpRenderer;
+  data::UpscalingFilter mFilter;
+  std::uint8_t mAlphaMod = 0;
+};
 
 } // namespace rigel::renderer

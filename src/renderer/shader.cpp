@@ -117,6 +117,16 @@ GlHandleWrapper compileShader(const std::string& source, GLenum type)
   return shader;
 }
 
+
+auto useTemporarily(const GLuint shaderHandle)
+{
+  GLint currentProgram;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+  glUseProgram(shaderHandle);
+
+  return base::defer([currentProgram]() { glUseProgram(currentProgram); });
+}
+
 } // namespace
 
 
@@ -172,16 +182,12 @@ Shader::Shader(const ShaderSpec& spec)
   }
 
   // Bind texture sampler names to texture units
-  GLint currentProgram;
-  glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
-  glUseProgram(mProgram.mHandle);
+  auto guard = useTemporarily(mProgram.mHandle);
 
   for (auto i = 0u; i < spec.mTextureUnitNames.size(); ++i)
   {
     setUniform(spec.mTextureUnitNames[i], int(i));
   }
-
-  glUseProgram(currentProgram);
 }
 
 
@@ -201,6 +207,12 @@ GLint Shader::location(const std::string& name) const
   }
 
   return it->second;
+}
+
+
+base::ScopeGuard useTemporarily(const Shader& shader)
+{
+  return useTemporarily(shader.handle());
 }
 
 } // namespace rigel::renderer

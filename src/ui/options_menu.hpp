@@ -33,6 +33,11 @@ struct IGameServiceProvider;
 class UserProfile;
 } // namespace rigel
 
+namespace rigel::renderer
+{
+class Renderer;
+}
+
 
 namespace rigel::ui
 {
@@ -49,6 +54,7 @@ public:
   OptionsMenu(
     UserProfile* pUserProfile,
     IGameServiceProvider* pServiceProvider,
+    renderer::Renderer* pRenderer,
     Type type);
   ~OptionsMenu();
 
@@ -73,6 +79,7 @@ private:
   UserProfile* mpUserProfile;
   data::GameOptions* mpOptions;
   IGameServiceProvider* mpServiceProvider;
+  renderer::Renderer* mpRenderer;
 
   int mSelectedSoundIndex = 0;
 

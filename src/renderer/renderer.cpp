@@ -539,6 +539,7 @@ struct Renderer::Impl
       mStateStack.back(), currentRenderTargetSize());
     batch.mpShader->use();
     batch.mpShader->setUniform("transform", transform);
+    setVertexLayout(batch.mpShader->vertexLayout());
 
     // Submit vertex buffer
     const auto numQuads =

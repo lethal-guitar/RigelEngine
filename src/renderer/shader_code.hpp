@@ -22,6 +22,8 @@
 namespace rigel::renderer
 {
 
+extern const char* STANDARD_VERTEX_SOURCE;
+
 extern const ShaderSpec TEXTURED_QUAD_SHADER;
 extern const ShaderSpec SIMPLE_TEXTURED_QUAD_SHADER;
 extern const ShaderSpec SOLID_COLOR_SHADER;

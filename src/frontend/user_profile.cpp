@@ -120,6 +120,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
   UpscalingFilter,
   {
     {UpscalingFilter::None, "None"},
+    {UpscalingFilter::SharpBilinear, "SharpBilinear"},
+    {UpscalingFilter::PixelPerfect, "PixelPerfect"},
     {UpscalingFilter::Bilinear, "Bilinear"},
   })
 } // namespace data
