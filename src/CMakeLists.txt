@@ -63,6 +63,8 @@ set(core_sources
     data/level_hints.hpp
     data/map.cpp
     data/map.hpp
+    data/mod_library.cpp
+    data/mod_library.hpp
     data/player_model.cpp
     data/player_model.hpp
     data/saved_game.hpp

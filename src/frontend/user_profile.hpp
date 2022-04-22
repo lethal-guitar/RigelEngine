@@ -19,6 +19,7 @@
 #include "assets/byte_buffer.hpp"
 #include "data/game_options.hpp"
 #include "data/high_score_list.hpp"
+#include "data/mod_library.hpp"
 #include "data/saved_game.hpp"
 
 #include <filesystem>
@@ -65,6 +66,7 @@ public:
   data::SaveSlotArray mSaveSlots;
   data::HighScoreListArray mHighScoreLists;
   data::GameOptions mOptions;
+  data::ModLibrary mModLibrary;
 
   std::optional<std::filesystem::path> mGamePath;
 

@@ -242,6 +242,7 @@ OptionsMenu::OptionsMenu(
   , mpOptions(&pUserProfile->mOptions)
   , mpServiceProvider(pServiceProvider)
   , mpRenderer(pRenderer)
+  , mEnableTopLevelMods(mpOptions->mEnableTopLevelMods)
   , mType(type)
   , mIsRunningInDesktopEnvironment(sdl_utils::isRunningInDesktopEnvironment())
 {
@@ -317,6 +318,16 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     // Popup was closed, quit the options menu
     endRebinding();
     mMenuOpen = false;
+
+    // Commit enabled mods on closing, so that the game is reloaded
+    // when we close the options menu, and not every time we tick/untick
+    // one of the checkboxes.
+    if (moLocalModLibrary && mType == Type::Main)
+    {
+      mpOptions->mEnableTopLevelMods = mEnableTopLevelMods;
+      moLocalModLibrary->replaceSelection(std::move(mModSelection));
+      mpUserProfile->mModLibrary = std::move(*moLocalModLibrary);
+    }
     return;
   }
 
@@ -553,6 +564,154 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
           ImGui::Bullet();
           ImGui::Text(
             "%s (%s)", controller.mName.c_str(), controller.mGuid.c_str());
+        }
+      }
+
+      ImGui::EndTabItem();
+    }
+
+    if (ImGui::BeginTabItem("Modding"))
+    {
+      if (!moLocalModLibrary)
+      {
+        // We make a local copy of the mod library, to avoid triggering an
+        // immediate restart in case our rescan causes changes to the mod
+        // selection. The copy is committed back to the user profile when
+        // closing the options menu.
+        moLocalModLibrary = mpUserProfile->mModLibrary;
+
+        if (mType == Type::Main)
+        {
+          moLocalModLibrary->rescan();
+        }
+
+        mModSelection = moLocalModLibrary->currentSelection();
+      }
+
+      ImGui::NewLine();
+
+      if (mType != Type::Main)
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped("Mods can only be configured from the main menu");
+        ImGui::PopStyleColor();
+        ImGui::Spacing();
+      }
+
+      withEnabledState(mType == Type::Main, [&]() {
+        ImGui::Checkbox(
+          "Allow top-level mods (uncategorized files)", &mEnableTopLevelMods);
+        ImGui::SameLine();
+
+        if (ImGui::Button("Rescan"))
+        {
+          moLocalModLibrary->replaceSelection(mModSelection);
+          moLocalModLibrary->rescan();
+          mModSelection = moLocalModLibrary->currentSelection();
+        }
+
+        ImGui::NewLine();
+      });
+
+      ImGui::NewLine();
+
+      if (mModSelection.empty())
+      {
+        ImGui::Text("No mods found");
+      }
+      else
+      {
+        std::optional<int> oIndexToMoveUp;
+        std::optional<int> oIndexToMoveDown;
+
+        const auto modListHeight = ImGui::GetContentRegionAvail().y -
+          (shouldDrawGamePathChooser()
+             ? mGamePathChooserHeightNormalized * ImGui::GetWindowSize().y
+             : 0.0f);
+
+        if (ImGui::BeginTable(
+              "mod_list",
+              3,
+              ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+                ImGuiTableFlags_ScrollY,
+              {-1, modListHeight}))
+        {
+          auto index = 0;
+          for (auto& modStatus : mModSelection)
+          {
+            ImGui::TableNextRow();
+            ImGui::PushID(index);
+
+            // Column: Checkbox
+            ImGui::TableNextColumn();
+            withEnabledState(mType == Type::Main, [&]() {
+              ImGui::Checkbox("", &modStatus.mIsEnabled);
+            });
+
+            // Column: Reordering buttons
+            ImGui::TableNextColumn();
+
+            withEnabledState(
+              mType == Type::Main && mModSelection.size() > 1, [&]() {
+                if (ImGui::Button("^"))
+                {
+                  oIndexToMoveUp = index;
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("v"))
+                {
+                  oIndexToMoveDown = index;
+                }
+              });
+
+            // Column: Dir name
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted(
+              moLocalModLibrary->modDirName(modStatus.mIndex).c_str());
+
+            ImGui::PopID();
+
+            ++index;
+          }
+
+          ImGui::EndTable();
+        }
+
+        if (oIndexToMoveUp)
+        {
+          if (*oIndexToMoveUp > 0)
+          {
+            std::swap(
+              mModSelection[*oIndexToMoveUp],
+              mModSelection[*oIndexToMoveUp - 1]);
+          }
+          else
+          {
+            std::rotate(
+              mModSelection.begin(),
+              mModSelection.begin() + 1,
+              mModSelection.end());
+          }
+        }
+
+        if (oIndexToMoveDown)
+        {
+          const auto maxIndex = int(mModSelection.size() - 1);
+          if (*oIndexToMoveDown < maxIndex)
+          {
+            std::swap(
+              mModSelection[*oIndexToMoveDown],
+              mModSelection[*oIndexToMoveDown + 1]);
+          }
+          else
+          {
+            std::rotate(
+              mModSelection.begin(),
+              mModSelection.end() - 1,
+              mModSelection.end());
+          }
         }
       }
 

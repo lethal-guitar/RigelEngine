@@ -46,6 +46,18 @@
 namespace rigel
 {
 
+/** Returns game path to be used for loading resources
+ *
+ * A game path specified on the command line takes priority over the path
+ * stored in the user profile. This function implements that priority by
+ * returning the right path based on the given command line options and user
+ * profile.
+ */
+std::filesystem::path effectiveGamePath(
+  const CommandLineOptions& options,
+  const UserProfile& profile);
+
+
 class Game : public IGameServiceProvider
 {
 public:
@@ -94,7 +106,7 @@ private:
   void performScreenFadeBlocking(FadeType type);
 
   void swapBuffers();
-  void applyChangedOptions();
+  bool applyChangedOptions();
   void enumerateGameControllers();
   void takeScreenshot();
   void setPerElementUpscalingEnabled(bool enabled);

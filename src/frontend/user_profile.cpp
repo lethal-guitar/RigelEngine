@@ -134,6 +134,7 @@ constexpr auto PREF_PATH_ORG_NAME = "lethal-guitar";
 constexpr auto PREF_PATH_APP_NAME = "Rigel Engine";
 constexpr auto USER_PROFILE_FILENAME_V1 = "UserProfile.rigel";
 constexpr auto OPTIONS_FILENAME = "Options.json";
+constexpr auto MOD_LIBRARY_FILENAME = "ModLibrary.json";
 
 // clang-format off
 constexpr auto DOS_SCANCODE_TO_SDL_MAP = std::array<SDL_Scancode, 89>{
@@ -358,6 +359,24 @@ nlohmann::json serialize(const data::HighScoreListArray& highScoreLists)
 }
 
 
+nlohmann::json serialize(const data::ModLibrary& modLibrary)
+{
+  using json = nlohmann::json;
+
+  auto serialized = json::array();
+
+  for (const auto& mod : modLibrary.currentSelection())
+  {
+    json serializedMod;
+    serializedMod["dirName"] = modLibrary.modDirName(mod.mIndex);
+    serializedMod["isEnabled"] = mod.mIsEnabled;
+    serialized.push_back(serializedMod);
+  }
+
+  return serialized;
+}
+
+
 nlohmann::ordered_json serialize(const data::GameOptions& options)
 {
   using json = nlohmann::ordered_json;
@@ -396,6 +415,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
     SDL_GetKeyName(options.mQuickSaveKeybinding);
   serialized["quickLoadKeybinding"] =
     SDL_GetKeyName(options.mQuickLoadKeybinding);
+  serialized["topLevelModsEnabled"] = options.mEnableTopLevelMods;
 
 #if 0
   // NOTE: This is disabled for now, it's not quite ready yet to be made
@@ -522,6 +542,25 @@ data::HighScoreListArray
 }
 
 
+template <>
+data::ModLibrary deserialize<data::ModLibrary>(const nlohmann::json& json)
+{
+  std::vector<std::string> modDirNames;
+  std::vector<data::ModStatus> modSelection;
+
+  auto index = 0;
+  for (const auto& serializedEntry : json)
+  {
+    modDirNames.push_back(serializedEntry["dirName"].get<std::string>());
+    modSelection.push_back({index, serializedEntry["isEnabled"].get<bool>()});
+
+    ++index;
+  }
+
+  return data::ModLibrary{{}, std::move(modDirNames), std::move(modSelection)};
+}
+
+
 template <typename TargetType>
 bool extractValueIfExists(
   const char* key,
@@ -597,6 +636,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
     "quickSaveKeybinding", result.mQuickSaveKeybinding, json);
   extractKeyBindingIfExists(
     "quickLoadKeybinding", result.mQuickLoadKeybinding, json);
+  extractValueIfExists("topLevelModsEnabled", result.mEnableTopLevelMods, json);
   extractValueIfExists(
     "compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
@@ -610,9 +650,10 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
 }
 
 
-void loadOptionsFileIfPresent(
+template <typename T>
+void deserializeJsonObjectIfPresent(
   const std::filesystem::path& path,
-  data::GameOptions& options)
+  T& result)
 {
   namespace fs = std::filesystem;
 
@@ -624,16 +665,16 @@ void loadOptionsFileIfPresent(
 
   try
   {
-    std::ifstream optionsFile(path.u8string());
+    std::ifstream jsonFile(path.u8string());
 
-    nlohmann::json serializedOptions;
-    optionsFile >> serializedOptions;
+    nlohmann::json serializedObject;
+    jsonFile >> serializedObject;
 
-    options = deserialize<data::GameOptions>(serializedOptions);
+    result = deserialize<T>(serializedObject);
   }
   catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to load options\n";
+    std::cerr << "WARNING: Failed to load " << path.u8string() << '\n';
     std::cerr << ex.what() << '\n';
   }
 }
@@ -676,7 +717,12 @@ UserProfile loadProfile(
     {
       auto optionsFile = fileOnDisk;
       optionsFile.replace_filename(OPTIONS_FILENAME);
-      loadOptionsFileIfPresent(optionsFile, profile.mOptions);
+      deserializeJsonObjectIfPresent<data::GameOptions>(
+        optionsFile, profile.mOptions);
+
+      optionsFile.replace_filename(MOD_LIBRARY_FILENAME);
+      deserializeJsonObjectIfPresent<data::ModLibrary>(
+        optionsFile, profile.mModLibrary);
     }
 
     return profile;
@@ -778,13 +824,21 @@ void UserProfile::saveToDisk()
     std::cerr << "WARNING: Failed to store user profile\n";
   }
 
-  // Save options file
+  // Save options file and mod library file
   {
     auto path = *mProfilePath;
-    path.replace_filename(OPTIONS_FILENAME);
 
-    auto optionsFile = std::ofstream(path.u8string());
-    optionsFile << std::setw(4) << options;
+    {
+      path.replace_filename(OPTIONS_FILENAME);
+      auto optionsFile = std::ofstream(path.u8string());
+      optionsFile << std::setw(4) << options;
+    }
+
+    {
+      path.replace_filename(MOD_LIBRARY_FILENAME);
+      auto modLibraryFile = std::ofstream(path.u8string());
+      modLibraryFile << std::setw(4) << serialize(mModLibrary);
+    }
   }
 }
 

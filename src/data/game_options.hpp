@@ -134,6 +134,9 @@ struct GameOptions
   SDL_Keycode mQuickSaveKeybinding = SDLK_F5;
   SDL_Keycode mQuickLoadKeybinding = SDLK_F7;
 
+  // Modding
+  bool mEnableTopLevelMods = true;
+
   // Gameplay
   bool mCompatibilityModeOn = false;
 

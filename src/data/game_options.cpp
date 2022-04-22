@@ -17,6 +17,7 @@
 #include "game_options.hpp"
 
 #include <algorithm>
+#include <type_traits>
 
 
 namespace rigel::data
@@ -49,5 +50,7 @@ bool canBeUsedForKeyBinding(const SDL_Keycode keyCode)
   return find(begin(DISALLOWED_KEYS), end(DISALLOWED_KEYS), keyCode) ==
     end(DISALLOWED_KEYS);
 }
+
+static_assert(std::is_trivially_copyable_v<GameOptions>);
 
 } // namespace rigel::data
