@@ -17,7 +17,7 @@
 #pragma once
 
 #include "base/array_view.hpp"
-#include "data/image.hpp"
+#include "base/image.hpp"
 
 #include <optional>
 #include <string>

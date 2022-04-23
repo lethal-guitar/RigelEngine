@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include <base/image.hpp>
 #include <base/spatial_types.hpp>
-#include <data/image.hpp>
 #include <vector>
 
 

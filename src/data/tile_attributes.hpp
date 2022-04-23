@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "image.hpp"
+#include "base/image.hpp"
 
 #include <cstddef>
 #include <vector>

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "data/image.hpp"
+#include "base/image.hpp"
 
 #include <array>
 

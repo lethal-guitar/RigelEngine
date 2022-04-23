@@ -43,6 +43,8 @@ set(core_sources
     base/container_utils.hpp
     base/defer.hpp
     base/grid.hpp
+    base/image.cpp
+    base/image.hpp
     base/math_utils.hpp
     base/spatial_types.hpp
     base/static_vector.hpp
@@ -59,8 +61,6 @@ set(core_sources
     data/game_traits.hpp
     data/high_score_list.cpp
     data/high_score_list.hpp
-    data/image.cpp
-    data/image.hpp
     data/level_hints.cpp
     data/level_hints.hpp
     data/map.cpp

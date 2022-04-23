@@ -19,8 +19,8 @@
 #include "base/array_view.hpp"
 #include "base/color.hpp"
 #include "base/defer.hpp"
+#include "base/image.hpp"
 #include "base/warnings.hpp"
-#include "data/image.hpp"
 #include "renderer/renderer_support.hpp"
 
 RIGEL_DISABLE_WARNINGS
