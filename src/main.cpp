@@ -27,6 +27,7 @@
 #include "base/match.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
+#include "frontend/user_profile.hpp"
 
 #include "game_main.hpp"
 
@@ -42,6 +43,7 @@
 #include <SDL_messagebox.h>
 
 RIGEL_DISABLE_WARNINGS
+#include <loguru.hpp>
 #include <lyra/lyra.hpp>
 RIGEL_RESTORE_WARNINGS
 
@@ -245,6 +247,20 @@ std::variant<CommandLineOptions, int> parseArgs(int argc, char** argv)
   return config;
 }
 
+
+void initializeLogging(int argc, char** argv)
+{
+  loguru::g_stderr_verbosity = loguru::Verbosity_WARNING;
+  loguru::init(argc, argv);
+
+  if (const auto oPreferencesPath = createOrGetPreferencesPath())
+  {
+    const auto logFilePath = *oPreferencesPath / "Log.txt";
+    loguru::add_file(
+      logFilePath.u8string().c_str(), loguru::Append, loguru::Verbosity_MAX);
+  }
+}
+
 } // namespace
 
 
@@ -270,6 +286,7 @@ int main(int argc, char** argv)
     // for why we're doing this.
     win32IoGuard.reset();
 
+    initializeLogging(argc, argv);
     enableDpiAwareness();
 
     return gameMain(config);
@@ -289,14 +306,14 @@ int main(int argc, char** argv)
   }
   catch (const std::exception& ex)
   {
+    LOG_F(ERROR, "%s", ex.what());
     showErrorBox(ex.what());
-    std::cerr << "ERROR: " << ex.what() << '\n';
     return -2;
   }
   catch (...)
   {
+    LOG_F(ERROR, "Unknown error");
     showErrorBox("Unknown error");
-    std::cerr << "UNKNOWN ERROR\n";
     return -3;
   }
 }
