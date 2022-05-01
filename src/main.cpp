@@ -90,12 +90,21 @@ static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
   return std::nullopt;
 }
 
+
+static void enableDpiAwareness()
+{
+  SetProcessDPIAware();
+}
+
 #else
 
 static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
 {
   return std::nullopt;
 }
+
+
+static void enableDpiAwareness() { }
 
 #endif
 
@@ -256,6 +265,17 @@ int main(int argc, char** argv)
   // can output some text to the terminal and then detach again.
   auto win32IoGuard = win32ReenableStdIo();
 
+  auto runWithOptions = [&](const CommandLineOptions& config) {
+    // Once we're ready to run, detach from the console. See comment above
+    // for why we're doing this.
+    win32IoGuard.reset();
+
+    enableDpiAwareness();
+
+    return gameMain(config);
+  };
+
+
   showBanner();
 
   try
@@ -264,14 +284,7 @@ int main(int argc, char** argv)
 
     return base::match(
       configOrExitCode,
-      [&](const CommandLineOptions& config) {
-        // Once we're ready to run, detach from the console. See comment above
-        // for why we're doing this.
-        win32IoGuard.reset();
-
-        return gameMain(config);
-      },
-
+      [&](const CommandLineOptions& config) { return runWithOptions(config); },
       [](const int exitCode) { return exitCode; });
   }
   catch (const std::exception& ex)

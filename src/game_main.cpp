@@ -32,10 +32,6 @@ RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
 RIGEL_RESTORE_WARNINGS
 
-#ifdef _WIN32
-  #include <windows.h>
-#endif
-
 #include <filesystem>
 
 
@@ -213,10 +209,6 @@ void initAndRunGame(
 int gameMain(const CommandLineOptions& options)
 {
   using base::defer;
-
-#ifdef _WIN32
-  SetProcessDPIAware();
-#endif
 
   sdl_utils::check(
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
