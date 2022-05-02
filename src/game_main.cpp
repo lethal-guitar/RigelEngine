@@ -221,13 +221,13 @@ int gameMain(const CommandLineOptions& options)
 {
   using base::defer;
 
+  loadGameControllerDbForOldSdl();
+
   sdl_utils::check(
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
   auto sdlMixerGuard = defer([]() { Mix_Quit(); });
-
-  loadGameControllerDbForOldSdl();
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   platform::setGLAttributes();
