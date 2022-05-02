@@ -69,8 +69,13 @@ ModLibrary::ModLibrary(
 
 void ModLibrary::updateGamePath(std::filesystem::path gamePath)
 {
+  const auto pathHasChanged = gamePath != mGamePath;
   mGamePath = std::move(gamePath);
-  rescan();
+
+  if (pathHasChanged)
+  {
+    rescan();
+  }
 }
 
 

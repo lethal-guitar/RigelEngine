@@ -153,14 +153,23 @@ void initAndRunGame(
   const CommandLineOptions& commandLineOptions)
 {
   auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
-    // The mod library might have the changed flag set due to the initial
-    // rescan (or the rescan after switching game path), but we don't want the
-    // game to see the flag since that would cause the game to immediately exit
-    // again requesting a restart.  Since the game hasn't been instantiated
-    // yet, the changed flag is meaningless anyway since the game will use the
-    // current up-to-date state of the mod library during Initialization.
+    showLoadingScreen(pWindow);
+
+    // Set up mod library with effective game path. This will automatically do
+    // a rescan, which is important in case available mods have changed since
+    // the last run.
+    userProfile.mModLibrary.updateGamePath(
+      effectiveGamePath(commandLineOptions, userProfile));
+
+    // The mod library might now have the changed flag set, but we don't want
+    // the game to see the flag since that would cause the game to immediately
+    // exit again requesting a restart.  Since the game hasn't been
+    // instantiated yet, the changed flag is meaningless anyway since the game
+    // will use the current up-to-date state of the mod library during
+    // Initialization.
     userProfile.mModLibrary.clearSelectionChangedFlag();
 
+    // Now initialize and run the game until it tells us that it's done
     Game game(options, &userProfile, pWindow, isFirstLaunch);
 
     for (;;)
@@ -180,15 +189,6 @@ void initAndRunGame(
     setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
 
-  showLoadingScreen(pWindow);
-
-  auto currentGamePath = effectiveGamePath(commandLineOptions, userProfile);
-
-  // Set up mod library with effective game path. This will automatically do a
-  // rescan, which is important in case available mods have changed since the
-  // last run.
-  userProfile.mModLibrary.updateGamePath(currentGamePath);
-
   auto result = run(
     commandLineOptions, needsProfileSetup && !userProfile.hasProgressData());
 
@@ -205,15 +205,6 @@ void initAndRunGame(
 
     while (result == Game::StopReason::RestartNeeded)
     {
-      showLoadingScreen(pWindow);
-
-      auto newGamePath = effectiveGamePath(commandLineOptions, userProfile);
-      if (newGamePath != currentGamePath)
-      {
-        userProfile.mModLibrary.updateGamePath(currentGamePath);
-        currentGamePath = std::move(newGamePath);
-      }
-
       result = run(optionsForRestartedGame, false);
     }
   }
