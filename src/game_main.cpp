@@ -43,6 +43,25 @@ using namespace sdl_utils;
 namespace
 {
 
+void loadGameControllerDbForOldSdl()
+{
+  // SDL versions before 2.0.10 didn't check the SDL_GAMECONTROLLERCONFIG_FILE
+  // env var. To make working with game controllers more consistent across
+  // SDL versions, we implement this ourselves in case the SDL version being
+  // used is older.
+  SDL_version version;
+  SDL_GetVersion(&version);
+
+  if (version.patch < 10)
+  {
+    if (const auto pMappingsFile = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE"))
+    {
+      SDL_GameControllerAddMappingsFromFile(pMappingsFile);
+    }
+  }
+}
+
+
 bool isValidGamePath(const std::filesystem::path& path)
 {
   namespace fs = std::filesystem;
@@ -216,16 +235,7 @@ int gameMain(const CommandLineOptions& options)
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
   auto sdlMixerGuard = defer([]() { Mix_Quit(); });
 
-  SDL_version version;
-  SDL_GetVersion(&version);
-
-  if (version.patch < 10)
-  {
-    if (const auto pMappingsFile = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE"))
-    {
-      SDL_GameControllerAddMappingsFromFile(pMappingsFile);
-    }
-  }
+  loadGameControllerDbForOldSdl();
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   platform::setGLAttributes();
