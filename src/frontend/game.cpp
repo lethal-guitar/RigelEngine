@@ -35,6 +35,7 @@
 
 RIGEL_DISABLE_WARNINGS
 #include <imgui.h>
+#include <loguru.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <ctime>
@@ -213,7 +214,7 @@ Game::Game(
     }
     catch (const std::exception& ex)
     {
-      std::cerr << "WARNING: Failed to initialize audio: " << ex.what() << '\n';
+      LOG_F(WARNING, "Failed to initialize audio: %s", ex.what());
     }
 
     return pResult;
@@ -535,8 +536,7 @@ bool Game::applyChangedOptions()
 
     if (result != 0)
     {
-      std::cerr << "WARNING: Failed to set window mode: " << SDL_GetError()
-                << '\n';
+      LOG_F(WARNING, "Failed to set window mode: %s", SDL_GetError());
       mpUserProfile->mOptions.mWindowMode = mPreviousOptions.mWindowMode;
     }
     else

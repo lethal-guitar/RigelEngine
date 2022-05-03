@@ -24,13 +24,13 @@
 RIGEL_DISABLE_WARNINGS
 #include <SDL_filesystem.h>
 #include <SDL_keyboard.h>
+#include <loguru.hpp>
 #include <nlohmann/json.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <unordered_set>
 
 
@@ -674,8 +674,7 @@ void deserializeJsonObjectIfPresent(
   }
   catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to load " << path.u8string() << '\n';
-    std::cerr << ex.what() << '\n';
+    LOG_F(ERROR, "Failed to load '%s': %s", path.u8string().c_str(), ex.what());
   }
 }
 
@@ -729,8 +728,7 @@ UserProfile loadProfile(
   }
   catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to load user profile\n";
-    std::cerr << ex.what() << '\n';
+    LOG_F(ERROR, "Failed to load user profile: %s", ex.what());
   }
 
   return UserProfile{pathForSaving};
@@ -807,9 +805,9 @@ void UserProfile::saveToDisk()
       const auto previousProfile = json::from_msgpack(mOriginalJson);
       serializedProfile = merge(previousProfile, serializedProfile);
     }
-    catch (const std::exception&)
+    catch (const std::exception& ex)
     {
-      std::cerr << "WARNING: Failed to merge in previous profile\n";
+      LOG_F(WARNING, "Failed to merge in previous profile data: %s", ex.what());
     }
   }
 
@@ -819,9 +817,9 @@ void UserProfile::saveToDisk()
   {
     assets::saveToFile(buffer, *mProfilePath);
   }
-  catch (const std::exception&)
+  catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to store user profile\n";
+    LOG_F(ERROR, "Failed to store user profile: %s", ex.what());
   }
 
   // Save options file and mod library file
@@ -877,6 +875,7 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath()
 
   if (!pPreferencesDirName)
   {
+    LOG_F(ERROR, "Cannot open user preferences directory: %s", SDL_GetError());
     return {};
   }
 
@@ -889,7 +888,6 @@ UserProfile createEmptyUserProfile()
   const auto preferencesPath = createOrGetPreferencesPath();
   if (!preferencesPath)
   {
-    std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
@@ -906,7 +904,6 @@ std::optional<UserProfile> loadUserProfile()
   const auto preferencesPath = createOrGetPreferencesPath();
   if (!preferencesPath)
   {
-    std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
