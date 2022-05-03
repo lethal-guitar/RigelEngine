@@ -252,6 +252,13 @@ Game::Game(
   , mSpriteFactory(&mRenderer, &mResources)
   , mTextRenderer(&mUiSpriteSheet, &mRenderer, mResources)
 {
+  LOG_F(INFO, "Successfully loaded all resources");
+  LOG_F(
+    INFO,
+    "Running %s version at %s",
+    mIsShareWareVersion ? "Shareware" : "Registered",
+    effectiveGamePath(commandLineOptions, *pUserProfile).u8string().c_str());
+
   mCommandLineOptions.mSkipIntro |= mpUserProfile->mOptions.mSkipIntro;
 
   applyChangedOptions();
@@ -261,6 +268,8 @@ Game::Game(
     mCommandLineOptions,
     mIsShareWareVersion,
     isFirstLaunch));
+
+  LOG_F(INFO, "Game started");
 
   mLastTime = base::Clock::now();
 }
@@ -422,6 +431,7 @@ bool Game::handleEvent(const SDL_Event& event)
       switch (event.window.event)
       {
         case SDL_WINDOWEVENT_MINIMIZED:
+          LOG_F(INFO, "Window minimized, pausing");
           mIsMinimized = true;
           break;
 
@@ -429,6 +439,7 @@ bool Game::handleEvent(const SDL_Event& event)
         case SDL_WINDOWEVENT_FOCUS_GAINED:
         case SDL_WINDOWEVENT_MAXIMIZED:
         case SDL_WINDOWEVENT_RESTORED:
+          LOG_IF_F(INFO, mIsMinimized, "Window restored, unpausing");
           mIsMinimized = false;
           break;
 
@@ -530,6 +541,10 @@ bool Game::applyChangedOptions()
     currentOptions.effectiveWindowMode() !=
     mPreviousOptions.effectiveWindowMode())
   {
+    LOG_F(
+      INFO,
+      "Changing window mode to %s",
+      data::windowModeName(currentOptions.effectiveWindowMode()));
     const auto result = SDL_SetWindowFullscreen(
       mpWindow,
       platform::flagsForWindowMode(currentOptions.effectiveWindowMode()));
@@ -634,6 +649,8 @@ bool Game::applyChangedOptions()
 
 void Game::enumerateGameControllers()
 {
+  LOG_SCOPE_FUNCTION(INFO);
+
   mGameControllerInfo.mGameControllers.clear();
   mGameControllerInfo.mUnrecognizedControllers.clear();
 
@@ -646,6 +663,11 @@ void Game::enumerateGameControllers()
 
     mGameControllerInfo.mUnrecognizedControllers.emplace_back(
       SDL_JoystickNameForIndex(index), guid);
+    LOG_F(
+      INFO,
+      "Found game controller without mappings: %s with GUID %s",
+      SDL_JoystickNameForIndex(index),
+      guid.c_str());
   };
 
   for (std::uint8_t i = 0; i < SDL_NumJoysticks(); ++i)
@@ -654,7 +676,18 @@ void Game::enumerateGameControllers()
     {
       auto pController =
         sdl_utils::Ptr<SDL_GameController>{SDL_GameControllerOpen(i)};
-      mGameControllerInfo.mGameControllers.push_back(std::move(pController));
+      if (pController)
+      {
+        LOG_F(
+          INFO,
+          "Found game controller: %s",
+          SDL_GameControllerName(pController.get()));
+        mGameControllerInfo.mGameControllers.push_back(std::move(pController));
+      }
+      else
+      {
+        LOG_F(ERROR, "Failed to open game controller: %s", SDL_GetError());
+      }
     }
     else
     {

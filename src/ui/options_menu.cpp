@@ -27,6 +27,7 @@
 #include "base/warnings.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
+#include "renderer/opengl.hpp"
 #include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/key_code.hpp"
 #include "sdl_utils/platform.hpp"
@@ -49,12 +50,6 @@ namespace rigel::ui
 
 namespace
 {
-
-#ifdef RIGEL_USE_GL_ES
-constexpr auto OPENGL_VARIANT = "OpenGL ES";
-#else
-constexpr auto OPENGL_VARIANT = "OpenGL";
-#endif
 
 constexpr auto WINDOW_SCALE = 0.8f;
 
@@ -759,7 +754,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
         VERSION_MINOR,
         VERSION_PATCH,
         COMMIT_HASH,
-        OPENGL_VARIANT);
+        renderer::OPENGL_VARIANT_NAME);
 
       SDL_version sdlVersion;
       SDL_GetVersion(&sdlVersion);

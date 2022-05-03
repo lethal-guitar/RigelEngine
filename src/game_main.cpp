@@ -16,6 +16,8 @@
 
 #include "game_main.hpp"
 
+#include "version_info.hpp"
+
 #include "base/defer.hpp"
 #include "frontend/game.hpp"
 #include "renderer/opengl.hpp"
@@ -55,6 +57,9 @@ void loadGameControllerDbForOldSdl()
 
   if (version.patch < 10)
   {
+    LOG_F(
+      INFO,
+      "SDL older than 2.0.10, manually checking SDL_GAMECONTROLLERCONFIG_FILE env var");
     if (const auto pMappingsFile = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE"))
     {
       SDL_GameControllerAddMappingsFromFile(pMappingsFile);
@@ -159,6 +164,7 @@ void initAndRunGame(
     // Set up mod library with effective game path. This will automatically do
     // a rescan, which is important in case available mods have changed since
     // the last run.
+    LOG_F(INFO, "Setting up mod library");
     userProfile.mModLibrary.updateGamePath(
       effectiveGamePath(commandLineOptions, userProfile));
 
@@ -171,6 +177,7 @@ void initAndRunGame(
     userProfile.mModLibrary.clearSelectionChangedFlag();
 
     // Now initialize and run the game until it tells us that it's done
+    LOG_F(INFO, "Starting game");
     Game game(options, &userProfile, pWindow, isFirstLaunch);
 
     for (;;)
@@ -199,6 +206,8 @@ void initAndRunGame(
   // the main menu and discard most command line options.
   if (result == Game::StopReason::RestartNeeded)
   {
+    LOG_F(INFO, "Game requested restart");
+
     auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
     optionsForRestartedGame.mDebugModeEnabled =
@@ -211,7 +220,36 @@ void initAndRunGame(
   }
 
   // We're exiting, save the user profile
+  LOG_F(INFO, "Game ended");
   userProfile.saveToDisk();
+}
+
+
+void logVersionAndSystemInfo()
+{
+  LOG_F(
+    INFO,
+    "RigelEngine v%d.%d.%d (commit %s) - %s renderer",
+    VERSION_MAJOR,
+    VERSION_MINOR,
+    VERSION_PATCH,
+    COMMIT_HASH,
+    renderer::OPENGL_VARIANT_NAME);
+
+  SDL_version sdlVersion;
+  SDL_GetVersion(&sdlVersion);
+
+  const auto pSdlMixerVersion = Mix_Linked_Version();
+
+  LOG_F(
+    INFO,
+    "Using SDL v%d.%d.%d - SDL Mixer v%d.%d.%d",
+    sdlVersion.major,
+    sdlVersion.minor,
+    sdlVersion.patch,
+    pSdlMixerVersion->major,
+    pSdlMixerVersion->minor,
+    pSdlMixerVersion->patch);
 }
 
 } // namespace
@@ -221,23 +259,40 @@ int gameMain(const CommandLineOptions& options)
 {
   using base::defer;
 
+  logVersionAndSystemInfo();
+
   loadGameControllerDbForOldSdl();
 
+  LOG_F(INFO, "Initializing SDL");
   sdl_utils::check(
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
+
+  LOG_F(INFO, "Initializing SDL_mixer");
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
   auto sdlMixerGuard = defer([]() { Mix_Quit(); });
+
+  LOG_F(
+    INFO,
+    "SDL backends: %s, %s",
+    SDL_GetCurrentVideoDriver(),
+    SDL_GetCurrentAudioDriver());
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   platform::setGLAttributes();
 
+  LOG_F(INFO, "Loading user profile");
   auto userProfile = loadOrCreateUserProfile();
+
+  LOG_F(INFO, "Creating window");
   auto pWindow = platform::createWindow(userProfile.mOptions);
+
+  LOG_F(INFO, "Initializing OpenGL context");
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
+  LOG_F(INFO, "Loading OpenGL function pointers");
   renderer::loadGlFunctions();
 
   // On some platforms, an initial swap is necessary in order for the next
@@ -248,6 +303,7 @@ int gameMain(const CommandLineOptions& options)
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
 
+  LOG_F(INFO, "Initializing Dear ImGui");
   ui::imgui_integration::init(
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
@@ -258,9 +314,12 @@ int gameMain(const CommandLineOptions& options)
   }
   catch (const std::exception& error)
   {
+    LOG_F(ERROR, "%s", error.what());
     ui::showErrorMessage(pWindow.get(), error.what());
     return -2;
   }
+
+  LOG_F(INFO, "Exiting");
 
   return 0;
 }

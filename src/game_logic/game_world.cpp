@@ -42,10 +42,10 @@
 #include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"
 
+#include <loguru.hpp>
+
 #include <cassert>
-#include <chrono>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 
@@ -302,8 +302,7 @@ GameWorld::GameWorld(
   , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
   , mMotionSmoothingWasEnabled(mpOptions->mMotionSmoothing)
 {
-  using namespace std::chrono;
-  auto before = high_resolution_clock::now();
+  LOG_SCOPE_FUNCTION(INFO);
 
   loadLevel(initialInput);
 
@@ -332,9 +331,11 @@ GameWorld::GameWorld(
     mMessageDisplay.setMessage(data::Messages::FindAllRadars);
   }
 
-  auto after = high_resolution_clock::now();
-  std::cout << "Level load time: "
-            << duration<double>(after - before).count() * 1000.0 << " ms\n";
+  LOG_F(
+    INFO,
+    "Level %d (episode %d) successfully loaded",
+    sessionId.mLevel + 1,
+    sessionId.mEpisode + 1);
 }
 
 
@@ -1151,6 +1152,8 @@ void GameWorld::quickSave()
     return;
   }
 
+  LOG_F(INFO, "Creating quick save");
+
   auto pStateCopy = std::make_unique<WorldState>(
     mpServiceProvider,
     mpRenderer,
@@ -1166,6 +1169,8 @@ void GameWorld::quickSave()
     QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
 
   mMessageDisplay.setMessage("Quick saved.");
+
+  LOG_F(INFO, "Quick save created");
 }
 
 
@@ -1175,6 +1180,8 @@ void GameWorld::quickLoad()
   {
     return;
   }
+
+  LOG_F(INFO, "Loading quick save");
 
   *mpPlayerModel = mpQuickSave->mPlayerModel;
   mpState->synchronizeTo(
@@ -1190,6 +1197,8 @@ void GameWorld::quickLoad()
     mpState->mSpriteRenderingSystem.update(
       mpState->mEntities, viewportSize, mpState->mCamera.position(), 1.0f);
   }
+
+  LOG_F(INFO, "Quick save loaded");
 }
 
 

@@ -18,6 +18,8 @@
 
 #include "base/container_utils.hpp"
 
+#include <loguru.hpp>
+
 #include <algorithm>
 #include <cassert>
 #include <limits>
@@ -83,8 +85,11 @@ void ModLibrary::rescan()
 {
   namespace fs = std::filesystem;
 
+  LOG_SCOPE_FUNCTION(INFO);
+
   // List all sub-directories of the "mods" directory. Each one is considered
   // a mod.
+  LOG_F(INFO, "Listing mod directories");
   auto newAvailableMods = std::vector<std::string>{};
 
   std::error_code err;
@@ -101,9 +106,12 @@ void ModLibrary::rescan()
     }
   }
 
+  LOG_F(INFO, "Found %d mods", int(newAvailableMods.size()));
+
   // No prior selection - create default selection and early out
   if (mModSelection.empty())
   {
+    LOG_F(INFO, "No previous mod library, creating default selection");
     mModSelection.reserve(newAvailableMods.size());
 
     for (auto i = 0; i < int(newAvailableMods.size()); ++i)
@@ -117,6 +125,7 @@ void ModLibrary::rescan()
 
   // We have a prior selection, we need to consolidate it with any new/deleted
   // entries.
+  LOG_F(INFO, "Updating library");
 
   // First, transform our data into a form that's easier to work with.
   struct ModConfig
