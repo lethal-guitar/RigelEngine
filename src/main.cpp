@@ -261,6 +261,29 @@ void initializeLogging(int argc, char** argv)
   }
 }
 
+
+int runGame(const CommandLineOptions& config)
+{
+  enableDpiAwareness();
+
+  try
+  {
+    return gameMain(config);
+  }
+  catch (const std::exception& ex)
+  {
+    LOG_F(ERROR, "%s", ex.what());
+    showErrorBox(ex.what());
+    return -2;
+  }
+  catch (...)
+  {
+    LOG_F(ERROR, "Unknown error");
+    showErrorBox("Unknown error");
+    return -3;
+  }
+}
+
 } // namespace
 
 
@@ -281,39 +304,20 @@ int main(int argc, char** argv)
   // can output some text to the terminal and then detach again.
   auto win32IoGuard = win32ReenableStdIo();
 
-  auto runWithOptions = [&](const CommandLineOptions& config) {
-    // Once we're ready to run, detach from the console. See comment above
-    // for why we're doing this.
-    win32IoGuard.reset();
-
-    initializeLogging(argc, argv);
-    enableDpiAwareness();
-
-    return gameMain(config);
-  };
-
-
   showBanner();
 
-  try
-  {
-    const auto configOrExitCode = parseArgs(argc, argv);
+  const auto configOrExitCode = parseArgs(argc, argv);
 
-    return base::match(
-      configOrExitCode,
-      [&](const CommandLineOptions& config) { return runWithOptions(config); },
-      [](const int exitCode) { return exitCode; });
-  }
-  catch (const std::exception& ex)
-  {
-    LOG_F(ERROR, "%s", ex.what());
-    showErrorBox(ex.what());
-    return -2;
-  }
-  catch (...)
-  {
-    LOG_F(ERROR, "Unknown error");
-    showErrorBox("Unknown error");
-    return -3;
-  }
+  return base::match(
+    configOrExitCode,
+    [&](const CommandLineOptions& config) {
+      // Once we're ready to run, detach from the console. See comment above
+      // for why we're doing this.
+      win32IoGuard.reset();
+
+      initializeLogging(argc, argv);
+
+      return runGame(config);
+    },
+    [](const int exitCode) { return exitCode; });
 }
