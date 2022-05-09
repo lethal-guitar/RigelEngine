@@ -368,6 +368,7 @@ target_link_libraries(rigel_core
     imgui-filebrowser
     nlohmann-json
     std::filesystem
+    loguru
 
     PRIVATE
     dbopl

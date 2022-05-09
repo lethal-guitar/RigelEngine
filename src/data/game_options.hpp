@@ -191,4 +191,6 @@ struct GameOptions
 
 bool canBeUsedForKeyBinding(SDL_Keycode key);
 
+const char* windowModeName(const data::WindowMode mode);
+
 } // namespace rigel::data

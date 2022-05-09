@@ -30,6 +30,12 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel::renderer
 {
 
+#ifdef RIGEL_USE_GL_ES
+constexpr auto OPENGL_VARIANT_NAME = "OpenGL ES";
+#else
+constexpr auto OPENGL_VARIANT_NAME = "OpenGL";
+#endif
+
 void loadGlFunctions();
 
-}
+} // namespace rigel::renderer

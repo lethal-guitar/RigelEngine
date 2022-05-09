@@ -24,6 +24,7 @@
 #include "base/string_utils.hpp"
 #include "sdl_utils/error.hpp"
 
+#include <loguru.hpp>
 #include <speex/speex_resampler.h>
 
 #include <algorithm>
@@ -375,6 +376,7 @@ SoundSystem::SoundSystem(
   const data::SoundStyle soundStyle,
   const data::AdlibPlaybackType adlibPlaybackType)
   : mCloseMixerGuard(std::invoke([]() {
+    LOG_F(INFO, "Opening audio device");
     sdl_mixer::check(Mix_OpenAudio(
       DESIRED_SAMPLE_RATE,
       AUDIO_S16LSB,
@@ -391,6 +393,13 @@ SoundSystem::SoundSystem(
   std::uint16_t audioFormat = 0;
   int numChannels = 0;
   Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
+
+  LOG_F(
+    INFO,
+    "Audio device specs: sampleRate=%d, audioFormat=%d, numChannels=%d",
+    sampleRate,
+    audioFormat,
+    numChannels);
 
   // Our music is in a format which SDL_mixer does not understand (IMF format
   // aka raw AdLib commands). Therefore, we cannot use any of the high-level
@@ -543,6 +552,10 @@ void SoundSystem::loadAllSounds(
   const int numChannels,
   const data::SoundStyle soundStyle)
 {
+  LOG_SCOPE_FUNCTION(INFO);
+
+  LOG_F(INFO, "Loading sound effects");
+
   const auto soundPackage = assets::loadAdlibSoundData(
     mpResources->file(assets::AUDIO_DICT_FILE),
     mpResources->file(assets::AUDIO_DATA_FILE));
@@ -553,8 +566,10 @@ void SoundSystem::loadAllSounds(
       std::error_code ec;
       if (std::filesystem::exists(replacementPath, ec))
       {
-        if (auto pMixChunk = Mix_LoadWAV(replacementPath.u8string().c_str()))
+        const auto filename = replacementPath.u8string();
+        if (auto pMixChunk = Mix_LoadWAV(filename.c_str()))
         {
+          LOG_F(INFO, "Using replacement sound effect: %s", filename.c_str());
           mSounds[idToIndex(id)] = LoadedSound{sdl_utils::wrap(pMixChunk)};
           return;
         }
@@ -577,12 +592,16 @@ void SoundSystem::loadAllSounds(
 
 void SoundSystem::reloadAllSounds()
 {
+  LOG_SCOPE_FUNCTION(INFO);
+
   stopAllSounds();
 
   int sampleRate = 0;
   std::uint16_t audioFormat = 0;
   int numChannels = 0;
   Mix_QuerySpec(&sampleRate, &audioFormat, &numChannels);
+
+  LOG_F(INFO, "Reloading sound effects");
 
   const auto soundPackage = assets::loadAdlibSoundData(
     mpResources->file(assets::AUDIO_DICT_FILE),
@@ -688,6 +707,8 @@ sdl_utils::Ptr<Mix_Music>
       const auto candidateFilePath = candidate.path().u8string();
       if (auto pSong = Mix_LoadMUS(candidateFilePath.c_str()))
       {
+        LOG_F(
+          INFO, "Using replacement music file: %s", candidateFilePath.c_str());
         auto pReplacement = sdl_utils::wrap(pSong);
         mReplacementSongFileCache.insert({name, candidateFilePath});
         return pReplacement;

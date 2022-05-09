@@ -18,6 +18,8 @@
 
 #include "sdl_utils/error.hpp"
 
+#include <loguru.hpp>
+
 
 namespace rigel::platform
 {
@@ -39,8 +41,14 @@ void setGLAttributes()
 
 sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options)
 {
+  LOG_SCOPE_FUNCTION(INFO);
+
+  LOG_F(INFO, "Querying current screen resolution");
+
   SDL_DisplayMode displayMode;
   sdl_utils::check(SDL_GetDesktopDisplayMode(0, &displayMode));
+
+  LOG_F(INFO, "Screen resolution is %dx%d", displayMode.w, displayMode.h);
 
   const auto isFullscreen =
     options.effectiveWindowMode() != data::WindowMode::Windowed;
@@ -53,12 +61,21 @@ sdl_utils::Ptr<SDL_Window> createWindow(const data::GameOptions& options)
     SDL_WINDOW_OPENGL;
   // clang-format on
 
+  const auto width = isFullscreen ? displayMode.w : options.mWindowWidth;
+  const auto height = isFullscreen ? displayMode.h : options.mWindowHeight;
+
+  LOG_F(
+    INFO,
+    "Creating window in %s mode, size: %dx%d",
+    windowModeName(options.effectiveWindowMode()),
+    width,
+    height);
   auto pWindow = sdl_utils::wrap(sdl_utils::check(SDL_CreateWindow(
     "Rigel Engine",
     options.mWindowPosX,
     options.mWindowPosY,
-    isFullscreen ? displayMode.w : options.mWindowWidth,
-    isFullscreen ? displayMode.h : options.mWindowHeight,
+    width,
+    height,
     windowFlags)));
 
   // Setting a display mode is necessary to make sure that exclusive

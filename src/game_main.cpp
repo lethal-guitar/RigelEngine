@@ -16,6 +16,8 @@
 
 #include "game_main.hpp"
 
+#include "version_info.hpp"
+
 #include "base/defer.hpp"
 #include "frontend/game.hpp"
 #include "renderer/opengl.hpp"
@@ -30,11 +32,8 @@ RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <imgui.h>
+#include <loguru.hpp>
 RIGEL_RESTORE_WARNINGS
-
-#ifdef _WIN32
-  #include <windows.h>
-#endif
 
 #include <filesystem>
 
@@ -46,6 +45,28 @@ using namespace sdl_utils;
 
 namespace
 {
+
+void loadGameControllerDbForOldSdl()
+{
+  // SDL versions before 2.0.10 didn't check the SDL_GAMECONTROLLERCONFIG_FILE
+  // env var. To make working with game controllers more consistent across
+  // SDL versions, we implement this ourselves in case the SDL version being
+  // used is older.
+  SDL_version version;
+  SDL_GetVersion(&version);
+
+  if (version.patch < 10)
+  {
+    LOG_F(
+      INFO,
+      "SDL older than 2.0.10, manually checking SDL_GAMECONTROLLERCONFIG_FILE env var");
+    if (const auto pMappingsFile = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE"))
+    {
+      SDL_GameControllerAddMappingsFromFile(pMappingsFile);
+    }
+  }
+}
+
 
 bool isValidGamePath(const std::filesystem::path& path)
 {
@@ -138,14 +159,25 @@ void initAndRunGame(
   const CommandLineOptions& commandLineOptions)
 {
   auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
-    // The mod library might have the changed flag set due to the initial
-    // rescan (or the rescan after switching game path), but we don't want the
-    // game to see the flag since that would cause the game to immediately exit
-    // again requesting a restart.  Since the game hasn't been instantiated
-    // yet, the changed flag is meaningless anyway since the game will use the
-    // current up-to-date state of the mod library during Initialization.
+    showLoadingScreen(pWindow);
+
+    // Set up mod library with effective game path. This will automatically do
+    // a rescan, which is important in case available mods have changed since
+    // the last run.
+    LOG_F(INFO, "Setting up mod library");
+    userProfile.mModLibrary.updateGamePath(
+      effectiveGamePath(commandLineOptions, userProfile));
+
+    // The mod library might now have the changed flag set, but we don't want
+    // the game to see the flag since that would cause the game to immediately
+    // exit again requesting a restart.  Since the game hasn't been
+    // instantiated yet, the changed flag is meaningless anyway since the game
+    // will use the current up-to-date state of the mod library during
+    // Initialization.
     userProfile.mModLibrary.clearSelectionChangedFlag();
 
+    // Now initialize and run the game until it tells us that it's done
+    LOG_F(INFO, "Starting game");
     Game game(options, &userProfile, pWindow, isFirstLaunch);
 
     for (;;)
@@ -165,15 +197,6 @@ void initAndRunGame(
     setupForFirstLaunch(pWindow, userProfile, commandLineOptions.mGamePath);
   }
 
-  showLoadingScreen(pWindow);
-
-  auto currentGamePath = effectiveGamePath(commandLineOptions, userProfile);
-
-  // Set up mod library with effective game path. This will automatically do a
-  // rescan, which is important in case available mods have changed since the
-  // last run.
-  userProfile.mModLibrary.updateGamePath(currentGamePath);
-
   auto result = run(
     commandLineOptions, needsProfileSetup && !userProfile.hasProgressData());
 
@@ -183,6 +206,8 @@ void initAndRunGame(
   // the main menu and discard most command line options.
   if (result == Game::StopReason::RestartNeeded)
   {
+    LOG_F(INFO, "Game requested restart");
+
     auto optionsForRestartedGame = CommandLineOptions{};
     optionsForRestartedGame.mSkipIntro = true;
     optionsForRestartedGame.mDebugModeEnabled =
@@ -190,21 +215,41 @@ void initAndRunGame(
 
     while (result == Game::StopReason::RestartNeeded)
     {
-      showLoadingScreen(pWindow);
-
-      auto newGamePath = effectiveGamePath(commandLineOptions, userProfile);
-      if (newGamePath != currentGamePath)
-      {
-        userProfile.mModLibrary.updateGamePath(currentGamePath);
-        currentGamePath = std::move(newGamePath);
-      }
-
       result = run(optionsForRestartedGame, false);
     }
   }
 
   // We're exiting, save the user profile
+  LOG_F(INFO, "Game ended");
   userProfile.saveToDisk();
+}
+
+
+void logVersionAndSystemInfo()
+{
+  LOG_F(
+    INFO,
+    "RigelEngine v%d.%d.%d (commit %s) - %s renderer",
+    VERSION_MAJOR,
+    VERSION_MINOR,
+    VERSION_PATCH,
+    COMMIT_HASH,
+    renderer::OPENGL_VARIANT_NAME);
+
+  SDL_version sdlVersion;
+  SDL_GetVersion(&sdlVersion);
+
+  const auto pSdlMixerVersion = Mix_Linked_Version();
+
+  LOG_F(
+    INFO,
+    "Using SDL v%d.%d.%d - SDL Mixer v%d.%d.%d",
+    sdlVersion.major,
+    sdlVersion.minor,
+    sdlVersion.patch,
+    pSdlMixerVersion->major,
+    pSdlMixerVersion->minor,
+    pSdlMixerVersion->patch);
 }
 
 } // namespace
@@ -214,36 +259,40 @@ int gameMain(const CommandLineOptions& options)
 {
   using base::defer;
 
-#ifdef _WIN32
-  SetProcessDPIAware();
-#endif
+  logVersionAndSystemInfo();
 
+  loadGameControllerDbForOldSdl();
+
+  LOG_F(INFO, "Initializing SDL");
   sdl_utils::check(
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER));
   auto sdlGuard = defer([]() { SDL_Quit(); });
+
+  LOG_F(INFO, "Initializing SDL_mixer");
   Mix_Init(MIX_INIT_FLAC | MIX_INIT_OGG | MIX_INIT_MP3 | MIX_INIT_MOD);
   auto sdlMixerGuard = defer([]() { Mix_Quit(); });
 
-  SDL_version version;
-  SDL_GetVersion(&version);
-
-  if (version.patch < 10)
-  {
-    if (const auto pMappingsFile = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE"))
-    {
-      SDL_GameControllerAddMappingsFromFile(pMappingsFile);
-    }
-  }
+  LOG_F(
+    INFO,
+    "SDL backends: %s, %s",
+    SDL_GetCurrentVideoDriver(),
+    SDL_GetCurrentAudioDriver());
 
   sdl_utils::check(SDL_GL_LoadLibrary(nullptr));
   platform::setGLAttributes();
 
+  LOG_F(INFO, "Loading user profile");
   auto userProfile = loadOrCreateUserProfile();
+
+  LOG_F(INFO, "Creating window");
   auto pWindow = platform::createWindow(userProfile.mOptions);
+
+  LOG_F(INFO, "Initializing OpenGL context");
   SDL_GLContext pGlContext =
     sdl_utils::check(SDL_GL_CreateContext(pWindow.get()));
   auto glGuard = defer([pGlContext]() { SDL_GL_DeleteContext(pGlContext); });
 
+  LOG_F(INFO, "Loading OpenGL function pointers");
   renderer::loadGlFunctions();
 
   // On some platforms, an initial swap is necessary in order for the next
@@ -254,6 +303,7 @@ int gameMain(const CommandLineOptions& options)
   SDL_DisableScreenSaver();
   SDL_ShowCursor(SDL_DISABLE);
 
+  LOG_F(INFO, "Initializing Dear ImGui");
   ui::imgui_integration::init(
     pWindow.get(), pGlContext, createOrGetPreferencesPath());
   auto imGuiGuard = defer([]() { ui::imgui_integration::shutdown(); });
@@ -264,9 +314,12 @@ int gameMain(const CommandLineOptions& options)
   }
   catch (const std::exception& error)
   {
+    LOG_F(ERROR, "%s", error.what());
     ui::showErrorMessage(pWindow.get(), error.what());
     return -2;
   }
+
+  LOG_F(INFO, "Exiting");
 
   return 0;
 }

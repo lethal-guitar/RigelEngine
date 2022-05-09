@@ -51,6 +51,24 @@ bool canBeUsedForKeyBinding(const SDL_Keycode keyCode)
     end(DISALLOWED_KEYS);
 }
 
+
+const char* windowModeName(const data::WindowMode mode)
+{
+  using WM = data::WindowMode;
+  switch (mode)
+  {
+    case WM::Fullscreen:
+      return "fullscreen (borderless window)";
+    case WM::ExclusiveFullscreen:
+      return "fullscreen (exclusive)";
+    case WM::Windowed:
+      return "windowed";
+  }
+
+  return "";
+}
+
+
 static_assert(std::is_trivially_copyable_v<GameOptions>);
 
 } // namespace rigel::data

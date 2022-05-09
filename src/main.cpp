@@ -27,6 +27,7 @@
 #include "base/match.hpp"
 #include "base/string_utils.hpp"
 #include "base/warnings.hpp"
+#include "frontend/user_profile.hpp"
 
 #include "game_main.hpp"
 
@@ -42,6 +43,7 @@
 #include <SDL_messagebox.h>
 
 RIGEL_DISABLE_WARNINGS
+#include <loguru.hpp>
 #include <lyra/lyra.hpp>
 RIGEL_RESTORE_WARNINGS
 
@@ -90,12 +92,21 @@ static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
   return std::nullopt;
 }
 
+
+static void enableDpiAwareness()
+{
+  SetProcessDPIAware();
+}
+
 #else
 
 static std::optional<rigel::base::ScopeGuard> win32ReenableStdIo()
 {
   return std::nullopt;
 }
+
+
+static void enableDpiAwareness() { }
 
 #endif
 
@@ -236,6 +247,43 @@ std::variant<CommandLineOptions, int> parseArgs(int argc, char** argv)
   return config;
 }
 
+
+void initializeLogging(int argc, char** argv)
+{
+  loguru::g_stderr_verbosity = loguru::Verbosity_WARNING;
+  loguru::init(argc, argv);
+
+  if (const auto oPreferencesPath = createOrGetPreferencesPath())
+  {
+    const auto logFilePath = *oPreferencesPath / "Log.txt";
+    loguru::add_file(
+      logFilePath.u8string().c_str(), loguru::Append, loguru::Verbosity_MAX);
+  }
+}
+
+
+int runGame(const CommandLineOptions& config)
+{
+  enableDpiAwareness();
+
+  try
+  {
+    return gameMain(config);
+  }
+  catch (const std::exception& ex)
+  {
+    LOG_F(ERROR, "%s", ex.what());
+    showErrorBox(ex.what());
+    return -2;
+  }
+  catch (...)
+  {
+    LOG_F(ERROR, "Unknown error");
+    showErrorBox("Unknown error");
+    return -3;
+  }
+}
+
 } // namespace
 
 
@@ -258,32 +306,18 @@ int main(int argc, char** argv)
 
   showBanner();
 
-  try
-  {
-    const auto configOrExitCode = parseArgs(argc, argv);
+  const auto configOrExitCode = parseArgs(argc, argv);
 
-    return base::match(
-      configOrExitCode,
-      [&](const CommandLineOptions& config) {
-        // Once we're ready to run, detach from the console. See comment above
-        // for why we're doing this.
-        win32IoGuard.reset();
+  return base::match(
+    configOrExitCode,
+    [&](const CommandLineOptions& config) {
+      // Once we're ready to run, detach from the console. See comment above
+      // for why we're doing this.
+      win32IoGuard.reset();
 
-        return gameMain(config);
-      },
+      initializeLogging(argc, argv);
 
-      [](const int exitCode) { return exitCode; });
-  }
-  catch (const std::exception& ex)
-  {
-    showErrorBox(ex.what());
-    std::cerr << "ERROR: " << ex.what() << '\n';
-    return -2;
-  }
-  catch (...)
-  {
-    showErrorBox("Unknown error");
-    std::cerr << "UNKNOWN ERROR\n";
-    return -3;
-  }
+      return runGame(config);
+    },
+    [](const int exitCode) { return exitCode; });
 }

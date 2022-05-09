@@ -46,5 +46,6 @@ add_subdirectory(stb EXCLUDE_FROM_ALL)
 add_subdirectory(imgui EXCLUDE_FROM_ALL)
 add_subdirectory(imgui-filebrowser EXCLUDE_FROM_ALL)
 add_subdirectory(nuked-opl3 EXCLUDE_FROM_ALL)
+add_subdirectory(loguru EXCLUDE_FROM_ALL)
 
 rigel_disable_warnings(entityx)

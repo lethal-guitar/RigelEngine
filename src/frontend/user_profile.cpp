@@ -24,13 +24,13 @@
 RIGEL_DISABLE_WARNINGS
 #include <SDL_filesystem.h>
 #include <SDL_keyboard.h>
+#include <loguru.hpp>
 #include <nlohmann/json.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <array>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <unordered_set>
 
 
@@ -674,8 +674,7 @@ void deserializeJsonObjectIfPresent(
   }
   catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to load " << path.u8string() << '\n';
-    std::cerr << ex.what() << '\n';
+    LOG_F(ERROR, "Failed to load '%s': %s", path.u8string().c_str(), ex.what());
   }
 }
 
@@ -729,8 +728,7 @@ UserProfile loadProfile(
   }
   catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to load user profile\n";
-    std::cerr << ex.what() << '\n';
+    LOG_F(ERROR, "Failed to load user profile: %s", ex.what());
   }
 
   return UserProfile{pathForSaving};
@@ -758,6 +756,7 @@ void UserProfile::saveToDisk()
 {
   if (!mProfilePath)
   {
+    LOG_F(WARNING, "Not saving user profile since no file path was set");
     return;
   }
 
@@ -807,21 +806,22 @@ void UserProfile::saveToDisk()
       const auto previousProfile = json::from_msgpack(mOriginalJson);
       serializedProfile = merge(previousProfile, serializedProfile);
     }
-    catch (const std::exception&)
+    catch (const std::exception& ex)
     {
-      std::cerr << "WARNING: Failed to merge in previous profile\n";
+      LOG_F(WARNING, "Failed to merge in previous profile data: %s", ex.what());
     }
   }
 
   // Save user profile
+  LOG_F(INFO, "Saving user profile");
   const auto buffer = json::to_msgpack(serializedProfile);
   try
   {
     assets::saveToFile(buffer, *mProfilePath);
   }
-  catch (const std::exception&)
+  catch (const std::exception& ex)
   {
-    std::cerr << "WARNING: Failed to store user profile\n";
+    LOG_F(ERROR, "Failed to store user profile: %s", ex.what());
   }
 
   // Save options file and mod library file
@@ -829,14 +829,30 @@ void UserProfile::saveToDisk()
     auto path = *mProfilePath;
 
     {
+      LOG_F(INFO, "Saving options file");
+
       path.replace_filename(OPTIONS_FILENAME);
       auto optionsFile = std::ofstream(path.u8string());
+      LOG_IF_F(
+        ERROR,
+        !optionsFile.is_open(),
+        "Failed to open %s for writing",
+        path.u8string().c_str());
+
       optionsFile << std::setw(4) << options;
     }
 
     {
+      LOG_F(INFO, "Saving mod library");
+
       path.replace_filename(MOD_LIBRARY_FILENAME);
       auto modLibraryFile = std::ofstream(path.u8string());
+      LOG_IF_F(
+        ERROR,
+        !modLibraryFile.is_open(),
+        "Failed to open %s for writing",
+        path.u8string().c_str());
+
       modLibraryFile << std::setw(4) << serialize(mModLibrary);
     }
   }
@@ -877,6 +893,7 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath()
 
   if (!pPreferencesDirName)
   {
+    LOG_F(ERROR, "Cannot open user preferences directory: %s", SDL_GetError());
     return {};
   }
 
@@ -889,7 +906,6 @@ UserProfile createEmptyUserProfile()
   const auto preferencesPath = createOrGetPreferencesPath();
   if (!preferencesPath)
   {
-    std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
@@ -906,7 +922,6 @@ std::optional<UserProfile> loadUserProfile()
   const auto preferencesPath = createOrGetPreferencesPath();
   if (!preferencesPath)
   {
-    std::cerr << "WARNING: Cannot open user preferences directory\n";
     return {};
   }
 
@@ -914,15 +929,18 @@ std::optional<UserProfile> loadUserProfile()
     (std::string{USER_PROFILE_BASE_NAME} + USER_PROFILE_FILE_EXTENSION);
   if (fs::exists(profileFilePath))
   {
+    LOG_F(INFO, "Found user profile version 2, loading");
     return loadProfile(profileFilePath);
   }
 
   const auto profileFilePath_v1 = *preferencesPath / USER_PROFILE_FILENAME_V1;
   if (fs::exists(profileFilePath_v1))
   {
+    LOG_F(INFO, "Found user profile version 1, loading");
     return loadProfile(profileFilePath_v1, profileFilePath);
   }
 
+  LOG_F(INFO, "No user profile found");
   return {};
 }
 
@@ -931,6 +949,8 @@ void importOriginalGameProfileData(
   UserProfile& profile,
   const std::string& gamePath)
 {
+  LOG_F(INFO, "Importing original game's user profile data");
+
   profile.mSaveSlots = assets::loadSavedGames(gamePath);
   profile.mHighScoreLists = assets::loadHighScoreLists(gamePath);
 
@@ -943,11 +963,15 @@ void importOriginalGameProfileData(
 
 UserProfile loadOrCreateUserProfile()
 {
+  LOG_SCOPE_FUNCTION(INFO);
+
   if (auto profile = loadUserProfile())
   {
+    LOG_F(INFO, "User profile successfully loaded");
     return *profile;
   }
 
+  LOG_F(INFO, "Creating new profile");
   auto profile = createEmptyUserProfile();
   profile.saveToDisk();
   return profile;
