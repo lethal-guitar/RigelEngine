@@ -35,12 +35,12 @@ const char* OUT_OF_DATA_ERROR_MSG = "No more data in stream";
 }
 
 
-ByteBuffer loadFile(const string& fileName)
+ByteBuffer loadFile(const std::filesystem::path& fileName)
 {
   ifstream file(fileName, ios::binary | ios::ate);
   if (!file.is_open())
   {
-    throw runtime_error(string("File can't be opened: ") + fileName);
+    throw runtime_error(string("File can't be opened: ") + fileName.u8string());
   }
 
   const auto fileSize = static_cast<size_t>(file.tellg());
