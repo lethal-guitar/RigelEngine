@@ -40,7 +40,7 @@ std::string normalizedFileName(std::string_view fileName)
 } // namespace
 
 
-CMPFilePackage::CMPFilePackage(const string& filePath)
+CMPFilePackage::CMPFilePackage(const std::filesystem::path& filePath)
   : mFileData(loadFile(filePath))
 {
   LeStreamReader dictReader(mFileData.begin(), mFileData.end());

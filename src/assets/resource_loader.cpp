@@ -142,7 +142,7 @@ ResourceLoader::ResourceLoader(
   : mGamePath(std::move(gamePath))
   , mModPaths(std::move(modPaths))
   , mEnableTopLevelMods(enableTopLevelMods)
-  , mFilePackage((mGamePath / "NUKEM2.CMP").u8string())
+  , mFilePackage(mGamePath / "NUKEM2.CMP")
   , mActorImagePackage(
       file(ActorImagePackage::IMAGE_DATA_FILE),
       file(ActorImagePackage::ACTOR_INFO_FILE))

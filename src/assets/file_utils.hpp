@@ -30,11 +30,11 @@ namespace rigel::assets
  *
  * Throws an exception if the file can't be opened.
  */
-ByteBuffer loadFile(const std::string& fileName);
+ByteBuffer loadFile(const std::filesystem::path& path);
 
-inline ByteBuffer loadFile(const std::filesystem::path& path)
+inline ByteBuffer loadFile(const std::string& fileName)
 {
-  return loadFile(path.u8string());
+  return loadFile(std::filesystem::u8path(fileName));
 }
 
 void saveToFile(

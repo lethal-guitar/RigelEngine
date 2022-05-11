@@ -19,6 +19,7 @@
 #include "assets/byte_buffer.hpp"
 
 #include <cstddef>
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -31,7 +32,7 @@ namespace rigel::assets
 class CMPFilePackage
 {
 public:
-  explicit CMPFilePackage(const std::string& filePath);
+  explicit CMPFilePackage(const std::filesystem::path& filePath);
 
   ByteBuffer file(std::string_view name) const;
 

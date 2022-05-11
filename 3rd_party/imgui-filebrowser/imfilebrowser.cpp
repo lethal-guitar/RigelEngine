@@ -286,7 +286,7 @@ void ImGui::FileBrowser::Display()
             if(IsItemClicked(0) && IsMouseDoubleClicked(0) && rsc.isDir)
             {
                 setNewPwd = true;
-                newPwd = (rsc.name != "..") ? (pwd_ / rsc.name) : pwd_.parent_path();
+                newPwd = (rsc.name != "..") ? (pwd_ / std::filesystem::u8path(rsc.name)) : pwd_.parent_path();
             }
         }
     }
@@ -407,11 +407,11 @@ void ImGui::FileBrowser::SetPwdUncatched(const std::filesystem::path &pwd)
         else
             continue;
 
-        rcd.name = p.path().filename().string();
+        rcd.name = p.path().filename().u8string();
         if(rcd.name.empty())
             continue;
 
-        rcd.extension = p.path().filename().extension().string();
+        rcd.extension = p.path().filename().extension().u8string();
 
         rcd.showName = (rcd.isDir ? "[D] " : "[F] ") + p.path().filename().u8string();
         fileRecords_.push_back(rcd);

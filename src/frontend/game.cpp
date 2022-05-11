@@ -185,7 +185,7 @@ std::filesystem::path effectiveGamePath(
 
   if (!options.mGamePath.empty())
   {
-    return options.mGamePath;
+    return std::filesystem::u8path(options.mGamePath);
   }
 
   return profile.mGamePath ? *profile.mGamePath : std::filesystem::path{};
