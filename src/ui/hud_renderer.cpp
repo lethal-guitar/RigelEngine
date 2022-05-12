@@ -22,6 +22,7 @@
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/sprite_factory.hpp"
+#include "renderer/viewport_utils.hpp"
 
 #include <cmath>
 #include <string>
@@ -189,7 +190,7 @@ void HudRenderer::updateAnimation()
 }
 
 
-void HudRenderer::render(
+void HudRenderer::renderClassicHud(
   const data::PlayerModel& playerModel,
   const base::ArrayView<base::Vec2> radarPositions)
 {
@@ -213,6 +214,30 @@ void HudRenderer::render(
   drawHealthBar(playerModel);
   drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer);
   drawRadar(radarPositions);
+}
+
+
+void HudRenderer::renderWidescreenHud(
+  const int viewportWidth,
+  const data::PlayerModel& playerModel,
+  const base::ArrayView<base::Vec2> radarPositions)
+{
+  // Space to the left of the HUD
+  const auto extraWidth = data::tilesToPixels(viewportWidth - HUD_WIDTH_TOTAL);
+  const auto hudStartY =
+    data::tilesToPixels(data::GameTraits::mapViewportHeightTiles);
+  constexpr auto hudHeightPx = data::tilesToPixels(HUD_HEIGHT_BOTTOM);
+
+  mpRenderer->drawFilledRectangle(
+    {{0, hudStartY + 1}, {extraWidth - 1, hudHeightPx - 2}},
+    data::GameTraits::INGAME_PALETTE[1]);
+
+  const auto extraTiles =
+    viewportWidth - data::GameTraits::mapViewportWidthTiles;
+  const auto hudOffset =
+    (extraTiles - HUD_WIDTH_RIGHT) * data::GameTraits::tileSize;
+  renderer::setLocalTranslation(mpRenderer, {hudOffset, 0});
+  renderClassicHud(playerModel, radarPositions);
 }
 
 

@@ -70,8 +70,6 @@ constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
 constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
 constexpr auto HEALTH_BAR_START_PX = base::Vec2{data::tilesToPixels(5), 0};
 
-constexpr auto HUD_WIDTH = 6;
-
 
 void drawBossHealthBar(
   const int health,
@@ -136,18 +134,8 @@ auto viewportSizeWideScreen(renderer::Renderer* pRenderer)
 {
   const auto info = renderer::determineWidescreenViewport(pRenderer);
   return base::Extents{
-    info.mWidthTiles - HUD_WIDTH, data::GameTraits::mapViewportSize.height};
-}
-
-
-void setupWidescreenHudOffset(
-  renderer::Renderer* pRenderer,
-  const int tilesOnScreen)
-{
-  const auto extraTiles =
-    tilesOnScreen - data::GameTraits::mapViewportWidthTiles;
-  const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
-  renderer::setLocalTranslation(pRenderer, {hudOffset, 0});
+    info.mWidthTiles - ui::HUD_WIDTH_RIGHT,
+    data::GameTraits::mapViewportSize.height};
 }
 
 
@@ -801,26 +789,13 @@ void GameWorld::render(const float interpolationFactor)
   auto drawHud = [&, this]() {
     const auto radarDots =
       collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
-    mHudRenderer.render(*mpPlayerModel, radarDots);
-  };
-
-  auto drawHudExtension = [&](const int viewportWidth) {
-    // Space to the left of the HUD
-    const auto extraWidth =
-      data::tilesToPixels(viewportWidth - ui::HUD_WIDTH_TOTAL);
-    const auto hudStartY =
-      data::tilesToPixels(data::GameTraits::mapViewportHeightTiles);
-    constexpr auto hudHeightPx = data::tilesToPixels(ui::HUD_HEIGHT_BOTTOM);
-
-    mpRenderer->drawFilledRectangle(
-      {{0, hudStartY + 1}, {extraWidth - 1, hudHeightPx - 2}},
-      data::GameTraits::INGAME_PALETTE[1]);
+    mHudRenderer.renderClassicHud(*mpPlayerModel, radarDots);
   };
 
   auto drawWidescreenHud = [&](const int viewportWidth) {
-    drawHudExtension(viewportWidth);
-    setupWidescreenHudOffset(mpRenderer, viewportWidth);
-    drawHud();
+    const auto radarDots =
+      collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
+    mHudRenderer.renderWidescreenHud(viewportWidth, *mpPlayerModel, radarDots);
   };
 
 

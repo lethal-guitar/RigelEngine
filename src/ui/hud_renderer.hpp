@@ -70,7 +70,13 @@ public:
     const engine::SpriteFactory* pSpriteFactory);
 
   void updateAnimation();
-  void render(
+
+  void renderClassicHud(
+    const data::PlayerModel& playerModel,
+    base::ArrayView<base::Vec2> radarPositions);
+
+  void renderWidescreenHud(
+    int viewportWidth,
     const data::PlayerModel& playerModel,
     base::ArrayView<base::Vec2> radarPositions);
 
