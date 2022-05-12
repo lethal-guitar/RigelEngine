@@ -95,9 +95,6 @@ private:
 
   std::uint32_t mElapsedFrames = 0;
 
-  renderer::Texture mTopRightTexture;
-  renderer::Texture mBottomLeftTexture;
-  renderer::Texture mBottomRightTexture;
   engine::TiledTexture* mpStatusSpriteSheetRenderer;
   const engine::SpriteFactory* mpSpriteFactory;
   mutable renderer::RenderTargetTexture mRadarSurface;
