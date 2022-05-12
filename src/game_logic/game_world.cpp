@@ -817,6 +817,12 @@ void GameWorld::render(const float interpolationFactor)
       data::GameTraits::INGAME_PALETTE[1]);
   };
 
+  auto drawWidescreenHud = [&](const int viewportWidth) {
+    drawHudExtension(viewportWidth);
+    setupWidescreenHudOffset(mpRenderer, viewportWidth);
+    drawHud();
+  };
+
 
   if (widescreenModeOn())
   {
@@ -841,10 +847,7 @@ void GameWorld::render(const float interpolationFactor)
 
         drawWorld(viewportSize);
 
-        drawHudExtension(info.mWidthTiles);
-
-        setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
-        drawHud();
+        drawWidescreenHud(info.mWidthTiles);
       }
 
       auto saved = setupWidescreenTopRowViewport(
@@ -865,10 +868,7 @@ void GameWorld::render(const float interpolationFactor)
         data::GameTraits::inGameViewportOffset.y});
       drawWorld(viewportSize);
 
-      drawHudExtension(info.mWidthTiles);
-
-      setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
-      drawHud();
+      drawWidescreenHud(info.mWidthTiles);
     }
   }
   else
