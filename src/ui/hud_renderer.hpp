@@ -81,6 +81,7 @@ public:
     base::ArrayView<base::Vec2> radarPositions);
 
 private:
+  void drawLeftSideExtension(int viewportWidth) const;
   void
     drawInventory(const std::vector<data::InventoryItemType>& inventory) const;
   void drawHealthBar(const data::PlayerModel& playerModel) const;

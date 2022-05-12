@@ -222,6 +222,22 @@ void HudRenderer::renderWidescreenHud(
   const data::PlayerModel& playerModel,
   const base::ArrayView<base::Vec2> radarPositions)
 {
+  drawLeftSideExtension(viewportWidth);
+
+  const auto extraTiles =
+    viewportWidth - data::GameTraits::mapViewportWidthTiles;
+  const auto hudOffset =
+    (extraTiles - HUD_WIDTH_RIGHT) * data::GameTraits::tileSize;
+
+  auto guard = renderer::saveState(mpRenderer);
+  renderer::setLocalTranslation(mpRenderer, {hudOffset, 0});
+
+  renderClassicHud(playerModel, radarPositions);
+}
+
+
+void HudRenderer::drawLeftSideExtension(const int viewportWidth) const
+{
   // Space to the left of the HUD
   const auto extraWidth = data::tilesToPixels(viewportWidth - HUD_WIDTH_TOTAL);
   const auto hudStartY =
@@ -231,13 +247,6 @@ void HudRenderer::renderWidescreenHud(
   mpRenderer->drawFilledRectangle(
     {{0, hudStartY + 1}, {extraWidth - 1, hudHeightPx - 2}},
     data::GameTraits::INGAME_PALETTE[1]);
-
-  const auto extraTiles =
-    viewportWidth - data::GameTraits::mapViewportWidthTiles;
-  const auto hudOffset =
-    (extraTiles - HUD_WIDTH_RIGHT) * data::GameTraits::tileSize;
-  renderer::setLocalTranslation(mpRenderer, {hudOffset, 0});
-  renderClassicHud(playerModel, radarPositions);
 }
 
 
