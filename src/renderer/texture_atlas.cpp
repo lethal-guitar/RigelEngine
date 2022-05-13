@@ -117,10 +117,7 @@ TextureAtlas::TextureAtlas(
 void TextureAtlas::draw(int index, const base::Rect<int>& destRect) const
 {
   const auto& info = mAtlasMap[index];
-  mpRenderer->drawTexture(
-    mAtlasTextures[info.mTextureIndex].data(),
-    toTexCoords(info.mRect, ATLAS_WIDTH, ATLAS_HEIGHT),
-    destRect);
+  mAtlasTextures[info.mTextureIndex].render(info.mRect, destRect);
 }
 
 
@@ -133,10 +130,7 @@ void TextureAtlas::draw(
   auto actualSrcRect = srcRect;
   actualSrcRect.topLeft += info.mRect.topLeft;
 
-  mpRenderer->drawTexture(
-    mAtlasTextures[info.mTextureIndex].data(),
-    toTexCoords(actualSrcRect, ATLAS_WIDTH, ATLAS_HEIGHT),
-    destRect);
+  mAtlasTextures[info.mTextureIndex].render(actualSrcRect, destRect);
 }
 
 } // namespace rigel::renderer

@@ -82,8 +82,9 @@ public:
   void
     render(const base::Vec2& position, const base::Rect<int>& sourceRect) const;
 
-  /** Render entire texture scaled to fill the given rectangle */
-  void renderScaled(const base::Rect<int>& destRect) const;
+  void render(
+    const base::Rect<int>& sourceRect,
+    const base::Rect<int>& destRect) const;
 
   int width() const { return mWidth; }
 

@@ -48,9 +48,11 @@ void Texture::render(
 }
 
 
-void Texture::renderScaled(const base::Rect<int>& destRect) const
+void Texture::render(const base::Rect<int>& sourceRect, const base::Rect<int>& destRect)
+  const
 {
-  mpRenderer->drawTexture(mId, {0.0f, 0.0f, 1.0f, 1.0f}, destRect);
+  mpRenderer->drawTexture(
+    mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);
 }
 
 
@@ -61,8 +63,7 @@ void Texture::render(
 {
   base::Rect<int> destRect{
     {x, y}, {sourceRect.size.width, sourceRect.size.height}};
-  mpRenderer->drawTexture(
-    mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);
+  render(sourceRect, destRect);
 }
 
 
