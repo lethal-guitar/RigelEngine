@@ -20,6 +20,7 @@
 #include "assets/cmp_file_package.hpp"
 #include "assets/duke_script_loader.hpp"
 #include "assets/palette.hpp"
+#include "base/array_view.hpp"
 #include "data/audio_buffer.hpp"
 #include "data/image.hpp"
 #include "data/movie.hpp"
@@ -34,6 +35,10 @@
 
 namespace rigel::assets
 {
+
+constexpr auto ULTRAWIDE_HUD_WIDTH = 560;
+constexpr auto ULTRAWIDE_HUD_HEIGHT = 70;
+constexpr auto ULTRAWIDE_HUD_INNER_WIDTH = 424;
 
 struct TileSet
 {
@@ -84,6 +89,8 @@ public:
 
   data::Image loadAntiPiracyImage() const;
 
+  data::Image loadUltrawideHudFrameImage() const;
+
   data::Image loadBackdrop(std::string_view name) const;
   TileSet loadCZone(std::string_view name) const;
   data::Movie loadMovie(std::string_view name) const;
@@ -112,6 +119,10 @@ private:
   std::optional<T> tryLoadReplacement(TryLoadFunc&& tryLoad) const;
   std::optional<data::Image>
     tryLoadPngReplacement(std::string_view filename) const;
+
+  data::Image loadEmbeddedImageAsset(
+    const char* replacementName,
+    base::ArrayView<std::uint8_t> data) const;
 
   data::Image loadTiledFullscreenImage(std::string_view name) const;
   data::Image loadTiledFullscreenImage(

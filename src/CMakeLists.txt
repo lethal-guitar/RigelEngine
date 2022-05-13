@@ -26,6 +26,7 @@ set(core_sources
     assets/resource_loader.cpp
     assets/resource_loader.hpp
     assets/rle_compression.hpp
+    assets/ultrawide_hud_image.ipp
     assets/user_profile_import.cpp
     assets/user_profile_import.hpp
     assets/voc_decoder.cpp
