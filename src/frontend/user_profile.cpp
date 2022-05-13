@@ -124,6 +124,15 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
     {UpscalingFilter::PixelPerfect, "PixelPerfect"},
     {UpscalingFilter::Bilinear, "Bilinear"},
   })
+
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  WidescreenHudStyle,
+  {
+    {WidescreenHudStyle::Classic, "Classic"},
+    {WidescreenHudStyle::Ultrawide, "Ultrawide"},
+    {WidescreenHudStyle::Modern, "Modern"},
+  })
 } // namespace data
 
 
@@ -424,6 +433,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
 #endif
 
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
+  serialized["widescreenHudStyle"] = options.mWidescreenHudStyle;
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
   serialized["skipIntro"] = options.mSkipIntro;
   serialized["motionSmoothing"] = options.mMotionSmoothing;
@@ -640,6 +650,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists(
     "compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
+  extractValueIfExists("widescreenHudStyle", result.mWidescreenHudStyle, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
   extractValueIfExists("skipIntro", result.mSkipIntro, json);
   extractValueIfExists("motionSmoothing", result.mMotionSmoothing, json);

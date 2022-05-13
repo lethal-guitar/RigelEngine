@@ -48,8 +48,9 @@ void Texture::render(
 }
 
 
-void Texture::render(const base::Rect<int>& sourceRect, const base::Rect<int>& destRect)
-  const
+void Texture::render(
+  const base::Rect<int>& sourceRect,
+  const base::Rect<int>& destRect) const
 {
   mpRenderer->drawTexture(
     mId, toTexCoords(sourceRect, mWidth, mHeight), destRect);

@@ -737,6 +737,19 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 #endif
 
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
+
+      ImGui::SameLine();
+      withEnabledState(mpOptions->mWidescreenModeOn, [this]() {
+        auto hudStyleIndex = static_cast<int>(mpOptions->mWidescreenHudStyle);
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 18);
+        ImGui::Combo(
+          "HUD style",
+          &hudStyleIndex,
+          "Classic\0Remixed 1 (bottom + overlays)\0Remixed 2 (bottom only)\0");
+        mpOptions->mWidescreenHudStyle =
+          static_cast<data::WidescreenHudStyle>(hudStyleIndex);
+      });
+
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
       ImGui::Checkbox(

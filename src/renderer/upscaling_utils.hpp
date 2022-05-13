@@ -66,6 +66,10 @@ bool canUsePixelPerfectScaling(
 
 WidescreenViewportInfo determineWidescreenViewport(const Renderer* pRenderer);
 
+int determineLowResBufferWidth(
+  const Renderer* pRenderer,
+  const bool widescreenModeWanted);
+
 RenderTargetTexture createFullscreenRenderTarget(
   Renderer* pRenderer,
   const data::GameOptions& options);
