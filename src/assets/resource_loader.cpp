@@ -133,6 +133,7 @@ std::string digitizedSoundFilenameForId(const data::SoundId soundId)
 }
 
 #include "ultrawide_hud_image.ipp"
+#include "wide_hud_image.ipp"
 
 } // namespace
 
@@ -275,6 +276,12 @@ data::Image ResourceLoader::loadAntiPiracyImage() const
     [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
   return data::Image(
     move(pixels), GameTraits::viewportWidthPx, GameTraits::viewportHeightPx);
+}
+
+
+data::Image ResourceLoader::loadWideHudFrameImage() const
+{
+  return loadEmbeddedImageAsset("remixed_hud_1.png", WIDE_HUD_IMAGE);
 }
 
 

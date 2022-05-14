@@ -31,6 +31,7 @@ set(core_sources
     assets/user_profile_import.hpp
     assets/voc_decoder.cpp
     assets/voc_decoder.hpp
+    assets/wide_hud_image.ipp
     audio/adlib_emulator.hpp
     audio/software_imf_player.cpp
     audio/software_imf_player.hpp

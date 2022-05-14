@@ -89,6 +89,7 @@ public:
 
   data::Image loadAntiPiracyImage() const;
 
+  data::Image loadWideHudFrameImage() const;
   data::Image loadUltrawideHudFrameImage() const;
 
   data::Image loadBackdrop(std::string_view name) const;
