@@ -438,15 +438,19 @@ void HudRenderer::drawUltrawideHud(
 
 void HudRenderer::drawLeftSideExtension(const int viewportWidth) const
 {
-  // Space to the left of the HUD
-  const auto extraWidth = data::tilesToPixels(viewportWidth - HUD_WIDTH_TOTAL);
+  const auto gapWidth = data::tilesToPixels(viewportWidth - HUD_WIDTH_TOTAL);
   const auto hudStartY =
     data::tilesToPixels(data::GameTraits::mapViewportHeightTiles);
   constexpr auto hudHeightPx = data::tilesToPixels(HUD_HEIGHT_BOTTOM);
+  constexpr auto tileSize = data::GameTraits::tileSize;
 
-  mpRenderer->drawFilledRectangle(
-    {{0, hudStartY + 1}, {extraWidth - 1, hudHeightPx - 2}},
-    data::GameTraits::INGAME_PALETTE[1]);
+  mWideHudFrameTexture.render({0, hudStartY}, {{}, {tileSize, hudHeightPx}});
+  mWideHudFrameTexture.render(
+    base::Rect<int>{{8, 0}, {tileSize, hudHeightPx}},
+    {{tileSize, hudStartY}, {gapWidth - tileSize - 2, hudHeightPx}});
+  mWideHudFrameTexture.render(
+    base::Rect<int>{{27, 0}, {2, hudHeightPx}},
+    {{gapWidth - 2, hudStartY}, {2, hudHeightPx}});
 }
 
 
