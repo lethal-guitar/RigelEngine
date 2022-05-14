@@ -333,6 +333,19 @@ void HudRenderer::drawHealthBar(const data::PlayerModel& playerModel) const
 void HudRenderer::drawCollectedLetters(
   const data::PlayerModel& playerModel) const
 {
+  auto guard = renderer::saveState(mpRenderer);
+
+  // The sprites used for the letter collection indicators don't just consist
+  // of the lit up letter, but also contain the surrounding parts of the HUD.
+  // Unfortunately, the color used in the sprites is slightly different from
+  // what's used in the HUD. This causes a subtle discoloration in the HUD when
+  // letters are collected.  To fix this, we set a clip rect to draw just the
+  // part of the sprite which contains the lit up letter.
+  renderer::setLocalClipRect(
+    mpRenderer,
+    {position + data::tileVectorToPixelVector({35, 24}) + base::Vec2{1, 5},
+     {29, 6}});
+
   for (const auto letter : playerModel.collectedLetters())
   {
     // The draw position is the same for all cases, because each actor
