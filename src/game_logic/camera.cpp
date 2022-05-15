@@ -246,6 +246,14 @@ void Camera::setPosition(const base::Vec2 position)
 }
 
 
+void Camera::recenter(const base::Extents& viewportSize)
+{
+  mViewportSize = viewportSize;
+  const auto adjustment = offsetToDeadZone(*mpPlayer, mPosition, mViewportSize);
+  setPosition(mPosition + adjustment);
+}
+
+
 void Camera::centerViewOnPlayer()
 {
   auto playerPos =

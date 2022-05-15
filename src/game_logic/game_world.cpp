@@ -297,6 +297,7 @@ GameWorld::GameWorld(
       renderer::determineWidescreenViewport(mpRenderer).mWidthPx,
       data::GameTraits::viewportHeightPx)
   , mPreviousWindowSize(mpRenderer->windowSize())
+  , mPreviousHudStyle(mpOptions->mWidescreenHudStyle)
   , mWidescreenModeWasOn(widescreenModeOn())
   , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
   , mMotionSmoothingWasEnabled(mpOptions->mMotionSmoothing)
@@ -710,6 +711,19 @@ void GameWorld::render(const float interpolationFactor)
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
   }
 
+  if (
+    widescreenModeOn() != mWidescreenModeWasOn ||
+    mPreviousWindowSize != mpRenderer->windowSize() ||
+    mPreviousHudStyle != mpOptions->mWidescreenHudStyle)
+  {
+    const auto& viewportSize = widescreenModeOn()
+      ? viewportSizeWideScreen(mpRenderer, *mpOptions)
+      : data::GameTraits::mapViewportSize;
+
+    mpState->mCamera.recenter(viewportSize);
+    mpState->mPreviousCameraPosition = mpState->mCamera.position();
+  }
+
   if (mpOptions->mMotionSmoothing != mMotionSmoothingWasEnabled)
   {
     updateMotionSmoothingStates();
@@ -874,6 +888,7 @@ void GameWorld::render(const float interpolationFactor)
     drawTopRow(data::GameTraits::inGameViewportSize.width);
   }
 
+  mPreviousHudStyle = mpOptions->mWidescreenHudStyle;
   mWidescreenModeWasOn = widescreenModeOn();
   mPerElementUpscalingWasEnabled = mpOptions->mPerElementUpscalingEnabled;
   mPreviousWindowSize = mpRenderer->windowSize();

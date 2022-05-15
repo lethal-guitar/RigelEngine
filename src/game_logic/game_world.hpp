@@ -176,6 +176,7 @@ private:
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
   base::Size<int> mPreviousWindowSize;
+  data::WidescreenHudStyle mPreviousHudStyle;
   bool mWidescreenModeWasOn;
   bool mPerElementUpscalingWasEnabled;
   bool mMotionSmoothingWasEnabled;
