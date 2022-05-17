@@ -52,13 +52,7 @@ void TiledTexture::renderTileStretched(
   const int index,
   const base::Rect<int>& destRect) const
 {
-  mpRenderer->drawTexture(
-    mTileSetTexture.data(),
-    renderer::toTexCoords(
-      sourceRect(index, 1, 1),
-      mTileSetTexture.width(),
-      mTileSetTexture.height()),
-    destRect);
+  mTileSetTexture.render(sourceRect(index, 1, 1), destRect);
 }
 
 
@@ -109,13 +103,8 @@ void TiledTexture::renderTileDoubleQuad(
 void TiledTexture::renderTileAtPixelPos(int index, const base::Vec2& pxPosition)
   const
 {
-  mpRenderer->drawTexture(
-    mTileSetTexture.data(),
-    renderer::toTexCoords(
-      sourceRect(index, 1, 1),
-      mTileSetTexture.width(),
-      mTileSetTexture.height()),
-    {pxPosition, tileExtentsToPixelExtents({1, 1})});
+  mTileSetTexture.render(
+    sourceRect(index, 1, 1), {pxPosition, tileExtentsToPixelExtents({1, 1})});
 }
 
 

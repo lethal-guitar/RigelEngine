@@ -18,11 +18,13 @@
 
 #include "base/array_view.hpp"
 #include "data/actor_ids.hpp"
+#include "data/game_options.hpp"
 #include "data/player_model.hpp"
 #include "engine/tiled_texture.hpp"
 #include "renderer/texture.hpp"
 
 #include <cstdint>
+#include <optional>
 #include <unordered_map>
 
 
@@ -67,19 +69,47 @@ public:
     const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer,
     engine::TiledTexture* pStatusSpriteSheetRenderer,
+    renderer::Texture wideHudFrameTexture,
+    renderer::Texture ultrawideHudFrameTexture,
     const engine::SpriteFactory* pSpriteFactory);
 
   void updateAnimation();
-  void render(
+
+  void renderClassicHud(
+    const data::PlayerModel& playerModel,
+    base::ArrayView<base::Vec2> radarPositions);
+
+  void renderWidescreenHud(
+    int viewportWidth,
+    data::WidescreenHudStyle style,
     const data::PlayerModel& playerModel,
     base::ArrayView<base::Vec2> radarPositions);
 
 private:
-  void
-    drawInventory(const std::vector<data::InventoryItemType>& inventory) const;
-  void drawHealthBar(const data::PlayerModel& playerModel) const;
-  void drawCollectedLetters(const data::PlayerModel& playerModel) const;
-  void drawRadar(base::ArrayView<base::Vec2> positions) const;
+  void drawModernHud(
+    int viewportWidth,
+    const data::PlayerModel& playerModel,
+    base::ArrayView<base::Vec2> radarPositions);
+  void drawUltrawideHud(
+    int viewportWidth,
+    const data::PlayerModel& playerModel,
+    base::ArrayView<base::Vec2> radarPositions);
+  void drawLeftSideExtension(int viewportWidth) const;
+  void drawInventory(
+    const std::vector<data::InventoryItemType>& inventory,
+    const base::Vec2& position) const;
+  void drawFloatingInventory(
+    const std::vector<data::InventoryItemType>& inventory,
+    const base::Vec2& position) const;
+  void drawHealthBar(
+    const data::PlayerModel& playerModel,
+    const base::Vec2& position) const;
+  void drawCollectedLetters(
+    const data::PlayerModel& playerModel,
+    const base::Vec2& position) const;
+  void drawRadar(
+    base::ArrayView<base::Vec2> positions,
+    const base::Vec2& position) const;
   void drawActorFrame(data::ActorID id, int frame, const base::Vec2& pos) const;
 
   const int mLevelNumber;
@@ -88,9 +118,8 @@ private:
 
   std::uint32_t mElapsedFrames = 0;
 
-  renderer::Texture mTopRightTexture;
-  renderer::Texture mBottomLeftTexture;
-  renderer::Texture mBottomRightTexture;
+  renderer::Texture mWideHudFrameTexture;
+  renderer::Texture mUltrawideHudFrameTexture;
   engine::TiledTexture* mpStatusSpriteSheetRenderer;
   const engine::SpriteFactory* mpSpriteFactory;
   mutable renderer::RenderTargetTexture mRadarSurface;

@@ -85,6 +85,14 @@ enum class UpscalingFilter : std::uint8_t
 };
 
 
+enum class WidescreenHudStyle : std::uint8_t
+{
+  Classic,
+  Modern,
+  Ultrawide,
+};
+
+
 /** Data-model for user-configurable options/settings
  *
  * This struct contains everything that can be configured by the user in
@@ -142,6 +150,7 @@ struct GameOptions
 
   // Enhancements
   bool mWidescreenModeOn = false;
+  WidescreenHudStyle mWidescreenHudStyle = WidescreenHudStyle::Classic;
   bool mQuickSavingEnabled = false;
   bool mSkipIntro = false;
   bool mMotionSmoothing = false;

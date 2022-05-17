@@ -70,8 +70,6 @@ constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
 constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
 constexpr auto HEALTH_BAR_START_PX = base::Vec2{data::tilesToPixels(5), 0};
 
-constexpr auto HUD_WIDTH = 6;
-
 
 void drawBossHealthBar(
   const int health,
@@ -132,22 +130,17 @@ int healthOrZero(entityx::Entity entity)
 }
 
 
-auto viewportSizeWideScreen(renderer::Renderer* pRenderer)
+auto viewportSizeWideScreen(
+  renderer::Renderer* pRenderer,
+  const data::GameOptions& options)
 {
   const auto info = renderer::determineWidescreenViewport(pRenderer);
+  const auto hudWidth =
+    options.mWidescreenHudStyle == data::WidescreenHudStyle::Classic
+    ? ui::HUD_WIDTH_RIGHT
+    : 0;
   return base::Extents{
-    info.mWidthTiles - HUD_WIDTH, data::GameTraits::mapViewportSize.height};
-}
-
-
-void setupWidescreenHudOffset(
-  renderer::Renderer* pRenderer,
-  const int tilesOnScreen)
-{
-  const auto extraTiles =
-    tilesOnScreen - data::GameTraits::mapViewportWidthTiles;
-  const auto hudOffset = (extraTiles - HUD_WIDTH) * data::GameTraits::tileSize;
-  renderer::setLocalTranslation(pRenderer, {hudOffset, 0});
+    info.mWidthTiles - hudWidth, data::GameTraits::mapViewportSize.height};
 }
 
 
@@ -288,6 +281,12 @@ GameWorld::GameWorld(
       mpOptions,
       mpRenderer,
       &mUiSpriteSheet,
+      renderer::Texture{
+        mpRenderer,
+        context.mpResources->loadWideHudFrameImage()},
+      renderer::Texture{
+        mpRenderer,
+        context.mpResources->loadUltrawideHudFrameImage()},
       mpSpriteFactory)
   , mMessageDisplay(mpServiceProvider, &mTextRenderer)
   , mWaterEffect(mpRenderer)
@@ -298,6 +297,7 @@ GameWorld::GameWorld(
       renderer::determineWidescreenViewport(mpRenderer).mWidthPx,
       data::GameTraits::viewportHeightPx)
   , mPreviousWindowSize(mpRenderer->windowSize())
+  , mPreviousHudStyle(mpOptions->mWidescreenHudStyle)
   , mWidescreenModeWasOn(widescreenModeOn())
   , mPerElementUpscalingWasEnabled(mpOptions->mPerElementUpscalingEnabled)
   , mMotionSmoothingWasEnabled(mpOptions->mMotionSmoothing)
@@ -642,7 +642,7 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
   }
 
   const auto& viewportSize = widescreenModeOn()
-    ? viewportSizeWideScreen(mpRenderer)
+    ? viewportSizeWideScreen(mpRenderer, *mpOptions)
     : data::GameTraits::mapViewportSize;
 
   mpState->mMapRenderer.updateAnimatedMapTiles();
@@ -709,6 +709,19 @@ void GameWorld::render(const float interpolationFactor)
   {
     mWaterEffectBuffer =
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
+  }
+
+  if (
+    widescreenModeOn() != mWidescreenModeWasOn ||
+    mPreviousWindowSize != mpRenderer->windowSize() ||
+    mPreviousHudStyle != mpOptions->mWidescreenHudStyle)
+  {
+    const auto& viewportSize = widescreenModeOn()
+      ? viewportSizeWideScreen(mpRenderer, *mpOptions)
+      : data::GameTraits::mapViewportSize;
+
+    mpState->mCamera.recenter(viewportSize);
+    mpState->mPreviousCameraPosition = mpState->mCamera.position();
   }
 
   if (mpOptions->mMotionSmoothing != mMotionSmoothingWasEnabled)
@@ -801,20 +814,14 @@ void GameWorld::render(const float interpolationFactor)
   auto drawHud = [&, this]() {
     const auto radarDots =
       collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
-    mHudRenderer.render(*mpPlayerModel, radarDots);
+    mHudRenderer.renderClassicHud(*mpPlayerModel, radarDots);
   };
 
-  auto drawHudExtension = [&](const int viewportWidth) {
-    // Space to the left of the HUD
-    const auto extraWidth =
-      data::tilesToPixels(viewportWidth - ui::HUD_WIDTH_TOTAL);
-    const auto hudStartY =
-      data::tilesToPixels(data::GameTraits::mapViewportHeightTiles);
-    constexpr auto hudHeightPx = data::tilesToPixels(ui::HUD_HEIGHT_BOTTOM);
-
-    mpRenderer->drawFilledRectangle(
-      {{0, hudStartY + 1}, {extraWidth - 1, hudHeightPx - 2}},
-      data::GameTraits::INGAME_PALETTE[1]);
+  auto drawWidescreenHud = [&](const int viewportWidth) {
+    const auto radarDots =
+      collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
+    mHudRenderer.renderWidescreenHud(
+      viewportWidth, mpOptions->mWidescreenHudStyle, *mpPlayerModel, radarDots);
   };
 
 
@@ -823,9 +830,7 @@ void GameWorld::render(const float interpolationFactor)
     mpServiceProvider->markCurrentFrameAsWidescreen();
 
     const auto info = renderer::determineWidescreenViewport(mpRenderer);
-    const auto viewportSize = base::Extents{
-      info.mWidthTiles - ui::HUD_WIDTH_RIGHT,
-      data::GameTraits::mapViewportHeightTiles};
+    const auto viewportSize = viewportSizeWideScreen(mpRenderer, *mpOptions);
 
     if (!mWidescreenModeWasOn && !mpOptions->mMotionSmoothing)
     {
@@ -841,10 +846,7 @@ void GameWorld::render(const float interpolationFactor)
 
         drawWorld(viewportSize);
 
-        drawHudExtension(info.mWidthTiles);
-
-        setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
-        drawHud();
+        drawWidescreenHud(info.mWidthTiles);
       }
 
       auto saved = setupWidescreenTopRowViewport(
@@ -865,10 +867,7 @@ void GameWorld::render(const float interpolationFactor)
         data::GameTraits::inGameViewportOffset.y});
       drawWorld(viewportSize);
 
-      drawHudExtension(info.mWidthTiles);
-
-      setupWidescreenHudOffset(mpRenderer, info.mWidthTiles);
-      drawHud();
+      drawWidescreenHud(info.mWidthTiles);
     }
   }
   else
@@ -889,6 +888,7 @@ void GameWorld::render(const float interpolationFactor)
     drawTopRow(data::GameTraits::inGameViewportSize.width);
   }
 
+  mPreviousHudStyle = mpOptions->mWidescreenHudStyle;
   mWidescreenModeWasOn = widescreenModeOn();
   mPerElementUpscalingWasEnabled = mpOptions->mPerElementUpscalingEnabled;
   mPreviousWindowSize = mpRenderer->windowSize();
@@ -1192,7 +1192,7 @@ void GameWorld::quickLoad()
   if (!mpOptions->mMotionSmoothing)
   {
     const auto& viewportSize = widescreenModeOn()
-      ? viewportSizeWideScreen(mpRenderer)
+      ? viewportSizeWideScreen(mpRenderer, *mpOptions)
       : data::GameTraits::mapViewportSize;
     mpState->mSpriteRenderingSystem.update(
       mpState->mEntities, viewportSize, mpState->mCamera.position(), 1.0f);

@@ -132,6 +132,9 @@ std::string digitizedSoundFilenameForId(const data::SoundId soundId)
   return "SB_"s + std::to_string(asSoundIndex(soundId)) + ".MNI";
 }
 
+#include "ultrawide_hud_image.ipp"
+#include "wide_hud_image.ipp"
+
 } // namespace
 
 
@@ -179,6 +182,25 @@ std::optional<data::Image>
   return tryLoadReplacement([filename](const fs::path& path) {
     return loadPng((path / filename).u8string());
   });
+}
+
+
+data::Image ResourceLoader::loadEmbeddedImageAsset(
+  const char* replacementName,
+  const base::ArrayView<std::uint8_t> data) const
+{
+  if (const auto oReplacement = tryLoadPngReplacement(replacementName))
+  {
+    return *oReplacement;
+  }
+
+  auto oEmbeddedImage = loadPng(data);
+  if (!oEmbeddedImage)
+  {
+    throw std::runtime_error("Failed to decode embedded texture");
+  }
+
+  return *oEmbeddedImage;
 }
 
 
@@ -254,6 +276,18 @@ data::Image ResourceLoader::loadAntiPiracyImage() const
     [&palette](const auto indexedPixel) { return palette[indexedPixel]; });
   return data::Image(
     move(pixels), GameTraits::viewportWidthPx, GameTraits::viewportHeightPx);
+}
+
+
+data::Image ResourceLoader::loadWideHudFrameImage() const
+{
+  return loadEmbeddedImageAsset("remixed_hud_1.png", WIDE_HUD_IMAGE);
+}
+
+
+data::Image ResourceLoader::loadUltrawideHudFrameImage() const
+{
+  return loadEmbeddedImageAsset("remixed_hud_2.png", ULTRAWIDE_HUD_IMAGE);
 }
 
 

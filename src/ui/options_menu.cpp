@@ -737,6 +737,19 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 #endif
 
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
+
+      ImGui::SameLine();
+      withEnabledState(mpOptions->mWidescreenModeOn, [this]() {
+        auto hudStyleIndex = static_cast<int>(mpOptions->mWidescreenHudStyle);
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 18);
+        ImGui::Combo(
+          "HUD style",
+          &hudStyleIndex,
+          "Classic\0Remixed 1 (bottom + overlays)\0Remixed 2 (bottom only)\0");
+        mpOptions->mWidescreenHudStyle =
+          static_cast<data::WidescreenHudStyle>(hudStyleIndex);
+      });
+
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
       ImGui::Checkbox(
@@ -1055,6 +1068,13 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   ImGui::NewLine();
 
   centeredText("RigelEngine icon by LunarLoony (https://lunarloony.co.uk)");
+
+  ImGui::NewLine();
+
+  centeredText(
+    "'Remixed 1' HUD artwork by Roobar (https://www.youtube.com/user/JBWhiskey)");
+  centeredText(
+    "'Remixed 2' HUD artwork by OpenRift412 (https://github.com/OpenRift412)");
 
   ImGui::NewLine();
 

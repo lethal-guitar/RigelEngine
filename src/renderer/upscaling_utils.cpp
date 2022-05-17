@@ -100,21 +100,6 @@ base::Size<float>
 }
 
 
-int determineLowResBufferWidth(
-  const Renderer* pRenderer,
-  const bool widescreenModeWanted)
-{
-  if (widescreenModeWanted && canUseWidescreenMode(pRenderer))
-  {
-    const auto scale = determineViewport(pRenderer).mScale.x;
-    const auto fullWidth = determineWidescreenViewport(pRenderer).mWidthPx;
-    return base::round(fullWidth / scale);
-  }
-
-  return data::GameTraits::viewportWidthPx;
-}
-
-
 void setupRenderingViewport(
   renderer::Renderer* pRenderer,
   const bool perElementUpscaling)
@@ -189,6 +174,21 @@ WidescreenViewportInfo determineWidescreenViewport(const Renderer* pRenderer)
   const auto paddingPixels = pRenderer->windowSize().width - widthInPixels;
 
   return {maxTilesOnScreen, widthInPixels, paddingPixels / 2};
+}
+
+
+int determineLowResBufferWidth(
+  const Renderer* pRenderer,
+  const bool widescreenModeWanted)
+{
+  if (widescreenModeWanted && canUseWidescreenMode(pRenderer))
+  {
+    const auto scale = determineViewport(pRenderer).mScale.x;
+    const auto fullWidth = determineWidescreenViewport(pRenderer).mWidthPx;
+    return base::round(fullWidth / scale);
+  }
+
+  return data::GameTraits::viewportWidthPx;
 }
 
 

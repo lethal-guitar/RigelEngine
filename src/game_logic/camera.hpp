@@ -53,6 +53,7 @@ public:
   void synchronizeTo(const Camera& other);
 
   void update(const PlayerInput& input, const base::Extents& viewportSize);
+  void recenter(const base::Extents& viewportSize);
   void centerViewOnPlayer();
 
   const base::Vec2& position() const;

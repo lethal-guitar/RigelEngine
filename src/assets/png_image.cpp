@@ -28,6 +28,27 @@ RIGEL_RESTORE_WARNINGS
 namespace rigel::assets
 {
 
+namespace
+{
+
+std::optional<data::Image>
+  convertToImage(unsigned char* pImageData, const int width, const int height)
+{
+  if (!pImageData)
+  {
+    return {};
+  }
+
+  const auto pPixels = reinterpret_cast<const data::Pixel*>(pImageData);
+  const auto numPixels = static_cast<size_t>(width * height);
+  data::PixelBuffer buffer{pPixels, pPixels + numPixels};
+  return data::Image{
+    std::move(buffer), static_cast<size_t>(width), static_cast<size_t>(height)};
+}
+
+} // namespace
+
+
 std::optional<data::Image> loadPng(const std::string& path)
 {
   int width = 0;
@@ -38,19 +59,25 @@ std::optional<data::Image> loadPng(const std::string& path)
   std::unique_ptr<unsigned char, decltype(imageDeleter)> pImageData{
     stbi_load(path.c_str(), &width, &height, nullptr, 4), imageDeleter};
 
-  if (pImageData)
-  {
-    const auto pPixels = reinterpret_cast<const data::Pixel*>(pImageData.get());
-    const auto numPixels = static_cast<size_t>(width * height);
-    data::PixelBuffer buffer{pPixels, pPixels + numPixels};
-    return data::Image{
-      std::move(buffer),
-      static_cast<size_t>(width),
-      static_cast<size_t>(height)};
-  }
-
-  return {};
+  return convertToImage(pImageData.get(), width, height);
 }
+
+
+std::optional<data::Image> loadPng(base::ArrayView<std::uint8_t> data)
+{
+  int width = 0;
+  int height = 0;
+  const auto imageDeleter = [](unsigned char* p) {
+    stbi_image_free(p);
+  };
+  std::unique_ptr<unsigned char, decltype(imageDeleter)> pImageData{
+    stbi_load_from_memory(
+      data.data(), data.size(), &width, &height, nullptr, 4),
+    imageDeleter};
+
+  return convertToImage(pImageData.get(), width, height);
+}
+
 
 bool savePng(const std::string& path, const data::Image& image)
 {

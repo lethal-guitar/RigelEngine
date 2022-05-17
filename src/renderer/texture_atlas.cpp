@@ -103,10 +103,7 @@ TextureAtlas::TextureAtlas(
     std::for_each(iFirstPacked, rects.end(), [&](const stbrp_rect& packedRect) {
       atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
       mAtlasMap[packedRect.id] = TextureInfo{
-        toTexCoords(
-          {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
-          ATLAS_WIDTH,
-          ATLAS_HEIGHT),
+        {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
         textureIndex};
     });
 
@@ -120,8 +117,20 @@ TextureAtlas::TextureAtlas(
 void TextureAtlas::draw(int index, const base::Rect<int>& destRect) const
 {
   const auto& info = mAtlasMap[index];
-  mpRenderer->drawTexture(
-    mAtlasTextures[info.mTextureIndex].data(), info.mCoordinates, destRect);
+  mAtlasTextures[info.mTextureIndex].render(info.mRect, destRect);
+}
+
+
+void TextureAtlas::draw(
+  int index,
+  const base::Rect<int>& srcRect,
+  const base::Rect<int>& destRect) const
+{
+  const auto& info = mAtlasMap[index];
+  auto actualSrcRect = srcRect;
+  actualSrcRect.topLeft += info.mRect.topLeft;
+
+  mAtlasTextures[info.mTextureIndex].render(actualSrcRect, destRect);
 }
 
 } // namespace rigel::renderer

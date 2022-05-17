@@ -18,6 +18,7 @@
 
 #include "assets/resource_loader.hpp"
 #include "base/match.hpp"
+#include "data/unit_conversions.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
 #include "game_logic/game_world.hpp"
@@ -357,9 +358,27 @@ auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult
           state.mIsTransparent && options.mWidescreenModeOn &&
           renderer::canUseWidescreenMode(mContext.mpRenderer))
         {
+          // When showing a message box while in-game, the corresponding
+          // scripts always feature a SHIFTWIN instruction, which causes
+          // the box to be offset to the left by 3 tiles. This is done
+          // because normally, the right-hand side of the HUD takes away
+          // some screen real estate, and thus the box needs to be shifted
+          // in order to still appear centered within the in-game content.
+          // But when using one of the alternative HUD styles that RigelEngine
+          // offers, there is no right-hand side HUD anymore, thus we need
+          // to negate this shift again in order for message boxes to still
+          // appear centered.
+          //
+          // TODO: Introduce a constant for this value?
+          const auto offsetForAlternativeHudStyles =
+            options.mWidescreenHudStyle != data::WidescreenHudStyle::Classic
+            ? data::tilesToPixels(3)
+            : 0;
+
           auto saved = renderer::saveState(mContext.mpRenderer);
           mContext.mpRenderer->setClipRect({});
           mContext.mpRenderer->setGlobalTranslation(
+            base::Vec2{offsetForAlternativeHudStyles, 0} +
             renderer::offsetTo4by3WithinWidescreen(
               mContext.mpRenderer, options));
           state.updateAndRender(dt);

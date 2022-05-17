@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "data/image.hpp"
 
 #include <optional>
@@ -25,6 +26,7 @@ namespace rigel::assets
 {
 
 std::optional<data::Image> loadPng(const std::string& path);
+std::optional<data::Image> loadPng(base::ArrayView<std::uint8_t> data);
 
 bool savePng(const std::string& path, const data::Image& image);
 
