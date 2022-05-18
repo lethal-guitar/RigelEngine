@@ -405,7 +405,7 @@ void MapRenderer::renderBackdrop(
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
     calculateBackdropTexCoords(cameraPosition, viewportSize),
-    {{}, data::tileExtentsToPixelExtents(viewportSize)});
+    {{}, data::tilesToPixels(viewportSize)});
 }
 
 
@@ -450,7 +450,7 @@ void MapRenderer::renderMapTiles(
     }
   });
 
-  const auto translation = data::tileVectorToPixelVector(sectionStart) * -1;
+  const auto translation = data::tilesToPixels(sectionStart) * -1;
 
   const auto saved = renderer::saveState(mpRenderer);
   renderer::setLocalTranslation(mpRenderer, translation);
@@ -559,7 +559,7 @@ void MapRenderer::renderDynamicSection(
         }
 
         const auto offsetInSection =
-          data::tileVectorToPixelVector(base::Vec2{x, y} - coordinates.topLeft);
+          data::tilesToPixels(base::Vec2{x, y} - coordinates.topLeft);
         renderSingleTile(tileIndex, pixelPosition + offsetInSection);
       }
     }
@@ -592,7 +592,7 @@ void MapRenderer::renderCachedSection(
     for (auto x = 0; x < width; ++x)
     {
       const auto screenPos =
-        data::tileVectorToPixelVector(base::Vec2{x, y}) + pixelPosition;
+        data::tilesToPixels(base::Vec2{x, y}) + pixelPosition;
 
       const auto [layer0, layer1] = unpack(*iMapData);
       drawTile(layer0, screenPos);

@@ -113,7 +113,7 @@ void collectVisibleSprites(
     const auto destRect = base::Rect<int>{
       engine::interpolatedPixelPosition(
         previousTopLeft, topLeft, interpolationFactor),
-      data::tileExtentsToPixelExtents(frame.mDimensions)};
+      data::tilesToPixels(frame.mDimensions)};
     const auto drawSpec =
       SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, translucent};
 
@@ -205,8 +205,8 @@ void collectVisibleSprites(
           float(strip.mHeight),
           interpolationFactor)));
 
-        const auto destRect = base::Rect<int>{
-          data::tileVectorToPixelVector(topLeft), {width, height}};
+        const auto destRect =
+          base::Rect<int>{data::tilesToPixels(topLeft), {width, height}};
 
         const auto drawSpec =
           SpriteDrawSpec{destRect, frame.mImageId, false, sprite.mTranslucent};

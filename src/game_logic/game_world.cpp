@@ -227,10 +227,9 @@ std::vector<engine::WaterEffectArea> collectWaterEffectAreas(
 
       if (screenBox.intersects(worldSpaceBbox))
       {
-        const auto topLeftPx = data::tileVectorToPixelVector(
-          worldSpaceBbox.topLeft - cameraPosition);
-        const auto sizePx =
-          data::tileExtentsToPixelExtents(worldSpaceBbox.size);
+        const auto topLeftPx =
+          data::tilesToPixels(worldSpaceBbox.topLeft - cameraPosition);
+        const auto sizePx = data::tilesToPixels(worldSpaceBbox.size);
         const auto hasAnimatedSurface = tag.mType == T::AnimatedWaterArea;
 
         result.push_back(
@@ -734,7 +733,7 @@ void GameWorld::render(const float interpolationFactor)
     [&](const auto& renderStart, const auto& viewportSize) {
       const auto clampedSize =
         clampedSectionSize(renderStart, viewportSize, mpState->mMap);
-      const auto clampedSizePx = data::tileExtentsToPixelExtents(clampedSize);
+      const auto clampedSizePx = data::tilesToPixels(clampedSize);
 
       auto saved = renderer::saveState(mpRenderer);
       renderer::setLocalClipRect(mpRenderer, {{}, clampedSizePx});
@@ -944,7 +943,7 @@ auto GameWorld::determineSmoothScrollViewport(
     base::Vec2{
       base::round(data::tilesToPixels(interpolatedCameraPosition.x)),
       base::round(data::tilesToPixels(interpolatedCameraPosition.y))} -
-    data::tileVectorToPixelVector(previousCameraPosition);
+    data::tilesToPixels(previousCameraPosition);
 
   return {
     interpolatedCameraPosition,
@@ -980,7 +979,7 @@ void GameWorld::drawMapAndSprites(
     if (state.mBackdropFlashColor)
     {
       mpRenderer->drawFilledRectangle(
-        {{}, data::tileExtentsToPixelExtents(params.mViewportSize)},
+        {{}, data::tilesToPixels(params.mViewportSize)},
         *state.mBackdropFlashColor);
     }
     else
@@ -998,8 +997,7 @@ void GameWorld::drawMapAndSprites(
           engine::interpolatedPixelPosition(e, interpolationFactor);
         state.mMapRenderer.renderSingleTile(
           debris.mTileIndex,
-          pixelPosition -
-            data::tileVectorToPixelVector(params.mRenderStartPosition));
+          pixelPosition - data::tilesToPixels(params.mRenderStartPosition));
       });
   };
 
