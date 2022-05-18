@@ -122,7 +122,7 @@ private:
     base::Vec2 mCameraOffset;
 
     base::Vec2 mRenderStartPosition;
-    base::Extents mViewportSize;
+    base::Size mViewportSize;
   };
 
   void loadLevel(const PlayerInput& initialInput);
@@ -145,7 +145,7 @@ private:
   void printDebugText(std::ostream& stream) const;
 
   ViewportParams determineSmoothScrollViewport(
-    const base::Extents& viewportSizeOriginal,
+    const base::Size& viewportSizeOriginal,
     const float interpolationFactor) const;
   void updateMotionSmoothingStates();
 
@@ -175,7 +175,7 @@ private:
   engine::WaterEffectRenderer mWaterEffect;
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
-  base::Size<int> mPreviousWindowSize;
+  base::SizeT<int> mPreviousWindowSize;
   data::WidescreenHudStyle mPreviousHudStyle;
   bool mWidescreenModeWasOn;
   bool mPerElementUpscalingWasEnabled;

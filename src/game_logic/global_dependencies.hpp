@@ -72,7 +72,7 @@ struct GlobalDependencies
 struct PerFrameState
 {
   PlayerInput mInput;
-  base::Extents mCurrentViewportSize;
+  base::Size mCurrentViewportSize;
   int mNumRadarDishes = 0;
   bool mIsOddFrame = false;
   bool mIsEarthShaking = false;

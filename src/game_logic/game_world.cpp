@@ -79,7 +79,7 @@ void drawBossHealthBar(
   textRenderer.drawSmallWhiteText(
     HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
 
-  const auto healthBarSize = base::Extents{health, data::GameTraits::tileSize};
+  const auto healthBarSize = base::Size{health, data::GameTraits::tileSize};
   uiSpriteSheet.renderTileStretched(
     HEALTH_BAR_TILE_INDEX, {HEALTH_BAR_START_PX, healthBarSize});
 }
@@ -139,7 +139,7 @@ auto viewportSizeWideScreen(
     options.mWidescreenHudStyle == data::WidescreenHudStyle::Classic
     ? ui::HUD_WIDTH_RIGHT
     : 0;
-  return base::Extents{
+  return base::Size{
     info.mWidthTiles - hudWidth, data::GameTraits::mapViewportSize.height};
 }
 
@@ -203,7 +203,7 @@ std::string vec2String(const base::Vec2T<ValueT>& vec, const int width)
 std::vector<engine::WaterEffectArea> collectWaterEffectAreas(
   entityx::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize)
+  const base::Size& viewportSize)
 {
   using engine::components::BoundingBox;
   using game_logic::components::ActorTag;
@@ -242,9 +242,9 @@ std::vector<engine::WaterEffectArea> collectWaterEffectAreas(
 }
 
 
-base::Extents clampedSectionSize(
+base::Size clampedSectionSize(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize,
+  const base::Size& sectionSize,
   const data::map::Map& map)
 {
   return {
@@ -752,7 +752,7 @@ void GameWorld::render(const float interpolationFactor)
         interpolationFactor);
     };
 
-  auto drawWorld = [&](const base::Extents& viewportSize) {
+  auto drawWorld = [&](const base::Size& viewportSize) {
     const auto viewportParams =
       determineSmoothScrollViewport(viewportSize, interpolationFactor);
 
@@ -895,7 +895,7 @@ void GameWorld::render(const float interpolationFactor)
 
 
 auto GameWorld::determineSmoothScrollViewport(
-  const base::Extents& viewportSizeOriginal,
+  const base::Size& viewportSizeOriginal,
   float interpolationFactor) const -> ViewportParams
 {
   const auto& state = *mpState;
@@ -935,7 +935,7 @@ auto GameWorld::determineSmoothScrollViewport(
       previousCameraPosition.y, currentCameraPosition.y, interpolationY),
   };
 
-  const auto viewportSize = base::Extents{
+  const auto viewportSize = base::Size{
     viewportSizeOriginal.width + (direction.x != 0 ? 2 : 0),
     viewportSizeOriginal.height + (direction.y != 0 ? 2 : 0)};
 

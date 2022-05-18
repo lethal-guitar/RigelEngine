@@ -86,21 +86,21 @@ Vec2T<NewValueT> cast(const Vec2T<ValueT>& point)
 
 
 template <typename ValueT>
-struct Size
+struct SizeT
 {
-  Size() = default;
-  constexpr Size(const ValueT width_, const ValueT height_) noexcept
+  SizeT() = default;
+  constexpr SizeT(const ValueT width_, const ValueT height_) noexcept
     : width(width_)
     , height(height_)
   {
   }
 
-  bool operator==(const Size<ValueT>& rhs) const
+  bool operator==(const SizeT<ValueT>& rhs) const
   {
     return std::tie(width, height) == std::tie(rhs.width, rhs.height);
   }
 
-  bool operator!=(const Size<ValueT>& rhs) const { return !(*this == rhs); }
+  bool operator!=(const SizeT<ValueT>& rhs) const { return !(*this == rhs); }
 
   ValueT width = 0;
   ValueT height = 0;
@@ -111,7 +111,7 @@ template <typename ValueT>
 struct Rect
 {
   Vec2T<ValueT> topLeft;
-  Size<ValueT> size;
+  SizeT<ValueT> size;
 
   Vec2T<ValueT> bottomLeft() const
   {
@@ -151,7 +151,7 @@ template <typename ValueT>
 Rect<ValueT> makeRect(Vec2T<ValueT> topLeft, Vec2T<ValueT> bottomRight)
 {
   const auto sizeAsPoint = bottomRight - topLeft;
-  return Rect<ValueT>{topLeft, Size<ValueT>{sizeAsPoint.x, sizeAsPoint.y}};
+  return Rect<ValueT>{topLeft, SizeT<ValueT>{sizeAsPoint.x, sizeAsPoint.y}};
 }
 
 
@@ -195,29 +195,29 @@ Vec2T<ValueT>& operator-=(Vec2T<ValueT>& lhs, const Vec2T<ValueT>& rhs)
 
 
 template <typename ValueT>
-Size<ValueT> operator+(const Size<ValueT>& lhs, const Size<ValueT>& rhs)
+SizeT<ValueT> operator+(const SizeT<ValueT>& lhs, const SizeT<ValueT>& rhs)
 {
-  return Size<ValueT>(lhs.width + rhs.width, lhs.height + rhs.height);
+  return SizeT<ValueT>(lhs.width + rhs.width, lhs.height + rhs.height);
 }
 
 
 template <typename ValueT>
-Size<ValueT> operator-(const Size<ValueT>& lhs, const Size<ValueT>& rhs)
+SizeT<ValueT> operator-(const SizeT<ValueT>& lhs, const SizeT<ValueT>& rhs)
 {
-  return Size<ValueT>(lhs.width - rhs.width, lhs.height - rhs.height);
+  return SizeT<ValueT>(lhs.width - rhs.width, lhs.height - rhs.height);
 }
 
 
 template <typename ValueT, typename ScalarT>
-auto operator*(const Size<ValueT>& size, const ScalarT scalar)
+auto operator*(const SizeT<ValueT>& size, const ScalarT scalar)
 {
-  return Size<decltype(size.width * scalar)>{
+  return SizeT<decltype(size.width * scalar)>{
     size.width * scalar, size.height * scalar};
 }
 
 
 template <typename ValueT>
-Size<ValueT>& operator+=(Size<ValueT>& lhs, const Size<ValueT>& rhs)
+SizeT<ValueT>& operator+=(SizeT<ValueT>& lhs, const SizeT<ValueT>& rhs)
 {
   auto newSize = lhs + rhs;
   std::swap(lhs, newSize);
@@ -226,7 +226,7 @@ Size<ValueT>& operator+=(Size<ValueT>& lhs, const Size<ValueT>& rhs)
 
 
 template <typename ValueT>
-Size<ValueT>& operator-=(Size<ValueT>& lhs, const Size<ValueT>& rhs)
+SizeT<ValueT>& operator-=(SizeT<ValueT>& lhs, const SizeT<ValueT>& rhs)
 {
   auto newSize = lhs - rhs;
   std::swap(lhs, newSize);
@@ -259,6 +259,6 @@ bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs)
 
 using Vec2 = Vec2T<int>;
 using Vec2f = Vec2T<float>;
-using Extents = Size<int>;
+using Size = SizeT<int>;
 
 } // namespace rigel::base

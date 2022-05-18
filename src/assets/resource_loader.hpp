@@ -52,7 +52,7 @@ struct ActorData
   struct Frame
   {
     base::Vec2 mDrawOffset;
-    base::Extents mLogicalSize;
+    base::Size mLogicalSize;
     data::Image mFrameImage;
   };
 

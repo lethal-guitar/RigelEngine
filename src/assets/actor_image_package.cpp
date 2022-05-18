@@ -62,7 +62,7 @@ ActorImagePackage::ActorImagePackage(
 
       const auto height = entryReader.readU16();
       const auto width = entryReader.readU16();
-      base::Extents size{width, height};
+      base::Size size{width, height};
 
       const auto imageDataOffset = entryReader.readU32();
       entryReader.skipBytes(4); // padding

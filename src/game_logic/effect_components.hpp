@@ -169,7 +169,7 @@ struct DestructionEffects
 struct SpriteCascadeSpawner
 {
   base::Vec2 mBasePosition;
-  base::Extents mCoveredArea;
+  base::Size mCoveredArea;
   data::ActorID mActorId;
   bool mSpawnedLastFrame = true;
 };

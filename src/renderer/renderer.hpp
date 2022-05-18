@@ -360,8 +360,8 @@ public:
 
   data::Image grabCurrentFramebuffer();
 
-  base::Size<int> currentRenderTargetSize() const;
-  base::Size<int> windowSize() const;
+  base::SizeT<int> currentRenderTargetSize() const;
+  base::SizeT<int> windowSize() const;
 
   base::Vec2 globalTranslation() const;
   base::Vec2f globalScale() const;

@@ -97,17 +97,17 @@ public:
 
   void renderDynamicBackgroundSections(
     const base::Vec2& sectionStart,
-    const base::Extents& sectionSize,
+    const base::Size& sectionSize,
     float interpolationFactor);
   void renderDynamicForegroundSections(
     const base::Vec2& sectionStart,
-    const base::Extents& sectionSize,
+    const base::Size& sectionSize,
     float interpolationFactor);
 
 private:
   void renderDynamicSections(
     const base::Vec2& sectionStart,
-    const base::Extents& sectionSize,
+    const base::Size& sectionSize,
     float interpolationFactor,
     engine::MapRenderer::DrawMode drawMode);
   void updateExtraSectionsIntersecting(const base::Rect<int>& section);

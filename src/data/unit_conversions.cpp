@@ -43,7 +43,7 @@ Vec2 pixelsToTiles(const Vec2& pixelVector)
 }
 
 
-Extents tilesToPixels(const Extents& tileExtents)
+Size tilesToPixels(const Size& tileExtents)
 {
   return {
     tilesToPixels(tileExtents.width),
@@ -52,7 +52,7 @@ Extents tilesToPixels(const Extents& tileExtents)
 }
 
 
-Extents pixelsToTiles(const Extents& pixelExtents)
+Size pixelsToTiles(const Size& pixelExtents)
 {
   return {
     pixelsToTiles(pixelExtents.width),

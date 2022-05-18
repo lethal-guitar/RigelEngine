@@ -497,7 +497,7 @@ void DynamicGeometrySystem::receive(const rigel::events::TileBurnedAway& event)
 
 void DynamicGeometrySystem::renderDynamicBackgroundSections(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize,
+  const base::Size& sectionSize,
   const float interpolationFactor)
 {
   renderDynamicSections(
@@ -510,7 +510,7 @@ void DynamicGeometrySystem::renderDynamicBackgroundSections(
 
 void DynamicGeometrySystem::renderDynamicForegroundSections(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize,
+  const base::Size& sectionSize,
   const float interpolationFactor)
 {
   renderDynamicSections(
@@ -523,7 +523,7 @@ void DynamicGeometrySystem::renderDynamicForegroundSections(
 
 void DynamicGeometrySystem::renderDynamicSections(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize,
+  const base::Size& sectionSize,
   const float interpolationFactor,
   const engine::MapRenderer::DrawMode drawMode)
 {

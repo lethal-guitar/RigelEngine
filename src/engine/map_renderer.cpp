@@ -185,7 +185,7 @@ base::Vec2f backdropOffset(
 }
 
 
-constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Extents{
+constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Size{
   tilesToPixels(data::GameTraits::CZone::tileSetImageWidth),
   tilesToPixels(data::GameTraits::CZone::tileSetImageHeight)};
 
@@ -216,9 +216,7 @@ std::vector<PackedTileData>
 }
 
 
-TileRenderData::TileRenderData(
-  base::Extents size,
-  renderer::Renderer* pRenderer)
+TileRenderData::TileRenderData(base::Size size, renderer::Renderer* pRenderer)
   : mSize(size)
   , mpRenderer(pRenderer)
 {
@@ -288,7 +286,7 @@ void MapRenderer::switchBackdrops()
 
 void MapRenderer::renderBackground(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize) const
+  const base::Size& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
 }
@@ -296,7 +294,7 @@ void MapRenderer::renderBackground(
 
 void MapRenderer::renderForeground(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize) const
+  const base::Size& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
 }
@@ -304,7 +302,7 @@ void MapRenderer::renderForeground(
 
 renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   const base::Vec2f& cameraPosition,
-  const base::Extents& viewportSize) const
+  const base::Size& viewportSize) const
 {
   // This function determines the texture coordinates we need to use for
   // drawing the backdrop into the current view port (which could be
@@ -398,7 +396,7 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 void MapRenderer::renderBackdrop(
   const base::Vec2f& cameraPosition,
-  const base::Extents& viewportSize) const
+  const base::Size& viewportSize) const
 {
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
@@ -411,7 +409,7 @@ void MapRenderer::renderBackdrop(
 
 void MapRenderer::renderMapTiles(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize,
+  const base::Size& sectionSize,
   const DrawMode drawMode) const
 {
   const auto blockX = sectionStart.x / BLOCK_SIZE;

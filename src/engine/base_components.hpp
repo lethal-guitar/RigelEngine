@@ -90,7 +90,7 @@ enum class Orientation
 bool isOnScreen(
   const components::BoundingBox& bounds,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize);
+  const base::Size& viewportSize);
 
 
 namespace orientation

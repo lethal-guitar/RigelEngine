@@ -28,7 +28,7 @@ public:
   TiledTexture(renderer::Texture&& tileSet, renderer::Renderer* pRenderer);
   TiledTexture(
     renderer::Texture&& tileSet,
-    const base::Extents logicalSize,
+    const base::Size logicalSize,
     renderer::Renderer* pRenderer);
 
   void renderTileStretched(int index, const base::Rect<int>& destRect) const;
