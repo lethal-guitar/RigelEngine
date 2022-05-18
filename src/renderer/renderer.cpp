@@ -122,7 +122,7 @@ void* toAttribOffset(std::uintptr_t offset)
 
 void setScissorBox(
   const base::Rect<int>& clipRect,
-  const base::SizeT<int>& frameBufferSize)
+  const base::Size& frameBufferSize)
 {
   const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
   glScissor(
@@ -269,8 +269,8 @@ struct Renderer::Impl
   Shader mTexturedQuadShader;
   Shader mSimpleTexturedQuadShader;
   Shader mSolidColorShader;
-  base::SizeT<int> mWindowSize;
-  base::SizeT<int> mLastKnownWindowSize;
+  base::Size mWindowSize;
+  base::Size mLastKnownWindowSize;
   SDL_Window* mpWindow;
   RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
 
@@ -1036,7 +1036,7 @@ struct Renderer::Impl
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
   }
 
-  base::SizeT<int> currentRenderTargetSize() const
+  base::Size currentRenderTargetSize() const
   {
     const auto& state = mStateStack.back();
     if (state.mRenderTargetTexture != 0)
@@ -1198,13 +1198,13 @@ std::optional<base::Rect<int>> Renderer::clipRect() const
 }
 
 
-base::SizeT<int> Renderer::currentRenderTargetSize() const
+base::Size Renderer::currentRenderTargetSize() const
 {
   return mpImpl->currentRenderTargetSize();
 }
 
 
-base::SizeT<int> Renderer::windowSize() const
+base::Size Renderer::windowSize() const
 {
   return mpImpl->mWindowSize;
 }

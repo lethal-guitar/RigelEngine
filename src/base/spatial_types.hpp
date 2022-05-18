@@ -260,5 +260,6 @@ bool operator!=(const Rect<ValueT>& lhs, const Rect<ValueT>& rhs)
 using Vec2 = Vec2T<int>;
 using Vec2f = Vec2T<float>;
 using Size = SizeT<int>;
+using SizeF = SizeT<float>;
 
 } // namespace rigel::base

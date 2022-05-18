@@ -27,7 +27,7 @@ namespace rigel::renderer
 namespace
 {
 
-auto asVec(const base::SizeT<int>& size)
+auto asVec(const base::Size& size)
 {
   return base::Vec2{size.width, size.height};
 }
