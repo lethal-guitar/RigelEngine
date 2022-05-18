@@ -81,7 +81,7 @@ public:
 
   void update(
     entityx::EntityManager& es,
-    const base::Extents& viewportSize,
+    const base::Size& viewportSize,
     const base::Vec2& cameraPosition,
     float interpolationFactor);
 

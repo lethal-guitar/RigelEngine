@@ -43,22 +43,20 @@ struct GameTraits
   static constexpr int viewportWidthTiles = viewportWidthPx / tileSize;
   static constexpr int viewportHeightTiles = viewportHeightPx / tileSize;
 
-  static constexpr base::Extents viewportSize{
-    viewportWidthPx,
-    viewportHeightPx};
+  static constexpr base::Size viewportSize{viewportWidthPx, viewportHeightPx};
 
   // The actual in-game viewport starts with an offset and is further reduced
   // to make room for the HUD. The right hand side features another 8px of
   // black border.
   static constexpr base::Vec2 inGameViewportOffset{8, 8};
-  static constexpr base::Extents inGameViewportSize{
+  static constexpr base::Size inGameViewportSize{
     GameTraits::viewportWidthPx - 16,
     GameTraits::viewportHeightPx - 8};
 
   static constexpr int mapViewportWidthTiles = viewportWidthTiles - 8;
   static constexpr int mapViewportHeightTiles = viewportHeightTiles - 5;
 
-  static constexpr base::Extents mapViewportSize{
+  static constexpr base::Size mapViewportSize{
     GameTraits::mapViewportWidthTiles,
     GameTraits::mapViewportHeightTiles};
 
@@ -114,7 +112,7 @@ struct GameTraits
     return (tileSizeSquared / pixelsPerEgaByte) * fontEgaPlanes;
   }
 
-  static constexpr base::Extents menuFontCharacterBitmapSizeTiles{1, 2};
+  static constexpr base::Size menuFontCharacterBitmapSizeTiles{1, 2};
 
   static constexpr std::size_t mapDataWords = 32750u;
 

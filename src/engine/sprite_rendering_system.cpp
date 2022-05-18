@@ -70,7 +70,7 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated)
 void collectVisibleSprites(
   ex::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize,
+  const base::Size& viewportSize,
   std::vector<SortableDrawSpec>& output,
   const float interpolationFactor)
 {
@@ -316,7 +316,7 @@ SpriteRenderingSystem::SpriteRenderingSystem(
 
 void SpriteRenderingSystem::update(
   ex::EntityManager& es,
-  const base::Extents& viewportSize,
+  const base::Size& viewportSize,
   const base::Vec2& cameraPosition,
   const float interpolationFactor)
 {

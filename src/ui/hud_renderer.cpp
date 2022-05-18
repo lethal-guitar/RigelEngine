@@ -499,7 +499,7 @@ void HudRenderer::drawFloatingInventory(
   const base::Vec2& position) const
 {
   const auto backgroundSize =
-    data::tilesToPixels(base::Extents{int(inventory.size()) * 2, 2});
+    data::tilesToPixels(base::Size{int(inventory.size()) * 2, 2});
   mpRenderer->drawFilledRectangle(
     {position - base::Vec2{backgroundSize.width, 0}, backgroundSize},
     OVERLAY_BACKGROUND_COLOR);

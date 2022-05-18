@@ -32,7 +32,7 @@ namespace rigel::assets
 struct ActorFrameHeader
 {
   base::Vec2 mDrawOffset;
-  base::Extents mSizeInTiles;
+  base::Size mSizeInTiles;
   std::uint32_t mFileOffset;
 };
 

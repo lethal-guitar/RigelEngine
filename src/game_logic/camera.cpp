@@ -109,9 +109,8 @@ base::Rect<int> deadZoneRect(const Player& player)
  * When the view port is not wide, the result is identical with the player's
  * world space collision box.
  */
-base::Rect<int> normalizedPlayerBounds(
-  const Player& player,
-  const base::Extents& viewportSize)
+base::Rect<int>
+  normalizedPlayerBounds(const Player& player, const base::Size& viewportSize)
 {
   const auto extraTiles =
     viewportSize.width - data::GameTraits::mapViewportSize.width;
@@ -126,7 +125,7 @@ base::Rect<int> normalizedPlayerBounds(
 base::Vec2 offsetToDeadZone(
   const Player& player,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize)
+  const base::Size& viewportSize)
 {
   const auto playerBounds = normalizedPlayerBounds(player, viewportSize);
   auto worldSpaceDeadZone = deadZoneRect(player);
@@ -171,7 +170,7 @@ void Camera::synchronizeTo(const Camera& other)
 }
 
 
-void Camera::update(const PlayerInput& input, const base::Extents& viewportSize)
+void Camera::update(const PlayerInput& input, const base::Size& viewportSize)
 {
   mViewportSize = viewportSize;
   updateManualScrolling(input);
@@ -246,7 +245,7 @@ void Camera::setPosition(const base::Vec2 position)
 }
 
 
-void Camera::recenter(const base::Extents& viewportSize)
+void Camera::recenter(const base::Size& viewportSize)
 {
   mViewportSize = viewportSize;
   const auto adjustment = offsetToDeadZone(*mpPlayer, mPosition, mViewportSize);

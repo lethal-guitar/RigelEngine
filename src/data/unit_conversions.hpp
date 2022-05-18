@@ -39,7 +39,7 @@ constexpr T tilesToPixels(const T tiles)
 base::Vec2 tilesToPixels(const base::Vec2& tileVector);
 base::Vec2 pixelsToTiles(const base::Vec2& pixelVector);
 
-base::Extents tilesToPixels(const base::Extents& tileExtents);
-base::Extents pixelsToTiles(const base::Extents& pixelExtents);
+base::Size tilesToPixels(const base::Size& tileExtents);
+base::Size pixelsToTiles(const base::Size& pixelExtents);
 
 } // namespace rigel::data
