@@ -539,8 +539,7 @@ void DynamicGeometrySystem::renderDynamicSections(
       continue;
     }
 
-    const auto pixelPos =
-      data::tileVectorToPixelVector(section.topLeft - sectionStart);
+    const auto pixelPos = data::tilesToPixels(section.topLeft - sectionStart);
 
     mpMapRenderer->renderDynamicSection(*mpMap, section, pixelPos, drawMode);
   }
@@ -553,7 +552,7 @@ void DynamicGeometrySystem::renderDynamicSections(
       const WorldPosition&) {
       const auto interpolatedPixelPos =
         engine::interpolatedPixelPosition(e, interpolationFactor) -
-        data::tileVectorToPixelVector(
+        data::tilesToPixels(
           base::Vec2{0, dynamic.mLinkedGeometrySection.size.height - 1});
 
       // Render the geometry with smoothing, to make falling pieces of the map
@@ -571,8 +570,7 @@ void DynamicGeometrySystem::renderDynamicSections(
           data::tilesToPixels(heightDecrease - interpolatedHeightDecrease));
 
         const auto pixelPos = interpolatedPixelPos -
-          data::tileVectorToPixelVector(sectionStart) -
-          base::Vec2{0, offsetForSinking};
+          data::tilesToPixels(sectionStart) - base::Vec2{0, offsetForSinking};
         mpMapRenderer->renderDynamicSection(
           *mpMap, dynamic.mLinkedGeometrySection, pixelPos, drawMode);
 
@@ -590,8 +588,8 @@ void DynamicGeometrySystem::renderDynamicSections(
 
           const auto lastRowOffset =
             base::round(data::tilesToPixels(interpolatedHeightDecrease));
-          const auto lastRowPixelPos = data::tileVectorToPixelVector(position) +
-            base::Vec2{0, lastRowOffset};
+          const auto lastRowPixelPos =
+            data::tilesToPixels(position) + base::Vec2{0, lastRowOffset};
           const auto allowedHeight = offsetForSinking;
 
           const auto saved = renderer::saveState(mpRenderer);
@@ -624,8 +622,7 @@ void DynamicGeometrySystem::renderDynamicSections(
           data::tilesToPixels(extraSectionRect->top()))
         {
           mpMapRenderer->renderCachedSection(
-            data::tileVectorToPixelVector(
-              extraSectionRect->topLeft - sectionStart),
+            data::tilesToPixels(extraSectionRect->topLeft - sectionStart),
             dynamic.mExtraSection->mMapData,
             extraSectionRect->size.width,
             drawMode);
@@ -633,7 +630,7 @@ void DynamicGeometrySystem::renderDynamicSections(
         else
         {
           const auto startPos =
-            interpolatedBottomPos - data::tileVectorToPixelVector(sectionStart);
+            interpolatedBottomPos - data::tilesToPixels(sectionStart);
           const auto visibleHeight =
             data::tilesToPixels(extraSectionRect->bottom() + 1) -
             interpolatedBottomPos.y;
@@ -645,8 +642,7 @@ void DynamicGeometrySystem::renderDynamicSections(
              {data::tilesToPixels(dynamic.mLinkedGeometrySection.size.width),
               visibleHeight}});
           mpMapRenderer->renderCachedSection(
-            data::tileVectorToPixelVector(
-              extraSectionRect->topLeft - sectionStart),
+            data::tilesToPixels(extraSectionRect->topLeft - sectionStart),
             dynamic.mExtraSection->mMapData,
             extraSectionRect->size.width,
             drawMode);

@@ -557,9 +557,8 @@ void DukeScriptRunner::drawSprite(
   const auto pos = base::Vec2{x - 1, y};
   const auto topLeft = pos - base::Vec2(0, spriteHeightTiles - 1);
 
-  const auto topLeftPx = data::tileVectorToPixelVector(topLeft);
-  const auto drawOffsetPx =
-    data::tileVectorToPixelVector(frameData.mDrawOffset);
+  const auto topLeftPx = data::tilesToPixels(topLeft);
+  const auto drawOffsetPx = data::tilesToPixels(frameData.mDrawOffset);
 
   renderer::Texture spriteTexture(mpRenderer, image);
   spriteTexture.render(topLeftPx + drawOffsetPx);

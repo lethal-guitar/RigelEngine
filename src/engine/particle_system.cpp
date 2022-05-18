@@ -145,7 +145,7 @@ struct ParticleGroup
     const float interpolation)
   {
     const auto screenSpaceOrigin =
-      data::tileVectorToPixelVector(mOrigin - cameraPosition);
+      data::tilesToPixels(mOrigin - cameraPosition);
     for (auto& particle : *mpParticles)
     {
       const auto currentParticlePosition =
