@@ -77,7 +77,7 @@ const ShaderSpec SHARP_BILINEAR_SHADER{
   FRAGMENT_SOURCE};
 
 
-base::SizeT<float>
+base::SizeF
   determineUsableSize(const float windowWidth, const float windowHeight)
 {
   auto quantize = [](const float value) {

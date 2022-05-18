@@ -175,7 +175,7 @@ private:
   engine::WaterEffectRenderer mWaterEffect;
   renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
-  base::SizeT<int> mPreviousWindowSize;
+  base::Size mPreviousWindowSize;
   data::WidescreenHudStyle mPreviousHudStyle;
   bool mWidescreenModeWasOn;
   bool mPerElementUpscalingWasEnabled;
