@@ -452,6 +452,7 @@ void DynamicGeometrySystem::receive(const events::ShootableKilled& event)
     entity.component<DynamicGeometrySection>()->mLinkedGeometrySection;
   explodeMapSection(
     mapSection, *mpMap, *mpEntityManager, *mpEvents, *mpRandomGenerator);
+  updateExtraSectionsIntersecting(mapSection);
   mpServiceProvider->playSound(data::SoundId::BigExplosion);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
@@ -479,6 +480,7 @@ void DynamicGeometrySystem::receive(
     event.mImpactPosition - base::Vec2{0, 2}, {3, 3}};
   explodeMapSection(
     mapSection, *mpMap, *mpEntityManager, *mpEvents, *mpRandomGenerator);
+  updateExtraSectionsIntersecting(mapSection);
   mpEvents->emit(rigel::events::ScreenFlash{});
 }
 
@@ -488,6 +490,8 @@ void DynamicGeometrySystem::receive(const rigel::events::TileBurnedAway& event)
   const auto [x, y] = event.mPosition;
   mpMap->setTileAt(0, x, y, 0);
   mpMap->setTileAt(1, x, y, 0);
+
+  updateExtraSectionsIntersecting({{x, y}, {1, 1}});
 }
 
 
@@ -652,6 +656,53 @@ void DynamicGeometrySystem::renderDynamicSections(
 }
 
 
+void DynamicGeometrySystem::updateExtraSectionsIntersecting(
+  const base::Rect<int>& section)
+{
+  using engine::components::WorldPosition;
+
+  mpEntityManager->each<DynamicGeometrySection, WorldPosition>(
+    [&](
+      entityx::Entity e,
+      DynamicGeometrySection& dynamic,
+      const WorldPosition&) {
+      const auto extraSectionRect = dynamic.extraSectionRect();
+      if (!extraSectionRect || !section.intersects(*extraSectionRect))
+      {
+        return;
+      }
+
+      // Offset section coordinates by the extra section's position.  The
+      // resulting values can be negative, in case the section starts to the
+      // left/on top of the extra section.
+      const auto localSectionX =
+        section.left() - dynamic.mLinkedGeometrySection.left();
+      const auto localSectionY = section.top() - dynamic.mExtraSection->mTop;
+
+      // Compute start and end positions within extra section
+      const auto startX = std::max(0, localSectionX);
+      const auto startY = std::max(0, localSectionY);
+      const auto localSectionWidth =
+        section.size.width - std::max(0, -localSectionX);
+      const auto localSectionHeight =
+        section.size.height - std::max(0, -localSectionY);
+      const auto endX = startX + localSectionWidth;
+      const auto endY = startY + localSectionHeight;
+
+      // Now clear the affected part of the extra section
+      const auto width = dynamic.mLinkedGeometrySection.size.width;
+
+      for (int y = startY; y < endY; ++y)
+      {
+        for (int x = startX; x < endX; ++x)
+        {
+          dynamic.mExtraSection->mMapData[x + y * width] = 0;
+        }
+      }
+    });
+}
+
+
 void behaviors::DynamicGeometryController::update(
   GlobalDependencies& d,
   GlobalState& s,
@@ -669,6 +720,37 @@ void behaviors::DynamicGeometryController::update(
   auto makeAlwaysActive = [&]() {
     engine::reassign<ActivationSettings>(
       entity, ActivationSettings::Policy::Always);
+  };
+
+  auto extraSectionStillNeeded = [&]() {
+    if (dynamic.mExtraSection)
+    {
+
+      const auto bottomOfExtraSection =
+        dynamic.mExtraSection->mTop + dynamic.mExtraSection->mHeight - 1;
+
+      if (mapSection.bottom() < bottomOfExtraSection)
+      {
+        // The dynamic section hasn't reached the bottom of the attached extra
+        // section, so we need to keep rendering the extra section's map cache.
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  auto destroyOrDisableEntity = [&]() {
+    // If this entity has an extra section that still needs to be rendered, we
+    // only strip away the controller, but keep the rest of the entity around.
+    if (extraSectionStillNeeded())
+    {
+      entity.remove<components::BehaviorController>();
+    }
+    else
+    {
+      entity.destroy();
+    }
   };
 
   auto updateWaiting = [&](const int numFrames) {
@@ -718,7 +800,7 @@ void behaviors::DynamicGeometryController::update(
 
     if (mapSection.size.height == 0)
     {
-      entity.destroy();
+      destroyOrDisableEntity();
     }
     else if (mapSection.size.height == 1)
     {
@@ -736,7 +818,11 @@ void behaviors::DynamicGeometryController::update(
   };
 
   auto land = [&]() {
-    dynamic.mExtraSection = std::nullopt;
+    if (!extraSectionStillNeeded())
+    {
+      dynamic.mExtraSection = std::nullopt;
+    }
+
     d.mpServiceProvider->playSound(data::SoundId::BlueKeyDoorOpened);
     d.mpEvents->emit(rigel::events::ScreenShake{7});
   };
@@ -744,7 +830,7 @@ void behaviors::DynamicGeometryController::update(
   auto explode = [&]() {
     explodeMapSection(mapSection, d, s);
     d.mpServiceProvider->playSound(data::SoundId::BigExplosion);
-    entity.destroy();
+    destroyOrDisableEntity();
   };
 
 

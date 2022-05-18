@@ -110,6 +110,7 @@ private:
     const base::Extents& sectionSize,
     float interpolationFactor,
     engine::MapRenderer::DrawMode drawMode);
+  void updateExtraSectionsIntersecting(const base::Rect<int>& section);
 
   renderer::Renderer* mpRenderer;
   IGameServiceProvider* mpServiceProvider;
