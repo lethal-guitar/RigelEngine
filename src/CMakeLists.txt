@@ -462,7 +462,16 @@ elseif(UNIX)
     install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine.metainfo.xml
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo
     )
-    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine.png
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine_48.png
+        RENAME rigelengine.png
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps
+    )
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine_64.png
+        RENAME rigelengine.png
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/64x64/apps
+    )
+    install(FILES ${CMAKE_SOURCE_DIR}/dist/linux/rigelengine_128.png
+        RENAME rigelengine.png
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps
     )
 endif()
