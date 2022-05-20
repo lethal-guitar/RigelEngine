@@ -12,8 +12,8 @@
             released by Apogee Software in 1993 for MS-DOS.  It works as a drop-in
             replacement for the original executable: It reads the game's data files and
             plays just like the original, but runs natively on modern operating systems.
-            On top of that, it offers various modern enhancements like better game
-            controller support, a wide-screen mode, quick saving etc.
+            On top of that, it offers various modern enhancements like higher frame rate,
+            better game controller support, a wide-screen mode, quick saving etc.
         </p>
         <p>
             In order to run RigelEngine, the game data from the original game is required.
