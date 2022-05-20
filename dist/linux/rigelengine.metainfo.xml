@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2022 Nikolai Wuttke -->
+<component type="desktop-application">
+    <id>io.github.lethal_guitar.RigelEngine</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-2.0-or-later</project_license>
+    <name>RigelEngine</name>
+    <summary>A modern re-implementation of the classic DOS game Duke Nukem II</summary>
+    <description>
+        <p>
+            RigelEngine is a re-implementation of the game Duke Nukem II, originally
+            released by Apogee Software in 1993 for MS-DOS.  It works as a drop-in
+            replacement for the original executable: It reads the game's data files and
+            plays just like the original, but runs natively on modern operating systems.
+            On top of that, it offers various modern enhancements like higher frame rate,
+            better game controller support, a wide-screen mode, quick saving etc.
+        </p>
+        <p>
+            In order to run RigelEngine, the game data from the original game is required.
+            Both the shareware version and the registered version work.
+        </p>
+        <p>
+            You can grab the shareware version from archive.org:
+            https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip
+        </p>
+    </description>
+
+    <categories>
+        <category>Game</category>
+    </categories>
+
+    <launchable type="desktop-id">rigelengine.desktop</launchable>
+
+    <url type="homepage">https://lethal-guitar.github.io/RigelEngine</url>
+    <url type="bugtracker">https://github.com/lethal-guitar/RigelEngine/issues</url>
+
+    <screenshots>
+        <screenshot type="default">
+            <caption>Playing Duke Nukem II's first level using RigelEngine</caption>
+            <image>https://lethal-guitar.github.io/RigelEngine/assets/screenshot.png</image>
+        </screenshot>
+    </screenshots>
+
+    <provides>
+        <binary>RigelEngine</binary>
+    </provides>
+
+    <releases>
+        <release version="0.8.4" date="2022-01-04"/>
+    </releases>
+
+    <content_rating type="oars-1.0"/>
+</component>
