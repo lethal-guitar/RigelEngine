@@ -88,7 +88,7 @@ const auto RADAR_DOT_COLOR = data::GameTraits::INGAME_PALETTE[15];
 
 constexpr auto OVERLAY_BACKGROUND_COLOR = []() {
   auto color = data::GameTraits::INGAME_PALETTE[1];
-  color.a = 200;
+  color.a = 240;
   return color;
 }();
 
@@ -498,8 +498,9 @@ void HudRenderer::drawFloatingInventory(
   const std::vector<data::InventoryItemType>& inventory,
   const base::Vec2& position) const
 {
+  const auto numItems = int(inventory.size());
   const auto backgroundSize =
-    data::tilesToPixels(base::Size{int(inventory.size()) * 2, 2});
+    data::tilesToPixels(base::Size{std::max(numItems, 2) * 2, 2});
   mpRenderer->drawFilledRectangle(
     {position - base::Vec2{backgroundSize.width, 0}, backgroundSize},
     OVERLAY_BACKGROUND_COLOR);
