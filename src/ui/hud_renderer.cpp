@@ -197,6 +197,27 @@ void drawWideHudFrameExtensions(
 } // namespace
 
 
+bool canUseHudStyle(
+  const WidescreenHudStyle style,
+  const renderer::Renderer* pRenderer)
+{
+  const auto availableWidth =
+    renderer::determineLowResBufferWidth(pRenderer, true);
+
+  switch (style)
+  {
+    case data::WidescreenHudStyle::Modern:
+      return availableWidth >= assets::WIDE_HUD_INNER_WIDTH;
+
+    case data::WidescreenHudStyle::Ultrawide:
+      return availableWidth >= assets::ULTRAWIDE_HUD_INNER_WIDTH;
+
+    default:
+      return true;
+  }
+}
+
+
 HudRenderer::HudRenderer(
   const int levelNumber,
   const data::GameOptions* pOptions,
@@ -291,11 +312,11 @@ void HudRenderer::renderWidescreenHud(
   };
 
 
-  const auto canUseUltrawideHud =
-    renderer::determineLowResBufferWidth(mpRenderer, true) >=
-    assets::ULTRAWIDE_HUD_INNER_WIDTH;
+  const auto styleToUse = canUseHudStyle(style, mpRenderer)
+    ? style
+    : data::WidescreenHudStyle::Classic;
 
-  switch (style)
+  switch (styleToUse)
   {
     case data::WidescreenHudStyle::Classic:
       drawClassicWidescreenHud();
@@ -306,14 +327,7 @@ void HudRenderer::renderWidescreenHud(
       break;
 
     case data::WidescreenHudStyle::Ultrawide:
-      if (canUseUltrawideHud)
-      {
-        drawUltrawideHud(viewportWidth, playerModel, radarPositions);
-      }
-      else
-      {
-        drawClassicWidescreenHud();
-      }
+      drawUltrawideHud(viewportWidth, playerModel, radarPositions);
       break;
   }
 }
