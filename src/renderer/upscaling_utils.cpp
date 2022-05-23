@@ -77,7 +77,7 @@ const ShaderSpec SHARP_BILINEAR_SHADER{
   FRAGMENT_SOURCE};
 
 
-base::Size<float>
+base::SizeF
   determineUsableSize(const float windowWidth, const float windowHeight)
 {
   auto quantize = [](const float value) {
@@ -135,7 +135,7 @@ ViewportInfo determineViewport(const Renderer* pRenderer)
 
   return {
     base::Vec2{int(offsetX), int(offsetY)},
-    base::Size<int>{int(usableWidth), int(usableHeight)},
+    base::SizeT<int>{int(usableWidth), int(usableHeight)},
     base::Vec2f{widthScale, heightScale}};
 }
 

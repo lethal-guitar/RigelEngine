@@ -69,7 +69,7 @@ bool determineActiveState(entityx::Entity entity, const bool inActiveRegion)
 bool isOnScreen(
   const BoundingBox& bounds,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize)
+  const base::Size& viewportSize)
 {
   const BoundingBox activeRegionBox{cameraPosition, viewportSize};
   return bounds.intersects(activeRegionBox);
@@ -79,7 +79,7 @@ bool isOnScreen(
 void markActiveEntities(
   entityx::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize)
+  const base::Size& viewportSize)
 {
   const BoundingBox activeRegionBox{cameraPosition, viewportSize};
 

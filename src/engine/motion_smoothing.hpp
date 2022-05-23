@@ -79,9 +79,7 @@ inline base::Vec2 interpolatedPixelPosition(
   const float interpolationFactor)
 {
   return lerpRounded(
-    data::tileVectorToPixelVector(a),
-    data::tileVectorToPixelVector(b),
-    interpolationFactor);
+    data::tilesToPixels(a), data::tilesToPixels(b), interpolationFactor);
 }
 
 
@@ -101,7 +99,7 @@ inline base::Vec2 interpolatedPixelPosition(
       previousPosition, currentPosition, interpolationFactor);
   }
 
-  return data::tileVectorToPixelVector(currentPosition);
+  return data::tilesToPixels(currentPosition);
 }
 
 } // namespace rigel::engine

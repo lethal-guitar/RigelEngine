@@ -38,7 +38,7 @@ class Renderer;
 struct ViewportInfo
 {
   base::Vec2 mOffset;
-  base::Size<int> mSize;
+  base::Size mSize;
   base::Vec2f mScale;
 };
 

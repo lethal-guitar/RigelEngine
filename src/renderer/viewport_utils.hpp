@@ -29,7 +29,7 @@ namespace rigel::renderer
 {
 
 base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale);
-base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale);
+base::Size scaleSize(const base::Size& size, const base::Vec2f& scale);
 
 void setLocalTranslation(
   renderer::Renderer* pRenderer,

@@ -25,7 +25,7 @@ namespace rigel::data
 using namespace base;
 
 
-Vec2 tileVectorToPixelVector(const Vec2& tileVec)
+Vec2 tilesToPixels(const Vec2& tileVec)
 {
   return {
     tilesToPixels(tileVec.x),
@@ -34,7 +34,7 @@ Vec2 tileVectorToPixelVector(const Vec2& tileVec)
 }
 
 
-Vec2 pixelVectorToTileVector(const Vec2& pixelVector)
+Vec2 pixelsToTiles(const Vec2& pixelVector)
 {
   return {
     pixelsToTiles(pixelVector.x),
@@ -43,7 +43,7 @@ Vec2 pixelVectorToTileVector(const Vec2& pixelVector)
 }
 
 
-Extents tileExtentsToPixelExtents(const Extents& tileExtents)
+Size tilesToPixels(const Size& tileExtents)
 {
   return {
     tilesToPixels(tileExtents.width),
@@ -52,7 +52,7 @@ Extents tileExtentsToPixelExtents(const Extents& tileExtents)
 }
 
 
-Extents pixelExtentsToTileExtents(const Extents& pixelExtents)
+Size pixelsToTiles(const Size& pixelExtents)
 {
   return {
     pixelsToTiles(pixelExtents.width),

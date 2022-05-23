@@ -49,7 +49,7 @@ struct SpriteFrame
   SpriteFrame(
     const int imageId,
     const base::Vec2 drawOffset,
-    const base::Extents dimensions)
+    const base::Size dimensions)
     : mImageId(imageId)
     , mDrawOffset(drawOffset)
     , mDimensions(dimensions)
@@ -58,7 +58,7 @@ struct SpriteFrame
 
   int mImageId;
   base::Vec2 mDrawOffset;
-  base::Extents mDimensions;
+  base::Size mDimensions;
 };
 
 

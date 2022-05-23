@@ -90,7 +90,7 @@ public:
 
   int height() const { return mHeight; }
 
-  base::Extents extents() const { return {mWidth, mHeight}; }
+  base::Size extents() const { return {mWidth, mHeight}; }
 
   TextureId data() const { return mId; }
 

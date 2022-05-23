@@ -33,7 +33,7 @@ public:
   void update(
     entityx::EntityManager& es,
     const base::Vec2& cameraPosition,
-    const base::Extents& viewportSize);
+    const base::Size& viewportSize);
 };
 
 } // namespace rigel::engine

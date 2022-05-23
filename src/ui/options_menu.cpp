@@ -31,6 +31,7 @@
 #include "renderer/upscaling_utils.hpp"
 #include "sdl_utils/key_code.hpp"
 #include "sdl_utils/platform.hpp"
+#include "ui/hud_renderer.hpp"
 #include "ui/menu_navigation.hpp"
 #include "ui/utils.hpp"
 
@@ -717,6 +718,14 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     {
       ImGui::NewLine();
 
+      if (!canUseHudStyle(mpOptions->mWidescreenHudStyle, mpRenderer))
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped(
+          "NOTE: Current screen resolution/window size is too small for chosen HUD style, falling back to Classic.");
+        ImGui::PopStyleColor();
+      }
+
 #if 0
       // NOTE: This is disabled for now, it's not quite ready yet to be made
       // user-facing.
@@ -739,6 +748,7 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
 
       ImGui::SameLine();
+
       withEnabledState(mpOptions->mWidescreenModeOn, [this]() {
         auto hudStyleIndex = static_cast<int>(mpOptions->mWidescreenHudStyle);
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 18);

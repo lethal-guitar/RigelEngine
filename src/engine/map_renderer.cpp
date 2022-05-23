@@ -185,7 +185,7 @@ base::Vec2f backdropOffset(
 }
 
 
-constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Extents{
+constexpr auto TILE_SET_IMAGE_LOGICAL_SIZE = base::Size{
   tilesToPixels(data::GameTraits::CZone::tileSetImageWidth),
   tilesToPixels(data::GameTraits::CZone::tileSetImageHeight)};
 
@@ -216,9 +216,7 @@ std::vector<PackedTileData>
 }
 
 
-TileRenderData::TileRenderData(
-  base::Extents size,
-  renderer::Renderer* pRenderer)
+TileRenderData::TileRenderData(base::Size size, renderer::Renderer* pRenderer)
   : mSize(size)
   , mpRenderer(pRenderer)
 {
@@ -288,7 +286,7 @@ void MapRenderer::switchBackdrops()
 
 void MapRenderer::renderBackground(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize) const
+  const base::Size& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
 }
@@ -296,7 +294,7 @@ void MapRenderer::renderBackground(
 
 void MapRenderer::renderForeground(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize) const
+  const base::Size& sectionSize) const
 {
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
 }
@@ -304,7 +302,7 @@ void MapRenderer::renderForeground(
 
 renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
   const base::Vec2f& cameraPosition,
-  const base::Extents& viewportSize) const
+  const base::Size& viewportSize) const
 {
   // This function determines the texture coordinates we need to use for
   // drawing the backdrop into the current view port (which could be
@@ -398,20 +396,20 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 void MapRenderer::renderBackdrop(
   const base::Vec2f& cameraPosition,
-  const base::Extents& viewportSize) const
+  const base::Size& viewportSize) const
 {
   const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
     calculateBackdropTexCoords(cameraPosition, viewportSize),
-    {{}, data::tileExtentsToPixelExtents(viewportSize)});
+    {{}, data::tilesToPixels(viewportSize)});
 }
 
 
 void MapRenderer::renderMapTiles(
   const base::Vec2& sectionStart,
-  const base::Extents& sectionSize,
+  const base::Size& sectionSize,
   const DrawMode drawMode) const
 {
   const auto blockX = sectionStart.x / BLOCK_SIZE;
@@ -450,7 +448,7 @@ void MapRenderer::renderMapTiles(
     }
   });
 
-  const auto translation = data::tileVectorToPixelVector(sectionStart) * -1;
+  const auto translation = data::tilesToPixels(sectionStart) * -1;
 
   const auto saved = renderer::saveState(mpRenderer);
   renderer::setLocalTranslation(mpRenderer, translation);
@@ -559,7 +557,7 @@ void MapRenderer::renderDynamicSection(
         }
 
         const auto offsetInSection =
-          data::tileVectorToPixelVector(base::Vec2{x, y} - coordinates.topLeft);
+          data::tilesToPixels(base::Vec2{x, y} - coordinates.topLeft);
         renderSingleTile(tileIndex, pixelPosition + offsetInSection);
       }
     }
@@ -592,7 +590,7 @@ void MapRenderer::renderCachedSection(
     for (auto x = 0; x < width; ++x)
     {
       const auto screenPos =
-        data::tileVectorToPixelVector(base::Vec2{x, y}) + pixelPosition;
+        data::tilesToPixels(base::Vec2{x, y}) + pixelPosition;
 
       const auto [layer0, layer1] = unpack(*iMapData);
       drawTile(layer0, screenPos);

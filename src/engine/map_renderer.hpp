@@ -52,7 +52,7 @@ struct TileBlock
 
 struct TileRenderData
 {
-  TileRenderData(base::Extents size, renderer::Renderer* pRenderer);
+  TileRenderData(base::Size size, renderer::Renderer* pRenderer);
   ~TileRenderData();
 
   TileRenderData(TileRenderData&&) noexcept = default;
@@ -61,7 +61,7 @@ struct TileRenderData
   TileRenderData& operator=(const TileRenderData&) = delete;
 
   std::array<std::vector<TileBlock>, 2> mLayers;
-  base::Extents mSize;
+  base::Size mSize;
   renderer::Renderer* mpRenderer;
 };
 
@@ -108,13 +108,13 @@ public:
 
   void renderBackdrop(
     const base::Vec2f& cameraPosition,
-    const base::Extents& viewportSize) const;
+    const base::Size& viewportSize) const;
   void renderBackground(
     const base::Vec2& sectionStart,
-    const base::Extents& sectionSize) const;
+    const base::Size& sectionSize) const;
   void renderForeground(
     const base::Vec2& sectionStart,
-    const base::Extents& sectionSize) const;
+    const base::Size& sectionSize) const;
 
   void updateAnimatedMapTiles();
   void updateBackdropAutoScrolling(engine::TimeDelta dt);
@@ -136,11 +136,11 @@ public:
 private:
   renderer::TexCoords calculateBackdropTexCoords(
     const base::Vec2f& cameraPosition,
-    const base::Extents& viewportSize) const;
+    const base::Size& viewportSize) const;
 
   void renderMapTiles(
     const base::Vec2& sectionStart,
-    const base::Extents& sectionSize,
+    const base::Size& sectionSize,
     DrawMode drawMode) const;
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 

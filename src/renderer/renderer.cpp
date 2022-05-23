@@ -94,7 +94,7 @@ std::tuple<GLuint, uint16_t> unpackVertexBuffer(const VertexBufferId buffer)
 
 struct RenderTarget
 {
-  base::Extents mSize;
+  base::Size mSize;
   GLuint mFbo;
 };
 
@@ -122,7 +122,7 @@ void* toAttribOffset(std::uintptr_t offset)
 
 void setScissorBox(
   const base::Rect<int>& clipRect,
-  const base::Size<int>& frameBufferSize)
+  const base::Size& frameBufferSize)
 {
   const auto offsetAtBottom = frameBufferSize.height - clipRect.bottom();
   glScissor(
@@ -168,7 +168,7 @@ auto getSize(SDL_Window* pWindow)
   int windowWidth = 0;
   int windowHeight = 0;
   SDL_GL_GetDrawableSize(pWindow, &windowWidth, &windowHeight);
-  return base::Size<int>{windowWidth, windowHeight};
+  return base::SizeT<int>{windowWidth, windowHeight};
 }
 
 
@@ -269,8 +269,8 @@ struct Renderer::Impl
   Shader mTexturedQuadShader;
   Shader mSimpleTexturedQuadShader;
   Shader mSolidColorShader;
-  base::Size<int> mWindowSize;
-  base::Size<int> mLastKnownWindowSize;
+  base::Size mWindowSize;
+  base::Size mLastKnownWindowSize;
   SDL_Window* mpWindow;
   RenderMode mLastKnownRenderMode = RenderMode::SpriteBatch;
 
@@ -817,7 +817,7 @@ struct Renderer::Impl
   }
 
 
-  void commitClipRect(const State& state, const base::Extents& framebufferSize)
+  void commitClipRect(const State& state, const base::Size& framebufferSize)
   {
     if (state.mClipRect)
     {
@@ -882,7 +882,7 @@ struct Renderer::Impl
 
   glm::mat4 computeTransformationMatrix(
     const State& state,
-    const base::Extents& framebufferSize)
+    const base::Size& framebufferSize)
   {
     const auto projection = glm::ortho(
       0.0f, float(framebufferSize.width), float(framebufferSize.height), 0.0f);
@@ -894,7 +894,7 @@ struct Renderer::Impl
 
   void commitTransformationMatrix(
     const State& state,
-    const base::Extents& framebufferSize)
+    const base::Size& framebufferSize)
   {
     const auto projectionMatrix =
       computeTransformationMatrix(state, framebufferSize);
@@ -1036,7 +1036,7 @@ struct Renderer::Impl
     glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
   }
 
-  base::Size<int> currentRenderTargetSize() const
+  base::Size currentRenderTargetSize() const
   {
     const auto& state = mStateStack.back();
     if (state.mRenderTargetTexture != 0)
@@ -1198,13 +1198,13 @@ std::optional<base::Rect<int>> Renderer::clipRect() const
 }
 
 
-base::Size<int> Renderer::currentRenderTargetSize() const
+base::Size Renderer::currentRenderTargetSize() const
 {
   return mpImpl->currentRenderTargetSize();
 }
 
 
-base::Size<int> Renderer::windowSize() const
+base::Size Renderer::windowSize() const
 {
   return mpImpl->mWindowSize;
 }

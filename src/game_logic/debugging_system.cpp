@@ -99,7 +99,7 @@ void DebuggingSystem::toggleGridDisplay()
 void DebuggingSystem::update(
   ex::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize,
+  const base::Size& viewportSize,
   const float interpolationFactor)
 {
   if (mShowWorldCollisionData)
@@ -118,8 +118,8 @@ void DebuggingSystem::update(
         }
 
         const auto collisionData = mpMap->collisionData(col, row);
-        const auto topLeft = tileVectorToPixelVector({x, y});
-        const auto bottomRight = tileVectorToPixelVector({x + 1, y + 1});
+        const auto topLeft = tilesToPixels(base::Vec2{x, y});
+        const auto bottomRight = tilesToPixels(base::Vec2{x + 1, y + 1});
         const auto left = topLeft.x;
         const auto top = topLeft.y;
         const auto right = bottomRight.x;
@@ -171,7 +171,7 @@ void DebuggingSystem::update(
     es.each<WorldPosition, BoundingBox>(
       [&](
         ex::Entity entity, const WorldPosition& pos, const BoundingBox& bbox) {
-        const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
+        const auto worldToScreenPx = tilesToPixels(cameraPosition);
         const auto worldSpaceBox = engine::toWorldSpace(bbox, pos);
 
         const auto topLeftCurrent = worldSpaceBox.topLeft;
@@ -182,7 +182,7 @@ void DebuggingSystem::update(
           : topLeftCurrent;
 
         auto transform = [&](const base::Vec2& p) {
-          return tileVectorToPixelVector(p) - worldToScreenPx;
+          return tilesToPixels(p) - worldToScreenPx;
         };
 
         const auto visualTopLeft = engine::lerpRounded(
@@ -190,8 +190,8 @@ void DebuggingSystem::update(
           transform(topLeftCurrent),
           interpolationFactor);
 
-        const auto boxInPixels = BoundingBox{
-          visualTopLeft, tileExtentsToPixelExtents(worldSpaceBox.size)};
+        const auto boxInPixels =
+          BoundingBox{visualTopLeft, tilesToPixels(worldSpaceBox.size)};
 
         mpRenderer->drawRectangle(boxInPixels, colorForEntity(entity));
       });
@@ -200,20 +200,19 @@ void DebuggingSystem::update(
       [&](
         ex::Entity entity,
         const game_logic::components::DynamicGeometrySection& dynamic) {
-        const auto worldToScreenPx = tileVectorToPixelVector(cameraPosition);
+        const auto worldToScreenPx = tilesToPixels(cameraPosition);
         const auto boxInPixels = BoundingBox{
-          tileVectorToPixelVector(dynamic.mLinkedGeometrySection.topLeft) -
+          tilesToPixels(dynamic.mLinkedGeometrySection.topLeft) -
             worldToScreenPx,
-          tileExtentsToPixelExtents(dynamic.mLinkedGeometrySection.size)};
+          tilesToPixels(dynamic.mLinkedGeometrySection.size)};
 
         mpRenderer->drawRectangle(boxInPixels, base::Color{0, 255, 255, 190});
 
         if (const auto extraSectionRect = dynamic.extraSectionRect())
         {
           const auto extraBoxInPixels = BoundingBox{
-            tileVectorToPixelVector(extraSectionRect->topLeft) -
-              worldToScreenPx,
-            tileExtentsToPixelExtents(extraSectionRect->size)};
+            tilesToPixels(extraSectionRect->topLeft) - worldToScreenPx,
+            tilesToPixels(extraSectionRect->size)};
           mpRenderer->drawRectangle(
             extraBoxInPixels, base::Color{255, 255, 100, 190});
         }

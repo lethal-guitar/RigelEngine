@@ -56,6 +56,11 @@ inline bool isVisibleOnRadar(const base::Vec2& position)
 }
 
 
+bool canUseHudStyle(
+  data::WidescreenHudStyle style,
+  const renderer::Renderer* pRenderer);
+
+
 constexpr auto HUD_HEIGHT_BOTTOM = 4;
 constexpr auto HUD_WIDTH_RIGHT = 6;
 constexpr auto HUD_WIDTH_TOTAL = HUD_WIDTH_RIGHT + 32;

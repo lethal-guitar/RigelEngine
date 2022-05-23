@@ -88,7 +88,7 @@ const auto RADAR_DOT_COLOR = data::GameTraits::INGAME_PALETTE[15];
 
 constexpr auto OVERLAY_BACKGROUND_COLOR = []() {
   auto color = data::GameTraits::INGAME_PALETTE[1];
-  color.a = 200;
+  color.a = 240;
   return color;
 }();
 
@@ -197,6 +197,27 @@ void drawWideHudFrameExtensions(
 } // namespace
 
 
+bool canUseHudStyle(
+  const WidescreenHudStyle style,
+  const renderer::Renderer* pRenderer)
+{
+  const auto availableWidth =
+    renderer::determineLowResBufferWidth(pRenderer, true);
+
+  switch (style)
+  {
+    case data::WidescreenHudStyle::Modern:
+      return availableWidth >= assets::WIDE_HUD_INNER_WIDTH;
+
+    case data::WidescreenHudStyle::Ultrawide:
+      return availableWidth >= assets::ULTRAWIDE_HUD_INNER_WIDTH;
+
+    default:
+      return true;
+  }
+}
+
+
 HudRenderer::HudRenderer(
   const int levelNumber,
   const data::GameOptions* pOptions,
@@ -232,22 +253,19 @@ void HudRenderer::renderClassicHud(
 
   // These use the actor sprite sheet texture.
   drawActorFrame(
-    ActorID::HUD_frame_background,
-    0,
-    data::tileVectorToPixelVector(HUD_START_TOP_RIGHT));
+    ActorID::HUD_frame_background, 0, data::tilesToPixels(HUD_START_TOP_RIGHT));
   drawActorFrame(
     ActorID::HUD_frame_background,
     1,
-    data::tileVectorToPixelVector(HUD_START_BOTTOM_LEFT));
+    data::tilesToPixels(HUD_START_BOTTOM_LEFT));
   drawActorFrame(
     ActorID::HUD_frame_background,
     2,
-    data::tileVectorToPixelVector(HUD_START_BOTTOM_RIGHT));
+    data::tilesToPixels(HUD_START_BOTTOM_RIGHT));
   drawInventory(
-    playerModel.inventory(),
-    data::tileVectorToPixelVector(INVENTORY_START_POS));
+    playerModel.inventory(), data::tilesToPixels(INVENTORY_START_POS));
   drawCollectedLetters(
-    playerModel, data::tileVectorToPixelVector(LETTER_INDICATOR_POSITION));
+    playerModel, data::tilesToPixels(LETTER_INDICATOR_POSITION));
 
   // These use the UI sprite sheet texture.
   drawScore(
@@ -294,11 +312,11 @@ void HudRenderer::renderWidescreenHud(
   };
 
 
-  const auto canUseUltrawideHud =
-    renderer::determineLowResBufferWidth(mpRenderer, true) >=
-    assets::ULTRAWIDE_HUD_INNER_WIDTH;
+  const auto styleToUse = canUseHudStyle(style, mpRenderer)
+    ? style
+    : data::WidescreenHudStyle::Classic;
 
-  switch (style)
+  switch (styleToUse)
   {
     case data::WidescreenHudStyle::Classic:
       drawClassicWidescreenHud();
@@ -309,14 +327,7 @@ void HudRenderer::renderWidescreenHud(
       break;
 
     case data::WidescreenHudStyle::Ultrawide:
-      if (canUseUltrawideHud)
-      {
-        drawUltrawideHud(viewportWidth, playerModel, radarPositions);
-      }
-      else
-      {
-        drawClassicWidescreenHud();
-      }
+      drawUltrawideHud(viewportWidth, playerModel, radarPositions);
       break;
   }
 }
@@ -466,8 +477,8 @@ void HudRenderer::drawInventory(
       if (iItem != inventory.end())
       {
         const auto itemType = *iItem++;
-        const auto drawPos = position +
-          data::tileVectorToPixelVector(base::Vec2{col * 2, row * 2});
+        const auto drawPos =
+          position + data::tilesToPixels(base::Vec2{col * 2, row * 2});
 
         switch (itemType)
         {
@@ -501,8 +512,9 @@ void HudRenderer::drawFloatingInventory(
   const std::vector<data::InventoryItemType>& inventory,
   const base::Vec2& position) const
 {
+  const auto numItems = int(inventory.size());
   const auto backgroundSize =
-    data::tileExtentsToPixelExtents({int(inventory.size()) * 2, 2});
+    data::tilesToPixels(base::Size{std::max(numItems, 2) * 2, 2});
   mpRenderer->drawFilledRectangle(
     {position - base::Vec2{backgroundSize.width, 0}, backgroundSize},
     OVERLAY_BACKGROUND_COLOR);
@@ -586,7 +598,7 @@ void HudRenderer::drawCollectedLetters(
   // part of the sprite which contains the lit up letter.
   renderer::setLocalClipRect(
     mpRenderer,
-    {position + data::tileVectorToPixelVector({35, 24}) + base::Vec2{1, 5},
+    {position + data::tilesToPixels(base::Vec2{35, 24}) + base::Vec2{1, 5},
      {29, 6}});
 
   for (const auto letter : playerModel.collectedLetters())
@@ -665,8 +677,8 @@ void HudRenderer::drawActorFrame(
 {
   const auto& frameData = mpSpriteFactory->actorFrameData(id, frame);
   const auto destRect = base::Rect<int>{
-    pixelPos + data::tileVectorToPixelVector(frameData.mDrawOffset),
-    data::tileExtentsToPixelExtents(frameData.mDimensions)};
+    pixelPos + data::tilesToPixels(frameData.mDrawOffset),
+    data::tilesToPixels(frameData.mDimensions)};
   mpSpriteFactory->textureAtlas().draw(frameData.mImageId, destRect);
 }
 

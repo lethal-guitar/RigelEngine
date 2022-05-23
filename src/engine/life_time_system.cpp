@@ -25,7 +25,7 @@ namespace rigel::engine
 void LifeTimeSystem::update(
   entityx::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize)
+  const base::Size& viewportSize)
 {
   namespace c = components;
   using Condition = components::AutoDestroy::Condition;

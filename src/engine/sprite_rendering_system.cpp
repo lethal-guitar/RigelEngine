@@ -70,7 +70,7 @@ void advanceAnimation(Sprite& sprite, AnimationLoop& animated)
 void collectVisibleSprites(
   ex::EntityManager& es,
   const base::Vec2& cameraPosition,
-  const base::Extents& viewportSize,
+  const base::Size& viewportSize,
   std::vector<SortableDrawSpec>& output,
   const float interpolationFactor)
 {
@@ -113,7 +113,7 @@ void collectVisibleSprites(
     const auto destRect = base::Rect<int>{
       engine::interpolatedPixelPosition(
         previousTopLeft, topLeft, interpolationFactor),
-      data::tileExtentsToPixelExtents(frame.mDimensions)};
+      data::tilesToPixels(frame.mDimensions)};
     const auto drawSpec =
       SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, translucent};
 
@@ -205,8 +205,8 @@ void collectVisibleSprites(
           float(strip.mHeight),
           interpolationFactor)));
 
-        const auto destRect = base::Rect<int>{
-          data::tileVectorToPixelVector(topLeft), {width, height}};
+        const auto destRect =
+          base::Rect<int>{data::tilesToPixels(topLeft), {width, height}};
 
         const auto drawSpec =
           SpriteDrawSpec{destRect, frame.mImageId, false, sprite.mTranslucent};
@@ -316,7 +316,7 @@ SpriteRenderingSystem::SpriteRenderingSystem(
 
 void SpriteRenderingSystem::update(
   ex::EntityManager& es,
-  const base::Extents& viewportSize,
+  const base::Size& viewportSize,
   const base::Vec2& cameraPosition,
   const float interpolationFactor)
 {
@@ -327,7 +327,7 @@ void SpriteRenderingSystem::update(
   mSortBuffer.clear();
   collectVisibleSprites(
     es, cameraPosition, viewportSize, mSortBuffer, interpolationFactor);
-  std::sort(begin(mSortBuffer), end(mSortBuffer));
+  std::stable_sort(begin(mSortBuffer), end(mSortBuffer));
 
   mSprites.clear();
   mSprites.reserve(mSortBuffer.size());

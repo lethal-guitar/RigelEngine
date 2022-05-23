@@ -36,6 +36,10 @@
 namespace rigel::assets
 {
 
+constexpr auto WIDE_HUD_WIDTH = 424;
+constexpr auto WIDE_HUD_HEIGHT = 32;
+constexpr auto WIDE_HUD_INNER_WIDTH = 368;
+
 constexpr auto ULTRAWIDE_HUD_WIDTH = 560;
 constexpr auto ULTRAWIDE_HUD_HEIGHT = 70;
 constexpr auto ULTRAWIDE_HUD_INNER_WIDTH = 424;
@@ -52,7 +56,7 @@ struct ActorData
   struct Frame
   {
     base::Vec2 mDrawOffset;
-    base::Extents mLogicalSize;
+    base::Size mLogicalSize;
     data::Image mFrameImage;
   };
 

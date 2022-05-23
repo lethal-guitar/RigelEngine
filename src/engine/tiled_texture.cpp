@@ -38,7 +38,7 @@ TiledTexture::TiledTexture(Texture&& tileSet, Renderer* pRenderer)
 
 TiledTexture::TiledTexture(
   Texture&& tileSet,
-  const base::Extents logicalSize,
+  const base::Size logicalSize,
   Renderer* pRenderer)
   : mTileSetTexture(std::move(tileSet))
   , mpRenderer(pRenderer)
@@ -72,7 +72,7 @@ renderer::QuadVertices TiledTexture::generateVertices(
       sourceRect(index, 1, 1),
       mTileSetTexture.width(),
       mTileSetTexture.height()),
-    {tileVectorToPixelVector({posX, posY}), tileExtentsToPixelExtents({1, 1})});
+    {tilesToPixels(base::Vec2{posX, posY}), tilesToPixels(base::Size{1, 1})});
 }
 
 
@@ -104,7 +104,7 @@ void TiledTexture::renderTileAtPixelPos(int index, const base::Vec2& pxPosition)
   const
 {
   mTileSetTexture.render(
-    sourceRect(index, 1, 1), {pxPosition, tileExtentsToPixelExtents({1, 1})});
+    sourceRect(index, 1, 1), {pxPosition, tilesToPixels(base::Size{1, 1})});
 }
 
 
@@ -133,8 +133,8 @@ void TiledTexture::renderTileGroup(
       sourceRect(index, tileSpanX, tileSpanY),
       mTileSetTexture.width(),
       mTileSetTexture.height()),
-    {tileVectorToPixelVector({posX, posY}),
-     tileExtentsToPixelExtents({tileSpanX, tileSpanY})});
+    {tilesToPixels(base::Vec2{posX, posY}),
+     tilesToPixels(base::Size{tileSpanX, tileSpanY})});
 }
 
 
@@ -145,8 +145,8 @@ base::Rect<int> TiledTexture::sourceRect(
 {
   const base::Vec2 tileSetStartPosition{
     index % tilesPerRow(), index / tilesPerRow()};
-  const auto topLeft = tileVectorToPixelVector(tileSetStartPosition);
-  const auto size = tileExtentsToPixelExtents({tileSpanX, tileSpanY});
+  const auto topLeft = tilesToPixels(tileSetStartPosition);
+  const auto size = tilesToPixels(base::Size{tileSpanX, tileSpanY});
 
   return {
     {topLeft.x * mScaleX, topLeft.y * mScaleY},

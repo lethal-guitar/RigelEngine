@@ -27,7 +27,7 @@ namespace rigel::renderer
 namespace
 {
 
-auto asVec(const base::Size<int>& size)
+auto asVec(const base::Size& size)
 {
   return base::Vec2{size.width, size.height};
 }
@@ -35,7 +35,7 @@ auto asVec(const base::Size<int>& size)
 
 auto asSize(const base::Vec2& vec)
 {
-  return base::Size{vec.x, vec.y};
+  return base::SizeT{vec.x, vec.y};
 }
 
 
@@ -69,7 +69,7 @@ base::Vec2 scaleVec(const base::Vec2& vec, const base::Vec2f& scale)
 }
 
 
-base::Extents scaleSize(const base::Extents& size, const base::Vec2f& scale)
+base::Size scaleSize(const base::Size& size, const base::Vec2f& scale)
 {
   return asSize(scaleVec(asVec(size), scale));
 }
