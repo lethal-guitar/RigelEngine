@@ -327,7 +327,7 @@ void SpriteRenderingSystem::update(
   mSortBuffer.clear();
   collectVisibleSprites(
     es, cameraPosition, viewportSize, mSortBuffer, interpolationFactor);
-  std::sort(begin(mSortBuffer), end(mSortBuffer));
+  std::stable_sort(begin(mSortBuffer), end(mSortBuffer));
 
   mSprites.clear();
   mSprites.reserve(mSortBuffer.size());
