@@ -23,6 +23,7 @@
 #include "frontend/user_profile.hpp"
 #include "game_logic/game_world.hpp"
 #include "renderer/upscaling_utils.hpp"
+#include "renderer/viewport_utils.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -378,7 +379,9 @@ auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult
           auto saved = renderer::saveState(mContext.mpRenderer);
           mContext.mpRenderer->setClipRect({});
           mContext.mpRenderer->setGlobalTranslation(
-            base::Vec2{offsetForAlternativeHudStyles, 0} +
+            renderer::scaleVec(
+              {offsetForAlternativeHudStyles, 0},
+              mContext.mpRenderer->globalScale()) +
             renderer::offsetTo4by3WithinWidescreen(
               mContext.mpRenderer, options));
           state.updateAndRender(dt);
