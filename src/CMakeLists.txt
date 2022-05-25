@@ -306,6 +306,8 @@ set(core_sources
     ui/apogee_logo.hpp
     ui/bonus_screen.cpp
     ui/bonus_screen.hpp
+    ui/credits.cpp
+    ui/credits.hpp
     ui/duke_3d_teaser_screen.cpp
     ui/duke_3d_teaser_screen.hpp
     ui/duke_script_runner.cpp
