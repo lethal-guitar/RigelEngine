@@ -98,12 +98,14 @@ void drawCredits(const float creditsBoxWidth)
   centeredText(
     "Shikadi Modding Wiki (https://moddingwiki.shikadi.net/wiki/Main_Page)");
   centeredText("The DOSBox project");
-  centeredText("IDA Pro disassembler by Hex Rays");
+  centeredText("Hex Rays (IDA Pro disassembler)");
   centeredText("Anton Gulenko");
   centeredText(
     "Clint Basinger aka LGR (https://www.youtube.com/c/Lazygamereviews)");
-  centeredText("Bart aka Dosgamert (https://www.youtube.com/c/dosgamert)");
-  centeredText("MaxiTaxi Creative (https://www.instagram.com/maxitaxi.f500)");
+  centeredText(
+    "Bart Remmers aka Dosgamert (https://www.youtube.com/c/dosgamert)");
+  centeredText(
+    "Maxime Schmidt (https://madebymaxi.nl, https://instagram.com/madeby.maxi)");
   centeredText("Everyone on the RigelEngine Discord");
 
   ImGui::NewLine();
@@ -553,6 +555,16 @@ void drawCredits(const float creditsBoxWidth)
   centeredText("SOFTWARE.");
   ImGui::NewLine();
   centeredText("https://github.com/nothings/stb");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
+
+  centeredTextBig("Loguru logging library for C++ by Emil Ernerfeldt", 1.4f);
+  ImGui::NewLine();
+  centeredText("https://www.github.com/emilk/loguru");
+
+  ImGui::NewLine();
+  ImGui::NewLine();
 }
 
 } // namespace rigel::ui
