@@ -1,4 +1,4 @@
-## What is Rigel Engine?
+## Welcome to Rigel Engine
 
 RigelEngine is a re-implementation of the game [Duke Nukem II](https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee Software in 1993 for MS-DOS.
 RigelEngine works as a drop-in replacement for the original executable: It reads the game's data files and plays just like the original,
@@ -30,10 +30,10 @@ The chosen path will be stored in the game's user profile, so that you don't hav
 ### Acquiring the game data
 
 You can download the shareware version for free from [archive.org](https://archive.org/download/msdos_DUKE2_shareware/DUKE2.zip).
-The full version (aka registered version) can be bought on [Zoom Platform](https://www.zoom-platform.com/product/duke-nukem-2),
-a store which still has a license to sell the game (unlike other digital stores like Steam and Gog).
+The full version (aka registered version) can be bought on [Zoom Platform](https://www.zoom-platform.com/product/duke-nukem-2).
 
 If you already have a copy of the game, you can also point RigelEngine to that existing installation.
+This includes the Steam and Gog versions.
 
 The only files actually required for RigelEngine are:
 
