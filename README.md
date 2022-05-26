@@ -102,7 +102,7 @@ As of version 0.8.0, this includes Windows (x64),
 Mac OS (x64),
 and `deb` packages for Debian/Ubuntu/Mint Linux distros (also x64).
 
-A Flatpak for other distros is currently work in progress.
+A [Flatpak](https://flathub.org/apps/details/io.github.lethal_guitar.RigelEngine) is also available.
 
 Also see [third-party Linux builds](https://github.com/lethal-guitar/RigelEngine/wiki/Third-party-Linux-builds)
 for a list of other Linux packages/builds provided by distros and other projects.
