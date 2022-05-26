@@ -19,7 +19,9 @@ See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing
 
 Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm via Emscripten)
 
-[Download RigelEngine](https://github.com/lethal-guitar/RigelEngine/releases) for Windows, Mac OS, or Linux.
+[Download RigelEngine](https://github.com/lethal-guitar/RigelEngine/releases) for Windows, Mac OS, or Linux (deb package).
+
+[Install via Flathub](https://flathub.org/apps/details/io.github.lethal_guitar.RigelEngine)
 
 ## Running RigelEngine
 
