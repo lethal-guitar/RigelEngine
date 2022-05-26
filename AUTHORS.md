@@ -25,6 +25,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 ## Contributors (reports/suggestions/testing/...)
 
 * Evo Stamatov ([@avioli](https://github.com/avioli))
+* Hugo Locurcio ([@Calinou](https://github.com/Calinou))
 * Jomon John ([@jomonjohnn](https://github.com/jomonjohnn))
 * Julius Schwartzenberg ([@jschwartzenberg](https://github.com/jschwartzenberg))
 * Kyle Falconer ([@Kyle-Falconer](https://github.com/Kyle-Falconer))
