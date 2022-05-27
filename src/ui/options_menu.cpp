@@ -536,11 +536,14 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::TextUnformatted("Gamepad controls:");
       ImGui::NewLine();
 
+      const auto extraFlags = isSmallScreen(windowSize)
+        ? 0
+        : ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_NoHostExtendX;
+
       if (ImGui::BeginTable(
             "gamepad_inputs",
             2,
-            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
-              ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_NoHostExtendX))
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | extraFlags))
       {
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
