@@ -60,6 +60,7 @@ private:
   game_logic::PlayerInput mPlayerInput;
   base::Vec2 mAnalogStickVector;
   const data::GameOptions* mpOptions;
+  bool mQuickSaveModifierHeld = false;
 };
 
 } // namespace rigel

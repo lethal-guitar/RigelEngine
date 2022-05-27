@@ -192,11 +192,18 @@ auto InputHandler::handleControllerInput(
         case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
         case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
           {
+            const auto isLeftTrigger =
+              event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT;
             const auto triggerPressed = event.caxis.value > TRIGGER_THRESHOLD;
 
-            auto& input = event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT
-              ? mPlayerInput.mJump
-              : mPlayerInput.mFire;
+            if (mQuickSaveModifierHeld && triggerPressed)
+            {
+              return isLeftTrigger ? MenuCommand::QuickLoad
+                                   : MenuCommand::QuickSave;
+            }
+
+            auto& input =
+              isLeftTrigger ? mPlayerInput.mJump : mPlayerInput.mFire;
             if (!input.mIsPressed && triggerPressed)
             {
               input.mWasTriggered = true;
@@ -217,6 +224,10 @@ auto InputHandler::handleControllerInput(
 
         switch (event.cbutton.button)
         {
+          case SDL_CONTROLLER_BUTTON_BACK:
+            mQuickSaveModifierHeld = buttonPressed;
+            break;
+
           case SDL_CONTROLLER_BUTTON_DPAD_UP:
             mPlayerInput.mUp = buttonPressed;
             handleAction(mPlayerInput.mInteract, buttonPressed);
@@ -237,19 +248,26 @@ auto InputHandler::handleControllerInput(
           case SDL_CONTROLLER_BUTTON_A:
           case SDL_CONTROLLER_BUTTON_B:
           case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-            handleAction(mPlayerInput.mJump, buttonPressed);
+            if (mQuickSaveModifierHeld && buttonPressed)
+            {
+              return MenuCommand::QuickLoad;
+            }
+            else
+            {
+              handleAction(mPlayerInput.mJump, buttonPressed);
+            }
             break;
 
           case SDL_CONTROLLER_BUTTON_X:
           case SDL_CONTROLLER_BUTTON_Y:
           case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-            handleAction(mPlayerInput.mFire, buttonPressed);
-            break;
-
-          case SDL_CONTROLLER_BUTTON_BACK:
-            if (buttonPressed)
+            if (mQuickSaveModifierHeld && buttonPressed)
             {
               return MenuCommand::QuickSave;
+            }
+            else
+            {
+              handleAction(mPlayerInput.mFire, buttonPressed);
             }
             break;
         }
