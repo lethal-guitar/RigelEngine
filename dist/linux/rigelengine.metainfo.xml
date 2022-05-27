@@ -27,12 +27,15 @@
 
     <categories>
         <category>Game</category>
+        <category>ActionGame</category>
+        <category>ArcadeGame</category>
     </categories>
 
     <launchable type="desktop-id">rigelengine.desktop</launchable>
 
     <url type="homepage">https://lethal-guitar.github.io/RigelEngine</url>
     <url type="bugtracker">https://github.com/lethal-guitar/RigelEngine/issues</url>
+    <url type="faq">https://github.com/lethal-guitar/RigelEngine/wiki/FAQ</url>
 
     <screenshots>
         <screenshot type="default">

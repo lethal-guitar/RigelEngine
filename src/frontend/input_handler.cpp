@@ -150,6 +150,14 @@ auto InputHandler::handleControllerInput(
   const SDL_Event& event,
   const bool playerInShip) -> MenuCommand
 {
+  auto handleAction = [&](game_logic::Button& button, const bool isPressed) {
+    button.mIsPressed = isPressed;
+    if (isPressed)
+    {
+      button.mWasTriggered = true;
+    }
+  };
+
   switch (event.type)
   {
     case SDL_CONTROLLERAXISMOTION:
@@ -184,11 +192,18 @@ auto InputHandler::handleControllerInput(
         case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
         case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
           {
+            const auto isLeftTrigger =
+              event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT;
             const auto triggerPressed = event.caxis.value > TRIGGER_THRESHOLD;
 
-            auto& input = event.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT
-              ? mPlayerInput.mJump
-              : mPlayerInput.mFire;
+            if (mQuickSaveModifierHeld && triggerPressed)
+            {
+              return isLeftTrigger ? MenuCommand::QuickLoad
+                                   : MenuCommand::QuickSave;
+            }
+
+            auto& input =
+              isLeftTrigger ? mPlayerInput.mJump : mPlayerInput.mFire;
             if (!input.mIsPressed && triggerPressed)
             {
               input.mWasTriggered = true;
@@ -209,13 +224,13 @@ auto InputHandler::handleControllerInput(
 
         switch (event.cbutton.button)
         {
+          case SDL_CONTROLLER_BUTTON_BACK:
+            mQuickSaveModifierHeld = buttonPressed;
+            break;
+
           case SDL_CONTROLLER_BUTTON_DPAD_UP:
             mPlayerInput.mUp = buttonPressed;
-            mPlayerInput.mInteract.mIsPressed = buttonPressed;
-            if (buttonPressed)
-            {
-              mPlayerInput.mInteract.mWasTriggered = true;
-            }
+            handleAction(mPlayerInput.mInteract, buttonPressed);
             break;
 
           case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
@@ -233,27 +248,26 @@ auto InputHandler::handleControllerInput(
           case SDL_CONTROLLER_BUTTON_A:
           case SDL_CONTROLLER_BUTTON_B:
           case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-            mPlayerInput.mJump.mIsPressed = buttonPressed;
-            if (buttonPressed)
+            if (mQuickSaveModifierHeld && buttonPressed)
             {
-              mPlayerInput.mJump.mWasTriggered = true;
+              return MenuCommand::QuickLoad;
+            }
+            else
+            {
+              handleAction(mPlayerInput.mJump, buttonPressed);
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_X:
           case SDL_CONTROLLER_BUTTON_Y:
           case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-            mPlayerInput.mFire.mIsPressed = buttonPressed;
-            if (buttonPressed)
-            {
-              mPlayerInput.mFire.mWasTriggered = true;
-            }
-            break;
-
-          case SDL_CONTROLLER_BUTTON_BACK:
-            if (buttonPressed)
+            if (mQuickSaveModifierHeld && buttonPressed)
             {
               return MenuCommand::QuickSave;
+            }
+            else
+            {
+              handleAction(mPlayerInput.mFire, buttonPressed);
             }
             break;
         }

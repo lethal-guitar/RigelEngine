@@ -35,6 +35,10 @@ namespace rigel::ui
 namespace
 {
 
+constexpr auto MENU_TITLE_POS_X = 3;
+constexpr auto MENU_TITLE_POS_Y = 2;
+constexpr auto MENU_TITLE_MAX_LENGTH = 34;
+
 constexpr auto MENU_START_POS_X = 11;
 constexpr auto MENU_START_POS_Y = 6;
 constexpr auto MENU_ITEM_HEIGHT = 2;
@@ -87,13 +91,26 @@ auto createSavedGame(
 }
 
 
-std::string makePrefillName(const data::SavedGame& savedGame)
+enum class SessionIdStringType
 {
-  std::stringstream stream;
-  stream << "Ep " << savedGame.mSessionId.mEpisode + 1 << ", "
-         << "Lv " << savedGame.mSessionId.mLevel + 1 << ", ";
+  Short,
+  Long
+};
 
-  switch (savedGame.mSessionId.mDifficulty)
+
+std::string sessionIdString(
+  const data::GameSessionId& sessionId,
+  const SessionIdStringType type)
+{
+  const auto useShortForm = type == SessionIdStringType::Short;
+  const auto episodeWord = useShortForm ? "Ep " : "Episode ";
+  const auto levelWord = useShortForm ? "Lv " : "Level ";
+
+  std::stringstream stream;
+  stream << episodeWord << sessionId.mEpisode + 1 << ", " << levelWord
+         << sessionId.mLevel + 1 << ", ";
+
+  switch (sessionId.mDifficulty)
   {
     case data::Difficulty::Easy:
       stream << "Easy";
@@ -109,11 +126,18 @@ std::string makePrefillName(const data::SavedGame& savedGame)
   return stream.str();
 }
 
+
+std::string makePrefillName(const data::GameSessionId& sessionId)
+{
+  return sessionIdString(sessionId, SessionIdStringType::Short);
+}
+
 } // namespace
 
 
 IngameMenu::TopLevelMenu::TopLevelMenu(
   GameMode::Context context,
+  const data::GameSessionId& sessionId,
   const bool canQuickLoad)
   : mContext(context)
   , mPalette(context.mpResources->loadPaletteFromFullScreenImage("MESSAGE.MNI"))
@@ -127,6 +151,7 @@ IngameMenu::TopLevelMenu::TopLevelMenu(
       context.mpRenderer,
       *context.mpResources,
       "MESSAGE.MNI"))
+  , mTitleText(sessionIdString(sessionId, SessionIdStringType::Long))
   , mItems{
       itemIndex("Save Game"),
       itemIndex("Restore Game"),
@@ -203,6 +228,12 @@ void IngameMenu::TopLevelMenu::updateAndRender(const engine::TimeDelta dt)
   mContext.mpRenderer->clear();
   mMenuBackground.render(0, 0);
 
+  mMenuElementRenderer.drawBigText(
+    MENU_TITLE_POS_X + (MENU_TITLE_MAX_LENGTH - int(mTitleText.size())) / 2,
+    MENU_TITLE_POS_Y,
+    mTitleText,
+    mPalette[6]);
+
   auto index = 0;
   for (const auto item : mItems)
   {
@@ -277,6 +308,7 @@ IngameMenu::IngameMenu(
   const data::GameSessionId& sessionId)
   : mContext(context)
   , mSavedGame(createSavedGame(sessionId, *pPlayerModel))
+  , mSessionId(sessionId)
   , mpGameWorld(pGameWorld)
 {
 }
@@ -607,7 +639,7 @@ void IngameMenu::enterMenu(const MenuType type)
       mStateStack.push(SavedGameNameEntry{
         mContext,
         slotIndex,
-        enteredViaGamepad ? makePrefillName(mSavedGame) : ""});
+        enteredViaGamepad ? makePrefillName(mSavedGame.mSessionId) : ""});
       return true;
     }
 
@@ -679,8 +711,8 @@ void IngameMenu::enterMenu(const MenuType type)
 
     case MenuType::TopLevel:
       {
-        auto pMenu =
-          std::make_unique<TopLevelMenu>(mContext, mpGameWorld->canQuickLoad());
+        auto pMenu = std::make_unique<TopLevelMenu>(
+          mContext, mSessionId, mpGameWorld->canQuickLoad());
         mContext.mpServiceProvider->fadeOutScreen();
         pMenu->updateAndRender(0.0);
         mContext.mpServiceProvider->fadeInScreen();
@@ -828,8 +860,8 @@ void IngameMenu::handleMenuActiveEvents()
       // the list of visible menu items. That resets the selection to the top
       // item though. So we select the "Options" entry again afterwards to
       // keep it selected.
-      pTopLevelMenu =
-        std::make_unique<TopLevelMenu>(mContext, mpGameWorld->canQuickLoad());
+      pTopLevelMenu = std::make_unique<TopLevelMenu>(
+        mContext, mSessionId, mpGameWorld->canQuickLoad());
       pTopLevelMenu->selectItem(itemIndex("Options"));
       mpTopLevelMenu = pTopLevelMenu.get();
     }
