@@ -531,6 +531,50 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::NewLine();
       ImGui::TextUnformatted("Gamepad configuration options coming soon.");
       ImGui::TextUnformatted("For now, this just shows all detected gamepads.");
+
+      ImGui::NewLine();
+      ImGui::TextUnformatted("Gamepad controls:");
+      ImGui::NewLine();
+
+      if (ImGui::BeginTable(
+            "gamepad_inputs",
+            2,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+              ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_NoHostExtendX))
+      {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("Movement");
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("D-pad or analog sticks");
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("Jump");
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("A, B, LB, or LT");
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("Shoot");
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("X, Y, RB, or RT");
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("Quick save");
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("back/select + shoot (X, Y, RB, or RT)");
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("Quick load");
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted("back/select + jump (A, B, LB, or LT)");
+
+        ImGui::EndTable();
+      }
+
       ImGui::NewLine();
 
       if (info.mGameControllers.empty())
