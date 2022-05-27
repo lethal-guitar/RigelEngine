@@ -150,6 +150,14 @@ auto InputHandler::handleControllerInput(
   const SDL_Event& event,
   const bool playerInShip) -> MenuCommand
 {
+  auto handleAction = [&](game_logic::Button& button, const bool isPressed) {
+    button.mIsPressed = isPressed;
+    if (isPressed)
+    {
+      button.mWasTriggered = true;
+    }
+  };
+
   switch (event.type)
   {
     case SDL_CONTROLLERAXISMOTION:
@@ -211,11 +219,7 @@ auto InputHandler::handleControllerInput(
         {
           case SDL_CONTROLLER_BUTTON_DPAD_UP:
             mPlayerInput.mUp = buttonPressed;
-            mPlayerInput.mInteract.mIsPressed = buttonPressed;
-            if (buttonPressed)
-            {
-              mPlayerInput.mInteract.mWasTriggered = true;
-            }
+            handleAction(mPlayerInput.mInteract, buttonPressed);
             break;
 
           case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
@@ -233,21 +237,13 @@ auto InputHandler::handleControllerInput(
           case SDL_CONTROLLER_BUTTON_A:
           case SDL_CONTROLLER_BUTTON_B:
           case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-            mPlayerInput.mJump.mIsPressed = buttonPressed;
-            if (buttonPressed)
-            {
-              mPlayerInput.mJump.mWasTriggered = true;
-            }
+            handleAction(mPlayerInput.mJump, buttonPressed);
             break;
 
           case SDL_CONTROLLER_BUTTON_X:
           case SDL_CONTROLLER_BUTTON_Y:
           case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-            mPlayerInput.mFire.mIsPressed = buttonPressed;
-            if (buttonPressed)
-            {
-              mPlayerInput.mFire.mWasTriggered = true;
-            }
+            handleAction(mPlayerInput.mFire, buttonPressed);
             break;
 
           case SDL_CONTROLLER_BUTTON_BACK:
