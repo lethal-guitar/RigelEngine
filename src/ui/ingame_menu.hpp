@@ -89,7 +89,10 @@ private:
 
   struct TopLevelMenu
   {
-    TopLevelMenu(GameMode::Context context, bool canQuickLoad);
+    TopLevelMenu(
+      GameMode::Context context,
+      const data::GameSessionId& sessionId,
+      bool canQuickLoad);
 
     TopLevelMenu(const TopLevelMenu&) = delete;
     TopLevelMenu& operator=(const TopLevelMenu&) = delete;
@@ -104,6 +107,7 @@ private:
     MenuElementRenderer mMenuElementRenderer;
     renderer::Texture mMenuBackground;
     MenuNavigationHelper mNavigationHelper;
+    std::string mTitleText;
     std::vector<int> mItems;
     engine::TimeDelta mElapsedTime = 0;
     int mSelectedIndex = 0;
@@ -194,6 +198,7 @@ private:
   GameMode::Context mContext;
   data::SavedGame mSavedGame;
   std::optional<data::SavedGame> mRequestedGameToLoad;
+  data::GameSessionId mSessionId;
   std::stack<State, std::vector<State>> mStateStack;
   std::vector<SDL_Event> mEventQueue;
   std::optional<MenuType> mMenuToEnter;
