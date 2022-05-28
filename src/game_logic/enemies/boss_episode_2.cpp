@@ -94,6 +94,10 @@ void BossEpisode2::update(
 
   if (mDestructionPending)
   {
+    body.mGravityAffected = false;
+    body.mVelocity = {};
+    engine::removeSafely<MovementSequence>(entity);
+    engine::removeSafely<AnimationSequence>(entity);
     d.mpEvents->emit(rigel::events::BossDestroyed{entity});
     return;
   }
