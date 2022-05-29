@@ -36,6 +36,7 @@ RIGEL_DISABLE_WARNINGS
 RIGEL_RESTORE_WARNINGS
 
 #include <filesystem>
+#include <fstream>
 
 
 namespace rigel
@@ -153,6 +154,44 @@ for more info.)");
 }
 
 
+void createModsDirIfNoneFound(const std::filesystem::path& gamePath)
+{
+  namespace fs = std::filesystem;
+
+  const auto modsDirPath = gamePath / data::MODS_PATH;
+
+  std::error_code ec;
+  if (fs::exists(modsDirPath, ec))
+  {
+    return;
+  }
+
+  if (fs::create_directory(modsDirPath, ec); ec)
+  {
+    LOG_F(ERROR, "Couldn't create mods directory: %s", ec.message().c_str());
+    return;
+  }
+
+  std::ofstream instructionsFile(modsDirPath / "instructions.txt");
+  instructionsFile <<
+    R"(Place mods into this directory, and they will show up in the 'Modding' section in the game's options menu.
+Each mod needs to be in a single directory (i.e., subdirectory of the 'mods' directory).
+
+If you have a mod which consists of loose files, create a directory for it
+first, and then place the files into that directory.
+
+For more information, see https://github.com/lethal-guitar/RigelEngine/wiki/Modding-support
+
+You can find some mods to get you started at https://github.com/lethal-guitar/RigelEngine/wiki/List-of-mods
+
+You've made a mod and would like to share it with the community?
+Stop by the 'modding' channel on the RigelEngine Discord: https://discord.gg/dtJQPFYD
+)";
+
+  LOG_F(INFO, "Created empty 'mods' directory and instructions.txt");
+}
+
+
 void initAndRunGame(
   SDL_Window* pWindow,
   UserProfile& userProfile,
@@ -161,12 +200,15 @@ void initAndRunGame(
   auto run = [&](const CommandLineOptions& options, const bool isFirstLaunch) {
     showLoadingScreen(pWindow);
 
+    const auto gamePath = effectiveGamePath(commandLineOptions, userProfile);
+
+    createModsDirIfNoneFound(gamePath);
+
     // Set up mod library with effective game path. This will automatically do
     // a rescan, which is important in case available mods have changed since
     // the last run.
     LOG_F(INFO, "Setting up mod library");
-    userProfile.mModLibrary.updateGamePath(
-      effectiveGamePath(commandLineOptions, userProfile));
+    userProfile.mModLibrary.updateGamePath(gamePath);
 
     // The mod library might now have the changed flag set, but we don't want
     // the game to see the flag since that would cause the game to immediately
