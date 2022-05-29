@@ -49,6 +49,7 @@
     </provides>
 
     <releases>
+        <release version="0.8.5" date="2022-05-30"/>
         <release version="0.8.4" date="2022-04-01"/>
     </releases>
 
