@@ -24,6 +24,7 @@
 #include <cassert>
 #include <limits>
 #include <unordered_map>
+#include <utility>
 
 
 namespace rigel::data
