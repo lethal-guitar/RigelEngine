@@ -51,7 +51,8 @@ private:
   renderer::Shader mShader;
   renderer::CustomQuadBatch mBatch;
   renderer::Texture mWaterSurfaceAnimTexture;
-  renderer::Texture mWaterEffectColorMapTexture;
+  renderer::Texture mWaterEffectPaletteTexture;
+  renderer::MonoTexture mRgbToPaletteIndexMap;
 };
 
 } // namespace rigel::engine

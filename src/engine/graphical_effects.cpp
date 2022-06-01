@@ -43,6 +43,7 @@ constexpr int nextPowerOf2(int number)
   return result;
 }
 
+constexpr auto RGB_TO_PALETTE_MAP_SIZE = 64;
 
 constexpr auto WATER_MASK_WIDTH = 8;
 constexpr auto WATER_MASK_HEIGHT = 8;
@@ -53,6 +54,15 @@ constexpr auto WATER_ANIM_TEX_HEIGHT =
 constexpr auto WATER_MASK_INDEX_FILLED = 4;
 
 
+// Applying the transform gives us a position in normalized device
+// coordinates (from -1.0 to 1.0). For sampling the render target texture,
+// we need texture coordinates in the range 0.0 to 1.0, however.
+// Therefore, we transform the position from normalized device coordinates
+// into the 0.0 to 1.0 range by adding 1 and dividing by 2.
+//
+// We assume that the texture is as large as the screen, therefore sampling
+// with the resulting tex coords should be equivalent to reading the pixel
+// located at 'position'.
 const char* VERTEX_SOURCE_WATER_EFFECT = R"shd(
 ATTRIBUTE vec2 position;
 ATTRIBUTE vec2 texCoord;
@@ -66,15 +76,6 @@ void main() {
   SET_POINT_SIZE(1.0);
   vec4 transformedPos = transform * vec4(position, 0.0, 1.0);
 
-  // Applying the transform gives us a position in normalized device
-  // coordinates (from -1.0 to 1.0). For sampling the render target texture,
-  // we need texture coordinates in the range 0.0 to 1.0, however.
-  // Therefore, we transform the position from normalized device coordinates
-  // into the 0.0 to 1.0 range by adding 1 and dividing by 2.
-  //
-  // We assume that the texture is as large as the screen, therefore sampling
-  // with the resulting tex coords should be equivalent to reading the pixel
-  // located at 'position'.
   texCoordFrag = (transformedPos.xy + vec2(1.0, 1.0)) / 2.0;
   texCoordMaskFrag = vec2(texCoord.x, 1.0 - texCoord.y);
 
@@ -83,6 +84,13 @@ void main() {
 )shd";
 
 
+// The original game runs in a palette-based video mode, where the frame
+// buffer stores indices into a palette of 16 colors instead of directly
+// storing color values. The water effect is implemented as a modification
+// of these index values in the frame buffer.
+// To replicate it, we first have to transform our RGBA color values into
+// indices, which we do with the help of the rgb to palette index map.
+// With the index, we then look up the corresponding "under water" color.
 const char* FRAGMENT_SOURCE_WATER_EFFECT = R"shd(
 DEFAULT_PRECISION_DECLARATION
 OUTPUT_COLOR_DECLARATION
@@ -92,56 +100,37 @@ IN vec2 texCoordMaskFrag;
 
 uniform sampler2D textureData;
 uniform sampler2D maskData;
-uniform sampler2D colorMapData;
+uniform sampler2D rgbToPaletteIndexData;
+uniform sampler2D targetPaletteData;
 
-
-vec3 paletteColor(int index) {
-  // 1st row of the color map contains the original palette. Because the
-  // texture is stored up-side down, y-coordinate 0.5 actually corresponds to
-  // the upper row of pixels.
-  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.5)).rgb;
-}
-
-
-vec3 remappedColor(int index) {
-  // 2nd row contains the remapped "water" palette
-  return TEXTURE_LOOKUP(colorMapData, vec2(float(index) / 16.0, 0.0)).rgb;
-}
-
-
-vec4 applyWaterEffect(vec4 color) {
-  // The original game runs in a palette-based video mode, where the frame
-  // buffer stores indices into a palette of 16 colors instead of directly
-  // storing color values. The water effect is implemented as a modification
-  // of these index values in the frame buffer.
-  // To replicate it, we first have to transform our RGBA color values into
-  // indices, by searching the palette for a matching color. With the index,
-  // we then look up the corresponding "under water" color.
-  // It would also be possible to perform the index manipulation here in the
-  // shader and then do another palette lookup to get the result. But due to
-  // precision problems on the Raspberry Pi which would cause visual glitches
-  // with that approach, we do it via lookup table instead.
-  int index = 0;
-  for (int i = 0; i < 16; ++i) {
-    if (color.rgb == paletteColor(i)) {
-      index = i;
-    }
-  }
-
-  return vec4(remappedColor(index), color.a);
-}
 
 void main() {
   vec4 color = TEXTURE_LOOKUP(textureData, texCoordFrag);
   vec4 mask = TEXTURE_LOOKUP(maskData, texCoordMaskFrag);
   float maskValue = mask.r;
-  OUTPUT_COLOR = mix(color, applyWaterEffect(color), maskValue);
+
+  vec4 quantizedRgb = floor(color * 16.0);
+  float rgbIndex =
+    quantizedRgb.r * 16.0 * 16.0 +
+    quantizedRgb.g * 16.0 +
+    quantizedRgb.b;
+  vec2 lookupCoords = vec2(mod(rgbIndex, 64.0), rgbIndex / 64.0) / 64.0;
+  float mapValue = TEXTURE_LOOKUP(rgbToPaletteIndexData, lookupCoords).r * 256.0;
+
+  vec4 adjustedColor = vec4(
+    TEXTURE_LOOKUP(targetPaletteData, vec2(mapValue / 16.0, 0.0)).rgb,
+    color.a);
+
+  OUTPUT_COLOR = mix(color, adjustedColor, maskValue);
 }
 )shd";
 
 
-constexpr auto WATER_EFFECT_TEXTURE_UNIT_NAMES =
-  std::array{"textureData", "maskData", "colorMapData"};
+constexpr auto WATER_EFFECT_TEXTURE_UNIT_NAMES = std::array{
+  "textureData",
+  "maskData",
+  "rgbToPaletteIndexData",
+  "targetPaletteData"};
 
 const renderer::ShaderSpec WATER_EFFECT_SHADER{
   renderer::VertexLayout::PositionAndTexCoords,
@@ -198,28 +187,20 @@ data::Image createWaterSurfaceAnimImage()
 }
 
 
-data::Image createWaterEffectColorMapImage()
+data::Image createWaterEffectPaletteImage()
 {
   constexpr auto NUM_COLORS = int(data::GameTraits::INGAME_PALETTE.size());
-  constexpr auto NUM_ROWS = 2;
 
   auto pixels = data::PixelBuffer{};
-  pixels.reserve(NUM_COLORS * NUM_ROWS);
+  pixels.reserve(NUM_COLORS);
 
-  // 1st row: Original palette
-  std::copy(
-    begin(data::GameTraits::INGAME_PALETTE),
-    end(data::GameTraits::INGAME_PALETTE),
-    std::back_inserter(pixels));
-
-  // 2nd row: Corresponding "under water" colors
   // For the water effect, every palette color is remapped to one
   // of the colors at indices 8 to 11. These colors are different
   // shades of blue and a dark green, which leads to the watery look.
   // The remapping is done by manipulating color indices like this:
   //   water_index = index % 4 + 8
   //
-  // In order to create a lookup table for remapping, we therefore
+  // In order to create the target palette for remapping, we therefore
   // need to repeat the colors found at indices 8 to 11 four times,
   // giving us a palette of only "under water" colors.
   constexpr auto WATER_INDEX_START = 8;
@@ -230,10 +211,55 @@ data::Image createWaterEffectColorMapImage()
     pixels.push_back(data::GameTraits::INGAME_PALETTE[index]);
   }
 
-  return data::Image{
-    std::move(pixels),
-    static_cast<size_t>(NUM_COLORS),
-    static_cast<size_t>(NUM_ROWS)};
+  return data::Image{std::move(pixels), static_cast<size_t>(NUM_COLORS), 1};
+}
+
+
+std::vector<std::uint8_t> createRgbToPaletteIndexMap()
+{
+  auto distanceSquared = [](const data::Pixel& lhs, const data::Pixel& rhs) {
+    const auto deltaR = lhs.r - rhs.r;
+    const auto deltaG = lhs.g - rhs.g;
+    const auto deltaB = lhs.b - rhs.b;
+
+    return deltaR * deltaR + deltaG * deltaG + deltaB * deltaB;
+  };
+
+  auto findClosestPaletteIndex = [&](int r, int g, int b) {
+    const auto rgbColor = data::Pixel{uint8_t(r), uint8_t(g), uint8_t(b), 255};
+
+    const auto iPalette = begin(data::GameTraits::INGAME_PALETTE);
+
+    const auto iClosestMatch = std::min_element(
+      iPalette,
+      end(data::GameTraits::INGAME_PALETTE),
+      [&](const data::Pixel& lhs, const data::Pixel& rhs) {
+        return distanceSquared(lhs, rgbColor) < distanceSquared(rhs, rgbColor);
+      });
+
+    return uint8_t(std::distance(iPalette, iClosestMatch));
+  };
+
+
+  constexpr auto FACTOR = 16;
+  constexpr auto MAX_COMPONENT_VALUE = 256 / FACTOR;
+
+  auto indices = std::vector<uint8_t>{};
+  indices.reserve(RGB_TO_PALETTE_MAP_SIZE * RGB_TO_PALETTE_MAP_SIZE);
+
+  for (auto r = 0; r < MAX_COMPONENT_VALUE; ++r)
+  {
+    for (auto g = 0; g < MAX_COMPONENT_VALUE; ++g)
+    {
+      for (auto b = 0; b < MAX_COMPONENT_VALUE; ++b)
+      {
+        indices.push_back(
+          findClosestPaletteIndex(r * FACTOR, g * FACTOR, b * FACTOR));
+      }
+    }
+  }
+
+  return indices;
 }
 
 } // namespace
@@ -244,7 +270,12 @@ SpecialEffectsRenderer::SpecialEffectsRenderer(renderer::Renderer* pRenderer)
   , mShader(WATER_EFFECT_SHADER)
   , mBatch(&mShader)
   , mWaterSurfaceAnimTexture(pRenderer, createWaterSurfaceAnimImage())
-  , mWaterEffectColorMapTexture(pRenderer, createWaterEffectColorMapImage())
+  , mWaterEffectPaletteTexture(pRenderer, createWaterEffectPaletteImage())
+  , mRgbToPaletteIndexMap(
+      pRenderer,
+      createRgbToPaletteIndexMap(),
+      RGB_TO_PALETTE_MAP_SIZE,
+      RGB_TO_PALETTE_MAP_SIZE)
 {
   pRenderer->setNativeRepeatEnabled(mWaterSurfaceAnimTexture.data(), true);
 }
@@ -300,7 +331,8 @@ void SpecialEffectsRenderer::drawWaterEffect(
 
   mBatch.addTexture(backgroundBuffer.data());
   mBatch.addTexture(mWaterSurfaceAnimTexture.data());
-  mBatch.addTexture(mWaterEffectColorMapTexture.data());
+  mBatch.addTexture(mRgbToPaletteIndexMap.data());
+  mBatch.addTexture(mWaterEffectPaletteTexture.data());
 
   mpRenderer->drawCustomQuadBatch(mBatch.data());
 }
