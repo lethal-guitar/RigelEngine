@@ -547,7 +547,9 @@ struct Renderer::Impl
 
     // Use shader
     const auto transform = computeTransformationMatrix(
-      mStateStack.back(), currentRenderTargetSize());
+      mStateStack.back().mGlobalTranslation,
+      mStateStack.back().mGlobalScale,
+      currentRenderTargetSize());
     batch.mpShader->use();
     batch.mpShader->setUniform("transform", transform);
     setVertexLayout(batch.mpShader->vertexLayout());
@@ -891,24 +893,12 @@ struct Renderer::Impl
   }
 
 
-  glm::mat4 computeTransformationMatrix(
-    const State& state,
-    const base::Size& framebufferSize)
-  {
-    const auto projection = glm::ortho(
-      0.0f, float(framebufferSize.width), float(framebufferSize.height), 0.0f);
-    return glm::scale(
-      glm::translate(projection, glm::vec3(state.mGlobalTranslation, 0.0f)),
-      glm::vec3(state.mGlobalScale, 1.0f));
-  }
-
-
   void commitTransformationMatrix(
     const State& state,
     const base::Size& framebufferSize)
   {
-    const auto projectionMatrix =
-      computeTransformationMatrix(state, framebufferSize);
+    const auto projectionMatrix = computeTransformationMatrix(
+      state.mGlobalTranslation, state.mGlobalScale, framebufferSize);
     shaderToUse(state).setUniform("transform", projectionMatrix);
   }
 
