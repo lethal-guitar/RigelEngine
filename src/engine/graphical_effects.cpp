@@ -239,7 +239,7 @@ data::Image createWaterEffectColorMapImage()
 } // namespace
 
 
-WaterEffectRenderer::WaterEffectRenderer(renderer::Renderer* pRenderer)
+SpecialEffectsRenderer::SpecialEffectsRenderer(renderer::Renderer* pRenderer)
   : mpRenderer(pRenderer)
   , mShader(WATER_EFFECT_SHADER)
   , mBatch(&mShader)
@@ -250,10 +250,10 @@ WaterEffectRenderer::WaterEffectRenderer(renderer::Renderer* pRenderer)
 }
 
 
-void WaterEffectRenderer::draw(
+void SpecialEffectsRenderer::drawWaterEffect(
   const renderer::RenderTargetTexture& backgroundBuffer,
-  const base::ArrayView<WaterEffectArea> areas,
-  const int surfaceAnimationStep)
+  base::ArrayView<WaterEffectArea> areas,
+  int surfaceAnimationStep)
 {
   assert(surfaceAnimationStep >= 0 && surfaceAnimationStep < 4);
 

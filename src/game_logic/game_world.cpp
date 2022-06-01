@@ -288,7 +288,7 @@ GameWorld::GameWorld(
         context.mpResources->loadUltrawideHudFrameImage()},
       mpSpriteFactory)
   , mMessageDisplay(mpServiceProvider, &mTextRenderer)
-  , mWaterEffect(mpRenderer)
+  , mSpecialEffects(mpRenderer)
   , mWaterEffectBuffer(
       renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
   , mLowResLayer(
@@ -1059,7 +1059,7 @@ void GameWorld::drawMapAndSprites(
 
     renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
 
-    mWaterEffect.draw(
+    mSpecialEffects.drawWaterEffect(
       mWaterEffectBuffer, waterEffectAreas, state.mWaterAnimStep);
     renderForegroundLayers();
   }

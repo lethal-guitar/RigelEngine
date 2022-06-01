@@ -36,12 +36,12 @@ struct WaterEffectArea
 };
 
 
-class WaterEffectRenderer
+class SpecialEffectsRenderer
 {
 public:
-  WaterEffectRenderer(renderer::Renderer* pRenderer);
+  SpecialEffectsRenderer(renderer::Renderer* pRenderer);
 
-  void draw(
+  void drawWaterEffect(
     const renderer::RenderTargetTexture& backgroundBuffer,
     base::ArrayView<WaterEffectArea> areas,
     int surfaceAnimationStep);
