@@ -372,7 +372,7 @@ void SpriteRenderingSystem::renderSprite(const SpriteDrawSpec& spec) const
   if (spec.mIsFlashingWhite)
   {
     const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
+    mpRenderer->setOverlayColor(data::GameTraits::INGAME_PALETTE[15]);
     mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
   }
   else if (spec.mUseCloakEffect)
