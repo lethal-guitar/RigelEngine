@@ -179,7 +179,7 @@ struct Sprite
   const SpriteDrawData* mpDrawData = nullptr;
   std::array<RenderSlot, NUM_RENDER_SLOTS> mFramesToRender;
   std::bitset<NUM_RENDER_SLOTS> mFlashingWhiteStates;
-  bool mTranslucent = false;
+  bool mUseCloakEffect = false;
   bool mShow = true;
 };
 

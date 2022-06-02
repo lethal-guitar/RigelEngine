@@ -96,7 +96,7 @@ void collectVisibleSprites(
                   const base::Vec2& previousPosition,
                   const base::Vec2& position,
                   const bool flashingWhite,
-                  const bool translucent,
+                  const bool useCloakEffect,
                   const bool drawTopmost,
                   const int drawOrder) {
     const auto topLeft = drawPosition(frame, position);
@@ -115,7 +115,7 @@ void collectVisibleSprites(
         previousTopLeft, topLeft, interpolationFactor),
       data::tilesToPixels(frame.mDimensions)};
     const auto drawSpec =
-      SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, translucent};
+      SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, useCloakEffect};
 
     output.push_back({drawSpec, drawOrder, drawTopmost});
   };
@@ -155,7 +155,7 @@ void collectVisibleSprites(
           previousPosition,
           position,
           sprite.mFlashingWhiteStates.test(slotIndex),
-          sprite.mTranslucent,
+          sprite.mUseCloakEffect,
           drawTopmost,
           drawOrder);
         ++slotIndex;
@@ -174,7 +174,7 @@ void collectVisibleSprites(
             previousPosition + item.mOffset,
             position + item.mOffset,
             false,
-            sprite.mTranslucent,
+            sprite.mUseCloakEffect,
             drawTopmost,
             drawOrder);
         }
@@ -208,8 +208,9 @@ void collectVisibleSprites(
         const auto destRect =
           base::Rect<int>{data::tilesToPixels(topLeft), {width, height}};
 
+        const auto useCloakEffect = sprite.mUseCloakEffect;
         const auto drawSpec =
-          SpriteDrawSpec{destRect, frame.mImageId, false, sprite.mTranslucent};
+          SpriteDrawSpec{destRect, frame.mImageId, false, useCloakEffect};
         output.push_back({drawSpec, drawOrder, drawTopmost});
       }
     });
@@ -374,7 +375,7 @@ void SpriteRenderingSystem::renderSprite(const SpriteDrawSpec& spec) const
     mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
     mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
   }
-  else if (spec.mIsTranslucent)
+  else if (spec.mUseCloakEffect)
   {
     const auto saved = renderer::saveState(mpRenderer);
     mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});

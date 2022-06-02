@@ -669,7 +669,7 @@ void Player::die()
   mpEvents->emit(rigel::events::CloakExpired{});
 
   auto& sprite = *mEntity.component<c::Sprite>();
-  sprite.mTranslucent = false;
+  sprite.mUseCloakEffect = false;
   sprite.mShow = true;
 
   mState = Dieing{};
@@ -1743,7 +1743,7 @@ void Player::updateCloakedAppearance()
   const auto hasCloak = isCloaked();
 
   auto& sprite = *mEntity.component<c::Sprite>();
-  sprite.mTranslucent = hasCloak;
+  sprite.mUseCloakEffect = hasCloak;
 
   // clang-format off
   if (

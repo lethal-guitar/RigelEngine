@@ -53,7 +53,7 @@ struct SpriteDrawSpec
   base::Rect<int> mDestRect;
   int mImageId;
   bool mIsFlashingWhite;
-  bool mIsTranslucent;
+  bool mUseCloakEffect;
 };
 
 
