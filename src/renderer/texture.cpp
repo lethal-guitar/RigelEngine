@@ -18,8 +18,6 @@
 
 #include "renderer/custom_quad_batch.hpp"
 
-#include <cassert>
-
 
 namespace rigel::renderer
 {

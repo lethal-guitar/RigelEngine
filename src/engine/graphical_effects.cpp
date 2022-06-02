@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <iterator>
 
 
 namespace rigel::engine
