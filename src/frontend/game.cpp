@@ -203,7 +203,12 @@ Game::Game(
       effectiveGamePath(commandLineOptions, *pUserProfile),
       pUserProfile->mOptions.mEnableTopLevelMods,
       pUserProfile->mModLibrary.enabledModPaths())
-  , mpSoundSystem([&]() {
+  , mpSoundSystem([&]() -> std::unique_ptr<audio::SoundSystem> {
+    if (commandLineOptions.mDisableAudio)
+    {
+      return nullptr;
+    }
+
     std::unique_ptr<audio::SoundSystem> pResult;
     try
     {
