@@ -22,7 +22,7 @@
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
 #include "game_logic/game_world.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 #include "ui/utils.hpp"
 

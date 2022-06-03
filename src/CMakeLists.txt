@@ -292,8 +292,8 @@ set(core_sources
     renderer/texture.hpp
     renderer/texture_atlas.cpp
     renderer/texture_atlas.hpp
-    renderer/upscaling_utils.cpp
-    renderer/upscaling_utils.hpp
+    renderer/upscaling.cpp
+    renderer/upscaling.hpp
     renderer/vertex_buffer_utils.hpp
     renderer/viewport_utils.cpp
     renderer/viewport_utils.hpp

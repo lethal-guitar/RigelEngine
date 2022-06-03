@@ -21,7 +21,7 @@
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "renderer/texture_atlas.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 
 #include <algorithm>
 #include <functional>

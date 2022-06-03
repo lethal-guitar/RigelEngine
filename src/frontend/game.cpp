@@ -24,7 +24,7 @@
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
 #include "game_logic/demo_player.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"

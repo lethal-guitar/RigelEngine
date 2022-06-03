@@ -19,7 +19,7 @@
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 
 #include <algorithm>
 #include <array>

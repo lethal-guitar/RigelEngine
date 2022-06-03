@@ -37,7 +37,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"
