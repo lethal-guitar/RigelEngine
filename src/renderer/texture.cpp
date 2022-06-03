@@ -140,4 +140,18 @@ RenderTargetTexture::RenderTargetTexture(
 {
 }
 
+
+MonoTexture::MonoTexture(
+  Renderer* pRenderer,
+  base::ArrayView<std::uint8_t> data,
+  const int width,
+  const int height)
+  : Texture(
+      pRenderer,
+      pRenderer->createMonoTexture(width, height, data),
+      width,
+      height)
+{
+}
+
 } // namespace rigel::renderer

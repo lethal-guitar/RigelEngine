@@ -57,6 +57,15 @@ constexpr auto MAX_QUADS_PER_BATCH = 1280u;
 constexpr auto MAX_BATCH_SIZE = MAX_QUADS_PER_BATCH * std::size(QUAD_INDICES);
 
 
+#ifdef RIGEL_USE_GL_ES
+constexpr GLint MONO_TEXTURE_INTERNAL_FORMAT = GL_LUMINANCE;
+constexpr GLenum MONO_TEXTURE_FORMAT = GL_LUMINANCE;
+#else
+constexpr GLint MONO_TEXTURE_INTERNAL_FORMAT = GL_RED;
+constexpr GLenum MONO_TEXTURE_FORMAT = GL_RED;
+#endif
+
+
 class DummyVao
 {
 #ifndef RIGEL_USE_GL_ES
@@ -175,7 +184,9 @@ auto getSize(SDL_Window* pWindow)
 GLuint createGlTexture(
   const GLsizei width,
   const GLsizei height,
-  const GLvoid* const pData)
+  const GLvoid* const pData,
+  const GLint internalFormat = GL_RGBA,
+  const GLenum format = GL_RGBA)
 {
   GLuint handle = 0;
   glGenTextures(1, &handle);
@@ -189,11 +200,11 @@ GLuint createGlTexture(
   glTexImage2D(
     GL_TEXTURE_2D,
     0,
-    GL_RGBA,
+    internalFormat,
     width,
     height,
     0,
-    GL_RGBA,
+    format,
     GL_UNSIGNED_BYTE,
     pData);
   return handle;
@@ -977,6 +988,24 @@ struct Renderer::Impl
   }
 
 
+  TextureId
+    createMonoTexture(int width, int height, base::ArrayView<std::uint8_t> data)
+  {
+    submitBatch();
+
+    const auto handle = createGlTexture(
+      GLsizei(width),
+      GLsizei(height),
+      data.data(),
+      MONO_TEXTURE_INTERNAL_FORMAT,
+      MONO_TEXTURE_FORMAT);
+    glBindTexture(GL_TEXTURE_2D, mLastUsedTexture);
+
+    ++mNumTextures;
+    return handle;
+  }
+
+
   void destroyTexture(TextureId texture)
   {
     submitBatch();
@@ -1256,6 +1285,15 @@ TextureId Renderer::createRenderTargetTexture(const int width, const int height)
 TextureId Renderer::createTexture(const data::Image& image)
 {
   return mpImpl->createTexture(image);
+}
+
+
+TextureId Renderer::createMonoTexture(
+  int width,
+  int height,
+  base::ArrayView<std::uint8_t> data)
+{
+  return mpImpl->createMonoTexture(width, height, data);
 }
 
 

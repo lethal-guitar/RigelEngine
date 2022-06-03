@@ -203,6 +203,11 @@ public:
    */
   TextureId createRenderTargetTexture(int width, int height);
 
+  TextureId createMonoTexture(
+    int width,
+    int height,
+    base::ArrayView<std::uint8_t> data);
+
   /** Destroy a previously created texture or render target
    *
    * This is a low-level API. Using the Texture and RenderTarget classes
