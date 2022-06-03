@@ -19,7 +19,9 @@
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
+#include "renderer/shader_code.hpp"
 #include "renderer/upscaling.hpp"
+#include "renderer/viewport_utils.hpp"
 
 #include <algorithm>
 #include <array>
@@ -141,6 +143,81 @@ const renderer::ShaderSpec WATER_EFFECT_SHADER{
   FRAGMENT_SOURCE_WATER_EFFECT};
 
 
+const char* VERTEX_SOURCE_CLOAK_EFFECT = R"shd(
+ATTRIBUTE vec2 position;
+ATTRIBUTE vec2 texCoord;
+
+OUT vec2 texCoordBackgroundFrag;
+OUT vec2 texCoordFrag;
+
+uniform mat4 transform;
+uniform mat4 backgroundTransform;
+
+void main() {
+  SET_POINT_SIZE(1.0);
+  vec4 transformedPosForUv = backgroundTransform * vec4(position, 0.0, 1.0);
+
+  texCoordBackgroundFrag = (transformedPosForUv.xy + vec2(1.0, 1.0)) / 2.0;
+  texCoordFrag = vec2(texCoord.x, 1.0 - texCoord.y);
+
+  gl_Position = transform * vec4(position, 0.0, 1.0);
+}
+)shd";
+
+const char* FRAGMENT_SOURCE_CLOAK_EFFECT = R"shd(
+DEFAULT_PRECISION_DECLARATION
+OUTPUT_COLOR_DECLARATION
+
+IN vec2 texCoordBackgroundFrag;
+IN vec2 texCoordFrag;
+
+uniform sampler2D backgroundTextureData;
+uniform sampler2D foregroundTextureData;
+uniform sampler2D rgbToPaletteIndexData;
+uniform sampler2D blendMapData;
+
+
+HIGHP float colorToPaletteIndex(vec4 color) {
+  HIGHP vec4 quantizedRgb = floor(color * 16.0);
+  HIGHP float rgbIndex =
+    quantizedRgb.r * 16.0 * 16.0 +
+    quantizedRgb.g * 16.0 +
+    quantizedRgb.b;
+  HIGHP vec2 lookupCoords = vec2(mod(rgbIndex, 64.0), rgbIndex / 64.0) / 64.0;
+  return TEXTURE_LOOKUP(rgbToPaletteIndexData, lookupCoords).r * 256.0;
+}
+
+
+void main() {
+  vec4 background = TEXTURE_LOOKUP(backgroundTextureData, texCoordBackgroundFrag);
+  vec4 foreground = TEXTURE_LOOKUP(foregroundTextureData, texCoordFrag);
+
+  HIGHP float index1 = colorToPaletteIndex(background);
+  HIGHP float index2 = colorToPaletteIndex(foreground);
+
+  vec3 blendedColor =
+    TEXTURE_LOOKUP(blendMapData, vec2(index1, index2) / 16.0).rgb;
+
+  float blendedAlpha = foreground.a + 1.0 - background.a;
+
+  OUTPUT_COLOR = vec4(blendedColor, blendedAlpha);
+}
+)shd";
+
+
+constexpr auto CLOAK_EFFECT_TEXTURE_UNIT_NAMES = std::array{
+  "backgroundTextureData",
+  "foregroundTextureData",
+  "rgbToPaletteIndexData",
+  "blendMapData"};
+
+const renderer::ShaderSpec CLOAK_EFFECT_SHADER{
+  renderer::VertexLayout::PositionAndTexCoords,
+  CLOAK_EFFECT_TEXTURE_UNIT_NAMES,
+  VERTEX_SOURCE_CLOAK_EFFECT,
+  FRAGMENT_SOURCE_CLOAK_EFFECT};
+
+
 data::Image createWaterSurfaceAnimImage()
 {
   auto pixels = data::PixelBuffer{
@@ -217,6 +294,28 @@ data::Image createWaterEffectPaletteImage()
 }
 
 
+data::Image createCloakBlendMapImage()
+{
+  constexpr auto NUM_COLORS = int(data::GameTraits::INGAME_PALETTE.size());
+
+  auto pixels = data::PixelBuffer{};
+  pixels.reserve(NUM_COLORS * NUM_COLORS);
+
+  for (auto y = NUM_COLORS - 1; y >= 0; --y)
+  {
+    for (auto x = 0; x < NUM_COLORS; ++x)
+    {
+      // Use (x & 1) for a similar effect but with pure grayscale (no
+      // red/yellow/green artifacts)
+      const auto blendedColorIndex = (x & ~2) | ((y & 1) << 1);
+      pixels.push_back(data::GameTraits::INGAME_PALETTE[blendedColorIndex]);
+    }
+  }
+
+  return data::Image{std::move(pixels), NUM_COLORS, NUM_COLORS};
+}
+
+
 std::vector<std::uint8_t> createRgbToPaletteIndexMap()
 {
   auto distanceSquared = [](const data::Pixel& lhs, const data::Pixel& rhs) {
@@ -271,12 +370,14 @@ SpecialEffectsRenderer::SpecialEffectsRenderer(
   renderer::Renderer* pRenderer,
   const data::GameOptions& options)
   : mpRenderer(pRenderer)
-  , mShader(WATER_EFFECT_SHADER)
-  , mBatch(&mShader)
+  , mWaterEffectShader(WATER_EFFECT_SHADER)
+  , mCloakEffectShader(CLOAK_EFFECT_SHADER)
+  , mBatch(&mWaterEffectShader)
   , mBackgroundBuffer(
       renderer::createFullscreenRenderTarget(mpRenderer, options))
   , mWaterSurfaceAnimTexture(pRenderer, createWaterSurfaceAnimImage())
   , mWaterEffectPaletteTexture(pRenderer, createWaterEffectPaletteImage())
+  , mCloakBlendMapTexture(pRenderer, createCloakBlendMapImage())
   , mRgbToPaletteIndexMap(
       pRenderer,
       createRgbToPaletteIndexMap(),
@@ -308,6 +409,11 @@ void SpecialEffectsRenderer::drawWaterEffect(
   base::ArrayView<WaterEffectArea> areas,
   int surfaceAnimationStep)
 {
+  if (areas.empty())
+  {
+    return;
+  }
+
   assert(surfaceAnimationStep >= 0 && surfaceAnimationStep < 4);
 
   mBatch.reset();
@@ -356,11 +462,55 @@ void SpecialEffectsRenderer::drawWaterEffect(
   mBatch.addTexture(mRgbToPaletteIndexMap.data());
   mBatch.addTexture(mWaterEffectPaletteTexture.data());
 
-  mShader.use();
-  mShader.setUniform(
+  mWaterEffectShader.use();
+  mWaterEffectShader.setUniform(
     "transform", renderer::computeTransformationMatrix(mpRenderer));
 
   mpRenderer->drawCustomQuadBatch(mBatch.data());
+}
+
+
+void SpecialEffectsRenderer::drawCloakEffect(
+  const renderer::TextureId textureId,
+  const renderer::TexCoords& texCoords,
+  const base::Rect<int>& destRect) const
+{
+  if (
+    mCloakEffectTempBuffer.width() < destRect.size.width ||
+    mCloakEffectTempBuffer.height() < destRect.size.height)
+  {
+    mCloakEffectTempBuffer = renderer::RenderTargetTexture(
+      mpRenderer, destRect.size.width, destRect.size.height);
+  }
+
+  const auto backgroundTransform = renderer::computeTransformationMatrix(
+    mpRenderer->globalTranslation() +
+      renderer::scaleVec(destRect.topLeft, mpRenderer->globalScale()),
+    mpRenderer->globalScale(),
+    mpRenderer->currentRenderTargetSize());
+
+  {
+    auto guard = mCloakEffectTempBuffer.bindAndReset();
+    mpRenderer->clear({});
+
+    const auto textureIds = std::array{
+      mBackgroundBuffer.data(),
+      textureId,
+      mRgbToPaletteIndexMap.data(),
+      mCloakBlendMapTexture.data()};
+    const auto vertices =
+      renderer::createTexturedQuadVertices(texCoords, {{}, destRect.size});
+
+    mCloakEffectShader.use();
+    mCloakEffectShader.setUniform("backgroundTransform", backgroundTransform);
+    mCloakEffectShader.setUniform(
+      "transform", renderer::computeTransformationMatrix(mpRenderer));
+
+    mpRenderer->drawCustomQuadBatch(
+      {textureIds, vertices, &mCloakEffectShader});
+  }
+
+  mCloakEffectTempBuffer.render(destRect.topLeft);
 }
 
 } // namespace rigel::engine

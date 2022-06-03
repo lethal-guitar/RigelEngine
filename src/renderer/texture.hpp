@@ -174,6 +174,7 @@ void drawWithCustomShader(
 class RenderTargetTexture : public Texture
 {
 public:
+  RenderTargetTexture() = default;
   RenderTargetTexture(Renderer* pRenderer, int width, int height);
 
   [[nodiscard]] auto bind()

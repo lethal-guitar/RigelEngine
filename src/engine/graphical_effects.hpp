@@ -56,13 +56,21 @@ public:
     base::ArrayView<WaterEffectArea> areas,
     int surfaceAnimationStep);
 
+  void drawCloakEffect(
+    renderer::TextureId textureId,
+    const renderer::TexCoords& texCoords,
+    const base::Rect<int>& destRect) const;
+
 private:
   renderer::Renderer* mpRenderer;
-  renderer::Shader mShader;
+  renderer::Shader mWaterEffectShader;
+  renderer::Shader mCloakEffectShader;
   renderer::CustomQuadBatch mBatch;
   renderer::RenderTargetTexture mBackgroundBuffer;
+  mutable renderer::RenderTargetTexture mCloakEffectTempBuffer;
   renderer::Texture mWaterSurfaceAnimTexture;
   renderer::Texture mWaterEffectPaletteTexture;
+  renderer::Texture mCloakBlendMapTexture;
   renderer::MonoTexture mRgbToPaletteIndexMap;
 };
 

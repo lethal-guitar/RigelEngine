@@ -39,6 +39,9 @@ class TextureAtlas;
 namespace rigel::engine
 {
 
+class SpecialEffectsRenderer;
+
+
 /** Animates sprites with an AnimationLoop component
  *
  * Should be called at game-logic rate. Works on all entities that have a
@@ -85,11 +88,15 @@ public:
     const base::Vec2& cameraPosition,
     float interpolationFactor);
 
-  void renderRegularSprites() const;
-  void renderForegroundSprites() const;
+  bool cloakEffectSpritesVisible() const { return mCloakEffectSpritesVisible; }
+
+  void renderRegularSprites(const SpecialEffectsRenderer& fx) const;
+  void renderForegroundSprites(const SpecialEffectsRenderer& fx) const;
 
 private:
-  void renderSprite(const SpriteDrawSpec& spec) const;
+  void renderSprite(
+    const SpriteDrawSpec& spec,
+    const SpecialEffectsRenderer& fx) const;
 
   // Temporary storage used for sorting sprites by draw order during sprite
   // collection. Scope-wise, this is only needed during update(), but in order
@@ -101,6 +108,7 @@ private:
   // by each call to update().
   std::vector<SpriteDrawSpec> mSprites;
   std::vector<SpriteDrawSpec>::iterator miForegroundSprites;
+  bool mCloakEffectSpritesVisible = false;
 
   // Dependencies needed for drawing
   renderer::Renderer* mpRenderer;

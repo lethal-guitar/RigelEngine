@@ -133,4 +133,15 @@ void TextureAtlas::draw(
   mAtlasTextures[info.mTextureIndex].render(actualSrcRect, destRect);
 }
 
+
+auto TextureAtlas::drawData(int index) const -> DrawData
+{
+  const auto& info = mAtlasMap[index];
+  const auto& texture = mAtlasTextures[info.mTextureIndex];
+
+  return {
+    texture.data(),
+    renderer::toTexCoords(info.mRect, texture.width(), texture.height())};
+}
+
 } // namespace rigel::renderer

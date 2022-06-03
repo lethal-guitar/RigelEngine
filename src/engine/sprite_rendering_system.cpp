@@ -17,6 +17,7 @@
 #include "sprite_rendering_system.hpp"
 
 #include "data/unit_conversions.hpp"
+#include "engine/graphical_effects.hpp"
 #include "engine/motion_smoothing.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
@@ -345,28 +346,37 @@ void SpriteRenderingSystem::update(
 
   miForegroundSprites = std::next(
     begin(mSprites), std::distance(begin(mSortBuffer), iFirstTopMostSprite));
+
+  mCloakEffectSpritesVisible =
+    std::any_of(begin(mSprites), end(mSprites), [](const SpriteDrawSpec& spec) {
+      return spec.mUseCloakEffect;
+    });
 }
 
 
-void SpriteRenderingSystem::renderRegularSprites() const
+void SpriteRenderingSystem::renderRegularSprites(
+  const SpecialEffectsRenderer& fx) const
 {
   for (auto it = mSprites.begin(); it != miForegroundSprites; ++it)
   {
-    renderSprite(*it);
+    renderSprite(*it, fx);
   }
 }
 
 
-void SpriteRenderingSystem::renderForegroundSprites() const
+void SpriteRenderingSystem::renderForegroundSprites(
+  const SpecialEffectsRenderer& fx) const
 {
   for (auto it = miForegroundSprites; it != mSprites.end(); ++it)
   {
-    renderSprite(*it);
+    renderSprite(*it, fx);
   }
 }
 
 
-void SpriteRenderingSystem::renderSprite(const SpriteDrawSpec& spec) const
+void SpriteRenderingSystem::renderSprite(
+  const SpriteDrawSpec& spec,
+  const SpecialEffectsRenderer& fx) const
 {
   // White flash takes priority over translucency
   if (spec.mIsFlashingWhite)
@@ -377,9 +387,9 @@ void SpriteRenderingSystem::renderSprite(const SpriteDrawSpec& spec) const
   }
   else if (spec.mUseCloakEffect)
   {
-    const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
-    mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
+    const auto [textureId, texCoords] = mpTextureAtlas->drawData(spec.mImageId);
+
+    fx.drawCloakEffect(textureId, texCoords, spec.mDestRect);
   }
   else
   {

@@ -1003,7 +1003,7 @@ void GameWorld::drawMapAndSprites(
       params.mRenderStartPosition, params.mViewportSize);
     state.mDynamicGeometrySystem.renderDynamicBackgroundSections(
       params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderRegularSprites();
+    state.mSpriteRenderingSystem.renderRegularSprites(mSpecialEffects);
   };
 
   auto renderForegroundLayers = [&]() {
@@ -1011,7 +1011,7 @@ void GameWorld::drawMapAndSprites(
       params.mRenderStartPosition, params.mViewportSize);
     state.mDynamicGeometrySystem.renderDynamicForegroundSections(
       params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderForegroundSprites();
+    state.mSpriteRenderingSystem.renderForegroundSprites(mSpecialEffects);
     renderTileDebris();
   };
 
@@ -1029,7 +1029,9 @@ void GameWorld::drawMapAndSprites(
 
   const auto waterEffectAreas = collectWaterEffectAreas(
     state.mEntities, params.mRenderStartPosition, params.mViewportSize);
-  if (waterEffectAreas.empty())
+  if (
+    waterEffectAreas.empty() &&
+    !mpState->mSpriteRenderingSystem.cloakEffectSpritesVisible())
   {
     renderBackdrop();
 
