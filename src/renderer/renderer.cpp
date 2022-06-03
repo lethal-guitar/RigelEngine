@@ -545,16 +545,10 @@ struct Renderer::Impl
       glBindTexture(GL_TEXTURE_2D, batch.mTextures[i - 1]);
     }
 
-    // Use shader
-    const auto transform = computeTransformationMatrix(
-      mStateStack.back().mGlobalTranslation,
-      mStateStack.back().mGlobalScale,
-      currentRenderTargetSize());
-    batch.mpShader->use();
-    batch.mpShader->setUniform("transform", transform);
-    setVertexLayout(batch.mpShader->vertexLayout());
 
     // Submit vertex buffer
+    setVertexLayout(batch.mpShader->vertexLayout());
+
     const auto numQuads =
       batch.mVertexBuffer.size() / std::tuple_size<QuadVertices>::value;
     const auto numIndices = GLsizei(numQuads * std::size(QUAD_INDICES));

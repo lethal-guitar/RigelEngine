@@ -17,6 +17,8 @@
 #include "texture.hpp"
 
 #include "renderer/custom_quad_batch.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/shader.hpp"
 
 
 namespace rigel::renderer
@@ -124,6 +126,10 @@ void drawWithCustomShader(
   const auto textureIds = std::array{texture.data()};
   const auto vertices = createTexturedQuadVertices(
     toTexCoords(sourceRect, texture.width(), texture.height()), destRect);
+
+  shader.use();
+  shader.setUniform("transform", computeTransformationMatrix(pRenderer));
+
   pRenderer->drawCustomQuadBatch({textureIds, vertices, &shader});
 }
 

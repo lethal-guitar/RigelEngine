@@ -356,6 +356,10 @@ void SpecialEffectsRenderer::drawWaterEffect(
   mBatch.addTexture(mRgbToPaletteIndexMap.data());
   mBatch.addTexture(mWaterEffectPaletteTexture.data());
 
+  mShader.use();
+  mShader.setUniform(
+    "transform", renderer::computeTransformationMatrix(mpRenderer));
+
   mpRenderer->drawCustomQuadBatch(mBatch.data());
 }
 
