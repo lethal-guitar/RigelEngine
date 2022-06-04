@@ -21,6 +21,11 @@
 #include "renderer/texture.hpp"
 
 
+namespace rigel::data
+{
+struct GameOptions;
+}
+
 namespace rigel::renderer
 {
 class Renderer;
@@ -36,22 +41,37 @@ struct WaterEffectArea
 };
 
 
-class WaterEffectRenderer
+class SpecialEffectsRenderer
 {
 public:
-  WaterEffectRenderer(renderer::Renderer* pRenderer);
+  SpecialEffectsRenderer(
+    renderer::Renderer* pRenderer,
+    const data::GameOptions& options);
 
-  void draw(
-    const renderer::RenderTargetTexture& backgroundBuffer,
+  void rebuildBackgroundBuffer(const data::GameOptions& options);
+  [[nodiscard]] auto bindBackgroundBuffer() { return mBackgroundBuffer.bind(); }
+  void drawBackgroundBuffer();
+
+  void drawWaterEffect(
     base::ArrayView<WaterEffectArea> areas,
     int surfaceAnimationStep);
 
+  void drawCloakEffect(
+    renderer::TextureId textureId,
+    const renderer::TexCoords& texCoords,
+    const base::Rect<int>& destRect) const;
+
 private:
   renderer::Renderer* mpRenderer;
-  renderer::Shader mShader;
+  renderer::Shader mWaterEffectShader;
+  renderer::Shader mCloakEffectShader;
   renderer::CustomQuadBatch mBatch;
+  renderer::RenderTargetTexture mBackgroundBuffer;
+  mutable renderer::RenderTargetTexture mCloakEffectTempBuffer;
   renderer::Texture mWaterSurfaceAnimTexture;
-  renderer::Texture mWaterEffectColorMapTexture;
+  renderer::Texture mWaterEffectPaletteTexture;
+  renderer::Texture mCloakBlendMapTexture;
+  renderer::MonoTexture mRgbToPaletteIndexMap;
 };
 
 } // namespace rigel::engine

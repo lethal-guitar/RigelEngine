@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "base/array_view.hpp"
 #include "base/defer.hpp"
 #include "base/spatial_types.hpp"
 #include "data/image.hpp"
@@ -173,6 +174,7 @@ void drawWithCustomShader(
 class RenderTargetTexture : public Texture
 {
 public:
+  RenderTargetTexture() = default;
   RenderTargetTexture(Renderer* pRenderer, int width, int height);
 
   [[nodiscard]] auto bind()
@@ -189,6 +191,18 @@ public:
     mpRenderer->setRenderTarget(data());
     return base::defer([this]() { mpRenderer->popState(); });
   }
+};
+
+
+class MonoTexture : public Texture
+{
+public:
+  MonoTexture() = default;
+  MonoTexture(
+    Renderer* renderer,
+    base::ArrayView<std::uint8_t> data,
+    int width,
+    int height);
 };
 
 } // namespace rigel::renderer

@@ -22,7 +22,7 @@
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/sprite_factory.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 
 #include <cmath>

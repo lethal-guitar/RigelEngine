@@ -28,7 +28,7 @@
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
 #include "renderer/opengl.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "sdl_utils/key_code.hpp"
 #include "sdl_utils/platform.hpp"
 #include "ui/credits.hpp"

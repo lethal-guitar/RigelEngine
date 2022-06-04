@@ -37,7 +37,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
 #include "ui/utils.hpp"
@@ -288,9 +288,7 @@ GameWorld::GameWorld(
         context.mpResources->loadUltrawideHudFrameImage()},
       mpSpriteFactory)
   , mMessageDisplay(mpServiceProvider, &mTextRenderer)
-  , mWaterEffect(mpRenderer)
-  , mWaterEffectBuffer(
-      renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
+  , mSpecialEffects(mpRenderer, *mpOptions)
   , mLowResLayer(
       mpRenderer,
       renderer::determineWidescreenViewport(mpRenderer).mWidthPx,
@@ -706,8 +704,7 @@ void GameWorld::render(const float interpolationFactor)
     mpOptions->mPerElementUpscalingEnabled != mPerElementUpscalingWasEnabled ||
     mPreviousWindowSize != mpRenderer->windowSize())
   {
-    mWaterEffectBuffer =
-      renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
+    mSpecialEffects.rebuildBackgroundBuffer(*mpOptions);
   }
 
   if (
@@ -1006,7 +1003,7 @@ void GameWorld::drawMapAndSprites(
       params.mRenderStartPosition, params.mViewportSize);
     state.mDynamicGeometrySystem.renderDynamicBackgroundSections(
       params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderRegularSprites();
+    state.mSpriteRenderingSystem.renderRegularSprites(mSpecialEffects);
   };
 
   auto renderForegroundLayers = [&]() {
@@ -1014,7 +1011,7 @@ void GameWorld::drawMapAndSprites(
       params.mRenderStartPosition, params.mViewportSize);
     state.mDynamicGeometrySystem.renderDynamicForegroundSections(
       params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderForegroundSprites();
+    state.mSpriteRenderingSystem.renderForegroundSprites(mSpecialEffects);
     renderTileDebris();
   };
 
@@ -1032,7 +1029,9 @@ void GameWorld::drawMapAndSprites(
 
   const auto waterEffectAreas = collectWaterEffectAreas(
     state.mEntities, params.mRenderStartPosition, params.mViewportSize);
-  if (waterEffectAreas.empty())
+  if (
+    waterEffectAreas.empty() &&
+    !mpState->mSpriteRenderingSystem.cloakEffectSpritesVisible())
   {
     renderBackdrop();
 
@@ -1043,24 +1042,18 @@ void GameWorld::drawMapAndSprites(
   else
   {
     {
-      auto saved = mWaterEffectBuffer.bind();
+      auto saved = mSpecialEffects.bindBackgroundBuffer();
       renderBackdrop();
 
       renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
       renderBackgroundLayers();
     }
 
-    {
-      auto saved = renderer::saveState(mpRenderer);
-      mpRenderer->setGlobalScale({1.0f, 1.0f});
-      mpRenderer->setGlobalTranslation({});
-      mWaterEffectBuffer.render(0, 0);
-    }
+    mSpecialEffects.drawBackgroundBuffer();
 
     renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
 
-    mWaterEffect.draw(
-      mWaterEffectBuffer, waterEffectAreas, state.mWaterAnimStep);
+    mSpecialEffects.drawWaterEffect(waterEffectAreas, state.mWaterAnimStep);
     renderForegroundLayers();
   }
 }

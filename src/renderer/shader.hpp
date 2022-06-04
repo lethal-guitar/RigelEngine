@@ -18,6 +18,7 @@
 
 #include "base/array_view.hpp"
 #include "base/defer.hpp"
+#include "base/spatial_types.hpp"
 #include "base/warnings.hpp"
 #include "renderer/opengl.hpp"
 
@@ -82,6 +83,36 @@ struct ShaderSpec
   const char* mVertexSource;
   const char* mFragmentSource;
 };
+
+
+glm::mat4 computeTransformationMatrix(
+  const glm::vec2& translation,
+  const glm::vec2& scale,
+  float framebufferWidth,
+  float framebufferHeight);
+
+inline glm::mat4 computeTransformationMatrix(
+  const glm::vec2& translation,
+  const glm::vec2& scale,
+  const base::Size& framebufferSize)
+{
+  return computeTransformationMatrix(
+    translation,
+    scale,
+    float(framebufferSize.width),
+    float(framebufferSize.height));
+}
+
+inline glm::mat4 computeTransformationMatrix(
+  const base::Vec2& translation,
+  const base::Vec2f& scale,
+  const base::Size& framebufferSize)
+{
+  return computeTransformationMatrix(
+    glm::vec2{float(translation.x), float(translation.y)},
+    glm::vec2{scale.x, scale.y},
+    framebufferSize);
+}
 
 
 class Shader

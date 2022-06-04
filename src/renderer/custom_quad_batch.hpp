@@ -17,8 +17,13 @@
 #pragma once
 
 #include "base/static_vector.hpp"
+#include "base/warnings.hpp"
 #include "renderer/renderer_support.hpp"
 #include "renderer/vertex_buffer_utils.hpp"
+
+RIGEL_DISABLE_WARNINGS
+#include <glm/mat4x4.hpp>
+RIGEL_RESTORE_WARNINGS
 
 #include <vector>
 
@@ -28,6 +33,8 @@ namespace rigel::renderer
 
 class Renderer;
 class Shader;
+
+glm::mat4 computeTransformationMatrix(renderer::Renderer* pRenderer);
 
 
 class CustomQuadBatch

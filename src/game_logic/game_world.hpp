@@ -172,8 +172,7 @@ private:
   data::PlayerModel mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
-  engine::WaterEffectRenderer mWaterEffect;
-  renderer::RenderTargetTexture mWaterEffectBuffer;
+  engine::SpecialEffectsRenderer mSpecialEffects;
   renderer::RenderTargetTexture mLowResLayer;
   base::Size mPreviousWindowSize;
   data::WidescreenHudStyle mPreviousHudStyle;

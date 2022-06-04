@@ -254,6 +254,7 @@ void initAndRunGame(
     optionsForRestartedGame.mSkipIntro = true;
     optionsForRestartedGame.mDebugModeEnabled =
       commandLineOptions.mDebugModeEnabled;
+    optionsForRestartedGame.mDisableAudio = commandLineOptions.mDisableAudio;
 
     while (result == Game::StopReason::RestartNeeded)
     {

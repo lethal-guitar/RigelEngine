@@ -43,6 +43,7 @@ struct CommandLineOptions
   std::optional<data::GameSessionId> mLevelToJumpTo;
   bool mSkipIntro = false;
   bool mDebugModeEnabled = false;
+  bool mDisableAudio = false;
   bool mPlayDemo = false;
   std::optional<base::Vec2> mPlayerPosition;
 };

@@ -17,11 +17,12 @@
 #include "sprite_rendering_system.hpp"
 
 #include "data/unit_conversions.hpp"
+#include "engine/graphical_effects.hpp"
 #include "engine/motion_smoothing.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "renderer/texture_atlas.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -96,7 +97,7 @@ void collectVisibleSprites(
                   const base::Vec2& previousPosition,
                   const base::Vec2& position,
                   const bool flashingWhite,
-                  const bool translucent,
+                  const bool useCloakEffect,
                   const bool drawTopmost,
                   const int drawOrder) {
     const auto topLeft = drawPosition(frame, position);
@@ -115,7 +116,7 @@ void collectVisibleSprites(
         previousTopLeft, topLeft, interpolationFactor),
       data::tilesToPixels(frame.mDimensions)};
     const auto drawSpec =
-      SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, translucent};
+      SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, useCloakEffect};
 
     output.push_back({drawSpec, drawOrder, drawTopmost});
   };
@@ -155,7 +156,7 @@ void collectVisibleSprites(
           previousPosition,
           position,
           sprite.mFlashingWhiteStates.test(slotIndex),
-          sprite.mTranslucent,
+          sprite.mUseCloakEffect,
           drawTopmost,
           drawOrder);
         ++slotIndex;
@@ -174,7 +175,7 @@ void collectVisibleSprites(
             previousPosition + item.mOffset,
             position + item.mOffset,
             false,
-            sprite.mTranslucent,
+            sprite.mUseCloakEffect,
             drawTopmost,
             drawOrder);
         }
@@ -208,8 +209,9 @@ void collectVisibleSprites(
         const auto destRect =
           base::Rect<int>{data::tilesToPixels(topLeft), {width, height}};
 
+        const auto useCloakEffect = sprite.mUseCloakEffect;
         const auto drawSpec =
-          SpriteDrawSpec{destRect, frame.mImageId, false, sprite.mTranslucent};
+          SpriteDrawSpec{destRect, frame.mImageId, false, useCloakEffect};
         output.push_back({drawSpec, drawOrder, drawTopmost});
       }
     });
@@ -344,41 +346,50 @@ void SpriteRenderingSystem::update(
 
   miForegroundSprites = std::next(
     begin(mSprites), std::distance(begin(mSortBuffer), iFirstTopMostSprite));
+
+  mCloakEffectSpritesVisible =
+    std::any_of(begin(mSprites), end(mSprites), [](const SpriteDrawSpec& spec) {
+      return spec.mUseCloakEffect;
+    });
 }
 
 
-void SpriteRenderingSystem::renderRegularSprites() const
+void SpriteRenderingSystem::renderRegularSprites(
+  const SpecialEffectsRenderer& fx) const
 {
   for (auto it = mSprites.begin(); it != miForegroundSprites; ++it)
   {
-    renderSprite(*it);
+    renderSprite(*it, fx);
   }
 }
 
 
-void SpriteRenderingSystem::renderForegroundSprites() const
+void SpriteRenderingSystem::renderForegroundSprites(
+  const SpecialEffectsRenderer& fx) const
 {
   for (auto it = miForegroundSprites; it != mSprites.end(); ++it)
   {
-    renderSprite(*it);
+    renderSprite(*it, fx);
   }
 }
 
 
-void SpriteRenderingSystem::renderSprite(const SpriteDrawSpec& spec) const
+void SpriteRenderingSystem::renderSprite(
+  const SpriteDrawSpec& spec,
+  const SpecialEffectsRenderer& fx) const
 {
   // White flash takes priority over translucency
   if (spec.mIsFlashingWhite)
   {
     const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setOverlayColor(base::Color{255, 255, 255, 255});
+    mpRenderer->setOverlayColor(data::GameTraits::INGAME_PALETTE[15]);
     mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
   }
-  else if (spec.mIsTranslucent)
+  else if (spec.mUseCloakEffect)
   {
-    const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setColorModulation(base::Color{255, 255, 255, 130});
-    mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
+    const auto [textureId, texCoords] = mpTextureAtlas->drawData(spec.mImageId);
+
+    fx.drawCloakEffect(textureId, texCoords, spec.mDestRect);
   }
   else
   {

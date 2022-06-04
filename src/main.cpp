@@ -175,6 +175,8 @@ std::variant<CommandLineOptions, int> parseArgs(int argc, char** argv)
       .help("Skip intro movies/Apogee logo, go straight to main menu")
     | lyra::opt(config.mDebugModeEnabled)["-d"]["--debug-mode"]
       .help("Enable debugging features")
+    | lyra::opt(config.mDisableAudio)["--no-audio"]
+      .help("Disable all audio output")
     | lyra::opt(config.mPlayDemo)["--play-demo"]
       .help("Play pre-recorded demo")
     | lyra::group([&](const lyra::group&){})

@@ -35,6 +35,12 @@ namespace rigel::renderer
 class TextureAtlas
 {
 public:
+  struct DrawData
+  {
+    renderer::TextureId mId;
+    renderer::TexCoords mTexCoords;
+  };
+
   /** Build a texture atlas
    *
    * Create an atlas using the provided list of images. Might use more than
@@ -62,6 +68,8 @@ public:
     int index,
     const base::Rect<int>& srcRect,
     const base::Rect<int>& destRect) const;
+
+  DrawData drawData(int index) const;
 
 private:
   struct TextureInfo

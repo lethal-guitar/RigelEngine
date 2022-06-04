@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "upscaling_utils.hpp"
+#include "upscaling.hpp"
 
 #include "base/math_utils.hpp"
 #include "data/game_traits.hpp"

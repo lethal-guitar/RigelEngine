@@ -275,6 +275,7 @@ set(core_sources
     game_logic/player/ship.hpp
     game_logic/world_state.cpp
     game_logic/world_state.hpp
+    renderer/custom_quad_batch.cpp
     renderer/custom_quad_batch.hpp
     renderer/fps_limiter.cpp
     renderer/fps_limiter.hpp
@@ -291,8 +292,8 @@ set(core_sources
     renderer/texture.hpp
     renderer/texture_atlas.cpp
     renderer/texture_atlas.hpp
-    renderer/upscaling_utils.cpp
-    renderer/upscaling_utils.hpp
+    renderer/upscaling.cpp
+    renderer/upscaling.hpp
     renderer/vertex_buffer_utils.hpp
     renderer/viewport_utils.cpp
     renderer/viewport_utils.hpp

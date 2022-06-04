@@ -24,7 +24,7 @@
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
 #include "game_logic/demo_player.hpp"
-#include "renderer/upscaling_utils.hpp"
+#include "renderer/upscaling.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"
@@ -203,7 +203,12 @@ Game::Game(
       effectiveGamePath(commandLineOptions, *pUserProfile),
       pUserProfile->mOptions.mEnableTopLevelMods,
       pUserProfile->mModLibrary.enabledModPaths())
-  , mpSoundSystem([&]() {
+  , mpSoundSystem([&]() -> std::unique_ptr<audio::SoundSystem> {
+    if (commandLineOptions.mDisableAudio)
+    {
+      return nullptr;
+    }
+
     std::unique_ptr<audio::SoundSystem> pResult;
     try
     {
