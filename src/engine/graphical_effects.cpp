@@ -16,8 +16,10 @@
 
 #include "graphical_effects.hpp"
 
+#include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "renderer/renderer.hpp"
+#include "renderer/upscaling_utils.hpp"
 
 #include <algorithm>
 #include <array>
@@ -265,10 +267,14 @@ std::vector<std::uint8_t> createRgbToPaletteIndexMap()
 } // namespace
 
 
-SpecialEffectsRenderer::SpecialEffectsRenderer(renderer::Renderer* pRenderer)
+SpecialEffectsRenderer::SpecialEffectsRenderer(
+  renderer::Renderer* pRenderer,
+  const data::GameOptions& options)
   : mpRenderer(pRenderer)
   , mShader(WATER_EFFECT_SHADER)
   , mBatch(&mShader)
+  , mBackgroundBuffer(
+      renderer::createFullscreenRenderTarget(mpRenderer, options))
   , mWaterSurfaceAnimTexture(pRenderer, createWaterSurfaceAnimImage())
   , mWaterEffectPaletteTexture(pRenderer, createWaterEffectPaletteImage())
   , mRgbToPaletteIndexMap(
@@ -281,8 +287,24 @@ SpecialEffectsRenderer::SpecialEffectsRenderer(renderer::Renderer* pRenderer)
 }
 
 
+void SpecialEffectsRenderer::rebuildBackgroundBuffer(
+  const data::GameOptions& options)
+{
+  mBackgroundBuffer =
+    renderer::createFullscreenRenderTarget(mpRenderer, options);
+}
+
+
+void SpecialEffectsRenderer::drawBackgroundBuffer()
+{
+  auto saved = renderer::saveState(mpRenderer);
+  mpRenderer->setGlobalScale({1.0f, 1.0f});
+  mpRenderer->setGlobalTranslation({});
+  mBackgroundBuffer.render(0, 0);
+}
+
+
 void SpecialEffectsRenderer::drawWaterEffect(
-  const renderer::RenderTargetTexture& backgroundBuffer,
   base::ArrayView<WaterEffectArea> areas,
   int surfaceAnimationStep)
 {
@@ -329,7 +351,7 @@ void SpecialEffectsRenderer::drawWaterEffect(
     }
   }
 
-  mBatch.addTexture(backgroundBuffer.data());
+  mBatch.addTexture(mBackgroundBuffer.data());
   mBatch.addTexture(mWaterSurfaceAnimTexture.data());
   mBatch.addTexture(mRgbToPaletteIndexMap.data());
   mBatch.addTexture(mWaterEffectPaletteTexture.data());

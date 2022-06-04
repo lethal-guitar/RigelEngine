@@ -21,6 +21,11 @@
 #include "renderer/texture.hpp"
 
 
+namespace rigel::data
+{
+struct GameOptions;
+}
+
 namespace rigel::renderer
 {
 class Renderer;
@@ -39,10 +44,15 @@ struct WaterEffectArea
 class SpecialEffectsRenderer
 {
 public:
-  SpecialEffectsRenderer(renderer::Renderer* pRenderer);
+  SpecialEffectsRenderer(
+    renderer::Renderer* pRenderer,
+    const data::GameOptions& options);
+
+  void rebuildBackgroundBuffer(const data::GameOptions& options);
+  [[nodiscard]] auto bindBackgroundBuffer() { return mBackgroundBuffer.bind(); }
+  void drawBackgroundBuffer();
 
   void drawWaterEffect(
-    const renderer::RenderTargetTexture& backgroundBuffer,
     base::ArrayView<WaterEffectArea> areas,
     int surfaceAnimationStep);
 
@@ -50,6 +60,7 @@ private:
   renderer::Renderer* mpRenderer;
   renderer::Shader mShader;
   renderer::CustomQuadBatch mBatch;
+  renderer::RenderTargetTexture mBackgroundBuffer;
   renderer::Texture mWaterSurfaceAnimTexture;
   renderer::Texture mWaterEffectPaletteTexture;
   renderer::MonoTexture mRgbToPaletteIndexMap;

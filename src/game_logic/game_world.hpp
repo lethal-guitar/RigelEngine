@@ -173,7 +173,6 @@ private:
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
   engine::SpecialEffectsRenderer mSpecialEffects;
-  renderer::RenderTargetTexture mWaterEffectBuffer;
   renderer::RenderTargetTexture mLowResLayer;
   base::Size mPreviousWindowSize;
   data::WidescreenHudStyle mPreviousHudStyle;

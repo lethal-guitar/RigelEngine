@@ -288,9 +288,7 @@ GameWorld::GameWorld(
         context.mpResources->loadUltrawideHudFrameImage()},
       mpSpriteFactory)
   , mMessageDisplay(mpServiceProvider, &mTextRenderer)
-  , mSpecialEffects(mpRenderer)
-  , mWaterEffectBuffer(
-      renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions))
+  , mSpecialEffects(mpRenderer, *mpOptions)
   , mLowResLayer(
       mpRenderer,
       renderer::determineWidescreenViewport(mpRenderer).mWidthPx,
@@ -706,8 +704,7 @@ void GameWorld::render(const float interpolationFactor)
     mpOptions->mPerElementUpscalingEnabled != mPerElementUpscalingWasEnabled ||
     mPreviousWindowSize != mpRenderer->windowSize())
   {
-    mWaterEffectBuffer =
-      renderer::createFullscreenRenderTarget(mpRenderer, *mpOptions);
+    mSpecialEffects.rebuildBackgroundBuffer(*mpOptions);
   }
 
   if (
@@ -1043,24 +1040,18 @@ void GameWorld::drawMapAndSprites(
   else
   {
     {
-      auto saved = mWaterEffectBuffer.bind();
+      auto saved = mSpecialEffects.bindBackgroundBuffer();
       renderBackdrop();
 
       renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
       renderBackgroundLayers();
     }
 
-    {
-      auto saved = renderer::saveState(mpRenderer);
-      mpRenderer->setGlobalScale({1.0f, 1.0f});
-      mpRenderer->setGlobalTranslation({});
-      mWaterEffectBuffer.render(0, 0);
-    }
+    mSpecialEffects.drawBackgroundBuffer();
 
     renderer::setLocalTranslation(mpRenderer, params.mCameraOffset);
 
-    mSpecialEffects.drawWaterEffect(
-      mWaterEffectBuffer, waterEffectAreas, state.mWaterAnimStep);
+    mSpecialEffects.drawWaterEffect(waterEffectAreas, state.mWaterAnimStep);
     renderForegroundLayers();
   }
 }
