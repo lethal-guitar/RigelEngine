@@ -18,8 +18,8 @@
 
 #include "base/array_view.hpp"
 #include "base/defer.hpp"
+#include "base/image.hpp"
 #include "base/spatial_types.hpp"
-#include "data/image.hpp"
 #include "renderer/renderer.hpp"
 
 

@@ -17,10 +17,10 @@
 #pragma once
 
 #include "assets/byte_buffer.hpp"
+#include "base/image.hpp"
 #include "base/spatial_types.hpp"
 #include "data/actor_ids.hpp"
 #include "data/game_traits.hpp"
-#include "data/image.hpp"
 
 #include <map>
 #include <vector>

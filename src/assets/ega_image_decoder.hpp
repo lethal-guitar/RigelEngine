@@ -18,8 +18,8 @@
 
 #include "assets/byte_buffer.hpp"
 #include "assets/palette.hpp"
+#include "base/image.hpp"
 #include "data/game_traits.hpp"
-#include "data/image.hpp"
 
 
 namespace rigel::assets
