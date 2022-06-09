@@ -16,10 +16,14 @@ if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type was specified, will default to ${CMAKE_BUILD_TYPE}")
 endif()
 
+message(STATUS "${PROJECT_NAME}, build type: ${CMAKE_BUILD_TYPE}, version: ${PROJECT_VERSION}")
+
 option(USE_GL_ES "Use OpenGL ES instead of regular OpenGL" OFF)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(BUILD_TESTS "Build tests" OFF)
+
+include("${CMAKE_SOURCE_DIR}/cmake/rigel_sanitizers.cmake")
 
 # Dependencies
 ###############################################################################

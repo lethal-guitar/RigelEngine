@@ -40,7 +40,7 @@ Each option can be either `ON` or `OFF`. The default is `OFF` for all options.
 
 * `USE_GL_ES`: Build against the OpenGL ES 2.0 API instead of OpenGL 3.0. See [OpenGL ES version](#linux-build-instructions-gles) for more info.
 * `WARNINGS_AS_ERRORS`: Make compiler warnings fail the build
-* `BUILD_TESTS`: Build the unit tests (`tests` target) 
+* `BUILD_TESTS`: Build the unit tests (`tests` target)
 * `BUILD_BENCHMARKS`: Build the benchmarks (`benchmarks` target)
 
 For developing RigelEngine, I recommend enabling warnings as errors and tests:
@@ -50,6 +50,15 @@ cmake . -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON
 ```
 
 This is how the project is built on CI.
+
+#### Using Address Sanitizer (ASAN)
+
+If you wish to run tests with AddressSanitizer (available on clang and gcc), use `CMAKE_BUILD_TYPE=Asan`, like so:
+
+```shell
+cmake . -DCMAKE_BUILD_TYPE=Asan -DWARNINGS_AS_ERRORS=ON -DBUILD_TESTS=ON
+ctest -T MemCheck # add other ctest options here, -V is a good one
+```
 
 ### <a name="dependencies">Pre-requisites and dependencies</a>
 
