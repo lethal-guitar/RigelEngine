@@ -17,12 +17,12 @@
 #pragma once
 
 #include "assets/byte_buffer.hpp"
-#include "data/audio_buffer.hpp"
+#include "base/audio_buffer.hpp"
 
 
 namespace rigel::assets
 {
 
-data::AudioBuffer decodeVoc(const ByteBuffer& data);
+base::AudioBuffer decodeVoc(const ByteBuffer& data);
 
 }
