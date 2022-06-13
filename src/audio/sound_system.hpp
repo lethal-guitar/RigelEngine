@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include "base/audio_buffer.hpp"
 #include "base/defer.hpp"
-#include "data/audio_buffer.hpp"
 #include "data/game_options.hpp"
 #include "data/song.hpp"
 #include "data/sound_ids.hpp"

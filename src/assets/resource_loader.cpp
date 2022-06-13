@@ -440,7 +440,7 @@ bool ResourceLoader::hasSoundBlasterSound(const data::SoundId id) const
 }
 
 
-data::AudioBuffer
+base::AudioBuffer
   ResourceLoader::loadSoundBlasterSound(const data::SoundId id) const
 {
   const auto digitizedSoundFileName = digitizedSoundFilenameForId(id);
@@ -493,7 +493,7 @@ std::vector<std::filesystem::path>
 }
 
 
-data::AudioBuffer ResourceLoader::loadSound(std::string_view name) const
+base::AudioBuffer ResourceLoader::loadSound(std::string_view name) const
 {
   return assets::decodeVoc(file(name));
 }

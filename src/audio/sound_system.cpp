@@ -67,8 +67,8 @@ const auto COMBINED_SOUNDS_ADLIB_PERCENTAGE = 0.30f;
 const auto DESIRED_SAMPLE_RATE = 44100;
 const auto BUFFER_SIZE = 2048;
 
-data::AudioBuffer
-  resampleAudio(const data::AudioBuffer& buffer, const int newSampleRate)
+base::AudioBuffer
+  resampleAudio(const base::AudioBuffer& buffer, const int newSampleRate)
 {
   using ResamplerPtr =
     std::unique_ptr<SpeexResamplerState, decltype(&speex_resampler_destroy)>;
@@ -82,7 +82,7 @@ data::AudioBuffer
     base::integerDivCeil<spx_uint32_t>(inputLength, buffer.mSampleRate) *
     newSampleRate);
 
-  std::vector<data::Sample> resampled(outputLength);
+  std::vector<base::Sample> resampled(outputLength);
   speex_resampler_process_int(
     pResampler.get(),
     0,
@@ -95,7 +95,7 @@ data::AudioBuffer
 }
 
 
-void appendRampToZero(data::AudioBuffer& buffer, const int sampleRate)
+void appendRampToZero(base::AudioBuffer& buffer, const int sampleRate)
 {
   // Roughly 10 ms of linear ramp
   const auto rampLength = (sampleRate / 100);
@@ -107,7 +107,7 @@ void appendRampToZero(data::AudioBuffer& buffer, const int sampleRate)
   {
     const auto interpolation = i / static_cast<double>(rampLength);
     const auto rampedValue = lastSample * (1.0 - interpolation);
-    buffer.mSamples.push_back(base::roundTo<data::Sample>(rampedValue));
+    buffer.mSamples.push_back(base::roundTo<base::Sample>(rampedValue));
   }
 }
 
@@ -115,8 +115,8 @@ void appendRampToZero(data::AudioBuffer& buffer, const int sampleRate)
 // Prepares the given audio buffer to be loaded into a Mix_Chunk. This includes
 // resampling to the given sample rate and making sure the buffer ends in a
 // zero value to avoid clicks/pops.
-data::AudioBuffer
-  prepareBuffer(const data::AudioBuffer& original, const int sampleRate)
+base::AudioBuffer
+  prepareBuffer(const base::AudioBuffer& original, const int sampleRate)
 {
   auto buffer = resampleAudio(original, sampleRate);
   if (buffer.mSamples.back() != 0)
@@ -133,7 +133,7 @@ data::AudioBuffer
 // Converts the given audio buffer into the given audio format and returns it
 // as a raw buffer
 RawBuffer convertBuffer(
-  const data::AudioBuffer& buffer,
+  const base::AudioBuffer& buffer,
   const std::uint16_t audioFormat,
   const int numChannels)
 {
@@ -163,8 +163,8 @@ RawBuffer convertBuffer(
 
 
 void overlaySound(
-  data::AudioBuffer& base,
-  const data::AudioBuffer& overlay,
+  base::AudioBuffer& base,
+  const base::AudioBuffer& overlay,
   const float overlayVolume)
 {
   assert(base.mSampleRate == overlay.mSampleRate);
@@ -181,7 +181,7 @@ void overlaySound(
     reinterpret_cast<std::uint8_t*>(base.mSamples.data()),
     reinterpret_cast<const std::uint8_t*>(overlay.mSamples.data()),
     AUDIO_S16LSB,
-    static_cast<std::uint32_t>(overlay.mSamples.size() * sizeof(data::Sample)),
+    static_cast<std::uint32_t>(overlay.mSamples.size() * sizeof(base::Sample)),
     overlayVolumeSdl);
 }
 
@@ -191,7 +191,7 @@ auto idToIndex(const data::SoundId id)
   return static_cast<int>(id);
 }
 
-data::AudioBuffer renderAdlibSound(
+base::AudioBuffer renderAdlibSound(
   const assets::AdlibSound& sound,
   const AdlibEmulator::Type emulatorType)
 {
@@ -215,7 +215,7 @@ data::AudioBuffer renderAdlibSound(
   const auto octaveBits = static_cast<uint8_t>((sound.mOctave & 7) << 2);
 
   const auto samplesPerTick = OPL2_SAMPLE_RATE / ADLIB_SOUND_RATE;
-  std::vector<data::Sample> renderedSamples;
+  std::vector<base::Sample> renderedSamples;
   renderedSamples.reserve(sound.mSoundData.size() * samplesPerTick);
 
   for (const auto byte : sound.mSoundData)
@@ -237,7 +237,7 @@ data::AudioBuffer renderAdlibSound(
 }
 
 
-data::AudioBuffer loadSoundForStyle(
+base::AudioBuffer loadSoundForStyle(
   const data::SoundId id,
   const data::SoundStyle soundStyle,
   const int sampleRate,

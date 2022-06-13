@@ -21,8 +21,8 @@
 #include "assets/duke_script_loader.hpp"
 #include "assets/palette.hpp"
 #include "base/array_view.hpp"
+#include "base/audio_buffer.hpp"
 #include "base/image.hpp"
-#include "data/audio_buffer.hpp"
 #include "data/movie.hpp"
 #include "data/song.hpp"
 #include "data/sound_ids.hpp"
@@ -102,7 +102,7 @@ public:
 
   data::Song loadMusic(std::string_view name) const;
   bool hasSoundBlasterSound(data::SoundId id) const;
-  data::AudioBuffer loadSoundBlasterSound(data::SoundId id) const;
+  base::AudioBuffer loadSoundBlasterSound(data::SoundId id) const;
 
   std::vector<std::filesystem::path>
     replacementSoundPaths(data::SoundId id) const;
@@ -133,7 +133,7 @@ private:
   data::Image loadTiledFullscreenImage(
     std::string_view name,
     const data::Palette16& overridePalette) const;
-  data::AudioBuffer loadSound(std::string_view name) const;
+  base::AudioBuffer loadSound(std::string_view name) const;
 
   std::filesystem::path mGamePath;
   std::vector<std::filesystem::path> mModPaths;

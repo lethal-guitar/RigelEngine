@@ -39,6 +39,7 @@ set(core_sources
     audio/sound_system.hpp
     base/array_view.cpp
     base/array_view.hpp
+    base/audio_buffer.hpp
     base/clock.hpp
     base/container_utils.hpp
     base/defer.hpp
@@ -52,7 +53,6 @@ set(core_sources
     base/string_utils.hpp
     base/warnings.hpp
     data/actor_ids.hpp
-    data/audio_buffer.hpp
     data/bonus.hpp
     data/duke_script.hpp
     data/game_options.cpp

@@ -375,7 +375,7 @@ void decodeAudio(
 } // namespace
 
 
-data::AudioBuffer decodeVoc(const ByteBuffer& data)
+base::AudioBuffer decodeVoc(const ByteBuffer& data)
 {
   LeStreamReader reader(data);
   if (!readAndValidateVocHeader(reader))
@@ -383,7 +383,7 @@ data::AudioBuffer decodeVoc(const ByteBuffer& data)
     throw std::invalid_argument("Invalid VOC file header");
   }
 
-  std::vector<data::Sample> decodedSamples;
+  std::vector<base::Sample> decodedSamples;
   std::optional<int> sampleRate;
 
   while (reader.hasData())
