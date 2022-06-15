@@ -32,7 +32,7 @@ std::uint8_t extend6bitColorValue(const std::uint8_t value)
 {
   // See http://www.shikadi.net/moddingwiki/VGA_Palette for details
   // on the 6-bit to 8-bit conversion
-  return static_cast<uint8_t>(std::min(255, (value * 255) / 63));
+  return static_cast<uint8_t>(std::min(255, value * 256 / 63));
 }
 
 
@@ -66,10 +66,17 @@ data::Palette16
     // maximum number is 68 instead of 63. This maps Duke 2 palette values to
     // normal 6-bit VGA/EGA values.
     //
-    // See http://www.shikadi.net/moddingwiki/Duke_Nukem_II_Palette_Formats
-    const auto baseColorValue = entry - 1;
-    return static_cast<std::uint8_t>(
-      std::max(0, baseColorValue - baseColorValue / 16));
+    // The reason for the non-standard value range is that the game never
+    // directly writes these values to the VGA palette. Instead, it submits
+    // new palettes always in conjunction with a fade-in effect. During the
+    // fade-in, the palette is initially set to all zeroes. Then, the game
+    // sends 15 different palettes, with a delay inbetween, in order to create
+    // the fading effect. To do this, it stores the palette values in words
+    // instead of bytes, and adds the original palette values to the current
+    // values each iteration. This ultimately results in 'value * 15'.
+    // Since that would be out of range, the value is then divided by 16 before
+    // actually submitting it to the VGA hardware.
+    return static_cast<std::uint8_t>(entry * 15 / 16);
   });
 }
 
