@@ -66,7 +66,7 @@ struct GameTraits
   static constexpr std::size_t pixelsPerEgaByte = 8u;
 
   // This palette is derived from the hardcoded EGA palette in the uncompressed
-  // EXE (using unlzexe) at offset 0x1b038 (registered version, might be
+  // EXE (using unlzexe) at offset 0x1b068 (registered version, might be
   // different in the shareware version). It's very similar to GAMEPAL.PAL, but
   // has some subtle differences, particularly in the blue hues.
   //
@@ -84,16 +84,16 @@ struct GameTraits
     data::Pixel{182, 182, 182, 255},
     data::Pixel{121,   0,   0, 255},
     data::Pixel{182,   0,   0, 255},
-    data::Pixel{242, 105,  60, 255},
-    data::Pixel{242, 242,   0, 255},
+    data::Pixel{243, 105,  60, 255},
+    data::Pixel{243, 243,   0, 255},
     data::Pixel{0,    60,   0, 255},
     data::Pixel{0,     0, 121, 255},
     data::Pixel{0,     0, 182, 255},
-    data::Pixel{0,     0, 242, 255},
+    data::Pixel{0,     0, 243, 255},
     data::Pixel{0,   121,   0, 255},
     data::Pixel{0,   182,   0, 255},
     data::Pixel{121,  60,   0, 255},
-    data::Pixel{242, 242, 242, 255},
+    data::Pixel{243, 243, 243, 255},
   };
   // clang-format on
 
