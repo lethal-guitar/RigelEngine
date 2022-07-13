@@ -350,15 +350,18 @@ void HudRenderer::drawModernHud(
   drawFloatingInventory(
     playerModel.inventory(), {rightEdgeForFloatingParts - 2, 2});
 
-  const auto radarPosX = rightEdgeForFloatingParts - RADAR_SIZE_PX - 2;
+  if (mpOptions->mShowRadarInModernHud)
+  {
+    const auto radarPosX = rightEdgeForFloatingParts - RADAR_SIZE_PX - 2;
 
-  // padding + height of inventory + padding
-  const auto radarPosY = 2 + data::tilesToPixels(2) + 2;
+    // padding + height of inventory + padding
+    const auto radarPosY = 2 + data::tilesToPixels(2) + 2;
 
-  mpRenderer->drawFilledRectangle(
-    {{radarPosX, radarPosY}, {RADAR_SIZE_PX, RADAR_SIZE_PX}},
-    OVERLAY_BACKGROUND_COLOR);
-  drawRadar(radarPositions, {radarPosX, 20});
+    mpRenderer->drawFilledRectangle(
+      {{radarPosX, radarPosY}, {RADAR_SIZE_PX, RADAR_SIZE_PX}},
+      OVERLAY_BACKGROUND_COLOR);
+    drawRadar(radarPositions, {radarPosX, 20});
+  }
 
   // HUD frame
   const auto hudStartY =
@@ -513,8 +516,10 @@ void HudRenderer::drawFloatingInventory(
   const base::Vec2& position) const
 {
   const auto numItems = int(inventory.size());
+  const auto numItemSlots =
+    mpOptions->mShowRadarInModernHud ? std::max(numItems, 2) : numItems;
   const auto backgroundSize =
-    data::tilesToPixels(base::Size{std::max(numItems, 2) * 2, 2});
+    data::tilesToPixels(base::Size{numItemSlots * 2, 2});
   mpRenderer->drawFilledRectangle(
     {position - base::Vec2{backgroundSize.width, 0}, backgroundSize},
     OVERLAY_BACKGROUND_COLOR);

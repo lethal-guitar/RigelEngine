@@ -434,6 +434,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
 
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["widescreenHudStyle"] = options.mWidescreenHudStyle;
+  serialized["showRadarInModernHud"] = options.mShowRadarInModernHud;
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
   serialized["skipIntro"] = options.mSkipIntro;
   serialized["motionSmoothing"] = options.mMotionSmoothing;
@@ -651,6 +652,8 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
     "compatibilityModeOn", result.mCompatibilityModeOn, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("widescreenHudStyle", result.mWidescreenHudStyle, json);
+  extractValueIfExists(
+    "showRadarInModernHud", result.mShowRadarInModernHud, json);
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
   extractValueIfExists("skipIntro", result.mSkipIntro, json);
   extractValueIfExists("motionSmoothing", result.mMotionSmoothing, json);

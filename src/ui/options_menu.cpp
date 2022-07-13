@@ -808,6 +808,16 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
           static_cast<data::WidescreenHudStyle>(hudStyleIndex);
       });
 
+      withEnabledState(
+        mpOptions->mWidescreenModeOn &&
+          mpOptions->mWidescreenHudStyle == data::WidescreenHudStyle::Modern,
+        [this]() {
+          auto inverted = !mpOptions->mShowRadarInModernHud;
+          ImGui::SameLine();
+          ImGui::Checkbox("Hide radar", &inverted);
+          mpOptions->mShowRadarInModernHud = !inverted;
+        });
+
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
       ImGui::Checkbox(
