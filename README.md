@@ -36,6 +36,8 @@ The project overall is far from finished, though. There are still some pieces mi
 
 RigelEngine runs on Windows, Linux, and Mac OS X.
 
+It's fairly easy to [install on Steam Deck](https://github.com/lethal-guitar/RigelEngine/wiki/Steam-Deck-setup), too.
+
 The Linux version also runs well on small single-board computers (SBCs) like the Raspberry Pi and Odroid Go Advance.
 See [Running on Raspberry Pi and Odroid Go Advance](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance).
 
