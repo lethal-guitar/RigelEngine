@@ -252,7 +252,6 @@ TEST_CASE("Player movement")
 
   auto& position = *playerEntity.component<WorldPosition>();
   auto& animationFrame = playerEntity.component<Sprite>()->mFramesToRender[0];
-  auto& bbox = *playerEntity.component<BoundingBox>();
 
   PlayerInput pressingLeft;
   pressingLeft.mLeft = true;
@@ -431,7 +430,7 @@ TEST_CASE("Player movement")
       CHECK(player.isCrouching());
       CHECK(
         player.worldSpaceHitBox().size.height == PLAYER_HITBOX_HEIGHT_CROUCHED);
-      CHECK(bbox.size.height == PLAYER_HEIGHT_CROUCHED);
+      CHECK(player.collisionBox().size.height == PLAYER_HEIGHT_CROUCHED);
 
       SECTION("isCrouching() works correctly when recoil animation shown")
       {
@@ -456,7 +455,7 @@ TEST_CASE("Player movement")
 
         CHECK(animationFrame == 0);
         CHECK(!player.isCrouching());
-        CHECK(bbox.size.height == PLAYER_HEIGHT);
+        CHECK(player.collisionBox().size.height == PLAYER_HEIGHT);
       }
     }
 
@@ -2180,7 +2179,7 @@ TEST_CASE("Player movement")
       CHECK(player.isCrouching());
       CHECK(
         player.worldSpaceHitBox().size.height == PLAYER_HITBOX_HEIGHT_CROUCHED);
-      CHECK(bbox.size.height == PLAYER_HEIGHT_CROUCHED);
+      CHECK(player.collisionBox().size.height == PLAYER_HEIGHT_CROUCHED);
 
       SECTION("isCrouching() works correctly when recoil animation shown")
       {
@@ -2205,7 +2204,7 @@ TEST_CASE("Player movement")
 
         CHECK(animationFrame == 0);
         CHECK(!player.isCrouching());
-        CHECK(bbox.size.height == PLAYER_HEIGHT);
+        CHECK(player.collisionBox().size.height == PLAYER_HEIGHT);
       }
     }
 

@@ -451,8 +451,30 @@ engine::components::BoundingBox Player::worldSpaceHitBox() const
 
 engine::components::BoundingBox Player::worldSpaceCollisionBox() const
 {
-  return engine::toWorldSpace(
-    *mEntity.component<const c::BoundingBox>(), position());
+  return engine::toWorldSpace(collisionBox(), position());
+}
+
+
+engine::components::BoundingBox Player::collisionBox() const
+{
+  auto bbox = *mEntity.component<const c::BoundingBox>();
+
+  if (!stateIs<InShip>())
+  {
+    bbox.size.height = PLAYER_HEIGHT;
+
+    if (isCrouching())
+    {
+      bbox.size.height = PLAYER_HEIGHT_CROUCHED;
+    }
+
+    if (stateIs<OnPipe>())
+    {
+      bbox.size.height = PLAYER_HEIGHT_ON_PIPE;
+    }
+  }
+
+  return bbox;
 }
 
 
@@ -600,7 +622,6 @@ void Player::update(const PlayerInput& unfilteredInput)
   updateLadderAttachment(movementVector);
   updateMovement(movementVector, input.mJump, input.mFire);
   updateShooting(input.mFire);
-  updateCollisionBox();
 
   if (mVisualState != previousVisualState)
   {
@@ -726,7 +747,6 @@ void Player::exitShip()
   *mEntity.component<c::BoundingBox>() = DEFAULT_PLAYER_BOUNDS;
 
   setVisualState(VisualState::Standing);
-  updateCollisionBox();
 }
 
 
@@ -873,10 +893,7 @@ void Player::updateMovement(
   mStance = WeaponStance::Regular;
   mIsRidingElevator = false;
 
-  updateCollisionBox();
-
   auto& position = *mEntity.component<c::WorldPosition>();
-  auto& bbox = *mEntity.component<c::BoundingBox>();
 
   updateJumpButtonStateTracking(jumpButton);
 
@@ -954,13 +971,13 @@ void Player::updateMovement(
 
       if (
         mJumpRequested &&
-        !mpCollisionChecker->isTouchingCeiling(position, bbox))
+        !mpCollisionChecker->isTouchingCeiling(position, collisionBox()))
       {
         jump();
       }
       else
       {
-        if (!mpCollisionChecker->isOnSolidGround(position, bbox))
+        if (!mpCollisionChecker->isOnSolidGround(position, collisionBox()))
         {
           startFalling();
         }
@@ -1028,7 +1045,7 @@ void Player::updateMovement(
     [&, this](ClimbingLadder& state) {
       if (
         mJumpRequested &&
-        !mpCollisionChecker->isTouchingCeiling(position, bbox))
+        !mpCollisionChecker->isTouchingCeiling(position, collisionBox()))
       {
         jumpFromLadder(movementVector);
         return;
@@ -1044,7 +1061,7 @@ void Player::updateMovement(
       if (movementVector.y != 0)
       {
         const auto movement = movementVector.y;
-        const auto worldBBox = engine::toWorldSpace(bbox, position);
+        const auto worldBBox = engine::toWorldSpace(collisionBox(), position);
 
         const auto attachX = worldBBox.topLeft.x + 1;
 
@@ -1072,7 +1089,7 @@ void Player::updateMovement(
       if (
         movementVector.y <= 0 &&
         mJumpRequested &&
-        !mpCollisionChecker->isTouchingCeiling(position, bbox))
+        !mpCollisionChecker->isTouchingCeiling(position, collisionBox()))
       // clang-format on
       {
         position.y -= 1;
@@ -1117,7 +1134,7 @@ void Player::updateMovement(
         }
         else
         {
-          const auto worldBBox = engine::toWorldSpace(bbox, position);
+          const auto worldBBox = worldSpaceCollisionBox();
 
           // clang-format off
           const auto testX = movementVector.x < 0
@@ -1166,7 +1183,7 @@ void Player::updateMovement(
           const auto result =
             moveHorizontally(*mpCollisionChecker, mEntity, movementDirection());
 
-          const auto worldBBox = engine::toWorldSpace(bbox, position);
+          const auto worldBBox = worldSpaceCollisionBox();
           if (result != MovementResult::Completed)
           {
             if (mpCollisionChecker->isOnSolidGround(worldBBox))
@@ -1210,7 +1227,7 @@ void Player::updateMovement(
       {
         exitShip();
 
-        if (!mpCollisionChecker->isTouchingCeiling(position, bbox))
+        if (!mpCollisionChecker->isTouchingCeiling(position, collisionBox()))
         {
           jump();
         }
@@ -1361,7 +1378,6 @@ bool Player::updateElevatorMovement(const int movementDirection)
 
 void Player::updateLadderAttachment(const base::Vec2& movementVector)
 {
-  const auto& bbox = *mEntity.component<c::BoundingBox>();
   auto& position = *mEntity.component<c::WorldPosition>();
 
   // clang-format off
@@ -1374,7 +1390,7 @@ void Player::updateLadderAttachment(const base::Vec2& movementVector)
   const auto wantsToAttach = movementVector.y < 0;
   if (canAttachToLadder && wantsToAttach)
   {
-    const auto worldBBox = engine::toWorldSpace(bbox, position);
+    const auto worldBBox = worldSpaceCollisionBox();
 
     std::optional<base::Vec2> maybeLadderTouchPoint;
     for (int i = 0; i < worldBBox.size.width; ++i)
@@ -1759,26 +1775,6 @@ void Player::updateCloakedAppearance()
 }
 
 
-void Player::updateCollisionBox()
-{
-  if (!stateIs<InShip>())
-  {
-    auto& bbox = *mEntity.component<c::BoundingBox>();
-    bbox.size.height = PLAYER_HEIGHT;
-
-    if (isCrouching())
-    {
-      bbox.size.height = PLAYER_HEIGHT_CROUCHED;
-    }
-
-    if (stateIs<OnPipe>())
-    {
-      bbox.size.height = PLAYER_HEIGHT_ON_PIPE;
-    }
-  }
-}
-
-
 void Player::updateHitBox()
 {
   using VS = VisualState;
@@ -1968,12 +1964,12 @@ void Player::switchOrientation()
   orientation = engine::orientation::opposite(orientation);
 
   auto& position = *mEntity.component<c::WorldPosition>();
-  const auto& bbox = *mEntity.component<c::BoundingBox>();
 
   const auto offset = base::Vec2{1, 0};
   const auto stuckInWall = orientation == c::Orientation::Left
-    ? mpCollisionChecker->isTouchingLeftWall(position + offset, bbox)
-    : mpCollisionChecker->isTouchingRightWall(position - offset, bbox);
+    ? mpCollisionChecker->isTouchingLeftWall(position + offset, collisionBox())
+    : mpCollisionChecker->isTouchingRightWall(
+        position - offset, collisionBox());
   if (stuckInWall)
   {
     const auto direction = engine::orientation::toMovement(orientation);

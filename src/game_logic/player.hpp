@@ -296,6 +296,7 @@ public:
   engine::components::Orientation orientation() const;
   engine::components::BoundingBox worldSpaceHitBox() const;
   engine::components::BoundingBox worldSpaceCollisionBox() const;
+  engine::components::BoundingBox collisionBox() const;
   const base::Vec2& position() const;
   int animationFrame() const;
 
@@ -370,7 +371,6 @@ private:
   void resetAnimation();
   void updateMercyFramesAnimation();
   void updateCloakedAppearance();
-  void updateCollisionBox();
   void updateHitBox();
   void dieIfFallenOutOfMap();
 
