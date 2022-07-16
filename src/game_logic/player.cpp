@@ -873,6 +873,8 @@ void Player::updateMovement(
   mStance = WeaponStance::Regular;
   mIsRidingElevator = false;
 
+  updateCollisionBox();
+
   auto& position = *mEntity.component<c::WorldPosition>();
   auto& bbox = *mEntity.component<c::BoundingBox>();
 

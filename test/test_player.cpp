@@ -1358,6 +1358,29 @@ TEST_CASE("Player movement")
       }
     }
 
+    SECTION("Regression test: Can't walk through wall right after crouching")
+    {
+      const auto originalPosition = position;
+
+      resetOrientation(Orientation::Right);
+
+      // Blocking tile right in front of Duke's head
+      map.setTileAt(0, position.x + 3, position.y - 4, 1);
+
+      // Make player crouch
+      PlayerInput input;
+      input.mDown = true;
+      player.update(input);
+
+      // Move to the right
+      input.mDown = false;
+      input.mRight = true;
+      player.update(input);
+
+      // Movement should be blocked
+      CHECK(position == originalPosition);
+    }
+
     SECTION("Regression test: Large jump to wooden beam in M5")
     {
       position = {50, 50};
