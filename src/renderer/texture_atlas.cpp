@@ -35,6 +35,7 @@ namespace
 
 constexpr auto ATLAS_WIDTH = 2048;
 constexpr auto ATLAS_HEIGHT = 1024;
+constexpr auto PADDING = 1;
 
 } // namespace
 
@@ -54,8 +55,8 @@ TextureAtlas::TextureAtlas(
   {
     rects.push_back(stbrp_rect{
       index,
-      static_cast<stbrp_coord>(image.width()),
-      static_cast<stbrp_coord>(image.height()),
+      static_cast<stbrp_coord>(image.width() + 2 * PADDING),
+      static_cast<stbrp_coord>(image.height() + 2 * PADDING),
       0,
       0,
       0});
@@ -101,9 +102,11 @@ TextureAtlas::TextureAtlas(
 
     const auto textureIndex = static_cast<int>(mAtlasTextures.size());
     std::for_each(iFirstPacked, rects.end(), [&](const stbrp_rect& packedRect) {
-      atlas.insertImage(packedRect.x, packedRect.y, images[packedRect.id]);
+      atlas.insertImage(
+        packedRect.x + PADDING, packedRect.y + PADDING, images[packedRect.id]);
       mAtlasMap[packedRect.id] = TextureInfo{
-        {{packedRect.x, packedRect.y}, {packedRect.w, packedRect.h}},
+        {{packedRect.x + PADDING, packedRect.y + PADDING},
+         {packedRect.w - 2 * PADDING, packedRect.h - 2 * PADDING}},
         textureIndex};
     });
 
