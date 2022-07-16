@@ -151,6 +151,7 @@ struct GameOptions
   // Enhancements
   bool mWidescreenModeOn = false;
   WidescreenHudStyle mWidescreenHudStyle = WidescreenHudStyle::Classic;
+  bool mShowRadarInModernHud = true;
   bool mQuickSavingEnabled = false;
   bool mSkipIntro = false;
   bool mMotionSmoothing = false;

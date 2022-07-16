@@ -72,12 +72,13 @@ bool isCancelButton(const SDL_Event& event)
 
 bool isQuitConfirmButton(const SDL_Event& event)
 {
-  const auto yPressed =
-    event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_y;
+  const auto yOrEnterPressed = event.type == SDL_KEYDOWN &&
+    (event.key.keysym.sym == SDLK_y || event.key.keysym.sym == SDLK_RETURN ||
+     event.key.keysym.sym == SDLK_KP_ENTER);
   const auto buttonAPressed = event.type == SDL_CONTROLLERBUTTONDOWN &&
     event.cbutton.button == SDL_CONTROLLER_BUTTON_A;
 
-  return yPressed || buttonAPressed;
+  return yOrEnterPressed || buttonAPressed;
 }
 
 

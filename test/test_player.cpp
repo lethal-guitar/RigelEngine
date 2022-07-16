@@ -252,7 +252,6 @@ TEST_CASE("Player movement")
 
   auto& position = *playerEntity.component<WorldPosition>();
   auto& animationFrame = playerEntity.component<Sprite>()->mFramesToRender[0];
-  auto& bbox = *playerEntity.component<BoundingBox>();
 
   PlayerInput pressingLeft;
   pressingLeft.mLeft = true;
@@ -431,7 +430,7 @@ TEST_CASE("Player movement")
       CHECK(player.isCrouching());
       CHECK(
         player.worldSpaceHitBox().size.height == PLAYER_HITBOX_HEIGHT_CROUCHED);
-      CHECK(bbox.size.height == PLAYER_HEIGHT_CROUCHED);
+      CHECK(player.collisionBox().size.height == PLAYER_HEIGHT_CROUCHED);
 
       SECTION("isCrouching() works correctly when recoil animation shown")
       {
@@ -456,7 +455,7 @@ TEST_CASE("Player movement")
 
         CHECK(animationFrame == 0);
         CHECK(!player.isCrouching());
-        CHECK(bbox.size.height == PLAYER_HEIGHT);
+        CHECK(player.collisionBox().size.height == PLAYER_HEIGHT);
       }
     }
 
@@ -1358,6 +1357,29 @@ TEST_CASE("Player movement")
       }
     }
 
+    SECTION("Regression test: Can't walk through wall right after crouching")
+    {
+      const auto originalPosition = position;
+
+      resetOrientation(Orientation::Right);
+
+      // Blocking tile right in front of Duke's head
+      map.setTileAt(0, position.x + 3, position.y - 4, 1);
+
+      // Make player crouch
+      PlayerInput input;
+      input.mDown = true;
+      player.update(input);
+
+      // Move to the right
+      input.mDown = false;
+      input.mRight = true;
+      player.update(input);
+
+      // Movement should be blocked
+      CHECK(position == originalPosition);
+    }
+
     SECTION("Regression test: Large jump to wooden beam in M5")
     {
       position = {50, 50};
@@ -2157,7 +2179,7 @@ TEST_CASE("Player movement")
       CHECK(player.isCrouching());
       CHECK(
         player.worldSpaceHitBox().size.height == PLAYER_HITBOX_HEIGHT_CROUCHED);
-      CHECK(bbox.size.height == PLAYER_HEIGHT_CROUCHED);
+      CHECK(player.collisionBox().size.height == PLAYER_HEIGHT_CROUCHED);
 
       SECTION("isCrouching() works correctly when recoil animation shown")
       {
@@ -2182,7 +2204,7 @@ TEST_CASE("Player movement")
 
         CHECK(animationFrame == 0);
         CHECK(!player.isCrouching());
-        CHECK(bbox.size.height == PLAYER_HEIGHT);
+        CHECK(player.collisionBox().size.height == PLAYER_HEIGHT);
       }
     }
 
