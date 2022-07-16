@@ -135,10 +135,10 @@ auto viewportSizeWideScreen(
   const data::GameOptions& options)
 {
   const auto info = renderer::determineWidescreenViewport(pRenderer);
+  const auto style =
+    ui::effectiveHudStyle(options.mWidescreenHudStyle, pRenderer);
   const auto hudWidth =
-    options.mWidescreenHudStyle == data::WidescreenHudStyle::Classic
-    ? ui::HUD_WIDTH_RIGHT
-    : 0;
+    style == data::WidescreenHudStyle::Classic ? ui::HUD_WIDTH_RIGHT : 0;
   return base::Size{
     info.mWidthTiles - hudWidth, data::GameTraits::mapViewportSize.height};
 }

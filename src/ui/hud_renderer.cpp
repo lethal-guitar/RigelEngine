@@ -218,6 +218,15 @@ bool canUseHudStyle(
 }
 
 
+WidescreenHudStyle effectiveHudStyle(
+  WidescreenHudStyle style,
+  const renderer::Renderer* pRenderer)
+{
+  return canUseHudStyle(style, pRenderer) ? style
+                                          : data::WidescreenHudStyle::Classic;
+}
+
+
 HudRenderer::HudRenderer(
   const int levelNumber,
   const data::GameOptions* pOptions,
@@ -312,11 +321,7 @@ void HudRenderer::renderWidescreenHud(
   };
 
 
-  const auto styleToUse = canUseHudStyle(style, mpRenderer)
-    ? style
-    : data::WidescreenHudStyle::Classic;
-
-  switch (styleToUse)
+  switch (effectiveHudStyle(style, mpRenderer))
   {
     case data::WidescreenHudStyle::Classic:
       drawClassicWidescreenHud();
