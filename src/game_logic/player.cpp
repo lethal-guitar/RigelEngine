@@ -409,7 +409,7 @@ bool Player::isCloaked() const
 
 bool Player::isDead() const
 {
-  return stateIs<dying>() || stateIs<GettingSuckedIntoSpace>();
+  return stateIs<Dying>() || stateIs<GettingSuckedIntoSpace>();
 }
 
 
@@ -672,8 +672,8 @@ void Player::die()
   sprite.mUseCloakEffect = false;
   sprite.mShow = true;
 
-  mState = dying{};
-  setVisualState(VisualState::dying);
+  mState = Dying{};
+  setVisualState(VisualState::Dying);
   mpServiceProvider->playSound(data::SoundId::DukeDeath);
 }
 
@@ -1232,7 +1232,7 @@ void Player::updateMovement(
       }
     },
 
-    [](const dying&) {
+    [](const Dying&) {
       // should be handled in updateDeathAnimation()
       assert(false);
     },
@@ -1530,7 +1530,7 @@ void Player::updateDeathAnimation()
 
   auto& position = *mEntity.component<c::WorldPosition>();
   auto& animationFrame = mEntity.component<c::Sprite>()->mFramesToRender[0];
-  auto& deathAnimationState = std::get<dying>(mState);
+  auto& deathAnimationState = std::get<Dying>(mState);
 
   if (position.y > mpMap->height() + 3)
   {
