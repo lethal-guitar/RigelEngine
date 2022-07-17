@@ -384,6 +384,19 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::Checkbox(
         "Enable screen flashing", &mpOptions->mEnableScreenFlashes);
 
+      if (mpOptions->mUpscalingFilter == data::UpscalingFilter::PixelPerfect)
+      {
+        ImGui::Checkbox(
+          "Aspect ratio correction", &mpOptions->mAspectRatioCorrectionEnabled);
+      }
+      else
+      {
+        bool dummy = true;
+        ImGui::BeginDisabled(true);
+        ImGui::Checkbox("Aspect ratio correction", &dummy);
+        ImGui::EndDisabled();
+      }
+
       withEnabledState(!mpOptions->mPerElementUpscalingEnabled, [&]() {
         auto upscalingFilterIndex =
           static_cast<int>(mpOptions->mUpscalingFilter);
@@ -766,7 +779,9 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
     {
       ImGui::NewLine();
 
-      if (!canUseHudStyle(mpOptions->mWidescreenHudStyle, mpRenderer))
+      if (
+        mpOptions->mWidescreenModeOn &&
+        !canUseHudStyle(mpOptions->mWidescreenHudStyle, mpRenderer))
       {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
         ImGui::TextWrapped(
@@ -808,15 +823,23 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
           static_cast<data::WidescreenHudStyle>(hudStyleIndex);
       });
 
-      withEnabledState(
-        mpOptions->mWidescreenModeOn &&
-          mpOptions->mWidescreenHudStyle == data::WidescreenHudStyle::Modern,
-        [this]() {
-          auto inverted = !mpOptions->mShowRadarInModernHud;
-          ImGui::SameLine();
-          ImGui::Checkbox("Hide radar", &inverted);
-          mpOptions->mShowRadarInModernHud = !inverted;
-        });
+      ImGui::SameLine();
+
+      const auto canToggleRadar = mpOptions->mWidescreenModeOn &&
+        mpOptions->mWidescreenHudStyle == data::WidescreenHudStyle::Modern;
+      if (canToggleRadar)
+      {
+        auto inverted = !mpOptions->mShowRadarInModernHud;
+        ImGui::Checkbox("Hide radar", &inverted);
+        mpOptions->mShowRadarInModernHud = !inverted;
+      }
+      else
+      {
+        auto dummy = false;
+        ImGui::BeginDisabled(true);
+        ImGui::Checkbox("Hide radar", &dummy);
+        ImGui::EndDisabled();
+      }
 
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
