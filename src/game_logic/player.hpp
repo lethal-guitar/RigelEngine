@@ -174,7 +174,7 @@ struct Finished
 } // namespace death_animation
 
 
-using dying  = std::variant<
+using Dying  = std::variant<
   death_animation::FlyingUp,
   death_animation::FallingDown,
   death_animation::Exploding,
@@ -194,7 +194,7 @@ using PlayerState = std::variant<
   Interacting,
   Incapacitated,
   GettingSuckedIntoSpace,
-  dying>;
+  Dying>;
 
 
 // The enum's values are chosen to match the corresponding animation frames.
@@ -218,7 +218,7 @@ enum class VisualState
   Interacting = 33,
   ClimbingLadder = 35,
   UsingJetpack = 37,
-  dying = 29,
+  Dying = 29,
   Dead = 32,
   InShip = 100
 };
