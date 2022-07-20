@@ -1,5 +1,17 @@
 # Contribution guide
 
+## Minimum requirements for code contributions
+
+When contributing changes to RigelEngine's code,
+please compile the code locally and try to run the game at least once
+before submitting your PR.
+There is a CI system in place which will test your changes on all platforms,
+and I'm happy to help with fixing issues that are specific to other platforms than
+the one you're working on.
+
+Please do not submit PRs based on code changes made in GitHub's web interface,
+as there's no way to know if the code actually compiles after these changes.
+
 ## Coding style and code quality guidelines
 
 * Choose human readable names
