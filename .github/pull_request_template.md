@@ -1,5 +1,8 @@
 Thank you for taking the time to contribute to RigelEngine!
 I really appreciate it.
+
+Please read [the contribution guidelines](https://github.com/lethal-guitar/RigelEngine/blob/master/CONTRIBUTING.md) if you haven't already.
+
 To make the process as smooth as possible for both of us,
 I'd ask you to check a few things before submitting your PR:
 
