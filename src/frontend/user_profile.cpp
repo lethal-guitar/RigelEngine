@@ -407,6 +407,8 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["showFpsCounter"] = options.mShowFpsCounter;
   serialized["enableScreenFlashes"] = options.mEnableScreenFlashes;
   serialized["upscalingFilter"] = options.mUpscalingFilter;
+  serialized["aspectRatioCorrectionEnabled"] =
+    options.mAspectRatioCorrectionEnabled;
   serialized["soundStyle"] = options.mSoundStyle;
   serialized["adlibPlaybackType"] = options.mAdlibPlaybackType;
   serialized["musicVolume"] = options.mMusicVolume;
@@ -631,6 +633,8 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists(
     "enableScreenFlashes", result.mEnableScreenFlashes, json);
   extractValueIfExists("upscalingFilter", result.mUpscalingFilter, json);
+  extractValueIfExists(
+    "aspectRatioCorrectionEnabled", result.mAspectRatioCorrectionEnabled, json);
   extractValueIfExists("soundStyle", result.mSoundStyle, json);
   extractValueIfExists("adlibPlaybackType", result.mAdlibPlaybackType, json);
   extractValueIfExists("musicVolume", result.mMusicVolume, json);

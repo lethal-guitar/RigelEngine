@@ -123,6 +123,7 @@ struct GameOptions
   bool mShowFpsCounter = false;
   bool mEnableScreenFlashes = true;
   UpscalingFilter mUpscalingFilter = UpscalingFilter::None;
+  bool mAspectRatioCorrectionEnabled = true;
 
   // Sound
   float mMusicVolume = MUSIC_VOLUME_DEFAULT;

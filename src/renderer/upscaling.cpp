@@ -152,6 +152,11 @@ bool canUsePixelPerfectScaling(
   const Renderer* pRenderer,
   const data::GameOptions& options)
 {
+  if (!options.mAspectRatioCorrectionEnabled)
+  {
+    return true;
+  }
+
   const auto pixelPerfectBufferWidth =
     determineLowResBufferWidth(pRenderer, options.mWidescreenModeOn);
   return pRenderer->windowSize().width >=
@@ -303,10 +308,14 @@ void UpscalingBuffer::present(
     const auto usedWidth = isWidescreenFrame
       ? mRenderTarget.width()
       : data::GameTraits::viewportWidthPx;
-    setUpViewport(
-      usedWidth,
-      mRenderTarget.height(),
-      {PIXEL_PERFECT_SCALE_X, PIXEL_PERFECT_SCALE_Y});
+
+    const auto maxIntegerScaleFactor = float(std::min(
+      mpRenderer->windowSize().width / usedWidth,
+      mpRenderer->windowSize().height / mRenderTarget.height()));
+    const auto scale = mAspectRatioCorrection
+      ? base::Vec2f{PIXEL_PERFECT_SCALE_X, PIXEL_PERFECT_SCALE_Y}
+      : base::Vec2f{maxIntegerScaleFactor, maxIntegerScaleFactor};
+    setUpViewport(usedWidth, mRenderTarget.height(), scale);
     mRenderTarget.render(0, 0);
   }
   else
@@ -348,6 +357,8 @@ void UpscalingBuffer::setAlphaMod(const std::uint8_t alphaMod)
 
 void UpscalingBuffer::updateConfiguration(const data::GameOptions& options)
 {
+  mAspectRatioCorrection = options.mAspectRatioCorrectionEnabled;
+
   mRenderTarget = createFullscreenRenderTarget(mpRenderer, options);
 
   if (options.mPerElementUpscalingEnabled)

@@ -98,6 +98,7 @@ private:
   Shader mSharpBilinearShader;
   Renderer* mpRenderer;
   data::UpscalingFilter mFilter;
+  bool mAspectRatioCorrection;
   std::uint8_t mAlphaMod = 0;
 };
 

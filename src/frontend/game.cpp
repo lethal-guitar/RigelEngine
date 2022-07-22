@@ -636,7 +636,9 @@ bool Game::applyChangedOptions()
   if (
     widescreenModeActive != mWidescreenModeWasActive ||
     mPreviousWindowSize != mRenderer.windowSize() ||
-    currentOptions.mUpscalingFilter != mPreviousOptions.mUpscalingFilter)
+    currentOptions.mUpscalingFilter != mPreviousOptions.mUpscalingFilter ||
+    currentOptions.mAspectRatioCorrectionEnabled !=
+      mPreviousOptions.mAspectRatioCorrectionEnabled)
   {
     mUpscalingBuffer.updateConfiguration(currentOptions);
   }
