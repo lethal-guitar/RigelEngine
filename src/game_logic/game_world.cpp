@@ -422,6 +422,13 @@ void GameWorld::receive(const rigel::events::ExitReached& event)
 }
 
 
+void GameWorld::receive(const rigel::events::HintMachineMessage& event)
+{
+  mMessageDisplay.setMessage(
+    event.mText, ui::MessagePriority::HintMachineMessage);
+}
+
+
 void GameWorld::receive(const rigel::events::PlayerDied& event)
 {
   mpState->mPlayerDied = true;
@@ -566,6 +573,7 @@ void GameWorld::subscribe(entityx::EventManager& eventManager)
 {
   eventManager.subscribe<rigel::events::CheckPointActivated>(*this);
   eventManager.subscribe<rigel::events::ExitReached>(*this);
+  eventManager.subscribe<rigel::events::HintMachineMessage>(*this);
   eventManager.subscribe<rigel::events::PlayerDied>(*this);
   eventManager.subscribe<rigel::events::PlayerTookDamage>(*this);
   eventManager.subscribe<rigel::events::PlayerMessage>(*this);
@@ -585,6 +593,7 @@ void GameWorld::unsubscribe(entityx::EventManager& eventManager)
 {
   eventManager.unsubscribe<rigel::events::CheckPointActivated>(*this);
   eventManager.unsubscribe<rigel::events::ExitReached>(*this);
+  eventManager.unsubscribe<rigel::events::HintMachineMessage>(*this);
   eventManager.unsubscribe<rigel::events::PlayerDied>(*this);
   eventManager.unsubscribe<rigel::events::PlayerTookDamage>(*this);
   eventManager.unsubscribe<rigel::events::PlayerMessage>(*this);
@@ -1159,7 +1168,7 @@ void GameWorld::quickSave()
   mpQuickSave = std::make_unique<QuickSaveData>(
     QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
 
-  mMessageDisplay.setMessage("Quick saved.");
+  mMessageDisplay.setMessage("Quick saved.", ui::MessagePriority::Menu);
 
   LOG_F(INFO, "Quick save created");
 }
@@ -1178,7 +1187,7 @@ void GameWorld::quickLoad()
   mpState->synchronizeTo(
     *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
-  mMessageDisplay.setMessage("Quick save restored.");
+  mMessageDisplay.setMessage("Quick save restored.", ui::MessagePriority::Menu);
 
   if (!mpOptions->mMotionSmoothing)
   {

@@ -488,7 +488,7 @@ void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity)
     mLevelHints.getHint(mSessionId.mEpisode, mSessionId.mLevel);
   if (maybeHint)
   {
-    showMessage(*maybeHint);
+    mpEvents->emit(rigel::events::HintMachineMessage{*maybeHint});
   }
 
   entity.remove<Interactable>();

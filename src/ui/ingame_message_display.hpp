@@ -32,6 +32,14 @@ class MenuElementRenderer;
 namespace rigel::ui
 {
 
+enum class MessagePriority
+{
+  Normal,
+  HintMachineMessage,
+  Menu
+};
+
+
 class IngameMessageDisplay
 {
 public:
@@ -39,7 +47,9 @@ public:
     IGameServiceProvider* pServiceProvider,
     MenuElementRenderer* pTextRenderer);
 
-  void setMessage(std::string message);
+  void setMessage(
+    std::string message,
+    MessagePriority priority = MessagePriority::Normal);
 
   void update();
   void render();
@@ -87,6 +97,7 @@ private:
   std::string mMessage;
   // TODO: Use a string_view instead of a second string once upgraded to C++ 17
   std::string mPrintedMessage;
+  MessagePriority mCurrentPriority = MessagePriority::Normal;
 
   MenuElementRenderer* mpTextRenderer;
   IGameServiceProvider* mpServiceProvider;
