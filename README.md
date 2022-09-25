@@ -17,6 +17,7 @@ On top of that, it offers many modern enhancements, including:
 There was never any source code released for the original game, so this project
 is based on reverse engineering. Disassembly from the original executable served as basis for writing new code from scratch, while video captures from DosBox were used for frame-by-frame verification.
 See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing-an-old-dos-game-in-c-17/) to learn more about the process.
+See [Duke2Reconstructed](https://github.com/lethal-guitar/Duke2Reconstructed) for what the original code might have looked like.
 
 Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm via Emscripten)
 
