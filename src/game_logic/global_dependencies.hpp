@@ -144,6 +144,12 @@ struct PlayerMessage
 };
 
 
+struct HintMachineMessage
+{
+  std::string mText;
+};
+
+
 struct TutorialMessage
 {
   TutorialMessage() = default;

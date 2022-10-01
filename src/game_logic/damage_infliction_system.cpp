@@ -65,22 +65,23 @@ DamageInflictionSystem::DamageInflictionSystem(
 
 void DamageInflictionSystem::update(ex::EntityManager& es)
 {
-  es.each<DamageInflicting, WorldPosition, BoundingBox>(
+  es.each<Shootable, WorldPosition, BoundingBox>(
     [this, &es](
-      ex::Entity inflictorEntity,
-      DamageInflicting& damage,
-      const WorldPosition& inflictorPosition,
-      const BoundingBox& bbox) {
-      const auto inflictorBbox = engine::toWorldSpace(bbox, inflictorPosition);
+      ex::Entity shootableEntity,
+      Shootable& shootable,
+      const WorldPosition& shootablePos,
+      const BoundingBox& shootableBboxLocal) {
+      const auto shootableBbox =
+        engine::toWorldSpace(shootableBboxLocal, shootablePos);
 
-      ex::ComponentHandle<Shootable> shootable;
-      ex::ComponentHandle<WorldPosition> shootablePos;
-      ex::ComponentHandle<BoundingBox> shootableBboxLocal;
-      for (auto shootableEntity : es.entities_with_components(
-             shootable, shootablePos, shootableBboxLocal))
+      ex::ComponentHandle<DamageInflicting> damage;
+      ex::ComponentHandle<WorldPosition> inflictorPosition;
+      ex::ComponentHandle<BoundingBox> inflictorBboxLocal;
+      for (auto inflictorEntity : es.entities_with_components(
+             damage, inflictorPosition, inflictorBboxLocal))
       {
-        const auto shootableBbox =
-          engine::toWorldSpace(*shootableBboxLocal, *shootablePos);
+        const auto inflictorBbox =
+          engine::toWorldSpace(*inflictorBboxLocal, *inflictorPosition);
 
         const auto shootableOnScreen =
           shootableEntity.has_component<Active>() &&
@@ -89,17 +90,12 @@ void DamageInflictionSystem::update(ex::EntityManager& es)
         // clang-format off
         if (
           shootableBbox.intersects(inflictorBbox) &&
-          !shootable->mInvincible &&
-          (shootableOnScreen || shootable->mCanBeHitWhenOffscreen))
+          !shootable.mInvincible &&
+          (shootableOnScreen || shootable.mCanBeHitWhenOffscreen))
         // clang-format on
         {
-          const auto destroyOnContact =
-            damage.mDestroyOnContact || shootable->mAlwaysConsumeInflictor;
-          inflictDamage(inflictorEntity, damage, shootableEntity, *shootable);
-          if (destroyOnContact)
-          {
-            break;
-          }
+          inflictDamage(inflictorEntity, *damage, shootableEntity, shootable);
+          break;
         }
       }
     });

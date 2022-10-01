@@ -88,6 +88,7 @@ public:
 
   void receive(const rigel::events::CheckPointActivated& event);
   void receive(const rigel::events::ExitReached& event);
+  void receive(const rigel::events::HintMachineMessage& event);
   void receive(const rigel::events::PlayerDied& event);
   void receive(const rigel::events::PlayerTookDamage& event);
   void receive(const rigel::events::PlayerMessage& event);

@@ -177,7 +177,8 @@ base::Vec2f backdropOffset(
     else
     {
       return {
-        0.0f, float(GameTraits::viewportHeightPx) - backdropAutoScrollOffset};
+        cameraPosition.x * PARALLAX_FACTOR,
+        float(GameTraits::viewportHeightPx) - backdropAutoScrollOffset};
     }
   }
 

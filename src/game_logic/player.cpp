@@ -1126,7 +1126,7 @@ void Player::updateMovement(
           startFallingDelayed();
         }
       }
-      else if (movementVector.x != 0)
+      else if (movementVector.x != 0 && !fireButton.mIsPressed)
       {
         if (movementVector.x != orientationAsMovement)
         {

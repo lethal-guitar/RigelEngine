@@ -44,11 +44,16 @@ IngameMessageDisplay::IngameMessageDisplay(
 }
 
 
-void IngameMessageDisplay::setMessage(std::string message)
+void IngameMessageDisplay::setMessage(
+  std::string message,
+  MessagePriority priority)
 {
-  if (!message.empty())
+  if (
+    !message.empty() &&
+    (priority >= mCurrentPriority || !std::holds_alternative<Printing>(mState)))
   {
     mMessage = std::move(message);
+    mCurrentPriority = priority;
     mPrintedMessage.clear();
     mState = Printing{};
   }
