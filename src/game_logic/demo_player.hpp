@@ -28,7 +28,7 @@
 namespace rigel::game_logic
 {
 
-class GameWorld;
+class GameWorld_Classic;
 
 
 struct DemoInput
@@ -57,7 +57,7 @@ private:
   std::size_t mLevelIndex = 0;
   engine::TimeDelta mElapsedTime = 0;
 
-  std::unique_ptr<GameWorld> mpWorld;
+  std::unique_ptr<GameWorld_Classic> mpWorld;
 };
 
 } // namespace rigel::game_logic

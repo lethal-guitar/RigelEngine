@@ -19,6 +19,7 @@
 #include "assets/resource_loader.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "game_logic/game_world.hpp"
+#include "game_logic_classic/game_world_classic.hpp"
 
 
 namespace rigel::game_logic
@@ -92,7 +93,7 @@ data::GameSessionId demoSessionId(const std::size_t levelIndex)
 DemoPlayer::DemoPlayer(GameMode::Context context)
   : mContext(context)
   , mFrames(loadDemo(*context.mpResources))
-  , mpWorld(std::make_unique<GameWorld>(
+  , mpWorld(std::make_unique<GameWorld_Classic>(
       &mPlayerModel,
       demoSessionId(0),
       context,
@@ -137,7 +138,7 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
 
     mPlayerModel.resetForNewLevel();
 
-    mpWorld = std::make_unique<GameWorld>(
+    mpWorld = std::make_unique<GameWorld_Classic>(
       &mPlayerModel,
       demoSessionId(mLevelIndex),
       mContext,
