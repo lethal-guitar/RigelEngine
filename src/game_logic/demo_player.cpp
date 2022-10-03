@@ -113,11 +113,14 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
     return;
   }
 
+  auto changeLevel = false;
+
   mElapsedTime += dt;
 
   if (mElapsedTime >= GAME_LOGIC_UPDATE_DELAY)
   {
     mpWorld->updateGameLogic(mFrames[mCurrentFrameIndex].mInput);
+    changeLevel = mFrames[mCurrentFrameIndex].mNextLevel;
     ++mCurrentFrameIndex;
 
     mElapsedTime -= GAME_LOGIC_UPDATE_DELAY;
@@ -126,17 +129,24 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
   mpWorld->render();
   mpWorld->processEndOfFrameActions();
 
-  if (
-    mCurrentFrameIndex < mFrames.size() &&
-    mFrames[mCurrentFrameIndex].mNextLevel)
+  if (changeLevel && mCurrentFrameIndex < mFrames.size())
   {
     mContext.mpServiceProvider->fadeOutScreen();
 
-    ++mCurrentFrameIndex;
     ++mLevelIndex;
+
     mPlayerModel.resetForNewLevel();
+
     mpWorld = std::make_unique<GameWorld>(
-      &mPlayerModel, demoSessionId(mLevelIndex), mContext);
+      &mPlayerModel,
+      demoSessionId(mLevelIndex),
+      mContext,
+      std::nullopt,
+      false,
+      mFrames[mCurrentFrameIndex].mInput);
+    mpWorld->render();
+
+    mCurrentFrameIndex++;
 
     mContext.mpServiceProvider->fadeInScreen();
   }
