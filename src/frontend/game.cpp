@@ -251,7 +251,7 @@ Game::Game(
   , mpUserProfile(pUserProfile)
   , mPreviousWindowSize(mRenderer.windowSize())
   , mWidescreenModeWasActive(
-      pUserProfile->mOptions.mWidescreenModeOn &&
+      pUserProfile->mOptions.widescreenModeActive() &&
       renderer::canUseWidescreenMode(&mRenderer))
   , mScriptRunner(&mResources, &mRenderer, &mpUserProfile->mSaveSlots, this)
   , mAllScripts(loadScripts(mResources))
@@ -639,7 +639,7 @@ bool Game::applyChangedOptions()
     }
   }
 
-  const auto widescreenModeActive = currentOptions.mWidescreenModeOn &&
+  const auto widescreenModeActive = currentOptions.widescreenModeActive() &&
     renderer::canUseWidescreenMode(&mRenderer);
   if (
     widescreenModeActive != mWidescreenModeWasActive ||

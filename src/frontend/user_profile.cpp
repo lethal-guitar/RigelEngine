@@ -133,6 +133,14 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
     {WidescreenHudStyle::Ultrawide, "Ultrawide"},
     {WidescreenHudStyle::Modern, "Modern"},
   })
+
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  GameplayStyle,
+  {
+    {GameplayStyle::Classic, "Classic"},
+    {GameplayStyle::Enhanced, "Enhanced"},
+  })
 } // namespace data
 
 
@@ -434,6 +442,8 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["compatibilityModeOn"] = options.mCompatibilityModeOn;
 #endif
 
+  serialized["gameplayStyle"] = options.mGameplayStyle;
+
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["widescreenHudStyle"] = options.mWidescreenHudStyle;
   serialized["showRadarInModernHud"] = options.mShowRadarInModernHud;
@@ -654,6 +664,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists("topLevelModsEnabled", result.mEnableTopLevelMods, json);
   extractValueIfExists(
     "compatibilityModeOn", result.mCompatibilityModeOn, json);
+  extractValueIfExists("gameplayStyle", result.mGameplayStyle, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("widescreenHudStyle", result.mWidescreenHudStyle, json);
   extractValueIfExists(
