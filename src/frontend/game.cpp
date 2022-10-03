@@ -97,6 +97,7 @@ std::unique_ptr<GameMode> createInitialGameMode(
   public:
     explicit DemoTestMode(Context context)
       : mDemoPlayer(context)
+      , mpServiceProvider(context.mpServiceProvider)
     {
     }
 
@@ -105,11 +106,18 @@ std::unique_ptr<GameMode> createInitialGameMode(
       const std::vector<SDL_Event>&) override
     {
       mDemoPlayer.updateAndRender(dt);
+
+      if (mDemoPlayer.isFinished())
+      {
+        mpServiceProvider->scheduleGameQuit();
+      }
+
       return nullptr;
     }
 
   private:
     game_logic::DemoPlayer mDemoPlayer;
+    IGameServiceProvider* mpServiceProvider;
   };
 
   if (commandLineOptions.mLevelToJumpTo)
