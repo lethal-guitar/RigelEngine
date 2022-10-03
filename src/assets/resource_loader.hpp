@@ -91,6 +91,11 @@ public:
     return mActorImagePackage.drawIndexFor(id);
   }
 
+  int numActorFrames(data::ActorID id) const
+  {
+    return mActorImagePackage.numFramesFor(id);
+  }
+
   data::Image loadAntiPiracyImage() const;
 
   data::Image loadWideHudFrameImage() const;

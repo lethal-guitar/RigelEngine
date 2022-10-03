@@ -67,6 +67,11 @@ public:
     return mDrawIndexById.at(static_cast<size_t>(id));
   }
 
+  int numFramesFor(data::ActorID id) const
+  {
+    return int(mHeadersById.at(id).mFrames.size());
+  }
+
 private:
   const ByteBuffer mImageData;
   std::map<data::ActorID, ActorHeader> mHeadersById;

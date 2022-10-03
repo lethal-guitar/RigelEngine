@@ -294,4 +294,7 @@ enum class ActorID
   Rigelatin_soldier_projectile = 300
 };
 
+
+constexpr auto TOTAL_NUM_ACTOR_IDS = 301;
+
 } // namespace rigel::data

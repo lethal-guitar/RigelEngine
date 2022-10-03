@@ -835,6 +835,29 @@ bool hasAssociatedSprite(const ActorID actorID)
 }
 
 
+std::vector<int> buildImageIdTable(const assets::ResourceLoader& resources)
+{
+  std::vector<int> result;
+  result.resize(data::TOTAL_NUM_ACTOR_IDS);
+
+  auto imageId = 0;
+
+  for (const auto mainId : INGAME_SPRITE_ACTOR_IDS)
+  {
+    const auto actorPartIds = actorIDListForActor(mainId);
+
+    for (const auto partId : actorPartIds)
+    {
+      result[static_cast<size_t>(partId)] = imageId;
+
+      imageId += resources.numActorFrames(partId);
+    }
+  }
+
+  return result;
+}
+
+
 SpriteFactory::SpriteFactory(
   renderer::Renderer* pRenderer,
   const assets::ResourceLoader* pResourceLoader)
