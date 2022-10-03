@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
 #include "defs.h"
 
@@ -250,5 +249,3 @@ void Quit(const char* quitMessage);
 extern byte gfxCurrentPalette[16 * 3];
 extern bool jsButtonsSwapped;
 extern byte far mapExtraData[8304];
-
-#endif

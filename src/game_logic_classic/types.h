@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 enum
 {
@@ -40,5 +39,3 @@ typedef byte bool;
 typedef signed char sbyte;
 
 typedef void interrupt (*InterruptHandler)(void);
-
-#endif

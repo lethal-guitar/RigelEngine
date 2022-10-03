@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ACTORS_H
-#define ACTORS_H
+#pragma once
 
 #include "types.h"
 
@@ -343,5 +342,3 @@ that some sort of macros were used to make things a little easier.
 #define AINFO_DATA_OFFSET(offset)                    \
   (((dword)*(gfxActorInfoData + offset + 7) << 16) + \
   (dword)*(gfxActorInfoData + offset + 6))
-
-#endif

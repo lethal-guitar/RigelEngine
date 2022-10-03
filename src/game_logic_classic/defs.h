@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DEFS_H
-#define DEFS_H
+#pragma once
 
 #include "types.h"
 
@@ -92,4 +91,3 @@ typedef enum
 #endif
 
 
-#endif

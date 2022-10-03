@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GAMEDEFS_H
-#define GAMEDEFS_H
+#pragma once
 
 #include "defs.h"
 
@@ -316,4 +315,3 @@ typedef struct {
   }
 
 
-#endif

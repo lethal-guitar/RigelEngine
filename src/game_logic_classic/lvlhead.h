@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVL_HEAD_H
-#define LVL_HEAD_H
+#pragma once
 
 #define LVL_TILESET_FILENAME() (levelHeaderData)
 #define LVL_BACKDROP_FILENAME() (levelHeaderData + 13)
@@ -41,5 +40,3 @@
 #define READ_LVL_ACTOR_DESC_ID(index) READ_LVL_HEADER_WORD(45 + index)
 #define READ_LVL_ACTOR_DESC_X(index)  READ_LVL_HEADER_WORD(47 + index)
 #define READ_LVL_ACTOR_DESC_Y(index)  READ_LVL_HEADER_WORD(49 + index)
-
-#endif

@@ -23,8 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VARS_H
-#define VARS_H
+#pragma once
 
 #include "defs.h"
 
@@ -131,4 +130,3 @@ extern char tempFilename[20];
 extern int flicNextDelay;
 extern bool sysIsSecondTick;
 
-#endif
