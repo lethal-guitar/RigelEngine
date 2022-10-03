@@ -106,6 +106,12 @@ public:
   void updateGameLogic(const PlayerInput& input);
   void render(float interpolationFactor = 0.0f);
   void processEndOfFrameActions();
+  void updateBackdropAutoScrolling(engine::TimeDelta dt);
+
+  bool isPlayerInShip() const;
+
+  void toggleGodMode();
+  bool isGodModeOn() const;
 
   void activateFullHealthCheat();
   void activateGiveItemsCheat();
@@ -114,7 +120,10 @@ public:
   void quickLoad();
   bool canQuickLoad() const;
 
-  friend class rigel::GameRunner;
+  void debugToggleBoundingBoxDisplay();
+  void debugToggleWorldCollisionDataDisplay();
+  void debugToggleGridDisplay();
+  void printDebugText(std::ostream& stream) const;
 
 private:
   struct ViewportParams
@@ -142,8 +151,6 @@ private:
   void updateTemporaryItemExpiration();
   void showTutorialMessage(const data::TutorialMessageId id);
   void flashScreen(const base::Color& color);
-
-  void printDebugText(std::ostream& stream) const;
 
   ViewportParams determineSmoothScrollViewport(
     const base::Size& viewportSizeOriginal,

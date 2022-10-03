@@ -19,7 +19,6 @@
 #include "base/math_utils.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
-#include "game_logic/world_state.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -62,8 +61,8 @@ void GameRunner::handleEvent(const SDL_Event& event)
     return;
   }
 
-  const auto menuCommand = mInputHandler.handleEvent(
-    event, mWorld.mpState->mPlayer.stateIs<game_logic::InShip>());
+  const auto menuCommand =
+    mInputHandler.handleEvent(event, mWorld.isPlayerInShip());
 
   switch (menuCommand)
   {
@@ -149,7 +148,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt)
       update();
     }
 
-    mWorld.mpState->mMapRenderer.updateBackdropAutoScrolling(dt);
+    mWorld.updateBackdropAutoScrolling(dt);
   }
 }
 
@@ -188,15 +187,14 @@ void GameRunner::handleDebugKeys(const SDL_Event& event)
     return;
   }
 
-  auto& debuggingSystem = mWorld.mpState->mDebuggingSystem;
   switch (event.key.keysym.sym)
   {
     case SDLK_b:
-      debuggingSystem.toggleBoundingBoxDisplay();
+      mWorld.debugToggleBoundingBoxDisplay();
       break;
 
     case SDLK_c:
-      debuggingSystem.toggleWorldCollisionDataDisplay();
+      mWorld.debugToggleWorldCollisionDataDisplay();
       break;
 
     case SDLK_d:
@@ -204,7 +202,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event)
       break;
 
     case SDLK_g:
-      debuggingSystem.toggleGridDisplay();
+      mWorld.debugToggleGridDisplay();
       break;
 
     case SDLK_s:
@@ -219,10 +217,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event)
       break;
 
     case SDLK_F10:
-      {
-        auto& player = mWorld.mpState->mPlayer;
-        player.mGodModeOn = !player.mGodModeOn;
-      }
+      mWorld.toggleGodMode();
       break;
 
     case SDLK_F11:
@@ -236,7 +231,7 @@ void GameRunner::renderDebugText()
 {
   std::stringstream debugText;
 
-  if (mWorld.mpState->mPlayer.mGodModeOn)
+  if (mWorld.isGodModeOn())
   {
     debugText << "GOD MODE on\n";
   }

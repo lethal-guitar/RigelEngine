@@ -1084,6 +1084,49 @@ void GameWorld::processEndOfFrameActions()
 }
 
 
+void GameWorld::updateBackdropAutoScrolling(const engine::TimeDelta dt)
+{
+  mpState->mMapRenderer.updateBackdropAutoScrolling(dt);
+}
+
+
+bool GameWorld::isPlayerInShip() const
+{
+  return mpState->mPlayer.stateIs<game_logic::InShip>();
+}
+
+
+void GameWorld::toggleGodMode()
+{
+  auto& player = mpState->mPlayer;
+  player.mGodModeOn = !player.mGodModeOn;
+}
+
+
+bool GameWorld::isGodModeOn() const
+{
+  return mpState->mPlayer.mGodModeOn;
+}
+
+
+void GameWorld::debugToggleBoundingBoxDisplay()
+{
+  mpState->mDebuggingSystem.toggleBoundingBoxDisplay();
+}
+
+
+void GameWorld::debugToggleWorldCollisionDataDisplay()
+{
+  mpState->mDebuggingSystem.toggleWorldCollisionDataDisplay();
+}
+
+
+void GameWorld::debugToggleGridDisplay()
+{
+  mpState->mDebuggingSystem.toggleGridDisplay();
+}
+
+
 void GameWorld::activateFullHealthCheat()
 {
   mpPlayerModel->resetHealthAndScore();
