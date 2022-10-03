@@ -42,6 +42,7 @@ class DemoPlayer
 {
 public:
   explicit DemoPlayer(GameMode::Context context);
+  ~DemoPlayer();
 
   void updateAndRender(engine::TimeDelta dt);
 

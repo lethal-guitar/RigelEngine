@@ -103,6 +103,9 @@ DemoPlayer::DemoPlayer(GameMode::Context context)
 }
 
 
+DemoPlayer::~DemoPlayer() = default;
+
+
 void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
 {
   if (isFinished())

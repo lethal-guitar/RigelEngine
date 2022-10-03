@@ -29,6 +29,7 @@
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 #include "game_logic/input.hpp"
+#include "game_logic_common/igame_world.hpp"
 #include "ui/hud_renderer.hpp"
 #include "ui/ingame_message_display.hpp"
 #include "ui/menu_element_renderer.hpp"
@@ -40,6 +41,7 @@ RIGEL_RESTORE_WARNINGS
 #include <iosfwd>
 #include <optional>
 #include <vector>
+
 
 namespace rigel
 {
@@ -58,20 +60,9 @@ struct LevelData;
 namespace rigel::game_logic
 {
 
-// Update game logic at 15 FPS. This is not exactly the speed at which the
-// game runs on period-appropriate hardware, but it's very close, and it nicely
-// fits into 60 FPS, giving us 4 render frames for 1 logic update.
-//
-// On a 486 with a fast graphics card, the game runs at roughly 15.5 FPS, with
-// a slower (non-VLB) graphics card, it's roughly 14 FPS. On a fast 386 (40
-// MHz), it's roughly 13 FPS. With 15 FPS, the feel should therefore be very
-// close to playing the game on a 486 at the default game speed setting.
-constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0 / 15.0;
-
-
 struct WorldState;
 
-class GameWorld : public entityx::Receiver<GameWorld>
+class GameWorld : public IGameWorld, public entityx::Receiver<GameWorld>
 {
 public:
   GameWorld(
@@ -81,10 +72,10 @@ public:
     std::optional<base::Vec2> playerPositionOverride = std::nullopt,
     bool showWelcomeMessage = false,
     const PlayerInput& initialInput = PlayerInput{});
-  ~GameWorld(); // NOLINT
+  ~GameWorld() override;
 
-  bool levelFinished() const;
-  std::set<data::Bonus> achievedBonuses() const;
+  bool levelFinished() const override;
+  std::set<data::Bonus> achievedBonuses() const override;
 
   void receive(const rigel::events::CheckPointActivated& event);
   void receive(const rigel::events::ExitReached& event);
@@ -102,28 +93,28 @@ public:
   void receive(const rigel::events::CloakPickedUp& event);
   void receive(const rigel::events::CloakExpired& event);
 
-  bool needsPerElementUpscaling() const;
-  void updateGameLogic(const PlayerInput& input);
-  void render(float interpolationFactor = 0.0f);
-  void processEndOfFrameActions();
-  void updateBackdropAutoScrolling(engine::TimeDelta dt);
+  bool needsPerElementUpscaling() const override;
+  void updateGameLogic(const PlayerInput& input) override;
+  void render(float interpolationFactor = 0.0f) override;
+  void processEndOfFrameActions() override;
+  void updateBackdropAutoScrolling(engine::TimeDelta dt) override;
 
-  bool isPlayerInShip() const;
+  bool isPlayerInShip() const override;
 
-  void toggleGodMode();
-  bool isGodModeOn() const;
+  void toggleGodMode() override;
+  bool isGodModeOn() const override;
 
-  void activateFullHealthCheat();
-  void activateGiveItemsCheat();
+  void activateFullHealthCheat() override;
+  void activateGiveItemsCheat() override;
 
-  void quickSave();
-  void quickLoad();
-  bool canQuickLoad() const;
+  void quickSave() override;
+  void quickLoad() override;
+  bool canQuickLoad() const override;
 
-  void debugToggleBoundingBoxDisplay();
-  void debugToggleWorldCollisionDataDisplay();
-  void debugToggleGridDisplay();
-  void printDebugText(std::ostream& stream) const;
+  void debugToggleBoundingBoxDisplay() override;
+  void debugToggleWorldCollisionDataDisplay() override;
+  void debugToggleGridDisplay() override;
+  void printDebugText(std::ostream& stream) const override;
 
 private:
   struct ViewportParams

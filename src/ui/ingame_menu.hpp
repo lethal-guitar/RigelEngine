@@ -21,7 +21,6 @@
 #include "data/bonus.hpp"
 #include "data/saved_game.hpp"
 #include "frontend/game_mode.hpp"
-#include "game_logic/game_world.hpp"
 #include "game_logic/input.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/menu_navigation.hpp"
@@ -41,7 +40,7 @@ RIGEL_RESTORE_WARNINGS
 
 namespace rigel::game_logic
 {
-class GameWorld;
+struct IGameWorld;
 }
 
 
@@ -61,7 +60,7 @@ public:
   IngameMenu(
     GameMode::Context context,
     const data::PlayerModel* pPlayerModel,
-    game_logic::GameWorld* pGameWorld,
+    game_logic::IGameWorld* pGameWorld,
     const data::GameSessionId& sessionId);
 
   /** Indicates that the game should be rendered before rendering the menu
@@ -202,7 +201,7 @@ private:
   std::stack<State, std::vector<State>> mStateStack;
   std::vector<SDL_Event> mEventQueue;
   std::optional<MenuType> mMenuToEnter;
-  game_logic::GameWorld* mpGameWorld;
+  game_logic::IGameWorld* mpGameWorld;
   TopLevelMenu* mpTopLevelMenu = nullptr;
   bool mQuitRequested = false;
   bool mFadeoutNeeded = false;

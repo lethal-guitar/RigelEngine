@@ -287,6 +287,7 @@ set(core_sources
     game_logic_classic/player.c
     game_logic_classic/sprite.c
     game_logic_classic/types.h
+    game_logic_common/igame_world.hpp
     renderer/custom_quad_batch.cpp
     renderer/custom_quad_batch.hpp
     renderer/fps_limiter.cpp
