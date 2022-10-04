@@ -440,6 +440,13 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
   serialized["quickSavingEnabled"] = options.mQuickSavingEnabled;
   serialized["skipIntro"] = options.mSkipIntro;
   serialized["motionSmoothing"] = options.mMotionSmoothing;
+  serialized["foregroundSpriteBrightness"] = options.mForeSpriteBrightness;
+  serialized["regularSpriteBrightness"] = options.mRegSpriteBrightness;
+  serialized["backgroundSpriteBrightness"] = options.mBackSpriteBrightness;
+  serialized["prisonerIsBackground"] = options.mPrisonerIsBackground;
+  serialized["foregroundTileBrightness"] = options.mForeTileBrightness;
+  serialized["backgroundTileBrightness"] = options.mBackTileBrightness;
+  serialized["parallaxTileBrightness"] = options.mDropTileBrightness;
   return serialized;
 }
 
@@ -661,6 +668,20 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractValueIfExists("quickSavingEnabled", result.mQuickSavingEnabled, json);
   extractValueIfExists("skipIntro", result.mSkipIntro, json);
   extractValueIfExists("motionSmoothing", result.mMotionSmoothing, json);
+  extractValueIfExists(
+    "foregroundSpriteBrightness", result.mForeSpriteBrightness, json);
+  extractValueIfExists(
+    "regularSpriteBrightness", result.mRegSpriteBrightness, json);
+  extractValueIfExists(
+    "backgroundSpriteBrightness", result.mBackSpriteBrightness, json);
+  extractValueIfExists(
+    "prisonerIsBackground", result.mPrisonerIsBackground, json);
+  extractValueIfExists(
+    "foregroundTileBrightness", result.mForeTileBrightness, json);
+  extractValueIfExists(
+    "backgroundTileBrightness", result.mBackTileBrightness, json);
+  extractValueIfExists(
+    "parallaxTileBrightness", result.mDropTileBrightness, json);
 
   removeInvalidKeybindings(result);
 

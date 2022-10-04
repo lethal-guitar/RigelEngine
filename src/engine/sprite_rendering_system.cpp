@@ -79,6 +79,7 @@ void collectVisibleSprites(
   using components::DrawTopMost;
   using components::ExtendedFrameList;
   using components::OverrideDrawOrder;
+  using components::SpriteBackground;
   using components::SpriteStrip;
 
   const auto screenBox = BoundingBox{{}, viewportSize};
@@ -99,7 +100,8 @@ void collectVisibleSprites(
                   const bool flashingWhite,
                   const bool useCloakEffect,
                   const bool drawTopmost,
-                  const int drawOrder) {
+                  const int drawOrder,
+                  const bool background) {
     const auto topLeft = drawPosition(frame, position);
 
     // Discard sprites outside visible area
@@ -115,8 +117,8 @@ void collectVisibleSprites(
       engine::interpolatedPixelPosition(
         previousTopLeft, topLeft, interpolationFactor),
       data::tilesToPixels(frame.mDimensions)};
-    const auto drawSpec =
-      SpriteDrawSpec{destRect, frame.mImageId, flashingWhite, useCloakEffect};
+    const auto drawSpec = SpriteDrawSpec{
+      destRect, frame.mImageId, flashingWhite, useCloakEffect, background};
 
     output.push_back({drawSpec, drawOrder, drawTopmost});
   };
@@ -138,6 +140,7 @@ void collectVisibleSprites(
       const auto drawOrder = entity.has_component<OverrideDrawOrder>()
         ? entity.component<const OverrideDrawOrder>()->mDrawOrder
         : sprite.mpDrawData->mDrawOrder;
+      const auto background = entity.has_component<SpriteBackground>();
 
       auto slotIndex = 0;
       for (const auto& baseFrameIndex : sprite.mFramesToRender)
@@ -158,7 +161,8 @@ void collectVisibleSprites(
           sprite.mFlashingWhiteStates.test(slotIndex),
           sprite.mUseCloakEffect,
           drawTopmost,
-          drawOrder);
+          drawOrder,
+          background);
         ++slotIndex;
       }
 
@@ -177,7 +181,8 @@ void collectVisibleSprites(
             false,
             sprite.mUseCloakEffect,
             drawTopmost,
-            drawOrder);
+            drawOrder,
+            background);
         }
       }
 
@@ -210,8 +215,8 @@ void collectVisibleSprites(
           base::Rect<int>{data::tilesToPixels(topLeft), {width, height}};
 
         const auto useCloakEffect = sprite.mUseCloakEffect;
-        const auto drawSpec =
-          SpriteDrawSpec{destRect, frame.mImageId, false, useCloakEffect};
+        const auto drawSpec = SpriteDrawSpec{
+          destRect, frame.mImageId, false, useCloakEffect, background};
         output.push_back({drawSpec, drawOrder, drawTopmost});
       }
     });
@@ -354,29 +359,45 @@ void SpriteRenderingSystem::update(
 }
 
 
-void SpriteRenderingSystem::renderRegularSprites(
-  const SpecialEffectsRenderer& fx) const
+void SpriteRenderingSystem::renderBackgroundSprites(
+  const SpecialEffectsRenderer& fx,
+  const float backColorMod) const
 {
   for (auto it = mSprites.begin(); it != miForegroundSprites; ++it)
   {
-    renderSprite(*it, fx);
+    if (it->mBackground)
+      renderSprite(*it, fx, backColorMod);
+  }
+}
+
+
+void SpriteRenderingSystem::renderRegularSprites(
+  const SpecialEffectsRenderer& fx,
+  const float regColorMod) const
+{
+  for (auto it = mSprites.begin(); it != miForegroundSprites; ++it)
+  {
+    if (!(it->mBackground))
+      renderSprite(*it, fx, regColorMod);
   }
 }
 
 
 void SpriteRenderingSystem::renderForegroundSprites(
-  const SpecialEffectsRenderer& fx) const
+  const SpecialEffectsRenderer& fx,
+  const float foreColorMod) const
 {
   for (auto it = miForegroundSprites; it != mSprites.end(); ++it)
   {
-    renderSprite(*it, fx);
+    renderSprite(*it, fx, foreColorMod);
   }
 }
 
 
 void SpriteRenderingSystem::renderSprite(
   const SpriteDrawSpec& spec,
-  const SpecialEffectsRenderer& fx) const
+  const SpecialEffectsRenderer& fx,
+  const float colorMod) const
 {
   // White flash takes priority over translucency
   if (spec.mIsFlashingWhite)
@@ -393,7 +414,17 @@ void SpriteRenderingSystem::renderSprite(
   }
   else
   {
+    if (colorMod < 1.0f)
+    {
+      // const auto saved = renderer::saveState(mpRenderer);
+      mpRenderer->setColorModulation(base::Color{
+        base::roundTo<uint8_t, float>(255 * colorMod),
+        base::roundTo<uint8_t, float>(255 * colorMod),
+        base::roundTo<uint8_t, float>(255 * colorMod),
+        255});
+    }
     mpTextureAtlas->draw(spec.mImageId, spec.mDestRect);
+    mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
   }
 }
 

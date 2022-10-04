@@ -1669,6 +1669,8 @@ void EntityFactory::configureEntity(
       entity.component<Shootable>()->mInvincible = true;
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       entity.assign<AppearsOnRadar>();
+      if (mpOptions->mPrisonerIsBackground)
+        entity.assign<SpriteBackground>();
       break;
 
     case ActorID::Passive_prisoner: // Monster in prison cell, passive
@@ -1676,6 +1678,8 @@ void EntityFactory::configureEntity(
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<ActivationSettings>(ActivationSettings::Policy::Always);
       entity.assign<AppearsOnRadar>();
+      if (mpOptions->mPrisonerIsBackground)
+        entity.assign<SpriteBackground>();
       break;
 
     case ActorID::Rigelatin_soldier: // Rigelatin soldier
@@ -1917,6 +1921,7 @@ void EntityFactory::configureEntity(
     case ActorID::Water_on_floor_1: // Shallow water (variant 1)
     case ActorID::Water_on_floor_2: // Shallow water (variant 2)
       entity.assign<AnimationLoop>(1);
+      entity.assign<SpriteBackground>();
       break;
 
     case ActorID::Messenger_drone_1: // "Your brain is ours!"
@@ -1961,6 +1966,7 @@ void EntityFactory::configureEntity(
     case ActorID::Flame_jet_3: // Small rocket exhaust flame left
     case ActorID::Flame_jet_4: // Small rocket exhaust flame right
       entity.assign<AnimationLoop>(2);
+      entity.assign<SpriteBackground>();
       break;
 
     case ActorID::Exit_trigger:

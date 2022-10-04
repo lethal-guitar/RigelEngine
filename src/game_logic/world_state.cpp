@@ -102,6 +102,7 @@ void copyAllComponents(entityx::Entity from, entityx::Entity to)
   copyComponentIfPresent<Shootable>(from, to);
   copyComponentIfPresent<SolidBody>(from, to);
   copyComponentIfPresent<Sprite>(from, to);
+  copyComponentIfPresent<SpriteBackground>(from, to);
   copyComponentIfPresent<SpriteCascadeSpawner>(from, to);
   copyComponentIfPresent<SpriteStrip>(from, to);
   copyComponentIfPresent<TileDebris>(from, to);

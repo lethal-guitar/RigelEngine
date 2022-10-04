@@ -181,6 +181,7 @@ struct Sprite
   std::bitset<NUM_RENDER_SLOTS> mFlashingWhiteStates;
   bool mUseCloakEffect = false;
   bool mShow = true;
+  bool mBackground = false;
 };
 
 
@@ -200,6 +201,11 @@ struct ExtendedFrameList
   };
 
   std::vector<RenderSpec> mFrames;
+};
+
+
+struct SpriteBackground
+{
 };
 
 

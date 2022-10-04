@@ -991,7 +991,9 @@ void GameWorld::drawMapAndSprites(
     else
     {
       state.mMapRenderer.renderBackdrop(
-        params.mInterpolatedCameraPosition, params.mViewportSize);
+        params.mInterpolatedCameraPosition,
+        params.mViewportSize,
+        mpOptions->mDropTileBrightness);
     }
   };
 
@@ -1009,18 +1011,26 @@ void GameWorld::drawMapAndSprites(
 
   auto renderBackgroundLayers = [&]() {
     state.mMapRenderer.renderBackground(
-      params.mRenderStartPosition, params.mViewportSize);
+      params.mRenderStartPosition,
+      params.mViewportSize,
+      mpOptions->mBackTileBrightness);
     state.mDynamicGeometrySystem.renderDynamicBackgroundSections(
       params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderRegularSprites(mSpecialEffects);
+    state.mSpriteRenderingSystem.renderBackgroundSprites(
+      mSpecialEffects, mpOptions->mBackSpriteBrightness);
+    state.mSpriteRenderingSystem.renderRegularSprites(
+      mSpecialEffects, mpOptions->mRegSpriteBrightness);
   };
 
   auto renderForegroundLayers = [&]() {
     state.mMapRenderer.renderForeground(
-      params.mRenderStartPosition, params.mViewportSize);
+      params.mRenderStartPosition,
+      params.mViewportSize,
+      mpOptions->mForeTileBrightness);
     state.mDynamicGeometrySystem.renderDynamicForegroundSections(
       params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderForegroundSprites(mSpecialEffects);
+    state.mSpriteRenderingSystem.renderForegroundSprites(
+      mSpecialEffects, mpOptions->mForeSpriteBrightness);
     renderTileDebris();
   };
 

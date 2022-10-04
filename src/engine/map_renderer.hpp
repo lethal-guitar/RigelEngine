@@ -108,13 +108,16 @@ public:
 
   void renderBackdrop(
     const base::Vec2f& cameraPosition,
-    const base::Size& viewportSize) const;
+    const base::Size& viewportSize,
+    const float dropColorMod) const;
   void renderBackground(
     const base::Vec2& sectionStart,
-    const base::Size& sectionSize) const;
+    const base::Size& sectionSize,
+    const float backColorMod) const;
   void renderForeground(
     const base::Vec2& sectionStart,
-    const base::Size& sectionSize) const;
+    const base::Size& sectionSize,
+    const float foreColorMod) const;
 
   void updateAnimatedMapTiles();
   void updateBackdropAutoScrolling(engine::TimeDelta dt);
@@ -141,7 +144,7 @@ private:
   void renderMapTiles(
     const base::Vec2& sectionStart,
     const base::Size& sectionSize,
-    DrawMode drawMode) const;
+    const DrawMode drawMode) const;
   data::map::TileIndex animatedTileIndex(data::map::TileIndex) const;
 
 private:
