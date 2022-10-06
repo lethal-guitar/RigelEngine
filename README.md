@@ -42,6 +42,8 @@ It's fairly easy to [install on Steam Deck](https://github.com/lethal-guitar/Rig
 The Linux version also runs well on small single-board computers (SBCs) like the Raspberry Pi and Odroid Go Advance.
 See [Running on Raspberry Pi and Odroid Go Advance](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance).
 
+[@Rinnegatamante](https://github.com/Rinnegatamante) made a [PS Vita port](https://vitadb.rinnegatamante.it/#/info/988).
+
 Android and iOS versions might happen someday, but there are no concrete plans at the moment.
 
 ### System requirements
