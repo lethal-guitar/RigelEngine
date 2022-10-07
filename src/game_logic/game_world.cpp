@@ -18,6 +18,7 @@
 
 #include "assets/resource_loader.hpp"
 #include "base/match.hpp"
+#include "base/spatial_types_printing.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
@@ -184,19 +185,6 @@ std::vector<base::Vec2> collectRadarDots(
     });
 
   return radarDots;
-}
-
-
-template <typename ValueT>
-std::string vec2String(const base::Vec2T<ValueT>& vec, const int width)
-{
-  std::stringstream stream;
-  // clang-format off
-  stream
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
-  // clang-format on
-  return stream.str();
 }
 
 
@@ -1411,9 +1399,13 @@ void GameWorld::flashScreen(const base::Color& color)
 
 void GameWorld::printDebugText(std::ostream& stream) const
 {
-  stream << "Scroll: " << vec2String(mpState->mCamera.position(), 4) << '\n'
-         << "Player: " << vec2String(mpState->mPlayer.position(), 4) << '\n'
-         << "Entities: " << mpState->mEntities.size() << '\n';
+  stream << "Scroll: ";
+  outputFixedWidth(stream, mpState->mCamera.position(), 4);
+
+  stream << "\nPlayer: ";
+  outputFixedWidth(stream, mpState->mPlayer.position(), 4);
+
+  stream << "\nEntities: " << mpState->mEntities.size() << '\n';
 
   if (mpOptions->mPerElementUpscalingEnabled)
   {
