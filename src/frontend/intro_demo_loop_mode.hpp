@@ -18,6 +18,7 @@
 
 #include "assets/duke_script_loader.hpp"
 #include "frontend/game_mode.hpp"
+#include "game_logic/demo_player.hpp"
 #include "ui/apogee_logo.hpp"
 #include "ui/intro_movie.hpp"
 
@@ -80,12 +81,18 @@ private:
   struct HypeScreen : ScriptedStep
   {
   };
+
   struct Story : ScriptedStep
   {
   };
 
-  using Step =
-    std::variant<ui::ApogeeLogo, ui::IntroMovie, Story, HypeScreen, Credits>;
+  using Step = std::variant<
+    ui::ApogeeLogo,
+    ui::IntroMovie,
+    Story,
+    HypeScreen,
+    Credits,
+    game_logic::DemoPlayer>;
 
   bool handleEvent(const SDL_Event& event);
   void startCurrentStep();

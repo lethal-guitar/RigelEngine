@@ -44,6 +44,9 @@ public:
   explicit DemoPlayer(GameMode::Context context);
   ~DemoPlayer();
 
+  DemoPlayer(DemoPlayer&&);
+  DemoPlayer& operator=(DemoPlayer&&);
+
   void updateAndRender(engine::TimeDelta dt);
 
   bool isFinished() const;

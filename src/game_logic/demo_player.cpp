@@ -93,18 +93,13 @@ data::GameSessionId demoSessionId(const std::size_t levelIndex)
 DemoPlayer::DemoPlayer(GameMode::Context context)
   : mContext(context)
   , mFrames(loadDemo(*context.mpResources))
-  , mpWorld(std::make_unique<GameWorld_Classic>(
-      &mPlayerModel,
-      demoSessionId(0),
-      context,
-      std::nullopt,
-      true,
-      mFrames[0].mInput))
 {
 }
 
 
 DemoPlayer::~DemoPlayer() = default;
+DemoPlayer::DemoPlayer(DemoPlayer&&) = default;
+DemoPlayer& DemoPlayer::operator=(DemoPlayer&&) = default;
 
 
 void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
@@ -112,6 +107,17 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
   if (isFinished())
   {
     return;
+  }
+
+  if (!mpWorld)
+  {
+    mpWorld = std::make_unique<GameWorld_Classic>(
+      &mPlayerModel,
+      demoSessionId(0),
+      mContext,
+      std::nullopt,
+      true,
+      mFrames[0].mInput);
   }
 
   auto changeLevel = false;
