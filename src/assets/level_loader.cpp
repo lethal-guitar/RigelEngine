@@ -62,6 +62,7 @@ namespace
 using ActorList = std::vector<LevelData::Actor>;
 
 
+constexpr char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 constexpr auto VALID_LEVEL_WIDTHS = std::array{32, 64, 128, 256, 512, 1024};
 
 
@@ -523,6 +524,19 @@ void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
 }
 
 } // namespace
+
+
+std::string levelFileName(const int episode, const int level)
+{
+  assert(episode >= 0 && episode < 4);
+  assert(level >= 0 && level < 8);
+
+  std::string fileName;
+  fileName += EPISODE_PREFIXES[episode];
+  fileName += std::to_string(level + 1);
+  fileName += ".MNI";
+  return fileName;
+}
 
 
 LevelData loadLevel(

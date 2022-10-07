@@ -30,6 +30,7 @@ namespace rigel::assets
 
 class ResourceLoader;
 
+std::string levelFileName(const int episode, const int level);
 
 data::map::LevelData loadLevel(
   std::string_view mapName,

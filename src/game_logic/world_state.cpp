@@ -39,22 +39,6 @@ namespace rigel::game_logic
 namespace
 {
 
-char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
-
-
-std::string levelFileName(const int episode, const int level)
-{
-  assert(episode >= 0 && episode < 4);
-  assert(level >= 0 && level < 8);
-
-  std::string fileName;
-  fileName += EPISODE_PREFIXES[episode];
-  fileName += std::to_string(level + 1);
-  fileName += ".MNI";
-  return fileName;
-}
-
-
 template <typename T>
 void copyComponentIfPresent(entityx::Entity from, entityx::Entity to)
 {
@@ -157,7 +141,7 @@ WorldState::WorldState(
       pSpriteFactory,
       sessionId,
       assets::loadLevel(
-        levelFileName(sessionId.mEpisode, sessionId.mLevel),
+        assets::levelFileName(sessionId.mEpisode, sessionId.mLevel),
         *pResources,
         sessionId.mDifficulty))
 {
