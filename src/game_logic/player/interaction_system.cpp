@@ -16,7 +16,6 @@
 
 #include "interaction_system.hpp"
 
-#include "assets/duke_script_loader.hpp"
 #include "assets/resource_loader.hpp"
 #include "data/strings.hpp"
 #include "engine/physics_system.hpp"
@@ -205,13 +204,6 @@ ex::Entity currentlyTouchedInteractable(
   return {};
 }
 
-
-data::LevelHints loadHints(const assets::ResourceLoader& resources)
-{
-  const auto text = resources.fileAsText("HELP.MNI");
-  return assets::loadHintMessages(text);
-}
-
 } // namespace
 
 
@@ -228,7 +220,7 @@ PlayerInteractionSystem::PlayerInteractionSystem(
   , mpServiceProvider(pServices)
   , mpEntityFactory(pEntityFactory)
   , mpEvents(pEvents)
-  , mLevelHints(loadHints(resources))
+  , mLevelHints(resources.loadHintMessages())
   , mSessionId(sessionId)
 {
 }

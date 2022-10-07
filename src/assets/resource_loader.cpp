@@ -505,6 +505,12 @@ ScriptBundle ResourceLoader::loadScriptBundle(std::string_view fileName) const
 }
 
 
+data::LevelHints ResourceLoader::loadHintMessages() const
+{
+  return assets::loadHintMessages(fileAsText("HELP.MNI"));
+}
+
+
 ByteBuffer ResourceLoader::file(std::string_view name) const
 {
   // TODO: Eliminate duplication with tryLoadReplacement?

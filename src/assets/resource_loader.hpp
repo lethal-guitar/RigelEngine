@@ -115,6 +115,8 @@ public:
 
   ScriptBundle loadScriptBundle(std::string_view fileName) const;
 
+  data::LevelHints loadHintMessages() const;
+
   ByteBuffer file(std::string_view name) const;
   std::string fileAsText(std::string_view name) const;
   bool hasFile(std::string_view name) const;
