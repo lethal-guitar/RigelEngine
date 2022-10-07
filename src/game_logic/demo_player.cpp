@@ -133,6 +133,8 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
     mElapsedTime -= GAME_LOGIC_UPDATE_DELAY;
   }
 
+  mpWorld->updateBackdropAutoScrolling(dt);
+
   mpWorld->render();
   mpWorld->processEndOfFrameActions();
 
