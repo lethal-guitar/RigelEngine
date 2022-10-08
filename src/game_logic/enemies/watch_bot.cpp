@@ -22,6 +22,7 @@
 #include "engine/entity_tools.hpp"
 #include "engine/movement.hpp"
 #include "engine/physical_components.hpp"
+#include "engine/physics.hpp"
 #include "engine/random_number_generator.hpp"
 #include "engine/sprite_tools.hpp"
 #include "frontend/game_service_provider.hpp"
@@ -81,20 +82,12 @@ void WatchBot::update(
   using namespace engine;
   using namespace engine::components;
 
-  const auto& position = *entity.component<WorldPosition>();
+  auto& position = *entity.component<WorldPosition>();
   const auto& bbox = *entity.component<BoundingBox>();
   const auto& playerPos = s.mpPlayer->orientedPosition();
 
   auto& animationFrame = entity.component<Sprite>()->mFramesToRender[0];
   auto& movingBody = *entity.component<MovingBody>();
-
-  auto jump = [&]() {
-    animationFrame = 0;
-
-    const auto newOrientation =
-      position.x > playerPos.x ? Orientation::Left : Orientation::Right;
-    mState = Jumping{newOrientation};
-  };
 
 
   base::match(
@@ -113,14 +106,14 @@ void WatchBot::update(
       const auto collidedWithCeiling = moveResult != MovementResult::Completed;
       if (collidedWithCeiling || state.mFramesElapsed >= 5)
       {
-        movingBody.mGravityAffected = true;
-        movingBody.mVelocity.y = -0.5f;
         mState = Falling{state.mOrientation};
-        return;
+        movingBody.mVelocity.y = 0.0f;
       }
     },
 
     [&, this](const Falling& state) {
+      engine::applyPhysics(
+        *d.mpCollisionChecker, *s.mpMap, entity, movingBody, position, bbox);
       moveHorizontally(
         *d.mpCollisionChecker,
         entity,
@@ -128,14 +121,19 @@ void WatchBot::update(
 
       if (d.mpCollisionChecker->isOnSolidGround(position, bbox))
       {
-        land(entity, d);
+        if (entity.component<Active>()->mIsOnScreen)
+        {
+          d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
+        }
+
+        engine::startAnimationSequence(entity, LAND_ON_GROUND_ANIM);
+        mState = OnGround{};
+        advanceRandomNumberGenerator(d);
       }
     },
 
     [&, this](OnGround& state) {
-      const auto randomChoice = d.mpRandomGenerator->gen();
-      const auto shouldLookAround =
-        randomChoice % 2 != 0 && (randomChoice / 32) % 2 != 0;
+      const auto shouldLookAround = (d.mpRandomGenerator->gen() & 33) != 0;
 
       ++state.mFramesElapsed;
       if (shouldLookAround && state.mFramesElapsed == 1)
@@ -152,69 +150,31 @@ void WatchBot::update(
 
       if (state.mFramesElapsed == 3)
       {
-        jump();
+        animationFrame = 0;
+
+        const auto newOrientation =
+          position.x > playerPos.x ? Orientation::Left : Orientation::Right;
+        mState = Jumping{newOrientation};
       }
     },
 
     [&, this](LookingAround& state) {
-      // TODO: Is there a way to use AnimationSequence here, but still only
-      // update on odd frames?
-      if (state.mFramesElapsed < 32)
-      {
-        const auto sequence = state.mOrientation == Orientation::Left
-          ? LOOK_LEFT_RIGHT_ANIM
-          : LOOK_RIGHT_LEFT_ANIM;
-        animationFrame = sequence[state.mFramesElapsed];
-      }
+      const auto sequence = state.mOrientation == Orientation::Left
+        ? LOOK_LEFT_RIGHT_ANIM
+        : LOOK_RIGHT_LEFT_ANIM;
+      animationFrame = sequence[state.mFramesElapsed];
 
       if (s.mpPerFrameState->mIsOddFrame)
       {
         ++state.mFramesElapsed;
       }
 
-      if (state.mFramesElapsed == 33)
+      if (state.mFramesElapsed == 32)
       {
         animationFrame = 1;
-        advanceRandomNumberGenerator(d);
-      }
-      else if (state.mFramesElapsed == 34)
-      {
-        jump();
+        mState = OnGround{1};
       }
     });
-
-  engine::synchronizeBoundingBoxToSprite(entity);
-}
-
-
-void WatchBot::onCollision(
-  GlobalDependencies& d,
-  GlobalState& s,
-  const engine::events::CollidedWithWorld&,
-  entityx::Entity entity)
-{
-  base::match(
-    mState,
-    [&, this](const Falling& state) { land(entity, d); },
-
-    [](const auto&) {});
-}
-
-
-void WatchBot::land(entityx::Entity entity, GlobalDependencies& d)
-{
-  using namespace engine::components;
-
-  const auto isOnScreen = entity.component<Active>()->mIsOnScreen;
-  if (isOnScreen)
-  {
-    d.mpServiceProvider->playSound(data::SoundId::DukeJumping);
-  }
-
-  engine::startAnimationSequence(entity, LAND_ON_GROUND_ANIM);
-  entity.component<MovingBody>()->mGravityAffected = false;
-  mState = OnGround{};
-  advanceRandomNumberGenerator(d);
 
   engine::synchronizeBoundingBoxToSprite(entity);
 }

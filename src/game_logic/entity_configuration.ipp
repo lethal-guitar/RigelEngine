@@ -1205,7 +1205,7 @@ void EntityFactory::configureEntity(
         DestructionEffects::TriggerCondition::OnKilled,
         mpSpriteFactory->actorFrameRect(actorID, 0));
       addDefaultMovingBody(entity, boundingBox);
-      entity.component<MovingBody>()->mGravityAffected = false;
+      entity.component<MovingBody>()->mIsActive = false;
       entity.assign<BehaviorController>(behaviors::WatchBot{});
       entity.assign<AppearsOnRadar>();
       break;

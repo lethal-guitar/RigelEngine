@@ -75,14 +75,6 @@ struct WatchBot
     bool isOnScreen,
     entityx::Entity entity);
 
-  void onCollision(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    const engine::events::CollidedWithWorld& event,
-    entityx::Entity entity);
-
-  void land(entityx::Entity entity, GlobalDependencies& dependencies);
-
   State mState = Jumping{};
 };
 
