@@ -24,6 +24,7 @@
 #include "engine/sprite_factory.hpp"
 #include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
+#include "ui/menu_element_renderer.hpp"
 
 #include <cmath>
 #include <string>
@@ -39,6 +40,11 @@ using namespace rigel::renderer;
 
 namespace
 {
+
+constexpr auto HEALTH_BAR_LABEL_START_X = 0;
+constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
+constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
+constexpr auto HEALTH_BAR_START_PX = base::Vec2{data::tilesToPixels(5), 0};
 
 constexpr auto NUM_HEALTH_SLICES = 8;
 
@@ -224,6 +230,28 @@ WidescreenHudStyle effectiveHudStyle(
 {
   return canUseHudStyle(style, pRenderer) ? style
                                           : data::WidescreenHudStyle::Classic;
+}
+
+
+void drawBossHealthBar(
+  int health,
+  int startingHealth,
+  int maxWidthPx,
+  const ui::MenuElementRenderer& textRenderer,
+  const engine::TiledTexture& uiSpriteSheet)
+{
+  textRenderer.drawSmallWhiteText(
+    HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
+
+  const auto maxHealthBarSize = maxWidthPx - HEALTH_BAR_START_PX.x;
+
+  const auto healthInPx = startingHealth > maxHealthBarSize
+    ? base::round(float(health) / startingHealth * maxHealthBarSize)
+    : health;
+
+  const auto healthBarSize = base::Size{healthInPx, data::GameTraits::tileSize};
+  uiSpriteSheet.renderTileStretched(
+    HEALTH_BAR_TILE_INDEX, {HEALTH_BAR_START_PX, healthBarSize});
 }
 
 

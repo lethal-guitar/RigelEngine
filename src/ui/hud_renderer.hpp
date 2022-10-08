@@ -46,6 +46,9 @@ class SpriteFactory;
 namespace ui
 {
 
+class MenuElementRenderer;
+
+
 inline bool isVisibleOnRadar(const base::Vec2& position)
 {
   // clang-format off
@@ -68,6 +71,14 @@ data::WidescreenHudStyle effectiveHudStyle(
 constexpr auto HUD_HEIGHT_BOTTOM = 4;
 constexpr auto HUD_WIDTH_RIGHT = 6;
 constexpr auto HUD_WIDTH_TOTAL = HUD_WIDTH_RIGHT + 32;
+
+
+void drawBossHealthBar(
+  int health,
+  int startingHealth,
+  int maxWidthPx,
+  const ui::MenuElementRenderer& textRenderer,
+  const engine::TiledTexture& uiSpriteSheet);
 
 
 class HudRenderer

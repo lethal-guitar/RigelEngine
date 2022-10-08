@@ -38,6 +38,8 @@ namespace rigel::game_logic
 // close to playing the game on a 486 at the default game speed setting.
 constexpr auto GAME_LOGIC_UPDATE_DELAY = 1.0 / 15.0;
 
+constexpr auto BOSS_LEVEL_INTRO_MUSIC = "CALM.IMF";
+
 
 struct IGameWorld
 {
