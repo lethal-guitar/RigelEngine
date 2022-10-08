@@ -77,21 +77,6 @@ bool isValidWidth(int width)
 }
 
 
-data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
-{
-  const auto index = rawIndex / 8u;
-  if (index >= GameTraits::CZone::numSolidTiles)
-  {
-    return (index - GameTraits::CZone::numSolidTiles) / 5u +
-      GameTraits::CZone::numSolidTiles;
-  }
-  else
-  {
-    return index;
-  }
-}
-
-
 struct LevelHeader
 {
   explicit LevelHeader(LeStreamReader& reader)
@@ -524,6 +509,25 @@ void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
 }
 
 } // namespace
+
+
+data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
+{
+  const auto index = rawIndex / 8u;
+  if (index >= GameTraits::CZone::numSolidTiles)
+  {
+    const auto converted = (index - GameTraits::CZone::numSolidTiles) / 5u +
+      GameTraits::CZone::numSolidTiles;
+
+    // Ensure that the index has a valid range
+    return data::map::TileIndex(
+      std::min(converted, GameTraits::CZone::numTilesTotal - 1));
+  }
+  else
+  {
+    return index;
+  }
+}
 
 
 std::string levelFileName(const int episode, const int level)

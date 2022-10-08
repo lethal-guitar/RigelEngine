@@ -32,6 +32,8 @@ class ResourceLoader;
 
 std::string levelFileName(const int episode, const int level);
 
+data::map::TileIndex convertTileIndex(const uint16_t rawIndex);
+
 data::map::LevelData loadLevel(
   std::string_view mapName,
   const ResourceLoader& resources,
