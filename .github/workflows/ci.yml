@@ -73,7 +73,7 @@ jobs:
     - name: Test (release)
       run: cd build && ctest
   build_osx:
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
     - uses: actions/checkout@v2
       with:

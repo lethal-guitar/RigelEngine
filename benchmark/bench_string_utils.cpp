@@ -14,9 +14,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <benchmark/benchmark.h>
-
 #include <base/string_utils.hpp>
+#include <base/warnings.hpp>
+
+RIGEL_DISABLE_WARNINGS
+#include <benchmark/benchmark.h>
+RIGEL_RESTORE_WARNINGS
 
 
 static void BMStringSplit(benchmark::State& state)

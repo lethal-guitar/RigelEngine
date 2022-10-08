@@ -60,6 +60,7 @@
     _Pragma("clang diagnostic ignored \"-Wgnu-anonymous-struct\"")               \
     _Pragma("clang diagnostic ignored \"-Wnested-anon-types\"")                  \
     _Pragma("clang diagnostic ignored \"-Wextra-semi-stmt\"")                    \
+    _Pragma("clang diagnostic ignored \"-Wsuggest-override\"")                   \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")
