@@ -280,6 +280,8 @@ set(core_sources
     game_logic_classic/game1.c
     game_logic_classic/game2.c
     game_logic_classic/game3.c
+    game_logic_classic/game_world_classic.cpp
+    game_logic_classic/game_world_classic.hpp
     game_logic_classic/memory.c
     game_logic_classic/misc.c
     game_logic_classic/particls.c
@@ -288,6 +290,7 @@ set(core_sources
     game_logic_classic/types.h
     game_logic_common/igame_world.hpp
     game_logic_common/input.hpp
+    game_logic_common/utils.hpp
     renderer/custom_quad_batch.cpp
     renderer/custom_quad_batch.hpp
     renderer/fps_limiter.cpp

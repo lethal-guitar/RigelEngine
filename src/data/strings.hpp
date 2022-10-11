@@ -52,6 +52,10 @@ struct Messages
     "DUKE, FIND AND DESTROY ALL THE*RADAR DISHES ON THIS LEVEL.";
 
   static constexpr auto WelcomeToDukeNukem2 = "WELCOME TO DUKE NUKEM II!";
+
+  static constexpr auto QuickSaved = "Quick saved.";
+
+  static constexpr auto QuickLoaded = "Quick save restored.";
 };
 
 } // namespace rigel::data

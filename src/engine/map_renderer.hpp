@@ -34,6 +34,7 @@ using PackedTileData = std::uint32_t;
 
 
 constexpr auto BLOCK_SIZE = 32;
+constexpr auto MAX_NUM_BLOCKS = 32;
 
 
 struct AnimatedTile
@@ -106,6 +107,10 @@ public:
 
   void switchBackdrops();
 
+  void markAsChanged(const base::Vec2& position);
+  void rebuildChangedBlocks(const data::map::Map& map);
+  void rebuildAllBlocks(const data::map::Map& map);
+
   void renderBackdrop(
     const base::Vec2f& cameraPosition,
     const base::Size& viewportSize) const;
@@ -153,6 +158,7 @@ private:
   renderer::Texture mAlternativeBackdropTexture;
 
   TileRenderData mRenderData;
+  std::bitset<MAX_NUM_BLOCKS> mOutOfDateBlocks;
 
   data::map::BackdropScrollMode mScrollMode;
 

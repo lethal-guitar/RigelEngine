@@ -21,6 +21,12 @@
 #include <vector>
 
 
+namespace rigel::game_logic
+{
+class GameWorld_Classic;
+}
+
+
 namespace rigel::data
 {
 
@@ -123,6 +129,8 @@ public:
 
   TutorialMessageState& tutorialMessages();
   const TutorialMessageState& tutorialMessages() const;
+
+  friend class rigel::game_logic::GameWorld_Classic;
 
 private:
   std::vector<CollectableLetterType> mCollectedLetters;

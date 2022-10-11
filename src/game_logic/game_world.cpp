@@ -38,6 +38,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
+#include "game_logic_common/utils.hpp"
 #include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
@@ -71,22 +72,6 @@ int healthOrZero(entityx::Entity entity)
   return entity.has_component<Shootable>()
     ? entity.component<Shootable>()->mHealth
     : 0;
-}
-
-
-[[nodiscard]] auto setupIngameViewport(
-  renderer::Renderer* pRenderer,
-  const int screenShakeOffsetX)
-{
-  auto saved = renderer::saveState(pRenderer);
-
-  const auto offset =
-    data::GameTraits::inGameViewportOffset + base::Vec2{screenShakeOffsetX, 0};
-  renderer::setLocalTranslation(pRenderer, offset);
-  renderer::setLocalClipRect(
-    pRenderer, base::Rect<int>{{}, data::GameTraits::inGameViewportSize});
-
-  return saved;
 }
 
 
@@ -1168,7 +1153,8 @@ void GameWorld::quickSave()
   mpQuickSave = std::make_unique<QuickSaveData>(
     QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
 
-  mMessageDisplay.setMessage("Quick saved.", ui::MessagePriority::Menu);
+  mMessageDisplay.setMessage(
+    data::Messages::QuickSaved, ui::MessagePriority::Menu);
 
   LOG_F(INFO, "Quick save created");
 }
@@ -1187,7 +1173,8 @@ void GameWorld::quickLoad()
   mpState->synchronizeTo(
     *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
-  mMessageDisplay.setMessage("Quick save restored.", ui::MessagePriority::Menu);
+  mMessageDisplay.setMessage(
+    data::Messages::QuickLoaded, ui::MessagePriority::Menu);
 
   if (!mpOptions->mMotionSmoothing)
   {
