@@ -59,47 +59,7 @@ void pascal TeleportTo(word x, word y)
  */
 void UpdateBackdrop(void)
 {
-  /*
-  How the parallax scrolling works
-
-  See the comment in LoadBackdrop() in lvlutil2.c. That function prepares
-  different copies of the backdrop image(s) to emulate scrolling by 4 or 2
-  pixels at a time. The backdrop is drawn as a grid of tiles in
-  UpdateAndDrawGame() - for each grid cell on screen, either part of the
-  backdrop is drawn, or a map tile. The backdrop image is laid out as a tileset,
-  and can only be drawn in 8x8-pixel blocks.
-  To scroll the backdrop in 8-pixel increments, the starting location within the
-  image is adjusted, with wraparound. This is achieved via bdOffsetTable:
-  See InitBackdropOffsetTable() in main.c.
-
-  To draw the backdrop scrolled by a certain number of 8-pixel steps, this
-  function here sets bdOffsetTablePtr to point to the right start offset within
-  the backdrop offset table. The drawing code in UpdateAndDrawGame() then uses
-  bdOffsetTablePtr to find the right tile within the backdrop image to draw
-  onto the screen. After each grid cell, it advances to the next entry in the
-  backdrop offset table. Since the table repeats after 40 entries, this causes
-  the backdrop image on screen to wrap around and repeat as well. After drawing
-  a full row of tiles, UpdateAndDrawGame() advances bdOffsetTablePtr by 80,
-  which skips to the next row within the backdrop offset table.
-
-  For scrolling in finer-grained steps, this function chooses the right backdrop
-  image. For horizontal parallax scrolling, for example, the regular image is
-  used for even camera positions, and the pre-shifted image (shifted left by 4
-  pixels) is used for odd camera positions. So for each change in camera
-  position, we alternate between the two images, creating the illusion of
-  scrolling in 4-pixel steps. After every other camera position change, we also
-  increment bdOffsetTablePtr to the next index, to scroll the backdrop by 8
-  pixels.
-
-  For a more in-depth explanation, also see:
-
-  https://github.com/smitelli/cosmore/blob/4ca928e5e9b28012190e5cb58dc174f2328c115f/src/game1.c#L714
-  https://lethalguitar.wordpress.com/2022/07/14/how-duke-nukem-iis-parallax-scrolling-worked/
-  */
-
   byte random;
-
-  bdOffsetTablePtr = bdOffsetTable;
 
   //
   // Earthquake effect
@@ -133,101 +93,6 @@ void UpdateBackdrop(void)
     gmEarthquakeCountdown--;
   }
 
-  //
-  // Horizontal auto-scrolling
-  //
-  if (mapBackdropAutoScrollX)
-  {
-    bdAutoScrollStep++;
-    if (bdAutoScrollStep == 4 * 40)
-    {
-      bdAutoScrollStep = 0;
-    }
-
-    // Alternate between the 4 pre-shifted versions of the backdrop image
-    // to create an impression of the backdrop moving by 2 pixels each frame.
-    bdAddress += 0x2000;
-    if (bdAddress == 0xC000)
-    {
-      bdAddress = 0x4000;
-    }
-
-    // Every 4 frames, advance the tile start offset for the backdrop to get
-    // scrolling past 8 pixels.
-    bdOffsetTablePtr += bdAutoScrollStep / 4;
-  }
-
-  //
-  // Vertical auto-scrolling + horizontal parallax
-  //
-  if (mapBackdropAutoScrollY)
-  {
-    if (bdAutoScrollStep == 0)
-    {
-      bdAutoScrollStep = 2 * 25;
-    }
-
-    bdAutoScrollStep--;
-
-    // Alternate between shifted and unshifted backdrop to emulate scrolling in
-    // 4-pixel increments for the horizontal parallax.
-    if (gmCameraPosX % 2)
-    {
-      bdAddress = 0x6000;
-    }
-    else
-    {
-      bdAddress = 0x4000;
-    }
-
-    // Same thing for the vertical axis, but here we alternate based on the
-    // auto-scroll stepper instead of the camera position.
-    if (bdAutoScrollStep % 2)
-    {
-      bdAddress += 0x4000;
-    }
-
-    // Set tile start offset to achieve scrolling past the first 4 pixels.
-    // For ever other vertical scroll step (`bdAutoScrollStep / 2`), we skip
-    // one row of tiles in the backdrop offset table (`* 80`). For every other
-    // horizontal camera position change, we move forward by one tile in the
-    // table. The table has enough entries to scroll up to 39 tiles, so after
-    // that, we need to wrap around - hence the `% 40`.
-    bdOffsetTablePtr += bdAutoScrollStep / 2 * 80 + gmCameraPosX / 2 % 40;
-  }
-
-  //
-  // Horizontal and vertical parallax
-  //
-  if (mapParallaxBoth)
-  {
-    // Alternate between shifted and unshifted backdrop to emulate scrolling in
-    // 4-pixel increments for the horizontal parallax.
-    // See LoadBackdrop().
-    if (gmCameraPosX % 2)
-    {
-      bdAddress = 0x6000;
-    }
-    else
-    {
-      bdAddress = 0x4000;
-    }
-
-    // Alternate between the vertically shifted and unshifted versions of the
-    // backdrop chosen above, to emulate vertical scrolling in 4-pixel
-    // increments.
-    if (gmCameraPosY % 2)
-    {
-      bdAddress += 0x4000;
-    }
-
-    // See above
-    bdOffsetTablePtr += gmCameraPosY / 2 % 25 * 80 + gmCameraPosX / 2 % 40;
-  }
-
-  //
-  // Horizontal parallax
-  //
   if (mapParallaxHorizontal)
   {
     // Reactor destruction event (backdrop flashes white every other frame)
@@ -252,21 +117,6 @@ void UpdateBackdrop(void)
           "DUKE... YOU HAVE DESTROYED*EVERYTHING.  EXCELLENT...");
       }
     }
-
-    // Horizontal parallax. bdAddressAdjust is used to switch between the
-    // primary and secondary backdrop image, for the reactor destruction event
-    // (in E1L5) and when switching the backdrop after teleporting (in E1L1).
-    if (gmCameraPosX % 2)
-    {
-      bdAddress = 0x6000 + bdAddressAdjust;
-    }
-    else
-    {
-      bdAddress = 0x4000 + bdAddressAdjust;
-    }
-
-    // See above
-    bdOffsetTablePtr += gmCameraPosX / 2 % 40;
   }
 }
 
@@ -281,302 +131,22 @@ void UpdateBackdrop(void)
  */
 void pascal UpdateAndDrawGame(void (*updatePlayerFunc)())
 {
-  register word col;
-  register word frontMaskedsIndex = 0;
-  word srcRowOffset;
-  word background;
-  word foreground;
-  word extraDataIndex;
-  word extraDataShift;
-  word frontMaskeds[500];
-
-// Draw a part of the backdrop. bdAddress and bdOffsetTablePtr are updated in
-// UpdateBackdrop() in order to make the backdrop scroll.
-// If the reactor destruction event (found in E1L5) is currently happening, we
-// draw a solid white color instead of the backdrop every other frame, to make
-// the backdrop image flash white. Interestingly, drawing the white color is
-// not implemented via the status icon tileset, which does also contain
-// single-color tiles for use with FillScreenRegion. Instead, we use the bottom
-// right solid tile (i.e., highest possible solid tile index) found in the
-// level-specific tileset. The tileset used in E1L5 happens to have a fully
-// white tile at that location, but it could easily be something else. I'm not
-// sure why it was implemented this way, perhaps as a way to give the artists
-// some control over the appearance of the backdrop flash?
-#define DRAW_BACKDROP_TILE()                                                   \
-  if (                                                                         \
-    gmReactorDestructionStep && gmReactorDestructionStep < 14 &&               \
-    gfxCurrentDisplayPage)                                                     \
-  {                                                                            \
-    BlitSolidTile(XY_TO_OFFSET(39, 24), col + destOffset);                     \
-  }                                                                            \
-  else                                                                         \
-  {                                                                            \
-    BlitSolidTile(bdAddress + *(bdOffsetTablePtr + col), col + destOffset);    \
-  }
-
-
-// Draw a masked tile. If the tile is a background tile, we can immediately draw
-// it, but if it's a foreground tile, we instead add it to a list to be drawn
-// later. This is so that foreground masked tiles appear in front of the
-// sprites. This mechanism is not needed for solid tiles, because the sprite
-// drawing code skips drawing parts of the sprite which are obscured by a
-// solid foreground tile. This allows us to draw all solid tiles in one go
-// without needing to distinguish between foreground and background tiles, and
-// still have sprites appear to be behind foreground tiles.
-#define DRAW_MASKED_TILE(value)                                                \
-  if (gfxTilesetAttributes[value >> 3] & TA_FOREGROUND)                        \
-  {                                                                            \
-    frontMaskeds[frontMaskedsIndex] = value;                                   \
-    frontMaskeds[frontMaskedsIndex + 1] = col + destOffset;                    \
-    frontMaskedsIndex += 2;                                                    \
-  }                                                                            \
-  else                                                                         \
-  {                                                                            \
-    BlitMaskedMapTile(gfxMaskedTileData + value, col + destOffset);            \
-  }
-
-
   if (gfxFlashScreen)
   {
-    // If a screen flash effect was requested, simply fill the screen using the
-    // requested color and then swap buffers. Because updatePlayerFunc is not
-    // invoked in this case, there is no frame delay and the in-game loop will
-    // call UpdateAndDrawGame() again right after, making the screen flash
-    // technically part of the following frame.
-    //
-    // [NOTE] The same could've been achieved in a clearer manner by doing the
-    // buffer swapping here inside the if statement, and then continuing on with
-    // the rest of the function instead of putting the remainder of the code
-    // into the else branch.
-    FillScreenRegion(
-      gfxScreenFlashColor, 1, 1, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+    gfxCurrentDisplayPage = !gfxCurrentDisplayPage;
     gfxFlashScreen = false;
   }
-  else
-  {
-    // Start drawing the map at screen pixel coordinates (8, 8). In EGA memory,
-    // 1 byte represents 8 pixels. 40 is the width of the entire screen (320 /
-    // 8).
-    destOffset = 8 * 40 + 1;
 
-    //
-    // Tile animation state update
-    //
-    if (gfxCurrentDisplayPage)
-    {
-      gfxTileAnimationStepSlow += 8;
-      if (gfxTileAnimationStepSlow == 32)
-      {
-        gfxTileAnimationStepSlow = 0;
-      }
-    }
+  updatePlayerFunc();
+  UpdateBackdrop();
+  UpdateMovingMapParts();
+  UpdateAndDrawActors();
+  UpdateAndDrawParticles();
+  UpdateAndDrawPlayerShots();
+  UpdateAndDrawEffects();
+  UpdateAndDrawTileDebris();
 
-    gfxTileAnimationStepFast += 8;
-    if (gfxTileAnimationStepFast == 32)
-    {
-      gfxTileAnimationStepFast = 0;
-    }
-
-    // Read input, update player, and - crucially - wait some ticks in order
-    // to make the game run at the configured game speed.
-    // See WaitAndUpdatePlayer() in player.c.
-    updatePlayerFunc();
-
-    UpdateBackdrop();
-
-    // Configure EGA hardware to allow the use of BlitSolidTile, which relies on
-    // the latch copy technique for speed. See gfx.asm.
-    // For drawing masked tiles, we need to temporarily change the hardware
-    // state, but this is done within BlitMaskedMapTile.
-    EGA_SETUP_LATCH_COPY();
-
-    // Pre-compute some variables to save on computation during the tile drawing
-    // loop
-    srcOffsetEnd = (gmCameraPosY + mapViewportHeight) << mapWidthShift;
-    srcRowOffset = gmCameraPosY << mapWidthShift;
-
-    UpdateMovingMapParts();
-
-    //
-    // Backdrop and map drawing
-    //
-
-    /*
-    The way drawing the map and backdrop works is interesting. The plain old VGA
-    interface has a very limited bandwidth thanks to the slow ISA bus.  All the
-    data has to be copied by the CPU, there's no DMA or other hardware accele-
-    ration. Later graphics cards did offer various acceleration capabilities,
-    but there was no common API to make use of these features under DOS, so a
-    game developer wanting to take advantage of this would have to develop
-    custom code for each graphics card vendor, and then include a setup where
-    the user would need to choose the type of card they have etc.  Basically all
-    the tedious stuff that's handled at the operating system level nowadays had
-    to be part of the game. And even if a developer went through all that
-    effort, the game would still be slow for users who didn't have one of the
-    supported video cards. It made much more sense to code against the lowest
-    common denominator, i.e. plain VGA, and try to get the best performance out
-    of it that you can. This way, your game would run on a wide range of
-    machines at acceptable speed, while keeping development effort manageable.
-
-    To achieve decent performance on older VGA cards, it's vitally important to
-    reduce the amount of data written to video memory each frame.  The game uses
-    two techniques to achieve that. First, it draws everything in a grid of 8x8
-    pixel tiles, including sprites. When drawing the map, each tile is filled
-    with either a part of the backdrop, or a solid tile.
-
-    Crucially, even tiles which appear in front of sprites are already drawn at
-    this point. When drawing the sprites later on, the parts of the sprite that
-    would be covered by a foreground tile are skipped completely. This way,
-    overdraw is reduced and thus also the amount of bandwidth needed.
-    See DrawActor() in sprite.c. This technique doesn't work for partially
-    transparent map tiles (aka masked tiles) though, so these are added to a
-    list instead and then drawn after drawing sprites.
-
-    The other technique used by the game to achieve a speedup is to copy solid
-    tiles from video memory to video memory using latch copies. See gfx.asm.
-
-    All of this already exists in Cosmo and (to some extent) Duke Nukem I.
-    What's new in Duke 2 is the addition of "composite" tiles which consist of a
-    solid tile background and a masked tile foreground.
-    */
-
-    do
-    {
-      col = 0;
-
-      do
-      {
-        pCurrentTile = mapData + srcRowOffset + col + gmCameraPosX;
-
-        if (*pCurrentTile == 0) // no tile, draw backdrop
-        {
-          DRAW_BACKDROP_TILE();
-        }
-        else if (*pCurrentTile >= 8000) // masked or composite tile
-        {
-          if (*pCurrentTile & 0x8000) // composite tile
-          {
-            // Extract foreground and background from the composite. A
-            // composite tile value consists of 10 bits for the background tile
-            // index, and 5 bits for the foreground tile index. The most
-            // significant bit serves as the marker to indicate a composite
-            // tile. 10 bits are enough to encode values up to 1023, which is
-            // sufficient to encode all possible solid tile indices since the
-            // highest possible index is 999. But 5 bits can only encode values
-            // up to 31. There are 160 masked tiles in a tileset, so that's
-            // clearly not enough. Level files therefore feature an additional
-            // "extra data" section after the regular map data, which contains 2
-            // additional bits for each tile in the map data.
-
-            // Solid tile indices are expected to be multiplied by 8 (<< 3), in
-            // order to be directly usable as a memory offset in BlitSolidTile.
-            background = (*pCurrentTile & 0x3FF) << 3;
-
-            // BlitMaskedMapTile subtracts 8000 from the value that's passed in,
-            // so we need to add 8000 to the value here. The foreground index
-            // also needs to be multiplied by 40, since regular masked tile
-            // values in the map data are encoded this way. This again makes it
-            // easier to directly use the tile value as a memory offset within
-            // BlitMaskedMapTile.
-            foreground = 8000 + ((*pCurrentTile >> 10) & 0x1F) * 40;
-
-            // Apply the extra data. Each byte in mapExtraData contains 4
-            // entries of 2 bits each - it covers 4 consecutive map data cells.
-            // We thus get the index of the byte to use by dividing our current
-            // map cell offset by 4, and the index of the entry within the byte
-            // by doing modulo 4. Since each entry is two bits in size, we also
-            // multiply the latter by two and this gives us a shift value to
-            // extract the bits we're interested in.
-            extraDataIndex = (srcRowOffset + col + gmCameraPosX) / 4;
-            extraDataShift = (srcRowOffset + col + gmCameraPosX) % 4 * 2;
-
-            foreground = foreground +
-              // Extract the 2 extra bits from the packed extra data
-              ((mapExtraData[extraDataIndex] >> extraDataShift) & 3) *
-
-                // This is conceptually a left shift by 5 followed by a
-                // multiplication by 40, but for some reason, it was coded this
-                // way. The left shift moves the 2 extra bits into the location
-                // within our foreground tile index where they belong (recall
-                // that the lower 5 bits are already set from the composite tile
-                // value), the multiply by 40 is for the same reason as
-                // explained above (to make the foreground tile value usable as
-                // a memory offset in BlitMaskedMapTile).
-                (32 * 40);
-
-            // Draw the background
-            BlitSolidTile(background, col + destOffset);
-
-            // Draw the foreground
-            DRAW_MASKED_TILE(foreground);
-          }
-          else // regular masked tile
-          {
-            DRAW_BACKDROP_TILE();
-            DRAW_MASKED_TILE(*pCurrentTile);
-          }
-        }
-        else // solid tile
-        {
-          if (HAS_TILE_ATTRIBUTE(*pCurrentTile, TA_ANIMATED)) // animated tile
-          {
-            if (HAS_TILE_ATTRIBUTE(*pCurrentTile, TA_SLOW_ANIMATION))
-            {
-              BlitSolidTile(
-                *pCurrentTile + gfxTileAnimationStepSlow, col + destOffset);
-            }
-            else
-            {
-              BlitSolidTile(
-                *pCurrentTile + gfxTileAnimationStepFast, col + destOffset);
-            }
-          }
-          else // no animation
-          {
-            BlitSolidTile(*pCurrentTile, col + destOffset);
-          }
-        }
-
-        col++;
-      } while (col < VIEWPORT_WIDTH);
-
-
-      // Skip to the next tile row on screen, 40 bytes in memory are 320 pixels
-      destOffset += 40 * 8;
-
-      // Skip to next row in backdrop offset table, see UpdateBackdrop() and
-      // InitBackdropOffsetTable().
-      bdOffsetTablePtr += 80;
-
-      // Skip to the next row in the map data
-      srcRowOffset += mapWidth;
-    } while (srcRowOffset < srcOffsetEnd);
-
-    //
-    // Update all other systems and draw sprites/particles
-    //
-    UpdateAndDrawActors();
-    UpdateAndDrawParticles();
-    UpdateAndDrawPlayerShots();
-    UpdateAndDrawEffects();
-    UpdateAndDrawWaterAreas();
-
-    // Now draw masked tiles that are meant to appear in front of sprites
-    for (col = 0; col < frontMaskedsIndex; col += 2)
-    {
-      BlitMaskedMapTile(
-        gfxMaskedTileData + frontMaskeds[col], frontMaskeds[col + 1]);
-    }
-
-    UpdateAndDrawTileDebris();
-  }
-
-  // Swap buffers
-  SetDrawPage(gfxCurrentDisplayPage);
-  SetDisplayPage(gfxCurrentDisplayPage = !gfxCurrentDisplayPage);
-
-#undef DRAW_BACKDROP_TILE
-#undef DRAW_MASKED_TILE
+  gfxCurrentDisplayPage = !gfxCurrentDisplayPage;
 }
 
 
@@ -1019,16 +589,6 @@ void pascal Map_DestroySection(word left, word top, word right, word bottom)
 }
 
 
-/** Draw a single solid tile at the given location */
-static void pascal DrawTileDebris(word tileValue, word x, word y)
-{
-  if (x > 0 && x < VIEWPORT_WIDTH && y > 0 && y < VIEWPORT_HEIGHT + 1)
-  {
-    BlitSolidTile(tileValue, x + y * (40 * 8));
-  }
-}
-
-
 /** Update and draw a currently active tile explosion */
 void UpdateAndDrawTileDebris(void)
 {
@@ -1049,8 +609,6 @@ void UpdateAndDrawTileDebris(void)
   // piece occupies 5 words.
   size = (gmExplodingSectionRight - gmExplodingSectionLeft) *
     (gmExplodingSectionBottom - gmExplodingSectionTop) * 5;
-
-  EGA_SETUP_LATCH_COPY();
 
   for (i = 0; i < size; i += 5)
   {

@@ -176,14 +176,6 @@ void pascal UpdateAndDrawParticles(void)
   word x;
   word y;
 
-  EGA_SET_DEFAULT_MODE();
-
-  // [BUG] Setting the EGA map mask to write to all planes simultaneously is
-  // missing here. This causes the first SetPixel() to potentially output an
-  // incorrect color, depending on the combination of existing color in the
-  // framebuffer and particle color. Subsequent calls after the first one are
-  // fine, since SetPixel sets the map mask to the correct value after drawing.
-
   for (groupIndex = 0; groupIndex < NUM_PARTICLE_GROUPS; groupIndex++)
   {
     if (psParticleGroups[groupIndex].timeAlive)

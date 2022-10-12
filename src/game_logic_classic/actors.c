@@ -2609,8 +2609,6 @@ void pascal Act_RespawnBeacon(word handle)
       gmBeaconPosY = state->y;
       gmBeaconActivated = true;
 
-      WriteSavedGame('Z');
-
       ShowInGameMessage("SECTOR SECURE!!!");
     }
 
@@ -7349,7 +7347,6 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      gmWaterAreasPresent = true;
       break;
 
     case ACT_WATER_DROP:
@@ -7414,7 +7411,6 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      gmWaterAreasPresent = true;
       break;
 
     case ACT_WATER_AREA_4x4:
@@ -7431,7 +7427,6 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      gmWaterAreasPresent = true;
       break;
 
     case ACT_RADAR_COMPUTER_TERMINAL:
@@ -7625,7 +7620,6 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      gmBossHealth /= 4;
       break;
 
     case ACT_BOSS_EPISODE_4:

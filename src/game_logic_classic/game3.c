@@ -41,9 +41,6 @@ also found here.
 
 *******************************************************************************/
 
-void pascal SpawnActor(word id, word x, word y);
-
-
 /** Initialize actor state at given list index, based on the parameters */
 void pascal InitActorState(
   word listIndex,
@@ -273,9 +270,7 @@ void pascal TryUnlockingDoor(bool* pSuccess, word neededKeyId, word handle)
   {
     plBlockLookingUp = true;
 
-    if (
-      (inputMoveUp || kbKeyState[SCANCODE_ENTER]) &&
-      RemoveFromInventory(neededKeyId))
+    if (inputMoveUp && RemoveFromInventory(neededKeyId))
     {
       *pSuccess = true;
 
@@ -290,24 +285,6 @@ void pascal TryUnlockingDoor(bool* pSuccess, word neededKeyId, word handle)
   {
     plBlockLookingUp = false;
   }
-}
-
-
-/** Draw a collected letter indicator onto the HUD
- *
- * This would work for any type of sprite, but is only used for the letter
- * collection indicators.
- */
-void HUD_DrawLetterIndicator(word id)
-{
-  // This appears to draw the sprite at (0, 0), but it actually ends up drawn
-  // in the lower right part of the screen. The actual position is encoded in
-  // the sprite's x/y offset in the actor info data.
-  SetDrawPage(gfxCurrentDisplayPage);
-  DrawSprite(id, 0, 0, 0);
-
-  SetDrawPage(!gfxCurrentDisplayPage);
-  DrawSprite(id, 0, 0, 0);
 }
 
 
@@ -451,7 +428,7 @@ void pascal UpdateActorPlayerCollision(word handle)
             TUT_FOUND_FORCE_FIELD,
             "USE THE ACCESS CARD TO DISABLE*THIS FORCE FIELD.");
 
-          if (inputMoveUp || kbKeyState[SCANCODE_ENTER])
+          if (inputMoveUp)
           {
             if (state->var1)
             {
@@ -460,7 +437,6 @@ void pascal UpdateActorPlayerCollision(word handle)
             }
             else if (gmRequestUnlockNextForceField)
             {
-              gmTutorialsShown[TUT_CARD_NEEDED] = true;
               ShowInGameMessage("ACCESS GRANTED.");
             }
           }
@@ -473,7 +449,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           ShowTutorial(TUT_FOUND_KEYHOLE, "USE A KEY TO OPEN THIS DOOR.");
           TryUnlockingDoor(&gmRequestUnlockNextDoor, ACT_BLUE_KEY, handle);
 
-          if (inputMoveUp || kbKeyState[SCANCODE_ENTER])
+          if (inputMoveUp)
           {
             if (state->var1)
             {
@@ -483,7 +459,6 @@ void pascal UpdateActorPlayerCollision(word handle)
             else if (gmRequestUnlockNextDoor)
             {
               ShowInGameMessage("OPENING DOOR.");
-              gmTutorialsShown[TUT_KEY_NEEDED] = true;
             }
           }
         }
@@ -737,9 +712,6 @@ void pascal UpdateActorPlayerCollision(word handle)
 
           plWeapon = state->var3;
 
-          HUD_DrawAmmo(plAmmo);
-          HUD_DrawWeapon(plWeapon);
-
           PlaySound(SND_WEAPON_PICKUP);
 
           state->deleted = true;
@@ -847,8 +819,6 @@ void pascal UpdateActorPlayerCollision(word handle)
           plHealth = PLAYER_MAX_HEALTH;
         }
 
-        HUD_DrawHealth(plHealth);
-
         // [BUG] The turkey doesn't give any points, but spawns a score number
         // on pickup
         SpawnEffect(
@@ -881,8 +851,6 @@ void pascal UpdateActorPlayerCollision(word handle)
             plHealth = PLAYER_MAX_HEALTH;
           }
 
-          HUD_DrawHealth(plHealth);
-
           SpawnEffect(
             ACT_SCORE_NUMBER_FX_100, state->x, state->y, EM_SCORE_NUMBER, 0);
         }
@@ -899,8 +867,6 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           plHealth = PLAYER_MAX_HEALTH;
         }
-
-        HUD_DrawHealth(plHealth);
 
         SpawnEffect(
           ACT_SCORE_NUMBER_FX_100, state->x, state->y, EM_SCORE_NUMBER, 0);
@@ -934,8 +900,6 @@ void pascal UpdateActorPlayerCollision(word handle)
             SpawnEffect(
               ACT_SCORE_NUMBER_FX_500, state->x, state->y, EM_SCORE_NUMBER, 0);
 
-            HUD_DrawHealth(plHealth);
-
             GiveScore(500);
           }
 
@@ -944,8 +908,6 @@ void pascal UpdateActorPlayerCollision(word handle)
         break;
 
       case ACT_N:
-        HUD_DrawLetterIndicator(ACT_LETTER_INDICATOR_N);
-
         // The letter collection state is stored in plCollectedLetters. The
         // low byte of that value is the number of letters that have been
         // collected in the right order, while the high byte is a bitmask which
@@ -972,8 +934,6 @@ void pascal UpdateActorPlayerCollision(word handle)
         break;
 
       case ACT_U:
-        HUD_DrawLetterIndicator(ACT_LETTER_INDICATOR_U);
-
         // See ACT_N above
         if ((plCollectedLetters & 7) == 1)
         {
@@ -996,8 +956,6 @@ void pascal UpdateActorPlayerCollision(word handle)
         break;
 
       case ACT_K:
-        HUD_DrawLetterIndicator(ACT_LETTER_INDICATOR_K);
-
         // See ACT_N above
         if ((plCollectedLetters & 7) == 2)
         {
@@ -1020,8 +978,6 @@ void pascal UpdateActorPlayerCollision(word handle)
         break;
 
       case ACT_E:
-        HUD_DrawLetterIndicator(ACT_LETTER_INDICATOR_E);
-
         // See ACT_N above
         if ((plCollectedLetters & 7) == 3)
         {
@@ -1045,8 +1001,6 @@ void pascal UpdateActorPlayerCollision(word handle)
 
       case ACT_M:
         plCollectedLetters |= 0x1000;
-
-        HUD_DrawLetterIndicator(ACT_LETTER_INDICATOR_M);
 
         // See ACT_N above
         if ((plCollectedLetters & 7) == 4)
@@ -1256,7 +1210,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         // AreSpritesTouching() at the top of this function.
         if (
           state->x <= plPosX && state->x + 3 >= plPosX && state->y == plPosY &&
-          (inputMoveUp || kbKeyState[SCANCODE_ENTER]) && plState == PS_NORMAL)
+          inputMoveUp && plState == PS_NORMAL)
         {
           byte counterpartId;
           ActorState* candidate;
@@ -1411,7 +1365,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         state->var5 = 1;
       }
 
-      HUD_DrawBossHealthBar(gmBossHealth = state->health);
+      gmBossHealth = state->health;
       break;
 
     case ACT_BOSS_EPISODE_1:
@@ -1421,7 +1375,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         state->var3 = 2;
       }
 
-      HUD_DrawBossHealthBar(gmBossHealth = state->health);
+      gmBossHealth = state->health;
       break;
 
     case ACT_BOSS_EPISODE_3:
@@ -1431,7 +1385,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         state->var3 = 2;
       }
 
-      HUD_DrawBossHealthBar(gmBossHealth = state->health / 4);
+      gmBossHealth = state->health;
       break;
 
     case ACT_BOSS_EPISODE_4:
@@ -1441,7 +1395,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         state->var3 = 2;
       }
 
-      HUD_DrawBossHealthBar(gmBossHealth = state->health);
+      gmBossHealth = state->health;
       break;
 
     case ACT_EYEBALL_THROWER_L:
@@ -2152,9 +2106,6 @@ bool pascal PlayerInRange(word handle, word distance)
 }
 
 
-#include "actors.c"
-
-
 /** Spawn a new actor into the game world
  *
  * Creates an actor of the given type at the given location.
@@ -2188,371 +2139,6 @@ void pascal SpawnActor(word id, word x, word y)
 }
 
 
-/** Load additional sprites needed by given actor
- *
- * Each actor has an associated sprite, but some actors require additional
- * sprites.  E.g. because they have different sprites for facing left/right,
- * are made up of multiple sprites, or can spawn other types of actors like
- * projectiles, effects etc. Since the latter aren't placed into levels, they
- * have to be loaded along with the actors that are able to spawn them into
- * the world.
- */
-void pascal LoadActorExtraSprites(word id)
-{
-  switch (id)
-  {
-    case ACT_RIGELATIN_SOLDIER:
-      LoadSprite(ACT_RIGELATIN_SOLDIER_SHOT);
-      // fallthrough (most likely unintentional)
-
-    case ACT_N:
-      LoadSpriteRange(ACT_LETTER_INDICATOR_N, ACT_LETTER_INDICATOR_M);
-      break;
-
-    case ACT_MESSENGER_DRONE_1:
-    case ACT_MESSENGER_DRONE_2:
-    case ACT_MESSENGER_DRONE_3:
-    case ACT_MESSENGER_DRONE_4:
-    case ACT_MESSENGER_DRONE_5:
-      LoadSpriteRange(ACT_MESSENGER_DRONE_BODY, ACT_MESSENGER_DRONE_FLAME_R);
-      break;
-
-    case ACT_CLOAKING_DEVICE:
-      LoadSprite(ACT_CLOAKING_DEVICE_ICON);
-      break;
-
-    case ACT_RED_BOX_TURKEY:
-      LoadSprite(ACT_TURKEY);
-      break;
-
-    case ACT_GREEN_CREATURE_L:
-    case ACT_GREEN_CREATURE_R:
-      LoadSprite(ACT_GREEN_CREATURE_EYE_FX_L);
-      LoadSpriteRange(ACT_GREEN_CREATURE_L, ACT_GREEN_CREATURE_SHELL_4_R);
-      LoadSprite(ACT_BIOLOGICAL_ENEMY_DEBRIS);
-      break;
-
-    case ACT_BIG_GREEN_CAT_L:
-    case ACT_BIG_GREEN_CAT_R:
-      LoadSpriteRange(ACT_BIG_GREEN_CAT_L, ACT_BIG_GREEN_CAT_R);
-      LoadSprite(ACT_BIOLOGICAL_ENEMY_DEBRIS);
-      break;
-
-    case ACT_SODA_CAN:
-    case ACT_SODA_6_PACK:
-      LoadSpriteRange(ACT_COKE_CAN_DEBRIS_1, ACT_COKE_CAN_DEBRIS_2);
-      break;
-
-    case ACT_METAL_GRABBER_CLAW:
-      LoadSpriteRange(
-        ACT_METAL_GRABBER_CLAW_DEBRIS_1, ACT_METAL_GRABBER_CLAW_DEBRIS_2);
-      break;
-
-    case ACT_BLUE_BONUS_GLOBE_1:
-      LoadSprite(ACT_SCORE_NUMBER_FX_500);
-      break;
-
-    case ACT_BLUE_BONUS_GLOBE_2:
-      LoadSprite(ACT_SCORE_NUMBER_FX_2000);
-      break;
-
-    case ACT_BLUE_BONUS_GLOBE_3:
-      LoadSprite(ACT_SCORE_NUMBER_FX_5000);
-      break;
-
-    case ACT_BLUE_BONUS_GLOBE_4:
-      LoadSprite(ACT_SCORE_NUMBER_FX_10000);
-      break;
-
-    case ACT_SLIME_PIPE:
-      LoadSprite(ACT_SLIME_DROP);
-      break;
-
-    case ACT_EYEBALL_THROWER_L:
-      LoadSpriteRange(ACT_EYEBALL_THROWER_R, ACT_EYEBALL_PROJECTILE);
-      break;
-
-    case ACT_DUKES_SHIP_R:
-      LoadSprite(ACT_DUKES_SHIP_L);
-      LoadSprite(ACT_DUKES_SHIP_LASER_SHOT);
-      LoadSprite(ACT_DUKES_SHIP_EXHAUST_FLAMES);
-      break;
-
-    case ACT_DUKE_L:
-    case ACT_DUKE_R:
-      switch (plWeapon)
-      {
-        case WPN_LASER:
-          LoadSpriteRange(
-            ACT_DUKE_LASER_SHOT_HORIZONTAL, ACT_DUKE_LASER_SHOT_VERTICAL);
-          break;
-
-        case WPN_ROCKETLAUNCHER:
-          LoadSpriteRange(ACT_DUKE_ROCKET_UP, ACT_SMOKE_PUFF_FX);
-          break;
-
-        case WPN_FLAMETHROWER:
-          LoadSprite(ACT_DUKE_FLAME_SHOT_UP);
-          LoadSpriteRange(ACT_DUKE_FLAME_SHOT_DOWN, ACT_DUKE_FLAME_SHOT_RIGHT);
-          break;
-      }
-      break;
-
-    case ACT_HOVERBOT_GENERATOR:
-      LoadSprite(ACT_HOVERBOT);
-      // fallthrough
-
-    case ACT_HOVERBOT:
-      LoadSprite(ACT_HOVERBOT_TELEPORT_FX);
-      LoadSpriteRange(ACT_HOVERBOT_DEBRIS_1, ACT_HOVERBOT_DEBRIS_2);
-      break;
-
-    case ACT_ROCKET_LAUNCHER:
-      LoadSpriteRange(ACT_DUKE_ROCKET_UP, ACT_SMOKE_PUFF_FX);
-      break;
-
-    case ACT_FLAME_THROWER:
-      LoadSprite(ACT_DUKE_FLAME_SHOT_UP);
-      LoadSpriteRange(ACT_DUKE_FLAME_SHOT_DOWN, ACT_DUKE_FLAME_SHOT_RIGHT);
-      break;
-
-    case ACT_LASER:
-      LoadSpriteRange(
-        ACT_DUKE_LASER_SHOT_HORIZONTAL, ACT_DUKE_LASER_SHOT_VERTICAL);
-      break;
-
-    case ACT_FLAME_THROWER_BOT_R:
-      LoadSprite(ACT_FLAME_THROWER_FIRE_R);
-      break;
-
-    case ACT_FLAME_THROWER_BOT_L:
-      LoadSprite(ACT_FLAME_THROWER_FIRE_L);
-      break;
-
-    case ACT_RED_BOX_BOMB:
-      LoadSprite(ACT_FIRE_BOMB_FIRE);
-      break;
-
-    case ACT_ROCKET_LAUNCHER_TURRET:
-      LoadSpriteRange(ACT_ENEMY_ROCKET_LEFT, ACT_ENEMY_ROCKET_RIGHT);
-      break;
-
-    case ACT_WATCHBOT_CONTAINER_CARRIER:
-      LoadSprite(ACT_WATCHBOT);
-      LoadSpriteRange(ACT_WATCHBOT_CONTAINER, ACT_WATCHBOT_CONTAINER_DEBRIS_2);
-      break;
-
-    case ACT_BOMBER_PLANE:
-      LoadSprite(ACT_MINI_NUKE);
-      LoadSprite(ACT_NUCLEAR_EXPLOSION);
-      break;
-
-    case ACT_ELECTRIC_REACTOR:
-      LoadSprite(ACT_WHITE_CIRCLE_FLASH_FX);
-      LoadSpriteRange(ACT_REACTOR_FIRE_L, ACT_REACTOR_FIRE_R);
-      break;
-
-    case ACT_MISSILE_INTACT:
-      LoadSprite(ACT_MISSILE_DEBRIS);
-      LoadSprite(ACT_WHITE_CIRCLE_FLASH_FX);
-      LoadSprite(ACT_MISSILE_EXHAUST_FLAME);
-      break;
-
-    case ACT_MISSILE_BROKEN:
-      LoadSprite(ACT_NUCLEAR_EXPLOSION);
-      LoadSprite(ACT_MISSILE_DEBRIS);
-      break;
-
-    case ACT_SLIME_BLOB:
-    case ACT_SLIME_CONTAINER:
-      LoadSprite(ACT_SLIME_BLOB);
-      LoadSprite(ACT_SLIME_BLOB_2);
-      LoadSprite(ACT_BIOLOGICAL_ENEMY_DEBRIS);
-      break;
-
-    case ACT_CEILING_SUCKER:
-    case ACT_UGLY_GREEN_BIRD:
-      LoadSprite(ACT_BIOLOGICAL_ENEMY_DEBRIS);
-      break;
-
-    case ACT_RAPID_FIRE:
-      LoadSprite(ACT_RAPID_FIRE_ICON);
-      break;
-
-    case ACT_BLUE_GUARD_R:
-    case ACT_BLUE_GUARD_L:
-    case ACT_BLUE_GUARD_USING_TERMINAL:
-      LoadSprite(ACT_BLUE_GUARD_R);
-      // fallthrough
-
-    case ACT_LASER_TURRET:
-    case ACT_HOVERING_LASER_TURRET:
-      // The shot sprite is identical for left and right, so there's only one
-      // sprite
-      LoadSprite(ACT_ENEMY_LASER_SHOT_L);
-      LoadSpriteRange(
-        ACT_ENEMY_LASER_MUZZLE_FLASH_L, ACT_ENEMY_LASER_MUZZLE_FLASH_R);
-      break;
-
-    case ACT_SUPER_FORCE_FIELD_R:
-      LoadSprite(ACT_SUPER_FORCE_FIELD_L);
-      break;
-
-    case ACT_WATER_DROP_SPAWNER:
-      LoadSprite(ACT_WATER_DROP);
-      break;
-
-    case ACT_SPIDER:
-      LoadSprite(ACT_SPIDER_SHAKEN_OFF);
-      break;
-
-    case ACT_SPECIAL_HINT_GLOBE:
-      LoadSprite(ACT_SPECIAL_HINT_GLOBE_ICON);
-      break;
-
-    case ACT_TELEPORTER_1:
-      LoadSprite(ACT_TELEPORTER_2);
-      break;
-
-    case ACT_WINDBLOWN_SPIDER_GENERATOR:
-      LoadSpriteRange(ACT_SPIDER_DEBRIS_2, ACT_SPIDER_BLOWING_IN_WIND);
-      break;
-
-    case ACT_UNICYCLE_BOT:
-      LoadSprite(ACT_SMOKE_PUFF_FX);
-      break;
-
-    case ACT_AGGRESSIVE_PRISONER:
-      LoadSprite(ACT_PRISONER_HAND_DEBRIS);
-      break;
-
-    case ACT_BOSS_EPISODE_1:
-      LoadSprite(ACT_MINI_NUKE_SMALL);
-      LoadSprite(ACT_NUCLEAR_EXPLOSION);
-      break;
-
-    case ACT_BOSS_EPISODE_3:
-      LoadSprite(ACT_ENEMY_ROCKET_LEFT);
-      LoadSprite(ACT_ENEMY_ROCKET_RIGHT);
-      LoadSprite(ACT_ENEMY_ROCKET_2_UP);
-      LoadSprite(ACT_ENEMY_ROCKET_2_DOWN);
-      break;
-
-    case ACT_BOSS_EPISODE_4:
-      LoadSprite(ACT_BOSS_EPISODE_4_SHOT);
-      break;
-
-    case ACT_BLOWING_FAN:
-      LoadSprite(ACT_BLOWING_FAN_THREADS_ON_TOP);
-      break;
-  }
-}
-
-
-/** Show a dot on the radar if the given position is in range */
-void pascal HUD_ShowOnRadar(word x, word y)
-{
-  register int x1 = plPosX - 17;
-  register int y1 = plPosY - 17;
-
-  if ((int)x > x1 && x < plPosX + 16 && (int)y > y1 && y < plPosY + 16)
-  {
-    x1 = x - plPosX;
-    y1 = y - plPosY;
-
-    // [BUG] If you're familiar with the game, you may wonder why the color is
-    // specified as brown here, but actually appears as white on screen.  The
-    // problem is that SetPixel requires the EGA map mask to be configured for
-    // writing to all planes simultaneously in order to work correctly.  If
-    // that's not the case, some bits of whatever color value is already in the
-    // framebuffer will remain, and be combined with the target color.
-    //
-    // When this function is invoked, it is usually preceded by a call to
-    // DrawActor. The latter invokes BlitMaskedTile, which writes to all 4 EGA
-    // planes, one plane at a time. The EGA map mask will be set to 1000b after
-    // DrawActor returns, meaning only writes to the 4th plane are enabled.  The
-    // color brown is 1110b. The background image for the radar view is a
-    // uniform dark grey, which is color index 0001b. SetPixel first erases the
-    // background by writing a 0 to the target coordinates, but because of the
-    // map mask, this only erases the most significant bit - which is already 0
-    // in the background color. Crucially, the 1 bit in the least significant
-    // position in the background color remains.  Next, SetPixel sets all bits
-    // to 1 which are set in the color to be written. This is equivalent to
-    // OR-ing the framebuffer value with the desired color value. Since the
-    // framebuffer still holds the background color, this gives us:
-    //
-    //   0001b OR 1110b -> 1111b
-    //
-    // And that happens to be white.
-    //
-    // It's worth noting that actors can appear on the radar view without
-    // appearing on screen, since the thresholds used in this function span an
-    // area of 32 units on both axes, but the game's viewport is only 20 tiles
-    // high. I.e. actors that are up to 12 tiles below the viewport can
-    // still appear on the radar.  For those actors, the color on screen will
-    // actually be different!  In case an actor is below the viewport, the last
-    // function that was called before drawing the radar dot (and which modifies
-    // the EGA state) will usually be SetPixel, from showing the previous actor
-    // on the radar. SetPixel itself sets the correct EGA map mask needed for
-    // its operation before returning, so the next SetPixel call after that
-    // will output the color as specified.  Meaning, actors below the viewport
-    // which appear on the radar actually show a brown dot (usually).
-    //
-    // Now, if this all sounds overly complicated, it's because none of this is
-    // intentional - it's just whatever coincidences lead to the EGA state being
-    // a certain way when drawing the radar dots. I honestly doubt that the
-    // original developers analyzed the situation very deeply. We don't know if
-    // radar dots were meant to appear in white or in brown, but white seems
-    // more likely since it provides better contrast against the background. So
-    // the most likely explanation is that the developers wanted the dots to
-    // appear in white, but perhaps used the wrong color index here by accident.
-    // We don't know if the original code actually featured named constants for
-    // color indices, after all, perhaps they just wrote the raw numbers and
-    // that would make it easy to mix up 14 (brown) and 15 (white).  By pure
-    // chance, the color ended up coming out as white anyway, and so they called
-    // it a day and moved on to the next thing.
-    //
-    // To make the behavior deterministic, we would need to set the map mask to
-    // 0xF here. No dedicated macro exists for this, but it could be done by
-    // doing an outport(0x3c4, 0xf02).
-    SetPixel(RADAR_POS_X + x1, RADAR_POS_Y + y1, CLR_BROWN);
-  }
-}
-
-
-/** Erase the radar display to a blank slate */
-void HUD_ClearRadar(void)
-{
-  DrawStatusIcon_2x2(XY_TO_OFFSET(33, 4), 34, 15);
-  DrawStatusIcon_2x2(XY_TO_OFFSET(33, 4), 36, 15);
-  DrawStatusIcon_2x2(XY_TO_OFFSET(33, 4), 34, 17);
-  DrawStatusIcon_2x2(XY_TO_OFFSET(33, 4), 36, 17);
-}
-
-
-/** Draw water areas */
-void UpdateAndDrawWaterAreas(void)
-{
-  register word i;
-  register word numActors = gmNumActors;
-
-  if (!gmWaterAreasPresent)
-  {
-    return;
-  }
-
-  for (i = 0; i < numActors; i++)
-  {
-    ActorState* actor = gmActorStates + i;
-
-    if (actor->id == ACT_WATER_BODY)
-    {
-      actor->updateFunc(i);
-    }
-  }
-}
-
-
 /** Updates and draws all actors
  *
  * This is the main entry point into the actor system.  It goes through all
@@ -2565,14 +2151,10 @@ void UpdateAndDrawWaterAreas(void)
  */
 void UpdateAndDrawActors(void)
 {
-  static int radarBlinkState = 0;
-
   register word handle;
   register word numActors = gmNumActors;
   ActorState* actor;
   word savedDrawStyle;
-
-  HUD_ClearRadar();
 
   for (handle = 0; handle < numActors; handle++)
   {
@@ -2583,12 +2165,6 @@ void UpdateAndDrawActors(void)
 
     // Skip deleted actors
     if (actor->deleted)
-    {
-      continue;
-    }
-
-    // Skip water areas, these are handled in UpdateAndDrawWaterAreas()
-    if (actor->id == ACT_WATER_BODY)
     {
       continue;
     }
@@ -2730,137 +2306,4 @@ void UpdateAndDrawActors(void)
     // function
     actor->drawStyle = savedDrawStyle;
   }
-
-
-  //
-  // HUD message (top row) update and drawing
-  //
-  if (hudMessageCharsPrinted)
-  {
-    // When a delay is set, count down the delay instead of printing more
-    // chars
-    if (hudMessageDelay)
-    {
-      hudMessageDelay--;
-
-      // Once we're done waiting, erase the currently visible characters
-      // and continue printing on the next frame (if there's more).
-      if (hudMessageDelay == 0)
-      {
-        hudMessageCharsPrinted = 1;
-
-        SetDrawPage(gfxCurrentDisplayPage);
-        FillScreenRegion(SFC_BLACK, 0, 0, SCREEN_WIDTH_TILES - 1, 0);
-
-        SetDrawPage(!gfxCurrentDisplayPage);
-        FillScreenRegion(SFC_BLACK, 0, 0, SCREEN_WIDTH_TILES - 1, 0);
-
-        // If we've reached the end of the message, then we stop
-        if (!(*hudCurrentMessage))
-        {
-          hudMessageCharsPrinted = 0;
-          hudShowingHintMachineMsg = false;
-        }
-      }
-    }
-    else // no delay, print the next character
-    {
-      if (*hudCurrentMessage)
-      {
-        int msgCharValue;
-
-        // There's no dedicated font rendering routine for the top-row HUD
-        // message's font, the drawing code is just inline here.
-        if (*hudCurrentMessage != ' ' && *hudCurrentMessage != '*')
-        {
-          if (*hudCurrentMessage >= 'A' && *hudCurrentMessage <= 'T')
-          {
-            msgCharValue =
-              ((*hudCurrentMessage - 'A') << 3) + XY_TO_OFFSET(20, 6);
-          }
-          else if (*hudCurrentMessage >= 'U' && *hudCurrentMessage <= 'Z')
-          {
-            msgCharValue =
-              ((*hudCurrentMessage - 'U') << 3) + XY_TO_OFFSET(17, 24);
-          }
-          else
-          {
-            switch ((int)*hudCurrentMessage)
-            {
-              case ',':
-                msgCharValue = XY_TO_OFFSET(23, 24);
-                break;
-              case '.':
-                msgCharValue = XY_TO_OFFSET(24, 24);
-                break;
-              case '!':
-                msgCharValue = XY_TO_OFFSET(25, 24);
-                break;
-              case '?':
-                msgCharValue = XY_TO_OFFSET(26, 24);
-                break;
-            }
-          }
-
-          // Draw the character onto both video pages
-          SetDrawPage(gfxCurrentDisplayPage);
-          DrawStatusIcon_1x1(msgCharValue, hudMessageCharsPrinted, 0);
-          SetDrawPage(!gfxCurrentDisplayPage);
-          DrawStatusIcon_1x1(msgCharValue, hudMessageCharsPrinted, 0);
-
-          PlaySound(SND_MESSAGE_TYPING);
-        }
-
-        hudMessageCharsPrinted++;
-        hudCurrentMessage++;
-      }
-
-      // When the available width is filled or we've reached a line break,
-      // set a delay. The message that was printed so far remains on screen.
-      if (
-        hudMessageCharsPrinted == 38 || !(*hudCurrentMessage) ||
-        *hudCurrentMessage == '*')
-      {
-        hudMessageDelay = 21;
-      }
-    }
-  }
-
-  //
-  // Draw blinking dot in the middle of the radar display
-  //
-
-  // [BUG] If we printed some message chars above, the blinking dot will not
-  // appear. This is because the message text rendering via DrawStatusIcon_1x1
-  // sets the EGA's write mode to latched writes, and that prevents SetPixel
-  // from working. To fix that, we simply need to add a EGA_SET_DEFAULT_MODE
-  // here.  A white dot will still appear in place of the blinking dot, but
-  // that's the regular radar dot representing the player. It's always drawn,
-  // but normally covered up by the blinking dot.
-  //
-  // It's also worth noting that SetPixel works correctly here purely by chance.
-  // SetPixel requires the EGA map mask to be set to 1111b, to allow writes to
-  // all EGA planes simultaneously. It doesn't set up this state by itself
-  // before drawing the pixel, but interestingly, it does _afterwards_. Meaning,
-  // the map mask will always be correct after a call to SetPixel.
-  // If no message characters are drawn, then the last function to be called
-  // before we draw the radar dot usually happens to be HUD_ShowOnRadar, which
-  // does call SetPixel. But there are situations where something else might be
-  // called before we get here, for example when we have actors that use
-  // DS_INVISIBLE and draw their sprites manually, like the grabber claw. Those
-  // actors generate a DrawSprite call, but no SetPixel call since
-  // HUD_ShowOnRadar is skipped if the draw style is DS_INVISIBLE. This then
-  // prevents the blinking dot from appearing correctly.
-  // To make this work reliably, the map mask should explicitly be set here.
-
-  // Update the color cycle state. This alternates through light grey, dark red,
-  // red, and orange when combined with CLR_LIGHT_GREY in the SetPixel call
-  // below.
-  radarBlinkState++;
-  if (radarBlinkState > 3)
-  {
-    radarBlinkState = 0;
-  }
-
-  SetPixel(RADAR_POS_X, RADAR_POS_Y, CLR_LIGHT_GREY + radarBlinkState);
 }

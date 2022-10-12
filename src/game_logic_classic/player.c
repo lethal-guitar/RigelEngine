@@ -31,79 +31,6 @@ Player control logic
 *******************************************************************************/
 
 
-/** Sets inputXXX variables based on keyboard/joystick input, or demo data */
-void ReadInput(void)
-{
-  byte keyboardInput = 0;
-  byte scriptResult;
-
-  // [NOTE] This seems like an odd place to call this function..
-  // Doing this within UpdateAndDrawGame or RunInGameLoop would seem
-  // more appropriate.
-  HUD_DrawLowHealthAnimation(plHealth);
-
-  if (!demoIsPlaying)
-  {
-    // Set input flags based on keyboard state, and check if any keyboard
-    // input occured
-    keyboardInput +=
-      (inputMoveUp = kbKeyState[kbBindingUp] | kbKeyState[SCANCODE_PGUP]);
-    keyboardInput +=
-      (inputMoveDown = kbKeyState[kbBindingDown] | kbKeyState[SCANCODE_PGDOWN]);
-    keyboardInput += (inputMoveLeft = kbKeyState[kbBindingLeft]);
-    keyboardInput += (inputMoveRight = kbKeyState[kbBindingRight]);
-    keyboardInput += (inputJump = kbKeyState[kbBindingJump]);
-    keyboardInput += (inputFire = kbKeyState[kbBindingFire]);
-
-    // If there was no keyboard input, poll the joystick if it's calibrated.
-    // Note that there is no mechanism for the game to detect if a joystick is
-    // actually plugged into the gameport.
-    if (!keyboardInput && jsCalibrated)
-    {
-      PollJoystick();
-    }
-
-    // Check if the player wants to quit. This is handled here instead of
-    // RunInGameLoop() because of demo recording.
-    if (kbKeyState[SCANCODE_ESC] || kbKeyState[SCANCODE_Q])
-    {
-      scriptResult = ShowScriptedUI("2Quit_Select", "TEXT.MNI");
-
-      if (scriptResult == 1)
-      {
-        gmGameState = GS_QUIT;
-        FinishDemoRecording();
-        FinishDemoPlayback();
-      }
-    }
-
-    // Record demo input if applicable - always a no-op in the shipping
-    // version of the game.
-    if (RecordDemoInput())
-    {
-      // RecordDemoInput() returns true if a level change was requested
-      gmGameState = GS_LEVEL_FINISHED;
-      return; // [NOTE] Redundant
-    }
-  }
-  else // demo playback
-  {
-    if (ReadDemoInput())
-    {
-      // ReadDemoInput() returns true when encountering a level change
-      // command in the recorded demo data
-      gmGameState = GS_LEVEL_FINISHED;
-    }
-
-    if (ANY_KEY_PRESSED())
-    {
-      gmGameState = GS_QUIT;
-      demoPlaybackAborted = true;
-    }
-  }
-}
-
-
 void UpdatePlayer_Shooting(void)
 {
   // Which sprite/actor id to use for each shot direction, for each
@@ -265,14 +192,11 @@ void UpdatePlayer_Shooting(void)
     if (plWeapon != WPN_REGULAR && plState != PS_USING_SHIP)
     {
       plAmmo--;
-      HUD_DrawAmmo(plAmmo);
 
       if (!plAmmo)
       {
         plWeapon = WPN_REGULAR;
-        HUD_DrawWeapon(WPN_REGULAR);
         plAmmo = MAX_AMMO;
-        HUD_DrawAmmo(MAX_AMMO);
       }
     }
   }
@@ -1262,10 +1186,6 @@ void UpdatePlayer(void)
       plRapidFireIsActiveFrame = false;
     }
 
-    if (kbKeyState[SCANCODE_PGUP] || kbKeyState[SCANCODE_PGDOWN])
-    {
-      vertScrollCooldown = 0;
-    }
 
     if (plState != PS_DYING && plState != PS_CLIMBING_LADDER)
     {
@@ -1477,13 +1397,4 @@ void UpdatePlayer(void)
 
 done:
   plBlockLookingUp = false;
-}
-
-
-void WaitAndUpdatePlayer(void)
-{
-  WaitTicks(12 - gmSpeedIndex);
-
-  ReadInput();
-  UpdatePlayer();
 }
