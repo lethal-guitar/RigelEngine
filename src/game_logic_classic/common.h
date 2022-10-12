@@ -54,7 +54,8 @@ typedef enum
 } ChunkType;
 
 
-typedef enum {
+typedef enum
+{
   VT_APOGEE_LOGO = 8,
   VT_NEO_LA = 0,
   VT_RANGE_1 = 4,
@@ -65,7 +66,7 @@ typedef enum {
 } VideoType;
 
 
-#define XY_TO_OFFSET(x, y) (x*8 + y*320)
+#define XY_TO_OFFSET(x, y) (x * 8 + y * 320)
 
 // Convert a tile value to pixels (multiply by 8)
 #define T2PX(val) (val << 3)
@@ -73,8 +74,8 @@ typedef enum {
 #define ANY_KEY_PRESSED() !(kbLastScancode & 0x80)
 #define LAST_SCANCODE() (kbLastScancode & 0x7F)
 
-#define CLEAR_SCREEN() \
-  FillScreenRegion( \
+#define CLEAR_SCREEN()                                                         \
+  FillScreenRegion(                                                            \
     SFC_BLACK, 0, 0, SCREEN_WIDTH_TILES - 1, SCREEN_HEIGHT_TILES - 1);
 
 
@@ -130,7 +131,8 @@ void Duke3dTeaserFadeIn(byte step);
 void FadeInScreen(void);
 
 void pascal InitParticleSystem(void);
-void pascal SpawnParticles(word x, word y, signed char xVelocityScale, byte color);
+void pascal
+  SpawnParticles(word x, word y, signed char xVelocityScale, byte color);
 void pascal UpdateAndDrawParticles(void);
 void pascal ClearParticles(void);
 
@@ -194,7 +196,7 @@ void pascal TryAddHighScore(byte episode);
 // So we don't declare it here, and instead declare it (with the wrong
 // return type) at the top of unit2.c
 //
-//ibool pascal IsSaveSlotEmpty(byte index);
+// ibool pascal IsSaveSlotEmpty(byte index);
 
 void pascal HUD_DrawLevelNumber(word level);
 void pascal HUD_DrawBackground(void);
@@ -211,7 +213,10 @@ void pascal HUD_UpdateInventoryAnimation(void);
 
 void pascal SetMapSize(word width);
 void pascal ParseLevelFlags(
-  byte flags, byte secondaryBackdrop, byte unused1, byte unused2);
+  byte flags,
+  byte secondaryBackdrop,
+  byte unused1,
+  byte unused2);
 void pascal DecompressRLE(byte far* src, byte far* dest);
 
 void ShowTextScreen(const char far* filename);
@@ -235,12 +240,8 @@ bool pascal QueryOrToggleOption(bool toggle, byte optionId);
 
 word Map_GetTile(word x, word y);
 void Map_SetTile(word tileIndex, word x, word y);
-void pascal Map_MoveSection(
-  word left,
-  word top,
-  word right,
-  word bottom,
-  word distance);
+void pascal
+  Map_MoveSection(word left, word top, word right, word bottom, word distance);
 
 void Quit(const char* quitMessage);
 

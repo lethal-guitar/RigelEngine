@@ -81,12 +81,18 @@ void UpdateMovingMapParts(void)
     state = gmMovingMapParts + i;
 
     // Skip deactivated/invalid types
-    if (state->type != 0 && state->type < 99) { continue; }
+    if (state->type != 0 && state->type < 99)
+    {
+      continue;
+    }
 
     if (state->type == 99) // shootable wall
     {
       if (FindPlayerShotInRect(
-        state->left - 1, state->top - 2, state->right + 2, state->bottom + 1))
+            state->left - 1,
+            state->top - 2,
+            state->right + 2,
+            state->bottom + 1))
       {
         // Deactivate this state object (type 1 is skipped by the check above)
         state->type = 1;
@@ -100,9 +106,9 @@ void UpdateMovingMapParts(void)
     else if (
       (state->type == 102 || state->type == 103 || state->type == 104) &&
       (HAS_TILE_ATTRIBUTE(
-        Map_GetTile(state->left, state->bottom + 1), TA_SOLID_TOP) ||
-      HAS_TILE_ATTRIBUTE(
-        Map_GetTile(state->right, state->bottom + 1), TA_SOLID_TOP)))
+         Map_GetTile(state->left, state->bottom + 1), TA_SOLID_TOP) ||
+       HAS_TILE_ATTRIBUTE(
+         Map_GetTile(state->right, state->bottom + 1), TA_SOLID_TOP)))
     {
       // Types 102, 103, and 104 don't do anything as long as there's solid
       // ground below.
@@ -118,7 +124,7 @@ void UpdateMovingMapParts(void)
         state->type = 105;
       }
 
-doMovement:
+    doMovement:
       left = state->left;
       top = state->top;
       right = state->right;
@@ -206,9 +212,9 @@ doMovement:
         if (
           (state->type == 102 || state->type == 103) &&
           (HAS_TILE_ATTRIBUTE(
-            Map_GetTile(state->left, state->bottom + 1), TA_SOLID_TOP) ||
-          HAS_TILE_ATTRIBUTE(
-            Map_GetTile(state->right, state->bottom + 1), TA_SOLID_TOP)))
+             Map_GetTile(state->left, state->bottom + 1), TA_SOLID_TOP) ||
+           HAS_TILE_ATTRIBUTE(
+             Map_GetTile(state->right, state->bottom + 1), TA_SOLID_TOP)))
         {
           PlaySound(SND_ROCK_LANDING);
           SHAKE_SCREEN(7);

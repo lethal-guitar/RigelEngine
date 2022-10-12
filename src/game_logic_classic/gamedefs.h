@@ -30,20 +30,21 @@
 #define RADAR_POS_X 288
 #define RADAR_POS_Y 136
 
-#define ORIENTATION_LEFT  0
+#define ORIENTATION_LEFT 0
 #define ORIENTATION_RIGHT 1
 
-#define DIFFICULTY_EASY   1
+#define DIFFICULTY_EASY 1
 #define DIFFICULTY_MEDIUM 2
-#define DIFFICULTY_HARD   3
+#define DIFFICULTY_HARD 3
 
-#define WPN_DAMAGE_REGULAR           1
-#define WPN_DAMAGE_LASER             2
-#define WPN_DAMAGE_ROCKET_LAUNCHER   8
-#define WPN_DAMAGE_FLAME_THROWER     2
-#define WPN_DAMAGE_SHIP_LASER        5
+#define WPN_DAMAGE_REGULAR 1
+#define WPN_DAMAGE_LASER 2
+#define WPN_DAMAGE_ROCKET_LAUNCHER 8
+#define WPN_DAMAGE_FLAME_THROWER 2
+#define WPN_DAMAGE_SHIP_LASER 5
 
-typedef enum {
+typedef enum
+{
   TUT_RAPID_FIRE,
   TUT_HEALTH_MOLECULE,
   TUT_WPN_REGULAR,
@@ -76,7 +77,8 @@ typedef enum {
 } TutorialId;
 
 
-typedef enum {
+typedef enum
+{
   PS_NORMAL,
   PS_JUMPING,
   PS_FALLING,
@@ -150,20 +152,21 @@ enum ConveyorBeltCheckResult
 
 
 // Types of effect movement patterns
-#define EM_SCORE_NUMBER    100
-#define EM_BURN_FX          99
-#define EM_NONE             98
-#define EM_RISE_UP          97
-#define EM_FLY_RIGHT         0
-#define EM_FLY_UPPER_RIGHT   1
-#define EM_FLY_UP            2
-#define EM_FLY_UPPER_LEFT    3
-#define EM_FLY_LEFT          4
-#define EM_FLY_DOWN          5
-#define EM_BLOW_IN_WIND      6
+#define EM_SCORE_NUMBER 100
+#define EM_BURN_FX 99
+#define EM_NONE 98
+#define EM_RISE_UP 97
+#define EM_FLY_RIGHT 0
+#define EM_FLY_UPPER_RIGHT 1
+#define EM_FLY_UP 2
+#define EM_FLY_UPPER_LEFT 3
+#define EM_FLY_LEFT 4
+#define EM_FLY_DOWN 5
+#define EM_BLOW_IN_WIND 6
 
 
-typedef struct {
+typedef struct
+{
   word active;
   word id;
   word framesToLive;
@@ -178,7 +181,8 @@ typedef struct {
 
 // WARNING: The exact memory layout is important here. See
 // UpdateAndDrawPlayerShots().
-typedef struct {
+typedef struct
+{
   word active;
   word id;
   word numFrames;
@@ -198,17 +202,19 @@ typedef struct
 } MovingMapPartState;
 
 
-typedef enum {
-  DS_INVISIBLE,  // actor is invisible, and won't collide with the
-                 // player/projectiles
+typedef enum
+{
+  DS_INVISIBLE, // actor is invisible, and won't collide with the
+                // player/projectiles
   DS_NORMAL,
   DS_WHITEFLASH, // used when an actor takes damage
-  DS_IN_FRONT,   // actor appears in front of map foreground tiles
+  DS_IN_FRONT, // actor appears in front of map foreground tiles
   DS_TRANSLUCENT // used for Duke when having the cloaking device
 } DrawStyle;
 
 
-typedef enum {
+typedef enum
+{
   TA_SOLID_TOP = 0x1,
   TA_SOLID_BOTTOM = 0x2,
   TA_SOLID_RIGHT = 0x4,
@@ -227,7 +233,8 @@ typedef enum {
 typedef void pascal (*ActorUpdateFunc)(word index);
 
 
-typedef struct {
+typedef struct
+{
   // Actor ID. Determines which sprite is drawn for the actor. Also
   // determines the actor's collision box, which is always identical to the
   // sprite's size.
@@ -242,22 +249,22 @@ typedef struct {
 
   // Update the actor even if not on screen (by default, only on-screen actors
   // are updated)
-  ibool alwaysUpdate:1;
+  ibool alwaysUpdate : 1;
 
   // Once the actor has appeared on screen, keep updating it even if it goes
   // off-screen
-  ibool remainActive:1;
+  ibool remainActive : 1;
 
   // Affects ApplyWorldCollision() in game3.c. When true, the actor can move
   // past 1 tile high walls (i.e., stairs) and can move off ledges.
-  ibool allowStairStepping:1;
+  ibool allowStairStepping : 1;
 
   // Actor is affected by gravity and conveyor belts
-  ibool gravityAffected:1;
+  ibool gravityAffected : 1;
 
   // Actor is marked as deleted, will be skipped during update and its state
   // can be reused when spawning a new actor
-  ibool deleted:1;
+  ibool deleted : 1;
 
   // Current gravity state. If gravity is enabled (gravity bit set in flags),
   // this determines how quickly the actor is falling down. See
@@ -289,29 +296,35 @@ typedef struct {
 } ActorState;
 
 
-#define HAS_TILE_ATTRIBUTE(tileIndex, attribute)          \
-  (int)(((tileIndex) & 0x8000) ? 0 :                      \
-  (gfxTilesetAttributes[(tileIndex) >> 3] & (attribute)))
+#define HAS_TILE_ATTRIBUTE(tileIndex, attribute)                               \
+  (int)(((tileIndex)&0x8000) ? 0 : (gfxTilesetAttributes[(tileIndex) >> 3] & (attribute)))
 
 #define SHAKE_SCREEN(amount) SetScreenShift(amount)
 
-#define FLASH_SCREEN(col) { gfxFlashScreen = true; gfxScreenFlashColor = col; }
-
-
-/** Play an explosion sound, randomly chosen between two variants */
-#define PLAY_EXPLOSION_SOUND()                 \
-  if (RandomNumber() & 1)                      \
-  { PlaySound(SND_EXPLOSION); }                \
-  else { PlaySound(SND_ALTERNATE_EXPLOSION); }
-
-
-#define UPDATE_ANIMATION_LOOP(state, from, to) \
-  {                                            \
-    state->frame++;                            \
-    if (state->frame == to + 1)                \
-    {                                          \
-      state->frame = from;                     \
-    }                                          \
+#define FLASH_SCREEN(col)                                                      \
+  {                                                                            \
+    gfxFlashScreen = true;                                                     \
+    gfxScreenFlashColor = col;                                                 \
   }
 
 
+/** Play an explosion sound, randomly chosen between two variants */
+#define PLAY_EXPLOSION_SOUND()                                                 \
+  if (RandomNumber() & 1)                                                      \
+  {                                                                            \
+    PlaySound(SND_EXPLOSION);                                                  \
+  }                                                                            \
+  else                                                                         \
+  {                                                                            \
+    PlaySound(SND_ALTERNATE_EXPLOSION);                                        \
+  }
+
+
+#define UPDATE_ANIMATION_LOOP(state, from, to)                                 \
+  {                                                                            \
+    state->frame++;                                                            \
+    if (state->frame == to + 1)                                                \
+    {                                                                          \
+      state->frame = from;                                                     \
+    }                                                                          \
+  }

@@ -74,22 +74,22 @@ static void pascal FillParticleGroup(int index, int direction)
       {
         // If a direction is specified, scale it randomly by a value between
         // 1 and 20 to generate a velocity.
-        *(psParticleData[index] + a + b*24) =
+        *(psParticleData[index] + a + b * 24) =
           direction * (RandomNumber() % 20 + 1);
       }
       else
       {
         // Otherwise, assign a random x velocity between -9 and 10
-        *(psParticleData[index] + a + b*24) = 10 - (RandomNumber() % 20);
+        *(psParticleData[index] + a + b * 24) = 10 - (RandomNumber() % 20);
       }
 
       // Randomly advance the initial index into the y update lookup table,
       // to make the particle start out flying up or down.
       // See UpdateAndDrawParticles().
-      *(psParticleData[index] + a + b*24 + 1) = RandomNumber() & 15; // % 16
+      *(psParticleData[index] + a + b * 24 + 1) = RandomNumber() & 15; // % 16
 
       // Initial y offset always starts out at 0
-      *(psParticleData[index] + a + b*24 + 2) = 0;
+      *(psParticleData[index] + a + b * 24 + 2) = 0;
     }
   }
 }

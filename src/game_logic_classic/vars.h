@@ -108,7 +108,8 @@ extern int jsThresholdUp;
 extern word gfxPaletteForFade[16 * 3];
 extern byte hudInventoryBlinkTimeLeft[NUM_INVENTORY_SLOTS + 1];
 extern SaveSlotName saveSlotNames[NUM_SAVE_SLOTS];
-extern char gmHighScoreNames[NUM_HIGH_SCORE_ENTRIES][HIGH_SCORE_NAME_MAX_LEN + 1];
+extern char gmHighScoreNames[NUM_HIGH_SCORE_ENTRIES]
+                            [HIGH_SCORE_NAME_MAX_LEN + 1];
 extern dword gmHighScoreList[NUM_HIGH_SCORE_ENTRIES];
 extern word mmChunkSizes[MM_MAX_NUM_CHUNKS];
 extern ChunkType mmChunkTypes[MM_MAX_NUM_CHUNKS];
@@ -129,4 +130,3 @@ extern InterruptHandler sysSavedTimerIntHandler;
 extern char tempFilename[20];
 extern int flicNextDelay;
 extern bool sysIsSecondTick;
-

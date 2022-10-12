@@ -28,40 +28,40 @@
 #include "types.h"
 
 // Pixels
-#define SCREEN_WIDTH            320
-#define SCREEN_HEIGHT           200
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 200
 
 // Tiles
-#define SCREEN_WIDTH_TILES       40
-#define SCREEN_HEIGHT_TILES      25
-#define VIEWPORT_WIDTH           32
-#define VIEWPORT_HEIGHT          20
+#define SCREEN_WIDTH_TILES 40
+#define SCREEN_HEIGHT_TILES 25
+#define VIEWPORT_WIDTH 32
+#define VIEWPORT_HEIGHT 20
 
-#define TIMER_FREQUENCY         280
+#define TIMER_FREQUENCY 280
 
-#define CLOAK_TIME              700
-#define RAPID_FIRE_TIME         700
-#define MAX_AMMO                 32
-#define MAX_AMMO_FLAMETHROWER    64
-#define PLAYER_MAX_HEALTH         9
-#define INITIAL_MERCY_FRAMES     20
-#define NUM_INVENTORY_SLOTS       6
+#define CLOAK_TIME 700
+#define RAPID_FIRE_TIME 700
+#define MAX_AMMO 32
+#define MAX_AMMO_FLAMETHROWER 64
+#define PLAYER_MAX_HEALTH 9
+#define INITIAL_MERCY_FRAMES 20
+#define NUM_INVENTORY_SLOTS 6
 
-#define MM_TOTAL_SIZE        390000
-#define MM_MAX_NUM_CHUNKS      1150
+#define MM_TOTAL_SIZE 390000
+#define MM_MAX_NUM_CHUNKS 1150
 
-#define NUM_HIGH_SCORE_ENTRIES   10
-#define HIGH_SCORE_NAME_MAX_LEN  15
+#define NUM_HIGH_SCORE_ENTRIES 10
+#define HIGH_SCORE_NAME_MAX_LEN 15
 
-#define NUM_SAVE_SLOTS            8
-#define SAVE_SLOT_NAME_MAX_LEN   18
+#define NUM_SAVE_SLOTS 8
+#define SAVE_SLOT_NAME_MAX_LEN 18
 
-#define NUM_PARTICLE_GROUPS       5
-#define PARTICLES_PER_GROUP      64
+#define NUM_PARTICLE_GROUPS 5
+#define PARTICLES_PER_GROUP 64
 
-#define MAX_NUM_ACTORS          448
-#define MAX_NUM_EFFECTS          18
-#define MAX_NUM_PLAYER_SHOTS      6
+#define MAX_NUM_ACTORS 448
+#define MAX_NUM_EFFECTS 18
+#define MAX_NUM_PLAYER_SHOTS 6
 #define MAX_NUM_MOVING_MAP_PARTS 70
 
 
@@ -87,7 +87,5 @@ typedef enum
 
 
 #ifndef SHAREWARE
-#define REGISTERED_VERSION
+  #define REGISTERED_VERSION
 #endif
-
-

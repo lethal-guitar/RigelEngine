@@ -161,8 +161,14 @@ void pascal LoadSpriteRange(int fromId, int toId)
  * This special logic only applies if the *2nd* sprite's actor id is Duke's.
  */
 bool pascal AreSpritesTouching(
-  word id1, word frame1, word x1, word y1,
-  word id2, word frame2, word x2, word y2)
+  word id1,
+  word frame1,
+  word x1,
+  word y1,
+  word id2,
+  word frame2,
+  word x2,
+  word y2)
 {
   register word height1;
   word width1;
@@ -238,13 +244,9 @@ bool pascal AreSpritesTouching(
   }
 
   // Now we can do the actual intersection test.
-  if ((
-      (x2 <= x1 && x2 + width2 > x1) ||
-      (x2 >= x1 && x1 + width1 > x2)
-    ) && (
-      (y1 - height1 < y2 && y2 <= y1) ||
-      (y2 - height2 < y1 && y1 <= y2)
-    ))
+  if (
+    ((x2 <= x1 && x2 + width2 > x1) || (x2 >= x1 && x1 + width1 > x2)) &&
+    ((y1 - height1 < y2 && y2 <= y1) || (y2 - height2 < y1 && y1 <= y2)))
   {
     return true;
   }
@@ -254,8 +256,7 @@ bool pascal AreSpritesTouching(
 
 
 /** Test if a sprite is partially/fully visible (inside the viewport) */
-bool pascal IsSpriteOnScreen(
-  word id, word frame, word x, word y)
+bool pascal IsSpriteOnScreen(word id, word frame, word x, word y)
 {
   register word width;
   register word height;
@@ -274,16 +275,15 @@ bool pascal IsSpriteOnScreen(
     (gmCameraPosX >= x && x + width > gmCameraPosX))
   {
     // top edge on screen?
-    if (
-      (y - height + 1 < gmCameraPosY + mapViewportHeight &&
-      y >= gmCameraPosY + mapViewportHeight))
+    if ((y - height + 1 < gmCameraPosY + mapViewportHeight &&
+         y >= gmCameraPosY + mapViewportHeight))
     {
       return true;
     }
     // bottom edge on screen?
     else if (y >= gmCameraPosY && y < gmCameraPosY + mapViewportHeight)
     {
-     return true;
+      return true;
     }
   }
 
@@ -337,7 +337,10 @@ void pascal DrawActor(word id, word frame, word x, word y, word drawStyle)
   word mapTile;
   void (*drawFunc)(byte far*, word, word);
 
-  if (drawStyle == DS_INVISIBLE) { return; }
+  if (drawStyle == DS_INVISIBLE)
+  {
+    return;
+  }
 
   EGA_SET_DEFAULT_MODE();
 
@@ -693,6 +696,6 @@ void pascal DrawFontSprite(word charIndex, word x, word y, word plane)
   // of the vertical tiles here. Unlike regular masked sprites, the font is
   // monochromatic with only one mask plane and one color bit plane.
   // Therefore, a single font sprite tile is 16 bytes rather than 40 bytes.
-  BlitFontTile(data,      x - 1, y,     plane);
+  BlitFontTile(data, x - 1, y, plane);
   BlitFontTile(data + 16, x - 1, y + 1, plane);
 }

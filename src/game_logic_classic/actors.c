@@ -58,9 +58,8 @@ void pascal Act_AnimatedProp(word handle)
   else if (state->id == ACT_SPECIAL_HINT_GLOBE)
   {
     // [PERF] Missing `static` causes a copy operation here
-    const byte HINT_GLOBE_ANIMATION[] = {
-      0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 3, 2, 1,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    const byte HINT_GLOBE_ANIMATION[] = {0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4,
+                                         3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     state->frame = HINT_GLOBE_ANIMATION[state->var1];
 
@@ -73,8 +72,7 @@ void pascal Act_AnimatedProp(word handle)
   else
   {
     if (
-      state->id == ACT_WATER_ON_FLOOR_1 ||
-      state->id == ACT_WATER_ON_FLOOR_2 ||
+      state->id == ACT_WATER_ON_FLOOR_1 || state->id == ACT_WATER_ON_FLOOR_2 ||
       state->id == ACT_ROTATING_FLOOR_SPIKES)
     {
       // Advance one frame every other game frame (half speed)
@@ -127,7 +125,10 @@ void pascal Act_Hoverbot(word handle)
   // Animate the body
   UPDATE_ANIMATION_LOOP(state, 0, 5);
 
-  if (state->var5) { return; } // if in initial wait state, we're done here
+  if (state->var5)
+  {
+    return;
+  } // if in initial wait state, we're done here
 
   if (state->var3 == 0) // moving
   {
@@ -382,9 +383,12 @@ void pascal Act_ItemBox(word handle)
   register ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  const sbyte FLY_UP_ARC[] = { -3, -2, -1, 0, 1, 2, 3, -1, 1 };
+  const sbyte FLY_UP_ARC[] = {-3, -2, -1, 0, 1, 2, 3, -1, 1};
 
-  if (!state->var1) { return; } // container hasn't been shot yet, stop here
+  if (!state->var1)
+  {
+    return;
+  } // container hasn't been shot yet, stop here
 
   if (state->var1 == 1) // first step of getting shot sequence
   {
@@ -500,8 +504,9 @@ void pascal Act_ItemBox(word handle)
 
     if (
       state->var1 == 12 ||
-      (state->var1 == 9 && !CheckWorldCollision(
-        MD_DOWN, state->id, state->frame, state->x, state->y + 1)))
+      (state->var1 == 9 &&
+       !CheckWorldCollision(
+         MD_DOWN, state->id, state->frame, state->x, state->y + 1)))
     {
       state->gravityAffected = true;
     }
@@ -554,21 +559,13 @@ void pascal Act_ItemBox(word handle)
           if (!spawnFailedLeft)
           {
             spawnFailedLeft += SpawnEffect(
-              ACT_FIRE_BOMB_FIRE,
-              state->x - 2 - i,
-              state->y,
-              EM_NONE,
-              i);
+              ACT_FIRE_BOMB_FIRE, state->x - 2 - i, state->y, EM_NONE, i);
           }
 
           if (!spawnFailedRight)
           {
             spawnFailedRight += SpawnEffect(
-              ACT_FIRE_BOMB_FIRE,
-              state->x + i + 2,
-              state->y,
-              EM_NONE,
-              i);
+              ACT_FIRE_BOMB_FIRE, state->x + i + 2, state->y, EM_NONE, i);
           }
         }
 
@@ -716,18 +713,17 @@ void pascal Act_WatchBot(word handle)
   register ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  const word HIDE_HEAD_ANIM[] = { 1, 2, 1, 0 };
+  const word HIDE_HEAD_ANIM[] = {1, 2, 1, 0};
 
   if (state->var4)
   {
     // [PERF] Missing `static` causes a copy operation here
     const byte LOOK_AROUND_ANIMS[2][32] = {
-      { 1, 1, 1, 3, 3, 1, 6, 6, 7, 8, 7, 6, 6, 6, 7, 8,
-      7, 6, 6, 6, 1, 1, 3, 3, 3, 1, 1, 1, 6, 6, 1, 1 },
+      {1, 1, 1, 3, 3, 1, 6, 6, 7, 8, 7, 6, 6, 6, 7, 8,
+       7, 6, 6, 6, 1, 1, 3, 3, 3, 1, 1, 1, 6, 6, 1, 1},
 
-      { 1, 1, 6, 6, 7, 8, 7, 6, 6, 1, 1, 3, 3, 1, 6, 6,
-      1, 1, 1, 3, 4, 5, 4, 3, 3, 3, 4, 5, 4, 3, 1, 1 }
-    };
+      {1, 1, 6, 6, 7, 8, 7, 6, 6, 1, 1, 3, 3, 1, 6, 6,
+       1, 1, 1, 3, 4, 5, 4, 3, 3, 3, 4, 5, 4, 3, 1, 1}};
 
     state->frame = LOOK_AROUND_ANIMS[state->var5][state->var4 - 1];
 
@@ -757,15 +753,14 @@ void pascal Act_WatchBot(word handle)
       }
     }
 
-doMovementOrWait:
+  doMovementOrWait:
     if (!state->var2)
     {
       state->frame = HIDE_HEAD_ANIM[state->var3];
       state->var3++;
 
       if (
-        (RandomNumber() & 33) &&
-        state->var3 == 2 &&
+        (RandomNumber() & 33) && state->var3 == 2 &&
         !ApplyWorldCollision(handle, MD_DOWN))
       {
         state->var4 = 1;
@@ -1092,8 +1087,10 @@ void pascal Act_WatchBotContainer(word handle)
 
   UPDATE_ANIMATION_LOOP(state, 1, 5);
 
-  if (state->var1 < 10 && !CheckWorldCollision(
-    MD_UP, ACT_WATCHBOT_CONTAINER, 0, state->x, state->y - 1))
+  if (
+    state->var1 < 10 &&
+    !CheckWorldCollision(
+      MD_UP, ACT_WATCHBOT_CONTAINER, 0, state->x, state->y - 1))
   {
     state->y--;
   }
@@ -1170,11 +1167,7 @@ void pascal Act_BomberPlane(word handle)
 
   // Draw exhaust flame
   DrawActor(
-    ACT_BOMBER_PLANE,
-    gfxCurrentDisplayPage + 1,
-    state->x,
-    state->y,
-    DS_NORMAL);
+    ACT_BOMBER_PLANE, gfxCurrentDisplayPage + 1, state->x, state->y, DS_NORMAL);
 }
 
 
@@ -1351,7 +1344,7 @@ void pascal Act_SlimeBlob(word handle)
         state->y++;
 
         if (!CheckWorldCollision(
-          MD_DOWN, state->id, state->frame, state->x, state->y + 3))
+              MD_DOWN, state->id, state->frame, state->x, state->y + 3))
         {
           return;
         }
@@ -1373,7 +1366,7 @@ void pascal Act_SlimeBlob(word handle)
         state->y--;
 
         if (!CheckWorldCollision(
-          MD_UP, state->id, state->frame, state->x, state->y))
+              MD_UP, state->id, state->frame, state->x, state->y))
         {
           return;
         }
@@ -1563,7 +1556,10 @@ void pascal Act_Snake(word handle)
 
     state->frame = state->var1 + state->var3 + gfxCurrentDisplayPage;
 
-    if (!state->var4) { return; }
+    if (!state->var4)
+    {
+      return;
+    }
   }
 
   state->var5++;
@@ -1694,18 +1690,14 @@ void pascal Act_CeilingSucker(word handle)
   ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte GRAB_ANIM_SEQ[] = { 0, 0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0 };
+  const byte GRAB_ANIM_SEQ[] = {0, 0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0};
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte EAT_PLAYER_ANIM_SEQ[] = {
-    0, 0, 0, 0, 0, 0, 10, 9, 8, 7, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 7, 8, 9,
-    10, 5, 4, 3, 2, 1, 0
-  };
+  const byte EAT_PLAYER_ANIM_SEQ[] = {0, 0, 0,  0, 0, 0, 10, 9, 8, 7, 6,
+                                      0, 6, 0,  6, 0, 6, 0,  6, 0, 6, 7,
+                                      8, 9, 10, 5, 4, 3, 2,  1, 0};
 
-  if (
-    !state->var1 &&
-    plPosX + 4 >= state->x &&
-    state->x + 4 >= plPosX)
+  if (!state->var1 && plPosX + 4 >= state->x && state->x + 4 >= plPosX)
   {
     state->var1 = 1;
   }
@@ -1768,14 +1760,20 @@ void pascal Act_PlayerShip(word handle)
 
 void pascal Act_BrokenMissile(word handle)
 {
-  static const byte ANIM_SEQ[] = { 1, 2, 3, 2, 3, 4, 3 };
+  static const byte ANIM_SEQ[] = {1, 2, 3, 2, 3, 4, 3};
 
   register ActorState* state = gmActorStates + handle;
   register int i;
 
-  if (!state->var1) { return; } // Hasn't been shot yet
+  if (!state->var1)
+  {
+    return;
+  } // Hasn't been shot yet
 
-  if (state->var2 >= 12) { return; }
+  if (state->var2 >= 12)
+  {
+    return;
+  }
 
   // Fall over animation
   if (state->var2 < 7)
@@ -1827,7 +1825,7 @@ void pascal Act_BrokenMissile(word handle)
 
 void pascal Act_EyeBallThrower(word handle)
 {
-  static const byte RISE_UP_ANIM[] = { 0, 0, 0, 0, 0, 0, 1, 2, 3, 4 };
+  static const byte RISE_UP_ANIM[] = {0, 0, 0, 0, 0, 0, 1, 2, 3, 4};
 
   ActorState* state = gmActorStates + handle;
 
@@ -1853,15 +1851,14 @@ void pascal Act_EyeBallThrower(word handle)
   else if (state->var1 == 11) // Walk, decide to attack
   {
     // [PERF] Missing `static` causes a copy operation here
-    const byte ANIM_SEQ[] = { 5, 6 };
+    const byte ANIM_SEQ[] = {5, 6};
 
     state->var3++;
 
     // Do we want to attack?
-    if ((
-      (state->id == ACT_EYEBALL_THROWER_L && state->x > plPosX) ||
-      (state->id == ACT_EYEBALL_THROWER_R && state->x < plPosX))
-      &&
+    if (
+      ((state->id == ACT_EYEBALL_THROWER_L && state->x > plPosX) ||
+       (state->id == ACT_EYEBALL_THROWER_R && state->x < plPosX)) &&
       PlayerInRange(handle, 14) && !PlayerInRange(handle, 9))
     {
       // Start attacking
@@ -1903,7 +1900,7 @@ void pascal Act_EyeBallThrower(word handle)
   else if (state->var1 == 12) // Attack
   {
     // [PERF] Missing `static` causes a copy operation here
-    const byte ANIM_SEQ[] = { 7, 7, 8, 8, 9, 9 };
+    const byte ANIM_SEQ[] = {7, 7, 8, 8, 9, 9};
 
     state->frame = ANIM_SEQ[state->var2++];
 
@@ -1913,11 +1910,7 @@ void pascal Act_EyeBallThrower(word handle)
       if (state->id == ACT_EYEBALL_THROWER_L)
       {
         SpawnEffect(
-          ACT_EYEBALL_PROJECTILE,
-          state->x,
-          state->y - 6,
-          EM_FLY_UPPER_LEFT,
-          0);
+          ACT_EYEBALL_PROJECTILE, state->x, state->y - 6, EM_FLY_UPPER_LEFT, 0);
       }
       else
       {
@@ -1940,7 +1933,11 @@ void pascal Act_EyeBallThrower(word handle)
 
 
 word FindActorDesc(
-  word startIndex, word neededId, word neededX, word neededY, word handle)
+  word startIndex,
+  word neededId,
+  word neededX,
+  word neededY,
+  word handle)
 {
   register word i;
   register ActorState* state = gmActorStates + handle;
@@ -2025,8 +2022,8 @@ void pascal Act_MovingMapPartTrigger(word handle)
   if (
     (state->var2 == 3 || state->var2 == 5) &&
     (mapHasEarthquake == false ||
-    gmEarthquakeCountdown >= gmEarthquakeThreshold ||
-    gmEarthquakeCountdown == 0))
+     gmEarthquakeCountdown >= gmEarthquakeThreshold ||
+     gmEarthquakeCountdown == 0))
   {
     return;
   }
@@ -2051,8 +2048,8 @@ void pascal Act_MovingMapPartTrigger(word handle)
     descIndex, ACT_META_DYNGEO_MARKER_1, 0x8000, state->y, handle);
   right = mapPart->right = READ_LVL_ACTOR_DESC_X(descIndex);
 
-  descIndex = FindActorDesc(
-    descIndex, ACT_META_DYNGEO_MARKER_2, right, 0x8000, handle);
+  descIndex =
+    FindActorDesc(descIndex, ACT_META_DYNGEO_MARKER_2, right, 0x8000, handle);
   mapPart->bottom = READ_LVL_ACTOR_DESC_Y(descIndex);
 
   if (state->var2)
@@ -2151,12 +2148,7 @@ void pascal Act_MessengerDrone(word handle)
         DS_NORMAL);
     }
 
-    DrawActor(
-      ACT_MESSENGER_DRONE_ENGINE_R,
-      0,
-      state->x,
-      state->y,
-      DS_NORMAL);
+    DrawActor(ACT_MESSENGER_DRONE_ENGINE_R, 0, state->x, state->y, DS_NORMAL);
   }
 
   if (state->var1 == 2) // facing right
@@ -2174,26 +2166,11 @@ void pascal Act_MessengerDrone(word handle)
         DS_NORMAL);
     }
 
-    DrawActor(
-      ACT_MESSENGER_DRONE_ENGINE_L,
-      0,
-      state->x,
-      state->y,
-      DS_NORMAL);
+    DrawActor(ACT_MESSENGER_DRONE_ENGINE_L, 0, state->x, state->y, DS_NORMAL);
   }
 
-  DrawActor(
-    ACT_MESSENGER_DRONE_ENGINE_DOWN,
-    0,
-    state->x,
-    state->y,
-    DS_NORMAL);
-  DrawActor(
-    ACT_MESSENGER_DRONE_BODY,
-    0,
-    state->x,
-    state->y,
-    DS_NORMAL);
+  DrawActor(ACT_MESSENGER_DRONE_ENGINE_DOWN, 0, state->x, state->y, DS_NORMAL);
+  DrawActor(ACT_MESSENGER_DRONE_BODY, 0, state->x, state->y, DS_NORMAL);
 
   // Start showing the message when close enough to the player
   if (!state->var2 && !state->var3 && PlayerInRange(handle, 6))
@@ -2214,22 +2191,21 @@ void pascal Act_MessengerDrone(word handle)
     // [PERF] Missing `static` causes a copy operation here
     byte SCREEN_CONTENT_ANIM_SEQS[5][50] = {
       // "Your brain is ours!"
-      { 0, 0, 10, 1, 10, 2, 10, 3, 14, 0, 10, 1, 10, 2, 10, 3, 14, 0xFF },
+      {0, 0, 10, 1, 10, 2, 10, 3, 14, 0, 10, 1, 10, 2, 10, 3, 14, 0xFF},
 
       // "Bring back the brain! ... Please stand by"
-      { 0, 0, 8, 1, 8, 2, 8, 3, 14, 4, 1, 5, 1, 6, 1, 7, 1, 4, 1, 5, 1, 6, 1, 7,
-        1, 4, 1, 5, 1, 6, 1, 7, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 4, 9, 1, 8, 4, 9,
-        1, 0xFF },
+      {0, 0, 8, 1, 8, 2, 8, 3, 14, 4, 1, 5, 1, 6, 1, 7,   1,
+       4, 1, 5, 1, 6, 1, 7, 1, 4,  1, 5, 1, 6, 1, 7, 1,   4,
+       1, 5, 1, 6, 1, 7, 1, 8, 4,  9, 1, 8, 4, 9, 1, 0xFF},
 
       // "Live from Rigel it's Saturday night!"
-      { 0, 0, 4, 1, 4, 2, 3, 3, 6, 4, 3, 5, 5, 6, 15, 0xFF },
+      {0, 0, 4, 1, 4, 2, 3, 3, 6, 4, 3, 5, 5, 6, 15, 0xFF},
 
       // "Die!"
-      { 0, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 15, 0xFF },
+      {0, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 15, 0xFF},
 
       // "You cannot escape us! You will get your brain sucked!"
-      { 0, 0, 8, 1, 8, 2, 8, 3, 8, 4, 8, 5, 8, 6, 8, 0xFF }
-    };
+      {0, 0, 8, 1, 8, 2, 8, 3, 8, 4, 8, 5, 8, 6, 8, 0xFF}};
 
     DrawActor(
       ACT_MESSENGER_DRONE_FLAME_DOWN,
@@ -2329,7 +2305,10 @@ void pascal Act_ForceField(word handle)
   // Draw emitter on top
   DrawActor(ACT_FORCE_FIELD, 1, state->x, state->y, DS_NORMAL);
 
-  if (state->var2) { return; } // If turned off, we're done here
+  if (state->var2)
+  {
+    return;
+  } // If turned off, we're done here
 
   // Handle unlocking
   if (gmRequestUnlockNextForceField)
@@ -2341,8 +2320,14 @@ void pascal Act_ForceField(word handle)
 
   // Handle player collision
   if (AreSpritesTouching(
-    ACT_FORCE_FIELD, 2, state->x, state->y,
-    plActorId, plAnimationFrame, plPosX, plPosY))
+        ACT_FORCE_FIELD,
+        2,
+        state->x,
+        state->y,
+        plActorId,
+        plAnimationFrame,
+        plPosX,
+        plPosY))
   {
     // Insta-kill player
     plHealth = 1;
@@ -2396,7 +2381,7 @@ void pascal Act_KeyHole(word handle)
   ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte KEY_HOLE_ANIMATION[] = { 0, 1, 2, 3, 4, 3, 2, 1 };
+  const byte KEY_HOLE_ANIMATION[] = {0, 1, 2, 3, 4, 3, 2, 1};
 
   if (state->var1 == 0)
   {
@@ -2456,10 +2441,7 @@ void pascal Act_SlidingDoorVertical(word handle)
     }
   }
 
-  if (
-    PlayerInRange(handle, 7) &&
-    state->y >= plPosY &&
-    state->y - 7 < plPosY)
+  if (PlayerInRange(handle, 7) && state->y >= plPosY && state->y - 7 < plPosY)
   {
     if (state->health == 1)
     {
@@ -2549,8 +2531,8 @@ void pascal Act_SlidingDoorHorizontal(word handle)
   }
 
   if (
-    state->x - 2 <= plPosX && state->x + 6 > plPosX &&
-    state->y - 3 < plPosY && state->y + 7 > plPosY)
+    state->x - 2 <= plPosX && state->x + 6 > plPosX && state->y - 3 < plPosY &&
+    state->y + 7 > plPosY)
   {
     if (!state->frame)
     {
@@ -2704,18 +2686,16 @@ void pascal Act_Skeleton(word handle)
 void pascal Act_BlowingFan(word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
-  const byte ANIM_SEQ[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 0, 1, 2, 3,
-    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2,
-    0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2
-  };
+  const byte ANIM_SEQ[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2,
+                           2, 2, 3, 3, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2,
+                           3, 0, 1, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2,
+                           0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2};
 
   // [PERF] Missing `static` causes a copy operation here
   const byte THREADS_ANIM_SEQ[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 2, 3, 2, 3,
-    2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2,
-    3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2
-  };
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3,
+    2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2,
+    3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2};
 
   ActorState* state = gmActorStates + handle;
 
@@ -2749,20 +2729,13 @@ void pascal Act_BlowingFan(word handle)
 
   // Attach player if in range and fan at speed
   if (
-    state->var2 > 24 &&
-    plPosY + 25 > state->y &&
-    state->y > plPosY &&
-    state->x <= plPosX &&
-    state->x + 5 > plPosX &&
-    plState != PS_DYING)
+    state->var2 > 24 && plPosY + 25 > state->y && state->y > plPosY &&
+    state->x <= plPosX && state->x + 5 > plPosX && plState != PS_DYING)
   {
     plState = PS_BLOWN_BY_FAN;
     gmActiveFanIndex = handle;
 
-    if (
-      state->frame == 3 ||
-      plPosY + 24 == state->y ||
-      plPosY + 25 == state->y)
+    if (state->frame == 3 || plPosY + 24 == state->y || plPosY + 25 == state->y)
     {
       PlaySound(SND_SWOOSH);
     }
@@ -2771,9 +2744,7 @@ void pascal Act_BlowingFan(word handle)
   // Detach player if out of range, or fan too slow
   if (
     plState == PS_BLOWN_BY_FAN &&
-    (state->var2 < 25 ||
-     state->x > plPosX ||
-     state->x + 5 <= plPosX ||
+    (state->var2 < 25 || state->x > plPosX || state->x + 5 <= plPosX ||
      state->y > plPosY + 25) &&
     handle == gmActiveFanIndex)
   {
@@ -2905,12 +2876,7 @@ void pascal Act_EnemyLaserShot(word handle)
       muzzleSprite = ACT_ENEMY_LASER_MUZZLE_FLASH_L;
     }
 
-    DrawActor(
-      muzzleSprite,
-      0,
-      state->x,
-      state->y,
-      DS_NORMAL);
+    DrawActor(muzzleSprite, 0, state->x, state->y, DS_NORMAL);
     PlaySound(SND_ENEMY_LASER_SHOT);
   }
 
@@ -2919,7 +2885,7 @@ void pascal Act_EnemyLaserShot(word handle)
     state->x += 2;
 
     if (CheckWorldCollision(
-      MD_RIGHT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
+          MD_RIGHT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
     {
       state->deleted = true;
     }
@@ -2929,7 +2895,7 @@ void pascal Act_EnemyLaserShot(word handle)
     state->x -= 2;
 
     if (CheckWorldCollision(
-      MD_LEFT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
+          MD_LEFT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
     {
       state->deleted = true;
     }
@@ -2990,7 +2956,10 @@ void pascal Act_SuperForceField(word handle)
 
   // If not destroyed yet, we're done here. var3 is set in
   // UpdateActorPlayerCollision().
-  if (!state->var3) { return; }
+  if (!state->var3)
+  {
+    return;
+  }
 
   //
   // Destruction animation
@@ -3015,8 +2984,7 @@ void pascal Act_SuperForceField(word handle)
   {
     state->deleted = true;
 
-    SpawnEffect(
-      ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_DOWN, 0);
+    SpawnEffect(ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_DOWN, 0);
     SpawnEffect(
       ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_UPPER_LEFT, 0);
     SpawnEffect(
@@ -3168,18 +3136,28 @@ void pascal Act_GrabberClaw(word handle)
     if (state->var2 == 2)
     {
       const byte ANIM_SEQ[] = {
-        0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 };
+        0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0};
 
       state->frame = 1 + ANIM_SEQ[state->var3];
 
       DrawActor(
-        ACT_METAL_GRABBER_CLAW, state->frame, state->x, state->y + i, DS_NORMAL);
+        ACT_METAL_GRABBER_CLAW,
+        state->frame,
+        state->x,
+        state->y + i,
+        DS_NORMAL);
 
       // Manually test for collision against the player,
       // since we use drawStyle DS_INVISIBLE.
       if (AreSpritesTouching(
-        state->id, 2, state->x, state->y + i,
-        plActorId, plAnimationFrame, plPosX, plPosY))
+            state->id,
+            2,
+            state->x,
+            state->y + i,
+            plActorId,
+            plAnimationFrame,
+            plPosX,
+            plPosY))
       {
         DamagePlayer();
       }
@@ -3254,7 +3232,7 @@ void pascal Act_FloatingLaserBot(word handle)
       if (xDiff > 0)
       {
         if (CheckWorldCollision(
-          MD_RIGHT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
+              MD_RIGHT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
         {
           state->x--;
         }
@@ -3263,7 +3241,7 @@ void pascal Act_FloatingLaserBot(word handle)
       if (xDiff < 0)
       {
         if (CheckWorldCollision(
-          MD_LEFT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
+              MD_LEFT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
         {
           state->x++;
         }
@@ -3562,25 +3540,23 @@ void pascal Act_Spider(word handle)
     }
   }
 
-    // Check if we want to fall onto the player from above
-    if (
-      state->x == plPosX &&
-      state->var1 != 2 &&
-      state->frame < 6 &&
-      state->y < plPosY - 3)
-    {
-      state->var1 = 2;
-      state->frame = 6;
-      state->gravityAffected = true;
-      return;
-    }
+  // Check if we want to fall onto the player from above
+  if (
+    state->x == plPosX && state->var1 != 2 && state->frame < 6 &&
+    state->y < plPosY - 3)
+  {
+    state->var1 = 2;
+    state->frame = 6;
+    state->gravityAffected = true;
+    return;
+  }
 
-    if (state->var1 == 2 && !state->gravityState)
-    {
-      // We've reached the ground
-      state->scoreGiven = true;
-      state->var1 = ORIENTATION_RIGHT;
-    }
+  if (state->var1 == 2 && !state->gravityState)
+  {
+    // We've reached the ground
+    state->scoreGiven = true;
+    state->var1 = ORIENTATION_RIGHT;
+  }
 }
 
 
@@ -3602,10 +3578,7 @@ bool BlueGuard_UpdateShooting(word handle)
     return false;
   }
 
-  if (
-    state->y + 3 > plPosY &&
-    state->y - 3 < plPosY &&
-    plState == PS_NORMAL)
+  if (state->y + 3 > plPosY && state->y - 3 < plPosY && plState == PS_NORMAL)
   {
     if (state->var3) // Stance change cooldown set
     {
@@ -3655,7 +3628,6 @@ bool BlueGuard_UpdateShooting(word handle)
       case 5:
         SpawnActor(ACT_ENEMY_LASER_SHOT_R, state->x + 3, state->y - 1);
         break;
-
     }
   }
 
@@ -3788,16 +3760,16 @@ void pascal Act_SpikedGreenCreature(word handle)
     if (state->var1 == 5)
     {
       SpawnEffect(
-        state->id == ACT_GREEN_CREATURE_L
-          ? ACT_GREEN_CREATURE_EYE_FX_L : ACT_GREEN_CREATURE_EYE_FX_R,
+        state->id == ACT_GREEN_CREATURE_L ? ACT_GREEN_CREATURE_EYE_FX_L
+                                          : ACT_GREEN_CREATURE_EYE_FX_R,
         state->x,
         state->y,
         EM_NONE,
         0);
 
       SpawnEffect(
-        state->id == ACT_GREEN_CREATURE_L
-          ? ACT_GREEN_CREATURE_EYE_FX_L : ACT_GREEN_CREATURE_EYE_FX_R,
+        state->id == ACT_GREEN_CREATURE_L ? ACT_GREEN_CREATURE_EYE_FX_L
+                                          : ACT_GREEN_CREATURE_EYE_FX_R,
         state->x,
         state->y,
         EM_NONE,
@@ -3858,8 +3830,7 @@ void pascal Act_SpikedGreenCreature(word handle)
         // the list.
         // [PERF] Missing `static` causes a copy operation here
         const int JUMP_SEQUENCE[] = {
-          3, 0, 0, 3, 0, 0, 4, 2, -2, 4, 2, -1, 4, 2, 0, 5, 2, 0, 0xFF
-        };
+          3, 0, 0, 3, 0, 0, 4, 2, -2, 4, 2, -1, 4, 2, 0, 5, 2, 0, 0xFF};
 
         if (state->var1 == 30)
         {
@@ -3949,7 +3920,7 @@ void pascal Act_GreenPanther(word handle)
   ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte ANIM_SEQ[] = { 0, 1, 2, 1 };
+  const byte ANIM_SEQ[] = {0, 1, 2, 1};
 
   if (state->var1)
   {
@@ -4068,7 +4039,7 @@ void pascal Act_Turkey(word handle)
 void pascal Act_GreenBird(word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
-  const word ANIM_SEQ[] = { 0, 1, 2, 1 };
+  const word ANIM_SEQ[] = {0, 1, 2, 1};
 
   ActorState* state = gmActorStates + handle;
 
@@ -4116,15 +4087,13 @@ void pascal Act_GreenBird(word handle)
 void pascal Act_RedBird(word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
-  const word FLY_ANIM_SEQ[] = { 0, 1, 2, 1 };
+  const word FLY_ANIM_SEQ[] = {0, 1, 2, 1};
 
   ActorState* state = gmActorStates + handle;
 
   // Switch to attacking state when above player
   if (
-    state->var1 != 2 &&
-    state->y + 2 < plPosY &&
-    state->x > plPosX &&
+    state->var1 != 2 && state->y + 2 < plPosY && state->x > plPosX &&
     state->x < plPosX + 2)
   {
     state->var1 = 2;
@@ -4163,7 +4132,10 @@ void pascal Act_RedBird(word handle)
     }
   }
 
-  if (state->var1 != 2) { return; }
+  if (state->var1 != 2)
+  {
+    return;
+  }
 
   if (state->var3 < 7) // Hover above player
   {
@@ -4227,8 +4199,7 @@ void pascal Act_Elevator(word handle)
   register int i;
 
   if (
-    plState == PS_DYING ||
-    plState == PS_AIRLOCK_DEATH_L ||
+    plState == PS_DYING || plState == PS_AIRLOCK_DEATH_L ||
     plState == PS_AIRLOCK_DEATH_R)
   {
     return;
@@ -4280,16 +4251,18 @@ void pascal Act_Elevator(word handle)
   {
     if (
       state->y - 3 == plPosY &&
-      ((plActorId == ACT_DUKE_R && state->x <= plPosX && state->x + 2 > plPosX) ||
-       (plActorId == ACT_DUKE_L && state->x - 1 <= plPosX && state->x >= plPosX)))
+      ((plActorId == ACT_DUKE_R && state->x <= plPosX &&
+        state->x + 2 > plPosX) ||
+       (plActorId == ACT_DUKE_L && state->x - 1 <= plPosX &&
+        state->x >= plPosX)))
     {
       plOnElevator = true;
 
       ShowTutorial(TUT_ELEVATOR, "PRESS UP OR DOWN TO USE THE*TURBO LIFT.");
 
       if (
-        inputMoveUp && !CheckWorldCollision(
-          MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
+        inputMoveUp &&
+        !CheckWorldCollision(MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
       {
         state->var1 = 1;
 
@@ -4304,7 +4277,7 @@ void pascal Act_Elevator(word handle)
         }
 
         if (!CheckWorldCollision(
-          MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
+              MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
         {
           state->y--;
           plPosY--;
@@ -4312,7 +4285,7 @@ void pascal Act_Elevator(word handle)
         }
 
         if (!CheckWorldCollision(
-          MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
+              MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
         {
           state->y--;
           plPosY--;
@@ -4326,8 +4299,9 @@ void pascal Act_Elevator(word handle)
 
         goto drawFlame;
       }
-      else if (inputMoveDown && !CheckWorldCollision(
-        MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+      else if (
+        inputMoveDown &&
+        !CheckWorldCollision(MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
       {
         state->var1 = 0;
 
@@ -4337,7 +4311,7 @@ void pascal Act_Elevator(word handle)
         }
 
         if (!CheckWorldCollision(
-          MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+              MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
         {
           state->y++;
           plPosY++;
@@ -4345,7 +4319,7 @@ void pascal Act_Elevator(word handle)
         }
 
         if (!CheckWorldCollision(
-          MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+              MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
         {
           state->y++;
           plPosY++;
@@ -4362,7 +4336,7 @@ void pascal Act_Elevator(word handle)
       else
       {
         if (CheckWorldCollision(
-          MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+              MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
         {
           plOnElevator = false;
         }
@@ -4384,7 +4358,7 @@ void pascal Act_Elevator(word handle)
       plOnElevator = false;
 
       if (!CheckWorldCollision(
-        MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+            MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
       {
         for (i = 0; i < 2; i++)
         {
@@ -4402,9 +4376,10 @@ void pascal Act_Elevator(word handle)
       Map_SetTile(state->scoreGiven, state->x + i + 1, state->y - 2);
     }
 
-drawFlame:
-    if (state->var1 && !CheckWorldCollision(
-      MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+  drawFlame:
+    if (
+      state->var1 &&
+      !CheckWorldCollision(MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
     {
       DrawActor(
         ACT_ELEVATOR,
@@ -4426,7 +4401,10 @@ void pascal Act_SmashHammer(word handle)
 
   if (state->var1 < 20) // waiting
   {
-    if (!state->var1 && !IsActorOnScreen(handle)) { return; }
+    if (!state->var1 && !IsActorOnScreen(handle))
+    {
+      return;
+    }
 
     state->var1++;
 
@@ -4590,14 +4568,14 @@ void pascal Act_LavaFountain(word handle)
     // Since we use drawStyle DS_INVISIBLE, we have to test for intersection
     // with the player manually.
     if (AreSpritesTouching(
-      ACT_LAVA_FOUNTAIN,
-      SPRITE_PLACEMENT_TABLE[state->var2],
-      state->x,
-      state->y + SPRITE_PLACEMENT_TABLE[state->var2 + 1],
-      plActorId,
-      plAnimationFrame,
-      plPosX,
-      plPosY))
+          ACT_LAVA_FOUNTAIN,
+          SPRITE_PLACEMENT_TABLE[state->var2],
+          state->x,
+          state->y + SPRITE_PLACEMENT_TABLE[state->var2 + 1],
+          plActorId,
+          plAnimationFrame,
+          plPosX,
+          plPosY))
     {
       DamagePlayer();
     }
@@ -4632,23 +4610,20 @@ void pascal Act_RadarComputer(word handle)
   byte i;
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte RADARS_PRESENT_ANIM_SEQ[] = {
-    4, 4, 4, 0, 4, 4, 4, 0, 4, 4, 4, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-    5, 5, 5, 5
-  };
+  const byte RADARS_PRESENT_ANIM_SEQ[] = {4, 4, 4, 0, 4, 4, 4, 0, 4, 4,
+                                          4, 0, 5, 5, 5, 5, 5, 5, 5, 5,
+                                          5, 5, 5, 5, 5, 5, 5, 5, 5};
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte RADARS_DESTROYED_ANIM_SEQ[] = {
-    6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-    7, 7, 7, 7
-  };
+  const byte RADARS_DESTROYED_ANIM_SEQ[] = {6, 6, 6, 0, 6, 6, 6, 0, 6, 6,
+                                            6, 0, 7, 7, 7, 7, 7, 7, 7, 7,
+                                            7, 7, 7, 7, 7, 7, 7, 7, 7};
 
 
   // Draw additional parts (the actor sprite itself is just the screen)
   for (i = 1; i < 4; i++)
   {
-    DrawActor(
-      ACT_RADAR_COMPUTER_TERMINAL, i, state->x, state->y, DS_NORMAL);
+    DrawActor(ACT_RADAR_COMPUTER_TERMINAL, i, state->x, state->y, DS_NORMAL);
   }
 
   if (gmRadarDishesLeft)
@@ -4664,12 +4639,7 @@ void pascal Act_RadarComputer(word handle)
       // top.
       state->drawStyle = DS_INVISIBLE;
 
-      DrawActor(
-        ACT_RADAR_COMPUTER_TERMINAL,
-        5,
-        state->x,
-        state->y,
-        DS_NORMAL);
+      DrawActor(ACT_RADAR_COMPUTER_TERMINAL, 5, state->x, state->y, DS_NORMAL);
 
       DrawActor(
         ACT_RADAR_COMPUTER_TERMINAL,
@@ -4831,11 +4801,14 @@ void pascal Act_WallWalker(word handle)
   ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte MOVEMENT_BY_STATE[] = { MD_UP, MD_DOWN, MD_LEFT, MD_RIGHT };
+  const byte MOVEMENT_BY_STATE[] = {MD_UP, MD_DOWN, MD_LEFT, MD_RIGHT};
 
   state->var5 = !state->var5;
 
-  if (state->var5) { return; }
+  if (state->var5)
+  {
+    return;
+  }
 
   state->var4 = !state->var4;
 
@@ -4945,7 +4918,7 @@ void pascal Act_AirlockDeathTrigger(word handle)
 void pascal Act_AggressivePrisoner(word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
-  const byte ANIM_SEQ[] = { 1, 2, 3, 4, 0 };
+  const byte ANIM_SEQ[] = {1, 2, 3, 4, 0};
 
   ActorState* state = gmActorStates + handle;
 
@@ -4977,11 +4950,8 @@ void pascal Act_AggressivePrisoner(word handle)
 
   // Do we want to try grabbing the player?
   if (
-    state->x - 4 < plPosX &&
-    state->x + 7 > plPosX &&
-    !state->var1 &&
-    (RandomNumber() & 0x10) &&
-    gfxCurrentDisplayPage)
+    state->x - 4 < plPosX && state->x + 7 > plPosX && !state->var1 &&
+    (RandomNumber() & 0x10) && gfxCurrentDisplayPage)
   {
     state->var2 = 0;
     state->var1 = 1;
@@ -5052,8 +5022,21 @@ void pascal UpdateBossDeathSequence(word handle)
 
   switch (state->var3)
   {
-    case 1: case 3: case 7: case 14: case 16: case 21: case 25: case 27:
-    case 30: case 32: case 36: case 40: case 43: case 48: case 50:
+    case 1:
+    case 3:
+    case 7:
+    case 14:
+    case 16:
+    case 21:
+    case 25:
+    case 27:
+    case 30:
+    case 32:
+    case 36:
+    case 40:
+    case 43:
+    case 48:
+    case 50:
       PLAY_EXPLOSION_SOUND();
 
       SpawnParticles(
@@ -5102,7 +5085,7 @@ void pascal Act_Boss1(word handle)
   ActorState* state = gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
-  sbyte Y_MOVEMENT_SEQ[] = { -1, -1, 0, 0, 1, 1, 1, 0, 0, -1 };
+  sbyte Y_MOVEMENT_SEQ[] = {-1, -1, 0, 0, 1, 1, 1, 0, 0, -1};
 
   // Animate the ship
   state->frame = gfxCurrentDisplayPage;
@@ -5141,7 +5124,7 @@ void pascal Act_Boss1(word handle)
       }
 
       if (CheckWorldCollision(
-        MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
+            MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
       {
         state->gravityAffected = false;
 
@@ -5179,7 +5162,7 @@ void pascal Act_Boss1(word handle)
     state->x -= 2;
 
     if (CheckWorldCollision(
-      MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
+          MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
     {
       state->var1 = 4;
     }
@@ -5194,7 +5177,7 @@ void pascal Act_Boss1(word handle)
     state->x += 2;
 
     if (CheckWorldCollision(
-      MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 2, state->y))
+          MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 2, state->y))
     {
       state->var1 = 7;
     }
@@ -5209,7 +5192,7 @@ void pascal Act_Boss1(word handle)
   else if (state->var1 == 8)
   {
     if (CheckWorldCollision(
-      MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
+          MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
     {
       state->gravityAffected = false;
     }
@@ -5219,7 +5202,7 @@ void pascal Act_Boss1(word handle)
       state->x -= 2;
 
       if (CheckWorldCollision(
-        MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
+            MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
       {
         state->var1 = 11;
       }
@@ -5230,7 +5213,7 @@ void pascal Act_Boss1(word handle)
     if (state->var3)
     {
       if (!CheckWorldCollision(
-        MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 1, state->y))
+            MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 1, state->y))
       {
         state->x++;
       }
@@ -5242,7 +5225,7 @@ void pascal Act_Boss1(word handle)
     else
     {
       if (!CheckWorldCollision(
-        MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 1, state->y))
+            MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 1, state->y))
       {
         state->x--;
       }
@@ -5254,10 +5237,7 @@ void pascal Act_Boss1(word handle)
 
     state->y += Y_MOVEMENT_SEQ[state->var4++ % 10];
 
-    if (
-      state->var4 > 50 &&
-      state->x - 1 <= plPosX &&
-      state->x + 9 >= plPosX)
+    if (state->var4 > 50 && state->x - 1 <= plPosX && state->x + 9 >= plPosX)
     {
       state->var4 = 0;
       state->var1 = 1;
@@ -5265,7 +5245,9 @@ void pascal Act_Boss1(word handle)
 
     // This does nothing, but is required to produce assembly matching the
     // original
-    while (false) {}
+    while (false)
+    {
+    }
   }
 
   if (state->var3 < 3)
@@ -5289,22 +5271,19 @@ void pascal Act_Boss2(word handle)
   //
   // [PERF] Missing `static` causes a copy operation here
   const sbyte FLY_TO_OTHER_SIDE_SEQ[] = {
-    0,  1,  2,   0,  1,  2,   1,  2,  3,   1,  2,  3,   2,  1,  3,   2,  1,  3,
-    2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,
-    2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,
-    2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,
-    2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,   2,  0,  3,
-    2,  0,  3,   2,  0,  3,   2,  0,  3,   2, -1,  3,   2, -1,  3,   1, -2,  3,
-    1, -2,  3,   0, -1,  3,   0, -1,  3
-  };
+    0,  1, 2, 0,  1, 2, 1,  2, 3, 1,  2, 3, 2,  1, 3, 2,  1, 3, 2, 0,
+    3,  2, 0, 3,  2, 0, 3,  2, 0, 3,  2, 0, 3,  2, 0, 3,  2, 0, 3, 2,
+    0,  3, 2, 0,  3, 2, 0,  3, 2, 0,  3, 2, 0,  3, 2, 0,  3, 2, 0, 3,
+    2,  0, 3, 2,  0, 3, 2,  0, 3, 2,  0, 3, 2,  0, 3, 2,  0, 3, 2, 0,
+    3,  2, 0, 3,  2, 0, 3,  2, 0, 3,  2, 0, 3,  2, 0, 3,  2, 0, 3, 2,
+    -1, 3, 2, -1, 3, 1, -2, 3, 1, -2, 3, 0, -1, 3, 0, -1, 3};
 
   // This table is a list of groups of 3: x offset, y offset, animation frame.
   //
   // [PERF] Missing `static` causes a copy operation here
-  const sbyte JUMP_TO_OTHER_SIDE_SEQ[] = {
-    0, -2,  0,   0, -2,  0,   1, -2,  0,   2, -1,  0,   3,  0,  0,   2,  1,  0,
-    1,  2,  0,   0,  2,  0,   0,  2,  0
-  };
+  const sbyte JUMP_TO_OTHER_SIDE_SEQ[] = {0, -2, 0, 0, -2, 0, 1, -2, 0,
+                                          2, -1, 0, 3, 0,  0, 2, 1,  0,
+                                          1, 2,  0, 0, 2,  0, 0, 2,  0};
 
   if (state->var5) // death sequence (var5 is set in HandleActorShotCollision)
   {
@@ -5386,7 +5365,7 @@ void pascal Act_Boss2(word handle)
     state->gravityAffected = true;
 
     if (CheckWorldCollision(
-      MD_DOWN, ACT_BOSS_EPISODE_2, 0, state->x, state->y + 1))
+          MD_DOWN, ACT_BOSS_EPISODE_2, 0, state->x, state->y + 1))
     {
       state->var1 = 4;
       state->var2 = 0;
@@ -5508,8 +5487,7 @@ void pascal Act_Boss3(word handle)
   // Shoot rockets at player
   //
   if (
-    IsActorOnScreen(handle) &&
-    gfxCurrentDisplayPage &&
+    IsActorOnScreen(handle) && gfxCurrentDisplayPage &&
     (word)RandomNumber() % 2)
   {
     // [NOTE] This code is a little convoluted. The actual goal is to figure out
@@ -5645,8 +5623,7 @@ void pascal Act_Boss4(word handle)
       {
         state->var4 = 0;
 
-        SpawnActor(
-          ACT_BOSS_EPISODE_4_SHOT, state->x + 4, state->y + 2);
+        SpawnActor(ACT_BOSS_EPISODE_4_SHOT, state->x + 4, state->y + 2);
 
         state->var2 = 0;
         state->var5 = 12;
@@ -5692,7 +5669,7 @@ void pascal Act_SmallFlyingShip(word handle)
   register int i;
 
   // [PERF] Missing `static` causes a copy operation here
-  const byte ANIM_SEQ[] = { 0, 1, 2, 1 };
+  const byte ANIM_SEQ[] = {0, 1, 2, 1};
 
   // Explode when hitting a wall, as if shot by the player (gives score)
   if (HAS_TILE_ATTRIBUTE(Map_GetTile(state->x - 1, state->y), TA_SOLID_RIGHT))
@@ -5706,8 +5683,7 @@ void pascal Act_SmallFlyingShip(word handle)
   {
     for (i = 0; i < 15; i++)
     {
-      if (HAS_TILE_ATTRIBUTE(
-        Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
+      if (HAS_TILE_ATTRIBUTE(Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
       {
         state->var1 = i;
         break;
@@ -5718,8 +5694,7 @@ void pascal Act_SmallFlyingShip(word handle)
   // Rise up if distance to ground level reduced
   for (i = 0; i < state->var1; i++)
   {
-    if (HAS_TILE_ATTRIBUTE(
-      Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
+    if (HAS_TILE_ATTRIBUTE(Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
     {
       state->y--;
       break;
@@ -5765,7 +5740,7 @@ void pascal Act_RigelatinSoldier(word handle)
 {
   ActorState* state = gmActorStates + handle;
 
-  const sbyte JUMP_SEQ[] = { -2, -2, -1, 0 };
+  const sbyte JUMP_SEQ[] = {-2, -2, -1, 0};
 
   if (state->var3)
   {
@@ -5802,7 +5777,7 @@ void pascal Act_RigelatinSoldier(word handle)
   }
 
   if (CheckWorldCollision(
-    MD_DOWN, ACT_RIGELATIN_SOLDIER, 0, state->x, state->y + 1))
+        MD_DOWN, ACT_RIGELATIN_SOLDIER, 0, state->x, state->y + 1))
   {
     if (state->x < plPosX)
     {
@@ -5858,7 +5833,7 @@ void pascal Act_RigelatinSoldier(word handle)
     if (state->var1)
     {
       if (!CheckWorldCollision(
-        MD_RIGHT, ACT_RIGELATIN_SOLDIER, 0, state->x + 2, state->y))
+            MD_RIGHT, ACT_RIGELATIN_SOLDIER, 0, state->x + 2, state->y))
       {
         state->x += 2;
       }
@@ -5866,7 +5841,7 @@ void pascal Act_RigelatinSoldier(word handle)
     else
     {
       if (!CheckWorldCollision(
-        MD_LEFT, ACT_RIGELATIN_SOLDIER, 0, state->x - 2, state->y))
+            MD_LEFT, ACT_RIGELATIN_SOLDIER, 0, state->x - 2, state->y))
       {
         state->x -= 2;
       }
@@ -5899,11 +5874,7 @@ animateAndAttack:
     else
     {
       SpawnEffect(
-        ACT_RIGELATIN_SOLDIER_SHOT,
-        state->x,
-        state->y - 4,
-        EM_FLY_LEFT,
-        0);
+        ACT_RIGELATIN_SOLDIER_SHOT, state->x, state->y - 4, EM_FLY_LEFT, 0);
     }
   }
   else

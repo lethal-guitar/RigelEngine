@@ -37,7 +37,7 @@ typedef enum
   ACT_HOVERBOT = 0,
   ACT_EXPLOSION_FX_1 = 1,
   ACT_EXPLOSION_FX_2 = 2,
-  ACT_FLAME_FX= 3,
+  ACT_FLAME_FX = 3,
   ACT_GREEN_CREATURE_EYE_FX_L = 4,
   ACT_DUKE_L = 5,
   ACT_DUKE_R = 6,
@@ -339,6 +339,6 @@ that some sort of macros were used to make things a little easier.
 #define AINFO_Y_OFFSET(offset) (int)*(gfxActorInfoData + offset + 3)
 #define AINFO_HEIGHT(offset) *(gfxActorInfoData + offset + 4)
 #define AINFO_WIDTH(offset) *(gfxActorInfoData + offset + 5)
-#define AINFO_DATA_OFFSET(offset)                    \
-  (((dword)*(gfxActorInfoData + offset + 7) << 16) + \
-  (dword)*(gfxActorInfoData + offset + 6))
+#define AINFO_DATA_OFFSET(offset)                                              \
+  (((dword) * (gfxActorInfoData + offset + 7) << 16) +                         \
+   (dword) * (gfxActorInfoData + offset + 6))

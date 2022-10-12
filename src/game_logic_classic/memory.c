@@ -185,7 +185,7 @@ static void pascal UpdateSpriteDataList(void far* address)
  */
 void pascal MM_PopChunk(ChunkType type)
 {
-  if (mmChunksUsed != 0 && mmChunkTypes[mmChunksUsed-1] == type)
+  if (mmChunksUsed != 0 && mmChunkTypes[mmChunksUsed - 1] == type)
   {
     mmChunksUsed--;
     mmMemUsed -= mmChunkSizes[mmChunksUsed];
@@ -221,7 +221,7 @@ void pascal MM_PopChunk(ChunkType type)
  */
 void pascal MM_PopChunks(ChunkType type)
 {
-  while (mmChunksUsed != 0 && mmChunkTypes[mmChunksUsed-1] == type)
+  while (mmChunksUsed != 0 && mmChunkTypes[mmChunksUsed - 1] == type)
   {
     mmChunksUsed--;
     mmMemUsed -= mmChunkSizes[mmChunksUsed];

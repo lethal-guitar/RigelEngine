@@ -111,7 +111,10 @@ byte pascal TestShotCollision(word handle)
   word i;
 
   // The player can't be hit by their own shots
-  if (actor->id == ACT_DUKE_L || actor->id == ACT_DUKE_R) { return 0; }
+  if (actor->id == ACT_DUKE_L || actor->id == ACT_DUKE_R)
+  {
+    return 0;
+  }
 
   // Test fire bomb fires
   for (i = 0; i < MAX_NUM_EFFECTS; i++)
@@ -131,8 +134,7 @@ byte pascal TestShotCollision(word handle)
         gmEffectStates[i].active - 1,
         gmEffectStates[i].x,
         gmEffectStates[i].y) &&
-      gmEffectStates[i].active &&
-      gmEffectStates[i].id == ACT_FIRE_BOMB_FIRE &&
+      gmEffectStates[i].active && gmEffectStates[i].id == ACT_FIRE_BOMB_FIRE &&
       gmEffectStates[i].spawnDelay <= 1)
     {
       return 1;
@@ -142,13 +144,22 @@ byte pascal TestShotCollision(word handle)
   // Test player shots
   for (i = 0; i < MAX_NUM_PLAYER_SHOTS; i++)
   {
-    if (gmPlayerShotStates[i].active == 0) { continue; }
+    if (gmPlayerShotStates[i].active == 0)
+    {
+      continue;
+    }
 
     shot = gmPlayerShotStates + i;
 
     if (AreSpritesTouching(
-      actor->id, actor->frame, actor->x, actor->y,
-      shot->id, shot->active - 1, shot->x, shot->y))
+          actor->id,
+          actor->frame,
+          actor->x,
+          actor->y,
+          shot->id,
+          shot->active - 1,
+          shot->x,
+          shot->y))
     {
       retPlayerShotDirection = shot->direction;
 
@@ -175,15 +186,13 @@ byte pascal TestShotCollision(word handle)
         case ACT_DUKE_ROCKET_LEFT:
         case ACT_DUKE_ROCKET_RIGHT:
           shot->active = shot->active | 0x8000; // deactivate shot
-          SpawnEffect(
-            ACT_EXPLOSION_FX_2, shot->x - 3, shot->y + 3, EM_NONE, 0);
+          SpawnEffect(ACT_EXPLOSION_FX_2, shot->x - 3, shot->y + 3, EM_NONE, 0);
           return WPN_DAMAGE_ROCKET_LAUNCHER;
 
         case ACT_REACTOR_FIRE_L:
         case ACT_REACTOR_FIRE_R:
         case ACT_DUKES_SHIP_LASER_SHOT:
-          SpawnEffect(
-            ACT_EXPLOSION_FX_2, shot->x - 3, shot->y + 3, EM_NONE, 0);
+          SpawnEffect(ACT_EXPLOSION_FX_2, shot->x - 3, shot->y + 3, EM_NONE, 0);
           return WPN_DAMAGE_SHIP_LASER;
       }
     }
@@ -195,7 +204,13 @@ byte pascal TestShotCollision(word handle)
 
 /** Test if sprite's bounding box is intersecting specified rectangle */
 bool pascal IsSpriteInRect(
-  word id, word x, word y, word left, word top, word right, word bottom)
+  word id,
+  word x,
+  word y,
+  word left,
+  word top,
+  word right,
+  word bottom)
 {
   register word height;
   register word width;
@@ -356,12 +371,24 @@ void pascal UpdateActorPlayerCollision(word handle)
   ActorState* state = gmActorStates + handle;
   int i;
 
-  if (plState == PS_DYING) { return; }
-  if (plState == PS_GETTING_EATEN) { return; }
+  if (plState == PS_DYING)
+  {
+    return;
+  }
+  if (plState == PS_GETTING_EATEN)
+  {
+    return;
+  }
 
   if (AreSpritesTouching(
-    state->id, state->frame, state->x, state->y,
-    plActorId, plAnimationFrame, plPosX, plPosY))
+        state->id,
+        state->frame,
+        state->x,
+        state->y,
+        plActorId,
+        plAnimationFrame,
+        plPosX,
+        plPosY))
   {
     switch (state->id)
     {
@@ -418,7 +445,8 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_CIRCUIT_CARD_KEYHOLE:
         if (plPosY - 2 == state->y)
         {
-          TryUnlockingDoor(&gmRequestUnlockNextForceField, ACT_CIRCUIT_CARD, handle);
+          TryUnlockingDoor(
+            &gmRequestUnlockNextForceField, ACT_CIRCUIT_CARD, handle);
           ShowTutorial(
             TUT_FOUND_FORCE_FIELD,
             "USE THE ACCESS CARD TO DISABLE*THIS FORCE FIELD.");
@@ -487,11 +515,8 @@ void pascal UpdateActorPlayerCollision(word handle)
 
       case ACT_CEILING_SUCKER:
         if (
-          plState != PS_USING_SHIP &&
-          state->frame == 5 &&
-          state->var1 < 10 &&
-          plPosX + 1 >= state->x &&
-          state->x + 1 >= plPosX)
+          plState != PS_USING_SHIP && state->frame == 5 && state->var1 < 10 &&
+          plPosX + 1 >= state->x && state->x + 1 >= plPosX)
         {
           gmPlayerEatingActor = state->id;
           plState = PS_GETTING_EATEN;
@@ -553,15 +578,18 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_SPIDER:
         DamagePlayer();
 
-        if (plCloakTimeLeft) { break; }
+        if (plCloakTimeLeft)
+        {
+          break;
+        }
 
         if (
           (plAttachedSpider1 == 0 && state->gravityState != 0) ||
           ((plAttachedSpider2 == 0 || plAttachedSpider3 == 0) &&
-          state->scoreGiven != 0 && // score field is repurposed as state
-                                    // variable, indicating if the spider
-                                    // is on the ground
-          state->frame < 12))
+           state->scoreGiven != 0 && // score field is repurposed as state
+                                     // variable, indicating if the spider
+                                     // is on the ground
+           state->frame < 12))
         {
           if (!state->gravityState) // on ground
           {
@@ -618,13 +646,13 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_SNAKE:
         if (
           // snake not currently eating player?
-          !state->var2 &&
-          plState == PS_NORMAL)
+          !state->var2 && plState == PS_NORMAL)
         {
           if (state->var1) // snake facing right and player in reach? or...
           {
-            if ((state->x + 3 == plPosX || state->x + 2 == plPosX) &&
-             state->y == plPosY)
+            if (
+              (state->x + 3 == plPosX || state->x + 2 == plPosX) &&
+              state->y == plPosY)
             {
               // Start eating the player (see Act_Snake)
               state->var2 = 1;
@@ -632,8 +660,9 @@ void pascal UpdateActorPlayerCollision(word handle)
           }
           else // ... snake facing left and player in reach?
           {
-            if ((state->x - 3 == plPosX || state->x - 2 == plPosX) &&
-             state->y == plPosY)
+            if (
+              (state->x - 3 == plPosX || state->x - 2 == plPosX) &&
+              state->y == plPosY)
             {
               // Start eating the player (see Act_Snake)
               state->var2 = 1;
@@ -894,7 +923,11 @@ void pascal UpdateActorPlayerCollision(word handle)
 
             GiveScore(10000);
             SpawnEffect(
-              ACT_SCORE_NUMBER_FX_10000, state->x, state->y, EM_SCORE_NUMBER, 0);
+              ACT_SCORE_NUMBER_FX_10000,
+              state->x,
+              state->y,
+              EM_SCORE_NUMBER,
+              0);
           }
           else
           {
@@ -1020,7 +1053,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           byte i;
 
-          sbyte SCORE_NUMBER_OFFSETS[] = { -3, 0, 3, 0 };
+          sbyte SCORE_NUMBER_OFFSETS[] = {-3, 0, 3, 0};
 
           PlaySound(SND_LETTERS_COLLECTED_CORRECTLY);
           ShowTutorial(
@@ -1060,7 +1093,10 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_CIRCUIT_CARD:
         // Only allow picking up the item if it has completed the upwards part
         // of the fly-up sequence after shooting the containing box
-        if (state->var1 <= 8) { break; }
+        if (state->var1 <= 8)
+        {
+          break;
+        }
 
         PlaySound(SND_ITEM_PICKUP);
 
@@ -1123,7 +1159,10 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_SPECIAL_HINT_MACHINE:
         // If the globe has already been placed onto the hint machine, do
         // nothing
-        if (state->var1) { break; }
+        if (state->var1)
+        {
+          break;
+        }
 
         if (RemoveFromInventory(ACT_SPECIAL_HINT_GLOBE_ICON))
         {
@@ -1204,8 +1243,8 @@ void pascal UpdateActorPlayerCollision(word handle)
 
       case ACT_TELEPORTER_2:
         if (
-          state->x <= plPosX && state->x + 3 >= plPosX &&
-          state->y == plPosY && plState == PS_NORMAL)
+          state->x <= plPosX && state->x + 3 >= plPosX && state->y == plPosY &&
+          plState == PS_NORMAL)
         {
           ShowTutorial(
             TUT_TELEPORTER, "PRESS UP OR ENTER TO USE*THE TRANSPORTER.*");
@@ -1217,8 +1256,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         // AreSpritesTouching() at the top of this function.
         if (
           state->x <= plPosX && state->x + 3 >= plPosX && state->y == plPosY &&
-          (inputMoveUp || kbKeyState[SCANCODE_ENTER]) &&
-          plState == PS_NORMAL)
+          (inputMoveUp || kbKeyState[SCANCODE_ENTER]) && plState == PS_NORMAL)
         {
           byte counterpartId;
           ActorState* candidate;
@@ -1294,7 +1332,6 @@ void pascal UpdateActorPlayerCollision(word handle)
           }
         }
         break;
-
     }
   }
 }
@@ -1342,7 +1379,10 @@ void pascal HandleActorShotCollision(int damage, word handle)
   register ActorState* state = gmActorStates + handle;
   register int i;
 
-  if (!damage) { return; }
+  if (!damage)
+  {
+    return;
+  }
 
   switch (state->id)
   {
@@ -1487,11 +1527,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
             i & 2 ? EM_FLY_LEFT : EM_FLY_RIGHT,
             i * 3);
           SpawnEffect(
-            ACT_SMOKE_CLOUD_FX,
-            state->x - 1,
-            state->y - 9 + i,
-            EM_NONE,
-            i * 2);
+            ACT_SMOKE_CLOUD_FX, state->x - 1, state->y - 9 + i, EM_NONE, i * 2);
         }
 
         PLAY_EXPLOSION_SOUND();
@@ -1660,8 +1696,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
       // to 0 when attaching to the player, and that excludes it from
       // shot collision detection.
       if (
-        plAttachedSpider1 == handle ||
-        plAttachedSpider2 == handle ||
+        plAttachedSpider1 == handle || plAttachedSpider2 == handle ||
         plAttachedSpider3 == handle)
       {
         break;
@@ -1669,8 +1704,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
 
       if (DamageActor(damage, handle))
       {
-        SpawnEffect(
-          ACT_EXPLOSION_FX_1, state->x - 1, state->y + 1, EM_NONE, 0);
+        SpawnEffect(ACT_EXPLOSION_FX_1, state->x - 1, state->y + 1, EM_NONE, 0);
         GiveScore(100);
         state->deleted = true;
       }
@@ -1729,29 +1763,16 @@ void pascal HandleActorShotCollision(int damage, word handle)
           {
             case SD_LEFT:
               SpawnEffect(
-                ACT_LASER_TURRET,
-                state->x,
-                state->y,
-                EM_FLY_UPPER_LEFT,
-                0);
+                ACT_LASER_TURRET, state->x, state->y, EM_FLY_UPPER_LEFT, 0);
               break;
 
             case SD_RIGHT:
               SpawnEffect(
-                ACT_LASER_TURRET,
-                state->x,
-                state->y,
-                EM_FLY_UPPER_RIGHT,
-                0);
+                ACT_LASER_TURRET, state->x, state->y, EM_FLY_UPPER_RIGHT, 0);
               break;
 
             default:
-              SpawnEffect(
-                ACT_LASER_TURRET,
-                state->x,
-                state->y,
-                EM_FLY_UP,
-                0);
+              SpawnEffect(ACT_LASER_TURRET, state->x, state->y, EM_FLY_UP, 0);
               break;
           }
 
@@ -1781,8 +1802,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
       if (DamageActor(damage, handle))
       {
         SpawnParticles(state->x + 1, state->y, 0, CLR_WHITE);
-        SpawnEffect(
-          ACT_EXPLOSION_FX_1, state->x - 1, state->y + 1, EM_NONE, 0);
+        SpawnEffect(ACT_EXPLOSION_FX_1, state->x - 1, state->y + 1, EM_NONE, 0);
         state->deleted = true;
       }
       break;
@@ -1835,8 +1855,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         };
         // clang-format on
 
-        SpawnDestructionEffects(
-          handle, DEBRIS_SPEC, ACT_EXPLOSION_FX_1);
+        SpawnDestructionEffects(handle, DEBRIS_SPEC, ACT_EXPLOSION_FX_1);
 
         state->deleted = true;
 
@@ -1948,21 +1967,13 @@ void pascal HandleActorShotCollision(int damage, word handle)
           if (!spawnFailedLeft)
           {
             spawnFailedLeft += SpawnEffect(
-              ACT_FIRE_BOMB_FIRE,
-              state->x - 2 - i,
-              state->y,
-              EM_NONE,
-              i);
+              ACT_FIRE_BOMB_FIRE, state->x - 2 - i, state->y, EM_NONE, i);
           }
 
           if (!spawnFailedRight)
           {
             spawnFailedRight += SpawnEffect(
-              ACT_FIRE_BOMB_FIRE,
-              state->x + i + 2,
-              state->y,
-              EM_NONE,
-              i);
+              ACT_FIRE_BOMB_FIRE, state->x + i + 2, state->y, EM_NONE, i);
           }
         }
 
@@ -1974,9 +1985,12 @@ void pascal HandleActorShotCollision(int damage, word handle)
       SpawnEffect(
         ACT_BONUS_GLOBE_DEBRIS_1, state->x, state->y, EM_FLY_UPPER_LEFT, 0);
       SpawnEffect(
-        ACT_BONUS_GLOBE_DEBRIS_2, state->x + 2, state->y, EM_FLY_UPPER_RIGHT, 0);
-      SpawnEffect(
-        state->var1, state->x, state->y, EM_FLY_UP, 0);
+        ACT_BONUS_GLOBE_DEBRIS_2,
+        state->x + 2,
+        state->y,
+        EM_FLY_UPPER_RIGHT,
+        0);
+      SpawnEffect(state->var1, state->x, state->y, EM_FLY_UP, 0);
 
       state->drawStyle = DS_WHITEFLASH;
 
@@ -2054,7 +2068,7 @@ int pascal ApplyWorldCollision(word handle, word direction)
     else
     {
       if (CheckWorldCollision(
-        MD_DOWN, actor->id, actor->frame, actor->x - 2, actor->y + 1))
+            MD_DOWN, actor->id, actor->frame, actor->x - 2, actor->y + 1))
       {
         canMove = true;
       }
@@ -2084,7 +2098,7 @@ int pascal ApplyWorldCollision(word handle, word direction)
     else
     {
       if (CheckWorldCollision(
-        MD_DOWN, actor->id, actor->frame, actor->x + 2, actor->y + 1))
+            MD_DOWN, actor->id, actor->frame, actor->x + 2, actor->y + 1))
       {
         canMove = true;
       }
@@ -2142,11 +2156,11 @@ bool pascal PlayerInRange(word handle, word distance)
 
 
 /** Spawn a new actor into the game world
-  *
-  * Creates an actor of the given type at the given location.
-  * Tries to reuse the state slot of a previously deleted actor if possible,
-  * otherwise the actor is added to the end of the list.
-  */
+ *
+ * Creates an actor of the given type at the given location.
+ * Tries to reuse the state slot of a previously deleted actor if possible,
+ * otherwise the actor is added to the end of the list.
+ */
 void pascal SpawnActor(word id, word x, word y)
 {
   int i;
@@ -2175,14 +2189,14 @@ void pascal SpawnActor(word id, word x, word y)
 
 
 /** Load additional sprites needed by given actor
-  *
-  * Each actor has an associated sprite, but some actors require additional
-  * sprites.  E.g. because they have different sprites for facing left/right,
-  * are made up of multiple sprites, or can spawn other types of actors like
-  * projectiles, effects etc. Since the latter aren't placed into levels, they
-  * have to be loaded along with the actors that are able to spawn them into
-  * the world.
-  */
+ *
+ * Each actor has an associated sprite, but some actors require additional
+ * sprites.  E.g. because they have different sprites for facing left/right,
+ * are made up of multiple sprites, or can spawn other types of actors like
+ * projectiles, effects etc. Since the latter aren't placed into levels, they
+ * have to be loaded along with the actors that are able to spawn them into
+ * the world.
+ */
 void pascal LoadActorExtraSprites(word id)
 {
   switch (id)
@@ -2270,8 +2284,7 @@ void pascal LoadActorExtraSprites(word id)
       {
         case WPN_LASER:
           LoadSpriteRange(
-            ACT_DUKE_LASER_SHOT_HORIZONTAL,
-            ACT_DUKE_LASER_SHOT_VERTICAL);
+            ACT_DUKE_LASER_SHOT_HORIZONTAL, ACT_DUKE_LASER_SHOT_VERTICAL);
           break;
 
         case WPN_ROCKETLAUNCHER:
@@ -2280,11 +2293,8 @@ void pascal LoadActorExtraSprites(word id)
 
         case WPN_FLAMETHROWER:
           LoadSprite(ACT_DUKE_FLAME_SHOT_UP);
-          LoadSpriteRange(
-            ACT_DUKE_FLAME_SHOT_DOWN,
-            ACT_DUKE_FLAME_SHOT_RIGHT);
+          LoadSpriteRange(ACT_DUKE_FLAME_SHOT_DOWN, ACT_DUKE_FLAME_SHOT_RIGHT);
           break;
-
       }
       break;
 
@@ -2303,15 +2313,12 @@ void pascal LoadActorExtraSprites(word id)
 
     case ACT_FLAME_THROWER:
       LoadSprite(ACT_DUKE_FLAME_SHOT_UP);
-      LoadSpriteRange(
-        ACT_DUKE_FLAME_SHOT_DOWN,
-        ACT_DUKE_FLAME_SHOT_RIGHT);
+      LoadSpriteRange(ACT_DUKE_FLAME_SHOT_DOWN, ACT_DUKE_FLAME_SHOT_RIGHT);
       break;
 
     case ACT_LASER:
       LoadSpriteRange(
-        ACT_DUKE_LASER_SHOT_HORIZONTAL,
-        ACT_DUKE_LASER_SHOT_VERTICAL);
+        ACT_DUKE_LASER_SHOT_HORIZONTAL, ACT_DUKE_LASER_SHOT_VERTICAL);
       break;
 
     case ACT_FLAME_THROWER_BOT_R:
@@ -2448,9 +2455,7 @@ void pascal HUD_ShowOnRadar(word x, word y)
   register int x1 = plPosX - 17;
   register int y1 = plPosY - 17;
 
-  if (
-    (int)x > x1 && x < plPosX + 16 &&
-    (int)y > y1 && y < plPosY + 16)
+  if ((int)x > x1 && x < plPosX + 16 && (int)y > y1 && y < plPosY + 16)
   {
     x1 = x - plPosX;
     y1 = y - plPosY;
@@ -2531,7 +2536,10 @@ void UpdateAndDrawWaterAreas(void)
   register word i;
   register word numActors = gmNumActors;
 
-  if (!gmWaterAreasPresent) { return; }
+  if (!gmWaterAreasPresent)
+  {
+    return;
+  }
 
   for (i = 0; i < numActors; i++)
   {
@@ -2574,10 +2582,16 @@ void UpdateAndDrawActors(void)
     savedDrawStyle = actor->drawStyle;
 
     // Skip deleted actors
-    if (actor->deleted) { continue; }
+    if (actor->deleted)
+    {
+      continue;
+    }
 
     // Skip water areas, these are handled in UpdateAndDrawWaterAreas()
-    if (actor->id == ACT_WATER_BODY) { continue; }
+    if (actor->id == ACT_WATER_BODY)
+    {
+      continue;
+    }
 
     //
     // Active state handling
@@ -2612,7 +2626,7 @@ void UpdateAndDrawActors(void)
 
       // If the actor is currently stuck in the ground, move it up by one unit
       if (CheckWorldCollision(
-        MD_DOWN, actor->id, actor->frame, actor->x, actor->y))
+            MD_DOWN, actor->id, actor->frame, actor->x, actor->y))
       {
         actor->y--;
         actor->gravityState = 0;
@@ -2620,7 +2634,7 @@ void UpdateAndDrawActors(void)
 
       // Is the actor currently in the air?
       if (!CheckWorldCollision(
-        MD_DOWN, actor->id, actor->frame, actor->x, actor->y + 1))
+            MD_DOWN, actor->id, actor->frame, actor->x, actor->y + 1))
       {
         // Apply acceleration
         if (actor->gravityState < 4)
@@ -2637,7 +2651,7 @@ void UpdateAndDrawActors(void)
         if (actor->gravityState == 4)
         {
           if (!CheckWorldCollision(
-            MD_DOWN, actor->id, actor->frame, actor->x, actor->y + 1))
+                MD_DOWN, actor->id, actor->frame, actor->x, actor->y + 1))
           {
             actor->y++;
           }
@@ -2653,13 +2667,17 @@ void UpdateAndDrawActors(void)
         actor->gravityState = 0;
 
         // Conveyor belt movement
-        if (retConveyorBeltCheckResult == 1 && !CheckWorldCollision(
-          MD_LEFT, actor->id, actor->frame, actor->x - 1, actor->y))
+        if (
+          retConveyorBeltCheckResult == 1 &&
+          !CheckWorldCollision(
+            MD_LEFT, actor->id, actor->frame, actor->x - 1, actor->y))
         {
           actor->x--;
         }
-        else if (retConveyorBeltCheckResult == 2 && !CheckWorldCollision(
-          MD_RIGHT, actor->id, actor->frame, actor->x + 1, actor->y))
+        else if (
+          retConveyorBeltCheckResult == 2 &&
+          !CheckWorldCollision(
+            MD_RIGHT, actor->id, actor->frame, actor->x + 1, actor->y))
         {
           actor->x++;
         }
@@ -2757,22 +2775,30 @@ void UpdateAndDrawActors(void)
         {
           if (*hudCurrentMessage >= 'A' && *hudCurrentMessage <= 'T')
           {
-            msgCharValue = ((*hudCurrentMessage - 'A') << 3) +
-              XY_TO_OFFSET(20, 6);
+            msgCharValue =
+              ((*hudCurrentMessage - 'A') << 3) + XY_TO_OFFSET(20, 6);
           }
           else if (*hudCurrentMessage >= 'U' && *hudCurrentMessage <= 'Z')
           {
-            msgCharValue = ((*hudCurrentMessage - 'U') << 3) +
-              XY_TO_OFFSET(17, 24);
+            msgCharValue =
+              ((*hudCurrentMessage - 'U') << 3) + XY_TO_OFFSET(17, 24);
           }
           else
           {
             switch ((int)*hudCurrentMessage)
             {
-              case ',': msgCharValue = XY_TO_OFFSET(23, 24); break;
-              case '.': msgCharValue = XY_TO_OFFSET(24, 24); break;
-              case '!': msgCharValue = XY_TO_OFFSET(25, 24); break;
-              case '?': msgCharValue = XY_TO_OFFSET(26, 24); break;
+              case ',':
+                msgCharValue = XY_TO_OFFSET(23, 24);
+                break;
+              case '.':
+                msgCharValue = XY_TO_OFFSET(24, 24);
+                break;
+              case '!':
+                msgCharValue = XY_TO_OFFSET(25, 24);
+                break;
+              case '?':
+                msgCharValue = XY_TO_OFFSET(26, 24);
+                break;
             }
           }
 
@@ -2791,7 +2817,8 @@ void UpdateAndDrawActors(void)
 
       // When the available width is filled or we've reached a line break,
       // set a delay. The message that was printed so far remains on screen.
-      if (hudMessageCharsPrinted == 38 || !(*hudCurrentMessage) ||
+      if (
+        hudMessageCharsPrinted == 38 || !(*hudCurrentMessage) ||
         *hudCurrentMessage == '*')
       {
         hudMessageDelay = 21;

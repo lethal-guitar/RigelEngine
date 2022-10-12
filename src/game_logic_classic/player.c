@@ -46,10 +46,10 @@ void ReadInput(void)
   {
     // Set input flags based on keyboard state, and check if any keyboard
     // input occured
-    keyboardInput += (
-      inputMoveUp = kbKeyState[kbBindingUp] | kbKeyState[SCANCODE_PGUP]);
-    keyboardInput += (
-      inputMoveDown = kbKeyState[kbBindingDown] | kbKeyState[SCANCODE_PGDOWN]);
+    keyboardInput +=
+      (inputMoveUp = kbKeyState[kbBindingUp] | kbKeyState[SCANCODE_PGUP]);
+    keyboardInput +=
+      (inputMoveDown = kbKeyState[kbBindingDown] | kbKeyState[SCANCODE_PGDOWN]);
     keyboardInput += (inputMoveLeft = kbKeyState[kbBindingLeft]);
     keyboardInput += (inputMoveRight = kbKeyState[kbBindingRight]);
     keyboardInput += (inputJump = kbKeyState[kbBindingJump]);
@@ -126,8 +126,7 @@ void UpdatePlayer_Shooting(void)
     ACT_DUKE_FLAME_SHOT_UP,
     ACT_DUKE_FLAME_SHOT_DOWN,
     ACT_DUKE_FLAME_SHOT_LEFT,
-    ACT_DUKE_FLAME_SHOT_RIGHT
-  };
+    ACT_DUKE_FLAME_SHOT_RIGHT};
 
   const word* shotSpriteMap = SHOT_SPRITE_MAP + plWeapon * 4;
 
@@ -135,8 +134,7 @@ void UpdatePlayer_Shooting(void)
   plRapidFireIsActiveFrame = !plRapidFireIsActiveFrame;
 
   if (
-    plAnimationFrame == 28 ||
-    plAnimationFrame == 5 ||
+    plAnimationFrame == 28 || plAnimationFrame == 5 ||
     plState == PS_RIDING_ELEVATOR)
   {
     // The player can't shoot while pulling up his legs hanging from a pipe
@@ -168,8 +166,7 @@ void UpdatePlayer_Shooting(void)
   // when not shooting, and to alternate it only when the fire button is
   // pressed.
   if (
-    plWeapon == WPN_FLAMETHROWER ||
-    plRapidFireTimeLeft ||
+    plWeapon == WPN_FLAMETHROWER || plRapidFireTimeLeft ||
     plState == PS_USING_SHIP)
   {
     plBlockShooting = plRapidFireIsActiveFrame;
@@ -321,7 +318,7 @@ void UpdatePlayer(void)
   if (plState == PS_AIRLOCK_DEATH_L || plState == PS_AIRLOCK_DEATH_R)
   {
     // [PERF] Missing `static` causes a copy operation here
-    const int AIRLOCK_DEATH_ARC[] = { -2, -2, -1, -1, 0 };
+    const int AIRLOCK_DEATH_ARC[] = {-2, -2, -1, -1, 0};
 
     plPosY += AIRLOCK_DEATH_ARC[plAirlockDeathStep];
 
@@ -424,8 +421,7 @@ void UpdatePlayer(void)
 
           if (plBodyExplosionStep == 10)
           {
-            SpawnEffect(
-              ACT_DUKE_DEATH_PARTICLES, plPosX, plPosY, EM_NONE, 0);
+            SpawnEffect(ACT_DUKE_DEATH_PARTICLES, plPosX, plPosY, EM_NONE, 0);
           }
 
           if (
@@ -471,8 +467,9 @@ void UpdatePlayer(void)
         {
           ++plPosY;
 
-          if (CheckWorldCollision(
-            MD_DOWN, plActorId, plAnimationFrame, plPosX, plPosY + 1) ==
+          if (
+            CheckWorldCollision(
+              MD_DOWN, plActorId, plAnimationFrame, plPosX, plPosY + 1) ==
             CR_COLLISION)
           {
             plAnimationFrame = 32;
@@ -481,8 +478,9 @@ void UpdatePlayer(void)
           {
             ++plPosY;
 
-            if (CheckWorldCollision(
-              MD_DOWN, plActorId, plAnimationFrame, plPosX, plPosY + 1) ==
+            if (
+              CheckWorldCollision(
+                MD_DOWN, plActorId, plAnimationFrame, plPosX, plPosY + 1) ==
               CR_COLLISION)
             {
               plAnimationFrame = 32;
@@ -504,13 +502,16 @@ void UpdatePlayer(void)
       //////////////////////////////////////////////////////////////////////////
 
       // Block input while unlocking a door/force field
-      if (plState == PS_NORMAL && plInteractAnimTicks) { return; }
+      if (plState == PS_NORMAL && plInteractAnimTicks)
+      {
+        return;
+      }
 
       // Attach to ladders
       if (
-        plState != PS_CLIMBING_LADDER &&
-        inputMoveUp &&
-        CheckWorldCollision(MD_UP, plActorId, 36, plPosX, plPosY) == CR_LADDER &&
+        plState != PS_CLIMBING_LADDER && inputMoveUp &&
+        CheckWorldCollision(MD_UP, plActorId, 36, plPosX, plPosY) ==
+          CR_LADDER &&
         (plState != PS_JUMPING || plJumpStep >= 4))
       {
         plState = PS_CLIMBING_LADDER;
@@ -556,17 +557,17 @@ void UpdatePlayer(void)
           }
 
           if (!CheckWorldCollision(
-            MD_LEFT, ACT_DUKES_SHIP_L, 0, plPosX - 1, plPosY))
+                MD_LEFT, ACT_DUKES_SHIP_L, 0, plPosX - 1, plPosY))
           {
             plPosX--;
           }
           else if (CheckWorldCollision(
-            MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                     MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
           {
             plPosY--;
           }
           else if (CheckWorldCollision(
-            MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                     MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
           {
             plPosY++;
           }
@@ -574,17 +575,17 @@ void UpdatePlayer(void)
           if (shipSpeed == 4)
           {
             if (!CheckWorldCollision(
-              MD_LEFT, ACT_DUKES_SHIP_L, 0, plPosX - 1, plPosY))
+                  MD_LEFT, ACT_DUKES_SHIP_L, 0, plPosX - 1, plPosY))
             {
               plPosX--;
             }
             else if (CheckWorldCollision(
-              MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                       MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
             {
               plPosY--;
             }
             else if (CheckWorldCollision(
-              MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                       MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
             {
               plPosY++;
             }
@@ -609,17 +610,17 @@ void UpdatePlayer(void)
           }
 
           if (!CheckWorldCollision(
-            MD_RIGHT, ACT_DUKES_SHIP_R, 0, plPosX + 1, plPosY))
+                MD_RIGHT, ACT_DUKES_SHIP_R, 0, plPosX + 1, plPosY))
           {
             plPosX++;
           }
           else if (CheckWorldCollision(
-            MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                     MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
           {
             plPosY--;
           }
           else if (CheckWorldCollision(
-            MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                     MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
           {
             plPosY++;
           }
@@ -627,17 +628,17 @@ void UpdatePlayer(void)
           if (shipSpeed == 4)
           {
             if (!CheckWorldCollision(
-              MD_RIGHT, ACT_DUKES_SHIP_R, 0, plPosX + 1, plPosY))
+                  MD_RIGHT, ACT_DUKES_SHIP_R, 0, plPosX + 1, plPosY))
             {
               plPosX++;
             }
             else if (CheckWorldCollision(
-              MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                       MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
             {
               plPosY--;
             }
             else if (CheckWorldCollision(
-              MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                       MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
             {
               plPosY++;
             }
@@ -656,7 +657,7 @@ void UpdatePlayer(void)
         if (inputMoveUp)
         {
           if (!CheckWorldCollision(
-            MD_UP, ACT_DUKES_SHIP_R, 0, plPosX, plPosY - 1))
+                MD_UP, ACT_DUKES_SHIP_R, 0, plPosX, plPosY - 1))
           {
             plPosY--;
           }
@@ -665,7 +666,7 @@ void UpdatePlayer(void)
         if (inputMoveDown)
         {
           if (!CheckWorldCollision(
-            MD_DOWN, ACT_DUKES_SHIP_R, 0, plPosX, plPosY + 1))
+                MD_DOWN, ACT_DUKES_SHIP_R, 0, plPosX, plPosY + 1))
           {
             plPosY++;
           }
@@ -713,8 +714,7 @@ void UpdatePlayer(void)
 
         // Horizontal movement
         if (
-          (inputMoveLeft || inputMoveRight) &&
-          plState != PS_RECOVERING &&
+          (inputMoveLeft || inputMoveRight) && plState != PS_RECOVERING &&
           plAnimationFrame != 28)
         {
           if (plJumpStep == 1 && plState == PS_JUMPING)
@@ -737,14 +737,14 @@ void UpdatePlayer(void)
             if (
               plActorId == ACT_DUKE_R &&
               !(hadCollision = CheckWorldCollision(
-                MD_RIGHT, ACT_DUKE_R, 0, plPosX + 1, plPosY - 1)))
+                  MD_RIGHT, ACT_DUKE_R, 0, plPosX + 1, plPosY - 1)))
             {
               plPosX++;
             }
             else if (
               plActorId == ACT_DUKE_L &&
               !(hadCollision = CheckWorldCollision(
-                MD_LEFT, ACT_DUKE_L, plAnimationFrame, plPosX, plPosY)))
+                  MD_LEFT, ACT_DUKE_L, plAnimationFrame, plPosX, plPosY)))
             {
               plPosX--;
             }
@@ -754,14 +754,14 @@ void UpdatePlayer(void)
             if (
               plActorId == ACT_DUKE_R &&
               !(hadCollision = CheckWorldCollision(
-                MD_RIGHT, ACT_DUKE_R, 0, plPosX + 1, plPosY)))
+                  MD_RIGHT, ACT_DUKE_R, 0, plPosX + 1, plPosY)))
             {
               plPosX++;
             }
             else if (
               plActorId == ACT_DUKE_L &&
               !(hadCollision = CheckWorldCollision(
-                MD_LEFT, ACT_DUKE_L, 0, plPosX - 1, plPosY)))
+                  MD_LEFT, ACT_DUKE_L, 0, plPosX - 1, plPosY)))
             {
               plPosX--;
             }
@@ -769,9 +769,7 @@ void UpdatePlayer(void)
         } // end horizontal movement
 
         // Activate flamethrower jetpack
-        if (
-          plWeapon == WPN_FLAMETHROWER &&
-          inputMoveDown & inputFire)
+        if (plWeapon == WPN_FLAMETHROWER && inputMoveDown & inputFire)
         {
           plState = PS_USING_JETPACK;
           plAnimationFrame = 37;
@@ -789,8 +787,8 @@ void UpdatePlayer(void)
         {
           if (inputMoveDown & inputFire && plWeapon == WPN_FLAMETHROWER)
           {
-            byte collisionCheck = CheckWorldCollision(
-              MD_UP, ACT_DUKE_L, 37, plPosX, plPosY - 1);
+            byte collisionCheck =
+              CheckWorldCollision(MD_UP, ACT_DUKE_L, 37, plPosX, plPosY - 1);
             if (collisionCheck != CR_COLLISION)
             {
               plPosY--;
@@ -807,7 +805,7 @@ void UpdatePlayer(void)
           }
         }
 
-updateNormal:
+      updateNormal:
         if (plState == PS_NORMAL)
         {
           register word collisionCheck;
@@ -820,7 +818,7 @@ updateNormal:
           if (
             inputJump && !plBlockJumping &&
             CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1) !=
-            CR_COLLISION)
+              CR_COLLISION)
           {
             plBlockJumping = true;
             PlaySound(SND_DUKE_JUMPING);
@@ -830,8 +828,8 @@ updateNormal:
             goto updateJumping;
           }
 
-          collisionCheck = CheckWorldCollision(
-            MD_DOWN, plActorId, 0, plPosX, plPosY + 1);
+          collisionCheck =
+            CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1);
 
           if (!collisionCheck || collisionCheck == CR_LADDER)
           {
@@ -867,19 +865,20 @@ updateNormal:
           }
         }
 
-updateHanging:
+      updateHanging:
         if (plState == PS_HANGING)
         {
           word collCheck;
 
-          if (CheckWorldCollision(
-            MD_UP, plActorId, 0, plPosX, plPosY) == CR_CLIMBABLE)
+          if (
+            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY) ==
+            CR_CLIMBABLE)
           {
             plPosY++;
           }
 
-          collCheck = CheckWorldCollision(
-            MD_UP, plActorId, 0, plPosX, plPosY - 1);
+          collCheck =
+            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
 
           if (!inputJump && plBlockJumping)
           {
@@ -941,16 +940,16 @@ updateHanging:
 
         if (plState == PS_BLOWN_BY_FAN)
         {
-          byte collisionCheck = CheckWorldCollision(
-            MD_UP, plActorId, 0, plPosX, plPosY - 1);
+          byte collisionCheck =
+            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
 
           if (collisionCheck != CR_COLLISION)
           {
             plPosY--;
           }
 
-          collisionCheck = CheckWorldCollision(
-            MD_UP, plActorId, 0, plPosX, plPosY - 1);
+          collisionCheck =
+            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
 
           if (collisionCheck != CR_COLLISION)
           {
@@ -958,7 +957,7 @@ updateHanging:
           }
         }
 
-updateFalling:
+      updateFalling:
         if (plState == PS_FALLING)
         {
           if (!inputJump && plBlockJumping)
@@ -973,8 +972,10 @@ updateFalling:
               plFallingSpeed++;
             }
 
-            if (plFallingSpeed && CheckWorldCollision(
-              MD_UP, plActorId, 0, plPosX, plPosY) == CR_CLIMBABLE)
+            if (
+              plFallingSpeed &&
+              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY) ==
+                CR_CLIMBABLE)
             {
               plAnimationFrame = 20;
               plState = PS_HANGING;
@@ -985,8 +986,8 @@ updateFalling:
             }
 
             if (
-              CheckWorldCollision(
-                MD_DOWN, plActorId, 0, plPosX, plPosY + 1) == CR_COLLISION)
+              CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1) ==
+              CR_COLLISION)
             {
               if (plFallingSpeed == 4)
               {
@@ -1012,8 +1013,9 @@ updateFalling:
 
           if (plFallingSpeed == 4)
           {
-            if (CheckWorldCollision(
-              MD_UP, plActorId, 0, plPosX, plPosY) == CR_CLIMBABLE)
+            if (
+              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY) ==
+              CR_CLIMBABLE)
             {
               plAnimationFrame = 20;
               plState = PS_HANGING;
@@ -1024,8 +1026,8 @@ updateFalling:
             }
 
             if (
-              CheckWorldCollision(
-                MD_DOWN, plActorId, 0, plPosX, plPosY + 1) == CR_COLLISION)
+              CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1) ==
+              CR_COLLISION)
             {
               if (plFallingSpeed == 4)
               {
@@ -1050,10 +1052,10 @@ updateFalling:
           }
         }
 
-updateJumping:
+      updateJumping:
         if (plState == PS_JUMPING)
         {
-          static byte PL_JUMP_ARC[] = { 0, 2, 2, 1, 1, 1, 0, 0, 0 };
+          static byte PL_JUMP_ARC[] = {0, 2, 2, 1, 1, 1, 0, 0, 0};
 
           register word collisionCheck;
 
@@ -1064,8 +1066,8 @@ updateJumping:
 
           if (plJumpStep && plJumpStep < 3)
           {
-            collisionCheck = CheckWorldCollision(
-              MD_UP, plActorId, 0, plPosX, plPosY - 2);
+            collisionCheck =
+              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 2);
 
             if (collisionCheck == CR_CLIMBABLE)
             {
@@ -1087,8 +1089,8 @@ updateJumping:
 
           if (plJumpStep < 9)
           {
-            collisionCheck = CheckWorldCollision(
-              MD_UP, plActorId, 0, plPosX, plPosY - 1);
+            collisionCheck =
+              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
 
             if (collisionCheck == CR_CLIMBABLE)
             {
@@ -1122,11 +1124,8 @@ updateJumping:
               }
 
               if (
-                plJumpStep == 2 &&
-                !doFlip &&
-                plAttachedSpider1 == 0 &&
-                plAttachedSpider2 == 0 &&
-                plAttachedSpider3 == 0)
+                plJumpStep == 2 && !doFlip && plAttachedSpider1 == 0 &&
+                plAttachedSpider2 == 0 && plAttachedSpider3 == 0)
               {
                 doFlip = !(RandomNumber() % 6);
 
@@ -1166,11 +1165,11 @@ updateJumping:
           goto updateFalling;
         }
 
-updateClimbingLadder:
+      updateClimbingLadder:
         if (plState == PS_CLIMBING_LADDER)
         {
           // [PERF] Missing `static` causes a copy operation here
-          const byte LADDER_CLIMB_ANIM[] = { 35, 36};
+          const byte LADDER_CLIMB_ANIM[] = {35, 36};
 
           plFallingSpeed = 0;
 
@@ -1211,22 +1210,23 @@ updateClimbingLadder:
 
             if (plPosY % 2)
             {
-              plAnimationFrame = LADDER_CLIMB_ANIM[
-                plLadderAnimationStep = !plLadderAnimationStep];
+              plAnimationFrame = LADDER_CLIMB_ANIM
+                [plLadderAnimationStep = !plLadderAnimationStep];
             }
           }
 
           if (inputMoveDown)
           {
-            if (CheckWorldCollision(
-              MD_DOWN, plActorId, 36, plPosX, plPosY + 1) == CR_LADDER)
+            if (
+              CheckWorldCollision(MD_DOWN, plActorId, 36, plPosX, plPosY + 1) ==
+              CR_LADDER)
             {
               plPosY++;
 
               if (plPosY % 2)
               {
-                plAnimationFrame = LADDER_CLIMB_ANIM[
-                  plLadderAnimationStep = !plLadderAnimationStep];
+                plAnimationFrame = LADDER_CLIMB_ANIM
+                  [plLadderAnimationStep = !plLadderAnimationStep];
               }
             }
             else
@@ -1245,7 +1245,7 @@ updateClimbingLadder:
     ////////////////////////////////////////////////////////////////////////////
     // Shooting
     ////////////////////////////////////////////////////////////////////////////
-updateShooting:
+  updateShooting:
     if (inputFire)
     {
       if (!retConveyorBeltCheckResult)
@@ -1288,8 +1288,8 @@ updateShooting:
     {
       gmCameraPosX--;
     }
-    else if (gmCameraPosX < mapWidth - VIEWPORT_WIDTH &&
-      plPosX - gmCameraPosX > 13)
+    else if (
+      gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 13)
     {
       gmCameraPosX++;
     }
@@ -1298,8 +1298,8 @@ updateShooting:
     {
       gmCameraPosX--;
     }
-    else if (gmCameraPosX < mapWidth - VIEWPORT_WIDTH &&
-      plPosX - gmCameraPosX > 13)
+    else if (
+      gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 13)
     {
       gmCameraPosX++;
     }
@@ -1315,13 +1315,13 @@ updateShooting:
         gmCameraPosX--;
       }
     }
-    else if (gmCameraPosX < mapWidth - VIEWPORT_WIDTH &&
-      plPosX - gmCameraPosX > 18)
+    else if (
+      gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 18)
     {
       gmCameraPosX++;
 
-      if (gmCameraPosX < mapWidth - VIEWPORT_WIDTH &&
-        plPosX - gmCameraPosX > 18)
+      if (
+        gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 18)
       {
         gmCameraPosX++;
       }
@@ -1330,12 +1330,8 @@ updateShooting:
 
   // Vertical movement up, manual (normal state)
   if (
-    plState == PS_NORMAL &&
-    inputMoveUp &&
-    gmCameraPosY != 0 &&
-    plPosY - gmCameraPosY < 19 &&
-    !plBlockLookingUp &&
-    !plOnElevator)
+    plState == PS_NORMAL && inputMoveUp && gmCameraPosY != 0 &&
+    plPosY - gmCameraPosY < 19 && !plBlockLookingUp && !plOnElevator)
   {
     if (gmCameraPosY < 2)
     {
@@ -1354,10 +1350,8 @@ updateShooting:
 
   // Vertical movement, automated
   if (
-    plState == PS_USING_SHIP ||
-    plState == PS_CLIMBING_LADDER ||
-    plState == PS_USING_JETPACK ||
-    plState == PS_BLOWN_BY_FAN ||
+    plState == PS_USING_SHIP || plState == PS_CLIMBING_LADDER ||
+    plState == PS_USING_JETPACK || plState == PS_BLOWN_BY_FAN ||
     plState == PS_RIDING_ELEVATOR ||
     (retConveyorBeltCheckResult && !inputMoveUp && !inputMoveDown))
   {
@@ -1373,8 +1367,8 @@ updateShooting:
       }
 
       if (
-        plState == PS_RIDING_ELEVATOR &&
-        gmCameraPosY < mapBottom - 19 && plPosY - gmCameraPosY > 12)
+        plState == PS_RIDING_ELEVATOR && gmCameraPosY < mapBottom - 19 &&
+        plPosY - gmCameraPosY > 12)
       {
         gmCameraPosY++;
       }
@@ -1384,7 +1378,8 @@ updateShooting:
     {
       gmCameraPosY--;
     }
-    else if (gmCameraPosY < mapBottom - VIEWPORT_HEIGHT && plPosY - gmCameraPosY > 12)
+    else if (
+      gmCameraPosY < mapBottom - VIEWPORT_HEIGHT && plPosY - gmCameraPosY > 12)
     {
       gmCameraPosY++;
     }
@@ -1393,8 +1388,7 @@ updateShooting:
   {
     // Vertical movement down, manual
     if (
-      inputMoveDown &&
-      (plState == PS_NORMAL || plState == PS_HANGING) &&
+      inputMoveDown && (plState == PS_NORMAL || plState == PS_HANGING) &&
       !plOnElevator)
     {
       if (plState == PS_NORMAL && vertScrollCooldown)
