@@ -91,9 +91,9 @@ typedef struct
 
 
 // Functions from unit1.c
-byte pascal DN2_inportb(int address);
-void pascal DN2_outportb(int address, byte value);
-void pascal DN2_outport(int address, word value);
+byte pascal DN2_inportb(int16_t address);
+void pascal DN2_outportb(int16_t address, byte value);
+void pascal DN2_outport(int16_t address, word value);
 
 void pascal CopyStringUppercased(const char far* src, char far* dest);
 bool pascal StringStartsWith(const char far* string, const char far* prefix);
@@ -107,15 +107,15 @@ void far* MM_PushChunk(word size, ChunkType type);
 void pascal MM_PopChunk(ChunkType type);
 void pascal MM_PopChunks(ChunkType type);
 
-int pascal OpenFileRW(char* name);
-int pascal OpenFileW(char* name);
-void pascal WriteWord(word value, int fd);
-word pascal ReadWord(int fd);
-void pascal CloseFile(int fd);
+int16_t pascal OpenFileRW(char* name);
+int16_t pascal OpenFileW(char* name);
+void pascal WriteWord(word value, int16_t fd);
+word pascal ReadWord(int16_t fd);
+void pascal CloseFile(int16_t fd);
 char far* MakeFilename(char far* prefix, byte number, char far* postfix);
 
 void LoadGroupFileDict(void);
-dword pascal OpenAssetFile(const char far* name, int* pOutFd);
+dword pascal OpenAssetFile(const char far* name, int16_t* pOutFd);
 word pascal GetAssetFileSize(const char far* name);
 void pascal LoadAssetFile(const char far* name, void far* buffer);
 void pascal LoadAssetFilePart(
@@ -142,7 +142,7 @@ void RestoreTimerInterrupt(void);
 void pascal WaitTicks(word ticks);
 
 void pascal PlayMusic(char far* filename, void far* buffer);
-void pascal StartMusicPlayback(int far* data);
+void pascal StartMusicPlayback(int16_t far* data);
 void StopMusic(void);
 void ResetAdLibMusicChannels(void);
 
@@ -182,7 +182,7 @@ void pascal DrawFullscreenImage(char far* filename);
 void pascal DrawSaveSlotNames(word selectedIndex);
 void pascal DrawKeyBindings(void);
 void pascal DrawCheckboxes(byte x, byte* checkboxData);
-void pascal UnfoldMessageBoxFrame(int top, int height, int width);
+void pascal UnfoldMessageBoxFrame(int16_t top, int16_t height, int16_t width);
 void ShowBonusScreen(void);
 bool pascal RunSaveGameNameEntry(word index);
 void pascal DrawHighScoreList(byte episode);
@@ -203,7 +203,7 @@ void pascal HUD_DrawBackground(void);
 void pascal HUD_DrawHealth(word health);
 void pascal HUD_DrawLowHealthAnimation(word health);
 void pascal HUD_DrawAmmo(word ammo);
-void pascal HUD_DrawWeapon(int weapon);
+void pascal HUD_DrawWeapon(int16_t weapon);
 void pascal HUD_DrawInventory(void);
 void pascal GiveScore(word score);
 void pascal AddInventoryItem(word item);
@@ -222,13 +222,13 @@ void pascal DecompressRLE(byte far* src, byte far* dest);
 void ShowTextScreen(const char far* filename);
 void ShowVGAScreen(const char far* filename);
 
-bool PlayVideo(char far* filename, word videoType, int numRepetitions);
+bool PlayVideo(char far* filename, word videoType, int16_t numRepetitions);
 
 
 // Functions from unit2.c
-int DN2_abs(int value);
+int16_t DN2_abs(int16_t value);
 
-void pascal PlaySound(int id);
+void pascal PlaySound(int16_t id);
 
 void pascal DrawSprite(word id, word frame, word x, word y);
 void pascal DrawFontSprite(word charIndex, word x, word y, word plane);

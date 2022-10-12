@@ -41,7 +41,7 @@ live for the same number of frames.
 /** Initialize the particle system */
 void pascal InitParticleSystem(void)
 {
-  int i;
+  int16_t i;
 
   for (i = 0; i < NUM_PARTICLE_GROUPS; i++)
   {
@@ -52,7 +52,7 @@ void pascal InitParticleSystem(void)
 
 
 /** Initialize particle group state with randomized positions & velocities */
-static void pascal FillParticleGroup(int index, int direction)
+static void pascal FillParticleGroup(int16_t index, int16_t direction)
 {
   sbyte a;
   sbyte b;
@@ -98,7 +98,7 @@ static void pascal FillParticleGroup(int index, int direction)
 /** Erase all currently active particles */
 void pascal ClearParticles(void)
 {
-  register int i;
+  register int16_t i;
 
   for (i = 0; i < NUM_PARTICLE_GROUPS; i++)
   {
@@ -122,7 +122,7 @@ void pascal ClearParticles(void)
  */
 void pascal SpawnParticles(word x, word y, sbyte direction, byte color)
 {
-  register int i;
+  register int16_t i;
 
   for (i = 0; i < NUM_PARTICLE_GROUPS; i++)
   {
@@ -143,7 +143,7 @@ void pascal SpawnParticles(word x, word y, sbyte direction, byte color)
 
 
 /** Returns true if the given pixel position is within the viewport area */
-static bool pascal IsPointVisible(int x, int y)
+static bool pascal IsPointVisible(int16_t x, int16_t y)
 {
   if (x >= 8 && x < 264 && y >= 8 && y < 160)
   {

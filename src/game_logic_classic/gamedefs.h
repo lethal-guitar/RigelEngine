@@ -278,7 +278,7 @@ typedef struct
   byte drawStyle;
 
   // How much damage the actor can take before being destroyed
-  int health;
+  int16_t health;
 
   // Actor-specific variables. What exactly these represent is up to the
   // interpretation of the behavior code, i.e. update function, damage handler
@@ -297,7 +297,10 @@ typedef struct
 
 
 #define HAS_TILE_ATTRIBUTE(tileIndex, attribute)                               \
-  (int)(((tileIndex)&0x8000) ? 0 : (gfxTilesetAttributes[(tileIndex) >> 3] & (attribute)))
+  (int16_t)(                                                                   \
+    ((tileIndex)&0x8000)                                                       \
+      ? 0                                                                      \
+      : (gfxTilesetAttributes[(tileIndex) >> 3] & (attribute)))
 
 #define SHAKE_SCREEN(amount) SetScreenShift(amount)
 

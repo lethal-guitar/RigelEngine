@@ -414,14 +414,14 @@ void pascal Act_ItemBox(word handle)
       };
       // clang-format on
 
-      register int i;
+      register int16_t i;
 
       for (i = 0; i < 8; i += 2)
       {
         SpawnEffect(FX_LIST[i], state->x, state->y, FX_LIST[i + 1], 0);
       }
 
-      if ((int)state->var2 == -1) // box is empty
+      if ((int16_t)state->var2 == -1) // box is empty
       {
         state->deleted = true;
         return;
@@ -444,7 +444,7 @@ void pascal Act_ItemBox(word handle)
       };
       // clang-format on
 
-      register int i;
+      register int16_t i;
 
       for (i = 0; i < 10; i += 2)
       {
@@ -544,7 +544,7 @@ void pascal Act_ItemBox(word handle)
         // [NOTE] This code is basically the same as in
         // HandleActorShotCollision(), a dedicated function would've been good
         // to reduce code duplication.
-        register int i;
+        register int16_t i;
         bool spawnFailedLeft = false;
         bool spawnFailedRight = false;
 
@@ -607,7 +607,7 @@ void pascal Act_ItemBox(word handle)
     case ACT_SODA_6_PACK:
       if (state->var3) // has the 6-pack been shot?
       {
-        register int i;
+        register int16_t i;
 
         PLAY_EXPLOSION_SOUND();
         state->deleted = true;
@@ -641,7 +641,7 @@ void pascal Act_FlameThrowerBot(word handle)
   ActorState* state = gmActorStates + handle;
 
   // Randomly decide to stop and shoot fire
-  if (!(((int)RandomNumber()) & 127))
+  if (!(((int16_t)RandomNumber()) & 127))
   {
     state->var2 = 16;
   }
@@ -1193,7 +1193,7 @@ void pascal Act_MiniNuke(word handle)
 
     if (state->id != ACT_MINI_NUKE_SMALL)
     {
-      register int i;
+      register int16_t i;
 
       for (i = 4; i < 20; i += 4)
       {
@@ -1498,7 +1498,7 @@ void pascal Act_Snake(word handle)
   {
     // [PERF] Missing `static` causes a copy operation here
     // clang-format off
-    int DEBRIS_SPEC[] = { 3,
+    int16_t DEBRIS_SPEC[] = { 3,
        0,  0, EM_NONE, 0,
       -1, -2, EM_NONE, 2,
        1, -3, EM_NONE, 4
@@ -1763,7 +1763,7 @@ void pascal Act_BrokenMissile(word handle)
   static const byte ANIM_SEQ[] = {1, 2, 3, 2, 3, 4, 3};
 
   register ActorState* state = gmActorStates + handle;
-  register int i;
+  register int16_t i;
 
   if (!state->var1)
   {
@@ -2511,7 +2511,7 @@ void pascal Act_SlidingDoorVertical(word handle)
 void pascal Act_SlidingDoorHorizontal(word handle)
 {
   register ActorState* state = gmActorStates + handle;
-  register int i;
+  register int16_t i;
 
   if (!state->scoreGiven)
   {
@@ -2996,7 +2996,7 @@ void pascal Act_SuperForceField(word handle)
 void pascal Act_IntactMissile(word handle)
 {
   register ActorState* state = gmActorStates + handle;
-  register int i;
+  register int16_t i;
 
   if (state->var1) // launching/flying?
   {
@@ -3205,8 +3205,8 @@ void pascal Act_GrabberClaw(word handle)
 void pascal Act_FloatingLaserBot(word handle)
 {
   ActorState* state = gmActorStates + handle;
-  int xDiff;
-  int yDiff;
+  int16_t xDiff;
+  int16_t yDiff;
 
   if (state->var1 < 10) // Waiting
   {
@@ -3777,7 +3777,7 @@ void pascal Act_SpikedGreenCreature(word handle)
     // Shell burst animation
     if (state->var1 == 15)
     {
-      register int i;
+      register int16_t i;
       word effectId;
 
       if (state->id == ACT_GREEN_CREATURE_L)
@@ -3827,7 +3827,7 @@ void pascal Act_SpikedGreenCreature(word handle)
         // A list of entries: (anim frame, x offset, y offset). 0xFF terminates
         // the list.
         // [PERF] Missing `static` causes a copy operation here
-        const int JUMP_SEQUENCE[] = {
+        const int16_t JUMP_SEQUENCE[] = {
           3, 0, 0, 3, 0, 0, 4, 2, -2, 4, 2, -1, 4, 2, 0, 5, 2, 0, 0xFF};
 
         if (state->var1 == 30)
@@ -4194,7 +4194,7 @@ void pascal Act_RedBird(word handle)
 void pascal Act_Elevator(word handle)
 {
   register ActorState* state = gmActorStates + handle;
-  register int i;
+  register int16_t i;
 
   if (
     plState == PS_DYING || plState == PS_AIRLOCK_DEATH_L ||
@@ -4698,7 +4698,7 @@ void pascal Act_WindBlownSpiderGenerator(word handle)
   if (state->y > plPosY && ((word)RandomNumber() % 2) && gfxCurrentDisplayPage)
   {
     SpawnEffect(
-      ACT_WINDBLOWN_SPIDER_GENERATOR + (int)RandomNumber() % 3,
+      ACT_WINDBLOWN_SPIDER_GENERATOR + (int16_t)RandomNumber() % 3,
       gmCameraPosX + (VIEWPORT_WIDTH - 1),
       gmCameraPosY + (word)RandomNumber() % 16,
 
@@ -5664,7 +5664,7 @@ void pascal Act_Boss4Projectile(word handle)
 void pascal Act_SmallFlyingShip(word handle)
 {
   register ActorState* state = gmActorStates + handle;
-  register int i;
+  register int16_t i;
 
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {0, 1, 2, 1};

@@ -174,17 +174,17 @@ void pascal UpdateAndDrawGame(void)
  * game's version of sloped surfaces, which are actually stairs that are made
  * to look like a slope with the help of masked (partially transparent) tiles.
  */
-int pascal
+int16_t pascal
   CheckWorldCollision(word direction, word actorId, word frame, word x, word y)
 {
-  register int i;
+  register int16_t i;
   register word height;
   word far* tileData;
   bool isPlayer = false;
   bool atStairStep = false;
   word width;
   word offset;
-  int bboxTop;
+  int16_t bboxTop;
   word attributes;
 
   retConveyorBeltCheckResult = CB_NONE;
@@ -535,7 +535,7 @@ void ResetEffectsAndPlayerShots(void)
 /** Erase map data and spawn flying debris for the specified region */
 void pascal Map_DestroySection(word left, word top, word right, word bottom)
 {
-  int i;
+  int16_t i;
   word x;
   word y;
   word tileValue;
@@ -593,7 +593,7 @@ void pascal Map_DestroySection(word left, word top, word right, word bottom)
 void UpdateAndDrawTileDebris(void)
 {
   // [PERF] Missing `static` causes a copy operation here
-  const int Y_MOVEMENT[] = {-3, -3, -2, -2, -1, 0, 0, 1, 2, 2, 3};
+  const int16_t Y_MOVEMENT[] = {-3, -3, -2, -2, -1, 0, 0, 1, 2, 2, 3};
 
   register word i;
   register word size;
@@ -735,7 +735,7 @@ bool pascal SpawnEffect(word id, word x, word y, word type, word spawnDelay)
  *
  * See game3.c for various examples of how this function is used.
  */
-void pascal SpawnDestructionEffects(word handle, int* spec, word actorId)
+void pascal SpawnDestructionEffects(word handle, int16_t* spec, word actorId)
 {
   register ActorState* actor = gmActorStates + handle;
   word entriesLeft = *spec;
@@ -829,7 +829,7 @@ void pascal SpawnBurnEffect(word effectId, word sourceId, word x, word y)
 void UpdateAndDrawEffects(void)
 {
   register EffectState* state;
-  register int j;
+  register int16_t j;
   word i;
 
   for (i = 0; i < MAX_NUM_EFFECTS; i++)
@@ -890,8 +890,8 @@ void UpdateAndDrawEffects(void)
         // bounding box, randomly placed.
         SpawnEffect(
           state->framesToLive, // ID to spawn
-          state->x + (int)RandomNumber() % state->spawnDelay,
-          state->y - (int)RandomNumber() % state->movementStep,
+          state->x + (int16_t)RandomNumber() % state->spawnDelay,
+          state->y - (int16_t)RandomNumber() % state->movementStep,
           EM_RISE_UP,
           0);
       }
@@ -957,7 +957,7 @@ void UpdateAndDrawEffects(void)
                 state->x + TILE_BURN_OFFSETS[j] - 1,
                 state->y + TILE_BURN_OFFSETS[j + 1] + 1,
                 EM_NONE,
-                (int)RandomNumber() & 3);
+                (int16_t)RandomNumber() & 3);
             }
           }
         }

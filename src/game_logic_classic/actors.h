@@ -318,9 +318,9 @@ to define a struct type and cast the actor info data to that type:
 typedef struct
 {
   word numFrames;
-  int drawIndex;
-  int drawOffsetX;
-  int drawOffsetY;
+  int16_t drawIndex;
+  int16_t drawOffsetX;
+  int16_t drawOffsetY;
   word height;
   word width;
   dword dataFileOffset;
@@ -334,9 +334,9 @@ words. We don't know what the actual code looked like, but it's quite likely
 that some sort of macros were used to make things a little easier.
 */
 #define AINFO_NUM_FRAMES(offset) *(gfxActorInfoData + offset)
-#define AINFO_DRAW_INDEX(offset) (int)*(gfxActorInfoData + offset + 1)
-#define AINFO_X_OFFSET(offset) (int)*(gfxActorInfoData + offset + 2)
-#define AINFO_Y_OFFSET(offset) (int)*(gfxActorInfoData + offset + 3)
+#define AINFO_DRAW_INDEX(offset) (int16_t) * (gfxActorInfoData + offset + 1)
+#define AINFO_X_OFFSET(offset) (int16_t) * (gfxActorInfoData + offset + 2)
+#define AINFO_Y_OFFSET(offset) (int16_t) * (gfxActorInfoData + offset + 3)
 #define AINFO_HEIGHT(offset) *(gfxActorInfoData + offset + 4)
 #define AINFO_WIDTH(offset) *(gfxActorInfoData + offset + 5)
 #define AINFO_DATA_OFFSET(offset)                                              \

@@ -75,7 +75,7 @@ done just by specifying the chunk type, not the allocated pointer.
  */
 bool MM_Init(void)
 {
-  int i;
+  int16_t i;
 
   // Reset the per-chunk bookkeeping data.
   //

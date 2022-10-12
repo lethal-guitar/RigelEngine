@@ -346,7 +346,7 @@ bool pascal Boss3_IsTouchingPlayer(word handle)
 void pascal UpdateActorPlayerCollision(word handle)
 {
   ActorState* state = gmActorStates + handle;
-  int i;
+  int16_t i;
 
   if (plState == PS_DYING)
   {
@@ -1328,10 +1328,10 @@ bool pascal DamageActor(word damage, word handle)
  * It primarily defines what kind of effects (explosions, particles, debris) to
  * trigger when an actor is destroyed by the player.
  */
-void pascal HandleActorShotCollision(int damage, word handle)
+void pascal HandleActorShotCollision(int16_t damage, word handle)
 {
   register ActorState* state = gmActorStates + handle;
-  register int i;
+  register int16_t i;
 
   if (!damage)
   {
@@ -1403,7 +1403,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
       if (DamageActor(damage, handle))
       {
         // clang-format off
-        int DEBRIS_SPEC[] = { 5,
+        int16_t DEBRIS_SPEC[] = { 5,
           0, -6, EM_FLY_UP, 0,
           0, -5, EM_FLY_LEFT, 1,
           0, -4, EM_FLY_RIGHT, 0,
@@ -1584,7 +1584,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
           state->id == ACT_SLIME_BLOB ||
           state->id == ACT_UGLY_GREEN_BIRD)
         {
-          int DEBRIS_SPEC[] = { 6,
+          int16_t DEBRIS_SPEC[] = { 6,
             1, 2, EM_FLY_UP, 0,
             0, 0, EM_FLY_UPPER_RIGHT, 1,
             -1, 1, EM_FLY_UPPER_LEFT, 2,
@@ -1802,7 +1802,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
       if (DamageActor(damage, handle))
       {
         // clang-format off
-        int DEBRIS_SPEC[] = { 3,
+        int16_t DEBRIS_SPEC[] = { 3,
            0,  0, EM_NONE, 0,
           -1, -2, EM_NONE, 2,
            1, -3, EM_NONE, 4,
@@ -1981,13 +1981,13 @@ void pascal HandleActorShotCollision(int damage, word handle)
  *
  * TODO: Document the allowStairStepping flag
  */
-int pascal ApplyWorldCollision(word handle, word direction)
+int16_t pascal ApplyWorldCollision(word handle, word direction)
 {
   register ActorState* actor = gmActorStates + handle;
 
   if (direction == MD_UP || direction == MD_DOWN)
   {
-    register int result = CheckWorldCollision(
+    register int16_t result = CheckWorldCollision(
       direction, actor->id, actor->frame, actor->x, actor->y);
 
     if (result)
@@ -2114,7 +2114,7 @@ bool pascal PlayerInRange(word handle, word distance)
  */
 void pascal SpawnActor(word id, word x, word y)
 {
-  int i;
+  int16_t i;
 
   // First, see if there's a free slot (actor that was deleted), and use it if
   // we find one

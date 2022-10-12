@@ -172,7 +172,7 @@ void UpdateMovingMapParts(void)
             SHAKE_SCREEN(2);
             SpawnEffect(
               ACT_FLAME_FX,
-              left + (int)RandomNumber() % (right - left),
+              left + (int16_t)RandomNumber() % (right - left),
               bottom + 1,
               EM_RISE_UP,
               0);

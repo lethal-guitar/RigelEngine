@@ -45,7 +45,7 @@ layout, so I made all of them globals.
 
 
 word uiMessageBoxShift;
-int uiProgressBarState;
+int16_t uiProgressBarState;
 word uiProgressBarTicksElapsed;
 word uiProgressBarStepDelay;
 
@@ -67,7 +67,7 @@ byte debugSelectedFunction;
 byte debugLevelToWarpTo;
 
 bool gmIsTeleporting;
-int plCollectedLetters;
+int16_t plCollectedLetters;
 word gmTeleportTargetPosX;
 word gmTeleportTargetPosY;
 
@@ -267,7 +267,7 @@ dword unused2;
 word gmCloakPickupPosX;
 word gmCloakPickupPosY;
 
-int far* sndPreBossMusicData;
+int16_t far* sndPreBossMusicData;
 word sndOriginalMusicSize;
 
 word gmExplodingSectionLeft;
@@ -286,7 +286,7 @@ word uiMenuCursorPos;
 byte uiMenuState;
 byte uiCurrentMenuId;
 
-int demoFileFd;
+int16_t demoFileFd;
 word demoFramesProcessed;
 bool demoIsPlaying;
 
@@ -310,7 +310,7 @@ byte fsGroupFileDict[4000];
 
 char* fsNameForErrorReport;
 
-int flicFrameDelay;
+int16_t flicFrameDelay;
 
 // [PERF] only 412 bytes are needed, but the array is of type dword and thus
 // uses 412*4 = 1648 bytes.  Most likely done by accident, maybe the type was
@@ -321,10 +321,10 @@ byte sndAudioData[6069];
 
 dword sysFastTicksElapsed;
 
-int jsThresholdRight;
-int jsThresholdLeft;
-int jsThresholdDown;
-int jsThresholdUp;
+int16_t jsThresholdRight;
+int16_t jsThresholdLeft;
+int16_t jsThresholdDown;
+int16_t jsThresholdUp;
 
 word gfxPaletteForFade[16 * 3];
 
@@ -350,13 +350,13 @@ ParticleGroup psParticleGroups[NUM_PARTICLE_GROUPS];
 
 long musicTicksElapsed;
 bool musicIsPlaying;
-int far* musicDataStart;
-int far* musicData;
-int musicDataLeft;
-int musicDataSize;
+int16_t far* musicDataStart;
+int16_t far* musicData;
+int16_t musicDataLeft;
+int16_t musicDataSize;
 long musicNextEventTime;
 InterruptHandler sysSavedTimerIntHandler;
 
 char tempFilename[20];
-int flicNextDelay;
+int16_t flicNextDelay;
 bool sysIsSecondTick;

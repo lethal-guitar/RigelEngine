@@ -242,7 +242,7 @@ void UpdatePlayer(void)
   if (plState == PS_AIRLOCK_DEATH_L || plState == PS_AIRLOCK_DEATH_R)
   {
     // [PERF] Missing `static` causes a copy operation here
-    const int AIRLOCK_DEATH_ARC[] = {-2, -2, -1, -1, 0};
+    const int16_t AIRLOCK_DEATH_ARC[] = {-2, -2, -1, -1, 0};
 
     plPosY += AIRLOCK_DEATH_ARC[plAirlockDeathStep];
 
