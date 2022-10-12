@@ -1408,6 +1408,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
     case ACT_EYEBALL_THROWER_R:
       if (DamageActor(damage, handle))
       {
+        // clang-format off
         int DEBRIS_SPEC[] = { 5,
           0, -6, EM_FLY_UP, 0,
           0, -5, EM_FLY_LEFT, 1,
@@ -1415,6 +1416,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
           0, -3, EM_FLY_UPPER_LEFT, 1,
           0, -1, EM_FLY_UP, 0
         };
+        // clang-format on
 
         PlaySound(SND_BIOLOGICAL_ENEMY_DESTROYED);
         state->deleted = true;
@@ -1581,6 +1583,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         SpawnBurnEffect(ACT_FLAME_FX, state->id, state->x, state->y);
         SpawnParticles(state->x + 1, state->y, 0, RandomNumber() & 15);
 
+        // clang-format off
         if (
           state->id == ACT_BIG_GREEN_CAT_L ||
           state->id == ACT_BIG_GREEN_CAT_R ||
@@ -1624,6 +1627,7 @@ void pascal HandleActorShotCollision(int damage, word handle)
         {
           PLAY_EXPLOSION_SOUND();
         }
+        // clang-format on
 
         state->deleted = true;
       }
@@ -1823,11 +1827,13 @@ void pascal HandleActorShotCollision(int damage, word handle)
     case ACT_FLOATING_ARROW:
       if (DamageActor(damage, handle))
       {
+        // clang-format off
         int DEBRIS_SPEC[] = { 3,
            0,  0, EM_NONE, 0,
           -1, -2, EM_NONE, 2,
            1, -3, EM_NONE, 4,
         };
+        // clang-format on
 
         SpawnDestructionEffects(
           handle, DEBRIS_SPEC, ACT_EXPLOSION_FX_1);

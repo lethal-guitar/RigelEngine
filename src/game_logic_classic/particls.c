@@ -162,10 +162,12 @@ void pascal UpdateAndDrawParticles(void)
   // and then quicker until max speed is reached.
   //
   // [PERF] Missing `static` causes a copy operation here
+  // clang-format off
   const sbyte MOVEMENT_TABLE[] = {
     -8, -8, -8, -8, -4, -4, -4, -2, -1, 0, 0, 1, 2, 4, 4, 4, 8, 8, 8, 8, 8,
      8,  8,  8,  8,  8,  8,  8,  8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
   };
+  // clang-format on
 
   ParticleGroup* group;
   word i;

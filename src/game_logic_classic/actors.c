@@ -401,12 +401,14 @@ void pascal Act_ItemBox(word handle)
     else
     {
       // [PERF] Missing `static` causes a copy operation here
+      // clang-format off
       const byte FX_LIST[] = {
         ACT_YELLOW_FIREBALL_FX, EM_FLY_UP,
         ACT_GREEN_FIREBALL_FX, EM_FLY_UPPER_LEFT,
         ACT_BLUE_FIREBALL_FX, EM_FLY_UPPER_RIGHT,
         ACT_GREEN_FIREBALL_FX, EM_FLY_DOWN
       };
+      // clang-format on
 
       register int i;
 
@@ -428,6 +430,7 @@ void pascal Act_ItemBox(word handle)
     if (state->id == ACT_NUCLEAR_WASTE_CAN_EMPTY)
     {
       // [PERF] Missing `static` causes a copy operation here
+      // clang-format off
       const byte FX_LIST[] = {
         ACT_NUCLEAR_WASTE_CAN_DEBRIS_4, EM_FLY_UP,
         ACT_NUCLEAR_WASTE_CAN_DEBRIS_3, EM_FLY_DOWN,
@@ -435,6 +438,7 @@ void pascal Act_ItemBox(word handle)
         ACT_NUCLEAR_WASTE_CAN_DEBRIS_2, EM_FLY_UPPER_RIGHT,
         ACT_SMOKE_CLOUD_FX, EM_NONE
       };
+      // clang-format on
 
       register int i;
 
@@ -1500,11 +1504,13 @@ void pascal Act_Snake(word handle)
   if (state->id == gmPlayerEatingActor && plState == PS_DYING)
   {
     // [PERF] Missing `static` causes a copy operation here
+    // clang-format off
     int DEBRIS_SPEC[] = { 3,
        0,  0, EM_NONE, 0,
       -1, -2, EM_NONE, 2,
        1, -3, EM_NONE, 4
     };
+    // clang-format on
 
     SpawnDestructionEffects(handle, DEBRIS_SPEC, ACT_EXPLOSION_FX_1);
     state->deleted = true;
@@ -4547,6 +4553,7 @@ void pascal Act_LavaFountain(word handle)
   // The list as a whole is terminated by -127.
   //
   // [PERF] Missing `static` causes a copy operation here
+  // clang-format off
   const sbyte SPRITE_PLACEMENT_TABLE[] = {
     3, 0, 127,
     4, -3, 1, 1, 127,
@@ -4561,6 +4568,7 @@ void pascal Act_LavaFountain(word handle)
     3, 0, 127,
     -127
   };
+  // clang-format on
 
   state->drawStyle = DS_INVISIBLE;
 
@@ -5921,6 +5929,7 @@ animateAndAttack:
  */
 bool SpawnActorInSlot(word slot, word id, word x, word y)
 {
+  // clang-format off
   switch (id)
   {
     case ACT_HOVERBOT:
@@ -7718,6 +7727,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     default:
       return false;
   }
+  // clang-format on
 
   return true;
 }
