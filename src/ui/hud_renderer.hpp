@@ -85,7 +85,7 @@ class HudRenderer
 {
 public:
   HudRenderer(
-    int levelNumber,
+    std::optional<int> levelNumber,
     const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer,
     engine::TiledTexture* pStatusSpriteSheetRenderer,
@@ -132,7 +132,7 @@ private:
     const base::Vec2& position) const;
   void drawActorFrame(data::ActorID id, int frame, const base::Vec2& pos) const;
 
-  const int mLevelNumber;
+  std::optional<int> mLevelNumber;
   renderer::Renderer* mpRenderer;
   const data::GameOptions* mpOptions;
 

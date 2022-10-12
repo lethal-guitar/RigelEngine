@@ -37,10 +37,12 @@ struct GameSessionId
   GameSessionId(
     const int episode,
     const int level,
-    const Difficulty difficulty = Difficulty::Medium)
+    const Difficulty difficulty = Difficulty::Medium,
+    const bool isDemo = false)
     : mEpisode(episode)
     , mLevel(level)
     , mDifficulty(difficulty)
+    , mIsDemo(isDemo)
   {
   }
 
@@ -49,6 +51,7 @@ struct GameSessionId
   int mEpisode = 0;
   int mLevel = 0;
   Difficulty mDifficulty = Difficulty::Medium;
+  bool mIsDemo = false;
 };
 
 

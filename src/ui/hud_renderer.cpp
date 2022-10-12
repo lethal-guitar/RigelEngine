@@ -256,7 +256,7 @@ void drawBossHealthBar(
 
 
 HudRenderer::HudRenderer(
-  const int levelNumber,
+  const std::optional<int> levelNumber,
   const data::GameOptions* pOptions,
   renderer::Renderer* pRenderer,
   engine::TiledTexture* pStatusSpriteSheet,
@@ -319,11 +319,16 @@ void HudRenderer::renderClassicHud(
     *mpStatusSpriteSheetRenderer,
     {22, GameTraits::mapViewportSize.height + 1});
   drawHealthBar(playerModel, {24, GameTraits::mapViewportSize.height + 1});
-  drawLevelNumber(
-    mLevelNumber,
-    *mpStatusSpriteSheetRenderer,
-    {GameTraits::mapViewportSize.width + 2,
-     GameTraits::mapViewportSize.height});
+
+  if (mLevelNumber)
+  {
+    drawLevelNumber(
+      *mLevelNumber,
+      *mpStatusSpriteSheetRenderer,
+      {GameTraits::mapViewportSize.width + 2,
+       GameTraits::mapViewportSize.height});
+  }
+
   drawRadar(radarPositions, {RADAR_POS_X, RADAR_POS_Y});
 }
 
@@ -426,12 +431,15 @@ void HudRenderer::drawModernHud(
     {22, GameTraits::mapViewportSize.height + 1});
   drawHealthBar(playerModel, {24, GameTraits::mapViewportSize.height + 1});
 
-  renderer::setLocalTranslation(mpRenderer, {4, 2});
-  drawLevelNumber(
-    mLevelNumber,
-    *mpStatusSpriteSheetRenderer,
-    {GameTraits::mapViewportSize.width + 2,
-     GameTraits::mapViewportSize.height + 1});
+  if (mLevelNumber)
+  {
+    renderer::setLocalTranslation(mpRenderer, {4, 2});
+    drawLevelNumber(
+      *mLevelNumber,
+      *mpStatusSpriteSheetRenderer,
+      {GameTraits::mapViewportSize.width + 2,
+       GameTraits::mapViewportSize.height + 1});
+  }
 }
 
 
@@ -478,7 +486,12 @@ void HudRenderer::drawUltrawideHud(
     *mpStatusSpriteSheetRenderer,
     {32, 6});
   drawHealthBar(playerModel, {34, 6});
-  drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer, {44, 5});
+
+  if (mLevelNumber)
+  {
+    drawLevelNumber(*mLevelNumber, *mpStatusSpriteSheetRenderer, {44, 5});
+  }
+
   drawRadar(radarPositions, {385, 36});
 }
 

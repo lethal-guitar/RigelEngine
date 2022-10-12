@@ -84,7 +84,7 @@ std::vector<DemoInput> loadDemo(const assets::ResourceLoader& resources)
 
 data::GameSessionId demoSessionId(const std::size_t levelIndex)
 {
-  return {DEMO_EPISODE, DEMO_LEVELS[levelIndex], DEMO_DIFFICULTY};
+  return {DEMO_EPISODE, DEMO_LEVELS[levelIndex], DEMO_DIFFICULTY, true};
 }
 
 } // namespace
