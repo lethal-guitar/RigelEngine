@@ -287,39 +287,17 @@ void MapRenderer::switchBackdrops()
 
 void MapRenderer::renderBackground(
   const base::Vec2& sectionStart,
-  const base::Size& sectionSize,
-  const float backColorMod) const
+  const base::Size& sectionSize) const
 {
-  if (backColorMod < 1.0f)
-  {
-    // const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setColorModulation(base::Color{
-      base::roundTo<uint8_t, float>(255 * backColorMod),
-      base::roundTo<uint8_t, float>(255 * backColorMod),
-      base::roundTo<uint8_t, float>(255 * backColorMod),
-      255});
-  }
   renderMapTiles(sectionStart, sectionSize, DrawMode::Background);
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 
 void MapRenderer::renderForeground(
   const base::Vec2& sectionStart,
-  const base::Size& sectionSize,
-  const float foreColorMod) const
+  const base::Size& sectionSize) const
 {
-  if (foreColorMod < 1.0f)
-  {
-    // const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setColorModulation(base::Color{
-      base::roundTo<uint8_t, float>(255 * foreColorMod),
-      base::roundTo<uint8_t, float>(255 * foreColorMod),
-      base::roundTo<uint8_t, float>(255 * foreColorMod),
-      255});
-  }
   renderMapTiles(sectionStart, sectionSize, DrawMode::Foreground);
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 
@@ -419,24 +397,14 @@ renderer::TexCoords MapRenderer::calculateBackdropTexCoords(
 
 void MapRenderer::renderBackdrop(
   const base::Vec2f& cameraPosition,
-  const base::Size& viewportSize,
-  const float dropColorMod) const
+  const base::Size& viewportSize) const
 {
-  if (dropColorMod < 1.0f)
-  {
-    // const auto saved = renderer::saveState(mpRenderer);
-    mpRenderer->setColorModulation(base::Color{
-      base::roundTo<uint8_t, float>(255 * dropColorMod),
-      base::roundTo<uint8_t, float>(255 * dropColorMod),
-      base::roundTo<uint8_t, float>(255 * dropColorMod),
-      255});
-  }
+  const auto saved = renderer::saveState(mpRenderer);
   mpRenderer->setTextureRepeatEnabled(true);
   mpRenderer->drawTexture(
     mBackdropTexture.data(),
     calculateBackdropTexCoords(cameraPosition, viewportSize),
     {{}, data::tilesToPixels(viewportSize)});
-  mpRenderer->setColorModulation(base::Color{255, 255, 255, 255});
 }
 
 
