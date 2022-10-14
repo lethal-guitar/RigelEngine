@@ -1901,7 +1901,7 @@ void EntityFactory::configureEntity(
     case ActorID::Rotating_floor_spikes: // rotating floor spikes
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<PlayerDamaging>(1);
-      entity.assign<AnimationLoop>(1);
+      entity.assign<AnimationLoop>(2);
       entity.assign<AppearsOnRadar>();
       break;
 
@@ -1914,8 +1914,10 @@ void EntityFactory::configureEntity(
     case ActorID::Water_fall_splash_left: // Water surface splash left
     case ActorID::Water_fall_splash_center: // Water surface splash center
     case ActorID::Water_fall_splash_right: // Water surface splash right
-    case ActorID::Water_on_floor_1: // Shallow water (variant 1)
-    case ActorID::Water_on_floor_2: // Shallow water (variant 2)
+    case ActorID::Flame_jet_1: // Rocket exhaust flame left
+    case ActorID::Flame_jet_2: // Rocket exhaust flame right
+    case ActorID::Flame_jet_3: // Small rocket exhaust flame left
+    case ActorID::Flame_jet_4: // Small rocket exhaust flame right
       entity.assign<AnimationLoop>(1);
       break;
 
@@ -1956,10 +1958,8 @@ void EntityFactory::configureEntity(
       entity.assign<BehaviorController>(behaviors::LavaFountain{});
       break;
 
-    case ActorID::Flame_jet_1: // Rocket exhaust flame left
-    case ActorID::Flame_jet_2: // Rocket exhaust flame right
-    case ActorID::Flame_jet_3: // Small rocket exhaust flame left
-    case ActorID::Flame_jet_4: // Small rocket exhaust flame right
+    case ActorID::Water_on_floor_1: // Shallow water (variant 1)
+    case ActorID::Water_on_floor_2: // Shallow water (variant 2)
       entity.assign<AnimationLoop>(2);
       break;
 
