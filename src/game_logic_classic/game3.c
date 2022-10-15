@@ -1050,6 +1050,8 @@ static void UpdateActorPlayerCollision(Context* ctx, word handle)
 
         PlaySound(ctx, SND_ITEM_PICKUP);
 
+        ctx->gmMerchCollected++;
+
         state->deleted = true;
         break;
 
@@ -1071,6 +1073,8 @@ static void UpdateActorPlayerCollision(Context* ctx, word handle)
         GiveScore(ctx, 100);
 
         PlaySound(ctx, SND_ITEM_PICKUP);
+
+        ctx->gmMerchCollected++;
 
         state->deleted = true;
         break;
@@ -1094,6 +1098,8 @@ static void UpdateActorPlayerCollision(Context* ctx, word handle)
 
         PlaySound(ctx, SND_ITEM_PICKUP);
 
+        ctx->gmMerchCollected++;
+
         state->deleted = true;
         break;
 
@@ -1115,6 +1121,8 @@ static void UpdateActorPlayerCollision(Context* ctx, word handle)
         GiveScore(ctx, 100);
 
         PlaySound(ctx, SND_ITEM_PICKUP);
+
+        ctx->gmMerchCollected++;
 
         state->deleted = true;
         break;
@@ -1162,6 +1170,8 @@ static void UpdateActorPlayerCollision(Context* ctx, word handle)
 
           PlaySound(ctx, SND_ITEM_PICKUP);
         }
+
+        ctx->gmMerchCollected++;
 
         state->deleted = true;
         break;
