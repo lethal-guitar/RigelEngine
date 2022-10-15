@@ -162,7 +162,9 @@ void collectVisibleSprites(
           sprite.mUseCloakEffect,
           drawTopmost,
           drawOrder,
-          background);
+          background &&
+            entity.component<SpriteBackground>()->mRenderSlotMask.test(
+              slotIndex));
         ++slotIndex;
       }
 

@@ -1670,7 +1670,14 @@ void EntityFactory::configureEntity(
       entity.component<Shootable>()->mDestroyWhenKilled = false;
       entity.assign<AppearsOnRadar>();
       if (mpOptions->mPrisonerIsBackground)
-        entity.assign<SpriteBackground>();
+      {
+        auto background = SpriteBackground{};
+
+        // Keep the grabbing hand in the foreground
+        background.mRenderSlotMask.reset(1);
+
+        entity.assign<SpriteBackground>(background);
+      }
       break;
 
     case ActorID::Passive_prisoner: // Monster in prison cell, passive

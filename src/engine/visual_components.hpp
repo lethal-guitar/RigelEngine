@@ -181,7 +181,6 @@ struct Sprite
   std::bitset<NUM_RENDER_SLOTS> mFlashingWhiteStates;
   bool mUseCloakEffect = false;
   bool mShow = true;
-  bool mBackground = false;
 };
 
 
@@ -206,6 +205,13 @@ struct ExtendedFrameList
 
 struct SpriteBackground
 {
+  SpriteBackground()
+  {
+    // Apply to all render slots by default
+    mRenderSlotMask.set();
+  }
+
+  std::bitset<NUM_RENDER_SLOTS> mRenderSlotMask;
 };
 
 
