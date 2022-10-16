@@ -3761,6 +3761,7 @@ static bool BlueGuard_UpdateShooting(Context* ctx, word handle)
 static void Act_BlueGuard(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
+  bool roundTwo = false;
 
   // Reset "recoil" animation back to regular version
   if (state->frame == 15)
@@ -3853,10 +3854,11 @@ begin:
       state->var1 = 0;
       state->var2 = 0;
 
-      // [BUG] If the guard is placed in the air, this results in an infinite
-      // loop - it keeps alternating between the two direction changes, since
-      // each ApplyWorldCollision() call will fail.
-      goto begin;
+      if (!roundTwo)
+      {
+        roundTwo = true;
+        goto begin;
+      }
     }
     else
     {
