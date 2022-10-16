@@ -237,7 +237,6 @@ set(core_sources
     game_logic/hazards/smash_hammer.cpp
     game_logic/hazards/smash_hammer.hpp
     game_logic/ientity_factory.hpp
-    game_logic/input.hpp
     game_logic/interactive/blowing_fan.cpp
     game_logic/interactive/blowing_fan.hpp
     game_logic/interactive/elevator.cpp
@@ -288,6 +287,7 @@ set(core_sources
     game_logic_classic/sprite.c
     game_logic_classic/types.h
     game_logic_common/igame_world.hpp
+    game_logic_common/input.hpp
     renderer/custom_quad_batch.cpp
     renderer/custom_quad_batch.hpp
     renderer/fps_limiter.cpp

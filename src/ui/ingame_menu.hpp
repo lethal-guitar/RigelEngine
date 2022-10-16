@@ -21,7 +21,7 @@
 #include "data/bonus.hpp"
 #include "data/saved_game.hpp"
 #include "frontend/game_mode.hpp"
-#include "game_logic/input.hpp"
+#include "game_logic_common/input.hpp"
 #include "ui/duke_script_runner.hpp"
 #include "ui/menu_navigation.hpp"
 #include "ui/options_menu.hpp"

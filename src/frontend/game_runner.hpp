@@ -22,8 +22,8 @@
 #include "data/saved_game.hpp"
 #include "frontend/game_mode.hpp"
 #include "frontend/input_handler.hpp"
-#include "game_logic/input.hpp"
 #include "game_logic_common/igame_world.hpp"
+#include "game_logic_common/input.hpp"
 #include "ui/ingame_menu.hpp"
 
 RIGEL_DISABLE_WARNINGS

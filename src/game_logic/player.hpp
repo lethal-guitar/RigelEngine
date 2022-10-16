@@ -21,8 +21,8 @@
 #include "engine/base_components.hpp"
 #include "engine/movement.hpp"
 #include "game_logic/global_dependencies.hpp"
-#include "game_logic/input.hpp"
 #include "game_logic/player/components.hpp"
+#include "game_logic_common/input.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <entityx/entityx.h>

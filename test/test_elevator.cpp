@@ -31,10 +31,10 @@
 #include <engine/timing.hpp>
 #include <game_logic/behavior_controller_system.hpp>
 #include <game_logic/entity_factory.hpp>
-#include <game_logic/input.hpp>
 #include <game_logic/interactive/elevator.hpp>
 #include <game_logic/player.hpp>
 #include <game_logic/player/components.hpp>
+#include <game_logic_common/input.hpp>
 
 
 using namespace rigel;

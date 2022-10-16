@@ -18,7 +18,7 @@
 
 #include "game_logic/damage_components.hpp"
 #include "game_logic/global_dependencies.hpp"
-#include "game_logic/input.hpp"
+#include "game_logic_common/input.hpp"
 
 namespace rigel::engine::events
 {

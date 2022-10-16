@@ -19,7 +19,7 @@
 #include "data/player_model.hpp"
 #include "engine/timing.hpp"
 #include "frontend/game_mode.hpp"
-#include "game_logic/input.hpp"
+#include "game_logic_common/input.hpp"
 
 #include <memory>
 #include <vector>

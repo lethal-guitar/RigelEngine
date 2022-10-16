@@ -19,7 +19,7 @@
 
 #include "data/bonus.hpp"
 #include "engine/timing.hpp"
-#include "game_logic/input.hpp"
+#include "game_logic_common/input.hpp"
 
 #include <iosfwd>
 #include <set>
