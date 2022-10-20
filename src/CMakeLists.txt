@@ -117,6 +117,8 @@ set(core_sources
     frontend/anti_piracy_screen_mode.cpp
     frontend/anti_piracy_screen_mode.hpp
     frontend/command_line_options.hpp
+    frontend/demo_player.cpp
+    frontend/demo_player.hpp
     frontend/game.cpp
     frontend/game.hpp
     frontend/game_mode.cpp
@@ -147,8 +149,6 @@ set(core_sources
     game_logic/damage_infliction_system.hpp
     game_logic/debugging_system.cpp
     game_logic/debugging_system.hpp
-    game_logic/demo_player.cpp
-    game_logic/demo_player.hpp
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp

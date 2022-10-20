@@ -17,8 +17,8 @@
 #pragma once
 
 #include "assets/duke_script_loader.hpp"
+#include "frontend/demo_player.hpp"
 #include "frontend/game_mode.hpp"
-#include "game_logic/demo_player.hpp"
 #include "ui/apogee_logo.hpp"
 #include "ui/intro_movie.hpp"
 

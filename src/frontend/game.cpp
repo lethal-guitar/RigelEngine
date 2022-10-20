@@ -23,11 +23,11 @@
 #include "data/duke_script.hpp"
 #include "data/game_traits.hpp"
 #include "engine/timing.hpp"
-#include "game_logic/demo_player.hpp"
 #include "renderer/upscaling.hpp"
 #include "ui/imgui_integration.hpp"
 
 #include "anti_piracy_screen_mode.hpp"
+#include "demo_player.hpp"
 #include "game_session_mode.hpp"
 #include "intro_demo_loop_mode.hpp"
 #include "menu_mode.hpp"
