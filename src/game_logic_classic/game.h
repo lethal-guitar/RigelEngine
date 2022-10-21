@@ -370,22 +370,22 @@ typedef struct
 
   // Update the actor even if not on screen (by default, only on-screen actors
   // are updated)
-  ibool alwaysUpdate : 1;
+  bool alwaysUpdate : 1;
 
   // Once the actor has appeared on screen, keep updating it even if it goes
   // off-screen
-  ibool remainActive : 1;
+  bool remainActive : 1;
 
   // Affects ApplyWorldCollision() in game3.c. When true, the actor can move
   // past 1 tile high walls (i.e., stairs) and can move off ledges.
-  ibool allowStairStepping : 1;
+  bool allowStairStepping : 1;
 
   // Actor is affected by gravity and conveyor belts
-  ibool gravityAffected : 1;
+  bool gravityAffected : 1;
 
   // Actor is marked as deleted, will be skipped during update and its state
   // can be reused when spawning a new actor
-  ibool deleted : 1;
+  bool deleted : 1;
 
   // Current gravity state. If gravity is enabled (gravity bit set in flags),
   // this determines how quickly the actor is falling down. See
