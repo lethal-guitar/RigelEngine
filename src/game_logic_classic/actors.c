@@ -5096,10 +5096,7 @@ void pascal Act_Boss1(word handle)
     state->var5 = state->y;
     state->var4 = 0;
 
-    StopPreBossMusic();
-    StartMusicPlayback(sndInGameMusicBuffer);
-
-    HUD_DrawBossHealthBar(gmBossHealth);
+    gmBossActivated = true;
   }
   else if (state->var1 == 1) // Plunge down onto player
   {
@@ -5306,10 +5303,7 @@ void pascal Act_Boss2(word handle)
     {
       state->var1++;
 
-      StopPreBossMusic();
-      StartMusicPlayback(sndInGameMusicBuffer);
-
-      HUD_DrawBossHealthBar(gmBossHealth);
+      gmBossActivated = true;
 
       state->var2 = 0;
     }
@@ -5461,10 +5455,7 @@ void pascal Act_Boss3(word handle)
 
   if (!state->var3)
   {
-    StopPreBossMusic();
-    StartMusicPlayback(sndInGameMusicBuffer);
-
-    HUD_DrawBossHealthBar(gmBossHealth);
+    gmBossActivated = true;
 
     state->var3 = 1;
   }
@@ -5560,9 +5551,7 @@ void pascal Act_Boss4(word handle)
   {
     state->var3 = 1;
 
-    StopPreBossMusic();
-    HUD_DrawBossHealthBar(gmBossHealth);
-    StartMusicPlayback(sndInGameMusicBuffer);
+    gmBossActivated = true;
   }
 
   if (state->var3 > 1)
