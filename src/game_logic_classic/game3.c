@@ -41,6 +41,19 @@ also found here.
 
 *******************************************************************************/
 
+/** Teleport to the given position
+ *
+ * This function sets up some state, the actual position change and the fade
+ * transition are handled by RunInGameLoop().
+ */
+void pascal TeleportTo(Context* ctx, word x, word y)
+{
+  ctx->gmIsTeleporting = true;
+  ctx->gmTeleportTargetPosX = x;
+  ctx->gmTeleportTargetPosY = y;
+}
+
+
 /** Initialize actor state at given list index, based on the parameters */
 void pascal InitActorState(
   Context* ctx,
