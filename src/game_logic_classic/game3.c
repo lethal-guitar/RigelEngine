@@ -1120,10 +1120,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           // Mark the machine as having the globe placed
           state->var1 = true;
 
-          // The scripting system also handles showing the hint machine
-          // messages
-          ShowScriptedUI("Hints", "HELP.MNI");
-          hudShowingHintMachineMsg = true;
+          ShowLevelSpecificHint();
         }
         else
         {
