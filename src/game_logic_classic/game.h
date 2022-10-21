@@ -68,6 +68,7 @@
 #define MAX_NUM_EFFECTS 18
 #define MAX_NUM_PLAYER_SHOTS 6
 #define MAX_NUM_MOVING_MAP_PARTS 70
+#define MAX_NUM_TILE_DEBRIS 700
 
 
 // Types of effect movement patterns
@@ -498,7 +499,7 @@ typedef struct Context_
   word gmCameraPosX;
   word gmCameraPosY;
   word* mapData;
-  word gmTileDebrisStates[700 * 5];
+  word gmTileDebrisStates[MAX_NUM_TILE_DEBRIS * 5];
   word* gfxActorInfoData;
   word gmNumActors;
   bool gmBossActivated;

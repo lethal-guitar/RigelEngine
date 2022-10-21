@@ -2066,6 +2066,15 @@ static void Act_MovingMapPartTrigger(Context* ctx, word handle)
   ActorState* state = ctx->gmActorStates + handle;
   word descIndex;
   word right;
+
+  if (ctx->gmNumMovingMapParts == MAX_NUM_MOVING_MAP_PARTS - 1)
+  {
+    RaiseError(
+      ctx,
+      "Too many dynamic map parts for Classic mode - play this level in Enhanced mode");
+    return;
+  }
+
   MovingMapPartState* mapPart =
     ctx->gmMovingMapParts + ctx->gmNumMovingMapParts;
 
@@ -2513,6 +2522,10 @@ static void Act_SlidingDoorVertical(Context* ctx, word handle)
   if (!state->scoreGiven)
   {
     state->tileBuffer = MM_PushChunk(ctx, 9 * sizeof(word), CT_TEMPORARY);
+    if (!state->tileBuffer)
+    {
+      return;
+    }
 
     for (i = 0; i < 8; i++)
     {
@@ -2606,6 +2619,10 @@ static void Act_SlidingDoorHorizontal(Context* ctx, word handle)
   if (!state->scoreGiven)
   {
     state->tileBuffer = MM_PushChunk(ctx, 6 * sizeof(word), CT_TEMPORARY);
+    if (!state->tileBuffer)
+    {
+      return;
+    }
 
     for (i = 0; i < 5; i++)
     {
@@ -4338,6 +4355,10 @@ static void Act_Elevator(Context* ctx, word handle)
     state->var5 = false;
 
     state->tileBuffer = MM_PushChunk(ctx, 2 * sizeof(word), CT_TEMPORARY);
+    if (!state->tileBuffer)
+    {
+      return;
+    }
 
     state->scoreGiven = FindFullySolidTileIndex(ctx);
 

@@ -577,6 +577,14 @@ void Map_DestroySection(
   word y;
   word tileValue;
 
+  if (
+    (ctx->gmExplodingSectionRight - ctx->gmExplodingSectionLeft) *
+      (ctx->gmExplodingSectionBottom - ctx->gmExplodingSectionTop) >=
+    MAX_NUM_TILE_DEBRIS)
+  {
+    return;
+  }
+
   PlaySound(ctx, SND_BIG_EXPLOSION);
 
   right += 1;
