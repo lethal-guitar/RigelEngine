@@ -563,6 +563,7 @@ typedef struct Context_
   word plAttachedSpider2;
   word plAttachedSpider3;
   word gmBossHealth;
+  word gmBossStartingHealth;
   byte gmRadarDishesLeft;
   word gmCloakPickupPosX;
   word gmCloakPickupPosY;

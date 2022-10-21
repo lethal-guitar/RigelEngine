@@ -7777,7 +7777,8 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        ctx->gmBossHealth = ctx->gmDifficulty * 20 + 90, // health
+        ctx->gmBossStartingHealth = ctx->gmBossHealth =
+          ctx->gmDifficulty * 20 + 90, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7793,7 +7794,8 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        ctx->gmBossHealth = ctx->gmDifficulty * 20 + 90, // health
+        ctx->gmBossStartingHealth = ctx->gmBossHealth =
+          ctx->gmDifficulty * 20 + 90, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7809,7 +7811,8 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        ctx->gmBossHealth = ctx->gmDifficulty * 75 + 600, // health
+        ctx->gmBossStartingHealth = ctx->gmBossHealth =
+          ctx->gmDifficulty * 75 + 600, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7825,7 +7828,8 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        ctx->gmBossHealth = ctx->gmDifficulty * 40 + 100, // health
+        ctx->gmBossStartingHealth = ctx->gmBossHealth =
+          ctx->gmDifficulty * 40 + 100, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
