@@ -619,8 +619,24 @@ void Map_DestroySection(
 /** Update and draw a currently active tile explosion */
 void UpdateAndDrawTileDebris(Context* ctx)
 {
-  // [PERF] Missing `static` causes a copy operation here
-  const int16_t Y_MOVEMENT[] = {-3, -3, -2, -2, -1, 0, 0, 1, 2, 2, 3};
+  // Indices 11, 12 and 13 are out of bounds of the original array.  Since the
+  // array gets copied to the local function's stack frame in the original
+  // code, reading past the end of the array actually reads the contents of the
+  // stack. The first 2 bytes on the stack after the copy of the array are the
+  // local variable `debris`, which is a far pointer and thus consists of a
+  // 16-bit offset followed by a 16-bit segment. The offset is what's read at
+  // index 11 in the array. Its value thus depends on what's assigned to
+  // `debris`, so we leave a 0 as placeholder here and then assign the actual
+  // value down below in the loop. Index 12 reads the segment part of the
+  // `debris` pointer. This happens to be constant, so we can put it into the
+  // array as is. The next value on the stack after that is the offset portion
+  // of the return address that was put onto the stack by the CALL instruction
+  // for UpdateAndDrawTileDebris. Since there is only one call site, it also
+  // happens to be constant, so we can add it to the array.  The values here
+  // are chosen to match the game running in DosBox - they might be slightly
+  // different when running on a real DOS system.
+  const int16_t Y_MOVEMENT[] = {
+    -3, -3, -2, -2, -1, 0, 0, 1, 2, 2, 3, 0, 0x199A, -100};
 
   register word i;
   register word size;
@@ -650,8 +666,14 @@ void UpdateAndDrawTileDebris(Context* ctx)
     debris = ctx->gmTileDebrisStates + i;
 
     debris[3] += debris[0]; // debris->x += xVelocity
-    debris[4] += Y_MOVEMENT[debris[1]]; // debris->y += Y_MOVEMENT[
-                                        //   debris->tableIndex]
+
+    // debris->y += Y_MOVEMENT[debris->tableIndex]
+
+    // See comment above - if we try to read index 11, it ends up being a read
+    // past the array in the original code. The actual value that happens to be
+    // read is the offset portion of the `debris` far pointer, which happens to
+    // be identical to `i * 2`.
+    debris[4] += debris[1] == 11 ? i * 2 : Y_MOVEMENT[debris[1]];
 
     // [BUG] The Y_MOVEMENT array only has 11 elements, but here we increment
     // the index up to a value of 12 (13th element). This causes an

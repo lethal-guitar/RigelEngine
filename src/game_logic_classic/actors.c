@@ -1896,7 +1896,7 @@ static void Act_BrokenMissile(Context* ctx, word handle)
 
 static void Act_EyeBallThrower(Context* ctx, word handle)
 {
-  static const byte RISE_UP_ANIM[] = {0, 0, 0, 0, 0, 0, 1, 2, 3, 4};
+  static const byte RISE_UP_ANIM[] = {0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5};
 
   ActorState* state = ctx->gmActorStates + handle;
 

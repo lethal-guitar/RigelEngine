@@ -166,11 +166,10 @@ void UpdateAndDrawParticles(Context* ctx)
   // slow down near the top of the arc, briefly stop, then fall down slowly
   // and then quicker until max speed is reached.
   //
-  // [PERF] Missing `static` causes a copy operation here
   // clang-format off
   const sbyte MOVEMENT_TABLE[] = {
     -8, -8, -8, -8, -4, -4, -4, -2, -1, 0, 0, 1, 2, 4, 4, 4, 8, 8, 8, 8, 8,
-     8,  8,  8,  8,  8,  8,  8,  8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
+     8,  8,  8,  8,  8,  8,  8,  8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0
   };
   // clang-format on
 
@@ -179,7 +178,7 @@ void UpdateAndDrawParticles(Context* ctx)
   word groupIndex;
   word* data;
   word x;
-  word y;
+  word y = 32; // see below
 
   for (groupIndex = 0; groupIndex < NUM_PARTICLE_GROUPS; groupIndex++)
   {
@@ -205,24 +204,18 @@ void UpdateAndDrawParticles(Context* ctx)
           8);
 
         // Update y position based on lookup table
-        *(data + i + 2) += MOVEMENT_TABLE[*(data + i + 1)];
+
+        // Recreate out-of-bounds read from the original code (reading past the
+        // end of MOVEMENT_TABLE, which has been copied to the stack, thus
+        // reading the low byte of the `y` variable).
+        word tableIndex = *(data + i + 1);
+        sbyte adjustment = tableIndex == 42
+          ? (sbyte)(y & 0xFF) : MOVEMENT_TABLE[tableIndex];
+
+        *(data + i + 2) += adjustment;
         y = (word)(T2PX(group->y - ctx->gmCameraPosY) + *(data + i + 2));
 
         // Advance y update table index
-        //
-        // [BUG] It's actually possible for this to increment the index past
-        // the end of the MOVEMENT_TABLE array, causing some out-of-bounds
-        // reads.  tableIndex is initialized to a random number between 0 and
-        // 15 (see InitParticleSystem()). Particle groups live for 28 frames.
-        // So if a particle has an initial tableIndex of 15, it will reach
-        // index 42 on the penultimate frame, and that index will be used to do
-        // a table lookup on the 28th frame. MOVEMENT_TABLE only has 41 entries,
-        // though. Indices 41 and 42 are thus reading whatever memory follows
-        // after MOVEMENT_TABLE. This happens to be the `sysTimerFrequency`
-        // variable (see music.c), which is initialized to 280. In little-endian
-        // representation, that value corresponds to the number 24 followed by
-        // a 1. So any particles which happen to have an initial tableIndex of
-        // 14 or 15 will make use of those values.
         *(data + i + 1) += 1;
 
         // Draw particle if within viewport
