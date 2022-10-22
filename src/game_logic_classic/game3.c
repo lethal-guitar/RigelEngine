@@ -406,9 +406,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         }
 
         DamagePlayer();
-        ShowTutorial(
-          TUT_CLOAK_NEEDED,
-          "OUCH, YOU NEED TO FIND THE CLOAKING*DEVICE TO DISABLE THIS FORCEFIELD.");
+        ShowTutorial(TUT_CLOAK_NEEDED);
         break;
 
       case ACT_RESPAWN_CHECKPOINT:
@@ -423,15 +421,13 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           TryUnlockingDoor(
             &gmRequestUnlockNextForceField, ACT_CIRCUIT_CARD, handle);
-          ShowTutorial(
-            TUT_FOUND_FORCE_FIELD,
-            "USE THE ACCESS CARD TO DISABLE*THIS FORCE FIELD.");
+          ShowTutorial(TUT_FOUND_FORCE_FIELD);
 
           if (inputMoveUp)
           {
             if (state->var1)
             {
-              ShowTutorial(TUT_CARD_NEEDED, "ACCESS DENIED.");
+              ShowTutorial(TUT_CARD_NEEDED);
               plBlockLookingUp = false;
             }
             else if (gmRequestUnlockNextForceField)
@@ -445,14 +441,14 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_BLUE_KEY_KEYHOLE:
         if (plPosY - 2 == state->y)
         {
-          ShowTutorial(TUT_FOUND_KEYHOLE, "USE A KEY TO OPEN THIS DOOR.");
+          ShowTutorial(TUT_FOUND_KEYHOLE);
           TryUnlockingDoor(&gmRequestUnlockNextDoor, ACT_BLUE_KEY, handle);
 
           if (inputMoveUp)
           {
             if (state->var1)
             {
-              ShowTutorial(TUT_KEY_NEEDED, "YOU NEED A KEY TO OPEN*THE DOOR.");
+              ShowTutorial(TUT_KEY_NEEDED);
               plBlockLookingUp = false;
             }
             else if (gmRequestUnlockNextDoor)
@@ -470,9 +466,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           state->var1 == 0 && // ship pickup cooldown has elapsed
           state->gravityState == 0) // ship is on solid ground
         {
-          ShowTutorial(
-            TUT_SHIP,
-            "THE SHIP. USE THIS TO GET OUT OF THIS*LEVEL.  YOU CAN FLY ANYWHERE, AND*YOUR WEAPON IS VERY POWERFUL.");
+          ShowTutorial(TUT_SHIP);
 
           plState = PS_USING_SHIP;
           plActorId = state->id;
@@ -677,24 +671,19 @@ void pascal UpdateActorPlayerCollision(word handle)
           switch (state->id)
           {
             case ACT_NORMAL_WEAPON:
-              ShowTutorial(TUT_WPN_REGULAR, "THIS IS YOUR REGULAR WEAPON!");
+              ShowTutorial(TUT_WPN_REGULAR);
               break;
 
             case ACT_LASER:
-              ShowTutorial(
-                TUT_WPN_LASER, "THIS WEAPON CAN SHOOT*THROUGH ANYTHING!");
+              ShowTutorial(TUT_WPN_LASER);
               break;
 
             case ACT_FLAME_THROWER:
-              ShowTutorial(
-                TUT_WPN_FLAMETHROWER,
-                "THERE ARE MANY SECRETS WITH*THIS WEAPON. USE IT TO*YOUR ADVANTAGE!");
+              ShowTutorial(TUT_WPN_FLAMETHROWER);
               break;
 
             case ACT_ROCKET_LAUNCHER:
-              ShowTutorial(
-                TUT_WPN_ROCKETLAUNCHER,
-                "A ROCKET LAUNCHER IS VERY*DEADLY. IT IS THE STRONGEST OF*ANY WEAPON!");
+              ShowTutorial(TUT_WPN_ROCKETLAUNCHER);
               break;
           }
 
@@ -838,8 +827,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         }
         else
         {
-          ShowTutorial(
-            TUT_SODA, "THE CAFFEINE IN SODAS PROVIDES*ONE UNIT OF HEALTH.");
+          ShowTutorial(TUT_SODA);
           GiveScore(100);
           PlaySound(SND_HEALTH_PICKUP);
 
@@ -876,8 +864,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         // of the fly-up sequence after shooting the containing box
         if (state->var1 > 8)
         {
-          ShowTutorial(
-            TUT_HEALTH_MOLECULE, "THIS ITEM WILL GIVE YOU ONE UNIT*OF HEALTH.");
+          ShowTutorial(TUT_HEALTH_MOLECULE);
           PlaySound(SND_HEALTH_PICKUP);
 
           plHealth++;
@@ -916,7 +903,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           plCollectedLetters++;
 
-          ShowTutorial(TUT_N, "GOT THE N.  WHAT IS NEXT?");
+          ShowTutorial(TUT_N);
         }
 
         plCollectedLetters |= 0x100;
@@ -938,7 +925,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           plCollectedLetters++;
 
-          ShowTutorial(TUT_U, "GOT THE U.");
+          ShowTutorial(TUT_U);
         }
 
         plCollectedLetters |= 0x200;
@@ -960,7 +947,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           plCollectedLetters++;
 
-          ShowTutorial(TUT_K, "GOT THE K.");
+          ShowTutorial(TUT_K);
         }
 
         plCollectedLetters |= 0x400;
@@ -982,7 +969,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           plCollectedLetters++;
 
-          ShowTutorial(TUT_E, "GOT THE E.");
+          ShowTutorial(TUT_E);
         }
 
         plCollectedLetters |= 0x800;
@@ -1009,9 +996,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           sbyte SCORE_NUMBER_OFFSETS[] = {-3, 0, 3, 0};
 
           PlaySound(SND_LETTERS_COLLECTED_CORRECTLY);
-          ShowTutorial(
-            TUT_LETTERS_COLLECTED,
-            "EXCELLENT!  ONE HUNDRED THOUSAND*POINTS!!!!!!!!!!!");
+          ShowTutorial(TUT_LETTERS_COLLECTED);
 
           for (i = 0; i < 10; i++)
           {
@@ -1069,11 +1054,11 @@ void pascal UpdateActorPlayerCollision(word handle)
         {
           if (state->id == ACT_BLUE_KEY)
           {
-            ShowTutorial(TUT_KEY, "FIND THE DOOR THAT*THIS KEY OPENS.");
+            ShowTutorial(TUT_KEY);
           }
           else
           {
-            ShowTutorial(TUT_CARD, "USE THE CARD TO TURN OFF*FORCE FIELDS.");
+            ShowTutorial(TUT_CARD);
           }
 
           SpawnEffect(
@@ -1094,8 +1079,7 @@ void pascal UpdateActorPlayerCollision(word handle)
 
           RemoveFromInventory(ACT_RAPID_FIRE_ICON);
 
-          ShowTutorial(
-            TUT_RAPID_FIRE, "HOLD DOWN YOUR FIRE BUTTON FOR*RAPID FIRE.");
+          ShowTutorial(TUT_RAPID_FIRE);
 
           AddInventoryItem(ACT_RAPID_FIRE_ICON);
 
@@ -1143,9 +1127,7 @@ void pascal UpdateActorPlayerCollision(word handle)
         }
         else
         {
-          ShowTutorial(
-            TUT_HINT_MACHINE,
-            "THIS DEVICE WILL GIVE SPECIFIC HINTS.*FIND THE SPECIAL BLUE GLOBE AND*BRING IT BACK HERE.");
+          ShowTutorial(TUT_HINT_MACHINE);
         }
         break;
 
@@ -1197,8 +1179,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           state->x <= plPosX && state->x + 3 >= plPosX && state->y == plPosY &&
           plState == PS_NORMAL)
         {
-          ShowTutorial(
-            TUT_TELEPORTER, "PRESS UP OR ENTER TO USE*THE TRANSPORTER.*");
+          ShowTutorial(TUT_TELEPORTER);
         }
 
         // Check if the player is interacting with the teleporter.

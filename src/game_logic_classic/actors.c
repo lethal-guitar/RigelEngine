@@ -2915,9 +2915,7 @@ void pascal Act_LevelExitTrigger(word handle)
     }
     else
     {
-      ShowTutorial(
-        TUT_RADARS_LEFT,
-        " WAIT!!!!!!!!      *YOU NEED TO DESTROY ALL THE RADAR*DISHES FIRST BEFORE YOU CAN COMPLETE*THE LEVEL...");
+      ShowTutorial(TUT_RADARS_LEFT);
     }
   }
 }
@@ -4256,7 +4254,7 @@ void pascal Act_Elevator(word handle)
     {
       plOnElevator = true;
 
-      ShowTutorial(TUT_ELEVATOR, "PRESS UP OR DOWN TO USE THE*TURBO LIFT.");
+      ShowTutorial(TUT_ELEVATOR);
 
       if (
         inputMoveUp &&

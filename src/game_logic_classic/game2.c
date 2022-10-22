@@ -71,8 +71,7 @@ void UpdateBackdrop(void)
       gmEarthquakeCountdown != 0)
     {
       random = RandomNumber() & 0x3;
-      ShowTutorial(
-        TUT_EARTHQUAKE, " E A R T H Q U A K E ! ! !*WAIT, THIS IS NOT EARTH.");
+      ShowTutorial(TUT_EARTHQUAKE);
 
       if (random)
       {
