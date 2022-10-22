@@ -297,8 +297,7 @@ void CheckLetterCollectionPityBonus(void)
   // collecting all the letters in order, the bug doesn't materialize.
   if ((plCollectedLetters >> 8 & 0x1F) == 0x1F && plCollectedLetters != 5)
   {
-    ShowInGameMessage(
-      "OH, WELL... TEN THOUSAND POINTS IS*BETTER THAN NOTHING.");
+    ShowInGameMessage(MID_OH_WELL);
   }
 
   // [BUG] The 10k points are given for each letter that's collected, instead of
@@ -437,7 +436,7 @@ void pascal UpdateActorPlayerCollision(word handle)
             }
             else if (gmRequestUnlockNextForceField)
             {
-              ShowInGameMessage("ACCESS GRANTED.");
+              ShowInGameMessage(MID_ACCESS_GRANTED);
             }
           }
         }
@@ -458,7 +457,7 @@ void pascal UpdateActorPlayerCollision(word handle)
             }
             else if (gmRequestUnlockNextDoor)
             {
-              ShowInGameMessage("OPENING DOOR.");
+              ShowInGameMessage(MID_OPENING_DOOR);
             }
           }
         }
@@ -1056,8 +1055,7 @@ void pascal UpdateActorPlayerCollision(word handle)
 
         if (state->id == ACT_CLOAKING_DEVICE)
         {
-          ShowInGameMessage(
-            "YOU ARE NOW INVINCIBLE FOR A SHORT*PERIOD OF TIME...**USE THIS TO ALSO DISABLE*THE FORCE FIELD...");
+          ShowInGameMessage(MID_INVINCIBLE);
           RemoveFromInventory(ACT_CLOAKING_DEVICE_ICON);
           AddInventoryItem(ACT_CLOAKING_DEVICE_ICON);
           plCloakTimeLeft = CLOAK_TIME;
@@ -1154,8 +1152,7 @@ void pascal UpdateActorPlayerCollision(word handle)
       case ACT_SPECIAL_HINT_GLOBE:
         PlaySound(SND_ITEM_PICKUP);
 
-        ShowInGameMessage(
-          "BRING THIS SPECIAL CRYSTAL GLOBE*BACK TO THE PEDESTAL TO RECEIVE A*SPECIAL HINT FOR THIS LEVEL.");
+        ShowInGameMessage(MID_HINT_GLOBE);
 
         AddInventoryItem(ACT_SPECIAL_HINT_GLOBE_ICON);
 

@@ -113,8 +113,7 @@ void UpdateBackdrop(void)
 
       if (gmReactorDestructionStep == 13)
       {
-        ShowInGameMessage(
-          "DUKE... YOU HAVE DESTROYED*EVERYTHING.  EXCELLENT...");
+        ShowInGameMessage(MID_DESTROYED_EVERYTHING);
       }
     }
   }

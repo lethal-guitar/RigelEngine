@@ -225,7 +225,7 @@ void pascal Act_PlayerSprite(word handle)
 
     if (plCloakTimeLeft == 30)
     {
-      ShowInGameMessage("CLOAK IS DISABLING...");
+      ShowInGameMessage(MID_CLOAK_DISABLING);
     }
 
     // Make player flash when cloak is disabling
@@ -250,7 +250,7 @@ void pascal Act_PlayerSprite(word handle)
 
     if (plRapidFireTimeLeft == 30)
     {
-      ShowInGameMessage("RAPID FIRE IS DISABLING...");
+      ShowInGameMessage(MID_RAPID_FIRE_DISABLING);
     }
 
     if (plRapidFireTimeLeft == 0)
@@ -2609,7 +2609,7 @@ void pascal Act_RespawnBeacon(word handle)
       gmBeaconPosY = state->y;
       gmBeaconActivated = true;
 
-      ShowInGameMessage("SECTOR SECURE!!!");
+      ShowInGameMessage(MID_SECTOR_SECURE);
     }
 
     if (state->var3 == 1)
@@ -2988,7 +2988,7 @@ void pascal Act_SuperForceField(word handle)
     SpawnEffect(
       ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_UPPER_RIGHT, 0);
     PlaySound(SND_BIG_EXPLOSION);
-    ShowInGameMessage("FORCE FIELD DESTROYED... *GOOD WORK...");
+    ShowInGameMessage(MID_FORCE_FIELD_DESTROYED);
   }
 }
 
