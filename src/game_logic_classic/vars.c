@@ -171,7 +171,6 @@ byte levelHeaderData[3002];
 
 word mmChunkSizes[MM_MAX_NUM_CHUNKS];
 ChunkType mmChunkTypes[MM_MAX_NUM_CHUNKS];
-byte far* mmRawMem;
 dword mmMemTotal;
 dword mmMemUsed;
 word mmChunksUsed;
@@ -185,3 +184,5 @@ byte plWeapon;
 byte plAmmo;
 byte plHealth;
 bool gmBeaconActivated;
+
+byte mmRawMem[MM_TOTAL_SIZE];
