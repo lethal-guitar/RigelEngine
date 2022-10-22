@@ -27,6 +27,11 @@
 
 #include "types.h"
 
+
+//
+// Definitions
+//
+
 // Pixels
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 200
@@ -65,6 +70,37 @@
 #define MAX_NUM_MOVING_MAP_PARTS 70
 
 
+// Types of effect movement patterns
+#define EM_SCORE_NUMBER 100
+#define EM_BURN_FX 99
+#define EM_NONE 98
+#define EM_RISE_UP 97
+#define EM_FLY_RIGHT 0
+#define EM_FLY_UPPER_RIGHT 1
+#define EM_FLY_UP 2
+#define EM_FLY_UPPER_LEFT 3
+#define EM_FLY_LEFT 4
+#define EM_FLY_DOWN 5
+#define EM_BLOW_IN_WIND 6
+
+#define ORIENTATION_LEFT 0
+#define ORIENTATION_RIGHT 1
+
+#define DIFFICULTY_EASY 1
+#define DIFFICULTY_MEDIUM 2
+#define DIFFICULTY_HARD 3
+
+#define WPN_DAMAGE_REGULAR 1
+#define WPN_DAMAGE_LASER 2
+#define WPN_DAMAGE_ROCKET_LAUNCHER 8
+#define WPN_DAMAGE_FLAME_THROWER 2
+#define WPN_DAMAGE_SHIP_LASER 5
+
+
+//
+// Enums
+//
+
 typedef enum
 {
   CLR_BLACK = 0,
@@ -85,19 +121,6 @@ typedef enum
   CLR_WHITE = 15
 } PaletteColor;
 
-
-#define ORIENTATION_LEFT 0
-#define ORIENTATION_RIGHT 1
-
-#define DIFFICULTY_EASY 1
-#define DIFFICULTY_MEDIUM 2
-#define DIFFICULTY_HARD 3
-
-#define WPN_DAMAGE_REGULAR 1
-#define WPN_DAMAGE_LASER 2
-#define WPN_DAMAGE_ROCKET_LAUNCHER 8
-#define WPN_DAMAGE_FLAME_THROWER 2
-#define WPN_DAMAGE_SHIP_LASER 5
 
 typedef enum
 {
@@ -207,18 +230,86 @@ enum ConveyorBeltCheckResult
 };
 
 
-// Types of effect movement patterns
-#define EM_SCORE_NUMBER 100
-#define EM_BURN_FX 99
-#define EM_NONE 98
-#define EM_RISE_UP 97
-#define EM_FLY_RIGHT 0
-#define EM_FLY_UPPER_RIGHT 1
-#define EM_FLY_UP 2
-#define EM_FLY_UPPER_LEFT 3
-#define EM_FLY_LEFT 4
-#define EM_FLY_DOWN 5
-#define EM_BLOW_IN_WIND 6
+typedef enum
+{
+  MID_DESTROYED_EVERYTHING,
+  MID_OH_WELL,
+  MID_ACCESS_GRANTED,
+  MID_OPENING_DOOR,
+  MID_INVINCIBLE,
+  MID_HINT_GLOBE,
+  MID_CLOAK_DISABLING,
+  MID_RAPID_FIRE_DISABLING,
+  MID_SECTOR_SECURE,
+  MID_FORCE_FIELD_DESTROYED
+} MessageId;
+
+
+typedef enum
+{
+  SFC_BLACK,
+  SFC_WHITE,
+  SFC_YELLOW,
+  SFC_BLACK2,
+  SFC_DEBUG1,
+  SFC_DEBUG2,
+  SFC_DEBUG3
+} ScreenFillColor;
+
+
+typedef enum
+{
+  CT_COMMON,
+  CT_SPRITE,
+  CT_MAP_DATA,
+  CT_INGAME_MUSIC,
+  CT_TEMPORARY,
+  CT_CZONE,
+  CT_MASKED_TILES = 9,
+  CT_MENU_MUSIC = 12,
+  CT_INTRO_SOUND_FX = 13,
+} ChunkType;
+
+
+typedef enum
+{
+  DS_INVISIBLE, // actor is invisible, and won't collide with the
+                // player/projectiles
+  DS_NORMAL,
+  DS_WHITEFLASH, // used when an actor takes damage
+  DS_IN_FRONT, // actor appears in front of map foreground tiles
+  DS_TRANSLUCENT // used for Duke when having the cloaking device
+} DrawStyle;
+
+
+typedef enum
+{
+  TA_SOLID_TOP = 0x1,
+  TA_SOLID_BOTTOM = 0x2,
+  TA_SOLID_RIGHT = 0x4,
+  TA_SOLID_LEFT = 0x8,
+  TA_ANIMATED = 0x10,
+  TA_FOREGROUND = 0x20,
+  TA_FLAMMABLE = 0x40,
+  TA_CLIMBABLE = 0x80,
+  TA_CONVEYOR_L = 0x100,
+  TA_CONVEYOR_R = 0x200,
+  TA_SLOW_ANIMATION = 0x400,
+  TA_LADDER = 0x4000,
+} TileAttributes;
+
+
+//
+// Structures
+//
+
+typedef struct
+{
+  word timeAlive;
+  word x;
+  word y;
+  word color;
+} ParticleGroup;
 
 
 typedef struct
@@ -255,34 +346,6 @@ typedef struct
   word bottom;
   word type;
 } MovingMapPartState;
-
-
-typedef enum
-{
-  DS_INVISIBLE, // actor is invisible, and won't collide with the
-                // player/projectiles
-  DS_NORMAL,
-  DS_WHITEFLASH, // used when an actor takes damage
-  DS_IN_FRONT, // actor appears in front of map foreground tiles
-  DS_TRANSLUCENT // used for Duke when having the cloaking device
-} DrawStyle;
-
-
-typedef enum
-{
-  TA_SOLID_TOP = 0x1,
-  TA_SOLID_BOTTOM = 0x2,
-  TA_SOLID_RIGHT = 0x4,
-  TA_SOLID_LEFT = 0x8,
-  TA_ANIMATED = 0x10,
-  TA_FOREGROUND = 0x20,
-  TA_FLAMMABLE = 0x40,
-  TA_CLIMBABLE = 0x80,
-  TA_CONVEYOR_L = 0x100,
-  TA_CONVEYOR_R = 0x200,
-  TA_SLOW_ANIMATION = 0x400,
-  TA_LADDER = 0x4000,
-} TileAttributes;
 
 
 typedef void pascal (*ActorUpdateFunc)(word index);
@@ -351,6 +414,10 @@ typedef struct
 } ActorState;
 
 
+//
+// Utility macros
+//
+
 #define HAS_TILE_ATTRIBUTE(tileIndex, attribute)                               \
   (int16_t)(                                                                   \
     ((tileIndex)&0x8000)                                                       \
@@ -398,56 +465,5 @@ typedef struct
 #define READ_LVL_ACTOR_DESC_X(index) READ_LVL_HEADER_WORD(47 + index)
 #define READ_LVL_ACTOR_DESC_Y(index) READ_LVL_HEADER_WORD(49 + index)
 
-
-typedef enum
-{
-  MID_DESTROYED_EVERYTHING,
-  MID_OH_WELL,
-  MID_ACCESS_GRANTED,
-  MID_OPENING_DOOR,
-  MID_INVINCIBLE,
-  MID_HINT_GLOBE,
-  MID_CLOAK_DISABLING,
-  MID_RAPID_FIRE_DISABLING,
-  MID_SECTOR_SECURE,
-  MID_FORCE_FIELD_DESTROYED
-} MessageId;
-
-
-typedef enum
-{
-  SFC_BLACK,
-  SFC_WHITE,
-  SFC_YELLOW,
-  SFC_BLACK2,
-  SFC_DEBUG1,
-  SFC_DEBUG2,
-  SFC_DEBUG3
-} ScreenFillColor;
-
-
-typedef enum
-{
-  CT_COMMON,
-  CT_SPRITE,
-  CT_MAP_DATA,
-  CT_INGAME_MUSIC,
-  CT_TEMPORARY,
-  CT_CZONE,
-  CT_MASKED_TILES = 9,
-  CT_MENU_MUSIC = 12,
-  CT_INTRO_SOUND_FX = 13,
-} ChunkType;
-
-
 // Convert a tile value to pixels (multiply by 8)
 #define T2PX(val) (val << 3)
-
-
-typedef struct
-{
-  word timeAlive;
-  word x;
-  word y;
-  word color;
-} ParticleGroup;
