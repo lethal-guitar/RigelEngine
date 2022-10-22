@@ -25,7 +25,70 @@
 
 #pragma once
 
-#include "defs.h"
+#include "types.h"
+
+// Pixels
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 200
+
+// Tiles
+#define SCREEN_WIDTH_TILES 40
+#define SCREEN_HEIGHT_TILES 25
+#define VIEWPORT_WIDTH 32
+#define VIEWPORT_HEIGHT 20
+
+#define TIMER_FREQUENCY 280
+
+#define CLOAK_TIME 700
+#define RAPID_FIRE_TIME 700
+#define MAX_AMMO 32
+#define MAX_AMMO_FLAMETHROWER 64
+#define PLAYER_MAX_HEALTH 9
+#define INITIAL_MERCY_FRAMES 20
+#define NUM_INVENTORY_SLOTS 6
+
+#define MM_TOTAL_SIZE 390000
+#define MM_MAX_NUM_CHUNKS 1150
+
+#define NUM_HIGH_SCORE_ENTRIES 10
+#define HIGH_SCORE_NAME_MAX_LEN 15
+
+#define NUM_SAVE_SLOTS 8
+#define SAVE_SLOT_NAME_MAX_LEN 18
+
+#define NUM_PARTICLE_GROUPS 5
+#define PARTICLES_PER_GROUP 64
+
+#define MAX_NUM_ACTORS 448
+#define MAX_NUM_EFFECTS 18
+#define MAX_NUM_PLAYER_SHOTS 6
+#define MAX_NUM_MOVING_MAP_PARTS 70
+
+
+typedef enum
+{
+  CLR_BLACK = 0,
+  CLR_DARK_GREY = 1,
+  CLR_GREY = 2,
+  CLR_LIGHT_GREY = 3,
+  CLR_DARK_RED = 4,
+  CLR_RED = 5,
+  CLR_ORANGE = 6,
+  CLR_YELLOW = 7,
+  CLR_DARK_GREEN = 8,
+  CLR_DARK_BLUE = 9,
+  CLR_BLUE = 10,
+  CLR_LIGHT_BLUE = 11,
+  CLR_GREEN = 12,
+  CLR_LIGHT_GREEN = 13,
+  CLR_BROWN = 14,
+  CLR_WHITE = 15
+} PaletteColor;
+
+
+#ifndef SHAREWARE
+  #define REGISTERED_VERSION
+#endif
 
 #define RADAR_POS_X 288
 #define RADAR_POS_Y 136
@@ -330,3 +393,257 @@ typedef struct
       state->frame = from;                                                     \
     }                                                                          \
   }
+
+#define LVL_TILESET_FILENAME() (levelHeaderData)
+#define LVL_BACKDROP_FILENAME() (levelHeaderData + 13)
+#define LVL_MUSIC_FILENAME() (levelHeaderData + 26)
+
+#define READ_LVL_HEADER_WORD(offset)                                           \
+  ((*(levelHeaderData + offset + 1) << 8) | *(levelHeaderData + offset))
+
+// Utility macros for reading actor descriptions in the level header
+//
+// 45 is the offset of the first actor description's first word within the level
+// header. Each actor description consists of 3 words (id, x, y).
+#define READ_LVL_ACTOR_DESC_ID(index) READ_LVL_HEADER_WORD(45 + index)
+#define READ_LVL_ACTOR_DESC_X(index) READ_LVL_HEADER_WORD(47 + index)
+#define READ_LVL_ACTOR_DESC_Y(index) READ_LVL_HEADER_WORD(49 + index)
+
+
+typedef enum
+{
+  MID_DESTROYED_EVERYTHING,
+  MID_OH_WELL,
+  MID_ACCESS_GRANTED,
+  MID_OPENING_DOOR,
+  MID_INVINCIBLE,
+  MID_HINT_GLOBE,
+  MID_CLOAK_DISABLING,
+  MID_RAPID_FIRE_DISABLING,
+  MID_SECTOR_SECURE,
+  MID_FORCE_FIELD_DESTROYED
+} MessageId;
+
+
+typedef enum
+{
+  SFC_BLACK,
+  SFC_WHITE,
+  SFC_YELLOW,
+  SFC_BLACK2,
+  SFC_DEBUG1,
+  SFC_DEBUG2,
+  SFC_DEBUG3
+} ScreenFillColor;
+
+
+typedef enum
+{
+  CT_COMMON,
+  CT_SPRITE,
+  CT_MAP_DATA,
+  CT_INGAME_MUSIC,
+  CT_TEMPORARY,
+  CT_CZONE,
+  CT_MASKED_TILES = 9,
+  CT_MENU_MUSIC = 12,
+  CT_INTRO_SOUND_FX = 13,
+} ChunkType;
+
+
+typedef enum
+{
+  VT_APOGEE_LOGO = 8,
+  VT_NEO_LA = 0,
+  VT_RANGE_1 = 4,
+  VT_RANGE_2 = 5,
+  VT_RANGE_3 = 6,
+  VT_UNUSED_1 = 2,
+  VT_UNUSED_2 = 3,
+} VideoType;
+
+
+#define XY_TO_OFFSET(x, y) (x * 8 + y * 320)
+
+// Convert a tile value to pixels (multiply by 8)
+#define T2PX(val) (val << 3)
+
+#define ANY_KEY_PRESSED() !(kbLastScancode & 0x80)
+#define LAST_SCANCODE() (kbLastScancode & 0x7F)
+
+#define CLEAR_SCREEN()                                                         \
+  FillScreenRegion(                                                            \
+    SFC_BLACK, 0, 0, SCREEN_WIDTH_TILES - 1, SCREEN_HEIGHT_TILES - 1);
+
+
+typedef char SaveSlotName[SAVE_SLOT_NAME_MAX_LEN + 1];
+
+typedef struct
+{
+  word timeAlive;
+  word x;
+  word y;
+  word color;
+} ParticleGroup;
+
+
+// Functions from unit1.c
+byte pascal DN2_inportb(int16_t address);
+void pascal DN2_outportb(int16_t address, byte value);
+void pascal DN2_outport(int16_t address, word value);
+
+void pascal CopyStringUppercased(const char far* src, char far* dest);
+bool pascal StringStartsWith(const char far* string, const char far* prefix);
+word pascal DN2_strlen(char far* string);
+
+byte RandomNumber(void);
+
+bool MM_Init(void);
+dword MM_MemAvailable(void);
+void far* MM_PushChunk(word size, ChunkType type);
+void pascal MM_PopChunk(ChunkType type);
+void pascal MM_PopChunks(ChunkType type);
+
+int16_t pascal OpenFileRW(char* name);
+int16_t pascal OpenFileW(char* name);
+void pascal WriteWord(word value, int16_t fd);
+word pascal ReadWord(int16_t fd);
+void pascal CloseFile(int16_t fd);
+char far* MakeFilename(char far* prefix, byte number, char far* postfix);
+
+void LoadGroupFileDict(void);
+dword pascal OpenAssetFile(const char far* name, int16_t* pOutFd);
+word pascal GetAssetFileSize(const char far* name);
+void pascal LoadAssetFile(const char far* name, void far* buffer);
+void pascal LoadAssetFilePart(
+  const char far* name,
+  dword offset,
+  void far* buffer,
+  word size);
+
+void pascal UploadTileset(byte far* data, word size, word targetOffset);
+
+void FadeOutScreen(void);
+void Duke3dTeaserFadeIn(byte step);
+void FadeInScreen(void);
+
+void pascal InitParticleSystem(void);
+void pascal
+  SpawnParticles(word x, word y, signed char xVelocityScale, byte color);
+void pascal UpdateAndDrawParticles(void);
+void pascal ClearParticles(void);
+
+void InstallTimerInterrupt(void);
+void RestoreTimerInterrupt(void);
+
+void pascal WaitTicks(word ticks);
+
+void pascal PlayMusic(char far* filename, void far* buffer);
+void pascal StartMusicPlayback(int16_t far* data);
+void StopMusic(void);
+void ResetAdLibMusicChannels(void);
+
+void pascal PollJoystick(void);
+void interrupt KeyboardHandler(void);
+
+byte pascal AwaitInput(void);
+byte AwaitInputOrTimeout(word ticksToWait);
+byte pascal GetTextInput(word x, word y);
+void pascal ToggleCheckbox(byte index, byte* checkboxData);
+
+word pascal FindNextToken(char far* str);
+word pascal FindTokenForwards(char far* token, char far* str);
+word pascal FindTokenBackwards(char far* token, char far* str);
+char pascal TerminateStrAfterToken(char far* str);
+char pascal TerminateStrAtEOL(char far* str);
+void pascal SetUpParameterRead(char far** pText, char* outOriginalEnd);
+void pascal UnterminateStr(char far* str, char newEnd);
+
+void pascal DrawStatusIcon_1x1(word srcOffset, word x, word y);
+void pascal DrawStatusIcon_1x2(word srcOffset, word x, word y);
+void pascal DrawStatusIcon_2x1(word srcOffset, word x, word y);
+void pascal DrawStatusIcon_2x2(word srcOffset, word x, word y);
+
+void pascal FillScreenRegion(
+  word fillTileIndex,
+  word left,
+  word bottom,
+  word right,
+  word top);
+
+void SetScreenShift(byte amount);
+
+void pascal DrawText(word x, word y, char far* text);
+void pascal DrawFullscreenImage(char far* filename);
+
+void pascal DrawSaveSlotNames(word selectedIndex);
+void pascal DrawKeyBindings(void);
+void pascal DrawCheckboxes(byte x, byte* checkboxData);
+void pascal UnfoldMessageBoxFrame(int16_t top, int16_t height, int16_t width);
+void ShowBonusScreen(void);
+bool pascal RunSaveGameNameEntry(word index);
+void pascal DrawHighScoreList(byte episode);
+void pascal RunRebindKeyDialog(byte index);
+bool pascal RunJoystickCalibration(void);
+void pascal TryAddHighScore(byte episode);
+
+// This function seems to have been redeclared in unit2.c, with a
+// mismatching return type. The function itself returns a word-sized
+// value, but calling code treats it as if returning a byte-sized one.
+// So we don't declare it here, and instead declare it (with the wrong
+// return type) at the top of unit2.c
+//
+// ibool pascal IsSaveSlotEmpty(byte index);
+
+void pascal HUD_DrawLevelNumber(word level);
+void pascal HUD_DrawBackground(void);
+void pascal HUD_DrawHealth(word health);
+void pascal HUD_DrawLowHealthAnimation(word health);
+void pascal HUD_DrawAmmo(word ammo);
+void pascal HUD_DrawWeapon(int16_t weapon);
+void pascal HUD_DrawInventory(void);
+void pascal GiveScore(word score);
+void pascal AddInventoryItem(word item);
+bool pascal RemoveFromInventory(word item);
+void pascal ClearInventory(void);
+void pascal HUD_UpdateInventoryAnimation(void);
+
+void pascal SetMapSize(word width);
+void pascal ParseLevelFlags(
+  byte flags,
+  byte secondaryBackdrop,
+  byte unused1,
+  byte unused2);
+void pascal DecompressRLE(byte far* src, byte far* dest);
+
+void ShowTextScreen(const char far* filename);
+void ShowVGAScreen(const char far* filename);
+
+bool PlayVideo(char far* filename, word videoType, int16_t numRepetitions);
+
+
+// Functions from unit2.c
+int16_t DN2_abs(int16_t value);
+
+void pascal PlaySound(int16_t id);
+
+void pascal DrawSprite(word id, word frame, word x, word y);
+void pascal DrawFontSprite(word charIndex, word x, word y, word plane);
+
+void DrawNewHighScoreEntryBackground(void);
+
+void DrawNewsReporterTalkAnim(void);
+bool pascal QueryOrToggleOption(bool toggle, byte optionId);
+
+word Map_GetTile(word x, word y);
+void Map_SetTile(word tileIndex, word x, word y);
+void pascal
+  Map_MoveSection(word left, word top, word right, word bottom, word distance);
+
+void Quit(const char* quitMessage);
+
+
+// Variables from unit1.c
+extern byte gfxCurrentPalette[16 * 3];
+extern bool jsButtonsSwapped;
+extern byte far mapExtraData[8304];
