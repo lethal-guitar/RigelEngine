@@ -69,11 +69,7 @@ bool gmRequestUnlockNextDoor;
 byte gmCurrentEpisode;
 byte gmCurrentLevel;
 
-// [NOTE] The game only uses 448 out of the 450 available slots.
-// It's theoretically possible that this array only holds 448 elements,
-// and is followed by 64 bytes of unused variables, but that seems
-// unlikely.
-ActorState gmActorStates[MAX_NUM_ACTORS + 2];
+ActorState gmActorStates[MAX_NUM_ACTORS];
 
 word levelActorListSize;
 
