@@ -55,7 +55,6 @@ extern byte gmCurrentEpisode;
 extern byte gmCurrentLevel;
 extern dword plScore;
 extern byte plWeapon;
-extern byte plWeapon_hud;
 extern word gfxCurrentDisplayPage;
 extern word mapBottom;
 extern word mapWidthShift;

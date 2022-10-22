@@ -1707,11 +1707,7 @@ void pascal HandleActorShotCollision(int16_t damage, word handle)
     case ACT_LASER_TURRET:
       if (state->var1 == 0) // not currently spinning
       {
-        // [NOTE] I'm not sure why there are two variables to track the player's
-        // current weapon. This is the only place where this alternate variable
-        // is used, everything else uses plWeapon.
-        // The variable is set in HUD_DrawWeapon().
-        if (plWeapon_hud != WPN_REGULAR || plState == PS_USING_SHIP)
+        if (plWeapon != WPN_REGULAR || plState == PS_USING_SHIP)
         {
           switch (retPlayerShotDirection)
           {

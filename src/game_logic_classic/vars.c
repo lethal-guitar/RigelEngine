@@ -125,8 +125,6 @@ bool mapHasEarthquake;
 byte gmEarthquakeCountdown;
 byte gmEarthquakeThreshold;
 
-byte plWeapon_hud;
-
 byte gmReactorDestructionStep;
 byte gmNumMovingMapParts;
 word plCloakTimeLeft;
