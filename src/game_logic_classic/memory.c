@@ -73,7 +73,7 @@ done just by specifying the chunk type, not the allocated pointer.
  * This allocates 380 kB of memory from DOS, and sets up the memory manager.
  * Doesn't do any error checking, and always returns false.
  */
-bool MM_Init(void)
+bool MM_Init(Context* ctx)
 {
   int16_t i;
 
@@ -85,21 +85,22 @@ bool MM_Init(void)
   // could've been done more efficiently using memset, though.
   for (i = 0; i < MM_MAX_NUM_CHUNKS; ++i)
   {
-    mmChunkSizes[i] = 0;
-    mmChunkTypes[i] = CT_TEMPORARY;
+    ctx->mmChunkSizes[i] = 0;
+    ctx->mmChunkTypes[i] = CT_TEMPORARY;
   }
 
   // Allocate memory from OS (via Borland standard library) and initialize
   // everything else.
-  mmMemTotal = MM_TOTAL_SIZE;
-  mmChunksUsed = 0;
-  mmMemUsed = 0;
+  ctx->mmMemTotal = MM_TOTAL_SIZE;
+  ctx->mmChunksUsed = 0;
+  ctx->mmMemUsed = 0;
 
   return false;
 }
 
 
-#define CURRENT_MEM_TOP_PTR() (void far*)((byte huge*)mmRawMem + mmMemUsed)
+#define CURRENT_MEM_TOP_PTR()                                                  \
+  (void far*)((byte huge*)ctx->mmRawMem + ctx->mmMemUsed)
 
 
 /** Allocate a chunk of given size and type
@@ -109,31 +110,31 @@ bool MM_Init(void)
  * enough memory being left, or the maximum number of chunks already being
  * allocated).
  */
-void far* MM_PushChunk(word size, ChunkType type)
+void far* MM_PushChunk(Context* ctx, word size, ChunkType type)
 {
   void far* mem;
 
-  if (mmMemUsed + size > mmMemTotal)
+  if (ctx->mmMemUsed + size > ctx->mmMemTotal)
   {
     Quit("No Memory");
   }
 
-  if (mmChunksUsed >= MM_MAX_NUM_CHUNKS)
+  if (ctx->mmChunksUsed >= MM_MAX_NUM_CHUNKS)
   {
     Quit("No Chunks");
   }
   else
   {
     // Make a note of the newly allocated chunk's properties
-    mmChunkSizes[mmChunksUsed] = size;
-    mmChunkTypes[mmChunksUsed] = type;
+    ctx->mmChunkSizes[ctx->mmChunksUsed] = size;
+    ctx->mmChunkTypes[ctx->mmChunksUsed] = type;
 
     // Use current top of memory buffer to satisfy the request
     mem = CURRENT_MEM_TOP_PTR();
 
     // Update how much memory/chunks remain available
-    mmMemUsed += size;
-    mmChunksUsed++;
+    ctx->mmMemUsed += size;
+    ctx->mmChunksUsed++;
   }
 
   return mem;

@@ -348,7 +348,10 @@ typedef struct
 } MovingMapPartState;
 
 
-typedef void pascal (*ActorUpdateFunc)(word index);
+struct Context_;
+
+
+typedef void pascal (*ActorUpdateFunc)(struct Context_* ctx, word index);
 
 
 typedef struct
@@ -422,26 +425,26 @@ typedef struct
   (int16_t)(                                                                   \
     ((tileIndex)&0x8000)                                                       \
       ? 0                                                                      \
-      : (gfxTilesetAttributes[(tileIndex) >> 3] & (attribute)))
+      : (ctx->gfxTilesetAttributes[(tileIndex) >> 3] & (attribute)))
 
-#define SHAKE_SCREEN(amount) SetScreenShift(amount)
+#define SHAKE_SCREEN(amount) SetScreenShift(ctx, amount)
 
 #define FLASH_SCREEN(col)                                                      \
   {                                                                            \
-    gfxFlashScreen = true;                                                     \
-    gfxScreenFlashColor = col;                                                 \
+    ctx->gfxFlashScreen = true;                                                \
+    ctx->gfxScreenFlashColor = col;                                            \
   }
 
 
 /** Play an explosion sound, randomly chosen between two variants */
 #define PLAY_EXPLOSION_SOUND()                                                 \
-  if (RandomNumber() & 1)                                                      \
+  if (RandomNumber(ctx) & 1)                                                   \
   {                                                                            \
-    PlaySound(SND_EXPLOSION);                                                  \
+    PlaySound(ctx, SND_EXPLOSION);                                             \
   }                                                                            \
   else                                                                         \
   {                                                                            \
-    PlaySound(SND_ALTERNATE_EXPLOSION);                                        \
+    PlaySound(ctx, SND_ALTERNATE_EXPLOSION);                                   \
   }
 
 
@@ -455,7 +458,8 @@ typedef struct
   }
 
 #define READ_LVL_HEADER_WORD(offset)                                           \
-  ((*(levelHeaderData + offset + 1) << 8) | *(levelHeaderData + offset))
+  ((*(ctx->levelHeaderData + offset + 1) << 8) |                               \
+   *(ctx->levelHeaderData + offset))
 
 // Utility macros for reading actor descriptions in the level header
 //

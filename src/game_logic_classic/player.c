@@ -31,7 +31,7 @@ Player control logic
 *******************************************************************************/
 
 
-void UpdatePlayer_Shooting(void)
+void UpdatePlayer_Shooting(Context* ctx)
 {
   // Which sprite/actor id to use for each shot direction, for each
   // weapon type
@@ -55,14 +55,14 @@ void UpdatePlayer_Shooting(void)
     ACT_DUKE_FLAME_SHOT_LEFT,
     ACT_DUKE_FLAME_SHOT_RIGHT};
 
-  const word* shotSpriteMap = SHOT_SPRITE_MAP + plWeapon * 4;
+  const word* shotSpriteMap = SHOT_SPRITE_MAP + ctx->plWeapon * 4;
 
   // Update rapid fire pacing
-  plRapidFireIsActiveFrame = !plRapidFireIsActiveFrame;
+  ctx->plRapidFireIsActiveFrame = !ctx->plRapidFireIsActiveFrame;
 
   if (
-    plAnimationFrame == 28 || plAnimationFrame == 5 ||
-    plState == PS_RIDING_ELEVATOR)
+    ctx->plAnimationFrame == 28 || ctx->plAnimationFrame == 5 ||
+    ctx->plState == PS_RIDING_ELEVATOR)
   {
     // The player can't shoot while pulling up his legs hanging from a pipe
     // (frame 28), recovering from landing (frame 5), or when riding an
@@ -74,11 +74,11 @@ void UpdatePlayer_Shooting(void)
   // After having fired a shot, the player needs to let go of the fire button
   // before being able to shoot again. This is implemented by the following
   // code.
-  if (!inputFire)
+  if (!ctx->inputFire)
   {
-    if (plBlockShooting)
+    if (ctx->plBlockShooting)
     {
-      plBlockShooting = false;
+      ctx->plBlockShooting = false;
     }
   }
 
@@ -93,110 +93,124 @@ void UpdatePlayer_Shooting(void)
   // when not shooting, and to alternate it only when the fire button is
   // pressed.
   if (
-    plWeapon == WPN_FLAMETHROWER || plRapidFireTimeLeft ||
-    plState == PS_USING_SHIP)
+    ctx->plWeapon == WPN_FLAMETHROWER || ctx->plRapidFireTimeLeft ||
+    ctx->plState == PS_USING_SHIP)
   {
-    plBlockShooting = plRapidFireIsActiveFrame;
+    ctx->plBlockShooting = ctx->plRapidFireIsActiveFrame;
   }
 
   // Fire a shot if requested and allowed
-  if (inputFire && !plBlockShooting)
+  if (ctx->inputFire && !ctx->plBlockShooting)
   {
-    plBlockShooting = true;
+    ctx->plBlockShooting = true;
 
     // Recoil animation for regular standing pose, this is overwritten in
     // some of the cases below
-    if (plAnimationFrame == 0)
+    if (ctx->plAnimationFrame == 0)
     {
-      plAnimationFrame = 18;
+      ctx->plAnimationFrame = 18;
     }
 
     // Now we need to determine the right offset and direction for spawning
     // a shot, based on Duke's orientation and pose (as indicated by the
     // animation frame).
-    if (plActorId == ACT_DUKES_SHIP_L)
+    if (ctx->plActorId == ACT_DUKES_SHIP_L)
     {
-      SpawnPlayerShot(ACT_DUKES_SHIP_LASER_SHOT, plPosX - 3, plPosY, SD_LEFT);
+      SpawnPlayerShot(
+        ctx, ACT_DUKES_SHIP_LASER_SHOT, ctx->plPosX - 3, ctx->plPosY, SD_LEFT);
     }
-    else if (plActorId == ACT_DUKES_SHIP_R)
+    else if (ctx->plActorId == ACT_DUKES_SHIP_R)
     {
-      SpawnPlayerShot(ACT_DUKES_SHIP_LASER_SHOT, plPosX + 8, plPosY, SD_RIGHT);
+      SpawnPlayerShot(
+        ctx, ACT_DUKES_SHIP_LASER_SHOT, ctx->plPosX + 8, ctx->plPosY, SD_RIGHT);
     }
-    else if (plActorId == ACT_DUKE_R)
+    else if (ctx->plActorId == ACT_DUKE_R)
     {
-      if (plAnimationFrame == 37) // Flame thrower jetpack
+      if (ctx->plAnimationFrame == 37) // Flame thrower jetpack
       {
-        SpawnPlayerShot(shotSpriteMap[1], plPosX + 1, plPosY + 1, SD_DOWN);
-        plAnimationFrame = 38;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[1], ctx->plPosX + 1, ctx->plPosY + 1, SD_DOWN);
+        ctx->plAnimationFrame = 38;
       }
-      else if (plAnimationFrame == 16) // Shooting upwards
+      else if (ctx->plAnimationFrame == 16) // Shooting upwards
       {
-        SpawnPlayerShot(shotSpriteMap[0], plPosX + 2, plPosY - 5, SD_UP);
-        plAnimationFrame = 19;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[0], ctx->plPosX + 2, ctx->plPosY - 5, SD_UP);
+        ctx->plAnimationFrame = 19;
       }
-      else if (plAnimationFrame == 17) // Crouched
+      else if (ctx->plAnimationFrame == 17) // Crouched
       {
-        SpawnPlayerShot(shotSpriteMap[3], plPosX + 3, plPosY - 1, SD_RIGHT);
-        plAnimationFrame = 34;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[3], ctx->plPosX + 3, ctx->plPosY - 1, SD_RIGHT);
+        ctx->plAnimationFrame = 34;
       }
-      else if (plAnimationFrame == 20) // Hanging from pipe
+      else if (ctx->plAnimationFrame == 20) // Hanging from pipe
       {
-        SpawnPlayerShot(shotSpriteMap[3], plPosX + 3, plPosY - 2, SD_RIGHT);
-        plAnimationFrame = 27;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[3], ctx->plPosX + 3, ctx->plPosY - 2, SD_RIGHT);
+        ctx->plAnimationFrame = 27;
       }
-      else if (plAnimationFrame == 25) // Shooting down while hanging
+      else if (ctx->plAnimationFrame == 25) // Shooting down while hanging
       {
-        SpawnPlayerShot(shotSpriteMap[1], plPosX + 0, plPosY + 1, SD_DOWN);
-        plAnimationFrame = 26;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[1], ctx->plPosX + 0, ctx->plPosY + 1, SD_DOWN);
+        ctx->plAnimationFrame = 26;
       }
       else // Regular standing pose, or walking
       {
-        SpawnPlayerShot(shotSpriteMap[3], plPosX + 3, plPosY - 2, SD_RIGHT);
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[3], ctx->plPosX + 3, ctx->plPosY - 2, SD_RIGHT);
       }
     }
-    else if (plActorId == ACT_DUKE_L)
+    else if (ctx->plActorId == ACT_DUKE_L)
     {
-      if (plAnimationFrame == 16)
+      if (ctx->plAnimationFrame == 16)
       {
-        SpawnPlayerShot(shotSpriteMap[0], plPosX + 1, plPosY - 5, SD_UP);
-        plAnimationFrame = 19;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[0], ctx->plPosX + 1, ctx->plPosY - 5, SD_UP);
+        ctx->plAnimationFrame = 19;
       }
-      else if (plAnimationFrame == 37)
+      else if (ctx->plAnimationFrame == 37)
       {
-        SpawnPlayerShot(shotSpriteMap[1], plPosX + 2, plPosY + 1, SD_DOWN);
-        plAnimationFrame = 38;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[1], ctx->plPosX + 2, ctx->plPosY + 1, SD_DOWN);
+        ctx->plAnimationFrame = 38;
       }
-      else if (plAnimationFrame == 17)
+      else if (ctx->plAnimationFrame == 17)
       {
-        SpawnPlayerShot(shotSpriteMap[2], plPosX - 2, plPosY - 1, SD_LEFT);
-        plAnimationFrame = 34;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[2], ctx->plPosX - 2, ctx->plPosY - 1, SD_LEFT);
+        ctx->plAnimationFrame = 34;
       }
-      else if (plAnimationFrame == 20)
+      else if (ctx->plAnimationFrame == 20)
       {
-        SpawnPlayerShot(shotSpriteMap[2], plPosX - 2, plPosY - 2, SD_LEFT);
-        plAnimationFrame = 27;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[2], ctx->plPosX - 2, ctx->plPosY - 2, SD_LEFT);
+        ctx->plAnimationFrame = 27;
       }
-      else if (plAnimationFrame == 25)
+      else if (ctx->plAnimationFrame == 25)
       {
-        SpawnPlayerShot(shotSpriteMap[1], plPosX + 3, plPosY + 1, SD_DOWN);
-        plAnimationFrame = 26;
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[1], ctx->plPosX + 3, ctx->plPosY + 1, SD_DOWN);
+        ctx->plAnimationFrame = 26;
       }
       else
       {
-        SpawnPlayerShot(shotSpriteMap[2], plPosX - 2, plPosY - 2, SD_LEFT);
+        SpawnPlayerShot(
+          ctx, shotSpriteMap[2], ctx->plPosX - 2, ctx->plPosY - 2, SD_LEFT);
       }
     }
 
     // Ammo consumption and switching back to regular weapon when
     // ammo is depleted
-    if (plWeapon != WPN_REGULAR && plState != PS_USING_SHIP)
+    if (ctx->plWeapon != WPN_REGULAR && ctx->plState != PS_USING_SHIP)
     {
-      plAmmo--;
+      ctx->plAmmo--;
 
-      if (!plAmmo)
+      if (!ctx->plAmmo)
       {
-        plWeapon = WPN_REGULAR;
-        plAmmo = MAX_AMMO;
+        ctx->plWeapon = WPN_REGULAR;
+        ctx->plAmmo = MAX_AMMO;
       }
     }
   }
@@ -204,25 +218,25 @@ void UpdatePlayer_Shooting(void)
 
 
 /** Respawn the ship pickup actor and adjust player back to normal */
-void UpdatePlayer_LeaveShip(void)
+void UpdatePlayer_LeaveShip(Context* ctx)
 {
-  if (plActorId == ACT_DUKES_SHIP_L)
+  if (ctx->plActorId == ACT_DUKES_SHIP_L)
   {
-    SpawnActor(ACT_DUKES_SHIP_AFTER_EXITING_L, plPosX, plPosY);
-    plActorId = ACT_DUKE_L;
-    plPosX += 3;
+    SpawnActor(ctx, ACT_DUKES_SHIP_AFTER_EXITING_L, ctx->plPosX, ctx->plPosY);
+    ctx->plActorId = ACT_DUKE_L;
+    ctx->plPosX += 3;
   }
   else
   {
-    SpawnActor(ACT_DUKES_SHIP_AFTER_EXITING_R, plPosX, plPosY);
-    plActorId = ACT_DUKE_R;
-    plPosX += 1;
+    SpawnActor(ctx, ACT_DUKES_SHIP_AFTER_EXITING_R, ctx->plPosX, ctx->plPosY);
+    ctx->plActorId = ACT_DUKE_R;
+    ctx->plPosX += 1;
   }
 }
 
 
 /** Main player update function */
-void UpdatePlayer(void)
+void UpdatePlayer(Context* ctx)
 {
   static bool doFlip = false;
   static byte vertScrollCooldown = 0;
@@ -232,95 +246,98 @@ void UpdatePlayer(void)
 
 
   // A spider clinging to Duke's front side prevents shooting
-  if (plAttachedSpider2)
+  if (ctx->plAttachedSpider2)
   {
-    inputFire = false;
+    ctx->inputFire = false;
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // Airlock death sequence
   //////////////////////////////////////////////////////////////////////////////
-  if (plState == PS_AIRLOCK_DEATH_L || plState == PS_AIRLOCK_DEATH_R)
+  if (ctx->plState == PS_AIRLOCK_DEATH_L || ctx->plState == PS_AIRLOCK_DEATH_R)
   {
     // [PERF] Missing `static` causes a copy operation here
     const int16_t AIRLOCK_DEATH_ARC[] = {-2, -2, -1, -1, 0};
 
-    plPosY += AIRLOCK_DEATH_ARC[plAirlockDeathStep];
+    ctx->plPosY += AIRLOCK_DEATH_ARC[ctx->plAirlockDeathStep];
 
-    plAnimationFrame++;
-    if (plAnimationFrame == 16)
+    ctx->plAnimationFrame++;
+    if (ctx->plAnimationFrame == 16)
     {
-      plAnimationFrame = 8;
+      ctx->plAnimationFrame = 8;
     }
 
-    if (plState == PS_AIRLOCK_DEATH_L)
+    if (ctx->plState == PS_AIRLOCK_DEATH_L)
     {
-      plActorId = ACT_DUKE_L;
-      plPosX -= 2;
+      ctx->plActorId = ACT_DUKE_L;
+      ctx->plPosX -= 2;
 
-      if (gmCameraPosX > 2)
+      if (ctx->gmCameraPosX > 2)
       {
-        gmCameraPosX -= 2;
+        ctx->gmCameraPosX -= 2;
       }
     }
     else
     {
-      plActorId = ACT_DUKE_R;
-      plPosX += 2;
+      ctx->plActorId = ACT_DUKE_R;
+      ctx->plPosX += 2;
 
-      if (gmCameraPosX < mapWidth - (VIEWPORT_WIDTH + 2))
+      if (ctx->gmCameraPosX < ctx->mapWidth - (VIEWPORT_WIDTH + 2))
       {
-        gmCameraPosX += 2;
+        ctx->gmCameraPosX += 2;
       }
     }
 
-    if (plPosX > mapWidth)
+    if (ctx->plPosX > ctx->mapWidth)
     {
-      gmGameState = GS_PLAYER_DIED;
-      PlaySound(SND_DUKE_DEATH);
+      ctx->gmGameState = GS_PLAYER_DIED;
+      PlaySound(ctx, SND_DUKE_DEATH);
     }
 
-    if (!plAirlockDeathStep)
+    if (!ctx->plAirlockDeathStep)
     {
-      PlaySound(SND_DUKE_PAIN);
+      PlaySound(ctx, SND_DUKE_PAIN);
     }
 
-    if (plAirlockDeathStep < 4)
+    if (ctx->plAirlockDeathStep < 4)
     {
-      plAirlockDeathStep++;
+      ctx->plAirlockDeathStep++;
     }
 
     return;
   }
 
-  if (plState != PS_GETTING_EATEN)
+  if (ctx->plState != PS_GETTING_EATEN)
   {
-    if (plState == PS_RIDING_ELEVATOR)
+    if (ctx->plState == PS_RIDING_ELEVATOR)
     {
       goto updateShooting;
     }
 
-    plWalkAnimTicksDue = !plWalkAnimTicksDue;
+    ctx->plWalkAnimTicksDue = !ctx->plWalkAnimTicksDue;
 
     ////////////////////////////////////////////////////////////////////////////
     // Conveyor belt movement
     ////////////////////////////////////////////////////////////////////////////
-    CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1);
+    CheckWorldCollision(
+      ctx, MD_DOWN, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY + 1);
 
-    if (retConveyorBeltCheckResult)
+    if (ctx->retConveyorBeltCheckResult)
     {
-      if (retConveyorBeltCheckResult == CB_LEFT)
+      if (ctx->retConveyorBeltCheckResult == CB_LEFT)
       {
-        if (!CheckWorldCollision(MD_LEFT, plActorId, 0, plPosX - 1, plPosY))
+        if (!CheckWorldCollision(
+              ctx, MD_LEFT, ctx->plActorId, 0, ctx->plPosX - 1, ctx->plPosY))
         {
-          plPosX--;
+          ctx->plPosX--;
         }
       }
-      else if (retConveyorBeltCheckResult == CB_RIGHT)
+      else if (ctx->retConveyorBeltCheckResult == CB_RIGHT)
       {
-        if (!CheckWorldCollision(MD_RIGHT, plActorId, 0, plPosX + 1, plPosY))
+        if (!CheckWorldCollision(
+              ctx, MD_RIGHT, ctx->plActorId, 0, ctx->plPosX + 1, ctx->plPosY))
         {
-          plPosX++;
+          ctx->plPosX++;
         }
       }
     }
@@ -328,95 +345,109 @@ void UpdatePlayer(void)
     ////////////////////////////////////////////////////////////////////////////
     // Death animation
     ////////////////////////////////////////////////////////////////////////////
-    if (plState == PS_DYING)
+    if (ctx->plState == PS_DYING)
     {
-      if (plKilledInShip)
+      if (ctx->plKilledInShip)
       {
-        UpdatePlayer_LeaveShip();
-        plKilledInShip = false;
+        UpdatePlayer_LeaveShip(ctx);
+        ctx->plKilledInShip = false;
       }
 
-      if (plAnimationFrame == 32 || plAnimationFrame == 0xFF)
+      if (ctx->plAnimationFrame == 32 || ctx->plAnimationFrame == 0xFF)
       {
-        plBodyExplosionStep++;
+        ctx->plBodyExplosionStep++;
 
-        if (plBodyExplosionStep >= 10)
+        if (ctx->plBodyExplosionStep >= 10)
         {
-          plAnimationFrame = 0xFF;
+          ctx->plAnimationFrame = 0xFF;
 
-          if (plBodyExplosionStep == 10)
+          if (ctx->plBodyExplosionStep == 10)
           {
-            SpawnEffect(ACT_DUKE_DEATH_PARTICLES, plPosX, plPosY, EM_NONE, 0);
+            SpawnEffect(
+              ctx,
+              ACT_DUKE_DEATH_PARTICLES,
+              ctx->plPosX,
+              ctx->plPosY,
+              EM_NONE,
+              0);
           }
 
           if (
-            plBodyExplosionStep & 1 && plBodyExplosionStep > 8 &&
-            plBodyExplosionStep < 16)
+            ctx->plBodyExplosionStep & 1 && ctx->plBodyExplosionStep > 8 &&
+            ctx->plBodyExplosionStep < 16)
           {
-            if (RandomNumber() & 1)
+            if (RandomNumber(ctx) & 1)
             {
-              PlaySound(SND_EXPLOSION);
+              PlaySound(ctx, SND_EXPLOSION);
             }
             else
             {
-              PlaySound(SND_ALTERNATE_EXPLOSION);
+              PlaySound(ctx, SND_ALTERNATE_EXPLOSION);
             }
           }
 
-          switch (plBodyExplosionStep)
+          switch (ctx->plBodyExplosionStep)
           {
             case 10:
-              SpawnParticles(plPosX + 2, plPosY, 0, 6);
+              SpawnParticles(ctx, ctx->plPosX + 2, ctx->plPosY, 0, 6);
               break;
 
             case 12:
-              SpawnParticles(plPosX + 1, plPosY, 1, 3);
+              SpawnParticles(ctx, ctx->plPosX + 1, ctx->plPosY, 1, 3);
               break;
 
             case 14:
-              SpawnParticles(plPosX + 2, plPosY, -1, 10);
+              SpawnParticles(ctx, ctx->plPosX + 2, ctx->plPosY, -1, 10);
               break;
           }
 
-          if (plBodyExplosionStep == 35)
+          if (ctx->plBodyExplosionStep == 35)
           {
-            gmGameState = GS_PLAYER_DIED;
-            plBodyExplosionStep = 0;
+            ctx->gmGameState = GS_PLAYER_DIED;
+            ctx->plBodyExplosionStep = 0;
             return;
           }
         }
       }
       else
       {
-        if (plDeathAnimationStep == 12)
+        if (ctx->plDeathAnimationStep == 12)
         {
-          ++plPosY;
+          ++ctx->plPosY;
 
           if (
             CheckWorldCollision(
-              MD_DOWN, plActorId, plAnimationFrame, plPosX, plPosY + 1) ==
-            CR_COLLISION)
+              ctx,
+              MD_DOWN,
+              ctx->plActorId,
+              ctx->plAnimationFrame,
+              ctx->plPosX,
+              ctx->plPosY + 1) == CR_COLLISION)
           {
-            plAnimationFrame = 32;
+            ctx->plAnimationFrame = 32;
           }
           else
           {
-            ++plPosY;
+            ++ctx->plPosY;
 
             if (
               CheckWorldCollision(
-                MD_DOWN, plActorId, plAnimationFrame, plPosX, plPosY + 1) ==
-              CR_COLLISION)
+                ctx,
+                MD_DOWN,
+                ctx->plActorId,
+                ctx->plAnimationFrame,
+                ctx->plPosX,
+                ctx->plPosY + 1) == CR_COLLISION)
             {
-              plAnimationFrame = 32;
+              ctx->plAnimationFrame = 32;
             }
           }
         }
         else
         {
-          plAnimationFrame = PL_DEATH_ANIMATION[plDeathAnimationStep];
-          plPosY += PL_DEATH_ANIMATION[plDeathAnimationStep + 1];
-          plDeathAnimationStep = plDeathAnimationStep + 2;
+          ctx->plAnimationFrame = PL_DEATH_ANIMATION[ctx->plDeathAnimationStep];
+          ctx->plPosY += PL_DEATH_ANIMATION[ctx->plDeathAnimationStep + 1];
+          ctx->plDeathAnimationStep = ctx->plDeathAnimationStep + 2;
         }
       }
     }
@@ -427,54 +458,55 @@ void UpdatePlayer(void)
       //////////////////////////////////////////////////////////////////////////
 
       // Block input while unlocking a door/force field
-      if (plState == PS_NORMAL && plInteractAnimTicks)
+      if (ctx->plState == PS_NORMAL && ctx->plInteractAnimTicks)
       {
         return;
       }
 
       // Attach to ladders
       if (
-        plState != PS_CLIMBING_LADDER && inputMoveUp &&
-        CheckWorldCollision(MD_UP, plActorId, 36, plPosX, plPosY) ==
+        ctx->plState != PS_CLIMBING_LADDER && ctx->inputMoveUp &&
+        CheckWorldCollision(
+          ctx, MD_UP, ctx->plActorId, 36, ctx->plPosX, ctx->plPosY) ==
           CR_LADDER &&
-        (plState != PS_JUMPING || plJumpStep >= 4))
+        (ctx->plState != PS_JUMPING || ctx->plJumpStep >= 4))
       {
-        plState = PS_CLIMBING_LADDER;
-        plAnimationFrame = 36;
+        ctx->plState = PS_CLIMBING_LADDER;
+        ctx->plAnimationFrame = 36;
 
         goto updateClimbingLadder;
       }
 
       // Filter inputs to avoid conflicting directional inputs
-      if (inputMoveLeft & inputMoveRight)
+      if (ctx->inputMoveLeft & ctx->inputMoveRight)
       {
-        inputMoveLeft = inputMoveRight = 0;
+        ctx->inputMoveLeft = ctx->inputMoveRight = 0;
       }
 
-      if (inputMoveUp & inputMoveDown)
+      if (ctx->inputMoveUp & ctx->inputMoveDown)
       {
-        inputMoveUp = inputMoveDown = 0;
+        ctx->inputMoveUp = ctx->inputMoveDown = 0;
       }
 
 
       //////////////////////////////////////////////////////////////////////////
       // Movement in ship
       //////////////////////////////////////////////////////////////////////////
-      if (plState == PS_USING_SHIP)
+      if (ctx->plState == PS_USING_SHIP)
       {
         static byte shipSpeed = 0;
 
-        plAnimationFrame = 1;
+        ctx->plAnimationFrame = 1;
 
         // Horizontal movement
-        if (inputMoveLeft)
+        if (ctx->inputMoveLeft)
         {
-          if (plActorId == ACT_DUKES_SHIP_R)
+          if (ctx->plActorId == ACT_DUKES_SHIP_R)
           {
             shipSpeed = 0;
           }
 
-          plActorId = ACT_DUKES_SHIP_L;
+          ctx->plActorId = ACT_DUKES_SHIP_L;
 
           if (shipSpeed < 4)
           {
@@ -482,37 +514,67 @@ void UpdatePlayer(void)
           }
 
           if (!CheckWorldCollision(
-                MD_LEFT, ACT_DUKES_SHIP_L, 0, plPosX - 1, plPosY))
+                ctx,
+                MD_LEFT,
+                ACT_DUKES_SHIP_L,
+                0,
+                ctx->plPosX - 1,
+                ctx->plPosY))
           {
-            plPosX--;
+            ctx->plPosX--;
           }
           else if (CheckWorldCollision(
-                     MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                     ctx,
+                     MD_DOWN,
+                     ACT_DUKES_SHIP_L,
+                     0,
+                     ctx->plPosX,
+                     ctx->plPosY + 1))
           {
-            plPosY--;
+            ctx->plPosY--;
           }
           else if (CheckWorldCollision(
-                     MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                     ctx,
+                     MD_UP,
+                     ACT_DUKES_SHIP_L,
+                     0,
+                     ctx->plPosX,
+                     ctx->plPosY - 1))
           {
-            plPosY++;
+            ctx->plPosY++;
           }
 
           if (shipSpeed == 4)
           {
             if (!CheckWorldCollision(
-                  MD_LEFT, ACT_DUKES_SHIP_L, 0, plPosX - 1, plPosY))
+                  ctx,
+                  MD_LEFT,
+                  ACT_DUKES_SHIP_L,
+                  0,
+                  ctx->plPosX - 1,
+                  ctx->plPosY))
             {
-              plPosX--;
+              ctx->plPosX--;
             }
             else if (CheckWorldCollision(
-                       MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                       ctx,
+                       MD_DOWN,
+                       ACT_DUKES_SHIP_L,
+                       0,
+                       ctx->plPosX,
+                       ctx->plPosY + 1))
             {
-              plPosY--;
+              ctx->plPosY--;
             }
             else if (CheckWorldCollision(
-                       MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                       ctx,
+                       MD_UP,
+                       ACT_DUKES_SHIP_L,
+                       0,
+                       ctx->plPosX,
+                       ctx->plPosY - 1))
             {
-              plPosY++;
+              ctx->plPosY++;
             }
           }
           else
@@ -520,14 +582,14 @@ void UpdatePlayer(void)
             // No-op
           }
         }
-        else if (inputMoveRight)
+        else if (ctx->inputMoveRight)
         {
-          if (plActorId == ACT_DUKES_SHIP_L)
+          if (ctx->plActorId == ACT_DUKES_SHIP_L)
           {
             shipSpeed = 0;
           }
 
-          plActorId = ACT_DUKES_SHIP_R;
+          ctx->plActorId = ACT_DUKES_SHIP_R;
 
           if (shipSpeed < 4)
           {
@@ -535,37 +597,67 @@ void UpdatePlayer(void)
           }
 
           if (!CheckWorldCollision(
-                MD_RIGHT, ACT_DUKES_SHIP_R, 0, plPosX + 1, plPosY))
+                ctx,
+                MD_RIGHT,
+                ACT_DUKES_SHIP_R,
+                0,
+                ctx->plPosX + 1,
+                ctx->plPosY))
           {
-            plPosX++;
+            ctx->plPosX++;
           }
           else if (CheckWorldCollision(
-                     MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                     ctx,
+                     MD_DOWN,
+                     ACT_DUKES_SHIP_L,
+                     0,
+                     ctx->plPosX,
+                     ctx->plPosY + 1))
           {
-            plPosY--;
+            ctx->plPosY--;
           }
           else if (CheckWorldCollision(
-                     MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                     ctx,
+                     MD_UP,
+                     ACT_DUKES_SHIP_L,
+                     0,
+                     ctx->plPosX,
+                     ctx->plPosY - 1))
           {
-            plPosY++;
+            ctx->plPosY++;
           }
 
           if (shipSpeed == 4)
           {
             if (!CheckWorldCollision(
-                  MD_RIGHT, ACT_DUKES_SHIP_R, 0, plPosX + 1, plPosY))
+                  ctx,
+                  MD_RIGHT,
+                  ACT_DUKES_SHIP_R,
+                  0,
+                  ctx->plPosX + 1,
+                  ctx->plPosY))
             {
-              plPosX++;
+              ctx->plPosX++;
             }
             else if (CheckWorldCollision(
-                       MD_DOWN, ACT_DUKES_SHIP_L, 0, plPosX, plPosY + 1))
+                       ctx,
+                       MD_DOWN,
+                       ACT_DUKES_SHIP_L,
+                       0,
+                       ctx->plPosX,
+                       ctx->plPosY + 1))
             {
-              plPosY--;
+              ctx->plPosY--;
             }
             else if (CheckWorldCollision(
-                       MD_UP, ACT_DUKES_SHIP_L, 0, plPosX, plPosY - 1))
+                       ctx,
+                       MD_UP,
+                       ACT_DUKES_SHIP_L,
+                       0,
+                       ctx->plPosX,
+                       ctx->plPosY - 1))
             {
-              plPosY++;
+              ctx->plPosY++;
             }
           }
           else
@@ -579,38 +671,43 @@ void UpdatePlayer(void)
         }
 
         // Vertical movement
-        if (inputMoveUp)
+        if (ctx->inputMoveUp)
         {
           if (!CheckWorldCollision(
-                MD_UP, ACT_DUKES_SHIP_R, 0, plPosX, plPosY - 1))
+                ctx, MD_UP, ACT_DUKES_SHIP_R, 0, ctx->plPosX, ctx->plPosY - 1))
           {
-            plPosY--;
+            ctx->plPosY--;
           }
         }
 
-        if (inputMoveDown)
+        if (ctx->inputMoveDown)
         {
           if (!CheckWorldCollision(
-                MD_DOWN, ACT_DUKES_SHIP_R, 0, plPosX, plPosY + 1))
+                ctx,
+                MD_DOWN,
+                ACT_DUKES_SHIP_R,
+                0,
+                ctx->plPosX,
+                ctx->plPosY + 1))
           {
-            plPosY++;
+            ctx->plPosY++;
           }
         }
 
         // Exit the ship when jumping
-        if (!inputJump && plBlockJumping)
+        if (!ctx->inputJump && ctx->plBlockJumping)
         {
-          plBlockJumping = false;
+          ctx->plBlockJumping = false;
         }
 
-        if (inputJump && !plBlockJumping)
+        if (ctx->inputJump && !ctx->plBlockJumping)
         {
-          UpdatePlayer_LeaveShip();
+          UpdatePlayer_LeaveShip(ctx);
 
-          plBlockJumping = true;
-          PlaySound(SND_DUKE_JUMPING);
-          plState = PS_JUMPING;
-          plJumpStep = 0;
+          ctx->plBlockJumping = true;
+          PlaySound(ctx, SND_DUKE_JUMPING);
+          ctx->plState = PS_JUMPING;
+          ctx->plJumpStep = 0;
 
           goto updateJumping;
         }
@@ -622,543 +719,586 @@ void UpdatePlayer(void)
         ////////////////////////////////////////////////////////////////////////
 
         // Adjust sprite when changing orientation (left/right)
-        if (inputMoveLeft)
+        if (ctx->inputMoveLeft)
         {
-          plActorId = ACT_DUKE_L;
+          ctx->plActorId = ACT_DUKE_L;
         }
 
-        if (inputMoveRight)
+        if (ctx->inputMoveRight)
         {
-          plActorId = ACT_DUKE_R;
+          ctx->plActorId = ACT_DUKE_R;
         }
 
-        if (plState == PS_CLIMBING_LADDER)
+        if (ctx->plState == PS_CLIMBING_LADDER)
         {
           goto updateClimbingLadder;
         }
 
         // Horizontal movement
         if (
-          (inputMoveLeft || inputMoveRight) && plState != PS_RECOVERING &&
-          plAnimationFrame != 28)
+          (ctx->inputMoveLeft || ctx->inputMoveRight) &&
+          ctx->plState != PS_RECOVERING && ctx->plAnimationFrame != 28)
         {
-          if (plJumpStep == 1 && plState == PS_JUMPING)
+          if (ctx->plJumpStep == 1 && ctx->plState == PS_JUMPING)
           {
             goto updateJumping;
           }
 
-          if (plState == PS_NORMAL && (inputMoveUp || inputMoveDown))
+          if (
+            ctx->plState == PS_NORMAL &&
+            (ctx->inputMoveUp || ctx->inputMoveDown))
           {
             goto updateNormal;
           }
 
-          if (plState == PS_HANGING)
+          if (ctx->plState == PS_HANGING)
           {
-            if (inputMoveDown || inputFire)
+            if (ctx->inputMoveDown || ctx->inputFire)
             {
               goto updateHanging;
             }
 
             if (
-              plActorId == ACT_DUKE_R &&
+              ctx->plActorId == ACT_DUKE_R &&
               !(hadCollision = CheckWorldCollision(
-                  MD_RIGHT, ACT_DUKE_R, 0, plPosX + 1, plPosY - 1)))
+                  ctx,
+                  MD_RIGHT,
+                  ACT_DUKE_R,
+                  0,
+                  ctx->plPosX + 1,
+                  ctx->plPosY - 1)))
             {
-              plPosX++;
+              ctx->plPosX++;
             }
             else if (
-              plActorId == ACT_DUKE_L &&
+              ctx->plActorId == ACT_DUKE_L &&
               !(hadCollision = CheckWorldCollision(
-                  MD_LEFT, ACT_DUKE_L, plAnimationFrame, plPosX, plPosY)))
+                  ctx,
+                  MD_LEFT,
+                  ACT_DUKE_L,
+                  ctx->plAnimationFrame,
+                  ctx->plPosX,
+                  ctx->plPosY)))
             {
-              plPosX--;
+              ctx->plPosX--;
             }
           }
           else
           {
             if (
-              plActorId == ACT_DUKE_R &&
+              ctx->plActorId == ACT_DUKE_R &&
               !(hadCollision = CheckWorldCollision(
-                  MD_RIGHT, ACT_DUKE_R, 0, plPosX + 1, plPosY)))
+                  ctx, MD_RIGHT, ACT_DUKE_R, 0, ctx->plPosX + 1, ctx->plPosY)))
             {
-              plPosX++;
+              ctx->plPosX++;
             }
             else if (
-              plActorId == ACT_DUKE_L &&
+              ctx->plActorId == ACT_DUKE_L &&
               !(hadCollision = CheckWorldCollision(
-                  MD_LEFT, ACT_DUKE_L, 0, plPosX - 1, plPosY)))
+                  ctx, MD_LEFT, ACT_DUKE_L, 0, ctx->plPosX - 1, ctx->plPosY)))
             {
-              plPosX--;
+              ctx->plPosX--;
             }
           }
         } // end horizontal movement
 
         // Activate flamethrower jetpack
-        if (plWeapon == WPN_FLAMETHROWER && inputMoveDown & inputFire)
+        if (
+          ctx->plWeapon == WPN_FLAMETHROWER &&
+          ctx->inputMoveDown & ctx->inputFire)
         {
-          plState = PS_USING_JETPACK;
-          plAnimationFrame = 37;
+          ctx->plState = PS_USING_JETPACK;
+          ctx->plAnimationFrame = 37;
         }
 
         // Jump/fall recovery frame
-        if (plState == PS_RECOVERING)
+        if (ctx->plState == PS_RECOVERING)
         {
-          plState = PS_NORMAL;
-          PlaySound(SND_DUKE_LANDING);
+          ctx->plState = PS_NORMAL;
+          PlaySound(ctx, SND_DUKE_LANDING);
         }
 
         // Flamethrower jetpack movement
-        if (plState == PS_USING_JETPACK)
+        if (ctx->plState == PS_USING_JETPACK)
         {
-          if (inputMoveDown & inputFire && plWeapon == WPN_FLAMETHROWER)
+          if (
+            ctx->inputMoveDown & ctx->inputFire &&
+            ctx->plWeapon == WPN_FLAMETHROWER)
           {
-            byte collisionCheck =
-              CheckWorldCollision(MD_UP, ACT_DUKE_L, 37, plPosX, plPosY - 1);
+            byte collisionCheck = CheckWorldCollision(
+              ctx, MD_UP, ACT_DUKE_L, 37, ctx->plPosX, ctx->plPosY - 1);
             if (collisionCheck != CR_COLLISION)
             {
-              plPosY--;
+              ctx->plPosY--;
             }
           }
           else
           {
-            plBlockJumping = true;
-            plState = PS_FALLING;
-            plFallingSpeed = 0;
-            plAnimationFrame = 6;
+            ctx->plBlockJumping = true;
+            ctx->plState = PS_FALLING;
+            ctx->plFallingSpeed = 0;
+            ctx->plAnimationFrame = 6;
 
             goto updateShooting;
           }
         }
 
       updateNormal:
-        if (plState == PS_NORMAL)
+        if (ctx->plState == PS_NORMAL)
         {
           register word collisionCheck;
 
-          if (!inputJump && plBlockJumping)
+          if (!ctx->inputJump && ctx->plBlockJumping)
           {
-            plBlockJumping = false;
+            ctx->plBlockJumping = false;
           }
 
           if (
-            inputJump && !plBlockJumping &&
-            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1) !=
+            ctx->inputJump && !ctx->plBlockJumping &&
+            CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 1) !=
               CR_COLLISION)
           {
-            plBlockJumping = true;
-            PlaySound(SND_DUKE_JUMPING);
-            plState = PS_JUMPING;
-            plJumpStep = 0;
+            ctx->plBlockJumping = true;
+            PlaySound(ctx, SND_DUKE_JUMPING);
+            ctx->plState = PS_JUMPING;
+            ctx->plJumpStep = 0;
 
             goto updateJumping;
           }
 
-          collisionCheck =
-            CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1);
+          collisionCheck = CheckWorldCollision(
+            ctx, MD_DOWN, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY + 1);
 
           if (!collisionCheck || collisionCheck == CR_LADDER)
           {
-            plState = PS_FALLING;
-            plFallingSpeed = 0;
+            ctx->plState = PS_FALLING;
+            ctx->plFallingSpeed = 0;
 
             goto updateFalling;
           }
 
-          if (inputMoveUp && !plOnElevator)
+          if (ctx->inputMoveUp && !ctx->plOnElevator)
           {
-            plAnimationFrame = 16;
+            ctx->plAnimationFrame = 16;
           }
-          else if (inputMoveDown && !plOnElevator)
+          else if (ctx->inputMoveDown && !ctx->plOnElevator)
           {
-            plAnimationFrame = 17;
+            ctx->plAnimationFrame = 17;
           }
-          else if ((inputMoveLeft || inputMoveRight) && !hadCollision)
+          else if ((ctx->inputMoveLeft || ctx->inputMoveRight) && !hadCollision)
           {
-            if (plWalkAnimTicksDue)
+            if (ctx->plWalkAnimTicksDue)
             {
-              plAnimationFrame++;
+              ctx->plAnimationFrame++;
             }
 
-            if (plAnimationFrame >= 5)
+            if (ctx->plAnimationFrame >= 5)
             {
-              plAnimationFrame = 1;
+              ctx->plAnimationFrame = 1;
             }
           }
           else
           {
-            plAnimationFrame = 0;
+            ctx->plAnimationFrame = 0;
           }
         }
 
       updateHanging:
-        if (plState == PS_HANGING)
+        if (ctx->plState == PS_HANGING)
         {
           word collCheck;
 
           if (
-            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY) ==
+            CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY) ==
             CR_CLIMBABLE)
           {
-            plPosY++;
+            ctx->plPosY++;
           }
 
-          collCheck =
-            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
+          collCheck = CheckWorldCollision(
+            ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 1);
 
-          if (!inputJump && plBlockJumping)
+          if (!ctx->inputJump && ctx->plBlockJumping)
           {
-            plBlockJumping = false;
+            ctx->plBlockJumping = false;
           }
 
           if (
-            inputJump && !plBlockJumping && !inputMoveDown &&
-            !CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 2))
+            ctx->inputJump && !ctx->plBlockJumping && !ctx->inputMoveDown &&
+            !CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 2))
           {
-            plBlockJumping = true;
-            PlaySound(SND_DUKE_JUMPING);
-            plState = PS_JUMPING;
-            plPosY--;
-            plJumpStep = 1;
+            ctx->plBlockJumping = true;
+            PlaySound(ctx, SND_DUKE_JUMPING);
+            ctx->plState = PS_JUMPING;
+            ctx->plPosY--;
+            ctx->plJumpStep = 1;
 
             goto updateJumping;
           }
 
-          if (inputMoveDown && inputJump || collCheck != CR_CLIMBABLE)
+          if (
+            (ctx->inputMoveDown && ctx->inputJump) || collCheck != CR_CLIMBABLE)
           {
-            plBlockJumping = true;
-            plState = PS_FALLING;
-            plFallingSpeed = 0;
-            plAnimationFrame = 6;
+            ctx->plBlockJumping = true;
+            ctx->plState = PS_FALLING;
+            ctx->plFallingSpeed = 0;
+            ctx->plAnimationFrame = 6;
 
             goto updateShooting;
           }
 
-          if (inputMoveDown)
+          if (ctx->inputMoveDown)
           {
-            plAnimationFrame = 25;
+            ctx->plAnimationFrame = 25;
           }
           else if (
-            !inputFire && (inputMoveLeft || inputMoveRight) && !hadCollision)
+            !ctx->inputFire && (ctx->inputMoveLeft || ctx->inputMoveRight) &&
+            !hadCollision)
           {
-            if (plWalkAnimTicksDue)
+            if (ctx->plWalkAnimTicksDue)
             {
-              plAnimationFrame++;
+              ctx->plAnimationFrame++;
             }
 
-            if (plAnimationFrame >= 25)
+            if (ctx->plAnimationFrame >= 25)
             {
-              plAnimationFrame = 21;
+              ctx->plAnimationFrame = 21;
             }
           }
           else
           {
-            plAnimationFrame = 20;
+            ctx->plAnimationFrame = 20;
           }
 
-          if (inputMoveUp)
+          if (ctx->inputMoveUp)
           {
-            plAnimationFrame = 28;
+            ctx->plAnimationFrame = 28;
 
             goto updateShooting;
           }
         }
 
-        if (plState == PS_BLOWN_BY_FAN)
+        if (ctx->plState == PS_BLOWN_BY_FAN)
         {
-          byte collisionCheck =
-            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
+          byte collisionCheck = CheckWorldCollision(
+            ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 1);
 
           if (collisionCheck != CR_COLLISION)
           {
-            plPosY--;
+            ctx->plPosY--;
           }
 
-          collisionCheck =
-            CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
+          collisionCheck = CheckWorldCollision(
+            ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 1);
 
           if (collisionCheck != CR_COLLISION)
           {
-            plPosY--;
+            ctx->plPosY--;
           }
         }
 
       updateFalling:
-        if (plState == PS_FALLING)
+        if (ctx->plState == PS_FALLING)
         {
-          if (!inputJump && plBlockJumping)
+          if (!ctx->inputJump && ctx->plBlockJumping)
           {
-            plBlockJumping = false;
+            ctx->plBlockJumping = false;
           }
 
-          if (plFallingSpeed <= 4)
+          if (ctx->plFallingSpeed <= 4)
           {
-            if (plFallingSpeed < 4)
+            if (ctx->plFallingSpeed < 4)
             {
-              plFallingSpeed++;
+              ctx->plFallingSpeed++;
             }
 
             if (
-              plFallingSpeed &&
-              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY) ==
+              ctx->plFallingSpeed &&
+              CheckWorldCollision(
+                ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY) ==
                 CR_CLIMBABLE)
             {
-              plAnimationFrame = 20;
-              plState = PS_HANGING;
-              PlaySound(SND_ATTACH_CLIMBABLE);
-              plPosY++;
+              ctx->plAnimationFrame = 20;
+              ctx->plState = PS_HANGING;
+              PlaySound(ctx, SND_ATTACH_CLIMBABLE);
+              ctx->plPosY++;
 
               goto updateShooting;
             }
 
             if (
-              CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1) ==
-              CR_COLLISION)
+              CheckWorldCollision(
+                ctx,
+                MD_DOWN,
+                ctx->plActorId,
+                0,
+                ctx->plPosX,
+                ctx->plPosY + 1) == CR_COLLISION)
             {
-              if (plFallingSpeed == 4)
+              if (ctx->plFallingSpeed == 4)
               {
-                plState = PS_RECOVERING;
-                plAnimationFrame = 5;
+                ctx->plState = PS_RECOVERING;
+                ctx->plAnimationFrame = 5;
 
                 goto updateShooting;
               }
               else
               {
-                plState = PS_NORMAL;
+                ctx->plState = PS_NORMAL;
 
                 goto updateNormal;
               }
             }
             else
             {
-              plPosY++;
+              ctx->plPosY++;
             }
 
-            plAnimationFrame = 7;
+            ctx->plAnimationFrame = 7;
           }
 
-          if (plFallingSpeed == 4)
+          if (ctx->plFallingSpeed == 4)
           {
             if (
-              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY) ==
+              CheckWorldCollision(
+                ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY) ==
               CR_CLIMBABLE)
             {
-              plAnimationFrame = 20;
-              plState = PS_HANGING;
-              PlaySound(SND_ATTACH_CLIMBABLE);
-              plPosY++;
+              ctx->plAnimationFrame = 20;
+              ctx->plState = PS_HANGING;
+              PlaySound(ctx, SND_ATTACH_CLIMBABLE);
+              ctx->plPosY++;
 
               goto updateShooting;
             }
 
             if (
-              CheckWorldCollision(MD_DOWN, plActorId, 0, plPosX, plPosY + 1) ==
-              CR_COLLISION)
+              CheckWorldCollision(
+                ctx,
+                MD_DOWN,
+                ctx->plActorId,
+                0,
+                ctx->plPosX,
+                ctx->plPosY + 1) == CR_COLLISION)
             {
-              if (plFallingSpeed == 4)
+              if (ctx->plFallingSpeed == 4)
               {
-                plState = PS_RECOVERING;
-                plAnimationFrame = 5;
+                ctx->plState = PS_RECOVERING;
+                ctx->plAnimationFrame = 5;
 
                 goto updateShooting;
               }
               else
               {
-                plState = PS_NORMAL;
+                ctx->plState = PS_NORMAL;
 
                 goto updateNormal;
               }
             }
             else
             {
-              plPosY++;
+              ctx->plPosY++;
             }
 
-            plAnimationFrame = 8;
+            ctx->plAnimationFrame = 8;
           }
         }
 
       updateJumping:
-        if (plState == PS_JUMPING)
+        if (ctx->plState == PS_JUMPING)
         {
           static byte PL_JUMP_ARC[] = {0, 2, 2, 1, 1, 1, 0, 0, 0};
 
           register word collisionCheck;
 
-          if (!inputJump && plBlockJumping)
+          if (!ctx->inputJump && ctx->plBlockJumping)
           {
-            plBlockJumping = false;
+            ctx->plBlockJumping = false;
           }
 
-          if (plJumpStep && plJumpStep < 3)
+          if (ctx->plJumpStep && ctx->plJumpStep < 3)
           {
-            collisionCheck =
-              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 2);
+            collisionCheck = CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 2);
 
             if (collisionCheck == CR_CLIMBABLE)
             {
-              plAnimationFrame = 20;
-              plPosY--;
-              plState = PS_HANGING;
-              PlaySound(SND_ATTACH_CLIMBABLE);
+              ctx->plAnimationFrame = 20;
+              ctx->plPosY--;
+              ctx->plState = PS_HANGING;
+              PlaySound(ctx, SND_ATTACH_CLIMBABLE);
 
               goto updateHanging;
             }
             else if (collisionCheck == CR_COLLISION)
             {
-              plJumpStep = 4;
+              ctx->plJumpStep = 4;
               doFlip = false;
             }
 
-            plAnimationFrame = 6;
+            ctx->plAnimationFrame = 6;
           }
 
-          if (plJumpStep < 9)
+          if (ctx->plJumpStep < 9)
           {
-            collisionCheck =
-              CheckWorldCollision(MD_UP, plActorId, 0, plPosX, plPosY - 1);
+            collisionCheck = CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 1);
 
             if (collisionCheck == CR_CLIMBABLE)
             {
-              plAnimationFrame = 20;
-              plState = PS_HANGING;
-              PlaySound(SND_ATTACH_CLIMBABLE);
+              ctx->plAnimationFrame = 20;
+              ctx->plState = PS_HANGING;
+              PlaySound(ctx, SND_ATTACH_CLIMBABLE);
 
               goto updateHanging;
             }
 
-            if (plJumpStep < 6 && collisionCheck == CR_COLLISION)
+            if (ctx->plJumpStep < 6 && collisionCheck == CR_COLLISION)
             {
-              plFallingSpeed = 0;
+              ctx->plFallingSpeed = 0;
               doFlip = false;
-              plState = PS_FALLING;
+              ctx->plState = PS_FALLING;
 
               goto updateFalling;
             }
             else
             {
-              plPosY -= PL_JUMP_ARC[plJumpStep];
+              ctx->plPosY -= PL_JUMP_ARC[ctx->plJumpStep];
 
-              if (plJumpStep == 3 && (!inputJump || plAttachedSpider1))
+              if (
+                ctx->plJumpStep == 3 &&
+                (!ctx->inputJump || ctx->plAttachedSpider1))
               {
-                plJumpStep = 6;
+                ctx->plJumpStep = 6;
               }
 
-              if (!plJumpStep)
+              if (!ctx->plJumpStep)
               {
-                plAnimationFrame = 5;
+                ctx->plAnimationFrame = 5;
               }
 
               if (
-                plJumpStep == 2 && !doFlip && plAttachedSpider1 == 0 &&
-                plAttachedSpider2 == 0 && plAttachedSpider3 == 0)
+                ctx->plJumpStep == 2 && !doFlip &&
+                ctx->plAttachedSpider1 == 0 && ctx->plAttachedSpider2 == 0 &&
+                ctx->plAttachedSpider3 == 0)
               {
-                doFlip = !(RandomNumber() % 6);
+                doFlip = !(RandomNumber(ctx) % 6);
 
                 if (doFlip)
                 {
-                  plAnimationFrame = 8;
+                  ctx->plAnimationFrame = 8;
                 }
                 else
                 {
-                  plAnimationFrame = 6;
+                  ctx->plAnimationFrame = 6;
                 }
               }
 
               if (doFlip)
               {
-                plAnimationFrame++;
+                ctx->plAnimationFrame++;
 
                 if (
-                  plAnimationFrame == 16 ||
-                  (inputMoveLeft == false && inputMoveRight == false))
+                  ctx->plAnimationFrame == 16 ||
+                  (ctx->inputMoveLeft == false && ctx->inputMoveRight == false))
                 {
-                  plAnimationFrame = 6;
+                  ctx->plAnimationFrame = 6;
                   doFlip = false;
                 }
               }
 
-              plJumpStep++;
+              ctx->plJumpStep++;
 
               goto updateClimbingLadder;
             }
           }
 
-          plFallingSpeed = 0;
+          ctx->plFallingSpeed = 0;
           doFlip = false;
-          plState = PS_FALLING;
+          ctx->plState = PS_FALLING;
 
           goto updateFalling;
         }
 
       updateClimbingLadder:
-        if (plState == PS_CLIMBING_LADDER)
+        if (ctx->plState == PS_CLIMBING_LADDER)
         {
           // [PERF] Missing `static` causes a copy operation here
           const byte LADDER_CLIMB_ANIM[] = {35, 36};
 
-          plFallingSpeed = 0;
+          ctx->plFallingSpeed = 0;
 
-          if (!inputJump && plBlockJumping)
+          if (!ctx->inputJump && ctx->plBlockJumping)
           {
-            plBlockJumping = false;
+            ctx->plBlockJumping = false;
           }
 
           if (
-            inputJump && !plBlockJumping &&
-            CheckWorldCollision(MD_UP, plActorId, 36, plPosX, plPosY - 1) !=
+            ctx->inputJump && !ctx->plBlockJumping &&
+            CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 36, ctx->plPosX, ctx->plPosY - 1) !=
               CR_COLLISION)
           {
-            if (inputMoveLeft)
+            if (ctx->inputMoveLeft)
             {
-              plPosX--;
+              ctx->plPosX--;
             }
 
-            if (inputMoveRight)
+            if (ctx->inputMoveRight)
             {
-              plPosX++;
+              ctx->plPosX++;
             }
 
-            plBlockJumping = true;
-            plState = PS_JUMPING;
-            PlaySound(SND_DUKE_JUMPING);
-            plJumpStep = 1;
+            ctx->plBlockJumping = true;
+            ctx->plState = PS_JUMPING;
+            PlaySound(ctx, SND_DUKE_JUMPING);
+            ctx->plJumpStep = 1;
 
             goto updateJumping;
           }
 
           if (
-            inputMoveUp &&
-            CheckWorldCollision(MD_UP, plActorId, 36, plPosX, plPosY - 1) ==
+            ctx->inputMoveUp &&
+            CheckWorldCollision(
+              ctx, MD_UP, ctx->plActorId, 36, ctx->plPosX, ctx->plPosY - 1) ==
               CR_LADDER)
           {
-            plPosY--;
+            ctx->plPosY--;
 
-            if (plPosY % 2)
+            if (ctx->plPosY % 2)
             {
-              plAnimationFrame = LADDER_CLIMB_ANIM
+              ctx->plAnimationFrame = LADDER_CLIMB_ANIM
                 [plLadderAnimationStep = !plLadderAnimationStep];
             }
           }
 
-          if (inputMoveDown)
+          if (ctx->inputMoveDown)
           {
             if (
-              CheckWorldCollision(MD_DOWN, plActorId, 36, plPosX, plPosY + 1) ==
-              CR_LADDER)
+              CheckWorldCollision(
+                ctx,
+                MD_DOWN,
+                ctx->plActorId,
+                36,
+                ctx->plPosX,
+                ctx->plPosY + 1) == CR_LADDER)
             {
-              plPosY++;
+              ctx->plPosY++;
 
-              if (plPosY % 2)
+              if (ctx->plPosY % 2)
               {
-                plAnimationFrame = LADDER_CLIMB_ANIM
+                ctx->plAnimationFrame = LADDER_CLIMB_ANIM
                   [plLadderAnimationStep = !plLadderAnimationStep];
               }
             }
             else
             {
-              plFallingSpeed = 0;
+              ctx->plFallingSpeed = 0;
               doFlip = false;
-              plState = PS_FALLING;
+              ctx->plState = PS_FALLING;
 
               goto updateFalling;
             }
@@ -1171,9 +1311,9 @@ void UpdatePlayer(void)
     // Shooting
     ////////////////////////////////////////////////////////////////////////////
   updateShooting:
-    if (inputFire)
+    if (ctx->inputFire)
     {
-      if (!retConveyorBeltCheckResult)
+      if (!ctx->retConveyorBeltCheckResult)
       {
         vertScrollCooldown = 5;
       }
@@ -1184,13 +1324,13 @@ void UpdatePlayer(void)
     }
     else
     {
-      plRapidFireIsActiveFrame = false;
+      ctx->plRapidFireIsActiveFrame = false;
     }
 
 
-    if (plState != PS_DYING && plState != PS_CLIMBING_LADDER)
+    if (ctx->plState != PS_DYING && ctx->plState != PS_CLIMBING_LADDER)
     {
-      UpdatePlayer_Shooting();
+      UpdatePlayer_Shooting(ctx);
     }
   }
 
@@ -1203,116 +1343,127 @@ void UpdatePlayer(void)
   // hard to see amidst the mess of nested if-statements and repetitive code.
 
   // Horizontal
-  if (plState == PS_USING_SHIP)
+  if (ctx->plState == PS_USING_SHIP)
   {
-    if (gmCameraPosX > 0 && plPosX - gmCameraPosX < 11)
+    if (ctx->gmCameraPosX > 0 && ctx->plPosX - ctx->gmCameraPosX < 11)
     {
-      gmCameraPosX--;
+      ctx->gmCameraPosX--;
     }
     else if (
-      gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 13)
+      ctx->gmCameraPosX < ctx->mapWidth - VIEWPORT_WIDTH &&
+      ctx->plPosX - ctx->gmCameraPosX > 13)
     {
-      gmCameraPosX++;
+      ctx->gmCameraPosX++;
     }
 
-    if (gmCameraPosX > 0 && plPosX - gmCameraPosX < 11)
+    if (ctx->gmCameraPosX > 0 && ctx->plPosX - ctx->gmCameraPosX < 11)
     {
-      gmCameraPosX--;
+      ctx->gmCameraPosX--;
     }
     else if (
-      gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 13)
+      ctx->gmCameraPosX < ctx->mapWidth - VIEWPORT_WIDTH &&
+      ctx->plPosX - ctx->gmCameraPosX > 13)
     {
-      gmCameraPosX++;
+      ctx->gmCameraPosX++;
     }
   }
   else
   {
-    if (gmCameraPosX > 0 && plPosX - gmCameraPosX < 10)
+    if (ctx->gmCameraPosX > 0 && ctx->plPosX - ctx->gmCameraPosX < 10)
     {
-      gmCameraPosX--;
+      ctx->gmCameraPosX--;
 
-      if (gmCameraPosX > 0 && plPosX - gmCameraPosX < 10)
+      if (ctx->gmCameraPosX > 0 && ctx->plPosX - ctx->gmCameraPosX < 10)
       {
-        gmCameraPosX--;
+        ctx->gmCameraPosX--;
       }
     }
     else if (
-      gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 18)
+      ctx->gmCameraPosX < ctx->mapWidth - VIEWPORT_WIDTH &&
+      ctx->plPosX - ctx->gmCameraPosX > 18)
     {
-      gmCameraPosX++;
+      ctx->gmCameraPosX++;
 
       if (
-        gmCameraPosX < mapWidth - VIEWPORT_WIDTH && plPosX - gmCameraPosX > 18)
+        ctx->gmCameraPosX < ctx->mapWidth - VIEWPORT_WIDTH &&
+        ctx->plPosX - ctx->gmCameraPosX > 18)
       {
-        gmCameraPosX++;
+        ctx->gmCameraPosX++;
       }
     }
   }
 
   // Vertical movement up, manual (normal state)
   if (
-    plState == PS_NORMAL && inputMoveUp && gmCameraPosY != 0 &&
-    plPosY - gmCameraPosY < 19 && !plBlockLookingUp && !plOnElevator)
+    ctx->plState == PS_NORMAL && ctx->inputMoveUp && ctx->gmCameraPosY != 0 &&
+    ctx->plPosY - ctx->gmCameraPosY < 19 && !ctx->plBlockLookingUp &&
+    !ctx->plOnElevator)
   {
-    if (gmCameraPosY < 2)
+    if (ctx->gmCameraPosY < 2)
     {
-      gmCameraPosY--;
+      ctx->gmCameraPosY--;
     }
-    else if (plPosY - gmCameraPosY < 18 && gmCameraPosY > 1)
+    else if (ctx->plPosY - ctx->gmCameraPosY < 18 && ctx->gmCameraPosY > 1)
     {
-      gmCameraPosY -= 2;
+      ctx->gmCameraPosY -= 2;
     }
 
-    if (plPosY - gmCameraPosY == 18)
+    if (ctx->plPosY - ctx->gmCameraPosY == 18)
     {
-      gmCameraPosY--;
+      ctx->gmCameraPosY--;
     }
   }
 
   // Vertical movement, automated
   if (
-    plState == PS_USING_SHIP || plState == PS_CLIMBING_LADDER ||
-    plState == PS_USING_JETPACK || plState == PS_BLOWN_BY_FAN ||
-    plState == PS_RIDING_ELEVATOR ||
-    (retConveyorBeltCheckResult && !inputMoveUp && !inputMoveDown))
+    ctx->plState == PS_USING_SHIP || ctx->plState == PS_CLIMBING_LADDER ||
+    ctx->plState == PS_USING_JETPACK || ctx->plState == PS_BLOWN_BY_FAN ||
+    ctx->plState == PS_RIDING_ELEVATOR ||
+    (ctx->retConveyorBeltCheckResult && !ctx->inputMoveUp &&
+     !ctx->inputMoveDown))
   {
-    if (gmCameraPosY > 0 && plPosY - gmCameraPosY < 11)
+    if (ctx->gmCameraPosY > 0 && ctx->plPosY - ctx->gmCameraPosY < 11)
     {
-      gmCameraPosY--;
+      ctx->gmCameraPosY--;
     }
     else
     {
-      if (gmCameraPosY < mapBottom - 19 && plPosY - gmCameraPosY > 12)
+      if (
+        ctx->gmCameraPosY < ctx->mapBottom - 19 &&
+        ctx->plPosY - ctx->gmCameraPosY > 12)
       {
-        gmCameraPosY++;
+        ctx->gmCameraPosY++;
       }
 
       if (
-        plState == PS_RIDING_ELEVATOR && gmCameraPosY < mapBottom - 19 &&
-        plPosY - gmCameraPosY > 12)
+        ctx->plState == PS_RIDING_ELEVATOR &&
+        ctx->gmCameraPosY < ctx->mapBottom - 19 &&
+        ctx->plPosY - ctx->gmCameraPosY > 12)
       {
-        gmCameraPosY++;
+        ctx->gmCameraPosY++;
       }
     }
 
-    if (gmCameraPosY > 0 && plPosY - gmCameraPosY < 11)
+    if (ctx->gmCameraPosY > 0 && ctx->plPosY - ctx->gmCameraPosY < 11)
     {
-      gmCameraPosY--;
+      ctx->gmCameraPosY--;
     }
     else if (
-      gmCameraPosY < mapBottom - VIEWPORT_HEIGHT && plPosY - gmCameraPosY > 12)
+      ctx->gmCameraPosY < ctx->mapBottom - VIEWPORT_HEIGHT &&
+      ctx->plPosY - ctx->gmCameraPosY > 12)
     {
-      gmCameraPosY++;
+      ctx->gmCameraPosY++;
     }
   }
   else
   {
     // Vertical movement down, manual
     if (
-      inputMoveDown && (plState == PS_NORMAL || plState == PS_HANGING) &&
-      !plOnElevator)
+      ctx->inputMoveDown &&
+      (ctx->plState == PS_NORMAL || ctx->plState == PS_HANGING) &&
+      !ctx->plOnElevator)
     {
-      if (plState == PS_NORMAL && vertScrollCooldown)
+      if (ctx->plState == PS_NORMAL && vertScrollCooldown)
       {
         vertScrollCooldown--;
 
@@ -1320,19 +1471,24 @@ void UpdatePlayer(void)
       }
       else
       {
-        if (plPosY - gmCameraPosY > 4 && gmCameraPosY + 19 < mapBottom)
+        if (
+          ctx->plPosY - ctx->gmCameraPosY > 4 &&
+          ctx->gmCameraPosY + 19 < ctx->mapBottom)
         {
-          gmCameraPosY++;
+          ctx->gmCameraPosY++;
         }
 
-        if (plPosY - gmCameraPosY > 4 && gmCameraPosY + 19 < mapBottom)
+        if (
+          ctx->plPosY - ctx->gmCameraPosY > 4 &&
+          ctx->gmCameraPosY + 19 < ctx->mapBottom)
         {
-          gmCameraPosY++;
+          ctx->gmCameraPosY++;
         }
       }
     }
     // Vertical movement up, manual (hanging from a pipe)
-    else if (inputMoveUp && plState == PS_HANGING && gmCameraPosY != 0)
+    else if (
+      ctx->inputMoveUp && ctx->plState == PS_HANGING && ctx->gmCameraPosY != 0)
     {
       if (vertScrollCooldown)
       {
@@ -1342,60 +1498,65 @@ void UpdatePlayer(void)
       }
       else
       {
-        if (gmCameraPosY < 2)
+        if (ctx->gmCameraPosY < 2)
         {
-          gmCameraPosY--;
+          ctx->gmCameraPosY--;
         }
         else
         {
-          if (plPosY - gmCameraPosY < 18 && gmCameraPosY > 1)
+          if (ctx->plPosY - ctx->gmCameraPosY < 18 && ctx->gmCameraPosY > 1)
           {
-            gmCameraPosY -= 2;
+            ctx->gmCameraPosY -= 2;
           }
 
-          if (plPosY - gmCameraPosY == 19)
+          if (ctx->plPosY - ctx->gmCameraPosY == 19)
           {
-            gmCameraPosY++;
+            ctx->gmCameraPosY++;
           }
         }
       }
     }
 
     // Some extra adjustments & special cases
-    if (plPosY > 4096)
+    if (ctx->plPosY > 4096)
     {
-      gmCameraPosY = 0;
+      ctx->gmCameraPosY = 0;
     }
     else if (
-      plState == PS_JUMPING && gmCameraPosY > 2 && plPosY - 2 < gmCameraPosY)
+      ctx->plState == PS_JUMPING && ctx->gmCameraPosY > 2 &&
+      ctx->plPosY - 2 < ctx->gmCameraPosY)
     {
-      gmCameraPosY -= 2;
+      ctx->gmCameraPosY -= 2;
     }
     else
     {
-      if (gmCameraPosY > 0 && plPosY - gmCameraPosY < 6)
+      if (ctx->gmCameraPosY > 0 && ctx->plPosY - ctx->gmCameraPosY < 6)
       {
-        gmCameraPosY--;
+        ctx->gmCameraPosY--;
       }
-      else if (gmCameraPosY < mapBottom - 18)
+      else if (ctx->gmCameraPosY < ctx->mapBottom - 18)
       {
-        if (plPosY - gmCameraPosY > 18 && gmCameraPosY < mapBottom - 19)
+        if (
+          ctx->plPosY - ctx->gmCameraPosY > 18 &&
+          ctx->gmCameraPosY < ctx->mapBottom - 19)
         {
-          gmCameraPosY++;
+          ctx->gmCameraPosY++;
         }
 
-        if (plPosY - gmCameraPosY > 18 && gmCameraPosY < mapBottom - 19)
+        if (
+          ctx->plPosY - ctx->gmCameraPosY > 18 &&
+          ctx->gmCameraPosY < ctx->mapBottom - 19)
         {
-          gmCameraPosY++;
+          ctx->gmCameraPosY++;
         }
       }
-      else if (plPosY - gmCameraPosY >= 19)
+      else if (ctx->plPosY - ctx->gmCameraPosY >= 19)
       {
-        gmCameraPosY++;
+        ctx->gmCameraPosY++;
       }
     }
   }
 
 done:
-  plBlockLookingUp = false;
+  ctx->plBlockLookingUp = false;
 }

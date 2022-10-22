@@ -47,6 +47,7 @@ collision detection (sprite against sprite) is also in here.
  * This special logic only applies if the *2nd* sprite's actor id is Duke's.
  */
 bool pascal AreSpritesTouching(
+  Context* ctx,
   word id1,
   word frame1,
   word x1,
@@ -64,13 +65,13 @@ bool pascal AreSpritesTouching(
   word offset2;
 
   // Load the relevant meta data for both sprites
-  offset1 = gfxActorInfoData[id1] + (frame1 << 3);
+  offset1 = ctx->gfxActorInfoData[id1] + (frame1 << 3);
   x1 += AINFO_X_OFFSET(offset1);
   y1 += AINFO_Y_OFFSET(offset1);
   height1 = AINFO_HEIGHT(offset1);
   width1 = AINFO_WIDTH(offset1);
 
-  offset2 = gfxActorInfoData[id2] + (frame2 << 3);
+  offset2 = ctx->gfxActorInfoData[id2] + (frame2 << 3);
   x2 += AINFO_X_OFFSET(offset2);
   y2 += AINFO_Y_OFFSET(offset2);
   height2 = AINFO_HEIGHT(offset2);
@@ -123,7 +124,7 @@ bool pascal AreSpritesTouching(
   // a sprite which is outside of the map (horizontally) will have a hitbox
   // covering the entire width of the map, which seems odd. As far as I'm
   // aware, this case never occurs in the shipping game.
-  if (x1 > mapWidth)
+  if (x1 > ctx->mapWidth)
   {
     width1 = x1 + width1;
     x1 = 0;
@@ -142,11 +143,11 @@ bool pascal AreSpritesTouching(
 
 
 /** Test if a sprite is partially/fully visible (inside the viewport) */
-bool pascal IsSpriteOnScreen(word id, word frame, word x, word y)
+bool pascal IsSpriteOnScreen(Context* ctx, word id, word frame, word x, word y)
 {
   register word width;
   register word height;
-  word offset = gfxActorInfoData[id] + (frame << 3);
+  word offset = ctx->gfxActorInfoData[id] + (frame << 3);
 
   x += AINFO_X_OFFSET(offset);
   y += AINFO_Y_OFFSET(offset);
@@ -155,19 +156,20 @@ bool pascal IsSpriteOnScreen(word id, word frame, word x, word y)
 
   if (
     // left edge on screen?
-    (gmCameraPosX < x && x < gmCameraPosX + VIEWPORT_WIDTH) ||
+    (ctx->gmCameraPosX < x && x < ctx->gmCameraPosX + VIEWPORT_WIDTH) ||
 
     // right edge on screen?
-    (gmCameraPosX >= x && x + width > gmCameraPosX))
+    (ctx->gmCameraPosX >= x && x + width > ctx->gmCameraPosX))
   {
     // top edge on screen?
-    if ((y - height + 1 < gmCameraPosY + mapViewportHeight &&
-         y >= gmCameraPosY + mapViewportHeight))
+    if ((y - height + 1 < ctx->gmCameraPosY + ctx->mapViewportHeight &&
+         y >= ctx->gmCameraPosY + ctx->mapViewportHeight))
     {
       return true;
     }
     // bottom edge on screen?
-    else if (y >= gmCameraPosY && y < gmCameraPosY + mapViewportHeight)
+    else if (
+      y >= ctx->gmCameraPosY && y < ctx->gmCameraPosY + ctx->mapViewportHeight)
     {
       return true;
     }
@@ -178,22 +180,22 @@ bool pascal IsSpriteOnScreen(word id, word frame, word x, word y)
 
 
 /** Play given sound if given actor is on screen */
-void pascal PlaySoundIfOnScreen(word handle, byte soundId)
+void pascal PlaySoundIfOnScreen(Context* ctx, word handle, byte soundId)
 {
-  ActorState* actor = gmActorStates + handle;
+  ActorState* actor = ctx->gmActorStates + handle;
 
   // [NOTE] This could've been simplified by using IsActorOnScreen
-  if (IsSpriteOnScreen(actor->id, actor->frame, actor->x, actor->y))
+  if (IsSpriteOnScreen(ctx, actor->id, actor->frame, actor->x, actor->y))
   {
-    PlaySound(soundId);
+    PlaySound(ctx, soundId);
   }
 }
 
 
 /** Convenience wrapper for IsSpriteOnScreen, for actors */
-bool pascal IsActorOnScreen(word handle)
+bool pascal IsActorOnScreen(Context* ctx, word handle)
 {
-  ActorState* actor = gmActorStates + handle;
+  ActorState* actor = ctx->gmActorStates + handle;
 
-  return IsSpriteOnScreen(actor->id, actor->frame, actor->x, actor->y);
+  return IsSpriteOnScreen(ctx, actor->id, actor->frame, actor->x, actor->y);
 }

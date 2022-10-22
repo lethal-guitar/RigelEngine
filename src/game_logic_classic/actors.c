@@ -47,13 +47,13 @@ This represents the largest part of the game logic by far.
  * advancing by one animation frame each game frame. But there are also a few
  * special cases for specific types of actors.
  */
-void pascal Act_AnimatedProp(word handle)
+void pascal Act_AnimatedProp(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->id == ACT_PASSIVE_PRISONER)
   {
-    state->frame = !((word)RandomNumber() & 4);
+    state->frame = !((word)RandomNumber(ctx) & 4);
   }
   else if (state->id == ACT_SPECIAL_HINT_GLOBE)
   {
@@ -76,7 +76,7 @@ void pascal Act_AnimatedProp(word handle)
       state->id == ACT_ROTATING_FLOOR_SPIKES)
     {
       // Advance one frame every other game frame (half speed)
-      state->frame = state->frame + gfxCurrentDisplayPage;
+      state->frame = state->frame + ctx->gfxCurrentDisplayPage;
     }
     else
     {
@@ -92,23 +92,25 @@ void pascal Act_AnimatedProp(word handle)
 }
 
 
-void pascal Act_Hoverbot(word handle)
+void pascal Act_Hoverbot(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var5) // wait before starting to move (after teleport animation)
   {
     state->var5--;
 
     // Draw the eye
-    DrawActor(ACT_HOVERBOT, state->var4 + 6, state->x, state->y, DS_NORMAL);
+    DrawActor(
+      ctx, ACT_HOVERBOT, state->var4 + 6, state->x, state->y, DS_NORMAL);
   }
   else if (state->var2 <= 9 && state->var2 > 1) // teleport animation
   {
     if (state->var2 == 8)
     {
       // The effect is player-damaging
-      SpawnEffect(ACT_HOVERBOT_TELEPORT_FX, state->x, state->y, EM_NONE, 0);
+      SpawnEffect(
+        ctx, ACT_HOVERBOT_TELEPORT_FX, state->x, state->y, EM_NONE, 0);
     }
 
     state->var2--;
@@ -135,9 +137,9 @@ void pascal Act_Hoverbot(word handle)
     if (state->var1) // moving right
     {
       state->x++;
-      ApplyWorldCollision(handle, MD_RIGHT);
+      ApplyWorldCollision(ctx, handle, MD_RIGHT);
 
-      if (state->x > plPosX)
+      if (state->x > ctx->plPosX)
       {
         // switch to "turning left"
         state->var3 = 1;
@@ -147,9 +149,9 @@ void pascal Act_Hoverbot(word handle)
     else // moving left
     {
       --state->x;
-      ApplyWorldCollision(handle, MD_LEFT);
+      ApplyWorldCollision(ctx, handle, MD_LEFT);
 
-      if (state->x < plPosX)
+      if (state->x < ctx->plPosX)
       {
         // switch to "turning right"
         state->var3 = 2;
@@ -160,7 +162,7 @@ void pascal Act_Hoverbot(word handle)
 
   if (state->var3 == 1) // turning left
   {
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       state->var4--;
     }
@@ -174,7 +176,7 @@ void pascal Act_Hoverbot(word handle)
 
   if (state->var3 == 2) // turning right
   {
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       state->var4++;
     }
@@ -187,86 +189,90 @@ void pascal Act_Hoverbot(word handle)
   }
 
   // Draw the eye
-  DrawActor(ACT_HOVERBOT, state->var4 + 6, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, ACT_HOVERBOT, state->var4 + 6, state->x, state->y, DS_NORMAL);
 }
 
 
-void pascal Act_PlayerSprite(word handle)
+void pascal Act_PlayerSprite(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Synchronize player sprite to player state
-  state->x = plPosX;
-  state->y = plPosY;
-  state->id = plActorId;
-  state->frame = plAnimationFrame;
+  state->x = ctx->plPosX;
+  state->y = ctx->plPosY;
+  state->id = ctx->plActorId;
+  state->frame = ctx->plAnimationFrame;
 
-  if (plState == PS_AIRLOCK_DEATH_L || plState == PS_AIRLOCK_DEATH_R)
+  if (ctx->plState == PS_AIRLOCK_DEATH_L || ctx->plState == PS_AIRLOCK_DEATH_R)
   {
     return;
   }
 
   // Kill the player if fallen out of the map (bottom-less pit)
-  if (plPosY - 4 > mapBottom && plPosY - 4 < mapBottom + 10)
+  if (ctx->plPosY - 4 > ctx->mapBottom && ctx->plPosY - 4 < ctx->mapBottom + 10)
   {
-    gmGameState = GS_PLAYER_DIED;
-    PlaySound(SND_DUKE_DEATH);
+    ctx->gmGameState = GS_PLAYER_DIED;
+    PlaySound(ctx, SND_DUKE_DEATH);
     return;
   }
 
   //
   // Cloaking device effect and timer
   //
-  if (plCloakTimeLeft)
+  if (ctx->plCloakTimeLeft)
   {
     state->drawStyle = DS_TRANSLUCENT;
 
-    --plCloakTimeLeft;
+    --ctx->plCloakTimeLeft;
 
-    if (plCloakTimeLeft == 30)
+    if (ctx->plCloakTimeLeft == 30)
     {
-      ShowInGameMessage(MID_CLOAK_DISABLING);
+      ShowInGameMessage(ctx, MID_CLOAK_DISABLING);
     }
 
     // Make player flash when cloak is disabling
-    if (plCloakTimeLeft < 30 && gfxCurrentDisplayPage)
+    if (ctx->plCloakTimeLeft < 30 && ctx->gfxCurrentDisplayPage)
     {
       state->drawStyle = DS_WHITEFLASH;
     }
 
-    if (plCloakTimeLeft == 0)
+    if (ctx->plCloakTimeLeft == 0)
     {
-      RemoveFromInventory(ACT_CLOAKING_DEVICE_ICON);
-      SpawnActor(ACT_CLOAKING_DEVICE, gmCloakPickupPosX, gmCloakPickupPosY);
+      RemoveFromInventory(ctx, ACT_CLOAKING_DEVICE_ICON);
+      SpawnActor(
+        ctx,
+        ACT_CLOAKING_DEVICE,
+        ctx->gmCloakPickupPosX,
+        ctx->gmCloakPickupPosY);
     }
   }
 
   //
   // Rapid fire powerup timer
   //
-  if (plRapidFireTimeLeft)
+  if (ctx->plRapidFireTimeLeft)
   {
-    --plRapidFireTimeLeft;
+    --ctx->plRapidFireTimeLeft;
 
-    if (plRapidFireTimeLeft == 30)
+    if (ctx->plRapidFireTimeLeft == 30)
     {
-      ShowInGameMessage(MID_RAPID_FIRE_DISABLING);
+      ShowInGameMessage(ctx, MID_RAPID_FIRE_DISABLING);
     }
 
-    if (plRapidFireTimeLeft == 0)
+    if (ctx->plRapidFireTimeLeft == 0)
     {
-      RemoveFromInventory(ACT_RAPID_FIRE_ICON);
+      RemoveFromInventory(ctx, ACT_RAPID_FIRE_ICON);
     }
   }
 
   //
   // Mercy frames (period of invincibility after getting hit)
   //
-  if (plMercyFramesLeft)
+  if (ctx->plMercyFramesLeft)
   {
-    if (plMercyFramesLeft & 1) // % 2
+    if (ctx->plMercyFramesLeft & 1) // % 2
     {
-      if (plMercyFramesLeft > 10)
+      if (ctx->plMercyFramesLeft > 10)
       {
         state->drawStyle = DS_INVISIBLE;
       }
@@ -276,13 +282,14 @@ void pascal Act_PlayerSprite(word handle)
       }
     }
 
-    plMercyFramesLeft--;
+    ctx->plMercyFramesLeft--;
   }
 
-  if (plState == PS_GETTING_EATEN || plAnimationFrame == 0xFF)
+  if (ctx->plState == PS_GETTING_EATEN || ctx->plAnimationFrame == 0xFF)
   {
     state->drawStyle = DS_INVISIBLE;
-    plAttachedSpider1 = plAttachedSpider2 = plAttachedSpider3 = 0;
+    ctx->plAttachedSpider1 = ctx->plAttachedSpider2 = ctx->plAttachedSpider3 =
+      0;
   }
 
   //
@@ -290,74 +297,78 @@ void pascal Act_PlayerSprite(word handle)
   //
 
   // Draw exhaust flames when the ship is moving
-  if (plState == PS_USING_SHIP && state->drawStyle != 0)
+  if (ctx->plState == PS_USING_SHIP && state->drawStyle != 0)
   {
-    if (inputMoveLeft && inputMoveRight)
+    if (ctx->inputMoveLeft && ctx->inputMoveRight)
     {
-      inputMoveLeft = inputMoveRight = 0;
+      ctx->inputMoveLeft = ctx->inputMoveRight = 0;
     }
 
-    if (inputMoveLeft && plActorId == ACT_DUKES_SHIP_L)
+    if (ctx->inputMoveLeft && ctx->plActorId == ACT_DUKES_SHIP_L)
     {
       DrawActor(
+        ctx,
         ACT_DUKES_SHIP_EXHAUST_FLAMES,
-        gfxCurrentDisplayPage + 4,
-        plPosX,
-        plPosY,
+        ctx->gfxCurrentDisplayPage + 4,
+        ctx->plPosX,
+        ctx->plPosY,
         DS_NORMAL);
     }
 
-    if (inputMoveRight && plActorId == ACT_DUKES_SHIP_R)
+    if (ctx->inputMoveRight && ctx->plActorId == ACT_DUKES_SHIP_R)
     {
       DrawActor(
+        ctx,
         ACT_DUKES_SHIP_EXHAUST_FLAMES,
-        gfxCurrentDisplayPage + 2,
-        plPosX,
-        plPosY,
+        ctx->gfxCurrentDisplayPage + 2,
+        ctx->plPosX,
+        ctx->plPosY,
         DS_NORMAL);
     }
 
-    if (inputMoveUp && !inputMoveDown)
+    if (ctx->inputMoveUp && !ctx->inputMoveDown)
     {
-      if (plActorId == ACT_DUKES_SHIP_L)
+      if (ctx->plActorId == ACT_DUKES_SHIP_L)
       {
         DrawActor(
+          ctx,
           ACT_DUKES_SHIP_EXHAUST_FLAMES,
-          gfxCurrentDisplayPage,
-          plPosX + 1,
-          plPosY,
+          ctx->gfxCurrentDisplayPage,
+          ctx->plPosX + 1,
+          ctx->plPosY,
           DS_NORMAL);
       }
 
-      if (plActorId == ACT_DUKES_SHIP_R)
+      if (ctx->plActorId == ACT_DUKES_SHIP_R)
       {
         DrawActor(
+          ctx,
           ACT_DUKES_SHIP_EXHAUST_FLAMES,
-          gfxCurrentDisplayPage,
-          plPosX,
-          plPosY,
+          ctx->gfxCurrentDisplayPage,
+          ctx->plPosX,
+          ctx->plPosY,
           DS_NORMAL);
       }
     }
   }
-  else if (plInteractAnimTicks)
+  else if (ctx->plInteractAnimTicks)
   {
-    if (plState == PS_NORMAL)
+    if (ctx->plState == PS_NORMAL)
     {
       state->frame = 33;
     }
 
-    plInteractAnimTicks++;
-    if (plInteractAnimTicks == 9)
+    ctx->plInteractAnimTicks++;
+    if (ctx->plInteractAnimTicks == 9)
     {
-      plInteractAnimTicks = 0;
+      ctx->plInteractAnimTicks = 0;
     }
   }
-  else if (plState == PS_RIDING_ELEVATOR)
+  else if (ctx->plState == PS_RIDING_ELEVATOR)
   {
     state->frame = 33;
   }
-  else if (plState == PS_BLOWN_BY_FAN)
+  else if (ctx->plState == PS_BLOWN_BY_FAN)
   {
     state->frame = 6;
   }
@@ -378,9 +389,9 @@ void pascal Act_PlayerSprite(word handle)
  * Part of the behavior that's common to all items is a brief fly up and fall
  * down sequence, with a short bounce when hitting the ground.
  */
-void pascal Act_ItemBox(word handle)
+void pascal Act_ItemBox(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   const sbyte FLY_UP_ARC[] = {-3, -2, -1, 0, 1, 2, 3, -1, 1};
@@ -418,7 +429,7 @@ void pascal Act_ItemBox(word handle)
 
       for (i = 0; i < 8; i += 2)
       {
-        SpawnEffect(FX_LIST[i], state->x, state->y, FX_LIST[i + 1], 0);
+        SpawnEffect(ctx, FX_LIST[i], state->x, state->y, FX_LIST[i + 1], 0);
       }
 
       if ((int16_t)state->var2 == -1) // box is empty
@@ -448,7 +459,7 @@ void pascal Act_ItemBox(word handle)
 
       for (i = 0; i < 10; i += 2)
       {
-        SpawnEffect(FX_LIST[i], state->x, state->y, FX_LIST[i + 1], 0);
+        SpawnEffect(ctx, FX_LIST[i], state->x, state->y, FX_LIST[i + 1], 0);
       }
     }
 
@@ -465,7 +476,7 @@ void pascal Act_ItemBox(word handle)
       // If the barrel has sludge inside, release it. The effect handles
       // damaging the player, so we don't need the barrel's actor anymore.
       state->deleted = true;
-      SpawnEffect(ACT_NUCLEAR_WASTE, state->x, state->y, EM_NONE, 1);
+      SpawnEffect(ctx, ACT_NUCLEAR_WASTE, state->x, state->y, EM_NONE, 1);
       return;
     }
 
@@ -488,7 +499,7 @@ void pascal Act_ItemBox(word handle)
 
       case ACT_TURKEY:
         state->deleted = true;
-        SpawnActor(ACT_TURKEY, state->x, state->y);
+        SpawnActor(ctx, ACT_TURKEY, state->x, state->y);
         return;
     }
   }
@@ -506,7 +517,7 @@ void pascal Act_ItemBox(word handle)
       state->var1 == 12 ||
       (state->var1 == 9 &&
        !CheckWorldCollision(
-         MD_DOWN, state->id, state->frame, state->x, state->y + 1)))
+         ctx, MD_DOWN, state->id, state->frame, state->x, state->y + 1)))
     {
       state->gravityAffected = true;
     }
@@ -518,7 +529,7 @@ void pascal Act_ItemBox(word handle)
   switch (state->id)
   {
     case ACT_PC:
-      state->frame = gfxCurrentDisplayPage;
+      state->frame = ctx->gfxCurrentDisplayPage;
       break;
 
     case ACT_RAPID_FIRE:
@@ -534,7 +545,7 @@ void pascal Act_ItemBox(word handle)
       UPDATE_ANIMATION_LOOP(state, 0, 7);
 
       state->var3++;
-      if (state->var3 > 24 && gfxCurrentDisplayPage)
+      if (state->var3 > 24 && ctx->gfxCurrentDisplayPage)
       {
         state->drawStyle = DS_WHITEFLASH;
       }
@@ -548,24 +559,24 @@ void pascal Act_ItemBox(word handle)
         bool spawnFailedLeft = false;
         bool spawnFailedRight = false;
 
-        gmBombBoxesLeft--;
+        ctx->gmBombBoxesLeft--;
 
         PLAY_EXPLOSION_SOUND();
 
-        SpawnParticles(state->x + 1, state->y, 0, CLR_WHITE);
+        SpawnParticles(ctx, state->x + 1, state->y, 0, CLR_WHITE);
 
         for (i = 0; i < 12; i += 2)
         {
           if (!spawnFailedLeft)
           {
             spawnFailedLeft += SpawnEffect(
-              ACT_FIRE_BOMB_FIRE, state->x - 2 - i, state->y, EM_NONE, i);
+              ctx, ACT_FIRE_BOMB_FIRE, state->x - 2 - i, state->y, EM_NONE, i);
           }
 
           if (!spawnFailedRight)
           {
             spawnFailedRight += SpawnEffect(
-              ACT_FIRE_BOMB_FIRE, state->x + i + 2, state->y, EM_NONE, i);
+              ctx, ACT_FIRE_BOMB_FIRE, state->x + i + 2, state->y, EM_NONE, i);
           }
         }
 
@@ -583,12 +594,13 @@ void pascal Act_ItemBox(word handle)
 
         state->y--;
 
-        if (CheckWorldCollision(MD_UP, ACT_SODA_CAN, 0, state->x, state->y))
+        if (CheckWorldCollision(
+              ctx, MD_UP, ACT_SODA_CAN, 0, state->x, state->y))
         {
           SpawnEffect(
-            ACT_COKE_CAN_DEBRIS_1, state->x, state->y, EM_FLY_LEFT, 0);
+            ctx, ACT_COKE_CAN_DEBRIS_1, state->x, state->y, EM_FLY_LEFT, 0);
           SpawnEffect(
-            ACT_COKE_CAN_DEBRIS_2, state->x, state->y, EM_FLY_RIGHT, 0);
+            ctx, ACT_COKE_CAN_DEBRIS_2, state->x, state->y, EM_FLY_RIGHT, 0);
           PLAY_EXPLOSION_SOUND();
           state->deleted = true;
           return;
@@ -596,8 +608,9 @@ void pascal Act_ItemBox(word handle)
 
         // Draw the rocket exhaust flame
         DrawActor(
+          ctx,
           ACT_SODA_CAN,
-          gfxCurrentDisplayPage + 6,
+          ctx->gfxCurrentDisplayPage + 6,
           state->x,
           state->y,
           DS_NORMAL);
@@ -615,12 +628,14 @@ void pascal Act_ItemBox(word handle)
         for (i = 0; i < 6; i++)
         {
           SpawnEffect(
+            ctx,
             ACT_COKE_CAN_DEBRIS_1,
             state->x + (i & 2),
             state->y + (i & 1),
             i,
             0);
           SpawnEffect(
+            ctx,
             ACT_COKE_CAN_DEBRIS_2,
             state->x + (i & 2),
             state->y + (i & 1),
@@ -628,20 +643,25 @@ void pascal Act_ItemBox(word handle)
             0);
         }
 
-        GiveScore(10000);
+        GiveScore(ctx, 10000);
         SpawnEffect(
-          ACT_SCORE_NUMBER_FX_10000, state->x, state->y, EM_SCORE_NUMBER, 0);
+          ctx,
+          ACT_SCORE_NUMBER_FX_10000,
+          state->x,
+          state->y,
+          EM_SCORE_NUMBER,
+          0);
       }
   }
 }
 
 
-void pascal Act_FlameThrowerBot(word handle)
+void pascal Act_FlameThrowerBot(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Randomly decide to stop and shoot fire
-  if (!(((int16_t)RandomNumber()) & 127))
+  if (!(((int16_t)RandomNumber(ctx)) & 127))
   {
     state->var2 = 16;
   }
@@ -657,12 +677,22 @@ void pascal Act_FlameThrowerBot(word handle)
       if (state->id == ACT_FLAME_THROWER_BOT_R)
       {
         SpawnEffect(
-          ACT_FLAME_THROWER_FIRE_R, state->x + 7, state->y - 3, EM_NONE, 0);
+          ctx,
+          ACT_FLAME_THROWER_FIRE_R,
+          state->x + 7,
+          state->y - 3,
+          EM_NONE,
+          0);
       }
       else
       {
         SpawnEffect(
-          ACT_FLAME_THROWER_FIRE_L, state->x - 7, state->y - 3, EM_NONE, 0);
+          ctx,
+          ACT_FLAME_THROWER_FIRE_L,
+          state->x - 7,
+          state->y - 3,
+          EM_NONE,
+          0);
       }
     }
   }
@@ -670,10 +700,10 @@ void pascal Act_FlameThrowerBot(word handle)
   {
     if (state->var1) // moving up
     {
-      if (gfxCurrentDisplayPage)
+      if (ctx->gfxCurrentDisplayPage)
       {
         state->y--;
-        if (ApplyWorldCollision(handle, MD_UP))
+        if (ApplyWorldCollision(ctx, handle, MD_UP))
         {
           // Start moving down
           state->var1 = 0;
@@ -683,7 +713,7 @@ void pascal Act_FlameThrowerBot(word handle)
     else // moving down
     {
       state->y++;
-      if (ApplyWorldCollision(handle, MD_DOWN))
+      if (ApplyWorldCollision(ctx, handle, MD_DOWN))
       {
         // Start moving up
         state->var1 = 1;
@@ -693,9 +723,9 @@ void pascal Act_FlameThrowerBot(word handle)
 }
 
 
-void pascal Act_BonusGlobe(word handle)
+void pascal Act_BonusGlobe(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Animate and draw the content inside the shell
   state->var2++;
@@ -704,13 +734,13 @@ void pascal Act_BonusGlobe(word handle)
     state->var2 = 0;
   }
 
-  DrawActor(state->var1, state->var2, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, state->var1, state->var2, state->x, state->y, DS_NORMAL);
 }
 
 
-void pascal Act_WatchBot(word handle)
+void pascal Act_WatchBot(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   const word HIDE_HEAD_ANIM[] = {1, 2, 1, 0};
@@ -727,7 +757,7 @@ void pascal Act_WatchBot(word handle)
 
     state->frame = LOOK_AROUND_ANIMS[state->var5][state->var4 - 1];
 
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       state->var4++;
     }
@@ -744,12 +774,12 @@ void pascal Act_WatchBot(word handle)
       if (state->var1)
       {
         state->x++;
-        ApplyWorldCollision(handle, MD_RIGHT);
+        ApplyWorldCollision(ctx, handle, MD_RIGHT);
       }
       else
       {
         state->x--;
-        ApplyWorldCollision(handle, MD_LEFT);
+        ApplyWorldCollision(ctx, handle, MD_LEFT);
       }
     }
 
@@ -760,17 +790,17 @@ void pascal Act_WatchBot(word handle)
       state->var3++;
 
       if (
-        (RandomNumber() & 33) && state->var3 == 2 &&
-        !ApplyWorldCollision(handle, MD_DOWN))
+        (RandomNumber(ctx) & 33) && state->var3 == 2 &&
+        !ApplyWorldCollision(ctx, handle, MD_DOWN))
       {
         state->var4 = 1;
-        state->var5 = (word)RandomNumber() % 2;
+        state->var5 = (word)RandomNumber(ctx) % 2;
       }
       else if (state->var3 == 4)
       {
         state->var2++;
 
-        if (state->x > plPosX)
+        if (state->x > ctx->plPosX)
         {
           state->var1 = 0;
         }
@@ -786,7 +816,7 @@ void pascal Act_WatchBot(word handle)
       {
         state->y--;
 
-        if (ApplyWorldCollision(handle, MD_UP))
+        if (ApplyWorldCollision(ctx, handle, MD_UP))
         {
           state->var2 = 5;
         }
@@ -795,7 +825,7 @@ void pascal Act_WatchBot(word handle)
         {
           state->y--;
 
-          if (ApplyWorldCollision(handle, MD_UP))
+          if (ApplyWorldCollision(ctx, handle, MD_UP))
           {
             state->var2 = 5;
           }
@@ -817,7 +847,7 @@ void pascal Act_WatchBot(word handle)
         state->gravityAffected = false;
         state->var3 = 0;
 
-        PlaySoundIfOnScreen(handle, SND_DUKE_JUMPING);
+        PlaySoundIfOnScreen(ctx, handle, SND_DUKE_JUMPING);
 
         goto doMovementOrWait;
       }
@@ -826,21 +856,21 @@ void pascal Act_WatchBot(word handle)
 }
 
 
-void pascal Act_RocketTurret(word handle)
+void pascal Act_RocketTurret(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (!state->var1)
   {
-    if (state->x - 3 > plPosX)
+    if (state->x - 3 > ctx->plPosX)
     {
       state->frame = 0;
     }
-    else if (state->x + 3 < plPosX)
+    else if (state->x + 3 < ctx->plPosX)
     {
       state->frame = 2;
     }
-    else if (state->y > plPosY)
+    else if (state->y > ctx->plPosY)
     {
       state->frame = 1;
     }
@@ -858,15 +888,15 @@ void pascal Act_RocketTurret(word handle)
     switch (state->frame)
     {
       case 0:
-        SpawnActor(ACT_ENEMY_ROCKET_LEFT, state->x - 2, state->y - 1);
+        SpawnActor(ctx, ACT_ENEMY_ROCKET_LEFT, state->x - 2, state->y - 1);
         break;
 
       case 1:
-        SpawnActor(ACT_ENEMY_ROCKET_UP, state->x + 1, state->y - 2);
+        SpawnActor(ctx, ACT_ENEMY_ROCKET_UP, state->x + 1, state->y - 2);
         break;
 
       case 2:
-        SpawnActor(ACT_ENEMY_ROCKET_RIGHT, state->x + 2, state->y - 1);
+        SpawnActor(ctx, ACT_ENEMY_ROCKET_RIGHT, state->x + 2, state->y - 1);
         break;
     }
 
@@ -875,11 +905,11 @@ void pascal Act_RocketTurret(word handle)
 }
 
 
-void pascal Act_EnemyRocket(word handle)
+void pascal Act_EnemyRocket(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
-  if (!IsActorOnScreen(handle))
+  if (!IsActorOnScreen(ctx, handle))
   {
     state->deleted = true;
     return;
@@ -889,7 +919,7 @@ void pascal Act_EnemyRocket(word handle)
 
   if (state->var1 == 1)
   {
-    PlaySound(SND_FLAMETHROWER_SHOT);
+    PlaySound(ctx, SND_FLAMETHROWER_SHOT);
   }
 
   if (state->id == ACT_ENEMY_ROCKET_LEFT)
@@ -902,13 +932,14 @@ void pascal Act_EnemyRocket(word handle)
     }
 
     DrawActor(
+      ctx,
       ACT_ENEMY_ROCKET_LEFT,
-      gfxCurrentDisplayPage + 1,
+      ctx->gfxCurrentDisplayPage + 1,
       state->x,
       state->y,
       DS_NORMAL);
 
-    if (ApplyWorldCollision(handle, MD_LEFT))
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT))
     {
       state->deleted = true;
     }
@@ -923,13 +954,14 @@ void pascal Act_EnemyRocket(word handle)
     }
 
     DrawActor(
+      ctx,
       ACT_ENEMY_ROCKET_RIGHT,
-      gfxCurrentDisplayPage + 1,
+      ctx->gfxCurrentDisplayPage + 1,
       state->x,
       state->y,
       DS_NORMAL);
 
-    if (ApplyWorldCollision(handle, MD_RIGHT))
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
     {
       state->deleted = true;
     }
@@ -944,13 +976,14 @@ void pascal Act_EnemyRocket(word handle)
     }
 
     DrawActor(
+      ctx,
       ACT_ENEMY_ROCKET_UP,
-      gfxCurrentDisplayPage + 1,
+      ctx->gfxCurrentDisplayPage + 1,
       state->x,
       state->y,
       DS_NORMAL);
 
-    if (ApplyWorldCollision(handle, MD_UP))
+    if (ApplyWorldCollision(ctx, handle, MD_UP))
     {
       state->deleted = true;
     }
@@ -965,13 +998,14 @@ void pascal Act_EnemyRocket(word handle)
     }
 
     DrawActor(
+      ctx,
       ACT_ENEMY_ROCKET_2_UP,
-      gfxCurrentDisplayPage + 1,
+      ctx->gfxCurrentDisplayPage + 1,
       state->x,
       state->y,
       DS_NORMAL);
 
-    if (ApplyWorldCollision(handle, MD_UP))
+    if (ApplyWorldCollision(ctx, handle, MD_UP))
     {
       state->deleted = true;
     }
@@ -986,14 +1020,15 @@ void pascal Act_EnemyRocket(word handle)
     }
 
     DrawActor(
+      ctx,
       ACT_ENEMY_ROCKET_2_DOWN,
-      gfxCurrentDisplayPage + 1,
+      ctx->gfxCurrentDisplayPage + 1,
       state->x,
       state->y,
       DS_NORMAL);
 
     // [BUG] Should be MD_DOWN
-    if (ApplyWorldCollision(handle, MD_UP))
+    if (ApplyWorldCollision(ctx, handle, MD_UP))
     {
       state->deleted = true;
     }
@@ -1001,40 +1036,40 @@ void pascal Act_EnemyRocket(word handle)
 
   if (state->deleted)
   {
-    SpawnEffect(ACT_EXPLOSION_FX_1, state->x, state->y, EM_NONE, 0);
+    SpawnEffect(ctx, ACT_EXPLOSION_FX_1, state->x, state->y, EM_NONE, 0);
   }
 
-  if (!IsActorOnScreen(handle))
+  if (!IsActorOnScreen(ctx, handle))
   {
     state->deleted = true;
   }
 }
 
 
-void pascal Act_WatchBotContainerCarrier(word handle)
+void pascal Act_WatchBotContainerCarrier(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (!state->var1)
   {
     state->frame = 0;
 
-    if (!PlayerInRange(handle, 5))
+    if (!PlayerInRange(ctx, handle, 5))
     {
-      if (state->x > plPosX)
+      if (state->x > ctx->plPosX)
       {
         state->x--;
 
-        if (ApplyWorldCollision(handle, MD_LEFT))
+        if (ApplyWorldCollision(ctx, handle, MD_LEFT))
         {
           state->var1 = 1;
         }
       }
-      else if (state->x + 3 < plPosX)
+      else if (state->x + 3 < ctx->plPosX)
       {
         state->x++;
 
-        if (ApplyWorldCollision(handle, MD_RIGHT))
+        if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
         {
           state->var1 = 1;
         }
@@ -1058,7 +1093,7 @@ void pascal Act_WatchBotContainerCarrier(word handle)
       state->frame = 1;
       state->var2 = 1;
 
-      SpawnActor(ACT_WATCHBOT_CONTAINER, state->x, state->y - 2);
+      SpawnActor(ctx, ACT_WATCHBOT_CONTAINER, state->x, state->y - 2);
     }
     else if (state->var1 > 20 && state->var1 < 35)
     {
@@ -1070,27 +1105,28 @@ void pascal Act_WatchBotContainerCarrier(word handle)
 
       PLAY_EXPLOSION_SOUND();
       SpawnBurnEffect(
-        ACT_FLAME_FX, ACT_WATCHBOT_CONTAINER_CARRIER, state->x, state->y);
+        ctx, ACT_FLAME_FX, ACT_WATCHBOT_CONTAINER_CARRIER, state->x, state->y);
     }
   }
 
   if (!state->var2)
   {
-    DrawActor(ACT_WATCHBOT_CONTAINER, 0, state->x, state->y - 2, DS_NORMAL);
+    DrawActor(
+      ctx, ACT_WATCHBOT_CONTAINER, 0, state->x, state->y - 2, DS_NORMAL);
   }
 }
 
 
-void pascal Act_WatchBotContainer(word handle)
+void pascal Act_WatchBotContainer(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   UPDATE_ANIMATION_LOOP(state, 1, 5);
 
   if (
     state->var1 < 10 &&
     !CheckWorldCollision(
-      MD_UP, ACT_WATCHBOT_CONTAINER, 0, state->x, state->y - 1))
+      ctx, MD_UP, ACT_WATCHBOT_CONTAINER, 0, state->x, state->y - 1))
   {
     state->y--;
   }
@@ -1103,30 +1139,36 @@ void pascal Act_WatchBotContainer(word handle)
     state->deleted = true;
 
     SpawnEffect(
-      ACT_WATCHBOT_CONTAINER_DEBRIS_1, state->x, state->y, EM_FLY_LEFT, 0);
+      ctx, ACT_WATCHBOT_CONTAINER_DEBRIS_1, state->x, state->y, EM_FLY_LEFT, 0);
     SpawnEffect(
-      ACT_WATCHBOT_CONTAINER_DEBRIS_2, state->x, state->y, EM_FLY_RIGHT, 0);
-    PlaySound(SND_ATTACH_CLIMBABLE);
+      ctx,
+      ACT_WATCHBOT_CONTAINER_DEBRIS_2,
+      state->x,
+      state->y,
+      EM_FLY_RIGHT,
+      0);
+    PlaySound(ctx, SND_ATTACH_CLIMBABLE);
 
-    SpawnActor(ACT_WATCHBOT, state->x + 1, state->y + 3);
+    SpawnActor(ctx, ACT_WATCHBOT, state->x + 1, state->y + 3);
   }
   else
   {
-    DrawActor(ACT_WATCHBOT_CONTAINER, 0, state->x, state->y, state->drawStyle);
+    DrawActor(
+      ctx, ACT_WATCHBOT_CONTAINER, 0, state->x, state->y, state->drawStyle);
   }
 }
 
 
-void pascal Act_BomberPlane(word handle)
+void pascal Act_BomberPlane(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 == 0) // Fly towards player
   {
     state->x--;
     if (
-      ApplyWorldCollision(handle, MD_LEFT) ||
-      (state->x <= plPosX && state->x + 6 >= plPosX))
+      ApplyWorldCollision(ctx, handle, MD_LEFT) ||
+      (state->x <= ctx->plPosX && state->x + 6 >= ctx->plPosX))
     {
       state->var1 = 1;
     }
@@ -1142,7 +1184,7 @@ void pascal Act_BomberPlane(word handle)
     if (state->var1 == 10)
     {
       // Drop bomb
-      SpawnActor(ACT_MINI_NUKE, state->x + 2, state->y + 1);
+      SpawnActor(ctx, ACT_MINI_NUKE, state->x + 2, state->y + 1);
     }
 
     if (state->var1 == 30)
@@ -1151,7 +1193,7 @@ void pascal Act_BomberPlane(word handle)
       state->y--;
       state->x -= 2;
 
-      if (!IsActorOnScreen(handle))
+      if (!IsActorOnScreen(ctx, handle))
       {
         state->deleted = true;
         return;
@@ -1162,18 +1204,23 @@ void pascal Act_BomberPlane(word handle)
   // Draw bomb if not dropped yet
   if (state->var1 < 10)
   {
-    DrawActor(ACT_MINI_NUKE, 0, state->x + 2, state->y, DS_NORMAL);
+    DrawActor(ctx, ACT_MINI_NUKE, 0, state->x + 2, state->y, DS_NORMAL);
   }
 
   // Draw exhaust flame
   DrawActor(
-    ACT_BOMBER_PLANE, gfxCurrentDisplayPage + 1, state->x, state->y, DS_NORMAL);
+    ctx,
+    ACT_BOMBER_PLANE,
+    ctx->gfxCurrentDisplayPage + 1,
+    state->x,
+    state->y,
+    DS_NORMAL);
 }
 
 
-void pascal Act_MiniNuke(word handle)
+void pascal Act_MiniNuke(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
 
   if (state->gravityState == 1)
   {
@@ -1187,8 +1234,8 @@ void pascal Act_MiniNuke(word handle)
   {
     state->deleted = true;
 
-    PlaySound(SND_BIG_EXPLOSION);
-    SpawnEffect(ACT_NUCLEAR_EXPLOSION, state->x, state->y, EM_NONE, 0);
+    PlaySound(ctx, SND_BIG_EXPLOSION);
+    SpawnEffect(ctx, ACT_NUCLEAR_EXPLOSION, state->x, state->y, EM_NONE, 0);
     FLASH_SCREEN(SFC_WHITE);
 
     if (state->id != ACT_MINI_NUKE_SMALL)
@@ -1198,12 +1245,14 @@ void pascal Act_MiniNuke(word handle)
       for (i = 4; i < 20; i += 4)
       {
         SpawnEffect(
+          ctx,
           ACT_NUCLEAR_EXPLOSION,
           state->x - i,
           state->y + 2,
           EM_NONE,
           i >> 1); // i / 2
         SpawnEffect(
+          ctx,
           ACT_NUCLEAR_EXPLOSION,
           state->x + i,
           state->y + 2,
@@ -1215,15 +1264,15 @@ void pascal Act_MiniNuke(word handle)
 }
 
 
-void pascal Act_SpikeBall(word handle)
+void pascal Act_SpikeBall(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 == 2)
   {
     state->x++;
 
-    if (ApplyWorldCollision(handle, MD_RIGHT))
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
     {
       state->var1 = 1;
     }
@@ -1232,7 +1281,7 @@ void pascal Act_SpikeBall(word handle)
   {
     state->x--;
 
-    if (ApplyWorldCollision(handle, MD_LEFT))
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT))
     {
       state->var1 = 2;
     }
@@ -1242,20 +1291,20 @@ void pascal Act_SpikeBall(word handle)
   {
     state->y--;
 
-    if (ApplyWorldCollision(handle, MD_UP))
+    if (ApplyWorldCollision(ctx, handle, MD_UP))
     {
       state->var2 = 5;
-      PlaySoundIfOnScreen(handle, SND_DUKE_JUMPING);
+      PlaySoundIfOnScreen(ctx, handle, SND_DUKE_JUMPING);
     }
 
     if (state->var2 < 2)
     {
       state->y--;
 
-      if (ApplyWorldCollision(handle, MD_UP))
+      if (ApplyWorldCollision(ctx, handle, MD_UP))
       {
         state->var2 = 5;
-        PlaySoundIfOnScreen(handle, SND_DUKE_JUMPING);
+        PlaySoundIfOnScreen(ctx, handle, SND_DUKE_JUMPING);
       }
     }
 
@@ -1277,25 +1326,25 @@ void pascal Act_SpikeBall(word handle)
   {
     state->var2 = 0;
     state->gravityAffected = false;
-    PlaySoundIfOnScreen(handle, SND_DUKE_JUMPING);
+    PlaySoundIfOnScreen(ctx, handle, SND_DUKE_JUMPING);
   }
 }
 
 
-void pascal Act_Reactor(word handle)
+void pascal Act_Reactor(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   UPDATE_ANIMATION_LOOP(state, 0, 3);
 }
 
 
-void pascal Act_SlimeContainer(word handle)
+void pascal Act_SlimeContainer(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Draw roof
-  DrawActor(ACT_SLIME_CONTAINER, 8, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, ACT_SLIME_CONTAINER, 8, state->x, state->y, DS_NORMAL);
 
   if (state->frame != 7)
   {
@@ -1311,24 +1360,24 @@ void pascal Act_SlimeContainer(word handle)
 
       if (state->frame == 7)
       {
-        SpawnActor(ACT_SLIME_BLOB, state->x + 2, state->y);
+        SpawnActor(ctx, ACT_SLIME_BLOB, state->x + 2, state->y);
       }
     }
     else // still intact
     {
       // Draw bottom part
-      DrawActor(ACT_SLIME_CONTAINER, 2, state->x, state->y, DS_NORMAL);
+      DrawActor(ctx, ACT_SLIME_CONTAINER, 2, state->x, state->y, DS_NORMAL);
 
       // Animate slime blob moving around inside
-      state->frame = RandomNumber() & 1; // % 2
+      state->frame = RandomNumber(ctx) & 1; // % 2
     }
   }
 }
 
 
-void pascal Act_SlimeBlob(word handle)
+void pascal Act_SlimeBlob(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->id == ACT_SLIME_BLOB_2) // on ceiling or flying
   {
@@ -1344,7 +1393,7 @@ void pascal Act_SlimeBlob(word handle)
         state->y++;
 
         if (!CheckWorldCollision(
-              MD_DOWN, state->id, state->frame, state->x, state->y + 3))
+              ctx, MD_DOWN, state->id, state->frame, state->x, state->y + 3))
         {
           return;
         }
@@ -1366,7 +1415,7 @@ void pascal Act_SlimeBlob(word handle)
         state->y--;
 
         if (!CheckWorldCollision(
-              MD_UP, state->id, state->frame, state->x, state->y))
+              ctx, MD_UP, state->id, state->frame, state->x, state->y))
         {
           return;
         }
@@ -1378,26 +1427,32 @@ void pascal Act_SlimeBlob(word handle)
       }
       else
       {
-        if (state->x == plPosX)
+        if (state->x == ctx->plPosX)
         {
           state->var1 = 100;
           return;
         }
 
         state->var2 = !state->var2;
-        state->frame = state->x > plPosX ? state->var2 + 7 : state->var2 + 9;
+        state->frame =
+          state->x > ctx->plPosX ? state->var2 + 7 : state->var2 + 9;
 
         if (state->var2 % 2)
         {
-          if (state->x > plPosX)
+          if (state->x > ctx->plPosX)
           {
             state->x--;
 
             if (
               CheckWorldCollision(
-                MD_LEFT, state->id, state->frame, state->x, state->y) ||
+                ctx, MD_LEFT, state->id, state->frame, state->x, state->y) ||
               !CheckWorldCollision(
-                MD_UP, state->id, state->frame, state->x - 4, state->y - 1))
+                ctx,
+                MD_UP,
+                state->id,
+                state->frame,
+                state->x - 4,
+                state->y - 1))
             {
               state->var1 = 100;
             }
@@ -1408,9 +1463,14 @@ void pascal Act_SlimeBlob(word handle)
 
             if (
               CheckWorldCollision(
-                MD_RIGHT, state->id, state->frame, state->x, state->y) ||
+                ctx, MD_RIGHT, state->id, state->frame, state->x, state->y) ||
               !CheckWorldCollision(
-                MD_UP, state->id, state->frame, state->x + 4, state->y - 1))
+                ctx,
+                MD_UP,
+                state->id,
+                state->frame,
+                state->x + 4,
+                state->y - 1))
             {
               state->var1 = 100;
             }
@@ -1425,7 +1485,7 @@ void pascal Act_SlimeBlob(word handle)
     {
       state->var1++;
 
-      if (!((word)RandomNumber() % 32))
+      if (!((word)RandomNumber(ctx) % 32))
       {
         // Start flying up
         state->id = ACT_SLIME_BLOB_2;
@@ -1434,11 +1494,11 @@ void pascal Act_SlimeBlob(word handle)
       }
       else
       {
-        state->frame = state->var2 + (RandomNumber() & 3);
+        state->frame = state->var2 + (RandomNumber(ctx) & 3);
 
         if (state->var1 == 10)
         {
-          if (state->x > plPosX)
+          if (state->x > ctx->plPosX)
           {
             state->var2 = 0;
           }
@@ -1456,8 +1516,8 @@ void pascal Act_SlimeBlob(word handle)
       state->frame = state->var2 + state->var3 % 2 + 3;
 
       if (
-        (state->x > plPosX && state->var2) ||
-        (state->x < plPosX && !state->var2))
+        (state->x > ctx->plPosX && state->var2) ||
+        (state->x < ctx->plPosX && !state->var2))
       {
         state->var1 = 0;
       }
@@ -1469,7 +1529,7 @@ void pascal Act_SlimeBlob(word handle)
           {
             state->x++;
 
-            if (ApplyWorldCollision(handle, MD_RIGHT))
+            if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
             {
               state->var1 = 0;
             }
@@ -1478,7 +1538,7 @@ void pascal Act_SlimeBlob(word handle)
           {
             state->x--;
 
-            if (ApplyWorldCollision(handle, MD_LEFT))
+            if (ApplyWorldCollision(ctx, handle, MD_LEFT))
             {
               state->var1 = 0;
             }
@@ -1490,11 +1550,11 @@ void pascal Act_SlimeBlob(word handle)
 }
 
 
-void pascal Act_Snake(word handle)
+void pascal Act_Snake(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
-  if (state->id == gmPlayerEatingActor && plState == PS_DYING)
+  if (state->id == ctx->gmPlayerEatingActor && ctx->plState == PS_DYING)
   {
     // [PERF] Missing `static` causes a copy operation here
     // clang-format off
@@ -1505,20 +1565,20 @@ void pascal Act_Snake(word handle)
     };
     // clang-format on
 
-    SpawnDestructionEffects(handle, DEBRIS_SPEC, ACT_EXPLOSION_FX_1);
+    SpawnDestructionEffects(ctx, handle, DEBRIS_SPEC, ACT_EXPLOSION_FX_1);
     state->deleted = true;
-    gmPlayerEatingActor = 0;
+    ctx->gmPlayerEatingActor = 0;
     return;
   }
 
   if (state->var2)
   {
-    gmPlayerEatingActor = state->id;
-    plState = PS_GETTING_EATEN;
+    ctx->gmPlayerEatingActor = state->id;
+    ctx->plState = PS_GETTING_EATEN;
 
     if (state->var3 == 2)
     {
-      plAnimationFrame = 0xFF;
+      ctx->plAnimationFrame = 0xFF;
     }
 
     if (!state->var4)
@@ -1527,7 +1587,7 @@ void pascal Act_Snake(word handle)
 
       if (state->var3 == 7)
       {
-        plPosX += 2;
+        ctx->plPosX += 2;
         state->var4 = 1;
 
         if (state->var1 < 2)
@@ -1543,18 +1603,18 @@ void pascal Act_Snake(word handle)
 
     if (state->var4)
     {
-      DamagePlayer();
+      DamagePlayer(ctx);
 
-      if (inputFire && plState != PS_DYING)
+      if (ctx->inputFire && ctx->plState != PS_DYING)
       {
         state->health = 1;
-        HandleActorShotCollision(state->health, handle);
-        plState = PS_NORMAL;
+        HandleActorShotCollision(ctx, state->health, handle);
+        ctx->plState = PS_NORMAL;
         return;
       }
     }
 
-    state->frame = state->var1 + state->var3 + gfxCurrentDisplayPage;
+    state->frame = state->var1 + state->var3 + ctx->gfxCurrentDisplayPage;
 
     if (!state->var4)
     {
@@ -1568,7 +1628,7 @@ void pascal Act_Snake(word handle)
   {
     if (!state->var2)
     {
-      if (!gfxCurrentDisplayPage)
+      if (!ctx->gfxCurrentDisplayPage)
       {
         state->x++;
         state->frame = state->var1 + (state->x & 1);
@@ -1576,14 +1636,14 @@ void pascal Act_Snake(word handle)
     }
     else
     {
-      if (gfxCurrentDisplayPage)
+      if (ctx->gfxCurrentDisplayPage)
       {
-        plPosX++;
+        ctx->plPosX++;
         state->x++;
       }
     }
 
-    if (ApplyWorldCollision(handle, MD_RIGHT))
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
     {
       state->var1 = 0;
       state->x += 2;
@@ -1593,7 +1653,7 @@ void pascal Act_Snake(word handle)
   {
     if (!state->var2)
     {
-      if (!gfxCurrentDisplayPage)
+      if (!ctx->gfxCurrentDisplayPage)
       {
         state->x--;
         state->frame = state->x & 1;
@@ -1601,14 +1661,14 @@ void pascal Act_Snake(word handle)
     }
     else
     {
-      if (gfxCurrentDisplayPage)
+      if (ctx->gfxCurrentDisplayPage)
       {
-        plPosX--;
+        ctx->plPosX--;
         state->x--;
       }
     }
 
-    if (ApplyWorldCollision(handle, MD_LEFT))
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT))
     {
       state->var1 = 9;
       state->x -= 2;
@@ -1617,12 +1677,12 @@ void pascal Act_Snake(word handle)
 }
 
 
-void pascal Act_SecurityCamera(word handle)
+void pascal Act_SecurityCamera(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   word savedY;
 
-  if (plCloakTimeLeft)
+  if (ctx->plCloakTimeLeft)
   {
     state->frame = 0;
     return;
@@ -1634,13 +1694,13 @@ void pascal Act_SecurityCamera(word handle)
     state->y++;
   }
 
-  if (state->x + 1 < plPosX)
+  if (state->x + 1 < ctx->plPosX)
   {
-    if (state->y - 1 > plPosY)
+    if (state->y - 1 > ctx->plPosY)
     {
       state->var1 = 3;
     }
-    else if (state->y < plPosY)
+    else if (state->y < ctx->plPosY)
     {
       state->var1 = 1;
     }
@@ -1649,13 +1709,13 @@ void pascal Act_SecurityCamera(word handle)
       state->var1 = 2;
     }
   }
-  else if (state->x > plPosX)
+  else if (state->x > ctx->plPosX)
   {
-    if (state->y - 1 > plPosY)
+    if (state->y - 1 > ctx->plPosY)
     {
       state->var1 = 5;
     }
-    else if (state->y < plPosY)
+    else if (state->y < ctx->plPosY)
     {
       state->var1 = 7;
     }
@@ -1666,7 +1726,7 @@ void pascal Act_SecurityCamera(word handle)
   }
   else
   {
-    if (state->y >= plPosY)
+    if (state->y >= ctx->plPosY)
     {
       state->var1 = 4;
     }
@@ -1685,9 +1745,9 @@ void pascal Act_SecurityCamera(word handle)
 }
 
 
-void pascal Act_CeilingSucker(word handle)
+void pascal Act_CeilingSucker(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   const byte GRAB_ANIM_SEQ[] = {0, 0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0};
@@ -1697,7 +1757,8 @@ void pascal Act_CeilingSucker(word handle)
                                       0, 6, 0,  6, 0, 6, 0,  6, 0, 6, 7,
                                       8, 9, 10, 5, 4, 3, 2,  1, 0};
 
-  if (!state->var1 && plPosX + 4 >= state->x && state->x + 4 >= plPosX)
+  if (
+    !state->var1 && ctx->plPosX + 4 >= state->x && state->x + 4 >= ctx->plPosX)
   {
     state->var1 = 1;
   }
@@ -1717,10 +1778,10 @@ void pascal Act_CeilingSucker(word handle)
 
     if (state->var2 && state->var1 == 25)
     {
-      plState = PS_NORMAL;
-      plAnimationFrame = 0;
-      plPosX = state->x;
-      DamagePlayer();
+      ctx->plState = PS_NORMAL;
+      ctx->plAnimationFrame = 0;
+      ctx->plPosX = state->x;
+      DamagePlayer(ctx);
     }
 
     if ((state->var1 == 11 && !state->var2) || state->var1 == 31)
@@ -1743,9 +1804,9 @@ void pascal Act_CeilingSucker(word handle)
 }
 
 
-void pascal Act_PlayerShip(word handle)
+void pascal Act_PlayerShip(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Update the cooldown timer - the ship can't be picked up again right after
   // exiting it. This is to prevent the player from immediately picking it up
@@ -1758,11 +1819,11 @@ void pascal Act_PlayerShip(word handle)
 }
 
 
-void pascal Act_BrokenMissile(word handle)
+void pascal Act_BrokenMissile(Context* ctx, word handle)
 {
   static const byte ANIM_SEQ[] = {1, 2, 3, 2, 3, 4, 3};
 
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
 
   if (!state->var1)
@@ -1789,7 +1850,7 @@ void pascal Act_BrokenMissile(word handle)
 
     if (ANIM_SEQ[state->var2] == 3)
     {
-      PlaySound(SND_ATTACH_CLIMBABLE);
+      PlaySound(ctx, SND_ATTACH_CLIMBABLE);
     }
   }
 
@@ -1804,6 +1865,7 @@ void pascal Act_BrokenMissile(word handle)
     PLAY_EXPLOSION_SOUND();
 
     SpawnEffect(
+      ctx,
       ACT_NUCLEAR_EXPLOSION,
       state->x - (state->var2 == 1 ? 4 : 0),
       state->y,
@@ -1813,6 +1875,7 @@ void pascal Act_BrokenMissile(word handle)
     for (i = 0; i < 4; i++)
     {
       SpawnEffect(
+        ctx,
         ACT_MISSILE_DEBRIS,
         state->x + (i << 1), // * 2
         state->y,
@@ -1823,15 +1886,15 @@ void pascal Act_BrokenMissile(word handle)
 }
 
 
-void pascal Act_EyeBallThrower(word handle)
+void pascal Act_EyeBallThrower(Context* ctx, word handle)
 {
   static const byte RISE_UP_ANIM[] = {0, 0, 0, 0, 0, 0, 1, 2, 3, 4};
 
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 == 0) // Turn towards player
   {
-    if (state->x > plPosX)
+    if (state->x > ctx->plPosX)
     {
       state->id = ACT_EYEBALL_THROWER_L;
     }
@@ -1857,9 +1920,9 @@ void pascal Act_EyeBallThrower(word handle)
 
     // Do we want to attack?
     if (
-      ((state->id == ACT_EYEBALL_THROWER_L && state->x > plPosX) ||
-       (state->id == ACT_EYEBALL_THROWER_R && state->x < plPosX)) &&
-      PlayerInRange(handle, 14) && !PlayerInRange(handle, 9))
+      ((state->id == ACT_EYEBALL_THROWER_L && state->x > ctx->plPosX) ||
+       (state->id == ACT_EYEBALL_THROWER_R && state->x < ctx->plPosX)) &&
+      PlayerInRange(ctx, handle, 14) && !PlayerInRange(ctx, handle, 9))
     {
       // Start attacking
       state->var1 = 12;
@@ -1876,7 +1939,7 @@ void pascal Act_EyeBallThrower(word handle)
       {
         state->x--;
 
-        if (ApplyWorldCollision(handle, MD_LEFT))
+        if (ApplyWorldCollision(ctx, handle, MD_LEFT))
         {
           // Start reorienting
           state->var1 = 0;
@@ -1888,7 +1951,7 @@ void pascal Act_EyeBallThrower(word handle)
       {
         state->x++;
 
-        if (ApplyWorldCollision(handle, MD_RIGHT))
+        if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
         {
           // Start reorienting
           state->var1 = 0;
@@ -1910,11 +1973,17 @@ void pascal Act_EyeBallThrower(word handle)
       if (state->id == ACT_EYEBALL_THROWER_L)
       {
         SpawnEffect(
-          ACT_EYEBALL_PROJECTILE, state->x, state->y - 6, EM_FLY_UPPER_LEFT, 0);
+          ctx,
+          ACT_EYEBALL_PROJECTILE,
+          state->x,
+          state->y - 6,
+          EM_FLY_UPPER_LEFT,
+          0);
       }
       else
       {
         SpawnEffect(
+          ctx,
           ACT_EYEBALL_PROJECTILE,
           state->x + 3,
           state->y - 6,
@@ -1933,6 +2002,7 @@ void pascal Act_EyeBallThrower(word handle)
 
 
 word FindActorDesc(
+  Context* ctx,
   word startIndex,
   word neededId,
   word neededX,
@@ -1940,11 +2010,11 @@ word FindActorDesc(
   word handle)
 {
   register word i;
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   word x;
   word y;
 
-  for (i = startIndex; i < levelActorListSize * 2; i += 6)
+  for (i = startIndex; i < ctx->levelActorListSize * 2; i += 6)
   {
     word id = READ_LVL_ACTOR_DESC_ID(i);
 
@@ -1983,20 +2053,21 @@ word FindActorDesc(
 }
 
 
-void pascal Act_MovingMapPartTrigger(word handle)
+void pascal Act_MovingMapPartTrigger(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
   word descIndex;
   word right;
-  MovingMapPartState* mapPart = gmMovingMapParts + gmNumMovingMapParts;
+  MovingMapPartState* mapPart =
+    ctx->gmMovingMapParts + ctx->gmNumMovingMapParts;
 
   state->drawStyle = DS_INVISIBLE;
 
-  if (gmRequestUnlockNextDoor)
+  if (ctx->gmRequestUnlockNextDoor)
   {
     state->y += 5;
 
-    if (!IsActorOnScreen(handle))
+    if (!IsActorOnScreen(ctx, handle))
     {
       state->y -= 5;
       return;
@@ -2009,9 +2080,9 @@ void pascal Act_MovingMapPartTrigger(word handle)
 
   if (state->var2 == 2)
   {
-    if (gmRequestUnlockNextDoor)
+    if (ctx->gmRequestUnlockNextDoor)
     {
-      gmRequestUnlockNextDoor = false;
+      ctx->gmRequestUnlockNextDoor = false;
     }
     else
     {
@@ -2021,9 +2092,9 @@ void pascal Act_MovingMapPartTrigger(word handle)
 
   if (
     (state->var2 == 3 || state->var2 == 5) &&
-    (mapHasEarthquake == false ||
-     gmEarthquakeCountdown >= gmEarthquakeThreshold ||
-     gmEarthquakeCountdown == 0))
+    (ctx->mapHasEarthquake == false ||
+     ctx->gmEarthquakeCountdown >= ctx->gmEarthquakeThreshold ||
+     ctx->gmEarthquakeCountdown == 0))
   {
     return;
   }
@@ -2034,22 +2105,22 @@ void pascal Act_MovingMapPartTrigger(word handle)
 
     if (state->var1 == 0)
     {
-      PlaySound(SND_FALLING_ROCK);
+      PlaySound(ctx, SND_FALLING_ROCK);
     }
 
     return;
   }
 
-  descIndex = FindActorDesc(0, state->id, state->x, state->y, handle);
+  descIndex = FindActorDesc(ctx, 0, state->id, state->x, state->y, handle);
   mapPart->left = state->x;
   mapPart->top = state->y;
 
   descIndex = FindActorDesc(
-    descIndex, ACT_META_DYNGEO_MARKER_1, 0x8000, state->y, handle);
+    ctx, descIndex, ACT_META_DYNGEO_MARKER_1, 0x8000, state->y, handle);
   right = mapPart->right = READ_LVL_ACTOR_DESC_X(descIndex);
 
-  descIndex =
-    FindActorDesc(descIndex, ACT_META_DYNGEO_MARKER_2, right, 0x8000, handle);
+  descIndex = FindActorDesc(
+    ctx, descIndex, ACT_META_DYNGEO_MARKER_2, right, 0x8000, handle);
   mapPart->bottom = READ_LVL_ACTOR_DESC_Y(descIndex);
 
   if (state->var2)
@@ -2059,15 +2130,15 @@ void pascal Act_MovingMapPartTrigger(word handle)
 
   if (!state->deleted)
   {
-    gmNumMovingMapParts++;
+    ctx->gmNumMovingMapParts++;
     state->deleted = true;
   }
 }
 
 
-void pascal Act_HoverBotGenerator(word handle)
+void pascal Act_HoverBotGenerator(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Spawn up to 30 robots
   if (state->var1 < 30)
@@ -2076,7 +2147,7 @@ void pascal Act_HoverBotGenerator(word handle)
 
     if (state->var2 == 36)
     {
-      SpawnActor(ACT_HOVERBOT, state->x + 1, state->y);
+      SpawnActor(ctx, ACT_HOVERBOT, state->x + 1, state->y);
 
       state->var1++;
       state->var2 = 0;
@@ -2087,19 +2158,19 @@ void pascal Act_HoverBotGenerator(word handle)
   UPDATE_ANIMATION_LOOP(state, 0, 3);
 
   // Draw the lower part
-  DrawActor(ACT_HOVERBOT_GENERATOR, 4, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, ACT_HOVERBOT_GENERATOR, 4, state->x, state->y, DS_NORMAL);
 }
 
 
-void pascal Act_MessengerDrone(word handle)
+void pascal Act_MessengerDrone(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register byte* screenData;
 
   // Orient towards player on first update
   if (!state->var1)
   {
-    if (state->x < plPosX)
+    if (state->x < ctx->plPosX)
     {
       state->var1 = 2;
     }
@@ -2141,14 +2212,16 @@ void pascal Act_MessengerDrone(word handle)
       state->x -= 2;
 
       DrawActor(
+        ctx,
         ACT_MESSENGER_DRONE_FLAME_R,
-        gfxCurrentDisplayPage,
+        ctx->gfxCurrentDisplayPage,
         state->x,
         state->y,
         DS_NORMAL);
     }
 
-    DrawActor(ACT_MESSENGER_DRONE_ENGINE_R, 0, state->x, state->y, DS_NORMAL);
+    DrawActor(
+      ctx, ACT_MESSENGER_DRONE_ENGINE_R, 0, state->x, state->y, DS_NORMAL);
   }
 
   if (state->var1 == 2) // facing right
@@ -2159,21 +2232,24 @@ void pascal Act_MessengerDrone(word handle)
       state->x += 2;
 
       DrawActor(
+        ctx,
         ACT_MESSENGER_DRONE_FLAME_L,
-        gfxCurrentDisplayPage,
+        ctx->gfxCurrentDisplayPage,
         state->x,
         state->y,
         DS_NORMAL);
     }
 
-    DrawActor(ACT_MESSENGER_DRONE_ENGINE_L, 0, state->x, state->y, DS_NORMAL);
+    DrawActor(
+      ctx, ACT_MESSENGER_DRONE_ENGINE_L, 0, state->x, state->y, DS_NORMAL);
   }
 
-  DrawActor(ACT_MESSENGER_DRONE_ENGINE_DOWN, 0, state->x, state->y, DS_NORMAL);
-  DrawActor(ACT_MESSENGER_DRONE_BODY, 0, state->x, state->y, DS_NORMAL);
+  DrawActor(
+    ctx, ACT_MESSENGER_DRONE_ENGINE_DOWN, 0, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, ACT_MESSENGER_DRONE_BODY, 0, state->x, state->y, DS_NORMAL);
 
   // Start showing the message when close enough to the player
-  if (!state->var2 && !state->var3 && PlayerInRange(handle, 6))
+  if (!state->var2 && !state->var3 && PlayerInRange(ctx, handle, 6))
   {
     state->var2 = 1;
   }
@@ -2208,8 +2284,9 @@ void pascal Act_MessengerDrone(word handle)
       {0, 0, 8, 1, 8, 2, 8, 3, 8, 4, 8, 5, 8, 6, 8, 0xFF}};
 
     DrawActor(
+      ctx,
       ACT_MESSENGER_DRONE_FLAME_DOWN,
-      gfxCurrentDisplayPage,
+      ctx->gfxCurrentDisplayPage,
       state->x,
       state->y,
       DS_NORMAL);
@@ -2239,12 +2316,12 @@ void pascal Act_MessengerDrone(word handle)
         state->var5 = *(screenData + 1);
       }
 
-      DrawActor(state->var4, *screenData, state->x, state->y, DS_NORMAL);
+      DrawActor(ctx, state->var4, *screenData, state->x, state->y, DS_NORMAL);
     }
   }
 
   // Delete ourselves once off screen if we're done showing the message
-  if (state->var3 && !IsActorOnScreen(handle))
+  if (state->var3 && !IsActorOnScreen(ctx, handle))
   {
     state->deleted = true;
   }
@@ -2252,31 +2329,31 @@ void pascal Act_MessengerDrone(word handle)
   // A drawStyle of DS_INVISIBLE means that this actor is excluded from
   // collision detection against player shots. To make the actor shootable
   // despite that, we need to manually invoke the collision check here.
-  HandleActorShotCollision(TestShotCollision(handle), handle);
+  HandleActorShotCollision(ctx, TestShotCollision(ctx, handle), handle);
   state->drawStyle = DS_INVISIBLE;
 }
 
 
-void pascal Act_SlimePipe(word handle)
+void pascal Act_SlimePipe(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_IN_FRONT;
 
   state->var1++;
   if (state->var1 % 25 == 0)
   {
-    SpawnActor(ACT_SLIME_DROP, state->x + 1, state->y + 1);
-    PlaySound(SND_WATER_DROP);
+    SpawnActor(ctx, ACT_SLIME_DROP, state->x + 1, state->y + 1);
+    PlaySound(ctx, SND_WATER_DROP);
   }
 
   state->frame = !state->frame;
 }
 
 
-void pascal Act_SlimeDrop(word handle)
+void pascal Act_SlimeDrop(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (!state->gravityState) // landed on ground?
   {
@@ -2290,20 +2367,20 @@ void pascal Act_SlimeDrop(word handle)
 }
 
 
-void pascal Act_ForceField(word handle)
+void pascal Act_ForceField(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register word drawStyle;
 
   if (
-    !IsSpriteOnScreen(ACT_FORCE_FIELD, 1, state->x, state->y) &&
-    !IsSpriteOnScreen(ACT_FORCE_FIELD, 0, state->x, state->y))
+    !IsSpriteOnScreen(ctx, ACT_FORCE_FIELD, 1, state->x, state->y) &&
+    !IsSpriteOnScreen(ctx, ACT_FORCE_FIELD, 0, state->x, state->y))
   {
     return;
   }
 
   // Draw emitter on top
-  DrawActor(ACT_FORCE_FIELD, 1, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, ACT_FORCE_FIELD, 1, state->x, state->y, DS_NORMAL);
 
   if (state->var2)
   {
@@ -2311,29 +2388,30 @@ void pascal Act_ForceField(word handle)
   } // If turned off, we're done here
 
   // Handle unlocking
-  if (gmRequestUnlockNextForceField)
+  if (ctx->gmRequestUnlockNextForceField)
   {
-    gmRequestUnlockNextForceField = false;
+    ctx->gmRequestUnlockNextForceField = false;
     state->var2 = true;
     return;
   }
 
   // Handle player collision
   if (AreSpritesTouching(
+        ctx,
         ACT_FORCE_FIELD,
         2,
         state->x,
         state->y,
-        plActorId,
-        plAnimationFrame,
-        plPosX,
-        plPosY))
+        ctx->plActorId,
+        ctx->plAnimationFrame,
+        ctx->plPosX,
+        ctx->plPosY))
   {
     // Insta-kill player
-    plHealth = 1;
-    plMercyFramesLeft = 0;
-    plCloakTimeLeft = 0;
-    DamagePlayer();
+    ctx->plHealth = 1;
+    ctx->plMercyFramesLeft = 0;
+    ctx->plCloakTimeLeft = 0;
+    DamagePlayer(ctx);
 
     // [BUG] The cloak doesn't reappear if the player dies while cloaked
     // and then respawns at a checkpoint, potentially making the level
@@ -2346,10 +2424,10 @@ void pascal Act_ForceField(word handle)
   //
   state->var1++;
 
-  if (RandomNumber() & 32)
+  if (RandomNumber(ctx) & 32)
   {
     drawStyle = DS_WHITEFLASH;
-    PlaySound(SND_FORCE_FIELD_FIZZLE);
+    PlaySound(ctx, SND_FORCE_FIELD_FIZZLE);
   }
   else
   {
@@ -2357,13 +2435,13 @@ void pascal Act_ForceField(word handle)
   }
 
   DrawActor(
-    ACT_FORCE_FIELD, state->var1 % 3 + 2, state->x, state->y, drawStyle);
+    ctx, ACT_FORCE_FIELD, state->var1 % 3 + 2, state->x, state->y, drawStyle);
 }
 
 
-void pascal Act_KeyCardSlot(word handle)
+void pascal Act_KeyCardSlot(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 == 0)
   {
@@ -2376,9 +2454,9 @@ void pascal Act_KeyCardSlot(word handle)
 }
 
 
-void pascal Act_KeyHole(word handle)
+void pascal Act_KeyHole(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   const byte KEY_HOLE_ANIMATION[] = {0, 1, 2, 3, 4, 3, 2, 1};
@@ -2401,13 +2479,13 @@ void pascal Act_KeyHole(word handle)
 
 
 /** Returns index of the 1st fully blocking solid tile */
-word FindFullySolidTileIndex(void)
+word FindFullySolidTileIndex(Context* ctx)
 {
   word i;
 
   for (i = 0; i < 1000; i++)
   {
-    if (gfxTilesetAttributes[i] == 0x0F)
+    if (ctx->gfxTilesetAttributes[i] == 0x0F)
     {
       return i * 8;
     }
@@ -2417,35 +2495,37 @@ word FindFullySolidTileIndex(void)
 }
 
 
-void pascal Act_SlidingDoorVertical(word handle)
+void pascal Act_SlidingDoorVertical(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register word i;
 
   state->drawStyle = DS_INVISIBLE;
 
   if (!state->scoreGiven)
   {
-    state->tileBuffer = MM_PushChunk(9 * sizeof(word), CT_TEMPORARY);
+    state->tileBuffer = MM_PushChunk(ctx, 9 * sizeof(word), CT_TEMPORARY);
 
     for (i = 0; i < 8; i++)
     {
-      state->tileBuffer[i] = Map_GetTile(state->x, state->y - i + 1);
+      state->tileBuffer[i] = Map_GetTile(ctx, state->x, state->y - i + 1);
     }
 
-    state->scoreGiven = FindFullySolidTileIndex();
+    state->scoreGiven = FindFullySolidTileIndex(ctx);
 
     for (i = 1; i < 8; i++)
     {
-      Map_SetTile(state->scoreGiven, state->x, state->y - i + 1);
+      Map_SetTile(ctx, state->scoreGiven, state->x, state->y - i + 1);
     }
   }
 
-  if (PlayerInRange(handle, 7) && state->y >= plPosY && state->y - 7 < plPosY)
+  if (
+    PlayerInRange(ctx, handle, 7) && state->y >= ctx->plPosY &&
+    state->y - 7 < ctx->plPosY)
   {
     if (state->health == 1)
     {
-      PlaySound(SND_SLIDING_DOOR);
+      PlaySound(ctx, SND_SLIDING_DOOR);
     }
 
     for (i = state->health; i < 9; i++)
@@ -2453,6 +2533,7 @@ void pascal Act_SlidingDoorVertical(word handle)
       if (i)
       {
         DrawActor(
+          ctx,
           ACT_SLIDING_DOOR_VERTICAL,
           i - state->health,
           state->x,
@@ -2462,7 +2543,7 @@ void pascal Act_SlidingDoorVertical(word handle)
 
       if (state->health == 1 && i < 8)
       {
-        Map_SetTile(state->tileBuffer[i], state->x, state->y - i + 1);
+        Map_SetTile(ctx, state->tileBuffer[i], state->x, state->y - i + 1);
       }
     }
 
@@ -2472,14 +2553,14 @@ void pascal Act_SlidingDoorVertical(word handle)
     }
     else
     {
-      Map_SetTile(state->scoreGiven, state->x, state->y - 7);
+      Map_SetTile(ctx, state->scoreGiven, state->x, state->y - 7);
     }
   }
   else // player not in range
   {
     if (state->health == 7)
     {
-      PlaySound(SND_SLIDING_DOOR);
+      PlaySound(ctx, SND_SLIDING_DOOR);
     }
 
     for (i = state->health; i < 9; i++)
@@ -2487,6 +2568,7 @@ void pascal Act_SlidingDoorVertical(word handle)
       if (i)
       {
         DrawActor(
+          ctx,
           ACT_SLIDING_DOOR_VERTICAL,
           i - state->health,
           state->x,
@@ -2496,7 +2578,7 @@ void pascal Act_SlidingDoorVertical(word handle)
 
       if (state->health == 1 && i)
       {
-        Map_SetTile(state->scoreGiven, state->x, state->y - i + 1);
+        Map_SetTile(ctx, state->scoreGiven, state->x, state->y - i + 1);
       }
     }
 
@@ -2508,40 +2590,40 @@ void pascal Act_SlidingDoorVertical(word handle)
 }
 
 
-void pascal Act_SlidingDoorHorizontal(word handle)
+void pascal Act_SlidingDoorHorizontal(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
 
   if (!state->scoreGiven)
   {
-    state->tileBuffer = MM_PushChunk(6 * sizeof(word), CT_TEMPORARY);
+    state->tileBuffer = MM_PushChunk(ctx, 6 * sizeof(word), CT_TEMPORARY);
 
     for (i = 0; i < 5; i++)
     {
-      state->tileBuffer[i] = Map_GetTile(state->x + i, state->y);
+      state->tileBuffer[i] = Map_GetTile(ctx, state->x + i, state->y);
     }
 
-    state->scoreGiven = FindFullySolidTileIndex();
+    state->scoreGiven = FindFullySolidTileIndex(ctx);
 
     for (i = 0; i < 5; i++)
     {
-      Map_SetTile(state->scoreGiven, state->x + i, state->y);
+      Map_SetTile(ctx, state->scoreGiven, state->x + i, state->y);
     }
   }
 
   if (
-    state->x - 2 <= plPosX && state->x + 6 > plPosX && state->y - 3 < plPosY &&
-    state->y + 7 > plPosY)
+    state->x - 2 <= ctx->plPosX && state->x + 6 > ctx->plPosX &&
+    state->y - 3 < ctx->plPosY && state->y + 7 > ctx->plPosY)
   {
     if (!state->frame)
     {
       for (i = 0; i < 5; i++)
       {
-        Map_SetTile(state->tileBuffer[i], state->x + i, state->y);
+        Map_SetTile(ctx, state->tileBuffer[i], state->x + i, state->y);
       }
 
-      PlaySound(SND_SLIDING_DOOR);
+      PlaySound(ctx, SND_SLIDING_DOOR);
     }
 
     if (state->frame < 2)
@@ -2551,8 +2633,8 @@ void pascal Act_SlidingDoorHorizontal(word handle)
 
     if (state->frame == 2)
     {
-      Map_SetTile(state->scoreGiven, state->x, state->y);
-      Map_SetTile(state->scoreGiven, state->x + 5, state->y);
+      Map_SetTile(ctx, state->scoreGiven, state->x, state->y);
+      Map_SetTile(ctx, state->scoreGiven, state->x + 5, state->y);
     }
   }
   else
@@ -2561,7 +2643,7 @@ void pascal Act_SlidingDoorHorizontal(word handle)
     {
       if (state->frame == 2)
       {
-        PlaySound(SND_SLIDING_DOOR);
+        PlaySound(ctx, SND_SLIDING_DOOR);
       }
 
       state->frame--;
@@ -2570,7 +2652,7 @@ void pascal Act_SlidingDoorHorizontal(word handle)
       {
         for (i = 0; i < 5; i++)
         {
-          Map_SetTile(state->scoreGiven, state->x + i, state->y);
+          Map_SetTile(ctx, state->scoreGiven, state->x + i, state->y);
         }
       }
     }
@@ -2578,13 +2660,13 @@ void pascal Act_SlidingDoorHorizontal(word handle)
 }
 
 
-void pascal Act_RespawnBeacon(word handle)
+void pascal Act_RespawnBeacon(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var2)
   {
-    if (IsActorOnScreen(handle))
+    if (IsActorOnScreen(ctx, handle))
     {
       state->var3 = 1;
       state->var1 = 2;
@@ -2605,11 +2687,11 @@ void pascal Act_RespawnBeacon(word handle)
 
     if (state->var3 == 10)
     {
-      gmBeaconPosX = state->x;
-      gmBeaconPosY = state->y;
-      gmBeaconActivated = true;
+      ctx->gmBeaconPosX = state->x;
+      ctx->gmBeaconPosY = state->y;
+      ctx->gmBeaconActivated = true;
 
-      ShowInGameMessage(MID_SECTOR_SECURE);
+      ShowInGameMessage(ctx, MID_SECTOR_SECURE);
     }
 
     if (state->var3 == 1)
@@ -2627,15 +2709,15 @@ void pascal Act_RespawnBeacon(word handle)
 }
 
 
-void pascal Act_Skeleton(word handle)
+void pascal Act_Skeleton(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (!state->var5)
   {
     state->var5 = true;
 
-    if (state->x > plPosX)
+    if (state->x > ctx->plPosX)
     {
       state->var1 = ORIENTATION_LEFT;
       state->frame = 0;
@@ -2647,13 +2729,13 @@ void pascal Act_Skeleton(word handle)
     }
   }
 
-  if (!gfxCurrentDisplayPage)
+  if (!ctx->gfxCurrentDisplayPage)
   {
     if (state->var1 != ORIENTATION_LEFT) // walking right
     {
       state->x++;
 
-      if (ApplyWorldCollision(handle, MD_RIGHT))
+      if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
       {
         state->var1 = ORIENTATION_LEFT;
         state->frame = 0;
@@ -2667,7 +2749,7 @@ void pascal Act_Skeleton(word handle)
     {
       state->x--;
 
-      if (ApplyWorldCollision(handle, MD_LEFT))
+      if (ApplyWorldCollision(ctx, handle, MD_LEFT))
       {
         state->var1 = ORIENTATION_RIGHT;
         state->frame = 4;
@@ -2681,7 +2763,7 @@ void pascal Act_Skeleton(word handle)
 }
 
 
-void pascal Act_BlowingFan(word handle)
+void pascal Act_BlowingFan(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2,
@@ -2695,7 +2777,7 @@ void pascal Act_BlowingFan(word handle)
     2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2,
     3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2};
 
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1) // slow down
   {
@@ -2719,6 +2801,7 @@ void pascal Act_BlowingFan(word handle)
   state->frame = ANIM_SEQ[state->var2];
 
   DrawActor(
+    ctx,
     ACT_BLOWING_FAN_THREADS_ON_TOP,
     THREADS_ANIM_SEQ[state->var2],
     state->x,
@@ -2727,41 +2810,44 @@ void pascal Act_BlowingFan(word handle)
 
   // Attach player if in range and fan at speed
   if (
-    state->var2 > 24 && plPosY + 25 > state->y && state->y > plPosY &&
-    state->x <= plPosX && state->x + 5 > plPosX && plState != PS_DYING)
+    state->var2 > 24 && ctx->plPosY + 25 > state->y && state->y > ctx->plPosY &&
+    state->x <= ctx->plPosX && state->x + 5 > ctx->plPosX &&
+    ctx->plState != PS_DYING)
   {
-    plState = PS_BLOWN_BY_FAN;
-    gmActiveFanIndex = handle;
+    ctx->plState = PS_BLOWN_BY_FAN;
+    ctx->gmActiveFanIndex = handle;
 
-    if (state->frame == 3 || plPosY + 24 == state->y || plPosY + 25 == state->y)
+    if (
+      state->frame == 3 || ctx->plPosY + 24 == state->y ||
+      ctx->plPosY + 25 == state->y)
     {
-      PlaySound(SND_SWOOSH);
+      PlaySound(ctx, SND_SWOOSH);
     }
   }
 
   // Detach player if out of range, or fan too slow
   if (
-    plState == PS_BLOWN_BY_FAN &&
-    (state->var2 < 25 || state->x > plPosX || state->x + 5 <= plPosX ||
-     state->y > plPosY + 25) &&
-    handle == gmActiveFanIndex)
+    ctx->plState == PS_BLOWN_BY_FAN &&
+    (state->var2 < 25 || state->x > ctx->plPosX ||
+     state->x + 5 <= ctx->plPosX || state->y > ctx->plPosY + 25) &&
+    handle == ctx->gmActiveFanIndex)
   {
-    plState = PS_JUMPING;
-    plJumpStep = 5;
-    plAnimationFrame = 6;
+    ctx->plState = PS_JUMPING;
+    ctx->plJumpStep = 5;
+    ctx->plAnimationFrame = 6;
   }
 
   // [NOTE] Could be simplified using PlaySoundIfOnScreen()
-  if (state->frame == 2 && IsActorOnScreen(handle))
+  if (state->frame == 2 && IsActorOnScreen(ctx, handle))
   {
-    PlaySound(SND_SWOOSH);
+    PlaySound(ctx, SND_SWOOSH);
   }
 }
 
 
-void pascal Act_LaserTurret(word handle)
+void pascal Act_LaserTurret(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1) // spinning
   {
@@ -2797,7 +2883,7 @@ void pascal Act_LaserTurret(word handle)
 
     if (state->frame == 5 || state->frame == 6)
     {
-      PlaySound(SND_SWOOSH);
+      PlaySound(ctx, SND_SWOOSH);
     }
   }
   else // not spinning
@@ -2807,7 +2893,7 @@ void pascal Act_LaserTurret(word handle)
       state->drawStyle = DS_WHITEFLASH;
     }
 
-    if (state->x > plPosX) // player on the right
+    if (state->x > ctx->plPosX) // player on the right
     {
       if (state->frame)
       {
@@ -2819,7 +2905,7 @@ void pascal Act_LaserTurret(word handle)
 
         if (!state->var2)
         {
-          SpawnActor(ACT_ENEMY_LASER_SHOT_L, state->x - 3, state->y);
+          SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_L, state->x - 3, state->y);
           state->var2 = 40;
         }
       }
@@ -2840,7 +2926,7 @@ void pascal Act_LaserTurret(word handle)
 
         if (!state->var2)
         {
-          SpawnActor(ACT_ENEMY_LASER_SHOT_R, state->x + 2, state->y);
+          SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_R, state->x + 2, state->y);
           state->var2 = 40;
         }
       }
@@ -2849,11 +2935,11 @@ void pascal Act_LaserTurret(word handle)
 }
 
 
-void pascal Act_EnemyLaserShot(word handle)
+void pascal Act_EnemyLaserShot(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
 
-  if (!IsActorOnScreen(handle))
+  if (!IsActorOnScreen(ctx, handle))
   {
     state->deleted = true;
     return;
@@ -2874,8 +2960,8 @@ void pascal Act_EnemyLaserShot(word handle)
       muzzleSprite = ACT_ENEMY_LASER_MUZZLE_FLASH_L;
     }
 
-    DrawActor(muzzleSprite, 0, state->x, state->y, DS_NORMAL);
-    PlaySound(SND_ENEMY_LASER_SHOT);
+    DrawActor(ctx, muzzleSprite, 0, state->x, state->y, DS_NORMAL);
+    PlaySound(ctx, SND_ENEMY_LASER_SHOT);
   }
 
   if (state->var1 == ACT_ENEMY_LASER_SHOT_R)
@@ -2883,7 +2969,7 @@ void pascal Act_EnemyLaserShot(word handle)
     state->x += 2;
 
     if (CheckWorldCollision(
-          MD_RIGHT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
+          ctx, MD_RIGHT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
     {
       state->deleted = true;
     }
@@ -2893,7 +2979,7 @@ void pascal Act_EnemyLaserShot(word handle)
     state->x -= 2;
 
     if (CheckWorldCollision(
-          MD_LEFT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
+          ctx, MD_LEFT, ACT_ENEMY_LASER_SHOT_L, 0, state->x, state->y))
     {
       state->deleted = true;
     }
@@ -2901,29 +2987,31 @@ void pascal Act_EnemyLaserShot(word handle)
 }
 
 
-void pascal Act_LevelExitTrigger(word handle)
+void pascal Act_LevelExitTrigger(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_INVISIBLE;
 
-  if (state->y >= plPosY && state->x >= plPosX && state->x - 2 <= plPosX)
+  if (
+    state->y >= ctx->plPosY && state->x >= ctx->plPosX &&
+    state->x - 2 <= ctx->plPosX)
   {
-    if (!gmRadarDishesLeft)
+    if (!ctx->gmRadarDishesLeft)
     {
-      gmGameState = GS_LEVEL_FINISHED;
+      ctx->gmGameState = GS_LEVEL_FINISHED;
     }
     else
     {
-      ShowTutorial(TUT_RADARS_LEFT);
+      ShowTutorial(ctx, TUT_RADARS_LEFT);
     }
   }
 }
 
 
-void pascal Act_SuperForceField(word handle)
+void pascal Act_SuperForceField(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Animation when shot or touched by the player (see
   // UpdateActorPlayerCollision() and HandleActorShotCollision())
@@ -2931,12 +3019,12 @@ void pascal Act_SuperForceField(word handle)
   {
     state->var1++;
 
-    state->frame = gfxCurrentDisplayPage + 1;
+    state->frame = ctx->gfxCurrentDisplayPage + 1;
 
-    if (RandomNumber() & 8)
+    if (RandomNumber(ctx) & 8)
     {
       state->drawStyle = DS_WHITEFLASH;
-      PlaySound(SND_FORCE_FIELD_FIZZLE);
+      PlaySound(ctx, SND_FORCE_FIELD_FIZZLE);
     }
 
     if (state->var1 == 20)
@@ -2948,7 +3036,7 @@ void pascal Act_SuperForceField(word handle)
 
   // Draw the emitter on top
   DrawActor(
-    ACT_SUPER_FORCE_FIELD_L, state->var4, state->x, state->y, DS_NORMAL);
+    ctx, ACT_SUPER_FORCE_FIELD_L, state->var4, state->x, state->y, DS_NORMAL);
 
   // If not destroyed yet, we're done here. var3 is set in
   // UpdateActorPlayerCollision().
@@ -2964,43 +3052,56 @@ void pascal Act_SuperForceField(word handle)
 
   if (state->var3 % 2)
   {
-    PlaySound(SND_GLASS_BREAKING);
+    PlaySound(ctx, SND_GLASS_BREAKING);
     SpawnParticles(
-      state->x + 1, state->y - state->var3 + 15, 0, CLR_LIGHT_BLUE);
+      ctx, state->x + 1, state->y - state->var3 + 15, 0, CLR_LIGHT_BLUE);
     SpawnEffect(
+      ctx,
       ACT_SCORE_NUMBER_FX_500,
       state->x,
       state->y - state->var3 + 19,
       EM_SCORE_NUMBER,
       0);
-    GiveScore(500);
+    GiveScore(ctx, 500);
   }
 
   if (state->var3 == 11)
   {
     state->deleted = true;
 
-    SpawnEffect(ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_DOWN, 0);
     SpawnEffect(
-      ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_UPPER_LEFT, 0);
+      ctx, ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_DOWN, 0);
     SpawnEffect(
-      ACT_EXPLOSION_FX_2, state->x - 1, state->y + 5, EM_FLY_UPPER_RIGHT, 0);
-    PlaySound(SND_BIG_EXPLOSION);
-    ShowInGameMessage(MID_FORCE_FIELD_DESTROYED);
+      ctx,
+      ACT_EXPLOSION_FX_2,
+      state->x - 1,
+      state->y + 5,
+      EM_FLY_UPPER_LEFT,
+      0);
+    SpawnEffect(
+      ctx,
+      ACT_EXPLOSION_FX_2,
+      state->x - 1,
+      state->y + 5,
+      EM_FLY_UPPER_RIGHT,
+      0);
+    PlaySound(ctx, SND_BIG_EXPLOSION);
+    ShowInGameMessage(ctx, MID_FORCE_FIELD_DESTROYED);
   }
 }
 
 
-void pascal Act_IntactMissile(word handle)
+void pascal Act_IntactMissile(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
 
   if (state->var1) // launching/flying?
   {
     DrawActor(
+      ctx,
       ACT_MISSILE_EXHAUST_FLAME,
-      gfxCurrentDisplayPage,
+      ctx->gfxCurrentDisplayPage,
       state->x,
       state->y,
       DS_NORMAL);
@@ -3008,16 +3109,16 @@ void pascal Act_IntactMissile(word handle)
     if (state->var1 == 1)
     {
       SpawnEffect(
-        ACT_WHITE_CIRCLE_FLASH_FX, state->x - 2, state->y + 1, EM_NONE, 0);
+        ctx, ACT_WHITE_CIRCLE_FLASH_FX, state->x - 2, state->y + 1, EM_NONE, 0);
       SpawnEffect(
-        ACT_WHITE_CIRCLE_FLASH_FX, state->x + 1, state->y + 1, EM_NONE, 0);
+        ctx, ACT_WHITE_CIRCLE_FLASH_FX, state->x + 1, state->y + 1, EM_NONE, 0);
     }
 
     if (state->var1 > 5)
     {
       state->y--;
 
-      if (ApplyWorldCollision(handle, MD_UP))
+      if (ApplyWorldCollision(ctx, handle, MD_UP))
       {
         state->var2 = 1;
       }
@@ -3026,13 +3127,13 @@ void pascal Act_IntactMissile(word handle)
       {
         state->y--;
 
-        if (ApplyWorldCollision(handle, MD_UP))
+        if (ApplyWorldCollision(ctx, handle, MD_UP))
         {
           state->var2 = 1;
         }
       }
 
-      PlaySound(SND_FLAMETHROWER_SHOT);
+      PlaySound(ctx, SND_FLAMETHROWER_SHOT);
     }
 
     if (state->var1 <= 8)
@@ -3048,17 +3149,20 @@ void pascal Act_IntactMissile(word handle)
     FLASH_SCREEN(SFC_WHITE);
     PLAY_EXPLOSION_SOUND();
 
-    Map_DestroySection(state->x, state->y - 14, state->x + 2, state->y - 12);
+    Map_DestroySection(
+      ctx, state->x, state->y - 14, state->x + 2, state->y - 12);
 
     for (i = 0; i < 4; i++)
     {
       SpawnEffect(
+        ctx,
         ACT_MISSILE_DEBRIS,
         state->x + i * 2,
         state->y - 8,
         (word)i % 2 ? EM_FLY_LEFT : EM_FLY_DOWN,
         i);
       SpawnEffect(
+        ctx,
         ACT_MISSILE_DEBRIS,
         state->x + i * 2,
         (state->y - 8) + i * 2,
@@ -3071,9 +3175,9 @@ void pascal Act_IntactMissile(word handle)
 }
 
 
-void pascal Act_GrabberClaw(word handle)
+void pascal Act_GrabberClaw(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register word i;
   word savedY;
 
@@ -3084,8 +3188,9 @@ void pascal Act_GrabberClaw(word handle)
   {
     state->var1++;
 
-    DrawActor(ACT_METAL_GRABBER_CLAW, 0, state->x, state->y, DS_NORMAL);
-    DrawActor(ACT_METAL_GRABBER_CLAW, 1, state->x, state->y + 1, DS_NORMAL);
+    DrawActor(ctx, ACT_METAL_GRABBER_CLAW, 0, state->x, state->y, DS_NORMAL);
+    DrawActor(
+      ctx, ACT_METAL_GRABBER_CLAW, 1, state->x, state->y + 1, DS_NORMAL);
 
     if (state->var1 == 10)
     {
@@ -3098,13 +3203,15 @@ void pascal Act_GrabberClaw(word handle)
     // Draw mounting pole at needed length
     for (i = 0; i < state->var1; i++)
     {
-      DrawActor(ACT_METAL_GRABBER_CLAW, 0, state->x, state->y + i, DS_NORMAL);
+      DrawActor(
+        ctx, ACT_METAL_GRABBER_CLAW, 0, state->x, state->y + i, DS_NORMAL);
     }
 
     // Extending
     if (state->var2 == 1)
     {
-      DrawActor(ACT_METAL_GRABBER_CLAW, 1, state->x, state->y + i, DS_NORMAL);
+      DrawActor(
+        ctx, ACT_METAL_GRABBER_CLAW, 1, state->x, state->y + i, DS_NORMAL);
 
       state->var1++;
 
@@ -3118,7 +3225,8 @@ void pascal Act_GrabberClaw(word handle)
     // Retracting
     if (state->var2 == 0)
     {
-      DrawActor(ACT_METAL_GRABBER_CLAW, 1, state->x, state->y + i, DS_NORMAL);
+      DrawActor(
+        ctx, ACT_METAL_GRABBER_CLAW, 1, state->x, state->y + i, DS_NORMAL);
 
       state->var1--;
 
@@ -3137,6 +3245,7 @@ void pascal Act_GrabberClaw(word handle)
       state->frame = 1 + ANIM_SEQ[state->var3];
 
       DrawActor(
+        ctx,
         ACT_METAL_GRABBER_CLAW,
         state->frame,
         state->x,
@@ -3146,16 +3255,17 @@ void pascal Act_GrabberClaw(word handle)
       // Manually test for collision against the player,
       // since we use drawStyle DS_INVISIBLE.
       if (AreSpritesTouching(
+            ctx,
             state->id,
             2,
             state->x,
             state->y + i,
-            plActorId,
-            plAnimationFrame,
-            plPosX,
-            plPosY))
+            ctx->plActorId,
+            ctx->plAnimationFrame,
+            ctx->plPosX,
+            ctx->plPosY))
       {
-        DamagePlayer();
+        DamagePlayer(ctx);
       }
 
       state->var3++;
@@ -3174,25 +3284,27 @@ void pascal Act_GrabberClaw(word handle)
     savedY = state->y;
     state->y += i;
 
-    if (TestShotCollision(handle))
+    if (TestShotCollision(ctx, handle))
     {
       state->deleted = true;
 
-      GiveScore(250);
+      GiveScore(ctx, 250);
       SpawnEffect(
+        ctx,
         ACT_METAL_GRABBER_CLAW_DEBRIS_1,
         state->x,
         state->y,
         EM_FLY_UPPER_LEFT,
         0);
       SpawnEffect(
+        ctx,
         ACT_METAL_GRABBER_CLAW_DEBRIS_2,
         state->x + 2,
         state->y,
         EM_FLY_UPPER_RIGHT,
         0);
       PLAY_EXPLOSION_SOUND();
-      SpawnBurnEffect(ACT_FLAME_FX, state->id, state->x, state->y);
+      SpawnBurnEffect(ctx, ACT_FLAME_FX, state->id, state->x, state->y);
     }
 
     state->y = savedY;
@@ -3200,9 +3312,9 @@ void pascal Act_GrabberClaw(word handle)
 }
 
 
-void pascal Act_FloatingLaserBot(word handle)
+void pascal Act_FloatingLaserBot(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
   int16_t xDiff;
   int16_t yDiff;
 
@@ -3210,17 +3322,17 @@ void pascal Act_FloatingLaserBot(word handle)
   {
     state->var1++;
 
-    if (!IsActorOnScreen(handle))
+    if (!IsActorOnScreen(ctx, handle))
     {
       state->alwaysUpdate = false;
     }
   }
   else if (state->var2 < 40) // Moving towards player
   {
-    if (!((word)RandomNumber() % 4))
+    if (!((word)RandomNumber(ctx) % 4))
     {
-      xDiff = Sign(plPosX - state->x + 1);
-      yDiff = Sign(plPosY - state->y - 2);
+      xDiff = Sign(ctx->plPosX - state->x + 1);
+      yDiff = Sign(ctx->plPosY - state->y - 2);
 
       state->x += xDiff;
       state->y += yDiff;
@@ -3228,7 +3340,7 @@ void pascal Act_FloatingLaserBot(word handle)
       if (xDiff > 0)
       {
         if (CheckWorldCollision(
-              MD_RIGHT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
+              ctx, MD_RIGHT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
         {
           state->x--;
         }
@@ -3237,7 +3349,7 @@ void pascal Act_FloatingLaserBot(word handle)
       if (xDiff < 0)
       {
         if (CheckWorldCollision(
-              MD_LEFT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
+              ctx, MD_LEFT, ACT_HOVERING_LASER_TURRET, 0, state->x, state->y))
         {
           state->x++;
         }
@@ -3245,12 +3357,12 @@ void pascal Act_FloatingLaserBot(word handle)
 
       if (yDiff > 0)
       {
-        ApplyWorldCollision(handle, MD_DOWN);
+        ApplyWorldCollision(ctx, handle, MD_DOWN);
       }
 
       if (yDiff < 0)
       {
-        ApplyWorldCollision(handle, MD_UP);
+        ApplyWorldCollision(ctx, handle, MD_UP);
       }
     }
 
@@ -3267,7 +3379,7 @@ void pascal Act_FloatingLaserBot(word handle)
   }
   else if (state->var2 < 80) // Shooting
   {
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       return;
     }
@@ -3275,19 +3387,19 @@ void pascal Act_FloatingLaserBot(word handle)
     switch (state->var2 % 4)
     {
       case 0:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y - 1);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y - 1);
         break;
 
       case 1:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y);
         break;
 
       case 2:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_R, state->x + 2, state->y);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_R, state->x + 2, state->y);
         break;
 
       case 3:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_R, state->x + 2, state->y - 1);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_R, state->x + 2, state->y - 1);
         break;
     }
 
@@ -3309,31 +3421,31 @@ void pascal Act_FloatingLaserBot(word handle)
 }
 
 
-void pascal Act_Spider(word handle)
+void pascal Act_Spider(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Delete ourselves if attached to the player and the player gets eaten by
   // a snake or ceiling sucker
-  if (plState == PS_GETTING_EATEN)
+  if (ctx->plState == PS_GETTING_EATEN)
   {
-    if (plAttachedSpider1 == handle)
+    if (ctx->plAttachedSpider1 == handle)
     {
-      plAttachedSpider1 = 0;
+      ctx->plAttachedSpider1 = 0;
       state->deleted = true;
       return;
     }
 
-    if (plAttachedSpider2 == handle)
+    if (ctx->plAttachedSpider2 == handle)
     {
-      plAttachedSpider2 = 0;
+      ctx->plAttachedSpider2 = 0;
       state->deleted = true;
       return;
     }
 
-    if (plAttachedSpider3 == handle)
+    if (ctx->plAttachedSpider3 == handle)
     {
-      plAttachedSpider3 = 0;
+      ctx->plAttachedSpider3 = 0;
       state->deleted = true;
       return;
     }
@@ -3346,51 +3458,51 @@ void pascal Act_Spider(word handle)
     //
     if (!state->scoreGiven)
     {
-      state->y = plPosY - 3;
-      state->x = plActorId == ACT_DUKE_L ? plPosX + 1 : plPosX;
+      state->y = ctx->plPosY - 3;
+      state->x = ctx->plActorId == ACT_DUKE_L ? ctx->plPosX + 1 : ctx->plPosX;
 
-      state->frame = 8 + ((word)RandomNumber() % 2);
+      state->frame = 8 + ((word)RandomNumber(ctx) % 2);
     }
     else
     {
-      if (plAttachedSpider2 == handle)
+      if (ctx->plAttachedSpider2 == handle)
       {
-        state->y = plPosY - 1;
+        state->y = ctx->plPosY - 1;
 
-        if (plActorId == ACT_DUKE_L)
+        if (ctx->plActorId == ACT_DUKE_L)
         {
-          state->x = plPosX - 1;
+          state->x = ctx->plPosX - 1;
           state->var2 = 12;
         }
         else
         {
-          state->x = plPosX + 2;
+          state->x = ctx->plPosX + 2;
           state->var2 = 14;
         }
       }
-      else if (plAttachedSpider3 == handle)
+      else if (ctx->plAttachedSpider3 == handle)
       {
-        state->y = plPosY - 2;
+        state->y = ctx->plPosY - 2;
 
-        if (plActorId == ACT_DUKE_R)
+        if (ctx->plActorId == ACT_DUKE_R)
         {
-          state->x = plPosX - 2;
+          state->x = ctx->plPosX - 2;
           state->var2 = 12;
         }
         else
         {
-          state->x = plPosX + 3;
+          state->x = ctx->plPosX + 3;
           state->var2 = 14;
         }
       }
 
-      state->frame = state->var2 + ((word)RandomNumber() % 2);
+      state->frame = state->var2 + ((word)RandomNumber(ctx) % 2);
     }
 
     //
     // Fall off if player quickly changes direction
     //
-    if (plActorId != state->var4)
+    if (ctx->plActorId != state->var4)
     {
       // Whenever the player orientation is different than last frame, increment
       // this counter. When the counter reaches 2, the spider falls off.
@@ -3398,28 +3510,29 @@ void pascal Act_Spider(word handle)
       // to zero, but only every other frame.
       state->var5++;
 
-      state->var4 = plActorId;
+      state->var4 = ctx->plActorId;
 
       if (state->var5 == 2)
       {
         SpawnEffect(
+          ctx,
           ACT_SPIDER_SHAKEN_OFF,
           state->x,
           state->y,
-          RandomNumber() & 2 ? EM_FLY_UPPER_LEFT : EM_FLY_UPPER_RIGHT,
+          RandomNumber(ctx) & 2 ? EM_FLY_UPPER_LEFT : EM_FLY_UPPER_RIGHT,
           0);
 
-        if (plAttachedSpider2 == handle)
+        if (ctx->plAttachedSpider2 == handle)
         {
-          plAttachedSpider2 = 0;
+          ctx->plAttachedSpider2 = 0;
         }
-        else if (plAttachedSpider3 == handle)
+        else if (ctx->plAttachedSpider3 == handle)
         {
-          plAttachedSpider3 = 0;
+          ctx->plAttachedSpider3 = 0;
         }
         else
         {
-          plAttachedSpider1 = 0;
+          ctx->plAttachedSpider1 = 0;
         }
 
         state->deleted = true;
@@ -3427,20 +3540,21 @@ void pascal Act_Spider(word handle)
     }
     else // player orientation unchanged
     {
-      if (gfxCurrentDisplayPage && state->var5)
+      if (ctx->gfxCurrentDisplayPage && state->var5)
       {
         state->var5--;
       }
     }
 
     // Also fall off if player is dying
-    if (plState == PS_DYING)
+    if (ctx->plState == PS_DYING)
     {
       SpawnEffect(
+        ctx,
         ACT_SPIDER_SHAKEN_OFF,
         state->x,
         state->y,
-        RandomNumber() & 2 ? EM_FLY_UPPER_RIGHT : EM_FLY_UPPER_LEFT,
+        RandomNumber(ctx) & 2 ? EM_FLY_UPPER_RIGHT : EM_FLY_UPPER_LEFT,
         0);
 
       state->deleted = true;
@@ -3453,7 +3567,8 @@ void pascal Act_Spider(word handle)
   {
     state->var3 = 1;
 
-    if (CheckWorldCollision(MD_DOWN, ACT_SPIDER, 0, state->x, state->y + 1))
+    if (CheckWorldCollision(
+          ctx, MD_DOWN, ACT_SPIDER, 0, state->x, state->y + 1))
     {
       state->scoreGiven = true;
       state->frame = 9;
@@ -3463,7 +3578,7 @@ void pascal Act_Spider(word handle)
   //
   // Movement
   //
-  if (state->var1 >= 2 || gfxCurrentDisplayPage == 0)
+  if (state->var1 >= 2 || ctx->gfxCurrentDisplayPage == 0)
   {
     if (state->var1 == ORIENTATION_RIGHT)
     {
@@ -3471,7 +3586,7 @@ void pascal Act_Spider(word handle)
 
       if (state->scoreGiven) // on ground
       {
-        if (ApplyWorldCollision(handle, MD_RIGHT))
+        if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
         {
           state->frame = 9;
           state->var1 = ORIENTATION_LEFT;
@@ -3487,8 +3602,9 @@ void pascal Act_Spider(word handle)
 
       // on ceiling
       if (
-        CheckWorldCollision(MD_RIGHT, ACT_SPIDER, 0, state->x, state->y) ||
-        !CheckWorldCollision(MD_UP, ACT_SPIDER, 0, state->x + 2, state->y - 1))
+        CheckWorldCollision(ctx, MD_RIGHT, ACT_SPIDER, 0, state->x, state->y) ||
+        !CheckWorldCollision(
+          ctx, MD_UP, ACT_SPIDER, 0, state->x + 2, state->y - 1))
       {
         state->x--;
         state->var1 = ORIENTATION_LEFT;
@@ -3506,7 +3622,7 @@ void pascal Act_Spider(word handle)
 
       if (state->scoreGiven) // on ground
       {
-        if (ApplyWorldCollision(handle, MD_LEFT))
+        if (ApplyWorldCollision(ctx, handle, MD_LEFT))
         {
           state->frame = 6;
           state->var1 = ORIENTATION_RIGHT;
@@ -3522,8 +3638,9 @@ void pascal Act_Spider(word handle)
 
       // on ceiling
       if (
-        CheckWorldCollision(MD_LEFT, ACT_SPIDER, 0, state->x, state->y) ||
-        !CheckWorldCollision(MD_UP, ACT_SPIDER, 0, state->x - 2, state->y - 1))
+        CheckWorldCollision(ctx, MD_LEFT, ACT_SPIDER, 0, state->x, state->y) ||
+        !CheckWorldCollision(
+          ctx, MD_UP, ACT_SPIDER, 0, state->x - 2, state->y - 1))
       {
         state->x++;
         state->var1 = ORIENTATION_RIGHT;
@@ -3538,8 +3655,8 @@ void pascal Act_Spider(word handle)
 
   // Check if we want to fall onto the player from above
   if (
-    state->x == plPosX && state->var1 != 2 && state->frame < 6 &&
-    state->y < plPosY - 3)
+    state->x == ctx->plPosX && state->var1 != 2 && state->frame < 6 &&
+    state->y < ctx->plPosY - 3)
   {
     state->var1 = 2;
     state->frame = 6;
@@ -3556,11 +3673,11 @@ void pascal Act_Spider(word handle)
 }
 
 
-bool BlueGuard_UpdateShooting(word handle)
+bool BlueGuard_UpdateShooting(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
-  if (plCloakTimeLeft)
+  if (ctx->plCloakTimeLeft)
   {
     return false;
   }
@@ -3568,13 +3685,15 @@ bool BlueGuard_UpdateShooting(word handle)
   // Don't attack if facing away from the player. Frames 0..5 are facing right,
   // 6..11 are facing left.
   if (
-    (state->frame < 6 && state->x > plPosX) ||
-    (state->frame > 5 && state->x < plPosX))
+    (state->frame < 6 && state->x > ctx->plPosX) ||
+    (state->frame > 5 && state->x < ctx->plPosX))
   {
     return false;
   }
 
-  if (state->y + 3 > plPosY && state->y - 3 < plPosY && plState == PS_NORMAL)
+  if (
+    state->y + 3 > ctx->plPosY && state->y - 3 < ctx->plPosY &&
+    ctx->plState == PS_NORMAL)
   {
     if (state->var3) // Stance change cooldown set
     {
@@ -3582,13 +3701,13 @@ bool BlueGuard_UpdateShooting(word handle)
     }
     else
     {
-      if (inputMoveDown || state->y < plPosY)
+      if (ctx->inputMoveDown || state->y < ctx->plPosY)
       {
         // Crouch down
         state->frame = state->var1 ? 11 : 5;
 
         // Set stance change cooldown
-        state->var3 = (word)RandomNumber() % 16;
+        state->var3 = (word)RandomNumber(ctx) % 16;
       }
       else
       {
@@ -3603,26 +3722,26 @@ bool BlueGuard_UpdateShooting(word handle)
   }
 
 
-  if (!((word)RandomNumber() % 8))
+  if (!((word)RandomNumber(ctx) % 8))
   {
     switch (state->frame)
     {
       case 10:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y - 2);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y - 2);
         state->frame = 15; // Recoil animation
         break;
 
       case 11:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y - 1);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_L, state->x - 2, state->y - 1);
         break;
 
       case 4:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_R, state->x + 3, state->y - 2);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_R, state->x + 3, state->y - 2);
         state->frame = 14; // Recoil animation
         break;
 
       case 5:
-        SpawnActor(ACT_ENEMY_LASER_SHOT_R, state->x + 3, state->y - 1);
+        SpawnActor(ctx, ACT_ENEMY_LASER_SHOT_R, state->x + 3, state->y - 1);
         break;
     }
   }
@@ -3631,9 +3750,9 @@ bool BlueGuard_UpdateShooting(word handle)
 }
 
 
-void pascal Act_BlueGuard(word handle)
+void pascal Act_BlueGuard(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Reset "recoil" animation back to regular version
   if (state->frame == 15)
@@ -3649,13 +3768,13 @@ begin:
   // "Typing on computer" state
   if (state->var5 > 1)
   {
-    if (state->y == plPosY && PlayerInRange(handle, 6))
+    if (state->y == ctx->plPosY && PlayerInRange(ctx, handle, 6))
     {
       // Stop typing
       state->var5 = 1;
 
       // Face player
-      if (state->x > plPosX)
+      if (state->x > ctx->plPosX)
       {
         state->var1 = 1;
       }
@@ -3666,13 +3785,14 @@ begin:
     }
     else // continue typing
     {
-      state->frame = 12 + ((word)gfxCurrentDisplayPage >> (RandomNumber() & 4));
+      state->frame =
+        12 + ((word)ctx->gfxCurrentDisplayPage >> (RandomNumber(ctx) & 4));
       return;
     }
   }
 
   // Attack if player in sight
-  if (BlueGuard_UpdateShooting(handle))
+  if (BlueGuard_UpdateShooting(ctx, handle))
   {
     // Don't walk when attacking
     return;
@@ -3683,14 +3803,14 @@ begin:
   //
   // Walking
   //
-  if (state->var1 == 0 && gfxCurrentDisplayPage)
+  if (state->var1 == 0 && ctx->gfxCurrentDisplayPage)
   {
     // Count how many steps we've walked
     state->var2++;
 
     state->x++;
 
-    if (ApplyWorldCollision(handle, MD_RIGHT) || state->var2 == 20)
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT) || state->var2 == 20)
     {
       // Turn around
       state->var1 = 1;
@@ -3712,14 +3832,14 @@ begin:
     }
   }
 
-  if (state->var1 == 1 && gfxCurrentDisplayPage)
+  if (state->var1 == 1 && ctx->gfxCurrentDisplayPage)
   {
     // Count how many steps we've walked
     state->var2++;
 
     state->x--;
 
-    if (ApplyWorldCollision(handle, MD_LEFT) || state->var2 == 20)
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT) || state->var2 == 20)
     {
       // Turn around
       state->var1 = 0;
@@ -3744,9 +3864,9 @@ begin:
 }
 
 
-void pascal Act_SpikedGreenCreature(word handle)
+void pascal Act_SpikedGreenCreature(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 < 15) // waiting
   {
@@ -3756,6 +3876,7 @@ void pascal Act_SpikedGreenCreature(word handle)
     if (state->var1 == 5)
     {
       SpawnEffect(
+        ctx,
         state->id == ACT_GREEN_CREATURE_L ? ACT_GREEN_CREATURE_EYE_FX_L
                                           : ACT_GREEN_CREATURE_EYE_FX_R,
         state->x,
@@ -3764,6 +3885,7 @@ void pascal Act_SpikedGreenCreature(word handle)
         0);
 
       SpawnEffect(
+        ctx,
         state->id == ACT_GREEN_CREATURE_L ? ACT_GREEN_CREATURE_EYE_FX_L
                                           : ACT_GREEN_CREATURE_EYE_FX_R,
         state->x,
@@ -3789,10 +3911,10 @@ void pascal Act_SpikedGreenCreature(word handle)
 
       for (i = 0; i < 4; i++)
       {
-        SpawnEffect(effectId + i, state->x, state->y, i, 0);
+        SpawnEffect(ctx, effectId + i, state->x, state->y, i, 0);
       }
 
-      PlaySound(SND_GLASS_BREAKING);
+      PlaySound(ctx, SND_GLASS_BREAKING);
 
       // Switch to form without shell
       state->frame++;
@@ -3802,7 +3924,7 @@ void pascal Act_SpikedGreenCreature(word handle)
   {
     if (state->var1 < 30)
     {
-      if (state->x > plPosX)
+      if (state->x > ctx->plPosX)
       {
         state->id = ACT_GREEN_CREATURE_L;
       }
@@ -3896,13 +4018,13 @@ void pascal Act_SpikedGreenCreature(word handle)
       // circumstances.
       if (
         state->id == ACT_GREEN_CREATURE_L &&
-        ApplyWorldCollision(handle, MD_LEFT))
+        ApplyWorldCollision(ctx, handle, MD_LEFT))
       {
         state->id = ACT_GREEN_CREATURE_R;
       }
       else if (
         state->id == ACT_GREEN_CREATURE_R &&
-        ApplyWorldCollision(handle, MD_RIGHT))
+        ApplyWorldCollision(ctx, handle, MD_RIGHT))
       {
         state->id = ACT_GREEN_CREATURE_L;
       }
@@ -3911,9 +4033,9 @@ void pascal Act_SpikedGreenCreature(word handle)
 }
 
 
-void pascal Act_GreenPanther(word handle)
+void pascal Act_GreenPanther(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {0, 1, 2, 1};
@@ -3935,7 +4057,7 @@ void pascal Act_GreenPanther(word handle)
     {
       state->x--;
 
-      if (ApplyWorldCollision(handle, MD_LEFT))
+      if (ApplyWorldCollision(ctx, handle, MD_LEFT))
       {
         state->id = ACT_BIG_GREEN_CAT_R;
         state->var1 = 10;
@@ -3943,7 +4065,7 @@ void pascal Act_GreenPanther(word handle)
 
       state->x--;
 
-      if (ApplyWorldCollision(handle, MD_LEFT))
+      if (ApplyWorldCollision(ctx, handle, MD_LEFT))
       {
         state->id = ACT_BIG_GREEN_CAT_R;
         state->var1 = 10;
@@ -3953,7 +4075,7 @@ void pascal Act_GreenPanther(word handle)
     {
       state->x++;
 
-      if (ApplyWorldCollision(handle, MD_RIGHT))
+      if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
       {
         state->id = ACT_BIG_GREEN_CAT_L;
         state->var1 = 10;
@@ -3961,7 +4083,7 @@ void pascal Act_GreenPanther(word handle)
 
       state->x++;
 
-      if (ApplyWorldCollision(handle, MD_RIGHT))
+      if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
       {
         state->id = ACT_BIG_GREEN_CAT_L;
         state->var1 = 10;
@@ -3985,15 +4107,15 @@ void pascal Act_GreenPanther(word handle)
 }
 
 
-void pascal Act_Turkey(word handle)
+void pascal Act_Turkey(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (!state->var1)
   {
     state->var1 = true;
 
-    if (state->x < plPosX)
+    if (state->x < ctx->plPosX)
     {
       state->var2 = ORIENTATION_RIGHT;
     }
@@ -4003,26 +4125,26 @@ void pascal Act_Turkey(word handle)
   {
     state->x++;
 
-    if (ApplyWorldCollision(handle, MD_RIGHT))
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
     {
       state->var2 = ORIENTATION_LEFT;
     }
     else
     {
-      state->frame = gfxCurrentDisplayPage + 2;
+      state->frame = ctx->gfxCurrentDisplayPage + 2;
     }
   }
   else if (state->var2 == ORIENTATION_LEFT)
   {
     state->x--;
 
-    if (ApplyWorldCollision(handle, MD_LEFT))
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT))
     {
       state->var2 = ORIENTATION_RIGHT;
     }
     else
     {
-      state->frame = gfxCurrentDisplayPage;
+      state->frame = ctx->gfxCurrentDisplayPage;
     }
   }
   else // cooked turkey
@@ -4032,17 +4154,17 @@ void pascal Act_Turkey(word handle)
 }
 
 
-void pascal Act_GreenBird(word handle)
+void pascal Act_GreenBird(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const word ANIM_SEQ[] = {0, 1, 2, 1};
 
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Orient towards player on first update
   if (!state->var3)
   {
-    if (state->x > plPosX)
+    if (state->x > ctx->plPosX)
     {
       state->var1 = 0;
     }
@@ -4059,7 +4181,7 @@ void pascal Act_GreenBird(word handle)
   {
     state->x++;
 
-    if (ApplyWorldCollision(handle, MD_RIGHT))
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
     {
       state->var1 = 0;
     }
@@ -4068,7 +4190,7 @@ void pascal Act_GreenBird(word handle)
   {
     state->x--;
 
-    if (ApplyWorldCollision(handle, MD_LEFT))
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT))
     {
       state->var1 = 3;
     }
@@ -4080,17 +4202,17 @@ void pascal Act_GreenBird(word handle)
 }
 
 
-void pascal Act_RedBird(word handle)
+void pascal Act_RedBird(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const word FLY_ANIM_SEQ[] = {0, 1, 2, 1};
 
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Switch to attacking state when above player
   if (
-    state->var1 != 2 && state->y + 2 < plPosY && state->x > plPosX &&
-    state->x < plPosX + 2)
+    state->var1 != 2 && state->y + 2 < ctx->plPosY && state->x > ctx->plPosX &&
+    state->x < ctx->plPosX + 2)
   {
     state->var1 = 2;
   }
@@ -4099,7 +4221,7 @@ void pascal Act_RedBird(word handle)
   {
     state->x++;
 
-    if (ApplyWorldCollision(handle, MD_RIGHT))
+    if (ApplyWorldCollision(ctx, handle, MD_RIGHT))
     {
       state->var1 = ORIENTATION_LEFT;
     }
@@ -4115,7 +4237,7 @@ void pascal Act_RedBird(word handle)
   {
     state->x--;
 
-    if (ApplyWorldCollision(handle, MD_LEFT))
+    if (ApplyWorldCollision(ctx, handle, MD_LEFT))
     {
       state->var1 = ORIENTATION_RIGHT;
       return;
@@ -4139,7 +4261,7 @@ void pascal Act_RedBird(word handle)
     // onto the player
     state->var4 = state->y;
 
-    state->frame = 6 + gfxCurrentDisplayPage;
+    state->frame = 6 + ctx->gfxCurrentDisplayPage;
 
     state->var3++;
   }
@@ -4169,7 +4291,7 @@ void pascal Act_RedBird(word handle)
   }
   else if (state->var3 == 8) // Rise back up to original height
   {
-    state->frame = 6 + gfxCurrentDisplayPage;
+    state->frame = 6 + ctx->gfxCurrentDisplayPage;
 
     if (state->var4 < state->y)
     {
@@ -4183,20 +4305,20 @@ void pascal Act_RedBird(word handle)
   else if (state->var3 == 9) // Return to flying
   {
     // Semi-randomly fly either left or right
-    state->var1 = gfxCurrentDisplayPage;
+    state->var1 = ctx->gfxCurrentDisplayPage;
     state->var3 = 0;
   }
 }
 
 
-void pascal Act_Elevator(word handle)
+void pascal Act_Elevator(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
 
   if (
-    plState == PS_DYING || plState == PS_AIRLOCK_DEATH_L ||
-    plState == PS_AIRLOCK_DEATH_R)
+    ctx->plState == PS_DYING || ctx->plState == PS_AIRLOCK_DEATH_L ||
+    ctx->plState == PS_AIRLOCK_DEATH_R)
   {
     return;
   }
@@ -4205,19 +4327,20 @@ void pascal Act_Elevator(word handle)
   {
     state->var5 = false;
 
-    state->tileBuffer = MM_PushChunk(2 * sizeof(word), CT_TEMPORARY);
+    state->tileBuffer = MM_PushChunk(ctx, 2 * sizeof(word), CT_TEMPORARY);
 
-    state->scoreGiven = FindFullySolidTileIndex();
+    state->scoreGiven = FindFullySolidTileIndex(ctx);
 
     for (i = 0; i < 2; i++)
     {
-      state->tileBuffer[i] = Map_GetTile(state->x + i + 1, state->y - 2);
+      state->tileBuffer[i] = Map_GetTile(ctx, state->x + i + 1, state->y - 2);
     }
   }
 
   if (state->var4)
   {
-    if (!CheckWorldCollision(MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+    if (!CheckWorldCollision(
+          ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
     {
       state->y++;
     }
@@ -4226,7 +4349,8 @@ void pascal Act_Elevator(word handle)
       state->var4 = 0;
     }
 
-    if (!CheckWorldCollision(MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+    if (!CheckWorldCollision(
+          ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
     {
       state->y++;
     }
@@ -4239,92 +4363,98 @@ void pascal Act_Elevator(word handle)
     {
       for (i = 0; i < 2; i++)
       {
-        state->tileBuffer[i] = Map_GetTile(state->x + i + 1, state->y - 2);
+        state->tileBuffer[i] = Map_GetTile(ctx, state->x + i + 1, state->y - 2);
       }
     }
   }
   else
   {
     if (
-      state->y - 3 == plPosY &&
-      ((plActorId == ACT_DUKE_R && state->x <= plPosX &&
-        state->x + 2 > plPosX) ||
-       (plActorId == ACT_DUKE_L && state->x - 1 <= plPosX &&
-        state->x >= plPosX)))
+      state->y - 3 == ctx->plPosY &&
+      ((ctx->plActorId == ACT_DUKE_R && state->x <= ctx->plPosX &&
+        state->x + 2 > ctx->plPosX) ||
+       (ctx->plActorId == ACT_DUKE_L && state->x - 1 <= ctx->plPosX &&
+        state->x >= ctx->plPosX)))
     {
-      plOnElevator = true;
+      ctx->plOnElevator = true;
 
-      ShowTutorial(TUT_ELEVATOR);
+      ShowTutorial(ctx, TUT_ELEVATOR);
 
       if (
-        inputMoveUp &&
-        !CheckWorldCollision(MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
+        ctx->inputMoveUp &&
+        !CheckWorldCollision(
+          ctx, MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
       {
         state->var1 = 1;
 
-        if (gfxCurrentDisplayPage)
+        if (ctx->gfxCurrentDisplayPage)
         {
-          PlaySound(SND_FLAMETHROWER_SHOT);
+          PlaySound(ctx, SND_FLAMETHROWER_SHOT);
         }
 
         for (i = 0; i < 2; i++)
         {
-          Map_SetTile(state->tileBuffer[i], state->x + i + 1, state->y - 2);
+          Map_SetTile(
+            ctx, state->tileBuffer[i], state->x + i + 1, state->y - 2);
         }
 
         if (!CheckWorldCollision(
-              MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
+              ctx, MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
         {
           state->y--;
-          plPosY--;
-          plState = PS_RIDING_ELEVATOR;
+          ctx->plPosY--;
+          ctx->plState = PS_RIDING_ELEVATOR;
         }
 
         if (!CheckWorldCollision(
-              MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
+              ctx, MD_UP, ACT_ELEVATOR, 0, state->x, state->y - 6))
         {
           state->y--;
-          plPosY--;
-          plState = PS_RIDING_ELEVATOR;
+          ctx->plPosY--;
+          ctx->plState = PS_RIDING_ELEVATOR;
         }
 
         for (i = 0; i < 2; i++)
         {
-          state->tileBuffer[i] = Map_GetTile(state->x + i + 1, state->y - 2);
+          state->tileBuffer[i] =
+            Map_GetTile(ctx, state->x + i + 1, state->y - 2);
         }
 
         goto drawFlame;
       }
       else if (
-        inputMoveDown &&
-        !CheckWorldCollision(MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+        ctx->inputMoveDown &&
+        !CheckWorldCollision(
+          ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
       {
         state->var1 = 0;
 
         for (i = 0; i < 2; i++)
         {
-          Map_SetTile(state->tileBuffer[i], state->x + i + 1, state->y - 2);
+          Map_SetTile(
+            ctx, state->tileBuffer[i], state->x + i + 1, state->y - 2);
         }
 
         if (!CheckWorldCollision(
-              MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+              ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
         {
           state->y++;
-          plPosY++;
-          plState = PS_RIDING_ELEVATOR;
+          ctx->plPosY++;
+          ctx->plState = PS_RIDING_ELEVATOR;
         }
 
         if (!CheckWorldCollision(
-              MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+              ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
         {
           state->y++;
-          plPosY++;
-          plState = PS_RIDING_ELEVATOR;
+          ctx->plPosY++;
+          ctx->plState = PS_RIDING_ELEVATOR;
         }
 
         for (i = 0; i < 2; i++)
         {
-          state->tileBuffer[i] = Map_GetTile(state->x + i + 1, state->y - 2);
+          state->tileBuffer[i] =
+            Map_GetTile(ctx, state->x + i + 1, state->y - 2);
         }
 
         goto drawFlame;
@@ -4332,33 +4462,34 @@ void pascal Act_Elevator(word handle)
       else
       {
         if (CheckWorldCollision(
-              MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+              ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
         {
-          plOnElevator = false;
+          ctx->plOnElevator = false;
         }
 
-        if (inputJump)
+        if (ctx->inputJump)
         {
-          plOnElevator = false;
+          ctx->plOnElevator = false;
           state->var1 = 3;
         }
         else
         {
-          plState = PS_NORMAL;
+          ctx->plState = PS_NORMAL;
           state->var1 = 3;
         }
       }
     }
     else if (!state->var4)
     {
-      plOnElevator = false;
+      ctx->plOnElevator = false;
 
       if (!CheckWorldCollision(
-            MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+            ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
       {
         for (i = 0; i < 2; i++)
         {
-          Map_SetTile(state->tileBuffer[i], state->x + i + 1, state->y - 2);
+          Map_SetTile(
+            ctx, state->tileBuffer[i], state->x + i + 1, state->y - 2);
         }
 
         state->var4 = 1;
@@ -4369,17 +4500,19 @@ void pascal Act_Elevator(word handle)
 
     for (i = 0; i < 2; i++)
     {
-      Map_SetTile(state->scoreGiven, state->x + i + 1, state->y - 2);
+      Map_SetTile(ctx, state->scoreGiven, state->x + i + 1, state->y - 2);
     }
 
   drawFlame:
     if (
       state->var1 &&
-      !CheckWorldCollision(MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
+      !CheckWorldCollision(
+        ctx, MD_DOWN, ACT_ELEVATOR, 0, state->x, state->y + 1))
     {
       DrawActor(
+        ctx,
         ACT_ELEVATOR,
-        state->var1 + gfxCurrentDisplayPage,
+        state->var1 + ctx->gfxCurrentDisplayPage,
         state->x,
         state->y,
         DS_NORMAL);
@@ -4387,17 +4520,17 @@ void pascal Act_Elevator(word handle)
   }
 
 drawHandrail:
-  DrawActor(ACT_ELEVATOR, 5, state->x, state->y, DS_NORMAL);
+  DrawActor(ctx, ACT_ELEVATOR, 5, state->x, state->y, DS_NORMAL);
 }
 
 
-void pascal Act_SmashHammer(word handle)
+void pascal Act_SmashHammer(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 < 20) // waiting
   {
-    if (!state->var1 && !IsActorOnScreen(handle))
+    if (!state->var1 && !IsActorOnScreen(ctx, handle))
     {
       return;
     }
@@ -4421,13 +4554,13 @@ void pascal Act_SmashHammer(word handle)
     // Draw the shaft
     for (i = 0; i < state->var2; i++)
     {
-      DrawActor(ACT_SMASH_HAMMER, 1, state->x, state->y - i, DS_NORMAL);
+      DrawActor(ctx, ACT_SMASH_HAMMER, 1, state->x, state->y - i, DS_NORMAL);
     }
 
-    if (ApplyWorldCollision(handle, MD_DOWN))
+    if (ApplyWorldCollision(ctx, handle, MD_DOWN))
     {
-      SpawnEffect(ACT_SMOKE_CLOUD_FX, state->x, state->y + 4, EM_NONE, 0);
-      PlaySound(SND_HAMMER_SMASH);
+      SpawnEffect(ctx, ACT_SMOKE_CLOUD_FX, state->x, state->y + 4, EM_NONE, 0);
+      PlaySound(ctx, SND_HAMMER_SMASH);
 
       // Start raising
       state->var3 = 2;
@@ -4443,7 +4576,8 @@ void pascal Act_SmashHammer(word handle)
     // Draw the shaft
     for (i = 0; i < state->var2; i++)
     {
-      DrawActor(ACT_SMASH_HAMMER, 1, state->x, state->y - i + 1, DS_NORMAL);
+      DrawActor(
+        ctx, ACT_SMASH_HAMMER, 1, state->x, state->y - i + 1, DS_NORMAL);
     }
 
     // Switch to waiting state
@@ -4457,9 +4591,9 @@ void pascal Act_SmashHammer(word handle)
 }
 
 
-void pascal Act_WaterArea(word handle)
+void pascal Act_WaterArea(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_INVISIBLE;
 
@@ -4471,25 +4605,25 @@ void pascal Act_WaterArea(word handle)
       state->var1 = 1;
     }
 
-    DrawWaterArea(state->x, state->y, state->var1);
+    DrawWaterArea(ctx, state->x, state->y, state->var1);
 
     if (state->var2) // 4x4 block
     {
-      DrawWaterArea(state->x + 2, state->y, state->var1);
-      DrawWaterArea(state->x, state->y + 2, 0);
-      DrawWaterArea(state->x + 2, state->y + 2, 0);
+      DrawWaterArea(ctx, state->x + 2, state->y, state->var1);
+      DrawWaterArea(ctx, state->x, state->y + 2, 0);
+      DrawWaterArea(ctx, state->x + 2, state->y + 2, 0);
     }
   }
   else // 1x1 block
   {
-    DrawWaterArea(state->x, state->y, 0);
+    DrawWaterArea(ctx, state->x, state->y, 0);
   }
 }
 
 
-void pascal Act_WaterDrop(word handle)
+void pascal Act_WaterDrop(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Once the water drop reaches solid ground, it deletes itself
   if (!state->gravityState)
@@ -4499,28 +4633,28 @@ void pascal Act_WaterDrop(word handle)
 }
 
 
-void pascal Act_WaterDropSpawner(word handle)
+void pascal Act_WaterDropSpawner(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_INVISIBLE;
 
-  if (gfxCurrentDisplayPage && RandomNumber() > 220)
+  if (ctx->gfxCurrentDisplayPage && RandomNumber(ctx) > 220)
   {
-    SpawnActor(ACT_WATER_DROP, state->x, state->y);
+    SpawnActor(ctx, ACT_WATER_DROP, state->x, state->y);
 
     // [NOTE] This could be simplified to PlaySoundIfOnScreen().
-    if (IsActorOnScreen(handle))
+    if (IsActorOnScreen(ctx, handle))
     {
-      PlaySound(SND_WATER_DROP);
+      PlaySound(ctx, SND_WATER_DROP);
     }
   }
 }
 
 
-void pascal Act_LavaFountain(word handle)
+void pascal Act_LavaFountain(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // This table is a list of lists of pairs of (animationFrame, yOffset).
   // Each sub-list is terminated by a value of 127.
@@ -4555,6 +4689,7 @@ void pascal Act_LavaFountain(word handle)
   while (SPRITE_PLACEMENT_TABLE[state->var2] != 127)
   {
     DrawActor(
+      ctx,
       ACT_LAVA_FOUNTAIN,
       SPRITE_PLACEMENT_TABLE[state->var2],
       state->x,
@@ -4564,21 +4699,22 @@ void pascal Act_LavaFountain(word handle)
     // Since we use drawStyle DS_INVISIBLE, we have to test for intersection
     // with the player manually.
     if (AreSpritesTouching(
+          ctx,
           ACT_LAVA_FOUNTAIN,
           SPRITE_PLACEMENT_TABLE[state->var2],
           state->x,
           state->y + SPRITE_PLACEMENT_TABLE[state->var2 + 1],
-          plActorId,
-          plAnimationFrame,
-          plPosX,
-          plPosY))
+          ctx->plActorId,
+          ctx->plAnimationFrame,
+          ctx->plPosX,
+          ctx->plPosY))
     {
-      DamagePlayer();
+      DamagePlayer(ctx);
     }
 
     if (state->var2 < 5)
     {
-      PlaySound(SND_LAVA_FOUNTAIN);
+      PlaySound(ctx, SND_LAVA_FOUNTAIN);
     }
 
     state->var2 += 2;
@@ -4591,7 +4727,7 @@ void pascal Act_LavaFountain(word handle)
     state->var2 = 0;
     state->var1 = 0;
 
-    if (!IsActorOnScreen(handle))
+    if (!IsActorOnScreen(ctx, handle))
     {
       state->alwaysUpdate = false;
       state->remainActive = true;
@@ -4600,9 +4736,9 @@ void pascal Act_LavaFountain(word handle)
 }
 
 
-void pascal Act_RadarComputer(word handle)
+void pascal Act_RadarComputer(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
   byte i;
 
   // [PERF] Missing `static` causes a copy operation here
@@ -4619,10 +4755,11 @@ void pascal Act_RadarComputer(word handle)
   // Draw additional parts (the actor sprite itself is just the screen)
   for (i = 1; i < 4; i++)
   {
-    DrawActor(ACT_RADAR_COMPUTER_TERMINAL, i, state->x, state->y, DS_NORMAL);
+    DrawActor(
+      ctx, ACT_RADAR_COMPUTER_TERMINAL, i, state->x, state->y, DS_NORMAL);
   }
 
-  if (gmRadarDishesLeft)
+  if (ctx->gmRadarDishesLeft)
   {
     state->frame = RADARS_PRESENT_ANIM_SEQ[state->var2];
 
@@ -4635,11 +4772,13 @@ void pascal Act_RadarComputer(word handle)
       // top.
       state->drawStyle = DS_INVISIBLE;
 
-      DrawActor(ACT_RADAR_COMPUTER_TERMINAL, 5, state->x, state->y, DS_NORMAL);
+      DrawActor(
+        ctx, ACT_RADAR_COMPUTER_TERMINAL, 5, state->x, state->y, DS_NORMAL);
 
       DrawActor(
+        ctx,
         ACT_RADAR_COMPUTER_TERMINAL,
-        7 + gmRadarDishesLeft,
+        7 + ctx->gmRadarDishesLeft,
         state->x - 1,
         state->y,
         DS_NORMAL);
@@ -4647,7 +4786,7 @@ void pascal Act_RadarComputer(word handle)
 
     // [NOTE] This is identical to the code in the else branch, so it could be
     // moved to below the if/else to avoid some code duplication.
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       state->var2++;
     }
@@ -4661,7 +4800,7 @@ void pascal Act_RadarComputer(word handle)
   {
     state->frame = RADARS_DESTROYED_ANIM_SEQ[state->var2];
 
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       state->var2++;
     }
@@ -4674,42 +4813,50 @@ void pascal Act_RadarComputer(word handle)
 }
 
 
-void pascal Act_HintMachine(word handle)
+void pascal Act_HintMachine(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // Draw the hint globe attached to the machine if it has been placed
   if (state->var1)
   {
     DrawActor(
-      ACT_SPECIAL_HINT_GLOBE_ICON, 0, state->x + 1, state->y - 4, DS_NORMAL);
+      ctx,
+      ACT_SPECIAL_HINT_GLOBE_ICON,
+      0,
+      state->x + 1,
+      state->y - 4,
+      DS_NORMAL);
   }
 }
 
 
-void pascal Act_WindBlownSpiderGenerator(word handle)
+void pascal Act_WindBlownSpiderGenerator(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_INVISIBLE;
 
-  if (state->y > plPosY && ((word)RandomNumber() % 2) && gfxCurrentDisplayPage)
+  if (
+    state->y > ctx->plPosY && ((word)RandomNumber(ctx) % 2) &&
+    ctx->gfxCurrentDisplayPage)
   {
     SpawnEffect(
-      ACT_WINDBLOWN_SPIDER_GENERATOR + (int16_t)RandomNumber() % 3,
-      gmCameraPosX + (VIEWPORT_WIDTH - 1),
-      gmCameraPosY + (word)RandomNumber() % 16,
+      ctx,
+      ACT_WINDBLOWN_SPIDER_GENERATOR + (int16_t)RandomNumber(ctx) % 3,
+      ctx->gmCameraPosX + (VIEWPORT_WIDTH - 1),
+      ctx->gmCameraPosY + (word)RandomNumber(ctx) % 16,
 
       // either EM_BLOW_IN_WIND or EM_FLY_LEFT
-      EM_BLOW_IN_WIND - ((word)RandomNumber() & 2),
+      EM_BLOW_IN_WIND - ((word)RandomNumber(ctx) & 2),
       0);
   }
 }
 
 
-void pascal Act_UniCycleBot(word handle)
+void pascal Act_UniCycleBot(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 < 15)
   {
@@ -4717,7 +4864,7 @@ void pascal Act_UniCycleBot(word handle)
 
     if (state->var1 == 15)
     {
-      if (state->x < plPosX)
+      if (state->x < ctx->plPosX)
       {
         state->var2 = 2;
       }
@@ -4726,11 +4873,11 @@ void pascal Act_UniCycleBot(word handle)
         state->var2 = 1;
       }
 
-      state->var4 = (word)RandomNumber() % 32 + 15;
+      state->var4 = (word)RandomNumber(ctx) % 32 + 15;
       state->var3 = 0;
     }
 
-    state->frame = ((word)RandomNumber() % 2) * 5;
+    state->frame = ((word)RandomNumber(ctx) % 2) * 5;
   }
   else
   {
@@ -4741,16 +4888,21 @@ void pascal Act_UniCycleBot(word handle)
 
     if (state->var2 == 1)
     {
-      state->frame = 3 + gfxCurrentDisplayPage;
+      state->frame = 3 + ctx->gfxCurrentDisplayPage;
 
       if (state->var3 < 10)
       {
         state->var3++;
 
-        if (gfxCurrentDisplayPage)
+        if (ctx->gfxCurrentDisplayPage)
         {
           SpawnEffect(
-            ACT_SMOKE_PUFF_FX, state->x + 1, state->y, EM_FLY_UPPER_RIGHT, 0);
+            ctx,
+            ACT_SMOKE_PUFF_FX,
+            state->x + 1,
+            state->y,
+            EM_FLY_UPPER_RIGHT,
+            0);
         }
       }
       else
@@ -4758,7 +4910,7 @@ void pascal Act_UniCycleBot(word handle)
         state->x--;
       }
 
-      if (ApplyWorldCollision(handle, MD_LEFT) || state->var4 == 0)
+      if (ApplyWorldCollision(ctx, handle, MD_LEFT) || state->var4 == 0)
       {
         state->var1 = 0;
       }
@@ -4766,16 +4918,16 @@ void pascal Act_UniCycleBot(word handle)
 
     if (state->var2 == 2)
     {
-      state->frame = 1 + gfxCurrentDisplayPage;
+      state->frame = 1 + ctx->gfxCurrentDisplayPage;
 
       if (state->var3 < 10)
       {
         state->var3++;
 
-        if (gfxCurrentDisplayPage)
+        if (ctx->gfxCurrentDisplayPage)
         {
           SpawnEffect(
-            ACT_SMOKE_PUFF_FX, state->x, state->y, EM_FLY_UPPER_LEFT, 0);
+            ctx, ACT_SMOKE_PUFF_FX, state->x, state->y, EM_FLY_UPPER_LEFT, 0);
         }
       }
       else
@@ -4783,7 +4935,7 @@ void pascal Act_UniCycleBot(word handle)
         state->x++;
       }
 
-      if (ApplyWorldCollision(handle, MD_RIGHT) || state->var4 == 0)
+      if (ApplyWorldCollision(ctx, handle, MD_RIGHT) || state->var4 == 0)
       {
         state->var1 = 0;
       }
@@ -4792,9 +4944,9 @@ void pascal Act_UniCycleBot(word handle)
 }
 
 
-void pascal Act_WallWalker(word handle)
+void pascal Act_WallWalker(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   const byte MOVEMENT_BY_STATE[] = {MD_UP, MD_DOWN, MD_LEFT, MD_RIGHT};
@@ -4855,72 +5007,72 @@ void pascal Act_WallWalker(word handle)
 // TODO: Is there a loop that produces the same ASM?
 repeat:
   if (
-    ApplyWorldCollision(handle, MOVEMENT_BY_STATE[state->var1]) ||
+    ApplyWorldCollision(ctx, handle, MOVEMENT_BY_STATE[state->var1]) ||
     state->var3 == 0)
   {
     if (state->var1 < 2)
     {
-      state->var1 = (word)RandomNumber() % 2 + 2;
+      state->var1 = (word)RandomNumber(ctx) % 2 + 2;
     }
     else
     {
-      state->var1 = (word)RandomNumber() % 2;
+      state->var1 = (word)RandomNumber(ctx) % 2;
     }
 
-    state->var3 = (word)RandomNumber() % 32 + 10;
+    state->var3 = (word)RandomNumber(ctx) % 32 + 10;
 
     goto repeat;
   }
 }
 
 
-void pascal Act_AirlockDeathTrigger(word handle)
+void pascal Act_AirlockDeathTrigger(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_INVISIBLE;
 
   if (
     state->id == ACT_AIRLOCK_DEATH_TRIGGER_R &&
-    Map_GetTile(state->x + 3, state->y))
+    Map_GetTile(ctx, state->x + 3, state->y))
   {
     return;
   }
 
   if (
     state->id == ACT_AIRLOCK_DEATH_TRIGGER_L &&
-    Map_GetTile(state->x - 3, state->y))
+    Map_GetTile(ctx, state->x - 3, state->y))
   {
     return;
   }
 
   state->deleted = true;
 
-  plAnimationFrame = 8;
+  ctx->plAnimationFrame = 8;
 
   if (state->id == ACT_AIRLOCK_DEATH_TRIGGER_L)
   {
-    plState = PS_AIRLOCK_DEATH_L;
+    ctx->plState = PS_AIRLOCK_DEATH_L;
   }
   else
   {
-    plState = PS_AIRLOCK_DEATH_R;
+    ctx->plState = PS_AIRLOCK_DEATH_R;
   }
 
-  plAnimationFrame = 8;
+  ctx->plAnimationFrame = 8;
 }
 
 
-void pascal Act_AggressivePrisoner(word handle)
+void pascal Act_AggressivePrisoner(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {1, 2, 3, 4, 0};
 
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var1 != 2) // not dying
   {
-    DrawActor(ACT_AGGRESSIVE_PRISONER, 0, state->x, state->y, DS_NORMAL);
+    DrawActor(ctx, ACT_AGGRESSIVE_PRISONER, 0, state->x, state->y, DS_NORMAL);
 
     // This also makes it so that the actor's actual bounding box doesn't
     // collide with the player, and thus doesn't cause any damage on touch
@@ -4946,8 +5098,8 @@ void pascal Act_AggressivePrisoner(word handle)
 
   // Do we want to try grabbing the player?
   if (
-    state->x - 4 < plPosX && state->x + 7 > plPosX && !state->var1 &&
-    (RandomNumber() & 0x10) && gfxCurrentDisplayPage)
+    state->x - 4 < ctx->plPosX && state->x + 7 > ctx->plPosX && !state->var1 &&
+    (RandomNumber(ctx) & 0x10) && ctx->gfxCurrentDisplayPage)
   {
     state->var2 = 0;
     state->var1 = 1;
@@ -4965,7 +5117,7 @@ void pascal Act_AggressivePrisoner(word handle)
       // grabbing done, go back to regular state
       state->var1 = 0;
     }
-    else if (gfxCurrentDisplayPage)
+    else if (ctx->gfxCurrentDisplayPage)
     {
       state->var2++;
     }
@@ -4973,35 +5125,35 @@ void pascal Act_AggressivePrisoner(word handle)
 }
 
 
-void pascal Act_ExplosionTrigger(word handle)
+void pascal Act_ExplosionTrigger(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->drawStyle = DS_INVISIBLE;
 
-  SpawnEffect(ACT_EXPLOSION_FX_1, state->x, state->y, EM_NONE, 0);
-  SpawnEffect(ACT_EXPLOSION_FX_1, state->x - 1, state->y - 2, EM_NONE, 1);
-  SpawnEffect(ACT_EXPLOSION_FX_1, state->x + 1, state->y - 3, EM_NONE, 2);
+  SpawnEffect(ctx, ACT_EXPLOSION_FX_1, state->x, state->y, EM_NONE, 0);
+  SpawnEffect(ctx, ACT_EXPLOSION_FX_1, state->x - 1, state->y - 2, EM_NONE, 1);
+  SpawnEffect(ctx, ACT_EXPLOSION_FX_1, state->x + 1, state->y - 3, EM_NONE, 2);
 
   state->deleted = true;
 }
 
 
-void pascal UpdateBossDeathSequence(word handle)
+void pascal UpdateBossDeathSequence(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var3 == 2)
   {
-    StopMusic();
-    GiveScore(50000);
+    StopMusic(ctx);
+    GiveScore(ctx, 50000);
     state->gravityAffected = false;
   }
 
   if (state->var3 == 50)
   {
     FLASH_SCREEN(SFC_WHITE);
-    PlaySound(SND_BIG_EXPLOSION);
+    PlaySound(ctx, SND_BIG_EXPLOSION);
   }
 
   // Rise up
@@ -5012,7 +5164,7 @@ void pascal UpdateBossDeathSequence(word handle)
 
   if (state->var3 == 60)
   {
-    gmGameState = GS_EPISODE_FINISHED;
+    ctx->gmGameState = GS_EPISODE_FINISHED;
     return;
   }
 
@@ -5036,35 +5188,38 @@ void pascal UpdateBossDeathSequence(word handle)
       PLAY_EXPLOSION_SOUND();
 
       SpawnParticles(
-        state->x + (word)RandomNumber() % 4,
-        state->y - (word)RandomNumber() % 8,
-        (word)RandomNumber() % 2 - 1,
-        (word)RandomNumber() % 16);
+        ctx,
+        state->x + (word)RandomNumber(ctx) % 4,
+        state->y - (word)RandomNumber(ctx) % 8,
+        (word)RandomNumber(ctx) % 2 - 1,
+        (word)RandomNumber(ctx) % 16);
       SpawnEffect(
+        ctx,
         ACT_EXPLOSION_FX_1,
-        state->x + (word)RandomNumber() % 4,
-        state->y - (word)RandomNumber() % 8,
+        state->x + (word)RandomNumber(ctx) % 4,
+        state->y - (word)RandomNumber(ctx) % 8,
         EM_NONE,
         0);
       SpawnEffect(
+        ctx,
         ACT_FLAME_FX,
-        state->x + (word)RandomNumber() % 4,
-        state->y - (word)RandomNumber() % 8,
+        state->x + (word)RandomNumber(ctx) % 4,
+        state->y - (word)RandomNumber(ctx) % 8,
         EM_FLY_DOWN,
         0);
   }
 
   if (state->var3 < 50)
   {
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
       state->drawStyle = DS_INVISIBLE;
     }
 
-    if ((RandomNumber() & 4) && gfxCurrentDisplayPage)
+    if ((RandomNumber(ctx) & 4) && ctx->gfxCurrentDisplayPage)
     {
       FLASH_SCREEN(SFC_WHITE);
-      PlaySound(SND_BIG_EXPLOSION);
+      PlaySound(ctx, SND_BIG_EXPLOSION);
     }
     else
     {
@@ -5076,19 +5231,19 @@ void pascal UpdateBossDeathSequence(word handle)
 }
 
 
-void pascal Act_Boss1(word handle)
+void pascal Act_Boss1(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // [PERF] Missing `static` causes a copy operation here
   sbyte Y_MOVEMENT_SEQ[] = {-1, -1, 0, 0, 1, 1, 1, 0, 0, -1};
 
   // Animate the ship
-  state->frame = gfxCurrentDisplayPage;
+  state->frame = ctx->gfxCurrentDisplayPage;
 
   if (state->var3 > 1) // Dying
   {
-    UpdateBossDeathSequence(handle);
+    UpdateBossDeathSequence(ctx, handle);
   }
   else if (state->var1 == 0) // First activation
   {
@@ -5096,7 +5251,7 @@ void pascal Act_Boss1(word handle)
     state->var5 = state->y;
     state->var4 = 0;
 
-    gmBossActivated = true;
+    ctx->gmBossActivated = true;
   }
   else if (state->var1 == 1) // Plunge down onto player
   {
@@ -5117,13 +5272,13 @@ void pascal Act_Boss1(word handle)
       }
 
       if (CheckWorldCollision(
-            MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
+            ctx, MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
       {
         state->gravityAffected = false;
 
         state->var1 = 2;
 
-        PlaySound(SND_HAMMER_SMASH);
+        PlaySound(ctx, SND_HAMMER_SMASH);
       }
     }
   }
@@ -5155,22 +5310,22 @@ void pascal Act_Boss1(word handle)
     state->x -= 2;
 
     if (CheckWorldCollision(
-          MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
+          ctx, MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
     {
       state->var1 = 4;
     }
   }
   else if (state->var1 == 4)
   {
-    if (gfxCurrentDisplayPage)
+    if (ctx->gfxCurrentDisplayPage)
     {
-      SpawnActor(ACT_MINI_NUKE_SMALL, state->x + 3, state->y + 1);
+      SpawnActor(ctx, ACT_MINI_NUKE_SMALL, state->x + 3, state->y + 1);
     }
 
     state->x += 2;
 
     if (CheckWorldCollision(
-          MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 2, state->y))
+          ctx, MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 2, state->y))
     {
       state->var1 = 7;
     }
@@ -5185,7 +5340,7 @@ void pascal Act_Boss1(word handle)
   else if (state->var1 == 8)
   {
     if (CheckWorldCollision(
-          MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
+          ctx, MD_DOWN, ACT_BOSS_EPISODE_1, 0, state->x, state->y + 1))
     {
       state->gravityAffected = false;
     }
@@ -5195,7 +5350,7 @@ void pascal Act_Boss1(word handle)
       state->x -= 2;
 
       if (CheckWorldCollision(
-            MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
+            ctx, MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 2, state->y))
       {
         state->var1 = 11;
       }
@@ -5206,7 +5361,7 @@ void pascal Act_Boss1(word handle)
     if (state->var3)
     {
       if (!CheckWorldCollision(
-            MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 1, state->y))
+            ctx, MD_RIGHT, ACT_BOSS_EPISODE_1, 0, state->x + 1, state->y))
       {
         state->x++;
       }
@@ -5218,7 +5373,7 @@ void pascal Act_Boss1(word handle)
     else
     {
       if (!CheckWorldCollision(
-            MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 1, state->y))
+            ctx, MD_LEFT, ACT_BOSS_EPISODE_1, 0, state->x - 1, state->y))
       {
         state->x--;
       }
@@ -5230,7 +5385,9 @@ void pascal Act_Boss1(word handle)
 
     state->y += Y_MOVEMENT_SEQ[state->var4++ % 10];
 
-    if (state->var4 > 50 && state->x - 1 <= plPosX && state->x + 9 >= plPosX)
+    if (
+      state->var4 > 50 && state->x - 1 <= ctx->plPosX &&
+      state->x + 9 >= ctx->plPosX)
     {
       state->var4 = 0;
       state->var1 = 1;
@@ -5246,19 +5403,19 @@ void pascal Act_Boss1(word handle)
   if (state->var3 < 3)
   {
     // Normal face
-    DrawActor(ACT_BOSS_EPISODE_1, 2, state->x, state->y, DS_NORMAL);
+    DrawActor(ctx, ACT_BOSS_EPISODE_1, 2, state->x, state->y, DS_NORMAL);
   }
-  else if (!gfxCurrentDisplayPage)
+  else if (!ctx->gfxCurrentDisplayPage)
   {
     // Scared face
-    DrawActor(ACT_BOSS_EPISODE_1, 3, state->x, state->y, DS_NORMAL);
+    DrawActor(ctx, ACT_BOSS_EPISODE_1, 3, state->x, state->y, DS_NORMAL);
   }
 }
 
 
-void pascal Act_Boss2(word handle)
+void pascal Act_Boss2(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   // This table is a list of groups of 3: x offset, y offset, animation frame.
   //
@@ -5287,23 +5444,23 @@ void pascal Act_Boss2(word handle)
     }
     else
     {
-      UpdateBossDeathSequence(handle);
+      UpdateBossDeathSequence(ctx, handle);
     }
   }
   else if (state->var3) // wait
   {
     state->var3--;
-    state->frame = gfxCurrentDisplayPage;
+    state->frame = ctx->gfxCurrentDisplayPage;
   }
   else if (state->var1 == 0) // initial wait upon activation
   {
-    state->frame = gfxCurrentDisplayPage;
+    state->frame = ctx->gfxCurrentDisplayPage;
 
     if (state->var2++ == 30)
     {
       state->var1++;
 
-      gmBossActivated = true;
+      ctx->gmBossActivated = true;
 
       state->var2 = 0;
     }
@@ -5316,7 +5473,7 @@ void pascal Act_Boss2(word handle)
 
     if (!state->frame)
     {
-      state->frame = gfxCurrentDisplayPage;
+      state->frame = ctx->gfxCurrentDisplayPage;
     }
 
     state->var2 += 3;
@@ -5338,7 +5495,7 @@ void pascal Act_Boss2(word handle)
 
     if (!state->frame)
     {
-      state->frame = gfxCurrentDisplayPage;
+      state->frame = ctx->gfxCurrentDisplayPage;
     }
 
     if (state->var2 == 0)
@@ -5355,7 +5512,7 @@ void pascal Act_Boss2(word handle)
     state->gravityAffected = true;
 
     if (CheckWorldCollision(
-          MD_DOWN, ACT_BOSS_EPISODE_2, 0, state->x, state->y + 1))
+          ctx, MD_DOWN, ACT_BOSS_EPISODE_2, 0, state->x, state->y + 1))
     {
       state->var1 = 4;
       state->var2 = 0;
@@ -5372,7 +5529,7 @@ void pascal Act_Boss2(word handle)
 
     if (!state->frame)
     {
-      state->frame = gfxCurrentDisplayPage;
+      state->frame = ctx->gfxCurrentDisplayPage;
     }
 
     state->var2 += 3;
@@ -5400,7 +5557,7 @@ void pascal Act_Boss2(word handle)
 
     if (!state->frame)
     {
-      state->frame = gfxCurrentDisplayPage;
+      state->frame = ctx->gfxCurrentDisplayPage;
     }
 
     if (state->var2 == 0)
@@ -5429,43 +5586,50 @@ void pascal Act_Boss2(word handle)
 }
 
 
-void Boss3_MoveTowardsPos(word* x, word* y, word targetX, word targetY)
+void Boss3_MoveTowardsPos(
+  Context* ctx,
+  word* x,
+  word* y,
+  word targetX,
+  word targetY)
 {
-  if (RandomNumber() & 1) // % 2
+  if (RandomNumber(ctx) & 1) // % 2
   {
     *x += Sign(targetX - *x - 4);
   }
 
-  if (gfxCurrentDisplayPage)
+  if (ctx->gfxCurrentDisplayPage)
   {
     *y += Sign(targetY - *y + 4);
   }
 }
 
 
-void pascal Act_Boss3(word handle)
+void pascal Act_Boss3(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (state->var3 > 1)
   {
-    UpdateBossDeathSequence(handle);
+    UpdateBossDeathSequence(ctx, handle);
     return;
   }
 
   if (!state->var3)
   {
-    gmBossActivated = true;
+    ctx->gmBossActivated = true;
 
     state->var3 = 1;
   }
 
-  Boss3_MoveTowardsPos(&state->x, &state->y, plPosX + 3, plPosY - 1);
+  Boss3_MoveTowardsPos(
+    ctx, &state->x, &state->y, ctx->plPosX + 3, ctx->plPosY - 1);
 
   // Draw engine exhaust flames
   DrawActor(
+    ctx,
     ACT_BOSS_EPISODE_3,
-    1 + gfxCurrentDisplayPage,
+    1 + ctx->gfxCurrentDisplayPage,
     state->x,
     state->y,
     DS_NORMAL);
@@ -5474,8 +5638,8 @@ void pascal Act_Boss3(word handle)
   // Shoot rockets at player
   //
   if (
-    IsActorOnScreen(handle) && gfxCurrentDisplayPage &&
-    (word)RandomNumber() % 2)
+    IsActorOnScreen(ctx, handle) && ctx->gfxCurrentDisplayPage &&
+    (word)RandomNumber(ctx) % 2)
   {
     // [NOTE] This code is a little convoluted. The actual goal is to figure out
     // if the player is in specific zones around the boss, in order to determine
@@ -5496,22 +5660,22 @@ void pascal Act_Boss3(word handle)
     // Player left of boss?
     state->x -= 9;
 
-    if (Boss3_IsTouchingPlayer(handle))
+    if (Boss3_IsTouchingPlayer(ctx, handle))
     {
       state->x += 9;
 
-      SpawnActor(ACT_ENEMY_ROCKET_LEFT, state->x - 4, state->y - 4);
+      SpawnActor(ctx, ACT_ENEMY_ROCKET_LEFT, state->x - 4, state->y - 4);
       return;
     }
 
     // Player right of boss?
     state->x += 18; // first += 9 to undo the -9 above, then +9
 
-    if (Boss3_IsTouchingPlayer(handle))
+    if (Boss3_IsTouchingPlayer(ctx, handle))
     {
       state->x -= 9;
 
-      SpawnActor(ACT_ENEMY_ROCKET_RIGHT, state->x + 8, state->y - 4);
+      SpawnActor(ctx, ACT_ENEMY_ROCKET_RIGHT, state->x + 8, state->y - 4);
       return;
     }
 
@@ -5519,22 +5683,22 @@ void pascal Act_Boss3(word handle)
     state->x -= 9;
     state->y -= 9;
 
-    if (Boss3_IsTouchingPlayer(handle))
+    if (Boss3_IsTouchingPlayer(ctx, handle))
     {
       state->y += 9;
 
-      SpawnActor(ACT_ENEMY_ROCKET_2_UP, state->x + 4, state->y - 8);
+      SpawnActor(ctx, ACT_ENEMY_ROCKET_2_UP, state->x + 4, state->y - 8);
       return;
     }
 
     // Player below boss?
     state->y += 18; // first += 9 to undo the -9 above, then +9
 
-    if (Boss3_IsTouchingPlayer(handle))
+    if (Boss3_IsTouchingPlayer(ctx, handle))
     {
       state->y -= 9;
 
-      SpawnActor(ACT_ENEMY_ROCKET_2_DOWN, state->x + 4, state->y + 3);
+      SpawnActor(ctx, ACT_ENEMY_ROCKET_2_DOWN, state->x + 4, state->y + 3);
       return;
     }
 
@@ -5543,48 +5707,48 @@ void pascal Act_Boss3(word handle)
 }
 
 
-void pascal Act_Boss4(word handle)
+void pascal Act_Boss4(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   if (!state->var3)
   {
     state->var3 = 1;
 
-    gmBossActivated = true;
+    ctx->gmBossActivated = true;
   }
 
   if (state->var3 > 1)
   {
-    UpdateBossDeathSequence(handle);
+    UpdateBossDeathSequence(ctx, handle);
     state->drawStyle = DS_INVISIBLE;
     return;
   }
 
   state->var1++;
 
-  if (!state->var5 && state->var4 < 14 && gfxCurrentDisplayPage)
+  if (!state->var5 && state->var4 < 14 && ctx->gfxCurrentDisplayPage)
   {
     state->var4 = 0;
 
-    if (state->x + 4 > plPosX)
+    if (state->x + 4 > ctx->plPosX)
     {
       state->x--;
       state->var4++;
     }
-    else if (state->x + 4 < plPosX)
+    else if (state->x + 4 < ctx->plPosX)
     {
       state->x++;
       state->var4++;
     }
 
 
-    if (state->y + 4 > plPosY)
+    if (state->y + 4 > ctx->plPosY)
     {
       state->y--;
       state->var4++;
     }
-    else if (state->y + 4 < plPosY)
+    else if (state->y + 4 < ctx->plPosY)
     {
       state->y++;
       state->var4++;
@@ -5592,7 +5756,12 @@ void pascal Act_Boss4(word handle)
   }
 
   DrawActor(
-    ACT_BOSS_EPISODE_4, state->var1 % 4 + 1, state->x, state->y, DS_NORMAL);
+    ctx,
+    ACT_BOSS_EPISODE_4,
+    state->var1 % 4 + 1,
+    state->x,
+    state->y,
+    DS_NORMAL);
 
   if (state->var5)
   {
@@ -5608,7 +5777,7 @@ void pascal Act_Boss4(word handle)
       {
         state->var4 = 0;
 
-        SpawnActor(ACT_BOSS_EPISODE_4_SHOT, state->x + 4, state->y + 2);
+        SpawnActor(ctx, ACT_BOSS_EPISODE_4_SHOT, state->x + 4, state->y + 2);
 
         state->var2 = 0;
         state->var5 = 12;
@@ -5625,9 +5794,9 @@ void MoveTowardsPos(word* x, word* y, word targetX, word targetY)
 }
 
 
-void pascal Act_Boss4Projectile(word handle)
+void pascal Act_Boss4Projectile(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   state->var2 = !state->var2;
 
@@ -5635,9 +5804,9 @@ void pascal Act_Boss4Projectile(word handle)
   {
     state->frame = 4;
 
-    if (RandomNumber() & 3) // % 4
+    if (RandomNumber(ctx) & 3) // % 4
     {
-      MoveTowardsPos(&state->x, &state->y, plPosX + 1, plPosY - 1);
+      MoveTowardsPos(&state->x, &state->y, ctx->plPosX + 1, ctx->plPosY - 1);
     }
   }
   else if (state->var2) // Play appearing animation, advance every other frame
@@ -5648,18 +5817,19 @@ void pascal Act_Boss4Projectile(word handle)
 }
 
 
-void pascal Act_SmallFlyingShip(word handle)
+void pascal Act_SmallFlyingShip(Context* ctx, word handle)
 {
-  register ActorState* state = gmActorStates + handle;
+  register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
 
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {0, 1, 2, 1};
 
   // Explode when hitting a wall, as if shot by the player (gives score)
-  if (HAS_TILE_ATTRIBUTE(Map_GetTile(state->x - 1, state->y), TA_SOLID_RIGHT))
+  if (HAS_TILE_ATTRIBUTE(
+        Map_GetTile(ctx, state->x - 1, state->y), TA_SOLID_RIGHT))
   {
-    HandleActorShotCollision(1, handle);
+    HandleActorShotCollision(ctx, 1, handle);
     return;
   }
 
@@ -5668,7 +5838,8 @@ void pascal Act_SmallFlyingShip(word handle)
   {
     for (i = 0; i < 15; i++)
     {
-      if (HAS_TILE_ATTRIBUTE(Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
+      if (HAS_TILE_ATTRIBUTE(
+            Map_GetTile(ctx, state->x, state->y + i), TA_SOLID_TOP))
       {
         state->var1 = i;
         break;
@@ -5679,7 +5850,8 @@ void pascal Act_SmallFlyingShip(word handle)
   // Rise up if distance to ground level reduced
   for (i = 0; i < state->var1; i++)
   {
-    if (HAS_TILE_ATTRIBUTE(Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
+    if (HAS_TILE_ATTRIBUTE(
+          Map_GetTile(ctx, state->x, state->y + i), TA_SOLID_TOP))
     {
       state->y--;
       break;
@@ -5689,7 +5861,7 @@ void pascal Act_SmallFlyingShip(word handle)
   // Otherwise, float back down
   if (
     i == state->var1 &&
-    !HAS_TILE_ATTRIBUTE(Map_GetTile(state->x, state->y + i), TA_SOLID_TOP))
+    !HAS_TILE_ATTRIBUTE(Map_GetTile(ctx, state->x, state->y + i), TA_SOLID_TOP))
   {
     state->y++;
   }
@@ -5702,7 +5874,7 @@ void pascal Act_SmallFlyingShip(word handle)
   // since they only appear in a level where you get Duke's ship) to the left,
   // but when you let a ship fly past you to the left it will remain active
   // until it hits a wall and gives you points, even if off-screen.
-  if (!IsActorOnScreen(handle) && state->x - 20 == plPosX)
+  if (!IsActorOnScreen(ctx, handle) && state->x - 20 == ctx->plPosX)
   {
     state->deleted = true;
   }
@@ -5721,9 +5893,9 @@ void pascal Act_SmallFlyingShip(word handle)
 }
 
 
-void pascal Act_RigelatinSoldier(word handle)
+void pascal Act_RigelatinSoldier(Context* ctx, word handle)
 {
-  ActorState* state = gmActorStates + handle;
+  ActorState* state = ctx->gmActorStates + handle;
 
   const sbyte JUMP_SEQ[] = {-2, -2, -1, 0};
 
@@ -5762,9 +5934,9 @@ void pascal Act_RigelatinSoldier(word handle)
   }
 
   if (CheckWorldCollision(
-        MD_DOWN, ACT_RIGELATIN_SOLDIER, 0, state->x, state->y + 1))
+        ctx, MD_DOWN, ACT_RIGELATIN_SOLDIER, 0, state->x, state->y + 1))
   {
-    if (state->x < plPosX)
+    if (state->x < ctx->plPosX)
     {
       state->var1 = 1;
     }
@@ -5773,7 +5945,7 @@ void pascal Act_RigelatinSoldier(word handle)
       state->var1 = 0;
     }
 
-    if ((word)RandomNumber() % 2)
+    if ((word)RandomNumber(ctx) % 2)
     {
       if (state->var1)
       {
@@ -5803,7 +5975,7 @@ void pascal Act_RigelatinSoldier(word handle)
         goto animateAndAttack;
       }
 
-      if ((word)RandomNumber() % 2)
+      if ((word)RandomNumber(ctx) % 2)
       {
         state->var3 = 20;
       }
@@ -5818,7 +5990,7 @@ void pascal Act_RigelatinSoldier(word handle)
     if (state->var1)
     {
       if (!CheckWorldCollision(
-            MD_RIGHT, ACT_RIGELATIN_SOLDIER, 0, state->x + 2, state->y))
+            ctx, MD_RIGHT, ACT_RIGELATIN_SOLDIER, 0, state->x + 2, state->y))
       {
         state->x += 2;
       }
@@ -5826,7 +5998,7 @@ void pascal Act_RigelatinSoldier(word handle)
     else
     {
       if (!CheckWorldCollision(
-            MD_LEFT, ACT_RIGELATIN_SOLDIER, 0, state->x - 2, state->y))
+            ctx, MD_LEFT, ACT_RIGELATIN_SOLDIER, 0, state->x - 2, state->y))
       {
         state->x -= 2;
       }
@@ -5850,6 +6022,7 @@ animateAndAttack:
     if (state->var1)
     {
       SpawnEffect(
+        ctx,
         ACT_RIGELATIN_SOLDIER_SHOT,
         state->x + 4,
         state->y - 4,
@@ -5859,7 +6032,12 @@ animateAndAttack:
     else
     {
       SpawnEffect(
-        ACT_RIGELATIN_SOLDIER_SHOT, state->x, state->y - 4, EM_FLY_LEFT, 0);
+        ctx,
+        ACT_RIGELATIN_SOLDIER_SHOT,
+        state->x,
+        state->y - 4,
+        EM_FLY_LEFT,
+        0);
     }
   }
   else
@@ -5883,19 +6061,19 @@ animateAndAttack:
  * vs. only when on screen etc.), the initial state of their actor-specific
  * variables, and more.
  */
-bool SpawnActorInSlot(word slot, word id, word x, word y)
+bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
 {
   // clang-format off
   switch (id)
   {
     case ACT_HOVERBOT:
       InitActorState(
-        slot, Act_Hoverbot, ACT_HOVERBOT, x, y,
+        ctx, slot, Act_Hoverbot, ACT_HOVERBOT, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         true,                // affected by gravity
-        gmDifficulty,        // health
+        ctx->gmDifficulty,        // health
         0,                   // var1
         9,                   // var2
         0,                   // var3
@@ -5907,7 +6085,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_DUKE_L:
     case ACT_DUKE_R:
       InitActorState(
-        slot, Act_PlayerSprite, id, plPosX = x, plPosY = y,
+        ctx, slot, Act_PlayerSprite, id, ctx->plPosX = x, ctx->plPosY = y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -5919,12 +6097,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      plActorId = id;
+      ctx->plActorId = id;
       break;
 
     case ACT_ROCKET_LAUNCHER:
       InitActorState(
-        slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -5936,12 +6114,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         100);                // score
-      gmWeaponsInLevel++;
+      ctx->gmWeaponsInLevel++;
       break;
 
     case ACT_FLAME_THROWER:
       InitActorState(
-        slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -5953,12 +6131,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         100);                // score
-      gmWeaponsInLevel++;
+      ctx->gmWeaponsInLevel++;
       break;
 
     case ACT_NORMAL_WEAPON:
       InitActorState(
-        slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -5970,12 +6148,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         100);                // score
-      gmWeaponsInLevel++;
+      ctx->gmWeaponsInLevel++;
       break;
 
     case ACT_LASER:
       InitActorState(
-        slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_GREEN_BOX, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -5987,13 +6165,13 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         100);                // score
-      gmWeaponsInLevel++;
+      ctx->gmWeaponsInLevel++;
       break;
 
     case ACT_FLAME_THROWER_BOT_R:
     case ACT_FLAME_THROWER_BOT_L:
       InitActorState(
-        slot, Act_FlameThrowerBot, id, x, y,
+        ctx, slot, Act_FlameThrowerBot, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6009,7 +6187,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RED_BOX_BOMB:
       InitActorState(
-        slot, Act_ItemBox, ACT_RED_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_RED_BOX, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6021,12 +6199,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         100);                // score
-      gmBombBoxesLeft++;
+      ctx->gmBombBoxesLeft++;
       break;
 
     case ACT_BLUE_BONUS_GLOBE_1:
       InitActorState(
-        slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
+        ctx, slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6038,12 +6216,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         500);                // score
-      gmOrbsLeft++;
+      ctx->gmOrbsLeft++;
       break;
 
     case ACT_BLUE_BONUS_GLOBE_2:
       InitActorState(
-        slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
+        ctx, slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6055,12 +6233,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         2000);               // score
-      gmOrbsLeft++;
+      ctx->gmOrbsLeft++;
       break;
 
     case ACT_BLUE_BONUS_GLOBE_3:
       InitActorState(
-        slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
+        ctx, slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6072,12 +6250,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         5000);               // score
-      gmOrbsLeft++;
+      ctx->gmOrbsLeft++;
       break;
 
     case ACT_BLUE_BONUS_GLOBE_4:
       InitActorState(
-        slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
+        ctx, slot, Act_BonusGlobe, ACT_BONUS_GLOBE_SHELL, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6089,17 +6267,17 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         10000);              // score
-      gmOrbsLeft++;
+      ctx->gmOrbsLeft++;
       break;
 
     case ACT_WATCHBOT:
       InitActorState(
-        slot, Act_WatchBot, ACT_WATCHBOT, x, y,
+        ctx, slot, Act_WatchBot, ACT_WATCHBOT, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 5,    // health
+        ctx->gmDifficulty + 5,    // health
         0,                   // var1
         1,                   // var2
         0,                   // var3
@@ -6111,7 +6289,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_TELEPORTER_1:
     case ACT_TELEPORTER_2:
       InitActorState(
-        slot, Act_AnimatedProp, ACT_TELEPORTER_2, x, y,
+        ctx, slot, Act_AnimatedProp, ACT_TELEPORTER_2, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6127,7 +6305,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_ROCKET_LAUNCHER_TURRET:
       InitActorState(
-        slot, Act_RocketTurret, ACT_ROCKET_LAUNCHER_TURRET, x, y,
+        ctx, slot, Act_RocketTurret, ACT_ROCKET_LAUNCHER_TURRET, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6147,7 +6325,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_ENEMY_ROCKET_2_UP:
     case ACT_ENEMY_ROCKET_2_DOWN:
       InitActorState(
-        slot, Act_EnemyRocket, id, x, y,
+        ctx, slot, Act_EnemyRocket, id, x, y,
         true,                // always update
         false,               // always update once activated
         true,                // allow stair stepping
@@ -6163,7 +6341,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATCHBOT_CONTAINER_CARRIER:
       InitActorState(
-        slot, Act_WatchBotContainerCarrier, ACT_WATCHBOT_CONTAINER_CARRIER, x, y,
+        ctx, slot, Act_WatchBotContainerCarrier, ACT_WATCHBOT_CONTAINER_CARRIER, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6179,7 +6357,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATCHBOT_CONTAINER:
       InitActorState(
-        slot, Act_WatchBotContainer, ACT_WATCHBOT_CONTAINER, x, y,
+        ctx, slot, Act_WatchBotContainer, ACT_WATCHBOT_CONTAINER, x, y,
         true,                // always update
         false,               // always update once activated
         true,                // allow stair stepping
@@ -6195,12 +6373,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOMBER_PLANE:
       InitActorState(
-        slot, Act_BomberPlane, ACT_BOMBER_PLANE, x, y,
+        ctx, slot, Act_BomberPlane, ACT_BOMBER_PLANE, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 5,    // health
+        ctx->gmDifficulty + 5,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6211,7 +6389,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_MINI_NUKE_SMALL:
       InitActorState(
-        slot, Act_MiniNuke, ACT_MINI_NUKE_SMALL, x, y,
+        ctx, slot, Act_MiniNuke, ACT_MINI_NUKE_SMALL, x, y,
         true,                // always update
         false,               // always update once activated
         true,                // allow stair stepping
@@ -6227,7 +6405,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_MINI_NUKE:
       InitActorState(
-        slot, Act_MiniNuke, ACT_MINI_NUKE, x, y,
+        ctx, slot, Act_MiniNuke, ACT_MINI_NUKE, x, y,
         true,                // always update
         false,               // always update once activated
         true,                // allow stair stepping
@@ -6243,12 +6421,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOUNCING_SPIKE_BALL:
       InitActorState(
-        slot, Act_SpikeBall, ACT_BOUNCING_SPIKE_BALL, x, y,
+        ctx, slot, Act_SpikeBall, ACT_BOUNCING_SPIKE_BALL, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 5,    // health
+        ctx->gmDifficulty + 5,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6259,7 +6437,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_ELECTRIC_REACTOR:
       InitActorState(
-        slot, Act_Reactor, ACT_ELECTRIC_REACTOR, x, y,
+        ctx, slot, Act_Reactor, ACT_ELECTRIC_REACTOR, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6275,7 +6453,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SLIME_CONTAINER:
       InitActorState(
-        slot, Act_SlimeContainer, ACT_SLIME_CONTAINER, x, y,
+        ctx, slot, Act_SlimeContainer, ACT_SLIME_CONTAINER, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6291,12 +6469,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SLIME_BLOB:
       InitActorState(
-        slot, Act_SlimeBlob, ACT_SLIME_BLOB, x, y,
+        ctx, slot, Act_SlimeBlob, ACT_SLIME_BLOB, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 5,    // health
+        ctx->gmDifficulty + 5,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6307,7 +6485,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_NUCLEAR_WASTE:
       InitActorState(
-        slot, Act_ItemBox, ACT_NUCLEAR_WASTE_CAN_EMPTY, x, y,
+        ctx, slot, Act_ItemBox, ACT_NUCLEAR_WASTE_CAN_EMPTY, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6323,12 +6501,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SNAKE:
       InitActorState(
-        slot, Act_Snake, ACT_SNAKE, x, y,
+        ctx, slot, Act_Snake, ACT_SNAKE, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 7,    // health
+        ctx->gmDifficulty + 7,    // health
         0,                   // var1
         0,                   // var2
         1,                   // var3
@@ -6340,7 +6518,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_CAMERA_ON_CEILING:
     case ACT_CAMERA_ON_FLOOR:
       InitActorState(
-        slot, Act_SecurityCamera, id, x, y,
+        ctx, slot, Act_SecurityCamera, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6352,17 +6530,17 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         100);                // score
-      gmCamerasInLevel++;
+      ctx->gmCamerasInLevel++;
       break;
 
     case ACT_CEILING_SUCKER:
       InitActorState(
-        slot, Act_CeilingSucker, ACT_CEILING_SUCKER, x, y,
+        ctx, slot, Act_CeilingSucker, ACT_CEILING_SUCKER, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty * 3 + 12, // health
+        ctx->gmDifficulty * 3 + 12, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6373,7 +6551,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DUKES_SHIP_R:
       InitActorState(
-        slot, Act_PlayerShip, ACT_DUKES_SHIP_R, x, y,
+        ctx, slot, Act_PlayerShip, ACT_DUKES_SHIP_R, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6389,7 +6567,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DUKES_SHIP_AFTER_EXITING_L:
       InitActorState(
-        slot, Act_PlayerShip, ACT_DUKES_SHIP_L, x, y,
+        ctx, slot, Act_PlayerShip, ACT_DUKES_SHIP_L, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6405,7 +6583,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DUKES_SHIP_AFTER_EXITING_R:
       InitActorState(
-        slot, Act_PlayerShip, ACT_DUKES_SHIP_R, x, y,
+        ctx, slot, Act_PlayerShip, ACT_DUKES_SHIP_R, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6421,7 +6599,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_MISSILE_BROKEN:
       InitActorState(
-        slot, Act_BrokenMissile, ACT_MISSILE_BROKEN, x, y,
+        ctx, slot, Act_BrokenMissile, ACT_MISSILE_BROKEN, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6437,7 +6615,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_EYEBALL_THROWER_L:
       InitActorState(
-        slot, Act_EyeBallThrower, ACT_EYEBALL_THROWER_L, x, y,
+        ctx, slot, Act_EyeBallThrower, ACT_EYEBALL_THROWER_L, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6453,7 +6631,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_1:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_1, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_1, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6469,7 +6647,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_2:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_2, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_2, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6485,7 +6663,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_HOVERBOT_GENERATOR:
       InitActorState(
-        slot, Act_HoverBotGenerator, ACT_HOVERBOT_GENERATOR, x, y,
+        ctx, slot, Act_HoverBotGenerator, ACT_HOVERBOT_GENERATOR, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6501,7 +6679,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_3:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_3, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_3, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6517,7 +6695,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SLIME_PIPE:
       InitActorState(
-        slot, Act_SlimePipe, ACT_SLIME_PIPE, x, y,
+        ctx, slot, Act_SlimePipe, ACT_SLIME_PIPE, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6533,7 +6711,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SLIME_DROP:
       InitActorState(
-        slot, Act_SlimeDrop, ACT_SLIME_DROP, x, y,
+        ctx, slot, Act_SlimeDrop, ACT_SLIME_DROP, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6549,7 +6727,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_FORCE_FIELD:
       InitActorState(
-        slot, Act_ForceField, ACT_FORCE_FIELD, x, y,
+        ctx, slot, Act_ForceField, ACT_FORCE_FIELD, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6565,7 +6743,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_CIRCUIT_CARD_KEYHOLE:
       InitActorState(
-        slot, Act_KeyCardSlot, ACT_CIRCUIT_CARD_KEYHOLE, x, y,
+        ctx, slot, Act_KeyCardSlot, ACT_CIRCUIT_CARD_KEYHOLE, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6581,7 +6759,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BLUE_KEY_KEYHOLE:
       InitActorState(
-        slot, Act_KeyHole, ACT_BLUE_KEY_KEYHOLE, x, y,
+        ctx, slot, Act_KeyHole, ACT_BLUE_KEY_KEYHOLE, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6597,7 +6775,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SLIDING_DOOR_VERTICAL:
       InitActorState(
-        slot, Act_SlidingDoorVertical, ACT_SLIDING_DOOR_VERTICAL, x, y,
+        ctx, slot, Act_SlidingDoorVertical, ACT_SLIDING_DOOR_VERTICAL, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6613,7 +6791,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RADAR_DISH:
       InitActorState(
-        slot, Act_AnimatedProp, ACT_RADAR_DISH, x, y,
+        ctx, slot, Act_AnimatedProp, ACT_RADAR_DISH, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6625,13 +6803,13 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         500);                // score
-      gmRadarDishesLeft++;
+      ctx->gmRadarDishesLeft++;
       break;
 
     case ACT_KEYHOLE_MOUNTING_POLE:
     case ACT_LASER_TURRET_MOUNTING_POST:
       InitActorState(
-        slot, Act_AnimatedProp, id, x, y,
+        ctx, slot, Act_AnimatedProp, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6647,7 +6825,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BLOWING_FAN:
       InitActorState(
-        slot, Act_BlowingFan, ACT_BLOWING_FAN, x, y,
+        ctx, slot, Act_BlowingFan, ACT_BLOWING_FAN, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6663,7 +6841,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_LASER_TURRET:
       InitActorState(
-        slot, Act_LaserTurret, ACT_LASER_TURRET, x, y,
+        ctx, slot, Act_LaserTurret, ACT_LASER_TURRET, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6675,12 +6853,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      gmTurretsInLevel++;
+      ctx->gmTurretsInLevel++;
       break;
 
     case ACT_SLIDING_DOOR_HORIZONTAL:
       InitActorState(
-        slot, Act_SlidingDoorHorizontal, ACT_SLIDING_DOOR_HORIZONTAL, x, y,
+        ctx, slot, Act_SlidingDoorHorizontal, ACT_SLIDING_DOOR_HORIZONTAL, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6696,7 +6874,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RESPAWN_CHECKPOINT:
       InitActorState(
-        slot, Act_RespawnBeacon, ACT_RESPAWN_CHECKPOINT, x, y,
+        ctx, slot, Act_RespawnBeacon, ACT_RESPAWN_CHECKPOINT, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6712,12 +6890,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SKELETON:
       InitActorState(
-        slot, Act_Skeleton, ACT_SKELETON, x, y,
+        ctx, slot, Act_Skeleton, ACT_SKELETON, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         true,                // affected by gravity
-        gmDifficulty + 1,    // health
+        ctx->gmDifficulty + 1,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6729,7 +6907,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_ENEMY_LASER_SHOT_R:
     case ACT_ENEMY_LASER_SHOT_L:
       InitActorState(
-        slot, Act_EnemyLaserShot, ACT_ENEMY_LASER_SHOT_L, x, y,
+        ctx, slot, Act_EnemyLaserShot, ACT_ENEMY_LASER_SHOT_L, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6745,7 +6923,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_4:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_4, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_4, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6761,7 +6939,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_5:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_5, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_5, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6777,7 +6955,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_EXIT_TRIGGER:
       InitActorState(
-        slot, Act_LevelExitTrigger, ACT_EXIT_TRIGGER, x, y,
+        ctx, slot, Act_LevelExitTrigger, ACT_EXIT_TRIGGER, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6793,7 +6971,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_6:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_6, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_6, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6809,7 +6987,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_7:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_7, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_7, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6825,7 +7003,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_DYNAMIC_GEOMETRY_8:
       InitActorState(
-        slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_8, x, y,
+        ctx, slot, Act_MovingMapPartTrigger, ACT_DYNAMIC_GEOMETRY_8, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6841,7 +7019,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SUPER_FORCE_FIELD_L:
       InitActorState(
-        slot, Act_SuperForceField, ACT_SUPER_FORCE_FIELD_L, x, y,
+        ctx, slot, Act_SuperForceField, ACT_SUPER_FORCE_FIELD_L, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -6857,7 +7035,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_MISSILE_INTACT:
       InitActorState(
-        slot, Act_IntactMissile, ACT_MISSILE_INTACT, x, y,
+        ctx, slot, Act_IntactMissile, ACT_MISSILE_INTACT, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6873,7 +7051,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_METAL_GRABBER_CLAW:
       InitActorState(
-        slot, Act_GrabberClaw, ACT_METAL_GRABBER_CLAW, x, y,
+        ctx, slot, Act_GrabberClaw, ACT_METAL_GRABBER_CLAW, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6889,12 +7067,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_HOVERING_LASER_TURRET:
       InitActorState(
-        slot, Act_FloatingLaserBot, ACT_HOVERING_LASER_TURRET, x, y,
+        ctx, slot, Act_FloatingLaserBot, ACT_HOVERING_LASER_TURRET, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 2,    // health
+        ctx->gmDifficulty + 2,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6905,12 +7083,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SPIDER:
       InitActorState(
-        slot, Act_Spider, ACT_SPIDER, x, y,
+        ctx, slot, Act_Spider, ACT_SPIDER, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty,        // health
+        ctx->gmDifficulty,        // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6937,7 +7115,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_T_SHIRT:
     case ACT_VIDEOCASSETTE:
       InitActorState(
-        slot, Act_ItemBox, ACT_BLUE_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_BLUE_BOX, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6949,17 +7127,17 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      gmMerchInLevel++;
+      ctx->gmMerchInLevel++;
       break;
 
     case ACT_BLUE_GUARD_R:
       InitActorState(
-        slot, Act_BlueGuard, ACT_BLUE_GUARD_R, x, y,
+        ctx, slot, Act_BlueGuard, ACT_BLUE_GUARD_R, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 1,    // health
+        ctx->gmDifficulty + 1,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -6973,7 +7151,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_RED_BOX:
     case ACT_BLUE_BOX:
       InitActorState(
-        slot, Act_ItemBox, id, x, y,
+        ctx, slot, Act_ItemBox, id, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -6989,12 +7167,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BLUE_GUARD_L:
       InitActorState(
-        slot, Act_BlueGuard, ACT_BLUE_GUARD_R, x, y,
+        ctx, slot, Act_BlueGuard, ACT_BLUE_GUARD_R, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 1,    // health
+        ctx->gmDifficulty + 1,    // health
         1,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7005,7 +7183,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_NUCLEAR_WASTE_CAN_EMPTY:
       InitActorState(
-        slot, Act_ItemBox, ACT_NUCLEAR_WASTE_CAN_EMPTY, x, y,
+        ctx, slot, Act_ItemBox, ACT_NUCLEAR_WASTE_CAN_EMPTY, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7022,7 +7200,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_SODA_CAN:
     case ACT_SODA_6_PACK:
       InitActorState(
-        slot, Act_ItemBox, ACT_RED_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_RED_BOX, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7040,7 +7218,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_FIRE_ON_FLOOR_1:
     case ACT_FIRE_ON_FLOOR_2:
       InitActorState(
-        slot, Act_AnimatedProp, id, x, y,
+        ctx, slot, Act_AnimatedProp, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7057,7 +7235,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_GREEN_CREATURE_L:
     case ACT_GREEN_CREATURE_R:
       InitActorState(
-        slot, Act_SpikedGreenCreature, id, x, y,
+        ctx, slot, Act_SpikedGreenCreature, id, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
@@ -7074,7 +7252,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_BIG_GREEN_CAT_L:
     case ACT_BIG_GREEN_CAT_R:
       InitActorState(
-        slot, Act_GreenPanther, id, x, y,
+        ctx, slot, Act_GreenPanther, id, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
@@ -7090,7 +7268,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RED_BOX_TURKEY:
       InitActorState(
-        slot, Act_ItemBox, ACT_RED_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_RED_BOX, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7106,7 +7284,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_TURKEY:
       InitActorState(
-        slot, Act_Turkey, ACT_TURKEY, x, y,
+        ctx, slot, Act_Turkey, ACT_TURKEY, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7122,12 +7300,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RED_BIRD:
       InitActorState(
-        slot, Act_RedBird, ACT_RED_BIRD, x, y,
+        ctx, slot, Act_RedBird, ACT_RED_BIRD, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty,        // health
+        ctx->gmDifficulty,        // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7138,7 +7316,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_UGLY_GREEN_BIRD:
       InitActorState(
-        slot, Act_GreenBird, ACT_UGLY_GREEN_BIRD, x, y,
+        ctx, slot, Act_GreenBird, ACT_UGLY_GREEN_BIRD, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
@@ -7157,7 +7335,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_CLOAKING_DEVICE:
     case ACT_BLUE_KEY:
       InitActorState(
-        slot, Act_ItemBox, ACT_WHITE_BOX, x, y,
+        ctx, slot, Act_ItemBox, ACT_WHITE_BOX, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7175,7 +7353,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_FLOATING_EXIT_SIGN_L:
     case ACT_FLOATING_ARROW:
       InitActorState(
-        slot, Act_AnimatedProp, id, x, y,
+        ctx, slot, Act_AnimatedProp, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7191,7 +7369,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_ELEVATOR:
       InitActorState(
-        slot, Act_Elevator, ACT_ELEVATOR, x, y,
+        ctx, slot, Act_Elevator, ACT_ELEVATOR, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7210,7 +7388,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_WATER_FALL_SPLASH_CENTER:
     case ACT_WATER_FALL_SPLASH_R:
       InitActorState(
-        slot, Act_AnimatedProp, id, x, y,
+        ctx, slot, Act_AnimatedProp, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7238,7 +7416,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_WATER_ON_FLOOR_2:
     case ACT_PASSIVE_PRISONER:
       InitActorState(
-        slot, Act_AnimatedProp, id, x, y,
+        ctx, slot, Act_AnimatedProp, id, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7258,7 +7436,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_MESSENGER_DRONE_4:
     case ACT_MESSENGER_DRONE_5:
       InitActorState(
-        slot, Act_MessengerDrone, ACT_MESSENGER_DRONE_BODY, x, y,
+        ctx, slot, Act_MessengerDrone, ACT_MESSENGER_DRONE_BODY, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7274,12 +7452,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BLUE_GUARD_USING_TERMINAL:
       InitActorState(
-        slot, Act_BlueGuard, ACT_BLUE_GUARD_R, x, y,
+        ctx, slot, Act_BlueGuard, ACT_BLUE_GUARD_R, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 1,    // health
+        ctx->gmDifficulty + 1,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7290,7 +7468,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SUPER_FORCE_FIELD_R:
       InitActorState(
-        slot, Act_SuperForceField, ACT_SUPER_FORCE_FIELD_L, x, y,
+        ctx, slot, Act_SuperForceField, ACT_SUPER_FORCE_FIELD_L, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7306,7 +7484,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SMASH_HAMMER:
       InitActorState(
-        slot, Act_SmashHammer, ACT_SMASH_HAMMER, x, y,
+        ctx, slot, Act_SmashHammer, ACT_SMASH_HAMMER, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7322,7 +7500,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATER_BODY:
       InitActorState(
-        slot, Act_WaterArea, ACT_WATER_BODY, x, y,
+        ctx, slot, Act_WaterArea, ACT_WATER_BODY, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7338,7 +7516,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATER_DROP:
       InitActorState(
-        slot, Act_WaterDrop, ACT_WATER_DROP, x, y,
+        ctx, slot, Act_WaterDrop, ACT_WATER_DROP, x, y,
         true,                // always update
         false,               // always update once activated
         true,                // allow stair stepping
@@ -7354,7 +7532,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATER_DROP_SPAWNER:
       InitActorState(
-        slot, Act_WaterDropSpawner, ACT_WATER_DROP_SPAWNER, x, y,
+        ctx, slot, Act_WaterDropSpawner, ACT_WATER_DROP_SPAWNER, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7370,7 +7548,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_LAVA_FOUNTAIN:
       InitActorState(
-        slot, Act_LavaFountain, ACT_LAVA_FOUNTAIN, x, y,
+        ctx, slot, Act_LavaFountain, ACT_LAVA_FOUNTAIN, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
@@ -7386,7 +7564,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATER_SURFACE:
       InitActorState(
-        slot, Act_WaterArea, ACT_WATER_BODY, x, y,
+        ctx, slot, Act_WaterArea, ACT_WATER_BODY, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7402,7 +7580,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WATER_AREA_4x4:
       InitActorState(
-        slot, Act_WaterArea, ACT_WATER_BODY, x, y,
+        ctx, slot, Act_WaterArea, ACT_WATER_BODY, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7418,7 +7596,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RADAR_COMPUTER_TERMINAL:
       InitActorState(
-        slot, Act_RadarComputer, ACT_RADAR_COMPUTER_TERMINAL, x, y,
+        ctx, slot, Act_RadarComputer, ACT_RADAR_COMPUTER_TERMINAL, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7434,7 +7612,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SPECIAL_HINT_GLOBE:
       InitActorState(
-        slot, Act_AnimatedProp, ACT_SPECIAL_HINT_GLOBE, x, y,
+        ctx, slot, Act_AnimatedProp, ACT_SPECIAL_HINT_GLOBE, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
@@ -7450,7 +7628,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_SPECIAL_HINT_MACHINE:
       InitActorState(
-        slot, Act_HintMachine, ACT_SPECIAL_HINT_MACHINE, x, y,
+        ctx, slot, Act_HintMachine, ACT_SPECIAL_HINT_MACHINE, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7466,7 +7644,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WINDBLOWN_SPIDER_GENERATOR:
       InitActorState(
-        slot, Act_WindBlownSpiderGenerator, ACT_WINDBLOWN_SPIDER_GENERATOR, x, y,
+        ctx, slot, Act_WindBlownSpiderGenerator, ACT_WINDBLOWN_SPIDER_GENERATOR, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7482,7 +7660,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_UNICYCLE_BOT:
       InitActorState(
-        slot, Act_UniCycleBot, ACT_UNICYCLE_BOT, x, y,
+        ctx, slot, Act_UniCycleBot, ACT_UNICYCLE_BOT, x, y,
         false,               // always update
         true,                // always update once activated
         true,                // allow stair stepping
@@ -7498,13 +7676,13 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_WALL_WALKER:
       InitActorState(
-        slot, Act_WallWalker, ACT_WALL_WALKER, x, y,
+        ctx, slot, Act_WallWalker, ACT_WALL_WALKER, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
         2,                   // health
-        (word)RandomNumber() % 4,  // var1
+        (word)RandomNumber(ctx) % 4,  // var1
         0,                   // var2
         20,                  // var3
         0,                   // var4
@@ -7515,7 +7693,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_AIRLOCK_DEATH_TRIGGER_L:
     case ACT_AIRLOCK_DEATH_TRIGGER_R:
       InitActorState(
-        slot, Act_AirlockDeathTrigger, id, x, y,
+        ctx, slot, Act_AirlockDeathTrigger, id, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7531,7 +7709,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_AGGRESSIVE_PRISONER:
       InitActorState(
-        slot, Act_AggressivePrisoner, ACT_AGGRESSIVE_PRISONER, x, y,
+        ctx, slot, Act_AggressivePrisoner, ACT_AGGRESSIVE_PRISONER, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7547,7 +7725,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_EXPLOSION_FX_TRIGGER:
       InitActorState(
-        slot, Act_ExplosionTrigger, ACT_EXPLOSION_FX_TRIGGER, x, y,
+        ctx, slot, Act_ExplosionTrigger, ACT_EXPLOSION_FX_TRIGGER, x, y,
         false,               // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7563,12 +7741,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOSS_EPISODE_1:
       InitActorState(
-        slot, Act_Boss1, ACT_BOSS_EPISODE_1, x, y,
+        ctx, slot, Act_Boss1, ACT_BOSS_EPISODE_1, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmBossHealth = gmDifficulty * 20 + 90, // health
+        ctx->gmBossHealth = ctx->gmDifficulty * 20 + 90, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7579,12 +7757,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOSS_EPISODE_2:
       InitActorState(
-        slot, Act_Boss2, ACT_BOSS_EPISODE_2, x, y,
+        ctx, slot, Act_Boss2, ACT_BOSS_EPISODE_2, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmBossHealth = gmDifficulty * 20 + 90, // health
+        ctx->gmBossHealth = ctx->gmDifficulty * 20 + 90, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7595,12 +7773,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOSS_EPISODE_3:
       InitActorState(
-        slot, Act_Boss3, ACT_BOSS_EPISODE_3, x, y,
+        ctx, slot, Act_Boss3, ACT_BOSS_EPISODE_3, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmBossHealth = gmDifficulty * 75 + 600, // health
+        ctx->gmBossHealth = ctx->gmDifficulty * 75 + 600, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7611,12 +7789,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOSS_EPISODE_4:
       InitActorState(
-        slot, Act_Boss4, ACT_BOSS_EPISODE_4, x, y,
+        ctx, slot, Act_Boss4, ACT_BOSS_EPISODE_4, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmBossHealth = gmDifficulty * 40 + 100, // health
+        ctx->gmBossHealth = ctx->gmDifficulty * 40 + 100, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7629,12 +7807,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
     case ACT_SMALL_FLYING_SHIP_2:
     case ACT_SMALL_FLYING_SHIP_3:
       InitActorState(
-        slot, Act_SmallFlyingShip, id, x, y,
+        ctx, slot, Act_SmallFlyingShip, id, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty + 1,    // health
+        ctx->gmDifficulty + 1,    // health
         0,                   // var1
         0,                   // var2
         0,                   // var3
@@ -7645,7 +7823,7 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_BOSS_EPISODE_4_SHOT:
       InitActorState(
-        slot, Act_Boss4Projectile, ACT_BOSS_EPISODE_4_SHOT, x, y,
+        ctx, slot, Act_Boss4Projectile, ACT_BOSS_EPISODE_4_SHOT, x, y,
         true,                // always update
         false,               // always update once activated
         false,               // allow stair stepping
@@ -7661,12 +7839,12 @@ bool SpawnActorInSlot(word slot, word id, word x, word y)
 
     case ACT_RIGELATIN_SOLDIER:
       InitActorState(
-        slot, Act_RigelatinSoldier, ACT_RIGELATIN_SOLDIER, x, y,
+        ctx, slot, Act_RigelatinSoldier, ACT_RIGELATIN_SOLDIER, x, y,
         false,               // always update
         true,                // always update once activated
         false,               // allow stair stepping
         false,               // affected by gravity
-        gmDifficulty * 2 + 25, // health
+        ctx->gmDifficulty * 2 + 25, // health
         0,                   // var1
         0,                   // var2
         0,                   // var3

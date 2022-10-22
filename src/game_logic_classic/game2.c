@@ -44,9 +44,9 @@ map and background drawing code, and a few random building block functions.
  */
 void pascal TeleportTo(word x, word y)
 {
-  gmIsTeleporting = true;
-  gmTeleportTargetPosX = x;
-  gmTeleportTargetPosY = y;
+  ctx->gmIsTeleporting = true;
+  ctx->gmTeleportTargetPosX = x;
+  ctx->gmTeleportTargetPosY = y;
 }
 
 
@@ -57,21 +57,21 @@ void pascal TeleportTo(word x, word y)
  * to have the desired results.
  * It also handles the earthquake and reactor destruction event effects.
  */
-void UpdateBackdrop(void)
+void UpdateBackdrop(Context* ctx)
 {
   byte random;
 
   //
   // Earthquake effect
   //
-  if (mapHasEarthquake)
+  if (ctx->mapHasEarthquake)
   {
     if (
-      gmEarthquakeCountdown < gmEarthquakeThreshold &&
-      gmEarthquakeCountdown != 0)
+      ctx->gmEarthquakeCountdown < ctx->gmEarthquakeThreshold &&
+      ctx->gmEarthquakeCountdown != 0)
     {
-      random = RandomNumber() & 0x3;
-      ShowTutorial(TUT_EARTHQUAKE);
+      random = RandomNumber(ctx) & 0x3;
+      ShowTutorial(ctx, TUT_EARTHQUAKE);
 
       if (random)
       {
@@ -79,40 +79,40 @@ void UpdateBackdrop(void)
       }
       else
       {
-        PlaySound(SND_EARTHQUAKE + (random > 2 ? 1 : 0));
+        PlaySound(ctx, SND_EARTHQUAKE + (random > 2 ? 1 : 0));
       }
     }
 
-    if (!gmEarthquakeCountdown)
+    if (!ctx->gmEarthquakeCountdown)
     {
-      gmEarthquakeCountdown = RandomNumber();
-      gmEarthquakeThreshold = RandomNumber() % 50;
+      ctx->gmEarthquakeCountdown = RandomNumber(ctx);
+      ctx->gmEarthquakeThreshold = RandomNumber(ctx) % 50;
     }
 
-    gmEarthquakeCountdown--;
+    ctx->gmEarthquakeCountdown--;
   }
 
-  if (mapParallaxHorizontal)
+  if (ctx->mapParallaxHorizontal)
   {
     // Reactor destruction event (backdrop flashes white every other frame)
     // update. The actual flashing happens in UpdateAndDrawGame() based on
     // the state of gmReactorDestructionStep, here we just update the step
     // variable, play sound effects, and show a message.
-    if (bdUseSecondary && mapHasReactorDestructionEvent)
+    if (ctx->bdUseSecondary && ctx->mapHasReactorDestructionEvent)
     {
-      if (gmReactorDestructionStep < 14)
+      if (ctx->gmReactorDestructionStep < 14)
       {
-        gmReactorDestructionStep++;
+        ctx->gmReactorDestructionStep++;
 
-        if (gfxCurrentDisplayPage)
+        if (ctx->gfxCurrentDisplayPage)
         {
-          PlaySound(SND_BIG_EXPLOSION);
+          PlaySound(ctx, SND_BIG_EXPLOSION);
         }
       }
 
-      if (gmReactorDestructionStep == 13)
+      if (ctx->gmReactorDestructionStep == 13)
       {
-        ShowInGameMessage(MID_DESTROYED_EVERYTHING);
+        ShowInGameMessage(ctx, MID_DESTROYED_EVERYTHING);
       }
     }
   }
@@ -127,24 +127,24 @@ void UpdateBackdrop(void)
  * state of the world. This includes parallax background, map tiles, sprites,
  * particle effects etc.
  */
-void pascal UpdateAndDrawGame(void)
+void pascal UpdateAndDrawGame(Context* ctx)
 {
-  if (gfxFlashScreen)
+  if (ctx->gfxFlashScreen)
   {
-    gfxCurrentDisplayPage = !gfxCurrentDisplayPage;
-    gfxFlashScreen = false;
+    ctx->gfxCurrentDisplayPage = !ctx->gfxCurrentDisplayPage;
+    ctx->gfxFlashScreen = false;
   }
 
-  UpdatePlayer();
-  UpdateBackdrop();
-  UpdateMovingMapParts();
-  UpdateAndDrawActors();
-  UpdateAndDrawParticles();
-  UpdateAndDrawPlayerShots();
-  UpdateAndDrawEffects();
-  UpdateAndDrawTileDebris();
+  UpdatePlayer(ctx);
+  UpdateBackdrop(ctx);
+  UpdateMovingMapParts(ctx);
+  UpdateAndDrawActors(ctx);
+  UpdateAndDrawParticles(ctx);
+  UpdateAndDrawPlayerShots(ctx);
+  UpdateAndDrawEffects(ctx);
+  UpdateAndDrawTileDebris(ctx);
 
-  gfxCurrentDisplayPage = !gfxCurrentDisplayPage;
+  ctx->gfxCurrentDisplayPage = !ctx->gfxCurrentDisplayPage;
 }
 
 
@@ -172,8 +172,13 @@ void pascal UpdateAndDrawGame(void)
  * game's version of sloped surfaces, which are actually stairs that are made
  * to look like a slope with the help of masked (partially transparent) tiles.
  */
-int16_t pascal
-  CheckWorldCollision(word direction, word actorId, word frame, word x, word y)
+int16_t pascal CheckWorldCollision(
+  Context* ctx,
+  word direction,
+  word actorId,
+  word frame,
+  word x,
+  word y)
 {
   register int16_t i;
   register word height;
@@ -185,9 +190,9 @@ int16_t pascal
   int16_t bboxTop;
   word attributes;
 
-  retConveyorBeltCheckResult = CB_NONE;
+  ctx->retConveyorBeltCheckResult = CB_NONE;
 
-  offset = gfxActorInfoData[actorId] + (frame << 3);
+  offset = ctx->gfxActorInfoData[actorId] + (frame << 3);
   height = AINFO_HEIGHT(offset);
   width = AINFO_WIDTH(offset);
 
@@ -198,7 +203,7 @@ int16_t pascal
   {
     isPlayer = true;
 
-    if (plPosX == 0 && direction == MD_LEFT)
+    if (ctx->plPosX == 0 && direction == MD_LEFT)
     {
       return CR_COLLISION;
     }
@@ -250,13 +255,13 @@ int16_t pascal
       }
 
       // Start at map tile underneath the sprite's top-left corner
-      tileData = mapData + ((y - height + 1) << mapWidthShift) + x;
+      tileData = ctx->mapData + ((y - height + 1) << ctx->mapWidthShift) + x;
 
       // Check the top edge. This is the entire length of the sprite for
       // horizontal shots, and only the top-most tile for vertical shots.
       for (i = 0; i < width; i++)
       {
-        attributes = *(gfxTilesetAttributes + (*(tileData + i) >> 3));
+        attributes = *(ctx->gfxTilesetAttributes + (*(tileData + i) >> 3));
 
         // Treat composite tiles as not solid - and abort the entire check.
         if (*(tileData + i) & 0x8000)
@@ -273,13 +278,13 @@ int16_t pascal
       }
 
       // Start at map tile underneath the sprite's bottom-left corner
-      tileData = mapData + (y << mapWidthShift) + x;
+      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x;
 
       // Check left edge, this is the entire height of the sprite for vertical
       // shots, and only the left-most tile for horizontal shots
       for (i = 0; i < height; i++)
       {
-        attributes = *(gfxTilesetAttributes + (*tileData >> 3));
+        attributes = *(ctx->gfxTilesetAttributes + (*tileData >> 3));
 
         // Treat composite tiles as not solid - and abort the entire check.
         if (*tileData & 0x8000)
@@ -295,7 +300,7 @@ int16_t pascal
         }
 
         // Go up by one tile
-        tileData -= mapWidth;
+        tileData -= ctx->mapWidth;
       }
 
       return CR_NONE;
@@ -310,7 +315,7 @@ int16_t pascal
       }
 
       // Start at map tile underneath top-left corner of the sprite
-      tileData = mapData + ((y - height + 1) << mapWidthShift) + x;
+      tileData = ctx->mapData + ((y - height + 1) << ctx->mapWidthShift) + x;
 
       if (isPlayer && HAS_TILE_ATTRIBUTE(*(tileData + 1), TA_CLIMBABLE))
       {
@@ -334,21 +339,22 @@ int16_t pascal
           return CR_LADDER;
         }
 
-        if (inputMoveLeft || inputMoveRight)
+        if (ctx->inputMoveLeft || ctx->inputMoveRight)
         {
           // No-op
         }
         else
         {
-          if (inputMoveUp && HAS_TILE_ATTRIBUTE(*tileData, TA_LADDER))
+          if (ctx->inputMoveUp && HAS_TILE_ATTRIBUTE(*tileData, TA_LADDER))
           {
-            plPosX--;
+            ctx->plPosX--;
             return CR_LADDER;
           }
 
-          if (inputMoveUp && HAS_TILE_ATTRIBUTE(*(tileData + 2), TA_LADDER))
+          if (
+            ctx->inputMoveUp && HAS_TILE_ATTRIBUTE(*(tileData + 2), TA_LADDER))
           {
-            plPosX++;
+            ctx->plPosX++;
             return CR_LADDER;
           }
         }
@@ -358,10 +364,10 @@ int16_t pascal
 
     case MD_DOWN:
       // Start at map tile underneath sprite's bottom-left corner
-      tileData = mapData + (y << mapWidthShift) + x;
+      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x;
 
       // Bottom edge outside the map is never solid
-      if (y > mapBottom)
+      if (y > ctx->mapBottom)
       {
         return CR_NONE;
       }
@@ -372,7 +378,7 @@ int16_t pascal
         // Conveyor belt checks
         if (HAS_TILE_ATTRIBUTE(*(tileData + i), TA_CONVEYOR_L))
         {
-          retConveyorBeltCheckResult = CB_LEFT;
+          ctx->retConveyorBeltCheckResult = CB_LEFT;
         }
 
         if (
@@ -380,7 +386,7 @@ int16_t pascal
           (HAS_TILE_ATTRIBUTE(*(tileData + width - 1), TA_CONVEYOR_R) ||
            !HAS_TILE_ATTRIBUTE(*(tileData + width - 1), TA_SOLID_TOP)))
         {
-          retConveyorBeltCheckResult = CB_RIGHT;
+          ctx->retConveyorBeltCheckResult = CB_RIGHT;
         }
 
         // Collision check
@@ -408,22 +414,22 @@ int16_t pascal
 
       // Left edge outside the map is always solid. This takes advantage of
       // unsigned wrap-around, so if x would be negative when treated as a
-      // signed value, then it will be larger than mapWidth if treated as
+      // signed value, then it will be larger than ctx->mapWidth if treated as
       // unsigned.
-      if (x > mapWidth)
+      if (x > ctx->mapWidth)
       {
         return CR_COLLISION;
       }
 
       // Start at map tile underneath the sprite's bottom-left corner
-      tileData = mapData + (y << mapWidthShift) + x;
+      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x;
 
       // Check the sprite's left edge
       for (i = 0; i < height; i++)
       {
         if (HAS_TILE_ATTRIBUTE(*tileData, TA_SOLID_RIGHT))
         {
-          if (isPlayer && plState == PS_NORMAL)
+          if (isPlayer && ctx->plState == PS_NORMAL)
           {
             atStairStep = true;
 
@@ -441,7 +447,7 @@ int16_t pascal
         }
 
         // Go up by one map tile
-        tileData -= mapWidth;
+        tileData -= ctx->mapWidth;
       }
 
       // When at a stair step, move the player up by one and report "no
@@ -450,7 +456,7 @@ int16_t pascal
       // in player.c).
       if (atStairStep)
       {
-        plPosY--;
+        ctx->plPosY--;
       }
 
       return CR_NONE;
@@ -464,20 +470,20 @@ int16_t pascal
       }
 
       // Right edge outside the map is always solid
-      if (x + width - 1 >= mapWidth)
+      if (x + width - 1 >= ctx->mapWidth)
       {
         return CR_COLLISION;
       }
 
       // Start at map tile underneath the sprite's bottom-right corner
-      tileData = mapData + (y << mapWidthShift) + x + width - 1;
+      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x + width - 1;
 
       // Check sprite's right edge
       for (i = 0; i < height; i++)
       {
         if (HAS_TILE_ATTRIBUTE(*tileData, TA_SOLID_LEFT))
         {
-          if (isPlayer && plState == PS_NORMAL)
+          if (isPlayer && ctx->plState == PS_NORMAL)
           {
             atStairStep = true;
 
@@ -494,7 +500,7 @@ int16_t pascal
           }
         }
 
-        tileData -= mapWidth;
+        tileData -= ctx->mapWidth;
       }
 
       // When at a stair step, move the player up by one and report "no
@@ -503,7 +509,7 @@ int16_t pascal
       // in player.c).
       if (atStairStep)
       {
-        plPosY--;
+        ctx->plPosY--;
       }
 
       return CR_NONE;
@@ -514,41 +520,42 @@ int16_t pascal
 
 
 /** Remove all currently active effects and player shots */
-void ResetEffectsAndPlayerShots(void)
+void ResetEffectsAndPlayerShots(Context* ctx)
 {
   register word i;
 
   for (i = 0; i < MAX_NUM_EFFECTS; i++)
   {
-    gmEffectStates[i].active = 0;
+    ctx->gmEffectStates[i].active = 0;
 
     if (i < MAX_NUM_PLAYER_SHOTS)
     {
-      gmPlayerShotStates[i].active = 0;
+      ctx->gmPlayerShotStates[i].active = 0;
     }
   }
 }
 
 
 /** Erase map data and spawn flying debris for the specified region */
-void pascal Map_DestroySection(word left, word top, word right, word bottom)
+void pascal
+  Map_DestroySection(Context* ctx, word left, word top, word right, word bottom)
 {
   int16_t i;
   word x;
   word y;
   word tileValue;
 
-  PlaySound(SND_BIG_EXPLOSION);
+  PlaySound(ctx, SND_BIG_EXPLOSION);
 
   right += 1;
   bottom += 1;
 
   // Set up state for flying tile debris
-  gmExplodingSectionLeft = left;
-  gmExplodingSectionTop = top;
-  gmExplodingSectionRight = right;
-  gmExplodingSectionBottom = bottom;
-  gmExplodingSectionTicksElapsed = 1;
+  ctx->gmExplodingSectionLeft = left;
+  ctx->gmExplodingSectionTop = top;
+  ctx->gmExplodingSectionRight = right;
+  ctx->gmExplodingSectionBottom = bottom;
+  ctx->gmExplodingSectionTicksElapsed = 1;
 
   // Spawn pieces of debris for each tile in the affected region, and erase
   // map data
@@ -558,7 +565,7 @@ void pascal Map_DestroySection(word left, word top, word right, word bottom)
   {
     for (x = left; x < right; x++)
     {
-      tileValue = Map_GetTile(x, y);
+      tileValue = Map_GetTile(ctx, x, y);
 
       if (tileValue) // skip empty map cells
       {
@@ -571,16 +578,16 @@ void pascal Map_DestroySection(word left, word top, word right, word bottom)
         // 3: word x
         // 4: word y
 
-        gmTileDebrisStates[i + 0] = 3 - RandomNumber() % 6;
-        gmTileDebrisStates[i + 1] = RandomNumber() % 5;
-        gmTileDebrisStates[i + 2] = tileValue;
-        gmTileDebrisStates[i + 3] = x - gmCameraPosX;
-        gmTileDebrisStates[i + 4] = y - gmCameraPosY;
+        ctx->gmTileDebrisStates[i + 0] = 3 - RandomNumber(ctx) % 6;
+        ctx->gmTileDebrisStates[i + 1] = RandomNumber(ctx) % 5;
+        ctx->gmTileDebrisStates[i + 2] = tileValue;
+        ctx->gmTileDebrisStates[i + 3] = x - ctx->gmCameraPosX;
+        ctx->gmTileDebrisStates[i + 4] = y - ctx->gmCameraPosY;
 
         // Advance to the start of the next tile debris state object
         i += 5;
 
-        Map_SetTile(0, x, y);
+        Map_SetTile(ctx, 0, x, y);
       }
     }
   }
@@ -588,7 +595,7 @@ void pascal Map_DestroySection(word left, word top, word right, word bottom)
 
 
 /** Update and draw a currently active tile explosion */
-void UpdateAndDrawTileDebris(void)
+void UpdateAndDrawTileDebris(Context* ctx)
 {
   // [PERF] Missing `static` causes a copy operation here
   const int16_t Y_MOVEMENT[] = {-3, -3, -2, -2, -1, 0, 0, 1, 2, 2, 3};
@@ -598,15 +605,15 @@ void UpdateAndDrawTileDebris(void)
   word far* debris;
 
   // If there's no flying tile debris right now, stop here.
-  if (gmExplodingSectionTicksElapsed == 0)
+  if (ctx->gmExplodingSectionTicksElapsed == 0)
   {
     return;
   }
 
   // size here is the number of word values we need to process. Each tile debris
   // piece occupies 5 words.
-  size = (gmExplodingSectionRight - gmExplodingSectionLeft) *
-    (gmExplodingSectionBottom - gmExplodingSectionTop) * 5;
+  size = (ctx->gmExplodingSectionRight - ctx->gmExplodingSectionLeft) *
+    (ctx->gmExplodingSectionBottom - ctx->gmExplodingSectionTop) * 5;
 
   for (i = 0; i < size; i += 5)
   {
@@ -618,7 +625,7 @@ void UpdateAndDrawTileDebris(void)
     // 2: word tileValue;
     // 3: word x
     // 4: word y
-    debris = gmTileDebrisStates + i;
+    debris = ctx->gmTileDebrisStates + i;
 
     debris[3] += debris[0]; // debris->x += xVelocity
     debris[4] += Y_MOVEMENT[debris[1]]; // debris->y += Y_MOVEMENT[
@@ -637,7 +644,7 @@ void UpdateAndDrawTileDebris(void)
     }
 
     // arguments are: tileValue, x, y
-    DrawTileDebris(debris[2], debris[3], debris[4]);
+    DrawTileDebris(ctx, debris[2], debris[3], debris[4]);
   }
 
   // Advance the timer, until the maximum time is reached. At that point, we
@@ -647,10 +654,10 @@ void UpdateAndDrawTileDebris(void)
   //
   // [NOTE] 80 seems excessively high, given that not a single tile debris
   // piece remains visible after just 11 frames.
-  gmExplodingSectionTicksElapsed++;
-  if (gmExplodingSectionTicksElapsed == 80)
+  ctx->gmExplodingSectionTicksElapsed++;
+  if (ctx->gmExplodingSectionTicksElapsed == 80)
   {
-    gmExplodingSectionTicksElapsed = 0;
+    ctx->gmExplodingSectionTicksElapsed = 0;
   }
 }
 
@@ -679,20 +686,21 @@ static bool pascal EffectIsDamaging(word actorId)
  *
  * Does nothing if the maximum number of effects is already reached.
  */
-bool pascal SpawnEffect(word id, word x, word y, word type, word spawnDelay)
+bool pascal
+  SpawnEffect(Context* ctx, word id, word x, word y, word type, word spawnDelay)
 {
   register word i;
-  register word offset = gfxActorInfoData[id];
+  register word offset = ctx->gfxActorInfoData[id];
   EffectState* state;
   word numFrames = AINFO_NUM_FRAMES(offset);
 
   // Search for a free slot in the effect states list
   for (i = 0; i < MAX_NUM_EFFECTS; i++)
   {
-    if (gmEffectStates[i].active == 0)
+    if (ctx->gmEffectStates[i].active == 0)
     {
       // We found a slot, set it up
-      state = gmEffectStates + i;
+      state = ctx->gmEffectStates + i;
 
       // If we're spawning a fire bomb fire, only do it if there's solid ground
       // below. Return true to indicate that spawning failed.
@@ -703,7 +711,7 @@ bool pascal SpawnEffect(word id, word x, word y, word type, word spawnDelay)
       // there instead.
       if (
         id == ACT_FIRE_BOMB_FIRE &&
-        !CheckWorldCollision(MD_DOWN, ACT_FIRE_BOMB_FIRE, 0, x, y + 1))
+        !CheckWorldCollision(ctx, MD_DOWN, ACT_FIRE_BOMB_FIRE, 0, x, y + 1))
       {
         return true;
       }
@@ -733,16 +741,20 @@ bool pascal SpawnEffect(word id, word x, word y, word type, word spawnDelay)
  *
  * See game3.c for various examples of how this function is used.
  */
-void pascal SpawnDestructionEffects(word handle, int16_t* spec, word actorId)
+void pascal SpawnDestructionEffects(
+  Context* ctx,
+  word handle,
+  int16_t* spec,
+  word actorId)
 {
-  register ActorState* actor = gmActorStates + handle;
+  register ActorState* actor = ctx->gmActorStates + handle;
   word entriesLeft = *spec;
   spec++;
 
   while (entriesLeft--)
   {
     SpawnEffect(
-      actorId, actor->x + spec[0], actor->y + spec[1], spec[2], spec[3]);
+      ctx, actorId, actor->x + spec[0], actor->y + spec[1], spec[2], spec[3]);
     spec += 4;
   }
 }
@@ -760,7 +772,8 @@ void pascal SpawnDestructionEffects(word handle, int16_t* spec, word actorId)
  *
  * Does nothing if the maximum number of effects is already reached.
  */
-void pascal SpawnBurnEffect(word effectId, word sourceId, word x, word y)
+void pascal
+  SpawnBurnEffect(Context* ctx, word effectId, word sourceId, word x, word y)
 {
   register word offset;
   register word i;
@@ -770,17 +783,17 @@ void pascal SpawnBurnEffect(word effectId, word sourceId, word x, word y)
 
   // The continually spawning effects should appear in an area corresponding
   // to the source sprite's bounding box, so we apply the x/y offset here.
-  offset = gfxActorInfoData[sourceId];
+  offset = ctx->gfxActorInfoData[sourceId];
   x += AINFO_X_OFFSET(offset);
   y += AINFO_Y_OFFSET(offset);
 
   // Search for an available slot
   for (i = 0; i < MAX_NUM_EFFECTS; i++)
   {
-    if (gmEffectStates[i].active == 0)
+    if (ctx->gmEffectStates[i].active == 0)
     {
       // We found a free slot, set it up
-      state = gmEffectStates + i;
+      state = ctx->gmEffectStates + i;
 
       state->active = 18;
       state->id = sourceId;
@@ -790,7 +803,7 @@ void pascal SpawnBurnEffect(word effectId, word sourceId, word x, word y)
       state->framesToLive = effectId;
 
       // Get height & width of the effect sprite
-      offset = gfxActorInfoData[effectId];
+      offset = ctx->gfxActorInfoData[effectId];
       height = AINFO_HEIGHT(offset);
       width = AINFO_WIDTH(offset);
 
@@ -807,7 +820,7 @@ void pascal SpawnBurnEffect(word effectId, word sourceId, word x, word y)
 
       // Store height and width of the _source_ sprite, so that we can define
       // the spawn area
-      offset = gfxActorInfoData[sourceId];
+      offset = ctx->gfxActorInfoData[sourceId];
       height = AINFO_HEIGHT(offset);
       width = AINFO_WIDTH(offset);
       state->movementStep = height;
@@ -824,7 +837,7 @@ void pascal SpawnBurnEffect(word effectId, word sourceId, word x, word y)
 
 
 /** Update and draw all currently active effects */
-void UpdateAndDrawEffects(void)
+void UpdateAndDrawEffects(Context* ctx)
 {
   register EffectState* state;
   register int16_t j;
@@ -832,12 +845,12 @@ void UpdateAndDrawEffects(void)
 
   for (i = 0; i < MAX_NUM_EFFECTS; i++)
   {
-    if (!gmEffectStates[i].active)
+    if (!ctx->gmEffectStates[i].active)
     {
       continue;
     }
 
-    state = gmEffectStates + i;
+    state = ctx->gmEffectStates + i;
 
     if (state->type == EM_SCORE_NUMBER)
     {
@@ -867,6 +880,7 @@ void UpdateAndDrawEffects(void)
       }
 
       DrawActor(
+        ctx,
         state->id,
         SCORE_NUMBER_ANIMATION[(state->active - 1) % 14],
         state->x,
@@ -887,9 +901,10 @@ void UpdateAndDrawEffects(void)
         // So this spawns an effect somewhere within the source sprite's
         // bounding box, randomly placed.
         SpawnEffect(
+          ctx,
           state->framesToLive, // ID to spawn
-          state->x + (int16_t)RandomNumber() % state->spawnDelay,
-          state->y - (int16_t)RandomNumber() % state->movementStep,
+          state->x + (int16_t)RandomNumber(ctx) % state->spawnDelay,
+          state->y - (int16_t)RandomNumber(ctx) % state->movementStep,
           EM_RISE_UP,
           0);
       }
@@ -901,7 +916,8 @@ void UpdateAndDrawEffects(void)
       if (state->type == EM_NONE || state->type == EM_RISE_UP)
       {
         // Delete effects that have disappeared from view
-        if (!IsSpriteOnScreen(state->id, state->active - 1, state->x, state->y))
+        if (!IsSpriteOnScreen(
+              ctx, state->id, state->active - 1, state->x, state->y))
         {
           state->active = 0;
           continue;
@@ -918,17 +934,18 @@ void UpdateAndDrawEffects(void)
         // on the first frame.
         if (state->id == ACT_EXPLOSION_FX_1 && state->active == 1)
         {
-          if (RandomNumber() & 1)
+          if (RandomNumber(ctx) & 1)
           {
-            PlaySound(SND_EXPLOSION);
+            PlaySound(ctx, SND_EXPLOSION);
           }
           else
           {
-            PlaySound(SND_ALTERNATE_EXPLOSION);
+            PlaySound(ctx, SND_ALTERNATE_EXPLOSION);
           }
         }
 
-        DrawActor(state->id, state->active - 1, state->x, state->y, DS_NORMAL);
+        DrawActor(
+          ctx, state->id, state->active - 1, state->x, state->y, DS_NORMAL);
 
         // Special case for ACT_FLAME_FX: Burn away tiles which have the
         // 'flammable' attribute
@@ -942,20 +959,23 @@ void UpdateAndDrawEffects(void)
           {
             if (HAS_TILE_ATTRIBUTE(
                   Map_GetTile(
+                    ctx,
                     state->x + TILE_BURN_OFFSETS[j],
                     state->y + TILE_BURN_OFFSETS[j + 1]),
                   TA_FLAMMABLE))
             {
               Map_SetTile(
+                ctx,
                 0,
                 state->x + TILE_BURN_OFFSETS[j],
                 state->y + TILE_BURN_OFFSETS[j + 1]);
               SpawnEffect(
+                ctx,
                 ACT_FLAME_FX,
                 state->x + TILE_BURN_OFFSETS[j] - 1,
                 state->y + TILE_BURN_OFFSETS[j + 1] + 1,
                 EM_NONE,
-                (int16_t)RandomNumber() & 3);
+                (int16_t)RandomNumber(ctx) & 3);
             }
           }
         }
@@ -981,7 +1001,8 @@ void UpdateAndDrawEffects(void)
         // been alive for 9 frames (movementStep is advanced by 2 every frame)
         if (
           state->movementStep > 17 &&
-          !IsSpriteOnScreen(state->id, state->active - 1, state->x, state->y) &&
+          !IsSpriteOnScreen(
+            ctx, state->id, state->active - 1, state->x, state->y) &&
           state->movementStep > 12) // [NOTE] Redundant, due to the `> 17` above
         {
           state->active = 0;
@@ -995,7 +1016,8 @@ void UpdateAndDrawEffects(void)
           continue;
         }
 
-        DrawActor(state->id, state->active - 1, state->x, state->y, DS_NORMAL);
+        DrawActor(
+          ctx, state->id, state->active - 1, state->x, state->y, DS_NORMAL);
 
         // Keep looping the animation
         state->active++;
@@ -1023,16 +1045,17 @@ void UpdateAndDrawEffects(void)
       if (
         EffectIsDamaging(state->id) &&
         AreSpritesTouching(
+          ctx,
           state->id,
           state->active - 1,
           state->x,
           state->y,
-          plActorId,
-          plAnimationFrame,
-          plPosX,
-          plPosY))
+          ctx->plActorId,
+          ctx->plAnimationFrame,
+          ctx->plPosX,
+          ctx->plPosY))
       {
-        DamagePlayer();
+        DamagePlayer(ctx);
       }
     }
   }
@@ -1040,7 +1063,8 @@ void UpdateAndDrawEffects(void)
 
 
 /** Spawn a player shot into the game world, if possible */
-void pascal SpawnPlayerShot(word id, word x, word y, word direction)
+void pascal
+  SpawnPlayerShot(Context* ctx, word id, word x, word y, word direction)
 {
   register word i;
   register word offset;
@@ -1055,7 +1079,7 @@ void pascal SpawnPlayerShot(word id, word x, word y, word direction)
     case ACT_DUKE_FLAME_SHOT_DOWN:
     case ACT_DUKE_FLAME_SHOT_LEFT:
     case ACT_DUKE_FLAME_SHOT_RIGHT:
-      PlaySound(SND_FLAMETHROWER_SHOT);
+      PlaySound(ctx, SND_FLAMETHROWER_SHOT);
       break;
 
     case ACT_DUKE_LASER_SHOT_HORIZONTAL:
@@ -1066,11 +1090,11 @@ void pascal SpawnPlayerShot(word id, word x, word y, word direction)
         muzzleY--;
       }
 
-      PlaySound(SND_DUKE_LASER_SHOT);
+      PlaySound(ctx, SND_DUKE_LASER_SHOT);
       break;
 
     default:
-      PlaySound(SND_NORMAL_SHOT);
+      PlaySound(ctx, SND_NORMAL_SHOT);
       break;
   }
 
@@ -1119,14 +1143,14 @@ void pascal SpawnPlayerShot(word id, word x, word y, word direction)
   // when firing to the left. Rockets that are fired downwards also spawn
   // too far up.
 
-  offset = gfxActorInfoData[id];
+  offset = ctx->gfxActorInfoData[id];
   numFrames = AINFO_NUM_FRAMES(offset);
 
   for (i = 0; i < MAX_NUM_PLAYER_SHOTS; i++)
   {
-    if (gmPlayerShotStates[i].active == 0)
+    if (ctx->gmPlayerShotStates[i].active == 0)
     {
-      state = gmPlayerShotStates + i;
+      state = ctx->gmPlayerShotStates + i;
 
       state->active = 1;
       state->id = id;
@@ -1138,6 +1162,7 @@ void pascal SpawnPlayerShot(word id, word x, word y, word direction)
       if (state->active < 28) // [NOTE] Always true
       {
         SpawnEffect(
+          ctx,
           direction + ACT_MUZZLE_FLASH_UP - SD_UP,
           muzzleX,
           muzzleY,
@@ -1152,7 +1177,7 @@ void pascal SpawnPlayerShot(word id, word x, word y, word direction)
 
 
 /** Update and draw all currently active player shots */
-void UpdateAndDrawPlayerShots(void)
+void UpdateAndDrawPlayerShots(Context* ctx)
 {
   // See GET_FIELD below. This is a list of memory offsets into the PlayerShot
   // struct, for referencing the y and x fields.
@@ -1179,12 +1204,12 @@ void UpdateAndDrawPlayerShots(void)
   for (i = 0; i < MAX_NUM_PLAYER_SHOTS; i++)
   {
     // Skip deleted shots
-    if (gmPlayerShotStates[i].active == 0)
+    if (ctx->gmPlayerShotStates[i].active == 0)
     {
       continue;
     }
 
-    state = gmPlayerShotStates + i;
+    state = ctx->gmPlayerShotStates + i;
 
     // TestShotCollision() in game3.c sets the high bit to mark shots that have
     // hit an enemy. These shots are still drawn for one more frame, and then
@@ -1194,20 +1219,23 @@ void UpdateAndDrawPlayerShots(void)
       // Unset the marker bit, since we need the active field in order to
       // determine the right animation frame.
       state->active &= 0x7FFF;
-      DrawActor(state->id, state->active - 1, state->x, state->y, DS_NORMAL);
+      DrawActor(
+        ctx, state->id, state->active - 1, state->x, state->y, DS_NORMAL);
 
       state->active = 0; // delete
     }
     else
     {
       // Remove shots that have left the playing field (aka screen)
-      if (!IsSpriteOnScreen(state->id, state->active - 1, state->x, state->y))
+      if (!IsSpriteOnScreen(
+            ctx, state->id, state->active - 1, state->x, state->y))
       {
         state->active = 0; // delete
         continue;
       }
 
-      DrawActor(state->id, state->active - 1, state->x, state->y, DS_NORMAL);
+      DrawActor(
+        ctx, state->id, state->active - 1, state->x, state->y, DS_NORMAL);
 
       // Move the shot, according to its type
       switch (state->id)
@@ -1215,6 +1243,7 @@ void UpdateAndDrawPlayerShots(void)
         case ACT_REGULAR_SHOT_HORIZONTAL:
         case ACT_REGULAR_SHOT_VERTICAL:
           if (CheckWorldCollision(
+                ctx,
                 MD_PROJECTILE,
                 state->id,
                 state->active - 1,
@@ -1225,6 +1254,7 @@ void UpdateAndDrawPlayerShots(void)
             // burn flammable tiles with the regular weapon
             // (see UpdateAndDrawEffects()).
             SpawnEffect(
+              ctx,
               ACT_FLAME_FX,
               state->x - (state->id == ACT_REGULAR_SHOT_VERTICAL ? 1 : 0),
               state->y + 1,
@@ -1298,6 +1328,7 @@ void UpdateAndDrawPlayerShots(void)
               ROCKET_SMOKE_SPAWN_OFFSET[(state->id - SD_UP) * 2 + 1];
 
             if (CheckWorldCollision(
+                  ctx,
                   MD_PROJECTILE,
                   state->id,
                   state->active - 1,
@@ -1308,26 +1339,37 @@ void UpdateAndDrawPlayerShots(void)
               if (state->id < ACT_DUKE_ROCKET_LEFT)
               {
                 SpawnEffect(
-                  ACT_EXPLOSION_FX_2, state->x - 2, state->y + 1, EM_NONE, 0);
+                  ctx,
+                  ACT_EXPLOSION_FX_2,
+                  state->x - 2,
+                  state->y + 1,
+                  EM_NONE,
+                  0);
               }
               else
               {
                 SpawnEffect(
-                  ACT_EXPLOSION_FX_2, state->x - 1, state->y + 2, EM_NONE, 0);
+                  ctx,
+                  ACT_EXPLOSION_FX_2,
+                  state->x - 1,
+                  state->y + 2,
+                  EM_NONE,
+                  0);
               }
 
-              PlaySound(SND_EXPLOSION);
+              PlaySound(ctx, SND_EXPLOSION);
 
               // Spawn flames at the impact location. This makes it possible to
               // burn flammable tiles with the rocket launcher
               // (see UpdateAndDrawEffects()).
-              SpawnBurnEffect(ACT_FLAME_FX, state->id, state->x, state->y);
+              SpawnBurnEffect(ctx, ACT_FLAME_FX, state->id, state->x, state->y);
               state->active = 0; // delete
             }
             else
             {
               // Spawn smoke puffs to mark the rocket's trail
               SpawnEffect(
+                ctx,
                 ACT_SMOKE_PUFF_FX,
                 state->x + smokeSpawnX,
                 state->y + smokeSpawnY,

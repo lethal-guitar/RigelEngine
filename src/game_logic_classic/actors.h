@@ -333,12 +333,13 @@ But instead, the game retrieves the data fields of each entry as individual
 words. We don't know what the actual code looked like, but it's quite likely
 that some sort of macros were used to make things a little easier.
 */
-#define AINFO_NUM_FRAMES(offset) *(gfxActorInfoData + offset)
-#define AINFO_DRAW_INDEX(offset) (int16_t) * (gfxActorInfoData + offset + 1)
-#define AINFO_X_OFFSET(offset) (int16_t) * (gfxActorInfoData + offset + 2)
-#define AINFO_Y_OFFSET(offset) (int16_t) * (gfxActorInfoData + offset + 3)
-#define AINFO_HEIGHT(offset) *(gfxActorInfoData + offset + 4)
-#define AINFO_WIDTH(offset) *(gfxActorInfoData + offset + 5)
+#define AINFO_NUM_FRAMES(offset) *(ctx->gfxActorInfoData + offset)
+#define AINFO_DRAW_INDEX(offset)                                               \
+  (int16_t) * (ctx->gfxActorInfoData + offset + 1)
+#define AINFO_X_OFFSET(offset) (int16_t) * (ctx->gfxActorInfoData + offset + 2)
+#define AINFO_Y_OFFSET(offset) (int16_t) * (ctx->gfxActorInfoData + offset + 3)
+#define AINFO_HEIGHT(offset) *(ctx->gfxActorInfoData + offset + 4)
+#define AINFO_WIDTH(offset) *(ctx->gfxActorInfoData + offset + 5)
 #define AINFO_DATA_OFFSET(offset)                                              \
-  (((dword) * (gfxActorInfoData + offset + 7) << 16) +                         \
-   (dword) * (gfxActorInfoData + offset + 6))
+  (((dword) * (ctx->gfxActorInfoData + offset + 7) << 16) +                    \
+   (dword) * (ctx->gfxActorInfoData + offset + 6))

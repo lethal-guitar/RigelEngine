@@ -39,20 +39,22 @@ live for the same number of frames.
 
 
 /** Initialize the particle system */
-void pascal InitParticleSystem(void)
+void pascal InitParticleSystem(Context* ctx)
 {
   int16_t i;
 
   for (i = 0; i < NUM_PARTICLE_GROUPS; i++)
   {
     // Each particle occupies 3 words -> 6 bytes
-    psParticleData[i] = MM_PushChunk(PARTICLES_PER_GROUP * 6, CT_COMMON);
+    ctx->psParticleData[i] =
+      MM_PushChunk(ctx, PARTICLES_PER_GROUP * 6, CT_COMMON);
   }
 }
 
 
 /** Initialize particle group state with randomized positions & velocities */
-static void pascal FillParticleGroup(int16_t index, int16_t direction)
+static void pascal
+  FillParticleGroup(Context* ctx, int16_t index, int16_t direction)
 {
   sbyte a;
   sbyte b;
@@ -74,35 +76,37 @@ static void pascal FillParticleGroup(int16_t index, int16_t direction)
       {
         // If a direction is specified, scale it randomly by a value between
         // 1 and 20 to generate a velocity.
-        *(psParticleData[index] + a + b * 24) =
-          direction * (RandomNumber() % 20 + 1);
+        *(ctx->psParticleData[index] + a + b * 24) =
+          direction * (RandomNumber(ctx) % 20 + 1);
       }
       else
       {
         // Otherwise, assign a random x velocity between -9 and 10
-        *(psParticleData[index] + a + b * 24) = 10 - (RandomNumber() % 20);
+        *(ctx->psParticleData[index] + a + b * 24) =
+          10 - (RandomNumber(ctx) % 20);
       }
 
       // Randomly advance the initial index into the y update lookup table,
       // to make the particle start out flying up or down.
       // See UpdateAndDrawParticles().
-      *(psParticleData[index] + a + b * 24 + 1) = RandomNumber() & 15; // % 16
+      *(ctx->psParticleData[index] + a + b * 24 + 1) =
+        RandomNumber(ctx) & 15; // % 16
 
       // Initial y offset always starts out at 0
-      *(psParticleData[index] + a + b * 24 + 2) = 0;
+      *(ctx->psParticleData[index] + a + b * 24 + 2) = 0;
     }
   }
 }
 
 
 /** Erase all currently active particles */
-void pascal ClearParticles(void)
+void pascal ClearParticles(Context* ctx)
 {
   register int16_t i;
 
   for (i = 0; i < NUM_PARTICLE_GROUPS; i++)
   {
-    psParticleGroups[i].timeAlive = 0;
+    ctx->psParticleGroups[i].timeAlive = 0;
   }
 }
 
@@ -120,22 +124,23 @@ void pascal ClearParticles(void)
  * exactly the same velocities as those created by the 1st call, and thus they
  * will overlap the 1st call's particles and effectively render them invisible.
  */
-void pascal SpawnParticles(word x, word y, sbyte direction, byte color)
+void pascal
+  SpawnParticles(Context* ctx, word x, word y, sbyte direction, byte color)
 {
   register int16_t i;
 
   for (i = 0; i < NUM_PARTICLE_GROUPS; i++)
   {
-    if (psParticleGroups[i].timeAlive == 0)
+    if (ctx->psParticleGroups[i].timeAlive == 0)
     {
-      ParticleGroup* group = psParticleGroups + i;
+      ParticleGroup* group = ctx->psParticleGroups + i;
 
       group->timeAlive = 1;
       group->x = x;
       group->y = y;
       group->color = color;
 
-      FillParticleGroup(i, direction);
+      FillParticleGroup(ctx, i, direction);
       break;
     }
   }
@@ -155,7 +160,7 @@ static bool pascal IsPointVisible(int16_t x, int16_t y)
 
 
 /** Update and draw all currently active particles */
-void pascal UpdateAndDrawParticles(void)
+void pascal UpdateAndDrawParticles(Context* ctx)
 {
   // This describes the vertical movement arc for particles: Fly up quickly,
   // slow down near the top of the arc, briefly stop, then fall down slowly
@@ -178,10 +183,10 @@ void pascal UpdateAndDrawParticles(void)
 
   for (groupIndex = 0; groupIndex < NUM_PARTICLE_GROUPS; groupIndex++)
   {
-    if (psParticleGroups[groupIndex].timeAlive)
+    if (ctx->psParticleGroups[groupIndex].timeAlive)
     {
-      group = &psParticleGroups[groupIndex];
-      data = psParticleData[groupIndex];
+      group = &ctx->psParticleGroups[groupIndex];
+      data = ctx->psParticleData[groupIndex];
 
       for (i = 0; i < PARTICLES_PER_GROUP * 3; i += 3)
       {
@@ -195,11 +200,12 @@ void pascal UpdateAndDrawParticles(void)
         // Calculate x position: Simple linear movement according to velocity,
         // i.e. x = xVelocity * timeAlive. For some reason, all x positions
         // are also offset to the right by 1 tile/8 pixels.
-        x = T2PX(group->x - gmCameraPosX) + *(data + i) * group->timeAlive + 8;
+        x = T2PX(group->x - ctx->gmCameraPosX) +
+          *(data + i) * group->timeAlive + 8;
 
         // Update y position based on lookup table
         *(data + i + 2) += MOVEMENT_TABLE[*(data + i + 1)];
-        y = T2PX(group->y - gmCameraPosY) + *(data + i + 2);
+        y = T2PX(group->y - ctx->gmCameraPosY) + *(data + i + 2);
 
         // Advance y update table index
         //
@@ -221,7 +227,7 @@ void pascal UpdateAndDrawParticles(void)
         // Draw particle if within viewport
         if (IsPointVisible(x, y))
         {
-          SetPixel(x, y, group->color);
+          SetPixel(ctx, x, y, group->color);
         }
       }
 
