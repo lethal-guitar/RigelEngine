@@ -129,7 +129,7 @@ void UpdateBackdrop(void)
  * state of the world. This includes parallax background, map tiles, sprites,
  * particle effects etc.
  */
-void pascal UpdateAndDrawGame(void (*updatePlayerFunc)())
+void pascal UpdateAndDrawGame(void)
 {
   if (gfxFlashScreen)
   {
@@ -137,7 +137,7 @@ void pascal UpdateAndDrawGame(void (*updatePlayerFunc)())
     gfxFlashScreen = false;
   }
 
-  updatePlayerFunc();
+  UpdatePlayer();
   UpdateBackdrop();
   UpdateMovingMapParts();
   UpdateAndDrawActors();
