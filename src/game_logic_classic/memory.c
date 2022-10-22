@@ -23,6 +23,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+
 
 /*******************************************************************************
 
@@ -114,28 +116,25 @@ void far* MM_PushChunk(Context* ctx, word size, ChunkType type)
 {
   void far* mem;
 
-  if (ctx->mmMemUsed + size > ctx->mmMemTotal)
+  if (
+    ctx->mmMemUsed + size > ctx->mmMemTotal ||
+    ctx->mmChunksUsed >= MM_MAX_NUM_CHUNKS)
   {
-    Quit("No Memory");
+    RaiseError(
+      ctx, "Classic mode memory limitations exceeded - use enhanced mode");
+    return NULL;
   }
 
-  if (ctx->mmChunksUsed >= MM_MAX_NUM_CHUNKS)
-  {
-    Quit("No Chunks");
-  }
-  else
-  {
-    // Make a note of the newly allocated chunk's properties
-    ctx->mmChunkSizes[ctx->mmChunksUsed] = size;
-    ctx->mmChunkTypes[ctx->mmChunksUsed] = type;
+  // Make a note of the newly allocated chunk's properties
+  ctx->mmChunkSizes[ctx->mmChunksUsed] = size;
+  ctx->mmChunkTypes[ctx->mmChunksUsed] = type;
 
-    // Use current top of memory buffer to satisfy the request
-    mem = CURRENT_MEM_TOP_PTR();
+  // Use current top of memory buffer to satisfy the request
+  mem = CURRENT_MEM_TOP_PTR();
 
-    // Update how much memory/chunks remain available
-    ctx->mmMemUsed += size;
-    ctx->mmChunksUsed++;
-  }
+  // Update how much memory/chunks remain available
+  ctx->mmMemUsed += size;
+  ctx->mmChunksUsed++;
 
   return mem;
 }
