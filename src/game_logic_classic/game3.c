@@ -1238,7 +1238,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           {
             if (mapSwitchBackdropOnTeleport)
             {
-              bdAddressAdjust = 0x4000;
+              bdUseSecondary = true;
             }
 
             counterpartId = ACT_TELEPORTER_2;
@@ -1247,7 +1247,7 @@ void pascal UpdateActorPlayerCollision(word handle)
           {
             if (mapSwitchBackdropOnTeleport)
             {
-              bdAddressAdjust = 0;
+              bdUseSecondary = false;
             }
 
             counterpartId = ACT_TELEPORTER_1;
@@ -1490,7 +1490,7 @@ void pascal HandleActorShotCollision(int16_t damage, word handle)
         // event" is active for the current level. This is used in E1L5.
         if (mapHasReactorDestructionEvent)
         {
-          bdAddressAdjust = 0x4000;
+          bdUseSecondary = true;
         }
 
         state->deleted = true;

@@ -99,7 +99,7 @@ void UpdateBackdrop(void)
     // update. The actual flashing happens in UpdateAndDrawGame() based on
     // the state of gmReactorDestructionStep, here we just update the step
     // variable, play sound effects, and show a message.
-    if (bdAddressAdjust && mapHasReactorDestructionEvent)
+    if (bdUseSecondary && mapHasReactorDestructionEvent)
     {
       if (gmReactorDestructionStep < 14)
       {

@@ -131,8 +131,6 @@ word plCloakTimeLeft;
 
 MovingMapPartState gmMovingMapParts[MAX_NUM_MOVING_MAP_PARTS];
 
-word bdAddressAdjust;
-
 word gmCamerasDestroyed;
 word gmCamerasInLevel;
 word gmWeaponsCollected;
@@ -178,3 +176,5 @@ word mmChunksUsed;
 
 word far* psParticleData[NUM_PARTICLE_GROUPS];
 ParticleGroup psParticleGroups[NUM_PARTICLE_GROUPS];
+
+bool bdUseSecondary;
