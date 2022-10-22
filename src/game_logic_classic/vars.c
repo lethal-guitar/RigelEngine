@@ -24,6 +24,8 @@
  */
 
 
+bool sysTecMode;
+
 byte retConveyorBeltCheckResult;
 
 // [NOTE] This has a constant value in the shipping game, but it might
@@ -178,3 +180,8 @@ word far* psParticleData[NUM_PARTICLE_GROUPS];
 ParticleGroup psParticleGroups[NUM_PARTICLE_GROUPS];
 
 bool bdUseSecondary;
+byte gmDifficulty;
+byte plWeapon;
+byte plAmmo;
+byte plHealth;
+bool gmBeaconActivated;

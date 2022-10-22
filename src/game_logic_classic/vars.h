@@ -28,6 +28,7 @@
 #include "defs.h"
 
 
+extern bool sysTecMode;
 extern bool mapParallaxHorizontal;
 extern bool mapHasReactorDestructionEvent;
 extern bool mapSwitchBackdropOnTeleport;

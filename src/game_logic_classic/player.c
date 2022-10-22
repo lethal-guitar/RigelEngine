@@ -226,6 +226,7 @@ void UpdatePlayer(void)
 {
   static bool doFlip = false;
   static byte vertScrollCooldown = 0;
+  static byte plLadderAnimationStep = 0;
 
   bool hadCollision;
 
