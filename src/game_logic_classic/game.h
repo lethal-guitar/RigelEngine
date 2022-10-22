@@ -591,3 +591,154 @@ typedef struct Context_
   bool gmBeaconActivated;
   byte mmRawMem[MM_TOTAL_SIZE];
 } Context;
+
+
+//
+// Function declarations
+//
+
+int16_t Sign(int16_t val);
+
+byte RandomNumber(Context* ctx);
+
+bool MM_Init(Context* ctx);
+void far* MM_PushChunk(Context* ctx, word size, ChunkType type);
+
+void InitParticleSystem(Context* ctx);
+void SpawnParticles(
+  Context* ctx,
+  word x,
+  word y,
+  signed char xVelocityScale,
+  byte color);
+void UpdateAndDrawParticles(Context* ctx);
+void ClearParticles(Context* ctx);
+
+void GiveScore(Context* ctx, word score);
+
+void Map_DestroySection(
+  Context* ctx,
+  word left,
+  word top,
+  word right,
+  word bottom);
+
+void DamagePlayer(Context* ctx);
+
+int16_t CheckWorldCollision(
+  Context* ctx,
+  word direction,
+  word actorId,
+  word frame,
+  word x,
+  word y);
+bool AreSpritesTouching(
+  Context* ctx,
+  word id1,
+  word frame1,
+  word x1,
+  word y1,
+  word id2,
+  word frame2,
+  word x2,
+  word y2);
+
+int16_t ApplyWorldCollision(Context* ctx, word handle, word direction);
+bool FindPlayerShotInRect(
+  Context* ctx,
+  word left,
+  word top,
+  word right,
+  word bottom);
+
+void PlaySoundIfOnScreen(Context* ctx, word handle, byte soundId);
+bool IsActorOnScreen(Context* ctx, word handle);
+bool IsSpriteOnScreen(Context* ctx, word id, word frame, word x, word y);
+bool Boss3_IsTouchingPlayer(Context* ctx, word handle);
+bool PlayerInRange(Context* ctx, word handle, word distance);
+
+bool SpawnEffect(
+  Context* ctx,
+  word id,
+  word x,
+  word y,
+  word type,
+  word spawnDelay);
+void SpawnDestructionEffects(
+  Context* ctx,
+  word handle,
+  int16_t* spec,
+  word actorId);
+void SpawnBurnEffect(Context* ctx, word effectId, word sourceId, word x, word y);
+
+void SpawnPlayerShot(Context* ctx, word id, word x, word y, word direction);
+
+void SpawnActor(Context* ctx, word id, word x, word y);
+bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y);
+void InitActorState(
+  Context* ctx,
+  word listIndex,
+  ActorUpdateFunc updateFunc,
+  word id,
+  word x,
+  word y,
+  word alwaysUpdate,
+  word remainActive,
+  word allowStairStepping,
+  word gravityAffected,
+  word health,
+  word var1,
+  word var2,
+  word var3,
+  word var4,
+  word var5,
+  word scoreGiven);
+
+void UpdatePlayer(Context* ctx);
+void UpdateMovingMapParts(Context* ctx);
+void UpdateAndDrawActors(Context* ctx);
+void UpdateAndDrawPlayerShots(Context* ctx);
+void UpdateAndDrawEffects(Context* ctx);
+void UpdateAndDrawTileDebris(Context* ctx);
+void UpdateAndDrawGame(Context* ctx);
+
+byte TestShotCollision(Context* ctx, word handle);
+void HandleActorShotCollision(Context* ctx, int16_t damage, word handle);
+
+void ResetEffectsAndPlayerShots(Context* ctx);
+void ResetGameState(Context* ctx);
+void CenterViewOnPlayer(Context* ctx);
+void SpawnLevelActors(Context* ctx);
+
+
+//
+// Hook functions (implemented by RigelEngine)
+//
+
+word Map_GetTile(Context* ctx, word x, word y);
+void Map_SetTile(Context* ctx, word tileIndex, word x, word y);
+
+void RaiseError(Context* ctx, const char* msg);
+void ShowInGameMessage(Context* ctx, MessageId id);
+void ShowLevelSpecificHint(Context* ctx);
+void ShowTutorial(Context* ctx, TutorialId index);
+
+void DrawActor(
+  Context* ctx,
+  word id,
+  word frame,
+  word x,
+  word y,
+  word drawStyle);
+void DrawWaterArea(Context* ctx, word left, word top, word animStep);
+void DrawTileDebris(Context* ctx, word tileIndex, word x, word y);
+void SetPixel(Context* ctx, word x, word y, byte color);
+void HUD_ShowOnRadar(Context* ctx, word x, word y);
+
+void AddInventoryItem(Context* ctx, word item);
+bool RemoveFromInventory(Context* ctx, word item);
+
+void SetScreenShift(Context* ctx, byte amount);
+
+void PlaySound(Context* ctx, int16_t id);
+void StopMusic(Context* ctx);
