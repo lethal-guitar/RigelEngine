@@ -137,7 +137,7 @@ void UpdateBackdrop(Context* ctx)
  * state of the world. This includes parallax background, map tiles, sprites,
  * particle effects etc.
  */
-void pascal UpdateAndDrawGame(Context* ctx)
+void UpdateAndDrawGame(Context* ctx)
 {
   if (ctx->gfxFlashScreen)
   {
@@ -182,7 +182,7 @@ void pascal UpdateAndDrawGame(Context* ctx)
  * game's version of sloped surfaces, which are actually stairs that are made
  * to look like a slope with the help of masked (partially transparent) tiles.
  */
-int16_t pascal CheckWorldCollision(
+int16_t CheckWorldCollision(
   Context* ctx,
   word direction,
   word actorId,
@@ -192,7 +192,7 @@ int16_t pascal CheckWorldCollision(
 {
   register int16_t i;
   register word height;
-  word far* tileData;
+  word* tileData;
   bool isPlayer = false;
   bool atStairStep = false;
   word width;
@@ -547,8 +547,12 @@ void ResetEffectsAndPlayerShots(Context* ctx)
 
 
 /** Erase map data and spawn flying debris for the specified region */
-void pascal
-  Map_DestroySection(Context* ctx, word left, word top, word right, word bottom)
+void Map_DestroySection(
+  Context* ctx,
+  word left,
+  word top,
+  word right,
+  word bottom)
 {
   int16_t i;
   word x;
@@ -612,7 +616,7 @@ void UpdateAndDrawTileDebris(Context* ctx)
 
   register word i;
   register word size;
-  word far* debris;
+  word* debris;
 
   // If there's no flying tile debris right now, stop here.
   if (ctx->gmExplodingSectionTicksElapsed == 0)
@@ -673,7 +677,7 @@ void UpdateAndDrawTileDebris(Context* ctx)
 
 
 /** Return whether effect with given actor ID should damage the player */
-static bool pascal EffectIsDamaging(word actorId)
+static bool EffectIsDamaging(word actorId)
 {
   switch (actorId)
   {
@@ -696,8 +700,13 @@ static bool pascal EffectIsDamaging(word actorId)
  *
  * Does nothing if the maximum number of effects is already reached.
  */
-bool pascal
-  SpawnEffect(Context* ctx, word id, word x, word y, word type, word spawnDelay)
+bool SpawnEffect(
+  Context* ctx,
+  word id,
+  word x,
+  word y,
+  word type,
+  word spawnDelay)
 {
   register word i;
   register word offset = ctx->gfxActorInfoData[id];
@@ -751,7 +760,7 @@ bool pascal
  *
  * See game3.c for various examples of how this function is used.
  */
-void pascal SpawnDestructionEffects(
+void SpawnDestructionEffects(
   Context* ctx,
   word handle,
   int16_t* spec,
@@ -782,8 +791,7 @@ void pascal SpawnDestructionEffects(
  *
  * Does nothing if the maximum number of effects is already reached.
  */
-void pascal
-  SpawnBurnEffect(Context* ctx, word effectId, word sourceId, word x, word y)
+void SpawnBurnEffect(Context* ctx, word effectId, word sourceId, word x, word y)
 {
   register word offset;
   register word i;
@@ -1073,8 +1081,7 @@ void UpdateAndDrawEffects(Context* ctx)
 
 
 /** Spawn a player shot into the game world, if possible */
-void pascal
-  SpawnPlayerShot(Context* ctx, word id, word x, word y, word direction)
+void SpawnPlayerShot(Context* ctx, word id, word x, word y, word direction)
 {
   register word i;
   register word offset;

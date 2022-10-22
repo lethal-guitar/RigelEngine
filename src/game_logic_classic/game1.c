@@ -30,7 +30,7 @@ Game logic, part 1: Dynamic level geometry (moving map parts)
 
 *******************************************************************************/
 
-static void pascal Map_MoveSection(
+static void Map_MoveSection(
   Context* ctx,
   word left,
   word top,

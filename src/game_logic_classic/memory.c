@@ -101,8 +101,7 @@ bool MM_Init(Context* ctx)
 }
 
 
-#define CURRENT_MEM_TOP_PTR()                                                  \
-  (void far*)((byte huge*)ctx->mmRawMem + ctx->mmMemUsed)
+#define CURRENT_MEM_TOP_PTR() (ctx->mmRawMem + ctx->mmMemUsed)
 
 
 /** Allocate a chunk of given size and type
@@ -112,9 +111,9 @@ bool MM_Init(Context* ctx)
  * enough memory being left, or the maximum number of chunks already being
  * allocated).
  */
-void far* MM_PushChunk(Context* ctx, word size, ChunkType type)
+void* MM_PushChunk(Context* ctx, word size, ChunkType type)
 {
-  void far* mem;
+  void* mem;
 
   if (
     ctx->mmMemUsed + size > ctx->mmMemTotal ||

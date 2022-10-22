@@ -39,7 +39,7 @@ live for the same number of frames.
 
 
 /** Initialize the particle system */
-void pascal InitParticleSystem(Context* ctx)
+void InitParticleSystem(Context* ctx)
 {
   int16_t i;
 
@@ -53,8 +53,7 @@ void pascal InitParticleSystem(Context* ctx)
 
 
 /** Initialize particle group state with randomized positions & velocities */
-static void pascal
-  FillParticleGroup(Context* ctx, int16_t index, int16_t direction)
+static void FillParticleGroup(Context* ctx, int16_t index, int16_t direction)
 {
   sbyte a;
   sbyte b;
@@ -100,7 +99,7 @@ static void pascal
 
 
 /** Erase all currently active particles */
-void pascal ClearParticles(Context* ctx)
+void ClearParticles(Context* ctx)
 {
   register int16_t i;
 
@@ -124,8 +123,7 @@ void pascal ClearParticles(Context* ctx)
  * exactly the same velocities as those created by the 1st call, and thus they
  * will overlap the 1st call's particles and effectively render them invisible.
  */
-void pascal
-  SpawnParticles(Context* ctx, word x, word y, sbyte direction, byte color)
+void SpawnParticles(Context* ctx, word x, word y, sbyte direction, byte color)
 {
   register int16_t i;
 
@@ -148,7 +146,7 @@ void pascal
 
 
 /** Returns true if the given pixel position is within the viewport area */
-static bool pascal IsPointVisible(int16_t x, int16_t y)
+static bool IsPointVisible(int16_t x, int16_t y)
 {
   if (x >= 8 && x < 264 && y >= 8 && y < 160)
   {
@@ -160,7 +158,7 @@ static bool pascal IsPointVisible(int16_t x, int16_t y)
 
 
 /** Update and draw all currently active particles */
-void pascal UpdateAndDrawParticles(Context* ctx)
+void UpdateAndDrawParticles(Context* ctx)
 {
   // This describes the vertical movement arc for particles: Fly up quickly,
   // slow down near the top of the arc, briefly stop, then fall down slowly
@@ -177,7 +175,7 @@ void pascal UpdateAndDrawParticles(Context* ctx)
   ParticleGroup* group;
   word i;
   word groupIndex;
-  word far* data;
+  word* data;
   word x;
   word y;
 

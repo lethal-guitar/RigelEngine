@@ -46,7 +46,7 @@ collision detection (sprite against sprite) is also in here.
  * Duke's body doesn't cause him to take damage when touching an enemy/hazard.
  * This special logic only applies if the *2nd* sprite's actor id is Duke's.
  */
-bool pascal AreSpritesTouching(
+bool AreSpritesTouching(
   Context* ctx,
   word id1,
   word frame1,
@@ -143,7 +143,7 @@ bool pascal AreSpritesTouching(
 
 
 /** Test if a sprite is partially/fully visible (inside the viewport) */
-bool pascal IsSpriteOnScreen(Context* ctx, word id, word frame, word x, word y)
+bool IsSpriteOnScreen(Context* ctx, word id, word frame, word x, word y)
 {
   register word width;
   register word height;
@@ -180,7 +180,7 @@ bool pascal IsSpriteOnScreen(Context* ctx, word id, word frame, word x, word y)
 
 
 /** Play given sound if given actor is on screen */
-void pascal PlaySoundIfOnScreen(Context* ctx, word handle, byte soundId)
+void PlaySoundIfOnScreen(Context* ctx, word handle, byte soundId)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 
@@ -193,7 +193,7 @@ void pascal PlaySoundIfOnScreen(Context* ctx, word handle, byte soundId)
 
 
 /** Convenience wrapper for IsSpriteOnScreen, for actors */
-bool pascal IsActorOnScreen(Context* ctx, word handle)
+bool IsActorOnScreen(Context* ctx, word handle)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 

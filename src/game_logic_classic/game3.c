@@ -41,7 +41,7 @@ also found here.
 
 *******************************************************************************/
 
-void pascal GiveScore(Context* ctx, word score)
+void GiveScore(Context* ctx, word score)
 {
   ctx->plScore += score;
 }
@@ -93,7 +93,7 @@ static int16_t DN2_abs(int16_t val)
  * This function sets up some state, the actual position change and the fade
  * transition are handled by RunInGameLoop().
  */
-void pascal TeleportTo(Context* ctx, word x, word y)
+void TeleportTo(Context* ctx, word x, word y)
 {
   ctx->gmIsTeleporting = true;
   ctx->gmTeleportTargetPosX = x;
@@ -102,7 +102,7 @@ void pascal TeleportTo(Context* ctx, word x, word y)
 
 
 /** Initialize actor state at given list index, based on the parameters */
-void pascal InitActorState(
+void InitActorState(
   Context* ctx,
   word listIndex,
   ActorUpdateFunc updateFunc,
@@ -162,7 +162,7 @@ void pascal InitActorState(
  * by one shot each frame, but a single shot can cause damage to multiple
  * actors.
  */
-byte pascal TestShotCollision(Context* ctx, word handle)
+byte TestShotCollision(Context* ctx, word handle)
 {
   PlayerShot* shot;
   ActorState* actor = ctx->gmActorStates + handle;
@@ -266,7 +266,7 @@ byte pascal TestShotCollision(Context* ctx, word handle)
 
 
 /** Test if sprite's bounding box is intersecting specified rectangle */
-static bool pascal IsSpriteInRect(
+static bool IsSpriteInRect(
   Context* ctx,
   word id,
   word x,
@@ -305,7 +305,7 @@ static bool pascal IsSpriteInRect(
 
 
 /** Test if a player shot intersects the given rectangle, delete it if so */
-bool pascal FindPlayerShotInRect(
+bool FindPlayerShotInRect(
   Context* ctx,
   word left,
   word top,
@@ -335,8 +335,11 @@ bool pascal FindPlayerShotInRect(
 
 
 /** Try unlocking a key card slot or key hole actor */
-void pascal
-  TryUnlockingDoor(Context* ctx, bool* pSuccess, word neededKeyId, word handle)
+void TryUnlockingDoor(
+  Context* ctx,
+  bool* pSuccess,
+  word neededKeyId,
+  word handle)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 
@@ -390,7 +393,7 @@ void CheckLetterCollectionPityBonus(Context* ctx)
 
 
 /** Convenience helper function */
-bool pascal Boss3_IsTouchingPlayer(Context* ctx, word handle)
+bool Boss3_IsTouchingPlayer(Context* ctx, word handle)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 
@@ -419,7 +422,7 @@ bool pascal Boss3_IsTouchingPlayer(Context* ctx, word handle)
  * been extended to feature a "damages player" flag that actors could set on
  * themselves, which would then be handled in UpdateAndDrawActors().
  */
-void pascal UpdateActorPlayerCollision(Context* ctx, word handle)
+void UpdateActorPlayerCollision(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   int16_t i;
@@ -1422,7 +1425,7 @@ void pascal UpdateActorPlayerCollision(Context* ctx, word handle)
 
 
 /** Apply damage to actor. Return true if actor was killed, false otherwise */
-bool pascal DamageActor(Context* ctx, word damage, word handle)
+bool DamageActor(Context* ctx, word damage, word handle)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 
@@ -1459,7 +1462,7 @@ bool pascal DamageActor(Context* ctx, word damage, word handle)
  * It primarily defines what kind of effects (explosions, particles, debris) to
  * trigger when an actor is destroyed by the player.
  */
-void pascal HandleActorShotCollision(Context* ctx, int16_t damage, word handle)
+void HandleActorShotCollision(Context* ctx, int16_t damage, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -2165,7 +2168,7 @@ void pascal HandleActorShotCollision(Context* ctx, int16_t damage, word handle)
  *
  * TODO: Document the allowStairStepping flag
  */
-int16_t pascal ApplyWorldCollision(Context* ctx, word handle, word direction)
+int16_t ApplyWorldCollision(Context* ctx, word handle, word direction)
 {
   register ActorState* actor = ctx->gmActorStates + handle;
 
@@ -2258,7 +2261,7 @@ int16_t pascal ApplyWorldCollision(Context* ctx, word handle, word direction)
 
 
 /** Check if center-to-center distance between actor & player is below value */
-bool pascal PlayerInRange(Context* ctx, word handle, word distance)
+bool PlayerInRange(Context* ctx, word handle, word distance)
 {
   register ActorState* actor = ctx->gmActorStates + handle;
   register word offset;
@@ -2296,7 +2299,7 @@ bool pascal PlayerInRange(Context* ctx, word handle, word distance)
  * Tries to reuse the state slot of a previously deleted actor if possible,
  * otherwise the actor is added to the end of the list.
  */
-void pascal SpawnActor(Context* ctx, word id, word x, word y)
+void SpawnActor(Context* ctx, word id, word x, word y)
 {
   int16_t i;
 

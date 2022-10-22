@@ -47,7 +47,7 @@ This represents the largest part of the game logic by far.
  * advancing by one animation frame each game frame. But there are also a few
  * special cases for specific types of actors.
  */
-void pascal Act_AnimatedProp(Context* ctx, word handle)
+void Act_AnimatedProp(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -92,7 +92,7 @@ void pascal Act_AnimatedProp(Context* ctx, word handle)
 }
 
 
-void pascal Act_Hoverbot(Context* ctx, word handle)
+void Act_Hoverbot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -193,7 +193,7 @@ void pascal Act_Hoverbot(Context* ctx, word handle)
 }
 
 
-void pascal Act_PlayerSprite(Context* ctx, word handle)
+void Act_PlayerSprite(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -389,7 +389,7 @@ void pascal Act_PlayerSprite(Context* ctx, word handle)
  * Part of the behavior that's common to all items is a brief fly up and fall
  * down sequence, with a short bounce when hitting the ground.
  */
-void pascal Act_ItemBox(Context* ctx, word handle)
+void Act_ItemBox(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -656,7 +656,7 @@ void pascal Act_ItemBox(Context* ctx, word handle)
 }
 
 
-void pascal Act_FlameThrowerBot(Context* ctx, word handle)
+void Act_FlameThrowerBot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -723,7 +723,7 @@ void pascal Act_FlameThrowerBot(Context* ctx, word handle)
 }
 
 
-void pascal Act_BonusGlobe(Context* ctx, word handle)
+void Act_BonusGlobe(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -738,7 +738,7 @@ void pascal Act_BonusGlobe(Context* ctx, word handle)
 }
 
 
-void pascal Act_WatchBot(Context* ctx, word handle)
+void Act_WatchBot(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -856,7 +856,7 @@ void pascal Act_WatchBot(Context* ctx, word handle)
 }
 
 
-void pascal Act_RocketTurret(Context* ctx, word handle)
+void Act_RocketTurret(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -905,7 +905,7 @@ void pascal Act_RocketTurret(Context* ctx, word handle)
 }
 
 
-void pascal Act_EnemyRocket(Context* ctx, word handle)
+void Act_EnemyRocket(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1046,7 +1046,7 @@ void pascal Act_EnemyRocket(Context* ctx, word handle)
 }
 
 
-void pascal Act_WatchBotContainerCarrier(Context* ctx, word handle)
+void Act_WatchBotContainerCarrier(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1117,7 +1117,7 @@ void pascal Act_WatchBotContainerCarrier(Context* ctx, word handle)
 }
 
 
-void pascal Act_WatchBotContainer(Context* ctx, word handle)
+void Act_WatchBotContainer(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1159,7 +1159,7 @@ void pascal Act_WatchBotContainer(Context* ctx, word handle)
 }
 
 
-void pascal Act_BomberPlane(Context* ctx, word handle)
+void Act_BomberPlane(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1218,7 +1218,7 @@ void pascal Act_BomberPlane(Context* ctx, word handle)
 }
 
 
-void pascal Act_MiniNuke(Context* ctx, word handle)
+void Act_MiniNuke(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -1264,7 +1264,7 @@ void pascal Act_MiniNuke(Context* ctx, word handle)
 }
 
 
-void pascal Act_SpikeBall(Context* ctx, word handle)
+void Act_SpikeBall(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1331,7 +1331,7 @@ void pascal Act_SpikeBall(Context* ctx, word handle)
 }
 
 
-void pascal Act_Reactor(Context* ctx, word handle)
+void Act_Reactor(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1339,7 +1339,7 @@ void pascal Act_Reactor(Context* ctx, word handle)
 }
 
 
-void pascal Act_SlimeContainer(Context* ctx, word handle)
+void Act_SlimeContainer(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1375,7 +1375,7 @@ void pascal Act_SlimeContainer(Context* ctx, word handle)
 }
 
 
-void pascal Act_SlimeBlob(Context* ctx, word handle)
+void Act_SlimeBlob(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1550,7 +1550,7 @@ void pascal Act_SlimeBlob(Context* ctx, word handle)
 }
 
 
-void pascal Act_Snake(Context* ctx, word handle)
+void Act_Snake(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1677,7 +1677,7 @@ void pascal Act_Snake(Context* ctx, word handle)
 }
 
 
-void pascal Act_SecurityCamera(Context* ctx, word handle)
+void Act_SecurityCamera(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   word savedY;
@@ -1745,7 +1745,7 @@ void pascal Act_SecurityCamera(Context* ctx, word handle)
 }
 
 
-void pascal Act_CeilingSucker(Context* ctx, word handle)
+void Act_CeilingSucker(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1804,7 +1804,7 @@ void pascal Act_CeilingSucker(Context* ctx, word handle)
 }
 
 
-void pascal Act_PlayerShip(Context* ctx, word handle)
+void Act_PlayerShip(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1819,7 +1819,7 @@ void pascal Act_PlayerShip(Context* ctx, word handle)
 }
 
 
-void pascal Act_BrokenMissile(Context* ctx, word handle)
+void Act_BrokenMissile(Context* ctx, word handle)
 {
   static const byte ANIM_SEQ[] = {1, 2, 3, 2, 3, 4, 3};
 
@@ -1886,7 +1886,7 @@ void pascal Act_BrokenMissile(Context* ctx, word handle)
 }
 
 
-void pascal Act_EyeBallThrower(Context* ctx, word handle)
+void Act_EyeBallThrower(Context* ctx, word handle)
 {
   static const byte RISE_UP_ANIM[] = {0, 0, 0, 0, 0, 0, 1, 2, 3, 4};
 
@@ -2053,7 +2053,7 @@ word FindActorDesc(
 }
 
 
-void pascal Act_MovingMapPartTrigger(Context* ctx, word handle)
+void Act_MovingMapPartTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   word descIndex;
@@ -2136,7 +2136,7 @@ void pascal Act_MovingMapPartTrigger(Context* ctx, word handle)
 }
 
 
-void pascal Act_HoverBotGenerator(Context* ctx, word handle)
+void Act_HoverBotGenerator(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2162,7 +2162,7 @@ void pascal Act_HoverBotGenerator(Context* ctx, word handle)
 }
 
 
-void pascal Act_MessengerDrone(Context* ctx, word handle)
+void Act_MessengerDrone(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register byte* screenData;
@@ -2334,7 +2334,7 @@ void pascal Act_MessengerDrone(Context* ctx, word handle)
 }
 
 
-void pascal Act_SlimePipe(Context* ctx, word handle)
+void Act_SlimePipe(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2351,7 +2351,7 @@ void pascal Act_SlimePipe(Context* ctx, word handle)
 }
 
 
-void pascal Act_SlimeDrop(Context* ctx, word handle)
+void Act_SlimeDrop(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2367,7 +2367,7 @@ void pascal Act_SlimeDrop(Context* ctx, word handle)
 }
 
 
-void pascal Act_ForceField(Context* ctx, word handle)
+void Act_ForceField(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register word drawStyle;
@@ -2439,7 +2439,7 @@ void pascal Act_ForceField(Context* ctx, word handle)
 }
 
 
-void pascal Act_KeyCardSlot(Context* ctx, word handle)
+void Act_KeyCardSlot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2454,7 +2454,7 @@ void pascal Act_KeyCardSlot(Context* ctx, word handle)
 }
 
 
-void pascal Act_KeyHole(Context* ctx, word handle)
+void Act_KeyHole(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2495,7 +2495,7 @@ word FindFullySolidTileIndex(Context* ctx)
 }
 
 
-void pascal Act_SlidingDoorVertical(Context* ctx, word handle)
+void Act_SlidingDoorVertical(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register word i;
@@ -2590,7 +2590,7 @@ void pascal Act_SlidingDoorVertical(Context* ctx, word handle)
 }
 
 
-void pascal Act_SlidingDoorHorizontal(Context* ctx, word handle)
+void Act_SlidingDoorHorizontal(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -2660,7 +2660,7 @@ void pascal Act_SlidingDoorHorizontal(Context* ctx, word handle)
 }
 
 
-void pascal Act_RespawnBeacon(Context* ctx, word handle)
+void Act_RespawnBeacon(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2709,7 +2709,7 @@ void pascal Act_RespawnBeacon(Context* ctx, word handle)
 }
 
 
-void pascal Act_Skeleton(Context* ctx, word handle)
+void Act_Skeleton(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2763,7 +2763,7 @@ void pascal Act_Skeleton(Context* ctx, word handle)
 }
 
 
-void pascal Act_BlowingFan(Context* ctx, word handle)
+void Act_BlowingFan(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2,
@@ -2845,7 +2845,7 @@ void pascal Act_BlowingFan(Context* ctx, word handle)
 }
 
 
-void pascal Act_LaserTurret(Context* ctx, word handle)
+void Act_LaserTurret(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2935,7 +2935,7 @@ void pascal Act_LaserTurret(Context* ctx, word handle)
 }
 
 
-void pascal Act_EnemyLaserShot(Context* ctx, word handle)
+void Act_EnemyLaserShot(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -2987,7 +2987,7 @@ void pascal Act_EnemyLaserShot(Context* ctx, word handle)
 }
 
 
-void pascal Act_LevelExitTrigger(Context* ctx, word handle)
+void Act_LevelExitTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3009,7 +3009,7 @@ void pascal Act_LevelExitTrigger(Context* ctx, word handle)
 }
 
 
-void pascal Act_SuperForceField(Context* ctx, word handle)
+void Act_SuperForceField(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3091,7 +3091,7 @@ void pascal Act_SuperForceField(Context* ctx, word handle)
 }
 
 
-void pascal Act_IntactMissile(Context* ctx, word handle)
+void Act_IntactMissile(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -3175,7 +3175,7 @@ void pascal Act_IntactMissile(Context* ctx, word handle)
 }
 
 
-void pascal Act_GrabberClaw(Context* ctx, word handle)
+void Act_GrabberClaw(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register word i;
@@ -3312,7 +3312,7 @@ void pascal Act_GrabberClaw(Context* ctx, word handle)
 }
 
 
-void pascal Act_FloatingLaserBot(Context* ctx, word handle)
+void Act_FloatingLaserBot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   int16_t xDiff;
@@ -3421,7 +3421,7 @@ void pascal Act_FloatingLaserBot(Context* ctx, word handle)
 }
 
 
-void pascal Act_Spider(Context* ctx, word handle)
+void Act_Spider(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3750,7 +3750,7 @@ bool BlueGuard_UpdateShooting(Context* ctx, word handle)
 }
 
 
-void pascal Act_BlueGuard(Context* ctx, word handle)
+void Act_BlueGuard(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3864,7 +3864,7 @@ begin:
 }
 
 
-void pascal Act_SpikedGreenCreature(Context* ctx, word handle)
+void Act_SpikedGreenCreature(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -4033,7 +4033,7 @@ void pascal Act_SpikedGreenCreature(Context* ctx, word handle)
 }
 
 
-void pascal Act_GreenPanther(Context* ctx, word handle)
+void Act_GreenPanther(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4107,7 +4107,7 @@ void pascal Act_GreenPanther(Context* ctx, word handle)
 }
 
 
-void pascal Act_Turkey(Context* ctx, word handle)
+void Act_Turkey(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4154,7 +4154,7 @@ void pascal Act_Turkey(Context* ctx, word handle)
 }
 
 
-void pascal Act_GreenBird(Context* ctx, word handle)
+void Act_GreenBird(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const word ANIM_SEQ[] = {0, 1, 2, 1};
@@ -4202,7 +4202,7 @@ void pascal Act_GreenBird(Context* ctx, word handle)
 }
 
 
-void pascal Act_RedBird(Context* ctx, word handle)
+void Act_RedBird(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const word FLY_ANIM_SEQ[] = {0, 1, 2, 1};
@@ -4311,7 +4311,7 @@ void pascal Act_RedBird(Context* ctx, word handle)
 }
 
 
-void pascal Act_Elevator(Context* ctx, word handle)
+void Act_Elevator(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -4524,7 +4524,7 @@ drawHandrail:
 }
 
 
-void pascal Act_SmashHammer(Context* ctx, word handle)
+void Act_SmashHammer(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -4591,7 +4591,7 @@ void pascal Act_SmashHammer(Context* ctx, word handle)
 }
 
 
-void pascal Act_WaterArea(Context* ctx, word handle)
+void Act_WaterArea(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4621,7 +4621,7 @@ void pascal Act_WaterArea(Context* ctx, word handle)
 }
 
 
-void pascal Act_WaterDrop(Context* ctx, word handle)
+void Act_WaterDrop(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4633,7 +4633,7 @@ void pascal Act_WaterDrop(Context* ctx, word handle)
 }
 
 
-void pascal Act_WaterDropSpawner(Context* ctx, word handle)
+void Act_WaterDropSpawner(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4652,7 +4652,7 @@ void pascal Act_WaterDropSpawner(Context* ctx, word handle)
 }
 
 
-void pascal Act_LavaFountain(Context* ctx, word handle)
+void Act_LavaFountain(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4736,7 +4736,7 @@ void pascal Act_LavaFountain(Context* ctx, word handle)
 }
 
 
-void pascal Act_RadarComputer(Context* ctx, word handle)
+void Act_RadarComputer(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   byte i;
@@ -4813,7 +4813,7 @@ void pascal Act_RadarComputer(Context* ctx, word handle)
 }
 
 
-void pascal Act_HintMachine(Context* ctx, word handle)
+void Act_HintMachine(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4831,7 +4831,7 @@ void pascal Act_HintMachine(Context* ctx, word handle)
 }
 
 
-void pascal Act_WindBlownSpiderGenerator(Context* ctx, word handle)
+void Act_WindBlownSpiderGenerator(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4854,7 +4854,7 @@ void pascal Act_WindBlownSpiderGenerator(Context* ctx, word handle)
 }
 
 
-void pascal Act_UniCycleBot(Context* ctx, word handle)
+void Act_UniCycleBot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4944,7 +4944,7 @@ void pascal Act_UniCycleBot(Context* ctx, word handle)
 }
 
 
-void pascal Act_WallWalker(Context* ctx, word handle)
+void Act_WallWalker(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5026,7 +5026,7 @@ repeat:
 }
 
 
-void pascal Act_AirlockDeathTrigger(Context* ctx, word handle)
+void Act_AirlockDeathTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5063,7 +5063,7 @@ void pascal Act_AirlockDeathTrigger(Context* ctx, word handle)
 }
 
 
-void pascal Act_AggressivePrisoner(Context* ctx, word handle)
+void Act_AggressivePrisoner(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {1, 2, 3, 4, 0};
@@ -5125,7 +5125,7 @@ void pascal Act_AggressivePrisoner(Context* ctx, word handle)
 }
 
 
-void pascal Act_ExplosionTrigger(Context* ctx, word handle)
+void Act_ExplosionTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5139,7 +5139,7 @@ void pascal Act_ExplosionTrigger(Context* ctx, word handle)
 }
 
 
-void pascal UpdateBossDeathSequence(Context* ctx, word handle)
+void UpdateBossDeathSequence(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5231,7 +5231,7 @@ void pascal UpdateBossDeathSequence(Context* ctx, word handle)
 }
 
 
-void pascal Act_Boss1(Context* ctx, word handle)
+void Act_Boss1(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5413,7 +5413,7 @@ void pascal Act_Boss1(Context* ctx, word handle)
 }
 
 
-void pascal Act_Boss2(Context* ctx, word handle)
+void Act_Boss2(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5605,7 +5605,7 @@ void Boss3_MoveTowardsPos(
 }
 
 
-void pascal Act_Boss3(Context* ctx, word handle)
+void Act_Boss3(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5707,7 +5707,7 @@ void pascal Act_Boss3(Context* ctx, word handle)
 }
 
 
-void pascal Act_Boss4(Context* ctx, word handle)
+void Act_Boss4(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5794,7 +5794,7 @@ void MoveTowardsPos(word* x, word* y, word targetX, word targetY)
 }
 
 
-void pascal Act_Boss4Projectile(Context* ctx, word handle)
+void Act_Boss4Projectile(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5817,7 +5817,7 @@ void pascal Act_Boss4Projectile(Context* ctx, word handle)
 }
 
 
-void pascal Act_SmallFlyingShip(Context* ctx, word handle)
+void Act_SmallFlyingShip(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -5893,7 +5893,7 @@ void pascal Act_SmallFlyingShip(Context* ctx, word handle)
 }
 
 
-void pascal Act_RigelatinSoldier(Context* ctx, word handle)
+void Act_RigelatinSoldier(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 

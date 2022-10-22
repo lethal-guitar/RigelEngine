@@ -327,7 +327,7 @@ typedef struct
 } ActorInfoEntry;
 
 word offset = gfxActorInfoData[actorId];
-ActorInfoEntry far* info = (ActorInfoEntry far*)(gfxActorInfoData + offset);
+ActorInfoEntry* info = (ActorInfoEntry*)(gfxActorInfoData + offset);
 
 But instead, the game retrieves the data fields of each entry as individual
 words. We don't know what the actual code looked like, but it's quite likely

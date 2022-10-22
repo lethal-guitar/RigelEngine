@@ -351,7 +351,7 @@ typedef struct
 struct Context_;
 
 
-typedef void pascal (*ActorUpdateFunc)(struct Context_* ctx, word index);
+typedef void (*ActorUpdateFunc)(struct Context_* ctx, word index);
 
 
 typedef struct
@@ -407,7 +407,7 @@ typedef struct
   word var1, var2, var3, var4, var5;
 
   // Used by actors that act like solid level geometry
-  word far* tileBuffer;
+  word* tileBuffer;
 
   // score given to the player when the actor is destroyed. Not always used,
   // sometimes this is hardcoded into the damage handler code instead.
@@ -490,15 +490,15 @@ typedef struct Context_
   word gmTeleportTargetPosY;
   byte retPlayerShotDirection;
   bool gmPlayerTookDamage;
-  word far* gfxTilesetAttributes;
+  word* gfxTilesetAttributes;
   word mapBottom;
   word mapWidthShift;
   word mapWidth;
   word gmCameraPosX;
   word gmCameraPosY;
-  word far* mapData;
-  word far gmTileDebrisStates[700 * 5];
-  word far* gfxActorInfoData;
+  word* mapData;
+  word gmTileDebrisStates[700 * 5];
+  word* gfxActorInfoData;
   word gmNumActors;
   bool gmBossActivated;
   bool plRapidFireIsActiveFrame;
@@ -581,7 +581,7 @@ typedef struct Context_
   dword mmMemTotal;
   dword mmMemUsed;
   word mmChunksUsed;
-  word far* psParticleData[NUM_PARTICLE_GROUPS];
+  word* psParticleData[NUM_PARTICLE_GROUPS];
   ParticleGroup psParticleGroups[NUM_PARTICLE_GROUPS];
   bool bdUseSecondary;
   byte gmDifficulty;
@@ -602,7 +602,7 @@ int16_t Sign(int16_t val);
 byte RandomNumber(Context* ctx);
 
 bool MM_Init(Context* ctx);
-void far* MM_PushChunk(Context* ctx, word size, ChunkType type);
+void* MM_PushChunk(Context* ctx, word size, ChunkType type);
 
 void InitParticleSystem(Context* ctx);
 void SpawnParticles(
@@ -669,7 +669,12 @@ void SpawnDestructionEffects(
   word handle,
   int16_t* spec,
   word actorId);
-void SpawnBurnEffect(Context* ctx, word effectId, word sourceId, word x, word y);
+void SpawnBurnEffect(
+  Context* ctx,
+  word effectId,
+  word sourceId,
+  word x,
+  word y);
 
 void SpawnPlayerShot(Context* ctx, word id, word x, word y, word direction);
 
