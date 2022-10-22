@@ -24,36 +24,7 @@
  */
 
 
-/*******************************************************************************
-
-This file contains all global variables without an initial value, which are
-stored in the BSS section of the executable. We don't know how these variables
-were declared in the original code, they might have been spread across both
-translation units, interspersed between function definitions, etc.
-
-But unfortunately, the linker changes the order of some variables if I declare
-them across mulitple translation units, based on rules that are as of now still
-unclear to me. Sticking all variables into one translation unit makes it easy
-to exactly recreate the original memory layout of these variables, which I
-wasn't able to achieve otherwise.
-
-It's also possible that some of these variables are actually function-local
-static variables, but again, that would make it harder to match the memory
-layout, so I made all of them globals.
-
-*******************************************************************************/
-
-
-word uiMessageBoxShift;
-int16_t uiProgressBarState;
-word uiProgressBarTicksElapsed;
-word uiProgressBarStepDelay;
-
-byte demoData[134];
-
 byte retConveyorBeltCheckResult;
-
-bool hudShowingHintMachineMsg;
 
 // [NOTE] This has a constant value in the shipping game, but it might
 // have been variable at some point during development - otherwise, the code
@@ -62,9 +33,6 @@ byte mapViewportHeight;
 
 bool gfxFlashScreen;
 byte gfxScreenFlashColor;
-
-byte debugSelectedFunction;
-byte debugLevelToWarpTo;
 
 bool gmIsTeleporting;
 int16_t plCollectedLetters;
@@ -75,12 +43,6 @@ byte retPlayerShotDirection;
 
 bool gmPlayerTookDamage;
 
-InterruptHandler kbSavedIntHandler;
-
-void far* sndInGameMusicBuffer;
-void far* sndMenuMusicBuffer;
-
-word far* bdOffsetTable;
 word far* gfxTilesetAttributes;
 
 word mapBottom;
@@ -96,50 +58,13 @@ word far gmTileDebrisStates[700 * 5];
 
 word far* gfxActorInfoData;
 
-word sysTicksElapsed;
-
 word gmNumActors;
 
-byte scriptPageIndex;
-
 bool gmBossActivated;
-
-bool jsButton3;
-bool jsButton4;
-
-word bdAutoScrollStep;
-word bdAddress;
-
-// These variables are only used within UpdateAndDrawGame().
-word destOffset;
-word srcOffsetEnd;
-word far* pCurrentTile;
-
-word far* bdOffsetTablePtr;
-
-byte far* gfxMaskedTileData;
 
 bool plRapidFireIsActiveFrame;
 
 bool gmRequestUnlockNextDoor;
-
-bool demoIsRecording;
-
-byte kbLastScancode;
-
-bool sndMusicEnabled;
-bool sndSoundEnabled;
-byte gmSpeedIndex;
-bool sndUseSbSounds;
-bool sndUseAdLibSounds;
-bool sndUsePcSpeakerSounds;
-
-bool uiDisplayPageChanged;
-
-// There are only 6 slots in the inventory. The 7th array element serves as a
-// sentinel value, to indicate the end of the inventory in case the player
-// has 6 items.
-word plInventory[NUM_INVENTORY_SLOTS + 1];
 
 byte gmCurrentEpisode;
 byte gmCurrentLevel;
@@ -156,8 +81,6 @@ word gfxCurrentDisplayPage;
 
 byte gmGameState;
 
-byte unused1;
-
 EffectState gmEffectStates[MAX_NUM_EFFECTS];
 PlayerShot gmPlayerShotStates[MAX_NUM_PLAYER_SHOTS];
 
@@ -167,24 +90,12 @@ bool inputMoveLeft;
 bool inputMoveRight;
 bool inputJump;
 bool inputFire;
-byte kbBindingUp;
-byte kbBindingDown;
-byte kbBindingLeft;
-byte kbBindingRight;
-byte kbBindingJump;
-byte kbBindingFire;
 
 word plRapidFireTimeLeft;
 
 dword plScore;
 
-bool jsCalibrated;
-
-bool mapParallaxBoth;
 bool mapParallaxHorizontal;
-bool mapBackdropAutoScrollX;
-bool mapBackdropAutoScrollY;
-byte mapSecondaryBackdrop;
 bool mapHasReactorDestructionEvent;
 bool mapSwitchBackdropOnTeleport;
 
@@ -218,17 +129,11 @@ byte gmEarthquakeThreshold;
 
 byte plWeapon_hud;
 
-char* hudCurrentMessage;
-
-bool gmTutorialsShown[NUM_TUTORIAL_IDS];
-
 byte gmReactorDestructionStep;
 byte gmNumMovingMapParts;
 word plCloakTimeLeft;
 
 MovingMapPartState gmMovingMapParts[MAX_NUM_MOVING_MAP_PARTS];
-
-byte far* sndDigitizedSounds[50];
 
 word bdAddressAdjust;
 
@@ -243,11 +148,6 @@ word gmTurretsInLevel;
 word gmOrbsLeft;
 word gmBombBoxesLeft;
 
-word hudMessageCharsPrinted;
-word hudMessageDelay;
-
-bool gmWaterAreasPresent;
-
 word plAttachedSpider1;
 word plAttachedSpider2;
 word plAttachedSpider3;
@@ -256,19 +156,8 @@ word gmBossHealth;
 
 byte gmRadarDishesLeft;
 
-char uiHintMessageBuffer[128];
-
-word sndCurrentMusicFileSize;
-byte sndCurrentPriority;
-byte sndCurrentPriorityFallback;
-
-dword unused2;
-
 word gmCloakPickupPosX;
 word gmCloakPickupPosY;
-
-int16_t far* sndPreBossMusicData;
-word sndOriginalMusicSize;
 
 word gmExplodingSectionLeft;
 word gmExplodingSectionTop;
@@ -278,65 +167,11 @@ byte gmExplodingSectionTicksElapsed;
 
 word gmActiveFanIndex;
 
-bool demoPlaybackAborted;
-
-byte uiReporterTalkAnimTicksLeft;
-word uiDemoTimeoutTime;
-word uiMenuCursorPos;
-byte uiMenuState;
-byte uiCurrentMenuId;
-
-int16_t demoFileFd;
-word demoFramesProcessed;
-bool demoIsPlaying;
-
 bool plBlockJumping;
 bool plWalkAnimTicksDue;
 bool plBlockShooting;
 
-bool unused3;
-
-bool hackStopApogeeLogo;
-
-byte far* gfxLoadedSprites[MM_MAX_NUM_CHUNKS];
-
 byte levelHeaderData[3002];
-
-word tempTileBuffer[3000];
-
-bool kbKeyState[128];
-
-byte fsGroupFileDict[4000];
-
-char* fsNameForErrorReport;
-
-int16_t flicFrameDelay;
-
-// [PERF] only 412 bytes are needed, but the array is of type dword and thus
-// uses 412*4 = 1648 bytes.  Most likely done by accident, maybe the type was
-// initially byte and was then changed to dword without adjusting the size.
-dword sndPackageHeader[412];
-
-byte sndAudioData[6069];
-
-dword sysFastTicksElapsed;
-
-int16_t jsThresholdRight;
-int16_t jsThresholdLeft;
-int16_t jsThresholdDown;
-int16_t jsThresholdUp;
-
-word gfxPaletteForFade[16 * 3];
-
-// See plInventory above
-byte hudInventoryBlinkTimeLeft[NUM_INVENTORY_SLOTS + 1];
-
-SaveSlotName saveSlotNames[NUM_SAVE_SLOTS];
-
-// +1 for zero terminator
-char gmHighScoreNames[NUM_HIGH_SCORE_ENTRIES][HIGH_SCORE_NAME_MAX_LEN + 1];
-
-dword gmHighScoreList[NUM_HIGH_SCORE_ENTRIES];
 
 word mmChunkSizes[MM_MAX_NUM_CHUNKS];
 ChunkType mmChunkTypes[MM_MAX_NUM_CHUNKS];
@@ -347,16 +182,3 @@ word mmChunksUsed;
 
 word far* psParticleData[NUM_PARTICLE_GROUPS];
 ParticleGroup psParticleGroups[NUM_PARTICLE_GROUPS];
-
-long musicTicksElapsed;
-bool musicIsPlaying;
-int16_t far* musicDataStart;
-int16_t far* musicData;
-int16_t musicDataLeft;
-int16_t musicDataSize;
-long musicNextEventTime;
-InterruptHandler sysSavedTimerIntHandler;
-
-char tempFilename[20];
-int16_t flicNextDelay;
-bool sysIsSecondTick;

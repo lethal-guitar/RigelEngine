@@ -175,7 +175,6 @@ typedef struct
   word type;
   word movementStep;
   word spawnDelay;
-  word unk2, unk3, unk4, unk5; // Padding?
 } EffectState;
 
 
