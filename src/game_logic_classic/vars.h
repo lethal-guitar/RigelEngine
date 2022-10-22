@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "gamedefs.h"
+#include "game.h"
 
 
 extern bool sysTecMode;
