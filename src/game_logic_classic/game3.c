@@ -23,6 +23,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "base/warnings.hpp"
+
+#include "actors.h"
+#include "game.h"
+#include "sounds.h"
+
 
 /*******************************************************************************
 
@@ -93,7 +99,7 @@ static int16_t DN2_abs(int16_t val)
  * This function sets up some state, the actual position change and the fade
  * transition are handled by RunInGameLoop().
  */
-void TeleportTo(Context* ctx, word x, word y)
+static void TeleportTo(Context* ctx, word x, word y)
 {
   ctx->gmIsTeleporting = true;
   ctx->gmTeleportTargetPosX = x;
@@ -222,7 +228,7 @@ byte TestShotCollision(Context* ctx, word handle)
           shot->x,
           shot->y))
     {
-      ctx->retPlayerShotDirection = shot->direction;
+      ctx->retPlayerShotDirection = (byte)shot->direction;
 
       switch (shot->id)
       {
@@ -335,11 +341,8 @@ bool FindPlayerShotInRect(
 
 
 /** Try unlocking a key card slot or key hole actor */
-void TryUnlockingDoor(
-  Context* ctx,
-  bool* pSuccess,
-  word neededKeyId,
-  word handle)
+static void
+  TryUnlockingDoor(Context* ctx, bool* pSuccess, word neededKeyId, word handle)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 
@@ -366,7 +369,7 @@ void TryUnlockingDoor(
 
 
 /** Check if the player has collected all letters, but in the wrong order */
-void CheckLetterCollectionPityBonus(Context* ctx)
+static void CheckLetterCollectionPityBonus(Context* ctx)
 {
   // [BUG] `plCollectedLetters != 5` is always true, if the first condition is
   // true. The author most likely intended to compare only the low byte of
@@ -422,10 +425,9 @@ bool Boss3_IsTouchingPlayer(Context* ctx, word handle)
  * been extended to feature a "damages player" flag that actors could set on
  * themselves, which would then be handled in UpdateAndDrawActors().
  */
-void UpdateActorPlayerCollision(Context* ctx, word handle)
+static void UpdateActorPlayerCollision(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
-  int16_t i;
 
   if (ctx->plState == PS_DYING)
   {
@@ -551,7 +553,7 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
           ShowTutorial(ctx, TUT_SHIP);
 
           ctx->plState = PS_USING_SHIP;
-          ctx->plActorId = state->id;
+          ctx->plActorId = (byte)state->id;
           ctx->plAnimationFrame = 1;
           ctx->plPosY = state->y;
           ctx->plPosX = state->x;
@@ -606,9 +608,7 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
       case ACT_SMALL_FLYING_SHIP_2:
       case ACT_SMALL_FLYING_SHIP_3:
         DamagePlayer(ctx);
-        // [BUG] Unintended fallthrough. No observable consequences, because
-        // the player has invincibility frames after taking damage and so the
-        // potential 2nd call to DamagePlayer() will have no effect.
+        break;
 
       case ACT_BOSS_EPISODE_2:
       case ACT_BOSS_EPISODE_1:
@@ -782,7 +782,7 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
 
           ctx->gmWeaponsCollected++;
 
-          ctx->plWeapon = state->var3;
+          ctx->plWeapon = (byte)state->var3;
 
           PlaySound(ctx, SND_WEAPON_PICKUP);
 
@@ -1138,7 +1138,7 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
             SpawnEffect(
               ctx,
               ACT_SCORE_NUMBER_FX_10000,
-              state->x + SCORE_NUMBER_OFFSETS[i & 3],
+              (word)(state->x + SCORE_NUMBER_OFFSETS[i & 3]),
               state->y - i,
               EM_SCORE_NUMBER,
               0);
@@ -1301,7 +1301,7 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
 
       case ACT_BONUS_GLOBE_SHELL:
         {
-          i = ACT_SCORE_NUMBER_FX_500;
+          int16_t i = ACT_SCORE_NUMBER_FX_500;
 
           GiveScore(ctx, state->scoreGiven);
 
@@ -1388,6 +1388,8 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
 
           // Now go through the entire list of actors, and find the first one
           // that is a) a teleporter and b) has the right counterpart ID.
+          int16_t i;
+
           for (i = 0; i < ctx->gmNumActors; i++)
           {
             candidate = ctx->gmActorStates + i;
@@ -1425,7 +1427,7 @@ void UpdateActorPlayerCollision(Context* ctx, word handle)
 
 
 /** Apply damage to actor. Return true if actor was killed, false otherwise */
-bool DamageActor(Context* ctx, word damage, word handle)
+static bool DamageActor(Context* ctx, word damage, word handle)
 {
   ActorState* actor = ctx->gmActorStates + handle;
 
@@ -1465,7 +1467,7 @@ bool DamageActor(Context* ctx, word damage, word handle)
 void HandleActorShotCollision(Context* ctx, int16_t damage, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
-  register int16_t i;
+  register word i;
 
   if (!damage)
   {
@@ -2269,7 +2271,7 @@ bool PlayerInRange(Context* ctx, word handle, word distance)
   word actorCenterX;
   word playerOffsetToCenter = 1;
 
-  offset = ctx->gfxActorInfoData[actor->id] + (actor->frame << 3);
+  offset = (word)(ctx->gfxActorInfoData[actor->id] + (actor->frame << 3));
   width = AINFO_WIDTH(offset);
   actorCenterX = actor->x + width / 2;
 
@@ -2341,7 +2343,7 @@ void UpdateAndDrawActors(Context* ctx)
   register word handle;
   register word numActors = ctx->gmNumActors;
   ActorState* actor;
-  word savedDrawStyle;
+  byte savedDrawStyle;
 
   for (handle = 0; handle < numActors; handle++)
   {

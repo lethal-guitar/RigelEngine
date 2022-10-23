@@ -23,6 +23,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "base/warnings.hpp"
+
+#include "actors.h"
+#include "game.h"
+#include "sounds.h"
+
 
 /*******************************************************************************
 
@@ -45,7 +51,7 @@ static void Map_MoveSection(
   {
     for (x = left; x <= right; x++)
     {
-      Map_SetTile(ctx, Map_GetTile(ctx, x, y), x, y + distance);
+      Map_SetTile(ctx, Map_GetTile(ctx, x, y), x, (word)(y + distance));
       Map_SetTile(ctx, 0, x, y);
     }
   }
@@ -195,7 +201,7 @@ void UpdateMovingMapParts(Context* ctx)
             SpawnEffect(
               ctx,
               ACT_FLAME_FX,
-              left + (int16_t)RandomNumber(ctx) % (right - left),
+              (word)(left + (int16_t)RandomNumber(ctx) % (right - left)),
               bottom + 1,
               EM_RISE_UP,
               0);

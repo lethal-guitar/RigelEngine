@@ -52,6 +52,7 @@ function(rigel_enable_warnings target)
             -Wno-suggest-destructor-override
             -Wno-return-std-move-in-c++11
             -Wno-non-virtual-dtor
+            -Wno-extra-semi-stmt
         )
 
         if (WARNINGS_AS_ERRORS)

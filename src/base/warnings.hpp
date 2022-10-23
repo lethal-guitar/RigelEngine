@@ -25,6 +25,12 @@
   #define RIGEL_DISABLE_WARNINGS                                               \
     __pragma(warning(push, 0))                                                 \
     __pragma(warning(disable : 4244))                                          \
+    __pragma(warning(disable : 4706))                                          \
+    /**/
+
+  #define RIGEL_DISABLE_CLASSIC_CODE_WARNINGS                                  \
+    __pragma(warning(push))                                                    \
+    __pragma(warning(disable : 4706))                                          \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS __pragma(warning(pop))
@@ -63,6 +69,12 @@
     _Pragma("clang diagnostic ignored \"-Wsuggest-override\"")                   \
     /**/
 
+  #define RIGEL_DISABLE_CLASSIC_CODE_WARNINGS                                  \
+    _Pragma("clang diagnostic push")                                           \
+    _Pragma("clang diagnostic ignored \"-Wconversion\"")                       \
+    _Pragma("clang diagnostic ignored \"-Wcast-align\"")                       \
+    /**/
+
   #define RIGEL_RESTORE_WARNINGS _Pragma("clang diagnostic pop")
 
 #elif defined(__GNUC__)
@@ -71,6 +83,10 @@
     _Pragma("GCC diagnostic push")                                             \
     _Pragma("GCC diagnostic ignored \"-Wpedantic\"")                           \
     _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"")               \
+    /**/
+
+  #define RIGEL_DISABLE_CLASSIC_CODE_WARNINGS                                  \
+    _Pragma("GCC diagnostic push")                                             \
     /**/
 
   #define RIGEL_RESTORE_WARNINGS _Pragma("GCC diagnostic pop")

@@ -23,6 +23,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "base/warnings.hpp"
+
+#include "actors.h"
+#include "game.h"
+#include "sounds.h"
+
 
 /*******************************************************************************
 
@@ -37,6 +43,7 @@ This represents the largest part of the game logic by far.
 
 *******************************************************************************/
 
+RIGEL_DISABLE_CLASSIC_CODE_WARNINGS
 
 /** Semi-generic utility actor
  *
@@ -47,7 +54,7 @@ This represents the largest part of the game logic by far.
  * advancing by one animation frame each game frame. But there are also a few
  * special cases for specific types of actors.
  */
-void Act_AnimatedProp(Context* ctx, word handle)
+static void Act_AnimatedProp(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -76,7 +83,7 @@ void Act_AnimatedProp(Context* ctx, word handle)
       state->id == ACT_ROTATING_FLOOR_SPIKES)
     {
       // Advance one frame every other game frame (half speed)
-      state->frame = state->frame + ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)(state->frame + ctx->gfxCurrentDisplayPage);
     }
     else
     {
@@ -92,7 +99,7 @@ void Act_AnimatedProp(Context* ctx, word handle)
 }
 
 
-void Act_Hoverbot(Context* ctx, word handle)
+static void Act_Hoverbot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -193,7 +200,7 @@ void Act_Hoverbot(Context* ctx, word handle)
 }
 
 
-void Act_PlayerSprite(Context* ctx, word handle)
+static void Act_PlayerSprite(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -389,7 +396,7 @@ void Act_PlayerSprite(Context* ctx, word handle)
  * Part of the behavior that's common to all items is a brief fly up and fall
  * down sequence, with a short bounce when hitting the ground.
  */
-void Act_ItemBox(Context* ctx, word handle)
+static void Act_ItemBox(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -529,7 +536,7 @@ void Act_ItemBox(Context* ctx, word handle)
   switch (state->id)
   {
     case ACT_PC:
-      state->frame = ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)ctx->gfxCurrentDisplayPage;
       break;
 
     case ACT_RAPID_FIRE:
@@ -656,7 +663,7 @@ void Act_ItemBox(Context* ctx, word handle)
 }
 
 
-void Act_FlameThrowerBot(Context* ctx, word handle)
+static void Act_FlameThrowerBot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -723,7 +730,7 @@ void Act_FlameThrowerBot(Context* ctx, word handle)
 }
 
 
-void Act_BonusGlobe(Context* ctx, word handle)
+static void Act_BonusGlobe(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -738,7 +745,7 @@ void Act_BonusGlobe(Context* ctx, word handle)
 }
 
 
-void Act_WatchBot(Context* ctx, word handle)
+static void Act_WatchBot(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -786,7 +793,7 @@ void Act_WatchBot(Context* ctx, word handle)
   doMovementOrWait:
     if (!state->var2)
     {
-      state->frame = HIDE_HEAD_ANIM[state->var3];
+      state->frame = (byte)HIDE_HEAD_ANIM[state->var3];
       state->var3++;
 
       if (
@@ -856,7 +863,7 @@ void Act_WatchBot(Context* ctx, word handle)
 }
 
 
-void Act_RocketTurret(Context* ctx, word handle)
+static void Act_RocketTurret(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -905,7 +912,7 @@ void Act_RocketTurret(Context* ctx, word handle)
 }
 
 
-void Act_EnemyRocket(Context* ctx, word handle)
+static void Act_EnemyRocket(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1046,7 +1053,7 @@ void Act_EnemyRocket(Context* ctx, word handle)
 }
 
 
-void Act_WatchBotContainerCarrier(Context* ctx, word handle)
+static void Act_WatchBotContainerCarrier(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1117,7 +1124,7 @@ void Act_WatchBotContainerCarrier(Context* ctx, word handle)
 }
 
 
-void Act_WatchBotContainer(Context* ctx, word handle)
+static void Act_WatchBotContainer(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1159,7 +1166,7 @@ void Act_WatchBotContainer(Context* ctx, word handle)
 }
 
 
-void Act_BomberPlane(Context* ctx, word handle)
+static void Act_BomberPlane(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1218,7 +1225,7 @@ void Act_BomberPlane(Context* ctx, word handle)
 }
 
 
-void Act_MiniNuke(Context* ctx, word handle)
+static void Act_MiniNuke(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -1264,7 +1271,7 @@ void Act_MiniNuke(Context* ctx, word handle)
 }
 
 
-void Act_SpikeBall(Context* ctx, word handle)
+static void Act_SpikeBall(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1331,7 +1338,7 @@ void Act_SpikeBall(Context* ctx, word handle)
 }
 
 
-void Act_Reactor(Context* ctx, word handle)
+static void Act_Reactor(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1339,7 +1346,7 @@ void Act_Reactor(Context* ctx, word handle)
 }
 
 
-void Act_SlimeContainer(Context* ctx, word handle)
+static void Act_SlimeContainer(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1375,7 +1382,7 @@ void Act_SlimeContainer(Context* ctx, word handle)
 }
 
 
-void Act_SlimeBlob(Context* ctx, word handle)
+static void Act_SlimeBlob(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1435,7 +1442,7 @@ void Act_SlimeBlob(Context* ctx, word handle)
 
         state->var2 = !state->var2;
         state->frame =
-          state->x > ctx->plPosX ? state->var2 + 7 : state->var2 + 9;
+          (byte)(state->x > ctx->plPosX ? state->var2 + 7 : state->var2 + 9);
 
         if (state->var2 % 2)
         {
@@ -1494,7 +1501,7 @@ void Act_SlimeBlob(Context* ctx, word handle)
       }
       else
       {
-        state->frame = state->var2 + (RandomNumber(ctx) & 3);
+        state->frame = (byte)(state->var2 + (RandomNumber(ctx) & 3));
 
         if (state->var1 == 10)
         {
@@ -1513,7 +1520,7 @@ void Act_SlimeBlob(Context* ctx, word handle)
     {
       state->var3++;
 
-      state->frame = state->var2 + state->var3 % 2 + 3;
+      state->frame = (byte)(state->var2 + state->var3 % 2 + 3);
 
       if (
         (state->x > ctx->plPosX && state->var2) ||
@@ -1550,7 +1557,7 @@ void Act_SlimeBlob(Context* ctx, word handle)
 }
 
 
-void Act_Snake(Context* ctx, word handle)
+static void Act_Snake(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1614,7 +1621,8 @@ void Act_Snake(Context* ctx, word handle)
       }
     }
 
-    state->frame = state->var1 + state->var3 + ctx->gfxCurrentDisplayPage;
+    state->frame =
+      (byte)(state->var1 + state->var3 + ctx->gfxCurrentDisplayPage);
 
     if (!state->var4)
     {
@@ -1631,7 +1639,7 @@ void Act_Snake(Context* ctx, word handle)
       if (!ctx->gfxCurrentDisplayPage)
       {
         state->x++;
-        state->frame = state->var1 + (state->x & 1);
+        state->frame = (byte)(state->var1 + (state->x & 1));
       }
     }
     else
@@ -1656,7 +1664,7 @@ void Act_Snake(Context* ctx, word handle)
       if (!ctx->gfxCurrentDisplayPage)
       {
         state->x--;
-        state->frame = state->x & 1;
+        state->frame = (byte)(state->x & 1);
       }
     }
     else
@@ -1677,10 +1685,10 @@ void Act_Snake(Context* ctx, word handle)
 }
 
 
-void Act_SecurityCamera(Context* ctx, word handle)
+static void Act_SecurityCamera(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
-  word savedY;
+  word savedY = 0;
 
   if (ctx->plCloakTimeLeft)
   {
@@ -1736,7 +1744,7 @@ void Act_SecurityCamera(Context* ctx, word handle)
     }
   }
 
-  state->frame = state->var1;
+  state->frame = (byte)state->var1;
 
   if (state->id == ACT_CAMERA_ON_CEILING)
   {
@@ -1745,7 +1753,7 @@ void Act_SecurityCamera(Context* ctx, word handle)
 }
 
 
-void Act_CeilingSucker(Context* ctx, word handle)
+static void Act_CeilingSucker(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1767,11 +1775,11 @@ void Act_CeilingSucker(Context* ctx, word handle)
   {
     if (!state->var2)
     {
-      state->frame = GRAB_ANIM_SEQ[state->var1];
+      state->frame = (byte)GRAB_ANIM_SEQ[state->var1];
     }
     else
     {
-      state->frame = EAT_PLAYER_ANIM_SEQ[state->var1];
+      state->frame = (byte)EAT_PLAYER_ANIM_SEQ[state->var1];
     }
 
     state->var1++;
@@ -1804,7 +1812,7 @@ void Act_CeilingSucker(Context* ctx, word handle)
 }
 
 
-void Act_PlayerShip(Context* ctx, word handle)
+static void Act_PlayerShip(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -1819,7 +1827,7 @@ void Act_PlayerShip(Context* ctx, word handle)
 }
 
 
-void Act_BrokenMissile(Context* ctx, word handle)
+static void Act_BrokenMissile(Context* ctx, word handle)
 {
   static const byte ANIM_SEQ[] = {1, 2, 3, 2, 3, 4, 3};
 
@@ -1841,11 +1849,11 @@ void Act_BrokenMissile(Context* ctx, word handle)
   {
     if (state->var1 == 1)
     {
-      state->frame = ANIM_SEQ[state->var2];
+      state->frame = (byte)ANIM_SEQ[state->var2];
     }
     else
     {
-      state->frame = ANIM_SEQ[state->var2] + 4;
+      state->frame = (byte)ANIM_SEQ[state->var2] + 4;
     }
 
     if (ANIM_SEQ[state->var2] == 3)
@@ -1877,7 +1885,7 @@ void Act_BrokenMissile(Context* ctx, word handle)
       SpawnEffect(
         ctx,
         ACT_MISSILE_DEBRIS,
-        state->x + (i << 1), // * 2
+        (word)(state->x + (i << 1)), // * 2
         state->y,
         i & 1 ? EM_FLY_UPPER_LEFT : EM_FLY_UPPER_RIGHT,
         i);
@@ -1886,7 +1894,7 @@ void Act_BrokenMissile(Context* ctx, word handle)
 }
 
 
-void Act_EyeBallThrower(Context* ctx, word handle)
+static void Act_EyeBallThrower(Context* ctx, word handle)
 {
   static const byte RISE_UP_ANIM[] = {0, 0, 0, 0, 0, 0, 1, 2, 3, 4};
 
@@ -1908,7 +1916,7 @@ void Act_EyeBallThrower(Context* ctx, word handle)
   }
   else if (state->var1 && state->var1 < 11) // Rise up
   {
-    state->frame = RISE_UP_ANIM[state->var1];
+    state->frame = (byte)RISE_UP_ANIM[state->var1];
     state->var1++;
   }
   else if (state->var1 == 11) // Walk, decide to attack
@@ -1932,7 +1940,7 @@ void Act_EyeBallThrower(Context* ctx, word handle)
     if (state->var1 != 12 && state->var3 % 4 == 0)
     {
       // Animte walking
-      state->frame = ANIM_SEQ[state->var2 = !state->var2];
+      state->frame = (byte)ANIM_SEQ[state->var2 = !state->var2];
 
       // Move
       if (state->id == ACT_EYEBALL_THROWER_L)
@@ -2001,7 +2009,7 @@ void Act_EyeBallThrower(Context* ctx, word handle)
 }
 
 
-word FindActorDesc(
+static word FindActorDesc(
   Context* ctx,
   word startIndex,
   word neededId,
@@ -2053,7 +2061,7 @@ word FindActorDesc(
 }
 
 
-void Act_MovingMapPartTrigger(Context* ctx, word handle)
+static void Act_MovingMapPartTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   word descIndex;
@@ -2136,7 +2144,7 @@ void Act_MovingMapPartTrigger(Context* ctx, word handle)
 }
 
 
-void Act_HoverBotGenerator(Context* ctx, word handle)
+static void Act_HoverBotGenerator(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2162,7 +2170,7 @@ void Act_HoverBotGenerator(Context* ctx, word handle)
 }
 
 
-void Act_MessengerDrone(Context* ctx, word handle)
+static void Act_MessengerDrone(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register byte* screenData;
@@ -2334,7 +2342,7 @@ void Act_MessengerDrone(Context* ctx, word handle)
 }
 
 
-void Act_SlimePipe(Context* ctx, word handle)
+static void Act_SlimePipe(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2351,7 +2359,7 @@ void Act_SlimePipe(Context* ctx, word handle)
 }
 
 
-void Act_SlimeDrop(Context* ctx, word handle)
+static void Act_SlimeDrop(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2367,7 +2375,7 @@ void Act_SlimeDrop(Context* ctx, word handle)
 }
 
 
-void Act_ForceField(Context* ctx, word handle)
+static void Act_ForceField(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register word drawStyle;
@@ -2439,7 +2447,7 @@ void Act_ForceField(Context* ctx, word handle)
 }
 
 
-void Act_KeyCardSlot(Context* ctx, word handle)
+static void Act_KeyCardSlot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2454,7 +2462,7 @@ void Act_KeyCardSlot(Context* ctx, word handle)
 }
 
 
-void Act_KeyHole(Context* ctx, word handle)
+static void Act_KeyHole(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2479,7 +2487,7 @@ void Act_KeyHole(Context* ctx, word handle)
 
 
 /** Returns index of the 1st fully blocking solid tile */
-word FindFullySolidTileIndex(Context* ctx)
+static word FindFullySolidTileIndex(Context* ctx)
 {
   word i;
 
@@ -2495,7 +2503,7 @@ word FindFullySolidTileIndex(Context* ctx)
 }
 
 
-void Act_SlidingDoorVertical(Context* ctx, word handle)
+static void Act_SlidingDoorVertical(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register word i;
@@ -2590,7 +2598,7 @@ void Act_SlidingDoorVertical(Context* ctx, word handle)
 }
 
 
-void Act_SlidingDoorHorizontal(Context* ctx, word handle)
+static void Act_SlidingDoorHorizontal(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -2660,7 +2668,7 @@ void Act_SlidingDoorHorizontal(Context* ctx, word handle)
 }
 
 
-void Act_RespawnBeacon(Context* ctx, word handle)
+static void Act_RespawnBeacon(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2709,7 +2717,7 @@ void Act_RespawnBeacon(Context* ctx, word handle)
 }
 
 
-void Act_Skeleton(Context* ctx, word handle)
+static void Act_Skeleton(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2763,7 +2771,7 @@ void Act_Skeleton(Context* ctx, word handle)
 }
 
 
-void Act_BlowingFan(Context* ctx, word handle)
+static void Act_BlowingFan(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2,
@@ -2845,7 +2853,7 @@ void Act_BlowingFan(Context* ctx, word handle)
 }
 
 
-void Act_LaserTurret(Context* ctx, word handle)
+static void Act_LaserTurret(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -2935,7 +2943,7 @@ void Act_LaserTurret(Context* ctx, word handle)
 }
 
 
-void Act_EnemyLaserShot(Context* ctx, word handle)
+static void Act_EnemyLaserShot(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -2987,7 +2995,7 @@ void Act_EnemyLaserShot(Context* ctx, word handle)
 }
 
 
-void Act_LevelExitTrigger(Context* ctx, word handle)
+static void Act_LevelExitTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3009,7 +3017,7 @@ void Act_LevelExitTrigger(Context* ctx, word handle)
 }
 
 
-void Act_SuperForceField(Context* ctx, word handle)
+static void Act_SuperForceField(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3019,7 +3027,7 @@ void Act_SuperForceField(Context* ctx, word handle)
   {
     state->var1++;
 
-    state->frame = ctx->gfxCurrentDisplayPage + 1;
+    state->frame = (byte)(ctx->gfxCurrentDisplayPage + 1);
 
     if (RandomNumber(ctx) & 8)
     {
@@ -3091,7 +3099,7 @@ void Act_SuperForceField(Context* ctx, word handle)
 }
 
 
-void Act_IntactMissile(Context* ctx, word handle)
+static void Act_IntactMissile(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -3175,7 +3183,7 @@ void Act_IntactMissile(Context* ctx, word handle)
 }
 
 
-void Act_GrabberClaw(Context* ctx, word handle)
+static void Act_GrabberClaw(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register word i;
@@ -3312,7 +3320,7 @@ void Act_GrabberClaw(Context* ctx, word handle)
 }
 
 
-void Act_FloatingLaserBot(Context* ctx, word handle)
+static void Act_FloatingLaserBot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   int16_t xDiff;
@@ -3421,7 +3429,7 @@ void Act_FloatingLaserBot(Context* ctx, word handle)
 }
 
 
-void Act_Spider(Context* ctx, word handle)
+static void Act_Spider(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3461,7 +3469,7 @@ void Act_Spider(Context* ctx, word handle)
       state->y = ctx->plPosY - 3;
       state->x = ctx->plActorId == ACT_DUKE_L ? ctx->plPosX + 1 : ctx->plPosX;
 
-      state->frame = 8 + ((word)RandomNumber(ctx) % 2);
+      state->frame = (byte)(8 + ((word)RandomNumber(ctx) % 2));
     }
     else
     {
@@ -3496,7 +3504,7 @@ void Act_Spider(Context* ctx, word handle)
         }
       }
 
-      state->frame = state->var2 + ((word)RandomNumber(ctx) % 2);
+      state->frame = (byte)(state->var2 + ((word)RandomNumber(ctx) % 2));
     }
 
     //
@@ -3673,7 +3681,7 @@ void Act_Spider(Context* ctx, word handle)
 }
 
 
-bool BlueGuard_UpdateShooting(Context* ctx, word handle)
+static bool BlueGuard_UpdateShooting(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3750,7 +3758,7 @@ bool BlueGuard_UpdateShooting(Context* ctx, word handle)
 }
 
 
-void Act_BlueGuard(Context* ctx, word handle)
+static void Act_BlueGuard(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -3785,8 +3793,8 @@ begin:
     }
     else // continue typing
     {
-      state->frame =
-        12 + ((word)ctx->gfxCurrentDisplayPage >> (RandomNumber(ctx) & 4));
+      state->frame = (byte)(
+        12 + ((word)ctx->gfxCurrentDisplayPage >> (RandomNumber(ctx) & 4)));
       return;
     }
   }
@@ -3864,7 +3872,7 @@ begin:
 }
 
 
-void Act_SpikedGreenCreature(Context* ctx, word handle)
+static void Act_SpikedGreenCreature(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -3957,7 +3965,7 @@ void Act_SpikedGreenCreature(Context* ctx, word handle)
           state->var1 = 31;
         }
 
-        state->frame = JUMP_SEQUENCE[state->var2];
+        state->frame = (byte)JUMP_SEQUENCE[state->var2];
 
         if (state->frame == 0xFF)
         {
@@ -4033,7 +4041,7 @@ void Act_SpikedGreenCreature(Context* ctx, word handle)
 }
 
 
-void Act_GreenPanther(Context* ctx, word handle)
+static void Act_GreenPanther(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4107,7 +4115,7 @@ void Act_GreenPanther(Context* ctx, word handle)
 }
 
 
-void Act_Turkey(Context* ctx, word handle)
+static void Act_Turkey(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4131,7 +4139,7 @@ void Act_Turkey(Context* ctx, word handle)
     }
     else
     {
-      state->frame = ctx->gfxCurrentDisplayPage + 2;
+      state->frame = (byte)(ctx->gfxCurrentDisplayPage + 2);
     }
   }
   else if (state->var2 == ORIENTATION_LEFT)
@@ -4144,17 +4152,17 @@ void Act_Turkey(Context* ctx, word handle)
     }
     else
     {
-      state->frame = ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)(ctx->gfxCurrentDisplayPage);
     }
   }
   else // cooked turkey
   {
-    state->frame = state->var3++ % 4 + 4;
+    state->frame = (byte)(state->var3++ % 4 + 4);
   }
 }
 
 
-void Act_GreenBird(Context* ctx, word handle)
+static void Act_GreenBird(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const word ANIM_SEQ[] = {0, 1, 2, 1};
@@ -4198,11 +4206,11 @@ void Act_GreenBird(Context* ctx, word handle)
 
   // Animate
   state->var2++;
-  state->frame = state->var1 + ANIM_SEQ[state->var2 % 4];
+  state->frame = (byte)(state->var1 + ANIM_SEQ[state->var2 % 4]);
 }
 
 
-void Act_RedBird(Context* ctx, word handle)
+static void Act_RedBird(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const word FLY_ANIM_SEQ[] = {0, 1, 2, 1};
@@ -4229,7 +4237,7 @@ void Act_RedBird(Context* ctx, word handle)
     {
       state->var2++;
 
-      state->frame = 3 + FLY_ANIM_SEQ[state->var2 % 4];
+      state->frame = (byte)(3 + FLY_ANIM_SEQ[state->var2 % 4]);
     }
   }
 
@@ -4246,7 +4254,7 @@ void Act_RedBird(Context* ctx, word handle)
     {
       state->var2++;
 
-      state->frame = FLY_ANIM_SEQ[state->var2 % 4];
+      state->frame = (byte)FLY_ANIM_SEQ[state->var2 % 4];
     }
   }
 
@@ -4261,7 +4269,7 @@ void Act_RedBird(Context* ctx, word handle)
     // onto the player
     state->var4 = state->y;
 
-    state->frame = 6 + ctx->gfxCurrentDisplayPage;
+    state->frame = (byte)(6 + ctx->gfxCurrentDisplayPage);
 
     state->var3++;
   }
@@ -4291,7 +4299,7 @@ void Act_RedBird(Context* ctx, word handle)
   }
   else if (state->var3 == 8) // Rise back up to original height
   {
-    state->frame = 6 + ctx->gfxCurrentDisplayPage;
+    state->frame = (byte)(6 + ctx->gfxCurrentDisplayPage);
 
     if (state->var4 < state->y)
     {
@@ -4311,7 +4319,7 @@ void Act_RedBird(Context* ctx, word handle)
 }
 
 
-void Act_Elevator(Context* ctx, word handle)
+static void Act_Elevator(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -4524,7 +4532,7 @@ drawHandrail:
 }
 
 
-void Act_SmashHammer(Context* ctx, word handle)
+static void Act_SmashHammer(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
 
@@ -4591,7 +4599,7 @@ void Act_SmashHammer(Context* ctx, word handle)
 }
 
 
-void Act_WaterArea(Context* ctx, word handle)
+static void Act_WaterArea(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4621,7 +4629,7 @@ void Act_WaterArea(Context* ctx, word handle)
 }
 
 
-void Act_WaterDrop(Context* ctx, word handle)
+static void Act_WaterDrop(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4633,7 +4641,7 @@ void Act_WaterDrop(Context* ctx, word handle)
 }
 
 
-void Act_WaterDropSpawner(Context* ctx, word handle)
+static void Act_WaterDropSpawner(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4652,7 +4660,7 @@ void Act_WaterDropSpawner(Context* ctx, word handle)
 }
 
 
-void Act_LavaFountain(Context* ctx, word handle)
+static void Act_LavaFountain(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4736,7 +4744,7 @@ void Act_LavaFountain(Context* ctx, word handle)
 }
 
 
-void Act_RadarComputer(Context* ctx, word handle)
+static void Act_RadarComputer(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
   byte i;
@@ -4813,7 +4821,7 @@ void Act_RadarComputer(Context* ctx, word handle)
 }
 
 
-void Act_HintMachine(Context* ctx, word handle)
+static void Act_HintMachine(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4831,7 +4839,7 @@ void Act_HintMachine(Context* ctx, word handle)
 }
 
 
-void Act_WindBlownSpiderGenerator(Context* ctx, word handle)
+static void Act_WindBlownSpiderGenerator(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4854,7 +4862,7 @@ void Act_WindBlownSpiderGenerator(Context* ctx, word handle)
 }
 
 
-void Act_UniCycleBot(Context* ctx, word handle)
+static void Act_UniCycleBot(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4877,7 +4885,7 @@ void Act_UniCycleBot(Context* ctx, word handle)
       state->var3 = 0;
     }
 
-    state->frame = ((word)RandomNumber(ctx) % 2) * 5;
+    state->frame = (byte)(((word)RandomNumber(ctx) % 2) * 5);
   }
   else
   {
@@ -4888,7 +4896,7 @@ void Act_UniCycleBot(Context* ctx, word handle)
 
     if (state->var2 == 1)
     {
-      state->frame = 3 + ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)(3 + ctx->gfxCurrentDisplayPage);
 
       if (state->var3 < 10)
       {
@@ -4918,7 +4926,7 @@ void Act_UniCycleBot(Context* ctx, word handle)
 
     if (state->var2 == 2)
     {
-      state->frame = 1 + ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)(1 + ctx->gfxCurrentDisplayPage);
 
       if (state->var3 < 10)
       {
@@ -4944,7 +4952,7 @@ void Act_UniCycleBot(Context* ctx, word handle)
 }
 
 
-void Act_WallWalker(Context* ctx, word handle)
+static void Act_WallWalker(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -4968,7 +4976,7 @@ void Act_WallWalker(Context* ctx, word handle)
   switch (state->var1)
   {
     case 0:
-      state->frame = state->var4 * 2;
+      state->frame = (byte)(state->var4 * 2);
 
       if (state->frame)
       {
@@ -4977,7 +4985,7 @@ void Act_WallWalker(Context* ctx, word handle)
       break;
 
     case 1:
-      state->frame = state->var4 * 2;
+      state->frame = (byte)(state->var4 * 2);
 
       if (!state->frame)
       {
@@ -4986,7 +4994,7 @@ void Act_WallWalker(Context* ctx, word handle)
       break;
 
     case 2:
-      state->frame = state->var4;
+      state->frame = (byte)state->var4;
 
       if (!state->frame)
       {
@@ -4995,7 +5003,7 @@ void Act_WallWalker(Context* ctx, word handle)
       break;
 
     case 3:
-      state->frame = state->var4;
+      state->frame = (byte)state->var4;
 
       if (state->frame)
       {
@@ -5026,7 +5034,7 @@ repeat:
 }
 
 
-void Act_AirlockDeathTrigger(Context* ctx, word handle)
+static void Act_AirlockDeathTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5063,7 +5071,7 @@ void Act_AirlockDeathTrigger(Context* ctx, word handle)
 }
 
 
-void Act_AggressivePrisoner(Context* ctx, word handle)
+static void Act_AggressivePrisoner(Context* ctx, word handle)
 {
   // [PERF] Missing `static` causes a copy operation here
   const byte ANIM_SEQ[] = {1, 2, 3, 4, 0};
@@ -5125,7 +5133,7 @@ void Act_AggressivePrisoner(Context* ctx, word handle)
 }
 
 
-void Act_ExplosionTrigger(Context* ctx, word handle)
+static void Act_ExplosionTrigger(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5139,7 +5147,7 @@ void Act_ExplosionTrigger(Context* ctx, word handle)
 }
 
 
-void UpdateBossDeathSequence(Context* ctx, word handle)
+static void UpdateBossDeathSequence(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5231,7 +5239,7 @@ void UpdateBossDeathSequence(Context* ctx, word handle)
 }
 
 
-void Act_Boss1(Context* ctx, word handle)
+static void Act_Boss1(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5239,7 +5247,7 @@ void Act_Boss1(Context* ctx, word handle)
   sbyte Y_MOVEMENT_SEQ[] = {-1, -1, 0, 0, 1, 1, 1, 0, 0, -1};
 
   // Animate the ship
-  state->frame = ctx->gfxCurrentDisplayPage;
+  state->frame = (byte)ctx->gfxCurrentDisplayPage;
 
   if (state->var3 > 1) // Dying
   {
@@ -5413,7 +5421,7 @@ void Act_Boss1(Context* ctx, word handle)
 }
 
 
-void Act_Boss2(Context* ctx, word handle)
+static void Act_Boss2(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5450,11 +5458,11 @@ void Act_Boss2(Context* ctx, word handle)
   else if (state->var3) // wait
   {
     state->var3--;
-    state->frame = ctx->gfxCurrentDisplayPage;
+    state->frame = (byte)ctx->gfxCurrentDisplayPage;
   }
   else if (state->var1 == 0) // initial wait upon activation
   {
-    state->frame = ctx->gfxCurrentDisplayPage;
+    state->frame = (byte)ctx->gfxCurrentDisplayPage;
 
     if (state->var2++ == 30)
     {
@@ -5473,7 +5481,7 @@ void Act_Boss2(Context* ctx, word handle)
 
     if (!state->frame)
     {
-      state->frame = ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)ctx->gfxCurrentDisplayPage;
     }
 
     state->var2 += 3;
@@ -5495,7 +5503,7 @@ void Act_Boss2(Context* ctx, word handle)
 
     if (!state->frame)
     {
-      state->frame = ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)ctx->gfxCurrentDisplayPage;
     }
 
     if (state->var2 == 0)
@@ -5529,7 +5537,7 @@ void Act_Boss2(Context* ctx, word handle)
 
     if (!state->frame)
     {
-      state->frame = ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)ctx->gfxCurrentDisplayPage;
     }
 
     state->var2 += 3;
@@ -5557,7 +5565,7 @@ void Act_Boss2(Context* ctx, word handle)
 
     if (!state->frame)
     {
-      state->frame = ctx->gfxCurrentDisplayPage;
+      state->frame = (byte)ctx->gfxCurrentDisplayPage;
     }
 
     if (state->var2 == 0)
@@ -5586,7 +5594,7 @@ void Act_Boss2(Context* ctx, word handle)
 }
 
 
-void Boss3_MoveTowardsPos(
+static void Boss3_MoveTowardsPos(
   Context* ctx,
   word* x,
   word* y,
@@ -5605,7 +5613,7 @@ void Boss3_MoveTowardsPos(
 }
 
 
-void Act_Boss3(Context* ctx, word handle)
+static void Act_Boss3(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5707,7 +5715,7 @@ void Act_Boss3(Context* ctx, word handle)
 }
 
 
-void Act_Boss4(Context* ctx, word handle)
+static void Act_Boss4(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5787,14 +5795,14 @@ void Act_Boss4(Context* ctx, word handle)
 }
 
 
-void MoveTowardsPos(word* x, word* y, word targetX, word targetY)
+static void MoveTowardsPos(word* x, word* y, word targetX, word targetY)
 {
   *x += Sign(targetX - *x);
   *y += Sign(targetY - *y);
 }
 
 
-void Act_Boss4Projectile(Context* ctx, word handle)
+static void Act_Boss4Projectile(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -5817,7 +5825,7 @@ void Act_Boss4Projectile(Context* ctx, word handle)
 }
 
 
-void Act_SmallFlyingShip(Context* ctx, word handle)
+static void Act_SmallFlyingShip(Context* ctx, word handle)
 {
   register ActorState* state = ctx->gmActorStates + handle;
   register int16_t i;
@@ -5893,7 +5901,7 @@ void Act_SmallFlyingShip(Context* ctx, word handle)
 }
 
 
-void Act_RigelatinSoldier(Context* ctx, word handle)
+static void Act_RigelatinSoldier(Context* ctx, word handle)
 {
   ActorState* state = ctx->gmActorStates + handle;
 
@@ -6017,7 +6025,7 @@ animateAndAttack:
 
   if (state->var3 == 20)
   {
-    state->frame = state->frame + 3;
+    state->frame = (byte)(state->frame + 3);
 
     if (state->var1)
     {
@@ -6048,7 +6056,7 @@ animateAndAttack:
     }
     else
     {
-      state->frame = state->frame + 2;
+      state->frame = (byte)(state->frame + 2);
     }
   }
 }
@@ -6097,7 +6105,7 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         0,                   // var4
         0,                   // var5
         0);                  // score
-      ctx->plActorId = id;
+      ctx->plActorId = (byte)id;
       break;
 
     case ACT_ROCKET_LAUNCHER:
@@ -7861,3 +7869,5 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
 
   return true;
 }
+
+RIGEL_RESTORE_WARNINGS

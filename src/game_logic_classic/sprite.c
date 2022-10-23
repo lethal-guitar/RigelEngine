@@ -23,6 +23,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "actors.h"
+#include "game.h"
+
 
 /*******************************************************************************
 
@@ -65,13 +68,13 @@ bool AreSpritesTouching(
   word offset2;
 
   // Load the relevant meta data for both sprites
-  offset1 = ctx->gfxActorInfoData[id1] + (frame1 << 3);
+  offset1 = (word)(ctx->gfxActorInfoData[id1] + (frame1 << 3));
   x1 += AINFO_X_OFFSET(offset1);
   y1 += AINFO_Y_OFFSET(offset1);
   height1 = AINFO_HEIGHT(offset1);
   width1 = AINFO_WIDTH(offset1);
 
-  offset2 = ctx->gfxActorInfoData[id2] + (frame2 << 3);
+  offset2 = (word)(ctx->gfxActorInfoData[id2] + (frame2 << 3));
   x2 += AINFO_X_OFFSET(offset2);
   y2 += AINFO_Y_OFFSET(offset2);
   height2 = AINFO_HEIGHT(offset2);
@@ -147,7 +150,7 @@ bool IsSpriteOnScreen(Context* ctx, word id, word frame, word x, word y)
 {
   register word width;
   register word height;
-  word offset = ctx->gfxActorInfoData[id] + (frame << 3);
+  word offset = (word)(ctx->gfxActorInfoData[id] + (frame << 3));
 
   x += AINFO_X_OFFSET(offset);
   y += AINFO_Y_OFFSET(offset);

@@ -23,6 +23,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "game.h"
+
 
 /*******************************************************************************
 
@@ -76,7 +78,7 @@ static void FillParticleGroup(Context* ctx, int16_t index, int16_t direction)
         // If a direction is specified, scale it randomly by a value between
         // 1 and 20 to generate a velocity.
         *(ctx->psParticleData[index] + a + b * 24) =
-          direction * (RandomNumber(ctx) % 20 + 1);
+          (word)(direction * (RandomNumber(ctx) % 20 + 1));
       }
       else
       {
@@ -198,12 +200,13 @@ void UpdateAndDrawParticles(Context* ctx)
         // Calculate x position: Simple linear movement according to velocity,
         // i.e. x = xVelocity * timeAlive. For some reason, all x positions
         // are also offset to the right by 1 tile/8 pixels.
-        x = T2PX(group->x - ctx->gmCameraPosX) +
-          *(data + i) * group->timeAlive + 8;
+        x = (word)(
+          T2PX(group->x - ctx->gmCameraPosX) + *(data + i) * group->timeAlive +
+          8);
 
         // Update y position based on lookup table
         *(data + i + 2) += MOVEMENT_TABLE[*(data + i + 1)];
-        y = T2PX(group->y - ctx->gmCameraPosY) + *(data + i + 2);
+        y = (word)(T2PX(group->y - ctx->gmCameraPosY) + *(data + i + 2));
 
         // Advance y update table index
         //
@@ -225,7 +228,7 @@ void UpdateAndDrawParticles(Context* ctx)
         // Draw particle if within viewport
         if (IsPointVisible(x, y))
         {
-          SetPixel(ctx, x, y, group->color);
+          SetPixel(ctx, x, y, (byte)group->color);
         }
       }
 

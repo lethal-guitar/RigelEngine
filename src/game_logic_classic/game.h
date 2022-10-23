@@ -458,8 +458,9 @@ typedef struct
   }
 
 #define READ_LVL_HEADER_WORD(offset)                                           \
-  ((*(ctx->levelHeaderData + offset + 1) << 8) |                               \
-   *(ctx->levelHeaderData + offset))
+  (word)(                                                                      \
+    (*(ctx->levelHeaderData + offset + 1) << 8) |                              \
+    *(ctx->levelHeaderData + offset))
 
 // Utility macros for reading actor descriptions in the level header
 //
@@ -470,7 +471,7 @@ typedef struct
 #define READ_LVL_ACTOR_DESC_Y(index) READ_LVL_HEADER_WORD(49 + index)
 
 // Convert a tile value to pixels (multiply by 8)
-#define T2PX(val) (val << 3)
+#define T2PX(val) ((val) << 3)
 
 
 //

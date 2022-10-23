@@ -23,6 +23,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "base/warnings.hpp"
+
+#include "actors.h"
+#include "game.h"
+#include "sounds.h"
+
+#include <stddef.h>
+
 
 /*******************************************************************************
 
@@ -67,7 +75,7 @@ static sbyte EFFECT_MOVEMENT_TABLES[7][21] = {
  * to have the desired results.
  * It also handles the earthquake and reactor destruction event effects.
  */
-void UpdateBackdrop(Context* ctx)
+static void UpdateBackdrop(Context* ctx)
 {
   byte random;
 
@@ -202,7 +210,7 @@ int16_t CheckWorldCollision(
 
   ctx->retConveyorBeltCheckResult = CB_NONE;
 
-  offset = ctx->gfxActorInfoData[actorId] + (frame << 3);
+  offset = (word)(ctx->gfxActorInfoData[actorId] + (frame << 3));
   height = AINFO_HEIGHT(offset);
   width = AINFO_WIDTH(offset);
 
@@ -750,6 +758,8 @@ bool SpawnEffect(
   return false;
 }
 
+
+RIGEL_DISABLE_CLASSIC_CODE_WARNINGS
 
 /** Spawn multiple effects based on specification
  *
@@ -1403,3 +1413,5 @@ void UpdateAndDrawPlayerShots(Context* ctx)
 
 #undef GET_FIELD
 }
+
+RIGEL_RESTORE_WARNINGS

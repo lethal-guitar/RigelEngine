@@ -23,6 +23,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "base/warnings.hpp"
+
+#include "actors.h"
+#include "game.h"
+#include "sounds.h"
+
 
 /*******************************************************************************
 
@@ -35,7 +41,7 @@ static sbyte PL_DEATH_ANIMATION[] =
   {29, -2, 29, -1, 29, 0, 29, 0, 30, 1, 31, 1};
 
 
-void UpdatePlayer_Shooting(Context* ctx)
+static void UpdatePlayer_Shooting(Context* ctx)
 {
   // Which sprite/actor id to use for each shot direction, for each
   // weapon type
@@ -222,7 +228,7 @@ void UpdatePlayer_Shooting(Context* ctx)
 
 
 /** Respawn the ship pickup actor and adjust player back to normal */
-void UpdatePlayer_LeaveShip(Context* ctx)
+static void UpdatePlayer_LeaveShip(Context* ctx)
 {
   if (ctx->plActorId == ACT_DUKES_SHIP_L)
   {
@@ -239,6 +245,9 @@ void UpdatePlayer_LeaveShip(Context* ctx)
 }
 
 
+RIGEL_DISABLE_CLASSIC_CODE_WARNINGS
+
+
 /** Main player update function */
 void UpdatePlayer(Context* ctx)
 {
@@ -246,7 +255,7 @@ void UpdatePlayer(Context* ctx)
   static byte vertScrollCooldown = 0;
   static byte plLadderAnimationStep = 0;
 
-  bool hadCollision;
+  bool hadCollision = false;
 
 
   // A spider clinging to Duke's front side prevents shooting
@@ -829,7 +838,7 @@ void UpdatePlayer(Context* ctx)
             ctx->inputMoveDown & ctx->inputFire &&
             ctx->plWeapon == WPN_FLAMETHROWER)
           {
-            byte collisionCheck = CheckWorldCollision(
+            int16_t collisionCheck = CheckWorldCollision(
               ctx, MD_UP, ACT_DUKE_L, 37, ctx->plPosX, ctx->plPosY - 1);
             if (collisionCheck != CR_COLLISION)
             {
@@ -987,7 +996,7 @@ void UpdatePlayer(Context* ctx)
 
         if (ctx->plState == PS_BLOWN_BY_FAN)
         {
-          byte collisionCheck = CheckWorldCollision(
+          int16_t collisionCheck = CheckWorldCollision(
             ctx, MD_UP, ctx->plActorId, 0, ctx->plPosX, ctx->plPosY - 1);
 
           if (collisionCheck != CR_COLLISION)
@@ -1564,3 +1573,5 @@ void UpdatePlayer(Context* ctx)
 done:
   ctx->plBlockLookingUp = false;
 }
+
+RIGEL_RESTORE_WARNINGS
