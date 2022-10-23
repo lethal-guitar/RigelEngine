@@ -30,6 +30,10 @@ Player control logic
 
 *******************************************************************************/
 
+// Pairs of (animation frame, Y movement)
+static sbyte PL_DEATH_ANIMATION[] =
+  {29, -2, 29, -1, 29, 0, 29, 0, 30, 1, 31, 1};
+
 
 void UpdatePlayer_Shooting(Context* ctx)
 {

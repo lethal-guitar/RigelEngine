@@ -30,6 +30,27 @@ Game logic, part 1: Dynamic level geometry (moving map parts)
 
 *******************************************************************************/
 
+static void pascal Map_MoveSection(
+  Context* ctx,
+  word left,
+  word top,
+  word right,
+  word bottom,
+  word distance)
+{
+  int16_t x;
+  int16_t y;
+
+  for (y = bottom; y >= top; y--)
+  {
+    for (x = left; x <= right; x++)
+    {
+      Map_SetTile(ctx, Map_GetTile(ctx, x, y), x, y + distance);
+      Map_SetTile(ctx, 0, x, y);
+    }
+  }
+}
+
 
 /** Update moving map parts and shootable walls
  *

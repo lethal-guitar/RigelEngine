@@ -41,6 +41,53 @@ also found here.
 
 *******************************************************************************/
 
+void pascal GiveScore(Context* ctx, word score)
+{
+  ctx->plScore += score;
+}
+
+
+void DamagePlayer(Context* ctx)
+{
+  if (
+    !ctx->sysTecMode && !ctx->plCloakTimeLeft && !ctx->plMercyFramesLeft &&
+    ctx->plState != PS_DYING)
+  {
+    ctx->plHealth--;
+    ctx->gmPlayerTookDamage = true;
+
+    if (ctx->plHealth > 0 && ctx->plHealth < 12)
+    {
+      ctx->plMercyFramesLeft = 50 - ctx->gmDifficulty * 10;
+      PlaySound(ctx, SND_DUKE_PAIN);
+    }
+    else
+    {
+      if (ctx->plState == PS_USING_SHIP)
+      {
+        ctx->plKilledInShip = true;
+      }
+
+      ctx->plState = PS_DYING;
+      ctx->plDeathAnimationStep = 0;
+      PlaySound(ctx, SND_DUKE_DEATH);
+    }
+  }
+}
+
+
+/** Replacement for C library's abs */
+static int16_t DN2_abs(int16_t val)
+{
+  if (val < 0)
+  {
+    return -val;
+  }
+
+  return val;
+}
+
+
 /** Teleport to the given position
  *
  * This function sets up some state, the actual position change and the fade
