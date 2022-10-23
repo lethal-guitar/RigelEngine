@@ -1517,7 +1517,9 @@ void UpdatePlayer(Context* ctx)
         }
         else
         {
-          if (ctx->plPosY - ctx->gmCameraPosY < 18 && ctx->gmCameraPosY > 1)
+          if (
+            (word)(ctx->plPosY - ctx->gmCameraPosY) < 18 &&
+            ctx->gmCameraPosY > 1)
           {
             ctx->gmCameraPosY -= 2;
           }
@@ -1537,33 +1539,33 @@ void UpdatePlayer(Context* ctx)
     }
     else if (
       ctx->plState == PS_JUMPING && ctx->gmCameraPosY > 2 &&
-      ctx->plPosY - 2 < ctx->gmCameraPosY)
+      (word)(ctx->plPosY - 2) < ctx->gmCameraPosY)
     {
       ctx->gmCameraPosY -= 2;
     }
     else
     {
-      if (ctx->gmCameraPosY > 0 && ctx->plPosY - ctx->gmCameraPosY < 6)
+      if (ctx->gmCameraPosY > 0 && (word)(ctx->plPosY - ctx->gmCameraPosY) < 6)
       {
         ctx->gmCameraPosY--;
       }
-      else if (ctx->gmCameraPosY < ctx->mapBottom - 18)
+      else if (ctx->gmCameraPosY < (word)(ctx->mapBottom - 18))
       {
         if (
-          ctx->plPosY - ctx->gmCameraPosY > 18 &&
-          ctx->gmCameraPosY < ctx->mapBottom - 19)
+          (word)(ctx->plPosY - ctx->gmCameraPosY) > 18 &&
+          ctx->gmCameraPosY < (word)(ctx->mapBottom - 19))
         {
           ctx->gmCameraPosY++;
         }
 
         if (
-          ctx->plPosY - ctx->gmCameraPosY > 18 &&
-          ctx->gmCameraPosY < ctx->mapBottom - 19)
+          (word)(ctx->plPosY - ctx->gmCameraPosY) > 18 &&
+          ctx->gmCameraPosY < (word)(ctx->mapBottom - 19))
         {
           ctx->gmCameraPosY++;
         }
       }
-      else if (ctx->plPosY - ctx->gmCameraPosY >= 19)
+      else if ((word)(ctx->plPosY - ctx->gmCameraPosY) >= 19)
       {
         ctx->gmCameraPosY++;
       }

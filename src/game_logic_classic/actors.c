@@ -439,7 +439,7 @@ static void Act_ItemBox(Context* ctx, word handle)
         SpawnEffect(ctx, FX_LIST[i], state->x, state->y, FX_LIST[i + 1], 0);
       }
 
-      if ((int16_t)state->var2 == -1) // box is empty
+      if (state->var2 == 0xFF) // box is empty
       {
         state->deleted = true;
         return;
@@ -499,7 +499,7 @@ static void Act_ItemBox(Context* ctx, word handle)
         state->health = 1;
         break;
 
-      case 0xFFFF:
+      case 0xFF:
         // Empty nuclear waste barrel
         state->deleted = true;
         return;
@@ -7166,7 +7166,7 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         true,                // affected by gravity
         1,                   // health
         0,                   // var1
-        -1,                  // var2
+        0xFF,                // var2
         0,                   // var3
         0,                   // var4
         0,                   // var5
@@ -7198,7 +7198,7 @@ bool SpawnActorInSlot(Context* ctx, word slot, word id, word x, word y)
         true,                // affected by gravity
         1,                   // health
         0,                   // var1
-        -1,                  // var2
+        0xFF,                // var2
         0,                   // var3
         0,                   // var4
         0,                   // var5
