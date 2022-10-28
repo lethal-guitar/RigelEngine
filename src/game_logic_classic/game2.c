@@ -1248,7 +1248,11 @@ void UpdateAndDrawPlayerShots(Context* ctx)
 {
   // See GET_FIELD below. This is a list of memory offsets into the PlayerShot
   // struct, for referencing the y and x fields.
-  static const byte OFFSET_TO_POS_FIELD[] = {4, 4, 3, 3};
+  static const size_t OFFSET_TO_POS_FIELD[] = {
+    offsetof(PlayerShot, y),
+    offsetof(PlayerShot, y),
+    offsetof(PlayerShot, x),
+    offsetof(PlayerShot, x)};
 
   // Lookup tables for shot movement. The entries are ordered by shot direction:
   // up, down, left, right. The value is added to the shot's appropriate data
@@ -1264,8 +1268,8 @@ void UpdateAndDrawPlayerShots(Context* ctx)
   word i;
 
 
-  // [UNSAFE] This relies on the exact memory layout of the PlayerShot struct.
-#define GET_FIELD(dir) *(((word*)state) + OFFSET_TO_POS_FIELD[dir - SD_UP])
+#define GET_FIELD(dir)                                                         \
+  *(word*)(((byte*)state) + OFFSET_TO_POS_FIELD[dir - SD_UP])
 
 
   for (i = 0; i < MAX_NUM_PLAYER_SHOTS; i++)

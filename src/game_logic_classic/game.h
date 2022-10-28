@@ -326,8 +326,6 @@ typedef struct
 } EffectState;
 
 
-// WARNING: The exact memory layout is important here. See
-// UpdateAndDrawPlayerShots().
 typedef struct
 {
   word active;
