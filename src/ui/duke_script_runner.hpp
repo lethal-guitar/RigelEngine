@@ -152,6 +152,16 @@ private:
     int mCurrentMenuPosY;
   };
 
+  struct MessageBoxState
+  {
+    engine::TimeDelta mElapsedTime;
+    int mX;
+    int mY;
+    int mWidth;
+    int mHeight;
+    int mTextPosY;
+  };
+
   void startExecution(const data::script::Script& script);
   void interpretNextAction();
 
@@ -221,6 +231,8 @@ private:
   std::optional<int> mCurrentPersistentSelectionSlot;
 
   std::optional<CheckBoxesState> mCheckBoxStates;
+
+  std::optional<MessageBoxState> mMessageBoxState;
 
   std::optional<engine::TimeDelta> mTimeSinceLastUserInput;
 

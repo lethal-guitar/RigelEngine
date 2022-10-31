@@ -137,23 +137,15 @@ struct AnimateNewsReporter
 
 struct ShowMessageBox
 {
-  template <typename MessageLinesT>
-  ShowMessageBox(
-    const int y_,
-    const int width_,
-    const int height_,
-    MessageLinesT&& messageLines_)
-    : y(y_)
-    , width(width_)
-    , height(height_)
-    , messageLines(std::forward<MessageLinesT>(messageLines_))
-  {
-  }
-
   int y;
   int width;
   int height;
-  std::vector<std::string> messageLines;
+};
+
+
+struct DrawMessageBoxText
+{
+  std::string mText;
 };
 
 
@@ -221,6 +213,7 @@ using Action = std::variant<
   Delay,
   DisableMenuFunctionality,
   DrawBigText,
+  DrawMessageBoxText,
   DrawSprite,
   DrawText,
   EnableTextOffset,

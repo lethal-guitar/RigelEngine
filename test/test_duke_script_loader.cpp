@@ -22,6 +22,7 @@ RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>
 RIGEL_RESTORE_WARNINGS
 
+#include <algorithm>
 #include <typeinfo>
 
 
@@ -241,16 +242,28 @@ TEST_CASE("Message box definition is parsed correctly")
                         "//END\r\n";
   const auto testScript = loadSingleScript(testData);
 
-  REQUIRE(testScript.size() == 1);
+  REQUIRE(testScript.size() == 6);
   const auto msgBox = asType<ShowMessageBox>(testScript[0]);
 
   CHECK(msgBox.y == 5);
   CHECK(msgBox.height == 6);
   CHECK(msgBox.width == 24);
 
-  vector<string> expectedMessageLines{
+  vector<string> actualMessageLines;
+  actualMessageLines.resize(5);
+
+  std::transform(
+    std::next(testScript.begin()),
+    testScript.end(),
+    actualMessageLines.begin(),
+    [](const Action& action) {
+      return asType<DrawMessageBoxText>(action).mText;
+    });
+
+  const vector<string> expectedMessageLines{
     "", "This is a", "test!", "", "  Hello Leading Space"};
-  CHECK(msgBox.messageLines == expectedMessageLines);
+
+  CHECK(actualMessageLines == expectedMessageLines);
 }
 
 TEST_CASE("News reporter animation commands are parsed correctly")
