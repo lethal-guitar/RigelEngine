@@ -86,6 +86,7 @@ private:
     ReadyToExecute,
     ExecutingScript,
     AwaitingUserInput,
+    AnimatingMessageBox,
     FinishedExecution,
     ExecutionInterrupted,
     ExecutionTimedOut,
@@ -200,6 +201,7 @@ private:
   void stopNewsReporterAnimation();
 
   void updateAndRenderDynamicElements(engine::TimeDelta dt);
+  void updateMessageBoxAnimation(engine::TimeDelta dt);
 
   void drawBigText(int x, int y, int colorIndex, std::string_view text) const;
 

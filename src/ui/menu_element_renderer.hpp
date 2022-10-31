@@ -55,11 +55,24 @@ public:
   void
     drawBigText(int x, int y, std::string_view text, const base::Color& color)
       const;
-  void drawMessageBox(int x, int y, int width, int height) const;
 
   void drawCheckBox(int x, int y, bool isChecked) const;
 
   void drawBonusScreenText(int x, int y, std::string_view text) const;
+
+  /** Draw message box frame at given position, with slide-in animation
+   *
+   * elapsedTime should be the total elapsed time since the message box frame
+   * is being drawn.
+   *
+   * Returns true if the animation is finished.
+   */
+  bool drawMessageBox(
+    int x,
+    int y,
+    int width,
+    int height,
+    engine::TimeDelta elapsedTime) const;
 
   /** Draw text entry cursor icon at given position/state.
    *
@@ -79,15 +92,7 @@ public:
 private:
   void drawTextEntryCursor(int x, int y, int state) const;
   void drawSelectionIndicator(int x, int y, int state) const;
-  void drawMessageBoxRow(
-    int x,
-    int y,
-    int width,
-    int leftIndex,
-    int middleIndex,
-    int rightIndex) const;
 
-private:
   renderer::Renderer* mpRenderer;
   engine::TiledTexture* mpSpriteSheet;
   engine::TiledTexture mBigTextTexture;

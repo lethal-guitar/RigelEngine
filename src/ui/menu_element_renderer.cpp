@@ -23,6 +23,7 @@
 #include "data/game_traits.hpp"
 #include "data/unit_conversions.hpp"
 #include "engine/timing.hpp"
+#include "renderer/viewport_utils.hpp"
 
 #include <cassert>
 #include <stdexcept>
@@ -298,23 +299,6 @@ void MenuElementRenderer::drawBigText(
 }
 
 
-void MenuElementRenderer::drawMessageBox(int x, int y, int width, int height)
-  const
-{
-  // Top border
-  drawMessageBoxRow(x, y, width, 0, 1, 2);
-
-  // Body with left and right borders
-  for (int row = 1; row < height - 1; ++row)
-  {
-    drawMessageBoxRow(x, y + row, width, 7, 8, 3);
-  }
-
-  // Bottom border
-  drawMessageBoxRow(x, y + height - 1, width, 6, 5, 4);
-}
-
-
 void MenuElementRenderer::drawCheckBox(
   const int x,
   const int y,
@@ -369,6 +353,103 @@ void MenuElementRenderer::drawBonusScreenText(
   }
 }
 
+
+bool MenuElementRenderer::drawMessageBox(
+  const int x,
+  const int y,
+  const int width,
+  const int height,
+  const engine::TimeDelta elapsedTime) const
+{
+  const auto horizontalAnimTime = engine::slowTicksToTime(width / 2 - 1);
+
+  const auto yCenter = y + height / 2;
+  const auto offset = 1 - height % 2;
+  const auto verticalAnimTime = engine::slowTicksToTime(yCenter - (y + offset));
+
+  const auto animatedWidth = data::tilesToPixels(2.0f) +
+    data::tilesToPixels(width - 2) *
+      float(std::min(1.0, elapsedTime / horizontalAnimTime));
+
+  const auto animatedHeightPercent =
+    float(std::min(1.0, (elapsedTime - horizontalAnimTime) / verticalAnimTime));
+  const auto animatedHeight = data::tilesToPixels(2.0f) +
+    (elapsedTime >= horizontalAnimTime
+       ? data::tilesToPixels(height - 2) * animatedHeightPercent
+       : 0.0f);
+
+  const auto xGap = (data::tilesToPixels(width) - animatedWidth) / 2.0f;
+  const auto yGap = (data::tilesToPixels(height) - animatedHeight) / 2.0f;
+  const auto xGapTiles = data::pixelsToTiles(base::round(xGap));
+  const auto yGapTiles = data::pixelsToTiles(base::round(yGap));
+  const auto xGapPx = base::round(xGap - data::tilesToPixels(xGapTiles));
+  const auto yGapPx = base::round(yGap - data::tilesToPixels(yGapTiles));
+
+  const auto startX = x + xGapTiles;
+  const auto startY = y + yGapTiles;
+  const auto lastColPx =
+    base::round(data::tilesToPixels(startX - 1) + animatedWidth);
+  const auto lastRowPx =
+    base::round(data::tilesToPixels(startY - 1) + animatedHeight);
+
+  constexpr auto baseIndex = 4 * 40;
+
+  auto saved = renderer::saveState(mpRenderer);
+  renderer::setLocalTranslation(mpRenderer, {xGapPx, yGapPx});
+
+  // Top-left corner
+  mpSpriteSheet->renderTile(baseIndex, startX, startY);
+
+  // Top side
+  mpSpriteSheet->renderTileStretched(
+    baseIndex + 1,
+    {data::tilesToPixels(base::Vec2{startX + 1, startY}),
+     {base::round(animatedWidth) - data::tilesToPixels(2),
+      data::GameTraits::tileSize}});
+
+  // Top-right corner
+  mpSpriteSheet->renderTileAtPixelPos(
+    baseIndex + 2, {lastColPx, data::tilesToPixels(startY)});
+
+  // Left side
+  mpSpriteSheet->renderTileStretched(
+    baseIndex + 7,
+    {data::tilesToPixels(base::Vec2{startX, startY + 1}),
+     {data::GameTraits::tileSize,
+      base::round(animatedHeight) - data::tilesToPixels(2)}});
+
+  // Center fill/background
+  mpSpriteSheet->renderTileStretched(
+    baseIndex + 8,
+    {data::tilesToPixels(base::Vec2{startX + 1, startY + 1}),
+     {base::round(animatedWidth) - data::tilesToPixels(2),
+      base::round(animatedHeight) - data::tilesToPixels(2)}});
+
+  // Right side
+  mpSpriteSheet->renderTileStretched(
+    baseIndex + 3,
+    {base::Vec2{lastColPx, data::tilesToPixels(startY + 1)},
+     {data::GameTraits::tileSize,
+      base::round(animatedHeight) - data::tilesToPixels(2)}});
+
+  // Bottom-left corner
+  mpSpriteSheet->renderTileAtPixelPos(
+    baseIndex + 6, {data::tilesToPixels(startX), lastRowPx});
+
+  // Bottom side
+  mpSpriteSheet->renderTileStretched(
+    baseIndex + 5,
+    {{data::tilesToPixels(startX + 1), lastRowPx},
+     {base::round(animatedWidth) - data::tilesToPixels(2),
+      data::GameTraits::tileSize}});
+
+  // Bottom-right corner
+  mpSpriteSheet->renderTileAtPixelPos(baseIndex + 4, {lastColPx, lastRowPx});
+
+  return elapsedTime >= horizontalAnimTime + verticalAnimTime;
+}
+
+
 void MenuElementRenderer::drawTextEntryCursor(
   const int x,
   const int y,
@@ -411,28 +492,6 @@ void MenuElementRenderer::drawTextEntryCursor(
   const auto baseIndex = 4 * mpSpriteSheet->tilesPerRow() + 9;
   const auto index = baseIndex + std::clamp(state, 0, 3);
   mpSpriteSheet->renderTile(index, x, y);
-}
-
-
-void MenuElementRenderer::drawMessageBoxRow(
-  const int x,
-  const int y,
-  const int width,
-  const int leftIndex,
-  const int middleIndex,
-  const int rightIndex) const
-{
-  const auto baseIndex = 4 * 40;
-
-  mpSpriteSheet->renderTile(baseIndex + leftIndex, x, y);
-
-  const auto untilX = x + width - 1;
-  for (int col = x + 1; col < untilX; ++col)
-  {
-    mpSpriteSheet->renderTile(baseIndex + middleIndex, col, y);
-  }
-
-  mpSpriteSheet->renderTile(baseIndex + rightIndex, x + width - 1, y);
 }
 
 } // namespace rigel::ui

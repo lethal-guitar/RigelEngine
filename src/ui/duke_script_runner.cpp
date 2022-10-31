@@ -247,6 +247,8 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt)
 
   bindCanvas();
 
+  updateMessageBoxAnimation(dt);
+
   while (mState == State::ExecutingScript)
   {
     interpretNextAction();
@@ -282,6 +284,26 @@ void DukeScriptRunner::updateAndRenderDynamicElements(
   if (hasCheckBoxes())
   {
     displayCheckBoxes(*mCheckBoxStates);
+  }
+}
+
+
+void DukeScriptRunner::updateMessageBoxAnimation(const engine::TimeDelta dt)
+{
+  if (mMessageBoxState && mState == State::AnimatingMessageBox)
+  {
+    const auto animationDone = mMenuElementRenderer.drawMessageBox(
+      mMessageBoxState->mX,
+      mMessageBoxState->mY,
+      mMessageBoxState->mWidth,
+      mMessageBoxState->mHeight,
+      mMessageBoxState->mElapsedTime);
+    mMessageBoxState->mElapsedTime += dt;
+
+    if (animationDone)
+    {
+      mState = State::ExecutingScript;
+    }
   }
 }
 
@@ -483,8 +505,10 @@ void DukeScriptRunner::interpretNextAction()
         xPos,
         messageBoxDefinition.y,
         messageBoxDefinition.width,
-        messageBoxDefinition.height);
+        messageBoxDefinition.height,
+        0.0);
 
+      mState = State::AnimatingMessageBox;
     },
 
     [this](const DrawMessageBoxText& text) {
