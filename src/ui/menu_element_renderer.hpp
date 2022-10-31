@@ -49,8 +49,6 @@ public:
     renderer::Renderer* pRenderer,
     const assets::ResourceLoader& resources);
 
-  // Stateless API
-  // --------------------------------------------------------------------------
   void drawText(int x, int y, std::string_view text) const;
   void drawSmallWhiteText(int x, int y, std::string_view text) const;
   void drawMultiLineText(int x, int y, std::string_view text) const;
