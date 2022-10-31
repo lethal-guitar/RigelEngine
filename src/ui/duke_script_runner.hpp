@@ -86,6 +86,7 @@ private:
     ReadyToExecute,
     ExecutingScript,
     AwaitingUserInput,
+    AnimatingMessageBox,
     FinishedExecution,
     ExecutionInterrupted,
     ExecutionTimedOut,
@@ -152,6 +153,16 @@ private:
     int mCurrentMenuPosY;
   };
 
+  struct MessageBoxState
+  {
+    engine::TimeDelta mElapsedTime;
+    int mX;
+    int mY;
+    int mWidth;
+    int mHeight;
+    int mTextPosY;
+  };
+
   void startExecution(const data::script::Script& script);
   void interpretNextAction();
 
@@ -190,6 +201,7 @@ private:
   void stopNewsReporterAnimation();
 
   void updateAndRenderDynamicElements(engine::TimeDelta dt);
+  void updateMessageBoxAnimation(engine::TimeDelta dt);
 
   void drawBigText(int x, int y, int colorIndex, std::string_view text) const;
 
@@ -221,6 +233,8 @@ private:
   std::optional<int> mCurrentPersistentSelectionSlot;
 
   std::optional<CheckBoxesState> mCheckBoxStates;
+
+  std::optional<MessageBoxState> mMessageBoxState;
 
   std::optional<engine::TimeDelta> mTimeSinceLastUserInput;
 

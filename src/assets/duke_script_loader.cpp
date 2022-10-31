@@ -106,58 +106,6 @@ void parseScriptLines(
 }
 
 
-vector<string> parseMessageBoxTextDefinition(istream& sourceStream)
-{
-  vector<string> messageLines;
-
-  // There is unfortunately no end marker for the CENTERWINDOW section,
-  // which makes parsing this a bit awkward. We keep parsing commands until
-  // we find one that's not part of the message box definition commands, then
-  // we assume the message box is complete and return to regular parsing.
-  auto startOfLine = sourceStream.tellg();
-  for (string line; getline(sourceStream, line, '\n');)
-  {
-    strings::trim(line);
-    if (isCommand(line))
-    {
-      stripCommandPrefix(line);
-      istringstream lineTextStream(line);
-      string command;
-      lineTextStream >> command;
-      strings::trim(command);
-
-      if (command == "CWTEXT")
-      {
-        lineTextStream.get();
-        string messageLine;
-        getline(lineTextStream, messageLine, '\r');
-        if (messageLine.empty())
-        {
-          throw invalid_argument("Corrupt Duke Script file");
-        }
-        strings::trimRight(messageLine);
-        messageLines.emplace_back(messageLine);
-      }
-      else if (command == "SKLINE")
-      {
-        messageLines.emplace_back("");
-      }
-      else
-      {
-        // Since we already read a command, we have to rewind the stream to
-        // allow the subsequent regular parsing to work.
-        sourceStream.seekg(startOfLine);
-        break;
-      }
-
-      startOfLine = sourceStream.tellg();
-    }
-  }
-
-  return messageLines;
-}
-
-
 std::optional<Action>
   parseSingleActionCommand(const string& command, istream& lineTextStream)
 {
@@ -275,6 +223,36 @@ std::optional<Action>
     }
 
     return Action{SetupCheckBoxes{xPos, definitions}};
+  }
+  else if (command == "CENTERWINDOW")
+  {
+    int y = 0;
+    int width = 0;
+    int height = 0;
+    lineTextStream >> y;
+    lineTextStream >> height;
+    lineTextStream >> width;
+
+    return Action{ShowMessageBox{y, width, height}};
+  }
+  else if (command == "SKLINE")
+  {
+    return Action{DrawMessageBoxText{""}};
+  }
+  else if (command == "CWTEXT")
+  {
+    string messageLine;
+    lineTextStream.get();
+    getline(lineTextStream, messageLine, '\r');
+
+    if (messageLine.empty())
+    {
+      throw invalid_argument("Corrupt Duke Script file");
+    }
+
+    strings::trimRight(messageLine);
+
+    return Action{DrawMessageBoxText{std::move(messageLine)}};
   }
   else
   {
@@ -417,20 +395,7 @@ vector<Action> parseCommand(
 {
   vector<Action> actions;
 
-  if (command == "CENTERWINDOW")
-  {
-    int y = 0;
-    int width = 0;
-    int height = 0;
-    currentLineStream >> y;
-    currentLineStream >> height;
-    currentLineStream >> width;
-
-    skipWhiteSpace(sourceTextStream);
-    return {Action{ShowMessageBox{
-      y, width, height, parseMessageBoxTextDefinition(sourceTextStream)}}};
-  }
-  else if (command == "MENU")
+  if (command == "MENU")
   {
     int slot = 0;
     currentLineStream >> slot;
@@ -504,6 +469,25 @@ data::script::Script parseScript(istream& sourceTextStream)
 
       script.insert(script.end(), actions.begin(), actions.end());
     });
+
+  const auto iMsgBoxAction =
+    std::find_if(script.begin(), script.end(), [](const Action& action) {
+      return std::holds_alternative<ShowMessageBox>(action);
+    });
+
+  const auto iMsgBoxTextAction =
+    std::find_if(script.begin(), script.end(), [](const Action& action) {
+      return std::holds_alternative<DrawMessageBoxText>(action);
+    });
+
+  if (iMsgBoxTextAction != script.end())
+  {
+    if (iMsgBoxAction == script.end() || iMsgBoxAction > iMsgBoxTextAction)
+    {
+      throw invalid_argument(
+        "CWTEXT or SKLINE must be preceded by a CENTERWINDOW command");
+    }
+  }
 
   return script;
 }

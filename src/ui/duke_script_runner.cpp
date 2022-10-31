@@ -94,6 +94,7 @@ void DukeScriptRunner::executeScript(const data::script::Script& script)
   mCurrentPersistentSelectionSlot = std::nullopt;
   mPagerState = std::nullopt;
   mCheckBoxStates = std::nullopt;
+  mMessageBoxState = std::nullopt;
   mDelayState = std::nullopt;
   mFadeInBeforeNextWaitStateScheduled = false;
   mDisableMenuFunctionalityForNextPagesDefinition = false;
@@ -246,6 +247,8 @@ void DukeScriptRunner::updateAndRender(engine::TimeDelta dt)
 
   bindCanvas();
 
+  updateMessageBoxAnimation(dt);
+
   while (mState == State::ExecutingScript)
   {
     interpretNextAction();
@@ -281,6 +284,26 @@ void DukeScriptRunner::updateAndRenderDynamicElements(
   if (hasCheckBoxes())
   {
     displayCheckBoxes(*mCheckBoxStates);
+  }
+}
+
+
+void DukeScriptRunner::updateMessageBoxAnimation(const engine::TimeDelta dt)
+{
+  if (mMessageBoxState && mState == State::AnimatingMessageBox)
+  {
+    const auto animationDone = mMenuElementRenderer.drawMessageBox(
+      mMessageBoxState->mX,
+      mMessageBoxState->mY,
+      mMessageBoxState->mWidth,
+      mMessageBoxState->mHeight,
+      mMessageBoxState->mElapsedTime);
+    mMessageBoxState->mElapsedTime += dt;
+
+    if (animationDone)
+    {
+      mState = State::ExecutingScript;
+    }
   }
 }
 
@@ -469,22 +492,35 @@ void DukeScriptRunner::interpretNextAction()
     [this](const ShowMessageBox& messageBoxDefinition) {
       const auto xOffset = mTextBoxOffsetEnabled ? 3 : 0;
       const auto xPos = (40 - messageBoxDefinition.width) / 2 - xOffset;
+
+      mMessageBoxState = MessageBoxState{
+        0.0,
+        xPos,
+        messageBoxDefinition.y,
+        messageBoxDefinition.width,
+        messageBoxDefinition.height,
+        messageBoxDefinition.y + 1};
+
       mMenuElementRenderer.drawMessageBox(
         xPos,
         messageBoxDefinition.y,
         messageBoxDefinition.width,
-        messageBoxDefinition.height);
+        messageBoxDefinition.height,
+        0.0);
 
-      auto yPos = messageBoxDefinition.y + 1;
-      const auto availableWidth = messageBoxDefinition.width - 1;
-      for (const auto& line : messageBoxDefinition.messageLines)
-      {
-        const auto lineLength = static_cast<int>(line.size());
-        const auto offsetToCenter = (availableWidth - lineLength) / 2;
+      mState = State::AnimatingMessageBox;
+    },
 
-        mMenuElementRenderer.drawText(xPos + 1 + offsetToCenter, yPos, line);
-        ++yPos;
-      }
+    [this](const DrawMessageBoxText& text) {
+      const auto lineLength = static_cast<int>(text.mText.size());
+      const auto offsetToCenter =
+        ((mMessageBoxState->mWidth - 1) - lineLength) / 2;
+
+      mMenuElementRenderer.drawText(
+        mMessageBoxState->mX + 1 + offsetToCenter,
+        mMessageBoxState->mTextPosY,
+        text.mText);
+      ++mMessageBoxState->mTextPosY;
     },
 
     [this](const ScheduleFadeInBeforeNextWaitState&) {
