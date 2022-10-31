@@ -5,8 +5,9 @@
 This project is a re-implementation of the game [Duke Nukem II](
 https://en.wikipedia.org/wiki/Duke_Nukem_II), originally released by Apogee
 Software in 1993 for MS-DOS. RigelEngine works as a drop-in replacement for the original executable: It reads the game's data files and plays just like the original,
-but runs natively on modern operating systems and is written in modern C++ code with a completely new architecture under the hood.
-On top of that, it offers many modern enhancements, including:
+but runs natively on modern operating systems and is written in modern C++ code.
+
+Compared to running the original in an emulator, RigelEngine offers many modern enhancements and usability improvements, including:
 
 * wide-screen mode
 * smooth scrolling & movement mode with increased frame rate
@@ -15,9 +16,8 @@ On top of that, it offers many modern enhancements, including:
 * extended modding features
 
 There was never any source code released for the original game, so this project
-is based on reverse engineering. Disassembly from the original executable served as basis for writing new code from scratch, while video captures from DosBox were used for frame-by-frame verification.
-See [my blog post](https://lethalguitar.wordpress.com/2019/05/28/re-implementing-an-old-dos-game-in-c-17/) to learn more about the process.
-See [Duke2Reconstructed](https://github.com/lethal-guitar/Duke2Reconstructed) for what the original code might have looked like.
+is based on reverse engineering (specifically, disassembly of the original binaries).
+See [Duke2Reconstructed](https://github.com/lethal-guitar/Duke2Reconstructed) for a complete reconstruction of the original code.
 
 Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm via Emscripten)
 
@@ -29,9 +29,14 @@ Showcase video (outdated):
 
 ## Current state
 
-Gameplay-wise, RigelEngine is feature-complete: All four episodes of the game (shareware and registered version) are fully playable and on par with the original game.
+RigelEngine is stable and fairly complete in terms of feature set.
+All four episodes of the game (shareware and registered version) are fully playable and on par with the original game.
 
-The project overall is far from finished, though. There are still some pieces missing to reach full parity with the original game ([a few visual effects](https://github.com/lethal-guitar/RigelEngine/milestone/5), [demo playback](https://github.com/lethal-guitar/RigelEngine/milestone/13)). On top of that, more [modern enhancements](https://github.com/lethal-guitar/RigelEngine/labels/enhancement) and [usability improvements](https://github.com/lethal-guitar/RigelEngine/labels/usability) are planned.
+That said, the project is still very much active, with
+further enhancements and usability improvements planned or currently in development.
+
+To be informed when a new version is released, you can watch this repository on GitHub, follow me [on Twitter](https://twitter.com/lethal_guitar), follow [my blog](https://lethalguitar.wordpress.com/), or periodically check the [releases section](https://github.com/lethal-guitar/RigelEngine/releases).
+When installing the Flatpak version on Linux, you will also get notified about updates via your Flatpak client.
 
 ### Supported platforms
 
@@ -42,7 +47,7 @@ It's fairly easy to [install on Steam Deck](https://github.com/lethal-guitar/Rig
 The Linux version also runs well on small single-board computers (SBCs) like the Raspberry Pi and Odroid Go Advance.
 See [Running on Raspberry Pi and Odroid Go Advance](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance).
 
-[@Rinnegatamante](https://github.com/Rinnegatamante) made a [PS Vita port](https://vitadb.rinnegatamante.it/#/info/988).
+There's also a (3rd party) [PS Vita port](https://vitadb.rinnegatamante.it/#/info/988).
 
 Android and iOS versions might happen someday, but there are no concrete plans at the moment.
 
