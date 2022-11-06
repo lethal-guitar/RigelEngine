@@ -200,13 +200,13 @@ int16_t CheckWorldCollision(
 {
   register int16_t i;
   register word height;
-  word* tileData;
   bool isPlayer = false;
   bool atStairStep = false;
   word width;
   word offset;
   int16_t bboxTop;
   word attributes;
+  word tileDataOffset;
 
   ctx->retConveyorBeltCheckResult = CB_NONE;
 
@@ -248,6 +248,13 @@ int16_t CheckWorldCollision(
     y += AINFO_Y_OFFSET(offset);
   }
 
+#define TILE_DATA_OFFSET(x_, y_)                                               \
+  (word)(((y_) << ctx->mapWidthShift) * sizeof(word)) + (x_) * sizeof(word)
+
+#define DEREF_TILE_DATA(off_)                                                  \
+  *(ctx->mapData +                                                             \
+    (word)(tileDataOffset + (off_) * sizeof(word)) / sizeof(word))
+
   switch (direction)
   {
     case MD_PROJECTILE:
@@ -273,16 +280,16 @@ int16_t CheckWorldCollision(
       }
 
       // Start at map tile underneath the sprite's top-left corner
-      tileData = ctx->mapData + ((y - height + 1) << ctx->mapWidthShift) + x;
+      tileDataOffset = TILE_DATA_OFFSET(x, y - height + 1);
 
       // Check the top edge. This is the entire length of the sprite for
       // horizontal shots, and only the top-most tile for vertical shots.
       for (i = 0; i < width; i++)
       {
-        attributes = *(ctx->gfxTilesetAttributes + (*(tileData + i) >> 3));
+        attributes = *(ctx->gfxTilesetAttributes + (DEREF_TILE_DATA(i) >> 3));
 
         // Treat composite tiles as not solid - and abort the entire check.
-        if (*(tileData + i) & 0x8000)
+        if (DEREF_TILE_DATA(i) & 0x8000)
         {
           return CR_NONE;
         }
@@ -296,16 +303,16 @@ int16_t CheckWorldCollision(
       }
 
       // Start at map tile underneath the sprite's bottom-left corner
-      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x;
+      tileDataOffset = TILE_DATA_OFFSET(x, y);
 
       // Check left edge, this is the entire height of the sprite for vertical
       // shots, and only the left-most tile for horizontal shots
       for (i = 0; i < height; i++)
       {
-        attributes = *(ctx->gfxTilesetAttributes + (*tileData >> 3));
+        attributes = *(ctx->gfxTilesetAttributes + (DEREF_TILE_DATA(0) >> 3));
 
         // Treat composite tiles as not solid - and abort the entire check.
-        if (*tileData & 0x8000)
+        if (DEREF_TILE_DATA(0) & 0x8000)
         {
           return CR_NONE;
         }
@@ -318,7 +325,7 @@ int16_t CheckWorldCollision(
         }
 
         // Go up by one tile
-        tileData -= ctx->mapWidth;
+        tileDataOffset -= ctx->mapWidth * sizeof(word);
       }
 
       return CR_NONE;
@@ -333,9 +340,9 @@ int16_t CheckWorldCollision(
       }
 
       // Start at map tile underneath top-left corner of the sprite
-      tileData = ctx->mapData + ((y - height + 1) << ctx->mapWidthShift) + x;
+      tileDataOffset = TILE_DATA_OFFSET(x, y - height + 1);
 
-      if (isPlayer && HAS_TILE_ATTRIBUTE(*(tileData + 1), TA_CLIMBABLE))
+      if (isPlayer && HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(1), TA_CLIMBABLE))
       {
         return CR_CLIMBABLE;
       }
@@ -343,7 +350,7 @@ int16_t CheckWorldCollision(
       // Check top edge of the sprite
       for (i = 0; i < width; i++)
       {
-        if (HAS_TILE_ATTRIBUTE(*(tileData + i), TA_SOLID_BOTTOM))
+        if (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(i), TA_SOLID_BOTTOM))
         {
           return CR_COLLISION;
         }
@@ -352,7 +359,7 @@ int16_t CheckWorldCollision(
       // Special logic for climbing ladders
       if (isPlayer)
       {
-        if (HAS_TILE_ATTRIBUTE(*(tileData + 1), TA_LADDER))
+        if (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(1), TA_LADDER))
         {
           return CR_LADDER;
         }
@@ -363,14 +370,17 @@ int16_t CheckWorldCollision(
         }
         else
         {
-          if (ctx->inputMoveUp && HAS_TILE_ATTRIBUTE(*tileData, TA_LADDER))
+          if (
+            ctx->inputMoveUp &&
+            HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(0), TA_LADDER))
           {
             ctx->plPosX--;
             return CR_LADDER;
           }
 
           if (
-            ctx->inputMoveUp && HAS_TILE_ATTRIBUTE(*(tileData + 2), TA_LADDER))
+            ctx->inputMoveUp &&
+            HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(2), TA_LADDER))
           {
             ctx->plPosX++;
             return CR_LADDER;
@@ -382,7 +392,7 @@ int16_t CheckWorldCollision(
 
     case MD_DOWN:
       // Start at map tile underneath sprite's bottom-left corner
-      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x;
+      tileDataOffset = TILE_DATA_OFFSET(x, y);
 
       // Bottom edge outside the map is never solid
       if (y > ctx->mapBottom)
@@ -394,28 +404,28 @@ int16_t CheckWorldCollision(
       for (i = 0; i < width; i++)
       {
         // Conveyor belt checks
-        if (HAS_TILE_ATTRIBUTE(*(tileData + i), TA_CONVEYOR_L))
+        if (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(i), TA_CONVEYOR_L))
         {
           ctx->retConveyorBeltCheckResult = CB_LEFT;
         }
 
         if (
-          HAS_TILE_ATTRIBUTE(*(tileData + i), TA_CONVEYOR_R) &&
-          (HAS_TILE_ATTRIBUTE(*(tileData + width - 1), TA_CONVEYOR_R) ||
-           !HAS_TILE_ATTRIBUTE(*(tileData + width - 1), TA_SOLID_TOP)))
+          HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(i), TA_CONVEYOR_R) &&
+          (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(width - 1), TA_CONVEYOR_R) ||
+           !HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(width - 1), TA_SOLID_TOP)))
         {
           ctx->retConveyorBeltCheckResult = CB_RIGHT;
         }
 
         // Collision check
-        if (HAS_TILE_ATTRIBUTE(*(tileData + i), TA_SOLID_TOP))
+        if (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(i), TA_SOLID_TOP))
         {
           return CR_COLLISION;
         }
       }
 
       // Special logic for climbing ladders
-      if (isPlayer && HAS_TILE_ATTRIBUTE(*(tileData + 1), TA_LADDER))
+      if (isPlayer && HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(1), TA_LADDER))
       {
         return CR_LADDER;
       }
@@ -440,12 +450,12 @@ int16_t CheckWorldCollision(
       }
 
       // Start at map tile underneath the sprite's bottom-left corner
-      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x;
+      tileDataOffset = TILE_DATA_OFFSET(x, y);
 
       // Check the sprite's left edge
       for (i = 0; i < height; i++)
       {
-        if (HAS_TILE_ATTRIBUTE(*tileData, TA_SOLID_RIGHT))
+        if (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(0), TA_SOLID_RIGHT))
         {
           if (isPlayer && ctx->plState == PS_NORMAL)
           {
@@ -465,7 +475,7 @@ int16_t CheckWorldCollision(
         }
 
         // Go up by one map tile
-        tileData -= ctx->mapWidth;
+        tileDataOffset -= ctx->mapWidth * sizeof(word);
       }
 
       // When at a stair step, move the player up by one and report "no
@@ -494,12 +504,12 @@ int16_t CheckWorldCollision(
       }
 
       // Start at map tile underneath the sprite's bottom-right corner
-      tileData = ctx->mapData + (y << ctx->mapWidthShift) + x + width - 1;
+      tileDataOffset = TILE_DATA_OFFSET(x + width - 1, y);
 
       // Check sprite's right edge
       for (i = 0; i < height; i++)
       {
-        if (HAS_TILE_ATTRIBUTE(*tileData, TA_SOLID_LEFT))
+        if (HAS_TILE_ATTRIBUTE(DEREF_TILE_DATA(0), TA_SOLID_LEFT))
         {
           if (isPlayer && ctx->plState == PS_NORMAL)
           {
@@ -518,7 +528,7 @@ int16_t CheckWorldCollision(
           }
         }
 
-        tileData -= ctx->mapWidth;
+        tileDataOffset -= ctx->mapWidth * sizeof(word);
       }
 
       // When at a stair step, move the player up by one and report "no
