@@ -22,13 +22,15 @@
 #include "data/saved_game.hpp"
 #include "frontend/game_mode.hpp"
 #include "frontend/input_handler.hpp"
-#include "game_logic/game_world.hpp"
-#include "game_logic/input.hpp"
+#include "game_logic_common/igame_world.hpp"
+#include "game_logic_common/input.hpp"
 #include "ui/ingame_menu.hpp"
 
 RIGEL_DISABLE_WARNINGS
 #include <SDL.h>
 RIGEL_RESTORE_WARNINGS
+
+#include <memory>
 
 
 namespace rigel
@@ -63,7 +65,7 @@ private:
 
   GameMode::Context mContext;
 
-  game_logic::GameWorld mWorld;
+  std::unique_ptr<game_logic::IGameWorld> mpWorld;
   InputHandler mInputHandler;
   engine::TimeDelta mAccumulatedTime = 0.0;
   ui::IngameMenu mMenu;
@@ -72,29 +74,5 @@ private:
   bool mDoNextSingleStep = false;
   bool mLevelFinishedByDebugKey = false;
 };
-
-
-inline bool GameRunner::levelFinished() const
-{
-  return mWorld.levelFinished() || mLevelFinishedByDebugKey;
-}
-
-
-inline bool GameRunner::gameQuit() const
-{
-  return mMenu.quitRequested();
-}
-
-
-inline std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const
-{
-  return mMenu.requestedGameToLoad();
-}
-
-
-inline std::set<data::Bonus> GameRunner::achievedBonuses() const
-{
-  return mWorld.achievedBonuses();
-}
 
 } // namespace rigel

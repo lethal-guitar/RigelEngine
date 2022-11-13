@@ -62,6 +62,7 @@ namespace
 using ActorList = std::vector<LevelData::Actor>;
 
 
+constexpr char EPISODE_PREFIXES[] = {'L', 'M', 'N', 'O'};
 constexpr auto VALID_LEVEL_WIDTHS = std::array{32, 64, 128, 256, 512, 1024};
 
 
@@ -73,21 +74,6 @@ bool isValidWidth(int width)
 
   return find(begin(VALID_LEVEL_WIDTHS), end(VALID_LEVEL_WIDTHS), width) !=
     end(VALID_LEVEL_WIDTHS);
-}
-
-
-data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
-{
-  const auto index = rawIndex / 8u;
-  if (index >= GameTraits::CZone::numSolidTiles)
-  {
-    return (index - GameTraits::CZone::numSolidTiles) / 5u +
-      GameTraits::CZone::numSolidTiles;
-  }
-  else
-  {
-    return index;
-  }
 }
 
 
@@ -523,6 +509,38 @@ void sortByDrawIndex(ActorList& actors, const ResourceLoader& resources)
 }
 
 } // namespace
+
+
+data::map::TileIndex convertTileIndex(const uint16_t rawIndex)
+{
+  const auto index = rawIndex / 8u;
+  if (index >= GameTraits::CZone::numSolidTiles)
+  {
+    const auto converted = (index - GameTraits::CZone::numSolidTiles) / 5u +
+      GameTraits::CZone::numSolidTiles;
+
+    // Ensure that the index has a valid range
+    return data::map::TileIndex(
+      std::min(converted, GameTraits::CZone::numTilesTotal - 1));
+  }
+  else
+  {
+    return index;
+  }
+}
+
+
+std::string levelFileName(const int episode, const int level)
+{
+  assert(episode >= 0 && episode < 4);
+  assert(level >= 0 && level < 8);
+
+  std::string fileName;
+  fileName += EPISODE_PREFIXES[episode];
+  fileName += std::to_string(level + 1);
+  fileName += ".MNI";
+  return fileName;
+}
 
 
 LevelData loadLevel(

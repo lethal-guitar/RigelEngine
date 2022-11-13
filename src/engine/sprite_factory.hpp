@@ -48,6 +48,7 @@ constexpr auto EFFECT_DRAW_ORDER = MUZZLE_FLASH_DRAW_ORDER + 1;
 
 
 bool hasAssociatedSprite(data::ActorID actorID);
+std::vector<int> buildImageIdTable(const assets::ResourceLoader& resources);
 
 class SpriteFactory : public ISpriteFactory
 {

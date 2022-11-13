@@ -44,6 +44,7 @@ IntroDemoLoopMode::IntroDemoLoopMode(Context context, const Type type)
     }
 
     mSteps.push_back(Credits{});
+    mSteps.push_back(game_logic::DemoPlayer(context));
 
     try
     {
@@ -78,6 +79,7 @@ IntroDemoLoopMode::IntroDemoLoopMode(Context context, const Type type)
 
     mSteps.push_back(Story{});
     mSteps.push_back(Credits{});
+    mSteps.push_back(game_logic::DemoPlayer(context));
   }
 
   startCurrentStep();
@@ -109,6 +111,8 @@ bool IntroDemoLoopMode::handleEvent(const SDL_Event& event)
     },
 
     [&](Credits& state) { return true; },
+
+    [&](game_logic::DemoPlayer& state) { return true; },
 
     [&](auto&& state) {
       mContext.mpScriptRunner->handleEvent(event);
@@ -177,6 +181,13 @@ void IntroDemoLoopMode::startCurrentStep()
       }
 
       mContext.mpScriptRunner->executeScript(creditsScript);
+    },
+
+    [&](game_logic::DemoPlayer& state) {
+      state = game_logic::DemoPlayer{mContext};
+      mContext.mpServiceProvider->fadeOutScreen();
+      state.updateAndRender(0.0);
+      mContext.mpServiceProvider->fadeInScreen();
     },
 
     [](auto&& state) { state.start(); });

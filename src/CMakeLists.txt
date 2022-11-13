@@ -117,6 +117,8 @@ set(core_sources
     frontend/anti_piracy_screen_mode.cpp
     frontend/anti_piracy_screen_mode.hpp
     frontend/command_line_options.hpp
+    frontend/demo_player.cpp
+    frontend/demo_player.hpp
     frontend/game.cpp
     frontend/game.hpp
     frontend/game_mode.cpp
@@ -147,8 +149,6 @@ set(core_sources
     game_logic/damage_infliction_system.hpp
     game_logic/debugging_system.cpp
     game_logic/debugging_system.hpp
-    game_logic/demo_player.cpp
-    game_logic/demo_player.hpp
     game_logic/dynamic_geometry_components.hpp
     game_logic/dynamic_geometry_system.cpp
     game_logic/dynamic_geometry_system.hpp
@@ -237,7 +237,6 @@ set(core_sources
     game_logic/hazards/smash_hammer.cpp
     game_logic/hazards/smash_hammer.hpp
     game_logic/ientity_factory.hpp
-    game_logic/input.hpp
     game_logic/interactive/blowing_fan.cpp
     game_logic/interactive/blowing_fan.hpp
     game_logic/interactive/elevator.cpp
@@ -281,12 +280,17 @@ set(core_sources
     game_logic_classic/game1.c
     game_logic_classic/game2.c
     game_logic_classic/game3.c
+    game_logic_classic/game_world_classic.cpp
+    game_logic_classic/game_world_classic.hpp
     game_logic_classic/memory.c
     game_logic_classic/misc.c
     game_logic_classic/particls.c
     game_logic_classic/player.c
     game_logic_classic/sprite.c
     game_logic_classic/types.h
+    game_logic_common/igame_world.hpp
+    game_logic_common/input.hpp
+    game_logic_common/utils.hpp
     renderer/custom_quad_batch.cpp
     renderer/custom_quad_batch.hpp
     renderer/fps_limiter.cpp

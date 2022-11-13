@@ -46,6 +46,9 @@ class SpriteFactory;
 namespace ui
 {
 
+class MenuElementRenderer;
+
+
 inline bool isVisibleOnRadar(const base::Vec2& position)
 {
   // clang-format off
@@ -70,11 +73,19 @@ constexpr auto HUD_WIDTH_RIGHT = 6;
 constexpr auto HUD_WIDTH_TOTAL = HUD_WIDTH_RIGHT + 32;
 
 
+void drawBossHealthBar(
+  int health,
+  int startingHealth,
+  int maxWidthPx,
+  const ui::MenuElementRenderer& textRenderer,
+  const engine::TiledTexture& uiSpriteSheet);
+
+
 class HudRenderer
 {
 public:
   HudRenderer(
-    int levelNumber,
+    std::optional<int> levelNumber,
     const data::GameOptions* pOptions,
     renderer::Renderer* pRenderer,
     engine::TiledTexture* pStatusSpriteSheetRenderer,
@@ -121,7 +132,7 @@ private:
     const base::Vec2& position) const;
   void drawActorFrame(data::ActorID id, int frame, const base::Vec2& pos) const;
 
-  const int mLevelNumber;
+  std::optional<int> mLevelNumber;
   renderer::Renderer* mpRenderer;
   const data::GameOptions* mpOptions;
 

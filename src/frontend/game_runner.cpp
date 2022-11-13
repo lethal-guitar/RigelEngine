@@ -19,7 +19,7 @@
 #include "base/math_utils.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
-#include "game_logic/world_state.hpp"
+#include "game_logic/game_world.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -35,14 +35,14 @@ GameRunner::GameRunner(
   const std::optional<base::Vec2> playerPositionOverride,
   const bool showWelcomeMessage)
   : mContext(context)
-  , mWorld(
+  , mpWorld(std::make_unique<game_logic::GameWorld>(
       pPlayerModel,
       sessionId,
       context,
       playerPositionOverride,
-      showWelcomeMessage)
+      showWelcomeMessage))
   , mInputHandler(&context.mpUserProfile->mOptions)
-  , mMenu(context, pPlayerModel, &mWorld, sessionId)
+  , mMenu(context, pPlayerModel, mpWorld.get(), sessionId)
 {
 }
 
@@ -62,17 +62,17 @@ void GameRunner::handleEvent(const SDL_Event& event)
     return;
   }
 
-  const auto menuCommand = mInputHandler.handleEvent(
-    event, mWorld.mpState->mPlayer.stateIs<game_logic::InShip>());
+  const auto menuCommand =
+    mInputHandler.handleEvent(event, mpWorld->isPlayerInShip());
 
   switch (menuCommand)
   {
     case InputHandler::MenuCommand::QuickSave:
-      mWorld.quickSave();
+      mpWorld->quickSave();
       break;
 
     case InputHandler::MenuCommand::QuickLoad:
-      mWorld.quickLoad();
+      mpWorld->quickLoad();
       break;
 
     default:
@@ -94,7 +94,7 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
   {
     // TODO: This is a workaround to make the fadeout on quitting work.
     // Would be good to find a better way to do this.
-    mWorld.render(interpolationFactor(dt));
+    mpWorld->render(interpolationFactor(dt));
     return;
   }
 
@@ -104,16 +104,16 @@ void GameRunner::updateAndRender(engine::TimeDelta dt)
   }
 
   updateWorld(dt);
-  mWorld.render(interpolationFactor(dt));
+  mpWorld->render(interpolationFactor(dt));
 
   renderDebugText();
-  mWorld.processEndOfFrameActions();
+  mpWorld->processEndOfFrameActions();
 }
 
 
 bool GameRunner::needsPerElementUpscaling() const
 {
-  return mWorld.needsPerElementUpscaling();
+  return mpWorld->needsPerElementUpscaling();
 }
 
 
@@ -128,7 +128,7 @@ float GameRunner::interpolationFactor(const engine::TimeDelta dt) const
 void GameRunner::updateWorld(const engine::TimeDelta dt)
 {
   auto update = [this]() {
-    mWorld.updateGameLogic(mInputHandler.fetchInput());
+    mpWorld->updateGameLogic(mInputHandler.fetchInput());
   };
 
 
@@ -149,7 +149,7 @@ void GameRunner::updateWorld(const engine::TimeDelta dt)
       update();
     }
 
-    mWorld.mpState->mMapRenderer.updateBackdropAutoScrolling(dt);
+    mpWorld->updateBackdropAutoScrolling(dt);
   }
 }
 
@@ -162,7 +162,7 @@ bool GameRunner::updateMenu(const engine::TimeDelta dt)
 
     if (mMenu.isTransparent())
     {
-      mWorld.render(interpolationFactor(dt));
+      mpWorld->render(interpolationFactor(dt));
     }
 
     const auto result = mMenu.updateAndRender(dt);
@@ -170,7 +170,7 @@ bool GameRunner::updateMenu(const engine::TimeDelta dt)
     if (result == ui::IngameMenu::UpdateResult::FinishedNeedsFadeout)
     {
       mContext.mpServiceProvider->fadeOutScreen();
-      mWorld.render(interpolationFactor(dt));
+      mpWorld->render(interpolationFactor(dt));
       mContext.mpServiceProvider->fadeInScreen();
     }
 
@@ -188,15 +188,14 @@ void GameRunner::handleDebugKeys(const SDL_Event& event)
     return;
   }
 
-  auto& debuggingSystem = mWorld.mpState->mDebuggingSystem;
   switch (event.key.keysym.sym)
   {
     case SDLK_b:
-      debuggingSystem.toggleBoundingBoxDisplay();
+      mpWorld->debugToggleBoundingBoxDisplay();
       break;
 
     case SDLK_c:
-      debuggingSystem.toggleWorldCollisionDataDisplay();
+      mpWorld->debugToggleWorldCollisionDataDisplay();
       break;
 
     case SDLK_d:
@@ -204,7 +203,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event)
       break;
 
     case SDLK_g:
-      debuggingSystem.toggleGridDisplay();
+      mpWorld->debugToggleGridDisplay();
       break;
 
     case SDLK_s:
@@ -219,10 +218,7 @@ void GameRunner::handleDebugKeys(const SDL_Event& event)
       break;
 
     case SDLK_F10:
-      {
-        auto& player = mWorld.mpState->mPlayer;
-        player.mGodModeOn = !player.mGodModeOn;
-      }
+      mpWorld->toggleGodMode();
       break;
 
     case SDLK_F11:
@@ -236,17 +232,41 @@ void GameRunner::renderDebugText()
 {
   std::stringstream debugText;
 
-  if (mWorld.mpState->mPlayer.mGodModeOn)
+  if (mpWorld->isGodModeOn())
   {
     debugText << "GOD MODE on\n";
   }
 
   if (mShowDebugText)
   {
-    mWorld.printDebugText(debugText);
+    mpWorld->printDebugText(debugText);
   }
 
   ui::drawText(debugText.str(), 0, 32, {255, 255, 255, 255});
+}
+
+
+bool GameRunner::levelFinished() const
+{
+  return mpWorld->levelFinished() || mLevelFinishedByDebugKey;
+}
+
+
+bool GameRunner::gameQuit() const
+{
+  return mMenu.quitRequested();
+}
+
+
+std::optional<data::SavedGame> GameRunner::requestedGameToLoad() const
+{
+  return mMenu.requestedGameToLoad();
+}
+
+
+std::set<data::Bonus> GameRunner::achievedBonuses() const
+{
+  return mpWorld->achievedBonuses();
 }
 
 } // namespace rigel

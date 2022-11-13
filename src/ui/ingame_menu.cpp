@@ -21,7 +21,7 @@
 #include "data/unit_conversions.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
-#include "game_logic/game_world.hpp"
+#include "game_logic_common/igame_world.hpp"
 #include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 #include "ui/utils.hpp"
@@ -304,7 +304,7 @@ IngameMenu::SavedGameNameEntry::SavedGameNameEntry(
 IngameMenu::IngameMenu(
   GameMode::Context context,
   const data::PlayerModel* pPlayerModel,
-  game_logic::GameWorld* pGameWorld,
+  game_logic::IGameWorld* pGameWorld,
   const data::GameSessionId& sessionId)
   : mContext(context)
   , mSavedGame(createSavedGame(sessionId, *pPlayerModel))

@@ -50,7 +50,6 @@ const auto SLOW_ANIM_FRAME_DELAY = 2;
 const auto PARALLAX_FACTOR = 4.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_HORIZONTAL = 30.0f;
 const auto AUTO_SCROLL_PX_PER_SECOND_VERTICAL = 60.0f;
-const auto MAX_BLOCKS = 32;
 
 
 struct TileBlockData
@@ -60,20 +59,18 @@ struct TileBlockData
 };
 
 
-void buildBlock(
+std::array<TileBlockData, 2> createBlockData(
   const int blockX,
   const int blockY,
-  TileRenderData& renderData,
   const data::map::Map& map,
-  const TiledTexture& tileSetTexture,
-  renderer::Renderer* pRenderer)
+  const TiledTexture& tileSetTexture)
 {
+  auto blockData = std::array<TileBlockData, 2>{};
+
   const auto blockStartX = blockX * BLOCK_SIZE;
   const auto blockEndX = (blockX + 1) * BLOCK_SIZE;
   const auto blockStartY = blockY * BLOCK_SIZE;
   const auto blockEndY = (blockY + 1) * BLOCK_SIZE;
-
-  auto blockData = std::array<TileBlockData, 2>{};
 
 
   auto addToBlock =
@@ -103,7 +100,6 @@ void buildBlock(
     };
 
 
-  // Fill block data with tiles
   for (auto y = blockStartY; y < blockEndY && y < map.height(); ++y)
   {
     for (auto x = blockStartX; x < blockEndX && x < map.width(); ++x)
@@ -113,7 +109,20 @@ void buildBlock(
     }
   }
 
-  // Commit block data
+  return blockData;
+}
+
+
+void buildBlock(
+  const int blockX,
+  const int blockY,
+  TileRenderData& renderData,
+  const data::map::Map& map,
+  const TiledTexture& tileSetTexture,
+  renderer::Renderer* pRenderer)
+{
+  const auto blockData = createBlockData(blockX, blockY, map, tileSetTexture);
+
   for (auto layer = 0; layer < 2; ++layer)
   {
     auto& data = blockData[layer];
@@ -124,6 +133,38 @@ void buildBlock(
 
     renderData.mLayers[layer].push_back(
       {buffer, std::move(data.mAnimatedTiles)});
+  }
+}
+
+
+void rebuildBlock(
+  TileRenderData& renderData,
+  const data::map::Map& map,
+  const TiledTexture& tileSetTexture,
+  renderer::Renderer* pRenderer,
+  const size_t blockIndex)
+{
+  const auto blockX = int(blockIndex) % renderData.mSize.width;
+  const auto blockY = int(blockIndex) / renderData.mSize.width;
+
+  const auto blockData = createBlockData(blockX, blockY, map, tileSetTexture);
+
+  for (auto layer = 0; layer < 2; ++layer)
+  {
+    auto& data = blockData[layer];
+
+    auto buffer = data.mVertices.empty()
+      ? renderer::INVALID_VERTEX_BUFFER_ID
+      : pRenderer->createVertexBuffer(data.mVertices);
+
+    auto& block = renderData.mLayers[layer][blockIndex];
+
+    if (block.mTilesBuffer != renderer::INVALID_VERTEX_BUFFER_ID)
+    {
+      renderData.mpRenderer->destroyVertexBuffer(block.mTilesBuffer);
+    }
+
+    block = {buffer, std::move(data.mAnimatedTiles)};
   }
 }
 
@@ -285,6 +326,43 @@ void MapRenderer::switchBackdrops()
 }
 
 
+void MapRenderer::markAsChanged(const base::Vec2& position)
+{
+  const auto blockIndex =
+    position.x / BLOCK_SIZE + position.y / BLOCK_SIZE * mRenderData.mSize.width;
+
+  mOutOfDateBlocks.set(blockIndex);
+}
+
+
+void MapRenderer::rebuildChangedBlocks(const data::map::Map& map)
+{
+  if (mOutOfDateBlocks.none())
+  {
+    return;
+  }
+
+  for (auto i = 0u; i < mOutOfDateBlocks.size(); ++i)
+  {
+    if (mOutOfDateBlocks.test(i))
+    {
+      rebuildBlock(mRenderData, map, mTileSetTexture, mpRenderer, i);
+    }
+  }
+
+  mOutOfDateBlocks.reset();
+}
+
+
+void MapRenderer::rebuildAllBlocks(const data::map::Map& map)
+{
+  for (auto i = 0u; i < mRenderData.mLayers[0].size(); ++i)
+  {
+    rebuildBlock(mRenderData, map, mTileSetTexture, mpRenderer, i);
+  }
+}
+
+
 void MapRenderer::renderBackground(
   const base::Vec2& sectionStart,
   const base::Size& sectionSize) const
@@ -440,7 +518,7 @@ void MapRenderer::renderMapTiles(
   };
 
 
-  base::static_vector<renderer::VertexBufferId, MAX_BLOCKS> blocksToRender;
+  base::static_vector<renderer::VertexBufferId, MAX_NUM_BLOCKS> blocksToRender;
 
   forEachVisibleBlock([&](const TileBlock& block) {
     if (block.mTilesBuffer != renderer::INVALID_VERTEX_BUFFER_ID)

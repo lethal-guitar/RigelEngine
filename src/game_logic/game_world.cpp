@@ -18,6 +18,7 @@
 
 #include "assets/resource_loader.hpp"
 #include "base/match.hpp"
+#include "base/spatial_types_printing.hpp"
 #include "data/game_options.hpp"
 #include "data/game_traits.hpp"
 #include "data/map.hpp"
@@ -37,6 +38,7 @@
 #include "game_logic/dynamic_geometry_components.hpp"
 #include "game_logic/enemies/dying_boss.hpp"
 #include "game_logic/world_state.hpp"
+#include "game_logic_common/utils.hpp"
 #include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
 #include "ui/menu_element_renderer.hpp"
@@ -63,28 +65,6 @@ using engine::components::WorldPosition;
 namespace
 {
 
-constexpr auto BOSS_LEVEL_INTRO_MUSIC = "CALM.IMF";
-
-constexpr auto HEALTH_BAR_LABEL_START_X = 0;
-constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
-constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
-constexpr auto HEALTH_BAR_START_PX = base::Vec2{data::tilesToPixels(5), 0};
-
-
-void drawBossHealthBar(
-  const int health,
-  const ui::MenuElementRenderer& textRenderer,
-  const engine::TiledTexture& uiSpriteSheet)
-{
-  textRenderer.drawSmallWhiteText(
-    HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
-
-  const auto healthBarSize = base::Size{health, data::GameTraits::tileSize};
-  uiSpriteSheet.renderTileStretched(
-    HEALTH_BAR_TILE_INDEX, {HEALTH_BAR_START_PX, healthBarSize});
-}
-
-
 int healthOrZero(entityx::Entity entity)
 {
   using game_logic::components::Shootable;
@@ -92,22 +72,6 @@ int healthOrZero(entityx::Entity entity)
   return entity.has_component<Shootable>()
     ? entity.component<Shootable>()->mHealth
     : 0;
-}
-
-
-[[nodiscard]] auto setupIngameViewport(
-  renderer::Renderer* pRenderer,
-  const int screenShakeOffsetX)
-{
-  auto saved = renderer::saveState(pRenderer);
-
-  const auto offset =
-    data::GameTraits::inGameViewportOffset + base::Vec2{screenShakeOffsetX, 0};
-  renderer::setLocalTranslation(pRenderer, offset);
-  renderer::setLocalClipRect(
-    pRenderer, base::Rect<int>{{}, data::GameTraits::inGameViewportSize});
-
-  return saved;
 }
 
 
@@ -184,19 +148,6 @@ std::vector<base::Vec2> collectRadarDots(
     });
 
   return radarDots;
-}
-
-
-template <typename ValueT>
-std::string vec2String(const base::Vec2T<ValueT>& vec, const int width)
-{
-  std::stringstream stream;
-  // clang-format off
-  stream
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
-    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
-  // clang-format on
-  return stream.str();
 }
 
 
@@ -794,21 +745,12 @@ void GameWorld::render(const float interpolationFactor)
   auto drawTopRow = [&, this](int maxWidthPx) {
     if (mpState->mActiveBossEntity)
     {
-      const auto health = healthOrZero(mpState->mActiveBossEntity);
-
-      const auto maxHealthBarSize = maxWidthPx - HEALTH_BAR_START_PX.x;
-      if (mpState->mBossStartingHealth <= maxHealthBarSize)
-      {
-        drawBossHealthBar(health, mTextRenderer, mUiSpriteSheet);
-      }
-      else
-      {
-        const auto healthPercentage =
-          float(health) / mpState->mBossStartingHealth;
-        const auto healthPercentagePx =
-          base::round(healthPercentage * maxHealthBarSize);
-        drawBossHealthBar(healthPercentagePx, mTextRenderer, mUiSpriteSheet);
-      }
+      drawBossHealthBar(
+        healthOrZero(mpState->mActiveBossEntity),
+        mpState->mBossStartingHealth,
+        maxWidthPx,
+        mTextRenderer,
+        mUiSpriteSheet);
     }
     else
     {
@@ -1084,6 +1026,49 @@ void GameWorld::processEndOfFrameActions()
 }
 
 
+void GameWorld::updateBackdropAutoScrolling(const engine::TimeDelta dt)
+{
+  mpState->mMapRenderer.updateBackdropAutoScrolling(dt);
+}
+
+
+bool GameWorld::isPlayerInShip() const
+{
+  return mpState->mPlayer.stateIs<game_logic::InShip>();
+}
+
+
+void GameWorld::toggleGodMode()
+{
+  auto& player = mpState->mPlayer;
+  player.mGodModeOn = !player.mGodModeOn;
+}
+
+
+bool GameWorld::isGodModeOn() const
+{
+  return mpState->mPlayer.mGodModeOn;
+}
+
+
+void GameWorld::debugToggleBoundingBoxDisplay()
+{
+  mpState->mDebuggingSystem.toggleBoundingBoxDisplay();
+}
+
+
+void GameWorld::debugToggleWorldCollisionDataDisplay()
+{
+  mpState->mDebuggingSystem.toggleWorldCollisionDataDisplay();
+}
+
+
+void GameWorld::debugToggleGridDisplay()
+{
+  mpState->mDebuggingSystem.toggleGridDisplay();
+}
+
+
 void GameWorld::activateFullHealthCheat()
 {
   mpPlayerModel->resetHealthAndScore();
@@ -1168,7 +1153,8 @@ void GameWorld::quickSave()
   mpQuickSave = std::make_unique<QuickSaveData>(
     QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
 
-  mMessageDisplay.setMessage("Quick saved.", ui::MessagePriority::Menu);
+  mMessageDisplay.setMessage(
+    data::Messages::QuickSaved, ui::MessagePriority::Menu);
 
   LOG_F(INFO, "Quick save created");
 }
@@ -1187,7 +1173,8 @@ void GameWorld::quickLoad()
   mpState->synchronizeTo(
     *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
-  mMessageDisplay.setMessage("Quick save restored.", ui::MessagePriority::Menu);
+  mMessageDisplay.setMessage(
+    data::Messages::QuickLoaded, ui::MessagePriority::Menu);
 
   if (!mpOptions->mMotionSmoothing)
   {
@@ -1368,9 +1355,13 @@ void GameWorld::flashScreen(const base::Color& color)
 
 void GameWorld::printDebugText(std::ostream& stream) const
 {
-  stream << "Scroll: " << vec2String(mpState->mCamera.position(), 4) << '\n'
-         << "Player: " << vec2String(mpState->mPlayer.position(), 4) << '\n'
-         << "Entities: " << mpState->mEntities.size() << '\n';
+  stream << "Scroll: ";
+  outputFixedWidth(stream, mpState->mCamera.position(), 4);
+
+  stream << "\nPlayer: ";
+  outputFixedWidth(stream, mpState->mPlayer.position(), 4);
+
+  stream << "\nEntities: " << mpState->mEntities.size() << '\n';
 
   if (mpOptions->mPerElementUpscalingEnabled)
   {

@@ -19,7 +19,7 @@
 #include "data/player_model.hpp"
 #include "engine/timing.hpp"
 #include "frontend/game_mode.hpp"
-#include "game_logic/input.hpp"
+#include "game_logic_common/input.hpp"
 
 #include <memory>
 #include <vector>
@@ -28,7 +28,7 @@
 namespace rigel::game_logic
 {
 
-class GameWorld;
+class GameWorld_Classic;
 
 
 struct DemoInput
@@ -42,6 +42,10 @@ class DemoPlayer
 {
 public:
   explicit DemoPlayer(GameMode::Context context);
+  ~DemoPlayer();
+
+  DemoPlayer(DemoPlayer&&);
+  DemoPlayer& operator=(DemoPlayer&&);
 
   void updateAndRender(engine::TimeDelta dt);
 
@@ -56,7 +60,7 @@ private:
   std::size_t mLevelIndex = 0;
   engine::TimeDelta mElapsedTime = 0;
 
-  std::unique_ptr<GameWorld> mpWorld;
+  std::unique_ptr<GameWorld_Classic> mpWorld;
 };
 
 } // namespace rigel::game_logic

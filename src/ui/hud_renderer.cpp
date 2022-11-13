@@ -24,6 +24,7 @@
 #include "engine/sprite_factory.hpp"
 #include "renderer/upscaling.hpp"
 #include "renderer/viewport_utils.hpp"
+#include "ui/menu_element_renderer.hpp"
 
 #include <cmath>
 #include <string>
@@ -39,6 +40,11 @@ using namespace rigel::renderer;
 
 namespace
 {
+
+constexpr auto HEALTH_BAR_LABEL_START_X = 0;
+constexpr auto HEALTH_BAR_LABEL_START_Y = 0;
+constexpr auto HEALTH_BAR_TILE_INDEX = 4 * 40 + 1;
+constexpr auto HEALTH_BAR_START_PX = base::Vec2{data::tilesToPixels(5), 0};
 
 constexpr auto NUM_HEALTH_SLICES = 8;
 
@@ -227,8 +233,30 @@ WidescreenHudStyle effectiveHudStyle(
 }
 
 
+void drawBossHealthBar(
+  int health,
+  int startingHealth,
+  int maxWidthPx,
+  const ui::MenuElementRenderer& textRenderer,
+  const engine::TiledTexture& uiSpriteSheet)
+{
+  textRenderer.drawSmallWhiteText(
+    HEALTH_BAR_LABEL_START_X, HEALTH_BAR_LABEL_START_Y, "BOSS");
+
+  const auto maxHealthBarSize = maxWidthPx - HEALTH_BAR_START_PX.x;
+
+  const auto healthInPx = startingHealth > maxHealthBarSize
+    ? base::round(float(health) / startingHealth * maxHealthBarSize)
+    : health;
+
+  const auto healthBarSize = base::Size{healthInPx, data::GameTraits::tileSize};
+  uiSpriteSheet.renderTileStretched(
+    HEALTH_BAR_TILE_INDEX, {HEALTH_BAR_START_PX, healthBarSize});
+}
+
+
 HudRenderer::HudRenderer(
-  const int levelNumber,
+  const std::optional<int> levelNumber,
   const data::GameOptions* pOptions,
   renderer::Renderer* pRenderer,
   engine::TiledTexture* pStatusSpriteSheet,
@@ -291,11 +319,16 @@ void HudRenderer::renderClassicHud(
     *mpStatusSpriteSheetRenderer,
     {22, GameTraits::mapViewportSize.height + 1});
   drawHealthBar(playerModel, {24, GameTraits::mapViewportSize.height + 1});
-  drawLevelNumber(
-    mLevelNumber,
-    *mpStatusSpriteSheetRenderer,
-    {GameTraits::mapViewportSize.width + 2,
-     GameTraits::mapViewportSize.height});
+
+  if (mLevelNumber)
+  {
+    drawLevelNumber(
+      *mLevelNumber,
+      *mpStatusSpriteSheetRenderer,
+      {GameTraits::mapViewportSize.width + 2,
+       GameTraits::mapViewportSize.height});
+  }
+
   drawRadar(radarPositions, {RADAR_POS_X, RADAR_POS_Y});
 }
 
@@ -398,12 +431,15 @@ void HudRenderer::drawModernHud(
     {22, GameTraits::mapViewportSize.height + 1});
   drawHealthBar(playerModel, {24, GameTraits::mapViewportSize.height + 1});
 
-  renderer::setLocalTranslation(mpRenderer, {4, 2});
-  drawLevelNumber(
-    mLevelNumber,
-    *mpStatusSpriteSheetRenderer,
-    {GameTraits::mapViewportSize.width + 2,
-     GameTraits::mapViewportSize.height + 1});
+  if (mLevelNumber)
+  {
+    renderer::setLocalTranslation(mpRenderer, {4, 2});
+    drawLevelNumber(
+      *mLevelNumber,
+      *mpStatusSpriteSheetRenderer,
+      {GameTraits::mapViewportSize.width + 2,
+       GameTraits::mapViewportSize.height + 1});
+  }
 }
 
 
@@ -450,7 +486,12 @@ void HudRenderer::drawUltrawideHud(
     *mpStatusSpriteSheetRenderer,
     {32, 6});
   drawHealthBar(playerModel, {34, 6});
-  drawLevelNumber(mLevelNumber, *mpStatusSpriteSheetRenderer, {44, 5});
+
+  if (mLevelNumber)
+  {
+    drawLevelNumber(*mLevelNumber, *mpStatusSpriteSheetRenderer, {44, 5});
+  }
+
   drawRadar(radarPositions, {385, 36});
 }
 

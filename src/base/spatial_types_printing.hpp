@@ -18,6 +18,7 @@
 
 #include "spatial_types.hpp"
 
+#include <iomanip>
 #include <iostream>
 
 
@@ -39,5 +40,20 @@ std::ostream& operator<<(std::ostream& stream, const Rect<ValueT>& rect)
          << rect.size.width << ", " << rect.size.height << '}';
   return stream;
 }
+
+
+template <typename ValueT>
+void outputFixedWidth(
+  std::ostream& stream,
+  const base::Vec2T<ValueT>& vec,
+  const int width)
+{
+  // clang-format off
+  stream
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.x << ", "
+    << std::setw(width) << std::fixed << std::setprecision(2) << vec.y;
+  // clang-format on
+}
+
 
 } // namespace rigel::base

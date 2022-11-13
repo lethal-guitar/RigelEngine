@@ -1,4 +1,4 @@
-/* Copyright (C) 2016, Nikolai Wuttke. All rights reserved.
+/* Copyright (C) 2022, Nikolai Wuttke. All rights reserved.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,27 +16,27 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include "assets/actor_image_package.hpp"
-#include "base/spatial_types.hpp"
-#include "data/game_session_data.hpp"
-#include "data/map.hpp"
+#include "data/game_traits.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/viewport_utils.hpp"
 
 
-namespace rigel::assets
+namespace rigel::game_logic
 {
 
-class ResourceLoader;
+[[nodiscard]] inline auto setupIngameViewport(
+  renderer::Renderer* pRenderer,
+  const int screenShakeOffsetX)
+{
+  auto saved = renderer::saveState(pRenderer);
 
-std::string levelFileName(const int episode, const int level);
+  const auto offset =
+    data::GameTraits::inGameViewportOffset + base::Vec2{screenShakeOffsetX, 0};
+  renderer::setLocalTranslation(pRenderer, offset);
+  renderer::setLocalClipRect(
+    pRenderer, base::Rect<int>{{}, data::GameTraits::inGameViewportSize});
 
-data::map::TileIndex convertTileIndex(const uint16_t rawIndex);
+  return saved;
+}
 
-data::map::LevelData loadLevel(
-  std::string_view mapName,
-  const ResourceLoader& resources,
-  data::Difficulty chosenDifficulty);
-
-} // namespace rigel::assets
+} // namespace rigel::game_logic

@@ -470,6 +470,8 @@ typedef struct
 
 typedef struct Context_
 {
+  void* pRigelBridge;
+
   bool sysTecMode;
   byte retConveyorBeltCheckResult;
   byte mapViewportHeight;
@@ -588,6 +590,11 @@ typedef struct Context_
 //
 // Function declarations
 //
+
+// clang-format off
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int16_t Sign(int16_t val);
 
@@ -739,3 +746,9 @@ void SetScreenShift(Context* ctx, byte amount);
 
 void PlaySound(Context* ctx, int16_t id);
 void StopMusic(Context* ctx);
+
+
+#ifdef __cplusplus
+}
+#endif
+// clang-format on

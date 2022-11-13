@@ -19,6 +19,7 @@
 #include "assets/resource_loader.hpp"
 #include "frontend/game_service_provider.hpp"
 #include "game_logic/game_world.hpp"
+#include "game_logic_classic/game_world_classic.hpp"
 
 
 namespace rigel::game_logic
@@ -83,7 +84,7 @@ std::vector<DemoInput> loadDemo(const assets::ResourceLoader& resources)
 
 data::GameSessionId demoSessionId(const std::size_t levelIndex)
 {
-  return {DEMO_EPISODE, DEMO_LEVELS[levelIndex], DEMO_DIFFICULTY};
+  return {DEMO_EPISODE, DEMO_LEVELS[levelIndex], DEMO_DIFFICULTY, true};
 }
 
 } // namespace
@@ -92,15 +93,13 @@ data::GameSessionId demoSessionId(const std::size_t levelIndex)
 DemoPlayer::DemoPlayer(GameMode::Context context)
   : mContext(context)
   , mFrames(loadDemo(*context.mpResources))
-  , mpWorld(std::make_unique<GameWorld>(
-      &mPlayerModel,
-      demoSessionId(0),
-      context,
-      std::nullopt,
-      true,
-      mFrames[0].mInput))
 {
 }
+
+
+DemoPlayer::~DemoPlayer() = default;
+DemoPlayer::DemoPlayer(DemoPlayer&&) = default;
+DemoPlayer& DemoPlayer::operator=(DemoPlayer&&) = default;
 
 
 void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
@@ -110,30 +109,53 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
     return;
   }
 
+  if (!mpWorld)
+  {
+    mpWorld = std::make_unique<GameWorld_Classic>(
+      &mPlayerModel,
+      demoSessionId(0),
+      mContext,
+      std::nullopt,
+      true,
+      mFrames[0].mInput);
+  }
+
+  auto changeLevel = false;
+
   mElapsedTime += dt;
 
   if (mElapsedTime >= GAME_LOGIC_UPDATE_DELAY)
   {
     mpWorld->updateGameLogic(mFrames[mCurrentFrameIndex].mInput);
+    changeLevel = mFrames[mCurrentFrameIndex].mNextLevel;
     ++mCurrentFrameIndex;
 
     mElapsedTime -= GAME_LOGIC_UPDATE_DELAY;
   }
 
+  mpWorld->updateBackdropAutoScrolling(dt);
+
   mpWorld->render();
   mpWorld->processEndOfFrameActions();
 
-  if (
-    mCurrentFrameIndex < mFrames.size() &&
-    mFrames[mCurrentFrameIndex].mNextLevel)
+  if (changeLevel && mCurrentFrameIndex < mFrames.size())
   {
     mContext.mpServiceProvider->fadeOutScreen();
 
-    ++mCurrentFrameIndex;
     ++mLevelIndex;
+
     mPlayerModel.resetForNewLevel();
-    mpWorld = std::make_unique<GameWorld>(
-      &mPlayerModel, demoSessionId(mLevelIndex), mContext);
+
+    mpWorld = std::make_unique<GameWorld_Classic>(
+      &mPlayerModel,
+      demoSessionId(mLevelIndex),
+      mContext,
+      std::nullopt,
+      false,
+      mFrames[mCurrentFrameIndex].mInput);
+    mpWorld->render();
+
+    mCurrentFrameIndex++;
 
     mContext.mpServiceProvider->fadeInScreen();
   }
