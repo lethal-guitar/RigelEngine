@@ -517,8 +517,12 @@ void IngameMenu::handleMenuEnterEvent(const SDL_Event& event)
 
   switch (event.key.keysym.sym)
   {
-    case SDLK_ESCAPE:
+    case SDLK_q:
       mMenuToEnter = MenuType::ConfirmQuitInGame;
+      break;
+
+    case SDLK_ESCAPE:
+      mMenuToEnter = MenuType::TopLevel;
       break;
 
     case SDLK_F1:
