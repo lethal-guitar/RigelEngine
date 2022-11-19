@@ -813,25 +813,6 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
         ImGui::EndDisabled();
       }
 
-#if 0
-      // NOTE: This is disabled for now, it's not quite ready yet to be made
-      // user-facing.
-      const auto canUseCompatibilityMode = !mpOptions->mWidescreenModeOn;
-
-      withEnabledState(canUseCompatibilityMode, [&]() {
-        auto gameplayStyleIndex =
-          mpOptions->mCompatibilityModeOn && canUseCompatibilityMode ? 0 : 1;
-        ImGui::Combo(
-          "Gameplay style",
-          &gameplayStyleIndex,
-          "Compatibility mode\0Enhanced mode\0");
-
-        if (canUseCompatibilityMode) {
-          mpOptions->mCompatibilityModeOn = gameplayStyleIndex == 0;
-        }
-      });
-#endif
-
       if (mpOptions->mGameplayStyle == data::GameplayStyle::Classic)
       {
         auto dummy = false;

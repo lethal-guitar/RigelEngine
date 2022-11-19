@@ -1287,55 +1287,25 @@ void Player::updateShooting(const Button& fireButton)
     mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
     mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
 
-  if (mpOptions->compatibilityModeOn())
+  if (!canFire())
   {
-    if (!fireButton.mIsPressed)
-    {
-      mRapidFiredLastFrame = false;
-    }
+    return;
+  }
 
+  if (
+    fireButton.mWasTriggered ||
+    (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame))
+  {
+    fireShot();
+  }
+
+  if (fireButton.mIsPressed && hasRapidFire)
+  {
     mRapidFiredLastFrame = !mRapidFiredLastFrame;
-
-    if (!canFire())
-    {
-      return;
-    }
-
-    if (!fireButton.mIsPressed)
-    {
-      mFiredLastFrame = false;
-    }
-
-    if (
-      (fireButton.mWasTriggered && !mFiredLastFrame) ||
-      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame))
-    {
-      fireShot();
-      mFiredLastFrame = true;
-    }
   }
   else
   {
-    if (!canFire())
-    {
-      return;
-    }
-
-    if (
-      fireButton.mWasTriggered ||
-      (fireButton.mIsPressed && hasRapidFire && !mRapidFiredLastFrame))
-    {
-      fireShot();
-    }
-
-    if (fireButton.mIsPressed && hasRapidFire)
-    {
-      mRapidFiredLastFrame = !mRapidFiredLastFrame;
-    }
-    else
-    {
-      mRapidFiredLastFrame = false;
-    }
+    mRapidFiredLastFrame = false;
   }
 }
 

@@ -154,7 +154,6 @@ struct GameOptions
   bool mEnableTopLevelMods = true;
 
   // Gameplay
-  bool mCompatibilityModeOn = false;
   GameplayStyle mGameplayStyle = GameplayStyle::Enhanced;
 
   // Enhancements
@@ -173,11 +172,6 @@ struct GameOptions
   bool mPerElementUpscalingEnabled = false;
 
   // Helper functions
-  bool compatibilityModeOn() const
-  {
-    return mCompatibilityModeOn && !mWidescreenModeOn;
-  }
-
   bool widescreenModeActive() const
   {
     return mWidescreenModeOn && mGameplayStyle == GameplayStyle::Enhanced;

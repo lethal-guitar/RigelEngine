@@ -123,8 +123,7 @@ base::Vec2 adjustedPosition(
   const ProjectileType type,
   WorldPosition position,
   const ProjectileDirection direction,
-  const BoundingBox& boundingBox,
-  const bool useBuggyOffsets)
+  const BoundingBox& boundingBox)
 {
   using D = ProjectileDirection;
 
@@ -159,29 +158,6 @@ base::Vec2 adjustedPosition(
   if (direction == D::Down && type != ProjectileType::Flame)
   {
     position.y += boundingBox.size.height - 1;
-  }
-
-  if (useBuggyOffsets)
-  {
-    if (type == ProjectileType::Normal && direction == D::Left)
-    {
-      position.x -= 1;
-    }
-
-    if (type == ProjectileType::Normal && direction == D::Down)
-    {
-      position.y += 1;
-    }
-
-    if (type == ProjectileType::Rocket && direction == D::Left)
-    {
-      position.x += 1;
-    }
-
-    if (type == ProjectileType::Rocket && direction == D::Down)
-    {
-      position.y -= 2;
-    }
   }
 
   return position;
@@ -368,8 +344,8 @@ entityx::Entity EntityFactory::spawnProjectile(
   const auto damageAmount = damageForProjectileType(type);
 
   entity.assign<Active>();
-  entity.assign<WorldPosition>(adjustedPosition(
-    type, pos, direction, boundingBox, mpOptions->compatibilityModeOn()));
+  entity.assign<WorldPosition>(
+    adjustedPosition(type, pos, direction, boundingBox));
   entity.assign<DamageInflicting>(damageAmount, DestroyOnContact{false});
   entity.assign<PlayerProjectile>(type);
   entity.assign<AutoDestroy>(
