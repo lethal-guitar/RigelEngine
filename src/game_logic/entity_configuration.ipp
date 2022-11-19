@@ -25,6 +25,8 @@ using namespace game_logic::components::parameter_aliases;
 
 const auto SCORE_NUMBER_LIFE_TIME = 60;
 
+constexpr auto ITEM_PICKUP_DELAY = 5;
+
 // clang-format off
 const base::Vec2f SCORE_NUMBER_MOVE_SEQUENCE[] = {
   {0.0f, -1.0f},
@@ -546,6 +548,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CircuitBoard;
         item.mShownTutorialMessage = TutorialMessageId::FoundAccessCard;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity, ContainerColor::White, 100, item, AppearsOnRadar{});
         entity.assign<CollectableItemForCheat>(
@@ -560,6 +563,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::BlueKey;
         item.mShownTutorialMessage = TutorialMessageId::FoundBlueKey;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity, ContainerColor::White, 100, item, AppearsOnRadar{});
         entity.assign<CollectableItemForCheat>(
@@ -574,6 +578,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::RapidFire;
         item.mShownTutorialMessage = TutorialMessageId::FoundRapidFire;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -592,6 +597,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 500;
         item.mGivenItem = InventoryItemType::CloakingDevice;
         item.mSpawnScoreNumbers = false;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         auto animation = AnimationLoop{1};
         configureItemBox(
           entity,
@@ -776,6 +782,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Rocket;
         item.mShownTutorialMessage = TutorialMessageId::FoundRocketLauncher;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -796,6 +803,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::FlameThrower;
         item.mShownTutorialMessage = TutorialMessageId::FoundFlameThrower;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -816,6 +824,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Normal;
         item.mShownTutorialMessage = TutorialMessageId::FoundRegularWeapon;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -834,6 +843,7 @@ void EntityFactory::configureEntity(
         item.mGivenScore = 2000;
         item.mGivenWeapon = WeaponType::Laser;
         item.mShownTutorialMessage = TutorialMessageId::FoundLaser;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity,
           ContainerColor::Green,
@@ -858,6 +868,7 @@ void EntityFactory::configureEntity(
         item.mGivenScoreAtFullHealth = 10000;
         item.mGivenHealth = 1;
         item.mShownTutorialMessage = TutorialMessageId::FoundHealthMolecule;
+        item.mDelayUntilPickupAllowed = ITEM_PICKUP_DELAY;
         configureItemBox(
           entity,
           ContainerColor::Blue,
@@ -1970,9 +1981,7 @@ void EntityFactory::configureEntity(
 
     case ActorID::Dynamic_geometry_2: // shootable wall, explodes into small
                                       // pieces
-      entity.assign<Shootable>(Health{1});
-      entity.component<Shootable>()->mAlwaysConsumeInflictor = true;
-      entity.component<Shootable>()->mCanBeHitWhenOffscreen = true;
+      entity.assign<ShootableWall>();
       {
         // Shootable walls have a bounding box that's one unit wider than the
         // actual area.
