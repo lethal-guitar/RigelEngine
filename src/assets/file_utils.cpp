@@ -56,7 +56,7 @@ void saveToFile(
   const assets::ByteBuffer& buffer,
   const std::filesystem::path& filePath)
 {
-  std::ofstream file(filePath.u8string(), std::ios::binary);
+  std::ofstream file(filePath, std::ios::binary);
   if (!file.is_open())
   {
     throw runtime_error(string("File can't be opened: ") + filePath.u8string());

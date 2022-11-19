@@ -853,7 +853,7 @@ void UserProfile::saveToDisk()
       LOG_F(INFO, "Saving options file");
 
       path.replace_filename(OPTIONS_FILENAME);
-      auto optionsFile = std::ofstream(path.u8string());
+      auto optionsFile = std::ofstream(path);
       LOG_IF_F(
         ERROR,
         !optionsFile.is_open(),
@@ -867,7 +867,7 @@ void UserProfile::saveToDisk()
       LOG_F(INFO, "Saving mod library");
 
       path.replace_filename(MOD_LIBRARY_FILENAME);
-      auto modLibraryFile = std::ofstream(path.u8string());
+      auto modLibraryFile = std::ofstream(path);
       LOG_IF_F(
         ERROR,
         !modLibraryFile.is_open(),
