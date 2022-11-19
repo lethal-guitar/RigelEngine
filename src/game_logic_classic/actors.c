@@ -2415,16 +2415,7 @@ static void Act_ForceField(Context* ctx, word handle)
         ctx->plPosX,
         ctx->plPosY))
   {
-    // Insta-kill player
-    ctx->plHealth = 1;
-    ctx->plMercyFramesLeft = 0;
-    ctx->plCloakTimeLeft = 0;
-    DamagePlayer(ctx);
-
-    // [BUG] The cloak doesn't reappear if the player dies while cloaked
-    // and then respawns at a checkpoint, potentially making the level
-    // unwinnable.  This should use the same cloak respawning code here as
-    // in Act_PlayerSprite().
+    InstaKillPlayer(ctx);
   }
 
   //

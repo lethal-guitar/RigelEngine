@@ -158,7 +158,7 @@ bool canUsePixelPerfectScaling(
   }
 
   const auto pixelPerfectBufferWidth =
-    determineLowResBufferWidth(pRenderer, options.mWidescreenModeOn);
+    determineLowResBufferWidth(pRenderer, options.widescreenModeActive());
   return pRenderer->windowSize().width >=
     pixelPerfectBufferWidth * PIXEL_PERFECT_SCALE_X &&
     pRenderer->windowSize().height >=
@@ -210,7 +210,7 @@ RenderTargetTexture createFullscreenRenderTarget(
   {
     return RenderTargetTexture{
       pRenderer,
-      determineLowResBufferWidth(pRenderer, options.mWidescreenModeOn),
+      determineLowResBufferWidth(pRenderer, options.widescreenModeActive()),
       data::GameTraits::viewportHeightPx};
   }
 }

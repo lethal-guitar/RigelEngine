@@ -20,6 +20,7 @@
 #include "frontend/game_service_provider.hpp"
 #include "frontend/user_profile.hpp"
 #include "game_logic/game_world.hpp"
+#include "game_logic_classic/game_world_classic.hpp"
 #include "ui/utils.hpp"
 
 #include <sstream>
@@ -28,6 +29,27 @@
 namespace rigel
 {
 
+namespace
+{
+
+template <typename... Args>
+std::unique_ptr<game_logic::IGameWorld>
+  createGameWorld(const data::GameplayStyle gameplayStyle, Args&&... args)
+{
+  if (gameplayStyle == data::GameplayStyle::Classic)
+  {
+    return std::make_unique<game_logic::GameWorld_Classic>(
+      std::forward<Args>(args)...);
+  }
+  else
+  {
+    return std::make_unique<game_logic::GameWorld>(std::forward<Args>(args)...);
+  }
+}
+
+} // namespace
+
+
 GameRunner::GameRunner(
   data::PlayerModel* pPlayerModel,
   const data::GameSessionId& sessionId,
@@ -35,7 +57,8 @@ GameRunner::GameRunner(
   const std::optional<base::Vec2> playerPositionOverride,
   const bool showWelcomeMessage)
   : mContext(context)
-  , mpWorld(std::make_unique<game_logic::GameWorld>(
+  , mpWorld(createGameWorld(
+      context.mpUserProfile->mOptions.mGameplayStyle,
       pPlayerModel,
       sessionId,
       context,

@@ -789,44 +789,63 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
         ImGui::PopStyleColor();
       }
 
-#if 0
-      // NOTE: This is disabled for now, it's not quite ready yet to be made
-      // user-facing.
-      const auto canUseCompatibilityMode = !mpOptions->mWidescreenModeOn;
 
-      withEnabledState(canUseCompatibilityMode, [&]() {
-        auto gameplayStyleIndex =
-          mpOptions->mCompatibilityModeOn && canUseCompatibilityMode ? 0 : 1;
+      if (mType == Type::Main)
+      {
+        auto gameplayStyleIndex = static_cast<int>(mpOptions->mGameplayStyle);
         ImGui::Combo(
-          "Gameplay style",
-          &gameplayStyleIndex,
-          "Compatibility mode\0Enhanced mode\0");
+          "Gameplay style", &gameplayStyleIndex, "Classic\0Enhanced\0");
+        mpOptions->mGameplayStyle =
+          static_cast<data::GameplayStyle>(gameplayStyleIndex);
+      }
+      else
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped("Gameplay style can only be changed in main menu");
+        ImGui::PopStyleColor();
 
-        if (canUseCompatibilityMode) {
-          mpOptions->mCompatibilityModeOn = gameplayStyleIndex == 0;
-        }
-      });
-#endif
+        ImGui::BeginDisabled(true);
 
-      ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
+        auto gameplayStyleIndex = static_cast<int>(mpOptions->mGameplayStyle);
+        ImGui::Combo(
+          "Gameplay style", &gameplayStyleIndex, "Classic\0Enhanced\0");
+
+        ImGui::EndDisabled();
+      }
+
+      if (mpOptions->mGameplayStyle == data::GameplayStyle::Classic)
+      {
+        auto dummy = false;
+        ImGui::BeginDisabled(true);
+        ImGui::Checkbox("Widescreen mode", &dummy);
+        ImGui::EndDisabled();
+      }
+      else
+      {
+        ImGui::Checkbox("Widescreen mode", &mpOptions->mWidescreenModeOn);
+      }
 
       ImGui::SameLine();
 
-      withEnabledState(mpOptions->mWidescreenModeOn, [this]() {
-        auto hudStyleIndex = static_cast<int>(mpOptions->mWidescreenHudStyle);
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 18);
-        ImGui::Combo(
-          "HUD style",
-          &hudStyleIndex,
-          "Classic\0Remixed 1 (bottom + overlays)\0Remixed 2 (bottom only)\0");
-        mpOptions->mWidescreenHudStyle =
-          static_cast<data::WidescreenHudStyle>(hudStyleIndex);
-      });
+      withEnabledState(
+        mpOptions->mWidescreenModeOn &&
+          mpOptions->mGameplayStyle == data::GameplayStyle::Enhanced,
+        [this]() {
+          auto hudStyleIndex = static_cast<int>(mpOptions->mWidescreenHudStyle);
+          ImGui::SetNextItemWidth(ImGui::GetFontSize() * 18);
+          ImGui::Combo(
+            "HUD style",
+            &hudStyleIndex,
+            "Classic\0Remixed 1 (bottom + overlays)\0Remixed 2 (bottom only)\0");
+          mpOptions->mWidescreenHudStyle =
+            static_cast<data::WidescreenHudStyle>(hudStyleIndex);
+        });
 
       ImGui::SameLine();
 
       const auto canToggleRadar = mpOptions->mWidescreenModeOn &&
-        mpOptions->mWidescreenHudStyle == data::WidescreenHudStyle::Modern;
+        mpOptions->mWidescreenHudStyle == data::WidescreenHudStyle::Modern &&
+        mpOptions->mGameplayStyle == data::GameplayStyle::Enhanced;
       if (canToggleRadar)
       {
         auto inverted = !mpOptions->mShowRadarInModernHud;
@@ -843,8 +862,20 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
       ImGui::Checkbox("Quick saving", &mpOptions->mQuickSavingEnabled);
       ImGui::Checkbox("Skip intro sequence", &mpOptions->mSkipIntro);
-      ImGui::Checkbox(
-        "Smooth scrolling & movement", &mpOptions->mMotionSmoothing);
+
+      if (mpOptions->mGameplayStyle == data::GameplayStyle::Classic)
+      {
+        auto dummy = false;
+        ImGui::BeginDisabled(true);
+        ImGui::Checkbox("Smooth scrolling & movement", &dummy);
+        ImGui::EndDisabled();
+      }
+      else
+      {
+        ImGui::Checkbox(
+          "Smooth scrolling & movement", &mpOptions->mMotionSmoothing);
+      }
+
       ImGui::EndTabItem();
     }
 
@@ -888,14 +919,15 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
 
   // If the user selects a key for rebinding, and then switches to a different
   // tab via the mouse/gamepad, stop rebinding. To implement that, we always
-  // stop rebinding when any other tab aside from keyboard controls is visible.
+  // stop rebinding when any other tab aside from keyboard controls is
+  // visible.
   if (stopRebindingDueToTabSwitch)
   {
     endRebinding();
   }
 
-  // If a game path was specified on the command line, don't show the game path
-  // chooser.
+  // If a game path was specified on the command line, don't show the game
+  // path chooser.
   if (shouldDrawGamePathChooser())
   {
     if (mGamePathChooserHeightNormalized == 0.0f)
@@ -1129,10 +1161,10 @@ void OptionsMenu::drawCreditsBox(const engine::TimeDelta dt)
   // to reappear after the end has scrolled off screen.
   if (mCreditsBoxContentHeightNormalized == 0.0f)
   {
-    // We store the height divided by the window height, since the window might
-    // be resized later. That would throw off our calculations if we were to
-    // store the actual height. But this way, we simply multiply with the
-    // actual window height at the time of drawing (see above).
+    // We store the height divided by the window height, since the window
+    // might be resized later. That would throw off our calculations if we
+    // were to store the actual height. But this way, we simply multiply with
+    // the actual window height at the time of drawing (see above).
     mCreditsBoxContentHeightNormalized =
       (ImGui::GetCursorPosY() - creditsBoxHeight) / windowSize.y;
   }

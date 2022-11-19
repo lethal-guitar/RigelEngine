@@ -133,6 +133,14 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
     {WidescreenHudStyle::Ultrawide, "Ultrawide"},
     {WidescreenHudStyle::Modern, "Modern"},
   })
+
+
+NLOHMANN_JSON_SERIALIZE_ENUM(
+  GameplayStyle,
+  {
+    {GameplayStyle::Classic, "Classic"},
+    {GameplayStyle::Enhanced, "Enhanced"},
+  })
 } // namespace data
 
 
@@ -428,11 +436,7 @@ nlohmann::ordered_json serialize(const data::GameOptions& options)
     SDL_GetKeyName(options.mQuickLoadKeybinding);
   serialized["topLevelModsEnabled"] = options.mEnableTopLevelMods;
 
-#if 0
-  // NOTE: This is disabled for now, it's not quite ready yet to be made
-  // user-facing.
-  serialized["compatibilityModeOn"] = options.mCompatibilityModeOn;
-#endif
+  serialized["gameplayStyle"] = options.mGameplayStyle;
 
   serialized["widescreenModeOn"] = options.mWidescreenModeOn;
   serialized["widescreenHudStyle"] = options.mWidescreenHudStyle;
@@ -652,8 +656,7 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
   extractKeyBindingIfExists(
     "quickLoadKeybinding", result.mQuickLoadKeybinding, json);
   extractValueIfExists("topLevelModsEnabled", result.mEnableTopLevelMods, json);
-  extractValueIfExists(
-    "compatibilityModeOn", result.mCompatibilityModeOn, json);
+  extractValueIfExists("gameplayStyle", result.mGameplayStyle, json);
   extractValueIfExists("widescreenModeOn", result.mWidescreenModeOn, json);
   extractValueIfExists("widescreenHudStyle", result.mWidescreenHudStyle, json);
   extractValueIfExists(

@@ -93,6 +93,13 @@ enum class WidescreenHudStyle : std::uint8_t
 };
 
 
+enum class GameplayStyle : std::uint8_t
+{
+  Classic,
+  Enhanced
+};
+
+
 /** Data-model for user-configurable options/settings
  *
  * This struct contains everything that can be configured by the user in
@@ -147,7 +154,7 @@ struct GameOptions
   bool mEnableTopLevelMods = true;
 
   // Gameplay
-  bool mCompatibilityModeOn = false;
+  GameplayStyle mGameplayStyle = GameplayStyle::Enhanced;
 
   // Enhancements
   bool mWidescreenModeOn = false;
@@ -165,9 +172,9 @@ struct GameOptions
   bool mPerElementUpscalingEnabled = false;
 
   // Helper functions
-  bool compatibilityModeOn() const
+  bool widescreenModeActive() const
   {
-    return mCompatibilityModeOn && !mWidescreenModeOn;
+    return mWidescreenModeOn && mGameplayStyle == GameplayStyle::Enhanced;
   }
 
   std::array<SDL_Keycode*, 8> allKeyBindings()

@@ -58,8 +58,10 @@
 #define MAX_NUM_ACTORS 448
 #define MAX_NUM_EFFECTS 18
 #define MAX_NUM_PLAYER_SHOTS 6
-#define MAX_NUM_MOVING_MAP_PARTS 70
 #define MAX_NUM_TILE_DEBRIS 700
+
+// This one is slightly raised, the original only allows 70 map parts
+#define MAX_NUM_MOVING_MAP_PARTS 100
 
 
 // Types of effect movement patterns
@@ -623,6 +625,7 @@ void Map_DestroySection(
   word bottom);
 
 void DamagePlayer(Context* ctx);
+void InstaKillPlayer(Context* ctx);
 
 int16_t CheckWorldCollision(
   Context* ctx,

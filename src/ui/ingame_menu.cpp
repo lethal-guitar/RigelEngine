@@ -388,7 +388,7 @@ auto IngameMenu::updateAndRender(engine::TimeDelta dt) -> UpdateResult
       [this, dt](ScriptedMenu& state) {
         const auto& options = mContext.mpUserProfile->mOptions;
         if (
-          state.mIsTransparent && options.mWidescreenModeOn &&
+          state.mIsTransparent && options.widescreenModeActive() &&
           renderer::canUseWidescreenMode(mContext.mpRenderer))
         {
           // When showing a message box while in-game, the corresponding
