@@ -262,7 +262,7 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es)
   es.each<CollectableItem, WorldPosition, BoundingBox>(
     [this, &es](
       ex::Entity entity,
-      const CollectableItem& collectable,
+      CollectableItem& collectable,
       const WorldPosition& pos,
       const BoundingBox& collisionRect) {
       using namespace data;
@@ -271,8 +271,15 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es)
       worldSpaceBbox.topLeft +=
         base::Vec2{pos.x, pos.y - (worldSpaceBbox.size.height - 1)};
 
+      if (collectable.mDelayUntilPickupAllowed > 0)
+      {
+        collectable.mDelayUntilPickupAllowed--;
+      }
+
       auto playerBBox = mpPlayer->worldSpaceHitBox();
-      if (worldSpaceBbox.intersects(playerBBox))
+      if (
+        collectable.mDelayUntilPickupAllowed == 0 &&
+        worldSpaceBbox.intersects(playerBBox))
       {
         std::optional<data::SoundId> soundToPlay;
 

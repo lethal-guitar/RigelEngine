@@ -38,6 +38,7 @@ struct CollectableItem
   std::optional<data::WeaponType> mGivenWeapon;
   std::optional<data::CollectableLetterType> mGivenCollectableLetter;
   std::optional<data::TutorialMessageId> mShownTutorialMessage;
+  std::uint8_t mDelayUntilPickupAllowed = 0;
   bool mSpawnScoreNumbers = true;
 };
 
