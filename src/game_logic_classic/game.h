@@ -623,6 +623,7 @@ void Map_DestroySection(
   word bottom);
 
 void DamagePlayer(Context* ctx);
+void InstaKillPlayer(Context* ctx);
 
 int16_t CheckWorldCollision(
   Context* ctx,

@@ -73,6 +73,23 @@ void DamagePlayer(Context* ctx)
 }
 
 
+void InstaKillPlayer(Context* ctx)
+{
+  ctx->plHealth = 1;
+  ctx->plMercyFramesLeft = 0;
+
+  if (ctx->plCloakTimeLeft)
+  {
+    ctx->plCloakTimeLeft = 0;
+    RemoveFromInventory(ctx, ACT_CLOAKING_DEVICE_ICON);
+    SpawnActor(
+      ctx, ACT_CLOAKING_DEVICE, ctx->gmCloakPickupPosX, ctx->gmCloakPickupPosY);
+  }
+
+  DamagePlayer(ctx);
+}
+
+
 /** Replacement for C library's abs */
 static int16_t DN2_abs(int16_t val)
 {
@@ -724,16 +741,7 @@ static void UpdateActorPlayerCollision(Context* ctx, word handle)
         break;
 
       case ACT_ELECTRIC_REACTOR:
-        // Insta-kill the player
-        ctx->plHealth = 1;
-        ctx->plMercyFramesLeft = 0;
-        ctx->plCloakTimeLeft = 0;
-        DamagePlayer(ctx);
-
-        // [BUG] The cloak doesn't reappear if the player dies while cloaked
-        // and then respawns at a checkpoint, potentially making the level
-        // unwinnable.  This should use the same cloak respawning code here as
-        // in Act_PlayerSprite().
+        InstaKillPlayer(ctx);
         break;
 
       case ACT_NORMAL_WEAPON:
