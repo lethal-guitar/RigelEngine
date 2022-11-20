@@ -729,7 +729,7 @@ void Game::takeScreenshot()
       fs::create_directory(path, ec);
     }
 
-    return assets::savePng((path / filename).u8string(), shot);
+    return assets::savePng(path / filename, shot);
   };
 
   const auto gameDirScreenshotPath =

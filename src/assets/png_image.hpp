@@ -29,6 +29,6 @@ namespace rigel::assets
 std::optional<data::Image> loadPng(const std::filesystem::path& path);
 std::optional<data::Image> loadPng(base::ArrayView<std::uint8_t> data);
 
-bool savePng(const std::string& path, const data::Image& image);
+bool savePng(const std::filesystem::path& path, const data::Image& image);
 
 } // namespace rigel::assets

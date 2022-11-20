@@ -24,7 +24,9 @@ RIGEL_DISABLE_WARNINGS
 #include <stb_image_write.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <fstream>
 #include <memory>
+
 
 namespace rigel::assets
 {
@@ -45,6 +47,13 @@ std::optional<data::Image>
   data::PixelBuffer buffer{pPixels, pPixels + numPixels};
   return data::Image{
     std::move(buffer), static_cast<size_t>(width), static_cast<size_t>(height)};
+}
+
+
+void writeToFile(void* pContext, void* pData, int size)
+{
+  auto& file = *static_cast<std::ofstream*>(pContext);
+  file.write(reinterpret_cast<const char*>(pData), size);
 }
 
 } // namespace
@@ -77,12 +86,18 @@ std::optional<data::Image> loadPng(base::ArrayView<std::uint8_t> data)
 }
 
 
-bool savePng(const std::string& path, const data::Image& image)
+bool savePng(const std::filesystem::path& path, const data::Image& image)
 {
+  std::ofstream file(path, std::ios::binary);
+  if (!file.is_open())
+  {
+    return false;
+  }
+
   const auto width = static_cast<int>(image.width());
   const auto height = static_cast<int>(image.height());
-  const auto result = stbi_write_png(
-    path.c_str(), width, height, 4, image.pixelData().data(), width * 4);
+  const auto result = stbi_write_png_to_func(
+    writeToFile, &file, width, height, 4, image.pixelData().data(), width * 4);
   return result != 0;
 }
 
