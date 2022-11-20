@@ -16,6 +16,7 @@
 
 #include "png_image.hpp"
 
+#include "assets/file_utils.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -49,17 +50,14 @@ std::optional<data::Image>
 } // namespace
 
 
-std::optional<data::Image> loadPng(const std::string& path)
+std::optional<data::Image> loadPng(const std::filesystem::path& path)
 {
-  int width = 0;
-  int height = 0;
-  const auto imageDeleter = [](unsigned char* p) {
-    stbi_image_free(p);
-  };
-  std::unique_ptr<unsigned char, decltype(imageDeleter)> pImageData{
-    stbi_load(path.c_str(), &width, &height, nullptr, 4), imageDeleter};
+  if (const auto data = tryLoadFile(path))
+  {
+    return loadPng(*data);
+  }
 
-  return convertToImage(pImageData.get(), width, height);
+  return {};
 }
 
 
