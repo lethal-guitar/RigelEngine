@@ -686,7 +686,7 @@ void deserializeJsonObjectIfPresent(
 
   try
   {
-    std::ifstream jsonFile(path.u8string());
+    std::ifstream jsonFile(path);
 
     nlohmann::json serializedObject;
     jsonFile >> serializedObject;
