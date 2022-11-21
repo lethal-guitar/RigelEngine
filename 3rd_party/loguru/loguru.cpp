@@ -45,6 +45,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <memory>
 
 #ifdef _WIN32
 	#include <direct.h>
@@ -697,7 +698,11 @@ namespace loguru
 			*p = '\0';
 
 	#ifdef _WIN32
-			if (_mkdir(file_path) == -1) {
+			const auto charsNeeded = MultiByteToWideChar(CP_UTF8, 0, file_path, -1, nullptr, 0);
+			auto w_file_path = std::unique_ptr<wchar_t[]>(new wchar_t[charsNeeded]);
+			MultiByteToWideChar(CP_UTF8, 0, file_path, -1, w_file_path.get(), charsNeeded);
+
+			if (_wmkdir(w_file_path.get()) == -1) {
 	#else
 			if (mkdir(file_path, 0755) == -1) {
 	#endif
@@ -732,12 +737,23 @@ namespace loguru
 			LOG_F(ERROR, "Failed to create directories to '" LOGURU_FMT(s) "'", path);
 		}
 
+#ifdef _WIN32
+		const auto mode_str = (mode == FileMode::Truncate ? L"w" : L"a");
+
+		const auto charsNeeded = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
+		auto wpath = std::unique_ptr<wchar_t[]>(new wchar_t[charsNeeded]);
+		MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath.get(), charsNeeded);
+
+		auto file = _wfopen(wpath.get(), mode_str);
+#else
 		const char* mode_str = (mode == FileMode::Truncate ? "w" : "a");
 		auto file = fopen(path, mode_str);
+#endif
 		if (!file) {
 			LOG_F(ERROR, "Failed to open '" LOGURU_FMT(s) "'", path);
 			return false;
 		}
+
 #if LOGURU_WITH_FILEABS
 		FileAbs* file_abs = new FileAbs(); // this is deleted in file_close;
 		snprintf(file_abs->path, sizeof(file_abs->path) - 1, "%s", path);

@@ -35,12 +35,12 @@ const char* OUT_OF_DATA_ERROR_MSG = "No more data in stream";
 }
 
 
-ByteBuffer loadFile(const std::filesystem::path& fileName)
+std::optional<ByteBuffer> tryLoadFile(const std::filesystem::path& path)
 {
-  ifstream file(fileName, ios::binary | ios::ate);
+  ifstream file(path, ios::binary | ios::ate);
   if (!file.is_open())
   {
-    throw runtime_error(string("File can't be opened: ") + fileName.u8string());
+    return {};
   }
 
   const auto fileSize = static_cast<size_t>(file.tellg());
@@ -49,6 +49,19 @@ ByteBuffer loadFile(const std::filesystem::path& fileName)
   static_assert(sizeof(char) == sizeof(uint8_t));
   file.read(reinterpret_cast<char*>(data.data()), fileSize);
   return data;
+}
+
+
+ByteBuffer loadFile(const std::filesystem::path& path)
+{
+  auto buffer = tryLoadFile(path);
+
+  if (!buffer)
+  {
+    throw runtime_error(string("File can't be opened: ") + path.u8string());
+  }
+
+  return *buffer;
 }
 
 

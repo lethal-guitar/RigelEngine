@@ -16,6 +16,7 @@
 
 #include "png_image.hpp"
 
+#include "assets/file_utils.hpp"
 #include "base/warnings.hpp"
 
 RIGEL_DISABLE_WARNINGS
@@ -23,7 +24,9 @@ RIGEL_DISABLE_WARNINGS
 #include <stb_image_write.h>
 RIGEL_RESTORE_WARNINGS
 
+#include <fstream>
 #include <memory>
+
 
 namespace rigel::assets
 {
@@ -46,20 +49,24 @@ std::optional<data::Image>
     std::move(buffer), static_cast<size_t>(width), static_cast<size_t>(height)};
 }
 
+
+void writeToFile(void* pContext, void* pData, int size)
+{
+  auto& file = *static_cast<std::ofstream*>(pContext);
+  file.write(reinterpret_cast<const char*>(pData), size);
+}
+
 } // namespace
 
 
-std::optional<data::Image> loadPng(const std::string& path)
+std::optional<data::Image> loadPng(const std::filesystem::path& path)
 {
-  int width = 0;
-  int height = 0;
-  const auto imageDeleter = [](unsigned char* p) {
-    stbi_image_free(p);
-  };
-  std::unique_ptr<unsigned char, decltype(imageDeleter)> pImageData{
-    stbi_load(path.c_str(), &width, &height, nullptr, 4), imageDeleter};
+  if (const auto data = tryLoadFile(path))
+  {
+    return loadPng(*data);
+  }
 
-  return convertToImage(pImageData.get(), width, height);
+  return {};
 }
 
 
@@ -79,12 +86,18 @@ std::optional<data::Image> loadPng(base::ArrayView<std::uint8_t> data)
 }
 
 
-bool savePng(const std::string& path, const data::Image& image)
+bool savePng(const std::filesystem::path& path, const data::Image& image)
 {
+  std::ofstream file(path, std::ios::binary);
+  if (!file.is_open())
+  {
+    return false;
+  }
+
   const auto width = static_cast<int>(image.width());
   const auto height = static_cast<int>(image.height());
-  const auto result = stbi_write_png(
-    path.c_str(), width, height, 4, image.pixelData().data(), width * 4);
+  const auto result = stbi_write_png_to_func(
+    writeToFile, &file, width, height, 4, image.pixelData().data(), width * 4);
   return result != 0;
 }
 

@@ -103,7 +103,7 @@ std::optional<data::Image> loadReplacementTilesetIfPresent(
   const auto replacementName = "tileset"s + number + ".png";
   const auto replacementPath = resourcePath / replacementName;
 
-  return loadPng(replacementPath.u8string());
+  return loadPng(replacementPath);
 }
 
 
@@ -179,9 +179,8 @@ std::optional<T> ResourceLoader::tryLoadReplacement(TryLoadFunc&& tryLoad) const
 std::optional<data::Image>
   ResourceLoader::tryLoadPngReplacement(std::string_view filename) const
 {
-  return tryLoadReplacement([filename](const fs::path& path) {
-    return loadPng((path / filename).u8string());
-  });
+  return tryLoadReplacement(
+    [filename](const fs::path& path) { return loadPng(path / filename); });
 }
 
 

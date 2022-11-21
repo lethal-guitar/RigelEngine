@@ -20,11 +20,14 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
 
 
 namespace rigel::assets
 {
+
+std::optional<ByteBuffer> tryLoadFile(const std::filesystem::path& path);
 
 /** Load entire contents of file with given name into ByteBuffer
  *

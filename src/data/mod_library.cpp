@@ -230,15 +230,18 @@ void ModLibrary::rescan()
 
 std::vector<std::filesystem::path> ModLibrary::enabledModPaths() const
 {
+  namespace fs = std::filesystem;
+
   // TODO: Maybe express this in a nicer way using ranges?
   // It's essentially a filter -> transform
-  std::vector<std::filesystem::path> enabledMods;
+  std::vector<fs::path> enabledMods;
 
   for (const auto& mod : mModSelection)
   {
     if (mod.mIsEnabled)
     {
-      enabledMods.push_back(mGamePath / MODS_PATH / mAvailableMods[mod.mIndex]);
+      enabledMods.push_back(
+        mGamePath / MODS_PATH / fs::u8path(mAvailableMods[mod.mIndex]));
     }
   }
 
