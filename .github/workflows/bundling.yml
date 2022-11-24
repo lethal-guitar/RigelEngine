@@ -30,6 +30,24 @@ jobs:
       with:
         name: ubuntu_deb_build
         path: build/packages/*.deb*
+  build_package_osx:
+    runs-on: macos-11
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: brew install sdl2 sdl2_mixer
+    - name: Run CMake
+      run: cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
+    - name: Build
+      run: cd build && make -j2
+    - name: Package (dmg)
+      run: cd build && cpack -G "DragNDrop" .. && mv packages/rigelengine.dmg packages/rigelengine_mac_x64.dmg && mv packages/rigelengine.dmg.sha256 packages/rigelengine_mac_x64.dmg.sha256
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos_dmg_build
+        path: build/packages/*.dmg*
 #  build_package_osx:
 #    runs-on: macos-11
 #    steps:
