@@ -32,19 +32,181 @@ namespace rigel
 namespace
 {
 
+using namespace game_logic;
+
+class CombinedGameWorld : public game_logic::IGameWorld
+{
+public:
+  CombinedGameWorld(
+    data::PlayerModel* pPlayerModel,
+    const data::GameSessionId& sessionId,
+    GameMode::Context context,
+    std::optional<base::Vec2> playerPositionOverride = std::nullopt,
+    bool showWelcomeMessage = false,
+    const PlayerInput& initialInput = PlayerInput{})
+    : mModelB(*pPlayerModel)
+    , mpRenderer(context.mpRenderer)
+    , mBuffer(mpRenderer, 320, 200)
+    , mpWorldA(std::make_unique<GameWorld_Classic>(
+        pPlayerModel,
+        sessionId,
+        context,
+        playerPositionOverride,
+        showWelcomeMessage,
+        initialInput))
+    , mpWorldB(std::make_unique<GameWorld>(
+        &mModelB,
+        sessionId,
+        context,
+        playerPositionOverride,
+        showWelcomeMessage,
+        initialInput))
+  {
+  }
+
+
+  bool levelFinished() const
+  {
+    return mpWorldA->levelFinished() || mpWorldB->levelFinished();
+  }
+
+  std::set<data::Bonus> achievedBonuses() const
+  {
+    return mpWorldA->achievedBonuses();
+  }
+
+  bool needsPerElementUpscaling() const { return true; }
+
+  void updateGameLogic(const PlayerInput& input)
+  {
+    mpWorldA->updateGameLogic(input);
+    mpWorldB->updateGameLogic(input);
+  }
+
+  void render(float interpolationFactor = 0.0f)
+  {
+    const auto saved2 = renderer::saveState(mpRenderer);
+    mpRenderer->setClipRect({});
+    mpRenderer->setGlobalTranslation({});
+
+    const auto totalWidth = mpRenderer->currentRenderTargetSize().width;
+    const auto widthPerGame = (totalWidth - 32) / 2;
+
+    const auto factorX = float(widthPerGame) / 320.0f;
+    const auto factorY = 1.3f * factorX;
+
+    mpRenderer->setGlobalScale({factorX, factorY});
+
+    {
+      const auto saved = mBuffer.bindAndReset();
+      mpRenderer->clear();
+      mpWorldA->render(interpolationFactor);
+    }
+
+    mBuffer.render(0, 0);
+
+    {
+      const auto saved = mBuffer.bindAndReset();
+      mpRenderer->clear();
+      mpWorldB->render(interpolationFactor);
+    }
+
+    mpRenderer->setGlobalTranslation({32 + widthPerGame, 0});
+    mBuffer.render(0, 0);
+  }
+
+  void processEndOfFrameActions()
+  {
+    mpWorldA->processEndOfFrameActions();
+    mpWorldB->processEndOfFrameActions();
+  }
+
+  void updateBackdropAutoScrolling(engine::TimeDelta dt)
+  {
+    mpWorldA->updateBackdropAutoScrolling(dt);
+    mpWorldB->updateBackdropAutoScrolling(dt);
+  }
+
+  bool isPlayerInShip() const { return mpWorldA->isPlayerInShip(); }
+
+  void toggleGodMode()
+  {
+    mpWorldA->toggleGodMode();
+    mpWorldB->toggleGodMode();
+  }
+
+  bool isGodModeOn() const { return mpWorldA->isGodModeOn(); }
+
+  void activateFullHealthCheat()
+  {
+    mpWorldA->activateFullHealthCheat();
+    mpWorldB->activateFullHealthCheat();
+  }
+
+  void activateGiveItemsCheat()
+  {
+    mpWorldA->activateGiveItemsCheat();
+    mpWorldB->activateGiveItemsCheat();
+  }
+
+  void quickSave()
+  {
+    mpWorldA->quickSave();
+    mpWorldB->quickSave();
+  }
+
+  void quickLoad()
+  {
+    mpWorldA->quickLoad();
+    mpWorldB->quickLoad();
+  }
+
+  bool canQuickLoad() const
+  {
+    return mpWorldA->canQuickLoad() || mpWorldB->canQuickLoad();
+  }
+
+  void debugToggleBoundingBoxDisplay()
+  {
+    mpWorldB->debugToggleBoundingBoxDisplay();
+  }
+
+  void debugToggleWorldCollisionDataDisplay()
+  {
+    mpWorldB->debugToggleWorldCollisionDataDisplay();
+  }
+
+  void debugToggleGridDisplay() { mpWorldB->debugToggleGridDisplay(); }
+
+  void printDebugText(std::ostream& stream) const
+  {
+    mpWorldA->printDebugText(stream);
+    mpWorldB->printDebugText(stream);
+  }
+
+private:
+  data::PlayerModel mModelB;
+  renderer::Renderer* mpRenderer;
+  renderer::RenderTargetTexture mBuffer;
+  std::unique_ptr<game_logic::GameWorld_Classic> mpWorldA;
+  std::unique_ptr<game_logic::GameWorld> mpWorldB;
+};
+
 template <typename... Args>
 std::unique_ptr<game_logic::IGameWorld>
   createGameWorld(const data::GameplayStyle gameplayStyle, Args&&... args)
 {
-  if (gameplayStyle == data::GameplayStyle::Classic)
-  {
-    return std::make_unique<game_logic::GameWorld_Classic>(
-      std::forward<Args>(args)...);
-  }
-  else
-  {
-    return std::make_unique<game_logic::GameWorld>(std::forward<Args>(args)...);
-  }
+  return std::make_unique<CombinedGameWorld>(std::forward<Args>(args)...);
+  // if (gameplayStyle == data::GameplayStyle::Classic)
+  //{
+  // return std::make_unique<game_logic::GameWorld_Classic>(
+  // std::forward<Args>(args)...);
+  //}
+  // else
+  //{
+  // return
+  // std::make_unique<game_logic::GameWorld>(std::forward<Args>(args)...);
+  //}
 }
 
 } // namespace
