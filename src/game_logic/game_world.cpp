@@ -1372,6 +1372,8 @@ void GameWorld::printDebugText(std::ostream& stream) const
 
   stream << "\nEntities: " << mpState->mEntities.size() << '\n';
 
+  stream << "\nRNG: " << int(mpState->mRandomGenerator.index()) << '\n';
+
   if (mpOptions->mPerElementUpscalingEnabled)
   {
     stream << "Hi-res mode ON\n";

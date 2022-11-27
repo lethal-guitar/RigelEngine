@@ -31,6 +31,8 @@ class RandomNumberGenerator
 public:
   int gen();
 
+  std::uint8_t index() const { return mNextNumberIndex; }
+
 private:
   std::uint8_t mNextNumberIndex = 0;
 };

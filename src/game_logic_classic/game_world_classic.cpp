@@ -1174,6 +1174,7 @@ void GameWorld_Classic::printDebugText(std::ostream& stream) const
   printNumberAligned("Player shots:    ", numShots);
   printNumberAligned("Particle groups: ", numParticleGroups);
   printNumberAligned("Tile debris:     ", numTileDebris);
+  printNumberAligned("RNG:             ", int(mpState->gmRngIndex));
 
   if (mpOptions->mPerElementUpscalingEnabled)
   {
