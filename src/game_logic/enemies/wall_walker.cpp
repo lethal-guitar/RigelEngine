@@ -16,8 +16,9 @@
 
 #include "wall_walker.hpp"
 
-#include "engine/movement.hpp"
+#include "engine/collision_checker.hpp"
 #include "engine/random_number_generator.hpp"
+#include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
@@ -44,50 +45,8 @@ void WallWalker::update(
 {
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
-
-  auto moveAndAnimate = [&, this]() {
-    switch (mDirection)
-    {
-      case Direction::Up:
-        animationFrame = mMovementToggle * 2;
-        if (mMovementToggle != 0)
-        {
-          return engine::moveVertically(*d.mpCollisionChecker, entity, -1) ==
-            engine::MovementResult::Completed;
-        }
-        break;
-
-      case Direction::Down:
-        animationFrame = mMovementToggle * 2;
-        if (mMovementToggle == 0)
-        {
-          return engine::moveVertically(*d.mpCollisionChecker, entity, 1) ==
-            engine::MovementResult::Completed;
-        }
-        break;
-
-      case Direction::Left:
-        animationFrame = mMovementToggle;
-        if (mMovementToggle == 0)
-        {
-          return engine::moveHorizontally(*d.mpCollisionChecker, entity, -1) ==
-            engine::MovementResult::Completed;
-        }
-        break;
-
-      case Direction::Right:
-        animationFrame = mMovementToggle;
-        if (mMovementToggle != 0)
-        {
-          return engine::moveHorizontally(*d.mpCollisionChecker, entity, 1) ==
-            engine::MovementResult::Completed;
-        }
-        break;
-    }
-
-    return true;
-  };
-
+  auto& position = *entity.component<engine::components::WorldPosition>();
+  const auto& bbox = *entity.component<engine::components::BoundingBox>();
 
   mShouldSkipThisFrame = !mShouldSkipThisFrame;
   if (mShouldSkipThisFrame)
@@ -96,10 +55,100 @@ void WallWalker::update(
   }
 
   mMovementToggle = !mMovementToggle;
-  --mFramesUntilDirectionSwitch;
 
-  const auto moveSucceeded = moveAndAnimate();
-  if (!moveSucceeded || mFramesUntilDirectionSwitch <= 0)
+  if (mFramesUntilDirectionSwitch != 0)
+  {
+    --mFramesUntilDirectionSwitch;
+  }
+
+  switch (mDirection)
+  {
+    case Direction::Up:
+      animationFrame = mMovementToggle * 2;
+      if (mMovementToggle != 0)
+      {
+        position.y--;
+      }
+      break;
+
+    case Direction::Down:
+      animationFrame = mMovementToggle * 2;
+      if (mMovementToggle == 0)
+      {
+        position.y++;
+      }
+      break;
+
+    case Direction::Left:
+      animationFrame = mMovementToggle;
+      if (mMovementToggle == 0)
+      {
+        position.x--;
+      }
+      break;
+
+    case Direction::Right:
+      animationFrame = mMovementToggle;
+      if (mMovementToggle != 0)
+      {
+        position.x++;
+      }
+      break;
+  }
+
+  engine::synchronizeBoundingBoxToSprite(entity);
+
+  auto applyCollision = [&]() {
+    switch (mDirection)
+    {
+      case Direction::Up:
+        if (d.mpCollisionChecker->isTouchingCeiling(
+              position + base::Vec2{0, 1}, bbox))
+        {
+          position.y++;
+          return true;
+        }
+        break;
+
+      case Direction::Down:
+        if (d.mpCollisionChecker->isOnSolidGround(
+              position + base::Vec2{0, -1}, bbox))
+        {
+          position.y--;
+          return true;
+        }
+        break;
+
+      case Direction::Left:
+        if (
+          d.mpCollisionChecker->isTouchingLeftWall(
+            position + base::Vec2{1, 0}, bbox) ||
+          !d.mpCollisionChecker->isOnSolidGround(
+            position + base::Vec2{-2, 0}, bbox))
+        {
+          position.x++;
+          return true;
+        }
+        break;
+
+      case Direction::Right:
+        if (
+          d.mpCollisionChecker->isTouchingRightWall(
+            position + base::Vec2{-1, 0}, bbox) ||
+          !d.mpCollisionChecker->isOnSolidGround(
+            position + base::Vec2{2, 0}, bbox))
+        {
+          position.x--;
+          return true;
+        }
+        break;
+    }
+
+    return false;
+  };
+
+
+  while (applyCollision() || mFramesUntilDirectionSwitch == 0)
   {
     const auto newDirectionChoice = d.mpRandomGenerator->gen() % 2;
     if (mDirection == Direction::Up || mDirection == Direction::Down)
