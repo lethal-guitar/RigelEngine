@@ -610,13 +610,13 @@ void GameWorld::updateGameLogic(const PlayerInput& input)
     mpState->mWaterAnimStep = 0;
   }
 
-  mpState->mDynamicGeometrySystem.updateShootableWalls();
-
   mpState->mPlayerInteractionSystem.updatePlayerInteraction(
     input, mpState->mEntities);
   mpState->mPlayer.update(input);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mpState->mCamera.update(input, viewportSize);
+
+  mpState->mDynamicGeometrySystem.updateShootableWalls();
 
   engine::markActiveEntities(
     mpState->mEntities, mpState->mCamera.position(), viewportSize);
