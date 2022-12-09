@@ -16,6 +16,7 @@
 
 #include "movement.hpp"
 
+#include "base/defer.hpp"
 #include "base/math_utils.hpp"
 #include "base/static_vector.hpp"
 #include "data/map.hpp"
@@ -228,6 +229,49 @@ MovementResult moveHorizontallyWithStairStepping(
           i > 0 ? MovementResult::MovedPartially : MovementResult::Failed;
         break;
       }
+    }
+  }
+
+  return finalResult;
+}
+
+
+MovementResult moveHorizontallyWithYAdjust(
+  const CollisionChecker& collisionChecker,
+  ex::Entity entity,
+  const int amount)
+{
+  if (amount == 0)
+  {
+    return MovementResult::Completed;
+  }
+
+  const auto desiredDistance = std::abs(amount);
+  const auto step = base::sgn(amount);
+
+  auto& position = *entity.component<WorldPosition>();
+  const auto& bbox = *entity.component<BoundingBox>();
+
+  const auto isColliding = [&]() {
+    return step < 0
+      ? collisionChecker.isTouchingLeftWall(position + base::Vec2{1, 0}, bbox)
+      : collisionChecker.isTouchingRightWall(
+          position + base::Vec2{-1, 0}, bbox);
+  };
+
+  MovementResult finalResult = MovementResult::Completed;
+  for (int i = 0; i < desiredDistance; ++i)
+  {
+    position.x += step;
+    --position.y;
+    const auto guard = base::defer([&]() { ++position.y; });
+
+    if (isColliding())
+    {
+      position.x -= step;
+      finalResult =
+        i > 0 ? MovementResult::MovedPartially : MovementResult::Failed;
+      break;
     }
   }
 

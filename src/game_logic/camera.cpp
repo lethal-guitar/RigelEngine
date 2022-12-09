@@ -59,7 +59,7 @@ constexpr auto TIGHT_VERTICAL_DEAD_ZONE = VerticalDeadZone{7, 13};
 
 constexpr auto INITIAL_CAMERA_OFFSET = base::Vec2{15, 19};
 
-constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 4;
+constexpr auto MANUAL_SROLL_COOLDOWN_AFTER_SHOOTING = 5;
 
 
 bool shouldUseTightDeadZone(const Player& player)
@@ -257,10 +257,6 @@ void Camera::centerViewOnPlayer()
 {
   auto playerPos =
     normalizedPlayerBounds(*mpPlayer, mViewportSize).bottomLeft();
-  if (mpPlayer->orientation() == Orientation::Left)
-  {
-    playerPos.x -= 1;
-  }
 
   setPosition(playerPos - INITIAL_CAMERA_OFFSET);
 }

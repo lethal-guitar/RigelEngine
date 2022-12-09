@@ -22,6 +22,7 @@
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/physical_components.hpp"
+#include "engine/physics.hpp"
 #include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "frontend/game_service_provider.hpp"
@@ -110,6 +111,9 @@ void SpikedGreenCreature::update(
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
 
+  engine::applyPhysics(
+    *d.mpCollisionChecker, *s.mpMap, entity, body, position, bbox);
+
   base::match(
     mState,
     [&, this](Awakening& state) {
@@ -126,6 +130,7 @@ void SpikedGreenCreature::update(
       {
         d.mpServiceProvider->playSound(data::SoundId::GlassBreaking);
         animationFrame = 1;
+        engine::synchronizeBoundingBoxToSprite(entity);
 
         spawnEffects(
           components::DestructionEffects{
@@ -147,9 +152,10 @@ void SpikedGreenCreature::update(
       {
         // There is a slight bug here, in that we stay on frame 2 the first
         // time around, but all subsequent Waiting states switch to frame 3
-        // here. Since this affects the enemies hitbox, I decided against
+        // here. Since this affects the enemy's hitbox, I decided against
         // fixing it.
         ++animationFrame;
+        engine::synchronizeBoundingBoxToSprite(entity);
       }
 
       if (state.mFramesElapsed == 15)
@@ -162,8 +168,9 @@ void SpikedGreenCreature::update(
       if (state.mFramesElapsed == 0)
       {
         engine::startAnimationSequence(entity, POUNCE_ANIM_SEQ);
-        engine::synchronizeBoundingBoxToSprite(entity);
       }
+
+      engine::synchronizeBoundingBoxToSprite(entity);
 
       if (state.mFramesElapsed < 6)
       {
@@ -178,7 +185,7 @@ void SpikedGreenCreature::update(
       ensureNotStuckInWall(d, entity);
 
       ++state.mFramesElapsed;
-      if (state.mFramesElapsed == 8)
+      if (state.mFramesElapsed == 7)
       {
         body.mGravityAffected = true;
         body.mVelocity.y = 1.0f;
@@ -187,49 +194,24 @@ void SpikedGreenCreature::update(
     },
 
     [&, this](const Landing&) {
-      const auto hasLanded =
-        d.mpCollisionChecker->isOnSolidGround(position, bbox);
+      const auto hasLanded = body.mVelocity.y == 0.0f;
       if (hasLanded)
       {
-        landOnGround(d, entity);
-        return;
+        animationFrame = 2;
+        engine::synchronizeBoundingBoxToSprite(entity);
+
+        const auto offset = engine::orientation::toMovement(orientation);
+        position.x += offset * MOVEMENT_SPEED;
+        ensureNotStuckInWall(d, entity);
+
+        body.mGravityAffected = false;
+        mState = Waiting{};
       }
-
-      moveWhileFalling(d, entity);
+      else
+      {
+        moveWhileFalling(d, entity);
+      }
     });
-
-  engine::synchronizeBoundingBoxToSprite(entity);
-}
-
-
-void SpikedGreenCreature::onCollision(
-  GlobalDependencies& d,
-  GlobalState&,
-  const engine::events::CollidedWithWorld& event,
-  entityx::Entity entity)
-{
-  if (std::holds_alternative<Landing>(mState) && event.mCollidedBottom)
-  {
-    landOnGround(d, entity);
-  }
-}
-
-
-void SpikedGreenCreature::landOnGround(
-  const GlobalDependencies& d,
-  entityx::Entity entity)
-{
-  auto& body = *entity.component<engine::components::MovingBody>();
-  auto& animationFrame =
-    entity.component<engine::components::Sprite>()->mFramesToRender[0];
-
-  body.mGravityAffected = false;
-  animationFrame = 2;
-  engine::synchronizeBoundingBoxToSprite(entity);
-
-  moveWhileFalling(d, entity);
-
-  mState = Waiting{};
 }
 
 
@@ -269,8 +251,7 @@ void SpikedGreenCreature::moveWhileFalling(
   const auto offset = engine::orientation::toMovement(orientation);
 
   position.x += offset;
-  engine::moveHorizontallyWithStairStepping(
-    *d.mpCollisionChecker, entity, offset);
+  engine::moveHorizontallyWithYAdjust(*d.mpCollisionChecker, entity, offset);
 }
 
 } // namespace rigel::game_logic::behaviors

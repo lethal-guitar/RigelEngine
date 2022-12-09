@@ -166,10 +166,19 @@ void GameRunner::updateWorld(const engine::TimeDelta dt)
   else
   {
     mAccumulatedTime += dt;
-    for (; mAccumulatedTime >= game_logic::GAME_LOGIC_UPDATE_DELAY;
-         mAccumulatedTime -= game_logic::GAME_LOGIC_UPDATE_DELAY)
+
+    // Unusually long delta time - most likely, the game was paused in the
+    // debugger, or something else happened (computer put to sleep?)
+    // Ignore this delta time.
+    if (mAccumulatedTime > 0.25)
+    {
+      mAccumulatedTime = 0.0;
+    }
+
+    if (mAccumulatedTime >= game_logic::GAME_LOGIC_UPDATE_DELAY)
     {
       update();
+      mAccumulatedTime -= game_logic::GAME_LOGIC_UPDATE_DELAY;
     }
 
     mpWorld->updateBackdropAutoScrolling(dt);
