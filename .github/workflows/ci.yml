@@ -14,7 +14,7 @@ jobs:
   clang_format_check:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: DoozyX/clang-format-lint-action@v0.12
       with:
         source: 'benchmark src test'
@@ -23,22 +23,22 @@ jobs:
   build_wasm:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Setup cache for Emscripten
       id: cache-system-libraries
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{env.EM_CACHE_DIR}}
         key: ${{env.EM_VERSION}}-${{ runner.os }}
-    - uses: mymindstorm/setup-emsdk@v7
+    - uses: mymindstorm/setup-emsdk@v11
       with:
         version: ${{env.EM_VERSION}}
         actions-cache-folder: ${{env.EM_CACHE_DIR}}
     - name: Setup cache for game data
       id: cache-game-data
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: DUKE2
         key: duke2-shareware
@@ -48,14 +48,14 @@ jobs:
       run: emcmake cmake -H. -Bbuild_wasm -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=ON -DWEBASSEMBLY_GAME_PATH=$(pwd)/DUKE2
     - name: Build
       run: make -j2 -Cbuild_wasm
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: wasm_build
         path: build_wasm/src/RigelEngine.*
   build_linux:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install dependencies
@@ -75,7 +75,7 @@ jobs:
   build_osx:
     runs-on: macos-11
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install dependencies
