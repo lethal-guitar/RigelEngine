@@ -1183,6 +1183,7 @@ void EntityFactory::configureEntity(
         actorID == ActorID::Big_green_cat_LEFT ? Orientation::Left
                                                : Orientation::Right);
       addDefaultMovingBody(entity, boundingBox);
+      entity.component<MovingBody>()->mIsActive = false;
       entity.assign<BehaviorController>(behaviors::BigGreenCat{});
       entity.assign<DestructionEffects>(
         BIOLOGICAL_ENEMY_KILL_EFFECT_SPEC,

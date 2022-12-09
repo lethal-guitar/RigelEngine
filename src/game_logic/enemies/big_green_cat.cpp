@@ -19,6 +19,8 @@
 #include "engine/base_components.hpp"
 #include "engine/collision_checker.hpp"
 #include "engine/movement.hpp"
+#include "engine/physics.hpp"
+#include "engine/sprite_tools.hpp"
 #include "engine/visual_components.hpp"
 #include "game_logic/global_dependencies.hpp"
 
@@ -42,42 +44,52 @@ void BigGreenCat::update(
   bool isOnScreen,
   entityx::Entity entity)
 {
+  auto& position = *entity.component<engine::components::WorldPosition>();
+  auto& body = *entity.component<engine::components::MovingBody>();
   auto& animationFrame =
     entity.component<engine::components::Sprite>()->mFramesToRender[0];
   auto& orientation = *entity.component<engine::components::Orientation>();
+
+  engine::applyPhysics(
+    *d.mpCollisionChecker,
+    *s.mpMap,
+    entity,
+    body,
+    position,
+    *entity.component<engine::components::BoundingBox>());
 
   if (mWaitFramesRemaining != 0)
   {
     animationFrame = 0;
     --mWaitFramesRemaining;
-    return;
-  }
-
-  ++mAnimationStep;
-  mAnimationStep %= 4;
-
-  const auto isTouchingGround = d.mpCollisionChecker->isOnSolidGround(
-    *entity.component<engine::components::WorldPosition>(),
-    *entity.component<engine::components::BoundingBox>());
-  if (isTouchingGround)
-  {
-    animationFrame = ANIMATION_SEQUENCE[mAnimationStep];
   }
   else
   {
-    animationFrame = 2;
+    ++mAnimationStep;
+    mAnimationStep %= 4;
+
+    const auto result = engine::moveHorizontallyWithYAdjust(
+      *d.mpCollisionChecker,
+      entity,
+      MOVEMENT_SPEED * engine::orientation::toMovement(orientation));
+    if (result != engine::MovementResult::Completed)
+    {
+      orientation = engine::orientation::opposite(orientation);
+      mWaitFramesRemaining = FRAMES_TO_WAIT;
+      mAnimationStep = 0;
+    }
+
+    if (body.mVelocity.y == 0.0f)
+    {
+      animationFrame = ANIMATION_SEQUENCE[mAnimationStep];
+    }
+    else
+    {
+      animationFrame = 2;
+    }
   }
 
-  const auto result = engine::moveHorizontallyWithStairStepping(
-    *d.mpCollisionChecker,
-    entity,
-    MOVEMENT_SPEED * engine::orientation::toMovement(orientation));
-  if (result != engine::MovementResult::Completed)
-  {
-    orientation = engine::orientation::opposite(orientation);
-    mWaitFramesRemaining = FRAMES_TO_WAIT;
-    mAnimationStep = 0;
-  }
+  engine::synchronizeBoundingBoxToSprite(entity);
 }
 
 } // namespace rigel::game_logic::behaviors
