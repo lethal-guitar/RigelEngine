@@ -198,7 +198,9 @@ WorldState::WorldState(
       [&]() {
         using engine::components::Orientation;
         auto playerEntity = mEntityFactory.spawnActor(
-          data::ActorID::Duke_LEFT, loadedLevel.mPlayerSpawnPosition);
+          data::ActorID::Duke_LEFT,
+          loadedLevel.mPlayerSpawnPosition +
+            (loadedLevel.mPlayerFacingLeft ? base::Vec2{1, 0} : base::Vec2{}));
         assignPlayerComponents(
           playerEntity,
           loadedLevel.mPlayerFacingLeft ? Orientation::Left

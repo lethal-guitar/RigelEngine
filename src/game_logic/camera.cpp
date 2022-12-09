@@ -257,10 +257,6 @@ void Camera::centerViewOnPlayer()
 {
   auto playerPos =
     normalizedPlayerBounds(*mpPlayer, mViewportSize).bottomLeft();
-  if (mpPlayer->orientation() == Orientation::Left)
-  {
-    playerPos.x -= 1;
-  }
 
   setPosition(playerPos - INITIAL_CAMERA_OFFSET);
 }
