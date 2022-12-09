@@ -72,13 +72,6 @@ struct SpikedGreenCreature
     bool isOnScreen,
     entityx::Entity entity);
 
-  void onCollision(
-    GlobalDependencies& dependencies,
-    GlobalState& state,
-    const engine::events::CollidedWithWorld& event,
-    entityx::Entity entity);
-
-  void landOnGround(const GlobalDependencies& d, entityx::Entity entity);
   void
     ensureNotStuckInWall(const GlobalDependencies& d, entityx::Entity entity);
   void moveWhileFalling(const GlobalDependencies& d, entityx::Entity entity);

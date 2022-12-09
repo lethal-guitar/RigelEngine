@@ -1511,6 +1511,7 @@ void EntityFactory::configureEntity(
       entity.assign<PlayerDamaging>(Damage{1});
       entity.assign<BoundingBox>(boundingBox);
       entity.assign<MovingBody>(Velocity{}, GravityAffected{false});
+      entity.component<MovingBody>()->mIsActive = false;
       entity.assign<Orientation>(
         actorID == ActorID::Spiked_green_creature_LEFT ? Orientation::Left
                                                        : Orientation::Right);
