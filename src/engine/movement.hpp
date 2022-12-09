@@ -79,6 +79,11 @@ MovementResult moveHorizontallyWithStairStepping(
   entityx::Entity entity,
   int amount);
 
+MovementResult moveHorizontallyWithYAdjust(
+  const CollisionChecker& collisionChecker,
+  entityx::Entity entity,
+  int amount);
+
 
 int determineConveyorBeltMotionAmount(
   const CollisionChecker& collisionChecker,
