@@ -15,6 +15,8 @@ Compared to running the original in an emulator, RigelEngine offers many modern 
 * improved game controller support
 * extended modding features
 
+<img src="https://nikolai-wuttke.de/RigelEngine/assets/screenshot.png" width="500"/>
+
 There was never any source code released for the original game, so this project
 is based on reverse engineering (specifically, disassembly of the original binaries).
 See [Duke2Reconstructed](https://github.com/lethal-guitar/Duke2Reconstructed) for a complete reconstruction of the original code.
@@ -23,9 +25,7 @@ Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm 
 
 Read the [F.A.Q.](https://github.com/lethal-guitar/RigelEngine/wiki/FAQ)
 
-Showcase video (outdated):
-
-<a href="http://www.youtube.com/watch?v=U7-eotm8Xoo"><img src="https://i.imgur.com/06btu7R.png" width="540"></img></a>
+Watch a [showcase video (outdated)](http://www.youtube.com/watch?v=U7-eotm8Xoo)
 
 ## Current state
 
@@ -63,7 +63,7 @@ On Linux, using GL ES can be an option for those older Intel GPUs.
 See [Supported Graphics cards](https://github.com/lethal-guitar/RigelEngine/wiki/Supported-graphics-cards-(GPUs)) for more info.
 
 Aside from the graphics card, you don't need much.
-The game needs less than 32 MB of RAM (64 MB on OS X),
+The game needs less than 64 MB of RAM,
 and runs fine on a single-core ARMv6 CPU clocked at 700 MHz (Raspberry Pi 1).
 
 ## Contributing
