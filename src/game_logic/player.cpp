@@ -745,6 +745,7 @@ void Player::exitShip()
   auto& sprite = *mEntity.component<c::Sprite>();
   sprite = mpEntityFactory->createSpriteForId(data::ActorID::Duke_LEFT);
   *mEntity.component<c::BoundingBox>() = DEFAULT_PLAYER_BOUNDS;
+  mEntity.remove<c::OverrideDrawOrder>();
 
   setVisualState(VisualState::Standing);
 }

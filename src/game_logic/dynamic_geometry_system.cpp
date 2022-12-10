@@ -402,9 +402,9 @@ void DynamicGeometrySystem::updateShootableWalls()
         const MovingBody& body,
         const WorldPosition& position,
         const BoundingBox& bbox) {
-        const auto futurePosition = base::Vec2{
+        const auto futurePosition = body.mIsActive ? base::Vec2{
           position.x + int(body.mVelocity.x),
-          position.y + int(body.mVelocity.y)};
+          position.y + int(body.mVelocity.y)} : position;
         mCollectedProjectiles.push_back(
           {entity, engine::toWorldSpace(bbox, futurePosition)});
       });
@@ -436,6 +436,7 @@ void DynamicGeometrySystem::updateShootableWalls()
 
             projectile.destroy();
             entity.destroy();
+            break;
           }
         }
       });
