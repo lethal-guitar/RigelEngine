@@ -436,6 +436,7 @@ void DynamicGeometrySystem::updateShootableWalls()
 
             projectile.destroy();
             entity.destroy();
+            break;
           }
         }
       });
