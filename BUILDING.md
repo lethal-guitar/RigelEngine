@@ -13,7 +13,6 @@
 * [OS X builds](#mac-build-instructions)
     * [Catalina (10.15) or newer](#mac-build-instructions-1015)
     * [Mojave (10.14) using clang 8](#mac-build-instructions-1014)
-    * [High Sierra (10.13) or older using clang 7](#mac-build-instructions-1013)
 * [Windows builds](#windows-build-instructions)
     * [64-bit builds](#windows-build-instructions-64)
     * [32-bit builds](#windows-build-instructions-32)
