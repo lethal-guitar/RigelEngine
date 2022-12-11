@@ -1912,10 +1912,17 @@ void EntityFactory::configureEntity(
       break;
 
     case ActorID::Rotating_floor_spikes: // rotating floor spikes
-      entity.assign<BoundingBox>(boundingBox);
-      entity.assign<PlayerDamaging>(1);
-      entity.assign<AnimationLoop>(2);
-      entity.assign<AppearsOnRadar>();
+      {
+        auto adjustedBbox = boundingBox;
+        adjustedBbox.size.height -= 1;
+        entity.assign<BoundingBox>(adjustedBbox);
+        entity.assign<PlayerDamaging>(1);
+        entity.assign<AnimationLoop>(2, 0, std::nullopt, 1);
+        entity.component<Sprite>()->mFramesToRender[0] =
+          engine::IGNORE_RENDER_SLOT;
+        entity.component<Sprite>()->mFramesToRender[1] = 0;
+        entity.assign<AppearsOnRadar>();
+      }
       break;
 
     case ActorID::Computer_Terminal_Duke_Escaped: // Computer showing "Duke
