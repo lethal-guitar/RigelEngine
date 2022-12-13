@@ -26,4 +26,6 @@ constexpr auto VERSION_PATCH = ${PROJECT_VERSION_PATCH};
 
 constexpr auto COMMIT_HASH = "${RIGEL_COMMIT_HASH}";
 
+constexpr auto IS_CUSTOM_BUILD = ${RIGEL_IS_CUSTOM_BUILD};
+
 }

@@ -367,6 +367,9 @@ set(core_sources
 set(RIGEL_COMMIT_HASH "N/A")
 rigel_determine_git_commit_hash(RIGEL_COMMIT_HASH)
 
+set(RIGEL_IS_CUSTOM_BUILD "true")
+rigel_check_if_custom_build(RIGEL_IS_CUSTOM_BUILD)
+
 configure_file(
     version_info.hpp.in
     "${CMAKE_CURRENT_BINARY_DIR}/generated/version_info.hpp"
