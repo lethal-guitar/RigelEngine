@@ -98,3 +98,29 @@ function(rigel_determine_git_commit_hash output_var)
         endif()
     endif()
 endfunction()
+
+
+function(rigel_check_if_custom_build output_var)
+    set(${output_var} "true" PARENT_SCOPE)
+
+    if (GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe --exact-match --tags HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            RESULT_VARIABLE git_exit_code
+            OUTPUT_VARIABLE git_tag_name
+            ERROR_QUIET
+        )
+
+        if(${git_exit_code} EQUAL 0)
+            string(STRIP "${git_tag_name}" git_tag_name)
+
+            if(
+                "${git_tag_name}" STREQUAL
+                "v${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+            )
+                set(${output_var} "false" PARENT_SCOPE)
+            endif()
+        endif()
+    endif()
+endfunction()

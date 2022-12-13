@@ -884,7 +884,8 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::NewLine();
 
       ImGui::Text(
-        "RigelEngine v%d.%d.%d (commit %s) - %s renderer",
+        "RigelEngine%sv%d.%d.%d (commit %s) - %s renderer",
+        IS_CUSTOM_BUILD ? " custom build, based on " : " ",
         VERSION_MAJOR,
         VERSION_MINOR,
         VERSION_PATCH,
