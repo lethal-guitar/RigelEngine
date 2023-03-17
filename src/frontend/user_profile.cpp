@@ -31,6 +31,7 @@ RIGEL_RESTORE_WARNINGS
 #include <array>
 #include <fstream>
 #include <iomanip>
+#include <optional>
 #include <unordered_set>
 
 
@@ -906,6 +907,26 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath()
 {
   namespace fs = std::filesystem;
 
+  if (isPortableInstall())
+  {
+    try
+    {
+      const auto prefsDir = fs::current_path() / "userdata";
+
+      if (!fs::exists(prefsDir) && !fs::is_directory(prefsDir))
+      {
+        fs::create_directory(prefsDir);
+      }
+
+      return prefsDir;
+    }
+    catch (const std::exception& ex)
+    {
+      LOG_F(ERROR, "Cannot open user preferences directory: %s", ex.what());
+      return {};
+    }
+  }
+
   auto deleter = [](char* path) {
     SDL_free(path);
   };
@@ -919,6 +940,37 @@ std::optional<std::filesystem::path> createOrGetPreferencesPath()
   }
 
   return fs::u8path(std::string{pPreferencesDirName.get()});
+}
+
+
+bool isPortableInstall()
+{
+  namespace fs = std::filesystem;
+
+  static std::optional<bool> cachedResult;
+
+  if (cachedResult)
+  {
+    return *cachedResult;
+  }
+
+  std::error_code errc;
+
+  const auto pwd = fs::current_path(errc);
+
+  if (errc)
+  {
+    return false;
+  }
+
+  const auto indicatorFile = pwd / "portable.txt";
+
+  const auto result = fs::exists(indicatorFile, errc) && !errc &&
+    fs::is_regular_file(indicatorFile, errc) && !errc;
+
+  cachedResult = result;
+
+  return result;
 }
 
 

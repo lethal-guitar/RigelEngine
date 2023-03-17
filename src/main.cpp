@@ -264,9 +264,15 @@ void initializeLogging(int argc, char** argv)
 }
 
 
-int runGame(const CommandLineOptions& config)
+int runGame(CommandLineOptions config)
 {
   enableDpiAwareness();
+
+  if (isPortableInstall())
+  {
+    std::error_code errc;
+    config.mGamePath = std::filesystem::current_path(errc).u8string();
+  }
 
   try
   {
