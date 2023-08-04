@@ -254,17 +254,17 @@ void ShowTutorial(Context* ctx, TutorialId index)
 {
   const auto id = static_cast<rigel::data::TutorialMessageId>(index);
 
-  if (!getBridge(ctx).mpPlayerModel->tutorialMessages().hasBeenShown(id))
+  if (!getBridge(ctx).mpPersistentPlayerState->tutorialMessages().hasBeenShown(id))
   {
     getBridge(ctx).mpMessageDisplay->setMessage(data::messageText(id));
-    getBridge(ctx).mpPlayerModel->tutorialMessages().markAsShown(id);
+    getBridge(ctx).mpPersistentPlayerState->tutorialMessages().markAsShown(id);
   }
 }
 
 
 void AddInventoryItem(Context* ctx, word item)
 {
-  getBridge(ctx).mpPlayerModel->giveItem(convertItemType(item));
+  getBridge(ctx).mpPersistentPlayerState->giveItem(convertItemType(item));
 }
 
 
@@ -272,12 +272,12 @@ bool RemoveFromInventory(Context* ctx, word item)
 {
   const auto type = convertItemType(item);
 
-  if (!getBridge(ctx).mpPlayerModel->hasItem(type))
+  if (!getBridge(ctx).mpPersistentPlayerState->hasItem(type))
   {
     return false;
   }
 
-  getBridge(ctx).mpPlayerModel->removeItem(type);
+  getBridge(ctx).mpPersistentPlayerState->removeItem(type);
   return true;
 }
 
@@ -332,19 +332,19 @@ void relayInput(const PlayerInput& input, State* pState)
 }
 
 
-void relayPlayerModel(const data::PlayerModel& playerModel, State* pState)
+void relayPersistentPlayerState(const data::PersistentPlayerState& PersistentPlayerState, State* pState)
 {
-  pState->plWeapon = static_cast<byte>(playerModel.weapon());
-  pState->plScore = dword(playerModel.score());
-  pState->plAmmo = byte(playerModel.ammo());
-  pState->plHealth = byte(playerModel.health());
+  pState->plWeapon = static_cast<byte>(PersistentPlayerState.weapon());
+  pState->plScore = dword(PersistentPlayerState.score());
+  pState->plAmmo = byte(PersistentPlayerState.ammo());
+  pState->plHealth = byte(PersistentPlayerState.health());
 }
 
 
 std::unique_ptr<State> createState(
   const data::GameSessionId& sessionId,
   const assets::ResourceLoader& resources,
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& PersistentPlayerState,
   Bridge* pBridge)
 {
   auto pState = std::make_unique<State>();
@@ -369,7 +369,7 @@ std::unique_ptr<State> createState(
   pState->gmCurrentEpisode = byte(sessionId.mEpisode);
   pState->gmDifficulty = byte(sessionId.mDifficulty) + 1;
 
-  relayPlayerModel(playerModel, pState.get());
+  relayPersistentPlayerState(PersistentPlayerState, pState.get());
 
   return pState;
 }
@@ -382,12 +382,12 @@ Bridge::Bridge(
   data::map::Map* pMap,
   IGameServiceProvider* pServiceProvider,
   ui::IngameMessageDisplay* pMessageDisplay,
-  data::PlayerModel* pPlayerModel)
+  data::PersistentPlayerState* pPersistentPlayerState)
   : mLevelHints(resources.loadHintMessages())
   , mpMap(pMap)
   , mpServiceProvider(pServiceProvider)
   , mpMessageDisplay(pMessageDisplay)
-  , mpPlayerModel(pPlayerModel)
+  , mpPersistentPlayerState(pPersistentPlayerState)
 {
 }
 
@@ -405,23 +405,23 @@ void Bridge::resetForNewFrame()
 struct GameWorld_Classic::QuickSaveData
 {
   QuickSaveData(
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& PersistentPlayerState,
     const data::map::Map& map,
     const State& state)
-    : mPlayerModel(playerModel)
+    : mPersistentPlayerState(PersistentPlayerState)
     , mMap(map)
     , mState(state)
   {
   }
 
-  data::PlayerModel mPlayerModel;
+  data::PersistentPlayerState mPersistentPlayerState;
   data::map::Map mMap;
   State mState;
 };
 
 
 GameWorld_Classic::GameWorld_Classic(
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
   std::optional<base::Vec2> playerPositionOverride,
@@ -434,13 +434,13 @@ GameWorld_Classic::GameWorld_Classic(
       data::GameTraits::viewportSize,
       mpRenderer)
   , mTextRenderer(&mUiSpriteSheet, mpRenderer, *context.mpResources)
-  , mpPlayerModel(pPlayerModel)
+  , mpPersistentPlayerState(pPersistentPlayerState)
   , mpOptions(&context.mpUserProfile->mOptions)
   , mpResources(context.mpResources)
   , mpSpriteFactory(context.mpSpriteFactory)
   , mImageIdTable(engine::buildImageIdTable(*context.mpResources))
   , mSessionId(sessionId)
-  , mPlayerModelAtLevelStart(*mpPlayerModel)
+  , mPersistentPlayerStateAtLevelStart(*mpPersistentPlayerState)
   , mHudRenderer(
       sessionId.mIsDemo ? std::nullopt
                         : std::make_optional(sessionId.mLevel + 1),
@@ -467,9 +467,9 @@ GameWorld_Classic::GameWorld_Classic(
       &mMap,
       mpServiceProvider,
       &mMessageDisplay,
-      mpPlayerModel)
+      mpPersistentPlayerState)
   , mpState(
-      createState(sessionId, *context.mpResources, *mpPlayerModel, &mBridge))
+      createState(sessionId, *context.mpResources, *mpPersistentPlayerState, &mBridge))
 {
   LOG_SCOPE_FUNCTION(INFO);
 
@@ -607,11 +607,11 @@ void GameWorld_Classic::updateGameLogic(const PlayerInput& input)
     syncBackdrop();
   }
 
-  syncPlayerModel();
+  syncPersistentPlayerState();
 
   if (mpState->gmBeaconActivated && !beaconWasActive)
   {
-    mCheckpointState = mpPlayerModel->makeCheckpoint();
+    mCheckpointState = mpPersistentPlayerState->makeCheckpoint();
   }
 
   if (mpState->gmBossActivated && !bossWasActive)
@@ -653,7 +653,7 @@ void GameWorld_Classic::render(float)
     auto saved = setupIngameViewport(mpRenderer, mBridge.mScreenShift);
 
     drawWorld();
-    mHudRenderer.renderClassicHud(*mpPlayerModel, mBridge.mRadarDots);
+    mHudRenderer.renderClassicHud(*mpPersistentPlayerState, mBridge.mRadarDots);
   }
 
   auto saved = renderer::saveState(mpRenderer);
@@ -921,7 +921,7 @@ void GameWorld_Classic::processEndOfFrameActions()
 
     if (mpState->gmBeaconActivated)
     {
-      mpPlayerModel->restoreFromCheckpoint(*mCheckpointState);
+      mpPersistentPlayerState->restoreFromCheckpoint(*mCheckpointState);
 
       mpState->plPosX = mpState->gmBeaconPosX;
       mpState->plPosY = mpState->gmBeaconPosY;
@@ -929,7 +929,7 @@ void GameWorld_Classic::processEndOfFrameActions()
     }
     else
     {
-      *mpPlayerModel = mPlayerModelAtLevelStart;
+      *mpPersistentPlayerState = mPersistentPlayerStateAtLevelStart;
       loadLevel(mSessionId);
 
       if (mpState->gmRadarDishesLeft)
@@ -940,7 +940,7 @@ void GameWorld_Classic::processEndOfFrameActions()
 
     syncBackdrop();
 
-    relayPlayerModel(*mpPlayerModel, mpState.get());
+    relayPersistentPlayerState(*mpPersistentPlayerState, mpState.get());
 
     CenterViewOnPlayer(mpState.get());
 
@@ -980,8 +980,8 @@ bool GameWorld_Classic::isGodModeOn() const
 
 void GameWorld_Classic::activateFullHealthCheat()
 {
-  mpPlayerModel->resetHealthAndScore();
-  relayPlayerModel(*mpPlayerModel, mpState.get());
+  mpPersistentPlayerState->resetHealthAndScore();
+  relayPersistentPlayerState(*mpPersistentPlayerState, mpState.get());
 }
 
 
@@ -1062,7 +1062,7 @@ void GameWorld_Classic::activateGiveItemsCheat()
     }
   }
 
-  syncPlayerModel();
+  syncPersistentPlayerState();
 }
 
 
@@ -1075,7 +1075,7 @@ void GameWorld_Classic::quickSave()
 
   LOG_F(INFO, "Creating quick save");
 
-  mpQuickSave = std::make_unique<QuickSaveData>(*mpPlayerModel, mMap, *mpState);
+  mpQuickSave = std::make_unique<QuickSaveData>(*mpPersistentPlayerState, mMap, *mpState);
 
   mMessageDisplay.setMessage(
     data::Messages::QuickSaved, ui::MessagePriority::Menu);
@@ -1093,7 +1093,7 @@ void GameWorld_Classic::quickLoad()
 
   LOG_F(INFO, "Loading quick save");
 
-  *mpPlayerModel = mpQuickSave->mPlayerModel;
+  *mpPersistentPlayerState = mpQuickSave->mPersistentPlayerState;
   mMap = mpQuickSave->mMap;
   *mpState = mpQuickSave->mState;
 
@@ -1301,40 +1301,40 @@ void GameWorld_Classic::syncBackdrop()
 }
 
 
-void GameWorld_Classic::syncPlayerModel()
+void GameWorld_Classic::syncPersistentPlayerState()
 {
   using LT = data::CollectableLetterType;
 
-  mpPlayerModel->mWeapon = static_cast<data::WeaponType>(mpState->plWeapon);
-  mpPlayerModel->mScore = mpState->plScore;
-  mpPlayerModel->mAmmo = mpState->plAmmo;
-  mpPlayerModel->mHealth = mpState->plHealth;
+  mpPersistentPlayerState->mWeapon = static_cast<data::WeaponType>(mpState->plWeapon);
+  mpPersistentPlayerState->mScore = mpState->plScore;
+  mpPersistentPlayerState->mAmmo = mpState->plAmmo;
+  mpPersistentPlayerState->mHealth = mpState->plHealth;
 
-  mpPlayerModel->mCollectedLetters.clear();
+  mpPersistentPlayerState->mCollectedLetters.clear();
 
   if (mpState->plCollectedLetters & 0x100)
   {
-    mpPlayerModel->mCollectedLetters.push_back(LT::N);
+    mpPersistentPlayerState->mCollectedLetters.push_back(LT::N);
   }
 
   if (mpState->plCollectedLetters & 0x200)
   {
-    mpPlayerModel->mCollectedLetters.push_back(LT::U);
+    mpPersistentPlayerState->mCollectedLetters.push_back(LT::U);
   }
 
   if (mpState->plCollectedLetters & 0x400)
   {
-    mpPlayerModel->mCollectedLetters.push_back(LT::K);
+    mpPersistentPlayerState->mCollectedLetters.push_back(LT::K);
   }
 
   if (mpState->plCollectedLetters & 0x800)
   {
-    mpPlayerModel->mCollectedLetters.push_back(LT::E);
+    mpPersistentPlayerState->mCollectedLetters.push_back(LT::E);
   }
 
   if (mpState->plCollectedLetters & 0x1000)
   {
-    mpPlayerModel->mCollectedLetters.push_back(LT::M);
+    mpPersistentPlayerState->mCollectedLetters.push_back(LT::M);
   }
 }
 
