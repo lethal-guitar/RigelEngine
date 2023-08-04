@@ -68,7 +68,7 @@ constexpr auto MAX_AMMO_FLAME_THROWER = 64;
 constexpr auto MAX_HEALTH = 9;
 
 
-class PlayerModel
+class PersistentPlayerState
 {
 public:
   struct CheckpointState
@@ -85,8 +85,8 @@ public:
     InOrder
   };
 
-  PlayerModel();
-  explicit PlayerModel(const SavedGame& save);
+  PersistentPlayerState();
+  explicit PersistentPlayerState(const SavedGame& save);
 
   CheckpointState makeCheckpoint() const;
   void restoreFromCheckpoint(const CheckpointState& state);

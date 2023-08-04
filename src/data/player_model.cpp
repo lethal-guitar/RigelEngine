@@ -24,8 +24,7 @@
 
 namespace rigel::data
 {
-
-PlayerModel::PlayerModel()
+PersistentPlayerState::PersistentPlayerState()
   : mWeapon(WeaponType::Normal)
   , mScore(0)
   , mAmmo(MAX_AMMO)
@@ -34,7 +33,7 @@ PlayerModel::PlayerModel()
 }
 
 
-PlayerModel::PlayerModel(const SavedGame& save)
+PersistentPlayerState::PersistentPlayerState(const SavedGame& save)
   : mTutorialMessages(save.mTutorialMessagesAlreadySeen)
   , mWeapon(save.mWeapon)
   , mScore(save.mScore)
@@ -44,13 +43,13 @@ PlayerModel::PlayerModel(const SavedGame& save)
 }
 
 
-PlayerModel::CheckpointState PlayerModel::makeCheckpoint() const
+PersistentPlayerState::CheckpointState PersistentPlayerState::makeCheckpoint() const
 {
   return CheckpointState{mWeapon, mAmmo, mHealth};
 }
 
 
-void PlayerModel::restoreFromCheckpoint(const CheckpointState& state)
+void PersistentPlayerState::restoreFromCheckpoint(const CheckpointState& state)
 {
   mHealth = std::max(2, state.mHealth);
   mWeapon = state.mWeapon;
@@ -58,51 +57,51 @@ void PlayerModel::restoreFromCheckpoint(const CheckpointState& state)
 }
 
 
-int PlayerModel::score() const
+int PersistentPlayerState::score() const
 {
   return mScore;
 }
 
 
-void PlayerModel::giveScore(const int amount)
+void PersistentPlayerState::giveScore(const int amount)
 {
   mScore = std::clamp(mScore + amount, 0, MAX_SCORE);
 }
 
 
-int PlayerModel::ammo() const
+int PersistentPlayerState::ammo() const
 {
   return mAmmo;
 }
 
 
-int PlayerModel::currentMaxAmmo() const
+int PersistentPlayerState::currentMaxAmmo() const
 {
   return mWeapon == WeaponType::FlameThrower ? MAX_AMMO_FLAME_THROWER
                                              : MAX_AMMO;
 }
 
 
-WeaponType PlayerModel::weapon() const
+WeaponType PersistentPlayerState::weapon() const
 {
   return mWeapon;
 }
 
 
-bool PlayerModel::currentWeaponConsumesAmmo() const
+bool PersistentPlayerState::currentWeaponConsumesAmmo() const
 {
   return mWeapon != WeaponType::Normal;
 }
 
 
-void PlayerModel::switchToWeapon(const WeaponType type)
+void PersistentPlayerState::switchToWeapon(const WeaponType type)
 {
   mWeapon = type;
   mAmmo = currentMaxAmmo();
 }
 
 
-void PlayerModel::useAmmo()
+void PersistentPlayerState::useAmmo()
 {
   if (currentWeaponConsumesAmmo())
   {
@@ -115,56 +114,56 @@ void PlayerModel::useAmmo()
 }
 
 
-void PlayerModel::setAmmo(int amount)
+void PersistentPlayerState::setAmmo(int amount)
 {
   assert(amount >= 0 && amount <= currentMaxAmmo());
   mAmmo = amount;
 }
 
 
-int PlayerModel::health() const
+int PersistentPlayerState::health() const
 {
   return mHealth;
 }
 
 
-bool PlayerModel::isAtFullHealth() const
+bool PersistentPlayerState::isAtFullHealth() const
 {
   return mHealth == MAX_HEALTH;
 }
 
 
-bool PlayerModel::isDead() const
+bool PersistentPlayerState::isDead() const
 {
   return mHealth <= 0;
 }
 
 
-void PlayerModel::takeDamage(const int amount)
+void PersistentPlayerState::takeDamage(const int amount)
 {
   mHealth = std::clamp(mHealth - amount, 0, MAX_HEALTH);
 }
 
 
-void PlayerModel::takeFatalDamage()
+void PersistentPlayerState::takeFatalDamage()
 {
   mHealth = 0;
 }
 
 
-void PlayerModel::giveHealth(const int amount)
+void PersistentPlayerState::giveHealth(const int amount)
 {
   mHealth = std::clamp(mHealth + amount, 0, MAX_HEALTH);
 }
 
 
-const std::vector<InventoryItemType>& PlayerModel::inventory() const
+const std::vector<InventoryItemType>& PersistentPlayerState::inventory() const
 {
   return mInventory;
 }
 
 
-bool PlayerModel::hasItem(const InventoryItemType type) const
+bool PersistentPlayerState::hasItem(const InventoryItemType type) const
 {
   using namespace std;
 
@@ -172,7 +171,7 @@ bool PlayerModel::hasItem(const InventoryItemType type) const
 }
 
 
-void PlayerModel::giveItem(InventoryItemType type)
+void PersistentPlayerState::giveItem(InventoryItemType type)
 {
   using namespace std;
 
@@ -191,7 +190,7 @@ void PlayerModel::giveItem(InventoryItemType type)
 }
 
 
-void PlayerModel::removeItem(const InventoryItemType type)
+void PersistentPlayerState::removeItem(const InventoryItemType type)
 {
   using namespace std;
 
@@ -203,14 +202,14 @@ void PlayerModel::removeItem(const InventoryItemType type)
 }
 
 
-const std::vector<CollectableLetterType>& PlayerModel::collectedLetters() const
+const std::vector<CollectableLetterType>& PersistentPlayerState::collectedLetters() const
 {
   return mCollectedLetters;
 }
 
 
-PlayerModel::LetterCollectionState
-  PlayerModel::addLetter(const CollectableLetterType type)
+PersistentPlayerState::LetterCollectionState
+  PersistentPlayerState::addLetter(const CollectableLetterType type)
 {
   using L = CollectableLetterType;
   static std::vector<L> sExpectedOrder = {L::N, L::U, L::K, L::E, L::M};
@@ -231,7 +230,7 @@ PlayerModel::LetterCollectionState
 }
 
 
-void PlayerModel::resetForNewLevel()
+void PersistentPlayerState::resetForNewLevel()
 {
   mHealth = MAX_HEALTH;
   mCollectedLetters.clear();
@@ -239,20 +238,20 @@ void PlayerModel::resetForNewLevel()
 }
 
 
-void PlayerModel::resetHealthAndScore()
+void PersistentPlayerState::resetHealthAndScore()
 {
   mHealth = MAX_HEALTH;
   mScore = 0;
 }
 
 
-TutorialMessageState& PlayerModel::tutorialMessages()
+TutorialMessageState& PersistentPlayerState::tutorialMessages()
 {
   return mTutorialMessages;
 }
 
 
-const TutorialMessageState& PlayerModel::tutorialMessages() const
+const TutorialMessageState& PersistentPlayerState::tutorialMessages() const
 {
   return mTutorialMessages;
 }
