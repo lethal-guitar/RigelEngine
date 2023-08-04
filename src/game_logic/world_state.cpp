@@ -129,7 +129,7 @@ WorldState::WorldState(
   IGameServiceProvider* pServiceProvider,
   renderer::Renderer* pRenderer,
   const assets::ResourceLoader* pResources,
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId)
@@ -137,7 +137,7 @@ WorldState::WorldState(
       pServiceProvider,
       pRenderer,
       pResources,
-      pPlayerModel,
+      pPersistentPlayerState,
       pOptions,
       pSpriteFactory,
       sessionId,
@@ -153,7 +153,7 @@ WorldState::WorldState(
   IGameServiceProvider* pServiceProvider,
   renderer::Renderer* pRenderer,
   const assets::ResourceLoader* pResources,
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId,
@@ -162,7 +162,7 @@ WorldState::WorldState(
       pServiceProvider,
       pRenderer,
       pResources,
-      pPlayerModel,
+      pPersistentPlayerState,
       pOptions,
       pSpriteFactory,
       sessionId,
@@ -176,7 +176,7 @@ WorldState::WorldState(
   IGameServiceProvider* pServiceProvider,
   renderer::Renderer* pRenderer,
   const assets::ResourceLoader* pResources,
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameOptions* pOptions,
   engine::SpriteFactory* pSpriteFactory,
   const data::GameSessionId sessionId,
@@ -208,7 +208,7 @@ WorldState::WorldState(
         return playerEntity;
       }(),
       sessionId.mDifficulty,
-      pPlayerModel,
+      pPersistentPlayerState,
       pServiceProvider,
       pOptions,
       &mCollisionChecker,
@@ -233,7 +233,7 @@ WorldState::WorldState(
   , mPlayerInteractionSystem(
       sessionId,
       &mPlayer,
-      pPlayerModel,
+      pPersistentPlayerState,
       pServiceProvider,
       &mEntityFactory,
       &mEventManager,
@@ -244,7 +244,7 @@ WorldState::WorldState(
       pServiceProvider,
       &mCollisionChecker,
       &mMap)
-  , mDamageInflictionSystem(pPlayerModel, pServiceProvider, &mEventManager)
+  , mDamageInflictionSystem(pPersistentPlayerState, pServiceProvider, &mEventManager)
   , mDynamicGeometrySystem(
       pRenderer,
       pServiceProvider,
@@ -299,7 +299,7 @@ WorldState::WorldState(
 void WorldState::synchronizeTo(
   const WorldState& other,
   IGameServiceProvider* pServiceProvider,
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameSessionId sessionId)
 {
   if (mBackdropSwitched != other.mBackdropSwitched)
@@ -370,7 +370,7 @@ void WorldState::synchronizeTo(
     mPlayer = Player{
       playerEntity,
       sessionId.mDifficulty,
-      pPlayerModel,
+      pPersistentPlayerState,
       pServiceProvider,
       mpOptions,
       &mCollisionChecker,

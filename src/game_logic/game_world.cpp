@@ -57,7 +57,7 @@ namespace rigel::game_logic
 using namespace engine;
 using namespace std;
 
-using data::PlayerModel;
+using data::PersistentPlayerState;
 using engine::components::InterpolateMotion;
 using engine::components::WorldPosition;
 
@@ -207,7 +207,7 @@ base::Size clampedSectionSize(
 
 
 GameWorld::GameWorld(
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
   std::optional<base::Vec2> playerPositionOverride,
@@ -220,12 +220,12 @@ GameWorld::GameWorld(
       data::GameTraits::viewportSize,
       mpRenderer)
   , mTextRenderer(&mUiSpriteSheet, mpRenderer, *context.mpResources)
-  , mpPlayerModel(pPlayerModel)
+  , mpPersistentPlayerState(pPersistentPlayerState)
   , mpOptions(&context.mpUserProfile->mOptions)
   , mpResources(context.mpResources)
   , mpSpriteFactory(context.mpSpriteFactory)
   , mSessionId(sessionId)
-  , mPlayerModelAtLevelStart(*mpPlayerModel)
+  , mPersistentPlayerStateAtLevelStart(*mpPersistentPlayerState)
   , mHudRenderer(
       sessionId.mLevel + 1,
       mpOptions,
@@ -354,7 +354,7 @@ std::set<data::Bonus> GameWorld::achievedBonuses() const
 void GameWorld::receive(const rigel::events::CheckPointActivated& event)
 {
   mpState->mActivatedCheckpoint =
-    CheckpointData{mpPlayerModel->makeCheckpoint(), event.mPosition};
+    CheckpointData{mpPersistentPlayerState->makeCheckpoint(), event.mPosition};
   mMessageDisplay.setMessage(data::Messages::FoundRespawnBeacon);
 }
 
@@ -511,7 +511,7 @@ void GameWorld::createNewState()
     mpServiceProvider,
     mpRenderer,
     mpResources,
-    mpPlayerModel,
+    mpPersistentPlayerState,
     mpOptions,
     mpSpriteFactory,
     mSessionId);
@@ -763,14 +763,14 @@ void GameWorld::render(const float interpolationFactor)
   auto drawHud = [&, this]() {
     const auto radarDots =
       collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
-    mHudRenderer.renderClassicHud(*mpPlayerModel, radarDots);
+    mHudRenderer.renderClassicHud(*mpPersistentPlayerState, radarDots);
   };
 
   auto drawWidescreenHud = [&](const int viewportWidth) {
     const auto radarDots =
       collectRadarDots(mpState->mEntities, mpState->mPlayer.orientedPosition());
     mHudRenderer.renderWidescreenHud(
-      viewportWidth, mpOptions->mWidescreenHudStyle, *mpPlayerModel, radarDots);
+      viewportWidth, mpOptions->mWidescreenHudStyle, *mpPersistentPlayerState, radarDots);
   };
 
 
@@ -1073,7 +1073,7 @@ void GameWorld::debugToggleGridDisplay()
 
 void GameWorld::activateFullHealthCheat()
 {
-  mpPlayerModel->resetHealthAndScore();
+  mpPersistentPlayerState->resetHealthAndScore();
 }
 
 
@@ -1105,14 +1105,14 @@ void GameWorld::activateGiveItemsCheat()
             inventoryItem == data::InventoryItemType::BlueKey ||
             inventoryItem == data::InventoryItemType::CircuitBoard)
           {
-            mpPlayerModel->giveItem(inventoryItem);
+            mpPersistentPlayerState->giveItem(inventoryItem);
             entity.destroy();
           }
           else if (
             inventoryItem == data::InventoryItemType::CloakingDevice &&
             !mpState->mPlayer.isCloaked())
           {
-            mpPlayerModel->giveItem(inventoryItem);
+            mpPersistentPlayerState->giveItem(inventoryItem);
           }
         },
 
@@ -1127,7 +1127,7 @@ void GameWorld::activateGiveItemsCheat()
 
   if (weaponToGive)
   {
-    mpPlayerModel->switchToWeapon(*weaponToGive);
+    mpPersistentPlayerState->switchToWeapon(*weaponToGive);
   }
 }
 
@@ -1145,15 +1145,15 @@ void GameWorld::quickSave()
     mpServiceProvider,
     mpRenderer,
     mpResources,
-    mpPlayerModel,
+    mpPersistentPlayerState,
     mpOptions,
     mpSpriteFactory,
     mSessionId);
   pStateCopy->synchronizeTo(
-    *mpState, mpServiceProvider, mpPlayerModel, mSessionId);
+    *mpState, mpServiceProvider, mpPersistentPlayerState, mSessionId);
 
   mpQuickSave = std::make_unique<QuickSaveData>(
-    QuickSaveData{*mpPlayerModel, std::move(pStateCopy)});
+    QuickSaveData{*mpPersistentPlayerState, std::move(pStateCopy)});
 
   mMessageDisplay.setMessage(
     data::Messages::QuickSaved, ui::MessagePriority::Menu);
@@ -1171,9 +1171,9 @@ void GameWorld::quickLoad()
 
   LOG_F(INFO, "Loading quick save");
 
-  *mpPlayerModel = mpQuickSave->mPlayerModel;
+  *mpPersistentPlayerState = mpQuickSave->mPersistentPlayerState;
   mpState->synchronizeTo(
-    *mpQuickSave->mpState, mpServiceProvider, mpPlayerModel, mSessionId);
+    *mpQuickSave->mpState, mpServiceProvider, mpPersistentPlayerState, mSessionId);
   mpState->mPreviousCameraPosition = mpState->mCamera.position();
   mMessageDisplay.setMessage(
     data::Messages::QuickLoaded, ui::MessagePriority::Menu);
@@ -1270,7 +1270,7 @@ void GameWorld::restartLevel()
 {
   mpServiceProvider->fadeOutScreen();
 
-  *mpPlayerModel = mPlayerModelAtLevelStart;
+  *mpPersistentPlayerState = mPersistentPlayerStateAtLevelStart;
   loadLevel({});
 
   if (mpState->mRadarDishCounter.radarDishesPresent())
@@ -1296,7 +1296,7 @@ void GameWorld::restartFromCheckpoint()
     mpState->mBackdropSwitched = false;
   }
 
-  mpPlayerModel->restoreFromCheckpoint(mpState->mActivatedCheckpoint->mState);
+  mpPersistentPlayerState->restoreFromCheckpoint(mpState->mActivatedCheckpoint->mState);
   mpState->mPlayer.reSpawnAt(mpState->mActivatedCheckpoint->mPosition);
 
   mpState->mCamera.centerViewOnPlayer();
@@ -1338,10 +1338,10 @@ void GameWorld::handleTeleporter()
 
 void GameWorld::showTutorialMessage(const data::TutorialMessageId id)
 {
-  if (!mpPlayerModel->tutorialMessages().hasBeenShown(id))
+  if (!mpPersistentPlayerState->tutorialMessages().hasBeenShown(id))
   {
     mMessageDisplay.setMessage(data::messageText(id));
-    mpPlayerModel->tutorialMessages().markAsShown(id);
+    mpPersistentPlayerState->tutorialMessages().markAsShown(id);
   }
 }
 

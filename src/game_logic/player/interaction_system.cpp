@@ -34,7 +34,7 @@
 namespace rigel::game_logic
 {
 
-using data::PlayerModel;
+using data::PersistentPlayerState;
 using engine::components::AnimationLoop;
 using engine::components::BoundingBox;
 using engine::components::Sprite;
@@ -210,13 +210,13 @@ ex::Entity currentlyTouchedInteractable(
 PlayerInteractionSystem::PlayerInteractionSystem(
   const data::GameSessionId& sessionId,
   Player* pPlayer,
-  PlayerModel* pPlayerModel,
+  PersistentPlayerState* pPersistentPlayerState,
   IGameServiceProvider* pServices,
   IEntityFactory* pEntityFactory,
   entityx::EventManager* pEvents,
   const assets::ResourceLoader& resources)
   : mpPlayer(pPlayer)
-  , mpPlayerModel(pPlayerModel)
+  , mpPersistentPlayerState(pPersistentPlayerState)
   , mpServiceProvider(pServices)
   , mpEntityFactory(pEntityFactory)
   , mpEvents(pEvents)
@@ -283,12 +283,12 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es)
       {
         std::optional<data::SoundId> soundToPlay;
 
-        const auto playerAtFullHealth = mpPlayerModel->isAtFullHealth();
+        const auto playerAtFullHealth = mpPersistentPlayerState->isAtFullHealth();
         if (auto maybeScore = givenScore(collectable, playerAtFullHealth))
         {
           const auto score = *maybeScore;
           assert(score > 0);
-          mpPlayerModel->giveScore(score);
+          mpPersistentPlayerState->giveScore(score);
 
           soundToPlay = SoundId::ItemPickup;
 
@@ -301,20 +301,20 @@ void PlayerInteractionSystem::updateItemCollection(entityx::EntityManager& es)
         if (collectable.mGivenHealth)
         {
           assert(*collectable.mGivenHealth > 0);
-          mpPlayerModel->giveHealth(*collectable.mGivenHealth);
+          mpPersistentPlayerState->giveHealth(*collectable.mGivenHealth);
           soundToPlay = SoundId::HealthPickup;
         }
 
         if (collectable.mGivenWeapon)
         {
-          mpPlayerModel->switchToWeapon(*collectable.mGivenWeapon);
+          mpPersistentPlayerState->switchToWeapon(*collectable.mGivenWeapon);
           soundToPlay = SoundId::WeaponPickup;
         }
 
         if (collectable.mGivenItem)
         {
           const auto itemType = *collectable.mGivenItem;
-          mpPlayerModel->giveItem(itemType);
+          mpPersistentPlayerState->giveItem(itemType);
 
           soundToPlay = itemType == InventoryItemType::RapidFire
             ? SoundId::WeaponPickup
@@ -425,11 +425,11 @@ void PlayerInteractionSystem::activateCardReader(
   entityx::Entity interactable)
 {
   const auto hasKey =
-    mpPlayerModel->hasItem(data::InventoryItemType::CircuitBoard);
+    mpPersistentPlayerState->hasItem(data::InventoryItemType::CircuitBoard);
 
   if (hasKey)
   {
-    mpPlayerModel->removeItem(data::InventoryItemType::CircuitBoard);
+    mpPersistentPlayerState->removeItem(data::InventoryItemType::CircuitBoard);
     interaction::disableKeyCardSlot(interactable);
     interaction::disableNextForceField(es);
 
@@ -447,9 +447,9 @@ void PlayerInteractionSystem::activateKeyHole(
   entityx::EntityManager& es,
   entityx::Entity interactable)
 {
-  if (mpPlayerModel->hasItem(data::InventoryItemType::BlueKey))
+  if (mpPersistentPlayerState->hasItem(data::InventoryItemType::BlueKey))
   {
-    mpPlayerModel->removeItem(data::InventoryItemType::BlueKey);
+    mpPersistentPlayerState->removeItem(data::InventoryItemType::BlueKey);
     interaction::disableKeyHole(interactable);
 
     auto door = findFirstMatchInSpawnOrder(es, ActorTag::Type::Door);
@@ -470,14 +470,14 @@ void PlayerInteractionSystem::activateKeyHole(
 
 void PlayerInteractionSystem::activateHintMachine(entityx::Entity entity)
 {
-  if (!mpPlayerModel->hasItem(data::InventoryItemType::SpecialHintGlobe))
+  if (!mpPersistentPlayerState->hasItem(data::InventoryItemType::SpecialHintGlobe))
   {
     return;
   }
 
   const auto machinePosition = *entity.component<WorldPosition>();
-  mpPlayerModel->removeItem(data::InventoryItemType::SpecialHintGlobe);
-  mpPlayerModel->giveScore(HINT_MACHINE_ACTIVATION_SCORE);
+  mpPersistentPlayerState->removeItem(data::InventoryItemType::SpecialHintGlobe);
+  mpPersistentPlayerState->giveScore(HINT_MACHINE_ACTIVATION_SCORE);
 
   mpServiceProvider->playSound(data::SoundId::ItemPickup);
   spawnScoreNumbers(
@@ -502,20 +502,20 @@ void PlayerInteractionSystem::collectLetter(
   const data::CollectableLetterType type,
   const base::Vec2& position)
 {
-  using S = data::PlayerModel::LetterCollectionState;
+  using S = data::PersistentPlayerState::LetterCollectionState;
 
-  const auto collectionState = mpPlayerModel->addLetter(type);
+  const auto collectionState = mpPersistentPlayerState->addLetter(type);
   if (collectionState == S::InOrder)
   {
     mpServiceProvider->playSound(data::SoundId::LettersCollectedCorrectly);
-    mpPlayerModel->giveScore(CORRECT_LETTER_COLLECTION_SCORE);
+    mpPersistentPlayerState->giveScore(CORRECT_LETTER_COLLECTION_SCORE);
     spawnScoreNumbersForLetterCollectionBonus(*mpEntityFactory, position);
     showTutorialMessage(data::TutorialMessageId::LettersCollectedRightOrder);
   }
   else
   {
     mpServiceProvider->playSound(data::SoundId::ItemPickup);
-    mpPlayerModel->giveScore(BASIC_LETTER_COLLECTION_SCORE);
+    mpPersistentPlayerState->giveScore(BASIC_LETTER_COLLECTION_SCORE);
 
     // In the original game, bonus letters spawn a floating 100 on pickup, but
     // the player is given 10100 points. This seems like a bug. My guess is

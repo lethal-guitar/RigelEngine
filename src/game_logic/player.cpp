@@ -316,7 +316,7 @@ std::optional<int> recoilAnimationFrame(const VisualState state)
 Player::Player(
   ex::Entity entity,
   const data::Difficulty difficulty,
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   IGameServiceProvider* pServiceProvider,
   const data::GameOptions* pOptions,
   const engine::CollisionChecker* pCollisionChecker,
@@ -325,7 +325,7 @@ Player::Player(
   ex::EventManager* pEvents,
   engine::RandomNumberGenerator* pRandomGenerator)
   : mEntity(entity)
-  , mpPlayerModel(pPlayerModel)
+  , mpPersistentPlayerState(pPersistentPlayerState)
   , mpServiceProvider(pServiceProvider)
   , mpCollisionChecker(pCollisionChecker)
   , mpMap(pMap)
@@ -403,7 +403,7 @@ bool Player::isInMercyFrames() const
 
 bool Player::isCloaked() const
 {
-  return mpPlayerModel->hasItem(data::InventoryItemType::CloakingDevice);
+  return mpPersistentPlayerState->hasItem(data::InventoryItemType::CloakingDevice);
 }
 
 
@@ -650,8 +650,8 @@ void Player::takeDamage(const int amount)
   }
 
   mpEvents->emit(rigel::events::PlayerTookDamage{});
-  mpPlayerModel->takeDamage(amount);
-  if (!mpPlayerModel->isDead())
+  mpPersistentPlayerState->takeDamage(amount);
+  if (!mpPersistentPlayerState->isDead())
   {
     mMercyFramesRemaining = mMercyFramesPerHit;
     mpServiceProvider->playSound(data::SoundId::DukePain);
@@ -685,8 +685,8 @@ void Player::die()
     exitShip();
   }
 
-  mpPlayerModel->takeFatalDamage();
-  mpPlayerModel->removeItem(data::InventoryItemType::CloakingDevice);
+  mpPersistentPlayerState->takeFatalDamage();
+  mpPersistentPlayerState->removeItem(data::InventoryItemType::CloakingDevice);
   mpEvents->emit(rigel::events::CloakExpired{});
 
   auto& sprite = *mEntity.component<c::Sprite>();
@@ -827,7 +827,7 @@ void Player::updateTemporaryItemExpiration()
                             const InventoryItemType itemType,
                             const char* message,
                             int& framesElapsedHavingItem) {
-    if (mpPlayerModel->hasItem(itemType))
+    if (mpPersistentPlayerState->hasItem(itemType))
     {
       ++framesElapsedHavingItem;
       if (framesElapsedHavingItem == ITEM_ABOUT_TO_EXPIRE_TIME)
@@ -837,7 +837,7 @@ void Player::updateTemporaryItemExpiration()
 
       if (framesElapsedHavingItem >= TEMPORARY_ITEM_EXPIRATION_TIME)
       {
-        mpPlayerModel->removeItem(itemType);
+        mpPersistentPlayerState->removeItem(itemType);
         framesElapsedHavingItem = 0;
 
         if (itemType == InventoryItemType::CloakingDevice)
@@ -901,7 +901,7 @@ void Player::updateMovement(
   // clang-format off
   const auto shouldActivateJetpack =
     canFire() &&
-    mpPlayerModel->weapon() == data::WeaponType::FlameThrower &&
+    mpPersistentPlayerState->weapon() == data::WeaponType::FlameThrower &&
     movementVector.y > 0 &&
     fireButton.mIsPressed;
   // clang-format on
@@ -1285,8 +1285,8 @@ void Player::updateJumpButtonStateTracking(const Button& jumpButton)
 void Player::updateShooting(const Button& fireButton)
 {
   const auto hasRapidFire = stateIs<InShip>() ||
-    mpPlayerModel->hasItem(data::InventoryItemType::RapidFire) ||
-    mpPlayerModel->weapon() == data::WeaponType::FlameThrower;
+    mpPersistentPlayerState->hasItem(data::InventoryItemType::RapidFire) ||
+    mpPersistentPlayerState->weapon() == data::WeaponType::FlameThrower;
 
   if (!canFire())
   {
@@ -1823,13 +1823,13 @@ void Player::fireShot()
   }
   else
   {
-    const auto weaponType = mpPlayerModel->weapon();
+    const auto weaponType = mpPersistentPlayerState->weapon();
 
     mpEntityFactory->spawnProjectile(
       projectileTypeForWeapon(weaponType),
       position + shotOffset(orientation(), mStance),
       direction);
-    mpPlayerModel->useAmmo();
+    mpPersistentPlayerState->useAmmo();
 
     mpServiceProvider->playSound(soundIdForWeapon(weaponType));
     spawnOneShotSprite(
