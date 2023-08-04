@@ -51,7 +51,7 @@ std::unique_ptr<game_logic::IGameWorld>
 
 
 GameRunner::GameRunner(
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   const data::GameSessionId& sessionId,
   GameMode::Context context,
   const std::optional<base::Vec2> playerPositionOverride,
@@ -59,13 +59,13 @@ GameRunner::GameRunner(
   : mContext(context)
   , mpWorld(createGameWorld(
       context.mpUserProfile->mOptions.mGameplayStyle,
-      pPlayerModel,
+      pPersistentPlayerState,
       sessionId,
       context,
       playerPositionOverride,
       showWelcomeMessage))
   , mInputHandler(&context.mpUserProfile->mOptions)
-  , mMenu(context, pPlayerModel, mpWorld.get(), sessionId)
+  , mMenu(context, pPersistentPlayerState, mpWorld.get(), sessionId)
 {
 }
 
