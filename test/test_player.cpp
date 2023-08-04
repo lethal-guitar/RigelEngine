@@ -212,7 +212,7 @@ TEST_CASE("Player movement")
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
 
-  data::PlayerModel playerModel;
+  data::PersistentPlayerState PersistentPlayerState;
   MockEntityFactory mockEntityFactory{&entityx.entities};
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
@@ -229,7 +229,7 @@ TEST_CASE("Player movement")
   Player player(
     playerEntity,
     data::Difficulty::Medium,
-    &playerModel,
+    &PersistentPlayerState,
     &mockServiceProvider,
     &options,
     &collisionChecker,
@@ -1837,7 +1837,7 @@ TEST_CASE("Player movement")
 
       SECTION("Laser shot")
       {
-        playerModel.switchToWeapon(data::WeaponType::Laser);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
         CHECK(lastFiredShot().type == ProjectileType::Laser);
@@ -1845,7 +1845,7 @@ TEST_CASE("Player movement")
 
       SECTION("Rocket shot")
       {
-        playerModel.switchToWeapon(data::WeaponType::Rocket);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Rocket);
 
         player.update(fireButtonTriggered);
         CHECK(lastFiredShot().type == ProjectileType::Rocket);
@@ -1853,7 +1853,7 @@ TEST_CASE("Player movement")
 
       SECTION("Flame shot")
       {
-        playerModel.switchToWeapon(data::WeaponType::FlameThrower);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
         CHECK(lastFiredShot().type == ProjectileType::Flame);
@@ -1876,7 +1876,7 @@ TEST_CASE("Player movement")
 
       SECTION("Laser")
       {
-        playerModel.switchToWeapon(data::WeaponType::Laser);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Laser);
 
         player.update(fireButtonTriggered);
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
@@ -1887,7 +1887,7 @@ TEST_CASE("Player movement")
 
       SECTION("Rocket launcher")
       {
-        playerModel.switchToWeapon(data::WeaponType::Rocket);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Rocket);
 
         // The rocket launcher also uses the normal shot sound
         player.update(fireButtonTriggered);
@@ -1899,7 +1899,7 @@ TEST_CASE("Player movement")
 
       SECTION("Flame thrower")
       {
-        playerModel.switchToWeapon(data::WeaponType::FlameThrower);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::FlameThrower);
 
         player.update(fireButtonTriggered);
         REQUIRE(mockServiceProvider.mLastTriggeredSoundId != std::nullopt);
@@ -1910,8 +1910,8 @@ TEST_CASE("Player movement")
 
       SECTION("Last shot before ammo depletion still uses appropriate sound")
       {
-        playerModel.switchToWeapon(data::WeaponType::Laser);
-        playerModel.setAmmo(1);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Laser);
+        PersistentPlayerState.setAmmo(1);
 
         player.update(fireButtonTriggered);
 
@@ -1930,42 +1930,42 @@ TEST_CASE("Player movement")
     {
       SECTION("Normal shot doesn't consume ammo")
       {
-        playerModel.setAmmo(24);
+        PersistentPlayerState.setAmmo(24);
         fireOneShot();
-        CHECK(playerModel.ammo() == 24);
+        CHECK(PersistentPlayerState.ammo() == 24);
       }
 
       SECTION("Laser consumes 1 unit of ammo per shot")
       {
-        playerModel.switchToWeapon(data::WeaponType::Laser);
-        playerModel.setAmmo(10);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Laser);
+        PersistentPlayerState.setAmmo(10);
 
         fireOneShot();
-        CHECK(playerModel.ammo() == 9);
+        CHECK(PersistentPlayerState.ammo() == 9);
       }
 
       SECTION("Rocket launcher consumes 1 unit of ammo per shot")
       {
-        playerModel.switchToWeapon(data::WeaponType::Rocket);
-        playerModel.setAmmo(10);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Rocket);
+        PersistentPlayerState.setAmmo(10);
 
         fireOneShot();
-        CHECK(playerModel.ammo() == 9);
+        CHECK(PersistentPlayerState.ammo() == 9);
       }
 
       SECTION("Flame thrower consumes 1 unit of ammo per shot")
       {
-        playerModel.switchToWeapon(data::WeaponType::FlameThrower);
-        playerModel.setAmmo(10);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::FlameThrower);
+        PersistentPlayerState.setAmmo(10);
 
         fireOneShot();
-        CHECK(playerModel.ammo() == 9);
+        CHECK(PersistentPlayerState.ammo() == 9);
       }
 
       SECTION("Multiple shots consume several units of ammo")
       {
-        playerModel.switchToWeapon(data::WeaponType::Laser);
-        playerModel.setAmmo(20);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Laser);
+        PersistentPlayerState.setAmmo(20);
 
         const auto shotsToFire = 15;
         for (int i = 0; i < shotsToFire; ++i)
@@ -1973,25 +1973,25 @@ TEST_CASE("Player movement")
           fireOneShot();
         }
 
-        CHECK(playerModel.ammo() == 20 - shotsToFire);
+        CHECK(PersistentPlayerState.ammo() == 20 - shotsToFire);
       }
 
       SECTION("Depleting ammo switches back to normal weapon")
       {
-        playerModel.switchToWeapon(data::WeaponType::Rocket);
-        playerModel.setAmmo(1);
+        PersistentPlayerState.switchToWeapon(data::WeaponType::Rocket);
+        PersistentPlayerState.setAmmo(1);
 
         fireOneShot();
 
-        CHECK(playerModel.weapon() == data::WeaponType::Normal);
-        CHECK(playerModel.ammo() == playerModel.currentMaxAmmo());
+        CHECK(PersistentPlayerState.weapon() == data::WeaponType::Normal);
+        CHECK(PersistentPlayerState.ammo() == PersistentPlayerState.currentMaxAmmo());
       }
     }
 
     SECTION(
       "Player fires continuously every other frame when owning rapid fire buff")
     {
-      playerModel.giveItem(data::InventoryItemType::RapidFire);
+      PersistentPlayerState.giveItem(data::InventoryItemType::RapidFire);
 
       player.update(pressingFire & fireButtonTriggered);
       CHECK(fireShotSpy.size() == 1);
@@ -2009,7 +2009,7 @@ TEST_CASE("Player movement")
 
     SECTION("Firing stops when rapid fire is taken away")
     {
-      playerModel.giveItem(data::InventoryItemType::RapidFire);
+      PersistentPlayerState.giveItem(data::InventoryItemType::RapidFire);
 
       for (int i = 0; i < 700; ++i)
       {
@@ -2017,7 +2017,7 @@ TEST_CASE("Player movement")
       }
       CHECK(fireShotSpy.size() == 350);
 
-      playerModel.removeItem(data::InventoryItemType::RapidFire);
+      PersistentPlayerState.removeItem(data::InventoryItemType::RapidFire);
 
       for (int i = 0; i < 2; ++i)
       {

@@ -105,11 +105,11 @@ TEST_CASE("Spike ball")
   playerEntity.assign<Sprite>();
   assignPlayerComponents(playerEntity, Orientation::Left);
 
-  data::PlayerModel playerModel;
+  data::PersistentPlayerState PersistentPlayerState;
   Player player(
     playerEntity,
     data::Difficulty::Medium,
-    &playerModel,
+    &PersistentPlayerState,
     &mockServiceProvider,
     &options,
     &collisionChecker,
