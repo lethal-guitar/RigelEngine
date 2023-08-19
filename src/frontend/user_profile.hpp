@@ -76,6 +76,9 @@ private:
 };
 
 
+bool isPortableInstall();
+
+
 UserProfile createEmptyUserProfile();
 
 
