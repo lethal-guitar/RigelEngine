@@ -32,11 +32,8 @@ Watch a [showcase video (outdated)](http://www.youtube.com/watch?v=U7-eotm8Xoo)
 RigelEngine is stable and fairly complete in terms of feature set.
 All four episodes of the game (shareware and registered version) are fully playable and on par with the original game.
 
-That said, the project is still very much active, with
-further enhancements and usability improvements planned or currently in development.
-
-To be informed when a new version is released, you can watch this repository on GitHub, follow me [on Twitter](https://twitter.com/lethal_guitar), follow [my blog](https://lethalguitar.wordpress.com/), or periodically check the [releases section](https://github.com/lethal-guitar/RigelEngine/releases).
-When installing the Flatpak version on Linux, you will also get notified about updates via your Flatpak client.
+I currently don't have any plans for significant future development - consider the project to be in "maintenance" mode.
+This means I'll try my best to fix major problems/bugs that come up and keep CI running, but I won't add any new features. 
 
 ### Supported platforms
 
@@ -48,8 +45,6 @@ The Linux version also runs well on small single-board computers (SBCs) like the
 See [Running on Raspberry Pi and Odroid Go Advance](https://github.com/lethal-guitar/RigelEngine/wiki/Running-on-Raspberry-Pi-and-Odroid-Go-Advance).
 
 There's also a (3rd party) [PS Vita port](https://vitadb.rinnegatamante.it/#/info/988).
-
-Android and iOS versions might happen someday, but there are no concrete plans at the moment.
 
 ### System requirements
 
