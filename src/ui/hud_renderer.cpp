@@ -282,7 +282,7 @@ void HudRenderer::updateAnimation()
 
 
 void HudRenderer::renderClassicHud(
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& persistentPlayerState,
   const base::ArrayView<base::Vec2> radarPositions)
 {
   // We group drawing into what texture is used to minimize the amount of
@@ -300,25 +300,27 @@ void HudRenderer::renderClassicHud(
     2,
     data::tilesToPixels(HUD_START_BOTTOM_RIGHT));
   drawInventory(
-    playerModel.inventory(), data::tilesToPixels(INVENTORY_START_POS));
+    persistentPlayerState.inventory(),
+    data::tilesToPixels(INVENTORY_START_POS));
   drawCollectedLetters(
-    playerModel, data::tilesToPixels(LETTER_INDICATOR_POSITION));
+    persistentPlayerState, data::tilesToPixels(LETTER_INDICATOR_POSITION));
 
   // These use the UI sprite sheet texture.
   drawScore(
-    playerModel.score(),
+    persistentPlayerState.score(),
     *mpStatusSpriteSheetRenderer,
     {2, GameTraits::mapViewportSize.height + 1});
   drawWeaponIcon(
-    playerModel.weapon(),
+    persistentPlayerState.weapon(),
     *mpStatusSpriteSheetRenderer,
     {17, GameTraits::mapViewportSize.height + 1});
   drawAmmoBar(
-    playerModel.ammo(),
-    playerModel.currentMaxAmmo(),
+    persistentPlayerState.ammo(),
+    persistentPlayerState.currentMaxAmmo(),
     *mpStatusSpriteSheetRenderer,
     {22, GameTraits::mapViewportSize.height + 1});
-  drawHealthBar(playerModel, {24, GameTraits::mapViewportSize.height + 1});
+  drawHealthBar(
+    persistentPlayerState, {24, GameTraits::mapViewportSize.height + 1});
 
   if (mLevelNumber)
   {
@@ -336,7 +338,7 @@ void HudRenderer::renderClassicHud(
 void HudRenderer::renderWidescreenHud(
   const int viewportWidth,
   const data::WidescreenHudStyle style,
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& persistentPlayerState,
   const base::ArrayView<base::Vec2> radarPositions)
 {
   auto drawClassicWidescreenHud = [&]() {
@@ -350,7 +352,7 @@ void HudRenderer::renderWidescreenHud(
     auto guard = renderer::saveState(mpRenderer);
     renderer::setLocalTranslation(mpRenderer, {hudOffset, 0});
 
-    renderClassicHud(playerModel, radarPositions);
+    renderClassicHud(persistentPlayerState, radarPositions);
   };
 
 
@@ -361,11 +363,11 @@ void HudRenderer::renderWidescreenHud(
       break;
 
     case data::WidescreenHudStyle::Modern:
-      drawModernHud(viewportWidth, playerModel, radarPositions);
+      drawModernHud(viewportWidth, persistentPlayerState, radarPositions);
       break;
 
     case data::WidescreenHudStyle::Ultrawide:
-      drawUltrawideHud(viewportWidth, playerModel, radarPositions);
+      drawUltrawideHud(viewportWidth, persistentPlayerState, radarPositions);
       break;
   }
 }
@@ -373,7 +375,7 @@ void HudRenderer::renderWidescreenHud(
 
 void HudRenderer::drawModernHud(
   int viewportWidth,
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& persistentPlayerState,
   base::ArrayView<base::Vec2> radarPositions)
 {
   const auto screenWidth =
@@ -386,7 +388,7 @@ void HudRenderer::drawModernHud(
   const auto rightEdgeForFloatingParts =
     screenWidth - std::max(0, paddingForCentering);
   drawFloatingInventory(
-    playerModel.inventory(), {rightEdgeForFloatingParts - 2, 2});
+    persistentPlayerState.inventory(), {rightEdgeForFloatingParts - 2, 2});
 
   if (mpOptions->mShowRadarInModernHud)
   {
@@ -414,22 +416,23 @@ void HudRenderer::drawModernHud(
   auto guard = renderer::saveState(mpRenderer);
   renderer::setLocalTranslation(mpRenderer, {paddingForCentering + 29, 0});
 
-  drawCollectedLetters(playerModel, {33, -23});
+  drawCollectedLetters(persistentPlayerState, {33, -23});
 
   drawScore(
-    playerModel.score(),
+    persistentPlayerState.score(),
     *mpStatusSpriteSheetRenderer,
     {2, GameTraits::mapViewportSize.height + 1});
   drawWeaponIcon(
-    playerModel.weapon(),
+    persistentPlayerState.weapon(),
     *mpStatusSpriteSheetRenderer,
     {17, GameTraits::mapViewportSize.height + 1});
   drawAmmoBar(
-    playerModel.ammo(),
-    playerModel.currentMaxAmmo(),
+    persistentPlayerState.ammo(),
+    persistentPlayerState.currentMaxAmmo(),
     *mpStatusSpriteSheetRenderer,
     {22, GameTraits::mapViewportSize.height + 1});
-  drawHealthBar(playerModel, {24, GameTraits::mapViewportSize.height + 1});
+  drawHealthBar(
+    persistentPlayerState, {24, GameTraits::mapViewportSize.height + 1});
 
   if (mLevelNumber)
   {
@@ -445,7 +448,7 @@ void HudRenderer::drawModernHud(
 
 void HudRenderer::drawUltrawideHud(
   int viewportWidth,
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& persistentPlayerState,
   base::ArrayView<base::Vec2> radarPositions)
 {
   const auto screenWidth =
@@ -470,22 +473,24 @@ void HudRenderer::drawUltrawideHud(
     auto guard = renderer::saveState(mpRenderer);
     renderer::setLocalTranslation(mpRenderer, {paddingForCentering, yPos});
 
-    drawInventory(playerModel.inventory(), {6, 15});
-    drawCollectedLetters(playerModel, {64, -138});
+    drawInventory(persistentPlayerState.inventory(), {6, 15});
+    drawCollectedLetters(persistentPlayerState, {64, -138});
   }
 
   auto guard = renderer::saveState(mpRenderer);
   renderer::setLocalTranslation(mpRenderer, {paddingForCentering, yPos - 2});
 
   // These use the UI sprite sheet texture.
-  drawScore(playerModel.score(), *mpStatusSpriteSheetRenderer, {12, 6});
-  drawWeaponIcon(playerModel.weapon(), *mpStatusSpriteSheetRenderer, {27, 6});
+  drawScore(
+    persistentPlayerState.score(), *mpStatusSpriteSheetRenderer, {12, 6});
+  drawWeaponIcon(
+    persistentPlayerState.weapon(), *mpStatusSpriteSheetRenderer, {27, 6});
   drawAmmoBar(
-    playerModel.ammo(),
-    playerModel.currentMaxAmmo(),
+    persistentPlayerState.ammo(),
+    persistentPlayerState.currentMaxAmmo(),
     *mpStatusSpriteSheetRenderer,
     {32, 6});
-  drawHealthBar(playerModel, {34, 6});
+  drawHealthBar(persistentPlayerState, {34, 6});
 
   if (mLevelNumber)
   {
@@ -603,7 +608,7 @@ void HudRenderer::drawFloatingInventory(
 
 
 void HudRenderer::drawHealthBar(
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& persistentPlayerState,
   const base::Vec2& position) const
 {
   // Health slices start at col 20, row 4. The first 9 are for the "0 health"
@@ -611,7 +616,7 @@ void HudRenderer::drawHealthBar(
 
   // The model has a range of 1-9 for health, but the HUD shows only 8
   // slices, with a special animation for having 1 point of health.
-  const auto numFullSlices = playerModel.health() - 1;
+  const auto numFullSlices = persistentPlayerState.health() - 1;
   if (numFullSlices > 0)
   {
     for (int i = 0; i < NUM_HEALTH_SLICES; ++i)
@@ -636,7 +641,7 @@ void HudRenderer::drawHealthBar(
 
 
 void HudRenderer::drawCollectedLetters(
-  const data::PlayerModel& playerModel,
+  const data::PersistentPlayerState& persistentPlayerState,
   const base::Vec2& position) const
 {
   auto guard = renderer::saveState(mpRenderer);
@@ -652,7 +657,7 @@ void HudRenderer::drawCollectedLetters(
     {position + data::tilesToPixels(base::Vec2{35, 24}) + base::Vec2{1, 5},
      {29, 6}});
 
-  for (const auto letter : playerModel.collectedLetters())
+  for (const auto letter : persistentPlayerState.collectedLetters())
   {
     // The draw position is the same for all cases, because each actor
     // includes a draw offset in its actor info that positions it correctly.

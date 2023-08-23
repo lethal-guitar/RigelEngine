@@ -47,11 +47,12 @@ constexpr int asNumber(const Bonus bonus)
 }
 
 
-inline void
-  addBonusScore(PlayerModel& playerModel, const std::set<Bonus>& bonuses)
+inline void addBonusScore(
+  PersistentPlayerState& persistentPlayerState,
+  const std::set<Bonus>& bonuses)
 {
   const auto numBonuses = static_cast<int>(bonuses.size());
-  playerModel.giveScore(numBonuses * SCORE_ADDED_PER_BONUS);
+  persistentPlayerState.giveScore(numBonuses * SCORE_ADDED_PER_BONUS);
 }
 
 } // namespace rigel::data

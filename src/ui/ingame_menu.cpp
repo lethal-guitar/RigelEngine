@@ -79,15 +79,15 @@ constexpr int itemIndex(const std::string_view item)
 
 auto createSavedGame(
   const data::GameSessionId& sessionId,
-  const data::PlayerModel& playerModel)
+  const data::PersistentPlayerState& persistentPlayerState)
 {
   return data::SavedGame{
     sessionId,
-    playerModel.tutorialMessages(),
+    persistentPlayerState.tutorialMessages(),
     "", // will be filled in on saving
-    playerModel.weapon(),
-    playerModel.ammo(),
-    playerModel.score()};
+    persistentPlayerState.weapon(),
+    persistentPlayerState.ammo(),
+    persistentPlayerState.score()};
 }
 
 
@@ -303,11 +303,11 @@ IngameMenu::SavedGameNameEntry::SavedGameNameEntry(
 
 IngameMenu::IngameMenu(
   GameMode::Context context,
-  const data::PlayerModel* pPlayerModel,
+  const data::PersistentPlayerState* pPersistentPlayerState,
   game_logic::IGameWorld* pGameWorld,
   const data::GameSessionId& sessionId)
   : mContext(context)
-  , mSavedGame(createSavedGame(sessionId, *pPlayerModel))
+  , mSavedGame(createSavedGame(sessionId, *pPersistentPlayerState))
   , mSessionId(sessionId)
   , mpGameWorld(pGameWorld)
 {

@@ -37,7 +37,7 @@ struct IGameServiceProvider;
 
 namespace data
 {
-class PlayerModel;
+class PersistentPlayerState;
 }
 
 namespace events
@@ -68,7 +68,7 @@ public:
   PlayerInteractionSystem(
     const data::GameSessionId& sessionId,
     Player* pPlayer,
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     IGameServiceProvider* pServices,
     IEntityFactory* pEntityFactory,
     entityx::EventManager* pEvents,
@@ -104,7 +104,7 @@ private:
 
 private:
   Player* mpPlayer;
-  data::PlayerModel* mpPlayerModel;
+  data::PersistentPlayerState* mpPersistentPlayerState;
   IGameServiceProvider* mpServiceProvider;
   IEntityFactory* mpEntityFactory;
   entityx::EventManager* mpEvents;

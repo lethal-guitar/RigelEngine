@@ -39,7 +39,7 @@ struct IGameServiceProvider;
 namespace data
 {
 struct GameOptions;
-class PlayerModel;
+class PersistentPlayerState;
 
 namespace map
 {
@@ -244,7 +244,7 @@ public:
   Player(
     entityx::Entity entity,
     data::Difficulty difficulty,
-    data::PlayerModel* pModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     IGameServiceProvider* pServiceProvider,
     const data::GameOptions* pOptions,
     const engine::CollisionChecker* pCollisionChecker,
@@ -311,7 +311,7 @@ public:
 
   base::Vec2& position();
 
-  data::PlayerModel& model() { return *mpPlayerModel; }
+  data::PersistentPlayerState& model() { return *mpPersistentPlayerState; }
 
   const entityx::Entity& entity() const { return mEntity; }
 
@@ -389,7 +389,7 @@ private:
   PlayerState mState;
   entityx::Entity mEntity;
   entityx::Entity mAttachedElevator;
-  data::PlayerModel* mpPlayerModel;
+  data::PersistentPlayerState* mpPersistentPlayerState;
   IGameServiceProvider* mpServiceProvider;
   const engine::CollisionChecker* mpCollisionChecker;
   const data::map::Map* mpMap;
