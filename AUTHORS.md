@@ -9,7 +9,7 @@ Nikolai Wuttke ([@lethal-guitar](https://github.com/lethal-guitar))
 * Alain Martin ([@McMartin](https://github.com/McMartin)): Help with OS X port, clang-tidy, compiler upgrades and lots of other things
 * Andrei-Florin Bencsik ([@bencsikandrei](https://github.com/bencsikandrei)): Replacements for Boost string utilities, introducing clang-format, .deb package creation, various code & CMake cleanups, and more
 * Naftali Murgor ([@naftalimurgor](https://github.com/naftalimurgor)): Code cleanups and reorganization
-* Pratik Anand ([@pratikone](https://github.com/pratikone)): Webassembly port, widescreen support, game path browser, initial gamepad support, README improvements
+* Pratik Anand ([@pratikone](https://github.com/pratikone)): Webassembly port, initial widescreen support prototype, game path browser, initial gamepad support, README improvements
 * Ryan Brown ([@rbrown46](https://github.com/rbrown46)): Actor image modding (replace sprites using `png` files)
 * Soham Roy ([@sohamroy19](https://github.com/sohamroy19)): Refactoring & code cleanups
 * [@mnhauke](https://github.com/mnhauke): OpenSUSE package
