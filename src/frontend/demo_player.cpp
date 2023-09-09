@@ -112,7 +112,7 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
   if (!mpWorld)
   {
     mpWorld = std::make_unique<GameWorld_Classic>(
-      &mPlayerModel,
+      &mPersistentPlayerState,
       demoSessionId(0),
       mContext,
       std::nullopt,
@@ -144,10 +144,10 @@ void DemoPlayer::updateAndRender(const engine::TimeDelta dt)
 
     ++mLevelIndex;
 
-    mPlayerModel.resetForNewLevel();
+    mPersistentPlayerState.resetForNewLevel();
 
     mpWorld = std::make_unique<GameWorld_Classic>(
-      &mPlayerModel,
+      &mPersistentPlayerState,
       demoSessionId(mLevelIndex),
       mContext,
       std::nullopt,

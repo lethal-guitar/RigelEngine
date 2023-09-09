@@ -53,7 +53,7 @@ public:
 private:
   GameSessionMode(
     const data::GameSessionId& sessionId,
-    data::PlayerModel playerModel,
+    data::PersistentPlayerState persistentPlayerState,
     Context context);
 
   void handleEvent(const SDL_Event& event);
@@ -79,7 +79,7 @@ private:
     HighScoreNameEntry,
     HighScoreListDisplay>;
 
-  data::PlayerModel mPlayerModel;
+  data::PersistentPlayerState mPersistentPlayerState;
   SessionStage mCurrentStage;
   const int mEpisode;
   int mCurrentLevelNr;

@@ -96,23 +96,23 @@ public:
   void updateAnimation();
 
   void renderClassicHud(
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& persistentPlayerState,
     base::ArrayView<base::Vec2> radarPositions);
 
   void renderWidescreenHud(
     int viewportWidth,
     data::WidescreenHudStyle style,
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& persistentPlayerState,
     base::ArrayView<base::Vec2> radarPositions);
 
 private:
   void drawModernHud(
     int viewportWidth,
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& persistentPlayerState,
     base::ArrayView<base::Vec2> radarPositions);
   void drawUltrawideHud(
     int viewportWidth,
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& persistentPlayerState,
     base::ArrayView<base::Vec2> radarPositions);
   void drawLeftSideExtension(int viewportWidth) const;
   void drawInventory(
@@ -122,10 +122,10 @@ private:
     const std::vector<data::InventoryItemType>& inventory,
     const base::Vec2& position) const;
   void drawHealthBar(
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& persistentPlayerState,
     const base::Vec2& position) const;
   void drawCollectedLetters(
-    const data::PlayerModel& playerModel,
+    const data::PersistentPlayerState& persistentPlayerState,
     const base::Vec2& position) const;
   void drawRadar(
     base::ArrayView<base::Vec2> positions,

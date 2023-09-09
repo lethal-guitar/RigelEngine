@@ -100,7 +100,7 @@ TEST_CASE("Rocket elevator")
   }
 
   CollisionChecker collisionChecker{&map, entityx.entities, entityx.events};
-  data::PlayerModel playerModel;
+  data::PersistentPlayerState persistentPlayerState;
   MockServiceProvider mockServiceProvider;
   engine::RandomNumberGenerator randomGenerator;
   MockSpriteFactory mockSpriteFactory;
@@ -121,7 +121,7 @@ TEST_CASE("Rocket elevator")
   Player player(
     playerEntity,
     data::Difficulty::Medium,
-    &playerModel,
+    &persistentPlayerState,
     &mockServiceProvider,
     &options,
     &collisionChecker,

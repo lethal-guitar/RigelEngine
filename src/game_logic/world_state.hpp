@@ -104,7 +104,7 @@ struct LevelBonusInfo
 
 struct CheckpointData
 {
-  data::PlayerModel::CheckpointState mState;
+  data::PersistentPlayerState::CheckpointState mState;
   base::Vec2 mPosition;
 };
 
@@ -115,7 +115,7 @@ struct WorldState
     IGameServiceProvider* pServiceProvider,
     renderer::Renderer* pRenderer,
     const assets::ResourceLoader* pResources,
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId);
@@ -123,7 +123,7 @@ struct WorldState
     IGameServiceProvider* pServiceProvider,
     renderer::Renderer* pRenderer,
     const assets::ResourceLoader* pResources,
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId,
@@ -132,7 +132,7 @@ struct WorldState
     IGameServiceProvider* pServiceProvider,
     renderer::Renderer* pRenderer,
     const assets::ResourceLoader* pResources,
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     const data::GameOptions* pOptions,
     engine::SpriteFactory* pSpriteFactory,
     data::GameSessionId sessionId,
@@ -142,7 +142,7 @@ struct WorldState
   void synchronizeTo(
     const WorldState& other,
     IGameServiceProvider* pServiceProvider,
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     data::GameSessionId sessionId);
 
   data::map::Map mMap;

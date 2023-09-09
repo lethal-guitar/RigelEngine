@@ -31,7 +31,7 @@ struct IGameServiceProvider;
 
 namespace rigel::data
 {
-class PlayerModel;
+class PersistentPlayerState;
 }
 
 
@@ -42,7 +42,7 @@ class DamageInflictionSystem
 {
 public:
   DamageInflictionSystem(
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     IGameServiceProvider* pServiceProvider,
     entityx::EventManager* pEvents);
 
@@ -55,7 +55,7 @@ private:
     entityx::Entity shootableEntity,
     components::Shootable& shootable);
 
-  data::PlayerModel* mpPlayerModel;
+  data::PersistentPlayerState* mpPersistentPlayerState;
   IGameServiceProvider* mpServiceProvider;
   entityx::EventManager* mpEvents;
 };

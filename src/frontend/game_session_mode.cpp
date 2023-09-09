@@ -35,7 +35,7 @@ GameSessionMode::GameSessionMode(
   Context context,
   std::optional<base::Vec2> playerPositionOverride)
   : mCurrentStage(std::make_unique<GameRunner>(
-      &mPlayerModel,
+      &mPersistentPlayerState,
       sessionId,
       context,
       playerPositionOverride,
@@ -49,9 +49,9 @@ GameSessionMode::GameSessionMode(
 
 
 GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
-  : mPlayerModel(save)
+  : mPersistentPlayerState(save)
   , mCurrentStage(std::make_unique<GameRunner>(
-      &mPlayerModel,
+      &mPersistentPlayerState,
       save.mSessionId,
       context,
       std::nullopt,
@@ -66,11 +66,11 @@ GameSessionMode::GameSessionMode(const data::SavedGame& save, Context context)
 
 GameSessionMode::GameSessionMode(
   const data::GameSessionId& sessionId,
-  data::PlayerModel playerModel,
+  data::PersistentPlayerState persistentPlayerState,
   Context context)
-  : mPlayerModel(std::move(playerModel))
+  : mPersistentPlayerState(std::move(persistentPlayerState))
   , mCurrentStage(std::make_unique<GameRunner>(
-      &mPlayerModel,
+      &mPersistentPlayerState,
       sessionId,
       context,
       std::nullopt,
@@ -153,9 +153,9 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
       if (pIngameMode->levelFinished())
       {
         const auto achievedBonuses = pIngameMode->achievedBonuses();
-        const auto scoreWithoutBonuses = mPlayerModel.score();
+        const auto scoreWithoutBonuses = mPersistentPlayerState.score();
 
-        data::addBonusScore(mPlayerModel, achievedBonuses);
+        data::addBonusScore(mPersistentPlayerState, achievedBonuses);
 
         if (data::isBossLevel(mCurrentLevelNr))
         {
@@ -186,7 +186,7 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
 
       if (bonusScreen.finished())
       {
-        mPlayerModel.resetForNewLevel();
+        mPersistentPlayerState.resetForNewLevel();
 
         // The new level we are about to enter might have different
         // requirements w.r.t. low-res vs. hi-res mode (per-element upscaling).
@@ -203,7 +203,7 @@ std::unique_ptr<GameMode> GameSessionMode::updateAndRender(
         // We can't use make_unique here, because the constructor is private.
         return std::unique_ptr<GameSessionMode>{new GameSessionMode{
           data::GameSessionId{mEpisode, ++mCurrentLevelNr, mDifficulty},
-          mPlayerModel,
+          mPersistentPlayerState,
           mContext}};
       }
 
@@ -269,7 +269,8 @@ void GameSessionMode::finishGameSession()
   mContext.mpServiceProvider->fadeOutScreen();
 
   const auto scoreQualifies = data::scoreQualifiesForHighScoreList(
-    mPlayerModel.score(), mContext.mpUserProfile->mHighScoreLists[mEpisode]);
+    mPersistentPlayerState.score(),
+    mContext.mpUserProfile->mHighScoreLists[mEpisode]);
   if (scoreQualifies)
   {
     SDL_StartTextInput();
@@ -287,7 +288,7 @@ void GameSessionMode::enterHighScore(std::string_view name)
   SDL_StopTextInput();
 
   data::insertNewScore(
-    mPlayerModel.score(),
+    mPersistentPlayerState.score(),
     std::string{name},
     mContext.mpUserProfile->mHighScoreLists[mEpisode]);
   mContext.mpUserProfile->saveToDisk();

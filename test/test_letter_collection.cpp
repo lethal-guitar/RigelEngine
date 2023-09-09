@@ -31,7 +31,7 @@ using namespace data;
 using namespace std;
 
 using LT = CollectableLetterType;
-using S = PlayerModel::LetterCollectionState;
+using S = PersistentPlayerState::LetterCollectionState;
 using ExpectedState = pair<LT, S>;
 
 
@@ -54,7 +54,7 @@ vector<S> getStates(const vector<ExpectedState>& expectations)
 
 vector<S> collectLetters(const vector<LT>& letters)
 {
-  PlayerModel model;
+  PersistentPlayerState model;
 
   return utils::transformed(
     letters, [&model](const auto letter) { return model.addLetter(letter); });

@@ -66,7 +66,7 @@ class GameWorld : public IGameWorld, public entityx::Receiver<GameWorld>
 {
 public:
   GameWorld(
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     const data::GameSessionId& sessionId,
     GameMode::Context context,
     std::optional<base::Vec2> playerPositionOverride = std::nullopt,
@@ -154,7 +154,7 @@ private:
 
   struct QuickSaveData
   {
-    data::PlayerModel mPlayerModel;
+    data::PersistentPlayerState mPersistentPlayerState;
     std::unique_ptr<WorldState> mpState;
   };
 
@@ -162,13 +162,13 @@ private:
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture mUiSpriteSheet;
   ui::MenuElementRenderer mTextRenderer;
-  data::PlayerModel* mpPlayerModel;
+  data::PersistentPlayerState* mpPersistentPlayerState;
   const data::GameOptions* mpOptions;
   const assets::ResourceLoader* mpResources;
   engine::SpriteFactory* mpSpriteFactory;
   data::GameSessionId mSessionId;
 
-  data::PlayerModel mPlayerModelAtLevelStart;
+  data::PersistentPlayerState mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
   engine::SpecialEffectsRenderer mSpecialEffects;

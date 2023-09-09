@@ -59,7 +59,7 @@ public:
 
   IngameMenu(
     GameMode::Context context,
-    const data::PlayerModel* pPlayerModel,
+    const data::PersistentPlayerState* pPersistentPlayerState,
     game_logic::IGameWorld* pGameWorld,
     const data::GameSessionId& sessionId);
 

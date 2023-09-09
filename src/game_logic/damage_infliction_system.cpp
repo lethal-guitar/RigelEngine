@@ -53,10 +53,10 @@ auto extractVelocity(entityx::Entity entity)
 
 
 DamageInflictionSystem::DamageInflictionSystem(
-  data::PlayerModel* pPlayerModel,
+  data::PersistentPlayerState* pPersistentPlayerState,
   IGameServiceProvider* pServiceProvider,
   entityx::EventManager* pEvents)
-  : mpPlayerModel(pPlayerModel)
+  : mpPersistentPlayerState(pPersistentPlayerState)
   , mpServiceProvider(pServiceProvider)
   , mpEvents(pEvents)
 {
@@ -139,7 +139,7 @@ void DamageInflictionSystem::inflictDamage(
     // Event listeners mustn't remove the shootable component
     assert(shootableEntity.has_component<Shootable>());
 
-    mpPlayerModel->giveScore(shootable.mGivenScore);
+    mpPersistentPlayerState->giveScore(shootable.mGivenScore);
 
     if (shootable.mDestroyWhenKilled)
     {

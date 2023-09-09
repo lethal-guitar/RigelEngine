@@ -53,7 +53,7 @@ public:
 
 private:
   GameMode::Context mContext;
-  data::PlayerModel mPlayerModel;
+  data::PersistentPlayerState mPersistentPlayerState;
 
   std::vector<DemoInput> mFrames;
   std::size_t mCurrentFrameIndex = 1;

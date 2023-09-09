@@ -92,7 +92,7 @@ struct Bridge
     data::map::Map* pMap,
     IGameServiceProvider* pServiceProvider,
     ui::IngameMessageDisplay* pMessageDisplay,
-    data::PlayerModel* pPlayerModel);
+    data::PersistentPlayerState* pPersistentPlayerState);
 
   void resetForNewFrame();
 
@@ -111,7 +111,7 @@ struct Bridge
   engine::MapRenderer* mpMapRenderer = nullptr;
   IGameServiceProvider* mpServiceProvider;
   ui::IngameMessageDisplay* mpMessageDisplay;
-  data::PlayerModel* mpPlayerModel;
+  data::PersistentPlayerState* mpPersistentPlayerState;
 };
 
 } // namespace detail
@@ -121,7 +121,7 @@ class GameWorld_Classic : public IGameWorld
 {
 public:
   GameWorld_Classic(
-    data::PlayerModel* pPlayerModel,
+    data::PersistentPlayerState* pPersistentPlayerState,
     const data::GameSessionId& sessionId,
     GameMode::Context context,
     std::optional<base::Vec2> playerPositionOverride = std::nullopt,
@@ -172,7 +172,7 @@ private:
   IGameServiceProvider* mpServiceProvider;
   engine::TiledTexture mUiSpriteSheet;
   ui::MenuElementRenderer mTextRenderer;
-  data::PlayerModel* mpPlayerModel;
+  data::PersistentPlayerState* mpPersistentPlayerState;
   const data::GameOptions* mpOptions;
   const assets::ResourceLoader* mpResources;
   engine::SpriteFactory* mpSpriteFactory;
@@ -184,7 +184,7 @@ private:
 
   data::map::Map mMap;
   std::optional<engine::MapRenderer> mMapRenderer;
-  data::PlayerModel mPlayerModelAtLevelStart;
+  data::PersistentPlayerState mPlayerModelAtLevelStart;
   ui::HudRenderer mHudRenderer;
   ui::IngameMessageDisplay mMessageDisplay;
   engine::SpecialEffectsRenderer mSpecialEffects;
@@ -197,7 +197,7 @@ private:
   std::unique_ptr<detail::State> mpState;
   std::unique_ptr<QuickSaveData> mpQuickSave;
 
-  std::optional<data::PlayerModel::CheckpointState> mCheckpointState;
+  std::optional<data::PersistentPlayerState::CheckpointState> mCheckpointState;
 };
 
 } // namespace rigel::game_logic
