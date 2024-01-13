@@ -741,6 +741,13 @@ UserProfile loadProfile(
       deserializeJsonFile(
         optionsFile, [&](const nlohmann::json& serializedObject) {
           profile.mOptions = deserialize<data::GameOptions>(serializedObject);
+
+          if (serializedObject.contains("gamePath"))
+          {
+            const auto gamePathStr =
+              serializedObject.at("gamePath").get<std::string>();
+            profile.mGamePath = fs::u8path(gamePathStr);
+          }
         });
 
       optionsFile.replace_filename(MOD_LIBRARY_FILENAME);
@@ -865,7 +872,15 @@ void UserProfile::saveToDisk()
         "Failed to open %s for writing",
         path.u8string().c_str());
 
-      optionsFile << std::setw(4) << options;
+
+      auto optionsPlusGamePath = options;
+
+      if (mGamePath)
+      {
+        optionsPlusGamePath["gamePath"] = mGamePath->u8string();
+      }
+
+      optionsFile << std::setw(4) << optionsPlusGamePath;
     }
 
     {
