@@ -672,10 +672,10 @@ data::GameOptions deserialize<data::GameOptions>(const nlohmann::json& json)
 }
 
 
-template <typename T>
-void deserializeJsonObjectIfPresent(
+template <typename Func>
+void deserializeJsonFile(
   const std::filesystem::path& path,
-  T& result)
+  Func&& deserializeFunc)
 {
   namespace fs = std::filesystem;
 
@@ -692,7 +692,7 @@ void deserializeJsonObjectIfPresent(
     nlohmann::json serializedObject;
     jsonFile >> serializedObject;
 
-    result = deserialize<T>(serializedObject);
+    deserializeFunc(serializedObject);
   }
   catch (const std::exception& ex)
   {
@@ -738,12 +738,16 @@ UserProfile loadProfile(
     {
       auto optionsFile = fileOnDisk;
       optionsFile.replace_filename(OPTIONS_FILENAME);
-      deserializeJsonObjectIfPresent<data::GameOptions>(
-        optionsFile, profile.mOptions);
+      deserializeJsonFile(
+        optionsFile, [&](const nlohmann::json& serializedObject) {
+          profile.mOptions = deserialize<data::GameOptions>(serializedObject);
+        });
 
       optionsFile.replace_filename(MOD_LIBRARY_FILENAME);
-      deserializeJsonObjectIfPresent<data::ModLibrary>(
-        optionsFile, profile.mModLibrary);
+      deserializeJsonFile(
+        optionsFile, [&](const nlohmann::json& serializedObject) {
+          profile.mModLibrary = deserialize<data::ModLibrary>(serializedObject);
+        });
     }
 
     return profile;
