@@ -381,8 +381,6 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
       ImGui::NewLine();
 
       ImGui::Checkbox("Show FPS", &mpOptions->mShowFpsCounter);
-      ImGui::Checkbox(
-        "Enable screen flashing", &mpOptions->mEnableScreenFlashes);
 
       if (mpOptions->mUpscalingFilter == data::UpscalingFilter::PixelPerfect)
       {
@@ -425,6 +423,78 @@ void OptionsMenu::updateAndRender(engine::TimeDelta dt)
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
         ImGui::TextWrapped(
           "NOTE: Current screen resolution/window size is too small for pixel-perfect scaling (needs at least 1600x1200)!\nFalling back to sharp bilinear.");
+        ImGui::PopStyleColor();
+      }
+
+      ImGui::EndTabItem();
+    }
+
+    if (ImGui::BeginTabItem("Visuals/Accessibility"))
+    {
+      ImGui::NewLine();
+
+      ImGui::Checkbox(
+        "Enable screen flashing", &mpOptions->mEnableScreenFlashes);
+
+      ImGui::NewLine();
+
+      ImGui::SliderFloat(
+        "Foreground tile brightness",
+        &mpOptions->mForeTileBrightness,
+        0.0f,
+        1.0f);
+      ImGui::SliderFloat(
+        "Background tile brightness",
+        &mpOptions->mBackTileBrightness,
+        0.0f,
+        1.0f);
+      ImGui::SliderFloat(
+        "Parallax tile brightness",
+        &mpOptions->mDropTileBrightness,
+        0.0f,
+        1.0f);
+
+      ImGui::NewLine();
+
+      ImGui::SliderFloat(
+        "Foreground sprite brightness",
+        &mpOptions->mForeSpriteBrightness,
+        0.0f,
+        1.0f);
+      ImGui::SliderFloat(
+        "Regular sprite brightness",
+        &mpOptions->mRegSpriteBrightness,
+        0.0f,
+        1.0f);
+      ImGui::SliderFloat(
+        "Background sprite brightness",
+        &mpOptions->mBackSpriteBrightness,
+        0.0f,
+        1.0f);
+      if (mpOptions->mBackTileBrightness != mpOptions->mBackSpriteBrightness)
+      {
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped(
+          "NOTE: Recommend Background sprite and Background tile brightness are equal");
+        ImGui::PopStyleColor();
+      }
+      else
+      {
+        ImGui::NewLine();
+      }
+      ImGui::Checkbox(
+        "Prisoner monster is background sprite",
+        &mpOptions->mPrisonerIsBackground);
+      if (
+        (!mpOptions->mPrisonerIsBackground &&
+         mpOptions->mRegSpriteBrightness != mpOptions->mBackTileBrightness) ||
+        (mpOptions->mPrisonerIsBackground &&
+         mpOptions->mBackSpriteBrightness != mpOptions->mBackTileBrightness))
+      {
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::TextWrapped("NOTE: Prisoner monster bar color will not match");
         ImGui::PopStyleColor();
       }
 
