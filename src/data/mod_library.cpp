@@ -27,32 +27,70 @@
 #include <utility>
 
 
+static void nativeFilesystemIterate(
+  const std::filesystem::path& p,
+  std::filesystem::directory_options options,
+  std::error_code& ec,
+  Filesystem::DirectoryIterateCallbackFuncT callback,
+  void* userData) noexcept
+{
+  namespace fs = std::filesystem;
+  auto dir_it = fs::directory_iterator(p, options, ec);
+  if (ec)
+  {
+    return;
+  }
+
+  for (const auto& dir_entry : dir_it)
+  {
+    if (!callback(dir_entry.path(), userData))
+    {
+      return;
+    }
+  }
+}
+
+const Filesystem gNativeFilesystemHandle{
+  &std::filesystem::is_directory,
+  &std::filesystem::exists,
+  &nativeFilesystemIterate};
+
 namespace rigel::data
 {
 
 namespace
 {
 
-bool isNonEmptyDirectory(const std::filesystem::directory_entry& entry)
+bool isNonEmptyDirectory(
+  const std::filesystem::path& entry,
+  const Filesystem& fsHandle)
 {
   namespace fs = std::filesystem;
-
   std::error_code err;
-  if (!entry.is_directory(err) || err)
+  if (!fsHandle.f_is_directory(entry, err) || err)
   {
     return false;
   }
 
-  if (!entry.exists(err) || err)
+  if (!fsHandle.f_exists(entry, err) || err)
   {
     return false;
   }
 
-  using std::begin;
-  using std::end;
+  bool foundOne = false;
+  fsHandle.f_directory_iterate(
+    entry,
+    fs::directory_options::none,
+    err,
+    [](const std::filesystem::path& p, void* userData) noexcept -> bool
+    {
+      *static_cast<bool*>(userData) = true;
+      // once we've found one, we can just return, it's surely non empty
+      return false;
+    },
+    &foundOne);
 
-  const auto iContents = fs::directory_iterator{entry.path(), err};
-  return !err && begin(iContents) != end(iContents);
+  return !err && !foundOne;
 }
 
 } // namespace
@@ -82,7 +120,7 @@ void ModLibrary::updateGamePath(std::filesystem::path gamePath)
 }
 
 
-void ModLibrary::rescan()
+void ModLibrary::rescan(const Filesystem& fsHandle)
 {
   namespace fs = std::filesystem;
 
@@ -94,18 +132,27 @@ void ModLibrary::rescan()
   auto newAvailableMods = std::vector<std::string>{};
 
   std::error_code err;
-  auto iModsDir = fs::directory_iterator{
-    mGamePath / MODS_PATH, fs::directory_options::skip_permission_denied, err};
-  if (!err)
+  struct Context
   {
-    for (const auto& entry : iModsDir)
+    std::vector<std::string>* pNewAvailableMods = nullptr;
+    const Filesystem* pFsHandle = nullptr;
+  } ctx{&newAvailableMods, &fsHandle};
+
+  fsHandle.f_directory_iterate(
+    mGamePath / MODS_PATH,
+    fs::directory_options::skip_permission_denied,
+    err,
+    [](const std::filesystem::path& p, void* userData) noexcept -> bool
     {
-      if (isNonEmptyDirectory(entry))
+      auto ctx =
+        static_cast<Context*>(userData);
+      if (isNonEmptyDirectory(p, *(ctx->pFsHandle)))
       {
-        newAvailableMods.push_back(entry.path().filename().u8string());
+        ctx->pNewAvailableMods->push_back(p.filename().u8string());
       }
-    }
-  }
+      return true;
+    },
+    &ctx);
 
   LOG_F(INFO, "Found %d mods", int(newAvailableMods.size()));
 
