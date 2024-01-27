@@ -21,6 +21,27 @@
 #include <tuple>
 #include <vector>
 
+struct Filesystem
+{
+  using IsDirectoryFuncT =
+    bool (*)(const std::filesystem::path& p, std::error_code& ec);
+  using ExistsFuncT =
+    bool (*)(const std::filesystem::path& p, std::error_code& ec) noexcept;
+  using DirectoryIterateCallbackFuncT =
+    bool (*)(const std::filesystem::path& p, void* user_data) noexcept;
+  using DirectoryIterateFuncT = void (*)(
+    const std::filesystem::path& p,
+    std::filesystem::directory_options options,
+    std::error_code& ec,
+    DirectoryIterateCallbackFuncT callback,
+    void* user_data) noexcept;
+
+  IsDirectoryFuncT f_is_directory;
+  ExistsFuncT f_exists;
+  DirectoryIterateFuncT f_directory_iterate;
+};
+
+extern const Filesystem gNativeFilesystemHandle;
 
 namespace rigel::data
 {
@@ -57,7 +78,7 @@ public:
     std::vector<ModStatus> initialSelection);
 
   void updateGamePath(std::filesystem::path gamePath);
-  void rescan();
+  void rescan(const Filesystem& fsHandle = gNativeFilesystemHandle);
 
   [[nodiscard]] std::vector<std::filesystem::path> enabledModPaths() const;
   [[nodiscard]] const std::string& modDirName(int index) const;
