@@ -27,7 +27,7 @@ static void BMStringSplit(benchmark::State& state)
   std::string const kInputString = "Hello, world";
   for (auto _ : state)
   {
-    const auto v = rigel::strings::split(kInputString, ',');
+    auto v = rigel::strings::split(kInputString, ',');
     benchmark::DoNotOptimize(v);
     benchmark::ClobberMemory();
   }

@@ -29,7 +29,8 @@ function(rigel_enable_warnings target)
         endif()
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_options(${target} PRIVATE
-            -Weverything
+            -Wall
+            -Wextra
             -Wno-unknown-warning-option
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
