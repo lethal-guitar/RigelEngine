@@ -260,7 +260,7 @@ data::Image createWaterSurfaceAnimImage()
   applyPattern(patternWaveLeft, pixelsPerAnimStep * 3);
 
   return data::Image{
-    move(pixels),
+    std::move(pixels),
     static_cast<size_t>(WATER_ANIM_TEX_WIDTH),
     static_cast<size_t>(WATER_ANIM_TEX_HEIGHT)};
 }

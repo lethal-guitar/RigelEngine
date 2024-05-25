@@ -74,7 +74,7 @@ ActorImagePackage::ActorImagePackage(
     if (!frameHeaders.empty())
     {
       mHeadersById.emplace(
-        ActorID(index), ActorHeader{drawIndex, move(frameHeaders)});
+        ActorID(index), ActorHeader{drawIndex, std::move(frameHeaders)});
     }
   }
 }

@@ -148,7 +148,7 @@ inline TileAttributeDict::TileAttributeDict(const AttributeArray& bitpacks)
 
 
 inline TileAttributeDict::TileAttributeDict(AttributeArray&& bitpacks)
-  : mAttributeBitPacks(move(bitpacks))
+  : mAttributeBitPacks(std::move(bitpacks))
 {
 }
 
