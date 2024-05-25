@@ -21,6 +21,9 @@ RIGEL_DISABLE_WARNINGS
 #include <catch.hpp>
 RIGEL_RESTORE_WARNINGS
 
+#include <algorithm>
+
+
 using namespace rigel;
 using namespace data;
 using namespace std;

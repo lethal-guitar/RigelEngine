@@ -25,6 +25,9 @@
 
 #include <imgui.h>
 
+#include <algorithm>
+
+
 ImGui::FileBrowser::FileBrowser(ImGuiFileBrowserFlags flags)
     : width_(700), height_(450), flags_(flags),
       openFlag_(false), closeFlag_(false), isOpened_(false), ok_(false),
