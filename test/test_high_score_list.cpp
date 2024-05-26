@@ -18,8 +18,11 @@
 #include <data/high_score_list.hpp>
 
 RIGEL_DISABLE_WARNINGS
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 RIGEL_RESTORE_WARNINGS
+
+#include <algorithm>
+
 
 using namespace rigel;
 using namespace data;

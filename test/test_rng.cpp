@@ -18,7 +18,7 @@
 #include <engine/random_number_generator.hpp>
 
 RIGEL_DISABLE_WARNINGS
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 RIGEL_RESTORE_WARNINGS
 
 #include <algorithm>

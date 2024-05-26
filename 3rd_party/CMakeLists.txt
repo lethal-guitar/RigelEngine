@@ -1,11 +1,6 @@
 # Header-only targets
 ###############################################################################
 
-add_library(catch2 INTERFACE)
-target_include_directories(catch2
-    INTERFACE
-    "${CMAKE_CURRENT_SOURCE_DIR}/catch"
-)
 add_library(glm INTERFACE)
 target_include_directories(glm
     INTERFACE

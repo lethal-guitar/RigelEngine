@@ -24,7 +24,7 @@
 #include <engine/timing.hpp>
 
 RIGEL_DISABLE_WARNINGS
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 RIGEL_RESTORE_WARNINGS
 
 

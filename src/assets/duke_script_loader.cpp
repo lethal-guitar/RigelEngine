@@ -299,7 +299,7 @@ vector<Action> parseTextCommandWithBigText(
   const auto colorIndex = static_cast<uint8_t>(*bigTextMarkerIter) - 0xF0;
   string bigTextPart(next(bigTextMarkerIter), sourceText.end());
   textActions.emplace_back(
-    DrawBigText{x + positionOffset, y, colorIndex, move(bigTextPart)});
+    DrawBigText{x + positionOffset, y, colorIndex, std::move(bigTextPart)});
 
   return textActions;
 }
@@ -585,7 +585,7 @@ data::LevelHints loadHintMessages(const std::string& scriptSource)
       skipWhiteSpace(lineTextStream);
 
       getline(lineTextStream, message, '\r');
-      hints.emplace_back(episode - 1, level - 1, move(message));
+      hints.emplace_back(episode - 1, level - 1, std::move(message));
     }
   }
 

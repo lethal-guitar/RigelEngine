@@ -34,6 +34,7 @@ function(rigel_enable_warnings target)
             -Wno-unknown-warning-option
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
+            -Wno-unqualified-std-cast-call
             -Wno-covered-switch-default
             -Wno-exit-time-destructors
             -Wno-missing-braces
