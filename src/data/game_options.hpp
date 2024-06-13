@@ -45,6 +45,12 @@ namespace rigel::data
 constexpr auto ENABLE_VSYNC_DEFAULT = true;
 constexpr auto MUSIC_VOLUME_DEFAULT = 1.0f;
 constexpr auto SOUND_VOLUME_DEFAULT = 1.0f;
+constexpr auto FOREGROUND_SPRITE_BRIGHTNESS_DEFAULT = 1.0f;
+constexpr auto REGULAR_SPRITE_BRIGHTNESS_DEFAULT = 1.0f;
+constexpr auto BACKGROUND_SPRITE_BRIGHTNESS_DEFAULT = 1.0f;
+constexpr auto FOREGROUND_TILE_BRIGHTNESS_DEFAULT = 1.0f;
+constexpr auto BACKGROUND_TILE_BRIGHTNESS_DEFAULT = 1.0f;
+constexpr auto BACKDROP_TILE_BRIGHTNESS_DEFAULT = 1.0f;
 
 enum class WindowMode
 {
@@ -163,6 +169,13 @@ struct GameOptions
   bool mQuickSavingEnabled = false;
   bool mSkipIntro = false;
   bool mMotionSmoothing = false;
+  float mForeSpriteBrightness = FOREGROUND_SPRITE_BRIGHTNESS_DEFAULT;
+  float mRegSpriteBrightness = REGULAR_SPRITE_BRIGHTNESS_DEFAULT;
+  float mBackSpriteBrightness = BACKGROUND_SPRITE_BRIGHTNESS_DEFAULT;
+  bool mPrisonerIsBackground = false;
+  float mForeTileBrightness = FOREGROUND_TILE_BRIGHTNESS_DEFAULT;
+  float mBackTileBrightness = BACKGROUND_TILE_BRIGHTNESS_DEFAULT;
+  float mDropTileBrightness = BACKDROP_TILE_BRIGHTNESS_DEFAULT;
 
   // Internal options
   //
