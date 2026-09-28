@@ -21,7 +21,7 @@ There was never any source code released for the original game, so this project
 is based on reverse engineering (specifically, disassembly of the original binaries).
 See [Duke2Reconstructed](https://github.com/lethal-guitar/Duke2Reconstructed) for a complete reconstruction of the original code.
 
-Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm via Emscripten)
+~~Try the [web version](https://rigelengine.nikolai-wuttke.de)! (compiled to wasm via Emscripten)~~ (currently not working, hopefully coming back soon)
 
 Read the [F.A.Q.](https://github.com/lethal-guitar/RigelEngine/wiki/FAQ)
 
