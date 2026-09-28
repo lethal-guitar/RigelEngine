@@ -203,6 +203,27 @@ base::Size clampedSectionSize(
     std::min(sectionSize.height, map.height() - sectionStart.y)};
 }
 
+
+base::ScopeGuard
+  applyBrightnessOption(renderer::Renderer* pRenderer, float brightness)
+{
+  if (brightness < 1.0f)
+  {
+    auto guard = renderer::saveState(pRenderer);
+    pRenderer->setColorModulation(base::Color{
+      base::roundTo<uint8_t>(255.0f * brightness),
+      base::roundTo<uint8_t>(255.0f * brightness),
+      base::roundTo<uint8_t>(255.0f * brightness),
+      255});
+    return guard;
+  }
+  else
+  {
+    return base::ScopeGuard{[]() {
+    }};
+  }
+}
+
 } // namespace
 
 
@@ -937,6 +958,8 @@ void GameWorld::drawMapAndSprites(
     }
     else
     {
+      const auto saved =
+        applyBrightnessOption(mpRenderer, mpOptions->mDropTileBrightness);
       state.mMapRenderer.renderBackdrop(
         params.mInterpolatedCameraPosition, params.mViewportSize);
     }
@@ -955,19 +978,34 @@ void GameWorld::drawMapAndSprites(
   };
 
   auto renderBackgroundLayers = [&]() {
-    state.mMapRenderer.renderBackground(
-      params.mRenderStartPosition, params.mViewportSize);
-    state.mDynamicGeometrySystem.renderDynamicBackgroundSections(
-      params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderRegularSprites(mSpecialEffects);
+    {
+      const auto saved =
+        applyBrightnessOption(mpRenderer, mpOptions->mBackTileBrightness);
+      state.mMapRenderer.renderBackground(
+        params.mRenderStartPosition, params.mViewportSize);
+      state.mDynamicGeometrySystem.renderDynamicBackgroundSections(
+        params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
+    }
+
+    state.mSpriteRenderingSystem.renderBackgroundSprites(
+      mSpecialEffects, mpOptions->mBackSpriteBrightness);
+    state.mSpriteRenderingSystem.renderRegularSprites(
+      mSpecialEffects, mpOptions->mRegSpriteBrightness);
   };
 
   auto renderForegroundLayers = [&]() {
-    state.mMapRenderer.renderForeground(
-      params.mRenderStartPosition, params.mViewportSize);
-    state.mDynamicGeometrySystem.renderDynamicForegroundSections(
-      params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
-    state.mSpriteRenderingSystem.renderForegroundSprites(mSpecialEffects);
+    {
+      const auto saved =
+        applyBrightnessOption(mpRenderer, mpOptions->mForeTileBrightness);
+
+      state.mMapRenderer.renderForeground(
+        params.mRenderStartPosition, params.mViewportSize);
+      state.mDynamicGeometrySystem.renderDynamicForegroundSections(
+        params.mRenderStartPosition, params.mViewportSize, interpolationFactor);
+    }
+
+    state.mSpriteRenderingSystem.renderForegroundSprites(
+      mSpecialEffects, mpOptions->mForeSpriteBrightness);
     renderTileDebris();
   };
 

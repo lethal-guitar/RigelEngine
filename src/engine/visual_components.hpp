@@ -203,6 +203,18 @@ struct ExtendedFrameList
 };
 
 
+struct SpriteBackground
+{
+  SpriteBackground()
+  {
+    // Apply to all render slots by default
+    mRenderSlotMask.set();
+  }
+
+  std::bitset<NUM_RENDER_SLOTS> mRenderSlotMask;
+};
+
+
 struct SpriteStrip
 {
   explicit SpriteStrip(const base::Vec2& start, int frame)

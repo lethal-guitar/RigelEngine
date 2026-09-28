@@ -57,6 +57,7 @@ struct SpriteDrawSpec
   int mImageId;
   bool mIsFlashingWhite;
   bool mUseCloakEffect;
+  bool mBackground;
 };
 
 
@@ -90,13 +91,21 @@ public:
 
   bool cloakEffectSpritesVisible() const { return mCloakEffectSpritesVisible; }
 
-  void renderRegularSprites(const SpecialEffectsRenderer& fx) const;
-  void renderForegroundSprites(const SpecialEffectsRenderer& fx) const;
+  void renderBackgroundSprites(
+    const SpecialEffectsRenderer& fx,
+    const float backColorMod) const;
+  void renderRegularSprites(
+    const SpecialEffectsRenderer& fx,
+    const float regColorMod) const;
+  void renderForegroundSprites(
+    const SpecialEffectsRenderer& fx,
+    const float foreColorMod) const;
 
 private:
   void renderSprite(
     const SpriteDrawSpec& spec,
-    const SpecialEffectsRenderer& fx) const;
+    const SpecialEffectsRenderer& fx,
+    const float colorMod) const;
 
   // Temporary storage used for sorting sprites by draw order during sprite
   // collection. Scope-wise, this is only needed during update(), but in order
